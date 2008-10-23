@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/WorldWind"/>
+	<classpathentry kind="lib" path="C:/Data/Libraries/geotools/geotools-2.5.0/gt-api-2.5.0.jar"/>
+	<classpathentry kind="lib" path="C:/Data/Libraries/geotools/geotools-2.5.0/gt-shapefile-2.5.0.jar"/>
+	<classpathentry kind="lib" path="C:/Data/Libraries/geotools/geotools-2.5.0/gt-main-2.5.0.jar"/>
+	<classpathentry kind="lib" path="C:/Data/Libraries/geotools/geotools-2.5.0/gt-referencing-2.5.0.jar"/>
+	<classpathentry kind="lib" path="C:/Data/Libraries/geotools/geotools-2.5.0/gt-render-2.5.0.jar"/>
+	<classpathentry kind="lib" path="C:/Data/Libraries/geotools/geotools-2.5.0/geoapi-2.2-M1.jar"/>
+	<classpathentry kind="lib" path="C:/Data/Libraries/geotools/geotools-2.5.0/gt-coverage-2.5.0.jar"/>
+	<classpathentry kind="lib" path="C:/Data/Libraries/geotools/geotools-2.5.0/gt-metadata-2.5.0.jar"/>
+	<classpathentry kind="lib" path="C:/Data/Libraries/geotools/jts-1.9/lib/jts-1.9.jar" sourcepath="C:/Data/Libraries/geotools/jts-1.9/src">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Data/Libraries/geotools/jts-1.9/doc/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
