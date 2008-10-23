@@ -6,7 +6,6 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.cache.BasicMemoryCache;
 import gov.nasa.worldwind.cache.MemoryCache;
-import gov.nasa.worldwind.formats.dds.DDSConverter;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.layers.TiledImageLayer;
@@ -15,22 +14,20 @@ import gov.nasa.worldwind.retrieve.HTTPRetriever;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
 import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.retrieve.URLRetriever;
+import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWIO;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -40,12 +37,10 @@ import com.sun.opengl.util.texture.TextureIO;
 public class MaskTiledImageLayer extends TiledImageLayer
 {
 	private final Object fileLock = new Object();
-	private MaskLevelSet levelSet;
 
-	public MaskTiledImageLayer(MaskLevelSet levelSet)
+	public MaskTiledImageLayer(LevelSet levelSet)
 	{
 		super(levelSet);
-		this.levelSet = new MaskLevelSet(levelSet);
 
 		if (!WorldWind.getMemoryCacheSet().containsCache(
 				TextureTile.class.getName()))
@@ -59,40 +54,14 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		}
 	}
 
-	@Override
-	protected MaskLevelSet getLevels()
-	{
-		return levelSet;
-	}
-
-	private String getMaskPath(TextureTile tile)
-	{
-		String path = levelSet.getMaskCacheName() + "/"
-				+ tile.getLevel().getLevelName() + "/" + tile.getRow() + "/"
-				+ tile.getRow() + "_" + tile.getColumn();
-		if (!tile.getLevel().isEmpty())
-			path += levelSet.getMaskFormatSuffix();
-		return path;
-	}
-
-	private URL getMaskResourceURL(TextureTile tile)
-			throws MalformedURLException
-	{
-		return levelSet.getMaskTileUrlBuilder().getURL(tile, null);
-	}
-
 	protected void forceTextureLoad(TextureTile tile)
 	{
 		final URL textureURL = WorldWind.getDataFileCache().findFile(
 				tile.getPath(), true);
-		final URL maskURL = WorldWind.getDataFileCache().findFile(
-				getMaskPath(tile), true);
 
-		if (textureURL != null && maskURL != null
-				&& !this.isTextureExpired(tile, textureURL)
-				&& !this.isTextureExpired(tile, maskURL))
+		if (textureURL != null && !this.isTextureExpired(tile, textureURL))
 		{
-			this.loadTexture(tile, textureURL, maskURL);
+			this.loadTexture(tile, textureURL);
 		}
 	}
 
@@ -122,14 +91,11 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		{
 			URL textureURL = WorldWind.getDataFileCache().findFile(
 					tile.getPath(), false);
-			URL maskURL = WorldWind.getDataFileCache().findFile(
-					layer.getMaskPath(tile), false);
 
-			if (textureURL != null && maskURL != null
-					&& !this.layer.isTextureExpired(tile, textureURL)
-					&& !this.layer.isTextureExpired(tile, maskURL))
+			if (textureURL != null
+					&& !this.layer.isTextureExpired(tile, textureURL))
 			{
-				if (this.layer.loadTexture(tile, textureURL, maskURL))
+				if (this.layer.loadTexture(tile, textureURL))
 				{
 					layer.getLevels().unmarkResourceAbsent(tile);
 					this.layer.firePropertyChange(AVKey.LAYER, null, this);
@@ -140,8 +106,6 @@ public class MaskTiledImageLayer extends TiledImageLayer
 					// Assume that something's wrong with the file and delete it.
 					gov.nasa.worldwind.WorldWind.getDataFileCache().removeFile(
 							textureURL);
-					gov.nasa.worldwind.WorldWind.getDataFileCache().removeFile(
-							maskURL);
 					layer.getLevels().markResourceAbsent(tile);
 					String message = Logging.getMessage(
 							"generic.DeletedCorruptDataFile", textureURL);
@@ -149,44 +113,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 				}
 			}
 
-			textureURL = WorldWind.getDataFileCache().findFile(tile.getPath(),
-					false);
-			maskURL = WorldWind.getDataFileCache().findFile(
-					layer.getMaskPath(tile), false);
-
-			List<Download> downloads = new ArrayList<Download>();
-			try
-			{
-				if (textureURL == null)
-				{
-					Download download = new Download(tile.getResourceURL(),
-							WorldWind.getDataFileCache()
-									.newFile(tile.getPath()));
-					downloads.add(download);
-				}
-
-				if (maskURL == null)
-				{
-					Download download = new Download(layer
-							.getMaskResourceURL(tile), WorldWind
-							.getDataFileCache()
-							.newFile(layer.getMaskPath(tile)));
-					downloads.add(download);
-				}
-			}
-			catch (MalformedURLException e)
-			{
-				Logging
-						.logger()
-						.log(
-								java.util.logging.Level.SEVERE,
-								Logging
-										.getMessage(
-												"layers.TextureLayer.ExceptionCreatingTextureUrl",
-												tile), e);
-			}
-
-			layer.downloadTexture(tile, downloads);
+			layer.downloadTexture(tile);
 		}
 
 		/**
@@ -246,14 +173,13 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		return true;
 	}
 
-	private boolean loadTexture(TextureTile tile, java.net.URL textureURL,
-			java.net.URL maskURL)
+	private boolean loadTexture(TextureTile tile, java.net.URL textureURL)
 	{
 		TextureData textureData;
 
 		synchronized (this.fileLock)
 		{
-			textureData = readTexture(textureURL, maskURL, this.isUseMipMaps());
+			textureData = readTexture(textureURL, this.isUseMipMaps());
 		}
 
 		if (textureData == null)
@@ -272,93 +198,103 @@ public class MaskTiledImageLayer extends TiledImageLayer
 				tile.getTileKey(), tile);
 	}
 
-	protected void downloadTexture(TextureTile tile, List<Download> downloads)
+	protected void downloadTexture(final TextureTile tile)
 	{
 		if (!WorldWind.getRetrievalService().isAvailable())
 			return;
 
-		DownloadPostProcessor dpp = new DownloadPostProcessor(tile, this);
-
-		for (Download download : downloads)
-		{
-			URL url = download.url;
-			if (url == null
-					|| WorldWind.getNetworkStatus().isHostUnavailable(url))
-			{
-				return;
-			}
-			if (!"http".equalsIgnoreCase(url.getProtocol()))
-			{
-				Logging.logger().severe(
-						Logging.getMessage(
-								"layers.TextureLayer.UnknownRetrievalProtocol",
-								url.toString()));
-				return;
-			}
-
-			Retriever retriever = new HTTPRetriever(url, dpp);
-			download.retriever = retriever;
-
-			// Apply any overridden timeouts.
-			Integer cto = AVListImpl.getIntegerValue(this,
-					AVKey.URL_CONNECT_TIMEOUT);
-			if (cto != null && cto > 0)
-				retriever.setConnectTimeout(cto);
-			Integer cro = AVListImpl.getIntegerValue(this,
-					AVKey.URL_READ_TIMEOUT);
-			if (cro != null && cro > 0)
-				retriever.setReadTimeout(cro);
-			Integer srl = AVListImpl.getIntegerValue(this,
-					AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT);
-			if (srl != null && srl > 0)
-				retriever.setStaleRequestLimit(srl);
-		}
-
-		dpp.setDownloads(downloads);
-
-		for (Download download : downloads)
-		{
-			WorldWind.getRetrievalService().runRetriever(download.retriever,
-					tile.getPriority());
-		}
-	}
-
-	private void saveBuffer(java.nio.ByteBuffer buffer, java.io.File outFile)
-			throws java.io.IOException
-	{
-		synchronized (this.fileLock) // sychronized with read of file in RequestTask.run()
-		{
-			WWIO.saveBuffer(buffer, outFile);
-		}
-	}
-
-	private static TextureData readTexture(java.net.URL url, java.net.URL mask,
-			boolean useMipMaps)
-	{
+		URL textureUrl;
+		URL maskUrl;
 		try
 		{
-			BufferedImage src = null;
-			BufferedImage msk = null;
-			try
+			textureUrl = tile.getResourceURL();
+			if (textureUrl == null)
+				return;
+
+			if (WorldWind.getNetworkStatus().isHostUnavailable(textureUrl))
+				return;
+
+			if (textureUrl.getQuery() == null)
 			{
-				src = ImageIO.read(url);
-				msk = ImageIO.read(mask);
-			}
-			catch (Exception e)
-			{
-			}
-			if (src != null && msk != null)
-			{
-				Graphics2D g2d = msk.createGraphics();
-				g2d.setComposite(AlphaComposite.SrcIn);
-				g2d.drawImage(src, 0, 0, null);
-				g2d.dispose();
-				return TextureIO.newTextureData(msk, useMipMaps);
+				maskUrl = new URL(textureUrl.toExternalForm() + "?mask");
 			}
 			else
 			{
-				return TextureIO.newTextureData(url, useMipMaps, null);
+				maskUrl = new URL(textureUrl.toExternalForm() + "&mask");
 			}
+		}
+		catch (java.net.MalformedURLException e)
+		{
+			Logging.logger().log(
+					java.util.logging.Level.SEVERE,
+					Logging.getMessage(
+							"layers.TextureLayer.ExceptionCreatingTextureUrl",
+							tile), e);
+			return;
+		}
+
+		Retriever textureRetriever;
+		Retriever maskRetriever;
+		DownloadPostProcessor dpp = new DownloadPostProcessor(tile, this);
+
+		if ("http".equalsIgnoreCase(textureUrl.getProtocol()))
+		{
+			textureRetriever = new HTTPRetriever(textureUrl, dpp);
+			maskRetriever = new HTTPRetriever(maskUrl, dpp);
+		}
+		else
+		{
+			Logging.logger().severe(
+					Logging.getMessage(
+							"layers.TextureLayer.UnknownRetrievalProtocol",
+							textureUrl.toString()));
+			return;
+		}
+
+		dpp.setRetrievers(textureRetriever, maskRetriever);
+
+		// Apply any overridden timeouts.
+		Integer cto = AVListImpl.getIntegerValue(this,
+				AVKey.URL_CONNECT_TIMEOUT);
+		if (cto != null && cto > 0)
+		{
+			textureRetriever.setConnectTimeout(cto);
+			maskRetriever.setConnectTimeout(cto);
+		}
+		Integer cro = AVListImpl.getIntegerValue(this, AVKey.URL_READ_TIMEOUT);
+		if (cro != null && cro > 0)
+		{
+			textureRetriever.setReadTimeout(cro);
+			maskRetriever.setReadTimeout(cro);
+		}
+		Integer srl = AVListImpl.getIntegerValue(this,
+				AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT);
+		if (srl != null && srl > 0)
+		{
+			textureRetriever.setStaleRequestLimit(srl);
+			maskRetriever.setStaleRequestLimit(srl);
+		}
+
+		WorldWind.getRetrievalService().runRetriever(textureRetriever,
+				tile.getPriority());
+		WorldWind.getRetrievalService().runRetriever(maskRetriever,
+				tile.getPriority());
+	}
+
+	private void saveImage(BufferedImage image, String format, File file)
+			throws IOException
+	{
+		synchronized (this.fileLock) // sychronized with read of file in RequestTask.run()
+		{
+			ImageIO.write(image, format, file);
+		}
+	}
+
+	private static TextureData readTexture(java.net.URL url, boolean useMipMaps)
+	{
+		try
+		{
+			return TextureIO.newTextureData(url, useMipMaps, null);
 		}
 		catch (Exception e)
 		{
@@ -369,41 +305,17 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		}
 	}
 
-	private static class DownloadData
-	{
-		ByteBuffer buffer;
-		String contentType;
-
-		public DownloadData(ByteBuffer buffer, String contentType)
-		{
-			this.buffer = buffer;
-			this.contentType = contentType;
-		}
-	}
-
-	private static class Download
-	{
-		URL url;
-		File file;
-
-		Retriever retriever;
-		DownloadData data;
-
-		public Download(URL url, File file)
-		{
-			this.url = url;
-			this.file = file;
-		}
-	}
-
 	private static class DownloadPostProcessor implements
 			RetrievalPostProcessor
 	{
 		private final TextureTile tile;
 		private final MaskTiledImageLayer layer;
 
-		private List<Download> downloads;
-		private Map<Retriever, Download> downloadMap = new HashMap<Retriever, Download>();
+		private Retriever textureRetriever;
+		private Retriever maskRetriever;
+
+		private BufferedImage texture;
+		private BufferedImage mask;
 
 		public DownloadPostProcessor(TextureTile tile, MaskTiledImageLayer layer)
 		{
@@ -411,77 +323,73 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			this.layer = layer;
 		}
 
-		public void setDownloads(List<Download> downloads)
+		public void setRetrievers(Retriever textureRetriever,
+				Retriever maskRetriever)
 		{
-			this.downloads = downloads;
-			downloadMap.clear();
-
-			for (Download download : downloads)
-			{
-				downloadMap.put(download.retriever, download);
-			}
+			this.textureRetriever = textureRetriever;
+			this.maskRetriever = maskRetriever;
 		}
 
 		public ByteBuffer run(Retriever retriever)
 		{
-			synchronized (downloadMap)
+			if (retriever == null)
 			{
-				if (retriever == null)
-				{
-					finish();
-					String msg = Logging
-							.getMessage("nullValue.RetrieverIsNull");
-					Logging.logger().severe(msg);
-					throw new IllegalArgumentException(msg);
-				}
-
-				Download download = downloadMap.remove(retriever);
-
-				if (download == null)
-				{
-					finish();
-					Logging.logger().severe(
-							"Unknown retriever passed to PostProcessor");
-					return null;
-				}
-
-				if (download.file == null)
-				{
-					finish();
-					return null;
-				}
-
-				DownloadData data = getData(retriever);
-				download.data = data;
-
-				if (data == null)
-				{
-					this.layer.getLevels().markResourceAbsent(this.tile);
-				}
-
-				if (downloadMap.isEmpty())
-				{
-					finish();
-				}
-
-				if (data == null)
-				{
-					return null;
-				}
-				return data.buffer;
+				finish();
+				String msg = Logging.getMessage("nullValue.RetrieverIsNull");
+				Logging.logger().severe(msg);
+				throw new IllegalArgumentException(msg);
 			}
+
+			if (retriever != textureRetriever && retriever != maskRetriever)
+			{
+				finish();
+				throw new IllegalArgumentException();
+			}
+
+			ByteBuffer data = getData(retriever);
+			if (data == null)
+			{
+				finish();
+			}
+			else
+			{
+				BufferedImage image = null;
+				InputStream is = new ByteArrayInputStream(data.array());
+				try
+				{
+					image = ImageIO.read(is);
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+					finish();
+				}
+
+				if (retriever == textureRetriever)
+				{
+					texture = image;
+				}
+				else
+				{
+					mask = image;
+				}
+			}
+
+			if (texture != null && mask != null)
+			{
+				finish();
+			}
+
+			return data;
 		}
 
-		public DownloadData getData(Retriever retriever)
+		public ByteBuffer getData(Retriever retriever)
 		{
 			if (!retriever.getState().equals(
 					Retriever.RETRIEVER_STATE_SUCCESSFUL))
 			{
 				return null;
 			}
-
-			URLRetriever r = (URLRetriever) retriever;
-			ByteBuffer buffer = r.getBuffer();
 
 			if (retriever instanceof HTTPRetriever)
 			{
@@ -492,77 +400,61 @@ public class MaskTiledImageLayer extends TiledImageLayer
 				}
 			}
 
-			if (buffer != null)
+			URLRetriever r = (URLRetriever) retriever;
+			String contentType = r.getContentType();
+			if (contentType != null && contentType.contains("image"))
 			{
-				String contentType = r.getContentType();
-				if (contentType == null)
-				{
-					return null;
-				}
-				else if (contentType.contains("xml")
-						|| contentType.contains("html")
-						|| contentType.contains("text"))
-				{
-					return null;
-				}
-				return new DownloadData(buffer, contentType);
+				return r.getBuffer();
 			}
 			return null;
 		}
 
 		private void finish()
 		{
-			boolean error = false;
-			for (Download download : downloads)
-			{
-				DownloadData data = download.data;
-				if (data == null)
-				{
-					error = true;
-					this.layer.getLevels().markResourceAbsent(this.tile);
-				}
-				else
-				{
-					try
-					{
-						String contentType = data.contentType;
-						ByteBuffer buffer = data.buffer;
-						File outFile = download.file;
-						if (contentType.contains("dds"))
-						{
-							this.layer.saveBuffer(buffer, outFile);
-						}
-						else if (contentType.contains("zip"))
-						{
-							// Assume it's zipped DDS, which the retriever would have unzipped into the buffer.
-							this.layer.saveBuffer(buffer, outFile);
-						}
-						else if (outFile.getName().endsWith(".dds"))
-						{
-							// Convert to DDS and save the result.
-							buffer = DDSConverter.convertToDDS(buffer,
-									contentType);
-							if (buffer != null)
-								this.layer.saveBuffer(buffer, outFile);
-						}
-						else if (contentType.contains("image"))
-						{
-							// Just save whatever it is to the cache.
-							this.layer.saveBuffer(buffer, outFile);
-						}
-					}
-					catch (IOException e)
-					{
-						error = true;
-						this.layer.getLevels().markResourceAbsent(this.tile);
-					}
-				}
-			}
-
-			if (!error)
+			if (tryFinish())
 			{
 				this.layer.firePropertyChange(AVKey.LAYER, null, this);
 			}
+			else
+			{
+				texture = null;
+				mask = null;
+				this.layer.getLevels().markResourceAbsent(this.tile);
+			}
+		}
+
+		private boolean tryFinish()
+		{
+			if (texture == null || mask == null)
+			{
+				return false;
+			}
+
+			final File outFile = WorldWind.getDataFileCache().newFile(
+					this.tile.getPath());
+			if (outFile == null)
+				return false;
+
+			if (outFile.exists())
+				return true;
+
+			Graphics2D g2d = mask.createGraphics();
+			g2d.setComposite(AlphaComposite.SrcIn);
+			g2d.drawImage(texture, 0, 0, null);
+			g2d.dispose();
+
+			try
+			{
+				//TODO take out hardcoded PNG
+				layer.saveImage(mask, "PNG", outFile);
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+
+			return true;
 		}
 	}
 }

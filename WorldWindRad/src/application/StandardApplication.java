@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import layers.radiometry.AreasLayer;
 import layers.radiometry.DoseRateLayer;
 import layers.radiometry.GAGlobe;
+import layers.radiometry.GravityLayer;
 import layers.radiometry.PotassiumLayer;
 import layers.radiometry.TernaryLayer;
 import layers.radiometry.ThoriumLayer;
@@ -38,26 +39,7 @@ public class StandardApplication extends ApplicationTemplate
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class
 				.getName());
 
-		//ApplicationTemplate.start("Radiometry", AppFrame.class);
-
-		try
-		{
-			ByteBuffer buffer = DDSConverter.convertToDDS(new File(
-					"C:/Data/Software/texconv/0012_0054.png"));
-			int limit = buffer.limit();
-			byte[] b = new byte[limit];
-			buffer.rewind();
-			buffer.get(b);
-
-			FileOutputStream fos = new FileOutputStream(new File(
-					"C:/Data/Software/texconv/0012_0054.dds"));
-			fos.write(b);
-			fos.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		ApplicationTemplate.start("Radiometry", AppFrame.class);
 	}
 
 	public static class AppFrame extends ApplicationTemplate.AppFrame
@@ -93,6 +75,10 @@ public class StandardApplication extends ApplicationTemplate
 			Layer areas = new AreasLayer();
 			areas.setEnabled(false);
 			layers.add(areas);
+			
+			Layer gravity = new GravityLayer();
+			gravity.setEnabled(false);
+			layers.add(gravity);
 
 			/*VectorLayer vectorLayer = new VectorLayer();
 			vectorLayer.setEnabled(false);
