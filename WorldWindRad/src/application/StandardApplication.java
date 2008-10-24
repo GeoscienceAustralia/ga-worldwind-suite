@@ -1,22 +1,24 @@
 package application;
 
+import globes.GAGlobe;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.examples.ApplicationTemplate;
-import gov.nasa.worldwind.formats.dds.DDSConverter;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.layers.Earth.MGRSGraticuleLayer;
 import gov.nasa.worldwind.layers.Earth.OpenStreetMapLayer;
+import gov.nasa.worldwind.layers.Earth.WorldBordersMetacartaLayer;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.ByteBuffer;
+import javax.swing.UIManager;
 
+import layers.other.GravityLayer;
 import layers.radiometry.AreasLayer;
 import layers.radiometry.DoseRateLayer;
-import layers.radiometry.GAGlobe;
-import layers.radiometry.GravityLayer;
 import layers.radiometry.PotassiumLayer;
+import layers.radiometry.RatioThKLayer;
+import layers.radiometry.RatioUKLayer;
+import layers.radiometry.RatioUThLayer;
 import layers.radiometry.TernaryLayer;
 import layers.radiometry.ThoriumLayer;
 import layers.radiometry.UraniumLayer;
@@ -38,6 +40,15 @@ public class StandardApplication extends ApplicationTemplate
 				StereoSceneController.class.getName());
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class
 				.getName());
+		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, GAGlobe.class.getName());
+
+		try
+		{
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (Exception e)
+		{
+		}
 
 		ApplicationTemplate.start("Radiometry", AppFrame.class);
 	}
@@ -47,8 +58,6 @@ public class StandardApplication extends ApplicationTemplate
 		public AppFrame()
 		{
 			super(true, true, false);
-
-			getWwd().getModel().setGlobe(new GAGlobe());
 
 			LayerList layers = getWwd().getModel().getLayers();
 
@@ -75,7 +84,19 @@ public class StandardApplication extends ApplicationTemplate
 			Layer areas = new AreasLayer();
 			areas.setEnabled(false);
 			layers.add(areas);
-			
+
+			Layer ratiothk = new RatioThKLayer();
+			ratiothk.setEnabled(false);
+			layers.add(ratiothk);
+
+			Layer ratiouk = new RatioUKLayer();
+			ratiouk.setEnabled(false);
+			layers.add(ratiouk);
+
+			Layer ratiouth = new RatioUThLayer();
+			ratiouth.setEnabled(false);
+			layers.add(ratiouth);
+
 			Layer gravity = new GravityLayer();
 			gravity.setEnabled(false);
 			layers.add(gravity);
@@ -104,14 +125,22 @@ public class StandardApplication extends ApplicationTemplate
 			{
 			}*/
 
-			OpenStreetMapLayer osml = new OpenStreetMapLayer();
+			Layer osml = new OpenStreetMapLayer();
 			osml.setEnabled(false);
 			layers.add(osml);
+
+			Layer borders = new WorldBordersMetacartaLayer();
+			borders.setEnabled(true);
+			layers.add(borders);
+
+			Layer graticule = new MGRSGraticuleLayer();
+			graticule.setEnabled(false);
+			layers.add(graticule);
 
 			getLayerPanel().update(getWwd());
 
 			//getWwd().getModel().setShowWireframeInterior(true);
-			getWwd().getSceneController().setVerticalExaggeration(1);
+			getWwd().getSceneController().setVerticalExaggeration(10);
 
 			((StereoOrbitView) getWwd().getView()).setMode(StereoMode.NONE);
 			//((StereoOrbitView)getWwd().getView()).setEyeSeparation(100);

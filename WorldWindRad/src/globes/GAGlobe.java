@@ -4,7 +4,7 @@ as represented by the Administrator of the
 National Aeronautics and Space Administration.
 All Rights Reserved.
 */
-package layers.radiometry;
+package globes;
 
 import gov.nasa.worldwind.globes.EllipsoidalGlobe;
 
