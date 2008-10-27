@@ -47,6 +47,6 @@ public class ThoriumLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "GA Radiometry - Thorium";
+		return "Thorium";
 	}
 }

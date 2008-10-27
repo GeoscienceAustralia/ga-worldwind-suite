@@ -47,6 +47,6 @@ public class RatioUKLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "GA Radiometry - Uranium Potassium Ratio";
+		return "Uranium Potassium Ratio";
 	}
 }

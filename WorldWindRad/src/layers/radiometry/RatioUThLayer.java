@@ -47,6 +47,6 @@ public class RatioUThLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "GA Radiometry - Uranium Thorium Ratio";
+		return "Uranium Thorium Ratio";
 	}
 }

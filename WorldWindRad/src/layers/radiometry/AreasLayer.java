@@ -76,6 +76,6 @@ public class AreasLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "GA Radiometry - Areas of Interest";
+		return "Areas of Interest";
 	}
 }

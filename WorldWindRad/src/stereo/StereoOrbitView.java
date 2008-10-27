@@ -8,6 +8,9 @@ import gov.nasa.worldwind.view.BasicOrbitView;
 
 import javax.media.opengl.GL;
 
+import settings.Settings;
+import settings.Settings.ProjectionMode;
+
 public class StereoOrbitView extends BasicOrbitView
 {
 	public enum Eye
@@ -16,17 +19,7 @@ public class StereoOrbitView extends BasicOrbitView
 		RIGHT
 	}
 
-	public enum StereoMode
-	{
-		NONE,
-		OFFSET,
-		FRUSTUM
-	}
-
-	private StereoMode mode = StereoMode.NONE;
 	private Eye eye = Eye.LEFT;
-	private double focalLength = 1000;
-	private double eyeSeparation = 10;
 	private boolean drawing;
 
 	public StereoOrbitView()
@@ -103,21 +96,22 @@ public class StereoOrbitView extends BasicOrbitView
 		//stereo
 		if (isDrawing())
 		{
-			if (this.mode == StereoMode.FRUSTUM)
+			if (Settings.get().getProjectionMode() == ProjectionMode.ASYMMETRIC_FRUSTUM)
 			{
 				double aspectratio = this.viewport.getWidth()
 						/ this.viewport.getHeight();
 				double vfov = this.fieldOfView.radians / aspectratio;
 				double widthdiv2 = nearDistance * Math.tan(vfov / 2.0);
 				double distance = (getEye() == Eye.RIGHT ? 1 : -1) * 0.5
-						* getEyeSeparation() * nearDistance / getFocalLength();
+						* Settings.get().getEyeSeparation() * nearDistance
+						/ Settings.get().getFocalLength();
 				double top = widthdiv2;
 				double bottom = -widthdiv2;
 				double left = -aspectratio * widthdiv2 + distance;
 				double right = aspectratio * widthdiv2 + distance;
 
-				this.projection = fromFrustum(left, right, bottom,
-						top, nearDistance, farDistance);
+				this.projection = fromFrustum(left, right, bottom, top,
+						nearDistance, farDistance);
 			}
 		}
 
@@ -127,27 +121,17 @@ public class StereoOrbitView extends BasicOrbitView
 		//========== after apply (GL matrix state) ==========//
 		afterDoApply();
 	}
-	
+
 	private static Matrix fromFrustum(double left, double right, double bottom,
 			double top, double near, double far)
 	{
 		double A = (right + left) / (right - left);
 		double B = (top + bottom) / (top - bottom);
-		double C = -(far + near) / (far - near);
-		double D = -(2 * far * near) / (far - near);
+		double C = (far + near) / (far - near);
+		double D = (2 * far * near) / (far - near);
 		double E = (2 * near) / (right - left);
 		double F = (2 * near) / (top - bottom);
 		return new Matrix(E, 0, A, 0, 0, F, B, 0, 0, 0, C, D, 0, 0, -1, 0);
-	}
-
-	public StereoMode getMode()
-	{
-		return mode;
-	}
-
-	public void setMode(StereoMode mode)
-	{
-		this.mode = mode;
 	}
 
 	public Eye getEye()
@@ -158,26 +142,6 @@ public class StereoOrbitView extends BasicOrbitView
 	public void setEye(Eye eye)
 	{
 		this.eye = eye;
-	}
-
-	public double getFocalLength()
-	{
-		return focalLength;
-	}
-
-	public void setFocalLength(double focalLength)
-	{
-		this.focalLength = focalLength;
-	}
-
-	public double getEyeSeparation()
-	{
-		return eyeSeparation;
-	}
-
-	public void setEyeSeparation(double eyeSeparation)
-	{
-		this.eyeSeparation = eyeSeparation;
 	}
 
 	public void setDrawing(boolean drawing)

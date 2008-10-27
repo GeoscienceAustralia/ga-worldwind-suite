@@ -13,6 +13,7 @@ import gov.nasa.worldwind.layers.Earth.WorldBordersMetacartaLayer;
 import javax.swing.UIManager;
 
 import layers.other.GravityLayer;
+import layers.other.MagneticsLayer;
 import layers.radiometry.AreasLayer;
 import layers.radiometry.DoseRateLayer;
 import layers.radiometry.PotassiumLayer;
@@ -24,7 +25,6 @@ import layers.radiometry.ThoriumLayer;
 import layers.radiometry.UraniumLayer;
 import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
-import stereo.StereoOrbitView.StereoMode;
 
 public class StandardApplication extends ApplicationTemplate
 {
@@ -100,6 +100,10 @@ public class StandardApplication extends ApplicationTemplate
 			Layer gravity = new GravityLayer();
 			gravity.setEnabled(false);
 			layers.add(gravity);
+			
+			Layer magnetics = new MagneticsLayer();
+			magnetics.setEnabled(false);
+			layers.add(magnetics);
 
 			/*VectorLayer vectorLayer = new VectorLayer();
 			vectorLayer.setEnabled(false);
@@ -140,10 +144,6 @@ public class StandardApplication extends ApplicationTemplate
 			getLayerPanel().update(getWwd());
 
 			//getWwd().getModel().setShowWireframeInterior(true);
-			getWwd().getSceneController().setVerticalExaggeration(10);
-
-			((StereoOrbitView) getWwd().getView()).setMode(StereoMode.NONE);
-			//((StereoOrbitView)getWwd().getView()).setEyeSeparation(100);
 
 			//new DownloadStatus().setVisible(true);
 		}

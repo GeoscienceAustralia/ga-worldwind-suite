@@ -5,8 +5,9 @@ import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.view.BasicOrbitViewModel;
+import settings.Settings;
+import settings.Settings.ProjectionMode;
 import stereo.StereoOrbitView.Eye;
-import stereo.StereoOrbitView.StereoMode;
 
 public class StereoOrbitViewModel extends BasicOrbitViewModel
 {
@@ -30,19 +31,21 @@ public class StereoOrbitViewModel extends BasicOrbitViewModel
 				pitch, zoom);
 		if (view.isDrawing())
 		{
-			if (view.getMode() == StereoMode.OFFSET)
+			ProjectionMode mode = Settings.get().getProjectionMode();
+			if (mode == ProjectionMode.SIMPLE_OFFSET)
 			{
 				matrix = Matrix.fromTranslation(
 						(view.getEye() == Eye.RIGHT ? 1 : -1) * zoom
-								* view.getEyeSeparation() * 0.0005, 0, 0)
-						.multiply(matrix);
+								* Settings.get().getEyeSeparation() * 0.005,
+						0, 0).multiply(matrix);
 			}
-			else if (view.getMode() == StereoMode.FRUSTUM)
+			else if (mode == ProjectionMode.ASYMMETRIC_FRUSTUM)
 			{
-				matrix = Matrix.fromTranslation(
-						(view.getEye() == Eye.RIGHT ? 1 : -1)
-								* view.getEyeSeparation() * 0.5, 0, 0)
-						.multiply(matrix);
+				matrix = Matrix
+						.fromTranslation(
+								(view.getEye() == Eye.RIGHT ? 1 : -1)
+										* Settings.get().getEyeSeparation()
+										* 0.5, 0, 0).multiply(matrix);
 			}
 		}
 		return matrix;

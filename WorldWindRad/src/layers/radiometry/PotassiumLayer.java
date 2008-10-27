@@ -47,6 +47,6 @@ public class PotassiumLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "GA Radiometry - Potassium";
+		return "Potassium";
 	}
 }

@@ -47,6 +47,6 @@ public class RatioThKLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "GA Radiometry - Thorium Potassium Ratio";
+		return "Thorium Potassium Ratio";
 	}
 }

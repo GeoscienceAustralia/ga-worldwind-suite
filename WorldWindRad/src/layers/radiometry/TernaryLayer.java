@@ -47,6 +47,6 @@ public class TernaryLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "GA Radiometry - Ternary";
+		return "Ternary";
 	}
 }

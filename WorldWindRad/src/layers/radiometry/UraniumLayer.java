@@ -47,6 +47,6 @@ public class UraniumLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "GA Radiometry - Uranium";
+		return "Uranium";
 	}
 }
