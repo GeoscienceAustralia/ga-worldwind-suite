@@ -8,9 +8,6 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.globes.Earth;
-import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.layers.Earth.BMNGSurfaceLayer;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -34,6 +31,8 @@ import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
 
+import panels.NASAPanel;
+import panels.OtherPanel;
 import panels.RadiometryPanel;
 import settings.Settings;
 import settings.SettingsDialog;
@@ -42,21 +41,6 @@ import stereo.StereoSceneController;
 
 public class Application
 {
-	/*public final static String STARS = StarsLayer.class.getName();
-	public final static String BMNG = BMNGSurfaceLayer.class.getName();
-	public final static String LANDSAT = LandsatI3.class.getName();
-	public final static String PLACENAMES = EarthNASAPlaceNameLayer.class
-			.getName();
-	public final static String COMPASS = CompassLayer.class.getName();
-
-
-	public final static String MAGNETICS = MagneticsLayer.class.getName();
-	public final static String GRAVITY = GravityLayer.class.getName();
-
-	public final static String[] NASA_LAYERS = { STARS, BMNG, LANDSAT,
-			PLACENAMES, COMPASS };
-	public final static String[] OTHER_LAYERS = { MAGNETICS, GRAVITY };*/
-
 	static
 	{
 		if (Configuration.isWindowsOS())
@@ -92,8 +76,7 @@ public class Application
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class
 				.getName());
 		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, GAGlobe.class.getName());
-		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, BMNGSurfaceLayer.class
-				.getName());
+		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 
 		Configuration.setValue(AVKey.INITIAL_LATITUDE, Double.toString(Angle
 				.fromDegreesLatitude(-27).degrees));
@@ -135,7 +118,7 @@ public class Application
 		splitPane.setDividerSize(8);
 		frame.add(splitPane, BorderLayout.CENTER);
 
-		Dimension minimumSize = new Dimension(100, 50);
+		Dimension minimumSize = new Dimension(250, 0);
 		wwd.setMinimumSize(minimumSize);
 		layers.setMinimumSize(minimumSize);
 
@@ -229,8 +212,10 @@ public class Application
 
 	private JComponent createNASA()
 	{
+		NASAPanel np = new NASAPanel(wwd);
 		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(new JPanel(), BorderLayout.NORTH);
+		panel.add(np, BorderLayout.NORTH);
+		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		JScrollPane scrollPane = new JScrollPane(panel);
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 		return scrollPane;
@@ -238,10 +223,10 @@ public class Application
 
 	private JComponent createRadiometry()
 	{
-		RadiometryPanel rp = new RadiometryPanel();
-		addLayers(rp.getLayers());
+		RadiometryPanel rp = new RadiometryPanel(wwd);
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(rp, BorderLayout.NORTH);
+		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		JScrollPane scrollPane = new JScrollPane(panel);
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 		return scrollPane;
@@ -249,20 +234,13 @@ public class Application
 
 	private JComponent createOther()
 	{
+		OtherPanel op = new OtherPanel(wwd);
 		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(new JPanel(), BorderLayout.NORTH);
+		panel.add(op, BorderLayout.NORTH);
+		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		JScrollPane scrollPane = new JScrollPane(panel);
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 		return scrollPane;
-	}
-
-	private void addLayers(Layer[] layers)
-	{
-		LayerList ll = wwd.getModel().getLayers();
-		for (Layer layer : layers)
-		{
-			ll.add(layer);
-		}
 	}
 
 	public void quit()
