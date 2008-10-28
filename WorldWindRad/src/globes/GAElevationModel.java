@@ -12,14 +12,14 @@ import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.globes.BasicElevationModel;
+import gov.nasa.worldwind.globes.BasicElevationModelFixed;
 import gov.nasa.worldwind.util.LevelSet;
 
 /**
  * @author Tom Gaskins
  * @version $Id: EarthElevationModel.java 2664 2007-08-23 22:17:25Z tgaskins $
  */
-public class GAElevationModel extends BasicElevationModel
+public class GAElevationModel extends BasicElevationModelFixed
 {
 	private static double HEIGHT_OF_MT_EVEREST = 8850d; // meters
 	private static double DEPTH_OF_MARIANAS_TRENCH = -11000d; // meters

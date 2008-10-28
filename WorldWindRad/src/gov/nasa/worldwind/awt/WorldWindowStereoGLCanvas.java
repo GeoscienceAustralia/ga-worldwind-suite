@@ -29,7 +29,7 @@ import java.util.*;
  * @author Tom Gaskins
  * @version $Id: WorldWindowGLCanvas.java 5101 2008-04-21 05:39:29Z tgaskins $
  */
-public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow
+public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow
 {
     private static final GLCapabilities caps = new GLCapabilities();
 
@@ -48,7 +48,7 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow
     /**
      * Constructs a new <code>WorldWindowGLCanvas</code> window on the default graphics device.
      */
-    public WorldWindowGLCanvas()
+    public WorldWindowStereoGLCanvas()
     {
         super(caps);
         try
@@ -84,7 +84,7 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow
      * @throws NullPointerException if shareWith is null.
      * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)
      */
-    public WorldWindowGLCanvas(WorldWindowGLCanvas shareWith)
+    public WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas shareWith)
     {
         super(caps, null, shareWith.getContext(), null);
         try
@@ -114,7 +114,7 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow
      * @throws IllegalArgumentException if <code>deevice</code> is null.
      * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)
      */
-    public WorldWindowGLCanvas(WorldWindowGLCanvas shareWith, java.awt.GraphicsDevice device)
+    public WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas shareWith, java.awt.GraphicsDevice device)
     {
         super(caps, null, shareWith.getContext(), device);
 

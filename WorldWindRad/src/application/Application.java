@@ -6,7 +6,7 @@ import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
+import gov.nasa.worldwind.awt.WorldWindowStereoGLCanvas;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.ScalebarLayer;
@@ -102,14 +102,14 @@ public class Application
 	}
 
 	private JFrame frame;
-	private WorldWindowGLCanvas wwd;
+	private WorldWindowStereoGLCanvas wwd;
 	private StatusBar statusBar;
 
 	public Application()
 	{
 		//create worldwind stuff
 
-		wwd = new WorldWindowGLCanvas();
+		wwd = new WorldWindowStereoGLCanvas();
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		wwd.addPropertyChangeListener(propertyChangeListener);
