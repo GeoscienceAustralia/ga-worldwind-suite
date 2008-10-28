@@ -116,7 +116,7 @@ public class Application
 
 		//create gui stuff
 
-		frame = new JFrame();
+		frame = new JFrame("Radiometrics");
 		frame.setLayout(new BorderLayout());
 		frame.setMenuBar(createMenuBar());
 
