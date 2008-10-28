@@ -14,12 +14,10 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.Proxy;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 
 import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -29,7 +27,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -62,15 +59,12 @@ public class SettingsDialog extends JDialog
 	private JSpinner focalLengthSpinner;
 
 	private JCheckBox proxyEnabledCheck;
-	private JLabel proxyTypeLabel;
-	private JRadioButton proxyHttpRadio;
-	private JRadioButton proxySocksRadio;
 	private JLabel proxyHostLabel;
 	private JTextField proxyHostText;
 	private JLabel proxyPortLabel;
 	private JIntegerField proxyPortText;
-
-	private JSpinner verticalExaggerationSpinner;
+	private JLabel nonProxyHostsLabel;
+	private JTextField nonProxyHostsText;
 
 	public SettingsDialog(JFrame frame)
 	{
@@ -165,11 +159,22 @@ public class SettingsDialog extends JDialog
 		double focalLength = (Double) focalLengthSpinner.getValue();
 
 		boolean proxyEnabled = proxyEnabledCheck.isSelected();
-		Proxy.Type proxyType = !proxyEnabled ? Proxy.Type.DIRECT
-				: proxyHttpRadio.isSelected() ? Proxy.Type.HTTP
-						: Proxy.Type.SOCKS;
 		String proxyHost = proxyHostText.getText();
 		int proxyPort = proxyPortText.getValue();
+
+		String nonProxyHostsString = nonProxyHostsText.getText();
+		String[] nph = nonProxyHostsString.split(",");
+		String nonProxyHosts = "";
+		for (String str : nph)
+		{
+			String trim = str.trim();
+			if (trim.length() > 0)
+			{
+				nonProxyHosts += "|" + trim;
+			}
+		}
+		nonProxyHosts = nonProxyHosts.length() == 0 ? nonProxyHosts
+				: nonProxyHosts.substring(1);
 
 		if (proxyEnabled)
 		{
@@ -180,9 +185,6 @@ public class SettingsDialog extends JDialog
 				showError(this, "Proxy values you entered are invalid.");
 			}
 		}
-
-		double verticalExaggeration = (Double) verticalExaggerationSpinner
-				.getValue();
 
 		boolean valid = proxyValid;
 
@@ -197,11 +199,10 @@ public class SettingsDialog extends JDialog
 				settings.setEyeSeparation(eyeSeparation);
 				settings.setFocalLength(focalLength);
 
-				settings.setProxyType(proxyType);
+				settings.setProxyEnabled(proxyEnabled);
 				settings.setProxyHost(proxyHost);
 				settings.setProxyPort(proxyPort);
-
-				settings.setVerticalExaggeration(verticalExaggeration);
+				settings.setNonProxyHosts(nonProxyHosts);
 
 				settings.save();
 			}
@@ -232,7 +233,7 @@ public class SettingsDialog extends JDialog
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.addTab("Renderer", createRenderer());
 		tabbedPane.addTab("Network", createNetwork());
-		tabbedPane.doLayout();
+		tabbedPane.validate();
 		return tabbedPane;
 	}
 
@@ -242,23 +243,13 @@ public class SettingsDialog extends JDialog
 		panel.setBorder(BorderFactory.createEtchedBorder());
 		GridBagConstraints c;
 
-		JComponent other = createOther();
-		other.setBorder(BorderFactory.createTitledBorder("Globe"));
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.WEST;
-		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
-		panel.add(other, c);
-
 		JComponent stereo = createStereo();
 		stereo.setBorder(BorderFactory.createTitledBorder("Stereo"));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.NORTH;
+		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 1;
 		c.weighty = 1;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
@@ -272,15 +263,16 @@ public class SettingsDialog extends JDialog
 	private JComponent createNetwork()
 	{
 		JPanel panel = new JPanel(new GridBagLayout());
+		panel.setBorder(BorderFactory.createEtchedBorder());
 		GridBagConstraints c;
 
 		JComponent proxy = createProxy();
 		proxy.setBorder(BorderFactory.createTitledBorder("Proxy"));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.NORTH;
+		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 1;
 		c.weighty = 1;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
@@ -409,42 +401,13 @@ public class SettingsDialog extends JDialog
 		return panel;
 	}
 
-	private JComponent createOther()
-	{
-		JComponent panel = new JPanel(new GridBagLayout());
-		GridBagConstraints c;
-		JLabel label;
-
-		label = new JLabel("Vertical exaggeration:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(SPACING, SPACING, 0, 0);
-		panel.add(label, c);
-
-		SpinnerModel verticalExaggerationModel = new SpinnerNumberModel(
-				settings.getVerticalExaggeration(), 1, 50, 1);
-		verticalExaggerationSpinner = new JSpinner(verticalExaggerationModel);
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.weightx = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
-		panel.add(verticalExaggerationSpinner, c);
-
-		return panel;
-	}
-
 	private JComponent createProxy()
 	{
 		GridBagConstraints c;
 		JPanel panel = new JPanel(new GridBagLayout());
 
 		proxyEnabledCheck = new JCheckBox("Enable proxy");
-		proxyEnabledCheck
-				.setSelected(settings.getProxyType() != Proxy.Type.DIRECT);
+		proxyEnabledCheck.setSelected(settings.isProxyEnabled());
 		proxyEnabledCheck.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -460,40 +423,10 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(proxyEnabledCheck, c);
 
-		proxyTypeLabel = new JLabel("Type:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 1;
-		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(SPACING, SPACING, 0, 0);
-		panel.add(proxyTypeLabel, c);
-
-		JPanel radio = new JPanel(new GridLayout(0, 2));
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 1;
-		c.weightx = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
-		panel.add(radio, c);
-
-		proxyHttpRadio = new JRadioButton("HTTP");
-		proxyHttpRadio.setSelected(settings.getProxyType() != Proxy.Type.SOCKS);
-		radio.add(proxyHttpRadio);
-
-		proxySocksRadio = new JRadioButton("SOCKS");
-		proxySocksRadio
-				.setSelected(settings.getProxyType() == Proxy.Type.SOCKS);
-		radio.add(proxySocksRadio);
-
-		ButtonGroup buttonGroup = new ButtonGroup();
-		buttonGroup.add(proxyHttpRadio);
-		buttonGroup.add(proxySocksRadio);
-
 		proxyHostLabel = new JLabel("Host:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = 1;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel.add(proxyHostLabel, c);
@@ -501,7 +434,8 @@ public class SettingsDialog extends JDialog
 		proxyHostText = new JTextField(settings.getProxyHost());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 2;
+		c.gridy = 1;
+		c.weightx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(proxyHostText, c);
@@ -509,7 +443,7 @@ public class SettingsDialog extends JDialog
 		proxyPortLabel = new JLabel("Port:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy = 2;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel.add(proxyPortLabel, c);
@@ -517,10 +451,40 @@ public class SettingsDialog extends JDialog
 		proxyPortText = new JIntegerField(settings.getProxyPort());
 		c = new GridBagConstraints();
 		c.gridx = 1;
+		c.gridy = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
+		panel.add(proxyPortText, c);
+
+		nonProxyHostsLabel = new JLabel("Non-proxy hosts:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 3;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(SPACING, SPACING, 0, 0);
+		panel.add(nonProxyHostsLabel, c);
+
+
+		String[] nph = settings.getNonProxyHosts().split("\\|");
+		String nonProxyHosts = "";
+		for (String str : nph)
+		{
+			String trim = str.trim();
+			if (trim.length() > 0)
+			{
+				nonProxyHosts += "," + trim;
+			}
+		}
+		nonProxyHosts = nonProxyHosts.length() == 0 ? nonProxyHosts
+				: nonProxyHosts.substring(1);
+
+		nonProxyHostsText = new JTextField(nonProxyHosts);
+		c = new GridBagConstraints();
+		c.gridx = 1;
 		c.gridy = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
-		panel.add(proxyPortText, c);
+		panel.add(nonProxyHostsText, c);
 
 		enableProxySettings();
 
@@ -530,13 +494,12 @@ public class SettingsDialog extends JDialog
 	private void enableProxySettings()
 	{
 		boolean enabled = proxyEnabledCheck.isSelected();
-		proxyTypeLabel.setEnabled(enabled);
-		proxyHttpRadio.setEnabled(enabled);
-		proxySocksRadio.setEnabled(enabled);
 		proxyHostLabel.setEnabled(enabled);
 		proxyHostText.setEnabled(enabled);
 		proxyPortLabel.setEnabled(enabled);
 		proxyPortText.setEnabled(enabled);
+		nonProxyHostsLabel.setEnabled(enabled);
+		nonProxyHostsText.setEnabled(enabled);
 	}
 
 	private void enableStereoSettings()

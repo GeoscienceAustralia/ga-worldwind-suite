@@ -3,7 +3,6 @@ package settings;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 
-import java.net.Proxy;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -50,8 +49,7 @@ public class Settings
 		STEREOBUFFER("Hardware stereo buffer"),
 		RCANAGLYPH("Red/cyan anaglyph"),
 		GMANAGLYPH("Green/magenta anaglyph"),
-		BYANAGLYPH("Blue/yellow anaglyph"),
-		SIDEBYSIDE("Side by side rendering");
+		BYANAGLYPH("Blue/yellow anaglyph");
 
 		private String pretty;
 
@@ -78,15 +76,14 @@ public class Settings
 				getVerticalExaggeration());
 	}
 
-	public Proxy.Type getProxyType()
+	public boolean isProxyEnabled()
 	{
-		return Proxy.Type.values()[preferences.getInt("ProxyType",
-				Proxy.Type.DIRECT.ordinal())];
+		return preferences.getBoolean("ProxyEnabled", false);
 	}
 
-	public void setProxyType(Proxy.Type proxyType)
+	public void setProxyEnabled(boolean proxyEnabled)
 	{
-		preferences.putInt("ProxyType", proxyType.ordinal());
+		preferences.putBoolean("ProxyEnabled", proxyEnabled);
 		updateProxyConfiguration();
 	}
 
@@ -112,14 +109,32 @@ public class Settings
 		updateProxyConfiguration();
 	}
 
+	public String getNonProxyHosts()
+	{
+		return preferences.get("NonProxyHosts", "");
+	}
+
+	public void setNonProxyHosts(String nonProxyHosts)
+	{
+		preferences.put("NonProxyHosts", nonProxyHosts);
+	}
+
 	private void updateProxyConfiguration()
 	{
-		Configuration.setValue(AVKey.URL_PROXY_HOST, getProxyHost());
-		Configuration.setValue(AVKey.URL_PROXY_PORT, getProxyPort());
-		Proxy.Type type = getProxyType();
-		Configuration.setValue(AVKey.URL_PROXY_TYPE,
-				type == Proxy.Type.HTTP ? "Proxy.Type.Http"
-						: type == Proxy.Type.SOCKS ? "Proxy.Type.SOCKS" : "");
+		if (isProxyEnabled())
+		{
+			System.setProperty("http.proxyHost", getProxyHost());
+			System
+					.setProperty("http.proxyPort", String
+							.valueOf(getProxyPort()));
+			System.setProperty("http.nonProxyHosts", getNonProxyHosts());
+		}
+		else
+		{
+			System.setProperty("http.proxyHost", "");
+			System.setProperty("http.proxyPort", "80");
+			System.setProperty("http.nonProxyHosts", "");
+		}
 	}
 
 	public StereoMode getStereoMode()

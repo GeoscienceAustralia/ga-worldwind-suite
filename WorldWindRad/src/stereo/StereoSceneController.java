@@ -65,24 +65,21 @@ public class StereoSceneController extends AbstractSceneController
 
 				stereo.setDrawing(true);
 				stereo.setEye(swap ? Eye.RIGHT : Eye.LEFT);
-				view.apply(dc);
-
 				setupBuffer(gl, mode, Eye.LEFT);
+				view.apply(dc);
 				this.draw(dc);
 
 				gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
 				gl.glDisable(GL.GL_FOG);
 
 				stereo.setEye(swap ? Eye.LEFT : Eye.RIGHT);
-				view.apply(dc);
-
 				setupBuffer(gl, mode, Eye.RIGHT);
+				view.apply(dc);
 				this.draw(dc);
 
 				stereo.setDrawing(false);
-				view.apply(dc);
-
 				restoreBuffer(gl, mode);
+				view.apply(dc);
 			}
 		}
 		finally
@@ -108,9 +105,6 @@ public class StereoSceneController extends AbstractSceneController
 			case STEREOBUFFER:
 				gl.glDrawBuffer(GL.GL_BACK);
 				break;
-			case SIDEBYSIDE:
-				//TODO
-				break;
 		}
 	}
 
@@ -125,9 +119,6 @@ public class StereoSceneController extends AbstractSceneController
 				break;
 			case STEREOBUFFER:
 				gl.glDrawBuffer(GL.GL_BACK);
-				break;
-			case SIDEBYSIDE:
-				//TODO
 				break;
 		}
 	}
