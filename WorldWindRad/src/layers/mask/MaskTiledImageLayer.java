@@ -1,4 +1,4 @@
-package mask;
+package layers.mask;
 
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.WorldWind;
