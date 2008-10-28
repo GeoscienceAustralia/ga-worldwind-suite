@@ -96,8 +96,6 @@ public class Application
 		//create worldwind stuff
 		
 		wwd = new WorldWindowGLCanvas();
-		wwd.setPreferredSize(new java.awt.Dimension(800, 600));
-		
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		
@@ -118,9 +116,12 @@ public class Application
 		splitPane.setDividerSize(8);
 		frame.add(splitPane, BorderLayout.CENTER);
 
-		Dimension minimumSize = new Dimension(250, 0);
+		Dimension minimumSize = new Dimension(100, 0);
 		wwd.setMinimumSize(minimumSize);
 		layers.setMinimumSize(minimumSize);
+		
+		wwd.setPreferredSize(new Dimension(800, 600));
+		layers.setPreferredSize(new Dimension(220, 0));
 
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter()
