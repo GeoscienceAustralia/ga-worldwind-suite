@@ -28,7 +28,7 @@ public class DoseRateLayer extends MaskTiledImageLayer
 		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Radiometry/Dose_100m_he_rgb");
-		params.setValue(AVKey.SERVICE, "http://localhost/wwtiles/radio.php");
+		params.setValue(AVKey.SERVICE, "http://localhost/worldwind/radio.php");
 		params.setValue(AVKey.DATASET_NAME, "Dose_100m_he_rgb");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 7);

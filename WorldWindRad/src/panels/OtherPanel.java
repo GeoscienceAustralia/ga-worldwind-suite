@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.Earth.GeoNamesLayer;
 
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
@@ -46,6 +47,8 @@ public class OtherPanel extends JPanel
 		magnetics = new MagneticsLayer();
 		magnetics.setEnabled(false);
 		wwd.getModel().getLayers().add(magnetics);
+		
+		wwd.getModel().getLayers().add(new GeoNamesLayer());
 	}
 
 	private void fillPanel()

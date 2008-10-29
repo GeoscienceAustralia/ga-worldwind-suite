@@ -28,7 +28,7 @@ public class RatioUThLayer extends MaskTiledImageLayer
 		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Radiometry/ratio_ut_100m_he_rgb");
-		params.setValue(AVKey.SERVICE, "http://localhost/wwtiles/radio.php");
+		params.setValue(AVKey.SERVICE, "http://localhost/worldwind/radio.php");
 		params.setValue(AVKey.DATASET_NAME, "ratio_ut_100m_he_rgb");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 7);
