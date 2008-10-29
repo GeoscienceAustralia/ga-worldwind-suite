@@ -1,14 +1,13 @@
 package panels;
 
+import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.layers.Layer;
+
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.Earth.GeoNamesLayer;
 
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
@@ -16,6 +15,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import layers.MyGeoNamesLayer;
 import layers.other.GravityLayer;
 import layers.other.MagneticsLayer;
 
@@ -48,7 +48,7 @@ public class OtherPanel extends JPanel
 		magnetics.setEnabled(false);
 		wwd.getModel().getLayers().add(magnetics);
 		
-		wwd.getModel().getLayers().add(new GeoNamesLayer());
+		wwd.getModel().getLayers().add(new MyGeoNamesLayer());
 	}
 
 	private void fillPanel()
