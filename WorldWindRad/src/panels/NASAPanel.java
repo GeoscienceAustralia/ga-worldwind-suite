@@ -12,6 +12,7 @@ import gov.nasa.worldwind.layers.Earth.BMNGOneImage;
 import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.layers.Earth.EarthNASAPlaceNameLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
+import gov.nasa.worldwind.layers.Earth.MGRSGraticuleLayer;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -32,6 +33,7 @@ public class NASAPanel extends JPanel
 	private Layer compass;
 	private Layer map;
 	private Layer scale;
+	private Layer graticule;
 
 	private Layer[] layers;
 
@@ -56,14 +58,17 @@ public class NASAPanel extends JPanel
 		compass = new CompassLayer();
 		map = new WorldMapLayer();
 		scale = new ScalebarLayer();
+		graticule = new MGRSGraticuleLayer();
 
 		layers = new Layer[] { stars, atmosphere, fog, bmngone, bmng, landsat,
-				pnl, compass, map, scale };
+				pnl, compass, map, scale, graticule };
 		for (Layer layer : layers)
 		{
 			layer.setEnabled(true);
 			wwd.getModel().getLayers().add(layer);
 		}
+		
+		graticule.setEnabled(false);
 	}
 
 	private void fillPanel()
