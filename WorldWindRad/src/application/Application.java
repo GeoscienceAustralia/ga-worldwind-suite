@@ -1,6 +1,5 @@
 package application;
 
-import globes.GAGlobe;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
@@ -9,6 +8,7 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.WorldWindowStereoGLCanvas;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ScalebarLayer;
 import gov.nasa.worldwind.layers.TerrainProfileLayer;
 import gov.nasa.worldwind.util.StatusBar;
@@ -30,6 +30,7 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -44,9 +45,9 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import panels.StandardPanel;
 import panels.OtherPanel;
 import panels.RadiometryPanel;
+import panels.StandardPanel;
 import settings.Settings;
 import settings.SettingsDialog;
 import stereo.StereoOrbitView;
@@ -88,7 +89,6 @@ public class Application
 				StereoSceneController.class.getName());
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class
 				.getName());
-		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, GAGlobe.class.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 
 		Configuration.setValue(AVKey.INITIAL_LATITUDE, Double.toString(Angle
@@ -355,6 +355,30 @@ public class Application
 		button.addActionListener(new ScaleListener(100));
 		button.setMinimumSize(size);
 		buttons.add(button);*/
+
+		final JCheckBox useTerrain = new JCheckBox("Use GA terrain");
+		useTerrain.setSelected(Settings.get().isUseTerrain());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 2;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		panel.add(useTerrain, c);
+
+		useTerrain.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				Settings.get().setUseTerrain(useTerrain.isSelected());
+				LayerList layers = wwd.getModel().getLayers();
+				Model model = new BasicModel();
+				model.setLayers(layers);
+				wwd.setModel(model);
+				listener.stateChanged(null);
+				listener.stateChanged(null);
+			}
+		});
 
 		return panel;
 	}

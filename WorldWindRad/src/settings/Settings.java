@@ -1,7 +1,9 @@
 package settings;
 
+import globes.GAGlobe;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.globes.Earth;
 
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -72,8 +74,10 @@ public class Settings
 	{
 		preferences = Preferences.userRoot().node(node);
 		updateProxyConfiguration();
-		Configuration.setValue(AVKey.VERTICAL_EXAGGERATION,
-				getVerticalExaggeration());
+		
+		//force configuration update
+		setVerticalExaggeration(getVerticalExaggeration());
+		setUseTerrain(isUseTerrain());
 	}
 
 	public boolean isProxyEnabled()
@@ -209,6 +213,18 @@ public class Settings
 		preferences.putDouble("VerticalExaggeration", verticalExaggeration);
 		Configuration.setValue(AVKey.VERTICAL_EXAGGERATION,
 				verticalExaggeration);
+	}
+
+	public boolean isUseTerrain()
+	{
+		return preferences.getBoolean("UseTerrain", false);
+	}
+
+	public void setUseTerrain(boolean useTerrain)
+	{
+		preferences.putBoolean("UseTerrain", useTerrain);
+		Configuration.setValue(AVKey.GLOBE_CLASS_NAME,
+				useTerrain ? GAGlobe.class.getName() : Earth.class.getName());
 	}
 
 	public void save() throws BackingStoreException

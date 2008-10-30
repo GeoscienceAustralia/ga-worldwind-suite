@@ -15,7 +15,6 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import layers.geonames.GeoNamesLayer;
 import layers.other.GravityLayer;
 import layers.other.MagneticsLayer;
 
@@ -47,8 +46,6 @@ public class OtherPanel extends JPanel
 		magnetics = new MagneticsLayer();
 		magnetics.setEnabled(false);
 		wwd.getModel().getLayers().add(magnetics);
-		
-		wwd.getModel().getLayers().add(new GeoNamesLayer());
 	}
 
 	private void fillPanel()
