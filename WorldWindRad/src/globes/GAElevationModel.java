@@ -12,7 +12,7 @@ import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.globes.BasicElevationModelFixed;
+import gov.nasa.worldwind.globes.fixed.BasicElevationModelFixed;
 import gov.nasa.worldwind.util.LevelSet;
 
 /**

@@ -21,8 +21,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
-import layers.LogoLayer;
 import layers.geonames.GeoNamesLayer;
+import layers.other.LogoLayer;
 
 public class StandardPanel extends JPanel
 {
