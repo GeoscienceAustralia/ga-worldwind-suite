@@ -15,6 +15,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import layers.LogoLayer;
 import layers.other.GravityLayer;
 import layers.other.MagneticsLayer;
 

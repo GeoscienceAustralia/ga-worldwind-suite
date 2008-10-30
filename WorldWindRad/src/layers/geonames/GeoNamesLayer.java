@@ -66,7 +66,7 @@ public class GeoNamesLayer extends AbstractLayer
 					}
 				});
 	}
-	
+
 	private ColorFontProvider setupFontProvider()
 	{
 		ColorFont def = new ColorFont(Font.decode("Arial-PLAIN-10"),
@@ -111,26 +111,23 @@ public class GeoNamesLayer extends AbstractLayer
 		fontProvider.put("PPLS", towns);
 		fontProvider.put("PPLW", towns);
 		fontProvider.put("PPLX", towns);
-		
+
 		return fontProvider;
 	}
 
 	public void doRender(DrawContext dc)
 	{
-		if (isEnabled())
-		{
-			int levels = calculateLevel(dc);
+		int levels = calculateLevel(dc);
 
-			Position eye = dc.getView().getEyePosition();
-			Sector sector = dc.getVisibleSector();
-			visibilityCalculator.setSector(sector);
-			visibilityCalculator.setLevels(levels);
-			visibilityCalculator.setEye(eye);
+		Position eye = dc.getView().getEyePosition();
+		Sector sector = dc.getVisibleSector();
+		visibilityCalculator.setSector(sector);
+		visibilityCalculator.setLevels(levels);
+		visibilityCalculator.setEye(eye);
 
-			render(dc, topGeoName);
+		render(dc, topGeoName);
 
-			sendRequests();
-		}
+		sendRequests();
 	}
 
 	public void sendRequests()

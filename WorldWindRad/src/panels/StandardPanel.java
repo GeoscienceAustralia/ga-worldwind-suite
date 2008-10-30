@@ -21,6 +21,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
+import layers.LogoLayer;
 import layers.geonames.GeoNamesLayer;
 
 public class StandardPanel extends JPanel
@@ -37,6 +38,7 @@ public class StandardPanel extends JPanel
 	private Layer map;
 	private Layer scale;
 	private Layer graticule;
+	private Layer logo;
 
 	private Layer[] layers;
 
@@ -63,9 +65,10 @@ public class StandardPanel extends JPanel
 		map = new WorldMapLayer();
 		scale = new ScalebarLayer();
 		graticule = new MGRSGraticuleLayer();
+		logo = new LogoLayer();
 
 		layers = new Layer[] { stars, atmosphere, fog, bmngone, bmng, landsat,
-				pnl, geonames, compass, map, scale, graticule };
+				pnl, geonames, graticule, compass, map, scale, logo };
 		for (Layer layer : layers)
 		{
 			layer.setEnabled(true);
@@ -82,7 +85,7 @@ public class StandardPanel extends JPanel
 
 		for (final Layer layer : layers)
 		{
-			final JCheckBox check = new JCheckBox(layer.toString());
+			final JCheckBox check = new JCheckBox(layer.getName());
 			check.setSelected(layer.isEnabled());
 			check.addActionListener(new ActionListener()
 			{
