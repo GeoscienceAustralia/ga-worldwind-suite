@@ -20,40 +20,97 @@ import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.retrieve.URLRetriever;
 import gov.nasa.worldwind.util.Logging;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Comparator;
+import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class GeoNamesLayer extends AbstractLayer
 {
 	private final static String GEONAMES_CHILDREN = "http://ws.geonames.org/children";
 	private final static int GEONAMES_GLOBE_ID = 6295630;
 
-	private final static int MAX_REQUESTS = 20;
-
 	private GeoName topGeoName;
-	private Set<Integer> requests = new HashSet<Integer>();
+	private VisibilityCalculatorImpl visibilityCalculator = new VisibilityCalculatorImpl();
+	private Queue<GeoName> requestQ;
 
 	private GeographicTextRenderer nameRenderer = new GeographicTextRenderer();
 
 	//TODO different attributes for different feature codes (fcode)
-	private TextProperties properties = new TextProperties(null, null, null);
-	private VisibilityCalculatorImpl visibilityCalculator = new VisibilityCalculatorImpl();
-
 
 	public GeoNamesLayer()
 	{
 		this.setName("GeoNames");
+
+		ColorFont def = new ColorFont(Font.decode("Arial-PLAIN-10"),
+				Color.lightGray, Color.black);
+
+		ColorFont continents = new ColorFont(Font.decode("Arial-BOLD-12"),
+				new Color(255, 255, 240), Color.black);
+		ColorFont countries = new ColorFont(Font.decode("Arial-BOLD-11"),
+				Color.white, Color.black);
+		ColorFont states = new ColorFont(Font.decode("Arial-BOLD-10"),
+				Color.yellow, Color.black);
+		ColorFont admin = new ColorFont(Font.decode("Arial-BOLD-10"),
+				Color.orange, Color.black);
+		ColorFont capitals = new ColorFont(Font.decode("Arial-BOLD-10"),
+				Color.red, Color.black);
+		ColorFont firstorder = new ColorFont(Font.decode("Arial-PLAIN-10"),
+				Color.green, Color.black);
+		ColorFont towns = new ColorFont(Font.decode("Arial-PLAIN-10"),
+				Color.cyan, Color.black);
+
+
+		ColorFontProvider fontProvider = new ColorFontProvider(def);
+		fontProvider.put("CONT", continents);
+		fontProvider.put("PCL", countries);
+		fontProvider.put("PCLD", countries);
+		fontProvider.put("PCLF", countries);
+		fontProvider.put("PCLI", countries);
+		fontProvider.put("PCLIX", countries);
+		fontProvider.put("PCLS", countries);
+		fontProvider.put("TERR", countries);
+		fontProvider.put("ADM1", states);
+		fontProvider.put("ADM2", admin);
+		fontProvider.put("ADM3", admin);
+		fontProvider.put("ADM4", admin);
+		fontProvider.put("ADMD", admin);
+		fontProvider.put("PPLC", capitals);
+		fontProvider.put("PPLA", firstorder);
+		fontProvider.put("PPL", towns);
+		fontProvider.put("PPLG", towns);
+		fontProvider.put("PPLL", towns);
+		fontProvider.put("PPLQ", towns);
+		fontProvider.put("PPLR", towns);
+		fontProvider.put("PPLS", towns);
+		fontProvider.put("PPLW", towns);
+		fontProvider.put("PPLX", towns);
+
 		topGeoName = new GeoName(null, GEONAMES_GLOBE_ID, LatLon.ZERO, null,
-				null, -1, properties, visibilityCalculator);
+				null, -1, fontProvider, visibilityCalculator);
+
+		requestQ = new PriorityBlockingQueue<GeoName>(64,
+				new Comparator<GeoName>()
+				{
+					public int compare(GeoName o1, GeoName o2)
+					{
+						double distance1 = visibilityCalculator
+								.distanceSquaredFromEye(o1);
+						double distance2 = visibilityCalculator
+								.distanceSquaredFromEye(o2);
+						return distance1 > distance2 ? 1
+								: distance1 == distance2 ? 0 : -1;
+					}
+				});
 	}
 
 	public void doRender(DrawContext dc)
 	{
-		//TODO calculate what level we are at
 		int levels = calculateLevel(dc);
 
 		Position eye = dc.getView().getEyePosition();
@@ -63,6 +120,43 @@ public class GeoNamesLayer extends AbstractLayer
 		visibilityCalculator.setEye(eye);
 
 		render(dc, topGeoName);
+
+		sendRequests();
+	}
+
+	public void sendRequests()
+	{
+		GeoName geoname = requestQ.poll();
+		while (geoname != null && !WorldWind.getTaskService().isFull())
+		{
+			//System.out.println(geoname);
+			WorldWind.getTaskService().addTask(new RequestTask(geoname));
+			geoname = requestQ.poll();
+		}
+		//System.out.println();
+		requestQ.clear();
+	}
+
+	private class RequestTask implements Runnable
+	{
+		private GeoName geoname;
+
+		public RequestTask(GeoName geoname)
+		{
+			this.geoname = geoname;
+		}
+
+		public void run()
+		{
+			if (geoname.cacheFileExists())
+			{
+				geoname.loadChildren();
+			}
+			else
+			{
+				download(geoname);
+			}
+		}
 	}
 
 	private int calculateLevel(DrawContext dc)
@@ -102,40 +196,19 @@ public class GeoNamesLayer extends AbstractLayer
 			else
 			{
 				Collection<GeoName> children = geoname.getChildren();
-				nameRenderer.render(dc, new IterableProxy<GeographicText>(
-						children));
 				for (GeoName child : children)
 				{
 					render(dc, child);
 				}
+				nameRenderer.render(dc, new IterableProxy<GeographicText>(
+						children));
 			}
 		}
 	}
 
-	public void requestChildren(final GeoName geoname)
+	public void requestChildren(GeoName geoname)
 	{
-		if (requests.size() < MAX_REQUESTS
-				&& !requests.contains(geoname.geonameId))
-		{
-			requests.add(geoname.geonameId);
-			Thread thread = new Thread(new Runnable()
-			{
-				public void run()
-				{
-					if (geoname.cacheFileExists())
-					{
-						geoname.loadChildren();
-						requests.remove(geoname.geonameId);
-					}
-					else
-					{
-						download(geoname);
-					}
-				}
-			});
-			thread.setDaemon(true);
-			thread.start();
-		}
+		requestQ.add(geoname);
 	}
 
 	private void download(GeoName geoname)
@@ -215,7 +288,6 @@ public class GeoNamesLayer extends AbstractLayer
 							"Error saving GeoNames .xml", e);
 				}
 			}
-			requests.remove(geoname.geonameId);
 			return buffer;
 		}
 

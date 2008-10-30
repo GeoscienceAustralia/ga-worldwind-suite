@@ -1,13 +1,14 @@
 package layers.geonames;
 
+import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 
 public class VisibilityCalculatorImpl implements VisibilityCalculator
 {
-	private Sector sector;
-	private int levels;
-	private Position eye;
+	private Sector sector = Sector.FULL_SPHERE;
+	private int levels = 0;
+	private Position eye = Position.ZERO;
 	private Object lock = new Object();
 
 	private Sector[] levelSectors;
@@ -51,10 +52,10 @@ public class VisibilityCalculatorImpl implements VisibilityCalculator
 			height /= 2d;
 			double lat = eye.getLatitude().degrees; //-90 to 90
 			double lon = eye.getLongitude().degrees; //-180 to 180
-			levelSectors[i] = Sector.fromDegrees(lat - height, lat + height, lon
-					- width, lon + width);
+			levelSectors[i] = Sector.fromDegrees(lat - height, lat + height,
+					lon - width, lon + width);
 		}
-		
+
 		dirty = false;
 	}
 
@@ -97,5 +98,18 @@ public class VisibilityCalculatorImpl implements VisibilityCalculator
 			this.eye = eye;
 			dirty = true;
 		}
+	}
+
+	public double distanceSquaredFromEye(GeoName geoname)
+	{
+		return latlonDistanceSquared(eye.getLatLon(), geoname.latlon);
+	}
+
+	public static double latlonDistanceSquared(LatLon ll1, LatLon ll2)
+	{
+		double latDelta = ll1.getLatitude().degrees - ll2.getLatitude().degrees;
+		double lonDelta = ll1.getLongitude().degrees
+				- ll2.getLongitude().degrees;
+		return (latDelta * latDelta) + (lonDelta * lonDelta);
 	}
 }

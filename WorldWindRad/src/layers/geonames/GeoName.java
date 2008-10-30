@@ -16,7 +16,9 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -36,14 +38,20 @@ public class GeoName implements GeographicText
 
 	private final VisibilityCalculator visibilityCalculator;
 	private final Position position;
-	private final TextProperties properties;
+	private final ColorFont font;
+	private final ColorFontProvider fontProvider;
 
+	private GeoName parent;
 	private Collection<GeoName> children;
-	private Object fileLock = new Object();
+	
+	private static Object fileLock = new Object();
+	private static Map<Integer, GeoName> geonameMap = new HashMap<Integer, GeoName>();
+	private static Object mapLock = new Object();
 
 	public GeoName(String name, int geonameId, LatLon latlon,
 			String featureClass, String featureCode, int level,
-			TextProperties properties, VisibilityCalculator visibilityCalculator)
+			ColorFontProvider fontProvider,
+			VisibilityCalculator visibilityCalculator)
 	{
 		this.name = name;
 		this.geonameId = geonameId;
@@ -52,13 +60,14 @@ public class GeoName implements GeographicText
 		this.featureClass = featureClass;
 		this.featureCode = featureCode;
 		this.level = level;
-		this.properties = properties;
+		this.fontProvider = fontProvider;
+		this.font = fontProvider.get(featureCode);
 		this.visibilityCalculator = visibilityCalculator;
 	}
 
 	private String cacheFilename()
 	{
-		return "GeoNames/" + geonameId + ".xml";
+		return "GeoNames/" + (level + 1) + "/" + geonameId + ".xml";
 	}
 
 	private URL findCacheFile()
@@ -86,6 +95,8 @@ public class GeoName implements GeographicText
 
 	public void loadChildren()
 	{
+		children = null;
+
 		URL url = findCacheFile();
 		if (url != null)
 		{
@@ -102,27 +113,62 @@ public class GeoName implements GeographicText
 				{
 					document = documentBuilder.parse(url.openStream());
 				}
-				children = parseDocument(document);
-				return;
+
+				Collection<GeoName> geonames = parseDocument(document);
+				if (geonames != null)
+				{
+					children = new HashSet<GeoName>();
+					for (GeoName geoname : geonames)
+					{
+						synchronized (mapLock)
+						{
+							GeoName mapped = geonameMap.get(geoname.geonameId);
+							if (mapped == null || mapped.parent == this)
+							{
+								geoname.parent = this;
+								children.add(geoname);
+								geonameMap.put(geoname.geonameId, geoname);
+							}
+							else
+							{
+								geoname = mapped;
+								double distance1 = VisibilityCalculatorImpl
+										.latlonDistanceSquared(latlon,
+												geoname.latlon);
+								double distance2 = VisibilityCalculatorImpl
+										.latlonDistanceSquared(
+												geoname.parent.latlon,
+												geoname.latlon);
+								if (distance1 < distance2)
+								{
+									geoname.parent.getChildren()
+											.remove(geoname);
+									children.add(geoname);
+									geoname.parent = this;
+								}
+							}
+						}
+					}
+				}
 			}
 			catch (Exception e)
 			{
 				Logging.logger().log(java.util.logging.Level.SEVERE,
-						"Deleting corrupt GeoNames .xml file", e);
+						"Deleting corrupt GeoNames .xml file " + url, e);
 				WorldWind.getDataFileCache().removeFile(url);
 			}
 		}
-		children = null;
 	}
 
-	private List<GeoName> parseDocument(Document document)
+	private Collection<GeoName> parseDocument(Document document)
 	{
-		NodeList resultsCount = document.getElementsByTagName("totalResultsCount");
-		if(resultsCount.getLength() <= 0)
+		NodeList resultsCount = document
+				.getElementsByTagName("totalResultsCount");
+		if (resultsCount.getLength() <= 0)
 		{
 			return null;
 		}
-		List<GeoName> geonames = new ArrayList<GeoName>();
+		Collection<GeoName> geonames = new ArrayList<GeoName>();
 		NodeList nodes = document.getElementsByTagName("geoname");
 		if (nodes != null)
 		{
@@ -179,7 +225,7 @@ public class GeoName implements GeographicText
 					LatLon latlon = new LatLon(Angle.fromDegreesLatitude(lat),
 							Angle.fromDegreesLongitude(lon));
 					GeoName geoname = new GeoName(name, geonameId, latlon,
-							featureCode, featureClass, level + 1, properties,
+							featureClass, featureCode, level + 1, fontProvider,
 							visibilityCalculator);
 					geonames.add(geoname);
 				}
@@ -200,17 +246,17 @@ public class GeoName implements GeographicText
 
 	public Color getBackgroundColor()
 	{
-		return properties.backgroundColor;
+		return font.backgroundColor;
 	}
 
 	public Color getColor()
 	{
-		return properties.color;
+		return font.color;
 	}
 
 	public Font getFont()
 	{
-		return properties.font;
+		return font.font;
 	}
 
 	public Position getPosition()
@@ -261,7 +307,7 @@ public class GeoName implements GeographicText
 	@Override
 	public String toString()
 	{
-		return name + " " + position;
+		return name + " (" + geonameId + ") " + position;
 	}
 
 	@Override
