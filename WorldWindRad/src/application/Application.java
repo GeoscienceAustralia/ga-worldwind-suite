@@ -44,7 +44,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import panels.NASAPanel;
+import panels.StandardPanel;
 import panels.OtherPanel;
 import panels.RadiometryPanel;
 import settings.Settings;
@@ -233,18 +233,18 @@ public class Application
 	private JTabbedPane createTabs()
 	{
 		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.addTab("NASA", createNASA());
+		tabbedPane.addTab("Standard", createStandard());
 		tabbedPane.addTab("Radiometrics", createRadiometry());
 		tabbedPane.addTab("Other", createOther());
 		tabbedPane.doLayout();
 		return tabbedPane;
 	}
 
-	private JComponent createNASA()
+	private JComponent createStandard()
 	{
-		NASAPanel np = new NASAPanel(wwd);
+		StandardPanel sp = new StandardPanel(wwd);
 		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(np, BorderLayout.NORTH);
+		panel.add(sp, BorderLayout.NORTH);
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		JScrollPane scrollPane = new JScrollPane(panel);
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));

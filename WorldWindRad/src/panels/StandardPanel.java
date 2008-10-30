@@ -21,7 +21,9 @@ import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
-public class NASAPanel extends JPanel
+import layers.geonames.GeoNamesLayer;
+
+public class StandardPanel extends JPanel
 {
 	private Layer stars;
 	private Layer atmosphere;
@@ -30,6 +32,7 @@ public class NASAPanel extends JPanel
 	private Layer bmng;
 	private Layer landsat;
 	private Layer pnl;
+	private Layer geonames;
 	private Layer compass;
 	private Layer map;
 	private Layer scale;
@@ -39,7 +42,7 @@ public class NASAPanel extends JPanel
 
 	private WorldWindow wwd;
 
-	public NASAPanel(WorldWindow wwd)
+	public StandardPanel(WorldWindow wwd)
 	{
 		this.wwd = wwd;
 		createLayers();
@@ -55,19 +58,21 @@ public class NASAPanel extends JPanel
 		bmng = new BMNGWMSLayer();
 		landsat = new LandsatI3WMSLayer();
 		pnl = new EarthNASAPlaceNameLayer();
+		geonames = new GeoNamesLayer();
 		compass = new CompassLayer();
 		map = new WorldMapLayer();
 		scale = new ScalebarLayer();
 		graticule = new MGRSGraticuleLayer();
 
 		layers = new Layer[] { stars, atmosphere, fog, bmngone, bmng, landsat,
-				pnl, compass, map, scale, graticule };
+				pnl, geonames, compass, map, scale, graticule };
 		for (Layer layer : layers)
 		{
 			layer.setEnabled(true);
 			wwd.getModel().getLayers().add(layer);
 		}
 		
+		geonames.setEnabled(false);
 		graticule.setEnabled(false);
 	}
 

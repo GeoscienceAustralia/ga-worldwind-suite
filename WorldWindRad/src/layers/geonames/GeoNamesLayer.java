@@ -45,8 +45,30 @@ public class GeoNamesLayer extends AbstractLayer
 
 	public GeoNamesLayer()
 	{
-		this.setName("GeoNames");
+		setName("GeoNames");
+		setPickEnabled(false);
 
+		ColorFontProvider fontProvider = setupFontProvider();
+		topGeoName = new GeoName(null, GEONAMES_GLOBE_ID, LatLon.ZERO, null,
+				null, -1, fontProvider, visibilityCalculator);
+
+		requestQ = new PriorityBlockingQueue<GeoName>(64,
+				new Comparator<GeoName>()
+				{
+					public int compare(GeoName o1, GeoName o2)
+					{
+						double distance1 = visibilityCalculator
+								.distanceSquaredFromEye(o1);
+						double distance2 = visibilityCalculator
+								.distanceSquaredFromEye(o2);
+						return distance1 > distance2 ? 1
+								: distance1 == distance2 ? 0 : -1;
+					}
+				});
+	}
+	
+	private ColorFontProvider setupFontProvider()
+	{
 		ColorFont def = new ColorFont(Font.decode("Arial-PLAIN-10"),
 				Color.lightGray, Color.black);
 
@@ -64,7 +86,6 @@ public class GeoNamesLayer extends AbstractLayer
 				Color.green, Color.black);
 		ColorFont towns = new ColorFont(Font.decode("Arial-PLAIN-10"),
 				Color.cyan, Color.black);
-
 
 		ColorFontProvider fontProvider = new ColorFontProvider(def);
 		fontProvider.put("CONT", continents);
@@ -90,38 +111,26 @@ public class GeoNamesLayer extends AbstractLayer
 		fontProvider.put("PPLS", towns);
 		fontProvider.put("PPLW", towns);
 		fontProvider.put("PPLX", towns);
-
-		topGeoName = new GeoName(null, GEONAMES_GLOBE_ID, LatLon.ZERO, null,
-				null, -1, fontProvider, visibilityCalculator);
-
-		requestQ = new PriorityBlockingQueue<GeoName>(64,
-				new Comparator<GeoName>()
-				{
-					public int compare(GeoName o1, GeoName o2)
-					{
-						double distance1 = visibilityCalculator
-								.distanceSquaredFromEye(o1);
-						double distance2 = visibilityCalculator
-								.distanceSquaredFromEye(o2);
-						return distance1 > distance2 ? 1
-								: distance1 == distance2 ? 0 : -1;
-					}
-				});
+		
+		return fontProvider;
 	}
 
 	public void doRender(DrawContext dc)
 	{
-		int levels = calculateLevel(dc);
+		if (isEnabled())
+		{
+			int levels = calculateLevel(dc);
 
-		Position eye = dc.getView().getEyePosition();
-		Sector sector = dc.getVisibleSector();
-		visibilityCalculator.setSector(sector);
-		visibilityCalculator.setLevels(levels);
-		visibilityCalculator.setEye(eye);
+			Position eye = dc.getView().getEyePosition();
+			Sector sector = dc.getVisibleSector();
+			visibilityCalculator.setSector(sector);
+			visibilityCalculator.setLevels(levels);
+			visibilityCalculator.setEye(eye);
 
-		render(dc, topGeoName);
+			render(dc, topGeoName);
 
-		sendRequests();
+			sendRequests();
+		}
 	}
 
 	public void sendRequests()
