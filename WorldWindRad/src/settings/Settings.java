@@ -1,9 +1,7 @@
 package settings;
 
-import globes.GAGlobe;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.globes.Earth;
 
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -77,7 +75,7 @@ public class Settings
 		
 		//force configuration update
 		setVerticalExaggeration(getVerticalExaggeration());
-		setUseTerrain(isUseTerrain());
+		//setUseTerrain(isUseTerrain());
 	}
 
 	public boolean isProxyEnabled()
@@ -215,7 +213,7 @@ public class Settings
 				verticalExaggeration);
 	}
 
-	public boolean isUseTerrain()
+	/*public boolean isUseTerrain()
 	{
 		return preferences.getBoolean("UseTerrain", false);
 	}
@@ -225,7 +223,7 @@ public class Settings
 		preferences.putBoolean("UseTerrain", useTerrain);
 		Configuration.setValue(AVKey.GLOBE_CLASS_NAME,
 				useTerrain ? GAGlobe.class.getName() : Earth.class.getName());
-	}
+	}*/
 
 	public void save() throws BackingStoreException
 	{

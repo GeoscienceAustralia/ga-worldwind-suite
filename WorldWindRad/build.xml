@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+
+<project name="WorldWindRad" default="run">
+
+	<property name="src.dir" value="${basedir}/src" />
+	<property name="lib.dir" value="${basedir}/lib" />
+	<property name="build.dir" value="${basedir}/build" />
+	<property name="target.dir" value="${basedir}/webstart" />
+	<property name="target.jar" value="application.jar" />
+	<property name="keystore" value="${basedir}/keystore" />
+	<property name="javac.debug" value="false" />
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${target.dir}" />
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${build.dir}" />
+		<copy todir="${build.dir}">
+			<fileset dir="${src.dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<javac source="1.5" target="1.5" srcdir="${src.dir}" destdir="${build.dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac.debug}" />
+	</target>
+
+	<target name="package" depends="compile">
+		<mkdir dir="${target.dir}" />
+		<jar destfile="${target.dir}/${target.jar}" basedir="${build.dir}" />
+	</target>
+
+	<target name="sign" depends="package">
+		<signjar jar="${target.dir}/${target.jar}" keystore="${keystore}" alias="myself" storepass="password" />
+	</target>
+
+	<target name="run" depends="sign" />
+</project>

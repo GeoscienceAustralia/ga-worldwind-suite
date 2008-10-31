@@ -8,7 +8,6 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ScalebarLayer;
 import gov.nasa.worldwind.layers.TerrainProfileLayer;
 import gov.nasa.worldwind.util.StatusBar;
@@ -30,7 +29,6 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -356,7 +354,7 @@ public class Application
 		button.setMinimumSize(size);
 		buttons.add(button);*/
 
-		final JCheckBox useTerrain = new JCheckBox("Use GA terrain");
+		/*final JCheckBox useTerrain = new JCheckBox("Use GA terrain");
 		useTerrain.setSelected(Settings.get().isUseTerrain());
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -378,7 +376,7 @@ public class Application
 				listener.stateChanged(null);
 				listener.stateChanged(null);
 			}
-		});
+		});*/
 
 		return panel;
 	}

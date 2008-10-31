@@ -103,7 +103,7 @@ public class StereoSceneController extends AbstractSceneController
 				gl.glColorMask(!left, !left, left, true);
 				break;
 			case STEREOBUFFER:
-				gl.glDrawBuffer(GL.GL_BACK);
+				gl.glDrawBuffer(left ? GL.GL_BACK_LEFT : GL.GL_BACK_RIGHT);
 				break;
 		}
 	}
