@@ -173,7 +173,7 @@ public class Settings
 	public ProjectionMode getProjectionMode()
 	{
 		return ProjectionMode.values()[preferences.getInt("ProjectionMode",
-				ProjectionMode.SIMPLE_OFFSET.ordinal())];
+				ProjectionMode.ASYMMETRIC_FRUSTUM.ordinal())];
 	}
 
 	public void setProjectionMode(ProjectionMode projectionMode)
