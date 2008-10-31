@@ -57,6 +57,7 @@ public class SettingsDialog extends JDialog
 	private JSpinner eyeSeparationSpinner;
 	private JLabel focalLengthLabel;
 	private JSpinner focalLengthSpinner;
+	private JCheckBox stereoCursorCheck;
 
 	private JCheckBox proxyEnabledCheck;
 	private JLabel proxyHostLabel;
@@ -157,6 +158,7 @@ public class SettingsDialog extends JDialog
 				.getSelectedItem();
 		double eyeSeparation = (Double) eyeSeparationSpinner.getValue();
 		double focalLength = (Double) focalLengthSpinner.getValue();
+		boolean stereoCursor = stereoCursorCheck.isSelected();
 
 		boolean proxyEnabled = proxyEnabledCheck.isSelected();
 		String proxyHost = proxyHostText.getText();
@@ -198,6 +200,7 @@ public class SettingsDialog extends JDialog
 				settings.setProjectionMode(projectionMode);
 				settings.setEyeSeparation(eyeSeparation);
 				settings.setFocalLength(focalLength);
+				settings.setStereoCursor(stereoCursor);
 
 				settings.setProxyEnabled(proxyEnabled);
 				settings.setProxyHost(proxyHost);
@@ -395,8 +398,17 @@ public class SettingsDialog extends JDialog
 		c.gridy = 4;
 		c.gridwidth = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
+		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(focalLengthSpinner, c);
+		
+		stereoCursorCheck = new JCheckBox("Stereo mouse cursor");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 5;
+		c.gridwidth = 4;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
+		panel.add(stereoCursorCheck, c);
 
 		return panel;
 	}
@@ -512,6 +524,7 @@ public class SettingsDialog extends JDialog
 		projectionModeCombo.setEnabled(enabled);
 		eyeSeparationLabel.setEnabled(enabled);
 		eyeSeparationSpinner.setEnabled(enabled);
+		stereoCursorCheck.setEnabled(enabled);
 		boolean focalLengthEnabled = enabled
 				&& projectionModeCombo.getSelectedItem() == ProjectionMode.ASYMMETRIC_FRUSTUM;
 		focalLengthLabel.setEnabled(focalLengthEnabled);

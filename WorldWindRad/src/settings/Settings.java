@@ -200,6 +200,16 @@ public class Settings
 	{
 		preferences.putDouble("FocalLength", focalLength);
 	}
+	
+	public boolean isStereoCursor()
+	{
+		return preferences.getBoolean("StereoCursor", false);
+	}
+	
+	public void setStereoCursor(boolean stereoCursor)
+	{
+		preferences.putBoolean("StereoCursor", stereoCursor);
+	}
 
 	public double getVerticalExaggeration()
 	{

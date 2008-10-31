@@ -5,11 +5,13 @@ import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ScalebarLayer;
 import gov.nasa.worldwind.layers.TerrainProfileLayer;
+import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.util.StatusBar;
 
 import java.awt.BorderLayout;
@@ -43,6 +45,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import layers.mouse.MouseLayer;
+import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 import panels.OtherPanel;
 import panels.RadiometryPanel;
 import panels.StandardPanel;
@@ -104,6 +108,7 @@ public class Application
 	private WorldWindowStereoGLCanvas wwd;
 	private StatusBar statusBar;
 	private StandardPanel standardPanel;
+	private MouseLayer mouseLayer;
 
 	public Application()
 	{
@@ -113,6 +118,7 @@ public class Application
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		wwd.addPropertyChangeListener(propertyChangeListener);
+		create3DMouse();
 
 		//create gui stuff
 
@@ -173,6 +179,27 @@ public class Application
 				frame.setVisible(true);
 			}
 		});
+	}
+
+	private void create3DMouse()
+	{
+		final UserFacingIcon icon = new UserFacingIcon(
+				"data/images/cursor.png", new Position(Angle.ZERO, Angle.ZERO,
+						0));
+		icon.setSize(new Dimension(16, 32));
+		icon.setAlwaysOnTop(true);
+
+		LayerList layers = wwd.getModel().getLayers();
+		mouseLayer = new MouseLayer(wwd, icon);
+		layers.add(mouseLayer);
+
+		enableMouseLayer();
+	}
+	
+	private void enableMouseLayer()
+	{
+		mouseLayer.setEnabled(Settings.get().isStereoEnabled()
+				&& Settings.get().isStereoCursor());
 	}
 
 	private MenuBar createMenuBar()
@@ -240,6 +267,7 @@ public class Application
 		{
 			standardPanel.turnOffAtmosphere();
 		}
+		enableMouseLayer();
 	}
 
 	private JTabbedPane createTabs()
@@ -286,7 +314,7 @@ public class Application
 	}
 
 	//logarithmic vertical exaggeration slider
-	
+
 	private int exaggerationToSlider(double exaggeration)
 	{
 		double y = exaggeration;
@@ -331,7 +359,8 @@ public class Application
 			public void set(double exaggeration)
 			{
 				label.setText(String
-						.valueOf(Math.round(exaggeration * 10d) / 10d) + " " + slider.getValue());
+						.valueOf(Math.round(exaggeration * 10d) / 10d)
+						+ " " + slider.getValue());
 				Settings.get().setVerticalExaggeration(exaggeration);
 				wwd.getSceneController().setVerticalExaggeration(exaggeration);
 				wwd.redraw();

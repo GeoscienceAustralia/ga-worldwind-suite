@@ -4,7 +4,7 @@ as represented by the Administrator of the
 National Aeronautics and Space Administration.
 All Rights Reserved.
 */
-package gov.nasa.worldwind.globes.fixed;
+package nasa.worldwind.globes.fixed;
 
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.WWObjectImpl;
