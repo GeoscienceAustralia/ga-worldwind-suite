@@ -129,8 +129,8 @@ public class StereoOrbitView extends AbstractView implements OrbitView
 	{
 		double A = (right + left) / (right - left);
 		double B = (top + bottom) / (top - bottom);
-		double C = (far + near) / (far - near);
-		double D = (2 * far * near) / (far - near);
+		double C = -(far + near) / (far - near);
+		double D = -(2 * far * near) / (far - near);
 		double E = (2 * near) / (right - left);
 		double F = (2 * near) / (top - bottom);
 		return new Matrix(E, 0, A, 0, 0, F, B, 0, 0, 0, C, D, 0, 0, -1, 0);
