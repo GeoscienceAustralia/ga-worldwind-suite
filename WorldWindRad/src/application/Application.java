@@ -195,7 +195,7 @@ public class Application
 
 		enableMouseLayer();
 	}
-	
+
 	private void enableMouseLayer()
 	{
 		mouseLayer.setEnabled(Settings.get().isStereoEnabled()
@@ -359,8 +359,7 @@ public class Application
 			public void set(double exaggeration)
 			{
 				label.setText(String
-						.valueOf(Math.round(exaggeration * 10d) / 10d)
-						+ " " + slider.getValue());
+						.valueOf(Math.round(exaggeration * 10d) / 10d));
 				Settings.get().setVerticalExaggeration(exaggeration);
 				wwd.getSceneController().setVerticalExaggeration(exaggeration);
 				wwd.redraw();
