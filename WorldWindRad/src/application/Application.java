@@ -48,6 +48,7 @@ import panels.RadiometryPanel;
 import panels.StandardPanel;
 import settings.Settings;
 import settings.SettingsDialog;
+import settings.Settings.ProjectionMode;
 import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
 
@@ -102,6 +103,7 @@ public class Application
 	private JFrame frame;
 	private WorldWindowStereoGLCanvas wwd;
 	private StatusBar statusBar;
+	private StandardPanel standardPanel;
 
 	public Application()
 	{
@@ -149,6 +151,8 @@ public class Application
 		statusBar = new StatusBar();
 		frame.add(statusBar, BorderLayout.PAGE_END);
 		statusBar.setEventSource(wwd);
+
+		afterSettingsChange();
 
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter()
@@ -221,11 +225,21 @@ public class Application
 					SettingsDialog settingsDialog = new SettingsDialog(frame);
 					settingsDialog.setVisible(true);
 					visible = false;
+					afterSettingsChange();
 				}
 			}
 		});
 
 		return menuBar;
+	}
+
+	private void afterSettingsChange()
+	{
+		if (Settings.get().isStereoEnabled()
+				&& Settings.get().getProjectionMode() == ProjectionMode.ASYMMETRIC_FRUSTUM)
+		{
+			standardPanel.turnOffAtmosphere();
+		}
 	}
 
 	private JTabbedPane createTabs()
@@ -240,9 +254,9 @@ public class Application
 
 	private JComponent createStandard()
 	{
-		StandardPanel sp = new StandardPanel(wwd);
+		standardPanel = new StandardPanel(wwd);
 		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(sp, BorderLayout.NORTH);
+		panel.add(standardPanel, BorderLayout.NORTH);
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		JScrollPane scrollPane = new JScrollPane(panel);
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -271,13 +285,29 @@ public class Application
 		return scrollPane;
 	}
 
+	//logarithmic vertical exaggeration slider
+	
+	private int exaggerationToSlider(double exaggeration)
+	{
+		double y = exaggeration;
+		double x = Math.log10(y + (100 - y) / 100);
+		return (int) (x * 100);
+	}
+
+	private double sliderToExaggeration(int slider)
+	{
+		double x = slider / 100d;
+		double y = Math.pow(10d, x) - (2 - x) / 2;
+		return y;
+	}
+
 	private JComponent createExaggeration()
 	{
 		GridBagConstraints c;
 		JPanel panel = new JPanel(new GridBagLayout());
 
-		final JSlider slider = new JSlider(0, 1000, (int) (Settings.get()
-				.getVerticalExaggeration() * 10));
+		final JSlider slider = new JSlider(0, 200,
+				exaggerationToSlider(Settings.get().getVerticalExaggeration()));
 		Dimension size = slider.getPreferredSize();
 		size.width = 50;
 		slider.setPreferredSize(size);
@@ -296,15 +326,25 @@ public class Application
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(label, c);
 
+		class Setter
+		{
+			public void set(double exaggeration)
+			{
+				label.setText(String
+						.valueOf(Math.round(exaggeration * 10d) / 10d) + " " + slider.getValue());
+				Settings.get().setVerticalExaggeration(exaggeration);
+				wwd.getSceneController().setVerticalExaggeration(exaggeration);
+				wwd.redraw();
+			}
+		}
+		final Setter setter = new Setter();
+
 		final ChangeListener listener = new ChangeListener()
 		{
 			public void stateChanged(ChangeEvent e)
 			{
-				double value = slider.getValue() / 10d;
-				label.setText(String.valueOf(value));
-				Settings.get().setVerticalExaggeration(value);
-				wwd.getSceneController().setVerticalExaggeration(value);
-				wwd.redraw();
+				double exaggeration = sliderToExaggeration(slider.getValue());
+				setter.set(exaggeration);
 			}
 		};
 		slider.addChangeListener(listener);
@@ -321,36 +361,36 @@ public class Application
 
 		class ScaleListener implements ActionListener
 		{
-			private int scale;
+			private double exaggeration;
 
-			public ScaleListener(int scale)
+			public ScaleListener(double exaggeration)
 			{
-				this.scale = scale;
+				this.exaggeration = exaggeration;
 			}
 
 			public void actionPerformed(ActionEvent e)
 			{
-				slider.setValue(scale * 10);
-				listener.stateChanged(null);
+				slider.setValue(exaggerationToSlider(exaggeration));
+				setter.set(exaggeration);
 			}
 		}
 
-		JButton button = new JButton("0:1");
-		button.addActionListener(new ScaleListener(0));
+		JButton button = new JButton("1:1");
+		button.addActionListener(new ScaleListener(2d));
 		size = button.getMinimumSize();
 		size.width = 0;
 		button.setMinimumSize(size);
 		buttons.add(button);
-		button = new JButton("1:1");
-		button.addActionListener(new ScaleListener(1));
+		button = new JButton("2:1");
+		button.addActionListener(new ScaleListener(2d));
 		button.setMinimumSize(size);
 		buttons.add(button);
 		button = new JButton("10:1");
-		button.addActionListener(new ScaleListener(10));
+		button.addActionListener(new ScaleListener(10d));
 		button.setMinimumSize(size);
 		buttons.add(button);
 		/*button = new JButton("100:1");
-		button.addActionListener(new ScaleListener(100));
+		button.addActionListener(new ScaleListener(100d));
 		button.setMinimumSize(size);
 		buttons.add(button);*/
 

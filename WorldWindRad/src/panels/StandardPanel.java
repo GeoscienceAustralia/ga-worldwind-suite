@@ -41,6 +41,7 @@ public class StandardPanel extends JPanel
 	private Layer logo;
 
 	private Layer[] layers;
+	private JCheckBox atmosphereCheck;
 
 	private WorldWindow wwd;
 
@@ -74,7 +75,7 @@ public class StandardPanel extends JPanel
 			layer.setEnabled(true);
 			wwd.getModel().getLayers().add(layer);
 		}
-		
+
 		geonames.setEnabled(false);
 		graticule.setEnabled(false);
 	}
@@ -96,6 +97,21 @@ public class StandardPanel extends JPanel
 				}
 			});
 			add(check);
+
+			if (layer == atmosphere)
+			{
+				atmosphereCheck = check;
+			}
+		}
+	}
+
+	public void turnOffAtmosphere()
+	{
+		if (atmosphere != null && atmosphereCheck != null)
+		{
+			atmosphere.setEnabled(false);
+			atmosphereCheck.setSelected(false);
+			wwd.redraw();
 		}
 	}
 }
