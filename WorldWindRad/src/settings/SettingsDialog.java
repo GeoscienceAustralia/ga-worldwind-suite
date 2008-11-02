@@ -391,7 +391,7 @@ public class SettingsDialog extends JDialog
 		panel.add(focalLengthLabel, c);
 
 		SpinnerModel focalLengthModel = new SpinnerNumberModel(settings
-				.getFocalLength(), 0, 1000, 1);
+				.getFocalLength(), 0, 10000, 1);
 		focalLengthSpinner = new JSpinner(focalLengthModel);
 		c = new GridBagConstraints();
 		c.gridx = 1;
@@ -402,6 +402,7 @@ public class SettingsDialog extends JDialog
 		panel.add(focalLengthSpinner, c);
 		
 		stereoCursorCheck = new JCheckBox("Stereo mouse cursor");
+		stereoCursorCheck.setSelected(settings.isStereoCursor());
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 5;
