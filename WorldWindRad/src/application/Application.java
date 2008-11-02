@@ -267,6 +267,9 @@ public class Application
 		{
 			standardPanel.turnOffAtmosphere();
 		}
+		standardPanel
+				.setMapPickingEnabled(!(Settings.get().isStereoEnabled() && Settings
+						.get().isStereoCursor()));
 		enableMouseLayer();
 	}
 

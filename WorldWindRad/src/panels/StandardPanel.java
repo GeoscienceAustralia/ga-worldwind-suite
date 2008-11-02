@@ -114,4 +114,9 @@ public class StandardPanel extends JPanel
 			wwd.redraw();
 		}
 	}
+	
+	public void setMapPickingEnabled(boolean enabled)
+	{
+		map.setPickEnabled(enabled);
+	}
 }
