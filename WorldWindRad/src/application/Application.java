@@ -16,8 +16,6 @@ import gov.nasa.worldwind.util.StatusBar;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Menu;
 import java.awt.MenuBar;
@@ -30,26 +28,18 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
 import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import layers.mouse.MouseLayer;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
-import panels.OtherPanel;
-import panels.RadiometryPanel;
-import panels.StandardPanel;
+import panels.layers.LayersPanel;
+import panels.other.ExaggerationPanel;
+import panels.places.PlaceSearchPanel;
 import settings.Settings;
 import settings.SettingsDialog;
 import settings.Settings.ProjectionMode;
@@ -107,7 +97,7 @@ public class Application
 	private JFrame frame;
 	private WorldWindowStereoGLCanvas wwd;
 	private StatusBar statusBar;
-	private StandardPanel standardPanel;
+	private LayersPanel layersPanel;
 	private MouseLayer mouseLayer;
 
 	public Application()
@@ -131,14 +121,15 @@ public class Application
 		JPanel layers = new JPanel(new GridLayout(0, 1, 0, 10));
 		layers.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(9,
 				9, 9, 9), new TitledBorder("Layers")));
-		layers.add(createTabs());
+		layersPanel = new LayersPanel(wwd);
+		layers.add(layersPanel);
 		left.add(layers, BorderLayout.CENTER);
 
 		JPanel exaggeration = new JPanel(new GridLayout(0, 1));
 		exaggeration.setBorder(new CompoundBorder(BorderFactory
 				.createEmptyBorder(0, 9, 9, 9),
 				new TitledBorder("Exaggeration")));
-		exaggeration.add(createExaggeration());
+		exaggeration.add(new ExaggerationPanel(wwd));
 		left.add(exaggeration, BorderLayout.SOUTH);
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -151,8 +142,17 @@ public class Application
 		wwd.setMinimumSize(minimumSize);
 		layers.setMinimumSize(minimumSize);
 
-		wwd.setPreferredSize(new Dimension(800, 600));
+		wwd.setPreferredSize(new Dimension(600, 600));
 		layers.setPreferredSize(new Dimension(220, 0));
+		
+		JPanel searchPanel = new JPanel(new GridLayout(0, 1));
+		searchPanel.setBorder(new CompoundBorder(BorderFactory
+				.createEmptyBorder(0, 9, 9, 9),
+				new TitledBorder("Place search")));
+		searchPanel.add(new PlaceSearchPanel(wwd));
+		frame.add(searchPanel, BorderLayout.EAST);
+		
+		searchPanel.setPreferredSize(new Dimension(200, 0));
 
 		statusBar = new StatusBar();
 		frame.add(statusBar, BorderLayout.PAGE_END);
@@ -265,191 +265,12 @@ public class Application
 		if (Settings.get().isStereoEnabled()
 				&& Settings.get().getProjectionMode() == ProjectionMode.ASYMMETRIC_FRUSTUM)
 		{
-			standardPanel.turnOffAtmosphere();
+			layersPanel.turnOffAtmosphere();
 		}
-		standardPanel
+		layersPanel
 				.setMapPickingEnabled(!(Settings.get().isStereoEnabled() && Settings
 						.get().isStereoCursor()));
 		enableMouseLayer();
-	}
-
-	private JTabbedPane createTabs()
-	{
-		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.addTab("Standard", createStandard());
-		tabbedPane.addTab("Radiometrics", createRadiometry());
-		tabbedPane.addTab("Other", createOther());
-		tabbedPane.doLayout();
-		return tabbedPane;
-	}
-
-	private JComponent createStandard()
-	{
-		standardPanel = new StandardPanel(wwd);
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(standardPanel, BorderLayout.NORTH);
-		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		JScrollPane scrollPane = new JScrollPane(panel);
-		scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		return scrollPane;
-	}
-
-	private JComponent createRadiometry()
-	{
-		RadiometryPanel rp = new RadiometryPanel(wwd);
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(rp, BorderLayout.NORTH);
-		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		JScrollPane scrollPane = new JScrollPane(panel);
-		scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		return scrollPane;
-	}
-
-	private JComponent createOther()
-	{
-		OtherPanel op = new OtherPanel(wwd);
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(op, BorderLayout.NORTH);
-		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		JScrollPane scrollPane = new JScrollPane(panel);
-		scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		return scrollPane;
-	}
-
-	//logarithmic vertical exaggeration slider
-
-	private int exaggerationToSlider(double exaggeration)
-	{
-		double y = exaggeration;
-		double x = Math.log10(y + (100 - y) / 100);
-		return (int) (x * 100);
-	}
-
-	private double sliderToExaggeration(int slider)
-	{
-		double x = slider / 100d;
-		double y = Math.pow(10d, x) - (2 - x) / 2;
-		return y;
-	}
-
-	private JComponent createExaggeration()
-	{
-		GridBagConstraints c;
-		JPanel panel = new JPanel(new GridBagLayout());
-
-		final JSlider slider = new JSlider(0, 200,
-				exaggerationToSlider(Settings.get().getVerticalExaggeration()));
-		Dimension size = slider.getPreferredSize();
-		size.width = 50;
-		slider.setPreferredSize(size);
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.NORTHWEST;
-		c.weightx = 1;
-		panel.add(slider, c);
-
-		final JLabel label = new JLabel();
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
-		panel.add(label, c);
-
-		class Setter
-		{
-			public void set(double exaggeration)
-			{
-				label.setText(String
-						.valueOf(Math.round(exaggeration * 10d) / 10d));
-				Settings.get().setVerticalExaggeration(exaggeration);
-				wwd.getSceneController().setVerticalExaggeration(exaggeration);
-				wwd.redraw();
-			}
-		}
-		final Setter setter = new Setter();
-
-		final ChangeListener listener = new ChangeListener()
-		{
-			public void stateChanged(ChangeEvent e)
-			{
-				double exaggeration = sliderToExaggeration(slider.getValue());
-				setter.set(exaggeration);
-			}
-		};
-		slider.addChangeListener(listener);
-		listener.stateChanged(null);
-
-		JPanel buttons = new JPanel(new GridLayout(1, 0));
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 1;
-		c.gridwidth = 2;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.NORTHWEST;
-		panel.add(buttons, c);
-
-		class ScaleListener implements ActionListener
-		{
-			private double exaggeration;
-
-			public ScaleListener(double exaggeration)
-			{
-				this.exaggeration = exaggeration;
-			}
-
-			public void actionPerformed(ActionEvent e)
-			{
-				slider.setValue(exaggerationToSlider(exaggeration));
-				setter.set(exaggeration);
-			}
-		}
-
-		JButton button = new JButton("1:1");
-		button.addActionListener(new ScaleListener(2d));
-		size = button.getMinimumSize();
-		size.width = 0;
-		button.setMinimumSize(size);
-		buttons.add(button);
-		button = new JButton("2:1");
-		button.addActionListener(new ScaleListener(2d));
-		button.setMinimumSize(size);
-		buttons.add(button);
-		button = new JButton("10:1");
-		button.addActionListener(new ScaleListener(10d));
-		button.setMinimumSize(size);
-		buttons.add(button);
-		/*button = new JButton("100:1");
-		button.addActionListener(new ScaleListener(100d));
-		button.setMinimumSize(size);
-		buttons.add(button);*/
-
-		/*final JCheckBox useTerrain = new JCheckBox("Use GA terrain");
-		useTerrain.setSelected(Settings.get().isUseTerrain());
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 2;
-		c.gridwidth = 2;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.NORTHWEST;
-		panel.add(useTerrain, c);
-
-		useTerrain.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				Settings.get().setUseTerrain(useTerrain.isSelected());
-				LayerList layers = wwd.getModel().getLayers();
-				Model model = new BasicModel();
-				model.setLayers(layers);
-				wwd.setModel(model);
-				listener.stateChanged(null);
-				listener.stateChanged(null);
-			}
-		});*/
-
-		return panel;
 	}
 
 	public void quit()

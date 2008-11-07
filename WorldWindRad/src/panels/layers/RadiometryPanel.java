@@ -1,4 +1,4 @@
-package panels;
+package panels.layers;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.layers.Layer;
