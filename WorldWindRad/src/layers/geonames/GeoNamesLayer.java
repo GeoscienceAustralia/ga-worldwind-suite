@@ -135,11 +135,9 @@ public class GeoNamesLayer extends AbstractLayer
 		GeoName geoname = requestQ.poll();
 		while (geoname != null && !WorldWind.getTaskService().isFull())
 		{
-			//System.out.println(geoname);
 			WorldWind.getTaskService().addTask(new RequestTask(geoname));
 			geoname = requestQ.poll();
 		}
-		//System.out.println();
 		requestQ.clear();
 	}
 

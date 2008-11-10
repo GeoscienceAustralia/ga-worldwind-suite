@@ -17,4 +17,10 @@ public class FeatureCode
 		this.name = name;
 		this.description = description;
 	}
+
+	@Override
+	public int hashCode()
+	{
+		return code.hashCode();
+	}
 }

@@ -1,23 +1,65 @@
 package geonames;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.Color;
+import java.awt.Font;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class FeatureCodes
 {
-	private final List<FeatureClass> featureClasses = new ArrayList<FeatureClass>();
+	private final static Map<String, FeatureClass> featureClasses = new HashMap<String, FeatureClass>();
+	private final static Map<String, FeatureCode> featureCodes = new HashMap<String, FeatureCode>();
 
-	public FeatureCodes()
+	public static FeatureClass getClass(String featureClass)
+	{
+		FeatureClass fc = featureClasses.get(featureClass);
+		if(fc == null)
+		{
+			fc = new FeatureClass(featureClass, "Unknown", Font.decode("Arial-PLAIN-10"), Color.white);
+		}
+		return fc;
+	}
+
+	public static FeatureCode getCode(String featureCode)
+	{
+		FeatureCode fc = featureCodes.get(featureCode);
+		if(fc == null)
+		{
+			fc = new FeatureCode(featureCode, "Unknown");
+		}
+		return fc;
+	}
+
+	static
 	{
 		init();
+		fillCodes();
 	}
-	
-	private void init()
+
+	private static void fillCodes()
+	{
+		for (Entry<String, FeatureClass> entry : featureClasses.entrySet())
+		{
+			Collection<FeatureCode> codes = entry.getValue().getCodes();
+			for (FeatureCode code : codes)
+			{
+				featureCodes.put(code.code, code);
+			}
+		}
+	}
+
+	private static void add(FeatureClass featureClass)
+	{
+		featureClasses.put(featureClass.code, featureClass);
+	}
+
+	private static void init()
 	{
 		FeatureClass fc;
-		
-		fc = new FeatureClass("A", "country, state, region");
-		featureClasses.add(fc);
+
+		fc = new FeatureClass("A", "country, state, region", Font.decode("Arial-BOLD-11"), Color.lightGray);
 		fc.add(new FeatureCode("ADM1", "first-order administrative division", "a primary administrative division of a country, such as a state in the United States"));
 		fc.add(new FeatureCode("ADM2", "second-order administrative division", "a subdivision of a first-order administrative division"));
 		fc.add(new FeatureCode("ADM3", "third-order administrative division", "a subdivision of a second-order administrative division"));
@@ -34,9 +76,9 @@ public class FeatureCodes
 		fc.add(new FeatureCode("TERR", "territory"));
 		fc.add(new FeatureCode("ZN", "zone"));
 		fc.add(new FeatureCode("ZNB", "buffer zone", "a zone recognized as a buffer between two nations in which military presence is minimal or absent"));
-		
-		fc = new FeatureClass("H", "stream, lake");
-		featureClasses.add(fc);
+		add(fc);
+
+		fc = new FeatureClass("H", "stream, lake", Font.decode("Arial-PLAIN-10"), Color.cyan);
 		fc.add(new FeatureCode("AIRS", "seaplane landing area", "a place on a waterbody where floatplanes land and take off"));
 		fc.add(new FeatureCode("ANCH", "anchorage", "an area where vessels may anchor"));
 		fc.add(new FeatureCode("BAY", "bay", "a coastal indentation between two capes or headlands, larger than a cove but smaller than a gulf"));
@@ -81,7 +123,8 @@ public class FeatureCodes
 		fc.add(new FeatureCode("FLLSX", "section of waterfall(s)", ""));
 		fc.add(new FeatureCode("FLTM", "mud flat(s)", "a relatively level area of mud either between high and low tide lines, or subject to flooding"));
 		fc.add(new FeatureCode("FLTT", "tidal flat(s)", "a large flat area of mud or sand attached to the shore and alternately covered and uncovered by the tide"));
-		fc.add(new FeatureCode("GLCR", "glacier(s)", "a mass of ice, usually at high latitudes or high elevations, with sufficient thickness to flow away from the source area in lobes, tongues, or masses"));
+		fc.add(new FeatureCode("GLCR", "glacier(s)",
+				"a mass of ice, usually at high latitudes or high elevations, with sufficient thickness to flow away from the source area in lobes, tongues, or masses"));
 		fc.add(new FeatureCode("GULF", "gulf", "a large recess in the coastline, larger than a bay"));
 		fc.add(new FeatureCode("GYSR", "geyser", "a type of hot spring with intermittent eruptions of jets of hot water and steam"));
 		fc.add(new FeatureCode("HBR", "harbor(s)", "a haven or space of deep water so sheltered by the adjacent land as to afford a safe anchorage for ships"));
@@ -89,8 +132,11 @@ public class FeatureCodes
 		fc.add(new FeatureCode("INLT", "inlet", "a narrow waterway extending into the land, or connecting a bay or lagoon with a larger body of water"));
 		fc.add(new FeatureCode("INLTQ", "former inlet", "an inlet which has been filled in, or blocked by deposits"));
 		fc.add(new FeatureCode("LBED", "lake bed(s)", "a dried up or drained area of a former lake"));
-		fc.add(new FeatureCode("LGN", "lagoon", "a shallow coastal waterbody, completely or partly separated from a larger body of water by a barrier island, coral reef or other depositional feature"));
-		fc.add(new FeatureCode("LGNS", "lagoons", "shallow coastal waterbodies, completely or partly separated from a larger body of water by a barrier island, coral reef or other depositional feature"));
+		fc
+				.add(new FeatureCode("LGN", "lagoon",
+						"a shallow coastal waterbody, completely or partly separated from a larger body of water by a barrier island, coral reef or other depositional feature"));
+		fc.add(new FeatureCode("LGNS", "lagoons",
+				"shallow coastal waterbodies, completely or partly separated from a larger body of water by a barrier island, coral reef or other depositional feature"));
 		fc.add(new FeatureCode("LGNX", "section of lagoon", ""));
 		fc.add(new FeatureCode("LK", "lake", "a large inland body of standing water"));
 		fc.add(new FeatureCode("LKC", "crater lake", "a lake in a crater or caldera"));
@@ -152,7 +198,8 @@ public class FeatureCodes
 		fc.add(new FeatureCode("STMI", "intermittent stream", ""));
 		fc.add(new FeatureCode("STMIX", "section of intermittent stream", ""));
 		fc.add(new FeatureCode("STMM", "stream mouth(s)", "a place where a stream discharges into a lagoon, lake, or the sea"));
-		fc.add(new FeatureCode("STMQ", "abandoned watercourse", "a former stream or distributary no longer carrying flowing water, but still evident due to lakes, wetland, topographic or vegetation patterns"));
+		fc.add(new FeatureCode("STMQ", "abandoned watercourse",
+				"a former stream or distributary no longer carrying flowing water, but still evident due to lakes, wetland, topographic or vegetation patterns"));
 		fc.add(new FeatureCode("STMS", "streams", "bodies of running water moving to a lower level in a channel on land"));
 		fc.add(new FeatureCode("STMSB", "lost river", "a surface stream that disappears into an underground channel, or dries up in an arid area"));
 		fc.add(new FeatureCode("STMX", "section of stream", ""));
@@ -160,11 +207,13 @@ public class FeatureCodes
 		fc.add(new FeatureCode("SWMP", "swamp", "a wetland dominated by tree vegetation"));
 		fc.add(new FeatureCode("SYSI", "irrigation system", "a network of ditches and one or more of the following elements: water supply, reservoir, canal, pump, well, drain, etc."));
 		fc.add(new FeatureCode("TNLC", "canal tunnel", "a tunnel through which a canal passes"));
-		fc.add(new FeatureCode("WAD", "wadi", "a valley or ravine, bounded by relatively steep banks, which in the rainy season becomes a watercourse; found primarily in North Africa and the Middle East"));
+		fc.add(new FeatureCode("WAD", "wadi",
+				"a valley or ravine, bounded by relatively steep banks, which in the rainy season becomes a watercourse; found primarily in North Africa and the Middle East"));
 		fc.add(new FeatureCode("WADB", "wadi bend", "a conspicuously curved or bent segment of a wadi"));
 		fc.add(new FeatureCode("WADJ", "wadi junction", "a place where two or more wadies join"));
 		fc.add(new FeatureCode("WADM", "wadi mouth", "the lower terminus of a wadi where it widens into an adjoining floodplain, depression, or waterbody"));
-		fc.add(new FeatureCode("WADS", "wadies", "valleys or ravines, bounded by relatively steep banks, which in the rainy season become watercourses; found primarily in North Africa and the Middle East"));
+		fc.add(new FeatureCode("WADS", "wadies",
+				"valleys or ravines, bounded by relatively steep banks, which in the rainy season become watercourses; found primarily in North Africa and the Middle East"));
 		fc.add(new FeatureCode("WADX", "section of wadi", ""));
 		fc.add(new FeatureCode("WHRL", "whirlpool", "a turbulent, rotating movement of water in a stream"));
 		fc.add(new FeatureCode("WLL", "well", "a cylindrical hole, pit, or tunnel drilled or dug down to a depth from which water, oil, or gas can be pumped or brought to the surface"));
@@ -174,9 +223,9 @@ public class FeatureCodes
 		fc.add(new FeatureCode("WTLDI", "intermittent wetland", ""));
 		fc.add(new FeatureCode("WTRC", "watercourse", "a natural, well-defined channel produced by flowing water, or an artificial channel designed to carry flowing water"));
 		fc.add(new FeatureCode("WTRH", "waterhole(s)", "a natural hole, hollow, or small depression that contains water, used by man and animals, especially in arid areas"));
-		
-		fc = new FeatureClass("L", "parks, area");
-		featureClasses.add(fc);
+		add(fc);
+
+		fc = new FeatureClass("L", "parks, area", Font.decode("Arial-PLAIN-10"), Color.green);
 		fc.add(new FeatureCode("AGRC", "agricultural colony", "a tract of land set aside for agricultural settlement"));
 		fc.add(new FeatureCode("AMUS", "amusement park", "Amusement Park are theme parks, adventure parks offering entertainment, similar to funfairs but with a fix location"));
 		fc.add(new FeatureCode("AREA", "area", "a tract of land without homogeneous character or boundaries"));
@@ -199,10 +248,12 @@ public class FeatureCodes
 		fc.add(new FeatureCode("INDS", "industrial area", "an area characterized by industrial activity"));
 		fc.add(new FeatureCode("LAND", "arctic land", "a tract of land in the Arctic"));
 		fc.add(new FeatureCode("LCTY", "locality", "a minor area or place of unspecified or mixed character and indefinite boundaries"));
-		fc.add(new FeatureCode("MILB", "military base", "a place used by an army or other armed service for storing arms and supplies, and for accommodating and training troops, a base from which operations can be initiated"));
+		fc.add(new FeatureCode("MILB", "military base",
+				"a place used by an army or other armed service for storing arms and supplies, and for accommodating and training troops, a base from which operations can be initiated"));
 		fc.add(new FeatureCode("MNA", "mining area", "an area of mine sites where minerals and ores are extracted"));
 		fc.add(new FeatureCode("MVA", "maneuver area", "a tract of land where military field exercises are carried out"));
-		fc.add(new FeatureCode("NVB", "naval base", "an area used to store supplies, provide barracks for troops and naval personnel, a port for naval vessels, and from which operations are initiated"));
+		fc.add(new FeatureCode("NVB", "naval base",
+				"an area used to store supplies, provide barracks for troops and naval personnel, a port for naval vessels, and from which operations are initiated"));
 		fc.add(new FeatureCode("OAS", "oasis(-es)", "an area in a desert made productive by the availability of water"));
 		fc.add(new FeatureCode("OILF", "oilfield", "an area containing a subterranean store of petroleum of economic value"));
 		fc.add(new FeatureCode("PEAT", "peat cutting area", "an area where peat is harvested"));
@@ -226,9 +277,9 @@ public class FeatureCodes
 		fc.add(new FeatureCode("SNOW", "snowfield", "an area of permanent snow and ice forming the accumulation area of a glacier"));
 		fc.add(new FeatureCode("TRB", "tribal area", "a tract of land used by nomadic or other tribes"));
 		fc.add(new FeatureCode("ZZZZZ", "master source holdings list", ""));
-		
-		fc = new FeatureClass("P", "city, village");
-		featureClasses.add(fc);
+		add(fc);
+
+		fc = new FeatureClass("P", "city, village", Font.decode("Arial-BOLD-11"), Color.yellow);
 		fc.add(new FeatureCode("PPL", "populated place", "a city, town, village, or other agglomeration of buildings where people live and work"));
 		fc.add(new FeatureCode("PPLA", "seat of a first-order administrative division", "seat of a first-order administrative division (PPLC takes precedence over PPLA)"));
 		fc.add(new FeatureCode("PPLC", "capital of a political entity", ""));
@@ -240,9 +291,9 @@ public class FeatureCodes
 		fc.add(new FeatureCode("PPLW", "destroyed populated place", "a village, town or city destroyed by a natural disaster, or by war"));
 		fc.add(new FeatureCode("PPLX", "section of populated place", ""));
 		fc.add(new FeatureCode("STLMT", "israeli settlement", ""));
-		
-		fc = new FeatureClass("R", "road, railroad");
-		featureClasses.add(fc);
+		add(fc);
+
+		fc = new FeatureClass("R", "road, railroad", Font.decode("Arial-PLAIN-10"), Color.red);
 		fc.add(new FeatureCode("CSWY", "causeway", "a raised roadway across wet ground or shallow water"));
 		fc.add(new FeatureCode("CSWYQ", "former causeway", "a causeway no longer used for transportation"));
 		fc.add(new FeatureCode("OILP", "oil pipeline", "a pipeline used for transporting oil"));
@@ -266,15 +317,18 @@ public class FeatureCodes
 		fc.add(new FeatureCode("TNLRR", "railroad tunnel", "a tunnel through which a railroad passes"));
 		fc.add(new FeatureCode("TNLS", "tunnels", "subterranean passageways for transportation"));
 		fc.add(new FeatureCode("TRL", "trail", "a path, track, or route used by pedestrians, animals, or off-road vehicles"));
-		
-		fc = new FeatureClass("S", "spot, building, farm");
-		featureClasses.add(fc);
+		add(fc);
+
+		fc = new FeatureClass("S", "spot, building, farm", Font.decode("Arial-PLAIN-10"), Color.pink);
 		fc.add(new FeatureCode("ADMF", "administrative facility", "a government building"));
 		fc.add(new FeatureCode("AGRF", "agricultural facility", "a building and/or tract of land used for improving agriculture"));
-		fc.add(new FeatureCode("AIRB", "airbase", "an area used to store supplies, provide barracks for air force personnel, hangars and runways for aircraft, and from which operations are initiated"));
+		fc
+				.add(new FeatureCode("AIRB", "airbase",
+						"an area used to store supplies, provide barracks for air force personnel, hangars and runways for aircraft, and from which operations are initiated"));
 		fc.add(new FeatureCode("AIRF", "airfield", "a place on land where aircraft land and take off; no facilities provided for the commercial handling of passengers and cargo"));
 		fc.add(new FeatureCode("AIRH", "heliport", "a place where helicopters land and take off"));
-		fc.add(new FeatureCode("AIRP", "airport", "a place where aircraft regularly land and take off, with runways, navigational aids, and major facilities for the commercial handling of passengers and cargo"));
+		fc.add(new FeatureCode("AIRP", "airport",
+				"a place where aircraft regularly land and take off, with runways, navigational aids, and major facilities for the commercial handling of passengers and cargo"));
 		fc.add(new FeatureCode("AIRQ", "abandoned airfield", ""));
 		fc.add(new FeatureCode("AMTH", "amphitheater", "an oval or circular structure with rising tiers of seats about a stage or open space"));
 		fc.add(new FeatureCode("ANS", "ancient site", "a place where archeological remains, old structures, or cultural artifacts are located"));
@@ -282,7 +336,9 @@ public class FeatureCodes
 		fc.add(new FeatureCode("ASTR", "astronomical station", "a point on the earth whose position has been determined by observations of celestial bodies"));
 		fc.add(new FeatureCode("ASYL", "asylum", "a facility where the insane are cared for and protected"));
 		fc.add(new FeatureCode("ATHF", "athletic field", "a tract of land used for playing team sports, and athletic track and field events"));
-		fc.add(new FeatureCode("ATM", "autmatic teller machine", "An unattended electronic machine in a public place, connected to a data system and related equipment and activated by a bank customer to obtain cash withdrawals and other banking services."));
+		fc
+				.add(new FeatureCode("ATM", "autmatic teller machine",
+						"An unattended electronic machine in a public place, connected to a data system and related equipment and activated by a bank customer to obtain cash withdrawals and other banking services."));
 		fc.add(new FeatureCode("BANK", "bank", "A business establishment in which money is kept for saving or commercial purposes or is invested, supplied for loans, or exchanged."));
 		fc.add(new FeatureCode("BCN", "beacon", "a fixed artificial navigation mark"));
 		fc.add(new FeatureCode("BDG", "bridge", "a structure erected across an obstacle such as a stream, road, etc., in order to carry roads, railroads, and pedestrians across"));
@@ -317,7 +373,8 @@ public class FeatureCodes
 		fc.add(new FeatureCode("CTRA", "atomic center", "a facility where atomic research is carried out"));
 		fc.add(new FeatureCode("CTRCM", "community center", "a facility for community recreation and other activities"));
 		fc.add(new FeatureCode("CTRF", "facility center", "a place where more than one facility is situated"));
-		fc.add(new FeatureCode("CTRM", "medical center", "a complex of health care buildings including two or more of the following: hospital, medical school, clinic, pharmacy, doctor's offices, etc."));
+		fc.add(new FeatureCode("CTRM", "medical center",
+				"a complex of health care buildings including two or more of the following: hospital, medical school, clinic, pharmacy, doctor's offices, etc."));
 		fc.add(new FeatureCode("CTRR", "religious center", "a facility where more than one religious activity is carried out, e.g., retreat, school, monastery, worship"));
 		fc.add(new FeatureCode("CTRS", "space center", "a facility for launching, tracking, or controlling satellites and space vehicles"));
 		fc.add(new FeatureCode("CVNT", "convent", "a building where a community of nuns lives in seclusion"));
@@ -408,7 +465,9 @@ public class FeatureCodes
 		fc.add(new FeatureCode("MNSN", "tin mine(s)", "a mine where tin ore is extracted"));
 		fc.add(new FeatureCode("MOLE", "mole", "a massive structure of masonry or large stones serving as a pier or breakwater"));
 		fc.add(new FeatureCode("MSQE", "mosque", "a building for public Islamic worship"));
-		fc.add(new FeatureCode("MSSN", "mission", "a place characterized by dwellings, school, church, hospital and other facilities operated by a religious group for the purpose of providing charitable services and to propagate religion"));
+		fc
+				.add(new FeatureCode("MSSN", "mission",
+						"a place characterized by dwellings, school, church, hospital and other facilities operated by a religious group for the purpose of providing charitable services and to propagate religion"));
 		fc.add(new FeatureCode("MSSNQ", "abandoned mission", ""));
 		fc.add(new FeatureCode("MSTY", "monastery", "a building and grounds where a community of monks lives in seclusion"));
 		fc.add(new FeatureCode("MTRO", "metro station", "metro station (Underground, Tube, or Méo)"));
@@ -500,7 +559,11 @@ public class FeatureCodes
 		fc.add(new FeatureCode("TWO", "Temp Work Office", "Temporary Work Offices"));
 		fc.add(new FeatureCode("UNIO", "postgrad & MBA", "Post Universitary Education Institutes (post graduate studies and highly specialised master programs) & MBA"));
 		fc.add(new FeatureCode("UNIP", "University Prep School", "University Preparation Schools & Institutions"));
-		fc.add(new FeatureCode("UNIV", "university", "An institution for higher learning with teaching and research facilities constituting a graduate school and professional schools that award master's degrees and doctorates and an undergraduate division that awards bachelor's degrees."));
+		fc
+				.add(new FeatureCode(
+						"UNIV",
+						"university",
+						"An institution for higher learning with teaching and research facilities constituting a graduate school and professional schools that award master's degrees and doctorates and an undergraduate division that awards bachelor's degrees."));
 		fc.add(new FeatureCode("USGE", "united states government establishment", "a facility operated by the United States Government in Panama"));
 		fc.add(new FeatureCode("VETF", "veterinary facility", "a building or camp at which veterinary services are available"));
 		fc.add(new FeatureCode("WALL", "wall", "a thick masonry structure, usually enclosing a field or building, or forming the side of a structure"));
@@ -511,12 +574,13 @@ public class FeatureCodes
 		fc.add(new FeatureCode("WTRW", "waterworks", "a facility for supplying potable water through a water source and a system of pumps and filtration beds"));
 		fc.add(new FeatureCode("ZNF", "free trade zone", "an area, usually a section of a port, where goods may be received and shipped free of customs duty and of most customs regulations"));
 		fc.add(new FeatureCode("ZOO", "zoo", "a zoological garden or park where wild animals are kept for exhibition"));
-		
-		fc = new FeatureClass("T", "mountain, hill, rock");
-		featureClasses.add(fc);
+		add(fc);
+
+		fc = new FeatureClass("T", "mountain, hill, rock", Font.decode("Arial-PLAIN-10"), Color.orange);
 		fc.add(new FeatureCode("ASPH", "asphalt lake", "a small basin containing naturally occurring asphalt"));
 		fc.add(new FeatureCode("ATOL", "atoll(s)", "a ring-shaped coral reef which has closely spaced islands on it encircling a lagoon"));
-		fc.add(new FeatureCode("BAR", "bar", "a shallow ridge or mound of coarse unconsolidated material in a stream channel, at the mouth of a stream, estuary, or lagoon and in the wave-break zone along coasts"));
+		fc.add(new FeatureCode("BAR", "bar",
+				"a shallow ridge or mound of coarse unconsolidated material in a stream channel, at the mouth of a stream, estuary, or lagoon and in the wave-break zone along coasts"));
 		fc.add(new FeatureCode("BCH", "beach", "a shore zone of coarse unconsolidated sediment that extends from the low-water line to the highest reach of storm waves"));
 		fc.add(new FeatureCode("BCHS", "beaches", "a shore zone of coarse unconsolidated sediment that extends from the low-water line to the highest reach of storm waves"));
 		fc.add(new FeatureCode("BDLD", "badlands", "an area characterized by a maze of very closely spaced, deep, narrow, steep-sided ravines, and sharp crests and pinnacles"));
@@ -542,7 +606,8 @@ public class FeatureCodes
 		fc.add(new FeatureCode("DUNE", "dune(s)", "a wave form, ridge or star shape feature composed of sand"));
 		fc.add(new FeatureCode("DVD", "divide", "a line separating adjacent drainage basins"));
 		fc.add(new FeatureCode("ERG", "sandy desert", "an extensive tract of shifting sand and sand dunes"));
-		fc.add(new FeatureCode("FAN", "fan(s)", "a fan-shaped wedge of coarse alluvium with apex merging with a mountain stream bed and the fan spreading out at a low angle slope onto an adjacent plain"));
+		fc.add(new FeatureCode("FAN", "fan(s)",
+				"a fan-shaped wedge of coarse alluvium with apex merging with a mountain stream bed and the fan spreading out at a low angle slope onto an adjacent plain"));
 		fc.add(new FeatureCode("FORD", "ford", "a shallow part of a stream which can be crossed on foot or by land vehicle"));
 		fc.add(new FeatureCode("FSR", "fissure", "a crack associated with volcanism"));
 		fc.add(new FeatureCode("GAP", "gap", "a low place in a ridge, not used for transportation"));
@@ -560,7 +625,8 @@ public class FeatureCodes
 		fc.add(new FeatureCode("ISLT", "land-tied island", "a coastal island connected to the mainland by barrier beaches, levees or dikes"));
 		fc.add(new FeatureCode("ISLX", "section of island", ""));
 		fc.add(new FeatureCode("ISTH", "isthmus", "a narrow strip of land connecting two larger land masses and bordered by water"));
-		fc.add(new FeatureCode("KRST", "karst area", "a distinctive landscape developed on soluble rock such as limestone characterized by sinkholes, caves, disappearing streams, and underground drainage"));
+		fc.add(new FeatureCode("KRST", "karst area",
+				"a distinctive landscape developed on soluble rock such as limestone characterized by sinkholes, caves, disappearing streams, and underground drainage"));
 		fc.add(new FeatureCode("LAVA", "lava area", "an area of solidified lava"));
 		fc.add(new FeatureCode("LEV", "levee", "a natural low embankment bordering a distributary or meandering stream; often built up artificially to control floods"));
 		fc.add(new FeatureCode("MESA", "mesa(s)", "a flat-topped, isolated elevation with steep slopes on all sides, less extensive than a plateau"));
@@ -611,13 +677,14 @@ public class FeatureCodes
 		fc.add(new FeatureCode("VALS", "valleys", "elongated depressions usually traversed by a stream"));
 		fc.add(new FeatureCode("VALX", "section of valley", ""));
 		fc.add(new FeatureCode("VLC", "volcano", "a conical elevation composed of volcanic materials with a crater at the top"));
-		
-		fc = new FeatureClass("U", "undersea");
-		featureClasses.add(fc);
+		add(fc);
+
+		fc = new FeatureClass("U", "undersea", Font.decode("Arial-PLAIN-10"), Color.blue);
 		fc.add(new FeatureCode("APNU", "apron", "a gentle slope, with a generally smooth surface, particularly found around groups of islands and seamounts"));
 		fc.add(new FeatureCode("ARCU", "arch", "a low bulge around the southeastern end of the island of Hawaii"));
 		fc.add(new FeatureCode("ARRU", "arrugado", "an area of subdued corrugations off Baja California"));
-		fc.add(new FeatureCode("BDLU", "borderland", "a region adjacent to a continent, normally occupied by or bordering a shelf, that is highly irregular with depths well in excess of those typical of a shelf"));
+		fc.add(new FeatureCode("BDLU", "borderland",
+				"a region adjacent to a continent, normally occupied by or bordering a shelf, that is highly irregular with depths well in excess of those typical of a shelf"));
 		fc.add(new FeatureCode("BKSU", "banks", "elevations, typically located on a shelf, over which the depth of water is relatively shallow but sufficient for safe surface navigation"));
 		fc.add(new FeatureCode("BNCU", "bench", "a small terrace"));
 		fc.add(new FeatureCode("BNKU", "bank", "an elevation, typically located on a shelf, over which the depth of water is relatively shallow but sufficient for safe surface navigation"));
@@ -633,7 +700,8 @@ public class FeatureCodes
 		fc.add(new FeatureCode("FLTU", "flat", "a small level or nearly level area"));
 		fc.add(new FeatureCode("FRKU", "fork", "a branch of a canyon or valley"));
 		fc.add(new FeatureCode("FRSU", "forks", "a branch of a canyon or valley"));
-		fc.add(new FeatureCode("FRZU", "fracture zone", "an extensive linear zone of irregular topography of the sea floor, characterized by steep-sided or asymmetrical ridges, troughs, or escarpments"));
+		fc.add(new FeatureCode("FRZU", "fracture zone",
+				"an extensive linear zone of irregular topography of the sea floor, characterized by steep-sided or asymmetrical ridges, troughs, or escarpments"));
 		fc.add(new FeatureCode("FURU", "furrow", "a closed, linear, narrow, shallow depression"));
 		fc.add(new FeatureCode("GAPU", "gap", "a narrow break in a ridge or rise"));
 		fc.add(new FeatureCode("GLYU", "gully", "a small valley-like feature"));
@@ -668,7 +736,8 @@ public class FeatureCodes
 		fc.add(new FeatureCode("SCNU", "seachannel", "a continuously sloping, elongated depression commonly found in fans or plains and customarily bordered by levees on one or two sides"));
 		fc.add(new FeatureCode("SCSU", "seachannels", "continuously sloping, elongated depressions commonly found in fans or plains and customarily bordered by levees on one or two sides"));
 		fc.add(new FeatureCode("SDLU", "saddle", "a low part, resembling in shape a saddle, in a ridge or between contiguous seamounts"));
-		fc.add(new FeatureCode("SHFU", "shelf", "a zone adjacent to a continent (or around an island) that extends from the low water line to a depth at which there is usually a marked increase of slope towards oceanic depths"));
+		fc.add(new FeatureCode("SHFU", "shelf",
+				"a zone adjacent to a continent (or around an island) that extends from the low water line to a depth at which there is usually a marked increase of slope towards oceanic depths"));
 		fc.add(new FeatureCode("SHLU", "shoal", "a surface-navigation hazard composed of unconsolidated material"));
 		fc.add(new FeatureCode("SHSU", "shoals", "hazards to surface navigation composed of unconsolidated material"));
 		fc.add(new FeatureCode("SHVU", "shelf valley", "a valley on the shelf, generally the shoreward extension of a canyon"));
@@ -677,7 +746,9 @@ public class FeatureCodes
 		fc.add(new FeatureCode("SMSU", "seamounts", "elevations rising generally more than 1,000 meters and of limited extent across the summit"));
 		fc.add(new FeatureCode("SMU", "seamount", "an elevation rising generally more than 1,000 meters and of limited extent across the summit"));
 		fc.add(new FeatureCode("SPRU", "spur", "a subordinate elevation, ridge, or rise projecting outward from a larger feature"));
-		fc.add(new FeatureCode("TERU", "terrace", "a relatively flat horizontal or gently inclined surface, sometimes long and narrow, which is bounded by a steeper ascending slope on one side and by a steep descending slope on the opposite side"));
+		fc
+				.add(new FeatureCode("TERU", "terrace",
+						"a relatively flat horizontal or gently inclined surface, sometimes long and narrow, which is bounded by a steeper ascending slope on one side and by a steep descending slope on the opposite side"));
 		fc.add(new FeatureCode("TMSU", "tablemounts (or guyots)", "seamounts having a comparatively smooth, flat top"));
 		fc.add(new FeatureCode("TMTU", "tablemount (or guyot)", "a seamount having a comparatively smooth, flat top"));
 		fc.add(new FeatureCode("TNGU", "tongue", "an elongate (tongue-like) extension of a flat sea floor into an adjacent higher feature"));
@@ -685,9 +756,9 @@ public class FeatureCodes
 		fc.add(new FeatureCode("TRNU", "trench", "a long, narrow, characteristically very deep and asymmetrical depression of the sea floor, with relatively steep sides"));
 		fc.add(new FeatureCode("VALU", "valley", "a relatively shallow, wide depression, the bottom of which usually has a continuous gradient"));
 		fc.add(new FeatureCode("VLSU", "valleys", "a relatively shallow, wide depression, the bottom of which usually has a continuous gradient"));
-		
-		fc = new FeatureClass("V", "forest, heath");
-		featureClasses.add(fc);
+		add(fc);
+
+		fc = new FeatureClass("V", "forest, heath", Font.decode("Arial-PLAIN-10"), new Color(0, 128, 0));
 		fc.add(new FeatureCode("BUSH", "bush(es)", "a small clump of conspicuous bushes in an otherwise bare area"));
 		fc.add(new FeatureCode("CULT", "cultivated area", "an area under cultivation"));
 		fc.add(new FeatureCode("FRST", "forest(s)", "an area dominated by tree vegetation"));
@@ -706,5 +777,6 @@ public class FeatureCodes
 		fc.add(new FeatureCode("VIN", "vineyard", "a planting of grapevines"));
 		fc.add(new FeatureCode("VINS", "vineyards", "plantings of grapevines"));
 		fc.add(new FeatureCode("ll", "not available"));
+		add(fc);
 	}
 }

@@ -131,6 +131,9 @@ public class Application
 				new TitledBorder("Exaggeration")));
 		exaggeration.add(new ExaggerationPanel(wwd));
 		left.add(exaggeration, BorderLayout.SOUTH);
+		
+		/*JPanel gotoCoordinates = new GoToCoordinatePanel(wwd);
+		left.add(gotoCoordinates, BorderLayout.PAGE_END);*/
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 				true, left, wwd);

@@ -3,81 +3,91 @@ package panels.places;
 import java.awt.Color;
 import java.awt.Font;
 
+import geonames.FeatureClass;
+import geonames.FeatureCode;
+import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.render.GeographicText;
 
 public class Place implements GeographicText
 {
+	public final String name;
+	public final String country;
+	public final int id;
+	public final LatLon latlon;
+	public final FeatureClass featureClass;
+	public final FeatureCode featureCode;
+	
+	public String[] parents;
+
+	public Place(String name, String country, int id, LatLon latlon, FeatureClass featureClass,
+			FeatureCode featureCode)
+	{
+		this.name = name;
+		this.country = country;
+		this.id = id;
+		this.latlon = latlon;
+		this.featureClass = featureClass;
+		this.featureCode = featureCode;
+	}
+
 	public Color getBackgroundColor()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return Color.black;
 	}
 
 	public Color getColor()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return featureClass.color;
 	}
 
 	public Font getFont()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return featureClass.font;
 	}
 
 	public Position getPosition()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new Position(latlon, 0);
 	}
 
 	public CharSequence getText()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return name;
 	}
 
 	public boolean isVisible()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	public void setBackgroundColor(Color background)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 	public void setColor(Color color)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 	public void setFont(Font font)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 	public void setPosition(Position position)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 	public void setText(CharSequence text)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 	public void setVisible(boolean visible)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
+	@Override
+	public String toString()
+	{
+		return name + " (" + featureCode.name + ")";
+	}
 }
