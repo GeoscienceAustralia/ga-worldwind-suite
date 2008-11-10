@@ -27,6 +27,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import util.ColorFont;
+
 public class GeoName implements GeographicText
 {
 	public final String name;

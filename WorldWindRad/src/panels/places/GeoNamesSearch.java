@@ -1,18 +1,19 @@
 package panels.places;
 
-import geonames.FeatureClass;
-import geonames.FeatureCode;
-import geonames.FeatureCodes;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,9 +22,36 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import util.ColorFont;
+
 public class GeoNamesSearch
 {
 	private final static String GEONAMES_SEARCH = "http://ws.geonames.org/search";
+	private final static Map<String, ColorFont> colorFonts = new HashMap<String, ColorFont>();
+	private final static ColorFont defaultColorFont = new ColorFont(Font
+			.decode("Arial-PLAIN-10"), Color.white, Color.black);
+
+	static
+	{
+		colorFonts.put("A", new ColorFont(Font.decode("Arial-BOLD-11"),
+				Color.lightGray, Color.black));
+		colorFonts.put("H", new ColorFont(Font.decode("Arial-PLAIN-10"),
+				Color.cyan, Color.black));
+		colorFonts.put("L", new ColorFont(Font.decode("Arial-PLAIN-10"),
+				Color.green, Color.black));
+		colorFonts.put("P", new ColorFont(Font.decode("Arial-BOLD-11"),
+				Color.yellow, Color.black));
+		colorFonts.put("R", new ColorFont(Font.decode("Arial-PLAIN-10"),
+				Color.red, Color.black));
+		colorFonts.put("S", new ColorFont(Font.decode("Arial-PLAIN-10"),
+				Color.pink, Color.black));
+		colorFonts.put("T", new ColorFont(Font.decode("Arial-PLAIN-10"),
+				Color.orange, Color.black));
+		colorFonts.put("U", new ColorFont(Font.decode("Arial-PLAIN-10"),
+				Color.blue, Color.black));
+		colorFonts.put("V", new ColorFont(Font.decode("Arial-PLAIN-10"),
+				new Color(0, 128, 0), Color.black));
+	}
 
 	public static enum SearchType
 	{
@@ -72,8 +100,8 @@ public class GeoNamesSearch
 		URL url = null;
 		try
 		{
-			url = new URL(GEONAMES_SEARCH + "?" + type.queryParameter + "="
-					+ text);
+			url = new URL(GEONAMES_SEARCH + "?style=long&"
+					+ type.queryParameter + "=" + text);
 		}
 		catch (MalformedURLException e)
 		{
@@ -129,8 +157,10 @@ public class GeoNamesSearch
 				NodeList children = node.getChildNodes();
 
 				String name = null;
-				String fclass = null;
+				String fcl = null;
 				String fcode = null;
+				String fclName = null;
+				String fcodeName = null;
 				Integer geonameId = null;
 				Double lat = null;
 				Double lon = null;
@@ -151,11 +181,19 @@ public class GeoNamesSearch
 						}
 						else if (child.getNodeName().equals("fcl"))
 						{
-							fclass = child.getTextContent();
+							fcl = child.getTextContent();
 						}
 						else if (child.getNodeName().equals("fcode"))
 						{
 							fcode = child.getTextContent();
+						}
+						else if (child.getNodeName().equals("fclName"))
+						{
+							fclName = child.getTextContent();
+						}
+						else if (child.getNodeName().equals("fcodeName"))
+						{
+							fcodeName = child.getTextContent();
 						}
 						else if (child.getNodeName().equals("lat"))
 						{
@@ -175,16 +213,19 @@ public class GeoNamesSearch
 					}
 				}
 
-				if (lat != null && lon != null && geonameId != null
-						&& name != null && name.length() > 0)
+				if (lat != null && lon != null && name != null
+						&& name.length() > 0)
 				{
 					LatLon latlon = new LatLon(Angle.fromDegreesLatitude(lat),
 							Angle.fromDegreesLongitude(lon));
-					FeatureClass featureClass = FeatureCodes.getClass(fclass);
-					FeatureCode featureCode = FeatureCodes.getCode(fcode);
+					ColorFont colorFont = colorFonts.get(fcl);
+					if (colorFont == null)
+					{
+						colorFont = defaultColorFont;
+					}
 
 					Place place = new Place(name, country, geonameId, latlon,
-							featureClass, featureCode);
+							fcl, fclName, fcode, fcodeName, colorFont);
 					places.add(place);
 				}
 			}

@@ -30,6 +30,8 @@ import java.util.Comparator;
 import java.util.Queue;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import util.ColorFont;
+
 public class GeoNamesLayer extends AbstractLayer
 {
 	private final static String GEONAMES_CHILDREN = "http://ws.geonames.org/children";
