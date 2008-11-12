@@ -9,7 +9,6 @@ import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
@@ -26,7 +25,6 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -41,6 +39,7 @@ import javax.swing.event.DocumentListener;
 
 import panels.places.GeoNamesSearch.Results;
 import panels.places.GeoNamesSearch.SearchType;
+import util.FlatJButton;
 import util.Icons;
 
 public class PlaceSearchPanel extends JPanel
@@ -56,8 +55,8 @@ public class PlaceSearchPanel extends JPanel
 	private JTextField latlonText;
 	private JTextField typeText;
 	private JList list;
-	private JButton searchButton;
-	private JButton clearButton;
+	private FlatJButton searchButton;
+	private FlatJButton clearButton;
 
 	public PlaceSearchPanel(final WorldWindow wwd)
 	{
@@ -79,20 +78,19 @@ public class PlaceSearchPanel extends JPanel
 		c.fill = GridBagConstraints.HORIZONTAL;
 		add(searchText, c);
 
-		searchButton = new JButton(Icons.search);
-		int size = searchButton.getPreferredSize().height;
+		searchButton = new FlatJButton(Icons.search);
+		searchButton.restrictSize();
 		searchButton.setToolTipText("Search");
-		searchButton.setMinimumSize(new Dimension(size, size));
 		searchButton.setEnabled(false);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
 		add(searchButton, c);
 
-		clearButton = new JButton(Icons.remove);
+		clearButton = new FlatJButton(Icons.remove);
+		clearButton.restrictSize();
 		clearButton.setToolTipText("Clear results");
 		clearButton.setEnabled(false);
-		clearButton.setMinimumSize(new Dimension(size, size));
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = 0;

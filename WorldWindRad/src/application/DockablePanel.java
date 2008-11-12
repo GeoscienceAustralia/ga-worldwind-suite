@@ -3,6 +3,8 @@ package application;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -78,6 +80,9 @@ public class DockablePanel extends AbstractDockable
 
 		titleLabel = new JLabel(title, icon, JLabel.LEADING);
 		titleLabel.setForeground(SystemColor.activeCaptionText);
+		Font font = titleLabel.getFont();
+		font = font.deriveFont(Font.BOLD);
+		titleLabel.setFont(font);
 		titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
 		toolbar = new JToolBar(JToolBar.HORIZONTAL);
@@ -139,9 +144,19 @@ public class DockablePanel extends AbstractDockable
 		headerPanel.add(toolbar, BorderLayout.EAST);
 		headerPanel.setOpaque(false);
 		headerPanel.setBorder(new RaisedHeaderBorder());
-		//headerPanel.setBorder(new ShadowBorder());
 
-		mainPanel = new JPanel(new BorderLayout());
+		final Dimension minimumSize = headerPanel.getPreferredSize();
+		minimumSize.width = minimumSize.height * 2;
+
+		mainPanel = new JPanel(new BorderLayout())
+		{
+			@Override
+			public void updateUI()
+			{
+				super.updateUI();
+				setMinimumSize(minimumSize);
+			}
+		};
 		mainPanel.add(headerPanel, BorderLayout.PAGE_START);
 		mainPanel.add(component, BorderLayout.CENTER);
 		mainPanel.setBorder(new ShadowBorder());
@@ -150,10 +165,10 @@ public class DockablePanel extends AbstractDockable
 		getDragSources().add(draggablePanel);
 		getFrameDragSources().add(draggablePanel);
 		DockingManager.registerDockable(this);
-		
+
 		focusLost();
 	}
-	
+
 	public String getTitle()
 	{
 		return getTabText();
@@ -173,8 +188,8 @@ public class DockablePanel extends AbstractDockable
 
 	private void focusLost()
 	{
-		titleLabel.setForeground(SystemColor.textInactiveText);
-		draggablePanel.setStart(SystemColor.control);
+		titleLabel.setForeground(SystemColor.inactiveCaptionText);
+		draggablePanel.setStart(SystemColor.inactiveCaption);
 	}
 
 	private static DockablePanel getDockablePanelContaining(Component component)
@@ -207,12 +222,12 @@ public class DockablePanel extends AbstractDockable
 			setForeground(start);
 			setBackground(end);
 		}
-		
+
 		public void setStart(Color start)
 		{
 			setForeground(start);
 		}
-		
+
 		public void setEnd(Color end)
 		{
 			setBackground(end);

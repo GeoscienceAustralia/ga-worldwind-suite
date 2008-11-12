@@ -12,6 +12,7 @@ public class Icons
 	public static final ImageIcon maximize;
 	public static final ImageIcon close;
 	public static final ImageIcon restore;
+	public static final ImageIcon run;
 
 	static
 	{
@@ -20,6 +21,7 @@ public class Icons
 		maximize = loadIcon("/data/icons/maximize.gif");
 		close = loadIcon("/data/icons/close.gif");
 		restore = loadIcon("/data/icons/restore.gif");
+		run = loadIcon("/data/icons/run.gif");
 	}
 
 	private static ImageIcon loadIcon(String path)

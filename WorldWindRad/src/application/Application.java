@@ -5,7 +5,6 @@ import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.examples.GoToCoordinatePanel;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
@@ -51,11 +50,11 @@ import org.flexdock.docking.DockingPort;
 import org.flexdock.docking.defaults.DefaultDockingPort;
 import org.flexdock.docking.drag.preview.AlphaPreview;
 import org.flexdock.docking.event.DockingEvent;
-import org.flexdock.docking.event.DockingListener;
 import org.flexdock.perspective.PerspectiveManager;
 
 import panels.layers.LayersPanel;
 import panels.other.ExaggerationPanel;
+import panels.other.GoToCoordinatePanel;
 import panels.places.PlaceSearchPanel;
 import settings.Settings;
 import settings.SettingsDialog;
@@ -132,8 +131,7 @@ public class Application
 		//create worldwind stuff
 
 		wwd = new WorldWindowStereoGLCanvas();
-		//wwd.setPreferredSize(new Dimension(800, 600));
-		wwd.setMinimumSize(new Dimension(0, 0));
+		wwd.setMinimumSize(new Dimension(10, 10));
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		wwd.addPropertyChangeListener(propertyChangeListener);
@@ -222,7 +220,21 @@ public class Application
 		afterSettingsChange();
 
 		frame.setMenuBar(createMenuBar());
+		addWindowListeners();
+
+		java.awt.EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				frame.setVisible(true);
+			}
+		});
+	}
+	
+	private void addWindowListeners()
+	{
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		
 		frame.addWindowListener(new WindowAdapter()
 		{
 			@Override
@@ -258,14 +270,6 @@ public class Application
 				{
 					Settings.get().setWindowBounds(frame.getBounds());
 				}
-			}
-		});
-
-		java.awt.EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				frame.setVisible(true);
 			}
 		});
 	}
