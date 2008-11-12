@@ -39,15 +39,12 @@ import javax.swing.UIManager;
 import layers.mouse.MouseLayer;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 
-import org.flexdock.docking.Dockable;
 import org.flexdock.docking.DockingConstants;
 import org.flexdock.docking.DockingManager;
 import org.flexdock.docking.DockingPort;
 import org.flexdock.docking.defaults.DefaultDockingPort;
 import org.flexdock.docking.drag.preview.AlphaPreview;
 import org.flexdock.perspective.PerspectiveManager;
-import org.flexdock.view.View;
-import org.flexdock.view.actions.ViewAction;
 
 import panels.layers.LayersPanel;
 import panels.other.ExaggerationPanel;
@@ -347,7 +344,7 @@ public class Application
 	{
 		try
 		{
-			//DockingManager.storeLayoutModel();
+			DockingManager.storeLayoutModel();
 		}
 		catch (Exception e)
 		{
@@ -396,15 +393,5 @@ public class Application
 		else
 			// Default to metric units.
 			this.statusBar.setElevationUnit(StatusBar.UNIT_METRIC);
-	}
-
-	private class MaximizeAction extends ViewAction
-	{
-		@Override
-		public void actionPerformed(View view, ActionEvent evt)
-		{
-			// TODO Auto-generated method stub
-
-		}
 	}
 }
