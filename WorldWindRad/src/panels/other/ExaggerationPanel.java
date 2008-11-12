@@ -96,7 +96,7 @@ public class ExaggerationPanel extends JPanel
 		}
 
 		JButton button = new JButton("1:1");
-		button.addActionListener(new ScaleListener(2d));
+		button.addActionListener(new ScaleListener(1d));
 		size = button.getMinimumSize();
 		size.width = 0;
 		button.setMinimumSize(size);

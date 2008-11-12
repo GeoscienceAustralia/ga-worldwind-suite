@@ -7,11 +7,13 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="WorldWindRad/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jogl.jar">
+	<classpathentry kind="lib" path="lib/jogl.jar" sourcepath="C:/Data/Libraries/JOGL/jogl-1.1.1-src/jogl/src/classes">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="WorldWindRad/lib"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/worldwind.jar" sourcepath="/WorldWind"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/flexdock-0.5.1.jar" sourcepath="/FlexDock"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

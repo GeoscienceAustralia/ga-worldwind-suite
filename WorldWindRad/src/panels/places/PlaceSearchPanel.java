@@ -10,6 +10,7 @@ import gov.nasa.worldwind.view.OrbitView;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -34,7 +35,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
-import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -169,7 +169,7 @@ public class PlaceSearchPanel extends JPanel
 
 		nameText = new JTextField("");
 		nameText.setEditable(false);
-		nameText.setBackground(list.getBackground());
+		//nameText.setBackground(list.getBackground());
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
@@ -188,7 +188,7 @@ public class PlaceSearchPanel extends JPanel
 
 		latlonText = new JTextField("");
 		latlonText.setEditable(false);
-		latlonText.setBackground(list.getBackground());
+		//latlonText.setBackground(list.getBackground());
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 1;
@@ -206,7 +206,7 @@ public class PlaceSearchPanel extends JPanel
 
 		typeText = new JTextField("");
 		typeText.setEditable(false);
-		typeText.setBackground(list.getBackground());
+		//typeText.setBackground(list.getBackground());
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 2;
@@ -330,37 +330,55 @@ public class PlaceSearchPanel extends JPanel
 
 	private void showResults(final Results results)
 	{
-		SwingUtilities.invokeLater(new Runnable()
+		if (EventQueue.isDispatchThread())
 		{
-			public void run()
+			showResultsImpl(results);
+		}
+		else
+		{
+			try
 			{
-				placeLayer.clearText();
-				listModel.clear();
-
-				if (results.error != null)
+				EventQueue.invokeAndWait(new Runnable()
 				{
-					listModel.addElement(results.error);
-				}
-				else
-				{
-					if (results.places.size() == 0)
+					public void run()
 					{
-						listModel.addElement("0 matches found");
+						showResultsImpl(results);
 					}
-					else
-					{
-						for (Place place : results.places)
-						{
-							placeLayer.addText(place);
-							listModel.addElement(place);
-						}
-						clearButton.setEnabled(true);
-					}
-				}
-
-				wwd.redraw();
+				});
 			}
-		});
+			catch (Exception e)
+			{
+			}
+		}
+	}
+
+	private void showResultsImpl(Results results)
+	{
+		placeLayer.clearText();
+		listModel.clear();
+
+		if (results.error != null)
+		{
+			listModel.addElement(results.error);
+		}
+		else
+		{
+			if (results.places.size() == 0)
+			{
+				listModel.addElement("0 matches found");
+			}
+			else
+			{
+				for (Place place : results.places)
+				{
+					placeLayer.addText(place);
+					listModel.addElement(place);
+				}
+				clearButton.setEnabled(true);
+			}
+		}
+
+		wwd.redraw();
 	}
 
 	private void search(final String text, final SearchType type)

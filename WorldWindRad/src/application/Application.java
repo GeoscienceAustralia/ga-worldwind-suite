@@ -5,6 +5,7 @@ import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.examples.GoToCoordinatePanel;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
@@ -15,11 +16,12 @@ import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.util.StatusBar;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -30,13 +32,23 @@ import java.beans.PropertyChangeListener;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
+import javax.swing.JPopupMenu;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.TitledBorder;
 
 import layers.mouse.MouseLayer;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
+
+import org.flexdock.docking.Dockable;
+import org.flexdock.docking.DockingConstants;
+import org.flexdock.docking.DockingManager;
+import org.flexdock.docking.DockingPort;
+import org.flexdock.docking.defaults.DefaultDockingPort;
+import org.flexdock.docking.drag.preview.AlphaPreview;
+import org.flexdock.perspective.PerspectiveManager;
+import org.flexdock.view.View;
+import org.flexdock.view.actions.ViewAction;
+
 import panels.layers.LayersPanel;
 import panels.other.ExaggerationPanel;
 import panels.places.PlaceSearchPanel;
@@ -48,6 +60,8 @@ import stereo.StereoSceneController;
 
 public class Application
 {
+	private final static String SETTINGS_KEY = "WorldWindRad";
+
 	static
 	{
 		if (Configuration.isWindowsOS())
@@ -76,7 +90,7 @@ public class Application
 
 	public static void main(String[] args)
 	{
-		Settings.initialize("WorldWindRad"); //TODO fix node name
+		Settings.initialize(SETTINGS_KEY);
 
 		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME,
 				StereoSceneController.class.getName());
@@ -100,11 +114,19 @@ public class Application
 	private LayersPanel layersPanel;
 	private MouseLayer mouseLayer;
 
+	private DefaultDockingPort dockingPort;
+	private DockablePanel globeDockable;
+	private DockablePanel layersDockable;
+	private DockablePanel exaggerationDockable;
+	private DockablePanel gotoDockable;
+	private DockablePanel placeSearchDockable;
+
 	public Application()
 	{
 		//create worldwind stuff
 
 		wwd = new WorldWindowStereoGLCanvas();
+		wwd.setPreferredSize(new Dimension(800, 600));
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		wwd.addPropertyChangeListener(propertyChangeListener);
@@ -112,57 +134,79 @@ public class Application
 
 		//create gui stuff
 
+		System.setProperty(DockingConstants.HEAVYWEIGHT_DOCKABLES, "true");
+		DockingManager.setDragPreview(new AlphaPreview(Color.black, new Color(
+				SystemColor.activeCaption.getRGB()), 0.5f));
+
+		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+
 		frame = new JFrame("Radiometrics");
 		frame.setLayout(new BorderLayout());
-		frame.setMenuBar(createMenuBar());
+		frame.setSize(800, 600);
 
-		JPanel left = new JPanel(new BorderLayout());
-
-		JPanel layers = new JPanel(new GridLayout(0, 1, 0, 10));
-		layers.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(9,
-				9, 9, 9), new TitledBorder("Layers")));
-		layersPanel = new LayersPanel(wwd);
-		layers.add(layersPanel);
-		left.add(layers, BorderLayout.CENTER);
-
-		JPanel exaggeration = new JPanel(new GridLayout(0, 1));
-		exaggeration.setBorder(new CompoundBorder(BorderFactory
-				.createEmptyBorder(0, 9, 9, 9),
-				new TitledBorder("Exaggeration")));
-		exaggeration.add(new ExaggerationPanel(wwd));
-		left.add(exaggeration, BorderLayout.SOUTH);
-		
-		/*JPanel gotoCoordinates = new GoToCoordinatePanel(wwd);
-		left.add(gotoCoordinates, BorderLayout.PAGE_END);*/
-
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				true, left, wwd);
-		splitPane.setOneTouchExpandable(true);
-		splitPane.setDividerSize(8);
-		frame.add(splitPane, BorderLayout.CENTER);
-
-		Dimension minimumSize = new Dimension(100, 0);
-		wwd.setMinimumSize(minimumSize);
-		layers.setMinimumSize(minimumSize);
-
-		wwd.setPreferredSize(new Dimension(600, 600));
-		layers.setPreferredSize(new Dimension(220, 0));
-		
-		JPanel searchPanel = new JPanel(new GridLayout(0, 1));
-		searchPanel.setBorder(new CompoundBorder(BorderFactory
-				.createEmptyBorder(0, 9, 9, 9),
-				new TitledBorder("Place search")));
-		searchPanel.add(new PlaceSearchPanel(wwd));
-		frame.add(searchPanel, BorderLayout.EAST);
-		
-		searchPanel.setPreferredSize(new Dimension(200, 0));
+		JPanel panel = new JPanel(new BorderLayout());
+		frame.setContentPane(panel);
+		//panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		statusBar = new StatusBar();
-		frame.add(statusBar, BorderLayout.PAGE_END);
+		panel.add(statusBar, BorderLayout.PAGE_END);
 		statusBar.setEventSource(wwd);
+		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
+
+		dockingPort = new DefaultDockingPort();
+		panel.add(dockingPort, BorderLayout.CENTER);
+
+		globeDockable = new DockablePanel("globe", "Globe", null, wwd, false,
+				true);
+
+		layersPanel = new LayersPanel(wwd);
+		layersDockable = new DockablePanel("layers", "Layers", null,
+				layersPanel, true, true);
+
+		ExaggerationPanel exaggerationPanel = new ExaggerationPanel(wwd);
+		exaggerationDockable = new DockablePanel("exaggeration",
+				"Exaggeration", null, exaggerationPanel, true, true);
+
+		PlaceSearchPanel placeSearchPanel = new PlaceSearchPanel(wwd);
+		placeSearchDockable = new DockablePanel("placesearch", "Place search",
+				null, placeSearchPanel, true, true);
+
+		GoToCoordinatePanel gotoPanel = new GoToCoordinatePanel(wwd);
+		gotoDockable = new DockablePanel("gotocoordinate", "Go to coordinates",
+				null, gotoPanel, true, true);
+
+		PerspectiveManager perspectiveManager = PerspectiveManager
+				.getInstance();
+		perspectiveManager.setDefaultPersistenceKey(SETTINGS_KEY);
+		DockingManager.setLayoutManager(perspectiveManager);
+		boolean loaded = false;
+		try
+		{
+			loaded = DockingManager.loadLayoutModel(true);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		if (!loaded)
+		{
+			dockingPort.dock(globeDockable, DockingConstants.CENTER_REGION);
+			globeDockable.dock(layersDockable, DockingConstants.WEST_REGION);
+			layersDockable.dock(exaggerationDockable,
+					DockingConstants.SOUTH_REGION);
+			globeDockable.dock(placeSearchDockable,
+					DockingConstants.EAST_REGION);
+
+			DockingManager.setSplitProportion((DockingPort) dockingPort, 0.25f);
+			DockingManager.setSplitProportion(placeSearchDockable, 0.8f);
+			DockingManager.setSplitProportion(exaggerationDockable, 0.8f);
+		}
 
 		afterSettingsChange();
 
+		frame.setMenuBar(createMenuBar());
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter()
 		{
@@ -172,8 +216,6 @@ public class Application
 				quit();
 			}
 		});
-
-		frame.pack();
 
 		java.awt.EventQueue.invokeLater(new Runnable()
 		{
@@ -225,10 +267,22 @@ public class Application
 			}
 		});
 
-		/*menu = new Menu("View");
+		menu = new Menu("View");
 		menuBar.add(menu);
 
-		menuItem = new MenuItem("Fullscreen");
+		menuItem = createDockableMenuItem(layersDockable);
+		menu.add(menuItem);
+
+		menuItem = createDockableMenuItem(exaggerationDockable);
+		menu.add(menuItem);
+
+		menuItem = createDockableMenuItem(placeSearchDockable);
+		menu.add(menuItem);
+		
+		menuItem = createDockableMenuItem(gotoDockable);
+		menu.add(menuItem);
+
+		/*menuItem = new MenuItem("Fullscreen");
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -263,6 +317,19 @@ public class Application
 		return menuBar;
 	}
 
+	private MenuItem createDockableMenuItem(final DockablePanel dockablePanel)
+	{
+		MenuItem menuItem = new MenuItem(dockablePanel.getTitle());
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				DockingManager.display(dockablePanel);
+			}
+		});
+		return menuItem;
+	}
+
 	private void afterSettingsChange()
 	{
 		if (Settings.get().isStereoEnabled()
@@ -278,6 +345,14 @@ public class Application
 
 	public void quit()
 	{
+		try
+		{
+			//DockingManager.storeLayoutModel();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		frame.dispose();
 		System.exit(0);
 	}
@@ -321,5 +396,15 @@ public class Application
 		else
 			// Default to metric units.
 			this.statusBar.setElevationUnit(StatusBar.UNIT_METRIC);
+	}
+
+	private class MaximizeAction extends ViewAction
+	{
+		@Override
+		public void actionPerformed(View view, ActionEvent evt)
+		{
+			// TODO Auto-generated method stub
+
+		}
 	}
 }
