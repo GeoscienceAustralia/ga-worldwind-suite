@@ -3,6 +3,7 @@ package settings;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 
+import java.awt.Rectangle;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -72,7 +73,7 @@ public class Settings
 	{
 		preferences = Preferences.userRoot().node(node);
 		updateProxyConfiguration();
-		
+
 		//force configuration update
 		setVerticalExaggeration(getVerticalExaggeration());
 		//setUseTerrain(isUseTerrain());
@@ -200,12 +201,12 @@ public class Settings
 	{
 		preferences.putDouble("FocalLength", focalLength);
 	}
-	
+
 	public boolean isStereoCursor()
 	{
 		return preferences.getBoolean("StereoCursor", false);
 	}
-	
+
 	public void setStereoCursor(boolean stereoCursor)
 	{
 		preferences.putBoolean("StereoCursor", stereoCursor);
@@ -221,6 +222,41 @@ public class Settings
 		preferences.putDouble("VerticalExaggeration", verticalExaggeration);
 		Configuration.setValue(AVKey.VERTICAL_EXAGGERATION,
 				verticalExaggeration);
+	}
+
+	public Rectangle getWindowBounds()
+	{
+		String[] split = preferences.get("WindowBounds", "").split(",");
+		try
+		{
+			int[] bounds = new int[4];
+			for (int i = 0; i < bounds.length; i++)
+			{
+				bounds[i] = Integer.parseInt(split[i]);
+			}
+			return new Rectangle(bounds[0], bounds[1], bounds[2], bounds[3]);
+		}
+		catch (Exception e)
+		{
+			return new Rectangle(0, 0, 800, 600);
+		}
+	}
+
+	public void setWindowBounds(Rectangle rectangle)
+	{
+		String bounds = rectangle.x + "," + rectangle.y + "," + rectangle.width
+				+ "," + rectangle.height;
+		preferences.put("WindowBounds", bounds);
+	}
+	
+	public boolean isWindowMaximized()
+	{
+		return preferences.getBoolean("WindowMaximized", false);
+	}
+	
+	public void setWindowMaximized(boolean windowMaximized)
+	{
+		preferences.putBoolean("WindowMaximized", windowMaximized);
 	}
 
 	/*public boolean isUseTerrain()

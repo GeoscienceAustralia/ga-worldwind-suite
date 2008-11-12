@@ -16,6 +16,7 @@ import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.util.StatusBar;
 
 import java.awt.BorderLayout;
+import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Menu;
@@ -24,8 +25,13 @@ import java.awt.MenuItem;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -44,6 +50,8 @@ import org.flexdock.docking.DockingManager;
 import org.flexdock.docking.DockingPort;
 import org.flexdock.docking.defaults.DefaultDockingPort;
 import org.flexdock.docking.drag.preview.AlphaPreview;
+import org.flexdock.docking.event.DockingEvent;
+import org.flexdock.docking.event.DockingListener;
 import org.flexdock.perspective.PerspectiveManager;
 
 import panels.layers.LayersPanel;
@@ -54,6 +62,7 @@ import settings.SettingsDialog;
 import settings.Settings.ProjectionMode;
 import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
+import util.DockingAdapter;
 
 public class Application
 {
@@ -123,7 +132,8 @@ public class Application
 		//create worldwind stuff
 
 		wwd = new WorldWindowStereoGLCanvas();
-		wwd.setPreferredSize(new Dimension(800, 600));
+		//wwd.setPreferredSize(new Dimension(800, 600));
+		wwd.setMinimumSize(new Dimension(0, 0));
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		wwd.addPropertyChangeListener(propertyChangeListener);
@@ -140,7 +150,11 @@ public class Application
 
 		frame = new JFrame("Radiometrics");
 		frame.setLayout(new BorderLayout());
-		frame.setSize(800, 600);
+		frame.setBounds(Settings.get().getWindowBounds());
+		if (Settings.get().isWindowMaximized())
+		{
+			frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		}
 
 		JPanel panel = new JPanel(new BorderLayout());
 		frame.setContentPane(panel);
@@ -161,17 +175,21 @@ public class Application
 		layersDockable = new DockablePanel("layers", "Layers", null,
 				layersPanel, true, true);
 
+		panel = new JPanel(new BorderLayout());
 		ExaggerationPanel exaggerationPanel = new ExaggerationPanel(wwd);
+		panel.add(exaggerationPanel, BorderLayout.NORTH);
 		exaggerationDockable = new DockablePanel("exaggeration",
-				"Exaggeration", null, exaggerationPanel, true, true);
+				"Exaggeration", null, panel, true, true);
 
 		PlaceSearchPanel placeSearchPanel = new PlaceSearchPanel(wwd);
 		placeSearchDockable = new DockablePanel("placesearch", "Place search",
 				null, placeSearchPanel, true, true);
 
+		panel = new JPanel(new BorderLayout());
 		GoToCoordinatePanel gotoPanel = new GoToCoordinatePanel(wwd);
+		panel.add(gotoPanel, BorderLayout.NORTH);
 		gotoDockable = new DockablePanel("gotocoordinate", "Go to coordinates",
-				null, gotoPanel, true, true);
+				null, panel, true, true);
 
 		PerspectiveManager perspectiveManager = PerspectiveManager
 				.getInstance();
@@ -214,6 +232,35 @@ public class Application
 			}
 		});
 
+		frame.addWindowStateListener(new WindowStateListener()
+		{
+			public void windowStateChanged(WindowEvent e)
+			{
+				Settings.get().setWindowMaximized(isMaximized());
+			}
+		});
+
+		frame.addComponentListener(new ComponentAdapter()
+		{
+			@Override
+			public void componentResized(ComponentEvent e)
+			{
+				if (!isMaximized() && !isFullscreen())
+				{
+					Settings.get().setWindowBounds(frame.getBounds());
+				}
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e)
+			{
+				if (!isMaximized() && !isFullscreen())
+				{
+					Settings.get().setWindowBounds(frame.getBounds());
+				}
+			}
+		});
+
 		java.awt.EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -242,6 +289,16 @@ public class Application
 	{
 		mouseLayer.setEnabled(Settings.get().isStereoEnabled()
 				&& Settings.get().isStereoCursor());
+	}
+
+	public boolean isMaximized()
+	{
+		return (frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH;
+	}
+
+	public boolean isFullscreen()
+	{
+		return false;
 	}
 
 	private MenuBar createMenuBar()
@@ -275,7 +332,7 @@ public class Application
 
 		menuItem = createDockableMenuItem(placeSearchDockable);
 		menu.add(menuItem);
-		
+
 		menuItem = createDockableMenuItem(gotoDockable);
 		menu.add(menuItem);
 
@@ -316,12 +373,32 @@ public class Application
 
 	private MenuItem createDockableMenuItem(final DockablePanel dockablePanel)
 	{
-		MenuItem menuItem = new MenuItem(dockablePanel.getTitle());
-		menuItem.addActionListener(new ActionListener()
+		final CheckboxMenuItem menuItem = new CheckboxMenuItem(dockablePanel
+				.getTitle(), DockingManager.isDocked(dockablePanel));
+		dockablePanel.addDockingListener(new DockingAdapter()
 		{
-			public void actionPerformed(ActionEvent e)
+			public void dockingComplete(DockingEvent evt)
 			{
-				DockingManager.display(dockablePanel);
+				menuItem.setState(DockingManager.isDocked(dockablePanel));
+			}
+
+			public void undockingComplete(DockingEvent evt)
+			{
+				menuItem.setState(DockingManager.isDocked(dockablePanel));
+			}
+		});
+		menuItem.addItemListener(new ItemListener()
+		{
+			public void itemStateChanged(ItemEvent e)
+			{
+				if (DockingManager.isDocked(dockablePanel))
+				{
+					DockingManager.close(dockablePanel);
+				}
+				else
+				{
+					DockingManager.display(dockablePanel);
+				}
 			}
 		});
 		return menuItem;
