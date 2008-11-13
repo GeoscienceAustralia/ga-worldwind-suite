@@ -88,7 +88,7 @@ public class DockablePanel extends AbstractDockable
 		toolbar = new JToolBar(JToolBar.HORIZONTAL);
 		toolbar.setFloatable(false);
 		toolbar.setBorderPainted(false);
-		toolbar.putClientProperty("JToolBar.isRollover", Boolean.TRUE);
+		toolbar.setRollover(true);
 
 		if (maximizable)
 		{

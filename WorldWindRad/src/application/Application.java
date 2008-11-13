@@ -3,14 +3,11 @@ package application;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
-import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.event.InputHandler;
-import gov.nasa.worldwind.event.SelectEvent;
-import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
@@ -20,7 +17,6 @@ import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.pick.PickedObjectList;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.util.StatusBar;
-import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
@@ -84,6 +80,7 @@ import settings.Settings.ProjectionMode;
 import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
 import util.DockingAdapter;
+import util.EyePositionViewStateIterator;
 import util.Icons;
 
 public class Application
@@ -328,94 +325,46 @@ public class Application
 
 	private void createDoubleClickListener()
 	{
-		InputHandler inputHandler = wwd.getInputHandler();
-		inputHandler.addSelectListener(new SelectListener()
-		{
-			public void selected(SelectEvent event)
-			{
-				System.out.println(event.getEventAction());
-				if (event.getEventAction() == SelectEvent.LEFT_DOUBLE_CLICK)
-				{
-					View view = wwd.getView();
-					if (view instanceof OrbitView)
-					{
-						OrbitView orbitView = (OrbitView) view;
-
-						ViewStateIterator vsi = FlyToOrbitViewStateIterator
-								.createZoomToIterator(orbitView.getHeading(),
-										orbitView.getHeading(), orbitView
-												.getPitch(), orbitView
-												.getPitch(), orbitView
-												.getZoom(),
-										orbitView.getZoom() / 2, 1000);
-						view.applyStateIterator(vsi);
-					}
-				}
-			}
-		});
-
 		wwd.addMouseListener(new MouseAdapter()
 		{
+			private LatLon latlon;
+
 			@Override
 			public void mouseClicked(MouseEvent e)
 			{
-				if (true)
+				if (!(wwd.getView() instanceof OrbitView))
 					return;
+				OrbitView view = (OrbitView) wwd.getView();
 
-				if (e.getClickCount() == 2)
+				if (e.getClickCount() % 2 == 1)
 				{
+					//single click
+					latlon = null;
+
 					PickedObjectList pickedObjects = wwd
 							.getObjectsAtCurrentPosition();
-					if (pickedObjects == null
-							|| pickedObjects.getTopPickedObject() == null
-							|| !pickedObjects.getTopPickedObject().isTerrain())
+					if (pickedObjects == null)
 						return;
 
-					View view = wwd.getView();
-					if (view instanceof OrbitView)
+					PickedObject top = pickedObjects.getTopPickedObject();
+					if (top == null || !top.isTerrain())
+						return;
+
+					latlon = top.getPosition().getLatLon();
+				}
+				else
+				{
+					//double click
+					Position eyePosition = view.getEyePosition();
+					if (eyePosition.getElevation() > 5000 && latlon != null)
 					{
-						OrbitView orbitView = (OrbitView) view;
-						double elevation = orbitView.getCenterPosition()
-								.getElevation();
-						//System.out.println(elevation);
-						//elevation /= 2;
-						//System.out.println(elevation);
-
-
-						PickedObject top = pickedObjects.getTopPickedObject();
-						Position topPosition = top.getPosition();
-						Position pos = new Position(topPosition.getLatLon(),
-								elevation);
-
-						/*ViewStateIterator vsi = FlyToOrbitViewStateIterator
-								.createZoomToIterator(orbitView, orbitView
-										.getHeading(), orbitView.getPitch(),
-										zoom);*/
-						/*ViewStateIterator vsi = FlyToOrbitViewStateIterator
-								.createPanToIterator(orbitView, wwd.getModel()
-										.getGlobe(), pos, orbitView
-										.getHeading(), orbitView.getPitch(),
-										orbitView.getZoom());*/
-
-
-						System.out.println(orbitView.getZoom());
-
-						/*ViewStateIterator vsi = FlyToOrbitViewStateIterator.createPanToIterator(wwd
-								.getModel().getGlobe(), orbitView
-								.getCenterPosition(), pos, orbitView
-								.getHeading(), orbitView.getHeading(),
-								orbitView.getPitch(), orbitView.getPitch(),
-								orbitView.getZoom(), orbitView.getZoom(), 500);*/
-						ViewStateIterator vsi = FlyToOrbitViewStateIterator
-								.createZoomToIterator(orbitView.getHeading(),
-										orbitView.getHeading(), orbitView
-												.getPitch(), orbitView
-												.getPitch(), orbitView
-												.getZoom(),
-										orbitView.getZoom() / 2, 1000);
+						ViewStateIterator vsi = EyePositionViewStateIterator
+								.createIterator(eyePosition,
+										new Position(latlon, eyePosition
+												.getElevation() / 2), 1000,
+										true);
 						view.applyStateIterator(vsi);
-
-						//view.setEyePosition(pos);
+						latlon = null;
 					}
 				}
 			}
