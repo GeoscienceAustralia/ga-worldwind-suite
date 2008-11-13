@@ -41,7 +41,7 @@ public class GeoNamesLayer extends AbstractLayer
 	private VisibilityCalculatorImpl visibilityCalculator = new VisibilityCalculatorImpl();
 	private Queue<GeoName> requestQ;
 
-	private GeographicTextRenderer nameRenderer = new GeographicTextRenderer();
+	private final GeographicTextRenderer nameRenderer = new GeographicTextRenderer();
 
 	//TODO different attributes for different feature codes (fcode)
 
@@ -336,5 +336,12 @@ public class GeoNamesLayer extends AbstractLayer
 
 			return null;
 		}
+	}
+	
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		nameRenderer.dispose();
 	}
 }

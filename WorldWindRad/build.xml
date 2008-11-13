@@ -9,6 +9,7 @@
 	<property name="target.jar" value="application.jar" />
 	<property name="keystore" value="${basedir}/keystore" />
 	<property name="javac.debug" value="false" />
+	<property name="jnlp.file" value="${basedir}/webstart.jnlp" />
 
 	<path id="classpath">
 		<fileset dir="${lib.dir}">
@@ -34,10 +35,15 @@
 	<target name="package" depends="compile">
 		<mkdir dir="${target.dir}" />
 		<jar destfile="${target.dir}/${target.jar}" basedir="${build.dir}" />
+		<copy file="${lib.dir}/commons-logging-1.1.jar" todir="${target.dir}" />
+		<copy file="${lib.dir}/flexdock-0.5.1.jar" todir="${target.dir}" />
+		<copy file="${jnlp.file}" todir="${target.dir}" />
 	</target>
 
 	<target name="sign" depends="package">
 		<signjar jar="${target.dir}/${target.jar}" keystore="${keystore}" alias="myself" storepass="password" />
+		<signjar jar="${target.dir}/commons-logging-1.1.jar" keystore="${keystore}" alias="myself" storepass="password" />
+		<signjar jar="${target.dir}/flexdock-0.5.1.jar" keystore="${keystore}" alias="myself" storepass="password" />
 	</target>
 
 	<target name="run" depends="sign" />

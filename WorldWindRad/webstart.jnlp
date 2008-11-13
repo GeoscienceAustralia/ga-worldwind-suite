@@ -20,6 +20,8 @@
         <j2se href="http://java.sun.com/products/autodl/j2se" version="1.5+" initial-heap-size="512m" max-heap-size="512m"/>
         <property name="sun.java2d.noddraw" value="true"/>
         <jar href="application.jar" main="true"/>
+        <jar href="flexdock-0.5.1.jar"/>
+        <jar href="commons-logging-1.1.jar"/>
         <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp"/>
         <extension name="worldwind" href="http://worldwind.arc.nasa.gov/java/0.5.0/webstart/worldwind.jnlp"/>
     </resources>

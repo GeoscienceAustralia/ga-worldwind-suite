@@ -3,24 +3,37 @@ package application;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.event.InputHandler;
+import gov.nasa.worldwind.event.SelectEvent;
+import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ScalebarLayer;
 import gov.nasa.worldwind.layers.TerrainProfileLayer;
+import gov.nasa.worldwind.pick.PickedObject;
+import gov.nasa.worldwind.pick.PickedObjectList;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.util.StatusBar;
+import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
+import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.awt.Rectangle;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,16 +41,25 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
@@ -62,6 +84,7 @@ import settings.Settings.ProjectionMode;
 import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
 import util.DockingAdapter;
+import util.Icons;
 
 public class Application
 {
@@ -114,6 +137,8 @@ public class Application
 	}
 
 	private JFrame frame;
+	private JFrame fullscreenFrame;
+	private GraphicsDevice fullscreenDevice;
 	private WorldWindowStereoGLCanvas wwd;
 	private StatusBar statusBar;
 	private LayersPanel layersPanel;
@@ -136,6 +161,7 @@ public class Application
 		wwd.setModel(model);
 		wwd.addPropertyChangeListener(propertyChangeListener);
 		create3DMouse();
+		createDoubleClickListener();
 
 		//create gui stuff
 
@@ -167,7 +193,18 @@ public class Application
 		panel.add(dockingPort, BorderLayout.CENTER);
 
 		globeDockable = new DockablePanel("globe", "Globe", null, wwd, false,
-				true);
+				false);
+		globeDockable.addMaximiseButton();
+		JButton fullscreen = new JButton(Icons.monitor);
+		fullscreen.setToolTipText("Fullscreen");
+		fullscreen.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				setFullscreen(!isFullscreen());
+			}
+		});
+		globeDockable.addButton(fullscreen);
 
 		layersPanel = new LayersPanel(wwd);
 		layersDockable = new DockablePanel("layers", "Layers", null,
@@ -230,11 +267,11 @@ public class Application
 			}
 		});
 	}
-	
+
 	private void addWindowListeners()
 	{
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		
+
 		frame.addWindowListener(new WindowAdapter()
 		{
 			@Override
@@ -289,6 +326,102 @@ public class Application
 		enableMouseLayer();
 	}
 
+	private void createDoubleClickListener()
+	{
+		InputHandler inputHandler = wwd.getInputHandler();
+		inputHandler.addSelectListener(new SelectListener()
+		{
+			public void selected(SelectEvent event)
+			{
+				System.out.println(event.getEventAction());
+				if (event.getEventAction() == SelectEvent.LEFT_DOUBLE_CLICK)
+				{
+					View view = wwd.getView();
+					if (view instanceof OrbitView)
+					{
+						OrbitView orbitView = (OrbitView) view;
+
+						ViewStateIterator vsi = FlyToOrbitViewStateIterator
+								.createZoomToIterator(orbitView.getHeading(),
+										orbitView.getHeading(), orbitView
+												.getPitch(), orbitView
+												.getPitch(), orbitView
+												.getZoom(),
+										orbitView.getZoom() / 2, 1000);
+						view.applyStateIterator(vsi);
+					}
+				}
+			}
+		});
+
+		wwd.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				if (true)
+					return;
+
+				if (e.getClickCount() == 2)
+				{
+					PickedObjectList pickedObjects = wwd
+							.getObjectsAtCurrentPosition();
+					if (pickedObjects == null
+							|| pickedObjects.getTopPickedObject() == null
+							|| !pickedObjects.getTopPickedObject().isTerrain())
+						return;
+
+					View view = wwd.getView();
+					if (view instanceof OrbitView)
+					{
+						OrbitView orbitView = (OrbitView) view;
+						double elevation = orbitView.getCenterPosition()
+								.getElevation();
+						//System.out.println(elevation);
+						//elevation /= 2;
+						//System.out.println(elevation);
+
+
+						PickedObject top = pickedObjects.getTopPickedObject();
+						Position topPosition = top.getPosition();
+						Position pos = new Position(topPosition.getLatLon(),
+								elevation);
+
+						/*ViewStateIterator vsi = FlyToOrbitViewStateIterator
+								.createZoomToIterator(orbitView, orbitView
+										.getHeading(), orbitView.getPitch(),
+										zoom);*/
+						/*ViewStateIterator vsi = FlyToOrbitViewStateIterator
+								.createPanToIterator(orbitView, wwd.getModel()
+										.getGlobe(), pos, orbitView
+										.getHeading(), orbitView.getPitch(),
+										orbitView.getZoom());*/
+
+
+						System.out.println(orbitView.getZoom());
+
+						/*ViewStateIterator vsi = FlyToOrbitViewStateIterator.createPanToIterator(wwd
+								.getModel().getGlobe(), orbitView
+								.getCenterPosition(), pos, orbitView
+								.getHeading(), orbitView.getHeading(),
+								orbitView.getPitch(), orbitView.getPitch(),
+								orbitView.getZoom(), orbitView.getZoom(), 500);*/
+						ViewStateIterator vsi = FlyToOrbitViewStateIterator
+								.createZoomToIterator(orbitView.getHeading(),
+										orbitView.getHeading(), orbitView
+												.getPitch(), orbitView
+												.getPitch(), orbitView
+												.getZoom(),
+										orbitView.getZoom() / 2, 1000);
+						view.applyStateIterator(vsi);
+
+						//view.setEyePosition(pos);
+					}
+				}
+			}
+		});
+	}
+
 	private void enableMouseLayer()
 	{
 		mouseLayer.setEnabled(Settings.get().isStereoEnabled()
@@ -302,7 +435,103 @@ public class Application
 
 	public boolean isFullscreen()
 	{
-		return false;
+		return fullscreenFrame != null;
+	}
+
+	public void setFullscreen(boolean fullscreen)
+	{
+		if (fullscreen != isFullscreen())
+		{
+			if (fullscreen)
+			{
+				boolean span = Settings.get().isSpanDisplays();
+				String id = Settings.get().getDisplayId();
+
+				GraphicsEnvironment ge = GraphicsEnvironment
+						.getLocalGraphicsEnvironment();
+				GraphicsDevice[] gds = ge.getScreenDevices();
+				fullscreenDevice = ge.getDefaultScreenDevice();
+
+				if (!fullscreenDevice.isFullScreenSupported())
+				{
+					JOptionPane
+							.showMessageDialog(
+									frame,
+									"Graphics device does not support fullscreen mode.",
+									"Not supported", JOptionPane.ERROR_MESSAGE);
+				}
+				else
+				{
+					fullscreenFrame = new JFrame(frame.getTitle());
+					JPanel panel = new JPanel(new BorderLayout());
+					fullscreenFrame.setContentPane(panel);
+					fullscreenFrame.setUndecorated(true);
+					fullscreenFrame.add(wwd);
+					fullscreenDevice.setFullScreenWindow(fullscreenFrame);
+
+					fullscreenFrame
+							.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+					fullscreenFrame.addWindowListener(new WindowAdapter()
+					{
+						@Override
+						public void windowClosing(WindowEvent e)
+						{
+							setFullscreen(false);
+						}
+					});
+
+					Action action = new AbstractAction()
+					{
+						public void actionPerformed(ActionEvent e)
+						{
+							setFullscreen(false);
+						}
+					};
+					panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+							KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+							action);
+					panel.getActionMap().put(action, action);
+
+					if (span)
+					{
+						Rectangle fullBounds = new Rectangle();
+						for (GraphicsDevice g : gds)
+						{
+							GraphicsConfiguration gc = g
+									.getDefaultConfiguration();
+							fullBounds = fullBounds.union(gc.getBounds());
+						}
+						frame.setBounds(fullBounds);
+					}
+					else if (id != null)
+					{
+						for (GraphicsDevice g : gds)
+						{
+							if (id.equals(g.getIDstring()))
+							{
+								GraphicsConfiguration gc = g
+										.getDefaultConfiguration();
+								frame.setBounds(gc.getBounds());
+								break;
+							}
+						}
+					}
+					fullscreenFrame.setVisible(true);
+					frame.setVisible(false);
+				}
+			}
+			else
+			{
+				if (fullscreenFrame != null)
+				{
+					globeDockable.setComponent(wwd);
+					fullscreenDevice.setFullScreenWindow(null);
+					fullscreenFrame.dispose();
+					fullscreenFrame = null;
+					frame.setVisible(true);
+				}
+			}
+		}
 	}
 
 	private MenuBar createMenuBar()
@@ -340,7 +569,9 @@ public class Application
 		menuItem = createDockableMenuItem(gotoDockable);
 		menu.add(menuItem);
 
-		/*menuItem = new MenuItem("Fullscreen");
+		menu.addSeparator();
+
+		menuItem = new MenuItem("Fullscreen");
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -348,7 +579,7 @@ public class Application
 			{
 				setFullscreen(!isFullscreen());
 			}
-		});*/
+		});
 
 		menu = new Menu("Options");
 		menuBar.add(menu);

@@ -92,47 +92,11 @@ public class DockablePanel extends AbstractDockable
 
 		if (maximizable)
 		{
-			final JButton button = new JButton(Icons.maximize);
-			button.setFocusable(false);
-			button.setBackground(toolbar.getBackground());
-			toolbar.add(button);
-			button.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e)
-				{
-					DockingPort dockingPort = DockingManager
-							.getRootDockingPort(getComponent());
-					if (DockingManager.isMaximized(DockablePanel.this)
-							|| (dockingPort != null && dockingPort
-									.getDockables().size() > 1))
-					{
-						DockingManager.toggleMaximized(DockablePanel.this);
-					}
-
-					if (DockingManager.isMaximized(DockablePanel.this))
-					{
-						button.setIcon(Icons.restore);
-					}
-					else
-					{
-						button.setIcon(Icons.maximize);
-					}
-				}
-			});
+			addMaximiseButton();
 		}
 		if (closeable)
 		{
-			JButton button = new JButton(Icons.close);
-			button.setFocusable(false);
-			button.setBackground(toolbar.getBackground());
-			toolbar.add(button);
-			button.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e)
-				{
-					DockingManager.close(DockablePanel.this);
-				}
-			});
+			addCloseButton();
 		}
 
 		draggablePanel = new GradientPanel(new BorderLayout(),
@@ -168,6 +132,68 @@ public class DockablePanel extends AbstractDockable
 
 		focusLost();
 	}
+	
+	public void addButton(JButton button)
+	{
+		button.setFocusable(false);
+		button.setBackground(toolbar.getBackground());
+		toolbar.add(button);
+	}
+	
+	public void addCloseButton()
+	{
+		JButton button = new JButton(Icons.close);
+		button.setFocusable(false);
+		button.setToolTipText("Close");
+		button.setBackground(toolbar.getBackground());
+		toolbar.add(button);
+		button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				DockingManager.close(DockablePanel.this);
+			}
+		});
+	}
+	
+	public void addMaximiseButton()
+	{
+		final JButton button = new JButton(Icons.maximize);
+		button.setFocusable(false);
+		button.setToolTipText("Maximize");
+		button.setBackground(toolbar.getBackground());
+		toolbar.add(button);
+		button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				DockingPort dockingPort = DockingManager
+						.getRootDockingPort(getComponent());
+				if (DockingManager.isMaximized(DockablePanel.this)
+						|| (dockingPort != null && dockingPort
+								.getDockables().size() > 1))
+				{
+					DockingManager.toggleMaximized(DockablePanel.this);
+				}
+
+				if (DockingManager.isMaximized(DockablePanel.this))
+				{
+					button.setIcon(Icons.restore);
+					button.setToolTipText("Restore");
+				}
+				else
+				{
+					button.setIcon(Icons.maximize);
+					button.setToolTipText("Maximize");
+				}
+			}
+		});
+	}
+	
+	public void addSeparator()
+	{
+		toolbar.addSeparator();
+	}
 
 	public String getTitle()
 	{
@@ -178,6 +204,11 @@ public class DockablePanel extends AbstractDockable
 	public Component getComponent()
 	{
 		return mainPanel;
+	}
+
+	public void setComponent(Component component)
+	{
+		mainPanel.add(component, BorderLayout.CENTER);
 	}
 
 	private void focusGained()

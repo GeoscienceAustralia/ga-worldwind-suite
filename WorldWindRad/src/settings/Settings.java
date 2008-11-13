@@ -248,15 +248,35 @@ public class Settings
 				+ "," + rectangle.height;
 		preferences.put("WindowBounds", bounds);
 	}
-	
+
 	public boolean isWindowMaximized()
 	{
 		return preferences.getBoolean("WindowMaximized", false);
 	}
-	
+
 	public void setWindowMaximized(boolean windowMaximized)
 	{
 		preferences.putBoolean("WindowMaximized", windowMaximized);
+	}
+
+	public boolean isSpanDisplays()
+	{
+		return preferences.getBoolean("SpanDisplays", false);
+	}
+
+	public void setSpanDisplays(boolean spanDisplays)
+	{
+		preferences.putBoolean("SpanDisplays", spanDisplays);
+	}
+
+	public String getDisplayId()
+	{
+		return preferences.get("DisplayId", null);
+	}
+
+	public void setDisplayId(String displayId)
+	{
+		preferences.put("DisplayId", displayId);
 	}
 
 	/*public boolean isUseTerrain()

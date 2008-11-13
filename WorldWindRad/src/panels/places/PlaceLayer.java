@@ -10,7 +10,7 @@ import java.util.List;
 
 public class PlaceLayer extends AbstractLayer
 {
-	private GeographicTextRenderer nameRenderer = new GeographicTextRenderer();
+	private final GeographicTextRenderer nameRenderer = new GeographicTextRenderer();
 	private List<GeographicText> text = new ArrayList<GeographicText>();
 
 	@Override
@@ -36,5 +36,12 @@ public class PlaceLayer extends AbstractLayer
 		{
 			this.text.clear();
 		}
+	}
+	
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		nameRenderer.dispose();
 	}
 }
