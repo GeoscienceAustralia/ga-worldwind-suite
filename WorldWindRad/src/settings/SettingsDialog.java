@@ -3,6 +3,8 @@ package settings;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -18,6 +20,7 @@ import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -27,6 +30,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -46,6 +50,11 @@ public class SettingsDialog extends JDialog
 	private static Rectangle oldBounds;
 
 	private Settings settings;
+
+	private JRadioButton spanDisplayRadio;
+	private JRadioButton singleDisplayRadio;
+	private JLabel displayLabel;
+	private JComboBox displayCombo;
 
 	private JCheckBox stereoEnabledCheck;
 	private JCheckBox stereoSwapCheck;
@@ -151,6 +160,10 @@ public class SettingsDialog extends JDialog
 	{
 		boolean proxyValid = true;
 
+		boolean spanDisplays = spanDisplayRadio.isSelected();
+		String displayId = ((DisplayObject) displayCombo.getSelectedItem()).device
+				.getIDstring();
+
 		boolean stereoEnabled = stereoEnabledCheck.isSelected();
 		boolean stereoSwap = stereoSwapCheck.isSelected();
 		StereoMode stereoMode = (StereoMode) stereoModeCombo.getSelectedItem();
@@ -194,6 +207,9 @@ public class SettingsDialog extends JDialog
 		{
 			try
 			{
+				settings.setSpanDisplays(spanDisplays);
+				settings.setDisplayId(displayId);
+
 				settings.setStereoEnabled(stereoEnabled);
 				settings.setStereoSwap(stereoSwap);
 				settings.setStereoMode(stereoMode);
@@ -246,11 +262,21 @@ public class SettingsDialog extends JDialog
 		panel.setBorder(BorderFactory.createEtchedBorder());
 		GridBagConstraints c;
 
+		JComponent fullscreen = createFullscreen();
+		fullscreen.setBorder(BorderFactory.createTitledBorder("Fullscreen"));
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
+		panel.add(fullscreen, c);
+
 		JComponent stereo = createStereo();
 		stereo.setBorder(BorderFactory.createTitledBorder("Stereo"));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 1;
@@ -280,6 +306,94 @@ public class SettingsDialog extends JDialog
 		c.weighty = 1;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
 		panel.add(proxy, c);
+
+		return panel;
+	}
+
+	private JComponent createFullscreen()
+	{
+		GridBagConstraints c;
+		JPanel panel = new JPanel(new GridBagLayout());
+
+		ActionListener al = new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				displayLabel.setEnabled(singleDisplayRadio.isSelected());
+				displayCombo.setEnabled(singleDisplayRadio.isSelected());
+			}
+		};
+
+		spanDisplayRadio = new JRadioButton("Span all displays", settings
+				.isSpanDisplays());
+		spanDisplayRadio.addActionListener(al);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 1;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
+		panel.add(spanDisplayRadio, c);
+
+		singleDisplayRadio = new JRadioButton("Use single display", !settings
+				.isSpanDisplays());
+		singleDisplayRadio.addActionListener(al);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
+		panel.add(singleDisplayRadio, c);
+
+		ButtonGroup buttonGroup = new ButtonGroup();
+		buttonGroup.add(spanDisplayRadio);
+		buttonGroup.add(singleDisplayRadio);
+
+		displayLabel = new JLabel("Display:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 2;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(SPACING, SPACING, 0, 0);
+		panel.add(displayLabel, c);
+
+		//build list of display devices
+		GraphicsEnvironment ge = GraphicsEnvironment
+				.getLocalGraphicsEnvironment();
+		GraphicsDevice[] screenDevices = ge.getScreenDevices();
+		GraphicsDevice defaultDevice = ge.getDefaultScreenDevice();
+		DisplayObject selectedDisplay = null;
+		DisplayObject defaultDisplay = null;
+		DisplayObject[] displays = new DisplayObject[screenDevices.length];
+		for (int i = 0; i < screenDevices.length; i++)
+		{
+			displays[i] = new DisplayObject(screenDevices[i]);
+			if (screenDevices[i].getIDstring().equals(settings.getDisplayId()))
+			{
+				selectedDisplay = displays[i];
+			}
+			if (screenDevices[i] == defaultDevice)
+			{
+				defaultDisplay = displays[i];
+			}
+		}
+		if (selectedDisplay == null)
+		{
+			selectedDisplay = defaultDisplay;
+		}
+
+		displayCombo = new JComboBox(displays);
+		displayCombo.setSelectedItem(selectedDisplay);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
+		panel.add(displayCombo, c);
+
+		al.actionPerformed(null);
 
 		return panel;
 	}
@@ -400,7 +514,7 @@ public class SettingsDialog extends JDialog
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(focalLengthSpinner, c);
-		
+
 		stereoCursorCheck = new JCheckBox("Stereo mouse cursor");
 		stereoCursorCheck.setSelected(settings.isStereoCursor());
 		c = new GridBagConstraints();
@@ -530,5 +644,21 @@ public class SettingsDialog extends JDialog
 				&& projectionModeCombo.getSelectedItem() == ProjectionMode.ASYMMETRIC_FRUSTUM;
 		focalLengthLabel.setEnabled(focalLengthEnabled);
 		focalLengthSpinner.setEnabled(focalLengthEnabled);
+	}
+
+	private class DisplayObject
+	{
+		public GraphicsDevice device;
+
+		public DisplayObject(GraphicsDevice device)
+		{
+			this.device = device;
+		}
+
+		@Override
+		public String toString()
+		{
+			return device.getIDstring();
+		}
 	}
 }

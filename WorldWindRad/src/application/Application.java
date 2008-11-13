@@ -328,6 +328,7 @@ public class Application
 		wwd.addMouseListener(new MouseAdapter()
 		{
 			private LatLon latlon;
+			private static final double minElevation = 5000d;
 
 			@Override
 			public void mouseClicked(MouseEvent e)
@@ -355,14 +356,18 @@ public class Application
 				else
 				{
 					//double click
-					Position eyePosition = view.getEyePosition();
-					if (eyePosition.getElevation() > 5000 && latlon != null)
+					if (latlon != null)
 					{
+						Position eyePosition = view.getEyePosition();
+						double newElevation = eyePosition.getElevation();
+						if (newElevation > minElevation)
+						{
+							newElevation = Math.max(minElevation,
+									newElevation / 2);
+						}
 						ViewStateIterator vsi = EyePositionViewStateIterator
-								.createIterator(eyePosition,
-										new Position(latlon, eyePosition
-												.getElevation() / 2), 1000,
-										true);
+								.createIterator(eyePosition, new Position(
+										latlon, newElevation), 1000, true);
 						view.applyStateIterator(vsi);
 						latlon = null;
 					}
@@ -450,7 +455,7 @@ public class Application
 									.getDefaultConfiguration();
 							fullBounds = fullBounds.union(gc.getBounds());
 						}
-						frame.setBounds(fullBounds);
+						fullscreenFrame.setBounds(fullBounds);
 					}
 					else if (id != null)
 					{
@@ -460,7 +465,7 @@ public class Application
 							{
 								GraphicsConfiguration gc = g
 										.getDefaultConfiguration();
-								frame.setBounds(gc.getBounds());
+								fullscreenFrame.setBounds(gc.getBounds());
 								break;
 							}
 						}
