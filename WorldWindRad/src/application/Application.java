@@ -3,21 +3,16 @@ package application;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
-import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ScalebarLayer;
 import gov.nasa.worldwind.layers.TerrainProfileLayer;
-import gov.nasa.worldwind.pick.PickedObject;
-import gov.nasa.worldwind.pick.PickedObjectList;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.util.StatusBar;
-import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.CheckboxMenuItem;
@@ -38,8 +33,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
@@ -80,7 +73,7 @@ import settings.Settings.ProjectionMode;
 import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
 import util.DockingAdapter;
-import util.EyePositionViewStateIterator;
+import util.DoubleClickZoomListener;
 import util.Icons;
 
 public class Application
@@ -325,55 +318,7 @@ public class Application
 
 	private void createDoubleClickListener()
 	{
-		wwd.addMouseListener(new MouseAdapter()
-		{
-			private LatLon latlon;
-			private static final double minElevation = 5000d;
-
-			@Override
-			public void mouseClicked(MouseEvent e)
-			{
-				if (!(wwd.getView() instanceof OrbitView))
-					return;
-				OrbitView view = (OrbitView) wwd.getView();
-
-				if (e.getClickCount() % 2 == 1)
-				{
-					//single click
-					latlon = null;
-
-					PickedObjectList pickedObjects = wwd
-							.getObjectsAtCurrentPosition();
-					if (pickedObjects == null)
-						return;
-
-					PickedObject top = pickedObjects.getTopPickedObject();
-					if (top == null || !top.isTerrain())
-						return;
-
-					latlon = top.getPosition().getLatLon();
-				}
-				else
-				{
-					//double click
-					if (latlon != null)
-					{
-						Position eyePosition = view.getEyePosition();
-						double newElevation = eyePosition.getElevation();
-						if (newElevation > minElevation)
-						{
-							newElevation = Math.max(minElevation,
-									newElevation / 2);
-						}
-						ViewStateIterator vsi = EyePositionViewStateIterator
-								.createIterator(eyePosition, new Position(
-										latlon, newElevation), 1000, true);
-						view.applyStateIterator(vsi);
-						latlon = null;
-					}
-				}
-			}
-		});
+		wwd.addMouseListener(new DoubleClickZoomListener(wwd, 5000d));
 	}
 
 	private void enableMouseLayer()
