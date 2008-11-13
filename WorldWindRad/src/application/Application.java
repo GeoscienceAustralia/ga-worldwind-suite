@@ -3,16 +3,20 @@ package application;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.globes.Earth;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ScalebarLayer;
 import gov.nasa.worldwind.layers.TerrainProfileLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.util.StatusBar;
+import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
+import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.CheckboxMenuItem;
@@ -182,9 +186,6 @@ public class Application
 		dockingPort = new DefaultDockingPort();
 		panel.add(dockingPort, BorderLayout.CENTER);
 
-		globeDockable = new DockablePanel("globe", "Globe", null, wwd, false,
-				false);
-		globeDockable.addMaximiseButton();
 		JButton fullscreen = new JButton(Icons.monitor);
 		fullscreen.setToolTipText("Fullscreen");
 		fullscreen.addActionListener(new ActionListener()
@@ -194,6 +195,57 @@ public class Application
 				setFullscreen(!isFullscreen());
 			}
 		});
+		JButton home = new JButton(Icons.home);
+		home.setToolTipText("Reset view");
+		home.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (!(wwd.getView() instanceof OrbitView))
+					return;
+
+				OrbitView view = (OrbitView) wwd.getView();
+				Position beginCenter = view.getCenterPosition();
+
+				Double initLat = Configuration
+						.getDoubleValue(AVKey.INITIAL_LATITUDE);
+				Double initLon = Configuration
+						.getDoubleValue(AVKey.INITIAL_LONGITUDE);
+				Double initAltitude = Configuration
+						.getDoubleValue(AVKey.INITIAL_ALTITUDE);
+				Double initHeading = Configuration
+						.getDoubleValue(AVKey.INITIAL_HEADING);
+				Double initPitch = Configuration
+						.getDoubleValue(AVKey.INITIAL_PITCH);
+
+				if (initLat == null)
+					initLat = 0d;
+				if (initLon == null)
+					initLon = 0d;
+				if (initAltitude == null)
+					initAltitude = 3d * Earth.WGS84_EQUATORIAL_RADIUS;
+				if (initHeading == null)
+					initHeading = 0d;
+				if (initPitch == null)
+					initPitch = 0d;
+
+				Position endCenter = Position.fromDegrees(initLat, initLon,
+						beginCenter.getElevation());
+
+				ViewStateIterator vsi = FlyToOrbitViewStateIterator
+						.createPanToIterator(wwd.getModel().getGlobe(),
+								beginCenter, endCenter, view.getHeading(),
+								Angle.fromDegrees(initHeading),
+								view.getPitch(), Angle.fromDegrees(initPitch),
+								view.getZoom(), initAltitude, 5000);
+				wwd.getView().applyStateIterator(vsi);
+			}
+		});
+
+		globeDockable = new DockablePanel("globe", "Globe", null, wwd, false,
+				false);
+		globeDockable.addButton(home);
+		globeDockable.addMaximiseButton();
 		globeDockable.addButton(fullscreen);
 
 		layersPanel = new LayersPanel(wwd);

@@ -6,6 +6,7 @@ import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.pick.PickedObjectList;
+import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.event.MouseAdapter;
@@ -16,7 +17,7 @@ public class DoubleClickZoomListener extends MouseAdapter
 	private WorldWindow wwd;
 	private LatLon latlon;
 	private double minElevation;
-	
+
 	public DoubleClickZoomListener(WorldWindow wwd, double minElevation)
 	{
 		this.wwd = wwd;
@@ -35,8 +36,7 @@ public class DoubleClickZoomListener extends MouseAdapter
 			//single click
 			latlon = null;
 
-			PickedObjectList pickedObjects = wwd
-					.getObjectsAtCurrentPosition();
+			PickedObjectList pickedObjects = wwd.getObjectsAtCurrentPosition();
 			if (pickedObjects == null)
 				return;
 
@@ -51,16 +51,19 @@ public class DoubleClickZoomListener extends MouseAdapter
 			//double click
 			if (latlon != null)
 			{
-				Position eyePosition = view.getEyePosition();
-				double newElevation = eyePosition.getElevation();
-				if (newElevation > minElevation)
+				double zoom = view.getZoom();
+				if (zoom > minElevation)
 				{
-					newElevation = Math.max(minElevation,
-							newElevation / 2);
+					zoom = Math.max(minElevation, zoom / 2);
 				}
-				ViewStateIterator vsi = EyePositionViewStateIterator
-						.createIterator(eyePosition, new Position(
-								latlon, newElevation), 1000, true);
+				Position beginCenter = view.getCenterPosition();
+				Position endCenter = new Position(latlon, beginCenter
+						.getElevation());
+				ViewStateIterator vsi = FlyToOrbitViewStateIterator
+						.createPanToIterator(wwd.getModel().getGlobe(),
+								beginCenter, endCenter, view.getHeading(), view
+										.getHeading(), view.getPitch(), view
+										.getPitch(), view.getZoom(), zoom, 1000);
 				view.applyStateIterator(vsi);
 				latlon = null;
 			}
