@@ -54,7 +54,7 @@ public class DoubleClickZoomListener extends MouseAdapter
 				double zoom = view.getZoom();
 				if (zoom > minElevation)
 				{
-					zoom = Math.max(minElevation, zoom / 2);
+					zoom = Math.max(minElevation, zoom / 3);
 				}
 				Position beginCenter = view.getCenterPosition();
 				Position endCenter = new Position(latlon, beginCenter

@@ -30,7 +30,7 @@ public class HelpControlsPanel extends JPanel
 		}
 		else
 		{
-			editorPane.setText("Could not find HTML page");
+			editorPane.setText("Could not find page");
 		}
 
 		JScrollPane scrollPane = new JScrollPane(editorPane);

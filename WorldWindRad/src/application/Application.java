@@ -19,7 +19,6 @@ import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
-import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
@@ -28,9 +27,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Menu;
-import java.awt.MenuBar;
-import java.awt.MenuItem;
 import java.awt.Rectangle;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
@@ -50,9 +46,13 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -308,7 +308,7 @@ public class Application
 
 		afterSettingsChange();
 
-		frame.setMenuBar(createMenuBar());
+		frame.setJMenuBar(createMenuBar());
 		addWindowListeners();
 
 		java.awt.EventQueue.invokeLater(new Runnable()
@@ -495,17 +495,17 @@ public class Application
 		}
 	}
 
-	private MenuBar createMenuBar()
+	private JMenuBar createMenuBar()
 	{
-		MenuBar menuBar = new MenuBar();
+		JMenuBar menuBar = new JMenuBar();
 
-		Menu menu;
-		MenuItem menuItem;
+		JMenu menu;
+		JMenuItem menuItem;
 
-		menu = new Menu("File");
+		menu = new JMenu("File");
 		menuBar.add(menu);
 
-		menuItem = new MenuItem("Exit");
+		menuItem = new JMenuItem("Exit");
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -515,7 +515,7 @@ public class Application
 			}
 		});
 
-		menu = new Menu("View");
+		menu = new JMenu("View");
 		menuBar.add(menu);
 
 		menuItem = createDockableMenuItem(layersDockable);
@@ -532,7 +532,7 @@ public class Application
 
 		menu.addSeparator();
 
-		menuItem = new MenuItem("Fullscreen");
+		menuItem = new JMenuItem("Fullscreen");
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -542,10 +542,10 @@ public class Application
 			}
 		});
 
-		menu = new Menu("Options");
+		menu = new JMenu("Options");
 		menuBar.add(menu);
 
-		menuItem = new MenuItem("Preferences...");
+		menuItem = new JMenuItem("Preferences...");
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -564,10 +564,10 @@ public class Application
 			}
 		});
 
-		menu = new Menu("Help");
+		menu = new JMenu("Help");
 		menuBar.add(menu);
 
-		menuItem = new MenuItem("Controls...");
+		menuItem = new JMenuItem("Controls...");
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -594,7 +594,7 @@ public class Application
 				c.weighty = 1;
 				c.fill = GridBagConstraints.BOTH;
 				dialog.add(new HelpControlsPanel(), c);
-				
+
 				JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
 				c = new GridBagConstraints();
 				c.gridx = 0;
@@ -628,25 +628,25 @@ public class Application
 		return menuBar;
 	}
 
-	private MenuItem createDockableMenuItem(final DockablePanel dockablePanel)
+	private JMenuItem createDockableMenuItem(final DockablePanel dockablePanel)
 	{
-		final CheckboxMenuItem menuItem = new CheckboxMenuItem(dockablePanel
+		final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(dockablePanel
 				.getTitle(), DockingManager.isDocked(dockablePanel));
 		dockablePanel.addDockingListener(new DockingAdapter()
 		{
 			public void dockingComplete(DockingEvent evt)
 			{
-				menuItem.setState(DockingManager.isDocked(dockablePanel));
+				menuItem.setSelected(DockingManager.isDocked(dockablePanel));
 			}
 
 			public void undockingComplete(DockingEvent evt)
 			{
-				menuItem.setState(DockingManager.isDocked(dockablePanel));
+				menuItem.setSelected(DockingManager.isDocked(dockablePanel));
 			}
 		});
-		menuItem.addItemListener(new ItemListener()
+		menuItem.addActionListener(new ActionListener()
 		{
-			public void itemStateChanged(ItemEvent e)
+			public void actionPerformed(ActionEvent e)
 			{
 				if (DockingManager.isDocked(dockablePanel))
 				{
