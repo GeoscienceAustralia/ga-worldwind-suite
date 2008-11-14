@@ -270,6 +270,8 @@ public class RadiometryPanel extends JPanel
 
 		areasCombo.addActionListener(new ActionListener()
 		{
+			private Timer timer;
+
 			public void actionPerformed(ActionEvent e)
 			{
 				Object object = areasCombo.getSelectedItem();
@@ -277,11 +279,17 @@ public class RadiometryPanel extends JPanel
 				{
 					Area area = (Area) object;
 					long lengthMillis = area.applyStateIterator(wwd);
-					Timer timer = new Timer((int) lengthMillis, new ActionListener()
+					
+					if (timer != null)
+					{
+						timer.stop();
+					}
+					timer = new Timer((int) lengthMillis, new ActionListener()
 					{
 						public void actionPerformed(ActionEvent e)
 						{
 							areasCombo.setSelectedIndex(0);
+							timer = null;
 						}
 					});
 					timer.setRepeats(false);
