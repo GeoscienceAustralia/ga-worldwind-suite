@@ -1,21 +1,31 @@
 package panels.layers;
 
+import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
+import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -28,6 +38,7 @@ import layers.radiometry.RatioUThLayer;
 import layers.radiometry.TernaryLayer;
 import layers.radiometry.ThoriumLayer;
 import layers.radiometry.UraniumLayer;
+import util.Util;
 
 public class RadiometryPanel extends JPanel
 {
@@ -55,8 +66,29 @@ public class RadiometryPanel extends JPanel
 	private JCheckBox areasCheck;
 	private JSlider radioSlider;
 	private JSlider areasSlider;
+	private JComboBox areasCombo;
 
 	private WorldWindow wwd;
+
+	private final static Area NSW = new Area("New South Wales (NSW)", -33.1987,
+			149.0234, 392604);
+	private final static Area VIC = new Area("Victoria (VIC)", -36.9108,
+			144.2817, 392604);
+	private final static Area QLD = new Area("Mount Isa (QLD)", -20.8108,
+			140.1693, 451477);
+	private final static Area SA_1 = new Area("NW South Australia (SA)",
+			-26.6803, 130.9017, 490283);
+	private final static Area SA_2 = new Area("Flinders (SA)", -32.0084,
+			138.6874, 392604);
+	private final static Area NT = new Area("Central Australia (NT)", -23.8029,
+			133.0763, 488105);
+	private final static Area WA = new Area("Pilbara (WA)", -21.0474, 119.6494,
+			559794);
+	private final static Area TAS = new Area("NE Tasmania (TAS)", -41.1247,
+			147.8028, 161772);
+
+	private final static Object[] AREAS = new Object[] { "", NSW, VIC, QLD,
+			SA_1, SA_2, NT, WA, TAS };
 
 	public RadiometryPanel(WorldWindow wwd)
 	{
@@ -193,7 +225,7 @@ public class RadiometryPanel extends JPanel
 		c.gridy = 2;
 		c.anchor = GridBagConstraints.WEST;
 		add(panel, c);
-		
+
 		areasCheck = new JCheckBox("Areas of Interest");
 		areasCheck.addActionListener(al);
 		c = new GridBagConstraints();
@@ -201,7 +233,7 @@ public class RadiometryPanel extends JPanel
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasCheck, c);
-		
+
 		areasSlider = new JSlider(1, 100, 100);
 		areasSlider.setPaintLabels(false);
 		areasSlider.setPaintTicks(false);
@@ -214,6 +246,47 @@ public class RadiometryPanel extends JPanel
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasSlider, c);
+
+		panel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 3;
+		c.anchor = GridBagConstraints.WEST;
+		add(panel, c);
+
+		JLabel label = new JLabel("Fly to area:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		panel.add(label, c);
+
+		areasCombo = new JComboBox(AREAS);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 0;
+		c.insets = new Insets(0, 5, 0, 0);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(areasCombo, c);
+
+		areasCombo.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				Object object = areasCombo.getSelectedItem();
+				if (object instanceof Area)
+				{
+					Area area = (Area) object;
+					long lengthMillis = area.applyStateIterator(wwd);
+					new Timer((int) lengthMillis * 2, new ActionListener()
+					{
+						public void actionPerformed(ActionEvent e)
+						{
+							areasCombo.setSelectedIndex(0);
+						}
+					}).start();
+				}
+			}
+		});
 
 		ternaryRadio.setSelected(true);
 		updateLayers();
@@ -247,5 +320,50 @@ public class RadiometryPanel extends JPanel
 		areas.setEnabled(areasCheck.isSelected());
 		areas.setOpacity(areasSlider.getValue() / 100d);
 		wwd.redraw();
+	}
+
+	private static class Area
+	{
+		private final String name;
+		private final LatLon center;
+		private final double zoom;
+
+		public Area(String name, double lat, double lon, double zoom)
+		{
+			this(name, LatLon.fromDegrees(lat, lon), zoom);
+		}
+
+		public Area(String name, LatLon center, double zoom)
+		{
+			this.name = name;
+			this.center = center;
+			this.zoom = zoom;
+		}
+
+		public long applyStateIterator(WorldWindow wwd)
+		{
+			if (!(wwd.getView() instanceof OrbitView))
+				return 0;
+
+			OrbitView view = (OrbitView) wwd.getView();
+			Position beginCenter = view.getCenterPosition();
+			long lengthMillis = Util.getScaledLengthMillis(beginCenter
+					.getLatLon(), center, 2000, 8000);
+
+			ViewStateIterator vsi = FlyToOrbitViewStateIterator
+					.createPanToIterator(wwd.getModel().getGlobe(),
+							beginCenter, new Position(center, 0), view
+									.getHeading(), Angle.ZERO, view.getPitch(),
+							Angle.ZERO, view.getZoom(), zoom, lengthMillis,
+							true);
+			view.applyStateIterator(vsi);
+			return lengthMillis;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
 	}
 }

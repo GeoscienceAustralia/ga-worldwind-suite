@@ -3,7 +3,6 @@ package panels.places;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
@@ -43,6 +42,7 @@ import panels.places.GeoNamesSearch.Results;
 import panels.places.GeoNamesSearch.SearchType;
 import util.FlatJButton;
 import util.Icons;
+import util.Util;
 
 public class PlaceSearchPanel extends JPanel
 {
@@ -304,23 +304,17 @@ public class PlaceSearchPanel extends JPanel
 			if (view instanceof OrbitView)
 			{
 				OrbitView orbitView = (OrbitView) view;
-
-				int min = 1000;
-				int max = 10000;
 				Position center = orbitView.getCenterPosition();
 				Position newCenter = place.getPosition();
-				int length = (int) (LatLon.greatCircleDistance(center
-						.getLatLon(), newCenter.getLatLon()).degrees / 180d * (double) (max - min))
-						+ min;
-				if (length > max)
-					length = max;
+				long lengthMillis = Util.getScaledLengthMillis(center
+						.getLatLon(), newCenter.getLatLon(), 2000, 8000);
 
 				ViewStateIterator vsi = FlyToOrbitViewStateIterator
 						.createPanToIterator(wwd.getModel().getGlobe(), center,
 								newCenter, orbitView.getHeading(), orbitView
 										.getHeading(), orbitView.getPitch(),
 								orbitView.getPitch(), orbitView.getZoom(),
-								orbitView.getZoom(), length);
+								orbitView.getZoom(), lengthMillis, true);
 
 				view.applyStateIterator(vsi);
 			}

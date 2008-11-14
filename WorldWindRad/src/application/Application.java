@@ -79,6 +79,7 @@ import stereo.StereoSceneController;
 import util.DockingAdapter;
 import util.DoubleClickZoomListener;
 import util.Icons;
+import util.Util;
 
 public class Application
 {
@@ -231,13 +232,15 @@ public class Application
 
 				Position endCenter = Position.fromDegrees(initLat, initLon,
 						beginCenter.getElevation());
+				long lengthMillis = Util.getScaledLengthMillis(beginCenter
+						.getLatLon(), endCenter.getLatLon(), 2000, 8000);
 
 				ViewStateIterator vsi = FlyToOrbitViewStateIterator
 						.createPanToIterator(wwd.getModel().getGlobe(),
 								beginCenter, endCenter, view.getHeading(),
 								Angle.fromDegrees(initHeading),
 								view.getPitch(), Angle.fromDegrees(initPitch),
-								view.getZoom(), initAltitude, 5000);
+								view.getZoom(), initAltitude, lengthMillis, true);
 				wwd.getView().applyStateIterator(vsi);
 			}
 		});
