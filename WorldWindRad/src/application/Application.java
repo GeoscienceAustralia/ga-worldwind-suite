@@ -25,6 +25,9 @@ import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
@@ -48,10 +51,12 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
@@ -70,6 +75,7 @@ import org.flexdock.perspective.PerspectiveManager;
 import panels.layers.LayersPanel;
 import panels.other.ExaggerationPanel;
 import panels.other.GoToCoordinatePanel;
+import panels.other.HelpControlsPanel;
 import panels.places.PlaceSearchPanel;
 import settings.Settings;
 import settings.SettingsDialog;
@@ -240,7 +246,8 @@ public class Application
 								beginCenter, endCenter, view.getHeading(),
 								Angle.fromDegrees(initHeading),
 								view.getPitch(), Angle.fromDegrees(initPitch),
-								view.getZoom(), initAltitude, lengthMillis, true);
+								view.getZoom(), initAltitude, lengthMillis,
+								true);
 				wwd.getView().applyStateIterator(vsi);
 			}
 		});
@@ -554,6 +561,67 @@ public class Application
 					visible = false;
 					afterSettingsChange();
 				}
+			}
+		});
+
+		menu = new Menu("Help");
+		menuBar.add(menu);
+
+		menuItem = new MenuItem("Controls...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				GridBagConstraints c;
+
+				final JDialog dialog = new JDialog(frame, "Controls", true);
+				dialog.setLayout(new GridBagLayout());
+				dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+				dialog.addWindowListener(new WindowAdapter()
+				{
+					@Override
+					public void windowClosing(WindowEvent e)
+					{
+						dialog.dispose();
+					}
+				});
+
+				c = new GridBagConstraints();
+				c.gridx = 0;
+				c.gridy = 0;
+				c.weightx = 1;
+				c.weighty = 1;
+				c.fill = GridBagConstraints.BOTH;
+				dialog.add(new HelpControlsPanel(), c);
+				
+				JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
+				c = new GridBagConstraints();
+				c.gridx = 0;
+				c.gridy = 1;
+				c.weightx = 1;
+				c.fill = GridBagConstraints.HORIZONTAL;
+				dialog.add(separator, c);
+
+				JButton okButton = new JButton("OK");
+				c = new GridBagConstraints();
+				c.gridx = 0;
+				c.gridy = 2;
+				c.insets = new Insets(10, 10, 10, 10);
+				c.anchor = GridBagConstraints.EAST;
+				dialog.add(okButton, c);
+				okButton.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						dialog.dispose();
+					}
+				});
+
+				dialog.setResizable(false);
+				dialog.setSize(640, 480);
+				dialog.setLocationRelativeTo(frame);
+				dialog.setVisible(true);
 			}
 		});
 
