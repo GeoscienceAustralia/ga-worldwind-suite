@@ -92,7 +92,7 @@ public class DockablePanel extends AbstractDockable
 
 		if (maximizable)
 		{
-			addMaximiseButton();
+			addMaximizeButton();
 		}
 		if (closeable)
 		{
@@ -156,7 +156,7 @@ public class DockablePanel extends AbstractDockable
 		});
 	}
 	
-	public void addMaximiseButton()
+	public void addMaximizeButton()
 	{
 		final JButton button = new JButton(Icons.maximize);
 		button.setFocusable(false);

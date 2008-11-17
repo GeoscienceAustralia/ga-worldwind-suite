@@ -55,6 +55,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
@@ -65,9 +66,9 @@ import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 import org.flexdock.docking.DockingConstants;
 import org.flexdock.docking.DockingManager;
 import org.flexdock.docking.DockingPort;
-import org.flexdock.docking.defaults.DefaultDockingPort;
 import org.flexdock.docking.drag.preview.AlphaPreview;
 import org.flexdock.docking.event.DockingEvent;
+import org.flexdock.docking.props.PropertyManager;
 import org.flexdock.perspective.PerspectiveManager;
 
 import panels.layers.LayersPanel;
@@ -143,7 +144,7 @@ public class Application
 	private LayersPanel layersPanel;
 	private MouseLayer mouseLayer;
 
-	private DefaultDockingPort dockingPort;
+	private TabbedDockingPort dockingPort;
 	private DockablePanel globeDockable;
 	private DockablePanel layersDockable;
 	private DockablePanel exaggerationDockable;
@@ -167,6 +168,8 @@ public class Application
 		System.setProperty(DockingConstants.HEAVYWEIGHT_DOCKABLES, "true");
 		DockingManager.setDragPreview(new AlphaPreview(Color.black, new Color(
 				SystemColor.activeCaption.getRGB()), 0.5f));
+		DockingManager.setSingleTabsAllowed(true);
+		PropertyManager.getDockingPortRoot().setTabPlacement(JTabbedPane.TOP);
 
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
@@ -188,7 +191,8 @@ public class Application
 		statusBar.setEventSource(wwd);
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
 
-		dockingPort = new DefaultDockingPort();
+		dockingPort = new TabbedDockingPort();
+		dockingPort.setTabsAsDragSource(true);
 		panel.add(dockingPort, BorderLayout.CENTER);
 
 		JButton fullscreen = new JButton(Icons.monitor);
@@ -206,55 +210,16 @@ public class Application
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (!(wwd.getView() instanceof OrbitView))
-					return;
-
-				OrbitView view = (OrbitView) wwd.getView();
-				Position beginCenter = view.getCenterPosition();
-
-				Double initLat = Configuration
-						.getDoubleValue(AVKey.INITIAL_LATITUDE);
-				Double initLon = Configuration
-						.getDoubleValue(AVKey.INITIAL_LONGITUDE);
-				Double initAltitude = Configuration
-						.getDoubleValue(AVKey.INITIAL_ALTITUDE);
-				Double initHeading = Configuration
-						.getDoubleValue(AVKey.INITIAL_HEADING);
-				Double initPitch = Configuration
-						.getDoubleValue(AVKey.INITIAL_PITCH);
-
-				if (initLat == null)
-					initLat = 0d;
-				if (initLon == null)
-					initLon = 0d;
-				if (initAltitude == null)
-					initAltitude = 3d * Earth.WGS84_EQUATORIAL_RADIUS;
-				if (initHeading == null)
-					initHeading = 0d;
-				if (initPitch == null)
-					initPitch = 0d;
-
-				Position endCenter = Position.fromDegrees(initLat, initLon,
-						beginCenter.getElevation());
-				long lengthMillis = Util.getScaledLengthMillis(beginCenter
-						.getLatLon(), endCenter.getLatLon(), 2000, 8000);
-
-				ViewStateIterator vsi = FlyToOrbitViewStateIterator
-						.createPanToIterator(wwd.getModel().getGlobe(),
-								beginCenter, endCenter, view.getHeading(),
-								Angle.fromDegrees(initHeading),
-								view.getPitch(), Angle.fromDegrees(initPitch),
-								view.getZoom(), initAltitude, lengthMillis,
-								true);
-				wwd.getView().applyStateIterator(vsi);
+				resetView();
 			}
 		});
 
 		globeDockable = new DockablePanel("globe", "Globe", null, wwd, false,
 				false);
 		globeDockable.addButton(home);
-		globeDockable.addMaximiseButton();
+		globeDockable.addMaximizeButton();
 		globeDockable.addButton(fullscreen);
+		dockingPort.dock(globeDockable);
 
 		layersPanel = new LayersPanel(wwd);
 		layersDockable = new DockablePanel("layers", "Layers", null,
@@ -302,6 +267,13 @@ public class Application
 			DockingManager.setSplitProportion((DockingPort) dockingPort, 0.25f);
 			DockingManager.setSplitProportion(placeSearchDockable, 0.8f);
 			DockingManager.setSplitProportion(exaggerationDockable, 0.8f);
+		}
+		else
+		{
+			if (!DockingManager.isDocked(globeDockable))
+			{
+				dockingPort.dock(globeDockable, DockingConstants.CENTER_REGION);
+			}
 		}
 
 		afterSettingsChange();
@@ -359,6 +331,47 @@ public class Application
 				}
 			}
 		});
+	}
+
+	private void resetView()
+	{
+		if (!(wwd.getView() instanceof OrbitView))
+			return;
+
+		OrbitView view = (OrbitView) wwd.getView();
+		Position beginCenter = view.getCenterPosition();
+
+		Double initLat = Configuration.getDoubleValue(AVKey.INITIAL_LATITUDE);
+		Double initLon = Configuration.getDoubleValue(AVKey.INITIAL_LONGITUDE);
+		Double initAltitude = Configuration
+				.getDoubleValue(AVKey.INITIAL_ALTITUDE);
+		Double initHeading = Configuration
+				.getDoubleValue(AVKey.INITIAL_HEADING);
+		Double initPitch = Configuration.getDoubleValue(AVKey.INITIAL_PITCH);
+
+		if (initLat == null)
+			initLat = 0d;
+		if (initLon == null)
+			initLon = 0d;
+		if (initAltitude == null)
+			initAltitude = 3d * Earth.WGS84_EQUATORIAL_RADIUS;
+		if (initHeading == null)
+			initHeading = 0d;
+		if (initPitch == null)
+			initPitch = 0d;
+
+		Position endCenter = Position.fromDegrees(initLat, initLon, beginCenter
+				.getElevation());
+		long lengthMillis = Util.getScaledLengthMillis(beginCenter.getLatLon(),
+				endCenter.getLatLon(), 2000, 8000);
+
+		ViewStateIterator vsi = FlyToOrbitViewStateIterator
+				.createPanToIterator(wwd.getModel().getGlobe(), beginCenter,
+						endCenter, view.getHeading(), Angle
+								.fromDegrees(initHeading), view.getPitch(),
+						Angle.fromDegrees(initPitch), view.getZoom(),
+						initAltitude, lengthMillis, true);
+		wwd.getView().applyStateIterator(vsi);
 	}
 
 	private void create3DMouse()
