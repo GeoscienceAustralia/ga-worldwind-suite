@@ -55,7 +55,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
-import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
@@ -68,7 +67,6 @@ import org.flexdock.docking.DockingManager;
 import org.flexdock.docking.DockingPort;
 import org.flexdock.docking.drag.preview.AlphaPreview;
 import org.flexdock.docking.event.DockingEvent;
-import org.flexdock.docking.props.PropertyManager;
 import org.flexdock.perspective.PerspectiveManager;
 
 import panels.layers.LayersPanel;
@@ -168,8 +166,8 @@ public class Application
 		System.setProperty(DockingConstants.HEAVYWEIGHT_DOCKABLES, "true");
 		DockingManager.setDragPreview(new AlphaPreview(Color.black, new Color(
 				SystemColor.activeCaption.getRGB()), 0.5f));
-		DockingManager.setSingleTabsAllowed(true);
-		PropertyManager.getDockingPortRoot().setTabPlacement(JTabbedPane.TOP);
+		//DockingManager.setSingleTabsAllowed(true);
+		//PropertyManager.getDockingPortRoot().setTabPlacement(JTabbedPane.TOP);
 
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
