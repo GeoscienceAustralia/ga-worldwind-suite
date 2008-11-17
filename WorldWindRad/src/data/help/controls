@@ -3,7 +3,7 @@
 <b>Mouse with scroll wheel:</b>
 <table border=0>
 <tr valign=top><td>Pan:</td><td><ul><li>Left mouse button click & drag - all directions<li>Left mouse button click once to center view</ul></td></tr>
-<tr valign=top><td>Zoom:</td><td><ul><li>Use the scroll wheel on the mouse<li>Left & Right mouse (both buttons) click & drag - up and down<li>Left mouse button double click to zoom and center</ul></td></tr>
+<tr valign=top><td>Zoom:</td><td><ul><li>Use the scroll wheel on the mouse<li>Left & Right mouse (both buttons) click & drag - up and down<li>Left/Right mouse button double click to zoom and center</ul></td></tr>
 <tr valign=top><td>Tilt:</td><td><ul><li>Right mouse button click & drag - up and down<li>"Page Up" and "Page Down" on the keyboard</ul></td></tr>
 <tr valign=top><td>Rotate:</td><td><ul><li>Right mouse button click & drag - left and right</ul></td></tr>
 <tr valign=top><td>Stop:</td><td><ul><li>Spacebar</ul></td></tr>
@@ -14,7 +14,7 @@
 <b>Single button mouse:</b>
 <table border=0>
 <tr valign=top><td>Pan:</td><td><ul><li>Left mouse button click & drag - all directions<li>Left mouse button click once to center view</ul></td></tr>
-<tr valign=top><td>Zoom:</td><td><ul><li>Hold "Ctrl" on the keyboard and Left mouse button click & drag - up and down<li>Left mouse button double click to zoom and center</ul></td></tr>
+<tr valign=top><td>Zoom:</td><td><ul><li>Hold "Ctrl" on the keyboard and Left mouse button click & drag - up and down<li>Left/Right mouse button double click to zoom and center</ul></td></tr>
 <tr valign=top><td>Tilt:</td><td><ul><li>Hold "Shift" on the keyboard and Left mouse button click & drag - up and down<li>"Page Up" and "Page Down" on the keyboard</ul></td></tr>
 <tr valign=top><td>Rotate:</td><td><ul><li>Hold "Shift" on the keyboard and Left mouse button click & drag - left and right</ul></td></tr>
 <tr valign=top><td>Stop:</td><td><ul><li>Spacebar</ul></td></tr>

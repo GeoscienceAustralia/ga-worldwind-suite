@@ -27,6 +27,10 @@ public class DoubleClickZoomListener extends MouseAdapter
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
+		if (e.getButton() != MouseEvent.BUTTON1
+				&& e.getButton() != MouseEvent.BUTTON3)
+			return;
+
 		if (!(wwd.getView() instanceof OrbitView))
 			return;
 		OrbitView view = (OrbitView) wwd.getView();
@@ -54,7 +58,9 @@ public class DoubleClickZoomListener extends MouseAdapter
 				double zoom = view.getZoom();
 				if (zoom > minElevation)
 				{
-					zoom = Math.max(minElevation, zoom / 3);
+					zoom = Math.max(minElevation,
+							e.getButton() == MouseEvent.BUTTON1 ? zoom / 3
+									: zoom * 3);
 				}
 				Position beginCenter = view.getCenterPosition();
 				Position endCenter = new Position(latlon, beginCenter
