@@ -1,4 +1,4 @@
-package keyframe;
+package path;
 
 public class Vector2 implements Vector<Vector2>
 {
@@ -248,5 +248,31 @@ public class Vector2 implements Vector<Vector2>
 		x = -x;
 		y = -y;
 		return this;
+	}
+
+	public Vector2 interpolate(Vector2 v, double percent)
+	{
+		return interpolate(v, percent, null);
+	}
+
+	public Vector2 interpolate(Vector2 v, double percent, Vector2 store)
+	{
+		if (store == null)
+			store = new Vector2();
+		store.x = interpolate(x, v.x, percent);
+		store.y = interpolate(y, v.y, percent);
+		return store;
+	}
+
+	public Vector2 interpolateLocal(Vector2 v, double percent)
+	{
+		x = interpolate(x, v.x, percent);
+		y = interpolate(y, v.y, percent);
+		return this;
+	}
+
+	public static double interpolate(double d1, double d2, double percent)
+	{
+		return d1 * (1 - percent) + d2 * percent;
 	}
 }

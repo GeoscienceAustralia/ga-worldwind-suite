@@ -6,29 +6,35 @@ public class AnimationPoint extends Point implements Serializable,
 		Comparable<AnimationPoint>
 {
 	public double time;
-	public Vector in;
-	public Vector out;
+	public Vector3 positionIn;
+	public Vector3 positionOut;
+	public Vector3 lookAtIn;
+	public Vector3 lookAtOut;
 
-	public AnimationPoint(double time, Point point, Vector in, Vector out)
+	public AnimationPoint(double time, Point point, Vector3 positionIn,
+			Vector3 positionOut, Vector3 lookAtIn, Vector3 lookAtOut)
 	{
-		this(time, new Position(point.position), point.heading, point.pitch,
-				in, out);
+		this(time, new Vector3(point.position), new Vector3(point.lookAt),
+				positionIn, positionOut, lookAtIn, lookAtOut);
 	}
 
-	public AnimationPoint(AnimationPoint animationPoint)
+	public AnimationPoint(AnimationPoint a)
 	{
-		this(animationPoint.time, new Position(animationPoint.position),
-				animationPoint.heading, animationPoint.pitch, new Vector(
-						animationPoint.in), new Vector(animationPoint.out));
+		this(a.time, new Vector3(a.position), new Vector3(a.lookAt),
+				new Vector3(a.positionIn), new Vector3(a.positionOut),
+				new Vector3(a.lookAtIn), new Vector3(a.lookAtOut));
 	}
 
-	public AnimationPoint(double time, Position position, double heading,
-			double pitch, Vector in, Vector out)
+	public AnimationPoint(double time, Vector3 position, Vector3 lookAt,
+			Vector3 positionIn, Vector3 positionOut, Vector3 lookAtIn,
+			Vector3 lookAtOut)
 	{
-		super(position, heading, pitch);
+		super(position, lookAt);
 		this.time = time;
-		this.in = in;
-		this.out = out;
+		this.positionIn = positionIn;
+		this.positionOut = positionOut;
+		this.lookAtIn = lookAtIn;
+		this.lookAtOut = lookAtOut;
 	}
 
 	public int compareTo(AnimationPoint o)
@@ -39,51 +45,30 @@ public class AnimationPoint extends Point implements Serializable,
 	public static Point bezierInterpolate(AnimationPoint p1, AnimationPoint p2,
 			double percent)
 	{
-		double longdiff = Longitude.difference(p1.position.longitude,
-				p2.position.longitude);
-		double latdiff = Latitude.difference(p1.position.latitude,
-				p2.position.latitude);
+		Vector3 v0 = p1.position;
+		Vector3 v3 = p2.position;
+		Vector3 v1 = v0.add(p1.positionOut);
+		Vector3 v2 = v3.add(p2.positionIn);
 
-		Vector v0 = new Vector(p1.position.longitude.degrees,
-				p1.position.latitude.degrees, p1.position.elevation);
-		Vector v3 = new Vector(v0.x + longdiff, v0.y + latdiff,
-				p2.position.elevation);
-		Vector v1 = v0.add(p1.out);
-		Vector v2 = v3.add(p2.in);
+		Bezier<Vector3> bezier = new Bezier<Vector3>(v0, v1, v2, v3);
+		Vector3 position = bezier.linearPointAt(percent);
 
-		Bezier b = new Bezier(v0, v1, v2, v3);
-		Vector v = b.linearPointAt(percent);
+		v0 = p1.lookAt;
+		v3 = p2.lookAt;
+		v1 = v0.add(p1.lookAtOut);
+		v2 = v3.add(p2.lookAtIn);
 
-		double heading = interpolate(p1.heading, p2.heading, percent);
-		double pitch = interpolate(p1.pitch, p2.pitch, percent);
+		bezier = new Bezier<Vector3>(v0, v1, v2, v3);
+		Vector3 lookAt = bezier.linearPointAt(percent);
 
-		return new Point(new Position(v.y, v.x, v.z), heading, pitch);
+		return new Point(position, lookAt);
 	}
 
 	public static Point linearInterpolate(AnimationPoint p1, AnimationPoint p2,
 			double percent)
 	{
-		double longdiff = Longitude.difference(p1.position.longitude,
-				p2.position.longitude);
-		double latdiff = Latitude.difference(p1.position.latitude,
-				p2.position.latitude);
-
-		double x1 = p1.position.longitude.degrees;
-		double y1 = p1.position.latitude.degrees;
-
-		double x = interpolate(x1, x1 + longdiff, percent);
-		double y = interpolate(y1, y1 + latdiff, percent);
-		double z = interpolate(p1.position.elevation, p2.position.elevation,
-				percent);
-
-		double heading = interpolate(p1.heading, p2.heading, percent);
-		double pitch = interpolate(p1.pitch, p2.pitch, percent);
-
-		return new Point(new Position(y, x, z), heading, pitch);
-	}
-
-	public static double interpolate(double d1, double d2, double percent)
-	{
-		return d1 * (1 - percent) + d2 * percent;
+		Vector3 position = p1.position.interpolate(p2.position, percent);
+		Vector3 lookAt = p1.lookAt.interpolate(p2.lookAt, percent);
+		return new Point(position, lookAt);
 	}
 }

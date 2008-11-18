@@ -1,5 +1,8 @@
 package keyframe;
 
+import path.Vector;
+import path.Vector1;
+
 public class Spring<V extends Vector<V>>
 {
 	private final static double DEFAULT_SPRING_K = 4d;

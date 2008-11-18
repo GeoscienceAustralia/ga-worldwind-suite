@@ -2,19 +2,17 @@ package path;
 
 public class Point
 {
-	public Position position;
-	public double heading;
-	public double pitch;
+	public Vector3 position;
+	public Vector3 lookAt;
 
 	public Point(Point point)
 	{
-		this(new Position(point.position), point.heading, point.pitch);
+		this(new Vector3(point.position), new Vector3(point.lookAt));
 	}
 
-	public Point(Position position, double heading, double pitch)
+	public Point(Vector3 position, Vector3 lookAt)
 	{
 		this.position = position;
-		this.heading = heading;
-		this.pitch = pitch;
+		this.lookAt = lookAt;
 	}
 }
