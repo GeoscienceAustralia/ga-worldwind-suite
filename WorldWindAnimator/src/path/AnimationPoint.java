@@ -44,9 +44,6 @@ public class AnimationPoint extends Point implements Serializable,
 		double latdiff = Latitude.difference(p1.position.latitude,
 				p2.position.latitude);
 
-		double t1 = percent;
-		double t2 = t1 * t1;
-		double t3 = t2 * t1;
 		Vector v0 = new Vector(p1.position.longitude.degrees,
 				p1.position.latitude.degrees, p1.position.elevation);
 		Vector v3 = new Vector(v0.x + longdiff, v0.y + latdiff,
@@ -54,24 +51,13 @@ public class AnimationPoint extends Point implements Serializable,
 		Vector v1 = v0.add(p1.out);
 		Vector v2 = v3.add(p2.in);
 
-		double cx = 3 * (v1.x - v0.x);
-		double cy = 3 * (v1.y - v0.y);
-		double cz = 3 * (v1.z - v0.z);
-		double bx = 3 * (v2.x - v1.x) - cx;
-		double by = 3 * (v2.y - v1.y) - cy;
-		double bz = 3 * (v2.z - v1.z) - cz;
-		double ax = v3.x - v0.x - cx - bx;
-		double ay = v3.y - v0.y - cy - by;
-		double az = v3.z - v0.z - cz - bz;
-
-		double x = ax * t3 + bx * t2 + cx * t1 + v0.x;
-		double y = ay * t3 + by * t2 + cy * t1 + v0.y;
-		double z = az * t3 + bz * t2 + cz * t1 + v0.z;
+		Bezier b = new Bezier(v0, v1, v2, v3);
+		Vector v = b.linearPointAt(percent);
 
 		double heading = interpolate(p1.heading, p2.heading, percent);
 		double pitch = interpolate(p1.pitch, p2.pitch, percent);
 
-		return new Point(new Position(x, y, z), heading, pitch);
+		return new Point(new Position(v.y, v.x, v.z), heading, pitch);
 	}
 
 	public static Point linearInterpolate(AnimationPoint p1, AnimationPoint p2,
@@ -93,7 +79,7 @@ public class AnimationPoint extends Point implements Serializable,
 		double heading = interpolate(p1.heading, p2.heading, percent);
 		double pitch = interpolate(p1.pitch, p2.pitch, percent);
 
-		return new Point(new Position(x, y, z), heading, pitch);
+		return new Point(new Position(y, x, z), heading, pitch);
 	}
 
 	public static double interpolate(double d1, double d2, double percent)

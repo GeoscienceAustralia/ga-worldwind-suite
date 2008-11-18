@@ -3,6 +3,7 @@ package application;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingEvent;
@@ -11,6 +12,7 @@ import gov.nasa.worldwind.util.StatusBar;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,6 +29,12 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
+
+import path.AnimationPath;
+import path.AnimationPoint;
+import path.Point;
+import path.Position;
+import path.Vector;
 
 import com.sun.opengl.util.BufferUtil;
 
@@ -69,6 +77,7 @@ public class Animator
 
 	private JFrame frame;
 	private WorldWindowGLCanvas wwd;
+	private boolean takingScreenshot = false;
 
 	public Animator()
 	{
@@ -90,7 +99,17 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				takeScreenshot();
+				takeScreenshot("screenshot.png");
+			}
+		});
+
+		button = new JButton("Animate");
+		left.add(button);
+		button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animate();
 			}
 		});
 
@@ -99,8 +118,8 @@ public class Animator
 		statusBar.setEventSource(wwd);
 
 		//do not take a screenshot while the following are true:
-		WorldWind.getTaskService().hasActiveTasks();
-		WorldWind.getRetrievalService().hasActiveTasks();
+		//WorldWind.getTaskService().hasActiveTasks();
+		//WorldWind.getRetrievalService().hasActiveTasks();
 
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter()
@@ -122,14 +141,111 @@ public class Animator
 		System.exit(0);
 	}
 
-	private void takeScreenshot()
+	private void takeScreenshot(String filename)
 	{
-		wwd.addRenderingListener(screenshotter);
+		if (!EventQueue.isDispatchThread())
+		{
+			takingScreenshot = true;
+		}
+
+		wwd.addRenderingListener(new Screenshotter(filename));
 		wwd.redraw();
+
+		if (!EventQueue.isDispatchThread())
+		{
+			while (takingScreenshot)
+			{
+				try
+				{
+					Thread.sleep(100);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
-	private final RenderingListener screenshotter = new RenderingListener()
+	private double e2a(double elevation)
 	{
+		return Math.log(elevation) * 10d;
+	}
+
+	private double a2e(double animation)
+	{
+		return Math.pow(Math.E, animation / 10d);
+	}
+
+	private void animate()
+	{
+		Vector pos = new Vector(0, 0, 40);
+		Vector zero = new Vector(0, 0, 0);
+
+		final AnimationPath path = new AnimationPath();
+		/*AnimationPoint p1 = new AnimationPoint(0, new Position(41.68695,
+				-87.70575, e2a(374070)), 0d, 0d, zero, zero);
+		AnimationPoint p2 = new AnimationPoint(4, new Position(41.68695,
+				-87.70575, e2a(6889382)), 0d, 0d, zero, pos);
+		AnimationPoint p3 = new AnimationPoint(8, new Position(51.44871,
+				-0.01974, e2a(6889382)), 0d, 0d, pos, zero);
+		AnimationPoint p4 = new AnimationPoint(12, new Position(51.44871,
+				-0.01974, e2a(374070)), 0d, 0d, zero, zero);
+		path.points.add(p1);
+		path.points.add(p2);
+		path.points.add(p3);
+		path.points.add(p4);*/
+
+		AnimationPoint p1 = new AnimationPoint(0, new Position(41.68695,
+				-87.70575, e2a(374070)), 0d, 0d, zero, pos);
+		AnimationPoint p2 = new AnimationPoint(5, new Position(51.44871,
+				-0.01974, e2a(374070)), 0d, 0d, pos, zero);
+		AnimationPoint p3 = new AnimationPoint(7, new Position(51.44871,
+				-0.01974, e2a(374070)), 0d, 0d, zero, pos);
+		AnimationPoint p4 = new AnimationPoint(12, new Position(-27, 133.5,
+				e2a(374070)), 0d, 0d, pos, zero);
+		path.points.add(p1);
+		path.points.add(p2);
+		path.points.add(p3);
+		path.points.add(p4);
+
+		Thread thread = new Thread(new Runnable()
+		{
+			public void run()
+			{
+				View view = wwd.getSceneController().getView();
+
+				long currentTime = 0;
+				while (currentTime / 1000d <= path.getMaxTime())
+				{
+					currentTime += 10;
+					double time = currentTime / 1000d;
+					Point point = path.getPositionAt(time);
+					System.out.println(point.position.elevation);
+					point.position.elevation = a2e(point.position.elevation);
+					gov.nasa.worldwind.geom.Position position = point.position
+							.getPosition();
+					view.setEyePosition(position);
+					wwd.redraw();
+					
+					takeScreenshot("screen" + (currentTime / 10) + ".png");
+
+					System.out.println(time + " = " + position);
+				}
+			}
+		});
+		thread.start();
+	}
+
+	private class Screenshotter implements RenderingListener
+	{
+		private final String filename;
+
+		public Screenshotter(String filename)
+		{
+			this.filename = filename;
+		}
+
 		public void stageChanged(RenderingEvent event)
 		{
 			if (WorldWind.getTaskService().hasActiveTasks()
@@ -143,7 +259,8 @@ public class Animator
 			else if (event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)
 			{
 				wwd.removeRenderingListener(this);
-				saveFrame();
+				saveFrame(filename);
+				takingScreenshot = false;
 			}
 		}
 
@@ -160,7 +277,7 @@ public class Animator
 		}
 	};
 
-	private void saveFrame()
+	private void saveFrame(String filename)
 	{
 		GL gl = wwd.getGL();
 		int width = wwd.getWidth();
@@ -184,7 +301,7 @@ public class Animator
 			}
 		}
 
-		File out = new File("screenshot.png");
+		File out = new File(filename);
 		try
 		{
 			ImageIO.write(img, "png", out);

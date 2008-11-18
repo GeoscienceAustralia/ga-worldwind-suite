@@ -24,11 +24,11 @@ public class AnimationPath implements Serializable
 
 		for (AnimationPoint point : points)
 		{
-			p2 = p1;
-			p1 = point;
-			if (p2 != null)
+			p1 = p2;
+			p2 = point;
+			if (p1 != null)
 			{
-				if (p1.time <= time && p2.time > time)
+				if (p1.time <= time && time < p2.time)
 					break;
 			}
 		}
@@ -40,5 +40,12 @@ public class AnimationPath implements Serializable
 		}
 
 		return null;
+	}
+
+	public double getMaxTime()
+	{
+		if (points.isEmpty())
+			return 0;
+		return points.last().time;
 	}
 }

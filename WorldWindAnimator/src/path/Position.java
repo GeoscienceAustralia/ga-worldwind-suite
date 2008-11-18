@@ -1,5 +1,7 @@
 package path;
 
+import gov.nasa.worldwind.geom.Angle;
+
 import java.io.Serializable;
 
 public class Position implements Serializable
@@ -26,5 +28,12 @@ public class Position implements Serializable
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.elevation = elevation;
+	}
+
+	public gov.nasa.worldwind.geom.Position getPosition()
+	{
+		return new gov.nasa.worldwind.geom.Position(Angle
+				.fromDegreesLatitude(latitude.degrees), Angle
+				.fromDegreesLongitude(longitude.degrees), elevation);
 	}
 }
