@@ -1,4 +1,4 @@
-package path;
+package path.vector;
 
 import java.io.Serializable;
 
@@ -75,4 +75,10 @@ public interface Vector<V> extends Cloneable, Serializable
 	public V interpolate(V v, double percent, V store);
 
 	public V interpolateLocal(V v, double percent);
+
+	public V normalize();
+
+	public V normalize(V store);
+
+	public V normalizeLocal();
 }

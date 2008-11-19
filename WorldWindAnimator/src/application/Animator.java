@@ -8,7 +8,10 @@ import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.util.StatusBar;
+import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -33,8 +36,8 @@ import javax.swing.UIManager;
 import path.AnimationPath;
 import path.AnimationPoint;
 import path.Point;
-import path.Position;
-import path.Vector;
+import path.vector.Vector2;
+import path.vector.Vector3;
 
 import com.sun.opengl.util.BufferUtil;
 
@@ -179,8 +182,8 @@ public class Animator
 
 	private void animate()
 	{
-		Vector pos = new Vector(0, 0, 40);
-		Vector zero = new Vector(0, 0, 0);
+		Vector3 pos = new Vector3(0, 0, 40);
+		Vector3 zero = Vector3.ZERO;
 
 		final AnimationPath path = new AnimationPath();
 		/*AnimationPoint p1 = new AnimationPoint(0, new Position(41.68695,
@@ -196,42 +199,67 @@ public class Animator
 		path.points.add(p3);
 		path.points.add(p4);*/
 
-		AnimationPoint p1 = new AnimationPoint(0, new Position(41.68695,
-				-87.70575, e2a(374070)), 0d, 0d, zero, pos);
-		AnimationPoint p2 = new AnimationPoint(5, new Position(51.44871,
-				-0.01974, e2a(374070)), 0d, 0d, pos, zero);
-		AnimationPoint p3 = new AnimationPoint(7, new Position(51.44871,
-				-0.01974, e2a(374070)), 0d, 0d, zero, pos);
-		AnimationPoint p4 = new AnimationPoint(12, new Position(-27, 133.5,
-				e2a(374070)), 0d, 0d, pos, zero);
-		path.points.add(p1);
-		path.points.add(p2);
-		path.points.add(p3);
-		path.points.add(p4);
+		Vector3 v1 = new Vector3(41.68695, -87.70575, e2a(374070));
+		Vector3 v2 = new Vector3(51.44871, -0.01974, e2a(374070));
+		Vector3 v3 = new Vector3(-27, 133.5, e2a(374070));
+
+		Vector3 zaxis = new Vector3(0, 0, 40);
+		Vector3 flat = v1.subtract(v2).normalizeLocal().multLocal(40);
+
+		Vector2 orientation1 = new Vector2(0, 0);
+		Vector2 orientation2 = new Vector2(180, 90);
+
+		AnimationPoint p1 = new AnimationPoint(v1, orientation1, zero, zaxis);
+		AnimationPoint p2 = new AnimationPoint(v2, orientation2, flat, flat
+				.negate());
+		AnimationPoint p3 = new AnimationPoint(v3, orientation1, zaxis, zero);
+		path.addPoint(p1);
+		path.addPoint(p2);
+		path.addPoint(p3);
 
 		Thread thread = new Thread(new Runnable()
 		{
 			public void run()
 			{
-				View view = wwd.getSceneController().getView();
+				View v = wwd.getSceneController().getView();
+				if (!(v instanceof OrbitView))
+					return;
+				OrbitView view = (OrbitView) v;
+				boolean detectCollisions = view.isDetectCollisions();
+				view.setDetectCollisions(false);
 
+				long totalTime = 1000;
+				long startTime = System.currentTimeMillis();
 				long currentTime = 0;
-				while (currentTime / 1000d <= path.getMaxTime())
+				double percent = 0;
+				while (percent <= 1)
 				{
-					currentTime += 10;
-					double time = currentTime / 1000d;
-					Point point = path.getPositionAt(time);
-					System.out.println(point.position.elevation);
-					point.position.elevation = a2e(point.position.elevation);
-					gov.nasa.worldwind.geom.Position position = point.position
-							.getPosition();
-					view.setEyePosition(position);
-					wwd.redraw();
+					//currentTime = System.currentTimeMillis() - startTime;
+					currentTime += 1;
 					
-					takeScreenshot("screen" + (currentTime / 10) + ".png");
+					percent = (double) currentTime / (double) totalTime;
 
-					System.out.println(time + " = " + position);
+					Point point = path.getPositionAt(percent);
+
+					Position position = Position.fromDegrees(point.position.x,
+							point.position.y, 0);
+					double zoom = a2e(point.position.z);
+					double heading = point.orientation.x;
+					double pitch = point.orientation.y;
+
+					view.setCenterPosition(position);
+					view.setZoom(zoom);
+					view.setHeading(Angle.fromDegrees(heading));
+					view.setPitch(Angle.fromDegrees(pitch));
+
+					wwd.redrawNow();
+
+					takeScreenshot("frames/screen" + (currentTime) + ".png");
+
+					//System.out.println(currentTime + " = " + position + " zoom = " + zoom);
 				}
+
+				view.setDetectCollisions(detectCollisions);
 			}
 		});
 		thread.start();
@@ -251,8 +279,6 @@ public class Animator
 			if (WorldWind.getTaskService().hasActiveTasks()
 					|| WorldWind.getRetrievalService().hasActiveTasks())
 			{
-				System.out
-						.println("Screenshot not ready, sleeping and redrawing");
 				sleep();
 				wwd.redraw();
 			}
@@ -302,6 +328,10 @@ public class Animator
 		}
 
 		File out = new File(filename);
+		if(!out.getParentFile().exists())
+		{
+			out.getParentFile().mkdirs();
+		}
 		try
 		{
 			ImageIO.write(img, "png", out);

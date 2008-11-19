@@ -1,4 +1,4 @@
-package path;
+package path.globe;
 
 import gov.nasa.worldwind.geom.Angle;
 

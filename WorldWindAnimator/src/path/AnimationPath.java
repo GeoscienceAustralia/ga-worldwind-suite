@@ -1,51 +1,121 @@
 package path;
 
 import java.io.Serializable;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import path.vector.Vector2;
+import path.vector.Vector3;
 
 public class AnimationPath implements Serializable
 {
-	public final SortedSet<AnimationPoint> points = new TreeSet<AnimationPoint>();
+	//1. moves between consecutive points at a constant speed
+	//2. calculate bezier distance between consecutive points
+	//3. change heading
 
-	public Point getPositionAt(double time)
+	public double positionAcceleration = 10;
+
+	private List<AnimationPoint> points = new ArrayList<AnimationPoint>();
+	private List<Bezier<Vector3>> beziers = new ArrayList<Bezier<Vector3>>();
+	private double length = 0;
+
+	private boolean dirty = false;
+
+	public void addPoint(AnimationPoint point)
 	{
-		if (points.first().time > time)
+		points.add(point);
+		dirty = true;
+	}
+
+	public AnimationPoint getPoint(int index)
+	{
+		return points.get(index);
+	}
+
+	public int getPointCount()
+	{
+		return points.size();
+	}
+
+	public void removePoint(int index)
+	{
+		points.remove(index);
+		dirty = true;
+	}
+
+	public void setDirty(boolean dirty)
+	{
+		this.dirty = dirty;
+	}
+
+	public boolean isDirty()
+	{
+		return dirty;
+	}
+
+	private void refreshIfDirty()
+	{
+		if (isDirty())
 		{
-			return points.first();
+			refresh();
 		}
-		else if (points.last().time <= time)
+	}
+
+	private void refresh()
+	{
+		length = 0;
+		beziers.clear();
+
+		for (int i = 1; i < points.size(); i++)
 		{
-			return points.last();
+			AnimationPoint p0 = points.get(i - 1);
+			AnimationPoint p1 = points.get(i);
+			Bezier<Vector3> bezier = new Bezier<Vector3>(p0.position,
+					p0.position.add(p0.out), p1.position.add(p1.in),
+					p1.position);
+			beziers.add(bezier);
+			length += bezier.getLength();
 		}
 
-		AnimationPoint p1 = null;
-		AnimationPoint p2 = null;
+		dirty = false;
+	}
 
-		for (AnimationPoint point : points)
+	public Point getPositionAt(double percent)
+	{
+		refreshIfDirty();
+		percent = Math.min(1, Math.max(0, percent));
+
+		double length = percent * this.length;
+		double cumulativeLength = 0;
+		double currentLength = 0;
+
+		int b;
+		for (b = 0; b < beziers.size(); b++)
 		{
-			p1 = p2;
-			p2 = point;
-			if (p1 != null)
+			currentLength = beziers.get(b).getLength();
+			if (currentLength + cumulativeLength >= length)
 			{
-				if (p1.time <= time && time < p2.time)
-					break;
+				break;
 			}
+			cumulativeLength += currentLength;
 		}
 
-		if (p1 != null && p2 != null)
+		if (b < beziers.size())
 		{
-			double percent = (time - p1.time) / (p2.time - p1.time);
-			return AnimationPoint.bezierInterpolate(p1, p2, percent);
+			AnimationPoint p0 = points.get(b);
+			AnimationPoint p1 = points.get(b + 1);
+			Bezier<Vector3> bezier = beziers.get(b);
+
+			percent = (length - cumulativeLength) / currentLength;
+			percent = Math.min(1, Math.max(0, percent));
+
+			Vector3 position = bezier.linearPointAt(percent);
+			Vector2 orientation = p0.orientation.interpolate(p1.orientation,
+					percent);
+			
+			return new Point(position, orientation);
 		}
 
 		return null;
-	}
-
-	public double getMaxTime()
-	{
-		if (points.isEmpty())
-			return 0;
-		return points.last().time;
 	}
 }

@@ -1,8 +1,11 @@
-package path;
+package path.vector;
 
 public class Vector3 implements Vector<Vector3>
 {
 	public final static Vector3 ZERO = new Vector3(0, 0, 0);
+	public final static Vector3 UNIT_X = new Vector3(1, 0, 0);
+	public final static Vector3 UNIT_Y = new Vector3(0, 1, 0);
+	public final static Vector3 UNIT_Z = new Vector3(0, 0, 1);
 
 	public double x;
 	public double y;
@@ -297,5 +300,29 @@ public class Vector3 implements Vector<Vector3>
 	public static double interpolate(double d1, double d2, double percent)
 	{
 		return d1 * (1 - percent) + d2 * percent;
+	}
+
+	public Vector3 normalize()
+	{
+		return normalize(null);
+	}
+
+	public Vector3 normalize(Vector3 store)
+	{
+		if (store == null)
+			store = new Vector3();
+		store.divide(distance());
+		return store;
+	}
+
+	public Vector3 normalizeLocal()
+	{
+		return divideLocal(distance());
+	}
+	
+	@Override
+	public String toString()
+	{
+		return this.getClass().getName() + " (" + x + ", " + y + ", " + z + ")";
 	}
 }

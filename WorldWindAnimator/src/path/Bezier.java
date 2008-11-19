@@ -1,23 +1,25 @@
 package path;
 
+import path.vector.Vector;
+
 public class Bezier<V extends Vector<V>>
 {
 	private final static int NUM_SUBDIVISIONS = 1000;
 
-	public final V v0;
-	public final V v1;
-	public final V v2;
-	public final V v3;
+	public final V begin;
+	public final V out;
+	public final V in;
+	public final V end;
 
 	private double[] lengths = new double[NUM_SUBDIVISIONS];
 	private double length;
 
-	public Bezier(V v0, V v1, V v2, V v3)
+	public Bezier(V begin, V out, V in, V end)
 	{
-		this.v0 = v0;
-		this.v1 = v1;
-		this.v2 = v2;
-		this.v3 = v3;
+		this.begin = begin;
+		this.end = end;
+		this.out = out;
+		this.in = in;
 		subdivide();
 	}
 
@@ -25,14 +27,14 @@ public class Bezier<V extends Vector<V>>
 	{
 		length = 0d;
 
-		V v0 = this.v0, v1 = null;
+		V begin = this.begin, end = null;
 		for (int i = 0; i < NUM_SUBDIVISIONS; i++)
 		{
 			double t = (i + 1) / (double) NUM_SUBDIVISIONS;
-			v1 = pointAt(t);
-			length += v0.subtract(v1).distance();
+			end = pointAt(t);
+			length += begin.subtract(end).distance();
 			lengths[i] = length;
-			v0 = v1;
+			begin = end;
 		}
 
 		if (length > 0d)
@@ -57,7 +59,7 @@ public class Bezier<V extends Vector<V>>
 			throw new IllegalArgumentException();
 		}
 		int i = 0;
-		while (lengths[i] <= percent)
+		while (i < lengths.length - 1 && lengths[i] <= percent)
 		{
 			i++;
 		}
@@ -78,22 +80,22 @@ public class Bezier<V extends Vector<V>>
 	private V pointAt(double t)
 	{
 		double t2 = t * t;
-		V c = v1.subtract(v0).multLocal(3d);
-		V b = v2.subtract(v1).multLocal(3d).subtractLocal(c);
-		V a = v3.subtract(v0).subtractLocal(c).subtractLocal(b);
+		V c = out.subtract(begin).multLocal(3d);
+		V b = in.subtract(out).multLocal(3d).subtractLocal(c);
+		V a = end.subtract(begin).subtractLocal(c).subtractLocal(b);
 		a.multLocal(t2 * t);
 		b.multLocal(t2);
 		c.multLocal(t);
-		a.addLocal(b).addLocal(c).addLocal(v0);
+		a.addLocal(b).addLocal(c).addLocal(begin);
 		return a;
 	}
 
 	@SuppressWarnings("unused")
 	private V deCasteljau(double t)
 	{
-		V v1 = this.v1.subtract(this.v0).multLocal(t).addLocal(this.v0);
-		V v2 = this.v2.subtract(this.v1).multLocal(t).addLocal(this.v1);
-		V v3 = this.v3.subtract(this.v2).multLocal(t).addLocal(this.v2);
+		V v1 = this.out.subtract(this.begin).multLocal(t).addLocal(this.begin);
+		V v2 = this.in.subtract(this.out).multLocal(t).addLocal(this.out);
+		V v3 = this.end.subtract(this.in).multLocal(t).addLocal(this.in);
 
 		v3 = v3.subtractLocal(v2).multLocal(t).addLocal(v2);
 		v2 = v2.subtractLocal(v1).multLocal(t).addLocal(v1);

@@ -1,4 +1,4 @@
-package path;
+package path.vector;
 
 public class Vector2 implements Vector<Vector2>
 {
@@ -274,5 +274,23 @@ public class Vector2 implements Vector<Vector2>
 	public static double interpolate(double d1, double d2, double percent)
 	{
 		return d1 * (1 - percent) + d2 * percent;
+	}
+
+	public Vector2 normalize()
+	{
+		return normalize(null);
+	}
+
+	public Vector2 normalize(Vector2 store)
+	{
+		if (store == null)
+			store = new Vector2();
+		store.divide(distance());
+		return store;
+	}
+
+	public Vector2 normalizeLocal()
+	{
+		return divideLocal(distance());
 	}
 }

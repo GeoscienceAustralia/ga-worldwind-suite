@@ -1,4 +1,4 @@
-package path;
+package path.globe;
 
 import java.io.Serializable;
 
