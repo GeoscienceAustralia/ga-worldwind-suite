@@ -208,14 +208,40 @@ public class Animator
 
 		Vector2 orientation1 = new Vector2(0, 0);
 		Vector2 orientation2 = new Vector2(180, 90);
+		Vector2 orientation3 = new Vector2(360, 0);
+		Vector2 orientation4 = new Vector2(540, 90);
+		Vector2 orientation5 = new Vector2(720, 0);
 
 		AnimationPoint p1 = new AnimationPoint(v1, orientation1, zero, zaxis);
-		AnimationPoint p2 = new AnimationPoint(v2, orientation2, flat, flat
+		AnimationPoint p2 = new AnimationPoint(v2, orientation2, flat, zero
 				.negate());
-		AnimationPoint p3 = new AnimationPoint(v3, orientation1, zaxis, zero);
+		AnimationPoint p3 = new AnimationPoint(v2, orientation3, zero, zero
+				.negate());
+		AnimationPoint p4 = new AnimationPoint(v2, orientation4, zero, flat
+				.negate());
+		AnimationPoint p5 = new AnimationPoint(v3, orientation5, zaxis, zero);
 		path.addPoint(p1);
 		path.addPoint(p2);
 		path.addPoint(p3);
+		path.addPoint(p4);
+		path.addPoint(p5);
+		
+		p1.velocityAt = 0;
+		p1.velocityAfter = 100;
+		p2.velocityAt = 0;
+		p2.velocityAfter = 100;
+		p3.velocityAt = 100;
+		p3.velocityAfter = 100;
+		p4.velocityAt =  0;
+		p4.velocityAfter = 100;
+		p5.velocityAt = 0;
+		p5.velocityAfter = 100;
+		
+		p1.accelerationAfter = 0.3;
+		p2.accelerationAfter = 10;
+		p3.accelerationAfter = 10;
+		p4.accelerationAfter = 0.3;
+		p4.accelerationAfter = 1;
 
 		Thread thread = new Thread(new Runnable()
 		{
@@ -228,15 +254,15 @@ public class Animator
 				boolean detectCollisions = view.isDetectCollisions();
 				view.setDetectCollisions(false);
 
-				long totalTime = 1000;
+				long totalTime = 100000;
 				long startTime = System.currentTimeMillis();
 				long currentTime = 0;
 				double percent = 0;
 				while (percent <= 1)
 				{
-					//currentTime = System.currentTimeMillis() - startTime;
-					currentTime += 1;
-					
+					currentTime = System.currentTimeMillis() - startTime;
+					//currentTime += 1;
+
 					percent = (double) currentTime / (double) totalTime;
 
 					Point point = path.getPositionAt(percent);
@@ -254,7 +280,7 @@ public class Animator
 
 					wwd.redrawNow();
 
-					takeScreenshot("frames/screen" + (currentTime) + ".png");
+					//takeScreenshot("frames/screen" + (currentTime) + ".png");
 
 					//System.out.println(currentTime + " = " + position + " zoom = " + zoom);
 				}
@@ -328,7 +354,7 @@ public class Animator
 		}
 
 		File out = new File(filename);
-		if(!out.getParentFile().exists())
+		if (!out.getParentFile().exists())
 		{
 			out.getParentFile().mkdirs();
 		}

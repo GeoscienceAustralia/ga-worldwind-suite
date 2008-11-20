@@ -13,6 +13,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/WorldWind"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/jme2"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

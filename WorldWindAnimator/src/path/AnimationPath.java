@@ -4,20 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import path.vector.Vector2;
-import path.vector.Vector3;
-
 public class AnimationPath implements Serializable
 {
-	//1. moves between consecutive points at a constant speed
-	//2. calculate bezier distance between consecutive points
-	//3. change heading
-
-	public double positionAcceleration = 10;
+	public double acceleration = 10;
 
 	private List<AnimationPoint> points = new ArrayList<AnimationPoint>();
-	private List<Bezier<Vector3>> beziers = new ArrayList<Bezier<Vector3>>();
+	private List<AnimationSection> sections = new ArrayList<AnimationSection>();
 	private double length = 0;
+	private double time = 0;
 
 	private boolean dirty = false;
 
@@ -64,17 +58,20 @@ public class AnimationPath implements Serializable
 	private void refresh()
 	{
 		length = 0;
-		beziers.clear();
+		time = 0;
+		sections.clear();
 
-		for (int i = 1; i < points.size(); i++)
+		for (int i = 0; i < points.size() - 1; i++)
 		{
-			AnimationPoint p0 = points.get(i - 1);
-			AnimationPoint p1 = points.get(i);
-			Bezier<Vector3> bezier = new Bezier<Vector3>(p0.position,
-					p0.position.add(p0.out), p1.position.add(p1.in),
-					p1.position);
-			beziers.add(bezier);
-			length += bezier.getLength();
+			AnimationPoint p0 = points.get(i);
+			AnimationPoint p1 = points.get(i + 1);
+			
+			AnimationSection section = new AnimationSection(p0, p1);
+			sections.add(section);
+			double d = section.getLength();
+			length += d;
+			
+			System.out.println(d);
 		}
 
 		dirty = false;
@@ -90,9 +87,9 @@ public class AnimationPath implements Serializable
 		double currentLength = 0;
 
 		int b;
-		for (b = 0; b < beziers.size(); b++)
+		for (b = 0; b < sections.size(); b++)
 		{
-			currentLength = beziers.get(b).getLength();
+			currentLength = sections.get(b).getLength();
 			if (currentLength + cumulativeLength >= length)
 			{
 				break;
@@ -100,20 +97,14 @@ public class AnimationPath implements Serializable
 			cumulativeLength += currentLength;
 		}
 
-		if (b < beziers.size())
+		if (b < sections.size())
 		{
-			AnimationPoint p0 = points.get(b);
-			AnimationPoint p1 = points.get(b + 1);
-			Bezier<Vector3> bezier = beziers.get(b);
+			AnimationSection section = sections.get(b);
 
 			percent = (length - cumulativeLength) / currentLength;
 			percent = Math.min(1, Math.max(0, percent));
 
-			Vector3 position = bezier.linearPointAt(percent);
-			Vector2 orientation = p0.orientation.interpolate(p1.orientation,
-					percent);
-			
-			return new Point(position, orientation);
+			return section.linearPointAt(percent);
 		}
 
 		return null;

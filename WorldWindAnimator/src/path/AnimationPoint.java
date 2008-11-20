@@ -9,6 +9,9 @@ public class AnimationPoint extends Point implements Serializable
 {
 	public Vector3 in;
 	public Vector3 out;
+	public double velocityAt;
+	public double velocityAfter;
+	public double accelerationAfter;
 
 	public AnimationPoint(Point point, Vector3 in, Vector3 out)
 	{
