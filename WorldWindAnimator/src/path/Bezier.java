@@ -11,7 +11,7 @@ public class Bezier<V extends Vector<V>>
 	public final V in;
 	public final V end;
 
-	private double[] lengths = new double[NUM_SUBDIVISIONS];
+	private double[] percents = new double[NUM_SUBDIVISIONS];
 	private double length;
 
 	public Bezier(V begin, V out, V in, V end)
@@ -27,13 +27,13 @@ public class Bezier<V extends Vector<V>>
 	{
 		length = 0d;
 
-		V begin = this.begin, end = null;
+		V begin = this.begin.clone(), end;
 		for (int i = 0; i < NUM_SUBDIVISIONS; i++)
 		{
 			double t = (i + 1) / (double) NUM_SUBDIVISIONS;
-			end = pointAt(t);
-			length += begin.subtract(end).distance();
-			lengths[i] = length;
+			end = bezierPointAt(t);
+			length += begin.subtractLocal(end).distance();
+			percents[i] = length;
 			begin = end;
 		}
 
@@ -41,10 +41,10 @@ public class Bezier<V extends Vector<V>>
 		{
 			for (int i = 0; i < NUM_SUBDIVISIONS; i++)
 			{
-				lengths[i] /= length;
+				percents[i] /= length;
 			}
 		}
-		lengths[NUM_SUBDIVISIONS - 1] = 1d;
+		percents[NUM_SUBDIVISIONS - 1] = 1d;
 	}
 
 	public double getLength()
@@ -52,32 +52,28 @@ public class Bezier<V extends Vector<V>>
 		return length;
 	}
 
-	public V linearPointAt(double percent)
+	public V pointAt(double percent)
 	{
 		if (percent < 0 || percent > 1)
 		{
 			throw new IllegalArgumentException();
 		}
+
 		int i = 0;
-		while (i < lengths.length - 1 && lengths[i] <= percent)
+		while (i < percents.length - 1 && percents[i] <= percent)
 		{
 			i++;
 		}
 
-		double length0 = 0d;
-		double length1 = lengths[i];
-		if (i > 0)
-		{
-			length0 = lengths[i - 1];
-		}
+		double percentStart = i > 0 ? percents[i - 1] : 0d;
+		double percentWindow = percents[i] - percentStart;
+		double p = (percent - percentStart) / percentWindow;
+		percent = (p + (double) i) / (double) NUM_SUBDIVISIONS;
 
-		double t = (percent - length0) / (length1 - length0);
-		t = (t + (double) i) / (double) NUM_SUBDIVISIONS;
-
-		return pointAt(t);
+		return bezierPointAt(percent);
 	}
 
-	private V pointAt(double t)
+	private V bezierPointAt(double t)
 	{
 		double t2 = t * t;
 		V c = out.subtract(begin).multLocal(3d);

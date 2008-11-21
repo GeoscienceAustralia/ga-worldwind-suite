@@ -293,4 +293,10 @@ public class Vector2 implements Vector<Vector2>
 	{
 		return divideLocal(distance());
 	}
+	
+	@Override
+	public String toString()
+	{
+		return this.getClass().getName() + " (" + x + ", " + y + ")";
+	}
 }

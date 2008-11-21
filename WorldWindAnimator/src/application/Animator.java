@@ -5,11 +5,21 @@ import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.layers.CompassLayer;
+import gov.nasa.worldwind.layers.FogLayer;
+import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.layers.ScalebarLayer;
+import gov.nasa.worldwind.layers.SkyGradientLayer;
+import gov.nasa.worldwind.layers.StarsLayer;
+import gov.nasa.worldwind.layers.WorldMapLayer;
+import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
+import gov.nasa.worldwind.layers.Earth.EarthNASAPlaceNameLayer;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
@@ -84,6 +94,8 @@ public class Animator
 
 	public Animator()
 	{
+		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
+
 		frame = new JFrame("World Wind");
 
 		frame.setLayout(new BorderLayout());
@@ -92,6 +104,20 @@ public class Animator
 		wwd.setModel(model);
 		wwd.setPreferredSize(new Dimension(800, 600));
 		frame.add(wwd, BorderLayout.CENTER);
+
+		LayerList layers = model.getLayers();
+
+		layers.add(new StarsLayer());
+		layers.add(new SkyGradientLayer());
+		layers.add(new FogLayer());
+		//layers.add(new BMNGOneImage());
+		layers.add(new BMNGWMSLayer());
+		//layers.add(new LandsatI3WMSLayer());
+		layers.add(new EarthNASAPlaceNameLayer());
+		layers.add(new CompassLayer());
+		layers.add(new WorldMapLayer());
+		layers.add(new ScalebarLayer());
+		//layers.add(new MGRSGraticuleLayer());
 
 		JPanel left = new JPanel(new GridLayout(0, 1));
 		frame.add(left, BorderLayout.WEST);
@@ -225,23 +251,26 @@ public class Animator
 		path.addPoint(p3);
 		path.addPoint(p4);
 		path.addPoint(p5);
-		
+
 		p1.velocityAt = 0;
 		p1.velocityAfter = 100;
 		p2.velocityAt = 0;
 		p2.velocityAfter = 100;
 		p3.velocityAt = 100;
 		p3.velocityAfter = 100;
-		p4.velocityAt =  0;
+		p4.velocityAt = 0;
 		p4.velocityAfter = 100;
 		p5.velocityAt = 0;
 		p5.velocityAfter = 100;
-		
-		p1.accelerationAfter = 0.3;
-		p2.accelerationAfter = 10;
-		p3.accelerationAfter = 10;
-		p4.accelerationAfter = 0.3;
-		p4.accelerationAfter = 1;
+
+		p1.accelerationIn = 10;
+		p1.accelerationOut = 1;
+		p2.accelerationIn = 100;
+		p2.accelerationOut = 100;
+		p3.accelerationIn = 100;
+		p3.accelerationOut = 100;
+		p4.accelerationIn = 10;
+		p4.accelerationOut = 10;
 
 		Thread thread = new Thread(new Runnable()
 		{
@@ -254,14 +283,14 @@ public class Animator
 				boolean detectCollisions = view.isDetectCollisions();
 				view.setDetectCollisions(false);
 
-				long totalTime = 100000;
+				long totalTime = 1000;
 				long startTime = System.currentTimeMillis();
 				long currentTime = 0;
 				double percent = 0;
 				while (percent <= 1)
 				{
-					currentTime = System.currentTimeMillis() - startTime;
-					//currentTime += 1;
+					//currentTime = System.currentTimeMillis() - startTime;
+					currentTime += 1;
 
 					percent = (double) currentTime / (double) totalTime;
 

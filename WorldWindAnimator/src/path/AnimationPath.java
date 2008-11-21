@@ -6,12 +6,9 @@ import java.util.List;
 
 public class AnimationPath implements Serializable
 {
-	public double acceleration = 10;
-
 	private List<AnimationPoint> points = new ArrayList<AnimationPoint>();
 	private List<AnimationSection> sections = new ArrayList<AnimationSection>();
 	private double length = 0;
-	private double time = 0;
 
 	private boolean dirty = false;
 
@@ -58,7 +55,6 @@ public class AnimationPath implements Serializable
 	private void refresh()
 	{
 		length = 0;
-		time = 0;
 		sections.clear();
 
 		for (int i = 0; i < points.size() - 1; i++)
@@ -70,8 +66,6 @@ public class AnimationPath implements Serializable
 			sections.add(section);
 			double d = section.getLength();
 			length += d;
-			
-			System.out.println(d);
 		}
 
 		dirty = false;

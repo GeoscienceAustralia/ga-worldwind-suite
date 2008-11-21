@@ -25,9 +25,10 @@ public class Motion
 	public double d2;
 	public double d3;
 
-	public Motion(double a, double v1, double v2, double v3, double d)
+	public Motion(double v1, double v2, double v3, double d, double ain,
+			double aout)
 	{
-		if (a <= 0)
+		if (ain <= 0 || aout <= 0)
 			throw new RuntimeException("Acceleration must be greater than 0");
 
 		if (v1 < 0 || v2 < 0 || v3 < 0)
@@ -37,15 +38,15 @@ public class Motion
 		this.v2 = v2;
 		this.v3 = v3;
 
-		calculate(d, a);
+		calculate(d, ain, aout);
 
 		if (d2 < 0)
 		{
 			//will only work if a1 is positive and a3 is negative or vise versa
 			if (Math.signum(a1) != Math.signum(a3))
 			{
-				fixV2(d, a);
-				calculate(d, a);
+				fixV2();
+				calculate(d, ain, aout);
 			}
 			else
 			{
@@ -56,12 +57,12 @@ public class Motion
 	}
 
 
-	private void calculate(double d, double a)
+	private void calculate(double d, double ain, double aout)
 	{
 		//acceleration/deceleration
-		a1 = (v2 > v1) ? a : -a;
+		a1 = (v2 > v1) ? ain : -ain;
 		a2 = 0;
-		a3 = (v3 > v2) ? a : -a;
+		a3 = (v3 > v2) ? aout : -aout;
 
 		//in,out time
 		t1 = (v2 - v1) / a1;
@@ -92,9 +93,10 @@ public class Motion
 		}
 	}
 
-	private void fixV2(double d, double a)
+	private void fixV2()
 	{
 		//find a new v2 such that d2 = 0
+		double d = d1 + d2 + d3;
 		v2 = Math.sqrt((4 * a1 * a3 * d - 2 * a1 * v3 * v3 + 2 * a3 * v1 * v1)
 				/ (2 * (a3 - a1)));
 	}
@@ -106,26 +108,43 @@ public class Motion
 
 	public double getPercent(double time)
 	{
+		if (time <= 0)
+			return 0;
+		if (time >= getTime())
+			return 1;
+
+		double a;
+		double d;
+		double u;
+		double t;
+
 		if (time < t1)
 		{
-			double t = time;
-			double d = v1 * t + 0.5 * a1 * t * t;
-			return d / (d1 + d2 + d3);
+			t = time;
+			a = a1;
+			d = 0;
+			u = v1;
 		}
 		else if (time < t1 + t2)
 		{
-			double t = time - t1;
-			double d = v2 * t/* + 0.5 * a2 * t * t*/; //a2 is 0
-			d += d1;
-			return d / (d1 + d2 + d3);
+			t = time - t1;
+			a = a2;
+			d = d1;
+			u = v2;
 		}
-		else if (time < t1 + t2 + t3)
+		else
 		{
-			double t = time - t1 - t2;
-			double d = v2 * t + 0.5 * a3 * t * t;
-			d += d1 + d2;
-			return d / (d1 + d2 + d3);
+			t = time - t1 - t2;
+			a = a3;
+			d = d1 + d2;
+			u = v2;
 		}
-		return 1;
+
+		d += u * t + 0.5 * a * t * t;
+		
+		/*double v = u + a * t;
+		System.out.println("Distance = " + d + ", Velocity = " + v);*/
+
+		return d / (d1 + d2 + d3);
 	}
 }

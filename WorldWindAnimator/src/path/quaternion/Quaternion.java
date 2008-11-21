@@ -54,6 +54,13 @@ public class Quaternion
 			return false;
 	}
 
+	public Quaternion fromAnglesDegrees(double yaw, double roll, double pitch)
+	{
+		double DEG_TO_RAD = Math.PI / 180d;
+		return fromAngles(yaw * DEG_TO_RAD, roll * DEG_TO_RAD, pitch
+				* DEG_TO_RAD);
+	}
+
 	public Quaternion fromAngles(double yaw, double roll, double pitch)
 	{
 		double angle;
