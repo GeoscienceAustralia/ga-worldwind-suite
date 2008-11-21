@@ -4,6 +4,7 @@ import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.ViewStateIterator;
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Angle;
@@ -513,6 +514,19 @@ public class Application
 
 		menu = new JMenu("File");
 		menuBar.add(menu);
+
+		final JCheckBoxMenuItem offline = new JCheckBoxMenuItem("Work offline");
+		menu.add(offline);
+		offline.setSelected(WorldWind.isOfflineMode());
+		offline.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				WorldWind.setOfflineMode(offline.isSelected());
+			}
+		});
+
+		menu.addSeparator();
 
 		menuItem = new JMenuItem("Exit");
 		menu.add(menuItem);

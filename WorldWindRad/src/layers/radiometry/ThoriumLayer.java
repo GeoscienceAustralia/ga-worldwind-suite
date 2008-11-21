@@ -27,8 +27,9 @@ public class ThoriumLayer extends MaskTiledImageLayer
 
 		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
-		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Radiometry/Th_100m_he_rgb");
-		params.setValue(AVKey.SERVICE, "http://sandpit:8500/map/web3d/worldwind/scripts/tiles.php");
+		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Radiometrics/Th_100m_he_rgb");
+		params.setValue(AVKey.SERVICE,
+				"http://sandpit:8500/map/web3d/worldwind/scripts/tiles.php");
 		params.setValue(AVKey.DATASET_NAME, "radio_Th_100m_he_rgb");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 7);
@@ -40,10 +41,13 @@ public class ThoriumLayer extends MaskTiledImageLayer
 				.fromDegreesLatitude(-8.9995000), Angle
 				.fromDegreesLongitude(112.8995000), Angle
 				.fromDegreesLongitude(153.6705000)));
+		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
+				.createDefaultUrlBuilder("tiles/Th_100m_he_rgb",
+						"tiles/radio_mask", ".jpg", ".png"));
 
 		return new LevelSet(params);
 	}
-	
+
 	@Override
 	public String toString()
 	{

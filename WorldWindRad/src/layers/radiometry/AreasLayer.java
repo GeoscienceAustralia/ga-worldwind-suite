@@ -28,8 +28,9 @@ public class AreasLayer extends MaskTiledImageLayer
 		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
 		params.setValue(AVKey.DATA_CACHE_NAME,
-				"GA/Radiometry/images_8areas_100m");
-		params.setValue(AVKey.SERVICE, "http://sandpit:8500/map/web3d/worldwind/scripts/tiles.php");
+				"GA/Radiometrics/images_8areas_100m");
+		params.setValue(AVKey.SERVICE,
+				"http://sandpit:8500/map/web3d/worldwind/scripts/tiles.php");
 		params.setValue(AVKey.DATASET_NAME, "images_8areas_100m");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 7);
@@ -69,6 +70,9 @@ public class AreasLayer extends MaskTiledImageLayer
 						new LevelSet.SectorResolution(Sector.fromDegrees(
 								-22.0555, -19.9995, 117.9925, 121.1775), 6),
 						new LevelSet.SectorResolution(Sector.FULL_SPHERE, 0) });
+		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
+				.createDefaultUrlBuilder("tiles/images_8areas_100m",
+						"tiles/images_8areas_100m_mask", ".jpg", ".png"));
 
 		return new LevelSet(params);
 	}

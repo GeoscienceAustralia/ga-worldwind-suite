@@ -27,8 +27,9 @@ public class GravityLayer extends MaskTiledImageLayer
 
 		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
-		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Radiometry/gravity");
-		params.setValue(AVKey.SERVICE, "http://sandpit:8500/map/web3d/worldwind/scripts/tiles.php");
+		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Gravity");
+		params.setValue(AVKey.SERVICE,
+				"http://sandpit:8500/map/web3d/worldwind/scripts/tiles.php");
 		params.setValue(AVKey.DATASET_NAME, "gravity");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 4);
@@ -40,6 +41,9 @@ public class GravityLayer extends MaskTiledImageLayer
 				.fromDegreesLatitude(-5.5648340), Angle
 				.fromDegreesLongitude(98.4274511), Angle
 				.fromDegreesLongitude(170.5036628)));
+		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
+				.createDefaultUrlBuilder("tiles/gravity", "tiles/gravity_mask",
+						".jpg", ".png"));
 
 		return new LevelSet(params);
 	}

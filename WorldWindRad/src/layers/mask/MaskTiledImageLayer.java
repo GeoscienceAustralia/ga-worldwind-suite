@@ -16,6 +16,8 @@ import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.retrieve.URLRetriever;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.Tile;
+import gov.nasa.worldwind.util.TileUrlBuilder;
 import gov.nasa.worldwind.util.WWIO;
 
 import java.awt.AlphaComposite;
@@ -26,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
@@ -37,6 +40,8 @@ import com.sun.opengl.util.texture.TextureIO;
 public class MaskTiledImageLayer extends TiledImageLayer
 {
 	private final Object fileLock = new Object();
+
+	public static final String LOCAL_URL_BUILDER = "layers.mask.MaskTiledImageLayer.LocalUrlBuilder";
 
 	public MaskTiledImageLayer(LevelSet levelSet)
 	{
@@ -200,28 +205,12 @@ public class MaskTiledImageLayer extends TiledImageLayer
 
 	protected void downloadTexture(final TextureTile tile)
 	{
-		if (!WorldWind.getRetrievalService().isAvailable())
-			return;
-
 		URL textureUrl;
 		URL maskUrl;
 		try
 		{
 			textureUrl = tile.getResourceURL();
-			if (textureUrl == null)
-				return;
-
-			if (WorldWind.getNetworkStatus().isHostUnavailable(textureUrl))
-				return;
-
-			if (textureUrl.getQuery() == null)
-			{
-				maskUrl = new URL(textureUrl.toExternalForm() + "?mask");
-			}
-			else
-			{
-				maskUrl = new URL(textureUrl.toExternalForm() + "&mask");
-			}
+			maskUrl = tile.getResourceURL("mask");
 		}
 		catch (java.net.MalformedURLException e)
 		{
@@ -233,16 +222,44 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			return;
 		}
 
-		Retriever textureRetriever;
-		Retriever maskRetriever;
+		if (textureUrl == null || maskUrl == null)
+			return;
+
+		boolean fileProtocol = "file"
+				.equalsIgnoreCase(textureUrl.getProtocol())
+				&& "file".equalsIgnoreCase(maskUrl.getProtocol());
+
+		if (!fileProtocol && !WorldWind.getRetrievalService().isAvailable())
+			return;
+
+		if (!fileProtocol
+				&& (WorldWind.getNetworkStatus().isHostUnavailable(textureUrl) || WorldWind
+						.getNetworkStatus().isHostUnavailable(maskUrl)))
+			return;
+
+		Retriever textureRetriever = null;
+		Retriever maskRetriever = null;
 		DownloadPostProcessor dpp = new DownloadPostProcessor(tile, this);
 
 		if ("http".equalsIgnoreCase(textureUrl.getProtocol()))
 		{
 			textureRetriever = new HTTPRetriever(textureUrl, dpp);
+		}
+		else if ("file".equalsIgnoreCase(textureUrl.getProtocol()))
+		{
+			textureRetriever = new FileRetriever(textureUrl, dpp);
+		}
+
+		if ("http".equalsIgnoreCase(textureUrl.getProtocol()))
+		{
 			maskRetriever = new HTTPRetriever(maskUrl, dpp);
 		}
-		else
+		else if ("file".equalsIgnoreCase(textureUrl.getProtocol()))
+		{
+			maskRetriever = new FileRetriever(maskUrl, dpp);
+		}
+
+		if (textureRetriever == null || maskRetriever == null)
 		{
 			Logging.logger().severe(
 					Logging.getMessage(
@@ -455,6 +472,106 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			}
 
 			return true;
+		}
+	}
+
+	public static TileUrlBuilder createDefaultUrlBuilder()
+	{
+		return createDefaultUrlBuilder((File) null, null, null, null);
+	}
+
+	public static TileUrlBuilder createDefaultUrlBuilder(
+			String localTextureDir, String localMaskDir,
+			String textureExtension, String maskExtension)
+	{
+		return createDefaultUrlBuilder(new File(localTextureDir), new File(
+				localMaskDir), textureExtension, maskExtension);
+	}
+
+	public static TileUrlBuilder createDefaultUrlBuilder(File localTextureDir,
+			File localMaskDir, String textureExtension, String maskExtension)
+	{
+		return new MaskUrlBuilder(localTextureDir, localMaskDir,
+				textureExtension, maskExtension);
+	}
+
+	private static class MaskUrlBuilder implements TileUrlBuilder
+	{
+		private File localTextureDir;
+		private File localMaskDir;
+		private String textureExtension;
+		private String maskExtension;
+
+		public MaskUrlBuilder(File localTextureDir, File localMaskDir,
+				String textureExtension, String maskExtension)
+		{
+			this.localTextureDir = localTextureDir;
+			this.localMaskDir = localMaskDir;
+			this.textureExtension = (textureExtension.startsWith(".") ? ""
+					: ".")
+					+ textureExtension;
+			this.maskExtension = (maskExtension.startsWith(".") ? "" : ".")
+					+ maskExtension;
+		}
+
+		private String prependZeros(int number, int length)
+		{
+			StringBuilder sb = new StringBuilder();
+			sb.append(number);
+			while (sb.length() < length)
+			{
+				sb.insert(0, "0");
+			}
+			return sb.toString();
+		}
+
+		private File buildFile(Tile tile, File dir, String extension)
+		{
+			if (dir == null || extension == null)
+				return null;
+
+			String level = String.valueOf(tile.getLevelNumber());
+			String row = prependZeros(tile.getRow(), 4);
+			String col = prependZeros(tile.getColumn(), 4);
+			return new File(dir, level + "/" + row + "/" + row + "_" + col
+					+ extension);
+		}
+
+		public URL getURL(Tile tile, String imageFormat)
+				throws MalformedURLException
+		{
+			boolean mask = "mask".equalsIgnoreCase(imageFormat);
+			File file = buildFile(tile, mask ? localMaskDir : localTextureDir,
+					mask ? maskExtension : textureExtension);
+			if (file != null && file.exists())
+			{
+				return file.toURL();
+			}
+			else
+			{
+				String service = tile.getLevel().getService();
+				if (service == null || service.length() < 1)
+					return null;
+
+				StringBuffer sb = new StringBuffer(tile.getLevel().getService());
+				if (sb.lastIndexOf("?") != sb.length() - 1)
+					sb.append("?");
+				sb.append("T=");
+				sb.append(tile.getLevel().getDataset());
+				sb.append("&L=");
+				sb.append(tile.getLevel().getLevelName());
+				sb.append("&X=");
+				sb.append(tile.getColumn());
+				sb.append("&Y=");
+				sb.append(tile.getRow());
+
+				if (mask)
+					sb.append("&mask");
+
+				// Convention for NASA WWN tiles is to request them with common dataset name but without dds.
+				return new URL(imageFormat == null ? sb.toString() : sb
+						.toString().replace("dds", ""));
+			}
 		}
 	}
 }
