@@ -2,9 +2,14 @@ package stereo;
 
 import gov.nasa.worldwind.AbstractSceneController;
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.render.DrawContext;
 
+import java.awt.Point;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.media.opengl.GL;
 
@@ -120,6 +125,51 @@ public class StereoSceneController extends AbstractSceneController
 			case STEREOBUFFER:
 				gl.glDrawBuffer(GL.GL_BACK);
 				break;
+		}
+	}
+
+	private ArrayList<Point> pickPoints = new ArrayList<Point>();
+
+	protected void pickTerrain(DrawContext dc)
+	{
+		try
+		{
+			if (dc.isPickingMode() && dc.getVisibleSector() != null
+					&& dc.getSurfaceGeometry() != null
+					&& dc.getSurfaceGeometry().size() > 0)
+			{
+				this.pickPoints.clear();
+				if (dc.getPickPoint() != null)
+					this.pickPoints.add(dc.getPickPoint());
+
+				// Clear viewportCenterPosition.
+				dc.setViewportCenterPosition(null);
+				Point vpc = dc.getViewportCenterScreenPoint();
+				if (vpc != null)
+					this.pickPoints.add(vpc);
+
+				if (this.pickPoints.size() == 0)
+					return;
+
+				List<PickedObject> pickedObjects = dc.getSurfaceGeometry()
+						.pick(dc, this.pickPoints);
+				if (pickedObjects == null || pickedObjects.size() == 0)
+					return;
+
+				for (PickedObject po : pickedObjects)
+				{
+					if (po == null)
+						continue;
+					if (po.getPickPoint().equals(dc.getPickPoint()))
+						dc.addPickedObject(po);
+					else if (po.getPickPoint().equals(vpc))
+						dc.setViewportCenterPosition((Position) po.getObject());
+				}
+			}
+		}
+		catch (IndexOutOfBoundsException e)
+		{
+			//ignore (bug in nasa code)
 		}
 	}
 }

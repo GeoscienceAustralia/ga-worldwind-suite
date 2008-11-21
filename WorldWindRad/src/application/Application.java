@@ -62,6 +62,7 @@ import javax.swing.UIManager;
 
 import layers.mouse.MouseLayer;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
+import nasa.worldwind.cache.FixedBasicDataFileCache;
 
 import org.flexdock.docking.DockingConstants;
 import org.flexdock.docking.DockingManager;
@@ -124,6 +125,8 @@ public class Application
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class
 				.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
+		Configuration.setValue(AVKey.DATA_FILE_CACHE_CLASS_NAME,
+				FixedBasicDataFileCache.class.getName());
 
 		Configuration.setValue(AVKey.INITIAL_LATITUDE, Double.toString(Angle
 				.fromDegreesLatitude(-27).degrees));
