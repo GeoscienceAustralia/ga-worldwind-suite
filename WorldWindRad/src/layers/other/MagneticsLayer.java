@@ -18,7 +18,6 @@ public class MagneticsLayer extends MaskTiledImageLayer
 		this.setRetainLevelZeroTiles(true);
 		this.setUseMipMaps(true);
 		this.setUseTransparentTextures(true);
-		//this.setOpacity(0.5);
 	}
 
 	private static LevelSet makeLevels()
@@ -42,7 +41,7 @@ public class MagneticsLayer extends MaskTiledImageLayer
 				.fromDegreesLongitude(98.4274511), Angle
 				.fromDegreesLongitude(170.5036628)));
 		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
-				.createDefaultUrlBuilder("tiles/magnetics/images",
+				.createDefaultUrlBuilder("tiles/magnetics/image",
 						"tiles/magnetics/mask", ".jpg", ".png"));
 
 		return new LevelSet(params);
