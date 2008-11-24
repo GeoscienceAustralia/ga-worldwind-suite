@@ -146,10 +146,6 @@ public class Animator
 		frame.add(statusBar, BorderLayout.PAGE_END);
 		statusBar.setEventSource(wwd);
 
-		//do not take a screenshot while the following are true:
-		//WorldWind.getTaskService().hasActiveTasks();
-		//WorldWind.getRetrievalService().hasActiveTasks();
-
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter()
 		{
