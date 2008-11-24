@@ -1,4 +1,4 @@
-package layers.radiometry;
+package layers.radioareas;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -7,31 +7,17 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.mask.MaskTiledImageLayer;
 
-public class AreasLayer extends MaskTiledImageLayer
+public class AreasLayerUtil
 {
-	public AreasLayer()
-	{
-		super(makeLevels());
-		this.setForceLevelZeroLoads(true);
-		this.setRetainLevelZeroTiles(true);
-		this.setUseMipMaps(true);
-		this.setUseTransparentTextures(true);
-		//this.setOpacity(0.5);
-	}
-
-	private static LevelSet makeLevels()
+	public static AVList makeParams()
 	{
 		AVList params = new AVListImpl();
 
 		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
-		params.setValue(AVKey.DATA_CACHE_NAME,
-				"GA/Radiometrics/images_8areas_100m");
 		params.setValue(AVKey.SERVICE,
 				"http://sandpit:8500/map/web3d/worldwind/scripts/tiles.php");
-		params.setValue(AVKey.DATASET_NAME, "images_8areas_100m");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 7);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
@@ -70,16 +56,7 @@ public class AreasLayer extends MaskTiledImageLayer
 						new LevelSet.SectorResolution(Sector.fromDegrees(
 								-22.0555, -19.9995, 117.9925, 121.1775), 6),
 						new LevelSet.SectorResolution(Sector.FULL_SPHERE, 0) });
-		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
-				.createDefaultUrlBuilder("tiles/images_8areas_100m",
-						"tiles/images_8areas_100m_mask", ".jpg", ".png"));
 
-		return new LevelSet(params);
-	}
-
-	@Override
-	public String toString()
-	{
-		return "Areas of Interest";
+		return params;
 	}
 }

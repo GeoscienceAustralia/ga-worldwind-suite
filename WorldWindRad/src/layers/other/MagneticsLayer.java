@@ -42,8 +42,8 @@ public class MagneticsLayer extends MaskTiledImageLayer
 				.fromDegreesLongitude(98.4274511), Angle
 				.fromDegreesLongitude(170.5036628)));
 		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
-				.createDefaultUrlBuilder("tiles/magnetics",
-						"tiles/magnetics_mask", ".jpg", ".png"));
+				.createDefaultUrlBuilder("tiles/magnetics/images",
+						"tiles/magnetics/mask", ".jpg", ".png"));
 
 		return new LevelSet(params);
 	}

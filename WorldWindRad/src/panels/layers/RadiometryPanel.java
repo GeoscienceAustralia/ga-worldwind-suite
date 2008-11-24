@@ -29,7 +29,14 @@ import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import layers.radiometry.AreasLayer;
+import layers.radioareas.DoseRateAreasLayer;
+import layers.radioareas.PotassiumAreasLayer;
+import layers.radioareas.RatioThKAreasLayer;
+import layers.radioareas.RatioUKAreasLayer;
+import layers.radioareas.RatioUThAreasLayer;
+import layers.radioareas.TernaryAreasLayer;
+import layers.radioareas.ThoriumAreasLayer;
+import layers.radioareas.UraniumAreasLayer;
 import layers.radiometry.DoseRateLayer;
 import layers.radiometry.PotassiumLayer;
 import layers.radiometry.RatioThKLayer;
@@ -52,7 +59,14 @@ public class RadiometryPanel extends JPanel
 	private Layer ratioUTh;
 	private Layer ratioUK;
 	private Layer ratioThK;
-	private Layer areas;
+	private Layer ternaryAreas;
+	private Layer uraniumAreas;
+	private Layer thoriumAreas;
+	private Layer potassiumAreas;
+	private Layer doseRateAreas;
+	private Layer ratioUThAreas;
+	private Layer ratioUKAreas;
+	private Layer ratioThKAreas;
 
 	private JCheckBox radioCheck;
 	private JRadioButton ternaryRadio;
@@ -64,6 +78,14 @@ public class RadiometryPanel extends JPanel
 	private JRadioButton ratioUKRadio;
 	private JRadioButton ratioThKRadio;
 	private JCheckBox areasCheck;
+	private JRadioButton ternaryAreasRadio;
+	private JRadioButton uraniumAreasRadio;
+	private JRadioButton thoriumAreasRadio;
+	private JRadioButton potassiumAreasRadio;
+	private JRadioButton doseRateAreasRadio;
+	private JRadioButton ratioUThAreasRadio;
+	private JRadioButton ratioUKAreasRadio;
+	private JRadioButton ratioThKAreasRadio;
 	private JSlider radioSlider;
 	private JSlider areasSlider;
 	private JComboBox areasCombo;
@@ -107,10 +129,20 @@ public class RadiometryPanel extends JPanel
 		ratioUTh = new RatioUThLayer();
 		ratioUK = new RatioUKLayer();
 		ratioThK = new RatioThKLayer();
-		areas = new AreasLayer();
+
+		ternaryAreas = new TernaryAreasLayer();
+		uraniumAreas = new UraniumAreasLayer();
+		thoriumAreas = new ThoriumAreasLayer();
+		potassiumAreas = new PotassiumAreasLayer();
+		doseRateAreas = new DoseRateAreasLayer();
+		ratioUThAreas = new RatioUThAreasLayer();
+		ratioUKAreas = new RatioUKAreasLayer();
+		ratioThKAreas = new RatioThKAreasLayer();
 
 		layers = new Layer[] { ternary, uranium, thorium, potassium, doseRate,
-				ratioUTh, ratioUK, ratioThK, areas };
+				ratioUTh, ratioUK, ratioThK, ternaryAreas, uraniumAreas,
+				thoriumAreas, potassiumAreas, doseRateAreas, ratioUThAreas,
+				ratioUKAreas, ratioThKAreas };
 		for (Layer layer : layers)
 		{
 			wwd.getModel().getLayers().add(layer);
@@ -120,6 +152,8 @@ public class RadiometryPanel extends JPanel
 
 	private void fillPanel()
 	{
+		int INDENT = 20;
+		
 		setLayout(new GridBagLayout());
 		GridBagConstraints c;
 		JPanel panel;
@@ -170,7 +204,7 @@ public class RadiometryPanel extends JPanel
 		panel.add(radioSlider, c);
 
 		panel = new JPanel(new GridLayout(0, 1));
-		panel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+		panel.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 1;
@@ -247,10 +281,61 @@ public class RadiometryPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasSlider, c);
 
-		panel = new JPanel(new GridBagLayout());
+		panel = new JPanel(new GridLayout(0, 1));
+		panel.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 3;
+		c.anchor = GridBagConstraints.WEST;
+		add(panel, c);
+
+		ternaryAreasRadio = new JRadioButton("Ternary");
+		panel.add(ternaryAreasRadio);
+		ternaryAreasRadio.addActionListener(al);
+
+		uraniumAreasRadio = new JRadioButton("Uranium");
+		panel.add(uraniumAreasRadio);
+		uraniumAreasRadio.addActionListener(al);
+
+		thoriumAreasRadio = new JRadioButton("Thorium");
+		panel.add(thoriumAreasRadio);
+		thoriumAreasRadio.addActionListener(al);
+
+		potassiumAreasRadio = new JRadioButton("Potassium");
+		panel.add(potassiumAreasRadio);
+		potassiumAreasRadio.addActionListener(al);
+
+		doseRateAreasRadio = new JRadioButton("Dose Rate");
+		panel.add(doseRateAreasRadio);
+		doseRateAreasRadio.addActionListener(al);
+
+		ratioUThAreasRadio = new JRadioButton("Uranium/Thorium Ratio");
+		panel.add(ratioUThAreasRadio);
+		ratioUThAreasRadio.addActionListener(al);
+
+		ratioUKAreasRadio = new JRadioButton("Uranium/Potassium Ratio");
+		panel.add(ratioUKAreasRadio);
+		ratioUKAreasRadio.addActionListener(al);
+
+		ratioThKAreasRadio = new JRadioButton("Thorium/Potassium Ratio");
+		panel.add(ratioThKAreasRadio);
+		ratioThKAreasRadio.addActionListener(al);
+
+		buttonGroup = new ButtonGroup();
+		buttonGroup.add(ternaryAreasRadio);
+		buttonGroup.add(uraniumAreasRadio);
+		buttonGroup.add(thoriumAreasRadio);
+		buttonGroup.add(potassiumAreasRadio);
+		buttonGroup.add(doseRateAreasRadio);
+		buttonGroup.add(ratioUThAreasRadio);
+		buttonGroup.add(ratioUKAreasRadio);
+		buttonGroup.add(ratioThKAreasRadio);
+
+		panel = new JPanel(new GridBagLayout());
+		panel.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 4;
 		c.anchor = GridBagConstraints.WEST;
 		add(panel, c);
 
@@ -298,6 +383,7 @@ public class RadiometryPanel extends JPanel
 		});
 
 		ternaryRadio.setSelected(true);
+		ternaryAreasRadio.setSelected(true);
 		updateLayers();
 		this.revalidate();
 	}
@@ -310,6 +396,8 @@ public class RadiometryPanel extends JPanel
 	private void updateLayers()
 	{
 		boolean radio = radioCheck.isSelected();
+		boolean areas = areasCheck.isSelected();
+
 		ternary.setEnabled(radio && ternaryRadio.isSelected());
 		ternary.setOpacity(radioSlider.getValue() / 100d);
 		uranium.setEnabled(radio && uraniumRadio.isSelected());
@@ -326,8 +414,24 @@ public class RadiometryPanel extends JPanel
 		ratioUK.setOpacity(radioSlider.getValue() / 100d);
 		ratioThK.setEnabled(radio && ratioThKRadio.isSelected());
 		ratioThK.setOpacity(radioSlider.getValue() / 100d);
-		areas.setEnabled(areasCheck.isSelected());
-		areas.setOpacity(areasSlider.getValue() / 100d);
+
+		ternaryAreas.setEnabled(areas && ternaryAreasRadio.isSelected());
+		ternaryAreas.setOpacity(areasSlider.getValue() / 100d);
+		uraniumAreas.setEnabled(areas && uraniumAreasRadio.isSelected());
+		uraniumAreas.setOpacity(areasSlider.getValue() / 100d);
+		thoriumAreas.setEnabled(areas && thoriumAreasRadio.isSelected());
+		thoriumAreas.setOpacity(areasSlider.getValue() / 100d);
+		potassiumAreas.setEnabled(areas && potassiumAreasRadio.isSelected());
+		potassiumAreas.setOpacity(areasSlider.getValue() / 100d);
+		doseRateAreas.setEnabled(areas && doseRateAreasRadio.isSelected());
+		doseRateAreas.setOpacity(areasSlider.getValue() / 100d);
+		ratioUThAreas.setEnabled(areas && ratioUThAreasRadio.isSelected());
+		ratioUThAreas.setOpacity(areasSlider.getValue() / 100d);
+		ratioUKAreas.setEnabled(areas && ratioUKAreasRadio.isSelected());
+		ratioUKAreas.setOpacity(areasSlider.getValue() / 100d);
+		ratioThKAreas.setEnabled(areas && ratioThKAreasRadio.isSelected());
+		ratioThKAreas.setOpacity(areasSlider.getValue() / 100d);
+
 		wwd.redraw();
 	}
 

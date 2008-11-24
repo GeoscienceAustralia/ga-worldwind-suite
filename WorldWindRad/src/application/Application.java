@@ -135,6 +135,8 @@ public class Application
 		/*Configuration.setValue(AVKey.INITIAL_ALTITUDE, Double
 				.toString(1.2 * Earth.WGS84_EQUATORIAL_RADIUS));*/
 
+		WorldWind.getDataFileCache().addCacheLocation("cache");
+
 		new Application();
 	}
 
@@ -290,7 +292,23 @@ public class Application
 				frame.setVisible(true);
 			}
 		});
+
+		//putInSeparateFrame(1024, 576);
 	}
+
+	/*private void putInSeparateFrame(int width, int height)
+	{
+		JFrame frame = new JFrame();
+		frame.setLayout(new BorderLayout());
+		frame.setUndecorated(true);
+		frame.add(wwd, BorderLayout.CENTER);
+		Dimension size = new Dimension(1024, 576);
+		wwd.setMinimumSize(size);
+		wwd.setMaximumSize(size);
+		wwd.setPreferredSize(size);
+		frame.setSize(size);
+		frame.setVisible(true);
+	}*/
 
 	private void addWindowListeners()
 	{

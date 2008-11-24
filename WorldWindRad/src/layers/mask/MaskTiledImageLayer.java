@@ -460,6 +460,25 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			g2d.drawImage(texture, 0, 0, null);
 			g2d.dispose();
 
+			/*BufferedImage bi = new BufferedImage(texture.getWidth(), texture
+					.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			for (int x = 0; x < texture.getWidth(); x++)
+			{
+				for (int y = 0; y < texture.getHeight(); y++)
+				{
+					int rgb = texture.getRGB(x, y);
+					Color c = new Color(rgb);
+					int alpha = 255;
+					if (c.getRed() + c.getBlue() + c.getGreen() < 30)
+					{
+						alpha = 0;
+					}
+					c = new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
+					bi.setRGB(x, y, c.getRGB());
+				}
+			}
+			mask = bi;*/
+
 			try
 			{
 				//TODO take out hardcoded PNG
