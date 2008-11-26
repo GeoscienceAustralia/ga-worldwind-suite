@@ -1,8 +1,10 @@
 package camera.bezier;
 
+import java.io.Serializable;
+
 import camera.vector.Vector;
 
-public class Bezier<V extends Vector<V>>
+public class Bezier<V extends Vector<V>> implements Serializable
 {
 	private final static int NUM_SUBDIVISIONS = 1000;
 

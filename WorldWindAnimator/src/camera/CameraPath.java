@@ -7,6 +7,11 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import camera.bezier.LatLonBezier;
+import camera.interpolate.Interpolatable;
+import camera.interpolate.InterpolatableHeading;
+import camera.interpolate.InterpolatableLatLon;
+import camera.interpolate.InterpolatablePitch;
+import camera.interpolate.InterpolatableZoom;
 import camera.motion.Motion;
 import camera.motion.MotionParams;
 import camera.params.Heading;
@@ -16,10 +21,10 @@ import camera.params.Zoom;
 
 public class CameraPath implements Serializable
 {
-	private SortedMap<Double, MotionAndObject<LatLonBezier>> centers = new TreeMap<Double, MotionAndObject<LatLonBezier>>();
-	private SortedMap<Double, MotionAndObject<Zoom>> zooms = new TreeMap<Double, MotionAndObject<Zoom>>();
-	private SortedMap<Double, MotionAndObject<Heading>> headings = new TreeMap<Double, MotionAndObject<Heading>>();
-	private SortedMap<Double, MotionAndObject<Pitch>> pitchs = new TreeMap<Double, MotionAndObject<Pitch>>();
+	private SortedMap<Double, MotionAndObject<InterpolatableLatLon>> centers = new TreeMap<Double, MotionAndObject<InterpolatableLatLon>>();
+	private SortedMap<Double, MotionAndObject<InterpolatableZoom>> zooms = new TreeMap<Double, MotionAndObject<InterpolatableZoom>>();
+	private SortedMap<Double, MotionAndObject<InterpolatableHeading>> headings = new TreeMap<Double, MotionAndObject<InterpolatableHeading>>();
+	private SortedMap<Double, MotionAndObject<InterpolatablePitch>> pitchs = new TreeMap<Double, MotionAndObject<InterpolatablePitch>>();
 
 	private boolean centersDirty = true;
 	private boolean zoomsDirty = true;
@@ -30,143 +35,69 @@ public class CameraPath implements Serializable
 	public CameraPath(LatLon initialCenter, LatLon initialOut,
 			Zoom initialZoom, Heading initialHeading, Pitch initialPitch)
 	{
-		centers.put(0d, new MotionAndObject<LatLonBezier>(new LatLonBezier(
-				initialCenter, null, initialOut), null));
-		zooms.put(0d, new MotionAndObject<Zoom>(initialZoom, null));
-		headings.put(0d, new MotionAndObject<Heading>(initialHeading, null));
-		pitchs.put(0d, new MotionAndObject<Pitch>(initialPitch, null));
+		centers.put(0d, new MotionAndObject<InterpolatableLatLon>(
+				new InterpolatableLatLon(new LatLonBezier(initialCenter, null,
+						initialOut)), null));
+		zooms.put(0d, new MotionAndObject<InterpolatableZoom>(
+				new InterpolatableZoom(initialZoom), null));
+		headings.put(0d, new MotionAndObject<InterpolatableHeading>(
+				new InterpolatableHeading(initialHeading), null));
+		pitchs.put(0d, new MotionAndObject<InterpolatablePitch>(
+				new InterpolatablePitch(initialPitch), null));
 	}
 
 	public void addCenter(LatLon center, LatLon in, LatLon out, double time,
 			MotionParams motion)
 	{
-		centers.put(time, new MotionAndObject<LatLonBezier>(new LatLonBezier(
-				center, in, out), new Motion(motion)));
+		LatLonBezier llb = new LatLonBezier(center, in, out);
+		centers.put(time, new MotionAndObject<InterpolatableLatLon>(
+				new InterpolatableLatLon(llb), new Motion(motion)));
 		centersDirty = true;
 	}
 
 	public void addZoom(Zoom zoom, double time, MotionParams motion)
 	{
-		zooms.put(time, new MotionAndObject<Zoom>(zoom, new Motion(motion)));
+		zooms.put(time, new MotionAndObject<InterpolatableZoom>(
+				new InterpolatableZoom(zoom), new Motion(motion)));
 		zoomsDirty = true;
 	}
 
 	public void addHeading(Heading heading, double time, MotionParams motion)
 	{
-		headings.put(time, new MotionAndObject<Heading>(heading, new Motion(
-				motion)));
+		headings.put(time, new MotionAndObject<InterpolatableHeading>(
+				new InterpolatableHeading(heading), new Motion(motion)));
 		headingsDirty = true;
 	}
 
 	public void addPitch(Pitch pitch, double time, MotionParams motion)
 	{
-		pitchs.put(time, new MotionAndObject<Pitch>(pitch, new Motion(motion)));
+		pitchs.put(time, new MotionAndObject<InterpolatablePitch>(
+				new InterpolatablePitch(pitch), new Motion(motion)));
 		pitchsDirty = true;
 	}
 
 	public LatLon getCenter(double time)
 	{
-		refreshIfDirty();
-
-		SortedMap<Double, MotionAndObject<LatLonBezier>> head = centers
-				.headMap(time);
-		SortedMap<Double, MotionAndObject<LatLonBezier>> tail = centers
-				.tailMap(time);
-
-		if (head.isEmpty())
-			return centers.get(centers.firstKey()).object.latlon;
-		if (tail.isEmpty())
-			return centers.get(centers.lastKey()).object.latlon;
-
-		double firstTime = head.lastKey();
-		double lastTime = tail.firstKey();
-
-		if (firstTime > time || lastTime < time)
-			throw new IllegalStateException();
-
-		//MotionAndObject<LatLonBezier> firstPoint = centers.get(firstTime);
-		MotionAndObject<LatLonBezier> lastPoint = centers.get(lastTime);
-
-		double percent = lastPoint.motion.getPercent(time - firstTime);
-		return lastPoint.object.getLatLon(percent);
+		return new ValueGetter<LatLon, InterpolatableLatLon>().getValue(time,
+				centers);
 	}
 
 	public Zoom getZoom(double time)
 	{
-		refreshIfDirty();
-
-		SortedMap<Double, MotionAndObject<Zoom>> head = zooms.headMap(time);
-		SortedMap<Double, MotionAndObject<Zoom>> tail = zooms.tailMap(time);
-
-		if (head.isEmpty())
-			return zooms.get(zooms.firstKey()).object;
-		if (tail.isEmpty())
-			return zooms.get(zooms.lastKey()).object;
-
-		double firstTime = head.lastKey();
-		double lastTime = tail.firstKey();
-
-		if (firstTime > time || lastTime < time)
-			throw new IllegalStateException();
-
-		MotionAndObject<Zoom> firstPoint = zooms.get(firstTime);
-		MotionAndObject<Zoom> lastPoint = zooms.get(lastTime);
-
-		double percent = lastPoint.motion.getPercent(time - firstTime);
-		return Zoom.interpolate(firstPoint.object, lastPoint.object, percent);
+		return new ValueGetter<Zoom, InterpolatableZoom>()
+				.getValue(time, zooms);
 	}
 
 	public Heading getHeading(double time)
 	{
-		refreshIfDirty();
-
-		SortedMap<Double, MotionAndObject<Heading>> head = headings
-				.headMap(time);
-		SortedMap<Double, MotionAndObject<Heading>> tail = headings
-				.tailMap(time);
-
-		if (head.isEmpty())
-			return headings.get(headings.firstKey()).object;
-		if (tail.isEmpty())
-			return headings.get(headings.lastKey()).object;
-
-		double firstTime = head.lastKey();
-		double lastTime = tail.firstKey();
-
-		if (firstTime > time || lastTime < time)
-			throw new IllegalStateException();
-
-		MotionAndObject<Heading> firstPoint = headings.get(firstTime);
-		MotionAndObject<Heading> lastPoint = headings.get(lastTime);
-
-		double percent = lastPoint.motion.getPercent(time - firstTime);
-		return Heading
-				.interpolate(firstPoint.object, lastPoint.object, percent);
+		return new ValueGetter<Heading, InterpolatableHeading>().getValue(time,
+				headings);
 	}
 
 	public Pitch getPitch(double time)
 	{
-		refreshIfDirty();
-
-		SortedMap<Double, MotionAndObject<Pitch>> head = pitchs.headMap(time);
-		SortedMap<Double, MotionAndObject<Pitch>> tail = pitchs.tailMap(time);
-
-		if (head.isEmpty())
-			return pitchs.get(pitchs.firstKey()).object;
-		if (tail.isEmpty())
-			return pitchs.get(pitchs.lastKey()).object;
-
-		double firstTime = head.lastKey();
-		double lastTime = tail.firstKey();
-
-		if (firstTime > time || lastTime < time)
-			throw new IllegalStateException();
-
-		MotionAndObject<Pitch> firstPoint = pitchs.get(firstTime);
-		MotionAndObject<Pitch> lastPoint = pitchs.get(lastTime);
-
-		double percent = lastPoint.motion.getPercent(time - firstTime);
-		return Pitch.interpolate(firstPoint.object, lastPoint.object, percent);
+		return new ValueGetter<Pitch, InterpolatablePitch>().getValue(time,
+				pitchs);
 	}
 
 	public double getTime()
@@ -178,124 +109,74 @@ public class CameraPath implements Serializable
 	private void refreshIfDirty()
 	{
 		this.time = 0;
-		double cumulativeTime = 0;
+		double time = 0;
 
 		if (centersDirty)
 		{
-			cumulativeTime = 0;
-			Iterator<Entry<Double, MotionAndObject<LatLonBezier>>> iterator = centers
-					.entrySet().iterator();
-			Entry<Double, MotionAndObject<LatLonBezier>> entry1 = iterator
-					.next(), entry2 = null;
-			while (iterator.hasNext())
-			{
-				entry2 = iterator.next();
-
-				double time = entry2.getKey() - entry1.getKey();
-				entry2.getValue().object
-						.setPreviousPoint(entry1.getValue().object);
-				double distance = entry2.getValue().object.getDistance();
-
-				Motion motion2 = entry2.getValue().motion;
-				if (motion2.params.usePreviousForIn)
-				{
-					Motion motion1 = entry1.getValue().motion;
-					double v1 = 0;
-					if (motion1 != null)
-					{
-						v1 = motion1.getOutVelocity();
-					}
-					motion2.setInVelocity(v1);
-				}
-
-				motion2.setTimeAndDistance(time, distance);
-				cumulativeTime += time;
-
-				entry1 = entry2;
-			}
+			time = new MapRefresher<InterpolatableLatLon>().refreshMap(centers);
+			this.time = Math.max(this.time, time);
 			centersDirty = false;
-			this.time = Math.max(this.time, cumulativeTime);
 		}
 		if (zoomsDirty)
 		{
-			cumulativeTime = 0;
-			Iterator<Entry<Double, MotionAndObject<Zoom>>> iterator = zooms
-					.entrySet().iterator();
-			Entry<Double, MotionAndObject<Zoom>> entry1 = iterator.next(), entry2 = null;
-			while (iterator.hasNext())
-			{
-				entry2 = iterator.next();
-
-				double time = entry2.getKey() - entry1.getKey();
-				double distance = Math.abs(Zoom.difference(
-						entry2.getValue().object, entry1.getValue().object));
-				cumulativeTime += time;
-
-				Motion motion2 = entry2.getValue().motion;
-				if (motion2.params.usePreviousForIn)
-				{
-					Motion motion1 = entry1.getValue().motion;
-					double v1 = 0;
-					if (motion1 != null)
-					{
-						v1 = motion1.getOutVelocity();
-					}
-					motion2.setInVelocity(v1);
-				}
-				motion2.setTimeAndDistance(time, distance);
-
-				entry1 = entry2;
-			}
+			time = new MapRefresher<InterpolatableZoom>().refreshMap(zooms);
+			this.time = Math.max(this.time, time);
 			zoomsDirty = false;
-			this.time = Math.max(this.time, cumulativeTime);
 		}
 		if (headingsDirty)
 		{
-			cumulativeTime = 0;
-			Iterator<Entry<Double, MotionAndObject<Heading>>> iterator = headings
-					.entrySet().iterator();
-			Entry<Double, MotionAndObject<Heading>> entry1 = iterator.next(), entry2 = null;
-			while (iterator.hasNext())
-			{
-				entry2 = iterator.next();
-
-				double time = entry2.getKey() - entry1.getKey();
-				double distance = Math.abs(Heading.difference(
-						entry2.getValue().object, entry1.getValue().object));
-				cumulativeTime += time;
-
-				Motion motion2 = entry2.getValue().motion;
-				if (motion2.params.usePreviousForIn)
-				{
-					Motion motion1 = entry1.getValue().motion;
-					double v1 = 0;
-					if (motion1 != null)
-					{
-						v1 = motion1.getOutVelocity();
-					}
-					motion2.setInVelocity(v1);
-				}
-				motion2.setTimeAndDistance(time, distance);
-
-				entry1 = entry2;
-			}
+			time = new MapRefresher<InterpolatableHeading>()
+					.refreshMap(headings);
+			this.time = Math.max(this.time, time);
 			headingsDirty = false;
-			this.time = Math.max(this.time, cumulativeTime);
 		}
 		if (pitchsDirty)
 		{
-			cumulativeTime = 0;
-			Iterator<Entry<Double, MotionAndObject<Pitch>>> iterator = pitchs
+			time = new MapRefresher<InterpolatablePitch>().refreshMap(pitchs);
+			this.time = Math.max(this.time, time);
+			pitchsDirty = false;
+		}
+	}
+
+	private static class ValueGetter<T, E extends Interpolatable<?, T>>
+	{
+		public T getValue(double time, SortedMap<Double, MotionAndObject<E>> map)
+		{
+			SortedMap<Double, MotionAndObject<E>> head = map.headMap(time);
+			SortedMap<Double, MotionAndObject<E>> tail = map.tailMap(time);
+
+			if (head.isEmpty())
+				return map.get(map.firstKey()).object.getEnd();
+			if (tail.isEmpty())
+				return map.get(map.lastKey()).object.getEnd();
+
+			double firstTime = head.lastKey();
+			double lastTime = tail.firstKey();
+
+			if (firstTime > time || lastTime < time)
+				throw new IllegalStateException();
+
+			MotionAndObject<E> lastPoint = map.get(lastTime);
+			double percent = lastPoint.motion.getPercent(time - firstTime);
+			return lastPoint.object.interpolate(percent);
+		}
+	}
+
+	private static class MapRefresher<E extends Interpolatable<?, ?>>
+	{
+		public double refreshMap(SortedMap<Double, MotionAndObject<E>> map)
+		{
+			double cumulativeTime = 0;
+			Iterator<Entry<Double, MotionAndObject<E>>> iterator = map
 					.entrySet().iterator();
-			Entry<Double, MotionAndObject<Pitch>> entry1 = iterator.next(), entry2 = null;
+			Entry<Double, MotionAndObject<E>> entry1 = iterator.next(), entry2 = null;
 			while (iterator.hasNext())
 			{
 				entry2 = iterator.next();
 
 				double time = entry2.getKey() - entry1.getKey();
-				double distance = Math.abs(Pitch.difference(
-						entry2.getValue().object, entry1.getValue().object));
-				cumulativeTime += time;
+				entry2.getValue().object.setPrevious(entry1.getValue().object);
+				double length = entry2.getValue().object.length();
 
 				Motion motion2 = entry2.getValue().motion;
 				if (motion2.params.usePreviousForIn)
@@ -308,16 +189,17 @@ public class CameraPath implements Serializable
 					}
 					motion2.setInVelocity(v1);
 				}
-				motion2.setTimeAndDistance(time, distance);
+
+				motion2.setTimeAndDistance(time, length);
+				cumulativeTime += time;
 
 				entry1 = entry2;
 			}
-			pitchsDirty = false;
-			this.time = Math.max(this.time, cumulativeTime);
+			return cumulativeTime;
 		}
 	}
 
-	private static class MotionAndObject<E>
+	private static class MotionAndObject<E extends Interpolatable<?, ?>>
 	{
 		public Motion motion;
 		public E object;

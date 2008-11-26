@@ -1,6 +1,8 @@
 package camera.motion;
 
-public class MotionParams
+import java.io.Serializable;
+
+public class MotionParams implements Serializable
 {
 	public final double accelerationIn;
 	public final double accelerationOut;
