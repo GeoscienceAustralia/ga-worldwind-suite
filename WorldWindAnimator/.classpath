@@ -7,7 +7,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="WorldWindAnimator/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jogl.jar">
+	<classpathentry kind="lib" path="lib/jogl.jar" sourcepath="C:/Data/Libraries/JOGL/jogl-1.1.1-src/jogl/src/classes">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="WorldWindAnimator/lib"/>
 		</attributes>
