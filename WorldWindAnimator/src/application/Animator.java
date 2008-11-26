@@ -200,7 +200,7 @@ public class Animator
 		Zoom zoom1 = Zoom.fromCameraZoom(6378137);
 		Zoom zoom2 = Zoom.fromCameraZoom(559794);
 
-		Heading heading1 = Heading.fromDegrees(-170);
+		Heading heading1 = Heading.fromDegrees(-180);
 		Heading heading2 = Heading.fromDegrees(180);
 		Pitch pitch1 = Pitch.fromDegrees(0);
 		Pitch pitch2 = Pitch.fromDegrees(70);

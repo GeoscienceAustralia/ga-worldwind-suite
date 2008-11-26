@@ -54,6 +54,8 @@ public class Motion implements Serializable, Cloneable
 			return 0;
 		if (time >= getTime())
 			return 1;
+		if (getDistance() <= 0)
+			return 1;
 
 		double a;
 		double d;
@@ -118,13 +120,13 @@ public class Motion implements Serializable, Cloneable
 			}
 		}
 
-		System.out.println();
+		/*System.out.println();
 		System.out.println("Calculations");
 		System.out.println("Times: " + t1 + ", " + t2 + ", " + t3);
 		System.out.println("Velocities: " + v1 + ", " + v2 + ", " + v3);
 		System.out.println("Distances: " + d1 + ", " + d2 + ", " + d3 + " ("
 				+ d3Calc + ")");
-		System.out.println("Accelerations: " + a1 + ", " + a3);
+		System.out.println("Accelerations: " + a1 + ", " + a3);*/
 	}
 
 	private void calculate()
