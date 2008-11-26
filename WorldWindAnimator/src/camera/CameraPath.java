@@ -195,7 +195,20 @@ public class CameraPath implements Serializable
 				entry2.getValue().object
 						.setPreviousPoint(entry1.getValue().object);
 				double distance = entry2.getValue().object.getDistance();
-				entry2.getValue().motion.setTimeAndDistance(time, distance);
+
+				Motion motion2 = entry2.getValue().motion;
+				if (motion2.params.usePreviousForIn)
+				{
+					Motion motion1 = entry1.getValue().motion;
+					double v1 = 0;
+					if (motion1 != null)
+					{
+						v1 = motion1.getOutVelocity();
+					}
+					motion2.setInVelocity(v1);
+				}
+
+				motion2.setTimeAndDistance(time, distance);
 				cumulativeTime += time;
 
 				entry1 = entry2;
@@ -216,8 +229,20 @@ public class CameraPath implements Serializable
 				double time = entry2.getKey() - entry1.getKey();
 				double distance = Math.abs(Zoom.difference(
 						entry2.getValue().object, entry1.getValue().object));
-				entry2.getValue().motion.setTimeAndDistance(time, distance);
 				cumulativeTime += time;
+
+				Motion motion2 = entry2.getValue().motion;
+				if (motion2.params.usePreviousForIn)
+				{
+					Motion motion1 = entry1.getValue().motion;
+					double v1 = 0;
+					if (motion1 != null)
+					{
+						v1 = motion1.getOutVelocity();
+					}
+					motion2.setInVelocity(v1);
+				}
+				motion2.setTimeAndDistance(time, distance);
 
 				entry1 = entry2;
 			}
@@ -237,8 +262,20 @@ public class CameraPath implements Serializable
 				double time = entry2.getKey() - entry1.getKey();
 				double distance = Math.abs(Heading.difference(
 						entry2.getValue().object, entry1.getValue().object));
-				entry2.getValue().motion.setTimeAndDistance(time, distance);
 				cumulativeTime += time;
+
+				Motion motion2 = entry2.getValue().motion;
+				if (motion2.params.usePreviousForIn)
+				{
+					Motion motion1 = entry1.getValue().motion;
+					double v1 = 0;
+					if (motion1 != null)
+					{
+						v1 = motion1.getOutVelocity();
+					}
+					motion2.setInVelocity(v1);
+				}
+				motion2.setTimeAndDistance(time, distance);
 
 				entry1 = entry2;
 			}
@@ -258,8 +295,20 @@ public class CameraPath implements Serializable
 				double time = entry2.getKey() - entry1.getKey();
 				double distance = Math.abs(Pitch.difference(
 						entry2.getValue().object, entry1.getValue().object));
-				entry2.getValue().motion.setTimeAndDistance(time, distance);
 				cumulativeTime += time;
+
+				Motion motion2 = entry2.getValue().motion;
+				if (motion2.params.usePreviousForIn)
+				{
+					Motion motion1 = entry1.getValue().motion;
+					double v1 = 0;
+					if (motion1 != null)
+					{
+						v1 = motion1.getOutVelocity();
+					}
+					motion2.setInVelocity(v1);
+				}
+				motion2.setTimeAndDistance(time, distance);
 
 				entry1 = entry2;
 			}
