@@ -1,6 +1,6 @@
-package path;
+package camera.bezier;
 
-import path.vector.Vector;
+import camera.vector.Vector;
 
 public class Bezier<V extends Vector<V>>
 {

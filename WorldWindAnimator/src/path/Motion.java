@@ -141,10 +141,10 @@ public class Motion
 		}
 
 		d += u * t + 0.5 * a * t * t;
-		
+
 		/*double v = u + a * t;
 		System.out.println("Distance = " + d + ", Velocity = " + v);*/
 
-		return d / (d1 + d2 + d3);
+		return Math.max(0, Math.min(1, d / (d1 + d2 + d3)));
 	}
 }

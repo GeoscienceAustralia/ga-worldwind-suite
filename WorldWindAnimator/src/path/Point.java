@@ -1,7 +1,7 @@
 package path;
 
-import path.vector.Vector2;
-import path.vector.Vector3;
+import camera.vector.Vector2;
+import camera.vector.Vector3;
 
 public class Point
 {

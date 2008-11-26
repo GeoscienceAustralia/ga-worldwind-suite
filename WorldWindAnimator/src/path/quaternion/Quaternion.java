@@ -1,6 +1,6 @@
 package path.quaternion;
 
-import path.vector.Vector3;
+import camera.vector.Vector3;
 
 public class Quaternion
 {

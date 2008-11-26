@@ -2,8 +2,9 @@ package path;
 
 import java.io.Serializable;
 
-import path.vector.Vector2;
-import path.vector.Vector3;
+import camera.vector.Vector2;
+import camera.vector.Vector3;
+
 
 public class AnimationPoint extends Point implements Serializable
 {

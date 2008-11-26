@@ -1,8 +1,9 @@
 package path;
 
+import camera.bezier.Bezier;
+import camera.vector.Vector2;
+import camera.vector.Vector3;
 import path.quaternion.Quaternion;
-import path.vector.Vector2;
-import path.vector.Vector3;
 
 public class AnimationSection
 {

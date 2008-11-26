@@ -46,8 +46,16 @@ import javax.swing.UIManager;
 import path.AnimationPath;
 import path.AnimationPoint;
 import path.Point;
-import path.vector.Vector2;
-import path.vector.Vector3;
+
+import camera.CameraPath;
+import camera.motion.Motion;
+import camera.motion.MotionParams;
+import camera.params.Heading;
+import camera.params.LatLon;
+import camera.params.Pitch;
+import camera.params.Zoom;
+import camera.vector.Vector2;
+import camera.vector.Vector3;
 
 import com.sun.opengl.util.BufferUtil;
 
@@ -194,15 +202,84 @@ public class Animator
 
 	private double e2a(double elevation)
 	{
-		return Math.log(elevation) * 10d;
+		return Math.log(elevation + 1);
 	}
 
 	private double a2e(double animation)
 	{
-		return Math.pow(Math.E, animation / 10d);
+		return Math.pow(Math.E, animation) - 1;
 	}
 
 	private void animate()
+	{
+		LatLon l1 = LatLon.fromDegrees(-27, 133.5);
+		LatLon l2 = LatLon.fromDegrees(-21.0474, 119.6494);
+
+		Zoom zoom1 = Zoom.fromCameraZoom(6378137);
+		Zoom zoom2 = Zoom.fromCameraZoom(559794);
+
+		Heading heading1 = Heading.fromDegrees(-170);
+		Heading heading2 = Heading.fromDegrees(180);
+		Pitch pitch1 = Pitch.fromDegrees(0);
+		Pitch pitch2 = Pitch.fromDegrees(70);
+		Pitch pitch3 = Pitch.fromDegrees(45);
+
+		MotionParams motion1 = new MotionParams(0.2, 0.2, 0, 0);
+		MotionParams motion2 = new MotionParams(5, 5, 0, 0);
+
+		final CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1);
+
+		path.addCenter(l2, l2, null, 20, motion1);
+		path.addZoom(zoom2, 10, motion1);
+		path.addHeading(heading2, 20, motion2);
+		path.addPitch(pitch2, 10, motion2);
+		path.addPitch(pitch3, 20, motion2);
+
+
+		Thread thread = new Thread(new Runnable()
+		{
+			public void run()
+			{
+				View v = wwd.getSceneController().getView();
+				if (!(v instanceof OrbitView))
+					return;
+				OrbitView view = (OrbitView) v;
+				boolean detectCollisions = view.isDetectCollisions();
+				view.setDetectCollisions(false);
+
+				double totalTime = path.getTime();
+				double startTime = System.currentTimeMillis() / 1000d;
+				double currentTime = 0;
+				while (currentTime <= totalTime)
+				{
+					currentTime = System.currentTimeMillis() / 1000d
+							- startTime;
+					//currentTime += 1;
+
+					LatLon center = path.getCenter(currentTime);
+					Zoom zoom = path.getZoom(currentTime);
+					Heading heading = path.getHeading(currentTime);
+					Pitch pitch = path.getPitch(currentTime);
+
+					view.setCenterPosition(new Position(center.getLatLon(), 0));
+					view.setZoom(zoom.toCameraZoom());
+					view.setHeading(heading.getAngle());
+					view.setPitch(pitch.getAngle());
+
+					wwd.redrawNow();
+
+					//takeScreenshot("frames/screen" + (currentTime) + ".png");
+
+					//System.out.println(currentTime + " = " + position + " zoom = " + zoom);
+				}
+
+				view.setDetectCollisions(detectCollisions);
+			}
+		});
+		thread.start();
+	}
+
+	private void animate2()
 	{
 		Vector3 pos = new Vector3(0, 0, 40);
 		Vector3 zero = Vector3.ZERO;
@@ -221,52 +298,62 @@ public class Animator
 		path.points.add(p3);
 		path.points.add(p4);*/
 
-		Vector3 v1 = new Vector3(41.68695, -87.70575, e2a(374070));
-		Vector3 v2 = new Vector3(51.44871, -0.01974, e2a(374070));
-		Vector3 v3 = new Vector3(-27, 133.5, e2a(374070));
 
-		Vector3 zaxis = new Vector3(0, 0, 40);
-		Vector3 flat = v1.subtract(v2).normalizeLocal().multLocal(40);
+		Vector3 v1 = new Vector3(-27, 133.5, e2a(6378137 * 3));
+		Vector3 v2 = new Vector3(-21.0474, 119.6494 - 1, e2a(559794));
+		Vector3 v3 = new Vector3(-21.0474 + 1, 119.6494, e2a(559794));
+		Vector3 v4 = new Vector3(-21.0474, 119.6494 + 1, e2a(559794));
+		Vector3 v5 = new Vector3(-21.0474 - 1, 119.6494, e2a(559794));
 
+		Vector3 xaxis = new Vector3(0.5, 0, 0);
+		Vector3 yaxis = new Vector3(0, 0.5, 0);
+
+		double pitch = 60;
 		Vector2 orientation1 = new Vector2(0, 0);
-		Vector2 orientation2 = new Vector2(180, 90);
-		Vector2 orientation3 = new Vector2(360, 0);
-		Vector2 orientation4 = new Vector2(540, 90);
-		Vector2 orientation5 = new Vector2(720, 0);
+		Vector2 orientation2 = new Vector2(90, pitch);
+		Vector2 orientation3 = new Vector2(180, pitch);
+		Vector2 orientation4 = new Vector2(270, pitch);
+		Vector2 orientation5 = new Vector2(360, pitch);
 
-		AnimationPoint p1 = new AnimationPoint(v1, orientation1, zero, zaxis);
-		AnimationPoint p2 = new AnimationPoint(v2, orientation2, flat, zero
+		AnimationPoint p1 = new AnimationPoint(v1, orientation1, zero, zero);
+		AnimationPoint p2 = new AnimationPoint(v2, orientation2, xaxis.mult(2)
+				.negateLocal(), xaxis);
+		AnimationPoint p3 = new AnimationPoint(v3, orientation3,
+				yaxis.negate(), yaxis);
+		AnimationPoint p4 = new AnimationPoint(v4, orientation4, xaxis, xaxis
 				.negate());
-		AnimationPoint p3 = new AnimationPoint(v2, orientation3, zero, zero
-				.negate());
-		AnimationPoint p4 = new AnimationPoint(v2, orientation4, zero, flat
-				.negate());
-		AnimationPoint p5 = new AnimationPoint(v3, orientation5, zaxis, zero);
-		path.addPoint(p1);
-		path.addPoint(p2);
-		path.addPoint(p3);
-		path.addPoint(p4);
-		path.addPoint(p5);
+		AnimationPoint p5 = new AnimationPoint(v5, orientation5, yaxis, zero);
+
+		/*AnimationPoint p1 = new AnimationPoint(v1, orientation1, zero, zero);
+		AnimationPoint p2 = new AnimationPoint(v2, orientation1, zero, zero);
+		AnimationPoint p3 = new AnimationPoint(v3, orientation1, zero, zero);
+		AnimationPoint p4 = new AnimationPoint(v4, orientation1, zero, zero);
+		AnimationPoint p5 = new AnimationPoint(v5, orientation1, zero, zero);*/
 
 		p1.velocityAt = 0;
-		p1.velocityAfter = 100;
-		p2.velocityAt = 0;
-		p2.velocityAfter = 100;
-		p3.velocityAt = 100;
-		p3.velocityAfter = 100;
-		p4.velocityAt = 0;
-		p4.velocityAfter = 100;
+		p1.velocityAfter = 50;
+		p2.velocityAt = 5;
+		p2.velocityAfter = 50;
+		p3.velocityAt = 50;
+		p3.velocityAfter = 50;
+		p4.velocityAt = 50;
+		p4.velocityAfter = 50;
 		p5.velocityAt = 0;
-		p5.velocityAfter = 100;
 
-		p1.accelerationIn = 10;
-		p1.accelerationOut = 1;
+		p1.accelerationIn = 100;
+		p1.accelerationOut = 100;
 		p2.accelerationIn = 100;
 		p2.accelerationOut = 100;
 		p3.accelerationIn = 100;
 		p3.accelerationOut = 100;
-		p4.accelerationIn = 10;
-		p4.accelerationOut = 10;
+		p4.accelerationIn = 100;
+		p4.accelerationOut = 100;
+
+		path.addPoint(p1);
+		path.addPoint(p2);
+		path.addPoint(p3);
+		//path.addPoint(p4);
+		//path.addPoint(p5);
 
 		Thread thread = new Thread(new Runnable()
 		{
@@ -279,14 +366,14 @@ public class Animator
 				boolean detectCollisions = view.isDetectCollisions();
 				view.setDetectCollisions(false);
 
-				long totalTime = 1000;
+				long totalTime = 5000;
 				long startTime = System.currentTimeMillis();
 				long currentTime = 0;
 				double percent = 0;
 				while (percent <= 1)
 				{
-					//currentTime = System.currentTimeMillis() - startTime;
-					currentTime += 1;
+					currentTime = System.currentTimeMillis() - startTime;
+					//currentTime += 1;
 
 					percent = (double) currentTime / (double) totalTime;
 

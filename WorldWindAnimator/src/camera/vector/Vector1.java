@@ -1,4 +1,4 @@
-package path.vector;
+package camera.vector;
 
 public class Vector1 implements Vector<Vector1>
 {
