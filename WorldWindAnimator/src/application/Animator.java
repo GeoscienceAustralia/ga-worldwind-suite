@@ -86,6 +86,7 @@ public class Animator
 	public static void main(String[] args)
 	{
 		new Animator();
+		//Animator.createPath();
 	}
 
 	private JFrame frame;
@@ -192,7 +193,7 @@ public class Animator
 		}
 	}
 
-	private void animate()
+	private static CameraPath createPath()
 	{
 		LatLon l1 = LatLon.fromDegrees(-27, 133.5);
 		LatLon l2 = LatLon.fromDegrees(-21.0474, 119.6494);
@@ -201,26 +202,43 @@ public class Animator
 		Zoom zoom2 = Zoom.fromCameraZoom(559794);
 
 		Heading heading1 = Heading.fromDegrees(0);
-		Heading heading2 = Heading.fromDegrees(180);
-		Heading heading3 = Heading.fromDegrees(360);
+		Heading heading2 = Heading.fromDegrees(-30);
+		Heading heading3 = Heading.fromDegrees(180);
+
 		Pitch pitch1 = Pitch.fromDegrees(0);
-		Pitch pitch2 = Pitch.fromDegrees(70);
-		Pitch pitch3 = Pitch.fromDegrees(45);
+		Pitch pitch2 = Pitch.fromDegrees(80);
+		Pitch pitch3 = Pitch.fromDegrees(50);
+		
+		double time1 = 5;
+		double time2 = 12;
 
-		MotionParams motion1 = new MotionParams(0.2, 0.2, 0, 0);
-		MotionParams motion2 = new MotionParams(400, 400, 0, 0, true, true);
+		MotionParams centerMotion = new MotionParams(3, 3, 0, 0);
+		MotionParams zoomMotion = new MotionParams(0.5, 0.5, 0, 0);
+		MotionParams headingMotion1 = new MotionParams(15, 15, 0, 3, false,
+				false);
+		MotionParams headingMotion2 = new MotionParams(15, 15, 0, 0, true,
+				false);
+		MotionParams pitchMotion = new MotionParams(15, 15, 0, 0);
 
-		final CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1);
+		CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1);
 
-		path.addCenter(l2, l2, null, 20, motion1);
-		path.addZoom(zoom2, 10, motion1);
-		path.addHeading(heading2, 5, motion2);
-		path.addHeading(heading3, 10, motion2);
-		path.addHeading(heading2, 15, motion2);
-		path.addHeading(heading3, 20, motion2);
-		path.addPitch(pitch2, 10, motion2);
-		path.addPitch(pitch3, 20, motion2);
+		path.addCenter(l2, l2, null, time1, centerMotion);
+		path.addZoom(zoom2, time1, zoomMotion);
 
+		path.addHeading(heading2, time1, headingMotion1);
+		path.addPitch(pitch2, time1, pitchMotion);
+
+		path.addHeading(heading3, time2, headingMotion2);
+		path.addPitch(pitch3, time2, pitchMotion);
+
+		path.refresh();
+		return path;
+	}
+
+	private void animate()
+	{
+		final CameraPath path = createPath();
+		System.out.println("Total time = " + path.getTime());
 
 		Thread thread = new Thread(new Runnable()
 		{

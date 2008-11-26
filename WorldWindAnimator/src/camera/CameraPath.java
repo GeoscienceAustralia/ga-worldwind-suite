@@ -26,11 +26,8 @@ public class CameraPath implements Serializable
 	private SortedMap<Double, MotionAndObject<InterpolatableHeading>> headings = new TreeMap<Double, MotionAndObject<InterpolatableHeading>>();
 	private SortedMap<Double, MotionAndObject<InterpolatablePitch>> pitchs = new TreeMap<Double, MotionAndObject<InterpolatablePitch>>();
 
-	private boolean centersDirty = true;
-	private boolean zoomsDirty = true;
-	private boolean headingsDirty = true;
-	private boolean pitchsDirty = true;
-	private double time = 0;
+	private boolean dirty = true;
+	private double time;
 
 	public CameraPath(LatLon initialCenter, LatLon initialOut,
 			Zoom initialZoom, Heading initialHeading, Pitch initialPitch)
@@ -52,89 +49,80 @@ public class CameraPath implements Serializable
 		LatLonBezier llb = new LatLonBezier(center, in, out);
 		centers.put(time, new MotionAndObject<InterpolatableLatLon>(
 				new InterpolatableLatLon(llb), new Motion(motion)));
-		centersDirty = true;
+		dirty = true;
 	}
 
 	public void addZoom(Zoom zoom, double time, MotionParams motion)
 	{
 		zooms.put(time, new MotionAndObject<InterpolatableZoom>(
 				new InterpolatableZoom(zoom), new Motion(motion)));
-		zoomsDirty = true;
+		dirty = true;
 	}
 
 	public void addHeading(Heading heading, double time, MotionParams motion)
 	{
 		headings.put(time, new MotionAndObject<InterpolatableHeading>(
 				new InterpolatableHeading(heading), new Motion(motion)));
-		headingsDirty = true;
+		dirty = true;
 	}
 
 	public void addPitch(Pitch pitch, double time, MotionParams motion)
 	{
 		pitchs.put(time, new MotionAndObject<InterpolatablePitch>(
 				new InterpolatablePitch(pitch), new Motion(motion)));
-		pitchsDirty = true;
+		dirty = true;
 	}
 
 	public LatLon getCenter(double time)
 	{
+		refresh();
 		return new ValueGetter<LatLon, InterpolatableLatLon>().getValue(time,
 				centers);
 	}
 
 	public Zoom getZoom(double time)
 	{
+		refresh();
 		return new ValueGetter<Zoom, InterpolatableZoom>()
 				.getValue(time, zooms);
 	}
 
 	public Heading getHeading(double time)
 	{
+		refresh();
 		return new ValueGetter<Heading, InterpolatableHeading>().getValue(time,
 				headings);
 	}
 
 	public Pitch getPitch(double time)
 	{
+		refresh();
 		return new ValueGetter<Pitch, InterpolatablePitch>().getValue(time,
 				pitchs);
 	}
 
 	public double getTime()
 	{
-		refreshIfDirty();
+		refresh();
 		return time;
 	}
 
-	private void refreshIfDirty()
+	public void refresh()
 	{
-		this.time = 0;
-		double time = 0;
+		if (dirty)
+		{
+			this.time = 0;
+			dirty = false;
 
-		if (centersDirty)
-		{
-			time = new MapRefresher<InterpolatableLatLon>().refreshMap(centers);
+			double time = new MapRefresher<InterpolatableLatLon>().refreshMap(centers);
 			this.time = Math.max(this.time, time);
-			centersDirty = false;
-		}
-		if (zoomsDirty)
-		{
 			time = new MapRefresher<InterpolatableZoom>().refreshMap(zooms);
 			this.time = Math.max(this.time, time);
-			zoomsDirty = false;
-		}
-		if (headingsDirty)
-		{
 			time = new MapRefresher<InterpolatableHeading>()
 					.refreshMap(headings);
 			this.time = Math.max(this.time, time);
-			headingsDirty = false;
-		}
-		if (pitchsDirty)
-		{
 			time = new MapRefresher<InterpolatablePitch>().refreshMap(pitchs);
 			this.time = Math.max(this.time, time);
-			pitchsDirty = false;
 		}
 	}
 
