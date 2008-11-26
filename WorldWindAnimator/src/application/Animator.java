@@ -202,34 +202,29 @@ public class Animator
 		Zoom zoom2 = Zoom.fromCameraZoom(559794);
 
 		Heading heading1 = Heading.fromDegrees(0);
-		Heading heading2 = Heading.fromDegrees(-30);
-		Heading heading3 = Heading.fromDegrees(180);
+		Heading heading2 = Heading.fromDegrees(-360);
 
 		Pitch pitch1 = Pitch.fromDegrees(0);
-		Pitch pitch2 = Pitch.fromDegrees(80);
+		Pitch pitch2 = Pitch.fromDegrees(70);
 		Pitch pitch3 = Pitch.fromDegrees(50);
-		
-		double time1 = 5;
-		double time2 = 12;
 
-		MotionParams centerMotion = new MotionParams(3, 3, 0, 0);
-		MotionParams zoomMotion = new MotionParams(0.5, 0.5, 0, 0);
-		MotionParams headingMotion1 = new MotionParams(15, 15, 0, 3, false,
-				false);
-		MotionParams headingMotion2 = new MotionParams(15, 15, 0, 0, true,
-				false);
-		MotionParams pitchMotion = new MotionParams(15, 15, 0, 0);
+		double time1 = 4;
+		double time3 = 12;
+
+		MotionParams centerMotion = new MotionParams(4, 4, 0, 0);
+		MotionParams zoomMotion = new MotionParams(0.8, 0.8, 0, 0);
+		MotionParams headingMotion = new MotionParams(10, 10, 0, 0);
+		MotionParams pitchMotion = new MotionParams(20, 20, 0, 0);
 
 		CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1);
 
 		path.addCenter(l2, l2, null, time1, centerMotion);
 		path.addZoom(zoom2, time1, zoomMotion);
 
-		path.addHeading(heading2, time1, headingMotion1);
-		path.addPitch(pitch2, time1, pitchMotion);
+		path.addHeading(heading2, time3, headingMotion);
 
-		path.addHeading(heading3, time2, headingMotion2);
-		path.addPitch(pitch3, time2, pitchMotion);
+		path.addPitch(pitch2, time1, pitchMotion);
+		path.addPitch(pitch3, time3, pitchMotion);
 
 		path.refresh();
 		return path;
@@ -238,7 +233,6 @@ public class Animator
 	private void animate()
 	{
 		final CameraPath path = createPath();
-		System.out.println("Total time = " + path.getTime());
 
 		Thread thread = new Thread(new Runnable()
 		{

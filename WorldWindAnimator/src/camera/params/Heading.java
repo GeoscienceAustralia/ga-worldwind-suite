@@ -20,6 +20,17 @@ public class Heading implements Serializable
 
 	private Heading(double degrees)
 	{
+		//degrees = fixDegrees(degrees);
+		this.degrees = degrees;
+	}
+
+	public Angle getAngle()
+	{
+		return Angle.fromDegrees(fixDegrees(degrees));
+	}
+
+	private static double fixDegrees(double degrees)
+	{
 		while (degrees > 180d)
 		{
 			degrees -= 360d;
@@ -28,12 +39,7 @@ public class Heading implements Serializable
 		{
 			degrees += 360d;
 		}
-		this.degrees = degrees;
-	}
-
-	public Angle getAngle()
-	{
-		return Angle.fromDegrees(degrees);
+		return degrees;
 	}
 
 	public static double difference(Heading h1, Heading h2)

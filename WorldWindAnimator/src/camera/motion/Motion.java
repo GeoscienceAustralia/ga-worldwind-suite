@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class Motion implements Serializable, Cloneable
 {
 	public static final double DBL_EPSILON = 2.220446049250313E-16d;
-	public static final double SMALL_DOUBLE = 1E-8;
+	public static final double SMALL_DOUBLE = 1E-3;
 
 	public final MotionParams params;
 
@@ -122,6 +122,10 @@ public class Motion implements Serializable, Cloneable
 				}
 			}
 		}
+		
+		System.out.println("DONE!");
+		System.out.println("DONE!");
+		System.out.println("DONE!");
 
 		/*System.out.println();
 		System.out.println("Calculations");
@@ -154,32 +158,29 @@ public class Motion implements Serializable, Cloneable
 			c = a1 * v3 * v3 - a3 * v1 * v1 - 2 * a1 * a3 * distance;
 		}
 
-		calculateV2(a, b, c, false);
-		calculateOthers();
-		if (!isValid())
+		if (a == 0)
 		{
-			calculateV2(a, b, c, true);
+			//special case when a1 == a3, no longer a quadratic
+			v2 = (2 * a1 * a1 * distance + a1 * v1 * v1 - a1 * v3 * v3)
+					/ (2 * (a1 * a1 * time + a1 * v1 - a1 * v3));
 			calculateOthers();
+		}
+		else
+		{
+			v2 = quadratic(a, b, c, false);
+			calculateOthers();
+			if (!isValid())
+			{
+				v2 = quadratic(a, b, c, true);
+				calculateOthers();
+			}
 		}
 	}
 
-	private void calculateV2(double a, double b, double c, boolean useNegative)
+	private double quadratic(double a, double b, double c, boolean useNegative)
 	{
-		double discriminant = b * b - 4 * a * c;
-		v2 = (-b + Math.sqrt(discriminant) * (useNegative ? -1 : 1)) / (2 * a);
-
-		//here, if the values are invalid but t1 and t2 and t3 are all greater than 0,
-		//then do we know it is possible to get to the location and velocity in a shorter time?
-
-		/*if (!isValid() && allowTimeModification && t1 >= 0 && t2 >= 0
-				&& t3 >= 0)
-		{
-			time = t1 + t3;
-			double d = d1 + d3;
-			v2 = Math.sqrt((4 * a1 * a3 * d - 2 * a1 * v3 * v3 + 2 * a3 * v1
-					* v1)
-					/ (2 * (a3 - a1)));
-		}*/
+		return (-b + Math.sqrt(b * b - 4 * a * c) * (useNegative ? -1 : 1))
+				/ (2 * a);
 	}
 
 	private void calculateOthers()
@@ -187,41 +188,46 @@ public class Motion implements Serializable, Cloneable
 		if (params.ignoreOut)
 		{
 			v3 = v2;
-			t3 = 0;
 			a3 = 0;
-			d3 = 0;
 
 			t1 = (v2 - v1) / a1;
+			t3 = 0;
 			t2 = time - t1;
 			d2 = v2 * t2;
 			d1 = distance - d2;
-
-			d3Calc = v2 * t3 + 0.5 * a3 * t3 * t3;
+			d3 = 0;
 		}
 		else if (params.ignoreIn)
 		{
 			v1 = v2;
 			a1 = 0;
-			t1 = 0;
-			d1 = 0;
 
+			t1 = 0;
 			t3 = (v3 - v2) / a3;
 			t2 = time - t3;
+			d1 = 0;
 			d2 = v2 * t2;
 			d3 = distance - d2;
-
-			d3Calc = v2 * t3 + 0.5 * a3 * t3 * t3;
 		}
 		else
 		{
 			t1 = (v2 - v1) / a1;
 			t3 = (v3 - v1 - a1 * t1) / a3;
 			t2 = time - t3 - t1;
+
 			d1 = v1 * t1 + 0.5 * a1 * t1 * t1;
 			d2 = v2 * t2;
 			d3 = distance - d1 - d2;
-			d3Calc = v2 * t3 + 0.5 * a3 * t3 * t3;
 		}
+		d3Calc = v2 * t3 + 0.5 * a3 * t3 * t3;
+		
+		System.out.println();
+		System.out.println("Calculations");
+		System.out.println("Times: " + t1 + ", " + t2 + ", " + t3);
+		System.out.println("Velocities: " + v1 + ", " + v2 + ", " + v3);
+		System.out.println("Distances: " + d1 + ", " + d2 + ", " + d3 + " ("
+				+ d3Calc + ")");
+		System.out.println("Accelerations: " + a1 + ", " + a3);
 	}
 
 	private boolean isValid()

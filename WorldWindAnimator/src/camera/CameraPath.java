@@ -114,15 +114,24 @@ public class CameraPath implements Serializable
 			this.time = 0;
 			dirty = false;
 
-			double time = new MapRefresher<InterpolatableLatLon>().refreshMap(centers);
-			this.time = Math.max(this.time, time);
-			time = new MapRefresher<InterpolatableZoom>().refreshMap(zooms);
-			this.time = Math.max(this.time, time);
-			time = new MapRefresher<InterpolatableHeading>()
-					.refreshMap(headings);
-			this.time = Math.max(this.time, time);
-			time = new MapRefresher<InterpolatablePitch>().refreshMap(pitchs);
-			this.time = Math.max(this.time, time);
+			try
+			{
+				double time = new MapRefresher<InterpolatableLatLon>()
+						.refreshMap(centers);
+				this.time = Math.max(this.time, time);
+				time = new MapRefresher<InterpolatableZoom>().refreshMap(zooms);
+				this.time = Math.max(this.time, time);
+				time = new MapRefresher<InterpolatableHeading>()
+						.refreshMap(headings);
+				this.time = Math.max(this.time, time);
+				time = new MapRefresher<InterpolatablePitch>()
+						.refreshMap(pitchs);
+				this.time = Math.max(this.time, time);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 
