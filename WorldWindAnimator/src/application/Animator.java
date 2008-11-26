@@ -200,20 +200,24 @@ public class Animator
 		Zoom zoom1 = Zoom.fromCameraZoom(6378137);
 		Zoom zoom2 = Zoom.fromCameraZoom(559794);
 
-		Heading heading1 = Heading.fromDegrees(-180);
+		Heading heading1 = Heading.fromDegrees(0);
 		Heading heading2 = Heading.fromDegrees(180);
+		Heading heading3 = Heading.fromDegrees(360);
 		Pitch pitch1 = Pitch.fromDegrees(0);
 		Pitch pitch2 = Pitch.fromDegrees(70);
 		Pitch pitch3 = Pitch.fromDegrees(45);
 
 		MotionParams motion1 = new MotionParams(0.2, 0.2, 0, 0);
-		MotionParams motion2 = new MotionParams(5, 5, 0, 0);
+		MotionParams motion2 = new MotionParams(400, 400, 0, 0, true, true);
 
 		final CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1);
 
 		path.addCenter(l2, l2, null, 20, motion1);
 		path.addZoom(zoom2, 10, motion1);
-		path.addHeading(heading2, 20, motion2);
+		path.addHeading(heading2, 5, motion2);
+		path.addHeading(heading3, 10, motion2);
+		path.addHeading(heading2, 15, motion2);
+		path.addHeading(heading3, 20, motion2);
 		path.addPitch(pitch2, 10, motion2);
 		path.addPitch(pitch3, 20, motion2);
 
