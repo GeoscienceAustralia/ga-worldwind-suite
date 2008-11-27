@@ -29,6 +29,8 @@ public class CameraPath implements Serializable
 	private boolean dirty = true;
 	private double time;
 
+	private double startOffset = 0, endOffset = 0;
+
 	public CameraPath(LatLon initialCenter, LatLon initialOut,
 			Zoom initialZoom, Heading initialHeading, Pitch initialPitch)
 	{
@@ -76,35 +78,45 @@ public class CameraPath implements Serializable
 	public LatLon getCenter(double time)
 	{
 		refresh();
-		return new ValueGetter<LatLon, InterpolatableLatLon>().getValue(time,
-				centers);
+		return new ValueGetter<LatLon, InterpolatableLatLon>().getValue(time
+				+ startOffset, centers);
 	}
 
 	public Zoom getZoom(double time)
 	{
 		refresh();
-		return new ValueGetter<Zoom, InterpolatableZoom>()
-				.getValue(time, zooms);
+		return new ValueGetter<Zoom, InterpolatableZoom>().getValue(time
+				+ startOffset, zooms);
 	}
 
 	public Heading getHeading(double time)
 	{
 		refresh();
-		return new ValueGetter<Heading, InterpolatableHeading>().getValue(time,
-				headings);
+		return new ValueGetter<Heading, InterpolatableHeading>().getValue(time
+				+ startOffset, headings);
 	}
 
 	public Pitch getPitch(double time)
 	{
 		refresh();
-		return new ValueGetter<Pitch, InterpolatablePitch>().getValue(time,
-				pitchs);
+		return new ValueGetter<Pitch, InterpolatablePitch>().getValue(time
+				+ startOffset, pitchs);
 	}
 
 	public double getTime()
 	{
 		refresh();
-		return time;
+		return time - startOffset - endOffset;
+	}
+
+	public void setStartOffset(double startOffset)
+	{
+		this.startOffset = startOffset;
+	}
+
+	public void setEndOffset(double endOffset)
+	{
+		this.endOffset = endOffset;
 	}
 
 	public void refresh()

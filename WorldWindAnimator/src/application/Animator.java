@@ -12,8 +12,11 @@ import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.CompassLayer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.layers.SkyGradientLayer;
+import gov.nasa.worldwind.layers.StarsLayer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
+import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
@@ -36,7 +39,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
-import layers.radioareas.TernaryAreasLayer;
 import camera.CameraPath;
 import camera.motion.MotionParams;
 import camera.params.Heading;
@@ -103,18 +105,20 @@ public class Animator
 
 		LayerList layers = model.getLayers();
 
-		//layers.add(new StarsLayer());
-		//layers.add(new SkyGradientLayer());
+		layers.add(new StarsLayer());
+		layers.add(new SkyGradientLayer());
 		//layers.add(new FogLayer());
 		//layers.add(new BMNGOneImage());
 		layers.add(new BMNGWMSLayer());
-		//layers.add(new LandsatI3WMSLayer());
+		layers.add(new LandsatI3WMSLayer());
 		//layers.add(new EarthNASAPlaceNameLayer());
 		layers.add(new CompassLayer());
 		layers.add(new WorldMapLayer());
 		//layers.add(new ScalebarLayer());
 		//layers.add(new MGRSGraticuleLayer());
-		layers.add(new TernaryAreasLayer());
+		//layers.add(new TernaryAreasLayer());
+
+		wwd.getSceneController().setVerticalExaggeration(2.0);
 
 		JPanel left = new JPanel(new GridLayout(0, 1));
 		frame.add(left, BorderLayout.WEST);
@@ -199,7 +203,7 @@ public class Animator
 		}
 	}
 
-	private static CameraPath createPath()
+	private static CameraPath createPilbaraPath()
 	{
 		LatLon l1 = LatLon.fromDegrees(-27, 133.5);
 		LatLon l2 = LatLon.fromDegrees(-21.0474, 119.6);
@@ -235,9 +239,98 @@ public class Animator
 		return path;
 	}
 
+	private static CameraPath createCanyonPath()
+	{
+		LatLon l1 = LatLon.fromDegrees(-27, 133.5);
+		Zoom zoom1 = Zoom.fromCameraZoom(12000000);
+		Heading heading1 = Heading.fromDegrees(0);
+		Pitch pitch1 = Pitch.fromDegrees(0);
+
+		double time1 = 1;
+		double startOffset = 1;
+		double endOffset = 0;
+		MotionParams motion = new MotionParams(10000, 10000, 0, 0);
+
+		Pitch pitch2 = Pitch.fromDegrees(80);
+		Zoom zoom2 = Zoom.fromCameraZoom(20000);
+
+		LatLon l2 = LatLon.fromDegrees(37.09, -111.26);
+		LatLon l3 = LatLon.fromDegrees(36.945, -111.46);
+		LatLon l4 = LatLon.fromDegrees(36.875, -111.56);
+		LatLon l5 = LatLon.fromDegrees(36.85, -111.61);
+		LatLon l6 = LatLon.fromDegrees(36.64, -111.76);
+
+		/*LatLon l2 = LatLon.fromDegrees(37, 111);
+		LatLon l3 = LatLon.fromDegrees(37, 112);
+		LatLon l4 = LatLon.fromDegrees(38, 112);
+		LatLon l5 = LatLon.fromDegrees(38, 111);
+		LatLon l6 = LatLon.fromDegrees(37, 111);*/
+
+		LatLon[] positions = new LatLon[] { l2, l3, l4, l5, l6 };
+		Heading[] headings = new Heading[positions.length];
+		double[] times = new double[positions.length];
+		LatLon[] ins = new LatLon[positions.length];
+		LatLon[] outs = new LatLon[positions.length];
+
+		Heading heading2 = Heading.fromDegrees(l2.angleBetween(l6) + 90d);
+
+		//heading is angle between this point and next point
+		//time is (distance between this point and last point) * constant
+
+		LatLon last, current, next;
+		times[0] = time1;
+		for (int i = 0; i < positions.length; i++)
+		{
+			current = positions[i];
+
+			if (i + 1 < positions.length)
+			{
+				next = positions[i + 1];
+				headings[i] = Heading
+						.fromDegrees(current.angleBetween(next) + 90d);
+				outs[i] = LatLon.interpolate(current, next, 0.5);
+			}
+			else
+			{
+				headings[i] = headings[i - 1];
+				outs[i] = positions[i];
+			}
+
+			if (i != 0)
+			{
+				last = positions[i - 1];
+				times[i] = current.distance(last) * 10 + times[i - 1];
+				ins[i] = LatLon.interpolate(last, current, 0.5);
+			}
+			else
+			{
+				times[i] = time1;
+				ins[i] = positions[i];
+			}
+			last = current;
+		}
+
+		CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1);
+		path.addZoom(zoom2, time1, motion);
+		path.addPitch(pitch2, time1, motion);
+
+		for (int i = 0; i < positions.length; i++)
+		{
+			path.addCenter(positions[i], ins[i], outs[i], times[i], motion);
+			//path.addHeading(headings[i], times[i], motion);
+		}
+
+		path.addHeading(heading2, time1, motion);
+
+		path.setStartOffset(startOffset);
+		path.setEndOffset(endOffset);
+		path.refresh();
+		return path;
+	}
+
 	private void animate(final boolean savingFrames)
 	{
-		final CameraPath path = createPath();
+		final CameraPath path = createCanyonPath();
 
 		Thread thread = new Thread(new Runnable()
 		{
@@ -245,12 +338,15 @@ public class Animator
 			{
 				Animator.this.frame.setAlwaysOnTop(savingFrames);
 
-				Toolkit tk = Toolkit.getDefaultToolkit();
-				BufferedImage image = new BufferedImage(1, 1,
-						BufferedImage.TYPE_INT_ARGB);
-				Cursor blankCursor = tk.createCustomCursor(image, new Point(0,
-						0), "BlackCursor");
-				wwd.setCursor(blankCursor);
+				if (savingFrames)
+				{
+					Toolkit tk = Toolkit.getDefaultToolkit();
+					BufferedImage image = new BufferedImage(1, 1,
+							BufferedImage.TYPE_INT_ARGB);
+					Cursor blankCursor = tk.createCustomCursor(image,
+							new Point(0, 0), "BlackCursor");
+					wwd.setCursor(blankCursor);
+				}
 
 				View v = wwd.getSceneController().getView();
 				if (!(v instanceof OrbitView))

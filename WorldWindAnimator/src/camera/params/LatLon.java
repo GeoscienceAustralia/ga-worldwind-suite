@@ -29,6 +29,20 @@ public class LatLon implements Serializable
 						.fromDegreesLongitude(longitude.degrees));
 	}
 
+	public double distance(LatLon ll)
+	{
+		double latdiff = Latitude.difference(latitude, ll.latitude);
+		double londiff = Longitude.difference(longitude, ll.longitude);
+		return Math.sqrt(latdiff * latdiff + londiff * londiff);
+	}
+
+	public double angleBetween(LatLon ll)
+	{
+		double latdiff = Latitude.difference(latitude, ll.latitude);
+		double londiff = Longitude.difference(longitude, ll.longitude);
+		return Math.atan2(-latdiff, londiff) * 180d / Math.PI;
+	}
+
 	public static LatLon fromDegrees(double degreesLatitude,
 			double degreesLongitude)
 	{
@@ -60,5 +74,13 @@ public class LatLon implements Serializable
 		double latDelta = Latitude.difference(
 				Latitude.fromDegrees(reference.y), latitude);
 		return new Vector2(longDelta, latDelta).addLocal(reference);
+	}
+
+	public static LatLon interpolate(LatLon l1, LatLon l2, double percent)
+	{
+		double latdiff = Latitude.difference(l1.latitude, l2.latitude);
+		double londiff = Longitude.difference(l1.longitude, l2.longitude);
+		return LatLon.fromDegrees(l1.latitude.degrees + latdiff * percent,
+				l1.longitude.degrees + londiff * percent);
 	}
 }
