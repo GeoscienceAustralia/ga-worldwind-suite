@@ -13,5 +13,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/WorldWind"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/WorldWindRad"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

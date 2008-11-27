@@ -11,37 +11,32 @@ import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.CompassLayer;
-import gov.nasa.worldwind.layers.FogLayer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.layers.ScalebarLayer;
-import gov.nasa.worldwind.layers.SkyGradientLayer;
-import gov.nasa.worldwind.layers.StarsLayer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
-import gov.nasa.worldwind.layers.Earth.EarthNASAPlaceNameLayer;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 
-import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
+import layers.radioareas.TernaryAreasLayer;
 import camera.CameraPath;
 import camera.motion.MotionParams;
 import camera.params.Heading;
@@ -49,7 +44,7 @@ import camera.params.LatLon;
 import camera.params.Pitch;
 import camera.params.Zoom;
 
-import com.sun.opengl.util.BufferUtil;
+import com.sun.opengl.util.Screenshot;
 
 public class Animator
 {
@@ -103,22 +98,23 @@ public class Animator
 		wwd = new WorldWindowGLCanvas();
 		Model model = new BasicModel();
 		wwd.setModel(model);
-		wwd.setPreferredSize(new Dimension(800, 600));
+		wwd.setPreferredSize(new Dimension(1024, 576));
 		frame.add(wwd, BorderLayout.CENTER);
 
 		LayerList layers = model.getLayers();
 
-		layers.add(new StarsLayer());
-		layers.add(new SkyGradientLayer());
-		layers.add(new FogLayer());
+		//layers.add(new StarsLayer());
+		//layers.add(new SkyGradientLayer());
+		//layers.add(new FogLayer());
 		//layers.add(new BMNGOneImage());
 		layers.add(new BMNGWMSLayer());
 		//layers.add(new LandsatI3WMSLayer());
-		layers.add(new EarthNASAPlaceNameLayer());
+		//layers.add(new EarthNASAPlaceNameLayer());
 		layers.add(new CompassLayer());
 		layers.add(new WorldMapLayer());
-		layers.add(new ScalebarLayer());
+		//layers.add(new ScalebarLayer());
 		//layers.add(new MGRSGraticuleLayer());
+		layers.add(new TernaryAreasLayer());
 
 		JPanel left = new JPanel(new GridLayout(0, 1));
 		frame.add(left, BorderLayout.WEST);
@@ -133,13 +129,23 @@ public class Animator
 			}
 		});
 
-		button = new JButton("Animate");
+		button = new JButton("Preview");
 		left.add(button);
 		button.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animate();
+				animate(false);
+			}
+		});
+
+		button = new JButton("Save");
+		left.add(button);
+		button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animate(true);
 			}
 		});
 
@@ -196,24 +202,23 @@ public class Animator
 	private static CameraPath createPath()
 	{
 		LatLon l1 = LatLon.fromDegrees(-27, 133.5);
-		LatLon l2 = LatLon.fromDegrees(-21.0474, 119.6494);
+		LatLon l2 = LatLon.fromDegrees(-21.0474, 119.6);
 
-		Zoom zoom1 = Zoom.fromCameraZoom(6378137);
-		Zoom zoom2 = Zoom.fromCameraZoom(559794);
+		Zoom zoom1 = Zoom.fromCameraZoom(12000000);
+		Zoom zoom2 = Zoom.fromCameraZoom(500000);
 
 		Heading heading1 = Heading.fromDegrees(0);
 		Heading heading2 = Heading.fromDegrees(-360);
 
 		Pitch pitch1 = Pitch.fromDegrees(0);
-		Pitch pitch2 = Pitch.fromDegrees(70);
-		Pitch pitch3 = Pitch.fromDegrees(50);
+		Pitch pitch2 = Pitch.fromDegrees(50);
 
 		double time1 = 4;
 		double time3 = 12;
 
-		MotionParams centerMotion = new MotionParams(4, 4, 0, 0);
-		MotionParams zoomMotion = new MotionParams(0.8, 0.8, 0, 0);
-		MotionParams headingMotion = new MotionParams(10, 10, 0, 0);
+		MotionParams centerMotion = new MotionParams(8, 2.5, 0, 0);
+		MotionParams zoomMotion = new MotionParams(2, 0.5, 0, 0);
+		MotionParams headingMotion = new MotionParams(20, 20, 0, 0);
 		MotionParams pitchMotion = new MotionParams(20, 20, 0, 0);
 
 		CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1);
@@ -224,13 +229,13 @@ public class Animator
 		path.addHeading(heading2, time3, headingMotion);
 
 		path.addPitch(pitch2, time1, pitchMotion);
-		path.addPitch(pitch3, time3, pitchMotion);
+		//path.addPitch(pitch3, time3, pitchMotion);
 
 		path.refresh();
 		return path;
 	}
 
-	private void animate()
+	private void animate(final boolean savingFrames)
 	{
 		final CameraPath path = createPath();
 
@@ -238,6 +243,15 @@ public class Animator
 		{
 			public void run()
 			{
+				Animator.this.frame.setAlwaysOnTop(savingFrames);
+
+				Toolkit tk = Toolkit.getDefaultToolkit();
+				BufferedImage image = new BufferedImage(1, 1,
+						BufferedImage.TYPE_INT_ARGB);
+				Cursor blankCursor = tk.createCustomCursor(image, new Point(0,
+						0), "BlackCursor");
+				wwd.setCursor(blankCursor);
+
 				View v = wwd.getSceneController().getView();
 				if (!(v instanceof OrbitView))
 					return;
@@ -245,14 +259,25 @@ public class Animator
 				boolean detectCollisions = view.isDetectCollisions();
 				view.setDetectCollisions(false);
 
+				int fps = 50;
+				int frame = 0;
+
 				double totalTime = path.getTime();
 				double startTime = System.currentTimeMillis() / 1000d;
 				double currentTime = 0;
 				while (currentTime <= totalTime)
 				{
-					currentTime = System.currentTimeMillis() / 1000d
-							- startTime;
-					//currentTime += 1;
+					frame++;
+
+					if (savingFrames)
+					{
+						currentTime = frame / (double) fps;
+					}
+					else
+					{
+						currentTime = System.currentTimeMillis() / 1000d
+								- startTime;
+					}
 
 					LatLon center = path.getCenter(currentTime);
 					Zoom zoom = path.getZoom(currentTime);
@@ -266,12 +291,18 @@ public class Animator
 
 					wwd.redrawNow();
 
-					//takeScreenshot("frames/screen" + (currentTime) + ".png");
+					if (savingFrames)
+					{
+						takeScreenshot("frames/frame" + frame + ".tga");
+					}
 
 					//System.out.println(currentTime + " = " + position + " zoom = " + zoom);
 				}
 
 				view.setDetectCollisions(detectCollisions);
+
+				Animator.this.frame.setAlwaysOnTop(false);
+				wwd.setCursor(null);
 			}
 		});
 		thread.start();
@@ -297,7 +328,22 @@ public class Animator
 			else if (event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)
 			{
 				wwd.removeRenderingListener(this);
-				saveFrame(filename);
+
+				File out = new File(filename);
+				if (!out.getParentFile().exists())
+				{
+					out.getParentFile().mkdirs();
+				}
+				try
+				{
+					Screenshot.writeToTargaFile(out, wwd.getWidth(), wwd
+							.getHeight());
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+
 				takingScreenshot = false;
 			}
 		}
@@ -314,44 +360,4 @@ public class Animator
 			}
 		}
 	};
-
-	private void saveFrame(String filename)
-	{
-		GL gl = wwd.getGL();
-		int width = wwd.getWidth();
-		int height = wwd.getHeight();
-		ByteBuffer buffer = BufferUtil.newByteBuffer(width * height * 3);
-		gl.glReadPixels(0, 0, width, height, GL.GL_RGB, GL.GL_UNSIGNED_BYTE,
-				buffer);
-		BufferedImage img = new BufferedImage(width, height,
-				BufferedImage.TYPE_INT_RGB);
-
-		for (int x = 0; x < width; x++)
-		{
-			for (int y = 0; y < height; y++)
-			{
-				int index = 3 * ((height - y - 1) * width + x);
-				int argb = (((int) (buffer.get(index + 0)) & 0xFF) << 16) //r
-						| (((int) (buffer.get(index + 1)) & 0xFF) << 8) //g
-						| (((int) (buffer.get(index + 2)) & 0xFF)); //b
-
-				img.setRGB(x, y, argb);
-			}
-		}
-
-		File out = new File(filename);
-		if (!out.getParentFile().exists())
-		{
-			out.getParentFile().mkdirs();
-		}
-		try
-		{
-			ImageIO.write(img, "png", out);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("Screenshot saved to " + out);
-	}
 }

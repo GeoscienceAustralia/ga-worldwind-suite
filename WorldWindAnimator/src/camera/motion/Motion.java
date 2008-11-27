@@ -105,15 +105,15 @@ public class Motion implements Serializable, Cloneable
 		calculate();
 		if (!isValid())
 		{
-			a1 = -a1;
+			a3 = -a3;
 			calculate();
 			if (!isValid())
 			{
-				a3 = -a3;
+				a1 = -a1;
 				calculate();
 				if (!isValid())
 				{
-					a1 = -a1;
+					a3 = -a3;
 					calculate();
 					if (!isValid())
 					{
