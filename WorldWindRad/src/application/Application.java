@@ -40,6 +40,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -293,7 +294,10 @@ public class Application
 			}
 		});
 
-		//putInSeparateFrame(1024, 576);
+		wwd.setMinimumSize(new Dimension(1024, 1024));
+		frame.pack();
+
+		//putInSeparateFrame(1024 * 3, 576 * 3);
 	}
 
 	/*private void putInSeparateFrame(int width, int height)
@@ -301,14 +305,20 @@ public class Application
 		JFrame frame = new JFrame();
 		frame.setLayout(new BorderLayout());
 		frame.setUndecorated(true);
+		frame.setAlwaysOnTop(false);
 		frame.add(wwd, BorderLayout.CENTER);
-		Dimension size = new Dimension(1024, 576);
+		Dimension size = new Dimension(width, height);
 		wwd.setMinimumSize(size);
 		wwd.setMaximumSize(size);
 		wwd.setPreferredSize(size);
 		frame.setSize(size);
 		frame.setVisible(true);
 	}*/
+
+	private void takeScreenshot(int width, int height, final File file)
+	{
+		Screenshotter.takeScreenshot(wwd, width, height, file);
+	}
 
 	private void addWindowListeners()
 	{
@@ -546,6 +556,16 @@ public class Application
 				WorldWind.setOfflineMode(offline.isSelected());
 			}
 		});
+
+		menuItem = new JMenuItem("Take screenshot");
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				takeScreenshot(1024 * 4, 576 * 4, new File("screenshot.png"));
+			}
+		});
+		menu.add(menuItem);
 
 		menu.addSeparator();
 

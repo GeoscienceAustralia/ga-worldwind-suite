@@ -234,6 +234,10 @@ public class Settings
 			{
 				bounds[i] = Integer.parseInt(split[i]);
 			}
+			if (bounds[0] < 0)
+				bounds[0] = 0;
+			if (bounds[1] < 0)
+				bounds[1] = 0;
 			return new Rectangle(bounds[0], bounds[1], bounds[2], bounds[3]);
 		}
 		catch (Exception e)
