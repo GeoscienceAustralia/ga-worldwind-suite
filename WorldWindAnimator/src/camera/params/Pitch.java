@@ -20,7 +20,7 @@ public class Pitch implements Serializable
 
 	private Pitch(double degrees)
 	{
-		this.degrees = Math.max(0, Math.min(90, degrees));
+		this.degrees = Math.max(0, Math.min(180, degrees));
 	}
 
 	public Angle getAngle()

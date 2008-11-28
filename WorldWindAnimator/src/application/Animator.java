@@ -31,6 +31,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -113,7 +114,7 @@ public class Animator
 		//layers.add(new FogLayer());
 		//layers.add(new BMNGOneImage());
 		layers.add(new BMNGWMSLayer());
-		layers.add(new LandsatI3WMSLayer());
+		//layers.add(new LandsatI3WMSLayer());
 		//layers.add(new EarthNASAPlaceNameLayer());
 		layers.add(new CompassLayer());
 		layers.add(new WorldMapLayer());
@@ -273,10 +274,11 @@ public class Animator
 		double time1 = 1;
 		double startOffset = 1;
 		double endOffset = 0;
-		MotionParams motion = new MotionParams(10000, 10000, 0, 0);
+		MotionParams motion = new MotionParams(1000, 1000, 0, 0);
+		MotionParams headingsMotion = new MotionParams(50, 35, 0, 0);
 
-		Pitch pitch2 = Pitch.fromDegrees(50);
-		Zoom zoom2 = Zoom.fromCameraZoom(10000);
+		Pitch pitch2 = Pitch.fromDegrees(85);
+		Zoom zoom2 = Zoom.fromCameraZoom(3000);
 
 		LatLon l2 = LatLon.fromDegrees(37.09, -111.26);
 		LatLon l3 = LatLon.fromDegrees(36.945, -111.46);
@@ -295,6 +297,7 @@ public class Animator
 		double[] times = new double[positions.length];
 		LatLon[] ins = new LatLon[positions.length];
 		LatLon[] outs = new LatLon[positions.length];
+		Roll[] rolls = new Roll[positions.length];
 
 		Heading heading2 = Heading.fromDegrees(l2.angleBetween(l6) + 90d);
 
@@ -306,6 +309,7 @@ public class Animator
 		for (int i = 0; i < positions.length; i++)
 		{
 			current = positions[i];
+			rolls[i] = Roll.fromDegrees(new Random().nextDouble() * 180 - 90);
 
 			if (i + 1 < positions.length)
 			{
@@ -323,7 +327,7 @@ public class Animator
 			if (i != 0)
 			{
 				last = positions[i - 1];
-				times[i] = current.distance(last) * 10 + times[i - 1];
+				times[i] = current.distance(last) * 30 + times[i - 1];
 				ins[i] = LatLon.interpolate(last, current, 0.5);
 			}
 			else
@@ -334,7 +338,7 @@ public class Animator
 			last = current;
 		}
 
-		CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1,
+		CameraPath path = new CameraPath(l1, l1, zoom1, headings[0], pitch1,
 				roll1, true);
 		path.addZoom(zoom2, time1, motion);
 		path.addPitch(pitch2, time1, motion);
@@ -342,10 +346,11 @@ public class Animator
 		for (int i = 0; i < positions.length; i++)
 		{
 			path.addLatLon(positions[i], ins[i], outs[i], times[i], motion);
-			path.addHeading(headings[i], times[i], motion);
+			path.addHeading(headings[i], times[i], headingsMotion);
+			path.addRoll(rolls[i], times[i], motion);
 		}
 
-		path.addHeading(heading2, time1, motion);
+		//path.addHeading(heading2, time1, motion);
 
 		path.setStartOffset(startOffset);
 		path.setEndOffset(endOffset);
