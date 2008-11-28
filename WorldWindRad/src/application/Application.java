@@ -296,25 +296,9 @@ public class Application
 				frame.setVisible(true);
 			}
 		});
-
-		//putInSeparateFrame(1024 * 3, 576 * 3);
 	}
 
-	/*private void putInSeparateFrame(int width, int height)
-	{
-		JFrame frame = new JFrame();
-		frame.setLayout(new BorderLayout());
-		frame.setUndecorated(true);
-		frame.setAlwaysOnTop(false);
-		frame.add(wwd, BorderLayout.CENTER);
-		Dimension size = new Dimension(width, height);
-		wwd.setMinimumSize(size);
-		wwd.setMaximumSize(size);
-		wwd.setPreferredSize(size);
-		frame.setSize(size);
-		frame.setVisible(true);
-	}*/
-
+	@SuppressWarnings("unused")
 	private void takeScreenshot(int width, int height, final File file)
 	{
 		Screenshotter.takeScreenshot(wwd, width, height, file);
@@ -557,7 +541,7 @@ public class Application
 			}
 		});
 
-		menuItem = new JMenuItem("Take screenshot");
+		/*menuItem = new JMenuItem("Take screenshot");
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -565,7 +549,7 @@ public class Application
 				takeScreenshot(1024 * 4, 576 * 4, new File("screenshot.png"));
 			}
 		});
-		menu.add(menuItem);
+		menu.add(menuItem);*/
 
 		menu.addSeparator();
 
