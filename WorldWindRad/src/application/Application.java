@@ -7,6 +7,7 @@ import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Earth;
@@ -14,6 +15,7 @@ import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ScalebarLayer;
 import gov.nasa.worldwind.layers.TerrainProfileLayer;
+import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
@@ -161,10 +163,11 @@ public class Application
 		//create worldwind stuff
 
 		wwd = new WorldWindowStereoGLCanvas();
-		wwd.setMinimumSize(new Dimension(10, 10));
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		wwd.addPropertyChangeListener(propertyChangeListener);
+		wwd.addSelectListener(new ClickAndGoSelectListener(wwd,
+				WorldMapLayer.class));
 		create3DMouse();
 		createDoubleClickListener();
 
@@ -293,9 +296,6 @@ public class Application
 				frame.setVisible(true);
 			}
 		});
-
-		wwd.setMinimumSize(new Dimension(1024, 1024));
-		frame.pack();
 
 		//putInSeparateFrame(1024 * 3, 576 * 3);
 	}
