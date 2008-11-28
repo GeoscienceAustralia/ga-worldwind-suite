@@ -9,7 +9,6 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
-import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.CompassLayer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
@@ -18,7 +17,6 @@ import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.util.StatusBar;
-import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -39,11 +37,14 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
+import view.BasicRollOrbitView;
+import view.RollOrbitView;
 import camera.CameraPath;
 import camera.motion.MotionParams;
 import camera.params.Heading;
 import camera.params.LatLon;
 import camera.params.Pitch;
+import camera.params.Roll;
 import camera.params.Zoom;
 
 import com.sun.opengl.util.Screenshot;
@@ -93,6 +94,8 @@ public class Animator
 	public Animator()
 	{
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
+		Configuration.setValue(AVKey.VIEW_CLASS_NAME, BasicRollOrbitView.class
+				.getName());
 
 		frame = new JFrame("World Wind");
 
@@ -152,6 +155,23 @@ public class Animator
 				animate(true);
 			}
 		});
+
+		/*button = new JButton("Orient");
+		left.add(button);
+		button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				Position eyePosition = Position.fromDegrees(20, 20, 1000000);
+				RollOrbitView view = (RollOrbitView) wwd.getView();
+				for (int i = 0; i < 361; i++)
+				{
+					view.setEye(eyePosition, Angle.fromDegrees(i), Angle.fromDegrees(60),
+							Angle.fromDegrees(i));
+					wwd.redrawNow();
+				}
+			}
+		});*/
 
 		StatusBar statusBar = new StatusBar();
 		frame.add(statusBar, BorderLayout.PAGE_END);
@@ -217,6 +237,8 @@ public class Animator
 		Pitch pitch1 = Pitch.fromDegrees(0);
 		Pitch pitch2 = Pitch.fromDegrees(50);
 
+		Roll roll1 = Roll.fromDegrees(0);
+
 		double time1 = 4;
 		double time3 = 12;
 
@@ -225,9 +247,10 @@ public class Animator
 		MotionParams headingMotion = new MotionParams(20, 20, 0, 0);
 		MotionParams pitchMotion = new MotionParams(20, 20, 0, 0);
 
-		CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1);
+		CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1,
+				roll1, false);
 
-		path.addCenter(l2, l2, null, time1, centerMotion);
+		path.addLatLon(l2, l2, null, time1, centerMotion);
 		path.addZoom(zoom2, time1, zoomMotion);
 
 		path.addHeading(heading2, time3, headingMotion);
@@ -245,14 +268,15 @@ public class Animator
 		Zoom zoom1 = Zoom.fromCameraZoom(12000000);
 		Heading heading1 = Heading.fromDegrees(0);
 		Pitch pitch1 = Pitch.fromDegrees(0);
+		Roll roll1 = Roll.fromDegrees(0);
 
 		double time1 = 1;
 		double startOffset = 1;
 		double endOffset = 0;
 		MotionParams motion = new MotionParams(10000, 10000, 0, 0);
 
-		Pitch pitch2 = Pitch.fromDegrees(80);
-		Zoom zoom2 = Zoom.fromCameraZoom(20000);
+		Pitch pitch2 = Pitch.fromDegrees(50);
+		Zoom zoom2 = Zoom.fromCameraZoom(10000);
 
 		LatLon l2 = LatLon.fromDegrees(37.09, -111.26);
 		LatLon l3 = LatLon.fromDegrees(36.945, -111.46);
@@ -310,14 +334,15 @@ public class Animator
 			last = current;
 		}
 
-		CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1);
+		CameraPath path = new CameraPath(l1, l1, zoom1, heading1, pitch1,
+				roll1, true);
 		path.addZoom(zoom2, time1, motion);
 		path.addPitch(pitch2, time1, motion);
 
 		for (int i = 0; i < positions.length; i++)
 		{
-			path.addCenter(positions[i], ins[i], outs[i], times[i], motion);
-			//path.addHeading(headings[i], times[i], motion);
+			path.addLatLon(positions[i], ins[i], outs[i], times[i], motion);
+			path.addHeading(headings[i], times[i], motion);
 		}
 
 		path.addHeading(heading2, time1, motion);
@@ -331,6 +356,7 @@ public class Animator
 	private void animate(final boolean savingFrames)
 	{
 		final CameraPath path = createCanyonPath();
+		//final CameraPath path = createPilbaraPath();
 
 		Thread thread = new Thread(new Runnable()
 		{
@@ -349,9 +375,9 @@ public class Animator
 				}
 
 				View v = wwd.getSceneController().getView();
-				if (!(v instanceof OrbitView))
+				if (!(v instanceof RollOrbitView))
 					return;
-				OrbitView view = (OrbitView) v;
+				RollOrbitView view = (RollOrbitView) v;
 				boolean detectCollisions = view.isDetectCollisions();
 				view.setDetectCollisions(false);
 
@@ -375,15 +401,24 @@ public class Animator
 								- startTime;
 					}
 
-					LatLon center = path.getCenter(currentTime);
+					LatLon latlon = path.getLatLon(currentTime);
 					Zoom zoom = path.getZoom(currentTime);
 					Heading heading = path.getHeading(currentTime);
 					Pitch pitch = path.getPitch(currentTime);
+					Roll roll = path.getRoll(currentTime);
 
-					view.setCenterPosition(new Position(center.getLatLon(), 0));
-					view.setZoom(zoom.toCameraZoom());
-					view.setHeading(heading.getAngle());
-					view.setPitch(pitch.getAngle());
+					if (path.isEyePath())
+					{
+						view.setEye(latlon.getLatLon(), heading.getAngle(),
+								pitch.getAngle(), roll.getAngle(), zoom
+										.toCameraZoom());
+					}
+					else
+					{
+						view.setCenter(latlon.getLatLon(), heading.getAngle(),
+								pitch.getAngle(), roll.getAngle(), zoom
+										.toCameraZoom());
+					}
 
 					wwd.redrawNow();
 

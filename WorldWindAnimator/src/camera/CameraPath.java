@@ -11,31 +11,37 @@ import camera.interpolate.Interpolatable;
 import camera.interpolate.InterpolatableHeading;
 import camera.interpolate.InterpolatableLatLon;
 import camera.interpolate.InterpolatablePitch;
+import camera.interpolate.InterpolatableRoll;
 import camera.interpolate.InterpolatableZoom;
 import camera.motion.Motion;
 import camera.motion.MotionParams;
 import camera.params.Heading;
 import camera.params.LatLon;
 import camera.params.Pitch;
+import camera.params.Roll;
 import camera.params.Zoom;
 
 public class CameraPath implements Serializable
 {
-	private SortedMap<Double, MotionAndObject<InterpolatableLatLon>> centers = new TreeMap<Double, MotionAndObject<InterpolatableLatLon>>();
+	private SortedMap<Double, MotionAndObject<InterpolatableLatLon>> latlons = new TreeMap<Double, MotionAndObject<InterpolatableLatLon>>();
 	private SortedMap<Double, MotionAndObject<InterpolatableZoom>> zooms = new TreeMap<Double, MotionAndObject<InterpolatableZoom>>();
 	private SortedMap<Double, MotionAndObject<InterpolatableHeading>> headings = new TreeMap<Double, MotionAndObject<InterpolatableHeading>>();
 	private SortedMap<Double, MotionAndObject<InterpolatablePitch>> pitchs = new TreeMap<Double, MotionAndObject<InterpolatablePitch>>();
+	private SortedMap<Double, MotionAndObject<InterpolatableRoll>> rolls = new TreeMap<Double, MotionAndObject<InterpolatableRoll>>();
 
 	private boolean dirty = true;
 	private double time;
 
 	private double startOffset = 0, endOffset = 0;
 
-	public CameraPath(LatLon initialCenter, LatLon initialOut,
-			Zoom initialZoom, Heading initialHeading, Pitch initialPitch)
+	private boolean eyePath;
+
+	public CameraPath(LatLon initialLatLon, LatLon initialOut,
+			Zoom initialZoom, Heading initialHeading, Pitch initialPitch,
+			Roll initialRoll, boolean eyePath)
 	{
-		centers.put(0d, new MotionAndObject<InterpolatableLatLon>(
-				new InterpolatableLatLon(new LatLonBezier(initialCenter, null,
+		latlons.put(0d, new MotionAndObject<InterpolatableLatLon>(
+				new InterpolatableLatLon(new LatLonBezier(initialLatLon, null,
 						initialOut)), null));
 		zooms.put(0d, new MotionAndObject<InterpolatableZoom>(
 				new InterpolatableZoom(initialZoom), null));
@@ -43,13 +49,21 @@ public class CameraPath implements Serializable
 				new InterpolatableHeading(initialHeading), null));
 		pitchs.put(0d, new MotionAndObject<InterpolatablePitch>(
 				new InterpolatablePitch(initialPitch), null));
+		rolls.put(0d, new MotionAndObject<InterpolatableRoll>(
+				new InterpolatableRoll(initialRoll), null));
+		this.eyePath = eyePath;
 	}
 
-	public void addCenter(LatLon center, LatLon in, LatLon out, double time,
+	public boolean isEyePath()
+	{
+		return eyePath;
+	}
+
+	public void addLatLon(LatLon latlon, LatLon in, LatLon out, double time,
 			MotionParams motion)
 	{
-		LatLonBezier llb = new LatLonBezier(center, in, out);
-		centers.put(time, new MotionAndObject<InterpolatableLatLon>(
+		LatLonBezier llb = new LatLonBezier(latlon, in, out);
+		latlons.put(time, new MotionAndObject<InterpolatableLatLon>(
 				new InterpolatableLatLon(llb), new Motion(motion)));
 		dirty = true;
 	}
@@ -75,11 +89,18 @@ public class CameraPath implements Serializable
 		dirty = true;
 	}
 
-	public LatLon getCenter(double time)
+	public void addRoll(Roll roll, double time, MotionParams motion)
+	{
+		rolls.put(time, new MotionAndObject<InterpolatableRoll>(
+				new InterpolatableRoll(roll), new Motion(motion)));
+		dirty = true;
+	}
+
+	public LatLon getLatLon(double time)
 	{
 		refresh();
 		return new ValueGetter<LatLon, InterpolatableLatLon>().getValue(time
-				+ startOffset, centers);
+				+ startOffset, latlons);
 	}
 
 	public Zoom getZoom(double time)
@@ -101,6 +122,13 @@ public class CameraPath implements Serializable
 		refresh();
 		return new ValueGetter<Pitch, InterpolatablePitch>().getValue(time
 				+ startOffset, pitchs);
+	}
+
+	public Roll getRoll(double time)
+	{
+		refresh();
+		return new ValueGetter<Roll, InterpolatableRoll>().getValue(time
+				+ startOffset, rolls);
 	}
 
 	public double getTime()
@@ -129,7 +157,7 @@ public class CameraPath implements Serializable
 			try
 			{
 				double time = new MapRefresher<InterpolatableLatLon>()
-						.refreshMap(centers);
+						.refreshMap(latlons);
 				this.time = Math.max(this.time, time);
 				time = new MapRefresher<InterpolatableZoom>().refreshMap(zooms);
 				this.time = Math.max(this.time, time);
@@ -138,6 +166,8 @@ public class CameraPath implements Serializable
 				this.time = Math.max(this.time, time);
 				time = new MapRefresher<InterpolatablePitch>()
 						.refreshMap(pitchs);
+				this.time = Math.max(this.time, time);
+				time = new MapRefresher<InterpolatableRoll>().refreshMap(rolls);
 				this.time = Math.max(this.time, time);
 			}
 			catch (Exception e)
