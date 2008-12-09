@@ -12,9 +12,9 @@ public class TabbedDockingPort extends DefaultDockingPort
 {
 	private DockingStrategy dockingStrategy = new TabbedDockingStrategy();
 
-	public TabbedDockingPort()
+	public TabbedDockingPort(String id)
 	{
-		super();
+		super(id);
 	}
 
 	public boolean dock(Dockable dockable)
@@ -40,7 +40,7 @@ public class TabbedDockingPort extends DefaultDockingPort
 		@Override
 		protected DockingPort createDockingPortImpl(DockingPort base)
 		{
-			return new TabbedDockingPort();
+			return new TabbedDockingPort(base.getPersistentId() + "_child");
 		}
 	}
 }

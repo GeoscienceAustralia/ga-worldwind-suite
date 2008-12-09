@@ -218,7 +218,10 @@ public class PlaceSearchPanel extends JPanel
 		{
 			public void mouseClicked(MouseEvent e)
 			{
-				selectionChanged();
+				if (e.getClickCount() == 2)
+				{
+					flyToSelection();
+				}
 			}
 		});
 
@@ -292,7 +295,7 @@ public class PlaceSearchPanel extends JPanel
 		searchButton.setEnabled(searchText.getText().length() > 0);
 	}
 
-	private void selectionChanged()
+	private void flyToSelection()
 	{
 		Object object = list.getSelectedValue();
 

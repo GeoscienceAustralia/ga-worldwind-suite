@@ -74,6 +74,7 @@ import org.flexdock.docking.drag.preview.AlphaPreview;
 import org.flexdock.docking.event.DockingEvent;
 import org.flexdock.perspective.PerspectiveManager;
 
+import panels.favourite.FavouritePanel;
 import panels.layers.LayersPanel;
 import panels.other.ExaggerationPanel;
 import panels.other.GoToCoordinatePanel;
@@ -157,6 +158,7 @@ public class Application
 	private DockablePanel exaggerationDockable;
 	private DockablePanel gotoDockable;
 	private DockablePanel placeSearchDockable;
+	private DockablePanel favouriteDockable;
 
 	public Application()
 	{
@@ -199,7 +201,7 @@ public class Application
 		statusBar.setEventSource(wwd);
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
 
-		dockingPort = new TabbedDockingPort();
+		dockingPort = new TabbedDockingPort("dockingport");
 		dockingPort.setTabsAsDragSource(true);
 		panel.add(dockingPort, BorderLayout.CENTER);
 
@@ -243,6 +245,10 @@ public class Application
 		placeSearchDockable = new DockablePanel("placesearch", "Place search",
 				null, placeSearchPanel, true, true);
 
+		FavouritePanel favouritePanel = new FavouritePanel(wwd);
+		favouriteDockable = new DockablePanel("favourites", "Favourites", null,
+				favouritePanel, true, true);
+
 		panel = new JPanel(new BorderLayout());
 		GoToCoordinatePanel gotoPanel = new GoToCoordinatePanel(wwd);
 		panel.add(gotoPanel, BorderLayout.NORTH);
@@ -271,9 +277,12 @@ public class Application
 					DockingConstants.SOUTH_REGION);
 			globeDockable.dock(placeSearchDockable,
 					DockingConstants.EAST_REGION);
+			placeSearchDockable.dock(favouriteDockable,
+					DockingConstants.SOUTH_REGION);
+			favouriteDockable.dock(gotoDockable, DockingConstants.SOUTH_REGION);
 
 			DockingManager.setSplitProportion((DockingPort) dockingPort, 0.25f);
-			DockingManager.setSplitProportion(placeSearchDockable, 0.8f);
+			DockingManager.setSplitProportion(placeSearchDockable, 0.5f);
 			DockingManager.setSplitProportion(exaggerationDockable, 0.8f);
 		}
 		else
@@ -575,6 +584,9 @@ public class Application
 		menuItem = createDockableMenuItem(placeSearchDockable);
 		menu.add(menuItem);
 
+		menuItem = createDockableMenuItem(favouriteDockable);
+		menu.add(menuItem);
+		
 		menuItem = createDockableMenuItem(gotoDockable);
 		menu.add(menuItem);
 

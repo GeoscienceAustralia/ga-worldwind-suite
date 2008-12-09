@@ -15,6 +15,9 @@ public class Icons
 	public static final ImageIcon run;
 	public static final ImageIcon monitor;
 	public static final ImageIcon home;
+	public static final ImageIcon delete;
+	public static final ImageIcon edit;
+	public static final ImageIcon add;
 
 	static
 	{
@@ -26,6 +29,9 @@ public class Icons
 		run = loadIcon("/data/icons/run.gif");
 		monitor = loadIcon("/data/icons/monitor.gif");
 		home = loadIcon("/data/icons/home.gif");
+		delete = loadIcon("/data/icons/delete.gif");
+		edit = loadIcon("/data/icons/edit.gif");
+		add = loadIcon("/data/icons/add.gif");
 	}
 
 	private static ImageIcon loadIcon(String path)
