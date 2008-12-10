@@ -159,6 +159,7 @@ public class Application
 	private DockablePanel gotoDockable;
 	private DockablePanel placeSearchDockable;
 	private DockablePanel favouriteDockable;
+	private FavouritePanel favouritePanel;
 
 	public Application()
 	{
@@ -245,7 +246,7 @@ public class Application
 		placeSearchDockable = new DockablePanel("placesearch", "Place search",
 				null, placeSearchPanel, true, true);
 
-		FavouritePanel favouritePanel = new FavouritePanel(wwd);
+		favouritePanel = new FavouritePanel(wwd);
 		favouriteDockable = new DockablePanel("favourites", "Favourites", null,
 				favouritePanel, true, true);
 
@@ -586,7 +587,7 @@ public class Application
 
 		menuItem = createDockableMenuItem(favouriteDockable);
 		menu.add(menuItem);
-		
+
 		menuItem = createDockableMenuItem(gotoDockable);
 		menu.add(menuItem);
 
@@ -736,6 +737,7 @@ public class Application
 
 	public void quit()
 	{
+		favouritePanel.save();
 		try
 		{
 			DockingManager.storeLayoutModel();
