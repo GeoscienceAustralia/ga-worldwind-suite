@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jnlp spec="1.0"
-      codebase="http://sandpit:8500/map/web3d/worldwind/webstart/"
-      href="webstart.jnlp">
-    <information>
-        <title>World Wind</title>
-        <vendor>Geoscience Australia</vendor>
-        <homepage href="http://www.ga.gov.au"/>
-        <description></description>
-        <description kind="short"></description>
-        <icon href="32x32-icon-nasa.png"/>
-        <icon kind="splash" href="400x230-splash-nww.png"/>
-        <offline-allowed/>
-    </information>
-    <security>
-        <all-permissions/>
-    </security>
-
-    <resources>
-        <j2se href="http://java.sun.com/products/autodl/j2se" version="1.5+" initial-heap-size="512m" max-heap-size="512m"/>
-        <property name="sun.java2d.noddraw" value="true"/>
-        <jar href="application.jar" main="true"/>
-        <jar href="flexdock-0.5.1.jar"/>
-        <jar href="commons-logging-1.1.jar"/>
-        <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp"/>
-        <extension name="worldwind" href="http://worldwind.arc.nasa.gov/java/0.5.0/webstart/worldwind.jnlp"/>
-    </resources>
-    <application-desc main-class="application.Application"/>
+<jnlp spec="1.0" codebase="http://sandpit:8500/apps/radiometrics/webstart/"
+	href="webstart.jnlp">
+	<information>
+		<title>World Wind</title>
+		<vendor>Geoscience Australia</vendor>
+		<homepage href="http://www.ga.gov.au" />
+		<description></description>
+		<description kind="short"></description>
+		<icon href="32x32-icon-nasa.png" />
+		<icon kind="splash" href="400x230-splash-nww.png" />
+		<offline-allowed />
+	</information>
+	<security>
+		<all-permissions />
+	</security>
+	<resources>
+		<j2se href="http://java.sun.com/products/autodl/j2se" version="1.5+"
+			initial-heap-size="512m" max-heap-size="512m" />
+		<property name="sun.java2d.noddraw" value="true" />
+		<jar href="application.jar" main="true" />
+		<jar href="flexdock-0.5.1.jar" />
+		<jar href="commons-logging-1.1.jar" />
+		<extension name="jogl"
+			href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp" />
+		<extension name="worldwind"
+			href="http://worldwind.arc.nasa.gov/java/0.5.0/webstart/worldwind.jnlp" />
+	</resources>
+	<application-desc main-class="application.Application" />
 </jnlp>

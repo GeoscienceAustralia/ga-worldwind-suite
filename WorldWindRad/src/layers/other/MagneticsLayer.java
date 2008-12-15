@@ -28,7 +28,7 @@ public class MagneticsLayer extends MaskTiledImageLayer
 		params.setValue(AVKey.TILE_HEIGHT, 512);
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Magnetics");
 		params.setValue(AVKey.SERVICE,
-				"http://sandpit:8500/map/web3d/worldwind/scripts/tiles.php");
+				"http://sandpit:8500/apps/radiometrics/scripts/tiles.php");
 		params.setValue(AVKey.DATASET_NAME, "magnetics");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 7);
