@@ -9,21 +9,32 @@ import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
@@ -45,6 +56,9 @@ import layers.radiometry.RatioUThLayer;
 import layers.radiometry.TernaryLayer;
 import layers.radiometry.ThoriumLayer;
 import layers.radiometry.UraniumLayer;
+import util.FlatJButton;
+import util.Icons;
+import util.ImageDialog;
 import util.Util;
 
 public class RadiometryPanel extends JPanel
@@ -91,6 +105,7 @@ public class RadiometryPanel extends JPanel
 	private JComboBox areasCombo;
 
 	private WorldWindow wwd;
+	private Frame frame;
 
 	private final static Area NSW = new Area("New South Wales (NSW)", -33.1987,
 			149.0234, 392604);
@@ -112,9 +127,10 @@ public class RadiometryPanel extends JPanel
 	private final static Object[] AREAS = new Object[] { "", NSW, VIC, QLD,
 			SA_1, SA_2, NT, WA, TAS };
 
-	public RadiometryPanel(WorldWindow wwd)
+	public RadiometryPanel(WorldWindow wwd, Frame frame)
 	{
 		this.wwd = wwd;
+		this.frame = frame;
 		createLayers();
 		fillPanel();
 	}
@@ -153,10 +169,10 @@ public class RadiometryPanel extends JPanel
 	private void fillPanel()
 	{
 		int INDENT = 20;
-		
+
 		setLayout(new GridBagLayout());
 		GridBagConstraints c;
-		JPanel panel;
+		JPanel panel, panel2;
 		Dimension size;
 
 		ActionListener al = new ActionListener()
@@ -182,13 +198,77 @@ public class RadiometryPanel extends JPanel
 		c.weightx = 1;
 		add(panel, c);
 
-		radioCheck = new JCheckBox("Radiometrics");
-		radioCheck.addActionListener(al);
+		panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
-		panel.add(radioCheck, c);
+		panel.add(panel2, c);
+
+		radioCheck = new JCheckBox("Radiometrics");
+		radioCheck.addActionListener(al);
+		panel2.add(radioCheck);
+
+		ActionListener metadataAL = new ActionListener()
+		{
+			JDialog dialog = init();
+
+			public JDialog init()
+			{
+				final JDialog dialog = new JDialog(frame, "Metadata", false);
+
+				JEditorPane editorPane = new JEditorPane();
+				editorPane.setEditable(false);
+				java.net.URL url = this.getClass().getResource(
+						"/data/help/metadata");
+				if (url != null)
+				{
+					try
+					{
+						editorPane.setPage(url);
+					}
+					catch (IOException e)
+					{
+						editorPane.setText(e.toString());
+					}
+				}
+				else
+				{
+					editorPane.setText("Could not find page");
+				}
+
+				JScrollPane scrollPane = new JScrollPane(editorPane);
+				dialog.add(scrollPane, BorderLayout.CENTER);
+
+				dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+				dialog.addWindowListener(new WindowAdapter()
+				{
+					@Override
+					public void windowClosing(WindowEvent e)
+					{
+						dialog.setVisible(false);
+					}
+				});
+
+				return dialog;
+			}
+
+			public void actionPerformed(ActionEvent ae)
+			{
+				if (!dialog.isVisible())
+				{
+					dialog.setSize(640, 480);
+					dialog.setLocationRelativeTo(frame);
+				}
+				dialog.setVisible(!dialog.isVisible());
+				dialog.validate();
+			}
+		};
+
+		FlatJButton metadata = new FlatJButton(Icons.info);
+		panel2.add(metadata);
+		metadata.restrictSize();
+		metadata.addActionListener(metadataAL);
 
 		radioSlider = new JSlider(1, 100, 100);
 		radioSlider.setPaintLabels(false);
@@ -211,37 +291,50 @@ public class RadiometryPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		add(panel, c);
 
+		ActionListener ternaryLegend = createLegendListener("ternary_cube.jpg",
+				"Ternary legend");
+		ActionListener KLegend = createLegendListener("k_legend.jpg",
+				"Potassium legend");
+		ActionListener ThLegend = createLegendListener("th_legend.jpg",
+				"Thorium legend");
+		ActionListener ULegend = createLegendListener("u_legend.jpg",
+				"Uranium legend");
+		ActionListener ratioLegend = createLegendListener("ratio_legend.jpg",
+				"Ratio legend");
+		ActionListener doseLegend = createLegendListener("dose_legend.jpg",
+				"Dose rate legend");
+
 		ternaryRadio = new JRadioButton("Ternary");
-		panel.add(ternaryRadio);
 		ternaryRadio.addActionListener(al);
-
-		uraniumRadio = new JRadioButton("Uranium");
-		panel.add(uraniumRadio);
-		uraniumRadio.addActionListener(al);
-
-		thoriumRadio = new JRadioButton("Thorium");
-		panel.add(thoriumRadio);
-		thoriumRadio.addActionListener(al);
+		panel.add(createRadioPanel(ternaryRadio, ternaryLegend));
 
 		potassiumRadio = new JRadioButton("Potassium");
-		panel.add(potassiumRadio);
 		potassiumRadio.addActionListener(al);
+		panel.add(createRadioPanel(potassiumRadio, KLegend));
+
+		thoriumRadio = new JRadioButton("Thorium");
+		thoriumRadio.addActionListener(al);
+		panel.add(createRadioPanel(thoriumRadio, ThLegend));
+
+		uraniumRadio = new JRadioButton("Uranium");
+		uraniumRadio.addActionListener(al);
+		panel.add(createRadioPanel(uraniumRadio, ULegend));
 
 		doseRateRadio = new JRadioButton("Dose Rate");
-		panel.add(doseRateRadio);
 		doseRateRadio.addActionListener(al);
-
-		ratioUThRadio = new JRadioButton("Uranium/Thorium Ratio");
-		panel.add(ratioUThRadio);
-		ratioUThRadio.addActionListener(al);
-
-		ratioUKRadio = new JRadioButton("Uranium/Potassium Ratio");
-		panel.add(ratioUKRadio);
-		ratioUKRadio.addActionListener(al);
+		panel.add(createRadioPanel(doseRateRadio, doseLegend));
 
 		ratioThKRadio = new JRadioButton("Thorium/Potassium Ratio");
-		panel.add(ratioThKRadio);
 		ratioThKRadio.addActionListener(al);
+		panel.add(createRadioPanel(ratioThKRadio, ratioLegend));
+
+		ratioUKRadio = new JRadioButton("Uranium/Potassium Ratio");
+		ratioUKRadio.addActionListener(al);
+		panel.add(createRadioPanel(ratioUKRadio, ratioLegend));
+
+		ratioUThRadio = new JRadioButton("Uranium/Thorium Ratio");
+		ratioUThRadio.addActionListener(al);
+		panel.add(createRadioPanel(ratioUThRadio, ratioLegend));
 
 		ButtonGroup buttonGroup = new ButtonGroup();
 		buttonGroup.add(ternaryRadio);
@@ -260,13 +353,21 @@ public class RadiometryPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		add(panel, c);
 
-		areasCheck = new JCheckBox("Areas of Interest");
-		areasCheck.addActionListener(al);
+		panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
-		panel.add(areasCheck, c);
+		panel.add(panel2, c);
+
+		areasCheck = new JCheckBox("Detailed areas");
+		areasCheck.addActionListener(al);
+		panel2.add(areasCheck);
+
+		metadata = new FlatJButton(Icons.info);
+		panel2.add(metadata);
+		metadata.restrictSize();
+		metadata.addActionListener(metadataAL);
 
 		areasSlider = new JSlider(1, 100, 100);
 		areasSlider.setPaintLabels(false);
@@ -290,36 +391,36 @@ public class RadiometryPanel extends JPanel
 		add(panel, c);
 
 		ternaryAreasRadio = new JRadioButton("Ternary");
-		panel.add(ternaryAreasRadio);
 		ternaryAreasRadio.addActionListener(al);
-
-		uraniumAreasRadio = new JRadioButton("Uranium");
-		panel.add(uraniumAreasRadio);
-		uraniumAreasRadio.addActionListener(al);
-
-		thoriumAreasRadio = new JRadioButton("Thorium");
-		panel.add(thoriumAreasRadio);
-		thoriumAreasRadio.addActionListener(al);
+		panel.add(createRadioPanel(ternaryAreasRadio, ternaryLegend));
 
 		potassiumAreasRadio = new JRadioButton("Potassium");
-		panel.add(potassiumAreasRadio);
 		potassiumAreasRadio.addActionListener(al);
+		panel.add(createRadioPanel(potassiumAreasRadio, KLegend));
+
+		thoriumAreasRadio = new JRadioButton("Thorium");
+		thoriumAreasRadio.addActionListener(al);
+		panel.add(createRadioPanel(thoriumAreasRadio, ThLegend));
+
+		uraniumAreasRadio = new JRadioButton("Uranium");
+		uraniumAreasRadio.addActionListener(al);
+		panel.add(createRadioPanel(uraniumAreasRadio, ULegend));
 
 		doseRateAreasRadio = new JRadioButton("Dose Rate");
-		panel.add(doseRateAreasRadio);
 		doseRateAreasRadio.addActionListener(al);
-
-		ratioUThAreasRadio = new JRadioButton("Uranium/Thorium Ratio");
-		panel.add(ratioUThAreasRadio);
-		ratioUThAreasRadio.addActionListener(al);
-
-		ratioUKAreasRadio = new JRadioButton("Uranium/Potassium Ratio");
-		panel.add(ratioUKAreasRadio);
-		ratioUKAreasRadio.addActionListener(al);
+		panel.add(createRadioPanel(doseRateAreasRadio, doseLegend));
 
 		ratioThKAreasRadio = new JRadioButton("Thorium/Potassium Ratio");
-		panel.add(ratioThKAreasRadio);
 		ratioThKAreasRadio.addActionListener(al);
+		panel.add(createRadioPanel(ratioThKAreasRadio, ratioLegend));
+
+		ratioUKAreasRadio = new JRadioButton("Uranium/Potassium Ratio");
+		ratioUKAreasRadio.addActionListener(al);
+		panel.add(createRadioPanel(ratioUKAreasRadio, ratioLegend));
+
+		ratioUThAreasRadio = new JRadioButton("Uranium/Thorium Ratio");
+		ratioUThAreasRadio.addActionListener(al);
+		panel.add(createRadioPanel(ratioUThAreasRadio, ratioLegend));
 
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(ternaryAreasRadio);
@@ -386,6 +487,74 @@ public class RadiometryPanel extends JPanel
 		ternaryAreasRadio.setSelected(true);
 		updateLayers();
 		this.revalidate();
+	}
+
+	private JPanel createRadioPanel(JRadioButton radio, ActionListener legendAL)
+	{
+		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		panel.add(radio);
+		FlatJButton legend = new FlatJButton(Icons.legend);
+		legend.restrictSize();
+		panel.add(legend);
+		legend.addActionListener(legendAL);
+		legend.setToolTipText("Show legend");
+		return panel;
+	}
+
+	private ActionListener createLegendListener(final String image,
+			final String title)
+	{
+		return new ActionListener()
+		{
+			private JDialog dialog = init();
+			private int width;
+			private int height;
+
+			private JDialog init()
+			{
+				java.net.URL url = this.getClass().getResource(
+						"/data/legends/" + image);
+				BufferedImage bi = null;
+				if (url != null)
+				{
+					try
+					{
+						bi = ImageIO.read(url);
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+				}
+				width = bi.getWidth() / 2;
+				height = bi.getHeight() / 2;
+
+				final JDialog dialog = new ImageDialog(frame, title, false, bi);
+
+				dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+				dialog.addWindowListener(new WindowAdapter()
+				{
+					@Override
+					public void windowClosing(WindowEvent e)
+					{
+						dialog.setVisible(false);
+					}
+				});
+
+				return dialog;
+			}
+
+			public void actionPerformed(ActionEvent e)
+			{
+				if (!dialog.isVisible())
+				{
+					dialog.setSize(width, height);
+					dialog.setLocationRelativeTo(frame);
+				}
+				dialog.setVisible(!dialog.isVisible());
+				dialog.validate();
+			}
+		};
 	}
 
 	public Layer[] getLayers()

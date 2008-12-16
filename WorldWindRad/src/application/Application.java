@@ -234,7 +234,7 @@ public class Application
 		globeDockable.addButton(fullscreen);
 		dockingPort.dock(globeDockable);
 
-		layersPanel = new LayersPanel(wwd);
+		layersPanel = new LayersPanel(wwd, frame);
 		layersDockable = new DockablePanel("layers", "Layers", null,
 				layersPanel, true, true);
 
@@ -618,7 +618,7 @@ public class Application
 			{
 				BookmarkManager bm = new BookmarkManager(frame,
 						"Organise bookmarks");
-				bm.setSize(640, 480);
+				bm.setSize(400, 300);
 				bm.setLocationRelativeTo(frame);
 				bm.setVisible(true);
 			}

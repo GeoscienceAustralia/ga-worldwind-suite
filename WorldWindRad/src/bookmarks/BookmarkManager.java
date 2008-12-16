@@ -105,6 +105,7 @@ public class BookmarkManager extends JDialog
 		panel.add(list, c);
 
 		rename = new FlatJButton(Icons.edit);
+		rename.restrictSize();
 		rename.setToolTipText("Rename");
 		final ActionListener renameAL = new ActionListener()
 		{
@@ -122,6 +123,7 @@ public class BookmarkManager extends JDialog
 
 		delete = new FlatJButton(Icons.delete);
 		delete.setToolTipText("Delete");
+		delete.restrictSize();
 		final ActionListener deleteAL = new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -137,7 +139,8 @@ public class BookmarkManager extends JDialog
 		panel.add(delete, c);
 
 		up = new FlatJButton(Icons.up);
-		delete.setToolTipText("Move up");
+		up.setToolTipText("Move up");
+		up.restrictSize();
 		up.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -155,7 +158,8 @@ public class BookmarkManager extends JDialog
 		panel.add(up, c);
 
 		down = new FlatJButton(Icons.down);
-		delete.setToolTipText("Move down");
+		down.setToolTipText("Move down");
+		down.restrictSize();
 		down.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)

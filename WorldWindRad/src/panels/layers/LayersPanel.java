@@ -3,6 +3,7 @@ package panels.layers;
 import gov.nasa.worldwind.WorldWindow;
 
 import java.awt.BorderLayout;
+import java.awt.Frame;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -14,11 +15,13 @@ public class LayersPanel extends JPanel
 {
 	private StandardPanel standardPanel;
 	private WorldWindow wwd;
+	private Frame frame;
 
-	public LayersPanel(WorldWindow wwd)
+	public LayersPanel(WorldWindow wwd, Frame frame)
 	{
 		super(new BorderLayout());
 		this.wwd = wwd;
+		this.frame = frame;
 		add(createTabs());
 	}
 
@@ -45,7 +48,7 @@ public class LayersPanel extends JPanel
 
 	private JComponent createRadiometry()
 	{
-		RadiometryPanel rp = new RadiometryPanel(wwd);
+		RadiometryPanel rp = new RadiometryPanel(wwd, frame);
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(rp, BorderLayout.NORTH);
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
