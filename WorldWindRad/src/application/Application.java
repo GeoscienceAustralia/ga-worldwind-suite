@@ -3,6 +3,7 @@ package application;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.applications.sar.SAR2;
@@ -74,7 +75,6 @@ import org.flexdock.docking.drag.preview.AlphaPreview;
 import org.flexdock.docking.event.DockingEvent;
 import org.flexdock.perspective.PerspectiveManager;
 
-import panels.favourite.FavouritePanel;
 import panels.layers.LayersPanel;
 import panels.other.ExaggerationPanel;
 import panels.other.GoToCoordinatePanel;
@@ -89,6 +89,10 @@ import util.DockingAdapter;
 import util.DoubleClickZoomListener;
 import util.Icons;
 import util.Util;
+import bookmarks.Bookmark;
+import bookmarks.BookmarkListener;
+import bookmarks.BookmarkManager;
+import bookmarks.Bookmarks;
 
 public class Application
 {
@@ -158,8 +162,6 @@ public class Application
 	private DockablePanel exaggerationDockable;
 	private DockablePanel gotoDockable;
 	private DockablePanel placeSearchDockable;
-	private DockablePanel favouriteDockable;
-	private FavouritePanel favouritePanel;
 
 	public Application()
 	{
@@ -246,10 +248,6 @@ public class Application
 		placeSearchDockable = new DockablePanel("placesearch", "Place search",
 				null, placeSearchPanel, true, true);
 
-		favouritePanel = new FavouritePanel(wwd);
-		favouriteDockable = new DockablePanel("favourites", "Favourites", null,
-				favouritePanel, true, true);
-
 		panel = new JPanel(new BorderLayout());
 		GoToCoordinatePanel gotoPanel = new GoToCoordinatePanel(wwd);
 		panel.add(gotoPanel, BorderLayout.NORTH);
@@ -278,9 +276,8 @@ public class Application
 					DockingConstants.SOUTH_REGION);
 			globeDockable.dock(placeSearchDockable,
 					DockingConstants.EAST_REGION);
-			placeSearchDockable.dock(favouriteDockable,
+			placeSearchDockable.dock(gotoDockable,
 					DockingConstants.SOUTH_REGION);
-			favouriteDockable.dock(gotoDockable, DockingConstants.SOUTH_REGION);
 
 			DockingManager.setSplitProportion((DockingPort) dockingPort, 0.25f);
 			DockingManager.setSplitProportion(placeSearchDockable, 0.5f);
@@ -585,9 +582,6 @@ public class Application
 		menuItem = createDockableMenuItem(placeSearchDockable);
 		menu.add(menuItem);
 
-		menuItem = createDockableMenuItem(favouriteDockable);
-		menu.add(menuItem);
-
 		menuItem = createDockableMenuItem(gotoDockable);
 		menu.add(menuItem);
 
@@ -602,6 +596,82 @@ public class Application
 				setFullscreen(!isFullscreen());
 			}
 		});
+
+		menu = new JMenu("Bookmarks");
+		menuBar.add(menu);
+
+		menuItem = new JMenuItem("Add bookmark...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				BookmarkManager.addBookmark(frame, wwd);
+			}
+		});
+
+		menuItem = new JMenuItem("Organise bookmarks...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				BookmarkManager bm = new BookmarkManager(frame,
+						"Organise bookmarks");
+				bm.setSize(640, 480);
+				bm.setLocationRelativeTo(frame);
+				bm.setVisible(true);
+			}
+		});
+
+		menu.addSeparator();
+		final JMenu bookmarksMenu = menu;
+		BookmarkListener bl = new BookmarkListener()
+		{
+			public void modified()
+			{
+				while (bookmarksMenu.getMenuComponentCount() > 3)
+				{
+					bookmarksMenu.remove(3);
+				}
+				for (final Bookmark bookmark : Bookmarks.iterable())
+				{
+					JMenuItem mi = new JMenuItem(bookmark.name);
+					bookmarksMenu.add(mi);
+					mi.addActionListener(new ActionListener()
+					{
+						public void actionPerformed(ActionEvent e)
+						{
+							View view = wwd.getView();
+							if (view instanceof OrbitView)
+							{
+								OrbitView orbitView = (OrbitView) view;
+								Position center = orbitView.getCenterPosition();
+								long lengthMillis = Util.getScaledLengthMillis(
+										center.getLatLon(), bookmark.center
+												.getLatLon(), 2000, 8000);
+
+								ViewStateIterator vsi = FlyToOrbitViewStateIterator
+										.createPanToIterator(wwd.getModel()
+												.getGlobe(), center,
+												bookmark.center, orbitView
+														.getHeading(),
+												bookmark.heading, orbitView
+														.getPitch(),
+												bookmark.pitch, orbitView
+														.getZoom(),
+												bookmark.zoom, lengthMillis,
+												true);
+
+								view.applyStateIterator(vsi);
+							}
+						}
+					});
+				}
+			}
+		};
+		Bookmarks.addBookmarkListener(bl);
+		bl.modified();
 
 		menu = new JMenu("Options");
 		menuBar.add(menu);
@@ -737,7 +807,7 @@ public class Application
 
 	public void quit()
 	{
-		favouritePanel.save();
+		Bookmarks.save();
 		try
 		{
 			DockingManager.storeLayoutModel();

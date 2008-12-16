@@ -18,6 +18,8 @@ public class Icons
 	public static final ImageIcon delete;
 	public static final ImageIcon edit;
 	public static final ImageIcon add;
+	public static final ImageIcon up;
+	public static final ImageIcon down;
 
 	static
 	{
@@ -32,6 +34,8 @@ public class Icons
 		delete = loadIcon("/data/icons/delete.gif");
 		edit = loadIcon("/data/icons/edit.gif");
 		add = loadIcon("/data/icons/add.gif");
+		up = loadIcon("/data/icons/up.gif");
+		down = loadIcon("/data/icons/down.gif");
 	}
 
 	private static ImageIcon loadIcon(String path)
