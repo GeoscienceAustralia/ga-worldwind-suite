@@ -130,7 +130,7 @@ public class Bookmarks
 
 	private static File getFile()
 	{
-		return WorldWind.getDataFileCache().newFile("Bookmarks/bookmarks.dat");
+		return WorldWind.getDataFileCache().newFile("GA/Bookmarks/bookmarks.dat");
 	}
 
 	private static List<Bookmark> loadObject()
