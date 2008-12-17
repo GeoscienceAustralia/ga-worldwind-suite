@@ -13,6 +13,7 @@ import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.layers.Earth.EarthNASAPlaceNameLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.layers.Earth.MGRSGraticuleLayer;
+import gov.nasa.worldwind.layers.Earth.OpenStreetMapLayer;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -23,6 +24,9 @@ import javax.swing.JPanel;
 
 import layers.geonames.GeoNamesLayer;
 import layers.other.LogoLayer;
+import layers.other.MetacartaCoastlineLayer;
+import layers.other.MetacartaCountryBoundariesLayer;
+import layers.other.MetacartaStateBoundariesLayer;
 
 public class StandardPanel extends JPanel
 {
@@ -34,6 +38,10 @@ public class StandardPanel extends JPanel
 	private Layer landsat;
 	private Layer pnl;
 	private Layer geonames;
+	private Layer coastline;
+	private Layer country;
+	private Layer state;
+	private Layer street;
 	private Layer compass;
 	private Layer map;
 	private Layer scale;
@@ -62,6 +70,10 @@ public class StandardPanel extends JPanel
 		landsat = new LandsatI3WMSLayer();
 		pnl = new EarthNASAPlaceNameLayer();
 		geonames = new GeoNamesLayer();
+		coastline = new MetacartaCoastlineLayer();
+		country = new MetacartaCountryBoundariesLayer();
+		state = new MetacartaStateBoundariesLayer();
+		street = new OpenStreetMapLayer();
 		compass = new CompassLayer();
 		map = new WorldMapLayer();
 		scale = new ScalebarLayer();
@@ -69,13 +81,18 @@ public class StandardPanel extends JPanel
 		logo = new LogoLayer();
 
 		layers = new Layer[] { stars, atmosphere, fog, bmngone, bmng, landsat,
-				pnl, geonames, graticule, compass, map, scale, logo };
+				pnl, geonames, coastline, country, state, street, graticule, compass,
+				map, scale, logo };
 		for (Layer layer : layers)
 		{
 			layer.setEnabled(true);
 			wwd.getModel().getLayers().add(layer);
 		}
 
+		coastline.setEnabled(false);
+		country.setEnabled(false);
+		state.setEnabled(false);
+		street.setEnabled(false);
 		geonames.setEnabled(false);
 		graticule.setEnabled(false);
 	}
@@ -114,7 +131,7 @@ public class StandardPanel extends JPanel
 			wwd.redraw();
 		}
 	}
-	
+
 	public void setMapPickingEnabled(boolean enabled)
 	{
 		map.setPickEnabled(enabled);
