@@ -18,7 +18,6 @@ import gov.nasa.worldwind.layers.ScalebarLayer;
 import gov.nasa.worldwind.layers.TerrainProfileLayer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
-import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
@@ -67,6 +66,7 @@ import javax.swing.UIManager;
 import layers.mouse.MouseLayer;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 import nasa.worldwind.cache.FixedBasicDataFileCache;
+import nasa.worldwind.util.StatusBar;
 
 import org.flexdock.docking.DockingConstants;
 import org.flexdock.docking.DockingManager;

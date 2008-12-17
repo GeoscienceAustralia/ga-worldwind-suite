@@ -3,6 +3,7 @@ package panels.places;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
@@ -312,12 +313,13 @@ public class PlaceSearchPanel extends JPanel
 				long lengthMillis = Util.getScaledLengthMillis(center
 						.getLatLon(), newCenter.getLatLon(), 2000, 8000);
 
+				double zoom = Math.max(100000, Math.min(1000000, orbitView
+						.getZoom()));
 				ViewStateIterator vsi = FlyToOrbitViewStateIterator
 						.createPanToIterator(wwd.getModel().getGlobe(), center,
-								newCenter, orbitView.getHeading(), orbitView
-										.getHeading(), orbitView.getPitch(),
-								orbitView.getPitch(), orbitView.getZoom(),
-								orbitView.getZoom(), lengthMillis, true);
+								newCenter, orbitView.getHeading(), Angle.ZERO,
+								orbitView.getPitch(), Angle.ZERO, orbitView
+										.getZoom(), zoom, lengthMillis, true);
 
 				view.applyStateIterator(vsi);
 			}
