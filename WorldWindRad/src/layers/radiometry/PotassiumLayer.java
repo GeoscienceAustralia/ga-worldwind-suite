@@ -33,6 +33,6 @@ public class PotassiumLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "Potassium";
+		return "Potassium (K)";
 	}
 }

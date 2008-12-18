@@ -33,6 +33,6 @@ public class ThoriumLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "Thorium";
+		return "Thorium (Th)";
 	}
 }

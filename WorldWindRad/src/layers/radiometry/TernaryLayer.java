@@ -33,6 +33,6 @@ public class TernaryLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "Ternary";
+		return "Ternary (K-Th-U)";
 	}
 }

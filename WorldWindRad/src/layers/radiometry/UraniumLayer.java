@@ -33,6 +33,6 @@ public class UraniumLayer extends MaskTiledImageLayer
 	@Override
 	public String toString()
 	{
-		return "Uranium";
+		return "Uranium (U)";
 	}
 }

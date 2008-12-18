@@ -304,19 +304,19 @@ public class RadiometryPanel extends JPanel
 		ActionListener doseLegend = createLegendListener("dose_legend.jpg",
 				"Dose rate legend");
 
-		ternaryRadio = new JRadioButton("Ternary");
+		ternaryRadio = new JRadioButton("Ternary (K-Th-U)");
 		ternaryRadio.addActionListener(al);
 		panel.add(createRadioPanel(ternaryRadio, ternaryLegend));
 
-		potassiumRadio = new JRadioButton("Potassium");
+		potassiumRadio = new JRadioButton("Potassium (K)");
 		potassiumRadio.addActionListener(al);
 		panel.add(createRadioPanel(potassiumRadio, KLegend));
 
-		thoriumRadio = new JRadioButton("Thorium");
+		thoriumRadio = new JRadioButton("Thorium (Th)");
 		thoriumRadio.addActionListener(al);
 		panel.add(createRadioPanel(thoriumRadio, ThLegend));
 
-		uraniumRadio = new JRadioButton("Uranium");
+		uraniumRadio = new JRadioButton("Uranium (U)");
 		uraniumRadio.addActionListener(al);
 		panel.add(createRadioPanel(uraniumRadio, ULegend));
 
@@ -390,19 +390,19 @@ public class RadiometryPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		add(panel, c);
 
-		ternaryAreasRadio = new JRadioButton("Ternary");
+		ternaryAreasRadio = new JRadioButton("Ternary (K-Th-U)");
 		ternaryAreasRadio.addActionListener(al);
 		panel.add(createRadioPanel(ternaryAreasRadio, ternaryLegend));
 
-		potassiumAreasRadio = new JRadioButton("Potassium");
+		potassiumAreasRadio = new JRadioButton("Potassium (K)");
 		potassiumAreasRadio.addActionListener(al);
 		panel.add(createRadioPanel(potassiumAreasRadio, KLegend));
 
-		thoriumAreasRadio = new JRadioButton("Thorium");
+		thoriumAreasRadio = new JRadioButton("Thorium (Th)");
 		thoriumAreasRadio.addActionListener(al);
 		panel.add(createRadioPanel(thoriumAreasRadio, ThLegend));
 
-		uraniumAreasRadio = new JRadioButton("Uranium");
+		uraniumAreasRadio = new JRadioButton("Uranium (U)");
 		uraniumAreasRadio.addActionListener(al);
 		panel.add(createRadioPanel(uraniumAreasRadio, ULegend));
 
