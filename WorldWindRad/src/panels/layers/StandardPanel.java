@@ -66,6 +66,7 @@ public class StandardPanel extends JPanel
 		atmosphere = new SkyGradientLayer();
 		fog = new FogLayer();
 		bmngone = new BMNGOneImage();
+		//bmng = new ShaderBMNGLayer();
 		bmng = new BMNGWMSLayer();
 		landsat = new LandsatI3WMSLayer();
 		pnl = new EarthNASAPlaceNameLayer();
@@ -79,10 +80,21 @@ public class StandardPanel extends JPanel
 		scale = new ScalebarLayer();
 		graticule = new MGRSGraticuleLayer();
 		logo = new LogoLayer();
+		
+		/*Layer kmllayer = null;
+		try
+		{
+			KMLFile kmlfile = KMLParser.parseFile("C:/WINNT/Profiles/u97852/Desktop/wave_amplitude_2000.0.kml");
+			kmllayer = new KMLLayer(kmlfile);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}*/
 
 		layers = new Layer[] { stars, atmosphere, fog, bmngone, bmng, landsat,
-				pnl, geonames, coastline, country, state, street, graticule, compass,
-				map, scale, logo };
+				pnl, geonames, coastline, country, state, street, graticule,
+				compass, map, scale, logo };
 		for (Layer layer : layers)
 		{
 			layer.setEnabled(true);
