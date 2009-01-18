@@ -26,8 +26,9 @@ public class ExaggerationPanel extends JPanel
 
 		GridBagConstraints c;
 
+		double settingsExaggeration = Settings.get().getVerticalExaggeration();
 		final JSlider slider = new JSlider(0, 200,
-				exaggerationToSlider(Settings.get().getVerticalExaggeration()));
+				exaggerationToSlider(settingsExaggeration));
 		Dimension size = slider.getPreferredSize();
 		size.width = 50;
 		slider.setPreferredSize(size);
@@ -58,6 +59,7 @@ public class ExaggerationPanel extends JPanel
 			}
 		}
 		final Setter setter = new Setter();
+		setter.set(settingsExaggeration);
 
 		final ChangeListener listener = new ChangeListener()
 		{
@@ -68,7 +70,6 @@ public class ExaggerationPanel extends JPanel
 			}
 		};
 		slider.addChangeListener(listener);
-		listener.stateChanged(null);
 
 		JPanel buttons = new JPanel(new GridLayout(1, 0));
 		c = new GridBagConstraints();
