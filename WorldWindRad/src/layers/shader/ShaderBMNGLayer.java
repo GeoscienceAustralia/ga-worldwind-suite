@@ -76,35 +76,4 @@ public class ShaderBMNGLayer extends BMNGWMSLayer
 		super.render(dc);
 		gl.glUseProgram(0);
 	}
-
-	/*@Override
-	protected void requestTexture(DrawContext dc, TextureTile tile)
-	{
-		super.requestTexture(dc, tile);
-		if(true) return;
-		
-		BufferedImage bi = new BufferedImage(512, 512,
-				BufferedImage.TYPE_INT_RGB);
-		Graphics2D g2d = bi.createGraphics();
-		g2d.setColor(Color.white);
-		g2d.drawString("Hello world", 0, 0);
-		g2d.fillRect(100, 100, 100, 100);
-		g2d.dispose();
-		TextureData textureData = TextureIO.newTextureData(bi, false);
-		tile.setTextureData(textureData);
-
-		if (tile.getLevelNumber() != 0 || !this.isRetainLevelZeroTiles())
-			WorldWind.getMemoryCache(TextureTile.class.getName()).add(
-					tile.getTileKey(), tile);
-
-		getLevels().unmarkResourceAbsent(tile);
-		firePropertyChange(AVKey.LAYER, null, this);
-	}
-
-	@Override
-	protected void forceTextureLoad(TextureTile tile)
-	{
-		//this.requestTexture(null, tile);
-		super.forceTextureLoad(tile);
-	}*/
 }
