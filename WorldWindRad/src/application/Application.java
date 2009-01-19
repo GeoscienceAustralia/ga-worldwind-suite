@@ -407,6 +407,7 @@ public class Application
 				}
 				else
 				{
+					saveSplitLocations();
 					fullscreenFrame = new JFrame(frame.getTitle());
 					JPanel panel = new JPanel(new BorderLayout());
 					fullscreenFrame.setContentPane(panel);
@@ -473,6 +474,7 @@ public class Application
 					fullscreenDevice.setFullScreenWindow(null);
 					fullscreenFrame.dispose();
 					fullscreenFrame = null;
+					loadSplitLocations();
 					frame.setVisible(true);
 				}
 			}
