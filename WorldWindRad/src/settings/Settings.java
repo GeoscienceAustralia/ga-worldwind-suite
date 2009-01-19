@@ -253,6 +253,35 @@ public class Settings
 		preferences.put("WindowBounds", bounds);
 	}
 
+	public int[] getSplitLocations()
+	{
+		String[] split = preferences.get("SplitLocations", "").split(",");
+		try
+		{
+			int[] splits = new int[split.length];
+			for (int i = 0; i < splits.length; i++)
+			{
+				splits[i] = Integer.parseInt(split[i]);
+			}
+			return splits;
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+
+	public void setSplitLocations(int[] splitLocations)
+	{
+		StringBuilder split = new StringBuilder();
+		for (int loc : splitLocations)
+		{
+			split.append(",");
+			split.append(loc);
+		}
+		preferences.put("SplitLocations", split.substring(1));
+	}
+
 	public boolean isWindowMaximized()
 	{
 		return preferences.getBoolean("WindowMaximized", false);

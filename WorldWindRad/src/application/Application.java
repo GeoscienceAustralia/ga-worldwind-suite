@@ -22,7 +22,6 @@ import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
@@ -31,7 +30,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -59,6 +57,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
@@ -67,14 +67,6 @@ import layers.mouse.MouseLayer;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 import nasa.worldwind.cache.FixedBasicDataFileCache;
 import nasa.worldwind.util.StatusBar;
-
-import org.flexdock.docking.DockingConstants;
-import org.flexdock.docking.DockingManager;
-import org.flexdock.docking.DockingPort;
-import org.flexdock.docking.drag.preview.AlphaPreview;
-import org.flexdock.docking.event.DockingEvent;
-import org.flexdock.perspective.PerspectiveManager;
-
 import panels.layers.LayersPanel;
 import panels.other.ExaggerationPanel;
 import panels.other.GoToCoordinatePanel;
@@ -85,7 +77,6 @@ import settings.SettingsDialog;
 import settings.Settings.ProjectionMode;
 import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
-import util.DockingAdapter;
 import util.DoubleClickZoomListener;
 import util.Icons;
 import util.Util;
@@ -155,13 +146,8 @@ public class Application
 	private StatusBar statusBar;
 	private LayersPanel layersPanel;
 	private MouseLayer mouseLayer;
-
-	private TabbedDockingPort dockingPort;
-	private DockablePanel globeDockable;
-	private DockablePanel layersDockable;
-	private DockablePanel exaggerationDockable;
-	private DockablePanel gotoDockable;
-	private DockablePanel placeSearchDockable;
+	private JSplitPane splitPane;
+	private JSplitPane westSplitPane;
 
 	public Application()
 	{
@@ -178,12 +164,6 @@ public class Application
 
 		//create gui stuff
 
-		System.setProperty(DockingConstants.HEAVYWEIGHT_DOCKABLES, "true");
-		DockingManager.setDragPreview(new AlphaPreview(Color.black, new Color(
-				SystemColor.activeCaption.getRGB()), 0.5f));
-		//DockingManager.setSingleTabsAllowed(true);
-		//PropertyManager.getDockingPortRoot().setTabPlacement(JTabbedPane.TOP);
-
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
@@ -199,14 +179,16 @@ public class Application
 		frame.setContentPane(panel);
 		//panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
+		panel.add(splitPane, BorderLayout.CENTER);
+		splitPane.setRightComponent(wwd);
+		splitPane.setOneTouchExpandable(true);
+		wwd.setMinimumSize(new Dimension(1, 1));
+
 		statusBar = new StatusBar();
 		panel.add(statusBar, BorderLayout.PAGE_END);
 		statusBar.setEventSource(wwd);
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
-
-		dockingPort = new TabbedDockingPort("dockingport");
-		dockingPort.setTabsAsDragSource(true);
-		panel.add(dockingPort, BorderLayout.CENTER);
 
 		JButton fullscreen = new JButton(Icons.monitor);
 		fullscreen.setToolTipText("Fullscreen");
@@ -227,82 +209,52 @@ public class Application
 			}
 		});
 
-		globeDockable = new DockablePanel("globe", "Globe", null, wwd, false,
-				false);
-		globeDockable.addButton(home);
-		globeDockable.addMaximizeButton();
-		globeDockable.addButton(fullscreen);
-		dockingPort.dock(globeDockable);
+		JTabbedPane tabbedPane1 = new JTabbedPane(JTabbedPane.BOTTOM);
+		JTabbedPane tabbedPane2 = new JTabbedPane(JTabbedPane.BOTTOM);
+
+		westSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
+		splitPane.setLeftComponent(westSplitPane);
+		splitPane.setResizeWeight(0.0);
 
 		layersPanel = new LayersPanel(wwd, frame);
-		layersDockable = new DockablePanel("layers", "Layers", null,
-				layersPanel, true, true);
+		tabbedPane1.addTab("Layers", layersPanel);
+
+		PlaceSearchPanel placeSearchPanel = new PlaceSearchPanel(wwd);
+		tabbedPane1.addTab("Place search", placeSearchPanel);
 
 		panel = new JPanel(new BorderLayout());
 		ExaggerationPanel exaggerationPanel = new ExaggerationPanel(wwd);
 		panel.add(exaggerationPanel, BorderLayout.NORTH);
-		exaggerationDockable = new DockablePanel("exaggeration",
-				"Exaggeration", null, panel, true, true);
-
-		PlaceSearchPanel placeSearchPanel = new PlaceSearchPanel(wwd);
-		placeSearchDockable = new DockablePanel("placesearch", "Place search",
-				null, placeSearchPanel, true, true);
+		tabbedPane2.addTab("Exaggeration", panel);
 
 		panel = new JPanel(new BorderLayout());
 		GoToCoordinatePanel gotoPanel = new GoToCoordinatePanel(wwd);
 		panel.add(gotoPanel, BorderLayout.NORTH);
-		gotoDockable = new DockablePanel("gotocoordinate", "Go to coordinates",
-				null, panel, true, true);
+		tabbedPane2.addTab("Go to coordinates", panel);
+		
+		westSplitPane.setTopComponent(tabbedPane1);
+		westSplitPane.setBottomComponent(tabbedPane2);
+		westSplitPane.setResizeWeight(1.0);
 
-		PerspectiveManager perspectiveManager = PerspectiveManager
-				.getInstance();
-		perspectiveManager.setDefaultPersistenceKey(SETTINGS_KEY);
-		DockingManager.setLayoutManager(perspectiveManager);
-		boolean loaded = false;
-		try
-		{
-			loaded = DockingManager.loadLayoutModel(true);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-
-		if (!loaded)
-		{
-			dockingPort.dock(globeDockable, DockingConstants.CENTER_REGION);
-			globeDockable.dock(layersDockable, DockingConstants.WEST_REGION);
-			layersDockable.dock(exaggerationDockable,
-					DockingConstants.SOUTH_REGION);
-			globeDockable.dock(placeSearchDockable,
-					DockingConstants.EAST_REGION);
-			placeSearchDockable.dock(gotoDockable,
-					DockingConstants.SOUTH_REGION);
-
-			DockingManager.setSplitProportion((DockingPort) dockingPort, 0.25f);
-			DockingManager.setSplitProportion(placeSearchDockable, 0.5f);
-			DockingManager.setSplitProportion(exaggerationDockable, 0.8f);
-		}
-		else
-		{
-			if (!DockingManager.isDocked(globeDockable))
-			{
-				dockingPort.dock(globeDockable, DockingConstants.CENTER_REGION);
-			}
-		}
-
+		loadSplitLocations();
 		afterSettingsChange();
 
 		frame.setJMenuBar(createMenuBar());
 		addWindowListeners();
 
-		java.awt.EventQueue.invokeLater(new Runnable()
+		try
 		{
-			public void run()
+			java.awt.EventQueue.invokeAndWait(new Runnable()
 			{
-				frame.setVisible(true);
-			}
-		});
+				public void run()
+				{
+					frame.setVisible(true);
+				}
+			});
+		}
+		catch (Exception e)
+		{
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -517,7 +469,7 @@ public class Application
 			{
 				if (fullscreenFrame != null)
 				{
-					globeDockable.setComponent(wwd);
+					splitPane.setRightComponent(wwd);
 					fullscreenDevice.setFullScreenWindow(null);
 					fullscreenFrame.dispose();
 					fullscreenFrame = null;
@@ -573,7 +525,7 @@ public class Application
 		menu = new JMenu("View");
 		menuBar.add(menu);
 
-		menuItem = createDockableMenuItem(layersDockable);
+		/*menuItem = createDockableMenuItem(layersDockable);
 		menu.add(menuItem);
 
 		menuItem = createDockableMenuItem(exaggerationDockable);
@@ -585,7 +537,7 @@ public class Application
 		menuItem = createDockableMenuItem(gotoDockable);
 		menu.add(menuItem);
 
-		menu.addSeparator();
+		menu.addSeparator();*/
 
 		menuItem = new JMenuItem("Fullscreen");
 		menu.add(menuItem);
@@ -759,7 +711,7 @@ public class Application
 		return menuBar;
 	}
 
-	private JMenuItem createDockableMenuItem(final DockablePanel dockablePanel)
+	/*private JMenuItem createDockableMenuItem(final DockablePanel dockablePanel)
 	{
 		final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(dockablePanel
 				.getTitle(), DockingManager.isDocked(dockablePanel));
@@ -790,7 +742,7 @@ public class Application
 			}
 		});
 		return menuItem;
-	}
+	}*/
 
 	private void afterSettingsChange()
 	{
@@ -808,16 +760,29 @@ public class Application
 	public void quit()
 	{
 		Bookmarks.save();
-		try
-		{
-			DockingManager.storeLayoutModel();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		saveSplitLocations();
 		frame.dispose();
 		System.exit(0);
+	}
+	
+	private void saveSplitLocations()
+	{
+		int[] splits = new int[2];
+		splits[0] = splitPane.getDividerLocation();
+		splits[1] = westSplitPane.getDividerLocation();
+		Settings.get().setSplitLocations(splits);
+	}
+	
+	private void loadSplitLocations()
+	{
+		int[] splits = Settings.get().getSplitLocations();
+		if(splits != null && splits.length == 2)
+		{
+			if(splits[0] >= 0)
+				splitPane.setDividerLocation(splits[0]);
+			if(splits[1] >= 0)
+				westSplitPane.setDividerLocation(splits[1]);
+		}
 	}
 
 	private final PropertyChangeListener propertyChangeListener = new PropertyChangeListener()
