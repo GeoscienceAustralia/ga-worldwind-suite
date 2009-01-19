@@ -27,7 +27,7 @@ public class LayersPanel extends JPanel
 
 	private JTabbedPane createTabs()
 	{
-		JTabbedPane tabbedPane = new JTabbedPane();
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
 		tabbedPane.addTab("Standard", createStandard());
 		tabbedPane.addTab("Radiometrics", createRadiometry());
 		tabbedPane.addTab("Other", createOther());

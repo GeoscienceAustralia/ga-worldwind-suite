@@ -209,8 +209,8 @@ public class Application
 			}
 		});
 
-		JTabbedPane tabbedPane1 = new JTabbedPane(JTabbedPane.BOTTOM);
-		JTabbedPane tabbedPane2 = new JTabbedPane(JTabbedPane.BOTTOM);
+		JTabbedPane tabbedPane1 = new JTabbedPane(JTabbedPane.TOP);
+		JTabbedPane tabbedPane2 = new JTabbedPane(JTabbedPane.TOP);
 
 		westSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
 		splitPane.setLeftComponent(westSplitPane);
