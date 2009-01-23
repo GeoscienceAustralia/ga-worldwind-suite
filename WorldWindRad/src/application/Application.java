@@ -42,7 +42,10 @@ import java.awt.event.WindowStateListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -50,6 +53,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -63,13 +67,13 @@ import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileFilter;
 
 import layers.mouse.MouseLayer;
 import layers.other.LogoLayer;
 import layers.shader.NormalTessellator;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 import nasa.worldwind.cache.FixedBasicDataFileCache;
-import nasa.worldwind.util.StatusBar;
 import panels.layers.LayersPanel;
 import panels.other.ExaggerationPanel;
 import panels.other.GoToCoordinatePanel;
@@ -81,7 +85,6 @@ import settings.Settings.ProjectionMode;
 import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
 import util.DoubleClickZoomListener;
-import util.Icons;
 import util.Util;
 import bookmarks.Bookmark;
 import bookmarks.BookmarkListener;
@@ -209,25 +212,6 @@ public class Application
 		statusBar.setEventSource(wwd);
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
 
-		JButton fullscreen = new JButton(Icons.monitor);
-		fullscreen.setToolTipText("Fullscreen");
-		fullscreen.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				setFullscreen(!isFullscreen());
-			}
-		});
-		JButton home = new JButton(Icons.home);
-		home.setToolTipText("Reset view");
-		home.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				resetView();
-			}
-		});
-
 		JTabbedPane tabbedPane1 = new JTabbedPane(JTabbedPane.TOP);
 		JTabbedPane tabbedPane2 = new JTabbedPane(JTabbedPane.TOP);
 
@@ -273,6 +257,53 @@ public class Application
 		}
 		catch (Exception e)
 		{
+		}
+	}
+
+	private void saveImage()
+	{
+		String[] formats = ImageIO.getWriterFormatNames();
+		final Set<String> imageFormats = new HashSet<String>();
+		for (String format : formats)
+		{
+			imageFormats.add(format.toUpperCase());
+		}
+
+		JFileChooser chooser = new JFileChooser();
+		FileFilter filter = new FileFilter()
+		{
+			@Override
+			public boolean accept(File f)
+			{
+				if (f.isDirectory())
+					return true;
+				int index = f.getName().lastIndexOf('.');
+				if (index < 0)
+					return false;
+				String ext = f.getName().substring(index + 1);
+				return imageFormats.contains(ext.toUpperCase());
+			}
+
+			@Override
+			public String getDescription()
+			{
+				String desc = "";
+				int i = 0;
+				for (String format : imageFormats)
+				{
+					desc += format;
+					if (i++ < imageFormats.size())
+						desc += ",";
+					desc += " ";
+				}
+				desc += " images";
+				return desc;
+			}
+		};
+		chooser.setFileFilter(filter);
+		if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
+		{
+			Screenshotter.takeScreenshot(wwd, wwd, chooser.getSelectedFile());
 		}
 	}
 
@@ -509,7 +540,7 @@ public class Application
 
 		menu = new JMenu("File");
 		menuBar.add(menu);
-
+		
 		final JCheckBoxMenuItem offline = new JCheckBoxMenuItem("Work offline");
 		menu.add(offline);
 		offline.setSelected(WorldWind.isOfflineMode());
@@ -521,16 +552,18 @@ public class Application
 			}
 		});
 
-		/*menuItem = new JMenuItem("Take screenshot");
+		menu.addSeparator();
+		
+		menuItem = new JMenuItem("Save image");
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				takeScreenshot(1024 * 4, 576 * 4, new File("screenshot.png"));
+				saveImage();
 			}
 		});
-		menu.add(menuItem);*/
-
+		menu.add(menuItem);
+		
 		menu.addSeparator();
 
 		menuItem = new JMenuItem("Exit");
@@ -545,6 +578,18 @@ public class Application
 
 		menu = new JMenu("View");
 		menuBar.add(menu);
+		
+		menuItem = new JMenuItem("Default view");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				resetView();
+			}
+		});
+		
+		menu.addSeparator();
 
 		/*menuItem = createDockableMenuItem(layersDockable);
 		menu.add(menuItem);

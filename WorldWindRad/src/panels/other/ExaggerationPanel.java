@@ -25,6 +25,14 @@ public class ExaggerationPanel extends JPanel
 		super(new GridBagLayout());
 
 		GridBagConstraints c;
+		
+		JLabel label = new JLabel();
+		label.setText("Vertical scale:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		add(label, c);
 
 		double settingsExaggeration = Settings.get().getVerticalExaggeration();
 		final JSlider slider = new JSlider(0, 200,
@@ -34,24 +42,24 @@ public class ExaggerationPanel extends JPanel
 		slider.setPreferredSize(size);
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 1;
 		add(slider, c);
 
-		final JLabel label = new JLabel();
+		final JLabel sliderLabel = new JLabel();
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 0;
+		c.gridy = 1;
 		c.anchor = GridBagConstraints.WEST;
-		add(label, c);
+		add(sliderLabel, c);
 
 		class Setter
 		{
 			public void set(double exaggeration)
 			{
-				label.setText(String
+				sliderLabel.setText(String
 						.valueOf(Math.round(exaggeration * 10d) / 10d));
 				Settings.get().setVerticalExaggeration(exaggeration);
 				wwd.getSceneController().setVerticalExaggeration(exaggeration);
@@ -74,7 +82,7 @@ public class ExaggerationPanel extends JPanel
 		JPanel buttons = new JPanel(new GridLayout(1, 0));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 2;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.NORTHWEST;
@@ -96,34 +104,44 @@ public class ExaggerationPanel extends JPanel
 			}
 		}
 
-		JButton button = new JButton("1:1");
+		JButton button = new JButton("1");
 		button.addActionListener(new ScaleListener(1d));
 		size = button.getMinimumSize();
 		size.width = 0;
 		button.setMinimumSize(size);
+		button.setToolTipText("1:1");
 		buttons.add(button);
-		button = new JButton("2:1");
+		button = new JButton("2");
 		button.addActionListener(new ScaleListener(2d));
 		button.setMinimumSize(size);
+		button.setToolTipText("2:1");
 		buttons.add(button);
-		button = new JButton("5:1");
+		button = new JButton("3");
+		button.addActionListener(new ScaleListener(3d));
+		button.setMinimumSize(size);
+		button.setToolTipText("3:1");
+		buttons.add(button);
+		button = new JButton("5");
 		button.addActionListener(new ScaleListener(5d));
 		button.setMinimumSize(size);
+		button.setToolTipText("5:1");
 		buttons.add(button);
-		button = new JButton("10:1");
+		button = new JButton("10");
 		button.addActionListener(new ScaleListener(10d));
 		button.setMinimumSize(size);
+		button.setToolTipText("10:1");
 		buttons.add(button);
 		/*button = new JButton("100:1");
 		button.addActionListener(new ScaleListener(100d));
 		button.setMinimumSize(size);
+		button.setToolTipText("100:1");
 		buttons.add(button);*/
 
 		/*final JCheckBox useTerrain = new JCheckBox("Use GA terrain");
 		useTerrain.setSelected(Settings.get().isUseTerrain());
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = 3;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.NORTHWEST;

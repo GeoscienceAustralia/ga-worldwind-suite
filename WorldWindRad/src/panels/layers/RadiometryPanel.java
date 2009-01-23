@@ -205,7 +205,7 @@ public class RadiometryPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(panel2, c);
 
-		radioCheck = new JCheckBox("Radiometrics");
+		radioCheck = new JCheckBox("Radioelements");
 		radioCheck.addActionListener(al);
 		panel2.add(radioCheck);
 

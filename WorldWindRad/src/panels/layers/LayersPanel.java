@@ -31,7 +31,7 @@ public class LayersPanel extends JPanel
 		tabbedPane.addTab("Standard", createStandard());
 		standardPanel.addLowerLayers();
 		
-		tabbedPane.addTab("Radioelements", createRadiometry());
+		tabbedPane.addTab("Radiometrics", createRadiometry());
 		tabbedPane.addTab("Other", createOther());
 		standardPanel.addUpperLayers();
 		

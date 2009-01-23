@@ -17,12 +17,20 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.media.opengl.GLCanvas;
 import javax.swing.JFrame;
 
 import com.sun.opengl.util.Screenshot;
 
 public class Screenshotter
 {
+	public static void takeScreenshot(WorldWindow wwd, GLCanvas canvas,
+			File file)
+	{
+		wwd.addRenderingListener(new SimpleScreenshotListener(wwd, file, canvas
+				.getWidth(), canvas.getHeight()));
+	}
+
 	public static void takeScreenshot(final WorldWindow wwd, final int width,
 			final int height, final File file)
 	{
@@ -165,6 +173,39 @@ public class Screenshotter
 				image = Screenshot.readToBufferedImage(x, y, width, height,
 						false);
 				done = true;
+			}
+		}
+	}
+
+	private static class SimpleScreenshotListener implements RenderingListener
+	{
+		private File file;
+		private int width;
+		private int height;
+		private WorldWindow wwd;
+
+		public SimpleScreenshotListener(WorldWindow wwd, File file, int width,
+				int height)
+		{
+			this.wwd = wwd;
+			this.file = file;
+			this.width = width;
+			this.height = height;
+		}
+
+		public void stageChanged(RenderingEvent event)
+		{
+			if (event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)
+			{
+				try
+				{
+					Screenshot.writeToFile(file, width, height);
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+				wwd.removeRenderingListener(this);
 			}
 		}
 	}

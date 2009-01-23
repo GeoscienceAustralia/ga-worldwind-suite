@@ -83,12 +83,20 @@ public class GoToCoordinatePanel extends JPanel
 	private void makePanel()
 	{
 		GridBagConstraints c;
+		
+		JLabel label = new JLabel();
+		label.setText("Enter lat/lon:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		add(label, c);
 
 		coordInput = new JTextField(10);
 		coordInput.setToolTipText("Type coordinates and press Enter");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		add(coordInput, c);
@@ -98,13 +106,13 @@ public class GoToCoordinatePanel extends JPanel
 		go.setToolTipText("Go");
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 0;
+		c.gridy = 1;
 		add(go, c);
 
 		resultLabel = new JLabel();
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 2;
 		add(resultLabel, c);
 
 		ActionListener al = new ActionListener()
@@ -142,10 +150,10 @@ public class GoToCoordinatePanel extends JPanel
 	{
 		LatLon latLon = computeLatLonFromString(coordInput.getText(), wwd
 				.getModel().getGlobe());
-		updateResult(latLon);
+		updateResult(latLon, false);
 	}
 
-	private void updateResult(LatLon latLon)
+	private void updateResult(LatLon latLon, boolean showInvalid)
 	{
 		if (latLon != null)
 		{
@@ -155,15 +163,17 @@ public class GoToCoordinatePanel extends JPanel
 							.getLatitude().degrees,
 							latLon.getLongitude().degrees));
 		}
-		else
+		else if(showInvalid)
 			resultLabel.setText("Invalid coordinates");
+		else
+			resultLabel.setText(" ");
 	}
 
 	private void gotoCoords()
 	{
 		LatLon latLon = computeLatLonFromString(coordInput.getText(), wwd
 				.getModel().getGlobe());
-		updateResult(latLon);
+		updateResult(latLon, true);
 		if (latLon != null)
 		{
 			OrbitView view = (OrbitView) wwd.getView();
