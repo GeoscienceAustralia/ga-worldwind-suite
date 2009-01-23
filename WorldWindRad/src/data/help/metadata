@@ -1,5 +1,5 @@
 <html>
-<body>
+<body style="font-family: sans-serif; font-size: small">
 All images are using Geodetic projection and the GDA94 datum, and have a cell size of 0.001&deg;.<br><br>
 <table border=1>
 <tr><th>Name</th><th>Description</th><th>Units</th><th>Comments</th></tr>

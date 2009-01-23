@@ -12,7 +12,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="WorldWindRad/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/worldwind.jar"/>
+	<classpathentry kind="lib" path="lib/worldwind.jar" sourcepath="/WorldWind"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/wwj-kml"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

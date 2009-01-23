@@ -392,35 +392,35 @@ public class RadiometryPanel extends JPanel
 
 		ternaryAreasRadio = new JRadioButton("Ternary (K-Th-U)");
 		ternaryAreasRadio.addActionListener(al);
-		panel.add(createRadioPanel(ternaryAreasRadio, ternaryLegend));
+		panel.add(ternaryAreasRadio);
 
 		potassiumAreasRadio = new JRadioButton("Potassium (K)");
 		potassiumAreasRadio.addActionListener(al);
-		panel.add(createRadioPanel(potassiumAreasRadio, KLegend));
+		panel.add(potassiumAreasRadio);
 
 		thoriumAreasRadio = new JRadioButton("Thorium (Th)");
 		thoriumAreasRadio.addActionListener(al);
-		panel.add(createRadioPanel(thoriumAreasRadio, ThLegend));
+		panel.add(thoriumAreasRadio);
 
 		uraniumAreasRadio = new JRadioButton("Uranium (U)");
 		uraniumAreasRadio.addActionListener(al);
-		panel.add(createRadioPanel(uraniumAreasRadio, ULegend));
+		panel.add(uraniumAreasRadio);
 
 		doseRateAreasRadio = new JRadioButton("Dose Rate");
 		doseRateAreasRadio.addActionListener(al);
-		panel.add(createRadioPanel(doseRateAreasRadio, doseLegend));
+		panel.add(doseRateAreasRadio);
 
 		ratioThKAreasRadio = new JRadioButton("Thorium/Potassium Ratio");
 		ratioThKAreasRadio.addActionListener(al);
-		panel.add(createRadioPanel(ratioThKAreasRadio, ratioLegend));
+		panel.add(ratioThKAreasRadio);
 
 		ratioUKAreasRadio = new JRadioButton("Uranium/Potassium Ratio");
 		ratioUKAreasRadio.addActionListener(al);
-		panel.add(createRadioPanel(ratioUKAreasRadio, ratioLegend));
+		panel.add(ratioUKAreasRadio);
 
 		ratioUThAreasRadio = new JRadioButton("Uranium/Thorium Ratio");
 		ratioUThAreasRadio.addActionListener(al);
-		panel.add(createRadioPanel(ratioUThAreasRadio, ratioLegend));
+		panel.add(ratioUThAreasRadio);
 
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(ternaryAreasRadio);

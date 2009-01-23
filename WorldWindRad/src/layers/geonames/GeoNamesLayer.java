@@ -34,7 +34,7 @@ import util.ColorFont;
 
 public class GeoNamesLayer extends AbstractLayer
 {
-	private final static String GEONAMES_CHILDREN = "http://ws.geonames.org/children";
+	private final static String GEONAMES_CHILDREN = "http://ws5.geonames.org/children";
 	private final static int GEONAMES_GLOBE_ID = 6295630;
 
 	private GeoName topGeoName;

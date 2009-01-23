@@ -12,6 +12,7 @@ import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Earth;
+import gov.nasa.worldwind.layers.CompassLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ScalebarLayer;
@@ -64,6 +65,8 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
 import layers.mouse.MouseLayer;
+import layers.other.LogoLayer;
+import layers.shader.NormalTessellator;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 import nasa.worldwind.cache.FixedBasicDataFileCache;
 import nasa.worldwind.util.StatusBar;
@@ -88,6 +91,7 @@ import bookmarks.Bookmarks;
 public class Application
 {
 	private final static String SETTINGS_KEY = "WorldWindRad";
+	public final static String VERSION = "1.0";
 
 	static
 	{
@@ -134,6 +138,9 @@ public class Application
 		/*Configuration.setValue(AVKey.INITIAL_ALTITUDE, Double
 				.toString(1.2 * Earth.WGS84_EQUATORIAL_RADIUS));*/
 
+		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
+				NormalTessellator.class.getName());
+
 		WorldWind.getDataFileCache().addCacheLocation("cache");
 
 		new Application();
@@ -149,6 +156,9 @@ public class Application
 	private JSplitPane splitPane;
 	private JSplitPane westSplitPane;
 
+	private WorldMapLayer map;
+	private Layer logo, scalebar, compass;
+
 	public Application()
 	{
 		//create worldwind stuff
@@ -162,12 +172,21 @@ public class Application
 		create3DMouse();
 		createDoubleClickListener();
 
+		map = new WorldMapLayer();
+		logo = new LogoLayer();
+		scalebar = new ScalebarLayer();
+		compass = new CompassLayer();
+		model.getLayers().add(map);
+		model.getLayers().add(logo);
+		model.getLayers().add(scalebar);
+		model.getLayers().add(compass);
+
 		//create gui stuff
 
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
-		frame = new JFrame("Radiometrics");
+		frame = new JFrame("Geoscience Australia – World Wind");
 		frame.setLayout(new BorderLayout());
 		frame.setBounds(Settings.get().getWindowBounds());
 		if (Settings.get().isWindowMaximized())
@@ -231,7 +250,7 @@ public class Application
 		GoToCoordinatePanel gotoPanel = new GoToCoordinatePanel(wwd);
 		panel.add(gotoPanel, BorderLayout.NORTH);
 		tabbedPane2.addTab("Go to coordinates", panel);
-		
+
 		westSplitPane.setTopComponent(tabbedPane1);
 		westSplitPane.setBottomComponent(tabbedPane2);
 		westSplitPane.setResizeWeight(1.0);
@@ -537,9 +556,21 @@ public class Application
 		menu.add(menuItem);
 
 		menuItem = createDockableMenuItem(gotoDockable);
+		menu.add(menuItem);*/
+
+		menuItem = createLayerMenuItem(map);
 		menu.add(menuItem);
 
-		menu.addSeparator();*/
+		menuItem = createLayerMenuItem(compass);
+		menu.add(menuItem);
+
+		menuItem = createLayerMenuItem(logo);
+		menu.add(menuItem);
+
+		menuItem = createLayerMenuItem(scalebar);
+		menu.add(menuItem);
+
+		menu.addSeparator();
 
 		menuItem = new JMenuItem("Fullscreen");
 		menu.add(menuItem);
@@ -710,7 +741,34 @@ public class Application
 			}
 		});
 
+		menu.addSeparator();
+
+		menuItem = new JMenuItem("About");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				new AboutDialog(frame);
+			}
+		});
+
 		return menuBar;
+	}
+
+	private JMenuItem createLayerMenuItem(final Layer layer)
+	{
+		final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(layer
+				.getName(), layer.isEnabled());
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				layer.setEnabled(menuItem.isSelected());
+				wwd.redraw();
+			}
+		});
+		return menuItem;
 	}
 
 	/*private JMenuItem createDockableMenuItem(final DockablePanel dockablePanel)
@@ -753,9 +811,8 @@ public class Application
 		{
 			layersPanel.turnOffAtmosphere();
 		}
-		layersPanel
-				.setMapPickingEnabled(!(Settings.get().isStereoEnabled() && Settings
-						.get().isStereoCursor()));
+		map.setPickEnabled(!(Settings.get().isStereoEnabled() && Settings.get()
+				.isStereoCursor()));
 		enableMouseLayer();
 	}
 
@@ -766,7 +823,7 @@ public class Application
 		frame.dispose();
 		System.exit(0);
 	}
-	
+
 	private void saveSplitLocations()
 	{
 		int[] splits = new int[2];
@@ -774,15 +831,15 @@ public class Application
 		splits[1] = westSplitPane.getDividerLocation();
 		Settings.get().setSplitLocations(splits);
 	}
-	
+
 	private void loadSplitLocations()
 	{
 		int[] splits = Settings.get().getSplitLocations();
-		if(splits != null && splits.length == 2)
+		if (splits != null && splits.length == 2)
 		{
-			if(splits[0] >= 0)
+			if (splits[0] >= 0)
 				splitPane.setDividerLocation(splits[0]);
-			if(splits[1] >= 0)
+			if (splits[1] >= 0)
 				westSplitPane.setDividerLocation(splits[1]);
 		}
 	}

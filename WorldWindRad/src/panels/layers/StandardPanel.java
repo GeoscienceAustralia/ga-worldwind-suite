@@ -1,13 +1,10 @@
 package panels.layers;
 
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.layers.CompassLayer;
 import gov.nasa.worldwind.layers.FogLayer;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.ScalebarLayer;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.layers.StarsLayer;
-import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.layers.Earth.BMNGOneImage;
 import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.layers.Earth.EarthNASAPlaceNameLayer;
@@ -23,7 +20,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 import layers.geonames.GeoNamesLayer;
-import layers.other.LogoLayer;
 import layers.other.MetacartaCoastlineLayer;
 import layers.other.MetacartaCountryBoundariesLayer;
 import layers.other.MetacartaStateBoundariesLayer;
@@ -42,13 +38,10 @@ public class StandardPanel extends JPanel
 	private Layer country;
 	private Layer state;
 	private Layer street;
-	private Layer compass;
-	private Layer map;
-	private Layer scale;
 	private Layer graticule;
-	private Layer logo;
 
-	private Layer[] layers;
+	private Layer[] lowerLayers;
+	private Layer[] upperLayers;
 	private JCheckBox atmosphereCheck;
 
 	private WorldWindow wwd;
@@ -57,7 +50,8 @@ public class StandardPanel extends JPanel
 	{
 		this.wwd = wwd;
 		createLayers();
-		fillPanel();
+		fillPanel(lowerLayers);
+		fillPanel(upperLayers);
 	}
 
 	private void createLayers()
@@ -75,12 +69,8 @@ public class StandardPanel extends JPanel
 		country = new MetacartaCountryBoundariesLayer();
 		state = new MetacartaStateBoundariesLayer();
 		street = new OpenStreetMapLayer();
-		compass = new CompassLayer();
-		map = new WorldMapLayer();
-		scale = new ScalebarLayer();
 		graticule = new MGRSGraticuleLayer();
-		logo = new LogoLayer();
-		
+
 		/*Layer kmllayer = null;
 		try
 		{
@@ -92,14 +82,12 @@ public class StandardPanel extends JPanel
 			e.printStackTrace();
 		}*/
 
-		layers = new Layer[] { stars, atmosphere, fog, bmngone, bmng, landsat,
-				pnl, geonames, coastline, country, state, street, graticule,
-				compass, map, scale, logo };
-		for (Layer layer : layers)
-		{
-			layer.setEnabled(true);
-			wwd.getModel().getLayers().add(layer);
-		}
+		//Layer nightlights = new NightLightsLayer();
+
+		lowerLayers = new Layer[] { stars, atmosphere, fog, bmngone, bmng,
+				landsat/*, nightlights*/ };
+		upperLayers = new Layer[] { pnl, geonames, coastline, country, state,
+				street, graticule };
 
 		coastline.setEnabled(false);
 		country.setEnabled(false);
@@ -107,9 +95,27 @@ public class StandardPanel extends JPanel
 		street.setEnabled(false);
 		geonames.setEnabled(false);
 		graticule.setEnabled(false);
+
+		//nightlights.setEnabled(false);
+	}
+	
+	public void addLowerLayers()
+	{
+		for (Layer layer : lowerLayers)
+		{
+			wwd.getModel().getLayers().add(layer);
+		}
 	}
 
-	private void fillPanel()
+	public void addUpperLayers()
+	{
+		for (Layer layer : upperLayers)
+		{
+			wwd.getModel().getLayers().add(layer);
+		}
+	}
+
+	private void fillPanel(Layer[] layers)
 	{
 		setLayout(new GridLayout(0, 1));
 
@@ -142,10 +148,5 @@ public class StandardPanel extends JPanel
 			atmosphereCheck.setSelected(false);
 			wwd.redraw();
 		}
-	}
-
-	public void setMapPickingEnabled(boolean enabled)
-	{
-		map.setPickEnabled(enabled);
 	}
 }
