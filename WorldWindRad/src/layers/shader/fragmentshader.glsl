@@ -3,9 +3,11 @@ uniform sampler2D tex1;
 uniform int showoutlines;
 uniform vec3 eyePosition;
 uniform vec3 sunPosition;
+uniform sampler2DShadow shadowMap;
 
 varying vec3 normal;
 varying vec3 position;
+varying vec4 shadow;
 
 void main(void)
 {
@@ -32,7 +34,8 @@ void main(void)
 	vec3 norm = normalize(normal);
 	
 	float nxDir = max(0.0, dot(norm, sunPosition));
-	nxDir = pow(nxDir, 0.8);
+	//nxDir = pow(nxDir, 0.1);
+	nxDir = min(1.0, nxDir * 2.0);
 	
 	vec4 specular = vec4(0.0);
 	
@@ -51,9 +54,12 @@ void main(void)
 		specular *= vec4(amount);
 	}
 	
-	day = day * vec4(3.0);
+	day = day * vec4(2.0);
 	gl_FragColor = mix(night, day, nxDir) + specular;
+	//gl_FragColor = vec4(vec3(nxDir), 1.0);
 	
 	//gl_FragColor = vec4(fract(normalize(position)), 1.0);
 	//gl_FragColor = vec4(fract(lightVector), 1.0);
+	
+	//gl_FragColor = vec4(vec3(shadow2DProj(shadowMap, shadow).rgb), 1.0);
 }

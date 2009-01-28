@@ -82,10 +82,8 @@ public class StandardPanel extends JPanel
 			e.printStackTrace();
 		}*/
 
-		//Layer nightlights = new NightLightsLayer();
-
 		lowerLayers = new Layer[] { stars, atmosphere, fog, bmngone, bmng,
-				landsat/*, nightlights*/ };
+				landsat };
 		upperLayers = new Layer[] { pnl, geonames, coastline, country, state,
 				street, graticule };
 
@@ -95,8 +93,6 @@ public class StandardPanel extends JPanel
 		street.setEnabled(false);
 		geonames.setEnabled(false);
 		graticule.setEnabled(false);
-
-		//nightlights.setEnabled(false);
 	}
 	
 	public void addLowerLayers()

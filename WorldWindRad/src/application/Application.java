@@ -78,6 +78,7 @@ import panels.layers.LayersPanel;
 import panels.other.ExaggerationPanel;
 import panels.other.GoToCoordinatePanel;
 import panels.other.HelpControlsPanel;
+import panels.other.SunPositionPanel;
 import panels.places.PlaceSearchPanel;
 import settings.Settings;
 import settings.SettingsDialog;
@@ -233,7 +234,13 @@ public class Application
 		panel = new JPanel(new BorderLayout());
 		GoToCoordinatePanel gotoPanel = new GoToCoordinatePanel(wwd);
 		panel.add(gotoPanel, BorderLayout.NORTH);
-		tabbedPane2.addTab("Go to coordinates", panel);
+		tabbedPane2.addTab("Go to coord", panel);
+		
+		panel = new JPanel(new BorderLayout());
+		SunPositionPanel sunPositionPanel = new SunPositionPanel(wwd);
+		panel.add(sunPositionPanel, BorderLayout.NORTH);
+		tabbedPane2.addTab("Sun position", panel);
+		
 
 		westSplitPane.setTopComponent(tabbedPane1);
 		westSplitPane.setBottomComponent(tabbedPane2);

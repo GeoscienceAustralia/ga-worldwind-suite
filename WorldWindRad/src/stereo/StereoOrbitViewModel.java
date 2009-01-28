@@ -29,7 +29,7 @@ public class StereoOrbitViewModel extends BasicOrbitViewModel
 	{
 		Matrix matrix = super.computeTransformMatrix(globe, center, heading,
 				pitch, zoom);
-		if (view.isDrawing())
+		if (view.isDrawingStereo())
 		{
 			ProjectionMode mode = Settings.get().getProjectionMode();
 			if (mode == ProjectionMode.SIMPLE_OFFSET)

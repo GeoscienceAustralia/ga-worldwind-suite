@@ -1,5 +1,6 @@
 varying vec3 normal;
 varying vec3 position;
+varying vec4 shadow;
 
 void main(void)
 {
@@ -10,4 +11,5 @@ void main(void)
 	//normal = normalize(gl_NormalMatrix * gl_Normal);
 	normal = gl_Normal;
 	position = gl_Vertex.xyz;
+	shadow = gl_TextureMatrix[0] * gl_ModelViewMatrix * gl_Vertex;
 }

@@ -1,41 +1,44 @@
 package layers.shader;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
-import javax.media.opengl.GL;
-
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.LevelSet;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+import javax.media.opengl.GL;
+
 public class NightLightsLayer extends BasicTiledImageLayer
 {
 	private int shaderprogram = -1;
 	private int eyeuniform = -1;
 	private int sununiform = -1;
+	private SunPositionProvider positionProvider;
 
-	public NightLightsLayer()
+	public NightLightsLayer(SunPositionProvider spp)
 	{
 		super(makeLevels());
+		this.positionProvider = spp;
 	}
 
 	private static LevelSet makeLevels()
 	{
 		AVList params = new AVListImpl();
 
-		params.setValue(AVKey.TILE_WIDTH, 1024);
+		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Night Lights");
 		params.setValue(AVKey.SERVICE, "http://localhost/tiles/tiles.php");
-		params.setValue(AVKey.DATASET_NAME, "sidebyside");
+		params.setValue(AVKey.DATASET_NAME, "stablelights");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".jpg");
 		params.setValue(AVKey.NUM_LEVELS, 3);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
@@ -104,7 +107,7 @@ public class NightLightsLayer extends BasicTiledImageLayer
 			gl.glUniform1i(gl.glGetUniformLocation(shaderprogram, "tex1"), 1);
 			eyeuniform = gl.glGetUniformLocation(shaderprogram, "eyePosition");
 			sununiform = gl.glGetUniformLocation(shaderprogram, "sunPosition");
-			
+
 			System.out.println("Shader program = " + shaderprogram
 					+ ", eye uniform = " + eyeuniform + ", sun uniform = "
 					+ sununiform);
@@ -115,9 +118,13 @@ public class NightLightsLayer extends BasicTiledImageLayer
 					(float) sunPosition.y, (float) sunPosition.z);
 		}
 
+		Vec4 sun = dc.getGlobe().computePointFromPosition(
+				new Position(positionProvider.getPosition(), 0)).normalize3();
+
 		gl.glUseProgram(shaderprogram);
 		Vec4 eye = dc.getView().getEyePoint();
 		gl.glUniform3f(eyeuniform, (float) eye.x, (float) eye.y, (float) eye.z);
+		gl.glUniform3f(sununiform, (float) sun.x, (float) sun.y, (float) sun.z);
 		super.render(dc);
 		gl.glUseProgram(0);
 	}

@@ -68,10 +68,10 @@ public class StereoSceneController extends AbstractSceneController
 				StereoMode mode = settings.getStereoMode();
 				boolean swap = settings.isStereoSwap();
 
-				stereo.setDrawing(true);
+				stereo.setDrawingStereo(true);
 				stereo.setEye(swap ? Eye.RIGHT : Eye.LEFT);
 				setupBuffer(gl, mode, Eye.LEFT);
-				view.apply(dc);
+				this.applyView(dc);
 				this.draw(dc);
 
 				gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
@@ -79,10 +79,10 @@ public class StereoSceneController extends AbstractSceneController
 
 				stereo.setEye(swap ? Eye.LEFT : Eye.RIGHT);
 				setupBuffer(gl, mode, Eye.RIGHT);
-				view.apply(dc);
+				this.applyView(dc);
 				this.draw(dc);
 
-				stereo.setDrawing(false);
+				stereo.setDrawingStereo(false);
 				restoreBuffer(gl, mode);
 				view.apply(dc);
 			}
