@@ -78,7 +78,6 @@ import panels.layers.LayersPanel;
 import panels.other.ExaggerationPanel;
 import panels.other.GoToCoordinatePanel;
 import panels.other.HelpControlsPanel;
-import panels.other.SunPositionPanel;
 import panels.places.PlaceSearchPanel;
 import settings.Settings;
 import settings.SettingsDialog;
@@ -95,7 +94,6 @@ import bookmarks.Bookmarks;
 public class Application
 {
 	private final static String SETTINGS_KEY = "WorldWindRad";
-	public final static String VERSION = "1.0";
 
 	static
 	{
@@ -236,10 +234,10 @@ public class Application
 		panel.add(gotoPanel, BorderLayout.NORTH);
 		tabbedPane2.addTab("Go to coord", panel);
 		
-		panel = new JPanel(new BorderLayout());
+		/*panel = new JPanel(new BorderLayout());
 		SunPositionPanel sunPositionPanel = new SunPositionPanel(wwd);
 		panel.add(sunPositionPanel, BorderLayout.NORTH);
-		tabbedPane2.addTab("Sun position", panel);
+		tabbedPane2.addTab("Sun position", panel);*/
 		
 
 		westSplitPane.setTopComponent(tabbedPane1);

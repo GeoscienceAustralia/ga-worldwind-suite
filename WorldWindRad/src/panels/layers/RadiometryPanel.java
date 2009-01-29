@@ -430,15 +430,18 @@ public class RadiometryPanel extends JPanel
 		c.insets = new Insets(0, 20, 0, 0);
 		panel.add(radio, c);
 
-		FlatJButton legend = new FlatJButton(Icons.legend);
-		legend.restrictSize();
-		legend.addActionListener(legendAL);
-		legend.setToolTipText("Show legend");
-		c = new GridBagConstraints();
-		c.gridx = 2;
-		c.gridy = gridy;
-		c.anchor = GridBagConstraints.WEST;
-		panel.add(legend, c);
+		if (legendAL != null)
+		{
+			FlatJButton legend = new FlatJButton(Icons.legend);
+			legend.restrictSize();
+			legend.addActionListener(legendAL);
+			legend.setToolTipText("Show legend");
+			c = new GridBagConstraints();
+			c.gridx = 2;
+			c.gridy = gridy;
+			c.anchor = GridBagConstraints.WEST;
+			panel.add(legend, c);
+		}
 	}
 
 	private ActionListener createMetadataListener()
