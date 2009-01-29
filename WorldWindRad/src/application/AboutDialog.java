@@ -2,16 +2,11 @@ package application;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -20,11 +15,13 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 
 import util.BrowserLauncher;
 
@@ -65,52 +62,37 @@ public class AboutDialog extends JDialog
 		canvas.setMaximumSize(imageSize);
 		add(canvas, BorderLayout.WEST);
 
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		panel.setBackground(Color.white);
-		add(panel, BorderLayout.CENTER);
+		JEditorPane editorPane = new JEditorPane();
+		editorPane.setEditable(false);
+		java.net.URL helpURL = this.getClass().getResource("/data/help/about");
+		if (helpURL != null)
+		{
+			try
+			{
+				editorPane.setPage(helpURL);
+			}
+			catch (IOException e)
+			{
+				editorPane.setText(e.toString());
+			}
+		}
+		else
+		{
+			editorPane.setText("Could not find page");
+		}
+		editorPane.addHyperlinkListener(new HyperlinkListener()
+		{
+			public void hyperlinkUpdate(HyperlinkEvent e)
+			{
+				if (e.getEventType() == EventType.ACTIVATED)
+				{
+					BrowserLauncher.openURL(e.getURL().toExternalForm());
+				}
+			}
+		});
+		add(editorPane, BorderLayout.CENTER);
 
-		JTextArea text = new JTextArea();
-		panel.add(text);
-		text
-				.setText("Geoscience Australia - World Wind\nVersion "
-						+ Application.VERSION
-						+ "\n\nBased on NASA World Wind\n\nLicensed under the NASA Open Source Agreement\n");
-		text.setFont(Font.decode(""));
-		
-		final String gaURL = "http://www.ga.gov.au/";
-		text = new JTextArea();
-		panel.add(text);
-		text.setText(gaURL);
-		text.setFont(Font.decode(""));
-		text.setForeground(Color.blue);
-		text.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		text.addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mouseClicked(MouseEvent e)
-			{
-				BrowserLauncher.openURL(gaURL);
-			}
-		});
-		
-		final String nasaURL = "http://worldwind.arc.nasa.gov/credits.html";
-		text = new JTextArea();
-		panel.add(text);
-		text.setText(nasaURL);
-		text.setFont(Font.decode(""));
-		text.setForeground(Color.blue);
-		text.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		text.addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mouseClicked(MouseEvent e)
-			{
-				BrowserLauncher.openURL(nasaURL);
-			}
-		});
-		
-		panel = new JPanel(new BorderLayout());
+		JPanel panel = new JPanel(new BorderLayout());
 		int spacing = 10;
 		panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory
 				.createEtchedBorder(), BorderFactory.createEmptyBorder(spacing,

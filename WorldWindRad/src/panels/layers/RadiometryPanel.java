@@ -37,6 +37,7 @@ import javax.swing.JSlider;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.basic.BasicHTML;
 
 import layers.radioareas.DoseRateAreasLayer;
 import layers.radioareas.PotassiumAreasLayer;
@@ -196,7 +197,7 @@ public class RadiometryPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		c.weightx = 1;
 		add(panel, c);
-		
+
 		int gridy = 0;
 
 		radioCheck = new JCheckBox("Radioelements");
@@ -206,7 +207,7 @@ public class RadiometryPanel extends JPanel
 		c.gridy = gridy;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(radioCheck, c);
-		
+
 		radioSlider = new JSlider(1, 100, 100);
 		radioSlider.setPaintLabels(false);
 		radioSlider.setPaintTicks(false);
@@ -291,7 +292,7 @@ public class RadiometryPanel extends JPanel
 		c.gridy = gridy;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasCheck, c);
-		
+
 		areasSlider = new JSlider(1, 100, 100);
 		areasSlider.setPaintLabels(false);
 		areasSlider.setPaintTicks(false);
@@ -412,13 +413,14 @@ public class RadiometryPanel extends JPanel
 		updateLayers();
 		this.revalidate();
 	}
-	
+
 	private void addRadioToPanel(JPanel panel, int gridy, JRadioButton radio)
 	{
 		addRadioToPanel(panel, gridy, radio, null);
 	}
 
-	private void addRadioToPanel(JPanel panel, int gridy, JRadioButton radio, ActionListener legendAL)
+	private void addRadioToPanel(JPanel panel, int gridy, JRadioButton radio,
+			ActionListener legendAL)
 	{
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
@@ -427,7 +429,7 @@ public class RadiometryPanel extends JPanel
 		c.gridwidth = 2;
 		c.insets = new Insets(0, 20, 0, 0);
 		panel.add(radio, c);
-		
+
 		FlatJButton legend = new FlatJButton(Icons.legend);
 		legend.restrictSize();
 		legend.addActionListener(legendAL);
@@ -438,7 +440,7 @@ public class RadiometryPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(legend, c);
 	}
-	
+
 	private ActionListener createMetadataListener()
 	{
 		return new ActionListener()
@@ -450,6 +452,8 @@ public class RadiometryPanel extends JPanel
 				final JDialog dialog = new JDialog(frame, "Metadata", false);
 
 				JEditorPane editorPane = new JEditorPane();
+				editorPane.putClientProperty(BasicHTML.documentBaseKey, this
+						.getClass().getResource("/data/help/"));
 				editorPane.setEditable(false);
 				java.net.URL url = this.getClass().getResource(
 						"/data/help/metadata");

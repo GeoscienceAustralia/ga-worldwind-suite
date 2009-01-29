@@ -33,10 +33,11 @@ void main(void)
 		float specularPower = pow(nxHalf, shininess);
 		specular = specularColor * specularPower;
 		
-		//float blue = normalize(day.rgb).b;
-		//float amount = clamp(blue * 5.0 - 2.0, 0.0, 1.0);
-		//specular *= vec4(amount);
+		float amount = tile.b;
+		//amount = clamp(amount * 5.0 - 2.0, 0.0, 1.0);
+		specular *= vec4(amount);
 	}
 	
-	gl_FragColor = mix(vec4(tile.rgb, 0.8), vec4(0.0), nxDir) + specular;
+	float red = tile.r;
+	gl_FragColor = mix(vec4(red, red * 0.9, red * 0.8, 0.8), vec4(0.0), nxDir) + specular;
 }
