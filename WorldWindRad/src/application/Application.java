@@ -157,6 +157,7 @@ public class Application
 	private MouseLayer mouseLayer;
 	private JSplitPane splitPane;
 	private JSplitPane westSplitPane;
+	private JMenu bookmarksMenu;
 
 	private WorldMapLayer map;
 	private Layer logo, scalebar, compass;
@@ -596,18 +597,6 @@ public class Application
 		
 		menu.addSeparator();
 
-		/*menuItem = createDockableMenuItem(layersDockable);
-		menu.add(menuItem);
-
-		menuItem = createDockableMenuItem(exaggerationDockable);
-		menu.add(menuItem);
-
-		menuItem = createDockableMenuItem(placeSearchDockable);
-		menu.add(menuItem);
-
-		menuItem = createDockableMenuItem(gotoDockable);
-		menu.add(menuItem);*/
-
 		menuItem = createLayerMenuItem(map);
 		menu.add(menuItem);
 
@@ -632,11 +621,11 @@ public class Application
 			}
 		});
 
-		menu = new JMenu("Bookmarks");
-		menuBar.add(menu);
+		bookmarksMenu = new JMenu("Bookmarks");
+		menuBar.add(bookmarksMenu);
 
 		menuItem = new JMenuItem("Add bookmark...");
-		menu.add(menuItem);
+		bookmarksMenu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -646,7 +635,7 @@ public class Application
 		});
 
 		menuItem = new JMenuItem("Organise bookmarks...");
-		menu.add(menuItem);
+		bookmarksMenu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -659,50 +648,12 @@ public class Application
 			}
 		});
 
-		menu.addSeparator();
-		final JMenu bookmarksMenu = menu;
+		bookmarksMenu.addSeparator();
 		BookmarkListener bl = new BookmarkListener()
 		{
 			public void modified()
 			{
-				while (bookmarksMenu.getMenuComponentCount() > 3)
-				{
-					bookmarksMenu.remove(3);
-				}
-				for (final Bookmark bookmark : Bookmarks.iterable())
-				{
-					JMenuItem mi = new JMenuItem(bookmark.name);
-					bookmarksMenu.add(mi);
-					mi.addActionListener(new ActionListener()
-					{
-						public void actionPerformed(ActionEvent e)
-						{
-							View view = wwd.getView();
-							if (view instanceof OrbitView)
-							{
-								OrbitView orbitView = (OrbitView) view;
-								Position center = orbitView.getCenterPosition();
-								long lengthMillis = Util.getScaledLengthMillis(
-										center.getLatLon(), bookmark.center
-												.getLatLon(), 2000, 8000);
-
-								ViewStateIterator vsi = FlyToOrbitViewStateIterator
-										.createPanToIterator(wwd.getModel()
-												.getGlobe(), center,
-												bookmark.center, orbitView
-														.getHeading(),
-												bookmark.heading, orbitView
-														.getPitch(),
-												bookmark.pitch, orbitView
-														.getZoom(),
-												bookmark.zoom, lengthMillis,
-												true);
-
-								view.applyStateIterator(vsi);
-							}
-						}
-					});
-				}
+				updateBookmarksMenu();
 			}
 		};
 		Bookmarks.addBookmarkListener(bl);
@@ -739,55 +690,7 @@ public class Application
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				GridBagConstraints c;
-
-				final JDialog dialog = new JDialog(frame, "Controls", true);
-				dialog.setLayout(new GridBagLayout());
-				dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-				dialog.addWindowListener(new WindowAdapter()
-				{
-					@Override
-					public void windowClosing(WindowEvent e)
-					{
-						dialog.dispose();
-					}
-				});
-
-				c = new GridBagConstraints();
-				c.gridx = 0;
-				c.gridy = 0;
-				c.weightx = 1;
-				c.weighty = 1;
-				c.fill = GridBagConstraints.BOTH;
-				dialog.add(new HelpControlsPanel(), c);
-
-				JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
-				c = new GridBagConstraints();
-				c.gridx = 0;
-				c.gridy = 1;
-				c.weightx = 1;
-				c.fill = GridBagConstraints.HORIZONTAL;
-				dialog.add(separator, c);
-
-				JButton okButton = new JButton("OK");
-				c = new GridBagConstraints();
-				c.gridx = 0;
-				c.gridy = 2;
-				c.insets = new Insets(10, 10, 10, 10);
-				c.anchor = GridBagConstraints.EAST;
-				dialog.add(okButton, c);
-				okButton.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						dialog.dispose();
-					}
-				});
-
-				dialog.setResizable(false);
-				dialog.setSize(640, 480);
-				dialog.setLocationRelativeTo(frame);
-				dialog.setVisible(true);
+				showControls();
 			}
 		});
 
@@ -820,39 +723,101 @@ public class Application
 		});
 		return menuItem;
 	}
-
-	/*private JMenuItem createDockableMenuItem(final DockablePanel dockablePanel)
+	
+	private void showControls()
 	{
-		final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(dockablePanel
-				.getTitle(), DockingManager.isDocked(dockablePanel));
-		dockablePanel.addDockingListener(new DockingAdapter()
-		{
-			public void dockingComplete(DockingEvent evt)
-			{
-				menuItem.setSelected(DockingManager.isDocked(dockablePanel));
-			}
+		GridBagConstraints c;
 
-			public void undockingComplete(DockingEvent evt)
+		final JDialog dialog = new JDialog(frame, "Controls", true);
+		dialog.setLayout(new GridBagLayout());
+		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		dialog.addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosing(WindowEvent e)
 			{
-				menuItem.setSelected(DockingManager.isDocked(dockablePanel));
+				dialog.dispose();
 			}
 		});
-		menuItem.addActionListener(new ActionListener()
+
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 1;
+		c.weighty = 1;
+		c.fill = GridBagConstraints.BOTH;
+		dialog.add(new HelpControlsPanel(), c);
+
+		JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.weightx = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		dialog.add(separator, c);
+
+		JButton okButton = new JButton("OK");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 2;
+		c.insets = new Insets(10, 10, 10, 10);
+		c.anchor = GridBagConstraints.EAST;
+		dialog.add(okButton, c);
+		okButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (DockingManager.isDocked(dockablePanel))
-				{
-					DockingManager.close(dockablePanel);
-				}
-				else
-				{
-					DockingManager.display(dockablePanel);
-				}
+				dialog.dispose();
 			}
 		});
-		return menuItem;
-	}*/
+
+		dialog.setResizable(false);
+		dialog.setSize(640, 480);
+		dialog.setLocationRelativeTo(frame);
+		dialog.setVisible(true);
+	}
+	
+	private void updateBookmarksMenu()
+	{
+		while (bookmarksMenu.getMenuComponentCount() > 3)
+		{
+			bookmarksMenu.remove(3);
+		}
+		for (final Bookmark bookmark : Bookmarks.iterable())
+		{
+			JMenuItem mi = new JMenuItem(bookmark.name);
+			bookmarksMenu.add(mi);
+			mi.addActionListener(new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					View view = wwd.getView();
+					if (view instanceof OrbitView)
+					{
+						OrbitView orbitView = (OrbitView) view;
+						Position center = orbitView.getCenterPosition();
+						long lengthMillis = Util.getScaledLengthMillis(
+								center.getLatLon(), bookmark.center
+										.getLatLon(), 2000, 8000);
+
+						ViewStateIterator vsi = FlyToOrbitViewStateIterator
+								.createPanToIterator(wwd.getModel()
+										.getGlobe(), center,
+										bookmark.center, orbitView
+												.getHeading(),
+										bookmark.heading, orbitView
+												.getPitch(),
+										bookmark.pitch, orbitView
+												.getZoom(),
+										bookmark.zoom, lengthMillis,
+										true);
+
+						view.applyStateIterator(vsi);
+					}
+				}
+			});
+		}
+	}
 
 	private void afterSettingsChange()
 	{

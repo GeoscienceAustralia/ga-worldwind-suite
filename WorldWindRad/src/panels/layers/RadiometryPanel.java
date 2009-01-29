@@ -190,10 +190,19 @@ public class RadiometryPanel extends JPanel
 		};
 		ActionListener metadataAL = createMetadataListener();
 
-		panel = new JPanel(new GridBagLayout());
+		panel = new TitlePanel(
+				new String[] { "RADIOMETRIC MAP", "OF AUSTRALIA" },
+				new String[] { "1st Edition, 2009" }, 0, 10);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
+		c.anchor = GridBagConstraints.CENTER;
+		add(panel, c);
+
+		panel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.weightx = 1;
 		add(panel, c);
@@ -290,6 +299,7 @@ public class RadiometryPanel extends JPanel
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = gridy;
+		c.insets = new Insets(10, 0, 0, 0);
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasCheck, c);
 
@@ -303,6 +313,7 @@ public class RadiometryPanel extends JPanel
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = gridy;
+		c.insets = new Insets(10, 0, 0, 0);
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasSlider, c);
 
@@ -312,6 +323,7 @@ public class RadiometryPanel extends JPanel
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = gridy++;
+		c.insets = new Insets(10, 0, 0, 0);
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(metadata, c);
 
@@ -361,7 +373,7 @@ public class RadiometryPanel extends JPanel
 		panel.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 2;
 		c.anchor = GridBagConstraints.WEST;
 		add(panel, c);
 
@@ -372,6 +384,7 @@ public class RadiometryPanel extends JPanel
 		panel.add(label, c);
 
 		areasCombo = new JComboBox(AREAS);
+		areasCombo.setMaximumRowCount(AREAS.length);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;

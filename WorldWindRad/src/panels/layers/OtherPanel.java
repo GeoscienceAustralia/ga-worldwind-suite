@@ -70,10 +70,19 @@ public class OtherPanel extends JPanel
 			}
 		};
 
-		panel = new JPanel(new GridBagLayout());
+		panel = new TitlePanel(new String[] { "GRAVITY ANOMALY MAP",
+				"OF THE AUSTRALIAN REGION" },
+				new String[] { "3rd Edition, 2008" }, 0, 10);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
+		c.anchor = GridBagConstraints.CENTER;
+		add(panel, c);
+
+		panel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.weightx = 1;
 		add(panel, c);
@@ -99,10 +108,18 @@ public class OtherPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(gravitySlider, c);
 
+		panel = new TitlePanel(new String[] { "MAGNETIC ANOMALY MAP",
+				"OF AUSTRALIA" }, new String[] { "4th Edition, 2004" }, 20, 10);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 2;
+		c.anchor = GridBagConstraints.CENTER;
+		add(panel, c);
+
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 3;
 		c.anchor = GridBagConstraints.WEST;
 		add(panel, c);
 
