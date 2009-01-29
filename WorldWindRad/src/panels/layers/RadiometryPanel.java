@@ -11,11 +11,9 @@ import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -172,7 +170,7 @@ public class RadiometryPanel extends JPanel
 
 		setLayout(new GridBagLayout());
 		GridBagConstraints c;
-		JPanel panel, panel2;
+		JPanel panel;
 		Dimension size;
 
 		ActionListener al = new ActionListener()
@@ -189,6 +187,7 @@ public class RadiometryPanel extends JPanel
 				updateLayers();
 			}
 		};
+		ActionListener metadataAL = createMetadataListener();
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -197,19 +196,252 @@ public class RadiometryPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		c.weightx = 1;
 		add(panel, c);
-
-		panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
-		panel.add(panel2, c);
+		
+		int gridy = 0;
 
 		radioCheck = new JCheckBox("Radioelements");
 		radioCheck.addActionListener(al);
-		panel2.add(radioCheck);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = gridy;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(radioCheck, c);
+		
+		radioSlider = new JSlider(1, 100, 100);
+		radioSlider.setPaintLabels(false);
+		radioSlider.setPaintTicks(false);
+		radioSlider.addChangeListener(cl);
+		size = radioSlider.getPreferredSize();
+		size.width = 50;
+		radioSlider.setPreferredSize(size);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = gridy;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(radioSlider, c);
 
-		ActionListener metadataAL = new ActionListener()
+		FlatJButton metadata = new FlatJButton(Icons.info);
+		metadata.restrictSize();
+		metadata.addActionListener(metadataAL);
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = gridy++;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(metadata, c);
+
+		ActionListener ternaryLegend = createLegendListener("ternary_cube.jpg",
+				"Ternary legend");
+		ActionListener KLegend = createLegendListener("k_legend.jpg",
+				"Potassium legend");
+		ActionListener ThLegend = createLegendListener("th_legend.jpg",
+				"Thorium legend");
+		ActionListener ULegend = createLegendListener("u_legend.jpg",
+				"Uranium legend");
+		ActionListener ratioLegend = createLegendListener("ratio_legend.jpg",
+				"Ratio legend");
+		ActionListener doseLegend = createLegendListener("dose_legend.jpg",
+				"Dose rate legend");
+
+		ternaryRadio = new JRadioButton("Ternary (K-Th-U)");
+		ternaryRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, ternaryRadio, ternaryLegend);
+
+		potassiumRadio = new JRadioButton("Potassium (K)");
+		potassiumRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, potassiumRadio, KLegend);
+
+		thoriumRadio = new JRadioButton("Thorium (Th)");
+		thoriumRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, thoriumRadio, ThLegend);
+
+		uraniumRadio = new JRadioButton("Uranium (U)");
+		uraniumRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, uraniumRadio, ULegend);
+
+		doseRateRadio = new JRadioButton("Dose Rate");
+		doseRateRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, doseRateRadio, doseLegend);
+
+		ratioThKRadio = new JRadioButton("Thorium/Potassium Ratio");
+		ratioThKRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, ratioThKRadio, ratioLegend);
+
+		ratioUKRadio = new JRadioButton("Uranium/Potassium Ratio");
+		ratioUKRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, ratioUKRadio, ratioLegend);
+
+		ratioUThRadio = new JRadioButton("Uranium/Thorium Ratio");
+		ratioUThRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, ratioUThRadio, ratioLegend);
+
+		ButtonGroup buttonGroup = new ButtonGroup();
+		buttonGroup.add(ternaryRadio);
+		buttonGroup.add(uraniumRadio);
+		buttonGroup.add(thoriumRadio);
+		buttonGroup.add(potassiumRadio);
+		buttonGroup.add(doseRateRadio);
+		buttonGroup.add(ratioUThRadio);
+		buttonGroup.add(ratioUKRadio);
+		buttonGroup.add(ratioThKRadio);
+
+		areasCheck = new JCheckBox("Detailed areas");
+		areasCheck.addActionListener(al);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = gridy;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(areasCheck, c);
+		
+		areasSlider = new JSlider(1, 100, 100);
+		areasSlider.setPaintLabels(false);
+		areasSlider.setPaintTicks(false);
+		areasSlider.addChangeListener(cl);
+		size = areasSlider.getPreferredSize();
+		size.width = 50;
+		areasSlider.setPreferredSize(size);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = gridy;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(areasSlider, c);
+
+		metadata = new FlatJButton(Icons.info);
+		metadata.restrictSize();
+		metadata.addActionListener(metadataAL);
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = gridy++;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(metadata, c);
+
+		ternaryAreasRadio = new JRadioButton("Ternary (K-Th-U)");
+		ternaryAreasRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, ternaryAreasRadio);
+
+		potassiumAreasRadio = new JRadioButton("Potassium (K)");
+		potassiumAreasRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, potassiumAreasRadio);
+
+		thoriumAreasRadio = new JRadioButton("Thorium (Th)");
+		thoriumAreasRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, thoriumAreasRadio);
+
+		uraniumAreasRadio = new JRadioButton("Uranium (U)");
+		uraniumAreasRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, uraniumAreasRadio);
+
+		doseRateAreasRadio = new JRadioButton("Dose Rate");
+		doseRateAreasRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, doseRateAreasRadio);
+
+		ratioThKAreasRadio = new JRadioButton("Thorium/Potassium Ratio");
+		ratioThKAreasRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, ratioThKAreasRadio);
+
+		ratioUKAreasRadio = new JRadioButton("Uranium/Potassium Ratio");
+		ratioUKAreasRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, ratioUKAreasRadio);
+
+		ratioUThAreasRadio = new JRadioButton("Uranium/Thorium Ratio");
+		ratioUThAreasRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, ratioUThAreasRadio);
+
+		buttonGroup = new ButtonGroup();
+		buttonGroup.add(ternaryAreasRadio);
+		buttonGroup.add(uraniumAreasRadio);
+		buttonGroup.add(thoriumAreasRadio);
+		buttonGroup.add(potassiumAreasRadio);
+		buttonGroup.add(doseRateAreasRadio);
+		buttonGroup.add(ratioUThAreasRadio);
+		buttonGroup.add(ratioUKAreasRadio);
+		buttonGroup.add(ratioThKAreasRadio);
+
+		panel = new JPanel(new GridBagLayout());
+		panel.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.WEST;
+		add(panel, c);
+
+		JLabel label = new JLabel("Fly to area:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		panel.add(label, c);
+
+		areasCombo = new JComboBox(AREAS);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 0;
+		c.insets = new Insets(0, 5, 0, 0);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(areasCombo, c);
+
+		areasCombo.addActionListener(new ActionListener()
+		{
+			private Timer timer;
+
+			public void actionPerformed(ActionEvent e)
+			{
+				Object object = areasCombo.getSelectedItem();
+				if (object instanceof Area)
+				{
+					Area area = (Area) object;
+					long lengthMillis = area.applyStateIterator(wwd);
+
+					if (timer != null && timer.isRunning())
+					{
+						timer.stop();
+					}
+					timer = new Timer((int) lengthMillis, new ActionListener()
+					{
+						public void actionPerformed(ActionEvent e)
+						{
+							areasCombo.setSelectedIndex(0);
+						}
+					});
+					timer.setRepeats(false);
+					timer.start();
+				}
+			}
+		});
+
+		ternaryRadio.setSelected(true);
+		ternaryAreasRadio.setSelected(true);
+		updateLayers();
+		this.revalidate();
+	}
+	
+	private void addRadioToPanel(JPanel panel, int gridy, JRadioButton radio)
+	{
+		addRadioToPanel(panel, gridy, radio, null);
+	}
+
+	private void addRadioToPanel(JPanel panel, int gridy, JRadioButton radio, ActionListener legendAL)
+	{
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = gridy;
+		c.anchor = GridBagConstraints.WEST;
+		c.gridwidth = 2;
+		c.insets = new Insets(0, 20, 0, 0);
+		panel.add(radio, c);
+		
+		FlatJButton legend = new FlatJButton(Icons.legend);
+		legend.restrictSize();
+		legend.addActionListener(legendAL);
+		legend.setToolTipText("Show legend");
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = gridy;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(legend, c);
+	}
+	
+	private ActionListener createMetadataListener()
+	{
+		return new ActionListener()
 		{
 			JDialog dialog = init();
 
@@ -264,241 +496,6 @@ public class RadiometryPanel extends JPanel
 				dialog.validate();
 			}
 		};
-
-		FlatJButton metadata = new FlatJButton(Icons.info);
-		panel2.add(metadata);
-		metadata.restrictSize();
-		metadata.addActionListener(metadataAL);
-
-		radioSlider = new JSlider(1, 100, 100);
-		radioSlider.setPaintLabels(false);
-		radioSlider.setPaintTicks(false);
-		radioSlider.addChangeListener(cl);
-		size = radioSlider.getPreferredSize();
-		size.width = 50;
-		radioSlider.setPreferredSize(size);
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
-		panel.add(radioSlider, c);
-
-		panel = new JPanel(new GridLayout(0, 1));
-		panel.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 1;
-		c.anchor = GridBagConstraints.WEST;
-		add(panel, c);
-
-		ActionListener ternaryLegend = createLegendListener("ternary_cube.jpg",
-				"Ternary legend");
-		ActionListener KLegend = createLegendListener("k_legend.jpg",
-				"Potassium legend");
-		ActionListener ThLegend = createLegendListener("th_legend.jpg",
-				"Thorium legend");
-		ActionListener ULegend = createLegendListener("u_legend.jpg",
-				"Uranium legend");
-		ActionListener ratioLegend = createLegendListener("ratio_legend.jpg",
-				"Ratio legend");
-		ActionListener doseLegend = createLegendListener("dose_legend.jpg",
-				"Dose rate legend");
-
-		ternaryRadio = new JRadioButton("Ternary (K-Th-U)");
-		ternaryRadio.addActionListener(al);
-		panel.add(createRadioPanel(ternaryRadio, ternaryLegend));
-
-		potassiumRadio = new JRadioButton("Potassium (K)");
-		potassiumRadio.addActionListener(al);
-		panel.add(createRadioPanel(potassiumRadio, KLegend));
-
-		thoriumRadio = new JRadioButton("Thorium (Th)");
-		thoriumRadio.addActionListener(al);
-		panel.add(createRadioPanel(thoriumRadio, ThLegend));
-
-		uraniumRadio = new JRadioButton("Uranium (U)");
-		uraniumRadio.addActionListener(al);
-		panel.add(createRadioPanel(uraniumRadio, ULegend));
-
-		doseRateRadio = new JRadioButton("Dose Rate");
-		doseRateRadio.addActionListener(al);
-		panel.add(createRadioPanel(doseRateRadio, doseLegend));
-
-		ratioThKRadio = new JRadioButton("Thorium/Potassium Ratio");
-		ratioThKRadio.addActionListener(al);
-		panel.add(createRadioPanel(ratioThKRadio, ratioLegend));
-
-		ratioUKRadio = new JRadioButton("Uranium/Potassium Ratio");
-		ratioUKRadio.addActionListener(al);
-		panel.add(createRadioPanel(ratioUKRadio, ratioLegend));
-
-		ratioUThRadio = new JRadioButton("Uranium/Thorium Ratio");
-		ratioUThRadio.addActionListener(al);
-		panel.add(createRadioPanel(ratioUThRadio, ratioLegend));
-
-		ButtonGroup buttonGroup = new ButtonGroup();
-		buttonGroup.add(ternaryRadio);
-		buttonGroup.add(uraniumRadio);
-		buttonGroup.add(thoriumRadio);
-		buttonGroup.add(potassiumRadio);
-		buttonGroup.add(doseRateRadio);
-		buttonGroup.add(ratioUThRadio);
-		buttonGroup.add(ratioUKRadio);
-		buttonGroup.add(ratioThKRadio);
-
-		panel = new JPanel(new GridBagLayout());
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 2;
-		c.anchor = GridBagConstraints.WEST;
-		add(panel, c);
-
-		panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
-		panel.add(panel2, c);
-
-		areasCheck = new JCheckBox("Detailed areas");
-		areasCheck.addActionListener(al);
-		panel2.add(areasCheck);
-
-		metadata = new FlatJButton(Icons.info);
-		panel2.add(metadata);
-		metadata.restrictSize();
-		metadata.addActionListener(metadataAL);
-
-		areasSlider = new JSlider(1, 100, 100);
-		areasSlider.setPaintLabels(false);
-		areasSlider.setPaintTicks(false);
-		areasSlider.addChangeListener(cl);
-		size = areasSlider.getPreferredSize();
-		size.width = 50;
-		areasSlider.setPreferredSize(size);
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
-		panel.add(areasSlider, c);
-
-		panel = new JPanel(new GridLayout(0, 1));
-		panel.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 3;
-		c.anchor = GridBagConstraints.WEST;
-		add(panel, c);
-
-		ternaryAreasRadio = new JRadioButton("Ternary (K-Th-U)");
-		ternaryAreasRadio.addActionListener(al);
-		panel.add(ternaryAreasRadio);
-
-		potassiumAreasRadio = new JRadioButton("Potassium (K)");
-		potassiumAreasRadio.addActionListener(al);
-		panel.add(potassiumAreasRadio);
-
-		thoriumAreasRadio = new JRadioButton("Thorium (Th)");
-		thoriumAreasRadio.addActionListener(al);
-		panel.add(thoriumAreasRadio);
-
-		uraniumAreasRadio = new JRadioButton("Uranium (U)");
-		uraniumAreasRadio.addActionListener(al);
-		panel.add(uraniumAreasRadio);
-
-		doseRateAreasRadio = new JRadioButton("Dose Rate");
-		doseRateAreasRadio.addActionListener(al);
-		panel.add(doseRateAreasRadio);
-
-		ratioThKAreasRadio = new JRadioButton("Thorium/Potassium Ratio");
-		ratioThKAreasRadio.addActionListener(al);
-		panel.add(ratioThKAreasRadio);
-
-		ratioUKAreasRadio = new JRadioButton("Uranium/Potassium Ratio");
-		ratioUKAreasRadio.addActionListener(al);
-		panel.add(ratioUKAreasRadio);
-
-		ratioUThAreasRadio = new JRadioButton("Uranium/Thorium Ratio");
-		ratioUThAreasRadio.addActionListener(al);
-		panel.add(ratioUThAreasRadio);
-
-		buttonGroup = new ButtonGroup();
-		buttonGroup.add(ternaryAreasRadio);
-		buttonGroup.add(uraniumAreasRadio);
-		buttonGroup.add(thoriumAreasRadio);
-		buttonGroup.add(potassiumAreasRadio);
-		buttonGroup.add(doseRateAreasRadio);
-		buttonGroup.add(ratioUThAreasRadio);
-		buttonGroup.add(ratioUKAreasRadio);
-		buttonGroup.add(ratioThKAreasRadio);
-
-		panel = new JPanel(new GridBagLayout());
-		panel.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 4;
-		c.anchor = GridBagConstraints.WEST;
-		add(panel, c);
-
-		JLabel label = new JLabel("Fly to area:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		panel.add(label, c);
-
-		areasCombo = new JComboBox(AREAS);
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.insets = new Insets(0, 5, 0, 0);
-		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(areasCombo, c);
-
-		areasCombo.addActionListener(new ActionListener()
-		{
-			private Timer timer;
-
-			public void actionPerformed(ActionEvent e)
-			{
-				Object object = areasCombo.getSelectedItem();
-				if (object instanceof Area)
-				{
-					Area area = (Area) object;
-					long lengthMillis = area.applyStateIterator(wwd);
-
-					if (timer != null && timer.isRunning())
-					{
-						timer.stop();
-					}
-					timer = new Timer((int) lengthMillis, new ActionListener()
-					{
-						public void actionPerformed(ActionEvent e)
-						{
-							areasCombo.setSelectedIndex(0);
-						}
-					});
-					timer.setRepeats(false);
-					timer.start();
-				}
-			}
-		});
-
-		ternaryRadio.setSelected(true);
-		ternaryAreasRadio.setSelected(true);
-		updateLayers();
-		this.revalidate();
-	}
-
-	private JPanel createRadioPanel(JRadioButton radio, ActionListener legendAL)
-	{
-		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		panel.add(radio);
-		FlatJButton legend = new FlatJButton(Icons.legend);
-		legend.restrictSize();
-		panel.add(legend);
-		legend.addActionListener(legendAL);
-		legend.setToolTipText("Show legend");
-		return panel;
 	}
 
 	private ActionListener createLegendListener(final String image,

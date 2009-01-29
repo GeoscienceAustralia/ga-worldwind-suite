@@ -121,11 +121,14 @@ public class NightLightsLayer extends BasicTiledImageLayer
 		Vec4 sun = dc.getGlobe().computePointFromPosition(
 				new Position(positionProvider.getPosition(), 0)).normalize3();
 
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glUseProgram(shaderprogram);
 		Vec4 eye = dc.getView().getEyePoint();
 		gl.glUniform3f(eyeuniform, (float) eye.x, (float) eye.y, (float) eye.z);
 		gl.glUniform3f(sununiform, (float) sun.x, (float) sun.y, (float) sun.z);
 		super.render(dc);
 		gl.glUseProgram(0);
+		gl.glDisable(GL.GL_BLEND);
 	}
 }
