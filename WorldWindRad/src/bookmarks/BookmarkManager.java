@@ -2,6 +2,7 @@ package bookmarks;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.Component;
@@ -281,9 +282,12 @@ public class BookmarkManager extends JDialog
 			if (view instanceof OrbitView)
 			{
 				OrbitView orbitView = (OrbitView) view;
-				Bookmark bookmark = new Bookmark(name, orbitView
-						.getCenterPosition(), orbitView.getHeading(), orbitView
-						.getPitch(), orbitView.getZoom());
+				Position center = orbitView.getCenterPosition();
+				Bookmark bookmark = new Bookmark(name,
+						center.getLatitude().degrees,
+						center.getLongitude().degrees, center.getElevation(),
+						orbitView.getHeading().degrees,
+						orbitView.getPitch().degrees, orbitView.getZoom());
 				Bookmarks.add(bookmark);
 			}
 		}
@@ -295,7 +299,8 @@ public class BookmarkManager extends JDialog
 		{
 			Object name = JOptionPane.showInputDialog(parent,
 					"Enter the new name", "Rename bookmark",
-					JOptionPane.QUESTION_MESSAGE, null, null, bookmark.name);
+					JOptionPane.QUESTION_MESSAGE, null, null, bookmark
+							.getName());
 			if (name instanceof String)
 			{
 				Bookmarks.rename(bookmark, (String) name);
@@ -309,7 +314,7 @@ public class BookmarkManager extends JDialog
 		{
 			int value = JOptionPane.showConfirmDialog(parent,
 					"Are you sure you want to delete the bookmark '"
-							+ bookmark.name + "'?", "Delete bookmark",
+							+ bookmark.getName() + "'?", "Delete bookmark",
 					JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			if (value == JOptionPane.YES_OPTION)
 			{

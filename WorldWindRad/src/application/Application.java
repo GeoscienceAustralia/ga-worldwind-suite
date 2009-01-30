@@ -93,8 +93,6 @@ import bookmarks.Bookmarks;
 
 public class Application
 {
-	private final static String SETTINGS_KEY = "WorldWindRad";
-
 	static
 	{
 		if (Configuration.isWindowsOS())
@@ -123,7 +121,7 @@ public class Application
 
 	public static void main(String[] args)
 	{
-		Settings.initialize(SETTINGS_KEY);
+		Settings.get();
 
 		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME,
 				StereoSceneController.class.getName());
@@ -234,12 +232,12 @@ public class Application
 		GoToCoordinatePanel gotoPanel = new GoToCoordinatePanel(wwd);
 		panel.add(gotoPanel, BorderLayout.NORTH);
 		tabbedPane2.addTab("Go to coord", panel);
-		
+
 		/*panel = new JPanel(new BorderLayout());
 		SunPositionPanel sunPositionPanel = new SunPositionPanel(wwd);
 		panel.add(sunPositionPanel, BorderLayout.NORTH);
 		tabbedPane2.addTab("Sun position", panel);*/
-		
+
 
 		westSplitPane.setTopComponent(tabbedPane1);
 		westSplitPane.setBottomComponent(tabbedPane2);
@@ -546,7 +544,7 @@ public class Application
 
 		menu = new JMenu("File");
 		menuBar.add(menu);
-		
+
 		final JCheckBoxMenuItem offline = new JCheckBoxMenuItem("Work offline");
 		menu.add(offline);
 		offline.setSelected(WorldWind.isOfflineMode());
@@ -559,7 +557,7 @@ public class Application
 		});
 
 		menu.addSeparator();
-		
+
 		menuItem = new JMenuItem("Save image");
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -569,7 +567,7 @@ public class Application
 			}
 		});
 		menu.add(menuItem);
-		
+
 		menu.addSeparator();
 
 		menuItem = new JMenuItem("Exit");
@@ -584,7 +582,7 @@ public class Application
 
 		menu = new JMenu("View");
 		menuBar.add(menu);
-		
+
 		menuItem = new JMenuItem("Default view");
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -594,7 +592,7 @@ public class Application
 				resetView();
 			}
 		});
-		
+
 		menu.addSeparator();
 
 		menuItem = createLayerMenuItem(map);
@@ -723,7 +721,7 @@ public class Application
 		});
 		return menuItem;
 	}
-	
+
 	private void showControls()
 	{
 		GridBagConstraints c;
@@ -776,7 +774,7 @@ public class Application
 		dialog.setLocationRelativeTo(frame);
 		dialog.setVisible(true);
 	}
-	
+
 	private void updateBookmarksMenu()
 	{
 		while (bookmarksMenu.getMenuComponentCount() > 3)
@@ -785,7 +783,7 @@ public class Application
 		}
 		for (final Bookmark bookmark : Bookmarks.iterable())
 		{
-			JMenuItem mi = new JMenuItem(bookmark.name);
+			JMenuItem mi = new JMenuItem(bookmark.getName());
 			bookmarksMenu.add(mi);
 			mi.addActionListener(new ActionListener()
 			{
@@ -796,21 +794,24 @@ public class Application
 					{
 						OrbitView orbitView = (OrbitView) view;
 						Position center = orbitView.getCenterPosition();
-						long lengthMillis = Util.getScaledLengthMillis(
-								center.getLatLon(), bookmark.center
-										.getLatLon(), 2000, 8000);
+						Position newCenter = Position.fromDegrees(bookmark
+								.getLat(), bookmark.getLon(), bookmark
+								.getElevation());
+						long lengthMillis = Util
+								.getScaledLengthMillis(center.getLatLon(),
+										newCenter.getLatLon(), 2000, 8000);
 
 						ViewStateIterator vsi = FlyToOrbitViewStateIterator
-								.createPanToIterator(wwd.getModel()
-										.getGlobe(), center,
-										bookmark.center, orbitView
-												.getHeading(),
-										bookmark.heading, orbitView
-												.getPitch(),
-										bookmark.pitch, orbitView
-												.getZoom(),
-										bookmark.zoom, lengthMillis,
-										true);
+								.createPanToIterator(wwd.getModel().getGlobe(),
+										center, newCenter, orbitView
+												.getHeading(), Angle
+												.fromDegrees(bookmark
+														.getHeading()),
+										orbitView.getPitch(), Angle
+												.fromDegrees(bookmark
+														.getPitch()), orbitView
+												.getZoom(), bookmark.getZoom(),
+										lengthMillis, true);
 
 						view.applyStateIterator(vsi);
 					}
@@ -833,8 +834,8 @@ public class Application
 
 	public void quit()
 	{
-		Bookmarks.save();
 		saveSplitLocations();
+		Settings.save();
 		frame.dispose();
 		System.exit(0);
 	}

@@ -16,8 +16,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -42,14 +40,14 @@ import settings.Settings.StereoMode;
 
 public class SettingsDialog extends JDialog
 {
-	private final static Logger logger = Logger.getLogger(SettingsDialog.class
-			.getName());
+	/*private final static Logger logger = Logger.getLogger(SettingsDialog.class
+			.getName());*/
 
 	private final static int SPACING = 5;
 
 	private static Rectangle oldBounds;
 
-	private Settings settings;
+	private Settings.Properties settings;
 
 	private JRadioButton spanDisplayRadio;
 	private JRadioButton singleDisplayRadio;
@@ -205,30 +203,21 @@ public class SettingsDialog extends JDialog
 
 		if (valid)
 		{
-			try
-			{
-				settings.setSpanDisplays(spanDisplays);
-				settings.setDisplayId(displayId);
+			settings.setSpanDisplays(spanDisplays);
+			settings.setDisplayId(displayId);
 
-				settings.setStereoEnabled(stereoEnabled);
-				settings.setStereoSwap(stereoSwap);
-				settings.setStereoMode(stereoMode);
-				settings.setProjectionMode(projectionMode);
-				settings.setEyeSeparation(eyeSeparation);
-				settings.setFocalLength(focalLength);
-				settings.setStereoCursor(stereoCursor);
+			settings.setStereoEnabled(stereoEnabled);
+			settings.setStereoSwap(stereoSwap);
+			settings.setStereoMode(stereoMode);
+			settings.setProjectionMode(projectionMode);
+			settings.setEyeSeparation(eyeSeparation);
+			settings.setFocalLength(focalLength);
+			settings.setStereoCursor(stereoCursor);
 
-				settings.setProxyEnabled(proxyEnabled);
-				settings.setProxyHost(proxyHost);
-				settings.setProxyPort(proxyPort);
-				settings.setNonProxyHosts(nonProxyHosts);
-
-				settings.save();
-			}
-			catch (BackingStoreException e)
-			{
-				logger.severe("Error saving settings: " + e.toString());
-			}
+			settings.setProxyEnabled(proxyEnabled);
+			settings.setProxyHost(proxyHost);
+			settings.setProxyPort(proxyPort);
+			settings.setNonProxyHosts(nonProxyHosts);
 		}
 
 		return valid;
@@ -446,9 +435,9 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(stereoModeCombo, c);
 
-		if (!Settings.get().isStereoSupported())
+		if (!Settings.isStereoSupported())
 		{
-			stereoModeCombo.removeItem(StereoMode.STEREOBUFFER);
+			stereoModeCombo.removeItem(StereoMode.STEREO_BUFFER);
 		}
 
 		projectionModeLabel = new JLabel("Projection mode:");

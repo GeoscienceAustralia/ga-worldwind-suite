@@ -23,14 +23,14 @@ public class TitlePanel extends JPanel
 		for (String t : title)
 		{
 			JLabel label = new JLabel(t);
-			label.setFont(Font.decode("Dialog-BOLD-14"));
+			label.setFont(Font.decode("Dialog-BOLD-12"));
 			label.setAlignmentX(CENTER_ALIGNMENT);
 			add(label);
 		}
 		for (String t : subtitle)
 		{
 			JLabel label = new JLabel(t);
-			label.setFont(Font.decode("Dialog-BOLD-12"));
+			label.setFont(Font.decode("Dialog-BOLD-11"));
 			label.setAlignmentX(CENTER_ALIGNMENT);
 			add(label);
 		}

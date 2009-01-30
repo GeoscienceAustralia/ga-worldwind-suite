@@ -27,7 +27,7 @@ public class StereoSceneController extends AbstractSceneController
 	@Override
 	protected void doRepaint(DrawContext dc)
 	{
-		Settings settings = Settings.get();
+		Settings.Properties settings = Settings.get();
 		double verticalExaggeration = settings.getVerticalExaggeration();
 		if (lastVerticalExaggeration != verticalExaggeration)
 		{
@@ -40,7 +40,7 @@ public class StereoSceneController extends AbstractSceneController
 		{
 			ByteBuffer buffer16 = BufferUtil.newByteBuffer(16);
 			gl.glGetBooleanv(GL.GL_STEREO, buffer16);
-			settings.setStereoSupported(buffer16.get() == 1);
+			Settings.setStereoSupported(buffer16.get() == 1);
 			stereoTested = true;
 		}
 
@@ -98,16 +98,16 @@ public class StereoSceneController extends AbstractSceneController
 		boolean left = eye == Eye.LEFT;
 		switch (mode)
 		{
-			case RCANAGLYPH:
+			case RC_ANAGLYPH:
 				gl.glColorMask(left, !left, !left, true);
 				break;
-			case GMANAGLYPH:
+			case GM_ANAGLYPH:
 				gl.glColorMask(!left, left, !left, true);
 				break;
-			case BYANAGLYPH:
+			case BY_ANAGLYPH:
 				gl.glColorMask(!left, !left, left, true);
 				break;
-			case STEREOBUFFER:
+			case STEREO_BUFFER:
 				gl.glDrawBuffer(left ? GL.GL_BACK_LEFT : GL.GL_BACK_RIGHT);
 				break;
 		}
@@ -117,12 +117,12 @@ public class StereoSceneController extends AbstractSceneController
 	{
 		switch (mode)
 		{
-			case BYANAGLYPH:
-			case GMANAGLYPH:
-			case RCANAGLYPH:
+			case BY_ANAGLYPH:
+			case GM_ANAGLYPH:
+			case RC_ANAGLYPH:
 				gl.glColorMask(true, true, true, true);
 				break;
-			case STEREOBUFFER:
+			case STEREO_BUFFER:
 				gl.glDrawBuffer(GL.GL_BACK);
 				break;
 		}

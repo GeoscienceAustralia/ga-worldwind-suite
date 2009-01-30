@@ -3,30 +3,374 @@ package settings;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import bookmarks.Bookmark;
+
 
 public class Settings
 {
+	private final static String SETTINGS_FILENAME = ".gaww.xml";
+
 	private static Settings instance;
+	private Properties settings;
+	private static boolean stereoSupported = false;
 
-	public static void initialize(String node)
+	static
 	{
-		instance = new Settings(node);
+		instance = new Settings(load());
+		instance.init();
 	}
 
-	public static Settings get()
+	public static Properties get()
 	{
-		if (instance == null)
+		return instance.settings;
+	}
+
+	private Settings(Properties settings)
+	{
+		this.settings = settings;
+	}
+
+	private static Properties load()
+	{
+		Properties settings = null;
+		File file = getSettingsFile();
+		if (file.exists())
 		{
-			throw new IllegalStateException(
-					"Must call Settings.initialize() first");
+			try
+			{
+				FileInputStream fis = new FileInputStream(file);
+				XMLDecoder xmldec = new XMLDecoder(fis);
+				settings = (Properties) xmldec.readObject();
+			}
+			catch (Exception e)
+			{
+				settings = null;
+			}
 		}
-		return instance;
+		if (settings == null)
+			settings = new Properties();
+		return settings;
 	}
 
-	public enum ProjectionMode
+	private void init()
+	{
+		//force configuration update
+		get().updateProxyConfiguration();
+		get().setVerticalExaggeration(get().getVerticalExaggeration());
+	}
+
+	private static File getSettingsFile()
+	{
+		String home = System.getProperty("user.home");
+		return new File(new File(home), SETTINGS_FILENAME);
+	}
+
+	public static void save()
+	{
+		try
+		{
+			File file = getSettingsFile();
+			FileOutputStream fos = new FileOutputStream(file);
+			XMLEncoder xmlenc = new XMLEncoder(fos);
+			xmlenc.writeObject(instance.settings);
+			xmlenc.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public static class Properties implements Serializable
+	{
+		private boolean proxyEnabled = false;
+		private String proxyHost = "";
+		private int proxyPort = 80;
+		private String nonProxyHosts = "";
+		private StereoMode stereoMode = StereoMode.RC_ANAGLYPH;
+		private boolean stereoSwap = false;
+		private String displayId = null;
+		private double eyeSeparation = 1.0;
+		private double focalLength = 100.0;
+		private ProjectionMode projectionMode = ProjectionMode.ASYMMETRIC_FRUSTUM;
+		private int[] splitLocations = null;
+		private double verticalExaggeration = 1.0;
+		private Rectangle windowBounds = null;
+		private boolean spanDisplays = false;
+		private boolean stereoCursor = false;
+		private boolean stereoEnabled = false;
+		private boolean windowMaximized = false;
+		private List<Bookmark> bookmarks = new ArrayList<Bookmark>();
+
+		public boolean isProxyEnabled()
+		{
+			return proxyEnabled;
+		}
+
+		public void setProxyEnabled(boolean proxyEnabled)
+		{
+			this.proxyEnabled = proxyEnabled;
+			updateProxyConfiguration();
+		}
+
+		public String getProxyHost()
+		{
+			return proxyHost;
+		}
+
+		public void setProxyHost(String proxyHost)
+		{
+			if (proxyHost == null)
+				proxyHost = "";
+			this.proxyHost = proxyHost;
+			updateProxyConfiguration();
+		}
+
+		public int getProxyPort()
+		{
+			return proxyPort;
+		}
+
+		public void setProxyPort(int proxyPort)
+		{
+			if (proxyPort <= 0)
+				proxyPort = 80;
+			this.proxyPort = proxyPort;
+			updateProxyConfiguration();
+		}
+
+		public String getNonProxyHosts()
+		{
+			return nonProxyHosts;
+		}
+
+		public void setNonProxyHosts(String nonProxyHosts)
+		{
+			if (nonProxyHosts == null)
+				nonProxyHosts = "";
+			this.nonProxyHosts = nonProxyHosts;
+			updateProxyConfiguration();
+		}
+
+		private void updateProxyConfiguration()
+		{
+			if (isProxyEnabled())
+			{
+				System.setProperty("http.proxyHost", getProxyHost());
+				System.setProperty("http.proxyPort", String
+						.valueOf(getProxyPort()));
+				System.setProperty("http.nonProxyHosts", getNonProxyHosts());
+			}
+			else
+			{
+				System.setProperty("http.proxyHost", "");
+				System.setProperty("http.proxyPort", "80");
+				System.setProperty("http.nonProxyHosts", "");
+			}
+		}
+
+		public StereoMode getStereoMode()
+		{
+			return stereoMode;
+		}
+
+		public void setStereoMode(StereoMode stereoMode)
+		{
+			if (stereoMode == null)
+				stereoMode = StereoMode.RC_ANAGLYPH;
+			this.stereoMode = stereoMode;
+		}
+
+		public boolean isStereoSwap()
+		{
+			return stereoSwap;
+		}
+
+		public void setStereoSwap(boolean stereoSwap)
+		{
+			this.stereoSwap = stereoSwap;
+		}
+
+		public boolean isStereoEnabled()
+		{
+			return stereoEnabled;
+		}
+
+		public void setStereoEnabled(boolean stereoEnabled)
+		{
+			this.stereoEnabled = stereoEnabled;
+		}
+
+		public ProjectionMode getProjectionMode()
+		{
+			return projectionMode;
+		}
+
+		public void setProjectionMode(ProjectionMode projectionMode)
+		{
+			if (projectionMode == null)
+				projectionMode = ProjectionMode.ASYMMETRIC_FRUSTUM;
+			this.projectionMode = projectionMode;
+		}
+
+		public double getEyeSeparation()
+		{
+			return eyeSeparation;
+		}
+
+		public void setEyeSeparation(double eyeSeparation)
+		{
+			this.eyeSeparation = eyeSeparation;
+		}
+
+		public double getFocalLength()
+		{
+			return focalLength;
+		}
+
+		public void setFocalLength(double focalLength)
+		{
+			this.focalLength = focalLength;
+		}
+
+		public boolean isStereoCursor()
+		{
+			return stereoCursor;
+		}
+
+		public void setStereoCursor(boolean stereoCursor)
+		{
+			this.stereoCursor = stereoCursor;
+		}
+
+		public double getVerticalExaggeration()
+		{
+			return verticalExaggeration;
+		}
+
+		public void setVerticalExaggeration(double verticalExaggeration)
+		{
+			if (verticalExaggeration < 0)
+				verticalExaggeration = 1.0;
+			this.verticalExaggeration = verticalExaggeration;
+			Configuration.setValue(AVKey.VERTICAL_EXAGGERATION,
+					verticalExaggeration);
+		}
+
+		public Rectangle getWindowBounds()
+		{
+			checkWindowBounds();
+			return windowBounds;
+		}
+
+		public void setWindowBounds(Rectangle windowBounds)
+		{
+			this.windowBounds = windowBounds;
+			checkWindowBounds();
+		}
+
+		private void checkWindowBounds()
+		{
+			GraphicsEnvironment ge = GraphicsEnvironment
+					.getLocalGraphicsEnvironment();
+
+			if (windowBounds == null)
+			{
+				Point center = ge.getCenterPoint();
+				windowBounds = new Rectangle(center.x - 400, center.y - 300,
+						800, 600);
+			}
+
+			Rectangle maximumBounds = ge.getMaximumWindowBounds();
+			if (!maximumBounds.contains(windowBounds))
+			{
+				windowBounds = new Rectangle(maximumBounds.x, maximumBounds.y,
+						windowBounds.width, windowBounds.height);
+				if (!maximumBounds.contains(windowBounds))
+				{
+					windowBounds = new Rectangle(maximumBounds.x + 10,
+							maximumBounds.y + 10, maximumBounds.width - 20,
+							maximumBounds.height - 20);
+				}
+			}
+		}
+
+		public int[] getSplitLocations()
+		{
+			return splitLocations;
+		}
+
+		public void setSplitLocations(int[] splitLocations)
+		{
+			this.splitLocations = splitLocations;
+		}
+
+		public boolean isWindowMaximized()
+		{
+			return windowMaximized;
+		}
+
+		public void setWindowMaximized(boolean windowMaximized)
+		{
+			this.windowMaximized = windowMaximized;
+		}
+
+		public boolean isSpanDisplays()
+		{
+			return spanDisplays;
+		}
+
+		public void setSpanDisplays(boolean spanDisplays)
+		{
+			this.spanDisplays = spanDisplays;
+		}
+
+		public String getDisplayId()
+		{
+			return displayId;
+		}
+
+		public void setDisplayId(String displayId)
+		{
+			this.displayId = displayId;
+		}
+
+		public List<Bookmark> getBookmarks()
+		{
+			return bookmarks;
+		}
+
+		public void setBookmarks(List<Bookmark> bookmarks)
+		{
+			if (bookmarks == null)
+				bookmarks = new ArrayList<Bookmark>();
+			this.bookmarks = bookmarks;
+		}
+	}
+
+	public static boolean isStereoSupported()
+	{
+		return stereoSupported;
+	}
+
+	public static void setStereoSupported(boolean stereoSupported)
+	{
+		Settings.stereoSupported = stereoSupported;
+	}
+
+	public enum ProjectionMode implements Serializable
 	{
 		SIMPLE_OFFSET("Simple offset"),
 		ASYMMETRIC_FRUSTUM("Asymmetric frustum");
@@ -43,14 +387,19 @@ public class Settings
 		{
 			return pretty;
 		}
+
+		static
+		{
+			EnumPersistenceDelegate.installFor(values());
+		}
 	}
 
-	public enum StereoMode
+	public enum StereoMode implements Serializable
 	{
-		STEREOBUFFER("Hardware stereo buffer"),
-		RCANAGLYPH("Red/cyan anaglyph"),
-		GMANAGLYPH("Green/magenta anaglyph"),
-		BYANAGLYPH("Blue/yellow anaglyph");
+		STEREO_BUFFER("Hardware stereo buffer"),
+		RC_ANAGLYPH("Red/cyan anaglyph"),
+		GM_ANAGLYPH("Green/magenta anaglyph"),
+		BY_ANAGLYPH("Blue/yellow anaglyph");
 
 		private String pretty;
 
@@ -64,278 +413,10 @@ public class Settings
 		{
 			return pretty;
 		}
-	}
 
-	private Preferences preferences;
-	private boolean stereoSupported;
-
-	private Settings(String node)
-	{
-		preferences = Preferences.userRoot().node(node);
-		updateProxyConfiguration();
-
-		//force configuration update
-		setVerticalExaggeration(getVerticalExaggeration());
-		//setUseTerrain(isUseTerrain());
-	}
-
-	public boolean isProxyEnabled()
-	{
-		return preferences.getBoolean("ProxyEnabled", false);
-	}
-
-	public void setProxyEnabled(boolean proxyEnabled)
-	{
-		preferences.putBoolean("ProxyEnabled", proxyEnabled);
-		updateProxyConfiguration();
-	}
-
-	public String getProxyHost()
-	{
-		return preferences.get("ProxyHost", "");
-	}
-
-	public void setProxyHost(String proxyHost)
-	{
-		preferences.put("ProxyHost", proxyHost);
-		updateProxyConfiguration();
-	}
-
-	public int getProxyPort()
-	{
-		return preferences.getInt("ProxyPort", 80);
-	}
-
-	public void setProxyPort(int proxyPort)
-	{
-		preferences.putInt("ProxyPort", proxyPort);
-		updateProxyConfiguration();
-	}
-
-	public String getNonProxyHosts()
-	{
-		return preferences.get("NonProxyHosts", "");
-	}
-
-	public void setNonProxyHosts(String nonProxyHosts)
-	{
-		preferences.put("NonProxyHosts", nonProxyHosts);
-	}
-
-	private void updateProxyConfiguration()
-	{
-		if (isProxyEnabled())
+		static
 		{
-			System.setProperty("http.proxyHost", getProxyHost());
-			System
-					.setProperty("http.proxyPort", String
-							.valueOf(getProxyPort()));
-			System.setProperty("http.nonProxyHosts", getNonProxyHosts());
+			EnumPersistenceDelegate.installFor(values());
 		}
-		else
-		{
-			System.setProperty("http.proxyHost", "");
-			System.setProperty("http.proxyPort", "80");
-			System.setProperty("http.nonProxyHosts", "");
-		}
-	}
-
-	public StereoMode getStereoMode()
-	{
-		return StereoMode.values()[preferences.getInt("StereoMode",
-				StereoMode.RCANAGLYPH.ordinal())];
-	}
-
-	public void setStereoMode(StereoMode stereoMode)
-	{
-		preferences.putInt("StereoMode", stereoMode.ordinal());
-	}
-
-	public boolean isStereoSwap()
-	{
-		return preferences.getBoolean("StereoSwap", false);
-	}
-
-	public void setStereoSwap(boolean stereoSwap)
-	{
-		preferences.putBoolean("StereoSwap", stereoSwap);
-	}
-
-	public boolean isStereoEnabled()
-	{
-		return preferences.getBoolean("StereoEnabled", false);
-	}
-
-	public void setStereoEnabled(boolean stereoEnabled)
-	{
-		preferences.putBoolean("StereoEnabled", stereoEnabled);
-	}
-
-	public ProjectionMode getProjectionMode()
-	{
-		return ProjectionMode.values()[preferences.getInt("ProjectionMode",
-				ProjectionMode.ASYMMETRIC_FRUSTUM.ordinal())];
-	}
-
-	public void setProjectionMode(ProjectionMode projectionMode)
-	{
-		preferences.putInt("ProjectionMode", projectionMode.ordinal());
-	}
-
-	public double getEyeSeparation()
-	{
-		return preferences.getDouble("EyeSeparation", 1);
-	}
-
-	public void setEyeSeparation(double eyeSeparation)
-	{
-		preferences.putDouble("EyeSeparation", eyeSeparation);
-	}
-
-	public double getFocalLength()
-	{
-		return preferences.getDouble("FocalLength", 100);
-	}
-
-	public void setFocalLength(double focalLength)
-	{
-		preferences.putDouble("FocalLength", focalLength);
-	}
-
-	public boolean isStereoCursor()
-	{
-		return preferences.getBoolean("StereoCursor", false);
-	}
-
-	public void setStereoCursor(boolean stereoCursor)
-	{
-		preferences.putBoolean("StereoCursor", stereoCursor);
-	}
-
-	public double getVerticalExaggeration()
-	{
-		return preferences.getDouble("VerticalExaggeration", 1);
-	}
-
-	public void setVerticalExaggeration(double verticalExaggeration)
-	{
-		preferences.putDouble("VerticalExaggeration", verticalExaggeration);
-		Configuration.setValue(AVKey.VERTICAL_EXAGGERATION,
-				verticalExaggeration);
-	}
-
-	public Rectangle getWindowBounds()
-	{
-		String[] split = preferences.get("WindowBounds", "").split(",");
-		try
-		{
-			int[] bounds = new int[4];
-			for (int i = 0; i < bounds.length; i++)
-			{
-				bounds[i] = Integer.parseInt(split[i]);
-			}
-			if (bounds[0] < 0)
-				bounds[0] = 0;
-			if (bounds[1] < 0)
-				bounds[1] = 0;
-			return new Rectangle(bounds[0], bounds[1], bounds[2], bounds[3]);
-		}
-		catch (Exception e)
-		{
-			return new Rectangle(0, 0, 800, 600);
-		}
-	}
-
-	public void setWindowBounds(Rectangle rectangle)
-	{
-		String bounds = rectangle.x + "," + rectangle.y + "," + rectangle.width
-				+ "," + rectangle.height;
-		preferences.put("WindowBounds", bounds);
-	}
-
-	public int[] getSplitLocations()
-	{
-		String[] split = preferences.get("SplitLocations", "").split(",");
-		try
-		{
-			int[] splits = new int[split.length];
-			for (int i = 0; i < splits.length; i++)
-			{
-				splits[i] = Integer.parseInt(split[i]);
-			}
-			return splits;
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
-	}
-
-	public void setSplitLocations(int[] splitLocations)
-	{
-		StringBuilder split = new StringBuilder();
-		for (int loc : splitLocations)
-		{
-			split.append(",");
-			split.append(loc);
-		}
-		preferences.put("SplitLocations", split.substring(1));
-	}
-
-	public boolean isWindowMaximized()
-	{
-		return preferences.getBoolean("WindowMaximized", false);
-	}
-
-	public void setWindowMaximized(boolean windowMaximized)
-	{
-		preferences.putBoolean("WindowMaximized", windowMaximized);
-	}
-
-	public boolean isSpanDisplays()
-	{
-		return preferences.getBoolean("SpanDisplays", false);
-	}
-
-	public void setSpanDisplays(boolean spanDisplays)
-	{
-		preferences.putBoolean("SpanDisplays", spanDisplays);
-	}
-
-	public String getDisplayId()
-	{
-		return preferences.get("DisplayId", null);
-	}
-
-	public void setDisplayId(String displayId)
-	{
-		preferences.put("DisplayId", displayId);
-	}
-
-	/*public boolean isUseTerrain()
-	{
-		return preferences.getBoolean("UseTerrain", false);
-	}
-
-	public void setUseTerrain(boolean useTerrain)
-	{
-		preferences.putBoolean("UseTerrain", useTerrain);
-		Configuration.setValue(AVKey.GLOBE_CLASS_NAME,
-				useTerrain ? GAGlobe.class.getName() : Earth.class.getName());
-	}*/
-
-	public void save() throws BackingStoreException
-	{
-		preferences.flush();
-	}
-
-	public boolean isStereoSupported()
-	{
-		return stereoSupported;
-	}
-
-	public void setStereoSupported(boolean stereoSupported)
-	{
-		this.stereoSupported = stereoSupported;
 	}
 }
