@@ -2,6 +2,7 @@ package retrieve;
 
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Polyline;
 
 import java.util.ArrayList;
@@ -24,5 +25,22 @@ public class SectorPolyline extends Polyline
 		setFollowTerrain(true);
 		setClosed(true);
 		setPathType(RHUMB_LINE);
+	}
+
+	@Override
+	public void render(DrawContext dc)
+	{
+		try
+		{
+			super.render(dc);
+		}
+		catch (NullPointerException e)
+		{
+			//catch bug in Position.interpolate
+			boolean followTerrain = isFollowTerrain();
+			setFollowTerrain(false);
+			super.render(dc);
+			setFollowTerrain(followTerrain);
+		}
 	}
 }

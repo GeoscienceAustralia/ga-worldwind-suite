@@ -276,7 +276,8 @@ public final class BasicRetrievalService extends WWObjectImpl implements
 			}
 
 			BasicRetrievalService.this.activeTasks.add(task);
-			beforeDownload(task);
+			if (!task.isCancelled())
+				beforeDownload(task);
 
 			thread.setName(RUNNING_THREAD_NAME_PREFIX
 					+ task.getRetriever().getName());
@@ -681,12 +682,15 @@ public final class BasicRetrievalService extends WWObjectImpl implements
 	private void beforeDownload(RetrievalTask task)
 	{
 		Tile tile = getTile(task);
-		SectorPolyline s = new SectorPolyline(tile.getSector());
-		s.setColor(COLOR);
-		s.setLineWidth(2.0);
-		s.setAntiAliasHint(Polyline.ANTIALIAS_NICEST);
-		sectors.put(task, s);
-		layer.addRenderable(s);
+		if (tile != null)
+		{
+			SectorPolyline s = new SectorPolyline(tile.getSector());
+			s.setColor(COLOR);
+			s.setLineWidth(2.0);
+			s.setAntiAliasHint(Polyline.ANTIALIAS_NICEST);
+			sectors.put(task, s);
+			layer.addRenderable(s);
+		}
 	}
 
 	private void afterDownload(RetrievalTask task)

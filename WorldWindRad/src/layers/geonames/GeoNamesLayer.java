@@ -42,6 +42,7 @@ public class GeoNamesLayer extends AbstractLayer
 	private Queue<GeoName> requestQ;
 
 	private final GeographicTextRenderer nameRenderer = new GeographicTextRenderer();
+	private Object lock = new Object();
 
 	//TODO different attributes for different feature codes (fcode)
 
@@ -127,7 +128,10 @@ public class GeoNamesLayer extends AbstractLayer
 		visibilityCalculator.setLevels(levels);
 		visibilityCalculator.setEye(eye);
 
-		render(dc, topGeoName);
+		synchronized (lock)
+		{
+			render(dc, topGeoName);
+		}
 
 		sendRequests();
 	}
@@ -156,7 +160,7 @@ public class GeoNamesLayer extends AbstractLayer
 		{
 			if (geoname.cacheFileExists())
 			{
-				geoname.loadChildren();
+				loadChildren(geoname);
 			}
 			else
 			{
@@ -215,6 +219,14 @@ public class GeoNamesLayer extends AbstractLayer
 	public void requestChildren(GeoName geoname)
 	{
 		requestQ.add(geoname);
+	}
+
+	private void loadChildren(GeoName geoname)
+	{
+		synchronized (lock)
+		{
+			geoname.loadChildren();
+		}
 	}
 
 	private void download(GeoName geoname)
@@ -286,7 +298,7 @@ public class GeoNamesLayer extends AbstractLayer
 					{
 						geoname.saveChildren(buffer);
 					}
-					geoname.loadChildren();
+					loadChildren(geoname);
 				}
 				catch (Exception e)
 				{
@@ -337,7 +349,7 @@ public class GeoNamesLayer extends AbstractLayer
 			return null;
 		}
 	}
-	
+
 	@Override
 	public void dispose()
 	{
