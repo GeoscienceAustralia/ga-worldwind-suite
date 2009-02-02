@@ -13,7 +13,7 @@ public class Bookmarks
 	{
 	}
 	
-	public static List<Bookmark> list()
+	private static List<Bookmark> list()
 	{
 		return Settings.get().getBookmarks();
 	}

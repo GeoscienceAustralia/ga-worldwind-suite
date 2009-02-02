@@ -19,6 +19,7 @@ import gov.nasa.worldwind.layers.ScalebarLayer;
 import gov.nasa.worldwind.layers.TerrainProfileLayer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
+import gov.nasa.worldwind.retrieve.RetrievalService;
 import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
@@ -79,6 +80,7 @@ import panels.other.ExaggerationPanel;
 import panels.other.GoToCoordinatePanel;
 import panels.other.HelpControlsPanel;
 import panels.places.PlaceSearchPanel;
+import retrieve.BasicRetrievalService;
 import settings.Settings;
 import settings.SettingsDialog;
 import settings.Settings.ProjectionMode;
@@ -140,6 +142,10 @@ public class Application
 
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				NormalTessellator.class.getName());
+		/*Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME,
+				ThreadedTaskService.class.getName());*/
+		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
+				BasicRetrievalService.class.getName());
 
 		WorldWind.getDataFileCache().addCacheLocation("cache");
 
@@ -261,6 +267,12 @@ public class Application
 		}
 		catch (Exception e)
 		{
+		}
+
+		RetrievalService rs = WorldWind.getRetrievalService();
+		if (rs instanceof BasicRetrievalService)
+		{
+			((BasicRetrievalService) rs).addLayer(wwd);
 		}
 	}
 

@@ -34,8 +34,8 @@ public class LogoLayer extends RenderableLayer
 	private String iconFilePath;
 	private int iconWidth;
 	private int iconHeight;
-	private double iconScale = 0.5;
-	private double toViewportScale = 0.2;
+	private double iconScale = 0.35;
+	private double toViewportScale = 0.35;
 	private String resizeBehavior = RESIZE_SHRINK_ONLY;
 	private String position = SOUTHWEST;
 	private int borderWidth = 20;
@@ -106,7 +106,7 @@ public class LogoLayer extends RenderableLayer
 			}
 
 			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
 			gl.glDisable(GL.GL_DEPTH_TEST);
 
 			double width = this.getScaledIconWidth();
@@ -197,7 +197,7 @@ public class LogoLayer extends RenderableLayer
 				}
 			}
 
-			iconTexture = TextureIO.newTexture(iconStream, false, null);
+			iconTexture = TextureIO.newTexture(iconStream, true, null);
 			iconTexture.bind();
 			this.iconWidth = iconTexture.getWidth();
 			this.iconHeight = iconTexture.getHeight();
@@ -214,7 +214,7 @@ public class LogoLayer extends RenderableLayer
 		GL gl = dc.getGL();
 		gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER,
-				GL.GL_LINEAR);//_MIPMAP_LINEAR);
+				GL.GL_LINEAR_MIPMAP_LINEAR);
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER,
 				GL.GL_LINEAR);
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S,
@@ -222,12 +222,12 @@ public class LogoLayer extends RenderableLayer
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T,
 				GL.GL_CLAMP_TO_EDGE);
 		// Enable texture anisotropy, improves "tilted" world map quality.
-		int[] maxAnisotropy = new int[1];
+		/*int[] maxAnisotropy = new int[1];
 		gl
 				.glGetIntegerv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT,
 						maxAnisotropy, 0);
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT,
-				maxAnisotropy[0]);
+				maxAnisotropy[0]);*/
 	}
 
 	private double getScaledIconWidth()

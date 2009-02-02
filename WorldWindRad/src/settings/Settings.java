@@ -3,6 +3,7 @@ package settings;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 
+import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -293,17 +294,34 @@ public class Settings
 						800, 600);
 			}
 
-			Rectangle maximumBounds = ge.getMaximumWindowBounds();
+			Rectangle maximumBounds = new Rectangle();
+			for (GraphicsDevice gd : ge.getScreenDevices())
+			{
+				maximumBounds = maximumBounds.union(gd
+						.getDefaultConfiguration().getBounds());
+			}
+
+			if (!maximumBounds.contains(windowBounds)
+					&& windowBounds.width <= maximumBounds.width
+					&& windowBounds.height <= maximumBounds.height)
+			{
+				if (windowBounds.x < maximumBounds.x)
+					windowBounds.x = maximumBounds.x;
+				if (windowBounds.y < maximumBounds.y)
+					windowBounds.y = maximumBounds.y;
+				if (windowBounds.x + windowBounds.width > maximumBounds.x
+						+ maximumBounds.width)
+					windowBounds.x = maximumBounds.x + maximumBounds.width
+							- windowBounds.width;
+				if (windowBounds.y + windowBounds.height > maximumBounds.y
+						+ maximumBounds.height)
+					windowBounds.y = maximumBounds.y + maximumBounds.height
+							- windowBounds.height;
+			}
+
 			if (!maximumBounds.contains(windowBounds))
 			{
-				windowBounds = new Rectangle(maximumBounds.x, maximumBounds.y,
-						windowBounds.width, windowBounds.height);
-				if (!maximumBounds.contains(windowBounds))
-				{
-					windowBounds = new Rectangle(maximumBounds.x + 10,
-							maximumBounds.y + 10, maximumBounds.width - 20,
-							maximumBounds.height - 20);
-				}
+				windowBounds = maximumBounds;
 			}
 		}
 

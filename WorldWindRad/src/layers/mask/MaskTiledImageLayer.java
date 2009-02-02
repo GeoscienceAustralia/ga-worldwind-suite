@@ -564,7 +564,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 					mask ? maskExtension : textureExtension);
 			if (file != null && file.exists())
 			{
-				return file.toURL();
+				return file.toURI().toURL();
 			}
 			else
 			{
