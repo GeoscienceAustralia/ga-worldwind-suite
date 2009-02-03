@@ -142,8 +142,6 @@ public class Application
 
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				NormalTessellator.class.getName());
-		/*Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME,
-				ThreadedTaskService.class.getName());*/
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
 				BasicRetrievalService.class.getName());
 

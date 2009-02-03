@@ -44,7 +44,8 @@ import java.util.logging.Level;
 
 import layers.geonames.GeoNamesLayer;
 import layers.mask.MaskTiledImageLayer;
-import layers.quadtile.QuadKeyEarthTile;
+import layers.virtualearth.BasicMercatorTiledImageLayer;
+import layers.virtualearth.MercatorTiledImageLayer;
 import nasa.worldwind.globes.fixed.BasicElevationModelFixed;
 
 /**
@@ -618,7 +619,7 @@ public final class BasicRetrievalService extends WWObjectImpl implements
 		return progress;
 	}
 
-	//ADDED BELOW
+	//CODE BELOW ADDED 2009-02-02 by Michael de Hoog
 
 	private static final Field[] FIELDS;
 	private Map<RetrievalTask, SectorPolyline> sectors = new HashMap<RetrievalTask, SectorPolyline>();
@@ -632,7 +633,8 @@ public final class BasicRetrievalService extends WWObjectImpl implements
 				PlaceNameLayer.class, RPFTiledImageLayer.class,
 				SurfaceImage.class, BasicElevationModelFixed.class,
 				GeoNamesLayer.class, MaskTiledImageLayer.class,
-				QuadKeyEarthTile.class };
+				BasicMercatorTiledImageLayer.class,
+				MercatorTiledImageLayer.class };
 		/* Search classes above for declared classes that implement
 		   RetrivalPostProcess AND contain a Field which is a subclass
 		   of Tile, and add those Fields to an array */

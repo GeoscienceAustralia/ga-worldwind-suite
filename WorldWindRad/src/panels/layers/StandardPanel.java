@@ -23,6 +23,7 @@ import layers.geonames.GeoNamesLayer;
 import layers.other.MetacartaCoastlineLayer;
 import layers.other.MetacartaCountryBoundariesLayer;
 import layers.other.MetacartaStateBoundariesLayer;
+import layers.virtualearth.VirtualEarthLayer;
 
 public class StandardPanel extends JPanel
 {
@@ -32,6 +33,7 @@ public class StandardPanel extends JPanel
 	private Layer bmngone;
 	private Layer bmng;
 	private Layer landsat;
+	private Layer virtualearth;
 	private Layer pnl;
 	private Layer geonames;
 	private Layer coastline;
@@ -63,6 +65,7 @@ public class StandardPanel extends JPanel
 		//bmng = new ShaderBMNGLayer();
 		bmng = new BMNGWMSLayer();
 		landsat = new LandsatI3WMSLayer();
+		virtualearth = new VirtualEarthLayer();
 		pnl = new EarthNASAPlaceNameLayer();
 		geonames = new GeoNamesLayer();
 		coastline = new MetacartaCoastlineLayer();
@@ -83,10 +86,11 @@ public class StandardPanel extends JPanel
 		}*/
 
 		lowerLayers = new Layer[] { stars, atmosphere, fog, bmngone, bmng,
-				landsat };
+				landsat, virtualearth };
 		upperLayers = new Layer[] { pnl, geonames, coastline, country, state,
 				street, graticule };
 
+		virtualearth.setEnabled(false);
 		coastline.setEnabled(false);
 		country.setEnabled(false);
 		state.setEnabled(false);
