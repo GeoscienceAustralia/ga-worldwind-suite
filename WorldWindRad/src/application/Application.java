@@ -80,7 +80,7 @@ import panels.other.ExaggerationPanel;
 import panels.other.GoToCoordinatePanel;
 import panels.other.HelpControlsPanel;
 import panels.places.PlaceSearchPanel;
-import retrieve.BasicRetrievalService;
+import retrieve.ExtendedRetrievalService;
 import settings.Settings;
 import settings.SettingsDialog;
 import settings.Settings.ProjectionMode;
@@ -143,7 +143,7 @@ public class Application
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				NormalTessellator.class.getName());
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
-				BasicRetrievalService.class.getName());
+				ExtendedRetrievalService.class.getName());
 
 		WorldWind.getDataFileCache().addCacheLocation("cache");
 
@@ -268,9 +268,9 @@ public class Application
 		}
 
 		RetrievalService rs = WorldWind.getRetrievalService();
-		if (rs instanceof BasicRetrievalService)
+		if (rs instanceof ExtendedRetrievalService)
 		{
-			((BasicRetrievalService) rs).addLayer(wwd);
+			((ExtendedRetrievalService) rs).addLayer(wwd);
 		}
 	}
 

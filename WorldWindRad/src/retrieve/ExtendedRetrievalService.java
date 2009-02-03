@@ -53,8 +53,9 @@ import nasa.worldwind.globes.fixed.BasicElevationModelFixed;
  * 
  * @author Tom Gaskins
  * @version $Id: BasicRetrievalService.java 3558 2007-11-17 08:36:45Z tgaskins $
+ * Modified to add a renderable layer that displays current tile downloads
  */
-public final class BasicRetrievalService extends WWObjectImpl implements
+public final class ExtendedRetrievalService extends WWObjectImpl implements
 		RetrievalService, Thread.UncaughtExceptionHandler
 {
 	// These constants are last-ditch values in case Configuration lacks defaults
@@ -189,7 +190,7 @@ public final class BasicRetrievalService extends WWObjectImpl implements
 							thread.setDaemon(true);
 							thread.setPriority(Thread.MIN_PRIORITY);
 							thread
-									.setUncaughtExceptionHandler(BasicRetrievalService.this);
+									.setUncaughtExceptionHandler(ExtendedRetrievalService.this);
 							return thread;
 						}
 					}, new ThreadPoolExecutor.DiscardPolicy() // abandon task when queue is full
@@ -263,7 +264,7 @@ public final class BasicRetrievalService extends WWObjectImpl implements
 				task.cancel(true);
 			}
 
-			if (BasicRetrievalService.this.activeTasks.contains(task))
+			if (ExtendedRetrievalService.this.activeTasks.contains(task))
 			{
 				// Task is a duplicate
 				Logging
@@ -276,14 +277,14 @@ public final class BasicRetrievalService extends WWObjectImpl implements
 				task.cancel(true);
 			}
 
-			BasicRetrievalService.this.activeTasks.add(task);
+			ExtendedRetrievalService.this.activeTasks.add(task);
 			if (!task.isCancelled())
 				beforeDownload(task);
 
 			thread.setName(RUNNING_THREAD_NAME_PREFIX
 					+ task.getRetriever().getName());
 			thread.setPriority(Thread.MIN_PRIORITY); // Subordinate thread priority to rendering
-			thread.setUncaughtExceptionHandler(BasicRetrievalService.this);
+			thread.setUncaughtExceptionHandler(ExtendedRetrievalService.this);
 
 			super.beforeExecute(thread, runnable);
 		}
@@ -310,7 +311,7 @@ public final class BasicRetrievalService extends WWObjectImpl implements
 
 			RetrievalTask task = (RetrievalTask) runnable;
 			afterDownload(task);
-			BasicRetrievalService.this.activeTasks.remove(task);
+			ExtendedRetrievalService.this.activeTasks.remove(task);
 			task.retriever.setEndTime(System.currentTimeMillis());
 
 			try
@@ -369,7 +370,7 @@ public final class BasicRetrievalService extends WWObjectImpl implements
 		}
 	}
 
-	public BasicRetrievalService()
+	public ExtendedRetrievalService()
 	{
 		Integer poolSize = Configuration.getIntegerValue(
 				AVKey.RETRIEVAL_POOL_SIZE, DEFAULT_POOL_SIZE);
