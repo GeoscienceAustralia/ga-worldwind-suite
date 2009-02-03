@@ -1,4 +1,4 @@
-package layers.virtualearth;
+package layers.mercator;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Sector;

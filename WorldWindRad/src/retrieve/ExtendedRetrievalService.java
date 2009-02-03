@@ -44,8 +44,8 @@ import java.util.logging.Level;
 
 import layers.geonames.GeoNamesLayer;
 import layers.mask.MaskTiledImageLayer;
-import layers.virtualearth.BasicMercatorTiledImageLayer;
-import layers.virtualearth.MercatorTiledImageLayer;
+import layers.mercator.BasicMercatorTiledImageLayer;
+import layers.mercator.MercatorTiledImageLayer;
 import nasa.worldwind.globes.fixed.BasicElevationModelFixed;
 
 /**

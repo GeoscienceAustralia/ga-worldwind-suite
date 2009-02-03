@@ -1,4 +1,4 @@
-package layers.other;
+package layers.metacarta;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;

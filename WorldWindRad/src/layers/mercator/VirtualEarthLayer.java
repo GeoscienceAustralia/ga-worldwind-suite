@@ -1,4 +1,4 @@
-package layers.virtualearth;
+package layers.mercator;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;

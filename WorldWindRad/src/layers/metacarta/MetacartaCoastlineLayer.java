@@ -1,4 +1,4 @@
-package layers.other;
+package layers.metacarta;
 
 import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 

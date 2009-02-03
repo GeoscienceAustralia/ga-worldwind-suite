@@ -10,7 +10,6 @@ import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.layers.Earth.EarthNASAPlaceNameLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.layers.Earth.MGRSGraticuleLayer;
-import gov.nasa.worldwind.layers.Earth.OpenStreetMapLayer;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -20,10 +19,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 import layers.geonames.GeoNamesLayer;
-import layers.other.MetacartaCoastlineLayer;
-import layers.other.MetacartaCountryBoundariesLayer;
-import layers.other.MetacartaStateBoundariesLayer;
-import layers.virtualearth.VirtualEarthLayer;
+import layers.mercator.VirtualEarthLayer;
+import layers.metacarta.MetacartaCoastlineLayer;
+import layers.metacarta.MetacartaCountryBoundariesLayer;
+import layers.metacarta.MetacartaStateBoundariesLayer;
 
 public class StandardPanel extends JPanel
 {
@@ -62,7 +61,6 @@ public class StandardPanel extends JPanel
 		atmosphere = new SkyGradientLayer();
 		fog = new FogLayer();
 		bmngone = new BMNGOneImage();
-		//bmng = new ShaderBMNGLayer();
 		bmng = new BMNGWMSLayer();
 		landsat = new LandsatI3WMSLayer();
 		virtualearth = new VirtualEarthLayer();
@@ -71,7 +69,7 @@ public class StandardPanel extends JPanel
 		coastline = new MetacartaCoastlineLayer();
 		country = new MetacartaCountryBoundariesLayer();
 		state = new MetacartaStateBoundariesLayer();
-		street = new OpenStreetMapLayer();
+		street = new layers.mercator.OpenStreetMapLayer();
 		graticule = new MGRSGraticuleLayer();
 
 		/*Layer kmllayer = null;

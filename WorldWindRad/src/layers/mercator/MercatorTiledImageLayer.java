@@ -4,7 +4,7 @@ as represented by the Administrator of the
 National Aeronautics and Space Administration.
 All Rights Reserved.
 */
-package layers.virtualearth;
+package layers.mercator;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
@@ -514,7 +514,7 @@ public abstract class MercatorTiledImageLayer extends AbstractLayer
 			minDistance = d5;
 
 		double cellSize = (Math.PI * sector.getDeltaLatRadians() * dc
-				.getGlobe().getRadius()) / 20; // TODO
+				.getGlobe().getRadius()) / 10; // TODO
 
 		return !(Math.log10(cellSize) <= (Math.log10(minDistance) - this.splitScale));
 	}
