@@ -1,6 +1,6 @@
 package layers.radiometry;
 
-import layers.GATilesUtil;
+import layers.GALayerUtil;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -16,7 +16,7 @@ public class RadioLayerUtil
 
 		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
-		params.setValue(AVKey.SERVICE, GATilesUtil.getTilesScriptUrl());
+		params.setValue(AVKey.SERVICE, GALayerUtil.getTilesScriptUrl());
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 7);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);

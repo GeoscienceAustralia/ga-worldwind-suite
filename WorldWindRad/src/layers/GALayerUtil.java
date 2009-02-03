@@ -1,6 +1,6 @@
 package layers;
 
-public class GATilesUtil
+public class GALayerUtil
 {
 	private final static String TILES_SCRIPT_URL = "http://sandpit:8500/map/web3d/world-wind/tiles.jsp";
 

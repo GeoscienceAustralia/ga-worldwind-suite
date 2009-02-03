@@ -7,7 +7,7 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.GATilesUtil;
+import layers.GALayerUtil;
 import layers.mask.MaskTiledImageLayer;
 
 public class MagneticsLayer extends MaskTiledImageLayer
@@ -28,7 +28,7 @@ public class MagneticsLayer extends MaskTiledImageLayer
 		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Magnetics");
-		params.setValue(AVKey.SERVICE, GATilesUtil.getTilesScriptUrl());
+		params.setValue(AVKey.SERVICE, GALayerUtil.getTilesScriptUrl());
 		params.setValue(AVKey.DATASET_NAME, "magnetics");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 7);
