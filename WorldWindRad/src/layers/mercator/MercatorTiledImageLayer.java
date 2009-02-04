@@ -514,7 +514,7 @@ public abstract class MercatorTiledImageLayer extends AbstractLayer
 			minDistance = d5;
 
 		double cellSize = (Math.PI * sector.getDeltaLatRadians() * dc
-				.getGlobe().getRadius()) / 10; // TODO
+				.getGlobe().getRadius()) / 20; // TODO
 
 		return !(Math.log10(cellSize) <= (Math.log10(minDistance) - this.splitScale));
 	}

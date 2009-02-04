@@ -10,6 +10,7 @@ import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.layers.Earth.EarthNASAPlaceNameLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.layers.Earth.MGRSGraticuleLayer;
+import gov.nasa.worldwind.layers.Earth.OpenStreetMapLayer;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -38,6 +39,7 @@ public class StandardPanel extends JPanel
 	private Layer coastline;
 	private Layer country;
 	private Layer state;
+	private Layer osmmapnik;
 	private Layer street;
 	private Layer graticule;
 
@@ -69,7 +71,8 @@ public class StandardPanel extends JPanel
 		coastline = new MetacartaCoastlineLayer();
 		country = new MetacartaCountryBoundariesLayer();
 		state = new MetacartaStateBoundariesLayer();
-		street = new layers.mercator.OpenStreetMapLayer();
+		osmmapnik = new layers.mercator.OpenStreetMapLayer();
+		street = new OpenStreetMapLayer();
 		graticule = new MGRSGraticuleLayer();
 
 		/*Layer kmllayer = null;
@@ -84,7 +87,7 @@ public class StandardPanel extends JPanel
 		}*/
 
 		lowerLayers = new Layer[] { stars, atmosphere, fog, bmngone, bmng,
-				landsat, virtualearth };
+				landsat, virtualearth, osmmapnik };
 		upperLayers = new Layer[] { pnl, geonames, coastline, country, state,
 				street, graticule };
 
@@ -92,11 +95,12 @@ public class StandardPanel extends JPanel
 		coastline.setEnabled(false);
 		country.setEnabled(false);
 		state.setEnabled(false);
-		street.setEnabled(false);
+		osmmapnik.setEnabled(false);
 		geonames.setEnabled(false);
 		graticule.setEnabled(false);
+		street.setEnabled(false);
 	}
-	
+
 	public void addLowerLayers()
 	{
 		for (Layer layer : lowerLayers)

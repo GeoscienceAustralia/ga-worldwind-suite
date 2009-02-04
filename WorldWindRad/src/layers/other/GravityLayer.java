@@ -19,6 +19,7 @@ public class GravityLayer extends MaskTiledImageLayer
 		this.setRetainLevelZeroTiles(true);
 		this.setUseMipMaps(true);
 		this.setUseTransparentTextures(true);
+		this.setSplitScale(GALayerUtil.getSplitScale());
 	}
 
 	private static LevelSet makeLevels()

@@ -17,6 +17,7 @@ public class VirtualEarthLayer extends BasicMercatorTiledImageLayer
 	public VirtualEarthLayer()
 	{
 		super(makeLevels());
+		setSplitScale(1.3);
 	}
 
 	private static LevelSet makeLevels()
