@@ -6,6 +6,7 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.cache.BasicMemoryCache;
 import gov.nasa.worldwind.cache.MemoryCache;
+import gov.nasa.worldwind.formats.dds.DDSConverter;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.layers.TiledImageLayer;
@@ -298,6 +299,19 @@ public class MaskTiledImageLayer extends TiledImageLayer
 				tile.getPriority());
 	}
 
+	private void saveDDS(BufferedImage image, File file) throws IOException
+	{
+		ByteBuffer buffer;
+		if (image.getColorModel().hasAlpha())
+			buffer = DDSConverter.convertToDxt3(image);
+		else
+			buffer = DDSConverter.convertToDxt1NoTransparency(image);
+		synchronized (this.fileLock)
+		{
+			WWIO.saveBuffer(buffer, file);
+		}
+	}
+
 	private void saveImage(BufferedImage image, String format, File file)
 			throws IOException
 	{
@@ -481,8 +495,12 @@ public class MaskTiledImageLayer extends TiledImageLayer
 
 			try
 			{
-				//TODO take out hardcoded PNG
-				layer.saveImage(mask, "PNG", outFile);
+				String ext = outFile.getName().substring(
+						outFile.getName().lastIndexOf('.') + 1);
+				if (ext.toLowerCase().equals("dds"))
+					layer.saveDDS(mask, outFile);
+				else
+					layer.saveImage(mask, ext, outFile);
 			}
 			catch (IOException e)
 			{

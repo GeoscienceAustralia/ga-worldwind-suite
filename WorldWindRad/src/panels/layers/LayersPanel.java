@@ -30,12 +30,13 @@ public class LayersPanel extends JPanel
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("Standard", createStandard());
 		standardPanel.addLowerLayers();
-		
+
 		tabbedPane.addTab("Radiometrics", createRadiometry());
 		tabbedPane.addTab("Other", createOther());
 		standardPanel.addUpperLayers();
-		
+
 		tabbedPane.doLayout();
+		tabbedPane.setSelectedIndex(1);
 		return tabbedPane;
 	}
 
@@ -52,7 +53,7 @@ public class LayersPanel extends JPanel
 
 	private JComponent createRadiometry()
 	{
-		RadiometryPanel rp = new RadiometryPanel(wwd, frame);
+		RadiometricsPanel rp = new RadiometricsPanel(wwd, frame);
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(rp, BorderLayout.NORTH);
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -71,7 +72,7 @@ public class LayersPanel extends JPanel
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 		return scrollPane;
 	}
-	
+
 	public void turnOffAtmosphere()
 	{
 		standardPanel.turnOffAtmosphere();

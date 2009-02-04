@@ -31,7 +31,7 @@ public class GravityLayer extends MaskTiledImageLayer
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Gravity");
 		params.setValue(AVKey.SERVICE, GALayerUtil.getTilesScriptUrl());
 		params.setValue(AVKey.DATASET_NAME, "gravity");
-		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
+		params.setValue(AVKey.FORMAT_SUFFIX, ".dds");
 		params.setValue(AVKey.NUM_LEVELS, 4);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle

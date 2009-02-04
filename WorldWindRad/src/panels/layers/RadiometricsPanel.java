@@ -60,7 +60,7 @@ import util.Icons;
 import util.ImageDialog;
 import util.Util;
 
-public class RadiometryPanel extends JPanel
+public class RadiometricsPanel extends JPanel
 {
 	private Layer[] layers;
 
@@ -126,7 +126,7 @@ public class RadiometryPanel extends JPanel
 	private final static Object[] AREAS = new Object[] { "", NSW, VIC, QLD,
 			SA_1, SA_2, NT, WA, TAS };
 
-	public RadiometryPanel(WorldWindow wwd, Frame frame)
+	public RadiometricsPanel(WorldWindow wwd, Frame frame)
 	{
 		this.wwd = wwd;
 		this.frame = frame;

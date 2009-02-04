@@ -3,7 +3,7 @@ package layers;
 public class GALayerUtil
 {
 	private final static String TILES_SCRIPT_URL = "http://sandpit:8500/apps/world-wind/tiles.jsp";
-	private final static double SPLIT_SCALE = 1.0;
+	private final static double SPLIT_SCALE = 0.9;
 
 	public static String getTilesScriptUrl()
 	{

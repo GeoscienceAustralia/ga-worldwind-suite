@@ -702,6 +702,7 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 		if (s != null)
 		{
 			layer.removeRenderable(s);
+			layer.firePropertyChange(AVKey.LAYER, null, this);
 		}
 	}
 

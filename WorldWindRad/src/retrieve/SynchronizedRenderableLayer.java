@@ -6,32 +6,21 @@ import gov.nasa.worldwind.render.Renderable;
 
 public class SynchronizedRenderableLayer extends RenderableLayer
 {
-	protected Object lock = new Object();
-	
 	@Override
-	protected void doRender(DrawContext dc)
+	protected synchronized void doRender(DrawContext dc)
 	{
-		synchronized (lock)
-		{
-			super.doRender(dc);
-		}
+		super.doRender(dc);
 	}
 
 	@Override
-	public void addRenderable(Renderable renderable)
+	public synchronized void addRenderable(Renderable renderable)
 	{
-		synchronized (lock)
-		{
-			super.addRenderable(renderable);
-		}
+		super.addRenderable(renderable);
 	}
 
 	@Override
-	public void removeRenderable(Renderable renderable)
+	public synchronized void removeRenderable(Renderable renderable)
 	{
-		synchronized (lock)
-		{
-			super.removeRenderable(renderable);
-		}
+		super.removeRenderable(renderable);
 	}
 }

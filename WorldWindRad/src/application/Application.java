@@ -73,6 +73,7 @@ import javax.swing.filechooser.FileFilter;
 import layers.mouse.MouseLayer;
 import layers.other.LogoLayer;
 import layers.shader.NormalTessellator;
+import nasa.worldwind.awt.AWTInputHandler;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 import nasa.worldwind.cache.FixedBasicDataFileCache;
 import panels.layers.LayersPanel;
@@ -144,6 +145,8 @@ public class Application
 				NormalTessellator.class.getName());
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
 				ExtendedRetrievalService.class.getName());
+		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
+				AWTInputHandler.class.getName());
 
 		WorldWind.getDataFileCache().addCacheLocation("cache");
 
@@ -226,6 +229,17 @@ public class Application
 
 		PlaceSearchPanel placeSearchPanel = new PlaceSearchPanel(wwd);
 		tabbedPane1.addTab("Place search", placeSearchPanel);
+		
+		/*final StatisticsPanel sp = new StatisticsPanel(wwd);
+		wwd.addRenderingListener(new RenderingListener()
+		{
+			public void stageChanged(RenderingEvent event)
+			{
+				sp.update(wwd);
+			}
+		});
+		tabbedPane1.addTab("Statistics", sp);
+		wwd.setPerFrameStatisticsKeys(PerformanceStatistic.ALL_STATISTICS_SET);*/
 
 		panel = new JPanel(new BorderLayout());
 		ExaggerationPanel exaggerationPanel = new ExaggerationPanel(wwd);
