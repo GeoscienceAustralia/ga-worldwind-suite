@@ -1,14 +1,14 @@
-package layers.radiometry;
+package layers.ga.radiometrics.areas;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.GALayer;
+import layers.ga.GALayer;
 import layers.mask.MaskTiledImageLayer;
 
-public class DoseRateLayer extends GALayer
+public class TernaryAreasLayer extends GALayer
 {
-	public DoseRateLayer()
+	public TernaryAreasLayer()
 	{
 		super(makeLevels());
 		this.setForceLevelZeroLoads(true);
@@ -20,14 +20,14 @@ public class DoseRateLayer extends GALayer
 
 	private static LevelSet makeLevels()
 	{
-		AVList params = RadioLayerUtil.makeParams();
-		String layerName = "radio_Dose_100m_he_rgb";
+		AVList params = AreasLayerUtil.makeParams();
+		String layerName = "radioareas_KThU_100m_he_rgb";
 
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Radiometrics/" + layerName);
 		params.setValue(AVKey.DATASET_NAME, layerName);
 		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
 				.createDefaultUrlBuilder("tiles/radiometrics/" + layerName,
-						"tiles/radiometrics/radio_mask", ".jpg", ".png"));
+						"tiles/radiometrics/radioareas_mask", ".jpg", ".png"));
 
 		return new LevelSet(params);
 	}
@@ -35,6 +35,6 @@ public class DoseRateLayer extends GALayer
 	@Override
 	public String toString()
 	{
-		return "Dose Rate";
+		return "Areas of Interest";
 	}
 }

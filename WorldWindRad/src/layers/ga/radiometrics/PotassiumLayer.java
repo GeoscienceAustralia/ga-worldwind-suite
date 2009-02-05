@@ -1,14 +1,14 @@
-package layers.radioareas;
+package layers.ga.radiometrics;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.GALayer;
+import layers.ga.GALayer;
 import layers.mask.MaskTiledImageLayer;
 
-public class TernaryAreasLayer extends GALayer
+public class PotassiumLayer extends GALayer
 {
-	public TernaryAreasLayer()
+	public PotassiumLayer()
 	{
 		super(makeLevels());
 		this.setForceLevelZeroLoads(true);
@@ -20,14 +20,14 @@ public class TernaryAreasLayer extends GALayer
 
 	private static LevelSet makeLevels()
 	{
-		AVList params = AreasLayerUtil.makeParams();
-		String layerName = "radioareas_KThU_100m_he_rgb";
+		AVList params = RadioLayerUtil.makeParams();
+		String layerName = "radio_K_100m_he_rgb";
 
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Radiometrics/" + layerName);
 		params.setValue(AVKey.DATASET_NAME, layerName);
 		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
 				.createDefaultUrlBuilder("tiles/radiometrics/" + layerName,
-						"tiles/radiometrics/radioareas_mask", ".jpg", ".png"));
+						"tiles/radiometrics/radio_mask", ".jpg", ".png"));
 
 		return new LevelSet(params);
 	}
@@ -35,6 +35,6 @@ public class TernaryAreasLayer extends GALayer
 	@Override
 	public String toString()
 	{
-		return "Areas of Interest";
+		return "Potassium (K)";
 	}
 }

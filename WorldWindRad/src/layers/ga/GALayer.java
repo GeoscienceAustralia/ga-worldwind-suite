@@ -1,4 +1,4 @@
-package layers;
+package layers.ga;
 
 import gov.nasa.worldwind.util.LevelSet;
 
@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import layers.mask.MaskTiledImageLayer;
-import layers.other.LogoLayer;
 
 public class GALayer extends MaskTiledImageLayer
 {

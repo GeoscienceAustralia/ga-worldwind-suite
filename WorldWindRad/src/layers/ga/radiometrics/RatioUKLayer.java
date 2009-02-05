@@ -1,14 +1,14 @@
-package layers.radiometry;
+package layers.ga.radiometrics;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.GALayer;
+import layers.ga.GALayer;
 import layers.mask.MaskTiledImageLayer;
 
-public class RatioUThLayer extends GALayer
+public class RatioUKLayer extends GALayer
 {
-	public RatioUThLayer()
+	public RatioUKLayer()
 	{
 		super(makeLevels());
 		this.setForceLevelZeroLoads(true);
@@ -21,7 +21,7 @@ public class RatioUThLayer extends GALayer
 	private static LevelSet makeLevels()
 	{
 		AVList params = RadioLayerUtil.makeParams();
-		String layerName = "radio_ratio_ut_100m_he_rgb";
+		String layerName = "radio_ratio_uk_100m_he_rgb";
 
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Radiometrics/" + layerName);
 		params.setValue(AVKey.DATASET_NAME, layerName);
@@ -35,6 +35,6 @@ public class RatioUThLayer extends GALayer
 	@Override
 	public String toString()
 	{
-		return "Uranium Thorium Ratio";
+		return "Uranium Potassium Ratio";
 	}
 }

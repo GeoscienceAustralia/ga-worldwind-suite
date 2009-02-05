@@ -1,4 +1,4 @@
-package layers.other;
+package layers.ga.magnetics;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -7,12 +7,12 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.GALayer;
+import layers.ga.GALayer;
 import layers.mask.MaskTiledImageLayer;
 
-public class GravityLayer extends GALayer
+public class MagneticsLayer extends GALayer
 {
-	public GravityLayer()
+	public MagneticsLayer()
 	{
 		super(makeLevels());
 		this.setForceLevelZeroLoads(true);
@@ -28,11 +28,11 @@ public class GravityLayer extends GALayer
 
 		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
-		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Gravity");
+		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Magnetics");
 		params.setValue(AVKey.SERVICE, GALayer.getTilesScriptUrl());
-		params.setValue(AVKey.DATASET_NAME, "gravity");
+		params.setValue(AVKey.DATASET_NAME, "magnetics");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".dds");
-		params.setValue(AVKey.NUM_LEVELS, 4);
+		params.setValue(AVKey.NUM_LEVELS, 7);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle
 				.fromDegrees(36d), Angle.fromDegrees(36d)));
@@ -42,8 +42,8 @@ public class GravityLayer extends GALayer
 				.fromDegreesLongitude(98.4274511), Angle
 				.fromDegreesLongitude(170.5036628)));
 		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
-				.createDefaultUrlBuilder("tiles/gravity/image",
-						"tiles/gravity/mask", ".jpg", ".png"));
+				.createDefaultUrlBuilder("tiles/magnetics/image",
+						"tiles/magnetics/mask", ".jpg", ".png"));
 
 		return new LevelSet(params);
 	}
@@ -51,6 +51,6 @@ public class GravityLayer extends GALayer
 	@Override
 	public String toString()
 	{
-		return "GA Gravity";
+		return "GA Magnetics";
 	}
 }

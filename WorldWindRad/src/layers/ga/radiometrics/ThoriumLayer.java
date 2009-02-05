@@ -1,9 +1,9 @@
-package layers.radiometry;
+package layers.ga.radiometrics;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.GALayer;
+import layers.ga.GALayer;
 import layers.mask.MaskTiledImageLayer;
 
 public class ThoriumLayer extends GALayer

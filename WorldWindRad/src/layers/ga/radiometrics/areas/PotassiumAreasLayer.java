@@ -1,14 +1,14 @@
-package layers.radioareas;
+package layers.ga.radiometrics.areas;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.GALayer;
+import layers.ga.GALayer;
 import layers.mask.MaskTiledImageLayer;
 
-public class DoseRateAreasLayer extends GALayer
+public class PotassiumAreasLayer extends GALayer
 {
-	public DoseRateAreasLayer()
+	public PotassiumAreasLayer()
 	{
 		super(makeLevels());
 		this.setForceLevelZeroLoads(true);
@@ -21,7 +21,7 @@ public class DoseRateAreasLayer extends GALayer
 	private static LevelSet makeLevels()
 	{
 		AVList params = AreasLayerUtil.makeParams();
-		String layerName = "radioareas_Dose_100m_he_rgb";
+		String layerName = "radioareas_K_100m_he_rgb";
 
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Radiometrics/" + layerName);
 		params.setValue(AVKey.DATASET_NAME, layerName);

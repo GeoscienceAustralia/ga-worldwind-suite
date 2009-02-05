@@ -1,14 +1,14 @@
-package layers.radioareas;
+package layers.ga.radiometrics.areas;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.GALayer;
+import layers.ga.GALayer;
 import layers.mask.MaskTiledImageLayer;
 
-public class RatioUKAreasLayer extends GALayer
+public class ThoriumAreasLayer extends GALayer
 {
-	public RatioUKAreasLayer()
+	public ThoriumAreasLayer()
 	{
 		super(makeLevels());
 		this.setForceLevelZeroLoads(true);
@@ -21,7 +21,7 @@ public class RatioUKAreasLayer extends GALayer
 	private static LevelSet makeLevels()
 	{
 		AVList params = AreasLayerUtil.makeParams();
-		String layerName = "radioareas_ratio_uk_100m_he_rgb";
+		String layerName = "radioareas_Th_100m_he_rgb";
 
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Radiometrics/" + layerName);
 		params.setValue(AVKey.DATASET_NAME, layerName);

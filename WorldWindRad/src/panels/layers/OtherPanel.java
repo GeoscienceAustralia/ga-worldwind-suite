@@ -15,8 +15,8 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import layers.other.GravityLayer;
-import layers.other.MagneticsLayer;
+import layers.ga.gravity.GravityLayer;
+import layers.ga.magnetics.MagneticsLayer;
 
 public class OtherPanel extends JPanel
 {

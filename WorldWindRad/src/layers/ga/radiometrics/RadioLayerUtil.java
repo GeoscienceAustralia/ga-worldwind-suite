@@ -1,6 +1,6 @@
-package layers.radiometry;
+package layers.ga.radiometrics;
 
-import layers.GALayer;
+import layers.ga.GALayer;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;

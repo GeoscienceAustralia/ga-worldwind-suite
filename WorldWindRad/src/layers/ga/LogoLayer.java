@@ -1,4 +1,4 @@
-package layers.other;
+package layers.ga;
 
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.geom.Vec4;

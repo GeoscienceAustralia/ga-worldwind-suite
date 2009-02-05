@@ -70,7 +70,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
-import layers.GALayer;
+import layers.ga.GALayer;
 import layers.mouse.MouseLayer;
 import layers.shader.NormalTessellator;
 import nasa.worldwind.awt.AWTInputHandler;
