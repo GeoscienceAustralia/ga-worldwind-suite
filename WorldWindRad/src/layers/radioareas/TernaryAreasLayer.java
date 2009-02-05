@@ -3,10 +3,10 @@ package layers.radioareas;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.GALayerUtil;
+import layers.GALayer;
 import layers.mask.MaskTiledImageLayer;
 
-public class TernaryAreasLayer extends MaskTiledImageLayer
+public class TernaryAreasLayer extends GALayer
 {
 	public TernaryAreasLayer()
 	{
@@ -15,7 +15,7 @@ public class TernaryAreasLayer extends MaskTiledImageLayer
 		this.setRetainLevelZeroTiles(true);
 		this.setUseMipMaps(true);
 		this.setUseTransparentTextures(true);
-		this.setSplitScale(GALayerUtil.getSplitScale());
+		this.setSplitScale(GALayer.getSplitScale());
 	}
 
 	private static LevelSet makeLevels()

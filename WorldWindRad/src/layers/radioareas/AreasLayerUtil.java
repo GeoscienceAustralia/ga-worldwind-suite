@@ -1,6 +1,6 @@
 package layers.radioareas;
 
-import layers.GALayerUtil;
+import layers.GALayer;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -17,7 +17,7 @@ public class AreasLayerUtil
 
 		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
-		params.setValue(AVKey.SERVICE, GALayerUtil.getTilesScriptUrl());
+		params.setValue(AVKey.SERVICE, GALayer.getTilesScriptUrl());
 		params.setValue(AVKey.FORMAT_SUFFIX, ".dds");
 		params.setValue(AVKey.NUM_LEVELS, 7);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);

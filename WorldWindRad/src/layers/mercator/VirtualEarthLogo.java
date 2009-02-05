@@ -1,13 +1,11 @@
-package layers.other;
+package layers.mercator;
 
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.geom.Vec4;
-import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.OrderedRenderable;
 import gov.nasa.worldwind.util.Logging;
 
-import java.awt.Color;
 import java.awt.Point;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,59 +18,46 @@ import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureCoords;
 import com.sun.opengl.util.texture.TextureIO;
 
-public class LogoLayer extends RenderableLayer
+public class VirtualEarthLogo implements OrderedRenderable
 {
-	public final static String NORTHWEST = "gov.nasa.worldwind.WorldmapLayer.NorthWest";
-	public final static String SOUTHWEST = "gov.nasa.worldwind.WorldmapLayer.SouthWest";
-	public final static String NORTHEAST = "gov.nasa.worldwind.WorldmapLayer.NorthEast";
-	public final static String SOUTHEAST = "gov.nasa.worldwind.WorldmapLayer.SouthEast";
+	public final static String NORTHWEST = "NorthWest";
+	public final static String SOUTHWEST = "SouthWest";
+	public final static String NORTHEAST = "NorthEast";
+	public final static String SOUTHEAST = "SouthEast";
 
-	public final static String RESIZE_STRETCH = "gov.nasa.worldwind.WorldmapLayer.Stretch";
-	public final static String RESIZE_SHRINK_ONLY = "gov.nasa.worldwind.WorldmapLayer.ShrinkOnly";
-	public final static String RESIZE_KEEP_FIXED_SIZE = "gov.nasa.worldwind.WorldmapLayer.FixedSize";
+	public final static String RESIZE_STRETCH = "Stretch";
+	public final static String RESIZE_SHRINK_ONLY = "ShrinkOnly";
+	public final static String RESIZE_KEEP_FIXED_SIZE = "FixedSize";
 
 	private String iconFilePath;
 	private int iconWidth;
 	private int iconHeight;
-	private double iconScale = 0.35;
-	private double toViewportScale = 0.35;
+	private double iconScale = 1.0;
+	private double toViewportScale = 1.0;
 	private String resizeBehavior = RESIZE_SHRINK_ONLY;
 	private String position = SOUTHWEST;
 	private int borderWidth = 20;
-	private Color backColor = new Color(0f, 0f, 0f, 0.0f);
-	private boolean layerOn = false;
+	private int borderHeight = 20;
+	private double opacity = 0.7;
 
-	public LogoLayer()
+	public VirtualEarthLogo()
 	{
-		iconFilePath = "data/images/geoscience_inline_white.png";
-		setName("GA logo");
+		iconFilePath = "logo_msve.png";
 	}
 
-	private OrderedIcon orderedImage = new OrderedIcon();
-
-	private class OrderedIcon implements OrderedRenderable
+	public double getDistanceFromEye()
 	{
-		public double getDistanceFromEye()
-		{
-			return 0;
-		}
-
-		public void pick(DrawContext dc, Point pickPoint)
-		{
-			drawIcon(dc);
-		}
-
-		public void render(DrawContext dc)
-		{
-			drawIcon(dc);
-		}
+		return 0;
 	}
 
-	@Override
-	protected void doRender(DrawContext dc)
+	public void pick(DrawContext dc, Point pickPoint)
 	{
-		if (isLayerOn())
-			dc.addOrderedRenderable(this.orderedImage);
+		drawIcon(dc);
+	}
+
+	public void render(DrawContext dc)
+	{
+		drawIcon(dc);
 	}
 
 	private void drawIcon(DrawContext dc)
@@ -140,20 +125,6 @@ public class LogoLayer extends RenderableLayer
 
 			if (!dc.isPickingMode())
 			{
-				// Draw background color behind the map
-				gl.glColor4ub((byte) this.backColor.getRed(),
-						(byte) this.backColor.getGreen(), (byte) this.backColor
-								.getBlue(),
-						(byte) (this.backColor.getAlpha() * this.getOpacity()));
-				gl.glDisable(GL.GL_TEXTURE_2D); // no textures
-				gl.glBegin(GL.GL_POLYGON);
-				gl.glVertex3d(0, 0, 0);
-				gl.glVertex3d(1, 0, 0);
-				gl.glVertex3d(1, 1, 0);
-				gl.glVertex3d(0, 1, 0);
-				gl.glVertex3d(0, 0, 0);
-				gl.glEnd();
-
 				// Draw world map icon
 				gl.glColor4d(1d, 1d, 1d, this.getOpacity());
 				gl.glEnable(GL.GL_TEXTURE_2D);
@@ -189,7 +160,7 @@ public class LogoLayer extends RenderableLayer
 		try
 		{
 			InputStream iconStream = this.getClass().getResourceAsStream(
-					"/" + this.iconFilePath);
+					this.iconFilePath);
 			if (iconStream == null)
 			{
 				File iconFile = new File(this.iconFilePath);
@@ -278,45 +249,45 @@ public class LogoLayer extends RenderableLayer
 		/*if (this.locationCenter != null)
 		{
 		    x = viewport.getWidth() - scaledWidth / 2 - this.borderWidth;
-		    y = viewport.getHeight() - scaledHeight / 2 - this.borderWidth;
+		    y = viewport.getHeight() - scaledHeight / 2 - this.borderHeight;
 		}
 		else */if (this.position.equals(NORTHEAST))
 		{
 			x = viewport.getWidth() - scaledWidth - this.borderWidth;
-			y = viewport.getHeight() - scaledHeight - this.borderWidth;
+			y = viewport.getHeight() - scaledHeight - this.borderHeight;
 		}
 		else if (this.position.equals(SOUTHEAST))
 		{
 			x = viewport.getWidth() - scaledWidth - this.borderWidth;
-			y = 0d + this.borderWidth;
+			y = 0d + this.borderHeight;
 		}
 		else if (this.position.equals(NORTHWEST))
 		{
 			x = 0d + this.borderWidth;
-			y = viewport.getHeight() - scaledHeight - this.borderWidth;
+			y = viewport.getHeight() - scaledHeight - this.borderHeight;
 		}
 		else if (this.position.equals(SOUTHWEST))
 		{
 			x = 0d + this.borderWidth;
-			y = 0d + this.borderWidth;
+			y = 0d + this.borderHeight;
 		}
 		else
 		// use North East
 		{
 			x = viewport.getWidth() - scaledWidth / 2 - this.borderWidth;
-			y = viewport.getHeight() - scaledHeight / 2 - this.borderWidth;
+			y = viewport.getHeight() - scaledHeight / 2 - this.borderHeight;
 		}
 
 		return new Vec4(x, y, 0);
 	}
 
-	public boolean isLayerOn()
+	public double getOpacity()
 	{
-		return layerOn;
+		return opacity;
 	}
 
-	public void setLayerOn(boolean layerOn)
+	public void setOpacity(double opacity)
 	{
-		this.layerOn = layerOn;
+		this.opacity = opacity;
 	}
 }

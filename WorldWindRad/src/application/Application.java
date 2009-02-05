@@ -70,8 +70,8 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
+import layers.GALayer;
 import layers.mouse.MouseLayer;
-import layers.other.LogoLayer;
 import layers.shader.NormalTessellator;
 import nasa.worldwind.awt.AWTInputHandler;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
@@ -181,13 +181,13 @@ public class Application
 		createDoubleClickListener();
 
 		map = new WorldMapLayer();
-		logo = new LogoLayer();
 		scalebar = new ScalebarLayer();
 		compass = new CompassLayer();
+		logo = GALayer.getLogoLayer();
 		model.getLayers().add(map);
-		model.getLayers().add(logo);
 		model.getLayers().add(scalebar);
 		model.getLayers().add(compass);
+		model.getLayers().add(logo);
 
 		//create gui stuff
 
@@ -624,11 +624,11 @@ public class Application
 
 		menuItem = createLayerMenuItem(compass);
 		menu.add(menuItem);
-
-		menuItem = createLayerMenuItem(logo);
+		
+		menuItem = createLayerMenuItem(scalebar);
 		menu.add(menuItem);
 
-		menuItem = createLayerMenuItem(scalebar);
+		menuItem = createLayerMenuItem(logo);
 		menu.add(menuItem);
 
 		menu.addSeparator();

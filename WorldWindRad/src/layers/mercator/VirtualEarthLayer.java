@@ -5,15 +5,19 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
+import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class VirtualEarthLayer extends BasicMercatorTiledImageLayer
 {
+	private VirtualEarthLogo logo = new VirtualEarthLogo();
+
 	public VirtualEarthLayer()
 	{
 		super(makeLevels());
@@ -73,7 +77,37 @@ public class VirtualEarthLayer extends BasicMercatorTiledImageLayer
 		}
 		return quad;
 	}
-	
+
+	@Override
+	public void render(DrawContext dc)
+	{
+		super.render(dc);
+		if (isEnabled())
+		{
+			dc.addOrderedRenderable(logo);
+		}
+	}
+
+	@Override
+	protected boolean isTileValid(BufferedImage image)
+	{
+		int width = image.getWidth() - 1;
+		int height = image.getHeight() - 1;
+		return !(isWhite(image.getRGB(0, 0))
+				&& isWhite(image.getRGB(0, height))
+				&& isWhite(image.getRGB(width, 0))
+				&& isWhite(image.getRGB(width, height)) && isWhite(image
+				.getRGB(width / 2, height / 2)));
+	}
+
+	private boolean isWhite(int rgb)
+	{
+		int r = (rgb >> 16) & 0xff;
+		int g = (rgb >> 8) & 0xff;
+		int b = (rgb >> 0) & 0xff;
+		return r + b + g > 215 * 3;
+	}
+
 	@Override
 	public String toString()
 	{

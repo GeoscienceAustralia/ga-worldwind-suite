@@ -42,7 +42,7 @@ import com.sun.opengl.util.texture.TextureIO;
 /**
  * @author tag
  * @version $Id: BasicTiledImageLayer.java 5051 2008-04-14 04:51:50Z tgaskins $
- * Modified 2009-02-03 to add support for Mercator projections
+ *          Modified 2009-02-03 to add support for Mercator projections
  */
 public class BasicMercatorTiledImageLayer extends MercatorTiledImageLayer
 {
@@ -402,10 +402,28 @@ public class BasicMercatorTiledImageLayer extends MercatorTiledImageLayer
 					}
 					else if (contentType.contains("image"))
 					{
-						// Just save whatever it is to the cache.
-						if (!this.layer.transformImage(buffer, tile
-								.getMercatorSector(), outFile))
+						BufferedImage image = this.layer
+								.convertBufferToImage(buffer);
+						if (image != null)
+						{
+							if (this.layer.isTileValid(image))
+							{
+								if (!this.layer.transformAndSave(image, tile
+										.getMercatorSector(), outFile))
+									image = null;
+							}
+							else
+							{
+								this.layer.getLevels().markResourceAbsent(
+										this.tile);
+								return null;
+							}
+						}
+						if (image == null)
+						{
+							// Just save whatever it is to the cache.
 							this.layer.saveBuffer(buffer, outFile);
+						}
 					}
 
 					if (buffer != null)
@@ -431,13 +449,32 @@ public class BasicMercatorTiledImageLayer extends MercatorTiledImageLayer
 		}
 	}
 
-	private boolean transformImage(ByteBuffer buffer, MercatorSector sector,
-			File outFile)
+	protected boolean isTileValid(BufferedImage image)
+	{
+		//override in subclass to check image tile
+		//if false is returned, then tile is marked absent
+		return true;
+	}
+
+	private BufferedImage convertBufferToImage(ByteBuffer buffer)
 	{
 		try
 		{
 			InputStream is = new ByteArrayInputStream(buffer.array());
 			BufferedImage image = ImageIO.read(is);
+			return image;
+		}
+		catch (IOException e)
+		{
+			return null;
+		}
+	}
+
+	private boolean transformAndSave(BufferedImage image, MercatorSector sector,
+			File outFile)
+	{
+		try
+		{
 			image = transform(image, sector);
 			String extension = outFile.getName().substring(
 					outFile.getName().lastIndexOf('.') + 1);

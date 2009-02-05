@@ -3,10 +3,10 @@ package layers.radiometry;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.GALayerUtil;
+import layers.GALayer;
 import layers.mask.MaskTiledImageLayer;
 
-public class RatioUKLayer extends MaskTiledImageLayer
+public class RatioUKLayer extends GALayer
 {
 	public RatioUKLayer()
 	{
@@ -15,7 +15,7 @@ public class RatioUKLayer extends MaskTiledImageLayer
 		this.setRetainLevelZeroTiles(true);
 		this.setUseMipMaps(true);
 		this.setUseTransparentTextures(true);
-		this.setSplitScale(GALayerUtil.getSplitScale());
+		this.setSplitScale(GALayer.getSplitScale());
 	}
 
 	private static LevelSet makeLevels()
