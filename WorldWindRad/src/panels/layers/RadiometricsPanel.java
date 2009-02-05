@@ -294,7 +294,7 @@ public class RadiometricsPanel extends JPanel
 		buttonGroup.add(ratioUKRadio);
 		buttonGroup.add(ratioThKRadio);
 
-		areasCheck = new JCheckBox("Detailed areas");
+		areasCheck = new JCheckBox("Color-enhanced areas");
 		areasCheck.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 0;

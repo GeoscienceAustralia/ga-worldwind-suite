@@ -35,6 +35,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -415,8 +416,15 @@ public class PlaceSearchPanel extends JPanel
 		}
 	}
 
-	private class CustomRenderer implements ListCellRenderer
+	private class CustomRenderer extends JLabel implements ListCellRenderer
 	{
+		public CustomRenderer()
+		{
+			super();
+			setOpaque(true);
+			setBorder(new EmptyBorder(1, 1, 1, 1));
+		}
+
 		public Component getListCellRendererComponent(JList list, Object value,
 				int index, boolean isSelected, boolean cellHasFocus)
 		{
@@ -428,18 +436,7 @@ public class PlaceSearchPanel extends JPanel
 				{
 					text += " (" + place.country + ")";
 				}
-
-				JLabel label = new JLabel(text);
-				label.setOpaque(true);
-
-				if (isSelected)
-				{
-					label.setBackground(list.getSelectionBackground());
-				}
-				else
-				{
-					label.setBackground(list.getBackground());
-				}
+				setText(text);
 
 				BufferedImage image = new BufferedImage(16, 16,
 						BufferedImage.TYPE_INT_RGB);
@@ -453,14 +450,18 @@ public class PlaceSearchPanel extends JPanel
 				g.dispose();
 
 				ImageIcon icon = new ImageIcon(image);
-				label.setIcon(icon);
-
-				return label;
+				setIcon(icon);
 			}
 			else
 			{
-				return new JLabel(value.toString());
+				setText(value.toString());
+				setIcon(null);
 			}
+			if (isSelected)
+				setBackground(list.getSelectionBackground());
+			else
+				setBackground(list.getBackground());
+			return this;
 		}
 	}
 }

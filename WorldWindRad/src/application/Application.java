@@ -89,6 +89,7 @@ import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
 import util.DoubleClickZoomListener;
 import util.Util;
+import annotations.AnnotationsPanel;
 import bookmarks.Bookmark;
 import bookmarks.BookmarkListener;
 import bookmarks.BookmarkManager;
@@ -229,6 +230,9 @@ public class Application
 
 		PlaceSearchPanel placeSearchPanel = new PlaceSearchPanel(wwd);
 		tabbedPane1.addTab("Place search", placeSearchPanel);
+		
+		AnnotationsPanel annotationsPanel = new AnnotationsPanel(wwd);
+		tabbedPane1.addTab("Annotations", annotationsPanel);
 		
 		/*final StatisticsPanel sp = new StatisticsPanel(wwd);
 		wwd.addRenderingListener(new RenderingListener()

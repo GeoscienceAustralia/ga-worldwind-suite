@@ -491,8 +491,11 @@ public class BasicMercatorTiledImageLayer extends MercatorTiledImageLayer
 
 	private BufferedImage transform(BufferedImage image, MercatorSector sector)
 	{
+		int type = image.getType();
+		if(type == 0)
+			type = BufferedImage.TYPE_INT_RGB;
 		BufferedImage trans = new BufferedImage(image.getWidth(), image
-				.getHeight(), image.getType());
+				.getHeight(), type);
 		double miny = sector.getMinLatPercent();
 		double maxy = sector.getMaxLatPercent();
 		for (int y = 0; y < image.getHeight(); y++)

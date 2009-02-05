@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import annotations.Annotation;
 import bookmarks.Bookmark;
 
 
@@ -114,6 +115,7 @@ public class Settings
 		private boolean stereoEnabled = false;
 		private boolean windowMaximized = false;
 		private List<Bookmark> bookmarks = new ArrayList<Bookmark>();
+		private List<Annotation> annotations = new ArrayList<Annotation>();
 
 		public boolean isProxyEnabled()
 		{
@@ -375,6 +377,18 @@ public class Settings
 			if (bookmarks == null)
 				bookmarks = new ArrayList<Bookmark>();
 			this.bookmarks = bookmarks;
+		}
+
+		public List<Annotation> getAnnotations()
+		{
+			return annotations;
+		}
+
+		public void setAnnotations(List<Annotation> annotations)
+		{
+			if (annotations == null)
+				annotations = new ArrayList<Annotation>();
+			this.annotations = annotations;
 		}
 	}
 
