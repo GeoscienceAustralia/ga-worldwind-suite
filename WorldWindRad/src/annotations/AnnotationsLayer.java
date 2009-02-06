@@ -101,7 +101,11 @@ public class AnnotationsLayer extends AbstractLayer
 					{
 						// If selected annotation delegate dragging computations to a dragger.
 						if (event.getTopObject() == currentAnnotation)
+						{
 							this.dragger.selected(event);
+							currentAnnotation.setDragging(event
+									.getEventAction().equals(SelectEvent.DRAG));
+						}
 					}
 
 					// We missed any roll-over events while dragging, so highlight any under the cursor now,
@@ -150,7 +154,6 @@ public class AnnotationsLayer extends AbstractLayer
 				.getAnnotations())
 		{
 			RenderableAnnotation a = new RenderableAnnotation(annotation);
-			a.getAttributes().setVisible(annotation.isVisible());
 			annotations.add(a);
 		}
 	}

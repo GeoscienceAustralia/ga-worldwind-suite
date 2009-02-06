@@ -45,8 +45,6 @@ public class VirtualEarthLayer extends BasicMercatorTiledImageLayer
 	public VirtualEarthLayer(Dataset dataset)
 	{
 		super(makeLevels(dataset));
-		if (dataset == null)
-			throw new NullPointerException("Dataset cannot be null");
 		this.dataset = dataset;
 		this.setValue(AVKey.DISPLAY_NAME, "Microsoft Virtual Earth "
 				+ dataset.label);
@@ -55,6 +53,9 @@ public class VirtualEarthLayer extends BasicMercatorTiledImageLayer
 
 	protected static LevelSet makeLevels(Dataset dataset)
 	{
+		if (dataset == null)
+			throw new NullPointerException("Dataset cannot be null");
+
 		AVList params = new AVListImpl();
 
 		params.setValue(AVKey.TILE_WIDTH, 256);

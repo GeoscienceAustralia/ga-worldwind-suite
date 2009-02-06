@@ -37,6 +37,7 @@ import javax.swing.SpinnerNumberModel;
 
 import settings.Settings.ProjectionMode;
 import settings.Settings.StereoMode;
+import util.JIntegerField;
 
 public class SettingsDialog extends JDialog
 {
@@ -565,6 +566,7 @@ public class SettingsDialog extends JDialog
 		panel.add(proxyPortLabel, c);
 
 		proxyPortText = new JIntegerField(settings.getProxyPort());
+		proxyPortText.setPositive(true);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 2;

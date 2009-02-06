@@ -89,6 +89,7 @@ import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
 import util.DoubleClickZoomListener;
 import util.Util;
+import annotations.AnnotationEditor;
 import annotations.AnnotationsPanel;
 import bookmarks.Bookmark;
 import bookmarks.BookmarkListener;
@@ -231,7 +232,7 @@ public class Application
 		PlaceSearchPanel placeSearchPanel = new PlaceSearchPanel(wwd);
 		tabbedPane1.addTab("Place search", placeSearchPanel);
 		
-		AnnotationsPanel annotationsPanel = new AnnotationsPanel(wwd);
+		AnnotationsPanel annotationsPanel = new AnnotationsPanel(wwd, frame);
 		tabbedPane1.addTab("Annotations", annotationsPanel);
 		
 		/*final StatisticsPanel sp = new StatisticsPanel(wwd);
@@ -923,9 +924,15 @@ public class Application
 		}
 
 		if (SAR2.UNIT_IMPERIAL.equals(newValue))
+		{
 			this.statusBar.setElevationUnit(StatusBar.UNIT_IMPERIAL);
+			AnnotationEditor.setUnits(AnnotationEditor.IMPERIAL);
+		}
 		else
+		{
 			// Default to metric units.
 			this.statusBar.setElevationUnit(StatusBar.UNIT_METRIC);
+			AnnotationEditor.setUnits(AnnotationEditor.METRIC);
+		}
 	}
 }

@@ -10,6 +10,7 @@ import gov.nasa.worldwind.view.OrbitView;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Point;
@@ -22,14 +23,18 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import settings.Settings;
 import util.FlatJButton;
@@ -43,6 +48,7 @@ public class AnnotationsPanel extends JPanel
 	private DefaultListModel model;
 	private ListItem dragging;
 	private AnnotationsLayer layer;
+	private Frame frame;
 
 	private class ListItem
 	{
@@ -56,9 +62,10 @@ public class AnnotationsPanel extends JPanel
 		}
 	}
 
-	public AnnotationsPanel(WorldWindow wwd)
+	public AnnotationsPanel(WorldWindow wwd, Frame frame)
 	{
 		this.wwd = wwd;
+		this.frame = frame;
 		createPanel();
 		populateList();
 		layer = new AnnotationsLayer(wwd);
@@ -78,8 +85,8 @@ public class AnnotationsPanel extends JPanel
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
+		c.weightx = 1d / 3d;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.5;
 		panel.add(add, c);
 		add.addActionListener(new ActionListener()
 		{
@@ -89,13 +96,29 @@ public class AnnotationsPanel extends JPanel
 			}
 		});
 
-		FlatJButton delete = new FlatJButton(Icons.delete);
-		delete.setToolTipText("Delete selected");
+		final FlatJButton edit = new FlatJButton(Icons.edit);
+		edit.setToolTipText("Edit selected");
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
+		c.weightx = 1d / 3d;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.5;
+		panel.add(edit, c);
+		edit.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				editSelected();
+			}
+		});
+
+		final FlatJButton delete = new FlatJButton(Icons.delete);
+		delete.setToolTipText("Delete selected");
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = 0;
+		c.weightx = 1d / 3d;
+		c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(delete, c);
 		delete.addActionListener(new ActionListener()
 		{
@@ -109,7 +132,20 @@ public class AnnotationsPanel extends JPanel
 		list = new JList(model);
 		list.setCellRenderer(new CheckboxListCellRenderer());
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		add(list, BorderLayout.CENTER);
+		JScrollPane scrollPane = new JScrollPane(list);
+		scrollPane.setBorder(BorderFactory.createLoweredBevelBorder());
+		add(scrollPane, BorderLayout.CENTER);
+
+		ListSelectionListener lsl = new ListSelectionListener()
+		{
+			public void valueChanged(ListSelectionEvent e)
+			{
+				edit.setEnabled(list.getSelectedIndex() >= 0);
+				delete.setEnabled(list.getSelectedIndex() >= 0);
+			}
+		};
+		list.getSelectionModel().addListSelectionListener(lsl);
+		lsl.valueChanged(null);
 
 		list.addMouseListener(new MouseAdapter()
 		{
@@ -244,20 +280,40 @@ public class AnnotationsPanel extends JPanel
 
 	private void addNew()
 	{
-		String label = JOptionPane.showInputDialog(this,
-				"Please enter the annotation label", "Add annotation",
-				JOptionPane.QUESTION_MESSAGE);
-		if (label != null && label.length() > 0)
+		View view = wwd.getView();
+		if (view instanceof OrbitView)
 		{
-			View view = wwd.getView();
-			if (view instanceof OrbitView)
+			OrbitView orbitView = (OrbitView) view;
+			Position pos = orbitView.getCenterPosition();
+			double minZoom = orbitView.getZoom() * 5;
+			Annotation annotation = new Annotation("",
+					pos.getLatitude().degrees, pos.getLongitude().degrees,
+					minZoom);
+			AnnotationEditor editor = new AnnotationEditor(wwd, frame,
+					"New annotation", annotation);
+			int value = editor.getOkCancel();
+			if (value == JOptionPane.OK_OPTION)
 			{
-				OrbitView orbitView = (OrbitView) view;
-				Position pos = orbitView.getCenterPosition();
-				Annotation annotation = new Annotation(label,
-						pos.getLatitude().degrees, pos.getLongitude().degrees);
 				Settings.get().getAnnotations().add(annotation);
 				addAnnotation(annotation);
+				list.repaint();
+				refreshLayer();
+			}
+		}
+	}
+
+	private void editSelected()
+	{
+		ListItem item = (ListItem) list.getSelectedValue();
+		if (item != null)
+		{
+			Annotation editing = new Annotation(item.annotation);
+			AnnotationEditor editor = new AnnotationEditor(wwd, frame,
+					"Edit annotation", editing);
+			int value = editor.getOkCancel();
+			if (value == JOptionPane.OK_OPTION)
+			{
+				item.annotation.setValuesFrom(editing);
 				list.repaint();
 				refreshLayer();
 			}
@@ -297,7 +353,7 @@ public class AnnotationsPanel extends JPanel
 			list.repaint();
 		}
 	}
-	
+
 	private void refreshLayer()
 	{
 		layer.refresh();
@@ -316,12 +372,20 @@ public class AnnotationsPanel extends JPanel
 			long lengthMillis = Util.getScaledLengthMillis(center.getLatLon(),
 					newCenter.getLatLon(), 2000, 8000);
 
+			double zoom = orbitView.getZoom();
+			double minZoom = annotation.getMinZoom();
+			double maxZoom = annotation.getMaxZoom();
+			if (minZoom >= 0 && zoom > minZoom)
+				zoom = Math.max(minZoom, 1000);
+			else if (maxZoom >= 0 && zoom < maxZoom)
+				zoom = maxZoom;
+
 			ViewStateIterator vsi = FlyToOrbitViewStateIterator
 					.createPanToIterator(wwd.getModel().getGlobe(), center,
 							newCenter, orbitView.getHeading(), orbitView
 									.getHeading(), orbitView.getPitch(),
-							orbitView.getPitch(), orbitView.getZoom(),
-							orbitView.getZoom(), lengthMillis, true);
+							orbitView.getPitch(), orbitView.getZoom(), zoom,
+							lengthMillis, true);
 
 			view.applyStateIterator(vsi);
 		}

@@ -9,18 +9,23 @@ import gov.nasa.worldwind.Movable;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.AbstractAnnotation;
+import gov.nasa.worldwind.render.AnnotationAttributes;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.MultiLineTextRenderer;
 
 public class RenderableAnnotation extends AbstractAnnotation implements
 		Locatable, Movable
 {
 	private Annotation annotation;
 	private Position position;
+	private boolean dragging;
 
 	public RenderableAnnotation(Annotation annotation)
 	{
 		this.annotation = annotation;
 		setText(annotation.getLabel());
+		setAttributes(new MyAnnotationAttributes(annotation));
+		getAttributes().setTextAlign(MultiLineTextRenderer.ALIGN_CENTER);
 	}
 
 	@Override
@@ -48,6 +53,20 @@ public class RenderableAnnotation extends AbstractAnnotation implements
 		drawScale = Math.min(attributes.getDistanceMaxScale(), Math.max(
 				attributes.getDistanceMinScale(), drawScale)); // Clamp to factor range
 
+		double minZoom = annotation.getMinZoom();
+		double maxZoom = annotation.getMaxZoom();
+		Position eyePos = dc.getView().getEyePosition();
+		double zoom = eyePos.getElevation();
+		if (minZoom >= 0 && zoom > minZoom)
+			drawAlpha = Math.max(0, Math.min(drawAlpha, 1 - 5
+					* (zoom - minZoom) / minZoom));
+		else if (maxZoom >= 0 && zoom < maxZoom)
+			drawAlpha = Math.max(0, Math.min(drawAlpha, 1 - 5
+					* (maxZoom - zoom) / maxZoom));
+
+		if (drawAlpha < 0.1)
+			getAttributes().setHighlighted(false);
+
 		// Prepare to draw
 		this.setDepthFunc(dc, screenPoint);
 		GL gl = dc.getGL();
@@ -59,6 +78,26 @@ public class RenderableAnnotation extends AbstractAnnotation implements
 		// Draw
 		drawAnnotation(dc, new Point((int) screenPoint.x, (int) screenPoint.y),
 				drawScale, drawAlpha, pos);
+	}
+
+	@Override
+	public String getText()
+	{
+		String text = annotation.getLabel();
+		if (dragging)
+		{
+			String latlon = String.format("Lat %7.4f\u00B0\nLon %7.4f\u00B0",
+					getPosition().getLatitude().degrees, getPosition()
+							.getLongitude().degrees);
+			text += "\n" + latlon;
+		}
+		return text;
+	}
+
+	@Override
+	public void setText(String text)
+	{
+		annotation.setLabel(text);
 	}
 
 	public Position getPosition()
@@ -87,5 +126,38 @@ public class RenderableAnnotation extends AbstractAnnotation implements
 		annotation.setLatitude(position.getLatitude().degrees);
 		annotation.setLongitude(position.getLongitude().degrees);
 		this.position = null;
+	}
+
+	public boolean isDragging()
+	{
+		return dragging;
+	}
+
+	public void setDragging(boolean dragging)
+	{
+		this.dragging = dragging;
+	}
+
+	public class MyAnnotationAttributes extends AnnotationAttributes
+	{
+		private Annotation annotation;
+
+		public MyAnnotationAttributes(Annotation annotation)
+		{
+			super();
+			this.annotation = annotation;
+		}
+
+		@Override
+		public boolean isVisible()
+		{
+			return annotation.isVisible();
+		}
+
+		@Override
+		public void setVisible(boolean visible)
+		{
+			annotation.setVisible(visible);
+		}
 	}
 }
