@@ -6,10 +6,8 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -17,27 +15,18 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.basic.BasicHTML;
 
 import layers.ga.radiometrics.DoseRateLayer;
 import layers.ga.radiometrics.PotassiumLayer;
@@ -55,13 +44,16 @@ import layers.ga.radiometrics.areas.RatioUThAreasLayer;
 import layers.ga.radiometrics.areas.TernaryAreasLayer;
 import layers.ga.radiometrics.areas.ThoriumAreasLayer;
 import layers.ga.radiometrics.areas.UraniumAreasLayer;
+import nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import util.FlatJButton;
+import util.HtmlViewer;
 import util.Icons;
-import util.ImageDialog;
 import util.Util;
 
 public class RadiometricsPanel extends JPanel
 {
+	private static final String METADATA_BASE = "/data/metadata/radiometrics/";
+
 	private Layer[] layers;
 
 	private Layer ternary;
@@ -91,17 +83,10 @@ public class RadiometricsPanel extends JPanel
 	private JRadioButton ratioUKRadio;
 	private JRadioButton ratioThKRadio;
 	private JCheckBox areasCheck;
-	private JRadioButton ternaryAreasRadio;
-	private JRadioButton uraniumAreasRadio;
-	private JRadioButton thoriumAreasRadio;
-	private JRadioButton potassiumAreasRadio;
-	private JRadioButton doseRateAreasRadio;
-	private JRadioButton ratioUThAreasRadio;
-	private JRadioButton ratioUKAreasRadio;
-	private JRadioButton ratioThKAreasRadio;
+	private JComboBox areasCombo;
 	private JSlider radioSlider;
 	private JSlider areasSlider;
-	private JComboBox areasCombo;
+	private JComboBox flytoCombo;
 
 	private WorldWindow wwd;
 	private Frame frame;
@@ -123,7 +108,7 @@ public class RadiometricsPanel extends JPanel
 	private final static Area TAS = new Area("NE Tasmania (TAS)", -41.1247,
 			147.8028, 161772);
 
-	private final static Object[] AREAS = new Object[] { "", NSW, VIC, QLD,
+	private final static Object[] FLYTO = new Object[] { "", NSW, VIC, QLD,
 			SA_1, SA_2, NT, WA, TAS };
 
 	public RadiometricsPanel(WorldWindow wwd, Frame frame)
@@ -168,11 +153,13 @@ public class RadiometricsPanel extends JPanel
 	private void fillPanel()
 	{
 		int INDENT = 20;
+		int SPACING = 5;
 
 		setLayout(new GridBagLayout());
 		GridBagConstraints c;
 		JPanel panel;
 		Dimension size;
+		JSeparator js;
 
 		ActionListener al = new ActionListener()
 		{
@@ -190,22 +177,38 @@ public class RadiometricsPanel extends JPanel
 		};
 		ActionListener metadataAL = createMetadataListener();
 
+		JPanel mainPanel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		c.weightx = 1;
+		add(mainPanel, c);
+
 		panel = new TitlePanel(
 				new String[] { "RADIOMETRIC MAP", "OF AUSTRALIA" },
-				new String[] { "1st Edition, 2009" }, 0, 10);
+				new String[] { "1st Edition, 2009" }, 0, 0);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.CENTER;
-		add(panel, c);
+		mainPanel.add(panel, c);
+
+		js = new JSeparator(JSeparator.HORIZONTAL);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(SPACING, 0, SPACING, 0);
+		mainPanel.add(js, c);
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 2;
 		c.anchor = GridBagConstraints.WEST;
 		c.weightx = 1;
-		add(panel, c);
+		mainPanel.add(panel, c);
 
 		int gridy = 0;
 
@@ -239,48 +242,48 @@ public class RadiometricsPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(metadata, c);
 
-		ActionListener ternaryLegend = createLegendListener("ternary_cube.jpg",
-				"Ternary legend");
-		ActionListener KLegend = createLegendListener("k_legend.jpg",
+		ActionListener ternaryLegend = createLegendListener(
+				"ternary_legend.html", "Ternary legend");
+		ActionListener KLegend = createLegendListener("k_legend.html",
 				"Potassium legend");
-		ActionListener ThLegend = createLegendListener("th_legend.jpg",
+		ActionListener ThLegend = createLegendListener("th_legend.html",
 				"Thorium legend");
-		ActionListener ULegend = createLegendListener("u_legend.jpg",
+		ActionListener ULegend = createLegendListener("u_legend.html",
 				"Uranium legend");
-		ActionListener ratioLegend = createLegendListener("ratio_legend.jpg",
+		ActionListener ratioLegend = createLegendListener("ratio_legend.html",
 				"Ratio legend");
-		ActionListener doseLegend = createLegendListener("dose_legend.jpg",
+		ActionListener doseLegend = createLegendListener("dose_legend.html",
 				"Dose rate legend");
 
-		ternaryRadio = new JRadioButton("Ternary (K-Th-U)");
+		ternaryRadio = new JRadioButton(ternary.getName());
 		ternaryRadio.addActionListener(al);
 		addRadioToPanel(panel, gridy++, ternaryRadio, ternaryLegend);
 
-		potassiumRadio = new JRadioButton("Potassium (K)");
+		potassiumRadio = new JRadioButton(potassium.getName());
 		potassiumRadio.addActionListener(al);
 		addRadioToPanel(panel, gridy++, potassiumRadio, KLegend);
 
-		thoriumRadio = new JRadioButton("Thorium (Th)");
+		thoriumRadio = new JRadioButton(thorium.getName());
 		thoriumRadio.addActionListener(al);
 		addRadioToPanel(panel, gridy++, thoriumRadio, ThLegend);
 
-		uraniumRadio = new JRadioButton("Uranium (U)");
+		uraniumRadio = new JRadioButton(uranium.getName());
 		uraniumRadio.addActionListener(al);
 		addRadioToPanel(panel, gridy++, uraniumRadio, ULegend);
 
-		doseRateRadio = new JRadioButton("Dose Rate");
+		doseRateRadio = new JRadioButton(doseRate.getName());
 		doseRateRadio.addActionListener(al);
 		addRadioToPanel(panel, gridy++, doseRateRadio, doseLegend);
 
-		ratioThKRadio = new JRadioButton("Thorium/Potassium Ratio");
+		ratioThKRadio = new JRadioButton(ratioThK.getName());
 		ratioThKRadio.addActionListener(al);
 		addRadioToPanel(panel, gridy++, ratioThKRadio, ratioLegend);
 
-		ratioUKRadio = new JRadioButton("Uranium/Potassium Ratio");
+		ratioUKRadio = new JRadioButton(ratioUK.getName());
 		ratioUKRadio.addActionListener(al);
 		addRadioToPanel(panel, gridy++, ratioUKRadio, ratioLegend);
 
-		ratioUThRadio = new JRadioButton("Uranium/Thorium Ratio");
+		ratioUThRadio = new JRadioButton(ratioUTh.getName());
 		ratioUThRadio.addActionListener(al);
 		addRadioToPanel(panel, gridy++, ratioUThRadio, ratioLegend);
 
@@ -294,12 +297,26 @@ public class RadiometricsPanel extends JPanel
 		buttonGroup.add(ratioUKRadio);
 		buttonGroup.add(ratioThKRadio);
 
+		js = new JSeparator(JSeparator.HORIZONTAL);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 3;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(SPACING, 0, SPACING, 0);
+		mainPanel.add(js, c);
+
+		panel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 4;
+		c.insets = new Insets(0, INDENT, 0, 0);
+		mainPanel.add(panel, c);
+
 		areasCheck = new JCheckBox("Color-enhanced areas");
 		areasCheck.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = gridy;
-		c.insets = new Insets(10, 0, 0, 0);
+		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasCheck, c);
 
@@ -312,93 +329,65 @@ public class RadiometricsPanel extends JPanel
 		areasSlider.setPreferredSize(size);
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = gridy;
-		c.insets = new Insets(10, 0, 0, 0);
+		c.gridy = 0;
+		c.insets = new Insets(0, 0, 0, 0);
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasSlider, c);
 
-		metadata = new FlatJButton(Icons.info);
-		metadata.restrictSize();
-		metadata.addActionListener(metadataAL);
-		c = new GridBagConstraints();
-		c.gridx = 2;
-		c.gridy = gridy++;
-		c.insets = new Insets(10, 0, 0, 0);
-		c.anchor = GridBagConstraints.WEST;
-		panel.add(metadata, c);
-
-		ternaryAreasRadio = new JRadioButton("Ternary (K-Th-U)");
-		ternaryAreasRadio.addActionListener(al);
-		addRadioToPanel(panel, gridy++, ternaryAreasRadio);
-
-		potassiumAreasRadio = new JRadioButton("Potassium (K)");
-		potassiumAreasRadio.addActionListener(al);
-		addRadioToPanel(panel, gridy++, potassiumAreasRadio);
-
-		thoriumAreasRadio = new JRadioButton("Thorium (Th)");
-		thoriumAreasRadio.addActionListener(al);
-		addRadioToPanel(panel, gridy++, thoriumAreasRadio);
-
-		uraniumAreasRadio = new JRadioButton("Uranium (U)");
-		uraniumAreasRadio.addActionListener(al);
-		addRadioToPanel(panel, gridy++, uraniumAreasRadio);
-
-		doseRateAreasRadio = new JRadioButton("Dose Rate");
-		doseRateAreasRadio.addActionListener(al);
-		addRadioToPanel(panel, gridy++, doseRateAreasRadio);
-
-		ratioThKAreasRadio = new JRadioButton("Thorium/Potassium Ratio");
-		ratioThKAreasRadio.addActionListener(al);
-		addRadioToPanel(panel, gridy++, ratioThKAreasRadio);
-
-		ratioUKAreasRadio = new JRadioButton("Uranium/Potassium Ratio");
-		ratioUKAreasRadio.addActionListener(al);
-		addRadioToPanel(panel, gridy++, ratioUKAreasRadio);
-
-		ratioUThAreasRadio = new JRadioButton("Uranium/Thorium Ratio");
-		ratioUThAreasRadio.addActionListener(al);
-		addRadioToPanel(panel, gridy++, ratioUThAreasRadio);
-
-		buttonGroup = new ButtonGroup();
-		buttonGroup.add(ternaryAreasRadio);
-		buttonGroup.add(uraniumAreasRadio);
-		buttonGroup.add(thoriumAreasRadio);
-		buttonGroup.add(potassiumAreasRadio);
-		buttonGroup.add(doseRateAreasRadio);
-		buttonGroup.add(ratioUThAreasRadio);
-		buttonGroup.add(ratioUKAreasRadio);
-		buttonGroup.add(ratioThKAreasRadio);
-
 		panel = new JPanel(new GridBagLayout());
-		panel.setBorder(BorderFactory.createEmptyBorder(0, INDENT, 0, 0));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = 5;
 		c.anchor = GridBagConstraints.WEST;
-		add(panel, c);
+		c.insets = new Insets(0, INDENT, 0, 0);
+		mainPanel.add(panel, c);
 
-		JLabel label = new JLabel("Fly to area:");
+		JLabel label = new JLabel("Layer:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(5, 0, 5, 0);
 		panel.add(label, c);
 
-		areasCombo = new JComboBox(AREAS);
-		areasCombo.setMaximumRowCount(AREAS.length);
+		Layer[] areas = new Layer[] { ternaryAreas, potassiumAreas,
+				thoriumAreas, uraniumAreas, doseRateAreas, ratioThKAreas,
+				ratioUKAreas, ratioUThAreas };
+		areasCombo = new JComboBox(areas);
+		areasCombo.setMaximumRowCount(areas.length);
+		areasCombo.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
-		c.insets = new Insets(0, 5, 0, 0);
-		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(5, 5, 5, 0);
+		c.anchor = GridBagConstraints.WEST;
+		//c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(areasCombo, c);
 
-		areasCombo.addActionListener(new ActionListener()
+		label = new JLabel("Fly to:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.EAST;
+		panel.add(label, c);
+
+		flytoCombo = new JComboBox(FLYTO);
+		flytoCombo.setMaximumRowCount(FLYTO.length);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 1;
+		c.insets = new Insets(0, 5, 0, 0);
+		c.anchor = GridBagConstraints.WEST;
+		//c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(flytoCombo, c);
+
+		flytoCombo.addActionListener(new ActionListener()
 		{
 			private Timer timer;
 
 			public void actionPerformed(ActionEvent e)
 			{
-				Object object = areasCombo.getSelectedItem();
+				Object object = flytoCombo.getSelectedItem();
 				if (object instanceof Area)
 				{
 					Area area = (Area) object;
@@ -412,7 +401,7 @@ public class RadiometricsPanel extends JPanel
 					{
 						public void actionPerformed(ActionEvent e)
 						{
-							areasCombo.setSelectedIndex(0);
+							flytoCombo.setSelectedIndex(0);
 						}
 					});
 					timer.setRepeats(false);
@@ -421,16 +410,23 @@ public class RadiometricsPanel extends JPanel
 			}
 		});
 
+		js = new JSeparator(JSeparator.HORIZONTAL);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 6;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(SPACING * 2, 0, SPACING * 2, 0);
+		mainPanel.add(js, c);
+
 		ternaryRadio.setSelected(true);
-		ternaryAreasRadio.setSelected(true);
 		updateLayers();
 		this.revalidate();
 	}
 
-	private void addRadioToPanel(JPanel panel, int gridy, JRadioButton radio)
+	/*private void addRadioToPanel(JPanel panel, int gridy, JRadioButton radio)
 	{
 		addRadioToPanel(panel, gridy, radio, null);
-	}
+	}*/
 
 	private void addRadioToPanel(JPanel panel, int gridy, JRadioButton radio,
 			ActionListener legendAL)
@@ -461,115 +457,30 @@ public class RadiometricsPanel extends JPanel
 	{
 		return new ActionListener()
 		{
-			JDialog dialog = init();
-
-			public JDialog init()
-			{
-				final JDialog dialog = new JDialog(frame, "Metadata", false);
-
-				JEditorPane editorPane = new JEditorPane();
-				editorPane.putClientProperty(BasicHTML.documentBaseKey, this
-						.getClass().getResource("/data/help/"));
-				editorPane.setEditable(false);
-				java.net.URL url = this.getClass().getResource(
-						"/data/help/metadata");
-				if (url != null)
-				{
-					try
-					{
-						editorPane.setPage(url);
-					}
-					catch (IOException e)
-					{
-						editorPane.setText(e.toString());
-					}
-				}
-				else
-				{
-					editorPane.setText("Could not find page");
-				}
-
-				JScrollPane scrollPane = new JScrollPane(editorPane);
-				dialog.add(scrollPane, BorderLayout.CENTER);
-
-				dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-				dialog.addWindowListener(new WindowAdapter()
-				{
-					@Override
-					public void windowClosing(WindowEvent e)
-					{
-						dialog.setVisible(false);
-					}
-				});
-
-				return dialog;
-			}
-
 			public void actionPerformed(ActionEvent ae)
 			{
-				if (!dialog.isVisible())
-				{
-					dialog.setSize(640, 480);
-					dialog.setLocationRelativeTo(frame);
-				}
-				dialog.setVisible(!dialog.isVisible());
-				dialog.validate();
+				HtmlViewer dialog = new HtmlViewer(frame, "Radiometrics",
+						METADATA_BASE + "metadata.html");
+				dialog.setSize(600, 440);
+				dialog.setLocationRelativeTo(frame);
+				dialog.setVisible(true);
 			}
 		};
 	}
 
-	private ActionListener createLegendListener(final String image,
+	private ActionListener createLegendListener(final String page,
 			final String title)
 	{
 		return new ActionListener()
 		{
-			private JDialog dialog = init();
-			private int width;
-			private int height;
-
-			private JDialog init()
-			{
-				java.net.URL url = this.getClass().getResource(
-						"/data/legends/" + image);
-				BufferedImage bi = null;
-				if (url != null)
-				{
-					try
-					{
-						bi = ImageIO.read(url);
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-					}
-				}
-				width = bi.getWidth() / 2;
-				height = bi.getHeight() / 2;
-
-				final JDialog dialog = new ImageDialog(frame, title, false, bi);
-
-				dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-				dialog.addWindowListener(new WindowAdapter()
-				{
-					@Override
-					public void windowClosing(WindowEvent e)
-					{
-						dialog.setVisible(false);
-					}
-				});
-
-				return dialog;
-			}
-
 			public void actionPerformed(ActionEvent e)
 			{
-				if (!dialog.isVisible())
-				{
-					dialog.setSize(width, height);
-					dialog.setLocationRelativeTo(frame);
-				}
-				dialog.setVisible(!dialog.isVisible());
-				dialog.validate();
+				HtmlViewer dialog = new HtmlViewer(frame, title, METADATA_BASE
+						+ page);
+				int width = title.toLowerCase().contains("ternary") ? 500 : 280;
+				dialog.setSize(width, 350);
+				dialog.setLocationRelativeTo(frame);
+				dialog.setVisible(true);
 			}
 		};
 	}
@@ -601,21 +512,22 @@ public class RadiometricsPanel extends JPanel
 		ratioThK.setEnabled(radio && ratioThKRadio.isSelected());
 		ratioThK.setOpacity(radioSlider.getValue() / 100d);
 
-		ternaryAreas.setEnabled(areas && ternaryAreasRadio.isSelected());
+		Layer area = (Layer) areasCombo.getSelectedItem();
+		ternaryAreas.setEnabled(areas && area == ternaryAreas);
 		ternaryAreas.setOpacity(areasSlider.getValue() / 100d);
-		uraniumAreas.setEnabled(areas && uraniumAreasRadio.isSelected());
+		uraniumAreas.setEnabled(areas && area == uraniumAreas);
 		uraniumAreas.setOpacity(areasSlider.getValue() / 100d);
-		thoriumAreas.setEnabled(areas && thoriumAreasRadio.isSelected());
+		thoriumAreas.setEnabled(areas && area == thoriumAreas);
 		thoriumAreas.setOpacity(areasSlider.getValue() / 100d);
-		potassiumAreas.setEnabled(areas && potassiumAreasRadio.isSelected());
+		potassiumAreas.setEnabled(areas && area == potassiumAreas);
 		potassiumAreas.setOpacity(areasSlider.getValue() / 100d);
-		doseRateAreas.setEnabled(areas && doseRateAreasRadio.isSelected());
+		doseRateAreas.setEnabled(areas && area == doseRateAreas);
 		doseRateAreas.setOpacity(areasSlider.getValue() / 100d);
-		ratioUThAreas.setEnabled(areas && ratioUThAreasRadio.isSelected());
+		ratioUThAreas.setEnabled(areas && area == ratioUThAreas);
 		ratioUThAreas.setOpacity(areasSlider.getValue() / 100d);
-		ratioUKAreas.setEnabled(areas && ratioUKAreasRadio.isSelected());
+		ratioUKAreas.setEnabled(areas && area == ratioUKAreas);
 		ratioUKAreas.setOpacity(areasSlider.getValue() / 100d);
-		ratioThKAreas.setEnabled(areas && ratioThKAreasRadio.isSelected());
+		ratioThKAreas.setEnabled(areas && area == ratioThKAreas);
 		ratioThKAreas.setOpacity(areasSlider.getValue() / 100d);
 
 		wwd.redraw();
@@ -647,7 +559,7 @@ public class RadiometricsPanel extends JPanel
 			OrbitView view = (OrbitView) wwd.getView();
 			Position beginCenter = view.getCenterPosition();
 			long lengthMillis = Util.getScaledLengthMillis(beginCenter
-					.getLatLon(), center, 2000, 8000);
+					.getLatLon(), center);
 
 			ViewStateIterator vsi = FlyToOrbitViewStateIterator
 					.createPanToIterator(wwd.getModel().getGlobe(),

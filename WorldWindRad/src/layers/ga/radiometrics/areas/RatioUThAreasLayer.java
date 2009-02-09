@@ -35,6 +35,6 @@ public class RatioUThAreasLayer extends GALayer
 	@Override
 	public String toString()
 	{
-		return "Areas of Interest";
+		return "Uranium/Thorium Ratio";
 	}
 }

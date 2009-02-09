@@ -3,6 +3,8 @@ package util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import settings.Settings;
+
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.coords.MGRSCoord;
@@ -13,7 +15,15 @@ public class Util
 {
 	public final static double METER_TO_FEET = 3.280839895;
 	public final static double METER_TO_MILE = 0.000621371192;
-	
+
+	public static long getScaledLengthMillis(LatLon beginLatLon,
+			LatLon endLatLon)
+	{
+		double scale = Settings.get().getViewIteratorSpeed();
+		return getScaledLengthMillis(beginLatLon, endLatLon,
+				(long) (4000 / scale), (long) (20000 / scale));
+	}
+
 	public static long getScaledLengthMillis(LatLon beginLatLon,
 			LatLon endLatLon, long minLengthMillis, long maxLengthMillis)
 	{

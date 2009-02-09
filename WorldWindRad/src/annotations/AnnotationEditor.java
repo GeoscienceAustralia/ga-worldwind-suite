@@ -290,17 +290,7 @@ public class AnnotationEditor extends JDialog
 
 		JPanel buttonsPanel = new JPanel(new FlowLayout());
 		panel.add(buttonsPanel, BorderLayout.CENTER);
-
-		JButton button = new JButton("Cancel");
-		buttonsPanel.add(button);
-		button.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				dispose();
-			}
-		});
-
+		
 		okButton = new JButton("OK");
 		buttonsPanel.add(okButton);
 		okButton.addActionListener(new ActionListener()
@@ -313,6 +303,16 @@ public class AnnotationEditor extends JDialog
 		});
 		okButton.setDefaultCapable(true);
 		getRootPane().setDefaultButton(okButton);
+
+		JButton button = new JButton("Cancel");
+		buttonsPanel.add(button);
+		button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				dispose();
+			}
+		});
 
 		setSize(400, 300);
 		checkValidity();

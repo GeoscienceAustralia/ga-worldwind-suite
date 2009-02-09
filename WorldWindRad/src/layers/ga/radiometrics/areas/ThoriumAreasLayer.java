@@ -35,6 +35,6 @@ public class ThoriumAreasLayer extends GALayer
 	@Override
 	public String toString()
 	{
-		return "Areas of Interest";
+		return "Thorium (Th)";
 	}
 }

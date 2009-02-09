@@ -35,6 +35,6 @@ public class DoseRateAreasLayer extends GALayer
 	@Override
 	public String toString()
 	{
-		return "Areas of Interest";
+		return "Dose Rate";
 	}
 }

@@ -10,76 +10,62 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Globe;
-import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import util.FlatJButton;
 import util.Icons;
 import util.Util;
-
-/**
- * This panel let the user input different coordinates and displays the
- * corresponding latitude and longitude in decimal degrees.
- * <p>
- * Supported format are:
- * <ul>
- * <li>MGRS strings with or without separting spaces.</li>
- * <li>Decimal degrees with sign prefix or N, S, E, W suffix.</li>
- * <li>Degrees, minutes and seconds with sign prefix or N, S, E, W suffix.</li>
- * </ul>
- * The separator between lat/lon pairs can be ',', ', ' or any number of spaces.
- * </p>
- * <p>
- * Examples:
- * 
- * <pre>
- * 11sku528111
- * 11S KU 528 111
- * 
- * 45N 123W
- * +45.1234, -123.12
- * 45.1234N 123.12W
- * 
- * 45° 30' 00&quot;N, 50° 30'W
- * 45°30' -50°30'
- * 45 30 N 50 30 W
- * </pre>
- * 
- * </p>
- * 
- * @author Patrick Murris
- * @version $Id: GoToCoordinatePanel.java 5175 2008-04-25 21:12:21Z
- *          patrickmurris $
- */
 
 public class GoToCoordinatePanel extends JPanel
 {
 	private WorldWindow wwd;
 	private JTextField coordInput;
 	private JLabel resultLabel;
+	private boolean inputValid = false;
+	private List<ChangeListener> listeners = new ArrayList<ChangeListener>();
 
 	public GoToCoordinatePanel(WorldWindow wwd)
 	{
-		super(new GridBagLayout());
-		this.wwd = wwd;
-		makePanel();
+		this(wwd, false);
 	}
 
-	private void makePanel()
+	private GoToCoordinatePanel(WorldWindow wwd, boolean inDialog)
+	{
+		super(new GridBagLayout());
+		this.wwd = wwd;
+		makePanel(inDialog);
+	}
+
+	private void makePanel(boolean inDialog)
 	{
 		GridBagConstraints c;
-		
+
 		JLabel label = new JLabel();
 		label.setText("Enter lat/lon:");
 		c = new GridBagConstraints();
@@ -88,7 +74,7 @@ public class GoToCoordinatePanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		add(label, c);
 
-		coordInput = new JTextField(10);
+		coordInput = new JTextField(30);
 		coordInput.setToolTipText("Type coordinates and press Enter");
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -97,29 +83,32 @@ public class GoToCoordinatePanel extends JPanel
 		c.weightx = 1;
 		add(coordInput, c);
 
-		FlatJButton go = new FlatJButton(Icons.run);
-		go.restrictSize();
-		go.setToolTipText("Go");
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 1;
-		add(go, c);
+		if (!inDialog)
+		{
+			FlatJButton go = new FlatJButton(Icons.run);
+			go.restrictSize();
+			go.setToolTipText("Go");
+			c = new GridBagConstraints();
+			c.gridx = 1;
+			c.gridy = 1;
+			add(go, c);
+
+			ActionListener al = new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					gotoCoords();
+				}
+			};
+			go.addActionListener(al);
+			coordInput.addActionListener(al);
+		}
 
 		resultLabel = new JLabel();
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 2;
 		add(resultLabel, c);
-
-		ActionListener al = new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				gotoCoords();
-			}
-		};
-		go.addActionListener(al);
-		coordInput.addActionListener(al);
 
 		coordInput.getDocument().addDocumentListener(new DocumentListener()
 		{
@@ -138,7 +127,7 @@ public class GoToCoordinatePanel extends JPanel
 				updateResult();
 			}
 		});
-		
+
 		updateResult();
 	}
 
@@ -149,20 +138,23 @@ public class GoToCoordinatePanel extends JPanel
 		updateResult(latLon, false);
 	}
 
-	private void updateResult(LatLon latLon, boolean showInvalid)
+	private void updateResult(LatLon latlon, boolean showInvalid)
 	{
-		if (latLon != null)
+		inputValid = latlon != null;
+		if (latlon != null)
 		{
 			//coordInput.setText(coordInput.getText().toUpperCase());
 			resultLabel.setText(String
-					.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", latLon
+					.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", latlon
 							.getLatitude().degrees,
-							latLon.getLongitude().degrees));
+							latlon.getLongitude().degrees));
 		}
-		else if(showInvalid)
+		else if (showInvalid)
 			resultLabel.setText("Invalid coordinates");
 		else
 			resultLabel.setText(" ");
+
+		notifyChangeListeners();
 	}
 
 	private void gotoCoords()
@@ -180,5 +172,96 @@ public class GoToCoordinatePanel extends JPanel
 									latLon, 0), view.getHeading(), view
 									.getPitch(), view.getZoom()));
 		}
+	}
+
+	private void addChangeListener(ChangeListener listener)
+	{
+		listeners.add(listener);
+	}
+
+	private void notifyChangeListeners()
+	{
+		for (ChangeListener listener : listeners)
+		{
+			listener.stateChanged(null);
+		}
+	}
+
+	public static void showGotoDialog(Frame owner, WorldWindow wwd, String title)
+	{
+		final JDialog dialog = new JDialog(owner, title, true);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		JPanel panel = new JPanel(new GridBagLayout());
+		dialog.add(panel);
+		GridBagConstraints c;
+
+		int SPACING = 10;
+
+		final GoToCoordinatePanel gtp = new GoToCoordinatePanel(wwd, true);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.BOTH;
+		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
+		panel.add(gtp, c);
+
+		final JButton ok = new JButton("OK");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.EAST;
+		c.weightx = 1;
+		c.insets = new Insets(SPACING, SPACING, SPACING, 0);
+		panel.add(ok, c);
+		ok.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (gtp.inputValid)
+				{
+					gtp.gotoCoords();
+					dialog.dispose();
+				}
+			}
+		});
+
+		JButton cancel = new JButton("Cancel");
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 1;
+		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
+		panel.add(cancel, c);
+		Action cancelAction = new AbstractAction()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				dialog.dispose();
+			}
+		};
+		cancel.addActionListener(cancelAction);
+
+		ChangeListener cl = new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				ok.setEnabled(gtp.inputValid);
+			}
+		};
+		gtp.addChangeListener(cl);
+		cl.stateChanged(null);
+
+		JRootPane rootPane = dialog.getRootPane();
+		ok.setDefaultCapable(true);
+		rootPane.setDefaultButton(ok);
+
+		KeyStroke stroke = KeyStroke.getKeyStroke("ESCAPE");
+		InputMap inputMap = rootPane
+				.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		inputMap.put(stroke, "ESCAPE");
+		rootPane.getActionMap().put("ESCAPE", cancelAction);
+
+		dialog.pack();
+		dialog.setVisible(true);
 	}
 }

@@ -6,11 +6,12 @@ import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.pick.PickedObjectList;
-import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import nasa.worldwind.view.FlyToOrbitViewStateIterator;
 
 public class DoubleClickZoomListener extends MouseAdapter
 {

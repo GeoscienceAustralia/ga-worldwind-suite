@@ -6,7 +6,6 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.Color;
@@ -39,6 +38,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
+import nasa.worldwind.view.FlyToOrbitViewStateIterator;
 
 import panels.places.GeoNamesSearch.Results;
 import panels.places.GeoNamesSearch.SearchType;
@@ -312,7 +313,7 @@ public class PlaceSearchPanel extends JPanel
 				Position center = orbitView.getCenterPosition();
 				Position newCenter = place.getPosition();
 				long lengthMillis = Util.getScaledLengthMillis(center
-						.getLatLon(), newCenter.getLatLon(), 2000, 8000);
+						.getLatLon(), newCenter.getLatLon());
 
 				double zoom = Math.max(100000, Math.min(1000000, orbitView
 						.getZoom()));

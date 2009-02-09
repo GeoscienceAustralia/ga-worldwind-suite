@@ -35,6 +35,6 @@ public class RatioUKLayer extends GALayer
 	@Override
 	public String toString()
 	{
-		return "Uranium Potassium Ratio";
+		return "Uranium/Potassium Ratio";
 	}
 }

@@ -35,6 +35,6 @@ public class RatioThKAreasLayer extends GALayer
 	@Override
 	public String toString()
 	{
-		return "Areas of Interest";
+		return "Thorium/Potassium Ratio";
 	}
 }

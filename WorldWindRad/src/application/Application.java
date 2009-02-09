@@ -20,7 +20,6 @@ import gov.nasa.worldwind.layers.TerrainProfileLayer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.retrieve.RetrievalService;
-import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
@@ -28,9 +27,6 @@ import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,7 +46,6 @@ import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -62,7 +57,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
@@ -76,10 +70,9 @@ import layers.shader.NormalTessellator;
 import nasa.worldwind.awt.AWTInputHandler;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 import nasa.worldwind.cache.FixedBasicDataFileCache;
+import nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import panels.layers.LayersPanel;
-import panels.other.ExaggerationPanel;
 import panels.other.GoToCoordinatePanel;
-import panels.other.HelpControlsPanel;
 import panels.places.PlaceSearchPanel;
 import retrieve.ExtendedRetrievalService;
 import settings.Settings;
@@ -88,6 +81,7 @@ import settings.Settings.ProjectionMode;
 import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
 import util.DoubleClickZoomListener;
+import util.HtmlViewer;
 import util.Util;
 import annotations.AnnotationEditor;
 import annotations.AnnotationsPanel;
@@ -163,7 +157,7 @@ public class Application
 	private LayersPanel layersPanel;
 	private MouseLayer mouseLayer;
 	private JSplitPane splitPane;
-	private JSplitPane westSplitPane;
+	//private JSplitPane westSplitPane;
 	private JMenu bookmarksMenu;
 
 	private WorldMapLayer map;
@@ -219,22 +213,23 @@ public class Application
 		statusBar.setEventSource(wwd);
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
 
-		JTabbedPane tabbedPane1 = new JTabbedPane(JTabbedPane.TOP);
-		JTabbedPane tabbedPane2 = new JTabbedPane(JTabbedPane.TOP);
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		splitPane.setLeftComponent(tabbedPane);
+		//JTabbedPane tabbedPane2 = new JTabbedPane(JTabbedPane.TOP);
 
-		westSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
+		/*westSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
 		splitPane.setLeftComponent(westSplitPane);
-		splitPane.setResizeWeight(0.0);
+		splitPane.setResizeWeight(0.0);*/
 
 		layersPanel = new LayersPanel(wwd, frame);
-		tabbedPane1.addTab("Layers", layersPanel);
+		tabbedPane.addTab("Layers", layersPanel);
 
 		PlaceSearchPanel placeSearchPanel = new PlaceSearchPanel(wwd);
-		tabbedPane1.addTab("Place search", placeSearchPanel);
-		
+		tabbedPane.addTab("Place search", placeSearchPanel);
+
 		AnnotationsPanel annotationsPanel = new AnnotationsPanel(wwd, frame);
-		tabbedPane1.addTab("Annotations", annotationsPanel);
-		
+		tabbedPane.addTab("Annotations", annotationsPanel);
+
 		/*final StatisticsPanel sp = new StatisticsPanel(wwd);
 		wwd.addRenderingListener(new RenderingListener()
 		{
@@ -246,25 +241,24 @@ public class Application
 		tabbedPane1.addTab("Statistics", sp);
 		wwd.setPerFrameStatisticsKeys(PerformanceStatistic.ALL_STATISTICS_SET);*/
 
-		panel = new JPanel(new BorderLayout());
+		/*panel = new JPanel(new BorderLayout());
 		ExaggerationPanel exaggerationPanel = new ExaggerationPanel(wwd);
 		panel.add(exaggerationPanel, BorderLayout.NORTH);
-		tabbedPane2.addTab("Exaggeration", panel);
+		tabbedPane2.addTab("Exaggeration", panel);*/
 
-		panel = new JPanel(new BorderLayout());
+		/*panel = new JPanel(new BorderLayout());
 		GoToCoordinatePanel gotoPanel = new GoToCoordinatePanel(wwd);
 		panel.add(gotoPanel, BorderLayout.NORTH);
-		tabbedPane2.addTab("Go to coord", panel);
+		tabbedPane2.addTab("Go to coord", panel);*/
 
 		/*panel = new JPanel(new BorderLayout());
 		SunPositionPanel sunPositionPanel = new SunPositionPanel(wwd);
 		panel.add(sunPositionPanel, BorderLayout.NORTH);
 		tabbedPane2.addTab("Sun position", panel);*/
 
-
-		westSplitPane.setTopComponent(tabbedPane1);
+		/*westSplitPane.setTopComponent(tabbedPane1);
 		westSplitPane.setBottomComponent(tabbedPane2);
-		westSplitPane.setResizeWeight(1.0);
+		westSplitPane.setResizeWeight(1.0);*/
 
 		loadSplitLocations();
 		afterSettingsChange();
@@ -291,6 +285,8 @@ public class Application
 		{
 			((ExtendedRetrievalService) rs).addLayer(wwd);
 		}
+
+		//wwd.getModel().getLayers().add(new YahooMapsLayer());
 	}
 
 	private void saveImage()
@@ -419,7 +415,7 @@ public class Application
 		Position endCenter = Position.fromDegrees(initLat, initLon, beginCenter
 				.getElevation());
 		long lengthMillis = Util.getScaledLengthMillis(beginCenter.getLatLon(),
-				endCenter.getLatLon(), 2000, 8000);
+				endCenter.getLatLon());
 
 		ViewStateIterator vsi = FlyToOrbitViewStateIterator
 				.createPanToIterator(wwd.getModel().getGlobe(), beginCenter,
@@ -622,6 +618,17 @@ public class Application
 			}
 		});
 
+		menuItem = new JMenuItem("Go to coordinates...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				GoToCoordinatePanel.showGotoDialog(frame, wwd,
+						"Go to coordinates");
+			}
+		});
+
 		menu.addSeparator();
 
 		menuItem = createLayerMenuItem(map);
@@ -629,7 +636,7 @@ public class Application
 
 		menuItem = createLayerMenuItem(compass);
 		menu.add(menuItem);
-		
+
 		menuItem = createLayerMenuItem(scalebar);
 		menu.add(menuItem);
 
@@ -753,51 +760,8 @@ public class Application
 
 	private void showControls()
 	{
-		GridBagConstraints c;
-
-		final JDialog dialog = new JDialog(frame, "Controls", true);
-		dialog.setLayout(new GridBagLayout());
-		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		dialog.addWindowListener(new WindowAdapter()
-		{
-			@Override
-			public void windowClosing(WindowEvent e)
-			{
-				dialog.dispose();
-			}
-		});
-
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.weightx = 1;
-		c.weighty = 1;
-		c.fill = GridBagConstraints.BOTH;
-		dialog.add(new HelpControlsPanel(), c);
-
-		JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 1;
-		c.weightx = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		dialog.add(separator, c);
-
-		JButton okButton = new JButton("OK");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 2;
-		c.insets = new Insets(10, 10, 10, 10);
-		c.anchor = GridBagConstraints.EAST;
-		dialog.add(okButton, c);
-		okButton.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				dialog.dispose();
-			}
-		});
-
+		JDialog dialog = new HtmlViewer(frame, "Controls",
+				"/data/help/controls.html", true);
 		dialog.setResizable(false);
 		dialog.setSize(640, 480);
 		dialog.setLocationRelativeTo(frame);
@@ -826,9 +790,8 @@ public class Application
 						Position newCenter = Position.fromDegrees(bookmark
 								.getLat(), bookmark.getLon(), bookmark
 								.getElevation());
-						long lengthMillis = Util
-								.getScaledLengthMillis(center.getLatLon(),
-										newCenter.getLatLon(), 2000, 8000);
+						long lengthMillis = Util.getScaledLengthMillis(center
+								.getLatLon(), newCenter.getLatLon());
 
 						ViewStateIterator vsi = FlyToOrbitViewStateIterator
 								.createPanToIterator(wwd.getModel().getGlobe(),
@@ -871,21 +834,21 @@ public class Application
 
 	private void saveSplitLocations()
 	{
-		int[] splits = new int[2];
+		int[] splits = new int[1];
 		splits[0] = splitPane.getDividerLocation();
-		splits[1] = westSplitPane.getDividerLocation();
+		//splits[1] = westSplitPane.getDividerLocation();
 		Settings.get().setSplitLocations(splits);
 	}
 
 	private void loadSplitLocations()
 	{
 		int[] splits = Settings.get().getSplitLocations();
-		if (splits != null && splits.length == 2)
+		if (splits != null && splits.length == 1)
 		{
 			if (splits[0] >= 0)
 				splitPane.setDividerLocation(splits[0]);
-			if (splits[1] >= 0)
-				westSplitPane.setDividerLocation(splits[1]);
+			/*if (splits[1] >= 0)
+				westSplitPane.setDividerLocation(splits[1]);*/
 		}
 	}
 

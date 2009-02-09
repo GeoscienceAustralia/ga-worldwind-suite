@@ -4,7 +4,6 @@ import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
@@ -35,6 +34,8 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import nasa.worldwind.view.FlyToOrbitViewStateIterator;
 
 import settings.Settings;
 import util.FlatJButton;
@@ -370,7 +371,7 @@ public class AnnotationsPanel extends JPanel
 			Position newCenter = Position.fromDegrees(annotation.getLatitude(),
 					annotation.getLongitude(), 0);
 			long lengthMillis = Util.getScaledLengthMillis(center.getLatLon(),
-					newCenter.getLatLon(), 2000, 8000);
+					newCenter.getLatLon());
 
 			double zoom = orbitView.getZoom();
 			double minZoom = annotation.getMinZoom();

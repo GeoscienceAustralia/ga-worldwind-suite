@@ -17,8 +17,11 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -29,11 +32,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JRootPane;
+import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import settings.Settings.ProjectionMode;
 import settings.Settings.StereoMode;
@@ -49,6 +57,12 @@ public class SettingsDialog extends JDialog
 	private static Rectangle oldBounds;
 
 	private Settings.Properties settings;
+
+	private JSlider viewIteratorSpeedSlider;
+	private JLabel viewIteratorSpeedLabel;
+	private JSlider verticalExaggerationSlider;
+	private JLabel verticalExaggerationLabel;
+	private double verticalExaggeration;
 
 	private JRadioButton spanDisplayRadio;
 	private JRadioButton singleDisplayRadio;
@@ -115,13 +129,24 @@ public class SettingsDialog extends JDialog
 			}
 		});
 
-		cancel.addActionListener(new ActionListener()
+		Action cancelAction = new AbstractAction()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				cancel();
 			}
-		});
+		};
+		cancel.addActionListener(cancelAction);
+		
+		JRootPane rootPane = getRootPane();
+		ok.setDefaultCapable(true);
+		rootPane.setDefaultButton(ok);
+
+		KeyStroke stroke = KeyStroke.getKeyStroke("ESCAPE");
+		InputMap inputMap = rootPane
+				.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		inputMap.put(stroke, "ESCAPE");
+		rootPane.getActionMap().put("ESCAPE", cancelAction);
 
 		pack();
 		//setResizable(false);
@@ -172,6 +197,8 @@ public class SettingsDialog extends JDialog
 		double focalLength = (Double) focalLengthSpinner.getValue();
 		boolean stereoCursor = stereoCursorCheck.isSelected();
 
+		double viewIteratorSpeed = viewIteratorSpeedSlider.getValue() / 10d;
+
 		boolean proxyEnabled = proxyEnabledCheck.isSelected();
 		String proxyHost = proxyHostText.getText();
 		int proxyPort = proxyPortText.getValue();
@@ -214,6 +241,9 @@ public class SettingsDialog extends JDialog
 			settings.setEyeSeparation(eyeSeparation);
 			settings.setFocalLength(focalLength);
 			settings.setStereoCursor(stereoCursor);
+
+			settings.setViewIteratorSpeed(viewIteratorSpeed);
+			settings.setVerticalExaggeration(verticalExaggeration);
 
 			settings.setProxyEnabled(proxyEnabled);
 			settings.setProxyHost(proxyHost);
@@ -265,14 +295,25 @@ public class SettingsDialog extends JDialog
 		JComponent stereo = createStereo();
 		stereo.setBorder(BorderFactory.createTitledBorder("Stereo"));
 		c = new GridBagConstraints();
+		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
+		panel.add(stereo, c);
+
+		JComponent other = createOther();
+		other.setBorder(BorderFactory.createTitledBorder("Other"));
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 1;
 		c.weighty = 1;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
-		panel.add(stereo, c);
+		panel.add(other, c);
 
 		enableStereoSettings();
 
@@ -518,6 +559,112 @@ public class SettingsDialog extends JDialog
 		return panel;
 	}
 
+	private JComponent createOther()
+	{
+		GridBagConstraints c;
+		JPanel panel = new JPanel(new GridBagLayout());
+
+		JPanel panel2 = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(panel2, c);
+
+		JLabel label = new JLabel("Vertical exaggeration:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(SPACING, SPACING, 0, 0);
+		panel2.add(label, c);
+
+		verticalExaggeration = Settings.get().getVerticalExaggeration();
+		verticalExaggerationSlider = new JSlider(0, 200,
+				exaggerationToSlider(verticalExaggeration));
+		/*Dimension size = slider.getPreferredSize();
+		size.width = 50;
+		slider.setPreferredSize(size);*/
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 0;
+		c.weightx = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(SPACING, SPACING, 0, 0);
+		panel2.add(verticalExaggerationSlider, c);
+
+		verticalExaggerationSlider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				double exaggeration = sliderToExaggeration(verticalExaggerationSlider
+						.getValue());
+				verticalExaggeration = Math.round(exaggeration * 10d) / 10d;
+				verticalExaggerationLabel.setText(String.format("%1.1f",
+						verticalExaggeration));
+			}
+		});
+
+		verticalExaggerationLabel = new JLabel(String.format("%1.1f",
+				verticalExaggeration));
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(SPACING, 0, 0, SPACING);
+		panel2.add(verticalExaggerationLabel, c);
+
+		panel2 = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(panel2, c);
+
+		label = new JLabel("Camera animation speed:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(SPACING, SPACING, SPACING, 0);
+		panel2.add(label, c);
+
+		int min = 1;
+		int max = 50;
+		int value = (int) (Settings.get().getViewIteratorSpeed() * 10);
+		value = Math.max(min, Math.min(max, value));
+		viewIteratorSpeedSlider = new JSlider(min, max, value);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		c.insets = new Insets(SPACING, SPACING, SPACING, 0);
+		panel2.add(viewIteratorSpeedSlider, c);
+		ChangeListener cl = new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				viewIteratorSpeedLabel.setText(String.format("%1.1f",
+						viewIteratorSpeedSlider.getValue() / 10d));
+			}
+		};
+		viewIteratorSpeedSlider.addChangeListener(cl);
+
+		viewIteratorSpeedLabel = new JLabel();
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(SPACING, 0, SPACING, SPACING);
+		panel2.add(viewIteratorSpeedLabel, c);
+
+		cl.stateChanged(null);
+
+		return panel;
+	}
+
 	private JComponent createProxy()
 	{
 		GridBagConstraints c;
@@ -635,6 +782,20 @@ public class SettingsDialog extends JDialog
 				&& projectionModeCombo.getSelectedItem() == ProjectionMode.ASYMMETRIC_FRUSTUM;
 		focalLengthLabel.setEnabled(focalLengthEnabled);
 		focalLengthSpinner.setEnabled(focalLengthEnabled);
+	}
+
+	private int exaggerationToSlider(double exaggeration)
+	{
+		double y = exaggeration;
+		double x = Math.log10(y + (100 - y) / 100);
+		return (int) (x * 100);
+	}
+
+	private double sliderToExaggeration(int slider)
+	{
+		double x = slider / 100d;
+		double y = Math.pow(10d, x) - (2 - x) / 2;
+		return y;
 	}
 
 	private class DisplayObject

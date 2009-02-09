@@ -32,7 +32,7 @@ public class LayersPanel extends JPanel
 		standardPanel.addLowerLayers();
 
 		tabbedPane.addTab("Radiometrics", createRadiometry());
-		tabbedPane.addTab("Other", createOther());
+		tabbedPane.addTab("Geophysics", createGeophysics());
 		standardPanel.addUpperLayers();
 
 		tabbedPane.doLayout();
@@ -62,9 +62,9 @@ public class LayersPanel extends JPanel
 		return scrollPane;
 	}
 
-	private JComponent createOther()
+	private JComponent createGeophysics()
 	{
-		OtherPanel op = new OtherPanel(wwd);
+		GeophysicsPanel op = new GeophysicsPanel(wwd);
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(op, BorderLayout.NORTH);
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

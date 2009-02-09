@@ -64,7 +64,8 @@ public class AboutDialog extends JDialog
 
 		JEditorPane editorPane = new JEditorPane();
 		editorPane.setEditable(false);
-		java.net.URL helpURL = this.getClass().getResource("/data/help/about");
+		java.net.URL helpURL = this.getClass().getResource(
+				"/data/help/about.html");
 		if (helpURL != null)
 		{
 			try

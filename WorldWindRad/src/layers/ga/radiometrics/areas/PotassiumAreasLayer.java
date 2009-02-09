@@ -35,6 +35,6 @@ public class PotassiumAreasLayer extends GALayer
 	@Override
 	public String toString()
 	{
-		return "Areas of Interest";
+		return "Potassium (K)";
 	}
 }

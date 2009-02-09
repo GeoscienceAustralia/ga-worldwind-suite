@@ -116,6 +116,7 @@ public class Settings
 		private boolean windowMaximized = false;
 		private List<Bookmark> bookmarks = new ArrayList<Bookmark>();
 		private List<Annotation> annotations = new ArrayList<Annotation>();
+		private double viewIteratorSpeed = 1.0;
 
 		public boolean isProxyEnabled()
 		{
@@ -389,6 +390,16 @@ public class Settings
 			if (annotations == null)
 				annotations = new ArrayList<Annotation>();
 			this.annotations = annotations;
+		}
+
+		public double getViewIteratorSpeed()
+		{
+			return viewIteratorSpeed;
+		}
+
+		public void setViewIteratorSpeed(double viewIteratorSpeed)
+		{
+			this.viewIteratorSpeed = viewIteratorSpeed;
 		}
 	}
 
