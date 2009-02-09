@@ -4,6 +4,7 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.layers.Layer;
 
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -16,6 +17,10 @@ import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import util.FlatJButton;
+import util.HtmlViewer;
+import util.Icons;
 
 import layers.ga.gravity.GravityLayer;
 import layers.ga.magnetics.MagneticsLayer;
@@ -31,9 +36,11 @@ public class GeophysicsPanel extends JPanel
 	private JSlider magneticsSlider;
 
 	private WorldWindow wwd;
+	private Frame frame;
 
-	public GeophysicsPanel(WorldWindow wwd)
+	public GeophysicsPanel(WorldWindow wwd, Frame frame)
 	{
+		this.frame = frame;
 		this.wwd = wwd;
 		createLayers();
 		fillPanel();
@@ -57,7 +64,8 @@ public class GeophysicsPanel extends JPanel
 		JPanel panel;
 		Dimension size;
 		JSeparator js;
-		
+		FlatJButton flat;
+
 		int SPACING = 5;
 
 		ActionListener al = new ActionListener()
@@ -74,7 +82,7 @@ public class GeophysicsPanel extends JPanel
 				updateLayers();
 			}
 		};
-		
+
 		JPanel mainPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -91,7 +99,7 @@ public class GeophysicsPanel extends JPanel
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.CENTER;
 		mainPanel.add(panel, c);
-		
+
 		js = new JSeparator(JSeparator.HORIZONTAL);
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -128,7 +136,27 @@ public class GeophysicsPanel extends JPanel
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(gravitySlider, c);
-		
+
+		flat = new FlatJButton(Icons.info);
+		flat.restrictSize();
+		flat.addActionListener(createMetadataListener("Gravity",
+				"/data/metadata/gravity/metadata.html", 600, 440));
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(flat, c);
+
+		flat = new FlatJButton(Icons.legend);
+		flat.restrictSize();
+		flat.addActionListener(createMetadataListener("Gravity Legend",
+				"/data/metadata/gravity/legend.html", 250, 420));
+		c = new GridBagConstraints();
+		c.gridx = 3;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(flat, c);
+
 		js = new JSeparator(JSeparator.HORIZONTAL);
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -144,7 +172,7 @@ public class GeophysicsPanel extends JPanel
 		c.gridy = 4;
 		c.anchor = GridBagConstraints.CENTER;
 		mainPanel.add(panel, c);
-		
+
 		js = new JSeparator(JSeparator.HORIZONTAL);
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -181,6 +209,26 @@ public class GeophysicsPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(magneticsSlider, c);
 		
+		flat = new FlatJButton(Icons.info);
+		flat.restrictSize();
+		flat.addActionListener(createMetadataListener("Magnetics",
+				"/data/metadata/magnetics/metadata.html", 600, 440));
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(flat, c);
+
+		flat = new FlatJButton(Icons.legend);
+		flat.restrictSize();
+		flat.addActionListener(createMetadataListener("Magnetics Legend",
+				"/data/metadata/magnetics/legend.html", 250, 420));
+		c = new GridBagConstraints();
+		c.gridx = 3;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(flat, c);
+
 		js = new JSeparator(JSeparator.HORIZONTAL);
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -197,5 +245,20 @@ public class GeophysicsPanel extends JPanel
 		magnetics.setEnabled(magneticsCheck.isSelected());
 		magnetics.setOpacity(magneticsSlider.getValue() / 100d);
 		wwd.redraw();
+	}
+
+	private ActionListener createMetadataListener(final String title,
+			final String page, final int width, final int height)
+	{
+		return new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				HtmlViewer dialog = new HtmlViewer(frame, title, page);
+				dialog.setSize(width, height);
+				dialog.setLocationRelativeTo(frame);
+				dialog.setVisible(true);
+			}
+		};
 	}
 }

@@ -64,7 +64,7 @@ public class LayersPanel extends JPanel
 
 	private JComponent createGeophysics()
 	{
-		GeophysicsPanel op = new GeophysicsPanel(wwd);
+		GeophysicsPanel op = new GeophysicsPanel(wwd, frame);
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(op, BorderLayout.NORTH);
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
