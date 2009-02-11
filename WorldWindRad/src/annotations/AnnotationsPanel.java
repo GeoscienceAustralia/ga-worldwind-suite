@@ -22,6 +22,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -347,6 +353,7 @@ public class AnnotationsPanel extends JPanel
 
 	private void deleteSelected()
 	{
+		int index = list.getSelectedIndex();
 		ListItem item = (ListItem) list.getSelectedValue();
 		if (item != null)
 		{
@@ -360,6 +367,9 @@ public class AnnotationsPanel extends JPanel
 				model.removeElement(item);
 				Settings.get().getAnnotations().remove(item.annotation);
 				list.repaint();
+				if (index >= model.getSize())
+					index = model.getSize() - 1;
+				list.setSelectedIndex(index);
 				refreshLayer();
 			}
 		}
@@ -423,6 +433,60 @@ public class AnnotationsPanel extends JPanel
 							zoom, lengthMillis, true);
 
 			view.applyStateIterator(vsi);
+		}
+	}
+
+	public void importAnnotations(File file) throws Exception
+	{
+		if (file.exists())
+		{
+			XMLDecoder xmldec = null;
+			try
+			{
+				FileInputStream fis = new FileInputStream(file);
+				xmldec = new XMLDecoder(fis);
+				List<Annotation> annotations = Settings.get().getAnnotations();
+				List<?> newAnnotations = (List<?>) xmldec.readObject();
+				if (newAnnotations != null)
+				{
+					for (Object object : newAnnotations)
+					{
+						if (object instanceof Annotation)
+							annotations.add((Annotation) object);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
+			finally
+			{
+				if (xmldec != null)
+					xmldec.close();
+			}
+			populateList();
+			refreshLayer();
+		}
+	}
+
+	public void exportAnnotations(File file) throws Exception
+	{
+		XMLEncoder xmlenc = null;
+		try
+		{
+			FileOutputStream fos = new FileOutputStream(file);
+			xmlenc = new XMLEncoder(fos);
+			xmlenc.writeObject(Settings.get().getAnnotations());
+		}
+		catch (Exception e)
+		{
+			throw e;
+		}
+		finally
+		{
+			if (xmlenc != null)
+				xmlenc.close();
 		}
 	}
 

@@ -319,6 +319,7 @@ public class RadiometricsPanel extends JPanel
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
+		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasCheck, c);
 
@@ -330,7 +331,7 @@ public class RadiometricsPanel extends JPanel
 		size.width = 50;
 		areasSlider.setPreferredSize(size);
 		c = new GridBagConstraints();
-		c.gridx = 1;
+		c.gridx = 2;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasSlider, c);
@@ -340,23 +341,15 @@ public class RadiometricsPanel extends JPanel
 		metadata.addActionListener(createMetadataListener(
 				"Colour-enhanced areas", "info_areas.html", 700, 500));
 		c = new GridBagConstraints();
-		c.gridx = 2;
+		c.gridx = 3;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(metadata, c);
 
-		panel = new JPanel(new GridBagLayout());
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 5;
-		c.anchor = GridBagConstraints.WEST;
-		c.insets = new Insets(0, INDENT, 0, 0);
-		mainPanel.add(panel, c);
-
 		JLabel label = new JLabel("Layer:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = 1;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(5, 0, 5, 0);
 		panel.add(label, c);
@@ -369,15 +362,28 @@ public class RadiometricsPanel extends JPanel
 		areasCombo.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 0;
+		c.gridy = 1;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(5, 5, 5, 0);
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasCombo, c);
 
+		FlatJButton legend = new FlatJButton(Icons.legend);
+		legend.restrictSize();
+		legend.addActionListener(createMetadataListener(
+				"Color-enhanced areas legends", "areas_legend.html", 700, 500));
+		c = new GridBagConstraints();
+		c.gridx = 3;
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(5, 0, 5, 0);
+		panel.add(legend, c);
+
 		label = new JLabel("Fly to:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 2;
 		c.anchor = GridBagConstraints.EAST;
 		panel.add(label, c);
 
@@ -389,7 +395,8 @@ public class RadiometricsPanel extends JPanel
 		flytoCombo.setMaximumSize(size);
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 1;
+		c.gridy = 2;
+		c.gridwidth = 3;
 		c.insets = new Insets(0, 5, 0, 0);
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(flytoCombo, c);
@@ -487,7 +494,7 @@ public class RadiometricsPanel extends JPanel
 					dialog.setLocationRelativeTo(frame);
 				}
 				if (dialog.isVisible())
-					dialog.dispose();
+					dialog.requestFocus();
 				else
 					dialog.setVisible(true);
 			}

@@ -277,7 +277,7 @@ public class GeophysicsPanel extends JPanel
 					dialog.setLocationRelativeTo(frame);
 				}
 				if (dialog.isVisible())
-					dialog.dispose();
+					dialog.requestFocus();
 				else
 					dialog.setVisible(true);
 			}

@@ -116,7 +116,7 @@ public class Application
 		catch (Exception e)
 		{
 		}
-		
+
 		NativeJOGLLibs.init();
 	}
 
@@ -165,6 +165,7 @@ public class Application
 	private Layer logo, scalebar, compass;
 
 	private JVisibleDialog annotationsDialog;
+	private AnnotationsPanel annotationsPanel;
 	private JVisibleDialog placesearchDialog;
 	private JDialog[] dialogs;
 
@@ -231,15 +232,7 @@ public class Application
 		afterSettingsChange();
 
 		//create dialogs
-		annotationsDialog = createDialog("Annotations");
-		annotationsDialog.add(new AnnotationsPanel(wwd, frame),
-				BorderLayout.CENTER);
-
-		placesearchDialog = createDialog("Place search");
-		placesearchDialog.add(new PlaceSearchPanel(wwd), BorderLayout.CENTER);
-
-		dialogs = new JDialog[] { annotationsDialog, placesearchDialog };
-		loadDialogBounds();
+		createDialogs();
 
 
 		frame.setJMenuBar(createMenuBar());
@@ -258,6 +251,138 @@ public class Application
 		catch (Exception e)
 		{
 		}
+	}
+
+	private void createDialogs()
+	{
+		annotationsDialog = createDialog("Annotations");
+		annotationsPanel = new AnnotationsPanel(wwd, frame);
+		annotationsDialog.add(annotationsPanel, BorderLayout.CENTER);
+		annotationsDialog.setJMenuBar(createAnnotationsMenuBar());
+
+		placesearchDialog = createDialog("Place search");
+		placesearchDialog.add(new PlaceSearchPanel(wwd), BorderLayout.CENTER);
+
+		dialogs = new JDialog[] { annotationsDialog, placesearchDialog };
+		loadDialogBounds();
+	}
+
+	private JMenuBar createAnnotationsMenuBar()
+	{
+		JMenuBar menuBar = new JMenuBar();
+
+		JMenu menu;
+		JMenuItem menuItem;
+
+		menu = new JMenu("File");
+		menuBar.add(menu);
+
+		final JFileChooser chooser = new JFileChooser();
+		FileFilter filter = new FileFilter()
+		{
+			@Override
+			public boolean accept(File f)
+			{
+				if (f.isDirectory())
+					return true;
+				int index = f.getName().lastIndexOf('.');
+				if (index < 0)
+					return false;
+				String ext = f.getName().substring(index + 1);
+				return ext.toLowerCase().equals("xml");
+			}
+
+			@Override
+			public String getDescription()
+			{
+				return "XML files (*.xml)";
+			}
+		};
+		chooser.setFileFilter(filter);
+
+		menuItem = new JMenuItem("Import...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent ae)
+			{
+				chooser.setMultiSelectionEnabled(true);
+				if (chooser.showOpenDialog(annotationsDialog) == JFileChooser.APPROVE_OPTION)
+				{
+					for (File file : chooser.getSelectedFiles())
+					{
+						try
+						{
+							annotationsPanel.importAnnotations(file);
+						}
+						catch (Exception e)
+						{
+							JOptionPane.showMessageDialog(annotationsDialog,
+									"Could not import " + file.getName(),
+									"Import error", JOptionPane.ERROR_MESSAGE);
+						}
+					}
+				}
+				chooser.setMultiSelectionEnabled(false);
+			}
+		});
+
+		menuItem = new JMenuItem("Export...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent ae)
+			{
+				if (chooser.showSaveDialog(annotationsDialog) == JFileChooser.APPROVE_OPTION)
+				{
+					File file = chooser.getSelectedFile();
+					if (!file.getName().toLowerCase().endsWith(".xml"))
+					{
+						file = new File(file.getAbsolutePath() + ".xml");
+						if (file.exists())
+						{
+							int answer = JOptionPane
+									.showConfirmDialog(
+											annotationsDialog,
+											file.getAbsolutePath()
+													+ " already exists.\nDo you want to replace it?",
+											"Export",
+											JOptionPane.YES_NO_OPTION,
+											JOptionPane.WARNING_MESSAGE);
+							if (answer != JOptionPane.YES_OPTION)
+								file = null;
+						}
+					}
+					if (file != null)
+					{
+						try
+						{
+							annotationsPanel.exportAnnotations(file);
+						}
+						catch (Exception e)
+						{
+							JOptionPane.showMessageDialog(annotationsDialog,
+									"Error: " + e, "Export error",
+									JOptionPane.ERROR_MESSAGE);
+						}
+					}
+				}
+			}
+		});
+
+		menu.addSeparator();
+
+		menuItem = new JMenuItem("Close");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				annotationsDialog.setVisible(false);
+			}
+		});
+
+		return menuBar;
 	}
 
 	private void saveImage()
@@ -740,7 +865,8 @@ public class Application
 	private JMenuItem createDialogMenuItem(final JVisibleDialog dialog)
 	{
 		final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(dialog
-				.getTitle(), dialog.isVisible());
+				.getTitle()
+				+ " dialog", dialog.isVisible());
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)

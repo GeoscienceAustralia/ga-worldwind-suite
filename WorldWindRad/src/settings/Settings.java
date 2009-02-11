@@ -49,15 +49,21 @@ public class Settings
 		File file = getSettingsFile();
 		if (file.exists())
 		{
+			XMLDecoder xmldec = null;
 			try
 			{
 				FileInputStream fis = new FileInputStream(file);
-				XMLDecoder xmldec = new XMLDecoder(fis);
+				xmldec = new XMLDecoder(fis);
 				settings = (Properties) xmldec.readObject();
 			}
 			catch (Exception e)
 			{
 				settings = null;
+			}
+			finally
+			{
+				if (xmldec != null)
+					xmldec.close();
 			}
 		}
 		if (settings == null)
@@ -80,17 +86,22 @@ public class Settings
 
 	public static void save()
 	{
+		XMLEncoder xmlenc = null;
 		try
 		{
 			File file = getSettingsFile();
 			FileOutputStream fos = new FileOutputStream(file);
-			XMLEncoder xmlenc = new XMLEncoder(fos);
+			xmlenc = new XMLEncoder(fos);
 			xmlenc.writeObject(instance.settings);
-			xmlenc.close();
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
+		}
+		finally
+		{
+			if (xmlenc != null)
+				xmlenc.close();
 		}
 	}
 

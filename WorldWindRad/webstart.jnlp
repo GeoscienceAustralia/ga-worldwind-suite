@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jnlp spec="1.0" codebase="http://sandpit:8500/apps/radiometrics/webstart/"
+<jnlp spec="1.0" codebase="http://sandpit:8500/apps/world-wind/"
 	href="webstart.jnlp">
 	<information>
 		<title>World Wind</title>
@@ -19,8 +19,6 @@
 			initial-heap-size="512m" max-heap-size="512m" />
 		<property name="sun.java2d.noddraw" value="true" />
 		<jar href="application.jar" main="true" />
-		<extension name="jogl"
-			href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp" />
 		<extension name="worldwind"
 			href="http://worldwind.arc.nasa.gov/java/0.5.0/webstart/worldwind.jnlp" />
 	</resources>
