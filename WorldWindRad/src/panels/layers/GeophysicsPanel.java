@@ -10,6 +10,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
@@ -22,6 +24,7 @@ import util.FlatJButton;
 import util.HtmlViewer;
 import util.Icons;
 
+import layers.ga.GALayer;
 import layers.ga.gravity.GravityLayer;
 import layers.ga.magnetics.MagneticsLayer;
 
@@ -139,8 +142,8 @@ public class GeophysicsPanel extends JPanel
 
 		flat = new FlatJButton(Icons.info);
 		flat.restrictSize();
-		flat.addActionListener(createMetadataListener("Gravity",
-				"/data/metadata/gravity/metadata.html", 600, 440));
+		flat.addActionListener(createMetadataListener("Gravity", "gravity",
+				"info_grav.html", 700, 500));
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = 0;
@@ -150,7 +153,7 @@ public class GeophysicsPanel extends JPanel
 		flat = new FlatJButton(Icons.legend);
 		flat.restrictSize();
 		flat.addActionListener(createMetadataListener("Gravity Legend",
-				"/data/metadata/gravity/legend.html", 250, 420));
+				"gravity", "grav_legend.html", 200, 420));
 		c = new GridBagConstraints();
 		c.gridx = 3;
 		c.gridy = 0;
@@ -208,11 +211,11 @@ public class GeophysicsPanel extends JPanel
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(magneticsSlider, c);
-		
+
 		flat = new FlatJButton(Icons.info);
 		flat.restrictSize();
-		flat.addActionListener(createMetadataListener("Magnetics",
-				"/data/metadata/magnetics/metadata.html", 600, 440));
+		flat.addActionListener(createMetadataListener("Magnetics", "magnetics",
+				"info_mag.html", 700, 500));
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = 0;
@@ -222,7 +225,7 @@ public class GeophysicsPanel extends JPanel
 		flat = new FlatJButton(Icons.legend);
 		flat.restrictSize();
 		flat.addActionListener(createMetadataListener("Magnetics Legend",
-				"/data/metadata/magnetics/legend.html", 250, 420));
+				"magnetics", "mag_legend.html", 220, 420));
 		c = new GridBagConstraints();
 		c.gridx = 3;
 		c.gridy = 0;
@@ -248,16 +251,35 @@ public class GeophysicsPanel extends JPanel
 	}
 
 	private ActionListener createMetadataListener(final String title,
-			final String page, final int width, final int height)
+			final String directory, final String htmlpage, final int width,
+			final int height)
 	{
 		return new ActionListener()
 		{
+			private HtmlViewer dialog = null;
+
 			public void actionPerformed(ActionEvent e)
 			{
-				HtmlViewer dialog = new HtmlViewer(frame, title, page);
-				dialog.setSize(width, height);
-				dialog.setLocationRelativeTo(frame);
-				dialog.setVisible(true);
+				if (dialog == null)
+				{
+					URL page = null, base = null;
+					try
+					{
+						base = new URL(GALayer.METADATA_BASE_URL + directory
+								+ "/");
+						page = new URL(base, htmlpage);
+					}
+					catch (MalformedURLException mue)
+					{
+					}
+					dialog = new HtmlViewer(frame, title, page, base);
+					dialog.setSize(width, height);
+					dialog.setLocationRelativeTo(frame);
+				}
+				if (dialog.isVisible())
+					dialog.dispose();
+				else
+					dialog.setVisible(true);
 			}
 		};
 	}

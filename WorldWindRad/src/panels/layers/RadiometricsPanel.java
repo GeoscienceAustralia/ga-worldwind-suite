@@ -15,6 +15,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
@@ -28,6 +30,7 @@ import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import layers.ga.GALayer;
 import layers.ga.radiometrics.DoseRateLayer;
 import layers.ga.radiometrics.PotassiumLayer;
 import layers.ga.radiometrics.RatioThKLayer;
@@ -52,8 +55,6 @@ import util.Util;
 
 public class RadiometricsPanel extends JPanel
 {
-	private static final String METADATA_BASE = "/data/metadata/radiometrics/";
-
 	private Layer[] layers;
 
 	private Layer ternary;
@@ -91,22 +92,22 @@ public class RadiometricsPanel extends JPanel
 	private WorldWindow wwd;
 	private Frame frame;
 
-	private final static Area NSW = new Area("New South Wales (NSW)", -33.1987,
-			149.0234, 392604);
-	private final static Area VIC = new Area("Victoria (VIC)", -36.9108,
+	private final static Area NSW = new Area("Bathurst/Orange Region - NSW",
+			-33.1987, 149.0234, 392604);
+	private final static Area VIC = new Area("Central Uplands - VIC", -36.9108,
 			144.2817, 392604);
-	private final static Area QLD = new Area("Mount Isa (QLD)", -20.8108,
-			140.1693, 451477);
-	private final static Area SA_1 = new Area("NW South Australia (SA)",
-			-26.6803, 130.9017, 490283);
-	private final static Area SA_2 = new Area("Flinders (SA)", -32.0084,
+	private final static Area QLD = new Area("Mount Isa Region - QLD",
+			-20.8108, 140.1693, 451477);
+	private final static Area SA_1 = new Area("Musgrave Range - SA", -26.6803,
+			130.9017, 490283);
+	private final static Area SA_2 = new Area("Flinders Ranges - SA", -32.0084,
 			138.6874, 392604);
-	private final static Area NT = new Area("Central Australia (NT)", -23.8029,
+	private final static Area NT = new Area("Macdonnell Ranges - NT", -23.8029,
 			133.0763, 488105);
-	private final static Area WA = new Area("Pilbara (WA)", -21.0474, 119.6494,
-			559794);
-	private final static Area TAS = new Area("NE Tasmania (TAS)", -41.1247,
-			147.8028, 161772);
+	private final static Area WA = new Area("Pilbara Region - WA", -21.0474,
+			119.6494, 559794);
+	private final static Area TAS = new Area("North East Region - TAS",
+			-41.1247, 147.8028, 161772);
 
 	private final static Object[] FLYTO = new Object[] { "", NSW, VIC, QLD,
 			SA_1, SA_2, NT, WA, TAS };
@@ -175,7 +176,6 @@ public class RadiometricsPanel extends JPanel
 				updateLayers();
 			}
 		};
-		ActionListener metadataAL = createMetadataListener();
 
 		JPanel mainPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -235,25 +235,26 @@ public class RadiometricsPanel extends JPanel
 
 		FlatJButton metadata = new FlatJButton(Icons.info);
 		metadata.restrictSize();
-		metadata.addActionListener(metadataAL);
+		metadata.addActionListener(createMetadataListener("Radiometrics",
+				"info_radio.html", 700, 500));
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = gridy++;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(metadata, c);
 
-		ActionListener ternaryLegend = createLegendListener(
-				"ternary_legend.html", "Ternary legend");
-		ActionListener KLegend = createLegendListener("k_legend.html",
-				"Potassium legend");
-		ActionListener ThLegend = createLegendListener("th_legend.html",
-				"Thorium legend");
-		ActionListener ULegend = createLegendListener("u_legend.html",
-				"Uranium legend");
-		ActionListener ratioLegend = createLegendListener("ratio_legend.html",
-				"Ratio legend");
-		ActionListener doseLegend = createLegendListener("dose_legend.html",
-				"Dose rate legend");
+		ActionListener ternaryLegend = createMetadataListener("Ternary legend",
+				"ternary_legend.html", 500, 350);
+		ActionListener KLegend = createMetadataListener("Potassium legend",
+				"k_legend.html", 280, 350);
+		ActionListener ThLegend = createMetadataListener("Thorium legend",
+				"th_legend.html", 280, 350);
+		ActionListener ULegend = createMetadataListener("Uranium legend",
+				"u_legend.html", 280, 350);
+		ActionListener ratioLegend = createMetadataListener("Ratio legend",
+				"ratio_legend.html", 280, 350);
+		ActionListener doseLegend = createMetadataListener("Dose rate legend",
+				"dose_legend.html", 280, 350);
 
 		ternaryRadio = new JRadioButton(ternary.getName());
 		ternaryRadio.addActionListener(al);
@@ -310,9 +311,10 @@ public class RadiometricsPanel extends JPanel
 		c.gridx = 0;
 		c.gridy = 4;
 		c.insets = new Insets(0, INDENT, 0, 0);
+		c.anchor = GridBagConstraints.WEST;
 		mainPanel.add(panel, c);
 
-		areasCheck = new JCheckBox("Color-enhanced areas");
+		areasCheck = new JCheckBox("Colour-enhanced areas");
 		areasCheck.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -330,9 +332,18 @@ public class RadiometricsPanel extends JPanel
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
-		c.insets = new Insets(0, 0, 0, 0);
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasSlider, c);
+
+		metadata = new FlatJButton(Icons.info);
+		metadata.restrictSize();
+		metadata.addActionListener(createMetadataListener(
+				"Colour-enhanced areas", "info_areas.html", 700, 500));
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(metadata, c);
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -361,7 +372,6 @@ public class RadiometricsPanel extends JPanel
 		c.gridy = 0;
 		c.insets = new Insets(5, 5, 5, 0);
 		c.anchor = GridBagConstraints.WEST;
-		//c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(areasCombo, c);
 
 		label = new JLabel("Fly to:");
@@ -373,12 +383,15 @@ public class RadiometricsPanel extends JPanel
 
 		flytoCombo = new JComboBox(FLYTO);
 		flytoCombo.setMaximumRowCount(FLYTO.length);
+		size = flytoCombo.getPreferredSize();
+		size.width -= 10;
+		flytoCombo.setPreferredSize(size);
+		flytoCombo.setMaximumSize(size);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 1;
 		c.insets = new Insets(0, 5, 0, 0);
 		c.anchor = GridBagConstraints.WEST;
-		//c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(flytoCombo, c);
 
 		flytoCombo.addActionListener(new ActionListener()
@@ -423,11 +436,6 @@ public class RadiometricsPanel extends JPanel
 		this.revalidate();
 	}
 
-	/*private void addRadioToPanel(JPanel panel, int gridy, JRadioButton radio)
-	{
-		addRadioToPanel(panel, gridy, radio, null);
-	}*/
-
 	private void addRadioToPanel(JPanel panel, int gridy, JRadioButton radio,
 			ActionListener legendAL)
 	{
@@ -453,34 +461,35 @@ public class RadiometricsPanel extends JPanel
 		}
 	}
 
-	private ActionListener createMetadataListener()
+	private ActionListener createMetadataListener(final String title,
+			final String htmlpage, final int width, final int height)
 	{
 		return new ActionListener()
 		{
+			private HtmlViewer dialog = null;
+
 			public void actionPerformed(ActionEvent ae)
 			{
-				HtmlViewer dialog = new HtmlViewer(frame, "Radiometrics",
-						METADATA_BASE + "metadata.html");
-				dialog.setSize(600, 440);
-				dialog.setLocationRelativeTo(frame);
-				dialog.setVisible(true);
-			}
-		};
-	}
-
-	private ActionListener createLegendListener(final String page,
-			final String title)
-	{
-		return new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				HtmlViewer dialog = new HtmlViewer(frame, title, METADATA_BASE
-						+ page);
-				int width = title.toLowerCase().contains("ternary") ? 500 : 280;
-				dialog.setSize(width, 350);
-				dialog.setLocationRelativeTo(frame);
-				dialog.setVisible(true);
+				if (dialog == null)
+				{
+					URL page = null, base = null;
+					try
+					{
+						base = new URL(GALayer.METADATA_BASE_URL
+								+ "radiometrics/");
+						page = new URL(base, htmlpage);
+					}
+					catch (MalformedURLException e)
+					{
+					}
+					dialog = new HtmlViewer(frame, title, page, base);
+					dialog.setSize(width, height);
+					dialog.setLocationRelativeTo(frame);
+				}
+				if (dialog.isVisible())
+					dialog.dispose();
+				else
+					dialog.setVisible(true);
 			}
 		};
 	}

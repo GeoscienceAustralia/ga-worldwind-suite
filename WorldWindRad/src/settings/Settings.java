@@ -19,7 +19,6 @@ import java.util.List;
 import annotations.Annotation;
 import bookmarks.Bookmark;
 
-
 public class Settings
 {
 	private final static String SETTINGS_FILENAME = ".gaww.xml";
@@ -117,6 +116,8 @@ public class Settings
 		private List<Bookmark> bookmarks = new ArrayList<Bookmark>();
 		private List<Annotation> annotations = new ArrayList<Annotation>();
 		private double viewIteratorSpeed = 1.0;
+		private Rectangle[] dialogBounds = null;
+		private boolean[] dialogsOpen = null;
 
 		public boolean isProxyEnabled()
 		{
@@ -275,17 +276,16 @@ public class Settings
 
 		public Rectangle getWindowBounds()
 		{
-			checkWindowBounds();
+			windowBounds = checkWindowBounds(windowBounds);
 			return windowBounds;
 		}
 
 		public void setWindowBounds(Rectangle windowBounds)
 		{
-			this.windowBounds = windowBounds;
-			checkWindowBounds();
+			this.windowBounds = checkWindowBounds(windowBounds);
 		}
 
-		private void checkWindowBounds()
+		private Rectangle checkWindowBounds(Rectangle windowBounds)
 		{
 			GraphicsEnvironment ge = GraphicsEnvironment
 					.getLocalGraphicsEnvironment();
@@ -295,6 +295,10 @@ public class Settings
 				Point center = ge.getCenterPoint();
 				windowBounds = new Rectangle(center.x - 400, center.y - 300,
 						800, 600);
+			}
+			else
+			{
+				windowBounds = new Rectangle(windowBounds);
 			}
 
 			Rectangle maximumBounds = new Rectangle();
@@ -326,6 +330,8 @@ public class Settings
 			{
 				windowBounds = maximumBounds;
 			}
+
+			return windowBounds;
 		}
 
 		public int[] getSplitLocations()
@@ -400,6 +406,38 @@ public class Settings
 		public void setViewIteratorSpeed(double viewIteratorSpeed)
 		{
 			this.viewIteratorSpeed = viewIteratorSpeed;
+		}
+
+		public Rectangle[] getDialogBounds()
+		{
+			dialogBounds = checkWindowBounds(dialogBounds);
+			return dialogBounds;
+		}
+
+		public void setDialogBounds(Rectangle[] dialogBounds)
+		{
+			this.dialogBounds = checkWindowBounds(dialogBounds);
+		}
+
+		private Rectangle[] checkWindowBounds(Rectangle[] bounds)
+		{
+			if (bounds == null)
+				return bounds;
+			for (int i = 0; i < bounds.length; i++)
+			{
+				bounds[i] = checkWindowBounds(bounds[i]);
+			}
+			return bounds;
+		}
+
+		public boolean[] getDialogsOpen()
+		{
+			return dialogsOpen;
+		}
+
+		public void setDialogsOpen(boolean[] dialogsOpen)
+		{
+			this.dialogsOpen = dialogsOpen;
 		}
 	}
 

@@ -49,6 +49,7 @@ public class StandardPanel extends JPanel
 	private Layer country;
 	private Layer state;
 	private Layer osmmapnik;
+	private Layer osmmapniktrans;
 	private Layer street;
 	private Layer graticule;
 
@@ -86,6 +87,7 @@ public class StandardPanel extends JPanel
 		country = new MetacartaCountryBoundariesLayer();
 		state = new MetacartaStateBoundariesLayer();
 		osmmapnik = new layers.mercator.OpenStreetMapLayer();
+		osmmapniktrans = new layers.mercator.OpenStreetMapTransparentLayer();
 		street = new OpenStreetMapLayer();
 		graticule = new MGRSGraticuleLayer();
 
@@ -103,7 +105,7 @@ public class StandardPanel extends JPanel
 		lowerLayers = new Layer[] { stars, atmosphere, fog, bmngone, bmng,
 				landsat, veaerial, veroad, vehybrid, osmmapnik };
 		upperLayers = new Layer[] { pnl, geonames, coastline, country, state,
-				street, graticule };
+				street, osmmapniktrans, graticule };
 
 		veaerial.setEnabled(false);
 		veroad.setEnabled(false);
@@ -115,6 +117,7 @@ public class StandardPanel extends JPanel
 		geonames.setEnabled(false);
 		graticule.setEnabled(false);
 		street.setEnabled(false);
+		osmmapniktrans.setEnabled(false);
 	}
 
 	private void createPanel()
@@ -261,6 +264,7 @@ public class StandardPanel extends JPanel
 		panel.add(createCheckBox(pnl));
 		panel.add(createCheckBox(geonames));
 		panel.add(createCheckBox(street));
+		panel.add(createCheckBox(osmmapniktrans));
 		panel.add(createCheckBox(graticule));
 	}
 

@@ -49,6 +49,8 @@ public class VirtualEarthLayer extends BasicMercatorTiledImageLayer
 		this.setValue(AVKey.DISPLAY_NAME, "Microsoft Virtual Earth "
 				+ dataset.label);
 		this.setSplitScale(1.3);
+		this.setForceLevelZeroLoads(true);
+		this.setRetainLevelZeroTiles(true);
 	}
 
 	protected static LevelSet makeLevels(Dataset dataset)
@@ -150,7 +152,7 @@ public class VirtualEarthLayer extends BasicMercatorTiledImageLayer
 		int r = (rgb >> 16) & 0xff;
 		int g = (rgb >> 8) & 0xff;
 		int b = (rgb >> 0) & 0xff;
-		return r + b + g > threshold * 3;
+		return r + b + g >= threshold * 3;
 	}
 
 	public Dataset getDataset()

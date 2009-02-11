@@ -18,6 +18,8 @@ public class OpenStreetMapLayer extends BasicMercatorTiledImageLayer
 	{
 		super(makeLevels());
 		setSplitScale(1.3);
+		this.setForceLevelZeroLoads(true);
+		this.setRetainLevelZeroTiles(true);
 	}
 
 	private static LevelSet makeLevels()

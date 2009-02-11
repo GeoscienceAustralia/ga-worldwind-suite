@@ -9,9 +9,10 @@ import layers.mask.MaskTiledImageLayer;
 
 public class GALayer extends MaskTiledImageLayer
 {
+	public final static String METADATA_BASE_URL = "http://sandpit:8500/apps/world-wind/metadata/";
 	private final static String TILES_SCRIPT_URL = "http://sandpit:8500/apps/world-wind/tiles.jsp";
 	private final static double SPLIT_SCALE = 0.9;
-	
+
 	private static List<GALayer> gaLayers = new ArrayList<GALayer>();
 	private static LogoLayer logoLayer = new LogoLayer();
 

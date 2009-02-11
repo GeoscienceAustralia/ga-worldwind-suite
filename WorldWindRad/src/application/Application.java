@@ -58,7 +58,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
@@ -82,6 +81,7 @@ import stereo.StereoOrbitView;
 import stereo.StereoSceneController;
 import util.DoubleClickZoomListener;
 import util.HtmlViewer;
+import util.JVisibleDialog;
 import util.Util;
 import annotations.AnnotationEditor;
 import annotations.AnnotationsPanel;
@@ -116,6 +116,8 @@ public class Application
 		catch (Exception e)
 		{
 		}
+		
+		NativeJOGLLibs.init();
 	}
 
 	public static void main(String[] args)
@@ -157,11 +159,14 @@ public class Application
 	private LayersPanel layersPanel;
 	private MouseLayer mouseLayer;
 	private JSplitPane splitPane;
-	//private JSplitPane westSplitPane;
 	private JMenu bookmarksMenu;
 
 	private WorldMapLayer map;
 	private Layer logo, scalebar, compass;
+
+	private JVisibleDialog annotationsDialog;
+	private JVisibleDialog placesearchDialog;
+	private JDialog[] dialogs;
 
 	public Application()
 	{
@@ -175,6 +180,12 @@ public class Application
 				WorldMapLayer.class));
 		create3DMouse();
 		createDoubleClickListener();
+
+		RetrievalService rs = WorldWind.getRetrievalService();
+		if (rs instanceof ExtendedRetrievalService)
+		{
+			((ExtendedRetrievalService) rs).addLayer(wwd);
+		}
 
 		map = new WorldMapLayer();
 		scalebar = new ScalebarLayer();
@@ -213,55 +224,23 @@ public class Application
 		statusBar.setEventSource(wwd);
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
 
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		splitPane.setLeftComponent(tabbedPane);
-		//JTabbedPane tabbedPane2 = new JTabbedPane(JTabbedPane.TOP);
-
-		/*westSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true);
-		splitPane.setLeftComponent(westSplitPane);
-		splitPane.setResizeWeight(0.0);*/
-
 		layersPanel = new LayersPanel(wwd, frame);
-		tabbedPane.addTab("Layers", layersPanel);
-
-		PlaceSearchPanel placeSearchPanel = new PlaceSearchPanel(wwd);
-		tabbedPane.addTab("Place search", placeSearchPanel);
-
-		AnnotationsPanel annotationsPanel = new AnnotationsPanel(wwd, frame);
-		tabbedPane.addTab("Annotations", annotationsPanel);
-
-		/*final StatisticsPanel sp = new StatisticsPanel(wwd);
-		wwd.addRenderingListener(new RenderingListener()
-		{
-			public void stageChanged(RenderingEvent event)
-			{
-				sp.update(wwd);
-			}
-		});
-		tabbedPane1.addTab("Statistics", sp);
-		wwd.setPerFrameStatisticsKeys(PerformanceStatistic.ALL_STATISTICS_SET);*/
-
-		/*panel = new JPanel(new BorderLayout());
-		ExaggerationPanel exaggerationPanel = new ExaggerationPanel(wwd);
-		panel.add(exaggerationPanel, BorderLayout.NORTH);
-		tabbedPane2.addTab("Exaggeration", panel);*/
-
-		/*panel = new JPanel(new BorderLayout());
-		GoToCoordinatePanel gotoPanel = new GoToCoordinatePanel(wwd);
-		panel.add(gotoPanel, BorderLayout.NORTH);
-		tabbedPane2.addTab("Go to coord", panel);*/
-
-		/*panel = new JPanel(new BorderLayout());
-		SunPositionPanel sunPositionPanel = new SunPositionPanel(wwd);
-		panel.add(sunPositionPanel, BorderLayout.NORTH);
-		tabbedPane2.addTab("Sun position", panel);*/
-
-		/*westSplitPane.setTopComponent(tabbedPane1);
-		westSplitPane.setBottomComponent(tabbedPane2);
-		westSplitPane.setResizeWeight(1.0);*/
+		splitPane.setLeftComponent(layersPanel);
 
 		loadSplitLocations();
 		afterSettingsChange();
+
+		//create dialogs
+		annotationsDialog = createDialog("Annotations");
+		annotationsDialog.add(new AnnotationsPanel(wwd, frame),
+				BorderLayout.CENTER);
+
+		placesearchDialog = createDialog("Place search");
+		placesearchDialog.add(new PlaceSearchPanel(wwd), BorderLayout.CENTER);
+
+		dialogs = new JDialog[] { annotationsDialog, placesearchDialog };
+		loadDialogBounds();
+
 
 		frame.setJMenuBar(createMenuBar());
 		addWindowListeners();
@@ -279,14 +258,6 @@ public class Application
 		catch (Exception e)
 		{
 		}
-
-		RetrievalService rs = WorldWind.getRetrievalService();
-		if (rs instanceof ExtendedRetrievalService)
-		{
-			((ExtendedRetrievalService) rs).addLayer(wwd);
-		}
-
-		//wwd.getModel().getLayers().add(new YahooMapsLayer());
 	}
 
 	private void saveImage()
@@ -631,6 +602,14 @@ public class Application
 
 		menu.addSeparator();
 
+		menuItem = createDialogMenuItem(annotationsDialog);
+		menu.add(menuItem);
+
+		menuItem = createDialogMenuItem(placesearchDialog);
+		menu.add(menuItem);
+
+		menu.addSeparator();
+
 		menuItem = createLayerMenuItem(map);
 		menu.add(menuItem);
 
@@ -758,6 +737,27 @@ public class Application
 		return menuItem;
 	}
 
+	private JMenuItem createDialogMenuItem(final JVisibleDialog dialog)
+	{
+		final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(dialog
+				.getTitle(), dialog.isVisible());
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				dialog.setVisible(menuItem.isSelected());
+			}
+		});
+		dialog.addVisibilityListener(new JVisibleDialog.VisibilityListener()
+		{
+			public void visibleChanged(boolean visible)
+			{
+				menuItem.setSelected(visible);
+			}
+		});
+		return menuItem;
+	}
+
 	private void showControls()
 	{
 		JDialog dialog = new HtmlViewer(frame, "Controls",
@@ -827,6 +827,7 @@ public class Application
 	public void quit()
 	{
 		saveSplitLocations();
+		saveDialogBounds();
 		Settings.save();
 		frame.dispose();
 		System.exit(0);
@@ -836,7 +837,6 @@ public class Application
 	{
 		int[] splits = new int[1];
 		splits[0] = splitPane.getDividerLocation();
-		//splits[1] = westSplitPane.getDividerLocation();
 		Settings.get().setSplitLocations(splits);
 	}
 
@@ -847,9 +847,60 @@ public class Application
 		{
 			if (splits[0] >= 0)
 				splitPane.setDividerLocation(splits[0]);
-			/*if (splits[1] >= 0)
-				westSplitPane.setDividerLocation(splits[1]);*/
 		}
+	}
+
+	private void loadDialogBounds()
+	{
+		boolean[] dialogsOpen = Settings.get().getDialogsOpen();
+		Rectangle[] dialogBounds = Settings.get().getDialogBounds();
+		if (dialogsOpen != null && dialogsOpen.length == dialogs.length
+				&& dialogBounds != null
+				&& dialogBounds.length == dialogs.length)
+		{
+			for (int i = 0; i < dialogs.length; i++)
+			{
+				dialogs[i].setBounds(dialogBounds[i]);
+				dialogs[i].setVisible(dialogsOpen[i]);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < dialogs.length; i++)
+			{
+				dialogs[i].pack();
+				dialogs[i].setLocationRelativeTo(frame);
+			}
+		}
+	}
+
+	private void saveDialogBounds()
+	{
+		boolean[] dialogsOpen = new boolean[dialogs.length];
+		Rectangle[] dialogBounds = new Rectangle[dialogs.length];
+		for (int i = 0; i < dialogs.length; i++)
+		{
+			dialogsOpen[i] = dialogs[i].isVisible();
+			dialogBounds[i] = dialogs[i].getBounds();
+		}
+		Settings.get().setDialogsOpen(dialogsOpen);
+		Settings.get().setDialogBounds(dialogBounds);
+	}
+
+	private JVisibleDialog createDialog(String title)
+	{
+		final JVisibleDialog dialog = new JVisibleDialog(frame, title);
+		dialog.setLayout(new BorderLayout());
+		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		dialog.addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosing(WindowEvent e)
+			{
+				dialog.setVisible(false);
+			}
+		});
+		return dialog;
 	}
 
 	private final PropertyChangeListener propertyChangeListener = new PropertyChangeListener()

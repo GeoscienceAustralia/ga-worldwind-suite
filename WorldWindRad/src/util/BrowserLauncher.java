@@ -1,6 +1,7 @@
 package util;
 
 import java.lang.reflect.Method;
+import java.net.URI;
 
 import javax.swing.JOptionPane;
 
@@ -11,14 +12,26 @@ public class BrowserLauncher
 	public static void openURL(String url)
 	{
 		boolean desktopSupported = false;
-		
-		/*try
+
+		try
 		{
 			Class<?> desktop = Class.forName("java.awt.Desktop");
+			Method getDesktopMethod = desktop.getMethod("getDesktop",
+					new Class<?>[] {});
+			Object desktopInstance = getDesktopMethod.invoke(null,
+					new Object[] {});
+			String methodName = "browse";
+			if (url.toLowerCase().startsWith("mailto:"))
+				methodName = "mail";
+			Method method = desktop.getMethod(methodName,
+					new Class<?>[] { URI.class });
+			URI uri = new URI(url);
+			method.invoke(desktopInstance, new Object[] { uri });
+			desktopSupported = true;
 		}
-		catch (ClassNotFoundException cnfe)
+		catch (Exception cnfe)
 		{
-		}*/
+		}
 
 		if (!desktopSupported)
 		{

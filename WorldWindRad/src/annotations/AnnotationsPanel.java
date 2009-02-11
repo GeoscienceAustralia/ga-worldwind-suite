@@ -3,6 +3,7 @@ package annotations;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.OrbitView;
 
@@ -27,8 +28,10 @@ import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
@@ -36,7 +39,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import nasa.worldwind.view.FlyToOrbitViewStateIterator;
-
 import settings.Settings;
 import util.FlatJButton;
 import util.Icons;
@@ -97,37 +99,39 @@ public class AnnotationsPanel extends JPanel
 			}
 		});
 
-		final FlatJButton edit = new FlatJButton(Icons.edit);
-		edit.setToolTipText("Edit selected");
+		final FlatJButton editButton = new FlatJButton(Icons.edit);
+		editButton.setToolTipText("Edit selected");
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
 		c.weightx = 1d / 3d;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(edit, c);
-		edit.addActionListener(new ActionListener()
+		panel.add(editButton, c);
+		ActionListener editAL = new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				editSelected();
 			}
-		});
+		};
+		editButton.addActionListener(editAL);
 
-		final FlatJButton delete = new FlatJButton(Icons.delete);
-		delete.setToolTipText("Delete selected");
+		final FlatJButton deleteButton = new FlatJButton(Icons.delete);
+		deleteButton.setToolTipText("Delete selected");
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = 0;
 		c.weightx = 1d / 3d;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(delete, c);
-		delete.addActionListener(new ActionListener()
+		panel.add(deleteButton, c);
+		ActionListener deleteAL = new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				deleteSelected();
 			}
-		});
+		};
+		deleteButton.addActionListener(deleteAL);
 
 		model = new DefaultListModel();
 		list = new JList(model);
@@ -141,12 +145,20 @@ public class AnnotationsPanel extends JPanel
 		{
 			public void valueChanged(ListSelectionEvent e)
 			{
-				edit.setEnabled(list.getSelectedIndex() >= 0);
-				delete.setEnabled(list.getSelectedIndex() >= 0);
+				editButton.setEnabled(list.getSelectedIndex() >= 0);
+				deleteButton.setEnabled(list.getSelectedIndex() >= 0);
 			}
 		};
 		list.getSelectionModel().addListSelectionListener(lsl);
 		lsl.valueChanged(null);
+
+		final JPopupMenu popupMenu = new JPopupMenu();
+		JMenuItem editMenu = new JMenuItem("Edit");
+		popupMenu.add(editMenu);
+		editMenu.addActionListener(editAL);
+		JMenuItem deleteMenu = new JMenuItem("Delete");
+		popupMenu.add(deleteMenu);
+		deleteMenu.addActionListener(deleteAL);
 
 		list.addMouseListener(new MouseAdapter()
 		{
@@ -159,16 +171,24 @@ public class AnnotationsPanel extends JPanel
 					Rectangle rect = list.getCellBounds(index, index);
 					if (rect.contains(e.getPoint()))
 					{
-						Rectangle checkRect = new Rectangle(rect.x, rect.y,
-								rect.height, rect.height);
-						ListItem listItem = (ListItem) model.get(index);
-						if (checkRect.contains(e.getPoint()))
+						if (e.getButton() == MouseEvent.BUTTON1)
 						{
-							toggleCheck(listItem);
+							Rectangle checkRect = new Rectangle(rect.x, rect.y,
+									rect.height, rect.height);
+							ListItem listItem = (ListItem) model.get(index);
+							if (checkRect.contains(e.getPoint()))
+							{
+								toggleCheck(listItem);
+							}
+							else if (e.getClickCount() == 2)
+							{
+								flyTo(listItem);
+							}
 						}
-						else if (e.getClickCount() == 2)
+						else if (e.getButton() == MouseEvent.BUTTON3)
 						{
-							flyTo(listItem);
+							list.setSelectedIndex(index);
+							popupMenu.show(list, e.getX(), e.getY());
 						}
 					}
 				}
@@ -290,6 +310,10 @@ public class AnnotationsPanel extends JPanel
 			Annotation annotation = new Annotation("",
 					pos.getLatitude().degrees, pos.getLongitude().degrees,
 					minZoom);
+			annotation.setZoom(orbitView.getZoom());
+			annotation.setHeading(orbitView.getHeading().degrees);
+			annotation.setPitch(orbitView.getPitch().degrees);
+			annotation.setSaveCamera(false);
 			AnnotationEditor editor = new AnnotationEditor(wwd, frame,
 					"New annotation", annotation);
 			int value = editor.getOkCancel();
@@ -373,20 +397,30 @@ public class AnnotationsPanel extends JPanel
 			long lengthMillis = Util.getScaledLengthMillis(center.getLatLon(),
 					newCenter.getLatLon());
 
+			Angle heading = orbitView.getHeading();
+			Angle pitch = orbitView.getPitch();
 			double zoom = orbitView.getZoom();
-			double minZoom = annotation.getMinZoom();
-			double maxZoom = annotation.getMaxZoom();
-			if (minZoom >= 0 && zoom > minZoom)
-				zoom = Math.max(minZoom, 1000);
-			else if (maxZoom >= 0 && zoom < maxZoom)
-				zoom = maxZoom;
+			if (annotation.isSaveCamera())
+			{
+				zoom = annotation.getZoom();
+				heading = Angle.fromDegrees(annotation.getHeading());
+				pitch = Angle.fromDegrees(annotation.getPitch());
+			}
+			else
+			{
+				double minZoom = annotation.getMinZoom();
+				double maxZoom = annotation.getMaxZoom();
+				if (minZoom >= 0 && zoom > minZoom)
+					zoom = Math.max(minZoom, 1000);
+				else if (maxZoom >= 0 && zoom < maxZoom)
+					zoom = maxZoom;
+			}
 
 			ViewStateIterator vsi = FlyToOrbitViewStateIterator
 					.createPanToIterator(wwd.getModel().getGlobe(), center,
-							newCenter, orbitView.getHeading(), orbitView
-									.getHeading(), orbitView.getPitch(),
-							orbitView.getPitch(), orbitView.getZoom(), zoom,
-							lengthMillis, true);
+							newCenter, orbitView.getHeading(), heading,
+							orbitView.getPitch(), pitch, orbitView.getZoom(),
+							zoom, lengthMillis, true);
 
 			view.applyStateIterator(vsi);
 		}
@@ -426,6 +460,7 @@ public class AnnotationsPanel extends JPanel
 				}
 				label.setText(annotation.getLabel());
 				check.setBackground(background);
+				check.setSelected(annotation.isVisible());
 			}
 			else
 			{

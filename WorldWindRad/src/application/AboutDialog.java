@@ -2,6 +2,7 @@ package application;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
@@ -88,6 +89,15 @@ public class AboutDialog extends JDialog
 				if (e.getEventType() == EventType.ACTIVATED)
 				{
 					BrowserLauncher.openURL(e.getURL().toExternalForm());
+				}
+				else if (e.getEventType() == EventType.ENTERED)
+				{
+					setCursor(Cursor
+							.getPredefinedCursor(Cursor.HAND_CURSOR));
+				}
+				else if (e.getEventType() == EventType.EXITED)
+				{
+					setCursor(null);
 				}
 			}
 		});

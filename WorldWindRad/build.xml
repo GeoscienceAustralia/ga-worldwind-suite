@@ -5,7 +5,8 @@
 	<property name="src.dir" value="${basedir}/src" />
 	<property name="lib.dir" value="${basedir}/lib" />
 	<property name="build.dir" value="${basedir}/build" />
-	<property name="target.dir" value="${basedir}/webstart" />
+	<property name="webstart.dir" value="${basedir}/webstart" />
+	<property name="executable.dir" value="${basedir}/executable" />
 	<property name="target.jar" value="application.jar" />
 	<property name="keystore" value="${basedir}/keystore" />
 	<property name="javac.debug" value="false" />
@@ -19,7 +20,8 @@
 
 	<target name="clean">
 		<delete dir="${build.dir}" />
-		<delete dir="${target.dir}" />
+		<delete dir="${webstart.dir}" />
+		<delete dir="${executable.dir}" />
 	</target>
 
 	<target name="compile">
@@ -33,14 +35,43 @@
 	</target>
 
 	<target name="package" depends="compile">
-		<mkdir dir="${target.dir}" />
-		<jar destfile="${target.dir}/${target.jar}" basedir="${build.dir}" />
-		<copy file="${jnlp.file}" todir="${target.dir}" />
+		<mkdir dir="${webstart.dir}" />
+		<jar destfile="${webstart.dir}/${target.jar}" basedir="${build.dir}" />
+		<copy file="${jnlp.file}" todir="${webstart.dir}" />
 	</target>
 
 	<target name="sign" depends="package">
-		<signjar jar="${target.dir}/${target.jar}" keystore="${keystore}" alias="myself" storepass="password" />
+		<signjar jar="${webstart.dir}/${target.jar}" keystore="${keystore}" alias="myself" storepass="password" />
 	</target>
 
 	<target name="run" depends="sign" />
+
+	<patternset id="manifest.exclude">
+		<exclude name="META-INF/*.DSA" />
+		<exclude name="META-INF/*.RSA" />
+		<exclude name="META-INF/*.SF" />
+		<exclude name="META-INF/MANIFEST.MF" />
+		<exclude name="META-INF/INDEX.LIST" />
+	</patternset>
+
+
+	<target name="executable" depends="compile">
+		<mkdir dir="${executable.dir}" />
+		<zip destfile="${executable.dir}/temp.zip">
+			<fileset dir="${lib.dir}" includes="jogl/**" />
+			<zipgroupfileset dir="${lib.dir}">
+				<include name="**/*.jar" />
+			</zipgroupfileset>
+		</zip>
+		<jar destfile="${executable.dir}/${target.jar}">
+			<fileset dir="${build.dir}" />
+			<zipfileset src="${executable.dir}/temp.zip">
+				<patternset refid="manifest.exclude" />
+			</zipfileset>
+			<manifest>
+				<attribute name="Main-Class" value="application.Application" />
+			</manifest>
+		</jar>
+		<delete file="${executable.dir}/temp.zip" />
+	</target>
 </project>

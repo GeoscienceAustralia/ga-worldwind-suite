@@ -10,6 +10,10 @@ public class Annotation implements Serializable
 	private boolean visible = true;
 	private double minZoom = -1;
 	private double maxZoom = -1;
+	private boolean saveCamera = false;
+	private double zoom = 0;
+	private double heading = 0;
+	private double pitch = 0;
 
 	public Annotation()
 	{
@@ -43,6 +47,10 @@ public class Annotation implements Serializable
 		this.minZoom = annotation.minZoom;
 		this.maxZoom = annotation.maxZoom;
 		this.visible = annotation.visible;
+		this.saveCamera = annotation.saveCamera;
+		this.zoom = annotation.zoom;
+		this.heading = annotation.heading;
+		this.pitch = annotation.pitch;
 	}
 
 	public String getLabel()
@@ -103,5 +111,45 @@ public class Annotation implements Serializable
 	public void setMaxZoom(double maxZoom)
 	{
 		this.maxZoom = maxZoom;
+	}
+
+	public boolean isSaveCamera()
+	{
+		return saveCamera;
+	}
+
+	public void setSaveCamera(boolean saveCamera)
+	{
+		this.saveCamera = saveCamera;
+	}
+
+	public double getZoom()
+	{
+		return zoom;
+	}
+
+	public void setZoom(double zoom)
+	{
+		this.zoom = zoom;
+	}
+
+	public double getHeading()
+	{
+		return heading;
+	}
+
+	public void setHeading(double heading)
+	{
+		this.heading = heading;
+	}
+
+	public double getPitch()
+	{
+		return pitch;
+	}
+
+	public void setPitch(double pitch)
+	{
+		this.pitch = pitch;
 	}
 }
