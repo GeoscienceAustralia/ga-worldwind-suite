@@ -7,10 +7,10 @@
 	<property name="build.dir" value="${basedir}/build" />
 	<property name="webstart.dir" value="${basedir}/webstart" />
 	<property name="executable.dir" value="${basedir}/executable" />
-	<property name="target.jar" value="application.jar" />
+	<property name="webstart.jar" value="application.jar" />
+	<property name="executable.jar" value="viewer.jar" />
 	<property name="keystore" value="${basedir}/keystore" />
 	<property name="javac.debug" value="false" />
-	<property name="jnlp.file" value="${basedir}/webstart.jnlp" />
 
 	<path id="classpath">
 		<fileset dir="${lib.dir}">
@@ -20,8 +20,8 @@
 
 	<target name="clean">
 		<delete dir="${build.dir}" />
-		<delete dir="${webstart.dir}" />
-		<delete dir="${executable.dir}" />
+		<delete file="${webstart.dir}/${webstart.jar}" />
+		<delete file="${executable.dir}/${executable.jar}" />
 	</target>
 
 	<target name="compile">
@@ -36,12 +36,11 @@
 
 	<target name="package" depends="compile">
 		<mkdir dir="${webstart.dir}" />
-		<jar destfile="${webstart.dir}/${target.jar}" basedir="${build.dir}" />
-		<copy file="${jnlp.file}" todir="${webstart.dir}" />
+		<jar destfile="${webstart.dir}/${webstart.jar}" basedir="${build.dir}" />
 	</target>
 
 	<target name="sign" depends="package">
-		<signjar jar="${webstart.dir}/${target.jar}" keystore="${keystore}" alias="myself" storepass="password" />
+		<signjar jar="${webstart.dir}/${webstart.jar}" keystore="${keystore}" alias="myself" storepass="password" />
 	</target>
 
 	<target name="run" depends="sign" />
@@ -63,13 +62,13 @@
 				<include name="**/*.jar" />
 			</zipgroupfileset>
 		</zip>
-		<jar destfile="${executable.dir}/${target.jar}">
+		<jar destfile="${executable.dir}/${executable.jar}">
 			<fileset dir="${build.dir}" />
 			<zipfileset src="${executable.dir}/temp.zip">
 				<patternset refid="manifest.exclude" />
 			</zipfileset>
 			<manifest>
-				<attribute name="Main-Class" value="application.Application" />
+				<attribute name="Main-Class" value="application.Offline" />
 			</manifest>
 		</jar>
 		<delete file="${executable.dir}/temp.zip" />

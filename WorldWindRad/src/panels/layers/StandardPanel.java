@@ -34,6 +34,8 @@ import layers.metacarta.MetacartaStateBoundariesLayer;
 
 public class StandardPanel extends JPanel
 {
+	private final static boolean VIRTUAL_EARTH_ENABLED = false;
+	
 	private Layer stars;
 	private Layer atmosphere;
 	private Layer fog;
@@ -142,29 +144,34 @@ public class StandardPanel extends JPanel
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		add(panel, c);
+		int gridy = 0;
+
+		ButtonGroup bg = new ButtonGroup();
 
 		noneRadio = new JRadioButton("None");
 		noneRadio.addActionListener(al);
+		bg.add(noneRadio);
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = gridy++;
 		c.anchor = GridBagConstraints.WEST;
 		c.weightx = 1;
 		panel.add(noneRadio, c);
 
 		nasaRadio = new JRadioButton(bmngone.getName());
 		nasaRadio.addActionListener(al);
+		bg.add(nasaRadio);
 		nasaRadio.setSelected(true);
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = gridy++;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(nasaRadio, c);
 
 		panel2 = new JPanel(new GridLayout(0, 1));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = gridy++;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 20, 0, 0);
 		panel.add(panel2, c);
@@ -177,54 +184,52 @@ public class StandardPanel extends JPanel
 		landsatCheck.addActionListener(al);
 		panel2.add(landsatCheck);
 
-		veRadio = new JRadioButton("Microsoft Virtual Earth");
-		veRadio.addActionListener(al);
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 3;
-		c.anchor = GridBagConstraints.WEST;
-		panel.add(veRadio, c);
+		if (VIRTUAL_EARTH_ENABLED)
+		{
+			veRadio = new JRadioButton("Microsoft Virtual Earth");
+			veRadio.addActionListener(al);
+			bg.add(veRadio);
+			c = new GridBagConstraints();
+			c.gridx = 0;
+			c.gridy = gridy++;
+			c.anchor = GridBagConstraints.WEST;
+			panel.add(veRadio, c);
 
-		panel2 = new JPanel(new GridLayout(1, 0));
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 4;
-		c.anchor = GridBagConstraints.WEST;
-		c.insets = new Insets(0, 20, 0, 0);
-		panel.add(panel2, c);
+			panel2 = new JPanel(new GridLayout(1, 0));
+			c = new GridBagConstraints();
+			c.gridx = 0;
+			c.gridy = gridy++;
+			c.anchor = GridBagConstraints.WEST;
+			c.insets = new Insets(0, 20, 0, 0);
+			panel.add(panel2, c);
 
-		hybridRadio = new JRadioButton(vehybrid.getDataset().label);
-		hybridRadio.setSelected(true);
-		hybridRadio.addActionListener(al);
-		panel2.add(hybridRadio);
+			hybridRadio = new JRadioButton(vehybrid.getDataset().label);
+			hybridRadio.setSelected(true);
+			hybridRadio.addActionListener(al);
+			panel2.add(hybridRadio);
 
-		aerialRadio = new JRadioButton(veaerial.getDataset().label);
-		aerialRadio.addActionListener(al);
-		panel2.add(aerialRadio);
+			aerialRadio = new JRadioButton(veaerial.getDataset().label);
+			aerialRadio.addActionListener(al);
+			panel2.add(aerialRadio);
 
-		roadRadio = new JRadioButton(veroad.getDataset().label);
-		roadRadio.addActionListener(al);
-		panel2.add(roadRadio);
+			roadRadio = new JRadioButton(veroad.getDataset().label);
+			roadRadio.addActionListener(al);
+			panel2.add(roadRadio);
+
+			ButtonGroup vebg = new ButtonGroup();
+			vebg.add(aerialRadio);
+			vebg.add(roadRadio);
+			vebg.add(hybridRadio);
+		}
 
 		osmRadio = new JRadioButton(osmmapnik.getName());
 		osmRadio.addActionListener(al);
+		bg.add(osmRadio);
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 5;
+		c.gridy = gridy++;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(osmRadio, c);
-
-		ButtonGroup bg = new ButtonGroup();
-		bg.add(noneRadio);
-		bg.add(nasaRadio);
-		bg.add(veRadio);
-		bg.add(osmRadio);
-
-		bg = new ButtonGroup();
-		bg.add(aerialRadio);
-		bg.add(roadRadio);
-		bg.add(hybridRadio);
-
 
 		panel = new JPanel(new GridLayout(0, 1));
 		panel.setBorder(BorderFactory.createTitledBorder("Boundaries"));
@@ -288,17 +293,25 @@ public class StandardPanel extends JPanel
 	{
 		bmngCheck.setEnabled(nasaRadio.isSelected());
 		landsatCheck.setEnabled(nasaRadio.isSelected());
-		aerialRadio.setEnabled(veRadio.isSelected());
-		roadRadio.setEnabled(veRadio.isSelected());
-		hybridRadio.setEnabled(veRadio.isSelected());
 
 		bmngone.setEnabled(nasaRadio.isSelected());
 		bmng.setEnabled(nasaRadio.isSelected() && bmngCheck.isSelected());
 		landsat.setEnabled(nasaRadio.isSelected() && landsatCheck.isSelected());
-		veaerial.setEnabled(veRadio.isSelected() && aerialRadio.isSelected());
-		veroad.setEnabled(veRadio.isSelected() && roadRadio.isSelected());
-		vehybrid.setEnabled(veRadio.isSelected() && hybridRadio.isSelected());
 		osmmapnik.setEnabled(osmRadio.isSelected());
+
+		if (VIRTUAL_EARTH_ENABLED)
+		{
+			aerialRadio.setEnabled(veRadio.isSelected());
+			roadRadio.setEnabled(veRadio.isSelected());
+			hybridRadio.setEnabled(veRadio.isSelected());
+
+			veaerial.setEnabled(veRadio.isSelected()
+					&& aerialRadio.isSelected());
+			veroad.setEnabled(veRadio.isSelected() && roadRadio.isSelected());
+			vehybrid.setEnabled(veRadio.isSelected()
+					&& hybridRadio.isSelected());
+		}
+
 		wwd.redraw();
 	}
 

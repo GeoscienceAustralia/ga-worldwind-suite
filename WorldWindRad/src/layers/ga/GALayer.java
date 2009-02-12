@@ -2,19 +2,37 @@ package layers.ga;
 
 import gov.nasa.worldwind.util.LevelSet;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import layers.mask.MaskTiledImageLayer;
+import application.Offline;
 
 public class GALayer extends MaskTiledImageLayer
 {
-	public final static String METADATA_BASE_URL = "http://sandpit:8500/apps/world-wind/metadata/";
+	private final static String METADATA_BASE_URL_STRING = "http://sandpit:8500/apps/world-wind/metadata/";
 	private final static String TILES_SCRIPT_URL = "http://sandpit:8500/apps/world-wind/tiles.jsp";
 	private final static double SPLIT_SCALE = 0.9;
 
+	private final static URL metadataBaseUrl;
 	private static List<GALayer> gaLayers = new ArrayList<GALayer>();
 	private static LogoLayer logoLayer = new LogoLayer();
+
+	static
+	{
+		URL url = null;
+		try
+		{
+			url = new URL(METADATA_BASE_URL_STRING);
+		}
+		catch (MalformedURLException e)
+		{
+		}
+		metadataBaseUrl = url;
+	}
 
 	public GALayer(LevelSet levelSet)
 	{
@@ -51,7 +69,26 @@ public class GALayer extends MaskTiledImageLayer
 
 	public static String getTilesScriptUrl()
 	{
-		return TILES_SCRIPT_URL;
+		return Offline.isOfflineVersion() ? "" : TILES_SCRIPT_URL;
+	}
+
+	public static URL getMetadataBaseUrl()
+	{
+		URL url = metadataBaseUrl;
+		if (Offline.isOfflineVersion())
+		{
+			String userDir = System.getProperty("user.dir");
+			File userDirFile = new File(userDir);
+			try
+			{
+				url = new File(userDirFile, "metadata").toURI().toURL();
+			}
+			catch (MalformedURLException e)
+			{
+				url = null;
+			}
+		}
+		return url;
 	}
 
 	public static double getSplitScale()

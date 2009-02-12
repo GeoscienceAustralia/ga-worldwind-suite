@@ -262,6 +262,7 @@ public class GoToCoordinatePanel extends JPanel
 		rootPane.getActionMap().put("ESCAPE", cancelAction);
 
 		dialog.pack();
+		dialog.setLocationRelativeTo(owner);
 		dialog.setVisible(true);
 	}
 }

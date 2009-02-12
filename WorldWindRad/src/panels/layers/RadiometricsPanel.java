@@ -244,17 +244,17 @@ public class RadiometricsPanel extends JPanel
 		panel.add(metadata, c);
 
 		ActionListener ternaryLegend = createMetadataListener("Ternary legend",
-				"ternary_legend.html", 500, 350);
+				"ternary_legend.html", 500, 380);
 		ActionListener KLegend = createMetadataListener("Potassium legend",
-				"k_legend.html", 280, 350);
+				"k_legend.html", 300, 380);
 		ActionListener ThLegend = createMetadataListener("Thorium legend",
-				"th_legend.html", 280, 350);
+				"th_legend.html", 300, 380);
 		ActionListener ULegend = createMetadataListener("Uranium legend",
-				"u_legend.html", 280, 350);
+				"u_legend.html", 300, 380);
 		ActionListener ratioLegend = createMetadataListener("Ratio legend",
-				"ratio_legend.html", 280, 350);
+				"ratio_legend.html", 300, 380);
 		ActionListener doseLegend = createMetadataListener("Dose rate legend",
-				"dose_legend.html", 280, 350);
+				"dose_legend.html", 300, 380);
 
 		ternaryRadio = new JRadioButton(ternary.getName());
 		ternaryRadio.addActionListener(al);
@@ -372,7 +372,7 @@ public class RadiometricsPanel extends JPanel
 		FlatJButton legend = new FlatJButton(Icons.legend);
 		legend.restrictSize();
 		legend.addActionListener(createMetadataListener(
-				"Color-enhanced areas legends", "areas_legend.html", 700, 500));
+				"Color-enhanced areas legends", "areas_legends.html", 700, 500));
 		c = new GridBagConstraints();
 		c.gridx = 3;
 		c.gridy = 1;
@@ -482,8 +482,8 @@ public class RadiometricsPanel extends JPanel
 					URL page = null, base = null;
 					try
 					{
-						base = new URL(GALayer.METADATA_BASE_URL
-								+ "radiometrics/");
+						base = new URL(GALayer.getMetadataBaseUrl(),
+								"radiometrics/");
 						page = new URL(base, htmlpage);
 					}
 					catch (MalformedURLException e)

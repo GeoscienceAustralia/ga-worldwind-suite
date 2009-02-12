@@ -605,9 +605,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 				if (mask)
 					sb.append("&mask");
 
-				// Convention for NASA WWN tiles is to request them with common dataset name but without dds.
-				return new URL(imageFormat == null ? sb.toString() : sb
-						.toString().replace("dds", ""));
+				return new URL(sb.toString());
 			}
 		}
 	}

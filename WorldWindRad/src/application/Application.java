@@ -94,11 +94,7 @@ public class Application
 {
 	static
 	{
-		if (Configuration.isWindowsOS())
-		{
-			System.setProperty("sun.java2d.noddraw", "true");
-		}
-		else if (Configuration.isMacOS())
+		if (Configuration.isMacOS())
 		{
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
 			System.setProperty(
@@ -116,8 +112,6 @@ public class Application
 		catch (Exception e)
 		{
 		}
-
-		NativeJOGLLibs.init();
 	}
 
 	public static void main(String[] args)
@@ -886,7 +880,7 @@ public class Application
 
 	private void showControls()
 	{
-		JDialog dialog = new HtmlViewer(frame, "Controls",
+		JDialog dialog = new HtmlViewer(frame, "Controls", false,
 				"/data/help/controls.html", true);
 		dialog.setResizable(false);
 		dialog.setSize(640, 480);

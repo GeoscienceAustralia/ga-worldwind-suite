@@ -1,7 +1,5 @@
 package util;
 
-import gov.nasa.worldwind.Configuration;
-
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Frame;
@@ -25,7 +23,6 @@ import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
-import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent.EventType;
@@ -37,12 +34,13 @@ public class HtmlViewer extends JDialog
 {
 	public HtmlViewer(Frame owner, String title, String resource)
 	{
-		this(owner, title, resource, false);
+		this(owner, title, false, resource, false);
 	}
 
-	public HtmlViewer(Frame owner, String title, String resource, boolean showOk)
+	public HtmlViewer(Frame owner, String title, boolean modal,
+			String resource, boolean showOk)
 	{
-		super(owner, title);
+		super(owner, title, modal);
 		URL url = null, base = null;
 		try
 		{
@@ -64,13 +62,19 @@ public class HtmlViewer extends JDialog
 
 	public HtmlViewer(Frame owner, String title, URL page, URL base)
 	{
-		this(owner, title, page, base, false);
+		this(owner, title, false, page, base, false);
 	}
 
-	public HtmlViewer(Frame owner, String title, URL page, URL base,
-			boolean showOk)
+	public HtmlViewer(Frame owner, String title, boolean modal, URL page,
+			URL base)
 	{
-		super(owner, title);
+		this(owner, title, modal, page, base, false);
+	}
+
+	public HtmlViewer(Frame owner, String title, boolean modal, URL page,
+			URL base, boolean showOk)
+	{
+		super(owner, title, modal);
 		init(page, base, showOk);
 	}
 
@@ -109,12 +113,11 @@ public class HtmlViewer extends JDialog
 			{
 				if (e.getEventType() == EventType.ACTIVATED)
 				{
-					BrowserLauncher.openURL(e.getURL().toExternalForm());
+					DefaultLauncher.openURL(e.getURL());
 				}
 				else if (e.getEventType() == EventType.ENTERED)
 				{
-					setCursor(Cursor
-							.getPredefinedCursor(Cursor.HAND_CURSOR));
+					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				}
 				else if (e.getEventType() == EventType.EXITED)
 				{
@@ -171,36 +174,11 @@ public class HtmlViewer extends JDialog
 
 	public static void main(String[] args)
 	{
-		if (Configuration.isWindowsOS())
-		{
-			System.setProperty("sun.java2d.noddraw", "true");
-		}
-		else if (Configuration.isMacOS())
-		{
-			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			System.setProperty(
-					"com.apple.mrj.application.apple.menu.about.name",
-					"World Wind Application");
-			System.setProperty("com.apple.mrj.application.growbox.intrudes",
-					"false");
-			System.setProperty("apple.awt.brushMetalLook", "true");
-		}
-
-		try
-		{
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (Exception e)
-		{
-		}
-
-		//ResponseCache.getDefault().
-
 		URL page = null, base = null;
 		try
 		{
-			base = new URL(GALayer.METADATA_BASE_URL + "magnetics/");
-			page = new URL(base, "info_mag.html");
+			base = new URL(GALayer.getMetadataBaseUrl() + "radiometrics/");
+			page = new URL(base, "areas_legend.html");
 		}
 		catch (MalformedURLException e)
 		{

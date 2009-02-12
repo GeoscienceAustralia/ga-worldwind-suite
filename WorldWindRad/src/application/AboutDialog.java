@@ -24,7 +24,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent.EventType;
 
-import util.BrowserLauncher;
+import util.DefaultLauncher;
 
 public class AboutDialog extends JDialog
 {
@@ -88,7 +88,7 @@ public class AboutDialog extends JDialog
 			{
 				if (e.getEventType() == EventType.ACTIVATED)
 				{
-					BrowserLauncher.openURL(e.getURL().toExternalForm());
+					DefaultLauncher.openURL(e.getURL());
 				}
 				else if (e.getEventType() == EventType.ENTERED)
 				{

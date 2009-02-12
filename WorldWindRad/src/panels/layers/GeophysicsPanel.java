@@ -153,7 +153,7 @@ public class GeophysicsPanel extends JPanel
 		flat = new FlatJButton(Icons.legend);
 		flat.restrictSize();
 		flat.addActionListener(createMetadataListener("Gravity Legend",
-				"gravity", "grav_legend.html", 200, 420));
+				"gravity", "grav_legend.html", 240, 500));
 		c = new GridBagConstraints();
 		c.gridx = 3;
 		c.gridy = 0;
@@ -225,7 +225,7 @@ public class GeophysicsPanel extends JPanel
 		flat = new FlatJButton(Icons.legend);
 		flat.restrictSize();
 		flat.addActionListener(createMetadataListener("Magnetics Legend",
-				"magnetics", "mag_legend.html", 220, 420));
+				"magnetics", "mag_legend.html", 240, 500));
 		c = new GridBagConstraints();
 		c.gridx = 3;
 		c.gridy = 0;
@@ -265,7 +265,7 @@ public class GeophysicsPanel extends JPanel
 					URL page = null, base = null;
 					try
 					{
-						base = new URL(GALayer.METADATA_BASE_URL + directory
+						base = new URL(GALayer.getMetadataBaseUrl(), directory
 								+ "/");
 						page = new URL(base, htmlpage);
 					}

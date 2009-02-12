@@ -22,14 +22,14 @@ import com.sun.opengl.util.texture.TextureIO;
 
 public class LogoLayer extends RenderableLayer
 {
-	public final static String NORTHWEST = "gov.nasa.worldwind.WorldmapLayer.NorthWest";
-	public final static String SOUTHWEST = "gov.nasa.worldwind.WorldmapLayer.SouthWest";
-	public final static String NORTHEAST = "gov.nasa.worldwind.WorldmapLayer.NorthEast";
-	public final static String SOUTHEAST = "gov.nasa.worldwind.WorldmapLayer.SouthEast";
+	public final static String NORTHWEST = "NorthWest";
+	public final static String SOUTHWEST = "SouthWest";
+	public final static String NORTHEAST = "NorthEast";
+	public final static String SOUTHEAST = "SouthEast";
 
-	public final static String RESIZE_STRETCH = "gov.nasa.worldwind.WorldmapLayer.Stretch";
-	public final static String RESIZE_SHRINK_ONLY = "gov.nasa.worldwind.WorldmapLayer.ShrinkOnly";
-	public final static String RESIZE_KEEP_FIXED_SIZE = "gov.nasa.worldwind.WorldmapLayer.FixedSize";
+	public final static String RESIZE_STRETCH = "Stretch";
+	public final static String RESIZE_SHRINK_ONLY = "ShrinkOnly";
+	public final static String RESIZE_KEEP_FIXED_SIZE = "FixedSize";
 
 	private String iconFilePath;
 	private int iconWidth;
