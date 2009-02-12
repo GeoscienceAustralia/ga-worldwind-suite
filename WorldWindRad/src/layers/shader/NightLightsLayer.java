@@ -24,6 +24,11 @@ public class NightLightsLayer extends BasicTiledImageLayer
 	private int sununiform = -1;
 	private SunPositionProvider positionProvider;
 
+	public NightLightsLayer()
+	{
+		this(new BasicSunPositionProvider());
+	}
+	
 	public NightLightsLayer(SunPositionProvider spp)
 	{
 		super(makeLevels());
@@ -39,7 +44,7 @@ public class NightLightsLayer extends BasicTiledImageLayer
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Night Lights");
 		params.setValue(AVKey.SERVICE, "http://localhost/tiles/tiles.php");
 		params.setValue(AVKey.DATASET_NAME, "nightlights");
-		params.setValue(AVKey.FORMAT_SUFFIX, ".dds");
+		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 3);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle

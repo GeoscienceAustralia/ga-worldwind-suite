@@ -39,7 +39,9 @@ import java.awt.event.WindowStateListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -161,7 +163,7 @@ public class Application
 	private JVisibleDialog annotationsDialog;
 	private AnnotationsPanel annotationsPanel;
 	private JVisibleDialog placesearchDialog;
-	private JDialog[] dialogs;
+	private List<JVisibleDialog> dialogs = new ArrayList<JVisibleDialog>();
 
 	public Application()
 	{
@@ -253,11 +255,12 @@ public class Application
 		annotationsPanel = new AnnotationsPanel(wwd, frame);
 		annotationsDialog.add(annotationsPanel, BorderLayout.CENTER);
 		annotationsDialog.setJMenuBar(createAnnotationsMenuBar());
+		dialogs.add(annotationsDialog);
 
 		placesearchDialog = createDialog("Place search");
 		placesearchDialog.add(new PlaceSearchPanel(wwd), BorderLayout.CENTER);
+		dialogs.add(placesearchDialog);
 
-		dialogs = new JDialog[] { annotationsDialog, placesearchDialog };
 		loadDialogBounds();
 	}
 
@@ -721,11 +724,11 @@ public class Application
 
 		menu.addSeparator();
 
-		menuItem = createDialogMenuItem(annotationsDialog);
-		menu.add(menuItem);
-
-		menuItem = createDialogMenuItem(placesearchDialog);
-		menu.add(menuItem);
+		for (JVisibleDialog dialog : dialogs)
+		{
+			menuItem = createDialogMenuItem(dialog);
+			menu.add(menuItem);
+		}
 
 		menu.addSeparator();
 
@@ -974,34 +977,35 @@ public class Application
 	{
 		boolean[] dialogsOpen = Settings.get().getDialogsOpen();
 		Rectangle[] dialogBounds = Settings.get().getDialogBounds();
-		if (dialogsOpen != null && dialogsOpen.length == dialogs.length
-				&& dialogBounds != null
-				&& dialogBounds.length == dialogs.length)
+		boolean useOpen = dialogsOpen != null
+				&& dialogsOpen.length == dialogs.size();
+		boolean useBounds = dialogBounds != null
+				&& dialogBounds.length == dialogs.size();
+		for (int i = 0; i < dialogs.size(); i++)
 		{
-			for (int i = 0; i < dialogs.length; i++)
+			JVisibleDialog dialog = dialogs.get(i);
+			if (useBounds && useOpen && dialogsOpen[i])
 			{
-				dialogs[i].setBounds(dialogBounds[i]);
-				dialogs[i].setVisible(dialogsOpen[i]);
+				dialog.setBounds(dialogBounds[i]);
+				dialog.setVisible(dialogsOpen[i]);
 			}
-		}
-		else
-		{
-			for (int i = 0; i < dialogs.length; i++)
+			else
 			{
-				dialogs[i].pack();
-				dialogs[i].setLocationRelativeTo(frame);
+				dialog.pack();
+				dialog.centerInOwnerWhenShown();
 			}
 		}
 	}
 
 	private void saveDialogBounds()
 	{
-		boolean[] dialogsOpen = new boolean[dialogs.length];
-		Rectangle[] dialogBounds = new Rectangle[dialogs.length];
-		for (int i = 0; i < dialogs.length; i++)
+		boolean[] dialogsOpen = new boolean[dialogs.size()];
+		Rectangle[] dialogBounds = new Rectangle[dialogs.size()];
+		for (int i = 0; i < dialogs.size(); i++)
 		{
-			dialogsOpen[i] = dialogs[i].isVisible();
-			dialogBounds[i] = dialogs[i].getBounds();
+			JVisibleDialog dialog = dialogs.get(i);
+			dialogsOpen[i] = dialog.isVisible();
+			dialogBounds[i] = dialog.getBounds();
 		}
 		Settings.get().setDialogsOpen(dialogsOpen);
 		Settings.get().setDialogBounds(dialogBounds);

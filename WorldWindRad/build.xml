@@ -36,7 +36,11 @@
 
 	<target name="package" depends="compile">
 		<mkdir dir="${webstart.dir}" />
-		<jar destfile="${webstart.dir}/${webstart.jar}" basedir="${build.dir}" />
+		<jar destfile="${webstart.dir}/${webstart.jar}" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="application.Application" />
+			</manifest>
+		</jar>
 	</target>
 
 	<target name="sign" depends="package">
@@ -52,7 +56,6 @@
 		<exclude name="META-INF/MANIFEST.MF" />
 		<exclude name="META-INF/INDEX.LIST" />
 	</patternset>
-
 
 	<target name="executable" depends="compile">
 		<mkdir dir="${executable.dir}" />

@@ -14,15 +14,23 @@ public class JVisibleDialog extends JDialog
 	}
 
 	private List<VisibilityListener> listeners = new ArrayList<VisibilityListener>();
+	private boolean centerInOwner = false;
+	private Frame owner;
 	
 	public JVisibleDialog(Frame owner, String title)
 	{
 		super(owner, title);
+		this.owner = owner;
 	}
 
 	@Override
 	public void setVisible(boolean b)
 	{
+		if(b && centerInOwner)
+		{
+			setLocationRelativeTo(owner);
+			centerInOwner = false;
+		}
 		super.setVisible(b);
 		notifyVisibilityListeners();
 	}
@@ -43,5 +51,10 @@ public class JVisibleDialog extends JDialog
 		{
 			listener.visibleChanged(isVisible());
 		}
+	}
+
+	public void centerInOwnerWhenShown()
+	{
+		centerInOwner = true;
 	}
 }
