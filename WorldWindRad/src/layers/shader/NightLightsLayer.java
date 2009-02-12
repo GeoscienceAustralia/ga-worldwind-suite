@@ -33,6 +33,8 @@ public class NightLightsLayer extends BasicTiledImageLayer
 	{
 		super(makeLevels());
 		this.positionProvider = spp;
+		this.setForceLevelZeroLoads(true);
+		this.setRetainLevelZeroTiles(true);
 	}
 
 	private static LevelSet makeLevels()

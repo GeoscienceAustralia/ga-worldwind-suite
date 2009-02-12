@@ -70,6 +70,7 @@ public class SettingsDialog extends JDialog
 	private JComboBox displayCombo;
 
 	private JCheckBox stereoEnabledCheck;
+	private JCheckBox hardwareStereoEnabledCheck;
 	private JCheckBox stereoSwapCheck;
 	private JLabel stereoModeLabel;
 	private JComboBox stereoModeCombo;
@@ -137,7 +138,7 @@ public class SettingsDialog extends JDialog
 			}
 		};
 		cancel.addActionListener(cancelAction);
-		
+
 		JRootPane rootPane = getRootPane();
 		ok.setDefaultCapable(true);
 		rootPane.setDefaultButton(ok);
@@ -189,6 +190,7 @@ public class SettingsDialog extends JDialog
 				.getIDstring();
 
 		boolean stereoEnabled = stereoEnabledCheck.isSelected();
+		boolean hardwareStereoEnabled = hardwareStereoEnabledCheck.isSelected();
 		boolean stereoSwap = stereoSwapCheck.isSelected();
 		StereoMode stereoMode = (StereoMode) stereoModeCombo.getSelectedItem();
 		ProjectionMode projectionMode = (ProjectionMode) projectionModeCombo
@@ -235,6 +237,7 @@ public class SettingsDialog extends JDialog
 			settings.setDisplayId(displayId);
 
 			settings.setStereoEnabled(stereoEnabled);
+			settings.setHardwareStereoEnabled(hardwareStereoEnabled);
 			settings.setStereoSwap(stereoSwap);
 			settings.setStereoMode(stereoMode);
 			settings.setProjectionMode(projectionMode);
@@ -271,6 +274,7 @@ public class SettingsDialog extends JDialog
 	{
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.addTab("Renderer", createRenderer());
+		tabbedPane.addTab("Stereo", createStereo());
 		tabbedPane.addTab("Network", createNetwork());
 		tabbedPane.validate();
 		return tabbedPane;
@@ -292,16 +296,6 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(fullscreen, c);
 
-		JComponent stereo = createStereo();
-		stereo.setBorder(BorderFactory.createTitledBorder("Stereo"));
-		c = new GridBagConstraints();
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1;
-		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
-		panel.add(stereo, c);
 
 		JComponent other = createOther();
 		other.setBorder(BorderFactory.createTitledBorder("Other"));
@@ -314,6 +308,26 @@ public class SettingsDialog extends JDialog
 		c.weighty = 1;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
 		panel.add(other, c);
+
+		return panel;
+	}
+
+	private JComponent createStereo()
+	{
+		JPanel panel = new JPanel(new GridBagLayout());
+		panel.setBorder(BorderFactory.createEtchedBorder());
+		GridBagConstraints c;
+
+		JComponent stereo = createStereoPanel();
+		stereo.setBorder(BorderFactory.createTitledBorder("Stereo"));
+		c = new GridBagConstraints();
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
+		panel.add(stereo, c);
 
 		enableStereoSettings();
 
@@ -429,7 +443,7 @@ public class SettingsDialog extends JDialog
 		return panel;
 	}
 
-	private JComponent createStereo()
+	private JComponent createStereoPanel()
 	{
 		GridBagConstraints c;
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -553,8 +567,20 @@ public class SettingsDialog extends JDialog
 		c.gridy = 5;
 		c.gridwidth = 4;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
+		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(stereoCursorCheck, c);
+
+		hardwareStereoEnabledCheck = new JCheckBox(
+				"Enable quad-buffered stereo support (requires restart)");
+		hardwareStereoEnabledCheck.setSelected(settings
+				.isHardwareStereoEnabled());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 6;
+		c.gridwidth = 4;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
+		panel.add(hardwareStereoEnabledCheck, c);
 
 		return panel;
 	}

@@ -169,7 +169,12 @@ public class Application
 	{
 		//create worldwind stuff
 
-		wwd = new WorldWindowStereoGLCanvas();
+		if (Settings.get().isHardwareStereoEnabled())
+			wwd = new WorldWindowStereoGLCanvas(
+					WorldWindowStereoGLCanvas.stereoCaps);
+		else
+			wwd = new WorldWindowStereoGLCanvas(
+					WorldWindowStereoGLCanvas.defaultCaps);
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		wwd.addPropertyChangeListener(propertyChangeListener);
@@ -260,6 +265,10 @@ public class Application
 		placesearchDialog = createDialog("Place search");
 		placesearchDialog.add(new PlaceSearchPanel(wwd), BorderLayout.CENTER);
 		dialogs.add(placesearchDialog);
+		
+		/*JVisibleDialog sunPositionDialog = createDialog("Sun position");
+		sunPositionDialog.add(new SunPositionPanel(wwd), BorderLayout.CENTER);
+		dialogs.add(sunPositionDialog);*/
 
 		loadDialogBounds();
 	}

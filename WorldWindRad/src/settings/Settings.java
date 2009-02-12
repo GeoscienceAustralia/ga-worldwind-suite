@@ -123,6 +123,7 @@ public class Settings
 		private boolean spanDisplays = false;
 		private boolean stereoCursor = false;
 		private boolean stereoEnabled = false;
+		private boolean hardwareStereoEnabled = false;
 		private boolean windowMaximized = false;
 		private List<Bookmark> bookmarks = new ArrayList<Bookmark>();
 		private List<Annotation> annotations = new ArrayList<Annotation>();
@@ -227,6 +228,16 @@ public class Settings
 		public void setStereoEnabled(boolean stereoEnabled)
 		{
 			this.stereoEnabled = stereoEnabled;
+		}
+
+		public boolean isHardwareStereoEnabled()
+		{
+			return hardwareStereoEnabled;
+		}
+
+		public void setHardwareStereoEnabled(boolean hardwareStereoEnabled)
+		{
+			this.hardwareStereoEnabled = hardwareStereoEnabled;
 		}
 
 		public ProjectionMode getProjectionMode()

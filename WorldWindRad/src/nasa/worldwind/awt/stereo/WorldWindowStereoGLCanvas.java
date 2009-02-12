@@ -50,16 +50,22 @@ import javax.media.opengl.GLContext;
  */
 public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow
 {
-	private static final GLCapabilities caps = new GLCapabilities();
+	public static final GLCapabilities defaultCaps = new GLCapabilities();
+	public static final GLCapabilities stereoCaps = new GLCapabilities();
 
 	static
 	{
-		caps.setAlphaBits(8);
-		caps.setRedBits(8);
-		caps.setGreenBits(8);
-		caps.setBlueBits(8);
-		caps.setDepthBits(24);
-		caps.setStereo(true);
+		defaultCaps.setAlphaBits(8);
+		defaultCaps.setRedBits(8);
+		defaultCaps.setGreenBits(8);
+		defaultCaps.setBlueBits(8);
+		defaultCaps.setDepthBits(24);
+		stereoCaps.setAlphaBits(8);
+		stereoCaps.setRedBits(8);
+		stereoCaps.setGreenBits(8);
+		stereoCaps.setBlueBits(8);
+		stereoCaps.setDepthBits(24);
+		stereoCaps.setStereo(true);
 	}
 
 	private final WorldWindowGLDrawable wwd; // WorldWindow interface delegates to wwd
@@ -68,7 +74,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow
 	 * Constructs a new <code>WorldWindowGLCanvas</code> window on the default
 	 * graphics device.
 	 */
-	public WorldWindowStereoGLCanvas()
+	public WorldWindowStereoGLCanvas(GLCapabilities caps)
 	{
 		super(caps);
 		try
@@ -113,7 +119,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow
 	 */
 	public WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas shareWith)
 	{
-		super(caps, null, shareWith.getContext(), null);
+		super(defaultCaps, null, shareWith.getContext(), null);
 		try
 		{
 			this.wwd = ((WorldWindowGLDrawable) WorldWind
@@ -152,7 +158,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow
 	public WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas shareWith,
 			java.awt.GraphicsDevice device)
 	{
-		super(caps, null, shareWith.getContext(), device);
+		super(defaultCaps, null, shareWith.getContext(), device);
 
 		if (device == null)
 		{
@@ -405,12 +411,4 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow
 	{
 		return this.wwd.getPerFrameStatistics();
 	}
-
-	/*private int display = 0;
-	@Override
-	public void display()
-	{
-		System.out.println("DISPLAY = " + ++display);
-		super.display();
-	}*/
 }
