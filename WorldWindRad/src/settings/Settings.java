@@ -471,6 +471,10 @@ public class Settings
 	public static void setStereoSupported(boolean stereoSupported)
 	{
 		Settings.stereoSupported = stereoSupported;
+		if (!stereoSupported)
+		{
+			get().setHardwareStereoEnabled(false);
+		}
 	}
 
 	public enum ProjectionMode implements Serializable
