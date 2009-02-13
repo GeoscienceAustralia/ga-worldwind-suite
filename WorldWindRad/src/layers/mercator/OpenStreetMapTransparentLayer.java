@@ -75,31 +75,8 @@ public class OpenStreetMapTransparentLayer extends BasicMercatorTiledImageLayer
 		if (rgb == -921880 || rgb == -4861744 || rgb == -856344
 				|| rgb == -856087)
 			a = 0;
-		//green
-		/*else if (rgb == -7486356 || rgb == -7486100 || rgb == -5513579
-				|| rgb == -5513578)
-			a = 128;
-		else
-		{
-			int r = (rgb >> 16) & 0xff;
-			int g = (rgb >> 8) & 0xff;
-			int b = (rgb >> 0) & 0xff;
-			if (within(r, g, b, 141, 197, 108, 5)
-					|| within(r, g, b, 170, 221, 154, 5))
-			{
-				a = 128;
-			}
-		}*/
 		return (rgb & 0xffffff) | (a << 24);
 	}
-
-	/*private boolean within(int r, int g, int b, int rd, int gd, int bd,
-			int threshold)
-	{
-		return r >= rd - threshold && r <= rd + threshold
-				&& g >= gd - threshold && g <= gd + threshold
-				&& b >= bd - threshold && b <= bd + threshold;
-	}*/
 
 	@Override
 	public String toString()
