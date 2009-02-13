@@ -13,6 +13,8 @@ import application.Offline;
 
 public class GALayer extends MaskTiledImageLayer
 {
+	//private final static String METADATA_BASE_URL_STRING = "http://www.ga.gov.au/apps/world-wind/metadata/";
+	//private final static String TILES_SCRIPT_URL = "http://www.ga.gov.au/apps/world-wind/tiles.jsp";
 	private final static String METADATA_BASE_URL_STRING = "http://sandpit:8500/apps/world-wind/metadata/";
 	private final static String TILES_SCRIPT_URL = "http://sandpit:8500/apps/world-wind/tiles.jsp";
 	private final static double SPLIT_SCALE = 0.9;

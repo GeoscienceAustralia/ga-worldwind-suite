@@ -7,6 +7,7 @@
 	<property name="build.dir" value="${basedir}/build" />
 	<property name="webstart.dir" value="${basedir}/webstart" />
 	<property name="executable.dir" value="${basedir}/executable" />
+	<property name="unsigned.jar" value="unsigned.jar" />
 	<property name="webstart.jar" value="application.jar" />
 	<property name="executable.jar" value="viewer.jar" />
 	<property name="keystore" value="${basedir}/keystore" />
@@ -20,6 +21,7 @@
 
 	<target name="clean">
 		<delete dir="${build.dir}" />
+		<delete file="${webstart.dir}/${unsigned.jar}" />
 		<delete file="${webstart.dir}/${webstart.jar}" />
 		<delete file="${executable.dir}/${executable.jar}" />
 	</target>
@@ -36,7 +38,7 @@
 
 	<target name="package" depends="compile">
 		<mkdir dir="${webstart.dir}" />
-		<jar destfile="${webstart.dir}/${webstart.jar}" basedir="${build.dir}">
+		<jar destfile="${webstart.dir}/${unsigned.jar}" basedir="${build.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="application.Application" />
 			</manifest>
@@ -44,10 +46,10 @@
 	</target>
 
 	<target name="sign" depends="package">
-		<signjar jar="${webstart.dir}/${webstart.jar}" keystore="${keystore}" alias="myself" storepass="password" />
+		<signjar jar="${webstart.dir}/${unsigned.jar}" signedjar="${webstart.dir}/${webstart.jar}" keystore="${keystore}" alias="myself" storepass="password" />
 	</target>
 
-	<target name="run" depends="sign" />
+	<target name="run" depends="package" />
 
 	<patternset id="manifest.exclude">
 		<exclude name="META-INF/*.DSA" />

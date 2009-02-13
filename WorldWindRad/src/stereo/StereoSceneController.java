@@ -93,6 +93,19 @@ public class StereoSceneController extends AbstractSceneController
 		}
 	}
 
+	@Override
+	protected void draw(DrawContext dc)
+	{
+		try
+		{
+			super.draw(dc);
+		}
+		catch (NumberFormatException e)
+		{
+			//scale bar layer sometimes throws this exception: ignore it
+		}
+	}
+
 	private void setupBuffer(GL gl, StereoMode mode, Eye eye)
 	{
 		boolean left = eye == Eye.LEFT;

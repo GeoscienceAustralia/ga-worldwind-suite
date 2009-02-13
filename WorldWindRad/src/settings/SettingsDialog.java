@@ -63,6 +63,7 @@ public class SettingsDialog extends JDialog
 	private JSlider verticalExaggerationSlider;
 	private JLabel verticalExaggerationLabel;
 	private double verticalExaggeration;
+	private JCheckBox showDownloadsCheck;
 
 	private JRadioButton spanDisplayRadio;
 	private JRadioButton singleDisplayRadio;
@@ -150,7 +151,6 @@ public class SettingsDialog extends JDialog
 		rootPane.getActionMap().put("ESCAPE", cancelAction);
 
 		pack();
-		//setResizable(false);
 		if (oldBounds != null)
 		{
 			setBounds(oldBounds);
@@ -199,7 +199,9 @@ public class SettingsDialog extends JDialog
 		double focalLength = (Double) focalLengthSpinner.getValue();
 		boolean stereoCursor = stereoCursorCheck.isSelected();
 
-		double viewIteratorSpeed = viewIteratorSpeedSlider.getValue() / 10d;
+		double viewIteratorSpeed = sliderToSpeed(viewIteratorSpeedSlider
+				.getValue());
+		boolean showDownloads = showDownloadsCheck.isSelected();
 
 		boolean proxyEnabled = proxyEnabledCheck.isSelected();
 		String proxyHost = proxyHostText.getText();
@@ -247,6 +249,7 @@ public class SettingsDialog extends JDialog
 
 			settings.setViewIteratorSpeed(viewIteratorSpeed);
 			settings.setVerticalExaggeration(verticalExaggeration);
+			settings.setShowDownloads(showDownloads);
 
 			settings.setProxyEnabled(proxyEnabled);
 			settings.setProxyHost(proxyHost);
@@ -653,12 +656,12 @@ public class SettingsDialog extends JDialog
 		c.gridx = 0;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(SPACING, SPACING, SPACING, 0);
+		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel2.add(label, c);
 
-		int min = 1;
-		int max = 50;
-		int value = (int) (Settings.get().getViewIteratorSpeed() * 10);
+		int min = 0;
+		int max = 100;
+		int value = speedToSlider(Settings.get().getViewIteratorSpeed());
 		value = Math.max(min, Math.min(max, value));
 		viewIteratorSpeedSlider = new JSlider(min, max, value);
 		c = new GridBagConstraints();
@@ -666,14 +669,15 @@ public class SettingsDialog extends JDialog
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
-		c.insets = new Insets(SPACING, SPACING, SPACING, 0);
+		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel2.add(viewIteratorSpeedSlider, c);
 		ChangeListener cl = new ChangeListener()
 		{
 			public void stateChanged(ChangeEvent e)
 			{
-				viewIteratorSpeedLabel.setText(String.format("%1.1f",
-						viewIteratorSpeedSlider.getValue() / 10d));
+				double value = sliderToSpeed(viewIteratorSpeedSlider.getValue());
+				String format = "%1." + (value < 10 ? "2" : "1") + "f";
+				viewIteratorSpeedLabel.setText(String.format(format, value));
 			}
 		};
 		viewIteratorSpeedSlider.addChangeListener(cl);
@@ -683,10 +687,19 @@ public class SettingsDialog extends JDialog
 		c.gridx = 2;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
-		c.insets = new Insets(SPACING, 0, SPACING, SPACING);
+		c.insets = new Insets(SPACING, 0, 0, SPACING);
 		panel2.add(viewIteratorSpeedLabel, c);
 
 		cl.stateChanged(null);
+
+		showDownloadsCheck = new JCheckBox("Display downloading tiles");
+		showDownloadsCheck.setSelected(settings.isShowDownloads());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 2;
+		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(showDownloadsCheck, c);
 
 		return panel;
 	}
@@ -813,14 +826,28 @@ public class SettingsDialog extends JDialog
 	private int exaggerationToSlider(double exaggeration)
 	{
 		double y = exaggeration;
-		double x = Math.log10(y + (100 - y) / 100);
-		return (int) (x * 100);
+		double x = Math.log10(y + (100d - y) / 100d);
+		return (int) (x * 100d);
 	}
 
 	private double sliderToExaggeration(int slider)
 	{
 		double x = slider / 100d;
 		double y = Math.pow(10d, x) - (2 - x) / 2;
+		return y;
+	}
+
+	private int speedToSlider(double speed)
+	{
+		double y = speed;
+		double x = Math.log10(y * 10d) / 2;
+		return (int) (x * 100d);
+	}
+
+	private double sliderToSpeed(int slider)
+	{
+		double x = slider;
+		double y = Math.pow(10, x * 2 / 100 - 1);
 		return y;
 	}
 

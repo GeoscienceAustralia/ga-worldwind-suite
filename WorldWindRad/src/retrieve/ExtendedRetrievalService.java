@@ -42,6 +42,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
+import settings.Settings;
+
 import layers.geonames.GeoNamesLayer;
 import layers.mask.MaskTiledImageLayer;
 import layers.mercator.BasicMercatorTiledImageLayer;
@@ -53,7 +55,8 @@ import nasa.worldwind.globes.fixed.BasicElevationModelFixed;
  * 
  * @author Tom Gaskins
  * @version $Id: BasicRetrievalService.java 3558 2007-11-17 08:36:45Z tgaskins $
- * Modified to add a renderable layer that displays current tile downloads
+ *          Modified to add a renderable layer that displays current tile
+ *          downloads
  */
 public final class ExtendedRetrievalService extends WWObjectImpl implements
 		RetrievalService, Thread.UncaughtExceptionHandler
@@ -684,15 +687,18 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 
 	private void beforeDownload(RetrievalTask task)
 	{
-		Tile tile = getTile(task);
-		if (tile != null)
+		if (Settings.get().isShowDownloads())
 		{
-			SectorPolyline s = new SectorPolyline(tile.getSector());
-			s.setColor(COLOR);
-			s.setLineWidth(2.0);
-			s.setAntiAliasHint(Polyline.ANTIALIAS_NICEST);
-			sectors.put(task, s);
-			layer.addRenderable(s);
+			Tile tile = getTile(task);
+			if (tile != null)
+			{
+				SectorPolyline s = new SectorPolyline(tile.getSector());
+				s.setColor(COLOR);
+				s.setLineWidth(2.0);
+				s.setAntiAliasHint(Polyline.ANTIALIAS_NICEST);
+				sectors.put(task, s);
+				layer.addRenderable(s);
+			}
 		}
 	}
 

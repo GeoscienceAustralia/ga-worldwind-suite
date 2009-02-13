@@ -116,7 +116,7 @@ public class Settings
 		private String displayId = null;
 		private double eyeSeparation = 1.0;
 		private double focalLength = 100.0;
-		private ProjectionMode projectionMode = ProjectionMode.ASYMMETRIC_FRUSTUM;
+		private ProjectionMode projectionMode = ProjectionMode.SIMPLE_OFFSET;
 		private int[] splitLocations = null;
 		private double verticalExaggeration = 1.0;
 		private Rectangle windowBounds = null;
@@ -130,6 +130,7 @@ public class Settings
 		private double viewIteratorSpeed = 1.0;
 		private Rectangle[] dialogBounds = null;
 		private boolean[] dialogsOpen = null;
+		private boolean showDownloads = true;
 
 		public boolean isProxyEnabled()
 		{
@@ -460,6 +461,16 @@ public class Settings
 		public void setDialogsOpen(boolean[] dialogsOpen)
 		{
 			this.dialogsOpen = dialogsOpen;
+		}
+
+		public boolean isShowDownloads()
+		{
+			return showDownloads;
+		}
+
+		public void setShowDownloads(boolean showDownloads)
+		{
+			this.showDownloads = showDownloads;
 		}
 	}
 

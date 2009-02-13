@@ -67,7 +67,6 @@ import javax.swing.filechooser.FileFilter;
 
 import layers.ga.GALayer;
 import layers.mouse.MouseLayer;
-import layers.shader.NormalTessellator;
 import nasa.worldwind.awt.AWTInputHandler;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
 import nasa.worldwind.cache.FixedBasicDataFileCache;
@@ -135,12 +134,12 @@ public class Application
 		/*Configuration.setValue(AVKey.INITIAL_ALTITUDE, Double
 				.toString(1.2 * Earth.WGS84_EQUATORIAL_RADIUS));*/
 
-		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
-				NormalTessellator.class.getName());
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
 				ExtendedRetrievalService.class.getName());
 		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
 				AWTInputHandler.class.getName());
+		/*Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
+				NormalTessellator.class.getName());*/
 
 		WorldWind.getDataFileCache().addCacheLocation("cache");
 
@@ -265,7 +264,7 @@ public class Application
 		placesearchDialog = createDialog("Place search");
 		placesearchDialog.add(new PlaceSearchPanel(wwd), BorderLayout.CENTER);
 		dialogs.add(placesearchDialog);
-		
+
 		/*JVisibleDialog sunPositionDialog = createDialog("Sun position");
 		sunPositionDialog.add(new SunPositionPanel(wwd), BorderLayout.CENTER);
 		dialogs.add(sunPositionDialog);*/
