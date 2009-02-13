@@ -28,7 +28,8 @@ public class OpenStreetMapTransparentLayer extends BasicMercatorTiledImageLayer
 
 		params.setValue(AVKey.TILE_WIDTH, 256);
 		params.setValue(AVKey.TILE_HEIGHT, 256);
-		params.setValue(AVKey.DATA_CACHE_NAME, "OpenStreetMap Mapnik Transparent");
+		params.setValue(AVKey.DATA_CACHE_NAME,
+				"OpenStreetMap Mapnik Transparent");
 		params.setValue(AVKey.SERVICE, "http://a.tile.openstreetmap.org/");
 		params.setValue(AVKey.DATASET_NAME, "mapnik");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
@@ -69,10 +70,36 @@ public class OpenStreetMapTransparentLayer extends BasicMercatorTiledImageLayer
 
 	private int convertTransparent(int rgb)
 	{
-		if (rgb == -921880 || rgb == -4861744)
-			return rgb & 0xffffff;
-		return rgb;
+		int a = 255;
+		//transparent colours
+		if (rgb == -921880 || rgb == -4861744 || rgb == -856344
+				|| rgb == -856087)
+			a = 0;
+		//green
+		/*else if (rgb == -7486356 || rgb == -7486100 || rgb == -5513579
+				|| rgb == -5513578)
+			a = 128;
+		else
+		{
+			int r = (rgb >> 16) & 0xff;
+			int g = (rgb >> 8) & 0xff;
+			int b = (rgb >> 0) & 0xff;
+			if (within(r, g, b, 141, 197, 108, 5)
+					|| within(r, g, b, 170, 221, 154, 5))
+			{
+				a = 128;
+			}
+		}*/
+		return (rgb & 0xffffff) | (a << 24);
 	}
+
+	/*private boolean within(int r, int g, int b, int rd, int gd, int bd,
+			int threshold)
+	{
+		return r >= rd - threshold && r <= rd + threshold
+				&& g >= gd - threshold && g <= gd + threshold
+				&& b >= bd - threshold && b <= bd + threshold;
+	}*/
 
 	@Override
 	public String toString()

@@ -500,7 +500,7 @@ public class BasicMercatorTiledImageLayer extends MercatorTiledImageLayer
 	{
 		int type = image.getType();
 		if(type == 0)
-			type = BufferedImage.TYPE_INT_RGB;
+			type = BufferedImage.TYPE_INT_ARGB;
 		BufferedImage trans = new BufferedImage(image.getWidth(), image
 				.getHeight(), type);
 		double miny = sector.getMinLatPercent();

@@ -12,6 +12,7 @@ import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.layers.Earth.MGRSGraticuleLayer;
 import gov.nasa.worldwind.layers.Earth.OpenStreetMapLayer;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -22,8 +23,12 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import layers.geonames.GeoNamesLayer;
 import layers.mercator.VirtualEarthLayer;
@@ -35,7 +40,7 @@ import layers.metacarta.MetacartaStateBoundariesLayer;
 public class StandardPanel extends JPanel
 {
 	private final static boolean VIRTUAL_EARTH_ENABLED = false;
-	
+
 	private Layer stars;
 	private Layer atmosphere;
 	private Layer fog;
@@ -253,7 +258,7 @@ public class StandardPanel extends JPanel
 		add(panel, c);
 
 		panel.add(createCheckBox(stars));
-		atmosphereCheck = createCheckBox(atmosphere);
+		atmosphereCheck = (JCheckBox) createCheckBox(atmosphere);
 		panel.add(atmosphereCheck);
 		panel.add(createCheckBox(fog));
 
@@ -268,8 +273,8 @@ public class StandardPanel extends JPanel
 
 		panel.add(createCheckBox(pnl));
 		panel.add(createCheckBox(geonames));
-		panel.add(createCheckBox(street));
-		panel.add(createCheckBox(osmmapniktrans));
+		panel.add(createCheckBox(street, true));
+		panel.add(createCheckBox(osmmapniktrans, true));
 		panel.add(createCheckBox(graticule));
 	}
 
@@ -315,7 +320,12 @@ public class StandardPanel extends JPanel
 		wwd.redraw();
 	}
 
-	private JCheckBox createCheckBox(final Layer layer)
+	private JComponent createCheckBox(final Layer layer)
+	{
+		return createCheckBox(layer, false);
+	}
+
+	private JComponent createCheckBox(final Layer layer, boolean opacitySlider)
 	{
 		final JCheckBox check = new JCheckBox(layer.getName());
 		check.setSelected(layer.isEnabled());
@@ -327,7 +337,39 @@ public class StandardPanel extends JPanel
 				wwd.redraw();
 			}
 		});
-		return check;
+		if (!opacitySlider)
+			return check;
+
+		JPanel panel = new JPanel(new GridBagLayout());
+		GridBagConstraints c;
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weighty = 1;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(check, c);
+
+		final JSlider slider = new JSlider(1, 100, 100);
+		slider.setPaintLabels(false);
+		slider.setPaintTicks(false);
+		Dimension size = slider.getPreferredSize();
+		size.width = 50;
+		slider.setPreferredSize(size);
+		slider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				layer.setOpacity(slider.getValue() / 100d);
+				wwd.redraw();
+			}
+		});
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 0;
+		c.weightx = 1;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(slider, c);
+		return panel;
 	}
 
 	public void turnOffAtmosphere()
