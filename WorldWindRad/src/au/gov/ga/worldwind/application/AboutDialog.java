@@ -42,11 +42,13 @@ public class AboutDialog extends JDialog
 			}
 		});
 
+		String base = "/au/gov/ga/worldwind/data/help/";
+
 		BufferedImage image = null;
 		try
 		{
-			InputStream is = AboutDialog.class
-					.getResourceAsStream("/data/help/about.jpg");
+			InputStream is = AboutDialog.class.getResourceAsStream(base
+					+ "about.jpg");
 			image = ImageIO.read(is);
 
 		}
@@ -66,8 +68,7 @@ public class AboutDialog extends JDialog
 
 		JEditorPane editorPane = new JEditorPane();
 		editorPane.setEditable(false);
-		java.net.URL helpURL = this.getClass().getResource(
-				"/data/help/about.html");
+		java.net.URL helpURL = this.getClass().getResource(base + "about.html");
 		if (helpURL != null)
 		{
 			try
@@ -93,8 +94,7 @@ public class AboutDialog extends JDialog
 				}
 				else if (e.getEventType() == EventType.ENTERED)
 				{
-					setCursor(Cursor
-							.getPredefinedCursor(Cursor.HAND_CURSOR));
+					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				}
 				else if (e.getEventType() == EventType.EXITED)
 				{

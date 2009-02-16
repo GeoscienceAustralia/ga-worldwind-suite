@@ -16,7 +16,7 @@ public class HelpControlsPanel extends JPanel
 		JEditorPane editorPane = new JEditorPane();
 		editorPane.setEditable(false);
 		java.net.URL helpURL = this.getClass().getResource(
-				"/data/help/controls");
+				"/au/gov/ga/worldwind/data/help/controls");
 		if (helpURL != null)
 		{
 			try

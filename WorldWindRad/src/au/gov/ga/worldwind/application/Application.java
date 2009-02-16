@@ -530,8 +530,8 @@ public class Application
 	private void create3DMouse()
 	{
 		final UserFacingIcon icon = new UserFacingIcon(
-				"data/images/cursor.png", new Position(Angle.ZERO, Angle.ZERO,
-						0));
+				"au/gov/ga/worldwind/data/images/cursor.png", new Position(
+						Angle.ZERO, Angle.ZERO, 0));
 		icon.setSize(new Dimension(16, 32));
 		icon.setAlwaysOnTop(true);
 
@@ -837,6 +837,16 @@ public class Application
 			}
 		});
 
+		menuItem = new JMenuItem("Data sources...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				showDataSources();
+			}
+		});
+
 		menu.addSeparator();
 
 		menuItem = new JMenuItem("About");
@@ -892,8 +902,17 @@ public class Application
 	private void showControls()
 	{
 		JDialog dialog = new HtmlViewer(frame, "Controls", false,
-				"/data/help/controls.html", true);
+				"/au/gov/ga/worldwind/data/help/controls.html", true);
 		dialog.setResizable(false);
+		dialog.setSize(640, 480);
+		dialog.setLocationRelativeTo(frame);
+		dialog.setVisible(true);
+	}
+
+	private void showDataSources()
+	{
+		JDialog dialog = new HtmlViewer(frame, "Data sources", false,
+				"/au/gov/ga/worldwind/data/help/datasources.html", false);
 		dialog.setSize(640, 480);
 		dialog.setLocationRelativeTo(frame);
 		dialog.setVisible(true);

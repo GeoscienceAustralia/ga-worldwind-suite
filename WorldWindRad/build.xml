@@ -40,7 +40,7 @@
 		<mkdir dir="${webstart.dir}" />
 		<jar destfile="${webstart.dir}/${unsigned.jar}" basedir="${build.dir}">
 			<manifest>
-				<attribute name="Main-Class" value="application.Application" />
+				<attribute name="Main-Class" value="au.gov.ga.worldwind.application.Application" />
 			</manifest>
 		</jar>
 	</target>
@@ -73,7 +73,7 @@
 				<patternset refid="manifest.exclude" />
 			</zipfileset>
 			<manifest>
-				<attribute name="Main-Class" value="application.Offline" />
+				<attribute name="Main-Class" value="au.gov.ga.worldwind.application.Offline" />
 			</manifest>
 		</jar>
 		<delete file="${executable.dir}/temp.zip" />

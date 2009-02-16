@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jnlp spec="1.0" codebase="http://sandpit:8500/apps/world-wind/"
+<jnlp spec="1.0" codebase="http://www.ga.gov.au/apps/world-wind/"
 	href="webstart.jnlp">
 	<information>
 		<title>World Wind</title>
@@ -22,5 +22,5 @@
 		<extension name="worldwind"
 			href="http://worldwind.arc.nasa.gov/java/0.5.0/webstart/worldwind.jnlp" />
 	</resources>
-	<application-desc main-class="application.Application" />
+	<application-desc main-class="au.gov.ga.worldwind.application.Application" />
 </jnlp>

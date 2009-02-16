@@ -20,16 +20,17 @@ public class Icons
 
 	static
 	{
-		remove = loadIcon("/data/icons/remove.gif");
-		search = loadIcon("/data/icons/search.gif");
-		run = loadIcon("/data/icons/run.gif");
-		delete = loadIcon("/data/icons/delete.gif");
-		edit = loadIcon("/data/icons/edit.gif");
-		add = loadIcon("/data/icons/add.gif");
-		up = loadIcon("/data/icons/up.gif");
-		down = loadIcon("/data/icons/down.gif");
-		legend = loadIcon("/data/icons/legend.gif");
-		info = loadIcon("/data/icons/information.gif");
+		String base = "/au/gov/ga/worldwind/data/icons/";
+		remove = loadIcon(base + "remove.gif");
+		search = loadIcon(base + "search.gif");
+		run = loadIcon(base + "run.gif");
+		delete = loadIcon(base + "delete.gif");
+		edit = loadIcon(base + "edit.gif");
+		add = loadIcon(base + "add.gif");
+		up = loadIcon(base + "up.gif");
+		down = loadIcon(base + "down.gif");
+		legend = loadIcon(base + "legend.gif");
+		info = loadIcon(base + "information.gif");
 	}
 
 	private static ImageIcon loadIcon(String path)
