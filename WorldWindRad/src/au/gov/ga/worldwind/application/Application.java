@@ -6,6 +6,7 @@ import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
@@ -117,6 +118,11 @@ public class Application
 
 	public static void main(String[] args)
 	{
+		start();
+	}
+
+	public static Application start()
+	{
 		Settings.get();
 
 		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME,
@@ -143,7 +149,7 @@ public class Application
 
 		WorldWind.getDataFileCache().addCacheLocation("cache");
 
-		new Application();
+		return new Application();
 	}
 
 	private JFrame frame;
@@ -164,7 +170,7 @@ public class Application
 	private JVisibleDialog placesearchDialog;
 	private List<JVisibleDialog> dialogs = new ArrayList<JVisibleDialog>();
 
-	public Application()
+	private Application()
 	{
 		//create worldwind stuff
 
@@ -251,6 +257,11 @@ public class Application
 		catch (Exception e)
 		{
 		}
+	}
+
+	public WorldWindow getWwd()
+	{
+		return wwd;
 	}
 
 	private void createDialogs()

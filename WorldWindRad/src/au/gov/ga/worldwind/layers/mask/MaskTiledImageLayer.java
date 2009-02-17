@@ -226,38 +226,41 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		if (textureUrl == null || maskUrl == null)
 			return;
 
-		boolean fileProtocol = "file"
-				.equalsIgnoreCase(textureUrl.getProtocol())
-				&& "file".equalsIgnoreCase(maskUrl.getProtocol());
+		boolean textureFileProtocol = "file".equalsIgnoreCase(textureUrl
+				.getProtocol());
+		boolean maskFileProtocol = "file".equalsIgnoreCase(maskUrl
+				.getProtocol());
 
-		if (!fileProtocol && !WorldWind.getRetrievalService().isAvailable())
+		if (!(textureFileProtocol && maskFileProtocol)
+				&& !WorldWind.getRetrievalService().isAvailable())
 			return;
 
-		if (!fileProtocol
-				&& (WorldWind.getNetworkStatus().isHostUnavailable(textureUrl) || WorldWind
-						.getNetworkStatus().isHostUnavailable(maskUrl)))
+		if ((!textureFileProtocol && WorldWind.getNetworkStatus()
+				.isHostUnavailable(textureUrl))
+				|| (!maskFileProtocol && WorldWind.getNetworkStatus()
+						.isHostUnavailable(maskUrl)))
 			return;
 
 		Retriever textureRetriever = null;
 		Retriever maskRetriever = null;
 		DownloadPostProcessor dpp = new DownloadPostProcessor(tile, this);
 
-		if ("http".equalsIgnoreCase(textureUrl.getProtocol()))
-		{
-			textureRetriever = new HTTPRetriever(textureUrl, dpp);
-		}
-		else if ("file".equalsIgnoreCase(textureUrl.getProtocol()))
+		if (textureFileProtocol)
 		{
 			textureRetriever = new FileRetriever(textureUrl, dpp);
 		}
-
-		if ("http".equalsIgnoreCase(textureUrl.getProtocol()))
+		else if ("http".equalsIgnoreCase(textureUrl.getProtocol()))
 		{
-			maskRetriever = new HTTPRetriever(maskUrl, dpp);
+			textureRetriever = new HTTPRetriever(textureUrl, dpp);
 		}
-		else if ("file".equalsIgnoreCase(textureUrl.getProtocol()))
+
+		if (maskFileProtocol)
 		{
 			maskRetriever = new FileRetriever(maskUrl, dpp);
+		}
+		else if ("http".equalsIgnoreCase(maskUrl.getProtocol()))
+		{
+			maskRetriever = new HTTPRetriever(maskUrl, dpp);
 		}
 
 		if (textureRetriever == null || maskRetriever == null)
@@ -293,10 +296,14 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			maskRetriever.setStaleRequestLimit(srl);
 		}
 
-		WorldWind.getRetrievalService().runRetriever(textureRetriever,
-				tile.getPriority());
-		WorldWind.getRetrievalService().runRetriever(maskRetriever,
-				tile.getPriority());
+		WorldWind.getRetrievalService().runRetriever(
+				textureRetriever,
+				textureFileProtocol ? tile.getPriority() - 1e100 : tile
+						.getPriority());
+		WorldWind.getRetrievalService().runRetriever(
+				maskRetriever,
+				maskFileProtocol ? tile.getPriority() - 1e100 : tile
+						.getPriority());
 	}
 
 	private void saveDDS(BufferedImage image, File file) throws IOException
