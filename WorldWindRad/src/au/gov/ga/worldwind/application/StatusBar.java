@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.application;
 
-public class StatusBar extends gov.nasa.worldwind.util.StatusBar
+public class StatusBar extends nasa.worldwind.util.StatusBar
 {
 	@Override
 	protected String makeEyeAltitudeDescription(double metersAltitude)
