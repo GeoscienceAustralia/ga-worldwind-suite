@@ -525,6 +525,7 @@ public class AnnotationsPanel extends JPanel
 					}
 				}
 			});
+			thread.setName("Annotations");
 			thread.setDaemon(true);
 			thread.start();
 		}

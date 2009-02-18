@@ -64,13 +64,14 @@ public class NormalTessellator extends WWObjectImpl implements Tessellator
 		private final IntBuffer indices;
 
 		private RenderInfo(int density, DoubleBuffer vertices,
-				DoubleBuffer normals, Vec4 refCenter, int resolution)
+				IntBuffer indices, DoubleBuffer normals, Vec4 refCenter,
+				int resolution)
 		{
 			this.density = density;
 			this.vertices = vertices;
 			this.texCoords = getTextureCoordinates(density);
 			this.referenceCenter = refCenter;
-			this.indices = getIndices(density);
+			this.indices = indices;
 			this.normals = normals;
 			this.resolution = resolution;
 		}
@@ -495,8 +496,10 @@ public class NormalTessellator extends WWObjectImpl implements Tessellator
 			lat = lat.add(dLat);
 		}
 
-		//calculate normals
-		java.nio.DoubleBuffer norms = getNormals(density, verts, refCenter);
+		//calculate indices and normals
+		java.nio.IntBuffer indices = getIndices(density);
+		java.nio.DoubleBuffer norms = getNormals(density, verts, indices,
+				refCenter);
 
 		//fold down the sides as skirts
 		double exaggeratedMinElevation = makeSkirts ? Math.abs(globe
@@ -556,8 +559,8 @@ public class NormalTessellator extends WWObjectImpl implements Tessellator
 				lon = lon.add(dLon);
 		}
 
-		return new RenderInfo(density, verts, norms, refCenter, elevations
-				.getResolution());
+		return new RenderInfo(density, verts, indices, norms, refCenter,
+				elevations.getResolution());
 	}
 
 	private void renderMultiTexture(DrawContext dc, RectTile tile,
@@ -1197,7 +1200,9 @@ public class NormalTessellator extends WWObjectImpl implements Tessellator
 		return buffer;
 	}
 
-	protected static DoubleBuffer getNormals(int density,
+	//calculates normals quickly, but uses 4 surrounding vertices
+	//instead of average of connected faces
+	protected static DoubleBuffer getNormalsQuick(int density,
 			DoubleBuffer vertices, Vec4 referenceCenter)
 	{
 		int side = density + 3;
@@ -1275,72 +1280,142 @@ public class NormalTessellator extends WWObjectImpl implements Tessellator
 		normals.put(dstIndex * 3 + 2, normals.get(srcIndex * 3 + 2));
 	}
 
+	//computes normals for the triangle strip
+	protected static java.nio.DoubleBuffer getNormals(int density,
+			DoubleBuffer vertices, java.nio.IntBuffer indices,
+			Vec4 referenceCenter)
+	{
+		int side = density + 3;
+		int numVertices = side * side;
+		int numFaces = indices.limit() - 2;
+		double centerX = referenceCenter.x;
+		double centerY = referenceCenter.y;
+		double centerZ = referenceCenter.z;
+		// Create normal buffer
+		java.nio.DoubleBuffer normals = BufferUtil
+				.newDoubleBuffer(numVertices * 3);
+		int[] counts = new int[numVertices];
+		Vec4[] norms = new Vec4[numVertices];
+		for (int i = 0; i < numVertices; i++)
+			norms[i] = new Vec4(0d);
+
+		for (int i = 0; i < numFaces; i++)
+		{
+			//get vertex indices
+			int index0 = indices.get(i);
+			int index1 = indices.get(i + 1);
+			int index2 = indices.get(i + 2);
+
+			//get verts involved in current face
+			Vec4 v0 = new Vec4(vertices.get(index0 * 3) + centerX, vertices
+					.get(index0 * 3 + 1)
+					+ centerY, vertices.get(index0 * 3 + 2) + centerZ);
+
+			Vec4 v1 = new Vec4(vertices.get(index1 * 3) + centerX, vertices
+					.get(index1 * 3 + 1)
+					+ centerY, vertices.get(index1 * 3 + 2) + centerZ);
+
+			Vec4 v2 = new Vec4(vertices.get(index2 * 3) + centerX, vertices
+					.get(index2 * 3 + 1)
+					+ centerY, vertices.get(index2 * 3 + 2) + centerZ);
+
+			// get triangle edge vectors and plane normal
+			Vec4 e1 = v1.subtract3(v0), e2;
+			if (i % 2 == 0)
+				e2 = v2.subtract3(v0);
+			else
+				e2 = v0.subtract3(v2);
+			Vec4 N = e1.cross3(e2).normalize3(); // if N is 0, the triangle is degenerate
+
+			// Store the face's normal for each of the vertices that make up the face.
+			norms[index0] = norms[index0].add3(N);
+			norms[index1] = norms[index1].add3(N);
+			norms[index2] = norms[index2].add3(N);
+
+			//increment vertex normal counts
+			counts[index0]++;
+			counts[index1]++;
+			counts[index2]++;
+		}
+
+		// Now loop through each vertex, and average out all the normals stored.
+		for (int i = 0; i < numVertices; i++)
+		{
+			norms[i] = norms[i].divide3(counts[i]).normalize3();
+			int index = i * 3;
+			normals.put(index++, norms[i].x).put(index++, norms[i].y).put(
+					index, norms[i].z);
+		}
+
+		return normals;
+	}
+	
 	// TODO: The following method was brought over from BasicRectangularTessellator and is unchecked.
-	//    // Compute normals for a strip
-	//    protected static java.nio.DoubleBuffer getNormals(int density, DoubleBuffer vertices,
-	//        java.nio.IntBuffer indices, Vec4 referenceCenter)
-	//    {
-	//        int numVertices = (density + 3) * (density + 3);
-	//        //int sideSize = density + 2;
-	//        int numFaces = indices.limit() - 2;
-	//        double centerX = referenceCenter.x;
-	//        double centerY = referenceCenter.y;
-	//        double centerZ = referenceCenter.z;
-	//        // Create normal buffer
-	//        java.nio.DoubleBuffer normals = BufferUtil.newDoubleBuffer(numVertices * 3);
-	//        // Create per vertex normal lists
-	//        ArrayList<ArrayList<Vec4>> normalLists = new ArrayList<ArrayList<Vec4>>(numVertices);
-	//        for (int i = 0; i < numVertices; i++)
-	//            normalLists.add(new ArrayList<Vec4>());
-	//        // Go through all faces in the strip and store normals in lists
-	//        for (int i = 0; i < numFaces; i++)
-	//        {
-	//            int vIndex = 3 * indices.get(i);
-	//            Vec4 v0 = new Vec4((vertices.get(vIndex++) + centerX),
-	//                (vertices.get(vIndex++) + centerY),
-	//                (vertices.get(vIndex) + centerZ));
-	//
-	//            vIndex = 3 * indices.get(i + 1);
-	//            Vec4 v1 = new Vec4((vertices.get(vIndex++) + centerX),
-	//                (vertices.get(vIndex++) + centerY),
-	//                (vertices.get(vIndex) + centerZ));
-	//
-	//            vIndex = 3 * indices.get(i + 2);
-	//            Vec4 v2 = new Vec4((vertices.get(vIndex++) + centerX),
-	//                (vertices.get(vIndex++) + centerY),
-	//                (vertices.get(vIndex) + centerZ));
-	//
-	//            // get triangle edge vectors and plane normal
-	//            Vec4 e1 = v1.subtract3(v0);
-	//            Vec4 e2 = v2.subtract3(v0);
-	//            Vec4 N = e1.cross3(e2).normalize3();  // if N is 0, the triangle is degenerate
-	//
-	//            // Store the face's normal for each of the vertices that make up the face.
-	//            // TODO: Clear up warnings here
-	//            normalLists.get(indices.get(i)).add(N);
-	//            normalLists.get(indices.get(i + 1)).add(N);
-	//            normalLists.get(indices.get(i + 2)).add(N);
-	//            //System.out.println("Normal: " + N);
-	//        }
-	//
-	//        // Now loop through each vertex, and average out all the normals stored.
-	//        int idx = 0;
-	//        for (int i = 0; i < numVertices; i++)
-	//        {
-	//            Vec4 normal = Vec4.ZERO;
-	//            // Sum
-	//            for (int j = 0; j < normalLists.get(i).size(); ++j)
-	//                normal = normal.add3(normalLists.get(i).get(j));
-	//            // Average
-	//            normal = normal.multiply3(1.0f / normalLists.get(i).size()).normalize3();
-	//            // Fill normal buffer
-	//            normals.put(idx++, normal.x);
-	//            normals.put(idx++, normal.y);
-	//            normals.put(idx++, normal.z);
-	//            //System.out.println("Normal: " + normal + " - " + normalLists[i].size());
-	//            //System.out.println("Normal buffer: " + normals.get(idx - 3) + ", " + normals.get(idx - 2) + ", " + normals.get(idx - 1));
-	//        }
-	//
-	//        return normals;
-	//    }
+	// Compute normals for a strip
+	/*protected static java.nio.DoubleBuffer getNormals(int density,
+			DoubleBuffer vertices, java.nio.IntBuffer indices,
+			Vec4 referenceCenter)
+	{
+		int numVertices = (density + 3) * (density + 3);
+		int sideSize = density + 2;
+		int numFaces = indices.limit() - 2;
+		double centerX = referenceCenter.x;
+		double centerY = referenceCenter.y;
+		double centerZ = referenceCenter.z;
+		// Create normal buffer
+		java.nio.DoubleBuffer normals = BufferUtil
+				.newDoubleBuffer(numVertices * 3);
+		// Create per vertex normal lists
+		List<List<Vec4>> normalLists = new ArrayList<List<Vec4>>(numVertices);
+		for (int i = 0; i < numVertices; i++)
+			normalLists.add(i, new ArrayList<Vec4>());
+		// Go through all faces in the strip and store normals in lists
+		for (int i = 0; i < numFaces; i++)
+		{
+			int vIndex = 3 * indices.get(i);
+			Vec4 v0 = new Vec4((vertices.get(vIndex++) + centerX), (vertices
+					.get(vIndex++) + centerY), (vertices.get(vIndex) + centerZ));
+
+			vIndex = 3 * indices.get(i + 1);
+			Vec4 v1 = new Vec4((vertices.get(vIndex++) + centerX), (vertices
+					.get(vIndex++) + centerY), (vertices.get(vIndex) + centerZ));
+
+			vIndex = 3 * indices.get(i + 2);
+			Vec4 v2 = new Vec4((vertices.get(vIndex++) + centerX), (vertices
+					.get(vIndex++) + centerY), (vertices.get(vIndex) + centerZ));
+
+			// get triangle edge vectors and plane normal
+			Vec4 e1 = v1.subtract3(v0);
+			Vec4 e2 = v2.subtract3(v0);
+			Vec4 N = e1.cross3(e2).normalize3(); // if N is 0, the triangle is degenerate
+
+			// Store the face's normal for each of the vertices that make up the face.
+			// TODO: Clear up warnings here
+			normalLists.get(indices.get(i)).add(N);
+			normalLists.get(indices.get(i + 1)).add(N);
+			normalLists.get(indices.get(i + 2)).add(N);
+			//System.out.println("Normal: " + N);
+		}
+
+		// Now loop through each vertex, and average out all the normals stored.
+		int idx = 0;
+		for (int i = 0; i < numVertices; i++)
+		{
+			Vec4 normal = Vec4.ZERO;
+			// Sum
+			for (int j = 0; j < normalLists.get(i).size(); ++j)
+				normal = normal.add3(normalLists.get(i).get(j));
+			// Average
+			normal = normal.multiply3(1.0f / normalLists.get(i).size())
+					.normalize3();
+			// Fill normal buffer
+			normals.put(idx++, normal.x);
+			normals.put(idx++, normal.y);
+			normals.put(idx++, normal.z);
+			//System.out.println("Normal: " + normal + " - " + normalLists[i].size());
+			//System.out.println("Normal buffer: " + normals.get(idx - 3) + ", " + normals.get(idx - 2) + ", " + normals.get(idx - 1));
+		}
+
+		return normals;
+	}*/
 }
