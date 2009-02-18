@@ -55,8 +55,6 @@ import au.gov.ga.worldwind.util.Util;
 
 public class AnnotationsPanel extends JPanel
 {
-	private static final long PLAY_PAUSE_LENGTH = 2000; //ms
-
 	private WorldWindow wwd;
 	private JList list;
 	private DefaultListModel model;
@@ -503,7 +501,7 @@ public class AnnotationsPanel extends JPanel
 						long length = flyToAnnotation(annotation);
 						if (length < 0)
 							break;
-						length += PLAY_PAUSE_LENGTH;
+						length += Settings.get().getAnnotationsPause();
 
 						//sleep for 'length' in 'jump' increments
 						for (; playing && length > jump; length -= jump)

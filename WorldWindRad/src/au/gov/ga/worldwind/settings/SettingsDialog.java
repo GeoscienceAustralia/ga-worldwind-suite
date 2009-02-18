@@ -59,11 +59,12 @@ public class SettingsDialog extends JDialog
 
 	private Settings.Properties settings;
 
-	private JSlider viewIteratorSpeedSlider;
-	private JLabel viewIteratorSpeedLabel;
 	private JSlider verticalExaggerationSlider;
 	private JLabel verticalExaggerationLabel;
 	private double verticalExaggeration;
+	private JSlider viewIteratorSpeedSlider;
+	private JLabel viewIteratorSpeedLabel;
+	private JIntegerField annotationsPauseText;
 	private JCheckBox showDownloadsCheck;
 
 	private JRadioButton spanDisplayRadio;
@@ -202,11 +203,12 @@ public class SettingsDialog extends JDialog
 
 		double viewIteratorSpeed = sliderToSpeed(viewIteratorSpeedSlider
 				.getValue());
+		Integer annotationsPause = annotationsPauseText.getValue();
 		boolean showDownloads = showDownloadsCheck.isSelected();
 
 		boolean proxyEnabled = proxyEnabledCheck.isSelected();
 		String proxyHost = proxyHostText.getText();
-		int proxyPort = proxyPortText.getValue();
+		Integer proxyPort = proxyPortText.getValue();
 
 		String nonProxyHostsString = nonProxyHostsText.getText();
 		String[] nph = nonProxyHostsString.split(",");
@@ -224,7 +226,7 @@ public class SettingsDialog extends JDialog
 
 		if (proxyEnabled)
 		{
-			if (proxyHost.length() == 0 || proxyPort <= 0)
+			if (proxyHost.length() == 0 || proxyPort == null)
 			{
 				proxyValid = false;
 
@@ -250,11 +252,14 @@ public class SettingsDialog extends JDialog
 
 			settings.setViewIteratorSpeed(viewIteratorSpeed);
 			settings.setVerticalExaggeration(verticalExaggeration);
+			if (annotationsPause != null)
+				settings.setAnnotationsPause(annotationsPause);
 			settings.setShowDownloads(showDownloads);
 
 			settings.setProxyEnabled(proxyEnabled);
 			settings.setProxyHost(proxyHost);
-			settings.setProxyPort(proxyPort);
+			if (proxyPort != null)
+				settings.setProxyPort(proxyPort);
 			settings.setNonProxyHosts(nonProxyHosts);
 		}
 
@@ -693,11 +698,42 @@ public class SettingsDialog extends JDialog
 
 		cl.stateChanged(null);
 
+		panel2 = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(panel2, c);
+
+		label = new JLabel("Annotation pause when playing:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
+		panel2.add(label, c);
+
+		annotationsPauseText = new JIntegerField(settings.getAnnotationsPause());
+		annotationsPauseText.setPositive(true);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 0;
+		c.weightx = 1;
+		c.insets = new Insets(SPACING, 0, 0, SPACING);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel2.add(annotationsPauseText, c);
+
+		label = new JLabel("ms");
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.gridy = 0;
+		c.insets = new Insets(SPACING, 0, 0, SPACING);
+		panel2.add(label, c);
+
 		showDownloadsCheck = new JCheckBox("Display downloading tiles");
 		showDownloadsCheck.setSelected(settings.isShowDownloads());
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = 3;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(showDownloadsCheck, c);

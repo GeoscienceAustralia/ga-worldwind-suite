@@ -131,6 +131,7 @@ public class Settings
 		private Rectangle[] dialogBounds = null;
 		private boolean[] dialogsOpen = null;
 		private boolean showDownloads = true;
+		private int annotationsPause = 1000;
 
 		public boolean isProxyEnabled()
 		{
@@ -471,6 +472,16 @@ public class Settings
 		public void setShowDownloads(boolean showDownloads)
 		{
 			this.showDownloads = showDownloads;
+		}
+
+		public int getAnnotationsPause()
+		{
+			return annotationsPause;
+		}
+
+		public void setAnnotationsPause(int annotationsPause)
+		{
+			this.annotationsPause = annotationsPause;
 		}
 	}
 
