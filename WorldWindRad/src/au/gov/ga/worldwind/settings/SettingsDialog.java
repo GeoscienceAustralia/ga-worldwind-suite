@@ -633,12 +633,13 @@ public class SettingsDialog extends JDialog
 						.getValue());
 				verticalExaggeration = Math.round(exaggeration * 10d) / 10d;
 				verticalExaggerationLabel.setText(String.format("%1.1f",
-						verticalExaggeration));
+						verticalExaggeration)
+						+ " x");
 			}
 		});
 
 		verticalExaggerationLabel = new JLabel(String.format("%1.1f",
-				verticalExaggeration));
+				verticalExaggeration) + " x");
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = 0;
@@ -679,7 +680,8 @@ public class SettingsDialog extends JDialog
 			{
 				double value = sliderToSpeed(viewIteratorSpeedSlider.getValue());
 				String format = "%1." + (value < 10 ? "2" : "1") + "f";
-				viewIteratorSpeedLabel.setText(String.format(format, value));
+				viewIteratorSpeedLabel.setText(String.format(format, value)
+						+ " x");
 			}
 		};
 		viewIteratorSpeedSlider.addChangeListener(cl);
