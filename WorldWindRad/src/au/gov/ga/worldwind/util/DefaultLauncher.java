@@ -184,7 +184,11 @@ public class DefaultLauncher
 		if (browser == null)
 			throw new Exception("Could not find web browser");
 		else
-			Runtime.getRuntime().exec(
+		{
+			Process process = Runtime.getRuntime().exec(
 					new String[] { browser, url.toExternalForm() });
+			new InputStreamGobbler(process.getInputStream());
+			new InputStreamGobbler(process.getErrorStream());
+		}
 	}
 }
