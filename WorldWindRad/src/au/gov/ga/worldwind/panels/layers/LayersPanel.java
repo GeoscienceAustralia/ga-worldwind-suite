@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.panels.layers;
 import gov.nasa.worldwind.WorldWindow;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Frame;
 
 import javax.swing.BorderFactory;
@@ -35,7 +36,7 @@ public class LayersPanel extends JPanel
 		tabbedPane.addTab("Geophysics", createGeophysics());
 		standardPanel.addUpperLayers();
 
-		tabbedPane.doLayout();
+		tabbedPane.validate();
 		tabbedPane.setSelectedIndex(1);
 		return tabbedPane;
 	}
@@ -59,6 +60,9 @@ public class LayersPanel extends JPanel
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		JScrollPane scrollPane = new JScrollPane(panel);
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+		Dimension size = rp.getPreferredSize();
+		size.width += 10; //include for border
+		scrollPane.setPreferredSize(size);
 		return scrollPane;
 	}
 
