@@ -47,12 +47,8 @@ import au.gov.ga.worldwind.settings.Settings.ProjectionMode;
 import au.gov.ga.worldwind.settings.Settings.StereoMode;
 import au.gov.ga.worldwind.util.JIntegerField;
 
-
 public class SettingsDialog extends JDialog
 {
-	/*private final static Logger logger = Logger.getLogger(SettingsDialog.class
-			.getName());*/
-
 	private final static int SPACING = 5;
 
 	private static Rectangle oldBounds;

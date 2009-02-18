@@ -355,19 +355,18 @@ public class Application
 					if (!file.getName().toLowerCase().endsWith(".xml"))
 					{
 						file = new File(file.getAbsolutePath() + ".xml");
-						if (file.exists())
-						{
-							int answer = JOptionPane
-									.showConfirmDialog(
-											annotationsDialog,
-											file.getAbsolutePath()
-													+ " already exists.\nDo you want to replace it?",
-											"Export",
-											JOptionPane.YES_NO_OPTION,
-											JOptionPane.WARNING_MESSAGE);
-							if (answer != JOptionPane.YES_OPTION)
-								file = null;
-						}
+					}
+					if (file.exists())
+					{
+						int answer = JOptionPane
+								.showConfirmDialog(
+										annotationsDialog,
+										file.getAbsolutePath()
+												+ " already exists.\nDo you want to replace it?",
+										"Export", JOptionPane.YES_NO_OPTION,
+										JOptionPane.WARNING_MESSAGE);
+						if (answer != JOptionPane.YES_OPTION)
+							file = null;
 					}
 					if (file != null)
 					{
@@ -382,6 +381,23 @@ public class Application
 									JOptionPane.ERROR_MESSAGE);
 						}
 					}
+				}
+			}
+		});
+
+		menuItem = new JMenuItem("Delete all");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				int value = JOptionPane.showConfirmDialog(annotationsDialog,
+						"All annotations will be deleted!\nAre you sure?",
+						"Delete all annotations", JOptionPane.YES_NO_OPTION,
+						JOptionPane.WARNING_MESSAGE);
+				if (value == JOptionPane.YES_OPTION)
+				{
+					annotationsPanel.deleteAllAnnotations();
 				}
 			}
 		});

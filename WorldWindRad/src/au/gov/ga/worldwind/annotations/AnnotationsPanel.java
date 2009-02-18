@@ -422,6 +422,13 @@ public class AnnotationsPanel extends JPanel
 		}
 	}
 
+	public void deleteAllAnnotations()
+	{
+		Settings.get().getAnnotations().clear();
+		populateList();
+		refreshLayer();
+	}
+
 	private void moveTo(ListItem item, int index)
 	{
 		int srcIndex = model.indexOf(item);
