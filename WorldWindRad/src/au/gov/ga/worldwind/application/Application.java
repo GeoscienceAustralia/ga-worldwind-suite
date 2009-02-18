@@ -9,6 +9,8 @@ import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.event.RenderingEvent;
+import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
@@ -172,6 +174,10 @@ public class Application
 
 	private Application()
 	{
+		//show splashscreen
+		frame = new JFrame("Geoscience Australia – World Wind");
+		final SplashScreen splashScreen = new SplashScreen(frame);
+
 		//create worldwind stuff
 
 		if (Settings.get().isHardwareStereoEnabled())
@@ -187,6 +193,18 @@ public class Application
 				WorldMapLayer.class));
 		create3DMouse();
 		createDoubleClickListener();
+
+		wwd.addRenderingListener(new RenderingListener()
+		{
+			public void stageChanged(RenderingEvent event)
+			{
+				if (event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)
+				{
+					splashScreen.dispose();
+					wwd.removeRenderingListener(this);
+				}
+			}
+		});
 
 		RetrievalService rs = WorldWind.getRetrievalService();
 		if (rs instanceof ExtendedRetrievalService)
@@ -208,7 +226,6 @@ public class Application
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
-		frame = new JFrame("Geoscience Australia – World Wind");
 		frame.setLayout(new BorderLayout());
 		frame.setBounds(Settings.get().getWindowBounds());
 		if (Settings.get().isWindowMaximized())

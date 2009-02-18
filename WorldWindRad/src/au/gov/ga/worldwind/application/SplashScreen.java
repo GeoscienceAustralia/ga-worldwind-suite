@@ -7,6 +7,7 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 
 public class SplashScreen extends JDialog
 {
@@ -14,6 +15,12 @@ public class SplashScreen extends JDialog
 
 	public SplashScreen()
 	{
+		this(null);
+	}
+
+	public SplashScreen(JFrame owner)
+	{
+		super(owner);
 		InputStream is = SplashScreen.class
 				.getResourceAsStream("/images/400x230-splash-nww.png");
 		if (is != null)
