@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.annotations;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.OrbitView;
@@ -22,6 +23,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.File;
@@ -44,21 +47,24 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.util.FlatJButton;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 
-import nasa.worldwind.view.FlyToOrbitViewStateIterator;
-
 public class AnnotationsPanel extends JPanel
 {
+	private static final long PLAY_PAUSE_LENGTH = 2000; //ms
+
 	private WorldWindow wwd;
 	private JList list;
 	private DefaultListModel model;
 	private ListItem dragging;
 	private AnnotationsLayer layer;
 	private Frame frame;
+	private boolean playing = false;
+	private FlatJButton addButton, editButton, deleteButton, playButton;
 
 	private class ListItem
 	{
@@ -90,15 +96,15 @@ public class AnnotationsPanel extends JPanel
 		JPanel panel = new JPanel(new GridBagLayout());
 		add(panel, BorderLayout.NORTH);
 
-		FlatJButton add = new FlatJButton(Icons.add);
-		add.setToolTipText("Add annotation");
+		addButton = new FlatJButton(Icons.add);
+		addButton.setToolTipText("Add annotation");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
-		c.weightx = 1d / 3d;
+		c.weightx = 1d / 4d;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(add, c);
-		add.addActionListener(new ActionListener()
+		panel.add(addButton, c);
+		addButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -106,12 +112,12 @@ public class AnnotationsPanel extends JPanel
 			}
 		});
 
-		final FlatJButton editButton = new FlatJButton(Icons.edit);
+		editButton = new FlatJButton(Icons.edit);
 		editButton.setToolTipText("Edit selected");
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
-		c.weightx = 1d / 3d;
+		c.weightx = 1d / 4d;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(editButton, c);
 		ActionListener editAL = new ActionListener()
@@ -123,12 +129,12 @@ public class AnnotationsPanel extends JPanel
 		};
 		editButton.addActionListener(editAL);
 
-		final FlatJButton deleteButton = new FlatJButton(Icons.delete);
+		deleteButton = new FlatJButton(Icons.delete);
 		deleteButton.setToolTipText("Delete selected");
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = 0;
-		c.weightx = 1d / 3d;
+		c.weightx = 1d / 4d;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(deleteButton, c);
 		ActionListener deleteAL = new ActionListener()
@@ -139,6 +145,24 @@ public class AnnotationsPanel extends JPanel
 			}
 		};
 		deleteButton.addActionListener(deleteAL);
+
+		playButton = new FlatJButton(Icons.run);
+		c = new GridBagConstraints();
+		c.gridx = 3;
+		c.gridy = 0;
+		c.weightx = 1 / 4d;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(playButton, c);
+		playButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (playing)
+					stopAnnotations();
+				else
+					playAnnotations();
+			}
+		});
 
 		model = new DefaultListModel();
 		list = new JList(model);
@@ -152,8 +176,7 @@ public class AnnotationsPanel extends JPanel
 		{
 			public void valueChanged(ListSelectionEvent e)
 			{
-				editButton.setEnabled(list.getSelectedIndex() >= 0);
-				deleteButton.setEnabled(list.getSelectedIndex() >= 0);
+				enableButtons();
 			}
 		};
 		list.getSelectionModel().addListSelectionListener(lsl);
@@ -246,6 +269,15 @@ public class AnnotationsPanel extends JPanel
 				}
 			}
 		});
+
+		stopAnnotations();
+	}
+
+	private void enableButtons()
+	{
+		addButton.setEnabled(!playing);
+		editButton.setEnabled(list.getSelectedIndex() >= 0 && !playing);
+		deleteButton.setEnabled(list.getSelectedIndex() >= 0 && !playing);
 	}
 
 	private ListItem getListItemUnderMouse(Point point)
@@ -334,6 +366,22 @@ public class AnnotationsPanel extends JPanel
 		}
 	}
 
+	private void selectAnnotation(Annotation annotation)
+	{
+		if (annotation != null)
+		{
+			for (int i = 0; i < model.size(); i++)
+			{
+				ListItem item = (ListItem) model.get(i);
+				if (item.annotation == annotation)
+				{
+					list.setSelectedIndex(i);
+					break;
+				}
+			}
+		}
+	}
+
 	private void editSelected()
 	{
 		ListItem item = (ListItem) list.getSelectedValue();
@@ -396,7 +444,99 @@ public class AnnotationsPanel extends JPanel
 		wwd.redraw();
 	}
 
-	private void flyToAnnotation(Annotation annotation)
+	private synchronized void stopAnnotations()
+	{
+		wwd.getView().stopStateIterators();
+		playing = false;
+		playButton.setIcon(Icons.run);
+		playButton.setToolTipText("Play through annotations");
+		enableButtons();
+	}
+
+	private synchronized void playAnnotations()
+	{
+		if (!playing)
+		{
+			playing = true;
+			final View view = wwd.getView();
+			view.addPropertyChangeListener(AVKey.VIEW,
+					new PropertyChangeListener()
+					{
+						public void propertyChange(PropertyChangeEvent evt)
+						{
+							if (!view.hasStateIterator())
+							{
+								stopAnnotations();
+							}
+							if (!playing)
+							{
+								view.removePropertyChangeListener(AVKey.VIEW,
+										this);
+							}
+						}
+					});
+			Thread thread = new Thread(new Runnable()
+			{
+				public void run()
+				{
+					ListItem item = (ListItem) list.getSelectedValue();
+					List<Annotation> annotations = Settings.get()
+							.getAnnotations();
+					Annotation annotation = null;
+					if (item != null)
+					{
+						annotation = item.annotation;
+					}
+					else if (!annotations.isEmpty())
+					{
+						annotation = annotations.get(0);
+					}
+
+					long jump = 100;
+					while (playing && !annotations.isEmpty())
+					{
+						int index = annotations.indexOf(annotation);
+						if (++index >= annotations.size())
+							index = 0;
+						annotation = annotations.get(index);
+						selectAnnotation(annotation);
+						long length = flyToAnnotation(annotation);
+						if (length < 0)
+							break;
+						length += PLAY_PAUSE_LENGTH;
+
+						//sleep for 'length' in 'jump' increments
+						for (; playing && length > jump; length -= jump)
+						{
+							sleep(jump);
+						}
+						if (playing)
+							sleep(length);
+					}
+				}
+
+				private void sleep(long millis)
+				{
+					try
+					{
+						Thread.sleep(millis);
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+				}
+			});
+			thread.setDaemon(true);
+			thread.start();
+		}
+
+		playButton.setIcon(Icons.stop);
+		playButton.setToolTipText("Stop playback");
+		enableButtons();
+	}
+
+	private long flyToAnnotation(Annotation annotation)
 	{
 		View view = wwd.getView();
 		if (view instanceof OrbitView)
@@ -434,7 +574,10 @@ public class AnnotationsPanel extends JPanel
 							zoom, lengthMillis, true);
 
 			view.applyStateIterator(vsi);
+
+			return lengthMillis;
 		}
+		return -1;
 	}
 
 	public void importAnnotations(File file) throws Exception

@@ -10,6 +10,7 @@ public class Icons
 	public static final ImageIcon remove;
 	public static final ImageIcon search;
 	public static final ImageIcon run;
+	public static final ImageIcon stop;
 	public static final ImageIcon delete;
 	public static final ImageIcon edit;
 	public static final ImageIcon add;
@@ -24,6 +25,7 @@ public class Icons
 		remove = loadIcon(base + "remove.gif");
 		search = loadIcon(base + "search.gif");
 		run = loadIcon(base + "run.gif");
+		stop = loadIcon(base + "stop.gif");
 		delete = loadIcon(base + "delete.gif");
 		edit = loadIcon(base + "edit.gif");
 		add = loadIcon(base + "add.gif");
