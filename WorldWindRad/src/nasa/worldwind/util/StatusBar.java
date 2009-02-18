@@ -15,7 +15,6 @@ import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.util.Logging;
 
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
@@ -84,17 +83,17 @@ public class StatusBar extends JPanel implements PositionListener,
 
 				if (!isNetworkAvailable.get())
 				{
-					heartBeat.setText(Logging.getMessage("term.NoNetwork"));
-					heartBeat.setForeground(new Color(255, 0, 0, MAX_ALPHA));
+					heartBeat.setText("No Network");
+					heartBeat.setForeground(new java.awt.Color(255, 0, 0, MAX_ALPHA));
 					return;
 				}
 
-				Color color = heartBeat.getForeground();
+				java.awt.Color color = heartBeat.getForeground();
 				int alpha = color.getAlpha();
 				if (isNetworkAvailable.get()
 						&& WorldWind.getRetrievalService().hasActiveTasks())
 				{
-					heartBeat.setText(Logging.getMessage("term.Downloading"));
+					heartBeat.setText("Downloading");
 					if (alpha >= MAX_ALPHA)
 						alpha = MAX_ALPHA;
 					else
@@ -105,7 +104,7 @@ public class StatusBar extends JPanel implements PositionListener,
 				{
 					alpha = Math.max(0, alpha - 20);
 				}
-				heartBeat.setForeground(new Color(255, 0, 0, alpha));
+				heartBeat.setForeground(new java.awt.Color(255, 0, 0, alpha));
 			}
 		});
 		downloadTimer.start();

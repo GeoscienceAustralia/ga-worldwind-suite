@@ -373,7 +373,7 @@ public class AnnotationsPanel extends JPanel
 				ListItem item = (ListItem) model.get(i);
 				if (item.annotation == annotation)
 				{
-					list.setSelectedIndex(i);
+					list.setSelectedValue(item, true);
 					break;
 				}
 			}
