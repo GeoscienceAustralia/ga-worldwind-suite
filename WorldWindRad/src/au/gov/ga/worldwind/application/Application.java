@@ -42,6 +42,7 @@ import java.awt.event.WindowStateListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -178,12 +179,13 @@ public class Application
 		//show splashscreen
 		frame = new JFrame("Geoscience Australia – World Wind");
 		final SplashScreen splashScreen = new SplashScreen(frame);
-		ImageIcon icon = new ImageIcon(Application.class
-				.getResource("/images/32x32-icon-earth.png"));
-		frame.setIconImage(icon.getImage());
+
+		//set icon
+		URL url = Application.class.getResource("/images/32x32-icon-earth.png");
+		if (url != null)
+			frame.setIconImage(new ImageIcon(url).getImage());
 
 		//create worldwind stuff
-
 		if (Settings.get().isHardwareStereoEnabled())
 			wwd = new WorldWindowStereoGLCanvas(
 					WorldWindowStereoGLCanvas.stereoCaps);
