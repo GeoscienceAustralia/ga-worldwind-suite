@@ -51,6 +51,7 @@ import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -177,6 +178,9 @@ public class Application
 		//show splashscreen
 		frame = new JFrame("Geoscience Australia – World Wind");
 		final SplashScreen splashScreen = new SplashScreen(frame);
+		ImageIcon icon = new ImageIcon(Application.class
+				.getResource("/images/32x32-icon-earth.png"));
+		frame.setIconImage(icon.getImage());
 
 		//create worldwind stuff
 
