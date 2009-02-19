@@ -1,7 +1,10 @@
 package au.gov.ga.worldwind.annotations;
 
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -49,6 +52,7 @@ public class AnnotationEditor extends JDialog
 	private JComboBox minZoomUnits;
 	private JComboBox maxZoomUnits;
 	private JCheckBox cameraInformation;
+	private JButton copyCamera;
 	private JCheckBox excludeFromPlaylist;
 	private JLabel zoomLabel;
 	private JLabel headingLabel;
@@ -89,8 +93,8 @@ public class AnnotationEditor extends JDialog
 		}
 	}
 
-	public AnnotationEditor(WorldWindow wwd, Frame owner, String title,
-			Annotation annotation)
+	public AnnotationEditor(final WorldWindow wwd, Frame owner, String title,
+			final Annotation annotation)
 	{
 		super(owner, title, true);
 		this.wwd = wwd;
@@ -166,7 +170,8 @@ public class AnnotationEditor extends JDialog
 		c.insets.bottom = 0;
 		panel.add(label, c);
 
-		latlon = new JTextField(textFormatedLatLon(annotation));
+		latlon = new JTextField(textFormatedLatLon(annotation.getLatitude(),
+				annotation.getLongitude()));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 2;
@@ -332,10 +337,52 @@ public class AnnotationEditor extends JDialog
 			}
 		});
 
-		headingLabel = new JLabel("Heading:");
+		copyCamera = new JButton("Fill from current view");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 7;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.CENTER;
+		c.insets = (Insets) insets.clone();
+		panel.add(copyCamera, c);
+		copyCamera.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				View view = wwd.getView();
+				if (view instanceof OrbitView)
+				{
+					OrbitView orbitView = (OrbitView) view;
+					heading.setValue(orbitView.getHeading().degrees);
+					pitch.setValue(orbitView.getPitch().degrees);
+					zoom.setValue(orbitView.getZoom());
+					Position pos = orbitView.getCenterPosition();
+					double lat = pos.getLatitude().degrees;
+					double lon = pos.getLongitude().degrees;
+					if (Math.abs(lat - annotation.getLatitude()) > 0.1
+							|| Math.abs(lon - annotation.getLongitude()) > 0.1)
+					{
+						int value = JOptionPane
+								.showConfirmDialog(
+										AnnotationEditor.this,
+										"Do you want to center the annotation at the current camera center?",
+										"Move annotation",
+										JOptionPane.YES_NO_OPTION,
+										JOptionPane.QUESTION_MESSAGE);
+						if (value == JOptionPane.YES_OPTION)
+						{
+							latlon.setText(textFormatedLatLon(lat, lon));
+						}
+					}
+					checkValidity();
+				}
+			}
+		});
+
+		headingLabel = new JLabel("Heading:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 8;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
 		panel.add(headingLabel, c);
@@ -343,7 +390,7 @@ public class AnnotationEditor extends JDialog
 		panel2 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 7;
+		c.gridy = 8;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
 		panel.add(panel2, c);
@@ -366,7 +413,7 @@ public class AnnotationEditor extends JDialog
 		pitchLabel = new JLabel("Pitch:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 8;
+		c.gridy = 9;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
 		panel.add(pitchLabel, c);
@@ -374,7 +421,7 @@ public class AnnotationEditor extends JDialog
 		panel2 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 8;
+		c.gridy = 9;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
 		panel.add(panel2, c);
@@ -397,7 +444,7 @@ public class AnnotationEditor extends JDialog
 		zoomLabel = new JLabel("Zoom:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 9;
+		c.gridy = 10;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
 		panel.add(zoomLabel, c);
@@ -405,7 +452,7 @@ public class AnnotationEditor extends JDialog
 		panel2 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 9;
+		c.gridy = 10;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(panel2, c);
 
@@ -438,12 +485,12 @@ public class AnnotationEditor extends JDialog
 		zoomUnits.addActionListener(al);
 		al.actionPerformed(null);
 
-		
+
 		excludeFromPlaylist = new JCheckBox("Exclude from playlist", annotation
 				.isExcludeFromPlaylist());
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 10;
+		c.gridy = 11;
 		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = (Insets) insets.clone();
@@ -575,19 +622,20 @@ public class AnnotationEditor extends JDialog
 
 	private void enableCameraInformation()
 	{
-		headingLabel.setEnabled(cameraInformation.isSelected());
-		zoomLabel.setEnabled(cameraInformation.isSelected());
-		pitchLabel.setEnabled(cameraInformation.isSelected());
-		heading.setEnabled(cameraInformation.isSelected());
-		zoom.setEnabled(cameraInformation.isSelected());
-		pitch.setEnabled(cameraInformation.isSelected());
-		zoomUnits.setEnabled(cameraInformation.isSelected());
+		boolean enabled = cameraInformation.isSelected();
+		copyCamera.setEnabled(enabled);
+		headingLabel.setEnabled(enabled);
+		zoomLabel.setEnabled(enabled);
+		pitchLabel.setEnabled(enabled);
+		heading.setEnabled(enabled);
+		zoom.setEnabled(enabled);
+		pitch.setEnabled(enabled);
+		zoomUnits.setEnabled(enabled);
 	}
 
-	private String textFormatedLatLon(Annotation annotation)
+	private String textFormatedLatLon(double latitude, double longitude)
 	{
-		return String.format("%7.4f %7.4f", annotation.getLatitude(),
-				annotation.getLongitude());
+		return String.format("%7.4f %7.4f", latitude, longitude);
 	}
 
 	private String labelFormatedLatLon(Annotation annotation)
