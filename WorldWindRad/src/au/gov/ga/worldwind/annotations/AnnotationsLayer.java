@@ -30,10 +30,12 @@ public class AnnotationsLayer extends AbstractLayer
 
 	private Color savedBorderColor;
 	private WorldWindow wwd;
+	private AnnotationsPanel annotationsPanel;
 
-	public AnnotationsLayer(final WorldWindow wwd)
+	public AnnotationsLayer(WorldWindow wwd, AnnotationsPanel annotationsPanel)
 	{
 		this.wwd = wwd;
+		this.annotationsPanel = annotationsPanel;
 		addSelectListener();
 		refresh();
 	}
@@ -78,6 +80,9 @@ public class AnnotationsLayer extends AbstractLayer
 											.getAttributes().getBorderColor();
 									currentAnnotation.getAttributes()
 											.setBorderColor(Color.YELLOW);
+									annotationsPanel
+											.selectAnnotation(currentAnnotation
+													.getAnnotation());
 								}
 							}
 							else
@@ -151,8 +156,8 @@ public class AnnotationsLayer extends AbstractLayer
 	public void refresh()
 	{
 		annotations.clear();
-		for (au.gov.ga.worldwind.annotations.Annotation annotation : Settings.get()
-				.getAnnotations())
+		for (au.gov.ga.worldwind.annotations.Annotation annotation : Settings
+				.get().getAnnotations())
 		{
 			RenderableAnnotation a = new RenderableAnnotation(annotation);
 			annotations.add(a);

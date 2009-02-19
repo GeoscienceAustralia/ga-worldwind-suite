@@ -160,4 +160,9 @@ public class RenderableAnnotation extends AbstractAnnotation implements
 			annotation.setVisible(visible);
 		}
 	}
+
+	public Annotation getAnnotation()
+	{
+		return annotation;
+	}
 }

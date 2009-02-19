@@ -82,7 +82,7 @@ public class AnnotationsPanel extends JPanel
 		this.frame = frame;
 		createPanel();
 		populateList();
-		layer = new AnnotationsLayer(wwd);
+		layer = new AnnotationsLayer(wwd, this);
 		wwd.getModel().getLayers().add(layer);
 	}
 
@@ -364,7 +364,7 @@ public class AnnotationsPanel extends JPanel
 		}
 	}
 
-	private void selectAnnotation(Annotation annotation)
+	public void selectAnnotation(Annotation annotation)
 	{
 		if (annotation != null)
 		{

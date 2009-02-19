@@ -12,6 +12,7 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -104,7 +105,7 @@ public class AnnotationEditor extends JDialog
 		Insets insets = new Insets(3, 1, 3, 1);
 		GridBagConstraints c;
 		JLabel label;
-		JPanel panel, panel2;
+		JPanel panel, panel2, panel3;
 
 		panel = new JPanel(new GridBagLayout());
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -129,29 +130,37 @@ public class AnnotationEditor extends JDialog
 				checkValidity();
 			}
 		};
+		ActionListener al = new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				checkValidity();
+			}
+		};
 
-		visible = new JCheckBox("Visible", annotation.isVisible());
+		panel2 = new JPanel(new GridBagLayout());
+		panel2.setBorder(BorderFactory.createTitledBorder("Annotation"));
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
-		c.gridwidth = 2;
-		c.insets = (Insets) insets.clone();
-		panel.add(visible, c);
+		c.weightx = 1;
+		c.weighty = 1;
+		c.fill = GridBagConstraints.BOTH;
+		panel.add(panel2, c);
 
 		label = new JLabel("Label:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 0;
 		c.anchor = GridBagConstraints.NORTHEAST;
 		c.insets = (Insets) insets.clone();
-		panel.add(label, c);
+		panel2.add(label, c);
 
 		text = new JTextArea(annotation.getLabel(), 3, 30);
 		text.setFont(Font.decode(""));
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 1;
+		c.gridy = 0;
 		c.weightx = 1;
 		c.weighty = 1;
 		c.fill = GridBagConstraints.BOTH;
@@ -159,50 +168,77 @@ public class AnnotationEditor extends JDialog
 		JScrollPane scrollPane = new JScrollPane(text,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		panel.add(scrollPane, c);
+		panel2.add(scrollPane, c);
 
 		label = new JLabel("Lat/Lon:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = 1;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
 		c.insets.bottom = 0;
-		panel.add(label, c);
+		panel2.add(label, c);
 
 		latlon = new JTextField(textFormatedLatLon(annotation.getLatitude(),
 				annotation.getLongitude()));
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 2;
+		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
 		c.insets.bottom = 0;
-		panel.add(latlon, c);
+		panel2.add(latlon, c);
 
 		latlonLabel = new JLabel(" ");
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 3;
+		c.gridy = 2;
 		c.anchor = GridBagConstraints.CENTER;
 		c.insets = (Insets) insets.clone();
 		c.insets.top = 0;
-		panel.add(latlonLabel, c);
+		panel2.add(latlonLabel, c);
+
+		panel3 = new JPanel(new GridLayout(0, 2));
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 3;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = (Insets) insets.clone();
+		panel2.add(panel3, c);
+
+		visible = new JCheckBox("Show on globe", annotation.isVisible());
+		panel3.add(visible);
+		visible.addActionListener(al);
+
+		excludeFromPlaylist = new JCheckBox("Exclude from playlist", annotation
+				.isExcludeFromPlaylist());
+		panel3.add(excludeFromPlaylist);
+		excludeFromPlaylist.addActionListener(al);
+
+		panel2 = new JPanel(new GridBagLayout());
+		panel2.setBorder(BorderFactory.createTitledBorder("Fade"));
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(panel2, c);
 
 		label = new JLabel("Fade in zoom:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = 0;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
-		panel.add(label, c);
+		panel2.add(label, c);
 
-		panel2 = new JPanel(new GridBagLayout());
+		panel3 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 4;
+		c.gridy = 0;
+		c.weightx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(panel2, c);
+		panel2.add(panel3, c);
 
 		Double minz = Double.valueOf(annotation.getMinZoom());
 		if (minz < 0)
@@ -215,7 +251,7 @@ public class AnnotationEditor extends JDialog
 		c.weightx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
-		panel2.add(minZoom, c);
+		panel3.add(minZoom, c);
 
 		minZoomUnits = new JComboBox(Units.values());
 		if (UNITS == IMPERIAL)
@@ -225,9 +261,9 @@ public class AnnotationEditor extends JDialog
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = (Insets) insets.clone();
-		panel2.add(minZoomUnits, c);
+		panel3.add(minZoomUnits, c);
 
-		ActionListener al = new ActionListener()
+		ActionListener mzal = new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -235,8 +271,8 @@ public class AnnotationEditor extends JDialog
 						.getScale());
 			}
 		};
-		minZoomUnits.addActionListener(al);
-		al.actionPerformed(null);
+		minZoomUnits.addActionListener(mzal);
+		mzal.actionPerformed(null);
 
 		FlatJButton flat = new FlatJButton(Icons.remove);
 		flat.restrictSize();
@@ -245,7 +281,7 @@ public class AnnotationEditor extends JDialog
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = (Insets) insets.clone();
-		panel2.add(flat, c);
+		panel3.add(flat, c);
 		flat.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -257,17 +293,17 @@ public class AnnotationEditor extends JDialog
 		label = new JLabel("Fade out zoom:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 5;
+		c.gridy = 1;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
-		panel.add(label, c);
+		panel2.add(label, c);
 
-		panel2 = new JPanel(new GridBagLayout());
+		panel3 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 5;
+		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(panel2, c);
+		panel2.add(panel3, c);
 
 		Double maxz = Double.valueOf(annotation.getMaxZoom());
 		if (maxz < 0)
@@ -280,7 +316,7 @@ public class AnnotationEditor extends JDialog
 		c.weightx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
-		panel2.add(maxZoom, c);
+		panel3.add(maxZoom, c);
 
 		maxZoomUnits = new JComboBox(Units.values());
 		if (UNITS == IMPERIAL)
@@ -290,9 +326,9 @@ public class AnnotationEditor extends JDialog
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = (Insets) insets.clone();
-		panel2.add(maxZoomUnits, c);
+		panel3.add(maxZoomUnits, c);
 
-		al = new ActionListener()
+		mzal = new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -300,8 +336,8 @@ public class AnnotationEditor extends JDialog
 						.getScale());
 			}
 		};
-		maxZoomUnits.addActionListener(al);
-		al.actionPerformed(null);
+		maxZoomUnits.addActionListener(mzal);
+		mzal.actionPerformed(null);
 
 		flat = new FlatJButton(Icons.remove);
 		flat.restrictSize();
@@ -310,7 +346,7 @@ public class AnnotationEditor extends JDialog
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = (Insets) insets.clone();
-		panel2.add(flat, c);
+		panel3.add(flat, c);
 		flat.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -319,15 +355,26 @@ public class AnnotationEditor extends JDialog
 			}
 		});
 
-		cameraInformation = new JCheckBox("Save camera information", annotation
-				.isSaveCamera());
+		panel2 = new JPanel(new GridBagLayout());
+		panel2.setBorder(BorderFactory.createTitledBorder("Camera"));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 6;
-		c.gridwidth = 2;
-		c.anchor = GridBagConstraints.WEST;
+		c.gridy = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(panel2, c);
+
+		panel3 = new JPanel(new GridLayout(0, 2));
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
-		panel.add(cameraInformation, c);
+		c.gridwidth = 2;
+		panel2.add(panel3, c);
+
+		cameraInformation = new JCheckBox("Save camera information", annotation
+				.isSaveCamera());
+		panel3.add(cameraInformation);
 		cameraInformation.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -338,13 +385,7 @@ public class AnnotationEditor extends JDialog
 		});
 
 		copyCamera = new JButton("Fill from current view");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 7;
-		c.gridwidth = 2;
-		c.anchor = GridBagConstraints.CENTER;
-		c.insets = (Insets) insets.clone();
-		panel.add(copyCamera, c);
+		panel3.add(copyCamera);
 		copyCamera.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -365,7 +406,7 @@ public class AnnotationEditor extends JDialog
 						int value = JOptionPane
 								.showConfirmDialog(
 										AnnotationEditor.this,
-										"Do you want to center the annotation at the current camera center?",
+										"Do you want to change the Lat/Lon to match the current camera center?",
 										"Move annotation",
 										JOptionPane.YES_NO_OPTION,
 										JOptionPane.QUESTION_MESSAGE);
@@ -382,18 +423,19 @@ public class AnnotationEditor extends JDialog
 		headingLabel = new JLabel("Heading:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 8;
+		c.gridy = 1;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
-		panel.add(headingLabel, c);
+		panel2.add(headingLabel, c);
 
-		panel2 = new JPanel(new GridBagLayout());
+		panel3 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 8;
+		c.gridy = 1;
+		c.weightx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
-		panel.add(panel2, c);
+		panel2.add(panel3, c);
 
 		heading = new JDoubleField(annotation.getHeading(), 2);
 		c = new GridBagConstraints();
@@ -401,30 +443,30 @@ public class AnnotationEditor extends JDialog
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
-		panel2.add(heading, c);
+		panel3.add(heading, c);
 
 		label = new JLabel("\u00B0");
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
 		c.insets = new Insets(0, insets.left + insets.right, 0, 0);
-		panel2.add(label, c);
+		panel3.add(label, c);
 
 		pitchLabel = new JLabel("Pitch:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 9;
+		c.gridy = 2;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
-		panel.add(pitchLabel, c);
+		panel2.add(pitchLabel, c);
 
-		panel2 = new JPanel(new GridBagLayout());
+		panel3 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 9;
+		c.gridy = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
-		panel.add(panel2, c);
+		panel2.add(panel3, c);
 
 		pitch = new JDoubleField(annotation.getPitch(), 2);
 		c = new GridBagConstraints();
@@ -432,29 +474,29 @@ public class AnnotationEditor extends JDialog
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
-		panel2.add(pitch, c);
+		panel3.add(pitch, c);
 
 		label = new JLabel("\u00B0");
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
 		c.insets = new Insets(0, insets.left + insets.right, 0, 0);
-		panel2.add(label, c);
+		panel3.add(label, c);
 
 		zoomLabel = new JLabel("Zoom:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 10;
+		c.gridy = 3;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
-		panel.add(zoomLabel, c);
+		panel2.add(zoomLabel, c);
 
-		panel2 = new JPanel(new GridBagLayout());
+		panel3 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 10;
+		c.gridy = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(panel2, c);
+		panel2.add(panel3, c);
 
 		zoom = new JDoubleField(annotation.getZoom(), 2);
 		c = new GridBagConstraints();
@@ -463,7 +505,7 @@ public class AnnotationEditor extends JDialog
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
 		c.weightx = 1;
-		panel2.add(zoom, c);
+		panel3.add(zoom, c);
 
 		zoomUnits = new JComboBox(Units.values());
 		if (UNITS == IMPERIAL)
@@ -473,35 +515,18 @@ public class AnnotationEditor extends JDialog
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = (Insets) insets.clone();
-		panel2.add(zoomUnits, c);
+		panel3.add(zoomUnits, c);
 
-		al = new ActionListener()
+		mzal = new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				zoom.setScale(((Units) zoomUnits.getSelectedItem()).getScale());
 			}
 		};
-		zoomUnits.addActionListener(al);
-		al.actionPerformed(null);
+		zoomUnits.addActionListener(mzal);
+		mzal.actionPerformed(null);
 
-
-		excludeFromPlaylist = new JCheckBox("Exclude from playlist", annotation
-				.isExcludeFromPlaylist());
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 11;
-		c.gridwidth = 2;
-		c.anchor = GridBagConstraints.WEST;
-		c.insets = (Insets) insets.clone();
-		panel.add(excludeFromPlaylist, c);
-		excludeFromPlaylist.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				checkValidity();
-			}
-		});
 
 		panel = new JPanel(new BorderLayout());
 		int spacing = 5;
