@@ -175,6 +175,9 @@ public class AnnotationsPanel extends JPanel
 			public void valueChanged(ListSelectionEvent e)
 			{
 				enableButtons();
+				ListItem item = (ListItem) list.getSelectedValue();
+				if (item != null)
+					annotationSelected(item.annotation);
 			}
 		};
 		list.getSelectionModel().addListSelectionListener(lsl);
@@ -276,6 +279,12 @@ public class AnnotationsPanel extends JPanel
 		addButton.setEnabled(!playing);
 		editButton.setEnabled(list.getSelectedIndex() >= 0 && !playing);
 		deleteButton.setEnabled(list.getSelectedIndex() >= 0 && !playing);
+	}
+
+	private void annotationSelected(Annotation annotation)
+	{
+		layer.selectAnnotation(annotation);
+		wwd.redraw();
 	}
 
 	private ListItem getListItemUnderMouse(Point point)
@@ -517,18 +526,19 @@ public class AnnotationsPanel extends JPanel
 							if (playing)
 								sleep(length);
 						}
-						
+
 						int nextIndex = index;
-						while(true)
+						while (true)
 						{
 							if (++nextIndex >= annotations.size())
 								nextIndex = 0;
-							if(nextIndex == index)
+							if (nextIndex == index)
 							{
 								index = -1;
 								break;
 							}
-							if (!annotations.get(nextIndex).isExcludeFromPlaylist())
+							if (!annotations.get(nextIndex)
+									.isExcludeFromPlaylist())
 							{
 								index = nextIndex;
 								break;

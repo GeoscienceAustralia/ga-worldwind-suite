@@ -1,12 +1,10 @@
 package au.gov.ga.worldwind.annotations;
 
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.examples.BasicDragger;
 import gov.nasa.worldwind.layers.AbstractLayer;
-import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.pick.PickedObjectList;
 import gov.nasa.worldwind.render.Annotation;
 import gov.nasa.worldwind.render.AnnotationRenderer;
@@ -25,7 +23,7 @@ public class AnnotationsLayer extends AbstractLayer
 {
 	private AnnotationRenderer renderer = new BasicAnnotationRenderer();
 	private List<Annotation> annotations = new ArrayList<Annotation>();
-	private RenderableAnnotation currentAnnotation;
+	private RenderableAnnotation selectedAnnotation;
 	private RenderableAnnotation lastPickedAnnotation;
 
 	private Color savedBorderColor;
@@ -53,43 +51,15 @@ public class AnnotationsLayer extends AbstractLayer
 				{
 					if (event.hasObjects())
 					{
-						if (event.getTopObject() instanceof Annotation)
+						if (event.getTopObject() instanceof RenderableAnnotation)
 						{
-							// Check for text or url
-							PickedObject po = event.getTopPickedObject();
-							if (po.getValue(AVKey.TEXT) != null)
-							{
-								if (currentAnnotation == event.getTopObject())
-									return;
-							}
+							RenderableAnnotation a = (RenderableAnnotation) event
+									.getTopObject();
 							// Left click on an annotation - select
-							if (currentAnnotation != null)
-							{
-								// Unselect current
-								currentAnnotation.getAttributes()
-										.setBorderColor(savedBorderColor);
-							}
-							if (currentAnnotation != event.getTopObject())
-							{
-								// Select new one if not current one already
-								if (event.getTopObject() instanceof RenderableAnnotation)
-								{
-									currentAnnotation = (RenderableAnnotation) event
-											.getTopObject();
-									savedBorderColor = currentAnnotation
-											.getAttributes().getBorderColor();
-									currentAnnotation.getAttributes()
-											.setBorderColor(Color.YELLOW);
-									annotationsPanel
-											.selectAnnotation(currentAnnotation
-													.getAnnotation());
-								}
-							}
-							else
-							{
-								// Clear current annotation
-								currentAnnotation = null; // switch off
-							}
+							selectAnnotation(a, true);
+							if (isSelected(a))
+								annotationsPanel.selectAnnotation(a
+										.getAnnotation());
 						}
 					}
 				}
@@ -106,10 +76,10 @@ public class AnnotationsLayer extends AbstractLayer
 					if (event.hasObjects())
 					{
 						// If selected annotation delegate dragging computations to a dragger.
-						if (event.getTopObject() == currentAnnotation)
+						if (event.getTopObject() == selectedAnnotation)
 						{
 							this.dragger.selected(event);
-							currentAnnotation.setDragging(event
+							selectedAnnotation.setDragging(event
 									.getEventAction().equals(SelectEvent.DRAG));
 						}
 					}
@@ -174,5 +144,44 @@ public class AnnotationsLayer extends AbstractLayer
 	protected void doPick(DrawContext dc, Point pickPoint)
 	{
 		renderer.pick(dc, annotations, pickPoint, this);
+	}
+
+	public void selectAnnotation(
+			au.gov.ga.worldwind.annotations.Annotation annotation)
+	{
+		for (Annotation a : annotations)
+		{
+			RenderableAnnotation ra = (RenderableAnnotation) a;
+			if (ra.getAnnotation() == annotation)
+			{
+				selectAnnotation(ra, false);
+				break;
+			}
+		}
+	}
+
+	protected boolean isSelected(RenderableAnnotation annotation)
+	{
+		return annotation == selectedAnnotation;
+	}
+
+	protected void selectAnnotation(RenderableAnnotation annotation,
+			boolean toggle)
+	{
+		if (selectedAnnotation != null)
+		{
+			selectedAnnotation.getAttributes().setBorderColor(savedBorderColor);
+		}
+		if (selectedAnnotation == annotation && toggle)
+		{
+			selectedAnnotation = null;
+		}
+		else
+		{
+			selectedAnnotation = annotation;
+			savedBorderColor = selectedAnnotation.getAttributes()
+					.getBorderColor();
+			selectedAnnotation.getAttributes().setBorderColor(Color.YELLOW);
+		}
 	}
 }
