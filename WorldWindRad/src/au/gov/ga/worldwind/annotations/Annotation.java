@@ -14,6 +14,7 @@ public class Annotation implements Serializable
 	private double zoom = 0;
 	private double heading = 0;
 	private double pitch = 0;
+	private boolean excludeFromPlaylist = false;
 
 	public Annotation()
 	{
@@ -33,12 +34,12 @@ public class Annotation implements Serializable
 		this.minZoom = minZoom;
 		this.visible = true;
 	}
-	
+
 	public Annotation(Annotation annotation)
 	{
 		setValuesFrom(annotation);
 	}
-	
+
 	public void setValuesFrom(Annotation annotation)
 	{
 		this.label = annotation.label;
@@ -51,6 +52,7 @@ public class Annotation implements Serializable
 		this.zoom = annotation.zoom;
 		this.heading = annotation.heading;
 		this.pitch = annotation.pitch;
+		this.excludeFromPlaylist = annotation.excludeFromPlaylist;
 	}
 
 	public String getLabel()
@@ -151,5 +153,15 @@ public class Annotation implements Serializable
 	public void setPitch(double pitch)
 	{
 		this.pitch = pitch;
+	}
+
+	public boolean isExcludeFromPlaylist()
+	{
+		return excludeFromPlaylist;
+	}
+
+	public void setExcludeFromPlaylist(boolean excludeFromPlaylist)
+	{
+		this.excludeFromPlaylist = excludeFromPlaylist;
 	}
 }

@@ -440,44 +440,84 @@ public class Application
 		final Set<String> imageFormats = new HashSet<String>();
 		for (String format : formats)
 		{
-			imageFormats.add(format.toUpperCase());
+			imageFormats.add(format.toLowerCase());
 		}
 
 		JFileChooser chooser = new JFileChooser();
-		FileFilter filter = new FileFilter()
+		List<FileFilter> filters = new ArrayList<FileFilter>();
+		FileFilter jpgFilter = null;
+		for (final String format : imageFormats)
 		{
-			@Override
-			public boolean accept(File f)
+			FileFilter filter = new FileFilter()
 			{
-				if (f.isDirectory())
-					return true;
-				int index = f.getName().lastIndexOf('.');
-				if (index < 0)
-					return false;
-				String ext = f.getName().substring(index + 1);
-				return imageFormats.contains(ext.toUpperCase());
-			}
-
-			@Override
-			public String getDescription()
-			{
-				String desc = "";
-				int i = 0;
-				for (String format : imageFormats)
+				@Override
+				public boolean accept(File f)
 				{
-					desc += format;
-					if (i++ < imageFormats.size())
-						desc += ",";
-					desc += " ";
+					if (f.isDirectory())
+						return true;
+					int index = f.getName().lastIndexOf('.');
+					if (index < 0)
+						return false;
+					String ext = f.getName().substring(index + 1);
+					return format.equals(ext.toLowerCase());
 				}
-				desc += " images";
-				return desc;
-			}
-		};
-		chooser.setFileFilter(filter);
+
+				@Override
+				public String getDescription()
+				{
+					return format.toUpperCase() + " image";
+				}
+
+				@Override
+				public String toString()
+				{
+					return format;
+				}
+			};
+			filters.add(filter);
+			chooser.addChoosableFileFilter(filter);
+			if (format.equals("jpg"))
+				jpgFilter = filter;
+		}
+		if (jpgFilter != null)
+			chooser.setFileFilter(jpgFilter);
+
 		if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
-			Screenshotter.takeScreenshot(wwd, wwd, chooser.getSelectedFile());
+			File file = chooser.getSelectedFile();
+			//get filter extension
+			String newExt;
+			FileFilter filter = chooser.getFileFilter();
+			if (filters.contains(filter))
+				newExt = filter.toString();
+			else
+				newExt = "jpg";
+			//find file extension
+			int index = file.getName().lastIndexOf('.');
+			String ext = null;
+			if (index > 0)
+				ext = file.getName().substring(index + 1);
+			//fix/add file extension
+			if (ext == null || !newExt.equals(ext.toLowerCase()))
+			{
+				ext = newExt;
+				file = new File(file.getParent(), file.getName() + "." + ext);
+			}
+			//ask user if they want to overwrite
+			if (file.exists())
+			{
+				int answer = JOptionPane.showConfirmDialog(frame, file
+						.getAbsolutePath()
+						+ " already exists.\nDo you want to replace it?",
+						"Save image", JOptionPane.YES_NO_OPTION,
+						JOptionPane.WARNING_MESSAGE);
+				if (answer != JOptionPane.YES_OPTION)
+					file = null;
+			}
+			if (file != null)
+			{
+				Screenshotter.takeScreenshot(wwd, wwd, file);
+			}
 		}
 	}
 

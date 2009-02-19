@@ -49,6 +49,7 @@ public class AnnotationEditor extends JDialog
 	private JComboBox minZoomUnits;
 	private JComboBox maxZoomUnits;
 	private JCheckBox cameraInformation;
+	private JCheckBox excludeFromPlaylist;
 	private JLabel zoomLabel;
 	private JLabel headingLabel;
 	private JLabel pitchLabel;
@@ -124,7 +125,7 @@ public class AnnotationEditor extends JDialog
 				checkValidity();
 			}
 		};
-		
+
 		visible = new JCheckBox("Visible", annotation.isVisible());
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -339,13 +340,28 @@ public class AnnotationEditor extends JDialog
 		c.insets = (Insets) insets.clone();
 		panel.add(headingLabel, c);
 
-		heading = new JDoubleField(annotation.getHeading(), 2);
+		panel2 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 7;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
-		panel.add(heading, c);
+		panel.add(panel2, c);
+
+		heading = new JDoubleField(annotation.getHeading(), 2);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		panel2.add(heading, c);
+
+		label = new JLabel("\u00B0");
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 0;
+		c.insets = new Insets(0, insets.left + insets.right, 0, 0);
+		panel2.add(label, c);
 
 		pitchLabel = new JLabel("Pitch:");
 		c = new GridBagConstraints();
@@ -355,13 +371,28 @@ public class AnnotationEditor extends JDialog
 		c.insets = (Insets) insets.clone();
 		panel.add(pitchLabel, c);
 
-		pitch = new JDoubleField(annotation.getPitch(), 2);
+		panel2 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 8;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
-		panel.add(pitch, c);
+		panel.add(panel2, c);
+
+		pitch = new JDoubleField(annotation.getPitch(), 2);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		panel2.add(pitch, c);
+
+		label = new JLabel("\u00B0");
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 0;
+		c.insets = new Insets(0, insets.left + insets.right, 0, 0);
+		panel2.add(label, c);
 
 		zoomLabel = new JLabel("Zoom:");
 		c = new GridBagConstraints();
@@ -406,6 +437,24 @@ public class AnnotationEditor extends JDialog
 		};
 		zoomUnits.addActionListener(al);
 		al.actionPerformed(null);
+
+		
+		excludeFromPlaylist = new JCheckBox("Exclude from playlist", annotation
+				.isExcludeFromPlaylist());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 10;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = (Insets) insets.clone();
+		panel.add(excludeFromPlaylist, c);
+		excludeFromPlaylist.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				checkValidity();
+			}
+		});
 
 		panel = new JPanel(new BorderLayout());
 		int spacing = 5;
@@ -457,7 +506,7 @@ public class AnnotationEditor extends JDialog
 	private boolean checkValidity()
 	{
 		boolean valid = true;
-		
+
 		annotation.setVisible(visible.isSelected());
 
 		String label = text.getText();
@@ -509,6 +558,7 @@ public class AnnotationEditor extends JDialog
 		annotation.setSaveCamera(cameraInformation.isSelected());
 		annotation.setHeading(h);
 		annotation.setPitch(p);
+		annotation.setExcludeFromPlaylist(excludeFromPlaylist.isSelected());
 
 		okButton.setEnabled(valid);
 		return valid;

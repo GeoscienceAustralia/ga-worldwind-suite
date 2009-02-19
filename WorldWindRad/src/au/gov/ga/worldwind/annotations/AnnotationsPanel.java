@@ -487,37 +487,55 @@ public class AnnotationsPanel extends JPanel
 					ListItem item = (ListItem) list.getSelectedValue();
 					List<Annotation> annotations = Settings.get()
 							.getAnnotations();
-					Annotation annotation = null;
+					int index = -1;
 					if (item != null)
 					{
-						annotation = item.annotation;
+						index = annotations.indexOf(item.annotation);
 					}
 					else if (!annotations.isEmpty())
 					{
-						annotation = annotations.get(0);
+						index = 0;
 					}
 
 					long jump = 100;
-					while (playing && !annotations.isEmpty())
+					while (playing && index >= 0)
 					{
-						int index = annotations.indexOf(annotation);
-						if (++index >= annotations.size())
-							index = 0;
-						annotation = annotations.get(index);
-						selectAnnotation(annotation);
-						long length = flyToAnnotation(annotation);
-						if (length < 0)
-							break;
-						length += Settings.get().getAnnotationsPause();
-
-						//sleep for 'length' in 'jump' increments
-						for (; playing && length > jump; length -= jump)
+						Annotation annotation = annotations.get(index);
+						if (!annotation.isExcludeFromPlaylist())
 						{
-							sleep(jump);
+							selectAnnotation(annotation);
+							long length = flyToAnnotation(annotation);
+							if (length < 0)
+								break;
+							length += Settings.get().getAnnotationsPause();
+
+							//sleep for 'length' in 'jump' increments
+							for (; playing && length > jump; length -= jump)
+							{
+								sleep(jump);
+							}
+							if (playing)
+								sleep(length);
 						}
-						if (playing)
-							sleep(length);
+						
+						int nextIndex = index;
+						while(true)
+						{
+							if (++nextIndex >= annotations.size())
+								nextIndex = 0;
+							if(nextIndex == index)
+							{
+								index = -1;
+								break;
+							}
+							if (!annotations.get(nextIndex).isExcludeFromPlaylist())
+							{
+								index = nextIndex;
+								break;
+							}
+						}
 					}
+					stopAnnotations();
 				}
 
 				private void sleep(long millis)
