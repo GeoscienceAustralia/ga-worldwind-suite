@@ -42,7 +42,6 @@ import java.awt.event.WindowStateListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -181,9 +180,14 @@ public class Application
 		final SplashScreen splashScreen = new SplashScreen(frame);
 
 		//set icon
-		URL url = Application.class.getResource("/images/32x32-icon-earth.png");
-		if (url != null)
-			frame.setIconImage(new ImageIcon(url).getImage());
+		try
+		{
+			frame.setIconImage(new ImageIcon(Application.class
+					.getResource("/images/32x32-icon-earth.png")).getImage());
+		}
+		catch (Exception e)
+		{
+		}
 
 		//create worldwind stuff
 		if (Settings.get().isHardwareStereoEnabled())
