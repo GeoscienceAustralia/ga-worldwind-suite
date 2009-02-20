@@ -6,12 +6,14 @@ import javax.media.opengl.GL;
 
 import gov.nasa.worldwind.Locatable;
 import gov.nasa.worldwind.Movable;
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.AbstractAnnotation;
 import gov.nasa.worldwind.render.AnnotationAttributes;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.MultiLineTextRenderer;
+import gov.nasa.worldwind.view.OrbitView;
 
 public class RenderableAnnotation extends AbstractAnnotation implements
 		Locatable, Movable
@@ -55,8 +57,12 @@ public class RenderableAnnotation extends AbstractAnnotation implements
 
 		double minZoom = annotation.getMinZoom();
 		double maxZoom = annotation.getMaxZoom();
-		Position eyePos = dc.getView().getEyePosition();
-		double zoom = eyePos.getElevation();
+		double zoom;
+		View view = dc.getView();
+		if (view instanceof OrbitView)
+			zoom = ((OrbitView) view).getZoom();
+		else
+			zoom = view.getEyePosition().getElevation();
 		if (minZoom >= 0 && zoom > minZoom)
 			drawAlpha = Math.max(0, Math.min(drawAlpha, 1 - 5
 					* (zoom - minZoom) / minZoom));

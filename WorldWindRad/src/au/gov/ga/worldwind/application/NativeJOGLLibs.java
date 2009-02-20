@@ -18,7 +18,7 @@ public class NativeJOGLLibs
 		String osName = System.getProperty("os.name").toLowerCase();
 		String osArch = System.getProperty("os.arch").toLowerCase();
 		String directory, prefix, suffix;
-		String[] libraries = new String[] { "jogl", "jogl_awt", "jogl_cg",
+		String[] libraries = new String[] { "jogl", "jogl_awt", /*"jogl_cg",*/
 				"gluegen-rt" };
 		File tmpdir = new File(System.getProperty("java.io.tmpdir"));
 		boolean macosx = false;
@@ -104,6 +104,7 @@ public class NativeJOGLLibs
 
 					//carry out preloads
 					//see NativeLibLoader for description of this
+					boolean success = true;
 					try
 					{
 						if (lib.equals("jogl_awt"))
@@ -122,22 +123,28 @@ public class NativeJOGLLibs
 					}
 					catch (Error e)
 					{
+						if (!e.getMessage().contains("already loaded"))
+							success = false;
 					}
 					catch (Exception e)
 					{
+						success = false;
 					}
 
 					//load library
-					try
+					if (success)
 					{
-						System.load(file.getAbsolutePath());
-						NativeLibLoader.disableLoading();
-					}
-					catch (Error e)
-					{
-					}
-					catch (Exception e)
-					{
+						try
+						{
+							System.load(file.getAbsolutePath());
+							NativeLibLoader.disableLoading();
+						}
+						catch (Error e)
+						{
+						}
+						catch (Exception e)
+						{
+						}
 					}
 				}
 			}
