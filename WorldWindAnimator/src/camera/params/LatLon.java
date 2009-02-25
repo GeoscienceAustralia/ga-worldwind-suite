@@ -23,10 +23,8 @@ public class LatLon implements Serializable
 
 	public gov.nasa.worldwind.geom.LatLon getLatLon()
 	{
-		return new gov.nasa.worldwind.geom.LatLon(gov.nasa.worldwind.geom.Angle
-				.fromDegreesLatitude(latitude.degrees),
-				gov.nasa.worldwind.geom.Angle
-						.fromDegreesLongitude(longitude.degrees));
+		return new gov.nasa.worldwind.geom.LatLon(latitude.getAngle(),
+				longitude.getAngle());
 	}
 
 	public double distance(LatLon ll)
@@ -53,6 +51,12 @@ public class LatLon implements Serializable
 	public static LatLon fromVector2(Vector2 v)
 	{
 		return fromDegrees(v.y, v.x);
+	}
+
+	public static LatLon fromLatLon(gov.nasa.worldwind.geom.LatLon latlon)
+	{
+		return fromDegrees(latlon.getLatitude().degrees,
+				latlon.getLongitude().degrees);
 	}
 
 	public Vector2 toVector2()

@@ -20,6 +20,17 @@ public class Longitude implements Serializable
 
 	private Longitude(double degrees)
 	{
+		//this.degrees = fixDegrees(degrees);
+		this.degrees = degrees;
+	}
+
+	public Angle getAngle()
+	{
+		return Angle.fromDegreesLongitude(fixDegrees(degrees));
+	}
+	
+	private static double fixDegrees(double degrees)
+	{
 		while (degrees > 180d)
 		{
 			degrees -= 360d;
@@ -28,12 +39,7 @@ public class Longitude implements Serializable
 		{
 			degrees += 360d;
 		}
-		this.degrees = degrees;
-	}
-
-	public Angle getAngle()
-	{
-		return Angle.fromDegreesLongitude(degrees);
+		return degrees;
 	}
 
 	public static double difference(Longitude l1, Longitude l2)

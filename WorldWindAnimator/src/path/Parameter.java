@@ -1,18 +1,21 @@
 package path;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import camera.vector.Vector2;
 
 public class Parameter
 {
 	private final static int BEZIER_SUBDIVISIONS_PER_FRAME = 10;
+	private final static boolean DEFAULT_LOCK_INOUT = true;
 
-	private SortedSet<KeyFrame> keys = new TreeSet<KeyFrame>();
-	private Map<Integer, KeyFrame> map = new HashMap<Integer, KeyFrame>();
+	private SortedMap<Integer, KeyFrame> map = new TreeMap<Integer, KeyFrame>();
+	private List<KeyFrame> keys = new ArrayList<KeyFrame>();
+	private KeyFrame lastPrevious, lastNext;
 
 	public Parameter()
 	{
@@ -20,21 +23,48 @@ public class Parameter
 
 	public int getFirstFrame()
 	{
-		return keys.first().frame;
+		return map.firstKey();
 	}
 
 	public int getLastFrame()
 	{
-		return keys.last().frame;
+		return map.lastKey();
 	}
 
-	public int[] getFrames()
+	public int size()
 	{
-		int[] frames = new int[keys.size()];
-		int i = 0;
+		return keys.size();
+	}
+
+	public int getFrame(int index)
+	{
+		return keys.get(index).frame;
+	}
+
+	public double getMaximumValue()
+	{
+		double max = Double.NEGATIVE_INFINITY;
 		for (KeyFrame key : keys)
-			frames[i++] = key.frame;
-		return frames;
+		{
+			max = Math.max(max, key.maxValue);
+			max = Math.max(max, key.value);
+			max = Math.max(max, key.inValue);
+			max = Math.max(max, key.outValue);
+		}
+		return max;
+	}
+
+	public double getMinimumValue()
+	{
+		double min = Double.POSITIVE_INFINITY;
+		for (KeyFrame key : keys)
+		{
+			min = Math.min(min, key.minValue);
+			min = Math.min(min, key.value);
+			min = Math.min(min, key.inValue);
+			min = Math.min(min, key.outValue);
+		}
+		return min;
 	}
 
 	public void addKey(int frame)
@@ -44,169 +74,125 @@ public class Parameter
 
 	public void addKey(int frame, double value)
 	{
+		if (map.containsKey(frame))
+			return;
+
 		KeyFrame key = new KeyFrame(frame, value);
-		if (!keys.contains(key))
-		{
-			keys.add(key);
-			map.put(frame, key);
-			setPredecessorAndSuccessor(key);
-			updateBezier(key.predecessor);
-			updateBezier(key);
-		}
+		keys.add(key);
+		Collections.sort(keys);
+		map.put(frame, key);
+		clearLast();
+
+		int index = keys.indexOf(key);
+		updateBezier(index - 1);
+
+		setLockInOut(index, DEFAULT_LOCK_INOUT);
+		if (!DEFAULT_LOCK_INOUT)
+			updateBezier(index);
 	}
 
-	private void setPredecessorAndSuccessor(KeyFrame key)
+	public void setValue(int index, double value)
 	{
-		if (key != null)
-		{
-			KeyFrame p = getPredecessor(key);
-			KeyFrame s = getSuccessor(key);
-			key.predecessor = p;
-			key.successor = s;
-			if (p != null)
-				p.successor = key;
-			if (s != null)
-				s.predecessor = key;
-		}
+		KeyFrame key = keys.get(index);
+		double diff = value - key.value;
+		key.value = value;
+		key.inValue += diff;
+		key.outValue += diff;
+		updateBezier(index - 1);
+		updateBezier(index);
 	}
 
-	private KeyFrame getPredecessor(KeyFrame key)
+	public Vector2 getIn(int index)
 	{
-		SortedSet<KeyFrame> head = keys.headSet(key);
-		if (head.isEmpty())
+		KeyFrame key = keys.get(index);
+		KeyFrame p = getOrNull(index - 1);
+		if (p == null)
 			return null;
-		return head.last();
+		double frame = key.frame - key.inPercent * (key.frame - p.frame);
+		return new Vector2(frame, key.inValue);
 	}
 
-	private KeyFrame getSuccessor(KeyFrame key)
+	public void setIn(int index, Vector2 v)
 	{
-		SortedSet<KeyFrame> tail = keys.tailSet(new KeyFrame(key.frame + 1));
-		if (tail.isEmpty())
-			return null;
-		return tail.first();
+		setIn(index, v.x, v.y);
 	}
 
-	public double getValue(int frame)
+	public void setIn(int index, double inFrame, double inValue)
 	{
-		KeyFrame key = getPreviousKey(frame);
-		if (key == null)
-			throw new IndexOutOfBoundsException();
-		double[] values = key.values;
-		if (values == null)
-			return key.value;
-		int index = frame - key.frame;
-		return key.values[index];
+		KeyFrame key = keys.get(index);
+		KeyFrame p = getOrNull(index - 1);
+		double inPercent = 0;
+		if (p != null)
+			inPercent = (key.frame - inFrame) / (double) (key.frame - p.frame);
+		setInPercent(index, inPercent, inValue);
 	}
 
-	public void setValue(int frame, double value)
+	public void setInPercent(int index, double inPercent, double inValue)
 	{
-		KeyFrame key = getKey(frame);
-		if (key != null)
-		{
-			double diff = value - key.value;
-			key.value = value;
-			key.inValue += diff;
-			key.outValue += diff;
-			updateBezier(key.predecessor);
-			updateBezier(key);
-		}
-	}
-
-	public void setIn(int frame, Vector2 v)
-	{
-		setIn(frame, v.x, v.y);
-	}
-
-	public void setIn(int frame, double inFrame, double inValue)
-	{
-		KeyFrame key = getKey(frame);
-		if (key != null)
-		{
-			KeyFrame p = key.predecessor;
-			double inPercent = 0;
-			if (p != null)
-				inPercent = (inFrame - p.frame)
-						/ (double) (key.frame - p.frame);
-			setInPercent(key, inPercent, inValue);
-		}
-	}
-
-	public void setInPercent(int frame, double inPercent, double inValue)
-	{
-		KeyFrame key = getKey(frame);
-		if (key != null)
-		{
-			setInPercent(key, inPercent, inValue);
-		}
-	}
-
-	private void setInPercent(KeyFrame key, double inPercent, double inValue)
-	{
+		KeyFrame key = keys.get(index);
 		key.inValue = inValue;
 		key.inPercent = clampPercent(inPercent);
-		updateBezier(key.predecessor);
+		updateBezier(index - 1);
 
 		if (key.lockInOut)
 		{
-			lockOut(key);
+			lockOut(index);
 		}
 	}
 
-	public void setOut(int frame, Vector2 v)
+	public Vector2 getOut(int index)
 	{
-		setOut(frame, v.x, v.y);
+		KeyFrame key = keys.get(index);
+		KeyFrame s = getOrNull(index + 1);
+		if (s == null)
+			return null;
+		double frame = key.frame + key.outPercent * (s.frame - key.frame);
+		return new Vector2(frame, key.outValue);
 	}
 
-	public void setOut(int frame, double outFrame, double outValue)
+	public void setOut(int index, Vector2 v)
 	{
-		KeyFrame key = getKey(frame);
-		if (key != null)
-		{
-			KeyFrame s = key.successor;
-			double outPercent = 0;
-			if (s != null)
-				outPercent = (s.frame - outFrame)
-						/ (double) (s.frame - key.frame);
-			setOutPercent(key, outPercent, outValue);
-		}
+		setOut(index, v.x, v.y);
 	}
 
-	public void setOutPercent(int frame, double outPercent, double outValue)
+	public void setOut(int index, double outFrame, double outValue)
 	{
-		KeyFrame key = getKey(frame);
-		if (key != null)
-		{
-			setOutPercent(key, outPercent, outValue);
-		}
+		KeyFrame key = keys.get(index);
+		KeyFrame s = getOrNull(index + 1);
+		double outPercent = 0;
+		if (s != null)
+			outPercent = (outFrame - key.frame)
+					/ (double) (s.frame - key.frame);
+		setOutPercent(index, outPercent, outValue);
 	}
 
-	private void setOutPercent(KeyFrame key, double outPercent, double outValue)
+	public void setOutPercent(int index, double outPercent, double outValue)
 	{
+		KeyFrame key = keys.get(index);
 		key.outValue = outValue;
 		key.outPercent = clampPercent(outPercent);
-		updateBezier(key);
+		updateBezier(index);
 
 		if (key.lockInOut)
 		{
-			lockIn(key);
+			lockIn(index);
 		}
 	}
 
-	public void setLockInOut(int frame, boolean lock)
+	public void setLockInOut(int index, boolean lock)
 	{
-		KeyFrame key = getKey(frame);
-		if (key != null)
-		{
-			key.lockInOut = lock;
-			if (lock)
-				lockOut(key);
-		}
+		KeyFrame key = keys.get(index);
+		key.lockInOut = lock;
+		if (lock)
+			lockOut(index);
 	}
 
-	private void lockIn(KeyFrame key)
+	private void lockIn(int index)
 	{
-		KeyFrame p = key.predecessor;
-		KeyFrame s = key.successor;
+		KeyFrame key = keys.get(index);
+		KeyFrame p = getOrNull(index - 1);
+		KeyFrame s = getOrNull(index + 1);
+
 		if (p == null || s == null)
 			return;
 
@@ -217,13 +203,15 @@ public class Parameter
 
 		key.inPercent = key.outPercent;
 		key.inValue = key.value - deltaInY;
-		updateBezier(p);
+		updateBezier(index - 1);
 	}
 
-	private void lockOut(KeyFrame key)
+	private void lockOut(int index)
 	{
-		KeyFrame p = key.predecessor;
-		KeyFrame s = key.successor;
+		KeyFrame key = keys.get(index);
+		KeyFrame p = getOrNull(index - 1);
+		KeyFrame s = getOrNull(index + 1);
+
 		if (p == null || s == null)
 			return;
 
@@ -235,57 +223,49 @@ public class Parameter
 		key.outPercent = key.inPercent;
 		key.outValue = key.value - deltaOutY;
 
-		updateBezier(key);
+		updateBezier(index);
 	}
 
-	public void setFrame(int frame, int newFrame)
+	public void setFrame(int index, int frame)
 	{
-		//don't overwrite a key that already exists
-		if (getKey(newFrame) != null)
-			return;
+		KeyFrame key = keys.get(index);
+		KeyFrame p = getOrNull(index - 1);
+		KeyFrame s = getOrNull(index + 1);
 
-		KeyFrame key = getKey(frame);
-		if (key != null)
-		{
-			KeyFrame p = key.predecessor;
-			KeyFrame s = key.successor;
-			if ((p == null || newFrame > p.frame)
-					&& (s == null || newFrame < s.frame))
-			{
-				//doesn't change position
-				key.frame = newFrame;
-				updateBezier(p);
-				updateBezier(key);
-			}
-			else
-			{
-				keys.remove(key);
-				key.frame = newFrame;
-				keys.add(key);
+		frame = clamp(frame, p == null ? Integer.MIN_VALUE : p.frame + 1,
+				s == null ? Integer.MAX_VALUE : s.frame - 1);
+		map.remove(key.frame);
+		key.frame = frame;
+		map.put(frame, key);
 
-				setPredecessorAndSuccessor(p);
-				updateBezier(p);
-
-				setPredecessorAndSuccessor(key);
-				updateBezier(key.predecessor);
-				updateBezier(key);
-			}
-			map.remove(frame);
-			map.put(newFrame, key);
-		}
+		updateBezier(index - 1);
+		updateBezier(index);
 	}
 
-	private void updateBezier(KeyFrame key)
+	private KeyFrame getOrNull(int index)
 	{
-		if (key == null)
+		if (index < 0 || index >= size())
+			return null;
+		return keys.get(index);
+	}
+
+	private void updateBezier(int index)
+	{
+		if (index < 0 || index >= keys.size())
 			return;
-		KeyFrame end = key.successor;
-		if (end == null)
+		
+		KeyFrame key = keys.get(index);
+		key.values = null;
+		key.maxValue = Double.NEGATIVE_INFINITY;
+		key.minValue = Double.POSITIVE_INFINITY;
+		
+		//is this the last key?
+		if (index >= keys.size() - 1)
 			return;
-		double sf = (end.frame - key.frame) * clampPercent(1 - key.outPercent)
-				+ key.frame;
-		double ef = (end.frame - key.frame) * clampPercent(end.inPercent)
-				+ key.frame;
+		
+		KeyFrame end = keys.get(index + 1);
+		double sf = key.frame + key.outPercent * (end.frame - key.frame);
+		double ef = end.frame - end.inPercent * (end.frame - key.frame);
 		Vector2 out = new Vector2(sf, key.outValue);
 		Vector2 in = new Vector2(ef, end.inValue);
 		Vector2 begin = new Vector2(key.frame, key.value);
@@ -304,18 +284,20 @@ public class Parameter
 
 			if (vNext.x > current + key.frame)
 			{
+				double value;
 				if (vLast == null)
 				{
-					key.values[current] = vNext.y;
+					value = vNext.y;
 				}
 				else
 				{
 					double percent = ((current + key.frame) - vLast.x)
 							/ (vNext.x - vLast.x);
-					key.values[current] = vLast.y + (vNext.y - vLast.y)
-							* percent;
+					value = vLast.y + (vNext.y - vLast.y) * percent;
 				}
-				current++;
+				key.values[current++] = value;
+				key.minValue = Math.min(key.minValue, value);
+				key.maxValue = Math.max(key.maxValue, value);
 			}
 
 			if (current >= frames)
@@ -340,22 +322,53 @@ public class Parameter
 		return a;
 	}
 
+	private int clamp(int value, int min, int max)
+	{
+		return Math.min(max, Math.max(min, value));
+	}
+
 	private double clampPercent(double value)
 	{
 		return Math.min(1, Math.max(0, value));
 	}
 
-	private KeyFrame getKey(int frame)
+	public double getValue(int frame)
 	{
-		return map.get(frame);
+		KeyFrame key = getPreviousKey(frame);
+		if (key == null)
+			throw new IndexOutOfBoundsException();
+		if (key.values == null)
+			return key.value;
+		int index = frame - key.frame;
+		return key.values[index];
 	}
 
 	private KeyFrame getPreviousKey(int frame)
 	{
-		SortedSet<KeyFrame> head = keys.headSet(new KeyFrame(frame + 1));
+		if (lastPrevious == null || frame < lastPrevious.frame
+				|| (lastNext != null && frame >= lastNext.frame))
+		{
+			lastPrevious = getPreviousKeyFromMap(frame);
+			if (lastPrevious != null)
+				lastNext = getOrNull(keys.indexOf(lastPrevious) + 1);
+		}
+		return lastPrevious;
+	}
+
+	private KeyFrame getPreviousKeyFromMap(int frame)
+	{
+		if (map.containsKey(frame))
+			return map.get(frame);
+		SortedMap<Integer, KeyFrame> head = map.headMap(frame);
 		if (head.isEmpty())
 			return null;
-		return head.last();
+		return map.get(head.lastKey());
+	}
+
+	private void clearLast()
+	{
+		lastPrevious = null;
+		lastNext = null;
 	}
 
 	private static class KeyFrame implements Comparable<KeyFrame>
@@ -367,14 +380,10 @@ public class Parameter
 		private double outValue;
 		private double outPercent;
 		private boolean lockInOut;
-		private double[] values;
-		private KeyFrame predecessor;
-		private KeyFrame successor;
 
-		private KeyFrame(int frame)
-		{
-			this.frame = frame;
-		}
+		private double[] values;
+		private double maxValue = Double.NEGATIVE_INFINITY;
+		private double minValue = Double.POSITIVE_INFINITY;
 
 		public KeyFrame(int frame, double value)
 		{
@@ -407,8 +416,7 @@ public class Parameter
 		parameter.addKey(100, 200);
 		parameter.addKey(200, 50);
 
-		parameter.setLockInOut(100, true);
-		parameter.setInPercent(100, 0.1, 150);
+		parameter.setInPercent(1, 0.1, 150);
 
 		for (int i = parameter.getFirstFrame(); i <= parameter.getLastFrame(); i++)
 		{

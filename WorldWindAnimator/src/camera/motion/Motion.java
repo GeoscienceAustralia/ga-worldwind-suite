@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class Motion implements Serializable, Cloneable
 {
 	public static final double DBL_EPSILON = 2.220446049250313E-16d;
-	public static final double SMALL_DOUBLE = 1E-3;
+	public static final double SMALL_DOUBLE = 1E-8;
 
 	public final MotionParams params;
 
@@ -97,38 +97,150 @@ public class Motion implements Serializable, Cloneable
 
 	private void refresh()
 	{
-		a1 = params.accelerationIn;
-		a3 = params.accelerationOut;
+		if (params.usePreviousForIn && !v1forced)
+		{
+			throw new IllegalStateException(
+					"Previous velocity has not been set");
+		}
+
+		//don't need to calculate motion if not travelling any distance
+		if (getDistance() <= 0)
+			return;
+
 		v1 = v1forced ? forcev1 : params.velocityIn;
 		v3 = params.velocityOut;
 
-		calculate();
-		if (!isValid())
+		if (params.constantVelocity)
 		{
-			a3 = -a3;
+			t1 = time;
+			t2 = 0;
+			t3 = 0;
+			a1 = 0;
+			a3 = 0;
+			v1 = distance / time;
+			v2 = v1;
+			v3 = v1;
+			d1 = distance;
+			d2 = 0;
+			d3 = 0;
+			d3Calc = d3;
+
+			if (!isValid())
+			{
+				throw new IllegalArgumentException(
+						"Could not calculate constant velocity to travel "
+								+ distance + " in " + time + " sec");
+			}
+		}
+		else if (params.calculateAccelerations)
+		{
+			/*if (params.ignoreOut)
+			{
+				t1 = time;
+				t2 = 0;
+				t3 = 0;
+
+				a1 = (2 * (distance - v1 * t1)) / (t1 * t1);
+				a3 = 0;
+
+				v2 = v1 + a1 * t1;
+				v3 = v2;
+
+				d1 = distance;
+				d2 = 0;
+				d3 = 0;
+				d3Calc = d3;
+			}
+			else if (params.ignoreIn)
+			{
+				t1 = 0;
+				t2 = 0;
+				t3 = time;
+
+				a1 = 0;
+				a3 = (2 * (v3 * t3 - distance)) / (t3 * t3);
+
+				v2 = v3 - a3 * t3;
+				v1 = 0;
+
+				d1 = 0;
+				d2 = 0;
+				d3 = distance;
+				d3Calc = d3;
+			}
+			else*/
+			{
+				t1 = time / 2;
+				t2 = 0;
+				t3 = t1;
+
+				a1 = distance / (t1 * t1) - v3 / (2 * t1) - (3 * v1) / (2 * t1);
+				a3 = (v3 - v1) / t1 - a1;
+
+				v2 = v1 + a1 * t1;
+
+				d1 = v1 * t1 + 0.5 * a1 * t1 * t1;
+				d2 = 0;
+				d3 = distance - d1;
+				d3Calc = v2 * t3 + 0.5 * a3 * t3 * t3;
+			}
+
+			System.out.println();
+			System.out.println("Calculations");
+			System.out.println("Input: time = " + time + ", distance = "
+					+ distance);
+			System.out.println("Times: " + t1 + ", " + t2 + ", " + t3);
+			System.out.println("Velocities: " + v1 + ", " + v2 + ", " + v3);
+			System.out.println("Distances: " + d1 + ", " + d2 + ", " + d3
+					+ " (" + d3Calc + ")");
+			System.out.println("Accelerations: " + a1 + ", " + a3);
+
+			if (!isValid())
+			{
+				throw new IllegalArgumentException(
+						"Could not calculate accelerations to travel "
+								+ distance + " in " + time + " sec");
+			}
+		}
+		else
+		{
+			a1 = params.accelerationIn;
+			a3 = params.accelerationOut;
+
 			calculate();
 			if (!isValid())
 			{
-				a1 = -a1;
+				a3 = -a3;
 				calculate();
 				if (!isValid())
 				{
-					a3 = -a3;
+					a1 = -a1;
 					calculate();
 					if (!isValid())
 					{
-						throw new IllegalArgumentException();
+						a3 = -a3;
+						calculate();
+						if (!isValid())
+						{
+							a1 = -a1;
+							throw new IllegalArgumentException("Cannot travel "
+									+ distance + " in " + time
+									+ " sec with accelerations " + a1 + " and "
+									+ a3);
+						}
 					}
 				}
 			}
 		}
-		
+
 		System.out.println("DONE!");
 		System.out.println("DONE!");
 		System.out.println("DONE!");
 
 		/*System.out.println();
 		System.out.println("Calculations");
+		System.out
+				.println("Input: time = " + time + ", distance = " + distance);
 		System.out.println("Times: " + t1 + ", " + t2 + ", " + t3);
 		System.out.println("Velocities: " + v1 + ", " + v2 + ", " + v3);
 		System.out.println("Distances: " + d1 + ", " + d2 + ", " + d3 + " ("
@@ -220,9 +332,19 @@ public class Motion implements Serializable, Cloneable
 			d3 = distance - d1 - d2;
 		}
 		d3Calc = v2 * t3 + 0.5 * a3 * t3 * t3;
-		
+
+		/*d1 = fixSmall(d1);
+		d2 = fixSmall(d2);
+		d3 = fixSmall(d3);
+		d3Calc = fixSmall(d3Calc);
+		t1 = fixSmall(t1);
+		t2 = fixSmall(t2);
+		t3 = fixSmall(t3);*/
+
 		System.out.println();
 		System.out.println("Calculations");
+		System.out
+				.println("Input: time = " + time + ", distance = " + distance);
 		System.out.println("Times: " + t1 + ", " + t2 + ", " + t3);
 		System.out.println("Velocities: " + v1 + ", " + v2 + ", " + v3);
 		System.out.println("Distances: " + d1 + ", " + d2 + ", " + d3 + " ("
@@ -251,5 +373,13 @@ public class Motion implements Serializable, Cloneable
 	public void unsetInVelocity()
 	{
 		v1forced = false;
+	}
+
+	@SuppressWarnings("unused")
+	private double fixSmall(double small)
+	{
+		if (small > -SMALL_DOUBLE)
+			return 0;
+		return small;
 	}
 }
