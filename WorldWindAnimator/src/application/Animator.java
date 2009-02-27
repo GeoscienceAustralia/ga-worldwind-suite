@@ -44,7 +44,7 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import layers.WestMacGlobe;
-
+import path.Parameter;
 import tessellator.ConfigurableTessellator;
 import view.BasicRollOrbitView;
 import view.RollOrbitView;
@@ -108,7 +108,8 @@ public class Animator
 				.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				ConfigurableTessellator.class.getName());
-		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, WestMacGlobe.class.getName());
+		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, WestMacGlobe.class
+				.getName());
 
 		frame = new JFrame("World Wind");
 
@@ -572,10 +573,41 @@ public class Animator
 		return path;
 	}
 
+	private path.CameraPath createWestMacPath()
+	{
+		Parameter eyeLat = new Parameter();
+		Parameter eyeLon = new Parameter();
+		Parameter eyeZoom = new Parameter();
+		Parameter targetLat = new Parameter();
+		Parameter targetLon = new Parameter();
+		Parameter targetZoom = new Parameter();
+
+		eyeLat.addKey(0, -23);
+		eyeLat.addKey(100, -50);
+		
+		eyeLon.addKey(0, 131);
+		eyeLon.addKey(200, 160);
+		
+		eyeZoom.addKey(0, path.CameraPath.c2z(600000));
+		eyeZoom.addKey(150, path.CameraPath.c2z(1200000));
+		
+		targetLat.addKey(0, -23);
+		targetLat.addKey(100, -23);
+		targetLat.addKey(200, -47);
+		
+		targetLon.addKey(0, 131);
+		targetLon.addKey(100, 131);
+		targetLon.addKey(150, 150);
+		
+		targetZoom.addKey(0, 0);
+
+		return new path.CameraPath(eyeLat, eyeLon, eyeZoom, targetLat,
+				targetLon, targetZoom);
+	}
+
 	private void animate(final boolean savingFrames)
 	{
-		//final CameraPath path = createCanyonPath();
-		final CameraPath path = createPilbaraPath();
+		final path.CameraPath path = createWestMacPath();
 
 		Thread thread = new Thread(new Runnable()
 		{
@@ -600,53 +632,17 @@ public class Animator
 				boolean detectCollisions = view.isDetectCollisions();
 				view.setDetectCollisions(false);
 
-				int fps = 40;
-				int frame = 1420;
-
-				double totalTime = path.getTime();
-				double startTime = System.currentTimeMillis() / 1000d;
-				double currentTime = 0;
-				while (currentTime <= totalTime)
+				int firstFrame = path.getFirstFrame();
+				int lastFrame = path.getLastFrame();
+				for (int frame = firstFrame; frame <= lastFrame; frame++)
 				{
-					frame++;
-
-					if (savingFrames)
-					{
-						currentTime = frame / (double) fps;
-					}
-					else
-					{
-						currentTime = System.currentTimeMillis() / 1000d
-								- startTime;
-					}
-
-					LatLon latlon = path.getLatLon(currentTime);
-					Zoom zoom = path.getZoom(currentTime);
-					Heading heading = path.getHeading(currentTime);
-					Pitch pitch = path.getPitch(currentTime);
-					Roll roll = path.getRoll(currentTime);
-
-					if (path.isEyePath())
-					{
-						view.setEye(latlon.getLatLon(), heading.getAngle(),
-								pitch.getAngle(), roll.getAngle(), zoom
-										.toCameraZoom());
-					}
-					else
-					{
-						view.setCenter(latlon.getLatLon(), heading.getAngle(),
-								pitch.getAngle(), roll.getAngle(), zoom
-										.toCameraZoom());
-					}
-
+					path.applyFrame(view, frame);
 					wwd.redrawNow();
 
 					if (savingFrames)
 					{
 						takeScreenshot("frames/frame" + frame + ".tga");
 					}
-
-					//System.out.println(currentTime + " = " + position + " zoom = " + zoom);
 				}
 
 				view.setDetectCollisions(detectCollisions);
@@ -686,8 +682,8 @@ public class Animator
 				}
 				try
 				{
-					com.sun.opengl.util.Screenshot.writeToTargaFile(out, wwd.getWidth(), wwd
-							.getHeight());
+					com.sun.opengl.util.Screenshot.writeToTargaFile(out, wwd
+							.getWidth(), wwd.getHeight());
 				}
 				catch (Exception e)
 				{

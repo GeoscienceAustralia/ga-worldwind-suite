@@ -253,16 +253,16 @@ public class Parameter
 	{
 		if (index < 0 || index >= keys.size())
 			return;
-		
+
 		KeyFrame key = keys.get(index);
 		key.values = null;
 		key.maxValue = Double.NEGATIVE_INFINITY;
 		key.minValue = Double.POSITIVE_INFINITY;
-		
+
 		//is this the last key?
 		if (index >= keys.size() - 1)
 			return;
-		
+
 		KeyFrame end = keys.get(index + 1);
 		double sf = key.frame + key.outPercent * (end.frame - key.frame);
 		double ef = end.frame - end.inPercent * (end.frame - key.frame);
@@ -336,10 +336,10 @@ public class Parameter
 	{
 		KeyFrame key = getPreviousKey(frame);
 		if (key == null)
-			throw new IndexOutOfBoundsException();
-		if (key.values == null)
-			return key.value;
+			return 0;
 		int index = frame - key.frame;
+		if (key.values == null || index >= key.values.length)
+			return key.value;
 		return key.values[index];
 	}
 

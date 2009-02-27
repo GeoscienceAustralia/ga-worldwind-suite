@@ -66,6 +66,13 @@ public class BasicRollOrbitViewModel implements RollOrbitViewModel
 		{
 			return this.zoom;
 		}
+
+		@Override
+		public String toString()
+		{
+			return center + " " + heading + " " + pitch + " " + roll + " "
+					+ zoom;
+		}
 	}
 
 	public BasicRollOrbitViewModel()
@@ -167,12 +174,14 @@ public class BasicRollOrbitViewModel implements RollOrbitViewModel
 		Matrix hpzTransform = modelTransform.multiply(centerTransformInv);
 		// Extract the heading, pitch, and zoom values from the transform.
 		Angle heading = hpzTransform.getRotationZ();
-		Angle pitch = hpzTransform.getRotationX();
+		Angle pitch = hpzTransform.getRotationX().multiply(-1);
+		if (pitch.degrees < 0 && pitch.degrees > -1E-5)
+			pitch = Angle.ZERO;
 		Angle roll = hpzTransform.getRotationY();
 		Vec4 zoomVec = hpzTransform.getTranslation();
 		if (heading != null && pitch != null && zoomVec != null)
-			return new BasicModelCoordinates(centerPos, heading, pitch
-					.multiply(-1), roll, zoomVec.getLength3());
+			return new BasicModelCoordinates(centerPos, heading, pitch, roll,
+					zoomVec.getLength3());
 		else
 			return null;
 	}
