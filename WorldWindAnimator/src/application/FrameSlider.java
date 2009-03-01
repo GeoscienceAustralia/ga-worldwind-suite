@@ -1,6 +1,7 @@
 package application;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -71,6 +72,10 @@ public class FrameSlider extends JComponent
 				repaint();
 			}
 		});
+
+		Dimension size = new Dimension(0, 54);
+		setMinimumSize(size);
+		setPreferredSize(size);
 	}
 
 	public int getMin()
@@ -370,8 +375,8 @@ public class FrameSlider extends JComponent
 		Graphics2D g2 = (Graphics2D) g;
 
 		//TODO remove
-		g2.setColor(new Color(225, 255, 255));
-		g2.fillRect(0, 0, getWidth(), getHeight());
+		/*g2.setColor(new Color(225, 255, 255));
+		g2.fillRect(0, 0, getWidth(), getHeight());*/
 
 		Font font = Font.decode("");
 		g2.setFont(font);
@@ -421,6 +426,7 @@ public class FrameSlider extends JComponent
 		//ticks
 		int availableTickWidth = getWidth() - moverWidth;
 		int tickY = moverHeight + 3;
+		int tickHeight = MAJOR_TICK_LENGTH;
 
 		g2.setColor(dark);
 		for (int i = 0; i < minorTicks; i++)
@@ -444,6 +450,8 @@ public class FrameSlider extends JComponent
 			stringBounds = fm.getStringBounds(frameString, g2);
 			g2.drawString(frameString, (int) (x - stringBounds.getWidth() / 2),
 					tickY + MAJOR_TICK_LENGTH + ascent);
+			tickHeight = Math.max(tickHeight,
+					(int) (MAJOR_TICK_LENGTH + stringBounds.getHeight()));
 		}
 
 		//keyframes
@@ -461,6 +469,10 @@ public class FrameSlider extends JComponent
 		g2.drawRect(position - 3, tickY, 6, MAJOR_TICK_LENGTH);
 		g2.setColor(new Color(0, 0, 255, 128));
 		g2.fillRect(position - 2, tickY + 1, 5, MAJOR_TICK_LENGTH - 1);
+
+		Dimension size = new Dimension(0, tickY + tickHeight);
+		setMinimumSize(size);
+		setPreferredSize(size);
 	}
 
 	private void drawArrow(Rectangle inside, int arrowSize, Graphics2D g2,
