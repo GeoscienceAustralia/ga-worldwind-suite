@@ -15,6 +15,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -51,6 +53,8 @@ public class FrameSlider extends JComponent
 
 	private boolean sizeDirty = true;
 	private boolean positionDirty = true;
+
+	private List<Integer> keys = new ArrayList<Integer>();
 
 	public FrameSlider(int value, int min, int max)
 	{
@@ -110,6 +114,28 @@ public class FrameSlider extends JComponent
 		return max - min + 1;
 	}
 
+	public void addKey(int frame)
+	{
+		keys.add(frame);
+		repaint();
+	}
+
+	public void removeKey(int frame)
+	{
+		keys.remove((Integer) frame);
+		repaint();
+	}
+
+	public int getKey(int index)
+	{
+		return keys.get(index);
+	}
+
+	public int keyCount()
+	{
+		return keys.size();
+	}
+
 	private void setupMouseListeners()
 	{
 		addMouseListener(new MouseAdapter()
@@ -137,13 +163,12 @@ public class FrameSlider extends JComponent
 					}
 					catch (Exception ex)
 					{
-						ex.printStackTrace();
 					}
 				}
 				else if (scrollRect.contains(e.getPoint())
 						&& !sliderRect.contains(e.getPoint()))
 				{
-					int frame = calculateFrameFromPosition(e.getX());
+					int frame = calculateFrameFromPosition(e.getX() + 1);
 					setValue(frame);
 				}
 			}
@@ -164,7 +189,6 @@ public class FrameSlider extends JComponent
 					draggingSlider = true;
 					dragPoint = new Point(e.getX() - sliderRect.x, e.getY()
 							- sliderRect.y);
-					System.out.println(dragPoint.x);
 				}
 				repaint();
 			}
@@ -282,7 +306,7 @@ public class FrameSlider extends JComponent
 		int sliderWidth = fontWidth + SLIDER_BORDER * 2;
 		int height = fontHeight + SLIDER_BORDER * 2;
 
-		scrollRect = new Rectangle(0, 0, width, height);
+		scrollRect = new Rectangle(0, 0, width, height + 3 + MAJOR_TICK_LENGTH);
 		leftRect = new Rectangle(0, 0, buttonWidth, height);
 		sliderRect = new Rectangle(buttonWidth, 0, sliderWidth, height);
 		rightRect = new Rectangle(buttonWidth + sliderWidth, 0, buttonWidth,
@@ -422,13 +446,21 @@ public class FrameSlider extends JComponent
 					tickY + MAJOR_TICK_LENGTH + ascent);
 		}
 
+		//keyframes
+		for (int key : keys)
+		{
+			int pos = calculatePositionFromFrame(key);
+			g2.setColor(dark);
+			g2.drawRect(pos - 3, tickY, 6, MINOR_TICK_LENGTH);
+			g2.setColor(new Color(255, 0, 0, 128));
+			g2.fillRect(pos - 2, tickY + 1, 5, MINOR_TICK_LENGTH - 1);
+		}
+
 		//selection box
 		g2.setColor(dark);
 		g2.drawRect(position - 3, tickY, 6, MAJOR_TICK_LENGTH);
 		g2.setColor(new Color(0, 0, 255, 128));
 		g2.fillRect(position - 2, tickY + 1, 5, MAJOR_TICK_LENGTH - 1);
-
-		//TODO draw any keyframes here
 	}
 
 	private void drawArrow(Rectangle inside, int arrowSize, Graphics2D g2,
@@ -466,7 +498,13 @@ public class FrameSlider extends JComponent
 	public static void main(String[] args)
 	{
 		JFrame frame = new JFrame();
-		frame.add(new FrameSlider(200, 0, 100));
+		FrameSlider slider = new FrameSlider(200, 0, 100);
+		slider.addKey(10);
+		slider.addKey(20);
+		slider.addKey(56);
+		slider.addKey(100);
+		slider.addKey(120);
+		frame.add(slider);
 		frame.setSize(640, 480);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
