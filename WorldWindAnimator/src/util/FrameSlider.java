@@ -1,4 +1,4 @@
-package application;
+package util;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JComponent;
-import javax.swing.JFrame;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class FrameSlider extends JComponent
 {
@@ -54,6 +55,8 @@ public class FrameSlider extends JComponent
 
 	private boolean sizeDirty = true;
 	private boolean positionDirty = true;
+
+	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
 
 	private List<Integer> keys = new ArrayList<Integer>();
 
@@ -112,6 +115,7 @@ public class FrameSlider extends JComponent
 		this.value = clamp(value, getMin(), getMax());
 		dirtyPosition();
 		repaint();
+		notifyChangeListeners();
 	}
 
 	public int getLength()
@@ -139,6 +143,11 @@ public class FrameSlider extends JComponent
 	public int keyCount()
 	{
 		return keys.size();
+	}
+	
+	public void clearKeys()
+	{
+		keys.clear();
 	}
 
 	private void setupMouseListeners()
@@ -507,18 +516,20 @@ public class FrameSlider extends JComponent
 				rect.y + rect.height - 1);
 	}
 
-	public static void main(String[] args)
+	public void addChangeListener(ChangeListener changeListener)
 	{
-		JFrame frame = new JFrame();
-		FrameSlider slider = new FrameSlider(200, 0, 100);
-		slider.addKey(10);
-		slider.addKey(20);
-		slider.addKey(56);
-		slider.addKey(100);
-		slider.addKey(120);
-		frame.add(slider);
-		frame.setSize(640, 480);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
+		changeListeners.add(changeListener);
+	}
+
+	public void removeChangeListener(ChangeListener changeListener)
+	{
+		changeListeners.remove(changeListener);
+	}
+
+	private void notifyChangeListeners()
+	{
+		ChangeEvent e = new ChangeEvent(this);
+		for (ChangeListener changeListener : changeListeners)
+			changeListener.stateChanged(e);
 	}
 }

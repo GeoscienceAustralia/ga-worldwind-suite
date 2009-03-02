@@ -1,5 +1,6 @@
 package path;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.TreeMap;
 
 import camera.vector.Vector2;
 
-public class Parameter
+public class Parameter implements Serializable
 {
 	private final static int BEZIER_SUBDIVISIONS_PER_FRAME = 10;
 	private final static boolean DEFAULT_LOCK_INOUT = true;
@@ -41,6 +42,14 @@ public class Parameter
 		return keys.get(index).frame;
 	}
 
+	public int indexOf(int frame)
+	{
+		KeyFrame key = map.get(frame);
+		if (key == null)
+			return -1;
+		return keys.indexOf(key);
+	}
+
 	public double getMaximumValue()
 	{
 		double max = Double.NEGATIVE_INFINITY;
@@ -69,13 +78,16 @@ public class Parameter
 
 	public void addKey(int frame)
 	{
-		addKey(frame, getValue(frame));
+		addKey(frame, getInterpolatedValue(frame));
 	}
 
 	public void addKey(int frame, double value)
 	{
 		if (map.containsKey(frame))
-			return;
+		{
+			KeyFrame key = map.remove(frame);
+			keys.remove(key);
+		}
 
 		KeyFrame key = new KeyFrame(frame, value);
 		keys.add(key);
@@ -91,6 +103,14 @@ public class Parameter
 			updateBezier(index);
 	}
 
+	public void removeKey(int index)
+	{
+		KeyFrame key = keys.get(index);
+		keys.remove(key);
+		map.remove(key.frame);
+		updateBezier(index - 1);
+	}
+
 	public void setValue(int index, double value)
 	{
 		KeyFrame key = keys.get(index);
@@ -100,6 +120,12 @@ public class Parameter
 		key.outValue += diff;
 		updateBezier(index - 1);
 		updateBezier(index);
+	}
+
+	public double getValue(int index)
+	{
+		KeyFrame key = keys.get(index);
+		return key.value;
 	}
 
 	public Vector2 getIn(int index)
@@ -177,6 +203,12 @@ public class Parameter
 		{
 			lockIn(index);
 		}
+	}
+
+	public boolean isLockInOut(int index)
+	{
+		KeyFrame key = keys.get(index);
+		return key.lockInOut;
 	}
 
 	public void setLockInOut(int index, boolean lock)
@@ -332,11 +364,16 @@ public class Parameter
 		return Math.min(1, Math.max(0, value));
 	}
 
-	public double getValue(int frame)
+	public double getInterpolatedValue(int frame)
 	{
 		KeyFrame key = getPreviousKey(frame);
 		if (key == null)
-			return 0;
+		{
+			if (keys.isEmpty())
+				return 0;
+			else
+				return keys.get(0).value;
+		}
 		int index = frame - key.frame;
 		if (key.values == null || index >= key.values.length)
 			return key.value;
@@ -371,7 +408,7 @@ public class Parameter
 		lastNext = null;
 	}
 
-	private static class KeyFrame implements Comparable<KeyFrame>
+	private static class KeyFrame implements Comparable<KeyFrame>, Serializable
 	{
 		private int frame;
 		private double value;
@@ -406,21 +443,6 @@ public class Parameter
 		public int compareTo(KeyFrame o)
 		{
 			return this.frame - o.frame;
-		}
-	}
-
-	public static void main(String[] args)
-	{
-		Parameter parameter = new Parameter();
-		parameter.addKey(0, 100);
-		parameter.addKey(100, 200);
-		parameter.addKey(200, 50);
-
-		parameter.setInPercent(1, 0.1, 150);
-
-		for (int i = parameter.getFirstFrame(); i <= parameter.getLastFrame(); i++)
-		{
-			System.out.println(parameter.getValue(i));
 		}
 	}
 }

@@ -66,10 +66,10 @@ public class ParameterEditor extends JComponent
 		int frameJump = Math.max(1, (lf - ff + 1) / getWidth());
 
 		g2.setColor(color);
-		double start = parameter.getValue(ff);
+		double start = parameter.getInterpolatedValue(ff);
 		for (int frame = ff + 1; frame <= lf; frame += frameJump)
 		{
-			double end = parameter.getValue(frame);
+			double end = parameter.getInterpolatedValue(frame);
 
 			double x1 = getX(frame - frameJump, ff, lf);
 			double x2 = getX(frame, ff, lf);
@@ -140,7 +140,7 @@ public class ParameterEditor extends JComponent
 
 			int frame = parameter.getFrame(i);
 			kfp.point = new Point2D.Double((frame - firstFrame) / frameWindow,
-					(parameter.getValue(frame) - yMinDraw) / yWindow);
+					(parameter.getInterpolatedValue(frame) - yMinDraw) / yWindow);
 
 			Vector2 in = parameter.getIn(i);
 			if (in != null)

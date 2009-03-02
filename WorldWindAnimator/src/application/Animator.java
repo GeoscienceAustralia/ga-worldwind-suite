@@ -15,7 +15,9 @@ import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.layers.StarsLayer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
+import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.util.StatusBar;
+import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -23,21 +25,34 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 
 import javax.swing.BorderFactory;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-import layers.WestMacGlobe;
-import path.Parameter;
+import path.SimpleAnimation;
 import tessellator.ConfigurableTessellator;
+import util.FrameSlider;
 import view.BasicRollOrbitView;
-import view.RollOrbitView;
 
 public class Animator
 {
@@ -76,6 +91,10 @@ public class Animator
 	private WorldWindowGLCanvas wwd;
 	private boolean takingScreenshot = false;
 	private FrameSlider slider;
+	private SimpleAnimation animation = null;
+	private File file = null;
+	private boolean autokey = true;
+	private boolean applying = false;
 
 	public Animator()
 	{
@@ -84,10 +103,21 @@ public class Animator
 				.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				ConfigurableTessellator.class.getName());
-		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, WestMacGlobe.class
-				.getName());
+		/*Configuration.setValue(AVKey.GLOBE_CLASS_NAME, WestMacGlobe.class
+				.getName());*/
+		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
+				AWTInputHandler.class.getName());
 
-		frame = new JFrame("World Wind");
+		frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosing(WindowEvent e)
+			{
+				quit();
+			}
+		});
 
 		frame.setLayout(new BorderLayout());
 		wwd = new WorldWindowGLCanvas();
@@ -105,7 +135,7 @@ public class Animator
 		//layers.add(new FogLayer());
 		//layers.add(new BMNGOneImage());
 		layers.add(new BMNGWMSLayer());
-		//layers.add(new LandsatI3WMSLayer());
+		layers.add(new LandsatI3WMSLayer());
 		//layers.add(new EarthNASAPlaceNameLayer());
 		layers.add(new CompassLayer());
 		layers.add(new WorldMapLayer());
@@ -121,113 +151,298 @@ public class Animator
 		slider = new FrameSlider(0, 0, 100);
 		slider.setMinimumSize(new Dimension(0, 54));
 		bottom.add(slider, BorderLayout.CENTER);
+		slider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				if (animation.size() > 0)
+				{
+					applyView();
+					wwd.redraw();
+				}
+			}
+		});
+
+		getView().addPropertyChangeListener(AVKey.VIEW,
+				new PropertyChangeListener()
+				{
+					public void propertyChange(PropertyChangeEvent evt)
+					{
+						if (autokey && !applying)
+						{
+							animation.addFrame(getView(), slider.getValue());
+							updateAnimation();
+						}
+					}
+				});
 
 		StatusBar statusBar = new StatusBar();
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
 		bottom.add(statusBar, BorderLayout.SOUTH);
 		statusBar.setEventSource(wwd);
 
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.addWindowListener(new WindowAdapter()
-		{
-			@Override
-			public void windowClosing(WindowEvent e)
-			{
-				quit();
-			}
-		});
+		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		createMenuBar();
+
+		animation = new SimpleAnimation();
+		setTitleBar();
+		updateAnimation();
 
 		frame.pack();
 		frame.setVisible(true);
 	}
 
+	private void createMenuBar()
+	{
+		JMenuBar menuBar = new JMenuBar();
+		frame.setJMenuBar(menuBar);
+
+		JMenu menu;
+		JMenuItem menuItem;
+
+		menu = new JMenu("File");
+		menuBar.add(menu);
+
+		menuItem = new JMenuItem("Open...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				open();
+			}
+		});
+
+		menuItem = new JMenuItem("Save");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				save();
+			}
+		});
+
+		menuItem = new JMenuItem("Save As...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				saveAs();
+			}
+		});
+
+		menu.addSeparator();
+
+		menuItem = new JMenuItem("Exit");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				quit();
+			}
+		});
+
+
+		menu = new JMenu("Key");
+		menuBar.add(menu);
+
+		menuItem = new JMenuItem("Add key");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animation.addFrame(getView(), slider.getValue());
+				updateAnimation();
+			}
+		});
+
+		menuItem = new JMenuItem("Remove key");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				int index = animation.indexOf(slider.getValue());
+				if (index >= 0)
+				{
+					animation.removeFrame(index);
+				}
+				updateAnimation();
+			}
+		});
+
+		menu.addSeparator();
+
+		final JCheckBoxMenuItem autoKeyItem = new JCheckBoxMenuItem("Auto key",
+				autokey);
+		menu.add(autoKeyItem);
+		autoKeyItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				autokey = autoKeyItem.isSelected();
+			}
+		});
+
+
+		menu = new JMenu("Animation");
+		menuBar.add(menu);
+
+		menuItem = new JMenuItem("Preview");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animate(false);
+			}
+		});
+
+		menuItem = new JMenuItem("Render...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animate(true);
+			}
+		});
+	}
+
+	private OrbitView getView()
+	{
+		return (OrbitView) wwd.getView();
+	}
+
+	private void applyView()
+	{
+		applying = true;
+		animation.applyFrame(getView(), slider.getValue());
+		applying = false;
+	}
+
 	public void quit()
 	{
+		//TODO ask if want to save
 		frame.dispose();
 		System.exit(0);
 	}
 
-	private path.CameraPath createTestPath()
+	private void open()
 	{
-		Parameter eyeLat = new Parameter();
-		Parameter eyeLon = new Parameter();
-		Parameter eyeZoom = new Parameter();
-		Parameter targetLat = new Parameter();
-		Parameter targetLon = new Parameter();
-		Parameter targetZoom = new Parameter();
+		JFileChooser chooser = new JFileChooser();
+		if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
+		{
+			File newFile = chooser.getSelectedFile();
+			SimpleAnimation newAnimation = SimpleAnimation.load(newFile);
+			if (newAnimation != null)
+			{
+				animation = newAnimation;
+				file = newFile;
+			}
+			else
+			{
+				JOptionPane.showMessageDialog(frame, "Could not open "
+						+ newFile.getAbsolutePath(), "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		setTitleBar();
+		updateAnimation();
+	}
 
-		eyeLat.addKey(0, -23);
-		eyeLat.addKey(100, -50);
+	private void save()
+	{
+		if (file == null)
+		{
+			saveAs();
+		}
+		else
+		{
+			animation.save(file);
+		}
+	}
 
-		eyeLon.addKey(0, 131);
-		eyeLon.addKey(200, 160);
+	private void saveAs()
+	{
+		JFileChooser chooser = new JFileChooser();
+		if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
+		{
+			file = chooser.getSelectedFile();
+			animation.save(file);
+		}
+		setTitleBar();
+	}
 
-		eyeZoom.addKey(0, path.CameraPath.c2z(600000));
-		eyeZoom.addKey(150, path.CameraPath.c2z(1200000));
+	private void setTitleBar()
+	{
+		String title = "World Wind Animator";
+		if (file != null)
+			title += " - " + file.getName();
+		frame.setTitle(title);
+	}
 
-		targetLat.addKey(0, -23);
-		targetLat.addKey(100, -23);
-		targetLat.addKey(200, -47);
-
-		targetLon.addKey(0, 131);
-		targetLon.addKey(100, 131);
-		targetLon.addKey(150, 150);
-
-		targetZoom.addKey(0, 0);
-
-		return new path.CameraPath(eyeLat, eyeLon, eyeZoom, targetLat,
-				targetLon, targetZoom);
+	private void updateAnimation()
+	{
+		slider.clearKeys();
+		for (int i = 0; i < animation.size(); i++)
+		{
+			slider.addKey(animation.getFrame(i));
+		}
 	}
 
 	private void animate(final boolean savingFrames)
 	{
-		final path.CameraPath path = createTestPath();
-
-		Thread thread = new Thread(new Runnable()
+		if (animation != null && animation.size() > 0)
 		{
-			public void run()
+			Thread thread = new Thread(new Runnable()
 			{
-				Animator.this.frame.setAlwaysOnTop(savingFrames);
-
-				if (savingFrames)
+				public void run()
 				{
-					Toolkit tk = Toolkit.getDefaultToolkit();
-					BufferedImage image = new BufferedImage(1, 1,
-							BufferedImage.TYPE_INT_ARGB);
-					Cursor blankCursor = tk.createCustomCursor(image,
-							new Point(0, 0), "BlackCursor");
-					wwd.setCursor(blankCursor);
-				}
-
-				View v = wwd.getSceneController().getView();
-				if (!(v instanceof RollOrbitView))
-					return;
-				RollOrbitView view = (RollOrbitView) v;
-				boolean detectCollisions = view.isDetectCollisions();
-				view.setDetectCollisions(false);
-
-				int firstFrame = path.getFirstFrame();
-				int lastFrame = path.getLastFrame();
-				for (int frame = firstFrame; frame <= lastFrame; frame++)
-				{
-					path.applyFrame(view, frame);
-					wwd.redrawNow();
+					Animator.this.frame.setAlwaysOnTop(savingFrames);
 
 					if (savingFrames)
 					{
-						takeScreenshot("frames/frame" + frame + ".tga");
+						Toolkit tk = Toolkit.getDefaultToolkit();
+						BufferedImage image = new BufferedImage(1, 1,
+								BufferedImage.TYPE_INT_ARGB);
+						Cursor blankCursor = tk.createCustomCursor(image,
+								new Point(0, 0), "BlackCursor");
+						wwd.setCursor(blankCursor);
 					}
+
+					View view = getView();
+					boolean detectCollisions = view.isDetectCollisions();
+					view.setDetectCollisions(false);
+
+					int firstFrame = animation.getFirstFrame();
+					int lastFrame = animation.getLastFrame();
+					for (int frame = firstFrame; frame <= lastFrame; frame++)
+					{
+						slider.setValue(frame);
+						wwd.redrawNow();
+
+						if (savingFrames)
+						{
+							takeScreenshot("frames/frame" + frame + ".tga");
+						}
+					}
+
+					view.setDetectCollisions(detectCollisions);
+
+					Animator.this.frame.setAlwaysOnTop(false);
+					wwd.setCursor(null);
 				}
-
-				view.setDetectCollisions(detectCollisions);
-
-				Animator.this.frame.setAlwaysOnTop(false);
-				wwd.setCursor(null);
-			}
-		});
-		thread.start();
+			});
+			thread.start();
+		}
 	}
-	
+
 	private void takeScreenshot(String filename)
 	{
 		if (!EventQueue.isDispatchThread())
