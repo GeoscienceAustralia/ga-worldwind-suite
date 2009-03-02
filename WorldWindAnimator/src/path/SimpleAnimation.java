@@ -3,12 +3,19 @@ package path;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.OrbitView;
 
+import java.awt.Color;
+import java.awt.GridLayout;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+
+import application.ParameterEditor;
 
 public class SimpleAnimation implements Serializable
 {
@@ -21,14 +28,44 @@ public class SimpleAnimation implements Serializable
 
 	public SimpleAnimation()
 	{
+		//TODO put somewhere else!
+		/*JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.setLayout(new GridLayout(0, 1));
+		ParameterEditor editor;
+
+		editor = new ParameterEditor(eyeLat);
+		editor.setBorder(BorderFactory.createLineBorder(Color.black));
+		frame.add(editor);
+		editor = new ParameterEditor(eyeLon);
+		editor.setBorder(BorderFactory.createLineBorder(Color.black));
+		frame.add(editor);
+		editor = new ParameterEditor(eyeZoom);
+		editor.setBorder(BorderFactory.createLineBorder(Color.black));
+		frame.add(editor);
+		editor = new ParameterEditor(centerLat);
+		editor.setBorder(BorderFactory.createLineBorder(Color.black));
+		frame.add(editor);
+		editor = new ParameterEditor(centerLon);
+		editor.setBorder(BorderFactory.createLineBorder(Color.black));
+		frame.add(editor);
+		editor = new ParameterEditor(centerZoom);
+		editor.setBorder(BorderFactory.createLineBorder(Color.black));
+		frame.add(editor);
+
+		frame.setSize(640, 480);
+		frame.setVisible(true);*/
 	}
 
 	public void applyFrame(OrbitView view, int frame)
 	{
-		Position eye = Position.fromDegrees(eyeLat.getInterpolatedValue(frame), eyeLon
-				.getInterpolatedValue(frame), z2c(eyeZoom.getInterpolatedValue(frame)));
-		Position center = Position.fromDegrees(centerLat.getInterpolatedValue(frame),
-				centerLon.getInterpolatedValue(frame), z2c(centerZoom.getInterpolatedValue(frame)));
+		Position eye = Position.fromDegrees(eyeLat.getInterpolatedValue(frame),
+				eyeLon.getInterpolatedValue(frame), z2c(eyeZoom
+						.getInterpolatedValue(frame)));
+		Position center = Position.fromDegrees(centerLat
+				.getInterpolatedValue(frame), centerLon
+				.getInterpolatedValue(frame), z2c(centerZoom
+				.getInterpolatedValue(frame)));
 		view.stopMovement();
 		view.setOrientation(eye, center);
 	}
@@ -43,6 +80,23 @@ public class SimpleAnimation implements Serializable
 		centerLat.addKey(frame, center.getLatitude().degrees);
 		centerLon.addKey(frame, center.getLongitude().degrees);
 		centerZoom.addKey(frame, c2z(center.getElevation()));
+
+		int index = eyeLat.indexOf(frame);
+		smooth(index);
+		if (index > 0)
+			smooth(index - 1);
+		if (index < size() - 1)
+			smooth(index + 1);
+	}
+
+	private void smooth(int index)
+	{
+		eyeLat.smooth(index);
+		eyeLon.smooth(index);
+		eyeZoom.smooth(index);
+		centerLat.smooth(index);
+		centerLon.smooth(index);
+		centerZoom.smooth(index);
 	}
 
 	public void removeFrame(int index)
@@ -59,7 +113,7 @@ public class SimpleAnimation implements Serializable
 	{
 		return eyeLat.getFrame(index);
 	}
-	
+
 	public int indexOf(int frame)
 	{
 		return eyeLat.indexOf(frame);
@@ -82,7 +136,7 @@ public class SimpleAnimation implements Serializable
 
 	public static double c2z(double camera)
 	{
-		return Math.log(camera + 1);
+		return Math.log(Math.max(0, camera) + 1);
 	}
 
 	public static double z2c(double zoom)

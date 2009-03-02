@@ -9,6 +9,7 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.layers.CompassLayer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
@@ -50,6 +51,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import path.SimpleAnimation;
+import sun.security.action.GetLongAction;
 import tessellator.ConfigurableTessellator;
 import util.FrameSlider;
 import view.BasicRollOrbitView;
@@ -170,8 +172,7 @@ public class Animator
 					{
 						if (autokey && !applying)
 						{
-							animation.addFrame(getView(), slider.getValue());
-							updateAnimation();
+							addFrame();
 						}
 					}
 				});
@@ -247,7 +248,7 @@ public class Animator
 		});
 
 
-		menu = new JMenu("Key");
+		menu = new JMenu("Frame");
 		menuBar.add(menu);
 
 		menuItem = new JMenuItem("Add key");
@@ -256,8 +257,7 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animation.addFrame(getView(), slider.getValue());
-				updateAnimation();
+				addFrame();
 			}
 		});
 
@@ -289,6 +289,28 @@ public class Animator
 			}
 		});
 
+		menuItem = new JMenuItem("Set frame count...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				int frames = slider.getLength() - 1;
+				Object value = JOptionPane.showInputDialog(frame,
+						"Number of frames:", "Set frame count",
+						JOptionPane.QUESTION_MESSAGE, null, null, frames);
+				try
+				{
+					frames = Integer.parseInt((String) value);
+				}
+				catch (Exception ex)
+				{
+				}
+				slider.setMin(0);
+				slider.setMax(frames);
+			}
+		});
+
 
 		menu = new JMenu("Animation");
 		menuBar.add(menu);
@@ -317,6 +339,18 @@ public class Animator
 	private OrbitView getView()
 	{
 		return (OrbitView) wwd.getView();
+	}
+
+	private void addFrame()
+	{
+		OrbitView view = getView();
+		if (view.getPitch().equals(Angle.ZERO))
+		{
+			view.setPitch(Angle.fromDegrees(0.1));
+			wwd.redrawNow();
+		}
+		animation.addFrame(view, slider.getValue());
+		updateAnimation();
 	}
 
 	private void applyView()

@@ -9,30 +9,42 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import path.Parameter;
 import camera.vector.Vector2;
 
 public class ParameterEditor extends JComponent
 {
-	private List<Parameter> parameters = new ArrayList<Parameter>();
-
 	private Parameter parameter;
 	private KeyFramePoint[] points;
 
-	public ParameterEditor()
+	public ParameterEditor(final Parameter parameter)
 	{
-		parameter = new Parameter();
-		parameter.addKey(0, 100);
-		parameter.addKey(1000, 200);
-		parameter.addKey(2000, 50);
-		parameter.setInPercent(1, 0.1, 150);
+		this.parameter = parameter;
 		points = calculatePoints(parameter);
+
+		parameter.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				Thread thread = new Thread()
+				{
+					@Override
+					public void run()
+					{
+						points = calculatePoints(parameter);
+						repaint();
+					}
+				};
+				thread.setDaemon(true);
+				thread.start();
+			}
+		});
 
 		addMouseListener(new MouseAdapter()
 		{
@@ -60,7 +72,7 @@ public class ParameterEditor extends JComponent
 	private void drawParameter(Parameter parameter, Graphics2D g2, Color color)
 	{
 		int ff = parameter.getFirstFrame();
-		int lf = parameter.getLastFrame();
+		int lf = parameter.getLastFrame() + 1;
 		double yMin = parameter.getMinimumValue();
 		double yMax = parameter.getMaximumValue();
 		int frameJump = Math.max(1, (lf - ff + 1) / getWidth());
@@ -85,34 +97,38 @@ public class ParameterEditor extends JComponent
 		for (KeyFramePoint point : points)
 		{
 			if (point.in != null)
-				g2.draw(new Line2D.Double(point.point, point.in));
+				g2.draw(new Line2D.Double(getX(point.point.x, 0, 1), getY(
+						point.point.y, 0, 1), getX(point.in.x, 0, 1), getY(
+						point.in.y, 0, 1)));
 			if (point.out != null)
-				g2.draw(new Line2D.Double(point.point, point.out));
+				g2.draw(new Line2D.Double(getX(point.point.x, 0, 1), getY(
+						point.point.y, 0, 1), getX(point.out.x, 0, 1), getY(
+						point.out.y, 0, 1)));
 		}
 
 		g2.setColor(color.darker().darker());
 		for (KeyFramePoint point : points)
 		{
 			if (point.in != null)
-				g2.fill(new Ellipse2D.Double(point.in.x - 2, point.in.y - 2, 4,
-						4));
+				g2.fill(new Ellipse2D.Double(getX(point.in.x, 0, 1) - 2, getY(
+						point.in.y, 0, 1) - 2, 4, 4));
 			if (point.out != null)
-				g2.fill(new Ellipse2D.Double(point.out.x - 2, point.out.y - 2,
-						4, 4));
+				g2.fill(new Ellipse2D.Double(getX(point.out.x, 0, 1) - 2, getY(
+						point.out.y, 0, 1) - 2, 4, 4));
 		}
 
 		//g2.setColor(Color.blue);
 		for (KeyFramePoint point : points)
 		{
-			g2.fill(new Ellipse2D.Double(point.point.x - 2, point.point.y - 2,
-					4, 4));
+			g2.fill(new Ellipse2D.Double(getX(point.point.x, 0, 1) - 2, getY(
+					point.point.y, 0, 1) - 2, 4, 4));
 		}
 	}
 
 	private double getX(double frame, int firstFrame, int lastFrame)
 	{
 		double w = getWidth() - 20;
-		double window = lastFrame - firstFrame + 1;
+		double window = lastFrame - firstFrame;
 		return w * (frame - firstFrame) / window + 10;
 	}
 
@@ -140,7 +156,8 @@ public class ParameterEditor extends JComponent
 
 			int frame = parameter.getFrame(i);
 			kfp.point = new Point2D.Double((frame - firstFrame) / frameWindow,
-					(parameter.getInterpolatedValue(frame) - yMinDraw) / yWindow);
+					(parameter.getInterpolatedValue(frame) - yMinDraw)
+							/ yWindow);
 
 			Vector2 in = parameter.getIn(i);
 			if (in != null)
@@ -158,9 +175,20 @@ public class ParameterEditor extends JComponent
 
 	public static void main(String[] args)
 	{
+		Parameter parameter = new Parameter();
+		parameter.addKey(0, -100);
+		parameter.addKey(100, 200);
+		parameter.addKey(2000, 300);
+		parameter.addKey(2500, -50);
+
+		parameter.smooth(0);
+		parameter.smooth(1);
+		parameter.smooth(2);
+		parameter.smooth(3);
+
 		JFrame frame = new JFrame("Bezier");
 		frame.setSize(640, 480);
-		frame.add(new ParameterEditor());
+		frame.add(new ParameterEditor(parameter));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}

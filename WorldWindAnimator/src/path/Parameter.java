@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import camera.vector.Vector2;
 
 public class Parameter implements Serializable
@@ -18,17 +21,23 @@ public class Parameter implements Serializable
 	private List<KeyFrame> keys = new ArrayList<KeyFrame>();
 	private KeyFrame lastPrevious, lastNext;
 
+	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
+
 	public Parameter()
 	{
 	}
 
 	public int getFirstFrame()
 	{
+		if (map.isEmpty())
+			return 0;
 		return map.firstKey();
 	}
 
 	public int getLastFrame()
 	{
+		if (map.isEmpty())
+			return 0;
 		return map.lastKey();
 	}
 
@@ -101,6 +110,8 @@ public class Parameter implements Serializable
 		setLockInOut(index, DEFAULT_LOCK_INOUT);
 		if (!DEFAULT_LOCK_INOUT)
 			updateBezier(index);
+
+		notifyChange();
 	}
 
 	public void removeKey(int index)
@@ -109,6 +120,8 @@ public class Parameter implements Serializable
 		keys.remove(key);
 		map.remove(key.frame);
 		updateBezier(index - 1);
+
+		notifyChange();
 	}
 
 	public void setValue(int index, double value)
@@ -120,6 +133,8 @@ public class Parameter implements Serializable
 		key.outValue += diff;
 		updateBezier(index - 1);
 		updateBezier(index);
+
+		notifyChange();
 	}
 
 	public double getValue(int index)
@@ -164,6 +179,8 @@ public class Parameter implements Serializable
 		{
 			lockOut(index);
 		}
+
+		notifyChange();
 	}
 
 	public Vector2 getOut(int index)
@@ -203,6 +220,8 @@ public class Parameter implements Serializable
 		{
 			lockIn(index);
 		}
+
+		notifyChange();
 	}
 
 	public boolean isLockInOut(int index)
@@ -217,6 +236,8 @@ public class Parameter implements Serializable
 		key.lockInOut = lock;
 		if (lock)
 			lockOut(index);
+
+		notifyChange();
 	}
 
 	private void lockIn(int index)
@@ -272,6 +293,32 @@ public class Parameter implements Serializable
 
 		updateBezier(index - 1);
 		updateBezier(index);
+
+		notifyChange();
+	}
+
+	public void smooth(int index)
+	{
+		KeyFrame key = keys.get(index);
+		KeyFrame p = getOrNull(index - 1);
+		KeyFrame s = getOrNull(index + 1);
+		if (p != null && s != null)
+		{
+			double y = key.value;
+			if (Math.signum(key.value - p.value) != Math.signum(key.value
+					- s.value))
+			{
+				//same direction
+				double m = (s.value - p.value) / (s.frame - p.frame);
+				double x = (key.frame - p.frame) * key.inPercent;
+				y = key.value - m * x;
+			}
+			setInPercent(index, key.inPercent, y);
+			if (!key.lockInOut)
+				lockOut(index);
+
+			notifyChange();
+		}
 	}
 
 	private KeyFrame getOrNull(int index)
@@ -408,6 +455,25 @@ public class Parameter implements Serializable
 		lastNext = null;
 	}
 
+	public void addChangeListener(ChangeListener changeListener)
+	{
+		changeListeners.add(changeListener);
+	}
+
+	public void removeChangeListener(ChangeListener changeListener)
+	{
+		changeListeners.remove(changeListener);
+	}
+
+	private void notifyChange()
+	{
+		ChangeEvent e = new ChangeEvent(this);
+		for (ChangeListener changeListener : changeListeners)
+		{
+			changeListener.stateChanged(e);
+		}
+	}
+
 	private static class KeyFrame implements Comparable<KeyFrame>, Serializable
 	{
 		private int frame;
@@ -443,6 +509,23 @@ public class Parameter implements Serializable
 		public int compareTo(KeyFrame o)
 		{
 			return this.frame - o.frame;
+		}
+	}
+
+	public static void main(String[] args)
+	{
+		Parameter parameter = new Parameter();
+		parameter.addKey(0, 100);
+		parameter.addKey(100, 150);
+		parameter.addKey(200, 250);
+		parameter.addKey(250, 50);
+
+		//parameter.setInPercent(1, 0.1, 150);
+		parameter.smooth(1);
+
+		for (int i = parameter.getFirstFrame(); i <= parameter.getLastFrame(); i++)
+		{
+			System.out.println(parameter.getInterpolatedValue(i));
 		}
 	}
 }
