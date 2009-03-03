@@ -3,8 +3,6 @@ package path;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.OrbitView;
 
-import java.awt.Color;
-import java.awt.GridLayout;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,10 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-
-import application.ParameterEditor;
+import camera.vector.Vector3;
 
 public class SimpleAnimation implements Serializable
 {
@@ -25,6 +20,7 @@ public class SimpleAnimation implements Serializable
 	private Parameter centerLat = new Parameter();
 	private Parameter centerLon = new Parameter();
 	private Parameter centerZoom = new Parameter();
+	private int frameCount = 100;
 
 	public SimpleAnimation()
 	{
@@ -87,6 +83,8 @@ public class SimpleAnimation implements Serializable
 			smooth(index - 1);
 		if (index < size() - 1)
 			smooth(index + 1);
+
+		frameCount = Math.max(frame, frameCount);
 	}
 
 	private void smooth(int index)
@@ -134,6 +132,69 @@ public class SimpleAnimation implements Serializable
 		return eyeLat.getLastFrame();
 	}
 
+	public void smoothEyeSpeed()
+	{
+		int size = size();
+		double[] cumulativeDistance = new double[size - 1];
+		for (int i = 0; i < size - 1; i++)
+		{
+			int firstFrame = getFrame(i);
+			int lastFrame = getFrame(i + 1);
+			cumulativeDistance[i] = i == 0 ? 0 : cumulativeDistance[i - 1];
+			Vector3 vStart = null;
+
+			for (int frame = firstFrame; frame <= lastFrame; frame++)
+			{
+				double x = eyeLat.getInterpolatedValue(frame);
+				double y = eyeLon.getInterpolatedValue(frame);
+				double z = eyeZoom.getInterpolatedValue(frame);
+				Vector3 vEnd = new Vector3(x, y, z);
+				if (vStart != null)
+				{
+					cumulativeDistance[i] += vStart.subtract(vEnd).distance();
+				}
+				vStart = vEnd;
+			}
+		}
+
+		int[] frames = new int[size];
+		int first = getFirstFrame();
+		int last = getLastFrame();
+		frames[0] = first;
+		frames[size - 1] = last;
+
+		for (int i = 1; i < size - 1; i++)
+		{
+			frames[i] = (int) Math.round((getLastFrame() - getFirstFrame() + 1)
+					* cumulativeDistance[i - 1] / cumulativeDistance[size - 2]);
+		}
+
+		//fix any frames that are equal
+		for (int i = 0; i < frames.length - 1; i++)
+		{
+			if (frames[i] >= frames[i + 1])
+				frames[i + 1] = frames[i] + 1;
+		}
+		if (frames[size - 1] != last)
+		{
+			frames[size - 1] = last;
+			for (int i = frames.length - 1; i > 0; i--)
+			{
+				if (frames[i] <= frames[i - 1])
+					frames[i - 1] = frames[i] - 1;
+			}
+		}
+		if (frames[0] != first)
+			throw new IllegalStateException();
+
+		eyeLat.setFrames(frames);
+		eyeLon.setFrames(frames);
+		eyeZoom.setFrames(frames);
+		centerLat.setFrames(frames);
+		centerLon.setFrames(frames);
+		centerZoom.setFrames(frames);
+	}
+
 	public static double c2z(double camera)
 	{
 		return Math.log(Math.max(0, camera) + 1);
@@ -142,6 +203,16 @@ public class SimpleAnimation implements Serializable
 	public static double z2c(double zoom)
 	{
 		return Math.pow(Math.E, zoom) - 1;
+	}
+
+	public int getFrameCount()
+	{
+		return frameCount;
+	}
+
+	public void setFrameCount(int frameCount)
+	{
+		this.frameCount = frameCount;
 	}
 
 	public static SimpleAnimation load(File file)

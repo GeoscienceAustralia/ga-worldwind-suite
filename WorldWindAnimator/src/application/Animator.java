@@ -51,7 +51,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import path.SimpleAnimation;
-import sun.security.action.GetLongAction;
 import tessellator.ConfigurableTessellator;
 import util.FrameSlider;
 import view.BasicRollOrbitView;
@@ -110,6 +109,8 @@ public class Animator
 		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
 				AWTInputHandler.class.getName());
 
+		animation = new SimpleAnimation();
+
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter()
@@ -150,7 +151,7 @@ public class Animator
 		JPanel bottom = new JPanel(new BorderLayout());
 		frame.add(bottom, BorderLayout.SOUTH);
 
-		slider = new FrameSlider(0, 0, 100);
+		slider = new FrameSlider(0, 0, animation.getFrameCount());
 		slider.setMinimumSize(new Dimension(0, 54));
 		bottom.add(slider, BorderLayout.CENTER);
 		slider.addChangeListener(new ChangeListener()
@@ -186,7 +187,6 @@ public class Animator
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		createMenuBar();
 
-		animation = new SimpleAnimation();
 		setTitleBar();
 		updateAnimation();
 
@@ -308,6 +308,18 @@ public class Animator
 				}
 				slider.setMin(0);
 				slider.setMax(frames);
+				animation.setFrameCount(frames);
+			}
+		});
+
+		menuItem = new JMenuItem("Smooth eye speed");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animation.smoothEyeSpeed();
+				updateAnimation();
 			}
 		});
 
@@ -428,6 +440,8 @@ public class Animator
 		{
 			slider.addKey(animation.getFrame(i));
 		}
+		slider.setMin(0);
+		slider.setMax(animation.getFrameCount());
 	}
 
 	private void animate(final boolean savingFrames)

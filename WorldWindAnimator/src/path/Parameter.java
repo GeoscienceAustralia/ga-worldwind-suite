@@ -2,6 +2,7 @@ package path;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
@@ -293,6 +294,29 @@ public class Parameter implements Serializable
 
 		updateBezier(index - 1);
 		updateBezier(index);
+
+		notifyChange();
+	}
+
+	public void setFrames(int[] frames)
+	{
+		if (frames.length != size())
+			throw new IllegalArgumentException();
+
+		Arrays.sort(frames);
+
+		for (int i = 0; i < size(); i++)
+		{
+			KeyFrame key = keys.get(i);
+			map.remove(key.frame);
+			key.frame = frames[i];
+			map.put(frames[i], key);
+		}
+
+		for (int i = 0; i < size() - 1; i++)
+		{
+			updateBezier(i);
+		}
 
 		notifyChange();
 	}
