@@ -9,6 +9,11 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import camera.vector.Vector3;
 
@@ -21,6 +26,8 @@ public class SimpleAnimation implements Serializable
 	private Parameter centerLon = new Parameter();
 	private Parameter centerZoom = new Parameter();
 	private int frameCount = 100;
+
+	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
 
 	public SimpleAnimation()
 	{
@@ -51,6 +58,20 @@ public class SimpleAnimation implements Serializable
 
 		frame.setSize(640, 480);
 		frame.setVisible(true);*/
+
+		ChangeListener cl = new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				notifyChange();
+			}
+		};
+		eyeLat.addChangeListener(cl);
+		eyeLon.addChangeListener(cl);
+		eyeZoom.addChangeListener(cl);
+		centerLat.addChangeListener(cl);
+		centerLon.addChangeListener(cl);
+		centerZoom.addChangeListener(cl);
 	}
 
 	public void applyFrame(OrbitView view, int frame)
@@ -66,10 +87,15 @@ public class SimpleAnimation implements Serializable
 		view.setOrientation(eye, center);
 	}
 
-	public void addFrame(OrbitView view, int frame)
+	public void addFrame(int frame, OrbitView view)
 	{
 		Position eye = view.getEyePosition();
 		Position center = view.getCenterPosition();
+		addFrame(frame, eye, center);
+	}
+
+	public void addFrame(int frame, Position eye, Position center)
+	{
 		eyeLat.addKey(frame, eye.getLatitude().degrees);
 		eyeLon.addKey(frame, eye.getLongitude().degrees);
 		eyeZoom.addKey(frame, c2z(eye.getElevation()));
@@ -135,64 +161,70 @@ public class SimpleAnimation implements Serializable
 	public void smoothEyeSpeed()
 	{
 		int size = size();
-		double[] cumulativeDistance = new double[size - 1];
-		for (int i = 0; i < size - 1; i++)
+		if (size > 1)
 		{
-			int firstFrame = getFrame(i);
-			int lastFrame = getFrame(i + 1);
-			cumulativeDistance[i] = i == 0 ? 0 : cumulativeDistance[i - 1];
-			Vector3 vStart = null;
-
-			for (int frame = firstFrame; frame <= lastFrame; frame++)
+			double[] cumulativeDistance = new double[size - 1];
+			for (int i = 0; i < size - 1; i++)
 			{
-				double x = eyeLat.getInterpolatedValue(frame);
-				double y = eyeLon.getInterpolatedValue(frame);
-				double z = eyeZoom.getInterpolatedValue(frame);
-				Vector3 vEnd = new Vector3(x, y, z);
-				if (vStart != null)
+				int firstFrame = getFrame(i);
+				int lastFrame = getFrame(i + 1);
+				cumulativeDistance[i] = i == 0 ? 0 : cumulativeDistance[i - 1];
+				Vector3 vStart = null;
+
+				for (int frame = firstFrame; frame <= lastFrame; frame++)
 				{
-					cumulativeDistance[i] += vStart.subtract(vEnd).distance();
+					double x = eyeLat.getInterpolatedValue(frame);
+					double y = eyeLon.getInterpolatedValue(frame);
+					double z = eyeZoom.getInterpolatedValue(frame);
+					Vector3 vEnd = new Vector3(x, y, z);
+					if (vStart != null)
+					{
+						cumulativeDistance[i] += vStart.subtract(vEnd)
+								.distance();
+					}
+					vStart = vEnd;
 				}
-				vStart = vEnd;
 			}
-		}
 
-		int[] frames = new int[size];
-		int first = getFirstFrame();
-		int last = getLastFrame();
-		frames[0] = first;
-		frames[size - 1] = last;
-
-		for (int i = 1; i < size - 1; i++)
-		{
-			frames[i] = (int) Math.round((getLastFrame() - getFirstFrame() + 1)
-					* cumulativeDistance[i - 1] / cumulativeDistance[size - 2]);
-		}
-
-		//fix any frames that are equal
-		for (int i = 0; i < frames.length - 1; i++)
-		{
-			if (frames[i] >= frames[i + 1])
-				frames[i + 1] = frames[i] + 1;
-		}
-		if (frames[size - 1] != last)
-		{
+			int[] frames = new int[size];
+			int first = getFirstFrame();
+			int last = getLastFrame();
+			frames[0] = first;
 			frames[size - 1] = last;
-			for (int i = frames.length - 1; i > 0; i--)
-			{
-				if (frames[i] <= frames[i - 1])
-					frames[i - 1] = frames[i] - 1;
-			}
-		}
-		if (frames[0] != first)
-			throw new IllegalStateException();
 
-		eyeLat.setFrames(frames);
-		eyeLon.setFrames(frames);
-		eyeZoom.setFrames(frames);
-		centerLat.setFrames(frames);
-		centerLon.setFrames(frames);
-		centerZoom.setFrames(frames);
+			for (int i = 1; i < size - 1; i++)
+			{
+				frames[i] = (int) Math
+						.round((getLastFrame() - getFirstFrame() + 1)
+								* cumulativeDistance[i - 1]
+								/ cumulativeDistance[size - 2]);
+			}
+
+			//fix any frames that are equal
+			for (int i = 0; i < frames.length - 1; i++)
+			{
+				if (frames[i] >= frames[i + 1])
+					frames[i + 1] = frames[i] + 1;
+			}
+			if (frames[size - 1] != last)
+			{
+				frames[size - 1] = last;
+				for (int i = frames.length - 1; i > 0; i--)
+				{
+					if (frames[i] <= frames[i - 1])
+						frames[i - 1] = frames[i] - 1;
+				}
+			}
+			if (frames[0] != first)
+				throw new IllegalStateException();
+
+			eyeLat.setFrames(frames);
+			eyeLon.setFrames(frames);
+			eyeZoom.setFrames(frames);
+			centerLat.setFrames(frames);
+			centerLon.setFrames(frames);
+			centerZoom.setFrames(frames);
+		}
 	}
 
 	public static double c2z(double camera)
@@ -213,6 +245,25 @@ public class SimpleAnimation implements Serializable
 	public void setFrameCount(int frameCount)
 	{
 		this.frameCount = frameCount;
+	}
+
+	public void addChangeListener(ChangeListener changeListener)
+	{
+		changeListeners.add(changeListener);
+	}
+
+	public void removeChangeListener(ChangeListener changeListener)
+	{
+		changeListeners.remove(changeListener);
+	}
+
+	private void notifyChange()
+	{
+		ChangeEvent e = new ChangeEvent(this);
+		for (ChangeListener changeListener : changeListeners)
+		{
+			changeListener.stateChanged(e);
+		}
 	}
 
 	public static SimpleAnimation load(File file)

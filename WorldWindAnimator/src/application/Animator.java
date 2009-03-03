@@ -10,6 +10,7 @@ import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.CompassLayer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
@@ -34,6 +35,9 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBoxMenuItem;
@@ -96,6 +100,7 @@ public class Animator
 	private File file = null;
 	private boolean autokey = true;
 	private boolean applying = false;
+	private Updater updater;
 
 	public Animator()
 	{
@@ -110,6 +115,7 @@ public class Animator
 				AWTInputHandler.class.getName());
 
 		animation = new SimpleAnimation();
+		updater = new Updater();
 
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -204,6 +210,17 @@ public class Animator
 
 		menu = new JMenu("File");
 		menuBar.add(menu);
+
+		menuItem = new JMenuItem("New");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animation = new SimpleAnimation();
+				updateAnimation();
+			}
+		});
 
 		menuItem = new JMenuItem("Open...");
 		menu.add(menuItem);
@@ -318,8 +335,16 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animation.smoothEyeSpeed();
-				updateAnimation();
+				if (JOptionPane
+						.showConfirmDialog(
+								frame,
+								"This will redistribute keyframes to attempt to smooth the eye speed.\nDo you wish to continue?",
+								"Smooth eye speed", JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+				{
+					animation.smoothEyeSpeed();
+					updateAnimation();
+				}
 			}
 		});
 
@@ -361,7 +386,8 @@ public class Animator
 			view.setPitch(Angle.fromDegrees(0.1));
 			wwd.redrawNow();
 		}
-		animation.addFrame(view, slider.getValue());
+		//animation.addFrame(slider.getValue(), view);
+		updater.addFrame(slider.getValue(), view);
 		updateAnimation();
 	}
 
@@ -569,4 +595,83 @@ public class Animator
 			}
 		}
 	};
+
+	private class Updater
+	{
+		private Map<Integer, ViewParameters> toApply = new HashMap<Integer, ViewParameters>();
+		private Object waiter = new Object();
+
+		public Updater()
+		{
+			Thread thread = new Thread()
+			{
+				@Override
+				public void run()
+				{
+					while (true)
+					{
+						Integer key = getNextKey();
+						if (key != null)
+						{
+							ViewParameters vp = removeValue(key);
+							animation.addFrame(key, vp.eye, vp.center);
+						}
+						else
+						{
+							synchronized (waiter)
+							{
+								try
+								{
+									waiter.wait();
+								}
+								catch (InterruptedException e)
+								{
+									e.printStackTrace();
+								}
+							}
+						}
+					}
+				}
+			};
+			thread.setDaemon(true);
+			thread.start();
+		}
+
+		private synchronized Integer getNextKey()
+		{
+			Set<Integer> keyset = toApply.keySet();
+			if (keyset.isEmpty())
+				return null;
+			return keyset.iterator().next();
+		}
+
+		private synchronized ViewParameters removeValue(Integer key)
+		{
+			return toApply.remove(key);
+		}
+
+		public synchronized void addFrame(int frame, OrbitView view)
+		{
+			toApply.put(frame, ViewParameters.fromView(view));
+			synchronized (waiter)
+			{
+				waiter.notify();
+			}
+		}
+
+	}
+
+	private static class ViewParameters
+	{
+		public Position eye;
+		public Position center;
+
+		public static ViewParameters fromView(OrbitView view)
+		{
+			ViewParameters vp = new ViewParameters();
+			vp.eye = view.getEyePosition();
+			vp.center = view.getCenterPosition();
+			return vp;
+		}
+	}
 }
