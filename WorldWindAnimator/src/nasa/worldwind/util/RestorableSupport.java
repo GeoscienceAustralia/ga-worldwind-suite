@@ -1383,7 +1383,6 @@ public class RestorableSupport
 			throw new IllegalArgumentException(message);
 		}
 
-
 		org.w3c.dom.Element elem = this.doc
 				.createElement(getStateObjectTagName());
 
@@ -1394,15 +1393,27 @@ public class RestorableSupport
 		if (restorable != null)
 		{
 			RestorableSupport rs = parse(restorable.getRestorableState());
-			elem.appendChild(rs.getDocumentElement());
+			org.w3c.dom.Node node = doc.importNode(rs.getDocumentElement(),
+					true);
+			elem.appendChild(node);
 		}
 
 		// If non-null, add the StateObject element to the specified context. Otherwise, add it to the
 		// document root element.
 		(context != null ? context.elem : getDocumentElement())
 				.appendChild(elem);
+	}
 
-		//return new StateObject(elem);
+	public <E extends Restorable> E getStateValueAsRestorable(String name,
+			E restorable)
+	{
+		if (name == null)
+		{
+			String message = Logging.getMessage("nullValue.StringIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+		return getStateValueAsRestorable(null, name, restorable);
 	}
 
 	public <E extends Restorable> E getStateValueAsRestorable(
@@ -1426,23 +1437,22 @@ public class RestorableSupport
 				context != null ? context.elem : null, name);
 		if (stateObject.elem != null && stateObject.elem.hasChildNodes())
 		{
-			org.w3c.dom.Node node = stateObject.elem.getChildNodes().item(0);
-			if (node instanceof org.w3c.dom.Element)
+			javax.xml.parsers.DocumentBuilderFactory docBuilderFactory = javax.xml.parsers.DocumentBuilderFactory
+					.newInstance();
+			try
 			{
-				javax.xml.parsers.DocumentBuilderFactory docBuilderFactory = javax.xml.parsers.DocumentBuilderFactory
-						.newInstance();
-				try
-				{
-					javax.xml.parsers.DocumentBuilder docBuilder = docBuilderFactory
-							.newDocumentBuilder();
-					org.w3c.dom.Document doc = docBuilder.newDocument();
-					RestorableSupport rs = new RestorableSupport(doc);
-					restorable.restoreState(rs.getStateAsXml());
-					return restorable;
-				}
-				catch (ParserConfigurationException e)
-				{
-				}
+				javax.xml.parsers.DocumentBuilder docBuilder = docBuilderFactory
+						.newDocumentBuilder();
+				org.w3c.dom.Document doc = docBuilder.newDocument();
+				org.w3c.dom.Node node = doc.importNode(stateObject.elem
+						.getChildNodes().item(0), true);
+				doc.appendChild(node);
+				RestorableSupport rs = new RestorableSupport(doc);
+				restorable.restoreState(rs.getStateAsXml());
+				return restorable;
+			}
+			catch (ParserConfigurationException e)
+			{
 			}
 		}
 

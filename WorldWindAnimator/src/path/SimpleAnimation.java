@@ -32,12 +32,7 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 
 	public SimpleAnimation()
 	{
-		eyeLat.addChangeListener(this);
-		eyeLon.addChangeListener(this);
-		eyeZoom.addChangeListener(this);
-		centerLat.addChangeListener(this);
-		centerLon.addChangeListener(this);
-		centerZoom.addChangeListener(this);
+		addChangeListener();
 
 		//TODO put somewhere else!
 		/*JFrame frame = new JFrame();
@@ -66,6 +61,16 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 
 		frame.setSize(640, 480);
 		frame.setVisible(true);*/
+	}
+	
+	private void addChangeListener()
+	{
+		eyeLat.addChangeListener(this);
+		eyeLon.addChangeListener(this);
+		eyeZoom.addChangeListener(this);
+		centerLat.addChangeListener(this);
+		centerLon.addChangeListener(this);
+		centerZoom.addChangeListener(this);
 	}
 
 	public synchronized void applyFrame(OrbitView view, int frame)
@@ -383,18 +388,12 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 			return null;
 
 		restorableSupport.addStateValueAsInteger("frameCount", frameCount);
-		restorableSupport.addStateValueAsString("eyeLat", eyeLat
-				.getRestorableState());
-		restorableSupport.addStateValueAsString("eyeLon", eyeLon
-				.getRestorableState());
-		restorableSupport.addStateValueAsString("eyeZoom", eyeZoom
-				.getRestorableState());
-		restorableSupport.addStateValueAsString("centerLat", centerLat
-				.getRestorableState());
-		restorableSupport.addStateValueAsString("centerLon", centerLon
-				.getRestorableState());
-		restorableSupport.addStateValueAsString("centerZoom", centerZoom
-				.getRestorableState());
+		restorableSupport.addStateValueAsRestorable("eyeLat", eyeLat);
+		restorableSupport.addStateValueAsRestorable("eyeLon", eyeLon);
+		restorableSupport.addStateValueAsRestorable("eyeZoom", eyeZoom);
+		restorableSupport.addStateValueAsRestorable("centerLat", centerLat);
+		restorableSupport.addStateValueAsRestorable("centerLon", centerLon);
+		restorableSupport.addStateValueAsRestorable("centerZoom", centerZoom);
 
 		return restorableSupport.getStateAsXml();
 	}
@@ -415,17 +414,31 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 		}
 
 		frameCount = restorableSupport.getStateValueAsInteger("frameCount");
-		eyeLat.restoreState(restorableSupport.getStateValueAsString("eyeLat"));
-		eyeLon.restoreState(restorableSupport.getStateValueAsString("eyeLon"));
-		eyeZoom
-				.restoreState(restorableSupport
-						.getStateValueAsString("eyeZoom"));
-		centerLat.restoreState(restorableSupport
-				.getStateValueAsString("centerLat"));
-		centerLon.restoreState(restorableSupport
-				.getStateValueAsString("centerLon"));
-		centerZoom.restoreState(restorableSupport
-				.getStateValueAsString("centerZoom"));
+
+		Parameter eyeLat = restorableSupport.getStateValueAsRestorable(
+				"eyeLat", new Parameter());
+		Parameter eyeLon = restorableSupport.getStateValueAsRestorable(
+				"eyeLon", new Parameter());
+		Parameter eyeZoom = restorableSupport.getStateValueAsRestorable(
+				"eyeZoom", new Parameter());
+		Parameter centerLat = restorableSupport.getStateValueAsRestorable(
+				"centerLat", new Parameter());
+		Parameter centerLon = restorableSupport.getStateValueAsRestorable(
+				"centerLon", new Parameter());
+		Parameter centerZoom = restorableSupport.getStateValueAsRestorable(
+				"centerZoom", new Parameter());
+
+		if (eyeLat != null && eyeLon != null && eyeZoom != null
+				&& centerLat != null && centerLon != null && centerZoom != null)
+		{
+			this.eyeLat = eyeLat;
+			this.eyeLon = eyeLon;
+			this.eyeZoom = eyeZoom;
+			this.centerLat = centerLat;
+			this.centerLon = centerLon;
+			this.centerZoom = centerZoom;
+			addChangeListener();
+		}
 
 		notifyChange();
 	}

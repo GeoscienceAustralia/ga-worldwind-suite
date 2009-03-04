@@ -354,10 +354,10 @@ public class Parameter implements Serializable, Restorable
 			return null;
 		return keys.get(index);
 	}
-	
+
 	private void updateAllBeziers()
 	{
-		for(int i = 0; i < size(); i++)
+		for (int i = 0; i < size(); i++)
 			updateBezier(i);
 	}
 
@@ -647,8 +647,7 @@ public class Parameter implements Serializable, Restorable
 		{
 			RestorableSupport.StateObject keyState = restorableSupport
 					.addStateObject(keysState, "key");
-			restorableSupport.addStateValueAsString(keyState, "key", key
-					.getRestorableState());
+			restorableSupport.addStateValueAsRestorable(keyState, "key", key);
 		}
 
 		return restorableSupport.getStateAsXml();
@@ -684,17 +683,13 @@ public class Parameter implements Serializable, Restorable
 				{
 					if (keyState != null)
 					{
-						String keyString = restorableSupport
-								.getStateValueAsString(keyState, "key");
-						if (keyString != null)
+						KeyFrame keyFrame = new KeyFrame();
+						keyFrame = restorableSupport.getStateValueAsRestorable(
+								keyState, "key", keyFrame);
+						if (keyFrame != null)
 						{
-							KeyFrame keyFrame = KeyFrame
-									.fromStateXml(keyString);
-							if (keyFrame != null)
-							{
-								keys.add(keyFrame);
-								map.put(keyFrame.frame, keyFrame);
-							}
+							keys.add(keyFrame);
+							map.put(keyFrame.frame, keyFrame);
 						}
 					}
 				}
