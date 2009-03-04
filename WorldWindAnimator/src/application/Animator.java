@@ -11,11 +11,7 @@ import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.layers.CompassLayer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.layers.SkyGradientLayer;
-import gov.nasa.worldwind.layers.StarsLayer;
-import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.util.StatusBar;
@@ -29,6 +25,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -50,6 +47,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
@@ -60,6 +58,7 @@ import path.SimpleAnimation;
 import tessellator.ConfigurableTessellator;
 import util.ChangeFrameListener;
 import util.FrameSlider;
+import util.TGAScreenshot;
 import view.BasicRollOrbitView;
 
 public class Animator
@@ -156,12 +155,12 @@ public class Animator
 
 		LayerList layers = model.getLayers();
 
-		layers.add(new StarsLayer());
-		layers.add(new SkyGradientLayer());
+		//layers.add(new StarsLayer());
+		//layers.add(new SkyGradientLayer());
 		//layers.add(new FogLayer());
 		//layers.add(new BMNGOneImage());
-		//layers.add(new BMNGWMSLayer());
-		//layers.add(new LandsatI3WMSLayer());
+		layers.add(new BMNGWMSLayer());
+		layers.add(new LandsatI3WMSLayer());
 		//layers.add(new EarthNASAPlaceNameLayer());
 		//layers.add(new CompassLayer());
 		//layers.add(new WorldMapLayer());
@@ -170,7 +169,7 @@ public class Animator
 		//layers.add(new TernaryAreasLayer());
 		layers.add(new WestMacALOS());
 
-		//wwd.getSceneController().setVerticalExaggeration(5.0);
+		wwd.getSceneController().setVerticalExaggeration(2.0);
 
 		JPanel bottom = new JPanel(new BorderLayout());
 		frame.add(bottom, BorderLayout.SOUTH);
@@ -241,9 +240,13 @@ public class Animator
 		JMenuItem menuItem;
 
 		menu = new JMenu("File");
+		menu.setMnemonic('F');
 		menuBar.add(menu);
 
 		menuItem = new JMenuItem("New");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke('N',
+				ActionEvent.CTRL_MASK));
+		menuItem.setMnemonic('N');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -254,6 +257,9 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("Open...");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke('O',
+				ActionEvent.CTRL_MASK));
+		menuItem.setMnemonic('O');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -264,6 +270,9 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("Save");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke('S',
+				ActionEvent.CTRL_MASK));
+		menuItem.setMnemonic('S');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -274,6 +283,7 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("Save As...");
+		menuItem.setMnemonic('A');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -286,6 +296,9 @@ public class Animator
 		menu.addSeparator();
 
 		menuItem = new JMenuItem("Exit");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4,
+				ActionEvent.ALT_MASK));
+		menuItem.setMnemonic('x');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -297,9 +310,12 @@ public class Animator
 
 
 		menu = new JMenu("Frame");
+		menu.setMnemonic('r');
 		menuBar.add(menu);
 
 		menuItem = new JMenuItem("Add key");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0));
+		menuItem.setMnemonic('A');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -309,7 +325,9 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Remove key");
+		menuItem = new JMenuItem("Delete key");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+		menuItem.setMnemonic('D');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -328,6 +346,7 @@ public class Animator
 
 		final JCheckBoxMenuItem autoKeyItem = new JCheckBoxMenuItem("Auto key",
 				autokey);
+		menuItem.setMnemonic('k');
 		menu.add(autoKeyItem);
 		autoKeyItem.addActionListener(new ActionListener()
 		{
@@ -338,6 +357,7 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("Set frame count...");
+		menuItem.setMnemonic('c');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -360,6 +380,7 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("Smooth eye speed");
+		menuItem.setMnemonic('S');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -378,11 +399,90 @@ public class Animator
 			}
 		});
 
+		menu.addSeparator();
+
+		menuItem = new JMenuItem("Previous");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, 0));
+		menuItem.setMnemonic('P');
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				slider.setValue(slider.getValue() - 1);
+			}
+		});
+
+		menuItem = new JMenuItem("Next");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, 0));
+		menuItem.setMnemonic('N');
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				slider.setValue(slider.getValue() + 1);
+			}
+		});
+
+		menuItem = new JMenuItem("Previous 10");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA,
+				KeyEvent.SHIFT_DOWN_MASK));
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				slider.setValue(slider.getValue() - 10);
+			}
+		});
+
+		menuItem = new JMenuItem("Next 10");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD,
+				KeyEvent.SHIFT_DOWN_MASK));
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				slider.setValue(slider.getValue() + 10);
+			}
+		});
+
+		menuItem = new JMenuItem("First");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA,
+				ActionEvent.CTRL_MASK));
+		menuItem.setMnemonic('F');
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				slider.setValue(animation.getFirstFrame());
+			}
+		});
+
+		menuItem = new JMenuItem("Last");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD,
+				ActionEvent.CTRL_MASK));
+		menuItem.setMnemonic('L');
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				slider.setValue(animation.getLastFrame());
+			}
+		});
+
 
 		menu = new JMenu("Animation");
+		menu.setMnemonic('A');
 		menuBar.add(menu);
 
 		menuItem = new JMenuItem("Preview");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
+		menuItem.setMnemonic('P');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -393,6 +493,9 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("Render...");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke('R',
+				ActionEvent.CTRL_MASK));
+		menuItem.setMnemonic('R');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -689,8 +792,18 @@ public class Animator
 				}
 				try
 				{
-					com.sun.opengl.util.Screenshot.writeToTargaFile(out, wwd
-							.getWidth(), wwd.getHeight());
+					if (out.getName().toLowerCase().endsWith(".tga"))
+					{
+						/*com.sun.opengl.util.Screenshot.writeToTargaFile(out,
+								wwd.getWidth(), wwd.getHeight(), true);*/
+						TGAScreenshot.writeToTargaFile(out, wwd.getWidth(), wwd
+								.getHeight(), true);
+					}
+					else
+					{
+						com.sun.opengl.util.Screenshot.writeToFile(out, wwd
+								.getWidth(), wwd.getHeight(), true);
+					}
 				}
 				catch (Exception e)
 				{
