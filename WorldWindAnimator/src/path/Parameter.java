@@ -1,5 +1,7 @@
 package path;
 
+import gov.nasa.worldwind.Restorable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,9 +13,10 @@ import java.util.TreeMap;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import nasa.worldwind.util.RestorableSupport;
 import camera.vector.Vector2;
 
-public class Parameter implements Serializable
+public class Parameter implements Serializable, Restorable
 {
 	private final static int BEZIER_SUBDIVISIONS_PER_FRAME = 10;
 	private final static boolean DEFAULT_LOCK_INOUT = true;
@@ -22,7 +25,7 @@ public class Parameter implements Serializable
 	private List<KeyFrame> keys = new ArrayList<KeyFrame>();
 	private KeyFrame lastPrevious, lastNext;
 
-	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
+	private transient List<ChangeListener> changeListeners;
 
 	public Parameter()
 	{
@@ -351,6 +354,12 @@ public class Parameter implements Serializable
 			return null;
 		return keys.get(index);
 	}
+	
+	private void updateAllBeziers()
+	{
+		for(int i = 0; i < size(); i++)
+			updateBezier(i);
+	}
 
 	private void updateBezier(int index)
 	{
@@ -481,24 +490,36 @@ public class Parameter implements Serializable
 
 	public void addChangeListener(ChangeListener changeListener)
 	{
+		checkChangeListeners();
 		changeListeners.add(changeListener);
 	}
 
 	public void removeChangeListener(ChangeListener changeListener)
 	{
+		checkChangeListeners();
 		changeListeners.remove(changeListener);
 	}
 
 	private void notifyChange()
 	{
-		ChangeEvent e = new ChangeEvent(this);
-		for (ChangeListener changeListener : changeListeners)
+		if (changeListeners != null)
 		{
-			changeListener.stateChanged(e);
+			ChangeEvent e = new ChangeEvent(this);
+			for (ChangeListener changeListener : changeListeners)
+			{
+				changeListener.stateChanged(e);
+			}
 		}
 	}
 
-	private static class KeyFrame implements Comparable<KeyFrame>, Serializable
+	private void checkChangeListeners()
+	{
+		if (changeListeners == null)
+			changeListeners = new ArrayList<ChangeListener>();
+	}
+
+	private static class KeyFrame implements Comparable<KeyFrame>,
+			Serializable, Restorable
 	{
 		private int frame;
 		private double value;
@@ -522,6 +543,10 @@ public class Parameter implements Serializable
 			this.outPercent = 0.5;
 		}
 
+		private KeyFrame()
+		{
+		}
+
 		@Override
 		public boolean equals(Object obj)
 		{
@@ -533,6 +558,62 @@ public class Parameter implements Serializable
 		public int compareTo(KeyFrame o)
 		{
 			return this.frame - o.frame;
+		}
+
+		public String getRestorableState()
+		{
+			RestorableSupport restorableSupport = RestorableSupport
+					.newRestorableSupport();
+			if (restorableSupport == null)
+				return null;
+
+			restorableSupport.addStateValueAsInteger("frame", frame);
+			restorableSupport.addStateValueAsDouble("value", value);
+			restorableSupport.addStateValueAsDouble("inValue", inValue);
+			restorableSupport.addStateValueAsDouble("inPercent", inPercent);
+			restorableSupport.addStateValueAsDouble("outValue", outValue);
+			restorableSupport.addStateValueAsDouble("outPercent", outPercent);
+			restorableSupport.addStateValueAsBoolean("lockInOut", lockInOut);
+
+			return restorableSupport.getStateAsXml();
+		}
+
+		public void restoreState(String stateInXml)
+		{
+			if (stateInXml == null)
+				throw new IllegalArgumentException();
+
+			RestorableSupport restorableSupport;
+			try
+			{
+				restorableSupport = RestorableSupport.parse(stateInXml);
+			}
+			catch (Exception e)
+			{
+				throw new IllegalArgumentException("Parsing failed", e);
+			}
+
+			frame = restorableSupport.getStateValueAsInteger("frame");
+			value = restorableSupport.getStateValueAsDouble("value");
+			inValue = restorableSupport.getStateValueAsDouble("inValue");
+			inPercent = restorableSupport.getStateValueAsDouble("inPercent");
+			outValue = restorableSupport.getStateValueAsDouble("outValue");
+			outPercent = restorableSupport.getStateValueAsDouble("outPercent");
+			lockInOut = restorableSupport.getStateValueAsBoolean("lockInOut");
+		}
+
+		public static KeyFrame fromStateXml(String stateInXml)
+		{
+			try
+			{
+				KeyFrame keyFrame = new KeyFrame();
+				keyFrame.restoreState(stateInXml);
+				return keyFrame;
+			}
+			catch (Exception e)
+			{
+				return null;
+			}
 		}
 	}
 
@@ -551,5 +632,77 @@ public class Parameter implements Serializable
 		{
 			System.out.println(parameter.getInterpolatedValue(i));
 		}
+	}
+
+	public String getRestorableState()
+	{
+		RestorableSupport restorableSupport = RestorableSupport
+				.newRestorableSupport();
+		if (restorableSupport == null)
+			return null;
+
+		RestorableSupport.StateObject keysState = restorableSupport
+				.addStateObject("keys");
+		for (KeyFrame key : keys)
+		{
+			RestorableSupport.StateObject keyState = restorableSupport
+					.addStateObject(keysState, "key");
+			restorableSupport.addStateValueAsString(keyState, "key", key
+					.getRestorableState());
+		}
+
+		return restorableSupport.getStateAsXml();
+	}
+
+	public void restoreState(String stateInXml)
+	{
+		if (stateInXml == null)
+			throw new IllegalArgumentException();
+
+		RestorableSupport restorableSupport;
+		try
+		{
+			restorableSupport = RestorableSupport.parse(stateInXml);
+		}
+		catch (Exception e)
+		{
+			throw new IllegalArgumentException("Parsing failed", e);
+		}
+
+		map.clear();
+		keys.clear();
+
+		RestorableSupport.StateObject keysState = restorableSupport
+				.getStateObject("keys");
+		if (keysState != null)
+		{
+			RestorableSupport.StateObject[] keyStateArray = restorableSupport
+					.getAllStateObjects(keysState, "key");
+			if (keyStateArray != null)
+			{
+				for (RestorableSupport.StateObject keyState : keyStateArray)
+				{
+					if (keyState != null)
+					{
+						String keyString = restorableSupport
+								.getStateValueAsString(keyState, "key");
+						if (keyString != null)
+						{
+							KeyFrame keyFrame = KeyFrame
+									.fromStateXml(keyString);
+							if (keyFrame != null)
+							{
+								keys.add(keyFrame);
+								map.put(keyFrame.frame, keyFrame);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		Collections.sort(keys);
+		clearLast();
+		updateAllBeziers();
 	}
 }

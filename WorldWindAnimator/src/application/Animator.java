@@ -35,6 +35,7 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -54,8 +55,10 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import layers.WestMacALOS;
 import path.SimpleAnimation;
 import tessellator.ConfigurableTessellator;
+import util.ChangeFrameListener;
 import util.FrameSlider;
 import view.BasicRollOrbitView;
 
@@ -98,9 +101,13 @@ public class Animator
 	private FrameSlider slider;
 	private SimpleAnimation animation = null;
 	private File file = null;
-	private boolean autokey = true;
+	private boolean autokey = false;
 	private boolean applying = false;
 	private Updater updater;
+	private boolean changed = false;
+	private boolean stop = false;
+	private boolean settingSlider = false;
+	private ChangeListener animationChangeListener;
 
 	public Animator()
 	{
@@ -114,7 +121,17 @@ public class Animator
 		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
 				AWTInputHandler.class.getName());
 
+		animationChangeListener = new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				changed = true;
+				setTitleBar();
+			}
+		};
+
 		animation = new SimpleAnimation();
+		resetChanged();
 		updater = new Updater();
 
 		frame = new JFrame();
@@ -143,16 +160,17 @@ public class Animator
 		layers.add(new SkyGradientLayer());
 		//layers.add(new FogLayer());
 		//layers.add(new BMNGOneImage());
-		layers.add(new BMNGWMSLayer());
-		layers.add(new LandsatI3WMSLayer());
+		//layers.add(new BMNGWMSLayer());
+		//layers.add(new LandsatI3WMSLayer());
 		//layers.add(new EarthNASAPlaceNameLayer());
-		layers.add(new CompassLayer());
-		layers.add(new WorldMapLayer());
+		//layers.add(new CompassLayer());
+		//layers.add(new WorldMapLayer());
 		//layers.add(new ScalebarLayer());
 		//layers.add(new MGRSGraticuleLayer());
 		//layers.add(new TernaryAreasLayer());
+		layers.add(new WestMacALOS());
 
-		wwd.getSceneController().setVerticalExaggeration(5.0);
+		//wwd.getSceneController().setVerticalExaggeration(5.0);
 
 		JPanel bottom = new JPanel(new BorderLayout());
 		frame.add(bottom, BorderLayout.SOUTH);
@@ -164,11 +182,25 @@ public class Animator
 		{
 			public void stateChanged(ChangeEvent e)
 			{
-				if (animation.size() > 0)
+				if (!settingSlider)
 				{
-					applyView();
-					wwd.redraw();
+					if (animation.size() > 0)
+					{
+						applyView();
+						wwd.redraw();
+					}
+					stop = true;
 				}
+			}
+		});
+		slider.addChangeFrameListener(new ChangeFrameListener()
+		{
+			public void frameChanged(int index, int oldFrame, int newFrame)
+			{
+				animation.setFrame(index, newFrame);
+				updateSlider();
+				applyView();
+				wwd.redraw();
 			}
 		});
 
@@ -194,7 +226,7 @@ public class Animator
 		createMenuBar();
 
 		setTitleBar();
-		updateAnimation();
+		updateSlider();
 
 		frame.pack();
 		frame.setVisible(true);
@@ -217,8 +249,7 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animation = new SimpleAnimation();
-				updateAnimation();
+				newFile();
 			}
 		});
 
@@ -289,7 +320,7 @@ public class Animator
 				{
 					animation.removeFrame(index);
 				}
-				updateAnimation();
+				updateSlider();
 			}
 		});
 
@@ -323,9 +354,8 @@ public class Animator
 				catch (Exception ex)
 				{
 				}
-				slider.setMin(0);
-				slider.setMax(frames);
 				animation.setFrameCount(frames);
+				updateSlider();
 			}
 		});
 
@@ -343,7 +373,7 @@ public class Animator
 								JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
 				{
 					animation.smoothEyeSpeed();
-					updateAnimation();
+					updateSlider();
 				}
 			}
 		});
@@ -386,46 +416,68 @@ public class Animator
 			view.setPitch(Angle.fromDegrees(0.1));
 			wwd.redrawNow();
 		}
-		//animation.addFrame(slider.getValue(), view);
 		updater.addFrame(slider.getValue(), view);
-		updateAnimation();
+		//animation.addFrame(slider.getValue(), view);
+		//updateAnimation();
 	}
 
 	private void applyView()
 	{
-		applying = true;
-		animation.applyFrame(getView(), slider.getValue());
-		applying = false;
+		int frame = slider.getValue();
+		if (animation.getFirstFrame() <= frame
+				&& frame <= animation.getLastFrame())
+		{
+			applying = true;
+			animation.applyFrame(getView(), frame);
+			applying = false;
+		}
 	}
 
 	public void quit()
 	{
-		//TODO ask if want to save
-		frame.dispose();
-		System.exit(0);
+		if (querySave())
+		{
+			frame.dispose();
+			System.exit(0);
+		}
+	}
+
+	private void newFile()
+	{
+		if (querySave())
+		{
+			animation = new SimpleAnimation();
+			resetChanged();
+			setFile(null);
+			updateSlider();
+		}
 	}
 
 	private void open()
 	{
-		JFileChooser chooser = new JFileChooser();
-		if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
+		if (querySave())
 		{
-			File newFile = chooser.getSelectedFile();
-			SimpleAnimation newAnimation = SimpleAnimation.load(newFile);
-			if (newAnimation != null)
+			JFileChooser chooser = new JFileChooser();
+			if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
-				animation = newAnimation;
-				file = newFile;
+				File newFile = chooser.getSelectedFile();
+				SimpleAnimation newAnimation = new SimpleAnimation();
+				try
+				{
+					newAnimation.load(newFile);
+					animation = newAnimation;
+					resetChanged();
+					setFile(newFile);
+				}
+				catch (Exception e)
+				{
+					JOptionPane.showMessageDialog(frame, "Could not open '"
+							+ newFile.getAbsolutePath() + "'.\n" + e, "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
 			}
-			else
-			{
-				JOptionPane.showMessageDialog(frame, "Could not open "
-						+ newFile.getAbsolutePath(), "Error",
-						JOptionPane.ERROR_MESSAGE);
-			}
+			updateSlider();
 		}
-		setTitleBar();
-		updateAnimation();
 	}
 
 	private void save()
@@ -436,7 +488,7 @@ public class Animator
 		}
 		else
 		{
-			animation.save(file);
+			save(file);
 		}
 	}
 
@@ -445,21 +497,74 @@ public class Animator
 		JFileChooser chooser = new JFileChooser();
 		if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
-			file = chooser.getSelectedFile();
-			animation.save(file);
+			setFile(chooser.getSelectedFile());
+			if (file != null)
+				save(file);
 		}
+	}
+
+	private void save(File file)
+	{
+		if (file != null)
+		{
+			try
+			{
+				animation.save(file);
+				resetChanged();
+			}
+			catch (IOException e)
+			{
+				JOptionPane.showMessageDialog(frame, "Saving failed.\n" + e,
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
+			setTitleBar();
+		}
+	}
+
+	private void setFile(File file)
+	{
+		this.file = file;
 		setTitleBar();
+	}
+
+	private void resetChanged()
+	{
+		animation.removeChangeListener(animationChangeListener);
+		animation.addChangeListener(animationChangeListener);
+		changed = false;
+	}
+
+	private boolean querySave()
+	{
+		if (!changed)
+			return true;
+		String file = this.file == null ? "Animation" : "'"
+				+ this.file.getName() + "'";
+		String message = file + " has been modified. Save changes?";
+		int value = JOptionPane.showConfirmDialog(frame, message, "Save",
+				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+		if (value == JOptionPane.CANCEL_OPTION)
+			return false;
+		if (value == JOptionPane.YES_OPTION)
+			save();
+		return true;
 	}
 
 	private void setTitleBar()
 	{
+		String file;
 		String title = "World Wind Animator";
-		if (file != null)
-			title += " - " + file.getName();
+		if (this.file != null)
+			file = this.file.getName();
+		else
+			file = "New animation";
+		if (changed)
+			file += " *";
+		title = file + " - " + title;
 		frame.setTitle(title);
 	}
 
-	private void updateAnimation()
+	private void updateSlider()
 	{
 		slider.clearKeys();
 		for (int i = 0; i < animation.size(); i++)
@@ -470,6 +575,13 @@ public class Animator
 		slider.setMax(animation.getFrameCount());
 	}
 
+	private void setSlider(int frame)
+	{
+		settingSlider = true;
+		slider.setValue(frame);
+		settingSlider = false;
+	}
+
 	private void animate(final boolean savingFrames)
 	{
 		if (animation != null && animation.size() > 0)
@@ -478,6 +590,7 @@ public class Animator
 			{
 				public void run()
 				{
+					stop = false;
 					Animator.this.frame.setAlwaysOnTop(savingFrames);
 
 					if (savingFrames)
@@ -494,12 +607,17 @@ public class Animator
 					boolean detectCollisions = view.isDetectCollisions();
 					view.setDetectCollisions(false);
 
-					int firstFrame = animation.getFirstFrame();
+					int firstFrame = Math.max(slider.getValue(), animation
+							.getFirstFrame());
 					int lastFrame = animation.getLastFrame();
 					for (int frame = firstFrame; frame <= lastFrame; frame++)
 					{
-						slider.setValue(frame);
+						setSlider(frame);
+						applyView();
 						wwd.redrawNow();
+
+						if (stop)
+							break;
 
 						if (savingFrames)
 						{
@@ -615,6 +733,7 @@ public class Animator
 						{
 							ViewParameters vp = removeValue(key);
 							animation.addFrame(key, vp.eye, vp.center);
+							updateSlider();
 						}
 						else
 						{

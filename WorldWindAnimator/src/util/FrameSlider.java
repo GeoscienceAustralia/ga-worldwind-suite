@@ -37,6 +37,8 @@ public class FrameSlider extends JComponent
 	private boolean rightDown = false;
 	private boolean draggingSlider = false;
 	private Point dragPoint = null;
+	private boolean draggingKeyFrame = false;
+	private int draggingKeyFrameIndex;
 
 	private Rectangle scrollRect;
 	private Rectangle sliderRect;
@@ -57,8 +59,10 @@ public class FrameSlider extends JComponent
 	private boolean positionDirty = true;
 
 	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
+	private List<ChangeFrameListener> changeFrameListeners = new ArrayList<ChangeFrameListener>();
 
 	private List<Integer> keys = new ArrayList<Integer>();
+	private List<Rectangle> keyRects = new ArrayList<Rectangle>();
 
 	public FrameSlider(int value, int min, int max)
 	{
@@ -88,9 +92,12 @@ public class FrameSlider extends JComponent
 
 	public void setMin(int min)
 	{
-		this.min = min;
-		dirtySize();
-		repaint();
+		if (this.min != min)
+		{
+			this.min = min;
+			dirtySize();
+			repaint();
+		}
 	}
 
 	public int getMax()
@@ -100,9 +107,12 @@ public class FrameSlider extends JComponent
 
 	public void setMax(int max)
 	{
-		this.max = max;
-		dirtySize();
-		repaint();
+		if (this.max != max)
+		{
+			this.max = max;
+			dirtySize();
+			repaint();
+		}
 	}
 
 	public int getValue()
@@ -112,10 +122,14 @@ public class FrameSlider extends JComponent
 
 	public void setValue(int value)
 	{
-		this.value = clamp(value, getMin(), getMax());
-		dirtyPosition();
-		repaint();
-		notifyChangeListeners();
+		value = clamp(value, getMin(), getMax());
+		if (this.value != value)
+		{
+			this.value = value;
+			dirtyPosition();
+			repaint();
+			notifyChangeListeners();
+		}
 	}
 
 	public int getLength()
@@ -126,12 +140,15 @@ public class FrameSlider extends JComponent
 	public void addKey(int frame)
 	{
 		keys.add(frame);
+		keyRects.add(new Rectangle());
 		repaint();
 	}
 
 	public void removeKey(int frame)
 	{
-		keys.remove((Integer) frame);
+		int index = keys.indexOf(frame);
+		keys.remove(index);
+		keyRects.remove(index);
 		repaint();
 	}
 
@@ -144,10 +161,11 @@ public class FrameSlider extends JComponent
 	{
 		return keys.size();
 	}
-	
+
 	public void clearKeys()
 	{
 		keys.clear();
+		keyRects.clear();
 	}
 
 	private void setupMouseListeners()
@@ -179,8 +197,8 @@ public class FrameSlider extends JComponent
 					{
 					}
 				}
-				else if (scrollRect.contains(e.getPoint())
-						&& !sliderRect.contains(e.getPoint()))
+				else if (scrollRect.contains(e.getPoint()) && !draggingSlider
+						&& !draggingKeyFrame)
 				{
 					int frame = calculateFrameFromPosition(e.getX() + 1);
 					setValue(frame);
@@ -204,6 +222,22 @@ public class FrameSlider extends JComponent
 					dragPoint = new Point(e.getX() - sliderRect.x, e.getY()
 							- sliderRect.y);
 				}
+				else
+				{
+					for (int i = 0; i < keyRects.size(); i++)
+					{
+						Rectangle keyRect = keyRects.get(i);
+						if (keyRect.contains(e.getPoint()))
+						{
+							draggingKeyFrame = true;
+							draggingKeyFrameIndex = i;
+							dragPoint = new Point(e.getX() - keyRect.x, e
+									.getY()
+									- keyRect.y);
+							break;
+						}
+					}
+				}
 				repaint();
 			}
 
@@ -213,6 +247,7 @@ public class FrameSlider extends JComponent
 				leftDown = false;
 				rightDown = false;
 				draggingSlider = false;
+				draggingKeyFrame = false;
 				repaint();
 			}
 		});
@@ -235,6 +270,17 @@ public class FrameSlider extends JComponent
 					int frame = calculateFrameFromPosition(e.getX()
 							- dragPoint.x + sliderRect.width / 2);
 					setValue(frame);
+				}
+				else if (draggingKeyFrame)
+				{
+					Rectangle keyRect = keyRects.get(draggingKeyFrameIndex);
+					int oldFrame = keys.get(draggingKeyFrameIndex);
+					int newFrame = calculateFrameFromPosition(e.getX()
+							- dragPoint.x + keyRect.width / 2);
+					keys.remove(draggingKeyFrameIndex);
+					keys.add(draggingKeyFrameIndex, newFrame);
+					notifyChangeFrameListeners(draggingKeyFrameIndex, oldFrame,
+							newFrame);
 				}
 				repaint();
 			}
@@ -464,13 +510,21 @@ public class FrameSlider extends JComponent
 		}
 
 		//keyframes
-		for (int key : keys)
+		for (int i = 0; i < keys.size(); i++)
 		{
+			int key = keys.get(i);
+			Rectangle rect = keyRects.get(i);
 			int pos = calculatePositionFromFrame(key);
+			rect.x = pos - 3;
+			rect.y = tickY;
+			rect.width = 6;
+			rect.height = MINOR_TICK_LENGTH;
 			g2.setColor(dark);
-			g2.drawRect(pos - 3, tickY, 6, MINOR_TICK_LENGTH);
+			g2.drawRect(rect.x, rect.y, rect.width, rect.height);
 			g2.setColor(new Color(255, 0, 0, 128));
-			g2.fillRect(pos - 2, tickY + 1, 5, MINOR_TICK_LENGTH - 1);
+			g2
+					.fillRect(rect.x + 1, rect.y + 1, rect.width - 1,
+							rect.height - 1);
 		}
 
 		//selection box
@@ -531,5 +585,23 @@ public class FrameSlider extends JComponent
 		ChangeEvent e = new ChangeEvent(this);
 		for (ChangeListener changeListener : changeListeners)
 			changeListener.stateChanged(e);
+	}
+
+	public void addChangeFrameListener(ChangeFrameListener changeFrameListener)
+	{
+		changeFrameListeners.add(changeFrameListener);
+	}
+
+	public void removeChangeFrameListener(
+			ChangeFrameListener changeFrameListener)
+	{
+		changeFrameListeners.remove(changeFrameListener);
+	}
+
+	private void notifyChangeFrameListeners(int index, int oldFrame,
+			int newFrame)
+	{
+		for (ChangeFrameListener changeFrameListener : changeFrameListeners)
+			changeFrameListener.frameChanged(index, oldFrame, newFrame);
 	}
 }

@@ -1,13 +1,11 @@
 package path;
 
+import gov.nasa.worldwind.Restorable;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +13,12 @@ import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import nasa.worldwind.util.RestorableSupport;
+import util.FileUtil;
 import camera.vector.Vector3;
 
-public class SimpleAnimation implements Serializable
+public class SimpleAnimation implements Serializable, ChangeListener,
+		Restorable
 {
 	private Parameter eyeLat = new Parameter();
 	private Parameter eyeLon = new Parameter();
@@ -27,10 +28,17 @@ public class SimpleAnimation implements Serializable
 	private Parameter centerZoom = new Parameter();
 	private int frameCount = 100;
 
-	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
+	private transient List<ChangeListener> changeListeners;
 
 	public SimpleAnimation()
 	{
+		eyeLat.addChangeListener(this);
+		eyeLon.addChangeListener(this);
+		eyeZoom.addChangeListener(this);
+		centerLat.addChangeListener(this);
+		centerLon.addChangeListener(this);
+		centerZoom.addChangeListener(this);
+
 		//TODO put somewhere else!
 		/*JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -58,23 +66,9 @@ public class SimpleAnimation implements Serializable
 
 		frame.setSize(640, 480);
 		frame.setVisible(true);*/
-
-		ChangeListener cl = new ChangeListener()
-		{
-			public void stateChanged(ChangeEvent e)
-			{
-				notifyChange();
-			}
-		};
-		eyeLat.addChangeListener(cl);
-		eyeLon.addChangeListener(cl);
-		eyeZoom.addChangeListener(cl);
-		centerLat.addChangeListener(cl);
-		centerLon.addChangeListener(cl);
-		centerZoom.addChangeListener(cl);
 	}
 
-	public void applyFrame(OrbitView view, int frame)
+	public synchronized void applyFrame(OrbitView view, int frame)
 	{
 		Position eye = Position.fromDegrees(eyeLat.getInterpolatedValue(frame),
 				eyeLon.getInterpolatedValue(frame), z2c(eyeZoom
@@ -94,7 +88,7 @@ public class SimpleAnimation implements Serializable
 		addFrame(frame, eye, center);
 	}
 
-	public void addFrame(int frame, Position eye, Position center)
+	public synchronized void addFrame(int frame, Position eye, Position center)
 	{
 		eyeLat.addKey(frame, eye.getLatitude().degrees);
 		eyeLon.addKey(frame, eye.getLongitude().degrees);
@@ -104,13 +98,18 @@ public class SimpleAnimation implements Serializable
 		centerZoom.addKey(frame, c2z(center.getElevation()));
 
 		int index = eyeLat.indexOf(frame);
+		smoothAll(index);
+
+		frameCount = Math.max(frame, frameCount);
+	}
+
+	private void smoothAll(int index)
+	{
 		smooth(index);
 		if (index > 0)
 			smooth(index - 1);
 		if (index < size() - 1)
 			smooth(index + 1);
-
-		frameCount = Math.max(frame, frameCount);
 	}
 
 	private void smooth(int index)
@@ -123,7 +122,7 @@ public class SimpleAnimation implements Serializable
 		centerZoom.smooth(index);
 	}
 
-	public void removeFrame(int index)
+	public synchronized void removeFrame(int index)
 	{
 		eyeLat.removeKey(index);
 		eyeLon.removeKey(index);
@@ -131,34 +130,46 @@ public class SimpleAnimation implements Serializable
 		centerLat.removeKey(index);
 		centerLon.removeKey(index);
 		centerZoom.removeKey(index);
+		smoothAll(index);
 	}
 
-	public int getFrame(int index)
+	public synchronized int getFrame(int index)
 	{
 		return eyeLat.getFrame(index);
 	}
 
-	public int indexOf(int frame)
+	public synchronized void setFrame(int index, int frame)
+	{
+		eyeLat.setFrame(index, frame);
+		eyeLon.setFrame(index, frame);
+		eyeZoom.setFrame(index, frame);
+		centerLat.setFrame(index, frame);
+		centerLon.setFrame(index, frame);
+		centerZoom.setFrame(index, frame);
+		smoothAll(index);
+	}
+
+	public synchronized int indexOf(int frame)
 	{
 		return eyeLat.indexOf(frame);
 	}
 
-	public int size()
+	public synchronized int size()
 	{
 		return eyeLat.size();
 	}
 
-	public int getFirstFrame()
+	public synchronized int getFirstFrame()
 	{
 		return eyeLat.getFirstFrame();
 	}
 
-	public int getLastFrame()
+	public synchronized int getLastFrame()
 	{
 		return eyeLat.getLastFrame();
 	}
 
-	public void smoothEyeSpeed()
+	public synchronized void smoothEyeSpeed()
 	{
 		int size = size();
 		if (size > 1)
@@ -224,6 +235,11 @@ public class SimpleAnimation implements Serializable
 			centerLat.setFrames(frames);
 			centerLon.setFrames(frames);
 			centerZoom.setFrames(frames);
+
+			for (int i = 0; i < size; i++)
+			{
+				smooth(i);
+			}
 		}
 	}
 
@@ -249,26 +265,40 @@ public class SimpleAnimation implements Serializable
 
 	public void addChangeListener(ChangeListener changeListener)
 	{
+		checkChangeListeners();
 		changeListeners.add(changeListener);
 	}
 
 	public void removeChangeListener(ChangeListener changeListener)
 	{
+		checkChangeListeners();
 		changeListeners.remove(changeListener);
 	}
 
 	private void notifyChange()
 	{
-		ChangeEvent e = new ChangeEvent(this);
-		for (ChangeListener changeListener : changeListeners)
+		if (changeListeners != null)
 		{
-			changeListener.stateChanged(e);
+			ChangeEvent e = new ChangeEvent(this);
+			for (ChangeListener changeListener : changeListeners)
+			{
+				changeListener.stateChanged(e);
+			}
 		}
 	}
 
-	public static SimpleAnimation load(File file)
+	private void checkChangeListeners()
 	{
-		SimpleAnimation sa = null;
+		if (changeListeners == null)
+			changeListeners = new ArrayList<ChangeListener>();
+	}
+
+	public void load(File file) throws IOException
+	{
+		String string = FileUtil.readFileAsString(file);
+		restoreState(string);
+
+		/*SimpleAnimation sa = null;
 		ObjectInputStream ois = null;
 		try
 		{
@@ -277,6 +307,18 @@ public class SimpleAnimation implements Serializable
 			if (object != null && object instanceof SimpleAnimation)
 			{
 				sa = (SimpleAnimation) object;
+				//sa.eyeLat.removeChangeListener(sa);
+				//sa.eyeLon.removeChangeListener(sa);
+				//sa.eyeZoom.removeChangeListener(sa);
+				//sa.centerLat.removeChangeListener(sa);
+				//sa.centerLon.removeChangeListener(sa);
+				//sa.centerZoom.removeChangeListener(sa);
+				sa.eyeLat.addChangeListener(sa);
+				sa.eyeLon.addChangeListener(sa);
+				sa.eyeZoom.addChangeListener(sa);
+				sa.centerLat.addChangeListener(sa);
+				sa.centerLon.addChangeListener(sa);
+				sa.centerZoom.addChangeListener(sa);
 			}
 		}
 		catch (Exception e)
@@ -295,12 +337,15 @@ public class SimpleAnimation implements Serializable
 				}
 			}
 		}
-		return sa;
+		return sa;*/
 	}
 
-	public void save(File file)
+	public void save(File file) throws IOException
 	{
-		ObjectOutputStream oos = null;
+		String string = getRestorableState();
+		FileUtil.writeStringToFile(string, file);
+
+		/*ObjectOutputStream oos = null;
 		try
 		{
 			oos = new ObjectOutputStream(new FileOutputStream(file));
@@ -322,6 +367,66 @@ public class SimpleAnimation implements Serializable
 				{
 				}
 			}
+		}*/
+	}
+
+	public void stateChanged(ChangeEvent e)
+	{
+		notifyChange();
+	}
+
+	public String getRestorableState()
+	{
+		RestorableSupport restorableSupport = RestorableSupport
+				.newRestorableSupport();
+		if (restorableSupport == null)
+			return null;
+
+		restorableSupport.addStateValueAsInteger("frameCount", frameCount);
+		restorableSupport.addStateValueAsString("eyeLat", eyeLat
+				.getRestorableState());
+		restorableSupport.addStateValueAsString("eyeLon", eyeLon
+				.getRestorableState());
+		restorableSupport.addStateValueAsString("eyeZoom", eyeZoom
+				.getRestorableState());
+		restorableSupport.addStateValueAsString("centerLat", centerLat
+				.getRestorableState());
+		restorableSupport.addStateValueAsString("centerLon", centerLon
+				.getRestorableState());
+		restorableSupport.addStateValueAsString("centerZoom", centerZoom
+				.getRestorableState());
+
+		return restorableSupport.getStateAsXml();
+	}
+
+	public void restoreState(String stateInXml)
+	{
+		if (stateInXml == null)
+			throw new IllegalArgumentException();
+
+		RestorableSupport restorableSupport;
+		try
+		{
+			restorableSupport = RestorableSupport.parse(stateInXml);
 		}
+		catch (Exception e)
+		{
+			throw new IllegalArgumentException("Parsing failed", e);
+		}
+
+		frameCount = restorableSupport.getStateValueAsInteger("frameCount");
+		eyeLat.restoreState(restorableSupport.getStateValueAsString("eyeLat"));
+		eyeLon.restoreState(restorableSupport.getStateValueAsString("eyeLon"));
+		eyeZoom
+				.restoreState(restorableSupport
+						.getStateValueAsString("eyeZoom"));
+		centerLat.restoreState(restorableSupport
+				.getStateValueAsString("centerLat"));
+		centerLon.restoreState(restorableSupport
+				.getStateValueAsString("centerLon"));
+		centerZoom.restoreState(restorableSupport
+				.getStateValueAsString("centerZoom"));
+
+		notifyChange();
 	}
 }

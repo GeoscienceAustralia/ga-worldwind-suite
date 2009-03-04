@@ -148,7 +148,7 @@ public class ParameterEditor extends JComponent
 		double frameWindow = lastFrame - firstFrame + 1;
 		double yWindow = yMaxDraw - yMinDraw;
 
-		points = new KeyFramePoint[parameter.size()];
+		KeyFramePoint[] points = new KeyFramePoint[parameter.size()];
 		for (int i = 0; i < parameter.size(); i++)
 		{
 			KeyFramePoint kfp = new KeyFramePoint();

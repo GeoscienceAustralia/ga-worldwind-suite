@@ -43,7 +43,7 @@ public class WestMacElevationModel extends BasicElevationModel
 		params.setValue(AVKey.TILE_HEIGHT, 150);
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/WestMac DEM");
 		params.setValue(AVKey.SERVICE, "http://localhost/tiles/westmac.php");
-		params.setValue(AVKey.DATASET_NAME, "westmac");
+		params.setValue(AVKey.DATASET_NAME, "dem150");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".bil");
 		params.setValue(AVKey.NUM_LEVELS, 11);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
