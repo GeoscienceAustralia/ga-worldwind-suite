@@ -12,8 +12,6 @@ import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
-import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
@@ -54,6 +52,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import layers.WestMacALOS;
+import layers.WestMacGlobe;
 import path.SimpleAnimation;
 import tessellator.ConfigurableTessellator;
 import util.ChangeFrameListener;
@@ -115,8 +114,8 @@ public class Animator
 				.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				ConfigurableTessellator.class.getName());
-		/*Configuration.setValue(AVKey.GLOBE_CLASS_NAME, WestMacGlobe.class
-				.getName());*/
+		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, WestMacGlobe.class
+				.getName());
 		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
 				AWTInputHandler.class.getName());
 
@@ -149,18 +148,19 @@ public class Animator
 		Model model = new BasicModel();
 		/*((ConfigurableTessellator) model.getGlobe().getTessellator())
 				.setLog10ResolutionTarget(2.2);*/
+		//model.getGlobe().getTessellator().setMakeTileSkirts(false);
+		//model.setShowWireframeInterior(true);
 		wwd.setModel(model);
 		wwd.setPreferredSize(new Dimension(1024, 576));
 		frame.add(wwd, BorderLayout.CENTER);
 
 		LayerList layers = model.getLayers();
-
 		//layers.add(new StarsLayer());
 		//layers.add(new SkyGradientLayer());
 		//layers.add(new FogLayer());
 		//layers.add(new BMNGOneImage());
-		layers.add(new BMNGWMSLayer());
-		layers.add(new LandsatI3WMSLayer());
+		//layers.add(new BMNGWMSLayer());
+		//layers.add(new LandsatI3WMSLayer());
 		//layers.add(new EarthNASAPlaceNameLayer());
 		//layers.add(new CompassLayer());
 		//layers.add(new WorldMapLayer());
@@ -202,6 +202,16 @@ public class Animator
 				wwd.redraw();
 			}
 		});
+
+		/*JScrollPane scrollPane = new JScrollPane(slider,
+				JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		scrollPane.setBorder(null);
+		bottom.add(scrollPane, BorderLayout.CENTER);
+		
+		Dimension sps = slider.getMinimumSize();
+		sps.width *= 2;
+		slider.setMinimumSize(sps);*/
 
 		getView().addPropertyChangeListener(AVKey.VIEW,
 				new PropertyChangeListener()
@@ -379,8 +389,34 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Smooth eye speed");
+		menuItem = new JMenuItem("Scale animation...");
 		menuItem.setMnemonic('S');
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				double scale = -1.0;
+				Object value = JOptionPane.showInputDialog(frame,
+						"Scale factor:", "Scale animation",
+						JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
+				try
+				{
+					scale = Double.parseDouble((String) value);
+				}
+				catch (Exception ex)
+				{
+				}
+				if (scale != 1.0 && scale > 0)
+				{
+					animation.scale(scale);
+				}
+				updateSlider();
+			}
+		});
+
+		menuItem = new JMenuItem("Smooth eye speed");
+		menuItem.setMnemonic('m');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -561,6 +597,7 @@ public class Animator
 		if (querySave())
 		{
 			JFileChooser chooser = new JFileChooser();
+			chooser.setFileFilter(new XmlFilter());
 			if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
 				File newFile = chooser.getSelectedFile();
@@ -598,11 +635,30 @@ public class Animator
 	private void saveAs()
 	{
 		JFileChooser chooser = new JFileChooser();
+		chooser.setFileFilter(new XmlFilter());
 		if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
-			setFile(chooser.getSelectedFile());
-			if (file != null)
-				save(file);
+			File newFile = chooser.getSelectedFile();
+			if (!newFile.getName().toLowerCase().endsWith(".xml"))
+			{
+				newFile = new File(newFile.getParent(), newFile.getName()
+						+ ".xml");
+			}
+			boolean override = true;
+			if (newFile.exists())
+			{
+				override = JOptionPane.showConfirmDialog(frame, newFile
+						.getAbsolutePath()
+						+ " already exists.\nDo you want to replace it?",
+						"Save As", JOptionPane.YES_NO_OPTION,
+						JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION;
+			}
+			if (override)
+			{
+				setFile(newFile);
+				if (file != null)
+					save(file);
+			}
 		}
 	}
 
@@ -904,6 +960,23 @@ public class Animator
 			vp.eye = view.getEyePosition();
 			vp.center = view.getCenterPosition();
 			return vp;
+		}
+	}
+
+	private static class XmlFilter extends javax.swing.filechooser.FileFilter
+	{
+		@Override
+		public boolean accept(File f)
+		{
+			if (f.isDirectory())
+				return true;
+			return f.getName().toLowerCase().endsWith(".xml");
+		}
+
+		@Override
+		public String getDescription()
+		{
+			return "XML files (*.xml)";
 		}
 	}
 }

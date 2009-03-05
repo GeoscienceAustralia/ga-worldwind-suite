@@ -6,7 +6,6 @@ All Rights Reserved.
 */
 package layers;
 
-import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -22,17 +21,13 @@ import gov.nasa.worldwind.util.LevelSet;
  */
 public class WestMacElevationModel extends BasicElevationModel
 {
-	private static double HEIGHT_OF_MT_EVEREST = 8850d; // meters
-	private static double DEPTH_OF_MARIANAS_TRENCH = -11000d; // meters
+	private static double HIGHEST_POINT = 1515d; // meters
+	private static double LOWEST_POINT = 308d; // meters
 
 	public WestMacElevationModel()
 	{
-		super(makeLevels(), DEPTH_OF_MARIANAS_TRENCH, HEIGHT_OF_MT_EVEREST);
+		super(makeLevels(), LOWEST_POINT, HIGHEST_POINT);
 		this.setNumExpectedValuesPerTile(22500);
-		String extremesFileName = Configuration
-				.getStringValue("gov.nasa.worldwind.avkey.ExtremeElevations.SRTM30Plus.FileName");
-		if (extremesFileName != null)
-			this.loadExtremeElevations(extremesFileName);
 	}
 
 	private static LevelSet makeLevels()
@@ -49,14 +44,15 @@ public class WestMacElevationModel extends BasicElevationModel
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle
 				.fromDegrees(36d), Angle.fromDegrees(36d)));
-		params.setValue(AVKey.SECTOR, Sector.FULL_SPHERE);
+		params.setValue(AVKey.SECTOR, Sector.fromDegrees(-25.0001389,
+				-23.0001389, 131.9998611, 133.9998611));
+		/*params.setValue(AVKey.SECTOR, Sector.FULL_SPHERE);
 		params.setValue(AVKey.SECTOR_RESOLUTION_LIMITS,
 				new LevelSet.SectorResolution[] {
 						new LevelSet.SectorResolution(Sector.fromDegrees(
 								-25.0001389, -23.0001389, 131.9998611,
 								133.9998611), 10), //WESTMAC
-						new LevelSet.SectorResolution(Sector.FULL_SPHERE, 0) // SRTM30Plus
-				});
+						new LevelSet.SectorResolution(Sector.FULL_SPHERE, 0) });*/
 
 		return new LevelSet(params);
 	}

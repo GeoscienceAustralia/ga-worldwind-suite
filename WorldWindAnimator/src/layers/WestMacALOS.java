@@ -31,21 +31,22 @@ public class WestMacALOS extends MaskTiledImageLayer
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/WestMac ALOS");
 		params.setValue(AVKey.SERVICE, "http://localhost/tiles/westmac.php");
 		params.setValue(AVKey.DATASET_NAME, "alosnp_4326");
-		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
+		params.setValue(AVKey.FORMAT_SUFFIX, ".dds");
 		params.setValue(AVKey.NUM_LEVELS, 13);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle
 				.fromDegrees(36d), Angle.fromDegrees(36d)));
-		params.setValue(AVKey.SECTOR, new Sector(Angle
+		/*params.setValue(AVKey.SECTOR, new Sector(Angle
 				.fromDegreesLatitude(-24.2057779), Angle
 				.fromDegreesLatitude(-23.1988560), Angle
 				.fromDegreesLongitude(132.0001334), Angle
-				.fromDegreesLongitude(134.1394049)));
-		/*params.setValue(AVKey.SECTOR, new Sector(Angle
+				.fromDegreesLongitude(134.1394049)));*/
+		params.setValue(AVKey.SECTOR, new Sector(Angle
 				.fromDegreesLatitude(-24.0), Angle
-				.fromDegreesLatitude(-23.26), Angle
-				.fromDegreesLongitude(132.15), Angle
-				.fromDegreesLongitude(133.57)));*/
+				.fromDegreesLatitude(-23.433333), Angle
+				.fromDegreesLongitude(132.25), Angle
+				.fromDegreesLongitude(133.95)));
+
 		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
 				.createDefaultUrlBuilder("tiles/westmac/image",
 						"tiles/westmac/mask", ".jpg", ".png"));

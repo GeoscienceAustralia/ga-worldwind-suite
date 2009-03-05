@@ -1439,20 +1439,33 @@ public class RestorableSupport
 		{
 			javax.xml.parsers.DocumentBuilderFactory docBuilderFactory = javax.xml.parsers.DocumentBuilderFactory
 					.newInstance();
-			try
+			org.w3c.dom.Element element = null;
+			org.w3c.dom.NodeList nodeList = stateObject.elem.getChildNodes();
+			for (int i = 0; i < nodeList.getLength(); i++)
 			{
-				javax.xml.parsers.DocumentBuilder docBuilder = docBuilderFactory
-						.newDocumentBuilder();
-				org.w3c.dom.Document doc = docBuilder.newDocument();
-				org.w3c.dom.Node node = doc.importNode(stateObject.elem
-						.getChildNodes().item(0), true);
-				doc.appendChild(node);
-				RestorableSupport rs = new RestorableSupport(doc);
-				restorable.restoreState(rs.getStateAsXml());
-				return restorable;
+				org.w3c.dom.Node node = nodeList.item(i);
+				if (node instanceof org.w3c.dom.Element)
+				{
+					element = (org.w3c.dom.Element) node;
+					break;
+				}
 			}
-			catch (ParserConfigurationException e)
+			if (element != null)
 			{
+				try
+				{
+					javax.xml.parsers.DocumentBuilder docBuilder = docBuilderFactory
+							.newDocumentBuilder();
+					org.w3c.dom.Document doc = docBuilder.newDocument();
+					org.w3c.dom.Node node = doc.importNode(element, true);
+					doc.appendChild(node);
+					RestorableSupport rs = new RestorableSupport(doc);
+					restorable.restoreState(rs.getStateAsXml());
+					return restorable;
+				}
+				catch (ParserConfigurationException e)
+				{
+				}
 			}
 		}
 

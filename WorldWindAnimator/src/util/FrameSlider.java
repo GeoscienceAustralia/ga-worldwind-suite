@@ -82,7 +82,7 @@ public class FrameSlider extends JComponent
 
 		Dimension size = new Dimension(0, 54);
 		setMinimumSize(size);
-		setPreferredSize(size);
+		//setPreferredSize(size);
 	}
 
 	public int getMin()
@@ -175,6 +175,16 @@ public class FrameSlider extends JComponent
 			@Override
 			public void mouseClicked(MouseEvent e)
 			{
+				int keyFrameIndex = -1;
+				for (int i = 0; i < keyRects.size(); i++)
+				{
+					if (keyRects.get(i).contains(e.getPoint()))
+					{
+						keyFrameIndex = i;
+						break;
+					}
+				}
+
 				boolean insideLeftRect = leftRect.contains(e.getPoint());
 				boolean insideRightRect = rightRect.contains(e.getPoint());
 				if (insideLeftRect || insideRightRect)
@@ -196,6 +206,11 @@ public class FrameSlider extends JComponent
 					catch (Exception ex)
 					{
 					}
+				}
+				else if (keyFrameIndex >= 0)
+				{
+					int frame = getKey(keyFrameIndex);
+					setValue(frame);
 				}
 				else if (scrollRect.contains(e.getPoint()) && !draggingSlider
 						&& !draggingKeyFrame)
@@ -530,13 +545,30 @@ public class FrameSlider extends JComponent
 		//selection box
 		g2.setColor(dark);
 		g2.drawRect(position - 3, tickY, 6, MAJOR_TICK_LENGTH);
-		g2.setColor(new Color(0, 0, 255, 128));
+		if (keys.contains(getValue()))
+			g2.setColor(new Color(0, 255, 0, 128));
+		else
+			g2.setColor(new Color(0, 0, 255, 128));
 		g2.fillRect(position - 2, tickY + 1, 5, MAJOR_TICK_LENGTH - 1);
 
 		Dimension size = new Dimension(0, tickY + tickHeight);
 		setMinimumSize(size);
 		setPreferredSize(size);
 	}
+	
+	/*public void setZoom(double scale)
+	{
+		
+	}
+
+	@Override
+	public Dimension getPreferredSize()
+	{
+		if (isPreferredSizeSet())
+			return super.getPreferredSize();
+		Dimension min = getMinimumSize();
+		min.width
+	}*/
 
 	private void drawArrow(Rectangle inside, int arrowSize, Graphics2D g2,
 			boolean right, int offset)

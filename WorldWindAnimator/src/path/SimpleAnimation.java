@@ -62,7 +62,7 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 		frame.setSize(640, 480);
 		frame.setVisible(true);*/
 	}
-	
+
 	private void addChangeListener()
 	{
 		eyeLat.addChangeListener(this);
@@ -110,11 +110,14 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 
 	private void smoothAll(int index)
 	{
-		smooth(index);
-		if (index > 0)
-			smooth(index - 1);
-		if (index < size() - 1)
-			smooth(index + 1);
+		if (index >= 0 && index < size())
+		{
+			smooth(index);
+			if (index > 0)
+				smooth(index - 1);
+			if (index < size() - 1)
+				smooth(index + 1);
+		}
 	}
 
 	private void smooth(int index)
@@ -172,6 +175,42 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 	public synchronized int getLastFrame()
 	{
 		return eyeLat.getLastFrame();
+	}
+
+	public synchronized void scale(double scale)
+	{
+		int newFrameCount = (int) Math.ceil(scale * getLastFrame() - scale
+				* getFirstFrame());
+		if (getFrameCount() < newFrameCount)
+		{
+			setFrameCount(newFrameCount);
+		}
+
+		int size = size();
+		int[] frames = new int[size];
+		for (int i = 0; i < size; i++)
+		{
+			frames[i] = (int) Math.round(eyeLat.getFrame(i) * scale);
+		}
+		for (int i = 0; i < frames.length - 1; i++)
+		{
+			if (frames[i] >= frames[i + 1])
+				frames[i + 1] = frames[i] + 1;
+		}
+
+		eyeLat.setFrames(frames);
+		eyeLon.setFrames(frames);
+		eyeZoom.setFrames(frames);
+		centerLat.setFrames(frames);
+		centerLon.setFrames(frames);
+		centerZoom.setFrames(frames);
+
+		for (int i = 0; i < size; i++)
+		{
+			smooth(i);
+		}
+
+		notifyChange();
 	}
 
 	public synchronized void smoothEyeSpeed()
@@ -245,6 +284,8 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 			{
 				smooth(i);
 			}
+
+			notifyChange();
 		}
 	}
 
@@ -415,20 +456,18 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 
 		frameCount = restorableSupport.getStateValueAsInteger("frameCount");
 
-		Parameter eyeLat = restorableSupport.getStateValueAsRestorable(
-				"eyeLat", new Parameter());
-		Parameter eyeLon = restorableSupport.getStateValueAsRestorable(
-				"eyeLon", new Parameter());
-		Parameter eyeZoom = restorableSupport.getStateValueAsRestorable(
-				"eyeZoom", new Parameter());
-		Parameter centerLat = restorableSupport.getStateValueAsRestorable(
-				"centerLat", new Parameter());
-		Parameter centerLon = restorableSupport.getStateValueAsRestorable(
-				"centerLon", new Parameter());
-		Parameter centerZoom = restorableSupport.getStateValueAsRestorable(
-				"centerZoom", new Parameter());
+		eyeLat = restorableSupport.getStateValueAsRestorable("eyeLat", eyeLat);
+		eyeLon = restorableSupport.getStateValueAsRestorable("eyeLon", eyeLon);
+		eyeZoom = restorableSupport.getStateValueAsRestorable("eyeZoom",
+				eyeZoom);
+		centerLat = restorableSupport.getStateValueAsRestorable("centerLat",
+				centerLat);
+		centerLon = restorableSupport.getStateValueAsRestorable("centerLon",
+				centerLon);
+		centerZoom = restorableSupport.getStateValueAsRestorable("centerZoom",
+				centerZoom);
 
-		if (eyeLat != null && eyeLon != null && eyeZoom != null
+		/*if (eyeLat != null && eyeLon != null && eyeZoom != null
 				&& centerLat != null && centerLon != null && centerZoom != null)
 		{
 			this.eyeLat = eyeLat;
@@ -438,7 +477,7 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 			this.centerLon = centerLon;
 			this.centerZoom = centerZoom;
 			addChangeListener();
-		}
+		}*/
 
 		notifyChange();
 	}

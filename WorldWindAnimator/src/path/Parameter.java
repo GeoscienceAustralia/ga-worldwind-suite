@@ -20,6 +20,7 @@ public class Parameter implements Serializable, Restorable
 {
 	private final static int BEZIER_SUBDIVISIONS_PER_FRAME = 10;
 	private final static boolean DEFAULT_LOCK_INOUT = true;
+	private final static double DEFAULT_INOUT_PERCENT = 0.4;
 
 	private SortedMap<Integer, KeyFrame> map = new TreeMap<Integer, KeyFrame>();
 	private List<KeyFrame> keys = new ArrayList<KeyFrame>();
@@ -336,9 +337,17 @@ public class Parameter implements Serializable, Restorable
 					- s.value))
 			{
 				//same direction
+				key.inPercent = DEFAULT_INOUT_PERCENT / 2.0;
+				key.outPercent = DEFAULT_INOUT_PERCENT / 2.0;
 				double m = (s.value - p.value) / (s.frame - p.frame);
 				double x = (key.frame - p.frame) * key.inPercent;
 				y = key.value - m * x;
+
+			}
+			else
+			{
+				key.inPercent = DEFAULT_INOUT_PERCENT;
+				key.outPercent = DEFAULT_INOUT_PERCENT;
 			}
 			setInPercent(index, key.inPercent, y);
 			if (!key.lockInOut)
@@ -539,8 +548,8 @@ public class Parameter implements Serializable, Restorable
 			this.value = value;
 			this.inValue = value;
 			this.outValue = value;
-			this.inPercent = 0.5;
-			this.outPercent = 0.5;
+			this.inPercent = DEFAULT_INOUT_PERCENT;
+			this.outPercent = DEFAULT_INOUT_PERCENT;
 		}
 
 		private KeyFrame()
@@ -617,23 +626,6 @@ public class Parameter implements Serializable, Restorable
 		}
 	}
 
-	public static void main(String[] args)
-	{
-		Parameter parameter = new Parameter();
-		parameter.addKey(0, 100);
-		parameter.addKey(100, 150);
-		parameter.addKey(200, 250);
-		parameter.addKey(250, 50);
-
-		//parameter.setInPercent(1, 0.1, 150);
-		parameter.smooth(1);
-
-		for (int i = parameter.getFirstFrame(); i <= parameter.getLastFrame(); i++)
-		{
-			System.out.println(parameter.getInterpolatedValue(i));
-		}
-	}
-
 	public String getRestorableState()
 	{
 		RestorableSupport restorableSupport = RestorableSupport
@@ -699,5 +691,6 @@ public class Parameter implements Serializable, Restorable
 		Collections.sort(keys);
 		clearLast();
 		updateAllBeziers();
+		notifyChange();
 	}
 }
