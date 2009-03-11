@@ -52,13 +52,12 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import nasa.worldwind.terrain.ConfigurableTessellator;
-import nasa.worldwind.view.BasicRollOrbitView;
-
 import layers.DepthLayer;
 import layers.WestMacALOS;
 import layers.WestMacGlobe;
 import layers.WestMacRoads;
+import nasa.worldwind.terrain.ConfigurableTessellator;
+import nasa.worldwind.view.BasicRollOrbitView;
 import path.SimpleAnimation;
 import util.ChangeFrameListener;
 import util.FrameSlider;
@@ -151,11 +150,12 @@ public class Animator
 		wwd.setModel(model);
 		setAnimationSize(1024, 576);
 		frame.add(wwd, BorderLayout.CENTER);
-		
+		/*((BasicElevationModel) model.getGlobe().getElevationModel())
+				.setDetailHint(1.0);*/
+
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
 		ConfigurableTessellator tesselator = (ConfigurableTessellator) model
 				.getGlobe().getTessellator();
-		/*tesselator.setLog10ResolutionTarget(2.5);*/
 		//tesselator.setMakeTileSkirts(false);
 		//model.setShowWireframeInterior(true);
 		wwd.getSceneController().setVerticalExaggeration(1.5);

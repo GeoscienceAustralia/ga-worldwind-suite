@@ -1,5 +1,7 @@
 package layers;
 
+import javax.media.opengl.GL;
+
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -7,6 +9,7 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.BasicTiledImageLayer;
+import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.LevelSet;
 
 public class WestMacRoads extends BasicTiledImageLayer
@@ -43,6 +46,15 @@ public class WestMacRoads extends BasicTiledImageLayer
 				.fromDegreesLongitude(133.95)));
 
 		return new LevelSet(params);
+	}
+
+	protected void setBlendingFunction(DrawContext dc)
+	{
+		GL gl = dc.getGL();
+		double alpha = this.getOpacity();
+		gl.glColor4d(1.0, 1.0, 1.0, alpha);
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	@Override

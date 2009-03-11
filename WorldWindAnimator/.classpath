@@ -12,7 +12,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="WorldWindAnimator/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/WorldWindRad"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Shapefile"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/WorldWind0.6"/>
 	<classpathentry kind="output" path="bin"/>

@@ -7,7 +7,7 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.util.LevelSet;
-import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
+import layers.mask.MaskTiledImageLayer;
 
 public class WestMacALOS extends MaskTiledImageLayer
 {
