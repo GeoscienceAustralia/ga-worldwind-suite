@@ -1,4 +1,4 @@
-package view;
+package nasa.worldwind.view;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Matrix;

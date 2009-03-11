@@ -1,4 +1,9 @@
-package view;
+/*
+Copyright (C) 2001, 2007 United States Government as represented by
+the Administrator of the National Aeronautics and Space Administration.
+All Rights Reserved.
+*/
+package nasa.worldwind.view;
 
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -21,6 +26,10 @@ import gov.nasa.worldwind.view.ViewSupport;
 
 import javax.media.opengl.GL;
 
+/**
+ * @author dcollins
+ * @version $Id: BasicOrbitView.java 6564 2008-09-11 00:31:51Z dcollins $
+ */
 public class BasicRollOrbitView extends AbstractView implements RollOrbitView
 {
 	private Position center = Position.ZERO;
@@ -181,22 +190,6 @@ public class BasicRollOrbitView extends AbstractView implements RollOrbitView
 
 		this.pitch = pitch;
 		resolveCollisionsWithPitch();
-	}
-
-	public Angle getRoll()
-	{
-		return this.roll;
-	}
-
-	public void setRoll(Angle roll)
-	{
-		if (roll == null)
-		{
-			String message = Logging.getMessage("nullValue.AngleIsNull");
-			Logging.logger().severe(message);
-			throw new IllegalArgumentException(message);
-		}
-		this.roll = roll;
 	}
 
 	public double getZoom()
@@ -391,7 +384,7 @@ public class BasicRollOrbitView extends AbstractView implements RollOrbitView
 			throw new IllegalArgumentException(message);
 		}
 
-		LatLon latlon = eyePosition.getLatLon();
+		LatLon latlon = eyePosition;
 		double elevation = eyePosition.getElevation();
 
 		// Set the center lat/lon to the eye lat/lon. Set the center elevation to zero if the eye elevation is >= 0.
@@ -690,18 +683,22 @@ public class BasicRollOrbitView extends AbstractView implements RollOrbitView
 		this.viewport = new java.awt.Rectangle(viewportArray[0],
 				viewportArray[1], viewportArray[2], viewportArray[3]);
 		// Compute the current clip plane distances.
-		double nearDistance = this.nearClipDistance > 0 ? this.nearClipDistance
-				: getAutoNearClipDistance();
-		double farDistance = this.farClipDistance > 0 ? this.farClipDistance
-				: getAutoFarClipDistance();
+		double nearDistance = this.nearClipDistance <= 0.0 ? getAutoNearClipDistance()
+				: this.nearClipDistance;
+		double farDistance = this.farClipDistance <= 0.0 ? getAutoFarClipDistance()
+				: this.farClipDistance;
+		// Compute the current viewport dimensions.
+		double viewportWidth = this.viewport.getWidth() <= 0.0 ? 1.0
+				: this.viewport.getWidth();
+		double viewportHeight = this.viewport.getHeight() <= 0.0 ? 1.0
+				: this.viewport.getHeight();
 		// Compute the current projection matrix.
 		this.projection = Matrix.fromPerspective(this.fieldOfView,
-				this.viewport.getWidth(), this.viewport.getHeight(),
-				nearDistance, farDistance);
+				viewportWidth, viewportHeight, nearDistance, farDistance);
 		// Compute the current frustum.
 		this.frustum = Frustum.fromPerspective(this.fieldOfView,
-				(int) this.viewport.getWidth(),
-				(int) this.viewport.getHeight(), nearDistance, farDistance);
+				(int) viewportWidth, (int) viewportHeight, nearDistance,
+				farDistance);
 
 		//========== load GL matrix state ==========//
 		this.viewSupport.loadGLViewState(dc, this.modelview, this.projection);
@@ -875,7 +872,7 @@ public class BasicRollOrbitView extends AbstractView implements RollOrbitView
 
 		if (this.pitch != null)
 			rs.addStateValueAsDouble("pitch", this.pitch.degrees);
-
+		
 		if (this.roll != null)
 			rs.addStateValueAsDouble("roll", this.roll.degrees);
 
@@ -931,7 +928,7 @@ public class BasicRollOrbitView extends AbstractView implements RollOrbitView
 		d = rs.getStateValueAsDouble("pitch");
 		if (d != null)
 			setPitch(Angle.fromDegrees(d));
-
+		
 		d = rs.getStateValueAsDouble("roll");
 		if (d != null)
 			setRoll(Angle.fromDegrees(d));
@@ -951,6 +948,22 @@ public class BasicRollOrbitView extends AbstractView implements RollOrbitView
 		d = rs.getStateValueAsDouble("farClipDistance");
 		if (d != null)
 			setFarClipDistance(d);
+	}
+
+	public Angle getRoll()
+	{
+		return this.roll;
+	}
+
+	public void setRoll(Angle roll)
+	{
+		if (roll == null)
+		{
+			String message = Logging.getMessage("nullValue.AngleIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+		this.roll = roll;
 	}
 
 	public void setEye(LatLon eye, Angle heading, Angle pitch, Angle roll,

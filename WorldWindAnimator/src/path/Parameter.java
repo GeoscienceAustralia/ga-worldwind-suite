@@ -357,6 +357,23 @@ public class Parameter implements Serializable, Restorable
 		}
 	}
 
+	public void scaleValues(double scale)
+	{
+		for (KeyFrame key : keys)
+		{
+			key.value *= scale;
+			key.inValue *= scale;
+			key.outValue *= scale;
+		}
+
+		for (int i = 0; i < size() - 1; i++)
+		{
+			updateBezier(i);
+		}
+
+		notifyChange();
+	}
+
 	private KeyFrame getOrNull(int index)
 	{
 		if (index < 0 || index >= size())

@@ -27,6 +27,9 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 	private Parameter centerLon = new Parameter();
 	private Parameter centerZoom = new Parameter();
 	private int frameCount = 100;
+	private boolean ignoreChange = false;
+	private int width = 1024;
+	private int height = 576;
 
 	private transient List<ChangeListener> changeListeners;
 
@@ -95,6 +98,8 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 
 	public synchronized void addFrame(int frame, Position eye, Position center)
 	{
+		ignoreChange = true;
+
 		eyeLat.addKey(frame, eye.getLatitude().degrees);
 		eyeLon.addKey(frame, eye.getLongitude().degrees);
 		eyeZoom.addKey(frame, c2z(eye.getElevation()));
@@ -106,6 +111,9 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 		smoothAll(index);
 
 		frameCount = Math.max(frame, frameCount);
+
+		ignoreChange = false;
+		notifyChange();
 	}
 
 	private void smoothAll(int index)
@@ -132,6 +140,8 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 
 	public synchronized void removeFrame(int index)
 	{
+		ignoreChange = true;
+
 		eyeLat.removeKey(index);
 		eyeLon.removeKey(index);
 		eyeZoom.removeKey(index);
@@ -139,6 +149,9 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 		centerLon.removeKey(index);
 		centerZoom.removeKey(index);
 		smoothAll(index);
+
+		ignoreChange = false;
+		notifyChange();
 	}
 
 	public synchronized int getFrame(int index)
@@ -148,6 +161,8 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 
 	public synchronized void setFrame(int index, int frame)
 	{
+		ignoreChange = true;
+
 		eyeLat.setFrame(index, frame);
 		eyeLon.setFrame(index, frame);
 		eyeZoom.setFrame(index, frame);
@@ -155,6 +170,9 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 		centerLon.setFrame(index, frame);
 		centerZoom.setFrame(index, frame);
 		smoothAll(index);
+
+		ignoreChange = false;
+		notifyChange();
 	}
 
 	public synchronized int indexOf(int frame)
@@ -179,6 +197,8 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 
 	public synchronized void scale(double scale)
 	{
+		ignoreChange = true;
+
 		int newFrameCount = (int) Math.ceil(scale * getLastFrame() - scale
 				* getFirstFrame());
 		if (getFrameCount() < newFrameCount)
@@ -210,11 +230,23 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 			smooth(i);
 		}
 
+		ignoreChange = false;
+		notifyChange();
+	}
+
+	public synchronized void scaleHeight(double scale)
+	{
+		ignoreChange = true;
+		eyeZoom.scaleValues(scale);
+		centerZoom.scaleValues(scale);
+		ignoreChange = false;
 		notifyChange();
 	}
 
 	public synchronized void smoothEyeSpeed()
 	{
+		ignoreChange = true;
+
 		int size = size();
 		if (size > 1)
 		{
@@ -284,9 +316,10 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 			{
 				smooth(i);
 			}
-
-			notifyChange();
 		}
+
+		ignoreChange = false;
+		notifyChange();
 	}
 
 	public static double c2z(double camera)
@@ -307,6 +340,26 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 	public void setFrameCount(int frameCount)
 	{
 		this.frameCount = frameCount;
+	}
+
+	public int getWidth()
+	{
+		return width;
+	}
+
+	public void setWidth(int width)
+	{
+		this.width = width;
+	}
+
+	public int getHeight()
+	{
+		return height;
+	}
+
+	public void setHeight(int height)
+	{
+		this.height = height;
 	}
 
 	public void addChangeListener(ChangeListener changeListener)
@@ -343,82 +396,18 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 	{
 		String string = FileUtil.readFileAsString(file);
 		restoreState(string);
-
-		/*SimpleAnimation sa = null;
-		ObjectInputStream ois = null;
-		try
-		{
-			ois = new ObjectInputStream(new FileInputStream(file));
-			Object object = ois.readObject();
-			if (object != null && object instanceof SimpleAnimation)
-			{
-				sa = (SimpleAnimation) object;
-				//sa.eyeLat.removeChangeListener(sa);
-				//sa.eyeLon.removeChangeListener(sa);
-				//sa.eyeZoom.removeChangeListener(sa);
-				//sa.centerLat.removeChangeListener(sa);
-				//sa.centerLon.removeChangeListener(sa);
-				//sa.centerZoom.removeChangeListener(sa);
-				sa.eyeLat.addChangeListener(sa);
-				sa.eyeLon.addChangeListener(sa);
-				sa.eyeZoom.addChangeListener(sa);
-				sa.centerLat.addChangeListener(sa);
-				sa.centerLon.addChangeListener(sa);
-				sa.centerZoom.addChangeListener(sa);
-			}
-		}
-		catch (Exception e)
-		{
-		}
-		finally
-		{
-			if (ois != null)
-			{
-				try
-				{
-					ois.close();
-				}
-				catch (Exception e)
-				{
-				}
-			}
-		}
-		return sa;*/
 	}
 
 	public void save(File file) throws IOException
 	{
 		String string = getRestorableState();
 		FileUtil.writeStringToFile(string, file);
-
-		/*ObjectOutputStream oos = null;
-		try
-		{
-			oos = new ObjectOutputStream(new FileOutputStream(file));
-			oos.writeObject(this);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			if (oos != null)
-			{
-				try
-				{
-					oos.close();
-				}
-				catch (Exception e)
-				{
-				}
-			}
-		}*/
 	}
 
 	public void stateChanged(ChangeEvent e)
 	{
-		notifyChange();
+		if (!ignoreChange)
+			notifyChange();
 	}
 
 	public String getRestorableState()
@@ -429,6 +418,8 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 			return null;
 
 		restorableSupport.addStateValueAsInteger("frameCount", frameCount);
+		restorableSupport.addStateValueAsInteger("width", width);
+		restorableSupport.addStateValueAsInteger("height", height);
 		restorableSupport.addStateValueAsRestorable("eyeLat", eyeLat);
 		restorableSupport.addStateValueAsRestorable("eyeLon", eyeLon);
 		restorableSupport.addStateValueAsRestorable("eyeZoom", eyeZoom);
@@ -455,6 +446,13 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 		}
 
 		frameCount = restorableSupport.getStateValueAsInteger("frameCount");
+
+		Integer width = restorableSupport.getStateValueAsInteger("width");
+		if (width != null)
+			this.width = width;
+		Integer height = restorableSupport.getStateValueAsInteger("height");
+		if (height != null)
+			this.height = height;
 
 		eyeLat = restorableSupport.getStateValueAsRestorable("eyeLat", eyeLat);
 		eyeLon = restorableSupport.getStateValueAsRestorable("eyeLon", eyeLon);

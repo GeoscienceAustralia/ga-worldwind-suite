@@ -6,6 +6,7 @@ import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
@@ -51,14 +52,17 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import nasa.worldwind.terrain.ConfigurableTessellator;
+import nasa.worldwind.view.BasicRollOrbitView;
+
+import layers.DepthLayer;
 import layers.WestMacALOS;
 import layers.WestMacGlobe;
+import layers.WestMacRoads;
 import path.SimpleAnimation;
-import tessellator.ConfigurableTessellator;
 import util.ChangeFrameListener;
 import util.FrameSlider;
 import util.TGAScreenshot;
-import view.BasicRollOrbitView;
 
 public class Animator
 {
@@ -116,8 +120,6 @@ public class Animator
 				ConfigurableTessellator.class.getName());
 		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, WestMacGlobe.class
 				.getName());
-		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
-				AWTInputHandler.class.getName());
 
 		animationChangeListener = new ChangeListener()
 		{
@@ -146,13 +148,18 @@ public class Animator
 		frame.setLayout(new BorderLayout());
 		wwd = new WorldWindowGLCanvas();
 		Model model = new BasicModel();
-		/*((ConfigurableTessellator) model.getGlobe().getTessellator())
-				.setLog10ResolutionTarget(2.2);*/
-		//model.getGlobe().getTessellator().setMakeTileSkirts(false);
-		//model.setShowWireframeInterior(true);
 		wwd.setModel(model);
-		wwd.setPreferredSize(new Dimension(1024, 576));
+		setAnimationSize(1024, 576);
 		frame.add(wwd, BorderLayout.CENTER);
+		
+		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
+		ConfigurableTessellator tesselator = (ConfigurableTessellator) model
+				.getGlobe().getTessellator();
+		/*tesselator.setLog10ResolutionTarget(2.5);*/
+		//tesselator.setMakeTileSkirts(false);
+		//model.setShowWireframeInterior(true);
+		wwd.getSceneController().setVerticalExaggeration(1.5);
+		tesselator.setElevationOffset(200);
 
 		LayerList layers = model.getLayers();
 		//layers.add(new StarsLayer());
@@ -167,9 +174,13 @@ public class Animator
 		//layers.add(new ScalebarLayer());
 		//layers.add(new MGRSGraticuleLayer());
 		//layers.add(new TernaryAreasLayer());
+		layers.add(new DepthLayer());
 		layers.add(new WestMacALOS());
+		layers.add(new WestMacRoads());
 
-		wwd.getSceneController().setVerticalExaggeration(2.0);
+		/*Layer roads = new ShapefileLayer(new File(
+				"C:/WINNT/Profiles/u97852/Desktop/Roads/Shapefile/Roads.shp"));
+		layers.add(roads);*/
 
 		JPanel bottom = new JPanel(new BorderLayout());
 		frame.add(bottom, BorderLayout.SOUTH);
@@ -239,6 +250,15 @@ public class Animator
 
 		frame.pack();
 		frame.setVisible(true);
+	}
+
+	private void setAnimationSize(int width, int height)
+	{
+		Dimension size = new Dimension(width, height);
+		wwd.setPreferredSize(size);
+		wwd.setMinimumSize(size);
+		wwd.setMaximumSize(size);
+		frame.pack();
 	}
 
 	private void createMenuBar()
@@ -389,52 +409,6 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Scale animation...");
-		menuItem.setMnemonic('S');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				double scale = -1.0;
-				Object value = JOptionPane.showInputDialog(frame,
-						"Scale factor:", "Scale animation",
-						JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
-				try
-				{
-					scale = Double.parseDouble((String) value);
-				}
-				catch (Exception ex)
-				{
-				}
-				if (scale != 1.0 && scale > 0)
-				{
-					animation.scale(scale);
-				}
-				updateSlider();
-			}
-		});
-
-		menuItem = new JMenuItem("Smooth eye speed");
-		menuItem.setMnemonic('m');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				if (JOptionPane
-						.showConfirmDialog(
-								frame,
-								"This will redistribute keyframes to attempt to smooth the eye speed.\nDo you wish to continue?",
-								"Smooth eye speed", JOptionPane.YES_NO_OPTION,
-								JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
-				{
-					animation.smoothEyeSpeed();
-					updateSlider();
-				}
-			}
-		});
-
 		menu.addSeparator();
 
 		menuItem = new JMenuItem("Previous");
@@ -516,6 +490,79 @@ public class Animator
 		menu.setMnemonic('A');
 		menuBar.add(menu);
 
+		menuItem = new JMenuItem("Scale animation...");
+		menuItem.setMnemonic('S');
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				double scale = -1.0;
+				Object value = JOptionPane.showInputDialog(frame,
+						"Scale factor:", "Scale animation",
+						JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
+				try
+				{
+					scale = Double.parseDouble((String) value);
+				}
+				catch (Exception ex)
+				{
+				}
+				if (scale != 1.0 && scale > 0)
+				{
+					animation.scale(scale);
+				}
+				updateSlider();
+			}
+		});
+
+		menuItem = new JMenuItem("Scale height...");
+		menuItem.setMnemonic('h');
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				double scale = -1.0;
+				Object value = JOptionPane.showInputDialog(frame,
+						"Scale factor:", "Scale height",
+						JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
+				try
+				{
+					scale = Double.parseDouble((String) value);
+				}
+				catch (Exception ex)
+				{
+				}
+				if (scale != 1.0 && scale > 0)
+				{
+					animation.scaleHeight(scale);
+				}
+			}
+		});
+
+		menuItem = new JMenuItem("Smooth eye speed");
+		menuItem.setMnemonic('m');
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (JOptionPane
+						.showConfirmDialog(
+								frame,
+								"This will redistribute keyframes to attempt to smooth the eye speed.\nDo you wish to continue?",
+								"Smooth eye speed", JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+				{
+					animation.smoothEyeSpeed();
+					updateSlider();
+				}
+			}
+		});
+
+		menu.addSeparator();
+
 		menuItem = new JMenuItem("Preview");
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
 		menuItem.setMnemonic('P');
@@ -524,7 +571,27 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animate(false);
+				animate(false, 1);
+			}
+		});
+
+		menuItem = new JMenuItem("Preview x2");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animate(false, 2);
+			}
+		});
+
+		menuItem = new JMenuItem("Preview x10");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animate(false, 10);
 			}
 		});
 
@@ -537,7 +604,7 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animate(true);
+				animate(true, 1);
 			}
 		});
 	}
@@ -741,7 +808,7 @@ public class Animator
 		settingSlider = false;
 	}
 
-	private void animate(final boolean savingFrames)
+	private void animate(final boolean savingFrames, final int frameSkip)
 	{
 		if (animation != null && animation.size() > 0)
 		{
@@ -750,7 +817,7 @@ public class Animator
 				public void run()
 				{
 					stop = false;
-					Animator.this.frame.setAlwaysOnTop(savingFrames);
+					frame.setAlwaysOnTop(savingFrames);
 
 					if (savingFrames)
 					{
@@ -760,16 +827,39 @@ public class Animator
 						Cursor blankCursor = tk.createCustomCursor(image,
 								new Point(0, 0), "BlackCursor");
 						wwd.setCursor(blankCursor);
+
+						setAnimationSize(animation.getWidth(), animation
+								.getHeight());
+						frame.setResizable(false);
 					}
 
 					View view = getView();
 					boolean detectCollisions = view.isDetectCollisions();
 					view.setDetectCollisions(false);
 
+					//TEMP
+					/*GraphicsEnvironment ge = GraphicsEnvironment
+							.getLocalGraphicsEnvironment();
+					DisplayMode dm = ge.getDefaultScreenDevice()
+							.getDisplayMode();
+					int screenWidth = dm.getWidth();
+					int screenHeight = dm.getHeight();
+					Random random = new Random();
+					Robot robot = null;
+					try
+					{
+						robot = new Robot();
+					}
+					catch (AWTException e)
+					{
+						e.printStackTrace();
+					}*/
+					//TEMP
 					int firstFrame = Math.max(slider.getValue(), animation
 							.getFirstFrame());
 					int lastFrame = animation.getLastFrame();
-					for (int frame = firstFrame; frame <= lastFrame; frame++)
+
+					for (int frame = firstFrame; frame <= lastFrame; frame += frameSkip)
 					{
 						setSlider(frame);
 						applyView();
@@ -780,13 +870,20 @@ public class Animator
 
 						if (savingFrames)
 						{
-							takeScreenshot("frames/frame" + frame + ".tga");
+							takeScreenshot("F:/West Macs Imagery/animation_frames/frame"
+									+ frame + ".tga");
 						}
+
+						//TEMP
+						/*robot.mouseMove(screenWidth - random.nextInt(10) - 1,
+								screenHeight - random.nextInt(10) - 1);*/
+						//TEMP
 					}
 
 					view.setDetectCollisions(detectCollisions);
 
-					Animator.this.frame.setAlwaysOnTop(false);
+					frame.setResizable(true);
+					frame.setAlwaysOnTop(false);
 					wwd.setCursor(null);
 				}
 			});
