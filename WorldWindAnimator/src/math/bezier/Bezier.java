@@ -1,8 +1,9 @@
-package camera.bezier;
+package math.bezier;
 
 import java.io.Serializable;
 
-import camera.vector.Vector;
+import math.vector.Vector;
+
 
 public class Bezier<V extends Vector<V>> implements Serializable
 {

@@ -41,11 +41,8 @@ public class WestMacALOS extends MaskTiledImageLayer
 				.fromDegreesLatitude(-23.1988560), Angle
 				.fromDegreesLongitude(132.0001334), Angle
 				.fromDegreesLongitude(134.1394049)));*/
-		params.setValue(AVKey.SECTOR, new Sector(Angle
-				.fromDegreesLatitude(-24.0), Angle
-				.fromDegreesLatitude(-23.433333), Angle
-				.fromDegreesLongitude(132.25), Angle
-				.fromDegreesLongitude(133.95)));
+		params.setValue(AVKey.SECTOR, Sector.fromDegrees(-24.0, -23.433333,
+				132.25, 133.95));
 
 		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
 				.createDefaultUrlBuilder("tiles/westmac/image",

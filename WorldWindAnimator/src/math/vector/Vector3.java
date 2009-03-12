@@ -1,4 +1,4 @@
-package camera.vector;
+package math.vector;
 
 public class Vector3 implements Vector<Vector3>
 {

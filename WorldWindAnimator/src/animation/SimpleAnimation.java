@@ -1,4 +1,4 @@
-package path;
+package animation;
 
 import gov.nasa.worldwind.Restorable;
 import gov.nasa.worldwind.geom.Position;
@@ -13,9 +13,9 @@ import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import math.vector.Vector3;
 import nasa.worldwind.util.RestorableSupport;
 import util.FileUtil;
-import camera.vector.Vector3;
 
 public class SimpleAnimation implements Serializable, ChangeListener,
 		Restorable

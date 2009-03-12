@@ -1,4 +1,4 @@
-package path;
+package animation;
 
 import gov.nasa.worldwind.Restorable;
 
@@ -13,8 +13,8 @@ import java.util.TreeMap;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import math.vector.Vector2;
 import nasa.worldwind.util.RestorableSupport;
-import camera.vector.Vector2;
 
 public class Parameter implements Serializable, Restorable
 {

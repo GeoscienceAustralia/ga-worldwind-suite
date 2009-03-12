@@ -57,14 +57,13 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import animation.SimpleAnimation;
+
 import layers.depth.DepthLayer;
 import layers.file.FileLayer;
-import layers.westmac.WestMacALOS;
 import layers.westmac.WestMacElevationModel;
-import layers.westmac.WestMacRoads;
 import nasa.worldwind.terrain.ConfigurableTessellator;
 import nasa.worldwind.view.BasicRollOrbitView;
-import path.SimpleAnimation;
 import util.ChangeFrameListener;
 import util.FrameSlider;
 import util.TGAScreenshot;
@@ -171,7 +170,7 @@ public class Animator
 
 		LayerList layers = model.getLayers();
 		layers.add(new DepthLayer());
-		
+
 		//layers.add(new StarsLayer());
 		//layers.add(new SkyGradientLayer());
 		//layers.add(new FogLayer());
@@ -183,17 +182,34 @@ public class Animator
 		//layers.add(new WorldMapLayer());
 		//layers.add(new ScalebarLayer());
 		//layers.add(new MGRSGraticuleLayer());
-		//layers.add(new TernaryAreasLayer());
-		
-		Layer page1 = FileLayer.createLayer("Map page1", "GA/WestMac Map Page 1",
-				".dds", new File(
+
+		Layer page1 = FileLayer.createLayer("WestMac Map Page 1",
+				"GA/WestMac Map Page 1", ".dds", new File(
 						"F:/West Macs Imagery/Rectified Map/4 Alpha/page1"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0536281, -23.4102781, 132.0746805, 133.9779805));
 		layers.add(page1);
-		
-		layers.add(new WestMacALOS());
-		layers.add(new WestMacRoads());
+
+		Layer page2 = FileLayer.createLayer("WestMac Map Page 2",
+				"GA/WestMac Map Page 2", ".dds", new File(
+						"F:/West Macs Imagery/Rectified Map/4 Alpha/page2"),
+				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
+						-24.0544889, -23.4081639, 132.0708833, 133.9771083));
+		layers.add(page2);
+
+		Layer alos = FileLayer.createLayer("WestMac ALOS", "GA/WestMac ALOS",
+				".dds", new File("F:/West Macs Imagery/wwtiles/alosnp_4326"),
+				"jpg", new File("F:/West Macs Imagery/wwtiles/mapmask"), "png",
+				13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(-24.0,
+						-23.433333, 132.25, 133.95));
+		layers.add(alos);
+
+		Layer roads = FileLayer.createLayer("WestMac Roads",
+				"GA/WestMac Roads", ".dds", new File(
+						"C:/WINNT/Profiles/u97852/Desktop/Roads/Mapnik/tiled"),
+				"png", 12, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
+						-24.0, -23.433333, 132.25, 133.95));
+		layers.add(roads);
 
 		/*Layer roads = new ShapefileLayer(new File(
 				"C:/WINNT/Profiles/u97852/Desktop/Roads/Shapefile/Roads.shp"));

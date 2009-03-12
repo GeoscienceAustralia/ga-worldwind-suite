@@ -39,11 +39,8 @@ public class WestMacRoads extends BasicTiledImageLayer
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle
 				.fromDegrees(36d), Angle.fromDegrees(36d)));
-		params.setValue(AVKey.SECTOR, new Sector(Angle
-				.fromDegreesLatitude(-24.0), Angle
-				.fromDegreesLatitude(-23.433333), Angle
-				.fromDegreesLongitude(132.25), Angle
-				.fromDegreesLongitude(133.95)));
+		params.setValue(AVKey.SECTOR, Sector.fromDegrees(-24.0, -23.433333,
+				132.25, 133.95));
 
 		return new LevelSet(params);
 	}

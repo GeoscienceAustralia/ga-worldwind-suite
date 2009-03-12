@@ -1,4 +1,4 @@
-package camera.vector;
+package math.vector;
 
 import java.io.Serializable;
 

@@ -3,11 +3,14 @@ package layers.file;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.TextureTile;
+import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
 
 import java.net.URL;
+
+import javax.media.opengl.GL;
 
 import nasa.worldwind.layers.BasicTiledImageLayer;
 
@@ -57,5 +60,14 @@ public class FileBasicTiledImageLayer extends BasicTiledImageLayer
 				tile, this));
 		WorldWind.getRetrievalService().runRetriever(retriever,
 				tile.getPriority() - 1e100);
+	}
+	
+	protected void setBlendingFunction(DrawContext dc)
+	{
+		GL gl = dc.getGL();
+		double alpha = this.getOpacity();
+		gl.glColor4d(alpha, alpha, alpha, alpha);
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 	}
 }

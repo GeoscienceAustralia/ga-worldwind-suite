@@ -15,8 +15,10 @@ import javax.swing.JFrame;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import path.Parameter;
-import camera.vector.Vector2;
+import math.vector.Vector2;
+
+import animation.Parameter;
+
 
 public class ParameterEditor extends JComponent
 {

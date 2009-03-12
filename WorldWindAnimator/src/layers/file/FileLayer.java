@@ -5,7 +5,7 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.TiledImageLayer;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
@@ -17,7 +17,7 @@ import layers.mask.MaskTiledImageLayer;
 
 public class FileLayer
 {
-	public static Layer createLayer(String name, String cacheName,
+	public static TiledImageLayer createLayer(String name, String cacheName,
 			String formatSuffix, File directory, String extension, int levels,
 			LatLon lztd, Sector sector)
 	{
@@ -38,12 +38,14 @@ public class FileLayer
 		params.setValue(AVKey.TILE_URL_BUILDER, new FileUrlBuilder(directory,
 				extension, null, null));
 
-		Layer layer = new FileBasicTiledImageLayer(params);
+		TiledImageLayer layer = new FileBasicTiledImageLayer(params);
 		layer.setName(name);
+		layer.setUseTransparentTextures(true);
+		layer.setUseMipMaps(true);
 		return layer;
 	}
 
-	public static Layer createLayer(String name, String cacheName,
+	public static TiledImageLayer createLayer(String name, String cacheName,
 			String formatSuffix, File directory, String extension,
 			File maskDirectory, String maskExtension, int levels, LatLon lztd,
 			Sector sector)
@@ -65,8 +67,10 @@ public class FileLayer
 		params.setValue(AVKey.TILE_URL_BUILDER, new FileUrlBuilder(directory,
 				extension, maskDirectory, maskExtension));
 
-		Layer layer = new MaskTiledImageLayer(params);
+		TiledImageLayer layer = new MaskTiledImageLayer(params);
 		layer.setName(name);
+		layer.setUseTransparentTextures(true);
+		layer.setUseMipMaps(true);
 		return layer;
 	}
 

@@ -39,16 +39,13 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.media.opengl.GL;
 
 import layers.file.FileRetriever;
 
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
 
-/**
- * @author tag
- * @version $Id: BasicTiledImageLayer.java 8941 2009-02-21 00:33:27Z dcollins $
- */
 public class MaskTiledImageLayer extends TiledImageLayer
 {
 	private final Object fileLock = new Object();
@@ -733,7 +730,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			return true;
 		}
 	}
-	
+
 	public static TileUrlBuilder createDefaultUrlBuilder()
 	{
 		return createDefaultUrlBuilder((File) null, null, null, null);
@@ -830,5 +827,14 @@ public class MaskTiledImageLayer extends TiledImageLayer
 				return new URL(sb.toString());
 			}
 		}
+	}
+
+	protected void setBlendingFunction(DrawContext dc)
+	{
+		GL gl = dc.getGL();
+		double alpha = this.getOpacity();
+		gl.glColor4d(1.0, 1.0, 1.0, alpha);
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 	}
 }
