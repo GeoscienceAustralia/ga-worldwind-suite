@@ -1,10 +1,4 @@
-/*
-Copyright (C) 2001, 2006 United States Government
-as represented by the Administrator of the
-National Aeronautics and Space Administration.
-All Rights Reserved.
-*/
-package layers;
+package layers.westmac;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -15,10 +9,6 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.LevelSet;
 
-/**
- * @author Tom Gaskins
- * @version $Id: EarthElevationModel.java 2664 2007-08-23 22:17:25Z tgaskins $
- */
 public class WestMacElevationModel extends BasicElevationModel
 {
 	private static double HIGHEST_POINT = 1515d; // meters

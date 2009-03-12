@@ -1,6 +1,4 @@
-package layers;
-
-import javax.media.opengl.GL;
+package layers.westmac;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -8,13 +6,12 @@ import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.layers.BasicTiledImageLayer;
-import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.LevelSet;
+import layers.mask.MaskTiledImageLayer;
 
-public class WestMacRoads extends BasicTiledImageLayer
+public class WestMacALOS extends MaskTiledImageLayer
 {
-	public WestMacRoads()
+	public WestMacALOS()
 	{
 		super(makeLevels());
 		this.setForceLevelZeroLoads(true);
@@ -31,35 +28,35 @@ public class WestMacRoads extends BasicTiledImageLayer
 
 		params.setValue(AVKey.TILE_WIDTH, 512);
 		params.setValue(AVKey.TILE_HEIGHT, 512);
-		params.setValue(AVKey.DATA_CACHE_NAME, "GA/WestMac Roads");
+		params.setValue(AVKey.DATA_CACHE_NAME, "GA/WestMac ALOS");
 		params.setValue(AVKey.SERVICE, "http://localhost/tiles/westmac.php");
-		params.setValue(AVKey.DATASET_NAME, "roads");
+		params.setValue(AVKey.DATASET_NAME, "alosnp_4326");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".dds");
-		params.setValue(AVKey.NUM_LEVELS, 12);
+		params.setValue(AVKey.NUM_LEVELS, 13);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle
 				.fromDegrees(36d), Angle.fromDegrees(36d)));
+		/*params.setValue(AVKey.SECTOR, new Sector(Angle
+				.fromDegreesLatitude(-24.2057779), Angle
+				.fromDegreesLatitude(-23.1988560), Angle
+				.fromDegreesLongitude(132.0001334), Angle
+				.fromDegreesLongitude(134.1394049)));*/
 		params.setValue(AVKey.SECTOR, new Sector(Angle
 				.fromDegreesLatitude(-24.0), Angle
 				.fromDegreesLatitude(-23.433333), Angle
 				.fromDegreesLongitude(132.25), Angle
 				.fromDegreesLongitude(133.95)));
 
-		return new LevelSet(params);
-	}
+		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
+				.createDefaultUrlBuilder("tiles/westmac/image",
+						"tiles/westmac/mask", ".jpg", ".png"));
 
-	protected void setBlendingFunction(DrawContext dc)
-	{
-		GL gl = dc.getGL();
-		double alpha = this.getOpacity();
-		gl.glColor4d(1.0, 1.0, 1.0, alpha);
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		return new LevelSet(params);
 	}
 
 	@Override
 	public String toString()
 	{
-		return "WestMac Roads";
+		return "WestMac ALOS imagery";
 	}
 }

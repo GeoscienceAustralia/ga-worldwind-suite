@@ -11,8 +11,13 @@ import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.terrain.BasicElevationModel;
+import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
@@ -52,10 +57,11 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import layers.DepthLayer;
-import layers.WestMacALOS;
-import layers.WestMacGlobe;
-import layers.WestMacRoads;
+import layers.depth.DepthLayer;
+import layers.file.FileLayer;
+import layers.westmac.WestMacALOS;
+import layers.westmac.WestMacElevationModel;
+import layers.westmac.WestMacRoads;
 import nasa.worldwind.terrain.ConfigurableTessellator;
 import nasa.worldwind.view.BasicRollOrbitView;
 import path.SimpleAnimation;
@@ -117,8 +123,6 @@ public class Animator
 				.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				ConfigurableTessellator.class.getName());
-		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, WestMacGlobe.class
-				.getName());
 
 		animationChangeListener = new ChangeListener()
 		{
@@ -150,8 +154,12 @@ public class Animator
 		wwd.setModel(model);
 		setAnimationSize(1024, 576);
 		frame.add(wwd, BorderLayout.CENTER);
-		/*((BasicElevationModel) model.getGlobe().getElevationModel())
-				.setDetailHint(1.0);*/
+
+		CompoundElevationModel cem = new CompoundElevationModel();
+		BasicElevationModel bem = new WestMacElevationModel();
+		cem.addElevationModel(bem);
+		model.getGlobe().setElevationModel(cem);
+		//bem.setDetailHint(1.0);
 
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
 		ConfigurableTessellator tesselator = (ConfigurableTessellator) model
@@ -162,6 +170,8 @@ public class Animator
 		tesselator.setElevationOffset(200);
 
 		LayerList layers = model.getLayers();
+		layers.add(new DepthLayer());
+		
 		//layers.add(new StarsLayer());
 		//layers.add(new SkyGradientLayer());
 		//layers.add(new FogLayer());
@@ -174,7 +184,14 @@ public class Animator
 		//layers.add(new ScalebarLayer());
 		//layers.add(new MGRSGraticuleLayer());
 		//layers.add(new TernaryAreasLayer());
-		layers.add(new DepthLayer());
+		
+		Layer page1 = FileLayer.createLayer("Map page1", "GA/WestMac Map Page 1",
+				".dds", new File(
+						"F:/West Macs Imagery/Rectified Map/4 Alpha/page1"),
+				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
+						-24.0536281, -23.4102781, 132.0746805, 133.9779805));
+		layers.add(page1);
+		
 		layers.add(new WestMacALOS());
 		layers.add(new WestMacRoads());
 

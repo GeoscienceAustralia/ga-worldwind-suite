@@ -40,6 +40,8 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import layers.file.FileRetriever;
+
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
 
