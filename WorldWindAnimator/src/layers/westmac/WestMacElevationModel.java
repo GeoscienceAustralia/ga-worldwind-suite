@@ -6,10 +6,13 @@ import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.LevelSet;
 
-public class WestMacElevationModel extends BasicElevationModel
+import java.io.File;
+
+import terrain.FileBasicElevationModel;
+
+public class WestMacElevationModel extends FileBasicElevationModel
 {
 	private static double HIGHEST_POINT = 1515d; // meters
 	private static double LOWEST_POINT = 308d; // meters
@@ -27,7 +30,7 @@ public class WestMacElevationModel extends BasicElevationModel
 		params.setValue(AVKey.TILE_WIDTH, 150);
 		params.setValue(AVKey.TILE_HEIGHT, 150);
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/WestMac DEM");
-		params.setValue(AVKey.SERVICE, "http://localhost/tiles/westmac.php");
+		params.setValue(AVKey.SERVICE, null);
 		params.setValue(AVKey.DATASET_NAME, "dem150");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".bil");
 		params.setValue(AVKey.NUM_LEVELS, 11);
@@ -43,6 +46,8 @@ public class WestMacElevationModel extends BasicElevationModel
 								-25.0001389, -23.0001389, 131.9998611,
 								133.9998611), 10), //WESTMAC
 						new LevelSet.SectorResolution(Sector.FULL_SPHERE, 0) });*/
+		params.setValue(AVKey.TILE_URL_BUILDER, new FileUrlBuilder(new File(
+				"F:/West Macs Imagery/wwtiles/dem150")));
 
 		return new LevelSet(params);
 	}

@@ -14,6 +14,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import layers.mask.MaskTiledImageLayer;
+import nasa.worldwind.terrain.BasicElevationModel;
+import terrain.FileBasicElevationModel;
 
 public class FileLayer
 {
@@ -72,6 +74,31 @@ public class FileLayer
 		layer.setUseTransparentTextures(true);
 		layer.setUseMipMaps(true);
 		return layer;
+	}
+
+	public static BasicElevationModel createElevationModel(String name,
+			String cacheName, File directory, int levels, int tilesize,
+			LatLon lztd, Sector sector, double minElevation, double maxElevation)
+	{
+		AVList params = new AVListImpl();
+		params.setValue(AVKey.TILE_WIDTH, tilesize);
+		params.setValue(AVKey.TILE_HEIGHT, tilesize);
+		params.setValue(AVKey.DATA_CACHE_NAME, cacheName);
+		params.setValue(AVKey.SERVICE, null);
+		params.setValue(AVKey.DATASET_NAME, name);
+		params.setValue(AVKey.FORMAT_SUFFIX, ".bil");
+		params.setValue(AVKey.NUM_LEVELS, levels);
+		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
+		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, lztd);
+		params.setValue(AVKey.SECTOR, sector);
+		params.setValue(AVKey.TILE_URL_BUILDER,
+				new FileBasicElevationModel.FileUrlBuilder(directory));
+
+		FileBasicElevationModel fbem = new FileBasicElevationModel(params, minElevation,
+				maxElevation);
+		fbem.setName(name);
+		fbem.setNumExpectedValuesPerTile(tilesize * tilesize);
+		return fbem;
 	}
 
 	private static class FileUrlBuilder implements TileUrlBuilder

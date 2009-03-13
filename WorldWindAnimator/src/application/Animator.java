@@ -14,9 +14,9 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
@@ -57,16 +57,15 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import animation.SimpleAnimation;
-
 import layers.depth.DepthLayer;
 import layers.file.FileLayer;
-import layers.westmac.WestMacElevationModel;
+import nasa.worldwind.terrain.BasicElevationModel;
 import nasa.worldwind.terrain.ConfigurableTessellator;
 import nasa.worldwind.view.BasicRollOrbitView;
 import util.ChangeFrameListener;
 import util.FrameSlider;
 import util.TGAScreenshot;
+import animation.SimpleAnimation;
 
 public class Animator
 {
@@ -114,6 +113,7 @@ public class Animator
 	private boolean stop = false;
 	private boolean settingSlider = false;
 	private ChangeListener animationChangeListener;
+	private Layer crosshair;
 
 	public Animator()
 	{
@@ -155,10 +155,7 @@ public class Animator
 		frame.add(wwd, BorderLayout.CENTER);
 
 		CompoundElevationModel cem = new CompoundElevationModel();
-		BasicElevationModel bem = new WestMacElevationModel();
-		cem.addElevationModel(bem);
 		model.getGlobe().setElevationModel(cem);
-		//bem.setDetailHint(1.0);
 
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
 		ConfigurableTessellator tesselator = (ConfigurableTessellator) model
@@ -183,16 +180,24 @@ public class Animator
 		//layers.add(new ScalebarLayer());
 		//layers.add(new MGRSGraticuleLayer());
 
+		BasicElevationModel bem = FileLayer.createElevationModel("WestMac DEM",
+				"GA/WestMac DEM", new File("F:/West Macs Imagery/wwtiles/dem150"),
+				11, 150, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
+						-25.0001389, -23.0001389, 131.9998611, 133.9998611),
+				308d, 1515d);
+		cem.addElevationModel(bem);
+		//bem.setDetailHint(1.0);
+
 		Layer page1 = FileLayer.createLayer("WestMac Map Page 1",
 				"GA/WestMac Map Page 1", ".dds", new File(
-						"F:/West Macs Imagery/Rectified Map/4 Alpha/page1"),
+						"F:/West Macs Imagery/Rectified Map/5 Tiles/page1"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0536281, -23.4102781, 132.0746805, 133.9779805));
 		layers.add(page1);
 
 		Layer page2 = FileLayer.createLayer("WestMac Map Page 2",
 				"GA/WestMac Map Page 2", ".dds", new File(
-						"F:/West Macs Imagery/Rectified Map/4 Alpha/page2"),
+						"F:/West Macs Imagery/Rectified Map/5 Tiles/page2"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0544889, -23.4081639, 132.0708833, 133.9771083));
 		layers.add(page2);
@@ -211,9 +216,24 @@ public class Animator
 						-24.0, -23.433333, 132.25, 133.95));
 		layers.add(roads);
 
+		page1.setEnabled(false);
+		//page2.setEnabled(false);
+		alos.setEnabled(false);
+		roads.setEnabled(false);
+
 		/*Layer roads = new ShapefileLayer(new File(
 				"C:/WINNT/Profiles/u97852/Desktop/Roads/Shapefile/Roads.shp"));
 		layers.add(roads);*/
+
+		/*int overlay = 220;
+		Layer overlayLayer = new ImageOverlay(
+				"C:/WINNT/Profiles/u97852/Desktop/TEMP FOLDING AS PNG/FoldingMap0"
+						+ overlay + ".png");
+		layers.add(overlayLayer);
+		overlayLayer.setOpacity(0.4);*/
+
+		crosshair = new CrosshairLayer();
+		layers.add(crosshair);
 
 		JPanel bottom = new JPanel(new BorderLayout());
 		frame.add(bottom, BorderLayout.SOUTH);
@@ -849,6 +869,7 @@ public class Animator
 			{
 				public void run()
 				{
+					crosshair.setEnabled(!savingFrames);
 					stop = false;
 					frame.setAlwaysOnTop(savingFrames);
 
@@ -918,6 +939,7 @@ public class Animator
 					frame.setResizable(true);
 					frame.setAlwaysOnTop(false);
 					wwd.setCursor(null);
+					crosshair.setEnabled(true);
 				}
 			});
 			thread.start();
