@@ -114,6 +114,7 @@ public class Animator
 	private boolean settingSlider = false;
 	private ChangeListener animationChangeListener;
 	private Layer crosshair;
+	private BasicElevationModel bem;
 
 	public Animator()
 	{
@@ -180,13 +181,12 @@ public class Animator
 		//layers.add(new ScalebarLayer());
 		//layers.add(new MGRSGraticuleLayer());
 
-		BasicElevationModel bem = FileLayer.createElevationModel("WestMac DEM",
+		bem = FileLayer.createElevationModel("WestMac DEM",
 				"GA/WestMac DEM", new File("F:/West Macs Imagery/wwtiles/dem150"),
 				11, 150, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-25.0001389, -23.0001389, 131.9998611, 133.9998611),
 				308d, 1515d);
 		cem.addElevationModel(bem);
-		//bem.setDetailHint(1.0);
 
 		Layer page1 = FileLayer.createLayer("WestMac Map Page 1",
 				"GA/WestMac Map Page 1", ".dds", new File(
@@ -216,9 +216,9 @@ public class Animator
 						-24.0, -23.433333, 132.25, 133.95));
 		layers.add(roads);
 
-		page1.setEnabled(false);
-		//page2.setEnabled(false);
-		alos.setEnabled(false);
+		//page1.setEnabled(false);
+		page2.setEnabled(false);
+		//alos.setEnabled(false);
 		roads.setEnabled(false);
 
 		/*Layer roads = new ShapefileLayer(new File(
@@ -872,6 +872,8 @@ public class Animator
 					crosshair.setEnabled(!savingFrames);
 					stop = false;
 					frame.setAlwaysOnTop(savingFrames);
+					double detailHint = bem.getDetailHint(Sector.FULL_SPHERE);
+					bem.setDetailHint(1.0);
 
 					if (savingFrames)
 					{
@@ -925,7 +927,7 @@ public class Animator
 						if (savingFrames)
 						{
 							takeScreenshot("F:/West Macs Imagery/animation_frames/frame"
-									+ frame + ".tga");
+									+ frame + ".png");
 						}
 
 						//TEMP
@@ -940,6 +942,7 @@ public class Animator
 					frame.setAlwaysOnTop(false);
 					wwd.setCursor(null);
 					crosshair.setEnabled(true);
+					bem.setDetailHint(detailHint);
 				}
 			});
 			thread.start();
