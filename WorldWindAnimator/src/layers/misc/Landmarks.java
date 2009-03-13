@@ -57,7 +57,7 @@ public class Landmarks extends RenderableLayer
 		}
 		for (Landmark landmark : landmarks)
 		{
-			SurfaceCircle sc = new SurfaceCircle(globe, landmark.latlon, 500,
+			SurfaceCircle sc = new SurfaceCircle(globe, landmark.latlon, 100,
 					10, Color.red, Color.red);
 			addRenderable(sc);
 		}

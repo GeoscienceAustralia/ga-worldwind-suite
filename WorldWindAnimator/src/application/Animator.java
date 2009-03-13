@@ -168,20 +168,9 @@ public class Animator
 		tesselator.setElevationOffset(200);
 
 		LayerList layers = model.getLayers();
+		
 		Layer depth = new DepthLayer();
 		layers.add(depth);
-
-		//layers.add(new StarsLayer());
-		//layers.add(new SkyGradientLayer());
-		//layers.add(new FogLayer());
-		//layers.add(new BMNGOneImage());
-		//layers.add(new BMNGWMSLayer());
-		//layers.add(new LandsatI3WMSLayer());
-		//layers.add(new EarthNASAPlaceNameLayer());
-		//layers.add(new CompassLayer());
-		//layers.add(new WorldMapLayer());
-		//layers.add(new ScalebarLayer());
-		//layers.add(new MGRSGraticuleLayer());
 
 		bem = FileLayer.createElevationModel("WestMac DEM", "GA/WestMac DEM",
 				new File("F:/West Macs Imagery/wwtiles/dem150"), 11, 150,
@@ -219,13 +208,18 @@ public class Animator
 
 		Landmarks landmarks = new Landmarks(model.getGlobe());
 		layers.add(landmarks);
+		
+		for(Layer layer : layers)
+		{
+			layer.setEnabled(false);
+		}
 
-		depth.setEnabled(false);
-		page1.setEnabled(false);
-		page2.setEnabled(false);
-		//alos.setEnabled(false);
-		//roads.setEnabled(false);
-		//landmarks.setEnabled(false);
+		depth.setEnabled(true);
+		page1.setEnabled(true);
+		//page2.setEnabled(true);
+		alos.setEnabled(true);
+		//roads.setEnabled(true);
+		//landmarks.setEnabled(true);
 
 		/*Layer roads = new ShapefileLayer(new File(
 				"C:/WINNT/Profiles/u97852/Desktop/Roads/Shapefile/Roads.shp"));

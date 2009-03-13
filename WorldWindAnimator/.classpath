@@ -13,6 +13,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/Shapefile"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/WorldWind0.6"/>
+	<classpathentry kind="lib" path="lib/worldwind.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
