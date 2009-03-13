@@ -1,4 +1,4 @@
-package application;
+package layers.misc;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.exception.WWRuntimeException;

@@ -59,6 +59,7 @@ import javax.swing.event.ChangeListener;
 
 import layers.depth.DepthLayer;
 import layers.file.FileLayer;
+import layers.misc.Landmarks;
 import nasa.worldwind.terrain.BasicElevationModel;
 import nasa.worldwind.terrain.ConfigurableTessellator;
 import nasa.worldwind.view.BasicRollOrbitView;
@@ -167,7 +168,8 @@ public class Animator
 		tesselator.setElevationOffset(200);
 
 		LayerList layers = model.getLayers();
-		layers.add(new DepthLayer());
+		Layer depth = new DepthLayer();
+		layers.add(depth);
 
 		//layers.add(new StarsLayer());
 		//layers.add(new SkyGradientLayer());
@@ -181,11 +183,10 @@ public class Animator
 		//layers.add(new ScalebarLayer());
 		//layers.add(new MGRSGraticuleLayer());
 
-		bem = FileLayer.createElevationModel("WestMac DEM",
-				"GA/WestMac DEM", new File("F:/West Macs Imagery/wwtiles/dem150"),
-				11, 150, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
-						-25.0001389, -23.0001389, 131.9998611, 133.9998611),
-				308d, 1515d);
+		bem = FileLayer.createElevationModel("WestMac DEM", "GA/WestMac DEM",
+				new File("F:/West Macs Imagery/wwtiles/dem150"), 11, 150,
+				LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(-25.0001389,
+						-23.0001389, 131.9998611, 133.9998611), 308d, 1515d);
 		cem.addElevationModel(bem);
 
 		Layer page1 = FileLayer.createLayer("WestMac Map Page 1",
@@ -211,15 +212,20 @@ public class Animator
 
 		Layer roads = FileLayer.createLayer("WestMac Roads",
 				"GA/WestMac Roads", ".dds", new File(
-						"C:/WINNT/Profiles/u97852/Desktop/Roads/Mapnik/tiled"),
+						"F:/West Macs Imagery/Vector/Roads/Mapnik/tiled"),
 				"png", 12, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0, -23.433333, 132.25, 133.95));
 		layers.add(roads);
 
-		//page1.setEnabled(false);
+		Landmarks landmarks = new Landmarks(model.getGlobe());
+		layers.add(landmarks);
+
+		depth.setEnabled(false);
+		page1.setEnabled(false);
 		page2.setEnabled(false);
 		//alos.setEnabled(false);
-		roads.setEnabled(false);
+		//roads.setEnabled(false);
+		//landmarks.setEnabled(false);
 
 		/*Layer roads = new ShapefileLayer(new File(
 				"C:/WINNT/Profiles/u97852/Desktop/Roads/Shapefile/Roads.shp"));
@@ -312,6 +318,7 @@ public class Animator
 		wwd.setMinimumSize(size);
 		wwd.setMaximumSize(size);
 		frame.pack();
+		wwd.setSize(size);
 	}
 
 	private void createMenuBar()
@@ -869,14 +876,16 @@ public class Animator
 			{
 				public void run()
 				{
-					crosshair.setEnabled(!savingFrames);
 					stop = false;
-					frame.setAlwaysOnTop(savingFrames);
-					double detailHint = bem.getDetailHint(Sector.FULL_SPHERE);
-					bem.setDetailHint(1.0);
+					double detailHint = 0;
 
 					if (savingFrames)
 					{
+						crosshair.setEnabled(false);
+						frame.setAlwaysOnTop(true);
+						detailHint = bem.getDetailHint(Sector.FULL_SPHERE);
+						bem.setDetailHint(1.0);
+
 						Toolkit tk = Toolkit.getDefaultToolkit();
 						BufferedImage image = new BufferedImage(1, 1,
 								BufferedImage.TYPE_INT_ARGB);
@@ -926,8 +935,7 @@ public class Animator
 
 						if (savingFrames)
 						{
-							takeScreenshot("F:/West Macs Imagery/animation_frames/frame"
-									+ frame + ".png");
+							takeScreenshot("frames/frame" + frame + ".png");
 						}
 
 						//TEMP
@@ -938,11 +946,14 @@ public class Animator
 
 					view.setDetectCollisions(detectCollisions);
 
-					frame.setResizable(true);
-					frame.setAlwaysOnTop(false);
-					wwd.setCursor(null);
-					crosshair.setEnabled(true);
-					bem.setDetailHint(detailHint);
+					if (savingFrames)
+					{
+						frame.setResizable(true);
+						frame.setAlwaysOnTop(false);
+						wwd.setCursor(null);
+						crosshair.setEnabled(true);
+						bem.setDetailHint(detailHint);
+					}
 				}
 			});
 			thread.start();
