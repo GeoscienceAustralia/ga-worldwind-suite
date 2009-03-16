@@ -8,6 +8,7 @@ import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
+import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
@@ -17,22 +18,19 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -102,7 +100,8 @@ public class Animator
 	}
 
 	private JFrame frame;
-	private WorldWindowGLCanvas wwd;
+
+	private WorldWindowGLJPanel wwd;
 	private boolean takingScreenshot = false;
 	private FrameSlider slider;
 	private SimpleAnimation animation = null;
@@ -119,11 +118,13 @@ public class Animator
 
 	public Animator()
 	{
-		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
+		//Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, BasicRollOrbitView.class
 				.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				ConfigurableTessellator.class.getName());
+		/*Configuration.setValue(AVKey.WORLD_WINDOW_CLASS_NAME,
+				WorldWindowFBO.class.getName());*/
 
 		animationChangeListener = new ChangeListener()
 		{
@@ -150,16 +151,16 @@ public class Animator
 		});
 
 		frame.setLayout(new BorderLayout());
-		wwd = new WorldWindowGLCanvas();
+		wwd = new WorldWindowGLJPanel();
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		setAnimationSize(1024, 576);
 		frame.add(wwd, BorderLayout.CENTER);
+		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
 
 		CompoundElevationModel cem = new CompoundElevationModel();
 		model.getGlobe().setElevationModel(cem);
 
-		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
 		ConfigurableTessellator tesselator = (ConfigurableTessellator) model
 				.getGlobe().getTessellator();
 		//tesselator.setMakeTileSkirts(false);
@@ -168,7 +169,7 @@ public class Animator
 		tesselator.setElevationOffset(200);
 
 		LayerList layers = model.getLayers();
-		
+
 		Layer depth = new DepthLayer();
 		layers.add(depth);
 
@@ -208,10 +209,10 @@ public class Animator
 
 		Landmarks landmarks = new Landmarks(model.getGlobe());
 		layers.add(landmarks);
-		
-		for(Layer layer : layers)
+
+		for (Layer layer : layers)
 		{
-			layer.setEnabled(false);
+			//layer.setEnabled(false);
 		}
 
 		depth.setEnabled(true);
@@ -249,7 +250,7 @@ public class Animator
 				{
 					if (animation.size() > 0)
 					{
-						applyView();
+						applyView(getView());
 						wwd.redraw();
 					}
 					stop = true;
@@ -262,7 +263,7 @@ public class Animator
 			{
 				animation.setFrame(index, newFrame);
 				updateSlider();
-				applyView();
+				applyView(getView());
 				wwd.redraw();
 			}
 		});
@@ -625,7 +626,7 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animate(false, 1);
+				preview(1);
 			}
 		});
 
@@ -635,7 +636,7 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animate(false, 2);
+				preview(2);
 			}
 		});
 
@@ -645,7 +646,7 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animate(false, 10);
+				preview(10);
 			}
 		});
 
@@ -658,7 +659,7 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animate(true, 1);
+				animate();
 			}
 		});
 	}
@@ -681,14 +682,14 @@ public class Animator
 		//updateAnimation();
 	}
 
-	private void applyView()
+	private void applyView(OrbitView view)
 	{
 		int frame = slider.getValue();
 		if (animation.getFirstFrame() <= frame
 				&& frame <= animation.getLastFrame())
 		{
 			applying = true;
-			animation.applyFrame(getView(), frame);
+			animation.applyFrame(view, frame);
 			applying = false;
 		}
 	}
@@ -862,7 +863,7 @@ public class Animator
 		settingSlider = false;
 	}
 
-	private void animate(final boolean savingFrames, final int frameSkip)
+	private void preview(final int frameSkip)
 	{
 		if (animation != null && animation.size() > 0)
 		{
@@ -871,49 +872,11 @@ public class Animator
 				public void run()
 				{
 					stop = false;
-					double detailHint = 0;
-
-					if (savingFrames)
-					{
-						crosshair.setEnabled(false);
-						frame.setAlwaysOnTop(true);
-						detailHint = bem.getDetailHint(Sector.FULL_SPHERE);
-						bem.setDetailHint(1.0);
-
-						Toolkit tk = Toolkit.getDefaultToolkit();
-						BufferedImage image = new BufferedImage(1, 1,
-								BufferedImage.TYPE_INT_ARGB);
-						Cursor blankCursor = tk.createCustomCursor(image,
-								new Point(0, 0), "BlackCursor");
-						wwd.setCursor(blankCursor);
-
-						setAnimationSize(animation.getWidth(), animation
-								.getHeight());
-						frame.setResizable(false);
-					}
 
 					View view = getView();
 					boolean detectCollisions = view.isDetectCollisions();
 					view.setDetectCollisions(false);
 
-					//TEMP
-					/*GraphicsEnvironment ge = GraphicsEnvironment
-							.getLocalGraphicsEnvironment();
-					DisplayMode dm = ge.getDefaultScreenDevice()
-							.getDisplayMode();
-					int screenWidth = dm.getWidth();
-					int screenHeight = dm.getHeight();
-					Random random = new Random();
-					Robot robot = null;
-					try
-					{
-						robot = new Robot();
-					}
-					catch (AWTException e)
-					{
-						e.printStackTrace();
-					}*/
-					//TEMP
 					int firstFrame = Math.max(slider.getValue(), animation
 							.getFirstFrame());
 					int lastFrame = animation.getLastFrame();
@@ -921,37 +884,29 @@ public class Animator
 					for (int frame = firstFrame; frame <= lastFrame; frame += frameSkip)
 					{
 						setSlider(frame);
-						applyView();
+						applyView(getView());
 						wwd.redrawNow();
 
 						if (stop)
 							break;
-
-						if (savingFrames)
-						{
-							takeScreenshot("frames/frame" + frame + ".png");
-						}
-
-						//TEMP
-						/*robot.mouseMove(screenWidth - random.nextInt(10) - 1,
-								screenHeight - random.nextInt(10) - 1);*/
-						//TEMP
 					}
 
 					view.setDetectCollisions(detectCollisions);
-
-					if (savingFrames)
-					{
-						frame.setResizable(true);
-						frame.setAlwaysOnTop(false);
-						wwd.setCursor(null);
-						crosshair.setEnabled(true);
-						bem.setDetailHint(detailHint);
-					}
 				}
 			});
 			thread.start();
 		}
+	}
+
+	private void animate()
+	{
+		crosshair.setEnabled(false);
+		double detailHint = bem.getDetailHint(Sector.FULL_SPHERE);
+		//bem.setDetailHint(1.0);
+		new Renderer(frame, animation, wwd.getModel(), wwd.getSceneController()
+				.getVerticalExaggeration());
+
+		//TODO reset vars above (when dialog is modal or something)
 	}
 
 	private void takeScreenshot(String filename)
