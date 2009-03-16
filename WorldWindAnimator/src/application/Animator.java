@@ -8,7 +8,6 @@ import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
-import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
@@ -18,7 +17,6 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
@@ -101,7 +99,7 @@ public class Animator
 
 	private JFrame frame;
 
-	private WorldWindowGLJPanel wwd;
+	private WorldWindowGLCanvas wwd;
 	private boolean takingScreenshot = false;
 	private FrameSlider slider;
 	private SimpleAnimation animation = null;
@@ -118,13 +116,11 @@ public class Animator
 
 	public Animator()
 	{
-		//Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
+		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, BasicRollOrbitView.class
 				.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				ConfigurableTessellator.class.getName());
-		/*Configuration.setValue(AVKey.WORLD_WINDOW_CLASS_NAME,
-				WorldWindowFBO.class.getName());*/
 
 		animationChangeListener = new ChangeListener()
 		{
@@ -151,7 +147,7 @@ public class Animator
 		});
 
 		frame.setLayout(new BorderLayout());
-		wwd = new WorldWindowGLJPanel();
+		wwd = new WorldWindowGLCanvas();
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		setAnimationSize(1024, 576);
@@ -212,7 +208,7 @@ public class Animator
 
 		for (Layer layer : layers)
 		{
-			//layer.setEnabled(false);
+			layer.setEnabled(false);
 		}
 
 		depth.setEnabled(true);
@@ -900,13 +896,47 @@ public class Animator
 
 	private void animate()
 	{
-		crosshair.setEnabled(false);
-		double detailHint = bem.getDetailHint(Sector.FULL_SPHERE);
-		//bem.setDetailHint(1.0);
-		new Renderer(frame, animation, wwd.getModel(), wwd.getSceneController()
-				.getVerticalExaggeration());
+		if (animation != null && animation.size() > 0)
+		{
+			Thread thread = new Thread(new Runnable()
+			{
+				public void run()
+				{
+					stop = false;
 
-		//TODO reset vars above (when dialog is modal or something)
+					setAnimationSize(animation.getWidth(), animation
+							.getHeight());
+
+					crosshair.setEnabled(false);
+					double detailHint = bem.getDetailHint(Sector.FULL_SPHERE);
+					bem.setDetailHint(1.0);
+
+					View view = wwd.getView();
+					boolean detectCollisions = view.isDetectCollisions();
+					view.setDetectCollisions(false);
+
+					int firstFrame = Math.max(slider.getValue(), animation
+							.getFirstFrame());
+					int lastFrame = animation.getLastFrame();
+
+					for (int frame = firstFrame; frame <= lastFrame; frame += 1)
+					{
+						setSlider(frame);
+						applyView(getView());
+
+						takeScreenshot("frames/frame" + frame + ".png");
+
+						if (stop)
+							break;
+					}
+
+					bem.setDetailHint(detailHint);
+					crosshair.setEnabled(true);
+					view.setDetectCollisions(detectCollisions);
+				}
+			});
+			thread.start();
+		}
 	}
 
 	private void takeScreenshot(String filename)
