@@ -14,9 +14,12 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.layers.SkyGradientLayer;
+import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
@@ -53,9 +56,12 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import layers.Skybox;
 import layers.depth.DepthLayer;
 import layers.file.FileLayer;
 import layers.misc.Landmarks;
+import nasa.worldwind.layers.AtmosphereLayer;
+import nasa.worldwind.layers.LensFlareLayer;
 import nasa.worldwind.terrain.BasicElevationModel;
 import nasa.worldwind.terrain.ConfigurableTessellator;
 import nasa.worldwind.view.BasicRollOrbitView;
@@ -114,6 +120,8 @@ public class Animator
 	private Layer crosshair;
 	private BasicElevationModel bem;
 
+	private Layer alos, map1, map2;
+
 	public Animator()
 	{
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
@@ -166,8 +174,22 @@ public class Animator
 
 		LayerList layers = model.getLayers();
 
+		Skybox skybox = new Skybox();
+		layers.add(skybox);
+
 		Layer depth = new DepthLayer();
 		layers.add(depth);
+
+		Vec4 direction = new Vec4(0.5, -0.6, 0.4, 1.0);
+		LensFlareLayer lensFlare = LensFlareLayer
+				.getPresetInstance(LensFlareLayer.PRESET_BOLD);
+		layers.add(lensFlare);
+		AtmosphereLayer atmosphere = new AtmosphereLayer();
+		layers.add(atmosphere);
+		lensFlare.setSunDirection(direction);
+		atmosphere.setLightDirection(direction);
+		SkyGradientLayer sky = new SkyGradientLayer();
+		layers.add(sky);
 
 		bem = FileLayer.createElevationModel("WestMac DEM", "GA/WestMac DEM",
 				new File("F:/West Macs Imagery/wwtiles/dem150"), 11, 150,
@@ -175,24 +197,24 @@ public class Animator
 						-23.0001389, 131.9998611, 133.9998611), 308d, 1515d);
 		cem.addElevationModel(bem);
 
-		Layer page1 = FileLayer.createLayer("WestMac Map Page 1",
+		map1 = FileLayer.createLayer("WestMac Map Page 1",
 				"GA/WestMac Map Page 1", ".dds", new File(
 						"F:/West Macs Imagery/Rectified Map/5 Tiles/page1"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0536281, -23.4102781, 132.0746805, 133.9779805));
-		layers.add(page1);
+		layers.add(map1);
 
-		Layer page2 = FileLayer.createLayer("WestMac Map Page 2",
+		map2 = FileLayer.createLayer("WestMac Map Page 2",
 				"GA/WestMac Map Page 2", ".dds", new File(
 						"F:/West Macs Imagery/Rectified Map/5 Tiles/page2"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0544889, -23.4081639, 132.0708833, 133.9771083));
-		layers.add(page2);
+		layers.add(map2);
 
-		Layer alos = FileLayer.createLayer("WestMac ALOS", "GA/WestMac ALOS",
-				".dds", new File("F:/West Macs Imagery/wwtiles/alosnp_4326"),
-				"jpg", new File("F:/West Macs Imagery/wwtiles/mapmask"), "png",
-				13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(-24.0,
+		alos = FileLayer.createLayer("WestMac ALOS", "GA/WestMac ALOS", ".dds",
+				new File("F:/West Macs Imagery/wwtiles/alosnp_4326"), "jpg",
+				new File("F:/West Macs Imagery/wwtiles/mapmask"), "png", 13,
+				LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(-24.0,
 						-23.433333, 132.25, 133.95));
 		layers.add(alos);
 
@@ -212,15 +234,25 @@ public class Animator
 		}
 
 		depth.setEnabled(true);
-		page1.setEnabled(true);
+		map1.setEnabled(true);
 		//page2.setEnabled(true);
-		alos.setEnabled(true);
+		//alos.setEnabled(true);
 		//roads.setEnabled(true);
 		//landmarks.setEnabled(true);
 
-		/*Layer roads = new ShapefileLayer(new File(
+		//lensFlare.setEnabled(true);
+		//atmosphere.setEnabled(true);
+		//sky.setEnabled(true);
+		
+		//skybox.setEnabled(true);
+		
+		/*Layer bmng = new BMNGWMSLayer();
+		bmng.setOpacity(0.3);
+		layers.add(bmng);*/
+
+		/*Layer roadsshp = new ShapefileLayer(new File(
 				"C:/WINNT/Profiles/u97852/Desktop/Roads/Shapefile/Roads.shp"));
-		layers.add(roads);*/
+		layers.add(roadsshp);*/
 
 		/*int overlay = 220;
 		Layer overlayLayer = new ImageOverlay(
@@ -646,7 +678,7 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Render...");
+		menuItem = new JMenuItem("Render (high-res)...");
 		menuItem.setAccelerator(KeyStroke.getKeyStroke('R',
 				ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('R');
@@ -655,7 +687,72 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animate();
+				animate(1);
+			}
+		});
+
+		menuItem = new JMenuItem("Render (standard-res)...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animate(0);
+			}
+		});
+
+		menuItem = new JMenuItem("Custom render (TO BE REMOVED!)");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				Thread thread = new Thread(new Runnable()
+				{
+					public void run()
+					{
+						double detail = 1.0;
+
+						int endFirst = 2000;
+						int startSecond = 7000;
+
+						endFirst = animation.getFirstFrame() + 5;
+						startSecond = animation.getLastFrame() - 5;
+						
+						map2.setEnabled(false);
+						map1.setEnabled(true);
+
+						joinThread(animate(detail, animation.getFirstFrame(),
+								endFirst, new File("map1")));
+						joinThread(animate(detail, startSecond, animation
+								.getLastFrame(), new File("map1")));
+
+						map1.setEnabled(false);
+						map2.setEnabled(true);
+
+						joinThread(animate(detail, animation.getFirstFrame(),
+								endFirst, new File("map2")));
+						joinThread(animate(detail, startSecond, animation
+								.getLastFrame(), new File("map2")));
+					}
+				});
+				thread.setDaemon(true);
+				thread.start();
+			}
+
+			private void joinThread(Thread thread)
+			{
+				while (thread.isAlive())
+				{
+					try
+					{
+						thread.join();
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+				}
 			}
 		});
 	}
@@ -894,7 +991,15 @@ public class Animator
 		}
 	}
 
-	private void animate()
+	private Thread animate(final double detailHint)
+	{
+		int firstFrame = Math.max(slider.getValue(), animation.getFirstFrame());
+		int lastFrame = animation.getLastFrame();
+		return animate(detailHint, firstFrame, lastFrame, new File("frames"));
+	}
+
+	private Thread animate(final double detailHint, final int firstFrame,
+			final int lastFrame, final File outputDir)
 	{
 		if (animation != null && animation.size() > 0)
 		{
@@ -908,45 +1013,47 @@ public class Animator
 							.getHeight());
 
 					crosshair.setEnabled(false);
-					double detailHint = bem.getDetailHint(Sector.FULL_SPHERE);
-					bem.setDetailHint(1.0);
+					double detailHintBackup = bem
+							.getDetailHint(Sector.FULL_SPHERE);
+					bem.setDetailHint(detailHint);
+					frame.setAlwaysOnTop(true);
 
 					View view = wwd.getView();
 					boolean detectCollisions = view.isDetectCollisions();
 					view.setDetectCollisions(false);
-
-					int firstFrame = Math.max(slider.getValue(), animation
-							.getFirstFrame());
-					int lastFrame = animation.getLastFrame();
 
 					for (int frame = firstFrame; frame <= lastFrame; frame += 1)
 					{
 						setSlider(frame);
 						applyView(getView());
 
-						takeScreenshot("frames/frame" + frame + ".png");
+						takeScreenshot(new File(outputDir, "frame" + frame
+								+ ".png"));
 
 						if (stop)
 							break;
 					}
 
-					bem.setDetailHint(detailHint);
+					bem.setDetailHint(detailHintBackup);
 					crosshair.setEnabled(true);
 					view.setDetectCollisions(detectCollisions);
+					frame.setAlwaysOnTop(false);
 				}
 			});
 			thread.start();
+			return thread;
 		}
+		return null;
 	}
 
-	private void takeScreenshot(String filename)
+	private void takeScreenshot(File file)
 	{
 		if (!EventQueue.isDispatchThread())
 		{
 			takingScreenshot = true;
 		}
 
-		wwd.addRenderingListener(new Screenshotter(filename));
+		wwd.addRenderingListener(new Screenshotter(file));
 		wwd.redraw();
 
 		if (!EventQueue.isDispatchThread())
@@ -967,11 +1074,11 @@ public class Animator
 
 	private class Screenshotter implements RenderingListener
 	{
-		private final String filename;
+		private final File file;
 
-		public Screenshotter(String filename)
+		public Screenshotter(File file)
 		{
-			this.filename = filename;
+			this.file = file;
 		}
 
 		public void stageChanged(RenderingEvent event)
@@ -986,23 +1093,22 @@ public class Animator
 			{
 				wwd.removeRenderingListener(this);
 
-				File out = new File(filename);
-				if (!out.getParentFile().exists())
+				if (!file.getParentFile().exists())
 				{
-					out.getParentFile().mkdirs();
+					file.getParentFile().mkdirs();
 				}
 				try
 				{
-					if (out.getName().toLowerCase().endsWith(".tga"))
+					if (file.getName().toLowerCase().endsWith(".tga"))
 					{
 						/*com.sun.opengl.util.Screenshot.writeToTargaFile(out,
 								wwd.getWidth(), wwd.getHeight(), true);*/
-						TGAScreenshot.writeToTargaFile(out, wwd.getWidth(), wwd
-								.getHeight(), true);
+						TGAScreenshot.writeToTargaFile(file, wwd.getWidth(),
+								wwd.getHeight(), true);
 					}
 					else
 					{
-						com.sun.opengl.util.Screenshot.writeToFile(out, wwd
+						com.sun.opengl.util.Screenshot.writeToFile(file, wwd
 								.getWidth(), wwd.getHeight(), true);
 					}
 				}

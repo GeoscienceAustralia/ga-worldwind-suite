@@ -1,11 +1,21 @@
 package layers.misc;
 
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.RenderableLayer;
-import gov.nasa.worldwind.render.SurfaceCircle;
+import gov.nasa.worldwind.render.Annotation;
+import gov.nasa.worldwind.render.AnnotationAttributes;
+import gov.nasa.worldwind.render.FrameFactory;
+import gov.nasa.worldwind.render.GlobeAnnotation;
+import gov.nasa.worldwind.render.PatternFactory;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,8 +25,12 @@ import util.FileUtil;
 
 public class Landmarks extends RenderableLayer
 {
+	private BufferedImage image;
+
 	public Landmarks(Globe globe)
 	{
+		image = createDiskImage(10, Color.red);
+
 		String landmarksString = "";
 		try
 		{
@@ -43,7 +57,7 @@ public class Landmarks extends RenderableLayer
 					double number = Double.parseDouble(split[2]);
 					String description = split[3];
 					landmark = new Landmark(LatLon.fromDegrees(lat, lon),
-							number, description);
+							number, description, image);
 				}
 				catch (Exception e)
 				{
@@ -57,34 +71,39 @@ public class Landmarks extends RenderableLayer
 		}
 		for (Landmark landmark : landmarks)
 		{
-			SurfaceCircle sc = new SurfaceCircle(globe, landmark.latlon, 100,
-					10, Color.red, Color.red);
-			addRenderable(sc);
+			addRenderable(landmark);
+			GlobeAnnotation anno = new GlobeAnnotation(landmark.number + "",
+					landmark.getPosition());
+			addRenderable(anno);
 		}
 	}
 
-	private static class Landmark
+	private static class Landmark extends GlobeAnnotation
 	{
-		private LatLon latlon;
 		private double number;
 		private String description;
 
-		public Landmark(LatLon latlon, double number, String description)
+		public Landmark(LatLon latlon, double number, String description,
+				BufferedImage image)
 		{
-			this.latlon = latlon;
+			super("", new Position(latlon, 0));
 			this.number = number;
 			this.description = description;
-		}
 
-		@Override
-		public String toString()
-		{
-			return latlon + " " + description;
-		}
+			AnnotationAttributes aa = getAttributes();
 
-		public LatLon getLatlon()
-		{
-			return latlon;
+			aa.setBorderWidth(0);
+			aa.setImageSource(image);
+			aa.setAdjustWidthToText(Annotation.SIZE_FIXED);
+			aa.setSize(new Dimension(image.getWidth(), image.getHeight()));
+			aa.setBackgroundColor(new Color(0, 0, 0, 0));
+			aa.setCornerRadius(0);
+			aa.setInsets(new Insets(0, 0, 0, 0));
+			aa.setDrawOffset(new Point(0, -image.getHeight() / 2));
+			aa.setLeader(FrameFactory.LEADER_NONE);
+			aa.setDistanceMaxScale(1);
+			aa.setDistanceMinScale(1);
+			aa.setDistanceMinOpacity(1);
 		}
 
 		public double getNumber()
@@ -96,5 +115,17 @@ public class Landmarks extends RenderableLayer
 		{
 			return description;
 		}
+	}
+
+	public static BufferedImage createDiskImage(int size, Color color)
+	{
+		BufferedImage image = PatternFactory.createPattern(
+				PatternFactory.PATTERN_CIRCLE, new Dimension(size, size), 1f,
+				color);
+		Graphics g = image.getGraphics();
+		g.setColor(Color.black);
+		g.drawOval(size / 2 - 1, size / 2 - 1, 1, 1);
+		g.dispose();
+		return image;
 	}
 }
