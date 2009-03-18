@@ -87,7 +87,8 @@ public class AtmosphericScatteringComputer
         return color;
     }
 
-    private int frame = 0;
+    @SuppressWarnings("unused")
+	private int frame = 0;
     public Color getColorForVertex(Vec4 vPos, Vec4 vCamera, Vec4 vLightDirection)
     {
         // Get the ray from the camera to the vertex, and its length (which is the far point of the ray
