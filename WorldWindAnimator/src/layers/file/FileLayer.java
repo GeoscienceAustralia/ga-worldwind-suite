@@ -15,7 +15,6 @@ import java.net.URL;
 
 import layers.mask.MaskTiledImageLayer;
 import nasa.worldwind.terrain.BasicElevationModel;
-import terrain.FileBasicElevationModel;
 
 public class FileLayer
 {

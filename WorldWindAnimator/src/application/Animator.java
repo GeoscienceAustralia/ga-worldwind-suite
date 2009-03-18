@@ -19,7 +19,6 @@ import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
-import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
@@ -59,6 +58,9 @@ import javax.swing.event.ChangeListener;
 import layers.Skybox;
 import layers.depth.DepthLayer;
 import layers.file.FileLayer;
+import layers.immediate.ImmediateMode;
+import layers.immediate.ImmediateRetrievalService;
+import layers.immediate.ImmediateTaskService;
 import layers.misc.Landmarks;
 import nasa.worldwind.layers.AtmosphereLayer;
 import nasa.worldwind.layers.LensFlareLayer;
@@ -130,6 +132,11 @@ public class Animator
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				ConfigurableTessellator.class.getName());
 
+		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME,
+				ImmediateTaskService.class.getName());
+		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
+				ImmediateRetrievalService.class.getName());
+		
 		animationChangeListener = new ChangeListener()
 		{
 			public void stateChanged(ChangeEvent e)
@@ -198,7 +205,7 @@ public class Animator
 		cem.addElevationModel(bem);
 
 		map1 = FileLayer.createLayer("WestMac Map Page 1",
-				"GA/WestMac Map Page 1", ".dds", new File(
+				"GA/WestMac Map Page 1_TEMP", ".dds", new File(
 						"F:/West Macs Imagery/Rectified Map/5 Tiles/page1"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0536281, -23.4102781, 132.0746805, 133.9779805));
@@ -243,9 +250,9 @@ public class Animator
 		//lensFlare.setEnabled(true);
 		//atmosphere.setEnabled(true);
 		//sky.setEnabled(true);
-		
+
 		//skybox.setEnabled(true);
-		
+
 		/*Layer bmng = new BMNGWMSLayer();
 		bmng.setOpacity(0.3);
 		layers.add(bmng);*/
@@ -716,14 +723,11 @@ public class Animator
 						int endFirst = 2000;
 						int startSecond = 7000;
 
-						endFirst = animation.getFirstFrame() + 5;
-						startSecond = animation.getLastFrame() - 5;
-						
 						map2.setEnabled(false);
 						map1.setEnabled(true);
 
-						joinThread(animate(detail, animation.getFirstFrame(),
-								endFirst, new File("map1")));
+						joinThread(animate(detail, /*animation.getFirstFrame()*/
+						1891, endFirst, new File("map1")));
 						joinThread(animate(detail, startSecond, animation
 								.getLastFrame(), new File("map1")));
 
@@ -1008,6 +1012,9 @@ public class Animator
 				public void run()
 				{
 					stop = false;
+					
+					boolean immediate = ImmediateMode.isImmediate();
+					ImmediateMode.setImmediate(true);
 
 					setAnimationSize(animation.getWidth(), animation
 							.getHeight());
@@ -1038,6 +1045,8 @@ public class Animator
 					crosshair.setEnabled(true);
 					view.setDetectCollisions(detectCollisions);
 					frame.setAlwaysOnTop(false);
+
+					ImmediateMode.setImmediate(immediate);
 				}
 			});
 			thread.start();
@@ -1086,6 +1095,7 @@ public class Animator
 			if (WorldWind.getTaskService().hasActiveTasks()
 					|| WorldWind.getRetrievalService().hasActiveTasks())
 			{
+				System.out.println("Sleeping while tasks are active");
 				sleep();
 				wwd.redraw();
 			}

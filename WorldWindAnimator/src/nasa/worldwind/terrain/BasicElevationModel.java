@@ -264,7 +264,7 @@ public class BasicElevationModel extends AbstractElevationModel
     //**************************************************************//
 
     // Create the tile corresponding to a specified key.
-    private Tile createTile(TileKey key)
+    protected Tile createTile(TileKey key)
     {
         Level level = this.levels.getLevel(key.getLevelNumber());
 
@@ -284,7 +284,7 @@ public class BasicElevationModel extends AbstractElevationModel
 
     // Thread off a task to determine whether the file is local or remote and then retrieve it either from the file
     // cache or a remote server.
-    private void requestTile(TileKey key)
+    protected void requestTile(TileKey key)
     {
         if (WorldWind.getTaskService().isFull())
             return;
@@ -373,7 +373,7 @@ public class BasicElevationModel extends AbstractElevationModel
     }
 
     // Reads a tile's elevations from the file cache and adds the tile to the memory cache.
-    private boolean loadElevations(Tile tile, java.net.URL url) throws IOException
+    protected boolean loadElevations(Tile tile, java.net.URL url) throws IOException
     {
         BufferWrapper elevations = this.readElevations(url);
         if (elevations == null)
@@ -397,7 +397,7 @@ public class BasicElevationModel extends AbstractElevationModel
             this.memoryCache.add(tile.getTileKey(), tile, elevations.getSizeInBytes());
     }
 
-    private boolean areElevationsInMemory(TileKey key)
+    protected boolean areElevationsInMemory(TileKey key)
     {
         Tile tile = this.getTileFromMemory(key);
         return (tile != null && tile.elevations != null);

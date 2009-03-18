@@ -12,9 +12,9 @@ import java.net.URL;
 
 import javax.media.opengl.GL;
 
-import nasa.worldwind.layers.BasicTiledImageLayer;
+import layers.immediate.ImmediateBasicTiledImageLayer;
 
-public class FileBasicTiledImageLayer extends BasicTiledImageLayer
+public class FileBasicTiledImageLayer extends ImmediateBasicTiledImageLayer
 {
 	public FileBasicTiledImageLayer(LevelSet levelSet)
 	{
@@ -61,7 +61,7 @@ public class FileBasicTiledImageLayer extends BasicTiledImageLayer
 		WorldWind.getRetrievalService().runRetriever(retriever,
 				tile.getPriority() - 1e100);
 	}
-	
+
 	protected void setBlendingFunction(DrawContext dc)
 	{
 		GL gl = dc.getGL();
@@ -69,5 +69,21 @@ public class FileBasicTiledImageLayer extends BasicTiledImageLayer
 		gl.glColor4d(alpha, alpha, alpha, alpha);
 		gl.glEnable(GL.GL_BLEND);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	@Override
+	protected void requestTexture(DrawContext dc, TextureTile tile)
+	{
+		super.requestTexture(dc, tile);
+
+		Runnable task = getRequestQ().poll();
+		while (task != null)
+		{
+			if (!WorldWind.getTaskService().isFull())
+			{
+				WorldWind.getTaskService().addTask(task);
+			}
+			task = getRequestQ().poll();
+		}
 	}
 }

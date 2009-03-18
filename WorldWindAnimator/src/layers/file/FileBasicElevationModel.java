@@ -1,4 +1,4 @@
-package terrain;
+package layers.file;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVList;
@@ -11,11 +11,9 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import layers.file.FileLayer;
-import layers.file.FileRetriever;
-import nasa.worldwind.terrain.BasicElevationModel;
+import layers.immediate.ImmediateBasicElevationModel;
 
-public class FileBasicElevationModel extends BasicElevationModel
+public class FileBasicElevationModel extends ImmediateBasicElevationModel
 {
 	public FileBasicElevationModel(LevelSet levels, double minElevation,
 			double maxElevation)

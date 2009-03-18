@@ -10,7 +10,8 @@ import gov.nasa.worldwind.util.LevelSet;
 
 import java.io.File;
 
-import terrain.FileBasicElevationModel;
+import layers.file.FileBasicElevationModel;
+
 
 public class WestMacElevationModel extends FileBasicElevationModel
 {
