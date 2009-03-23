@@ -7,25 +7,27 @@ import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.layers.SkyGradientLayer;
+import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -39,7 +41,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.media.opengl.GLCapabilities;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -62,8 +66,11 @@ import layers.immediate.ImmediateMode;
 import layers.immediate.ImmediateRetrievalService;
 import layers.immediate.ImmediateTaskService;
 import layers.misc.Landmarks;
+import nasa.worldwind.awt.WorldWindowGLCanvas;
 import nasa.worldwind.layers.AtmosphereLayer;
+import nasa.worldwind.layers.FogLayer;
 import nasa.worldwind.layers.LensFlareLayer;
+import nasa.worldwind.layers.SkyGradientLayer;
 import nasa.worldwind.terrain.BasicElevationModel;
 import nasa.worldwind.terrain.ConfigurableTessellator;
 import nasa.worldwind.view.BasicRollOrbitView;
@@ -74,6 +81,19 @@ import animation.SimpleAnimation;
 
 public class Animator
 {
+	private static final GLCapabilities caps = new GLCapabilities();
+
+	static
+	{
+		caps.setAlphaBits(8);
+		caps.setRedBits(8);
+		caps.setGreenBits(8);
+		caps.setBlueBits(8);
+		caps.setDepthBits(24);
+		caps.setSampleBuffers(true);
+		caps.setNumSamples(4);
+	}
+
 	static
 	{
 		if (Configuration.isMacOS())
@@ -121,8 +141,9 @@ public class Animator
 	private ChangeListener animationChangeListener;
 	private Layer crosshair;
 	private BasicElevationModel bem;
+	private LensFlareLayer lensFlare;
 
-	private Layer alos, map1, map2;
+	private Layer alos, map1, map2, roads, bmng;
 
 	public Animator()
 	{
@@ -131,12 +152,14 @@ public class Animator
 				.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				ConfigurableTessellator.class.getName());
+		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME,
+				QualitySceneController.class.getName());
 
 		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME,
 				ImmediateTaskService.class.getName());
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
 				ImmediateRetrievalService.class.getName());
-		
+
 		animationChangeListener = new ChangeListener()
 		{
 			public void stateChanged(ChangeEvent e)
@@ -162,7 +185,7 @@ public class Animator
 		});
 
 		frame.setLayout(new BorderLayout());
-		wwd = new WorldWindowGLCanvas();
+		wwd = new WorldWindowGLCanvas(caps);
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		setAnimationSize(1024, 576);
@@ -187,16 +210,83 @@ public class Animator
 		Layer depth = new DepthLayer();
 		layers.add(depth);
 
-		Vec4 direction = new Vec4(0.5, -0.6, 0.4, 1.0);
-		LensFlareLayer lensFlare = LensFlareLayer
+		//Vec4 direction = new Vec4(0.36, 0.96, -0.36, 1.0);
+		Vec4 direction = new Vec4(0.36, 0.9, -0.3, 1.0);
+		lensFlare = LensFlareLayer
 				.getPresetInstance(LensFlareLayer.PRESET_BOLD);
 		layers.add(lensFlare);
+		lensFlare.setSunDistance(lensFlare.getSunDistance() * 100);
 		AtmosphereLayer atmosphere = new AtmosphereLayer();
 		layers.add(atmosphere);
 		lensFlare.setSunDirection(direction);
 		atmosphere.setLightDirection(direction);
 		SkyGradientLayer sky = new SkyGradientLayer();
 		layers.add(sky);
+
+		Color fogColor = new Color(138, 82, 57);
+
+		FogLayer fog = new FogLayer();
+		layers.add(fog);
+		fog.setNearFactor(0.8f);
+		fog.setFarFactor(0.4f);
+		fog.setColor(fogColor);
+
+		/*float[] fogColorf = fogColor.getComponents(new float[4]);
+		sky.setHorizonColor(new Color(fogColorf[0], fogColorf[1], fogColorf[2], 1.0f));
+		sky.setZenithColor(new Color(fogColorf[0], fogColorf[1], fogColorf[2], 1.0f));
+		sky.setAtmosphereThickness(300);*/
+
+
+		JFrame flareframe = new JFrame("lensflare");
+		flareframe.setLayout(new GridLayout(0, 3));
+		JButton button = new JButton("X");
+		flareframe.add(button);
+		button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				Vec4 sunDirection = lensFlare.getSunDirection();
+				Matrix transform = Matrix.fromRotationX(Angle.fromDegrees(10));
+				sunDirection = sunDirection.transformBy4(transform);
+				lensFlare.setSunDirection(sunDirection);
+				System.out.println(sunDirection);
+				wwd.redraw();
+			}
+		});
+		button = new JButton("Y");
+		flareframe.add(button);
+		button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				Vec4 sunDirection = lensFlare.getSunDirection();
+				Matrix transform = Matrix.fromRotationY(Angle.fromDegrees(10));
+				sunDirection = sunDirection.transformBy4(transform);
+				lensFlare.setSunDirection(sunDirection);
+				System.out.println(sunDirection);
+				wwd.redraw();
+			}
+		});
+		button = new JButton("Z");
+		flareframe.add(button);
+		button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				Vec4 sunDirection = lensFlare.getSunDirection();
+				Matrix transform = Matrix.fromRotationZ(Angle.fromDegrees(10));
+				sunDirection = sunDirection.transformBy4(transform);
+				lensFlare.setSunDirection(sunDirection);
+				System.out.println(sunDirection);
+				wwd.redraw();
+			}
+		});
+		flareframe.pack();
+		flareframe.setVisible(true);
+		
+		bmng = new BMNGWMSLayer();
+		//bmng.setOpacity(0.3);
+		layers.add(bmng);
 
 		bem = FileLayer.createElevationModel("WestMac DEM", "GA/WestMac DEM",
 				new File("F:/West Macs Imagery/wwtiles/dem150"), 11, 150,
@@ -205,7 +295,7 @@ public class Animator
 		cem.addElevationModel(bem);
 
 		map1 = FileLayer.createLayer("WestMac Map Page 1",
-				"GA/WestMac Map Page 1_TEMP", ".dds", new File(
+				"GA/WestMac Map Page 1", ".dds", new File(
 						"F:/West Macs Imagery/Rectified Map/5 Tiles/page1"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0536281, -23.4102781, 132.0746805, 133.9779805));
@@ -225,8 +315,8 @@ public class Animator
 						-23.433333, 132.25, 133.95));
 		layers.add(alos);
 
-		Layer roads = FileLayer.createLayer("WestMac Roads",
-				"GA/WestMac Roads", ".dds", new File(
+		roads = FileLayer.createLayer("WestMac Roads", "GA/WestMac Roads",
+				".dds", new File(
 						"F:/West Macs Imagery/Vector/Roads/Mapnik/tiled"),
 				"png", 12, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0, -23.433333, 132.25, 133.95));
@@ -241,21 +331,20 @@ public class Animator
 		}
 
 		depth.setEnabled(true);
-		map1.setEnabled(true);
-		//page2.setEnabled(true);
-		//alos.setEnabled(true);
+		bmng.setEnabled(true);
+		//map1.setEnabled(true);
+		//map2.setEnabled(true);
+		alos.setEnabled(true);
 		//roads.setEnabled(true);
+
 		//landmarks.setEnabled(true);
 
-		//lensFlare.setEnabled(true);
+		lensFlare.setEnabled(true);
 		//atmosphere.setEnabled(true);
 		//sky.setEnabled(true);
 
-		//skybox.setEnabled(true);
-
-		/*Layer bmng = new BMNGWMSLayer();
-		bmng.setOpacity(0.3);
-		layers.add(bmng);*/
+		skybox.setEnabled(true);
+		fog.setEnabled(true);
 
 		/*Layer roadsshp = new ShapefileLayer(new File(
 				"C:/WINNT/Profiles/u97852/Desktop/Roads/Shapefile/Roads.shp"));
@@ -723,21 +812,97 @@ public class Animator
 						int endFirst = 2000;
 						int startSecond = 7000;
 
+						int first = animation.getFirstFrame();
+						int last = animation.getLastFrame();
+
+						alos.setEnabled(false);
+						map1.setEnabled(false);
 						map2.setEnabled(false);
+						roads.setEnabled(true);
+
+						joinThread(animate(
+								detail,
+								0,
+								1,
+								new File(
+										"F:/West Macs Imagery/animation_frames_filtered/roads")));
+
+						joinThread(animate(
+								detail,
+								first,
+								last,
+								new File(
+										"F:/West Macs Imagery/animation_frames_filtered/roads")));
+
+						/*alos.setEnabled(true);
+						map1.setEnabled(false);
+						map2.setEnabled(false);
+						roads.setEnabled(false);
+
+						joinThread(animate(
+								detail,
+								first,
+								last,
+								new File(
+										"F:/West Macs Imagery/animation_frames_filtered/landsat")));
+
+						alos.setEnabled(false);
+						map1.setEnabled(false);
+						map2.setEnabled(false);
+						roads.setEnabled(true);
+
+						joinThread(animate(
+								detail,
+								first,
+								last,
+								new File(
+										"F:/West Macs Imagery/animation_frames_filtered/roads")));
+
+						alos.setEnabled(false);
 						map1.setEnabled(true);
+						map2.setEnabled(false);
+						roads.setEnabled(false);
 
-						joinThread(animate(detail, /*animation.getFirstFrame()*/
-						1891, endFirst, new File("map1")));
-						joinThread(animate(detail, startSecond, animation
-								.getLastFrame(), new File("map1")));
+						joinThread(animate(
+								detail,
+								first,
+								endFirst,
+								new File(
+										"F:/West Macs Imagery/animation_frames_filtered/map1")));
+						joinThread(animate(
+								detail,
+								startSecond,
+								last,
+								new File(
+										"F:/West Macs Imagery/animation_frames_filtered/map1")));
 
+						alos.setEnabled(false);
 						map1.setEnabled(false);
 						map2.setEnabled(true);
+						roads.setEnabled(false);
 
-						joinThread(animate(detail, animation.getFirstFrame(),
-								endFirst, new File("map2")));
-						joinThread(animate(detail, startSecond, animation
-								.getLastFrame(), new File("map2")));
+						joinThread(animate(
+								detail,
+								first,
+								endFirst,
+								new File(
+										"F:/West Macs Imagery/animation_frames_filtered/map2")));
+						joinThread(animate(
+								detail,
+								startSecond,
+								last,
+								new File(
+										"F:/West Macs Imagery/animation_frames_filtered/map2")));
+
+						try
+						{
+							Runtime.getRuntime().exec(
+									"c:/winnt/system32/shutdown.exe -s -t 60");
+						}
+						catch (IOException e)
+						{
+							e.printStackTrace();
+						}*/
 					}
 				});
 				thread.setDaemon(true);
@@ -1012,7 +1177,7 @@ public class Animator
 				public void run()
 				{
 					stop = false;
-					
+
 					boolean immediate = ImmediateMode.isImmediate();
 					ImmediateMode.setImmediate(true);
 

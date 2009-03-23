@@ -28,7 +28,7 @@ public class Skybox extends RenderableLayer
 	private static final String[] keys = new String[6];
 	private static final String[] id = { "front", "left", "back", "right",
 			"top", "bottom" };
-	private String skyboxDir = "C:/WINNT/Profiles/u97852/Desktop/skybox/textures";
+	private String skyboxDir = "C:/WINNT/Profiles/u97852/Desktop/skybox/textures3";
 	private String extension = ".png";
 
 	static
@@ -43,7 +43,7 @@ public class Skybox extends RenderableLayer
 	{
 		for (int i = 0; i < keys.length; i++)
 		{
-			skybox[i] = dc.getTextureCache().get(keys[i]);
+			//skybox[i] = dc.getTextureCache().get(keys[i]);
 			if (skybox[i] == null)
 			{
 				try
@@ -64,7 +64,7 @@ public class Skybox extends RenderableLayer
 
 					skybox[i] = TextureIO.newTexture(stream, true, null);
 					skybox[i].bind();
-					dc.getTextureCache().put(keys[i], skybox[i]);
+					//dc.getTextureCache().put(keys[i], skybox[i]);
 				}
 				catch (IOException e)
 				{
@@ -156,6 +156,8 @@ public class Skybox extends RenderableLayer
 
 		// Just in case we set all vertices to white.
 		gl.glColor4f(1, 1, 1, 1);
+		
+		//gl.glScaled(1e20d, 1e20d, 1e20d);
 
 		// Render the front quad
 		skybox[0].bind();
@@ -177,13 +179,13 @@ public class Skybox extends RenderableLayer
 		gl.glBegin(GL.GL_QUADS);
 		{
 			gl.glTexCoord2f(1, 1);
-			gl.glVertex3f(0.5f, -0.5f, 0.5f);
+			gl.glVertex3f(-0.5f, -0.5f, -0.5f);
 			gl.glTexCoord2f(0, 1);
-			gl.glVertex3f(0.5f, -0.5f, -0.5f);
+			gl.glVertex3f(-0.5f, -0.5f, 0.5f);
 			gl.glTexCoord2f(0, 0);
-			gl.glVertex3f(0.5f, 0.5f, -0.5f);
+			gl.glVertex3f(-0.5f, 0.5f, 0.5f);
 			gl.glTexCoord2f(1, 0);
-			gl.glVertex3f(0.5f, 0.5f, 0.5f);
+			gl.glVertex3f(-0.5f, 0.5f, -0.5f);
 		}
 		gl.glEnd();
 
@@ -207,13 +209,13 @@ public class Skybox extends RenderableLayer
 		gl.glBegin(GL.GL_QUADS);
 		{
 			gl.glTexCoord2f(1, 1);
-			gl.glVertex3f(-0.5f, -0.5f, -0.5f);
+			gl.glVertex3f(0.5f, -0.5f, 0.5f);
 			gl.glTexCoord2f(0, 1);
-			gl.glVertex3f(-0.5f, -0.5f, 0.5f);
+			gl.glVertex3f(0.5f, -0.5f, -0.5f);
 			gl.glTexCoord2f(0, 0);
-			gl.glVertex3f(-0.5f, 0.5f, 0.5f);
+			gl.glVertex3f(0.5f, 0.5f, -0.5f);
 			gl.glTexCoord2f(1, 0);
-			gl.glVertex3f(-0.5f, 0.5f, -0.5f);
+			gl.glVertex3f(0.5f, 0.5f, 0.5f);
 		}
 		gl.glEnd();
 
