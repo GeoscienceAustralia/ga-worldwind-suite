@@ -11,14 +11,12 @@ import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
@@ -27,7 +25,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -43,7 +40,6 @@ import java.util.Set;
 
 import javax.media.opengl.GLCapabilities;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -59,13 +55,15 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import layers.Skybox;
 import layers.depth.DepthLayer;
 import layers.file.FileLayer;
 import layers.immediate.ImmediateMode;
 import layers.immediate.ImmediateRetrievalService;
 import layers.immediate.ImmediateTaskService;
+import layers.immediate.bmng.BMNGWMSLayer;
 import layers.misc.Landmarks;
+import layers.sky.Skybox;
+import layers.sky.Skysphere;
 import nasa.worldwind.awt.WorldWindowGLCanvas;
 import nasa.worldwind.layers.AtmosphereLayer;
 import nasa.worldwind.layers.FogLayer;
@@ -206,14 +204,16 @@ public class Animator
 
 		Skybox skybox = new Skybox();
 		layers.add(skybox);
+		Skysphere skysphere = new Skysphere();
+		layers.add(skysphere);
 
 		Layer depth = new DepthLayer();
 		layers.add(depth);
 
 		//Vec4 direction = new Vec4(0.36, 0.96, -0.36, 1.0);
-		Vec4 direction = new Vec4(0.36, 0.9, -0.3, 1.0);
+		Vec4 direction = new Vec4(0.32, 0.9, -0.3, 1.0);
 		lensFlare = LensFlareLayer
-				.getPresetInstance(LensFlareLayer.PRESET_BOLD);
+				.getPresetInstance(LensFlareLayer.PRESET_NOSUN);
 		layers.add(lensFlare);
 		lensFlare.setSunDistance(lensFlare.getSunDistance() * 100);
 		AtmosphereLayer atmosphere = new AtmosphereLayer();
@@ -237,7 +237,7 @@ public class Animator
 		sky.setAtmosphereThickness(300);*/
 
 
-		JFrame flareframe = new JFrame("lensflare");
+		/*JFrame flareframe = new JFrame("lensflare");
 		flareframe.setLayout(new GridLayout(0, 3));
 		JButton button = new JButton("X");
 		flareframe.add(button);
@@ -282,7 +282,7 @@ public class Animator
 			}
 		});
 		flareframe.pack();
-		flareframe.setVisible(true);
+		flareframe.setVisible(true);*/
 		
 		bmng = new BMNGWMSLayer();
 		//bmng.setOpacity(0.3);
@@ -343,8 +343,9 @@ public class Animator
 		//atmosphere.setEnabled(true);
 		//sky.setEnabled(true);
 
-		skybox.setEnabled(true);
+		//skybox.setEnabled(true);
 		fog.setEnabled(true);
+		skysphere.setEnabled(true);
 
 		/*Layer roadsshp = new ShapefileLayer(new File(
 				"C:/WINNT/Profiles/u97852/Desktop/Roads/Shapefile/Roads.shp"));
@@ -809,32 +810,28 @@ public class Animator
 					{
 						double detail = 1.0;
 
-						int endFirst = 2000;
-						int startSecond = 7000;
-
 						int first = animation.getFirstFrame();
 						int last = animation.getLastFrame();
-
-						alos.setEnabled(false);
-						map1.setEnabled(false);
-						map2.setEnabled(false);
-						roads.setEnabled(true);
 
 						joinThread(animate(
 								detail,
 								0,
 								1,
 								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/roads")));
+										"F:/West Macs Imagery/animation_frames_filtered/landsky")));
 
 						joinThread(animate(
 								detail,
 								first,
 								last,
 								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/roads")));
+										"F:/West Macs Imagery/animation_frames_filtered/landsky")));
 
-						/*alos.setEnabled(true);
+						/*
+						int endFirst = 2000;
+						int startSecond = 7000;
+						
+						alos.setEnabled(true);
 						map1.setEnabled(false);
 						map2.setEnabled(false);
 						roads.setEnabled(false);

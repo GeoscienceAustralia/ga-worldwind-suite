@@ -1,4 +1,4 @@
-package layers;
+package layers.sky;
 
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.geom.Angle;
@@ -28,7 +28,7 @@ public class Skybox extends RenderableLayer
 	private static final String[] keys = new String[6];
 	private static final String[] id = { "front", "left", "back", "right",
 			"top", "bottom" };
-	private String skyboxDir = "C:/WINNT/Profiles/u97852/Desktop/skybox/textures3";
+	private String skyboxDir = "data/skybox";
 	private String extension = ".png";
 
 	static
@@ -113,9 +113,9 @@ public class Skybox extends RenderableLayer
 		gl.glLoadIdentity();
 
 		dc.getGLU().gluPerspective(
-				50.0,
-				dc.getGLDrawable().getWidth()
-						/ (double) dc.getGLDrawable().getHeight(), 0.0, 5.0);
+				dc.getView().getFieldOfView().degrees,
+				dc.getView().getViewport().getWidth()
+						/ dc.getView().getViewport().getHeight(), 0.1, 5.0);
 
 		//set up modelview matrix
 		gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -156,9 +156,18 @@ public class Skybox extends RenderableLayer
 
 		// Just in case we set all vertices to white.
 		gl.glColor4f(1, 1, 1, 1);
-		
-		//gl.glScaled(1e20d, 1e20d, 1e20d);
+		// Draw
+		drawSkybox(gl);
 
+		// Restore enable bits and matrix
+		gl.glPopAttrib();
+		gl.glPopMatrix();
+		gl.glMatrixMode(GL.GL_PROJECTION);
+		gl.glPopMatrix();
+	}
+
+	private void drawSkybox(GL gl)
+	{
 		// Render the front quad
 		skybox[0].bind();
 		gl.glBegin(GL.GL_QUADS);
@@ -248,11 +257,5 @@ public class Skybox extends RenderableLayer
 			gl.glVertex3f(0.5f, -0.5f, -0.5f);
 		}
 		gl.glEnd();
-
-		// Restore enable bits and matrix
-		gl.glPopAttrib();
-		gl.glPopMatrix();
-		gl.glMatrixMode(GL.GL_PROJECTION);
-		gl.glPopMatrix();
 	}
 }
