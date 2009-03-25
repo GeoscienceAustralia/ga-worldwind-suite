@@ -12,11 +12,17 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
+import au.gov.ga.worldwind.layers.user.UserLayerPanel;
+import au.gov.ga.worldwind.layers.user.UserLayers;
+
 public class LayersPanel extends JPanel
 {
+	private JTabbedPane tabbedPane;
 	private StandardPanel standardPanel;
 	private WorldWindow wwd;
 	private Frame frame;
+	private UserLayerPanel userPanel;
+	private boolean containsUserPanel = false;
 
 	public LayersPanel(WorldWindow wwd, Frame frame)
 	{
@@ -28,13 +34,15 @@ public class LayersPanel extends JPanel
 
 	private JTabbedPane createTabs()
 	{
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("Standard", createStandard());
 		standardPanel.addLowerLayers();
 
 		tabbedPane.addTab("Radiometrics", createRadiometry());
 		tabbedPane.addTab("Geophysics", createGeophysics());
 		standardPanel.addUpperLayers();
+
+		userPanel = new UserLayerPanel(wwd, frame);
 
 		tabbedPane.validate();
 		tabbedPane.setSelectedIndex(1);
@@ -75,6 +83,24 @@ public class LayersPanel extends JPanel
 		JScrollPane scrollPane = new JScrollPane(panel);
 		scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 		return scrollPane;
+	}
+
+	public void updateUserLayers()
+	{
+		userPanel.updateLayers();
+		if (containsUserPanel ^ !UserLayers.isEmpty()) //i love XOR!
+		{
+			if (containsUserPanel)
+			{
+				tabbedPane.removeTabAt(3);
+				containsUserPanel = false;
+			}
+			else
+			{
+				tabbedPane.addTab("User layers", userPanel);
+				containsUserPanel = true;
+			}
+		}
 	}
 
 	public void turnOffAtmosphere()

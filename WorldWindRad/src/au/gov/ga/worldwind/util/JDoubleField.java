@@ -10,7 +10,7 @@ public class JDoubleField extends JTextField
 {
 	private Double value;
 	private boolean positive;
-	private int precision;
+	private Integer precision;
 	private double scale = 1;
 	private boolean setting = false, updating = false;
 
@@ -18,6 +18,13 @@ public class JDoubleField extends JTextField
 	{
 		super();
 		this.precision = precision;
+		setValue(value);
+	}
+
+	public JDoubleField(Double value)
+	{
+		super();
+		this.precision = null;
 		setValue(value);
 	}
 
@@ -68,9 +75,11 @@ public class JDoubleField extends JTextField
 			setting = true;
 			if (value == null)
 				setText("");
-			else
+			else if (precision != null)
 				setText(String.format("%1." + precision + "f", value
 						* getScale()));
+			else
+				setText(String.valueOf(value * getScale()));
 			setting = false;
 		}
 	}

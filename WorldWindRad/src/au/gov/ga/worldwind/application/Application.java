@@ -67,6 +67,8 @@ import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
 import nasa.worldwind.awt.AWTInputHandler;
@@ -81,6 +83,9 @@ import au.gov.ga.worldwind.bookmarks.BookmarkManager;
 import au.gov.ga.worldwind.bookmarks.Bookmarks;
 import au.gov.ga.worldwind.layers.ga.GALayer;
 import au.gov.ga.worldwind.layers.mouse.MouseLayer;
+import au.gov.ga.worldwind.layers.user.UserLayerDefinition;
+import au.gov.ga.worldwind.layers.user.UserLayerEditor;
+import au.gov.ga.worldwind.layers.user.UserLayers;
 import au.gov.ga.worldwind.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.panels.places.PlaceSearchPanel;
@@ -267,6 +272,16 @@ public class Application
 		//create dialogs
 		createDialogs();
 
+		//init user layers
+		UserLayers.init(wwd);
+		layersPanel.updateUserLayers();
+		UserLayers.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				layersPanel.updateUserLayers();
+			}
+		});
 
 		frame.setJMenuBar(createMenuBar());
 		addWindowListeners();
@@ -776,9 +791,26 @@ public class Application
 			}
 		});
 
+		menuItem = new JMenuItem("Add user layer...");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				UserLayerDefinition def = new UserLayerDefinition();
+				def = UserLayerEditor.editDefinition(frame, "New user layer",
+						def);
+				if (def != null)
+				{
+					UserLayers.addUserLayer(def);
+				}
+			}
+		});
+
 		menu.addSeparator();
 
 		menuItem = new JMenuItem("Save image");
+		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -786,7 +818,6 @@ public class Application
 				saveImage();
 			}
 		});
-		menu.add(menuItem);
 
 		menu.addSeparator();
 

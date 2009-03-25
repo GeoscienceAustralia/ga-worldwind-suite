@@ -18,6 +18,7 @@ import java.util.List;
 
 import au.gov.ga.worldwind.annotations.Annotation;
 import au.gov.ga.worldwind.bookmarks.Bookmark;
+import au.gov.ga.worldwind.layers.user.UserLayerDefinition;
 
 public class Settings
 {
@@ -132,6 +133,7 @@ public class Settings
 		private boolean[] dialogsOpen = null;
 		private boolean showDownloads = true;
 		private int annotationsPause = 1000;
+		private List<UserLayerDefinition> userLayers = new ArrayList<UserLayerDefinition>();
 
 		public boolean isProxyEnabled()
 		{
@@ -482,6 +484,16 @@ public class Settings
 		public void setAnnotationsPause(int annotationsPause)
 		{
 			this.annotationsPause = annotationsPause;
+		}
+
+		public List<UserLayerDefinition> getUserLayers()
+		{
+			return userLayers;
+		}
+
+		public void setUserLayers(List<UserLayerDefinition> userLayers)
+		{
+			this.userLayers = userLayers;
 		}
 	}
 
