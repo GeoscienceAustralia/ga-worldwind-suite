@@ -1,9 +1,9 @@
-package au.gov.ga.worldwind.layers.user;
+package au.gov.ga.worldwind.layers.local;
 
 import java.awt.Color;
 import java.io.Serializable;
 
-public class UserLayerDefinition implements Serializable
+public class LocalLayerDefinition implements Serializable
 {
 	private String name = "";
 	private String directory = "";
@@ -14,7 +14,7 @@ public class UserLayerDefinition implements Serializable
 	private Color transparentColor = Color.black;
 	private int transparentFuzz = 10;
 
-	public UserLayerDefinition()
+	public LocalLayerDefinition()
 	{
 	}
 
@@ -98,8 +98,8 @@ public class UserLayerDefinition implements Serializable
 		this.tilesize = tilesize;
 	}
 
-	public UserLayer createLayer()
+	public LocalLayer createLayer()
 	{
-		return new UserLayer(this);
+		return new LocalLayer(this);
 	}
 }

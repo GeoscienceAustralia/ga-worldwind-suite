@@ -82,10 +82,10 @@ import au.gov.ga.worldwind.bookmarks.BookmarkListener;
 import au.gov.ga.worldwind.bookmarks.BookmarkManager;
 import au.gov.ga.worldwind.bookmarks.Bookmarks;
 import au.gov.ga.worldwind.layers.ga.GALayer;
+import au.gov.ga.worldwind.layers.local.LocalLayerDefinition;
+import au.gov.ga.worldwind.layers.local.LocalLayerEditor;
+import au.gov.ga.worldwind.layers.local.LocalLayers;
 import au.gov.ga.worldwind.layers.mouse.MouseLayer;
-import au.gov.ga.worldwind.layers.user.UserLayerDefinition;
-import au.gov.ga.worldwind.layers.user.UserLayerEditor;
-import au.gov.ga.worldwind.layers.user.UserLayers;
 import au.gov.ga.worldwind.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.panels.places.PlaceSearchPanel;
@@ -273,13 +273,13 @@ public class Application
 		createDialogs();
 
 		//init user layers
-		UserLayers.init(wwd);
-		layersPanel.updateUserLayers();
-		UserLayers.addChangeListener(new ChangeListener()
+		LocalLayers.init(wwd);
+		layersPanel.updateLocalLayers();
+		LocalLayers.get().addChangeListener(new ChangeListener()
 		{
 			public void stateChanged(ChangeEvent e)
 			{
-				layersPanel.updateUserLayers();
+				layersPanel.updateLocalLayers();
 			}
 		});
 
@@ -791,18 +791,18 @@ public class Application
 			}
 		});
 
-		menuItem = new JMenuItem("Add user layer...");
+		menuItem = new JMenuItem("Add local tileset...");
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				UserLayerDefinition def = new UserLayerDefinition();
-				def = UserLayerEditor.editDefinition(frame, "New user layer",
-						def);
+				LocalLayerDefinition def = new LocalLayerDefinition();
+				def = LocalLayerEditor.editDefinition(frame,
+						"New local tileset", def);
 				if (def != null)
 				{
-					UserLayers.addUserLayer(def);
+					LocalLayers.get().addLayer(def);
 				}
 			}
 		});
@@ -1104,6 +1104,7 @@ public class Application
 		saveSplitLocations();
 		saveDialogBounds();
 		Settings.save();
+		LocalLayers.save();
 		frame.dispose();
 		System.exit(0);
 	}

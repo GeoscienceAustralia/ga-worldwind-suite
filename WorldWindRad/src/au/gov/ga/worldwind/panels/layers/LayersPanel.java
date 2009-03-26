@@ -12,8 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
-import au.gov.ga.worldwind.layers.user.UserLayerPanel;
-import au.gov.ga.worldwind.layers.user.UserLayers;
+import au.gov.ga.worldwind.layers.local.LocalLayerPanel;
 
 public class LayersPanel extends JPanel
 {
@@ -21,8 +20,8 @@ public class LayersPanel extends JPanel
 	private StandardPanel standardPanel;
 	private WorldWindow wwd;
 	private Frame frame;
-	private UserLayerPanel userPanel;
-	private boolean containsUserPanel = false;
+	private LocalLayerPanel localPanel;
+	private boolean containsLocalPanel = false;
 
 	public LayersPanel(WorldWindow wwd, Frame frame)
 	{
@@ -42,7 +41,7 @@ public class LayersPanel extends JPanel
 		tabbedPane.addTab("Geophysics", createGeophysics());
 		standardPanel.addUpperLayers();
 
-		userPanel = new UserLayerPanel(wwd, frame);
+		localPanel = new LocalLayerPanel(wwd, frame);
 
 		tabbedPane.validate();
 		tabbedPane.setSelectedIndex(1);
@@ -85,20 +84,20 @@ public class LayersPanel extends JPanel
 		return scrollPane;
 	}
 
-	public void updateUserLayers()
+	public void updateLocalLayers()
 	{
-		userPanel.updateLayers();
-		if (containsUserPanel ^ !UserLayers.isEmpty()) //i love XOR!
+		localPanel.updateLayers();
+		if (containsLocalPanel ^ !localPanel.isEmpty()) //i love XOR!
 		{
-			if (containsUserPanel)
+			if (containsLocalPanel)
 			{
 				tabbedPane.removeTabAt(3);
-				containsUserPanel = false;
+				containsLocalPanel = false;
 			}
 			else
 			{
-				tabbedPane.addTab("User layers", userPanel);
-				containsUserPanel = true;
+				tabbedPane.addTab("Local tilesets", localPanel);
+				containsLocalPanel = true;
 			}
 		}
 	}

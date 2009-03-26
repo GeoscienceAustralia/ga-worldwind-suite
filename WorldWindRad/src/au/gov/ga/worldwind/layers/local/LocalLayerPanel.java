@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.layers.user;
+package au.gov.ga.worldwind.layers.local;
 
 import gov.nasa.worldwind.WorldWindow;
 
@@ -22,13 +22,13 @@ import javax.swing.event.ChangeListener;
 import au.gov.ga.worldwind.util.FlatJButton;
 import au.gov.ga.worldwind.util.Icons;
 
-public class UserLayerPanel extends JPanel
+public class LocalLayerPanel extends JPanel
 {
 	private JPanel layersPanel;
 	private WorldWindow wwd;
 	private Frame owner;
 
-	public UserLayerPanel(WorldWindow wwd, Frame owner)
+	public LocalLayerPanel(WorldWindow wwd, Frame owner)
 	{
 		this.wwd = wwd;
 		this.owner = owner;
@@ -42,7 +42,7 @@ public class UserLayerPanel extends JPanel
 	public void updateLayers()
 	{
 		clearUserLayers();
-		for (UserLayer layer : UserLayers.getLayers())
+		for (LocalLayer layer : LocalLayers.get().getLayers())
 		{
 			addUserLayer(layer);
 		}
@@ -53,7 +53,7 @@ public class UserLayerPanel extends JPanel
 		layersPanel.removeAll();
 	}
 
-	private void addUserLayer(final UserLayer layer)
+	private void addUserLayer(final LocalLayer layer)
 	{
 		GridBagConstraints c;
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -99,12 +99,12 @@ public class UserLayerPanel extends JPanel
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				UserLayerDefinition def = layer.getDefinition();
-				def = UserLayerEditor.editDefinition(owner, "Edit user layer",
+				LocalLayerDefinition def = layer.getDefinition();
+				def = LocalLayerEditor.editDefinition(owner, "Edit local tileset",
 						def);
 				if (def != null)
 				{
-					UserLayers.updateUserLayer(def);
+					LocalLayers.get().updateLayer(def);
 				}
 			}
 		});
@@ -114,18 +114,18 @@ public class UserLayerPanel extends JPanel
 
 		FlatJButton delete = new FlatJButton(Icons.delete);
 		delete.restrictSize();
-		delete.setToolTipText("Delete layer");
+		delete.setToolTipText("Delete tileset");
 		delete.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				int value = JOptionPane.showConfirmDialog(UserLayerPanel.this,
-						"Are you sure you want to delete user layer "
-								+ layer.getName() + "?", "Delete layer?",
+				int value = JOptionPane.showConfirmDialog(LocalLayerPanel.this,
+						"Are you sure you want to delete local tileset "
+								+ layer.getName() + "?", "Delete tileset?",
 						JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 				if (value == JOptionPane.YES_OPTION)
 				{
-					UserLayers.removeUserLayer(layer.getDefinition());
+					LocalLayers.get().removeLayer(layer.getDefinition());
 				}
 			}
 		});
@@ -134,5 +134,10 @@ public class UserLayerPanel extends JPanel
 		c.weightx = 1;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(delete, c);
+	}
+
+	public boolean isEmpty()
+	{
+		return LocalLayers.get().isEmpty();
 	}
 }

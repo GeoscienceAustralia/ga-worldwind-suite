@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.layers.user;
+package au.gov.ga.worldwind.layers.local;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -32,7 +32,7 @@ import javax.swing.event.DocumentListener;
 import au.gov.ga.worldwind.util.JDoubleField;
 import au.gov.ga.worldwind.util.JIntegerField;
 
-public class UserLayerEditor extends JDialog
+public class LocalLayerEditor extends JDialog
 {
 	private JTextField nameField;
 	private JTextField dirField;
@@ -52,10 +52,10 @@ public class UserLayerEditor extends JDialog
 	private final static String[] FILE_EXTENSIONS = { "JPG", "PNG", "BMP",
 			"JPEG", "DDS" };
 
-	private UserLayerEditor(Frame owner, String title,
-			final UserLayerDefinition definition)
+	private LocalLayerEditor(Frame owner, String title,
+			final LocalLayerDefinition definition)
 	{
-		super(owner, "User layer", true);
+		super(owner, title, true);
 
 		setLayout(new BorderLayout());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -155,7 +155,7 @@ public class UserLayerEditor extends JDialog
 				chooser.setDialogTitle("Select layer tileset directory");
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				chooser.setAcceptAllFileFilterUsed(false);
-				if (chooser.showOpenDialog(UserLayerEditor.this) == JFileChooser.APPROVE_OPTION)
+				if (chooser.showOpenDialog(LocalLayerEditor.this) == JFileChooser.APPROVE_OPTION)
 				{
 					dirField.setText(chooser.getSelectedFile()
 							.getAbsolutePath());
@@ -412,7 +412,7 @@ public class UserLayerEditor extends JDialog
 		okButton.setEnabled(valid);
 	}
 
-	private boolean checkAndUpdateDefinition(UserLayerDefinition definition)
+	private boolean checkAndUpdateDefinition(LocalLayerDefinition definition)
 	{
 		definition.setName(nameField.getText());
 		definition.setDirectory(dirField.getText());
@@ -444,10 +444,10 @@ public class UserLayerEditor extends JDialog
 		fuzzUnit.setEnabled(enabled);
 	}
 
-	public static UserLayerDefinition editDefinition(Frame owner, String title,
-			UserLayerDefinition definition)
+	public static LocalLayerDefinition editDefinition(Frame owner, String title,
+			LocalLayerDefinition definition)
 	{
-		UserLayerEditor editor = new UserLayerEditor(owner, title, definition);
+		LocalLayerEditor editor = new LocalLayerEditor(owner, title, definition);
 		editor.setVisible(true);
 		if (editor.okPressed)
 		{

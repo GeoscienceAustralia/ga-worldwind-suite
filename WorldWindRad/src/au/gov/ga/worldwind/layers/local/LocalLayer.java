@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.layers.user;
+package au.gov.ga.worldwind.layers.local;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,21 +30,23 @@ import javax.media.opengl.GL;
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
 
-public class UserLayer extends TiledImageLayer
+public class LocalLayer extends TiledImageLayer
 {
 	private final Object fileLock = new Object();
-	private final UserLayerDefinition definition;
+	private final LocalLayerDefinition definition;
 	private final File directory;
 
-	public UserLayer(UserLayerDefinition definition)
+	public LocalLayer(LocalLayerDefinition definition)
 	{
 		super(makeLevels(definition));
 		this.definition = definition;
 		directory = new File(definition.getDirectory());
 		setName(definition.getName());
+		setUseMipMaps(true);
+		setUseTransparentTextures(true);
 	}
 
-	public UserLayerDefinition getDefinition()
+	public LocalLayerDefinition getDefinition()
 	{
 		return definition;
 	}
@@ -146,7 +149,7 @@ public class UserLayer extends TiledImageLayer
 		return str;
 	}
 
-	protected static LevelSet makeLevels(UserLayerDefinition definition)
+	protected static LevelSet makeLevels(LocalLayerDefinition definition)
 	{
 		File directory = new File(definition.getDirectory());
 		int levels = levelCount(directory);
@@ -156,7 +159,8 @@ public class UserLayer extends TiledImageLayer
 		AVList params = new AVListImpl();
 		params.setValue(AVKey.TILE_WIDTH, definition.getTilesize());
 		params.setValue(AVKey.TILE_HEIGHT, definition.getTilesize());
-		params.setValue(AVKey.DATA_CACHE_NAME, "User/" + definition.getName());
+		params.setValue(AVKey.DATA_CACHE_NAME, "Local/" + definition.getName()
+				+ "/" + randomString(8));
 		params.setValue(AVKey.SERVICE, null);
 		params.setValue(AVKey.DATASET_NAME, definition.getName());
 		params.setValue(AVKey.FORMAT_SUFFIX, "." + definition.getExtension());
@@ -175,6 +179,19 @@ public class UserLayer extends TiledImageLayer
 		});
 
 		return new LevelSet(params);
+	}
+
+	private static String randomString(int length)
+	{
+		String chars = new String(
+				"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+		Random random = new Random();
+		StringBuilder sb = new StringBuilder(length);
+		for (int i = 0; i < length; i++)
+		{
+			sb.append(chars.charAt(random.nextInt(chars.length())));
+		}
+		return sb.toString();
 	}
 
 	@Override
@@ -310,10 +327,10 @@ public class UserLayer extends TiledImageLayer
 	private static class RequestTask implements Runnable,
 			Comparable<RequestTask>
 	{
-		private final UserLayer layer;
+		private final LocalLayer layer;
 		private final TextureTile tile;
 
-		private RequestTask(TextureTile tile, UserLayer layer)
+		private RequestTask(TextureTile tile, LocalLayer layer)
 		{
 			this.layer = layer;
 			this.tile = tile;
