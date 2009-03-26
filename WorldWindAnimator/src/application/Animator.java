@@ -4,11 +4,8 @@ import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
-import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
-import gov.nasa.worldwind.event.RenderingEvent;
-import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -24,7 +21,6 @@ import gov.nasa.worldwind.view.OrbitView;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -73,8 +69,8 @@ import nasa.worldwind.terrain.BasicElevationModel;
 import nasa.worldwind.terrain.ConfigurableTessellator;
 import nasa.worldwind.view.BasicRollOrbitView;
 import util.ChangeFrameListener;
+import util.FileUtil;
 import util.FrameSlider;
-import util.TGAScreenshot;
 import animation.SimpleAnimation;
 
 public class Animator
@@ -89,6 +85,7 @@ public class Animator
 		caps.setBlueBits(8);
 		caps.setDepthBits(24);
 		caps.setSampleBuffers(true);
+		caps.setDoubleBuffered(true);
 		caps.setNumSamples(4);
 	}
 
@@ -126,7 +123,6 @@ public class Animator
 	private JFrame frame;
 
 	private WorldWindowGLCanvas wwd;
-	private boolean takingScreenshot = false;
 	private FrameSlider slider;
 	private SimpleAnimation animation = null;
 	private File file = null;
@@ -151,7 +147,7 @@ public class Animator
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				ConfigurableTessellator.class.getName());
 		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME,
-				QualitySceneController.class.getName());
+				AnimatorSceneController.class.getName());
 
 		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME,
 				ImmediateTaskService.class.getName());
@@ -283,41 +279,47 @@ public class Animator
 		});
 		flareframe.pack();
 		flareframe.setVisible(true);*/
-		
+
 		bmng = new BMNGWMSLayer();
 		//bmng.setOpacity(0.3);
 		layers.add(bmng);
 
+		String tileDrive = "D";
+
 		bem = FileLayer.createElevationModel("WestMac DEM", "GA/WestMac DEM",
-				new File("F:/West Macs Imagery/wwtiles/dem150"), 11, 150,
-				LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(-25.0001389,
-						-23.0001389, 131.9998611, 133.9998611), 308d, 1515d);
+				new File(tileDrive + ":/West Macs Imagery/wwtiles/dem150"), 11,
+				150, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
+						-25.0001389, -23.0001389, 131.9998611, 133.9998611),
+				308d, 1515d);
 		cem.addElevationModel(bem);
 
 		map1 = FileLayer.createLayer("WestMac Map Page 1",
-				"GA/WestMac Map Page 1", ".dds", new File(
-						"F:/West Macs Imagery/Rectified Map/5 Tiles/page1"),
+				"GA/WestMac Map Page 1", ".dds", new File(tileDrive
+						+ ":/West Macs Imagery/Rectified Map/5 Tiles/page1"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0536281, -23.4102781, 132.0746805, 133.9779805));
 		layers.add(map1);
 
 		map2 = FileLayer.createLayer("WestMac Map Page 2",
-				"GA/WestMac Map Page 2", ".dds", new File(
-						"F:/West Macs Imagery/Rectified Map/5 Tiles/page2"),
+				"GA/WestMac Map Page 2", ".dds", new File(tileDrive
+						+ ":/West Macs Imagery/Rectified Map/5 Tiles/page2"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0544889, -23.4081639, 132.0708833, 133.9771083));
 		layers.add(map2);
 
-		alos = FileLayer.createLayer("WestMac ALOS", "GA/WestMac ALOS", ".dds",
-				new File("F:/West Macs Imagery/wwtiles/alosnp_4326"), "jpg",
-				new File("F:/West Macs Imagery/wwtiles/mapmask"), "png", 13,
-				LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(-24.0,
-						-23.433333, 132.25, 133.95));
+		alos = FileLayer
+				.createLayer("WestMac ALOS", "GA/WestMac ALOS", ".dds",
+						new File(tileDrive
+								+ ":/West Macs Imagery/wwtiles/alosnp_4326"),
+						"jpg", new File(tileDrive
+								+ ":/West Macs Imagery/wwtiles/mapmask"),
+						"png", 13, LatLon.fromDegrees(36d, 36d), Sector
+								.fromDegrees(-24.0, -23.433333, 132.25, 133.95));
 		layers.add(alos);
 
 		roads = FileLayer.createLayer("WestMac Roads", "GA/WestMac Roads",
-				".dds", new File(
-						"F:/West Macs Imagery/Vector/Roads/Mapnik/tiled"),
+				".dds", new File(tileDrive
+						+ ":/West Macs Imagery/Vector/Roads/Mapnik/tiled"),
 				"png", 12, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0, -23.433333, 132.25, 133.95));
 		layers.add(roads);
@@ -335,7 +337,8 @@ public class Animator
 		//map1.setEnabled(true);
 		//map2.setEnabled(true);
 		alos.setEnabled(true);
-		//roads.setEnabled(true);
+		roads.setEnabled(true);
+		roads.setOpacity(0.7);
 
 		//landmarks.setEnabled(true);
 
@@ -812,20 +815,27 @@ public class Animator
 
 						int first = animation.getFirstFrame();
 						int last = animation.getLastFrame();
+						
+						first = 7960;
+						last = 7965;
 
-						joinThread(animate(
+						//last = 600;
+
+						animate(detail, first, last, new File("frames"), false);
+
+						/*joinThread(animate(
 								detail,
 								0,
 								1,
 								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/landsky")));
+										"F:/West Macs Imagery/animation_frames_filtered/map1")));
 
 						joinThread(animate(
 								detail,
 								first,
 								last,
 								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/landsky")));
+										"F:/West Macs Imagery/animation_frames_filtered/map1")));*/
 
 						/*
 						int endFirst = 2000;
@@ -1161,11 +1171,12 @@ public class Animator
 	{
 		int firstFrame = Math.max(slider.getValue(), animation.getFirstFrame());
 		int lastFrame = animation.getLastFrame();
-		return animate(detailHint, firstFrame, lastFrame, new File("frames"));
+		return animate(detailHint, firstFrame, lastFrame, new File("frames"),
+				true);
 	}
 
 	private Thread animate(final double detailHint, final int firstFrame,
-			final int lastFrame, final File outputDir)
+			final int lastFrame, final File outputDir, final boolean alpha)
 	{
 		if (animation != null && animation.size() > 0)
 		{
@@ -1177,6 +1188,8 @@ public class Animator
 
 					boolean immediate = ImmediateMode.isImmediate();
 					ImmediateMode.setImmediate(true);
+					AnimatorSceneController asc = (AnimatorSceneController) wwd
+							.getSceneController();
 
 					setAnimationSize(animation.getWidth(), animation
 							.getHeight());
@@ -1191,13 +1204,18 @@ public class Animator
 					boolean detectCollisions = view.isDetectCollisions();
 					view.setDetectCollisions(false);
 
+					int filenameLength = String.valueOf(lastFrame).length();
+
 					for (int frame = firstFrame; frame <= lastFrame; frame += 1)
 					{
 						setSlider(frame);
 						applyView(getView());
 
-						takeScreenshot(new File(outputDir, "frame" + frame
-								+ ".png"));
+						asc.takeScreenshot(new File(outputDir, "frame"
+								+ FileUtil.paddedInt(frame, filenameLength)
+								+ ".tga"), alpha);
+						wwd.redraw();
+						asc.waitForScreenshot();
 
 						if (stop)
 							break;
@@ -1216,95 +1234,6 @@ public class Animator
 		}
 		return null;
 	}
-
-	private void takeScreenshot(File file)
-	{
-		if (!EventQueue.isDispatchThread())
-		{
-			takingScreenshot = true;
-		}
-
-		wwd.addRenderingListener(new Screenshotter(file));
-		wwd.redraw();
-
-		if (!EventQueue.isDispatchThread())
-		{
-			while (takingScreenshot)
-			{
-				try
-				{
-					Thread.sleep(100);
-				}
-				catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	private class Screenshotter implements RenderingListener
-	{
-		private final File file;
-
-		public Screenshotter(File file)
-		{
-			this.file = file;
-		}
-
-		public void stageChanged(RenderingEvent event)
-		{
-			if (WorldWind.getTaskService().hasActiveTasks()
-					|| WorldWind.getRetrievalService().hasActiveTasks())
-			{
-				System.out.println("Sleeping while tasks are active");
-				sleep();
-				wwd.redraw();
-			}
-			else if (event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)
-			{
-				wwd.removeRenderingListener(this);
-
-				if (!file.getParentFile().exists())
-				{
-					file.getParentFile().mkdirs();
-				}
-				try
-				{
-					if (file.getName().toLowerCase().endsWith(".tga"))
-					{
-						/*com.sun.opengl.util.Screenshot.writeToTargaFile(out,
-								wwd.getWidth(), wwd.getHeight(), true);*/
-						TGAScreenshot.writeToTargaFile(file, wwd.getWidth(),
-								wwd.getHeight(), true);
-					}
-					else
-					{
-						com.sun.opengl.util.Screenshot.writeToFile(file, wwd
-								.getWidth(), wwd.getHeight(), true);
-					}
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-
-				takingScreenshot = false;
-			}
-		}
-
-		private void sleep()
-		{
-			try
-			{
-				Thread.sleep(100);
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
-		}
-	};
 
 	private class Updater
 	{

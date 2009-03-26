@@ -71,7 +71,7 @@ public class FileBasicTiledImageLayer extends ImmediateBasicTiledImageLayer
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	@Override
+	/*@Override
 	protected void requestTexture(DrawContext dc, TextureTile tile)
 	{
 		super.requestTexture(dc, tile);
@@ -85,5 +85,5 @@ public class FileBasicTiledImageLayer extends ImmediateBasicTiledImageLayer
 			}
 			task = getRequestQ().poll();
 		}
-	}
+	}*/
 }

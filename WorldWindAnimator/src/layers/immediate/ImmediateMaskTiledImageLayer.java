@@ -7,25 +7,25 @@ import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
-import nasa.worldwind.layers.BasicTiledImageLayer;
+import layers.mask.MaskTiledImageLayer;
 
-public class ImmediateBasicTiledImageLayer extends BasicTiledImageLayer
+public class ImmediateMaskTiledImageLayer extends MaskTiledImageLayer
 {
-	public ImmediateBasicTiledImageLayer(LevelSet levelSet)
+	public ImmediateMaskTiledImageLayer(LevelSet levelSet)
 	{
 		super(levelSet);
 	}
 
-	public ImmediateBasicTiledImageLayer(AVList params)
+	public ImmediateMaskTiledImageLayer(AVList params)
 	{
 		super(params);
 	}
 
-	public ImmediateBasicTiledImageLayer(String stateInXml)
+	public ImmediateMaskTiledImageLayer(String stateInXml)
 	{
 		super(stateInXml);
 	}
-
+	
 	@Override
 	protected void requestTexture(DrawContext dc, TextureTile tile)
 	{

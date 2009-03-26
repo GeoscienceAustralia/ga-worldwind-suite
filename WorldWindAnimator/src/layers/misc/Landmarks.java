@@ -35,7 +35,7 @@ public class Landmarks extends RenderableLayer
 		try
 		{
 			landmarksString = FileUtil.readFileAsString(new File(
-					"F:/West Macs Imagery/landmarks.csv"));
+					"D:/West Macs Imagery/landmarks.csv"));
 		}
 		catch (IOException e)
 		{

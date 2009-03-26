@@ -5,7 +5,6 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.layers.TiledImageLayer;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
@@ -13,8 +12,9 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import layers.mask.MaskTiledImageLayer;
+import nasa.worldwind.layers.TiledImageLayer;
 import nasa.worldwind.terrain.BasicElevationModel;
+import util.FileUtil;
 
 public class FileLayer
 {
@@ -68,7 +68,7 @@ public class FileLayer
 		params.setValue(AVKey.TILE_URL_BUILDER, new FileUrlBuilder(directory,
 				extension, maskDirectory, maskExtension));
 
-		TiledImageLayer layer = new MaskTiledImageLayer(params);
+		TiledImageLayer layer = new FileMaskTiledImageLayer(params);
 		layer.setName(name);
 		layer.setUseTransparentTextures(true);
 		layer.setUseMipMaps(true);
@@ -93,8 +93,8 @@ public class FileLayer
 		params.setValue(AVKey.TILE_URL_BUILDER,
 				new FileBasicElevationModel.FileUrlBuilder(directory));
 
-		FileBasicElevationModel fbem = new FileBasicElevationModel(params, minElevation,
-				maxElevation);
+		FileBasicElevationModel fbem = new FileBasicElevationModel(params,
+				minElevation, maxElevation);
 		fbem.setName(name);
 		fbem.setNumExpectedValuesPerTile(tilesize * tilesize);
 		return fbem;
@@ -123,11 +123,11 @@ public class FileLayer
 			File file = new File(mask ? maskDirectory : directory, tile
 					.getLevelNumber()
 					+ File.separator
-					+ paddedInt(tile.getRow(), 4)
+					+ FileUtil.paddedInt(tile.getRow(), 4)
 					+ File.separator
-					+ paddedInt(tile.getRow(), 4)
+					+ FileUtil.paddedInt(tile.getRow(), 4)
 					+ "_"
-					+ paddedInt(tile.getColumn(), 4)
+					+ FileUtil.paddedInt(tile.getColumn(), 4)
 					+ "."
 					+ (mask ? maskExtension : extension));
 			if (file.exists())
@@ -135,15 +135,5 @@ public class FileLayer
 			return FileLayer.class.getResource("blank."
 					+ (mask ? maskExtension : extension));
 		}
-	}
-
-	private static String paddedInt(int value, int charcount)
-	{
-		String str = String.valueOf(value);
-		while (str.length() < charcount)
-		{
-			str = "0" + str;
-		}
-		return str;
 	}
 }

@@ -32,10 +32,11 @@ public class Skysphere extends AbstractLayer
 	private Texture texture;
 	private boolean inited = false;
 	private String texturePath = "data/skysphere/sky10.png";
+	private int slices = 20;
+	private int segments = 20;
 
 	public Skysphere()
 	{
-
 	}
 
 	private void initializeTextures(DrawContext dc)
@@ -90,6 +91,7 @@ public class Skysphere extends AbstractLayer
 
 		if (!inited)
 		{
+			setupGeometryBuffers(slices, segments, 1d, false, true);
 			initializeTextures(dc);
 			inited = true;
 		}
@@ -145,16 +147,16 @@ public class Skysphere extends AbstractLayer
 		gl.glRotated(180, 0, 0, 1);
 		//rotate sun to be in correct position
 		gl.glRotated(-83, 0, 1, 0);
-		
+
 		gl.glMatrixMode(GL.GL_TEXTURE);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
 		gl.glScaled(1.0d, 2.0d, 1.0d);
-		
+
 		gl.glColor3d(1, 1, 1);
 		texture.bind();
-		drawSphere(gl, 20, 20, 1);
-		
+		drawSphere(gl);
+
 		gl.glPopMatrix();
 
 		// Restore enable bits and matrix
@@ -165,13 +167,8 @@ public class Skysphere extends AbstractLayer
 		gl.glPopMatrix();
 	}
 
-	private void drawSphere(GL gl, int slices, int segments, double radius)
+	private void drawSphere(GL gl)
 	{
-		if (vb == null)
-		{
-			setGeometryData(slices, segments, radius, false, true);
-		}
-
 		gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
 		gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
 		gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
@@ -184,29 +181,18 @@ public class Skysphere extends AbstractLayer
 		gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vb);
 		gl.glNormalPointer(GL.GL_DOUBLE, 0, nb);
 		gl.glTexCoordPointer(2, GL.GL_DOUBLE, 0, tb);
-		gl.glDrawElements(GL.GL_TRIANGLES, ib.limit(), GL.GL_UNSIGNED_INT, ib);
+		gl.glDrawElements(GL.GL_TRIANGLES, ib.limit() / 2, GL.GL_UNSIGNED_INT, ib);
 
 		gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
 		gl.glDisableClientState(GL.GL_NORMAL_ARRAY);
 		gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
 	}
 
-	/*private DoubleBuffer cb;
-	private void randomiseColor()
-	{
-		Random random = new Random();
-		cb = BufferUtil.newDoubleBuffer(vertexCount * 3);
-		for (int i = 0; i < cb.limit(); i++)
-		{
-			cb.put(random.nextDouble());
-		}
-	}*/
-
-	private void setGeometryData(int zSamples, int radialSamples,
-			double radius, boolean projected, boolean interior)
+	private void setupGeometryBuffers(int slices, int segments, double radius,
+			boolean projected, boolean interior)
 	{
 		// allocate vertices
-		vertexCount = (zSamples - 2) * (radialSamples + 1) + 2;
+		vertexCount = (slices - 2) * (segments + 1) + 2;
 		vb = BufferUtil.newDoubleBuffer(vertexCount * 3);
 
 		// allocate normals if requested
@@ -216,15 +202,15 @@ public class Skysphere extends AbstractLayer
 		tb = BufferUtil.newDoubleBuffer(vertexCount * 2);
 
 		// allocate index buffer
-		triCount = 2 * (zSamples - 2) * radialSamples;
+		triCount = 2 * (slices - 2) * segments;
 		ib = BufferUtil.newIntBuffer(triCount * 3);
 
 		//sphere center
 		Vec4 center = Vec4.UNIT_W;
 
 		// generate geometry
-		double fInvRS = 1.0f / radialSamples;
-		double yFactor = 2.0f / (zSamples - 1);
+		double fInvRS = 1.0f / segments;
+		double yFactor = 2.0f / (slices - 1);
 		double pi = Math.PI;
 		double twopi = pi * 2d;
 		double halfpi = pi / 2d;
@@ -232,20 +218,20 @@ public class Skysphere extends AbstractLayer
 
 		// Generate points on the unit circle to be used in computing the mesh
 		// points on a sphere slice.
-		double[] aSin = new double[radialSamples + 1];
-		double[] aCos = new double[radialSamples + 1];
-		for (int iR = 0; iR < radialSamples; iR++)
+		double[] aSin = new double[segments + 1];
+		double[] aCos = new double[segments + 1];
+		for (int iR = 0; iR < segments; iR++)
 		{
 			double fAngle = twopi * fInvRS * iR;
 			aCos[iR] = Math.cos(fAngle);
 			aSin[iR] = Math.sin(fAngle);
 		}
-		aSin[radialSamples] = aSin[0];
-		aCos[radialSamples] = aCos[0];
+		aSin[segments] = aSin[0];
+		aCos[segments] = aCos[0];
 
 		// generate the sphere itself
 		int i = 0;
-		for (int iY = 1; iY < (zSamples - 1); iY++)
+		for (int iY = 1; iY < (slices - 1); iY++)
 		{
 			double yFraction = -1.0f + yFactor * iY; // in (-1,1)
 			double y = radius * yFraction;
@@ -258,7 +244,7 @@ public class Skysphere extends AbstractLayer
 
 			// compute slice vertices with duplication at end point
 			int iSave = i;
-			for (int r = 0; r < radialSamples; r++)
+			for (int r = 0; r < segments; r++)
 			{
 				double radialFraction = r * fInvRS; // in [0,1)
 				Vec4 radial = new Vec4(aCos[r], 0, aSin[r]);
@@ -328,14 +314,14 @@ public class Skysphere extends AbstractLayer
 
 		// generate connectivity
 		int index = 0;
-		for (int iZ = 0, iZStart = 0; iZ < (zSamples - 3); iZ++)
+		for (int iY = 0, iYStart = 0; iY < (slices - 3); iY++)
 		{
-			int i0 = iZStart;
+			int i0 = iYStart;
 			int i1 = i0 + 1;
-			iZStart += (radialSamples + 1);
-			int i2 = iZStart;
+			iYStart += (segments + 1);
+			int i2 = iYStart;
 			int i3 = i2 + 1;
-			for (int j = 0; j < radialSamples; j++, index += 6)
+			for (int j = 0; j < segments; j++, index += 6)
 			{
 				if (!interior)
 				{
@@ -360,7 +346,7 @@ public class Skysphere extends AbstractLayer
 		}
 
 		// south pole triangles
-		for (int j = 0; j < radialSamples; j++, index += 3)
+		for (int j = 0; j < segments; j++, index += 3)
 		{
 			if (!interior)
 			{
@@ -377,8 +363,8 @@ public class Skysphere extends AbstractLayer
 		}
 
 		// north pole triangles
-		int iOffset = (zSamples - 3) * (radialSamples + 1);
-		for (int j = 0; j < radialSamples; j++, index += 3)
+		int iOffset = (slices - 3) * (segments + 1);
+		for (int j = 0; j < segments; j++, index += 3)
 		{
 			if (!interior)
 			{

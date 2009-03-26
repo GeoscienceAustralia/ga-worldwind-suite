@@ -3,17 +3,23 @@ package layers.immediate;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.TileKey;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 import nasa.worldwind.terrain.BasicElevationModel;
 
 public class ImmediateBasicElevationModel extends BasicElevationModel
 {
+	private boolean elevationWasRequested;
+
 	public ImmediateBasicElevationModel(LevelSet levels, double minElevation,
 			double maxElevation)
 	{
@@ -38,6 +44,43 @@ public class ImmediateBasicElevationModel extends BasicElevationModel
 	}
 
 	@Override
+	public double getElevations(Sector sector, List<? extends LatLon> latlons,
+			double targetResolution, double[] buffer)
+	{
+		if (!ImmediateMode.isImmediate())
+		{
+			return super.getElevations(sector, latlons, targetResolution,
+					buffer);
+		}
+
+		double value;
+		do
+		{
+			elevationWasRequested = false;
+			value = super.getElevations(sector, latlons, targetResolution,
+					buffer);
+		} while (elevationWasRequested);
+		return value;
+	}
+
+	@Override
+	public double getUnmappedElevation(Angle latitude, Angle longitude)
+	{
+		if (!ImmediateMode.isImmediate())
+		{
+			return super.getUnmappedElevation(latitude, longitude);
+		}
+
+		double value;
+		do
+		{
+			elevationWasRequested = false;
+			value = super.getUnmappedElevation(latitude, longitude);
+		} while (elevationWasRequested);
+		return value;
+	}
+
+	@Override
 	protected void requestTile(TileKey key)
 	{
 		if (!ImmediateMode.isImmediate())
@@ -45,6 +88,8 @@ public class ImmediateBasicElevationModel extends BasicElevationModel
 			super.requestTile(key);
 			return;
 		}
+
+		elevationWasRequested = true;
 
 		// check to ensure load is still needed
 		if (areElevationsInMemory(key))
@@ -69,7 +114,7 @@ public class ImmediateBasicElevationModel extends BasicElevationModel
 	private boolean loadTileFromStore(Tile tile) throws IOException
 	{
 		//from BasicElevationModel.requestTask.run()
-		
+
 		final URL url = WorldWind.getDataFileStore().findFile(tile.getPath(),
 				false);
 		if (url != null)

@@ -12,7 +12,6 @@ import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.TextureTile;
-import gov.nasa.worldwind.layers.TiledImageLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.retrieve.HTTPRetriever;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
@@ -42,6 +41,7 @@ import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 
 import layers.file.FileRetriever;
+import nasa.worldwind.layers.TiledImageLayer;
 
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
@@ -386,7 +386,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		}
 	}
 
-	private boolean isTextureExpired(TextureTile tile, java.net.URL textureURL)
+	protected boolean isTextureExpired(TextureTile tile, java.net.URL textureURL)
 	{
 		if (!WWIO.isFileOutOfDate(textureURL, tile.getLevel().getExpiryTime()))
 			return false;
@@ -399,7 +399,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		return true;
 	}
 
-	private boolean loadTexture(TextureTile tile, java.net.URL textureURL)
+	protected boolean loadTexture(TextureTile tile, java.net.URL textureURL)
 	{
 		TextureData textureData;
 

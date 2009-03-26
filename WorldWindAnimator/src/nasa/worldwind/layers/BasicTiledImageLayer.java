@@ -18,7 +18,6 @@ import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.TextureTile;
-import gov.nasa.worldwind.layers.TiledImageLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.retrieve.HTTPRetriever;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
