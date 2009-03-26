@@ -21,11 +21,11 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
+
+import au.gov.ga.worldwind.util.Util;
 
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
@@ -51,110 +51,10 @@ public class LocalLayer extends TiledImageLayer
 		return definition;
 	}
 
-	public static int levelCount(File directory)
-	{
-		int levels = -1;
-		for (int i = 0; true; i++)
-		{
-			File leveldir = new File(directory, String.valueOf(i));
-			if (!leveldir.exists())
-				break;
-			levels++;
-		}
-		return levels;
-	}
-
-	public static Sector sector(File directory, String extension, int levels,
-			double lztsd)
-	{
-		int level = levels - 1;
-		File lastLevelDirectory = new File(directory, String.valueOf(level));
-		MinMax rowMinMax = getMinMaxRow(lastLevelDirectory);
-		File firstRowDirectory = new File(lastLevelDirectory, paddedInt(
-				rowMinMax.min, 4));
-		MinMax colMinMax = getMinMaxCol(firstRowDirectory, extension);
-		return Sector.fromDegrees(getTileLat(rowMinMax.min, level, lztsd),
-				getTileLat(rowMinMax.max + 1, level, lztsd), getTileLon(
-						colMinMax.min, level, lztsd), getTileLon(
-						colMinMax.max + 1, level, lztsd));
-	}
-
-	private static class MinMax
-	{
-		private int min = Integer.MAX_VALUE;
-		private int max = Integer.MIN_VALUE;
-	}
-
-	private static MinMax getMinMaxRow(File directory)
-	{
-		MinMax minmax = new MinMax();
-		String[] list = directory.list();
-		boolean match = false;
-		for (String file : list)
-		{
-			if (file.matches("\\d+"))
-			{
-				match = true;
-				int row = Integer.parseInt(file);
-				minmax.min = Math.min(minmax.min, row);
-				minmax.max = Math.max(minmax.max, row);
-			}
-		}
-		return match ? minmax : null;
-	}
-
-	private static MinMax getMinMaxCol(File directory, String extension)
-	{
-		MinMax minmax = new MinMax();
-		String[] list = directory.list();
-		boolean match = false;
-		for (String file : list)
-		{
-			if (file.toLowerCase().matches(
-					"\\d+\\_\\d+\\Q." + extension.toLowerCase() + "\\E"))
-			{
-				Pattern pattern = Pattern.compile("\\d+");
-				Matcher matcher = pattern.matcher(file);
-				if (matcher.find() && matcher.find(matcher.end()))
-				{
-					match = true;
-					int col = Integer.parseInt(matcher.group());
-					minmax.min = Math.min(minmax.min, col);
-					minmax.max = Math.max(minmax.max, col);
-				}
-			}
-		}
-		return match ? minmax : null;
-	}
-
-	private static double getTileLon(int col, int level, double lztsd)
-	{
-		double levelpow = Math.pow(0.5, level);
-		return col * lztsd * levelpow - 180;
-	}
-
-	private static double getTileLat(int row, int level, double lztsd)
-	{
-		double levelpow = Math.pow(0.5, level);
-		return row * lztsd * levelpow - 90;
-	}
-
-	private static String paddedInt(int value, int charcount)
-	{
-		String str = String.valueOf(value);
-		while (str.length() < charcount)
-		{
-			str = "0" + str;
-		}
-		return str;
-	}
-
 	protected static LevelSet makeLevels(LocalLayerDefinition definition)
 	{
-		File directory = new File(definition.getDirectory());
-		int levels = levelCount(directory);
-		Sector sector = sector(directory, definition.getExtension(), levels,
-				definition.getLztsd());
+		Sector sector = Sector.fromDegrees(definition.getMinLat(), definition
+				.getMaxLat(), definition.getMinLon(), definition.getMaxLon());
 
 		AVList params = new AVListImpl();
 		params.setValue(AVKey.TILE_WIDTH, definition.getTilesize());
@@ -164,7 +64,7 @@ public class LocalLayer extends TiledImageLayer
 		params.setValue(AVKey.SERVICE, null);
 		params.setValue(AVKey.DATASET_NAME, definition.getName());
 		params.setValue(AVKey.FORMAT_SUFFIX, "." + definition.getExtension());
-		params.setValue(AVKey.NUM_LEVELS, levels);
+		params.setValue(AVKey.NUM_LEVELS, definition.getLevelcount());
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, LatLon.fromDegrees(
 				definition.getLztsd(), definition.getLztsd()));
@@ -233,9 +133,9 @@ public class LocalLayer extends TiledImageLayer
 	private File getTileFile(TextureTile tile)
 	{
 		return new File(directory, tile.getLevelNumber() + File.separator
-				+ paddedInt(tile.getRow(), 4) + File.separator
-				+ paddedInt(tile.getRow(), 4) + "_"
-				+ paddedInt(tile.getColumn(), 4) + "."
+				+ Util.paddedInt(tile.getRow(), 4) + File.separator
+				+ Util.paddedInt(tile.getRow(), 4) + "_"
+				+ Util.paddedInt(tile.getColumn(), 4) + "."
 				+ definition.getExtension());
 	}
 

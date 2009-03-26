@@ -10,6 +10,11 @@ public class LocalLayerDefinition implements Serializable
 	private String extension = "JPG";
 	private int tilesize = 512;
 	private double lztsd = 36d;
+	private int levelcount = 1;
+	private double minLat = -90;
+	private double minLon = -180;
+	private double maxLat = 90;
+	private double maxLon = 180;
 	private boolean hasTransparentColor = false;
 	private Color transparentColor = Color.black;
 	private int transparentFuzz = 10;
@@ -101,5 +106,55 @@ public class LocalLayerDefinition implements Serializable
 	public LocalLayer createLayer()
 	{
 		return new LocalLayer(this);
+	}
+
+	public int getLevelcount()
+	{
+		return levelcount;
+	}
+
+	public void setLevelcount(int levelcount)
+	{
+		this.levelcount = levelcount;
+	}
+
+	public double getMinLat()
+	{
+		return minLat;
+	}
+
+	public void setMinLat(double minlat)
+	{
+		this.minLat = minlat;
+	}
+
+	public double getMinLon()
+	{
+		return minLon;
+	}
+
+	public void setMinLon(double minlon)
+	{
+		this.minLon = minlon;
+	}
+
+	public double getMaxLat()
+	{
+		return maxLat;
+	}
+
+	public void setMaxLat(double maxlat)
+	{
+		this.maxLat = maxlat;
+	}
+
+	public double getMaxLon()
+	{
+		return maxLon;
+	}
+
+	public void setMaxLon(double maxlon)
+	{
+		this.maxLon = maxlon;
 	}
 }

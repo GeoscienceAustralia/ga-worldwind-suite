@@ -236,4 +236,14 @@ public class Util
 
 		return null;
 	}
+	
+	public static String paddedInt(int value, int charcount)
+	{
+		String str = String.valueOf(value);
+		while (str.length() < charcount)
+		{
+			str = "0" + str;
+		}
+		return str;
+	}
 }
