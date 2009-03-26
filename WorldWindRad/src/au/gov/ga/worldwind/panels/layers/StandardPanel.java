@@ -30,6 +30,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import au.gov.ga.worldwind.application.Application;
 import au.gov.ga.worldwind.layers.geonames.GeoNamesLayer;
 import au.gov.ga.worldwind.layers.mercator.VirtualEarthLayer;
 import au.gov.ga.worldwind.layers.mercator.VirtualEarthLayer.Dataset;
@@ -40,8 +41,6 @@ import au.gov.ga.worldwind.layers.metacarta.MetacartaStateBoundariesLayer;
 
 public class StandardPanel extends JPanel
 {
-	private final static boolean VIRTUAL_EARTH_ENABLED = false;
-
 	private Layer stars;
 	private Layer atmosphere;
 	private Layer fog;
@@ -190,7 +189,7 @@ public class StandardPanel extends JPanel
 		landsatCheck.addActionListener(al);
 		panel2.add(landsatCheck);
 
-		if (VIRTUAL_EARTH_ENABLED)
+		if (Application.VIRTUAL_EARTH_ENABLED)
 		{
 			veRadio = new JRadioButton("Microsoft Virtual Earth");
 			veRadio.addActionListener(al);
@@ -305,7 +304,7 @@ public class StandardPanel extends JPanel
 		landsat.setEnabled(nasaRadio.isSelected() && landsatCheck.isSelected());
 		osmmapnik.setEnabled(osmRadio.isSelected());
 
-		if (VIRTUAL_EARTH_ENABLED)
+		if (Application.VIRTUAL_EARTH_ENABLED)
 		{
 			aerialRadio.setEnabled(veRadio.isSelected());
 			roadRadio.setEnabled(veRadio.isSelected());

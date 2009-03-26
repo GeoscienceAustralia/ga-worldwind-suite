@@ -102,6 +102,9 @@ import au.gov.ga.worldwind.util.Util;
 
 public class Application
 {
+	public final static boolean LOCAL_LAYERS_ENABLED = true;
+	public final static boolean VIRTUAL_EARTH_ENABLED = false;
+
 	static
 	{
 		if (Configuration.isMacOS())
@@ -273,15 +276,18 @@ public class Application
 		createDialogs();
 
 		//init user layers
-		LocalLayers.init(wwd);
-		layersPanel.updateLocalLayers();
-		LocalLayers.get().addChangeListener(new ChangeListener()
+		if (LOCAL_LAYERS_ENABLED)
 		{
-			public void stateChanged(ChangeEvent e)
+			LocalLayers.init(wwd);
+			layersPanel.updateLocalLayers();
+			LocalLayers.get().addChangeListener(new ChangeListener()
 			{
-				layersPanel.updateLocalLayers();
-			}
-		});
+				public void stateChanged(ChangeEvent e)
+				{
+					layersPanel.updateLocalLayers();
+				}
+			});
+		}
 
 		frame.setJMenuBar(createMenuBar());
 		addWindowListeners();
@@ -791,21 +797,24 @@ public class Application
 			}
 		});
 
-		menuItem = new JMenuItem("Add local tileset...");
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		if (LOCAL_LAYERS_ENABLED)
 		{
-			public void actionPerformed(ActionEvent e)
+			menuItem = new JMenuItem("Add local tileset...");
+			menu.add(menuItem);
+			menuItem.addActionListener(new ActionListener()
 			{
-				LocalLayerDefinition def = new LocalLayerDefinition();
-				def = LocalLayerEditor.editDefinition(frame,
-						"New local tileset", def);
-				if (def != null)
+				public void actionPerformed(ActionEvent e)
 				{
-					LocalLayers.get().addLayer(def);
+					LocalLayerDefinition def = new LocalLayerDefinition();
+					def = LocalLayerEditor.editDefinition(frame,
+							"New local tileset", def);
+					if (def != null)
+					{
+						LocalLayers.get().addLayer(def);
+					}
 				}
-			}
-		});
+			});
+		}
 
 		menu.addSeparator();
 
@@ -1104,7 +1113,10 @@ public class Application
 		saveSplitLocations();
 		saveDialogBounds();
 		Settings.save();
-		LocalLayers.save();
+		if (LOCAL_LAYERS_ENABLED)
+		{
+			LocalLayers.save();
+		}
 		frame.dispose();
 		System.exit(0);
 	}

@@ -223,7 +223,7 @@ public class LocalLayers
 	public static class Definitions implements Serializable
 	{
 		private List<LocalLayerDefinition> definitions;
-		
+
 		public Definitions()
 		{
 		}
