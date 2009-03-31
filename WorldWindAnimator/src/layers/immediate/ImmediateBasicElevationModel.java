@@ -14,33 +14,23 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-import nasa.worldwind.terrain.BasicElevationModel;
-
-public class ImmediateBasicElevationModel extends BasicElevationModel
+public class ImmediateBasicElevationModel extends gov.nasa.worldwind.terrain.BasicElevationModel
 {
 	private boolean elevationWasRequested;
 
-	public ImmediateBasicElevationModel(LevelSet levels, double minElevation,
-			double maxElevation)
+	public ImmediateBasicElevationModel(LevelSet levels)
 	{
-		super(levels, minElevation, maxElevation);
+		super(levels);
 	}
 
-	public ImmediateBasicElevationModel(AVList params, double minElevation,
-			double maxElevation)
+	public ImmediateBasicElevationModel(AVList params)
 	{
-		super(params, minElevation, maxElevation);
+		super(params);
 	}
 
 	public ImmediateBasicElevationModel(String stateInXml)
 	{
 		super(stateInXml);
-	}
-
-	public ImmediateBasicElevationModel(AVList params,
-			double[] minAndMaxElevation)
-	{
-		super(params, minAndMaxElevation);
 	}
 
 	@Override

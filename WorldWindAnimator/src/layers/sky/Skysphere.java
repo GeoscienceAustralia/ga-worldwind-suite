@@ -34,6 +34,7 @@ public class Skysphere extends AbstractLayer
 	private String texturePath = "data/skysphere/sky10.png";
 	private int slices = 20;
 	private int segments = 20;
+	private double rotation = -83d;
 
 	public Skysphere()
 	{
@@ -146,7 +147,7 @@ public class Skysphere extends AbstractLayer
 		//rotate upside-down texture
 		gl.glRotated(180, 0, 0, 1);
 		//rotate sun to be in correct position
-		gl.glRotated(-83, 0, 1, 0);
+		gl.glRotated(rotation, 0, 1, 0);
 
 		gl.glMatrixMode(GL.GL_TEXTURE);
 		gl.glPushMatrix();
@@ -181,7 +182,8 @@ public class Skysphere extends AbstractLayer
 		gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vb);
 		gl.glNormalPointer(GL.GL_DOUBLE, 0, nb);
 		gl.glTexCoordPointer(2, GL.GL_DOUBLE, 0, tb);
-		gl.glDrawElements(GL.GL_TRIANGLES, ib.limit() / 2, GL.GL_UNSIGNED_INT, ib);
+		gl.glDrawElements(GL.GL_TRIANGLES, ib.limit() / 2, GL.GL_UNSIGNED_INT,
+				ib);
 
 		gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
 		gl.glDisableClientState(GL.GL_NORMAL_ARRAY);

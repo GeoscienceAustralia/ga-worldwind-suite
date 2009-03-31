@@ -14,7 +14,7 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.terrain.CompoundElevationModel;
+import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
@@ -65,9 +65,8 @@ import nasa.worldwind.layers.AtmosphereLayer;
 import nasa.worldwind.layers.FogLayer;
 import nasa.worldwind.layers.LensFlareLayer;
 import nasa.worldwind.layers.SkyGradientLayer;
-import nasa.worldwind.terrain.BasicElevationModel;
-import nasa.worldwind.terrain.ConfigurableTessellator;
 import nasa.worldwind.view.BasicRollOrbitView;
+import terrain.OffsetCompoundElevationModel;
 import util.ChangeFrameListener;
 import util.FileUtil;
 import util.FrameSlider;
@@ -144,8 +143,6 @@ public class Animator
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, BasicRollOrbitView.class
 				.getName());
-		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
-				ConfigurableTessellator.class.getName());
 		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME,
 				AnimatorSceneController.class.getName());
 
@@ -186,15 +183,13 @@ public class Animator
 		frame.add(wwd, BorderLayout.CENTER);
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
 
-		CompoundElevationModel cem = new CompoundElevationModel();
-		model.getGlobe().setElevationModel(cem);
+		OffsetCompoundElevationModel ocem = new OffsetCompoundElevationModel();
+		model.getGlobe().setElevationModel(ocem);
 
-		ConfigurableTessellator tesselator = (ConfigurableTessellator) model
-				.getGlobe().getTessellator();
 		//tesselator.setMakeTileSkirts(false);
 		//model.setShowWireframeInterior(true);
 		wwd.getSceneController().setVerticalExaggeration(1.5);
-		tesselator.setElevationOffset(200);
+		ocem.setElevationOffset(200);
 
 		LayerList layers = model.getLayers();
 
@@ -291,7 +286,7 @@ public class Animator
 				150, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-25.0001389, -23.0001389, 131.9998611, 133.9998611),
 				308d, 1515d);
-		cem.addElevationModel(bem);
+		ocem.addElevationModel(bem);
 
 		map1 = FileLayer.createLayer("WestMac Map Page 1",
 				"GA/WestMac Map Page 1", ".dds", new File(tileDrive
@@ -815,9 +810,9 @@ public class Animator
 
 						int first = animation.getFirstFrame();
 						int last = animation.getLastFrame();
-						
-						first = 7960;
-						last = 7965;
+
+						first = 590;
+						last = 595;
 
 						//last = 600;
 
@@ -1142,10 +1137,6 @@ public class Animator
 				{
 					stop = false;
 
-					View view = getView();
-					boolean detectCollisions = view.isDetectCollisions();
-					view.setDetectCollisions(false);
-
 					int firstFrame = Math.max(slider.getValue(), animation
 							.getFirstFrame());
 					int lastFrame = animation.getLastFrame();
@@ -1159,8 +1150,6 @@ public class Animator
 						if (stop)
 							break;
 					}
-
-					view.setDetectCollisions(detectCollisions);
 				}
 			});
 			thread.start();

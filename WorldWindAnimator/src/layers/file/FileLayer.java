@@ -5,6 +5,7 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
@@ -13,7 +14,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import nasa.worldwind.layers.TiledImageLayer;
-import nasa.worldwind.terrain.BasicElevationModel;
 import util.FileUtil;
 
 public class FileLayer
@@ -92,11 +92,11 @@ public class FileLayer
 		params.setValue(AVKey.SECTOR, sector);
 		params.setValue(AVKey.TILE_URL_BUILDER,
 				new FileBasicElevationModel.FileUrlBuilder(directory));
+		params.setValue(AVKey.ELEVATION_MIN, minElevation);
+		params.setValue(AVKey.ELEVATION_MAX, maxElevation);
 
-		FileBasicElevationModel fbem = new FileBasicElevationModel(params,
-				minElevation, maxElevation);
+		FileBasicElevationModel fbem = new FileBasicElevationModel(params);
 		fbem.setName(name);
-		fbem.setNumExpectedValuesPerTile(tilesize * tilesize);
 		return fbem;
 	}
 

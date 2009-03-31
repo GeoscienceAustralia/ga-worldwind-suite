@@ -15,26 +15,19 @@ import layers.immediate.ImmediateBasicElevationModel;
 
 public class FileBasicElevationModel extends ImmediateBasicElevationModel
 {
-	public FileBasicElevationModel(LevelSet levels, double minElevation,
-			double maxElevation)
+	public FileBasicElevationModel(LevelSet levels)
 	{
-		super(levels, minElevation, maxElevation);
+		super(levels);
 	}
 
-	public FileBasicElevationModel(AVList params, double minElevation,
-			double maxElevation)
+	public FileBasicElevationModel(AVList params)
 	{
-		super(params, minElevation, maxElevation);
+		super(params);
 	}
 
 	public FileBasicElevationModel(String stateInXml)
 	{
 		super(stateInXml);
-	}
-
-	public FileBasicElevationModel(AVList params, double[] minAndMaxElevation)
-	{
-		super(params, minAndMaxElevation);
 	}
 
 	@Override

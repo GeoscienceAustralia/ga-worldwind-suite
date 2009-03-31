@@ -26,7 +26,7 @@ import java.util.*;
  * layers). It's a self-contained component intended to serve as an application's world window. rendering.
  *
  * @author Tom Gaskins
- * @version $Id: WorldWindowGLCanvas.java 7649 2008-11-15 07:11:30Z tgaskins $
+ * @version $Id: WorldWindowGLCanvas.java 9428 2009-03-17 07:05:09Z tgaskins $
  */
 public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, PropertyChangeListener
 {
@@ -64,7 +64,6 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
         }
     }
     
-    /** Constructs a new <code>WorldWindowGLCanvas</code> window on the default graphics device. */
     public WorldWindowGLCanvas(GLCapabilities caps)
     {
         super(caps);
@@ -301,14 +300,14 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
         return this.wwd.getSceneController() != null ? this.wwd.getSceneController().getPickedObjectList() : null;
     }
 
-    public void setValue(String key, Object value)
+    public Object setValue(String key, Object value)
     {
-        this.wwd.setValue(key, value);
+        return this.wwd.setValue(key, value);
     }
 
-    public void setValues(AVList avList)
+    public AVList setValues(AVList avList)
     {
-        this.wwd.setValues(avList);
+        return this.wwd.setValues(avList);
     }
 
     public Object getValue(String key)
@@ -336,9 +335,9 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
         return this.wwd.hasKey(key);
     }
 
-    public void removeKey(String key)
+    public Object removeKey(String key)
     {
-        this.wwd.removeKey(key);
+        return this.wwd.removeKey(key);
     }
 
     @Override
