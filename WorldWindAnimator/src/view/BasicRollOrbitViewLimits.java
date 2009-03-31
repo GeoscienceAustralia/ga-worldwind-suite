@@ -15,7 +15,6 @@ public class BasicRollOrbitViewLimits extends BasicOrbitViewLimits implements
 		super();
 		minRoll = Angle.NEG180;
 		maxRoll = Angle.POS180;
-		maxPitch = Angle.POS180;
 	}
 
 	public Angle[] getRollLimits()

@@ -18,6 +18,7 @@ import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
+import gov.nasa.worldwind.view.OrbitViewLimits;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -182,6 +183,8 @@ public class Animator
 		setAnimationSize(1024, 576);
 		frame.add(wwd, BorderLayout.CENTER);
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
+		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(
+				Angle.ZERO, Angle.POS180);
 
 		OffsetCompoundElevationModel ocem = new OffsetCompoundElevationModel();
 		model.getGlobe().setElevationModel(ocem);
