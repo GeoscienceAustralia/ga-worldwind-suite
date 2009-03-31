@@ -14,6 +14,7 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
@@ -64,12 +65,11 @@ import nasa.worldwind.awt.WorldWindowGLCanvas;
 import nasa.worldwind.layers.AtmosphereLayer;
 import nasa.worldwind.layers.FogLayer;
 import nasa.worldwind.layers.LensFlareLayer;
-import nasa.worldwind.layers.SkyGradientLayer;
-import nasa.worldwind.view.BasicRollOrbitView;
 import terrain.OffsetCompoundElevationModel;
 import util.ChangeFrameListener;
 import util.FileUtil;
 import util.FrameSlider;
+import view.BasicRollOrbitView;
 import animation.SimpleAnimation;
 
 public class Animator

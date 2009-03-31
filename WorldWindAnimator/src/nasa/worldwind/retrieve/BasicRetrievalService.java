@@ -50,13 +50,13 @@ public class BasicRetrievalService extends WWObjectImpl
     /**
      * Encapsulates a single threaded retrieval as a {@link java.util.concurrent.FutureTask}.
      */
-    protected static class RetrievalTask extends FutureTask<Retriever>
+    private static class RetrievalTask extends FutureTask<Retriever>
         implements RetrievalFuture, Comparable<RetrievalTask>
     {
         private Retriever retriever;
         private double priority; // retrieval secondary priority (primary priority is submit time)
 
-        public RetrievalTask(Retriever retriever, double priority)
+        private RetrievalTask(Retriever retriever, double priority)
         {
             super(retriever);
             this.retriever = retriever;

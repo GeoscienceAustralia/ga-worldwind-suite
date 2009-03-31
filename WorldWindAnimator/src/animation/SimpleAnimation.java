@@ -1,6 +1,7 @@
 package animation;
 
 import gov.nasa.worldwind.Restorable;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.OrbitView;
 
@@ -16,6 +17,7 @@ import javax.swing.event.ChangeListener;
 import math.vector.Vector3;
 import nasa.worldwind.util.RestorableSupport;
 import util.FileUtil;
+import view.RollOrbitView;
 
 public class SimpleAnimation implements Serializable, ChangeListener,
 		Restorable
@@ -87,7 +89,17 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 				.getInterpolatedValue(frame)));
 		view.stopMovement();
 		view.setOrientation(eye, center);
+
+		/*if (view instanceof RollOrbitView)
+		{
+			roll = roll.addDegrees(1);
+			if(roll.getDegrees() >= 360)
+				roll = Angle.ZERO;
+			((RollOrbitView) view).setRoll(roll);
+		}*/
 	}
+
+	private Angle roll = Angle.ZERO;
 
 	public void addFrame(int frame, OrbitView view)
 	{

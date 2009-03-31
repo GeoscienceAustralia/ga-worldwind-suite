@@ -2,20 +2,32 @@ package layers.immediate;
 
 import gov.nasa.worldwind.retrieve.RetrievalFuture;
 import gov.nasa.worldwind.retrieve.Retriever;
-import nasa.worldwind.retrieve.BasicRetrievalService;
 
-public class ImmediateRetrievalService extends BasicRetrievalService
+import java.util.concurrent.ExecutionException;
+
+public class ImmediateRetrievalService extends
+		nasa.worldwind.retrieve.BasicRetrievalService
 {
-	@Override
 	public synchronized RetrievalFuture runRetriever(Retriever retriever,
 			double priority)
 	{
+		RetrievalFuture future = super.runRetriever(retriever, priority);
 		if (ImmediateMode.isImmediate())
 		{
-			RetrievalTask task = new RetrievalTask(retriever, priority);
-			task.run();
-			return task;
+			//wait for retriever to complete
+			try
+			{
+				future.get();
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+			catch (ExecutionException e)
+			{
+				e.printStackTrace();
+			}
 		}
-		return super.runRetriever(retriever, priority);
+		return future;
 	}
 }

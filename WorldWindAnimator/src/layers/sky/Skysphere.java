@@ -18,7 +18,7 @@ import java.nio.IntBuffer;
 
 import javax.media.opengl.GL;
 
-import nasa.worldwind.view.RollOrbitView;
+import view.RollOrbitView;
 
 import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.texture.Texture;
@@ -34,7 +34,7 @@ public class Skysphere extends AbstractLayer
 	private String texturePath = "data/skysphere/sky10.png";
 	private int slices = 20;
 	private int segments = 20;
-	private double rotation = -83d;
+	private Angle rotation = Angle.fromDegrees(83d);
 
 	public Skysphere()
 	{
@@ -105,7 +105,7 @@ public class Skysphere extends AbstractLayer
 		dc.getGLU().gluPerspective(
 				dc.getView().getFieldOfView().degrees,
 				dc.getView().getViewport().getWidth()
-						/ dc.getView().getViewport().getHeight(), 0.1, 5.0); //TODO
+						/ dc.getView().getViewport().getHeight(), 0.1, 10.0);
 
 		//set up modelview matrix
 		gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -126,16 +126,20 @@ public class Skysphere extends AbstractLayer
 		}
 
 		Matrix transform = Matrix.IDENTITY;
-		transform = transform.multiply(Matrix.fromRotationY(heading
-				.multiply(-1.0)));
+		transform = transform.multiply(Matrix.fromRotationZ(roll));
 		transform = transform.multiply(Matrix.fromRotationX(pitch
-				.addDegrees(90)));
-		transform = transform.multiply(Matrix.fromRotationZ(roll)); //TODO check
+				.addDegrees(90).multiply(-1.0)));
+		transform = transform.multiply(Matrix.fromRotationY(heading.multiply(
+				-1.0).add(rotation)));
 
-		Vec4 up = Vec4.UNIT_Y; //TODO recalculate if forward is parallel to up
+		double[] matrixArray = new double[16];
+		transform.toArray(matrixArray, 0, false);
+		gl.glLoadMatrixd(matrixArray, 0);
+
+		/*Vec4 up = Vec4.UNIT_Y;
 		Vec4 forward = Vec4.UNIT_Z.transformBy4(transform);
 		dc.getGLU().gluLookAt(0, 0, 0, forward.x, forward.y, forward.z, up.x,
-				up.y, up.z);
+				up.y, up.z);*/
 
 		// Enable/Disable features
 		gl.glPushAttrib(GL.GL_ENABLE_BIT);
@@ -143,11 +147,6 @@ public class Skysphere extends AbstractLayer
 		gl.glDisable(GL.GL_DEPTH_TEST);
 		gl.glDisable(GL.GL_LIGHTING);
 		gl.glDisable(GL.GL_BLEND);
-
-		//rotate upside-down texture
-		gl.glRotated(180, 0, 0, 1);
-		//rotate sun to be in correct position
-		gl.glRotated(rotation, 0, 1, 0);
 
 		gl.glMatrixMode(GL.GL_TEXTURE);
 		gl.glPushMatrix();
