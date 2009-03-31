@@ -5,6 +5,9 @@ import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.BasicOrbitViewModel;
 
+/**
+ * @author Michael de Hoog
+ */
 public class BasicRollOrbitViewModel extends BasicOrbitViewModel implements
 		RollOrbitViewModel
 {

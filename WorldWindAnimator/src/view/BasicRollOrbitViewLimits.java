@@ -4,6 +4,9 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.BasicOrbitViewLimits;
 
+/**
+ * @author Michael de Hoog
+ */
 public class BasicRollOrbitViewLimits extends BasicOrbitViewLimits implements
 		RollOrbitViewLimits
 {
