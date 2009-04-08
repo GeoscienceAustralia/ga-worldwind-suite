@@ -23,10 +23,10 @@ public class DepthLayer extends AbstractLayer
 	protected void doRender(DrawContext dc)
 	{
 		GL gl = dc.getGL();
+		gl.glPushAttrib(GL.GL_POLYGON_BIT);
+		
 		try
 		{
-			gl.glPushAttrib(GL.GL_POLYGON_BIT);
-
 			gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
 			gl.glEnable(GL.GL_CULL_FACE);
 			gl.glCullFace(GL.GL_BACK);

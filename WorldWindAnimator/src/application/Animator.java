@@ -15,10 +15,9 @@ import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
-import gov.nasa.worldwind.terrain.BasicElevationModel;
+import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
-import gov.nasa.worldwind.view.OrbitViewLimits;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -54,6 +53,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import layers.depth.DepthLayer;
+import layers.elevation.ElevationShader;
+import layers.elevation.ElevationTesselator;
+import layers.elevation.textured.ElevationLayer;
+import layers.elevation.textured.ExtendedBasicElevationModel;
 import layers.file.FileLayer;
 import layers.immediate.ImmediateMode;
 import layers.immediate.ImmediateRetrievalService;
@@ -70,7 +73,7 @@ import terrain.OffsetCompoundElevationModel;
 import util.ChangeFrameListener;
 import util.FileUtil;
 import util.FrameSlider;
-import view.BasicRollOrbitView;
+import view.roll.BasicRollOrbitView;
 import animation.SimpleAnimation;
 
 public class Animator
@@ -134,10 +137,10 @@ public class Animator
 	private boolean settingSlider = false;
 	private ChangeListener animationChangeListener;
 	private Layer crosshair;
-	private BasicElevationModel bem;
+	private OffsetCompoundElevationModel ocem;
 	private LensFlareLayer lensFlare;
 
-	private Layer alos, map1, map2, roads, bmng;
+	private Layer alos, map1, map2, roads, bmng, landsat;
 
 	public Animator()
 	{
@@ -151,6 +154,9 @@ public class Animator
 				ImmediateTaskService.class.getName());
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
 				ImmediateRetrievalService.class.getName());
+
+		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
+				ElevationTesselator.class.getName());
 
 		animationChangeListener = new ChangeListener()
 		{
@@ -186,13 +192,15 @@ public class Animator
 		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(
 				Angle.ZERO, Angle.POS180);
 
-		OffsetCompoundElevationModel ocem = new OffsetCompoundElevationModel();
+		ocem = new OffsetCompoundElevationModel();
+		ocem.addElevationModel(model.getGlobe().getElevationModel());
 		model.getGlobe().setElevationModel(ocem);
+		//ocem.setDetailHint(1.2);
 
 		//tesselator.setMakeTileSkirts(false);
 		//model.setShowWireframeInterior(true);
-		wwd.getSceneController().setVerticalExaggeration(1.5);
-		ocem.setElevationOffset(200);
+		//wwd.getSceneController().setVerticalExaggeration(1.5);
+		//ocem.setElevationOffset(200);
 
 		LayerList layers = model.getLayers();
 
@@ -279,16 +287,25 @@ public class Animator
 		flareframe.setVisible(true);*/
 
 		bmng = new BMNGWMSLayer();
-		//bmng.setOpacity(0.3);
 		layers.add(bmng);
+
+		landsat = new LandsatI3WMSLayer();
+		layers.add(landsat);
 
 		String tileDrive = "D";
 
-		bem = FileLayer.createElevationModel("WestMac DEM", "GA/WestMac DEM",
+		/*BasicElevationModel bem = FileLayer.createElevationModel("WestMac DEM", "GA/WestMac DEM",
 				new File(tileDrive + ":/West Macs Imagery/wwtiles/dem150"), 11,
 				150, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-25.0001389, -23.0001389, 131.9998611, 133.9998611),
-				308d, 1515d);
+				308d, 1515d);*/
+		ExtendedBasicElevationModel bem = FileLayer.createElevationModel(
+				"SW Margins DEM", "GA/SW Margins DEM", new File(tileDrive
+						+ ":/SW Margins/bathy/tiled"), 7, 150, LatLon
+						.fromDegrees(20d, 20d), Sector.fromDegrees(-59.99875,
+						-7.99875, 91.99875, 171.99875), -8922, 3958);
+		bem.setMissingDataSignal(-32768);
+		ocem.removeElevationModel(0);
 		ocem.addElevationModel(bem);
 
 		map1 = FileLayer.createLayer("WestMac Map Page 1",
@@ -322,6 +339,14 @@ public class Animator
 						-24.0, -23.433333, 132.25, 133.95));
 		layers.add(roads);
 
+		Layer elevation = new ElevationShader();
+		layers.add(elevation);
+		//elevation.setOpacity(0.2);
+
+		//Layer elevationImage = new ElevationTiledImageLayer(ocem);
+		Layer elevationImage = new ElevationLayer(bem);
+		layers.add(elevationImage);
+
 		Landmarks landmarks = new Landmarks(model.getGlobe());
 		layers.add(landmarks);
 
@@ -332,21 +357,25 @@ public class Animator
 
 		depth.setEnabled(true);
 		bmng.setEnabled(true);
+		landsat.setEnabled(true);
+		//elevation.setEnabled(true);
+		elevationImage.setEnabled(true);
+
 		//map1.setEnabled(true);
 		//map2.setEnabled(true);
-		alos.setEnabled(true);
-		roads.setEnabled(true);
-		roads.setOpacity(0.7);
+		//alos.setEnabled(true);
+		//roads.setEnabled(true);
+		//roads.setOpacity(0.7);
 
 		//landmarks.setEnabled(true);
 
-		lensFlare.setEnabled(true);
+		//lensFlare.setEnabled(true);
 		//atmosphere.setEnabled(true);
 		//sky.setEnabled(true);
 
 		//skybox.setEnabled(true);
-		fog.setEnabled(true);
-		skysphere.setEnabled(true);
+		//fog.setEnabled(true);
+		//skysphere.setEnabled(true);
 
 		/*Layer roadsshp = new ShapefileLayer(new File(
 				"C:/WINNT/Profiles/u97852/Desktop/Roads/Shapefile/Roads.shp"));
@@ -430,6 +459,50 @@ public class Animator
 
 		frame.pack();
 		frame.setVisible(true);
+
+
+		/*JFrame sliders = new JFrame("sliders");
+		sliders.setLayout(new GridLayout(0, 1));
+		JSlider slider;
+
+		slider = new JSlider(-180, 180, 0);
+		sliders.add(slider);
+		slider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				((RollOrbitView) wwd.getView()).setHeading(Angle
+						.fromDegrees(((JSlider) e.getSource()).getValue()));
+				wwd.redraw();
+			}
+		});
+		
+		slider = new JSlider(0, 180, 0);
+		sliders.add(slider);
+		slider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				((RollOrbitView) wwd.getView()).setPitch(Angle
+						.fromDegrees(((JSlider) e.getSource()).getValue()));
+				wwd.redraw();
+			}
+		});
+		
+		slider = new JSlider(-180, 180, 0);
+		sliders.add(slider);
+		slider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				((RollOrbitView) wwd.getView()).setRoll(Angle
+						.fromDegrees(((JSlider) e.getSource()).getValue()));
+				wwd.redraw();
+			}
+		});
+		
+		sliders.setSize(640, 480);
+		sliders.setVisible(true);*/
 	}
 
 	private void setAnimationSize(int width, int height)
@@ -1187,9 +1260,8 @@ public class Animator
 							.getHeight());
 
 					crosshair.setEnabled(false);
-					double detailHintBackup = bem
-							.getDetailHint(Sector.FULL_SPHERE);
-					bem.setDetailHint(detailHint);
+					double detailHintBackup = ocem.getDetailHint();
+					ocem.setDetailHint(detailHint);
 					frame.setAlwaysOnTop(true);
 
 					View view = wwd.getView();
@@ -1213,7 +1285,7 @@ public class Animator
 							break;
 					}
 
-					bem.setDetailHint(detailHintBackup);
+					ocem.setDetailHint(detailHintBackup);
 					crosshair.setEnabled(true);
 					view.setDetectCollisions(detectCollisions);
 					frame.setAlwaysOnTop(false);

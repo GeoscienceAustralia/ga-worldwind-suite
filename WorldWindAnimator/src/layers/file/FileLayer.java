@@ -5,7 +5,6 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
@@ -13,6 +12,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import layers.elevation.textured.ExtendedBasicElevationModel;
 import nasa.worldwind.layers.TiledImageLayer;
 import util.FileUtil;
 
@@ -75,7 +75,7 @@ public class FileLayer
 		return layer;
 	}
 
-	public static BasicElevationModel createElevationModel(String name,
+	public static ExtendedBasicElevationModel createElevationModel(String name,
 			String cacheName, File directory, int levels, int tilesize,
 			LatLon lztd, Sector sector, double minElevation, double maxElevation)
 	{

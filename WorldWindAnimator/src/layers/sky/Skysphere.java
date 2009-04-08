@@ -18,7 +18,7 @@ import java.nio.IntBuffer;
 
 import javax.media.opengl.GL;
 
-import view.RollOrbitView;
+import view.roll.RollOrbitView;
 
 import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.texture.Texture;

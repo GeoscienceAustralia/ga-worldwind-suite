@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-public class ImmediateBasicElevationModel extends gov.nasa.worldwind.terrain.BasicElevationModel
+import layers.elevation.textured.ExtendedBasicElevationModel;
+
+public class ImmediateBasicElevationModel extends ExtendedBasicElevationModel
 {
 	private boolean elevationWasRequested;
 
@@ -71,7 +73,7 @@ public class ImmediateBasicElevationModel extends gov.nasa.worldwind.terrain.Bas
 	}
 
 	@Override
-	protected void requestTile(TileKey key)
+	public void requestTile(TileKey key)
 	{
 		if (!ImmediateMode.isImmediate())
 		{

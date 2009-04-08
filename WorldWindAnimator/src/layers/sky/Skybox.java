@@ -16,7 +16,7 @@ import java.io.InputStream;
 
 import javax.media.opengl.GL;
 
-import view.RollOrbitView;
+import view.roll.RollOrbitView;
 
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;

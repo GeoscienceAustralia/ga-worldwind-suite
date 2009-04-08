@@ -1,4 +1,4 @@
-package view;
+package view.roll;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.util.Logging;
@@ -25,12 +25,12 @@ public class BasicRollOrbitView extends BasicOrbitView implements RollOrbitView
 
 	public RollOrbitViewLimits getRollOrbitViewLimits()
 	{
-		return (RollOrbitViewLimits) super.getOrbitViewLimits();
+		return (RollOrbitViewLimits) getOrbitViewLimits();
 	}
 
 	public void setRollOrbitViewLimits(RollOrbitViewLimits viewLimits)
 	{
-		super.setOrbitViewLimits(viewLimits);
+		setOrbitViewLimits(viewLimits);
 	}
 
 	public Angle getRoll()

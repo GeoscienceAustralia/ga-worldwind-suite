@@ -103,6 +103,11 @@ public abstract class TiledImageLayer extends AbstractLayer
         this.setPickEnabled(false); // textures are assumed to be terrain unless specifically indicated otherwise.
         this.tileCountName = this.getName() + " Tiles";
     }
+    
+    protected TextureTile createTile(Sector sector, Level level, int row, int col)
+    {
+    	return new TextureTile(sector, level, row, col);
+    }
 
     @Override
     public void setName(String name)
@@ -249,7 +254,7 @@ public abstract class TiledImageLayer extends AbstractLayer
                 Angle t2;
                 t2 = t1.add(dLon);
 
-                this.topLevels.add(new TextureTile(new Sector(p1, p2, t1, t2), level, row, col));
+                this.topLevels.add(createTile(new Sector(p1, p2, t1, t2), level, row, col));
                 t1 = t2;
             }
             p1 = p2;
@@ -1041,7 +1046,7 @@ public abstract class TiledImageLayer extends AbstractLayer
             {
                 TileKey key = new TileKey(targetLevel.getLevelNumber(), row, col, targetLevel.getCacheName());
                 Sector tileSector = this.levels.computeSectorForKey(key);
-                sectorTiles[nwRow - row][col - nwCol] = new TextureTile(tileSector, targetLevel, row, col);
+                sectorTiles[nwRow - row][col - nwCol] = createTile(tileSector, targetLevel, row, col);
             }
         }
 

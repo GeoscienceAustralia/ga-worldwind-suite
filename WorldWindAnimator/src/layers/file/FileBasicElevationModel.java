@@ -37,7 +37,8 @@ public class FileBasicElevationModel extends ImmediateBasicElevationModel
 		try
 		{
 			url = tile.getResourceURL();
-			if (WorldWind.getNetworkStatus().isHostUnavailable(url))
+			if (url == null
+					|| WorldWind.getNetworkStatus().isHostUnavailable(url))
 			{
 				this.getLevels().markResourceAbsent(tile);
 				return;

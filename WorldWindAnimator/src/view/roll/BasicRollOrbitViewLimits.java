@@ -1,4 +1,4 @@
-package view;
+package view.roll;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.util.Logging;

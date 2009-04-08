@@ -503,7 +503,7 @@ public class BasicTiledImageLayer extends TiledImageLayer
 				tile.getPriority());
 	}
 
-	private void saveBuffer(java.nio.ByteBuffer buffer, java.io.File outFile)
+	protected void saveBuffer(java.nio.ByteBuffer buffer, java.io.File outFile)
 			throws java.io.IOException
 	{
 		synchronized (this.fileLock) // sychronized with read of file in RequestTask.run()
