@@ -11,11 +11,13 @@ import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
+import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
@@ -57,6 +59,7 @@ import layers.elevation.ElevationShader;
 import layers.elevation.ElevationTesselator;
 import layers.elevation.textured.ElevationLayer;
 import layers.elevation.textured.ExtendedBasicElevationModel;
+import layers.elevation.textured.ExtendedBasicElevationModelFactory;
 import layers.file.FileLayer;
 import layers.immediate.ImmediateMode;
 import layers.immediate.ImmediateRetrievalService;
@@ -193,7 +196,7 @@ public class Animator
 				Angle.ZERO, Angle.POS180);
 
 		ocem = new OffsetCompoundElevationModel();
-		ocem.addElevationModel(model.getGlobe().getElevationModel());
+		//ocem.addElevationModel(model.getGlobe().getElevationModel());
 		model.getGlobe().setElevationModel(ocem);
 		//ocem.setDetailHint(1.2);
 
@@ -299,13 +302,20 @@ public class Animator
 				150, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-25.0001389, -23.0001389, 131.9998611, 133.9998611),
 				308d, 1515d);*/
+
+		ElevationModel earthem = new ExtendedBasicElevationModelFactory()
+				.createFromConfigFile("config/LegacyEarthElevationModel.xml");
+		ExtendedBasicElevationModel eem = getEBEM(earthem);
+
 		ExtendedBasicElevationModel bem = FileLayer.createElevationModel(
 				"SW Margins DEM", "GA/SW Margins DEM", new File(tileDrive
 						+ ":/SW Margins/bathy/tiled"), 7, 150, LatLon
 						.fromDegrees(20d, 20d), Sector.fromDegrees(-59.99875,
 						-7.99875, 91.99875, 171.99875), -8922, 3958);
 		bem.setMissingDataSignal(-32768);
-		ocem.removeElevationModel(0);
+
+		//ocem.removeElevationModel(0);
+		ocem.addElevationModel(eem);
 		ocem.addElevationModel(bem);
 
 		map1 = FileLayer.createLayer("WestMac Map Page 1",
@@ -503,6 +513,27 @@ public class Animator
 		
 		sliders.setSize(640, 480);
 		sliders.setVisible(true);*/
+	}
+
+	private ExtendedBasicElevationModel getEBEM(ElevationModel elevationModel)
+	{
+		if (elevationModel instanceof ExtendedBasicElevationModel)
+		{
+			return (ExtendedBasicElevationModel) elevationModel;
+		}
+		else if (elevationModel instanceof CompoundElevationModel)
+		{
+			CompoundElevationModel cem = (CompoundElevationModel) elevationModel;
+			for (ElevationModel model : cem.getElevationModels())
+			{
+				ExtendedBasicElevationModel ebem = getEBEM(model);
+				if (ebem != null)
+				{
+					return ebem;
+				}
+			}
+		}
+		return null;
 	}
 
 	private void setAnimationSize(int width, int height)

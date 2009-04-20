@@ -84,7 +84,7 @@ public class ElevationLayer extends TiledImageLayer
 			setupShader(dc);
 		}
 		GL gl = dc.getGL();
-		gl.glUseProgram(shaderprogram);
+		//gl.glUseProgram(shaderprogram);
 
 		double minElevation = ((ElevationTesselator) dc.getGlobe()
 				.getTessellator()).getMinElevation();
@@ -182,13 +182,17 @@ public class ElevationLayer extends TiledImageLayer
 
 	protected boolean loadElevations(Globe globe, TextureTile tile)
 	{
-		TileKey[] keys = getTouchingElevationTileKeys(tile);
-		if (keys == null)
+		TileKey[] keys = new TileKey[9];
+		Sector[] sectors = new Sector[9];
+		boolean anyTouching = fillTouchingElevationTileKeys(tile, keys, sectors);
+		if (!anyTouching)
 		{
 			getLevels().markResourceAbsent(tile);
 			return false;
 		}
 
+		int width = tile.getLevel().getTileWidth();
+		int height = tile.getLevel().getTileHeight();
 		boolean allLoaded = true;
 		BufferWrapper[] elevations = new BufferWrapper[9];
 		for (int i = 0; i < elevations.length; i++)
@@ -201,15 +205,21 @@ public class ElevationLayer extends TiledImageLayer
 					elevationModel.requestTile(keys[i]);
 					allLoaded = false;
 				}
+				else if (elevations[i].length() != width * height)
+				{
+					Logging.logger().severe(
+							"Elevations array has incorrect length");
+					getLevels().markResourceAbsent(tile);
+					return false;
+				}
 			}
 		}
 
 		if (allLoaded)
 		{
 			double[] minmax = getMinMax(elevations[4]);
-			TextureData textureData = convertToTextureData(tile.getLevel()
-					.getTileWidth(), tile.getLevel().getTileHeight(), globe,
-					elevations, minmax[0], minmax[1]);
+			TextureData textureData = convertToTextureData(width, height,
+					globe, sectors[4], elevations, minmax[0], minmax[1]);
 
 			if (textureData == null)
 			{
@@ -245,12 +255,16 @@ public class ElevationLayer extends TiledImageLayer
 				tile.getTileKey(), tile);
 	}
 
-	protected TileKey[] getTouchingElevationTileKeys(TextureTile tile)
+	protected boolean fillTouchingElevationTileKeys(TextureTile tile,
+			TileKey[] keys, Sector[] sectors)
 	{
+		if (keys.length != 9 || sectors.length != 9)
+			throw new IllegalArgumentException("Illegal array length");
+
 		LevelSet elevationLevels = elevationModel.getLevels();
 		Level elevationLevel = elevationLevels.getLevel(tile.getLevelNumber());
 		if (elevationLevel == null)
-			return null;
+			return false;
 
 		//calculate column and row count over the globe for this level
 		int colCount = (int) Math.ceil(Angle.POS360.divide(elevationLevel
@@ -258,24 +272,23 @@ public class ElevationLayer extends TiledImageLayer
 		int rowCount = (int) Math.ceil(Angle.POS180.divide(elevationLevel
 				.getTileDelta().latitude));
 
-		TileKey[] keys = new TileKey[9];
+		//fill list of 9 tilekeys, 5'th one is the center tile
 		boolean anyValid = false;
-
-		//create a list of 9 tilekeys, 5'th one is the center tile
 		for (int i = 0, r = -1; r <= 1; r++)
+		//for (int i = 0, r = 1; r >= -1; r--)
 		{
 			for (int c = -1; c <= 1; c++, i++)
 			{
-				int col = (c + tile.getColumn()) % colCount;
-				int row = (r + tile.getRow()) % rowCount;
+				int col = (c + tile.getColumn() + colCount) % colCount;
+				int row = (r + tile.getRow() + rowCount) % rowCount;
 
 				TileKey key = new TileKey(tile.getLevelNumber(), row, col,
 						elevationLevels.getFirstLevel().getCacheName());
-				Sector sector = elevationLevels.computeSectorForKey(key);
+				sectors[i] = elevationLevels.computeSectorForKey(key);
 				//only add if the sector intersects the levels sector
-				if (elevationLevels.getSector().intersects(sector))
+				if (elevationLevels.getSector().intersects(sectors[i]))
 				{
-					int maxlevel = elevationLevels.getLastLevel(sector)
+					int maxlevel = elevationLevels.getLastLevel(sectors[i])
 							.getLevelNumber();
 					if (maxlevel >= elevationLevel.getLevelNumber())
 					{
@@ -287,9 +300,9 @@ public class ElevationLayer extends TiledImageLayer
 		}
 
 		if (!anyValid || keys[4] == null)
-			return null;
+			return false;
 
-		return keys;
+		return true;
 	}
 
 	protected double[] getMinMax(BufferWrapper elevations)
@@ -309,38 +322,47 @@ public class ElevationLayer extends TiledImageLayer
 	}
 
 	protected TextureData convertToTextureData(int width, int height,
-			Globe globe, BufferWrapper[] elevations, double minElevation,
-			double maxElevation)
+			Globe globe, Sector sector, BufferWrapper[] elevations,
+			double minElevation, double maxElevation)
 	{
-		for (BufferWrapper elevs : elevations)
-		{
-			if (elevs != null && elevs.length() != width * height)
-			{
-				Logging.logger()
-						.severe("Elevations buffer length is incorrect");
-				return null;
-			}
-		}
+		//elevation tile index configuration:
+		//+-+-+-+
+		//|6|7|8|
+		//+-+-+-+
+		//|3|4|5|
+		//+-+-+-+
+		//|0|1|2|
+		//+-+-+-+
+		
+		Vec4[] verts = calculateTileVerts(width, height, globe, sector,
+				elevations, elevationModel.getMissingDataSignal());
+		Vec4[] normals = calculateNormals(width, height, verts);
 
-		BufferWrapper elevs = elevations[4];
+		byte[] red = new byte[width * height];
+		byte[] blue = new byte[width * height];
+		byte[] green = new byte[width * height];
+		byte[] alpha = new byte[width * height];
 
-		byte[] bytes = new byte[elevs.length()];
-		byte[] alpha = new byte[elevs.length()];
-		for (int i = 0; i < elevs.length(); i++)
+		for (int i = 0; i < width * height; i++)
 		{
-			double value = elevs.getDouble(i);
-			bytes[i] = (byte) (255d * (value - minElevation) / (maxElevation - minElevation));
-			alpha[i] = (byte) ((value == elevationModel.getMissingDataSignal()) ? 0
-					: 255);
+			Vec4 normal = normals[i];
+			if (normal == null)
+				normal = Vec4.ZERO;
+
+			red[i] = (byte) (255.0 * (normal.x + 1) / 2);
+			green[i] = (byte) (255.0 * (normal.y + 1) / 2);
+			blue[i] = (byte) (255.0 * (normal.z + 1) / 2);
+			//alpha[i] = (byte) (255.0 * (elevations[4].getDouble(i) - minElevation) / (maxElevation - minElevation));
+			alpha[i] = (byte) 255;
 		}
 
 		byte[][] bands = new byte[4][];
-		bands[0] = bytes;
-		bands[1] = bytes;
-		bands[2] = bytes;
+		bands[0] = red;
+		bands[1] = blue;
+		bands[2] = green;
 		bands[3] = alpha;
 
-		DataBuffer db = new DataBufferByte(bands, bands[0].length);
+		DataBuffer db = new DataBufferByte(bands, width * height);
 		SampleModel sm = new BandedSampleModel(DataBuffer.TYPE_BYTE, width,
 				height, bands.length);
 		Raster raster = Raster.createRaster(sm, db, null);
@@ -348,6 +370,167 @@ public class ElevationLayer extends TiledImageLayer
 				BufferedImage.TYPE_INT_ARGB);
 		image.setData(raster);
 		return TextureIO.newTextureData(image, isUseMipMaps());
+	}
+
+	protected static Vec4[] calculateTileVerts(int width, int height,
+			Globe globe, Sector sector, BufferWrapper[] elevations,
+			double missingDataSignal)
+	{
+		double[] allElevations = new double[(width + 2) * (height + 2)];
+		for (int y = 0; y < height + 2; y++)
+		{
+			int srcy = clamp(y - 1, 0, height - 1);
+			for (int x = 0; x < width + 2; x++)
+			{
+				int srcx = clamp(x - 1, 0, width - 1);
+				allElevations[getArrayIndex(width + 2, height + 2, x, y)] = elevations[4]
+						.getDouble(getArrayIndex(width, height, srcx, srcy));
+			}
+		}
+		//left & right rows, not corners
+		for (int x = 0; x < width + 2; x += width + 1)
+		{
+			boolean left = x == 0;
+			int srcx = left ? x - 2 : x;
+			BufferWrapper elevs = left ? elevations[3] : elevations[5];
+			if (elevs != null)
+			{
+				for (int y = 1; y < height + 1; y++)
+				{
+					int srcy = y - 1;
+					allElevations[getArrayIndex(width + 2, height + 2, x, y)] = elevs
+							.getDouble(getArrayIndex(width, height, srcx, srcy));
+				}
+			}
+		}
+		//top & bottom rows, and corners
+		for (int y = 0; y < height + 2; y += height + 1)
+		{
+			boolean top = y == 0;
+			int srcy = top ? y - 2 : y;
+			for (int x = 0; x < width + 2; x++)
+			{
+				int srcx = x - 1;
+				BufferWrapper elevs = top ? elevations[7] : elevations[1];
+				if (x == 0)
+				{
+					//left corners
+					elevs = top ? elevations[6] : elevations[0];
+					srcx--;
+				}
+				else if (x == width + 1)
+				{
+					//right corners
+					elevs = top ? elevations[8] : elevations[2];
+					srcx++;
+				}
+				if (elevs != null)
+				{
+					allElevations[getArrayIndex(width + 2, height + 2, x, y)] = elevs
+							.getDouble(getArrayIndex(width, height, srcx, srcy));
+				}
+				/*else if(y == 0 || y == height + 1)
+				{
+					//copy from next or prev row
+					allElevations[getArrayIndex(width + 2, height + 2, x, y)] = allElevations[getArrayIndex(
+							width + 2, height + 2, x, top ? y + 1 : y - 1)];
+				}*/
+			}
+		}
+
+		Vec4[] verts = new Vec4[(width + 2) * (height + 2)];
+		double dlon = sector.getDeltaLonDegrees() / width;
+		double dlat = sector.getDeltaLatDegrees() / height;
+
+		for (int y = 0; y < height + 2; y++)
+		{
+			Angle lat = sector.getMaxLatitude().subtractDegrees(dlat * (y - 1));
+			for (int x = 0; x < width + 2; x++)
+			{
+				Angle lon = sector.getMinLongitude().addDegrees(dlon * (x - 1));
+				int index = getArrayIndex(width + 2, height + 2, x, y);
+				if (allElevations[index] != missingDataSignal)
+				{
+					verts[index] = globe.computePointFromPosition(lat, lon,
+							allElevations[index] * 100);
+				}
+			}
+		}
+
+		return verts;
+	}
+
+	protected static Vec4[] calculateNormals(int width, int height, Vec4[] verts)
+	{
+		if (verts.length != (width + 2) * (height + 2))
+			throw new IllegalStateException("Illegal vertices length");
+
+		Vec4[] norms = new Vec4[width * height];
+		for (int y = 0; y < height; y++)
+		{
+			for (int x = 0; x < width; x++)
+			{
+				//   v2
+				//   |
+				//v1-v0-v3
+				//   |
+				//   v4
+
+				Vec4 v0 = verts[getArrayIndex(width + 2, height + 2, x + 1,
+						y + 1)];
+				if (v0 != null)
+				{
+					Vec4 v1 = verts[getArrayIndex(width + 2, height + 2, x,
+							y + 1)];
+					Vec4 v2 = verts[getArrayIndex(width + 2, height + 2, x + 1,
+							y)];
+					Vec4 v3 = verts[getArrayIndex(width + 2, height + 2, x + 2,
+							y + 1)];
+					Vec4 v4 = verts[getArrayIndex(width + 2, height + 2, x + 1,
+							y + 2)];
+
+					Vec4[] normals = new Vec4[4];
+					normals[0] = v1 != null && v2 != null ? v0.subtract3(v1)
+							.cross3(v0.subtract3(v2)).normalize3() : null;
+					normals[1] = v2 != null && v3 != null ? v0.subtract3(v2)
+							.cross3(v0.subtract3(v3)).normalize3() : null;
+					normals[2] = v3 != null && v4 != null ? v0.subtract3(v3)
+							.cross3(v0.subtract3(v4)).normalize3() : null;
+					normals[3] = v4 != null && v1 != null ? v0.subtract3(v4)
+							.cross3(v0.subtract3(v1)).normalize3() : null;
+					Vec4 normal = Vec4.ZERO;
+					for (Vec4 n : normals)
+					{
+						if (n != null)
+							normal = normal.add3(n);
+					}
+					if (normal != Vec4.ZERO)
+					{
+						norms[getArrayIndex(width, height, x, y)] = normal
+								.normalize3();
+					}
+				}
+			}
+		}
+		return norms;
+	}
+
+	protected static int getArrayIndex(int width, int height, int x, int y)
+	{
+		while (x < 0)
+			x += width;
+		while (y < 0)
+			y += height;
+		while (x >= width)
+			x -= width;
+		while (y >= height)
+			y -= height;
+		return width * y + x;
+	}
+
+	protected static int clamp(int value, int min, int max)
+	{
+		return (value < min) ? min : (value > max) ? max : value;
 	}
 
 	protected static class RequestTask implements Runnable,
