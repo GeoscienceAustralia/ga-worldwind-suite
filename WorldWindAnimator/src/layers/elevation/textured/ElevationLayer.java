@@ -24,11 +24,19 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.URL;
 
 import javax.media.opengl.GL;
 
-import layers.elevation.ElevationTesselator;
+import layers.immediate.ImmediateMode;
 import nasa.worldwind.layers.TiledImageLayer;
 
 import com.sun.opengl.util.texture.Texture;
@@ -44,7 +52,10 @@ public class ElevationLayer extends TiledImageLayer
 	protected Vec4 sunPosition = new Vec4(1, 1, 1);
 	protected Vec4 sunPositionNormalized = sunPosition.normalize3();
 	protected double minElevationClamp = -Double.MAX_VALUE;
-	protected double maxElevationClamp = 0;//Double.MAX_VALUE;
+	protected double maxElevationClamp = Double.MAX_VALUE;
+	protected double bakedExaggeration = 100.0;
+
+	protected Object fileLock = new Object();
 
 	private int shaderprogram = -1;
 	private int minElevationUniform;
@@ -52,10 +63,13 @@ public class ElevationLayer extends TiledImageLayer
 	private int minTexElevationUniform;
 	private int maxTexElevationUniform;
 	private int exaggerationUniform;
+	private int bakedExaggerationUniform;
 	private int opacityUniform;
 	private int eyePositionUniform;
 	private int sunPositionUniform;
 	private int oldModelViewInverseUniform;
+
+	private DrawContext dc = null;
 
 	public ElevationLayer(ExtendedBasicElevationModel elevationModel)
 	{
@@ -78,7 +92,7 @@ public class ElevationLayer extends TiledImageLayer
 				+ levels.getLastLevel().getCacheName());
 		params.setValue(AVKey.SERVICE, null);
 		params.setValue(AVKey.DATASET_NAME, levels.getLastLevel().getDataset());
-		params.setValue(AVKey.FORMAT_SUFFIX, ".bil");
+		params.setValue(AVKey.FORMAT_SUFFIX, ".elev");
 		params.setValue(AVKey.NUM_LEVELS, levels.getNumLevels());
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0); //?
 		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, levels.getFirstLevel()
@@ -92,6 +106,8 @@ public class ElevationLayer extends TiledImageLayer
 	@Override
 	public void render(DrawContext dc)
 	{
+		this.dc = dc;
+
 		if (shaderprogram == -1)
 		{
 			setupShader(dc);
@@ -110,6 +126,7 @@ public class ElevationLayer extends TiledImageLayer
 		gl.glUniform1f(minElevationUniform, (float) minElevation);
 		gl.glUniform1f(maxElevationUniform, (float) maxElevation);
 		gl.glUniform1f(exaggerationUniform, (float) exaggeration);
+		gl.glUniform1f(bakedExaggerationUniform, (float) bakedExaggeration);
 		gl.glUniform1f(opacityUniform, (float) getOpacity());
 
 		Matrix modelViewInv = dc.getView().getModelviewMatrix().getInverse();
@@ -190,6 +207,8 @@ public class ElevationLayer extends TiledImageLayer
 				"maxTexElevation");
 		exaggerationUniform = gl.glGetUniformLocation(shaderprogram,
 				"exaggeration");
+		bakedExaggerationUniform = gl.glGetUniformLocation(shaderprogram,
+				"bakedExaggeration");
 		opacityUniform = gl.glGetUniformLocation(shaderprogram, "opacity");
 		eyePositionUniform = gl.glGetUniformLocation(shaderprogram,
 				"eyePosition");
@@ -202,12 +221,20 @@ public class ElevationLayer extends TiledImageLayer
 	@Override
 	protected void forceTextureLoad(TextureTile tile)
 	{
-		requestTexture(null, tile);
+		if (dc == null)
+			return;
+		attemptLoad(dc.getGlobe(), tile);
 	}
 
 	@Override
 	protected void requestTexture(DrawContext dc, TextureTile tile)
 	{
+		if (ImmediateMode.isImmediate())
+		{
+			attemptLoad(dc.getGlobe(), tile);
+			return;
+		}
+
 		Vec4 centroid = tile.getCentroidPoint(dc.getGlobe());
 		if (this.getReferencePoint() != null)
 			tile.setPriority(centroid.distanceTo3(this.getReferencePoint()));
@@ -218,14 +245,162 @@ public class ElevationLayer extends TiledImageLayer
 
 	protected void attemptLoad(Globe globe, TextureTile tile)
 	{
-		if (loadElevations(globe, tile))
+		URL textureURL = WorldWind.getDataFileStore().findFile(tile.getPath(),
+				false);
+		if (textureURL != null)
 		{
-			getLevels().unmarkResourceAbsent(tile);
-			firePropertyChange(AVKey.LAYER, null, this);
+			if (loadTexture(tile, textureURL))
+			{
+				return;
+			}
+		}
+
+		if (requestElevations(globe, tile))
+		{
+			if (!ImmediateMode.isImmediate())
+			{
+				firePropertyChange(AVKey.LAYER, null, this);
+			}
+			else
+			{
+				textureURL = WorldWind.getDataFileStore().findFile(
+						tile.getPath(), false);
+				if (textureURL != null)
+				{
+					loadTexture(tile, textureURL);
+				}
+			}
 		}
 	}
 
-	protected boolean loadElevations(Globe globe, TextureTile tile)
+	protected boolean loadTexture(TextureTile tile, URL textureURL)
+	{
+		if (!(tile instanceof MinMaxTextureTile))
+		{
+			Logging.logger().severe(
+					"Tile is not instance of " + MinMaxTextureTile.class);
+			getLevels().markResourceAbsent(tile);
+			return false;
+		}
+
+		synchronized (fileLock)
+		{
+			InputStream is = null;
+			try
+			{
+				is = textureURL.openStream();
+				DataInputStream dis = new DataInputStream(is);
+
+				int width = dis.readInt();
+				int height = dis.readInt();
+				int bands = dis.readInt();
+				double minElevation = dis.readDouble();
+				double maxElevation = dis.readDouble();
+				byte[][] bytes = new byte[bands][];
+				for (int i = 0; i < bands; i++)
+				{
+					bytes[i] = new byte[width * height];
+					is.read(bytes[i]);
+				}
+
+				DataBuffer db = new DataBufferByte(bytes, width * height);
+				SampleModel sm = new BandedSampleModel(DataBuffer.TYPE_BYTE,
+						width, height, bands);
+				Raster raster = Raster.createRaster(sm, db, null);
+				BufferedImage image = new BufferedImage(width, height,
+						BufferedImage.TYPE_INT_ARGB_PRE);
+				image.setData(raster);
+
+				TextureData textureData = TextureIO.newTextureData(image,
+						isUseMipMaps());
+				if (textureData == null)
+				{
+					throw new Exception("Could not create texture data for "
+							+ textureURL);
+				}
+
+				((MinMaxTextureTile) tile).setMinElevation(minElevation);
+				((MinMaxTextureTile) tile).setMaxElevation(maxElevation);
+				tile.setTextureData(textureData);
+
+				//if (tile.getLevelNumber() != 0 || !this.isRetainLevelZeroTiles())
+				addTileToCache(tile);
+
+				getLevels().unmarkResourceAbsent(tile);
+				firePropertyChange(AVKey.LAYER, null, this);
+				return true;
+			}
+			catch (Exception e)
+			{
+				// Assume that something's wrong with the file and delete it.
+				gov.nasa.worldwind.WorldWind.getDataFileStore().removeFile(
+						textureURL);
+				getLevels().markResourceAbsent(tile);
+				String message = Logging.getMessage(
+						"generic.DeletedCorruptDataFile", textureURL);
+				Logging.logger().info(message + ":" + e.getLocalizedMessage());
+				return false;
+			}
+			finally
+			{
+				if (is != null)
+				{
+					try
+					{
+						is.close();
+					}
+					catch (IOException e)
+					{
+					}
+				}
+			}
+		}
+	}
+
+	protected boolean saveTexture(File file, byte[][] bytes, int width,
+			int height, double minElevation, double maxElevation)
+	{
+		synchronized (fileLock)
+		{
+			OutputStream os = null;
+			try
+			{
+				os = new FileOutputStream(file);
+				DataOutputStream dos = new DataOutputStream(os);
+				int bands = bytes.length;
+				dos.writeInt(width);
+				dos.writeInt(height);
+				dos.writeInt(bands);
+				dos.writeDouble(minElevation);
+				dos.writeDouble(maxElevation);
+				for (int i = 0; i < bytes.length; i++)
+				{
+					os.write(bytes[i]);
+				}
+				return true;
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+			finally
+			{
+				if (os != null)
+				{
+					try
+					{
+						os.close();
+					}
+					catch (IOException e)
+					{
+					}
+				}
+			}
+		}
+	}
+
+	protected boolean requestElevations(Globe globe, TextureTile tile)
 	{
 		TileKey[] keys = new TileKey[9];
 		Sector[] sectors = new Sector[9];
@@ -244,10 +419,9 @@ public class ElevationLayer extends TiledImageLayer
 		{
 			if (keys[i] != null)
 			{
-				elevations[i] = elevationModel.getElevationsFromMemory(keys[i]);
+				elevations[i] = getElevationsFromMemory(keys[i]);
 				if (elevations[i] == null)
 				{
-					elevationModel.requestTile(keys[i]);
 					allLoaded = false;
 				}
 				else if (elevations[i].length() != width * height)
@@ -262,36 +436,30 @@ public class ElevationLayer extends TiledImageLayer
 
 		if (allLoaded)
 		{
-			double[] minmax = getMinMax(elevations[4]);
-			TextureData textureData = convertToTextureData(width, height,
-					globe, sectors[4], elevations, minmax[0], minmax[1]);
+			double[] minmax = getMinMax(elevations[4], elevationModel
+					.getMissingDataSignal());
+			byte[][] bytes = elevationsToTexture(width, height, globe,
+					sectors[4], elevations, minmax[0], minmax[1]);
 
-			if (textureData == null)
-			{
-				Logging.logger().severe(
-						"Could not create texture data for " + tile);
-				getLevels().markResourceAbsent(tile);
-				return false;
-			}
-
-			if (!(tile instanceof MinMaxTextureTile))
-			{
-				Logging.logger().severe(
-						"Tile is not instance of " + MinMaxTextureTile.class);
-				getLevels().markResourceAbsent(tile);
-				return false;
-			}
-
-			((MinMaxTextureTile) tile).setMinElevation(minmax[0]);
-			((MinMaxTextureTile) tile).setMaxElevation(minmax[1]);
-			tile.setTextureData(textureData);
-
-			//if (tile.getLevelNumber() != 0 || !this.isRetainLevelZeroTiles())
-			addTileToCache(tile);
-			return true;
+			File file = WorldWind.getDataFileStore().newFile(tile.getPath());
+			return saveTexture(file, bytes, width, height, minmax[0], minmax[1]);
 		}
 
 		return false;
+	}
+
+	protected BufferWrapper getElevationsFromMemory(TileKey key)
+	{
+		BufferWrapper elevations = elevationModel.getElevationsFromMemory(key);
+		if (elevations == null)
+		{
+			elevationModel.requestTile(key);
+			if (ImmediateMode.isImmediate())
+			{
+				elevations = elevationModel.getElevationsFromMemory(key);
+			}
+		}
+		return elevations;
 	}
 
 	protected void addTileToCache(TextureTile tile)
@@ -349,14 +517,15 @@ public class ElevationLayer extends TiledImageLayer
 		return true;
 	}
 
-	protected double[] getMinMax(BufferWrapper elevations)
+	protected double[] getMinMax(BufferWrapper elevations,
+			double missingDataSignal)
 	{
 		double min = Double.MAX_VALUE;
 		double max = -Double.MAX_VALUE;
 		for (int i = 0; i < elevations.length(); i++)
 		{
 			double value = elevations.getDouble(i);
-			if (value != elevationModel.getMissingDataSignal())
+			if (value != missingDataSignal)
 			{
 				min = Math.min(min, elevations.getDouble(i));
 				max = Math.max(max, elevations.getDouble(i));
@@ -370,9 +539,9 @@ public class ElevationLayer extends TiledImageLayer
 		return new double[] { min, max };
 	}
 
-	protected TextureData convertToTextureData(int width, int height,
-			Globe globe, Sector sector, BufferWrapper[] elevations,
-			double minElevation, double maxElevation)
+	protected byte[][] elevationsToTexture(int width, int height, Globe globe,
+			Sector sector, BufferWrapper[] elevations, double minElevation,
+			double maxElevation)
 	{
 		//elevation tile index configuration:
 		//+-+-+-+
@@ -384,8 +553,7 @@ public class ElevationLayer extends TiledImageLayer
 		//+-+-+-+
 
 		Vec4[] verts = calculateTileVerts(width, height, globe, sector,
-				elevations, elevationModel.getMissingDataSignal(),
-				minElevationClamp, maxElevationClamp);
+				elevations, elevationModel.getMissingDataSignal());
 		Vec4[] normals = calculateNormals(width, height, verts);
 
 		byte[] red = new byte[width * height];
@@ -403,29 +571,18 @@ public class ElevationLayer extends TiledImageLayer
 			green[i] = (byte) (255.0 * (normal.y + 1) / 2);
 			blue[i] = (byte) (255.0 * (normal.z + 1) / 2);
 			alpha[i] = (byte) (255.0 * (elevations[4].getDouble(i) - minElevation) / (maxElevation - minElevation));
-			//alpha[i] = (byte) 255;
 		}
 
-		byte[][] bands = new byte[4][];
-		bands[0] = red;
-		bands[1] = green;
-		bands[2] = blue;
-		bands[3] = alpha;
-
-		DataBuffer db = new DataBufferByte(bands, width * height);
-		SampleModel sm = new BandedSampleModel(DataBuffer.TYPE_BYTE, width,
-				height, bands.length);
-		Raster raster = Raster.createRaster(sm, db, null);
-		BufferedImage image = new BufferedImage(width, height,
-				BufferedImage.TYPE_INT_ARGB_PRE);
-		image.setData(raster);
-		return TextureIO.newTextureData(image, isUseMipMaps());
+		byte[][] bytes = new byte[4][];
+		bytes[0] = red;
+		bytes[1] = green;
+		bytes[2] = blue;
+		bytes[3] = alpha;
+		return bytes;
 	}
 
-	protected static Vec4[] calculateTileVerts(int width, int height,
-			Globe globe, Sector sector, BufferWrapper[] elevations,
-			double missingDataSignal, double minElevationClamp,
-			double maxElevationClamp)
+	protected Vec4[] calculateTileVerts(int width, int height, Globe globe,
+			Sector sector, BufferWrapper[] elevations, double missingDataSignal)
 	{
 		double[] allElevations = new double[(width + 2) * (height + 2)];
 		for (int y = 0; y < height + 2; y++)
@@ -506,7 +663,7 @@ public class ElevationLayer extends TiledImageLayer
 						&& elevation <= maxElevationClamp)
 				{
 					verts[index] = globe.computePointFromPosition(lat, lon,
-							elevation * 100);
+							elevation * bakedExaggeration);
 				}
 			}
 		}
@@ -514,7 +671,7 @@ public class ElevationLayer extends TiledImageLayer
 		return verts;
 	}
 
-	protected static Vec4[] calculateNormals(int width, int height, Vec4[] verts)
+	protected Vec4[] calculateNormals(int width, int height, Vec4[] verts)
 	{
 		if (verts.length != (width + 2) * (height + 2))
 			throw new IllegalStateException("Illegal vertices length");
@@ -613,10 +770,47 @@ public class ElevationLayer extends TiledImageLayer
 		this.sunPositionNormalized = sunPosition.normalize3();
 	}
 
+	public double getMinElevationClamp()
+	{
+		return minElevationClamp;
+	}
+
+	public void setMinElevationClamp(double minElevationClamp)
+	{
+		this.minElevationClamp = minElevationClamp;
+	}
+
+	public double getMaxElevationClamp()
+	{
+		return maxElevationClamp;
+	}
+
+	public void setMaxElevationClamp(double maxElevationClamp)
+	{
+		this.maxElevationClamp = maxElevationClamp;
+	}
+
 	@Override
 	public void setSplitScale(double splitScale)
 	{
 		super.setSplitScale(splitScale);
+	}
+
+	@Override
+	protected TextureTile createTile(Sector sector, Level level, int row,
+			int col)
+	{
+		return new MinMaxTextureTile(this, sector, level, row, col);
+	}
+
+	@Override
+	protected void setBlendingFunction(DrawContext dc)
+	{
+		GL gl = dc.getGL();
+		double alpha = this.getOpacity();
+		gl.glColor4d(alpha, alpha, alpha, alpha);
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	protected static class RequestTask implements Runnable,
@@ -673,23 +867,6 @@ public class ElevationLayer extends TiledImageLayer
 		{
 			return this.tile.toString();
 		}
-	}
-
-	@Override
-	protected TextureTile createTile(Sector sector, Level level, int row,
-			int col)
-	{
-		return new MinMaxTextureTile(this, sector, level, row, col);
-	}
-	
-	@Override
-	protected void setBlendingFunction(DrawContext dc)
-	{
-		GL gl = dc.getGL();
-        double alpha = this.getOpacity();
-        gl.glColor4d(alpha, alpha, alpha, alpha);
-        gl.glEnable(GL.GL_BLEND);
-        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	protected static class MinMaxTextureTile extends TextureTile

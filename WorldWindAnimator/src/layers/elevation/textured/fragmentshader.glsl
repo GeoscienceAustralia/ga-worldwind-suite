@@ -7,6 +7,7 @@ uniform float maxElevation;
 uniform float minTexElevation;
 uniform float maxTexElevation;
 uniform float exaggeration;
+uniform float bakedExaggeration;
 
 uniform vec3 eyePosition;
 uniform vec3 sunPosition;
@@ -82,8 +83,8 @@ void main(void)
 	vec3 perpposition = normalize(cross(bivector, normposition));
 	//angle between position and normal
 	float normalangle = acos(dot(normposition, normal));
-	//calculate exaggerated angle (normals are already exaggerated by 100)
-	float exaggeratedangle = tan((exaggeration / 100.0) * atan(normalangle));
+	//calculate exaggerated angle (normals are already exaggerated by bakedExaggeration)
+	float exaggeratedangle = tan((exaggeration / bakedExaggeration) * atan(normalangle));
 	//calculate mixer
 	float mixer = clamp(exaggeratedangle * 2.0 / PI, 0.0, 1.0);
 	//calculate new exaggerated normal

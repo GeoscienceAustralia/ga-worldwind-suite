@@ -40,9 +40,6 @@ public class ElevationTesselator extends RectangularTessellator
 
 	private double minElevation;
 	private double maxElevation;
-	
-	private double minGlobalElevation;
-	private double maxGlobalElevation;
 
 	@Override
 	public SectorGeometryList tessellate(DrawContext dc)

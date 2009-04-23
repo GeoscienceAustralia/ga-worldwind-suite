@@ -320,7 +320,7 @@ public class Animator
 		ocem.addElevationModel(eem);
 		ocem.addElevationModel(bem);
 
-		map1 = FileLayer.createLayer("WestMac Map Page 1",
+		/*map1 = FileLayer.createLayer("WestMac Map Page 1",
 				"GA/WestMac Map Page 1", ".dds", new File(tileDrive
 						+ ":/West Macs Imagery/Rectified Map/5 Tiles/page1"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
@@ -349,7 +349,7 @@ public class Animator
 						+ ":/West Macs Imagery/Vector/Roads/Mapnik/tiled"),
 				"png", 12, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0, -23.433333, 132.25, 133.95));
-		layers.add(roads);
+		layers.add(roads);*/
 
 		Layer elevation = new ElevationShader();
 		layers.add(elevation);
@@ -359,6 +359,7 @@ public class Animator
 		elevationImage.setSunPosition(new Vec4(0.61, 0.42, -0.67));
 		elevationImage.setExaggeration(50);
 		elevationImage.setSplitScale(1.2);
+		elevationImage.setMaxElevationClamp(0);
 		//elevationImage.setOpacity(0.5);
 		layers.add(elevationImage);
 
