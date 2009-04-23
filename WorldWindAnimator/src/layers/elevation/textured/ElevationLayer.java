@@ -5,6 +5,7 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
@@ -30,6 +31,7 @@ import javax.media.opengl.GL;
 import layers.elevation.ElevationTesselator;
 import nasa.worldwind.layers.TiledImageLayer;
 
+import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
 
@@ -38,18 +40,29 @@ public class ElevationLayer extends TiledImageLayer
 	protected static final String CACHE_NAME_PREFIX = "Elevation Layer/";
 
 	protected ExtendedBasicElevationModel elevationModel;
+	protected double exaggeration = 1.0;
+	protected Vec4 sunPosition = new Vec4(1, 1, 1);
+	protected Vec4 sunPositionNormalized = sunPosition.normalize3();
+	protected double minElevationClamp = -Double.MAX_VALUE;
+	protected double maxElevationClamp = 0;//Double.MAX_VALUE;
 
 	private int shaderprogram = -1;
 	private int minElevationUniform;
 	private int maxElevationUniform;
 	private int minTexElevationUniform;
 	private int maxTexElevationUniform;
+	private int exaggerationUniform;
 	private int opacityUniform;
+	private int eyePositionUniform;
+	private int sunPositionUniform;
+	private int oldModelViewInverseUniform;
 
 	public ElevationLayer(ExtendedBasicElevationModel elevationModel)
 	{
 		super(makeLevels(elevationModel));
 		this.elevationModel = elevationModel;
+		setUseTransparentTextures(true);
+		setUseMipMaps(true);
 	}
 
 	protected static LevelSet makeLevels(
@@ -84,16 +97,40 @@ public class ElevationLayer extends TiledImageLayer
 			setupShader(dc);
 		}
 		GL gl = dc.getGL();
-		//gl.glUseProgram(shaderprogram);
+		gl.glUseProgram(shaderprogram);
 
-		double minElevation = ((ElevationTesselator) dc.getGlobe()
+		/*double minElevation = ((ElevationTesselator) dc.getGlobe()
 				.getTessellator()).getMinElevation();
 		double maxElevation = ((ElevationTesselator) dc.getGlobe()
-				.getTessellator()).getMaxElevation();
+				.getTessellator()).getMaxElevation();*/
+		double minElevation = elevationModel.getMinElevation();
+		double maxElevation = elevationModel.getMaxElevation();
+		minElevation = clamp(minElevation, minElevationClamp, maxElevationClamp);
+		maxElevation = clamp(maxElevation, minElevationClamp, maxElevationClamp);
 		gl.glUniform1f(minElevationUniform, (float) minElevation);
 		gl.glUniform1f(maxElevationUniform, (float) maxElevation);
-
+		gl.glUniform1f(exaggerationUniform, (float) exaggeration);
 		gl.glUniform1f(opacityUniform, (float) getOpacity());
+
+		Matrix modelViewInv = dc.getView().getModelviewMatrix().getInverse();
+		float[] modelViewInvArray = new float[] { (float) modelViewInv.m11,
+				(float) modelViewInv.m21, (float) modelViewInv.m31,
+				(float) modelViewInv.m41, (float) modelViewInv.m12,
+				(float) modelViewInv.m22, (float) modelViewInv.m32,
+				(float) modelViewInv.m42, (float) modelViewInv.m13,
+				(float) modelViewInv.m23, (float) modelViewInv.m33,
+				(float) modelViewInv.m43, (float) modelViewInv.m14,
+				(float) modelViewInv.m24, (float) modelViewInv.m34,
+				(float) modelViewInv.m44 };
+		gl.glUniformMatrix4fv(oldModelViewInverseUniform, 1, false,
+				modelViewInvArray, 0);
+
+		Vec4 eye = dc.getView().getEyePoint();
+		gl.glUniform3f(eyePositionUniform, (float) eye.x, (float) eye.y,
+				(float) eye.z);
+		gl.glUniform3f(sunPositionUniform, (float) sunPositionNormalized.x,
+				(float) sunPositionNormalized.y,
+				(float) sunPositionNormalized.z);
 
 		super.render(dc);
 		gl.glUseProgram(0);
@@ -151,7 +188,15 @@ public class ElevationLayer extends TiledImageLayer
 				"minTexElevation");
 		maxTexElevationUniform = gl.glGetUniformLocation(shaderprogram,
 				"maxTexElevation");
+		exaggerationUniform = gl.glGetUniformLocation(shaderprogram,
+				"exaggeration");
 		opacityUniform = gl.glGetUniformLocation(shaderprogram, "opacity");
+		eyePositionUniform = gl.glGetUniformLocation(shaderprogram,
+				"eyePosition");
+		sunPositionUniform = gl.glGetUniformLocation(shaderprogram,
+				"sunPosition");
+		oldModelViewInverseUniform = gl.glGetUniformLocation(shaderprogram,
+				"oldModelViewInverse");
 	}
 
 	@Override
@@ -239,8 +284,8 @@ public class ElevationLayer extends TiledImageLayer
 
 			((MinMaxTextureTile) tile).setMinElevation(minmax[0]);
 			((MinMaxTextureTile) tile).setMaxElevation(minmax[1]);
-
 			tile.setTextureData(textureData);
+
 			//if (tile.getLevelNumber() != 0 || !this.isRetainLevelZeroTiles())
 			addTileToCache(tile);
 			return true;
@@ -275,7 +320,6 @@ public class ElevationLayer extends TiledImageLayer
 		//fill list of 9 tilekeys, 5'th one is the center tile
 		boolean anyValid = false;
 		for (int i = 0, r = -1; r <= 1; r++)
-		//for (int i = 0, r = 1; r >= -1; r--)
 		{
 			for (int c = -1; c <= 1; c++, i++)
 			{
@@ -283,7 +327,7 @@ public class ElevationLayer extends TiledImageLayer
 				int row = (r + tile.getRow() + rowCount) % rowCount;
 
 				TileKey key = new TileKey(tile.getLevelNumber(), row, col,
-						elevationLevels.getFirstLevel().getCacheName());
+						elevationLevel.getCacheName());
 				sectors[i] = elevationLevels.computeSectorForKey(key);
 				//only add if the sector intersects the levels sector
 				if (elevationLevels.getSector().intersects(sectors[i]))
@@ -318,6 +362,11 @@ public class ElevationLayer extends TiledImageLayer
 				max = Math.max(max, elevations.getDouble(i));
 			}
 		}
+		if (min == Double.MAX_VALUE || max == -Double.MAX_VALUE)
+		{
+			throw new IllegalStateException(
+					"All elevations are missing data, min/max not found");
+		}
 		return new double[] { min, max };
 	}
 
@@ -333,9 +382,10 @@ public class ElevationLayer extends TiledImageLayer
 		//+-+-+-+
 		//|0|1|2|
 		//+-+-+-+
-		
+
 		Vec4[] verts = calculateTileVerts(width, height, globe, sector,
-				elevations, elevationModel.getMissingDataSignal());
+				elevations, elevationModel.getMissingDataSignal(),
+				minElevationClamp, maxElevationClamp);
 		Vec4[] normals = calculateNormals(width, height, verts);
 
 		byte[] red = new byte[width * height];
@@ -352,14 +402,14 @@ public class ElevationLayer extends TiledImageLayer
 			red[i] = (byte) (255.0 * (normal.x + 1) / 2);
 			green[i] = (byte) (255.0 * (normal.y + 1) / 2);
 			blue[i] = (byte) (255.0 * (normal.z + 1) / 2);
-			//alpha[i] = (byte) (255.0 * (elevations[4].getDouble(i) - minElevation) / (maxElevation - minElevation));
-			alpha[i] = (byte) 255;
+			alpha[i] = (byte) (255.0 * (elevations[4].getDouble(i) - minElevation) / (maxElevation - minElevation));
+			//alpha[i] = (byte) 255;
 		}
 
 		byte[][] bands = new byte[4][];
 		bands[0] = red;
-		bands[1] = blue;
-		bands[2] = green;
+		bands[1] = green;
+		bands[2] = blue;
 		bands[3] = alpha;
 
 		DataBuffer db = new DataBufferByte(bands, width * height);
@@ -367,14 +417,15 @@ public class ElevationLayer extends TiledImageLayer
 				height, bands.length);
 		Raster raster = Raster.createRaster(sm, db, null);
 		BufferedImage image = new BufferedImage(width, height,
-				BufferedImage.TYPE_INT_ARGB);
+				BufferedImage.TYPE_INT_ARGB_PRE);
 		image.setData(raster);
 		return TextureIO.newTextureData(image, isUseMipMaps());
 	}
 
 	protected static Vec4[] calculateTileVerts(int width, int height,
 			Globe globe, Sector sector, BufferWrapper[] elevations,
-			double missingDataSignal)
+			double missingDataSignal, double minElevationClamp,
+			double maxElevationClamp)
 	{
 		double[] allElevations = new double[(width + 2) * (height + 2)];
 		for (int y = 0; y < height + 2; y++)
@@ -449,10 +500,13 @@ public class ElevationLayer extends TiledImageLayer
 			{
 				Angle lon = sector.getMinLongitude().addDegrees(dlon * (x - 1));
 				int index = getArrayIndex(width + 2, height + 2, x, y);
-				if (allElevations[index] != missingDataSignal)
+				double elevation = allElevations[index];
+				if (elevation != missingDataSignal
+						&& elevation >= minElevationClamp
+						&& elevation <= maxElevationClamp)
 				{
 					verts[index] = globe.computePointFromPosition(lat, lon,
-							allElevations[index] * 100);
+							elevation * 100);
 				}
 			}
 		}
@@ -490,13 +544,13 @@ public class ElevationLayer extends TiledImageLayer
 							y + 2)];
 
 					Vec4[] normals = new Vec4[4];
-					normals[0] = v1 != null && v2 != null ? v0.subtract3(v1)
+					normals[0] = v1 != null && v2 != null ? v1.subtract3(v0)
 							.cross3(v0.subtract3(v2)).normalize3() : null;
-					normals[1] = v2 != null && v3 != null ? v0.subtract3(v2)
+					normals[1] = v2 != null && v3 != null ? v2.subtract3(v0)
 							.cross3(v0.subtract3(v3)).normalize3() : null;
-					normals[2] = v3 != null && v4 != null ? v0.subtract3(v3)
+					normals[2] = v3 != null && v4 != null ? v3.subtract3(v0)
 							.cross3(v0.subtract3(v4)).normalize3() : null;
-					normals[3] = v4 != null && v1 != null ? v0.subtract3(v4)
+					normals[3] = v4 != null && v1 != null ? v4.subtract3(v0)
 							.cross3(v0.subtract3(v1)).normalize3() : null;
 					Vec4 normal = Vec4.ZERO;
 					for (Vec4 n : normals)
@@ -531,6 +585,38 @@ public class ElevationLayer extends TiledImageLayer
 	protected static int clamp(int value, int min, int max)
 	{
 		return (value < min) ? min : (value > max) ? max : value;
+	}
+
+	protected static double clamp(double value, double min, double max)
+	{
+		return (value < min) ? min : (value > max) ? max : value;
+	}
+
+	public double getExaggeration()
+	{
+		return exaggeration;
+	}
+
+	public void setExaggeration(double exaggeration)
+	{
+		this.exaggeration = exaggeration;
+	}
+
+	public Vec4 getSunPosition()
+	{
+		return sunPosition;
+	}
+
+	public void setSunPosition(Vec4 sunPosition)
+	{
+		this.sunPosition = sunPosition;
+		this.sunPositionNormalized = sunPosition.normalize3();
+	}
+
+	@Override
+	public void setSplitScale(double splitScale)
+	{
+		super.setSplitScale(splitScale);
 	}
 
 	protected static class RequestTask implements Runnable,
@@ -595,6 +681,16 @@ public class ElevationLayer extends TiledImageLayer
 	{
 		return new MinMaxTextureTile(this, sector, level, row, col);
 	}
+	
+	@Override
+	protected void setBlendingFunction(DrawContext dc)
+	{
+		GL gl = dc.getGL();
+        double alpha = this.getOpacity();
+        gl.glColor4d(alpha, alpha, alpha, alpha);
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+	}
 
 	protected static class MinMaxTextureTile extends TextureTile
 	{
@@ -630,30 +726,101 @@ public class ElevationLayer extends TiledImageLayer
 		}
 
 		@Override
+		protected Texture initializeTexture(DrawContext dc)
+		{
+			if (dc == null)
+			{
+				String message = Logging
+						.getMessage("nullValue.DrawContextIsNull");
+				Logging.logger().severe(message);
+				throw new IllegalStateException(message);
+			}
+
+			Texture t = this.getTexture(dc.getTextureCache());
+			if (t != null)
+				return t;
+
+			if (this.getTextureData() == null)
+			{
+				String msg = Logging.getMessage("nullValue.TextureDataIsNull");
+				Logging.logger().severe(msg);
+				throw new IllegalStateException(msg);
+			}
+
+			try
+			{
+				t = new ElevationTexture(this.getTextureData(),
+						getMinElevation(), getMaxElevation());
+			}
+			catch (Exception e)
+			{
+				Logging
+						.logger()
+						.log(
+								java.util.logging.Level.SEVERE,
+								"layers.TextureLayer.ExceptionAttemptingToReadTextureFile",
+								e);
+				return null;
+			}
+
+			this.setTexture(dc.getTextureCache(), t);
+			t.bind();
+
+			this.setTextureParameters(dc, t);
+
+			return t;
+		}
+
+		@Override
 		public boolean bind(DrawContext dc)
 		{
-			boolean success = super.bind(dc);
-
-			GL gl = dc.getGL();
-			MinMaxTextureTile tile = this;
-			while (tile != null)
+			if (dc == null)
 			{
-				if (tile.isTextureInMemory(dc.getTextureCache()))
-					break;
-				if (tile.getFallbackTile() instanceof MinMaxTextureTile)
-					tile = (MinMaxTextureTile) tile.getFallbackTile();
-				else
-					tile = null;
-			}
-			if (tile != null)
-			{
-				gl.glUniform1f(layer.minTexElevationUniform, (float) tile
-						.getMinElevation());
-				gl.glUniform1f(layer.maxTexElevationUniform, (float) tile
-						.getMaxElevation());
+				String message = Logging
+						.getMessage("nullValue.DrawContextIsNull");
+				Logging.logger().severe(message);
+				throw new IllegalStateException(message);
 			}
 
-			return success;
+			Texture t = this.getTexture(dc.getTextureCache());
+			if (t == null && this.getTextureData() != null)
+			{
+				t = this.initializeTexture(dc);
+				if (t != null)
+					return true; // texture was bound during initialization.
+			}
+
+			if (t == null && this.getFallbackTile() != null)
+			{
+				MinMaxTextureTile resourceTile = this.getFallbackTile();
+				t = resourceTile.getTexture(dc.getTextureCache());
+				if (t == null)
+				{
+					t = resourceTile.initializeTexture(dc);
+					if (t != null)
+						return true; // texture was bound during initialization.
+				}
+			}
+
+			if (t != null)
+			{
+				t.bind();
+
+				if (!(t instanceof ElevationTexture))
+				{
+					String message = "Texture is not instance of ElevationTexture";
+					Logging.logger().severe(message);
+					throw new IllegalStateException(message);
+				}
+
+				GL gl = dc.getGL();
+				gl.glUniform1f(layer.minTexElevationUniform,
+						(float) ((ElevationTexture) t).getMinElevation());
+				gl.glUniform1f(layer.maxTexElevationUniform,
+						(float) ((ElevationTexture) t).getMaxElevation());
+			}
+
+			return t != null;
 		}
 
 		protected TextureTile getTileFromMemoryCache(TileKey tileKey)
@@ -723,6 +890,12 @@ public class ElevationLayer extends TiledImageLayer
 						t1, t2), nextLevel, 2 * row + 1, 2 * col + 1);
 
 			return subTiles;
+		}
+
+		@Override
+		public MinMaxTextureTile getFallbackTile()
+		{
+			return (MinMaxTextureTile) super.getFallbackTile();
 		}
 	}
 }

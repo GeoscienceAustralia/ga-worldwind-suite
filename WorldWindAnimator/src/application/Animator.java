@@ -24,6 +24,7 @@ import gov.nasa.worldwind.view.OrbitView;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -48,6 +49,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSlider;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
@@ -202,7 +204,7 @@ public class Animator
 
 		//tesselator.setMakeTileSkirts(false);
 		//model.setShowWireframeInterior(true);
-		//wwd.getSceneController().setVerticalExaggeration(1.5);
+		wwd.getSceneController().setVerticalExaggeration(10);
 		//ocem.setElevationOffset(200);
 
 		LayerList layers = model.getLayers();
@@ -353,8 +355,11 @@ public class Animator
 		layers.add(elevation);
 		//elevation.setOpacity(0.2);
 
-		//Layer elevationImage = new ElevationTiledImageLayer(ocem);
-		Layer elevationImage = new ElevationLayer(bem);
+		final ElevationLayer elevationImage = new ElevationLayer(bem);
+		elevationImage.setSunPosition(new Vec4(0.61, 0.42, -0.67));
+		elevationImage.setExaggeration(50);
+		elevationImage.setSplitScale(1.2);
+		//elevationImage.setOpacity(0.5);
 		layers.add(elevationImage);
 
 		Landmarks landmarks = new Landmarks(model.getGlobe());
@@ -513,6 +518,85 @@ public class Animator
 		
 		sliders.setSize(640, 480);
 		sliders.setVisible(true);*/
+
+		JFrame exaggeration = new JFrame("exaggeration");
+		exaggeration.setLayout(new GridLayout(0, 1));
+		JSlider slider;
+
+		slider = new JSlider(0, 100, (int) wwd.getSceneController()
+				.getVerticalExaggeration());
+		exaggeration.add(slider);
+		slider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				int value = ((JSlider) e.getSource()).getValue();
+				Configuration.setValue(AVKey.VERTICAL_EXAGGERATION,
+						(double) value);
+				wwd.getSceneController().setVerticalExaggeration(value);
+				wwd.redraw();
+			}
+		});
+
+		slider = new JSlider(0, 100, (int) elevationImage.getExaggeration());
+		exaggeration.add(slider);
+		slider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				int value = ((JSlider) e.getSource()).getValue();
+				elevationImage.setExaggeration(value);
+				wwd.redraw();
+			}
+		});
+
+		slider = new JSlider(-1000, 1000, (int) (elevationImage
+				.getSunPosition().x * 1000));
+		exaggeration.add(slider);
+		slider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				int value = ((JSlider) e.getSource()).getValue();
+				Vec4 pos = elevationImage.getSunPosition();
+				pos = new Vec4(value / 1000d, pos.y, pos.z);
+				elevationImage.setSunPosition(pos);
+				wwd.redraw();
+			}
+		});
+
+		slider = new JSlider(-1000, 1000, (int) (elevationImage
+				.getSunPosition().y * 1000));
+		exaggeration.add(slider);
+		slider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				int value = ((JSlider) e.getSource()).getValue();
+				Vec4 pos = elevationImage.getSunPosition();
+				pos = new Vec4(pos.x, value / 1000d, pos.z);
+				elevationImage.setSunPosition(pos);
+				wwd.redraw();
+			}
+		});
+
+		slider = new JSlider(-1000, 1000, (int) (elevationImage
+				.getSunPosition().z * 1000));
+		exaggeration.add(slider);
+		slider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				int value = ((JSlider) e.getSource()).getValue();
+				Vec4 pos = elevationImage.getSunPosition();
+				pos = new Vec4(pos.x, pos.y, value / 1000d);
+				elevationImage.setSunPosition(pos);
+				wwd.redraw();
+			}
+		});
+
+		exaggeration.setSize(640, 200);
+		exaggeration.setVisible(true);
 	}
 
 	private ExtendedBasicElevationModel getEBEM(ElevationModel elevationModel)

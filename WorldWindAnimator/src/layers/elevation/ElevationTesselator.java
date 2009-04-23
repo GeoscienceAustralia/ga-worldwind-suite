@@ -19,18 +19,18 @@ public class ElevationTesselator extends RectangularTessellator
 {
 	protected static class RenderInfo extends RectangularTessellator.RenderInfo
 	{
-		protected final DoubleBuffer positions;
 		protected final DoubleBuffer vertices;
 		protected final Vec4 refCenter;
+		protected final double[] elevations;
 		protected final double minElevation;
 		protected final double maxElevation;
 
 		protected RenderInfo(int density, DoubleBuffer vertices,
-				DoubleBuffer positions, double minElevation,
-				double maxElevation, DoubleBuffer texCoords, Vec4 refCenter)
+				double[] elevations, double minElevation, double maxElevation,
+				DoubleBuffer texCoords, Vec4 refCenter)
 		{
 			super(density, vertices, texCoords, refCenter);
-			this.positions = positions;
+			this.elevations = elevations;
 			this.vertices = vertices;
 			this.minElevation = minElevation;
 			this.maxElevation = maxElevation;
@@ -40,6 +40,9 @@ public class ElevationTesselator extends RectangularTessellator
 
 	private double minElevation;
 	private double maxElevation;
+	
+	private double minGlobalElevation;
+	private double maxGlobalElevation;
 
 	@Override
 	public SectorGeometryList tessellate(DrawContext dc)
@@ -62,17 +65,15 @@ public class ElevationTesselator extends RectangularTessellator
 			else
 			{
 				ri.vertices.rewind();
-				for (int i = 0; i < ri.vertices.limit(); i += 3)
+				for (int i = 0; i < ri.vertices.limit() / 3; i++)
 				{
 					Vec4 point = new Vec4(ri.vertices.get(), ri.vertices.get(),
 							ri.vertices.get()).add3(ri.refCenter);
 					if (isPointInScreen(dc, point))
 					{
 						count++;
-						minElevation = Math.min(minElevation, ri.positions
-								.get(i + 2));
-						maxElevation = Math.max(maxElevation, ri.positions
-								.get(i + 2));
+						minElevation = Math.min(minElevation, ri.elevations[i]);
+						maxElevation = Math.max(maxElevation, ri.elevations[i]);
 					}
 				}
 			}
@@ -122,13 +123,11 @@ public class ElevationTesselator extends RectangularTessellator
 		int density = tile.density;
 		int numVertices = (density + 3) * (density + 3);
 		DoubleBuffer verts = BufferUtil.newDoubleBuffer(numVertices * 3);
-		DoubleBuffer positions = BufferUtil.newDoubleBuffer(numVertices * 3);
 		ArrayList<LatLon> latlons = this.computeLocations(tile);
 		double[] elevations = new double[latlons.size()];
 		dc.getGlobe().getElevations(tile.sector, latlons, tile.getResolution(),
 				elevations);
 
-		int iv = 0, ip = 0;
 		double verticalExaggeration = dc.getVerticalExaggeration();
 		double exaggeratedMinElevation = makeSkirts ? globe.getMinElevation()
 				* verticalExaggeration : 0;
@@ -139,21 +138,20 @@ public class ElevationTesselator extends RectangularTessellator
 
 		double minElevation = Double.MAX_VALUE;
 		double maxElevation = -Double.MAX_VALUE;
-		int ie = 0;
+		int ie = 0, iv = 0;
 		Iterator<LatLon> latLonIter = latlons.iterator();
 		for (int j = 0; j <= density + 2; j++)
 		{
 			for (int i = 0; i <= density + 2; i++)
 			{
 				LatLon latlon = latLonIter.next();
-				double elevation = verticalExaggeration * elevations[ie++];
-
-				positions.put(ip++, latlon.getLatitude().degrees).put(ip++,
-						latlon.getLongitude().degrees).put(ip++, elevation);
+				double elevation = elevations[ie++];
 
 				minElevation = Math.min(minElevation, elevation);
 				maxElevation = Math.max(maxElevation, elevation);
 
+				//add exaggeration and skirts
+				elevation *= verticalExaggeration;
 				if (j == 0 || j >= tile.density + 2 || i == 0
 						|| i >= tile.density + 2)
 				{ // use abs to account for negative elevation.
@@ -168,7 +166,7 @@ public class ElevationTesselator extends RectangularTessellator
 			}
 		}
 
-		return new RenderInfo(density, verts, positions, minElevation,
+		return new RenderInfo(density, verts, elevations, minElevation,
 				maxElevation, getTextureCoordinates(density), refCenter);
 	}
 }
