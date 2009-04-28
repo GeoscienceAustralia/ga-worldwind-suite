@@ -138,6 +138,8 @@ void main(void)
 	//gl_FragColor = vec4(fract(normalize(position)), opacity);
 	//gl_FragColor = vec4(chroma, opacity);
 	
+	//gl_FragColor = vec4(tile.a, tile.a, tile.a, opacity);
+	
 	//nxDir = clamp(nxDir, 0.0, 1.0);
 	//float amount = abs(nxDir - 0.5) * 2.0;
 	//amount = pow(amount, 1.5);

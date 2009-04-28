@@ -581,68 +581,72 @@ public class ElevationLayer extends TiledImageLayer
 		return bytes;
 	}
 
+	protected double getValue(int width, int height, int x, int y,
+			BufferWrapper[] elevations, double missingDataSignal)
+	{
+		BufferWrapper elevs = elevations[4];
+		boolean left = x < 0;
+		boolean right = x >= width;
+		boolean top = y < 0;
+		boolean bottom = y >= height;
+
+		//can we do this with simple integer maths?
+
+		//assumption: tile edge contain same values as adjacent tile edge
+
+		if (top)
+		{
+			x--;
+			x += width;
+			elevs = elevations[7];
+		}
+		else if (bottom)
+		{
+			x++;
+			x -= width;
+			elevs = elevations[1];
+		}
+
+		if (left)
+		{
+			y--;
+			y += height;
+			if (top)
+				elevs = elevations[6];
+			else if (bottom)
+				elevs = elevations[0];
+			else
+				elevs = elevations[3];
+		}
+		else if (right)
+		{
+			y++;
+			y -= height;
+			if (top)
+				elevs = elevations[8];
+			else if (bottom)
+				elevs = elevations[2];
+			else
+				elevs = elevations[5];
+		}
+
+		if (elevs == null)
+			return missingDataSignal;
+
+		return elevs.getDouble(getArrayIndex(width, height, x, y));
+	}
+
 	protected Vec4[] calculateTileVerts(int width, int height, Globe globe,
 			Sector sector, BufferWrapper[] elevations, double missingDataSignal)
 	{
 		double[] allElevations = new double[(width + 2) * (height + 2)];
-		for (int y = 0; y < height + 2; y++)
+
+		for (int y = -1; y < height + 1; y++)
 		{
-			int srcy = clamp(y - 1, 0, height - 1);
-			for (int x = 0; x < width + 2; x++)
+			for (int x = -1; x < width + 1; x++)
 			{
-				int srcx = clamp(x - 1, 0, width - 1);
-				allElevations[getArrayIndex(width + 2, height + 2, x, y)] = elevations[4]
-						.getDouble(getArrayIndex(width, height, srcx, srcy));
-			}
-		}
-		//left & right rows, not corners
-		for (int x = 0; x < width + 2; x += width + 1)
-		{
-			boolean left = x == 0;
-			int srcx = left ? x - 2 : x;
-			BufferWrapper elevs = left ? elevations[3] : elevations[5];
-			if (elevs != null)
-			{
-				for (int y = 1; y < height + 1; y++)
-				{
-					int srcy = y - 1;
-					allElevations[getArrayIndex(width + 2, height + 2, x, y)] = elevs
-							.getDouble(getArrayIndex(width, height, srcx, srcy));
-				}
-			}
-		}
-		//top & bottom rows, and corners
-		for (int y = 0; y < height + 2; y += height + 1)
-		{
-			boolean top = y == 0;
-			int srcy = top ? y - 2 : y;
-			for (int x = 0; x < width + 2; x++)
-			{
-				int srcx = x - 1;
-				BufferWrapper elevs = top ? elevations[7] : elevations[1];
-				if (x == 0)
-				{
-					//left corners
-					elevs = top ? elevations[6] : elevations[0];
-					srcx--;
-				}
-				else if (x == width + 1)
-				{
-					//right corners
-					elevs = top ? elevations[8] : elevations[2];
-					srcx++;
-				}
-				if (elevs != null)
-				{
-					allElevations[getArrayIndex(width + 2, height + 2, x, y)] = elevs
-							.getDouble(getArrayIndex(width, height, srcx, srcy));
-				}
-				/*else if(y == 0 || y == height + 1)
-				{
-					//copy from next or prev row
-					allElevations[getArrayIndex(width + 2, height + 2, x, y)] = allElevations[getArrayIndex(
-							width + 2, height + 2, x, top ? y + 1 : y - 1)];
-				}*/
+				allElevations[getArrayIndex(width + 2, height + 2, x + 1, y + 1)] = getValue(
+						width, height, x, y, elevations, missingDataSignal);
 			}
 		}
 

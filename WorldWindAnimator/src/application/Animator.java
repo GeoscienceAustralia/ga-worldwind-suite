@@ -67,6 +67,8 @@ import layers.immediate.ImmediateMode;
 import layers.immediate.ImmediateRetrievalService;
 import layers.immediate.ImmediateTaskService;
 import layers.immediate.bmng.BMNGWMSLayer;
+import layers.metacarta.MetacartaCoastlineLayer;
+import layers.metacarta.MetacartaStateBoundariesLayer;
 import layers.misc.Landmarks;
 import layers.sky.Skybox;
 import layers.sky.Skysphere;
@@ -358,7 +360,7 @@ public class Animator
 		final ElevationLayer elevationImage = new ElevationLayer(bem);
 		elevationImage.setSunPosition(new Vec4(0.61, 0.42, -0.67));
 		elevationImage.setExaggeration(50);
-		elevationImage.setSplitScale(1.2);
+		elevationImage.setSplitScale(1.5);
 		elevationImage.setMaxElevationClamp(0);
 		//elevationImage.setOpacity(0.5);
 		layers.add(elevationImage);
@@ -403,6 +405,14 @@ public class Animator
 						+ overlay + ".png");
 		layers.add(overlayLayer);
 		overlayLayer.setOpacity(0.4);*/
+
+		MetacartaStateBoundariesLayer state = new MetacartaStateBoundariesLayer();
+		state.setSplitScale(1.2);
+		layers.add(state);
+
+		MetacartaCoastlineLayer coast = new MetacartaCoastlineLayer();
+		coast.setSplitScale(1.2);
+		layers.add(coast);
 
 		crosshair = new CrosshairLayer();
 		layers.add(crosshair);
