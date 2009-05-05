@@ -1,9 +1,9 @@
 package application;
 
-import javax.media.opengl.GL;
-
 import gov.nasa.worldwind.BasicSceneController;
 import gov.nasa.worldwind.render.DrawContext;
+
+import javax.media.opengl.GL;
 
 public class QualitySceneController extends BasicSceneController
 {

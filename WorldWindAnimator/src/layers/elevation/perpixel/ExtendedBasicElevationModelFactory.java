@@ -1,4 +1,4 @@
-package layers.elevation.textured;
+package layers.elevation.perpixel;
 
 import gov.nasa.worldwind.BasicFactory;
 import gov.nasa.worldwind.avlist.AVKey;

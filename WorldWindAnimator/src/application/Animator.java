@@ -9,8 +9,10 @@ import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Quaternion;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.globes.Earth;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
@@ -57,19 +59,19 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import layers.depth.DepthLayer;
-import layers.elevation.ElevationShader;
-import layers.elevation.ElevationTesselator;
-import layers.elevation.textured.ElevationLayer;
-import layers.elevation.textured.ExtendedBasicElevationModel;
-import layers.elevation.textured.ExtendedBasicElevationModelFactory;
+import layers.elevation.perpixel.ExtendedBasicElevationModel;
+import layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
+import layers.elevation.perpixel.shaded.ShadedElevationLayer;
+import layers.elevation.perpixel.shadows.ShadowsElevationLayer;
+import layers.elevation.pervetex.ElevationTesselator;
 import layers.file.FileLayer;
 import layers.immediate.ImmediateMode;
 import layers.immediate.ImmediateRetrievalService;
 import layers.immediate.ImmediateTaskService;
 import layers.immediate.bmng.BMNGWMSLayer;
-import layers.metacarta.MetacartaCoastlineLayer;
-import layers.metacarta.MetacartaStateBoundariesLayer;
 import layers.misc.Landmarks;
+import layers.other.GravityLayer;
+import layers.other.MagneticsLayer;
 import layers.sky.Skybox;
 import layers.sky.Skysphere;
 import nasa.worldwind.awt.WorldWindowGLCanvas;
@@ -147,7 +149,14 @@ public class Animator
 	private OffsetCompoundElevationModel ocem;
 	private LensFlareLayer lensFlare;
 
-	private Layer alos, map1, map2, roads, bmng, landsat;
+	private Vec4 sunPosition = new Vec4(0.0, 0.0,
+			Earth.WGS84_EQUATORIAL_RADIUS * 2);
+	private JSlider xRotate, yRotate, zRotate;
+
+	private ShadedElevationLayer elevationEarth, elevationSW;
+	private ShadowsElevationLayer shadowsEarth, shadowsSW;
+
+	private Layer bmng, landsat;
 
 	public Animator()
 	{
@@ -164,6 +173,9 @@ public class Animator
 
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				ElevationTesselator.class.getName());
+
+		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE,
+				16777216L * 4); //64 mb
 
 		animationChangeListener = new ChangeListener()
 		{
@@ -311,16 +323,26 @@ public class Animator
 				.createFromConfigFile("config/LegacyEarthElevationModel.xml");
 		ExtendedBasicElevationModel eem = getEBEM(earthem);
 
+		Sector bemSector = Sector.fromDegrees(-59.99875, -7.99875, 91.99875,
+				171.99875);
 		ExtendedBasicElevationModel bem = FileLayer.createElevationModel(
 				"SW Margins DEM", "GA/SW Margins DEM", new File(tileDrive
 						+ ":/SW Margins/bathy/tiled"), 7, 150, LatLon
-						.fromDegrees(20d, 20d), Sector.fromDegrees(-59.99875,
-						-7.99875, 91.99875, 171.99875), -8922, 3958);
+						.fromDegrees(20d, 20d), bemSector, -8922, 3958);
 		bem.setMissingDataSignal(-32768);
+
+		/*Sector semSector = Sector.fromDegrees(-27.0015, -22.5005, 106.5005,
+				110.5025);
+		ExtendedBasicElevationModel sem = FileLayer.createElevationModel(
+				"SONNE DEM", "GA/SONNE DEM", new File(tileDrive
+						+ ":/SW Margins/sonne/tiled"), 7, 150, LatLon
+						.fromDegrees(20d, 20d), semSector, -8922, 3958);
+		sem.setMissingDataSignal(-32768);*/
 
 		//ocem.removeElevationModel(0);
 		ocem.addElevationModel(eem);
 		ocem.addElevationModel(bem);
+		//ocem.addElevationModel(sem);
 
 		/*map1 = FileLayer.createLayer("WestMac Map Page 1",
 				"GA/WestMac Map Page 1", ".dds", new File(tileDrive
@@ -353,17 +375,46 @@ public class Animator
 						-24.0, -23.433333, 132.25, 133.95));
 		layers.add(roads);*/
 
-		Layer elevation = new ElevationShader();
-		layers.add(elevation);
-		//elevation.setOpacity(0.2);
+		sunPosition = new Vec4(8788864.60609344, -2029069.2736562756,
+				-9020047.848073645, 0.0);
 
-		final ElevationLayer elevationImage = new ElevationLayer(bem);
-		elevationImage.setSunPosition(new Vec4(0.61, 0.42, -0.67));
-		elevationImage.setExaggeration(50);
-		elevationImage.setSplitScale(1.5);
-		elevationImage.setMaxElevationClamp(0);
-		//elevationImage.setOpacity(0.5);
-		layers.add(elevationImage);
+		elevationEarth = new ShadedElevationLayer(eem);
+		elevationEarth.setSunPosition(sunPosition);
+		elevationEarth.setExaggeration(50);
+		elevationEarth.setMaxElevationClamp(0);
+		elevationEarth.setMinElevationClamp(bem.getMinElevation());
+		//elevationEarth.setOpacity(0.5);
+		layers.add(elevationEarth);
+
+		Sector elevSector = new Sector(
+				bemSector.getMinLatitude().addDegrees(1), bemSector
+						.getMaxLatitude().addDegrees(-1), bemSector
+						.getMinLongitude().addDegrees(1), bemSector
+						.getMaxLongitude().addDegrees(-1));
+		elevationSW = new ShadedElevationLayer(bem, elevSector);
+		elevationSW.setSunPosition(sunPosition);
+		elevationSW.setExaggeration(50);
+		elevationSW.setSplitScale(1.5);
+		elevationSW.setMaxElevationClamp(0);
+		elevationSW.setMinElevationClamp(bem.getMinElevation());
+		//elevationSW.setOpacity(0.5);
+		layers.add(elevationSW);
+
+		shadowsEarth = new ShadowsElevationLayer(bem, elevSector);
+		shadowsEarth.setSunPosition(sunPosition);
+		shadowsEarth.setOpacity(0.5);
+		layers.add(shadowsEarth);
+
+		shadowsSW = new ShadowsElevationLayer(bem, elevSector);
+		shadowsSW.setSunPosition(sunPosition);
+		shadowsSW.setOpacity(0.5);
+		layers.add(shadowsSW);
+
+		Layer gravity = new GravityLayer();
+		layers.add(gravity);
+
+		Layer magnetics = new MagneticsLayer();
+		layers.add(magnetics);
 
 		Landmarks landmarks = new Landmarks(model.getGlobe());
 		layers.add(landmarks);
@@ -376,8 +427,13 @@ public class Animator
 		depth.setEnabled(true);
 		bmng.setEnabled(true);
 		landsat.setEnabled(true);
-		//elevation.setEnabled(true);
-		elevationImage.setEnabled(true);
+		//elevationEarth.setEnabled(true);
+		elevationSW.setEnabled(true);
+		//shadowsEarth.setEnabled(true);
+		shadowsSW.setEnabled(true);
+
+
+		//gravity.setEnabled(true);
 
 		//map1.setEnabled(true);
 		//map2.setEnabled(true);
@@ -395,24 +451,62 @@ public class Animator
 		//fog.setEnabled(true);
 		//skysphere.setEnabled(true);
 
-		/*Layer roadsshp = new ShapefileLayer(new File(
-				"C:/WINNT/Profiles/u97852/Desktop/Roads/Shapefile/Roads.shp"));
-		layers.add(roadsshp);*/
+		/*ShapefileLayer seismicShp = new ShapefileLayer();
+		seismicShp.setColor(Color.red);
+		seismicShp.loadFile(new File("D:/SW Margins/vector/seismic.shp"));
+		layers.add(seismicShp);
 
-		/*int overlay = 220;
-		Layer overlayLayer = new ImageOverlay(
-				"C:/WINNT/Profiles/u97852/Desktop/TEMP FOLDING AS PNG/FoldingMap0"
-						+ overlay + ".png");
-		layers.add(overlayLayer);
-		overlayLayer.setOpacity(0.4);*/
+		ShapefileLayer studyShp = new ShapefileLayer();
+		studyShp.setColor(Color.yellow);
+		studyShp.setOpacity(0.5);
+		studyShp.loadFile(new File("D:/SW Margins/vector/study_areas.shp"));
+		layers.add(studyShp);
+		
+		ShapefileLayer eezShp = new ShapefileLayer();
+		eezShp.setColor(Color.white);
+		eezShp.setFollowTerrain(false);
+		eezShp.loadFile(new File("D:/SW Margins/vector/eez_limit.shp"));
+		layers.add(eezShp);*/
 
-		MetacartaStateBoundariesLayer state = new MetacartaStateBoundariesLayer();
+		/*ShapefileLayer extendedShp = new ShapefileLayer();
+		extendedShp.setColor(Color.green);
+		//extendedShp.setFollowTerrain(false);
+		extendedShp.setOpacity(0.5);
+		extendedShp.loadFile(new File("D:/SW Margins/vector/ecs.shp"));
+		layers.add(extendedShp);*/
+
+		/*ShapefileLayer swath1Shp = new ShapefileLayer();
+		swath1Shp.setColor(Color.white);
+		swath1Shp.setFollowTerrain(false);
+		swath1Shp.loadFile(new File("D:/SW Margins/vector/swath_leg1.shp"));
+		layers.add(swath1Shp);
+		
+		ShapefileLayer swath2Shp = new ShapefileLayer();
+		swath2Shp.setColor(Color.white);
+		swath2Shp.setFollowTerrain(false);
+		swath2Shp.loadFile(new File("D:/SW Margins/vector/swath_leg2.shp"));
+		layers.add(swath2Shp);
+		
+		ShapefileLayer swath3Shp = new ShapefileLayer();
+		swath3Shp.setColor(Color.white);
+		swath3Shp.setFollowTerrain(false);
+		swath3Shp.loadFile(new File("D:/SW Margins/vector/swath_leg3.shp"));
+		layers.add(swath3Shp);*/
+
+		/*ShapefileLayer coastlineShp = new ShapefileLayer();
+		coastlineShp.setColor(Color.white);
+		coastlineShp.setFollowTerrain(true);
+		coastlineShp.loadFile(new File("D:/SW Margins/vector/coastline.shp"));
+		layers.add(coastlineShp);*/
+
+
+		/*MetacartaStateBoundariesLayer state = new MetacartaStateBoundariesLayer();
 		state.setSplitScale(1.2);
 		layers.add(state);
 
 		MetacartaCoastlineLayer coast = new MetacartaCoastlineLayer();
 		coast.setSplitScale(1.2);
-		layers.add(coast);
+		layers.add(coast);*/
 
 		crosshair = new CrosshairLayer();
 		layers.add(crosshair);
@@ -549,65 +643,93 @@ public class Animator
 			}
 		});
 
-		slider = new JSlider(0, 100, (int) elevationImage.getExaggeration());
+		slider = new JSlider(0, 100, (int) elevationSW.getExaggeration());
 		exaggeration.add(slider);
 		slider.addChangeListener(new ChangeListener()
 		{
 			public void stateChanged(ChangeEvent e)
 			{
 				int value = ((JSlider) e.getSource()).getValue();
-				elevationImage.setExaggeration(value);
+				elevationSW.setExaggeration(value);
 				wwd.redraw();
 			}
 		});
 
-		slider = new JSlider(-1000, 1000, (int) (elevationImage
-				.getSunPosition().x * 1000));
+		slider = new JSlider(1, 1000, (int) (shadowsSW.getScale() * 100.0));
 		exaggeration.add(slider);
 		slider.addChangeListener(new ChangeListener()
 		{
 			public void stateChanged(ChangeEvent e)
 			{
 				int value = ((JSlider) e.getSource()).getValue();
-				Vec4 pos = elevationImage.getSunPosition();
-				pos = new Vec4(value / 1000d, pos.y, pos.z);
-				elevationImage.setSunPosition(pos);
+				shadowsSW.setScale(value / 100.0);
+				shadowsEarth.setScale(value / 100.0);
 				wwd.redraw();
 			}
 		});
 
-		slider = new JSlider(-1000, 1000, (int) (elevationImage
-				.getSunPosition().y * 1000));
+		slider = new JSlider(-1000, 1000, (int) (shadowsSW.getBias() * 1000.0));
 		exaggeration.add(slider);
 		slider.addChangeListener(new ChangeListener()
 		{
 			public void stateChanged(ChangeEvent e)
 			{
 				int value = ((JSlider) e.getSource()).getValue();
-				Vec4 pos = elevationImage.getSunPosition();
-				pos = new Vec4(pos.x, value / 1000d, pos.z);
-				elevationImage.setSunPosition(pos);
+				shadowsSW.setBias(value / 1000.0);
+				shadowsEarth.setBias(value / 1000.0);
 				wwd.redraw();
 			}
 		});
 
-		slider = new JSlider(-1000, 1000, (int) (elevationImage
-				.getSunPosition().z * 1000));
-		exaggeration.add(slider);
-		slider.addChangeListener(new ChangeListener()
+		xRotate = new JSlider(-180, 180, 0);
+		exaggeration.add(xRotate);
+		xRotate.addChangeListener(new ChangeListener()
 		{
 			public void stateChanged(ChangeEvent e)
 			{
-				int value = ((JSlider) e.getSource()).getValue();
-				Vec4 pos = elevationImage.getSunPosition();
-				pos = new Vec4(pos.x, pos.y, value / 1000d);
-				elevationImage.setSunPosition(pos);
-				wwd.redraw();
+				rotateSunPosition(xRotate.getValue(), yRotate.getValue(),
+						zRotate.getValue());
+			}
+		});
+
+		yRotate = new JSlider(-180, 180, 0);
+		exaggeration.add(yRotate);
+		yRotate.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				rotateSunPosition(xRotate.getValue(), yRotate.getValue(),
+						zRotate.getValue());
+			}
+		});
+
+		zRotate = new JSlider(-180, 180, 0);
+		exaggeration.add(zRotate);
+		zRotate.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				rotateSunPosition(xRotate.getValue(), yRotate.getValue(),
+						zRotate.getValue());
 			}
 		});
 
 		exaggeration.setSize(640, 200);
 		exaggeration.setVisible(true);
+	}
+
+	private void rotateSunPosition(double x, double y, double z)
+	{
+		Quaternion q = Quaternion.fromRotationXYZ(Angle.fromDegrees(x), Angle
+				.fromDegrees(y), Angle.fromDegrees(z));
+		Vec4 newPosition = sunPosition.transformBy3(q);
+		elevationEarth.setSunPosition(newPosition);
+		elevationSW.setSunPosition(newPosition);
+		shadowsEarth.setSunPosition(newPosition);
+		shadowsSW.setSunPosition(newPosition);
+		wwd.redraw();
+
+		System.out.println("New sun position = " + newPosition);
 	}
 
 	private ExtendedBasicElevationModel getEBEM(ElevationModel elevationModel)

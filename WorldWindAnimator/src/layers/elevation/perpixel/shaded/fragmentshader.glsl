@@ -56,39 +56,36 @@ vec3 ocean(float depth)
 
 void main(void)
 {
-	vec4 tile = texture2D(tex0, gl_TexCoord[0].st);
 	vec4 alpha = texture2D(tex1, gl_TexCoord[1].st);
-	
 	//alpha mask - drop frags less than 0.01
 	if(alpha.a < 1.0) discard;
 	
+	vec4 tile = texture2D(tex0, gl_TexCoord[0].st);
+	
 	//read normal from tile rgb
-	vec3 unnormnormal = tile.rgb * 2.0 - 1.0;
+	vec3 normalUnnormalized = tile.rgb * 2.0 - 1.0;
 	//drop zero (or near zero) length normals (invalid elevation)
-	if(length(unnormnormal) < 0.1) discard;
+	if(length(normalUnnormalized) < 0.1) discard;
 	
 	//read elevation from tile alpha
 	float elevation = minTexElevation + tile.a * (maxTexElevation - minTexElevation);
 	
-	//only show bathymetry
-	//if(elevation > 0) discard;
-	
 	//normalized normal
-	vec3 normal = normalize(unnormnormal);
+	vec3 normal = normalize(normalUnnormalized);
 	//normalized position
-	vec3 normposition = normalize(position);
+	vec3 positionNormalized = normalize(position);
 	//vector perpendicular to position and normal
-	vec3 bivector = normalize(cross(normposition, normal));
+	vec3 bivector = normalize(cross(positionNormalized, normal));
 	//vector at right angles to position in direction of normal
-	vec3 perpposition = normalize(cross(bivector, normposition));
+	vec3 perpposition = normalize(cross(bivector, positionNormalized));
 	//angle between position and normal
-	float normalangle = acos(dot(normposition, normal));
+	float normalangle = acos(dot(positionNormalized, normal));
 	//calculate exaggerated angle (normals are already exaggerated by bakedExaggeration)
 	float exaggeratedangle = tan((exaggeration / bakedExaggeration) * atan(normalangle));
 	//calculate mixer
 	float mixer = clamp(exaggeratedangle * 2.0 / PI, 0.0, 1.0);
 	//calculate new exaggerated normal
-	normal = normalize(mix(normposition, perpposition, mixer));
+	normal = normalize(mix(positionNormalized, perpposition, mixer));
 	
 	vec3 ambiColor = vec3(0.1, 0.1, 0.1);
 	vec3 diffColor = vec3(1.0, 1.0, 1.0);
@@ -132,16 +129,4 @@ void main(void)
 	vec3 color = ocean(percent);
 	
 	gl_FragColor = vec4(light * color + specular * color, opacity);
-	//gl_FragColor = vec4(diffuse, opacity);
-	//gl_FragColor = vec4((normal + 1.0) / 2.0, opacity);
-	//gl_FragColor = vec4((normposition + 1.0) / 2.0, opacity);
-	//gl_FragColor = vec4(fract(normalize(position)), opacity);
-	//gl_FragColor = vec4(chroma, opacity);
-	
-	//gl_FragColor = vec4(tile.a, tile.a, tile.a, opacity);
-	
-	//nxDir = clamp(nxDir, 0.0, 1.0);
-	//float amount = abs(nxDir - 0.5) * 2.0;
-	//amount = pow(amount, 1.5);
-	//gl_FragColor = vec4(vec3(nxDir), amount * 0.5);
 }

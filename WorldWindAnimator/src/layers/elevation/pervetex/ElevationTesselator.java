@@ -1,4 +1,4 @@
-package layers.elevation;
+package layers.elevation.pervetex;
 
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;

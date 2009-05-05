@@ -1,4 +1,4 @@
-package layers.elevation.textured;
+package layers.elevation.perpixel;
 
 import gov.nasa.worldwind.cache.MemoryCache;
 import gov.nasa.worldwind.terrain.BasicElevationModel;

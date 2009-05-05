@@ -191,7 +191,7 @@ public abstract class TiledImageLayer extends AbstractLayer
         return levels;
     }
 
-    protected void setSplitScale(double splitScale)
+    public void setSplitScale(double splitScale)
     {
         this.splitScale = splitScale;
     }

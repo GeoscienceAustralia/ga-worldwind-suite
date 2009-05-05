@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-import layers.elevation.textured.ExtendedBasicElevationModel;
+import layers.elevation.perpixel.ExtendedBasicElevationModel;
 
 public class ImmediateBasicElevationModel extends ExtendedBasicElevationModel
 {

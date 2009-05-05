@@ -12,7 +12,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import layers.elevation.textured.ExtendedBasicElevationModel;
+import layers.elevation.perpixel.ExtendedBasicElevationModel;
 import nasa.worldwind.layers.TiledImageLayer;
 import util.FileUtil;
 
