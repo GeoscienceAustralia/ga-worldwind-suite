@@ -375,8 +375,8 @@ public class Animator
 						-24.0, -23.433333, 132.25, 133.95));
 		layers.add(roads);*/
 
-		sunPosition = new Vec4(8788864.60609344, -2029069.2736562756,
-				-9020047.848073645, 0.0);
+		sunPosition = new Vec4(7649434.404798721, 4779897.118999491,
+				-9020047.848073645, 0.0);//(8788864.60609344, -2029069.2736562756, -9020047.848073645, 0.0);
 
 		elevationEarth = new ShadedElevationLayer(eem);
 		elevationEarth.setSunPosition(sunPosition);
@@ -400,7 +400,16 @@ public class Animator
 		//elevationSW.setOpacity(0.5);
 		layers.add(elevationSW);
 
-		shadowsEarth = new ShadowsElevationLayer(bem, elevSector);
+		/*ShadedElevationLayer elevationSONNE = new ShadedElevationLayer(sem);
+		elevationSONNE.setSunPosition(sunPosition);
+		elevationSONNE.setExaggeration(50);
+		elevationSONNE.setSplitScale(1.5);
+		elevationSONNE.setMaxElevationClamp(0);
+		elevationSONNE.setMinElevationClamp(bem.getMinElevation());
+		//elevationSONNE.setOpacity(0.5);
+		layers.add(elevationSONNE);*/
+
+		shadowsEarth = new ShadowsElevationLayer(eem);
 		shadowsEarth.setSunPosition(sunPosition);
 		shadowsEarth.setOpacity(0.5);
 		layers.add(shadowsEarth);
@@ -426,14 +435,16 @@ public class Animator
 
 		depth.setEnabled(true);
 		bmng.setEnabled(true);
-		landsat.setEnabled(true);
-		//elevationEarth.setEnabled(true);
+		//landsat.setEnabled(true);
+		elevationEarth.setEnabled(true);
 		elevationSW.setEnabled(true);
+		//elevationSONNE.setEnabled(true);
 		//shadowsEarth.setEnabled(true);
-		shadowsSW.setEnabled(true);
+		//shadowsSW.setEnabled(true);
 
 
 		//gravity.setEnabled(true);
+		//magnetics.setEnabled(true);
 
 		//map1.setEnabled(true);
 		//map2.setEnabled(true);
@@ -454,24 +465,28 @@ public class Animator
 		/*ShapefileLayer seismicShp = new ShapefileLayer();
 		seismicShp.setColor(Color.red);
 		seismicShp.loadFile(new File("D:/SW Margins/vector/seismic.shp"));
-		layers.add(seismicShp);
+		layers.add(seismicShp);*/
 
-		ShapefileLayer studyShp = new ShapefileLayer();
-		studyShp.setColor(Color.yellow);
-		studyShp.setOpacity(0.5);
+		/*ShapefileLayer studyShp = new ShapefileLayer();
+		studyShp.setColor(Color.white);
+		studyShp.setLineWidth(2.0);
+		//studyShp.setOpacity(0.5);
 		studyShp.loadFile(new File("D:/SW Margins/vector/study_areas.shp"));
-		layers.add(studyShp);
+		layers.add(studyShp);*/
 		
-		ShapefileLayer eezShp = new ShapefileLayer();
+		/*ShapefileLayer eezShp = new ShapefileLayer();
 		eezShp.setColor(Color.white);
 		eezShp.setFollowTerrain(false);
+		eezShp.setLineWidth(2.0);
 		eezShp.loadFile(new File("D:/SW Margins/vector/eez_limit.shp"));
 		layers.add(eezShp);*/
 
 		/*ShapefileLayer extendedShp = new ShapefileLayer();
-		extendedShp.setColor(Color.green);
-		//extendedShp.setFollowTerrain(false);
-		extendedShp.setOpacity(0.5);
+		extendedShp.setColor(Color.white);
+		extendedShp.setFollowTerrain(false);
+		extendedShp.setLineWidth(2);
+		//extendedShp.setOpacity(0.5);
+		extendedShp.setRemoveDetailLevels(1);
 		extendedShp.loadFile(new File("D:/SW Margins/vector/ecs.shp"));
 		layers.add(extendedShp);*/
 
@@ -496,6 +511,7 @@ public class Animator
 		/*ShapefileLayer coastlineShp = new ShapefileLayer();
 		coastlineShp.setColor(Color.white);
 		coastlineShp.setFollowTerrain(true);
+		coastlineShp.setLineWidth(2.0);
 		coastlineShp.loadFile(new File("D:/SW Margins/vector/coastline.shp"));
 		layers.add(coastlineShp);*/
 

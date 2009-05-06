@@ -267,7 +267,7 @@ public class ShadedElevationLayer extends ElevationLayer
 			}
 		}
 	}
-	
+
 	@Override
 	protected boolean loadTexture(TextureTile tile, URL textureURL)
 	{
@@ -369,8 +369,7 @@ public class ShadedElevationLayer extends ElevationLayer
 		}
 		if (min == Double.MAX_VALUE || max == -Double.MAX_VALUE)
 		{
-			throw new IllegalStateException(
-					"All elevations are missing data, min/max not found");
+			Logging.logger().warning("No elevations found in tile");
 		}
 		return new double[] { min, max };
 	}
