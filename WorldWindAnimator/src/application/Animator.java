@@ -425,8 +425,8 @@ public class Animator
 		Layer magnetics = new MagneticsLayer();
 		layers.add(magnetics);
 
-		Landmarks landmarks = new Landmarks(model.getGlobe());
-		layers.add(landmarks);
+		/*Landmarks landmarks = new Landmarks(model.getGlobe());
+		layers.add(landmarks);*/
 
 		for (Layer layer : layers)
 		{
@@ -640,7 +640,7 @@ public class Animator
 		sliders.setSize(640, 480);
 		sliders.setVisible(true);*/
 
-		JFrame exaggeration = new JFrame("exaggeration");
+		/*JFrame exaggeration = new JFrame("exaggeration");
 		exaggeration.setLayout(new GridLayout(0, 1));
 		JSlider slider;
 
@@ -666,6 +666,7 @@ public class Animator
 			public void stateChanged(ChangeEvent e)
 			{
 				int value = ((JSlider) e.getSource()).getValue();
+				elevationEarth.setExaggeration(value);
 				elevationSW.setExaggeration(value);
 				wwd.redraw();
 			}
@@ -731,7 +732,7 @@ public class Animator
 		});
 
 		exaggeration.setSize(640, 200);
-		exaggeration.setVisible(true);
+		exaggeration.setVisible(true);*/
 	}
 
 	private void rotateSunPosition(double x, double y, double z)
