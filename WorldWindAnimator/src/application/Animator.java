@@ -18,6 +18,7 @@ import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
+import gov.nasa.worldwind.layers.StarsLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
@@ -26,7 +27,6 @@ import gov.nasa.worldwind.view.OrbitView;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -69,7 +69,6 @@ import layers.immediate.ImmediateMode;
 import layers.immediate.ImmediateRetrievalService;
 import layers.immediate.ImmediateTaskService;
 import layers.immediate.bmng.BMNGWMSLayer;
-import layers.misc.Landmarks;
 import layers.other.GravityLayer;
 import layers.other.MagneticsLayer;
 import layers.sky.Skybox;
@@ -175,7 +174,7 @@ public class Animator
 				ElevationTesselator.class.getName());
 
 		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE,
-				16777216L * 4); //64 mb
+				16777216L * 8); //128 mb
 
 		animationChangeListener = new ChangeListener()
 		{
@@ -222,14 +221,14 @@ public class Animator
 		//ocem.setElevationOffset(200);
 
 		LayerList layers = model.getLayers();
+		
+		StarsLayer stars = new StarsLayer();
+		layers.add(stars);
 
 		Skybox skybox = new Skybox();
 		layers.add(skybox);
 		Skysphere skysphere = new Skysphere();
 		layers.add(skysphere);
-
-		Layer depth = new DepthLayer();
-		layers.add(depth);
 
 		//Vec4 direction = new Vec4(0.36, 0.96, -0.36, 1.0);
 		Vec4 direction = new Vec4(0.32, 0.9, -0.3, 1.0);
@@ -251,6 +250,9 @@ public class Animator
 		fog.setNearFactor(0.8f);
 		fog.setFarFactor(0.4f);
 		fog.setColor(fogColor);
+		
+		Layer depth = new DepthLayer();
+		layers.add(depth);
 
 		/*float[] fogColorf = fogColor.getComponents(new float[4]);
 		sky.setHorizonColor(new Color(fogColorf[0], fogColorf[1], fogColorf[2], 1.0f));
@@ -432,6 +434,9 @@ public class Animator
 		{
 			layer.setEnabled(false);
 		}
+		
+		stars.setEnabled(true);
+		sky.setEnabled(true);
 
 		depth.setEnabled(true);
 		bmng.setEnabled(true);
@@ -471,6 +476,7 @@ public class Animator
 		studyShp.setColor(Color.white);
 		studyShp.setLineWidth(2.0);
 		//studyShp.setOpacity(0.5);
+		studyShp.setUsePolyline(true);
 		studyShp.loadFile(new File("D:/SW Margins/vector/study_areas.shp"));
 		layers.add(studyShp);*/
 		
@@ -487,6 +493,7 @@ public class Animator
 		extendedShp.setLineWidth(2);
 		//extendedShp.setOpacity(0.5);
 		extendedShp.setRemoveDetailLevels(1);
+		extendedShp.setUsePolyline(true);
 		extendedShp.loadFile(new File("D:/SW Margins/vector/ecs.shp"));
 		layers.add(extendedShp);*/
 
@@ -514,6 +521,15 @@ public class Animator
 		coastlineShp.setLineWidth(2.0);
 		coastlineShp.loadFile(new File("D:/SW Margins/vector/coastline.shp"));
 		layers.add(coastlineShp);*/
+		
+		/*ShapefileLayer basinsShp = new ShapefileLayer();
+		basinsShp.setColor(Color.white);
+		basinsShp.setFollowTerrain(true);
+		basinsShp.setLineWidth(2.0);
+		basinsShp.setUsePolyline(true);
+		basinsShp.loadFile(new File("D:/SW Margins/vector/OffhoreSedBasinsNov08.shp"));
+		basinsShp.setRemoveDetailLevels(5);
+		layers.add(basinsShp);*/
 
 
 		/*MetacartaStateBoundariesLayer state = new MetacartaStateBoundariesLayer();
