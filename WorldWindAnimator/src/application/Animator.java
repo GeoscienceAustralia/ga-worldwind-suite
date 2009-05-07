@@ -25,7 +25,6 @@ import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -71,11 +70,7 @@ import layers.immediate.ImmediateTaskService;
 import layers.immediate.bmng.BMNGWMSLayer;
 import layers.other.GravityLayer;
 import layers.other.MagneticsLayer;
-import layers.sky.Skybox;
-import layers.sky.Skysphere;
 import nasa.worldwind.awt.WorldWindowGLCanvas;
-import nasa.worldwind.layers.AtmosphereLayer;
-import nasa.worldwind.layers.FogLayer;
 import nasa.worldwind.layers.LensFlareLayer;
 import terrain.OffsetCompoundElevationModel;
 import util.ChangeFrameListener;
@@ -152,7 +147,7 @@ public class Animator
 			Earth.WGS84_EQUATORIAL_RADIUS * 2);
 	private JSlider xRotate, yRotate, zRotate;
 
-	private ShadedElevationLayer elevationEarth, elevationSW;
+	private ShadedElevationLayer elevationEarth, elevationSW, elevationSONNE;
 	private ShadowsElevationLayer shadowsEarth, shadowsSW;
 
 	private Layer bmng, landsat;
@@ -211,9 +206,7 @@ public class Animator
 				Angle.ZERO, Angle.POS180);
 
 		ocem = new OffsetCompoundElevationModel();
-		//ocem.addElevationModel(model.getGlobe().getElevationModel());
 		model.getGlobe().setElevationModel(ocem);
-		//ocem.setDetailHint(1.2);
 
 		//tesselator.setMakeTileSkirts(false);
 		//model.setShowWireframeInterior(true);
@@ -221,36 +214,32 @@ public class Animator
 		//ocem.setElevationOffset(200);
 
 		LayerList layers = model.getLayers();
-		
+
 		StarsLayer stars = new StarsLayer();
 		layers.add(stars);
 
-		Skybox skybox = new Skybox();
+		/*Skybox skybox = new Skybox();
 		layers.add(skybox);
 		Skysphere skysphere = new Skysphere();
 		layers.add(skysphere);
 
-		//Vec4 direction = new Vec4(0.36, 0.96, -0.36, 1.0);
 		Vec4 direction = new Vec4(0.32, 0.9, -0.3, 1.0);
 		lensFlare = LensFlareLayer
 				.getPresetInstance(LensFlareLayer.PRESET_NOSUN);
 		layers.add(lensFlare);
 		lensFlare.setSunDistance(lensFlare.getSunDistance() * 100);
-		AtmosphereLayer atmosphere = new AtmosphereLayer();
-		layers.add(atmosphere);
-		lensFlare.setSunDirection(direction);
-		atmosphere.setLightDirection(direction);
+		lensFlare.setSunDirection(direction);*/
+		
 		SkyGradientLayer sky = new SkyGradientLayer();
 		layers.add(sky);
 
-		Color fogColor = new Color(138, 82, 57);
-
+		/*Color fogColor = new Color(138, 82, 57);
 		FogLayer fog = new FogLayer();
 		layers.add(fog);
 		fog.setNearFactor(0.8f);
 		fog.setFarFactor(0.4f);
-		fog.setColor(fogColor);
-		
+		fog.setColor(fogColor);*/
+
 		Layer depth = new DepthLayer();
 		layers.add(depth);
 
@@ -315,12 +304,6 @@ public class Animator
 
 		String tileDrive = "Z";
 
-		/*BasicElevationModel bem = FileLayer.createElevationModel("WestMac DEM", "GA/WestMac DEM",
-				new File(tileDrive + ":/West Macs Imagery/wwtiles/dem150"), 11,
-				150, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
-						-25.0001389, -23.0001389, 131.9998611, 133.9998611),
-				308d, 1515d);*/
-
 		ElevationModel earthem = new ExtendedBasicElevationModelFactory()
 				.createFromConfigFile("config/LegacyEarthElevationModel.xml");
 		ExtendedBasicElevationModel eem = getEBEM(earthem);
@@ -333,90 +316,64 @@ public class Animator
 						.fromDegrees(20d, 20d), bemSector, -8922, 3958);
 		bem.setMissingDataSignal(-32768);
 
-		/*Sector semSector = Sector.fromDegrees(-27.0015, -22.5005, 106.5005,
+		Sector semSector = Sector.fromDegrees(-27.0015, -22.5005, 106.5005,
 				110.5025);
 		ExtendedBasicElevationModel sem = FileLayer.createElevationModel(
 				"SONNE DEM", "GA/SONNE DEM", new File(tileDrive
-						+ ":/SW Margins/sonne/tiled"), 7, 150, LatLon
-						.fromDegrees(20d, 20d), semSector, -8922, 3958);
-		sem.setMissingDataSignal(-32768);*/
+						+ ":/SW Margins/sonne/tiledB"), 7, 150, LatLon
+						.fromDegrees(20d, 20d), semSector, -6400, -2310);
+		sem.setMissingDataSignal(-9999);
 
-		//ocem.removeElevationModel(0);
 		ocem.addElevationModel(eem);
 		ocem.addElevationModel(bem);
-		//ocem.addElevationModel(sem);
+		ocem.addElevationModel(sem);
 
 		/*map1 = FileLayer.createLayer("WestMac Map Page 1",
 				"GA/WestMac Map Page 1", ".dds", new File(tileDrive
 						+ ":/West Macs Imagery/Rectified Map/5 Tiles/page1"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0536281, -23.4102781, 132.0746805, 133.9779805));
-		layers.add(map1);
-
-		map2 = FileLayer.createLayer("WestMac Map Page 2",
-				"GA/WestMac Map Page 2", ".dds", new File(tileDrive
-						+ ":/West Macs Imagery/Rectified Map/5 Tiles/page2"),
-				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
-						-24.0544889, -23.4081639, 132.0708833, 133.9771083));
-		layers.add(map2);
-
-		alos = FileLayer
-				.createLayer("WestMac ALOS", "GA/WestMac ALOS", ".dds",
-						new File(tileDrive
-								+ ":/West Macs Imagery/wwtiles/alosnp_4326"),
-						"jpg", new File(tileDrive
-								+ ":/West Macs Imagery/wwtiles/mapmask"),
-						"png", 13, LatLon.fromDegrees(36d, 36d), Sector
-								.fromDegrees(-24.0, -23.433333, 132.25, 133.95));
-		layers.add(alos);
-
-		roads = FileLayer.createLayer("WestMac Roads", "GA/WestMac Roads",
-				".dds", new File(tileDrive
-						+ ":/West Macs Imagery/Vector/Roads/Mapnik/tiled"),
-				"png", 12, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
-						-24.0, -23.433333, 132.25, 133.95));
-		layers.add(roads);*/
+		layers.add(map1);*/
 
 		sunPosition = new Vec4(7649434.404798721, 4779897.118999491,
-				-9020047.848073645, 0.0);//(8788864.60609344, -2029069.2736562756, -9020047.848073645, 0.0);
+				-9020047.848073645, 0.0);
 
 		elevationEarth = new ShadedElevationLayer(eem);
 		elevationEarth.setSunPosition(sunPosition);
 		elevationEarth.setExaggeration(50);
 		elevationEarth.setMaxElevationClamp(0);
 		elevationEarth.setMinElevationClamp(bem.getMinElevation());
-		//elevationEarth.setOpacity(0.5);
 		layers.add(elevationEarth);
 
-		Sector elevSector = new Sector(
-				bemSector.getMinLatitude().addDegrees(1), bemSector
-						.getMaxLatitude().addDegrees(-1), bemSector
-						.getMinLongitude().addDegrees(1), bemSector
+		Sector belevSector = new Sector(bemSector.getMinLatitude()
+				.addDegrees(1), bemSector.getMaxLatitude().addDegrees(-1),
+				bemSector.getMinLongitude().addDegrees(1), bemSector
 						.getMaxLongitude().addDegrees(-1));
-		elevationSW = new ShadedElevationLayer(bem, elevSector);
+		elevationSW = new ShadedElevationLayer(bem, belevSector);
 		elevationSW.setSunPosition(sunPosition);
 		elevationSW.setExaggeration(50);
 		elevationSW.setSplitScale(1.5);
 		elevationSW.setMaxElevationClamp(0);
 		elevationSW.setMinElevationClamp(bem.getMinElevation());
-		//elevationSW.setOpacity(0.5);
 		layers.add(elevationSW);
 
-		/*ShadedElevationLayer elevationSONNE = new ShadedElevationLayer(sem);
+		Sector selevSector = new Sector(semSector.getMinLatitude(), semSector
+				.getMaxLatitude(), semSector.getMinLongitude().addDegrees(0.1),
+				semSector.getMaxLongitude());
+		elevationSONNE = new ShadedElevationLayer(sem, selevSector);
 		elevationSONNE.setSunPosition(sunPosition);
 		elevationSONNE.setExaggeration(50);
 		elevationSONNE.setSplitScale(1.5);
 		elevationSONNE.setMaxElevationClamp(0);
 		elevationSONNE.setMinElevationClamp(bem.getMinElevation());
-		//elevationSONNE.setOpacity(0.5);
-		layers.add(elevationSONNE);*/
+		layers.add(elevationSONNE);
 
 		shadowsEarth = new ShadowsElevationLayer(eem);
 		shadowsEarth.setSunPosition(sunPosition);
 		shadowsEarth.setOpacity(0.5);
 		layers.add(shadowsEarth);
 
-		shadowsSW = new ShadowsElevationLayer(bem, elevSector);
+		shadowsSW = new ShadowsElevationLayer(bem, belevSector);
 		shadowsSW.setSunPosition(sunPosition);
 		shadowsSW.setOpacity(0.5);
 		layers.add(shadowsSW);
@@ -434,7 +391,7 @@ public class Animator
 		{
 			layer.setEnabled(false);
 		}
-		
+
 		stars.setEnabled(true);
 		sky.setEnabled(true);
 
@@ -443,26 +400,16 @@ public class Animator
 		//landsat.setEnabled(true);
 		elevationEarth.setEnabled(true);
 		elevationSW.setEnabled(true);
-		//elevationSONNE.setEnabled(true);
+		elevationSONNE.setEnabled(true);
 		//shadowsEarth.setEnabled(true);
 		//shadowsSW.setEnabled(true);
-
-
+		
 		//gravity.setEnabled(true);
 		//magnetics.setEnabled(true);
-
-		//map1.setEnabled(true);
-		//map2.setEnabled(true);
-		//alos.setEnabled(true);
-		//roads.setEnabled(true);
-		//roads.setOpacity(0.7);
 
 		//landmarks.setEnabled(true);
 
 		//lensFlare.setEnabled(true);
-		//atmosphere.setEnabled(true);
-		//sky.setEnabled(true);
-
 		//skybox.setEnabled(true);
 		//fog.setEnabled(true);
 		//skysphere.setEnabled(true);
@@ -479,7 +426,7 @@ public class Animator
 		studyShp.setUsePolyline(true);
 		studyShp.loadFile(new File("D:/SW Margins/vector/study_areas.shp"));
 		layers.add(studyShp);*/
-		
+
 		/*ShapefileLayer eezShp = new ShapefileLayer();
 		eezShp.setColor(Color.white);
 		eezShp.setFollowTerrain(false);
@@ -521,7 +468,7 @@ public class Animator
 		coastlineShp.setLineWidth(2.0);
 		coastlineShp.loadFile(new File("D:/SW Margins/vector/coastline.shp"));
 		layers.add(coastlineShp);*/
-		
+
 		/*ShapefileLayer basinsShp = new ShapefileLayer();
 		basinsShp.setColor(Color.white);
 		basinsShp.setFollowTerrain(true);
@@ -684,6 +631,7 @@ public class Animator
 				int value = ((JSlider) e.getSource()).getValue();
 				elevationEarth.setExaggeration(value);
 				elevationSW.setExaggeration(value);
+				elevationSONNE.setExaggeration(value);
 				wwd.redraw();
 			}
 		});
@@ -758,6 +706,7 @@ public class Animator
 		Vec4 newPosition = sunPosition.transformBy3(q);
 		elevationEarth.setSunPosition(newPosition);
 		elevationSW.setSunPosition(newPosition);
+		elevationSONNE.setSunPosition(newPosition);
 		shadowsEarth.setSunPosition(newPosition);
 		shadowsSW.setSunPosition(newPosition);
 		wwd.redraw();

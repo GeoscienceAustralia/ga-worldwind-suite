@@ -367,10 +367,10 @@ public class ShadedElevationLayer extends ElevationLayer
 				max = Math.max(max, elevations.getDouble(i));
 			}
 		}
-		if (min == Double.MAX_VALUE || max == -Double.MAX_VALUE)
+		/*if (min == Double.MAX_VALUE || max == -Double.MAX_VALUE)
 		{
 			Logging.logger().warning("No elevations found in tile");
-		}
+		}*/
 		return new double[] { min, max };
 	}
 
