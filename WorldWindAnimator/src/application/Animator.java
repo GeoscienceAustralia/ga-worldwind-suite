@@ -313,7 +313,7 @@ public class Animator
 		landsat = new LandsatI3WMSLayer();
 		layers.add(landsat);
 
-		String tileDrive = "D";
+		String tileDrive = "Z";
 
 		/*BasicElevationModel bem = FileLayer.createElevationModel("WestMac DEM", "GA/WestMac DEM",
 				new File(tileDrive + ":/West Macs Imagery/wwtiles/dem150"), 11,
