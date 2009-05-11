@@ -386,13 +386,17 @@ public class ShadowsElevationLayer extends ElevationLayer
 			Globe globe, Sector sector, BufferWrapper[] elevations)
 	{
 		int padding = width;
+		double missingDataSignal = elevationModel.getMissingDataSignal();
+		double[] paddedElevations = calculatePaddedElevations(width, height,
+				padding, elevations, missingDataSignal);
 		Vec4[] verts = calculateTileVerts(width, height, globe, sector,
-				elevations, elevationModel.getMissingDataSignal(), padding,
-				bakedExaggeration);
+				paddedElevations, missingDataSignal, padding, bakedExaggeration);
 		System.out.println("Calculating horizon angles for sector " + sector
 				+ "...");
-		double[][] angles = calculateHorizonAngles(width, height, verts,
-				padding);
+		/*double[][] angles = calculateHorizonAngles(width, height, verts,
+				padding);*/
+		double[][] angles = calculateHorizonAnglesFast(width, height, verts,
+				paddedElevations, missingDataSignal, padding);
 		System.out.println(sector + " complete");
 		byte[][] texture = convertHorizonAnglesToTexture(width, height, angles);
 		return texture;
@@ -406,6 +410,8 @@ public class ShadowsElevationLayer extends ElevationLayer
 		if (verts.length != (width + padding2) * (height + padding2))
 			throw new IllegalStateException("Illegal vertices length");
 
+		Vec4[] vecs = new Vec4[16];
+		Vec4 vec;
 		double[][] angles = new double[16][];
 		for (int i = 0; i < angles.length; i++)
 		{
@@ -422,8 +428,8 @@ public class ShadowsElevationLayer extends ElevationLayer
 
 			for (int x = 0; x < width; x++)
 			{
-				Vec4 vec = verts[getArrayIndex(width + padding2, height
-						+ padding2, x + padding, y + padding)];
+				vec = verts[getArrayIndex(width + padding2, height + padding2,
+						x + padding, y + padding)];
 				if (vec != null)
 				{
 					Vec4 vecnorm = vec.normalize3();
@@ -437,7 +443,8 @@ public class ShadowsElevationLayer extends ElevationLayer
 					//for (int i = 1; i <= padding; i++)
 					for (int i = 2; i <= padding; i += 2)
 					{
-						Vec4[] vecs = new Vec4[16];
+						boolean even = i % 2 == 0;
+
 						vecs[0] = verts[getArrayIndex(width + padding2, height
 								+ padding2, x + padding - i, y + padding)];
 						vecs[2] = verts[getArrayIndex(width + padding2, height
@@ -454,7 +461,7 @@ public class ShadowsElevationLayer extends ElevationLayer
 								+ padding2, x + padding, y + padding + i)];
 						vecs[14] = verts[getArrayIndex(width + padding2, height
 								+ padding2, x + padding - i, y + padding + i)];
-						if (i % 2 == 0)
+						if (even)
 						{
 							int i2 = i / 2;
 							vecs[1] = verts[getArrayIndex(width + padding2,
@@ -483,7 +490,7 @@ public class ShadowsElevationLayer extends ElevationLayer
 											+ padding + i2)];
 						}
 
-						for (int j = 0; j < angles.length; j++)
+						for (int j = 0; j < angles.length; j += even ? 1 : 2)
 						{
 							if (vecs[j] != null)
 							{
@@ -493,6 +500,156 @@ public class ShadowsElevationLayer extends ElevationLayer
 								if (angle < angles[j][index])
 								{
 									angles[j][index] = angle;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return angles;
+	}
+
+	protected double[][] calculateHorizonAnglesFast(int width, int height,
+			Vec4[] verts, double[] paddedElevations, double missingDataSignal,
+			int padding)
+	{
+		//calculate useful variables
+		int padding2 = padding * 2;
+		int size = (width + padding2) * (height + padding2);
+
+		//check array lengths
+		if (verts.length != size)
+			throw new IllegalStateException("Illegal vertices length");
+		if (paddedElevations.length != size)
+			throw new IllegalStateException("Illegal paddedElevations length");
+
+		//set up angles array
+		double[][] angles = new double[16][];
+		for (int i = 0; i < angles.length; i++)
+		{
+			angles[i] = new double[width * height];
+			for (int j = 0; j < angles[i].length; j++)
+			{
+				angles[i][j] = Double.MAX_VALUE;
+			}
+		}
+
+		//loop through all verts
+		for (int y = 0; y < height; y++)
+		{
+			for (int x = 0; x < width; x++)
+			{
+				//current vert elevation
+				int paddedIndex = getArrayIndex(width + padding2, height
+						+ padding2, x + padding, y + padding);
+				double elevation = paddedElevations[paddedIndex];
+				if (elevation != missingDataSignal)
+				{
+					int finalIndex = getArrayIndex(width, height, x, y);
+
+					//set up useful arrays
+					int[] maxIndices = new int[16];
+					double[] maxRatio = new double[16];
+					for (int i = 0; i < maxRatio.length; i++)
+					{
+						maxIndices[i] = -1;
+						maxRatio[i] = -Double.MAX_VALUE;
+					}
+
+					//  2  3  4  5  6
+					//  1           7
+					//  0           8
+					// 15           9
+					// 14 13 12 11 10
+
+					//for (int i = 1; i <= padding; i++)
+					for (int i = 2; i <= padding; i += 2)
+					{
+						int[] indices = new int[16];
+						boolean even = i % 2 == 0;
+
+						//calculate vert indices in the 16 different directions
+						indices[0] = getArrayIndex(width + padding2, height
+								+ padding2, x + padding - i, y + padding);
+						indices[2] = getArrayIndex(width + padding2, height
+								+ padding2, x + padding - i, y + padding - i);
+						indices[4] = getArrayIndex(width + padding2, height
+								+ padding2, x + padding, y + padding - i);
+						indices[6] = getArrayIndex(width + padding2, height
+								+ padding2, x + padding + i, y + padding - i);
+						indices[8] = getArrayIndex(width + padding2, height
+								+ padding2, x + padding + i, y + padding);
+						indices[10] = getArrayIndex(width + padding2, height
+								+ padding2, x + padding + i, y + padding + i);
+						indices[12] = getArrayIndex(width + padding2, height
+								+ padding2, x + padding, y + padding + i);
+						indices[14] = getArrayIndex(width + padding2, height
+								+ padding2, x + padding - i, y + padding + i);
+						if (even)
+						{
+							int i2 = i / 2;
+							indices[1] = getArrayIndex(width + padding2, height
+									+ padding2, x + padding - i, y + padding
+									- i2);
+							indices[3] = getArrayIndex(width + padding2, height
+									+ padding2, x + padding - i2, y + padding
+									- i);
+							indices[5] = getArrayIndex(width + padding2, height
+									+ padding2, x + padding + i2, y + padding
+									- i);
+							indices[7] = getArrayIndex(width + padding2, height
+									+ padding2, x + padding + i, y + padding
+									- i2);
+							indices[9] = getArrayIndex(width + padding2, height
+									+ padding2, x + padding + i, y + padding
+									+ i2);
+							indices[11] = getArrayIndex(width + padding2,
+									height + padding2, x + padding + i2, y
+											+ padding + i);
+							indices[13] = getArrayIndex(width + padding2,
+									height + padding2, x + padding - i2, y
+											+ padding + i);
+							indices[15] = getArrayIndex(width + padding2,
+									height + padding2, x + padding - i, y
+											+ padding + i2);
+						}
+
+						//check if vert is greater than max found in all directions
+						for (int j = 0; j < indices.length; j += even ? 1 : 2)
+						{
+							double e = paddedElevations[indices[j]];
+							if (e != missingDataSignal)
+							{
+								double ratio = (e - elevation) / (double) i;
+								if (ratio > maxRatio[j])
+								{
+									maxRatio[j] = ratio;
+									maxIndices[j] = indices[j];
+								}
+							}
+						}
+					}
+
+					//calculate angles between current vert and max vert
+					Vec4 currentVert = verts[paddedIndex];
+					if (currentVert != null)
+					{
+						Vec4 vertNorm = currentVert.normalize3();
+						for (int i = 0; i < maxIndices.length; i++)
+						{
+							int maxIndex = maxIndices[i];
+							if (maxIndex >= 0)
+							{
+								Vec4 maxVert = verts[maxIndex];
+								if (maxVert != null)
+								{
+									Vec4 vertDiff = maxVert.subtract3(
+											currentVert).normalize3();
+									double angle = Math.acos(vertDiff
+											.dot3(vertNorm));
+									angles[i][finalIndex] = angle;
 								}
 							}
 						}

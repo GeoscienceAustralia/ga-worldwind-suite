@@ -270,29 +270,43 @@ public abstract class ElevationLayer extends TiledImageLayer
 		return true;
 	}
 
-	protected Vec4[] calculateTileVerts(int width, int height, Globe globe,
-			Sector sector, BufferWrapper[] elevations,
-			double missingDataSignal, int padding, double bakedExaggeration)
+	protected double[] calculatePaddedElevations(int width, int height,
+			int padding, BufferWrapper[] elevations, double missingDataSignal)
 	{
 		if (padding > width || padding > height)
 			throw new IllegalArgumentException(
 					"Padding cannot be greater than width/height");
 
 		int padding2 = padding * 2;
-		double[] allElevations = new double[(width + padding2)
+		double[] paddedElevations = new double[(width + padding2)
 				* (height + padding2)];
 
 		for (int y = -padding; y < height + padding; y++)
 		{
 			for (int x = -padding; x < width + padding; x++)
 			{
-				allElevations[getArrayIndex(width + padding2,
-						height + padding2, x + padding, y + padding)] = getValue(
+				paddedElevations[getArrayIndex(width + padding2, height
+						+ padding2, x + padding, y + padding)] = getValue(
 						width, height, x, y, elevations, missingDataSignal);
 			}
 		}
 
-		Vec4[] verts = new Vec4[(width + padding2) * (height + padding2)];
+		return paddedElevations;
+	}
+
+	protected Vec4[] calculateTileVerts(int width, int height, Globe globe,
+			Sector sector, double[] paddedElevations, double missingDataSignal,
+			int padding, double bakedExaggeration)
+	{
+		int padding2 = padding * 2;
+		int size = (width + padding2) * (height + padding2);
+
+		if (paddedElevations.length != size)
+		{
+			throw new IllegalArgumentException("Illegal paddedElevations length");
+		}
+
+		Vec4[] verts = new Vec4[size];
 		double dlon = sector.getDeltaLonDegrees() / width;
 		double dlat = sector.getDeltaLatDegrees() / height;
 
@@ -309,7 +323,7 @@ public abstract class ElevationLayer extends TiledImageLayer
 				{
 					int index = getArrayIndex(width + padding2, height
 							+ padding2, x, y);
-					double elevation = allElevations[index];
+					double elevation = paddedElevations[index];
 					if (elevation != missingDataSignal
 							&& elevation >= minElevationClamp
 							&& elevation <= maxElevationClamp)

@@ -326,7 +326,7 @@ public class Animator
 
 		ocem.addElevationModel(eem);
 		ocem.addElevationModel(bem);
-		ocem.addElevationModel(sem);
+		//ocem.addElevationModel(sem);
 
 		/*map1 = FileLayer.createLayer("WestMac Map Page 1",
 				"GA/WestMac Map Page 1", ".dds", new File(dataDrive
@@ -402,7 +402,7 @@ public class Animator
 		elevationSW.setEnabled(true);
 		elevationSONNE.setEnabled(true);
 		//shadowsEarth.setEnabled(true);
-		//shadowsSW.setEnabled(true);
+		shadowsSW.setEnabled(true);
 		
 		//gravity.setEnabled(true);
 		//magnetics.setEnabled(true);

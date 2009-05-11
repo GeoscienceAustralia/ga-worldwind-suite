@@ -194,8 +194,19 @@ void main(void)
 	float horizonAngle = horizon * PI;
 	horizonAngle = horizonAngle * scale + bias;
 	
-	bool inShadow = sunAngle > horizonAngle;
-	gl_FragColor = vec4(0.0, 0.0, 0.0, inShadow ? opacity : 0.0);
+	//calculate shadow amount
+	float window = PI * 0.25;
+	float amount;
+	if(window > 0)
+	{
+		amount = clamp((sunAngle - horizonAngle) / window, 0.0, 1.0);
+	}
+	else
+	{
+		amount = horizonAngle < sunAngle ? 1.0 : 0.0;
+	}
+	
+	gl_FragColor = vec4(0.0, 0.0, 0.0, amount * opacity);
 	
 	//debug sun position:
 	/*if(sunAngle < 0.1)

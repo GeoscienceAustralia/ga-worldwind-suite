@@ -388,9 +388,11 @@ public class ShadedElevationLayer extends ElevationLayer
 		//+-+-+-+
 
 		int padding = 1;
+		double missingDataSignal = elevationModel.getMissingDataSignal();
+		double[] paddedElevations = calculatePaddedElevations(width, height,
+				padding, elevations, missingDataSignal);
 		Vec4[] verts = calculateTileVerts(width, height, globe, sector,
-				elevations, elevationModel.getMissingDataSignal(), padding,
-				bakedExaggeration);
+				paddedElevations, missingDataSignal, padding, bakedExaggeration);
 		Vec4[] normals = calculateNormals(width, height, verts, padding);
 		//Vec4[] bentNormals = calculateBentNormals(width, height, verts, padding);
 		//normals = mixNormals(normals, bentNormals, 0.5);
