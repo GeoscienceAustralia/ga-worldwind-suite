@@ -376,6 +376,7 @@ public class Animator
 		shadowsSW = new ShadowsElevationLayer(bem, belevSector);
 		shadowsSW.setSunPosition(sunPosition);
 		shadowsSW.setOpacity(0.5);
+		shadowsSW.setSplitScale(1.3);
 		layers.add(shadowsSW);
 
 		Layer gravity = new GravityLayer();
@@ -402,7 +403,7 @@ public class Animator
 		elevationSW.setEnabled(true);
 		elevationSONNE.setEnabled(true);
 		//shadowsEarth.setEnabled(true);
-		shadowsSW.setEnabled(true);
+		//shadowsSW.setEnabled(true);
 		
 		//gravity.setEnabled(true);
 		//magnetics.setEnabled(true);
