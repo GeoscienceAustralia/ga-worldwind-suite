@@ -1,4 +1,4 @@
-package tiler;
+package util;
 
 public class Sector
 {

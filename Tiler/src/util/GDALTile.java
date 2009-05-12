@@ -1,4 +1,4 @@
-package tiler;
+package util;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -11,7 +11,6 @@ import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -28,34 +27,6 @@ import org.gdal.osr.SpatialReference;
 
 public class GDALTile
 {
-	static
-	{
-		gdal.AllRegister();
-	}
-
-	public static void init()
-	{
-	};
-
-	public static Dataset open(File file)
-	{
-		try
-		{
-			Dataset dataset = (Dataset) gdal.Open(file.getAbsolutePath(),
-					gdalconst.GA_ReadOnly);
-			if (dataset == null)
-			{
-				printLastError();
-			}
-			return dataset;
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 	//construtor globals
 	private final double minLatitude;
 	private final double minLongitude;
@@ -201,7 +172,7 @@ public class GDALTile
 		}
 		if (returnVal != gdalconstConstants.CE_None)
 		{
-			printLastError();
+			GDALUtil.printLastError();
 		}
 		readRectangle(dataset, null);
 	}
@@ -307,7 +278,7 @@ public class GDALTile
 				}
 				if (returnVal != gdalconstConstants.CE_None)
 				{
-					printLastError();
+					GDALUtil.printLastError();
 				}
 			}
 		}
@@ -336,13 +307,6 @@ public class GDALTile
 		boolean indexed = lastBand.GetRasterColorInterpretation() == gdalconstConstants.GCI_PaletteIndex;
 		indexColorModel = indexed ? lastBand.GetRasterColorTable()
 				.getIndexColorModel(dataTypeSize) : null;
-	}
-
-	public static void printLastError()
-	{
-		System.err.println("Last error: " + gdal.GetLastErrorMsg());
-		System.err.println("Last error no: " + gdal.GetLastErrorNo());
-		System.err.println("Last error type: " + gdal.GetLastErrorType());
 	}
 
 	public BufferedImage getAsImage()

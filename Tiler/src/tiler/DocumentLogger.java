@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import javax.swing.text.Style;
@@ -27,39 +29,42 @@ public class DocumentLogger extends Logger
 		Style def = StyleContext.getDefaultStyleContext().getStyle(
 				StyleContext.DEFAULT_STYLE);
 
-		Style regular = document.addStyle("REGULAR", def);
+		Style regular = document.addStyle(Level.ALL.getName(), def);
 		StyleConstants.setFontFamily(def, "SansSerif");
 
-		Style s = document.addStyle("SEVERE", regular);
+		Style s = document.addStyle(Level.SEVERE.getName(), regular);
 		StyleConstants.setForeground(s, Color.red);
 
-		s = document.addStyle("WARNING", regular);
+		s = document.addStyle(Level.WARNING.getName(), regular);
 		StyleConstants.setForeground(s, Color.orange);
 
-		s = document.addStyle("INFO", regular);
+		s = document.addStyle(Level.INFO.getName(), regular);
 		StyleConstants.setForeground(s, new Color(0, 128, 0));
 
-		s = document.addStyle("FINE", regular);
+		s = document.addStyle(Level.FINE.getName(), regular);
 		StyleConstants.setForeground(s, Color.gray);
 
-		s = document.addStyle("FINER", regular);
+		s = document.addStyle(Level.FINER.getName(), regular);
 		StyleConstants.setForeground(s, Color.lightGray);
 
-		s = document.addStyle("FINEST", regular);
+		s = document.addStyle(Level.FINEST.getName(), regular);
 		StyleConstants.setForeground(s, Color.lightGray);
 	}
 
-	private void addLogLine(String msg, String type)
+	@Override
+	public void log(LogRecord record)
 	{
+		String level = record.getLevel().getName();
+		String msg = record.getMessage();
 		String line = msg == null ? "Unknown" : msg;
 		DateFormat df = new SimpleDateFormat("[HH:mm:ss]");
-		String prefix = df.format(new Date()) + " - " + type + " - ";
+		String prefix = df.format(new Date()) + " - " + level + " - ";
 		String suffix = System.getProperty("line.separator");
 		String text = prefix + line + suffix;
 
-		Style style = document.getStyle(type);
+		Style style = document.getStyle(level);
 		if (style == null)
-			style = document.getStyle("REGULAR");
+			style = document.getStyle(Level.ALL.getName());
 		try
 		{
 			document.insertString(document.getLength(), text, style);
@@ -68,41 +73,5 @@ public class DocumentLogger extends Logger
 		{
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public void warning(String msg)
-	{
-		addLogLine(msg, "WARNING");
-	}
-
-	@Override
-	public void severe(String msg)
-	{
-		addLogLine(msg, "SEVERE");
-	}
-
-	@Override
-	public void info(String msg)
-	{
-		addLogLine(msg, "INFO");
-	}
-
-	@Override
-	public void fine(String msg)
-	{
-		addLogLine(msg, "FINE");
-	}
-
-	@Override
-	public void finer(String msg)
-	{
-		addLogLine(msg, "FINER");
-	}
-
-	@Override
-	public void finest(String msg)
-	{
-		addLogLine(msg, "FINEST");
 	}
 }

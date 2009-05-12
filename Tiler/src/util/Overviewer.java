@@ -1,4 +1,4 @@
-package tiler;
+package util;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
-import util.FileUtil;
 import util.FileFilters.DirectoryFileFilter;
 import util.FileFilters.ExtensionFileFilter;
 

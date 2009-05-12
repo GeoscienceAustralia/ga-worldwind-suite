@@ -14,8 +14,11 @@ import javax.imageio.ImageIO;
 
 import org.gdal.gdal.Dataset;
 import org.gdal.gdalconst.gdalconstConstants;
-import org.gdal.osr.CoordinateTransformation;
-import org.gdal.osr.SpatialReference;
+
+import util.GDALTile;
+import util.GDALUtil;
+import util.Overviewer;
+import util.Sector;
 
 public class TilerConsole
 {
@@ -37,9 +40,9 @@ public class TilerConsole
 		boolean saveAlpha = false;
 		int outputType = gdalconstConstants.GDT_Int16;
 
-		Dataset dataset = GDALTile.open(file);
-		Sector sector = getSector(dataset);
-		int levels = levelCount(dataset, lztd, sector, tilesize);
+		Dataset dataset = GDALUtil.open(file);
+		Sector sector = GDALUtil.getSector(dataset);
+		int levels = GDALUtil.levelCount(dataset, lztd, sector, tilesize);
 		double width = dataset.getRasterXSize();
 		double height = dataset.getRasterYSize();
 		int bufferTypeSize = 2;
@@ -53,17 +56,17 @@ public class TilerConsole
 				+ " x " + (tilesizedegrees * width / sector.getDeltaLatitude())
 				+ ")");
 
-		int minX = getTileX(sector.getMinLongitude(), level, lztd);
-		int maxX = getTileX(sector.getMaxLongitude(), level, lztd);
-		int minY = getTileY(sector.getMinLatitude(), level, lztd);
-		int maxY = getTileY(sector.getMaxLatitude(), level, lztd);
+		int minX = GDALUtil.getTileX(sector.getMinLongitude(), level, lztd);
+		int maxX = GDALUtil.getTileX(sector.getMaxLongitude(), level, lztd);
+		int minY = GDALUtil.getTileY(sector.getMinLatitude(), level, lztd);
+		int maxY = GDALUtil.getTileY(sector.getMaxLatitude(), level, lztd);
 
 		int size = (maxX - minX + 1) * (maxY - minY + 1);
 		int count = 0;
 		for (int Y = minY; Y <= maxY; Y++)
 		{
 			File rowDir = new File(outputDir, String.valueOf(level));
-			rowDir = new File(rowDir, paddedInt(Y, 4));
+			rowDir = new File(rowDir, GDALUtil.paddedInt(Y, 4));
 			if (!rowDir.exists())
 			{
 				rowDir.mkdirs();
@@ -82,8 +85,8 @@ public class TilerConsole
 				final double lat2 = lat1 + tilesizedegrees;
 				final double lon2 = lon1 + tilesizedegrees;
 
-				final File dst = new File(rowDir, paddedInt(Y, 4) + "_"
-						+ paddedInt(X, 4) + "." + outputExt);
+				final File dst = new File(rowDir, GDALUtil.paddedInt(Y, 4) + "_"
+						+ GDALUtil.paddedInt(X, 4) + "." + outputExt);
 				if (dst.exists())
 				{
 					System.out.println(dst.getAbsolutePath()
@@ -150,109 +153,5 @@ public class TilerConsole
 		}
 
 		System.out.println("Done");
-	}
-
-	private static int levelCount(Dataset dataset, double lztd, Sector sector,
-			int tilesize)
-	{
-		double width = dataset.getRasterXSize();
-		double height = dataset.getRasterYSize();
-		double latPixels = sector.getDeltaLatitude() / height;
-		double lonPixels = sector.getDeltaLongitude() / width;
-		double texelSize = Math.min(latPixels, lonPixels);
-		return (int) Math.ceil(Math.log10(texelSize * tilesize / lztd)
-				/ Math.log10(0.5)) + 1;
-	}
-
-	private static Sector getSector(Dataset dataset)
-	{
-		double[] geoTransformArray = new double[6];
-		dataset.GetGeoTransform(geoTransformArray);
-
-		if (geoTransformArray[0] == 0 && geoTransformArray[1] == 0
-				&& geoTransformArray[2] == 0 && geoTransformArray[3] == 0
-				&& geoTransformArray[4] == 0 && geoTransformArray[5] == 0)
-		{
-			System.err.println("Dataset contains zeroed geotransform");
-			return null;
-		}
-
-		int width = dataset.getRasterXSize();
-		int height = dataset.getRasterYSize();
-		//gX = gt[0] + gt[1] * x + gt[2] * y;
-		//gY = gt[3] + gt[4] * x + gt[5] * y;
-		double minlon = geoTransformArray[0];
-		double maxlat = geoTransformArray[3];
-		double maxlon = geoTransformArray[0] + geoTransformArray[1] * width
-				+ geoTransformArray[2] * height;
-		double minlat = geoTransformArray[3] + geoTransformArray[4] * width
-				+ geoTransformArray[5] * height;
-
-		String projection = dataset.GetProjectionRef();
-		if (projection != null && projection.length() > 0)
-		{
-			SpatialReference proj = new SpatialReference(projection);
-			if (proj != null)
-			{
-				SpatialReference geog = proj.CloneGeogCS();
-				if (geog != null)
-				{
-					CoordinateTransformation transform = new CoordinateTransformation(
-							proj, geog);
-					if (transform != null)
-					{
-						double[] transPoint = new double[3];
-						transform.TransformPoint(transPoint, minlon, minlat, 0);
-						minlon = transPoint[0];
-						minlat = transPoint[1];
-						transform.TransformPoint(transPoint, maxlon, maxlat, 0);
-						maxlon = transPoint[0];
-						maxlat = transPoint[1];
-						transform.delete();
-					}
-					geog.delete();
-				}
-				proj.delete();
-			}
-		}
-
-		if (minlat > maxlat)
-		{
-			double temp = minlat;
-			minlat = maxlat;
-			maxlat = temp;
-		}
-		if (minlon > maxlon)
-		{
-			double temp = minlon;
-			minlon = maxlon;
-			maxlon = temp;
-		}
-
-		return new Sector(minlat, minlon, maxlat, maxlon);
-	}
-
-	public static int getTileX(double lon, int layer, double lztsd)
-	{
-		double layerpow = Math.pow(0.5, layer);
-		double X = (lon + 180) / (lztsd * layerpow);
-		return (int) X;
-	}
-
-	public static int getTileY(double lat, int layer, double lztsd)
-	{
-		double layerpow = Math.pow(0.5, layer);
-		double Y = (lat + 90) / (lztsd * layerpow);
-		return (int) Y;
-	}
-
-	private String paddedInt(int value, int charcount)
-	{
-		String str = String.valueOf(value);
-		while (str.length() < charcount)
-		{
-			str = "0" + str;
-		}
-		return str;
 	}
 }
