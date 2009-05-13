@@ -8,6 +8,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -16,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -27,8 +31,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -50,6 +56,7 @@ import util.GDALTile;
 import util.GDALUtil;
 import util.JDoubleField;
 import util.JIntegerField;
+import util.ProgressReporterImpl;
 import util.Sector;
 
 public class Tiler
@@ -99,6 +106,8 @@ public class Tiler
 	public final static String LOGGER = "TilerLogger";
 
 	private Logger logger;
+	private JTextPane textLog;
+	private JPopupMenu loggerPopup;
 	private JFrame frame;
 	private JProgressBar progress;
 
@@ -131,6 +140,7 @@ public class Tiler
 
 	private JTextArea tileText;
 	private JButton tileButton;
+	private JButton cancelButton;
 
 	private boolean tilesizeChanged = false;
 	private boolean tilesizeBeingSet = false;
@@ -139,9 +149,13 @@ public class Tiler
 	private boolean alphaSet = true;
 
 	private boolean fileOpen = false;
+	private boolean validOptions = false;
+	private boolean running = false;
 	private int bandCount = 0;
 	private Dataset dataset;
 	private Sector sector;
+
+	private TilerProgressReporter reporter;
 
 	private List<JComponent> labels = new ArrayList<JComponent>();
 
@@ -157,6 +171,7 @@ public class Tiler
 		JScrollPane scrollPane;
 		ButtonGroup bg;
 		JPanel panel;
+		Dimension size;
 
 		frame = new JFrame("Tiler");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -183,7 +198,7 @@ public class Tiler
 
 		frame.add(split, BorderLayout.CENTER);
 
-		JTextPane textLog = new JTextPane();
+		textLog = new JTextPane();
 		textLog.setEditable(false);
 		scrollPane = new JScrollPane(textLog,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -205,8 +220,9 @@ public class Tiler
 
 		logger = new DocumentLogger(LOGGER, textLog.getStyledDocument());
 		LogManager.getLogManager().addLogger(logger);
-		logger.setLevel(Level.FINEST);
+		logger.setLevel(Level.FINE);
 		GDALUtil.init(logger);
+		createLoggerPopupMenu();
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -256,8 +272,9 @@ public class Tiler
 		scrollPane = new JScrollPane(infoText,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollPane.setMinimumSize(new Dimension(100, 100));
-		scrollPane.setPreferredSize(new Dimension(100, 100));
+		size = new Dimension(20, 20);
+		scrollPane.setMinimumSize(size);
+		scrollPane.setPreferredSize(size);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 1;
@@ -333,7 +350,7 @@ public class Tiler
 		tilesizeField = new JIntegerField(512);
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		Dimension size = tilesizeField.getPreferredSize();
+		size = tilesizeField.getPreferredSize();
 		size.width = 50;
 		tilesizeField.setMinimumSize(size);
 		tilesizeField.setMaximumSize(size);
@@ -450,7 +467,6 @@ public class Tiler
 		c.gridy = 1;
 		c.anchor = GridBagConstraints.WEST;
 		imageCard.add(alphaCheck, c);
-		alphaCheck.setEnabled(false);
 		alphaCheck.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -532,7 +548,7 @@ public class Tiler
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				nodataCheckChanged();
+				enableFields();
 			}
 		});
 
@@ -589,8 +605,9 @@ public class Tiler
 		scrollPane = new JScrollPane(tileText,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollPane.setMinimumSize(new Dimension(100, 100));
-		scrollPane.setPreferredSize(new Dimension(100, 100));
+		size = new Dimension(20, 20);
+		scrollPane.setMinimumSize(size);
+		scrollPane.setPreferredSize(size);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 1;
@@ -600,16 +617,33 @@ public class Tiler
 		c.anchor = GridBagConstraints.NORTH;
 		brPanel.add(scrollPane, c);
 
-		tileButton = new JButton("Generate tiles");
+		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 2;
-		brPanel.add(tileButton, c);
+		brPanel.add(panel, c);
+
+		tileButton = new JButton("Generate tiles");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		panel.add(tileButton, c);
 		tileButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				generateTiles();
+			}
+		});
+
+		cancelButton = new JButton("Cancel");
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		panel.add(cancelButton, c);
+		cancelButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				cancel();
 			}
 		});
 
@@ -630,6 +664,51 @@ public class Tiler
 		leftSplit.setResizeWeight(0.5);
 		rightSplit.setResizeWeight(0.5);
 		topSplit.setResizeWeight(0.5);
+	}
+
+	private void createLoggerPopupMenu()
+	{
+		loggerPopup = new JPopupMenu();
+		Level[] levels = new Level[] { Level.FINEST, Level.FINER, Level.FINE,
+				Level.INFO, Level.WARNING, Level.SEVERE };
+
+		ButtonGroup bg = new ButtonGroup();
+		for (final Level level : levels)
+		{
+			JRadioButtonMenuItem menuItem = new JRadioButtonMenuItem(
+					new AbstractAction(level.getName())
+					{
+						public void actionPerformed(ActionEvent e)
+						{
+							logger.setLevel(level);
+						}
+					});
+			loggerPopup.add(menuItem);
+			bg.add(menuItem);
+			menuItem.setSelected(logger.getLevel().equals(level));
+		}
+
+		MouseListener ml = new MouseAdapter()
+		{
+			public void mousePressed(MouseEvent e)
+			{
+				maybeShowPopup(e);
+			}
+
+			public void mouseReleased(MouseEvent e)
+			{
+				maybeShowPopup(e);
+			}
+
+			private void maybeShowPopup(MouseEvent e)
+			{
+				if (e.isPopupTrigger())
+				{
+					loggerPopup.show(e.getComponent(), e.getX(), e.getY());
+				}
+			}
+		};
+		textLog.addMouseListener(ml);
 	}
 
 	private void addRecalculateListeners()
@@ -673,26 +752,6 @@ public class Tiler
 	private void openDataset(File file)
 	{
 		fileOpen = file != null;
-
-		alphaCheck.setEnabled(fileOpen);
-		//bandCombo.setEnabled(fileopen);
-		byteRadio.setEnabled(fileOpen);
-		elevationRadio.setEnabled(fileOpen);
-		imageRadio.setEnabled(fileOpen);
-		infoText.setEnabled(fileOpen);
-		int16Radio.setEnabled(fileOpen);
-		int32Radio.setEnabled(fileOpen);
-		jpegRadio.setEnabled(fileOpen);
-		lztsField.setEnabled(fileOpen);
-		nodataCheck.setEnabled(fileOpen);
-		overviewsCheck.setEnabled(fileOpen);
-		pngRadio.setEnabled(fileOpen);
-		//tileButton.setEnabled(enabled);
-		tilesizeField.setEnabled(fileOpen);
-		for (JComponent label : labels)
-		{
-			label.setEnabled(fileOpen);
-		}
 
 		if (!fileOpen)
 		{
@@ -807,8 +866,9 @@ public class Tiler
 		bandCountChanged();
 		tileTypeChanged();
 		imageFormatChanged();
-		nodataCheckChanged();
 		recalculateTiles();
+
+		frame.doLayout();
 	}
 
 	private void tileTypeChanged()
@@ -854,7 +914,7 @@ public class Tiler
 	private void imageFormatChanged()
 	{
 		alphaCheck.setSelected(pngRadio.isSelected() && alphaSet);
-		alphaCheck.setEnabled(pngRadio.isSelected() && fileOpen);
+		enableFields();
 	}
 
 	private void bandCountChanged()
@@ -864,6 +924,7 @@ public class Tiler
 		{
 			bandCombo.removeItemAt(0);
 		}
+		int bandCount = this.bandCount <= 0 ? 1 : this.bandCount;
 		nodataFields = new JIntegerField[bandCount];
 		for (int i = 0; i < bandCount; i++)
 		{
@@ -878,30 +939,58 @@ public class Tiler
 
 			bandCombo.addItem(new Integer(i + 1));
 		}
-		bandCombo.setEnabled(bandCount > 1 && fileOpen);
 	}
 
-	private void nodataCheckChanged()
+	private void enableFields()
 	{
+		boolean standard = fileOpen && !running;
+
+		byteRadio.setEnabled(standard);
+		elevationRadio.setEnabled(standard);
+		imageRadio.setEnabled(standard);
+		//infoText.setEnabled(standard);
+		//tileText.setEnabled(standard);
+		int16Radio.setEnabled(standard);
+		int32Radio.setEnabled(standard);
+		jpegRadio.setEnabled(standard);
+		lztsField.setEnabled(standard);
+		nodataCheck.setEnabled(standard);
+		overviewsCheck.setEnabled(standard);
+		pngRadio.setEnabled(standard);
+		tilesizeField.setEnabled(standard);
+		for (JComponent label : labels)
+		{
+			label.setEnabled(standard);
+		}
+
+		alphaCheck.setEnabled(pngRadio.isSelected() && standard);
+		bandCombo.setEnabled(bandCount > 1 && standard);
+
 		for (JIntegerField field : nodataFields)
 		{
-			field.setEnabled(nodataCheck.isSelected());
+			field.setEnabled(nodataCheck.isSelected() && standard);
 		}
+
+		browseButton.setEnabled(!running);
+		outputButton.setEnabled(!running);
+		outputDirectory.setEnabled(!running);
+		tileButton.setEnabled(validOptions && !running);
+		cancelButton.setEnabled(running);
 	}
 
 	private void recalculateTiles()
 	{
-		boolean valid = fileOpen;
+		validOptions = fileOpen;
 
 		StringBuilder info = new StringBuilder();
 
-		if (valid)
+		if (validOptions)
 		{
 			Double lzts = lztsField.getValue();
 			Integer tilesize = tilesizeField.getValue();
 
-			valid = lzts != null && tilesize != null;
-			if (valid)
+			validOptions = lzts != null && tilesize != null;
+			if (validOptions)
 			{
 				int levels = GDALUtil.levelCount(dataset, lzts, sector,
 						tilesize);
@@ -951,7 +1040,7 @@ public class Tiler
 					+ "\n");
 		}
 
-		if (!valid)
+		if (!validOptions)
 		{
 			tileText.setText("Invalid dataset or options");
 		}
@@ -961,12 +1050,38 @@ public class Tiler
 		}
 		tileText.select(0, 0);
 
-		tileButton.setEnabled(valid && dir != null);
+		validOptions = validOptions && dir != null;
+		enableFields();
 	}
 
 	private void generateTiles()
 	{
+		reporter = new TilerProgressReporter(this, logger);
+		started();
+		
 		//TODO
+	}
+
+	private void cancel()
+	{
+		if (reporter != null)
+		{
+			reporter.cancel();
+		}
+		completed();
+	}
+
+	private void started()
+	{
+		running = true;
+		enableFields();
+	}
+
+	private void completed()
+	{
+		running = false;
+		enableFields();
+		reporter = null;
 	}
 
 	private static class GDALFileFilter extends FileFilter
@@ -981,6 +1096,34 @@ public class Tiler
 		public String getDescription()
 		{
 			return "Any GDAL supported dataset (*.*)";
+		}
+	}
+
+	private static class TilerProgressReporter extends ProgressReporterImpl
+	{
+		private Tiler tiler;
+
+		public TilerProgressReporter(Tiler tiler, Logger logger)
+		{
+			super(logger);
+			this.tiler = tiler;
+		}
+
+		public void done()
+		{
+			tiler.completed();
+		}
+
+		@Override
+		public void cancel()
+		{
+			super.cancel();
+			tiler.completed();
+		}
+
+		public void progress(double percent)
+		{
+			tiler.progress.setValue((int) (percent * 100));
 		}
 	}
 }
