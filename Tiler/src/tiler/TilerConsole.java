@@ -17,24 +17,23 @@ import org.gdal.gdalconst.gdalconstConstants;
 
 import util.GDALTile;
 import util.GDALUtil;
-import util.Overviewer;
 import util.Sector;
 
 public class TilerConsole
 {
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
 		new TilerConsole();
 	}
 
-	public TilerConsole()
+	public TilerConsole() throws Exception
 	{
 		File file = new File("D:/SW Margins/sonne/SONNE_100B.ers");
 		File outputDir = new File("D:/SW Margins/sonne/tiledB");
 		String outputExt = "bil";
 		double lztd = 20d;
 		int tilesize = 150;
-		long nodata = -9999;
+		int outside = -9999;
 		boolean overviews = true;
 		int threadCount = 1;
 		boolean saveAlpha = false;
@@ -45,7 +44,9 @@ public class TilerConsole
 		int levels = GDALUtil.levelCount(dataset, lztd, sector, tilesize);
 		double width = dataset.getRasterXSize();
 		double height = dataset.getRasterYSize();
-		int bufferTypeSize = 2;
+		int bufferType = 1;
+
+		int[] outsidea = null;
 
 		int level = levels - 1;
 		//level = 1;
@@ -85,8 +86,8 @@ public class TilerConsole
 				final double lat2 = lat1 + tilesizedegrees;
 				final double lon2 = lon1 + tilesizedegrees;
 
-				final File dst = new File(rowDir, GDALUtil.paddedInt(Y, 4) + "_"
-						+ GDALUtil.paddedInt(X, 4) + "." + outputExt);
+				final File dst = new File(rowDir, GDALUtil.paddedInt(Y, 4)
+						+ "_" + GDALUtil.paddedInt(X, 4) + "." + outputExt);
 				if (dst.exists())
 				{
 					System.out.println(dst.getAbsolutePath()
@@ -95,10 +96,13 @@ public class TilerConsole
 				else
 				{
 					GDALTile tile = new GDALTile(dataset, tilesize, tilesize,
-							lat1, lon1, lat2, lon2, saveAlpha);
+							lat1, lon1, lat2, lon2, saveAlpha, -1);
 					tile = tile.convertToType(outputType); //TODO only for bil
-					tile.fillNodata(nodata);
-					bufferTypeSize = tile.getBufferTypeSize();
+					outsidea = new int[tile.getBandCount()];
+					for (int i = 0; i < tile.getBandCount(); i++)
+						outsidea[i] = outside;
+					tile.fillOutside(outsidea);
+					bufferType = tile.getBufferType();
 					if (outputExt.toLowerCase().equals("bil"))
 					{
 						try
@@ -141,14 +145,15 @@ public class TilerConsole
 
 			if (outputExt.toLowerCase().equals("bil"))
 			{
-				Overviewer.createBilOverviews(outputDir, tilesize, tilesize,
-						threadCount, bufferTypeSize, ByteOrder.LITTLE_ENDIAN,
-						nodata);
+				Overviewer
+						.createElevationOverviews(outputDir, tilesize,
+								tilesize, bufferType, ByteOrder.LITTLE_ENDIAN,
+								outsidea);
 			}
 			else
 			{
 				Overviewer.createImageOverviews(outputDir, outputExt, tilesize,
-						tilesize, saveAlpha, threadCount);
+						tilesize, outsidea);
 			}
 		}
 

@@ -1,14 +1,22 @@
 package util;
 
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
+
+import util.FileFilters.ExtensionFileFilter;
 
 
 public class GDALUtil
@@ -18,39 +26,22 @@ public class GDALUtil
 		gdal.AllRegister();
 	}
 
-	private static Logger logger;
-
-	public static void init(Logger logger)
+	public static void init()
 	{
-		GDALUtil.logger = logger;
-	};
-
-	public static Dataset open(File file)
-	{
-		try
-		{
-			Dataset dataset = (Dataset) gdal.Open(file.getAbsolutePath(),
-					gdalconst.GA_ReadOnly);
-			if (dataset == null)
-			{
-				printLastError();
-			}
-			return dataset;
-		}
-		catch (Exception e)
-		{
-			logger.log(Level.SEVERE, e.getMessage(), e);
-		}
-		return null;
 	}
 
-	public static void printLastError()
+	public static Dataset open(File file) throws GDALException
 	{
-		String msg = gdal.GetLastErrorNo() + " - " + gdal.GetLastErrorMsg();
-		logger.severe(msg);
+		Dataset dataset = (Dataset) gdal.Open(file.getAbsolutePath(),
+				gdalconst.GA_ReadOnly);
+		if (dataset == null)
+		{
+			throw new GDALException();
+		}
+		return dataset;
 	}
 
-	public static Sector getSector(Dataset dataset)
+	public static Sector getSector(Dataset dataset) throws TilerException
 	{
 		double[] geoTransformArray = new double[6];
 		dataset.GetGeoTransform(geoTransformArray);
@@ -59,8 +50,7 @@ public class GDALUtil
 				&& geoTransformArray[2] == 0 && geoTransformArray[3] == 0
 				&& geoTransformArray[4] == 0 && geoTransformArray[5] == 0)
 		{
-			logger.severe("Dataset contains zeroed geotransform");
-			return null;
+			throw new TilerException("Dataset contains zeroed geotransform");
 		}
 
 		int width = dataset.getRasterXSize();
@@ -129,7 +119,7 @@ public class GDALUtil
 		return (int) Math.ceil(Math.log10(texelSize * tilesize / lztd)
 				/ Math.log10(0.5)) + 1;
 	}
-	
+
 	public static int getTileX(double lon, int layer, double lztsd)
 	{
 		double layerpow = Math.pow(0.5, layer);
@@ -143,7 +133,7 @@ public class GDALUtil
 		double Y = (lat + 90) / (lztsd * layerpow);
 		return (int) Y;
 	}
-	
+
 	public static String paddedInt(int value, int charcount)
 	{
 		String str = String.valueOf(value);
@@ -152,5 +142,58 @@ public class GDALUtil
 			str = "0" + str;
 		}
 		return str;
+	}
+	
+	public static void main(String[] args)
+	{
+		short[] minmax = findShortMinMax(new File(
+				"D:/SW Margins/sonne/tiledB/8"), (short) -9999,
+				Short.MIN_VALUE, (short) -1);
+		System.out.println("Min = " + minmax[0]);
+		System.out.println("Max = " + minmax[1]);
+	}
+
+	public static short[] findShortMinMax(File dir, short nodataValue,
+			short ignoreMin, short ignoreMax)
+	{
+		short min = Short.MAX_VALUE;
+		short max = Short.MIN_VALUE;
+
+		String extension = "bil";
+		ExtensionFileFilter fileFilter = new ExtensionFileFilter(extension);
+		List<File> sourceFiles = new ArrayList<File>();
+		FileUtil.recursivelyAddFiles(sourceFiles, dir, fileFilter);
+
+		int count = sourceFiles.size(), done = 0;
+		for (File file : sourceFiles)
+		{
+			System.out.println("Processing " + file + " (" + (++done) + "/"
+					+ count + " - " + (done * 100 / count) + "%) " + min + ","
+					+ max);
+			try
+			{
+				FileChannel fc = new FileInputStream(file).getChannel();
+				ByteBuffer bb = ByteBuffer.allocate((int) file.length());
+				bb.order(ByteOrder.LITTLE_ENDIAN);
+				fc.read(bb);
+				bb.rewind();
+				ShortBuffer sb = bb.asShortBuffer();
+				for (int i = 0; i < sb.limit(); i++)
+				{
+					short current = sb.get();
+					if (current == nodataValue)
+						continue;
+					if (current < ignoreMin || current > ignoreMax)
+						continue;
+					min = current < min ? current : min;
+					max = current > max ? current : max;
+				}
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return new short[] { min, max };
 	}
 }

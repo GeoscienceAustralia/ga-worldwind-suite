@@ -1,4 +1,4 @@
-package tiler;
+package util;
 
 import java.awt.Color;
 import java.text.DateFormat;

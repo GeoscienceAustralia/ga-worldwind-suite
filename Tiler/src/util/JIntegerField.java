@@ -25,7 +25,7 @@ public class JIntegerField extends JTextField
 
 	public Integer getValue()
 	{
-		if (getText().length() == 0)
+		if (getText().length() == 0 || getText().equals("-"))
 			return null;
 		return value;
 	}
@@ -82,7 +82,7 @@ public class JIntegerField extends JTextField
 
 		private boolean checkAndSet(String result)
 		{
-			if (result.length() == 0)
+			if (result.length() == 0 || (result.equals("-") && !isPositive()))
 				return true;
 
 			boolean doit = true;
