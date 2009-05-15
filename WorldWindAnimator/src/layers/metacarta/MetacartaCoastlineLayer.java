@@ -1,11 +1,12 @@
 package layers.metacarta;
 
-import javax.media.opengl.GL;
-
-import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.render.DrawContext;
 
-public class MetacartaCoastlineLayer extends BasicTiledImageLayer
+import javax.media.opengl.GL;
+
+import layers.immediate.ImmediateBasicTiledImageLayer;
+
+public class MetacartaCoastlineLayer extends ImmediateBasicTiledImageLayer
 {
 	public MetacartaCoastlineLayer()
 	{

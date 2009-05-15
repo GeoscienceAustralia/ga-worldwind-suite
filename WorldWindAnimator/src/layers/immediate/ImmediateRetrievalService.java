@@ -12,7 +12,7 @@ public class ImmediateRetrievalService extends
 			double priority)
 	{
 		RetrievalFuture future = super.runRetriever(retriever, priority);
-		if (ImmediateMode.isImmediate())
+		if (ImmediateMode.isImmediate() && future != null)
 		{
 			//wait for retriever to complete
 			try

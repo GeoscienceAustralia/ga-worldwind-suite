@@ -49,6 +49,8 @@ public class ShadedElevationLayer extends ElevationLayer
 	protected Vec4 sunPosition = new Vec4(1, 1, 1);
 	protected Vec4 sunPositionNormalized = sunPosition.normalize3();
 	protected double bakedExaggeration = 100.0;
+	protected double shaderMinElevation;
+	protected double shaderMaxElevation;
 
 	private int shaderProgram = -1;
 	private int minElevationUniform;
@@ -71,6 +73,8 @@ public class ShadedElevationLayer extends ElevationLayer
 			Sector sector)
 	{
 		super(elevationModel, CACHE_NAME_PREFIX, FORMAT_SUFFIX, sector);
+		shaderMinElevation = elevationModel.getMinElevation();
+		shaderMaxElevation = elevationModel.getMaxElevation();
 	}
 
 	@Override
@@ -86,10 +90,10 @@ public class ShadedElevationLayer extends ElevationLayer
 
 		//double minElevation = ((ElevationTesselator) dc.getGlobe().getTessellator()).getMinElevation();
 		//double maxElevation = ((ElevationTesselator) dc.getGlobe().getTessellator()).getMaxElevation();
-		double minElevation = elevationModel.getMinElevation();
-		double maxElevation = elevationModel.getMaxElevation();
-		minElevation = clamp(minElevation, minElevationClamp, maxElevationClamp);
-		maxElevation = clamp(maxElevation, minElevationClamp, maxElevationClamp);
+		double minElevation = clamp(shaderMinElevation, minElevationClamp,
+				maxElevationClamp);
+		double maxElevation = clamp(shaderMaxElevation, minElevationClamp,
+				maxElevationClamp);
 		gl.glUniform1f(minElevationUniform, (float) minElevation);
 		gl.glUniform1f(maxElevationUniform, (float) maxElevation);
 		gl.glUniform1f(exaggerationUniform, (float) exaggeration);
@@ -207,6 +211,26 @@ public class ShadedElevationLayer extends ElevationLayer
 	{
 		this.sunPosition = sunPosition;
 		this.sunPositionNormalized = sunPosition.normalize3();
+	}
+
+	public double getShaderMinElevation()
+	{
+		return shaderMinElevation;
+	}
+
+	public void setShaderMinElevation(double shaderMinElevation)
+	{
+		this.shaderMinElevation = shaderMinElevation;
+	}
+
+	public double getShaderMaxElevation()
+	{
+		return shaderMaxElevation;
+	}
+
+	public void setShaderMaxElevation(double shaderMaxElevation)
+	{
+		this.shaderMaxElevation = shaderMaxElevation;
 	}
 
 	@Override

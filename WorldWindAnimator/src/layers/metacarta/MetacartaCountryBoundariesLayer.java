@@ -1,11 +1,12 @@
 package layers.metacarta;
 
-import javax.media.opengl.GL;
-
-import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.render.DrawContext;
 
-public class MetacartaCountryBoundariesLayer extends BasicTiledImageLayer
+import javax.media.opengl.GL;
+
+import layers.immediate.ImmediateBasicTiledImageLayer;
+
+public class MetacartaCountryBoundariesLayer extends ImmediateBasicTiledImageLayer
 {
 	public MetacartaCountryBoundariesLayer()
 	{

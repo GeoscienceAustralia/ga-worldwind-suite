@@ -19,7 +19,6 @@ import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.layers.StarsLayer;
-import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
@@ -67,8 +66,11 @@ import layers.file.FileLayer;
 import layers.immediate.ImmediateMode;
 import layers.immediate.ImmediateRetrievalService;
 import layers.immediate.ImmediateTaskService;
-import layers.immediate.bmng.BMNGWMSLayer;
+import layers.metacarta.MetacartaCoastlineLayer;
+import layers.metacarta.MetacartaStateBoundariesLayer;
 import layers.other.GravityLayer;
+import layers.other.ImmediateBMNGWMSLayer;
+import layers.other.ImmediateLandsatI3WMSLayer;
 import layers.other.MagneticsLayer;
 import nasa.worldwind.awt.WorldWindowGLCanvas;
 import nasa.worldwind.layers.LensFlareLayer;
@@ -81,6 +83,8 @@ import animation.SimpleAnimation;
 
 public class Animator
 {
+	private final static String DATA_DRIVE = "Z";
+
 	private static final GLCapabilities caps = new GLCapabilities();
 
 	static
@@ -154,6 +158,8 @@ public class Animator
 
 	public Animator()
 	{
+		//ImmediateMode.setImmediate(true);
+
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, BasicRollOrbitView.class
 				.getName());
@@ -229,7 +235,7 @@ public class Animator
 		layers.add(lensFlare);
 		lensFlare.setSunDistance(lensFlare.getSunDistance() * 100);
 		lensFlare.setSunDirection(direction);*/
-		
+
 		SkyGradientLayer sky = new SkyGradientLayer();
 		layers.add(sky);
 
@@ -296,13 +302,11 @@ public class Animator
 		flareframe.pack();
 		flareframe.setVisible(true);*/
 
-		bmng = new BMNGWMSLayer();
+		bmng = new ImmediateBMNGWMSLayer();
 		layers.add(bmng);
 
-		landsat = new LandsatI3WMSLayer();
+		landsat = new ImmediateLandsatI3WMSLayer();
 		layers.add(landsat);
-
-		String dataDrive = "Z";
 
 		ElevationModel earthem = new ExtendedBasicElevationModelFactory()
 				.createFromConfigFile("config/LegacyEarthElevationModel.xml");
@@ -311,7 +315,7 @@ public class Animator
 		Sector bemSector = Sector.fromDegrees(-59.99875, -7.99875, 91.99875,
 				171.99875);
 		ExtendedBasicElevationModel bem = FileLayer.createElevationModel(
-				"SW Margins DEM", "GA/SW Margins DEM", new File(dataDrive
+				"SW Margins DEM", "GA/SW Margins DEM", new File(DATA_DRIVE
 						+ ":/SW Margins/bathy/tiled"), 7, 150, LatLon
 						.fromDegrees(20d, 20d), bemSector, -8922, 3958);
 		bem.setMissingDataSignal(-32768);
@@ -319,7 +323,7 @@ public class Animator
 		Sector semSector = Sector.fromDegrees(-27.0015, -22.5005, 106.5005,
 				110.5025);
 		ExtendedBasicElevationModel sem = FileLayer.createElevationModel(
-				"SONNE DEM", "GA/SONNE DEM", new File(dataDrive
+				"SONNE DEM", "GA/SONNE DEM", new File(DATA_DRIVE
 						+ ":/SW Margins/sonne/tiledB"), 7, 150, LatLon
 						.fromDegrees(20d, 20d), semSector, -6400, -2310);
 		sem.setMissingDataSignal(-9999);
@@ -366,6 +370,8 @@ public class Animator
 		elevationSONNE.setSplitScale(1.5);
 		elevationSONNE.setMaxElevationClamp(0);
 		elevationSONNE.setMinElevationClamp(bem.getMinElevation());
+		elevationSONNE.setShaderMaxElevation(bem.getMaxElevation());
+		elevationSONNE.setShaderMinElevation(bem.getMinElevation());
 		layers.add(elevationSONNE);
 
 		shadowsEarth = new ShadowsElevationLayer(eem);
@@ -384,6 +390,14 @@ public class Animator
 
 		Layer magnetics = new MagneticsLayer();
 		layers.add(magnetics);
+
+		MetacartaStateBoundariesLayer state = new MetacartaStateBoundariesLayer();
+		state.setSplitScale(1.2);
+		layers.add(state);
+
+		MetacartaCoastlineLayer coast = new MetacartaCoastlineLayer();
+		coast.setSplitScale(1.2);
+		layers.add(coast);
 
 		/*Landmarks landmarks = new Landmarks(model.getGlobe());
 		layers.add(landmarks);*/
@@ -404,10 +418,12 @@ public class Animator
 		elevationSONNE.setEnabled(true);
 		//shadowsEarth.setEnabled(true);
 		//shadowsSW.setEnabled(true);
-		
+
 		//gravity.setEnabled(true);
 		//magnetics.setEnabled(true);
 
+		//coast.setEnabled(true);
+		//state.setEnabled(true);
 		//landmarks.setEnabled(true);
 
 		//lensFlare.setEnabled(true);
@@ -479,14 +495,6 @@ public class Animator
 		basinsShp.setRemoveDetailLevels(5);
 		layers.add(basinsShp);*/
 
-
-		/*MetacartaStateBoundariesLayer state = new MetacartaStateBoundariesLayer();
-		state.setSplitScale(1.2);
-		layers.add(state);
-
-		MetacartaCoastlineLayer coast = new MetacartaCoastlineLayer();
-		coast.setSplitScale(1.2);
-		layers.add(coast);*/
 
 		crosshair = new CrosshairLayer();
 		layers.add(crosshair);
@@ -1467,8 +1475,8 @@ public class Animator
 	{
 		int firstFrame = Math.max(slider.getValue(), animation.getFirstFrame());
 		int lastFrame = animation.getLastFrame();
-		return animate(detailHint, firstFrame, lastFrame, new File("frames"),
-				true);
+		return animate(detailHint, firstFrame, lastFrame, new File(DATA_DRIVE
+				+ ":/frames"), true);
 	}
 
 	private Thread animate(final double detailHint, final int firstFrame,

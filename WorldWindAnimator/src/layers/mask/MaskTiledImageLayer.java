@@ -763,10 +763,11 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		{
 			this.localTextureDir = localTextureDir;
 			this.localMaskDir = localMaskDir;
-			this.textureExtension = (textureExtension.startsWith(".") ? ""
-					: ".")
-					+ textureExtension;
-			this.maskExtension = (maskExtension.startsWith(".") ? "" : ".")
+			this.textureExtension = textureExtension == null ? null
+					: (textureExtension.startsWith(".") ? "" : ".")
+							+ textureExtension;
+			this.maskExtension = maskExtension == null ? null : (maskExtension
+					.startsWith(".") ? "" : ".")
 					+ maskExtension;
 		}
 

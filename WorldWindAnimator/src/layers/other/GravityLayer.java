@@ -8,6 +8,7 @@ import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.util.LevelSet;
 import layers.immediate.ImmediateMaskTiledImageLayer;
+import layers.mask.MaskTiledImageLayer;
 
 public class GravityLayer extends ImmediateMaskTiledImageLayer
 {
@@ -39,9 +40,8 @@ public class GravityLayer extends ImmediateMaskTiledImageLayer
 				.fromDegreesLatitude(-5.5648340), Angle
 				.fromDegreesLongitude(98.4274511), Angle
 				.fromDegreesLongitude(170.5036628)));
-		/*params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
-				.createDefaultUrlBuilder("tiles/gravity/image",
-						"tiles/gravity/mask", ".jpg", ".png"));*/
+		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
+				.createDefaultUrlBuilder());
 
 		return new LevelSet(params);
 	}

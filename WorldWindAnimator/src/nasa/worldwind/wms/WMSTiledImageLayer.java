@@ -4,7 +4,7 @@ as represented by the Administrator of the
 National Aeronautics and Space Administration.
 All Rights Reserved.
 */
-package layers.immediate.bmng;
+package nasa.worldwind.wms;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -17,6 +17,7 @@ import gov.nasa.worldwind.util.RestorableSupport;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 import gov.nasa.worldwind.util.WWIO;
+import gov.nasa.worldwind.util.WWXML;
 import gov.nasa.worldwind.wms.BoundingBox;
 import gov.nasa.worldwind.wms.Capabilities;
 
@@ -26,15 +27,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 
-import layers.immediate.ImmediateBasicTiledImageLayer;
+import nasa.worldwind.layers.BasicTiledImageLayer;
 
 import org.w3c.dom.Element;
 
 /**
  * @author tag
- * @version $Id: WMSTiledImageLayer.java 8441 2009-01-14 17:00:10Z dcollins $
+ * @version $Id: WMSTiledImageLayer.java 9600 2009-03-22 20:04:40Z tgaskins $
  */
-public class WMSTiledImageLayer extends ImmediateBasicTiledImageLayer
+public class WMSTiledImageLayer extends BasicTiledImageLayer
 {
     private AVList creationParams;
 
@@ -110,9 +111,9 @@ public class WMSTiledImageLayer extends ImmediateBasicTiledImageLayer
         if (i != null)
             params.setValue(AVKey.TILE_HEIGHT, i);
 
-        Double d = rs.getStateValueAsDouble(AVKey.EXPIRY_TIME);
-        if (d != null)
-            params.setValue(AVKey.EXPIRY_TIME, Math.round(d));
+        Long lo = rs.getStateValueAsLong(AVKey.EXPIRY_TIME);
+        if (lo != null)
+            params.setValue(AVKey.EXPIRY_TIME, lo);
 
         Double lat = rs.getStateValueAsDouble(AVKey.LEVEL_ZERO_TILE_DELTA + ".Latitude");
         Double lon = rs.getStateValueAsDouble(AVKey.LEVEL_ZERO_TILE_DELTA + ".Longitude");
@@ -185,10 +186,13 @@ public class WMSTiledImageLayer extends ImmediateBasicTiledImageLayer
         if (so != null)
         {
             RestorableSupport.StateObject[] avpairs = rs.getAllStateObjects(so, "");
-            for (RestorableSupport.StateObject avp : avpairs)
+            if (avpairs != null)
             {
-                if (avp != null)
-                    this.setValue(avp.getName(), avp.getValue());
+                for (RestorableSupport.StateObject avp : avpairs)
+                {
+                    if (avp != null)
+                        this.setValue(avp.getName(), avp.getValue());
+                }
             }
         }
     }
@@ -252,10 +256,14 @@ public class WMSTiledImageLayer extends ImmediateBasicTiledImageLayer
             }
         }
 
+        Long lastUpdate = caps.getLayerLatestLastUpdateTime(caps, names);
+        if (lastUpdate != null)
+            params.setValue(AVKey.EXPIRY_TIME, lastUpdate);
+
         params.setValue(AVKey.DATASET_NAME, layerNames);
 
         String mapRequestURIString = caps.getGetMapRequestGetURL();
-        mapRequestURIString = fixGetMapString(mapRequestURIString);
+        mapRequestURIString = WWXML.fixGetMapString(mapRequestURIString);
         if (params.getValue(AVKey.SERVICE) == null)
             params.setValue(AVKey.SERVICE, mapRequestURIString);
         mapRequestURIString = params.getStringValue(AVKey.SERVICE);
@@ -351,19 +359,6 @@ public class WMSTiledImageLayer extends ImmediateBasicTiledImageLayer
     private static double clamp(double v, double min, double max)
     {
         return v < min ? min : v > max ? max : v;
-    }
-
-    private static String fixGetMapString(String gms)
-    {
-        gms = gms.trim();
-        int qMarkIndex = gms.indexOf("?");
-        if (qMarkIndex < 0)
-            gms += "?";
-        else if (qMarkIndex != gms.length() - 1)
-            if (gms.lastIndexOf("&") != gms.length() - 1)
-                gms += "&";
-
-        return gms;
     }
 
     private static String makeTitle(Capabilities caps, String layerNames, String styleNames)

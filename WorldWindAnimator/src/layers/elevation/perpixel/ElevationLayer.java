@@ -91,6 +91,10 @@ public abstract class ElevationLayer extends TiledImageLayer
 	public void render(DrawContext dc)
 	{
 		this.dc = dc;
+		
+		if (!this.isEnabled())
+			return;
+
 		setupShader(dc);
 		super.render(dc);
 		packupShader(dc);
@@ -303,7 +307,8 @@ public abstract class ElevationLayer extends TiledImageLayer
 
 		if (paddedElevations.length != size)
 		{
-			throw new IllegalArgumentException("Illegal paddedElevations length");
+			throw new IllegalArgumentException(
+					"Illegal paddedElevations length");
 		}
 
 		Vec4[] verts = new Vec4[size];
