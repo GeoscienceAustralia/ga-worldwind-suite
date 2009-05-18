@@ -70,37 +70,6 @@ import util.TilerException;
 
 public class Application
 {
-	/*
-	BUTTONS
-	-------
-	Open File
-	Preview?
-	
-	INFORMATION
-	-----------
-	Dimensions
-	Extents
-	Coordinate system
-	Band count
-	Buffer format
-	
-	TILING OPTIONS
-	--------------
-	Tiling type (image or bil (or mapnik?))
-	Level Zero Tile Size (degrees)
-	Tile size (pixels)
-	No data value (show value for each band)
-	Create overviews (true/false)
-	
-	FOR IMAGES:
-	Image format (JPEG or PNG)
-	Save alpha channel (PNG only)
-	
-	FOR BILS:
-	Output type (byte, int16, int32)
-	Band to use (if more than one band)
-	 */
-
 	static
 	{
 		try
@@ -184,8 +153,9 @@ public class Application
 	private int levels;
 
 	private TilerProgressReporter reporter;
-
 	private List<JComponent> labels = new ArrayList<JComponent>();
+	/*private Preferences preferences = Preferences.userRoot().node(
+			"WorldWind/Tiler");*/
 
 	public static void main(String[] args)
 	{
@@ -204,6 +174,21 @@ public class Application
 		frame = new JFrame("Tiler");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setLayout(new BorderLayout());
+		/*frame.addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosed(WindowEvent we)
+			{
+				try
+				{
+					preferences.flush();
+				}
+				catch (BackingStoreException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		});*/
 
 		JPanel tlPanel = new JPanel(new GridBagLayout());
 		tlPanel.setBorder(BorderFactory.createTitledBorder("Dataset"));
@@ -810,13 +795,13 @@ public class Application
 		frame.setVisible(true);
 
 		//TODO make better
-		split.setDividerLocation(0.7);
+		/*split.setDividerLocation(0.7);
 		leftSplit.setDividerLocation(0.5);
-		rightSplit.setDividerLocation(0.5);
+		rightSplit.setDividerLocation(0.5);*/
 		topSplit.setDividerLocation(0.5);
 		split.setResizeWeight(0.7);
-		leftSplit.setResizeWeight(0.5);
-		rightSplit.setResizeWeight(0.5);
+		leftSplit.setResizeWeight(0.8);
+		rightSplit.setResizeWeight(0.0);
 		topSplit.setResizeWeight(0.5);
 	}
 
