@@ -17,7 +17,9 @@ import org.gdal.gdalconst.gdalconstConstants;
 
 import util.GDALTile;
 import util.GDALUtil;
+import util.ProgressReporter;
 import util.Sector;
+import util.SimpleProgressReporter;
 
 public class TilerConsole
 {
@@ -35,7 +37,6 @@ public class TilerConsole
 		int tilesize = 150;
 		int outside = -9999;
 		boolean overviews = true;
-		int threadCount = 1;
 		boolean saveAlpha = false;
 		int outputType = gdalconstConstants.GDT_Int16;
 
@@ -61,6 +62,8 @@ public class TilerConsole
 		int maxX = GDALUtil.getTileX(sector.getMaxLongitude(), level, lztd);
 		int minY = GDALUtil.getTileY(sector.getMinLatitude(), level, lztd);
 		int maxY = GDALUtil.getTileY(sector.getMaxLatitude(), level, lztd);
+
+		ProgressReporter progress = new SimpleProgressReporter();
 
 		int size = (maxX - minX + 1) * (maxY - minY + 1);
 		int count = 0;
@@ -145,15 +148,14 @@ public class TilerConsole
 
 			if (outputExt.toLowerCase().equals("bil"))
 			{
-				Overviewer
-						.createElevationOverviews(outputDir, tilesize,
-								tilesize, bufferType, ByteOrder.LITTLE_ENDIAN,
-								outsidea);
+				Overviewer.createElevationOverviews(outputDir, tilesize,
+						tilesize, bufferType, ByteOrder.LITTLE_ENDIAN,
+						outsidea, sector, lztd, progress);
 			}
 			else
 			{
 				Overviewer.createImageOverviews(outputDir, outputExt, tilesize,
-						tilesize, outsidea);
+						tilesize, outsidea, sector, lztd, progress);
 			}
 		}
 

@@ -137,12 +137,16 @@ public class Application
 	private JCheckBox replaceCheck;
 	private JLabel replace1Label;
 	private JLabel replace2Label;
+	private JLabel replace3Label;
+	private JLabel replace4Label;
 	private JPanel minPanel;
 	private JPanel maxPanel;
 	private JPanel replacePanel;
+	private JPanel otherwisePanel;
 	private JIntegerField[] minFields = new JIntegerField[0];
 	private JIntegerField[] maxFields = new JIntegerField[0];
 	private JIntegerField[] replaceFields = new JIntegerField[0];
+	private JIntegerField[] otherwiseFields = new JIntegerField[0];
 
 	private JPanel cards;
 
@@ -174,6 +178,7 @@ public class Application
 	private boolean validOptions = false;
 	private boolean running = false;
 	private int bandCount = 0;
+	private int outputBandCount = 0;
 	private Dataset dataset;
 	private Sector sector;
 	private int levels;
@@ -257,6 +262,8 @@ public class Application
 		logger.setLevel(Level.FINE);
 		createLoggerPopupMenu();
 
+		//TOP LEFT
+
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -316,6 +323,8 @@ public class Application
 		c.anchor = GridBagConstraints.NORTH;
 		tlPanel.add(scrollPane, c);
 
+		//BOTTOM LEFT
+
 		previewCanvas = new JLabel();
 		previewCanvas.setHorizontalAlignment(SwingConstants.CENTER);
 		scrollPane = new JScrollPane(previewCanvas,
@@ -327,6 +336,8 @@ public class Application
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor = GridBagConstraints.CENTER;
 		blPanel.add(scrollPane, c);
+
+		//TOP RIGHT
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -618,12 +629,21 @@ public class Application
 		c.insets = new Insets(0, 32, 0, 0);
 		trPanel.add(outsidePanel, c);
 
-		replaceCheck = new JCheckBox("Set pixels with values between:");
+		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 8;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.weighty = 1;
+		trPanel.add(panel, c);
+
+		replaceCheck = new JCheckBox("Set pixels with values:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
-		trPanel.add(replaceCheck, c);
+		c.gridwidth = 2;
+		panel.add(replaceCheck, c);
 		replaceCheck.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -632,46 +652,67 @@ public class Application
 			}
 		});
 
+		replace1Label = new JLabel("between:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 32, 0, 0);
+		panel.add(replace1Label, c);
+
 		minPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 9;
+		c.gridx = 1;
+		c.gridy = 1;
 		c.anchor = GridBagConstraints.WEST;
-		c.insets = new Insets(0, 32, 0, 0);
-		trPanel.add(minPanel, c);
+		panel.add(minPanel, c);
 
-		replace1Label = new JLabel("and:");
+		replace2Label = new JLabel("and:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 10;
-		c.anchor = GridBagConstraints.WEST;
+		c.gridy = 2;
+		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 32, 0, 0);
-		trPanel.add(replace1Label, c);
+		panel.add(replace2Label, c);
 
 		maxPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 11;
+		c.gridx = 1;
+		c.gridy = 2;
 		c.anchor = GridBagConstraints.WEST;
-		c.insets = new Insets(0, 32, 0, 0);
-		trPanel.add(maxPanel, c);
+		panel.add(maxPanel, c);
 
-		replace2Label = new JLabel("to:");
+		replace3Label = new JLabel("to:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 12;
-		c.anchor = GridBagConstraints.WEST;
+		c.gridy = 3;
+		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 32, 0, 0);
-		trPanel.add(replace2Label, c);
+		panel.add(replace3Label, c);
 
 		replacePanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 3;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(replacePanel, c);
+
+		replace4Label = new JLabel("otherwise:");
+		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 13;
-		c.anchor = GridBagConstraints.NORTHWEST;
-		c.weighty = 1;
+		c.gridy = 4;
+		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 32, 0, 0);
-		trPanel.add(replacePanel, c);
+		panel.add(replace4Label, c);
+
+		otherwisePanel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 4;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(otherwisePanel, c);
+
+		//BOTTOM RIGHT
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -1059,22 +1100,25 @@ public class Application
 		Integer[] minBackup = readIntegerFields(minFields);
 		Integer[] maxBackup = readIntegerFields(maxFields);
 		Integer[] replaceBackup = readIntegerFields(replaceFields);
+		Integer[] otherwiseBackup = readIntegerFields(otherwiseFields);
 
 		outsidePanel.removeAll();
 		minPanel.removeAll();
 		maxPanel.removeAll();
 		replacePanel.removeAll();
+		otherwisePanel.removeAll();
 		while (bandCombo.getItemCount() > 0)
 		{
 			bandCombo.removeItemAt(0);
 		}
-		int bandCount = this.bandCount <= 0 ? 1 : this.bandCount;
-		bandCount = bandCount == 3 && alphaCheck.isSelected() ? 4 : bandCount;
-		outsideFields = new JIntegerField[bandCount];
-		minFields = new JIntegerField[bandCount];
-		maxFields = new JIntegerField[bandCount];
-		replaceFields = new JIntegerField[bandCount];
-		for (int i = 0; i < bandCount; i++)
+		outputBandCount = bandCount <= 0 ? 1 : bandCount == 3
+				&& alphaCheck.isSelected() ? 4 : bandCount;
+		outsideFields = new JIntegerField[outputBandCount];
+		minFields = new JIntegerField[outputBandCount];
+		maxFields = new JIntegerField[outputBandCount];
+		replaceFields = new JIntegerField[outputBandCount];
+		otherwiseFields = new JIntegerField[outputBandCount];
+		for (int i = 0; i < outputBandCount; i++)
 		{
 			outsideFields[i] = new JIntegerField(0);
 			Dimension size = outsideFields[i].getPreferredSize();
@@ -1106,14 +1150,22 @@ public class Application
 			c.gridx = i;
 			replacePanel.add(replaceFields[i], c);
 
+			otherwiseFields[i] = new JIntegerField(null);
+			otherwiseFields[i].setMinimumSize(size);
+			otherwiseFields[i].setPreferredSize(size);
+			c = new GridBagConstraints();
+			c.gridx = i;
+			otherwisePanel.add(otherwiseFields[i], c);
+
 			bandCombo.addItem(new Integer(i + 1));
 		}
-		
+
 		//restore values
 		writeIntegerFields(outsideFields, outsideBackup);
 		writeIntegerFields(minFields, minBackup);
 		writeIntegerFields(maxFields, maxBackup);
 		writeIntegerFields(replaceFields, replaceBackup);
+		writeIntegerFields(otherwiseFields, otherwiseBackup);
 
 		enableFields();
 	}
@@ -1172,6 +1224,8 @@ public class Application
 		replaceCheck.setEnabled(standard);
 		replace1Label.setEnabled(replaceCheck.isSelected() && standard);
 		replace2Label.setEnabled(replaceCheck.isSelected() && standard);
+		replace3Label.setEnabled(replaceCheck.isSelected() && standard);
+		replace4Label.setEnabled(replaceCheck.isSelected() && standard);
 		for (JIntegerField field : minFields)
 		{
 			field.setEnabled(replaceCheck.isSelected() && standard);
@@ -1181,6 +1235,10 @@ public class Application
 			field.setEnabled(replaceCheck.isSelected() && standard);
 		}
 		for (JIntegerField field : replaceFields)
+		{
+			field.setEnabled(replaceCheck.isSelected() && standard);
+		}
+		for (JIntegerField field : otherwiseFields)
 		{
 			field.setEnabled(replaceCheck.isSelected() && standard);
 		}
@@ -1228,15 +1286,7 @@ public class Application
 
 				for (int i = overviews ? 0 : levels - 1; i < levels; i++)
 				{
-					int minX = GDALUtil.getTileX(sector.getMinLongitude(), i,
-							lzts);
-					int maxX = GDALUtil.getTileX(sector.getMaxLongitude(), i,
-							lzts);
-					int minY = GDALUtil.getTileY(sector.getMinLatitude(), i,
-							lzts);
-					int maxY = GDALUtil.getTileY(sector.getMaxLatitude(), i,
-							lzts);
-					tileCount[i] = (maxX - minX + 1) * (maxY - minY + 1);
+					tileCount[i] = GDALUtil.tileCount(sector, i, lzts);
 					totalCount += tileCount[i];
 				}
 
@@ -1296,10 +1346,12 @@ public class Application
 				int[] minReplace = null;
 				int[] maxReplace = null;
 				Integer[] replace = null;
+				Integer[] otherwise = null;
+				boolean overviews = overviewsCheck.isSelected();
 				if (outsideCheck.isSelected())
 				{
-					outsideValues = new int[bandCount];
-					for (int b = 0; b < bandCount; b++)
+					outsideValues = new int[outputBandCount];
+					for (int b = 0; b < outputBandCount; b++)
 					{
 						Integer value = outsideFields[b].getValue();
 						outsideValues[b] = value != null ? value : 0;
@@ -1307,18 +1359,22 @@ public class Application
 				}
 				if (replaceCheck.isSelected())
 				{
-					minReplace = new int[bandCount];
-					maxReplace = new int[bandCount];
-					replace = new Integer[bandCount];
-					for (int b = 0; b < bandCount; b++)
+					minReplace = new int[outputBandCount];
+					maxReplace = new int[outputBandCount];
+					replace = new Integer[outputBandCount];
+					otherwise = new Integer[outputBandCount];
+					for (int b = 0; b < outputBandCount; b++)
 					{
 						Integer value = minFields[b].getValue();
 						minReplace[b] = value != null ? value : 0;
 						value = maxFields[b].getValue();
 						maxReplace[b] = value != null ? value : 0;
 						replace[b] = replaceFields[b].getValue();
+						otherwise[b] = otherwiseFields[b].getValue();
 					}
 				}
+
+				//TODO implement reporter in Overviewer
 
 				if (imageRadio.isSelected())
 				{
@@ -1328,9 +1384,13 @@ public class Application
 
 					Tiler.tileImages(dataset, sector, level, tilesize, lzts,
 							imageFormat, addAlpha, outsideValues, minReplace,
-							maxReplace, replace, outDir, reporter);
-					Overviewer.createImageOverviews(outDir, imageFormat,
-							tilesize, tilesize, outsideValues);
+							maxReplace, replace, otherwise, outDir, reporter);
+					if (overviews && !reporter.isCancelled())
+					{
+						Overviewer.createImageOverviews(outDir, imageFormat,
+								tilesize, tilesize, outsideValues, sector,
+								lzts, reporter);
+					}
 				}
 				else if (elevationRadio.isSelected())
 				{
@@ -1341,11 +1401,16 @@ public class Application
 							.getSelectedItem()) - 1;
 					Tiler.tileElevations(dataset, sector, level, tilesize,
 							lzts, bufferType, band, outsideValues, minReplace,
-							maxReplace, replace, outDir, reporter);
-					Overviewer.createElevationOverviews(outDir, tilesize,
-							tilesize, bufferType, ByteOrder.LITTLE_ENDIAN, /*TODO remove hardcoded byteorder*/
-							outsideValues);
+							maxReplace, replace, otherwise, outDir, reporter);
+					if (overviews && !reporter.isCancelled())
+					{
+						Overviewer.createElevationOverviews(outDir, tilesize,
+								tilesize, bufferType, ByteOrder.LITTLE_ENDIAN, /*TODO remove hardcoded byteorder*/
+								outsideValues, sector, lzts, reporter);
+					}
 				}
+
+				reporter.done();
 			}
 		});
 		thread.setDaemon(true);

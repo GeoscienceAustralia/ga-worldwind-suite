@@ -24,6 +24,11 @@ import org.gdal.osr.SpatialReference;
 
 public class GDALTile
 {
+	//TODO test with various datatypes:
+	//So far, only really tested with 3 and 4 band image datasets,
+	//and 16-bit integer DEMs. Need to test replace and datatype
+	//modification with other datatypes.
+	
 	//construtor globals
 	private final double minLatitude;
 	private final double minLongitude;
@@ -291,9 +296,9 @@ public class GDALTile
 		//inside dataRectangle, 0 otherwise
 		if (bufferBandCount == 4 && dataBandCount != 4)
 		{
-			for (int x = 0; x < width; x++)
+			for (int y = 0; y < height; y++)
 			{
-				for (int y = 0; y < height; y++)
+				for (int x = 0; x < width; x++)
 				{
 					int index = getBufferIndex(x, y, 3) * bufferTypeSize;
 					for (int i = 0; i < bufferTypeSize; i++)
@@ -373,7 +378,7 @@ public class GDALTile
 		//set image type
 		if (bufferBandCount == 4)
 		{
-			imageType = BufferedImage.TYPE_INT_ARGB;
+			imageType = BufferedImage.TYPE_INT_ARGB_PRE;
 		}
 		else if (bufferBandCount == 3)
 		{
@@ -440,11 +445,12 @@ public class GDALTile
 		}
 	}
 
-	public void replaceValues(int[] min, int[] max, Integer[] replacement)
-			throws TilerException
+	public void replaceValues(int[] min, int[] max, Integer[] replacement,
+			Integer[] otherwise) throws TilerException
 	{
 		if (min.length != bufferBandCount || max.length != bufferBandCount
-				|| replacement.length != bufferBandCount)
+				|| replacement.length != bufferBandCount
+				|| otherwise.length != bufferBandCount)
 		{
 			throw new IllegalArgumentException(
 					"Array size does not equal band count");
@@ -453,7 +459,7 @@ public class GDALTile
 		boolean allNull = true;
 		for (int b = 0; b < bufferBandCount; b++)
 		{
-			if (replacement[b] != null)
+			if (replacement[b] != null || otherwise[b] != null)
 			{
 				allNull = false;
 				break;
@@ -465,70 +471,67 @@ public class GDALTile
 			return;
 		}
 
-		int[] values = new int[bufferBandCount];
-		for (int x = 0; x < width; x++)
+		for (int y = 0; y < height; y++)
 		{
-			for (int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++)
 			{
 				boolean between = true;
 
 				for (int b = 0; b < bufferBandCount; b++)
 				{
 					int index = getBufferIndex(x, y, b) * bufferTypeSize;
+					int value = 0;
 					if (bufferType == gdalconstConstants.GDT_Byte)
 					{
-						values[b] = buffer.get(index);
+						value = buffer.get(index) & 0xff;
 					}
 					else if (bufferType == gdalconstConstants.GDT_Int16
 							|| bufferType == gdalconstConstants.GDT_UInt16)
 					{
-						values[b] = buffer.getShort(index);
+						value = buffer.getShort(index);
 					}
 					else if (bufferType == gdalconstConstants.GDT_Int32
 							|| bufferType == gdalconstConstants.GDT_UInt32)
 					{
-						values[b] = buffer.getInt(index);
+						value = buffer.getInt(index);
 					}
 					else
 					{
 						throw new TilerException("Unsupported buffer type");
 					}
 
-					if (values[b] < min[b] || values[b] > max[b])
+					if (value < min[b] || value > max[b])
 					{
 						between = false;
 						break;
 					}
 				}
 
-				if (between)
+				Integer[] values = between ? replacement : otherwise;
+
+				for (int b = 0; b < bufferBandCount; b++)
 				{
-					for (int b = 0; b < bufferBandCount; b++)
+					if (values[b] != null)
 					{
-						if (replacement[b] != null)
+						int index = getBufferIndex(x, y, b) * bufferTypeSize;
+						int value = values[b];
+						if (bufferType == gdalconstConstants.GDT_Byte)
 						{
-							int index = getBufferIndex(x, y, b)
-									* bufferTypeSize;
-							int rep = replacement[b];
-							if (bufferType == gdalconstConstants.GDT_Byte)
-							{
-								buffer.put(index, (byte) rep);
-							}
-							else if (bufferType == gdalconstConstants.GDT_Int16
-									|| bufferType == gdalconstConstants.GDT_UInt16)
-							{
-								buffer.putShort(index, (short) rep);
-							}
-							else if (bufferType == gdalconstConstants.GDT_Int32
-									|| bufferType == gdalconstConstants.GDT_UInt32)
-							{
-								buffer.putInt(index, rep);
-							}
-							else
-							{
-								throw new TilerException(
-										"Unsupported buffer type");
-							}
+							buffer.put(index, (byte) value);
+						}
+						else if (bufferType == gdalconstConstants.GDT_Int16
+								|| bufferType == gdalconstConstants.GDT_UInt16)
+						{
+							buffer.putShort(index, (short) value);
+						}
+						else if (bufferType == gdalconstConstants.GDT_Int32
+								|| bufferType == gdalconstConstants.GDT_UInt32)
+						{
+							buffer.putInt(index, value);
+						}
+						else
+						{
+							throw new TilerException("Unsupported buffer type");
 						}
 					}
 				}
@@ -645,7 +648,7 @@ public class GDALTile
 
 		if (srcBufferType == gdalconstConstants.GDT_Byte)
 		{
-			lvalue = src.get();
+			lvalue = src.get() & 0xff;
 			dvalue = lvalue;
 		}
 		else if (srcBufferType == gdalconstConstants.GDT_Int16)

@@ -22,29 +22,34 @@ public class Tiler
 	public static void tileImages(Dataset dataset, Sector sector, int level,
 			int tilesize, double lzts, String imageFormat, boolean addAlpha,
 			int[] outsideValues, int[] minReplace, int[] maxReplace,
-			Integer[] replace, File outputDirectory, ProgressReporter progress)
+			Integer[] replace, Integer[] otherwise, File outputDirectory,
+			ProgressReporter progress)
 	{
 		tile(false, dataset, sector, level, tilesize, lzts, imageFormat,
 				addAlpha, -1, -1, outsideValues, minReplace, maxReplace,
-				replace, outputDirectory, progress);
+				replace, otherwise, outputDirectory, progress);
 	}
 
 	public static void tileElevations(Dataset dataset, Sector sector,
 			int level, int tilesize, double lzts, int bufferType, int band,
 			int[] outsideValues, int[] minReplace, int[] maxReplace,
-			Integer[] replace, File outputDirectory, ProgressReporter progress)
+			Integer[] replace, Integer[] otherwise, File outputDirectory,
+			ProgressReporter progress)
 	{
 		tile(true, dataset, sector, level, tilesize, lzts, null, false,
 				bufferType, band, outsideValues, minReplace, maxReplace,
-				replace, outputDirectory, progress);
+				replace, otherwise, outputDirectory, progress);
 	}
 
 	private static void tile(boolean elevations, Dataset dataset,
 			Sector sector, int level, int tilesize, double lzts,
 			String imageFormat, boolean addAlpha, int bufferType, int band,
 			int[] outsideValues, int[] minReplace, int[] maxReplace,
-			Integer[] replace, File outputDirectory, ProgressReporter progress)
+			Integer[] replace, Integer[] otherwise, File outputDirectory,
+			ProgressReporter progress)
 	{
+		progress.getLogger().info("Generating tiles...");
+
 		String outputExt = elevations ? "bil" : imageFormat;
 
 		double tilesizedegrees = Math.pow(0.5, level) * lzts;
@@ -111,7 +116,8 @@ public class Tiler
 						if (minReplace != null && maxReplace != null
 								&& replace != null)
 						{
-							tile.replaceValues(minReplace, maxReplace, replace);
+							tile.replaceValues(minReplace, maxReplace, replace,
+									otherwise);
 						}
 						if (elevations)
 						{
@@ -138,5 +144,7 @@ public class Tiler
 				}
 			}
 		}
+
+		progress.getLogger().info("Tile generation complete");
 	}
 }

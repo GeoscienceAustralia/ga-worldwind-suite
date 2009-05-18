@@ -120,17 +120,26 @@ public class GDALUtil
 				/ Math.log10(0.5)) + 1;
 	}
 
-	public static int getTileX(double lon, int layer, double lztsd)
+	public static int tileCount(Sector sector, int level, double lztsd)
 	{
-		double layerpow = Math.pow(0.5, layer);
-		double X = (lon + 180) / (lztsd * layerpow);
+		int minX = GDALUtil.getTileX(sector.getMinLongitude(), level, lztsd);
+		int maxX = GDALUtil.getTileX(sector.getMaxLongitude(), level, lztsd);
+		int minY = GDALUtil.getTileY(sector.getMinLatitude(), level, lztsd);
+		int maxY = GDALUtil.getTileY(sector.getMaxLatitude(), level, lztsd);
+		return (maxX - minX + 1) * (maxY - minY + 1);
+	}
+
+	public static int getTileX(double longitude, int level, double lztsd)
+	{
+		double layerpow = Math.pow(0.5, level);
+		double X = (longitude + 180) / (lztsd * layerpow);
 		return (int) X;
 	}
 
-	public static int getTileY(double lat, int layer, double lztsd)
+	public static int getTileY(double latitude, int level, double lztsd)
 	{
-		double layerpow = Math.pow(0.5, layer);
-		double Y = (lat + 90) / (lztsd * layerpow);
+		double layerpow = Math.pow(0.5, level);
+		double Y = (latitude + 90) / (lztsd * layerpow);
 		return (int) Y;
 	}
 
@@ -143,7 +152,7 @@ public class GDALUtil
 		}
 		return str;
 	}
-	
+
 	public static void main(String[] args)
 	{
 		short[] minmax = findShortMinMax(new File(

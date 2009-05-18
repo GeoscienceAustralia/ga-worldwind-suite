@@ -31,200 +31,218 @@ import javax.imageio.ImageIO;
 import org.gdal.gdal.gdal;
 
 import util.FileUtil;
+import util.GDALUtil;
+import util.ProgressReporter;
+import util.Sector;
 import util.FileFilters.DirectoryFileFilter;
 import util.FileFilters.ExtensionFileFilter;
 
 public class Overviewer
 {
 	public static void createImageOverviews(File directory, String extension,
-			int width, int height, int[] outsideValues)
+			int width, int height, int[] outsideValues, Sector sector,
+			double lzts, ProgressReporter reporter)
 	{
 		createOverviews(false, directory, extension, width, height, 1, null,
-				outsideValues);
+				outsideValues, sector, lzts, reporter);
 	}
 
 	public static void createElevationOverviews(File directory, int width,
-			int height, int bufferType, ByteOrder byteOrder, int[] outsideValues)
+			int height, int bufferType, ByteOrder byteOrder,
+			int[] outsideValues, Sector sector, double lzts,
+			ProgressReporter reporter)
 	{
 		createOverviews(true, directory, "bil", width, height, bufferType,
-				byteOrder, outsideValues);
+				byteOrder, outsideValues, sector, lzts, reporter);
 	}
 
 	private static void createOverviews(boolean elevations, File directory,
 			String extension, int width, int height, int bufferType,
-			ByteOrder byteOrder, int[] outsideValues)
+			ByteOrder byteOrder, int[] outsideValues, Sector sector,
+			double lzts, ProgressReporter progress)
 	{
+		progress.getLogger().info("Generating overviews...");
+
 		if (directory.isDirectory())
 		{
+			//fix extension
+			if (extension.startsWith("."))
+			{
+				extension = extension.substring(1);
+			}
+
+			//calculate buffer type size
+			int bufferTypeSize = 1;
+			if (elevations)
+			{
+				bufferTypeSize = gdal.GetDataTypeSize(bufferType);
+				if (bufferTypeSize != 1 && bufferTypeSize != 2
+						&& bufferTypeSize != 4)
+				{
+					throw new IllegalArgumentException("Illegal buffer type");
+				}
+			}
+
+			//create buffer/image for tiles outside extents (tiles that don't exist)
+			ByteBuffer outsideBuffer = null;
+			BufferedImage outsideImage = null;
+			if (outsideValues != null)
+			{
+				int bandCount = outsideValues.length;
+				int[] offsets = new int[bandCount];
+
+				byte[] bytes = new byte[bandCount * width * height
+						* bufferTypeSize];
+				outsideBuffer = ByteBuffer.wrap(bytes);
+
+				for (int b = 0; b < bandCount; b++)
+				{
+					offsets[b] = b * width * height * bufferTypeSize;
+					for (int i = 0; i < width * height; i++)
+					{
+						int index = offsets[b] + i;
+						switch (bufferTypeSize)
+						{
+							case 1:
+								outsideBuffer.put(index,
+										(byte) outsideValues[b]);
+								break;
+							case 2:
+								outsideBuffer.putShort(index,
+										(short) outsideValues[b]);
+								break;
+							case 4:
+								outsideBuffer.putInt(index, outsideValues[b]);
+								break;
+						}
+					}
+				}
+
+				if (!elevations)
+				{
+					DataBuffer buffer = new DataBufferByte(bytes, bytes.length);
+					SampleModel sampleModel = new ComponentSampleModel(
+							DataBuffer.TYPE_BYTE, width, height, 1, width,
+							offsets);
+					WritableRaster raster = Raster.createWritableRaster(
+							sampleModel, buffer, null);
+					int imageType = bandCount == 1 ? BufferedImage.TYPE_BYTE_GRAY
+							: bandCount == 3 ? BufferedImage.TYPE_INT_RGB
+									: BufferedImage.TYPE_INT_ARGB_PRE;
+					outsideImage = new BufferedImage(width, height, imageType);
+					outsideImage.setData(raster);
+				}
+			}
+
 			File[] dirs = directory.listFiles(new DirectoryFileFilter());
-			int toplevel = Integer.MIN_VALUE;
+			int maxlevel = Integer.MIN_VALUE;
 			for (int i = 0; i < dirs.length; i++)
 			{
 				try
 				{
 					int num = Integer.parseInt(dirs[i].getName());
-					if (num > toplevel)
+					if (num > maxlevel)
 					{
-						toplevel = num;
+						maxlevel = num;
 					}
 				}
 				catch (NumberFormatException e)
 				{
 				}
 			}
-			while (toplevel > 0)
+
+			int count = 0;
+			int size = 0;
+			for (int i = 0; i < maxlevel; i++)
 			{
-				File dir = new File(directory.getAbsolutePath() + "/"
-						+ toplevel);
-				processDirectory(elevations, toplevel, dir, extension, width,
-						height, bufferType, byteOrder, outsideValues);
-				toplevel--;
+				size += GDALUtil.tileCount(sector, maxlevel, lzts);
 			}
-		}
-	}
 
-	private static void processDirectory(boolean elevations, int level,
-			File dir, String extension, int width, int height, int bufferType,
-			ByteOrder byteOrder, int[] outsideValues)
-	{
-		//fix extension
-		if (extension.startsWith("."))
-		{
-			extension = extension.substring(1);
-		}
-
-		//create a list of files to process
-		ExtensionFileFilter fileFilter = new ExtensionFileFilter(extension);
-		Set<File> sourceFiles = new HashSet<File>();
-		FileUtil.recursivelyAddFiles(sourceFiles, dir, fileFilter);
-
-		//progress variables
-		int count = sourceFiles.size();
-		int done = 0;
-
-		//calculate buffer type size
-		int bufferTypeSize = 1;
-		if (elevations)
-		{
-			bufferTypeSize = gdal.GetDataTypeSize(bufferType);
-			if (bufferTypeSize != 1 && bufferTypeSize != 2
-					&& bufferTypeSize != 4)
+			for (int level = maxlevel; level > 0; level--)
 			{
-				throw new IllegalArgumentException("Illegal buffer type");
-			}
-		}
+				if (progress.isCancelled())
+					break;
 
-		//create buffer/image for tiles outside extents (tiles that don't exist)
-		ByteBuffer outsideBuffer = null;
-		BufferedImage outsideImage = null;
-		if (outsideValues != null)
-		{
-			int bandCount = outsideValues.length;
-			int[] offsets = new int[bandCount];
+				//level directory
+				File dir = new File(directory.getAbsolutePath() + "/" + level);
 
-			byte[] bytes = new byte[bandCount * width * height * bufferTypeSize];
-			outsideBuffer = ByteBuffer.wrap(bytes);
+				//create a list of files to process
+				ExtensionFileFilter fileFilter = new ExtensionFileFilter(
+						extension);
+				Set<File> sourceFiles = new HashSet<File>();
+				FileUtil.recursivelyAddFiles(sourceFiles, dir, fileFilter);
 
-			for (int b = 0; b < bandCount; b++)
-			{
-				offsets[b] = b * width * height * bufferTypeSize;
-				for (int i = 0; i < width * height; i++)
+				while (!sourceFiles.isEmpty())
 				{
-					int index = offsets[b] + i;
-					switch (bufferTypeSize)
+					if (progress.isCancelled())
+						break;
+
+					count++;
+					progress.getLogger().fine(
+							"Overview " + count + "/" + size + " ("
+									+ (count * 100 / size) + "%)");
+					progress.progress(count / (double) size);
+
+					File file = sourceFiles.iterator().next();
+					String path = file.getName();
+					Pattern pattern = Pattern.compile("\\d+");
+					Matcher matcher = pattern.matcher(path);
+					matcher.find();
+					int row = Integer.parseInt(matcher.group());
+					matcher.find(matcher.end());
+					int col = Integer.parseInt(matcher.group());
+
+					int rowabove = row / 2;
+					int colabove = col / 2;
+
+					final File src0 = tileFile(dir, extension, rowabove * 2,
+							colabove * 2);
+					final File src1 = tileFile(dir, extension,
+							rowabove * 2 + 1, colabove * 2);
+					final File src2 = tileFile(dir, extension, rowabove * 2,
+							colabove * 2 + 1);
+					final File src3 = tileFile(dir, extension,
+							rowabove * 2 + 1, colabove * 2 + 1);
+
+					sourceFiles.remove(src0);
+					sourceFiles.remove(src1);
+					sourceFiles.remove(src2);
+					sourceFiles.remove(src3);
+
+					final File dst = tileFile(new File(dir.getParent() + "/"
+							+ (level - 1)), extension, rowabove, colabove);
+					dst.getParentFile().mkdirs();
+					if (dst.exists())
 					{
-						case 1:
-							outsideBuffer.put(index, (byte) outsideValues[b]);
-							break;
-						case 2:
-							outsideBuffer.putShort(index,
-									(short) outsideValues[b]);
-							break;
-						case 4:
-							outsideBuffer.putInt(index, outsideValues[b]);
-							break;
-					}
-				}
-			}
-
-			if (!elevations)
-			{
-				DataBuffer buffer = new DataBufferByte(bytes, bytes.length);
-				SampleModel sampleModel = new ComponentSampleModel(
-						DataBuffer.TYPE_BYTE, width, height, 1, width, offsets);
-				WritableRaster raster = Raster.createWritableRaster(
-						sampleModel, buffer, null);
-				int imageType = bandCount == 1 ? BufferedImage.TYPE_BYTE_GRAY
-						: bandCount == 3 ? BufferedImage.TYPE_INT_RGB
-								: BufferedImage.TYPE_INT_ARGB_PRE; //TODO should imagetype be premultiplied alpha?
-				outsideImage = new BufferedImage(width, height, imageType);
-				outsideImage.setData(raster);
-			}
-		}
-
-		while (!sourceFiles.isEmpty())
-		{
-			File file = sourceFiles.iterator().next();
-			String path = file.getName();
-			Pattern pattern = Pattern.compile("\\d+");
-			Matcher matcher = pattern.matcher(path);
-			matcher.find();
-			int row = Integer.parseInt(matcher.group());
-			matcher.find(matcher.end());
-			int col = Integer.parseInt(matcher.group());
-
-			int rowabove = row / 2;
-			int colabove = col / 2;
-
-			final File src0 = tileFile(dir, extension, rowabove * 2,
-					colabove * 2);
-			final File src1 = tileFile(dir, extension, rowabove * 2 + 1,
-					colabove * 2);
-			final File src2 = tileFile(dir, extension, rowabove * 2,
-					colabove * 2 + 1);
-			final File src3 = tileFile(dir, extension, rowabove * 2 + 1,
-					colabove * 2 + 1);
-
-			if (sourceFiles.remove(src0))
-				done++;
-			if (sourceFiles.remove(src1))
-				done++;
-			if (sourceFiles.remove(src2))
-				done++;
-			if (sourceFiles.remove(src3))
-				done++;
-
-			final File dst = tileFile(new File(dir.getParent() + "/"
-					+ (level - 1)), extension, rowabove, colabove);
-			dst.getParentFile().mkdirs();
-			if (dst.exists())
-			{
-				System.out.println(dst + " already exists");
-			}
-			else
-			{
-				System.out.println("Creating " + dst + " (" + done + "/"
-						+ count + " - " + (done * 100 / count) + "%)");
-				try
-				{
-					if (elevations)
-					{
-						mixElevations(src0, src1, src2, src3, dst, width,
-								height, bufferTypeSize, byteOrder,
-								outsideValues);
+						progress.getLogger().finer(
+								dst.getAbsolutePath() + " already exists");
 					}
 					else
 					{
-						mixImages(src0, src1, src2, src3, dst, width, height,
-								outsideImage);
+						try
+						{
+							if (elevations)
+							{
+								mixElevations(src0, src1, src2, src3, dst,
+										width, height, bufferTypeSize,
+										byteOrder, outsideValues);
+							}
+							else
+							{
+								mixImages(src0, src1, src2, src3, dst, width,
+										height, outsideImage);
+							}
+						}
+						catch (IOException e)
+						{
+							progress.getLogger().severe(e.getMessage());
+						}
 					}
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
 				}
 			}
 		}
+
+		progress.getLogger().info("Overview generation complete");
 	}
 
 	private static File tileFile(File dir, String extension, int row, int col)
@@ -248,7 +266,7 @@ public class Overviewer
 
 		BufferedImage image = i0 != null ? i0 : i1 != null ? i1
 				: i2 != null ? i2 : i3 != null ? i3 : outsideImage;
-		int type = image != null ? image.getType()
+		int type = image != null && image.getType() != 0 ? image.getType()
 				: BufferedImage.TYPE_INT_ARGB;
 
 		//TODO warn if image == outsideImage (no src files exist)
