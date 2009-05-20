@@ -24,6 +24,7 @@ import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -56,6 +57,7 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import layer.ShapefileLayer;
 import layers.depth.DepthLayer;
 import layers.elevation.perpixel.ExtendedBasicElevationModel;
 import layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
@@ -333,7 +335,7 @@ public class Animator
 		//ocem.addElevationModel(sem);
 
 		/*map1 = FileLayer.createLayer("WestMac Map Page 1",
-				"GA/WestMac Map Page 1", ".dds", new File(dataDrive
+				"GA/WestMac Map Page 1", ".dds", new File(DATA_DRIVE
 						+ ":/West Macs Imagery/Rectified Map/5 Tiles/page1"),
 				"png", 13, LatLon.fromDegrees(36d, 36d), Sector.fromDegrees(
 						-24.0536281, -23.4102781, 132.0746805, 133.9779805));
@@ -433,7 +435,7 @@ public class Animator
 
 		/*ShapefileLayer seismicShp = new ShapefileLayer();
 		seismicShp.setColor(Color.red);
-		seismicShp.loadFile(new File(dataDrive + ":/SW Margins/vector/seismic.shp"));
+		seismicShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/seismic.shp"));
 		layers.add(seismicShp);*/
 
 		/*ShapefileLayer studyShp = new ShapefileLayer();
@@ -441,14 +443,17 @@ public class Animator
 		studyShp.setLineWidth(2.0);
 		//studyShp.setOpacity(0.5);
 		studyShp.setUsePolyline(true);
-		studyShp.loadFile(new File(dataDrive + ":/SW Margins/vector/study_areas.shp"));
+		studyShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/study_areas.shp"));
 		layers.add(studyShp);*/
 
 		/*ShapefileLayer eezShp = new ShapefileLayer();
 		eezShp.setColor(Color.white);
-		eezShp.setFollowTerrain(false);
+		eezShp.setFollowTerrain(true);
 		eezShp.setLineWidth(2.0);
-		eezShp.loadFile(new File(dataDrive + ":/SW Margins/vector/eez_limit.shp"));
+		eezShp.setUsePolyline(false);
+		eezShp.setRemoveDetailLevels(1);
+		eezShp.loadFile(new File(DATA_DRIVE
+				+ ":/SW Margins/vector/eez_limit.shp"));
 		layers.add(eezShp);*/
 
 		/*ShapefileLayer extendedShp = new ShapefileLayer();
@@ -458,32 +463,32 @@ public class Animator
 		//extendedShp.setOpacity(0.5);
 		extendedShp.setRemoveDetailLevels(1);
 		extendedShp.setUsePolyline(true);
-		extendedShp.loadFile(new File(dataDrive + ":/SW Margins/vector/ecs.shp"));
+		extendedShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/ecs.shp"));
 		layers.add(extendedShp);*/
 
 		/*ShapefileLayer swath1Shp = new ShapefileLayer();
 		swath1Shp.setColor(Color.white);
 		swath1Shp.setFollowTerrain(false);
-		swath1Shp.loadFile(new File(dataDrive + ":/SW Margins/vector/swath_leg1.shp"));
+		swath1Shp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/swath_leg1.shp"));
 		layers.add(swath1Shp);
 		
 		ShapefileLayer swath2Shp = new ShapefileLayer();
 		swath2Shp.setColor(Color.white);
 		swath2Shp.setFollowTerrain(false);
-		swath2Shp.loadFile(new File(dataDrive + ":/SW Margins/vector/swath_leg2.shp"));
+		swath2Shp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/swath_leg2.shp"));
 		layers.add(swath2Shp);
 		
 		ShapefileLayer swath3Shp = new ShapefileLayer();
 		swath3Shp.setColor(Color.white);
 		swath3Shp.setFollowTerrain(false);
-		swath3Shp.loadFile(new File(dataDrive + ":/SW Margins/vector/swath_leg3.shp"));
+		swath3Shp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/swath_leg3.shp"));
 		layers.add(swath3Shp);*/
 
 		/*ShapefileLayer coastlineShp = new ShapefileLayer();
 		coastlineShp.setColor(Color.white);
 		coastlineShp.setFollowTerrain(true);
 		coastlineShp.setLineWidth(2.0);
-		coastlineShp.loadFile(new File(dataDrive + ":/SW Margins/vector/coastline.shp"));
+		coastlineShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/coastline.shp"));
 		layers.add(coastlineShp);*/
 
 		/*ShapefileLayer basinsShp = new ShapefileLayer();
@@ -491,7 +496,7 @@ public class Animator
 		basinsShp.setFollowTerrain(true);
 		basinsShp.setLineWidth(2.0);
 		basinsShp.setUsePolyline(true);
-		basinsShp.loadFile(new File(dataDrive + ":/SW Margins/vector/OffhoreSedBasinsNov08.shp"));
+		basinsShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/OffhoreSedBasinsNov08.shp"));
 		basinsShp.setRemoveDetailLevels(5);
 		layers.add(basinsShp);*/
 
