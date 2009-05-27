@@ -55,6 +55,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -224,6 +225,7 @@ public class Application
 		JPanel panel;
 		Dimension size;
 		ActionListener al;
+		JSeparator sep;
 
 		frame = new JFrame("World Wind Tiler");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -332,6 +334,13 @@ public class Application
 		bg.add(gdalRadio);
 		bg.add(mapnikRadio);
 
+		sep = new JSeparator(JSeparator.HORIZONTAL);
+		c = new GridBagConstraints();
+		c.gridy = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(10, 0, 10, 0);
+		tlPanel.add(sep, c);
+
 		dataModeCards = new JPanel(new CardLayout());
 		c = new GridBagConstraints();
 		c.gridy = 2;
@@ -346,7 +355,6 @@ public class Application
 
 		JPanel mapnikCard = new JPanel(new GridBagLayout());
 		dataModeCards.add(mapnikCard, mapnikRadio.getText());
-
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -490,10 +498,17 @@ public class Application
 				setupInputFile();
 			}
 		});
+		
+		sep = new JSeparator(JSeparator.HORIZONTAL);
+		c = new GridBagConstraints();
+		c.gridy = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(10, 0, 10, 0);
+		mapnikCard.add(sep, c);
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
-		c.gridy = 1;
+		c.gridy = 2;
 		c.anchor = GridBagConstraints.NORTH;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
@@ -1662,7 +1677,7 @@ public class Application
 		{
 			bandCombo.removeItemAt(0);
 		}
-		outputBandCount = bandCount <= 0 ? 0 : bandCount == 3
+		outputBandCount = bandCount <= 0 ? 1 : bandCount == 3
 				&& alphaCheck.isSelected() ? 4 : bandCount;
 		outsideFields = new JIntegerField[outputBandCount];
 		minFields = new JIntegerField[outputBandCount];
@@ -1817,6 +1832,15 @@ public class Application
 				&& outputDirectory.getText().length() != 0 && !running);
 		cancelButton.setEnabled(running);
 		progress.setEnabled(running);
+		
+		visibledFields();
+	}
+	
+	private void visibledFields()
+	{
+		boolean mapnik = mapnikRadio.isSelected();
+		
+		
 	}
 
 	private void recalculateTiles()
