@@ -2,6 +2,8 @@ package util;
 
 public class Sector
 {
+	public static final Sector FULL_SPHERE = new Sector(-90, -180, 90, 180);
+
 	private final double minLatitude;
 	private final double minLongitude;
 	private final double maxLatitude;
@@ -44,5 +46,12 @@ public class Sector
 	public double getDeltaLongitude()
 	{
 		return maxLongitude - minLongitude;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "(" + minLatitude + "," + minLongitude + "," + maxLatitude + ","
+				+ maxLongitude + ")";
 	}
 }

@@ -1,4 +1,4 @@
-package util;
+package gdal;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -22,13 +22,15 @@ import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
 import org.gdal.osr.SpatialReference;
 
+import util.TilerException;
+
 public class GDALTile
 {
 	//TODO test with various datatypes:
 	//So far, only really tested with 3 and 4 band image datasets,
 	//and 16-bit integer DEMs. Need to test replace and datatype
 	//modification with other datatypes.
-	
+
 	//construtor globals
 	private final double minLatitude;
 	private final double minLongitude;
@@ -101,35 +103,38 @@ public class GDALTile
 	protected void readDataset(Dataset dataset) throws GDALException,
 			TilerException
 	{
-		//in order to use this, GDAL_DATA env variable must be set to the
-		//location of gcs.csv (usually GDAL_DIR/data)
-		SpatialReference dstSR = new SpatialReference();
-		dstSR.ImportFromEPSG(4326); //WGS84
-
-		String projection = dataset.GetProjection();
-		SpatialReference srcSR = (projection == null || projection.length() == 0) ? null
-				: new SpatialReference(projection);
-
-		try
+		if (GDALUtil.isProjectionsSupported())
 		{
-			if (srcSR != null && dstSR != null && srcSR.IsSame(dstSR) != 1)
+			SpatialReference dstSR = new SpatialReference();
+			dstSR.ImportFromEPSG(4326); //WGS84
+
+			String projection = dataset.GetProjection();
+			SpatialReference srcSR = (projection == null || projection.length() == 0) ? null
+					: new SpatialReference(projection);
+
+			try
 			{
-				System.out.println("Reprojecting image to "
-						+ dstSR.ExportToPrettyWkt(1));
-				readDatasetReprojected(dataset, dstSR);
-				//throw new TilerException("Projection not supported: " + srcSR.ExportToPrettyWkt(1));
+				if (srcSR != null && dstSR != null && srcSR.IsSame(dstSR) != 1)
+				{
+					readDatasetReprojected(dataset, dstSR);
+					//throw new TilerException("Projection not supported: " + srcSR.ExportToPrettyWkt(1));
+				}
+				else
+				{
+					readDatasetNormal(dataset);
+				}
 			}
-			else
+			finally
 			{
-				readDatasetNormal(dataset);
+				if (srcSR != null)
+					srcSR.delete();
+				if (dstSR != null)
+					dstSR.delete();
 			}
 		}
-		finally
+		else
 		{
-			if (srcSR != null)
-				srcSR.delete();
-			if (dstSR != null)
-				dstSR.delete();
+			readDatasetNormal(dataset);
 		}
 	}
 

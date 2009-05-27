@@ -1,4 +1,4 @@
-package util;
+package gdal;
 
 import org.gdal.gdal.gdal;
 

@@ -1,4 +1,4 @@
-package util;
+package gdal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,18 +16,42 @@ import org.gdal.gdalconst.gdalconst;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 
+import util.FileUtil;
+import util.Sector;
+import util.TilerException;
 import util.FileFilters.ExtensionFileFilter;
-
 
 public class GDALUtil
 {
+	public static final String GCS_FILE = "gcs.csv";
+
 	static
 	{
 		gdal.AllRegister();
+
+		File gcs = null;
+		String gdaldata = System.getenv("GDAL_DATA");
+		if (gdaldata != null)
+		{
+			File dir = new File(gdaldata);
+			if (dir.exists() && dir.isDirectory())
+			{
+				gcs = new File(dir, GCS_FILE);
+			}
+		}
+
+		projectionsSupported = (gcs != null && gcs.isFile());
 	}
 
 	public static void init()
 	{
+	}
+
+	private static boolean projectionsSupported;
+
+	public static boolean isProjectionsSupported()
+	{
+		return projectionsSupported;
 	}
 
 	public static Dataset open(File file) throws GDALException
@@ -64,31 +88,36 @@ public class GDALUtil
 		double minlat = geoTransformArray[3] + geoTransformArray[4] * width
 				+ geoTransformArray[5] * height;
 
-		String projection = dataset.GetProjectionRef();
-		if (projection != null && projection.length() > 0)
+		if (isProjectionsSupported())
 		{
-			SpatialReference proj = new SpatialReference(projection);
-			if (proj != null)
+			String projection = dataset.GetProjectionRef();
+			if (projection != null && projection.length() > 0)
 			{
-				SpatialReference geog = proj.CloneGeogCS();
-				if (geog != null)
+				SpatialReference proj = new SpatialReference(projection);
+				if (proj != null)
 				{
-					CoordinateTransformation transform = new CoordinateTransformation(
-							proj, geog);
-					if (transform != null)
+					SpatialReference geog = proj.CloneGeogCS();
+					if (geog != null)
 					{
-						double[] transPoint = new double[3];
-						transform.TransformPoint(transPoint, minlon, minlat, 0);
-						minlon = transPoint[0];
-						minlat = transPoint[1];
-						transform.TransformPoint(transPoint, maxlon, maxlat, 0);
-						maxlon = transPoint[0];
-						maxlat = transPoint[1];
-						transform.delete();
+						CoordinateTransformation transform = new CoordinateTransformation(
+								proj, geog);
+						if (transform != null)
+						{
+							double[] transPoint = new double[3];
+							transform.TransformPoint(transPoint, minlon,
+									minlat, 0);
+							minlon = transPoint[0];
+							minlat = transPoint[1];
+							transform.TransformPoint(transPoint, maxlon,
+									maxlat, 0);
+							maxlon = transPoint[0];
+							maxlat = transPoint[1];
+							transform.delete();
+						}
+						geog.delete();
 					}
-					geog.delete();
+					proj.delete();
 				}
-				proj.delete();
 			}
 		}
 
@@ -122,10 +151,14 @@ public class GDALUtil
 
 	public static int tileCount(Sector sector, int level, double lztsd)
 	{
-		int minX = GDALUtil.getTileX(sector.getMinLongitude(), level, lztsd);
-		int maxX = GDALUtil.getTileX(sector.getMaxLongitude(), level, lztsd);
-		int minY = GDALUtil.getTileY(sector.getMinLatitude(), level, lztsd);
-		int maxY = GDALUtil.getTileY(sector.getMaxLatitude(), level, lztsd);
+		int minX = GDALUtil.getTileX(sector.getMinLongitude() + 1e-10, level,
+				lztsd);
+		int maxX = GDALUtil.getTileX(sector.getMaxLongitude() - 1e-10, level,
+				lztsd);
+		int minY = GDALUtil.getTileY(sector.getMinLatitude() + 1e-10, level,
+				lztsd);
+		int maxY = GDALUtil.getTileY(sector.getMaxLatitude() - 1e-10, level,
+				lztsd);
 		return (maxX - minX + 1) * (maxY - minY + 1);
 	}
 

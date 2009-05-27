@@ -1,5 +1,8 @@
 package tiler;
 
+import gdal.GDALTile;
+import gdal.GDALUtil;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -10,24 +13,31 @@ import java.nio.channels.FileChannel.MapMode;
 
 import javax.imageio.ImageIO;
 
+import mapnik.MapnikUtil;
+
 import org.gdal.gdal.Dataset;
 
-import util.GDALTile;
-import util.GDALUtil;
 import util.ProgressReporter;
 import util.Sector;
 
 public class Tiler
 {
+	private enum Type
+	{
+		Images,
+		Elevations,
+		Mapnik
+	}
+
 	public static void tileImages(Dataset dataset, Sector sector, int level,
 			int tilesize, double lzts, String imageFormat, boolean addAlpha,
 			int[] outsideValues, int[] minReplace, int[] maxReplace,
 			Integer[] replace, Integer[] otherwise, File outputDirectory,
 			ProgressReporter progress)
 	{
-		tile(false, dataset, sector, level, tilesize, lzts, imageFormat,
-				addAlpha, -1, -1, outsideValues, minReplace, maxReplace,
-				replace, otherwise, outputDirectory, progress);
+		tile(Type.Images, dataset, null, sector, level, tilesize, lzts,
+				imageFormat, addAlpha, -1, -1, outsideValues, minReplace,
+				maxReplace, replace, otherwise, outputDirectory, progress);
 	}
 
 	public static void tileElevations(Dataset dataset, Sector sector,
@@ -36,12 +46,21 @@ public class Tiler
 			Integer[] replace, Integer[] otherwise, File outputDirectory,
 			ProgressReporter progress)
 	{
-		tile(true, dataset, sector, level, tilesize, lzts, null, false,
-				bufferType, band, outsideValues, minReplace, maxReplace,
-				replace, otherwise, outputDirectory, progress);
+		tile(Type.Elevations, dataset, null, sector, level, tilesize, lzts,
+				null, false, bufferType, band, outsideValues, minReplace,
+				maxReplace, replace, otherwise, outputDirectory, progress);
 	}
 
-	private static void tile(boolean elevations, Dataset dataset,
+	public static void tileMapnik(File mapFile, Sector sector, int level,
+			int tilesize, double lzts, String imageFormat,
+			File outputDirectory, ProgressReporter progress)
+	{
+		tile(Type.Mapnik, null, mapFile, sector, level, tilesize, lzts,
+				imageFormat, false, -1, -1, null, null, null, null, null,
+				outputDirectory, progress);
+	}
+
+	private static void tile(Type type, Dataset dataset, File mapFile,
 			Sector sector, int level, int tilesize, double lzts,
 			String imageFormat, boolean addAlpha, int bufferType, int band,
 			int[] outsideValues, int[] minReplace, int[] maxReplace,
@@ -50,13 +69,17 @@ public class Tiler
 	{
 		progress.getLogger().info("Generating tiles...");
 
-		String outputExt = elevations ? "bil" : imageFormat;
+		String outputExt = type == Type.Elevations ? "bil" : imageFormat;
 
 		double tilesizedegrees = Math.pow(0.5, level) * lzts;
-		int minX = GDALUtil.getTileX(sector.getMinLongitude(), level, lzts);
-		int maxX = GDALUtil.getTileX(sector.getMaxLongitude(), level, lzts);
-		int minY = GDALUtil.getTileY(sector.getMinLatitude(), level, lzts);
-		int maxY = GDALUtil.getTileY(sector.getMaxLatitude(), level, lzts);
+		int minX = GDALUtil.getTileX(sector.getMinLongitude() + 1e-10, level,
+				lzts);
+		int maxX = GDALUtil.getTileX(sector.getMaxLongitude() - 1e-10, level,
+				lzts);
+		int minY = GDALUtil.getTileY(sector.getMinLatitude() + 1e-10, level,
+				lzts);
+		int maxY = GDALUtil.getTileY(sector.getMaxLatitude() - 1e-10, level,
+				lzts);
 
 		int size = (maxX - minX + 1) * (maxY - minY + 1);
 		int count = 0;
@@ -95,56 +118,75 @@ public class Tiler
 						+ "_" + GDALUtil.paddedInt(X, 4) + "." + outputExt);
 				if (dst.exists())
 				{
-					progress.getLogger().finer(
+					progress.getLogger().warning(
 							dst.getAbsolutePath() + " already exists");
 				}
 				else
 				{
 					try
 					{
-						GDALTile tile = new GDALTile(dataset, tilesize,
-								tilesize, lat1, lon1, lat2, lon2, addAlpha,
-								band);
-						if (elevations)
+						if (type == Type.Mapnik)
 						{
-							tile = tile.convertToType(bufferType);
-						}
-						if (outsideValues != null)
-						{
-							tile.fillOutside(outsideValues);
-						}
-						if (minReplace != null && maxReplace != null
-								&& replace != null)
-						{
-							tile.replaceValues(minReplace, maxReplace, replace,
-									otherwise);
-						}
-						if (elevations)
-						{
-							ByteBuffer bb = tile.getBuffer();
-							bb.rewind();
-							FileChannel fc = new RandomAccessFile(dst, "rw")
-									.getChannel();
-							MappedByteBuffer mbb = fc.map(MapMode.READ_WRITE,
-									0, bb.limit());
-							mbb.order(bb.order());
-							mbb.put(bb);
-							fc.close();
+							Sector s = new Sector(lat1, lon1, lat2, lon2);
+							MapnikUtil.tile(s, tilesize, tilesize, mapFile,
+									dst, progress.getLogger());
 						}
 						else
 						{
-							BufferedImage image = tile.getAsImage();
-							ImageIO.write(image, outputExt, dst);
+							GDALTile tile = new GDALTile(dataset, tilesize,
+									tilesize, lat1, lon1, lat2, lon2, addAlpha,
+									band);
+							if (type == Type.Elevations)
+							{
+								tile = tile.convertToType(bufferType);
+							}
+							if (outsideValues != null)
+							{
+								tile.fillOutside(outsideValues);
+							}
+							if (minReplace != null && maxReplace != null
+									&& replace != null)
+							{
+								tile.replaceValues(minReplace, maxReplace,
+										replace, otherwise);
+							}
+							if (type == Type.Elevations)
+							{
+								ByteBuffer bb = tile.getBuffer();
+								bb.rewind();
+								FileChannel fc = new RandomAccessFile(dst, "rw")
+										.getChannel();
+								MappedByteBuffer mbb = fc.map(
+										MapMode.READ_WRITE, 0, bb.limit());
+								mbb.order(bb.order());
+								mbb.put(bb);
+								fc.close();
+							}
+							else
+							{
+								BufferedImage image = tile.getAsImage();
+								ImageIO.write(image, outputExt, dst);
+							}
 						}
 					}
 					catch (Exception e)
 					{
 						progress.getLogger().severe(e.getMessage());
+						try
+						{
+							Thread.sleep(1);
+						}
+						catch (InterruptedException e1)
+						{
+							e1.printStackTrace();
+						}
 					}
 				}
 			}
 		}
 
-		progress.getLogger().info("Tile generation complete");
+		progress.getLogger().info(
+				"Tile generation "
+						+ (progress.isCancelled() ? "cancelled" : "complete"));
 	}
 }

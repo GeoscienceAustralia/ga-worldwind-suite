@@ -1,5 +1,7 @@
 package tiler;
 
+import gdal.GDALUtil;
+
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -31,7 +33,6 @@ import javax.imageio.ImageIO;
 import org.gdal.gdal.gdal;
 
 import util.FileUtil;
-import util.GDALUtil;
 import util.ProgressReporter;
 import util.Sector;
 import util.FileFilters.DirectoryFileFilter;
@@ -214,7 +215,7 @@ public class Overviewer
 					dst.getParentFile().mkdirs();
 					if (dst.exists())
 					{
-						progress.getLogger().finer(
+						progress.getLogger().warning(
 								dst.getAbsolutePath() + " already exists");
 					}
 					else
@@ -242,7 +243,9 @@ public class Overviewer
 			}
 		}
 
-		progress.getLogger().info("Overview generation complete");
+		progress.getLogger().info(
+				"Overview generation "
+						+ (progress.isCancelled() ? "cancelled" : "complete"));
 	}
 
 	private static File tileFile(File dir, String extension, int row, int col)

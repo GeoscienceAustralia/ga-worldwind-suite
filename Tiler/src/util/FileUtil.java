@@ -12,17 +12,23 @@ public class FileUtil
 			FileFilter filter)
 	{
 		File[] list = dir.listFiles(filter);
-		for (File file : list)
+		if (list != null)
 		{
-			files.add(file);
+			for (File file : list)
+			{
+				files.add(file);
+			}
 		}
 		File[] dirs = dir.listFiles(new DirectoryFileFilter());
-		for (File d : dirs)
+		if (dirs != null)
 		{
-			recursivelyAddFiles(files, d, filter);
+			for (File d : dirs)
+			{
+				recursivelyAddFiles(files, d, filter);
+			}
 		}
 	}
-	
+
 	public static String paddedInt(int value, int charcount)
 	{
 		String str = String.valueOf(value);

@@ -1,5 +1,8 @@
 package tiler;
 
+import gdal.GDALTile;
+import gdal.GDALUtil;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -15,8 +18,6 @@ import javax.imageio.ImageIO;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdalconst.gdalconstConstants;
 
-import util.GDALTile;
-import util.GDALUtil;
 import util.ProgressReporter;
 import util.Sector;
 import util.SimpleProgressReporter;
