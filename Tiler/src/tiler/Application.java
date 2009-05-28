@@ -116,7 +116,6 @@ public class Application
 	private JRadioButton mapnikRadio;
 	private JRadioButton datasetSelected;
 
-	private JSpinner levelsSpinner;
 	private JDoubleField minLatitudeField;
 	private JDoubleField minLongitudeField;
 	private JDoubleField maxLatitudeField;
@@ -132,6 +131,8 @@ public class Application
 	private JButton browseMapnikScriptButton;
 	private JTextArea infoText;
 	private JLabel previewCanvas;
+
+	private JLabel tileTypeLabel;
 	private JRadioButton imageRadio;
 	private JRadioButton elevationRadio;
 	private JDoubleField lztsField;
@@ -139,6 +140,8 @@ public class Application
 	private JCheckBox outsideCheck;
 	private JPanel outsidePanel;
 	private JIntegerField[] outsideFields = new JIntegerField[0];
+	private JLabel levelsLabel;
+	private JSpinner levelsSpinner;
 	private JCheckBox overviewsCheck;
 	private JCheckBox replaceCheck;
 	private JLabel replace1Label;
@@ -147,23 +150,25 @@ public class Application
 	private JLabel replace4Label;
 	private JPanel minPanel;
 	private JPanel maxPanel;
-	private JPanel replacePanel;
+	private JPanel withPanel;
 	private JPanel otherwisePanel;
 	private JIntegerField[] minFields = new JIntegerField[0];
 	private JIntegerField[] maxFields = new JIntegerField[0];
 	private JIntegerField[] replaceFields = new JIntegerField[0];
 	private JIntegerField[] otherwiseFields = new JIntegerField[0];
 
-	private JPanel imageCards;
 	private JPanel dataModeCards;
 
+	private JLabel imageFormatLabel;
 	private JRadioButton jpegRadio;
 	private JRadioButton pngRadio;
 	private JCheckBox alphaCheck;
 
+	private JLabel cellTypeLabel;
 	private JRadioButton byteRadio;
 	private JRadioButton int16Radio;
 	private JRadioButton int32Radio;
+	private JLabel bandLabel;
 	private JComboBox bandCombo;
 	private JCheckBox overrideLevelsCheck;
 	private JSpinner overrideLevelsSpinner;
@@ -226,6 +231,7 @@ public class Application
 		Dimension size;
 		ActionListener al;
 		JSeparator sep;
+		int SPACING = 4;
 
 		frame = new JFrame("World Wind Tiler");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -257,6 +263,18 @@ public class Application
 				rightSplit);
 		logSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, topSplit,
 				bPanel);
+
+		//add scroll pane to options
+		panel = new JPanel(new GridBagLayout());
+		scrollPane = new JScrollPane(panel,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		c = new GridBagConstraints();
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 1;
+		c.weighty = 1;
+		trPanel.add(scrollPane, c);
+		trPanel = panel;
 
 		frame.add(logSplit, BorderLayout.CENTER);
 
@@ -306,6 +324,7 @@ public class Application
 		label = new JLabel("Mode:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
+		c.insets = new Insets(0, 0, 0, SPACING);
 		panel.add(label, c);
 
 		al = new ActionListener()
@@ -338,7 +357,7 @@ public class Application
 		c = new GridBagConstraints();
 		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(10, 0, 10, 0);
+		c.insets = new Insets(SPACING * 2, 0, SPACING * 2, 0);
 		tlPanel.add(sep, c);
 
 		dataModeCards = new JPanel(new CardLayout());
@@ -365,6 +384,7 @@ public class Application
 		label = new JLabel("Dataset:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
 		panel.add(label, c);
 
 		gdalFileField = new JTextField();
@@ -373,11 +393,13 @@ public class Application
 		c.gridx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(gdalFileField, c);
 
 		browseGdalButton = new JButton("...");
 		c = new GridBagConstraints();
 		c.gridx = 2;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(browseGdalButton, c);
 		browseGdalButton.addActionListener(new ActionListener()
 		{
@@ -417,6 +439,7 @@ public class Application
 		c.gridx = 0;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
 		panel.add(label, c);
 
 		pythonBinaryField = new JTextField();
@@ -426,12 +449,14 @@ public class Application
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(pythonBinaryField, c);
 
 		browsePythonBinaryButton = new JButton("...");
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = 0;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(browsePythonBinaryButton, c);
 		browsePythonBinaryButton.addActionListener(new ActionListener()
 		{
@@ -446,6 +471,7 @@ public class Application
 		c.gridx = 0;
 		c.gridy = 1;
 		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
 		panel.add(label, c);
 
 		mapnikScriptField = new JTextField();
@@ -455,12 +481,14 @@ public class Application
 		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(mapnikScriptField, c);
 
 		browseMapnikScriptButton = new JButton("...");
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = 1;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(browseMapnikScriptButton, c);
 		browseMapnikScriptButton.addActionListener(new ActionListener()
 		{
@@ -475,6 +503,7 @@ public class Application
 		c.gridx = 0;
 		c.gridy = 2;
 		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, 0, SPACING);
 		panel.add(label, c);
 
 		mapnikFileField = new JTextField();
@@ -498,12 +527,12 @@ public class Application
 				setupInputFile();
 			}
 		});
-		
+
 		sep = new JSeparator(JSeparator.HORIZONTAL);
 		c = new GridBagConstraints();
 		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(10, 0, 10, 0);
+		c.insets = new Insets(SPACING * 2, 0, SPACING * 2, 0);
 		mapnikCard.add(sep, c);
 
 		panel = new JPanel(new GridBagLayout());
@@ -515,82 +544,74 @@ public class Application
 		c.weighty = 1;
 		mapnikCard.add(panel, c);
 
-		label = new JLabel("Level count:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 3;
-		c.anchor = GridBagConstraints.EAST;
-		panel.add(label, c);
-		labels.add(label);
-
-		levelsSpinner = new JSpinner(new SpinnerNumberModel(5, 1, 100, 1));
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 3;
-		c.gridwidth = 3;
-		c.anchor = GridBagConstraints.WEST;
-		panel.add(levelsSpinner, c);
-
 		label = new JLabel("Min latitude:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = 0;
 		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
 		panel.add(label, c);
 		labels.add(label);
 
 		minLatitudeField = new JDoubleField(-90d);
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 4;
+		c.gridy = 0;
 		c.weightx = 0.5;
 		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
 		panel.add(minLatitudeField, c);
 
 		label = new JLabel("Min longitude:");
 		c = new GridBagConstraints();
 		c.gridx = 2;
-		c.gridy = 4;
+		c.gridy = 0;
 		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, SPACING, SPACING, SPACING);
 		panel.add(label, c);
 		labels.add(label);
 
 		minLongitudeField = new JDoubleField(-180d);
 		c = new GridBagConstraints();
 		c.gridx = 3;
-		c.gridy = 4;
+		c.gridy = 0;
 		c.weightx = 0.5;
 		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(minLongitudeField, c);
 
 		label = new JLabel("Max latitude:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 5;
+		c.gridy = 1;
 		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
 		panel.add(label, c);
 		labels.add(label);
 
 		maxLatitudeField = new JDoubleField(90d);
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 5;
+		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
 		panel.add(maxLatitudeField, c);
 
 		label = new JLabel("Max longitude:");
 		c = new GridBagConstraints();
 		c.gridx = 2;
-		c.gridy = 5;
+		c.gridy = 1;
 		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, SPACING, SPACING, SPACING);
 		panel.add(label, c);
 		labels.add(label);
 
 		maxLongitudeField = new JDoubleField(180d);
 		c = new GridBagConstraints();
 		c.gridx = 3;
-		c.gridy = 5;
+		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(maxLongitudeField, c);
 
 		//BOTTOM LEFT
@@ -610,19 +631,22 @@ public class Application
 
 		//TOP RIGHT
 
-		panel = new JPanel(new GridBagLayout());
+		tileTypeLabel = new JLabel("Tile type:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(tileTypeLabel, c);
+
+		panel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 0;
 		c.weightx = 1;
 		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(panel, c);
-
-		label = new JLabel("Tile type:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		panel.add(label, c);
-		labels.add(label);
 
 		al = new ActionListener()
 		{
@@ -635,13 +659,13 @@ public class Application
 		imageRadio = new JRadioButton("Images");
 		imageRadio.setSelected(true);
 		c = new GridBagConstraints();
-		c.gridx = 1;
+		c.gridx = 0;
 		panel.add(imageRadio, c);
 		imageRadio.addActionListener(al);
 
 		elevationRadio = new JRadioButton("Elevations");
 		c = new GridBagConstraints();
-		c.gridx = 2;
+		c.gridx = 1;
 		panel.add(elevationRadio, c);
 		elevationRadio.addActionListener(al);
 
@@ -649,23 +673,27 @@ public class Application
 		bg.add(imageRadio);
 		bg.add(elevationRadio);
 
-		panel = new JPanel(new GridBagLayout());
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 1;
-		c.anchor = GridBagConstraints.WEST;
-		trPanel.add(panel, c);
-
 		label = new JLabel("Tile size:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		panel.add(label, c);
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(label, c);
 		labels.add(label);
+
+		panel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(panel, c);
 
 		tilesizeField = new JIntegerField(512);
 		tilesizeField.setPositive(true);
 		c = new GridBagConstraints();
-		c.gridx = 1;
+		c.gridx = 0;
 		size = tilesizeField.getPreferredSize();
 		size.width = 50;
 		tilesizeField.setMinimumSize(size);
@@ -686,26 +714,31 @@ public class Application
 
 		label = new JLabel("px");
 		c = new GridBagConstraints();
-		c.gridx = 2;
+		c.gridx = 1;
+		c.insets = new Insets(0, SPACING / 2, 0, 0);
 		panel.add(label, c);
 		labels.add(label);
-
-		panel = new JPanel(new GridBagLayout());
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 2;
-		c.anchor = GridBagConstraints.WEST;
-		trPanel.add(panel, c);
 
 		label = new JLabel("Level zero tile size:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		panel.add(label, c);
+		c.gridy = 2;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(label, c);
 		labels.add(label);
+
+		panel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 2;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(panel, c);
 
 		lztsField = new JDoubleField(36d);
 		c = new GridBagConstraints();
-		c.gridx = 1;
+		c.gridx = 0;
 		size = lztsField.getPreferredSize();
 		size.width = 50;
 		lztsField.setMinimumSize(size);
@@ -726,32 +759,42 @@ public class Application
 
 		label = new JLabel("\u00B0");
 		c = new GridBagConstraints();
-		c.gridx = 2;
+		c.gridx = 1;
+		c.insets = new Insets(0, SPACING / 2, 0, 0);
 		panel.add(label, c);
 		labels.add(label);
 
-		imageCards = new JPanel(new CardLayout());
+		levelsLabel = new JLabel("Level count:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 3;
-		c.anchor = GridBagConstraints.WEST;
-		trPanel.add(imageCards, c);
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(levelsLabel, c);
 
-		JPanel imageCard = new JPanel(new GridBagLayout());
-		imageCards.add(imageCard, imageRadio.getText());
+		levelsSpinner = new JSpinner(new SpinnerNumberModel(5, 1, 100, 1));
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 3;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(levelsSpinner, c);
+
+		imageFormatLabel = new JLabel("Image format:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 4;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(imageFormatLabel, c);
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
-		c.gridy = 0;
-		c.weightx = 1;
+		c.gridx = 1;
+		c.gridy = 4;
 		c.anchor = GridBagConstraints.WEST;
-		imageCard.add(panel, c);
-
-		label = new JLabel("Image format:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		panel.add(label, c);
-		labels.add(label);
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(panel, c);
 
 		al = new ActionListener()
 		{
@@ -764,13 +807,13 @@ public class Application
 		jpegRadio = new JRadioButton("JPEG");
 		jpegRadio.setSelected(true);
 		c = new GridBagConstraints();
-		c.gridx = 1;
+		c.gridx = 0;
 		panel.add(jpegRadio, c);
 		jpegRadio.addActionListener(al);
 
 		pngRadio = new JRadioButton("PNG");
 		c = new GridBagConstraints();
-		c.gridx = 2;
+		c.gridx = 1;
 		panel.add(pngRadio, c);
 		pngRadio.addActionListener(al);
 
@@ -780,9 +823,12 @@ public class Application
 
 		alphaCheck = new JCheckBox("Add alpha channel");
 		c = new GridBagConstraints();
-		c.gridy = 1;
+		c.gridx = 0;
+		c.gridy = 5;
 		c.anchor = GridBagConstraints.WEST;
-		imageCard.add(alphaCheck, c);
+		c.gridwidth = 2;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(alphaCheck, c);
 		alphaCheck.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -792,36 +838,36 @@ public class Application
 			}
 		});
 
-		JPanel elevationCard = new JPanel(new GridBagLayout());
-		imageCards.add(elevationCard, elevationRadio.getText());
+		cellTypeLabel = new JLabel("Output cell type:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 6;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(cellTypeLabel, c);
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
-		c.gridy = 0;
-		c.weightx = 1;
+		c.gridx = 1;
+		c.gridy = 6;
 		c.anchor = GridBagConstraints.WEST;
-		elevationCard.add(panel, c);
-
-		label = new JLabel("Output cell type:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		panel.add(label, c);
-		labels.add(label);
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(panel, c);
 
 		byteRadio = new JRadioButton("Byte");
 		c = new GridBagConstraints();
-		c.gridx = 1;
+		c.gridx = 0;
 		panel.add(byteRadio, c);
 
 		int16Radio = new JRadioButton("16-bit integer");
 		int16Radio.setSelected(true);
 		c = new GridBagConstraints();
-		c.gridx = 2;
+		c.gridx = 1;
 		panel.add(int16Radio, c);
 
 		int32Radio = new JRadioButton("32-bit integer");
 		c = new GridBagConstraints();
-		c.gridx = 3;
+		c.gridx = 2;
 		panel.add(int32Radio, c);
 
 		bg = new ButtonGroup();
@@ -829,41 +875,49 @@ public class Application
 		bg.add(int16Radio);
 		bg.add(int32Radio);
 
-		panel = new JPanel(new GridBagLayout());
-		c = new GridBagConstraints();
-		c.gridy = 1;
-		c.anchor = GridBagConstraints.WEST;
-		elevationCard.add(panel, c);
-
-		label = new JLabel("Band:");
+		bandLabel = new JLabel("Band:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		panel.add(label, c);
-		labels.add(label);
+		c.gridy = 7;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(bandLabel, c);
+
+		panel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 7;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(panel, c);
 
 		bandCombo = new JComboBox(new Integer[] { 1 });
 		c = new GridBagConstraints();
-		c.gridx = 1;
+		c.gridx = 0;
 		panel.add(bandCombo, c);
 
 		overviewsCheck = new JCheckBox("Generate overviews");
 		overviewsCheck.setSelected(true);
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = 8;
+		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(overviewsCheck, c);
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 5;
+		c.gridy = 9;
+		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.WEST;
 		trPanel.add(panel, c);
 
 		overrideLevelsCheck = new JCheckBox("Override level count:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
 		panel.add(overrideLevelsCheck, c);
 		overrideLevelsCheck.addActionListener(new ActionListener()
 		{
@@ -882,12 +936,14 @@ public class Application
 				1));
 		c = new GridBagConstraints();
 		c.gridx = 1;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(overrideLevelsSpinner, c);
 
 		outsideCheck = new JCheckBox("Set pixels outsize dataset extents to:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 6;
+		c.gridy = 10;
+		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.WEST;
 		trPanel.add(outsideCheck, c);
 		outsideCheck.addActionListener(new ActionListener()
@@ -900,27 +956,19 @@ public class Application
 
 		outsidePanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 7;
+		c.gridx = 1;
+		c.gridy = 11;
 		c.anchor = GridBagConstraints.WEST;
-		c.insets = new Insets(0, 32, 0, 0);
+		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(outsidePanel, c);
-
-		panel = new JPanel(new GridBagLayout());
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 8;
-		c.anchor = GridBagConstraints.NORTHWEST;
-		c.weighty = 1;
-		trPanel.add(panel, c);
 
 		replaceCheck = new JCheckBox("Set pixels with values:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
+		c.gridy = 12;
 		c.gridwidth = 2;
-		panel.add(replaceCheck, c);
+		c.anchor = GridBagConstraints.WEST;
+		trPanel.add(replaceCheck, c);
 		replaceCheck.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -932,62 +980,73 @@ public class Application
 		replace1Label = new JLabel("between:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 13;
 		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(0, 32, 0, 0);
-		panel.add(replace1Label, c);
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(replace1Label, c);
 
 		minPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 1;
+		c.gridy = 13;
 		c.anchor = GridBagConstraints.WEST;
-		panel.add(minPanel, c);
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(minPanel, c);
 
 		replace2Label = new JLabel("and:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = 14;
 		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(0, 32, 0, 0);
-		panel.add(replace2Label, c);
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(replace2Label, c);
 
 		maxPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 2;
+		c.gridy = 14;
 		c.anchor = GridBagConstraints.WEST;
-		panel.add(maxPanel, c);
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(maxPanel, c);
 
 		replace3Label = new JLabel("to:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy = 15;
 		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(0, 32, 0, 0);
-		panel.add(replace3Label, c);
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(replace3Label, c);
 
-		replacePanel = new JPanel(new GridBagLayout());
+		withPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 3;
+		c.gridy = 15;
 		c.anchor = GridBagConstraints.WEST;
-		panel.add(replacePanel, c);
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(withPanel, c);
 
 		replace4Label = new JLabel("otherwise:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = 16;
 		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(0, 32, 0, 0);
-		panel.add(replace4Label, c);
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(replace4Label, c);
 
 		otherwisePanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 4;
+		c.gridy = 16;
 		c.anchor = GridBagConstraints.WEST;
-		panel.add(otherwisePanel, c);
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(otherwisePanel, c);
+
+		panel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 17;
+		c.weighty = 1;
+		trPanel.add(panel, c);
 
 		//BOTTOM RIGHT
 
@@ -1001,6 +1060,7 @@ public class Application
 		label = new JLabel("Output directory:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
 		panel.add(label, c);
 
 		final String outputDirKey = "Last Output Directory";
@@ -1010,6 +1070,7 @@ public class Application
 		c.gridx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(outputDirectory, c);
 
 		outputDirectory.getDocument().addDocumentListener(new DocumentAdapter()
@@ -1029,6 +1090,7 @@ public class Application
 		outputButton = new JButton("...");
 		c = new GridBagConstraints();
 		c.gridx = 2;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(outputButton, c);
 		outputButton.addActionListener(new ActionListener()
 		{
@@ -1064,6 +1126,7 @@ public class Application
 		c.weighty = 1;
 		c.weightx = 1;
 		c.anchor = GridBagConstraints.NORTH;
+		c.insets = new Insets(0, 0, SPACING, 0);
 		brPanel.add(scrollPane, c);
 
 		panel = new JPanel(new GridBagLayout());
@@ -1075,6 +1138,7 @@ public class Application
 		tileButton = new JButton("Generate tiles");
 		c = new GridBagConstraints();
 		c.gridx = 0;
+		c.insets = new Insets(0, 0, 0, SPACING);
 		panel.add(tileButton, c);
 		tileButton.addActionListener(new ActionListener()
 		{
@@ -1600,7 +1664,7 @@ public class Application
 
 	private void tileTypeChanged()
 	{
-		CardLayout cl = (CardLayout) imageCards.getLayout();
+		/*CardLayout cl = (CardLayout) imageCards.getLayout();
 		if (elevationRadio.isSelected())
 		{
 			cl.show(imageCards, elevationRadio.getText());
@@ -1608,7 +1672,7 @@ public class Application
 		else
 		{
 			cl.show(imageCards, imageRadio.getText());
-		}
+		}*/
 
 		if (!tilesizeChanged)
 		{
@@ -1636,6 +1700,8 @@ public class Application
 			}
 			lztsBeingSet = false;
 		}
+
+		bandCountChanged();
 	}
 
 	private void imageFormatChanged()
@@ -1671,14 +1737,14 @@ public class Application
 		outsidePanel.removeAll();
 		minPanel.removeAll();
 		maxPanel.removeAll();
-		replacePanel.removeAll();
+		withPanel.removeAll();
 		otherwisePanel.removeAll();
 		while (bandCombo.getItemCount() > 0)
 		{
 			bandCombo.removeItemAt(0);
 		}
-		outputBandCount = bandCount <= 0 ? 1 : bandCount == 3
-				&& alphaCheck.isSelected() ? 4 : bandCount;
+		outputBandCount = bandCount <= 0 ? 1 : elevationRadio.isSelected() ? 1
+				: bandCount == 3 && alphaCheck.isSelected() ? 4 : bandCount;
 		outsideFields = new JIntegerField[outputBandCount];
 		minFields = new JIntegerField[outputBandCount];
 		maxFields = new JIntegerField[outputBandCount];
@@ -1717,7 +1783,7 @@ public class Application
 			replaceFields[i].setPreferredSize(size);
 			c = new GridBagConstraints();
 			c.gridx = i;
-			replacePanel.add(replaceFields[i], c);
+			withPanel.add(replaceFields[i], c);
 
 			otherwiseFields[i] = new JIntegerField(null);
 			otherwiseFields[i].setMinimumSize(size);
@@ -1780,15 +1846,20 @@ public class Application
 		{
 			label.setEnabled(standard);
 		}
+		tileTypeLabel.setEnabled(standard);
+		imageFormatLabel.setEnabled(standard);
+		cellTypeLabel.setEnabled(standard);
+		bandLabel.setEnabled(standard);
 
-		levelsSpinner.setEnabled(standard);
+		levelsLabel.setEnabled(standard && mapnik);
+		levelsSpinner.setEnabled(standard && mapnik);
 		minLatitudeField.setEnabled(standard);
 		maxLatitudeField.setEnabled(standard);
 		minLongitudeField.setEnabled(standard);
 		maxLongitudeField.setEnabled(standard);
 
 		alphaCheck.setEnabled(pngRadio.isSelected() && standard
-				&& bandCount != 4 && !mapnik);
+				&& bandCount == 3 && !mapnik && !elevationRadio.isSelected());
 		bandCombo.setEnabled(bandCount > 1 && standard);
 		overrideLevelsSpinner.setEnabled(overrideLevelsCheck.isSelected()
 				&& standard);
@@ -1832,15 +1903,49 @@ public class Application
 				&& outputDirectory.getText().length() != 0 && !running);
 		cancelButton.setEnabled(running);
 		progress.setEnabled(running);
-		
+
 		visibledFields();
 	}
-	
+
 	private void visibledFields()
 	{
 		boolean mapnik = mapnikRadio.isSelected();
-		
-		
+
+		tileTypeLabel.setVisible(!mapnik);
+		imageRadio.setVisible(!mapnik);
+		elevationRadio.setVisible(!mapnik);
+
+		boolean images = mapnik || imageRadio.isSelected();
+		imageFormatLabel.setVisible(images);
+		jpegRadio.setVisible(images);
+		pngRadio.setVisible(images);
+
+		alphaCheck.setVisible(pngRadio.isSelected() && bandCount == 3
+				&& !mapnik && !elevationRadio.isSelected());
+
+		boolean elevations = elevationRadio.isSelected() && !mapnik;
+		bandLabel.setVisible(elevations);
+		bandCombo.setVisible(elevations);
+		cellTypeLabel.setVisible(elevations);
+		byteRadio.setVisible(elevations);
+		int16Radio.setVisible(elevations);
+		int32Radio.setVisible(elevations);
+
+		levelsLabel.setVisible(mapnik);
+		levelsSpinner.setVisible(mapnik);
+		overrideLevelsCheck.setVisible(!mapnik);
+		overrideLevelsSpinner.setVisible(!mapnik);
+		outsideCheck.setVisible(!mapnik);
+		outsidePanel.setVisible(!mapnik);
+		replaceCheck.setVisible(!mapnik);
+		replace1Label.setVisible(!mapnik);
+		replace2Label.setVisible(!mapnik);
+		replace3Label.setVisible(!mapnik);
+		replace4Label.setVisible(!mapnik);
+		minPanel.setVisible(!mapnik);
+		maxPanel.setVisible(!mapnik);
+		withPanel.setVisible(!mapnik);
+		otherwisePanel.setVisible(!mapnik);
 	}
 
 	private void recalculateTiles()
