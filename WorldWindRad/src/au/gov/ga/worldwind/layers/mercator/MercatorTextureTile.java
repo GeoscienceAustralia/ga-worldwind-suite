@@ -1,11 +1,14 @@
 package au.gov.ga.worldwind.layers.mercator;
 
 import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.cache.TextureCache;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.util.Level;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.TileKey;
+
+import com.sun.opengl.util.texture.Texture;
 
 public class MercatorTextureTile extends TextureTile
 {
@@ -90,5 +93,41 @@ public class MercatorTextureTile extends TextureTile
 	public MercatorSector getMercatorSector()
 	{
 		return mercatorSector;
+	}
+
+	// If only this function in the superclass wasn't private, then we could
+	// simply override it instead of needing to override setTexture()
+	private void updateMemoryCache()
+	{
+		if (this.getTileFromMemoryCache(this.getTileKey()) != null)
+			WorldWind.getMemoryCache(MercatorTextureTile.class.getName()).add(
+					this.getTileKey(), this);
+	}
+
+	// Have to override setTexture(), because superclass calls it's updateMemoryCache(),
+	// which updates TextureTile cache and not MercatorTextureTile cache
+	@Override
+	public void setTexture(TextureCache tc, Texture texture)
+	{
+		if (tc == null)
+		{
+			String message = Logging.getMessage("nullValue.TextureCacheIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalStateException(message);
+		}
+
+		tc.put(this.getTileKey(), texture);
+
+		// No more need for texture data; allow garbage collector and memory cache to reclaim it.
+		//this.textureData = null;
+		try
+		{
+			setTextureData(null);
+		}
+		catch (NullPointerException e)
+		{
+		}
+
+		this.updateMemoryCache();
 	}
 }

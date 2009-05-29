@@ -44,7 +44,7 @@ public class Screenshotter
 		thread.start();
 	}
 
-	private static void takeScreenshotThread(final WorldWindow wwd, int width,
+	private static void takeScreenshotThread(WorldWindow wwd, int width,
 			int height, File file)
 	{
 		if (!(wwd instanceof Component))
@@ -57,7 +57,7 @@ public class Screenshotter
 		frame.setLayout(new BorderLayout());
 		frame.setUndecorated(true);
 		frame.setResizable(false);
-		frame.setAlwaysOnTop(false);
+		frame.setAlwaysOnTop(true);
 		frame.add(component, BorderLayout.CENTER);
 		Dimension size = new Dimension(width, height);
 		component.setMinimumSize(size);

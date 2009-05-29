@@ -269,6 +269,9 @@ public class Application
 		layersPanel = new LayersPanel(wwd, frame);
 		splitPane.setLeftComponent(layersPanel);
 
+		//panel.add(wwd, BorderLayout.CENTER);
+		//panel.add(layersPanel, BorderLayout.WEST);
+
 		loadSplitLocations();
 		afterSettingsChange();
 
@@ -827,6 +830,16 @@ public class Application
 				saveImage();
 			}
 		});
+
+		/*menuItem = new JMenuItem("Save large image");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				takeScreenshot(4000, 4000, new File("largescreeshot.png"));
+			}
+		});*/
 
 		menu.addSeparator();
 
