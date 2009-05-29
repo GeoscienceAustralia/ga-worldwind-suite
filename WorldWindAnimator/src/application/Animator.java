@@ -14,24 +14,17 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Earth;
 import gov.nasa.worldwind.globes.ElevationModel;
-import gov.nasa.worldwind.layers.AnnotationLayer;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.layers.StarsLayer;
-import gov.nasa.worldwind.render.AnnotationAttributes;
-import gov.nasa.worldwind.render.GeographicText;
-import gov.nasa.worldwind.render.GlobeAnnotation;
-import gov.nasa.worldwind.render.UserFacingText;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.OrbitView;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -63,7 +56,6 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import layer.ShapefileLayer;
 import layers.depth.DepthLayer;
 import layers.elevation.perpixel.ExtendedBasicElevationModel;
 import layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
@@ -154,6 +146,7 @@ public class Animator
 	private Layer crosshair;
 	private OffsetCompoundElevationModel ocem;
 	private LensFlareLayer lensFlare;
+	private JCheckBoxMenuItem useScaledZoomCheck;
 
 	private Vec4 sunPosition = new Vec4(0.0, 0.0,
 			Earth.WGS84_EQUATORIAL_RADIUS * 2);
@@ -414,30 +407,30 @@ public class Animator
 		{
 			layer.setEnabled(false);
 		}
-		
+
 		//AnnotationAttributes townAttr = new AnnotationAttributes();
-        //townAttr.setDefaults(defaultAttributes);
-        //townAttr.setFont(Font.decode("Arial-BOLD-12"));
-        
+		//townAttr.setDefaults(defaultAttributes);
+		//townAttr.setFont(Font.decode("Arial-BOLD-12"));
+
 		//AnnotationLayer annos = new AnnotationLayer();
 		//annos.addAnnotation(new GlobeAnnotation("Margaret River", Position.fromDegrees(-33.7340, 115.0000, 0), townAttr));
-        
+
 		//layers.add(annos);
-		
-				
+
+
 		stars.setEnabled(true);
 		sky.setEnabled(true);
 
 		depth.setEnabled(true);
 		bmng.setEnabled(true);
-		
+
 		//landsat.setEnabled(true);
-		
+
 		elevationEarth.setEnabled(true);
 		elevationSW.setEnabled(true);
 		elevationSONNE.setEnabled(true);
-		
-		
+
+
 		//shadowsEarth.setEnabled(true);
 		//shadowsSW.setEnabled(true);
 
@@ -452,66 +445,66 @@ public class Animator
 		//skybox.setEnabled(true);
 		//fog.setEnabled(true);
 		//skysphere.setEnabled(true);
-/*
-		ShapefileLayer seismicShp = new ShapefileLayer();
-		seismicShp.setColor(Color.yellow);
-		seismicShp.setUsePolyline(true);
-		seismicShp.setLineWidth(2.0);
-		seismicShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/seismic.shp"));
-		layers.add(seismicShp);
+		/*
+				ShapefileLayer seismicShp = new ShapefileLayer();
+				seismicShp.setColor(Color.yellow);
+				seismicShp.setUsePolyline(true);
+				seismicShp.setLineWidth(2.0);
+				seismicShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/seismic.shp"));
+				layers.add(seismicShp);
 
-		ShapefileLayer studyShp = new ShapefileLayer();
-		studyShp.setColor(Color.white);
-		studyShp.setLineWidth(2.0);
-		//studyShp.setOpacity(0.5);
-		studyShp.setUsePolyline(true);
-		studyShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/study_areas.shp"));
-		layers.add(studyShp);*/
+				ShapefileLayer studyShp = new ShapefileLayer();
+				studyShp.setColor(Color.white);
+				studyShp.setLineWidth(2.0);
+				//studyShp.setOpacity(0.5);
+				studyShp.setUsePolyline(true);
+				studyShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/study_areas.shp"));
+				layers.add(studyShp);*/
 
-/*		ShapefileLayer eezShp = new ShapefileLayer();
-		eezShp.setColor(Color.green);
-		eezShp.setFollowTerrain(true);
-		eezShp.setLineWidth(1.0);
-		//eezShp.setOpacity(0.4);
-		eezShp.setUsePolyline(false);
-		eezShp.setRemoveDetailLevels(1);
-		eezShp.loadFile(new File(DATA_DRIVE
-				+ ":/SW Margins/edited_data/eez_limit.shp"));
-		layers.add(eezShp); */
-		
-	/*	ShapefileLayer eezShp2 = new ShapefileLayer();
-		eezShp2.setColor(Color.green);
-		eezShp2.setFollowTerrain(false);
-		eezShp2.setLineWidth(2.5);		
-		eezShp2.setUsePolyline(true);
-		eezShp2.setRemoveDetailLevels(1);
-		eezShp2.loadFile(new File(DATA_DRIVE
-				+ ":/SW Margins/edited_data/eez_limit.shp"));
-		layers.add(eezShp2);*/
-	/*	
-		ShapefileLayer extendedShp2 = new ShapefileLayer();
-		extendedShp2.setColor(Color.yellow);
-		extendedShp2.setFollowTerrain(true);
-		extendedShp2.setLineWidth(1.0);
-		//extendedShp2.setOpacity(0.4);
-		extendedShp2.setUsePolyline(false);
-		extendedShp2.setRemoveDetailLevels(1);		
-		//extendedShp2.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/ecs.shp"));
-		extendedShp2.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/ecs_line_minus_eez_limit.shp"));
-		layers.add(extendedShp2);		*/
-			
-		
-/*		ShapefileLayer extendedShp = new ShapefileLayer();
-		extendedShp.setColor(Color.magenta);
-		extendedShp.setFollowTerrain(true);
-		extendedShp.setLineWidth(2.5);
-		//extendedShp.setOpacity(0.5);
-		extendedShp.setRemoveDetailLevels(1);
-		extendedShp.setUsePolyline(true);
-		extendedShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/ecs_line_minus_eez_limit.shp"));
-		//extendedShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/ecs.shp"));
-		layers.add(extendedShp);  */
-		
+		/*		ShapefileLayer eezShp = new ShapefileLayer();
+				eezShp.setColor(Color.green);
+				eezShp.setFollowTerrain(true);
+				eezShp.setLineWidth(1.0);
+				//eezShp.setOpacity(0.4);
+				eezShp.setUsePolyline(false);
+				eezShp.setRemoveDetailLevels(1);
+				eezShp.loadFile(new File(DATA_DRIVE
+						+ ":/SW Margins/edited_data/eez_limit.shp"));
+				layers.add(eezShp); */
+
+		/*	ShapefileLayer eezShp2 = new ShapefileLayer();
+			eezShp2.setColor(Color.green);
+			eezShp2.setFollowTerrain(false);
+			eezShp2.setLineWidth(2.5);		
+			eezShp2.setUsePolyline(true);
+			eezShp2.setRemoveDetailLevels(1);
+			eezShp2.loadFile(new File(DATA_DRIVE
+					+ ":/SW Margins/edited_data/eez_limit.shp"));
+			layers.add(eezShp2);*/
+		/*	
+			ShapefileLayer extendedShp2 = new ShapefileLayer();
+			extendedShp2.setColor(Color.yellow);
+			extendedShp2.setFollowTerrain(true);
+			extendedShp2.setLineWidth(1.0);
+			//extendedShp2.setOpacity(0.4);
+			extendedShp2.setUsePolyline(false);
+			extendedShp2.setRemoveDetailLevels(1);		
+			//extendedShp2.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/ecs.shp"));
+			extendedShp2.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/ecs_line_minus_eez_limit.shp"));
+			layers.add(extendedShp2);		*/
+
+
+		/*		ShapefileLayer extendedShp = new ShapefileLayer();
+				extendedShp.setColor(Color.magenta);
+				extendedShp.setFollowTerrain(true);
+				extendedShp.setLineWidth(2.5);
+				//extendedShp.setOpacity(0.5);
+				extendedShp.setRemoveDetailLevels(1);
+				extendedShp.setUsePolyline(true);
+				extendedShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/ecs_line_minus_eez_limit.shp"));
+				//extendedShp.loadFile(new File(DATA_DRIVE + ":/SW Margins/vector/ecs.shp"));
+				layers.add(extendedShp);  */
+
 
 		/*ShapefileLayer swath1Shp = new ShapefileLayer();
 		swath1Shp.setColor(Color.white);
@@ -919,6 +912,13 @@ public class Animator
 
 		menu.addSeparator();
 
+		/*menuItem = new JMenuItem("Set key in percent");
+		menuItem.setMnemonic('I');
+		menu.add(menuItem);
+		menu
+		
+		menu.addSeparator();*/
+
 		final JCheckBoxMenuItem autoKeyItem = new JCheckBoxMenuItem("Auto key",
 				autokey);
 		menuItem.setMnemonic('k');
@@ -1034,6 +1034,17 @@ public class Animator
 		menu = new JMenu("Animation");
 		menu.setMnemonic('A');
 		menuBar.add(menu);
+
+		useScaledZoomCheck = new JCheckBoxMenuItem("Use scaled zoom");
+		useScaledZoomCheck.setSelected(animation.isScaledZoom());
+		menu.add(useScaledZoomCheck);
+		useScaledZoomCheck.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animation.setScaledZoom(useScaledZoomCheck.isSelected());
+			}
+		});
 
 		menuItem = new JMenuItem("Scale animation...");
 		menuItem.setMnemonic('S');
@@ -1334,11 +1345,18 @@ public class Animator
 		}
 	}
 
+	private void setAnimation(SimpleAnimation animation)
+	{
+		this.animation = animation;
+		if (useScaledZoomCheck != null)
+			useScaledZoomCheck.setSelected(animation.isScaledZoom());
+	}
+
 	private void newFile()
 	{
 		if (querySave())
 		{
-			animation = new SimpleAnimation();
+			setAnimation(new SimpleAnimation());
 			resetChanged();
 			setFile(null);
 			updateSlider();
@@ -1358,7 +1376,7 @@ public class Animator
 				try
 				{
 					newAnimation.load(newFile);
-					animation = newAnimation;
+					setAnimation(newAnimation);
 					resetChanged();
 					setFile(newFile);
 				}

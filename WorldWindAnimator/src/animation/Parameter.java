@@ -158,6 +158,12 @@ public class Parameter implements Serializable, Restorable
 		return new Vector2(frame, key.inValue);
 	}
 
+	public Vector2 getInPercent(int index)
+	{
+		KeyFrame key = keys.get(index);
+		return new Vector2(key.inPercent, key.inValue);
+	}
+
 	public void setIn(int index, Vector2 v)
 	{
 		setIn(index, v.x, v.y);
@@ -196,6 +202,12 @@ public class Parameter implements Serializable, Restorable
 			return null;
 		double frame = key.frame + key.outPercent * (s.frame - key.frame);
 		return new Vector2(frame, key.outValue);
+	}
+
+	public Vector2 getOutPercent(int index)
+	{
+		KeyFrame key = keys.get(index);
+		return new Vector2(key.outPercent, key.outValue);
 	}
 
 	public void setOut(int index, Vector2 v)

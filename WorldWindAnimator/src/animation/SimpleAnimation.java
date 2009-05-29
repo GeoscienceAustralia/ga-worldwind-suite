@@ -13,6 +13,7 @@ import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import math.vector.Vector2;
 import math.vector.Vector3;
 import nasa.worldwind.util.RestorableSupport;
 import util.FileUtil;
@@ -30,6 +31,7 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 	private boolean ignoreChange = false;
 	private int width = 1024;
 	private int height = 576;
+	private boolean scaledZoom = true;
 
 	private transient List<ChangeListener> changeListeners;
 
@@ -78,13 +80,15 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 
 	public synchronized void applyFrame(OrbitView view, int frame)
 	{
+		double zoom = eyeZoom.getInterpolatedValue(frame);
 		Position eye = Position.fromDegrees(eyeLat.getInterpolatedValue(frame),
-				eyeLon.getInterpolatedValue(frame), z2c(eyeZoom
-						.getInterpolatedValue(frame)));
+				eyeLon.getInterpolatedValue(frame),
+				scaledZoom ? fromScaledZoom(zoom) : zoom);
+		zoom = centerZoom.getInterpolatedValue(frame);
 		Position center = Position.fromDegrees(centerLat
 				.getInterpolatedValue(frame), centerLon
-				.getInterpolatedValue(frame), z2c(centerZoom
-				.getInterpolatedValue(frame)));
+				.getInterpolatedValue(frame), scaledZoom ? fromScaledZoom(zoom)
+				: zoom);
 		view.stopMovement();
 		view.setOrientation(eye, center);
 	}
@@ -102,10 +106,12 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 
 		eyeLat.addKey(frame, eye.getLatitude().degrees);
 		eyeLon.addKey(frame, eye.getLongitude().degrees);
-		eyeZoom.addKey(frame, c2z(eye.getElevation()));
+		eyeZoom.addKey(frame, scaledZoom ? toScaledZoom(eye.getElevation())
+				: eye.getElevation());
 		centerLat.addKey(frame, center.getLatitude().degrees);
 		centerLon.addKey(frame, center.getLongitude().degrees);
-		centerZoom.addKey(frame, c2z(center.getElevation()));
+		centerZoom.addKey(frame, scaledZoom ? toScaledZoom(center
+				.getElevation()) : center.getElevation());
 
 		int index = eyeLat.indexOf(frame);
 		smoothAll(index);
@@ -322,12 +328,60 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 		notifyChange();
 	}
 
-	public static double c2z(double camera)
+	public synchronized void setScaledZoom(boolean scaledZoom)
+	{
+		if (this.scaledZoom != scaledZoom)
+		{
+			int size = size();
+			for (int i = 0; i < size; i++)
+			{
+				Vector2 in, out;
+				double z;
+
+				z = eyeZoom.getValue(i);
+				z = scaledZoom ? toScaledZoom(z) : fromScaledZoom(z);
+				in = eyeZoom.getInPercent(i);
+				in.y = scaledZoom ? toScaledZoom(in.y) : fromScaledZoom(in.y);
+				out = eyeZoom.getOutPercent(i);
+				out.y = scaledZoom ? toScaledZoom(out.y)
+						: fromScaledZoom(out.y);
+
+				eyeZoom.setValue(i, z);
+				eyeZoom.setInPercent(i, in.x, in.y);
+				eyeZoom.setOutPercent(i, out.x, out.y);
+
+				z = centerZoom.getValue(i);
+				z = scaledZoom ? toScaledZoom(z) : fromScaledZoom(z);
+				in = centerZoom.getInPercent(i);
+				in.y = scaledZoom ? toScaledZoom(in.y) : fromScaledZoom(in.y);
+				out = centerZoom.getOutPercent(i);
+				out.y = scaledZoom ? toScaledZoom(out.y)
+						: fromScaledZoom(out.y);
+
+				centerZoom.setValue(i, z);
+				centerZoom.setInPercent(i, in.x, in.y);
+				centerZoom.setOutPercent(i, out.x, out.y);
+			}
+			
+			for (int i = 0; i < size; i++)
+			{
+				smooth(i);
+			}
+		}
+		this.scaledZoom = scaledZoom;
+	}
+
+	public boolean isScaledZoom()
+	{
+		return scaledZoom;
+	}
+
+	public static double toScaledZoom(double camera)
 	{
 		return Math.log(Math.max(0, camera) + 1);
 	}
 
-	public static double z2c(double zoom)
+	public static double fromScaledZoom(double zoom)
 	{
 		return Math.pow(Math.E, zoom) - 1;
 	}
@@ -420,6 +474,7 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 		restorableSupport.addStateValueAsInteger("frameCount", frameCount);
 		restorableSupport.addStateValueAsInteger("width", width);
 		restorableSupport.addStateValueAsInteger("height", height);
+		restorableSupport.addStateValueAsBoolean("scaledZoom", scaledZoom);
 		restorableSupport.addStateValueAsRestorable("eyeLat", eyeLat);
 		restorableSupport.addStateValueAsRestorable("eyeLon", eyeLon);
 		restorableSupport.addStateValueAsRestorable("eyeZoom", eyeZoom);
@@ -453,6 +508,10 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 		Integer height = restorableSupport.getStateValueAsInteger("height");
 		if (height != null)
 			this.height = height;
+		Boolean scaledZoom = restorableSupport
+				.getStateValueAsBoolean("scaledZoom");
+		if (scaledZoom != null)
+			this.scaledZoom = scaledZoom;
 
 		eyeLat = restorableSupport.getStateValueAsRestorable("eyeLat", eyeLat);
 		eyeLon = restorableSupport.getStateValueAsRestorable("eyeLon", eyeLon);
