@@ -791,12 +791,39 @@ public class Animator
 
 	private void setAnimationSize(int width, int height)
 	{
-		Dimension size = new Dimension(width, height);
-		wwd.setPreferredSize(size);
-		wwd.setMinimumSize(size);
-		wwd.setMaximumSize(size);
-		frame.pack();
-		wwd.setSize(size);
+		if (!frame.isVisible())
+		{
+			Dimension wwdSize = new Dimension(width, height);
+			wwd.setMinimumSize(wwdSize);
+			wwd.setMaximumSize(wwdSize);
+			wwd.setPreferredSize(wwdSize);
+			wwd.setSize(wwdSize);
+			frame.pack();
+		}
+		else
+		{
+			Dimension wwdSize = wwd.getSize();
+			Dimension frameSize = frame.getSize();
+			int deltaWidth = frameSize.width - wwdSize.width;
+			int deltaHeight = frameSize.height - wwdSize.height;
+
+			frameSize = new Dimension(width + deltaWidth, height + deltaHeight);
+			frame.setPreferredSize(frameSize);
+			frame.setMinimumSize(frameSize);
+			frame.setMaximumSize(frameSize);
+			frame.setSize(frameSize);
+			frame.pack();
+
+			wwdSize = wwd.getSize();
+			if (wwdSize.width != width || wwdSize.height != height)
+			{
+				JOptionPane.showMessageDialog(frame,
+						"Could not set animation dimensions to " + width + "x"
+								+ height + " (currently " + wwdSize.width + "x"
+								+ wwdSize.height + ")",
+						"Could not set dimensions", JOptionPane.ERROR_MESSAGE);
+			}
+		}
 	}
 
 	private void createMenuBar()

@@ -82,7 +82,9 @@ public class FrameSlider extends JComponent
 
 		Dimension size = new Dimension(0, 54);
 		setMinimumSize(size);
-		//setPreferredSize(size);
+		setPreferredSize(size);
+		setMaximumSize(size);
+		setSize(size);
 	}
 
 	public int getMin()
