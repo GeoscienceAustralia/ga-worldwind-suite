@@ -1,22 +1,16 @@
 package au.gov.ga.worldwind.annotations;
 
-import java.awt.Point;
-
-import javax.media.opengl.GL;
-
-import gov.nasa.worldwind.Locatable;
-import gov.nasa.worldwind.Movable;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
-import gov.nasa.worldwind.render.AbstractAnnotation;
 import gov.nasa.worldwind.render.AnnotationAttributes;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.GlobeAnnotation;
 import gov.nasa.worldwind.render.MultiLineTextRenderer;
+import gov.nasa.worldwind.util.WWMath;
 import gov.nasa.worldwind.view.OrbitView;
 
-public class RenderableAnnotation extends AbstractAnnotation implements
-		Locatable, Movable
+public class RenderableAnnotation extends GlobeAnnotation
 {
 	private Annotation annotation;
 	private Position position;
@@ -24,14 +18,15 @@ public class RenderableAnnotation extends AbstractAnnotation implements
 
 	public RenderableAnnotation(Annotation annotation)
 	{
+		super(annotation.getLabel(), Position.fromDegrees(annotation
+				.getLatitude(), annotation.getLongitude(), 0));
 		this.annotation = annotation;
-		setText(annotation.getLabel());
 		setAttributes(new MyAnnotationAttributes(annotation));
 		getAttributes().setTextAlign(MultiLineTextRenderer.ALIGN_CENTER);
 	}
 
-	@Override
-	protected void doDraw(DrawContext dc)
+	//taken from superclass, apart from additions (see below)
+	protected void doRenderNow(DrawContext dc)
 	{
 		if (dc.isPickingMode() && this.getPickSupport() == null)
 			return;
@@ -41,20 +36,28 @@ public class RenderableAnnotation extends AbstractAnnotation implements
 		if (point == null)
 			return;
 
-		double eyeDistance = dc.getView().getEyePoint().distanceTo3(point);
-		final Vec4 screenPoint = dc.getView().project(point);
+		if (dc.getView().getFrustumInModelCoordinates().getNear().distanceTo(
+				point) < 0)
+			return;
+
+		Vec4 screenPoint = dc.getView().project(point);
 		if (screenPoint == null)
 			return;
 
+		java.awt.Dimension size = this.getPreferredSize(dc);
 		Position pos = dc.getGlobe().computePositionFromPoint(point);
 
-		// Determine scaling and transparency factors based on distance from eye vs the distance to the look at point
-		double drawScale = computeLookAtDistance(dc) / eyeDistance; // TODO: cache lookAtDistance for one frame cycle
-		double drawAlpha = Math.min(1d, Math.max(attributes
-				.getDistanceMinOpacity(), Math.sqrt(drawScale)));
-		drawScale = Math.min(attributes.getDistanceMaxScale(), Math.max(
-				attributes.getDistanceMinScale(), drawScale)); // Clamp to factor range
+		// Determine scale and opacity factors based on distance from eye vs the distance to the look at point.
+		double lookAtDistance = this.computeLookAtDistance(dc);
+		double eyeDistance = dc.getView().getEyePoint().distanceTo3(point);
+		double distanceFactor = Math.sqrt(lookAtDistance / eyeDistance);
+		double scale = WWMath.clamp(distanceFactor, this.attributes
+				.getDistanceMinScale(), this.attributes.getDistanceMaxScale());
+		double opacity = WWMath.clamp(distanceFactor, this.attributes
+				.getDistanceMinOpacity(), 1);
 
+		
+		//added lines below
 		double minZoom = annotation.getMinZoom();
 		double maxZoom = annotation.getMaxZoom();
 		double zoom;
@@ -64,26 +67,20 @@ public class RenderableAnnotation extends AbstractAnnotation implements
 		else
 			zoom = view.getEyePosition().getElevation();
 		if (minZoom >= 0 && zoom > minZoom)
-			drawAlpha = Math.max(0, Math.min(drawAlpha, 1 - 5
-					* (zoom - minZoom) / minZoom));
+			opacity = WWMath.clamp(1 - 5 * (zoom - minZoom) / minZoom, 0,
+					opacity);
 		else if (maxZoom >= 0 && zoom < maxZoom)
-			drawAlpha = Math.max(0, Math.min(drawAlpha, 1 - 5
-					* (maxZoom - zoom) / maxZoom));
-
-		if (drawAlpha < 0.1)
+			opacity = WWMath.clamp(1 - 5 * (maxZoom - zoom) / maxZoom, 0,
+					opacity);
+		if (opacity < 0.1)
 			getAttributes().setHighlighted(false);
+		//added lines above
 
-		// Prepare to draw
+
 		this.setDepthFunc(dc, screenPoint);
-		GL gl = dc.getGL();
-		gl.glMatrixMode(GL.GL_MODELVIEW);
-		gl.glLoadIdentity();
-		// Translate to screenpoint
-		gl.glTranslated(screenPoint.x, screenPoint.y, 0d);
-
-		// Draw
-		drawAnnotation(dc, new Point((int) screenPoint.x, (int) screenPoint.y),
-				drawScale, drawAlpha, pos);
+		this.drawTopLevelAnnotation(dc, (int) screenPoint.x,
+				(int) screenPoint.y, size.width, size.height, scale, opacity,
+				pos);
 	}
 
 	@Override
@@ -103,7 +100,8 @@ public class RenderableAnnotation extends AbstractAnnotation implements
 	@Override
 	public void setText(String text)
 	{
-		annotation.setLabel(text);
+		if (annotation != null)
+			annotation.setLabel(text);
 	}
 
 	public Position getPosition()
@@ -144,7 +142,12 @@ public class RenderableAnnotation extends AbstractAnnotation implements
 		this.dragging = dragging;
 	}
 
-	public class MyAnnotationAttributes extends AnnotationAttributes
+	public Annotation getAnnotation()
+	{
+		return annotation;
+	}
+
+	public static class MyAnnotationAttributes extends AnnotationAttributes
 	{
 		private Annotation annotation;
 
@@ -165,10 +168,5 @@ public class RenderableAnnotation extends AbstractAnnotation implements
 		{
 			annotation.setVisible(visible);
 		}
-	}
-
-	public Annotation getAnnotation()
-	{
-		return annotation;
 	}
 }

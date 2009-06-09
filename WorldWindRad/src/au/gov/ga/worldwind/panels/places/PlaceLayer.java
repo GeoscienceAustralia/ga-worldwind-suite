@@ -42,6 +42,5 @@ public class PlaceLayer extends AbstractLayer
 	public void dispose()
 	{
 		super.dispose();
-		nameRenderer.dispose();
 	}
 }

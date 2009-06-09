@@ -7,7 +7,6 @@ import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.applications.sar.SAR2;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
@@ -39,8 +38,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -73,7 +70,7 @@ import javax.swing.filechooser.FileFilter;
 
 import nasa.worldwind.awt.AWTInputHandler;
 import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
-import nasa.worldwind.cache.FixedBasicDataFileCache;
+import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import au.gov.ga.worldwind.annotations.AnnotationEditor;
 import au.gov.ga.worldwind.annotations.AnnotationsPanel;
@@ -89,7 +86,6 @@ import au.gov.ga.worldwind.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.panels.places.PlaceSearchPanel;
-import au.gov.ga.worldwind.retrieve.ExtendedRetrievalService;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.SettingsDialog;
 import au.gov.ga.worldwind.settings.Settings.ProjectionMode;
@@ -141,8 +137,6 @@ public class Application
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class
 				.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
-		Configuration.setValue(AVKey.DATA_FILE_CACHE_CLASS_NAME,
-				FixedBasicDataFileCache.class.getName());
 
 		Configuration.setValue(AVKey.INITIAL_LATITUDE, Double.toString(Angle
 				.fromDegreesLatitude(-27).degrees));
@@ -158,7 +152,7 @@ public class Application
 		/*Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				NormalTessellator.class.getName());*/
 
-		WorldWind.getDataFileCache().addCacheLocation("cache");
+		WorldWind.getDataFileStore().addLocation("cache", false);
 
 		return new Application();
 	}
@@ -206,7 +200,6 @@ public class Application
 					WorldWindowStereoGLCanvas.defaultCaps);
 		Model model = new BasicModel();
 		wwd.setModel(model);
-		wwd.addPropertyChangeListener(propertyChangeListener);
 		wwd.addSelectListener(new ClickAndGoSelectListener(wwd,
 				WorldMapLayer.class));
 		create3DMouse();
@@ -1207,22 +1200,13 @@ public class Application
 		return dialog;
 	}
 
-	private final PropertyChangeListener propertyChangeListener = new PropertyChangeListener()
-	{
-		public void propertyChange(PropertyChangeEvent propertyChangeEvent)
-		{
-			if (propertyChangeEvent.getPropertyName() == SAR2.ELEVATION_UNIT)
-				updateElevationUnit(propertyChangeEvent.getNewValue());
-		}
-	};
-
-	private void updateElevationUnit(Object newValue)
+	public void updateElevationUnit(String newValue)
 	{
 		for (Layer layer : this.wwd.getModel().getLayers())
 		{
 			if (layer instanceof ScalebarLayer)
 			{
-				if (SAR2.UNIT_IMPERIAL.equals(newValue))
+				if (StatusBar.UNIT_IMPERIAL.equals(newValue))
 					((ScalebarLayer) layer)
 							.setUnit(ScalebarLayer.UNIT_IMPERIAL);
 				else
@@ -1231,7 +1215,7 @@ public class Application
 			}
 			else if (layer instanceof TerrainProfileLayer)
 			{
-				if (SAR2.UNIT_IMPERIAL.equals(newValue))
+				if (StatusBar.UNIT_IMPERIAL.equals(newValue))
 					((TerrainProfileLayer) layer)
 							.setUnit(TerrainProfileLayer.UNIT_IMPERIAL);
 				else
@@ -1241,7 +1225,7 @@ public class Application
 			}
 		}
 
-		if (SAR2.UNIT_IMPERIAL.equals(newValue))
+		if (StatusBar.UNIT_IMPERIAL.equals(newValue))
 		{
 			this.statusBar.setElevationUnit(StatusBar.UNIT_IMPERIAL);
 			AnnotationEditor.setUnits(AnnotationEditor.IMPERIAL);

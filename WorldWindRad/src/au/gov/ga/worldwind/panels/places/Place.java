@@ -9,7 +9,6 @@ import java.awt.Font;
 
 import au.gov.ga.worldwind.util.ColorFont;
 
-
 public class Place implements GeographicText
 {
 	public final String name;
@@ -67,6 +66,11 @@ public class Place implements GeographicText
 	{
 		return true;
 	}
+	
+	public double getPriority()
+	{
+		return 0;
+	}
 
 	public void setBackgroundColor(Color background)
 	{
@@ -89,6 +93,10 @@ public class Place implements GeographicText
 	}
 
 	public void setVisible(boolean visible)
+	{
+	}
+
+	public void setPriority(double d)
 	{
 	}
 }

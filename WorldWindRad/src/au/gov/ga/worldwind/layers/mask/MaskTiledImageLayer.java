@@ -1,11 +1,8 @@
 package au.gov.ga.worldwind.layers.mask;
 
-import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVListImpl;
-import gov.nasa.worldwind.cache.BasicMemoryCache;
-import gov.nasa.worldwind.cache.MemoryCache;
 import gov.nasa.worldwind.formats.dds.DDSConverter;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.TextureTile;
@@ -40,6 +37,8 @@ import com.sun.opengl.util.texture.TextureIO;
 
 public class MaskTiledImageLayer extends TiledImageLayer
 {
+	//TODO do we need to update this class with the new bulk-download stuff?
+	
 	private final Object fileLock = new Object();
 
 	public static final String LOCAL_URL_BUILDER = "layers.mask.MaskTiledImageLayer.LocalUrlBuilder";
@@ -47,22 +46,11 @@ public class MaskTiledImageLayer extends TiledImageLayer
 	public MaskTiledImageLayer(LevelSet levelSet)
 	{
 		super(levelSet);
-
-		if (!WorldWind.getMemoryCacheSet().containsCache(
-				TextureTile.class.getName()))
-		{
-			long size = Configuration.getLongValue(
-					AVKey.TEXTURE_IMAGE_CACHE_SIZE, 3000000L);
-			MemoryCache cache = new BasicMemoryCache((long) (0.85 * size), size);
-			cache.setName("Texture Tiles");
-			WorldWind.getMemoryCacheSet().addCache(TextureTile.class.getName(),
-					cache);
-		}
 	}
 
 	protected void forceTextureLoad(TextureTile tile)
 	{
-		final URL textureURL = WorldWind.getDataFileCache().findFile(
+		final URL textureURL = WorldWind.getDataFileStore().findFile(
 				tile.getPath(), true);
 
 		if (textureURL != null && !this.isTextureExpired(tile, textureURL))
@@ -95,7 +83,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 
 		public void run()
 		{
-			URL textureURL = WorldWind.getDataFileCache().findFile(
+			URL textureURL = WorldWind.getDataFileStore().findFile(
 					tile.getPath(), false);
 
 			if (textureURL != null
@@ -110,7 +98,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 				else
 				{
 					// Assume that something's wrong with the file and delete it.
-					gov.nasa.worldwind.WorldWind.getDataFileCache().removeFile(
+					gov.nasa.worldwind.WorldWind.getDataFileStore().removeFile(
 							textureURL);
 					layer.getLevels().markResourceAbsent(tile);
 					String message = Logging.getMessage(
@@ -173,7 +161,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			return false;
 
 		// The file has expired. Delete it.
-		gov.nasa.worldwind.WorldWind.getDataFileCache().removeFile(url);
+		gov.nasa.worldwind.WorldWind.getDataFileStore().removeFile(url);
 		String message = Logging.getMessage("generic.DataFileExpired", url);
 		Logging.logger().fine(message);
 		return true;
@@ -198,10 +186,24 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		return true;
 	}
 
+	private static TextureData readTexture(java.net.URL url, boolean useMipMaps)
+	{
+		try
+		{
+			return TextureIO.newTextureData(url, useMipMaps, null);
+		}
+		catch (Exception e)
+		{
+			Logging.logger().log(java.util.logging.Level.SEVERE,
+					"layers.TextureLayer.ExceptionAttemptingToReadTextureFile",
+					e);
+			return null;
+		}
+	}
+
 	private void addTileToCache(TextureTile tile)
 	{
-		WorldWind.getMemoryCache(TextureTile.class.getName()).add(
-				tile.getTileKey(), tile);
+		TextureTile.getMemoryCache().add(tile.getTileKey(), tile);
 	}
 
 	protected void downloadTexture(final TextureTile tile)
@@ -325,21 +327,6 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		synchronized (this.fileLock) // sychronized with read of file in RequestTask.run()
 		{
 			ImageIO.write(image, format, file);
-		}
-	}
-
-	private static TextureData readTexture(java.net.URL url, boolean useMipMaps)
-	{
-		try
-		{
-			return TextureIO.newTextureData(url, useMipMaps, null);
-		}
-		catch (Exception e)
-		{
-			Logging.logger().log(java.util.logging.Level.SEVERE,
-					"layers.TextureLayer.ExceptionAttemptingToReadTextureFile",
-					e);
-			return null;
 		}
 	}
 
@@ -468,7 +455,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 				return false;
 			}
 
-			final File outFile = WorldWind.getDataFileCache().newFile(
+			final File outFile = WorldWind.getDataFileStore().newFile(
 					this.tile.getPath());
 			if (outFile == null)
 				return false;
@@ -480,25 +467,6 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			g2d.setComposite(AlphaComposite.SrcIn);
 			g2d.drawImage(texture, 0, 0, null);
 			g2d.dispose();
-
-			/*BufferedImage bi = new BufferedImage(texture.getWidth(), texture
-					.getHeight(), BufferedImage.TYPE_INT_ARGB);
-			for (int x = 0; x < texture.getWidth(); x++)
-			{
-				for (int y = 0; y < texture.getHeight(); y++)
-				{
-					int rgb = texture.getRGB(x, y);
-					Color c = new Color(rgb);
-					int alpha = 255;
-					if (c.getRed() + c.getBlue() + c.getGreen() < 30)
-					{
-						alpha = 0;
-					}
-					c = new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
-					bi.setRGB(x, y, c.getRGB());
-				}
-			}
-			mask = bi;*/
 
 			try
 			{

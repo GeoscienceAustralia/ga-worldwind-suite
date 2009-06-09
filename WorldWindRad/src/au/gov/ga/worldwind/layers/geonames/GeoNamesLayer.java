@@ -355,6 +355,5 @@ public class GeoNamesLayer extends AbstractLayer
 	public void dispose()
 	{
 		super.dispose();
-		nameRenderer.dispose();
 	}
 }

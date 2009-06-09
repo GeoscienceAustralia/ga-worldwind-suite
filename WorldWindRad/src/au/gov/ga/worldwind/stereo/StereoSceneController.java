@@ -13,7 +13,6 @@ import java.util.List;
 
 import javax.media.opengl.GL;
 
-
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.Settings.StereoMode;
 import au.gov.ga.worldwind.stereo.StereoOrbitView.Eye;

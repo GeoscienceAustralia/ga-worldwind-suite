@@ -29,7 +29,6 @@ import org.w3c.dom.NodeList;
 
 import au.gov.ga.worldwind.util.ColorFont;
 
-
 public class GeoName implements GeographicText
 {
 	public final String name;
@@ -75,12 +74,12 @@ public class GeoName implements GeographicText
 
 	private URL findCacheFile()
 	{
-		return WorldWind.getDataFileCache().findFile(cacheFilename(), true);
+		return WorldWind.getDataFileStore().findFile(cacheFilename(), true);
 	}
 
 	private File newCacheFile()
 	{
-		return WorldWind.getDataFileCache().newFile(cacheFilename());
+		return WorldWind.getDataFileStore().newFile(cacheFilename());
 	}
 
 	public boolean cacheFileExists()
@@ -158,7 +157,7 @@ public class GeoName implements GeographicText
 			{
 				Logging.logger().log(java.util.logging.Level.SEVERE,
 						"Deleting corrupt GeoNames .xml file " + url, e);
-				WorldWind.getDataFileCache().removeFile(url);
+				WorldWind.getDataFileStore().removeFile(url);
 			}
 		}
 	}
@@ -276,6 +275,11 @@ public class GeoName implements GeographicText
 	{
 		return visibilityCalculator.isVisible(this);
 	}
+	
+	public double getPriority()
+	{
+		return 0;
+	}
 
 	@Deprecated
 	public void setBackgroundColor(Color background)
@@ -304,6 +308,11 @@ public class GeoName implements GeographicText
 
 	@Deprecated
 	public void setVisible(boolean visible)
+	{
+	}
+
+	@Deprecated
+	public void setPriority(double d)
 	{
 	}
 

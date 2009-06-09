@@ -1,7 +1,6 @@
 package au.gov.ga.worldwind.panels.layers;
 
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.layers.FogLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.layers.StarsLayer;
@@ -11,6 +10,8 @@ import gov.nasa.worldwind.layers.Earth.EarthNASAPlaceNameLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.layers.Earth.MGRSGraticuleLayer;
 import gov.nasa.worldwind.layers.Earth.OpenStreetMapLayer;
+import gov.nasa.worldwind.layers.Mercator.examples.VirtualEarthLayer;
+import gov.nasa.worldwind.layers.Mercator.examples.VirtualEarthLayer.Dataset;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -32,18 +33,14 @@ import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.application.Application;
 import au.gov.ga.worldwind.layers.geonames.GeoNamesLayer;
-import au.gov.ga.worldwind.layers.mercator.VirtualEarthLayer;
-import au.gov.ga.worldwind.layers.mercator.VirtualEarthLayer.Dataset;
 import au.gov.ga.worldwind.layers.metacarta.MetacartaCoastlineLayer;
 import au.gov.ga.worldwind.layers.metacarta.MetacartaCountryBoundariesLayer;
 import au.gov.ga.worldwind.layers.metacarta.MetacartaStateBoundariesLayer;
-
 
 public class StandardPanel extends JPanel
 {
 	private Layer stars;
 	private Layer atmosphere;
-	private Layer fog;
 	private Layer bmngone;
 	private Layer bmng;
 	private Layer landsat;
@@ -81,7 +78,6 @@ public class StandardPanel extends JPanel
 	{
 		stars = new StarsLayer();
 		atmosphere = new SkyGradientLayer();
-		fog = new FogLayer();
 		bmngone = new BMNGOneImage();
 		bmng = new BMNGWMSLayer();
 		landsat = new LandsatI3WMSLayer();
@@ -109,7 +105,7 @@ public class StandardPanel extends JPanel
 			e.printStackTrace();
 		}*/
 
-		lowerLayers = new Layer[] { stars, atmosphere, fog, bmngone, bmng,
+		lowerLayers = new Layer[] { stars, atmosphere, bmngone, bmng,
 				landsat, veaerial, veroad, vehybrid, osmmapnik };
 		upperLayers = new Layer[] { pnl, geonames, coastline, country, state,
 				street, osmmapniktrans, graticule };
@@ -260,7 +256,6 @@ public class StandardPanel extends JPanel
 		panel.add(createCheckBox(stars));
 		atmosphereCheck = (JCheckBox) createCheckBox(atmosphere);
 		panel.add(atmosphereCheck);
-		panel.add(createCheckBox(fog));
 
 
 		panel = new JPanel(new GridLayout(0, 1));

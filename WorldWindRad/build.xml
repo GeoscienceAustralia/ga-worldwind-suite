@@ -1,12 +1,14 @@
 <?xml version="1.0" ?>
 
-<project name="WorldWindRad" default="run">
+<project name="WorldWindRad" basedir="." default="run">
 
 	<property name="src.dir" value="${basedir}/src" />
-	<property name="lib.dir" value="${basedir}/lib" />
+	<property name="lib.dir" value="${basedir}/../WorldWindLib/lib" />
 	<property name="build.dir" value="${basedir}/build" />
+	
 	<property name="webstart.dir" value="${basedir}/webstart" />
 	<property name="executable.dir" value="${basedir}/executable" />
+	
 	<property name="unsigned.jar" value="unsigned.jar" />
 	<property name="webstart.jar" value="application.jar" />
 	<property name="executable.jar" value="viewer.jar" />

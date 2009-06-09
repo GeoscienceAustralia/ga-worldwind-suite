@@ -1,13 +1,13 @@
 package au.gov.ga.worldwind.stereo;
 
-import au.gov.ga.worldwind.settings.Settings;
-import au.gov.ga.worldwind.settings.Settings.ProjectionMode;
-import au.gov.ga.worldwind.stereo.StereoOrbitView.Eye;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.view.BasicOrbitViewModel;
+import au.gov.ga.worldwind.settings.Settings;
+import au.gov.ga.worldwind.settings.Settings.ProjectionMode;
+import au.gov.ga.worldwind.stereo.StereoOrbitView.Eye;
 
 public class StereoOrbitViewModel extends BasicOrbitViewModel
 {

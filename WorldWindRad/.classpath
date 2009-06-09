@@ -2,12 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/jogl.jar" sourcepath="C:/Data/Libraries/JOGL/jogl-1.1.1-src/jogl/src/classes">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="WorldWindRad/lib/jogl/windows-i586"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="lib/worldwind.jar" sourcepath="/WorldWind"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/WorldWindLib"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
