@@ -18,7 +18,7 @@ import math.vector.Vector3;
 import nasa.worldwind.util.RestorableSupport;
 import util.FileUtil;
 
-public class SimpleAnimation implements Serializable, ChangeListener,
+public class Animation implements Serializable, ChangeListener,
 		Restorable
 {
 	private Parameter eyeLat = new Parameter();
@@ -35,7 +35,7 @@ public class SimpleAnimation implements Serializable, ChangeListener,
 
 	private transient List<ChangeListener> changeListeners;
 
-	public SimpleAnimation()
+	public Animation()
 	{
 		addChangeListener();
 
