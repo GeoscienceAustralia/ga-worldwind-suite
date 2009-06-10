@@ -45,9 +45,9 @@ import java.util.logging.Level;
 
 import au.gov.ga.worldwind.layers.geonames.GeoNamesLayer;
 import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
-import au.gov.ga.worldwind.retrieve.SectorPolyline;
-import au.gov.ga.worldwind.retrieve.SynchronizedRenderableLayer;
 import au.gov.ga.worldwind.settings.Settings;
+import au.gov.ga.worldwind.util.SectorPolyline;
+import au.gov.ga.worldwind.util.SynchronizedRenderableLayer;
 
 /**
  * Performs threaded retrieval of data.

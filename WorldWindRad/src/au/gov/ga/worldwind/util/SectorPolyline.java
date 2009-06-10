@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.retrieve;
+package au.gov.ga.worldwind.util;
 
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
