@@ -27,7 +27,7 @@ import au.gov.ga.worldwind.util.ColorFont;
 
 public class GeoNamesSearch
 {
-	private final static String GEONAMES_SEARCH = "http://ws5.geonames.org/search";
+	private final static String GEONAMES_SEARCH = "http://ws.geonames.org/search";
 	private final static Map<String, ColorFont> colorFonts = new HashMap<String, ColorFont>();
 	private final static ColorFont defaultColorFont = new ColorFont(Font
 			.decode("Arial-PLAIN-10"), Color.white, Color.black);
