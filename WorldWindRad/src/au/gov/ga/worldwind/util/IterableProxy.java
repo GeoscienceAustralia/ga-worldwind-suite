@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.layers.geonames;
+package au.gov.ga.worldwind.util;
 
 import java.util.Iterator;
 

@@ -18,6 +18,7 @@ import java.util.List;
 
 import au.gov.ga.worldwind.annotations.Annotation;
 import au.gov.ga.worldwind.bookmarks.Bookmark;
+import au.gov.ga.worldwind.util.EnumPersistenceDelegate;
 
 public class Settings
 {

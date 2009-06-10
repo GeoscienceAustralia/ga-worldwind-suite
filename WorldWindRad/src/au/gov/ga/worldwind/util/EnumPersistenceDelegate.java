@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.settings;
+package au.gov.ga.worldwind.util;
 
 import java.beans.BeanInfo;
 import java.beans.DefaultPersistenceDelegate;

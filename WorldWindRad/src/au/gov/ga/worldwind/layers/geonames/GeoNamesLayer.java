@@ -31,6 +31,7 @@ import java.util.Queue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import au.gov.ga.worldwind.util.ColorFont;
+import au.gov.ga.worldwind.util.IterableProxy;
 
 
 public class GeoNamesLayer extends AbstractLayer
