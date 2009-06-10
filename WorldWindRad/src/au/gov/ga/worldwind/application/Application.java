@@ -68,8 +68,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
-import nasa.worldwind.awt.AWTInputHandler;
-import nasa.worldwind.awt.stereo.WorldWindowStereoGLCanvas;
+import nasa.worldwind.awt.WorldWindowStereoGLCanvas;
 import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import au.gov.ga.worldwind.annotations.AnnotationEditor;
@@ -147,8 +146,8 @@ public class Application
 
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
 				ExtendedRetrievalService.class.getName());
-		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
-				AWTInputHandler.class.getName());
+		/*Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
+				AWTInputHandler.class.getName());*/
 		/*Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
 				NormalTessellator.class.getName());*/
 
@@ -204,6 +203,9 @@ public class Application
 				WorldMapLayer.class));
 		create3DMouse();
 		createDoubleClickListener();
+		
+		//hack camera smoothing to be not as crazy as default
+		CameraSmoothHack.hackCameraSmoothing(wwd.getInputHandler());
 
 		wwd.addRenderingListener(new RenderingListener()
 		{

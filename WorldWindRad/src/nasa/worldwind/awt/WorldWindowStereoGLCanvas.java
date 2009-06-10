@@ -4,7 +4,7 @@ as represented by the Administrator of the
 National Aeronautics and Space Administration.
 All Rights Reserved.
 */
-package nasa.worldwind.awt.stereo;
+package nasa.worldwind.awt;
 
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
