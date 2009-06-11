@@ -79,7 +79,7 @@ import util.ChangeFrameListener;
 import util.FileUtil;
 import util.FrameSlider;
 import view.roll.BasicRollOrbitView;
-import animation.SimpleAnimation;
+import animation.Animation;
 
 public class Animator
 {
@@ -134,7 +134,7 @@ public class Animator
 
 	private WorldWindowGLCanvas wwd;
 	private FrameSlider slider;
-	private SimpleAnimation animation = null;
+	private Animation animation = null;
 	private File file = null;
 	private boolean autokey = false;
 	private boolean applying = false;
@@ -187,7 +187,7 @@ public class Animator
 			}
 		};
 
-		animation = new SimpleAnimation();
+		animation = new Animation();
 		resetChanged();
 		updater = new Updater();
 
@@ -1372,7 +1372,7 @@ public class Animator
 		}
 	}
 
-	private void setAnimation(SimpleAnimation animation)
+	private void setAnimation(Animation animation)
 	{
 		this.animation = animation;
 		if (useScaledZoomCheck != null)
@@ -1383,7 +1383,7 @@ public class Animator
 	{
 		if (querySave())
 		{
-			setAnimation(new SimpleAnimation());
+			setAnimation(new Animation());
 			resetChanged();
 			setFile(null);
 			updateSlider();
@@ -1399,7 +1399,7 @@ public class Animator
 			if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
 				File newFile = chooser.getSelectedFile();
-				SimpleAnimation newAnimation = new SimpleAnimation();
+				Animation newAnimation = new Animation();
 				try
 				{
 					newAnimation.load(newFile);
