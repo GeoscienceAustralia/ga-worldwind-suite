@@ -38,6 +38,7 @@ import au.gov.ga.worldwind.layers.ga.radiometrics.RatioUKLayer;
 import au.gov.ga.worldwind.layers.ga.radiometrics.RatioUThLayer;
 import au.gov.ga.worldwind.layers.ga.radiometrics.TernaryLayer;
 import au.gov.ga.worldwind.layers.ga.radiometrics.ThoriumLayer;
+import au.gov.ga.worldwind.layers.ga.radiometrics.USquaredLayer;
 import au.gov.ga.worldwind.layers.ga.radiometrics.UraniumLayer;
 import au.gov.ga.worldwind.layers.ga.radiometrics.areas.DoseRateAreasLayer;
 import au.gov.ga.worldwind.layers.ga.radiometrics.areas.PotassiumAreasLayer;
@@ -74,6 +75,7 @@ public class RadiometricsPanel extends JPanel
 	private Layer ratioUThAreas;
 	private Layer ratioUKAreas;
 	private Layer ratioThKAreas;
+	private Layer USquaredOverTh;
 
 	private JCheckBox radioCheck;
 	private JRadioButton ternaryRadio;
@@ -84,6 +86,7 @@ public class RadiometricsPanel extends JPanel
 	private JRadioButton ratioUThRadio;
 	private JRadioButton ratioUKRadio;
 	private JRadioButton ratioThKRadio;
+	private JRadioButton USquaredOverThRadio;
 	private JCheckBox areasCheck;
 	private JComboBox areasCombo;
 	private JSlider radioSlider;
@@ -131,6 +134,7 @@ public class RadiometricsPanel extends JPanel
 		ratioUTh = new RatioUThLayer();
 		ratioUK = new RatioUKLayer();
 		ratioThK = new RatioThKLayer();
+		USquaredOverTh = new USquaredLayer();
 
 		ternaryAreas = new TernaryAreasLayer();
 		uraniumAreas = new UraniumAreasLayer();
@@ -144,7 +148,7 @@ public class RadiometricsPanel extends JPanel
 		layers = new Layer[] { ternary, uranium, thorium, potassium, doseRate,
 				ratioUTh, ratioUK, ratioThK, ternaryAreas, uraniumAreas,
 				thoriumAreas, potassiumAreas, doseRateAreas, ratioUThAreas,
-				ratioUKAreas, ratioThKAreas };
+				ratioUKAreas, ratioThKAreas, USquaredOverTh  };
 		for (Layer layer : layers)
 		{
 			wwd.getModel().getLayers().add(layer);
@@ -288,6 +292,10 @@ public class RadiometricsPanel extends JPanel
 		ratioUThRadio = new JRadioButton(ratioUTh.getName());
 		ratioUThRadio.addActionListener(al);
 		addRadioToPanel(panel, gridy++, ratioUThRadio, ratioLegend);
+		
+		USquaredOverThRadio = new JRadioButton(USquaredOverTh.getName());
+		USquaredOverThRadio.addActionListener(al);
+		addRadioToPanel(panel, gridy++, USquaredOverThRadio, ratioLegend);
 
 		ButtonGroup buttonGroup = new ButtonGroup();
 		buttonGroup.add(ternaryRadio);
@@ -298,6 +306,7 @@ public class RadiometricsPanel extends JPanel
 		buttonGroup.add(ratioUThRadio);
 		buttonGroup.add(ratioUKRadio);
 		buttonGroup.add(ratioThKRadio);
+		buttonGroup.add(USquaredOverThRadio);
 
 		js = new JSeparator(JSeparator.HORIZONTAL);
 		c = new GridBagConstraints();
@@ -528,6 +537,8 @@ public class RadiometricsPanel extends JPanel
 		ratioUK.setOpacity(radioSlider.getValue() / 100d);
 		ratioThK.setEnabled(radio && ratioThKRadio.isSelected());
 		ratioThK.setOpacity(radioSlider.getValue() / 100d);
+		USquaredOverTh.setEnabled(radio && USquaredOverThRadio.isSelected());
+		USquaredOverTh.setOpacity(radioSlider.getValue() / 100d);
 
 		Layer area = (Layer) areasCombo.getSelectedItem();
 		ternaryAreas.setEnabled(areas && area == ternaryAreas);
