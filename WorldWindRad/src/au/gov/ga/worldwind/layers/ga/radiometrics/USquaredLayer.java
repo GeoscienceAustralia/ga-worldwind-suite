@@ -31,7 +31,7 @@ public class USquaredLayer extends GALayer
 		
 		params.setValue(AVKey.DATA_CACHE_NAME, "GA/Radiometrics/" + layerName);
 		params.setValue(AVKey.DATASET_NAME, layerName);
-		//params.setValue(AVKey.SERVICE, "http://sandpit:8500/resources/images/world-wind/tiles.jsp");
+		params.setValue(AVKey.SERVICE, GALayer.getTilesScriptUrl());
 		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
 				.createDefaultUrlBuilder("tiles/radiometrics/" + layerName,
 						"tiles/radiometrics/radio_mask", ".jpg", ".png"));		
