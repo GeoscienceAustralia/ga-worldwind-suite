@@ -77,6 +77,7 @@ public class Overviewer
 			if (elevations)
 			{
 				bufferTypeSize = gdal.GetDataTypeSize(bufferType);
+				bufferTypeSize /= 4;
 				if (bufferTypeSize != 1 && bufferTypeSize != 2
 						&& bufferTypeSize != 4)
 				{

@@ -892,6 +892,7 @@ public class Application
 		trPanel.add(panel, c);
 
 		bandCombo = new JComboBox(new Integer[] { 1 });
+		bandCombo.setSelectedIndex(0);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		panel.add(bandCombo, c);
@@ -2218,8 +2219,9 @@ public class Application
 					int bufferType = byteRadio.isSelected() ? gdalconstConstants.GDT_Byte
 							: int16Radio.isSelected() ? gdalconstConstants.GDT_Int16
 									: gdalconstConstants.GDT_Int32;
-					int band = Integer.parseInt((String) bandCombo
-							.getSelectedItem()) - 1;
+
+					int band = bandCombo.getSelectedIndex();			
+					
 					Tiler.tileElevations(dataset, sector, level, tilesize,
 							lzts, bufferType, band, outsideValues, minReplace,
 							maxReplace, replace, otherwise, outDir, reporter);
