@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.util;
 import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.view.BasicOrbitView;
 import gov.nasa.worldwind.view.BasicOrbitViewAnimator;
 import gov.nasa.worldwind.view.BasicOrbitViewStateIterator;
 import gov.nasa.worldwind.view.OrbitView;
@@ -34,7 +35,7 @@ public class EyePositionViewStateIterator extends BasicOrbitViewStateIterator
 		return this.maxSmoothing != 0;
 	}
 
-	public void doNextState(double interpolant, OrbitView orbitView)
+	public void doNextState(double interpolant, BasicOrbitView orbitView)
 	{
 		if (orbitView == null)
 		{

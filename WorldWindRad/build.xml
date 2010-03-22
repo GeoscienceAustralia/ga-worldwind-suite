@@ -3,7 +3,7 @@
 <project name="WorldWindRad" basedir="." default="run">
 
 	<property name="src.dir" value="${basedir}/src" />
-	<property name="lib.dir" value="${basedir}/../WorldWindLib/lib" />
+	<property name="lib.dir" value="${basedir}/lib" />
 	<property name="build.dir" value="${basedir}/build" />
 	
 	<property name="webstart.dir" value="${basedir}/webstart" />
@@ -16,7 +16,7 @@
 	<property name="javac.debug" value="false" />
 
 	<path id="classpath">
-		<fileset dir="${lib.dir}">
+		<fileset dir="${lib.dir}" >
 			<include name="**/*.jar" />
 		</fileset>
 	</path>
