@@ -49,6 +49,7 @@ public class StereoSceneController extends AbstractSceneController
 		{
 			this.applyView(dc);
 			this.createTerrain(dc);
+			this.preRender(dc);
 			this.clearFrame(dc);
 			this.pick(dc);
 			this.clearFrame(dc);
