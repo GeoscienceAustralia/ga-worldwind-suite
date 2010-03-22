@@ -3,13 +3,13 @@ package au.gov.ga.worldwind.annotations;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
-import gov.nasa.worldwind.examples.BasicDragger;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.pick.PickedObjectList;
 import gov.nasa.worldwind.render.Annotation;
 import gov.nasa.worldwind.render.AnnotationRenderer;
 import gov.nasa.worldwind.render.BasicAnnotationRenderer;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.util.BasicDragger;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -137,7 +137,7 @@ public class AnnotationsLayer extends AbstractLayer
 	@Override
 	protected void doRender(DrawContext dc)
 	{
-		renderer.render(dc, annotations);
+		renderer.render(dc, annotations, this);
 	}
 
 	@Override

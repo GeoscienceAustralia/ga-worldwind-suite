@@ -19,7 +19,7 @@ public class GravityLayer extends GALayer
 		this.setRetainLevelZeroTiles(true);
 		this.setUseMipMaps(true);
 		this.setUseTransparentTextures(true);
-		this.setSplitScale(GALayer.getSplitScale());
+		this.setSplitScale(GALayer.getGASplitScale());
 	}
 
 	private static LevelSet makeLevels()

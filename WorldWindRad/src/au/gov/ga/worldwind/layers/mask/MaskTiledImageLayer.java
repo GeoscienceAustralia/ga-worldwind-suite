@@ -62,8 +62,8 @@ public class MaskTiledImageLayer extends TiledImageLayer
 	protected void requestTexture(DrawContext dc, TextureTile tile)
 	{
 		Vec4 centroid = tile.getCentroidPoint(dc.getGlobe());
-		if (this.getReferencePoint() != null)
-			tile.setPriority(centroid.distanceTo3(this.getReferencePoint()));
+		if (this.getReferencePoint(dc) != null)
+			tile.setPriority(centroid.distanceTo3(this.getReferencePoint(dc)));
 
 		RequestTask task = new RequestTask(tile, this);
 		this.getRequestQ().add(task);

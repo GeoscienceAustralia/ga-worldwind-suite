@@ -3,21 +3,23 @@ Copyright (C) 2001, 2006 United States Government
 as represented by the Administrator of the
 National Aeronautics and Space Administration.
 All Rights Reserved.
-*/
+ */
 package nasa.worldwind.retrieve;
 
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.WWObjectImpl;
-import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.BasicTiledImageLayer;
+import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.layers.TiledImageLayer;
-import gov.nasa.worldwind.layers.Mercator.BasicMercatorTiledImageLayer;
-import gov.nasa.worldwind.layers.Mercator.MercatorTiledImageLayer;
 import gov.nasa.worldwind.layers.placename.PlaceNameLayer;
 import gov.nasa.worldwind.layers.rpf.RPFTiledImageLayer;
+import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Polyline;
+import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.render.SurfaceImage;
 import gov.nasa.worldwind.retrieve.RetrievalFuture;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
@@ -43,22 +45,19 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import au.gov.ga.worldwind.layers.geonames.GeoNamesLayer;
-import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
-import au.gov.ga.worldwind.settings.Settings;
-import au.gov.ga.worldwind.util.SectorPolyline;
-import au.gov.ga.worldwind.util.SynchronizedRenderableLayer;
-
 /**
  * Performs threaded retrieval of data.
  * 
  * @author Tom Gaskins
- * @version $Id: BasicRetrievalService.java 6362 2008-09-03 17:45:47Z tgaskins $
+ * @version $Id: BasicRetrievalService.java 11710 2009-06-17 22:48:37Z tgaskins
+ *          $
+ * Modified to add a renderable layer that displays current tile
+ *          downloads
  */
 public final class ExtendedRetrievalService extends WWObjectImpl implements
-		RetrievalService, Thread.UncaughtExceptionHandler
-{
-	// These constants are last-ditch values in case Configuration lacks defaults
+		RetrievalService, Thread.UncaughtExceptionHandler {
+	// These constants are last-ditch values in case Configuration lacks
+	// defaults
 	private static final int DEFAULT_QUEUE_SIZE = 100;
 	private static final int DEFAULT_POOL_SIZE = 5;
 	private static final long DEFAULT_STALE_REQUEST_LIMIT = 30000; // milliseconds
@@ -70,7 +69,10 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 			.getMessage("BasicRetrievalService.IdleThreadNamePrefix");
 
 	private RetrievalExecutor executor; // thread pool for running retrievers
-	private ConcurrentLinkedQueue<RetrievalTask> activeTasks; // tasks currently allocated a thread
+
+        // tasks currently allocated a thread
+	private ConcurrentLinkedQueue<RetrievalTask> activeTasks;
+
 	private int queueSize; // maximum queue size
 
 	/**
@@ -78,31 +80,27 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 	 * {@link java.util.concurrent.FutureTask}.
 	 */
 	private static class RetrievalTask extends FutureTask<Retriever> implements
-			RetrievalFuture, Comparable<RetrievalTask>
-	{
+			RetrievalFuture, Comparable<RetrievalTask> {
 		private Retriever retriever;
-		private double priority; // retrieval secondary priority (primary priority is submit time)
+		private double priority; // retrieval secondary priority (primary
+									// priority is submit time)
 
-		private RetrievalTask(Retriever retriever, double priority)
-		{
+		private RetrievalTask(Retriever retriever, double priority) {
 			super(retriever);
 			this.retriever = retriever;
 			this.priority = priority;
 		}
 
-		public double getPriority()
-		{
+		public double getPriority() {
 			return priority;
 		}
 
-		public Retriever getRetriever()
-		{
+		public Retriever getRetriever() {
 			return this.retriever;
 		}
 
 		@Override
-		public void run()
-		{
+		public void run() {
 			if (this.isDone() || this.isCancelled())
 				return;
 
@@ -117,18 +115,19 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 		 * @throws IllegalArgumentException
 		 *             if <code>that</code> is null
 		 */
-		public int compareTo(RetrievalTask that)
-		{
-			if (that == null)
-			{
+		public int compareTo(RetrievalTask that) {
+			if (that == null) {
 				String msg = Logging.getMessage("nullValue.RetrieverIsNull");
 				Logging.logger().fine(msg);
 				throw new IllegalArgumentException(msg);
 			}
 
-			if (this.priority > 0 && that.priority > 0) // only secondary priority used if either is negative
+			if (this.priority > 0 && that.priority > 0) // only secondary
+														// priority used if
+														// either is negative
 			{
-				// Requests submitted within different time-granularity periods are ordered exclusive of their
+				// Requests submitted within different time-granularity periods
+				// are ordered exclusive of their
 				// client-specified priority.
 				long now = System.currentTimeMillis();
 				long thisElapsedTime = now - this.retriever.getSubmitTime();
@@ -137,13 +136,13 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 					return thisElapsedTime < thatElapsedTime ? -1 : 1;
 			}
 
-			// The client-pecified priority is compared for requests submitted within the same granularity period.
+			// The client-pecified priority is compared for requests submitted
+			// within the same granularity period.
 			return this.priority == that.priority ? 0
 					: this.priority < that.priority ? -1 : 1;
 		}
 
-		public boolean equals(Object o)
-		{
+		public boolean equals(Object o) {
 			if (this == o)
 				return true;
 			if (o == null || getClass() != o.getClass())
@@ -156,14 +155,12 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 			// Priority and submint time are not factors in equality
 		}
 
-		public int hashCode()
-		{
+		public int hashCode() {
 			return this.retriever.getName().hashCode();
 		}
 	}
 
-	public void uncaughtException(Thread thread, Throwable throwable)
-	{
+	public void uncaughtException(Thread thread, Throwable throwable) {
 		Logging
 				.logger()
 				.fine(
@@ -173,19 +170,16 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 										thread.getName()));
 	}
 
-	private class RetrievalExecutor extends ThreadPoolExecutor
-	{
-		private static final long THREAD_TIMEOUT = 2; // keep idle threads alive this many seconds
+	private class RetrievalExecutor extends ThreadPoolExecutor {
+		private static final long THREAD_TIMEOUT = 2; // keep idle threads alive
+														// this many seconds
 		private long staleRequestLimit; // reject requests older than this
 
-		private RetrievalExecutor(int poolSize, int queueSize)
-		{
+		private RetrievalExecutor(int poolSize, int queueSize) {
 			super(poolSize, poolSize, THREAD_TIMEOUT, TimeUnit.SECONDS,
 					new PriorityBlockingQueue<Runnable>(queueSize),
-					new ThreadFactory()
-					{
-						public Thread newThread(Runnable runnable)
-						{
+					new ThreadFactory() {
+						public Thread newThread(Runnable runnable) {
 							Thread thread = new Thread(runnable);
 							thread.setDaemon(true);
 							thread.setPriority(Thread.MIN_PRIORITY);
@@ -193,13 +187,17 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 									.setUncaughtExceptionHandler(ExtendedRetrievalService.this);
 							return thread;
 						}
-					}, new ThreadPoolExecutor.DiscardPolicy() // abandon task when queue is full
+					}, new ThreadPoolExecutor.DiscardPolicy() // abandon task
+																// when queue is
+																// full
 					{
-						// This listener is invoked only when the executor queue is a bounded queue and runs out of room.
-						// If the queue is a java.util.concurrent.PriorityBlockingQueue, this listener is never invoked.
+						// This listener is invoked only when the executor queue
+						// is a bounded queue and runs out of room.
+						// If the queue is a
+						// java.util.concurrent.PriorityBlockingQueue, this
+						// listener is never invoked.
 						public void rejectedExecution(Runnable runnable,
-								ThreadPoolExecutor threadPoolExecutor)
-						{
+								ThreadPoolExecutor threadPoolExecutor) {
 							// Interposes logging for rejected execution
 							Logging
 									.logger()
@@ -230,16 +228,13 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 		 *             if either <code>thread</code> or <code>runnable</code> is
 		 *             null
 		 */
-		protected void beforeExecute(Thread thread, Runnable runnable)
-		{
-			if (thread == null)
-			{
+		protected void beforeExecute(Thread thread, Runnable runnable) {
+			if (thread == null) {
 				String msg = Logging.getMessage("nullValue.ThreadIsNull");
 				Logging.logger().fine(msg);
 				throw new IllegalArgumentException(msg);
 			}
-			if (runnable == null)
-			{
+			if (runnable == null) {
 				String msg = Logging.getMessage("nullValue.RunnableIsNull");
 				Logging.logger().fine(msg);
 				throw new IllegalArgumentException(msg);
@@ -251,8 +246,7 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 			long limit = task.retriever.getStaleRequestLimit() >= 0 ? task.retriever
 					.getStaleRequestLimit()
 					: this.staleRequestLimit;
-			if (task.retriever.getBeginTime() - task.retriever.getSubmitTime() > limit)
-			{
+			if (task.retriever.getBeginTime() - task.retriever.getSubmitTime() > limit) {
 				// Task has been sitting on the queue too long
 				Logging
 						.logger()
@@ -264,8 +258,7 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 				task.cancel(true);
 			}
 
-			if (ExtendedRetrievalService.this.activeTasks.contains(task))
-			{
+			if (ExtendedRetrievalService.this.activeTasks.contains(task)) {
 				// Task is a duplicate
 				Logging
 						.logger()
@@ -278,14 +271,13 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 			}
 
 			ExtendedRetrievalService.this.activeTasks.add(task);
-			//lines added here
 			if (!task.isCancelled())
 				beforeDownload(task);
-			//lines added here
 
 			thread.setName(RUNNING_THREAD_NAME_PREFIX
 					+ task.getRetriever().getName());
-			thread.setPriority(Thread.MIN_PRIORITY); // Subordinate thread priority to rendering
+			thread.setPriority(Thread.MIN_PRIORITY); // Subordinate thread
+														// priority to rendering
 			thread.setUncaughtExceptionHandler(ExtendedRetrievalService.this);
 
 			super.beforeExecute(thread, runnable);
@@ -300,10 +292,8 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 		 * @throws IllegalArgumentException
 		 *             if <code>runnable</code> is null
 		 */
-		protected void afterExecute(Runnable runnable, Throwable throwable)
-		{
-			if (runnable == null)
-			{
+		protected void afterExecute(Runnable runnable, Throwable throwable) {
+			if (runnable == null) {
 				String msg = Logging.getMessage("nullValue.RunnableIsNull");
 				Logging.logger().fine(msg);
 				throw new IllegalArgumentException(msg);
@@ -312,16 +302,12 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 			super.afterExecute(runnable, throwable);
 
 			RetrievalTask task = (RetrievalTask) runnable;
-			//line added here
 			afterDownload(task);
-			//line added here
 			ExtendedRetrievalService.this.activeTasks.remove(task);
 			task.retriever.setEndTime(System.currentTimeMillis());
 
-			try
-			{
-				if (throwable != null)
-				{
+			try {
+				if (throwable != null) {
 					Logging
 							.logger()
 							.log(
@@ -335,47 +321,35 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 				}
 
 				task.get(); // Wait for task to finish, cancel or break
-			}
-			catch (java.util.concurrent.ExecutionException e)
-			{
+			} catch (java.util.concurrent.ExecutionException e) {
 				String message = Logging
 						.getMessage(
 								"BasicRetrievalService.ExecutionExceptionDuringRetrieval",
 								task.getRetriever().getName());
-				if (e.getCause() instanceof SocketTimeoutException)
-				{
+				if (e.getCause() instanceof SocketTimeoutException) {
 					Logging.logger().fine(
 							message + " " + e.getCause().getLocalizedMessage());
-				}
-				else
-				{
+				} else {
 					Logging.logger().log(Level.FINE, message, e);
 				}
-			}
-			catch (InterruptedException e)
-			{
+			} catch (InterruptedException e) {
 				Logging.logger().log(
 						Level.FINE,
 						Logging.getMessage(
 								"BasicRetrievalService.RetrievalInterrupted",
 								task.getRetriever().getName()), e);
-			}
-			catch (java.util.concurrent.CancellationException e)
-			{
+			} catch (java.util.concurrent.CancellationException e) {
 				Logging.logger().fine(
 						Logging.getMessage(
 								"BasicRetrievalService.RetrievalCancelled",
 								task.getRetriever().getName()));
-			}
-			finally
-			{
+			} finally {
 				Thread.currentThread().setName(IDLE_THREAD_NAME_PREFIX);
 			}
 		}
 	}
 
-	public ExtendedRetrievalService()
-	{
+	public ExtendedRetrievalService() {
 		Integer poolSize = Configuration.getIntegerValue(
 				AVKey.RETRIEVAL_POOL_SIZE, DEFAULT_POOL_SIZE);
 		this.queueSize = Configuration.getIntegerValue(
@@ -384,12 +358,12 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 		// this.executor runs the retrievers, each in their own thread
 		this.executor = new RetrievalExecutor(poolSize, this.queueSize);
 
-		// this.activeTasks holds the list of currently executing tasks (*not* those pending on the queue)
+		// this.activeTasks holds the list of currently executing tasks (*not*
+		// those pending on the queue)
 		this.activeTasks = new ConcurrentLinkedQueue<RetrievalTask>();
 	}
 
-	public void shutdown(boolean immediately)
-	{
+	public void shutdown(boolean immediately) {
 		if (immediately)
 			this.executor.shutdownNow();
 		else
@@ -406,23 +380,21 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 	 * @throws IllegalArgumentException
 	 *             if <code>retrieer</code> is null or has no name
 	 */
-	public RetrievalFuture runRetriever(Retriever retriever)
-	{
-		if (retriever == null)
-		{
+	public RetrievalFuture runRetriever(Retriever retriever) {
+		if (retriever == null) {
 			String msg = Logging.getMessage("nullValue.RetrieverIsNull");
 			Logging.logger().fine(msg);
 			throw new IllegalArgumentException(msg);
 		}
-		if (retriever.getName() == null)
-		{
+		if (retriever.getName() == null) {
 			String message = Logging
 					.getMessage("nullValue.RetrieverNameIsNull");
 			Logging.logger().fine(message);
 			throw new IllegalArgumentException(message);
 		}
 
-		// Add with secondary priority that removes most recently added requests first.
+		// Add with secondary priority that removes most recently added requests
+		// first.
 		return this.runRetriever(retriever, (double) (Long.MAX_VALUE - System
 				.currentTimeMillis()));
 	}
@@ -439,25 +411,21 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 	 *             if <code>retriever</code> is null or has no name
 	 */
 	public synchronized RetrievalFuture runRetriever(Retriever retriever,
-			double priority)
-	{
-		if (retriever == null)
-		{
+			double priority) {
+		if (retriever == null) {
 			String message = Logging.getMessage("nullValue.RetrieverIsNull");
 			Logging.logger().fine(message);
 			throw new IllegalArgumentException(message);
 		}
 
-		if (retriever.getName() == null)
-		{
+		if (retriever.getName() == null) {
 			String message = Logging
 					.getMessage("nullValue.RetrieverNameIsNull");
 			Logging.logger().fine(message);
 			throw new IllegalArgumentException(message);
 		}
 
-		if (!this.isAvailable())
-		{
+		if (!this.isAvailable()) {
 			Logging.logger().finer(
 					Logging.getMessage(
 							"BasicRetrievalService.ResourceRejected", retriever
@@ -483,10 +451,8 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 	 * @throws IllegalArgumentException
 	 *             if <code>poolSize</code> is non-positive
 	 */
-	public void setRetrieverPoolSize(int poolSize)
-	{
-		if (poolSize < 1)
-		{
+	public void setRetrieverPoolSize(int poolSize) {
+		if (poolSize < 1) {
 			String message = Logging
 					.getMessage("BasicRetrievalService.RetrieverPoolSizeIsLessThanOne");
 			Logging.logger().fine(message);
@@ -497,37 +463,32 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 		this.executor.setMaximumPoolSize(poolSize);
 	}
 
-	public int getRetrieverPoolSize()
-	{
+	public int getRetrieverPoolSize() {
 		return this.executor.getCorePoolSize();
 	}
 
-	private boolean hasRetrievers()
-	{
+	private boolean hasRetrievers() {
 		Thread[] threads = new Thread[Thread.activeCount()];
 		int numThreads = Thread.enumerate(threads);
-		for (int i = 0; i < numThreads; i++)
-		{
+		for (int i = 0; i < numThreads; i++) {
 			if (threads[i].getName().startsWith(RUNNING_THREAD_NAME_PREFIX))
 				return true;
 		}
 		return false;
 	}
 
-	public boolean hasActiveTasks()
-	{
+	public boolean hasActiveTasks() {
 		return this.hasRetrievers();
 	}
 
-	public boolean isAvailable()
-	{
+	public boolean isAvailable() {
 		return this.executor.getQueue().size() < this.queueSize;
-		//            && !WorldWind.getNetworkStatus().isNetworkUnavailable();
+		// && !WorldWind.getNetworkStatus().isNetworkUnavailable();
 	}
 
-	public int getNumRetrieversPending()
-	{
-		// Could use same method to determine active tasks as hasRetrievers() above, but this method only advisory.
+	public int getNumRetrieversPending() {
+		// Could use same method to determine active tasks as hasRetrievers()
+		// above, but this method only advisory.
 		return this.activeTasks.size() + this.executor.getQueue().size();
 	}
 
@@ -539,10 +500,8 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 	 * @throws IllegalArgumentException
 	 *             if <code>retriever</code> is null
 	 */
-	public boolean contains(Retriever retriever)
-	{
-		if (retriever == null)
-		{
+	public boolean contains(Retriever retriever) {
+		if (retriever == null) {
 			String msg = Logging.getMessage("nullValue.RetrieverIsNull");
 			Logging.logger().fine(msg);
 			throw new IllegalArgumentException(msg);
@@ -552,28 +511,22 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 				.contains(task));
 	}
 
-	public double getProgress()
-	{
+	public double getProgress() {
 		int totalContentLength = 0;
 		int totalBytesRead = 0;
 
-		for (RetrievalTask task : this.activeTasks)
-		{
+		for (RetrievalTask task : this.activeTasks) {
 			if (task.isDone())
 				continue;
 
 			Retriever retriever = task.getRetriever();
-			try
-			{
+			try {
 				double tcl = retriever.getContentLength();
-				if (tcl > 0)
-				{
+				if (tcl > 0) {
 					totalContentLength += tcl;
 					totalBytesRead += retriever.getContentLengthRead();
 				}
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				Logging
 						.logger()
 						.log(
@@ -587,22 +540,17 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 			}
 		}
 
-		for (Runnable runnable : this.executor.getQueue())
-		{
+		for (Runnable runnable : this.executor.getQueue()) {
 			RetrievalTask task = (RetrievalTask) runnable;
 
 			Retriever retriever = task.getRetriever();
-			try
-			{
+			try {
 				double tcl = retriever.getContentLength();
-				if (tcl > 0)
-				{
+				if (tcl > 0) {
 					totalContentLength += tcl;
 					totalBytesRead += retriever.getContentLengthRead();
 				}
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				String message = Logging
 						.getMessage("BasicRetrievalService.ExceptionRetrievingContentSizes")
 						+ (retriever.getName() != null ? retriever.getName()
@@ -624,48 +572,39 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 		return progress;
 	}
 
-	//CODE BELOW ADDED 2009-02-02 by Michael de Hoog
+	// CODE BELOW ADDED 2009-02-02, last modified 2009-09-09
 
 	private static final Field[] FIELDS;
 	private Map<RetrievalTask, SectorPolyline> sectors = new HashMap<RetrievalTask, SectorPolyline>();
-	private RenderableLayer layer = new SynchronizedRenderableLayer();
+	private RenderableLayer layer = null;
 	private static final Color COLOR = new Color(1f, 0f, 0f, 0.5f);
 
-	static
-	{
+	static {
 		Class<?>[] classes = new Class<?>[] { TiledImageLayer.class,
 				BasicElevationModel.class, BasicTiledImageLayer.class,
 				PlaceNameLayer.class, RPFTiledImageLayer.class,
-				SurfaceImage.class, GeoNamesLayer.class,
-				MaskTiledImageLayer.class, BasicMercatorTiledImageLayer.class,
-				MercatorTiledImageLayer.class };
-		/* Search classes above for declared classes that implement
-		   RetrivalPostProcess AND contain a Field which is a subclass
-		   of Tile, and add those Fields to an array */
+				SurfaceImage.class };
+		/*
+		 * Search classes above for declared classes that implement
+		 * RetrivalPostProcess AND contain a Field which is a subclass of Tile,
+		 * and add those Fields to an array
+		 */
 		List<Field> tileFields = new ArrayList<Field>();
-		for (Class<?> c : classes)
-		{
-			for (Class<?> dc : c.getDeclaredClasses())
-			{
-				for (Class<?> i : dc.getInterfaces())
-				{
-					if (i == RetrievalPostProcessor.class)
-					{
-						for (Field field : dc.getDeclaredFields())
-						{
+		for (Class<?> c : classes) {
+			for (Class<?> dc : c.getDeclaredClasses()) {
+				for (Class<?> i : dc.getInterfaces()) {
+					if (i == RetrievalPostProcessor.class) {
+						for (Field field : dc.getDeclaredFields()) {
 							Class<?> type = field.getType();
 							boolean found = false;
-							while (type != null)
-							{
-								if (type == Tile.class)
-								{
+							while (type != null) {
+								if (type == Tile.class) {
 									found = true;
 									break;
 								}
 								type = type.getSuperclass();
 							}
-							if (found)
-							{
+							if (found) {
 								field.setAccessible(true);
 								tileFields.add(field);
 								break;
@@ -679,64 +618,104 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 		FIELDS = tileFields.toArray(new Field[tileFields.size()]);
 	}
 
-	public void addLayer(WorldWindow wwd)
-	{
-		wwd.getModel().getLayers().add(layer);
-		layer.setPickEnabled(false);
+	public synchronized Layer getLayer() {
+		if (layer == null) {
+			layer = new SynchronizedRenderableLayer();
+		}
+		return layer;
 	}
 
-	private void beforeDownload(RetrievalTask task)
-	{
-		if (Settings.get().isShowDownloads())
-		{
-			Tile tile = getTile(task);
-			if (tile != null)
-			{
-				SectorPolyline s = new SectorPolyline(tile.getSector());
-				s.setColor(COLOR);
-				s.setLineWidth(2.0);
-				s.setAntiAliasHint(Polyline.ANTIALIAS_NICEST);
-				sectors.put(task, s);
-				layer.addRenderable(s);
-			}
+	private void beforeDownload(RetrievalTask task) {
+		Tile tile = getTile(task);
+		if (tile != null) {
+			SectorPolyline s = new SectorPolyline(tile.getSector());
+			s.setColor(COLOR);
+			s.setLineWidth(2.0);
+			s.setAntiAliasHint(Polyline.ANTIALIAS_NICEST);
+			sectors.put(task, s);
+			layer.addRenderable(s);
 		}
 	}
 
-	private void afterDownload(RetrievalTask task)
-	{
+	private void afterDownload(RetrievalTask task) {
 		SectorPolyline s = sectors.remove(task);
-		if (s != null)
-		{
+		if (s != null) {
 			layer.removeRenderable(s);
 			layer.firePropertyChange(AVKey.LAYER, null, this);
 		}
 	}
 
-	private Tile getTile(RetrievalTask task)
-	{
+	private Tile getTile(RetrievalTask task) {
 		Retriever retriever = task.getRetriever();
-		if (retriever instanceof URLRetriever)
-		{
+		if (retriever instanceof URLRetriever) {
 			URLRetriever ur = (URLRetriever) retriever;
 			RetrievalPostProcessor rpp = ur.getPostProcessor();
-			for (Field field : FIELDS)
-			{
-				if (rpp.getClass() == field.getDeclaringClass())
-				{
-					try
-					{
+			for (Field field : FIELDS) {
+				if (rpp.getClass() == field.getDeclaringClass()) {
+					try {
 						Object object = field.get(rpp);
-						if (object instanceof Tile)
-						{
+						if (object instanceof Tile) {
 							return (Tile) object;
 						}
-					}
-					catch (Exception e)
-					{
+					} catch (Exception e) {
 					}
 				}
 			}
 		}
 		return null;
+	}
+
+	public class SectorPolyline extends Polyline {
+		public SectorPolyline(Sector sector) {
+			List<LatLon> latlons = new ArrayList<LatLon>();
+			latlons.add(new LatLon(sector.getMinLatitude(), sector
+					.getMinLongitude()));
+			latlons.add(new LatLon(sector.getMinLatitude(), sector
+					.getMaxLongitude()));
+			latlons.add(new LatLon(sector.getMaxLatitude(), sector
+					.getMaxLongitude()));
+			latlons.add(new LatLon(sector.getMaxLatitude(), sector
+					.getMinLongitude()));
+			setPositions(latlons, 0);
+			setFollowTerrain(true);
+			setClosed(true);
+			setPathType(RHUMB_LINE);
+		}
+
+		@Override
+		public void render(DrawContext dc) {
+			try {
+				super.render(dc);
+			} catch (NullPointerException e) {
+				// catch bug in Position.interpolate
+				boolean followTerrain = isFollowTerrain();
+				setFollowTerrain(false);
+				super.render(dc);
+				setFollowTerrain(followTerrain);
+			}
+		}
+	}
+
+	public class SynchronizedRenderableLayer extends RenderableLayer {
+		public SynchronizedRenderableLayer() {
+			super();
+			setPickEnabled(false);
+			setName("tile retrieval");
+		}
+
+		@Override
+		protected synchronized void doRender(DrawContext dc) {
+			super.doRender(dc);
+		}
+
+		@Override
+		public synchronized void addRenderable(Renderable renderable) {
+			super.addRenderable(renderable);
+		}
+
+		@Override
+		public synchronized void removeRenderable(Renderable renderable) {
+			super.removeRenderable(renderable);
+		}
 	}
 }

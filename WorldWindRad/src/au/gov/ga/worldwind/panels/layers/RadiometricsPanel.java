@@ -1,12 +1,12 @@
 package au.gov.ga.worldwind.panels.layers;
 
-import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.view.OrbitView;
+import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
+import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -53,10 +53,7 @@ import au.gov.ga.worldwind.util.HtmlViewer;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 
-import nasa.worldwind.view.FlyToOrbitViewStateIterator;
-
-public class RadiometricsPanel extends JPanel
-{
+public class RadiometricsPanel extends JPanel {
 	private Layer[] layers;
 
 	private Layer ternary;
@@ -116,16 +113,14 @@ public class RadiometricsPanel extends JPanel
 	private final static Object[] FLYTO = new Object[] { "", NSW, VIC, QLD,
 			SA_1, SA_2, NT, WA, TAS };
 
-	public RadiometricsPanel(WorldWindow wwd, Frame frame)
-	{
+	public RadiometricsPanel(WorldWindow wwd, Frame frame) {
 		this.wwd = wwd;
 		this.frame = frame;
 		createLayers();
 		fillPanel();
 	}
 
-	private void createLayers()
-	{
+	private void createLayers() {
 		ternary = new TernaryLayer();
 		uranium = new UraniumLayer();
 		thorium = new ThoriumLayer();
@@ -148,16 +143,14 @@ public class RadiometricsPanel extends JPanel
 		layers = new Layer[] { ternary, uranium, thorium, potassium, doseRate,
 				ratioUTh, ratioUK, ratioThK, ternaryAreas, uraniumAreas,
 				thoriumAreas, potassiumAreas, doseRateAreas, ratioUThAreas,
-				ratioUKAreas, ratioThKAreas, USquaredOverTh  };
-		for (Layer layer : layers)
-		{
+				ratioUKAreas, ratioThKAreas, USquaredOverTh };
+		for (Layer layer : layers) {
 			wwd.getModel().getLayers().add(layer);
 			layer.setEnabled(false);
 		}
 	}
 
-	private void fillPanel()
-	{
+	private void fillPanel() {
 		int INDENT = 20;
 		int SPACING = 5;
 
@@ -167,17 +160,13 @@ public class RadiometricsPanel extends JPanel
 		Dimension size;
 		JSeparator js;
 
-		ActionListener al = new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
+		ActionListener al = new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				updateLayers();
 			}
 		};
-		ChangeListener cl = new ChangeListener()
-		{
-			public void stateChanged(ChangeEvent e)
-			{
+		ChangeListener cl = new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
 				updateLayers();
 			}
 		};
@@ -292,7 +281,7 @@ public class RadiometricsPanel extends JPanel
 		ratioUThRadio = new JRadioButton(ratioUTh.getName());
 		ratioUThRadio.addActionListener(al);
 		addRadioToPanel(panel, gridy++, ratioUThRadio, ratioLegend);
-		
+
 		USquaredOverThRadio = new JRadioButton(USquaredOverTh.getName());
 		USquaredOverThRadio.addActionListener(al);
 		addRadioToPanel(panel, gridy++, USquaredOverThRadio, ratioLegend);
@@ -381,8 +370,10 @@ public class RadiometricsPanel extends JPanel
 
 		FlatJButton legend = new FlatJButton(Icons.legend);
 		legend.restrictSize();
-		legend.addActionListener(createMetadataListener(
-				"Color-enhanced areas legends", "areas_legends.html", 700, 500));
+		legend
+				.addActionListener(createMetadataListener(
+						"Color-enhanced areas legends", "areas_legends.html",
+						700, 500));
 		c = new GridBagConstraints();
 		c.gridx = 3;
 		c.gridy = 1;
@@ -411,26 +402,20 @@ public class RadiometricsPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(flytoCombo, c);
 
-		flytoCombo.addActionListener(new ActionListener()
-		{
+		flytoCombo.addActionListener(new ActionListener() {
 			private Timer timer;
 
-			public void actionPerformed(ActionEvent e)
-			{
+			public void actionPerformed(ActionEvent e) {
 				Object object = flytoCombo.getSelectedItem();
-				if (object instanceof Area)
-				{
+				if (object instanceof Area) {
 					Area area = (Area) object;
 					long lengthMillis = area.applyStateIterator(wwd);
 
-					if (timer != null && timer.isRunning())
-					{
+					if (timer != null && timer.isRunning()) {
 						timer.stop();
 					}
-					timer = new Timer((int) lengthMillis, new ActionListener()
-					{
-						public void actionPerformed(ActionEvent e)
-						{
+					timer = new Timer((int) lengthMillis, new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
 							flytoCombo.setSelectedIndex(0);
 						}
 					});
@@ -454,8 +439,7 @@ public class RadiometricsPanel extends JPanel
 	}
 
 	private void addRadioToPanel(JPanel panel, int gridy, JRadioButton radio,
-			ActionListener legendAL)
-	{
+			ActionListener legendAL) {
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = gridy;
@@ -464,8 +448,7 @@ public class RadiometricsPanel extends JPanel
 		c.insets = new Insets(0, 20, 0, 0);
 		panel.add(radio, c);
 
-		if (legendAL != null)
-		{
+		if (legendAL != null) {
 			FlatJButton legend = new FlatJButton(Icons.legend);
 			legend.restrictSize();
 			legend.addActionListener(legendAL);
@@ -479,25 +462,18 @@ public class RadiometricsPanel extends JPanel
 	}
 
 	private ActionListener createMetadataListener(final String title,
-			final String htmlpage, final int width, final int height)
-	{
-		return new ActionListener()
-		{
+			final String htmlpage, final int width, final int height) {
+		return new ActionListener() {
 			private HtmlViewer dialog = null;
 
-			public void actionPerformed(ActionEvent ae)
-			{
-				if (dialog == null)
-				{
+			public void actionPerformed(ActionEvent ae) {
+				if (dialog == null) {
 					URL page = null, base = null;
-					try
-					{
+					try {
 						base = new URL(GALayer.getMetadataBaseUrl(),
 								"radiometrics/");
 						page = new URL(base, htmlpage);
-					}
-					catch (MalformedURLException e)
-					{
+					} catch (MalformedURLException e) {
 					}
 					dialog = new HtmlViewer(frame, title, page, base);
 					dialog.setSize(width, height);
@@ -511,13 +487,11 @@ public class RadiometricsPanel extends JPanel
 		};
 	}
 
-	public Layer[] getLayers()
-	{
+	public Layer[] getLayers() {
 		return layers;
 	}
 
-	private void updateLayers()
-	{
+	private void updateLayers() {
 		boolean radio = radioCheck.isSelected();
 		boolean areas = areasCheck.isSelected();
 
@@ -561,47 +535,40 @@ public class RadiometricsPanel extends JPanel
 		wwd.redraw();
 	}
 
-	private static class Area
-	{
+	private static class Area {
 		private final String name;
 		private final LatLon center;
 		private final double zoom;
 
-		public Area(String name, double lat, double lon, double zoom)
-		{
+		public Area(String name, double lat, double lon, double zoom) {
 			this(name, LatLon.fromDegrees(lat, lon), zoom);
 		}
 
-		public Area(String name, LatLon center, double zoom)
-		{
+		public Area(String name, LatLon center, double zoom) {
 			this.name = name;
 			this.center = center;
 			this.zoom = zoom;
 		}
 
-		public long applyStateIterator(WorldWindow wwd)
-		{
+		public long applyStateIterator(WorldWindow wwd) {
 			if (!(wwd.getView() instanceof OrbitView))
 				return 0;
 
 			OrbitView view = (OrbitView) wwd.getView();
 			Position beginCenter = view.getCenterPosition();
-			long lengthMillis = Util.getScaledLengthMillis(beginCenter
-					.getLatLon(), center);
+			long lengthMillis = Util.getScaledLengthMillis(beginCenter, center);
 
-			ViewStateIterator vsi = FlyToOrbitViewStateIterator
-					.createPanToIterator(wwd.getModel().getGlobe(),
-							beginCenter, new Position(center, 0), view
-									.getHeading(), Angle.ZERO, view.getPitch(),
-							Angle.ZERO, view.getZoom(), zoom, lengthMillis,
-							true);
-			view.applyStateIterator(vsi);
+			view.addAnimator(FlyToOrbitViewAnimator
+					.createFlyToOrbitViewAnimator(view, beginCenter,
+							new Position(center, 0), view.getHeading(),
+							Angle.ZERO, view.getPitch(), Angle.ZERO, view
+									.getZoom(), zoom, lengthMillis, true));
+
 			return lengthMillis;
 		}
 
 		@Override
-		public String toString()
-		{
+		public String toString() {
 			return name;
 		}
 	}

@@ -4,7 +4,6 @@ import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
-import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -22,7 +21,8 @@ import gov.nasa.worldwind.layers.TerrainProfileLayer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.retrieve.RetrievalService;
-import gov.nasa.worldwind.view.OrbitView;
+import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
+import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -70,7 +70,6 @@ import javax.swing.filechooser.FileFilter;
 
 import nasa.worldwind.awt.WorldWindowStereoGLCanvas;
 import nasa.worldwind.retrieve.ExtendedRetrievalService;
-import nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import au.gov.ga.worldwind.annotations.AnnotationEditor;
 import au.gov.ga.worldwind.annotations.AnnotationsPanel;
 import au.gov.ga.worldwind.bookmarks.Bookmark;
@@ -116,8 +115,7 @@ public class Application
 		try
 		{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (Exception e)
+		} catch (Exception e)
 		{
 		}
 	}
@@ -141,15 +139,21 @@ public class Application
 				.fromDegreesLatitude(-27).degrees));
 		Configuration.setValue(AVKey.INITIAL_LONGITUDE, Double.toString(Angle
 				.fromDegreesLongitude(133.5).degrees));
-		/*Configuration.setValue(AVKey.INITIAL_ALTITUDE, Double
-				.toString(1.2 * Earth.WGS84_EQUATORIAL_RADIUS));*/
+		/*
+		 * Configuration.setValue(AVKey.INITIAL_ALTITUDE, Double .toString(1.2
+		 * Earth.WGS84_EQUATORIAL_RADIUS));
+		 */
 
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
 				ExtendedRetrievalService.class.getName());
-		/*Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
-				AWTInputHandler.class.getName());*/
-		/*Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
-				NormalTessellator.class.getName());*/
+		/*
+		 * Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
+		 * AWTInputHandler.class.getName());
+		 */
+		/*
+		 * Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
+		 * NormalTessellator.class.getName());
+		 */
 
 		WorldWind.getDataFileStore().addLocation("cache", false);
 
@@ -176,21 +180,20 @@ public class Application
 
 	private Application()
 	{
-		//show splashscreen
+		// show splashscreen
 		frame = new JFrame("Geoscience Australia – World Wind");
 		final SplashScreen splashScreen = new SplashScreen(frame);
 
-		//set icon
+		// set icon
 		try
 		{
 			frame.setIconImage(new ImageIcon(Application.class
 					.getResource("/images/32x32-icon-earth.png")).getImage());
-		}
-		catch (Exception e)
+		} catch (Exception e)
 		{
 		}
 
-		//create worldwind stuff
+		// create worldwind stuff
 		if (Settings.get().isHardwareStereoEnabled())
 			wwd = new WorldWindowStereoGLCanvas(
 					WorldWindowStereoGLCanvas.stereoCaps);
@@ -203,8 +206,8 @@ public class Application
 				WorldMapLayer.class));
 		create3DMouse();
 		createDoubleClickListener();
-		
-		//hack camera smoothing to be not as crazy as default
+
+		// hack camera smoothing to be not as crazy as default
 		CameraSmoothHack.hackCameraSmoothing(wwd.getInputHandler());
 
 		wwd.addRenderingListener(new RenderingListener()
@@ -222,7 +225,7 @@ public class Application
 		RetrievalService rs = WorldWind.getRetrievalService();
 		if (rs instanceof ExtendedRetrievalService)
 		{
-			((ExtendedRetrievalService) rs).addLayer(wwd);
+			model.getLayers().add(((ExtendedRetrievalService) rs).getLayer());
 		}
 
 		map = new WorldMapLayer();
@@ -234,7 +237,7 @@ public class Application
 		model.getLayers().add(compass);
 		model.getLayers().add(logo);
 
-		//create gui stuff
+		// create gui stuff
 
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
@@ -248,7 +251,7 @@ public class Application
 
 		JPanel panel = new JPanel(new BorderLayout());
 		frame.setContentPane(panel);
-		//panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		// panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
 		panel.add(splitPane, BorderLayout.CENTER);
@@ -264,16 +267,16 @@ public class Application
 		layersPanel = new LayersPanel(wwd, frame);
 		splitPane.setLeftComponent(layersPanel);
 
-		//panel.add(wwd, BorderLayout.CENTER);
-		//panel.add(layersPanel, BorderLayout.WEST);
+		// panel.add(wwd, BorderLayout.CENTER);
+		// panel.add(layersPanel, BorderLayout.WEST);
 
 		loadSplitLocations();
 		afterSettingsChange();
 
-		//create dialogs
+		// create dialogs
 		createDialogs();
 
-		//init user layers
+		// init user layers
 		if (LOCAL_LAYERS_ENABLED)
 		{
 			LocalLayers.init(wwd);
@@ -299,8 +302,7 @@ public class Application
 					frame.setVisible(true);
 				}
 			});
-		}
-		catch (Exception e)
+		} catch (Exception e)
 		{
 		}
 	}
@@ -322,9 +324,11 @@ public class Application
 		placesearchDialog.add(new PlaceSearchPanel(wwd), BorderLayout.CENTER);
 		dialogs.add(placesearchDialog);
 
-		/*JVisibleDialog sunPositionDialog = createDialog("Sun position");
-		sunPositionDialog.add(new SunPositionPanel(wwd), BorderLayout.CENTER);
-		dialogs.add(sunPositionDialog);*/
+		/*
+		 * JVisibleDialog sunPositionDialog = createDialog("Sun position");
+		 * sunPositionDialog.add(new SunPositionPanel(wwd),
+		 * BorderLayout.CENTER); dialogs.add(sunPositionDialog);
+		 */
 
 		loadDialogBounds();
 	}
@@ -376,8 +380,7 @@ public class Application
 						try
 						{
 							annotationsPanel.importAnnotations(file);
-						}
-						catch (Exception e)
+						} catch (Exception e)
 						{
 							JOptionPane.showMessageDialog(annotationsDialog,
 									"Could not import " + file.getName(),
@@ -419,8 +422,7 @@ public class Application
 						try
 						{
 							annotationsPanel.exportAnnotations(file);
-						}
-						catch (Exception e)
+						} catch (Exception e)
 						{
 							JOptionPane.showMessageDialog(annotationsDialog,
 									"Error: " + e, "Export error",
@@ -514,25 +516,25 @@ public class Application
 		if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
 			File file = chooser.getSelectedFile();
-			//get filter extension
+			// get filter extension
 			String newExt;
 			FileFilter filter = chooser.getFileFilter();
 			if (filters.contains(filter))
 				newExt = filter.toString();
 			else
 				newExt = "jpg";
-			//find file extension
+			// find file extension
 			int index = file.getName().lastIndexOf('.');
 			String ext = null;
 			if (index > 0)
 				ext = file.getName().substring(index + 1);
-			//fix/add file extension
+			// fix/add file extension
 			if (ext == null || !newExt.equals(ext.toLowerCase()))
 			{
 				ext = newExt;
 				file = new File(file.getParent(), file.getName() + "." + ext);
 			}
-			//ask user if they want to overwrite
+			// ask user if they want to overwrite
 			if (file.exists())
 			{
 				int answer = JOptionPane.showConfirmDialog(frame, file
@@ -628,16 +630,13 @@ public class Application
 
 		Position endCenter = Position.fromDegrees(initLat, initLon, beginCenter
 				.getElevation());
-		long lengthMillis = Util.getScaledLengthMillis(beginCenter.getLatLon(),
-				endCenter.getLatLon());
+		long lengthMillis = Util.getScaledLengthMillis(beginCenter, endCenter);
 
-		ViewStateIterator vsi = FlyToOrbitViewStateIterator
-				.createPanToIterator(wwd.getModel().getGlobe(), beginCenter,
-						endCenter, view.getHeading(), Angle
-								.fromDegrees(initHeading), view.getPitch(),
-						Angle.fromDegrees(initPitch), view.getZoom(),
-						initAltitude, lengthMillis, true);
-		wwd.getView().applyStateIterator(vsi);
+		view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(
+				view, beginCenter, endCenter, view.getHeading(), Angle
+						.fromDegrees(initHeading), view.getPitch(), Angle
+						.fromDegrees(initPitch), view.getZoom(), initAltitude,
+				lengthMillis, true));
 	}
 
 	private void create3DMouse()
@@ -697,8 +696,7 @@ public class Application
 									frame,
 									"Graphics device does not support fullscreen mode.",
 									"Not supported", JOptionPane.ERROR_MESSAGE);
-				}
-				else
+				} else
 				{
 					saveSplitLocations();
 					fullscreenFrame = new JFrame(frame.getTitle());
@@ -741,8 +739,7 @@ public class Application
 							fullBounds = fullBounds.union(gc.getBounds());
 						}
 						fullscreenFrame.setBounds(fullBounds);
-					}
-					else if (id != null)
+					} else if (id != null)
 					{
 						for (GraphicsDevice g : gds)
 						{
@@ -758,8 +755,7 @@ public class Application
 					fullscreenFrame.setVisible(true);
 					frame.setVisible(false);
 				}
-			}
-			else
+			} else
 			{
 				if (fullscreenFrame != null)
 				{
@@ -826,15 +822,12 @@ public class Application
 			}
 		});
 
-		/*menuItem = new JMenuItem("Save large image");
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				takeScreenshot(4000, 4000, new File("largescreeshot.png"));
-			}
-		});*/
+		/*
+		 * menuItem = new JMenuItem("Save large image"); menu.add(menuItem);
+		 * menuItem.addActionListener(new ActionListener() { public void
+		 * actionPerformed(ActionEvent e) { takeScreenshot(4000, 4000, new
+		 * File("largescreeshot.png")); } });
+		 */
 
 		menu.addSeparator();
 
@@ -1082,11 +1075,11 @@ public class Application
 						Position newCenter = Position.fromDegrees(bookmark
 								.getLat(), bookmark.getLon(), bookmark
 								.getElevation());
-						long lengthMillis = Util.getScaledLengthMillis(center
-								.getLatLon(), newCenter.getLatLon());
+						long lengthMillis = Util.getScaledLengthMillis(center,
+								newCenter);
 
-						ViewStateIterator vsi = FlyToOrbitViewStateIterator
-								.createPanToIterator(wwd.getModel().getGlobe(),
+						orbitView.addAnimator(FlyToOrbitViewAnimator
+								.createFlyToOrbitViewAnimator(orbitView,
 										center, newCenter, orbitView
 												.getHeading(), Angle
 												.fromDegrees(bookmark
@@ -1095,9 +1088,7 @@ public class Application
 												.fromDegrees(bookmark
 														.getPitch()), orbitView
 												.getZoom(), bookmark.getZoom(),
-										lengthMillis, true);
-
-						view.applyStateIterator(vsi);
+										lengthMillis, true));
 					}
 				}
 			});
@@ -1163,8 +1154,7 @@ public class Application
 				dialog.setVisible(dialogsOpen[i]);
 				if (!dialogsOpen[i])
 					dialog.centerInOwnerWhenShown();
-			}
-			else
+			} else
 			{
 				dialog.pack();
 				dialog.centerInOwnerWhenShown();
@@ -1214,8 +1204,7 @@ public class Application
 				else
 					// Default to metric units.
 					((ScalebarLayer) layer).setUnit(ScalebarLayer.UNIT_METRIC);
-			}
-			else if (layer instanceof TerrainProfileLayer)
+			} else if (layer instanceof TerrainProfileLayer)
 			{
 				if (StatusBar.UNIT_IMPERIAL.equals(newValue))
 					((TerrainProfileLayer) layer)
@@ -1231,8 +1220,7 @@ public class Application
 		{
 			this.statusBar.setElevationUnit(StatusBar.UNIT_IMPERIAL);
 			AnnotationEditor.setUnits(AnnotationEditor.IMPERIAL);
-		}
-		else
+		} else
 		{
 			// Default to metric units.
 			this.statusBar.setElevationUnit(StatusBar.UNIT_METRIC);

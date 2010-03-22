@@ -93,7 +93,7 @@ public class GALayer extends MaskTiledImageLayer
 		return url;
 	}
 
-	public static double getSplitScale()
+	public static double getGASplitScale()
 	{
 		return SPLIT_SCALE;
 	}

@@ -102,7 +102,7 @@ public class VisibilityCalculatorImpl implements VisibilityCalculator
 
 	public double distanceSquaredFromEye(GeoName geoname)
 	{
-		return latlonDistanceSquared(eye.getLatLon(), geoname.latlon);
+		return latlonDistanceSquared(eye, geoname.latlon);
 	}
 
 	public static double latlonDistanceSquared(LatLon ll1, LatLon ll2)

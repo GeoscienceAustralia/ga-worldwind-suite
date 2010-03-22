@@ -1,14 +1,14 @@
 package au.gov.ga.worldwind.annotations;
 
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.AnnotationAttributes;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.GlobeAnnotation;
-import gov.nasa.worldwind.render.MultiLineTextRenderer;
 import gov.nasa.worldwind.util.WWMath;
-import gov.nasa.worldwind.view.OrbitView;
+import gov.nasa.worldwind.view.orbit.OrbitView;
 
 public class RenderableAnnotation extends GlobeAnnotation
 {
@@ -22,7 +22,7 @@ public class RenderableAnnotation extends GlobeAnnotation
 				.getLatitude(), annotation.getLongitude(), 0));
 		this.annotation = annotation;
 		setAttributes(new MyAnnotationAttributes(annotation));
-		getAttributes().setTextAlign(MultiLineTextRenderer.ALIGN_CENTER);
+		getAttributes().setTextAlign(AVKey.CENTER);
 	}
 
 	//taken from superclass, apart from additions (see below)
@@ -31,8 +31,7 @@ public class RenderableAnnotation extends GlobeAnnotation
 		if (dc.isPickingMode() && this.getPickSupport() == null)
 			return;
 
-		Vec4 point = dc.getAnnotationRenderer()
-				.getAnnotationDrawPoint(dc, this);
+		Vec4 point = this.getAnnotationDrawPoint(dc);
 		if (point == null)
 			return;
 

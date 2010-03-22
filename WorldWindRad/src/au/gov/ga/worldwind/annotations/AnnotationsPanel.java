@@ -1,12 +1,12 @@
 package au.gov.ga.worldwind.annotations;
 
 import gov.nasa.worldwind.View;
-import gov.nasa.worldwind.ViewStateIterator;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.view.OrbitView;
+import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
+import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -47,7 +47,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import nasa.worldwind.view.FlyToOrbitViewStateIterator;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.util.FlatJButton;
 import au.gov.ga.worldwind.util.Icons;
@@ -460,7 +459,7 @@ public class AnnotationsPanel extends JPanel
 
 	private synchronized void stopAnnotations()
 	{
-		wwd.getView().stopStateIterators();
+		wwd.getView().stopAnimations();
 		playing = false;
 		playButton.setIcon(Icons.run);
 		playButton.setToolTipText("Play through annotations");
@@ -478,7 +477,7 @@ public class AnnotationsPanel extends JPanel
 					{
 						public void propertyChange(PropertyChangeEvent evt)
 						{
-							if (!view.hasStateIterator())
+							if (!view.isAnimating())
 							{
 								stopAnnotations();
 							}
@@ -579,8 +578,7 @@ public class AnnotationsPanel extends JPanel
 			Position center = orbitView.getCenterPosition();
 			Position newCenter = Position.fromDegrees(annotation.getLatitude(),
 					annotation.getLongitude(), 0);
-			long lengthMillis = Util.getScaledLengthMillis(center.getLatLon(),
-					newCenter.getLatLon());
+			long lengthMillis = Util.getScaledLengthMillis(center, newCenter);
 
 			Angle heading = orbitView.getHeading();
 			Angle pitch = orbitView.getPitch();
@@ -601,13 +599,11 @@ public class AnnotationsPanel extends JPanel
 					zoom = maxZoom;
 			}
 
-			ViewStateIterator vsi = FlyToOrbitViewStateIterator
-					.createPanToIterator(wwd.getModel().getGlobe(), center,
-							newCenter, orbitView.getHeading(), heading,
-							orbitView.getPitch(), pitch, orbitView.getZoom(),
-							zoom, lengthMillis, true);
-
-			view.applyStateIterator(vsi);
+			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(
+					orbitView, center, newCenter,
+					orbitView.getHeading(), heading,
+					orbitView.getPitch(), pitch,
+					orbitView.getZoom(), zoom, lengthMillis, true));
 
 			return lengthMillis;
 		}

@@ -1,16 +1,16 @@
 package au.gov.ga.worldwind.util;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import au.gov.ga.worldwind.settings.Settings;
-
-
+import gov.nasa.worldwind.animation.Animator;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.coords.MGRSCoord;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import au.gov.ga.worldwind.settings.Settings;
 
 public class Util
 {

@@ -3,7 +3,7 @@ package au.gov.ga.worldwind.bookmarks;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.view.OrbitView;
+import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.Component;
 import java.awt.Frame;
