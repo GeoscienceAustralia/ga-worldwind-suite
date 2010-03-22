@@ -29,15 +29,7 @@ import au.gov.ga.worldwind.util.Util;
 
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
-/**
- * 
- * @author Michael de Hoog
- * 2010 Chris Thorne: Documentation and modifications.
- * Sets up the AVList parameters for a tiled image layer.
- * Note the URL builder part is critical for inclusion of mask images.
- * This class is used by LocalLayerDefinition to create the layer parameters.
- *
- */
+
 public class LocalLayer extends TiledImageLayer
 {
 	private final Object fileLock = new Object();
