@@ -82,6 +82,9 @@ import util.DocumentAdapter;
 import util.DocumentLogger;
 import util.JDoubleField;
 import util.JIntegerField;
+import util.JLongField;
+import util.NullableNumberArray;
+import util.NumberArray;
 import util.Prefs;
 import util.ProgressReporterImpl;
 import util.Sector;
@@ -139,7 +142,7 @@ public class Application
 	private JIntegerField tilesizeField;
 	private JCheckBox outsideCheck;
 	private JPanel outsidePanel;
-	private JIntegerField[] outsideFields = new JIntegerField[0];
+	private JTextField[] outsideFields = new JTextField[0];
 	private JLabel levelsLabel;
 	private JSpinner levelsSpinner;
 	private JCheckBox overviewsCheck;
@@ -152,10 +155,10 @@ public class Application
 	private JPanel maxPanel;
 	private JPanel withPanel;
 	private JPanel otherwisePanel;
-	private JIntegerField[] minFields = new JIntegerField[0];
-	private JIntegerField[] maxFields = new JIntegerField[0];
-	private JIntegerField[] replaceFields = new JIntegerField[0];
-	private JIntegerField[] otherwiseFields = new JIntegerField[0];
+	private JTextField[] minFields = new JTextField[0];
+	private JTextField[] maxFields = new JTextField[0];
+	private JTextField[] replaceFields = new JTextField[0];
+	private JTextField[] otherwiseFields = new JTextField[0];
 
 	private JPanel dataModeCards;
 
@@ -168,6 +171,7 @@ public class Application
 	private JRadioButton byteRadio;
 	private JRadioButton int16Radio;
 	private JRadioButton int32Radio;
+	private JRadioButton float32Radio;
 	private JLabel bandLabel;
 	private JComboBox bandCombo;
 	private JCheckBox overrideLevelsCheck;
@@ -264,7 +268,7 @@ public class Application
 		logSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, topSplit,
 				bPanel);
 
-		//add scroll pane to options
+		// add scroll pane to options
 		panel = new JPanel(new GridBagLayout());
 		scrollPane = new JScrollPane(panel,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -313,7 +317,7 @@ public class Application
 		LogManager.getLogManager().addLogger(logger);
 		createLoggerPopupMenu();
 
-		//TOP LEFT
+		// TOP LEFT
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -614,7 +618,7 @@ public class Application
 		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(maxLongitudeField, c);
 
-		//BOTTOM LEFT
+		// BOTTOM LEFT
 
 		previewCanvas = new JLabel();
 		previewCanvas.setHorizontalAlignment(SwingConstants.CENTER);
@@ -629,7 +633,7 @@ public class Application
 		c.anchor = GridBagConstraints.CENTER;
 		blPanel.add(scrollPane, c);
 
-		//TOP RIGHT
+		// TOP RIGHT
 
 		tileTypeLabel = new JLabel("Tile type:");
 		c = new GridBagConstraints();
@@ -709,6 +713,14 @@ public class Application
 				{
 					tilesizeChanged = true;
 				}
+			}
+		});
+		tilesizeField.addFocusListener(new FocusAdapter()
+		{
+			@Override
+			public void focusLost(FocusEvent e)
+			{
+				tilesizeChanged();
 			}
 		});
 
@@ -854,26 +866,44 @@ public class Application
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(panel, c);
 
+		al = new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				elevationFormatChanged();
+			}
+		};
+
 		byteRadio = new JRadioButton("Byte");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		panel.add(byteRadio, c);
+		byteRadio.addActionListener(al);
 
 		int16Radio = new JRadioButton("16-bit integer");
 		int16Radio.setSelected(true);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		panel.add(int16Radio, c);
+		int16Radio.addActionListener(al);
 
 		int32Radio = new JRadioButton("32-bit integer");
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		panel.add(int32Radio, c);
+		int32Radio.addActionListener(al);
+
+		float32Radio = new JRadioButton("32-bit float");
+		c = new GridBagConstraints();
+		c.gridx = 3;
+		panel.add(float32Radio, c);
+		float32Radio.addActionListener(al);
 
 		bg = new ButtonGroup();
 		bg.add(byteRadio);
 		bg.add(int16Radio);
 		bg.add(int32Radio);
+		bg.add(float32Radio);
 
 		bandLabel = new JLabel("Band:");
 		c = new GridBagConstraints();
@@ -891,7 +921,8 @@ public class Application
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(panel, c);
 
-		bandCombo = new JComboBox(new Integer[] { 1 });
+		bandCombo = new JComboBox(new Integer[]
+		{ 1 });
 		bandCombo.setSelectedIndex(0);
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -940,7 +971,7 @@ public class Application
 		c.insets = new Insets(0, 0, SPACING, 0);
 		panel.add(overrideLevelsSpinner, c);
 
-		outsideCheck = new JCheckBox("Set pixels outsize dataset extents to:");
+		outsideCheck = new JCheckBox("");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 10;
@@ -1049,7 +1080,7 @@ public class Application
 		c.weighty = 1;
 		trPanel.add(panel, c);
 
-		//BOTTOM RIGHT
+		// BOTTOM RIGHT
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -1324,7 +1355,7 @@ public class Application
 	private void createLoggerPopupMenu()
 	{
 		final String preferenceKey = "Logger Level";
-		Level prefLevel = Level.FINE;
+		Level prefLevel = Level.INFO;
 		try
 		{
 			String prefLevelStr = preferences.get(preferenceKey, prefLevel
@@ -1337,8 +1368,9 @@ public class Application
 		logger.setLevel(prefLevel);
 
 		loggerPopup = new JPopupMenu();
-		Level[] levels = new Level[] { Level.FINEST, Level.FINER, Level.FINE,
-				Level.INFO, Level.WARNING, Level.SEVERE };
+		Level[] levels = new Level[]
+		{ Level.FINEST, Level.FINER, Level.FINE, Level.INFO, Level.WARNING,
+				Level.SEVERE };
 
 		ButtonGroup bg = new ButtonGroup();
 		for (final Level level : levels)
@@ -1438,7 +1470,7 @@ public class Application
 
 		if (!fileOpen)
 		{
-			//no file open
+			// no file open
 			infoText.setText("");
 			gdalFileField.setText("");
 			mapnikFileField.setText("");
@@ -1485,12 +1517,16 @@ public class Application
 							: new SpatialReference(projection);
 					String[] dataTypes = new String[bandCount];
 					int[] dataTypeSizes = new int[bandCount];
+					Double[] nodata = new Double[bandCount];
 					for (int i = 0; i < bandCount; i++)
 					{
 						Band band = dataset.GetRasterBand(i + 1);
 						int dataType = band.getDataType();
 						dataTypes[i] = gdal.GetDataTypeName(dataType);
 						dataTypeSizes[i] = gdal.GetDataTypeSize(dataType);
+						Double[] nodataValue = new Double[1];
+						band.GetNoDataValue(nodataValue);
+						nodata[i] = nodataValue[0];
 					}
 					StringBuilder info = new StringBuilder();
 					info.append("Dataset information:\n");
@@ -1498,10 +1534,10 @@ public class Application
 					info.append("Cell size = "
 							+ (sector.getDeltaLongitude() / width) + ", "
 							+ (sector.getDeltaLatitude() / height) + "\n");
-					info.append("Top left corner = ("
+					info.append("Bottom left corner = ("
 							+ sector.getMinLongitude() + ", "
 							+ sector.getMinLatitude() + ")\n");
-					info.append("Bottom right corner = ("
+					info.append("Top right corner = ("
 							+ sector.getMaxLongitude() + ", "
 							+ sector.getMaxLatitude() + ")\n");
 					info.append("Raster band count = " + bandCount + "\n");
@@ -1509,7 +1545,7 @@ public class Application
 					{
 						info.append("Band " + (i + 1) + " data type = "
 								+ dataTypes[i] + " (" + dataTypeSizes[i]
-								+ " bit)\n");
+								+ " bit), (no data value = " + nodata[i] + ")\n");
 					}
 					if (spatialReference != null)
 					{
@@ -1703,6 +1739,7 @@ public class Application
 		}
 
 		bandCountChanged();
+		tilesizeChanged();
 	}
 
 	private void imageFormatChanged()
@@ -1713,25 +1750,58 @@ public class Application
 		enableFields();
 	}
 
+	private void elevationFormatChanged()
+	{
+		bandCountChanged();
+		enableFields();
+	}
+	
+	private void tilesizeChanged()
+	{
+		if (elevationRadio.isSelected()
+				&& tilesizeField.getValue() % 2 != 0)
+		{
+			JOptionPane.showMessageDialog(frame,
+					"Tile size must be a multiple of 2",
+					"Invalid tile size",
+					JOptionPane.INFORMATION_MESSAGE);
+			tilesizeField.setValue(tilesizeField.getValue() + 1);
+		}
+	}
+
+	private boolean isFloat()
+	{
+		return elevationRadio.isSelected() && float32Radio.isSelected();
+	}
+
 	private void bandCountChanged()
 	{
 		GridBagConstraints c;
 
-		//save old values
-		Integer[] outsideBackup = readIntegerFields(outsideFields);
-		Integer[] minBackup = readIntegerFields(minFields);
-		Integer[] maxBackup = readIntegerFields(maxFields);
-		Integer[] replaceBackup = readIntegerFields(replaceFields);
-		Integer[] otherwiseBackup = readIntegerFields(otherwiseFields);
+		// save old values
+		Object[] outsideBackup = readNumberFields(outsideFields);
+		Object[] minBackup = readNumberFields(minFields);
+		Object[] maxBackup = readNumberFields(maxFields);
+		Object[] replaceBackup = readNumberFields(replaceFields);
+		Object[] otherwiseBackup = readNumberFields(otherwiseFields);
 
 		FocusListener fl = new FocusAdapter()
 		{
 			@Override
 			public void focusLost(FocusEvent e)
 			{
-				JIntegerField jif = (JIntegerField) e.getSource();
-				if (jif.getValue() == null)
-					jif.setValue(0);
+				if (e.getSource() instanceof JLongField)
+				{
+					JLongField jif = (JLongField) e.getSource();
+					if (jif.getValue() == null)
+						jif.setValue(0l);
+				}
+				else if (e.getSource() instanceof JDoubleField)
+				{
+					JDoubleField jdf = (JDoubleField) e.getSource();
+					if (jdf.getValue() == null)
+						jdf.setValue(0d);
+				}
 			}
 		};
 
@@ -1746,14 +1816,18 @@ public class Application
 		}
 		outputBandCount = bandCount <= 0 ? 1 : elevationRadio.isSelected() ? 1
 				: bandCount == 3 && alphaCheck.isSelected() ? 4 : bandCount;
-		outsideFields = new JIntegerField[outputBandCount];
-		minFields = new JIntegerField[outputBandCount];
-		maxFields = new JIntegerField[outputBandCount];
-		replaceFields = new JIntegerField[outputBandCount];
-		otherwiseFields = new JIntegerField[outputBandCount];
+		boolean isFloat = isFloat();
+		outsideFields = new JTextField[outputBandCount];
+		minFields = new JTextField[outputBandCount];
+		maxFields = new JTextField[outputBandCount];
+		replaceFields = new JTextField[outputBandCount];
+		otherwiseFields = new JTextField[outputBandCount];
 		for (int i = 0; i < outputBandCount; i++)
 		{
-			outsideFields[i] = new JIntegerField(0);
+			if (isFloat)
+				outsideFields[i] = new JDoubleField(0d);
+			else
+				outsideFields[i] = new JLongField(0l);
 			Dimension size = outsideFields[i].getPreferredSize();
 			size.width = 50;
 			outsideFields[i].setMinimumSize(size);
@@ -1763,7 +1837,10 @@ public class Application
 			c.gridx = i;
 			outsidePanel.add(outsideFields[i], c);
 
-			minFields[i] = new JIntegerField(0);
+			if (isFloat)
+				minFields[i] = new JDoubleField(0d);
+			else
+				minFields[i] = new JLongField(0l);
 			minFields[i].setMinimumSize(size);
 			minFields[i].setPreferredSize(size);
 			minFields[i].addFocusListener(fl);
@@ -1771,7 +1848,10 @@ public class Application
 			c.gridx = i;
 			minPanel.add(minFields[i], c);
 
-			maxFields[i] = new JIntegerField(0);
+			if (isFloat)
+				maxFields[i] = new JDoubleField(0d);
+			else
+				maxFields[i] = new JLongField(0l);
 			maxFields[i].setMinimumSize(size);
 			maxFields[i].setPreferredSize(size);
 			maxFields[i].addFocusListener(fl);
@@ -1779,14 +1859,20 @@ public class Application
 			c.gridx = i;
 			maxPanel.add(maxFields[i], c);
 
-			replaceFields[i] = new JIntegerField(null);
+			if (isFloat)
+				replaceFields[i] = new JDoubleField(null);
+			else
+				replaceFields[i] = new JLongField(null);
 			replaceFields[i].setMinimumSize(size);
 			replaceFields[i].setPreferredSize(size);
 			c = new GridBagConstraints();
 			c.gridx = i;
 			withPanel.add(replaceFields[i], c);
 
-			otherwiseFields[i] = new JIntegerField(null);
+			if (isFloat)
+				otherwiseFields[i] = new JDoubleField(null);
+			else
+				otherwiseFields[i] = new JLongField(null);
 			otherwiseFields[i].setMinimumSize(size);
 			otherwiseFields[i].setPreferredSize(size);
 			c = new GridBagConstraints();
@@ -1796,31 +1882,51 @@ public class Application
 			bandCombo.addItem(new Integer(i + 1));
 		}
 
-		//restore values
-		writeIntegerFields(outsideFields, outsideBackup);
-		writeIntegerFields(minFields, minBackup);
-		writeIntegerFields(maxFields, maxBackup);
-		writeIntegerFields(replaceFields, replaceBackup);
-		writeIntegerFields(otherwiseFields, otherwiseBackup);
+		// restore values
+		writeNumberFields(outsideFields, outsideBackup);
+		writeNumberFields(minFields, minBackup);
+		writeNumberFields(maxFields, maxBackup);
+		writeNumberFields(replaceFields, replaceBackup);
+		writeNumberFields(otherwiseFields, otherwiseBackup);
 
 		enableFields();
 	}
 
-	private Integer[] readIntegerFields(JIntegerField[] fields)
+	private Object[] readNumberFields(JTextField[] fields)
 	{
-		Integer[] ints = new Integer[fields.length];
+		Object[] values = new Object[fields.length];
 		for (int i = 0; i < fields.length; i++)
 		{
-			ints[i] = fields[i].getValue();
+			if (fields[i] instanceof JLongField)
+				values[i] = ((JLongField) fields[i]).getValue();
+			else if (fields[i] instanceof JDoubleField)
+				values[i] = ((JDoubleField) fields[i]).getValue();
 		}
-		return ints;
+		return values;
 	}
 
-	private void writeIntegerFields(JIntegerField[] fields, Integer[] values)
+	private void writeNumberFields(JTextField[] fields, Object[] values)
 	{
 		for (int i = 0; i < fields.length && i < values.length; i++)
 		{
-			fields[i].setValue(values[i]);
+			if (fields[i] instanceof JLongField)
+			{
+				Long value = values[i] == null ? null
+						: values[i] instanceof Long ? (Long) values[i]
+								: values[i] instanceof Double ? ((Double) values[i])
+										.longValue()
+										: null;
+				((JLongField) fields[i]).setValue(value);
+			}
+			else if (fields[i] instanceof JDoubleField)
+			{
+				Double value = values[i] == null ? null
+						: values[i] instanceof Double ? (Double) values[i]
+								: values[i] instanceof Long ? ((Long) values[i])
+										.doubleValue()
+										: null;
+				((JDoubleField) fields[i]).setValue(value);
+			}
 		}
 	}
 
@@ -1832,10 +1938,11 @@ public class Application
 		byteRadio.setEnabled(standard);
 		elevationRadio.setEnabled(standard && !mapnik);
 		imageRadio.setEnabled(standard);
-		//infoText.setEnabled(standard);
-		//tileText.setEnabled(standard);
+		// infoText.setEnabled(standard);
+		// tileText.setEnabled(standard);
 		int16Radio.setEnabled(standard);
 		int32Radio.setEnabled(standard);
+		float32Radio.setEnabled(standard);
 		jpegRadio.setEnabled(standard);
 		lztsField.setEnabled(standard);
 		outsideCheck.setEnabled(standard && !mapnik);
@@ -1865,9 +1972,19 @@ public class Application
 		overrideLevelsSpinner.setEnabled(overrideLevelsCheck.isSelected()
 				&& standard);
 
-		for (JIntegerField field : outsideFields)
+		for (JTextField field : outsideFields)
 		{
 			field.setEnabled(outsideCheck.isSelected() && standard);
+		}
+
+		if (!elevationRadio.isSelected())
+		{
+			outsideCheck.setText("Set pixels outside dataset extents to:");
+		}
+		else
+		{
+			outsideCheck
+					.setText("Use elevation NODATA value (using output cell type):");
 		}
 
 		replaceCheck.setEnabled(standard && !mapnik);
@@ -1875,19 +1992,19 @@ public class Application
 		replace2Label.setEnabled(replaceCheck.isSelected() && standard);
 		replace3Label.setEnabled(replaceCheck.isSelected() && standard);
 		replace4Label.setEnabled(replaceCheck.isSelected() && standard);
-		for (JIntegerField field : minFields)
+		for (JTextField field : minFields)
 		{
 			field.setEnabled(replaceCheck.isSelected() && standard);
 		}
-		for (JIntegerField field : maxFields)
+		for (JTextField field : maxFields)
 		{
 			field.setEnabled(replaceCheck.isSelected() && standard);
 		}
-		for (JIntegerField field : replaceFields)
+		for (JTextField field : replaceFields)
 		{
 			field.setEnabled(replaceCheck.isSelected() && standard);
 		}
-		for (JIntegerField field : otherwiseFields)
+		for (JTextField field : otherwiseFields)
 		{
 			field.setEnabled(replaceCheck.isSelected() && standard);
 		}
@@ -1931,6 +2048,7 @@ public class Application
 		byteRadio.setVisible(elevations);
 		int16Radio.setVisible(elevations);
 		int32Radio.setVisible(elevations);
+		float32Radio.setVisible(elevations);
 
 		levelsLabel.setVisible(mapnik);
 		levelsSpinner.setVisible(mapnik);
@@ -2155,35 +2273,65 @@ public class Application
 				int tilesize = tilesizeField.getValue();
 				double lzts = lztsField.getValue();
 				File outDir = new File(outputDirectory.getText());
-				int[] outsideValues = null;
-				int[] minReplace = null;
-				int[] maxReplace = null;
-				Integer[] replace = null;
-				Integer[] otherwise = null;
+				NumberArray outsideValues = null;
+				NumberArray minReplace = null;
+				NumberArray maxReplace = null;
+				NullableNumberArray replace = null;
+				NullableNumberArray otherwise = null;
+
 				boolean overviews = overviewsCheck.isSelected();
+				boolean isFloat = isFloat();
 				if (outsideCheck.isSelected())
 				{
-					outsideValues = new int[outputBandCount];
+					outsideValues = new NumberArray(outputBandCount);
 					for (int b = 0; b < outputBandCount; b++)
 					{
-						Integer value = outsideFields[b].getValue();
-						outsideValues[b] = value != null ? value : 0;
+						if (isFloat)
+						{
+							outsideValues.setDouble(b,
+									((JDoubleField) outsideFields[b])
+											.getValue());
+						}
+						else
+						{
+							outsideValues.setLong(b,
+									((JLongField) outsideFields[b]).getValue());
+						}
 					}
 				}
 				if (replaceCheck.isSelected())
 				{
-					minReplace = new int[outputBandCount];
-					maxReplace = new int[outputBandCount];
-					replace = new Integer[outputBandCount];
-					otherwise = new Integer[outputBandCount];
+					minReplace = new NumberArray(outputBandCount);
+					maxReplace = new NumberArray(outputBandCount);
+					replace = new NullableNumberArray(outputBandCount);
+					otherwise = new NullableNumberArray(outputBandCount);
 					for (int b = 0; b < outputBandCount; b++)
 					{
-						Integer value = minFields[b].getValue();
-						minReplace[b] = value != null ? value : 0;
-						value = maxFields[b].getValue();
-						maxReplace[b] = value != null ? value : 0;
-						replace[b] = replaceFields[b].getValue();
-						otherwise[b] = otherwiseFields[b].getValue();
+						if (isFloat)
+						{
+							minReplace.setDouble(b,
+									((JDoubleField) minFields[b]).getValue());
+							maxReplace.setDouble(b,
+									((JDoubleField) maxFields[b]).getValue());
+							replace.setDouble(b,
+									((JDoubleField) replaceFields[b])
+											.getValue());
+							otherwise.setDouble(b,
+									((JDoubleField) otherwiseFields[b])
+											.getValue());
+						}
+						else
+						{
+							minReplace.setLong(b, ((JLongField) minFields[b])
+									.getValue());
+							maxReplace.setLong(b, ((JLongField) maxFields[b])
+									.getValue());
+							replace.setLong(b, ((JLongField) replaceFields[b])
+									.getValue());
+							otherwise.setLong(b,
+									((JLongField) otherwiseFields[b])
+											.getValue());
+						}
 					}
 				}
 
@@ -2218,18 +2366,47 @@ public class Application
 				{
 					int bufferType = byteRadio.isSelected() ? gdalconstConstants.GDT_Byte
 							: int16Radio.isSelected() ? gdalconstConstants.GDT_Int16
-									: gdalconstConstants.GDT_Int32;
+									: int32Radio.isSelected() ? gdalconstConstants.GDT_Int32
+											: gdalconstConstants.GDT_Float32;
 
-					int band = bandCombo.getSelectedIndex();			
-					
+					int band = bandCombo.getSelectedIndex();
+
+					NumberArray minmax = new NumberArray(2);
+					if (isFloat)
+					{
+						minmax.setDouble(0, Double.MAX_VALUE);
+						minmax.setDouble(1, -Double.MAX_VALUE);
+					}
+					else
+					{
+						minmax.setLong(0, Long.MAX_VALUE);
+						minmax.setLong(1, Long.MIN_VALUE);
+					}
+
 					Tiler.tileElevations(dataset, sector, level, tilesize,
 							lzts, bufferType, band, outsideValues, minReplace,
-							maxReplace, replace, otherwise, outDir, reporter);
+							maxReplace, replace, otherwise, minmax, outDir,
+							reporter);
+
 					if (overviews && !reporter.isCancelled())
 					{
 						Overviewer.createElevationOverviews(outDir, tilesize,
 								tilesize, bufferType, ByteOrder.LITTLE_ENDIAN, /*TODO remove hardcoded byteorder*/
 								outsideValues, sector, lzts, reporter);
+					}
+
+					if (isFloat)
+					{
+						reporter.getLogger().info(
+								"Elevation bounds: min = "
+										+ minmax.getDouble(0) + ", max = "
+										+ minmax.getDouble(1));
+					}
+					else
+					{
+						reporter.getLogger().info(
+								"Elevation bounds: min = " + minmax.getLong(0)
+										+ ", max = " + minmax.getLong(1));
 					}
 				}
 

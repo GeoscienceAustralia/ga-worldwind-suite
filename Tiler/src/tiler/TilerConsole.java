@@ -18,6 +18,7 @@ import javax.imageio.ImageIO;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdalconst.gdalconstConstants;
 
+import util.NumberArray;
 import util.ProgressReporter;
 import util.Sector;
 import util.SimpleProgressReporter;
@@ -36,7 +37,7 @@ public class TilerConsole
 		String outputExt = "bil";
 		double lztd = 20d;
 		int tilesize = 150;
-		int outside = -9999;
+		long outside = -9999;
 		boolean overviews = true;
 		boolean saveAlpha = false;
 		int outputType = gdalconstConstants.GDT_Int16;
@@ -48,10 +49,10 @@ public class TilerConsole
 		double height = dataset.getRasterYSize();
 		int bufferType = 1;
 
-		int[] outsidea = null;
+		NumberArray outsidea = null;
 
 		int level = levels - 1;
-		//level = 1;
+		// level = 1;
 		double tilesizedegrees = Math.pow(0.5, level) * lztd;
 		System.out.println("Calculating level " + level + ", tile size "
 				+ tilesizedegrees + " ("
@@ -101,10 +102,10 @@ public class TilerConsole
 				{
 					GDALTile tile = new GDALTile(dataset, tilesize, tilesize,
 							lat1, lon1, lat2, lon2, saveAlpha, -1);
-					tile = tile.convertToType(outputType); //TODO only for bil
-					outsidea = new int[tile.getBandCount()];
+					tile = tile.convertToType(outputType); // TODO only for bil
+					outsidea = new NumberArray(tile.getBandCount());
 					for (int i = 0; i < tile.getBandCount(); i++)
-						outsidea[i] = outside;
+						outsidea.setLong(i, outside);
 					tile.fillOutside(outsidea);
 					bufferType = tile.getBufferType();
 					if (outputExt.toLowerCase().equals("bil"))

@@ -1,5 +1,6 @@
 package tiler;
 
+import gdal.GDALTile;
 import gdal.GDALUtil;
 
 import java.awt.AlphaComposite;
@@ -33,6 +34,7 @@ import javax.imageio.ImageIO;
 import org.gdal.gdal.gdal;
 
 import util.FileUtil;
+import util.NumberArray;
 import util.ProgressReporter;
 import util.Sector;
 import util.FileFilters.DirectoryFileFilter;
@@ -41,99 +43,39 @@ import util.FileFilters.ExtensionFileFilter;
 public class Overviewer
 {
 	public static void createImageOverviews(File directory, String extension,
-			int width, int height, int[] outsideValues, Sector sector,
+			int width, int height, NumberArray outsideValues, Sector sector,
 			double lzts, ProgressReporter reporter)
 	{
-		createOverviews(false, directory, extension, width, height, 1, null,
-				outsideValues, sector, lzts, reporter);
+		OverviewCreator overviewCreator = new ImageOverviewCreator(width,
+				height, outsideValues);
+		createOverviews(overviewCreator, directory, extension, sector, lzts,
+				reporter);
 	}
 
 	public static void createElevationOverviews(File directory, int width,
 			int height, int bufferType, ByteOrder byteOrder,
-			int[] outsideValues, Sector sector, double lzts,
+			NumberArray outsideValues, Sector sector, double lzts,
 			ProgressReporter reporter)
 	{
-		createOverviews(true, directory, "bil", width, height, bufferType,
-				byteOrder, outsideValues, sector, lzts, reporter);
+		int bands = 1;
+		OverviewCreator overviewCreator = new ElevationOverviewCreator(width,
+				height, bands, bufferType, byteOrder, outsideValues);
+		createOverviews(overviewCreator, directory, "bil", sector, lzts,
+				reporter);
 	}
 
-	private static void createOverviews(boolean elevations, File directory,
-			String extension, int width, int height, int bufferType,
-			ByteOrder byteOrder, int[] outsideValues, Sector sector,
-			double lzts, ProgressReporter progress)
+	private static void createOverviews(OverviewCreator overviewCreator,
+			File directory, String extension, Sector sector, double lzts,
+			ProgressReporter progress)
 	{
 		progress.getLogger().info("Generating overviews...");
 
 		if (directory.isDirectory())
 		{
-			//fix extension
+			// fix extension
 			if (extension.startsWith("."))
 			{
 				extension = extension.substring(1);
-			}
-
-			//calculate buffer type size
-			int bufferTypeSize = 1;
-			if (elevations)
-			{
-				bufferTypeSize = gdal.GetDataTypeSize(bufferType);
-				bufferTypeSize /= 4;
-				if (bufferTypeSize != 1 && bufferTypeSize != 2
-						&& bufferTypeSize != 4)
-				{
-					throw new IllegalArgumentException("Illegal buffer type");
-				}
-			}
-
-			//create buffer/image for tiles outside extents (tiles that don't exist)
-			ByteBuffer outsideBuffer = null;
-			BufferedImage outsideImage = null;
-			if (outsideValues != null)
-			{
-				int bandCount = outsideValues.length;
-				int[] offsets = new int[bandCount];
-
-				byte[] bytes = new byte[bandCount * width * height
-						* bufferTypeSize];
-				outsideBuffer = ByteBuffer.wrap(bytes);
-
-				for (int b = 0; b < bandCount; b++)
-				{
-					offsets[b] = b * width * height * bufferTypeSize;
-					for (int i = 0; i < width * height; i++)
-					{
-						int index = offsets[b] + i;
-						switch (bufferTypeSize)
-						{
-							case 1:
-								outsideBuffer.put(index,
-										(byte) outsideValues[b]);
-								break;
-							case 2:
-								outsideBuffer.putShort(index,
-										(short) outsideValues[b]);
-								break;
-							case 4:
-								outsideBuffer.putInt(index, outsideValues[b]);
-								break;
-						}
-					}
-				}
-
-				if (!elevations)
-				{
-					DataBuffer buffer = new DataBufferByte(bytes, bytes.length);
-					SampleModel sampleModel = new ComponentSampleModel(
-							DataBuffer.TYPE_BYTE, width, height, 1, width,
-							offsets);
-					WritableRaster raster = Raster.createWritableRaster(
-							sampleModel, buffer, null);
-					int imageType = bandCount == 1 ? BufferedImage.TYPE_BYTE_GRAY
-							: bandCount == 3 ? BufferedImage.TYPE_INT_RGB
-									: BufferedImage.TYPE_INT_ARGB_PRE;
-					outsideImage = new BufferedImage(width, height, imageType);
-					outsideImage.setData(raster);
-				}
 			}
 
 			File[] dirs = directory.listFiles(new DirectoryFileFilter());
@@ -157,7 +99,7 @@ public class Overviewer
 			int size = 0;
 			for (int i = 0; i < maxlevel; i++)
 			{
-				size += GDALUtil.tileCount(sector, maxlevel, lzts);
+				size += GDALUtil.tileCount(sector, i, lzts);
 			}
 
 			for (int level = maxlevel; level > 0; level--)
@@ -165,10 +107,10 @@ public class Overviewer
 				if (progress.isCancelled())
 					break;
 
-				//level directory
+				// level directory
 				File dir = new File(directory.getAbsolutePath() + "/" + level);
 
-				//create a list of files to process
+				// create a list of files to process
 				ExtensionFileFilter fileFilter = new ExtensionFileFilter(
 						extension);
 				Set<File> sourceFiles = new HashSet<File>();
@@ -223,17 +165,7 @@ public class Overviewer
 					{
 						try
 						{
-							if (elevations)
-							{
-								mixElevations(src0, src1, src2, src3, dst,
-										width, height, bufferTypeSize,
-										byteOrder, outsideValues);
-							}
-							else
-							{
-								mixImages(src0, src1, src2, src3, dst, width,
-										height, outsideImage);
-							}
+							overviewCreator.mix(src0, src1, src2, src3, dst);
 						}
 						catch (IOException e)
 						{
@@ -256,296 +188,456 @@ public class Overviewer
 				+ "_" + FileUtil.paddedInt(col, 4) + "." + extension);
 	}
 
-	private static void mixImages(File src0, File src1, File src2, File src3,
-			File dst, int width, int height, BufferedImage outsideImage)
-			throws IOException
+	private interface OverviewCreator
 	{
-		if (dst.exists())
-			throw new IllegalArgumentException("Destination already exists");
-
-		BufferedImage i0 = src0.exists() ? ImageIO.read(src0) : null;
-		BufferedImage i1 = src1.exists() ? ImageIO.read(src1) : null;
-		BufferedImage i2 = src2.exists() ? ImageIO.read(src2) : null;
-		BufferedImage i3 = src3.exists() ? ImageIO.read(src3) : null;
-
-		BufferedImage image = i0 != null ? i0 : i1 != null ? i1
-				: i2 != null ? i2 : i3 != null ? i3 : outsideImage;
-		int type = image != null && image.getType() != 0 ? image.getType()
-				: BufferedImage.TYPE_INT_ARGB;
-
-		//TODO warn if image == outsideImage (no src files exist)
-
-		i0 = i0 != null ? i0 : outsideImage;
-		i1 = i1 != null ? i1 : outsideImage;
-		i2 = i2 != null ? i2 : outsideImage;
-		i3 = i3 != null ? i3 : outsideImage;
-
-		int w = width;
-		int h = height;
-		int w2 = w / 2;
-		int h2 = h / 2;
-
-		BufferedImage id = new BufferedImage(w, h, type);
-		Graphics2D g = id.createGraphics();
-		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-				RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-
-		if (outsideImage == null
-				&& (image == null || image.getColorModel().hasAlpha()))
-		{
-			Composite c = g.getComposite();
-			g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR,
-					0.0f));
-			g.fillRect(0, 0, w, h);
-			g.setComposite(c);
-		}
-
-		//+--+--+ 0
-		//|i1|i3|
-		//+--+--+ h2
-		//|i0|i2|
-		//+--+--+ h
-		//0  w2 w
-
-		if (i0 != null)
-			g.drawImage(i0, 0, h2, w2, h, 0, 0, w, h, null);
-		if (i1 != null)
-			g.drawImage(i1, 0, 0, w2, h2, 0, 0, w, h, null);
-		if (i2 != null)
-			g.drawImage(i2, w2, h2, w, h, 0, 0, w, h, null);
-		if (i3 != null)
-			g.drawImage(i3, w2, 0, w, h2, 0, 0, w, h, null);
-
-		g.dispose();
-
-		dst.getParentFile().mkdirs();
-		String imageformat = dst.getName().substring(
-				dst.getName().lastIndexOf('.') + 1).toLowerCase();
-		ImageIO.write(id, imageformat, dst);
+		void mix(File src0, File src1, File src2, File src3, File dst)
+				throws IOException;
 	}
 
-	private static void mixElevations(File src0, File src1, File src2,
-			File src3, File dst, int width, int height, int bufferTypeSize,
-			ByteOrder byteOrder, int[] outsideValues) throws IOException
+	private static class ImageOverviewCreator implements OverviewCreator
 	{
-		if (dst.exists())
-			throw new IllegalArgumentException("Destination already exists");
+		private BufferedImage outsideImage;
+		private int width;
+		private int height;
 
-		boolean useOutsideValue = outsideValues != null
-				&& outsideValues.length > 0;
-		int outsideValue = useOutsideValue ? outsideValues[0] : 0;
-
-		FileChannel dstfc = null, src0fc = null, src1fc = null, src2fc = null, src3fc = null;
-		try
+		public ImageOverviewCreator(int width, int height,
+				NumberArray outsideValues)
 		{
-			dstfc = new RandomAccessFile(dst, "rw").getChannel();
-			MappedByteBuffer dstbb = dstfc.map(MapMode.READ_WRITE, 0, width
-					* height * bufferTypeSize);
-			dstbb.order(byteOrder);
+			this.width = width;
+			this.height = height;
 
-			src0 = src0 != null && src0.exists() ? src0 : null;
-			src1 = src1 != null && src1.exists() ? src1 : null;
-			src2 = src2 != null && src2.exists() ? src2 : null;
-			src3 = src3 != null && src3.exists() ? src3 : null;
+			// create image for tiles outside extents (tiles that don't
+			// exist)
 
-			src0fc = src0 != null ? new FileInputStream(src0).getChannel()
-					: null;
-			src1fc = src1 != null ? new FileInputStream(src1).getChannel()
-					: null;
-			src2fc = src2 != null ? new FileInputStream(src2).getChannel()
-					: null;
-			src3fc = src3 != null ? new FileInputStream(src3).getChannel()
-					: null;
-
-			ByteBuffer src0bb = src0fc != null ? getFileChannelAsByteBuffer(
-					src0fc, (int) src0.length(), byteOrder) : null;
-			ByteBuffer src1bb = src1fc != null ? getFileChannelAsByteBuffer(
-					src1fc, (int) src1.length(), byteOrder) : null;
-			ByteBuffer src2bb = src2fc != null ? getFileChannelAsByteBuffer(
-					src2fc, (int) src2.length(), byteOrder) : null;
-			ByteBuffer src3bb = src3fc != null ? getFileChannelAsByteBuffer(
-					src3fc, (int) src3.length(), byteOrder) : null;
-
-			/*src0bb = src0bb != null ? src0bb : outsideBuffer;
-			src1bb = src1bb != null ? src1bb : outsideBuffer;
-			src2bb = src2bb != null ? src2bb : outsideBuffer;
-			src3bb = src3bb != null ? src3bb : outsideBuffer;*/
-
-			checkParameters(src0bb, src1bb, src2bb, src3bb, dstbb, width,
-					height);
-
-			for (int y = 0; y < height; y++)
+			if (outsideValues != null)
 			{
-				int sy = y % (height / 2);
-				for (int x = 0; x < width; x++)
+				int bandCount = outsideValues.length();
+				int[] offsets = new int[bandCount];
+
+				byte[] bytes = new byte[bandCount * width * height];
+				ByteBuffer buffer = ByteBuffer.wrap(bytes);
+
+				for (int b = 0; b < bandCount; b++)
 				{
-					int sx = x % (width / 2);
-					ByteBuffer buffer = selectBuffer(src0bb, src1bb, src2bb,
-							src3bb, x, y, width, height);
-					long value = useOutsideValue ? outsideValue : 0;
-					if (buffer != null)
+					offsets[b] = b * width * height; // * bufferTypeSize;
+					for (int i = 0; i < width * height; i++)
 					{
-						int index0 = (width * height + (sy * 2) * width + (sx * 2))
-								* bufferTypeSize;
-						int index1 = (width * height + (sy * 2) * width + (sx * 2 + 1))
-								* bufferTypeSize;
-						int index2 = (width * height + (sy * 2 + 1) * width + sx * 2)
-								* bufferTypeSize;
-						int index3 = (width * height + (sy * 2 + 1) * width + (sx * 2 + 1))
-								* bufferTypeSize;
-						long v0 = 0, v1 = 0, v2 = 0, v3 = 0;
-
-						switch (bufferTypeSize)
-						{
-							case 1:
-								v0 = buffer.get(index0);
-								v1 = buffer.get(index1);
-								v2 = buffer.get(index2);
-								v3 = buffer.get(index3);
-								break;
-							case 2:
-								v0 = buffer.getShort(index0);
-								v1 = buffer.getShort(index1);
-								v2 = buffer.getShort(index2);
-								v3 = buffer.getShort(index3);
-								break;
-							case 4:
-								v0 = buffer.getInt(index0);
-								v1 = buffer.getInt(index1);
-								v2 = buffer.getInt(index2);
-								v3 = buffer.getInt(index3);
-								break;
-						}
-
-						if (useOutsideValue
-								&& (v0 == outsideValue || v1 == outsideValue
-										|| v2 == outsideValue || v3 == outsideValue))
-						{
-							value = outsideValue;
-						}
-						else
-						{
-							value = (v0 + v1 + v2 + v3) / 4;
-						}
-					}
-
-					switch (bufferTypeSize)
-					{
-						case 1:
-							dstbb.put((byte) value);
-							break;
-						case 2:
-							dstbb.putShort((byte) value);
-							break;
-						case 4:
-							dstbb.putInt((byte) value);
-							break;
+						int index = offsets[b] + i;
+						buffer.put(index, outsideValues.getByte(b));
 					}
 				}
+
+				DataBuffer db = new DataBufferByte(bytes, bytes.length);
+				SampleModel sampleModel = new ComponentSampleModel(
+						DataBuffer.TYPE_BYTE, width, height, 1, width, offsets);
+				WritableRaster raster = Raster.createWritableRaster(
+						sampleModel, db, null);
+				int imageType = bandCount == 1 ? BufferedImage.TYPE_BYTE_GRAY
+						: bandCount == 3 ? BufferedImage.TYPE_INT_RGB
+								: BufferedImage.TYPE_INT_ARGB_PRE;
+				outsideImage = new BufferedImage(width, height, imageType);
+				outsideImage.setData(raster);
 			}
 		}
-		finally
+
+		@Override
+		public void mix(File src0, File src1, File src2, File src3, File dst)
+				throws IOException
 		{
-			if (dstfc != null)
-				dstfc.close();
-			if (src0fc != null)
-				src0fc.close();
-			if (src1fc != null)
-				src1fc.close();
-			if (src2fc != null)
-				src2fc.close();
-			if (src3fc != null)
-				src3fc.close();
+			if (dst.exists())
+				throw new IllegalArgumentException("Destination already exists");
+
+			BufferedImage i0 = src0.exists() ? ImageIO.read(src0) : null;
+			BufferedImage i1 = src1.exists() ? ImageIO.read(src1) : null;
+			BufferedImage i2 = src2.exists() ? ImageIO.read(src2) : null;
+			BufferedImage i3 = src3.exists() ? ImageIO.read(src3) : null;
+
+			BufferedImage image = i0 != null ? i0 : i1 != null ? i1
+					: i2 != null ? i2 : i3 != null ? i3 : outsideImage;
+			int type = image != null && image.getType() != 0 ? image.getType()
+					: BufferedImage.TYPE_INT_ARGB;
+
+			// TODO warn if image == outsideImage (no src files exist)
+
+			i0 = i0 != null ? i0 : outsideImage;
+			i1 = i1 != null ? i1 : outsideImage;
+			i2 = i2 != null ? i2 : outsideImage;
+			i3 = i3 != null ? i3 : outsideImage;
+
+			int w = width;
+			int h = height;
+			int w2 = w / 2;
+			int h2 = h / 2;
+
+			BufferedImage id = new BufferedImage(w, h, type);
+			Graphics2D g = id.createGraphics();
+			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+					RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+			if (outsideImage == null
+					&& (image == null || image.getColorModel().hasAlpha()))
+			{
+				Composite c = g.getComposite();
+				g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR,
+						0.0f));
+				g.fillRect(0, 0, w, h);
+				g.setComposite(c);
+			}
+
+			// +--+--+ 0
+			// |i1|i3|
+			// +--+--+ h2
+			// |i0|i2|
+			// +--+--+ h
+			// 0 w2 w
+
+			if (i0 != null)
+				g.drawImage(i0, 0, h2, w2, h, 0, 0, w, h, null);
+			if (i1 != null)
+				g.drawImage(i1, 0, 0, w2, h2, 0, 0, w, h, null);
+			if (i2 != null)
+				g.drawImage(i2, w2, h2, w, h, 0, 0, w, h, null);
+			if (i3 != null)
+				g.drawImage(i3, w2, 0, w, h2, 0, 0, w, h, null);
+
+			g.dispose();
+
+			dst.getParentFile().mkdirs();
+			String imageformat = dst.getName().substring(
+					dst.getName().lastIndexOf('.') + 1).toLowerCase();
+			ImageIO.write(id, imageformat, dst);
 		}
 	}
 
-	private static ByteBuffer getFileChannelAsByteBuffer(
-			FileChannel fileChannel, int length, ByteOrder byteOrder)
-			throws IOException
+	private static class ElevationOverviewCreator implements OverviewCreator
 	{
-		ByteBuffer bb = ByteBuffer.allocate(length);
-		bb.order(byteOrder);
-		fileChannel.read(bb);
-		bb.rewind();
-		return bb;
-	}
+		private boolean floatingPoint;
+		private int bufferTypeSize;
+		private NumberArray outsideValues;
+		private ByteOrder byteOrder;
+		private int width;
+		private int height;
+		private int bands;
+		private TypeHandler typeHandler;
 
-	private static void checkParameters(Buffer src0, Buffer src1, Buffer src2,
-			Buffer src3, Buffer dst, int width, int height)
-	{
-		if (width % 2 != 0 || height % 2 != 0)
-			throw new IllegalArgumentException(
-					"Width and height must be a factor of 2");
-		if ((src0 != null && src0.limit() != width * height)
-				|| (src1 != null && src1.limit() != width * height)
-				|| (src2 != null && src2.limit() != width * height)
-				|| (src3 != null && src3.limit() != width * height))
-			throw new IllegalArgumentException(
-					"Source buffer size doesn't match parameters");
-		if (dst.limit() != width * height)
-			throw new IllegalArgumentException(
-					"Destination buffer size doesn't match parameters");
-	}
-
-	private static <E extends Buffer> E selectBuffer(E src0, E src1, E src2,
-			E src3, int x, int y, int w, int h)
-	{
-		//+--+--+
-		//|i1|i3|
-		//+--+--+
-		//|i0|i2|
-		//+--+--+
-		return (x < w / 2) ? (y < h / 2 ? src1 : src0) : (y < h / 2 ? src3
-				: src2);
-	}
-
-	/*private static void mixByte(ByteBuffer src0, ByteBuffer src1,
-			ByteBuffer src2, ByteBuffer src3, ByteBuffer dst, int width,
-			int height, int bands, byte[] nodataValues)
-	{
-		checkParameters(src0, src1, src2, src3, dst, width, height, bands);
-		if (nodataValues.length != bands)
-			throw new IllegalArgumentException(
-					"nodata array does not equal the number of bands");
-
-		for (int b = 0; b < bands; b++)
+		public ElevationOverviewCreator(int width, int height, int bands,
+				int bufferType, ByteOrder byteOrder, NumberArray outsideValues)
 		{
-			for (int y = 0; y < height; y++)
+			floatingPoint = GDALTile.isTypeFloatingPoint(bufferType);
+
+			bufferTypeSize = gdal.GetDataTypeSize(bufferType);
+			if (!((!floatingPoint && (bufferTypeSize == 8 || bufferTypeSize == 16))
+					|| (floatingPoint && bufferTypeSize == 64) || (bufferTypeSize == 32)))
+				throw new IllegalArgumentException("Illegal buffer type");
+			bufferTypeSize /= 8;
+
+			if (width % 2 != 0 || height % 2 != 0)
+				throw new IllegalArgumentException(
+						"Width/Height must be multiples of 2");
+
+			if (outsideValues != null && outsideValues.length() != bands)
+				throw new IllegalArgumentException(
+						"Outside values array length doesn't equal the number of bands");
+
+			typeHandler = createTypeHandler();
+
+			this.outsideValues = outsideValues;
+			this.byteOrder = byteOrder;
+			this.width = width;
+			this.height = height;
+			this.bands = bands;
+		}
+
+		private TypeHandler createTypeHandler()
+		{
+			switch (bufferTypeSize)
 			{
-				int sy = y % (height / 2);
-				for (int x = 0; x < width; x++)
+			case 1:
+				return new ByteTypeHandler();
+			case 2:
+				return new ShortTypeHandler();
+			case 4:
+				return floatingPoint ? new FloatTypeHandler()
+						: new IntTypeHandler();
+			case 8:
+				return new DoubleTypeHandler();
+			}
+			return null;
+		}
+
+		@Override
+		public void mix(File src0, File src1, File src2, File src3, File dst)
+				throws IOException
+		{
+			if (dst.exists())
+				throw new IllegalArgumentException("Destination already exists");
+
+			RandomAccessFile dstraf = null;
+			FileInputStream src0fis = null, src1fis = null, src2fis = null, src3fis = null;
+			try
+			{
+				src0 = src0 != null && src0.exists() ? src0 : null;
+				src1 = src1 != null && src1.exists() ? src1 : null;
+				src2 = src2 != null && src2.exists() ? src2 : null;
+				src3 = src3 != null && src3.exists() ? src3 : null;
+
+				long length = src0 != null ? src0.length()
+						: src1 != null ? src1.length() : src2 != null ? src2
+								.length() : src3 != null ? src3.length() : -1;
+
+				if ((src1 != null && src1.length() != length)
+						|| (src2 != null && src2.length() != length)
+						|| (src3 != null && src3.length() != length))
+					throw new IllegalArgumentException(
+							"Source file(s) don't have equal sizes");
+
+				if (length > 0
+						&& length != width * height * bands * bufferTypeSize)
+					throw new IllegalArgumentException(
+							"Source file(s) have an invalid size");
+
+				dstraf = new RandomAccessFile(dst, "rw");
+				FileChannel dstfc = dstraf.getChannel();
+				MappedByteBuffer dstbb = dstfc.map(MapMode.READ_WRITE, 0, width
+						* height * bands * bufferTypeSize);
+				dstbb.order(byteOrder);
+
+				src0fis = src0 != null ? new FileInputStream(src0) : null;
+				src1fis = src1 != null ? new FileInputStream(src1) : null;
+				src2fis = src2 != null ? new FileInputStream(src2) : null;
+				src3fis = src3 != null ? new FileInputStream(src3) : null;
+
+				ByteBuffer src0bb = src0fis != null ? getFileChannelAsByteBuffer(
+						src0fis.getChannel(), (int) src0.length(), byteOrder)
+						: null;
+				ByteBuffer src1bb = src1fis != null ? getFileChannelAsByteBuffer(
+						src1fis.getChannel(), (int) src1.length(), byteOrder)
+						: null;
+				ByteBuffer src2bb = src2fis != null ? getFileChannelAsByteBuffer(
+						src2fis.getChannel(), (int) src2.length(), byteOrder)
+						: null;
+				ByteBuffer src3bb = src3fis != null ? getFileChannelAsByteBuffer(
+						src3fis.getChannel(), (int) src3.length(), byteOrder)
+						: null;
+
+				for (int b = 0; b < bands; b++)
 				{
-					int sx = x % (width / 2);
-					ByteBuffer buffer = selectBuffer(src0, src1, src2, src3, x,
-							y, width, height);
-					if (buffer == null)
+					int offset = b * width * height * bufferTypeSize;
+					Object outsideValue = outsideValues == null ? null
+							: typeHandler.getNumberArrayValue(b, outsideValues);
+
+					for (int y = 0; y < height; y++)
 					{
-						dst.put(nodataValues[b]);
-					}
-					else
-					{
-						byte v0 = buffer.get(b * width * height + (sy * 2)
-								* width + (sx * 2));
-						byte v1 = buffer.get(b * width * height + (sy * 2)
-								* width + (sx * 2 + 1));
-						byte v2 = buffer.get(b * width * height + (sy * 2 + 1)
-								* width + sx * 2);
-						byte v3 = buffer.get(b * width * height + (sy * 2 + 1)
-								* width + (sx * 2 + 1));
-						if (nodataValues != null
-								&& (v0 == nodataValues[b]
-										|| v1 == nodataValues[b]
-										|| v2 == nodataValues[b] || v3 == nodataValues[b]))
+						int sy = y % (height / 2);
+						for (int x = 0; x < width; x++)
 						{
-							dst.put(nodataValues[b]);
-						}
-						else
-						{
-							dst.put((byte) ((v0 + v1 + v2 + v3) / 4));
+							int sx = x % (width / 2);
+							ByteBuffer buffer = selectBuffer(src0bb, src1bb,
+									src2bb, src3bb, x, y, width, height);
+							Object value = outsideValue;
+							if (buffer != null)
+							{
+								int index0 = ((sy * 2) * width + (sx * 2))
+										* bufferTypeSize + offset;
+								int index1 = ((sy * 2) * width + (sx * 2 + 1))
+										* bufferTypeSize + offset;
+								int index2 = ((sy * 2 + 1) * width + sx * 2)
+										* bufferTypeSize + offset;
+								int index3 = ((sy * 2 + 1) * width + (sx * 2 + 1))
+										* bufferTypeSize + offset;
+
+								Object v0 = typeHandler.getBufferValue(index0,
+										buffer);
+								Object v1 = typeHandler.getBufferValue(index1,
+										buffer);
+								Object v2 = typeHandler.getBufferValue(index2,
+										buffer);
+								Object v3 = typeHandler.getBufferValue(index3,
+										buffer);
+
+								if (value == null
+										|| !(v0 == value || v1 == value
+												|| v2 == value || v3 == value))
+								{
+									value = typeHandler.average(v0, v1, v2, v3);
+								}
+							}
+							if (value == null)
+								dstbb.position(dstbb.position()
+										+ bufferTypeSize);
+							else
+								typeHandler.putBufferValue(dstbb, value);
 						}
 					}
 				}
 			}
+			finally
+			{
+				if (dstraf != null)
+					dstraf.close();
+				if (src0fis != null)
+					src0fis.close();
+				if (src1fis != null)
+					src1fis.close();
+				if (src2fis != null)
+					src2fis.close();
+				if (src3fis != null)
+					src3fis.close();
+			}
 		}
-	}*/
+
+		private ByteBuffer getFileChannelAsByteBuffer(FileChannel fileChannel,
+				int length, ByteOrder byteOrder) throws IOException
+		{
+			ByteBuffer bb = ByteBuffer.allocate(length);
+			bb.order(byteOrder);
+			fileChannel.read(bb);
+			bb.rewind();
+			return bb;
+		}
+
+		private <E extends Buffer> E selectBuffer(E src0, E src1, E src2,
+				E src3, int x, int y, int w, int h)
+		{
+			// +--+--+
+			// |i1|i3|
+			// +--+--+
+			// |i0|i2|
+			// +--+--+
+			return (x < w / 2) ? (y < h / 2 ? src1 : src0) : (y < h / 2 ? src3
+					: src2);
+		}
+	}
+
+	private interface TypeHandler
+	{
+		public Object getNumberArrayValue(int index, NumberArray na);
+
+		public Object getBufferValue(int index, ByteBuffer buffer);
+
+		public void putBufferValue(ByteBuffer buffer, Object value);
+
+		public Object average(Object v0, Object v1, Object v2, Object v3);
+	}
+
+	private static class ByteTypeHandler implements TypeHandler
+	{
+		public Object getNumberArrayValue(int index, NumberArray na)
+		{
+			return na.getByte(index);
+		}
+
+		public Object getBufferValue(int index, ByteBuffer buffer)
+		{
+			return buffer.get(index);
+		}
+
+		public void putBufferValue(ByteBuffer buffer, Object value)
+		{
+			buffer.put((Byte) value);
+		}
+
+		public Object average(Object v0, Object v1, Object v2, Object v3)
+		{
+			return (byte) ((((Byte) v0).shortValue() + ((Byte) v1).shortValue()
+					+ ((Byte) v2).shortValue() + ((Byte) v3).shortValue()) / (short) 4);
+		}
+	}
+
+	private static class ShortTypeHandler implements TypeHandler
+	{
+		public Object getNumberArrayValue(int index, NumberArray na)
+		{
+			return na.getShort(index);
+		}
+
+		public Object getBufferValue(int index, ByteBuffer buffer)
+		{
+			return buffer.getShort(index);
+		}
+
+		public void putBufferValue(ByteBuffer buffer, Object value)
+		{
+			buffer.putShort((Short) value);
+		}
+
+		public Object average(Object v0, Object v1, Object v2, Object v3)
+		{
+			return (short) ((((Short) v0).intValue() + ((Short) v1).intValue()
+					+ ((Short) v2).intValue() + ((Short) v3).intValue()) / 4);
+		}
+	}
+
+	private static class IntTypeHandler implements TypeHandler
+	{
+		public Object getNumberArrayValue(int index, NumberArray na)
+		{
+			return na.getInt(index);
+		}
+
+		public Object getBufferValue(int index, ByteBuffer buffer)
+		{
+			return buffer.getInt(index);
+		}
+
+		public void putBufferValue(ByteBuffer buffer, Object value)
+		{
+			buffer.putInt((Integer) value);
+		}
+
+		public Object average(Object v0, Object v1, Object v2, Object v3)
+		{
+			return (int) ((((Integer) v0).longValue()
+					+ ((Integer) v1).longValue() + ((Integer) v2).longValue() + ((Integer) v3)
+					.longValue()) / 4l);
+		}
+	}
+
+	private static class FloatTypeHandler implements TypeHandler
+	{
+		public Object getNumberArrayValue(int index, NumberArray na)
+		{
+			return na.getFloat(index);
+		}
+
+		public Object getBufferValue(int index, ByteBuffer buffer)
+		{
+			return buffer.getFloat(index);
+		}
+
+		public void putBufferValue(ByteBuffer buffer, Object value)
+		{
+			buffer.putFloat((Float) value);
+		}
+
+		public Object average(Object v0, Object v1, Object v2, Object v3)
+		{
+			return (float) ((((Float) v0).doubleValue()
+					+ ((Float) v1).doubleValue() + ((Float) v2).doubleValue() + ((Float) v3)
+					.doubleValue()) / 4d);
+		}
+	}
+
+	private static class DoubleTypeHandler implements TypeHandler
+	{
+		public Object getNumberArrayValue(int index, NumberArray na)
+		{
+			return na.getDouble(index);
+		}
+
+		public Object getBufferValue(int index, ByteBuffer buffer)
+		{
+			return buffer.getDouble(index);
+		}
+
+		public void putBufferValue(ByteBuffer buffer, Object value)
+		{
+			buffer.putDouble((Double) value);
+		}
+
+		public Object average(Object v0, Object v1, Object v2, Object v3)
+		{
+			return ((Double) v0 + (Double) v1 + (Double) v2 + (Double) v3) / 4d;
+		}
+	}
 }

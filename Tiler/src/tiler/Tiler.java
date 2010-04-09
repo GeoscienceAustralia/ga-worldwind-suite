@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 
 import javax.imageio.ImageIO;
@@ -17,6 +16,8 @@ import mapnik.MapnikUtil;
 
 import org.gdal.gdal.Dataset;
 
+import util.NullableNumberArray;
+import util.NumberArray;
 import util.ProgressReporter;
 import util.Sector;
 
@@ -24,31 +25,32 @@ public class Tiler
 {
 	private enum Type
 	{
-		Images,
-		Elevations,
-		Mapnik
+		Images, Elevations, Mapnik
 	}
 
 	public static void tileImages(Dataset dataset, Sector sector, int level,
 			int tilesize, double lzts, String imageFormat, boolean addAlpha,
-			int[] outsideValues, int[] minReplace, int[] maxReplace,
-			Integer[] replace, Integer[] otherwise, File outputDirectory,
+			NumberArray outsideValues, NumberArray minReplace,
+			NumberArray maxReplace, NullableNumberArray replace,
+			NullableNumberArray otherwise, File outputDirectory,
 			ProgressReporter progress)
 	{
 		tile(Type.Images, dataset, null, sector, level, tilesize, lzts,
 				imageFormat, addAlpha, -1, -1, outsideValues, minReplace,
-				maxReplace, replace, otherwise, outputDirectory, progress);
+				maxReplace, replace, otherwise, null, outputDirectory, progress);
 	}
 
 	public static void tileElevations(Dataset dataset, Sector sector,
 			int level, int tilesize, double lzts, int bufferType, int band,
-			int[] outsideValues, int[] minReplace, int[] maxReplace,
-			Integer[] replace, Integer[] otherwise, File outputDirectory,
-			ProgressReporter progress)
+			NumberArray outsideValues, NumberArray minReplace,
+			NumberArray maxReplace, NullableNumberArray replace,
+			NullableNumberArray otherwise, NumberArray minMax,
+			File outputDirectory, ProgressReporter progress)
 	{
 		tile(Type.Elevations, dataset, null, sector, level, tilesize, lzts,
 				null, false, bufferType, band, outsideValues, minReplace,
-				maxReplace, replace, otherwise, outputDirectory, progress);
+				maxReplace, replace, otherwise, minMax, outputDirectory,
+				progress);
 	}
 
 	public static void tileMapnik(File mapFile, Sector sector, int level,
@@ -56,16 +58,17 @@ public class Tiler
 			File outputDirectory, ProgressReporter progress)
 	{
 		tile(Type.Mapnik, null, mapFile, sector, level, tilesize, lzts,
-				imageFormat, false, -1, -1, null, null, null, null, null,
+				imageFormat, false, -1, -1, null, null, null, null, null, null,
 				outputDirectory, progress);
 	}
 
 	private static void tile(Type type, Dataset dataset, File mapFile,
 			Sector sector, int level, int tilesize, double lzts,
 			String imageFormat, boolean addAlpha, int bufferType, int band,
-			int[] outsideValues, int[] minReplace, int[] maxReplace,
-			Integer[] replace, Integer[] otherwise, File outputDirectory,
-			ProgressReporter progress)
+			NumberArray outsideValues, NumberArray minReplace,
+			NumberArray maxReplace, NullableNumberArray replace,
+			NullableNumberArray otherwise, NumberArray minMax,
+			File outputDirectory, ProgressReporter progress)
 	{
 		progress.getLogger().info("Generating tiles...");
 
@@ -145,22 +148,32 @@ public class Tiler
 								tile.fillOutside(outsideValues);
 							}
 							if (minReplace != null && maxReplace != null
-									&& replace != null)
+									&& replace != null && otherwise != null)
 							{
 								tile.replaceValues(minReplace, maxReplace,
 										replace, otherwise);
 							}
 							if (type == Type.Elevations)
 							{
+								tile.updateMinMax(minMax, outsideValues);
+
 								ByteBuffer bb = tile.getBuffer();
 								bb.rewind();
-								FileChannel fc = new RandomAccessFile(dst, "rw")
-										.getChannel();
-								MappedByteBuffer mbb = fc.map(
-										MapMode.READ_WRITE, 0, bb.limit());
-								mbb.order(bb.order());
-								mbb.put(bb);
-								fc.close();
+								RandomAccessFile raf = null;
+								try
+								{
+									raf = new RandomAccessFile(dst, "rw");
+									MappedByteBuffer mbb = raf.getChannel()
+											.map(MapMode.READ_WRITE, 0,
+													bb.limit());
+									mbb.order(bb.order());
+									mbb.put(bb);
+								}
+								finally
+								{
+									if (raf != null)
+										raf.close();
+								}
 							}
 							else
 							{
