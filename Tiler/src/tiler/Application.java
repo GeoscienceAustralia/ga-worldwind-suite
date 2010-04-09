@@ -83,6 +83,7 @@ import util.DocumentLogger;
 import util.JDoubleField;
 import util.JIntegerField;
 import util.JLongField;
+import util.MinMaxArray;
 import util.NullableNumberArray;
 import util.NumberArray;
 import util.Prefs;
@@ -151,12 +152,18 @@ public class Application
 	private JLabel replace2Label;
 	private JLabel replace3Label;
 	private JLabel replace4Label;
+	private JLabel replace5Label;
+	private JLabel replace6Label;
 	private JPanel minPanel;
 	private JPanel maxPanel;
+	private JPanel min2Panel;
+	private JPanel max2Panel;
 	private JPanel withPanel;
 	private JPanel otherwisePanel;
 	private JTextField[] minFields = new JTextField[0];
 	private JTextField[] maxFields = new JTextField[0];
+	private JTextField[] min2Fields = new JTextField[0];
+	private JTextField[] max2Fields = new JTextField[0];
 	private JTextField[] replaceFields = new JTextField[0];
 	private JTextField[] otherwiseFields = new JTextField[0];
 
@@ -1041,7 +1048,7 @@ public class Application
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(maxPanel, c);
 
-		replace3Label = new JLabel("to:");
+		replace3Label = new JLabel("or between:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 15;
@@ -1049,15 +1056,15 @@ public class Application
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(replace3Label, c);
 
-		withPanel = new JPanel(new GridBagLayout());
+		min2Panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 15;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
-		trPanel.add(withPanel, c);
+		trPanel.add(min2Panel, c);
 
-		replace4Label = new JLabel("otherwise:");
+		replace4Label = new JLabel("and:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 16;
@@ -1065,10 +1072,42 @@ public class Application
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(replace4Label, c);
 
-		otherwisePanel = new JPanel(new GridBagLayout());
+		max2Panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 16;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(max2Panel, c);
+
+		replace5Label = new JLabel("set to:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 17;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(replace5Label, c);
+
+		withPanel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 17;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(withPanel, c);
+
+		replace6Label = new JLabel("otherwise:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 18;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(replace6Label, c);
+
+		otherwisePanel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 18;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(otherwisePanel, c);
@@ -1076,7 +1115,7 @@ public class Application
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 17;
+		c.gridy = 19;
 		c.weighty = 1;
 		trPanel.add(panel, c);
 
@@ -1518,15 +1557,23 @@ public class Application
 					String[] dataTypes = new String[bandCount];
 					int[] dataTypeSizes = new int[bandCount];
 					Double[] nodata = new Double[bandCount];
+					double[] min = new double[bandCount];
+					double[] max = new double[bandCount];
 					for (int i = 0; i < bandCount; i++)
 					{
 						Band band = dataset.GetRasterBand(i + 1);
 						int dataType = band.getDataType();
 						dataTypes[i] = gdal.GetDataTypeName(dataType);
 						dataTypeSizes[i] = gdal.GetDataTypeSize(dataType);
+
 						Double[] nodataValue = new Double[1];
 						band.GetNoDataValue(nodataValue);
 						nodata[i] = nodataValue[0];
+
+						double[] minmax = new double[2];
+						band.ComputeRasterMinMax(minmax, 1);
+						min[i] = minmax[0];
+						max[i] = minmax[1];
 					}
 					StringBuilder info = new StringBuilder();
 					info.append("Dataset information:\n");
@@ -1543,9 +1590,12 @@ public class Application
 					info.append("Raster band count = " + bandCount + "\n");
 					for (int i = 0; i < bandCount; i++)
 					{
-						info.append("Band " + (i + 1) + " data type = "
-								+ dataTypes[i] + " (" + dataTypeSizes[i]
-								+ " bit), (no data value = " + nodata[i] + ")\n");
+						info.append("Band " + (i + 1) + ":\n");
+						info.append("    Data type = " + dataTypes[i] + " ("
+								+ dataTypeSizes[i] + " bit)\n");
+						info.append("    No-data value = " + nodata[i] + "\n");
+						info.append("    Approx minimum = " + min[i] + "\n");
+						info.append("    Approx maximum = " + max[i] + "\n");
 					}
 					if (spatialReference != null)
 					{
@@ -1755,15 +1805,13 @@ public class Application
 		bandCountChanged();
 		enableFields();
 	}
-	
+
 	private void tilesizeChanged()
 	{
-		if (elevationRadio.isSelected()
-				&& tilesizeField.getValue() % 2 != 0)
+		if (elevationRadio.isSelected() && tilesizeField.getValue() % 2 != 0)
 		{
 			JOptionPane.showMessageDialog(frame,
-					"Tile size must be a multiple of 2",
-					"Invalid tile size",
+					"Tile size must be a multiple of 2", "Invalid tile size",
 					JOptionPane.INFORMATION_MESSAGE);
 			tilesizeField.setValue(tilesizeField.getValue() + 1);
 		}
@@ -1782,6 +1830,8 @@ public class Application
 		Object[] outsideBackup = readNumberFields(outsideFields);
 		Object[] minBackup = readNumberFields(minFields);
 		Object[] maxBackup = readNumberFields(maxFields);
+		Object[] min2Backup = readNumberFields(min2Fields);
+		Object[] max2Backup = readNumberFields(max2Fields);
 		Object[] replaceBackup = readNumberFields(replaceFields);
 		Object[] otherwiseBackup = readNumberFields(otherwiseFields);
 
@@ -1808,6 +1858,8 @@ public class Application
 		outsidePanel.removeAll();
 		minPanel.removeAll();
 		maxPanel.removeAll();
+		min2Panel.removeAll();
+		max2Panel.removeAll();
 		withPanel.removeAll();
 		otherwisePanel.removeAll();
 		while (bandCombo.getItemCount() > 0)
@@ -1820,6 +1872,8 @@ public class Application
 		outsideFields = new JTextField[outputBandCount];
 		minFields = new JTextField[outputBandCount];
 		maxFields = new JTextField[outputBandCount];
+		min2Fields = new JTextField[outputBandCount];
+		max2Fields = new JTextField[outputBandCount];
 		replaceFields = new JTextField[outputBandCount];
 		otherwiseFields = new JTextField[outputBandCount];
 		for (int i = 0; i < outputBandCount; i++)
@@ -1838,26 +1892,44 @@ public class Application
 			outsidePanel.add(outsideFields[i], c);
 
 			if (isFloat)
-				minFields[i] = new JDoubleField(0d);
+				minFields[i] = new JDoubleField(null);
 			else
-				minFields[i] = new JLongField(0l);
+				minFields[i] = new JLongField(null);
 			minFields[i].setMinimumSize(size);
 			minFields[i].setPreferredSize(size);
-			minFields[i].addFocusListener(fl);
 			c = new GridBagConstraints();
 			c.gridx = i;
 			minPanel.add(minFields[i], c);
 
 			if (isFloat)
-				maxFields[i] = new JDoubleField(0d);
+				maxFields[i] = new JDoubleField(null);
 			else
-				maxFields[i] = new JLongField(0l);
+				maxFields[i] = new JLongField(null);
 			maxFields[i].setMinimumSize(size);
 			maxFields[i].setPreferredSize(size);
-			maxFields[i].addFocusListener(fl);
 			c = new GridBagConstraints();
 			c.gridx = i;
 			maxPanel.add(maxFields[i], c);
+
+			if (isFloat)
+				min2Fields[i] = new JDoubleField(null);
+			else
+				min2Fields[i] = new JLongField(null);
+			min2Fields[i].setMinimumSize(size);
+			min2Fields[i].setPreferredSize(size);
+			c = new GridBagConstraints();
+			c.gridx = i;
+			min2Panel.add(min2Fields[i], c);
+
+			if (isFloat)
+				max2Fields[i] = new JDoubleField(null);
+			else
+				max2Fields[i] = new JLongField(null);
+			max2Fields[i].setMinimumSize(size);
+			max2Fields[i].setPreferredSize(size);
+			c = new GridBagConstraints();
+			c.gridx = i;
+			max2Panel.add(max2Fields[i], c);
 
 			if (isFloat)
 				replaceFields[i] = new JDoubleField(null);
@@ -1886,6 +1958,8 @@ public class Application
 		writeNumberFields(outsideFields, outsideBackup);
 		writeNumberFields(minFields, minBackup);
 		writeNumberFields(maxFields, maxBackup);
+		writeNumberFields(min2Fields, min2Backup);
+		writeNumberFields(max2Fields, max2Backup);
 		writeNumberFields(replaceFields, replaceBackup);
 		writeNumberFields(otherwiseFields, otherwiseBackup);
 
@@ -1992,11 +2066,21 @@ public class Application
 		replace2Label.setEnabled(replaceCheck.isSelected() && standard);
 		replace3Label.setEnabled(replaceCheck.isSelected() && standard);
 		replace4Label.setEnabled(replaceCheck.isSelected() && standard);
+		replace5Label.setEnabled(replaceCheck.isSelected() && standard);
+		replace6Label.setEnabled(replaceCheck.isSelected() && standard);
 		for (JTextField field : minFields)
 		{
 			field.setEnabled(replaceCheck.isSelected() && standard);
 		}
 		for (JTextField field : maxFields)
+		{
+			field.setEnabled(replaceCheck.isSelected() && standard);
+		}
+		for (JTextField field : min2Fields)
+		{
+			field.setEnabled(replaceCheck.isSelected() && standard);
+		}
+		for (JTextField field : max2Fields)
 		{
 			field.setEnabled(replaceCheck.isSelected() && standard);
 		}
@@ -2061,8 +2145,12 @@ public class Application
 		replace2Label.setVisible(!mapnik);
 		replace3Label.setVisible(!mapnik);
 		replace4Label.setVisible(!mapnik);
+		replace5Label.setVisible(!mapnik);
+		replace6Label.setVisible(!mapnik);
 		minPanel.setVisible(!mapnik);
 		maxPanel.setVisible(!mapnik);
+		min2Panel.setVisible(!mapnik);
+		max2Panel.setVisible(!mapnik);
 		withPanel.setVisible(!mapnik);
 		otherwisePanel.setVisible(!mapnik);
 	}
@@ -2274,8 +2362,7 @@ public class Application
 				double lzts = lztsField.getValue();
 				File outDir = new File(outputDirectory.getText());
 				NumberArray outsideValues = null;
-				NumberArray minReplace = null;
-				NumberArray maxReplace = null;
+				MinMaxArray[] minMaxReplaces = null;
 				NullableNumberArray replace = null;
 				NullableNumberArray otherwise = null;
 
@@ -2301,18 +2388,21 @@ public class Application
 				}
 				if (replaceCheck.isSelected())
 				{
-					minReplace = new NumberArray(outputBandCount);
-					maxReplace = new NumberArray(outputBandCount);
+					minMaxReplaces = new MinMaxArray[2];
+					minMaxReplaces[0] = new MinMaxArray(outputBandCount);
+					minMaxReplaces[1] = new MinMaxArray(outputBandCount);
 					replace = new NullableNumberArray(outputBandCount);
 					otherwise = new NullableNumberArray(outputBandCount);
 					for (int b = 0; b < outputBandCount; b++)
 					{
 						if (isFloat)
 						{
-							minReplace.setDouble(b,
-									((JDoubleField) minFields[b]).getValue());
-							maxReplace.setDouble(b,
+							minMaxReplaces[0].setMinMaxDouble(b,
+									((JDoubleField) minFields[b]).getValue(),
 									((JDoubleField) maxFields[b]).getValue());
+							minMaxReplaces[1].setMinMaxDouble(b,
+									((JDoubleField) min2Fields[b]).getValue(),
+									((JDoubleField) max2Fields[b]).getValue());
 							replace.setDouble(b,
 									((JDoubleField) replaceFields[b])
 											.getValue());
@@ -2322,10 +2412,12 @@ public class Application
 						}
 						else
 						{
-							minReplace.setLong(b, ((JLongField) minFields[b])
-									.getValue());
-							maxReplace.setLong(b, ((JLongField) maxFields[b])
-									.getValue());
+							minMaxReplaces[0].setMinMaxLong(b,
+									((JLongField) minFields[b]).getValue(),
+									((JLongField) maxFields[b]).getValue());
+							minMaxReplaces[1].setMinMaxLong(b,
+									((JLongField) min2Fields[b]).getValue(),
+									((JLongField) max2Fields[b]).getValue());
 							replace.setLong(b, ((JLongField) replaceFields[b])
 									.getValue());
 							otherwise.setLong(b,
@@ -2353,8 +2445,9 @@ public class Application
 							&& alphaCheck.isSelected();
 
 					Tiler.tileImages(dataset, sector, level, tilesize, lzts,
-							imageFormat, addAlpha, outsideValues, minReplace,
-							maxReplace, replace, otherwise, outDir, reporter);
+							imageFormat, addAlpha, outsideValues,
+							minMaxReplaces, replace, otherwise, outDir,
+							reporter);
 					if (overviews && !reporter.isCancelled())
 					{
 						Overviewer.createImageOverviews(outDir, imageFormat,
@@ -2384,8 +2477,8 @@ public class Application
 					}
 
 					Tiler.tileElevations(dataset, sector, level, tilesize,
-							lzts, bufferType, band, outsideValues, minReplace,
-							maxReplace, replace, otherwise, minmax, outDir,
+							lzts, bufferType, band, outsideValues,
+							minMaxReplaces, replace, otherwise, minmax, outDir,
 							reporter);
 
 					if (overviews && !reporter.isCancelled())

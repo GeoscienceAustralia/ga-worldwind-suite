@@ -16,6 +16,7 @@ import mapnik.MapnikUtil;
 
 import org.gdal.gdal.Dataset;
 
+import util.MinMaxArray;
 import util.NullableNumberArray;
 import util.NumberArray;
 import util.ProgressReporter;
@@ -30,27 +31,24 @@ public class Tiler
 
 	public static void tileImages(Dataset dataset, Sector sector, int level,
 			int tilesize, double lzts, String imageFormat, boolean addAlpha,
-			NumberArray outsideValues, NumberArray minReplace,
-			NumberArray maxReplace, NullableNumberArray replace,
-			NullableNumberArray otherwise, File outputDirectory,
-			ProgressReporter progress)
+			NumberArray outsideValues, MinMaxArray[] replaceMinMaxs,
+			NullableNumberArray replace, NullableNumberArray otherwise,
+			File outputDirectory, ProgressReporter progress)
 	{
 		tile(Type.Images, dataset, null, sector, level, tilesize, lzts,
-				imageFormat, addAlpha, -1, -1, outsideValues, minReplace,
-				maxReplace, replace, otherwise, null, outputDirectory, progress);
+				imageFormat, addAlpha, -1, -1, outsideValues, replaceMinMaxs,
+				replace, otherwise, null, outputDirectory, progress);
 	}
 
 	public static void tileElevations(Dataset dataset, Sector sector,
 			int level, int tilesize, double lzts, int bufferType, int band,
-			NumberArray outsideValues, NumberArray minReplace,
-			NumberArray maxReplace, NullableNumberArray replace,
-			NullableNumberArray otherwise, NumberArray minMax,
-			File outputDirectory, ProgressReporter progress)
+			NumberArray outsideValues, MinMaxArray[] replaceMinMaxs,
+			NullableNumberArray replace, NullableNumberArray otherwise,
+			NumberArray minMax, File outputDirectory, ProgressReporter progress)
 	{
 		tile(Type.Elevations, dataset, null, sector, level, tilesize, lzts,
-				null, false, bufferType, band, outsideValues, minReplace,
-				maxReplace, replace, otherwise, minMax, outputDirectory,
-				progress);
+				null, false, bufferType, band, outsideValues, replaceMinMaxs,
+				replace, otherwise, minMax, outputDirectory, progress);
 	}
 
 	public static void tileMapnik(File mapFile, Sector sector, int level,
@@ -58,17 +56,16 @@ public class Tiler
 			File outputDirectory, ProgressReporter progress)
 	{
 		tile(Type.Mapnik, null, mapFile, sector, level, tilesize, lzts,
-				imageFormat, false, -1, -1, null, null, null, null, null, null,
+				imageFormat, false, -1, -1, null, null, null, null, null,
 				outputDirectory, progress);
 	}
 
 	private static void tile(Type type, Dataset dataset, File mapFile,
 			Sector sector, int level, int tilesize, double lzts,
 			String imageFormat, boolean addAlpha, int bufferType, int band,
-			NumberArray outsideValues, NumberArray minReplace,
-			NumberArray maxReplace, NullableNumberArray replace,
-			NullableNumberArray otherwise, NumberArray minMax,
-			File outputDirectory, ProgressReporter progress)
+			NumberArray outsideValues, MinMaxArray[] replaceMinMaxs,
+			NullableNumberArray replace, NullableNumberArray otherwise,
+			NumberArray minMax, File outputDirectory, ProgressReporter progress)
 	{
 		progress.getLogger().info("Generating tiles...");
 
@@ -147,11 +144,11 @@ public class Tiler
 							{
 								tile.fillOutside(outsideValues);
 							}
-							if (minReplace != null && maxReplace != null
-									&& replace != null && otherwise != null)
+							if (replaceMinMaxs != null && replace != null
+									&& otherwise != null)
 							{
-								tile.replaceValues(minReplace, maxReplace,
-										replace, otherwise);
+								tile.replaceValues(replaceMinMaxs, replace,
+										otherwise);
 							}
 							if (type == Type.Elevations)
 							{

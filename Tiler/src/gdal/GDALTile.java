@@ -22,6 +22,7 @@ import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
 import org.gdal.osr.SpatialReference;
 
+import util.MinMaxArray;
 import util.NullableNumberArray;
 import util.NumberArray;
 import util.TilerException;
@@ -451,15 +452,22 @@ public class GDALTile
 		}
 	}
 
-	public void replaceValues(NumberArray min, NumberArray max,
+	public void replaceValues(MinMaxArray[] minMaxs,
 			NullableNumberArray replacement, NullableNumberArray otherwise)
 			throws TilerException
 	{
-		if (min.length() != bufferBandCount || max.length() != bufferBandCount
-				|| replacement.length() != bufferBandCount
+		if (minMaxs == null || minMaxs.length == 0)
+			return;
+
+		for (int i = 0; i < minMaxs.length; i++)
+			if (minMaxs[i].length() != bufferBandCount)
+				throw new IllegalArgumentException(
+						"Array size must equal band count");
+
+		if (replacement.length() != bufferBandCount
 				|| otherwise.length() != bufferBandCount)
 			throw new IllegalArgumentException(
-					"Array size does not equal band count");
+					"Array size must equal band count");
 
 		boolean allNull = true;
 		for (int b = 0; b < bufferBandCount; b++)
@@ -477,34 +485,35 @@ public class GDALTile
 			return;
 		}
 
+		double[] doubleValues = new double[bufferBandCount];
+		long[] longValues = new long[bufferBandCount];
+
 		for (int y = 0; y < height; y++)
 		{
 			for (int x = 0; x < width; x++)
 			{
-				boolean between = true;
+				boolean between = false;
 
 				for (int b = 0; b < bufferBandCount; b++)
 				{
 					int index = getBufferIndex(x, y, b) * bufferTypeSize;
-
 					if (floatingPoint)
-					{
-						double value = getDoubleValue(index, buffer, bufferType);
-						if (value < min.getDouble(b)
-								|| value > max.getDouble(b))
-						{
-							between = false;
-							break;
-						}
-					}
+						doubleValues[b] = getDoubleValue(index, buffer,
+								bufferType);
 					else
+						longValues[b] = getLongValue(index, buffer, bufferType);
+				}
+
+				for (int i = 0; i < minMaxs.length; i++)
+				{
+					if (minMaxs[i] != null)
 					{
-						long value = getLongValue(index, buffer, bufferType);
-						if (value < min.getLong(b) || value > max.getLong(b))
-						{
-							between = false;
+						if (floatingPoint)
+							between = minMaxs[i].isBetweenDouble(doubleValues);
+						else
+							between = minMaxs[i].isBetweenLong(longValues);
+						if (between)
 							break;
-						}
 					}
 				}
 
