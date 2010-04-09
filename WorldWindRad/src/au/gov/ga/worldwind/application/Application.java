@@ -207,9 +207,6 @@ public class Application
 		create3DMouse();
 		createDoubleClickListener();
 
-		// hack camera smoothing to be not as crazy as default
-		CameraSmoothHack.hackCameraSmoothing(wwd.getInputHandler());
-
 		wwd.addRenderingListener(new RenderingListener()
 		{
 			public void stageChanged(RenderingEvent event)
@@ -637,6 +634,7 @@ public class Application
 						.fromDegrees(initHeading), view.getPitch(), Angle
 						.fromDegrees(initPitch), view.getZoom(), initAltitude,
 				lengthMillis, true));
+		wwd.redraw();
 	}
 
 	private void create3DMouse()
@@ -656,7 +654,7 @@ public class Application
 
 	private void createDoubleClickListener()
 	{
-		wwd.addMouseListener(new DoubleClickZoomListener(wwd, 5000d));
+		wwd.getInputHandler().addMouseListener(new DoubleClickZoomListener(wwd, 5000d));
 	}
 
 	private void enableMouseLayer()
@@ -1089,6 +1087,7 @@ public class Application
 														.getPitch()), orbitView
 												.getZoom(), bookmark.getZoom(),
 										lengthMillis, true));
+						wwd.redraw();
 					}
 				}
 			});

@@ -9,7 +9,6 @@ package au.gov.ga.worldwind.panels.other;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
@@ -42,24 +41,28 @@ import au.gov.ga.worldwind.util.FlatJButton;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 
-public class GoToCoordinatePanel extends JPanel {
+public class GoToCoordinatePanel extends JPanel
+{
 	private WorldWindow wwd;
 	private JTextField coordInput;
 	private JLabel resultLabel;
 	private boolean inputValid = false;
 	private List<ChangeListener> listeners = new ArrayList<ChangeListener>();
 
-	public GoToCoordinatePanel(WorldWindow wwd) {
+	public GoToCoordinatePanel(WorldWindow wwd)
+	{
 		this(wwd, false);
 	}
 
-	private GoToCoordinatePanel(WorldWindow wwd, boolean inDialog) {
+	private GoToCoordinatePanel(WorldWindow wwd, boolean inDialog)
+	{
 		super(new GridBagLayout());
 		this.wwd = wwd;
 		makePanel(inDialog);
 	}
 
-	private void makePanel(boolean inDialog) {
+	private void makePanel(boolean inDialog)
+	{
 		GridBagConstraints c;
 
 		JLabel label = new JLabel();
@@ -79,7 +82,8 @@ public class GoToCoordinatePanel extends JPanel {
 		c.weightx = 1;
 		add(coordInput, c);
 
-		if (!inDialog) {
+		if (!inDialog)
+		{
 			FlatJButton go = new FlatJButton(Icons.run);
 			go.restrictSize();
 			go.setToolTipText("Go");
@@ -88,8 +92,10 @@ public class GoToCoordinatePanel extends JPanel {
 			c.gridy = 1;
 			add(go, c);
 
-			ActionListener al = new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
+			ActionListener al = new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
 					gotoCoords();
 				}
 			};
@@ -103,16 +109,20 @@ public class GoToCoordinatePanel extends JPanel {
 		c.gridy = 2;
 		add(resultLabel, c);
 
-		coordInput.getDocument().addDocumentListener(new DocumentListener() {
-			public void changedUpdate(DocumentEvent e) {
+		coordInput.getDocument().addDocumentListener(new DocumentListener()
+		{
+			public void changedUpdate(DocumentEvent e)
+			{
 				updateResult();
 			}
 
-			public void insertUpdate(DocumentEvent e) {
+			public void insertUpdate(DocumentEvent e)
+			{
 				updateResult();
 			}
 
-			public void removeUpdate(DocumentEvent e) {
+			public void removeUpdate(DocumentEvent e)
+			{
 				updateResult();
 			}
 		});
@@ -120,21 +130,25 @@ public class GoToCoordinatePanel extends JPanel {
 		updateResult();
 	}
 
-	private void updateResult() {
+	private void updateResult()
+	{
 		LatLon latLon = Util.computeLatLonFromString(coordInput.getText(), wwd
 				.getModel().getGlobe());
 		updateResult(latLon, false);
 	}
 
-	private void updateResult(LatLon latlon, boolean showInvalid) {
+	private void updateResult(LatLon latlon, boolean showInvalid)
+	{
 		inputValid = latlon != null;
-		if (latlon != null) {
+		if (latlon != null)
+		{
 			// coordInput.setText(coordInput.getText().toUpperCase());
 			resultLabel.setText(String
 					.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", latlon
 							.getLatitude().degrees,
 							latlon.getLongitude().degrees));
-		} else if (showInvalid)
+		}
+		else if (showInvalid)
 			resultLabel.setText("Invalid coordinates");
 		else
 			resultLabel.setText(" ");
@@ -142,13 +156,14 @@ public class GoToCoordinatePanel extends JPanel {
 		notifyChangeListeners();
 	}
 
-	private void gotoCoords() {
+	private void gotoCoords()
+	{
 		LatLon latLon = Util.computeLatLonFromString(coordInput.getText(), wwd
 				.getModel().getGlobe());
 		updateResult(latLon, true);
-		if (latLon != null) {
+		if (latLon != null)
+		{
 			OrbitView view = (OrbitView) wwd.getView();
-			Globe globe = wwd.getModel().getGlobe();
 
 			Position beginCenter = view.getCenterPosition();
 			Position center = new Position(latLon, 0);
@@ -160,20 +175,25 @@ public class GoToCoordinatePanel extends JPanel {
 									.getPitch(), view.getPitch(), view
 									.getZoom(), view.getZoom(), lengthMillis,
 							true));
+			wwd.redraw();
 		}
 	}
 
-	private void addChangeListener(ChangeListener listener) {
+	private void addChangeListener(ChangeListener listener)
+	{
 		listeners.add(listener);
 	}
 
-	private void notifyChangeListeners() {
-		for (ChangeListener listener : listeners) {
+	private void notifyChangeListeners()
+	{
+		for (ChangeListener listener : listeners)
+		{
 			listener.stateChanged(null);
 		}
 	}
 
-	public static void showGotoDialog(Frame owner, WorldWindow wwd, String title) {
+	public static void showGotoDialog(Frame owner, WorldWindow wwd, String title)
+	{
 		final JDialog dialog = new JDialog(owner, title, true);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -199,9 +219,12 @@ public class GoToCoordinatePanel extends JPanel {
 		c.weightx = 1;
 		c.insets = new Insets(SPACING, SPACING, SPACING, 0);
 		panel.add(ok, c);
-		ok.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (gtp.inputValid) {
+		ok.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (gtp.inputValid)
+				{
 					gtp.gotoCoords();
 					dialog.dispose();
 				}
@@ -214,15 +237,19 @@ public class GoToCoordinatePanel extends JPanel {
 		c.gridy = 1;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
 		panel.add(cancel, c);
-		Action cancelAction = new AbstractAction() {
-			public void actionPerformed(ActionEvent e) {
+		Action cancelAction = new AbstractAction()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				dialog.dispose();
 			}
 		};
 		cancel.addActionListener(cancelAction);
 
-		ChangeListener cl = new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
+		ChangeListener cl = new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
 				ok.setEnabled(gtp.inputValid);
 			}
 		};

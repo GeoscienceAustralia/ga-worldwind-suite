@@ -563,6 +563,7 @@ public class RadiometricsPanel extends JPanel {
 							new Position(center, 0), view.getHeading(),
 							Angle.ZERO, view.getPitch(), Angle.ZERO, view
 									.getZoom(), zoom, lengthMillis, true));
+			wwd.redraw();
 
 			return lengthMillis;
 		}

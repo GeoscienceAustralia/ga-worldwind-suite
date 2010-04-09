@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.annotations;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
@@ -23,8 +22,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.File;
@@ -471,23 +468,18 @@ public class AnnotationsPanel extends JPanel
 		if (!playing)
 		{
 			playing = true;
-			final View view = wwd.getView();
-			view.addPropertyChangeListener(AVKey.VIEW,
-					new PropertyChangeListener()
+			wwd.getInputHandler().addMouseListener(new MouseAdapter()
+			{
+				@Override
+				public void mousePressed(MouseEvent e)
+				{
+					stopAnnotations();
+					if (!playing)
 					{
-						public void propertyChange(PropertyChangeEvent evt)
-						{
-							if (!view.isAnimating())
-							{
-								stopAnnotations();
-							}
-							if (!playing)
-							{
-								view.removePropertyChangeListener(AVKey.VIEW,
-										this);
-							}
-						}
-					});
+						wwd.getInputHandler().removeMouseListener(this);
+					}
+				}
+			});
 			Thread thread = new Thread(new Runnable()
 			{
 				public void run()
@@ -517,7 +509,7 @@ public class AnnotationsPanel extends JPanel
 								break;
 							length += Settings.get().getAnnotationsPause();
 
-							//sleep for 'length' in 'jump' increments
+							// sleep for 'length' in 'jump' increments
 							for (; playing && length > jump; length -= jump)
 							{
 								sleep(jump);
@@ -599,11 +591,12 @@ public class AnnotationsPanel extends JPanel
 					zoom = maxZoom;
 			}
 
-			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(
-					orbitView, center, newCenter,
-					orbitView.getHeading(), heading,
-					orbitView.getPitch(), pitch,
-					orbitView.getZoom(), zoom, lengthMillis, true));
+			view.addAnimator(FlyToOrbitViewAnimator
+					.createFlyToOrbitViewAnimator(orbitView, center, newCenter,
+							orbitView.getHeading(), heading, orbitView
+									.getPitch(), pitch, orbitView.getZoom(),
+							zoom, lengthMillis, true));
+			wwd.redraw();
 
 			return lengthMillis;
 		}

@@ -182,25 +182,4 @@ public class HtmlViewer extends JDialog
 			rootPane.setDefaultButton(ok);
 		}
 	}
-
-	/*public static void main(String[] args)
-	{
-		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
-		System.setProperty("http.proxyPort", "8080");
-		System.setProperty("http.nonProxyHosts", "localhost");
-		
-		URL page = null, base = null;
-		try
-		{
-			base = new URL("http://www.google.com.au/intl/en/");
-			page = new URL(base, "about.html");
-		}
-		catch (MalformedURLException e)
-		{
-		}
-		HtmlViewer dialog = new HtmlViewer(null, "Radiometrics", page, base);
-		dialog.setSize(600, 440);
-		dialog.setLocationRelativeTo(null);
-		dialog.setVisible(true);
-	}*/
 }

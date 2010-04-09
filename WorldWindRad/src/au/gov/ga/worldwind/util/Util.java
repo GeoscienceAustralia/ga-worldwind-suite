@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.util;
 
-import gov.nasa.worldwind.animation.Animator;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.coords.MGRSCoord;

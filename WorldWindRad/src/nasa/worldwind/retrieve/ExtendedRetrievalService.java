@@ -91,6 +91,7 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 			this.priority = priority;
 		}
 
+		@SuppressWarnings("unused")
 		public double getPriority() {
 			return priority;
 		}

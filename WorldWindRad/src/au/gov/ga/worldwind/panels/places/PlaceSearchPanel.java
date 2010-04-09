@@ -296,6 +296,7 @@ public class PlaceSearchPanel extends JPanel {
 								newCenter, orbitView.getHeading(), Angle.ZERO,
 								orbitView.getPitch(), Angle.ZERO, orbitView
 										.getZoom(), zoom, lengthMillis, true));
+				wwd.redraw();
 			}
 
 			nameText.setText(place.name);

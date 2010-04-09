@@ -11,18 +11,21 @@ import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class DoubleClickZoomListener extends MouseAdapter {
+public class DoubleClickZoomListener extends MouseAdapter
+{
 	private WorldWindow wwd;
 	private LatLon latlon;
 	private double minElevation;
 
-	public DoubleClickZoomListener(WorldWindow wwd, double minElevation) {
+	public DoubleClickZoomListener(WorldWindow wwd, double minElevation)
+	{
 		this.wwd = wwd;
 		this.minElevation = minElevation;
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent e) {
+	public void mouseClicked(MouseEvent e)
+	{
 		if (e.getButton() != MouseEvent.BUTTON1
 				&& e.getButton() != MouseEvent.BUTTON3)
 			return;
@@ -31,7 +34,8 @@ public class DoubleClickZoomListener extends MouseAdapter {
 			return;
 		OrbitView view = (OrbitView) wwd.getView();
 
-		if (e.getClickCount() % 2 == 1) {
+		if (e.getClickCount() % 2 == 1)
+		{
 			// single click
 			latlon = null;
 
@@ -44,11 +48,14 @@ public class DoubleClickZoomListener extends MouseAdapter {
 				return;
 
 			latlon = top.getPosition();
-		} else {
+		} else
+		{
 			// double click
-			if (latlon != null) {
+			if (latlon != null)
+			{
 				double zoom = view.getZoom();
-				if (zoom > minElevation) {
+				if (zoom > minElevation)
+				{
 					zoom = Math.max(minElevation,
 							e.getButton() == MouseEvent.BUTTON1 ? zoom / 3
 									: zoom * 3);
@@ -56,12 +63,14 @@ public class DoubleClickZoomListener extends MouseAdapter {
 				Position beginCenter = view.getCenterPosition();
 				Position endCenter = new Position(latlon, beginCenter
 						.getElevation());
+				view.stopAnimations();
 				view.addAnimator(FlyToOrbitViewAnimator
 						.createFlyToOrbitViewAnimator(view, beginCenter,
 								endCenter, view.getHeading(),
 								view.getHeading(), view.getPitch(), view
 										.getPitch(), view.getZoom(), zoom,
 								1000, true));
+				wwd.redraw();
 				latlon = null;
 			}
 		}

@@ -2,14 +2,9 @@ package au.gov.ga.worldwind.stereo;
 
 import gov.nasa.worldwind.AbstractSceneController;
 import gov.nasa.worldwind.View;
-import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.render.DrawContext;
 
-import java.awt.Point;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.media.opengl.GL;
 
@@ -48,6 +43,7 @@ public class StereoSceneController extends AbstractSceneController
 		try
 		{
 			this.applyView(dc);
+			dc.addPickPointFrustum();
 			this.createTerrain(dc);
 			this.preRender(dc);
 			this.clearFrame(dc);
@@ -94,7 +90,7 @@ public class StereoSceneController extends AbstractSceneController
 		}
 	}
 
-	@Override
+	/*@Override
 	protected void draw(DrawContext dc)
 	{
 		try
@@ -105,7 +101,7 @@ public class StereoSceneController extends AbstractSceneController
 		{
 			//scale bar layer sometimes throws this exception: ignore it
 		}
-	}
+	}*/
 
 	private void setupBuffer(GL gl, StereoMode mode, Eye eye)
 	{
@@ -142,7 +138,7 @@ public class StereoSceneController extends AbstractSceneController
 		}
 	}
 
-	private ArrayList<Point> pickPoints = new ArrayList<Point>();
+	/*private ArrayList<Point> pickPoints = new ArrayList<Point>();
 
 	protected void pickTerrain(DrawContext dc)
 	{
@@ -185,5 +181,5 @@ public class StereoSceneController extends AbstractSceneController
 		{
 			//ignore (bug in nasa code)
 		}
-	}
+	}*/
 }
