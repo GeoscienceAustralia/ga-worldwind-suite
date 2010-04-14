@@ -337,7 +337,9 @@ public class GDALTile
 	public static boolean isTypeFloatingPoint(int bufferType)
 	{
 		return bufferType == gdalconstConstants.GDT_Float32
-				|| bufferType == gdalconstConstants.GDT_Float64;
+				|| bufferType == gdalconstConstants.GDT_CFloat32
+				|| bufferType == gdalconstConstants.GDT_Float64
+				|| bufferType == gdalconstConstants.GDT_CFloat64;
 	}
 
 	public BufferedImage getAsImage() throws TilerException
@@ -364,7 +366,8 @@ public class GDALTile
 					: BufferedImage.TYPE_BYTE_GRAY;
 		}
 		else if (bufferType == gdalconstConstants.GDT_Int16
-				|| bufferType == gdalconstConstants.GDT_UInt16)
+				|| bufferType == gdalconstConstants.GDT_UInt16
+				|| bufferType == gdalconstConstants.GDT_CInt16)
 		{
 			short[] shorts = new short[pixels * bufferBandCount];
 			buffer.asShortBuffer().get(shorts);
@@ -374,7 +377,8 @@ public class GDALTile
 			imageType = BufferedImage.TYPE_USHORT_GRAY;
 		}
 		else if (bufferType == gdalconstConstants.GDT_Int32
-				|| bufferType == gdalconstConstants.GDT_UInt32)
+				|| bufferType == gdalconstConstants.GDT_UInt32
+				|| bufferType == gdalconstConstants.GDT_CInt32)
 		{
 			int[] ints = new int[pixels * bufferBandCount];
 			buffer.asIntBuffer().get(ints);
@@ -689,13 +693,15 @@ public class GDALTile
 				newFloatingPoint);
 	}
 
-	private long getLongValue(ByteBuffer buffer, int bufferType)
+	public static long getLongValue(ByteBuffer buffer, int bufferType)
 	{
 		if (bufferType == gdalconstConstants.GDT_Byte)
 			return buffer.get() & 0xff;
-		else if (bufferType == gdalconstConstants.GDT_Int16)
+		else if (bufferType == gdalconstConstants.GDT_Int16
+				|| bufferType == gdalconstConstants.GDT_CInt16)
 			return buffer.getShort();
-		else if (bufferType == gdalconstConstants.GDT_Int32)
+		else if (bufferType == gdalconstConstants.GDT_Int32
+				|| bufferType == gdalconstConstants.GDT_CInt32)
 			return buffer.getInt();
 		else if (bufferType == gdalconstConstants.GDT_UInt16)
 			return getUInt16(buffer);
@@ -705,13 +711,16 @@ public class GDALTile
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private long getLongValue(int index, ByteBuffer buffer, int bufferType)
+	private static long getLongValue(int index, ByteBuffer buffer,
+			int bufferType)
 	{
 		if (bufferType == gdalconstConstants.GDT_Byte)
 			return buffer.get(index) & 0xff;
-		else if (bufferType == gdalconstConstants.GDT_Int16)
+		else if (bufferType == gdalconstConstants.GDT_Int16
+				|| bufferType == gdalconstConstants.GDT_CInt16)
 			return buffer.getShort(index);
-		else if (bufferType == gdalconstConstants.GDT_Int32)
+		else if (bufferType == gdalconstConstants.GDT_Int32
+				|| bufferType == gdalconstConstants.GDT_CInt32)
 			return buffer.getInt(index);
 		else if (bufferType == gdalconstConstants.GDT_UInt16)
 			return getUInt16(index, buffer);
@@ -721,33 +730,41 @@ public class GDALTile
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private double getDoubleValue(ByteBuffer buffer, int bufferType)
+	public static double getDoubleValue(ByteBuffer buffer, int bufferType)
 	{
-		if (bufferType == gdalconstConstants.GDT_Float32)
+		if (bufferType == gdalconstConstants.GDT_Float32
+				|| bufferType == gdalconstConstants.GDT_CFloat32)
 			return buffer.getFloat();
-		else if (bufferType == gdalconstConstants.GDT_Float64)
+		else if (bufferType == gdalconstConstants.GDT_Float64
+				|| bufferType == gdalconstConstants.GDT_CFloat64)
 			return buffer.getDouble();
 		else
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private double getDoubleValue(int index, ByteBuffer buffer, int bufferType)
+	private static double getDoubleValue(int index, ByteBuffer buffer,
+			int bufferType)
 	{
-		if (bufferType == gdalconstConstants.GDT_Float32)
+		if (bufferType == gdalconstConstants.GDT_Float32
+				|| bufferType == gdalconstConstants.GDT_CFloat32)
 			return buffer.getFloat(index);
-		else if (bufferType == gdalconstConstants.GDT_Float64)
+		else if (bufferType == gdalconstConstants.GDT_Float64
+				|| bufferType == gdalconstConstants.GDT_CFloat64)
 			return buffer.getDouble(index);
 		else
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private void putLongValue(ByteBuffer buffer, int bufferType, long value)
+	private static void putLongValue(ByteBuffer buffer, int bufferType,
+			long value)
 	{
 		if (bufferType == gdalconstConstants.GDT_Byte)
 			buffer.put((byte) value);
-		else if (bufferType == gdalconstConstants.GDT_Int16)
+		else if (bufferType == gdalconstConstants.GDT_Int16
+				|| bufferType == gdalconstConstants.GDT_CInt16)
 			buffer.putShort((short) value);
-		else if (bufferType == gdalconstConstants.GDT_Int32)
+		else if (bufferType == gdalconstConstants.GDT_Int32
+				|| bufferType == gdalconstConstants.GDT_CInt32)
 			buffer.putInt((int) value);
 		else if (bufferType == gdalconstConstants.GDT_UInt16)
 			putUInt16(buffer, value);
@@ -757,14 +774,16 @@ public class GDALTile
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private void putLongValue(int index, ByteBuffer buffer, int bufferType,
-			long value)
+	private static void putLongValue(int index, ByteBuffer buffer,
+			int bufferType, long value)
 	{
 		if (bufferType == gdalconstConstants.GDT_Byte)
 			buffer.put(index, (byte) value);
-		else if (bufferType == gdalconstConstants.GDT_Int16)
+		else if (bufferType == gdalconstConstants.GDT_Int16
+				|| bufferType == gdalconstConstants.GDT_CInt16)
 			buffer.putShort(index, (short) value);
-		else if (bufferType == gdalconstConstants.GDT_Int32)
+		else if (bufferType == gdalconstConstants.GDT_Int32
+				|| bufferType == gdalconstConstants.GDT_CInt32)
 			buffer.putInt(index, (int) value);
 		else if (bufferType == gdalconstConstants.GDT_UInt16)
 			putUInt16(index, buffer, value);
@@ -774,28 +793,33 @@ public class GDALTile
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private void putDoubleValue(ByteBuffer buffer, int bufferType, double value)
+	private static void putDoubleValue(ByteBuffer buffer, int bufferType,
+			double value)
 	{
-		if (bufferType == gdalconstConstants.GDT_Float32)
+		if (bufferType == gdalconstConstants.GDT_Float32
+				|| bufferType == gdalconstConstants.GDT_CFloat32)
 			buffer.putFloat((float) value);
-		else if (bufferType == gdalconstConstants.GDT_Float64)
+		else if (bufferType == gdalconstConstants.GDT_Float64
+				|| bufferType == gdalconstConstants.GDT_CFloat64)
 			buffer.putDouble(value);
 		else
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private void putDoubleValue(int index, ByteBuffer buffer, int bufferType,
-			double value)
+	private static void putDoubleValue(int index, ByteBuffer buffer,
+			int bufferType, double value)
 	{
-		if (bufferType == gdalconstConstants.GDT_Float32)
+		if (bufferType == gdalconstConstants.GDT_Float32
+				|| bufferType == gdalconstConstants.GDT_CFloat32)
 			buffer.putFloat(index, (float) value);
-		else if (bufferType == gdalconstConstants.GDT_Float64)
+		else if (bufferType == gdalconstConstants.GDT_Float64
+				|| bufferType == gdalconstConstants.GDT_CFloat64)
 			buffer.putDouble(index, value);
 		else
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private int getUInt16(ByteBuffer buffer)
+	private static int getUInt16(ByteBuffer buffer)
 	{
 		int first = 0xff & (int) buffer.get();
 		int second = 0xff & (int) buffer.get();
@@ -805,7 +829,7 @@ public class GDALTile
 			return (first | second << 8);
 	}
 
-	private int getUInt16(int index, ByteBuffer buffer)
+	private static int getUInt16(int index, ByteBuffer buffer)
 	{
 		int first = 0xff & (int) buffer.get(index);
 		int second = 0xff & (int) buffer.get(index + 1);
@@ -815,7 +839,7 @@ public class GDALTile
 			return (first | second << 8);
 	}
 
-	private long getUInt32(ByteBuffer buffer)
+	private static long getUInt32(ByteBuffer buffer)
 	{
 		long first = 0xff & (int) buffer.get();
 		long second = 0xff & (int) buffer.get();
@@ -827,7 +851,7 @@ public class GDALTile
 			return (first | second << 8l | third << 16l | fourth << 24l);
 	}
 
-	private long getUInt32(int index, ByteBuffer buffer)
+	private static long getUInt32(int index, ByteBuffer buffer)
 	{
 		long first = 0xff & (int) buffer.get(index);
 		long second = 0xff & (int) buffer.get(index + 1);
@@ -839,7 +863,7 @@ public class GDALTile
 			return (first | second << 8l | third << 16l | fourth << 24l);
 	}
 
-	private void putUInt16(ByteBuffer buffer, long value)
+	private static void putUInt16(ByteBuffer buffer, long value)
 	{
 		byte first = (byte) ((value >> 8) & 0xff);
 		byte second = (byte) (value & 0xff);
@@ -855,7 +879,7 @@ public class GDALTile
 		}
 	}
 
-	private void putUInt16(int index, ByteBuffer buffer, long value)
+	private static void putUInt16(int index, ByteBuffer buffer, long value)
 	{
 		byte first = (byte) ((value >> 8) & 0xff);
 		byte second = (byte) (value & 0xff);
@@ -871,7 +895,7 @@ public class GDALTile
 		}
 	}
 
-	private void putUInt32(ByteBuffer buffer, long value)
+	private static void putUInt32(ByteBuffer buffer, long value)
 	{
 		byte first = (byte) ((value >> 24) & 0xff);
 		byte second = (byte) ((value >> 16) & 0xff);
@@ -893,7 +917,7 @@ public class GDALTile
 		}
 	}
 
-	private void putUInt32(int index, ByteBuffer buffer, long value)
+	private static void putUInt32(int index, ByteBuffer buffer, long value)
 	{
 		byte first = (byte) ((value >> 24) & 0xff);
 		byte second = (byte) ((value >> 16) & 0xff);

@@ -130,14 +130,8 @@ public class MapnikUtil
 		return null;
 	}
 
-	public static void main(String[] args) throws TilerException
-	{
-		System.out.println(getSector(new File(
-				"D:/West Macs Imagery/Vector/Roads/Mapnik/map.xml")));
-	}
-
-	public static void tile(Sector sector, int width, int height, File input, File dst,
-			final Logger logger) throws TilerException
+	public static void tile(Sector sector, int width, int height, File input,
+			File dst, final Logger logger) throws TilerException
 	{
 		File python = getPythonBinaryFile();
 		File mapnik = getMapnikScriptFile();
@@ -148,9 +142,9 @@ public class MapnikUtil
 				+ mapnik.getAbsolutePath() + "\" -i " + format + " -e \""
 				+ sector.getMinLongitude() + "," + sector.getMinLatitude()
 				+ "," + sector.getMaxLongitude() + ","
-				+ sector.getMaxLatitude() + "\" -s \"" + width + ","
-				+ height + "\" --noopen -m \"" + input.getAbsolutePath()
-				+ "\" -o \"" + dst.getAbsolutePath() + "\"";
+				+ sector.getMaxLatitude() + "\" -s \"" + width + "," + height
+				+ "\" --noopen -m \"" + input.getAbsolutePath() + "\" -o \""
+				+ dst.getAbsolutePath() + "\"";
 		try
 		{
 			Process process = Runtime.getRuntime().exec(command);

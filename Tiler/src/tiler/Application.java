@@ -75,8 +75,11 @@ import mapnik.MapnikUtil;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
+import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
 import org.gdal.osr.SpatialReference;
+
+import preview.PreviewSetup;
 
 import util.DocumentAdapter;
 import util.DocumentLogger;
@@ -107,6 +110,8 @@ public class Application
 	}
 
 	public final static String LOGGER = "TilerLogger";
+
+	public final static String OUTPUT_DIR_KEY = "Last Output Directory";
 
 	private Logger logger;
 	private JTextPane textLog;
@@ -1134,8 +1139,6 @@ public class Application
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		panel.add(label, c);
 
-		final String outputDirKey = "Last Output Directory";
-
 		outputDirectory = new JTextField();
 		c = new GridBagConstraints();
 		c.gridx = 1;
@@ -1153,7 +1156,7 @@ public class Application
 				File dir = new File(text);
 				if (dir.isDirectory())
 				{
-					preferences.put(outputDirKey, text);
+					preferences.put(OUTPUT_DIR_KEY, text);
 				}
 			}
 		});
@@ -1168,14 +1171,14 @@ public class Application
 			public void actionPerformed(ActionEvent e)
 			{
 				JFileChooser chooser = new JFileChooser(preferences.get(
-						outputDirKey, null));
+						OUTPUT_DIR_KEY, null));
 				chooser.setAcceptAllFileFilterUsed(false);
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 				{
 					File dir = chooser.getSelectedFile();
 					outputDirectory.setText(dir.getAbsolutePath());
-					preferences.put(outputDirKey, dir.getAbsolutePath());
+					preferences.put(OUTPUT_DIR_KEY, dir.getAbsolutePath());
 				}
 			}
 		});
@@ -1231,6 +1234,19 @@ public class Application
 			}
 		});
 
+		JButton previewButton = new JButton("Preview generated tileset");
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		panel.add(previewButton, c);
+		previewButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				preview();
+			}
+		});
+
 		updatePythonFields();
 		addRecalculateListeners();
 		openDataset(null);
@@ -1245,6 +1261,29 @@ public class Application
 		loadFrameBounds();
 		loadSplitLocations();
 		frame.setVisible(true);
+	}
+
+	private void preview()
+	{
+		boolean elevations = elevationRadio.isSelected();
+		String extension = elevations ? "bil" : getImageFormat();
+		int type = getElevationBufferType();
+		Double nodata = null;
+		if (outsideCheck.isSelected() && outsideFields != null
+				&& outsideFields.length > 0)
+		{
+			if (isFloat())
+				nodata = ((JDoubleField) outsideFields[0]).getValue();
+			else
+			{
+				Long l = ((JLongField) outsideFields[0]).getValue();
+				if (l != null)
+					nodata = l.doubleValue();
+			}
+		}
+		new PreviewSetup(frame, outputDirectory.getText(), extension,
+				elevations, type, tilesizeField.getValue(), nodata, lztsField
+						.getValue());
 	}
 
 	private void loadSplitLocations()
@@ -1631,6 +1670,7 @@ public class Application
 												.getMinLongitude(), sector
 												.getMaxLatitude(), sector
 												.getMaxLongitude());
+								tile = tile.convertToType(gdalconst.GDT_Byte);
 								BufferedImage image = tile.getAsImage();
 								ImageIcon icon = new ImageIcon(image);
 								previewCanvas.setIcon(icon);
@@ -2427,7 +2467,7 @@ public class Application
 					}
 				}
 
-				String imageFormat = pngRadio.isSelected() ? "png" : "jpg";
+				String imageFormat = getImageFormat();
 				if (mapnikRadio.isSelected())
 				{
 					Tiler.tileMapnik(mapFile, sector, level, tilesize, lzts,
@@ -2457,10 +2497,7 @@ public class Application
 				}
 				else if (elevationRadio.isSelected())
 				{
-					int bufferType = byteRadio.isSelected() ? gdalconstConstants.GDT_Byte
-							: int16Radio.isSelected() ? gdalconstConstants.GDT_Int16
-									: int32Radio.isSelected() ? gdalconstConstants.GDT_Int32
-											: gdalconstConstants.GDT_Float32;
+					int bufferType = getElevationBufferType();
 
 					int band = bandCombo.getSelectedIndex();
 
@@ -2508,6 +2545,19 @@ public class Application
 		});
 		thread.setDaemon(true);
 		thread.start();
+	}
+
+	private int getElevationBufferType()
+	{
+		return byteRadio.isSelected() ? gdalconstConstants.GDT_Byte
+				: int16Radio.isSelected() ? gdalconstConstants.GDT_Int16
+						: int32Radio.isSelected() ? gdalconstConstants.GDT_Int32
+								: gdalconstConstants.GDT_Float32;
+	}
+
+	private String getImageFormat()
+	{
+		return pngRadio.isSelected() ? "png" : "jpg";
 	}
 
 	private void cancel()

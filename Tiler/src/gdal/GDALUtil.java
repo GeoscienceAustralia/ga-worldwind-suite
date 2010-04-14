@@ -1,14 +1,6 @@
 package gdal;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
@@ -16,10 +8,8 @@ import org.gdal.gdalconst.gdalconst;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 
-import util.FileUtil;
 import util.Sector;
 import util.TilerException;
-import util.FileFilters.ExtensionFileFilter;
 
 public class GDALUtil
 {
@@ -79,8 +69,8 @@ public class GDALUtil
 
 		int width = dataset.getRasterXSize();
 		int height = dataset.getRasterYSize();
-		//gX = gt[0] + gt[1] * x + gt[2] * y;
-		//gY = gt[3] + gt[4] * x + gt[5] * y;
+		// gX = gt[0] + gt[1] * x + gt[2] * y;
+		// gY = gt[3] + gt[4] * x + gt[5] * y;
 		double minlon = geoTransformArray[0];
 		double maxlat = geoTransformArray[3];
 		double maxlon = geoTransformArray[0] + geoTransformArray[1] * width
@@ -184,58 +174,5 @@ public class GDALUtil
 			str = "0" + str;
 		}
 		return str;
-	}
-
-	public static void main(String[] args)
-	{
-		short[] minmax = findShortMinMax(new File(
-				"D:/SW Margins/sonne/tiledB/8"), (short) -9999,
-				Short.MIN_VALUE, (short) -1);
-		System.out.println("Min = " + minmax[0]);
-		System.out.println("Max = " + minmax[1]);
-	}
-
-	public static short[] findShortMinMax(File dir, short nodataValue,
-			short ignoreMin, short ignoreMax)
-	{
-		short min = Short.MAX_VALUE;
-		short max = Short.MIN_VALUE;
-
-		String extension = "bil";
-		ExtensionFileFilter fileFilter = new ExtensionFileFilter(extension);
-		List<File> sourceFiles = new ArrayList<File>();
-		FileUtil.recursivelyAddFiles(sourceFiles, dir, fileFilter);
-
-		int count = sourceFiles.size(), done = 0;
-		for (File file : sourceFiles)
-		{
-			System.out.println("Processing " + file + " (" + (++done) + "/"
-					+ count + " - " + (done * 100 / count) + "%) " + min + ","
-					+ max);
-			try
-			{
-				FileChannel fc = new FileInputStream(file).getChannel();
-				ByteBuffer bb = ByteBuffer.allocate((int) file.length());
-				bb.order(ByteOrder.LITTLE_ENDIAN);
-				fc.read(bb);
-				bb.rewind();
-				ShortBuffer sb = bb.asShortBuffer();
-				for (int i = 0; i < sb.limit(); i++)
-				{
-					short current = sb.get();
-					if (current == nodataValue)
-						continue;
-					if (current < ignoreMin || current > ignoreMax)
-						continue;
-					min = current < min ? current : min;
-					max = current > max ? current : max;
-				}
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
-		return new short[] { min, max };
 	}
 }
