@@ -30,11 +30,22 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 import org.gdal.gdal.gdal;
+import org.gdal.gdalconst.gdalconst;
 
 import util.FileFilters.DirectoryFileFilter;
 
 public class Previewer extends JFrame
 {
+	public static void main(String[] args) throws Exception
+	{
+		File directory = new File("C:/data/cloates_3m_d/tiles");
+		new Previewer(directory, "bil", gdalconst.GDT_Float32, 150, 150, 0d,
+				20d);
+		/*File directory = new File(
+				"S:/resources/images/world-wind/radiometrics/radio_KThU_100m_he_rgb");
+		new Previewer(directory, "jpg", 36d);*/
+	}
+
 	private File directory;
 	private String extension;
 	private double lzts;
@@ -403,6 +414,9 @@ public class Previewer extends JFrame
 				if (value > max)
 					max = value;
 			}
+			
+			if(max == min)
+				max = min + 1;
 
 			int pixels = width * height;
 			int[] offsets = new int[4];
@@ -423,7 +437,7 @@ public class Previewer extends JFrame
 			WritableRaster raster = Raster.createWritableRaster(sampleModel,
 					dataBuffer, null);
 			BufferedImage image = new BufferedImage(width, height,
-					BufferedImage.TYPE_INT_ARGB_PRE);
+					BufferedImage.TYPE_INT_ARGB);
 			image.setData(raster);
 			return image;
 		}

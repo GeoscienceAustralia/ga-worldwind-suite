@@ -81,4 +81,17 @@ public class NumberArray
 		longs[i] = (long) v;
 		doubles[i] = v;
 	}
+	
+	public String toString(boolean isFloat)
+	{
+		String s = "(";
+		for (int i = 0; i < length(); i++)
+		{
+			if (i > 0)
+				s += ", ";
+			s += isFloat ? doubles[i] : longs[i];
+		}
+		s += ")";
+		return s;
+	}
 }

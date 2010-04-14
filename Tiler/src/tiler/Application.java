@@ -27,8 +27,13 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.ByteOrder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -80,7 +85,7 @@ import org.gdal.gdalconst.gdalconstConstants;
 import org.gdal.osr.SpatialReference;
 
 import preview.PreviewSetup;
-
+import util.BufferedLineWriter;
 import util.DocumentAdapter;
 import util.DocumentLogger;
 import util.JDoubleField;
@@ -92,7 +97,9 @@ import util.NumberArray;
 import util.Prefs;
 import util.ProgressReporterImpl;
 import util.Sector;
+import util.StringLineBuilder;
 import util.TilerException;
+import util.Util;
 
 public class Application
 {
@@ -1565,6 +1572,7 @@ public class Application
 			{
 				gdalFileField.setText(file.getAbsolutePath());
 				mapnikFileField.setText(file.getAbsolutePath());
+				this.mapFile = file;
 
 				if (gdalRadio.isSelected())
 				{
@@ -1614,37 +1622,37 @@ public class Application
 						min[i] = minmax[0];
 						max[i] = minmax[1];
 					}
-					StringBuilder info = new StringBuilder();
-					info.append("Dataset information:\n");
-					info.append("Size = " + width + ", " + height + "\n");
-					info.append("Cell size = "
+					StringLineBuilder info = new StringLineBuilder();
+
+					info.appendLine("Dataset information:");
+					info.appendLine("Size = " + width + ", " + height);
+					info.appendLine("Cell size = "
 							+ (sector.getDeltaLongitude() / width) + ", "
-							+ (sector.getDeltaLatitude() / height) + "\n");
-					info.append("Bottom left corner = ("
+							+ (sector.getDeltaLatitude() / height));
+					info.appendLine("Bottom left corner = ("
 							+ sector.getMinLongitude() + ", "
-							+ sector.getMinLatitude() + ")\n");
-					info.append("Top right corner = ("
+							+ sector.getMinLatitude() + ")");
+					info.appendLine("Top right corner = ("
 							+ sector.getMaxLongitude() + ", "
-							+ sector.getMaxLatitude() + ")\n");
-					info.append("Raster band count = " + bandCount + "\n");
+							+ sector.getMaxLatitude() + ")");
+					info.appendLine("Raster band count = " + bandCount);
 					for (int i = 0; i < bandCount; i++)
 					{
-						info.append("Band " + (i + 1) + ":\n");
-						info.append("    Data type = " + dataTypes[i] + " ("
-								+ dataTypeSizes[i] + " bit)\n");
-						info.append("    No-data value = " + nodata[i] + "\n");
-						info.append("    Approx minimum = " + min[i] + "\n");
-						info.append("    Approx maximum = " + max[i] + "\n");
+						info.appendLine("Band " + (i + 1) + ":");
+						info.appendLine("    Data type = " + dataTypes[i]
+								+ " (" + dataTypeSizes[i] + " bit)");
+						info.appendLine("    No-data value = " + nodata[i]);
+						info.appendLine("    Approx minimum = " + min[i]);
+						info.appendLine("    Approx maximum = " + max[i]);
 					}
 					if (spatialReference != null)
 					{
-						info.append("Coordinate system = \n");
-						info
-								.append(spatialReference.ExportToPrettyWkt()
-										+ "\n");
+						info.appendLine("Coordinate system =");
+						info.appendLine(Util.fixNewlines(spatialReference
+								.ExportToPrettyWkt()));
 					}
 
-					String text = info.substring(0, info.length() - 1);
+					String text = info.toString(true);
 					infoText.setText(text);
 					infoText.select(0, 0);
 
@@ -1689,7 +1697,6 @@ public class Application
 				{
 					infoText.setText("");
 					this.bandCount = 0;
-					this.mapFile = file;
 
 					Sector sect = MapnikUtil.getSector(mapFile);
 					if (sect == null)
@@ -2199,7 +2206,7 @@ public class Application
 	{
 		validOptions = fileOpen;
 
-		StringBuilder info = new StringBuilder();
+		StringLineBuilder info = new StringLineBuilder();
 
 		if (mapnikRadio.isSelected())
 		{
@@ -2258,28 +2265,28 @@ public class Application
 					totalCount += tileCount[i];
 				}
 
-				info.append("Tiling information:\n");
-				info.append("Level count = " + levels + "\n");
+				info.appendLine("Tiling information:");
+				info.appendLine("Level count = " + levels);
 				if (overviews)
 				{
-					info.append("Tile count at highest level = "
-							+ tileCount[levels - 1] + "\n");
-					info.append("Overview tile count = "
-							+ (totalCount - tileCount[levels - 1]) + "\n");
+					info.appendLine("Tile count at highest level = "
+							+ tileCount[levels - 1]);
+					info.appendLine("Overview tile count = "
+							+ (totalCount - tileCount[levels - 1]));
 				}
-				info.append("Total tile count = " + totalCount + "\n");
+				info.appendLine("Total tile count = " + totalCount);
 			}
 		}
 
 		String outDir = outputDirectory.getText();
 		if (outDir.length() == 0)
 		{
-			info.append("Please select an output directory\n");
+			info.appendLine("Please select an output directory");
 		}
 		else
 		{
-			info.append("Tiles will be saved to "
-					+ new File(outDir).getAbsolutePath() + "\n");
+			info.appendLine("Tiles will be saved to "
+					+ new File(outDir).getAbsolutePath());
 		}
 
 		if (!validOptions)
@@ -2288,7 +2295,7 @@ public class Application
 		}
 		else
 		{
-			tileText.setText(info.substring(0, info.length() - 1));
+			tileText.setText(info.toString(true));
 		}
 		tileText.select(0, 0);
 
@@ -2401,150 +2408,271 @@ public class Application
 				int tilesize = tilesizeField.getValue();
 				double lzts = lztsField.getValue();
 				File outDir = new File(outputDirectory.getText());
-				NumberArray outsideValues = null;
-				MinMaxArray[] minMaxReplaces = null;
-				NullableNumberArray replace = null;
-				NullableNumberArray otherwise = null;
-
 				boolean overviews = overviewsCheck.isSelected();
-				boolean isFloat = isFloat();
-				if (outsideCheck.isSelected())
-				{
-					outsideValues = new NumberArray(outputBandCount);
-					for (int b = 0; b < outputBandCount; b++)
-					{
-						if (isFloat)
-						{
-							outsideValues.setDouble(b,
-									((JDoubleField) outsideFields[b])
-											.getValue());
-						}
-						else
-						{
-							outsideValues.setLong(b,
-									((JLongField) outsideFields[b]).getValue());
-						}
-					}
-				}
-				if (replaceCheck.isSelected())
-				{
-					minMaxReplaces = new MinMaxArray[2];
-					minMaxReplaces[0] = new MinMaxArray(outputBandCount);
-					minMaxReplaces[1] = new MinMaxArray(outputBandCount);
-					replace = new NullableNumberArray(outputBandCount);
-					otherwise = new NullableNumberArray(outputBandCount);
-					for (int b = 0; b < outputBandCount; b++)
-					{
-						if (isFloat)
-						{
-							minMaxReplaces[0].setMinMaxDouble(b,
-									((JDoubleField) minFields[b]).getValue(),
-									((JDoubleField) maxFields[b]).getValue());
-							minMaxReplaces[1].setMinMaxDouble(b,
-									((JDoubleField) min2Fields[b]).getValue(),
-									((JDoubleField) max2Fields[b]).getValue());
-							replace.setDouble(b,
-									((JDoubleField) replaceFields[b])
-											.getValue());
-							otherwise.setDouble(b,
-									((JDoubleField) otherwiseFields[b])
-											.getValue());
-						}
-						else
-						{
-							minMaxReplaces[0].setMinMaxLong(b,
-									((JLongField) minFields[b]).getValue(),
-									((JLongField) maxFields[b]).getValue());
-							minMaxReplaces[1].setMinMaxLong(b,
-									((JLongField) min2Fields[b]).getValue(),
-									((JLongField) max2Fields[b]).getValue());
-							replace.setLong(b, ((JLongField) replaceFields[b])
-									.getValue());
-							otherwise.setLong(b,
-									((JLongField) otherwiseFields[b])
-											.getValue());
-						}
-					}
-				}
 
-				String imageFormat = getImageFormat();
-				if (mapnikRadio.isSelected())
+				FileWriter logWriter = null;
+				try
 				{
-					Tiler.tileMapnik(mapFile, sector, level, tilesize, lzts,
-							imageFormat, outDir, reporter);
-					if (overviews && !reporter.isCancelled())
-					{
-						Overviewer.createImageOverviews(outDir, imageFormat,
-								tilesize, tilesize, outsideValues, sector,
-								lzts, reporter);
-					}
-				}
-				else if (imageRadio.isSelected())
-				{
-					boolean addAlpha = pngRadio.isSelected()
-							&& alphaCheck.isSelected();
+					outDir.mkdirs();
+					File logFile = new File(outDir, "tiler_" + getDateTime()
+							+ ".log");
+					logWriter = new FileWriter(logFile);
+					BufferedLineWriter writer = new BufferedLineWriter(
+							logWriter);
 
-					Tiler.tileImages(dataset, sector, level, tilesize, lzts,
-							imageFormat, addAlpha, outsideValues,
-							minMaxReplaces, replace, otherwise, outDir,
-							reporter);
-					if (overviews && !reporter.isCancelled())
+					String imageFormat = getImageFormat();
+					if (mapnikRadio.isSelected())
 					{
-						Overviewer.createImageOverviews(outDir, imageFormat,
-								tilesize, tilesize, outsideValues, sector,
-								lzts, reporter);
-					}
-				}
-				else if (elevationRadio.isSelected())
-				{
-					int bufferType = getElevationBufferType();
+						writer.writeLine("Input file: "
+								+ mapFile.getAbsolutePath());
+						writer.writeLine("Python binary: "
+								+ MapnikUtil.getPythonBinary());
+						writer.writeLine("Mapnik script: "
+								+ MapnikUtil.getMapnikScript());
+						writer.writeLine("Sector: " + sector);
+						writer.writeLine("Output directory: "
+								+ outDir.getAbsolutePath());
+						writer.writeLine("Level count: " + level);
+						writer.writeLine("Tilesize: " + tilesize);
+						writer.writeLine("Level zero tile size: " + lzts);
+						writer.writeLine("Image format: " + imageFormat);
 
-					int band = bandCombo.getSelectedIndex();
-
-					NumberArray minmax = new NumberArray(2);
-					if (isFloat)
-					{
-						minmax.setDouble(0, Double.MAX_VALUE);
-						minmax.setDouble(1, -Double.MAX_VALUE);
+						Tiler.tileMapnik(mapFile, sector, level, tilesize,
+								lzts, imageFormat, outDir, reporter);
+						if (overviews && !reporter.isCancelled())
+						{
+							Overviewer.createImageOverviews(outDir,
+									imageFormat, tilesize, tilesize, null,
+									sector, lzts, reporter);
+						}
 					}
 					else
 					{
-						minmax.setLong(0, Long.MAX_VALUE);
-						minmax.setLong(1, Long.MIN_VALUE);
+						boolean isFloat = isFloat();
+						NumberArray outsideValues = null;
+						MinMaxArray[] minMaxReplaces = null;
+						NullableNumberArray replace = null;
+						NullableNumberArray otherwise = null;
+
+						if (outsideCheck.isSelected())
+						{
+							outsideValues = new NumberArray(outputBandCount);
+							for (int b = 0; b < outputBandCount; b++)
+							{
+								if (isFloat)
+								{
+									outsideValues.setDouble(b,
+											((JDoubleField) outsideFields[b])
+													.getValue());
+								}
+								else
+								{
+									outsideValues.setLong(b,
+											((JLongField) outsideFields[b])
+													.getValue());
+								}
+							}
+						}
+						if (replaceCheck.isSelected())
+						{
+							minMaxReplaces = new MinMaxArray[2];
+							minMaxReplaces[0] = new MinMaxArray(outputBandCount);
+							minMaxReplaces[1] = new MinMaxArray(outputBandCount);
+							replace = new NullableNumberArray(outputBandCount);
+							otherwise = new NullableNumberArray(outputBandCount);
+							for (int b = 0; b < outputBandCount; b++)
+							{
+								if (isFloat)
+								{
+									minMaxReplaces[0].setMinMaxDouble(b,
+											((JDoubleField) minFields[b])
+													.getValue(),
+											((JDoubleField) maxFields[b])
+													.getValue());
+									minMaxReplaces[1].setMinMaxDouble(b,
+											((JDoubleField) min2Fields[b])
+													.getValue(),
+											((JDoubleField) max2Fields[b])
+													.getValue());
+									replace.setDouble(b,
+											((JDoubleField) replaceFields[b])
+													.getValue());
+									otherwise.setDouble(b,
+											((JDoubleField) otherwiseFields[b])
+													.getValue());
+								}
+								else
+								{
+									minMaxReplaces[0].setMinMaxLong(b,
+											((JLongField) minFields[b])
+													.getValue(),
+											((JLongField) maxFields[b])
+													.getValue());
+									minMaxReplaces[1].setMinMaxLong(b,
+											((JLongField) min2Fields[b])
+													.getValue(),
+											((JLongField) max2Fields[b])
+													.getValue());
+									replace.setLong(b,
+											((JLongField) replaceFields[b])
+													.getValue());
+									otherwise.setLong(b,
+											((JLongField) otherwiseFields[b])
+													.getValue());
+								}
+							}
+						}
+
+						writer.writeLine("Input file: "
+								+ mapFile.getAbsolutePath());
+						writer.newLine();
+
+						writer.writeLine(infoText.getText());
+						writer.newLine();
+
+						writer.writeLine(tileText.getText());
+						writer.newLine();
+
+						writer.writeLine("Output parameters:");
+						writer.writeLine("Sector: " + sector);
+						writer.writeLine("Output directory: "
+								+ outDir.getAbsolutePath());
+						writer.writeLine("Level count: " + level);
+						writer.writeLine("Tilesize: " + tilesize);
+						writer.writeLine("Level zero tile size: " + lzts);
+						writer.writeLine("Image format: " + imageFormat);
+						if (outsideValues != null)
+						{
+							writer.writeLine("Set outside values: "
+									+ outsideValues.toString(isFloat));
+						}
+						if (minMaxReplaces != null)
+						{
+							writer
+									.writeLine("Replace min 1: "
+											+ minMaxReplaces[0].toString(
+													isFloat, true));
+							writer.writeLine("Replace max 1: "
+									+ minMaxReplaces[0]
+											.toString(isFloat, false));
+							writer
+									.writeLine("Replace min 2: "
+											+ minMaxReplaces[1].toString(
+													isFloat, true));
+							writer.writeLine("Replace max 2: "
+									+ minMaxReplaces[1]
+											.toString(isFloat, false));
+
+							writer.writeLine("Replace with: "
+									+ replace.toString(isFloat));
+							writer.writeLine("Otherwise: "
+									+ otherwise.toString(isFloat));
+						}
+
+						if (imageRadio.isSelected())
+						{
+							boolean addAlpha = pngRadio.isSelected()
+									&& alphaCheck.isSelected();
+
+							writer.writeLine("Add alpha: " + addAlpha);
+
+							Tiler.tileImages(dataset, sector, level, tilesize,
+									lzts, imageFormat, addAlpha, outsideValues,
+									minMaxReplaces, replace, otherwise, outDir,
+									reporter);
+							if (overviews && !reporter.isCancelled())
+							{
+								Overviewer.createImageOverviews(outDir,
+										imageFormat, tilesize, tilesize,
+										outsideValues, sector, lzts, reporter);
+							}
+						}
+						else if (elevationRadio.isSelected())
+						{
+							int bufferType = getElevationBufferType();
+							int band = bandCombo.getSelectedIndex();
+
+							writer.writeLine("Band: " + band);
+							writer.writeLine("Buffer type: "
+									+ gdal.GetDataTypeName(bufferType));
+
+							NumberArray minmax = new NumberArray(2);
+							if (isFloat)
+							{
+								minmax.setDouble(0, Double.MAX_VALUE);
+								minmax.setDouble(1, -Double.MAX_VALUE);
+							}
+							else
+							{
+								minmax.setLong(0, Long.MAX_VALUE);
+								minmax.setLong(1, Long.MIN_VALUE);
+							}
+
+							Tiler.tileElevations(dataset, sector, level,
+									tilesize, lzts, bufferType, band,
+									outsideValues, minMaxReplaces, replace,
+									otherwise, minmax, outDir, reporter);
+
+							if (overviews && !reporter.isCancelled())
+							{
+								Overviewer.createElevationOverviews(outDir,
+										tilesize, tilesize, bufferType,
+										ByteOrder.LITTLE_ENDIAN, /*TODO remove hardcoded byteorder*/
+										outsideValues, sector, lzts, reporter);
+							}
+
+							if (isFloat)
+							{
+								reporter.getLogger().info(
+										"Elevation bounds: min = "
+												+ minmax.getDouble(0)
+												+ ", max = "
+												+ minmax.getDouble(1));
+							}
+							else
+							{
+								reporter.getLogger().info(
+										"Elevation bounds: min = "
+												+ minmax.getLong(0)
+												+ ", max = "
+												+ minmax.getLong(1));
+							}
+
+							writer.newLine();
+							writer.writeLine("Min/Max:");
+							writer.writeLine(minmax.toString(isFloat));
+						}
 					}
 
-					Tiler.tileElevations(dataset, sector, level, tilesize,
-							lzts, bufferType, band, outsideValues,
-							minMaxReplaces, replace, otherwise, minmax, outDir,
-							reporter);
-
-					if (overviews && !reporter.isCancelled())
-					{
-						Overviewer.createElevationOverviews(outDir, tilesize,
-								tilesize, bufferType, ByteOrder.LITTLE_ENDIAN, /*TODO remove hardcoded byteorder*/
-								outsideValues, sector, lzts, reporter);
-					}
-
-					if (isFloat)
-					{
-						reporter.getLogger().info(
-								"Elevation bounds: min = "
-										+ minmax.getDouble(0) + ", max = "
-										+ minmax.getDouble(1));
-					}
-					else
-					{
-						reporter.getLogger().info(
-								"Elevation bounds: min = " + minmax.getLong(0)
-										+ ", max = " + minmax.getLong(1));
-					}
+					writer.flush();
+					reporter.done();
 				}
-
-				reporter.done();
+				catch (IOException e)
+				{
+					reporter.getLogger().log(Level.SEVERE, e.getMessage(), e);
+				}
+				finally
+				{
+					if (logWriter != null)
+						try
+						{
+							logWriter.close();
+						}
+						catch (IOException e)
+						{
+						}
+				}
 			}
 		});
 		thread.setDaemon(true);
 		thread.start();
+	}
+
+	private String getDateTime()
+	{
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		Date date = new Date();
+		return dateFormat.format(date);
 	}
 
 	private int getElevationBufferType()

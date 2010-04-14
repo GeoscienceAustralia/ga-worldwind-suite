@@ -139,4 +139,17 @@ public class NullableNumberArray
 			doubles[i] = v;
 		}
 	}
+	
+	public String toString(boolean isFloat)
+	{
+		String s = "(";
+		for (int i = 0; i < length(); i++)
+		{
+			if (i > 0)
+				s += ", ";
+			s += isFloat ? (Object)doubles[i] : (Object)longs[i];
+		}
+		s += ")";
+		return s;
+	}
 }

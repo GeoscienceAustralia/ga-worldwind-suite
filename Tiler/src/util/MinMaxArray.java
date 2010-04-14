@@ -93,4 +93,19 @@ public class MinMaxArray
 
 		return true;
 	}
+
+	public String toString(boolean isFloat, boolean mins)
+	{
+		Double[] ds = mins ? minDoubles : maxDoubles;
+		Long[] ls = mins ? minLongs : maxLongs;
+		String s = "(";
+		for (int i = 0; i < length(); i++)
+		{
+			if (i > 0)
+				s += ", ";
+			s += isFloat ? (Object)ds[i] : (Object)ls[i];
+		}
+		s += ")";
+		return s;
+	}
 }
