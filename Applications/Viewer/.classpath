@@ -2,11 +2,6 @@
 <classpath>
 	<classpathentry excluding="**/.svn/*" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/worldwind.jar"/>
-	<classpathentry kind="lib" path="lib/jogl.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="WorldWindRad/lib/jogl/windows-i586"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/worldwind-0.6.442.13312"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
