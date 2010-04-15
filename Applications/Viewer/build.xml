@@ -1,22 +1,28 @@
 <?xml version="1.0" ?>
 
-<project name="WorldWindRad" basedir="." default="run">
+<project name="Viewer" basedir="." default="run">
 
 	<property name="src.dir" value="${basedir}/src" />
-	<property name="lib.dir" value="${basedir}/lib" />
+	<property name="worldwind.dir" value="${basedir}/../../SDK/worldwind-0.6.442.13312" />
+	<property name="worldwind.jar" value="worldwind.jar" />
+	<property name="jogl.dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
+
 	<property name="build.dir" value="${basedir}/build" />
-	
 	<property name="webstart.dir" value="${basedir}/webstart" />
 	<property name="executable.dir" value="${basedir}/executable" />
-	
+
 	<property name="unsigned.jar" value="unsigned.jar" />
 	<property name="webstart.jar" value="application.jar" />
 	<property name="executable.jar" value="viewer.jar" />
+
 	<property name="keystore" value="${basedir}/keystore" />
 	<property name="javac.debug" value="false" />
 
 	<path id="classpath">
-		<fileset dir="${lib.dir}" >
+		<fileset dir="${worldwind.dir}">
+			<include name="${worldwind.jar}" />
+		</fileset>
+		<fileset dir="${jogl.dir}">
 			<include name="**/*.jar" />
 		</fileset>
 	</path>
@@ -64,9 +70,12 @@
 	<target name="executable" depends="compile">
 		<mkdir dir="${executable.dir}" />
 		<zip destfile="${executable.dir}/temp.zip">
-			<fileset dir="${lib.dir}" includes="jogl/**" />
-			<zipgroupfileset dir="${lib.dir}">
+			<fileset dir="${jogl.dir}" includes="native/**" />
+			<zipgroupfileset dir="${jogl.dir}">
 				<include name="**/*.jar" />
+			</zipgroupfileset>
+			<zipgroupfileset dir="${worldwind.dir}">
+				<include name="${worldwind.jar}" />
 			</zipgroupfileset>
 		</zip>
 		<jar destfile="${executable.dir}/${executable.jar}">

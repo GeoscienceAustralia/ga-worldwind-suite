@@ -11,7 +11,7 @@ import com.sun.opengl.impl.NativeLibLoader;
 
 public class NativeJOGLLibs
 {
-	private final static String BASE_DIR = "/jogl/";
+	private final static String BASE_DIR = "/native/";
 
 	public static void init()
 	{
