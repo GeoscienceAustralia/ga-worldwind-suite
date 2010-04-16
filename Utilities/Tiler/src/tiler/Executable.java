@@ -53,7 +53,7 @@ public class Executable
 		// set the PATH environment variable so that the gdaljni.dll can find
 		// it's dependencies
 		String path = System.getenv("PATH");
-		path = path + ";" + gdalDir.getAbsolutePath();
+		path = gdalDir.getAbsolutePath() + ";" + path;
 		((WinLibC) libc)._putenv("PATH=" + path);
 
 		// reset the java.library.path variable so the gdal.jar loads the

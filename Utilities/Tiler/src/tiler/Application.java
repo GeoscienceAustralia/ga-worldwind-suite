@@ -29,6 +29,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteOrder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -101,7 +104,7 @@ import util.StringLineBuilder;
 import util.TilerException;
 import util.Util;
 
-public class Application
+public class Application implements UncaughtExceptionHandler
 {
 	static
 	{
@@ -245,6 +248,8 @@ public class Application
 				return;
 			}
 		}
+
+		Thread.setDefaultUncaughtExceptionHandler(this);
 
 		JLabel label;
 		GridBagConstraints c;
@@ -1590,6 +1595,16 @@ public class Application
 						throw new TilerException("Dataset " + file
 								+ " is not geo-referenced");
 					}
+					if (sector.getMinLatitude() < -90
+							|| sector.getMaxLatitude() > 90
+							|| sector.getMinLongitude() < -180
+							|| sector.getMaxLongitude() > 180)
+					{
+						throw new TilerException(
+								"Dataset sector "
+										+ sector
+										+ " is invalid; only lat/lon coordinate systems are supported");
+					}
 					bandCount = dataset.getRasterCount();
 					if (bandCount == 0)
 					{
@@ -2777,5 +2792,17 @@ public class Application
 			tiler.progress.setValue(ip);
 			tiler.progress.setString(ip + "% complete");
 		}
+	}
+
+	@Override
+	public void uncaughtException(Thread t, Throwable e)
+	{
+		e.printStackTrace();
+
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		JOptionPane.showMessageDialog(frame, sw.getBuffer().toString(),
+				"Exception", JOptionPane.ERROR_MESSAGE);
 	}
 }

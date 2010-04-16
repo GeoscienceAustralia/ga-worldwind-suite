@@ -135,8 +135,9 @@ public class GDALUtil
 		double lonPixels = sector.getDeltaLongitude() / width;
 		double latPixels = sector.getDeltaLatitude() / height;
 		double texelSize = Math.min(latPixels, lonPixels);
-		return (int) Math.ceil(Math.log10(texelSize * tilesize / lztd)
+		int level = (int) Math.ceil(Math.log10(texelSize * tilesize / lztd)
 				/ Math.log10(0.5)) + 1;
+		return Math.max(level, 1);
 	}
 
 	public static int tileCount(Sector sector, int level, double lztsd)
