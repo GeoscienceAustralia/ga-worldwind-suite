@@ -1,0 +1,84 @@
+<?xml version="1.0" ?>
+
+<project name="Tiler" basedir="." default="run">
+
+	<property name="src.dir" value="${basedir}/src" />
+	<property name="lib.dir" value="${basedir}/lib" />
+	<property name="gdal.dir" value="${basedir}/gdal" />
+	<property name="data.dir" value="${basedir}/data" />
+
+	<property name="build.dir" value="${basedir}/build" />
+	<property name="executable.dir" value="${basedir}/executable" />
+	<property name="executable.jar" value="tiler.jar" />
+
+	<property name="javac.debug" value="false" />
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${gdal.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${executable.dir}" />
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${build.dir}" />
+		<copy todir="${build.dir}">
+			<fileset dir="${src.dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<javac source="1.5" target="1.5" srcdir="${src.dir}" destdir="${build.dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac.debug}" />
+	</target>
+
+	<patternset id="manifest.exclude">
+		<exclude name="META-INF/*.DSA" />
+		<exclude name="META-INF/*.RSA" />
+		<exclude name="META-INF/*.SF" />
+		<exclude name="META-INF/MANIFEST.MF" />
+		<exclude name="META-INF/INDEX.LIST" />
+	</patternset>
+
+	<target name="executable" depends="compile">
+		<mkdir dir="${executable.dir}" />
+		<mkdir dir="${executable.dir}/lib" />
+		<mkdir dir="${executable.dir}/data" />
+		<zip destfile="${executable.dir}/temp.zip">
+			<zipgroupfileset dir="${lib.dir}">
+				<include name="**/*.jar" />
+			</zipgroupfileset>
+			<zipgroupfileset dir="${gdal.dir}">
+				<include name="**/*.jar" />
+			</zipgroupfileset>
+		</zip>
+		<jar destfile="${executable.dir}/${executable.jar}">
+			<fileset dir="${build.dir}" />
+			<zipfileset src="${executable.dir}/temp.zip">
+				<patternset refid="manifest.exclude" />
+			</zipfileset>
+			<manifest>
+				<attribute name="Main-Class" value="tiler.Executable" />
+
+			</manifest>
+		</jar>
+		<delete file="${executable.dir}/temp.zip" />
+		<copy todir="${executable.dir}/gdal">
+			<fileset dir="${gdal.dir}">
+				<include name="**/*.dll" />
+			</fileset>
+		</copy>
+		<copy todir="${executable.dir}/data">
+			<fileset dir="${data.dir}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="run" depends="executable" />
+</project>

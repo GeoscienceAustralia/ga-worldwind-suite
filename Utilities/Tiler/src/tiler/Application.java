@@ -224,7 +224,7 @@ public class Application
 
 	private Preferences preferences = Prefs.getPreferences();
 
-	public static void main(String[] args)
+	public static void start()
 	{
 		new Application();
 	}
