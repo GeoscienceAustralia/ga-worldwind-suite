@@ -47,8 +47,6 @@
 
 	<target name="executable" depends="compile">
 		<mkdir dir="${executable.dir}" />
-		<mkdir dir="${executable.dir}/lib" />
-		<mkdir dir="${executable.dir}/data" />
 		<zip destfile="${executable.dir}/temp.zip">
 			<zipgroupfileset dir="${lib.dir}">
 				<include name="**/*.jar" />
