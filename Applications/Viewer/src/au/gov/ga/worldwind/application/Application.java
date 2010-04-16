@@ -39,6 +39,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.io.File;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -97,7 +98,7 @@ import au.gov.ga.worldwind.util.Util;
 public class Application
 {
 	public final static boolean LOCAL_LAYERS_ENABLED = true;
-	public final static boolean VIRTUAL_EARTH_ENABLED = false;
+	public static boolean VIRTUAL_EARTH_ENABLED = false;
 
 	static
 	{
@@ -115,7 +116,18 @@ public class Application
 		try
 		{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e)
+		}
+		catch (Exception e)
+		{
+		}
+		
+		try
+		{
+			InetAddress addr = InetAddress.getLocalHost();
+			VIRTUAL_EARTH_ENABLED = addr.getCanonicalHostName().endsWith(
+					".agso.gov.au");
+		}
+		catch (Exception e)
 		{
 		}
 	}
@@ -189,7 +201,8 @@ public class Application
 		{
 			frame.setIconImage(new ImageIcon(Application.class
 					.getResource("/images/32x32-icon-earth.png")).getImage());
-		} catch (Exception e)
+		}
+		catch (Exception e)
 		{
 		}
 
@@ -299,7 +312,8 @@ public class Application
 					frame.setVisible(true);
 				}
 			});
-		} catch (Exception e)
+		}
+		catch (Exception e)
 		{
 		}
 	}
@@ -377,7 +391,8 @@ public class Application
 						try
 						{
 							annotationsPanel.importAnnotations(file);
-						} catch (Exception e)
+						}
+						catch (Exception e)
 						{
 							JOptionPane.showMessageDialog(annotationsDialog,
 									"Could not import " + file.getName(),
@@ -419,7 +434,8 @@ public class Application
 						try
 						{
 							annotationsPanel.exportAnnotations(file);
-						} catch (Exception e)
+						}
+						catch (Exception e)
 						{
 							JOptionPane.showMessageDialog(annotationsDialog,
 									"Error: " + e, "Export error",
@@ -654,7 +670,8 @@ public class Application
 
 	private void createDoubleClickListener()
 	{
-		wwd.getInputHandler().addMouseListener(new DoubleClickZoomListener(wwd, 5000d));
+		wwd.getInputHandler().addMouseListener(
+				new DoubleClickZoomListener(wwd, 5000d));
 	}
 
 	private void enableMouseLayer()
@@ -694,7 +711,8 @@ public class Application
 									frame,
 									"Graphics device does not support fullscreen mode.",
 									"Not supported", JOptionPane.ERROR_MESSAGE);
-				} else
+				}
+				else
 				{
 					saveSplitLocations();
 					fullscreenFrame = new JFrame(frame.getTitle());
@@ -737,7 +755,8 @@ public class Application
 							fullBounds = fullBounds.union(gc.getBounds());
 						}
 						fullscreenFrame.setBounds(fullBounds);
-					} else if (id != null)
+					}
+					else if (id != null)
 					{
 						for (GraphicsDevice g : gds)
 						{
@@ -753,7 +772,8 @@ public class Application
 					fullscreenFrame.setVisible(true);
 					frame.setVisible(false);
 				}
-			} else
+			}
+			else
 			{
 				if (fullscreenFrame != null)
 				{
@@ -1153,7 +1173,8 @@ public class Application
 				dialog.setVisible(dialogsOpen[i]);
 				if (!dialogsOpen[i])
 					dialog.centerInOwnerWhenShown();
-			} else
+			}
+			else
 			{
 				dialog.pack();
 				dialog.centerInOwnerWhenShown();
@@ -1203,7 +1224,8 @@ public class Application
 				else
 					// Default to metric units.
 					((ScalebarLayer) layer).setUnit(ScalebarLayer.UNIT_METRIC);
-			} else if (layer instanceof TerrainProfileLayer)
+			}
+			else if (layer instanceof TerrainProfileLayer)
 			{
 				if (StatusBar.UNIT_IMPERIAL.equals(newValue))
 					((TerrainProfileLayer) layer)
@@ -1219,7 +1241,8 @@ public class Application
 		{
 			this.statusBar.setElevationUnit(StatusBar.UNIT_IMPERIAL);
 			AnnotationEditor.setUnits(AnnotationEditor.IMPERIAL);
-		} else
+		}
+		else
 		{
 			// Default to metric units.
 			this.statusBar.setElevationUnit(StatusBar.UNIT_METRIC);

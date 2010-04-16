@@ -55,7 +55,6 @@ public class StandardPanel extends JPanel
 	private Layer osmmapnik;
 	private Layer osmmapniktrans;
 	private Layer street;
-	//private Layer graticule;
 	private Layer latlon;
 
 	private Layer[] lowerLayers;
@@ -93,7 +92,6 @@ public class StandardPanel extends JPanel
 		osmmapnik = new au.gov.ga.worldwind.layers.mercator.OpenStreetMapLayer();
 		osmmapniktrans = new au.gov.ga.worldwind.layers.mercator.OpenStreetMapTransparentLayer();
 		street = new OpenStreetMapLayer();
-		//graticule = new MGRSGraticuleLayer();
 		latlon = new LatLonGraticuleLayer();
 
 		/*Layer kmllayer = null;
@@ -110,7 +108,7 @@ public class StandardPanel extends JPanel
 		lowerLayers = new Layer[] { stars, atmosphere, bmngone, bmng,
 				landsat, veaerial, veroad, vehybrid, osmmapnik };
 		upperLayers = new Layer[] { pnl, geonames, coastline, country, state,
-				street, osmmapniktrans, /*graticule,*/ latlon };
+				street, osmmapniktrans, latlon };
 
 		veaerial.setEnabled(false);
 		veroad.setEnabled(false);
@@ -120,7 +118,6 @@ public class StandardPanel extends JPanel
 		state.setEnabled(false);
 		osmmapnik.setEnabled(false);
 		geonames.setEnabled(false);
-		//graticule.setEnabled(false);
 		latlon.setEnabled(false);
 		street.setEnabled(false);
 		osmmapniktrans.setEnabled(false);
@@ -273,7 +270,6 @@ public class StandardPanel extends JPanel
 		panel.add(createCheckBox(geonames));
 		panel.add(createCheckBox(street, true));
 		panel.add(createCheckBox(osmmapniktrans, true));
-		//panel.add(createCheckBox(graticule));
 		panel.add(createCheckBox(latlon));
 	}
 
