@@ -1595,10 +1595,12 @@ public class Application implements UncaughtExceptionHandler
 						throw new TilerException("Dataset " + file
 								+ " is not geo-referenced");
 					}
-					if (sector.getMinLatitude() < -90
-							|| sector.getMaxLatitude() > 90
-							|| sector.getMinLongitude() < -180
-							|| sector.getMaxLongitude() > 180)
+					if (sector.getMinLatitude() < -180
+							|| sector.getMaxLatitude() > 180
+							|| sector.getMinLongitude() < -360
+							|| sector.getMaxLongitude() > 360
+							|| Math.abs(sector.getDeltaLatitude()) > 180
+							|| Math.abs(sector.getDeltaLongitude()) > 360)
 					{
 						throw new TilerException(
 								"Dataset sector "
