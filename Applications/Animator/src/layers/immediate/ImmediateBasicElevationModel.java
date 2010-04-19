@@ -1,6 +1,5 @@
 package layers.immediate;
 
-import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Angle;
@@ -89,7 +88,7 @@ public class ImmediateBasicElevationModel extends ExtendedBasicElevationModel
 
 		try
 		{
-			Tile tile = createTile(key);
+			ElevationTile tile = createTile(key);
 			if (!loadTileFromStore(tile))
 				downloadElevations(tile);
 			loadTileFromStore(tile);
@@ -103,13 +102,12 @@ public class ImmediateBasicElevationModel extends ExtendedBasicElevationModel
 		}
 	}
 
-	private boolean loadTileFromStore(Tile tile) throws IOException
+	private boolean loadTileFromStore(ElevationTile tile) throws IOException
 	{
-		//from BasicElevationModel.requestTask.run()
+		// from BasicElevationModel.requestTask.run()
 
-		final URL url = WorldWind.getDataFileStore().findFile(tile.getPath(),
-				false);
-		if (url != null)
+		final URL url = getDataFileStore().findFile(tile.getPath(), false);
+		if (url != null && !isFileExpired(tile, url, getDataFileStore()))
 		{
 			if (loadElevations(tile, url))
 			{
@@ -120,7 +118,7 @@ public class ImmediateBasicElevationModel extends ExtendedBasicElevationModel
 			else
 			{
 				// Assume that something's wrong with the file and delete it.
-				WorldWind.getDataFileStore().removeFile(url);
+				getDataFileStore().removeFile(url);
 				getLevels().markResourceAbsent(tile);
 				String message = Logging.getMessage(
 						"generic.DeletedCorruptDataFile", url);

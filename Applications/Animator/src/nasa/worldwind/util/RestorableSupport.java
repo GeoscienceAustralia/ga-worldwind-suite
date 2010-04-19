@@ -6,13 +6,12 @@ All Rights Reserved.
 package nasa.worldwind.util;
 
 import gov.nasa.worldwind.Restorable;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.avlist.*;
+import gov.nasa.worldwind.geom.*;
+import gov.nasa.worldwind.util.*;
 
-import java.awt.Color;
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -26,7 +25,7 @@ import javax.xml.parsers.ParserConfigurationException;
  * For example, this document stores four states: the string "Hello World!", the largest value an unsigned byte can
  * hold, the value of PI to six digits, and a boolean "true". <code>
  * <pre>
- * {@literal <?xml version=”1.0” encoding=”UTF-8”?>}
+ * {@literal <?xml version="1.0" encoding="UTF-8"?>}
  * {@literal <restorableState>}
  *   {@literal <stateObject name="helloWorldString">Hello World!</stateObject>}
  *   {@literal <stateObject name="maxUnsignedByteValue">255</stateObject>}
@@ -40,7 +39,7 @@ import javax.xml.parsers.ParserConfigurationException;
  * and Booleans.
  *
  * @author dcollins
- * @version $Id: RestorableSupport.java 7629 2008-11-14 21:33:47Z dcollins $
+ * @version $Id: RestorableSupport.java 12963 2009-12-24 09:54:34Z tgaskins $
  * @see gov.nasa.worldwind.Restorable
  */
 public class RestorableSupport
@@ -69,6 +68,7 @@ public class RestorableSupport
 
     /**
      * Creates a new RestorableSupport with no contents.
+     *
      * @param documentElementName the name of the restorable state document element.
      *
      * @return a new, empty RestorableSupport instance.
@@ -95,7 +95,7 @@ public class RestorableSupport
         }
         catch (javax.xml.parsers.ParserConfigurationException e)
         {
-            String message = Logging.getMessage("RestorableSupport.ExceptionCreatingParser");
+            String message = Logging.getMessage("generic.ExceptionCreatingParser");
             Logging.logger().severe(message);
             throw new IllegalStateException(message, e);
         }
@@ -117,6 +117,7 @@ public class RestorableSupport
      * @param stateInXml the XML document to parse for state.
      *
      * @return a new RestorableSupport instance with the specified state.
+     *
      * @throws IllegalArgumentException If <code>stateInXml</code> is null, or the its contents are not a well formed
      *                                  XML document.
      */
@@ -141,19 +142,19 @@ public class RestorableSupport
         }
         catch (java.io.IOException e)
         {
-            String message = Logging.getMessage("RestorableSupport.ExceptionParsingXml", stateInXml);
+            String message = Logging.getMessage("generic.ExceptionAttemptingToParseStateXml", stateInXml);
             Logging.logger().severe(message);
             throw new IllegalArgumentException(message, e);
         }
         catch (org.xml.sax.SAXException e)
         {
-            String message = Logging.getMessage("RestorableSupport.ExceptionParsingXml", stateInXml);
+            String message = Logging.getMessage("generic.ExceptionAttemptingToParseStateXml", stateInXml);
             Logging.logger().severe(message);
             throw new IllegalArgumentException(message, e);
         }
         catch (javax.xml.parsers.ParserConfigurationException e)
         {
-            String message = Logging.getMessage("RestorableSupport.ExceptionCreatingParser");
+            String message = Logging.getMessage("generic.ExceptionAttemptingToParseStateXml", stateInXml);
             Logging.logger().severe(message);
             throw new IllegalStateException(message, e);
         }
@@ -189,7 +190,7 @@ public class RestorableSupport
 
     /**
      * Returns an XML document string describing this RestorableSupport's current set of state objects. If this
-     * RestorableSupport cannot be converted, this will return null.
+     * RestorableSupport cannot be converted, this method returns null.
      *
      * @return an XML state document string.
      */
@@ -211,13 +212,13 @@ public class RestorableSupport
         }
         catch (javax.xml.transform.TransformerConfigurationException e)
         {
-            String message = Logging.getMessage("RestorableSupport.ExceptionWritingXml");
+            String message = Logging.getMessage("generic.ExceptionWritingXml");
             Logging.logger().severe(message);
             return null;
         }
         catch (javax.xml.transform.TransformerException e)
         {
-            String message = Logging.getMessage("RestorableSupport.ExceptionWritingXml");
+            String message = Logging.getMessage("generic.ExceptionWritingXml");
             Logging.logger().severe(message);
             return null;
         }
@@ -301,7 +302,7 @@ public class RestorableSupport
          * Sets the value of this StateObject to the specified String. If there are StateObjects nested beneath this
          * one, then the entire tree beneath this StateObject is replaced with the specified value.
          *
-         * @param value String value that will replace this StateObject's value.
+         * @param value String value that replaces this StateObject's value.
          *
          * @throws IllegalArgumentException If <code>value</code> is null.
          */
@@ -329,8 +330,8 @@ public class RestorableSupport
     }
 
     /**
-     * Returns the String to be used for each state object's tag name. This tag name will be used as a search parameter
-     * to find a state object, and will be used as the tag name when a new state object is created. The default tag name
+     * Returns the String to be used for each state object's tag name. This tag name is used as a search parameter
+     * to find a state object, and is used as the tag name when a new state object is created. The default tag name
      * is "stateObject".
      *
      * @return String to be used for each state object's tag name
@@ -341,8 +342,8 @@ public class RestorableSupport
     }
 
     /**
-     * Sets the String to be used for each state object's tag name. This tag name will be used as a search parameter to
-     * find a state object, and will be used as the tag name when a new state object is created. Setting this value will
+     * Sets the String to be used for each state object's tag name. This tag name is used as a search parameter to
+     * find a state object, and is used as the tag name when a new state object is created. Setting this value does
      * not retroactively set tag names for existing state objects. The default tag name is "stateObject".
      *
      * @param stateObjectTagName String to be used for each state object's tag name.
@@ -420,18 +421,24 @@ public class RestorableSupport
             if (result == null
                 || !(result instanceof org.w3c.dom.NodeList)
                 || ((org.w3c.dom.NodeList) result).getLength() == 0)
+            {
                 return null;
+            }
 
             // If the result is a NodeList, return an array of StateObjects for each Element node in that list.
             org.w3c.dom.NodeList nodeList = (org.w3c.dom.NodeList) result;
-            StateObject[] stateObjects = new StateObject[nodeList.getLength()];
+            ArrayList<StateObject> stateObjectList = new ArrayList<StateObject>();
             for (int i = 0; i < nodeList.getLength(); i++)
             {
                 org.w3c.dom.Node node = nodeList.item(i);
                 if (node instanceof org.w3c.dom.Element)
-                    stateObjects[i] = new StateObject((org.w3c.dom.Element) node);
+                {
+                    stateObjectList.add(new StateObject((org.w3c.dom.Element) node));
+                }
             }
-            return stateObjects;
+            StateObject[] stateObjectArray = new StateObject[stateObjectList.size()];
+            stateObjectList.toArray(stateObjectArray);
+            return stateObjectArray;
         }
         catch (javax.xml.xpath.XPathExpressionException e)
         {
@@ -443,10 +450,9 @@ public class RestorableSupport
     {
         org.w3c.dom.NodeList nodeList = (context != null ? context : getDocumentElement()).getChildNodes();
 
-        StateObject[] stateObjects = new StateObject[0];
+        ArrayList<StateObject> stateObjectList = new ArrayList<StateObject>();
         if (nodeList != null)
         {
-            stateObjects = new StateObject[nodeList.getLength()];
             for (int i = 0; i < nodeList.getLength(); i++)
             {
                 org.w3c.dom.Node node = nodeList.item(i);
@@ -454,11 +460,14 @@ public class RestorableSupport
                     && node.getNodeName() != null
                     && node.getNodeName().equals(getStateObjectTagName()))
                 {
-                    stateObjects[i] = new StateObject((org.w3c.dom.Element) node);
+                    stateObjectList.add(new StateObject((org.w3c.dom.Element) node));
                 }
             }
         }
-        return stateObjects;
+
+        StateObject[] stateObjectArray = new StateObject[stateObjectList.size()];
+        stateObjectList.toArray(stateObjectArray);
+        return stateObjectArray;
     }
 
     private StateObject createStateObject(org.w3c.dom.Element context, String name, String value)
@@ -505,12 +514,13 @@ public class RestorableSupport
     }
 
     /**
-     * Returns the StateObject with the specified <code>name</code>. This will search the StateObjects directly beneath
-     * the document root. If no StateObject with that name exists, this will return null.
+     * Returns the StateObject with the specified <code>name</code>. This searches the StateObjects directly beneath the
+     * document root. If no StateObject with that name exists, this method returns null.
      *
      * @param name the StateObject name to search for.
      *
      * @return the StateObject instance, or null if none exists.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null.
      */
     public StateObject getStateObject(String name)
@@ -526,14 +536,15 @@ public class RestorableSupport
     }
 
     /**
-     * Returns the StateObject with the specified <code>name</code>. If context is not null, this will search the
-     * StateObjects directly below the specified <code>context</code>. Otherwise, this will search the StateObjects
-     * directly beneath the document root. If no StateObject with that name exists, this will return null.
+     * Returns the StateObject with the specified <code>name</code>. If context is not null, this method searches the
+     * StateObjects directly below the specified <code>context</code>. Otherwise, this method searches the StateObjects
+     * directly beneath the document root. If no StateObject with that name exists, this method returns null.
      *
      * @param context StateObject context to search, or null to search the document root.
      * @param name    the StateObject name to search for.
      *
      * @return the StateObject instance, or null if none exists.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null, or if <code>context</code> is not null and does
      *                                  not belong to this RestorableSupport.
      */
@@ -556,13 +567,14 @@ public class RestorableSupport
     }
 
     /**
-     * Returns all StateObjects directly beneath the a context StateObject. If context is not null, this will return all
-     * the StateObjects directly below the specified <code>context</code>. Otherwise, this will return all the
+     * Returns all StateObjects directly beneath the a context StateObject. If context is not null, this method returns
+     * all the StateObjects directly below the specified <code>context</code>. Otherwise, this method returns all the
      * StateObjects directly beneath the document root.
      *
      * @param context StateObject context to search, or null to search the document root.
      *
-     * @return an array of the StateObject instances, which will have zero length if none exist.
+     * @return an array of the StateObject instances, which has zero length if none exist.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null, or if <code>context</code> is not null and does
      *                                  not belong to this RestorableSupport.
      */
@@ -580,11 +592,12 @@ public class RestorableSupport
 
     /**
      * Returns any StateObjects directly beneath the document root that have the specified <code>name</code>. If no
-     * StateObjects with that name exist, this will return a valid StateObject array with zero length.
+     * StateObjects with that name exist, this method returns a valid StateObject array with zero length.
      *
      * @param name the StateObject name to search for.
      *
-     * @return an array of the StateObject instances, which will have zero length if none exist.
+     * @return an array of the StateObject instances, which has zero length if none exist.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null.
      */
     public StateObject[] getAllStateObjects(String name)
@@ -600,15 +613,16 @@ public class RestorableSupport
     }
 
     /**
-     * Returns all StateObjects with the specified <code>name</code>. If context is not null, this will search the
-     * StateObjects directly below the specified <code>context</code>. Otherwise, this will search the StateObjects
-     * directly beneath the document root. If no StateObjects with that name exist, this will return a valid StateObject
-     * array with zero length.
+     * Returns all StateObjects with the specified <code>name</code>. If context is not null, this method searches the
+     * StateObjects directly below the specified <code>context</code>. Otherwise, this method searches the StateObjects
+     * directly beneath the document root. If no StateObjects with that name exist, this method returns a valid
+     * StateObject array with zero length.
      *
      * @param context StateObject context to search, or null to search the document root.
      * @param name    the StateObject name to search for.
      *
-     * @return an array of the StateObject instances, which will have zero length if none exist.
+     * @return an array of the StateObject instances, which has zero length if none exist.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null, or if <code>context</code> is not null and does
      *                                  not belong to this RestorableSupport.
      */
@@ -631,12 +645,13 @@ public class RestorableSupport
     }
 
     /**
-     * Adds a new StateObject with the specified <code>name</code>. The new StateObject will be placed directly beneath
+     * Adds a new StateObject with the specified <code>name</code>. The new StateObject is placed directly beneath
      * the document root. If a StateObject with this name already exists, a new one is still created.
      *
      * @param name the new StateObject's name.
      *
      * @return the new StateObject instance.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null.
      */
     public StateObject addStateObject(String name)
@@ -653,15 +668,16 @@ public class RestorableSupport
 
     /**
      * Adds a new StateObject with the specified <code>name</code>. If <code>context</code> is not null, the new
-     * StateObject will be nested directly beneath the specified <code>context</code>. Otherwise, the new StateObject
-     * will be placed directly beneath the document root. If a StateObject with this name already exists, a new one is
+     * StateObject is nested directly beneath the specified <code>context</code>. Otherwise, the new StateObject
+     * is placed directly beneath the document root. If a StateObject with this name already exists, a new one is
      * still created.
      *
-     * @param context the StateObject under which the new StateObject will be created, or null to place it under the
+     * @param context the StateObject under which the new StateObject is created, or null to place it under the
      *                document root.
      * @param name    the new StateObject's name.
      *
      * @return the new StateObject instance.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null, or if <code>context</code> is not null and does
      *                                  not belong to this RestorableSupport.
      */
@@ -691,9 +707,10 @@ public class RestorableSupport
     /**
      * Returns the value of the StateObject as a String.
      *
-     * @param stateObject the StateObject that will be converted to a String.
+     * @param stateObject the StateObject that is converted to a String.
      *
      * @return the value of the StateObject as a String.
+     *
      * @throws IllegalArgumentException If <code>stateObject</code> is null, or does not belong to this
      *                                  RestorableSupport.
      */
@@ -716,13 +733,14 @@ public class RestorableSupport
     }
 
     /**
-     * Returns the value of the StateObject with the specified <code>name</code> as a String. This will search the
+     * Returns the value of the StateObject with the specified <code>name</code> as a String. This method searches the
      * StateObjects directly beneath the document root. If no StateObject with that name exists, or if the value of that
-     * StateObject is not a String, this will return null.
+     * StateObject is not a String, this method returns null.
      *
      * @param name the StateObject name to search for.
      *
      * @return the value of the StateObject as a String, or null if none exists.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null.
      */
     public String getStateValueAsString(String name)
@@ -732,14 +750,15 @@ public class RestorableSupport
 
     /**
      * Returns the value of the StateObject with the specified <code>name</code> as a String. If context is not null,
-     * this will search the StateObjects directly below the specified <code>context</code>. Otherwise, this will search
-     * the StateObjects directly beneath the document root. If no StateObject with that name exists, or if the value of
-     * that StateObject is not a String, this will return null.
+     * this method searches the StateObjects directly below the specified <code>context</code>. Otherwise, this method
+     * searches the StateObjects directly beneath the document root. If no StateObject with that name exists, or if the
+     * value of that StateObject is not a String, this method returns null.
      *
      * @param context StateObject context to search, or null to search the document root.
      * @param name    the StateObject name to search for.
      *
      * @return the value of the StateObject as a String, or null if none exists.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null, or if <code>context</code> is not null and does
      *                                  not belong to this RestorableSupport.
      */
@@ -755,9 +774,10 @@ public class RestorableSupport
     /**
      * Returns the value of the StateObject as an Integer.
      *
-     * @param stateObject the StateObject that will be converted to an Integer.
+     * @param stateObject the StateObject that is converted to an Integer.
      *
      * @return the value of the StateObject as an Integer.
+     *
      * @throws IllegalArgumentException If <code>stateObject</code> is null, or does not belong to this
      *                                  RestorableSupport.
      */
@@ -773,20 +793,21 @@ public class RestorableSupport
         }
         catch (NumberFormatException e)
         {
-            String message = Logging.getMessage("RestorableSupport.ConversionError", stringValue);
+            String message = Logging.getMessage("generic.ConversionError", stringValue);
             Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
             return null;
         }
     }
 
     /**
-     * Returns the value of the StateObject with the specified <code>name</code> as an Integer. This will search the
+     * Returns the value of the StateObject with the specified <code>name</code> as an Integer. This method searches the
      * StateObjects directly beneath the document root. If no StateObject with that name exists, or if the value of that
-     * StateObject is not an Integer, this will return null.
+     * StateObject is not an Integer, this method returns null.
      *
      * @param name the StateObject name to search for.
      *
      * @return the value of the StateObject as an Integer, or null if none exists.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null.
      */
     public Integer getStateValueAsInteger(String name)
@@ -796,14 +817,15 @@ public class RestorableSupport
 
     /**
      * Returns the value of the StateObject with the specified <code>name</code> as an Integer. If context is not null,
-     * this will search the StateObjects directly below the specified <code>context</code>. Otherwise, this will search
-     * the StateObjects directly beneath the document root. If no StateObject with that name exists, or if the value of
-     * that StateObject is not an Integer, this will return null.
+     * this method searches the StateObjects directly below the specified <code>context</code>. Otherwise, this method
+     * searches the StateObjects directly beneath the document root. If no StateObject with that name exists, or if the
+     * value of that StateObject is not an Integer, this method returns null.
      *
      * @param context StateObject context to search, or null to search the document root.
      * @param name    the StateObject name to search for.
      *
      * @return the value of the StateObject as an Integer, or null if none exists.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null, or if <code>context</code> is not null and does
      *                                  not belong to this RestorableSupport.
      */
@@ -819,9 +841,10 @@ public class RestorableSupport
     /**
      * Returns the value of the StateObject as a Double.
      *
-     * @param stateObject the StateObject that will be converted to a Double.
+     * @param stateObject the StateObject that is converted to a Double.
      *
      * @return the value of the StateObject as a Double.
+     *
      * @throws IllegalArgumentException If <code>stateObject</code> is null, or does not belong to this
      *                                  RestorableSupport.
      */
@@ -837,20 +860,21 @@ public class RestorableSupport
         }
         catch (NumberFormatException e)
         {
-            String message = Logging.getMessage("RestorableSupport.ConversionError", stringValue);
+            String message = Logging.getMessage("generic.ConversionError", stringValue);
             Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
             return null;
         }
     }
 
     /**
-     * Returns the value of the StateObject with the specified <code>name</code> as a Double. This will search the
+     * Returns the value of the StateObject with the specified <code>name</code> as a Double. This method searches the
      * StateObjects directly beneath the document root. If no StateObject with that name exists, or if the value of that
-     * StateObject is not a Double, this will return null.
+     * StateObject is not a Double, this method returns null.
      *
      * @param name the StateObject name to search for.
      *
      * @return the value of the StateObject as a Double, or null if none exists.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null.
      */
     public Double getStateValueAsDouble(String name)
@@ -860,14 +884,15 @@ public class RestorableSupport
 
     /**
      * Returns the value of the StateObject with the specified <code>name</code> as a Double. If context is not null,
-     * this will search the StateObjects directly below the specified <code>context</code>. Otherwise, this will search
+     * this method searches the StateObjects directly below the specified <code>context</code>. Otherwise, this searches
      * the StateObjects directly beneath the document root. If no StateObject with that name exists, or if the value of
-     * that StateObject is not a Double, this will return null.
+     * that StateObject is not a Double, this method returns null.
      *
      * @param context StateObject context to search, or null to search the document root.
      * @param name    the StateObject name to search for.
      *
      * @return the value of the StateObject as a Double, or null if none exists.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null, or if <code>context</code> is not null and does
      *                                  not belong to this RestorableSupport.
      */
@@ -881,12 +906,80 @@ public class RestorableSupport
     }
 
     /**
+     * Returns the value of the StateObject as a Long.
+     *
+     * @param stateObject the StateObject that is converted to a Long.
+     *
+     * @return the value of the StateObject as a Long.
+     *
+     * @throws IllegalArgumentException If <code>stateObject</code> is null, or does not belong to this
+     *                                  RestorableSupport.
+     */
+    public Long getStateObjectAsLong(StateObject stateObject)
+    {
+        String stringValue = getStateObjectAsString(stateObject);
+        if (stringValue == null)
+            return null;
+
+        try
+        {
+            return Long.valueOf(stringValue);
+        }
+        catch (NumberFormatException e)
+        {
+            String message = Logging.getMessage("generic.ConversionError", stringValue);
+            Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns the value of the StateObject with the specified <code>name</code> as a Long. This searches the
+     * StateObjects directly beneath the document root. If no StateObject with that name exists, or if the value of that
+     * StateObject is not a Long, this method returns null.
+     *
+     * @param name the StateObject name to search for.
+     *
+     * @return the value of the StateObject as a Long, or null if none exists.
+     *
+     * @throws IllegalArgumentException If <code>name</code> is null.
+     */
+    public Long getStateValueAsLong(String name)
+    {
+        return getStateValueAsLong(null, name);
+    }
+
+    /**
+     * Returns the value of the StateObject with the specified <code>name</code> as a Long. If context is not null, this
+     * method searches the StateObjects directly below the specified <code>context</code>. Otherwise, this method
+     * searches the StateObjects directly beneath the document root. If no StateObject with that name exists, or if the
+     * value of that StateObject is not a Double, this method returns null.
+     *
+     * @param context StateObject context to search, or null to search the document root.
+     * @param name    the StateObject name to search for.
+     *
+     * @return the value of the StateObject as a Long, or null if none exists.
+     *
+     * @throws IllegalArgumentException If <code>name</code> is null, or if <code>context</code> is not null and does
+     *                                  not belong to this RestorableSupport.
+     */
+    public Long getStateValueAsLong(StateObject context, String name)
+    {
+        StateObject stateObject = getStateObject(context, name);
+        if (stateObject == null)
+            return null;
+
+        return getStateObjectAsLong(stateObject);
+    }
+
+    /**
      * Returns the value of the StateObject as a Boolean. The Boolean value returned is equivalent to passing the
      * StateObject's String value to <code>Boolean.valueOf</code>.
      *
-     * @param stateObject the StateObject that will be converted to a Boolean.
+     * @param stateObject the StateObject that is converted to a Boolean.
      *
      * @return the value of the StateObject as a Boolean.
+     *
      * @throws IllegalArgumentException If <code>stateObject</code> is null, or does not belong to this
      *                                  RestorableSupport.
      */
@@ -902,21 +995,22 @@ public class RestorableSupport
         }
         catch (NumberFormatException e)
         {
-            String message = Logging.getMessage("RestorableSupport.ConversionError", stringValue);
+            String message = Logging.getMessage("generic.ConversionError", stringValue);
             Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
             return null;
         }
     }
 
     /**
-     * Returns the value of the StateObject with the specified <code>name</code> as a Boolean. This will search the
-     * StateObjects directly beneath the document root. If no StateObject with that name exists, this will return null.
-     * Otherwise, the Boolean value returned is equivalent to passing the StateObject's String value to
+     * Returns the value of the StateObject with the specified <code>name</code> as a Boolean. This method searches the
+     * StateObjects directly beneath the document root. If no StateObject with that name exists, this method returns
+     * null. Otherwise, the Boolean value returned is equivalent to passing the StateObject's String value to
      * <code>Boolean.valueOf</code>.
      *
      * @param name the StateObject name to search for.
      *
      * @return the value of the StateObject as a Boolean, or null if none exists.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null.
      */
     public Boolean getStateValueAsBoolean(String name)
@@ -926,15 +1020,16 @@ public class RestorableSupport
 
     /**
      * Returns the value of the StateObject with the specified <code>name</code> as a Boolean. If context is not null,
-     * this will search the StateObjects directly below the specified <code>context</code>. Otherwise, this will search
-     * the StateObjects directly beneath the document root. If no StateObject with that name exists, this will return
-     * null. Otherwise, the Boolean value returned is equivalent to passing the StateObject's String value to
-     * <code>Boolean.valueOf</code>.
+     * this method searches the StateObjects directly below the specified <code>context</code>. Otherwise, this method
+     * searches the StateObjects directly beneath the document root. If no StateObject with that name exists, this
+     * method returns null. Otherwise, the Boolean value returned is equivalent to passing the StateObject's String
+     * value to <code>Boolean.valueOf</code>.
      *
      * @param context StateObject context to search, or null to search the document root.
      * @param name    the StateObject name to search for.
      *
      * @return the value of the StateObject as a Boolean, or null if none exists.
+     *
      * @throws IllegalArgumentException If <code>name</code> is null, or if <code>context</code> is not null and does
      *                                  not belong to this RestorableSupport.
      */
@@ -950,9 +1045,10 @@ public class RestorableSupport
     /**
      * Returns the value of the StateObject as a LatLon.
      *
-     * @param stateObject the StateObject that will be converted to a LatLon.
+     * @param stateObject the StateObject that is converted to a LatLon.
      *
      * @return the value of the StateObject as a LatLon.
+     *
      * @throws IllegalArgumentException If <code>stateObject</code> is null, or does not belong to this
      *                                  RestorableSupport.
      */
@@ -975,7 +1071,7 @@ public class RestorableSupport
         Double lon = getStateValueAsDouble(stateObject, "longitudeDegrees");
         if (lat == null || lon == null)
         {
-            String message = Logging.getMessage("RestorableSupport.ConversionError", stateObject.getName());
+            String message = Logging.getMessage("generic.ConversionError", stateObject.getName());
             Logging.logger().log(java.util.logging.Level.SEVERE, message);
             return null;
         }
@@ -1000,9 +1096,10 @@ public class RestorableSupport
     /**
      * Returns the value of the StateObject as a Position.
      *
-     * @param stateObject the StateObject that will be converted to a Position.
+     * @param stateObject the StateObject that is converted to a Position.
      *
      * @return the value of the StateObject as a Position.
+     *
      * @throws IllegalArgumentException If <code>stateObject</code> is null, or does not belong to this
      *                                  RestorableSupport.
      */
@@ -1026,7 +1123,7 @@ public class RestorableSupport
         Double elevation = getStateValueAsDouble(stateObject, "elevation");
         if (lat == null || lon == null || elevation == null)
         {
-            String message = Logging.getMessage("RestorableSupport.ConversionError", stateObject.getName());
+            String message = Logging.getMessage("generic.ConversionError", stateObject.getName());
             Logging.logger().log(java.util.logging.Level.SEVERE, message);
             return null;
         }
@@ -1051,9 +1148,10 @@ public class RestorableSupport
     /**
      * Returns the value of the StateObject as a List of LatLons.
      *
-     * @param stateObject the StateObject that will be converted to a List of LatLons.
+     * @param stateObject the StateObject that is converted to a List of LatLons.
      *
      * @return the value of the StateObject as a List of LatLons.
+     *
      * @throws IllegalArgumentException If <code>stateObject</code> is null, or does not belong to this
      *                                  RestorableSupport.
      */
@@ -1108,9 +1206,10 @@ public class RestorableSupport
     /**
      * Returns the value of the StateObject as a Sector.
      *
-     * @param stateObject the StateObject that will be converted to a Sector.
+     * @param stateObject the StateObject that is converted to a Sector.
      *
      * @return the value of the StateObject as a Sector.
+     *
      * @throws IllegalArgumentException If <code>stateObject</code> is null, or does not belong to this
      *                                  RestorableSupport.
      */
@@ -1135,7 +1234,7 @@ public class RestorableSupport
         Double maxLon = getStateValueAsDouble(stateObject, "maxLongitudeDegrees");
         if (minLat == null || maxLat == null || minLon == null || maxLon == null)
         {
-            String message = Logging.getMessage("RestorableSupport.ConversionError", stateObject.getName());
+            String message = Logging.getMessage("generic.ConversionError", stateObject.getName());
             Logging.logger().log(java.util.logging.Level.SEVERE, message);
             return null;
         }
@@ -1177,7 +1276,7 @@ public class RestorableSupport
 
     /**
      * Adds a new StateObject with the specified <code>name</code> and String <code>value</code>. The new StateObject
-     * will be placed beneath the document root. If a StateObject with this name already exists, a new one is still
+     * is placed beneath the document root. If a StateObject with this name already exists, a new one is still
      * created.
      *
      * @param name  the new StateObject's name.
@@ -1192,8 +1291,8 @@ public class RestorableSupport
 
     /**
      * Adds a new StateObject with the specified <code>name</code> and String <code>value</code>. The new StateObject
-     * will be placed beneath the document root. If a StateObject with this name already exists, a new one is still
-     * created. If <code>escapeValue</code> is true, the text in <code>value</code> will be escaped in a CDATA section.
+     * is placed beneath the document root. If a StateObject with this name already exists, a new one is still
+     * created. If <code>escapeValue</code> is true, the text in <code>value</code> is escaped in a CDATA section.
      * Otherwise, no special processing is performed on <code>value</code>. Once <code>value</code> has been escaped and
      * added, it can be extracted exactly like any other String value.
      *
@@ -1210,11 +1309,11 @@ public class RestorableSupport
 
     /**
      * Adds a new StateObject with the specified <code>name</code> and String <code>value</code>. If
-     * <code>context</code> is not null, the new StateObject will be nested directly beneath the specified
-     * <code>context</code>. Otherwise, the new StateObject will be placed directly beneath the document root. If a
+     * <code>context</code> is not null, the new StateObject is nested directly beneath the specified
+     * <code>context</code>. Otherwise, the new StateObject is placed directly beneath the document root. If a
      * StateObject with this name already exists, a new one is still created.
      *
-     * @param context the StateObject context under which the new StateObject will be created, or null to place it under
+     * @param context the StateObject context under which the new StateObject is created, or null to place it under
      *                the document root.
      * @param name    the new StateObject's name.
      * @param value   the new StateObject's String value.
@@ -1229,14 +1328,14 @@ public class RestorableSupport
 
     /**
      * Adds a new StateObject with the specified <code>name</code> and String <code>value</code>. If
-     * <code>context</code> is not null, the new StateObject will be nested directly beneath the specified
-     * <code>context</code>. Otherwise, the new StateObject will be placed directly beneath the document root. If a
+     * <code>context</code> is not null, the new StateObject is nested directly beneath the specified
+     * <code>context</code>. Otherwise, the new StateObject is placed directly beneath the document root. If a
      * StateObject with this name already exists, a new one is still created. If <code>escapeValue</code> is true, the
-     * text in <code>value</code> will be escaped in a CDATA section. Otherwise, no special processing is performed on
+     * text in <code>value</code> is escaped in a CDATA section. Otherwise, no special processing is performed on
      * <code>value</code>. Once <code>value</code> has been escaped and added, it can be extracted exactly like any
      * other String value.
      *
-     * @param context     the StateObject context under which the new StateObject will be created, or null to place it
+     * @param context     the StateObject context under which the new StateObject is created, or null to place it
      *                    under the document root.
      * @param name        the new StateObject's name.
      * @param value       the new StateObject's String value.
@@ -1265,7 +1364,7 @@ public class RestorableSupport
 
     /**
      * Adds a new StateObject with the specified <code>name</code> and Integer <code>value</code>. The new StateObject
-     * will be placed beneath the document root. If a StateObject with this name already exists, a new one is still
+     * is placed beneath the document root. If a StateObject with this name already exists, a new one is still
      * created.
      *
      * @param name     the new StateObject's name.
@@ -1280,11 +1379,11 @@ public class RestorableSupport
 
     /**
      * Adds a new StateObject with the specified <code>name</code> and Integer <code>value</code>. If
-     * <code>context</code> is not null, the new StateObject will be nested directly beneath the specified
-     * <code>context</code>. Otherwise, the new StateObject will be placed directly beneath the document root. If a
+     * <code>context</code> is not null, the new StateObject is nested directly beneath the specified
+     * <code>context</code>. Otherwise, the new StateObject is placed directly beneath the document root. If a
      * StateObject with this name already exists, a new one is still created.
      *
-     * @param context  the StateObject context under which the new StateObject will be created, or null to place it
+     * @param context  the StateObject context under which the new StateObject is created, or null to place it
      *                 under the document root.
      * @param name     the new StateObject's name.
      * @param intValue the new StateObject's Integer value.
@@ -1312,7 +1411,7 @@ public class RestorableSupport
 
     /**
      * Adds a new StateObject with the specified <code>name</code> and Double <code>value</code>. The new StateObject
-     * will be placed beneath the document root. If a StateObject with this name already exists, a new one is still
+     * is placed beneath the document root. If a StateObject with this name already exists, a new one is still
      * created.
      *
      * @param name        the new StateObject's name.
@@ -1327,11 +1426,11 @@ public class RestorableSupport
 
     /**
      * Adds a new StateObject with the specified <code>name</code> and Double <code>value</code>. If
-     * <code>context</code> is not null, the new StateObject will be nested directly beneath the specified
-     * <code>context</code>. Otherwise, the new StateObject will be placed directly beneath the document root. If a
+     * <code>context</code> is not null, the new StateObject is nested directly beneath the specified
+     * <code>context</code>. Otherwise, the new StateObject is placed directly beneath the document root. If a
      * StateObject with this name already exists, a new one is still created.
      *
-     * @param context     the StateObject context under which the new StateObject will be created, or null to place it
+     * @param context     the StateObject context under which the new StateObject is created, or null to place it
      *                    under the document root.
      * @param name        the new StateObject's name.
      * @param doubleValue the new StateObject's Double value.
@@ -1359,7 +1458,7 @@ public class RestorableSupport
 
     /**
      * Adds a new StateObject with the specified <code>name</code> and Boolean <code>value</code>. The new StateObject
-     * will be placed beneath the document root. If a StateObject with this name already exists, a new one is still
+     * is placed beneath the document root. If a StateObject with this name already exists, a new one is still
      * created.
      *
      * @param name         the new StateObject's name.
@@ -1374,11 +1473,11 @@ public class RestorableSupport
 
     /**
      * Adds a new StateObject with the specified <code>name</code> and Boolean <code>value</code>. If
-     * <code>context</code> is not null, the new StateObject will be nested directly beneath the specified
-     * <code>context</code>. Otherwise, the new StateObject will be placed directly beneath the document root. If a
+     * <code>context</code> is not null, the new StateObject is nested directly beneath the specified
+     * <code>context</code>. Otherwise, the new StateObject is placed directly beneath the document root. If a
      * StateObject with this name already exists, a new one is still created.
      *
-     * @param context      the StateObject context under which the new StateObject will be created, or null to place it
+     * @param context      the StateObject context under which the new StateObject is created, or null to place it
      *                     under the document root.
      * @param name         the new StateObject's name.
      * @param booleanValue the new StateObject's Boolean value.
@@ -1581,6 +1680,7 @@ public class RestorableSupport
      * @param color Color to encode.
      *
      * @return String encoding of the specified <code>color</code>.
+     *
      * @throws IllegalArgumentException If <code>color</code> is null.
      */
     public static String encodeColor(java.awt.Color color)
@@ -1593,20 +1693,22 @@ public class RestorableSupport
         }
 
         // Encode the red, green, blue, and alpha components
-        int rgba = (color.getRed()   & 0xFF) << 24
-                 | (color.getGreen() & 0xFF) << 16
-                 | (color.getBlue()  & 0xFF) << 8
-                 | (color.getAlpha() & 0xFF);
+        int rgba = (color.getRed() & 0xFF) << 24
+            | (color.getGreen() & 0xFF) << 16
+            | (color.getBlue() & 0xFF) << 8
+            | (color.getAlpha() & 0xFF);
         return String.format("%#08X", rgba);
     }
 
     /**
      * Returns the Color described by the String <code>encodedString</code>. This understands Colors encoded with a call
-     * to {@link #encodeColor(java.awt.Color)}. If <code>encodedString</code> cannot be decoded, this will return null.
+     * to {@link #encodeColor(java.awt.Color)}. If <code>encodedString</code> cannot be decoded, this method returns
+     * null.
      *
      * @param encodedString String to decode.
      *
      * @return Color decoded from the specified <code>encodedString</code>, or null if the String cannot be decoded.
+     *
      * @throws IllegalArgumentException If <code>encodedString</code> is null.
      */
     public static java.awt.Color decodeColor(String encodedString)
@@ -1631,7 +1733,7 @@ public class RestorableSupport
         }
         catch (NumberFormatException e)
         {
-            String message = Logging.getMessage("RestorableSupport.ConversionError", encodedString);
+            String message = Logging.getMessage("generic.ConversionError", encodedString);
             Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
             return null;
         }
@@ -1642,6 +1744,13 @@ public class RestorableSupport
             (i >> 16) & 0xFF,
             (i >> 8) & 0xFF,
             i & 0xFF);
+    }
+
+    public static void adjustTitleAndDisplayName(AVList params)
+    {
+        String displayName = params.getStringValue(AVKey.DISPLAY_NAME);
+        if (displayName == null && params.getValue(AVKey.TITLE) != null)
+            params.setValue(AVKey.DISPLAY_NAME, params.getValue(AVKey.TITLE));
     }
     
     public void addStateValueAsRestorable(String name, Restorable restorable)

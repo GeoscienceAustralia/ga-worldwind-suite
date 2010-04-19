@@ -2,7 +2,7 @@ package view.roll;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.util.Logging;
-import gov.nasa.worldwind.view.BasicOrbitViewLimits;
+import gov.nasa.worldwind.view.orbit.BasicOrbitViewLimits;
 
 /**
  * @author Michael de Hoog

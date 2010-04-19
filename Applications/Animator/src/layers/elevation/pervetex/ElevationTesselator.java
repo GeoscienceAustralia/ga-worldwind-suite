@@ -6,10 +6,13 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.terrain.SectorGeometry;
 import gov.nasa.worldwind.terrain.SectorGeometryList;
+import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import javax.media.opengl.GL;
 
 import nasa.worldwind.terrain.RectangularTessellator;
 
@@ -25,13 +28,14 @@ public class ElevationTesselator extends RectangularTessellator
 		protected final double minElevation;
 		protected final double maxElevation;
 
-		protected RenderInfo(int density, DoubleBuffer vertices,
+		protected RenderInfo(DrawContext dc, int density,
+				DoubleBuffer vertices, Integer bufferIdVertices,
 				double[] elevations, double minElevation, double maxElevation,
-				DoubleBuffer texCoords, Vec4 refCenter)
+				Vec4 refCenter)
 		{
-			super(density, vertices, texCoords, refCenter);
-			this.elevations = elevations;
+			super(dc, density, vertices, bufferIdVertices, refCenter);
 			this.vertices = vertices;
+			this.elevations = elevations;
 			this.minElevation = minElevation;
 			this.maxElevation = maxElevation;
 			this.refCenter = refCenter;
@@ -119,15 +123,31 @@ public class ElevationTesselator extends RectangularTessellator
 	{
 		int density = tile.density;
 		int numVertices = (density + 3) * (density + 3);
-		DoubleBuffer verts = BufferUtil.newDoubleBuffer(numVertices * 3);
+
+		DoubleBuffer verts;
+
+		// Re-use the RenderInfo vertices buffer. If it has not been set or the
+		// density has changed, create a new buffer
+		if (tile.ri == null || tile.ri.vertices == null
+				|| density != tile.ri.density)
+		{
+			verts = BufferUtil.newDoubleBuffer(numVertices * 3);
+		}
+		else
+		{
+			verts = tile.ri.vertices;
+			verts.rewind();
+		}
+
 		ArrayList<LatLon> latlons = this.computeLocations(tile);
 		double[] elevations = new double[latlons.size()];
 		dc.getGlobe().getElevations(tile.sector, latlons, tile.getResolution(),
 				elevations);
 
+		int iv = 0;
 		double verticalExaggeration = dc.getVerticalExaggeration();
-		double exaggeratedMinElevation = makeSkirts ? globe.getMinElevation()
-				* verticalExaggeration : 0;
+		Double exaggeratedMinElevation = makeSkirts ? globe.getMinElevation()
+				* verticalExaggeration : null;
 
 		LatLon centroid = tile.sector.getCentroid();
 		Vec4 refCenter = globe.computePointFromPosition(centroid.getLatitude(),
@@ -135,26 +155,22 @@ public class ElevationTesselator extends RectangularTessellator
 
 		double minElevation = Double.MAX_VALUE;
 		double maxElevation = -Double.MAX_VALUE;
-		int ie = 0, iv = 0;
+		int ie = 0;
 		Iterator<LatLon> latLonIter = latlons.iterator();
 		for (int j = 0; j <= density + 2; j++)
 		{
 			for (int i = 0; i <= density + 2; i++)
 			{
 				LatLon latlon = latLonIter.next();
-				double elevation = elevations[ie++];
+				double elevation = verticalExaggeration * elevations[ie++];
 
 				minElevation = Math.min(minElevation, elevation);
 				maxElevation = Math.max(maxElevation, elevation);
 
-				//add exaggeration and skirts
-				elevation *= verticalExaggeration;
-				if (j == 0 || j >= tile.density + 2 || i == 0
-						|| i >= tile.density + 2)
-				{ // use abs to account for negative elevation.
-					elevation -= exaggeratedMinElevation >= 0 ? exaggeratedMinElevation
-							: -exaggeratedMinElevation;
-				}
+				// Tile edges use min elevation to draw the skirts
+				if (exaggeratedMinElevation != null
+						&& (j == 0 || j >= tile.density + 2 || i == 0 || i >= tile.density + 2))
+					elevation = exaggeratedMinElevation;
 
 				Vec4 p = globe.computePointFromPosition(latlon.getLatitude(),
 						latlon.getLongitude(), elevation);
@@ -163,7 +179,37 @@ public class ElevationTesselator extends RectangularTessellator
 			}
 		}
 
-		return new RenderInfo(density, verts, elevations, minElevation,
-				maxElevation, getTextureCoordinates(density), refCenter);
+		verts.rewind();
+
+		Integer bufferIdVertices = null;
+
+		// Vertex Buffer Objects are supported in versions 1.5 and greater
+		if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
+		{
+			GL gl = dc.getGL();
+
+			OGLStackHandler ogsh = new OGLStackHandler();
+
+			try
+			{
+				ogsh.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+
+				// Create a new bufferId
+				int glBuf[] = new int[1];
+				gl.glGenBuffers(1, glBuf, 0);
+				bufferIdVertices = glBuf[0];
+
+				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, bufferIdVertices);
+				gl.glBufferData(GL.GL_ARRAY_BUFFER, verts.limit() * 8, verts,
+						GL.GL_DYNAMIC_DRAW);
+			}
+			finally
+			{
+				ogsh.pop(gl);
+			}
+		}
+
+		return new RenderInfo(dc, density, verts, bufferIdVertices, elevations,
+				minElevation, maxElevation, refCenter);
 	}
 }

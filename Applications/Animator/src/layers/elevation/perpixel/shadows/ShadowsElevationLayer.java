@@ -31,7 +31,7 @@ import java.net.URL;
 import javax.media.opengl.GL;
 
 import layers.elevation.perpixel.ElevationLayer;
-import layers.elevation.perpixel.ExtendedBasicElevationModel;
+import layers.elevation.perpixel.ExtendedElevationModel;
 
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
@@ -54,12 +54,12 @@ public class ShadowsElevationLayer extends ElevationLayer
 
 	protected double bakedExaggeration = 100.0;
 
-	public ShadowsElevationLayer(ExtendedBasicElevationModel elevationModel)
+	public ShadowsElevationLayer(ExtendedElevationModel elevationModel)
 	{
 		this(elevationModel, null);
 	}
 
-	public ShadowsElevationLayer(ExtendedBasicElevationModel elevationModel,
+	public ShadowsElevationLayer(ExtendedElevationModel elevationModel,
 			Sector sector)
 	{
 		super(elevationModel, CACHE_NAME_PREFIX, FORMAT_SUFFIX, sector);

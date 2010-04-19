@@ -32,7 +32,8 @@ public class FileBasicTiledImageLayer extends ImmediateBasicTiledImageLayer
 	}
 
 	@Override
-	protected void downloadTexture(final TextureTile tile)
+	protected void downloadTexture(final TextureTile tile,
+			DownloadPostProcessor postProcessor)
 	{
 		URL url;
 		try
@@ -49,15 +50,16 @@ public class FileBasicTiledImageLayer extends ImmediateBasicTiledImageLayer
 			return;
 		}
 
-		//if protocol is not "file", then let superclass handle it
+		// if protocol is not "file", then let superclass handle it
 		if (url == null || !"file".equalsIgnoreCase(url.getProtocol()))
 		{
-			super.downloadTexture(tile);
+			super.downloadTexture(tile, postProcessor);
 			return;
 		}
 
-		Retriever retriever = new FileRetriever(url, new DownloadPostProcessor(
-				tile, this));
+		if (postProcessor == null)
+			postProcessor = new DownloadPostProcessor(tile, this);
+		Retriever retriever = new FileRetriever(url, postProcessor);
 		WorldWind.getRetrievalService().runRetriever(retriever,
 				tile.getPriority() - 1e100);
 	}

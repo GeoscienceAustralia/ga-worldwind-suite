@@ -77,7 +77,7 @@ public class FileLayer
 
 	public static ExtendedBasicElevationModel createElevationModel(String name,
 			String cacheName, File directory, int levels, int tilesize,
-			LatLon lztd, Sector sector, double minElevation, double maxElevation)
+			LatLon lztd, Sector sector, double minElevation, double maxElevation, String pixelFormat)
 	{
 		AVList params = new AVListImpl();
 		params.setValue(AVKey.TILE_WIDTH, tilesize);
@@ -94,6 +94,7 @@ public class FileLayer
 				new FileBasicElevationModel.FileUrlBuilder(directory));
 		params.setValue(AVKey.ELEVATION_MIN, minElevation);
 		params.setValue(AVKey.ELEVATION_MAX, maxElevation);
+		params.setValue(AVKey.PIXEL_FORMAT, pixelFormat);
 
 		FileBasicElevationModel fbem = new FileBasicElevationModel(params);
 		fbem.setName(name);

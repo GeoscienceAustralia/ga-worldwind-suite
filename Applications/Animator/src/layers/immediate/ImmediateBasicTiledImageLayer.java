@@ -1,12 +1,14 @@
 package layers.immediate;
 
-import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
+
+import java.net.URL;
+
 import nasa.worldwind.layers.BasicTiledImageLayer;
 
 public class ImmediateBasicTiledImageLayer extends BasicTiledImageLayer
@@ -36,21 +38,23 @@ public class ImmediateBasicTiledImageLayer extends BasicTiledImageLayer
 		}
 
 		if (!loadTextureFromStore(tile))
-			downloadTexture(tile);
+			downloadTexture(tile, null);
 		loadTextureFromStore(tile);
 
-		//Add to list of tiles to be drawn. Usually this is done by addTile(),
-		//but if texture needs to be requested, it must be forced. See addTile().
+		// Add to list of tiles to be drawn. Usually this is done by addTile(),
+		// but if texture needs to be requested, it must be forced. See
+		// addTile().
 		addTileToCurrent(tile);
 	}
 
 	private boolean loadTextureFromStore(TextureTile tile)
 	{
-		//from BasicTiledImageLayer.requestTask.run()
+		// from BasicTiledImageLayer.requestTask.run()
 
-		final java.net.URL textureURL = WorldWind.getDataFileStore().findFile(
-				tile.getPath(), false);
-		if (textureURL != null && !isTextureExpired(tile, textureURL))
+		final URL textureURL = getDataFileStore().findFile(tile.getPath(),
+				false);
+		if (textureURL != null
+				&& !isTextureFileExpired(tile, textureURL, getDataFileStore()))
 		{
 			if (loadTexture(tile, textureURL))
 			{
@@ -61,9 +65,7 @@ public class ImmediateBasicTiledImageLayer extends BasicTiledImageLayer
 			else
 			{
 				// Assume that something's wrong with the file and delete it.
-				gov.nasa.worldwind.WorldWind.getDataFileStore().removeFile(
-						textureURL);
-				getLevels().markResourceAbsent(tile);
+				getDataFileStore().removeFile(textureURL);
 				String message = Logging.getMessage(
 						"generic.DeletedCorruptDataFile", textureURL);
 				Logging.logger().info(message);

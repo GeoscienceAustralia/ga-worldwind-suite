@@ -2,7 +2,7 @@ package animation;
 
 import gov.nasa.worldwind.Restorable;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.view.OrbitView;
+import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.io.File;
 import java.io.IOException;

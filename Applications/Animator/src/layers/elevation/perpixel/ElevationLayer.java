@@ -10,6 +10,7 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.BufferWrapper;
 import gov.nasa.worldwind.util.Level;
 import gov.nasa.worldwind.util.LevelSet;
@@ -28,7 +29,7 @@ import com.sun.opengl.util.texture.TextureIO;
 
 public abstract class ElevationLayer extends TiledImageLayer
 {
-	protected ExtendedBasicElevationModel elevationModel;
+	protected ExtendedElevationModel elevationModel;
 
 	protected double minElevationClamp = -Double.MAX_VALUE;
 	protected double maxElevationClamp = Double.MAX_VALUE;
@@ -37,13 +38,13 @@ public abstract class ElevationLayer extends TiledImageLayer
 
 	private DrawContext dc = null;
 
-	public ElevationLayer(ExtendedBasicElevationModel elevationModel,
+	public ElevationLayer(ExtendedElevationModel elevationModel,
 			String cacheNamePrefix, String formatSuffix)
 	{
 		this(elevationModel, cacheNamePrefix, formatSuffix, null);
 	}
 
-	public ElevationLayer(ExtendedBasicElevationModel elevationModel,
+	public ElevationLayer(ExtendedElevationModel elevationModel,
 			String cacheNamePrefix, String formatSuffix, Sector sector)
 	{
 		super(makeLevels(elevationModel, sector, cacheNamePrefix, formatSuffix));
@@ -53,10 +54,10 @@ public abstract class ElevationLayer extends TiledImageLayer
 	}
 
 	protected static LevelSet makeLevels(
-			ExtendedBasicElevationModel elevationModel, Sector sector,
+			ExtendedElevationModel elevationModel, Sector sector,
 			String cacheNamePrefix, String formatSuffix)
 	{
-		LevelSet levels = elevationModel.getLevels();
+		LevelSet levels = ((BasicElevationModel)elevationModel).getLevels();
 
 		AVList params = new AVListImpl();
 		params.setValue(AVKey.TILE_WIDTH, levels.getLastLevel().getTileWidth());
@@ -128,8 +129,9 @@ public abstract class ElevationLayer extends TiledImageLayer
 		}
 
 		Vec4 centroid = tile.getCentroidPoint(dc.getGlobe());
-		if (this.getReferencePoint() != null)
-			tile.setPriority(centroid.distanceTo3(this.getReferencePoint()));
+        Vec4 referencePoint = this.getReferencePoint(dc);
+        if (referencePoint != null)
+            tile.setPriority(centroid.distanceTo3(referencePoint));
 
 		RequestTask task = new RequestTask(dc.getGlobe(), tile, this);
 		this.getRequestQ().add(task);
@@ -231,7 +233,7 @@ public abstract class ElevationLayer extends TiledImageLayer
 		if (keys.length != 9 || sectors.length != 9)
 			throw new IllegalArgumentException("Illegal array length");
 
-		LevelSet elevationLevels = elevationModel.getLevels();
+		LevelSet elevationLevels = ((BasicElevationModel)elevationModel).getLevels();
 		Level elevationLevel = elevationLevels.getLevel(tile.getLevelNumber());
 		if (elevationLevel == null)
 			return false;

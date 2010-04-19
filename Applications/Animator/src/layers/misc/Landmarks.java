@@ -106,11 +106,13 @@ public class Landmarks extends RenderableLayer
 			aa.setDistanceMinOpacity(1);
 		}
 
+		@SuppressWarnings("unused")
 		public double getNumber()
 		{
 			return number;
 		}
 
+		@SuppressWarnings("unused")
 		public String getDescription()
 		{
 			return description;

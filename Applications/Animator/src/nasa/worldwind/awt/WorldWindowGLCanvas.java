@@ -14,7 +14,6 @@ import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.pick.PickedObjectList;
 import gov.nasa.worldwind.util.*;
-import gov.nasa.worldwind.View;
 
 import javax.media.opengl.*;
 import java.awt.*;
@@ -26,7 +25,7 @@ import java.util.*;
  * layers). It's a self-contained component intended to serve as an application's world window. rendering.
  *
  * @author Tom Gaskins
- * @version $Id: WorldWindowGLCanvas.java 9428 2009-03-17 07:05:09Z tgaskins $
+ * @version $Id: WorldWindowGLCanvas.java 11421 2009-06-03 13:23:25Z tgaskins $
  */
 public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, PropertyChangeListener
 {
@@ -43,7 +42,9 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
 
     private final WorldWindowGLDrawable wwd; // WorldWindow interface delegates to wwd
 
-    /** Constructs a new <code>WorldWindowGLCanvas</code> window on the default graphics device. */
+    /**
+     * Constructs a new <code>WorldWindowGLCanvas</code> window on the default graphics device.
+     */
     public WorldWindowGLCanvas()
     {
         super(caps);
@@ -55,6 +56,7 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
+            this.wwd.endInitalization();
         }
         catch (Exception e)
         {
@@ -75,6 +77,7 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
+            this.wwd.endInitalization();
         }
         catch (Exception e)
         {
@@ -98,7 +101,6 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
      * be null
      *
      * @param shareWith a <code>WorldWindowGLCanvas</code> with which to share graphics resources.
-     *
      * @throws NullPointerException if shareWith is null.
      * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)
      */
@@ -113,6 +115,7 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
+            this.wwd.endInitalization();
         }
         catch (Exception e)
         {
@@ -129,7 +132,6 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
      *
      * @param shareWith a <code>WorldWindowGLCanvas</code> with which to share graphics resources.
      * @param device    the <code>GraphicsDevice</code> on which to create the window.
-     *
      * @throws NullPointerException     if <code>shareWith</code> is null.
      * @throws IllegalArgumentException if <code>deevice</code> is null.
      * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)
@@ -152,6 +154,7 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
+            this.wwd.endInitalization();
         }
         catch (Exception e)
         {

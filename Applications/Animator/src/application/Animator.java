@@ -6,6 +6,7 @@ import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
+import gov.nasa.worldwind.examples.sunlight.LensFlareLayer;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -21,7 +22,7 @@ import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.layers.StarsLayer;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.StatusBar;
-import gov.nasa.worldwind.view.OrbitView;
+import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -59,6 +60,7 @@ import javax.swing.event.ChangeListener;
 import layers.depth.DepthLayer;
 import layers.elevation.perpixel.ExtendedBasicElevationModel;
 import layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
+import layers.elevation.perpixel.ExtendedElevationModel;
 import layers.elevation.perpixel.shaded.ShadedElevationLayer;
 import layers.elevation.perpixel.shadows.ShadowsElevationLayer;
 import layers.elevation.pervetex.ElevationTesselator;
@@ -73,7 +75,6 @@ import layers.other.ImmediateBMNGWMSLayer;
 import layers.other.ImmediateLandsatI3WMSLayer;
 import layers.other.MagneticsLayer;
 import nasa.worldwind.awt.WorldWindowGLCanvas;
-import nasa.worldwind.layers.LensFlareLayer;
 import terrain.OffsetCompoundElevationModel;
 import util.ChangeFrameListener;
 import util.FileUtil;
@@ -159,7 +160,7 @@ public class Animator
 
 	public Animator()
 	{
-		//ImmediateMode.setImmediate(true);
+		// ImmediateMode.setImmediate(true);
 
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, BasicRollOrbitView.class
@@ -176,7 +177,7 @@ public class Animator
 				ElevationTesselator.class.getName());
 
 		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE,
-				16777216L * 8); //128 mb
+				16777216L * 8); // 128 mb
 
 		animationChangeListener = new ChangeListener()
 		{
@@ -215,10 +216,10 @@ public class Animator
 		ocem = new OffsetCompoundElevationModel();
 		model.getGlobe().setElevationModel(ocem);
 
-		//tesselator.setMakeTileSkirts(false);
-		//model.setShowWireframeInterior(true);
+		// tesselator.setMakeTileSkirts(false);
+		// model.setShowWireframeInterior(true);
 		wwd.getSceneController().setVerticalExaggeration(10);
-		//ocem.setElevationOffset(200);
+		// ocem.setElevationOffset(200);
 
 		LayerList layers = model.getLayers();
 
@@ -309,16 +310,17 @@ public class Animator
 		landsat = new ImmediateLandsatI3WMSLayer();
 		layers.add(landsat);
 
-		ElevationModel earthem = new ExtendedBasicElevationModelFactory()
-				.createFromConfigFile("config/LegacyEarthElevationModel.xml");
-		ExtendedBasicElevationModel eem = getEBEM(earthem);
+		ElevationModel earthem = (ElevationModel) new ExtendedBasicElevationModelFactory()
+				.createFromConfigSource(
+						"config/Earth/EarthElevationModelAsBil16.xml", null);
+		ExtendedElevationModel eem = getEBEM(earthem);
 
 		Sector bemSector = Sector.fromDegrees(-59.99875, -7.99875, 91.99875,
 				171.99875);
 		ExtendedBasicElevationModel bem = FileLayer.createElevationModel(
 				"SW Margins DEM", "GA/SW Margins DEM", new File(DATA_DRIVE
 						+ ":/SW Margins/bathy/tiled"), 7, 150, LatLon
-						.fromDegrees(20d, 20d), bemSector, -8922, 3958);
+						.fromDegrees(20d, 20d), bemSector, -8922, 3958, AVKey.INT16);
 		bem.setMissingDataSignal(-32768);
 
 		Sector semSector = Sector.fromDegrees(-27.0015, -22.5005, 106.5005,
@@ -326,12 +328,12 @@ public class Animator
 		ExtendedBasicElevationModel sem = FileLayer.createElevationModel(
 				"SONNE DEM", "GA/SONNE DEM", new File(DATA_DRIVE
 						+ ":/SW Margins/sonne/tiledB"), 7, 150, LatLon
-						.fromDegrees(20d, 20d), semSector, -6400, -2310);
+						.fromDegrees(20d, 20d), semSector, -6400, -2310, AVKey.INT16);
 		sem.setMissingDataSignal(-9999);
 
 		ocem.addElevationModel(eem);
 		ocem.addElevationModel(bem);
-		//ocem.addElevationModel(sem);
+		// ocem.addElevationModel(sem);
 
 		/*map1 = FileLayer.createLayer("WestMac Map Page 1",
 				"GA/WestMac Map Page 1", ".dds", new File(DATA_DRIVE
@@ -408,14 +410,15 @@ public class Animator
 			layer.setEnabled(false);
 		}
 
-		//AnnotationAttributes townAttr = new AnnotationAttributes();
-		//townAttr.setDefaults(defaultAttributes);
-		//townAttr.setFont(Font.decode("Arial-BOLD-12"));
+		// AnnotationAttributes townAttr = new AnnotationAttributes();
+		// townAttr.setDefaults(defaultAttributes);
+		// townAttr.setFont(Font.decode("Arial-BOLD-12"));
 
-		//AnnotationLayer annos = new AnnotationLayer();
-		//annos.addAnnotation(new GlobeAnnotation("Margaret River", Position.fromDegrees(-33.7340, 115.0000, 0), townAttr));
+		// AnnotationLayer annos = new AnnotationLayer();
+		// annos.addAnnotation(new GlobeAnnotation("Margaret River",
+		// Position.fromDegrees(-33.7340, 115.0000, 0), townAttr));
 
-		//layers.add(annos);
+		// layers.add(annos);
 
 
 		stars.setEnabled(true);
@@ -424,27 +427,27 @@ public class Animator
 		depth.setEnabled(true);
 		bmng.setEnabled(true);
 
-		//landsat.setEnabled(true);
+		// landsat.setEnabled(true);
 
 		elevationEarth.setEnabled(true);
 		elevationSW.setEnabled(true);
 		elevationSONNE.setEnabled(true);
 
 
-		//shadowsEarth.setEnabled(true);
-		//shadowsSW.setEnabled(true);
+		// shadowsEarth.setEnabled(true);
+		// shadowsSW.setEnabled(true);
 
-		//gravity.setEnabled(true);
-		//magnetics.setEnabled(true);
+		// gravity.setEnabled(true);
+		// magnetics.setEnabled(true);
 
-		//coast.setEnabled(true);
-		//state.setEnabled(true);
-		//landmarks.setEnabled(true);
+		// coast.setEnabled(true);
+		// state.setEnabled(true);
+		// landmarks.setEnabled(true);
 
-		//lensFlare.setEnabled(true);
-		//skybox.setEnabled(true);
-		//fog.setEnabled(true);
-		//skysphere.setEnabled(true);
+		// lensFlare.setEnabled(true);
+		// skybox.setEnabled(true);
+		// fog.setEnabled(true);
+		// skysphere.setEnabled(true);
 		/*
 				ShapefileLayer seismicShp = new ShapefileLayer();
 				seismicShp.setColor(Color.yellow);
@@ -768,18 +771,18 @@ public class Animator
 		System.out.println("New sun position = " + newPosition);
 	}
 
-	private ExtendedBasicElevationModel getEBEM(ElevationModel elevationModel)
+	private ExtendedElevationModel getEBEM(ElevationModel elevationModel)
 	{
-		if (elevationModel instanceof ExtendedBasicElevationModel)
+		if (elevationModel instanceof ExtendedElevationModel)
 		{
-			return (ExtendedBasicElevationModel) elevationModel;
+			return (ExtendedElevationModel) elevationModel;
 		}
 		else if (elevationModel instanceof CompoundElevationModel)
 		{
 			CompoundElevationModel cem = (CompoundElevationModel) elevationModel;
 			for (ElevationModel model : cem.getElevationModels())
 			{
-				ExtendedBasicElevationModel ebem = getEBEM(model);
+				ExtendedElevationModel ebem = getEBEM(model);
 				if (ebem != null)
 				{
 					return ebem;
@@ -1219,7 +1222,7 @@ public class Animator
 						first = 590;
 						last = 595;
 
-						//last = 600;
+						// last = 600;
 
 						animate(detail, first, last, new File("frames"), false);
 
@@ -1347,8 +1350,8 @@ public class Animator
 			wwd.redrawNow();
 		}
 		updater.addFrame(slider.getValue(), view);
-		//animation.addFrame(slider.getValue(), view);
-		//updateAnimation();
+		// animation.addFrame(slider.getValue(), view);
+		// updateAnimation();
 	}
 
 	private void applyView(OrbitView view)
@@ -1601,8 +1604,9 @@ public class Animator
 					frame.setAlwaysOnTop(true);
 
 					View view = wwd.getView();
-					boolean detectCollisions = view.isDetectCollisions();
-					view.setDetectCollisions(false);
+					OrbitView orbitView = (OrbitView) view;
+					boolean detectCollisions = orbitView.isDetectCollisions();
+					orbitView.setDetectCollisions(false);
 
 					int filenameLength = String.valueOf(lastFrame).length();
 
@@ -1623,7 +1627,7 @@ public class Animator
 
 					ocem.setDetailHint(detailHintBackup);
 					crosshair.setEnabled(true);
-					view.setDetectCollisions(detectCollisions);
+					orbitView.setDetectCollisions(detectCollisions);
 					frame.setAlwaysOnTop(false);
 
 					ImmediateMode.setImmediate(immediate);

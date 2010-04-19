@@ -33,7 +33,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLException;
 
 import layers.elevation.perpixel.ElevationLayer;
-import layers.elevation.perpixel.ExtendedBasicElevationModel;
+import layers.elevation.perpixel.ExtendedElevationModel;
 
 import com.sun.opengl.util.texture.SubclassableTexture;
 import com.sun.opengl.util.texture.Texture;
@@ -64,12 +64,12 @@ public class ShadedElevationLayer extends ElevationLayer
 	private int sunPositionUniform;
 	private int oldModelViewInverseUniform;
 
-	public ShadedElevationLayer(ExtendedBasicElevationModel elevationModel)
+	public ShadedElevationLayer(ExtendedElevationModel elevationModel)
 	{
 		this(elevationModel, null);
 	}
 
-	public ShadedElevationLayer(ExtendedBasicElevationModel elevationModel,
+	public ShadedElevationLayer(ExtendedElevationModel elevationModel,
 			Sector sector)
 	{
 		super(elevationModel, CACHE_NAME_PREFIX, FORMAT_SUFFIX, sector);
