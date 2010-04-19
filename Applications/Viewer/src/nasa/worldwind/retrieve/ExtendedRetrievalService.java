@@ -15,6 +15,8 @@ import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.layers.TiledImageLayer;
+import gov.nasa.worldwind.layers.Mercator.BasicMercatorTiledImageLayer;
+import gov.nasa.worldwind.layers.Mercator.MercatorTiledImageLayer;
 import gov.nasa.worldwind.layers.placename.PlaceNameLayer;
 import gov.nasa.worldwind.layers.rpf.RPFTiledImageLayer;
 import gov.nasa.worldwind.render.DrawContext;
@@ -44,6 +46,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+
+import au.gov.ga.worldwind.layers.geonames.GeoNamesLayer;
+import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
+import au.gov.ga.worldwind.settings.Settings;
 
 /**
  * Performs threaded retrieval of data.
@@ -584,7 +590,9 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 		Class<?>[] classes = new Class<?>[] { TiledImageLayer.class,
 				BasicElevationModel.class, BasicTiledImageLayer.class,
 				PlaceNameLayer.class, RPFTiledImageLayer.class,
-				SurfaceImage.class };
+				SurfaceImage.class, MercatorTiledImageLayer.class,
+				BasicMercatorTiledImageLayer.class, MaskTiledImageLayer.class,
+				GeoNamesLayer.class };
 		/*
 		 * Search classes above for declared classes that implement
 		 * RetrivalPostProcess AND contain a Field which is a subclass of Tile,
@@ -593,7 +601,7 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 		List<Field> tileFields = new ArrayList<Field>();
 		for (Class<?> c : classes) {
 			for (Class<?> dc : c.getDeclaredClasses()) {
-				for (Class<?> i : dc.getInterfaces()) {
+				for (Class<?> i : getInterfaces(dc)) {
 					if (i == RetrievalPostProcessor.class) {
 						for (Field field : dc.getDeclaredFields()) {
 							Class<?> type = field.getType();
@@ -618,6 +626,18 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 		}
 		FIELDS = tileFields.toArray(new Field[tileFields.size()]);
 	}
+	
+	private static List<Class<?>> getInterfaces(Class<?> c)
+	{
+		List<Class<?>> cs = new ArrayList<Class<?>>();
+		while(c != null)
+		{
+			for(Class<?> i : c.getInterfaces())
+				cs.add(i);
+			c = c.getSuperclass();
+		}
+		return cs;
+	}
 
 	public synchronized Layer getLayer() {
 		if (layer == null) {
@@ -627,14 +647,16 @@ public final class ExtendedRetrievalService extends WWObjectImpl implements
 	}
 
 	private void beforeDownload(RetrievalTask task) {
-		Tile tile = getTile(task);
-		if (tile != null) {
-			SectorPolyline s = new SectorPolyline(tile.getSector());
-			s.setColor(COLOR);
-			s.setLineWidth(2.0);
-			s.setAntiAliasHint(Polyline.ANTIALIAS_NICEST);
-			sectors.put(task, s);
-			layer.addRenderable(s);
+		if(Settings.get().isShowDownloads()) {
+			Tile tile = getTile(task);
+			if (tile != null) {
+				SectorPolyline s = new SectorPolyline(tile.getSector());
+				s.setColor(COLOR);
+				s.setLineWidth(2.0);
+				s.setAntiAliasHint(Polyline.ANTIALIAS_NICEST);
+				sectors.put(task, s);
+				layer.addRenderable(s);
+			}
 		}
 	}
 
