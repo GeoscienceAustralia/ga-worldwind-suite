@@ -7,8 +7,9 @@ import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.layers.StarsLayer;
 import gov.nasa.worldwind.layers.Earth.BMNGOneImage;
 import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
-import gov.nasa.worldwind.layers.Earth.EarthNASAPlaceNameLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
+import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
+import gov.nasa.worldwind.layers.Earth.NASAWFSPlaceNameLayer;
 import gov.nasa.worldwind.layers.Earth.OpenStreetMapLayer;
 import gov.nasa.worldwind.layers.Mercator.examples.VirtualEarthLayer;
 import gov.nasa.worldwind.layers.Mercator.examples.VirtualEarthLayer.Dataset;
@@ -21,6 +22,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
@@ -44,9 +46,9 @@ public class StandardPanel extends JPanel
 	private Layer bmngone;
 	private Layer bmng;
 	private Layer landsat;
-	private VirtualEarthLayer veaerial;
-	private VirtualEarthLayer veroad;
-	private VirtualEarthLayer vehybrid;
+	private Layer veaerial;
+	private Layer veroads;
+	private Layer vehybrid;
 	private Layer pnl;
 	private Layer geonames;
 	private Layer coastline;
@@ -54,7 +56,7 @@ public class StandardPanel extends JPanel
 	private Layer state;
 	private Layer osmmapnik;
 	private Layer osmmapniktrans;
-	private Layer street;
+	//private Layer street;
 	private Layer latlon;
 
 	private Layer[] lowerLayers;
@@ -62,7 +64,7 @@ public class StandardPanel extends JPanel
 	private JCheckBox atmosphereCheck;
 	private JRadioButton noneRadio, nasaRadio, veRadio, osmRadio, aerialRadio,
 			roadRadio, hybridRadio;
-	private JCheckBox bmngCheck, landsatCheck;
+	private JCheckBox veCheck, bmngCheck, landsatCheck;
 
 	private WorldWindow wwd;
 
@@ -81,17 +83,26 @@ public class StandardPanel extends JPanel
 		bmngone = new BMNGOneImage();
 		bmng = new BMNGWMSLayer();
 		landsat = new LandsatI3WMSLayer();
-		veaerial = new VirtualEarthLayer(Dataset.AERIAL);
-		veroad = new VirtualEarthLayer(Dataset.ROAD);
-		vehybrid = new VirtualEarthLayer(Dataset.HYBRID);
-		pnl = new EarthNASAPlaceNameLayer();
+		if (Application.MERCATOR_VIRTUAL_EARTH)
+		{
+			veaerial = new VirtualEarthLayer(Dataset.AERIAL);
+			veroads = new VirtualEarthLayer(Dataset.ROAD);
+			vehybrid = new VirtualEarthLayer(Dataset.HYBRID);
+		}
+		else
+		{
+			veaerial = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
+			veroads = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_ROADS);
+			vehybrid = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_HYBRID);
+		}
+		pnl = new NASAWFSPlaceNameLayer();
 		geonames = new GeoNamesLayer();
 		coastline = new MetacartaCoastlineLayer();
 		country = new MetacartaCountryBoundariesLayer();
 		state = new MetacartaStateBoundariesLayer();
-		osmmapnik = new au.gov.ga.worldwind.layers.mercator.OpenStreetMapLayer();
-		osmmapniktrans = new au.gov.ga.worldwind.layers.mercator.OpenStreetMapTransparentLayer();
-		street = new OpenStreetMapLayer();
+		osmmapnik = new gov.nasa.worldwind.layers.Mercator.examples.OSMMapnikLayer();
+		osmmapniktrans = new gov.nasa.worldwind.layers.Mercator.examples.OSMMapnikTransparentLayer();
+		//street = new OpenStreetMapLayer();
 		latlon = new LatLonGraticuleLayer();
 
 		/*Layer kmllayer = null;
@@ -105,13 +116,15 @@ public class StandardPanel extends JPanel
 			e.printStackTrace();
 		}*/
 
-		lowerLayers = new Layer[] { stars, atmosphere, bmngone, bmng,
-				landsat, veaerial, veroad, vehybrid, osmmapnik };
-		upperLayers = new Layer[] { pnl, geonames, coastline, country, state,
-				street, osmmapniktrans, latlon };
+		lowerLayers = new Layer[]
+		{ stars, atmosphere, bmngone, bmng, landsat, osmmapnik, veaerial, veroads,
+				vehybrid };
+		upperLayers = new Layer[]
+		{ pnl, geonames, coastline, country, state, /*street,*/ osmmapniktrans,
+				latlon };
 
 		veaerial.setEnabled(false);
-		veroad.setEnabled(false);
+		veroads.setEnabled(false);
 		vehybrid.setEnabled(false);
 		coastline.setEnabled(false);
 		country.setEnabled(false);
@@ -119,7 +132,7 @@ public class StandardPanel extends JPanel
 		osmmapnik.setEnabled(false);
 		geonames.setEnabled(false);
 		latlon.setEnabled(false);
-		street.setEnabled(false);
+		//street.setEnabled(false);
 		osmmapniktrans.setEnabled(false);
 	}
 
@@ -185,7 +198,16 @@ public class StandardPanel extends JPanel
 		landsatCheck.addActionListener(al);
 		panel2.add(landsatCheck);
 
-		if (Application.VIRTUAL_EARTH_ENABLED)
+		osmRadio = new JRadioButton(osmmapnik.getName());
+		osmRadio.addActionListener(al);
+		bg.add(osmRadio);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = gridy++;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(osmRadio, c);
+		
+		if (Application.MERCATOR_VIRTUAL_EARTH)
 		{
 			veRadio = new JRadioButton("Microsoft Virtual Earth");
 			veRadio.addActionListener(al);
@@ -195,42 +217,44 @@ public class StandardPanel extends JPanel
 			c.gridy = gridy++;
 			c.anchor = GridBagConstraints.WEST;
 			panel.add(veRadio, c);
-
-			panel2 = new JPanel(new GridLayout(1, 0));
+		}
+		else
+		{
+			veCheck = new JCheckBox("Microsoft Virtual Earth");
+			veCheck.addActionListener(al);
 			c = new GridBagConstraints();
 			c.gridx = 0;
 			c.gridy = gridy++;
 			c.anchor = GridBagConstraints.WEST;
-			c.insets = new Insets(0, 20, 0, 0);
-			panel.add(panel2, c);
-
-			hybridRadio = new JRadioButton(vehybrid.getDataset().label);
-			hybridRadio.setSelected(true);
-			hybridRadio.addActionListener(al);
-			panel2.add(hybridRadio);
-
-			aerialRadio = new JRadioButton(veaerial.getDataset().label);
-			aerialRadio.addActionListener(al);
-			panel2.add(aerialRadio);
-
-			roadRadio = new JRadioButton(veroad.getDataset().label);
-			roadRadio.addActionListener(al);
-			panel2.add(roadRadio);
-
-			ButtonGroup vebg = new ButtonGroup();
-			vebg.add(aerialRadio);
-			vebg.add(roadRadio);
-			vebg.add(hybridRadio);
+			panel.add(veCheck, c); 
 		}
 
-		osmRadio = new JRadioButton(osmmapnik.getName());
-		osmRadio.addActionListener(al);
-		bg.add(osmRadio);
+		panel2 = new JPanel(new GridLayout(1, 0));
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = gridy++;
 		c.anchor = GridBagConstraints.WEST;
-		panel.add(osmRadio, c);
+		c.insets = new Insets(0, 20, 0, 0);
+		panel.add(panel2, c);
+
+		hybridRadio = new JRadioButton("Hybrid");
+		hybridRadio.setSelected(true);
+		hybridRadio.addActionListener(al);
+		panel2.add(hybridRadio);
+
+		aerialRadio = new JRadioButton("Aerial");
+		aerialRadio.addActionListener(al);
+		panel2.add(aerialRadio);
+
+		roadRadio = new JRadioButton("Roads");
+		roadRadio.addActionListener(al);
+		panel2.add(roadRadio);
+
+		ButtonGroup vebg = new ButtonGroup();
+		vebg.add(aerialRadio);
+		vebg.add(roadRadio);
+		vebg.add(hybridRadio);
+		
 
 		panel = new JPanel(new GridLayout(0, 1));
 		panel.setBorder(BorderFactory.createTitledBorder("Boundaries"));
@@ -268,7 +292,7 @@ public class StandardPanel extends JPanel
 
 		panel.add(createCheckBox(pnl));
 		panel.add(createCheckBox(geonames));
-		panel.add(createCheckBox(street, true));
+		//panel.add(createCheckBox(street, true));
 		panel.add(createCheckBox(osmmapniktrans, true));
 		panel.add(createCheckBox(latlon));
 	}
@@ -298,19 +322,16 @@ public class StandardPanel extends JPanel
 		bmng.setEnabled(nasaRadio.isSelected() && bmngCheck.isSelected());
 		landsat.setEnabled(nasaRadio.isSelected() && landsatCheck.isSelected());
 		osmmapnik.setEnabled(osmRadio.isSelected());
+		
+		AbstractButton ve = veRadio != null ? veRadio : veCheck;
 
-		if (Application.VIRTUAL_EARTH_ENABLED)
-		{
-			aerialRadio.setEnabled(veRadio.isSelected());
-			roadRadio.setEnabled(veRadio.isSelected());
-			hybridRadio.setEnabled(veRadio.isSelected());
+		aerialRadio.setEnabled(ve.isSelected());
+		roadRadio.setEnabled(ve.isSelected());
+		hybridRadio.setEnabled(ve.isSelected());
 
-			veaerial.setEnabled(veRadio.isSelected()
-					&& aerialRadio.isSelected());
-			veroad.setEnabled(veRadio.isSelected() && roadRadio.isSelected());
-			vehybrid.setEnabled(veRadio.isSelected()
-					&& hybridRadio.isSelected());
-		}
+		veaerial.setEnabled(ve.isSelected() && aerialRadio.isSelected());
+		veroads.setEnabled(ve.isSelected() && roadRadio.isSelected());
+		vehybrid.setEnabled(ve.isSelected() && hybridRadio.isSelected());
 
 		wwd.redraw();
 	}

@@ -39,7 +39,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.io.File;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -98,7 +97,7 @@ import au.gov.ga.worldwind.util.Util;
 public class Application
 {
 	public final static boolean LOCAL_LAYERS_ENABLED = true;
-	public static boolean VIRTUAL_EARTH_ENABLED = false;
+	public static boolean MERCATOR_VIRTUAL_EARTH = false;
 
 	static
 	{
@@ -121,15 +120,15 @@ public class Application
 		{
 		}
 		
-		try
+		/*try
 		{
 			InetAddress addr = InetAddress.getLocalHost();
-			VIRTUAL_EARTH_ENABLED = addr.getCanonicalHostName().endsWith(
+			MERCATOR_VIRTUAL_EARTH = addr.getCanonicalHostName().endsWith(
 					".agso.gov.au");
 		}
 		catch (Exception e)
 		{
-		}
+		}*/
 	}
 
 	public static void main(String[] args)
