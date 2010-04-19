@@ -75,7 +75,7 @@ import layers.other.ImmediateBMNGWMSLayer;
 import layers.other.ImmediateLandsatI3WMSLayer;
 import layers.other.MagneticsLayer;
 import nasa.worldwind.awt.WorldWindowGLCanvas;
-import terrain.OffsetCompoundElevationModel;
+import terrain.DetailedCompoundElevationModel;
 import util.ChangeFrameListener;
 import util.FileUtil;
 import util.FrameSlider;
@@ -145,7 +145,7 @@ public class Animator
 	private boolean settingSlider = false;
 	private ChangeListener animationChangeListener;
 	private Layer crosshair;
-	private OffsetCompoundElevationModel ocem;
+	private DetailedCompoundElevationModel ocem;
 	private LensFlareLayer lensFlare;
 	private JCheckBoxMenuItem useScaledZoomCheck;
 
@@ -213,7 +213,7 @@ public class Animator
 		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(
 				Angle.ZERO, Angle.POS180);
 
-		ocem = new OffsetCompoundElevationModel();
+		ocem = new DetailedCompoundElevationModel();
 		model.getGlobe().setElevationModel(ocem);
 
 		// tesselator.setMakeTileSkirts(false);
