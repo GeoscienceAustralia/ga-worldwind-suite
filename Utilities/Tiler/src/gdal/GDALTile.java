@@ -186,7 +186,7 @@ public class GDALTile
 		{
 			throw new GDALException();
 		}
-		readRectangle(dataset, null);
+		readRectangle(dst, null);
 	}
 
 	protected void readRectangle(Dataset dataset, Rectangle srcRect)
