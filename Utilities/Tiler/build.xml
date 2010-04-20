@@ -76,6 +76,11 @@
 				<include name="**/*" />
 			</fileset>
 		</copy>
+		<copy todir="${executable.dir}">
+			<fileset dir="${basedir}">
+				<include name="run.bat" />
+			</fileset>
+		</copy>
 	</target>
 
 	<target name="run" depends="executable" />
