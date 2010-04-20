@@ -8,6 +8,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -1680,6 +1681,32 @@ public class Application implements UncaughtExceptionHandler
 							logger.fine("Generating preview...");
 							try
 							{
+								BufferedImage image = new BufferedImage(150,
+										50, BufferedImage.TYPE_INT_ARGB);
+								Graphics2D g = null;
+								try
+								{
+									g = image.createGraphics();
+									g.setColor(Color.black);
+									String s = "LOADING...";
+									Font font = new Font("Dialog", Font.BOLD,
+											18);
+									g.setFont(font);
+									int width = g.getFontMetrics().stringWidth(
+											s);
+									int height = g.getFontMetrics().getAscent();
+									g.drawString(s,
+											(image.getWidth() - width) / 2,
+											(image.getHeight() + height) / 2);
+								}
+								finally
+								{
+									if (g != null)
+										g.dispose();
+								}
+								ImageIcon icon = new ImageIcon(image);
+								previewCanvas.setIcon(icon);
+
 								int w = 400;
 								int h = w;
 								if (width > height)
@@ -1691,19 +1718,17 @@ public class Application implements UncaughtExceptionHandler
 									w = h * width / height;
 								}
 								GDALTile tile = new GDALTile(dataset, w, h,
-										sector.getMinLatitude(), sector
-												.getMinLongitude(), sector
-												.getMaxLatitude(), sector
-												.getMaxLongitude());
+										sector);
 								tile = tile.convertToType(gdalconst.GDT_Byte);
-								BufferedImage image = tile.getAsImage();
-								ImageIcon icon = new ImageIcon(image);
+								image = tile.getAsImage();
+								icon = new ImageIcon(image);
 								previewCanvas.setIcon(icon);
 								logger.fine("Preview generation complete");
 							}
 							catch (Exception e)
 							{
 								logger.warning(e.getMessage());
+								previewCanvas.setIcon(null);
 							}
 						}
 					});

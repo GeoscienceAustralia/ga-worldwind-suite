@@ -113,6 +113,7 @@ public class Tiler
 				final double lon1 = (X * tilesizedegrees) - 180;
 				final double lat2 = lat1 + tilesizedegrees;
 				final double lon2 = lon1 + tilesizedegrees;
+				Sector s = new Sector(lat1, lon1, lat2, lon2);
 
 				final File dst = new File(rowDir, GDALUtil.paddedInt(Y, 4)
 						+ "_" + GDALUtil.paddedInt(X, 4) + "." + outputExt);
@@ -127,15 +128,13 @@ public class Tiler
 					{
 						if (type == Type.Mapnik)
 						{
-							Sector s = new Sector(lat1, lon1, lat2, lon2);
 							MapnikUtil.tile(s, tilesize, tilesize, mapFile,
 									dst, progress.getLogger());
 						}
 						else
 						{
 							GDALTile tile = new GDALTile(dataset, tilesize,
-									tilesize, lat1, lon1, lat2, lon2, addAlpha,
-									band);
+									tilesize, s, addAlpha, band);
 							if (type == Type.Elevations)
 							{
 								tile = tile.convertToType(bufferType);

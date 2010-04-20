@@ -25,6 +25,7 @@ import org.gdal.osr.SpatialReference;
 import util.MinMaxArray;
 import util.NullableNumberArray;
 import util.NumberArray;
+import util.Sector;
 import util.TilerException;
 
 public class GDALTile
@@ -35,10 +36,7 @@ public class GDALTile
 	// modification with other datatypes.
 
 	// construtor globals
-	private final double minLatitude;
-	private final double minLongitude;
-	private final double maxLatitude;
-	private final double maxLongitude;
+	private final Sector sector;
 	private final int width;
 	private final int height;
 	private final boolean addAlpha;
@@ -55,28 +53,23 @@ public class GDALTile
 	private boolean indexed;
 	private IndexColorModel indexColorModel;
 
-	public GDALTile(Dataset dataset, int width, int height, double minLatitude,
-			double minLongitude, double maxLatitude, double maxLongitude)
+	public GDALTile(Dataset dataset, int width, int height, Sector sector)
 			throws GDALException, TilerException
 	{
-		this(dataset, width, height, minLatitude, minLongitude, maxLatitude,
-				maxLongitude, false, -1);
+		this(dataset, width, height, sector, false, -1);
 	}
 
-	public GDALTile(Dataset dataset, int width, int height, double minLatitude,
-			double minLongitude, double maxLatitude, double maxLongitude,
+	public GDALTile(Dataset dataset, int width, int height, Sector sector,
 			boolean addAlpha, int selectedBand) throws GDALException,
 			TilerException
 	{
-		if (minLatitude >= maxLatitude || minLongitude >= maxLongitude)
+		if (sector.getMinLatitude() >= sector.getMaxLatitude()
+				|| sector.getMinLongitude() >= sector.getMaxLongitude())
 			throw new IllegalArgumentException();
 
 		this.width = width;
 		this.height = height;
-		this.minLatitude = minLatitude;
-		this.minLongitude = minLongitude;
-		this.maxLatitude = maxLatitude;
-		this.maxLongitude = maxLongitude;
+		this.sector = sector;
 		this.addAlpha = addAlpha;
 		this.selectedBand = selectedBand;
 		readDataset(dataset);
@@ -92,10 +85,7 @@ public class GDALTile
 
 		this.width = tile.width;
 		this.height = tile.height;
-		this.minLatitude = tile.minLatitude;
-		this.minLongitude = tile.minLongitude;
-		this.maxLatitude = tile.maxLatitude;
-		this.maxLongitude = tile.maxLongitude;
+		this.sector = tile.sector;
 		this.addAlpha = tile.addAlpha;
 		this.selectedBand = tile.selectedBand;
 
@@ -150,13 +140,12 @@ public class GDALTile
 		double[] geoTransformArray = new double[6];
 		dataset.GetGeoTransform(geoTransformArray);
 
-		int srcX = (int) ((minLongitude - geoTransformArray[0])
+		int srcX = (int) ((sector.getMinLongitude() - geoTransformArray[0])
 				/ geoTransformArray[1] + 0.001);
-		int srcY = (int) ((maxLatitude - geoTransformArray[3])
+		int srcY = (int) ((sector.getMaxLatitude() - geoTransformArray[3])
 				/ geoTransformArray[5] + 0.001);
-		int srcWidth = (int) ((maxLongitude - minLongitude)
-				/ geoTransformArray[1] + 0.5);
-		int srcHeight = (int) ((minLatitude - maxLatitude)
+		int srcWidth = (int) (sector.getDeltaLongitude() / geoTransformArray[1] + 0.5);
+		int srcHeight = (int) (-sector.getDeltaLatitude()
 				/ geoTransformArray[5] + 0.5);
 
 		Rectangle srcRect = new Rectangle(srcX, srcY, srcWidth, srcHeight);
@@ -173,10 +162,10 @@ public class GDALTile
 			dst.AddBand();
 
 		double[] geoTransformArray = new double[6];
-		geoTransformArray[0] = minLongitude;
-		geoTransformArray[3] = maxLatitude;
-		geoTransformArray[1] = (maxLongitude - minLongitude) / (double) width;
-		geoTransformArray[5] = (minLatitude - maxLatitude) / (double) height;
+		geoTransformArray[0] = sector.getMinLongitude();
+		geoTransformArray[3] = sector.getMaxLatitude();
+		geoTransformArray[1] = sector.getDeltaLongitude() / (double) width;
+		geoTransformArray[5] = -sector.getDeltaLatitude() / (double) height;
 		dst.SetGeoTransform(geoTransformArray);
 		dst.SetProjection(dstSR.ExportToWkt());
 
@@ -592,24 +581,9 @@ public class GDALTile
 		return b * width * height + y * width + x;
 	}
 
-	public double getMinLatitude()
+	public Sector getSector()
 	{
-		return minLatitude;
-	}
-
-	public double getMinLongitude()
-	{
-		return minLongitude;
-	}
-
-	public double getMaxLatitude()
-	{
-		return maxLatitude;
-	}
-
-	public double getMaxLongitude()
-	{
-		return maxLongitude;
+		return sector;
 	}
 
 	public int getWidth()
