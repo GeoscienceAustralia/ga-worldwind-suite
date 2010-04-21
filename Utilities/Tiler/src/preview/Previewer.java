@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import javax.imageio.ImageIO;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 
 import org.gdal.gdal.gdal;
@@ -38,7 +39,7 @@ public class Previewer extends JFrame
 {
 	public static void main(String[] args) throws Exception
 	{
-		File directory = new File("C:/data/cloates_3m_d/tiles");
+		File directory = new File("C:/WINNT/Profiles/u97852/Desktop/bathy");
 		new Previewer(directory, "bil", gdalconst.GDT_Float32, 150, 150, 0d,
 				20d);
 		/*File directory = new File(
@@ -109,33 +110,49 @@ public class Previewer extends JFrame
 			public void mouseClicked(MouseEvent e)
 			{
 				Rectangle bounds = getRootPane().getBounds();
-				int x = e.getX() - bounds.x;
-				int y = bounds.height - (e.getY() - bounds.y);
+				int x = e.getX() - bounds.x - xoffset;
+				int y = bounds.height - (e.getY() - bounds.y - yoffset);
 
 				double tileW = bounds.width / (double) xCount;
 				double tileH = bounds.height / (double) yCount;
-				int tileX = (int) (x / tileW);
-				int tileY = (int) (y / tileH);
+				int tileX = (int) Math.floor(x / tileW) + xpos;
+				int tileY = (int) Math.floor(y / tileH) + ypos;
 
-				boolean left = e.getButton() == MouseEvent.BUTTON1;
-				int newLevel = left ? level + 1 : level - 1;
-				newLevel = Math.max(minlevel, Math.min(maxlevel, newLevel));
-				if (newLevel == level)
-					return;
-
-				level = newLevel;
-				if (left)
+				if (e.isControlDown())
 				{
-					xpos = (xpos + tileX) * 2 - xCount / 2;
-					ypos = (ypos + tileY) * 2 - yCount / 2;
+					int index = (tileY - ypos + 1) * (xCount + 2)
+							+ (tileX - xpos + 1);
+					JDialog dialog = new ImageView(images[index]);
+					dialog.setSize(800, 800);
+					dialog.setVisible(true);
 				}
 				else
 				{
-					xpos = (xpos + tileX) / 2 - xCount / 2;
-					ypos = (ypos + tileY) / 2 - yCount / 2;
+					boolean left = e.getButton() == MouseEvent.BUTTON1;
+					int newLevel = left ? level + 1 : level - 1;
+					newLevel = Math.max(minlevel, Math.min(maxlevel, newLevel));
+					if (newLevel == level)
+						return;
+
+					level = newLevel;
+					if (left)
+					{
+						xpos = tileX * 2 - xCount / 2;
+						ypos = tileY * 2 - yCount / 2;
+					}
+					else
+					{
+						xpos = tileX / 2 - xCount / 2;
+						ypos = tileY / 2 - yCount / 2;
+					}
+					if (xCount % 2 == 0)
+						xoffset = (int) (-tileW / 2);
+					if (yCount % 2 == 0)
+						yoffset = (int) (-tileH / 2);
+
+					loadImages();
+					repaint();
 				}
-				loadImages();
-				repaint();
 			}
 
 			@Override
@@ -314,10 +331,9 @@ public class Previewer extends JFrame
 			Graphics2D g2 = (Graphics2D) g;
 
 			g2.translate(drawRect.x, drawRect.y);
-			
+
 			g2.setBackground(Color.white);
-			g2.clearRect(0, 0, drawRect.width,
-					drawRect.height);
+			g2.clearRect(0, 0, drawRect.width, drawRect.height);
 
 			// draw transparent background
 			int transparentSquareSize = 15;
@@ -334,7 +350,7 @@ public class Previewer extends JFrame
 					}
 				}
 			}
-			
+
 			g2.translate(xoffset, yoffset);
 
 			int index = 0;
@@ -414,8 +430,8 @@ public class Previewer extends JFrame
 				if (value > max)
 					max = value;
 			}
-			
-			if(max == min)
+
+			if (max == min)
 				max = min + 1;
 
 			int pixels = width * height;
@@ -449,5 +465,79 @@ public class Previewer extends JFrame
 			return GDALTile.getDoubleValue(buffer, type);
 		else
 			return GDALTile.getLongValue(buffer, type);
+	}
+
+	private class ImageView extends JDialog
+	{
+		private BufferedImage image;
+
+		public ImageView(BufferedImage image)
+		{
+			super(Previewer.this, true);
+			this.image = image;
+
+			swapBackground();
+
+			addMouseListener(new MouseAdapter()
+			{
+				@Override
+				public void mouseClicked(MouseEvent e)
+				{
+					swapBackground();
+				}
+			});
+		}
+
+		private void swapBackground()
+		{
+			if (getBackground() != Color.white)
+			{
+				setBackground(Color.white);
+				setForeground(new Color(220, 220, 220));
+			}
+			else
+			{
+				setBackground(Color.black);
+				setForeground(new Color(35, 35, 35));
+			}
+		}
+
+		@Override
+		public void paint(Graphics g)
+		{
+			Rectangle drawRect = getRootPane().getBounds();
+
+			Graphics2D g2 = (Graphics2D) g;
+			g2.translate(drawRect.x, drawRect.y);
+
+			g2.setBackground(getBackground());
+			g2.clearRect(0, 0, drawRect.width, drawRect.height);
+
+			int transparentSquareSize = 15;
+			g2.setColor(getForeground());
+			for (int y = 0; y < drawRect.height; y += transparentSquareSize)
+			{
+				for (int x = 0; x < drawRect.width; x += transparentSquareSize)
+				{
+					if ((x / transparentSquareSize % 2 == 0)
+							^ (y / transparentSquareSize % 2 == 0))
+					{
+						g2.fillRect(x, y, transparentSquareSize,
+								transparentSquareSize);
+					}
+				}
+			}
+
+			if (image != null)
+			{
+				g.drawImage(image, 0, 0, drawRect.width, drawRect.height, null);
+			}
+		}
+
+		@Override
+		public void update(Graphics g)
+		{
+			paint(g);
+		}
 	}
 }

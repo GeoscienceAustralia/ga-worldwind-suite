@@ -455,9 +455,11 @@ public class Overviewer
 								Object v3 = typeHandler.getBufferValue(index3,
 										buffer);
 
-								if (value == null
-										|| !(v0 == value || v1 == value
-												|| v2 == value || v3 == value))
+								if (outsideValue == null
+										|| !(v0.equals(outsideValue)
+												|| v1.equals(outsideValue)
+												|| v2.equals(outsideValue) || v3
+												.equals(outsideValue)))
 								{
 									value = typeHandler.average(v0, v1, v2, v3);
 								}
