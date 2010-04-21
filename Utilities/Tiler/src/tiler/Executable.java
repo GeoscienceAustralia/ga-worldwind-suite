@@ -32,18 +32,18 @@ public class Executable
 
 	private static void start() throws Exception
 	{
-		File dataDir = new File("data");
 		File gdalDir = new File("gdal");
+		File dataDir = new File(gdalDir, "data");
 
-		if (!dataDir.exists())
-		{
-			throw new FileNotFoundException("Directory not found: "
-					+ dataDir.getAbsolutePath());
-		}
 		if (!gdalDir.exists())
 		{
 			throw new FileNotFoundException("Directory not found: "
 					+ gdalDir.getAbsolutePath());
+		}
+		if (!dataDir.exists())
+		{
+			throw new FileNotFoundException("Directory not found: "
+					+ dataDir.getAbsolutePath());
 		}
 
 		// set the GDAL_DATA environment variable to enable reprojection support
