@@ -3,14 +3,17 @@ package layers.file;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.retrieve.Retriever;
+import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 
 import layers.immediate.ImmediateBasicElevationModel;
 
@@ -58,19 +61,43 @@ public class FileBasicElevationModel extends ImmediateBasicElevationModel
 			return;
 		}
 
-		//if protocol is not "file", then let superclass handle it
+		// if protocol is not "file", then let superclass handle it
 		if (url == null || !"file".equalsIgnoreCase(url.getProtocol()))
 		{
 			super.downloadElevations(tile);
 			return;
 		}
 
-		Retriever retriever = new FileRetriever(url, new DownloadPostProcessor(
-				tile, this));
+		Retriever retriever = new FileRetriever(url,
+				new FileDownloadPostProcessor(tile, this));
 		if (WorldWind.getRetrievalService().contains(retriever))
 			return;
 
 		WorldWind.getRetrievalService().runRetriever(retriever, 0d);
+	}
+
+	public static class FileDownloadPostProcessor extends DownloadPostProcessor
+	{
+		public FileDownloadPostProcessor(Tile tile,
+				BasicElevationModel elevationModel)
+		{
+			super(tile, elevationModel);
+		}
+
+		@Override
+		protected boolean validateResponseCode()
+		{
+			if (this.retriever instanceof FileRetriever)
+				return true;
+			return super.validateResponseCode();
+		}
+
+		@Override
+		protected ByteBuffer handleContent() throws IOException
+		{
+			this.saveBuffer();
+			return this.getRetriever().getBuffer();
+		}
 	}
 
 	public static class FileUrlBuilder implements TileUrlBuilder

@@ -8,11 +8,14 @@ import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
 
+import java.io.IOException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
 
 import layers.immediate.ImmediateBasicTiledImageLayer;
+import nasa.worldwind.layers.BasicTiledImageLayer;
 
 public class FileBasicTiledImageLayer extends ImmediateBasicTiledImageLayer
 {
@@ -58,7 +61,7 @@ public class FileBasicTiledImageLayer extends ImmediateBasicTiledImageLayer
 		}
 
 		if (postProcessor == null)
-			postProcessor = new DownloadPostProcessor(tile, this);
+			postProcessor = new FileDownloadPostProcessor(tile, this);
 		Retriever retriever = new FileRetriever(url, postProcessor);
 		WorldWind.getRetrievalService().runRetriever(retriever,
 				tile.getPriority() - 1e100);
@@ -71,6 +74,30 @@ public class FileBasicTiledImageLayer extends ImmediateBasicTiledImageLayer
 		gl.glColor4d(alpha, alpha, alpha, alpha);
 		gl.glEnable(GL.GL_BLEND);
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+	}
+	
+	public static class FileDownloadPostProcessor extends DownloadPostProcessor
+	{
+		public FileDownloadPostProcessor(TextureTile tile,
+				BasicTiledImageLayer layer)
+		{
+			super(tile, layer);
+		}
+
+		@Override
+		protected boolean validateResponseCode()
+		{
+			if (this.retriever instanceof FileRetriever)
+				return true;
+			return super.validateResponseCode();
+		}
+
+		@Override
+		protected ByteBuffer handleContent() throws IOException
+		{
+			this.saveBuffer();
+			return this.getRetriever().getBuffer();
+		}
 	}
 
 	/*@Override
