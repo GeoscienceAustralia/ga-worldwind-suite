@@ -2,64 +2,38 @@
 
 <project name="Viewer" basedir="." default="run">
 
-	<property name="src.dir" value="${basedir}/src" />
-	<property name="worldwind.dir" value="${basedir}/../../SDK/worldwind-0.6.442.13312" />
-	<property name="worldwind.jar" value="worldwind.jar" />
-	<property name="jogl.dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
+	<property name="src_dir" value="${basedir}/src" />
+	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-0.6.442.13312" />
+	<property name="worldwind_jar" value="worldwind.jar" />
+	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
 
-	<property name="build.dir" value="${basedir}/build" />
-	<property name="webstart.dir" value="${basedir}/webstart" />
-	<property name="executable.dir" value="${basedir}/executable" />
+	<property name="build_dir" value="${basedir}/build" />
+	<property name="webstart_dir" value="${basedir}/webstart" />
+	<property name="executable_dir" value="${basedir}/executable" />
 
-	<property name="unsigned.jar" value="unsigned.jar" />
-	<property name="webstart.jar" value="application.jar" />
-	<property name="executable.jar" value="viewer.jar" />
+	<property name="app_unsigned_jar" value="application-unsigned.jar" />
+	<property name="app_signed_jar" value="application.jar" />
+	<property name="ww_unsigned_jar" value="worldwind-unsigned.jar" />
+	<property name="ww_signed_jar" value="worldwind.jar" />
 
-	<property name="keystore" value="${basedir}/keystore" />
-	<property name="javac.debug" value="false" />
+	<property name="executable_jar" value="executable.jar" />
+	<property name="offline_jar" value="offline.jar" />
+
+	<property name="keystore_file" value="${basedir}/keystore" />
+	<property name="keystore_alias" value="myself" />
+	<property name="keystore_password" value="password" />
+	<property name="javac_debug" value="false" />
 
 	<path id="classpath">
-		<fileset dir="${worldwind.dir}">
-			<include name="${worldwind.jar}" />
+		<fileset dir="${worldwind_dir}">
+			<include name="${worldwind_jar}" />
 		</fileset>
-		<fileset dir="${jogl.dir}">
+		<fileset dir="${jogl_dir}">
 			<include name="**/*.jar" />
 		</fileset>
 	</path>
 
-	<target name="clean">
-		<delete dir="${build.dir}" />
-		<delete file="${webstart.dir}/${unsigned.jar}" />
-		<delete file="${webstart.dir}/${webstart.jar}" />
-		<delete file="${executable.dir}/${executable.jar}" />
-	</target>
-
-	<target name="compile">
-		<mkdir dir="${build.dir}" />
-		<copy todir="${build.dir}">
-			<fileset dir="${src.dir}">
-				<exclude name="**/*.java" />
-			</fileset>
-		</copy>
-		<javac source="1.5" target="1.5" srcdir="${src.dir}" destdir="${build.dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac.debug}" />
-	</target>
-
-	<target name="package" depends="compile">
-		<mkdir dir="${webstart.dir}" />
-		<jar destfile="${webstart.dir}/${unsigned.jar}" basedir="${build.dir}">
-			<manifest>
-				<attribute name="Main-Class" value="au.gov.ga.worldwind.application.Application" />
-			</manifest>
-		</jar>
-	</target>
-
-	<target name="sign" depends="package">
-		<signjar jar="${webstart.dir}/${unsigned.jar}" signedjar="${webstart.dir}/${webstart.jar}" keystore="${keystore}" alias="myself" storepass="password" />
-	</target>
-
-	<target name="run" depends="package" />
-
-	<patternset id="manifest.exclude">
+	<patternset id="manifest_exclude">
 		<exclude name="META-INF/*.DSA" />
 		<exclude name="META-INF/*.RSA" />
 		<exclude name="META-INF/*.SF" />
@@ -67,26 +41,83 @@
 		<exclude name="META-INF/INDEX.LIST" />
 	</patternset>
 
-	<target name="executable" depends="compile">
-		<mkdir dir="${executable.dir}" />
-		<zip destfile="${executable.dir}/temp.zip">
-			<fileset dir="${jogl.dir}" includes="native/**" />
-			<zipgroupfileset dir="${jogl.dir}">
-				<include name="**/*.jar" />
-			</zipgroupfileset>
-			<zipgroupfileset dir="${worldwind.dir}">
-				<include name="${worldwind.jar}" />
-			</zipgroupfileset>
-		</zip>
-		<jar destfile="${executable.dir}/${executable.jar}">
-			<fileset dir="${build.dir}" />
-			<zipfileset src="${executable.dir}/temp.zip">
-				<patternset refid="manifest.exclude" />
-			</zipfileset>
+	<target name="clean">
+		<delete dir="${build_dir}" />
+		<delete file="${webstart_dir}/${app_unsigned_jar}" />
+		<delete file="${webstart_dir}/${app_signed_jar}" />
+		<delete file="${executable_dir}/${executable_jar}" />
+		<delete file="${executable_dir}/${offline_jar}" />
+	</target>
+
+	<target name="build">
+		<mkdir dir="${build_dir}" />
+		<copy todir="${build_dir}">
+			<fileset dir="${src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<javac source="1.5" target="1.5" srcdir="${src_dir}" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" />
+	</target>
+
+	<target name="package" depends="build">
+		<mkdir dir="${webstart_dir}" />
+		<jar destfile="${webstart_dir}/${app_unsigned_jar}" basedir="${build_dir}">
 			<manifest>
-				<attribute name="Main-Class" value="au.gov.ga.worldwind.application.Offline" />
+				<attribute name="Main-Class" value="au.gov.ga.worldwind.application.Application" />
 			</manifest>
 		</jar>
-		<delete file="${executable.dir}/temp.zip" />
+		<jar destfile="${webstart_dir}/${ww_unsigned_jar}">
+			<zipfileset src="${worldwind_dir}/${worldwind_jar}">
+				<patternset refid="manifest_exclude" />
+			</zipfileset>
+		</jar>
 	</target>
+
+	<target name="sign" depends="package">
+		<signjar jar="${webstart_dir}/${app_unsigned_jar}" signedjar="${webstart_dir}/${app_signed_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/${ww_unsigned_jar}" signedjar="${webstart_dir}/${ww_signed_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+	</target>
+
+	<target name="executables" depends="build">
+		<mkdir dir="${executable_dir}" />
+
+		<zip destfile="${executable_dir}/temp.zip">
+			<zipgroupfileset dir="${jogl_dir}">
+				<include name="**/*.jar" />
+			</zipgroupfileset>
+			<zipgroupfileset dir="${worldwind_dir}">
+				<include name="${worldwind_jar}" />
+			</zipgroupfileset>
+		</zip>
+
+		<jar destfile="${executable_dir}/${executable_jar}">
+			<fileset dir="${build_dir}" />
+			<fileset dir="${jogl_dir}" includes="native/**" />
+
+			<zipfileset src="${executable_dir}/temp.zip">
+				<patternset refid="manifest_exclude" />
+			</zipfileset>
+
+			<manifest>
+				<attribute name="Main-Class" value="au.gov.ga.worldwind.application.Executable" />
+			</manifest>
+		</jar>
+
+		<jar destfile="${executable_dir}/${offline_jar}">
+			<fileset dir="${build_dir}" />
+			<fileset dir="${jogl_dir}" includes="native/**" />
+
+			<zipfileset src="${executable_dir}/temp.zip">
+				<patternset refid="manifest_exclude" />
+			</zipfileset>
+
+			<manifest>
+				<attribute name="Main-Class" value="au.gov.ga.worldwind.application.Executable" />
+			</manifest>
+		</jar>
+
+		<delete file="${executable_dir}/temp.zip" />
+	</target>
+
+	<target name="run" depends="sign, executables" />
 </project>
