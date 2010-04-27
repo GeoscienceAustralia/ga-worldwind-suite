@@ -6,12 +6,24 @@ import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 
 import javax.swing.JOptionPane;
+import javax.swing.UIManager;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 
 public class Executable
 {
+	static
+	{
+		try
+		{
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (Exception e)
+		{
+		}
+	}
+	
 	public interface WinLibC extends Library
 	{
 		public int _putenv(String name);
