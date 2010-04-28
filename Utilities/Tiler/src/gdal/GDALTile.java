@@ -156,10 +156,25 @@ public class GDALTile
 			SpatialReference dstSR) throws GDALException, TilerException
 	{
 		Driver memDriver = gdal.GetDriverByName("MEM");
-		Dataset dst = memDriver.Create("mem", width, height);
+		//create a dataset with 1 band with the same data type as band 1 of the source
+		Dataset dst = memDriver.Create("mem", width, height, 1, dataset
+				.GetRasterBand(1).getDataType());
+		//add the other bands with the same data type as the source bands
+		for (int i = 1; i < dataset.getRasterCount(); i++)
+		{
+			dst.AddBand(dataset.GetRasterBand(i + 1).getDataType());
+		}
 
-		while (dst.getRasterCount() < dataset.getRasterCount())
-			dst.AddBand();
+		//currently the NODATA values are being ignored! this means datasets with NODATA in an incorrect projection will not work!
+		/*for (int i = 0; i < dataset.getRasterCount(); i++)
+		{
+			Band srcBand = dataset.GetRasterBand(i + 1);
+			Band dstBand = dst.GetRasterBand(i + 1);
+			Double[] val = new Double[1];
+			srcBand.GetNoDataValue(val);
+			if (val[0] != null)
+				dstBand.SetNoDataValue(val[0]);
+		}*/
 
 		double[] geoTransformArray = new double[6];
 		geoTransformArray[0] = sector.getMinLongitude();
