@@ -2681,7 +2681,7 @@ public class Application implements UncaughtExceptionHandler
 							}
 
 							writer.newLine();
-							writer.writeLine("Min/Max:");
+							writer.writeLine("Min/Max: ");
 							writer.writeLine(minmax.toString(isFloat));
 						}
 					}

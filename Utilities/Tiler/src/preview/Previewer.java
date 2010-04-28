@@ -423,7 +423,7 @@ public class Previewer extends JFrame
 			for (int i = 0; i < width * height && i < length; i++)
 			{
 				double value = getBufferValue(bb);
-				if (value == nodata)
+				if (nodata != null && value == nodata)
 					continue;
 				if (value < min)
 					min = value;
@@ -444,7 +444,8 @@ public class Previewer extends JFrame
 			{
 				double value = getBufferValue(bb);
 				bytes[i] = (byte) (255d * (value - min) / (max - min));
-				bytes[i + pixels] = (byte) (value == nodata ? 0 : 255);
+				bytes[i + pixels] = (byte) (nodata != null && value == nodata ? 0
+						: 255);
 			}
 
 			DataBuffer dataBuffer = new DataBufferByte(bytes, bytes.length);
