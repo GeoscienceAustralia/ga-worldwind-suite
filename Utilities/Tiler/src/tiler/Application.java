@@ -94,7 +94,6 @@ import util.NumberArray;
 import util.Prefs;
 import util.ProgressReporterImpl;
 import util.Sector;
-import util.StringLineBuilder;
 import util.TilerException;
 
 public class Application implements UncaughtExceptionHandler
