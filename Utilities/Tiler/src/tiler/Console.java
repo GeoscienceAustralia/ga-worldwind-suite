@@ -57,7 +57,7 @@ public class Console
 				+ "             equal the number of output bands, blanks permitted)\n"
 				+ "Image specific switches:\n"
 				+ "  -f format  Image output format (default: JPG)\n"
-				+ "  -a         Add alpha band to image if input has no alpha band\n"
+				+ "  -a         Add alpha band to image tiles if input has no alpha band\n"
 				+ "Elevation specific switches:\n"
 				+ "  -d type    Elevation output format (default: INT16)\n"
 				+ "  -b band    Band to read from for elevation data (default: 1)";
