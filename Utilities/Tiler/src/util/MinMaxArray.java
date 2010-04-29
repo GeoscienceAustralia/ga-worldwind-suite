@@ -31,6 +31,12 @@ public class MinMaxArray
 		allNullDirty = true;
 	}
 
+	public void setMinMaxLongs(Long[] min, Long[] max)
+	{
+		for (int i = 0; i < min.length; i++)
+			setMinMaxLong(i, min[i], max[i]);
+	}
+
 	public void setMinMaxDouble(int i, Double min, Double max)
 	{
 		minDoubles[i] = min;
@@ -38,6 +44,12 @@ public class MinMaxArray
 		minLongs[i] = min != null ? min.longValue() : null;
 		maxLongs[i] = max != null ? max.longValue() : null;
 		allNullDirty = true;
+	}
+
+	public void setMinMaxDoubles(Double[] min, Double[] max)
+	{
+		for (int i = 0; i < min.length; i++)
+			setMinMaxDouble(i, min[i], max[i]);
 	}
 
 	private boolean allNull()
@@ -103,7 +115,7 @@ public class MinMaxArray
 		{
 			if (i > 0)
 				s += ", ";
-			s += isFloat ? (Object)ds[i] : (Object)ls[i];
+			s += isFloat ? (Object) ds[i] : (Object) ls[i];
 		}
 		s += ")";
 		return s;

@@ -428,7 +428,7 @@ public class GDALTile
 		return img;
 	}
 
-	public void fillOutside(NumberArray values) throws TilerException
+	public void fillOutside(NullableNumberArray values) throws TilerException
 	{
 		if (values.length() != bufferBandCount)
 			throw new IllegalArgumentException(
@@ -439,13 +439,24 @@ public class GDALTile
 				&& dataRectangle.height == height)
 			return;
 
-		for (int x = 0; x < width; x++)
+		for (int b = 0; b < bufferBandCount; b++)
 		{
-			for (int y = 0; y < height; y++)
+			if (floatingPoint)
 			{
-				if (!dataRectangle.contains(x, y))
+				if (values.getDouble(b) == null)
+					continue;
+			}
+			else
+			{
+				if (values.getLong(b) == null)
+					continue;
+			}
+
+			for (int x = 0; x < width; x++)
+			{
+				for (int y = 0; y < height; y++)
 				{
-					for (int b = 0; b < bufferBandCount; b++)
+					if (!dataRectangle.contains(x, y))
 					{
 						int index = getBufferIndex(x, y, b) * bufferTypeSize;
 						if (floatingPoint)
@@ -547,7 +558,8 @@ public class GDALTile
 		}
 	}
 
-	public void updateMinMax(NumberArray minmax, NumberArray outsideValues)
+	public void updateMinMax(NumberArray minmax,
+			NullableNumberArray outsideValues)
 	{
 		if (minmax == null)
 			return;
@@ -564,8 +576,9 @@ public class GDALTile
 					int index = getBufferIndex(x, y, b) * bufferTypeSize;
 					if (floatingPoint)
 					{
-						Double value = getDoubleValue(index, buffer, bufferType);
+						double value = getDoubleValue(index, buffer, bufferType);
 						if (outsideValues != null
+								&& outsideValues.getDouble(b) != null
 								&& value == outsideValues.getDouble(b))
 							continue;
 
@@ -578,6 +591,7 @@ public class GDALTile
 					{
 						Long value = getLongValue(index, buffer, bufferType);
 						if (outsideValues != null
+								&& outsideValues.getLong(b) != null
 								&& value == outsideValues.getLong(b))
 							continue;
 

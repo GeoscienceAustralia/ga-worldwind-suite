@@ -78,7 +78,8 @@
 		</copy>
 		<copy todir="${executable.dir}">
 			<fileset dir="${basedir}">
-				<include name="run.bat" />
+				<include name="gui.bat" />
+				<include name="console.bat" />
 			</fileset>
 		</copy>
 	</target>

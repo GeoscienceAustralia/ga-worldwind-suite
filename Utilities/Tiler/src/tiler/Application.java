@@ -28,16 +28,12 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteOrder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -81,15 +77,12 @@ import javax.swing.filechooser.FileFilter;
 
 import mapnik.MapnikUtil;
 
-import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
-import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
-import org.gdal.osr.SpatialReference;
 
 import preview.PreviewSetup;
-import util.BufferedLineWriter;
+import tiler.Tiler.TilingType;
 import util.DocumentAdapter;
 import util.DocumentLogger;
 import util.JDoubleField;
@@ -103,7 +96,6 @@ import util.ProgressReporterImpl;
 import util.Sector;
 import util.StringLineBuilder;
 import util.TilerException;
-import util.Util;
 
 public class Application implements UncaughtExceptionHandler
 {
@@ -116,11 +108,9 @@ public class Application implements UncaughtExceptionHandler
 		catch (Exception e)
 		{
 		}
-
-		GDALUtil.init();
 	}
 
-	public final static String LOGGER = "TilerLogger";
+	private final static String LOGGER = "TilerLogger";
 
 	public final static String OUTPUT_DIR_KEY = "Last Output Directory";
 
@@ -151,6 +141,7 @@ public class Application implements UncaughtExceptionHandler
 	private JButton browseMapnikScriptButton;
 	private JTextArea infoText;
 	private JLabel previewCanvas;
+	private boolean previewGenerated;
 
 	private JLabel tileTypeLabel;
 	private JRadioButton imageRadio;
@@ -235,6 +226,8 @@ public class Application implements UncaughtExceptionHandler
 
 	public Application()
 	{
+		GDALUtil.init();
+
 		if (!GDALUtil.isProjectionsSupported())
 		{
 			String message = "Before running this program, the GDAL_DATA environment variable should point to the directory containing\n"
@@ -1558,6 +1551,7 @@ public class Application implements UncaughtExceptionHandler
 	private void openDataset(File file)
 	{
 		fileOpen = file != null;
+		previewGenerated = false;
 
 		if (!fileOpen)
 		{
@@ -1614,63 +1608,8 @@ public class Application implements UncaughtExceptionHandler
 						throw new TilerException(
 								"Dataset contains 0 raster bands");
 					}
-					String projection = dataset.GetProjection();
-					SpatialReference spatialReference = (projection == null
-							|| projection.length() == 0 || !GDALUtil
-							.isProjectionsSupported()) ? null
-							: new SpatialReference(projection);
-					String[] dataTypes = new String[bandCount];
-					int[] dataTypeSizes = new int[bandCount];
-					Double[] nodata = new Double[bandCount];
-					double[] min = new double[bandCount];
-					double[] max = new double[bandCount];
-					for (int i = 0; i < bandCount; i++)
-					{
-						Band band = dataset.GetRasterBand(i + 1);
-						int dataType = band.getDataType();
-						dataTypes[i] = gdal.GetDataTypeName(dataType);
-						dataTypeSizes[i] = gdal.GetDataTypeSize(dataType);
 
-						Double[] nodataValue = new Double[1];
-						band.GetNoDataValue(nodataValue);
-						nodata[i] = nodataValue[0];
-
-						double[] minmax = new double[2];
-						band.ComputeRasterMinMax(minmax, 1);
-						min[i] = minmax[0];
-						max[i] = minmax[1];
-					}
-					StringLineBuilder info = new StringLineBuilder();
-
-					info.appendLine("Dataset information:");
-					info.appendLine("Size = " + width + ", " + height);
-					info.appendLine("Cell size = "
-							+ (sector.getDeltaLongitude() / width) + ", "
-							+ (sector.getDeltaLatitude() / height));
-					info.appendLine("Bottom left corner = ("
-							+ sector.getMinLongitude() + ", "
-							+ sector.getMinLatitude() + ")");
-					info.appendLine("Top right corner = ("
-							+ sector.getMaxLongitude() + ", "
-							+ sector.getMaxLatitude() + ")");
-					info.appendLine("Raster band count = " + bandCount);
-					for (int i = 0; i < bandCount; i++)
-					{
-						info.appendLine("Band " + (i + 1) + ":");
-						info.appendLine("    Data type = " + dataTypes[i]
-								+ " (" + dataTypeSizes[i] + " bit)");
-						info.appendLine("    No-data value = " + nodata[i]);
-						info.appendLine("    Approx minimum = " + min[i]);
-						info.appendLine("    Approx maximum = " + max[i]);
-					}
-					if (spatialReference != null)
-					{
-						info.appendLine("Coordinate system =");
-						info.appendLine(Util.fixNewlines(spatialReference
-								.ExportToPrettyWkt()));
-					}
-
-					String text = info.toString(true);
+					String text = GDALUtil.getInfoText(dataset, sector);
 					infoText.setText(text);
 					infoText.select(0, 0);
 
@@ -1730,6 +1669,8 @@ public class Application implements UncaughtExceptionHandler
 								logger.warning(e.getMessage());
 								previewCanvas.setIcon(null);
 							}
+							previewGenerated = true;
+							enableFields();
 						}
 					});
 					thread.setDaemon(true);
@@ -1776,6 +1717,8 @@ public class Application implements UncaughtExceptionHandler
 							{
 								logger.warning(e.toString());
 							}
+							previewGenerated = true;
+							enableFields();
 						}
 					});
 					thread.setDaemon(true);
@@ -2190,7 +2133,7 @@ public class Application implements UncaughtExceptionHandler
 		browsePythonBinaryButton.setEnabled(!running);
 		outputButton.setEnabled(!running);
 		outputDirectory.setEnabled(!running);
-		tileButton.setEnabled(validOptions
+		tileButton.setEnabled(validOptions && previewGenerated
 				&& outputDirectory.getText().length() != 0 && !running);
 		cancelButton.setEnabled(running);
 		progress.setEnabled(running);
@@ -2248,8 +2191,6 @@ public class Application implements UncaughtExceptionHandler
 	{
 		validOptions = fileOpen;
 
-		StringLineBuilder info = new StringLineBuilder();
-
 		if (mapnikRadio.isSelected())
 		{
 			Double minlat = minLatitudeField.getValue();
@@ -2267,15 +2208,16 @@ public class Application implements UncaughtExceptionHandler
 			}
 		}
 
+		boolean overviews = overviewsCheck.isSelected();
+		Double lzts = lztsField.getValue();
+		Integer tilesize = tilesizeField.getValue();
+		if (tilesize != null && tilesize <= 0)
+			tilesize = null;
+		if (lzts != null && lzts <= 0)
+			lzts = null;
+
 		if (validOptions)
 		{
-			Double lzts = lztsField.getValue();
-			Integer tilesize = tilesizeField.getValue();
-			if (tilesize != null && tilesize <= 0)
-				tilesize = null;
-			if (lzts != null && lzts <= 0)
-				lzts = null;
-
 			validOptions = lzts != null && tilesize != null;
 			if (validOptions)
 			{
@@ -2297,38 +2239,7 @@ public class Application implements UncaughtExceptionHandler
 					}
 					overrideLevelsSpinner.getModel().setValue(levels);
 				}
-				int[] tileCount = new int[levels];
-				int totalCount = 0;
-				boolean overviews = overviewsCheck.isSelected();
-
-				for (int i = overviews ? 0 : levels - 1; i < levels; i++)
-				{
-					tileCount[i] = GDALUtil.tileCount(sector, i, lzts);
-					totalCount += tileCount[i];
-				}
-
-				info.appendLine("Tiling information:");
-				info.appendLine("Level count = " + levels);
-				if (overviews)
-				{
-					info.appendLine("Tile count at highest level = "
-							+ tileCount[levels - 1]);
-					info.appendLine("Overview tile count = "
-							+ (totalCount - tileCount[levels - 1]));
-				}
-				info.appendLine("Total tile count = " + totalCount);
 			}
-		}
-
-		String outDir = outputDirectory.getText();
-		if (outDir.length() == 0)
-		{
-			info.appendLine("Please select an output directory");
-		}
-		else
-		{
-			info.appendLine("Tiles will be saved to "
-					+ new File(outDir).getAbsolutePath());
 		}
 
 		if (!validOptions)
@@ -2337,7 +2248,23 @@ public class Application implements UncaughtExceptionHandler
 		}
 		else
 		{
-			tileText.setText(info.toString(true));
+			String outDirText = outputDirectory.getText();
+			File outDir = outDirText.length() == 0 ? null
+					: new File(outDirText);
+
+			String info = GDALUtil.getTileText(dataset, sector, lzts, levels,
+					overviews);
+			if (outDir == null)
+			{
+				info += System.getProperty("line.separator")
+						+ "Please select an output directory";
+			}
+			else
+			{
+				info += System.getProperty("line.separator")
+						+ "Tiles will be saved to " + outDir.getAbsolutePath();
+			}
+			tileText.setText(info);
 		}
 		tileText.select(0, 0);
 
@@ -2452,32 +2379,20 @@ public class Application implements UncaughtExceptionHandler
 				File outDir = new File(outputDirectory.getText());
 				boolean overviews = overviewsCheck.isSelected();
 
-				FileWriter logWriter = null;
+				LogWriter logWriter = null;
 				try
 				{
 					outDir.mkdirs();
-					File logFile = new File(outDir, "tiler_" + getDateTime()
-							+ ".log");
-					logWriter = new FileWriter(logFile);
-					BufferedLineWriter writer = new BufferedLineWriter(
-							logWriter);
+					logWriter = new LogWriter(outDir);
 
 					String imageFormat = getImageFormat();
 					if (mapnikRadio.isSelected())
 					{
-						writer.writeLine("Input file: "
-								+ mapFile.getAbsolutePath());
-						writer.writeLine("Python binary: "
-								+ MapnikUtil.getPythonBinary());
-						writer.writeLine("Mapnik script: "
-								+ MapnikUtil.getMapnikScript());
-						writer.writeLine("Sector: " + sector);
-						writer.writeLine("Output directory: "
-								+ outDir.getAbsolutePath());
-						writer.writeLine("Level count: " + level);
-						writer.writeLine("Tilesize: " + tilesize);
-						writer.writeLine("Level zero tile size: " + lzts);
-						writer.writeLine("Image format: " + imageFormat);
+						logWriter.startLog(TilingType.Mapnik, mapFile, outDir,
+								sector, level, tilesize, lzts, imageFormat,
+								false, 0, 0, infoText.getText(), tileText
+										.getText(), null, null, null, null,
+								false);
 
 						Tiler.tileMapnik(mapFile, sector, level, tilesize,
 								lzts, imageFormat, outDir, reporter);
@@ -2491,14 +2406,15 @@ public class Application implements UncaughtExceptionHandler
 					else
 					{
 						boolean isFloat = isFloat();
-						NumberArray outsideValues = null;
+						NullableNumberArray outsideValues = null;
 						MinMaxArray[] minMaxReplaces = null;
 						NullableNumberArray replace = null;
 						NullableNumberArray otherwise = null;
 
 						if (outsideCheck.isSelected())
 						{
-							outsideValues = new NumberArray(outputBandCount);
+							outsideValues = new NullableNumberArray(
+									outputBandCount);
 							for (int b = 0; b < outputBandCount; b++)
 							{
 								if (isFloat)
@@ -2565,58 +2481,17 @@ public class Application implements UncaughtExceptionHandler
 							}
 						}
 
-						writer.writeLine("Input file: "
-								+ mapFile.getAbsolutePath());
-						writer.newLine();
-
-						writer.writeLine(infoText.getText());
-						writer.newLine();
-
-						writer.writeLine(tileText.getText());
-						writer.newLine();
-
-						writer.writeLine("Output parameters:");
-						writer.writeLine("Sector: " + sector);
-						writer.writeLine("Output directory: "
-								+ outDir.getAbsolutePath());
-						writer.writeLine("Level count: " + level);
-						writer.writeLine("Tilesize: " + tilesize);
-						writer.writeLine("Level zero tile size: " + lzts);
-						writer.writeLine("Image format: " + imageFormat);
-						if (outsideValues != null)
-						{
-							writer.writeLine("Set outside values: "
-									+ outsideValues.toString(isFloat));
-						}
-						if (minMaxReplaces != null)
-						{
-							writer
-									.writeLine("Replace min 1: "
-											+ minMaxReplaces[0].toString(
-													isFloat, true));
-							writer.writeLine("Replace max 1: "
-									+ minMaxReplaces[0]
-											.toString(isFloat, false));
-							writer
-									.writeLine("Replace min 2: "
-											+ minMaxReplaces[1].toString(
-													isFloat, true));
-							writer.writeLine("Replace max 2: "
-									+ minMaxReplaces[1]
-											.toString(isFloat, false));
-
-							writer.writeLine("Replace with: "
-									+ replace.toString(isFloat));
-							writer.writeLine("Otherwise: "
-									+ otherwise.toString(isFloat));
-						}
-
 						if (imageRadio.isSelected())
 						{
 							boolean addAlpha = pngRadio.isSelected()
 									&& alphaCheck.isSelected();
 
-							writer.writeLine("Add alpha: " + addAlpha);
+							logWriter.startLog(TilingType.Images, mapFile,
+									outDir, sector, level, tilesize, lzts,
+									imageFormat, addAlpha, 0, 0, infoText
+											.getText(), tileText.getText(),
+									outsideValues, minMaxReplaces, replace,
+									otherwise, isFloat);
 
 							Tiler.tileImages(dataset, sector, level, tilesize,
 									lzts, imageFormat, addAlpha, outsideValues,
@@ -2634,9 +2509,12 @@ public class Application implements UncaughtExceptionHandler
 							int bufferType = getElevationBufferType();
 							int band = bandCombo.getSelectedIndex();
 
-							writer.writeLine("Band: " + band);
-							writer.writeLine("Buffer type: "
-									+ gdal.GetDataTypeName(bufferType));
+							logWriter.startLog(TilingType.Elevations, mapFile,
+									outDir, sector, level, tilesize, lzts,
+									imageFormat, false, band, bufferType,
+									infoText.getText(), tileText.getText(),
+									outsideValues, minMaxReplaces, replace,
+									otherwise, isFloat);
 
 							NumberArray minmax = new NumberArray(2);
 							if (isFloat)
@@ -2680,13 +2558,10 @@ public class Application implements UncaughtExceptionHandler
 												+ minmax.getLong(1));
 							}
 
-							writer.newLine();
-							writer.writeLine("Min/Max: ");
-							writer.writeLine(minmax.toString(isFloat));
+							logWriter.logMinMax(minmax, isFloat);
 						}
 					}
 
-					writer.flush();
 					reporter.done();
 				}
 				catch (IOException e)
@@ -2698,7 +2573,7 @@ public class Application implements UncaughtExceptionHandler
 					if (logWriter != null)
 						try
 						{
-							logWriter.close();
+							logWriter.finishLog();
 						}
 						catch (IOException e)
 						{
@@ -2708,13 +2583,6 @@ public class Application implements UncaughtExceptionHandler
 		});
 		thread.setDaemon(true);
 		thread.start();
-	}
-
-	private String getDateTime()
-	{
-		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-		Date date = new Date();
-		return dateFormat.format(date);
 	}
 
 	private int getElevationBufferType()

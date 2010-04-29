@@ -34,7 +34,7 @@ import javax.imageio.ImageIO;
 import org.gdal.gdal.gdal;
 
 import util.FileUtil;
-import util.NumberArray;
+import util.NullableNumberArray;
 import util.ProgressReporter;
 import util.Sector;
 import util.FileFilters.DirectoryFileFilter;
@@ -43,8 +43,8 @@ import util.FileFilters.ExtensionFileFilter;
 public class Overviewer
 {
 	public static void createImageOverviews(File directory, String extension,
-			int width, int height, NumberArray outsideValues, Sector sector,
-			double lzts, ProgressReporter reporter)
+			int width, int height, NullableNumberArray outsideValues,
+			Sector sector, double lzts, ProgressReporter reporter)
 	{
 		OverviewCreator overviewCreator = new ImageOverviewCreator(width,
 				height, outsideValues);
@@ -54,7 +54,7 @@ public class Overviewer
 
 	public static void createElevationOverviews(File directory, int width,
 			int height, int bufferType, ByteOrder byteOrder,
-			NumberArray outsideValues, Sector sector, double lzts,
+			NullableNumberArray outsideValues, Sector sector, double lzts,
 			ProgressReporter reporter)
 	{
 		int bands = 1;
@@ -201,7 +201,7 @@ public class Overviewer
 		private int height;
 
 		public ImageOverviewCreator(int width, int height,
-				NumberArray outsideValues)
+				NullableNumberArray outsideValues)
 		{
 			this.width = width;
 			this.height = height;
@@ -219,6 +219,9 @@ public class Overviewer
 
 				for (int b = 0; b < bandCount; b++)
 				{
+					if (outsideValues.getByte(b) == null)
+						continue;
+
 					offsets[b] = b * width * height; // * bufferTypeSize;
 					for (int i = 0; i < width * height; i++)
 					{
@@ -247,10 +250,44 @@ public class Overviewer
 			if (dst.exists())
 				throw new IllegalArgumentException("Destination already exists");
 
-			BufferedImage i0 = src0.exists() ? ImageIO.read(src0) : null;
-			BufferedImage i1 = src1.exists() ? ImageIO.read(src1) : null;
-			BufferedImage i2 = src2.exists() ? ImageIO.read(src2) : null;
-			BufferedImage i3 = src3.exists() ? ImageIO.read(src3) : null;
+			BufferedImage i0 = null, i1 = null, i2 = null, i3 = null;
+
+			try
+			{
+				if (src0.exists())
+					i0 = ImageIO.read(src0);
+			}
+			catch (Exception e)
+			{
+				throw new IOException("Error reading " + src0, e);
+			}
+			try
+			{
+				if (src1.exists())
+					i1 = ImageIO.read(src1);
+			}
+			catch (Exception e)
+			{
+				throw new IOException("Error reading " + src1, e);
+			}
+			try
+			{
+				if (src2.exists())
+					i2 = ImageIO.read(src2);
+			}
+			catch (Exception e)
+			{
+				throw new IOException("Error reading " + src2, e);
+			}
+			try
+			{
+				if (src3.exists())
+					i3 = ImageIO.read(src3);
+			}
+			catch (Exception e)
+			{
+				throw new IOException("Error reading " + src3, e);
+			}
 
 			BufferedImage image = i0 != null ? i0 : i1 != null ? i1
 					: i2 != null ? i2 : i3 != null ? i3 : outsideImage;
@@ -313,7 +350,7 @@ public class Overviewer
 	{
 		private boolean floatingPoint;
 		private int bufferTypeSize;
-		private NumberArray outsideValues;
+		private NullableNumberArray outsideValues;
 		private ByteOrder byteOrder;
 		private int width;
 		private int height;
@@ -321,7 +358,8 @@ public class Overviewer
 		private TypeHandler typeHandler;
 
 		public ElevationOverviewCreator(int width, int height, int bands,
-				int bufferType, ByteOrder byteOrder, NumberArray outsideValues)
+				int bufferType, ByteOrder byteOrder,
+				NullableNumberArray outsideValues)
 		{
 			floatingPoint = GDALTile.isTypeFloatingPoint(bufferType);
 
@@ -513,7 +551,7 @@ public class Overviewer
 
 	private interface TypeHandler
 	{
-		public Object getNumberArrayValue(int index, NumberArray na);
+		public Object getNumberArrayValue(int index, NullableNumberArray na);
 
 		public Object getBufferValue(int index, ByteBuffer buffer);
 
@@ -524,7 +562,7 @@ public class Overviewer
 
 	private static class ByteTypeHandler implements TypeHandler
 	{
-		public Object getNumberArrayValue(int index, NumberArray na)
+		public Object getNumberArrayValue(int index, NullableNumberArray na)
 		{
 			return na.getByte(index);
 		}
@@ -548,7 +586,7 @@ public class Overviewer
 
 	private static class ShortTypeHandler implements TypeHandler
 	{
-		public Object getNumberArrayValue(int index, NumberArray na)
+		public Object getNumberArrayValue(int index, NullableNumberArray na)
 		{
 			return na.getShort(index);
 		}
@@ -572,7 +610,7 @@ public class Overviewer
 
 	private static class IntTypeHandler implements TypeHandler
 	{
-		public Object getNumberArrayValue(int index, NumberArray na)
+		public Object getNumberArrayValue(int index, NullableNumberArray na)
 		{
 			return na.getInt(index);
 		}
@@ -597,7 +635,7 @@ public class Overviewer
 
 	private static class FloatTypeHandler implements TypeHandler
 	{
-		public Object getNumberArrayValue(int index, NumberArray na)
+		public Object getNumberArrayValue(int index, NullableNumberArray na)
 		{
 			return na.getFloat(index);
 		}
@@ -622,7 +660,7 @@ public class Overviewer
 
 	private static class DoubleTypeHandler implements TypeHandler
 	{
-		public Object getNumberArrayValue(int index, NumberArray na)
+		public Object getNumberArrayValue(int index, NullableNumberArray na)
 		{
 			return na.getDouble(index);
 		}

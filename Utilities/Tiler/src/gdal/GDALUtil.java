@@ -2,6 +2,7 @@ package gdal;
 
 import java.io.File;
 
+import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
@@ -9,7 +10,9 @@ import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 
 import util.Sector;
+import util.StringLineBuilder;
 import util.TilerException;
+import util.Util;
 
 public class GDALUtil
 {
@@ -175,5 +178,95 @@ public class GDALUtil
 			str = "0" + str;
 		}
 		return str;
+	}
+
+	public static String getInfoText(Dataset dataset, Sector sector)
+	{
+		int width = dataset.getRasterXSize();
+		int height = dataset.getRasterYSize();
+		int bandCount = dataset.getRasterCount();
+		String projection = dataset.GetProjection();
+		SpatialReference spatialReference = (projection == null
+				|| projection.length() == 0 || !GDALUtil
+				.isProjectionsSupported()) ? null : new SpatialReference(
+				projection);
+		String[] dataTypes = new String[bandCount];
+		int[] dataTypeSizes = new int[bandCount];
+		Double[] nodata = new Double[bandCount];
+		double[] min = new double[bandCount];
+		double[] max = new double[bandCount];
+		for (int i = 0; i < bandCount; i++)
+		{
+			Band band = dataset.GetRasterBand(i + 1);
+			int dataType = band.getDataType();
+			dataTypes[i] = gdal.GetDataTypeName(dataType);
+			dataTypeSizes[i] = gdal.GetDataTypeSize(dataType);
+
+			Double[] nodataValue = new Double[1];
+			band.GetNoDataValue(nodataValue);
+			nodata[i] = nodataValue[0];
+
+			double[] minmax = new double[2];
+			band.ComputeRasterMinMax(minmax, 1);
+			min[i] = minmax[0];
+			max[i] = minmax[1];
+		}
+
+		StringLineBuilder info = new StringLineBuilder();
+
+		info.appendLine("Dataset information:");
+		info.appendLine("Size = " + width + ", " + height);
+		info.appendLine("Cell size = " + (sector.getDeltaLongitude() / width)
+				+ ", " + (sector.getDeltaLatitude() / height));
+		info.appendLine("Bottom left corner = (" + sector.getMinLongitude()
+				+ ", " + sector.getMinLatitude() + ")");
+		info.appendLine("Top right corner = (" + sector.getMaxLongitude()
+				+ ", " + sector.getMaxLatitude() + ")");
+		info.appendLine("Raster band count = " + bandCount);
+		for (int i = 0; i < bandCount; i++)
+		{
+			info.appendLine("Band " + (i + 1) + ":");
+			info.appendLine("    Data type = " + dataTypes[i] + " ("
+					+ dataTypeSizes[i] + " bit)");
+			info.appendLine("    No-data value = " + nodata[i]);
+			info.appendLine("    Approx minimum = " + min[i]);
+			info.appendLine("    Approx maximum = " + max[i]);
+		}
+		if (spatialReference != null)
+		{
+			info.appendLine("Coordinate system =");
+			info.appendLine(Util.fixNewlines(spatialReference
+					.ExportToPrettyWkt()));
+		}
+
+		return info.toString(true);
+	}
+
+	public static String getTileText(Dataset dataset, Sector sector,
+			double lzts, int levels, boolean overviews)
+	{
+		StringLineBuilder info = new StringLineBuilder();
+
+		int[] tileCount = new int[levels];
+		int totalCount = 0;
+
+		for (int i = overviews ? 0 : levels - 1; i < levels; i++)
+		{
+			tileCount[i] = GDALUtil.tileCount(sector, i, lzts);
+			totalCount += tileCount[i];
+		}
+
+		info.appendLine("Tiling information:");
+		info.appendLine("Level count = " + levels);
+		if (overviews)
+		{
+			info.appendLine("Tile count at highest level = "
+					+ tileCount[levels - 1]);
+			info.appendLine("Overview tile count = "
+					+ (totalCount - tileCount[levels - 1]));
+		}
+		info.appendLine("Total tile count = " + totalCount);
+
+		return info.toString(true);
 	}
 }
