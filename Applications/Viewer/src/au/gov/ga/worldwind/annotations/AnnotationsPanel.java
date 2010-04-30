@@ -44,8 +44,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import au.gov.ga.worldwind.components.FlatJButton;
 import au.gov.ga.worldwind.settings.Settings;
-import au.gov.ga.worldwind.util.FlatJButton;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 

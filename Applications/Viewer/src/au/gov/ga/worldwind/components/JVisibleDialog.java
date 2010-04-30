@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.util;
+package au.gov.ga.worldwind.components;
 
 import java.awt.Frame;
 import java.util.ArrayList;

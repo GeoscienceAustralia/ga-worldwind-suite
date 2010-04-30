@@ -43,9 +43,9 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import au.gov.ga.worldwind.components.JIntegerField;
 import au.gov.ga.worldwind.settings.Settings.ProjectionMode;
 import au.gov.ga.worldwind.settings.Settings.StereoMode;
-import au.gov.ga.worldwind.util.JIntegerField;
 
 public class SettingsDialog extends JDialog
 {

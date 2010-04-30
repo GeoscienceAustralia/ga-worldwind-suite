@@ -37,7 +37,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import au.gov.ga.worldwind.util.FlatJButton;
+import au.gov.ga.worldwind.components.FlatJButton;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 

@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.util;
+package au.gov.ga.worldwind.components;
 
 import javax.swing.JTextField;
 import javax.swing.text.AttributeSet;

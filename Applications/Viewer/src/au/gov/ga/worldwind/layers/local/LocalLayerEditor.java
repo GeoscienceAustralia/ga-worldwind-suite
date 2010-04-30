@@ -35,8 +35,8 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import au.gov.ga.worldwind.util.JDoubleField;
-import au.gov.ga.worldwind.util.JIntegerField;
+import au.gov.ga.worldwind.components.JDoubleField;
+import au.gov.ga.worldwind.components.JIntegerField;
 import au.gov.ga.worldwind.util.Util;
 
 public class LocalLayerEditor extends JDialog

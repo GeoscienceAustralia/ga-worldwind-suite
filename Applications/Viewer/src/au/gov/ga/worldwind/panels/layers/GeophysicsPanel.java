@@ -20,11 +20,11 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import au.gov.ga.worldwind.components.FlatJButton;
+import au.gov.ga.worldwind.components.HtmlViewer;
 import au.gov.ga.worldwind.layers.ga.GALayer;
 import au.gov.ga.worldwind.layers.ga.gravity.GravityLayer;
 import au.gov.ga.worldwind.layers.ga.magnetics.MagneticsLayer;
-import au.gov.ga.worldwind.util.FlatJButton;
-import au.gov.ga.worldwind.util.HtmlViewer;
 import au.gov.ga.worldwind.util.Icons;
 
 

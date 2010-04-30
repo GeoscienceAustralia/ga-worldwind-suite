@@ -30,7 +30,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
-import au.gov.ga.worldwind.util.FlatJButton;
+import au.gov.ga.worldwind.components.FlatJButton;
 import au.gov.ga.worldwind.util.Icons;
 
 

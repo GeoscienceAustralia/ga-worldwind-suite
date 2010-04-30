@@ -19,7 +19,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import au.gov.ga.worldwind.util.FlatJButton;
+import au.gov.ga.worldwind.components.FlatJButton;
 import au.gov.ga.worldwind.util.Icons;
 
 public class LocalLayerPanel extends JPanel

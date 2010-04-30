@@ -76,6 +76,8 @@ import au.gov.ga.worldwind.bookmarks.Bookmark;
 import au.gov.ga.worldwind.bookmarks.BookmarkListener;
 import au.gov.ga.worldwind.bookmarks.BookmarkManager;
 import au.gov.ga.worldwind.bookmarks.Bookmarks;
+import au.gov.ga.worldwind.components.HtmlViewer;
+import au.gov.ga.worldwind.components.JVisibleDialog;
 import au.gov.ga.worldwind.layers.ga.GALayer;
 import au.gov.ga.worldwind.layers.local.LocalLayerDefinition;
 import au.gov.ga.worldwind.layers.local.LocalLayerEditor;
@@ -90,8 +92,6 @@ import au.gov.ga.worldwind.settings.Settings.ProjectionMode;
 import au.gov.ga.worldwind.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.stereo.StereoSceneController;
 import au.gov.ga.worldwind.util.DoubleClickZoomListener;
-import au.gov.ga.worldwind.util.HtmlViewer;
-import au.gov.ga.worldwind.util.JVisibleDialog;
 import au.gov.ga.worldwind.util.Util;
 
 public class Application

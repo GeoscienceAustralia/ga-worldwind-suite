@@ -30,6 +30,8 @@ import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import au.gov.ga.worldwind.components.FlatJButton;
+import au.gov.ga.worldwind.components.HtmlViewer;
 import au.gov.ga.worldwind.layers.ga.GALayer;
 import au.gov.ga.worldwind.layers.ga.radiometrics.DoseRateLayer;
 import au.gov.ga.worldwind.layers.ga.radiometrics.PotassiumLayer;
@@ -48,8 +50,6 @@ import au.gov.ga.worldwind.layers.ga.radiometrics.areas.RatioUThAreasLayer;
 import au.gov.ga.worldwind.layers.ga.radiometrics.areas.TernaryAreasLayer;
 import au.gov.ga.worldwind.layers.ga.radiometrics.areas.ThoriumAreasLayer;
 import au.gov.ga.worldwind.layers.ga.radiometrics.areas.UraniumAreasLayer;
-import au.gov.ga.worldwind.util.FlatJButton;
-import au.gov.ga.worldwind.util.HtmlViewer;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 

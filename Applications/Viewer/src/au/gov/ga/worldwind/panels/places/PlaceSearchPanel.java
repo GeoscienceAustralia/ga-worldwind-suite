@@ -39,9 +39,9 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import au.gov.ga.worldwind.components.FlatJButton;
 import au.gov.ga.worldwind.panels.places.GeoNamesSearch.Results;
 import au.gov.ga.worldwind.panels.places.GeoNamesSearch.SearchType;
-import au.gov.ga.worldwind.util.FlatJButton;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 

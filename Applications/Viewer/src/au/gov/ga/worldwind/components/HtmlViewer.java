@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.util;
+package au.gov.ga.worldwind.components;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -28,6 +28,8 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.plaf.basic.BasicHTML;
+
+import au.gov.ga.worldwind.util.DefaultLauncher;
 
 public class HtmlViewer extends JDialog
 {
