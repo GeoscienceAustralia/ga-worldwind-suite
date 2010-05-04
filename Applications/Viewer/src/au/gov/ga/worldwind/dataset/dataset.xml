@@ -1,0 +1,8 @@
+<DatasetList>
+	<Dataset name="NASA" icon="">
+		<Dataset name="Common">
+			<Layer name="BMNG" url="file:bin/au/gov/ga/worldwind/dataset/layer.xml" />
+		</Dataset>
+		<Link name="Recursive" url="file:bin/au/gov/ga/worldwind/dataset/dataset.xml" />
+	</Dataset>
+</DatasetList>

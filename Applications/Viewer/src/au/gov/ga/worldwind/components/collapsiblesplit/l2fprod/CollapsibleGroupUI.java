@@ -43,7 +43,6 @@ import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.MouseInputListener;
 import javax.swing.plaf.ActionMapUIResource;
@@ -205,9 +204,10 @@ public class CollapsibleGroupUI extends ComponentUI
 
 	protected Border createContentPaneBorder()
 	{
-		Color borderColor = UIManager.getColor("TaskPaneGroup.borderColor");
+		return BorderFactory.createEmptyBorder();
+		/*Color borderColor = UIManager.getColor("TaskPaneGroup.borderColor");
 		return new CompoundBorder(new ContentPaneBorder(borderColor),
-				BorderFactory.createEmptyBorder(10, 10, 10, 10));
+				BorderFactory.createEmptyBorder(10, 10, 10, 10));*/
 	}
 
 	public Component createAction(Action action)

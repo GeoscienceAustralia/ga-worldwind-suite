@@ -145,7 +145,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 	private AnimationListener animator;
 	private int currentHeight = -1;
 	private WrapperContainer wrapper;
-	private boolean useAnimation = true;
+	private boolean useAnimation = false;
 	private AnimationParams animationParams;
 
 	/**

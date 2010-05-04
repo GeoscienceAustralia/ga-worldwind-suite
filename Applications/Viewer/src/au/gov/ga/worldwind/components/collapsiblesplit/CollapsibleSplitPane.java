@@ -64,7 +64,6 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 				(Component) component);
 		int dividerAbove = getLayout().dividerAboveComponentBounds(
 				(Component) component);
-		System.out.println("DIVIDER ABOVE = " + dividerAbove);
 		Rectangle bounds = null;
 		if (dividerAbove >= 0)
 		{
@@ -74,7 +73,7 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 		doLayout();
 		if (bounds != null && dividerAbove == 0)
 		{
-			System.out.println(getLayout().setDividerPosition(dividerAbove, bounds.x, bounds.y));
+			getLayout().setDividerPosition(dividerAbove, bounds.x, bounds.y);
 		}
 		doLayout();
 	}

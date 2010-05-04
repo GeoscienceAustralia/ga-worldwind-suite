@@ -182,8 +182,8 @@ public class CollapsibleGroup extends AbstractCollapsiblePanel implements
 		setOpaque(false);
 
 		// disable animation if specified in UIManager
-		setAnimated(!Boolean.FALSE.equals(UIManager
-				.get("TaskPaneGroup.animate")));
+		if (Boolean.FALSE.equals(UIManager.get("TaskPaneGroup.animate")))
+			setAnimated(false);
 
 		// listen for animation events and forward them to registered listeners
 		collapsePane.addPropertyChangeListener(

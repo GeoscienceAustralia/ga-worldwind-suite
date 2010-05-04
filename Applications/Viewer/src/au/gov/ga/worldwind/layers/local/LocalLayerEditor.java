@@ -368,7 +368,7 @@ public class LocalLayerEditor extends JDialog
 		c.weightx = 1;
 		panel.add(levelcountField, c);
 
-		label = new JLabel("Top left lat/lon:");
+		label = new JLabel("Bottom left lat/lon:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 2;
@@ -387,7 +387,7 @@ public class LocalLayerEditor extends JDialog
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(topleftField, c);
 
-		label = new JLabel("Bottom right lat/lon:");
+		label = new JLabel("Top right lat/lon:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 3;
