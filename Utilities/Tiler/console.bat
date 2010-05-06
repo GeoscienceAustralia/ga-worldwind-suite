@@ -1,2 +1,2 @@
 @echo off
-java -cp tiler.jar -Djava.library.path=gdal tiler.Console %*
+java -cp tiler.jar tiler.Console %*

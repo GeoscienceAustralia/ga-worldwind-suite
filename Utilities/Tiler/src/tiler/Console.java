@@ -3,6 +3,7 @@ package tiler;
 import gdal.GDALUtil;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.text.DateFormat;
@@ -32,40 +33,55 @@ public class Console
 
 	private static void printUsage()
 	{
-		String text = "Usage: [{-h,--help}] [{-i,--images}] [{-e,--elevations}] [{-z,--lzts} lzts]\n"
-				+ "       [{-t,--tilesize} size] [{-f,--format} {JPG|PNG}]\n"
-				+ "       [{-d,--datatype} {BYTE|INT16|INT32|FLOAT32}] [{-a,--addalpha}]\n"
-				+ "       [{-b,--band} band] [{-n,--nooverviews}] [{-l,--levels} levels]\n"
-				+ "       [{-o,--setoutside} \"value[,value...]]\"\n"
-				+ "       [{-r,--replacevalues} \"min1[,min1...] max1[,max1...] min2[,min2...]\n"
-				+ "                              max2[,max2...] with[,with...] else[,else...]\"\n"
-				+ "       input_file output_directory\n"
-				+ "\n"
-				+ "General switches:\n"
-				+ "  -h         Show this help\n"
-				+ "  -i         Generate image tiles (default)\n"
-				+ "  -e         Generate elevation tiles\n"
-				+ "  -z lzts    Level zero tile size in degrees (default: 36.0 for images, 20.0\n"
-				+ "             for elevations)\n"
-				+ "  -t size    Width and height of tiles (default: 512 for images, 150 for\n"
-				+ "             elevations)\n"
-				+ "  -n         Don't generate overviews\n"
-				+ "  -l levels  Number of levels to generate (default: calculated optimal)\n"
-				+ "  -o \"...\"   Set values outside extends to (number of values must equal the\n"
-				+ "             number of output bands, blanks permitted)\n"
-				+ "  -r \"...\"   Replace values between (number of values in each group must\n"
-				+ "             equal the number of output bands, blanks permitted)\n"
-				+ "Image specific switches:\n"
-				+ "  -f format  Image output format (default: JPG)\n"
-				+ "  -a         Add alpha band to image tiles if input has no alpha band\n"
-				+ "Elevation specific switches:\n"
-				+ "  -d type    Elevation output format (default: INT16)\n"
-				+ "  -b band    Band to read from for elevation data (default: 1)";
+		String text =
+				"Usage: [{-h,--help}] [{-i,--images}] [{-e,--elevations}] [{-z,--lzts} lzts]\n"
+						+ "       [{-t,--tilesize} size] [{-f,--format} {JPG|PNG}]\n"
+						+ "       [{-d,--datatype} {BYTE|INT16|INT32|FLOAT32}] [{-a,--addalpha}]\n"
+						+ "       [{-b,--band} band] [{-n,--nooverviews}] [{-l,--levels} levels]\n"
+						+ "       [{-o,--setoutside} \"value[,value...]]\"\n"
+						+ "       [{-r,--replacevalues} \"min1[,min1...] max1[,max1...] min2[,min2...]\n"
+						+ "                              max2[,max2...] with[,with...] else[,else...]\"\n"
+						+ "       input_file output_directory\n"
+						+ "\n"
+						+ "General switches:\n"
+						+ "  -h         Show this help\n"
+						+ "  -i         Generate image tiles (default)\n"
+						+ "  -e         Generate elevation tiles\n"
+						+ "  -z lzts    Level zero tile size in degrees (default: 36.0 for images, 20.0\n"
+						+ "             for elevations)\n"
+						+ "  -t size    Width and height of tiles (default: 512 for images, 150 for\n"
+						+ "             elevations)\n"
+						+ "  -n         Don't generate overviews\n"
+						+ "  -l levels  Number of levels to generate (default: calculated optimal)\n"
+						+ "  -o \"...\"   Set values outside extends to (number of values must equal the\n"
+						+ "             number of output bands, blanks permitted)\n"
+						+ "  -r \"...\"   Replace values between (number of values in each group must\n"
+						+ "             equal the number of output bands, blanks permitted)\n"
+						+ "Image specific switches:\n"
+						+ "  -f format  Image output format (default: JPG)\n"
+						+ "  -a         Add alpha band to image tiles if input has no alpha band\n"
+						+ "Elevation specific switches:\n"
+						+ "  -d type    Elevation output format (default: INT16)\n"
+						+ "  -b band    Band to read from for elevation data (default: 1)";
 		System.out.println(text);
 	}
 
 	public static void main(String[] args)
 	{
+		try
+		{
+			Executable.setGDALEnvironmentVariables();
+		}
+		catch (FileNotFoundException e1)
+		{
+			System.err.println(e1.getMessage());
+			System.exit(2);
+		}
+		catch (Exception e)
+		{
+			System.out.println("WARNING: " + e.getLocalizedMessage());
+		}
+
 		//-i -images
 		//-e -elevations
 		//-t -tilesize 512
@@ -150,25 +166,19 @@ public class Console
 		}
 
 		Boolean images = (Boolean) parser.getOptionValue(imagesO, true);
-		Boolean elevations = (Boolean) parser
-				.getOptionValue(elevationsO, false)
-				&& !images;
+		Boolean elevations = (Boolean) parser.getOptionValue(elevationsO, false) && !images;
 
-		Integer tilesize = (Integer) parser.getOptionValue(tilesizeO,
-				elevations ? 150 : 512);
-		Double lzts = (Double) parser.getOptionValue(lztsO, elevations ? 20d
-				: 36d);
+		Integer tilesize = (Integer) parser.getOptionValue(tilesizeO, elevations ? 150 : 512);
+		Double lzts = (Double) parser.getOptionValue(lztsO, elevations ? 20d : 36d);
 
-		String imageFormat = ((String) parser.getOptionValue(formatO, "JPG"))
-				.toUpperCase();
+		String imageFormat = ((String) parser.getOptionValue(formatO, "JPG")).toUpperCase();
 		if (!(imageFormat.equals("JPG") || imageFormat.equals("PNG")))
 		{
 			exitWithMessage("Unknown image format: " + imageFormat);
 		}
 
 		boolean isFloat = false;
-		String dataType = ((String) parser.getOptionValue(datatypeO, "INT16"))
-				.toUpperCase();
+		String dataType = ((String) parser.getOptionValue(datatypeO, "INT16")).toUpperCase();
 		int bufferType = 0;
 		if (dataType.equals("BYTE"))
 		{
@@ -194,13 +204,11 @@ public class Console
 
 		Boolean addAlpha = (Boolean) parser.getOptionValue(addalphaO, false);
 		Integer band = (Integer) parser.getOptionValue(bandO, 1);
-		Boolean nooverviews = (Boolean) parser.getOptionValue(nooverviewsO,
-				false);
+		Boolean nooverviews = (Boolean) parser.getOptionValue(nooverviewsO, false);
 		Integer levels = (Integer) parser.getOptionValue(levelsO);
-		NullableNumberArray outside = (NullableNumberArray) parser
-				.getOptionValue(outsideO);
-		ReplaceValues replaces = (ReplaceValues) parser.getOptionValue(
-				replaceO, new ReplaceValues());
+		NullableNumberArray outside = (NullableNumberArray) parser.getOptionValue(outsideO);
+		ReplaceValues replaces =
+				(ReplaceValues) parser.getOptionValue(replaceO, new ReplaceValues());
 
 		try
 		{
@@ -217,16 +225,12 @@ public class Console
 			if (outside != null && outside.length() != bandCount)
 			{
 				exitWithMessage("Outside value count (" + outside.length()
-						+ ") doesn't equal output band count (" + bandCount
-						+ ")");
+						+ ") doesn't equal output band count (" + bandCount + ")");
 			}
-			else if (replaces.replaceMinMaxs != null
-					&& replaces.valueCount != bandCount)
+			else if (replaces.replaceMinMaxs != null && replaces.valueCount != bandCount)
 			{
-				exitWithMessage("Replace group value count ("
-						+ replaces.valueCount
-						+ ") doesn't equal output band count (" + bandCount
-						+ ")");
+				exitWithMessage("Replace group value count (" + replaces.valueCount
+						+ ") doesn't equal output band count (" + bandCount + ")");
 			}
 
 			ConsoleProgressReporter reporter = new ConsoleProgressReporter();
@@ -237,47 +241,40 @@ public class Console
 				output.mkdirs();
 				logWriter = new LogWriter(output);
 				String infoText = GDALUtil.getInfoText(dataset, sector);
-				String tileText = GDALUtil.getTileText(dataset, sector, lzts,
-						levels, !nooverviews);
+				String tileText = GDALUtil.getTileText(dataset, sector, lzts, levels, !nooverviews);
 
 				if (elevations)
 				{
-					logWriter.startLog(TilingType.Elevations, input, output,
-							sector, level, tilesize, lzts, imageFormat,
-							addAlpha, band, bufferType, infoText, tileText,
-							outside, replaces.replaceMinMaxs, replaces.replace,
+					logWriter.startLog(TilingType.Elevations, input, output, sector, level,
+							tilesize, lzts, imageFormat, addAlpha, band, bufferType, infoText,
+							tileText, outside, replaces.replaceMinMaxs, replaces.replace,
 							replaces.otherwise, isFloat);
 
 					NumberArray minMax = new NumberArray(2);
-					Tiler.tileElevations(dataset, sector, level, tilesize,
-							lzts, bufferType, band, outside,
-							replaces.replaceMinMaxs, replaces.replace,
-							replaces.otherwise, minMax, output, reporter);
+					Tiler.tileElevations(dataset, sector, level, tilesize, lzts, bufferType, band,
+							outside, replaces.replaceMinMaxs, replaces.replace, replaces.otherwise,
+							minMax, output, reporter);
 					if (!nooverviews)
 					{
-						Overviewer.createElevationOverviews(output, tilesize,
-								tilesize, bufferType, ByteOrder.LITTLE_ENDIAN,
-								outside, sector, lzts, reporter);
+						Overviewer.createElevationOverviews(output, tilesize, tilesize, bufferType,
+								ByteOrder.LITTLE_ENDIAN, outside, sector, lzts, reporter);
 					}
 					logWriter.logMinMax(minMax, isFloat);
 				}
 				else
 				{
-					logWriter.startLog(TilingType.Images, input, output,
-							sector, level, tilesize, lzts, imageFormat,
-							addAlpha, band, bufferType, infoText, tileText,
-							outside, replaces.replaceMinMaxs, replaces.replace,
-							replaces.otherwise, isFloat);
+					logWriter.startLog(TilingType.Images, input, output, sector, level, tilesize,
+							lzts, imageFormat, addAlpha, band, bufferType, infoText, tileText,
+							outside, replaces.replaceMinMaxs, replaces.replace, replaces.otherwise,
+							isFloat);
 
-					Tiler.tileImages(dataset, sector, level, tilesize, lzts,
-							imageFormat, addAlpha, outside,
-							replaces.replaceMinMaxs, replaces.replace,
-							replaces.otherwise, output, reporter);
+					Tiler.tileImages(dataset, sector, level, tilesize, lzts, imageFormat, addAlpha,
+							outside, replaces.replaceMinMaxs, replaces.replace, replaces.otherwise,
+							output, reporter);
 					if (!nooverviews)
 					{
-						Overviewer.createImageOverviews(output, imageFormat,
-								tilesize, tilesize, outside, sector, lzts,
-								reporter);
+						Overviewer.createImageOverviews(output, imageFormat, tilesize, tilesize,
+								outside, sector, lzts, reporter);
 					}
 				}
 			}
@@ -305,8 +302,8 @@ public class Console
 		System.exit(2);
 	}
 
-	private static NullableNumberArray parseNumberArray(Option option,
-			String arg) throws IllegalOptionValueException
+	private static NullableNumberArray parseNumberArray(Option option, String arg)
+			throws IllegalOptionValueException
 	{
 		try
 		{

@@ -23,7 +23,7 @@ public class Executable
 		{
 		}
 	}
-	
+
 	public interface WinLibC extends Library
 	{
 		public int _putenv(String name);
@@ -37,25 +37,32 @@ public class Executable
 		}
 		catch (Exception e)
 		{
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Error",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
 	private static void start() throws Exception
+	{
+		setGDALEnvironmentVariables();
+
+		// start the application
+		Application.start();
+	}
+
+	public static void setGDALEnvironmentVariables() throws FileNotFoundException,
+			SecurityException, NoSuchFieldException, IllegalArgumentException,
+			IllegalAccessException
 	{
 		File gdalDir = new File("gdal");
 		File dataDir = new File(gdalDir, "data");
 
 		if (!gdalDir.exists())
 		{
-			throw new FileNotFoundException("Directory not found: "
-					+ gdalDir.getAbsolutePath());
+			throw new FileNotFoundException("Directory not found: " + gdalDir.getAbsolutePath());
 		}
 		if (!dataDir.exists())
 		{
-			throw new FileNotFoundException("Directory not found: "
-					+ dataDir.getAbsolutePath());
+			throw new FileNotFoundException("Directory not found: " + dataDir.getAbsolutePath());
 		}
 
 		// set the GDAL_DATA environment variable to enable reprojection support
@@ -70,8 +77,9 @@ public class Executable
 
 		// reset the java.library.path variable so the gdal.jar loads the
 		// library from the correct directory
-		String newLibPath = gdalDir.getAbsolutePath() + File.pathSeparator
-				+ System.getProperty("java.library.path");
+		String newLibPath =
+				gdalDir.getAbsolutePath() + File.pathSeparator
+						+ System.getProperty("java.library.path");
 		System.setProperty("java.library.path", newLibPath);
 		Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
 		if (fieldSysPath != null)
@@ -79,8 +87,5 @@ public class Executable
 			fieldSysPath.setAccessible(true);
 			fieldSysPath.set(System.class.getClassLoader(), null);
 		}
-
-		// start the application
-		Application.start();
 	}
 }
