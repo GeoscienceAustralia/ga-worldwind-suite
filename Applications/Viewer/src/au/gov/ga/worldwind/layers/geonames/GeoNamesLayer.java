@@ -120,6 +120,7 @@ public class GeoNamesLayer extends AbstractLayer
 		return fontProvider;
 	}
 
+	@Override
 	public void doRender(DrawContext dc)
 	{
 		int levels = calculateLevel(dc);

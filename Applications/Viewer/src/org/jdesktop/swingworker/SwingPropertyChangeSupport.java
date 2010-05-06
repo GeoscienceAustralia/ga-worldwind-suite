@@ -66,7 +66,8 @@ public final class SwingPropertyChangeSupport extends PropertyChangeSupport {
      *         {@code null}
      * @since 1.6
      */
-    public void firePropertyChange(final PropertyChangeEvent evt) {
+    @Override
+	public void firePropertyChange(final PropertyChangeEvent evt) {
         if (evt == null) {
             throw new NullPointerException();
         }

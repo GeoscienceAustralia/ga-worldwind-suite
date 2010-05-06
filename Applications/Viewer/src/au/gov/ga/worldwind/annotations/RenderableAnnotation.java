@@ -26,6 +26,7 @@ public class RenderableAnnotation extends GlobeAnnotation
 	}
 
 	//taken from superclass, apart from additions (see below)
+	@Override
 	protected void doRenderNow(DrawContext dc)
 	{
 		if (dc.isPickingMode() && this.getPickSupport() == null)
@@ -103,6 +104,7 @@ public class RenderableAnnotation extends GlobeAnnotation
 			annotation.setLabel(text);
 	}
 
+	@Override
 	public Position getPosition()
 	{
 		if (position == null)
@@ -111,11 +113,13 @@ public class RenderableAnnotation extends GlobeAnnotation
 		return position;
 	}
 
+	@Override
 	public Position getReferencePosition()
 	{
 		return getPosition();
 	}
 
+	@Override
 	public void move(Position position)
 	{
 		Position newPosition = getPosition().add(position);
@@ -124,6 +128,7 @@ public class RenderableAnnotation extends GlobeAnnotation
 		this.position = null;
 	}
 
+	@Override
 	public void moveTo(Position position)
 	{
 		annotation.setLatitude(position.getLatitude().degrees);

@@ -55,6 +55,7 @@ public class LinkButtonUI extends BasicButtonUI
 	protected int dashedRectGapHeight;
 	private Color focusColor;
 
+	@Override
 	protected void installDefaults(AbstractButton b)
 	{
 		super.installDefaults(b);
@@ -72,12 +73,14 @@ public class LinkButtonUI extends BasicButtonUI
 		b.setHorizontalAlignment(AbstractButton.LEFT);
 	}
 
+	@Override
 	protected void installListeners(AbstractButton b)
 	{
 		super.installListeners(b);
 		b.addMouseListener(handCursorListener);
 	}
 
+	@Override
 	protected void uninstallListeners(AbstractButton b)
 	{
 		super.uninstallListeners(b);
@@ -89,6 +92,7 @@ public class LinkButtonUI extends BasicButtonUI
 		return focusColor;
 	}
 
+	@Override
 	public void paint(Graphics g, JComponent c)
 	{
 		AbstractButton b = (AbstractButton) c;
@@ -164,6 +168,7 @@ public class LinkButtonUI extends BasicButtonUI
 		((Graphics2D) g).setComposite(oldComposite);
 	}
 
+	@Override
 	protected void paintFocus(Graphics g, AbstractButton b, Rectangle viewRect,
 			Rectangle textRect, Rectangle iconRect)
 	{
@@ -181,6 +186,7 @@ public class LinkButtonUI extends BasicButtonUI
 				width - dashedRectGapWidth, height - dashedRectGapHeight);
 	}
 
+	@Override
 	protected void paintButtonPressed(Graphics g, AbstractButton b)
 	{
 		setTextShiftOffset();
@@ -188,12 +194,14 @@ public class LinkButtonUI extends BasicButtonUI
 
 	static class HandCursor extends MouseAdapter
 	{
+		@Override
 		public void mouseEntered(MouseEvent e)
 		{
 			e.getComponent().setCursor(
 					Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		}
 
+		@Override
 		public void mouseExited(MouseEvent e)
 		{
 			e.getComponent().setCursor(Cursor.getDefaultCursor());

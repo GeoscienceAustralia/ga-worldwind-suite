@@ -28,6 +28,7 @@ public class JDoubleField extends JTextField
 		setValue(value);
 	}
 
+	@Override
 	protected Document createDefaultModel()
 	{
 		return new DoubleDocument();
@@ -86,6 +87,7 @@ public class JDoubleField extends JTextField
 
 	private class DoubleDocument extends PlainDocument
 	{
+		@Override
 		public void insertString(int offs, String str, AttributeSet a)
 				throws BadLocationException
 		{

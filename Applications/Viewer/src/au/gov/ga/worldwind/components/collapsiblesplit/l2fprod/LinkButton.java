@@ -77,6 +77,7 @@ public class LinkButton extends JButton
 	 * @see javax.swing.JComponent#getUIClassID
 	 * @see javax.swing.UIDefaults#getUI
 	 */
+	@Override
 	public String getUIClassID()
 	{
 		return UI_CLASS_ID;

@@ -127,6 +127,7 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 
 	private class DefaultDividerPainter extends DividerPainter
 	{
+		@Override
 		public void paint(Graphics g, Rectangle bounds)
 		{
 			Graphics2D g2d = (Graphics2D) g;
@@ -231,31 +232,37 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 
 	private class InputHandler extends MouseInputAdapter implements KeyListener
 	{
+		@Override
 		public void mouseEntered(MouseEvent e)
 		{
 			updateCursor(e.getX(), e.getY(), true);
 		}
 
+		@Override
 		public void mouseMoved(MouseEvent e)
 		{
 			updateCursor(e.getX(), e.getY(), true);
 		}
 
+		@Override
 		public void mouseExited(MouseEvent e)
 		{
 			updateCursor(e.getX(), e.getY(), false);
 		}
 
+		@Override
 		public void mousePressed(MouseEvent e)
 		{
 			startDrag(e.getX(), e.getY());
 		}
 
+		@Override
 		public void mouseReleased(MouseEvent e)
 		{
 			finishDrag(e.getX(), e.getY());
 		}
 
+		@Override
 		public void mouseDragged(MouseEvent e)
 		{
 			updateDrag(e.getX(), e.getY());

@@ -18,6 +18,7 @@ public class JIntegerField extends JTextField
 		setValue(value);
 	}
 
+	@Override
 	protected Document createDefaultModel()
 	{
 		return new IntegerDocument();
@@ -62,6 +63,7 @@ public class JIntegerField extends JTextField
 
 	private class IntegerDocument extends PlainDocument
 	{
+		@Override
 		public void insertString(int offs, String str, AttributeSet a)
 				throws BadLocationException
 		{

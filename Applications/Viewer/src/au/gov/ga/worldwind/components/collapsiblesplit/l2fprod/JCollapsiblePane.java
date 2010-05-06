@@ -183,6 +183,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 			JCollapsiblePane.this.addCollapseListener(this);
 		}
 
+		@Override
 		public void putValue(String key, Object newValue)
 		{
 			super.putValue(key, newValue);
@@ -249,6 +250,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 	/**
 	 * Overriden to redirect call to the content pane.
 	 */
+	@Override
 	public void setLayout(LayoutManager mgr)
 	{
 		// wrapper can be null when setLayout is called by "super()" constructor
@@ -261,6 +263,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 	/**
 	 * Overriden to redirect call to the content pane.
 	 */
+	@Override
 	protected void addImpl(Component comp, Object constraints, int index)
 	{
 		getContentPane().add(comp, constraints, index);
@@ -269,6 +272,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 	/**
 	 * Overriden to redirect call to the content pane
 	 */
+	@Override
 	public void remove(Component comp)
 	{
 		getContentPane().remove(comp);
@@ -277,6 +281,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 	/**
 	 * Overriden to redirect call to the content pane.
 	 */
+	@Override
 	public void remove(int index)
 	{
 		getContentPane().remove(index);
@@ -285,6 +290,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 	/**
 	 * Overriden to redirect call to the content pane.
 	 */
+	@Override
 	public void removeAll()
 	{
 		getContentPane().removeAll();
@@ -388,6 +394,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 		}
 	}
 
+	@Override
 	public Dimension getMinimumSize()
 	{
 		return getPreferredSize();
@@ -402,6 +409,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 	 * 
 	 * @return this component preferred size
 	 */
+	@Override
 	public Dimension getPreferredSize()
 	{
 		/*
@@ -737,6 +745,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 			}
 		}
 
+		@Override
 		public void paintComponent(Graphics g)
 		{
 			if (!useAnimation || c.isVisible())
@@ -763,6 +772,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 			}
 		}
 
+		@Override
 		public void paint(Graphics g)
 		{
 			Graphics2D g2d = (Graphics2D) g;

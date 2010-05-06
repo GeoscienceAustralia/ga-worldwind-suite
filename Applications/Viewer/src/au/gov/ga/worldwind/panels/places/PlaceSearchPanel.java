@@ -217,6 +217,7 @@ public class PlaceSearchPanel extends JPanel
 
 		list.addMouseListener(new MouseAdapter()
 		{
+			@Override
 			public void mouseClicked(MouseEvent e)
 			{
 				if (e.getClickCount() == 2)

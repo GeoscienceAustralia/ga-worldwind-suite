@@ -39,6 +39,7 @@ public class GlossyCollapsibleGroupUI extends CollapsibleGroupUI
 		return new GlossyCollapsibleGroupUI();
 	}
 
+	@Override
 	protected Border createPaneBorder()
 	{
 		return new GlossyPaneBorder();
@@ -48,6 +49,7 @@ public class GlossyCollapsibleGroupUI extends CollapsibleGroupUI
 	 * Overriden to paint the background of the component but keeping the
 	 * rounded corners.
 	 */
+	@Override
 	public void update(Graphics g, JComponent c)
 	{
 		if (c.isOpaque())
@@ -68,7 +70,7 @@ public class GlossyCollapsibleGroupUI extends CollapsibleGroupUI
 	 */
 	class GlossyPaneBorder extends PaneBorder
 	{
-
+		@Override
 		protected void paintTitleBackground(CollapsibleGroup group, Graphics g)
 		{
 
@@ -102,6 +104,7 @@ public class GlossyCollapsibleGroupUI extends CollapsibleGroupUI
 			g.setClip(oldClip);
 		}
 
+		@Override
 		protected void paintExpandedControls(CollapsibleGroup group,
 				Graphics g, int x, int y, int width, int height)
 		{
@@ -116,10 +119,10 @@ public class GlossyCollapsibleGroupUI extends CollapsibleGroupUI
 					RenderingHints.VALUE_ANTIALIAS_OFF);
 		}
 
+		@Override
 		protected boolean isMouseOverBorder()
 		{
 			return true;
 		}
-
 	}
 }

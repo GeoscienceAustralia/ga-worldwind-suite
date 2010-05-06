@@ -2,32 +2,19 @@ package au.gov.ga.worldwind.dataset;
 
 import java.net.URL;
 
-public class LayerDefinition implements ILayerDefinition
+public class LayerDefinition extends AbstractData implements ILayerDefinition
 {
-	private String name;
 	private URL url;
 
-	public LayerDefinition(String name, URL url)
+	public LayerDefinition(String name, URL url, URL descriptionURL, URL iconURL)
 	{
-		this.name = name;
+		super(name, descriptionURL, iconURL);
 		this.url = url;
-	}
-
-	@Override
-	public String getName()
-	{
-		return name;
 	}
 
 	@Override
 	public URL getURL()
 	{
 		return url;
-	}
-	
-	@Override
-	public String toString()
-	{
-		return getName();
 	}
 }

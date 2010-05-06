@@ -74,6 +74,7 @@ public class CollapsibleGroupUI extends ComponentUI
 
 	protected ChangeListener propertyListener;
 
+	@Override
 	public void installUI(JComponent c)
 	{
 		super.installUI(c);
@@ -135,6 +136,7 @@ public class CollapsibleGroupUI extends ComponentUI
 		return map;
 	}
 
+	@Override
 	public void uninstallUI(JComponent c)
 	{
 		uninstallListeners();
@@ -174,6 +176,7 @@ public class CollapsibleGroupUI extends ComponentUI
 		return new PaneBorder();
 	}
 
+	@Override
 	public Dimension getPreferredSize(JComponent c)
 	{
 		Component component = group.getComponent(0);
@@ -214,6 +217,7 @@ public class CollapsibleGroupUI extends ComponentUI
 	{
 		LinkButton link = new LinkButton(action)
 		{
+			@Override
 			public void updateUI()
 			{
 				super.updateUI();
@@ -303,6 +307,7 @@ public class CollapsibleGroupUI extends ComponentUI
 
 	class ToggleListener extends MouseInputAdapter
 	{
+		@Override
 		public void mouseEntered(MouseEvent e)
 		{
 			if (isInBorder(e))
@@ -317,6 +322,7 @@ public class CollapsibleGroupUI extends ComponentUI
 			}
 		}
 
+		@Override
 		public void mouseExited(MouseEvent e)
 		{
 			e.getComponent().setCursor(null);
@@ -324,6 +330,7 @@ public class CollapsibleGroupUI extends ComponentUI
 			group.repaint();
 		}
 
+		@Override
 		public void mouseMoved(MouseEvent e)
 		{
 			if (isInBorder(e) && group.isCollapsable())
@@ -341,6 +348,7 @@ public class CollapsibleGroupUI extends ComponentUI
 			}
 		}
 
+		@Override
 		public void mouseReleased(MouseEvent e)
 		{
 			if (isInBorder(e) && group.isCollapsable())
@@ -362,6 +370,7 @@ public class CollapsibleGroupUI extends ComponentUI
 			group.setCollapsed(!group.isCollapsed());
 		}
 
+		@Override
 		public boolean isEnabled()
 		{
 			return group.isVisible() && group.isCollapsable();

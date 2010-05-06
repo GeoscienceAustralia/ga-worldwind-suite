@@ -215,6 +215,7 @@ public class LocalLayer extends TiledImageLayer
 				tile.getTileKey(), tile);
 	}
 
+	@Override
 	protected void setBlendingFunction(DrawContext dc)
 	{
 		GL gl = dc.getGL();
@@ -254,6 +255,7 @@ public class LocalLayer extends TiledImageLayer
 							: 1;
 		}
 
+		@Override
 		public boolean equals(Object o)
 		{
 			if (this == o)
@@ -267,11 +269,13 @@ public class LocalLayer extends TiledImageLayer
 			return !(tile != null ? !tile.equals(that.tile) : that.tile != null);
 		}
 
+		@Override
 		public int hashCode()
 		{
 			return (tile != null ? tile.hashCode() : 0);
 		}
 
+		@Override
 		public String toString()
 		{
 			return this.tile.toString();

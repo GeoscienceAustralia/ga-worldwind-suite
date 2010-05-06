@@ -1,9 +1,8 @@
-package au.gov.ga.worldwind.components.lazytree.layertree;
+package au.gov.ga.worldwind.components.lazytree;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
-import au.gov.ga.worldwind.components.lazytree.LazyTreeNode;
 
 public class LazyTreeObjectNode extends LazyTreeNode
 {

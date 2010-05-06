@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.components.lazytree;
 
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
@@ -10,20 +9,19 @@ import javax.swing.tree.TreePath;
 
 import org.jdesktop.swingworker.SwingWorker;
 
-import au.gov.ga.worldwind.components.lazytree.layertree.LazyLoadException;
-
 public class LazyTreeController implements TreeWillExpandListener
 {
 	private SwingWorkerFactory<MutableTreeNode[], ?> workerFactory = new DefaultWorkerFactory();
+	private LazyTree tree;
 	private DefaultTreeModel model;
 
-	public LazyTreeController(DefaultTreeModel model)
+	public LazyTreeController(LazyTree tree, DefaultTreeModel model)
 	{
+		this.tree = tree;
 		this.model = model;
 	}
 
-	public void treeWillCollapse(TreeExpansionEvent event)
-			throws ExpandVetoException
+	public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException
 	{
 		TreePath path = event.getPath();
 		Object lastPathComponent = path.getLastPathComponent();
@@ -33,8 +31,7 @@ public class LazyTreeController implements TreeWillExpandListener
 		}
 	}
 
-	public void treeWillExpand(TreeExpansionEvent event)
-			throws ExpandVetoException
+	public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException
 	{
 		TreePath path = event.getPath();
 		Object lastPathComponent = path.getLastPathComponent();
@@ -44,8 +41,7 @@ public class LazyTreeController implements TreeWillExpandListener
 		}
 	}
 
-	public void collapseNode(final LazyTreeNode node,
-			final DefaultTreeModel model)
+	public void collapseNode(final LazyTreeNode node, final DefaultTreeModel model)
 	{
 		if (node.isErrorLoading())
 		{
@@ -59,13 +55,14 @@ public class LazyTreeController implements TreeWillExpandListener
 		{
 			return;
 		}
+		tree.addLoadingNode(node);
 		node.setChildren(createLoadingNode());
 		createSwingWorker(node).execute();
 	}
 
 	protected MutableTreeNode createLoadingNode()
 	{
-		return new DefaultMutableTreeNode("Loading ...", false);
+		return new LoadingNode("Loading ...");
 	}
 
 	protected MutableTreeNode createErrorNode(Exception e)
@@ -79,18 +76,29 @@ public class LazyTreeController implements TreeWillExpandListener
 		{
 			text = "Error: " + e.getLocalizedMessage();
 		}
-		return new DefaultMutableTreeNode(text, false);
+		return new ErrorNode(text);
 	}
 
-	protected IWorker<MutableTreeNode[]> getWorkerInterface(
-			final LazyTreeNode node)
+	protected SwingWorker<MutableTreeNode[], ?> createSwingWorker(LazyTreeNode node)
+	{
+		return getWorkerFactory().getInstance(getWorkerInterface(node));
+	}
+
+	protected IWorker<MutableTreeNode[]> getWorkerInterface(final LazyTreeNode node)
 	{
 		return new IWorker<MutableTreeNode[]>()
 		{
 			@Override
 			public MutableTreeNode[] work() throws Exception
 			{
-				return node.loadChildren(model);
+				try
+				{
+					return node.loadChildren(model);
+				}
+				finally
+				{
+					tree.removeLoadingNode(node);
+				}
 			}
 
 			@Override
@@ -108,19 +116,12 @@ public class LazyTreeController implements TreeWillExpandListener
 		};
 	}
 
-	protected SwingWorker<MutableTreeNode[], ?> createSwingWorker(
-			final LazyTreeNode node)
-	{
-		return getWorkerFactory().getInstance(getWorkerInterface(node));
-	}
-
 	public SwingWorkerFactory<MutableTreeNode[], ?> getWorkerFactory()
 	{
 		return workerFactory;
 	}
 
-	public void setWorkerFactory(
-			SwingWorkerFactory<MutableTreeNode[], ?> workerFactory)
+	public void setWorkerFactory(SwingWorkerFactory<MutableTreeNode[], ?> workerFactory)
 	{
 		this.workerFactory = workerFactory;
 	}

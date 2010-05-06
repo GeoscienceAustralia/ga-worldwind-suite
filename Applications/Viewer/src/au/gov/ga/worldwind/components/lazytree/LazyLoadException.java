@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.components.lazytree.layertree;
+package au.gov.ga.worldwind.components.lazytree;
 
 public class LazyLoadException extends Exception
 {

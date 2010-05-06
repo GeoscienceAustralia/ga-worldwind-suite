@@ -2,11 +2,11 @@ package au.gov.ga.worldwind.dataset;
 
 import java.util.List;
 
-import au.gov.ga.worldwind.components.lazytree.layertree.ITreeObject;
+import au.gov.ga.worldwind.components.lazytree.ITreeObject;
 
-public interface IDataset extends ITreeObject
+public interface IDataset extends IData, ITreeObject
 {
-	public String getName();
 	public List<IDataset> getDatasets();
+
 	public List<ILayerDefinition> getLayers();
 }

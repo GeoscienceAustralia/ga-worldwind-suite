@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.dataset;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,17 +8,16 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
-import au.gov.ga.worldwind.components.lazytree.layertree.LazyTreeObjectNode;
+import au.gov.ga.worldwind.components.lazytree.LazyTreeObjectNode;
 
-public class Dataset implements IDataset
+public class Dataset extends AbstractData implements IDataset
 {
 	private List<ILayerDefinition> layers = new ArrayList<ILayerDefinition>();
 	private List<IDataset> datasets = new ArrayList<IDataset>();
-	private String name;
 
-	public Dataset(String name)
+	public Dataset(String name, URL descriptionURL, URL iconURL)
 	{
-		this.name = name;
+		super(name, descriptionURL, iconURL);
 	}
 
 	@Override
@@ -33,16 +33,9 @@ public class Dataset implements IDataset
 	}
 
 	@Override
-	public String getName()
-	{
-		return name;
-	}
-
-	@Override
 	public MutableTreeNode[] getChildren(DefaultTreeModel model)
 	{
-		MutableTreeNode[] array = new MutableTreeNode[datasets.size()
-				+ layers.size()];
+		MutableTreeNode[] array = new MutableTreeNode[datasets.size() + layers.size()];
 		int i = 0;
 		for (IDataset dataset : datasets)
 		{
@@ -53,11 +46,5 @@ public class Dataset implements IDataset
 			array[i++] = new DefaultMutableTreeNode(layer, false);
 		}
 		return array;
-	}
-
-	@Override
-	public String toString()
-	{
-		return getName();
 	}
 }

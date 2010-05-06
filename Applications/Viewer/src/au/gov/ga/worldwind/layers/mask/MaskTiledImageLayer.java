@@ -32,6 +32,8 @@ import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
+import au.gov.ga.worldwind.dataset.downloader.FileRetriever;
+
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
 
@@ -48,6 +50,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		super(levelSet);
 	}
 
+	@Override
 	protected void forceTextureLoad(TextureTile tile)
 	{
 		final URL textureURL = WorldWind.getDataFileStore().findFile(
@@ -59,6 +62,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		}
 	}
 
+	@Override
 	protected void requestTexture(DrawContext dc, TextureTile tile)
 	{
 		Vec4 centroid = tile.getCentroidPoint(dc.getGlobe());
@@ -131,6 +135,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 							: 1;
 		}
 
+		@Override
 		public boolean equals(Object o)
 		{
 			if (this == o)
@@ -144,11 +149,13 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			return !(tile != null ? !tile.equals(that.tile) : that.tile != null);
 		}
 
+		@Override
 		public int hashCode()
 		{
 			return (tile != null ? tile.hashCode() : 0);
 		}
 
+		@Override
 		public String toString()
 		{
 			return this.tile.toString();

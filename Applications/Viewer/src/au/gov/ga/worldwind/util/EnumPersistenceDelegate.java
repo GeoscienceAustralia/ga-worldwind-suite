@@ -35,6 +35,7 @@ public class EnumPersistenceDelegate extends DefaultPersistenceDelegate
 		}
 	}
 
+	@Override
 	protected Expression instantiate(Object oldInstance, Encoder out)
 	{
 		Enum<?> e = (Enum<?>) oldInstance;
@@ -42,6 +43,7 @@ public class EnumPersistenceDelegate extends DefaultPersistenceDelegate
 				new Object[] { e.name() });
 	}
 
+	@Override
 	protected boolean mutatesTo(Object oldInstance, Object newInstance)
 	{
 		return oldInstance == newInstance;
