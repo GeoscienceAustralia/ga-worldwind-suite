@@ -307,7 +307,7 @@ public class Console
 	{
 		try
 		{
-			String[] split = arg.split(",");
+			String[] split = (arg + " ").split(","); //split doesn't work if there are no values
 			Double[] d = stringsToDoubles(split);
 			NullableNumberArray n = new NullableNumberArray(d.length);
 			n.setDoubles(d);
@@ -328,6 +328,9 @@ public class Console
 		String[] groups = arg.split(" ");
 		if (groups.length != 6)
 			throw new IllegalOptionValueException(option, arg);
+		
+		for(int i = 0; i < groups.length; i++)
+			groups[i] = groups[i] + " ";
 
 		String[] min1 = groups[0].split(",");
 		String[] max1 = groups[1].split(",");
@@ -374,13 +377,14 @@ public class Console
 		Double[] d = new Double[s.length];
 		for (int i = 0; i < s.length; i++)
 		{
-			if (s.length == 0)
+			String t = s[i].trim();
+			if (t.length() == 0)
 			{
 				d[i] = null;
 			}
 			else
 			{
-				d[i] = Double.parseDouble(s[i]);
+				d[i] = Double.parseDouble(t);
 			}
 		}
 		return d;
