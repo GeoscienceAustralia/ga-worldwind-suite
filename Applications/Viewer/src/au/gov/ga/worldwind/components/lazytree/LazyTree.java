@@ -9,7 +9,7 @@ import javax.swing.tree.TreeNode;
 
 public class LazyTree extends JTree
 {
-	protected Set<TreeNode> loadingNodes = new HashSet<TreeNode>();
+	private Set<TreeNode> loadingNodes = new HashSet<TreeNode>();
 
 	public LazyTree(DefaultTreeModel model)
 	{
@@ -20,16 +20,25 @@ public class LazyTree extends JTree
 
 	public boolean addLoadingNode(TreeNode node)
 	{
-		return loadingNodes.add(node);
+		synchronized (loadingNodes)
+		{
+			return loadingNodes.add(node);
+		}
 	}
 
 	public boolean removeLoadingNode(TreeNode node)
 	{
-		return loadingNodes.remove(node);
+		synchronized (loadingNodes)
+		{
+			return loadingNodes.remove(node);
+		}
 	}
-	
+
 	public int loadingNodeCount()
 	{
-		return loadingNodes.size();
+		synchronized (loadingNodes)
+		{
+			return loadingNodes.size();
+		}
 	}
 }

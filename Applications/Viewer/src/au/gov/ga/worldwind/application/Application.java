@@ -173,7 +173,7 @@ public class Application
 
 	private JFrame frame;
 	private JFrame fullscreenFrame;
-	private GraphicsDevice fullscreenDevice;
+	//private GraphicsDevice fullscreenDevice;
 	private WorldWindowStereoGLCanvas wwd;
 	private StatusBar statusBar;
 	private LayersPanel layersPanel;
@@ -701,8 +701,8 @@ public class Application
 				GraphicsEnvironment ge = GraphicsEnvironment
 						.getLocalGraphicsEnvironment();
 				GraphicsDevice[] gds = ge.getScreenDevices();
-				fullscreenDevice = ge.getDefaultScreenDevice();
-
+				
+				/*fullscreenDevice = ge.getDefaultScreenDevice();
 				if (!fullscreenDevice.isFullScreenSupported())
 				{
 					JOptionPane
@@ -711,7 +711,7 @@ public class Application
 									"Graphics device does not support fullscreen mode.",
 									"Not supported", JOptionPane.ERROR_MESSAGE);
 				}
-				else
+				else*/
 				{
 					saveSplitLocations();
 					fullscreenFrame = new JFrame(frame.getTitle());
@@ -719,7 +719,8 @@ public class Application
 					fullscreenFrame.setContentPane(panel);
 					fullscreenFrame.setUndecorated(true);
 					fullscreenFrame.add(wwd);
-					fullscreenDevice.setFullScreenWindow(fullscreenFrame);
+					//fullscreenDevice.setFullScreenWindow(fullscreenFrame);
+					fullscreenFrame.setAlwaysOnTop(true);
 
 					fullscreenFrame
 							.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -777,7 +778,7 @@ public class Application
 				if (fullscreenFrame != null)
 				{
 					splitPane.setRightComponent(wwd);
-					fullscreenDevice.setFullScreenWindow(null);
+					//fullscreenDevice.setFullScreenWindow(null);
 					fullscreenFrame.dispose();
 					fullscreenFrame = null;
 					loadSplitLocations();
