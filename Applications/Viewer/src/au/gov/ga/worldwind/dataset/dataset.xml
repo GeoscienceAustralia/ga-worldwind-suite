@@ -8,5 +8,11 @@
 		</Dataset>
 		<Link name="Recursive" url="file:bin/au/gov/ga/worldwind/dataset/dataset.xml"
 			description="http://www.ga.gov.au/" />
+		<Dataset name="Common2"
+			icon="http://gos2.geodata.gov/Portal/images/miniGeographic_Services16.png">
+			<Layer name="BMNG" url="file:bin/au/gov/ga/worldwind/dataset/layer.xml"
+				description="http://www.ga.gov.au/"
+				icon="http://www.geodata.gov/Portal/images/miniLive_Data_and_Maps16.png" />
+		</Dataset>
 	</Dataset>
 </DatasetList>

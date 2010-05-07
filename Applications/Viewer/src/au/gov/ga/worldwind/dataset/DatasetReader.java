@@ -2,26 +2,22 @@ package au.gov.ga.worldwind.dataset;
 
 import gov.nasa.worldwind.util.WWXML;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 public class DatasetReader
 {
-	public static IDataset read(Object source) throws ParserConfigurationException, SAXException,
-			IOException
+	public static IDataset read(Object source) throws MalformedURLException
 	{
 		//top level dataset (DatasetList) doesn't have a name, and is not shown in the tree
 		IDataset root = new Dataset(null, null, null);
 
-		Document doc = WWXML.openDocument(source);
-		Element[] elements = WWXML.getElements(doc.getDocumentElement(), "//DatasetList", null);
+		Document document = WWXML.openDocument(source);
+		Element[] elements =
+				WWXML.getElements(document.getDocumentElement(), "//DatasetList", null);
 		if (elements != null)
 		{
 			for (Element element : elements)

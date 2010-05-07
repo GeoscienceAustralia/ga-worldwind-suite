@@ -22,6 +22,8 @@ import au.gov.ga.worldwind.util.EnumPersistenceDelegate;
 
 public class Settings
 {
+	//TODO don't use XMLEncoder, but rather write a custom XML file
+	
 	private final static String SETTINGS_FILENAME = ".gaww.xml";
 
 	private static Settings instance;

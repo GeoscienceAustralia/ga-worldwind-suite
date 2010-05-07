@@ -131,8 +131,6 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 		//update the label
 		label.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
 
-		System.out.println(row + ", " + this.tree.loadingNodeCount());
-
 		if (row < 0)
 			return label;
 
