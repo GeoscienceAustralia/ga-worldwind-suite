@@ -1,10 +1,11 @@
 package au.gov.ga.worldwind.dataset.layers;
 
-import java.io.File;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JTree;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
@@ -12,18 +13,8 @@ import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.dataset.layers.LayerTreePersistance.NodeItem;
 
-public class LayerTreeModel implements TreeModel
+public class LayerTreeModel implements TreeModel, TreeExpansionListener
 {
-	public static LayerTreeModel loadFromXML(Object source) throws MalformedURLException
-	{
-		return new LayerTreeModel(LayerTreePersistance.readFromXML(source));
-	}
-
-	public void saveToXML(File output)
-	{
-		LayerTreePersistance.saveToXML(this.root, output);
-	}
-
 	private NodeItem root;
 	private List<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
 
@@ -199,5 +190,46 @@ public class LayerTreeModel implements TreeModel
 		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
 		for (TreeModelListener l : listeners)
 			l.treeNodesRemoved(e);
+	}
+
+	@Override
+	public void treeCollapsed(TreeExpansionEvent event)
+	{
+		Object o = event.getPath().getLastPathComponent();
+		NodeItem node = (NodeItem) o;
+		node.setExpanded(false);
+	}
+
+	@Override
+	public void treeExpanded(TreeExpansionEvent event)
+	{
+		Object o = event.getPath().getLastPathComponent();
+		NodeItem node = (NodeItem) o;
+		node.setExpanded(true);
+	}
+
+	public void expandNodes(JTree tree)
+	{
+		List<NodeItem> path = new ArrayList<NodeItem>();
+		path.add(root);
+		expandIfRequired(tree, path);
+	}
+
+	private void expandIfRequired(JTree tree, List<NodeItem> path)
+	{
+		NodeItem last = path.get(path.size() - 1);
+		if (last.isExpanded() && last.getChildCount() > 0)
+		{
+			TreePath tp = new TreePath(path.toArray());
+			tree.expandPath(tp);
+
+			for (int i = 0; i < last.getChildCount(); i++)
+			{
+				NodeItem child = last.getChild(i);
+				path.add(child);
+				expandIfRequired(tree, path); //call recursively
+				path.remove(path.size() - 1);
+			}
+		}
 	}
 }

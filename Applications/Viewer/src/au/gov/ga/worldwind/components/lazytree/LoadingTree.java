@@ -11,6 +11,10 @@ public class LoadingTree extends JTree
 {
 	private Set<Object> loadingNodes = new HashSet<Object>();
 
+	public LoadingTree()
+	{
+	}
+
 	public LoadingTree(TreeModel model)
 	{
 		super(model);
@@ -39,7 +43,7 @@ public class LoadingTree extends JTree
 			return loadingNodes.size();
 		}
 	}
-	
+
 	@Override
 	public boolean imageUpdate(Image img, int infoflags, int x, int y, int w, int h)
 	{
