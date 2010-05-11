@@ -90,7 +90,7 @@ public class AnnotationsPanel extends JPanel
 		JPanel panel = new JPanel(new GridBagLayout());
 		add(panel, BorderLayout.NORTH);
 
-		addButton = new FlatJButton(Icons.add);
+		addButton = new FlatJButton(Icons.add.getIcon());
 		addButton.setToolTipText("Add annotation");
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -106,7 +106,7 @@ public class AnnotationsPanel extends JPanel
 			}
 		});
 
-		editButton = new FlatJButton(Icons.edit);
+		editButton = new FlatJButton(Icons.edit.getIcon());
 		editButton.setToolTipText("Edit selected");
 		c = new GridBagConstraints();
 		c.gridx = 1;
@@ -123,7 +123,7 @@ public class AnnotationsPanel extends JPanel
 		};
 		editButton.addActionListener(editAL);
 
-		deleteButton = new FlatJButton(Icons.delete);
+		deleteButton = new FlatJButton(Icons.delete.getIcon());
 		deleteButton.setToolTipText("Delete selected");
 		c = new GridBagConstraints();
 		c.gridx = 2;
@@ -140,7 +140,7 @@ public class AnnotationsPanel extends JPanel
 		};
 		deleteButton.addActionListener(deleteAL);
 
-		playButton = new FlatJButton(Icons.run);
+		playButton = new FlatJButton(Icons.run.getIcon());
 		c = new GridBagConstraints();
 		c.gridx = 3;
 		c.gridy = 0;
@@ -458,7 +458,7 @@ public class AnnotationsPanel extends JPanel
 	{
 		wwd.getView().stopAnimations();
 		playing = false;
-		playButton.setIcon(Icons.run);
+		playButton.setIcon(Icons.run.getIcon());
 		playButton.setToolTipText("Play through annotations");
 		enableButtons();
 	}
@@ -556,7 +556,7 @@ public class AnnotationsPanel extends JPanel
 			thread.start();
 		}
 
-		playButton.setIcon(Icons.stop);
+		playButton.setIcon(Icons.stop.getIcon());
 		playButton.setToolTipText("Stop playback");
 		enableButtons();
 	}

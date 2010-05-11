@@ -27,7 +27,7 @@ public class LazyTreeController implements TreeWillExpandListener
 		Object lastPathComponent = path.getLastPathComponent();
 		if (lastPathComponent instanceof LazyTreeNode)
 		{
-			collapseNode((LazyTreeNode) lastPathComponent, model);
+			collapseNode((LazyTreeNode) lastPathComponent);
 		}
 	}
 
@@ -37,11 +37,11 @@ public class LazyTreeController implements TreeWillExpandListener
 		Object lastPathComponent = path.getLastPathComponent();
 		if (lastPathComponent instanceof LazyTreeNode)
 		{
-			expandNode((LazyTreeNode) lastPathComponent, model);
+			expandNode((LazyTreeNode) lastPathComponent);
 		}
 	}
 
-	public void collapseNode(final LazyTreeNode node, final DefaultTreeModel model)
+	public void collapseNode(final LazyTreeNode node)
 	{
 		if (node.isErrorLoading())
 		{
@@ -49,7 +49,7 @@ public class LazyTreeController implements TreeWillExpandListener
 		}
 	}
 
-	public void expandNode(final LazyTreeNode node, final DefaultTreeModel model)
+	public void expandNode(final LazyTreeNode node)
 	{
 		if (node.areChildrenLoaded())
 		{

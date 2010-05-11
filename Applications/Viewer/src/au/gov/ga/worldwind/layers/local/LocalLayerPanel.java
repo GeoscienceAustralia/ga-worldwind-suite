@@ -92,7 +92,7 @@ public class LocalLayerPanel extends JPanel
 		c.gridx = 1;
 		panel.add(slider, c);
 
-		FlatJButton edit = new FlatJButton(Icons.edit);
+		FlatJButton edit = new FlatJButton(Icons.edit.getIcon());
 		edit.restrictSize();
 		edit.setToolTipText("Edit layer");
 		edit.addActionListener(new ActionListener()
@@ -112,7 +112,7 @@ public class LocalLayerPanel extends JPanel
 		c.gridx = 2;
 		panel.add(edit);
 
-		FlatJButton delete = new FlatJButton(Icons.delete);
+		FlatJButton delete = new FlatJButton(Icons.delete.getIcon());
 		delete.restrictSize();
 		delete.setToolTipText("Delete tileset");
 		delete.addActionListener(new ActionListener()

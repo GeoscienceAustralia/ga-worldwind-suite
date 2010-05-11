@@ -32,4 +32,21 @@ public class LazyTreeObjectNode extends LazyTreeNode
 		setAllowsChildren(false);
 		return null;
 	}
+
+	public void refreshChildren(DefaultTreeModel model)
+	{
+		if (getUserObject() instanceof ITreeObject)
+		{
+			ITreeObject userObject = (ITreeObject) getUserObject();
+			reset();
+			if (userObject instanceof ILazyTreeObject)
+			{
+
+			}
+			else
+			{
+				setChildren(userObject.getChildren(model));
+			}
+		}
+	}
 }

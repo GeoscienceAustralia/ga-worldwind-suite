@@ -274,7 +274,7 @@ public class AnnotationEditor extends JDialog
 		minZoomUnits.addActionListener(mzal);
 		mzal.actionPerformed(null);
 
-		FlatJButton flat = new FlatJButton(Icons.remove);
+		FlatJButton flat = new FlatJButton(Icons.remove.getIcon());
 		flat.restrictSize();
 		c = new GridBagConstraints();
 		c.gridx = 2;
@@ -339,7 +339,7 @@ public class AnnotationEditor extends JDialog
 		maxZoomUnits.addActionListener(mzal);
 		mzal.actionPerformed(null);
 
-		flat = new FlatJButton(Icons.remove);
+		flat = new FlatJButton(Icons.remove.getIcon());
 		flat.restrictSize();
 		c = new GridBagConstraints();
 		c.gridx = 2;

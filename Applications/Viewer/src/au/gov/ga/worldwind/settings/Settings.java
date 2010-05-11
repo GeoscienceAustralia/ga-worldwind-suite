@@ -23,8 +23,8 @@ import au.gov.ga.worldwind.util.EnumPersistenceDelegate;
 public class Settings
 {
 	//TODO don't use XMLEncoder, but rather write a custom XML file
-	
-	private final static String SETTINGS_FILENAME = ".gaww.xml";
+
+	private final static String SETTINGS_FILENAME = "settings.xml";
 
 	private static Settings instance;
 	private Properties settings;
@@ -83,8 +83,17 @@ public class Settings
 
 	private static File getSettingsFile()
 	{
+		return new File(getUserDirectory(), SETTINGS_FILENAME);
+	}
+
+	public static File getUserDirectory()
+	{
 		String home = System.getProperty("user.home");
-		return new File(new File(home), SETTINGS_FILENAME);
+		File homeDir = new File(home);
+		File dir = new File(homeDir, ".gaww");
+		if (!dir.exists())
+			dir.mkdirs();
+		return dir;
 	}
 
 	public static void save()
@@ -191,8 +200,7 @@ public class Settings
 			if (isProxyEnabled())
 			{
 				System.setProperty("http.proxyHost", getProxyHost());
-				System.setProperty("http.proxyPort", String
-						.valueOf(getProxyPort()));
+				System.setProperty("http.proxyPort", String.valueOf(getProxyPort()));
 				System.setProperty("http.nonProxyHosts", getNonProxyHosts());
 			}
 			else
@@ -297,8 +305,7 @@ public class Settings
 			if (verticalExaggeration < 0)
 				verticalExaggeration = 1.0;
 			this.verticalExaggeration = verticalExaggeration;
-			Configuration.setValue(AVKey.VERTICAL_EXAGGERATION,
-					verticalExaggeration);
+			Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, verticalExaggeration);
 		}
 
 		public Rectangle getWindowBounds()
@@ -314,14 +321,12 @@ public class Settings
 
 		private Rectangle checkWindowBounds(Rectangle windowBounds)
 		{
-			GraphicsEnvironment ge = GraphicsEnvironment
-					.getLocalGraphicsEnvironment();
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
 			if (windowBounds == null)
 			{
 				Point center = ge.getCenterPoint();
-				windowBounds = new Rectangle(center.x - 400, center.y - 300,
-						800, 600);
+				windowBounds = new Rectangle(center.x - 400, center.y - 300, 800, 600);
 			}
 			else
 			{
@@ -331,26 +336,20 @@ public class Settings
 			Rectangle maximumBounds = new Rectangle();
 			for (GraphicsDevice gd : ge.getScreenDevices())
 			{
-				maximumBounds = maximumBounds.union(gd
-						.getDefaultConfiguration().getBounds());
+				maximumBounds = maximumBounds.union(gd.getDefaultConfiguration().getBounds());
 			}
 
-			if (!maximumBounds.contains(windowBounds)
-					&& windowBounds.width <= maximumBounds.width
+			if (!maximumBounds.contains(windowBounds) && windowBounds.width <= maximumBounds.width
 					&& windowBounds.height <= maximumBounds.height)
 			{
 				if (windowBounds.x < maximumBounds.x)
 					windowBounds.x = maximumBounds.x;
 				if (windowBounds.y < maximumBounds.y)
 					windowBounds.y = maximumBounds.y;
-				if (windowBounds.x + windowBounds.width > maximumBounds.x
-						+ maximumBounds.width)
-					windowBounds.x = maximumBounds.x + maximumBounds.width
-							- windowBounds.width;
-				if (windowBounds.y + windowBounds.height > maximumBounds.y
-						+ maximumBounds.height)
-					windowBounds.y = maximumBounds.y + maximumBounds.height
-							- windowBounds.height;
+				if (windowBounds.x + windowBounds.width > maximumBounds.x + maximumBounds.width)
+					windowBounds.x = maximumBounds.x + maximumBounds.width - windowBounds.width;
+				if (windowBounds.y + windowBounds.height > maximumBounds.y + maximumBounds.height)
+					windowBounds.y = maximumBounds.y + maximumBounds.height - windowBounds.height;
 			}
 
 			if (!maximumBounds.contains(windowBounds))
@@ -504,8 +503,7 @@ public class Settings
 
 	public enum ProjectionMode implements Serializable
 	{
-		SIMPLE_OFFSET("Simple offset"),
-		ASYMMETRIC_FRUSTUM("Asymmetric frustum");
+		SIMPLE_OFFSET("Simple offset"), ASYMMETRIC_FRUSTUM("Asymmetric frustum");
 
 		private String pretty;
 
@@ -528,10 +526,8 @@ public class Settings
 
 	public enum StereoMode implements Serializable
 	{
-		STEREO_BUFFER("Hardware stereo buffer"),
-		RC_ANAGLYPH("Red/cyan anaglyph"),
-		GM_ANAGLYPH("Green/magenta anaglyph"),
-		BY_ANAGLYPH("Blue/yellow anaglyph");
+		STEREO_BUFFER("Hardware stereo buffer"), RC_ANAGLYPH("Red/cyan anaglyph"), GM_ANAGLYPH(
+				"Green/magenta anaglyph"), BY_ANAGLYPH("Blue/yellow anaglyph");
 
 		private String pretty;
 

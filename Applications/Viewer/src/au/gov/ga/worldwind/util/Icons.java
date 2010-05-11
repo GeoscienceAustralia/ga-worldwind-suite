@@ -3,47 +3,59 @@ package au.gov.ga.worldwind.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 import javax.swing.ImageIcon;
 
-public class Icons
+public enum Icons
 {
+	remove("remove.gif"),
+	search("search.gif"),
+	run("run.gif"),
+	stop("stop.gif"),
+	delete("delete.gif"),
+	edit("edit.gif"),
+	add("add.gif"),
+	up("up.gif"),
+	down("down.gif"),
+	legend("legend.gif"),
+	info("information.gif"),
+	error("error.gif"),
+	earth("earth.png");
+
 	private static final String ICON_DIRECTORY = "/au/gov/ga/worldwind/data/icons/";
+	private ImageIcon icon;
+	private URL url;
 
-	public static final ImageIcon remove;
-	public static final ImageIcon search;
-	public static final ImageIcon run;
-	public static final ImageIcon stop;
-	public static final ImageIcon delete;
-	public static final ImageIcon edit;
-	public static final ImageIcon add;
-	public static final ImageIcon up;
-	public static final ImageIcon down;
-	public static final ImageIcon legend;
-	public static final ImageIcon info;
-	public static final ImageIcon error;
-
-	static
+	Icons(String filename)
 	{
-		remove = loadIcon(ICON_DIRECTORY + "remove.gif");
-		search = loadIcon(ICON_DIRECTORY + "search.gif");
-		run = loadIcon(ICON_DIRECTORY + "run.gif");
-		stop = loadIcon(ICON_DIRECTORY + "stop.gif");
-		delete = loadIcon(ICON_DIRECTORY + "delete.gif");
-		edit = loadIcon(ICON_DIRECTORY + "edit.gif");
-		add = loadIcon(ICON_DIRECTORY + "add.gif");
-		up = loadIcon(ICON_DIRECTORY + "up.gif");
-		down = loadIcon(ICON_DIRECTORY + "down.gif");
-		legend = loadIcon(ICON_DIRECTORY + "legend.gif");
-		info = loadIcon(ICON_DIRECTORY + "information.gif");
-		error = loadIcon(ICON_DIRECTORY + "error.gif");
+		url = createURL(filename);
 	}
 
-	private static ImageIcon loadIcon(String path)
+	public ImageIcon getIcon()
+	{
+		if (icon == null)
+		{
+			icon = loadIcon(url);
+		}
+		return icon;
+	}
+
+	public static ImageIcon newLoadingIcon()
+	{
+		return loadIcon(createURL("loading.gif"));
+	}
+
+	private static URL createURL(String filename)
+	{
+		return Icons.class.getResource(ICON_DIRECTORY + filename);
+	}
+
+	private static ImageIcon loadIcon(URL url)
 	{
 		try
 		{
-			InputStream is = Icons.class.getResourceAsStream(path);
+			InputStream is = url.openStream();
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			byte[] buffer = new byte[1024];
 			int read;
@@ -57,10 +69,5 @@ public class Icons
 		{
 			return null;
 		}
-	}
-
-	public static ImageIcon newLoadingIcon()
-	{
-		return loadIcon(ICON_DIRECTORY + "loading.gif");
 	}
 }

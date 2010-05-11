@@ -30,7 +30,7 @@ public abstract class LazyTreeNode extends DefaultMutableTreeNode
 		setAllowsChildren(nodes != null && nodes.length > 0);
 	}
 
-	public void reset()
+	protected void reset()
 	{
 		setChildren((MutableTreeNode[]) null);
 		setAllowsChildren(true);

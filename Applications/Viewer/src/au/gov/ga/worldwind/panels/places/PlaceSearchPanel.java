@@ -81,7 +81,7 @@ public class PlaceSearchPanel extends JPanel
 		c.fill = GridBagConstraints.HORIZONTAL;
 		add(searchText, c);
 
-		searchButton = new FlatJButton(Icons.search);
+		searchButton = new FlatJButton(Icons.search.getIcon());
 		searchButton.restrictSize();
 		searchButton.setToolTipText("Search");
 		searchButton.setEnabled(false);
@@ -90,7 +90,7 @@ public class PlaceSearchPanel extends JPanel
 		c.gridy = 0;
 		add(searchButton, c);
 
-		clearButton = new FlatJButton(Icons.remove);
+		clearButton = new FlatJButton(Icons.remove.getIcon());
 		clearButton.restrictSize();
 		clearButton.setToolTipText("Clear results");
 		clearButton.setEnabled(false);

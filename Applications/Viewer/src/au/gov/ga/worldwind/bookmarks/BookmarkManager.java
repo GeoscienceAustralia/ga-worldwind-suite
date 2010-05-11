@@ -106,7 +106,7 @@ public class BookmarkManager extends JDialog
 		c.gridheight = 4;
 		panel.add(list, c);
 
-		rename = new FlatJButton(Icons.edit);
+		rename = new FlatJButton(Icons.edit.getIcon());
 		rename.restrictSize();
 		rename.setToolTipText("Rename");
 		final ActionListener renameAL = new ActionListener()
@@ -123,7 +123,7 @@ public class BookmarkManager extends JDialog
 		c.gridy = 0;
 		panel.add(rename, c);
 
-		delete = new FlatJButton(Icons.delete);
+		delete = new FlatJButton(Icons.delete.getIcon());
 		delete.setToolTipText("Delete");
 		delete.restrictSize();
 		final ActionListener deleteAL = new ActionListener()
@@ -140,7 +140,7 @@ public class BookmarkManager extends JDialog
 		c.gridy = 1;
 		panel.add(delete, c);
 
-		up = new FlatJButton(Icons.up);
+		up = new FlatJButton(Icons.up.getIcon());
 		up.setToolTipText("Move up");
 		up.restrictSize();
 		up.addActionListener(new ActionListener()
@@ -159,7 +159,7 @@ public class BookmarkManager extends JDialog
 		c.gridy = 2;
 		panel.add(up, c);
 
-		down = new FlatJButton(Icons.down);
+		down = new FlatJButton(Icons.down.getIcon());
 		down.setToolTipText("Move down");
 		down.restrictSize();
 		down.addActionListener(new ActionListener()

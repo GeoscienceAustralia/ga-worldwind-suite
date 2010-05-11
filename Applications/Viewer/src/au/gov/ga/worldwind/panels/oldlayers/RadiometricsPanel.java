@@ -227,7 +227,7 @@ public class RadiometricsPanel extends JPanel {
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(radioSlider, c);
 
-		FlatJButton metadata = new FlatJButton(Icons.info);
+		FlatJButton metadata = new FlatJButton(Icons.info.getIcon());
 		metadata.restrictSize();
 		metadata.addActionListener(createMetadataListener("Radiometrics",
 				"info_radio.html", 700, 500));
@@ -335,7 +335,7 @@ public class RadiometricsPanel extends JPanel {
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasSlider, c);
 
-		metadata = new FlatJButton(Icons.info);
+		metadata = new FlatJButton(Icons.info.getIcon());
 		metadata.restrictSize();
 		metadata.addActionListener(createMetadataListener(
 				"Colour-enhanced areas", "info_areas.html", 700, 500));
@@ -368,7 +368,7 @@ public class RadiometricsPanel extends JPanel {
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(areasCombo, c);
 
-		FlatJButton legend = new FlatJButton(Icons.legend);
+		FlatJButton legend = new FlatJButton(Icons.legend.getIcon());
 		legend.restrictSize();
 		legend
 				.addActionListener(createMetadataListener(
@@ -449,7 +449,7 @@ public class RadiometricsPanel extends JPanel {
 		panel.add(radio, c);
 
 		if (legendAL != null) {
-			FlatJButton legend = new FlatJButton(Icons.legend);
+			FlatJButton legend = new FlatJButton(Icons.legend.getIcon());
 			legend.restrictSize();
 			legend.addActionListener(legendAL);
 			legend.setToolTipText("Show legend");

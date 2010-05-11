@@ -75,7 +75,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		listeners.remove(l);
 	}
 
-	public void removeNodeFromParent(INode node, TreePath path)
+	public void removeNodeFromParent(INode node)
 	{
 		INode parent = node.getParent();
 		if (parent != null)
@@ -92,13 +92,13 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		}
 	}
 
-	public void insertNodeInto(INode moveNode, INode targetNode, int index, TreePath path)
+	public void insertNodeInto(INode newNode, INode parentNode, int index)
 	{
-		targetNode.insertChild(index, moveNode);
+		parentNode.insertChild(index, newNode);
 
 		int[] newIndexs = new int[1];
 		newIndexs[0] = index;
-		nodesWereInserted(targetNode, newIndexs);
+		nodesWereInserted(parentNode, newIndexs);
 	}
 
 	public INode getParent(INode targetNode)

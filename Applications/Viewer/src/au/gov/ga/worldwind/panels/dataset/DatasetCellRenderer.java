@@ -52,7 +52,7 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 		button = new JButton();
 		button.setOpaque(false);
 
-		int height = Icons.add.getIconHeight();
+		int height = Icons.add.getIcon().getIconHeight();
 		Dimension size = new Dimension(height + 2, height + 2);
 		button.setPreferredSize(size);
 		button.setMinimumSize(size);
@@ -146,7 +146,7 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 			}
 			else if (node instanceof ErrorNode)
 			{
-				label.setIcon(Icons.error);
+				label.setIcon(Icons.error.getIcon());
 			}
 			else
 			{
@@ -210,7 +210,7 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 						if (false)
 							button.setIcon(Icons.remove);
 						else*/
-						button.setIcon(Icons.add);
+						button.setIcon(Icons.add.getIcon());
 
 						boolean mouseInsideButton =
 								mouseRow >= 0 && button.getBounds().contains(mouseX, mouseY);

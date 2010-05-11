@@ -24,17 +24,20 @@ public class NodeTransferHandler extends TransferHandler
 	public NodeTransferHandler(JTree layersTree, JTree datasetTree)
 	{
 		super();
-		this.datasetTree = datasetTree;
 		this.layersTree = layersTree;
+		this.datasetTree = datasetTree;
 	}
 
 	@Override
 	public int getSourceActions(JComponent c)
 	{
-		if (c == datasetTree)
-			return TransferHandler.COPY;
-		if (c == layersTree)
-			return TransferHandler.MOVE;
+		if (c != null)
+		{
+			if (c == datasetTree)
+				return TransferHandler.COPY;
+			if (c == layersTree)
+				return TransferHandler.MOVE;
+		}
 		return TransferHandler.NONE;
 	}
 
@@ -42,6 +45,9 @@ public class NodeTransferHandler extends TransferHandler
 	protected Transferable createTransferable(JComponent source)
 	{
 		dropLocation = null;
+
+		if (source == null)
+			return null;
 
 		TreeTransferable t = null;
 		if (source == layersTree)
@@ -70,19 +76,38 @@ public class NodeTransferHandler extends TransferHandler
 	}
 
 	@Override
+	public boolean canImport(TransferSupport support)
+	{
+		return support.getComponent() == layersTree;
+	}
+
+	@Override
+	public boolean importData(TransferSupport support)
+	{
+		DropLocation dl = support.getDropLocation();
+		if (dl instanceof JTree.DropLocation)
+		{
+			dropLocation = (JTree.DropLocation) dl;
+			return true;
+		}
+		return false;
+	}
+
+	@Override
 	protected void exportDone(JComponent source, Transferable data, int action)
 	{
-		if (dropLocation == null || data == null || !(data instanceof TreeTransferable))
+		if (source == null || dropLocation == null || data == null
+				|| !(data instanceof TreeTransferable))
 			return;
 
 		TreeTransferable t = (TreeTransferable) data;
 		LayerTreeModel model = (LayerTreeModel) layersTree.getModel();
 
-		TreePath parentPath;
-		INode parent = null;
+		TreePath p = dropLocation.getPath();
+		if (p == null)
+			return; //TODO perhaps add it to uncategorized folder?
 
-		parentPath = dropLocation.getPath();
-		parent = (INode) parentPath.getLastPathComponent();
+		INode parent = (INode) p.getLastPathComponent();
 		int index = dropLocation.getChildIndex();
 
 		if (index < 0)
@@ -105,8 +130,8 @@ public class NodeTransferHandler extends TransferHandler
 						index--;
 				}
 
-				model.removeNodeFromParent(move, path);
-				model.insertNodeInto(move, parent, index, parentPath);
+				model.removeNodeFromParent(move);
+				model.insertNodeInto(move, parent, index);
 				index++;
 			}
 			else if (source == datasetTree)
@@ -116,7 +141,7 @@ public class NodeTransferHandler extends TransferHandler
 				{
 					ILayerDefinition definition = (ILayerDefinition) dmtn.getUserObject();
 					INode node = LayerNode.createFromLayerDefinition(definition);
-					model.insertNodeInto(node, parent, index, parentPath);
+					model.insertNodeInto(node, parent, index);
 				}
 			}
 		}
@@ -125,24 +150,6 @@ public class NodeTransferHandler extends TransferHandler
 			((ClearableBasicTreeUI) layersTree.getUI()).relayout();
 
 		dropLocation = null;
-	}
-
-	@Override
-	public boolean canImport(TransferSupport support)
-	{
-		return support.getComponent() == layersTree;
-	}
-
-	@Override
-	public boolean importData(TransferSupport support)
-	{
-		DropLocation dl = support.getDropLocation();
-		if (dl instanceof JTree.DropLocation)
-		{
-			dropLocation = (JTree.DropLocation) dl;
-			return true;
-		}
-		return false;
 	}
 
 	private boolean nodeAncestorOf(INode ancestor, INode child)

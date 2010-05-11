@@ -84,7 +84,7 @@ public class GoToCoordinatePanel extends JPanel
 
 		if (!inDialog)
 		{
-			FlatJButton go = new FlatJButton(Icons.run);
+			FlatJButton go = new FlatJButton(Icons.run.getIcon());
 			go.restrictSize();
 			go.setToolTipText("Go");
 			c = new GridBagConstraints();

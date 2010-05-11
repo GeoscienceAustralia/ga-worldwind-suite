@@ -141,7 +141,7 @@ public class GeophysicsPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(gravitySlider, c);
 
-		flat = new FlatJButton(Icons.info);
+		flat = new FlatJButton(Icons.info.getIcon());
 		flat.restrictSize();
 		flat.addActionListener(createMetadataListener("Gravity", "gravity",
 				"info_grav.html", 700, 500));
@@ -151,7 +151,7 @@ public class GeophysicsPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(flat, c);
 
-		flat = new FlatJButton(Icons.legend);
+		flat = new FlatJButton(Icons.legend.getIcon());
 		flat.restrictSize();
 		flat.addActionListener(createMetadataListener("Gravity Legend",
 				"gravity", "grav_legend.html", 240, 500));
@@ -213,7 +213,7 @@ public class GeophysicsPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(magneticsSlider, c);
 
-		flat = new FlatJButton(Icons.info);
+		flat = new FlatJButton(Icons.info.getIcon());
 		flat.restrictSize();
 		flat.addActionListener(createMetadataListener("Magnetics", "magnetics",
 				"info_mag.html", 700, 500));
@@ -223,7 +223,7 @@ public class GeophysicsPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(flat, c);
 
-		flat = new FlatJButton(Icons.legend);
+		flat = new FlatJButton(Icons.legend.getIcon());
 		flat.restrictSize();
 		flat.addActionListener(createMetadataListener("Magnetics Legend",
 				"magnetics", "mag_legend.html", 240, 500));
