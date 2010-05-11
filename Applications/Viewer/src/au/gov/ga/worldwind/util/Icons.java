@@ -21,6 +21,8 @@ public enum Icons
 	legend("legend.gif"),
 	info("information.gif"),
 	error("error.gif"),
+	newfolder("newfolder.gif"),
+	folder("folder.gif"),
 	earth("earth.png");
 
 	private static final String ICON_DIRECTORY = "/au/gov/ga/worldwind/data/icons/";
@@ -40,7 +42,7 @@ public enum Icons
 		}
 		return icon;
 	}
-	
+
 	public URL getURL()
 	{
 		return url;

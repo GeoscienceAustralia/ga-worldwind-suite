@@ -12,7 +12,7 @@ public class LayerDefinition extends AbstractData implements ILayerDefinition
 		this.url = url;
 	}
 
-	public URL getURL()
+	public URL getLayerURL()
 	{
 		return url;
 	}

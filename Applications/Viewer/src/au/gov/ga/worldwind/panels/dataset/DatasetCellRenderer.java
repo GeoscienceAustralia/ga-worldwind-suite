@@ -25,6 +25,7 @@ import javax.swing.tree.TreePath;
 import au.gov.ga.worldwind.components.lazytree.ErrorNode;
 import au.gov.ga.worldwind.components.lazytree.LoadingNode;
 import au.gov.ga.worldwind.components.lazytree.LoadingTree;
+import au.gov.ga.worldwind.panels.layers.LayerTreeModel;
 import au.gov.ga.worldwind.util.DefaultLauncher;
 import au.gov.ga.worldwind.util.HSLColor;
 import au.gov.ga.worldwind.util.Icons;
@@ -43,6 +44,8 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 	private DefaultTreeCellRenderer label;
 
 	private ImageIcon loadingIcon;
+
+	private LayerTreeModel layerTreeModel;
 
 	public DatasetCellRenderer()
 	{
@@ -71,9 +74,15 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 		loadingIcon = Icons.newLoadingIcon();
 	}
 
+	public void setLayerTreeModel(LayerTreeModel layerTreeModel)
+	{
+		this.layerTreeModel = layerTreeModel;
+	}
+
 	private void toggleLayer(int row)
 	{
-		System.out.println("SELECTED = " + row);
+		if (layerTreeModel == null)
+			return;
 
 		TreePath path = tree.getSelectionPath();
 		Object value = path.getLastPathComponent();
@@ -83,7 +92,11 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 			if (userObject != null && userObject instanceof ILayerDefinition)
 			{
 				ILayerDefinition layer = (ILayerDefinition) userObject;
-				System.out.println(layer.getName());
+				if (layerTreeModel.containsLayer(layer))
+					layerTreeModel.removeLayer(layer);
+				else
+					layerTreeModel.addLayer(layer);
+				tree.repaint();
 			}
 		}
 	}
@@ -198,19 +211,18 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 						label.setIcon(null);
 					}
 
-					if (userObject instanceof ILayerDefinition)
+					if (userObject instanceof ILayerDefinition && layerTreeModel != null)
 					{
 						//have to add it each time? it removes itself?
 						add(label, BorderLayout.CENTER);
 						returnValue = this;
 						//doLayout();
 
-						//TODO set icon to remove/add if user has layer in their layer list or not
-						/*ILayerDefinition node = (ILayerDefinition) userObject;
-						if (false)
-							button.setIcon(Icons.remove);
-						else*/
-						button.setIcon(Icons.add.getIcon());
+						ILayerDefinition layer = (ILayerDefinition) userObject;
+						if (layerTreeModel.containsLayer(layer))
+							button.setIcon(Icons.remove.getIcon());
+						else
+							button.setIcon(Icons.add.getIcon());
 
 						boolean mouseInsideButton =
 								mouseRow >= 0 && button.getBounds().contains(mouseX, mouseY);

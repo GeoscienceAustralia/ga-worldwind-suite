@@ -14,6 +14,7 @@ import javax.swing.tree.TreePath;
 import au.gov.ga.worldwind.components.lazytree.LazyTree;
 import au.gov.ga.worldwind.components.lazytree.LazyTreeObjectNode;
 import au.gov.ga.worldwind.panels.WWPanel;
+import au.gov.ga.worldwind.panels.layers.LayerTreeModel;
 
 public class DatasetPanel extends JPanel implements WWPanel
 {
@@ -21,6 +22,7 @@ public class DatasetPanel extends JPanel implements WWPanel
 	private Dataset root;
 	private LazyTreeObjectNode rootNode;
 	private DefaultTreeModel model;
+	private DatasetCellRenderer renderer;
 
 	public DatasetPanel()
 	{
@@ -30,16 +32,17 @@ public class DatasetPanel extends JPanel implements WWPanel
 		model = new DefaultTreeModel(null);
 		rootNode = new LazyTreeObjectNode(root, model);
 		model.setRoot(rootNode);
+		renderer = new DatasetCellRenderer();
 
 		tree = new LazyTree(model);
 		tree.setRootVisible(false);
 		tree.setShowsRootHandles(true);
 		tree.setRowHeight(0);
-		tree.setCellRenderer(new DatasetCellRenderer());
+		tree.setCellRenderer(renderer);
 
 		JScrollPane scrollPane = new JScrollPane(tree);
 		add(scrollPane, BorderLayout.CENTER);
-		scrollPane.setPreferredSize(new Dimension(20, 20));
+		scrollPane.setPreferredSize(new Dimension(50, 50));
 	}
 
 	public void addDataset(Dataset dataset)
@@ -57,6 +60,11 @@ public class DatasetPanel extends JPanel implements WWPanel
 	public JTree getTree()
 	{
 		return tree;
+	}
+
+	public void registerLayerTreeModel(LayerTreeModel layerTreeModel)
+	{
+		renderer.setLayerTreeModel(layerTreeModel);
 	}
 
 	@Override

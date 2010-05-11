@@ -121,7 +121,11 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 		if (value != null && value instanceof INode)
 		{
 			final INode node = (INode) value;
-			if (node.isIconLoaded())
+			if (node.isError())
+			{
+				label.setIcon(Icons.error.getIcon());
+			}
+			else if (node.isIconLoaded())
 			{
 				label.setIcon(node.getIcon());
 			}

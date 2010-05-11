@@ -4,19 +4,24 @@ import gov.nasa.worldwind.WorldWindow;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.io.File;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.DropMode;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeCellEditor;
-import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.components.lazytree.LoadingTree;
 import au.gov.ga.worldwind.panels.WWPanel;
+import au.gov.ga.worldwind.panels.dataset.DatasetPanel;
 import au.gov.ga.worldwind.panels.layers.drag.NodeTransferHandler;
 import au.gov.ga.worldwind.settings.Settings;
+import au.gov.ga.worldwind.util.Icons;
 
 public class LayersPanel extends JPanel implements WWPanel
 {
@@ -24,7 +29,10 @@ public class LayersPanel extends JPanel implements WWPanel
 	private static final File layersFile = new File(Settings.getUserDirectory(), LAYERS_FILENAME);
 
 	private LoadingTree tree;
+	private LayerTreeModel model;
 	private INode root;
+
+	private DatasetPanel datasetPanel;
 
 	public LayersPanel()
 	{
@@ -40,31 +48,108 @@ public class LayersPanel extends JPanel implements WWPanel
 		if (root == null)
 			root = createDefaultRoot();
 
-		LayerTreeModel model = new LayerTreeModel(root);
-		tree = new LoadingTree(model);
+		tree = new LoadingTree();
+		model = new LayerTreeModel(tree, root);
+		tree.setModel(model);
 		tree.setUI(new ClearableBasicTreeUI());
 		tree.setCellRenderer(new LayerCellRenderer());
-		tree.setCellEditor(new DefaultTreeCellEditor(tree, new DefaultTreeCellRenderer()));
+		//tree.setCellEditor(new DefaultTreeCellEditor(tree, new DefaultTreeCellRenderer()));
 		tree.setEditable(true);
 		tree.setShowsRootHandles(true);
 		tree.setRootVisible(false);
 		tree.setRowHeight(0);
 		tree.addTreeExpansionListener(model);
-		model.expandNodes(tree);
+		model.expandNodes();
 
 		JScrollPane scrollPane = new JScrollPane(tree);
 		add(scrollPane, BorderLayout.CENTER);
-		scrollPane.setPreferredSize(new Dimension(20, 20));
+		scrollPane.setPreferredSize(new Dimension(50, 50));
+
+
+		Action newFolderAction = new AbstractAction("Create Folder", Icons.newfolder.getIcon())
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				FolderNode node = new FolderNode("New Folder", Icons.folder.getURL(), true);
+				TreePath p = tree.getSelectionPath();
+				TreePath editPath;
+				if (p == null)
+				{
+					model.addToRoot(node);
+					editPath = new TreePath(new Object[] { root, node });
+				}
+				else
+				{
+					INode parent = (INode) p.getLastPathComponent();
+					model.insertNodeInto(node, parent, parent.getChildCount());
+					editPath = p.pathByAddingChild(node);
+				}
+				tree.expandPath(editPath);
+				tree.startEditingAtPath(editPath);
+			}
+		};
+
+		Action renameAction = new AbstractAction("Rename selected", Icons.edit.getIcon())
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				TreePath p = tree.getSelectionPath();
+				if (p != null)
+				{
+					tree.startEditingAtPath(p);
+				}
+			}
+		};
+
+		Action deleteAction = new AbstractAction("Delete selected", Icons.delete.getIcon())
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				TreePath p = tree.getSelectionPath();
+				if (p != null)
+				{
+					INode node = (INode) p.getLastPathComponent();
+					model.removeNodeFromParent(node);
+				}
+			}
+		};
+
+		JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
+		toolBar.setFloatable(false);
+		toolBar.add(newFolderAction);
+		toolBar.add(renameAction);
+		toolBar.add(deleteAction);
+		add(toolBar, BorderLayout.PAGE_START);
 	}
 
-	public void setupDrag(JTree datasetTree)
+	public void linkWithDatasetPanel(DatasetPanel datasetPanel)
 	{
+		this.datasetPanel = datasetPanel;
+		datasetPanel.registerLayerTreeModel(model);
+	}
+
+	public void setupDrag()
+	{
+		JTree datasetTree = datasetPanel != null ? datasetPanel.getTree() : null;
+
 		NodeTransferHandler handler = new NodeTransferHandler(tree, datasetTree);
 		tree.setTransferHandler(handler);
-		datasetTree.setTransferHandler(handler);
 		tree.setDragEnabled(true);
-		datasetTree.setDragEnabled(true);
 		tree.setDropMode(DropMode.ON_OR_INSERT);
+
+		if (datasetTree != null)
+		{
+			datasetTree.setTransferHandler(handler);
+			datasetTree.setDragEnabled(true);
+		}
+	}
+
+	public LayerTreeModel getModel()
+	{
+		return model;
 	}
 
 	private INode createDefaultRoot()

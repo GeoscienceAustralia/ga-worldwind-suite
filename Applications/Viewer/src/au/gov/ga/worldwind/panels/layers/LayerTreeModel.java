@@ -1,7 +1,12 @@
 package au.gov.ga.worldwind.panels.layers;
 
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
@@ -11,14 +16,101 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
+
 public class LayerTreeModel implements TreeModel, TreeExpansionListener
 {
 	private INode root;
+	private JTree tree;
 	private List<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
+	private Map<URL, Set<LayerNode>> layerURLs = new HashMap<URL, Set<LayerNode>>();
 
-	public LayerTreeModel(INode root)
+	public LayerTreeModel(JTree tree, INode root)
 	{
+		this.tree = tree;
 		this.root = root;
+		addLayerChildrenURLsToMap(root);
+	}
+
+	private void addLayerChildrenURLsToMap(INode node)
+	{
+		for (int i = 0; i < node.getChildCount(); i++)
+		{
+			INode child = node.getChild(i);
+			if (child instanceof LayerNode)
+			{
+				addedLayer((LayerNode) child);
+			}
+			addLayerChildrenURLsToMap(child);
+		}
+	}
+
+	public void addToRoot(INode node)
+	{
+		insertNodeInto(node, root, root.getChildCount());
+	}
+
+	public void addLayer(ILayerDefinition layer)
+	{
+		INode node = LayerNode.createFromLayerDefinition(layer);
+		TreePath selected = tree.getSelectionPath();
+		if (selected == null)
+			addToRoot(node);
+		else
+		{
+			INode parent = (INode) selected.getLastPathComponent();
+			insertNodeInto(node, parent, parent.getChildCount());
+		}
+		((ClearableBasicTreeUI) tree.getUI()).relayout();
+	}
+
+	public void removeLayer(ILayerDefinition layer)
+	{
+		URL url = layer.getLayerURL();
+		if (layerURLs.containsKey(url))
+		{
+			Set<LayerNode> set = layerURLs.get(url);
+			while (!set.isEmpty())
+			{
+				//this will call removedLayer() which will remove the node from the set
+				removeNodeFromParent(set.iterator().next());
+			}
+		}
+	}
+
+	public boolean containsLayer(ILayerDefinition layer)
+	{
+		return layerURLs.containsKey(layer.getLayerURL());
+	}
+
+	public void addedLayer(LayerNode node)
+	{
+		URL url = node.getLayerURL();
+		Set<LayerNode> set;
+		if (layerURLs.containsKey(url))
+		{
+			set = layerURLs.get(url);
+		}
+		else
+		{
+			set = new HashSet<LayerNode>();
+			layerURLs.put(url, set);
+		}
+		set.add(node);
+	}
+
+	public void removedLayer(LayerNode node)
+	{
+		URL url = node.getLayerURL();
+		if (layerURLs.containsKey(url))
+		{
+			Set<LayerNode> set = layerURLs.get(url);
+			set.remove(node);
+			if (set.isEmpty())
+			{
+				layerURLs.remove(url);
+			}
+		}
 	}
 
 	public Object getChild(Object parent, int index)
@@ -75,6 +167,20 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		listeners.remove(l);
 	}
 
+	public void insertNodeInto(INode newNode, INode parentNode, int index)
+	{
+		parentNode.insertChild(index, newNode);
+
+		int[] newIndexs = new int[1];
+		newIndexs[0] = index;
+		nodesWereInserted(parentNode, newIndexs);
+
+		if (newNode instanceof LayerNode)
+		{
+			addedLayer((LayerNode) newNode);
+		}
+	}
+
 	public void removeNodeFromParent(INode node)
 	{
 		INode parent = node.getParent();
@@ -90,15 +196,10 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			removedArray[0] = node;
 			nodesWereRemoved(parent, childIndex, removedArray);
 		}
-	}
-
-	public void insertNodeInto(INode newNode, INode parentNode, int index)
-	{
-		parentNode.insertChild(index, newNode);
-
-		int[] newIndexs = new int[1];
-		newIndexs[0] = index;
-		nodesWereInserted(parentNode, newIndexs);
+		if (node instanceof LayerNode)
+		{
+			removedLayer((LayerNode) node);
+		}
 	}
 
 	public INode getParent(INode targetNode)
@@ -120,7 +221,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		node.setExpanded(true);
 	}
 
-	public void expandNodes(JTree tree)
+	public void expandNodes()
 	{
 		List<INode> path = new ArrayList<INode>();
 		path.add(root);

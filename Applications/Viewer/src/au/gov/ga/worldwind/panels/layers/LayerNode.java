@@ -52,6 +52,6 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	public static LayerNode createFromLayerDefinition(ILayerDefinition definition)
 	{
 		return new LayerNode(definition.getName(), definition.getIconURL(), true, definition
-				.getURL(), definition.getDescriptionURL(), true);
+				.getLayerURL(), definition.getDescriptionURL(), true);
 	}
 }

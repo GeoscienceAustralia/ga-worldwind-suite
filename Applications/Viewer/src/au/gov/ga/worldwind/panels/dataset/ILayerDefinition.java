@@ -4,5 +4,5 @@ import java.net.URL;
 
 public interface ILayerDefinition extends IData
 {
-	public URL getURL();
+	public URL getLayerURL();
 }

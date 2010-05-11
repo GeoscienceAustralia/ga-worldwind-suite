@@ -104,15 +104,17 @@ public class NodeTransferHandler extends TransferHandler
 		LayerTreeModel model = (LayerTreeModel) layersTree.getModel();
 
 		TreePath p = dropLocation.getPath();
-		if (p == null)
-			return; //TODO perhaps add it to uncategorized folder?
+		boolean noparent = p == null;
+		INode parent = null;
+		int index = 0;
 
-		INode parent = (INode) p.getLastPathComponent();
-		int index = dropLocation.getChildIndex();
-
-		if (index < 0)
+		if (!noparent)
 		{
-			index = parent.getChildCount();
+			parent = (INode) p.getLastPathComponent();
+			index = dropLocation.getChildIndex();
+
+			if (index < 0)
+				index = parent.getChildCount();
 		}
 
 		for (TreePath path : t.getPaths())
@@ -121,18 +123,19 @@ public class NodeTransferHandler extends TransferHandler
 			{
 				INode move = (INode) path.getLastPathComponent();
 
-				if (move == parent || nodeAncestorOf(move, parent))
-					continue;
-
-				if (move.getParent() == parent)
+				if (!noparent)
 				{
-					if (index > model.getIndexOfChild(parent, move))
+					if (move == parent || nodeAncestorOf(move, parent))
+						continue;
+					if (move.getParent() == parent && index > model.getIndexOfChild(parent, move))
 						index--;
 				}
 
 				model.removeNodeFromParent(move);
-				model.insertNodeInto(move, parent, index);
-				index++;
+				if (noparent)
+					model.addToRoot(move);
+				else
+					model.insertNodeInto(move, parent, index++);
 			}
 			else if (source == datasetTree)
 			{
@@ -141,13 +144,15 @@ public class NodeTransferHandler extends TransferHandler
 				{
 					ILayerDefinition definition = (ILayerDefinition) dmtn.getUserObject();
 					INode node = LayerNode.createFromLayerDefinition(definition);
-					model.insertNodeInto(node, parent, index);
+					if (noparent)
+						model.addToRoot(node);
+					else
+						model.insertNodeInto(node, parent, index);
 				}
 			}
 		}
 
-		if (layersTree.getUI() instanceof ClearableBasicTreeUI)
-			((ClearableBasicTreeUI) layersTree.getUI()).relayout();
+		((ClearableBasicTreeUI) layersTree.getUI()).relayout();
 
 		dropLocation = null;
 	}
