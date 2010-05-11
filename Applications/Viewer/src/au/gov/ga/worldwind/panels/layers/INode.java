@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.panels.layers;
 
-import au.gov.ga.worldwind.dataset.IIconItem;
+import au.gov.ga.worldwind.panels.dataset.IIconItem;
 
 public interface INode extends IIconItem
 {

@@ -4,7 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.dataset.AbstractIconItem;
+import au.gov.ga.worldwind.panels.dataset.AbstractIconItem;
 
 public abstract class AbstractNode extends AbstractIconItem implements INode
 {

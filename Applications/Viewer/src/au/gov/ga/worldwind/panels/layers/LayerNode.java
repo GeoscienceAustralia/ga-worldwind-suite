@@ -2,7 +2,7 @@ package au.gov.ga.worldwind.panels.layers;
 
 import java.net.URL;
 
-import au.gov.ga.worldwind.dataset.ILayerDefinition;
+import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 
 public class LayerNode extends AbstractNode implements ILayerNode
 {

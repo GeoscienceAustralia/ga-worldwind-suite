@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.dataset;
+package au.gov.ga.worldwind.panels.dataset;
 
 import au.gov.ga.worldwind.components.lazytree.ILazyTreeObject;
 

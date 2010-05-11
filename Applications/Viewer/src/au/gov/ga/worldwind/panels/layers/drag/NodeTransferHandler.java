@@ -8,7 +8,7 @@ import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import au.gov.ga.worldwind.dataset.ILayerDefinition;
+import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.panels.layers.ClearableBasicTreeUI;
 import au.gov.ga.worldwind.panels.layers.INode;
 import au.gov.ga.worldwind.panels.layers.LayerNode;
