@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.panels.layers;
+package au.gov.ga.worldwind.panels.oldlayers;
 
 import java.awt.Dimension;
 import java.awt.Font;
