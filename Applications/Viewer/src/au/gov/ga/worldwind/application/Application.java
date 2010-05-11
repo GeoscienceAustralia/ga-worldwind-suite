@@ -83,7 +83,7 @@ import au.gov.ga.worldwind.layers.local.LocalLayerDefinition;
 import au.gov.ga.worldwind.layers.local.LocalLayerEditor;
 import au.gov.ga.worldwind.layers.local.LocalLayers;
 import au.gov.ga.worldwind.layers.mouse.MouseLayer;
-import au.gov.ga.worldwind.panels.layers.LayersPanel;
+import au.gov.ga.worldwind.panels.oldlayers.LayersPanel;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.panels.places.PlaceSearchPanel;
 import au.gov.ga.worldwind.settings.Settings;

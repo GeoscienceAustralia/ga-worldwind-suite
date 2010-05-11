@@ -60,9 +60,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			if (!item.getName().equals(s))
 			{
 				item.setName(s);
-				TreeModelEvent e = new TreeModelEvent(this, path);
-				for (TreeModelListener l : listeners)
-					l.treeNodesChanged(e);
+				nodeChanged(item);
 			}
 		}
 	}
@@ -147,9 +145,57 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		}
 	}
 
-	//---------------------------------------------------------------------------------------
-	//METHODS BELOW ARE FROM DefaultTreeModel
-	//---------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------------------//
+	// METHODS BELOW ARE FROM DefaultTreeModel, adapted for the LayerTreeModel's INodes //
+	//----------------------------------------------------------------------------------//
+
+	private void nodeChanged(INode node)
+	{
+		if (node != null)
+		{
+			INode parent = node.getParent();
+
+			if (parent != null)
+			{
+				int anIndex = getIndexOfChild(parent, node);
+				if (anIndex != -1)
+				{
+					int[] cIndexs = new int[1];
+
+					cIndexs[0] = anIndex;
+					nodesChanged(parent, cIndexs);
+				}
+			}
+			else if (node == getRoot())
+			{
+				nodesChanged(node, null);
+			}
+		}
+	}
+
+	private void nodesChanged(INode node, int[] childIndices)
+	{
+		if (node != null)
+		{
+			if (childIndices != null)
+			{
+				int cCount = childIndices.length;
+
+				if (cCount > 0)
+				{
+					Object[] cChildren = new Object[cCount];
+
+					for (int counter = 0; counter < cCount; counter++)
+						cChildren[counter] = getChild(node, childIndices[counter]);
+					fireTreeNodesChanged(this, getPathToRoot(node), childIndices, cChildren);
+				}
+			}
+			else if (node == getRoot())
+			{
+				fireTreeNodesChanged(this, getPathToRoot(node), null, null);
+			}
+		}
+	}
 
 	private void nodesWereInserted(INode node, int[] childIndices)
 	{
@@ -203,6 +249,14 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			nodes[nodes.length - depth] = aNode;
 		}
 		return nodes;
+	}
+
+	protected void fireTreeNodesChanged(Object source, Object[] path, int[] childIndices,
+			Object[] children)
+	{
+		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
+		for (TreeModelListener l : listeners)
+			l.treeNodesChanged(e);
 	}
 
 	private void fireTreeNodesInserted(Object source, Object[] path, int[] childIndices,
