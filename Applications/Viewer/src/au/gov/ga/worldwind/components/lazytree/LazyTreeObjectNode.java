@@ -41,7 +41,6 @@ public class LazyTreeObjectNode extends LazyTreeNode
 			reset();
 			if (userObject instanceof ILazyTreeObject)
 			{
-
 			}
 			else
 			{

@@ -19,8 +19,8 @@ public class CollapsibleSplitLayout implements LayoutManager2
 	private final Map<String, Component> componentMap = new HashMap<String, Component>();
 	private final Map<Component, String> reverseComponentMap = new HashMap<Component, String>();
 
-	private int dividerSize;
-	private boolean vertical;
+	private int dividerSize = 5;
+	private boolean vertical = false;
 
 	public void addPlaceholder(String name, float weight)
 	{

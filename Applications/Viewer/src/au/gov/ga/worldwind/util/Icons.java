@@ -40,6 +40,11 @@ public enum Icons
 		}
 		return icon;
 	}
+	
+	public URL getURL()
+	{
+		return url;
+	}
 
 	public static ImageIcon newLoadingIcon()
 	{
