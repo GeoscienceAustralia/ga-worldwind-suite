@@ -1,18 +1,22 @@
-package au.gov.ga.worldwind.dataset.downloader;
-
-import gov.nasa.worldwind.retrieve.HTTPRetriever;
-import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
+package au.gov.ga.worldwind.downloader;
 
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
 
-public class IfModifiedHTTPRetriever extends HTTPRetriever
+import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
+import gov.nasa.worldwind.retrieve.URLRetriever;
+
+public class FileRetriever extends URLRetriever
 {
 	private Long ifModifiedSince;
 
-	public IfModifiedHTTPRetriever(URL url, Long ifModifiedSince,
-			RetrievalPostProcessor postProcessor)
+	public FileRetriever(URL url, RetrievalPostProcessor postProcessor)
+	{
+		this(url, null, postProcessor);
+	}
+
+	public FileRetriever(URL url, Long ifModifiedSince, RetrievalPostProcessor postProcessor)
 	{
 		super(url, postProcessor);
 		this.ifModifiedSince = ifModifiedSince;

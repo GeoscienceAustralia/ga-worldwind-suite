@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.dataset.layers;
+package au.gov.ga.worldwind.panels.layers;
 
 import gov.nasa.worldwind.util.WWXML;
 

@@ -2,8 +2,8 @@ package au.gov.ga.worldwind.dataset;
 
 import java.net.URL;
 
-import au.gov.ga.worldwind.dataset.downloader.Downloader;
-import au.gov.ga.worldwind.dataset.downloader.RetrievalResult;
+import au.gov.ga.worldwind.downloader.Downloader;
+import au.gov.ga.worldwind.downloader.RetrievalResult;
 
 public class LazyDataset extends Dataset implements ILazyDataset
 {

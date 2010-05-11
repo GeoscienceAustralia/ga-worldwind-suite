@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.dataset.downloader;
+package au.gov.ga.worldwind.downloader;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;

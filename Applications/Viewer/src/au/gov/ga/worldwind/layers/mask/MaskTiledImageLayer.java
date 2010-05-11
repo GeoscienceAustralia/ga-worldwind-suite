@@ -32,7 +32,7 @@ import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
-import au.gov.ga.worldwind.dataset.downloader.FileRetriever;
+import au.gov.ga.worldwind.downloader.FileRetriever;
 
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;

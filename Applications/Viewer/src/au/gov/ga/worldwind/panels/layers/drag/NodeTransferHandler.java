@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.dataset.layers.drag;
+package au.gov.ga.worldwind.panels.layers.drag;
 
 import java.awt.datatransfer.Transferable;
 
@@ -9,10 +9,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.dataset.ILayerDefinition;
-import au.gov.ga.worldwind.dataset.layers.ClearableBasicTreeUI;
-import au.gov.ga.worldwind.dataset.layers.INode;
-import au.gov.ga.worldwind.dataset.layers.LayerNode;
-import au.gov.ga.worldwind.dataset.layers.LayerTreeModel;
+import au.gov.ga.worldwind.panels.layers.ClearableBasicTreeUI;
+import au.gov.ga.worldwind.panels.layers.INode;
+import au.gov.ga.worldwind.panels.layers.LayerNode;
+import au.gov.ga.worldwind.panels.layers.LayerTreeModel;
 
 public class NodeTransferHandler extends TransferHandler
 {

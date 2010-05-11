@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.dataset.layers.drag;
+package au.gov.ga.worldwind.panels.layers.drag;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
