@@ -11,60 +11,52 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import au.gov.ga.worldwind.dataset.layers.LayerTreePersistance.NodeItem;
-
 public class LayerTreeModel implements TreeModel, TreeExpansionListener
 {
-	private NodeItem root;
+	private INode root;
 	private List<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
 
-	public LayerTreeModel(NodeItem root)
+	public LayerTreeModel(INode root)
 	{
 		this.root = root;
 	}
 
-	@Override
 	public Object getChild(Object parent, int index)
 	{
-		NodeItem node = (NodeItem) parent;
+		INode node = (INode) parent;
 		if (index < 0 || index >= node.getChildCount())
 			return null;
 		return node.getChild(index);
 	}
 
-	@Override
 	public int getChildCount(Object parent)
 	{
-		NodeItem node = (NodeItem) parent;
+		INode node = (INode) parent;
 		return node.getChildCount();
 	}
 
-	@Override
 	public int getIndexOfChild(Object parent, Object child)
 	{
-		NodeItem node = (NodeItem) parent;
+		INode node = (INode) parent;
 		return node.getChildIndex(child);
 	}
 
-	@Override
-	public NodeItem getRoot()
+	public INode getRoot()
 	{
 		return root;
 	}
 
-	@Override
 	public boolean isLeaf(Object node)
 	{
 		return getChildCount(node) == 0;
 	}
 
-	@Override
 	public void valueForPathChanged(TreePath path, Object newValue)
 	{
 		if (newValue instanceof String)
 		{
 			String s = (String) newValue;
-			NodeItem item = (NodeItem) path.getLastPathComponent();
+			INode item = (INode) path.getLastPathComponent();
 			if (!item.getName().equals(s))
 			{
 				item.setName(s);
@@ -75,21 +67,19 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		}
 	}
 
-	@Override
 	public void addTreeModelListener(TreeModelListener l)
 	{
 		listeners.add(l);
 	}
 
-	@Override
 	public void removeTreeModelListener(TreeModelListener l)
 	{
 		listeners.remove(l);
 	}
 
-	public void removeNodeFromParent(NodeItem node, TreePath path)
+	public void removeNodeFromParent(INode node, TreePath path)
 	{
-		NodeItem parent = node.getParent();
+		INode parent = node.getParent();
 		if (parent != null)
 		{
 			int index = getIndexOfChild(parent, node);
@@ -104,7 +94,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		}
 	}
 
-	public void insertNodeInto(NodeItem moveNode, NodeItem targetNode, int index, TreePath path)
+	public void insertNodeInto(INode moveNode, INode targetNode, int index, TreePath path)
 	{
 		targetNode.insertChild(index, moveNode);
 
@@ -113,16 +103,55 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		nodesWereInserted(targetNode, newIndexs);
 	}
 
-	public NodeItem getParent(NodeItem targetNode)
+	public INode getParent(INode targetNode)
 	{
 		return targetNode.getParent();
+	}
+
+	public void treeCollapsed(TreeExpansionEvent event)
+	{
+		Object o = event.getPath().getLastPathComponent();
+		INode node = (INode) o;
+		node.setExpanded(false);
+	}
+
+	public void treeExpanded(TreeExpansionEvent event)
+	{
+		Object o = event.getPath().getLastPathComponent();
+		INode node = (INode) o;
+		node.setExpanded(true);
+	}
+
+	public void expandNodes(JTree tree)
+	{
+		List<INode> path = new ArrayList<INode>();
+		path.add(root);
+		expandIfRequired(tree, path);
+	}
+
+	private void expandIfRequired(JTree tree, List<INode> path)
+	{
+		INode last = path.get(path.size() - 1);
+		if (last.isExpanded() && last.getChildCount() > 0)
+		{
+			TreePath tp = new TreePath(path.toArray());
+			tree.expandPath(tp);
+
+			for (int i = 0; i < last.getChildCount(); i++)
+			{
+				INode child = last.getChild(i);
+				path.add(child);
+				expandIfRequired(tree, path); //call recursively
+				path.remove(path.size() - 1);
+			}
+		}
 	}
 
 	//---------------------------------------------------------------------------------------
 	//METHODS BELOW ARE FROM DefaultTreeModel
 	//---------------------------------------------------------------------------------------
 
-	private void nodesWereInserted(NodeItem node, int[] childIndices)
+	private void nodesWereInserted(INode node, int[] childIndices)
 	{
 		if (node != null && childIndices != null && childIndices.length > 0)
 		{
@@ -135,7 +164,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		}
 	}
 
-	private void nodesWereRemoved(NodeItem node, int[] childIndices, Object[] removedChildren)
+	private void nodesWereRemoved(INode node, int[] childIndices, Object[] removedChildren)
 	{
 		if (node != null && childIndices != null)
 		{
@@ -143,14 +172,14 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		}
 	}
 
-	private NodeItem[] getPathToRoot(NodeItem aNode)
+	private INode[] getPathToRoot(INode aNode)
 	{
 		return getPathToRoot(aNode, 0);
 	}
 
-	private NodeItem[] getPathToRoot(NodeItem aNode, int depth)
+	private INode[] getPathToRoot(INode aNode, int depth)
 	{
-		NodeItem[] nodes;
+		INode[] nodes;
 		// This method recurses, traversing towards the root in order
 		// size the array. On the way back, it fills in the nodes,
 		// starting from the root and working back to the original node.
@@ -162,13 +191,13 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			if (depth == 0)
 				return null;
 			else
-				nodes = new NodeItem[depth];
+				nodes = new INode[depth];
 		}
 		else
 		{
 			depth++;
 			if (aNode == root)
-				nodes = new NodeItem[depth];
+				nodes = new INode[depth];
 			else
 				nodes = getPathToRoot(aNode.getParent(), depth);
 			nodes[nodes.length - depth] = aNode;
@@ -190,46 +219,5 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
 		for (TreeModelListener l : listeners)
 			l.treeNodesRemoved(e);
-	}
-
-	@Override
-	public void treeCollapsed(TreeExpansionEvent event)
-	{
-		Object o = event.getPath().getLastPathComponent();
-		NodeItem node = (NodeItem) o;
-		node.setExpanded(false);
-	}
-
-	@Override
-	public void treeExpanded(TreeExpansionEvent event)
-	{
-		Object o = event.getPath().getLastPathComponent();
-		NodeItem node = (NodeItem) o;
-		node.setExpanded(true);
-	}
-
-	public void expandNodes(JTree tree)
-	{
-		List<NodeItem> path = new ArrayList<NodeItem>();
-		path.add(root);
-		expandIfRequired(tree, path);
-	}
-
-	private void expandIfRequired(JTree tree, List<NodeItem> path)
-	{
-		NodeItem last = path.get(path.size() - 1);
-		if (last.isExpanded() && last.getChildCount() > 0)
-		{
-			TreePath tp = new TreePath(path.toArray());
-			tree.expandPath(tp);
-
-			for (int i = 0; i < last.getChildCount(); i++)
-			{
-				NodeItem child = last.getChild(i);
-				path.add(child);
-				expandIfRequired(tree, path); //call recursively
-				path.remove(path.size() - 1);
-			}
-		}
 	}
 }

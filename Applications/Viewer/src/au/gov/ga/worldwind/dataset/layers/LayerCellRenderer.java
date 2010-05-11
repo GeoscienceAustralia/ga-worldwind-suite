@@ -1,10 +1,9 @@
-package au.gov.ga.worldwind.dataset;
+package au.gov.ga.worldwind.dataset.layers;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -14,22 +13,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 
-import au.gov.ga.worldwind.components.lazytree.ErrorNode;
-import au.gov.ga.worldwind.components.lazytree.LoadingNode;
 import au.gov.ga.worldwind.components.lazytree.LoadingTree;
 import au.gov.ga.worldwind.util.DefaultLauncher;
 import au.gov.ga.worldwind.util.HSLColor;
 import au.gov.ga.worldwind.util.Icons;
 
-public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
+public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 {
 	private LoadingTree tree;
 	private RendererMouseKeyListener mouseKeyListener = new RendererMouseKeyListener();
@@ -39,23 +35,18 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 			keyDownRow = -1;
 	private int mouseX = -1, mouseY = -1;
 
-	private JButton button;
+	private JCheckBox button;
 	private DefaultTreeCellRenderer label;
 
 	private ImageIcon loadingIcon;
 
-	public DatasetCellRenderer()
+	public LayerCellRenderer()
 	{
 		super(new BorderLayout(3, 3));
 		setOpaque(false);
 
-		button = new JButton();
+		button = new JCheckBox();
 		button.setOpaque(false);
-
-		int height = Icons.add.getIconHeight();
-		Dimension size = new Dimension(height + 2, height + 2);
-		button.setPreferredSize(size);
-		button.setMinimumSize(size);
 
 		label = new DefaultTreeCellRenderer();
 		label.setTextNonSelectionColor(Color.black);
@@ -73,18 +64,12 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 
 	private void toggleLayer(int row)
 	{
-		System.out.println("SELECTED = " + row);
-
 		TreePath path = tree.getSelectionPath();
 		Object value = path.getLastPathComponent();
-		if (value != null && value instanceof DefaultMutableTreeNode)
+		if (value != null && value instanceof ILayerNode)
 		{
-			Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
-			if (userObject != null && userObject instanceof ILayerDefinition)
-			{
-				ILayerDefinition layer = (ILayerDefinition) userObject;
-				System.out.println(layer.getName());
-			}
+			ILayerNode layer = (ILayerNode) value;
+			layer.setEnabled(!layer.isEnabled());
 		}
 	}
 
@@ -92,16 +77,12 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 	{
 		TreePath path = tree.getSelectionPath();
 		Object value = path.getLastPathComponent();
-		if (value != null && value instanceof DefaultMutableTreeNode)
+		if (value != null && value instanceof ILayerNode)
 		{
-			Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
-			if (userObject != null && userObject instanceof IData)
+			ILayerNode layer = (ILayerNode) value;
+			if (layer.getDescriptionURL() != null)
 			{
-				IData data = (IData) userObject;
-				if (data.getDescriptionURL() != null)
-				{
-					DefaultLauncher.openURL(data.getDescriptionURL());
-				}
+				DefaultLauncher.openURL(layer.getDescriptionURL());
 			}
 		}
 	}
@@ -137,94 +118,68 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 		boolean urlRow = false;
 		boolean loadingRow = false;
 
-		if (value != null && value instanceof DefaultMutableTreeNode)
+		if (value != null && value instanceof INode)
 		{
-			final DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-			if (node instanceof LoadingNode)
+			final INode node = (INode) value;
+			if (node.isIconLoaded())
 			{
-				loadingRow = true;
-			}
-			else if (node instanceof ErrorNode)
-			{
-				label.setIcon(Icons.error);
+				label.setIcon(node.getIcon());
 			}
 			else
 			{
-				Object userObject = node.getUserObject();
-				if (userObject != null)
+				loadingRow = true;
+				Runnable afterLoad = new Runnable()
 				{
-					if (userObject instanceof IData)
+					public void run()
 					{
-						IData data = (IData) userObject;
-						if (data.isIconLoaded())
-						{
-							label.setIcon(data.getIcon());
-						}
-						else
-						{
-							loadingRow = true;
-							Runnable afterLoad = new Runnable()
-							{
-								public void run()
-								{
-									DatasetCellRenderer.this.tree.removeLoadingNode(node);
-									//repaint the whole tree, as the node for the
-									//icon just loaded may have changed rows
-									tree.repaint();
-								}
-							};
-							boolean added = this.tree.addLoadingNode(node);
-							//if icon will not be loaded but we added a loading node,
-							//then remove the loading node
-							if (!data.loadIcon(afterLoad) && added)
-							{
-								this.tree.removeLoadingNode(node);
-								loadingRow = false;
-							}
-						}
-
-						if (data.getDescriptionURL() != null)
-						{
-							//make the label look like a link
-							String text =
-									"<html><font color=\"#0000CF\"><u>" + label.getText()
-											+ "</u></font></html>";
-							label.setText(text);
-							urlRow = true;
-						}
+						LayerCellRenderer.this.tree.removeLoadingNode(node);
+						//repaint the whole tree, as the node for the
+						//icon just loaded may have changed rows
+						tree.repaint();
 					}
-					else
-					{
-						label.setIcon(null);
-					}
-
-					if (userObject instanceof ILayerDefinition)
-					{
-						//have to add it each time? it removes itself?
-						add(label, BorderLayout.CENTER);
-						returnValue = this;
-						//doLayout();
-
-						//TODO set icon to remove/add if user has layer in their layer list or not
-						/*ILayerDefinition node = (ILayerDefinition) userObject;
-						if (false)
-							button.setIcon(Icons.remove);
-						else*/
-						button.setIcon(Icons.add);
-
-						boolean mouseInsideButton =
-								mouseRow >= 0 && button.getBounds().contains(mouseX, mouseY);
-						boolean rollover =
-								(mouseInsideButton && row == mouseRow && mouseButtonDownRow <= 0)
-										|| (hasFocus);
-						boolean down =
-								(mouseInsideButton && row == mouseButtonDownRow)
-										|| (hasFocus && row == keyDownRow);
-
-						button.getModel().setRollover(rollover && row >= 0);
-						button.getModel().setSelected(down && row >= 0);
-					}
+				};
+				boolean added = this.tree.addLoadingNode(node);
+				//if icon will not be loaded but we added a loading node,
+				//then remove the loading node
+				if (!node.loadIcon(afterLoad) && added)
+				{
+					this.tree.removeLoadingNode(node);
+					loadingRow = false;
 				}
+			}
+
+			if (node instanceof LayerNode)
+			{
+				LayerNode layer = (LayerNode) node;
+
+				if (layer.getDescriptionURL() != null)
+				{
+					//make the label look like a link
+					String text =
+							"<html><font color=\"#0000CF\"><u>" + label.getText()
+									+ "</u></font></html>";
+					label.setText(text);
+					urlRow = true;
+				}
+
+				//have to add it each time? it removes itself?
+				add(label, BorderLayout.CENTER);
+				returnValue = this;
+
+				boolean mouseInsideButton =
+						mouseRow >= 0 && button.getBounds().contains(mouseX, mouseY);
+				boolean rollover =
+						(mouseInsideButton && row == mouseRow && mouseButtonDownRow <= 0)
+								|| (hasFocus);
+				boolean down =
+						(mouseInsideButton && row == mouseButtonDownRow)
+								|| (hasFocus && row == keyDownRow);
+
+				button.getModel().setRollover(rollover && row >= 0);
+				button.getModel().setPressed(down && row >= 0);
+				button.getModel().setArmed(down && row >= 0);
+
+				button.setSelected(layer.isEnabled());
 			}
 		}
 
@@ -359,7 +314,9 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 			lastRow = mouseRow;
 			if (mouseRow >= 0)
 			{
-				tree.repaint(tree.getRowBounds(mouseRow));
+				Rectangle bounds = tree.getRowBounds(mouseRow);
+				if (bounds != null)
+					tree.repaint(bounds);
 			}
 		}
 

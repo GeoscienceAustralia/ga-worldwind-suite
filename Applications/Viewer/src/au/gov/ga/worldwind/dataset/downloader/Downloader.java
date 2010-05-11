@@ -281,6 +281,7 @@ public class Downloader
 			{
 				File file = newCacheFile(url);
 				WWIO.saveBuffer(result.getAsBuffer(), file);
+				//note: the following is only available in Java 6
 				file.setReadable(true, false);
 				file.setWritable(true, false);
 			}
