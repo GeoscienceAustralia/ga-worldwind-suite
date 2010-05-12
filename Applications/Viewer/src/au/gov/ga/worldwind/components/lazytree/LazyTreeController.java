@@ -12,12 +12,10 @@ import org.jdesktop.swingworker.SwingWorker;
 public class LazyTreeController implements TreeWillExpandListener
 {
 	private SwingWorkerFactory<MutableTreeNode[], ?> workerFactory = new DefaultWorkerFactory();
-	private LazyTree tree;
 	private DefaultTreeModel model;
 
-	public LazyTreeController(LazyTree tree, DefaultTreeModel model)
+	public LazyTreeController(DefaultTreeModel model)
 	{
-		this.tree = tree;
 		this.model = model;
 	}
 
@@ -55,7 +53,6 @@ public class LazyTreeController implements TreeWillExpandListener
 		{
 			return;
 		}
-		tree.addLoadingNode(node);
 		node.setChildren(createLoadingNode());
 		createSwingWorker(node).execute();
 	}
@@ -91,14 +88,7 @@ public class LazyTreeController implements TreeWillExpandListener
 			@Override
 			public MutableTreeNode[] work() throws Exception
 			{
-				try
-				{
-					return node.loadChildren(model);
-				}
-				finally
-				{
-					tree.removeLoadingNode(node);
-				}
+				return node.loadChildren(model);
 			}
 
 			@Override

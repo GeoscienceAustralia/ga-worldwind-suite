@@ -138,6 +138,8 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 			tree.addMouseListener(mouseKeyListener);
 			tree.addMouseMotionListener(mouseKeyListener);
 			tree.addKeyListener(mouseKeyListener);
+
+			loadingIcon.setImageObserver(tree);
 		}
 
 		//update the label
@@ -148,14 +150,13 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 
 		Component returnValue = label;
 		boolean urlRow = false;
-		boolean loadingRow = false;
 
 		if (value != null && value instanceof DefaultMutableTreeNode)
 		{
-			final DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
 			if (node instanceof LoadingNode)
 			{
-				loadingRow = true;
+				label.setIcon(loadingIcon);
 			}
 			else if (node instanceof ErrorNode)
 			{
@@ -175,25 +176,14 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 						}
 						else
 						{
-							loadingRow = true;
 							Runnable afterLoad = new Runnable()
 							{
 								public void run()
 								{
-									DatasetCellRenderer.this.tree.removeLoadingNode(node);
-									//repaint the whole tree, as the node for the
-									//icon just loaded may have changed rows
 									tree.repaint();
 								}
 							};
-							boolean added = this.tree.addLoadingNode(node);
-							//if icon will not be loaded but we added a loading node,
-							//then remove the loading node
-							if (!data.loadIcon(afterLoad) && added)
-							{
-								this.tree.removeLoadingNode(node);
-								loadingRow = false;
-							}
+							data.loadIcon(afterLoad);
 						}
 
 						if (data.getDescriptionURL() != null)
@@ -204,6 +194,11 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 											+ "</u></font></html>";
 							label.setText(text);
 							urlRow = true;
+						}
+
+						if (data.isLoading())
+						{
+							label.setIcon(loadingIcon);
 						}
 					}
 					else
@@ -257,16 +252,6 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 		}
 		else
 			urlRows.remove(row);
-
-		if (loadingRow)
-		{
-			label.setIcon(loadingIcon);
-			loadingIcon.setImageObserver(tree);
-		}
-		else if (this.tree.loadingNodeCount() <= 0)
-		{
-			loadingIcon.setImageObserver(null);
-		}
 
 		return returnValue;
 	}

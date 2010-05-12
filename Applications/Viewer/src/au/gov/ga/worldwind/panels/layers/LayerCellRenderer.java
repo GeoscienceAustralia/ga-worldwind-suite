@@ -106,6 +106,8 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 			tree.addMouseListener(mouseKeyListener);
 			tree.addMouseMotionListener(mouseKeyListener);
 			tree.addKeyListener(mouseKeyListener);
+
+			loadingIcon.setImageObserver(tree);
 		}
 
 		//update the label
@@ -116,45 +118,39 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 
 		Component returnValue = label;
 		boolean urlRow = false;
-		boolean loadingRow = false;
 
 		if (value != null && value instanceof INode)
 		{
-			final INode node = (INode) value;
-			if (node.isError())
-			{
-				label.setIcon(Icons.error.getIcon());
-			}
-			else if (node.isIconLoaded())
+			INode node = (INode) value;
+			if (node.isIconLoaded())
 			{
 				label.setIcon(node.getIcon());
 			}
 			else
 			{
-				loadingRow = true;
 				Runnable afterLoad = new Runnable()
 				{
 					public void run()
 					{
-						LayerCellRenderer.this.tree.removeLoadingNode(node);
-						//repaint the whole tree, as the node for the
-						//icon just loaded may have changed rows
 						tree.repaint();
 					}
 				};
-				boolean added = this.tree.addLoadingNode(node);
-				//if icon will not be loaded but we added a loading node,
-				//then remove the loading node
-				if (!node.loadIcon(afterLoad) && added)
-				{
-					this.tree.removeLoadingNode(node);
-					loadingRow = false;
-				}
+				node.loadIcon(afterLoad);
+			}
+
+			if (node.isLoading())
+			{
+				label.setIcon(loadingIcon);
 			}
 
 			if (node instanceof LayerNode)
 			{
 				LayerNode layer = (LayerNode) node;
+
+				if (layer.isError())
+				{
+					label.setIcon(Icons.error.getIcon());
+				}
 
 				if (layer.getDescriptionURL() != null)
 				{
@@ -204,16 +200,6 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 		}
 		else
 			urlRows.remove(row);
-
-		if (loadingRow)
-		{
-			label.setIcon(loadingIcon);
-			loadingIcon.setImageObserver(tree);
-		}
-		else if (this.tree.loadingNodeCount() <= 0)
-		{
-			loadingIcon.setImageObserver(null);
-		}
 
 		return returnValue;
 	}

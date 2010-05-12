@@ -13,7 +13,6 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 	private boolean expanded;
 	private INode parent;
 	private List<INode> children = new ArrayList<INode>();
-	private boolean error;
 
 	public AbstractNode(String name, URL iconURL, boolean expanded)
 	{
@@ -32,16 +31,6 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 		if (name == null)
 			name = "";
 		this.name = name;
-	}
-
-	public boolean isError()
-	{
-		return error;
-	}
-
-	public void setError(boolean error)
-	{
-		this.error = error;
 	}
 
 	public boolean isExpanded()

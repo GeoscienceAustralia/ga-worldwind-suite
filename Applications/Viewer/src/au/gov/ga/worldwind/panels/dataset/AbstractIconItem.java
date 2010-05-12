@@ -17,13 +17,13 @@ public abstract class AbstractIconItem implements IIconItem
 	private ImageIcon icon;
 	private boolean iconDownloading = false;
 	private Object iconLock = new Object();
-	
+
 	public AbstractIconItem(URL iconURL)
 	{
 		this.iconURL = iconURL;
 		iconLoaded = iconURL == null;
 	}
-	
+
 	public boolean isIconLoaded()
 	{
 		synchronized (iconLock)
@@ -32,7 +32,7 @@ public abstract class AbstractIconItem implements IIconItem
 		}
 	}
 
-	public boolean loadIcon(final Runnable afterLoad)
+	public void loadIcon(final Runnable afterLoad)
 	{
 		synchronized (iconLock)
 		{
@@ -60,10 +60,8 @@ public abstract class AbstractIconItem implements IIconItem
 					}
 				};
 				Downloader.downloadIfModified(iconURL, setIconHandler, setIconHandler);
-				return true;
 			}
 		}
-		return false;
 	}
 
 	public ImageIcon getIcon()
@@ -81,6 +79,27 @@ public abstract class AbstractIconItem implements IIconItem
 
 	public void setIconURL(URL iconURL)
 	{
-		this.iconURL = iconURL;
+		if (iconURL == null && this.iconURL == null)
+			return;
+		if (iconURL != null && iconURL.equals(this.iconURL))
+			return;
+
+		synchronized (iconLock)
+		{
+			this.iconURL = iconURL;
+			
+			iconLoaded = iconURL == null;
+			if (iconLoaded)
+				icon = null;
+		}
+	}
+
+	@Override
+	public boolean isLoading()
+	{
+		synchronized (iconLock)
+		{
+			return iconDownloading;
+		}
 	}
 }

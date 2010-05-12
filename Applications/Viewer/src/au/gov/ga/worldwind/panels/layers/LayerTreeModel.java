@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.panels.layers;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,26 +24,14 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	private INode root;
 	private JTree tree;
 	private List<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
-	private Map<URL, Set<LayerNode>> layerURLs = new HashMap<URL, Set<LayerNode>>();
+	private List<ILayerNode> layerNodes = new ArrayList<ILayerNode>();
+	private Map<URL, Set<ILayerNode>> layerURLmap = new HashMap<URL, Set<ILayerNode>>();
 
 	public LayerTreeModel(JTree tree, INode root)
 	{
 		this.tree = tree;
 		this.root = root;
-		addLayerChildrenURLsToMap(root);
-	}
-
-	private void addLayerChildrenURLsToMap(INode node)
-	{
-		for (int i = 0; i < node.getChildCount(); i++)
-		{
-			INode child = node.getChild(i);
-			if (child instanceof LayerNode)
-			{
-				addedLayer((LayerNode) child);
-			}
-			addLayerChildrenURLsToMap(child);
-		}
+		addAnyLayers(root);
 	}
 
 	public void addToRoot(INode node)
@@ -54,22 +43,28 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	{
 		INode node = LayerNode.createFromLayerDefinition(layer);
 		TreePath selected = tree.getSelectionPath();
+		TreePath expand;
 		if (selected == null)
+		{
 			addToRoot(node);
+			expand = new TreePath(new Object[] { root, node });
+		}
 		else
 		{
 			INode parent = (INode) selected.getLastPathComponent();
 			insertNodeInto(node, parent, parent.getChildCount());
+			expand = selected.pathByAddingChild(node);
 		}
 		((ClearableBasicTreeUI) tree.getUI()).relayout();
+		tree.scrollPathToVisible(expand);
 	}
 
 	public void removeLayer(ILayerDefinition layer)
 	{
 		URL url = layer.getLayerURL();
-		if (layerURLs.containsKey(url))
+		if (layerURLmap.containsKey(url))
 		{
-			Set<LayerNode> set = layerURLs.get(url);
+			Set<ILayerNode> set = layerURLmap.get(url);
 			while (!set.isEmpty())
 			{
 				//this will call removedLayer() which will remove the node from the set
@@ -80,37 +75,95 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 	public boolean containsLayer(ILayerDefinition layer)
 	{
-		return layerURLs.containsKey(layer.getLayerURL());
+		return layerURLmap.containsKey(layer.getLayerURL());
 	}
 
-	public void addedLayer(LayerNode node)
+	private void addAnyLayers(INode node)
 	{
-		URL url = node.getLayerURL();
-		Set<LayerNode> set;
-		if (layerURLs.containsKey(url))
-		{
-			set = layerURLs.get(url);
-		}
-		else
-		{
-			set = new HashSet<LayerNode>();
-			layerURLs.put(url, set);
-		}
-		set.add(node);
+		boolean changed = addAnyLayersBelow(node);
+		if (changed)
+			rebuildLayersList();
 	}
 
-	public void removedLayer(LayerNode node)
+	private void removeAnyLayers(INode node)
 	{
-		URL url = node.getLayerURL();
-		if (layerURLs.containsKey(url))
+		boolean changed = removeAnyLayersBelow(node);
+		if (changed)
+			rebuildLayersList();
+	}
+
+	private boolean addAnyLayersBelow(INode node)
+	{
+		boolean changed = false;
+		if (node instanceof ILayerNode)
 		{
-			Set<LayerNode> set = layerURLs.get(url);
-			set.remove(node);
-			if (set.isEmpty())
+			ILayerNode layer = (ILayerNode) node;
+			URL url = layer.getLayerURL();
+			Set<ILayerNode> set;
+			if (layerURLmap.containsKey(url))
 			{
-				layerURLs.remove(url);
+				set = layerURLmap.get(url);
 			}
+			else
+			{
+				set = new HashSet<ILayerNode>();
+				layerURLmap.put(url, set);
+			}
+			set.add(layer);
+			changed = true;
 		}
+		//call recursively for all node's children
+		for (int i = 0; i < node.getChildCount(); i++)
+			changed |= addAnyLayersBelow(node.getChild(i));
+
+		return changed;
+	}
+
+	private boolean removeAnyLayersBelow(INode node)
+	{
+		boolean changed = false;
+		if (node instanceof ILayerNode)
+		{
+			ILayerNode layer = (ILayerNode) node;
+			URL url = layer.getLayerURL();
+			if (layerURLmap.containsKey(url))
+			{
+				Set<ILayerNode> set = layerURLmap.get(url);
+				set.remove(layer);
+				if (set.isEmpty())
+				{
+					layerURLmap.remove(url);
+				}
+			}
+			changed = true;
+		}
+		//call recursively for all node's children
+		for (int i = 0; i < node.getChildCount(); i++)
+			changed |= removeAnyLayersBelow(node.getChild(i));
+
+		return changed;
+	}
+
+	private void rebuildLayersList()
+	{
+		synchronized (layerNodes)
+		{
+			layerNodes.clear();
+			addLayersToLayerList(root);
+
+			System.out.println(Arrays.toString(layerNodes.toArray()));
+		}
+	}
+
+	private void addLayersToLayerList(INode node)
+	{
+		if (node instanceof ILayerNode)
+		{
+			ILayerNode layer = (ILayerNode) node;
+			layerNodes.add(layer);
+		}
+		for (int i = 0; i < node.getChildCount(); i++)
+			addLayersToLayerList(node.getChild(i));
 	}
 
 	public Object getChild(Object parent, int index)
@@ -175,10 +228,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		newIndexs[0] = index;
 		nodesWereInserted(parentNode, newIndexs);
 
-		if (newNode instanceof LayerNode)
-		{
-			addedLayer((LayerNode) newNode);
-		}
+		addAnyLayers(newNode);
 	}
 
 	public void removeNodeFromParent(INode node)
@@ -196,10 +246,8 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			removedArray[0] = node;
 			nodesWereRemoved(parent, childIndex, removedArray);
 		}
-		if (node instanceof LayerNode)
-		{
-			removedLayer((LayerNode) node);
-		}
+
+		removeAnyLayers(node);
 	}
 
 	public INode getParent(INode targetNode)

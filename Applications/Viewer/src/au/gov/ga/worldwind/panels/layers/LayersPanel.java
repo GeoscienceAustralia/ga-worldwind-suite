@@ -85,7 +85,7 @@ public class LayersPanel extends JPanel implements WWPanel
 					model.insertNodeInto(node, parent, parent.getChildCount());
 					editPath = p.pathByAddingChild(node);
 				}
-				tree.expandPath(editPath);
+				tree.scrollPathToVisible(editPath);
 				tree.startEditingAtPath(editPath);
 			}
 		};

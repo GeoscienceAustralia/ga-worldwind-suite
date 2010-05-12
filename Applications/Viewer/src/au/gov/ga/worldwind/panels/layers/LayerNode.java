@@ -9,6 +9,8 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	private URL layerURL;
 	private URL descriptionURL;
 	private boolean enabled;
+	private boolean error = false;
+	private boolean layerLoading = false;
 
 	public LayerNode(String name, URL iconURL, boolean expanded, URL layerURL, URL descriptionURL,
 			boolean enabled)
@@ -53,5 +55,35 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	{
 		return new LayerNode(definition.getName(), definition.getIconURL(), true, definition
 				.getLayerURL(), definition.getDescriptionURL(), true);
+	}
+
+	@Override
+	public boolean isLoading()
+	{
+		return super.isLoading() || isLayerLoading();
+	}
+
+	@Override
+	public boolean isLayerLoading()
+	{
+		return layerLoading;
+	}
+
+	@Override
+	public void setLayerLoading(boolean layerLoading)
+	{
+		this.layerLoading = layerLoading;
+	}
+
+	@Override
+	public boolean isError()
+	{
+		return error;
+	}
+
+	@Override
+	public void setError(boolean error)
+	{
+		this.error = error;
 	}
 }

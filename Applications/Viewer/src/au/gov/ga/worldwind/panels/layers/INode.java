@@ -8,18 +8,12 @@ public interface INode extends IIconItem
 
 	public void setName(String name);
 
-	public boolean isIconLoaded();
-
 	public boolean isExpanded();
 
 	/**
 	 * Should only be called by LayerTreeModel
 	 */
 	public void setExpanded(boolean expanded);
-
-	public boolean isError();
-
-	public void setError(boolean error);
 
 	/**
 	 * Should only be called by LayerTreeModel
