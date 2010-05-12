@@ -122,7 +122,7 @@ public class Settings
 		private boolean proxyEnabled = false;
 		private String proxyHost = "";
 		private int proxyPort = 80;
-		private String nonProxyHosts = "";
+		private ProxyType proxyType = ProxyType.HTTP;
 		private StereoMode stereoMode = StereoMode.RC_ANAGLYPH;
 		private boolean stereoSwap = false;
 		private String displayId = null;
@@ -163,8 +163,8 @@ public class Settings
 
 		public void setProxyHost(String proxyHost)
 		{
-			if (proxyHost == null)
-				proxyHost = "";
+			if (proxyHost != null && proxyHost.length() == 0)
+				proxyHost = null;
 			this.proxyHost = proxyHost;
 			updateProxyConfiguration();
 		}
@@ -182,16 +182,14 @@ public class Settings
 			updateProxyConfiguration();
 		}
 
-		public String getNonProxyHosts()
+		public ProxyType getProxyType()
 		{
-			return nonProxyHosts;
+			return proxyType;
 		}
 
-		public void setNonProxyHosts(String nonProxyHosts)
+		public void setProxyType(ProxyType proxyType)
 		{
-			if (nonProxyHosts == null)
-				nonProxyHosts = "";
-			this.nonProxyHosts = nonProxyHosts;
+			this.proxyType = proxyType;
 			updateProxyConfiguration();
 		}
 
@@ -199,15 +197,19 @@ public class Settings
 		{
 			if (isProxyEnabled())
 			{
-				System.setProperty("http.proxyHost", getProxyHost());
+				Configuration.setValue(AVKey.URL_PROXY_HOST, getProxyHost());
+				Configuration.setValue(AVKey.URL_PROXY_PORT, getProxyPort());
+				Configuration.setValue(AVKey.URL_PROXY_TYPE, getProxyType().getType());
+
+				System.setProperty("http.proxyHost", getProxyHost() == null ? "" : getProxyHost());
 				System.setProperty("http.proxyPort", String.valueOf(getProxyPort()));
-				System.setProperty("http.nonProxyHosts", getNonProxyHosts());
 			}
 			else
 			{
+				Configuration.removeKey(AVKey.URL_PROXY_HOST);
+
 				System.setProperty("http.proxyHost", "");
-				System.setProperty("http.proxyPort", "80");
-				System.setProperty("http.nonProxyHosts", "");
+				System.setProperty("http.proxyPort", "");
 			}
 		}
 
@@ -541,6 +543,38 @@ public class Settings
 		{
 			return pretty;
 		}
+
+		static
+		{
+			EnumPersistenceDelegate.installFor(values());
+		}
+	}
+
+	public enum ProxyType implements Serializable
+	{
+		HTTP("HTTP", "Proxy.Type.Http"), SOCKS("SOCKS", "Proxy.Type.SOCKS");
+
+		private String pretty;
+		private String type;
+
+		ProxyType(String pretty, String type)
+		{
+			this.pretty = pretty;
+			this.type = type;
+		}
+
+		@Override
+		public String toString()
+		{
+			return pretty;
+		}
+
+		public String getType()
+		{
+			return type;
+		}
+
+
 
 		static
 		{

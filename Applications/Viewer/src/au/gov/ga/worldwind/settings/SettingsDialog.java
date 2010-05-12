@@ -45,6 +45,7 @@ import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.components.JIntegerField;
 import au.gov.ga.worldwind.settings.Settings.ProjectionMode;
+import au.gov.ga.worldwind.settings.Settings.ProxyType;
 import au.gov.ga.worldwind.settings.Settings.StereoMode;
 
 public class SettingsDialog extends JDialog
@@ -86,8 +87,8 @@ public class SettingsDialog extends JDialog
 	private JTextField proxyHostText;
 	private JLabel proxyPortLabel;
 	private JIntegerField proxyPortText;
-	private JLabel nonProxyHostsLabel;
-	private JTextField nonProxyHostsText;
+	private JLabel proxyTypeLabel;
+	private JComboBox proxyTypeCombo;
 
 	public SettingsDialog(JFrame frame)
 	{
@@ -144,8 +145,7 @@ public class SettingsDialog extends JDialog
 		rootPane.setDefaultButton(ok);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke("ESCAPE");
-		InputMap inputMap = rootPane
-				.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		inputMap.put(stroke, "ESCAPE");
 		rootPane.getActionMap().put("ESCAPE", cancelAction);
 
@@ -185,48 +185,31 @@ public class SettingsDialog extends JDialog
 		boolean proxyValid = true;
 
 		boolean spanDisplays = spanDisplayRadio.isSelected();
-		String displayId = ((DisplayObject) displayCombo.getSelectedItem()).device
-				.getIDstring();
+		String displayId = ((DisplayObject) displayCombo.getSelectedItem()).device.getIDstring();
 
 		boolean stereoEnabled = stereoEnabledCheck.isSelected();
 		boolean hardwareStereoEnabled = hardwareStereoEnabledCheck.isSelected();
 		boolean stereoSwap = stereoSwapCheck.isSelected();
 		StereoMode stereoMode = (StereoMode) stereoModeCombo.getSelectedItem();
-		ProjectionMode projectionMode = (ProjectionMode) projectionModeCombo
-				.getSelectedItem();
+		ProjectionMode projectionMode = (ProjectionMode) projectionModeCombo.getSelectedItem();
 		double eyeSeparation = (Double) eyeSeparationSpinner.getValue();
 		double focalLength = (Double) focalLengthSpinner.getValue();
 		boolean stereoCursor = stereoCursorCheck.isSelected();
 
-		double viewIteratorSpeed = sliderToSpeed(viewIteratorSpeedSlider
-				.getValue());
+		double viewIteratorSpeed = sliderToSpeed(viewIteratorSpeedSlider.getValue());
 		Integer annotationsPause = annotationsPauseText.getValue();
 		boolean showDownloads = showDownloadsCheck.isSelected();
 
 		boolean proxyEnabled = proxyEnabledCheck.isSelected();
 		String proxyHost = proxyHostText.getText();
 		Integer proxyPort = proxyPortText.getValue();
-
-		String nonProxyHostsString = nonProxyHostsText.getText();
-		String[] nph = nonProxyHostsString.split(",");
-		String nonProxyHosts = "";
-		for (String str : nph)
-		{
-			String trim = str.trim();
-			if (trim.length() > 0)
-			{
-				nonProxyHosts += "|" + trim;
-			}
-		}
-		nonProxyHosts = nonProxyHosts.length() == 0 ? nonProxyHosts
-				: nonProxyHosts.substring(1);
+		ProxyType proxyType = (ProxyType) proxyTypeCombo.getSelectedItem();
 
 		if (proxyEnabled)
 		{
 			if (proxyHost.length() == 0 || proxyPort == null)
 			{
 				proxyValid = false;
-
 				showError(this, "Proxy values you entered are invalid.");
 			}
 		}
@@ -257,7 +240,7 @@ public class SettingsDialog extends JDialog
 			settings.setProxyHost(proxyHost);
 			if (proxyPort != null)
 				settings.setProxyPort(proxyPort);
-			settings.setNonProxyHosts(nonProxyHosts);
+			settings.setProxyType(proxyType);
 		}
 
 		return valid;
@@ -265,15 +248,13 @@ public class SettingsDialog extends JDialog
 
 	private static void showError(Component parent, String message)
 	{
-		JOptionPane.showMessageDialog(parent, message, "Error",
-				JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(parent, message, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
 	@SuppressWarnings("unused")
 	private static void showInfo(Component parent, String message)
 	{
-		JOptionPane.showMessageDialog(parent, message, "Info",
-				JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(parent, message, "Info", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	private JTabbedPane createTabs()
@@ -375,8 +356,7 @@ public class SettingsDialog extends JDialog
 			}
 		};
 
-		spanDisplayRadio = new JRadioButton("Span all displays", settings
-				.isSpanDisplays());
+		spanDisplayRadio = new JRadioButton("Span all displays", settings.isSpanDisplays());
 		spanDisplayRadio.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -387,8 +367,7 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(spanDisplayRadio, c);
 
-		singleDisplayRadio = new JRadioButton("Use single display", !settings
-				.isSpanDisplays());
+		singleDisplayRadio = new JRadioButton("Use single display", !settings.isSpanDisplays());
 		singleDisplayRadio.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -411,8 +390,7 @@ public class SettingsDialog extends JDialog
 		panel.add(displayLabel, c);
 
 		//build list of display devices
-		GraphicsEnvironment ge = GraphicsEnvironment
-				.getLocalGraphicsEnvironment();
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice[] screenDevices = ge.getScreenDevices();
 		GraphicsDevice defaultDevice = ge.getDefaultScreenDevice();
 		DisplayObject selectedDisplay = null;
@@ -536,8 +514,8 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel.add(eyeSeparationLabel, c);
 
-		SpinnerModel eyeSeparationModel = new SpinnerNumberModel(settings
-				.getEyeSeparation(), 0, 10, 0.1);
+		SpinnerModel eyeSeparationModel =
+				new SpinnerNumberModel(settings.getEyeSeparation(), 0, 10, 0.1);
 		eyeSeparationSpinner = new JSpinner(eyeSeparationModel);
 		c = new GridBagConstraints();
 		c.gridx = 1;
@@ -555,8 +533,8 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel.add(focalLengthLabel, c);
 
-		SpinnerModel focalLengthModel = new SpinnerNumberModel(settings
-				.getFocalLength(), 0, 10000, 1);
+		SpinnerModel focalLengthModel =
+				new SpinnerNumberModel(settings.getFocalLength(), 0, 10000, 1);
 		focalLengthSpinner = new JSpinner(focalLengthModel);
 		c = new GridBagConstraints();
 		c.gridx = 1;
@@ -576,10 +554,9 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(stereoCursorCheck, c);
 
-		hardwareStereoEnabledCheck = new JCheckBox(
-				"Enable quad-buffered stereo support (requires restart)");
-		hardwareStereoEnabledCheck.setSelected(settings
-				.isHardwareStereoEnabled());
+		hardwareStereoEnabledCheck =
+				new JCheckBox("Enable quad-buffered stereo support (requires restart)");
+		hardwareStereoEnabledCheck.setSelected(settings.isHardwareStereoEnabled());
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 6;
@@ -613,8 +590,8 @@ public class SettingsDialog extends JDialog
 		panel2.add(label, c);
 
 		verticalExaggeration = Settings.get().getVerticalExaggeration();
-		verticalExaggerationSlider = new JSlider(0, 200,
-				exaggerationToSlider(verticalExaggeration));
+		verticalExaggerationSlider =
+				new JSlider(0, 200, exaggerationToSlider(verticalExaggeration));
 		/*Dimension size = slider.getPreferredSize();
 		size.width = 50;
 		slider.setPreferredSize(size);*/
@@ -630,17 +607,14 @@ public class SettingsDialog extends JDialog
 		{
 			public void stateChanged(ChangeEvent e)
 			{
-				double exaggeration = sliderToExaggeration(verticalExaggerationSlider
-						.getValue());
+				double exaggeration = sliderToExaggeration(verticalExaggerationSlider.getValue());
 				verticalExaggeration = Math.round(exaggeration * 10d) / 10d;
-				verticalExaggerationLabel.setText(String.format("%1.1f",
-						verticalExaggeration)
+				verticalExaggerationLabel.setText(String.format("%1.1f", verticalExaggeration)
 						+ " x");
 			}
 		});
 
-		verticalExaggerationLabel = new JLabel(String.format("%1.1f",
-				verticalExaggeration) + " x");
+		verticalExaggerationLabel = new JLabel(String.format("%1.1f", verticalExaggeration) + " x");
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = 0;
@@ -681,8 +655,7 @@ public class SettingsDialog extends JDialog
 			{
 				double value = sliderToSpeed(viewIteratorSpeedSlider.getValue());
 				String format = "%1." + (value < 10 ? "2" : "1") + "f";
-				viewIteratorSpeedLabel.setText(String.format(format, value)
-						+ " x");
+				viewIteratorSpeedLabel.setText(String.format(format, value) + " x");
 			}
 		};
 		viewIteratorSpeedSlider.addChangeListener(cl);
@@ -796,35 +769,22 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(proxyPortText, c);
 
-		nonProxyHostsLabel = new JLabel("Non-proxy hosts:");
+		proxyTypeLabel = new JLabel("Proxy type:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 3;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
-		panel.add(nonProxyHostsLabel, c);
+		panel.add(proxyTypeLabel, c);
 
-
-		String[] nph = settings.getNonProxyHosts().split("\\|");
-		String nonProxyHosts = "";
-		for (String str : nph)
-		{
-			String trim = str.trim();
-			if (trim.length() > 0)
-			{
-				nonProxyHosts += "," + trim;
-			}
-		}
-		nonProxyHosts = nonProxyHosts.length() == 0 ? nonProxyHosts
-				: nonProxyHosts.substring(1);
-
-		nonProxyHostsText = new JTextField(nonProxyHosts);
+		proxyTypeCombo = new JComboBox(ProxyType.values());
+		proxyTypeCombo.setSelectedItem(settings.getProxyType());
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
-		panel.add(nonProxyHostsText, c);
+		panel.add(proxyTypeCombo, c);
 
 		enableProxySettings();
 
@@ -838,8 +798,8 @@ public class SettingsDialog extends JDialog
 		proxyHostText.setEnabled(enabled);
 		proxyPortLabel.setEnabled(enabled);
 		proxyPortText.setEnabled(enabled);
-		nonProxyHostsLabel.setEnabled(enabled);
-		nonProxyHostsText.setEnabled(enabled);
+		proxyTypeLabel.setEnabled(enabled);
+		proxyTypeCombo.setEnabled(enabled);
 	}
 
 	private void enableStereoSettings()
@@ -853,8 +813,9 @@ public class SettingsDialog extends JDialog
 		eyeSeparationLabel.setEnabled(enabled);
 		eyeSeparationSpinner.setEnabled(enabled);
 		stereoCursorCheck.setEnabled(enabled);
-		boolean focalLengthEnabled = enabled
-				&& projectionModeCombo.getSelectedItem() == ProjectionMode.ASYMMETRIC_FRUSTUM;
+		boolean focalLengthEnabled =
+				enabled
+						&& projectionModeCombo.getSelectedItem() == ProjectionMode.ASYMMETRIC_FRUSTUM;
 		focalLengthLabel.setEnabled(focalLengthEnabled);
 		focalLengthSpinner.setEnabled(focalLengthEnabled);
 	}
