@@ -48,18 +48,7 @@ public class LayersPanel extends JPanel implements WWPanel
 		if (root == null)
 			root = createDefaultRoot();
 
-		tree = new LoadingTree();
-		model = new LayerTreeModel(tree, root);
-		tree.setModel(model);
-		tree.setUI(new ClearableBasicTreeUI());
-		tree.setCellRenderer(new LayerCellRenderer());
-		//tree.setCellEditor(new DefaultTreeCellEditor(tree, new DefaultTreeCellRenderer()));
-		tree.setEditable(true);
-		tree.setShowsRootHandles(true);
-		tree.setRootVisible(false);
-		tree.setRowHeight(0);
-		tree.addTreeExpansionListener(model);
-		model.expandNodes();
+		tree = new LayerTree(root);
 
 		JScrollPane scrollPane = new JScrollPane(tree);
 		add(scrollPane, BorderLayout.CENTER);

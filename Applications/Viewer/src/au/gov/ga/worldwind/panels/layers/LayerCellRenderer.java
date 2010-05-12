@@ -20,14 +20,13 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 
-import au.gov.ga.worldwind.components.lazytree.LoadingTree;
 import au.gov.ga.worldwind.util.DefaultLauncher;
 import au.gov.ga.worldwind.util.HSLColor;
 import au.gov.ga.worldwind.util.Icons;
 
 public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 {
-	private LoadingTree tree;
+	private LayerTree tree;
 	private RendererMouseKeyListener mouseKeyListener = new RendererMouseKeyListener();
 	private Map<Integer, Rectangle> urlRows = new HashMap<Integer, Rectangle>();
 
@@ -69,7 +68,7 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 		if (value != null && value instanceof ILayerNode)
 		{
 			ILayerNode layer = (ILayerNode) value;
-			layer.setEnabled(!layer.isEnabled());
+			tree.getModel().setEnabled(layer, !tree.getModel().isEnabled(layer));
 		}
 	}
 
@@ -90,8 +89,8 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 	public Component getTreeCellRendererComponent(final JTree tree, Object value, boolean selected,
 			boolean expanded, boolean leaf, final int row, boolean hasFocus)
 	{
-		if (!(tree instanceof LoadingTree))
-			throw new IllegalArgumentException("Tree must be a LoadingTree");
+		if (!(tree instanceof LayerTree))
+			throw new IllegalArgumentException("Tree must be a LayerTree");
 
 		//tree has changed!
 		if (this.tree != tree)
@@ -102,7 +101,7 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 				this.tree.removeMouseMotionListener(mouseKeyListener);
 				this.tree.removeKeyListener(mouseKeyListener);
 			}
-			this.tree = (LoadingTree) tree;
+			this.tree = (LayerTree) tree;
 			tree.addMouseListener(mouseKeyListener);
 			tree.addMouseMotionListener(mouseKeyListener);
 			tree.addKeyListener(mouseKeyListener);

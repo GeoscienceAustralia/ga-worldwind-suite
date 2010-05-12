@@ -39,6 +39,26 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		insertNodeInto(node, root, root.getChildCount());
 	}
 
+	public void setEnabled(ILayerNode layer, boolean enabled)
+	{
+		if (layer.isEnabled() != enabled)
+		{
+			layer.setEnabled(enabled);
+			enableLayers();
+		}
+	}
+
+	public boolean isEnabled(ILayerNode layer)
+	{
+		return layer.isEnabled();
+	}
+	
+	private void enableLayers()
+	{
+		//TODO
+		System.out.println(Arrays.toString(layerNodes.toArray()));
+	}
+
 	public void addLayer(ILayerDefinition layer)
 	{
 		INode node = LayerNode.createFromLayerDefinition(layer);
@@ -150,8 +170,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		{
 			layerNodes.clear();
 			addLayersToLayerList(root);
-
-			System.out.println(Arrays.toString(layerNodes.toArray()));
+			enableLayers();
 		}
 	}
 
