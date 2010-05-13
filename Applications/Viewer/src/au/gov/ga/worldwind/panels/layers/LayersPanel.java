@@ -16,7 +16,6 @@ import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 
-import au.gov.ga.worldwind.components.lazytree.LoadingTree;
 import au.gov.ga.worldwind.panels.WWPanel;
 import au.gov.ga.worldwind.panels.dataset.DatasetPanel;
 import au.gov.ga.worldwind.panels.layers.drag.NodeTransferHandler;
@@ -28,8 +27,7 @@ public class LayersPanel extends JPanel implements WWPanel
 	private static final String LAYERS_FILENAME = "layers.xml";
 	private static final File layersFile = new File(Settings.getUserDirectory(), LAYERS_FILENAME);
 
-	private LoadingTree tree;
-	private LayerTreeModel model;
+	private LayerTree tree;
 	private INode root;
 
 	private DatasetPanel datasetPanel;
@@ -65,13 +63,13 @@ public class LayersPanel extends JPanel implements WWPanel
 				TreePath editPath;
 				if (p == null)
 				{
-					model.addToRoot(node);
+					getModel().addToRoot(node);
 					editPath = new TreePath(new Object[] { root, node });
 				}
 				else
 				{
 					INode parent = (INode) p.getLastPathComponent();
-					model.insertNodeInto(node, parent, parent.getChildCount());
+					getModel().insertNodeInto(node, parent, parent.getChildCount());
 					editPath = p.pathByAddingChild(node);
 				}
 				tree.scrollPathToVisible(editPath);
@@ -101,7 +99,7 @@ public class LayersPanel extends JPanel implements WWPanel
 				if (p != null)
 				{
 					INode node = (INode) p.getLastPathComponent();
-					model.removeNodeFromParent(node);
+					getModel().removeNodeFromParent(node);
 				}
 			}
 		};
@@ -117,7 +115,7 @@ public class LayersPanel extends JPanel implements WWPanel
 	public void linkWithDatasetPanel(DatasetPanel datasetPanel)
 	{
 		this.datasetPanel = datasetPanel;
-		datasetPanel.registerLayerTreeModel(model);
+		datasetPanel.registerLayerTreeModel(getModel());
 	}
 
 	public void setupDrag()
@@ -138,7 +136,7 @@ public class LayersPanel extends JPanel implements WWPanel
 
 	public LayerTreeModel getModel()
 	{
-		return model;
+		return tree.getModel();
 	}
 
 	private INode createDefaultRoot()
