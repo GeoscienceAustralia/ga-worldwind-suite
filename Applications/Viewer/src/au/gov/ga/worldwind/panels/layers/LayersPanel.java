@@ -34,7 +34,7 @@ public class LayersPanel extends JPanel implements WWPanel
 
 	private DatasetPanel datasetPanel;
 
-	public LayersPanel()
+	public LayersPanel(WorldWindow wwd)
 	{
 		super(new BorderLayout());
 
@@ -50,8 +50,11 @@ public class LayersPanel extends JPanel implements WWPanel
 
 		LayerList layerList = new LayerList();
 		CompoundElevationModel elevationModel = new CompoundElevationModel();
-		LayerEnabler enabler = new LayerEnabler(layerList, elevationModel);
+		LayerEnabler enabler = new LayerEnabler(wwd, layerList, elevationModel);
 		tree = new LayerTree(root, enabler);
+
+		wwd.getModel().setLayers(layerList);
+		wwd.getModel().getGlobe().setElevationModel(elevationModel);
 
 		JScrollPane scrollPane = new JScrollPane(tree);
 		add(scrollPane, BorderLayout.CENTER);
@@ -105,7 +108,7 @@ public class LayersPanel extends JPanel implements WWPanel
 				{
 					INode node = (INode) p.getLastPathComponent();
 					getModel().removeNodeFromParent(node, true);
-					if(datasetPanel != null)
+					if (datasetPanel != null)
 						datasetPanel.getTree().repaint();
 				}
 			}

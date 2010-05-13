@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.panels.layers;
 
+import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
@@ -16,14 +17,16 @@ import au.gov.ga.worldwind.downloader.RetrievalResult;
 
 public class LayerEnabler
 {
+	private WorldWindow wwd;
 	private LayerList layerList;
 	private CompoundElevationModel elevationModel;
 
 	private List<ILayerNode> nodes = new ArrayList<ILayerNode>();
 	private List<Wrapper> wrappers = new ArrayList<Wrapper>();
 
-	public LayerEnabler(LayerList layerList, CompoundElevationModel elevationModel)
+	public LayerEnabler(WorldWindow wwd, LayerList layerList, CompoundElevationModel elevationModel)
 	{
+		this.wwd = wwd;
 		this.layerList = layerList;
 		this.elevationModel = elevationModel;
 	}
@@ -104,7 +107,16 @@ public class LayerEnabler
 		}
 
 		//create a layer or elevation model from the downloaded result
-		Object layer = LayerLoader.load(result.getAsInputStream());
+		Object layer;
+		try
+		{
+			layer = LayerLoader.load(result.getAsInputStream());
+		}
+		catch (Exception e)
+		{
+			node.setError(e);
+			return;
+		}
 		if (layer == null)
 			return;
 
@@ -159,6 +171,8 @@ public class LayerEnabler
 			elevationModel.removeElevationModel(0);
 		for (ElevationModel em : elevationModels)
 			elevationModel.addElevationModel(em);
+
+		wwd.redraw();
 
 		System.out.println("layerList = " + Arrays.toString(layerList.toArray()));
 		System.out.println("elevationModel = "

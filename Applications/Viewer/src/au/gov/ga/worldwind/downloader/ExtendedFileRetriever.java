@@ -24,9 +24,10 @@ public class ExtendedFileRetriever extends FileRetriever implements ExtendedRetr
 	{
 		try
 		{
-			if ("file".equalsIgnoreCase(connection.getURL().getProtocol()))
+			if (ifModifiedSince != null
+					&& "file".equalsIgnoreCase(connection.getURL().getProtocol()))
 			{
-				notModified = checkIfModified(connection.getURL());
+				notModified = checkIfModified(connection.getURL(), ifModifiedSince);
 				if (notModified)
 					return null;
 			}
@@ -40,7 +41,7 @@ public class ExtendedFileRetriever extends FileRetriever implements ExtendedRetr
 		}
 	}
 
-	private boolean checkIfModified(URL url)
+	private boolean checkIfModified(URL url, long ifModifiedSince)
 	{
 		File file = null;
 		try
