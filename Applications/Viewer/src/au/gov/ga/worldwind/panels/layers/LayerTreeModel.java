@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.panels.layers;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,17 +25,19 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	private List<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
 	private List<ILayerNode> layerNodes = new ArrayList<ILayerNode>();
 	private Map<URL, Set<ILayerNode>> layerURLmap = new HashMap<URL, Set<ILayerNode>>();
+	private LayerEnabler enabler;
 
-	public LayerTreeModel(JTree tree, INode root)
+	public LayerTreeModel(JTree tree, INode root, LayerEnabler enabler)
 	{
 		this.tree = tree;
 		this.root = root;
-		addAnyLayers(root);
+		this.enabler = enabler;
+		addAnyLayers(root, true);
 	}
 
-	public void addToRoot(INode node)
+	public void addToRoot(INode node, boolean refreshLayers)
 	{
-		insertNodeInto(node, root, root.getChildCount());
+		insertNodeInto(node, root, root.getChildCount(), refreshLayers);
 	}
 
 	public void setEnabled(ILayerNode layer, boolean enabled)
@@ -44,7 +45,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		if (layer.isEnabled() != enabled)
 		{
 			layer.setEnabled(enabled);
-			enableLayers();
+			refreshLayers();
 		}
 	}
 
@@ -52,11 +53,11 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	{
 		return layer.isEnabled();
 	}
-	
-	private void enableLayers()
+
+	private void refreshLayers()
 	{
-		//TODO
-		System.out.println(Arrays.toString(layerNodes.toArray()));
+		List<ILayerNode> copy = new ArrayList<ILayerNode>(layerNodes);
+		enabler.enable(copy);
 	}
 
 	public void addLayer(ILayerDefinition layer)
@@ -66,13 +67,13 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		TreePath expand;
 		if (selected == null)
 		{
-			addToRoot(node);
+			addToRoot(node, true);
 			expand = new TreePath(new Object[] { root, node });
 		}
 		else
 		{
 			INode parent = (INode) selected.getLastPathComponent();
-			insertNodeInto(node, parent, parent.getChildCount());
+			insertNodeInto(node, parent, parent.getChildCount(), true);
 			expand = selected.pathByAddingChild(node);
 		}
 		((ClearableBasicTreeUI) tree.getUI()).relayout();
@@ -88,8 +89,10 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			while (!set.isEmpty())
 			{
 				//this will call removedLayer() which will remove the node from the set
-				removeNodeFromParent(set.iterator().next());
+				removeNodeFromParent(set.iterator().next(), false);
 			}
+			//only rebuild the layers list at the end
+			rebuildLayersList();
 		}
 	}
 
@@ -98,17 +101,17 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		return layerURLmap.containsKey(layer.getLayerURL());
 	}
 
-	private void addAnyLayers(INode node)
+	private void addAnyLayers(INode node, boolean rebuildLayersList)
 	{
 		boolean changed = addAnyLayersBelow(node);
-		if (changed)
+		if (changed && rebuildLayersList)
 			rebuildLayersList();
 	}
 
-	private void removeAnyLayers(INode node)
+	private void removeAnyLayers(INode node, boolean rebuildLayersList)
 	{
 		boolean changed = removeAnyLayersBelow(node);
-		if (changed)
+		if (changed && rebuildLayersList)
 			rebuildLayersList();
 	}
 
@@ -169,12 +172,12 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		synchronized (layerNodes)
 		{
 			layerNodes.clear();
-			addLayersToLayerList(root);
-			enableLayers();
+			addLayersToLayerList(root, layerNodes);
+			refreshLayers();
 		}
 	}
 
-	private void addLayersToLayerList(INode node)
+	private void addLayersToLayerList(INode node, List<ILayerNode> layerNodes)
 	{
 		if (node instanceof ILayerNode)
 		{
@@ -182,7 +185,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			layerNodes.add(layer);
 		}
 		for (int i = 0; i < node.getChildCount(); i++)
-			addLayersToLayerList(node.getChild(i));
+			addLayersToLayerList(node.getChild(i), layerNodes);
 	}
 
 	public Object getChild(Object parent, int index)
@@ -239,7 +242,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		listeners.remove(l);
 	}
 
-	public void insertNodeInto(INode newNode, INode parentNode, int index)
+	public void insertNodeInto(INode newNode, INode parentNode, int index, boolean rebuildLayersList)
 	{
 		parentNode.insertChild(index, newNode);
 
@@ -247,10 +250,10 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		newIndexs[0] = index;
 		nodesWereInserted(parentNode, newIndexs);
 
-		addAnyLayers(newNode);
+		addAnyLayers(newNode, rebuildLayersList);
 	}
 
-	public void removeNodeFromParent(INode node)
+	public void removeNodeFromParent(INode node, boolean rebuildLayersList)
 	{
 		INode parent = node.getParent();
 		if (parent != null)
@@ -266,7 +269,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			nodesWereRemoved(parent, childIndex, removedArray);
 		}
 
-		removeAnyLayers(node);
+		removeAnyLayers(node, rebuildLayersList);
 	}
 
 	public INode getParent(INode targetNode)

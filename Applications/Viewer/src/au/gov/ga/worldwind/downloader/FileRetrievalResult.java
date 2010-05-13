@@ -8,9 +8,9 @@ public class FileRetrievalResult extends ByteBufferRetrievalResult
 {
 	private File file;
 
-	public FileRetrievalResult(File file)
+	public FileRetrievalResult(File file, boolean fromCache)
 	{
-		super(readFile(file));
+		super(readFile(file), fromCache, false, null);
 		this.file = file;
 	}
 

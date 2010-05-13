@@ -10,7 +10,6 @@ import gov.nasa.worldwind.util.WWIO;
 
 import java.io.File;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +65,9 @@ public class Downloader
 		//get the result immediately
 		RetrievalResult result = immediateHandler.get();
 
+		if (result.getError() != null)
+			throw result.getError();
+
 		if (cache && result.hasData())
 		{
 			saveToCache(url, result);
@@ -113,18 +115,26 @@ public class Downloader
 		//get the result immediately
 		RetrievalResult modifiedResult = immediateHandler.get();
 
+		//if an error occurred, then rethrow it
+		if (modifiedResult.getError() != null)
+			throw modifiedResult.getError();
+
 		if (modifiedResult.hasData())
 		{
 			saveToCache(url, modifiedResult);
 			return modifiedResult;
 		}
 
+		if (cachedResult == null)
+			throw new Exception("Download failed: " + url);
+
 		return cachedResult;
 	}
 
 	/**
 	 * Performs a download asynchronously, calling the handler when download is
-	 * complete. If the URL is cached, no download is performed.
+	 * complete. If the URL is cached, no download is performed, and the handler
+	 * is called synchronously.
 	 * 
 	 * @param url
 	 *            URL to download
@@ -141,7 +151,7 @@ public class Downloader
 			RetrievalResult result = getFromCache(url);
 			if (result != null && result.hasData())
 			{
-				downloadHandler.handle(result, true);
+				downloadHandler.handle(result);
 				return;
 			}
 		}
@@ -149,13 +159,13 @@ public class Downloader
 		RetrievalHandler cacherHandler = new RetrievalHandler()
 		{
 			@Override
-			public void handle(RetrievalResult result, boolean cached)
+			public void handle(RetrievalResult result)
 			{
 				if (cache && result.hasData())
 				{
 					saveToCache(url, result);
 				}
-				downloadHandler.handle(result, cached);
+				downloadHandler.handle(result);
 			}
 		};
 
@@ -175,10 +185,11 @@ public class Downloader
 
 	/**
 	 * Performs a download asynchronously. If the URL is cached, the
-	 * cacheHandler is called with the result. The server is checked to see if a
-	 * newer version exists than the cached version. If so, it is downloaded,
-	 * and the downloadHandler is called with the result (to check if new data
-	 * has been downloaded, use result.hasData() in the downloadHandler).
+	 * cacheHandler is called synchronously with the result. The server is
+	 * checked to see if a newer version exists than the cached version. If so,
+	 * it is downloaded, and the downloadHandler is called with the result (to
+	 * check if new data has been downloaded, use result.hasData() in the
+	 * downloadHandler).
 	 * 
 	 * @param url
 	 *            URL to download
@@ -197,9 +208,9 @@ public class Downloader
 
 	/**
 	 * Performs a download asynchronously. If the URL is cached, the
-	 * cacheHandler is called with the result. The latest version is also
-	 * downloaded and cached, and the downloadHandler is called with the new
-	 * result.
+	 * cacheHandler is called synchronously with the result. The latest version
+	 * is also downloaded and cached, and the downloadHandler is called with the
+	 * new result.
 	 * 
 	 * @param url
 	 *            URL to download
@@ -221,7 +232,7 @@ public class Downloader
 		Long lastModified = null;
 		if (result != null && result.hasData())
 		{
-			cacheHandler.handle(result, true);
+			cacheHandler.handle(result);
 			if (checkIfModified)
 				lastModified = result.lastModified();
 		}
@@ -229,13 +240,13 @@ public class Downloader
 		RetrievalHandler cacherHandler = new RetrievalHandler()
 		{
 			@Override
-			public void handle(RetrievalResult result, boolean cached)
+			public void handle(RetrievalResult result)
 			{
 				if (result.hasData())
 				{
 					saveToCache(url, result);
 				}
-				downloadHandler.handle(result, cached);
+				downloadHandler.handle(result);
 			}
 		};
 
@@ -263,7 +274,7 @@ public class Downloader
 				try
 				{
 					File file = new File(fileUrl.toURI());
-					return new FileRetrievalResult(file);
+					return new FileRetrievalResult(file, true);
 				}
 				catch (Exception e)
 				{
@@ -292,15 +303,6 @@ public class Downloader
 		}
 	}
 
-	/*private static void removeCachedURL(URL url)
-	{
-		synchronized (cacheLock)
-		{
-			URL fileUrl = getCacheURL(url);
-			WorldWind.getDataFileStore().removeFile(fileUrl);
-		}
-	}*/
-
 	private static URL getCacheURL(URL url)
 	{
 		String filename = filenameForURL(url);
@@ -326,8 +328,8 @@ public class Downloader
 	{
 		if ("http".equalsIgnoreCase(url.getProtocol())
 				|| "https".equalsIgnoreCase(url.getProtocol()))
-			return new IfModifiedHTTPRetriever(url, ifModifiedSince, postProcessor);
-		return new FileRetriever(url, ifModifiedSince, postProcessor);
+			return new ExtendedHTTPRetriever(url, ifModifiedSince, postProcessor);
+		return new ExtendedFileRetriever(url, ifModifiedSince, postProcessor);
 	}
 
 	private static void runRetriever(Retriever retriever, HandlerPostProcessor postProcessor)
@@ -360,49 +362,12 @@ public class Downloader
 		}
 
 		@Override
-		public void handle(RetrievalResult result, boolean cached)
+		public void handle(RetrievalResult result)
 		{
 			synchronized (semaphore)
 			{
 				this.result = result;
 				semaphore.notify();
-			}
-		}
-	}
-
-	private static class HandlerPostProcessor implements RetrievalPostProcessor
-	{
-		private Object lock = new Object();
-		private final List<RetrievalHandler> handlers = new ArrayList<RetrievalHandler>();
-		private RetrievalResult result = null;
-
-		public HandlerPostProcessor(RetrievalHandler handler)
-		{
-			handlers.add(handler);
-		}
-
-		public void addHandler(RetrievalHandler handler)
-		{
-			synchronized (lock)
-			{
-				if (result == null)
-					//result has not been calculated yet, so wait for run() to be called
-					handlers.add(handler);
-				else
-					handler.handle(result, false);
-			}
-		}
-
-		@Override
-		public ByteBuffer run(Retriever retriever)
-		{
-			synchronized (lock)
-			{
-				ByteBuffer buffer = retriever.getBuffer();
-				result = new ByteBufferRetrievalResult(buffer);
-				for (RetrievalHandler handler : handlers)
-					handler.handle(result, false);
-				return buffer;
 			}
 		}
 	}
@@ -427,14 +392,15 @@ public class Downloader
 						try
 						{
 							Thread.sleep(5000);
+							removeNonActiveRetrievers();
 						}
-						catch (InterruptedException e)
+						catch (Exception e)
 						{
 						}
-						removeNonActiveRetrievers();
 					}
 				}
 			});
+			thread.setName("Retriever cache cleaner");
 			thread.setDaemon(true);
 			thread.start();
 		}

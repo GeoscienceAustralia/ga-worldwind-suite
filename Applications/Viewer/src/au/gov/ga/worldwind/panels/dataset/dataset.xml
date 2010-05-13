@@ -2,7 +2,7 @@
 	<Dataset name="NASA" icon="file:bin/au/gov/ga/worldwind/panels/dataset/layer.png">
 		<Dataset name="Common"
 			icon="http://gos2.geodata.gov/Portal/images/miniGeographic_Services16.png">
-			<Layer name="BMNG" url="file:bin/au/gov/ga/worldwind/panels/dataset/layer.xml"
+			<Layer name="BMNG" url="file:bin/au/gov/ga/worldwind/panels/dataset/layer.xm"
 				description="http://www.ga.gov.au/"
 				icon="http://www.geodata.gov/Portal/images/miniLive_Data_and_Maps16.png" />
 		</Dataset>

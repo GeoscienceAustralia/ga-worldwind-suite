@@ -1,6 +1,8 @@
 package au.gov.ga.worldwind.panels.layers;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.terrain.CompoundElevationModel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -46,7 +48,10 @@ public class LayersPanel extends JPanel implements WWPanel
 		if (root == null)
 			root = createDefaultRoot();
 
-		tree = new LayerTree(root);
+		LayerList layerList = new LayerList();
+		CompoundElevationModel elevationModel = new CompoundElevationModel();
+		LayerEnabler enabler = new LayerEnabler(layerList, elevationModel);
+		tree = new LayerTree(root, enabler);
 
 		JScrollPane scrollPane = new JScrollPane(tree);
 		add(scrollPane, BorderLayout.CENTER);
@@ -63,13 +68,13 @@ public class LayersPanel extends JPanel implements WWPanel
 				TreePath editPath;
 				if (p == null)
 				{
-					getModel().addToRoot(node);
+					getModel().addToRoot(node, false);
 					editPath = new TreePath(new Object[] { root, node });
 				}
 				else
 				{
 					INode parent = (INode) p.getLastPathComponent();
-					getModel().insertNodeInto(node, parent, parent.getChildCount());
+					getModel().insertNodeInto(node, parent, parent.getChildCount(), false);
 					editPath = p.pathByAddingChild(node);
 				}
 				tree.scrollPathToVisible(editPath);
@@ -99,7 +104,9 @@ public class LayersPanel extends JPanel implements WWPanel
 				if (p != null)
 				{
 					INode node = (INode) p.getLastPathComponent();
-					getModel().removeNodeFromParent(node);
+					getModel().removeNodeFromParent(node, true);
+					if(datasetPanel != null)
+						datasetPanel.getTree().repaint();
 				}
 			}
 		};

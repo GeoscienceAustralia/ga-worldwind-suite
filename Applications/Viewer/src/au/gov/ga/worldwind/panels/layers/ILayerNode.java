@@ -16,9 +16,11 @@ public interface ILayerNode extends INode
 
 	public void setEnabled(boolean enabled);
 
-	public boolean isError();
+	public boolean hasError();
 
-	public void setError(boolean error);
+	public Exception getError();
+
+	public void setError(Exception error);
 
 	public boolean isLayerLoading();
 

@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.panels.layers.drag;
 
+import java.awt.Rectangle;
 import java.awt.datatransfer.Transferable;
 
 import javax.swing.JComponent;
@@ -131,11 +132,11 @@ public class NodeTransferHandler extends TransferHandler
 						index--;
 				}
 
-				model.removeNodeFromParent(move);
+				model.removeNodeFromParent(move, false);
 				if (noparent)
-					model.addToRoot(move);
+					model.addToRoot(move, true);
 				else
-					model.insertNodeInto(move, parent, index++);
+					model.insertNodeInto(move, parent, index++, true);
 			}
 			else if (source == datasetTree)
 			{
@@ -145,9 +146,13 @@ public class NodeTransferHandler extends TransferHandler
 					ILayerDefinition definition = (ILayerDefinition) dmtn.getUserObject();
 					INode node = LayerNode.createFromLayerDefinition(definition);
 					if (noparent)
-						model.addToRoot(node);
+						model.addToRoot(node, true);
 					else
-						model.insertNodeInto(node, parent, index);
+						model.insertNodeInto(node, parent, index, true);
+
+					Rectangle bounds = datasetTree.getPathBounds(path);
+					if (bounds != null)
+						datasetTree.repaint(bounds);
 				}
 			}
 		}

@@ -260,6 +260,7 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 	{
 		private int lastRow = -1;
 		private int lastCursor = -1;
+		private int lastCursorRow = -1;
 
 		@Override
 		public void mouseMoved(MouseEvent e)
@@ -426,13 +427,36 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 			}
 
 			//only set the cursor if it is not the same as the last one set
-			if (lastCursor != cursor)
+			if (lastCursor != cursor || lastCursorRow != mouseRow)
 			{
 				lastCursor = cursor;
+				lastCursorRow = mouseRow;
 				if (cursor == -1)
+				{
 					tree.setCursor(null);
+					tree.setToolTipText(null);
+				}
 				else
+				{
 					tree.setCursor(Cursor.getPredefinedCursor(cursor));
+					TreePath path = tree.getPathForRow(mouseRow);
+					if (path != null)
+					{
+						Object value = path.getLastPathComponent();
+						if (value != null && value instanceof DefaultMutableTreeNode)
+						{
+							Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
+							if (userObject instanceof IData)
+							{
+								IData data = (IData) userObject;
+								if (data.getDescriptionURL() != null)
+								{
+									tree.setToolTipText(data.getDescriptionURL().toExternalForm());
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}

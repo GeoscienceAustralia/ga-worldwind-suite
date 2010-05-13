@@ -41,7 +41,7 @@ public abstract class AbstractIconItem implements IIconItem
 				iconDownloading = true;
 				RetrievalHandler setIconHandler = new RetrievalHandler()
 				{
-					public void handle(RetrievalResult result, boolean cached)
+					public void handle(RetrievalResult result)
 					{
 						synchronized (iconLock)
 						{
@@ -87,7 +87,7 @@ public abstract class AbstractIconItem implements IIconItem
 		synchronized (iconLock)
 		{
 			this.iconURL = iconURL;
-			
+
 			iconLoaded = iconURL == null;
 			if (iconLoaded)
 				icon = null;

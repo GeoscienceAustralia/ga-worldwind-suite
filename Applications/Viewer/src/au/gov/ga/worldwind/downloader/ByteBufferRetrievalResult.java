@@ -6,11 +6,18 @@ import java.nio.ByteBuffer;
 
 public class ByteBufferRetrievalResult implements RetrievalResult
 {
+	private final Exception error;
 	private final ByteBuffer buffer;
+	private final boolean fromCache;
+	private final boolean notModified;
 
-	public ByteBufferRetrievalResult(ByteBuffer buffer)
+	public ByteBufferRetrievalResult(ByteBuffer buffer, boolean fromCache, boolean notModified,
+			Exception error)
 	{
 		this.buffer = buffer;
+		this.fromCache = fromCache;
+		this.notModified = notModified;
+		this.error = error;
 	}
 
 	@Override
@@ -22,7 +29,7 @@ public class ByteBufferRetrievalResult implements RetrievalResult
 	@Override
 	public InputStream getAsInputStream()
 	{
-		if(buffer == null)
+		if (buffer == null)
 			return null;
 		return new ByteArrayInputStream(getArray());
 	}
@@ -30,11 +37,11 @@ public class ByteBufferRetrievalResult implements RetrievalResult
 	@Override
 	public String getAsString()
 	{
-		if(buffer == null)
+		if (buffer == null)
 			return null;
 		return new String(getArray());
 	}
-	
+
 	private byte[] getArray()
 	{
 		byte[] array;
@@ -53,5 +60,20 @@ public class ByteBufferRetrievalResult implements RetrievalResult
 	public boolean hasData()
 	{
 		return buffer != null;
+	}
+
+	public boolean isFromCache()
+	{
+		return fromCache;
+	}
+
+	public boolean isNotModified()
+	{
+		return notModified;
+	}
+
+	public Exception getError()
+	{
+		return error;
 	}
 }

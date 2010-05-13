@@ -142,16 +142,17 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 				label.setIcon(loadingIcon);
 			}
 
-			if (node instanceof LayerNode)
+			if (node instanceof ILayerNode)
 			{
-				LayerNode layer = (LayerNode) node;
+				ILayerNode layer = (ILayerNode) node;
 
-				if (layer.isError())
+				if (layer.hasError())
 				{
+					//may be better to put the error on a separate line
 					label.setIcon(Icons.error.getIcon());
+					label.setText(label.getText() + " - " + layer.getError().getMessage());
 				}
-
-				if (layer.getDescriptionURL() != null)
+				else if (layer.getDescriptionURL() != null)
 				{
 					//make the label look like a link
 					String text =
@@ -207,6 +208,7 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 	{
 		private int lastRow = -1;
 		private int lastCursor = -1;
+		private int lastCursorRow = -1;
 
 		@Override
 		public void mouseMoved(MouseEvent e)
@@ -375,13 +377,32 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 			}
 
 			//only set the cursor if it is not the same as the last one set
-			if (lastCursor != cursor)
+			if (lastCursor != cursor || lastCursorRow != mouseRow)
 			{
 				lastCursor = cursor;
+				lastCursorRow = mouseRow;
 				if (cursor == -1)
+				{
 					tree.setCursor(null);
+					tree.setToolTipText(null);
+				}
 				else
+				{
 					tree.setCursor(Cursor.getPredefinedCursor(cursor));
+					TreePath path = tree.getPathForRow(mouseRow);
+					if (path != null)
+					{
+						Object value = path.getLastPathComponent();
+						if (value != null && value instanceof ILayerNode)
+						{
+							ILayerNode layer = (ILayerNode) value;
+							if (layer.getDescriptionURL() != null)
+							{
+								tree.setToolTipText(layer.getDescriptionURL().toExternalForm());
+							}
+						}
+					}
+				}
 			}
 		}
 	}

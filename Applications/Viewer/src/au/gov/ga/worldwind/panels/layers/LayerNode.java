@@ -9,7 +9,7 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	private URL layerURL;
 	private URL descriptionURL;
 	private boolean enabled;
-	private boolean error = false;
+	private Exception error = null;
 	private boolean layerLoading = false;
 
 	public LayerNode(String name, URL iconURL, boolean expanded, URL layerURL, URL descriptionURL,
@@ -76,13 +76,19 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	}
 
 	@Override
-	public boolean isError()
+	public boolean hasError()
+	{
+		return error != null;
+	}
+
+	@Override
+	public Exception getError()
 	{
 		return error;
 	}
 
 	@Override
-	public void setError(boolean error)
+	public void setError(Exception error)
 	{
 		this.error = error;
 	}

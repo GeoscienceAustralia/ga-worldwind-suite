@@ -19,6 +19,9 @@ public class LazyDataset extends Dataset implements ILazyDataset
 	{
 		//download immediately, checking for modifications
 		RetrievalResult result = Downloader.downloadImmediatelyIfModified(url);
+		if (result.getError() != null)
+			throw result.getError();
+
 		if (result != null)
 		{
 			IDataset dataset = DatasetReader.read(result.getAsInputStream());

@@ -9,10 +9,10 @@ import au.gov.ga.worldwind.components.lazytree.LoadingTree;
 
 public class LayerTree extends LoadingTree
 {
-	public LayerTree(INode root)
+	public LayerTree(INode root, LayerEnabler enabler)
 	{
 		super();
-		LayerTreeModel model = new LayerTreeModel(this, root);
+		LayerTreeModel model = new LayerTreeModel(this, root, enabler);
 		setModel(model);
 
 		setUI(new ClearableBasicTreeUI());
