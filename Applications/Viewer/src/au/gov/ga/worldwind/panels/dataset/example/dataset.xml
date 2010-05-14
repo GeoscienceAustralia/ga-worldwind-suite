@@ -7,31 +7,33 @@
 		<Layer name="Earth Image" url="NASA/earth_image.xml" icon="layer.png" />
 		<Layer name="Blue Marble" url="NASA/blue_marble.xml" icon="layer.png" />
 		<Layer name="Landsat" url="NASA/landsat.xml" icon="layer.png" />
-		<Layer name="Virtual Earth" url="NASA/virtual_earth.xml" icon="layer.png" />
+		<Layer name="Virtual Earth - Aerial" url="NASA/virtual_earth_aerial.xml" icon="layer.png" />
+		<Layer name="Virtual Earth - Roads" url="NASA/virtual_earth_roads.xml" icon="layer.png" />
+		<Layer name="Virtual Earth - Hybrid" url="NASA/virtual_earth_hybrid.xml" icon="layer.png" />
+		<Layer name="Country Boundaries" url="NASA/country_boundaries.xml" icon="layer.png" />
 		<Layer name="Place Names" url="NASA/place_names.xml" icon="layer.png" />
 	</Dataset>
 	<Dataset name="Geoscience Australia" icon="ga.png" description="http://www.ga.gov.au/">
 		<Dataset name="Radiometric Map of Australia" icon="GA/Radiometrics/icon.png" description="http://www.ga.gov.au/minerals/research/national/radiometric/index.jsp">
 			<Dataset name="Detailed Areas" icon="GA/Radiometrics/icon.png">
-				<Layer name="Ternary" url="GA/Radiometrics/Areas/Ternary.xml" icon="layer.png" />
-				<Layer name="Potassium" url="GA/Radiometrics/Areas/Potassium.xml" icon="layer.png" />
-				<Layer name="Thorium" url="GA/Radiometrics/Areas/Thorium.xml" icon="layer.png" />
-				<Layer name="Uranium" url="GA/Radiometrics/Areas/Uranium.xml" icon="layer.png" />
-				<Layer name="Uranium Squared" url="GA/Radiometrics/Areas/Uranium_Squared.xml" icon="layer.png" />
-				<Layer name="Ratio Th-K" url="GA/Radiometrics/Areas/Ratio_Th_K.xml" icon="layer.png" />
-				<Layer name="Ratio U-K" url="GA/Radiometrics/Areas/Ratio_U_K.xml" icon="layer.png" />
-				<Layer name="Ratio U-Th" url="GA/Radiometrics/Areas/Ratio_U_Th.xml" icon="layer.png" />
+				<Layer name="Ternary (K-Th-U)" url="GA/Radiometrics/Areas/Ternary.xml" icon="layer.png" />
+				<Layer name="Potassium (K)" url="GA/Radiometrics/Areas/Potassium.xml" icon="layer.png" />
+				<Layer name="Thorium (Th)" url="GA/Radiometrics/Areas/Thorium.xml" icon="layer.png" />
+				<Layer name="Uranium (U)" url="GA/Radiometrics/Areas/Uranium.xml" icon="layer.png" />
 				<Layer name="Dose Rate" url="GA/Radiometrics/Areas/Dose_Rate.xml" icon="layer.png" />
+				<Layer name="Thorium/Potassium Ratio" url="GA/Radiometrics/Areas/Ratio_Th_K.xml" icon="layer.png" />
+				<Layer name="Uranium/Potassium Ratio" url="GA/Radiometrics/Areas/Ratio_U_K.xml" icon="layer.png" />
+				<Layer name="Uranium/Thorium Ratio" url="GA/Radiometrics/Areas/Ratio_U_Th.xml" icon="layer.png" />
 			</Dataset>
-			<Layer name="Ternary" url="GA/Radiometrics/Ternary.xml" icon="layer.png" />
-			<Layer name="Potassium" url="GA/Radiometrics/Potassium.xml" icon="layer.png" />
-			<Layer name="Thorium" url="GA/Radiometrics/Thorium.xml" icon="layer.png" />
-			<Layer name="Uranium" url="GA/Radiometrics/Uranium.xml" icon="layer.png" />
-			<Layer name="Uranium Squared" url="GA/Radiometrics/Uranium_Squared.xml" icon="layer.png" />
-			<Layer name="Ratio Th-K" url="GA/Radiometrics/Ratio_Th_K.xml" icon="layer.png" />
-			<Layer name="Ratio U-K" url="GA/Radiometrics/Ratio_U_K.xml" icon="layer.png" />
-			<Layer name="Ratio U-Th" url="GA/Radiometrics/Ratio_U_Th.xml" icon="layer.png" />
+			<Layer name="Ternary (K-Th-U)" url="GA/Radiometrics/Ternary.xml" icon="layer.png" />
+			<Layer name="Potassium (K)" url="GA/Radiometrics/Potassium.xml" icon="layer.png" />
+			<Layer name="Thorium (Th)" url="GA/Radiometrics/Thorium.xml" icon="layer.png" />
+			<Layer name="Uranium (U)" url="GA/Radiometrics/Uranium.xml" icon="layer.png" />
 			<Layer name="Dose Rate" url="GA/Radiometrics/Dose_Rate.xml" icon="layer.png" />
+			<Layer name="Thorium/Potassium Ratio" url="GA/Radiometrics/Ratio_Th_K.xml" icon="layer.png" />
+			<Layer name="Uranium/Potassium Ratio" url="GA/Radiometrics/Ratio_U_K.xml" icon="layer.png" />
+			<Layer name="Uranium/Thorium Ratio" url="GA/Radiometrics/Ratio_U_Th.xml" icon="layer.png" />
+			<Layer name="Uranium^2/Thorium Ratio" url="GA/Radiometrics/Uranium_Squared.xml" icon="layer.png" />
 		</Dataset>
 		<!-- Important to escaped ampersands in URLs! -->
 		<Dataset name="Gravity Anomaly Map of the Australian Region" icon="GA/Gravity/icon.png" description="https://www.ga.gov.au/products/servlet/controller?event=GEOCAT_DETAILS&amp;catno=65682">
