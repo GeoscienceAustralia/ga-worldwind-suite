@@ -19,6 +19,8 @@ import au.gov.ga.worldwind.downloader.RetrievalResult;
 
 public class LayerEnabler
 {
+	private LayerTree tree;
+
 	private WorldWindow wwd;
 	private LayerList layerList;
 	private ExtendedCompoundElevationModel elevationModel;
@@ -33,6 +35,11 @@ public class LayerEnabler
 		this.wwd = wwd;
 		this.layerList = layerList;
 		this.elevationModel = elevationModel;
+	}
+
+	public void setTree(LayerTree tree)
+	{
+		this.tree = tree;
 	}
 
 	//called by LayerTreeModel
@@ -95,21 +102,28 @@ public class LayerEnabler
 				handleResult(node, result);
 			}
 		};
-		node.setLayerLoading(true);
+		setLayerLoading(node, true);
 		Downloader.downloadIfModified(url, handler, handler);
+	}
+
+	private void setLayerLoading(ILayerNode node, boolean loading)
+	{
+		node.setLayerLoading(loading);
+		if (tree != null)
+			tree.repaint();
 	}
 
 	private synchronized void handleResult(ILayerNode node, RetrievalResult result)
 	{
 		if (result.getError() != null)
 		{
-			node.setLayerLoading(false);
+			setLayerLoading(node, false);
 			node.setError(result.getError());
 			return;
 		}
 
 		if (!result.isFromCache())
-			node.setLayerLoading(false);
+			setLayerLoading(node, false);
 
 		//data was not modified (already created layer from cache)
 		if (result.isNotModified())
@@ -161,11 +175,13 @@ public class LayerEnabler
 		List<ElevationModel> elevationModels = new ArrayList<ElevationModel>();
 		for (Wrapper wrapper : wrappers)
 		{
-			if (wrapper.node.isEnabled()) //TODO rethink this?
+			if (wrapper.node.isEnabled())
 			{
 				if (wrapper.hasLayer())
 				{
-					layers.add(wrapper.getLayer());
+					Layer layer = wrapper.getLayer();
+					layer.setEnabled(true);
+					layers.add(layer);
 				}
 				else if (wrapper.hasElevationModel())
 				{

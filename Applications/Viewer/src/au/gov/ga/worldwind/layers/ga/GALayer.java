@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.gov.ga.worldwind.application.Offline;
-import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
+import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayerOld;
 
-public class GALayer extends MaskTiledImageLayer
+public class GALayer extends MaskTiledImageLayerOld
 {
 	private final static String METADATA_BASE_URL_STRING = "http://www.ga.gov.au/apps/world-wind/metadata/";
 	private final static String TILES_SCRIPT_URL = "http://www.ga.gov.au/apps/world-wind/tiles.jsp";

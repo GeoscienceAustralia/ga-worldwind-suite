@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.layers.ga.magnetics;
 
 import au.gov.ga.worldwind.layers.ga.GALayer;
-import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
+import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayerOld;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -41,7 +41,7 @@ public class MagneticsLayer extends GALayer
 				.fromDegreesLatitude(-5.5648340), Angle
 				.fromDegreesLongitude(98.4274511), Angle
 				.fromDegreesLongitude(170.5036628)));
-		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayer
+		params.setValue(AVKey.TILE_URL_BUILDER, MaskTiledImageLayerOld
 				.createDefaultUrlBuilder("tiles/magnetics/image",
 						"tiles/magnetics/mask", ".jpg", ".png"));
 

@@ -51,6 +51,7 @@ public class LayersPanel extends JPanel implements WWPanel
 		ExtendedCompoundElevationModel elevationModel = new ExtendedCompoundElevationModel();
 		LayerEnabler enabler = new LayerEnabler(wwd, layerList, elevationModel);
 		tree = new LayerTree(root, enabler);
+		enabler.setTree(tree);
 
 		wwd.getModel().setLayers(layerList);
 		wwd.getModel().getGlobe().setElevationModel(elevationModel);

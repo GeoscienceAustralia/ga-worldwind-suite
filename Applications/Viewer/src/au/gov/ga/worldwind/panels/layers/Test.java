@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.panels.layers;
 
+import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
@@ -36,6 +37,8 @@ public class Test extends JPanel
 		Settings.get().setProxyPort(8080);
 		Settings.get().setProxyType(ProxyType.HTTP);
 		Settings.save();
+
+		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
 
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
