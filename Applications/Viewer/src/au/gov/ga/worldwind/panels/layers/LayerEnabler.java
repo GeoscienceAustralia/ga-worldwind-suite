@@ -4,12 +4,14 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.terrain.CompoundElevationModel;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import au.gov.ga.worldwind.downloader.Downloader;
 import au.gov.ga.worldwind.downloader.RetrievalHandler;
@@ -19,12 +21,14 @@ public class LayerEnabler
 {
 	private WorldWindow wwd;
 	private LayerList layerList;
-	private CompoundElevationModel elevationModel;
+	private ExtendedCompoundElevationModel elevationModel;
 
 	private List<ILayerNode> nodes = new ArrayList<ILayerNode>();
 	private List<Wrapper> wrappers = new ArrayList<Wrapper>();
+	private Map<ILayerNode, Wrapper> nodeMap = new HashMap<ILayerNode, Wrapper>();
 
-	public LayerEnabler(WorldWindow wwd, LayerList layerList, CompoundElevationModel elevationModel)
+	public LayerEnabler(WorldWindow wwd, LayerList layerList,
+			ExtendedCompoundElevationModel elevationModel)
 	{
 		this.wwd = wwd;
 		this.layerList = layerList;
@@ -34,38 +38,50 @@ public class LayerEnabler
 	//called by LayerTreeModel
 	public synchronized void enable(List<ILayerNode> nodes)
 	{
-		System.out.println("enable() " + Arrays.toString(nodes.toArray()));
-
-		if (nodes.equals(this.nodes))
+		//check if the node list has changed (if not, simply call refreshLists() to enable/disable layers)
+		if (!nodes.equals(this.nodes))
 		{
-			//no layers have been removed, added, or moved position
-			//simply enable/disable current layers
-			this.nodes = nodes;
-			refreshLists();
-		}
-		else
-		{
-			//TODO this can be implemented much more nicely!!
-			//don't need to load everything everytime a single layer is added/moved/removed
+			//build a set of added nodes
+			Set<ILayerNode> added = new HashSet<ILayerNode>(nodes);
+			added.removeAll(this.nodes);
 
+			if (!added.isEmpty() || nodes.size() != this.nodes.size())
+			{
+				//if any nodes have been added, or the node count is not the same (therefore some
+				//may have been removed; calculate the removed set, and then refresh the nodeMap
+
+				Set<ILayerNode> removed = new HashSet<ILayerNode>(this.nodes);
+				removed.removeAll(nodes);
+
+				for (ILayerNode remove : removed)
+				{
+					nodeMap.remove(remove);
+				}
+				for (ILayerNode add : added)
+				{
+					Wrapper wrapper = new Wrapper(add);
+					nodeMap.put(add, wrapper);
+				}
+			}
+
+			//set the global here, so that handleResult can find the index of it's node in the list
 			this.nodes = nodes;
 
+			//rebuild the wrappers list so that it contains wrappers in the same order as the nodes list
 			wrappers.clear();
 			for (ILayerNode node : nodes)
 			{
-				wrappers.add(new PlaceholderWrapper(node));
-				loadLayer(node);
-			}
+				wrappers.add(nodeMap.get(node));
 
-			refreshLists();
+				//load the layer if it has been added in this refresh
+				if (added.contains(node))
+					loadLayer(node);
+			}
 		}
 
-		//check for any changes in list
-		//if any removed, remove them (they may still be loading; ensure after load handler doesn't add it)
-
-		//store a copy of the nodes list every time this function is called
-		//then go through the list and call loadLayer for each
-		//after the layer is loaded, find it's index in the copied list
+		//build the layer lists and redraw
+		this.nodes = nodes;
+		refreshLists();
 	}
 
 	private void loadLayer(final ILayerNode node)
@@ -102,7 +118,7 @@ public class LayerEnabler
 		if (!result.hasData())
 		{
 			//shouldn't get here
-			node.setError(new Exception("Error"));
+			node.setError(new Exception("Error downloading layer"));
 			return;
 		}
 
@@ -120,23 +136,23 @@ public class LayerEnabler
 		if (layer == null)
 			return;
 
-		Wrapper wrapper = null;
+		int index = nodes.indexOf(node);
+		if (index < 0) //layer must have been removed during loading
+			return;
+
+		Wrapper wrapper = wrappers.get(index);
 		if (layer instanceof Layer)
 		{
-			wrapper = new LayerWrapper(node, (Layer) layer);
+			wrapper.setLayer((Layer) layer);
 		}
 		else if (layer instanceof ElevationModel)
 		{
-			wrapper = new ElevationModelWrapper(node, (ElevationModel) layer);
+			wrapper.setElevationModel((ElevationModel) layer);
 		}
 
-		if (wrapper != null)
-		{
-			int index = nodes.indexOf(node);
-			wrappers.set(index, wrapper);
-			if (!result.isFromCache())
-				refreshLists();
-		}
+		//must've been a download, so have to refresh the layer list
+		if (!result.isFromCache())
+			refreshLists();
 	}
 
 	private void refreshLists()
@@ -147,15 +163,13 @@ public class LayerEnabler
 		{
 			if (wrapper.node.isEnabled()) //TODO rethink this?
 			{
-				if (wrapper instanceof LayerWrapper)
+				if (wrapper.hasLayer())
 				{
-					LayerWrapper lw = (LayerWrapper) wrapper;
-					layers.add(lw.layer);
+					layers.add(wrapper.getLayer());
 				}
-				else if (wrapper instanceof ElevationModelWrapper)
+				else if (wrapper.hasElevationModel())
 				{
-					ElevationModelWrapper emw = (ElevationModelWrapper) wrapper;
-					elevationModels.add(emw.elevationModel);
+					elevationModels.add(wrapper.getElevationModel());
 				}
 			}
 		}
@@ -167,55 +181,60 @@ public class LayerEnabler
 		layerList.clear();
 		layerList.addAll(layers);
 
-		while (!elevationModel.getElevationModels().isEmpty())
-			elevationModel.removeElevationModel(0);
-		for (ElevationModel em : elevationModels)
-			elevationModel.addElevationModel(em);
+		elevationModel.clear();
+		elevationModel.addAll(elevationModels);
 
 		wwd.redraw();
-
-		System.out.println("layerList = " + Arrays.toString(layerList.toArray()));
-		System.out.println("elevationModel = "
-				+ Arrays.toString(elevationModel.getElevationModels().toArray()));
 	}
 
-	private abstract static class Wrapper
+	private static class Wrapper
 	{
 		public final ILayerNode node;
+
+		private Layer layer;
+		private ElevationModel elevationModel;
 
 		public Wrapper(ILayerNode node)
 		{
 			this.node = node;
 		}
-	}
 
-	private static class PlaceholderWrapper extends Wrapper
-	{
-		public PlaceholderWrapper(ILayerNode node)
+		public boolean hasLayer()
 		{
-			super(node);
+			return layer != null;
 		}
-	}
 
-	private static class LayerWrapper extends Wrapper
-	{
-		public final Layer layer;
-
-		public LayerWrapper(ILayerNode node, Layer layer)
+		public Layer getLayer()
 		{
-			super(node);
+			return layer;
+		}
+
+		public void setLayer(Layer layer)
+		{
 			this.layer = layer;
+			if (layer != null)
+			{
+				setElevationModel(null);
+			}
 		}
-	}
 
-	private static class ElevationModelWrapper extends Wrapper
-	{
-		public final ElevationModel elevationModel;
-
-		public ElevationModelWrapper(ILayerNode node, ElevationModel elevationModel)
+		public boolean hasElevationModel()
 		{
-			super(node);
+			return elevationModel != null;
+		}
+
+		public ElevationModel getElevationModel()
+		{
+			return elevationModel;
+		}
+
+		public void setElevationModel(ElevationModel elevationModel)
+		{
 			this.elevationModel = elevationModel;
+			if (elevationModel != null)
+			{
+				setLayer(null);
+			}
 		}
 	}
 }

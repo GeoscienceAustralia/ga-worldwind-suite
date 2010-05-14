@@ -318,9 +318,12 @@ public class Downloader
 
 	private static String filenameForURL(URL url)
 	{
-		// need to replace the following characters: \/:*?"<>|
+		// need to replace the following invalid filename characters: \/:*?"<>|
+		// replace them with exclamation points, because that is cool
 		String external = url.toExternalForm();
-		return DIRECTORY + File.separator + external.replaceAll("[\\/:*?\"<>|]", "_");
+		external = external.replaceAll("!", "!!");
+		external = external.replaceAll("[\\/:*?\"<>|]", "!");
+		return DIRECTORY + File.separator + external;
 	}
 
 	private static URLRetriever createRetriever(URL url, Long ifModifiedSince,

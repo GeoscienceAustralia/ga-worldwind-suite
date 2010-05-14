@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.panels.layers;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.terrain.CompoundElevationModel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -49,7 +48,7 @@ public class LayersPanel extends JPanel implements WWPanel
 			root = createDefaultRoot();
 
 		LayerList layerList = new LayerList();
-		CompoundElevationModel elevationModel = new CompoundElevationModel();
+		ExtendedCompoundElevationModel elevationModel = new ExtendedCompoundElevationModel();
 		LayerEnabler enabler = new LayerEnabler(wwd, layerList, elevationModel);
 		tree = new LayerTree(root, enabler);
 
