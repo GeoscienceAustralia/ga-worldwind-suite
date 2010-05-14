@@ -34,10 +34,10 @@
 			<Layer name="Dose Rate" url="GA/Radiometrics/Dose_Rate.xml" icon="layer.png" />
 		</Dataset>
 		<!-- Important to escaped ampersands in URLs! -->
-		<Dataset name="Gravity Anomaly Map of the Australian Region" description="https://www.ga.gov.au/products/servlet/controller?event=GEOCAT_DETAILS&amp;catno=65682">
+		<Dataset name="Gravity Anomaly Map of the Australian Region" icon="GA/Gravity/icon.png" description="https://www.ga.gov.au/products/servlet/controller?event=GEOCAT_DETAILS&amp;catno=65682">
 			<Layer name="Gravity" url="GA/Gravity/Gravity.xml" icon="layer.png" />
 		</Dataset>
-		<Dataset name="Magnetic Anomaly Map of the Australian Region" description="https://www.ga.gov.au/products/servlet/controller?event=GEOCAT_DETAILS&amp;catno=61703">
+		<Dataset name="Magnetic Anomaly Map of the Australian Region" icon="GA/Magnetics/icon.png" description="https://www.ga.gov.au/products/servlet/controller?event=GEOCAT_DETAILS&amp;catno=61703">
 			<Layer name="Magnetic" url="GA/Magnetics/Magnetics.xml" icon="layer.png" />
 		</Dataset>
 	</Dataset>
