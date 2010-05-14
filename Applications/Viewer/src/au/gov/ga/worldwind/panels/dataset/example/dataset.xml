@@ -10,10 +10,37 @@
 		<Layer name="Virtual Earth" url="NASA/virtual_earth.xml" icon="layer.png" />
 		<Layer name="Place Names" url="NASA/place_names.xml" icon="layer.png" />
 	</Dataset>
-	<Dataset name="Geoscience Australia" icon="ga.png"
-		description="http://www.ga.gov.au/">
-		<Layer name="Radiometrics - Ternary" url="GA/Radiometrics/ternary.xml"
-			icon="layer.png" />
+	<Dataset name="Geoscience Australia" icon="ga.png" description="http://www.ga.gov.au/">
+		<Dataset name="Radiometric Map of Australia" icon="GA/Radiometrics/icon.png" description="http://www.ga.gov.au/minerals/research/national/radiometric/index.jsp">
+			<Dataset name="Detailed Areas" icon="GA/Radiometrics/icon.png">
+				<Layer name="Ternary" url="GA/Radiometrics/Areas/Ternary.xml" icon="layer.png" />
+				<Layer name="Potassium" url="GA/Radiometrics/Areas/Potassium.xml" icon="layer.png" />
+				<Layer name="Thorium" url="GA/Radiometrics/Areas/Thorium.xml" icon="layer.png" />
+				<Layer name="Uranium" url="GA/Radiometrics/Areas/Uranium.xml" icon="layer.png" />
+				<Layer name="Uranium Squared" url="GA/Radiometrics/Areas/Uranium_Squared.xml" icon="layer.png" />
+				<Layer name="Ratio Th-K" url="GA/Radiometrics/Areas/Ratio_Th_K.xml" icon="layer.png" />
+				<Layer name="Ratio U-K" url="GA/Radiometrics/Areas/Ratio_U_K.xml" icon="layer.png" />
+				<Layer name="Ratio U-Th" url="GA/Radiometrics/Areas/Ratio_U_Th.xml" icon="layer.png" />
+				<Layer name="Dose Rate" url="GA/Radiometrics/Areas/Dose_Rate.xml" icon="layer.png" />
+			</Dataset>
+			<Layer name="Ternary" url="GA/Radiometrics/Ternary.xml" icon="layer.png" />
+			<Layer name="Potassium" url="GA/Radiometrics/Potassium.xml" icon="layer.png" />
+			<Layer name="Thorium" url="GA/Radiometrics/Thorium.xml" icon="layer.png" />
+			<Layer name="Uranium" url="GA/Radiometrics/Uranium.xml" icon="layer.png" />
+			<Layer name="Uranium Squared" url="GA/Radiometrics/Uranium_Squared.xml" icon="layer.png" />
+			<Layer name="Ratio Th-K" url="GA/Radiometrics/Ratio_Th_K.xml" icon="layer.png" />
+			<Layer name="Ratio U-K" url="GA/Radiometrics/Ratio_U_K.xml" icon="layer.png" />
+			<Layer name="Ratio U-Th" url="GA/Radiometrics/Ratio_U_Th.xml" icon="layer.png" />
+			<Layer name="Dose Rate" url="GA/Radiometrics/Dose_Rate.xml" icon="layer.png" />
+		</Dataset>
+		<!-- Important to escaped ampersands in URLs! -->
+		<Dataset name="Gravity Anomaly Map of the Australian Region" description="https://www.ga.gov.au/products/servlet/controller?event=GEOCAT_DETAILS&amp;catno=65682">
+			<Layer name="Gravity" url="GA/Gravity/Gravity.xml" icon="layer.png" />
+		</Dataset>
+		<Dataset name="Magnetic Anomaly Map of the Australian Region" description="https://www.ga.gov.au/products/servlet/controller?event=GEOCAT_DETAILS&amp;catno=61703">
+			<Layer name="Magnetic" url="GA/Magnetics/Magnetics.xml" icon="layer.png" />
+		</Dataset>
 	</Dataset>
-	<Link name="Recursive" url="dataset.xml" />
+	<!-- Can also lazily link to other dataset XML files: -->
+	<!--<Link name="Recursive" url="dataset.xml" />-->
 </DatasetList>
