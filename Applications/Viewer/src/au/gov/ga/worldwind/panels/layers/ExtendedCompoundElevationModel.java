@@ -7,13 +7,18 @@ import java.util.Collection;
 
 public class ExtendedCompoundElevationModel extends CompoundElevationModel
 {
-	public void clear()
-	{
-		elevationModels.clear();
-	}
-
 	public void addAll(Collection<? extends ElevationModel> c)
 	{
 		elevationModels.addAll(c);
+	}
+
+	public void removeAll(Collection<?> c)
+	{
+		elevationModels.removeAll(c);
+	}
+
+	public void clear()
+	{
+		elevationModels.clear();
 	}
 }

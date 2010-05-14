@@ -29,6 +29,9 @@ public class LayerEnabler
 	private List<Wrapper> wrappers = new ArrayList<Wrapper>();
 	private Map<ILayerNode, Wrapper> nodeMap = new HashMap<ILayerNode, Wrapper>();
 
+	private List<Layer> layers = new ArrayList<Layer>();
+	private List<ElevationModel> elevationModels = new ArrayList<ElevationModel>();
+
 	public LayerEnabler(WorldWindow wwd, LayerList layerList,
 			ExtendedCompoundElevationModel elevationModel)
 	{
@@ -171,8 +174,18 @@ public class LayerEnabler
 
 	private void refreshLists()
 	{
-		List<Layer> layers = new ArrayList<Layer>();
-		List<ElevationModel> elevationModels = new ArrayList<ElevationModel>();
+		//TODO instead of clearing layers and readding, only remove those that need to be removed,
+		//and only add those that need to be added, and move those that need to be moved
+
+		//remove all that we added last time
+		layerList.removeAll(layers);
+		elevationModel.removeAll(elevationModels);
+
+		//clear the lists
+		layers.clear();
+		elevationModels.clear();
+
+		//rebuild the lists
 		for (Wrapper wrapper : wrappers)
 		{
 			if (wrapper.node.isEnabled())
@@ -190,14 +203,7 @@ public class LayerEnabler
 			}
 		}
 
-		//TODO instead of clearing layers and readding, only remove those that need to be removed,
-		//and only add those that need to be added
-		//should be easy, just cache those that were added last time
-
-		layerList.clear();
 		layerList.addAll(layers);
-
-		elevationModel.clear();
 		elevationModel.addAll(elevationModels);
 
 		wwd.redraw();
