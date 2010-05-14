@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
 
 public class DatasetReader
 {
-	public static IDataset read(Object source) throws MalformedURLException
+	public static IDataset read(Object source, URL context) throws MalformedURLException
 	{
 		//top level dataset (DatasetList) doesn't have a name, and is not shown in the tree
 		IDataset root = new Dataset(null, null, null);
@@ -22,14 +22,15 @@ public class DatasetReader
 		{
 			for (Element element : elements)
 			{
-				addRelevant(element, root);
+				addRelevant(element, root, context);
 			}
 		}
 
 		return root;
 	}
 
-	private static void addRelevant(Element element, IDataset parent) throws MalformedURLException
+	private static void addRelevant(Element element, IDataset parent, URL context)
+			throws MalformedURLException
 	{
 		Element[] elements = WWXML.getElements(element, "Dataset|Link|Layer", null);
 		if (elements != null)
@@ -38,58 +39,61 @@ public class DatasetReader
 			{
 				if (e.getNodeName().equals("Dataset"))
 				{
-					IDataset dataset = addDataset(e, parent);
-					addRelevant(e, dataset);
+					IDataset dataset = addDataset(e, parent, context);
+					addRelevant(e, dataset, context);
 				}
 				else if (e.getNodeName().equals("Link"))
 				{
-					addLink(e, parent);
+					addLink(e, parent, context);
 				}
 				else if (e.getNodeName().equals("Layer"))
 				{
-					addLayer(e, parent);
+					addLayer(e, parent, context);
 				}
 			}
 		}
 	}
 
-	private static IDataset addDataset(Element element, IDataset parent)
+	private static IDataset addDataset(Element element, IDataset parent, URL context)
 			throws MalformedURLException
 	{
 		String name = WWXML.getText(element, "@name");
-		URL description = getURL(element, "@description");
-		URL icon = getURL(element, "@icon");
+		URL description = getURL(element, "@description", context);
+		URL icon = getURL(element, "@icon", context);
 		IDataset dataset = new Dataset(name, description, icon);
 		parent.getDatasets().add(dataset);
 		return dataset;
 	}
 
-	private static void addLink(Element element, IDataset parent) throws MalformedURLException
+	private static void addLink(Element element, IDataset parent, URL context)
+			throws MalformedURLException
 	{
 		String name = WWXML.getText(element, "@name");
-		URL description = getURL(element, "@description");
-		URL icon = getURL(element, "@icon");
-		URL url = getURL(element, "@url");
+		URL description = getURL(element, "@description", context);
+		URL icon = getURL(element, "@icon", context);
+		URL url = getURL(element, "@url", context);
 		IDataset dataset = new LazyDataset(name, url, description, icon);
 		parent.getDatasets().add(dataset);
 	}
 
-	private static void addLayer(Element element, IDataset parent) throws MalformedURLException
+	private static void addLayer(Element element, IDataset parent, URL context)
+			throws MalformedURLException
 	{
 		String name = WWXML.getText(element, "@name");
-		URL description = getURL(element, "@description");
-		URL icon = getURL(element, "@icon");
-		URL url = getURL(element, "@url");
+		URL description = getURL(element, "@description", context);
+		URL icon = getURL(element, "@icon", context);
+		URL url = getURL(element, "@url", context);
 		ILayerDefinition layer = new LayerDefinition(name, url, description, icon);
 		parent.getLayers().add(layer);
 	}
 
-	private static URL getURL(Element element, String path) throws MalformedURLException
+	private static URL getURL(Element element, String path, URL context)
+			throws MalformedURLException
 	{
 		String text = WWXML.getText(element, path);
 		if (text == null || text.length() == 0)
 			return null;
-		return new URL(text);
+		return new URL(context, text);
 	}
 
 	/*private static String getDescription(Element element)

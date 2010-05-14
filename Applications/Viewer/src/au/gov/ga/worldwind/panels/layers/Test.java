@@ -115,7 +115,7 @@ public class Test extends JPanel
 		URL url = null;
 		try
 		{
-			url = new URL("file:bin/au/gov/ga/worldwind/panels/dataset/test/dataset.xml");
+			url = new URL("http://www.ga.gov.au:8500/apps/world-wind/dataset/dataset.xml");
 		}
 		catch (MalformedURLException e)
 		{

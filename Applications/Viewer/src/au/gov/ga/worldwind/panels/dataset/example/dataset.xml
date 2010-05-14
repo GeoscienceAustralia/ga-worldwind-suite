@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DatasetList>
+	<Dataset name="NASA" icon="nasa.png" description="http://worldwind.arc.nasa.gov/java/">
+		<Layer name="Earth Digital Elevation Model" url="NASA/earth_elevation_model.xml" icon="layer.png" />
+		<Layer name="Stars" url="NASA/stars.xml" icon="layer.png" />
+		<Layer name="Sky" url="NASA/sky.xml" icon="layer.png" />
+		<Layer name="Earth Image" url="NASA/earth_image.xml" icon="layer.png" />
+		<Layer name="Blue Marble" url="NASA/blue_marble.xml" icon="layer.png" />
+		<Layer name="Landsat" url="NASA/landsat.xml" icon="layer.png" />
+		<Layer name="Virtual Earth" url="NASA/virtual_earth.xml" icon="layer.png" />
+		<Layer name="Place Names" url="NASA/place_names.xml" icon="layer.png" />
+	</Dataset>
+	<Dataset name="Geoscience Australia" icon="ga.png"
+		description="http://www.ga.gov.au/">
+		<Layer name="Radiometrics - Ternary" url="GA/Radiometrics/ternary.xml"
+			icon="layer.png" />
+	</Dataset>
+	<Link name="Recursive" url="dataset.xml" />
+</DatasetList>

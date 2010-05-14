@@ -32,4 +32,8 @@
 		</NorthEast>
 	</Sector>
 	<UseTransparentTextures>true</UseTransparentTextures>
+	<ForceLevelZeroLoads>true</ForceLevelZeroLoads>
+	<RetainLevelZeroTiles>true</RetainLevelZeroTiles>
+	<UseMipMaps>true</UseMipMaps>
+	<SplitScale>0.9</SplitScale>
 </Layer>

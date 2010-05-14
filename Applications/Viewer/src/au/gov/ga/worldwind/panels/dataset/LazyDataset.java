@@ -7,7 +7,7 @@ import au.gov.ga.worldwind.downloader.RetrievalResult;
 
 public class LazyDataset extends Dataset implements ILazyDataset
 {
-	private URL url;
+	private final URL url;
 
 	public LazyDataset(String name, URL url, URL descriptionURL, URL iconURL)
 	{
@@ -24,7 +24,7 @@ public class LazyDataset extends Dataset implements ILazyDataset
 
 		if (result != null)
 		{
-			IDataset dataset = DatasetReader.read(result.getAsInputStream());
+			IDataset dataset = DatasetReader.read(result.getAsInputStream(), url);
 			if (dataset != null)
 			{
 				getDatasets().addAll(dataset.getDatasets());
