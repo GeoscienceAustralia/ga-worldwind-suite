@@ -6,11 +6,9 @@ All Rights Reserved.
 */
 package nasa.worldwind.retrieve;
 
-import gov.nasa.worldwind.*;
+import gov.nasa.worldwind.Configuration;
+import gov.nasa.worldwind.WWObjectImpl;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.terrain.BasicElevationModel;
-import gov.nasa.worldwind.util.Logging;
-import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.BasicTiledImageLayer;
@@ -25,20 +23,33 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Polyline;
 import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.render.SurfaceImage;
-import gov.nasa.worldwind.retrieve.*;
+import gov.nasa.worldwind.retrieve.RetrievalFuture;
+import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
+import gov.nasa.worldwind.retrieve.RetrievalService;
+import gov.nasa.worldwind.retrieve.Retriever;
+import gov.nasa.worldwind.retrieve.URLRetriever;
+import gov.nasa.worldwind.terrain.BasicElevationModel;
+import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.Tile;
 
 import java.awt.Color;
 import java.lang.reflect.Field;
-import java.net.*;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import au.gov.ga.worldwind.layers.geonames.GeoNamesLayer;
 import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
+import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayerOld;
 import au.gov.ga.worldwind.settings.Settings;
 
 /**
@@ -539,8 +550,8 @@ public final class ExtendedRetrievalService extends WWObjectImpl
 				BasicTiledImageLayer.class, PlaceNameLayer.class,
 				RPFTiledImageLayer.class, SurfaceImage.class,
 				MercatorTiledImageLayer.class,
-				BasicMercatorTiledImageLayer.class, MaskTiledImageLayer.class,
-				GeoNamesLayer.class };
+				BasicMercatorTiledImageLayer.class, MaskTiledImageLayerOld.class,
+				MaskTiledImageLayer.class, GeoNamesLayer.class };
 		// Search classes above for declared classes that implement
 		// RetrivalPostProcess AND contain a Field which is a subclass of Tile,
 		// and add those Fields to an array

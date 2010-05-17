@@ -93,6 +93,8 @@ public class DatasetReader
 		String text = WWXML.getText(element, path);
 		if (text == null || text.length() == 0)
 			return null;
+		if (context == null)
+			return new URL(text);
 		return new URL(context, text);
 	}
 

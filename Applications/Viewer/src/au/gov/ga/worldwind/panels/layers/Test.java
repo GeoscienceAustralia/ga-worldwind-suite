@@ -13,20 +13,17 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.InputStream;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
-import au.gov.ga.worldwind.components.collapsiblesplit.CollapsibleSplitPane;
-import au.gov.ga.worldwind.components.collapsiblesplit.l2fprod.CollapsibleGroup;
-import au.gov.ga.worldwind.panels.dataset.DatasetPanel;
-import au.gov.ga.worldwind.panels.dataset.LazyDataset;
+import au.gov.ga.worldwind.panels.SideBar;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.Settings.ProxyType;
-import au.gov.ga.worldwind.util.Icons;
+import au.gov.ga.worldwind.theme.Theme;
+import au.gov.ga.worldwind.theme.ThemeFactory;
 
 public class Test extends JPanel
 {
@@ -51,6 +48,9 @@ public class Test extends JPanel
 		wwd.addSelectListener(new ClickAndGoSelectListener(wwd, WorldMapLayer.class));
 		frame.add(wwd, BorderLayout.CENTER);
 
+		m.getLayers().clear();
+		m.getGlobe().setElevationModel(new ExtendedCompoundElevationModel());
+
 
 		final Test test = new Test(wwd);
 		frame.add(test, BorderLayout.WEST);
@@ -69,59 +69,23 @@ public class Test extends JPanel
 			@Override
 			public void windowClosing(WindowEvent e)
 			{
-				test.layersPanel.dispose();
+				test.theme.dispose();
 				frame.dispose();
 			}
 		});
 	}
 
-	private LayersPanel layersPanel;
+	private Theme theme;
 
 	public Test(WorldWindow wwd) throws Exception
 	{
-		final CollapsibleSplitPane pane = new CollapsibleSplitPane();
-		pane.getLayout().addPlaceholder("panel0", 1);
-		pane.getLayout().addPlaceholder("panel1", 1);
-		pane.getLayout().addPlaceholder("panel2", 1);
-		pane.getLayout().setVertical(true);
-		pane.getLayout().setDividerSize(5);
+		super(new BorderLayout());
 
-		CollapsibleGroup layersGroup = new CollapsibleGroup();
-		layersGroup.setTitle("Layers");
-		layersGroup.setScrollOnExpand(true);
-		pane.add(layersGroup, "panel0");
-		layersGroup.setLayout(new BorderLayout());
-
-		CollapsibleGroup datasetsGroup = new CollapsibleGroup();
-		datasetsGroup.setTitle("Datasets");
-		datasetsGroup.setScrollOnExpand(true);
-		pane.add(datasetsGroup, "panel1");
-		datasetsGroup.setLayout(new BorderLayout());
-
-		setLayout(new BorderLayout());
-		add(pane, BorderLayout.CENTER);
-
-
-		layersPanel = new LayersPanel(wwd);
-		layersGroup.add(layersPanel, BorderLayout.CENTER);
-
-		DatasetPanel datasetPanel = new DatasetPanel();
-		datasetsGroup.add(datasetPanel, BorderLayout.CENTER);
-
-		layersPanel.linkWithDatasetPanel(datasetPanel);
-		layersPanel.setupDrag();
-
-
-		URL url = null;
-		try
-		{
-			url = new URL("http://www.ga.gov.au:8500/apps/world-wind/dataset/dataset.xml");
-		}
-		catch (MalformedURLException e)
-		{
-			e.printStackTrace();
-		}
-		LazyDataset dataset = new LazyDataset("Datasets", url, null, Icons.earth.getURL());
-		datasetPanel.addDataset(dataset);
+		InputStream is =
+				Test.class.getResourceAsStream("/config/DefaultTheme.xml");
+		theme = ThemeFactory.createFromXML(is, null);
+		theme.setup(wwd);
+		SideBar sidebar = new SideBar(theme);
+		add(sidebar, BorderLayout.CENTER);
 	}
 }

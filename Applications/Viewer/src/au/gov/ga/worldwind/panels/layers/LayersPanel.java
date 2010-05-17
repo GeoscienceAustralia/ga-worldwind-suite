@@ -1,12 +1,12 @@
 package au.gov.ga.worldwind.panels.layers;
 
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.layers.LayerList;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.Collection;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -17,23 +17,27 @@ import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 
-import au.gov.ga.worldwind.panels.WWPanel;
 import au.gov.ga.worldwind.panels.dataset.DatasetPanel;
 import au.gov.ga.worldwind.panels.layers.drag.NodeTransferHandler;
 import au.gov.ga.worldwind.settings.Settings;
+import au.gov.ga.worldwind.theme.Theme;
+import au.gov.ga.worldwind.theme.ThemePanel;
 import au.gov.ga.worldwind.util.Icons;
 
-public class LayersPanel extends JPanel implements WWPanel
+public class LayersPanel extends JPanel implements ThemePanel
 {
 	private static final String LAYERS_FILENAME = "layers.xml";
 	private static final File layersFile = new File(Settings.getUserDirectory(), LAYERS_FILENAME);
 
+	private String displayName = "Layers";
 	private LayerTree tree;
 	private INode root;
 
+	private LayerEnabler layerEnabler;
+
 	private DatasetPanel datasetPanel;
 
-	public LayersPanel(WorldWindow wwd)
+	public LayersPanel()
 	{
 		super(new BorderLayout());
 
@@ -47,14 +51,9 @@ public class LayersPanel extends JPanel implements WWPanel
 		if (root == null)
 			root = createDefaultRoot();
 
-		LayerList layerList = new LayerList();
-		ExtendedCompoundElevationModel elevationModel = new ExtendedCompoundElevationModel();
-		LayerEnabler enabler = new LayerEnabler(wwd, layerList, elevationModel);
-		tree = new LayerTree(root, enabler);
-		enabler.setTree(tree);
-
-		wwd.getModel().setLayers(layerList);
-		wwd.getModel().getGlobe().setElevationModel(elevationModel);
+		layerEnabler = new LayerEnabler();
+		tree = new LayerTree(root, layerEnabler);
+		layerEnabler.setTree(tree);
 
 		JScrollPane scrollPane = new JScrollPane(tree);
 		add(scrollPane, BorderLayout.CENTER);
@@ -122,13 +121,54 @@ public class LayersPanel extends JPanel implements WWPanel
 		add(toolBar, BorderLayout.PAGE_START);
 	}
 
-	public void linkWithDatasetPanel(DatasetPanel datasetPanel)
+	public LayerTreeModel getModel()
 	{
-		this.datasetPanel = datasetPanel;
-		datasetPanel.registerLayerTreeModel(getModel());
+		return tree.getModel();
 	}
 
-	public void setupDrag()
+	private INode createDefaultRoot()
+	{
+		return new FolderNode("root", null, true);
+	}
+
+	@Override
+	public JPanel getPanel()
+	{
+		return this;
+	}
+
+	@Override
+	public void setup(Theme theme)
+	{
+		WorldWindow wwd = theme.getWwd();
+		layerEnabler.setWwd(wwd);
+		linkPanels(theme.getPanels());
+	}
+
+	@Override
+	public void dispose()
+	{
+		LayerTreePersistance.saveToXML(root, layersFile);
+	}
+
+	private void linkPanels(Collection<ThemePanel> panels)
+	{
+		for (ThemePanel panel : panels)
+		{
+			if (panel instanceof DatasetPanel)
+			{
+				datasetPanel = (DatasetPanel) panel;
+				break;
+			}
+		}
+		if (datasetPanel != null)
+		{
+			datasetPanel.registerLayerTreeModel(getModel());
+		}
+		setupDrag();
+	}
+
+	private void setupDrag()
 	{
 		JTree datasetTree = datasetPanel != null ? datasetPanel.getTree() : null;
 
@@ -144,37 +184,25 @@ public class LayersPanel extends JPanel implements WWPanel
 		}
 	}
 
-	public LayerTreeModel getModel()
+	@Override
+	public boolean isOn()
 	{
-		return tree.getModel();
-	}
-
-	private INode createDefaultRoot()
-	{
-		return new FolderNode("root", null, true);
+		return isVisible();
 	}
 
 	@Override
-	public String getName()
+	public void setOn(boolean on)
 	{
-		return "Layers";
+		setVisible(on);
 	}
 
-	@Override
-	public JPanel getPanel()
+	public String getDisplayName()
 	{
-		return this;
+		return displayName;
 	}
 
-	@Override
-	public void setup(WorldWindow wwd)
+	public void setDisplayName(String displayName)
 	{
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void dispose()
-	{
-		LayerTreePersistance.saveToXML(root, layersFile);
+		this.displayName = displayName;
 	}
 }

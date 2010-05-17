@@ -4,6 +4,7 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.terrain.CompoundElevationModel;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -32,17 +33,34 @@ public class LayerEnabler
 	private List<Layer> layers = new ArrayList<Layer>();
 	private List<ElevationModel> elevationModels = new ArrayList<ElevationModel>();
 
-	public LayerEnabler(WorldWindow wwd, LayerList layerList,
-			ExtendedCompoundElevationModel elevationModel)
-	{
-		this.wwd = wwd;
-		this.layerList = layerList;
-		this.elevationModel = elevationModel;
-	}
-
 	public void setTree(LayerTree tree)
 	{
 		this.tree = tree;
+	}
+
+	public synchronized void setWwd(WorldWindow wwd)
+	{
+		this.wwd = wwd;
+		layerList = wwd.getModel().getLayers();
+
+		ElevationModel em = wwd.getModel().getGlobe().getElevationModel();
+		if (em instanceof ExtendedCompoundElevationModel)
+		{
+			elevationModel = (ExtendedCompoundElevationModel) em;
+		}
+		else if (em instanceof CompoundElevationModel)
+		{
+			elevationModel = new ExtendedCompoundElevationModel();
+			((CompoundElevationModel) em).addElevationModel(elevationModel);
+		}
+		else
+		{
+			throw new IllegalStateException(
+					"Globe's elevation model must be a CompoundElevationModel, "
+							+ "and should be an ExtendedCompoundElevationModel");
+		}
+		
+		refreshLists();
 	}
 
 	//called by LayerTreeModel
@@ -176,6 +194,8 @@ public class LayerEnabler
 	{
 		//TODO instead of clearing layers and readding, only remove those that need to be removed,
 		//and only add those that need to be added, and move those that need to be moved
+		if (wwd == null)
+			return;
 
 		//remove all that we added last time
 		layerList.removeAll(layers);
@@ -205,8 +225,6 @@ public class LayerEnabler
 
 		layerList.addAll(layers);
 		elevationModel.addAll(elevationModels);
-
-		wwd.redraw();
 	}
 
 	private static class Wrapper

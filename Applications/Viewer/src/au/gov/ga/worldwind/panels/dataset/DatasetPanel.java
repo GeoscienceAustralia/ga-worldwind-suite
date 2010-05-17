@@ -1,7 +1,5 @@
 package au.gov.ga.worldwind.panels.dataset;
 
-import gov.nasa.worldwind.WorldWindow;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
@@ -13,11 +11,14 @@ import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.components.lazytree.LazyTree;
 import au.gov.ga.worldwind.components.lazytree.LazyTreeObjectNode;
-import au.gov.ga.worldwind.panels.WWPanel;
 import au.gov.ga.worldwind.panels.layers.LayerTreeModel;
+import au.gov.ga.worldwind.theme.Theme;
+import au.gov.ga.worldwind.theme.ThemePanel;
 
-public class DatasetPanel extends JPanel implements WWPanel
+public class DatasetPanel extends JPanel implements ThemePanel
 {
+	private String displayName = "Datasets";
+	
 	private LazyTree tree;
 	private Dataset root;
 	private LazyTreeObjectNode rootNode;
@@ -45,18 +46,6 @@ public class DatasetPanel extends JPanel implements WWPanel
 		scrollPane.setPreferredSize(new Dimension(50, 50));
 	}
 
-	public void addDataset(Dataset dataset)
-	{
-		root.getDatasets().add(dataset);
-		rootNode.refreshChildren(model);
-		Object[] path;
-		if (rootNode.getChildCount() <= 0)
-			path = new Object[] { rootNode };
-		else
-			path = new Object[] { rootNode, rootNode.getChildAt(rootNode.getChildCount() - 1) };
-		tree.expandPath(new TreePath(path));
-	}
-
 	public JTree getTree()
 	{
 		return tree;
@@ -68,24 +57,53 @@ public class DatasetPanel extends JPanel implements WWPanel
 	}
 
 	@Override
-	public String getName()
-	{
-		return "Datasets";
-	}
-
-	@Override
 	public JPanel getPanel()
 	{
 		return this;
 	}
 
 	@Override
-	public void setup(WorldWindow wwd)
+	public void setup(Theme theme)
 	{
+		for(IDataset dataset : theme.getDatasets())
+		{
+			root.getDatasets().add(dataset);
+		}
+		rootNode.refreshChildren(model);
+		
+		//expand root by default
+		Object[] path;
+		if (rootNode.getChildCount() <= 0)
+			path = new Object[] { rootNode };
+		else
+			path = new Object[] { rootNode, rootNode.getChildAt(rootNode.getChildCount() - 1) };
+		tree.expandPath(new TreePath(path));
 	}
 
 	@Override
 	public void dispose()
 	{
+	}
+
+	@Override
+	public boolean isOn()
+	{
+		return isVisible();
+	}
+
+	@Override
+	public void setOn(boolean on)
+	{
+		setVisible(on);
+	}
+
+	public String getDisplayName()
+	{
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName)
+	{
+		this.displayName = displayName;
 	}
 }
