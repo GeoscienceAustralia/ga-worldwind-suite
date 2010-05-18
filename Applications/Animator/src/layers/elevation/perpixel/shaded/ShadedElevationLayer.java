@@ -69,8 +69,7 @@ public class ShadedElevationLayer extends ElevationLayer
 		this(elevationModel, null);
 	}
 
-	public ShadedElevationLayer(ExtendedElevationModel elevationModel,
-			Sector sector)
+	public ShadedElevationLayer(ExtendedElevationModel elevationModel, Sector sector)
 	{
 		super(elevationModel, CACHE_NAME_PREFIX, FORMAT_SUFFIX, sector);
 		shaderMinElevation = elevationModel.getMinElevation();
@@ -90,10 +89,8 @@ public class ShadedElevationLayer extends ElevationLayer
 
 		//double minElevation = ((ElevationTesselator) dc.getGlobe().getTessellator()).getMinElevation();
 		//double maxElevation = ((ElevationTesselator) dc.getGlobe().getTessellator()).getMaxElevation();
-		double minElevation = clamp(shaderMinElevation, minElevationClamp,
-				maxElevationClamp);
-		double maxElevation = clamp(shaderMaxElevation, minElevationClamp,
-				maxElevationClamp);
+		double minElevation = clamp(shaderMinElevation, minElevationClamp, maxElevationClamp);
+		double maxElevation = clamp(shaderMaxElevation, minElevationClamp, maxElevationClamp);
 		gl.glUniform1f(minElevationUniform, (float) minElevation);
 		gl.glUniform1f(maxElevationUniform, (float) maxElevation);
 		gl.glUniform1f(exaggerationUniform, (float) exaggeration);
@@ -101,24 +98,21 @@ public class ShadedElevationLayer extends ElevationLayer
 		gl.glUniform1f(opacityUniform, (float) getOpacity());
 
 		Matrix modelViewInv = dc.getView().getModelviewMatrix().getInverse();
-		float[] modelViewInvArray = new float[] { (float) modelViewInv.m11,
-				(float) modelViewInv.m21, (float) modelViewInv.m31,
-				(float) modelViewInv.m41, (float) modelViewInv.m12,
-				(float) modelViewInv.m22, (float) modelViewInv.m32,
-				(float) modelViewInv.m42, (float) modelViewInv.m13,
-				(float) modelViewInv.m23, (float) modelViewInv.m33,
-				(float) modelViewInv.m43, (float) modelViewInv.m14,
-				(float) modelViewInv.m24, (float) modelViewInv.m34,
-				(float) modelViewInv.m44 };
-		gl.glUniformMatrix4fv(oldModelViewInverseUniform, 1, false,
-				modelViewInvArray, 0);
+		float[] modelViewInvArray =
+				new float[] { (float) modelViewInv.m11, (float) modelViewInv.m21,
+						(float) modelViewInv.m31, (float) modelViewInv.m41,
+						(float) modelViewInv.m12, (float) modelViewInv.m22,
+						(float) modelViewInv.m32, (float) modelViewInv.m42,
+						(float) modelViewInv.m13, (float) modelViewInv.m23,
+						(float) modelViewInv.m33, (float) modelViewInv.m43,
+						(float) modelViewInv.m14, (float) modelViewInv.m24,
+						(float) modelViewInv.m34, (float) modelViewInv.m44 };
+		gl.glUniformMatrix4fv(oldModelViewInverseUniform, 1, false, modelViewInvArray, 0);
 
 		Vec4 eye = dc.getView().getEyePoint();
-		gl.glUniform3f(eyePositionUniform, (float) eye.x, (float) eye.y,
-				(float) eye.z);
+		gl.glUniform3f(eyePositionUniform, (float) eye.x, (float) eye.y, (float) eye.z);
 		gl.glUniform3f(sunPositionUniform, (float) sunPositionNormalized.x,
-				(float) sunPositionNormalized.y,
-				(float) sunPositionNormalized.z);
+				(float) sunPositionNormalized.y, (float) sunPositionNormalized.z);
 	}
 
 	protected void initShader(DrawContext dc)
@@ -130,15 +124,17 @@ public class ShadedElevationLayer extends ElevationLayer
 
 		try
 		{
-			BufferedReader brv = new BufferedReader(new InputStreamReader(this
-					.getClass().getResourceAsStream("vertexshader.glsl")));
+			BufferedReader brv =
+					new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(
+							"vertexshader.glsl")));
 			while ((line = brv.readLine()) != null)
 			{
 				vsrc += line + "\n";
 			}
 
-			BufferedReader brf = new BufferedReader(new InputStreamReader(this
-					.getClass().getResourceAsStream("fragmentshader.glsl")));
+			BufferedReader brf =
+					new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(
+							"fragmentshader.glsl")));
 			while ((line = brf.readLine()) != null)
 			{
 				fsrc += line + "\n";
@@ -149,11 +145,9 @@ public class ShadedElevationLayer extends ElevationLayer
 			e.printStackTrace();
 		}
 
-		gl.glShaderSource(v, 1, new String[] { vsrc }, new int[] { vsrc
-				.length() }, 0);
+		gl.glShaderSource(v, 1, new String[] { vsrc }, new int[] { vsrc.length() }, 0);
 		gl.glCompileShader(v);
-		gl.glShaderSource(f, 1, new String[] { fsrc }, new int[] { fsrc
-				.length() }, 0);
+		gl.glShaderSource(f, 1, new String[] { fsrc }, new int[] { fsrc.length() }, 0);
 		gl.glCompileShader(f);
 
 		shaderProgram = gl.glCreateProgram();
@@ -165,25 +159,16 @@ public class ShadedElevationLayer extends ElevationLayer
 		gl.glUseProgram(shaderProgram);
 		gl.glUniform1i(gl.glGetUniformLocation(shaderProgram, "tex0"), 0);
 		gl.glUniform1i(gl.glGetUniformLocation(shaderProgram, "tex1"), 1);
-		minElevationUniform = gl.glGetUniformLocation(shaderProgram,
-				"minElevation");
-		maxElevationUniform = gl.glGetUniformLocation(shaderProgram,
-				"maxElevation");
-		minTexElevationUniform = gl.glGetUniformLocation(shaderProgram,
-				"minTexElevation");
-		maxTexElevationUniform = gl.glGetUniformLocation(shaderProgram,
-				"maxTexElevation");
-		exaggerationUniform = gl.glGetUniformLocation(shaderProgram,
-				"exaggeration");
-		bakedExaggerationUniform = gl.glGetUniformLocation(shaderProgram,
-				"bakedExaggeration");
+		minElevationUniform = gl.glGetUniformLocation(shaderProgram, "minElevation");
+		maxElevationUniform = gl.glGetUniformLocation(shaderProgram, "maxElevation");
+		minTexElevationUniform = gl.glGetUniformLocation(shaderProgram, "minTexElevation");
+		maxTexElevationUniform = gl.glGetUniformLocation(shaderProgram, "maxTexElevation");
+		exaggerationUniform = gl.glGetUniformLocation(shaderProgram, "exaggeration");
+		bakedExaggerationUniform = gl.glGetUniformLocation(shaderProgram, "bakedExaggeration");
 		opacityUniform = gl.glGetUniformLocation(shaderProgram, "opacity");
-		eyePositionUniform = gl.glGetUniformLocation(shaderProgram,
-				"eyePosition");
-		sunPositionUniform = gl.glGetUniformLocation(shaderProgram,
-				"sunPosition");
-		oldModelViewInverseUniform = gl.glGetUniformLocation(shaderProgram,
-				"oldModelViewInverse");
+		eyePositionUniform = gl.glGetUniformLocation(shaderProgram, "eyePosition");
+		sunPositionUniform = gl.glGetUniformLocation(shaderProgram, "sunPosition");
+		oldModelViewInverseUniform = gl.glGetUniformLocation(shaderProgram, "oldModelViewInverse");
 	}
 
 	@Override
@@ -234,23 +219,22 @@ public class ShadedElevationLayer extends ElevationLayer
 	}
 
 	@Override
-	protected boolean handleElevations(Globe globe, TextureTile tile,
-			Sector sector, BufferWrapper[] elevations)
+	protected boolean handleElevations(Globe globe, TextureTile tile, Sector sector,
+			BufferWrapper[] elevations)
 	{
 		int width = tile.getLevel().getTileWidth();
 		int height = tile.getLevel().getTileHeight();
 
-		double[] minmax = getMinMax(elevations[4], elevationModel
-				.getMissingDataSignal());
-		byte[][] bytes = elevationsToTexture(width, height, globe, sector,
-				elevations, minmax[0], minmax[1]);
+		double[] minmax = getMinMax(elevations[4], elevationModel.getMissingDataSignal());
+		byte[][] bytes =
+				elevationsToTexture(width, height, globe, sector, elevations, minmax[0], minmax[1]);
 
 		File file = WorldWind.getDataFileStore().newFile(tile.getPath());
 		return saveTexture(file, bytes, width, height, minmax[0], minmax[1]);
 	}
 
-	protected boolean saveTexture(File file, byte[][] bytes, int width,
-			int height, double minElevation, double maxElevation)
+	protected boolean saveTexture(File file, byte[][] bytes, int width, int height,
+			double minElevation, double maxElevation)
 	{
 		synchronized (fileLock)
 		{
@@ -297,8 +281,7 @@ public class ShadedElevationLayer extends ElevationLayer
 	{
 		if (!(tile instanceof MinMaxTextureTile))
 		{
-			Logging.logger().severe(
-					"Tile is not instance of " + MinMaxTextureTile.class);
+			Logging.logger().severe("Tile is not instance of " + MinMaxTextureTile.class);
 			getLevels().markResourceAbsent(tile);
 			return false;
 		}
@@ -324,19 +307,16 @@ public class ShadedElevationLayer extends ElevationLayer
 				}
 
 				DataBuffer db = new DataBufferByte(bytes, width * height);
-				SampleModel sm = new BandedSampleModel(DataBuffer.TYPE_BYTE,
-						width, height, bands);
+				SampleModel sm = new BandedSampleModel(DataBuffer.TYPE_BYTE, width, height, bands);
 				Raster raster = Raster.createRaster(sm, db, null);
-				BufferedImage image = new BufferedImage(width, height,
-						BufferedImage.TYPE_INT_ARGB_PRE);
+				BufferedImage image =
+						new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
 				image.setData(raster);
 
-				TextureData textureData = TextureIO.newTextureData(image,
-						isUseMipMaps());
+				TextureData textureData = TextureIO.newTextureData(image, isUseMipMaps());
 				if (textureData == null)
 				{
-					throw new Exception("Could not create texture data for "
-							+ textureURL);
+					throw new Exception("Could not create texture data for " + textureURL);
 				}
 
 				((MinMaxTextureTile) tile).setMinElevation(minElevation);
@@ -353,11 +333,9 @@ public class ShadedElevationLayer extends ElevationLayer
 			catch (Exception e)
 			{
 				// Assume that something's wrong with the file and delete it.
-				gov.nasa.worldwind.WorldWind.getDataFileStore().removeFile(
-						textureURL);
+				gov.nasa.worldwind.WorldWind.getDataFileStore().removeFile(textureURL);
 				getLevels().markResourceAbsent(tile);
-				String message = Logging.getMessage(
-						"generic.DeletedCorruptDataFile", textureURL);
+				String message = Logging.getMessage("generic.DeletedCorruptDataFile", textureURL);
 				Logging.logger().info(message + ":" + e.getLocalizedMessage());
 				return false;
 			}
@@ -377,8 +355,7 @@ public class ShadedElevationLayer extends ElevationLayer
 		}
 	}
 
-	protected double[] getMinMax(BufferWrapper elevations,
-			double missingDataSignal)
+	protected double[] getMinMax(BufferWrapper elevations, double missingDataSignal)
 	{
 		double min = Double.MAX_VALUE;
 		double max = -Double.MAX_VALUE;
@@ -391,6 +368,10 @@ public class ShadedElevationLayer extends ElevationLayer
 				max = Math.max(max, elevations.getDouble(i));
 			}
 		}
+		if (min < minElevationClamp)
+			min = minElevationClamp;
+		if (max > maxElevationClamp)
+			max = maxElevationClamp;
 		/*if (min == Double.MAX_VALUE || max == -Double.MAX_VALUE)
 		{
 			Logging.logger().warning("No elevations found in tile");
@@ -398,9 +379,8 @@ public class ShadedElevationLayer extends ElevationLayer
 		return new double[] { min, max };
 	}
 
-	protected byte[][] elevationsToTexture(int width, int height, Globe globe,
-			Sector sector, BufferWrapper[] elevations, double minElevation,
-			double maxElevation)
+	protected byte[][] elevationsToTexture(int width, int height, Globe globe, Sector sector,
+			BufferWrapper[] elevations, double minElevation, double maxElevation)
 	{
 		//elevation tile index configuration:
 		//+-+-+-+
@@ -413,10 +393,11 @@ public class ShadedElevationLayer extends ElevationLayer
 
 		int padding = 1;
 		double missingDataSignal = elevationModel.getMissingDataSignal();
-		double[] paddedElevations = calculatePaddedElevations(width, height,
-				padding, elevations, missingDataSignal);
-		Vec4[] verts = calculateTileVerts(width, height, globe, sector,
-				paddedElevations, missingDataSignal, padding, bakedExaggeration);
+		double[] paddedElevations =
+				calculatePaddedElevations(width, height, padding, elevations, missingDataSignal);
+		Vec4[] verts =
+				calculateTileVerts(width, height, globe, sector, paddedElevations,
+						missingDataSignal, padding, bakedExaggeration);
 		Vec4[] normals = calculateNormals(width, height, verts, padding);
 		//Vec4[] bentNormals = calculateBentNormals(width, height, verts, padding);
 		//normals = mixNormals(normals, bentNormals, 0.5);
@@ -435,7 +416,9 @@ public class ShadedElevationLayer extends ElevationLayer
 			red[i] = (byte) (255.0 * (normal.x + 1) / 2);
 			green[i] = (byte) (255.0 * (normal.y + 1) / 2);
 			blue[i] = (byte) (255.0 * (normal.z + 1) / 2);
-			alpha[i] = (byte) (255.0 * (elevations[4].getDouble(i) - minElevation) / (maxElevation - minElevation));
+			double elevation = elevations[4].getDouble(i);
+			elevation = Math.max(minElevation, Math.min(maxElevation, elevation));
+			alpha[i] = (byte) (255.0 * (elevation - minElevation) / (maxElevation - minElevation));
 		}
 
 		byte[][] bytes = new byte[4][];
@@ -446,8 +429,7 @@ public class ShadedElevationLayer extends ElevationLayer
 		return bytes;
 	}
 
-	protected Vec4[] calculateNormals(int width, int height, Vec4[] verts,
-			int padding)
+	protected Vec4[] calculateNormals(int width, int height, Vec4[] verts, int padding)
 	{
 		int padding2 = padding * 2;
 
@@ -465,28 +447,37 @@ public class ShadedElevationLayer extends ElevationLayer
 				//   |
 				//   v4
 
-				Vec4 v0 = verts[getArrayIndex(width + padding2, height
-						+ padding2, x + padding, y + padding)];
+				Vec4 v0 =
+						verts[getArrayIndex(width + padding2, height + padding2, x + padding, y
+								+ padding)];
 				if (v0 != null)
 				{
-					Vec4 v1 = verts[getArrayIndex(width + padding2, height
-							+ padding2, x + padding - 1, y + padding)];
-					Vec4 v2 = verts[getArrayIndex(width + padding2, height
-							+ padding2, x + padding, y + padding - 1)];
-					Vec4 v3 = verts[getArrayIndex(width + padding2, height
-							+ padding2, x + padding + 1, y + padding)];
-					Vec4 v4 = verts[getArrayIndex(width + padding2, height
-							+ padding2, x + padding, y + padding + 1)];
+					Vec4 v1 =
+							verts[getArrayIndex(width + padding2, height + padding2, x + padding
+									- 1, y + padding)];
+					Vec4 v2 =
+							verts[getArrayIndex(width + padding2, height + padding2, x + padding, y
+									+ padding - 1)];
+					Vec4 v3 =
+							verts[getArrayIndex(width + padding2, height + padding2, x + padding
+									+ 1, y + padding)];
+					Vec4 v4 =
+							verts[getArrayIndex(width + padding2, height + padding2, x + padding, y
+									+ padding + 1)];
 
 					Vec4[] normals = new Vec4[4];
-					normals[0] = v1 != null && v2 != null ? v1.subtract3(v0)
-							.cross3(v0.subtract3(v2)).normalize3() : null;
-					normals[1] = v2 != null && v3 != null ? v2.subtract3(v0)
-							.cross3(v0.subtract3(v3)).normalize3() : null;
-					normals[2] = v3 != null && v4 != null ? v3.subtract3(v0)
-							.cross3(v0.subtract3(v4)).normalize3() : null;
-					normals[3] = v4 != null && v1 != null ? v4.subtract3(v0)
-							.cross3(v0.subtract3(v1)).normalize3() : null;
+					normals[0] =
+							v1 != null && v2 != null ? v1.subtract3(v0).cross3(v0.subtract3(v2))
+									.normalize3() : null;
+					normals[1] =
+							v2 != null && v3 != null ? v2.subtract3(v0).cross3(v0.subtract3(v3))
+									.normalize3() : null;
+					normals[2] =
+							v3 != null && v4 != null ? v3.subtract3(v0).cross3(v0.subtract3(v4))
+									.normalize3() : null;
+					normals[3] =
+							v4 != null && v1 != null ? v4.subtract3(v0).cross3(v0.subtract3(v1))
+									.normalize3() : null;
 					Vec4 normal = Vec4.ZERO;
 					for (Vec4 n : normals)
 					{
@@ -495,8 +486,7 @@ public class ShadedElevationLayer extends ElevationLayer
 					}
 					if (normal != Vec4.ZERO)
 					{
-						norms[getArrayIndex(width, height, x, y)] = normal
-								.normalize3();
+						norms[getArrayIndex(width, height, x, y)] = normal.normalize3();
 					}
 				}
 			}
@@ -504,8 +494,7 @@ public class ShadedElevationLayer extends ElevationLayer
 		return norms;
 	}
 
-	protected Vec4[] calculateBentNormals(int width, int height, Vec4[] verts,
-			int padding)
+	protected Vec4[] calculateBentNormals(int width, int height, Vec4[] verts, int padding)
 	{
 		int padding2 = padding * 2;
 
@@ -518,8 +507,9 @@ public class ShadedElevationLayer extends ElevationLayer
 		{
 			for (int x = 0; x < width; x++)
 			{
-				Vec4 vec = verts[getArrayIndex(width + padding2, height
-						+ padding2, x + padding, y + padding)];
+				Vec4 vec =
+						verts[getArrayIndex(width + padding2, height + padding2, x + padding, y
+								+ padding)];
 				if (vec != null)
 				{
 					Vec4 vecnorm = vec.normalize3();
@@ -540,49 +530,57 @@ public class ShadedElevationLayer extends ElevationLayer
 					for (int i = 2; i <= padding; i += 2)
 					{
 						Vec4[] vecs = new Vec4[16];
-						vecs[0] = verts[getArrayIndex(width + padding2, height
-								+ padding2, x + padding - i, y + padding)];
-						vecs[2] = verts[getArrayIndex(width + padding2, height
-								+ padding2, x + padding - i, y + padding - i)];
-						vecs[4] = verts[getArrayIndex(width + padding2, height
-								+ padding2, x + padding, y + padding - i)];
-						vecs[6] = verts[getArrayIndex(width + padding2, height
-								+ padding2, x + padding + i, y + padding - i)];
-						vecs[8] = verts[getArrayIndex(width + padding2, height
-								+ padding2, x + padding + i, y + padding)];
-						vecs[10] = verts[getArrayIndex(width + padding2, height
-								+ padding2, x + padding + i, y + padding + i)];
-						vecs[12] = verts[getArrayIndex(width + padding2, height
-								+ padding2, x + padding, y + padding + i)];
-						vecs[14] = verts[getArrayIndex(width + padding2, height
-								+ padding2, x + padding - i, y + padding + i)];
+						vecs[0] =
+								verts[getArrayIndex(width + padding2, height + padding2, x
+										+ padding - i, y + padding)];
+						vecs[2] =
+								verts[getArrayIndex(width + padding2, height + padding2, x
+										+ padding - i, y + padding - i)];
+						vecs[4] =
+								verts[getArrayIndex(width + padding2, height + padding2, x
+										+ padding, y + padding - i)];
+						vecs[6] =
+								verts[getArrayIndex(width + padding2, height + padding2, x
+										+ padding + i, y + padding - i)];
+						vecs[8] =
+								verts[getArrayIndex(width + padding2, height + padding2, x
+										+ padding + i, y + padding)];
+						vecs[10] =
+								verts[getArrayIndex(width + padding2, height + padding2, x
+										+ padding + i, y + padding + i)];
+						vecs[12] =
+								verts[getArrayIndex(width + padding2, height + padding2, x
+										+ padding, y + padding + i)];
+						vecs[14] =
+								verts[getArrayIndex(width + padding2, height + padding2, x
+										+ padding - i, y + padding + i)];
 						if (i % 2 == 0)
 						{
 							int i2 = i / 2;
-							vecs[1] = verts[getArrayIndex(width + padding2,
-									height + padding2, x + padding - i, y
-											+ padding - i2)];
-							vecs[3] = verts[getArrayIndex(width + padding2,
-									height + padding2, x + padding - i2, y
-											+ padding - i)];
-							vecs[5] = verts[getArrayIndex(width + padding2,
-									height + padding2, x + padding + i2, y
-											+ padding - i)];
-							vecs[7] = verts[getArrayIndex(width + padding2,
-									height + padding2, x + padding + i, y
-											+ padding - i2)];
-							vecs[9] = verts[getArrayIndex(width + padding2,
-									height + padding2, x + padding + i, y
-											+ padding + i2)];
-							vecs[11] = verts[getArrayIndex(width + padding2,
-									height + padding2, x + padding + i2, y
-											+ padding + i)];
-							vecs[13] = verts[getArrayIndex(width + padding2,
-									height + padding2, x + padding - i2, y
-											+ padding + i)];
-							vecs[15] = verts[getArrayIndex(width + padding2,
-									height + padding2, x + padding - i, y
-											+ padding + i2)];
+							vecs[1] =
+									verts[getArrayIndex(width + padding2, height + padding2, x
+											+ padding - i, y + padding - i2)];
+							vecs[3] =
+									verts[getArrayIndex(width + padding2, height + padding2, x
+											+ padding - i2, y + padding - i)];
+							vecs[5] =
+									verts[getArrayIndex(width + padding2, height + padding2, x
+											+ padding + i2, y + padding - i)];
+							vecs[7] =
+									verts[getArrayIndex(width + padding2, height + padding2, x
+											+ padding + i, y + padding - i2)];
+							vecs[9] =
+									verts[getArrayIndex(width + padding2, height + padding2, x
+											+ padding + i, y + padding + i2)];
+							vecs[11] =
+									verts[getArrayIndex(width + padding2, height + padding2, x
+											+ padding + i2, y + padding + i)];
+							vecs[13] =
+									verts[getArrayIndex(width + padding2, height + padding2, x
+											+ padding - i2, y + padding + i)];
+							vecs[15] =
+									verts[getArrayIndex(width + padding2, height + padding2, x
+											+ padding - i, y + padding + i2)];
 						}
 
 						for (int j = 0; j < maxes.length; j++)
@@ -611,8 +609,7 @@ public class ShadedElevationLayer extends ElevationLayer
 					}
 					if (normal != Vec4.ZERO)
 					{
-						norms[getArrayIndex(width, height, x, y)] = normal
-								.normalize3();
+						norms[getArrayIndex(width, height, x, y)] = normal.normalize3();
 					}
 				}
 			}
@@ -622,8 +619,7 @@ public class ShadedElevationLayer extends ElevationLayer
 	}
 
 	@Override
-	protected TextureTile createTile(Sector sector, Level level, int row,
-			int col)
+	protected TextureTile createTile(Sector sector, Level level, int row, int col)
 	{
 		return new MinMaxTextureTile(this, sector, level, row, col);
 	}
@@ -633,15 +629,14 @@ public class ShadedElevationLayer extends ElevationLayer
 	{
 		if (!(tile instanceof MinMaxTextureTile))
 		{
-			String message = "Tile is not instance of "
-					+ MinMaxTextureTile.class;
+			String message = "Tile is not instance of " + MinMaxTextureTile.class;
 			Logging.logger().severe(message);
 			throw new IllegalStateException(message);
 		}
 
 		MinMaxTextureTile mmtt = (MinMaxTextureTile) tile;
-		return new ElevationTexture(tile.getTextureData(), mmtt
-				.getMinElevation(), mmtt.getMaxElevation());
+		return new ElevationTexture(tile.getTextureData(), mmtt.getMinElevation(), mmtt
+				.getMaxElevation());
 	}
 
 	@Override
@@ -651,17 +646,16 @@ public class ShadedElevationLayer extends ElevationLayer
 
 		if (!(texture instanceof ElevationTexture))
 		{
-			String message = "Texture is not instance of "
-					+ ElevationTexture.class;
+			String message = "Texture is not instance of " + ElevationTexture.class;
 			Logging.logger().severe(message);
 			throw new IllegalStateException(message);
 		}
 
 		GL gl = dc.getGL();
-		gl.glUniform1f(minTexElevationUniform,
-				(float) ((ElevationTexture) texture).getMinElevation());
-		gl.glUniform1f(maxTexElevationUniform,
-				(float) ((ElevationTexture) texture).getMaxElevation());
+		gl.glUniform1f(minTexElevationUniform, (float) ((ElevationTexture) texture)
+				.getMinElevation());
+		gl.glUniform1f(maxTexElevationUniform, (float) ((ElevationTexture) texture)
+				.getMaxElevation());
 	}
 
 	protected static class MinMaxTextureTile extends ElevationTextureTile
@@ -669,8 +663,7 @@ public class ShadedElevationLayer extends ElevationLayer
 		private double minElevation = Double.MAX_VALUE;
 		private double maxElevation = -Double.MAX_VALUE;
 
-		public MinMaxTextureTile(ElevationLayer layer, Sector sector,
-				Level level, int row, int col)
+		public MinMaxTextureTile(ElevationLayer layer, Sector sector, Level level, int row, int col)
 		{
 			super(layer, sector, level, row, col);
 		}
@@ -701,8 +694,8 @@ public class ShadedElevationLayer extends ElevationLayer
 		private final double minElevation;
 		private final double maxElevation;
 
-		public ElevationTexture(TextureData data, double minElevation,
-				double maxElevation) throws GLException
+		public ElevationTexture(TextureData data, double minElevation, double maxElevation)
+				throws GLException
 		{
 			super(data);
 			this.minElevation = minElevation;
