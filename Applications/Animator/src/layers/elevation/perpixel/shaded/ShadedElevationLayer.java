@@ -417,7 +417,7 @@ public class ShadedElevationLayer extends ElevationLayer
 			green[i] = (byte) (255.0 * (normal.y + 1) / 2);
 			blue[i] = (byte) (255.0 * (normal.z + 1) / 2);
 			double elevation = elevations[4].getDouble(i);
-			elevation = Math.max(minElevation, Math.min(maxElevation, elevation));
+			elevation = clamp(elevation, minElevation, maxElevation);
 			alpha[i] = (byte) (255.0 * (elevation - minElevation) / (maxElevation - minElevation));
 		}
 
