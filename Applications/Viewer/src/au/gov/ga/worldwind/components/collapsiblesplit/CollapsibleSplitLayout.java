@@ -20,9 +20,9 @@ public class CollapsibleSplitLayout implements LayoutManager2
 	private final Map<Component, String> reverseComponentMap = new HashMap<Component, String>();
 
 	private int dividerSize = 5;
-	private boolean vertical = false;
+	private boolean vertical = true;
 
-	public void addPlaceholder(String name, float weight)
+	public void addPlaceholder(String name, float weight, boolean resizable)
 	{
 		if (name == null)
 			throw new IllegalArgumentException("placeholder name cannot be null");
@@ -45,6 +45,7 @@ public class CollapsibleSplitLayout implements LayoutManager2
 		placeholder.name = name;
 		placeholder.weight = weight;
 		placeholder.expanded = expanded;
+		placeholder.resizable = resizable;
 		placeholders.add(placeholder);
 		placeholderMap.put(name, placeholder);
 	}
@@ -314,7 +315,7 @@ public class CollapsibleSplitLayout implements LayoutManager2
 		for (int i = 0; i < placeholders.size(); i++)
 		{
 			Placeholder placeholder = placeholders.get(i);
-			if (placeholder.expanded && placeholderHasComponent(placeholder))
+			if (placeholder.takesExtraSpace() && placeholderHasComponent(placeholder))
 			{
 				if (i <= index)
 				{
@@ -374,7 +375,7 @@ public class CollapsibleSplitLayout implements LayoutManager2
 			for (int i = index; i >= 0; i--)
 			{
 				Placeholder placeholder = placeholders.get(i);
-				if (placeholder.expanded && placeholderHasComponent(placeholder))
+				if (placeholder.takesExtraSpace() && placeholderHasComponent(placeholder))
 				{
 					if (placeholder.weight >= deltaBefore)
 					{
@@ -402,7 +403,7 @@ public class CollapsibleSplitLayout implements LayoutManager2
 			for (int i = index + 1; i < placeholders.size(); i++)
 			{
 				Placeholder placeholder = placeholders.get(i);
-				if (placeholder.expanded && placeholderHasComponent(placeholder))
+				if (placeholder.takesExtraSpace() && placeholderHasComponent(placeholder))
 				{
 					if (placeholder.weight >= deltaAfter)
 					{
@@ -455,8 +456,7 @@ public class CollapsibleSplitLayout implements LayoutManager2
 	{
 		if (!isPlaceholderNameValid(placeholderName))
 			throw new IllegalArgumentException("placeholder not found");
-		weight = Math.min(0, weight);
-		placeholderMap.get(placeholderName).weight = weight;
+		placeholderMap.get(placeholderName).weight = Math.max(0f, weight); //weight cannot be negative
 	}
 
 	public boolean isExpanded(String placeholderName)
@@ -471,6 +471,20 @@ public class CollapsibleSplitLayout implements LayoutManager2
 		if (!isPlaceholderNameValid(placeholderName))
 			throw new IllegalArgumentException("placeholder not found");
 		placeholderMap.get(placeholderName).expanded = expanded;
+	}
+
+	public boolean isResizable(String placeholderName)
+	{
+		if (!isPlaceholderNameValid(placeholderName))
+			throw new IllegalArgumentException("placeholder not found");
+		return placeholderMap.get(placeholderName).resizable;
+	}
+
+	public void setResizable(String placeholderName, boolean resizable)
+	{
+		if (!isPlaceholderNameValid(placeholderName))
+			throw new IllegalArgumentException("placeholder not found");
+		placeholderMap.get(placeholderName).resizable = resizable;
 	}
 
 	private boolean isPlaceholderNameValid(String placeholderName)
@@ -508,8 +522,9 @@ public class CollapsibleSplitLayout implements LayoutManager2
 		{
 			if (placeholderHasComponent(placeholder))
 			{
-				totalWeight += placeholder.weight;
-				if (placeholder.expanded)
+				if (placeholder.resizable)
+					totalWeight += placeholder.weight;
+				if (placeholder.takesExtraSpace())
 					countExpanded++;
 			}
 		}
@@ -519,7 +534,7 @@ public class CollapsibleSplitLayout implements LayoutManager2
 			totalWeight = 1f;
 		for (Placeholder placeholder : placeholders)
 		{
-			if (placeholderHasComponent(placeholder) && placeholder.expanded)
+			if (placeholderHasComponent(placeholder) && placeholder.takesExtraSpace())
 			{
 				placeholder.weight = totalWeight / countExpanded;
 			}
@@ -542,14 +557,20 @@ public class CollapsibleSplitLayout implements LayoutManager2
 		public String name;
 		public float weight;
 		public boolean expanded;
+		public boolean resizable;
 		public Rectangle nextDividerBounds;
 		public int extraComponentSpace;
 
 		public float getExpandedWeight()
 		{
-			if (expanded)
+			if (takesExtraSpace())
 				return weight;
 			return 0f;
+		}
+
+		public boolean takesExtraSpace()
+		{
+			return resizable && expanded;
 		}
 	}
 }

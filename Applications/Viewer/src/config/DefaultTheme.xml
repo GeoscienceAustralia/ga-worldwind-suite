@@ -4,12 +4,12 @@
 	<!-- <ThemeName></ThemeName> -->
 	<MenuBar>true</MenuBar>
 	<StatusBar>true</StatusBar>
-	
+
 	<InitialLatitude>-27.0</InitialLatitude>
 	<InitialLongitude>133.5</InitialLongitude>
-	<!-- <InitialAltitude></InitialAltitude>
-	<InitialHeading></InitialHeading>
-	<InitialPitch></InitialPitch> -->
+	<!--<InitialAltitude></InitialAltitude>-->
+	<!--<InitialHeading></InitialHeading>-->
+	<!--<InitialPitch></InitialPitch>-->
 
 	<!-- Heads-up-display elements (can also include graticules) -->
 	<HUD name="World Map" className="au.gov.ga.worldwind.theme.hud.WorldMapHUD"
@@ -27,4 +27,6 @@
 		enabled="true" />
 	<Panel name="Datasets" className="au.gov.ga.worldwind.panels.dataset.DatasetPanel"
 		enabled="true" />
+	<Panel name="Vertical Exaggeration" className="au.gov.ga.worldwind.panels.other.ExaggerationPanel"
+		enabled="true" resizable="false" />
 </Theme>

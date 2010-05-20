@@ -10,6 +10,8 @@ public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 {
 	private List<ThemePieceListener> listeners = new ArrayList<ThemePieceListener>();
 	private String displayName;
+	private boolean resizable = true;
+	private float weight = 1f;
 
 	public AbstractThemePanel()
 	{
@@ -54,6 +56,30 @@ public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 	public void setDisplayName(String displayName)
 	{
 		this.displayName = displayName;
+	}
+
+	@Override
+	public boolean isResizable()
+	{
+		return resizable;
+	}
+
+	@Override
+	public void setResizable(boolean resizable)
+	{
+		this.resizable = resizable;
+	}
+
+	@Override
+	public float getWeight()
+	{
+		return weight;
+	}
+
+	@Override
+	public void setWeight(float weight)
+	{
+		this.weight = weight;
 	}
 
 	@Override

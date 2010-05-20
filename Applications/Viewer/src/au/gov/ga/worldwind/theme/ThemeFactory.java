@@ -120,13 +120,20 @@ public class ThemeFactory
 			{
 				String className = WWXML.getText(element, "@className");
 				boolean enabled = getBoolean(element, "@enabled", true);
+				String name = WWXML.getText(element, "@name");
+				Double weightD = WWXML.getDouble(element, "@weight", null);
+				float weight = weightD != null ? weightD.floatValue() : 1f;
+				boolean resizable = getBoolean(element, "@resizable", true);
 
 				try
 				{
 					Class<?> c = Class.forName(className);
 					Class<? extends ThemePanel> tc = c.asSubclass(ThemePanel.class);
 					ThemePanel panel = tc.newInstance();
+					panel.setDisplayName(name);
 					panel.setOn(enabled);
+					panel.setResizable(resizable);
+					panel.setWeight(weight);
 					panels.add(panel);
 				}
 				catch (Exception e)

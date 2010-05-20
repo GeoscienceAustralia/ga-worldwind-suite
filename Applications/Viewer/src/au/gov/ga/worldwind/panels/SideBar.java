@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import au.gov.ga.worldwind.components.collapsiblesplit.CollapsibleSplitLayout;
 import au.gov.ga.worldwind.components.collapsiblesplit.CollapsibleSplitPane;
 import au.gov.ga.worldwind.components.collapsiblesplit.l2fprod.CollapsibleGroup;
 import au.gov.ga.worldwind.theme.Theme;
@@ -22,13 +23,15 @@ public class SideBar extends JPanel implements ThemePieceListener
 		super(new BorderLayout());
 
 		final CollapsibleSplitPane pane = new CollapsibleSplitPane();
-		pane.getLayout().setVertical(true);
-		for (int i = 0; i < theme.getPanels().size(); i++)
-			pane.getLayout().addPlaceholder("panel" + i, 1);
+		CollapsibleSplitLayout layout = pane.getLayout();
+		layout.setVertical(true);
 
 		int i = 0;
 		for (ThemePanel panel : theme.getPanels())
 		{
+			String placeholderName = "panel" + i++;
+			layout.addPlaceholder(placeholderName, panel.getWeight(), panel.isResizable());
+
 			CollapsibleGroup group = new CollapsibleGroup();
 			group.setVisible(panel.isOn());
 			group.setScrollOnExpand(true);
@@ -36,7 +39,7 @@ public class SideBar extends JPanel implements ThemePieceListener
 			group.setTitle(panel.getDisplayName());
 			group.add(panel.getPanel(), BorderLayout.CENTER);
 
-			pane.add(group, "panel" + i++);
+			pane.add(group, placeholderName);
 			groups.add(group);
 			panels.add(panel);
 
