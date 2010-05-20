@@ -10,8 +10,6 @@ import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
 import gov.nasa.worldwind.layers.Earth.NASAWFSPlaceNameLayer;
-import gov.nasa.worldwind.layers.Mercator.examples.VirtualEarthLayer;
-import gov.nasa.worldwind.layers.Mercator.examples.VirtualEarthLayer.Dataset;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -32,7 +30,6 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import au.gov.ga.worldwind.application.Application;
 import au.gov.ga.worldwind.layers.geonames.GeoNamesLayer;
 import au.gov.ga.worldwind.layers.metacarta.MetacartaCoastlineLayer;
 import au.gov.ga.worldwind.layers.metacarta.MetacartaCountryBoundariesLayer;
@@ -82,13 +79,13 @@ public class StandardPanel extends JPanel
 		bmngone = new BMNGOneImage();
 		bmng = new BMNGWMSLayer();
 		landsat = new LandsatI3WMSLayer();
-		if (Application.MERCATOR_VIRTUAL_EARTH)
+		/*if (Application.MERCATOR_VIRTUAL_EARTH)
 		{
 			veaerial = new VirtualEarthLayer(Dataset.AERIAL);
 			veroads = new VirtualEarthLayer(Dataset.ROAD);
 			vehybrid = new VirtualEarthLayer(Dataset.HYBRID);
 		}
-		else
+		else*/
 		{
 			veaerial = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
 			veroads = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_ROADS);
@@ -206,7 +203,7 @@ public class StandardPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(osmRadio, c);
 		
-		if (Application.MERCATOR_VIRTUAL_EARTH)
+		/*if (Application.MERCATOR_VIRTUAL_EARTH)
 		{
 			veRadio = new JRadioButton("Microsoft Virtual Earth");
 			veRadio.addActionListener(al);
@@ -217,7 +214,7 @@ public class StandardPanel extends JPanel
 			c.anchor = GridBagConstraints.WEST;
 			panel.add(veRadio, c);
 		}
-		else
+		else*/
 		{
 			veCheck = new JCheckBox("Microsoft Virtual Earth");
 			veCheck.addActionListener(al);

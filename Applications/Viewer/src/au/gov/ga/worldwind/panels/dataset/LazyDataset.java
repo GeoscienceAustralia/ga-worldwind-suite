@@ -9,9 +9,9 @@ public class LazyDataset extends Dataset implements ILazyDataset
 {
 	private final URL url;
 
-	public LazyDataset(String name, URL url, URL descriptionURL, URL iconURL)
+	public LazyDataset(String name, URL url, URL descriptionURL, URL iconURL, boolean root)
 	{
-		super(name, descriptionURL, iconURL);
+		super(name, descriptionURL, iconURL, root);
 		this.url = url;
 	}
 

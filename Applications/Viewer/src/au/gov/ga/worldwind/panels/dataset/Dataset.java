@@ -15,9 +15,9 @@ public class Dataset extends AbstractData implements IDataset
 	private List<ILayerDefinition> layers = new ArrayList<ILayerDefinition>();
 	private List<IDataset> datasets = new ArrayList<IDataset>();
 
-	public Dataset(String name, URL descriptionURL, URL iconURL)
+	public Dataset(String name, URL descriptionURL, URL iconURL, boolean root)
 	{
-		super(name, descriptionURL, iconURL);
+		super(name, descriptionURL, iconURL, root);
 	}
 
 	@Override

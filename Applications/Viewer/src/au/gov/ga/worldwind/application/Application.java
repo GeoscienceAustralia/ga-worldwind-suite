@@ -3,9 +3,7 @@ package au.gov.ga.worldwind.application;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
-import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
-import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
@@ -13,7 +11,6 @@ import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Earth;
-import gov.nasa.worldwind.layers.CompassLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ScalebarLayer;
@@ -39,6 +36,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +47,6 @@ import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -64,51 +62,44 @@ import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
 import nasa.worldwind.awt.WorldWindowStereoGLCanvas;
 import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import au.gov.ga.worldwind.annotations.AnnotationEditor;
-import au.gov.ga.worldwind.annotations.AnnotationsPanel;
-import au.gov.ga.worldwind.bookmarks.Bookmark;
-import au.gov.ga.worldwind.bookmarks.BookmarkListener;
-import au.gov.ga.worldwind.bookmarks.BookmarkManager;
-import au.gov.ga.worldwind.bookmarks.Bookmarks;
 import au.gov.ga.worldwind.components.HtmlViewer;
-import au.gov.ga.worldwind.components.JVisibleDialog;
-import au.gov.ga.worldwind.layers.ga.GALayer;
-import au.gov.ga.worldwind.layers.local.LocalLayerDefinition;
-import au.gov.ga.worldwind.layers.local.LocalLayerEditor;
-import au.gov.ga.worldwind.layers.local.LocalLayers;
 import au.gov.ga.worldwind.layers.mouse.MouseLayer;
-import au.gov.ga.worldwind.panels.oldlayers.LayersPanel;
+import au.gov.ga.worldwind.panels.SideBar;
+import au.gov.ga.worldwind.panels.layers.ExtendedCompoundElevationModel;
+import au.gov.ga.worldwind.panels.layers.LayerFactory;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
-import au.gov.ga.worldwind.panels.places.PlaceSearchPanel;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.SettingsDialog;
-import au.gov.ga.worldwind.settings.Settings.ProjectionMode;
 import au.gov.ga.worldwind.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.stereo.StereoSceneController;
+import au.gov.ga.worldwind.theme.Theme;
+import au.gov.ga.worldwind.theme.ThemeHUD;
+import au.gov.ga.worldwind.theme.ThemeOpener;
+import au.gov.ga.worldwind.theme.ThemePanel;
+import au.gov.ga.worldwind.theme.ThemePiece;
+import au.gov.ga.worldwind.theme.ThemeOpener.ThemeOpenDelegate;
+import au.gov.ga.worldwind.theme.ThemePiece.ThemePieceListener;
 import au.gov.ga.worldwind.util.DoubleClickZoomListener;
+import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 
 public class Application
 {
-	public final static boolean LOCAL_LAYERS_ENABLED = true;
-	public static boolean MERCATOR_VIRTUAL_EARTH = false;
+	//public final static boolean LOCAL_LAYERS_ENABLED = true;
 
 	static
 	{
 		if (Configuration.isMacOS())
 		{
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			System.setProperty(
-					"com.apple.mrj.application.apple.menu.about.name",
+			System.setProperty("com.apple.mrj.application.apple.menu.about.name",
 					"World Wind Application");
-			System.setProperty("com.apple.mrj.application.growbox.intrudes",
-					"false");
+			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
 			System.setProperty("apple.awt.brushMetalLook", "true");
 		}
 
@@ -119,106 +110,105 @@ public class Application
 		catch (Exception e)
 		{
 		}
-		
-		/*try
-		{
-			InetAddress addr = InetAddress.getLocalHost();
-			MERCATOR_VIRTUAL_EARTH = addr.getCanonicalHostName().endsWith(
-					".agso.gov.au");
-		}
-		catch (Exception e)
-		{
-		}*/
+
+		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
+		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, StereoSceneController.class
+				.getName());
+		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class.getName());
+		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
+		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class
+				.getName());
+		//Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME, AWTInputHandler.class.getName());
+		//Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, NormalTessellator.class.getName());
 	}
 
 	public static void main(String[] args)
 	{
-		start();
-	}
-
-	public static Application start()
-	{
+		//Settings need to be initialised before Theme is opened, so that proxy values are set
 		Settings.get();
 
-		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME,
-				StereoSceneController.class.getName());
-		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class
-				.getName());
-		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
+		URL themeUrl = null;
+		if (args.length > 0)
+		{
+			try
+			{
+				themeUrl = new URL(args[0]);
+			}
+			catch (MalformedURLException e)
+			{
+			}
+		}
+		ThemeOpenDelegate delegate = new ThemeOpenDelegate()
+		{
+			@Override
+			public void opened(Theme theme)
+			{
+				start(theme);
+			}
+		};
+		if (themeUrl == null)
+			ThemeOpener.openDefault(delegate);
+		else
+			ThemeOpener.openTheme(themeUrl, delegate);
+	}
 
-		Configuration.setValue(AVKey.INITIAL_LATITUDE, Double.toString(Angle
-				.fromDegreesLatitude(-27).degrees));
-		Configuration.setValue(AVKey.INITIAL_LONGITUDE, Double.toString(Angle
-				.fromDegreesLongitude(133.5).degrees));
-		/*
-		 * Configuration.setValue(AVKey.INITIAL_ALTITUDE, Double .toString(1.2
-		 * Earth.WGS84_EQUATORIAL_RADIUS));
-		 */
-
-		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
-				ExtendedRetrievalService.class.getName());
-		/*
-		 * Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME,
-		 * AWTInputHandler.class.getName());
-		 */
-		/*
-		 * Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
-		 * NormalTessellator.class.getName());
-		 */
+	private static Application start(Theme theme)
+	{
+		if (theme.getInitialLatitude() != null)
+			Configuration.setValue(AVKey.INITIAL_LATITUDE, theme.getInitialLatitude());
+		if (theme.getInitialLongitude() != null)
+			Configuration.setValue(AVKey.INITIAL_LONGITUDE, theme.getInitialLongitude());
+		if (theme.getInitialAltitude() != null)
+			Configuration.setValue(AVKey.INITIAL_ALTITUDE, theme.getInitialAltitude());
+		if (theme.getInitialHeading() != null)
+			Configuration.setValue(AVKey.INITIAL_HEADING, theme.getInitialHeading());
+		if (theme.getInitialPitch() != null)
+			Configuration.setValue(AVKey.INITIAL_PITCH, theme.getInitialPitch());
 
 		WorldWind.getDataFileStore().addLocation("cache", false);
 
-		return new Application();
+		return new Application(theme);
 	}
 
+	private Theme theme;
 	private JFrame frame;
 	private JFrame fullscreenFrame;
-	//private GraphicsDevice fullscreenDevice;
+
 	private WorldWindowStereoGLCanvas wwd;
-	private StatusBar statusBar;
-	private LayersPanel layersPanel;
 	private MouseLayer mouseLayer;
+
+	private SideBar sideBar;
+	private StatusBar statusBar;
+	private JMenuBar menuBar;
 	private JSplitPane splitPane;
-	private JMenu bookmarksMenu;
 
-	private WorldMapLayer map;
-	private Layer logo, scalebar, compass;
-
-	private JVisibleDialog annotationsDialog;
-	private AnnotationsPanel annotationsPanel;
-	private JVisibleDialog placesearchDialog;
-	private List<JVisibleDialog> dialogs = new ArrayList<JVisibleDialog>();
-
-	private Application()
+	private Application(Theme theme)
 	{
-		// show splashscreen
-		frame = new JFrame("Geoscience Australia – World Wind");
-		final SplashScreen splashScreen = new SplashScreen(frame);
+		this.theme = theme;
 
-		// set icon
-		try
-		{
-			frame.setIconImage(new ImageIcon(Application.class
-					.getResource("/images/32x32-icon-earth.png")).getImage());
-		}
-		catch (Exception e)
-		{
-		}
+		//initialize frame
+		String title = "Geoscience Australia – World Wind";
+		if (theme.getName() != null && theme.getName().length() > 0)
+			title += " - " + theme.getName();
+		frame = new JFrame(title);
+		frame.setIconImage(Icons.earth32.getIcon().getImage());
+
+		// show splashscreen
+		final SplashScreen splashScreen = new SplashScreen(frame);
 
 		// create worldwind stuff
 		if (Settings.get().isHardwareStereoEnabled())
-			wwd = new WorldWindowStereoGLCanvas(
-					WorldWindowStereoGLCanvas.stereoCaps);
+			wwd = new WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas.stereoCaps);
 		else
-			wwd = new WorldWindowStereoGLCanvas(
-					WorldWindowStereoGLCanvas.defaultCaps);
+			wwd = new WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas.defaultCaps);
 		Model model = new BasicModel();
+		model.getGlobe().setElevationModel(new ExtendedCompoundElevationModel());
 		wwd.setModel(model);
-		wwd.addSelectListener(new ClickAndGoSelectListener(wwd,
-				WorldMapLayer.class));
+		wwd.addSelectListener(new ClickAndGoSelectListener(wwd, WorldMapLayer.class));
 		create3DMouse();
 		createDoubleClickListener();
 
+		//hide splash screen when first frame is rendered
 		wwd.addRenderingListener(new RenderingListener()
 		{
 			public void stageChanged(RenderingEvent event)
@@ -231,23 +221,17 @@ public class Application
 			}
 		});
 
+		//setup retrieval service layer
 		RetrievalService rs = WorldWind.getRetrievalService();
 		if (rs instanceof ExtendedRetrievalService)
 		{
 			model.getLayers().add(((ExtendedRetrievalService) rs).getLayer());
 		}
 
-		map = new WorldMapLayer();
-		scalebar = new ScalebarLayer();
-		compass = new CompassLayer();
-		logo = GALayer.getLogoLayer();
-		model.getLayers().add(map);
-		model.getLayers().add(scalebar);
-		model.getLayers().add(compass);
-		model.getLayers().add(logo);
+		//link theme to WorldWindow
+		theme.setup(wwd);
 
-		// create gui stuff
-
+		//ensure menu bar and popups appear over the heavyweight WW canvas
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
@@ -268,25 +252,25 @@ public class Application
 		splitPane.setOneTouchExpandable(true);
 		wwd.setMinimumSize(new Dimension(1, 1));
 
-		statusBar = new StatusBar();
-		panel.add(statusBar, BorderLayout.PAGE_END);
-		statusBar.setEventSource(wwd);
-		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
+		if (theme.hasStatusBar())
+		{
+			statusBar = new StatusBar();
+			panel.add(statusBar, BorderLayout.PAGE_END);
+			statusBar.setEventSource(wwd);
+			statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
+		}
 
-		layersPanel = new LayersPanel(wwd, frame);
-		splitPane.setLeftComponent(layersPanel);
-
-		// panel.add(wwd, BorderLayout.CENTER);
-		// panel.add(layersPanel, BorderLayout.WEST);
+		if (!theme.getPanels().isEmpty())
+		{
+			sideBar = new SideBar(theme);
+			splitPane.setLeftComponent(sideBar);
+		}
 
 		loadSplitLocations();
 		afterSettingsChange();
 
-		// create dialogs
-		createDialogs();
-
 		// init user layers
-		if (LOCAL_LAYERS_ENABLED)
+		/*if (LOCAL_LAYERS_ENABLED)
 		{
 			LocalLayers.init(wwd);
 			layersPanel.updateLocalLayers();
@@ -297,9 +281,14 @@ public class Application
 					layersPanel.updateLocalLayers();
 				}
 			});
+		}*/
+
+		if (theme.hasMenuBar())
+		{
+			menuBar = createMenuBar();
+			frame.setJMenuBar(menuBar);
 		}
 
-		frame.setJMenuBar(createMenuBar());
 		addWindowListeners();
 
 		try
@@ -317,12 +306,7 @@ public class Application
 		}
 	}
 
-	public WorldWindow getWwd()
-	{
-		return wwd;
-	}
-
-	private void createDialogs()
+	/*private void createDialogs()
 	{
 		annotationsDialog = createDialog("Annotations");
 		annotationsPanel = new AnnotationsPanel(wwd, frame);
@@ -334,11 +318,10 @@ public class Application
 		placesearchDialog.add(new PlaceSearchPanel(wwd), BorderLayout.CENTER);
 		dialogs.add(placesearchDialog);
 
-		/*
-		 * JVisibleDialog sunPositionDialog = createDialog("Sun position");
-		 * sunPositionDialog.add(new SunPositionPanel(wwd),
-		 * BorderLayout.CENTER); dialogs.add(sunPositionDialog);
-		 */
+
+		JVisibleDialog sunPositionDialog = createDialog("Sun position");
+		sunPositionDialog.add(new SunPositionPanel(wwd), BorderLayout.CENTER);
+		dialogs.add(sunPositionDialog);
 
 		loadDialogBounds();
 	}
@@ -393,9 +376,8 @@ public class Application
 						}
 						catch (Exception e)
 						{
-							JOptionPane.showMessageDialog(annotationsDialog,
-									"Could not import " + file.getName(),
-									"Import error", JOptionPane.ERROR_MESSAGE);
+							JOptionPane.showMessageDialog(annotationsDialog, "Could not import "
+									+ file.getName(), "Import error", JOptionPane.ERROR_MESSAGE);
 						}
 					}
 				}
@@ -418,13 +400,11 @@ public class Application
 					}
 					if (file.exists())
 					{
-						int answer = JOptionPane
-								.showConfirmDialog(
-										annotationsDialog,
-										file.getAbsolutePath()
-												+ " already exists.\nDo you want to replace it?",
-										"Export", JOptionPane.YES_NO_OPTION,
-										JOptionPane.WARNING_MESSAGE);
+						int answer =
+								JOptionPane.showConfirmDialog(annotationsDialog, file
+										.getAbsolutePath()
+										+ " already exists.\nDo you want to replace it?", "Export",
+										JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 						if (answer != JOptionPane.YES_OPTION)
 							file = null;
 					}
@@ -436,9 +416,8 @@ public class Application
 						}
 						catch (Exception e)
 						{
-							JOptionPane.showMessageDialog(annotationsDialog,
-									"Error: " + e, "Export error",
-									JOptionPane.ERROR_MESSAGE);
+							JOptionPane.showMessageDialog(annotationsDialog, "Error: " + e,
+									"Export error", JOptionPane.ERROR_MESSAGE);
 						}
 					}
 				}
@@ -451,10 +430,11 @@ public class Application
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				int value = JOptionPane.showConfirmDialog(annotationsDialog,
-						"All annotations will be deleted!\nAre you sure?",
-						"Delete all annotations", JOptionPane.YES_NO_OPTION,
-						JOptionPane.WARNING_MESSAGE);
+				int value =
+						JOptionPane.showConfirmDialog(annotationsDialog,
+								"All annotations will be deleted!\nAre you sure?",
+								"Delete all annotations", JOptionPane.YES_NO_OPTION,
+								JOptionPane.WARNING_MESSAGE);
 				if (value == JOptionPane.YES_OPTION)
 				{
 					annotationsPanel.deleteAllAnnotations();
@@ -475,7 +455,7 @@ public class Application
 		});
 
 		return menuBar;
-	}
+	}*/
 
 	private void saveImage()
 	{
@@ -549,11 +529,10 @@ public class Application
 			// ask user if they want to overwrite
 			if (file.exists())
 			{
-				int answer = JOptionPane.showConfirmDialog(frame, file
-						.getAbsolutePath()
-						+ " already exists.\nDo you want to replace it?",
-						"Save image", JOptionPane.YES_NO_OPTION,
-						JOptionPane.WARNING_MESSAGE);
+				int answer =
+						JOptionPane.showConfirmDialog(frame, file.getAbsolutePath()
+								+ " already exists.\nDo you want to replace it?", "Save image",
+								JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 				if (answer != JOptionPane.YES_OPTION)
 					file = null;
 			}
@@ -623,10 +602,8 @@ public class Application
 
 		Double initLat = Configuration.getDoubleValue(AVKey.INITIAL_LATITUDE);
 		Double initLon = Configuration.getDoubleValue(AVKey.INITIAL_LONGITUDE);
-		Double initAltitude = Configuration
-				.getDoubleValue(AVKey.INITIAL_ALTITUDE);
-		Double initHeading = Configuration
-				.getDoubleValue(AVKey.INITIAL_HEADING);
+		Double initAltitude = Configuration.getDoubleValue(AVKey.INITIAL_ALTITUDE);
+		Double initHeading = Configuration.getDoubleValue(AVKey.INITIAL_HEADING);
 		Double initPitch = Configuration.getDoubleValue(AVKey.INITIAL_PITCH);
 
 		if (initLat == null)
@@ -640,22 +617,19 @@ public class Application
 		if (initPitch == null)
 			initPitch = 0d;
 
-		Position endCenter = Position.fromDegrees(initLat, initLon, beginCenter
-				.getElevation());
+		Position endCenter = Position.fromDegrees(initLat, initLon, beginCenter.getElevation());
 		long lengthMillis = Util.getScaledLengthMillis(beginCenter, endCenter);
 
-		view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(
-				view, beginCenter, endCenter, view.getHeading(), Angle
-						.fromDegrees(initHeading), view.getPitch(), Angle
-						.fromDegrees(initPitch), view.getZoom(), initAltitude,
-				lengthMillis, true));
+		view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter,
+				endCenter, view.getHeading(), Angle.fromDegrees(initHeading), view.getPitch(),
+				Angle.fromDegrees(initPitch), view.getZoom(), initAltitude, lengthMillis, true));
 		wwd.redraw();
 	}
 
 	private void create3DMouse()
 	{
-		final UserFacingIcon icon = new UserFacingIcon(
-				"au/gov/ga/worldwind/data/images/cursor.png", new Position(
+		final UserFacingIcon icon =
+				new UserFacingIcon("au/gov/ga/worldwind/data/images/cursor.png", new Position(
 						Angle.ZERO, Angle.ZERO, 0));
 		icon.setSize(new Dimension(16, 32));
 		icon.setAlwaysOnTop(true);
@@ -669,14 +643,12 @@ public class Application
 
 	private void createDoubleClickListener()
 	{
-		wwd.getInputHandler().addMouseListener(
-				new DoubleClickZoomListener(wwd, 5000d));
+		wwd.getInputHandler().addMouseListener(new DoubleClickZoomListener(wwd, 5000d));
 	}
 
 	private void enableMouseLayer()
 	{
-		mouseLayer.setEnabled(Settings.get().isStereoEnabled()
-				&& Settings.get().isStereoCursor());
+		mouseLayer.setEnabled(Settings.get().isStereoEnabled() && Settings.get().isStereoCursor());
 	}
 
 	public boolean isMaximized()
@@ -698,87 +670,68 @@ public class Application
 				boolean span = Settings.get().isSpanDisplays();
 				String id = Settings.get().getDisplayId();
 
-				GraphicsEnvironment ge = GraphicsEnvironment
-						.getLocalGraphicsEnvironment();
+				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 				GraphicsDevice[] gds = ge.getScreenDevices();
-				
-				/*fullscreenDevice = ge.getDefaultScreenDevice();
-				if (!fullscreenDevice.isFullScreenSupported())
+
+				saveSplitLocations();
+				fullscreenFrame = new JFrame(frame.getTitle());
+				JPanel panel = new JPanel(new BorderLayout());
+				fullscreenFrame.setContentPane(panel);
+				fullscreenFrame.setUndecorated(true);
+				fullscreenFrame.add(wwd);
+				fullscreenFrame.setAlwaysOnTop(true);
+
+				fullscreenFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				fullscreenFrame.addWindowListener(new WindowAdapter()
 				{
-					JOptionPane
-							.showMessageDialog(
-									frame,
-									"Graphics device does not support fullscreen mode.",
-									"Not supported", JOptionPane.ERROR_MESSAGE);
-				}
-				else*/
-				{
-					saveSplitLocations();
-					fullscreenFrame = new JFrame(frame.getTitle());
-					JPanel panel = new JPanel(new BorderLayout());
-					fullscreenFrame.setContentPane(panel);
-					fullscreenFrame.setUndecorated(true);
-					fullscreenFrame.add(wwd);
-					//fullscreenDevice.setFullScreenWindow(fullscreenFrame);
-					fullscreenFrame.setAlwaysOnTop(true);
-
-					fullscreenFrame
-							.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-					fullscreenFrame.addWindowListener(new WindowAdapter()
+					@Override
+					public void windowClosing(WindowEvent e)
 					{
-						@Override
-						public void windowClosing(WindowEvent e)
-						{
-							setFullscreen(false);
-						}
-					});
-
-					Action action = new AbstractAction()
-					{
-						public void actionPerformed(ActionEvent e)
-						{
-							setFullscreen(false);
-						}
-					};
-					panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-							KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-							action);
-					panel.getActionMap().put(action, action);
-
-					if (span)
-					{
-						Rectangle fullBounds = new Rectangle();
-						for (GraphicsDevice g : gds)
-						{
-							GraphicsConfiguration gc = g
-									.getDefaultConfiguration();
-							fullBounds = fullBounds.union(gc.getBounds());
-						}
-						fullscreenFrame.setBounds(fullBounds);
+						setFullscreen(false);
 					}
-					else if (id != null)
+				});
+
+				Action action = new AbstractAction()
+				{
+					public void actionPerformed(ActionEvent e)
 					{
-						for (GraphicsDevice g : gds)
+						setFullscreen(false);
+					}
+				};
+				panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+						KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), action);
+				panel.getActionMap().put(action, action);
+
+				if (span)
+				{
+					Rectangle fullBounds = new Rectangle();
+					for (GraphicsDevice g : gds)
+					{
+						GraphicsConfiguration gc = g.getDefaultConfiguration();
+						fullBounds = fullBounds.union(gc.getBounds());
+					}
+					fullscreenFrame.setBounds(fullBounds);
+				}
+				else if (id != null)
+				{
+					for (GraphicsDevice g : gds)
+					{
+						if (id.equals(g.getIDstring()))
 						{
-							if (id.equals(g.getIDstring()))
-							{
-								GraphicsConfiguration gc = g
-										.getDefaultConfiguration();
-								fullscreenFrame.setBounds(gc.getBounds());
-								break;
-							}
+							GraphicsConfiguration gc = g.getDefaultConfiguration();
+							fullscreenFrame.setBounds(gc.getBounds());
+							break;
 						}
 					}
-					fullscreenFrame.setVisible(true);
-					frame.setVisible(false);
 				}
+				fullscreenFrame.setVisible(true);
+				frame.setVisible(false);
 			}
 			else
 			{
 				if (fullscreenFrame != null)
 				{
 					splitPane.setRightComponent(wwd);
-					//fullscreenDevice.setFullScreenWindow(null);
 					fullscreenFrame.dispose();
 					fullscreenFrame = null;
 					loadSplitLocations();
@@ -809,7 +762,7 @@ public class Application
 			}
 		});
 
-		if (LOCAL_LAYERS_ENABLED)
+		/*if (LOCAL_LAYERS_ENABLED)
 		{
 			menuItem = new JMenuItem("Add local tileset...");
 			menu.add(menuItem);
@@ -818,15 +771,14 @@ public class Application
 				public void actionPerformed(ActionEvent e)
 				{
 					LocalLayerDefinition def = new LocalLayerDefinition();
-					def = LocalLayerEditor.editDefinition(frame,
-							"New local tileset", def);
+					def = LocalLayerEditor.editDefinition(frame, "New local tileset", def);
 					if (def != null)
 					{
 						LocalLayers.get().addLayer(def);
 					}
 				}
 			});
-		}
+		}*/
 
 		menu.addSeparator();
 
@@ -840,12 +792,16 @@ public class Application
 			}
 		});
 
-		/*
-		 * menuItem = new JMenuItem("Save large image"); menu.add(menuItem);
-		 * menuItem.addActionListener(new ActionListener() { public void
-		 * actionPerformed(ActionEvent e) { takeScreenshot(4000, 4000, new
-		 * File("largescreeshot.png")); } });
-		 */
+
+		/*menuItem = new JMenuItem("Save large image");
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				takeScreenshot(4000, 4000, new File("largescreeshot.png"));
+			}
+		});*/
 
 		menu.addSeparator();
 
@@ -878,32 +834,25 @@ public class Application
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				GoToCoordinatePanel.showGotoDialog(frame, wwd,
-						"Go to coordinates");
+				GoToCoordinatePanel.showGotoDialog(frame, wwd, "Go to coordinates");
 			}
 		});
 
 		menu.addSeparator();
 
-		for (JVisibleDialog dialog : dialogs)
+		for (ThemePanel panel : theme.getPanels())
 		{
-			menuItem = createDialogMenuItem(dialog);
+			menuItem = createThemePieceMenuItem(panel);
 			menu.add(menuItem);
 		}
 
 		menu.addSeparator();
 
-		menuItem = createLayerMenuItem(map);
-		menu.add(menuItem);
-
-		menuItem = createLayerMenuItem(compass);
-		menu.add(menuItem);
-
-		menuItem = createLayerMenuItem(scalebar);
-		menu.add(menuItem);
-
-		menuItem = createLayerMenuItem(logo);
-		menu.add(menuItem);
+		for (ThemeHUD hud : theme.getHUDs())
+		{
+			menuItem = createThemePieceMenuItem(hud);
+			menu.add(menuItem);
+		}
 
 		menu.addSeparator();
 
@@ -917,7 +866,7 @@ public class Application
 			}
 		});
 
-		bookmarksMenu = new JMenu("Bookmarks");
+		/*bookmarksMenu = new JMenu("Bookmarks");
 		menuBar.add(bookmarksMenu);
 
 		menuItem = new JMenuItem("Add bookmark...");
@@ -936,8 +885,7 @@ public class Application
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				BookmarkManager bm = new BookmarkManager(frame,
-						"Organise bookmarks");
+				BookmarkManager bm = new BookmarkManager(frame, "Organise bookmarks");
 				bm.setSize(400, 300);
 				bm.setLocationRelativeTo(frame);
 				bm.setVisible(true);
@@ -953,7 +901,7 @@ public class Application
 			}
 		};
 		Bookmarks.addBookmarkListener(bl);
-		bl.modified();
+		bl.modified();*/
 
 		menu = new JMenu("Options");
 		menuBar.add(menu);
@@ -990,7 +938,7 @@ public class Application
 			}
 		});
 
-		menuItem = new JMenuItem("Data sources...");
+		/*menuItem = new JMenuItem("Data sources...");
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -1000,7 +948,7 @@ public class Application
 			}
 		});
 
-		menu.addSeparator();
+		menu.addSeparator();*/
 
 		menuItem = new JMenuItem("About");
 		menu.add(menuItem);
@@ -1015,38 +963,23 @@ public class Application
 		return menuBar;
 	}
 
-	private JMenuItem createLayerMenuItem(final Layer layer)
+	private JMenuItem createThemePieceMenuItem(final ThemePiece piece)
 	{
-		final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(layer
-				.getName(), layer.isEnabled());
+		final JCheckBoxMenuItem menuItem =
+				new JCheckBoxMenuItem(piece.getDisplayName(), piece.isOn());
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				layer.setEnabled(menuItem.isSelected());
-				wwd.redraw();
+				piece.setOn(menuItem.isSelected());
 			}
 		});
-		return menuItem;
-	}
-
-	private JMenuItem createDialogMenuItem(final JVisibleDialog dialog)
-	{
-		final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(dialog
-				.getTitle()
-				+ " dialog", dialog.isVisible());
-		menuItem.addActionListener(new ActionListener()
+		piece.addListener(new ThemePieceListener()
 		{
-			public void actionPerformed(ActionEvent e)
+			@Override
+			public void onToggled(boolean on)
 			{
-				dialog.setVisible(menuItem.isSelected());
-			}
-		});
-		dialog.addVisibilityListener(new JVisibleDialog.VisibilityListener()
-		{
-			public void visibleChanged(boolean visible)
-			{
-				menuItem.setSelected(visible);
+				menuItem.setSelected(on);
 			}
 		});
 		return menuItem;
@@ -1054,24 +987,26 @@ public class Application
 
 	private void showControls()
 	{
-		JDialog dialog = new HtmlViewer(frame, "Controls", false,
-				"/au/gov/ga/worldwind/data/help/controls.html", true);
+		JDialog dialog =
+				new HtmlViewer(frame, "Controls", false,
+						"/au/gov/ga/worldwind/data/help/controls.html", true);
 		dialog.setResizable(false);
 		dialog.setSize(640, 480);
 		dialog.setLocationRelativeTo(frame);
 		dialog.setVisible(true);
 	}
 
-	private void showDataSources()
+	/*private void showDataSources()
 	{
-		JDialog dialog = new HtmlViewer(frame, "Data sources", false,
-				"/au/gov/ga/worldwind/data/help/datasources.html", false);
+		JDialog dialog =
+				new HtmlViewer(frame, "Data sources", false,
+						"/au/gov/ga/worldwind/data/help/datasources.html", false);
 		dialog.setSize(640, 480);
 		dialog.setLocationRelativeTo(frame);
 		dialog.setVisible(true);
-	}
+	}*/
 
-	private void updateBookmarksMenu()
+	/*private void updateBookmarksMenu()
 	{
 		while (bookmarksMenu.getMenuComponentCount() > 3)
 		{
@@ -1090,51 +1025,39 @@ public class Application
 					{
 						OrbitView orbitView = (OrbitView) view;
 						Position center = orbitView.getCenterPosition();
-						Position newCenter = Position.fromDegrees(bookmark
-								.getLat(), bookmark.getLon(), bookmark
-								.getElevation());
-						long lengthMillis = Util.getScaledLengthMillis(center,
-								newCenter);
+						Position newCenter =
+								Position.fromDegrees(bookmark.getLat(), bookmark.getLon(), bookmark
+										.getElevation());
+						long lengthMillis = Util.getScaledLengthMillis(center, newCenter);
 
-						orbitView.addAnimator(FlyToOrbitViewAnimator
-								.createFlyToOrbitViewAnimator(orbitView,
-										center, newCenter, orbitView
-												.getHeading(), Angle
-												.fromDegrees(bookmark
-														.getHeading()),
-										orbitView.getPitch(), Angle
-												.fromDegrees(bookmark
-														.getPitch()), orbitView
-												.getZoom(), bookmark.getZoom(),
-										lengthMillis, true));
+						orbitView.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(
+								orbitView, center, newCenter, orbitView.getHeading(), Angle
+										.fromDegrees(bookmark.getHeading()), orbitView.getPitch(),
+								Angle.fromDegrees(bookmark.getPitch()), orbitView.getZoom(),
+								bookmark.getZoom(), lengthMillis, true));
 						wwd.redraw();
 					}
 				}
 			});
 		}
-	}
+	}*/
 
 	private void afterSettingsChange()
 	{
-		if (Settings.get().isStereoEnabled()
+		/*if (Settings.get().isStereoEnabled()
 				&& Settings.get().getProjectionMode() == ProjectionMode.ASYMMETRIC_FRUSTUM)
 		{
 			layersPanel.turnOffAtmosphere();
 		}
-		map.setPickEnabled(!(Settings.get().isStereoEnabled() && Settings.get()
-				.isStereoCursor()));
+		map.setPickEnabled(!(Settings.get().isStereoEnabled() && Settings.get().isStereoCursor()));*/
 		enableMouseLayer();
 	}
 
 	public void quit()
 	{
 		saveSplitLocations();
-		saveDialogBounds();
 		Settings.save();
-		if (LOCAL_LAYERS_ENABLED)
-		{
-			LocalLayers.save();
-		}
+		theme.dispose();
 		frame.dispose();
 		System.exit(0);
 	}
@@ -1156,62 +1079,6 @@ public class Application
 		}
 	}
 
-	private void loadDialogBounds()
-	{
-		boolean[] dialogsOpen = Settings.get().getDialogsOpen();
-		Rectangle[] dialogBounds = Settings.get().getDialogBounds();
-		boolean useOpen = dialogsOpen != null
-				&& dialogsOpen.length == dialogs.size();
-		boolean useBounds = dialogBounds != null
-				&& dialogBounds.length == dialogs.size();
-		for (int i = 0; i < dialogs.size(); i++)
-		{
-			JVisibleDialog dialog = dialogs.get(i);
-			if (useBounds && useOpen)
-			{
-				dialog.setBounds(dialogBounds[i]);
-				dialog.setVisible(dialogsOpen[i]);
-				if (!dialogsOpen[i])
-					dialog.centerInOwnerWhenShown();
-			}
-			else
-			{
-				dialog.pack();
-				dialog.centerInOwnerWhenShown();
-			}
-		}
-	}
-
-	private void saveDialogBounds()
-	{
-		boolean[] dialogsOpen = new boolean[dialogs.size()];
-		Rectangle[] dialogBounds = new Rectangle[dialogs.size()];
-		for (int i = 0; i < dialogs.size(); i++)
-		{
-			JVisibleDialog dialog = dialogs.get(i);
-			dialogsOpen[i] = dialog.isVisible();
-			dialogBounds[i] = dialog.getBounds();
-		}
-		Settings.get().setDialogsOpen(dialogsOpen);
-		Settings.get().setDialogBounds(dialogBounds);
-	}
-
-	private JVisibleDialog createDialog(String title)
-	{
-		final JVisibleDialog dialog = new JVisibleDialog(frame, title);
-		dialog.setLayout(new BorderLayout());
-		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		dialog.addWindowListener(new WindowAdapter()
-		{
-			@Override
-			public void windowClosing(WindowEvent e)
-			{
-				dialog.setVisible(false);
-			}
-		});
-		return dialog;
-	}
-
 	public void updateElevationUnit(String newValue)
 	{
 		for (Layer layer : this.wwd.getModel().getLayers())
@@ -1219,8 +1086,7 @@ public class Application
 			if (layer instanceof ScalebarLayer)
 			{
 				if (StatusBar.UNIT_IMPERIAL.equals(newValue))
-					((ScalebarLayer) layer)
-							.setUnit(ScalebarLayer.UNIT_IMPERIAL);
+					((ScalebarLayer) layer).setUnit(ScalebarLayer.UNIT_IMPERIAL);
 				else
 					// Default to metric units.
 					((ScalebarLayer) layer).setUnit(ScalebarLayer.UNIT_METRIC);
@@ -1228,12 +1094,10 @@ public class Application
 			else if (layer instanceof TerrainProfileLayer)
 			{
 				if (StatusBar.UNIT_IMPERIAL.equals(newValue))
-					((TerrainProfileLayer) layer)
-							.setUnit(TerrainProfileLayer.UNIT_IMPERIAL);
+					((TerrainProfileLayer) layer).setUnit(TerrainProfileLayer.UNIT_IMPERIAL);
 				else
 					// Default to metric units.
-					((TerrainProfileLayer) layer)
-							.setUnit(TerrainProfileLayer.UNIT_METRIC);
+					((TerrainProfileLayer) layer).setUnit(TerrainProfileLayer.UNIT_METRIC);
 			}
 		}
 

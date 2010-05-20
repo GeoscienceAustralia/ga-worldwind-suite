@@ -12,7 +12,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
-import au.gov.ga.worldwind.application.Application;
 import au.gov.ga.worldwind.layers.local.LocalLayerPanel;
 
 public class LayersPanel extends JPanel
@@ -42,10 +41,10 @@ public class LayersPanel extends JPanel
 		tabbedPane.addTab("Geophysics", createGeophysics());
 		standardPanel.addUpperLayers();
 
-		if (Application.LOCAL_LAYERS_ENABLED)
+		/*if (Application.LOCAL_LAYERS_ENABLED)
 		{
 			localPanel = new LocalLayerPanel(wwd, frame);
-		}
+		}*/
 
 		tabbedPane.validate();
 		tabbedPane.setSelectedIndex(1);

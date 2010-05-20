@@ -6,12 +6,14 @@ public abstract class AbstractData extends AbstractIconItem implements IData
 {
 	private String name;
 	private URL descriptionURL;
+	private boolean root;
 
-	public AbstractData(String name, URL descriptionURL, URL iconURL)
+	public AbstractData(String name, URL descriptionURL, URL iconURL, boolean root)
 	{
 		super(iconURL);
 		this.name = name;
 		this.descriptionURL = descriptionURL;
+		this.root = root;
 	}
 
 	public String getName()
@@ -28,5 +30,11 @@ public abstract class AbstractData extends AbstractIconItem implements IData
 	public String toString()
 	{
 		return getName();
+	}
+	
+	@Override
+	public boolean isRoot()
+	{
+		return root;
 	}
 }

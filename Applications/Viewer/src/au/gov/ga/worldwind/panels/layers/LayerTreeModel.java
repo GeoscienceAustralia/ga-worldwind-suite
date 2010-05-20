@@ -16,6 +16,7 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.panels.dataset.IData;
 import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 
 public class LayerTreeModel implements TreeModel, TreeExpansionListener
@@ -60,22 +61,42 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		enabler.enable(copy);
 	}
 
-	public void addLayer(ILayerDefinition layer)
+	public void addLayer(ILayerDefinition layer, IData[] parents)
 	{
-		INode node = LayerNode.createFromLayerDefinition(layer);
-		TreePath selected = tree.getSelectionPath();
-		TreePath expand;
-		if (selected == null)
+		INode layerNode = LayerNode.createFromLayerDefinition(layer);
+		List<INode> expandPath = new ArrayList<INode>();
+
+		//add any parents of this layer that don't already exist in the tree
+		INode currentParent = getRoot();
+		for (int i = parents.length - 1; i >= 0; i--)
 		{
-			addToRoot(node, true);
-			expand = new TreePath(new Object[] { root, node });
+			IData data = parents[i];
+			INode node = null;
+			for (int j = 0; j < currentParent.getChildCount(); j++)
+			{
+				INode child = currentParent.getChild(j);
+				if (data.getName().equalsIgnoreCase(child.getName()))
+				{
+					node = child;
+					break;
+				}
+			}
+			if (node == null)
+			{
+				node = new FolderNode(data.getName(), data.getIconURL(), true);
+				insertNodeInto(node, currentParent, currentParent.getChildCount(), false);
+			}
+			expandPath.add(currentParent);
+			currentParent = node;
 		}
-		else
-		{
-			INode parent = (INode) selected.getLastPathComponent();
-			insertNodeInto(node, parent, parent.getChildCount(), true);
-			expand = selected.pathByAddingChild(node);
-		}
+		expandPath.add(currentParent);
+		expandPath.add(layerNode);
+
+		//add the layer
+		insertNodeInto(layerNode, currentParent, currentParent.getChildCount(), true);
+		TreePath expand = new TreePath(expandPath.toArray());
+
+		//relayout the tree, and expand to make the layer node visible
 		((ClearableBasicTreeUI) tree.getUI()).relayout();
 		tree.scrollPathToVisible(expand);
 	}
@@ -88,8 +109,17 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			Set<ILayerNode> set = layerURLmap.get(url);
 			while (!set.isEmpty())
 			{
-				//this will call removedLayer() which will remove the node from the set
-				removeNodeFromParent(set.iterator().next(), false);
+				//get the layer node to remove
+				ILayerNode layerNode = set.iterator().next();
+				INode remove = layerNode;
+
+				//go up the list of parents if the parents have this layer as their only child
+				while (remove.getParent() != null && remove.getParent().getChildCount() == 1)
+					remove = remove.getParent();
+
+				//the following will call removedLayer() which will remove the node from the set
+				//(therefore this is not an infinite loop)
+				removeNodeFromParent(remove, false);
 			}
 			//only rebuild the layers list at the end
 			rebuildLayersList();

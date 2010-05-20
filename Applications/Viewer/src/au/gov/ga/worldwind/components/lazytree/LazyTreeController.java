@@ -1,13 +1,12 @@
 package au.gov.ga.worldwind.components.lazytree;
 
+import javax.swing.SwingWorker;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
-
-import org.jdesktop.swingworker.SwingWorker;
 
 public class LazyTreeController implements TreeWillExpandListener
 {

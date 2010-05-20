@@ -5,6 +5,7 @@ import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
+import gov.nasa.worldwind.terrain.ZeroElevationModel;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class LayerEnabler
 	private WorldWindow wwd;
 	private LayerList layerList;
 	private ExtendedCompoundElevationModel elevationModel;
+	private ElevationModel zeroElevationModel = new ZeroElevationModel();
 
 	private List<ILayerNode> nodes = new ArrayList<ILayerNode>();
 	private List<Wrapper> wrappers = new ArrayList<Wrapper>();
@@ -222,6 +224,10 @@ public class LayerEnabler
 				}
 			}
 		}
+
+		//ensure there is at least one elevation model, otherwise navigation behaves strangely
+		if(elevationModels.isEmpty())
+			elevationModels.add(zeroElevationModel);
 
 		layerList.addAll(layers);
 		elevationModel.addAll(elevationModels);

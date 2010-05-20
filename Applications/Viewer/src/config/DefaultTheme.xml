@@ -4,6 +4,12 @@
 	<!-- <ThemeName></ThemeName> -->
 	<MenuBar>true</MenuBar>
 	<StatusBar>true</StatusBar>
+	
+	<InitialLatitude>-27.0</InitialLatitude>
+	<InitialLongitude>133.5</InitialLongitude>
+	<!-- <InitialAltitude></InitialAltitude>
+	<InitialHeading></InitialHeading>
+	<InitialPitch></InitialPitch> -->
 
 	<!-- Heads-up-display elements (can also include graticules) -->
 	<HUD name="World Map" className="au.gov.ga.worldwind.theme.hud.WorldMapHUD"

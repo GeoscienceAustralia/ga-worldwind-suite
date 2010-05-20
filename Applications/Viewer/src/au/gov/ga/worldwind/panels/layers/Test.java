@@ -76,16 +76,16 @@ public class Test extends JPanel
 	}
 
 	private Theme theme;
+	private SideBar sidebar;
 
 	public Test(WorldWindow wwd) throws Exception
 	{
 		super(new BorderLayout());
 
-		InputStream is =
-				Test.class.getResourceAsStream("/config/DefaultTheme.xml");
+		InputStream is = Test.class.getResourceAsStream("/config/DefaultTheme.xml");
 		theme = ThemeFactory.createFromXML(is, null);
 		theme.setup(wwd);
-		SideBar sidebar = new SideBar(theme);
+		sidebar = new SideBar(theme);
 		add(sidebar, BorderLayout.CENTER);
 	}
 }

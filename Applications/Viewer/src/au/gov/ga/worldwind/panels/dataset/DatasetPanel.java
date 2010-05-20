@@ -3,7 +3,6 @@ package au.gov.ga.worldwind.panels.dataset;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
@@ -12,13 +11,11 @@ import javax.swing.tree.TreePath;
 import au.gov.ga.worldwind.components.lazytree.LazyTree;
 import au.gov.ga.worldwind.components.lazytree.LazyTreeObjectNode;
 import au.gov.ga.worldwind.panels.layers.LayerTreeModel;
+import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
-import au.gov.ga.worldwind.theme.ThemePanel;
 
-public class DatasetPanel extends JPanel implements ThemePanel
+public class DatasetPanel extends AbstractThemePanel
 {
-	private String displayName = "Datasets";
-	
 	private LazyTree tree;
 	private Dataset root;
 	private LazyTreeObjectNode rootNode;
@@ -28,8 +25,9 @@ public class DatasetPanel extends JPanel implements ThemePanel
 	public DatasetPanel()
 	{
 		super(new BorderLayout());
+		setDisplayName("Datasets");
 
-		root = new Dataset("root", null, null);
+		root = new Dataset("root", null, null, true);
 		model = new DefaultTreeModel(null);
 		rootNode = new LazyTreeObjectNode(root, model);
 		model.setRoot(rootNode);
@@ -57,12 +55,6 @@ public class DatasetPanel extends JPanel implements ThemePanel
 	}
 
 	@Override
-	public JPanel getPanel()
-	{
-		return this;
-	}
-
-	@Override
 	public void setup(Theme theme)
 	{
 		for(IDataset dataset : theme.getDatasets())
@@ -83,27 +75,5 @@ public class DatasetPanel extends JPanel implements ThemePanel
 	@Override
 	public void dispose()
 	{
-	}
-
-	@Override
-	public boolean isOn()
-	{
-		return isVisible();
-	}
-
-	@Override
-	public void setOn(boolean on)
-	{
-		setVisible(on);
-	}
-
-	public String getDisplayName()
-	{
-		return displayName;
-	}
-
-	public void setDisplayName(String displayName)
-	{
-		this.displayName = displayName;
 	}
 }

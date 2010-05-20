@@ -13,7 +13,7 @@ public class DatasetReader
 	public static IDataset read(Object source, URL context) throws MalformedURLException
 	{
 		//top level dataset (DatasetList) doesn't have a name, and is not shown in the tree
-		IDataset root = new Dataset(null, null, null);
+		IDataset root = new Dataset(null, null, null, true);
 
 		Document document = WWXML.openDocument(source);
 		Element[] elements =
@@ -60,7 +60,8 @@ public class DatasetReader
 		String name = WWXML.getText(element, "@name");
 		URL description = getURL(element, "@description", context);
 		URL icon = getURL(element, "@icon", context);
-		IDataset dataset = new Dataset(name, description, icon);
+		boolean root = getBoolean(element, "@root", false);
+		IDataset dataset = new Dataset(name, description, icon, root);
 		parent.getDatasets().add(dataset);
 		return dataset;
 	}
@@ -72,7 +73,8 @@ public class DatasetReader
 		URL description = getURL(element, "@description", context);
 		URL icon = getURL(element, "@icon", context);
 		URL url = getURL(element, "@url", context);
-		IDataset dataset = new LazyDataset(name, url, description, icon);
+		boolean root = getBoolean(element, "@root", false);
+		IDataset dataset = new LazyDataset(name, url, description, icon, root);
 		parent.getDatasets().add(dataset);
 	}
 
@@ -83,7 +85,8 @@ public class DatasetReader
 		URL description = getURL(element, "@description", context);
 		URL icon = getURL(element, "@icon", context);
 		URL url = getURL(element, "@url", context);
-		ILayerDefinition layer = new LayerDefinition(name, url, description, icon);
+		boolean root = getBoolean(element, "@root", false);
+		ILayerDefinition layer = new LayerDefinition(name, url, description, icon, root);
 		parent.getLayers().add(layer);
 	}
 
@@ -96,6 +99,14 @@ public class DatasetReader
 		if (context == null)
 			return new URL(text);
 		return new URL(context, text);
+	}
+
+	private static boolean getBoolean(Element context, String path, boolean def)
+	{
+		Boolean b = WWXML.getBoolean(context, path, null);
+		if (b == null)
+			return def;
+		return b;
 	}
 
 	/*private static String getDescription(Element element)

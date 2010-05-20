@@ -11,13 +11,21 @@ import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 
 public interface Theme extends Disposable
 {
+	public void setup(WorldWindow wwd);
+	public WorldWindow getWwd();
+	
 	public String getName();
 	public boolean hasMenuBar();
 	public boolean hasStatusBar();
+	
 	public List<IDataset> getDatasets();
 	public List<ILayerDefinition> getLayers();
 	public List<ThemeHUD> getHUDs();
 	public List<ThemePanel> getPanels();
-	public void setup(WorldWindow wwd);
-	public WorldWindow getWwd();
+	
+	public Double getInitialLatitude();
+	public Double getInitialLongitude();
+	public Double getInitialAltitude();
+	public Double getInitialHeading();
+	public Double getInitialPitch();
 }

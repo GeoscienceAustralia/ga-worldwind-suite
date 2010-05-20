@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <DatasetList>
-	<Dataset name="NASA" icon="nasa.png" description="http://worldwind.arc.nasa.gov/java/">
+	<Dataset name="NASA" icon="nasa.png" description="http://worldwind.arc.nasa.gov/java/" root="true">
 		<Layer name="Earth Digital Elevation Model" url="NASA/earth_elevation_model.xml" icon="layer.png" />
 		<Layer name="Stars" url="NASA/stars.xml" icon="layer.png" />
 		<Layer name="Sky" url="NASA/sky.xml" icon="layer.png" />
@@ -13,7 +13,7 @@
 		<Layer name="Country Boundaries" url="NASA/country_boundaries.xml" icon="layer.png" />
 		<Layer name="Place Names" url="NASA/place_names.xml" icon="layer.png" />
 	</Dataset>
-	<Dataset name="Geoscience Australia" icon="ga.png" description="http://www.ga.gov.au/">
+	<Dataset name="Geoscience Australia" icon="ga.png" description="http://www.ga.gov.au/" root="true">
 		<Dataset name="Radiometric Map of Australia" icon="GA/Radiometrics/icon.png" description="http://www.ga.gov.au/minerals/research/national/radiometric/index.jsp">
 			<Dataset name="Detailed Areas" icon="GA/Radiometrics/icon.png">
 				<Layer name="Ternary (K-Th-U)" url="GA/Radiometrics/Areas/Ternary.xml" icon="layer.png" />

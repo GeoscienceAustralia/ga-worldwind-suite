@@ -23,7 +23,8 @@ public enum Icons
 	error("error.gif"),
 	newfolder("newfolder.gif"),
 	folder("folder.gif"),
-	earth("earth.png");
+	earth("earth.png"),
+	earth32("earth32.png");
 
 	private static final String ICON_DIRECTORY = "/au/gov/ga/worldwind/data/icons/";
 	private ImageIcon icon;

@@ -11,6 +11,6 @@ public class Executable
 			DirectDraw.disableDirectDraw();
 		}
 		NativeJOGLLibs.init();
-		Application.start();
+		Application.main(args);
 	}
 }

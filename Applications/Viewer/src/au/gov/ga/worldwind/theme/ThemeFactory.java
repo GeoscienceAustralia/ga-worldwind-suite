@@ -37,21 +37,22 @@ public class ThemeFactory
 			element = document.getDocumentElement();
 		}
 
-		String name = WWXML.getText(element, "ThemeName");
-		boolean menuBar = getBoolean(element, "MenuBar", false);
-		boolean statusBar = getBoolean(element, "StatusBar", false);
-		List<ThemeHUD> huds = parseHUDs(element, "HUD");
-		List<ThemePanel> panels = parsePanels(element, "Panel");
-		List<IDataset> datasets = parseDatasets(element, "Dataset", context);
-		List<ILayerDefinition> layers = parseLayers(element, "Layer", context);
+		BasicTheme theme = new BasicTheme(WWXML.getText(element, "ThemeName"));
 
-		BasicTheme theme = new BasicTheme(name);
-		theme.setMenuBar(menuBar);
-		theme.setStatusBar(statusBar);
-		theme.setHUDs(huds);
-		theme.setPanels(panels);
-		theme.setDatasets(datasets);
-		theme.setLayers(layers);
+		theme.setMenuBar(getBoolean(element, "MenuBar", false));
+		theme.setStatusBar(getBoolean(element, "StatusBar", false));
+
+		theme.setHUDs(parseHUDs(element, "HUD"));
+		theme.setPanels(parsePanels(element, "Panel"));
+		theme.setDatasets(parseDatasets(element, "Dataset", context));
+		theme.setLayers(parseLayers(element, "Layer", context));
+
+		theme.setInitialLatitude(WWXML.getDouble(element, "InitialLatitude", null));
+		theme.setInitialLongitude(WWXML.getDouble(element, "InitialLongitude", null));
+		theme.setInitialAltitude(WWXML.getDouble(element, "InitialAltitude", null));
+		theme.setInitialHeading(WWXML.getDouble(element, "InitialHeading", null));
+		theme.setInitialPitch(WWXML.getDouble(element, "InitialPitch", null));
+
 		return theme;
 	}
 
@@ -157,7 +158,7 @@ public class ThemeFactory
 					else
 						iconURL = getURL(icon, urlContext);
 
-					IDataset dataset = new LazyDataset(name, url, description, iconURL);
+					IDataset dataset = new LazyDataset(name, url, description, iconURL, true);
 					datasets.add(dataset);
 				}
 				catch (Exception e)
@@ -186,7 +187,7 @@ public class ThemeFactory
 					boolean enabled = getBoolean(element, "@enabled", true);
 
 					ILayerDefinition layer =
-							new LayerDefinition(name, url, description, icon, enabled);
+							new LayerDefinition(name, url, description, icon, true, enabled);
 					layers.add(layer);
 				}
 				catch (Exception e)

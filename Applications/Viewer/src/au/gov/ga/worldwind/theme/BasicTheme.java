@@ -18,6 +18,12 @@ public class BasicTheme implements Theme
 	private List<ILayerDefinition> layers;
 	private List<ThemeHUD> HUDs;
 	private List<ThemePanel> panels;
+	
+	private Double initialLatitude;
+	private Double initialLongitude;
+	private Double initialAltitude;
+	private Double initialHeading;
+	private Double initialPitch;
 
 	public BasicTheme(String name)
 	{
@@ -37,6 +43,17 @@ public class BasicTheme implements Theme
 		{
 			hud.setup(this);
 		}
+	}
+
+	@Override
+	public void dispose()
+	{
+		if (getHUDs() != null)
+			for (ThemeHUD hud : getHUDs())
+				hud.dispose();
+		if (getPanels() != null)
+			for (ThemePanel panel : getPanels())
+				panel.dispose();
 	}
 
 	/*-- GETTERS AND SETTERS --*/
@@ -121,14 +138,53 @@ public class BasicTheme implements Theme
 		this.panels = panels;
 	}
 
-	@Override
-	public void dispose()
+	public Double getInitialLatitude()
 	{
-		if (getHUDs() != null)
-			for (ThemeHUD hud : getHUDs())
-				hud.dispose();
-		if (getPanels() != null)
-			for (ThemePanel panel : getPanels())
-				panel.dispose();
+		return initialLatitude;
+	}
+
+	public void setInitialLatitude(Double initialLatitude)
+	{
+		this.initialLatitude = initialLatitude;
+	}
+
+	public Double getInitialLongitude()
+	{
+		return initialLongitude;
+	}
+
+	public void setInitialLongitude(Double initialLongitude)
+	{
+		this.initialLongitude = initialLongitude;
+	}
+
+	public Double getInitialAltitude()
+	{
+		return initialAltitude;
+	}
+
+	public void setInitialAltitude(Double initialAltitude)
+	{
+		this.initialAltitude = initialAltitude;
+	}
+
+	public Double getInitialHeading()
+	{
+		return initialHeading;
+	}
+
+	public void setInitialHeading(Double initialHeading)
+	{
+		this.initialHeading = initialHeading;
+	}
+
+	public Double getInitialPitch()
+	{
+		return initialPitch;
+	}
+
+	public void setInitialPitch(Double initialPitch)
+	{
+		this.initialPitch = initialPitch;
 	}
 }

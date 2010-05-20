@@ -11,7 +11,6 @@ import java.util.Collection;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DropMode;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
@@ -20,16 +19,16 @@ import javax.swing.tree.TreePath;
 import au.gov.ga.worldwind.panels.dataset.DatasetPanel;
 import au.gov.ga.worldwind.panels.layers.drag.NodeTransferHandler;
 import au.gov.ga.worldwind.settings.Settings;
+import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.theme.ThemePanel;
 import au.gov.ga.worldwind.util.Icons;
 
-public class LayersPanel extends JPanel implements ThemePanel
+public class LayersPanel extends AbstractThemePanel
 {
 	private static final String LAYERS_FILENAME = "layers.xml";
 	private static final File layersFile = new File(Settings.getUserDirectory(), LAYERS_FILENAME);
 
-	private String displayName = "Layers";
 	private LayerTree tree;
 	private INode root;
 
@@ -40,6 +39,7 @@ public class LayersPanel extends JPanel implements ThemePanel
 	public LayersPanel()
 	{
 		super(new BorderLayout());
+		setDisplayName("Layers");
 
 		try
 		{
@@ -132,12 +132,6 @@ public class LayersPanel extends JPanel implements ThemePanel
 	}
 
 	@Override
-	public JPanel getPanel()
-	{
-		return this;
-	}
-
-	@Override
 	public void setup(Theme theme)
 	{
 		WorldWindow wwd = theme.getWwd();
@@ -182,27 +176,5 @@ public class LayersPanel extends JPanel implements ThemePanel
 			datasetTree.setTransferHandler(handler);
 			datasetTree.setDragEnabled(true);
 		}
-	}
-
-	@Override
-	public boolean isOn()
-	{
-		return isVisible();
-	}
-
-	@Override
-	public void setOn(boolean on)
-	{
-		setVisible(on);
-	}
-
-	public String getDisplayName()
-	{
-		return displayName;
-	}
-
-	public void setDisplayName(String displayName)
-	{
-		this.displayName = displayName;
 	}
 }

@@ -10,7 +10,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
@@ -85,18 +87,42 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 			return;
 
 		TreePath path = tree.getSelectionPath();
-		Object value = path.getLastPathComponent();
-		if (value != null && value instanceof DefaultMutableTreeNode)
+		if (path != null)
 		{
-			Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
-			if (userObject != null && userObject instanceof ILayerDefinition)
+			Object value = path.getLastPathComponent();
+			if (value != null && value instanceof DefaultMutableTreeNode)
 			{
-				ILayerDefinition layer = (ILayerDefinition) userObject;
-				if (layerTreeModel.containsLayer(layer))
-					layerTreeModel.removeLayer(layer);
-				else
-					layerTreeModel.addLayer(layer);
-				tree.repaint();
+				Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
+				if (userObject != null && userObject instanceof ILayerDefinition)
+				{
+					ILayerDefinition layer = (ILayerDefinition) userObject;
+					if (layerTreeModel.containsLayer(layer))
+					{
+						layerTreeModel.removeLayer(layer);
+					}
+					else
+					{
+						//create a list of parents of this layer until one of the parents is a 'root'
+						List<IData> parents = new ArrayList<IData>();
+						Object[] os = path.getPath();
+						for (int i = os.length - 1; i >= 0; i--)
+						{
+							Object o = os[i];
+							if (o == null || !(o instanceof DefaultMutableTreeNode))
+								break;
+							Object uo = ((DefaultMutableTreeNode) o).getUserObject();
+							if (uo == null || !(uo instanceof IData))
+								break;
+							IData data = (IData) uo;
+							if (data != layer)
+								parents.add(data);
+							if (data.isRoot())
+								break;
+						}
+						layerTreeModel.addLayer(layer, parents.toArray(new IData[parents.size()]));
+					}
+					tree.repaint();
+				}
 			}
 		}
 	}

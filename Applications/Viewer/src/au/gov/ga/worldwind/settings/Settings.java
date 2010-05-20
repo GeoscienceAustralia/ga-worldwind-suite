@@ -140,8 +140,6 @@ public class Settings
 		private List<Bookmark> bookmarks = new ArrayList<Bookmark>();
 		private List<Annotation> annotations = new ArrayList<Annotation>();
 		private double viewIteratorSpeed = 1.0;
-		private Rectangle[] dialogBounds = null;
-		private boolean[] dialogsOpen = null;
 		private boolean showDownloads = true;
 		private int annotationsPause = 1000;
 
@@ -434,38 +432,6 @@ public class Settings
 		public void setViewIteratorSpeed(double viewIteratorSpeed)
 		{
 			this.viewIteratorSpeed = viewIteratorSpeed;
-		}
-
-		public Rectangle[] getDialogBounds()
-		{
-			dialogBounds = checkWindowBounds(dialogBounds);
-			return dialogBounds;
-		}
-
-		public void setDialogBounds(Rectangle[] dialogBounds)
-		{
-			this.dialogBounds = checkWindowBounds(dialogBounds);
-		}
-
-		private Rectangle[] checkWindowBounds(Rectangle[] bounds)
-		{
-			if (bounds == null)
-				return bounds;
-			for (int i = 0; i < bounds.length; i++)
-			{
-				bounds[i] = checkWindowBounds(bounds[i]);
-			}
-			return bounds;
-		}
-
-		public boolean[] getDialogsOpen()
-		{
-			return dialogsOpen;
-		}
-
-		public void setDialogsOpen(boolean[] dialogsOpen)
-		{
-			this.dialogsOpen = dialogsOpen;
 		}
 
 		public boolean isShowDownloads()

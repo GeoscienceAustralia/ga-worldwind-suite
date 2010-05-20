@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.theme.hud;
 
+import au.gov.ga.worldwind.theme.AbstractThemeHUD;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 

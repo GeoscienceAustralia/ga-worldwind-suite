@@ -1,13 +1,15 @@
-package au.gov.ga.worldwind.theme.hud;
+package au.gov.ga.worldwind.theme;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.layers.Layer;
-import au.gov.ga.worldwind.theme.Theme;
-import au.gov.ga.worldwind.theme.ThemeHUD;
 
 public abstract class AbstractThemeHUD implements ThemeHUD
 {
 	private Layer layer;
+	private List<ThemePieceListener> listeners = new ArrayList<ThemePieceListener>();
 
 	protected abstract Layer createLayer();
 
@@ -37,7 +39,12 @@ public abstract class AbstractThemeHUD implements ThemeHUD
 	@Override
 	public void setOn(boolean on)
 	{
-		layer.setEnabled(on);
+		if (layer.isEnabled() != on)
+		{
+			layer.setEnabled(on);
+			for (ThemePieceListener listener : listeners)
+				listener.onToggled(on);
+		}
 	}
 
 	@Override
@@ -82,5 +89,17 @@ public abstract class AbstractThemeHUD implements ThemeHUD
 		if (l.equals("center"))
 			return AVKey.CENTER;
 		return position;
+	}
+
+	@Override
+	public void addListener(ThemePieceListener listener)
+	{
+		listeners.add(listener);
+	}
+
+	@Override
+	public void removeListener(ThemePieceListener listener)
+	{
+		listeners.remove(listener);
 	}
 }
