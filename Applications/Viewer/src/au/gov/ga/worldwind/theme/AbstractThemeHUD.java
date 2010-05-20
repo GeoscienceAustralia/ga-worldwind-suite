@@ -1,15 +1,16 @@
 package au.gov.ga.worldwind.theme;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.layers.Layer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractThemeHUD implements ThemeHUD
 {
 	private Layer layer;
 	private List<ThemePieceListener> listeners = new ArrayList<ThemePieceListener>();
+	private List<ThemeHUDListener> hudListeners = new ArrayList<ThemeHUDListener>();
 
 	protected abstract Layer createLayer();
 
@@ -27,7 +28,12 @@ public abstract class AbstractThemeHUD implements ThemeHUD
 	@Override
 	public void setDisplayName(String name)
 	{
-		layer.setName(name);
+		String oldName = layer.getName();
+		if (oldName != name && (name == null || !name.equals(oldName)))
+		{
+			layer.setName(name);
+			raiseDisplayNameChange();
+		}
 	}
 
 	@Override
@@ -39,11 +45,10 @@ public abstract class AbstractThemeHUD implements ThemeHUD
 	@Override
 	public void setOn(boolean on)
 	{
-		if (layer.isEnabled() != on)
+		if (isOn() != on)
 		{
 			layer.setEnabled(on);
-			for (ThemePieceListener listener : listeners)
-				listener.onToggled(on);
+			raiseOnToggled();
 		}
 	}
 
@@ -62,13 +67,21 @@ public abstract class AbstractThemeHUD implements ThemeHUD
 	@Override
 	public final void setPosition(String position)
 	{
-		doSetPosition(convertPosition(position));
+		position = convertPosition(position);
+		String oldPosition = getPosition();
+		if (oldPosition != position && (position == null || !position.equals(oldPosition)))
+		{
+			doSetPosition(position);
+			raisePositionChanged();
+		}
 	}
 
 	public abstract void doSetPosition(String position);
 
 	private static String convertPosition(String position)
 	{
+		if (position == null)
+			return null;
 		String l = position.toLowerCase();
 		if (l.equals("north"))
 			return AVKey.NORTH;
@@ -95,11 +108,33 @@ public abstract class AbstractThemeHUD implements ThemeHUD
 	public void addListener(ThemePieceListener listener)
 	{
 		listeners.add(listener);
+		if (listener instanceof ThemeHUDListener)
+			hudListeners.add((ThemeHUDListener) listener);
 	}
 
 	@Override
 	public void removeListener(ThemePieceListener listener)
 	{
 		listeners.remove(listener);
+		if (listener instanceof ThemeHUDListener)
+			hudListeners.remove((ThemeHUDListener) listener);
+	}
+
+	protected void raiseOnToggled()
+	{
+		for (ThemePieceListener listener : listeners)
+			listener.onToggled(this);
+	}
+
+	protected void raiseDisplayNameChange()
+	{
+		for (ThemePieceListener listener : listeners)
+			listener.displayNameChanged(this);
+	}
+
+	protected void raisePositionChanged()
+	{
+		for (ThemeHUDListener listener : hudListeners)
+			listener.positionChanged(this);
 	}
 }

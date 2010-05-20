@@ -14,6 +14,20 @@ public interface ThemePiece extends Disposable
 
 	public interface ThemePieceListener
 	{
-		public void onToggled(boolean on);
+		public void onToggled(ThemePiece source);
+		public void displayNameChanged(ThemePiece source);
+	}
+
+	public class ThemePieceAdapter implements ThemePieceListener
+	{
+		@Override
+		public void displayNameChanged(ThemePiece source)
+		{
+		}
+		
+		@Override
+		public void onToggled(ThemePiece source)
+		{
+		}
 	}
 }

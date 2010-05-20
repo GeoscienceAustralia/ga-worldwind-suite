@@ -91,6 +91,7 @@ public class ThemeFactory
 				String className = WWXML.getText(element, "@className");
 				String position = WWXML.getText(element, "@position");
 				boolean enabled = getBoolean(element, "@enabled", true);
+				String name = WWXML.getText(element, "@name");
 
 				try
 				{
@@ -99,6 +100,7 @@ public class ThemeFactory
 					ThemeHUD hud = tc.newInstance();
 					hud.setPosition(position);
 					hud.setOn(enabled);
+					hud.setDisplayName(name);
 					huds.add(hud);
 				}
 				catch (Exception e)
@@ -123,7 +125,7 @@ public class ThemeFactory
 				String name = WWXML.getText(element, "@name");
 				Double weightD = WWXML.getDouble(element, "@weight", null);
 				float weight = weightD != null ? weightD.floatValue() : 1f;
-				boolean resizable = getBoolean(element, "@resizable", true);
+				boolean expanded = getBoolean(element, "@expanded", true);
 
 				try
 				{
@@ -132,8 +134,8 @@ public class ThemeFactory
 					ThemePanel panel = tc.newInstance();
 					panel.setDisplayName(name);
 					panel.setOn(enabled);
-					panel.setResizable(resizable);
 					panel.setWeight(weight);
+					panel.setExpanded(expanded);
 					panels.add(panel);
 				}
 				catch (Exception e)

@@ -13,7 +13,17 @@
 
 	<!-- Heads-up-display elements (can also include graticules) -->
 	<HUD name="World Map" className="au.gov.ga.worldwind.theme.hud.WorldMapHUD"
-		position="NorthWest" enabled="true" />
+		position="NorthWest" />
+	<HUD name="Compass" className="au.gov.ga.worldwind.theme.hud.CompassHUD"
+		position="NorthEast" />
+	<HUD name="Scalebar" className="au.gov.ga.worldwind.theme.hud.ScalebarHUD"
+		position="SouthEast" />
+	<HUD name="Navigation Controls" className="au.gov.ga.worldwind.theme.hud.ControlsHUD"
+		position="SouthWest" />
+	<HUD name="Graticule" className="au.gov.ga.worldwind.theme.hud.GraticuleHUD"
+		enabled="false" />
+	<HUD name="Crosshair" className="au.gov.ga.worldwind.theme.hud.CrosshairHUD"
+		enabled="false" />
 
 	<!-- Datasets are shown in the Dataset panel -->
 	<Dataset name="Datasets"
@@ -23,10 +33,10 @@
 	<!-- <Layer name="" url="" icon="" description="" enabled="true" /> -->
 
 	<!-- Sidebar panels -->
-	<Panel name="Layers" className="au.gov.ga.worldwind.panels.layers.LayersPanel"
-		enabled="true" />
-	<Panel name="Datasets" className="au.gov.ga.worldwind.panels.dataset.DatasetPanel"
-		enabled="true" />
+	<Panel name="Search" className="au.gov.ga.worldwind.panels.places.PlaceSearchPanel"
+		expanded="false" />
+	<Panel name="Layers" className="au.gov.ga.worldwind.panels.layers.LayersPanel" />
+	<Panel name="Datasets" className="au.gov.ga.worldwind.panels.dataset.DatasetPanel" />
 	<Panel name="Vertical Exaggeration" className="au.gov.ga.worldwind.panels.other.ExaggerationPanel"
-		enabled="true" resizable="false" />
+		enabled="false" />
 </Theme>

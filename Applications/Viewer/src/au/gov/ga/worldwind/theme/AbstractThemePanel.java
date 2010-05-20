@@ -9,9 +9,11 @@ import javax.swing.JPanel;
 public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 {
 	private List<ThemePieceListener> listeners = new ArrayList<ThemePieceListener>();
+	private List<ThemePanelListener> panelListeners = new ArrayList<ThemePanelListener>();
 	private String displayName;
 	private boolean resizable = true;
 	private float weight = 1f;
+	private boolean expanded = true;
 
 	public AbstractThemePanel()
 	{
@@ -41,8 +43,7 @@ public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 		if (isOn() != on)
 		{
 			setVisible(on);
-			for (ThemePieceListener listener : listeners)
-				listener.onToggled(on);
+			raiseOnToggled();
 		}
 	}
 
@@ -55,7 +56,12 @@ public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 	@Override
 	public void setDisplayName(String displayName)
 	{
-		this.displayName = displayName;
+		if (this.displayName != displayName
+				&& (displayName == null || !displayName.equals(this.displayName)))
+		{
+			this.displayName = displayName;
+			raiseDisplayNameChange();
+		}
 	}
 
 	@Override
@@ -67,7 +73,11 @@ public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 	@Override
 	public void setResizable(boolean resizable)
 	{
-		this.resizable = resizable;
+		if (this.resizable != resizable)
+		{
+			this.resizable = resizable;
+			raiseResizableToggled();
+		}
 	}
 
 	@Override
@@ -79,18 +89,72 @@ public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 	@Override
 	public void setWeight(float weight)
 	{
-		this.weight = weight;
+		if (this.weight != weight)
+		{
+			this.weight = weight;
+			raiseWeightChanged();
+		}
+	}
+
+	@Override
+	public boolean isExpanded()
+	{
+		return expanded;
+	}
+
+	@Override
+	public void setExpanded(boolean expanded)
+	{
+		if (this.expanded != expanded)
+		{
+			this.expanded = expanded;
+			raiseExpandedToggled();
+		}
 	}
 
 	@Override
 	public void addListener(ThemePieceListener listener)
 	{
 		listeners.add(listener);
+		if (listener instanceof ThemePanelListener)
+			panelListeners.add((ThemePanelListener) listener);
 	}
 
 	@Override
 	public void removeListener(ThemePieceListener listener)
 	{
 		listeners.remove(listener);
+		if (listener instanceof ThemePanelListener)
+			panelListeners.remove((ThemePanelListener) listener);
+	}
+
+	protected void raiseOnToggled()
+	{
+		for (ThemePieceListener listener : listeners)
+			listener.onToggled(this);
+	}
+
+	protected void raiseDisplayNameChange()
+	{
+		for (ThemePieceListener listener : listeners)
+			listener.displayNameChanged(this);
+	}
+
+	protected void raiseResizableToggled()
+	{
+		for (ThemePanelListener listener : panelListeners)
+			listener.resizableToggled(this);
+	}
+
+	protected void raiseExpandedToggled()
+	{
+		for (ThemePanelListener listener : panelListeners)
+			listener.expandedToggled(this);
+	}
+
+	protected void raiseWeightChanged()
+	{
+		for (ThemePanelListener listener : panelListeners)
+			listener.weightChanged(this);
 	}
 }

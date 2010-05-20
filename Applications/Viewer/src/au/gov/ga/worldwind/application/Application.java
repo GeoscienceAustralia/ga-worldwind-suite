@@ -83,7 +83,7 @@ import au.gov.ga.worldwind.theme.ThemeOpener;
 import au.gov.ga.worldwind.theme.ThemePanel;
 import au.gov.ga.worldwind.theme.ThemePiece;
 import au.gov.ga.worldwind.theme.ThemeOpener.ThemeOpenDelegate;
-import au.gov.ga.worldwind.theme.ThemePiece.ThemePieceListener;
+import au.gov.ga.worldwind.theme.ThemePiece.ThemePieceAdapter;
 import au.gov.ga.worldwind.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
@@ -974,12 +974,12 @@ public class Application
 				piece.setOn(menuItem.isSelected());
 			}
 		});
-		piece.addListener(new ThemePieceListener()
+		piece.addListener(new ThemePieceAdapter()
 		{
 			@Override
-			public void onToggled(boolean on)
+			public void onToggled(ThemePiece source)
 			{
-				menuItem.setSelected(on);
+				menuItem.setSelected(source.isOn());
 			}
 		});
 		return menuItem;

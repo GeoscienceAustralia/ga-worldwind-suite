@@ -8,6 +8,7 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -15,11 +16,12 @@ import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
@@ -34,18 +36,20 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import au.gov.ga.worldwind.components.FlatJButton;
 import au.gov.ga.worldwind.panels.places.GeoNamesSearch.Results;
 import au.gov.ga.worldwind.panels.places.GeoNamesSearch.SearchType;
+import au.gov.ga.worldwind.theme.AbstractThemePanel;
+import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 
-public class PlaceSearchPanel extends JPanel
+public class PlaceSearchPanel extends AbstractThemePanel
 {
 	private WorldWindow wwd;
 	private static PlaceLayer placeLayer = new PlaceLayer();
@@ -54,24 +58,16 @@ public class PlaceSearchPanel extends JPanel
 	private Object lock = new Object();
 
 	private JTextField searchText;
-	private JTextField nameText;
-	private JTextField latlonText;
-	private JTextField typeText;
 	private JList list;
 	private FlatJButton searchButton;
 	private FlatJButton clearButton;
 
-	public PlaceSearchPanel(final WorldWindow wwd)
+	private JScrollPane listScrollPane;
+
+	public PlaceSearchPanel()
 	{
 		super(new GridBagLayout());
 		GridBagConstraints c;
-
-		this.wwd = wwd;
-		LayerList layers = wwd.getModel().getLayers();
-		if (!layers.contains(placeLayer))
-		{
-			layers.add(placeLayer);
-		}
 
 		searchText = new JTextField();
 		c = new GridBagConstraints();
@@ -129,7 +125,8 @@ public class PlaceSearchPanel extends JPanel
 			public void actionPerformed(ActionEvent e)
 			{
 				placeLayer.setEnabled(showResults.isSelected());
-				wwd.redraw();
+				if (wwd != null)
+					wwd.redraw();
 			}
 		});
 		c = new GridBagConstraints();
@@ -139,81 +136,22 @@ public class PlaceSearchPanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		add(showResults, c);
 
-		listModel = new DefaultListModel();
-		list = new JList(listModel);
-		list.setCellRenderer(new CustomRenderer());
-		JScrollPane scrollPane = new JScrollPane(list);
+		panel = new JPanel(new BorderLayout());
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 3;
 		c.gridwidth = 3;
 		c.weighty = 1;
 		c.fill = GridBagConstraints.BOTH;
-		scrollPane.setBorder(BorderFactory.createLoweredBevelBorder());
-		add(scrollPane, c);
-
-		panel = new JPanel(new GridBagLayout());
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 4;
-		c.gridwidth = 3;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.setBorder(new TitledBorder("Description"));
 		add(panel, c);
 
-		JLabel label = new JLabel("Name:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.EAST;
-		panel.add(label, c);
-
-		nameText = new JTextField("");
-		nameText.setEditable(false);
-		// nameText.setBackground(list.getBackground());
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.weightx = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(0, 4, 0, 0);
-		panel.add(nameText, c);
-
-		label = new JLabel("Lat/Lon:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 1;
-		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(4, 0, 0, 0);
-		panel.add(label, c);
-
-		latlonText = new JTextField("");
-		latlonText.setEditable(false);
-		// latlonText.setBackground(list.getBackground());
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(4, 4, 0, 0);
-		panel.add(latlonText, c);
-
-		label = new JLabel("Type:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 2;
-		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(4, 0, 0, 0);
-		panel.add(label, c);
-
-		typeText = new JTextField("");
-		typeText.setEditable(false);
-		// typeText.setBackground(list.getBackground());
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 2;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(4, 4, 0, 0);
-		panel.add(typeText, c);
+		listModel = new DefaultListModel();
+		list = new JList(listModel);
+		list.setCellRenderer(new CustomRenderer());
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		listScrollPane = new JScrollPane(list);
+		listScrollPane.setBorder(BorderFactory.createLoweredBevelBorder());
+		panel.add(listScrollPane, BorderLayout.CENTER);
 
 		list.addMouseListener(new MouseAdapter()
 		{
@@ -224,6 +162,41 @@ public class PlaceSearchPanel extends JPanel
 				{
 					flyToSelection();
 				}
+			}
+		});
+
+		list.addMouseMotionListener(new MouseMotionAdapter()
+		{
+			private Place lastPlace;
+			
+			@Override
+			public void mouseMoved(MouseEvent e)
+			{
+				String text = null;
+				int index = list.locationToIndex(e.getPoint());
+				if (index >= 0)
+				{
+					Rectangle r = list.getCellBounds(index, index);
+					if (r.contains(e.getPoint()))
+					{
+						Object o = list.getModel().getElementAt(index);
+						if (o instanceof Place)
+						{
+							Place place = (Place) o;
+							text =
+									place.fcodename
+											+ " ("
+											+ String.format("%7.3f\u00B0, %7.3f\u00B0",
+													place.latlon.getLatitude().degrees,
+													place.latlon.getLongitude().degrees) + ")";
+							
+							if(lastPlace != place)
+								setToolTipText(null);
+							lastPlace = place;
+						}
+					}
+				}
+				list.setToolTipText(text);
 			}
 		});
 
@@ -245,6 +218,11 @@ public class PlaceSearchPanel extends JPanel
 					{
 						type = SearchType.EXACT;
 					}
+					
+					listScrollPane.setVisible(true);
+					setResizable(true);
+					validate();
+					
 					search(str, type);
 				}
 			}
@@ -278,18 +256,22 @@ public class PlaceSearchPanel extends JPanel
 				clear();
 			}
 		});
+
+		clear();
 	}
 
 	private void clear()
 	{
+		listScrollPane.setVisible(false);
+		setResizable(false);
 		currentSearch = null;
 		placeLayer.clearText();
 		listModel.clear();
-		nameText.setText("");
-		latlonText.setText("");
-		typeText.setText("");
 		clearButton.setEnabled(false);
-		wwd.redraw();
+		if (wwd != null)
+			wwd.redraw();
+
+		validate();
 	}
 
 	private void searchTextChanged()
@@ -305,38 +287,25 @@ public class PlaceSearchPanel extends JPanel
 		{
 			Place place = (Place) object;
 
-			View view = wwd.getView();
-			if (view instanceof OrbitView)
+			if (wwd != null)
 			{
-				OrbitView orbitView = (OrbitView) view;
-				Position center = orbitView.getCenterPosition();
-				Position newCenter = place.getPosition();
-				long lengthMillis = Util.getScaledLengthMillis(center,
-						newCenter);
+				View view = wwd.getView();
+				if (view instanceof OrbitView)
+				{
+					OrbitView orbitView = (OrbitView) view;
+					Position center = orbitView.getCenterPosition();
+					Position newCenter = place.getPosition();
+					long lengthMillis = Util.getScaledLengthMillis(center, newCenter);
 
-				double zoom = Math.max(100000, Math.min(1000000, orbitView
-						.getZoom()));
+					double zoom = Math.max(100000, Math.min(1000000, orbitView.getZoom()));
 
-				view.addAnimator(FlyToOrbitViewAnimator
-						.createFlyToOrbitViewAnimator(orbitView, center,
-								newCenter, orbitView.getHeading(), Angle.ZERO,
-								orbitView.getPitch(), Angle.ZERO, orbitView
-										.getZoom(), zoom, lengthMillis, true));
-				wwd.redraw();
+					view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView,
+							center, newCenter, orbitView.getHeading(), Angle.ZERO, orbitView
+									.getPitch(), Angle.ZERO, orbitView.getZoom(), zoom,
+							lengthMillis, true));
+					wwd.redraw();
+				}
 			}
-
-			nameText.setText(place.name);
-			latlonText.setText(String.format("%7.3f\u00B0, %7.3f\u00B0",
-					place.latlon.getLatitude().degrees, place.latlon
-							.getLongitude().degrees));
-			typeText.setText(place.fcodename);
-
-			nameText.setSelectionStart(0);
-			nameText.setSelectionEnd(0);
-			latlonText.setSelectionStart(0);
-			latlonText.setSelectionEnd(0);
-			typeText.setSelectionStart(0);
-			typeText.setSelectionEnd(0);
 		}
 	}
 
@@ -390,7 +359,8 @@ public class PlaceSearchPanel extends JPanel
 			}
 		}
 
-		wwd.redraw();
+		if (wwd != null)
+			wwd.redraw();
 	}
 
 	private void search(final String text, final SearchType type)
@@ -412,6 +382,7 @@ public class PlaceSearchPanel extends JPanel
 				}
 			});
 			currentSearch.setDaemon(true);
+			currentSearch.setName("Place search");
 			currentSearch.start();
 		}
 	}
@@ -425,8 +396,8 @@ public class PlaceSearchPanel extends JPanel
 			setBorder(new EmptyBorder(1, 1, 1, 1));
 		}
 
-		public Component getListCellRendererComponent(JList list, Object value,
-				int index, boolean isSelected, boolean cellHasFocus)
+		public Component getListCellRendererComponent(JList list, Object value, int index,
+				boolean isSelected, boolean cellHasFocus)
 		{
 			if (value instanceof Place)
 			{
@@ -438,8 +409,7 @@ public class PlaceSearchPanel extends JPanel
 				}
 				setText(text);
 
-				BufferedImage image = new BufferedImage(16, 16,
-						BufferedImage.TYPE_INT_RGB);
+				BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
 				Graphics g = image.getGraphics();
 				g.setColor(list.getBackground());
 				g.fillRect(0, 0, image.getWidth(), image.getHeight());
@@ -463,5 +433,21 @@ public class PlaceSearchPanel extends JPanel
 				setBackground(list.getBackground());
 			return this;
 		}
+	}
+
+	@Override
+	public void setup(Theme theme)
+	{
+		wwd = theme.getWwd();
+		LayerList layers = wwd.getModel().getLayers();
+		if (!layers.contains(placeLayer))
+		{
+			layers.add(placeLayer);
+		}
+	}
+
+	@Override
+	public void dispose()
+	{
 	}
 }

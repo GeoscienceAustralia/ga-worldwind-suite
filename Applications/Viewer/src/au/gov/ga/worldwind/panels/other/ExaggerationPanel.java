@@ -22,6 +22,8 @@ public class ExaggerationPanel extends AbstractThemePanel
 	public ExaggerationPanel()
 	{
 		super(new GridBagLayout());
+		
+		setResizable(false);
 
 		GridBagConstraints c;
 

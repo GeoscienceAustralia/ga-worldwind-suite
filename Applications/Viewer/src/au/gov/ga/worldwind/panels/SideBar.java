@@ -11,18 +11,19 @@ import au.gov.ga.worldwind.components.collapsiblesplit.CollapsibleSplitPane;
 import au.gov.ga.worldwind.components.collapsiblesplit.l2fprod.CollapsibleGroup;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.theme.ThemePanel;
-import au.gov.ga.worldwind.theme.ThemePiece.ThemePieceListener;
+import au.gov.ga.worldwind.theme.ThemePiece;
+import au.gov.ga.worldwind.theme.ThemePanel.ThemePanelAdapter;
 
-public class SideBar extends JPanel implements ThemePieceListener
+public class SideBar extends JPanel
 {
+	private CollapsibleSplitPane pane;
 	private List<CollapsibleGroup> groups = new ArrayList<CollapsibleGroup>();
-	private List<ThemePanel> panels = new ArrayList<ThemePanel>();
 
 	public SideBar(Theme theme)
 	{
 		super(new BorderLayout());
 
-		final CollapsibleSplitPane pane = new CollapsibleSplitPane();
+		pane = new CollapsibleSplitPane();
 		CollapsibleSplitLayout layout = pane.getLayout();
 		layout.setVertical(true);
 
@@ -34,6 +35,7 @@ public class SideBar extends JPanel implements ThemePieceListener
 
 			CollapsibleGroup group = new CollapsibleGroup();
 			group.setVisible(panel.isOn());
+			group.setCollapsed(!panel.isExpanded());
 			group.setScrollOnExpand(true);
 			group.setLayout(new BorderLayout());
 			group.setTitle(panel.getDisplayName());
@@ -41,30 +43,70 @@ public class SideBar extends JPanel implements ThemePieceListener
 
 			pane.add(group, placeholderName);
 			groups.add(group);
-			panels.add(panel);
 
-			panel.addListener(this);
+			panel.addListener(new Listener(placeholderName, group));
 		}
 
 		add(pane, BorderLayout.CENTER);
 	}
 
-	@Override
-	public void onToggled(boolean on)
-	{
-		refreshVisibility();
-	}
-
 	public void refreshVisibility()
 	{
 		boolean anyVisible = false;
-		for (int i = 0; i < groups.size(); i++)
+		for (CollapsibleGroup group : groups)
 		{
-			boolean visible = panels.get(i).isOn();
-			groups.get(i).setVisible(visible);
-			anyVisible |= visible;
+			if (group.isVisible())
+			{
+				anyVisible = true;
+				break;
+			}
 		}
 		setVisible(anyVisible);
-		repaint();
+		validate();
+	}
+
+	private class Listener extends ThemePanelAdapter
+	{
+		private String placeholderName;
+		private CollapsibleGroup group;
+
+		public Listener(String placeholderName, CollapsibleGroup group)
+		{
+			this.placeholderName = placeholderName;
+			this.group = group;
+		}
+
+		@Override
+		public void onToggled(ThemePiece source)
+		{
+			group.setVisible(source.isOn());
+			refreshVisibility();
+		}
+
+		@Override
+		public void expandedToggled(ThemePanel source)
+		{
+			group.setCollapsed(!source.isExpanded());
+		}
+
+		@Override
+		public void displayNameChanged(ThemePiece source)
+		{
+			group.setTitle(source.getDisplayName());
+		}
+
+		@Override
+		public void resizableToggled(ThemePanel source)
+		{
+			pane.getLayout().setResizable(placeholderName, source.isResizable());
+			pane.validate();
+		}
+
+		@Override
+		public void weightChanged(ThemePanel source)
+		{
+			pane.getLayout().setWeight(placeholderName, source.getWeight());
+			pane.validate();
+		}
 	}
 }
