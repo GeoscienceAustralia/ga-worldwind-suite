@@ -53,15 +53,14 @@ public class GDALTile
 	private boolean indexed;
 	private IndexColorModel indexColorModel;
 
-	public GDALTile(Dataset dataset, int width, int height, Sector sector)
-			throws GDALException, TilerException
+	public GDALTile(Dataset dataset, int width, int height, Sector sector) throws GDALException,
+			TilerException
 	{
 		this(dataset, width, height, sector, false, -1);
 	}
 
-	public GDALTile(Dataset dataset, int width, int height, Sector sector,
-			boolean addAlpha, int selectedBand) throws GDALException,
-			TilerException
+	public GDALTile(Dataset dataset, int width, int height, Sector sector, boolean addAlpha,
+			int selectedBand) throws GDALException, TilerException
 	{
 		if (sector.getMinLatitude() >= sector.getMaxLatitude()
 				|| sector.getMinLongitude() >= sector.getMaxLongitude())
@@ -75,8 +74,8 @@ public class GDALTile
 		readDataset(dataset);
 	}
 
-	protected GDALTile(GDALTile tile, ByteBuffer buffer, int bufferType,
-			int bufferTypeSize, boolean floatingPoint)
+	protected GDALTile(GDALTile tile, ByteBuffer buffer, int bufferType, int bufferTypeSize,
+			boolean floatingPoint)
 	{
 		this.buffer = buffer;
 		this.bufferType = bufferType;
@@ -95,8 +94,7 @@ public class GDALTile
 		this.indexColorModel = tile.indexColorModel;
 	}
 
-	protected void readDataset(Dataset dataset) throws GDALException,
-			TilerException
+	protected void readDataset(Dataset dataset) throws GDALException, TilerException
 	{
 		if (GDALUtil.isProjectionsSupported())
 		{
@@ -104,8 +102,9 @@ public class GDALTile
 			dstSR.ImportFromEPSG(4326); // WGS84
 
 			String projection = dataset.GetProjection();
-			SpatialReference srcSR = (projection == null || projection.length() == 0) ? null
-					: new SpatialReference(projection);
+			SpatialReference srcSR =
+					(projection == null || projection.length() == 0) ? null : new SpatialReference(
+							projection);
 
 			try
 			{
@@ -134,31 +133,29 @@ public class GDALTile
 		}
 	}
 
-	protected void readDatasetNormal(Dataset dataset) throws GDALException,
-			TilerException
+	protected void readDatasetNormal(Dataset dataset) throws GDALException, TilerException
 	{
 		double[] geoTransformArray = new double[6];
 		dataset.GetGeoTransform(geoTransformArray);
 
-		int srcX = (int) ((sector.getMinLongitude() - geoTransformArray[0])
-				/ geoTransformArray[1] + 0.001);
-		int srcY = (int) ((sector.getMaxLatitude() - geoTransformArray[3])
-				/ geoTransformArray[5] + 0.001);
+		int srcX =
+				(int) ((sector.getMinLongitude() - geoTransformArray[0]) / geoTransformArray[1] + 0.001);
+		int srcY =
+				(int) ((sector.getMaxLatitude() - geoTransformArray[3]) / geoTransformArray[5] + 0.001);
 		int srcWidth = (int) (sector.getDeltaLongitude() / geoTransformArray[1] + 0.5);
-		int srcHeight = (int) (-sector.getDeltaLatitude()
-				/ geoTransformArray[5] + 0.5);
+		int srcHeight = (int) (-sector.getDeltaLatitude() / geoTransformArray[5] + 0.5);
 
 		Rectangle srcRect = new Rectangle(srcX, srcY, srcWidth, srcHeight);
 		readRectangle(dataset, srcRect);
 	}
 
-	protected void readDatasetReprojected(Dataset dataset,
-			SpatialReference dstSR) throws GDALException, TilerException
+	protected void readDatasetReprojected(Dataset dataset, SpatialReference dstSR)
+			throws GDALException, TilerException
 	{
 		Driver memDriver = gdal.GetDriverByName("MEM");
 		//create a dataset with 1 band with the same data type as band 1 of the source
-		Dataset dst = memDriver.Create("mem", width, height, 1, dataset
-				.GetRasterBand(1).getDataType());
+		Dataset dst =
+				memDriver.Create("mem", width, height, 1, dataset.GetRasterBand(1).getDataType());
 		//add the other bands with the same data type as the source bands
 		for (int i = 1; i < dataset.getRasterCount(); i++)
 		{
@@ -184,8 +181,7 @@ public class GDALTile
 		dst.SetGeoTransform(geoTransformArray);
 		dst.SetProjection(dstSR.ExportToWkt());
 
-		int returnVal = gdal.ReprojectImage(dataset, dst, null, null,
-				gdalconst.GRA_NearestNeighbour);
+		int returnVal = gdal.ReprojectImage(dataset, dst, null, null, gdalconst.GRA_Bilinear);
 		if (returnVal != gdalconstConstants.CE_None)
 		{
 			throw new GDALException();
@@ -193,8 +189,8 @@ public class GDALTile
 		readRectangle(dst, null);
 	}
 
-	protected void readRectangle(Dataset dataset, Rectangle srcRect)
-			throws GDALException, TilerException
+	protected void readRectangle(Dataset dataset, Rectangle srcRect) throws GDALException,
+			TilerException
 	{
 		// get and check raster band count
 		int dataBandCount = dataset.getRasterCount();
@@ -209,8 +205,8 @@ public class GDALTile
 			throw new IllegalArgumentException("Selected band does not exist");
 		}
 
-		bufferBandCount = selectedBand >= 0 ? 1
-				: (addAlpha && dataBandCount == 3) ? 4 : dataBandCount;
+		bufferBandCount =
+				selectedBand >= 0 ? 1 : (addAlpha && dataBandCount == 3) ? 4 : dataBandCount;
 
 		// get the rasters and the raster data type
 		bufferType = 0;
@@ -235,8 +231,7 @@ public class GDALTile
 				}
 				else if (bands[i].getDataType() != bufferType)
 				{
-					throw new TilerException(
-							"Raster bands are of different types");
+					throw new TilerException("Raster bands are of different types");
 				}
 			}
 		}
@@ -255,28 +250,27 @@ public class GDALTile
 		dataRectangle = new Rectangle(0, 0, width, height);
 		if (srcRect == null)
 		{
-			srcRect = new Rectangle(0, 0, dataset.getRasterXSize(), dataset
-					.getRasterYSize());
+			srcRect = new Rectangle(0, 0, dataset.getRasterXSize(), dataset.getRasterYSize());
 		}
 		else if (srcRect.x < 0 || srcRect.y < 0
 				|| srcRect.x + srcRect.width > dataset.getRasterXSize()
 				|| srcRect.y + srcRect.height > dataset.getRasterYSize())
 		{
-			Rectangle newSrcRect = new Rectangle(0, 0,
-					dataset.getRasterXSize(), dataset.getRasterYSize());
+			Rectangle newSrcRect =
+					new Rectangle(0, 0, dataset.getRasterXSize(), dataset.getRasterYSize());
 			newSrcRect = srcRect.intersection(newSrcRect);
 
 			if (!newSrcRect.isEmpty())
 			{
 				// calculate dst rect for the new src rect
-				int dstX = dataRectangle.width * (newSrcRect.x - srcRect.x)
-						/ srcRect.width;
-				int dstY = dataRectangle.height * (newSrcRect.y - srcRect.y)
-						/ srcRect.height;
-				int dstWidth = dataRectangle.width - dataRectangle.width
-						* (srcRect.width - newSrcRect.width) / srcRect.width;
-				int dstHeight = dataRectangle.height - dataRectangle.height
-						* (srcRect.height - newSrcRect.height) / srcRect.height;
+				int dstX = dataRectangle.width * (newSrcRect.x - srcRect.x) / srcRect.width;
+				int dstY = dataRectangle.height * (newSrcRect.y - srcRect.y) / srcRect.height;
+				int dstWidth =
+						dataRectangle.width - dataRectangle.width
+								* (srcRect.width - newSrcRect.width) / srcRect.width;
+				int dstHeight =
+						dataRectangle.height - dataRectangle.height
+								* (srcRect.height - newSrcRect.height) / srcRect.height;
 				dataRectangle = new Rectangle(dstX, dstY, dstWidth, dstHeight);
 			}
 			else
@@ -287,23 +281,54 @@ public class GDALTile
 		}
 
 		// read image data
-		for (int b = 0; b < bands.length; b++)
+		if (!srcRect.isEmpty())
 		{
-			if (!srcRect.isEmpty())
+			if (srcRect.width < dataRectangle.width && srcRect.height < dataRectangle.height)
 			{
-				// slice buffer at the correct write position
-				buffer.position(b * bandSize + dataRectangle.x
-						+ dataRectangle.y * width);
-				ByteBuffer sliced = buffer.slice();
+				//src rect is smaller: read into buffer, and then interpolate
+				int smallBandSize = srcRect.width * srcRect.height * bufferTypeSize;
+				ByteBuffer small = ByteBuffer.allocateDirect(smallBandSize * bands.length);
+				small.order(ByteOrder.LITTLE_ENDIAN);
 
-				// read band into buffer
-				int returnVal = bands[b].ReadRaster_Direct(srcRect.x,
-						srcRect.y, srcRect.width, srcRect.height,
-						dataRectangle.width, dataRectangle.height, bufferType,
-						sliced, bufferTypeSize, bufferTypeSize * width);
-				if (returnVal != gdalconstConstants.CE_None)
+				for (int b = 0; b < bands.length; b++)
 				{
-					throw new GDALException();
+					small.position(b * smallBandSize);
+					ByteBuffer sliced = small.slice();
+
+					/*int returnVal =
+							bands[b].ReadRaster_Direct(srcRect.x, srcRect.y, srcRect.width,
+									srcRect.height, sliced);*/
+					int returnVal =
+							bands[b].ReadRaster_Direct(srcRect.x, srcRect.y, srcRect.width,
+									srcRect.height, srcRect.width, srcRect.height, bufferType,
+									sliced, bufferTypeSize, bufferTypeSize * srcRect.width);
+					if (returnVal != gdalconstConstants.CE_None)
+					{
+						throw new GDALException();
+					}
+				}
+
+				enlarge(small, srcRect, buffer, dataRectangle, width, height, bufferType,
+						bufferTypeSize, bands.length, floatingPoint);
+			}
+			else
+			{
+				for (int b = 0; b < bands.length; b++)
+				{
+					// slice buffer at the correct write position
+					buffer.position(b * bandSize + (dataRectangle.x + dataRectangle.y * width)
+							* bufferTypeSize);
+					ByteBuffer sliced = buffer.slice();
+
+					// read band into buffer
+					int returnVal =
+							bands[b].ReadRaster_Direct(srcRect.x, srcRect.y, srcRect.width,
+									srcRect.height, dataRectangle.width, dataRectangle.height,
+									bufferType, sliced, bufferTypeSize, bufferTypeSize * width);
+					if (returnVal != gdalconstConstants.CE_None)
+					{
+						throw new GDALException();
+					}
 				}
 			}
 		}
@@ -333,9 +358,72 @@ public class GDALTile
 
 		// set variables for indexed image
 		Band lastBand = bands[bands.length - 1];
-		boolean indexed = lastBand.GetRasterColorInterpretation() == gdalconstConstants.GCI_PaletteIndex;
-		indexColorModel = indexed ? lastBand.GetRasterColorTable()
-				.getIndexColorModel(dataTypeSize) : null;
+		boolean indexed =
+				lastBand.GetRasterColorInterpretation() == gdalconstConstants.GCI_PaletteIndex;
+		indexColorModel =
+				indexed ? lastBand.GetRasterColorTable().getIndexColorModel(dataTypeSize) : null;
+	}
+
+	private void enlarge(ByteBuffer src, Rectangle srcRect, ByteBuffer dst, Rectangle dstRect,
+			int width, int height, int bufferType, int bufferTypeSize, int bands, boolean isFloat)
+	{
+		int srcStride = srcRect.width * bufferTypeSize;
+		int srcBandSize = srcStride * srcRect.height;
+		int dstBandSize = width * height * bufferTypeSize;
+
+		for (int b = 0; b < bands; b++)
+		{
+			src.position(srcBandSize * b);
+			dst.position(b * dstBandSize + (dstRect.x + dstRect.y * width) * bufferTypeSize);
+			ByteBuffer ss = src.slice();
+			ByteBuffer ds = dst.slice();
+			ss.order(src.order());
+			ds.order(dst.order());
+
+			for (int y = 0; y < dstRect.height; y++)
+			{
+				double mixY = srcRect.getHeight() * y / dstRect.getHeight();
+				int srcY = (int) Math.floor(mixY);
+				mixY -= srcY;
+
+				ds.position(y * width * bufferTypeSize);
+
+				for (int x = 0; x < dstRect.width; x++)
+				{
+					double mixX = srcRect.getWidth() * x / dstRect.getWidth();
+					int srcX = (int) Math.floor(mixX);
+					mixX -= srcX;
+
+					int i0 = srcY * srcStride + srcX * bufferTypeSize;
+					int i1 = srcX < srcRect.width - 1 ? i0 + bufferTypeSize : i0;
+					int i2 = srcY < srcRect.height - 1 ? i0 + srcStride : i0;
+					int i3 = srcX < srcRect.width - 1 ? i2 + bufferTypeSize : i2;
+
+					if (isFloat)
+					{
+						double s0 = getDoubleValue(i0, ss, bufferType);
+						double s1 = getDoubleValue(i1, ss, bufferType);
+						double s2 = getDoubleValue(i2, ss, bufferType);
+						double s3 = getDoubleValue(i3, ss, bufferType);
+						double mixed =
+								s0 * (1.0 - mixX) * (1.0 - mixY) + s1 * mixX * (1.0 - mixY) + s2
+										* (1.0 - mixX) * mixY + s3 * mixX * mixY;
+						putDoubleValue(ds, bufferType, mixed);
+					}
+					else
+					{
+						long s0 = getLongValue(i0, ss, bufferType);
+						long s1 = getLongValue(i1, ss, bufferType);
+						long s2 = getLongValue(i2, ss, bufferType);
+						long s3 = getLongValue(i3, ss, bufferType);
+						long mixed =
+								(long) (s0 * (1.0 - mixX) * (1.0 - mixY) + s1 * mixX * (1.0 - mixY)
+										+ s2 * (1.0 - mixX) * mixY + s3 * mixX * mixY);
+						putLongValue(ds, bufferType, mixed);
+					}
+				}
+			}
+		}
 	}
 
 	public static boolean isTypeFloatingPoint(int bufferType)
@@ -349,11 +437,7 @@ public class GDALTile
 	public BufferedImage getAsImage() throws TilerException
 	{
 		int pixels = width * height;
-		int[] offsets = new int[bufferBandCount];
-		for (int b = 0; b < bufferBandCount; b++)
-		{
-			offsets[b] = b * pixels;
-		}
+		int bandCount = bufferBandCount;
 
 		// image data
 		DataBuffer imgBuffer = null;
@@ -362,56 +446,78 @@ public class GDALTile
 		// create image data for buffer type
 		if (bufferType == gdalconstConstants.GDT_Byte)
 		{
-			byte[] bytes = new byte[pixels * bufferBandCount];
+			byte[] bytes = new byte[pixels * bandCount];
 			buffer.get(bytes);
 			imgBuffer = new DataBufferByte(bytes, bytes.length);
 			dataType = DataBuffer.TYPE_BYTE;
-			imageType = indexed ? BufferedImage.TYPE_BYTE_INDEXED
-					: BufferedImage.TYPE_BYTE_GRAY;
+			imageType = indexed ? BufferedImage.TYPE_BYTE_INDEXED : BufferedImage.TYPE_BYTE_GRAY;
 		}
 		else if (bufferType == gdalconstConstants.GDT_Int16
 				|| bufferType == gdalconstConstants.GDT_UInt16
 				|| bufferType == gdalconstConstants.GDT_CInt16)
 		{
-			short[] shorts = new short[pixels * bufferBandCount];
+			short[] shorts = new short[pixels * bandCount];
 			buffer.asShortBuffer().get(shorts);
 			imgBuffer = new DataBufferShort(shorts, shorts.length);
-			dataType = bufferType == gdalconstConstants.GDT_UInt16 ? DataBuffer.TYPE_USHORT
-					: DataBuffer.TYPE_SHORT;
+			dataType =
+					bufferType == gdalconstConstants.GDT_UInt16 ? DataBuffer.TYPE_USHORT
+							: DataBuffer.TYPE_SHORT;
 			imageType = BufferedImage.TYPE_USHORT_GRAY;
 		}
 		else if (bufferType == gdalconstConstants.GDT_Int32
 				|| bufferType == gdalconstConstants.GDT_UInt32
 				|| bufferType == gdalconstConstants.GDT_CInt32)
 		{
-			int[] ints = new int[pixels * bufferBandCount];
+			int[] ints = new int[pixels * bandCount];
 			buffer.asIntBuffer().get(ints);
 			imgBuffer = new DataBufferInt(ints, ints.length);
 			dataType = DataBuffer.TYPE_INT;
 			imageType = BufferedImage.TYPE_CUSTOM;
 		}
+		//TEMP
+		/*else if (bufferType == gdalconstConstants.GDT_Float32 && bandCount == 1)
+		{
+			GDALTile byteTile = this.convertToType(gdalconstConstants.GDT_Byte);
+			bandCount = 4;
+			byte[] bytes = new byte[pixels * bandCount];
+			ByteBuffer buf = byteTile.getBuffer();
+			for (int i = 0; i < bandCount; i++)
+			{
+				buf.rewind();
+				buf.get(bytes, pixels * i, pixels);
+			}
+			imgBuffer = new DataBufferByte(bytes, bytes.length);
+			dataType = DataBuffer.TYPE_BYTE;
+		}*/
+		//TEMP
 		else
 		{
 			throw new TilerException("Unsupported image data type");
 		}
 
+		//create offsets array
+		int[] offsets = new int[bandCount];
+		for (int b = 0; b < bandCount; b++)
+		{
+			offsets[b] = b * pixels;
+		}
+
 		// create sample model and raster
-		SampleModel sampleModel = new ComponentSampleModel(dataType, width,
-				height, 1, width, offsets);
-		WritableRaster raster = Raster.createWritableRaster(sampleModel,
-				imgBuffer, null);
+		SampleModel sampleModel =
+				new ComponentSampleModel(dataType, width, height, 1, width, offsets);
+		WritableRaster raster = Raster.createWritableRaster(sampleModel, imgBuffer, null);
 		BufferedImage img = null;
 
 		// set image type
-		if (bufferBandCount == 4)
+		if (bandCount == 4)
 		{
 			imageType = BufferedImage.TYPE_INT_ARGB_PRE;
 		}
-		else if (bufferBandCount == 3)
+		else if (bandCount == 3)
 		{
 			imageType = BufferedImage.TYPE_INT_RGB;
 		}
-		else if (indexed && bufferBandCount == 1)
+		else if (indexed && bandCount == 1)
 		{
 			// ok
 		}
@@ -421,9 +527,9 @@ public class GDALTile
 		}
 
 		// create and return image
-		img = (indexColorModel == null) ? new BufferedImage(width, height,
-				imageType) : new BufferedImage(width, height, imageType,
-				indexColorModel);
+		img =
+				(indexColorModel == null) ? new BufferedImage(width, height, imageType)
+						: new BufferedImage(width, height, imageType, indexColorModel);
 		img.setData(raster);
 		return img;
 	}
@@ -431,11 +537,9 @@ public class GDALTile
 	public void fillOutside(NullableNumberArray values) throws TilerException
 	{
 		if (values.length() != bufferBandCount)
-			throw new IllegalArgumentException(
-					"Array size does not equal band count");
+			throw new IllegalArgumentException("Array size does not equal band count");
 
-		if (dataRectangle.x == 0 && dataRectangle.y == 0
-				&& dataRectangle.width == width
+		if (dataRectangle.x == 0 && dataRectangle.y == 0 && dataRectangle.width == width
 				&& dataRectangle.height == height)
 			return;
 
@@ -460,39 +564,32 @@ public class GDALTile
 					{
 						int index = getBufferIndex(x, y, b) * bufferTypeSize;
 						if (floatingPoint)
-							putDoubleValue(index, buffer, bufferType, values
-									.getDouble(b));
+							putDoubleValue(index, buffer, bufferType, values.getDouble(b));
 						else
-							putLongValue(index, buffer, bufferType, values
-									.getLong(b));
+							putLongValue(index, buffer, bufferType, values.getLong(b));
 					}
 				}
 			}
 		}
 	}
 
-	public void replaceValues(MinMaxArray[] minMaxs,
-			NullableNumberArray replacement, NullableNumberArray otherwise)
-			throws TilerException
+	public void replaceValues(MinMaxArray[] minMaxs, NullableNumberArray replacement,
+			NullableNumberArray otherwise) throws TilerException
 	{
 		if (minMaxs == null || minMaxs.length == 0)
 			return;
 
 		for (int i = 0; i < minMaxs.length; i++)
 			if (minMaxs[i].length() != bufferBandCount)
-				throw new IllegalArgumentException(
-						"Array size must equal band count");
+				throw new IllegalArgumentException("Array size must equal band count");
 
-		if (replacement.length() != bufferBandCount
-				|| otherwise.length() != bufferBandCount)
-			throw new IllegalArgumentException(
-					"Array size must equal band count");
+		if (replacement.length() != bufferBandCount || otherwise.length() != bufferBandCount)
+			throw new IllegalArgumentException("Array size must equal band count");
 
 		boolean allNull = true;
 		for (int b = 0; b < bufferBandCount; b++)
 		{
-			if (replacement.getDouble(b) != null
-					|| otherwise.getDouble(b) != null)
+			if (replacement.getDouble(b) != null || otherwise.getDouble(b) != null)
 			{
 				allNull = false;
 				break;
@@ -517,8 +614,7 @@ public class GDALTile
 				{
 					int index = getBufferIndex(x, y, b) * bufferTypeSize;
 					if (floatingPoint)
-						doubleValues[b] = getDoubleValue(index, buffer,
-								bufferType);
+						doubleValues[b] = getDoubleValue(index, buffer, bufferType);
 					else
 						longValues[b] = getLongValue(index, buffer, bufferType);
 				}
@@ -544,13 +640,11 @@ public class GDALTile
 						int index = getBufferIndex(x, y, b) * bufferTypeSize;
 						if (floatingPoint)
 						{
-							putDoubleValue(index, buffer, bufferType, values
-									.getDouble(b));
+							putDoubleValue(index, buffer, bufferType, values.getDouble(b));
 						}
 						else
 						{
-							putLongValue(index, buffer, bufferType, values
-									.getLong(b));
+							putLongValue(index, buffer, bufferType, values.getLong(b));
 						}
 					}
 				}
@@ -558,8 +652,7 @@ public class GDALTile
 		}
 	}
 
-	public void updateMinMax(NumberArray minmax,
-			NullableNumberArray outsideValues)
+	public void updateMinMax(NumberArray minmax, NullableNumberArray outsideValues)
 	{
 		if (minmax == null)
 			return;
@@ -577,8 +670,7 @@ public class GDALTile
 					if (floatingPoint)
 					{
 						double value = getDoubleValue(index, buffer, bufferType);
-						if (outsideValues != null
-								&& outsideValues.getDouble(b) != null
+						if (outsideValues != null && outsideValues.getDouble(b) != null
 								&& value == outsideValues.getDouble(b))
 							continue;
 
@@ -590,8 +682,7 @@ public class GDALTile
 					else
 					{
 						Long value = getLongValue(index, buffer, bufferType);
-						if (outsideValues != null
-								&& outsideValues.getLong(b) != null
+						if (outsideValues != null && outsideValues.getLong(b) != null
 								&& value == outsideValues.getLong(b))
 							continue;
 
@@ -663,8 +754,7 @@ public class GDALTile
 		int newBufferTypeSize = gdal.GetDataTypeSize(newBufferType) / 8;
 		boolean newFloatingPoint = isTypeFloatingPoint(newBufferType);
 		int size = buffer.limit() / bufferTypeSize;
-		ByteBuffer newBuffer = ByteBuffer.allocateDirect(size
-				* newBufferTypeSize);
+		ByteBuffer newBuffer = ByteBuffer.allocateDirect(size * newBufferTypeSize);
 		newBuffer.order(buffer.order());
 
 		long lvalue = 0;
@@ -692,8 +782,7 @@ public class GDALTile
 		buffer.rewind();
 		newBuffer.rewind();
 
-		return new GDALTile(this, newBuffer, newBufferType, newBufferTypeSize,
-				newFloatingPoint);
+		return new GDALTile(this, newBuffer, newBufferType, newBufferTypeSize, newFloatingPoint);
 	}
 
 	public static long getLongValue(ByteBuffer buffer, int bufferType)
@@ -714,8 +803,7 @@ public class GDALTile
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private static long getLongValue(int index, ByteBuffer buffer,
-			int bufferType)
+	private static long getLongValue(int index, ByteBuffer buffer, int bufferType)
 	{
 		if (bufferType == gdalconstConstants.GDT_Byte)
 			return buffer.get(index) & 0xff;
@@ -745,8 +833,7 @@ public class GDALTile
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private static double getDoubleValue(int index, ByteBuffer buffer,
-			int bufferType)
+	private static double getDoubleValue(int index, ByteBuffer buffer, int bufferType)
 	{
 		if (bufferType == gdalconstConstants.GDT_Float32
 				|| bufferType == gdalconstConstants.GDT_CFloat32)
@@ -758,8 +845,7 @@ public class GDALTile
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private static void putLongValue(ByteBuffer buffer, int bufferType,
-			long value)
+	private static void putLongValue(ByteBuffer buffer, int bufferType, long value)
 	{
 		if (bufferType == gdalconstConstants.GDT_Byte)
 			buffer.put((byte) value);
@@ -777,8 +863,7 @@ public class GDALTile
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private static void putLongValue(int index, ByteBuffer buffer,
-			int bufferType, long value)
+	private static void putLongValue(int index, ByteBuffer buffer, int bufferType, long value)
 	{
 		if (bufferType == gdalconstConstants.GDT_Byte)
 			buffer.put(index, (byte) value);
@@ -796,8 +881,7 @@ public class GDALTile
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private static void putDoubleValue(ByteBuffer buffer, int bufferType,
-			double value)
+	private static void putDoubleValue(ByteBuffer buffer, int bufferType, double value)
 	{
 		if (bufferType == gdalconstConstants.GDT_Float32
 				|| bufferType == gdalconstConstants.GDT_CFloat32)
@@ -809,8 +893,7 @@ public class GDALTile
 			throw new IllegalStateException("Unknown buffer type");
 	}
 
-	private static void putDoubleValue(int index, ByteBuffer buffer,
-			int bufferType, double value)
+	private static void putDoubleValue(int index, ByteBuffer buffer, int bufferType, double value)
 	{
 		if (bufferType == gdalconstConstants.GDT_Float32
 				|| bufferType == gdalconstConstants.GDT_CFloat32)
