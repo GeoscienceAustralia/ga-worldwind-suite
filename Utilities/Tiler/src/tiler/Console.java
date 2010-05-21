@@ -34,11 +34,11 @@ public class Console
 	private static void printUsage()
 	{
 		String text =
-				"Usage: [{-h,--help}] [{-i,--images}] [{-e,--elevations}] [{-z,--lzts} lzts]\n"
-						+ "       [{-t,--tilesize} size] [{-f,--format} {JPG|PNG}]\n"
+				"Usage: [{-h,--help}] [{-i,--images}] [{-e,--elevations}] [{-p,--reproject}]\n"
+						+ "       [{-z,--lzts} lzts] [{-t,--tilesize} size] [{-f,--format} {JPG|PNG}]\n"
 						+ "       [{-d,--datatype} {BYTE|INT16|INT32|FLOAT32}] [{-a,--addalpha}]\n"
 						+ "       [{-b,--band} band] [{-n,--nooverviews}] [{-l,--levels} levels]\n"
-						+ "       [{-o,--setoutside} \"value[,value...]]\"\n"
+						+ "       [{-m,--bilinear}] [{-o,--setoutside} \"value[,value...]]\"\n"
 						+ "       [{-r,--replacevalues} \"min1[,min1...] max1[,max1...] min2[,min2...]\n"
 						+ "                              max2[,max2...] with[,with...] else[,else...]\"\n"
 						+ "       input_file output_directory\n"
@@ -47,12 +47,16 @@ public class Console
 						+ "  -h         Show this help\n"
 						+ "  -i         Generate image tiles (default)\n"
 						+ "  -e         Generate elevation tiles\n"
+						+ "  -p         Reproject if required (if input dataset is not using WGS84 or\n"
+						+ "             similar)\n"
 						+ "  -z lzts    Level zero tile size in degrees (default: 36.0 for images, 20.0\n"
 						+ "             for elevations)\n"
 						+ "  -t size    Width and height of tiles (default: 512 for images, 150 for\n"
 						+ "             elevations)\n"
 						+ "  -n         Don't generate overviews\n"
 						+ "  -l levels  Number of levels to generate (default: calculated optimal)\n"
+						+ "  -m         Use bilinear magnification if the top level tiles generated have\n"
+						+ "             a higher resolution than the dataset\n"
 						+ "  -o \"...\"   Set values outside extends to (number of values must equal the\n"
 						+ "             number of output bands, blanks permitted)\n"
 						+ "  -r \"...\"   Replace values between (number of values in each group must\n"
@@ -82,24 +86,27 @@ public class Console
 			System.out.println("WARNING: " + e.getLocalizedMessage());
 		}
 
-		//-i -images
-		//-e -elevations
-		//-t -tilesize 512
-		//-z -lzts 36
-		//-f -format JPG|PNG     (images)
-		//-d -datatype BYTE|INT16|INT32|FLOAT32     (elevations)
-		//-a -addalpha      (images)
-		//-b -band 1      (elevations)
-		//-n -nooverviews
-		//-l -levels n
-		//-s -setoutside n,n,n
-		//-r -replacevalues "n,n,n n,n,n n,n,n n,n,n n,n,n n,n,n"
+		//-i --images
+		//-e --elevations
+		//-p --reproject
+		//-t --tilesize 512
+		//-z --lzts 36
+		//-f --format JPG|PNG     (images)
+		//-d --datatype BYTE|INT16|INT32|FLOAT32     (elevations)
+		//-a --addalpha      (images)
+		//-b --band 1      (elevations)
+		//-n --nooverviews
+		//-l --levels n
+		//-m --bilinear
+		//-s --setoutside n,n,n
+		//-r --replacevalues "n,n,n n,n,n n,n,n n,n,n n,n,n n,n,n"
 
 		CmdLineParser parser = new CmdLineParser();
 
 		Option helpO = parser.addBooleanOption('h', "help");
 		Option imagesO = parser.addBooleanOption('i', "images");
 		Option elevationsO = parser.addBooleanOption('e', "elevations");
+		Option reprojectO = parser.addBooleanOption('p', "reproject");
 		Option tilesizeO = parser.addIntegerOption('t', "tilesize");
 		Option lztsO = parser.addDoubleOption('z', "lzts");
 		Option formatO = parser.addStringOption('f', "format");
@@ -108,6 +115,7 @@ public class Console
 		Option bandO = parser.addIntegerOption('b', "band");
 		Option nooverviewsO = parser.addBooleanOption('n', "nooverviews");
 		Option levelsO = parser.addIntegerOption('l', "levels");
+		Option bilinearO = parser.addBooleanOption('m', "bilinear");
 		Option outsideO = new Option('o', "setoutside", true)
 		{
 			@Override
@@ -167,6 +175,8 @@ public class Console
 
 		Boolean images = (Boolean) parser.getOptionValue(imagesO, true);
 		Boolean elevations = (Boolean) parser.getOptionValue(elevationsO, false) && !images;
+		Boolean reproject = (Boolean) parser.getOptionValue(reprojectO, false);
+		Boolean bilinear = (Boolean) parser.getOptionValue(bilinearO, false);
 
 		Integer tilesize = (Integer) parser.getOptionValue(tilesizeO, elevations ? 150 : 512);
 		Double lzts = (Double) parser.getOptionValue(lztsO, elevations ? 20d : 36d);
@@ -251,7 +261,7 @@ public class Console
 							replaces.otherwise, isFloat);
 
 					NumberArray minMax = new NumberArray(2);
-					Tiler.tileElevations(dataset, sector, level, tilesize, lzts, bufferType, band,
+					Tiler.tileElevations(dataset, reproject, bilinear, sector, level, tilesize, lzts, bufferType, band,
 							outside, replaces.replaceMinMaxs, replaces.replace, replaces.otherwise,
 							minMax, output, reporter);
 					if (!nooverviews)
@@ -268,7 +278,7 @@ public class Console
 							outside, replaces.replaceMinMaxs, replaces.replace, replaces.otherwise,
 							isFloat);
 
-					Tiler.tileImages(dataset, sector, level, tilesize, lzts, imageFormat, addAlpha,
+					Tiler.tileImages(dataset, reproject, bilinear, sector, level, tilesize, lzts, imageFormat, addAlpha,
 							outside, replaces.replaceMinMaxs, replaces.replace, replaces.otherwise,
 							output, reporter);
 					if (!nooverviews)
@@ -328,8 +338,8 @@ public class Console
 		String[] groups = arg.split(" ");
 		if (groups.length != 6)
 			throw new IllegalOptionValueException(option, arg);
-		
-		for(int i = 0; i < groups.length; i++)
+
+		for (int i = 0; i < groups.length; i++)
 			groups[i] = groups[i] + " ";
 
 		String[] min1 = groups[0].split(",");

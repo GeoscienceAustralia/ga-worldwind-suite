@@ -160,4 +160,24 @@ public class NullableNumberArray
 		s += ")";
 		return s;
 	}
+
+	public boolean equalsDoubles(double[] d, int offset)
+	{
+		if (d == null || d.length < length() + offset)
+			return false;
+		for (int i = 0; i < length(); i++)
+			if (getDouble(i) != d[i + offset])
+				return false;
+		return true;
+	}
+
+	public boolean equalsLongs(long[] l, int offset)
+	{
+		if (l == null || l.length < length() + offset)
+			return false;
+		for (int i = 0; i < length(); i++)
+			if (getLong(i) != l[i + offset])
+				return false;
+		return true;
+	}
 }

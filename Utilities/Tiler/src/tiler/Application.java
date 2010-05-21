@@ -1,6 +1,7 @@
 package tiler;
 
 import gdal.GDALTile;
+import gdal.GDALTileParameters;
 import gdal.GDALUtil;
 
 import java.awt.BorderLayout;
@@ -145,6 +146,8 @@ public class Application implements UncaughtExceptionHandler
 	private JLabel tileTypeLabel;
 	private JRadioButton imageRadio;
 	private JRadioButton elevationRadio;
+	private JCheckBox reprojectCheck;
+	private JCheckBox bilinearCheck;
 	private JDoubleField lztsField;
 	private JIntegerField tilesizeField;
 	private JCheckBox outsideCheck;
@@ -229,13 +232,15 @@ public class Application implements UncaughtExceptionHandler
 
 		if (!GDALUtil.isProjectionsSupported())
 		{
-			String message = "Before running this program, the GDAL_DATA environment variable should point to the directory containing\n"
-					+ "'"
-					+ GDALUtil.GCS_FILE
-					+ "' (usually GDAL_DIR/data). Without this environment variable, map projections are unsupported.\n\n"
-					+ "Do you wish to continue without projection support?";
-			int value = JOptionPane.showConfirmDialog(null, message, "Warning",
-					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			String message =
+					"Before running this program, the GDAL_DATA environment variable should point to the directory containing\n"
+							+ "'"
+							+ GDALUtil.GCS_FILE
+							+ "' (usually GDAL_DIR/data). Without this environment variable, map projections are unsupported.\n\n"
+							+ "Do you wish to continue without projection support?";
+			int value =
+					JOptionPane.showConfirmDialog(null, message, "Warning",
+							JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 			if (value != JOptionPane.YES_OPTION)
 			{
 				return;
@@ -276,20 +281,16 @@ public class Application implements UncaughtExceptionHandler
 		brPanel.setBorder(BorderFactory.createTitledBorder("Tiler"));
 		JPanel bPanel = new JPanel(new GridBagLayout());
 
-		leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, tlPanel,
-				blPanel);
-		rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, trPanel,
-				brPanel);
-		topSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, leftSplit,
-				rightSplit);
-		logSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, topSplit,
-				bPanel);
+		leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, tlPanel, blPanel);
+		rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, trPanel, brPanel);
+		topSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, leftSplit, rightSplit);
+		logSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, topSplit, bPanel);
 
 		// add scroll pane to options
 		panel = new JPanel(new GridBagLayout());
-		scrollPane = new JScrollPane(panel,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane =
+				new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1;
@@ -301,9 +302,9 @@ public class Application implements UncaughtExceptionHandler
 
 		textLog = new JTextPane();
 		textLog.setEditable(false);
-		scrollPane = new JScrollPane(textLog,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollPane =
+				new JScrollPane(textLog, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
@@ -435,9 +436,9 @@ public class Application implements UncaughtExceptionHandler
 		infoText.setEditable(false);
 		Font font = Font.decode(null);
 		infoText.setFont(font);
-		scrollPane = new JScrollPane(infoText,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollPane =
+				new JScrollPane(infoText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		size = new Dimension(20, 20);
 		scrollPane.setMinimumSize(size);
 		scrollPane.setPreferredSize(size);
@@ -639,9 +640,9 @@ public class Application implements UncaughtExceptionHandler
 
 		previewCanvas = new JLabel();
 		previewCanvas.setHorizontalAlignment(SwingConstants.CENTER);
-		scrollPane = new JScrollPane(previewCanvas,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollPane =
+				new JScrollPane(previewCanvas, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		previewCanvas.setBackground(Color.white);
 		c = new GridBagConstraints();
 		c.weightx = 1;
@@ -652,10 +653,12 @@ public class Application implements UncaughtExceptionHandler
 
 		// TOP RIGHT
 
+		int row = 0;
+
 		tileTypeLabel = new JLabel("Tile type:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(tileTypeLabel, c);
@@ -663,7 +666,7 @@ public class Application implements UncaughtExceptionHandler
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 0;
+		c.gridy = row;
 		c.weightx = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
@@ -697,7 +700,7 @@ public class Application implements UncaughtExceptionHandler
 		label = new JLabel("Tile size:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(label, c);
@@ -706,7 +709,7 @@ public class Application implements UncaughtExceptionHandler
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 1;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(panel, c);
@@ -751,7 +754,7 @@ public class Application implements UncaughtExceptionHandler
 		label = new JLabel("Level zero tile size:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(label, c);
@@ -760,7 +763,7 @@ public class Application implements UncaughtExceptionHandler
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 2;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(panel, c);
@@ -796,7 +799,7 @@ public class Application implements UncaughtExceptionHandler
 		levelsLabel = new JLabel("Level count:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(levelsLabel, c);
@@ -804,7 +807,7 @@ public class Application implements UncaughtExceptionHandler
 		levelsSpinner = new JSpinner(new SpinnerNumberModel(5, 1, 100, 1));
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 3;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(levelsSpinner, c);
@@ -812,7 +815,7 @@ public class Application implements UncaughtExceptionHandler
 		imageFormatLabel = new JLabel("Image format:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(imageFormatLabel, c);
@@ -820,7 +823,7 @@ public class Application implements UncaughtExceptionHandler
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 4;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(panel, c);
@@ -853,7 +856,7 @@ public class Application implements UncaughtExceptionHandler
 		alphaCheck = new JCheckBox("Add alpha channel");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 5;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.WEST;
 		c.gridwidth = 2;
 		c.insets = new Insets(0, 0, SPACING, 0);
@@ -870,7 +873,7 @@ public class Application implements UncaughtExceptionHandler
 		cellTypeLabel = new JLabel("Output cell type:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 6;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(cellTypeLabel, c);
@@ -878,7 +881,7 @@ public class Application implements UncaughtExceptionHandler
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 6;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(panel, c);
@@ -925,7 +928,7 @@ public class Application implements UncaughtExceptionHandler
 		bandLabel = new JLabel("Band:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 7;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(bandLabel, c);
@@ -933,13 +936,12 @@ public class Application implements UncaughtExceptionHandler
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 7;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(panel, c);
 
-		bandCombo = new JComboBox(new Integer[]
-		{ 1 });
+		bandCombo = new JComboBox(new Integer[] { 1 });
 		bandCombo.setSelectedIndex(0);
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -949,16 +951,36 @@ public class Application implements UncaughtExceptionHandler
 		overviewsCheck.setSelected(true);
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 8;
+		c.gridy = ++row;
 		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(overviewsCheck, c);
 
+		reprojectCheck = new JCheckBox("Reproject if required");
+		reprojectCheck.setSelected(false);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = ++row;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(reprojectCheck, c);
+
+		bilinearCheck = new JCheckBox("Use bilinear interpolation if required");
+		bilinearCheck.setSelected(true);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = ++row;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(bilinearCheck, c);
+
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 9;
+		c.gridy = ++row;
 		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.WEST;
 		trPanel.add(panel, c);
@@ -972,8 +994,7 @@ public class Application implements UncaughtExceptionHandler
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (mapnikRadio.isSelected()
-						&& !overrideLevelsCheck.isSelected())
+				if (mapnikRadio.isSelected() && !overrideLevelsCheck.isSelected())
 				{
 					overrideLevelsCheck.setSelected(true);
 				}
@@ -981,8 +1002,7 @@ public class Application implements UncaughtExceptionHandler
 			}
 		});
 
-		overrideLevelsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 100,
-				1));
+		overrideLevelsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.insets = new Insets(0, 0, SPACING, 0);
@@ -991,7 +1011,7 @@ public class Application implements UncaughtExceptionHandler
 		outsideCheck = new JCheckBox("");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 10;
+		c.gridy = ++row;
 		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.WEST;
 		trPanel.add(outsideCheck, c);
@@ -1006,7 +1026,7 @@ public class Application implements UncaughtExceptionHandler
 		outsidePanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 11;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(outsidePanel, c);
@@ -1014,7 +1034,7 @@ public class Application implements UncaughtExceptionHandler
 		replaceCheck = new JCheckBox("Set pixels with values:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 12;
+		c.gridy = ++row;
 		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.WEST;
 		trPanel.add(replaceCheck, c);
@@ -1029,7 +1049,7 @@ public class Application implements UncaughtExceptionHandler
 		replace1Label = new JLabel("between:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 13;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(replace1Label, c);
@@ -1037,7 +1057,7 @@ public class Application implements UncaughtExceptionHandler
 		minPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 13;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(minPanel, c);
@@ -1045,7 +1065,7 @@ public class Application implements UncaughtExceptionHandler
 		replace2Label = new JLabel("and:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 14;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(replace2Label, c);
@@ -1053,7 +1073,7 @@ public class Application implements UncaughtExceptionHandler
 		maxPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 14;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(maxPanel, c);
@@ -1061,7 +1081,7 @@ public class Application implements UncaughtExceptionHandler
 		replace3Label = new JLabel("or between:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 15;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(replace3Label, c);
@@ -1069,7 +1089,7 @@ public class Application implements UncaughtExceptionHandler
 		min2Panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 15;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(min2Panel, c);
@@ -1077,7 +1097,7 @@ public class Application implements UncaughtExceptionHandler
 		replace4Label = new JLabel("and:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 16;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(replace4Label, c);
@@ -1085,7 +1105,7 @@ public class Application implements UncaughtExceptionHandler
 		max2Panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 16;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(max2Panel, c);
@@ -1093,7 +1113,7 @@ public class Application implements UncaughtExceptionHandler
 		replace5Label = new JLabel("set to:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 17;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(replace5Label, c);
@@ -1101,7 +1121,7 @@ public class Application implements UncaughtExceptionHandler
 		withPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 17;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(withPanel, c);
@@ -1109,7 +1129,7 @@ public class Application implements UncaughtExceptionHandler
 		replace6Label = new JLabel("otherwise:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 18;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(0, 0, SPACING, SPACING);
 		trPanel.add(replace6Label, c);
@@ -1117,15 +1137,15 @@ public class Application implements UncaughtExceptionHandler
 		otherwisePanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 18;
+		c.gridy = row;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(otherwisePanel, c);
 
-		panel = new JPanel(new GridBagLayout());
+		panel = new JPanel();
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 19;
+		c.gridy = ++row;
 		c.weighty = 1;
 		trPanel.add(panel, c);
 
@@ -1175,8 +1195,7 @@ public class Application implements UncaughtExceptionHandler
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				JFileChooser chooser = new JFileChooser(preferences.get(
-						OUTPUT_DIR_KEY, null));
+				JFileChooser chooser = new JFileChooser(preferences.get(OUTPUT_DIR_KEY, null));
 				chooser.setAcceptAllFileFilterUsed(false);
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
@@ -1192,9 +1211,9 @@ public class Application implements UncaughtExceptionHandler
 		tileText.setBackground(label.getBackground());
 		tileText.setEditable(false);
 		tileText.setFont(font);
-		scrollPane = new JScrollPane(tileText,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollPane =
+				new JScrollPane(tileText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		size = new Dimension(20, 20);
 		scrollPane.setMinimumSize(size);
 		scrollPane.setPreferredSize(size);
@@ -1274,8 +1293,7 @@ public class Application implements UncaughtExceptionHandler
 		String extension = elevations ? "bil" : getImageFormat();
 		int type = getElevationBufferType();
 		Double nodata = null;
-		if (outsideCheck.isSelected() && outsideFields != null
-				&& outsideFields.length > 0)
+		if (outsideCheck.isSelected() && outsideFields != null && outsideFields.length > 0)
 		{
 			if (isFloat())
 				nodata = ((JDoubleField) outsideFields[0]).getValue();
@@ -1286,9 +1304,8 @@ public class Application implements UncaughtExceptionHandler
 					nodata = l.doubleValue();
 			}
 		}
-		new PreviewSetup(frame, outputDirectory.getText(), extension,
-				elevations, type, tilesizeField.getValue(), nodata, lztsField
-						.getValue());
+		new PreviewSetup(frame, outputDirectory.getText(), extension, elevations, type,
+				tilesizeField.getValue(), nodata, lztsField.getValue());
 	}
 
 	private void loadSplitLocations()
@@ -1330,10 +1347,10 @@ public class Application implements UncaughtExceptionHandler
 		{
 			public void run()
 			{
-				String value = logSplit.getDividerLocation() + ","
-						+ topSplit.getDividerLocation() + ","
-						+ leftSplit.getDividerLocation() + ","
-						+ rightSplit.getDividerLocation();
+				String value =
+						logSplit.getDividerLocation() + "," + topSplit.getDividerLocation() + ","
+								+ leftSplit.getDividerLocation() + ","
+								+ rightSplit.getDividerLocation();
 				preferences.put(preferenceKey, value);
 			}
 		};
@@ -1387,9 +1404,9 @@ public class Application implements UncaughtExceptionHandler
 				Point location = frame.getLocation();
 				int x = location.x;
 				int y = location.y;
-				boolean maximized = (frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH;
-				String value = width + "," + height + "," + x + "," + y + ","
-						+ maximized;
+				boolean maximized =
+						(frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH;
+				String value = width + "," + height + "," + x + "," + y + "," + maximized;
 				preferences.put(preferenceKey, value);
 			}
 		};
@@ -1441,8 +1458,7 @@ public class Application implements UncaughtExceptionHandler
 		Level prefLevel = Level.INFO;
 		try
 		{
-			String prefLevelStr = preferences.get(preferenceKey, prefLevel
-					.getName());
+			String prefLevelStr = preferences.get(preferenceKey, prefLevel.getName());
 			prefLevel = Level.parse(prefLevelStr);
 		}
 		catch (Exception e)
@@ -1451,15 +1467,15 @@ public class Application implements UncaughtExceptionHandler
 		logger.setLevel(prefLevel);
 
 		loggerPopup = new JPopupMenu();
-		Level[] levels = new Level[]
-		{ Level.FINEST, Level.FINER, Level.FINE, Level.INFO, Level.WARNING,
-				Level.SEVERE };
+		Level[] levels =
+				new Level[] { Level.FINEST, Level.FINER, Level.FINE, Level.INFO, Level.WARNING,
+						Level.SEVERE };
 
 		ButtonGroup bg = new ButtonGroup();
 		for (final Level level : levels)
 		{
-			JRadioButtonMenuItem menuItem = new JRadioButtonMenuItem(
-					new AbstractAction(level.getName())
+			JRadioButtonMenuItem menuItem =
+					new JRadioButtonMenuItem(new AbstractAction(level.getName())
 					{
 						public void actionPerformed(ActionEvent e)
 						{
@@ -1581,31 +1597,24 @@ public class Application implements UncaughtExceptionHandler
 					this.dataset = dataset;
 					final int width = dataset.getRasterXSize();
 					final int height = dataset.getRasterYSize();
-					if (sector.getMinLongitude() == 0
-							&& sector.getMinLatitude() == 0
+					if (sector.getMinLongitude() == 0 && sector.getMinLatitude() == 0
 							&& sector.getMaxLongitude() == width
 							&& sector.getMaxLatitude() == height)
 					{
-						throw new TilerException("Dataset " + file
-								+ " is not geo-referenced");
+						throw new TilerException("Dataset " + file + " is not geo-referenced");
 					}
-					if (sector.getMinLatitude() < -180
-							|| sector.getMaxLatitude() > 180
-							|| sector.getMinLongitude() < -360
-							|| sector.getMaxLongitude() > 360
+					if (sector.getMinLatitude() < -180 || sector.getMaxLatitude() > 180
+							|| sector.getMinLongitude() < -360 || sector.getMaxLongitude() > 360
 							|| Math.abs(sector.getDeltaLatitude()) > 180
 							|| Math.abs(sector.getDeltaLongitude()) > 360)
 					{
-						throw new TilerException(
-								"Dataset sector "
-										+ sector
-										+ " is invalid; only lat/lon coordinate systems are supported");
+						throw new TilerException("Dataset sector " + sector
+								+ " is invalid; only lat/lon coordinate systems are supported");
 					}
 					bandCount = dataset.getRasterCount();
 					if (bandCount == 0)
 					{
-						throw new TilerException(
-								"Dataset contains 0 raster bands");
+						throw new TilerException("Dataset contains 0 raster bands");
 					}
 
 					String text = GDALUtil.getInfoText(dataset, sector);
@@ -1619,23 +1628,20 @@ public class Application implements UncaughtExceptionHandler
 							logger.fine("Generating preview...");
 							try
 							{
-								BufferedImage image = new BufferedImage(150,
-										50, BufferedImage.TYPE_INT_ARGB);
+								BufferedImage image =
+										new BufferedImage(150, 50, BufferedImage.TYPE_INT_ARGB);
 								Graphics2D g = null;
 								try
 								{
 									g = image.createGraphics();
 									g.setColor(Color.black);
 									String s = "LOADING...";
-									Font font = new Font("Dialog", Font.BOLD,
-											18);
+									Font font = new Font("Dialog", Font.BOLD, 18);
 									g.setFont(font);
-									int width = g.getFontMetrics().stringWidth(
-											s);
+									int width = g.getFontMetrics().stringWidth(s);
 									int height = g.getFontMetrics().getAscent();
-									g.drawString(s,
-											(image.getWidth() - width) / 2,
-											(image.getHeight() + height) / 2);
+									g.drawString(s, (image.getWidth() - width) / 2, (image
+											.getHeight() + height) / 2);
 								}
 								finally
 								{
@@ -1655,8 +1661,9 @@ public class Application implements UncaughtExceptionHandler
 								{
 									w = h * width / height;
 								}
-								GDALTile tile = new GDALTile(dataset, w, h,
-										sector);
+								GDALTileParameters parameters =
+										new GDALTileParameters(dataset, new Dimension(w, h), sector);
+								GDALTile tile = new GDALTile(parameters);
 								tile = tile.convertToType(gdalconst.GDT_Byte);
 								image = tile.getAsImage();
 								icon = new ImageIcon(image);
@@ -1684,8 +1691,7 @@ public class Application implements UncaughtExceptionHandler
 					if (sect == null)
 					{
 						sect = Sector.FULL_SPHERE;
-						logger
-								.warning("Could not read map sector, setting sector to full globe");
+						logger.warning("Could not read map sector, setting sector to full globe");
 					}
 
 					this.sector = sect;
@@ -1701,12 +1707,10 @@ public class Application implements UncaughtExceptionHandler
 							logger.fine("Generating preview...");
 							try
 							{
-								File dst = File.createTempFile("preview",
-										".png");
+								File dst = File.createTempFile("preview", ".png");
 								dst.deleteOnExit();
-								MapnikUtil.tile(sector, previewCanvas
-										.getWidth(), previewCanvas.getHeight(),
-										mapFile, dst, logger);
+								MapnikUtil.tile(sector, previewCanvas.getWidth(), previewCanvas
+										.getHeight(), mapFile, dst, logger);
 								BufferedImage image = ImageIO.read(dst);
 								ImageIcon icon = new ImageIcon(image);
 								previewCanvas.setIcon(icon);
@@ -1743,19 +1747,19 @@ public class Application implements UncaughtExceptionHandler
 
 	private void datasetModeChanged()
 	{
-		JRadioButton newDatasetSelected = gdalRadio.isSelected() ? gdalRadio
-				: mapnikRadio;
+		JRadioButton newDatasetSelected = gdalRadio.isSelected() ? gdalRadio : mapnikRadio;
 		if (datasetSelected != newDatasetSelected)
 		{
 			int value = JOptionPane.YES_OPTION;
 			if (fileOpen)
 			{
-				value = JOptionPane
-						.showConfirmDialog(
-								frame,
-								"The current file will be closed.\nAre you sure you want to change the mode?",
-								"Mode change", JOptionPane.YES_NO_OPTION,
-								JOptionPane.INFORMATION_MESSAGE);
+				value =
+						JOptionPane
+								.showConfirmDialog(
+										frame,
+										"The current file will be closed.\nAre you sure you want to change the mode?",
+										"Mode change", JOptionPane.YES_NO_OPTION,
+										JOptionPane.INFORMATION_MESSAGE);
 			}
 			if (value == JOptionPane.YES_OPTION)
 			{
@@ -1825,8 +1829,7 @@ public class Application implements UncaughtExceptionHandler
 
 	private void imageFormatChanged()
 	{
-		alphaCheck.setSelected(pngRadio.isSelected() && alphaSet
-				&& bandCount != 4);
+		alphaCheck.setSelected(pngRadio.isSelected() && alphaSet && bandCount != 4);
 		bandCountChanged();
 		enableFields();
 	}
@@ -1841,9 +1844,8 @@ public class Application implements UncaughtExceptionHandler
 	{
 		if (elevationRadio.isSelected() && tilesizeField.getValue() % 2 != 0)
 		{
-			JOptionPane.showMessageDialog(frame,
-					"Tile size must be a multiple of 2", "Invalid tile size",
-					JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(frame, "Tile size must be a multiple of 2",
+					"Invalid tile size", JOptionPane.INFORMATION_MESSAGE);
 			tilesizeField.setValue(tilesizeField.getValue() + 1);
 		}
 	}
@@ -1897,8 +1899,9 @@ public class Application implements UncaughtExceptionHandler
 		{
 			bandCombo.removeItemAt(0);
 		}
-		outputBandCount = bandCount <= 0 ? 1 : elevationRadio.isSelected() ? 1
-				: bandCount == 3 && alphaCheck.isSelected() ? 4 : bandCount;
+		outputBandCount =
+				bandCount <= 0 ? 1 : elevationRadio.isSelected() ? 1 : bandCount == 3
+						&& alphaCheck.isSelected() ? 4 : bandCount;
 		boolean isFloat = isFloat();
 		outsideFields = new JTextField[outputBandCount];
 		minFields = new JTextField[outputBandCount];
@@ -2016,19 +2019,17 @@ public class Application implements UncaughtExceptionHandler
 		{
 			if (fields[i] instanceof JLongField)
 			{
-				Long value = values[i] == null ? null
-						: values[i] instanceof Long ? (Long) values[i]
-								: values[i] instanceof Double ? ((Double) values[i])
-										.longValue()
+				Long value =
+						values[i] == null ? null : values[i] instanceof Long ? (Long) values[i]
+								: values[i] instanceof Double ? ((Double) values[i]).longValue()
 										: null;
 				((JLongField) fields[i]).setValue(value);
 			}
 			else if (fields[i] instanceof JDoubleField)
 			{
-				Double value = values[i] == null ? null
-						: values[i] instanceof Double ? (Double) values[i]
-								: values[i] instanceof Long ? ((Long) values[i])
-										.doubleValue()
+				Double value =
+						values[i] == null ? null : values[i] instanceof Double ? (Double) values[i]
+								: values[i] instanceof Long ? ((Long) values[i]).doubleValue()
 										: null;
 				((JDoubleField) fields[i]).setValue(value);
 			}
@@ -2052,6 +2053,8 @@ public class Application implements UncaughtExceptionHandler
 		lztsField.setEnabled(standard);
 		outsideCheck.setEnabled(standard && !mapnik);
 		overviewsCheck.setEnabled(standard);
+		reprojectCheck.setEnabled(standard && !mapnik);
+		bilinearCheck.setEnabled(standard && !mapnik);
 		overrideLevelsCheck.setEnabled(standard && !mapnik);
 		pngRadio.setEnabled(standard);
 		tilesizeField.setEnabled(standard);
@@ -2071,11 +2074,10 @@ public class Application implements UncaughtExceptionHandler
 		minLongitudeField.setEnabled(standard);
 		maxLongitudeField.setEnabled(standard);
 
-		alphaCheck.setEnabled(pngRadio.isSelected() && standard
-				&& bandCount == 3 && !mapnik && !elevationRadio.isSelected());
+		alphaCheck.setEnabled(pngRadio.isSelected() && standard && bandCount == 3 && !mapnik
+				&& !elevationRadio.isSelected());
 		bandCombo.setEnabled(bandCount > 1 && standard);
-		overrideLevelsSpinner.setEnabled(overrideLevelsCheck.isSelected()
-				&& standard);
+		overrideLevelsSpinner.setEnabled(overrideLevelsCheck.isSelected() && standard);
 
 		for (JTextField field : outsideFields)
 		{
@@ -2088,8 +2090,7 @@ public class Application implements UncaughtExceptionHandler
 		}
 		else
 		{
-			outsideCheck
-					.setText("Use elevation NODATA value (using output cell type):");
+			outsideCheck.setText("Use elevation NODATA value (using output cell type):");
 		}
 
 		replaceCheck.setEnabled(standard && !mapnik);
@@ -2153,8 +2154,8 @@ public class Application implements UncaughtExceptionHandler
 		jpegRadio.setVisible(images);
 		pngRadio.setVisible(images);
 
-		alphaCheck.setVisible(pngRadio.isSelected() && bandCount == 3
-				&& !mapnik && !elevationRadio.isSelected());
+		alphaCheck.setVisible(pngRadio.isSelected() && bandCount == 3 && !mapnik
+				&& !elevationRadio.isSelected());
 
 		boolean elevations = elevationRadio.isSelected() && !mapnik;
 		bandLabel.setVisible(elevations);
@@ -2169,6 +2170,8 @@ public class Application implements UncaughtExceptionHandler
 		levelsSpinner.setVisible(mapnik);
 		overrideLevelsCheck.setVisible(!mapnik);
 		overrideLevelsSpinner.setVisible(!mapnik);
+		reprojectCheck.setVisible(!mapnik);
+		bilinearCheck.setVisible(!mapnik);
 		outsideCheck.setVisible(!mapnik);
 		outsidePanel.setVisible(!mapnik);
 		replaceCheck.setVisible(!mapnik);
@@ -2196,8 +2199,8 @@ public class Application implements UncaughtExceptionHandler
 			Double minlon = minLongitudeField.getValue();
 			Double maxlat = maxLatitudeField.getValue();
 			Double maxlon = maxLongitudeField.getValue();
-			if (minlat == null || minlon == null || maxlat == null
-					|| maxlon == null || minlat >= maxlat || minlon >= maxlon)
+			if (minlat == null || minlon == null || maxlat == null || maxlon == null
+					|| minlat >= maxlat || minlon >= maxlon)
 			{
 				validOptions = false;
 			}
@@ -2222,15 +2225,13 @@ public class Application implements UncaughtExceptionHandler
 			{
 				if (overrideLevelsCheck.isSelected())
 				{
-					levels = (Integer) overrideLevelsSpinner.getModel()
-							.getValue();
+					levels = (Integer) overrideLevelsSpinner.getModel().getValue();
 				}
 				else
 				{
 					if (gdalRadio.isSelected())
 					{
-						levels = GDALUtil.levelCount(dataset, lzts, sector,
-								tilesize);
+						levels = GDALUtil.levelCount(dataset, lzts, sector, tilesize);
 					}
 					else
 					{
@@ -2248,20 +2249,18 @@ public class Application implements UncaughtExceptionHandler
 		else
 		{
 			String outDirText = outputDirectory.getText();
-			File outDir = outDirText.length() == 0 ? null
-					: new File(outDirText);
+			File outDir = outDirText.length() == 0 ? null : new File(outDirText);
 
-			String info = GDALUtil.getTileText(dataset, sector, lzts, levels,
-					overviews);
+			String info = GDALUtil.getTileText(dataset, sector, lzts, levels, overviews);
 			if (outDir == null)
 			{
-				info += System.getProperty("line.separator")
-						+ "Please select an output directory";
+				info += System.getProperty("line.separator") + "Please select an output directory";
 			}
 			else
 			{
-				info += System.getProperty("line.separator")
-						+ "Tiles will be saved to " + outDir.getAbsolutePath();
+				info +=
+						System.getProperty("line.separator") + "Tiles will be saved to "
+								+ outDir.getAbsolutePath();
 			}
 			tileText.setText(info);
 		}
@@ -2273,8 +2272,7 @@ public class Application implements UncaughtExceptionHandler
 	private void setupInputFile()
 	{
 		String preferenceKey = "Last Input Directory";
-		JFileChooser chooser = new JFileChooser(preferences.get(preferenceKey,
-				null));
+		JFileChooser chooser = new JFileChooser(preferences.get(preferenceKey, null));
 		if (gdalRadio.isSelected())
 		{
 			chooser.setFileFilter(new GDALFileFilter());
@@ -2287,8 +2285,7 @@ public class Application implements UncaughtExceptionHandler
 		if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
 			File file = chooser.getSelectedFile();
-			preferences.put(preferenceKey, file.getParentFile()
-					.getAbsolutePath());
+			preferences.put(preferenceKey, file.getParentFile().getAbsolutePath());
 			openDataset(file);
 		}
 	}
@@ -2302,8 +2299,7 @@ public class Application implements UncaughtExceptionHandler
 			@Override
 			public boolean accept(File f)
 			{
-				return f.isDirectory()
-						|| f.getName().equalsIgnoreCase("python.exe");
+				return f.isDirectory() || f.getName().equalsIgnoreCase("python.exe");
 			}
 
 			@Override
@@ -2330,8 +2326,7 @@ public class Application implements UncaughtExceptionHandler
 			@Override
 			public boolean accept(File f)
 			{
-				return f.isDirectory()
-						|| f.getName().toLowerCase().endsWith(".py");
+				return f.isDirectory() || f.getName().toLowerCase().endsWith(".py");
 			}
 
 			@Override
@@ -2363,8 +2358,7 @@ public class Application implements UncaughtExceptionHandler
 
 	private void generateTiles()
 	{
-		final TilerProgressReporter reporter = new TilerProgressReporter(this,
-				logger);
+		final TilerProgressReporter reporter = new TilerProgressReporter(this, logger);
 		this.reporter = reporter;
 		started();
 
@@ -2377,6 +2371,8 @@ public class Application implements UncaughtExceptionHandler
 				double lzts = lztsField.getValue();
 				File outDir = new File(outputDirectory.getText());
 				boolean overviews = overviewsCheck.isSelected();
+				boolean reproject = reprojectCheck.isSelected();
+				boolean bilinear = bilinearCheck.isSelected();
 
 				LogWriter logWriter = null;
 				try
@@ -2387,19 +2383,16 @@ public class Application implements UncaughtExceptionHandler
 					String imageFormat = getImageFormat();
 					if (mapnikRadio.isSelected())
 					{
-						logWriter.startLog(TilingType.Mapnik, mapFile, outDir,
-								sector, level, tilesize, lzts, imageFormat,
-								false, 0, 0, infoText.getText(), tileText
-										.getText(), null, null, null, null,
-								false);
+						logWriter.startLog(TilingType.Mapnik, mapFile, outDir, sector, level,
+								tilesize, lzts, imageFormat, false, 0, 0, infoText.getText(),
+								tileText.getText(), null, null, null, null, false);
 
-						Tiler.tileMapnik(mapFile, sector, level, tilesize,
-								lzts, imageFormat, outDir, reporter);
+						Tiler.tileMapnik(mapFile, sector, level, tilesize, lzts, imageFormat,
+								outDir, reporter);
 						if (overviews && !reporter.isCancelled())
 						{
-							Overviewer.createImageOverviews(outDir,
-									imageFormat, tilesize, tilesize, null,
-									sector, lzts, reporter);
+							Overviewer.createImageOverviews(outDir, imageFormat, tilesize,
+									tilesize, null, sector, lzts, reporter);
 						}
 					}
 					else
@@ -2412,21 +2405,18 @@ public class Application implements UncaughtExceptionHandler
 
 						if (outsideCheck.isSelected())
 						{
-							outsideValues = new NullableNumberArray(
-									outputBandCount);
+							outsideValues = new NullableNumberArray(outputBandCount);
 							for (int b = 0; b < outputBandCount; b++)
 							{
 								if (isFloat)
 								{
-									outsideValues.setDouble(b,
-											((JDoubleField) outsideFields[b])
-													.getValue());
+									outsideValues.setDouble(b, ((JDoubleField) outsideFields[b])
+											.getValue());
 								}
 								else
 								{
-									outsideValues.setLong(b,
-											((JLongField) outsideFields[b])
-													.getValue());
+									outsideValues.setLong(b, ((JLongField) outsideFields[b])
+											.getValue());
 								}
 							}
 						}
@@ -2442,65 +2432,45 @@ public class Application implements UncaughtExceptionHandler
 								if (isFloat)
 								{
 									minMaxReplaces[0].setMinMaxDouble(b,
-											((JDoubleField) minFields[b])
-													.getValue(),
-											((JDoubleField) maxFields[b])
-													.getValue());
+											((JDoubleField) minFields[b]).getValue(),
+											((JDoubleField) maxFields[b]).getValue());
 									minMaxReplaces[1].setMinMaxDouble(b,
-											((JDoubleField) min2Fields[b])
-													.getValue(),
-											((JDoubleField) max2Fields[b])
-													.getValue());
-									replace.setDouble(b,
-											((JDoubleField) replaceFields[b])
-													.getValue());
-									otherwise.setDouble(b,
-											((JDoubleField) otherwiseFields[b])
-													.getValue());
+											((JDoubleField) min2Fields[b]).getValue(),
+											((JDoubleField) max2Fields[b]).getValue());
+									replace.setDouble(b, ((JDoubleField) replaceFields[b])
+											.getValue());
+									otherwise.setDouble(b, ((JDoubleField) otherwiseFields[b])
+											.getValue());
 								}
 								else
 								{
-									minMaxReplaces[0].setMinMaxLong(b,
-											((JLongField) minFields[b])
-													.getValue(),
-											((JLongField) maxFields[b])
-													.getValue());
-									minMaxReplaces[1].setMinMaxLong(b,
-											((JLongField) min2Fields[b])
-													.getValue(),
-											((JLongField) max2Fields[b])
-													.getValue());
-									replace.setLong(b,
-											((JLongField) replaceFields[b])
-													.getValue());
-									otherwise.setLong(b,
-											((JLongField) otherwiseFields[b])
-													.getValue());
+									minMaxReplaces[0].setMinMaxLong(b, ((JLongField) minFields[b])
+											.getValue(), ((JLongField) maxFields[b]).getValue());
+									minMaxReplaces[1].setMinMaxLong(b, ((JLongField) min2Fields[b])
+											.getValue(), ((JLongField) max2Fields[b]).getValue());
+									replace.setLong(b, ((JLongField) replaceFields[b]).getValue());
+									otherwise.setLong(b, ((JLongField) otherwiseFields[b])
+											.getValue());
 								}
 							}
 						}
 
 						if (imageRadio.isSelected())
 						{
-							boolean addAlpha = pngRadio.isSelected()
-									&& alphaCheck.isSelected();
+							boolean addAlpha = pngRadio.isSelected() && alphaCheck.isSelected();
 
-							logWriter.startLog(TilingType.Images, mapFile,
-									outDir, sector, level, tilesize, lzts,
-									imageFormat, addAlpha, 0, 0, infoText
-											.getText(), tileText.getText(),
-									outsideValues, minMaxReplaces, replace,
-									otherwise, isFloat);
+							logWriter.startLog(TilingType.Images, mapFile, outDir, sector, level,
+									tilesize, lzts, imageFormat, addAlpha, 0, 0,
+									infoText.getText(), tileText.getText(), outsideValues,
+									minMaxReplaces, replace, otherwise, isFloat);
 
-							Tiler.tileImages(dataset, sector, level, tilesize,
-									lzts, imageFormat, addAlpha, outsideValues,
-									minMaxReplaces, replace, otherwise, outDir,
-									reporter);
+							Tiler.tileImages(dataset, reproject, bilinear, sector, level, tilesize,
+									lzts, imageFormat, addAlpha, outsideValues, minMaxReplaces,
+									replace, otherwise, outDir, reporter);
 							if (overviews && !reporter.isCancelled())
 							{
-								Overviewer.createImageOverviews(outDir,
-										imageFormat, tilesize, tilesize,
-										outsideValues, sector, lzts, reporter);
+								Overviewer.createImageOverviews(outDir, imageFormat, tilesize,
+										tilesize, outsideValues, sector, lzts, reporter);
 							}
 						}
 						else if (elevationRadio.isSelected())
@@ -2508,12 +2478,10 @@ public class Application implements UncaughtExceptionHandler
 							int bufferType = getElevationBufferType();
 							int band = bandCombo.getSelectedIndex();
 
-							logWriter.startLog(TilingType.Elevations, mapFile,
-									outDir, sector, level, tilesize, lzts,
-									imageFormat, false, band, bufferType,
-									infoText.getText(), tileText.getText(),
-									outsideValues, minMaxReplaces, replace,
-									otherwise, isFloat);
+							logWriter.startLog(TilingType.Elevations, mapFile, outDir, sector,
+									level, tilesize, lzts, imageFormat, false, band, bufferType,
+									infoText.getText(), tileText.getText(), outsideValues,
+									minMaxReplaces, replace, otherwise, isFloat);
 
 							NumberArray minmax = new NumberArray(2);
 							if (isFloat)
@@ -2527,33 +2495,27 @@ public class Application implements UncaughtExceptionHandler
 								minmax.setLong(1, Long.MIN_VALUE);
 							}
 
-							Tiler.tileElevations(dataset, sector, level,
-									tilesize, lzts, bufferType, band,
-									outsideValues, minMaxReplaces, replace,
-									otherwise, minmax, outDir, reporter);
+							Tiler.tileElevations(dataset, reproject, bilinear, sector, level,
+									tilesize, lzts, bufferType, band, outsideValues,
+									minMaxReplaces, replace, otherwise, minmax, outDir, reporter);
 
 							if (overviews && !reporter.isCancelled())
 							{
-								Overviewer.createElevationOverviews(outDir,
-										tilesize, tilesize, bufferType,
-										ByteOrder.LITTLE_ENDIAN, /*TODO remove hardcoded byteorder*/
+								Overviewer.createElevationOverviews(outDir, tilesize, tilesize,
+										bufferType, ByteOrder.LITTLE_ENDIAN, /*TODO remove hardcoded byteorder*/
 										outsideValues, sector, lzts, reporter);
 							}
 
 							if (isFloat)
 							{
 								reporter.getLogger().info(
-										"Elevation bounds: min = "
-												+ minmax.getDouble(0)
-												+ ", max = "
-												+ minmax.getDouble(1));
+										"Elevation bounds: min = " + minmax.getDouble(0)
+												+ ", max = " + minmax.getDouble(1));
 							}
 							else
 							{
 								reporter.getLogger().info(
-										"Elevation bounds: min = "
-												+ minmax.getLong(0)
-												+ ", max = "
+										"Elevation bounds: min = " + minmax.getLong(0) + ", max = "
 												+ minmax.getLong(1));
 							}
 
@@ -2586,10 +2548,9 @@ public class Application implements UncaughtExceptionHandler
 
 	private int getElevationBufferType()
 	{
-		return byteRadio.isSelected() ? gdalconstConstants.GDT_Byte
-				: int16Radio.isSelected() ? gdalconstConstants.GDT_Int16
-						: int32Radio.isSelected() ? gdalconstConstants.GDT_Int32
-								: gdalconstConstants.GDT_Float32;
+		return byteRadio.isSelected() ? gdalconstConstants.GDT_Byte : int16Radio.isSelected()
+				? gdalconstConstants.GDT_Int16 : int32Radio.isSelected()
+						? gdalconstConstants.GDT_Int32 : gdalconstConstants.GDT_Float32;
 	}
 
 	private String getImageFormat()
@@ -2639,8 +2600,7 @@ public class Application implements UncaughtExceptionHandler
 		@Override
 		public boolean accept(File f)
 		{
-			return f.isDirectory()
-					|| f.getName().toLowerCase().endsWith(".xml");
+			return f.isDirectory() || f.getName().toLowerCase().endsWith(".xml");
 		}
 
 		@Override
@@ -2696,7 +2656,7 @@ public class Application implements UncaughtExceptionHandler
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		e.printStackTrace(pw);
-		JOptionPane.showMessageDialog(frame, sw.getBuffer().toString(),
-				"Exception", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(frame, sw.getBuffer().toString(), "Exception",
+				JOptionPane.ERROR_MESSAGE);
 	}
 }
