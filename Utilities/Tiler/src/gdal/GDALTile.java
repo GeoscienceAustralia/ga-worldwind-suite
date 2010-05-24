@@ -32,11 +32,8 @@ import util.TilerException;
 public class GDALTile
 {
 	// TODO test with various datatypes:
-	// So far, only really tested with 3 and 4 band image datasets,
-	// and 16-bit integer DEMs. Need to test replace and datatype
-	// modification with other datatypes.
+	// So far, only really tested with 3 and 4 band image datasets and 1 band DEMs
 
-	// construtor globals
 	private final GDALTileParameters parameters;
 
 	// calculated globals
@@ -82,6 +79,11 @@ public class GDALTile
 		{
 			SpatialReference dstSR = new SpatialReference();
 			dstSR.ImportFromEPSG(4326); // WGS84
+			/*SpatialReference dstSR2 = new SpatialReference();
+			dstSR2.ImportFromEPSG(4283); // GDA94
+			SpatialReference dstSR3 =
+					new SpatialReference(
+							"GEOGCS[\"GEOCENTRIC DATUM of AUSTRALIA\",DATUM[\"GDA94\",SPHEROID[\"GRS80\",6378137,298.257222101]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433]]");*/
 
 			String projection = parameters.dataset.GetProjection();
 			SpatialReference srcSR =
@@ -90,7 +92,7 @@ public class GDALTile
 
 			try
 			{
-				if (srcSR != null && dstSR != null && srcSR.IsSame(dstSR) != 1)
+				if (srcSR != null && srcSR.IsSame(dstSR) != 1)
 				{
 					readDatasetReprojected(dstSR);
 					// throw new TilerException("Projection not supported: " +
