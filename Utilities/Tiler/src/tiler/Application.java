@@ -2384,8 +2384,9 @@ public class Application implements UncaughtExceptionHandler
 					if (mapnikRadio.isSelected())
 					{
 						logWriter.startLog(TilingType.Mapnik, mapFile, outDir, sector, level,
-								tilesize, lzts, imageFormat, false, 0, 0, infoText.getText(),
-								tileText.getText(), null, null, null, null, false);
+								tilesize, lzts, imageFormat, false, 0, 0, false, false, infoText
+										.getText(), tileText.getText(), null, null, null, null,
+								false);
 
 						Tiler.tileMapnik(mapFile, sector, level, tilesize, lzts, imageFormat,
 								outDir, reporter);
@@ -2460,9 +2461,9 @@ public class Application implements UncaughtExceptionHandler
 							boolean addAlpha = pngRadio.isSelected() && alphaCheck.isSelected();
 
 							logWriter.startLog(TilingType.Images, mapFile, outDir, sector, level,
-									tilesize, lzts, imageFormat, addAlpha, 0, 0,
-									infoText.getText(), tileText.getText(), outsideValues,
-									minMaxReplaces, replace, otherwise, isFloat);
+									tilesize, lzts, imageFormat, addAlpha, 0, 0, bilinear,
+									reproject, infoText.getText(), tileText.getText(),
+									outsideValues, minMaxReplaces, replace, otherwise, isFloat);
 
 							Tiler.tileImages(dataset, reproject, bilinear, sector, level, tilesize,
 									lzts, imageFormat, addAlpha, outsideValues, minMaxReplaces,
@@ -2480,8 +2481,8 @@ public class Application implements UncaughtExceptionHandler
 
 							logWriter.startLog(TilingType.Elevations, mapFile, outDir, sector,
 									level, tilesize, lzts, imageFormat, false, band, bufferType,
-									infoText.getText(), tileText.getText(), outsideValues,
-									minMaxReplaces, replace, otherwise, isFloat);
+									bilinear, reproject, infoText.getText(), tileText.getText(),
+									outsideValues, minMaxReplaces, replace, otherwise, isFloat);
 
 							NumberArray minmax = new NumberArray(2);
 							if (isFloat)

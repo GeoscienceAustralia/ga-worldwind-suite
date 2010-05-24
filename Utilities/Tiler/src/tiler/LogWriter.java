@@ -29,13 +29,12 @@ public class LogWriter
 		writer = new BufferedLineWriter(logWriter);
 	}
 
-	public void startLog(TilingType type, File mapFile, File outDir,
-			Sector sector, int level, int tilesize, double lzts,
-			String imageFormat, boolean addAlpha, int band, int bufferType,
-			String infoText, String tileText,
+	public void startLog(TilingType type, File mapFile, File outDir, Sector sector, int level,
+			int tilesize, double lzts, String imageFormat, boolean addAlpha, int band,
+			int bufferType, boolean bilinear, boolean reproject, String infoText, String tileText,
 			NullableNumberArray outsideValues, MinMaxArray[] minMaxReplaces,
-			NullableNumberArray replace, NullableNumberArray otherwise,
-			boolean isFloat) throws IOException
+			NullableNumberArray replace, NullableNumberArray otherwise, boolean isFloat)
+			throws IOException
 	{
 		if (type == TilingType.Mapnik)
 		{
@@ -66,22 +65,18 @@ public class LogWriter
 			writer.writeLine("Level count: " + level);
 			writer.writeLine("Tilesize: " + tilesize);
 			writer.writeLine("Level zero tile size: " + lzts);
-			writer.writeLine("Image format: " + imageFormat);
+			writer.writeLine("Bilinear magnification: " + bilinear);
+			writer.writeLine("Reproject if required: " + reproject);
 			if (outsideValues != null)
 			{
-				writer.writeLine("Set outside values: "
-						+ outsideValues.toString(isFloat));
+				writer.writeLine("Set outside values: " + outsideValues.toString(isFloat));
 			}
 			if (minMaxReplaces != null)
 			{
-				writer.writeLine("Replace min 1: "
-						+ minMaxReplaces[0].toString(isFloat, true));
-				writer.writeLine("Replace max 1: "
-						+ minMaxReplaces[0].toString(isFloat, false));
-				writer.writeLine("Replace min 2: "
-						+ minMaxReplaces[1].toString(isFloat, true));
-				writer.writeLine("Replace max 2: "
-						+ minMaxReplaces[1].toString(isFloat, false));
+				writer.writeLine("Replace min 1: " + minMaxReplaces[0].toString(isFloat, true));
+				writer.writeLine("Replace max 1: " + minMaxReplaces[0].toString(isFloat, false));
+				writer.writeLine("Replace min 2: " + minMaxReplaces[1].toString(isFloat, true));
+				writer.writeLine("Replace max 2: " + minMaxReplaces[1].toString(isFloat, false));
 
 				writer.writeLine("Replace with: " + replace.toString(isFloat));
 				writer.writeLine("Otherwise: " + otherwise.toString(isFloat));
@@ -89,20 +84,19 @@ public class LogWriter
 
 			if (type == TilingType.Images)
 			{
+				writer.writeLine("Image format: " + imageFormat);
 				writer.writeLine("Add alpha: " + addAlpha);
 			}
 			else if (type == TilingType.Elevations)
 			{
 				writer.writeLine("Band: " + band);
-				writer.writeLine("Buffer type: "
-						+ gdal.GetDataTypeName(bufferType));
+				writer.writeLine("Buffer type: " + gdal.GetDataTypeName(bufferType));
 			}
 		}
 		writer.flush();
 	}
 
-	public void logMinMax(NumberArray minmax, boolean isFloat)
-			throws IOException
+	public void logMinMax(NumberArray minmax, boolean isFloat) throws IOException
 	{
 		writer.newLine();
 		writer.writeLine("Min/Max: ");

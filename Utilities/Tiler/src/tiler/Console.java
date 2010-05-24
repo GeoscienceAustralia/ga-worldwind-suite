@@ -256,14 +256,14 @@ public class Console
 				if (elevations)
 				{
 					logWriter.startLog(TilingType.Elevations, input, output, sector, level,
-							tilesize, lzts, imageFormat, addAlpha, band, bufferType, infoText,
-							tileText, outside, replaces.replaceMinMaxs, replaces.replace,
-							replaces.otherwise, isFloat);
+							tilesize, lzts, imageFormat, addAlpha, band, bufferType, bilinear,
+							reproject, infoText, tileText, outside, replaces.replaceMinMaxs,
+							replaces.replace, replaces.otherwise, isFloat);
 
 					NumberArray minMax = new NumberArray(2);
-					Tiler.tileElevations(dataset, reproject, bilinear, sector, level, tilesize, lzts, bufferType, band,
-							outside, replaces.replaceMinMaxs, replaces.replace, replaces.otherwise,
-							minMax, output, reporter);
+					Tiler.tileElevations(dataset, reproject, bilinear, sector, level, tilesize,
+							lzts, bufferType, band, outside, replaces.replaceMinMaxs,
+							replaces.replace, replaces.otherwise, minMax, output, reporter);
 					if (!nooverviews)
 					{
 						Overviewer.createElevationOverviews(output, tilesize, tilesize, bufferType,
@@ -274,13 +274,13 @@ public class Console
 				else
 				{
 					logWriter.startLog(TilingType.Images, input, output, sector, level, tilesize,
-							lzts, imageFormat, addAlpha, band, bufferType, infoText, tileText,
-							outside, replaces.replaceMinMaxs, replaces.replace, replaces.otherwise,
-							isFloat);
+							lzts, imageFormat, addAlpha, band, bufferType, bilinear, reproject,
+							infoText, tileText, outside, replaces.replaceMinMaxs, replaces.replace,
+							replaces.otherwise, isFloat);
 
-					Tiler.tileImages(dataset, reproject, bilinear, sector, level, tilesize, lzts, imageFormat, addAlpha,
-							outside, replaces.replaceMinMaxs, replaces.replace, replaces.otherwise,
-							output, reporter);
+					Tiler.tileImages(dataset, reproject, bilinear, sector, level, tilesize, lzts,
+							imageFormat, addAlpha, outside, replaces.replaceMinMaxs,
+							replaces.replace, replaces.otherwise, output, reporter);
 					if (!nooverviews)
 					{
 						Overviewer.createImageOverviews(output, imageFormat, tilesize, tilesize,
