@@ -33,7 +33,7 @@ public class Test extends JPanel
 		Settings.get().setProxyHost("proxy.agso.gov.au");
 		Settings.get().setProxyPort(8080);
 		Settings.get().setProxyType(ProxyType.HTTP);
-		Settings.save();
+		Settings.get().save();
 
 		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
 

@@ -6,6 +6,7 @@ import gov.nasa.worldwind.geom.coords.MGRSCoord;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
 
+import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,19 +17,27 @@ public class Util
 	public final static double METER_TO_FEET = 3.280839895;
 	public final static double METER_TO_MILE = 0.000621371192;
 
-	public static long getScaledLengthMillis(LatLon beginLatLon,
-			LatLon endLatLon)
+	public static File getUserDirectory()
 	{
-		double scale = Settings.get().getViewIteratorSpeed();
-		return getScaledLengthMillis(beginLatLon, endLatLon,
-				(long) (4000 / scale), (long) (20000 / scale));
+		String home = System.getProperty("user.home");
+		File homeDir = new File(home);
+		File dir = new File(homeDir, ".gaww");
+		if (!dir.exists())
+			dir.mkdirs();
+		return dir;
 	}
 
-	public static long getScaledLengthMillis(LatLon beginLatLon,
-			LatLon endLatLon, long minLengthMillis, long maxLengthMillis)
+	public static long getScaledLengthMillis(LatLon beginLatLon, LatLon endLatLon)
 	{
-		Angle sphericalDistance = LatLon.greatCircleDistance(beginLatLon,
-				endLatLon);
+		double scale = Settings.get().getViewIteratorSpeed();
+		return getScaledLengthMillis(beginLatLon, endLatLon, (long) (4000 / scale),
+				(long) (20000 / scale));
+	}
+
+	public static long getScaledLengthMillis(LatLon beginLatLon, LatLon endLatLon,
+			long minLengthMillis, long maxLengthMillis)
+	{
+		Angle sphericalDistance = LatLon.greatCircleDistance(beginLatLon, endLatLon);
 		double scaleFactor = angularRatio(sphericalDistance, Angle.POS180);
 		return (long) mixDouble(scaleFactor, minLengthMillis, maxLengthMillis);
 	}
@@ -36,8 +45,7 @@ public class Util
 	public static long getScaledLengthMillis(double beginZoom, double endZoom,
 			long minLengthMillis, long maxLengthMillis)
 	{
-		double scaleFactor = Math.abs(endZoom - beginZoom)
-				/ Math.max(endZoom, beginZoom);
+		double scaleFactor = Math.abs(endZoom - beginZoom) / Math.max(endZoom, beginZoom);
 		scaleFactor = clampDouble(scaleFactor, 0.0, 1.0);
 		return (long) mixDouble(scaleFactor, minLengthMillis, maxLengthMillis);
 	}
@@ -111,8 +119,7 @@ public class Util
 					MGRSCoord MGRS = MGRSCoord.fromString(coordString, globe);
 					// NOTE: the MGRSCoord does not always report errors with invalide strings,
 					// but will have lat and lon set to zero
-					if (MGRS.getLatitude().degrees != 0
-							|| MGRS.getLatitude().degrees != 0)
+					if (MGRS.getLatitude().degrees != 0 || MGRS.getLatitude().degrees != 0)
 					{
 						lat = MGRS.getLatitude();
 						lon = MGRS.getLongitude();
@@ -169,9 +176,11 @@ public class Util
 		// eg: 123° 34' 42"S 45° 12' 30"W
 		if (lat == null || lon == null)
 		{
-			regex = "([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}['|\u2019|\\s])?(\\s*\\d{1,2}[\"|\u201d])?\\s*[N|n|S|s]?)";
+			regex =
+					"([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}['|\u2019|\\s])?(\\s*\\d{1,2}[\"|\u201d])?\\s*[N|n|S|s]?)";
 			regex += separators;
-			regex += "([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}['|\u2019|\\s])?(\\s*\\d{1,2}[\"|\u201d])?\\s*[E|e|W|w]?)";
+			regex +=
+					"([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}['|\u2019|\\s])?(\\s*\\d{1,2}[\"|\u201d])?\\s*[E|e|W|w]?)";
 			pattern = Pattern.compile(regex);
 			matcher = pattern.matcher(coordString);
 			if (matcher.matches())
@@ -184,8 +193,7 @@ public class Util
 		if (lat == null || lon == null)
 			return null;
 
-		if (lat.degrees >= -90 && lat.degrees <= 90 && lon.degrees >= -180
-				&& lon.degrees <= 180)
+		if (lat.degrees >= -90 && lat.degrees <= 90 && lon.degrees >= -180 && lon.degrees <= 180)
 			return new LatLon(lat, lon);
 
 		return null;
@@ -201,8 +209,7 @@ public class Util
 	private static Angle parseDMSString(String dmsString)
 	{
 		// Replace degree, min and sec signs with space
-		dmsString = dmsString
-				.replaceAll("[D|d|\u00B0|'|\u2019|\"|\u201d]", " ");
+		dmsString = dmsString.replaceAll("[D|d|\u00B0|'|\u2019|\"|\u201d]", " ");
 		// Replace multiple spaces with single ones
 		dmsString = dmsString.replaceAll("\\s+", " ");
 		dmsString = dmsString.trim();
@@ -230,12 +237,11 @@ public class Util
 		double s = DMS.length > 2 ? Integer.parseInt(DMS[2]) : 0;
 
 		if (m >= 0 && m <= 60 && s >= 0 && s <= 60)
-			return Angle
-					.fromDegrees(d * sign + m / 60 * sign + s / 3600 * sign);
+			return Angle.fromDegrees(d * sign + m / 60 * sign + s / 3600 * sign);
 
 		return null;
 	}
-	
+
 	public static String paddedInt(int value, int charcount)
 	{
 		String str = String.valueOf(value);
@@ -244,5 +250,14 @@ public class Util
 			str = "0" + str;
 		}
 		return str;
+	}
+
+	public static String capitalizeFirstLetter(String s)
+	{
+		if (s == null)
+			return null;
+		if (s.isEmpty())
+			return s;
+		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
 }

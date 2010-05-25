@@ -68,26 +68,29 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 		//add any parents of this layer that don't already exist in the tree
 		INode currentParent = getRoot();
-		for (int i = parents.length - 1; i >= 0; i--)
+		if (parents != null)
 		{
-			IData data = parents[i];
-			INode node = null;
-			for (int j = 0; j < currentParent.getChildCount(); j++)
+			for (int i = parents.length - 1; i >= 0; i--)
 			{
-				INode child = currentParent.getChild(j);
-				if (data.getName().equalsIgnoreCase(child.getName()))
+				IData data = parents[i];
+				INode node = null;
+				for (int j = 0; j < currentParent.getChildCount(); j++)
 				{
-					node = child;
-					break;
+					INode child = currentParent.getChild(j);
+					if (data.getName().equalsIgnoreCase(child.getName()))
+					{
+						node = child;
+						break;
+					}
 				}
+				if (node == null)
+				{
+					node = new FolderNode(data.getName(), data.getIconURL(), true);
+					insertNodeInto(node, currentParent, currentParent.getChildCount(), false);
+				}
+				expandPath.add(currentParent);
+				currentParent = node;
 			}
-			if (node == null)
-			{
-				node = new FolderNode(data.getName(), data.getIconURL(), true);
-				insertNodeInto(node, currentParent, currentParent.getChildCount(), false);
-			}
-			expandPath.add(currentParent);
-			currentParent = node;
 		}
 		expandPath.add(currentParent);
 		expandPath.add(layerNode);
@@ -114,7 +117,8 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				INode remove = layerNode;
 
 				//go up the list of parents if the parents have this layer as their only child
-				while (remove.getParent() != null && remove.getParent().getChildCount() == 1)
+				while (remove.getParent() != null && remove.getParent() != root
+						&& remove.getParent().getChildCount() == 1)
 					remove = remove.getParent();
 
 				//the following will call removedLayer() which will remove the node from the set

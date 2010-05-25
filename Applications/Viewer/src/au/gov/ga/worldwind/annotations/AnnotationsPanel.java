@@ -10,11 +10,9 @@ import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -32,33 +30,40 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 
-import au.gov.ga.worldwind.components.FlatJButton;
 import au.gov.ga.worldwind.settings.Settings;
+import au.gov.ga.worldwind.theme.AbstractThemePanel;
+import au.gov.ga.worldwind.theme.Theme;
+import au.gov.ga.worldwind.util.BasicAction;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 
-public class AnnotationsPanel extends JPanel
+public class AnnotationsPanel extends AbstractThemePanel
 {
 	private WorldWindow wwd;
 	private JList list;
 	private DefaultListModel model;
 	private ListItem dragging;
 	private AnnotationsLayer layer;
-	private Frame frame;
+	private Window window;
 	private boolean playing = false;
-	private FlatJButton addButton, editButton, deleteButton, playButton;
+	private BasicAction addAction, editAction, deleteAction, playAction, importAction,
+			exportAction;
+	private JFileChooser exportImportChooser;
 
 	private class ListItem
 	{
@@ -72,33 +77,18 @@ public class AnnotationsPanel extends JPanel
 		}
 	}
 
-	public AnnotationsPanel(WorldWindow wwd, Frame frame)
+	public AnnotationsPanel()
 	{
-		this.wwd = wwd;
-		this.frame = frame;
+		super(new BorderLayout());
+
 		createPanel();
 		populateList();
-		layer = new AnnotationsLayer(wwd, this);
-		wwd.getModel().getLayers().add(layer);
 	}
 
 	private void createPanel()
 	{
-		setLayout(new BorderLayout());
-
-		GridBagConstraints c;
-		JPanel panel = new JPanel(new GridBagLayout());
-		add(panel, BorderLayout.NORTH);
-
-		addButton = new FlatJButton(Icons.add.getIcon());
-		addButton.setToolTipText("Add annotation");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.weightx = 1d / 4d;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(addButton, c);
-		addButton.addActionListener(new ActionListener()
+		addAction = new BasicAction("Add", "Add annotation", Icons.add.getIcon());
+		addAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -106,48 +96,26 @@ public class AnnotationsPanel extends JPanel
 			}
 		});
 
-		editButton = new FlatJButton(Icons.edit.getIcon());
-		editButton.setToolTipText("Edit selected");
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.weightx = 1d / 4d;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(editButton, c);
-		ActionListener editAL = new ActionListener()
+		editAction = new BasicAction("Edit", "Edit selected", Icons.edit.getIcon());
+		editAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				editSelected();
 			}
-		};
-		editButton.addActionListener(editAL);
+		});
 
-		deleteButton = new FlatJButton(Icons.delete.getIcon());
-		deleteButton.setToolTipText("Delete selected");
-		c = new GridBagConstraints();
-		c.gridx = 2;
-		c.gridy = 0;
-		c.weightx = 1d / 4d;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(deleteButton, c);
-		ActionListener deleteAL = new ActionListener()
+		deleteAction = new BasicAction("Delete", "Delete selected", Icons.delete.getIcon());
+		deleteAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				deleteSelected();
 			}
-		};
-		deleteButton.addActionListener(deleteAL);
+		});
 
-		playButton = new FlatJButton(Icons.run.getIcon());
-		c = new GridBagConstraints();
-		c.gridx = 3;
-		c.gridy = 0;
-		c.weightx = 1 / 4d;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		panel.add(playButton, c);
-		playButton.addActionListener(new ActionListener()
+		playAction = new BasicAction("Play", "Fly through all annotations", Icons.run.getIcon());
+		playAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -157,6 +125,40 @@ public class AnnotationsPanel extends JPanel
 					playAnnotations();
 			}
 		});
+
+		importAction = new BasicAction("Import", "Import annotations", Icons.imporrt.getIcon());
+		importAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				importAnnotations();
+			}
+		});
+
+		exportAction = new BasicAction("Export", "Export annotations", Icons.export.getIcon());
+		exportAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				exportAnnotations();
+			}
+		});
+
+
+
+		JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
+		toolBar.setFloatable(false);
+		toolBar.add(addAction);
+		toolBar.add(editAction);
+		toolBar.add(deleteAction);
+		toolBar.addSeparator();
+		toolBar.add(importAction);
+		toolBar.add(exportAction);
+		toolBar.addSeparator();
+		toolBar.add(playAction);
+		add(toolBar, BorderLayout.PAGE_START);
 
 		model = new DefaultListModel();
 		list = new JList(model);
@@ -170,7 +172,7 @@ public class AnnotationsPanel extends JPanel
 		{
 			public void valueChanged(ListSelectionEvent e)
 			{
-				enableButtons();
+				enableActions();
 				ListItem item = (ListItem) list.getSelectedValue();
 				if (item != null)
 					annotationSelected(item.annotation);
@@ -180,12 +182,8 @@ public class AnnotationsPanel extends JPanel
 		lsl.valueChanged(null);
 
 		final JPopupMenu popupMenu = new JPopupMenu();
-		JMenuItem editMenu = new JMenuItem("Edit");
-		popupMenu.add(editMenu);
-		editMenu.addActionListener(editAL);
-		JMenuItem deleteMenu = new JMenuItem("Delete");
-		popupMenu.add(deleteMenu);
-		deleteMenu.addActionListener(deleteAL);
+		popupMenu.add(editAction);
+		popupMenu.add(deleteAction);
 
 		list.addMouseListener(new MouseAdapter()
 		{
@@ -200,8 +198,8 @@ public class AnnotationsPanel extends JPanel
 					{
 						if (e.getButton() == MouseEvent.BUTTON1)
 						{
-							Rectangle checkRect = new Rectangle(rect.x, rect.y,
-									rect.height, rect.height);
+							Rectangle checkRect =
+									new Rectangle(rect.x, rect.y, rect.height, rect.height);
 							ListItem listItem = (ListItem) model.get(index);
 							if (checkRect.contains(e.getPoint()))
 							{
@@ -270,11 +268,11 @@ public class AnnotationsPanel extends JPanel
 		stopAnnotations();
 	}
 
-	private void enableButtons()
+	private void enableActions()
 	{
-		addButton.setEnabled(!playing);
-		editButton.setEnabled(list.getSelectedIndex() >= 0 && !playing);
-		deleteButton.setEnabled(list.getSelectedIndex() >= 0 && !playing);
+		addAction.setEnabled(!playing);
+		editAction.setEnabled(list.getSelectedIndex() >= 0 && !playing);
+		deleteAction.setEnabled(list.getSelectedIndex() >= 0 && !playing);
 	}
 
 	private void annotationSelected(Annotation annotation)
@@ -349,15 +347,15 @@ public class AnnotationsPanel extends JPanel
 			OrbitView orbitView = (OrbitView) view;
 			Position pos = orbitView.getCenterPosition();
 			double minZoom = orbitView.getZoom() * 5;
-			Annotation annotation = new Annotation("",
-					pos.getLatitude().degrees, pos.getLongitude().degrees,
-					minZoom);
+			Annotation annotation =
+					new Annotation("", pos.getLatitude().degrees, pos.getLongitude().degrees,
+							minZoom);
 			annotation.setZoom(orbitView.getZoom());
 			annotation.setHeading(orbitView.getHeading().degrees);
 			annotation.setPitch(orbitView.getPitch().degrees);
 			annotation.setSaveCamera(false);
-			AnnotationEditor editor = new AnnotationEditor(wwd, frame,
-					"New annotation", annotation);
+			AnnotationEditor editor =
+					new AnnotationEditor(wwd, window, "New annotation", annotation);
 			int value = editor.getOkCancel();
 			if (value == JOptionPane.OK_OPTION)
 			{
@@ -391,8 +389,7 @@ public class AnnotationsPanel extends JPanel
 		if (item != null)
 		{
 			Annotation editing = new Annotation(item.annotation);
-			AnnotationEditor editor = new AnnotationEditor(wwd, frame,
-					"Edit annotation", editing);
+			AnnotationEditor editor = new AnnotationEditor(wwd, window, "Edit annotation", editing);
 			int value = editor.getOkCancel();
 			if (value == JOptionPane.OK_OPTION)
 			{
@@ -409,11 +406,11 @@ public class AnnotationsPanel extends JPanel
 		ListItem item = (ListItem) list.getSelectedValue();
 		if (item != null)
 		{
-			int value = JOptionPane.showConfirmDialog(this,
-					"Are you sure you want to delete the annotation '"
-							+ item.annotation.getLabel() + "'?",
-					"Delete annotation", JOptionPane.YES_NO_OPTION,
-					JOptionPane.QUESTION_MESSAGE);
+			int value =
+					JOptionPane.showConfirmDialog(this,
+							"Are you sure you want to delete the annotation '"
+									+ item.annotation.getLabel() + "'?", "Delete annotation",
+							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			if (value == JOptionPane.YES_OPTION)
 			{
 				model.removeElement(item);
@@ -456,11 +453,12 @@ public class AnnotationsPanel extends JPanel
 
 	private synchronized void stopAnnotations()
 	{
-		wwd.getView().stopAnimations();
+		if (wwd != null)
+			wwd.getView().stopAnimations();
 		playing = false;
-		playButton.setIcon(Icons.run.getIcon());
-		playButton.setToolTipText("Play through annotations");
-		enableButtons();
+		playAction.setIcon(Icons.run.getIcon());
+		playAction.setToolTipText("Play through annotations");
+		enableActions();
 	}
 
 	private synchronized void playAnnotations()
@@ -485,8 +483,7 @@ public class AnnotationsPanel extends JPanel
 				public void run()
 				{
 					ListItem item = (ListItem) list.getSelectedValue();
-					List<Annotation> annotations = Settings.get()
-							.getAnnotations();
+					List<Annotation> annotations = Settings.get().getAnnotations();
 					int index = -1;
 					if (item != null)
 					{
@@ -528,8 +525,7 @@ public class AnnotationsPanel extends JPanel
 								index = -1;
 								break;
 							}
-							if (!annotations.get(nextIndex)
-									.isExcludeFromPlaylist())
+							if (!annotations.get(nextIndex).isExcludeFromPlaylist())
 							{
 								index = nextIndex;
 								break;
@@ -556,9 +552,9 @@ public class AnnotationsPanel extends JPanel
 			thread.start();
 		}
 
-		playButton.setIcon(Icons.stop.getIcon());
-		playButton.setToolTipText("Stop playback");
-		enableButtons();
+		playAction.setIcon(Icons.stop.getIcon());
+		playAction.setToolTipText("Stop playback");
+		enableActions();
 	}
 
 	private long flyToAnnotation(Annotation annotation)
@@ -568,8 +564,8 @@ public class AnnotationsPanel extends JPanel
 		{
 			OrbitView orbitView = (OrbitView) view;
 			Position center = orbitView.getCenterPosition();
-			Position newCenter = Position.fromDegrees(annotation.getLatitude(),
-					annotation.getLongitude(), 0);
+			Position newCenter =
+					Position.fromDegrees(annotation.getLatitude(), annotation.getLongitude(), 0);
 			long lengthMillis = Util.getScaledLengthMillis(center, newCenter);
 
 			Angle heading = orbitView.getHeading();
@@ -591,11 +587,9 @@ public class AnnotationsPanel extends JPanel
 					zoom = maxZoom;
 			}
 
-			view.addAnimator(FlyToOrbitViewAnimator
-					.createFlyToOrbitViewAnimator(orbitView, center, newCenter,
-							orbitView.getHeading(), heading, orbitView
-									.getPitch(), pitch, orbitView.getZoom(),
-							zoom, lengthMillis, true));
+			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView, center,
+					newCenter, orbitView.getHeading(), heading, orbitView.getPitch(), pitch,
+					orbitView.getZoom(), zoom, lengthMillis, true));
 			wwd.redraw();
 
 			return lengthMillis;
@@ -603,7 +597,59 @@ public class AnnotationsPanel extends JPanel
 		return -1;
 	}
 
-	public void importAnnotations(File file) throws Exception
+	private JFileChooser getChooser()
+	{
+		if (exportImportChooser == null)
+		{
+			exportImportChooser = new JFileChooser();
+			FileFilter filter = new FileFilter()
+			{
+				@Override
+				public boolean accept(File f)
+				{
+					if (f.isDirectory())
+						return true;
+					int index = f.getName().lastIndexOf('.');
+					if (index < 0)
+						return false;
+					String ext = f.getName().substring(index + 1);
+					return ext.toLowerCase().equals("xml");
+				}
+
+				@Override
+				public String getDescription()
+				{
+					return "XML files (*.xml)";
+				}
+			};
+			exportImportChooser.setFileFilter(filter);
+		}
+		return exportImportChooser;
+	}
+
+	private void importAnnotations()
+	{
+		final JFileChooser chooser = getChooser();
+		chooser.setMultiSelectionEnabled(true);
+		if (chooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION)
+		{
+			for (File file : chooser.getSelectedFiles())
+			{
+				try
+				{
+					importAnnotations(file);
+				}
+				catch (Exception e)
+				{
+					JOptionPane.showMessageDialog(window, "Could not import " + file.getName(),
+							"Import error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
+		chooser.setMultiSelectionEnabled(false);
+	}
+
+	private void importAnnotations(File file) throws Exception
 	{
 		if (file.exists())
 		{
@@ -637,7 +683,41 @@ public class AnnotationsPanel extends JPanel
 		}
 	}
 
-	public void exportAnnotations(File file) throws Exception
+	private void exportAnnotations()
+	{
+		final JFileChooser chooser = getChooser();
+		if (chooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION)
+		{
+			File file = chooser.getSelectedFile();
+			if (!file.getName().toLowerCase().endsWith(".xml"))
+			{
+				file = new File(file.getAbsolutePath() + ".xml");
+			}
+			if (file.exists())
+			{
+				int answer =
+						JOptionPane.showConfirmDialog(window, file.getAbsolutePath()
+								+ " already exists.\nDo you want to replace it?", "Export",
+								JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+				if (answer != JOptionPane.YES_OPTION)
+					file = null;
+			}
+			if (file != null)
+			{
+				try
+				{
+					exportAnnotations(file);
+				}
+				catch (Exception e)
+				{
+					JOptionPane.showMessageDialog(window, "Error: " + e, "Export error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
+	}
+
+	private void exportAnnotations(File file) throws Exception
 	{
 		XMLEncoder xmlenc = null;
 		try
@@ -657,8 +737,7 @@ public class AnnotationsPanel extends JPanel
 		}
 	}
 
-	private class CheckboxListCellRenderer extends JPanel implements
-			ListCellRenderer
+	private class CheckboxListCellRenderer extends JPanel implements ListCellRenderer
 	{
 		private JPanel panel;
 		private JLabel label;
@@ -673,18 +752,16 @@ public class AnnotationsPanel extends JPanel
 			add(label, BorderLayout.CENTER);
 		}
 
-		public Component getListCellRendererComponent(JList list, Object value,
-				int index, boolean isSelected, boolean cellHasFocus)
+		public Component getListCellRendererComponent(JList list, Object value, int index,
+				boolean isSelected, boolean cellHasFocus)
 		{
-			Color background = isSelected ? list.getSelectionBackground()
-					: list.getBackground();
+			Color background = isSelected ? list.getSelectionBackground() : list.getBackground();
 
 			if (value instanceof ListItem)
 			{
 				final Annotation annotation = ((ListItem) value).annotation;
 				final JCheckBox check = ((ListItem) value).check;
-				if (panel.getComponentCount() != 1
-						|| panel.getComponent(0) != check)
+				if (panel.getComponentCount() != 1 || panel.getComponent(0) != check)
 				{
 					panel.removeAll();
 					panel.add(check, BorderLayout.CENTER);
@@ -704,5 +781,20 @@ public class AnnotationsPanel extends JPanel
 
 			return this;
 		}
+	}
+
+	@Override
+	public void setup(Theme theme)
+	{
+		wwd = theme.getWwd();
+		layer = new AnnotationsLayer(wwd, this);
+		wwd.getModel().getLayers().add(layer);
+
+		window = SwingUtilities.getWindowAncestor(this);
+	}
+
+	@Override
+	public void dispose()
+	{
 	}
 }

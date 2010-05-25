@@ -4,8 +4,6 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.terrain.CompoundElevationModel;
-import gov.nasa.worldwind.terrain.ZeroElevationModel;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,9 +22,8 @@ public class LayerEnabler
 	private LayerTree tree;
 
 	private WorldWindow wwd;
-	private LayerList layerList;
-	private ExtendedCompoundElevationModel elevationModel;
-	private ElevationModel zeroElevationModel = new ZeroElevationModel();
+	private SectionList<Layer> layerList;
+	private SectionList<ElevationModel> elevationModel;
 
 	private List<ILayerNode> nodes = new ArrayList<ILayerNode>();
 	private List<Wrapper> wrappers = new ArrayList<Wrapper>();
@@ -43,25 +40,32 @@ public class LayerEnabler
 	public synchronized void setWwd(WorldWindow wwd)
 	{
 		this.wwd = wwd;
-		layerList = wwd.getModel().getLayers();
+
+		LayerList ll = wwd.getModel().getLayers();
+		if (ll instanceof ExtendedLayerList)
+		{
+			layerList = (ExtendedLayerList) ll;
+		}
+		else
+		{
+			throw new IllegalStateException(
+					"Model's layer list must be an instance of ExtendedLayerList");
+		}
 
 		ElevationModel em = wwd.getModel().getGlobe().getElevationModel();
 		if (em instanceof ExtendedCompoundElevationModel)
 		{
 			elevationModel = (ExtendedCompoundElevationModel) em;
 		}
-		else if (em instanceof CompoundElevationModel)
-		{
-			elevationModel = new ExtendedCompoundElevationModel();
-			((CompoundElevationModel) em).addElevationModel(elevationModel);
-		}
 		else
 		{
 			throw new IllegalStateException(
-					"Globe's elevation model must be a CompoundElevationModel, "
-							+ "and should be an ExtendedCompoundElevationModel");
+					"Globe's elevation model must be an instance of ExtendedCompoundElevationModel");
 		}
-		
+
+		layerList.registerSectionObject(this);
+		elevationModel.registerSectionObject(this);
+
 		refreshLists();
 	}
 
@@ -200,8 +204,8 @@ public class LayerEnabler
 			return;
 
 		//remove all that we added last time
-		layerList.removeAll(layers);
-		elevationModel.removeAll(elevationModels);
+		layerList.removeAllFromSection(this, layers);
+		elevationModel.removeAllFromSection(this, elevationModels);
 
 		//clear the lists
 		layers.clear();
@@ -225,12 +229,8 @@ public class LayerEnabler
 			}
 		}
 
-		//ensure there is at least one elevation model, otherwise navigation behaves strangely
-		if(elevationModels.isEmpty())
-			elevationModels.add(zeroElevationModel);
-
-		layerList.addAll(layers);
-		elevationModel.addAll(elevationModels);
+		layerList.addAllFromSection(this, layers);
+		elevationModel.addAllFromSection(this, elevationModels);
 	}
 
 	private static class Wrapper

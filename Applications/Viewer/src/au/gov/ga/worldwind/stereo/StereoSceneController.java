@@ -22,7 +22,7 @@ public class StereoSceneController extends AbstractSceneController
 	@Override
 	protected void doRepaint(DrawContext dc)
 	{
-		Settings.Properties settings = Settings.get();
+		Settings settings = Settings.get();
 		double verticalExaggeration = settings.getVerticalExaggeration();
 		if (lastVerticalExaggeration != verticalExaggeration)
 		{

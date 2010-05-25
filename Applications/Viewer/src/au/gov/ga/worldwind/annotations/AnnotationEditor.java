@@ -9,11 +9,11 @@ import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -94,10 +94,10 @@ public class AnnotationEditor extends JDialog
 		}
 	}
 
-	public AnnotationEditor(final WorldWindow wwd, Frame owner, String title,
+	public AnnotationEditor(final WorldWindow wwd, Window owner, String title,
 			final Annotation annotation)
 	{
-		super(owner, title, true);
+		super(owner, title, ModalityType.APPLICATION_MODAL);
 		this.wwd = wwd;
 		this.annotation = annotation;
 		setLayout(new BorderLayout());

@@ -1,15 +1,12 @@
 package au.gov.ga.worldwind.panels.layers;
 
-import gov.nasa.worldwind.WorldWindow;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.DropMode;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -18,16 +15,17 @@ import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.panels.dataset.DatasetPanel;
 import au.gov.ga.worldwind.panels.layers.drag.NodeTransferHandler;
-import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.theme.ThemePanel;
+import au.gov.ga.worldwind.util.BasicAction;
 import au.gov.ga.worldwind.util.Icons;
+import au.gov.ga.worldwind.util.Util;
 
 public class LayersPanel extends AbstractThemePanel
 {
 	private static final String LAYERS_FILENAME = "layers.xml";
-	private static final File layersFile = new File(Settings.getUserDirectory(), LAYERS_FILENAME);
+	private static final File layersFile = new File(Util.getUserDirectory(), LAYERS_FILENAME);
 
 	private LayerTree tree;
 	private INode root;
@@ -49,7 +47,7 @@ public class LayersPanel extends AbstractThemePanel
 		{
 		}
 		if (root == null)
-			root = createDefaultRoot();
+			root = new FolderNode("root", null, true);
 
 		layerEnabler = new LayerEnabler();
 		tree = new LayerTree(root, layerEnabler);
@@ -59,8 +57,14 @@ public class LayersPanel extends AbstractThemePanel
 		add(scrollPane, BorderLayout.CENTER);
 		scrollPane.setPreferredSize(new Dimension(50, 50));
 
+		createToolBar();
+	}
 
-		Action newFolderAction = new AbstractAction("Create Folder", Icons.newfolder.getIcon())
+	private void createToolBar()
+	{
+		BasicAction newFolderAction =
+				new BasicAction("Create", "Create Folder", Icons.newfolder.getIcon());
+		newFolderAction.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
@@ -82,9 +86,11 @@ public class LayersPanel extends AbstractThemePanel
 				tree.scrollPathToVisible(editPath);
 				tree.startEditingAtPath(editPath);
 			}
-		};
+		});
 
-		Action renameAction = new AbstractAction("Rename selected", Icons.edit.getIcon())
+		BasicAction renameAction =
+				new BasicAction("Rename", "Rename selected", Icons.edit.getIcon());
+		renameAction.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
@@ -95,9 +101,11 @@ public class LayersPanel extends AbstractThemePanel
 					tree.startEditingAtPath(p);
 				}
 			}
-		};
+		});
 
-		Action deleteAction = new AbstractAction("Delete selected", Icons.delete.getIcon())
+		BasicAction deleteAction =
+				new BasicAction("Delete", "Delete selected", Icons.delete.getIcon());
+		deleteAction.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
@@ -111,7 +119,7 @@ public class LayersPanel extends AbstractThemePanel
 						datasetPanel.getTree().repaint();
 				}
 			}
-		};
+		});
 
 		JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
 		toolBar.setFloatable(false);
@@ -126,16 +134,10 @@ public class LayersPanel extends AbstractThemePanel
 		return tree.getModel();
 	}
 
-	private INode createDefaultRoot()
-	{
-		return new FolderNode("root", null, true);
-	}
-
 	@Override
 	public void setup(Theme theme)
 	{
-		WorldWindow wwd = theme.getWwd();
-		layerEnabler.setWwd(wwd);
+		layerEnabler.setWwd(theme.getWwd());
 		linkPanels(theme.getPanels());
 	}
 

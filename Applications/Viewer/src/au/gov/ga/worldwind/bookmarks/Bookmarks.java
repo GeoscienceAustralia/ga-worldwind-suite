@@ -3,8 +3,6 @@ package au.gov.ga.worldwind.bookmarks;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.settings.Settings;
-
 
 public class Bookmarks
 {
@@ -16,7 +14,8 @@ public class Bookmarks
 	
 	private static List<Bookmark> list()
 	{
-		return Settings.get().getBookmarks();
+		return null;
+		//return Settings.get().getBookmarks();
 	}
 
 	public static void moveUp(Bookmark bookmark)

@@ -54,7 +54,7 @@ public class SettingsDialog extends JDialog
 
 	private static Rectangle oldBounds;
 
-	private Settings.Properties settings;
+	private Settings settings;
 
 	private JSlider verticalExaggerationSlider;
 	private JLabel verticalExaggerationLabel;

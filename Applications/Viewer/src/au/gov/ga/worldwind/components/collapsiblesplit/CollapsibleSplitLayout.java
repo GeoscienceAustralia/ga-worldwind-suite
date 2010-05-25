@@ -14,85 +14,63 @@ import java.util.Map;
 
 public class CollapsibleSplitLayout implements LayoutManager2
 {
-	private final List<Placeholder> placeholders = new ArrayList<Placeholder>();
-	private final Map<String, Placeholder> placeholderMap = new HashMap<String, Placeholder>();
-	private final Map<String, Component> componentMap = new HashMap<String, Component>();
-	private final Map<Component, String> reverseComponentMap = new HashMap<Component, String>();
+	private final List<LayoutPlaceholder> placeholders = new ArrayList<LayoutPlaceholder>();
+	private final Map<Component, LayoutPlaceholder> componentMap =
+			new HashMap<Component, LayoutPlaceholder>();
 
 	private int dividerSize = 5;
 	private boolean vertical = true;
 
-	public void addPlaceholder(String name, float weight, boolean resizable)
-	{
-		if (name == null)
-			throw new IllegalArgumentException("placeholder name cannot be null");
-		if (placeholderMap.containsKey(name))
-			throw new IllegalArgumentException("placeholder already added: " + name);
-
-		//check if there is already a collapsible component for this name; if there is,
-		//use it's collapsed state for the expanded property, otherwise default to true
-		boolean expanded = true;
-		if (componentMap.containsKey(name))
-		{
-			Component c = componentMap.get(name);
-			if (c instanceof ICollapsible)
-			{
-				expanded = !((ICollapsible) c).isCollapsed();
-			}
-		}
-
-		Placeholder placeholder = new Placeholder();
-		placeholder.name = name;
-		placeholder.weight = weight;
-		placeholder.expanded = expanded;
-		placeholder.resizable = resizable;
-		placeholders.add(placeholder);
-		placeholderMap.put(name, placeholder);
-	}
-
 	@Override
 	public void addLayoutComponent(Component comp, Object constraints)
 	{
-		if (constraints instanceof String)
-			addLayoutComponent((String) constraints, comp);
-		else
-			throw new IllegalArgumentException("cannot add to layout: constraint must be a string");
+		if (!(constraints instanceof CollapsibleSplitConstraints))
+			throw new IllegalArgumentException(
+					"cannot add to layout: constraints must be an instanceof "
+							+ CollapsibleSplitConstraints.class.getSimpleName());
+
+		CollapsibleSplitConstraints c = (CollapsibleSplitConstraints) constraints;
+
+		//ensure the component matches the expanded state
+		if (comp instanceof ICollapsible)
+		{
+			ICollapsible collapsible = (ICollapsible) comp;
+			if (collapsible.isCollapsed() == c.expanded)
+				collapsible.setCollapsed(!c.expanded);
+		}
+
+		LayoutPlaceholder placeholder =
+				new LayoutPlaceholder(comp, c.weight, c.expanded, c.resizable);
+		placeholders.add(placeholder);
+		componentMap.put(comp, placeholder);
 	}
 
 	@Override
 	public void addLayoutComponent(String name, Component comp)
 	{
-		if (name == null)
-			throw new IllegalArgumentException("cannot add to layout: name not specified");
-		if (comp == null)
-			throw new IllegalArgumentException("cannot add to layout: component is null");
-
-		if (componentMap.containsKey(name) && componentMap.get(name) != comp)
-			throw new IllegalArgumentException("cannot add to layout: name is not unique");
-		if (reverseComponentMap.containsKey(comp) && !reverseComponentMap.get(comp).equals(name))
-			throw new IllegalArgumentException("cannot add to layout: component is not unique");
-
-		componentMap.put(name, comp);
-		reverseComponentMap.put(comp, name);
-
-		if (comp instanceof ICollapsible)
-		{
-			if (isPlaceholderNameValid(name))
-			{
-				setExpanded(name, !((ICollapsible) comp).isCollapsed());
-			}
-		}
 	}
 
 	@Override
 	public void removeLayoutComponent(Component comp)
 	{
-		if (reverseComponentMap.containsKey(comp))
+		if (componentMap.containsKey(comp))
 		{
-			String name = reverseComponentMap.get(comp);
-			reverseComponentMap.remove(comp);
-			componentMap.remove(name);
+			LayoutPlaceholder placeholder = componentMap.get(comp);
+			placeholders.remove(placeholder);
+			componentMap.remove(comp);
 		}
+	}
+
+	public void addListener(Component comp, CollapsibleSplitListener listener)
+	{
+		if (componentMap.containsKey(comp))
+			componentMap.get(comp).addListener(listener);
+	}
+
+	public void removeListener(Component comp, CollapsibleSplitListener listener)
+	{
+		if (componentMap.containsKey(comp))
+			componentMap.get(comp).removeListener(listener);
 	}
 
 	@Override
@@ -125,9 +103,9 @@ public class CollapsibleSplitLayout implements LayoutManager2
 		int height = 0;
 
 		boolean anyAdded = false;
-		for (Placeholder placeholder : placeholders)
+		for (LayoutPlaceholder placeholder : placeholders)
 		{
-			if (placeholderHasComponent(placeholder))
+			if (componentIsVisible(placeholder))
 			{
 				if (anyAdded)
 				{
@@ -136,7 +114,7 @@ public class CollapsibleSplitLayout implements LayoutManager2
 					else
 						width += getDividerSize();
 				}
-				Component component = placeholderComponent(placeholder);
+				Component component = placeholder.component;
 				Dimension size =
 						minimum ? component.getMinimumSize() : component.getPreferredSize();
 				if (isVertical())
@@ -196,13 +174,13 @@ public class CollapsibleSplitLayout implements LayoutManager2
 			otherDimension = bounds.height - insets.top - insets.bottom;
 		}
 
-		Placeholder lastPlaceholder = null;
+		LayoutPlaceholder lastPlaceholder = null;
 		int i = 0;
-		for (Placeholder placeholder : placeholders)
+		for (LayoutPlaceholder placeholder : placeholders)
 		{
-			if (placeholderHasComponent(placeholder))
+			if (componentIsVisible(placeholder))
 			{
-				Component component = placeholderComponent(placeholder);
+				Component component = placeholder.component;
 				Dimension minimum = component.getMinimumSize();
 				Rectangle b = new Rectangle(x, y, 0, 0);
 				int extraSpace;
@@ -262,9 +240,9 @@ public class CollapsibleSplitLayout implements LayoutManager2
 	public int dividerAt(int x, int y)
 	{
 		int i = 0;
-		for (Placeholder placeholder : placeholders)
+		for (LayoutPlaceholder placeholder : placeholders)
 		{
-			if (placeholderHasComponent(placeholder))
+			if (componentIsVisible(placeholder))
 			{
 				if (placeholder.nextDividerBounds != null
 						&& placeholder.nextDividerBounds.contains(x, y))
@@ -277,18 +255,15 @@ public class CollapsibleSplitLayout implements LayoutManager2
 
 	public int dividerAboveComponentBounds(Component component)
 	{
-		if (reverseComponentMap.containsKey(component))
+		if (componentMap.containsKey(component))
 		{
-			String name = reverseComponentMap.get(component);
-			if (isPlaceholderNameValid(name))
+			LayoutPlaceholder placeholder = componentMap.get(component);
+			int index = placeholders.indexOf(placeholder);
+			for (int i = index - 1; i >= 0; i--)
 			{
-				int index = placeholders.indexOf(placeholderMap.get(name));
-				for (int i = index - 1; i >= 0; i--)
+				if (componentIsVisible(placeholders.get(i)))
 				{
-					if (placeholderHasComponent(placeholders.get(i)))
-					{
-						return i;
-					}
+					return i;
 				}
 			}
 		}
@@ -310,24 +285,24 @@ public class CollapsibleSplitLayout implements LayoutManager2
 		int totalExpandedBefore = 0, totalExpandedAfter = 0;
 		int totalSpaceBefore = 0, totalSpaceAfter = 0;
 		float totalWeightBefore = 0f, totalWeightAfter = 0f;
-		Placeholder previousExpanded = null, nextExpanded = null;
+		LayoutPlaceholder previousExpanded = null, nextExpanded = null;
 
 		for (int i = 0; i < placeholders.size(); i++)
 		{
-			Placeholder placeholder = placeholders.get(i);
-			if (placeholder.takesExtraSpace() && placeholderHasComponent(placeholder))
+			LayoutPlaceholder placeholder = placeholders.get(i);
+			if (placeholder.takesExtraSpace() && componentIsVisible(placeholder))
 			{
 				if (i <= index)
 				{
 					totalSpaceBefore += placeholder.extraComponentSpace;
-					totalWeightBefore += placeholder.weight;
+					totalWeightBefore += placeholder.getWeight();
 					totalExpandedBefore++;
 					previousExpanded = placeholder;
 				}
 				else
 				{
 					totalSpaceAfter += placeholder.extraComponentSpace;
-					totalWeightAfter += placeholder.weight;
+					totalWeightAfter += placeholder.getWeight();
 					totalExpandedAfter++;
 					if (nextExpanded == null)
 						nextExpanded = placeholder;
@@ -367,25 +342,25 @@ public class CollapsibleSplitLayout implements LayoutManager2
 		float deltaBefore = newTotalWeightBefore - totalWeightBefore;
 		if (deltaBefore >= 0)
 		{
-			previousExpanded.weight += deltaBefore;
+			previousExpanded.addToWeight(deltaBefore);
 		}
 		else
 		{
 			deltaBefore = -deltaBefore;
 			for (int i = index; i >= 0; i--)
 			{
-				Placeholder placeholder = placeholders.get(i);
-				if (placeholder.takesExtraSpace() && placeholderHasComponent(placeholder))
+				LayoutPlaceholder placeholder = placeholders.get(i);
+				if (placeholder.takesExtraSpace() && componentIsVisible(placeholder))
 				{
-					if (placeholder.weight >= deltaBefore)
+					if (placeholder.getWeight() >= deltaBefore)
 					{
-						placeholder.weight -= deltaBefore;
+						placeholder.addToWeight(-deltaBefore);
 						break;
 					}
 					else
 					{
-						deltaBefore -= placeholder.weight;
-						placeholder.weight = 0;
+						deltaBefore -= placeholder.getWeight();
+						placeholder.setWeight(0);
 					}
 				}
 			}
@@ -395,25 +370,25 @@ public class CollapsibleSplitLayout implements LayoutManager2
 		float deltaAfter = newTotalWeightAfter - totalWeightAfter;
 		if (deltaAfter >= 0)
 		{
-			nextExpanded.weight += deltaAfter;
+			nextExpanded.addToWeight(deltaAfter);
 		}
 		else
 		{
 			deltaAfter = -deltaAfter;
 			for (int i = index + 1; i < placeholders.size(); i++)
 			{
-				Placeholder placeholder = placeholders.get(i);
-				if (placeholder.takesExtraSpace() && placeholderHasComponent(placeholder))
+				LayoutPlaceholder placeholder = placeholders.get(i);
+				if (placeholder.takesExtraSpace() && componentIsVisible(placeholder))
 				{
-					if (placeholder.weight >= deltaAfter)
+					if (placeholder.getWeight() >= deltaAfter)
 					{
-						placeholder.weight -= deltaAfter;
+						placeholder.addToWeight(-deltaAfter);
 						break;
 					}
 					else
 					{
-						deltaAfter -= placeholder.weight;
-						placeholder.weight = 0;
+						deltaAfter -= placeholder.getWeight();
+						placeholder.setWeight(0);
 					}
 				}
 			}
@@ -445,69 +420,53 @@ public class CollapsibleSplitLayout implements LayoutManager2
 		this.vertical = vertical;
 	}
 
-	public float getWeight(String placeholderName)
+	public float getWeight(Component comp)
 	{
-		if (!isPlaceholderNameValid(placeholderName))
-			throw new IllegalArgumentException("placeholder not found");
-		return placeholderMap.get(placeholderName).weight;
+		if (!componentMap.containsKey(comp))
+			throw new IllegalArgumentException("component not found");
+		return componentMap.get(comp).getWeight();
 	}
 
-	public void setWeight(String placeholderName, float weight)
+	public void setWeight(Component comp, float weight)
 	{
-		if (!isPlaceholderNameValid(placeholderName))
-			throw new IllegalArgumentException("placeholder not found");
-		placeholderMap.get(placeholderName).weight = Math.max(0f, weight); //weight cannot be negative
+		if (!componentMap.containsKey(comp))
+			throw new IllegalArgumentException("component not found");
+		componentMap.get(comp).setWeight(Math.max(0f, weight)); //weight cannot be negative
 	}
 
-	public boolean isExpanded(String placeholderName)
+	public boolean isExpanded(Component comp)
 	{
-		if (!isPlaceholderNameValid(placeholderName))
-			throw new IllegalArgumentException("placeholder not found");
-		return placeholderMap.get(placeholderName).expanded;
+		if (!componentMap.containsKey(comp))
+			throw new IllegalArgumentException("component not found");
+		return componentMap.get(comp).isExpanded();
 	}
 
-	public void setExpanded(String placeholderName, boolean expanded)
+	public void setExpanded(Component comp, boolean expanded)
 	{
-		if (!isPlaceholderNameValid(placeholderName))
-			throw new IllegalArgumentException("placeholder not found");
-		placeholderMap.get(placeholderName).expanded = expanded;
+		if (!componentMap.containsKey(comp))
+			throw new IllegalArgumentException("component not found");
+		componentMap.get(comp).setExpanded(expanded);
 	}
 
-	public boolean isResizable(String placeholderName)
+	public boolean isResizable(Component comp)
 	{
-		if (!isPlaceholderNameValid(placeholderName))
-			throw new IllegalArgumentException("placeholder not found");
-		return placeholderMap.get(placeholderName).resizable;
+		if (!componentMap.containsKey(comp))
+			throw new IllegalArgumentException("component not found");
+		return componentMap.get(comp).isResizable();
 	}
 
-	public void setResizable(String placeholderName, boolean resizable)
+	public void setResizable(Component comp, boolean resizable)
 	{
-		if (!isPlaceholderNameValid(placeholderName))
-			throw new IllegalArgumentException("placeholder not found");
-		placeholderMap.get(placeholderName).resizable = resizable;
-	}
-
-	private boolean isPlaceholderNameValid(String placeholderName)
-	{
-		return placeholderMap.containsKey(placeholderName);
-	}
-
-	public String getPlaceholderName(Component component)
-	{
-		if (reverseComponentMap.containsKey(component))
-		{
-			String name = reverseComponentMap.get(component);
-			if (isPlaceholderNameValid(name))
-				return name;
-		}
-		return null;
+		if (!componentMap.containsKey(comp))
+			throw new IllegalArgumentException("component not found");
+		componentMap.get(comp).setResizable(resizable);
 	}
 
 	private float totalExpandedWeight()
 	{
 		float expandedWeight = 0f;
-		for (Placeholder placeholder : placeholders)
-			if (placeholderHasComponent(placeholder))
+		for (LayoutPlaceholder placeholder : placeholders)
+			if (componentIsVisible(placeholder))
 				expandedWeight += placeholder.getExpandedWeight();
 		if (expandedWeight < 0f)
 			expandedWeight = 0f;
@@ -518,12 +477,12 @@ public class CollapsibleSplitLayout implements LayoutManager2
 	{
 		float totalWeight = 0f;
 		int countExpanded = 0;
-		for (Placeholder placeholder : placeholders)
+		for (LayoutPlaceholder placeholder : placeholders)
 		{
-			if (placeholderHasComponent(placeholder))
+			if (componentIsVisible(placeholder))
 			{
-				if (placeholder.resizable)
-					totalWeight += placeholder.weight;
+				if (placeholder.isResizable())
+					totalWeight += placeholder.getWeight();
 				if (placeholder.takesExtraSpace())
 					countExpanded++;
 			}
@@ -532,45 +491,17 @@ public class CollapsibleSplitLayout implements LayoutManager2
 			return;
 		if (totalWeight < 0f)
 			totalWeight = 1f;
-		for (Placeholder placeholder : placeholders)
+		for (LayoutPlaceholder placeholder : placeholders)
 		{
-			if (placeholderHasComponent(placeholder) && placeholder.takesExtraSpace())
+			if (componentIsVisible(placeholder) && placeholder.takesExtraSpace())
 			{
-				placeholder.weight = totalWeight / countExpanded;
+				placeholder.setWeight(totalWeight / countExpanded);
 			}
 		}
 	}
 
-	private boolean placeholderHasComponent(Placeholder placeholder)
+	private boolean componentIsVisible(LayoutPlaceholder placeholder)
 	{
-		return componentMap.containsKey(placeholder.name)
-				&& componentMap.get(placeholder.name).isVisible();
-	}
-
-	private Component placeholderComponent(Placeholder placeholder)
-	{
-		return componentMap.get(placeholder.name);
-	}
-
-	private static class Placeholder
-	{
-		public String name;
-		public float weight;
-		public boolean expanded;
-		public boolean resizable;
-		public Rectangle nextDividerBounds;
-		public int extraComponentSpace;
-
-		public float getExpandedWeight()
-		{
-			if (takesExtraSpace())
-				return weight;
-			return 0f;
-		}
-
-		public boolean takesExtraSpace()
-		{
-			return resizable && expanded;
-		}
+		return placeholder.component.isVisible();
 	}
 }

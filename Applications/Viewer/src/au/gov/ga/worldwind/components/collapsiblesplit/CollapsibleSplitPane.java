@@ -53,23 +53,29 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 		super.setLayout(mgr);
 	}
 
+	public void addListener(Component comp, CollapsibleSplitListener listener)
+	{
+		getLayout().addListener(comp, listener);
+	}
+
+	public void removeListener(Component comp, CollapsibleSplitListener listener)
+	{
+		getLayout().removeListener(comp, listener);
+	}
+
 	@Override
 	public void collapseToggled(ICollapsible component, boolean collapsed)
 	{
 		if (!(component instanceof Component)) //redundant, but here just in case subclasses do something wrong
-			throw new IllegalArgumentException(
-					"ICollapsible is not an instance of Component");
+			throw new IllegalArgumentException("ICollapsible is not an instance of Component");
 
-		String placeholderName = getLayout().getPlaceholderName(
-				(Component) component);
-		int dividerAbove = getLayout().dividerAboveComponentBounds(
-				(Component) component);
+		int dividerAbove = getLayout().dividerAboveComponentBounds((Component) component);
 		Rectangle bounds = null;
 		if (dividerAbove >= 0)
 		{
 			bounds = getLayout().dividerBounds(dividerAbove);
 		}
-		getLayout().setExpanded(placeholderName, !component.isCollapsed());
+		getLayout().setExpanded((Component) component, !component.isCollapsed());
 		doLayout();
 		if (bounds != null && dividerAbove == 0)
 		{
@@ -148,8 +154,8 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 			int index = getLayout().dividerAt(x, y);
 			if (index >= 0)
 			{
-				cursorID = getLayout().isVertical() ? Cursor.N_RESIZE_CURSOR
-						: Cursor.E_RESIZE_CURSOR;
+				cursorID =
+						getLayout().isVertical() ? Cursor.N_RESIZE_CURSOR : Cursor.E_RESIZE_CURSOR;
 			}
 		}
 		setCursor(Cursor.getPredefinedCursor(cursorID));
@@ -203,8 +209,7 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 	{
 		if (dragging)
 		{
-			setDividerPosition(dragIndex, dragStart.x + dragOffset.x,
-					dragStart.y + dragOffset.y);
+			setDividerPosition(dragIndex, dragStart.x + dragOffset.x, dragStart.y + dragOffset.y);
 			dragging = false;
 			if (!isContinuousLayout())
 			{

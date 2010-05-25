@@ -5,17 +5,16 @@ import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.util.WWXML;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import au.gov.ga.worldwind.util.XMLUtil;
 
 public class LayerLoader
 {
 	public static Object load(Object source) throws Exception
 	{
-		Document document = WWXML.openDocument(source);
-		Element element = document.getDocumentElement();
+		Element element = XMLUtil.getElementFromSource(source);
 
 		try
 		{

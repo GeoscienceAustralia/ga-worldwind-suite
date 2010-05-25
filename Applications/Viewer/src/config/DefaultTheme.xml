@@ -30,13 +30,19 @@
 		url="http://www.ga.gov.au:8500/apps/world-wind/dataset/dataset.xml" />
 
 	<!-- Layers are shown in the Theme Layers panel (non editable list) -->
-	<!-- <Layer name="" url="" icon="" description="" enabled="true" /> -->
+	<Layer name="Potassium"
+		url="http://www.ga.gov.au:8500/apps/world-wind/dataset/GA/Radiometrics/Potassium.xml"
+		icon="" description="" enabled="true" />
 
 	<!-- Sidebar panels -->
 	<Panel name="Search" className="au.gov.ga.worldwind.panels.places.PlaceSearchPanel"
 		expanded="false" />
+	<Panel name="Annotations" className="au.gov.ga.worldwind.annotations.AnnotationsPanel"
+		expanded="true" />
 	<Panel name="Layers" className="au.gov.ga.worldwind.panels.layers.LayersPanel" />
 	<Panel name="Datasets" className="au.gov.ga.worldwind.panels.dataset.DatasetPanel" />
+	<Panel name="Theme Layers" className="au.gov.ga.worldwind.panels.layers.ThemeLayersPanel" />
 	<Panel name="Vertical Exaggeration" className="au.gov.ga.worldwind.panels.other.ExaggerationPanel"
 		enabled="false" />
+
 </Theme>

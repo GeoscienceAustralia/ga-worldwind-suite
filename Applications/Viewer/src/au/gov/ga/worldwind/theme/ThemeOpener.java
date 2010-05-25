@@ -82,6 +82,7 @@ public class ThemeOpener
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "Could not open default theme: "
 					+ e.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}

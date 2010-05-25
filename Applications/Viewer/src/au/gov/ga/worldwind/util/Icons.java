@@ -23,6 +23,8 @@ public enum Icons
 	error("error.gif"),
 	newfolder("newfolder.gif"),
 	folder("folder.gif"),
+	imporrt("import.gif"),
+	export("export.gif"),
 	earth("earth.png"),
 	earth32("earth32.png");
 

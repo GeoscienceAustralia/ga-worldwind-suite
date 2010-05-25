@@ -168,7 +168,7 @@ public class PlaceSearchPanel extends AbstractThemePanel
 		list.addMouseMotionListener(new MouseMotionAdapter()
 		{
 			private Place lastPlace;
-			
+
 			@Override
 			public void mouseMoved(MouseEvent e)
 			{
@@ -183,14 +183,19 @@ public class PlaceSearchPanel extends AbstractThemePanel
 						if (o instanceof Place)
 						{
 							Place place = (Place) o;
-							text =
-									place.fcodename
-											+ " ("
+							text = "<html>Name: " + place.name + "<br>";
+							text += "Country: " + place.country + "<br>";
+							text +=
+									"Class: " + Util.capitalizeFirstLetter(place.fcodename)
+											+ "<br>";
+							text +=
+									"Location: ("
 											+ String.format("%7.3f\u00B0, %7.3f\u00B0",
 													place.latlon.getLatitude().degrees,
-													place.latlon.getLongitude().degrees) + ")";
-							
-							if(lastPlace != place)
+													place.latlon.getLongitude().degrees)
+											+ ")</html>";
+
+							if (lastPlace != place)
 								setToolTipText(null);
 							lastPlace = place;
 						}
@@ -218,11 +223,11 @@ public class PlaceSearchPanel extends AbstractThemePanel
 					{
 						type = SearchType.EXACT;
 					}
-					
+
 					listScrollPane.setVisible(true);
 					setResizable(true);
 					validate();
-					
+
 					search(str, type);
 				}
 			}
@@ -297,7 +302,7 @@ public class PlaceSearchPanel extends AbstractThemePanel
 					Position newCenter = place.getPosition();
 					long lengthMillis = Util.getScaledLengthMillis(center, newCenter);
 
-					double zoom = Math.max(100000, Math.min(1000000, orbitView.getZoom()));
+					double zoom = Math.max(1e4, Math.min(1e5, orbitView.getZoom()));
 
 					view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView,
 							center, newCenter, orbitView.getHeading(), Angle.ZERO, orbitView

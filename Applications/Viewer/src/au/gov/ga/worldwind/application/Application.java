@@ -71,6 +71,7 @@ import au.gov.ga.worldwind.components.HtmlViewer;
 import au.gov.ga.worldwind.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.panels.SideBar;
 import au.gov.ga.worldwind.panels.layers.ExtendedCompoundElevationModel;
+import au.gov.ga.worldwind.panels.layers.ExtendedLayerList;
 import au.gov.ga.worldwind.panels.layers.LayerFactory;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.settings.Settings;
@@ -185,6 +186,7 @@ public class Application
 	private Application(Theme theme)
 	{
 		this.theme = theme;
+		Settings.get().loadThemeProperties(theme);
 
 		//initialize frame
 		String title = "Geoscience Australia – World Wind";
@@ -202,6 +204,7 @@ public class Application
 		else
 			wwd = new WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas.defaultCaps);
 		Model model = new BasicModel();
+		model.setLayers(new ExtendedLayerList());
 		model.getGlobe().setElevationModel(new ExtendedCompoundElevationModel());
 		wwd.setModel(model);
 		wwd.addSelectListener(new ClickAndGoSelectListener(wwd, WorldMapLayer.class));
@@ -266,7 +269,7 @@ public class Application
 			splitPane.setLeftComponent(sideBar);
 		}
 
-		loadSplitLocations();
+		loadSplitLocation();
 		afterSettingsChange();
 
 		// init user layers
@@ -324,137 +327,6 @@ public class Application
 		dialogs.add(sunPositionDialog);
 
 		loadDialogBounds();
-	}
-
-	private JMenuBar createAnnotationsMenuBar()
-	{
-		JMenuBar menuBar = new JMenuBar();
-
-		JMenu menu;
-		JMenuItem menuItem;
-
-		menu = new JMenu("File");
-		menuBar.add(menu);
-
-		final JFileChooser chooser = new JFileChooser();
-		FileFilter filter = new FileFilter()
-		{
-			@Override
-			public boolean accept(File f)
-			{
-				if (f.isDirectory())
-					return true;
-				int index = f.getName().lastIndexOf('.');
-				if (index < 0)
-					return false;
-				String ext = f.getName().substring(index + 1);
-				return ext.toLowerCase().equals("xml");
-			}
-
-			@Override
-			public String getDescription()
-			{
-				return "XML files (*.xml)";
-			}
-		};
-		chooser.setFileFilter(filter);
-
-		menuItem = new JMenuItem("Import...");
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent ae)
-			{
-				chooser.setMultiSelectionEnabled(true);
-				if (chooser.showOpenDialog(annotationsDialog) == JFileChooser.APPROVE_OPTION)
-				{
-					for (File file : chooser.getSelectedFiles())
-					{
-						try
-						{
-							annotationsPanel.importAnnotations(file);
-						}
-						catch (Exception e)
-						{
-							JOptionPane.showMessageDialog(annotationsDialog, "Could not import "
-									+ file.getName(), "Import error", JOptionPane.ERROR_MESSAGE);
-						}
-					}
-				}
-				chooser.setMultiSelectionEnabled(false);
-			}
-		});
-
-		menuItem = new JMenuItem("Export...");
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent ae)
-			{
-				if (chooser.showSaveDialog(annotationsDialog) == JFileChooser.APPROVE_OPTION)
-				{
-					File file = chooser.getSelectedFile();
-					if (!file.getName().toLowerCase().endsWith(".xml"))
-					{
-						file = new File(file.getAbsolutePath() + ".xml");
-					}
-					if (file.exists())
-					{
-						int answer =
-								JOptionPane.showConfirmDialog(annotationsDialog, file
-										.getAbsolutePath()
-										+ " already exists.\nDo you want to replace it?", "Export",
-										JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-						if (answer != JOptionPane.YES_OPTION)
-							file = null;
-					}
-					if (file != null)
-					{
-						try
-						{
-							annotationsPanel.exportAnnotations(file);
-						}
-						catch (Exception e)
-						{
-							JOptionPane.showMessageDialog(annotationsDialog, "Error: " + e,
-									"Export error", JOptionPane.ERROR_MESSAGE);
-						}
-					}
-				}
-			}
-		});
-
-		menuItem = new JMenuItem("Delete all");
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				int value =
-						JOptionPane.showConfirmDialog(annotationsDialog,
-								"All annotations will be deleted!\nAre you sure?",
-								"Delete all annotations", JOptionPane.YES_NO_OPTION,
-								JOptionPane.WARNING_MESSAGE);
-				if (value == JOptionPane.YES_OPTION)
-				{
-					annotationsPanel.deleteAllAnnotations();
-				}
-			}
-		});
-
-		menu.addSeparator();
-
-		menuItem = new JMenuItem("Close");
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				annotationsDialog.setVisible(false);
-			}
-		});
-
-		return menuBar;
 	}*/
 
 	private void saveImage()
@@ -673,7 +545,7 @@ public class Application
 				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 				GraphicsDevice[] gds = ge.getScreenDevices();
 
-				saveSplitLocations();
+				saveSplitLocation();
 				fullscreenFrame = new JFrame(frame.getTitle());
 				JPanel panel = new JPanel(new BorderLayout());
 				fullscreenFrame.setContentPane(panel);
@@ -734,7 +606,7 @@ public class Application
 					splitPane.setRightComponent(wwd);
 					fullscreenFrame.dispose();
 					fullscreenFrame = null;
-					loadSplitLocations();
+					loadSplitLocation();
 					frame.setVisible(true);
 				}
 			}
@@ -1055,28 +927,22 @@ public class Application
 
 	public void quit()
 	{
-		saveSplitLocations();
-		Settings.save();
+		saveSplitLocation();
+		Settings.get().saveThemeProperties(theme);
+		Settings.get().save();
 		theme.dispose();
 		frame.dispose();
 		System.exit(0);
 	}
 
-	private void saveSplitLocations()
+	private void saveSplitLocation()
 	{
-		int[] splits = new int[1];
-		splits[0] = splitPane.getDividerLocation();
-		Settings.get().setSplitLocations(splits);
+		Settings.get().setSplitLocation(splitPane.getDividerLocation());
 	}
 
-	private void loadSplitLocations()
+	private void loadSplitLocation()
 	{
-		int[] splits = Settings.get().getSplitLocations();
-		if (splits != null && splits.length == 1)
-		{
-			if (splits[0] >= 0)
-				splitPane.setDividerLocation(splits[0]);
-		}
+		splitPane.setDividerLocation(Settings.get().getSplitLocation());
 	}
 
 	public void updateElevationUnit(String newValue)
