@@ -115,50 +115,51 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 	private void enableSlider()
 	{
 		TreePath selected = tree.getSelectionPath();
-		boolean enable = false;
-		if (selected != null)
+		ILayerNode node = getLayer(selected);
+		if (node != null && layerEnabler.hasLayer(node))
 		{
-			Object o = selected.getLastPathComponent();
-			if (o instanceof ILayerNode)
-			{
-				ILayerNode node = (ILayerNode) o;
-				if (layerEnabler.hasLayer(node))
-				{
-					enable = true;
-					double opacity = node.isEnabled() ? node.getOpacity() * 100d : 0;
-					ignoreSliderChange = true;
-					opacitySlider.setValue((int) Math.round(opacity));
-					ignoreSliderChange = false;
-				}
-			}
+			double opacity = node.isEnabled() ? node.getOpacity() * 100d : 0;
+			ignoreSliderChange = true;
+			opacitySlider.setValue((int) Math.round(opacity));
+			ignoreSliderChange = false;
+			opacitySlider.setEnabled(true);
 		}
-		opacitySlider.setEnabled(enable);
+		else
+		{
+			opacitySlider.setEnabled(false);
+		}
 	}
 
 	private void setSelectedOpacity()
 	{
 		TreePath selected = tree.getSelectionPath();
-		if (selected != null)
+		ILayerNode node = getLayer(selected);
+		if (node != null && layerEnabler.hasLayer(node))
 		{
-			Object o = selected.getLastPathComponent();
+			double opacity = opacitySlider.getValue() / 100d;
+			boolean enabled = opacity > 0;
+			tree.getModel().setEnabled(node, enabled);
+			tree.getModel().setOpacity(node, opacity);
+
+			((ClearableBasicTreeUI) tree.getUI()).relayout(selected);
+
+			Rectangle bounds = tree.getPathBounds(selected);
+			if (bounds != null)
+				tree.repaint(bounds);
+		}
+	}
+
+	private ILayerNode getLayer(TreePath path)
+	{
+		if (path != null)
+		{
+			Object o = path.getLastPathComponent();
 			if (o instanceof ILayerNode)
 			{
-				ILayerNode node = (ILayerNode) o;
-				if (layerEnabler.hasLayer(node))
-				{
-					double opacity = opacitySlider.getValue() / 100d;
-					boolean enabled = opacity > 0;
-					tree.getModel().setEnabled(node, enabled);
-					tree.getModel().setOpacity(node, opacity);
-
-					((ClearableBasicTreeUI) tree.getUI()).relayout(selected);
-
-					Rectangle bounds = tree.getPathBounds(selected);
-					if (bounds != null)
-						tree.repaint(bounds);
-				}
+				return (ILayerNode) o;
 			}
 		}
+		return null;
 	}
 
 	protected void setupToolBarBeforeSlider(JToolBar toolBar)

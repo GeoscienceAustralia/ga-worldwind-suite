@@ -276,7 +276,6 @@ public class SettingsDialog extends JDialog
 		JComponent fullscreen = createFullscreen();
 		fullscreen.setBorder(BorderFactory.createTitledBorder("Fullscreen"));
 		c = new GridBagConstraints();
-		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
@@ -287,8 +286,7 @@ public class SettingsDialog extends JDialog
 		JComponent other = createOther();
 		other.setBorder(BorderFactory.createTitledBorder("Other"));
 		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 1;
@@ -309,10 +307,10 @@ public class SettingsDialog extends JDialog
 		stereo.setBorder(BorderFactory.createTitledBorder("Stereo"));
 		c = new GridBagConstraints();
 		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
+		c.anchor = GridBagConstraints.NORTH;
 		c.weightx = 1;
+		c.weighty = 1;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
 		panel.add(stereo, c);
 
@@ -330,10 +328,8 @@ public class SettingsDialog extends JDialog
 		JComponent proxy = createProxy();
 		proxy.setBorder(BorderFactory.createTitledBorder("Proxy"));
 		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.NORTHWEST;
+		c.anchor = GridBagConstraints.NORTH;
 		c.weightx = 1;
 		c.weighty = 1;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
