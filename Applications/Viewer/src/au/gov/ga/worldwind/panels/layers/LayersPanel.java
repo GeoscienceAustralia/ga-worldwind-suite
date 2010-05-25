@@ -1,36 +1,32 @@
 package au.gov.ga.worldwind.panels.layers;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
 
 import javax.swing.DropMode;
-import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.panels.dataset.DatasetPanel;
 import au.gov.ga.worldwind.panels.layers.drag.NodeTransferHandler;
-import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.theme.ThemePanel;
 import au.gov.ga.worldwind.util.BasicAction;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 
-public class LayersPanel extends AbstractThemePanel
+public class LayersPanel extends AbstractLayersPanel
 {
 	private static final String LAYERS_FILENAME = "layers.xml";
 	private static final File layersFile = new File(Util.getUserDirectory(), LAYERS_FILENAME);
 
-	private LayerTree tree;
-	private INode root;
-
-	private LayerEnabler layerEnabler;
+	private BasicAction newFolderAction, renameAction, deleteAction;
 
 	private DatasetPanel datasetPanel;
 
@@ -39,6 +35,22 @@ public class LayersPanel extends AbstractThemePanel
 		super(new BorderLayout());
 		setDisplayName("Layers");
 
+		tree.addTreeSelectionListener(new TreeSelectionListener()
+		{
+			@Override
+			public void valueChanged(TreeSelectionEvent e)
+			{
+				enableActions();
+			}
+		});
+
+		enableActions();
+	}
+
+	@Override
+	protected INode createRootNode()
+	{
+		INode root = null;
 		try
 		{
 			root = LayerTreePersistance.readFromXML(layersFile);
@@ -48,22 +60,13 @@ public class LayersPanel extends AbstractThemePanel
 		}
 		if (root == null)
 			root = new FolderNode("root", null, true);
-
-		layerEnabler = new LayerEnabler();
-		tree = new LayerTree(root, layerEnabler);
-		layerEnabler.setTree(tree);
-
-		JScrollPane scrollPane = new JScrollPane(tree);
-		add(scrollPane, BorderLayout.CENTER);
-		scrollPane.setPreferredSize(new Dimension(MINIMUM_LIST_HEIGHT, MINIMUM_LIST_HEIGHT));
-
-		createToolBar();
+		return root;
 	}
 
-	private void createToolBar()
+	@Override
+	protected void setupToolBarBeforeSlider(JToolBar toolBar)
 	{
-		BasicAction newFolderAction =
-				new BasicAction("Create", "Create Folder", Icons.newfolder.getIcon());
+		newFolderAction = new BasicAction("Create", "Create Folder", Icons.newfolder.getIcon());
 		newFolderAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -88,8 +91,7 @@ public class LayersPanel extends AbstractThemePanel
 			}
 		});
 
-		BasicAction renameAction =
-				new BasicAction("Rename", "Rename selected", Icons.edit.getIcon());
+		renameAction = new BasicAction("Rename", "Rename selected", Icons.edit.getIcon());
 		renameAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -103,8 +105,7 @@ public class LayersPanel extends AbstractThemePanel
 			}
 		});
 
-		BasicAction deleteAction =
-				new BasicAction("Delete", "Delete selected", Icons.delete.getIcon());
+		deleteAction = new BasicAction("Delete", "Delete selected", Icons.delete.getIcon());
 		deleteAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -121,12 +122,17 @@ public class LayersPanel extends AbstractThemePanel
 			}
 		});
 
-		JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
-		toolBar.setFloatable(false);
 		toolBar.add(newFolderAction);
 		toolBar.add(renameAction);
 		toolBar.add(deleteAction);
-		add(toolBar, BorderLayout.PAGE_START);
+		toolBar.addSeparator();
+	}
+
+	private void enableActions()
+	{
+		boolean anySelected = tree.getSelectionPath() != null;
+		renameAction.setEnabled(anySelected);
+		deleteAction.setEnabled(anySelected);
 	}
 
 	public LayerTreeModel getModel()
@@ -137,8 +143,9 @@ public class LayersPanel extends AbstractThemePanel
 	@Override
 	public void setup(Theme theme)
 	{
-		layerEnabler.setWwd(theme.getWwd());
+		super.setup(theme);
 		linkPanels(theme.getPanels());
+		setupDrag();
 	}
 
 	@Override
@@ -161,7 +168,6 @@ public class LayersPanel extends AbstractThemePanel
 		{
 			datasetPanel.registerLayerTreeModel(getModel());
 		}
-		setupDrag();
 	}
 
 	private void setupDrag()

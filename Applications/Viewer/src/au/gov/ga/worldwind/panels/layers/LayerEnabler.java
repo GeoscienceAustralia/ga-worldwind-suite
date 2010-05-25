@@ -32,9 +32,21 @@ public class LayerEnabler
 	private List<Layer> layers = new ArrayList<Layer>();
 	private List<ElevationModel> elevationModels = new ArrayList<ElevationModel>();
 
+	private List<RefreshListener> listeners = new ArrayList<RefreshListener>();
+
 	public void setTree(LayerTree tree)
 	{
 		this.tree = tree;
+	}
+
+	public void addRefreshListener(RefreshListener listener)
+	{
+		listeners.add(listener);
+	}
+
+	public void removeRefreshListener(RefreshListener listener)
+	{
+		listeners.remove(listener);
 	}
 
 	public synchronized void setWwd(WorldWindow wwd)
@@ -214,23 +226,26 @@ public class LayerEnabler
 		//rebuild the lists
 		for (Wrapper wrapper : wrappers)
 		{
-			if (wrapper.node.isEnabled())
+			if (wrapper.hasLayer())
 			{
-				if (wrapper.hasLayer())
-				{
-					Layer layer = wrapper.getLayer();
-					layer.setEnabled(true);
-					layers.add(layer);
-				}
-				else if (wrapper.hasElevationModel())
-				{
+				Layer layer = wrapper.getLayer();
+				layer.setEnabled(wrapper.node.isEnabled());
+				layer.setOpacity(wrapper.node.getOpacity());
+				layers.add(layer);
+			}
+			else if (wrapper.hasElevationModel())
+			{
+				if (wrapper.node.isEnabled())
 					elevationModels.add(wrapper.getElevationModel());
-				}
 			}
 		}
 
 		layerList.addAllFromSection(this, layers);
 		elevationModel.addAllFromSection(this, elevationModels);
+
+		//tell the listeners that the list has been refreshed
+		for (RefreshListener listener : listeners)
+			listener.refreshed();
 	}
 
 	private static class Wrapper
@@ -282,5 +297,10 @@ public class LayerEnabler
 				setLayer(null);
 			}
 		}
+	}
+
+	public static interface RefreshListener
+	{
+		public void refreshed();
 	}
 }

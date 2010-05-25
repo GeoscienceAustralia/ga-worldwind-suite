@@ -40,7 +40,7 @@ public class Settings
 	{
 		return new File(Util.getUserDirectory(), SETTINGS_FILENAME);
 	}
-	
+
 	public static boolean isStereoSupported()
 	{
 		return stereoSupported;
@@ -454,9 +454,10 @@ public class Settings
 			{
 				if (pp.getClassName().equals(panel.getClass().getName()))
 				{
-					panel.setOn(pp.isEnabled());
 					panel.setExpanded(pp.isExpanded());
 					panel.setWeight(pp.getWeight());
+					if (theme.hasMenuBar())
+						panel.setOn(pp.isEnabled());
 					break;
 				}
 			}
@@ -468,7 +469,8 @@ public class Settings
 			{
 				if (hp.getClassName().equals(hud.getClass().getName()))
 				{
-					hud.setOn(hp.isEnabled());
+					if (theme.hasMenuBar())
+						hud.setOn(hp.isEnabled());
 					break;
 				}
 			}
@@ -494,9 +496,10 @@ public class Settings
 				getPanelProperties().add(prop);
 			}
 			prop.setClassName(panel.getClass().getName());
-			prop.setEnabled(panel.isOn());
 			prop.setExpanded(panel.isExpanded());
 			prop.setWeight(panel.getWeight());
+			if (theme.hasMenuBar())
+				prop.setEnabled(panel.isOn());
 		}
 
 		for (ThemeHUD hud : theme.getHUDs())
@@ -516,7 +519,8 @@ public class Settings
 				getHudProperties().add(prop);
 			}
 			prop.setClassName(hud.getClass().getName());
-			prop.setEnabled(hud.isOn());
+			if (theme.hasMenuBar())
+				prop.setEnabled(hud.isOn());
 		}
 	}
 

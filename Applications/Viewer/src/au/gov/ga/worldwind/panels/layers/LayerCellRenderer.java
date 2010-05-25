@@ -152,14 +152,24 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 					label.setIcon(Icons.error.getIcon());
 					label.setText(label.getText() + " - " + layer.getError().getMessage());
 				}
-				else if (layer.getDescriptionURL() != null)
+				else
 				{
-					//make the label look like a link
-					String text =
-							"<html><font color=\"#0000CF\"><u>" + label.getText()
-									+ "</u></font></html>";
-					label.setText(text);
-					urlRow = true;
+					if (layer.isEnabled() && layer.getOpacity() < 1)
+					{
+						String text =
+								label.getText() + " (" + (int) Math.round(layer.getOpacity() * 100)
+										+ "%)";
+						label.setText(text);
+					}
+					if (layer.getDescriptionURL() != null)
+					{
+						//make the label look like a link
+						String text =
+								"<html><font color=\"#0000CF\"><u>" + label.getText()
+										+ "</u></font></html>";
+						label.setText(text);
+						urlRow = true;
+					}
 				}
 
 				//have to add it each time? it removes itself?

@@ -55,6 +55,20 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		return layer.isEnabled();
 	}
 
+	public void setOpacity(ILayerNode layer, double opacity)
+	{
+		if (layer.getOpacity() != opacity)
+		{
+			layer.setOpacity(opacity);
+			refreshLayers();
+		}
+	}
+
+	public double getOpacity(ILayerNode layer)
+	{
+		return layer.getOpacity();
+	}
+
 	private void refreshLayers()
 	{
 		List<ILayerNode> copy = new ArrayList<ILayerNode>(layerNodes);
@@ -100,7 +114,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		TreePath expand = new TreePath(expandPath.toArray());
 
 		//relayout the tree, and expand to make the layer node visible
-		((ClearableBasicTreeUI) tree.getUI()).relayout();
+		((ClearableBasicTreeUI) tree.getUI()).relayout(expand);
 		tree.scrollPathToVisible(expand);
 	}
 

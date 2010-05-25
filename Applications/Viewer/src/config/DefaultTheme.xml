@@ -11,35 +11,25 @@
 	<!--<InitialHeading></InitialHeading>-->
 	<!--<InitialPitch></InitialPitch>-->
 
-	<!-- Heads-up-display elements (can also include graticules) -->
-	<HUD name="World Map" className="au.gov.ga.worldwind.theme.hud.WorldMapHUD"
-		position="NorthWest" />
-	<HUD name="Compass" className="au.gov.ga.worldwind.theme.hud.CompassHUD"
-		position="NorthEast" />
-	<HUD name="Scalebar" className="au.gov.ga.worldwind.theme.hud.ScalebarHUD"
-		position="SouthEast" />
-	<HUD name="Navigation Controls" className="au.gov.ga.worldwind.theme.hud.ControlsHUD"
-		position="SouthWest" />
-	<HUD name="Graticule" className="au.gov.ga.worldwind.theme.hud.GraticuleHUD"
-		enabled="false" />
-	<HUD name="Crosshair" className="au.gov.ga.worldwind.theme.hud.CrosshairHUD"
-		enabled="false" />
+	<!-- Heads-up-display elements (can also include special layers) -->
+	<HUD name="World Map" className="au.gov.ga.worldwind.theme.hud.WorldMapHUD" position="NorthWest" />
+	<HUD name="Compass" className="au.gov.ga.worldwind.theme.hud.CompassHUD" position="NorthEast" />
+	<HUD name="Scalebar" className="au.gov.ga.worldwind.theme.hud.ScalebarHUD" position="SouthEast" />
+	<HUD name="Navigation Controls" className="au.gov.ga.worldwind.theme.hud.ControlsHUD" position="SouthWest" />
+	<HUD name="Graticule" className="au.gov.ga.worldwind.theme.hud.GraticuleHUD" enabled="false" />
+	<HUD name="Crosshair" className="au.gov.ga.worldwind.theme.hud.CrosshairHUD" enabled="false" />
 
 	<!-- Datasets are shown in the Dataset panel -->
-	<Dataset name="Datasets"
-		url="http://www.ga.gov.au:8500/apps/world-wind/dataset/dataset.xml" />
+	<Dataset name="Datasets" url="http://www.ga.gov.au:8500/apps/world-wind/dataset/dataset.xml" />
 
 	<!-- Layers are shown in the Theme Layers panel (non editable list) -->
-	<Layer name="Potassium"
-		url="http://www.ga.gov.au:8500/apps/world-wind/dataset/GA/Radiometrics/Potassium.xml"
+	<Layer name="Potassium" url="http://www.ga.gov.au:8500/apps/world-wind/dataset/GA/Radiometrics/Potassium.xml"
 		icon="" description="" enabled="true" />
 
 	<!-- Sidebar panels -->
-	<Panel name="Search"
-		className="au.gov.ga.worldwind.panels.geonames.GeoNamesSearchPanel"
+	<Panel name="Search" className="au.gov.ga.worldwind.panels.geonames.GeoNamesSearchPanel"
 		expanded="false" />
-	<Panel name="Places" className="au.gov.ga.worldwind.panels.places.PlacesPanel"
-		expanded="true" />
+	<Panel name="Places" className="au.gov.ga.worldwind.panels.places.PlacesPanel" expanded="true" />
 	<Panel name="Layers" className="au.gov.ga.worldwind.panels.layers.LayersPanel" />
 	<Panel name="Datasets" className="au.gov.ga.worldwind.panels.dataset.DatasetPanel" />
 	<Panel name="Theme Layers" className="au.gov.ga.worldwind.panels.layers.ThemeLayersPanel" />

@@ -50,6 +50,7 @@ import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.util.BasicAction;
+import au.gov.ga.worldwind.util.HSLColor;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 
@@ -169,6 +170,11 @@ public class PlacesPanel extends AbstractThemePanel
 		scrollPane.setBorder(BorderFactory.createLoweredBevelBorder());
 		add(scrollPane, BorderLayout.CENTER);
 		scrollPane.setPreferredSize(new Dimension(MINIMUM_LIST_HEIGHT, MINIMUM_LIST_HEIGHT));
+
+		list.setSelectionForeground(Color.black);
+		Color backgroundSelection = list.getSelectionBackground();
+		HSLColor hsl = new HSLColor(backgroundSelection);
+		list.setSelectionBackground(hsl.adjustTone(80));
 
 		ListSelectionListener lsl = new ListSelectionListener()
 		{

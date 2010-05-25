@@ -20,26 +20,34 @@ public class XMLUtil extends WWXML
 				return ((Document) source).getDocumentElement();
 			else
 			{
-				Document document = WWXML.openDocument(source);
+				Document document = openDocument(source);
 				if (document != null)
 					return document.getDocumentElement();
 			}
 		}
 		return null;
 	}
-	
+
 	public static boolean getBoolean(Element context, String path, boolean def)
 	{
-		Boolean b = XMLUtil.getBoolean(context, path, null);
+		Boolean b = getBoolean(context, path, null);
 		if (b == null)
 			return def;
 		return b;
 	}
 
+	public static double getDouble(Element context, String path, double def)
+	{
+		Double d = getDouble(context, path, null);
+		if (d == null)
+			return def;
+		return d;
+	}
+
 	public static URL getURL(Element element, String path, URL context)
 			throws MalformedURLException
 	{
-		String text = XMLUtil.getText(element, path);
+		String text = getText(element, path);
 		return getURL(text, context);
 	}
 

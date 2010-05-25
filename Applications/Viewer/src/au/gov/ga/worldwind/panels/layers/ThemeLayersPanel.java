@@ -1,43 +1,22 @@
 package au.gov.ga.worldwind.panels.layers;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-
-import javax.swing.JScrollPane;
 
 import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
-import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
 
-public class ThemeLayersPanel extends AbstractThemePanel
+public class ThemeLayersPanel extends AbstractLayersPanel
 {
-	private LayerTree tree;
-	private INode root;
-
-	private LayerEnabler layerEnabler;
-
 	public ThemeLayersPanel()
 	{
 		super(new BorderLayout());
 		setDisplayName("Theme Layers");
-
-		root = new FolderNode("root", null, true);
-		layerEnabler = new LayerEnabler();
-		tree = new LayerTree(root, layerEnabler);
-		layerEnabler.setTree(tree);
-
-		tree.setShowsRootHandles(false);
-		tree.setEditable(false);
-
-		JScrollPane scrollPane = new JScrollPane(tree);
-		add(scrollPane, BorderLayout.CENTER);
-		scrollPane.setPreferredSize(new Dimension(MINIMUM_LIST_HEIGHT, MINIMUM_LIST_HEIGHT));
 	}
 
 	@Override
 	public void setup(Theme theme)
 	{
-		layerEnabler.setWwd(theme.getWwd());
+		super.setup(theme);
 
 		for (ILayerDefinition layer : theme.getLayers())
 		{
@@ -51,5 +30,11 @@ public class ThemeLayersPanel extends AbstractThemePanel
 	@Override
 	public void dispose()
 	{
+	}
+
+	@Override
+	protected INode createRootNode()
+	{
+		return new FolderNode("root", null, true);
 	}
 }
