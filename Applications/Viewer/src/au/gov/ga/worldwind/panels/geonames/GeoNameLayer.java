@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.panels.places;
+package au.gov.ga.worldwind.panels.geonames;
 
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
@@ -8,7 +8,7 @@ import gov.nasa.worldwind.render.GeographicTextRenderer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlaceLayer extends AbstractLayer
+public class GeoNameLayer extends AbstractLayer
 {
 	private final GeographicTextRenderer nameRenderer = new GeographicTextRenderer();
 	private List<GeographicText> text = new ArrayList<GeographicText>();

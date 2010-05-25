@@ -53,13 +53,11 @@ public class AnnotationsLayer extends AbstractLayer
 					{
 						if (event.getTopObject() instanceof RenderableAnnotation)
 						{
-							RenderableAnnotation a = (RenderableAnnotation) event
-									.getTopObject();
+							RenderableAnnotation a = (RenderableAnnotation) event.getTopObject();
 							// Left click on an annotation - select
 							selectAnnotation(a, true);
 							if (isSelected(a))
-								annotationsPanel.selectAnnotation(a
-										.getAnnotation());
+								annotationsPanel.selectAnnotation(a.getAnnotation());
 						}
 					}
 				}
@@ -79,8 +77,8 @@ public class AnnotationsLayer extends AbstractLayer
 						if (event.getTopObject() == selectedAnnotation)
 						{
 							this.dragger.selected(event);
-							selectedAnnotation.setDragging(event
-									.getEventAction().equals(SelectEvent.DRAG));
+							selectedAnnotation.setDragging(event.getEventAction().equals(
+									SelectEvent.DRAG));
 						}
 					}
 
@@ -88,8 +86,7 @@ public class AnnotationsLayer extends AbstractLayer
 					// or de-highlight the dragged shape if it's no longer under the cursor.
 					if (event.getEventAction().equals(SelectEvent.DRAG_END))
 					{
-						PickedObjectList pol = wwd
-								.getObjectsAtCurrentPosition();
+						PickedObjectList pol = wwd.getObjectsAtCurrentPosition();
 						if (pol != null)
 						{
 							highlight(pol.getTopObject());
@@ -126,8 +123,8 @@ public class AnnotationsLayer extends AbstractLayer
 	public void refresh()
 	{
 		annotations.clear();
-		for (au.gov.ga.worldwind.annotations.Annotation annotation : Settings
-				.get().getAnnotations())
+		for (au.gov.ga.worldwind.annotations.Annotation annotation : Settings.get()
+				.getAnnotations())
 		{
 			RenderableAnnotation a = new RenderableAnnotation(annotation);
 			annotations.add(a);
@@ -146,8 +143,7 @@ public class AnnotationsLayer extends AbstractLayer
 		renderer.pick(dc, annotations, pickPoint, this);
 	}
 
-	public void selectAnnotation(
-			au.gov.ga.worldwind.annotations.Annotation annotation)
+	protected void selectAnnotation(au.gov.ga.worldwind.annotations.Annotation annotation)
 	{
 		for (Annotation a : annotations)
 		{
@@ -165,8 +161,7 @@ public class AnnotationsLayer extends AbstractLayer
 		return annotation == selectedAnnotation;
 	}
 
-	protected void selectAnnotation(RenderableAnnotation annotation,
-			boolean toggle)
+	protected void selectAnnotation(RenderableAnnotation annotation, boolean toggle)
 	{
 		if (selectedAnnotation != null)
 		{
@@ -179,8 +174,7 @@ public class AnnotationsLayer extends AbstractLayer
 		else
 		{
 			selectedAnnotation = annotation;
-			savedBorderColor = selectedAnnotation.getAttributes()
-					.getBorderColor();
+			savedBorderColor = selectedAnnotation.getAttributes().getBorderColor();
 			selectedAnnotation.getAttributes().setBorderColor(Color.YELLOW);
 		}
 	}

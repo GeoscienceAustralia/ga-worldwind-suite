@@ -10,6 +10,7 @@ import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
@@ -167,6 +168,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 		JScrollPane scrollPane = new JScrollPane(list);
 		scrollPane.setBorder(BorderFactory.createLoweredBevelBorder());
 		add(scrollPane, BorderLayout.CENTER);
+		scrollPane.setPreferredSize(new Dimension(MINIMUM_LIST_HEIGHT, MINIMUM_LIST_HEIGHT));
 
 		ListSelectionListener lsl = new ListSelectionListener()
 		{
@@ -367,7 +369,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 		}
 	}
 
-	public void selectAnnotation(Annotation annotation)
+	void selectAnnotation(Annotation annotation)
 	{
 		if (annotation != null)
 		{
@@ -424,7 +426,20 @@ public class AnnotationsPanel extends AbstractThemePanel
 		}
 	}
 
-	public void deleteAllAnnotations()
+	public void deleteAllAnnotationsWarn()
+	{
+		int value =
+				JOptionPane.showConfirmDialog(window,
+						"All annotations will be deleted!\nAre you sure?",
+						"Delete all annotations", JOptionPane.YES_NO_OPTION,
+						JOptionPane.WARNING_MESSAGE);
+		if (value == JOptionPane.YES_OPTION)
+		{
+			deleteAllAnnotations();
+		}
+	}
+
+	private void deleteAllAnnotations()
 	{
 		Settings.get().getAnnotations().clear();
 		populateList();

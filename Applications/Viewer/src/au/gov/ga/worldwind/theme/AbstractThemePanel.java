@@ -8,6 +8,8 @@ import javax.swing.JPanel;
 
 public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 {
+	public static final int MINIMUM_LIST_HEIGHT = 25;
+	
 	private List<ThemePieceListener> listeners = new ArrayList<ThemePieceListener>();
 	private List<ThemePanelListener> panelListeners = new ArrayList<ThemePanelListener>();
 	private String displayName;

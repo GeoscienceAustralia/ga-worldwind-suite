@@ -35,7 +35,8 @@
 		icon="" description="" enabled="true" />
 
 	<!-- Sidebar panels -->
-	<Panel name="Search" className="au.gov.ga.worldwind.panels.places.PlaceSearchPanel"
+	<Panel name="Search"
+		className="au.gov.ga.worldwind.panels.geonames.GeoNamesSearchPanel"
 		expanded="false" />
 	<Panel name="Annotations" className="au.gov.ga.worldwind.annotations.AnnotationsPanel"
 		expanded="true" />

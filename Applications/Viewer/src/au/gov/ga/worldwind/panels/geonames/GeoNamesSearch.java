@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.panels.places;
+package au.gov.ga.worldwind.panels.geonames;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
@@ -71,9 +71,9 @@ public class GeoNamesSearch
 	public static class Results
 	{
 		public final String error;
-		public final List<Place> places;
+		public final List<GeoName> places;
 
-		public Results(List<Place> places)
+		public Results(List<GeoName> places)
 		{
 			this.places = places;
 			this.error = null;
@@ -148,7 +148,7 @@ public class GeoNamesSearch
 				return new Results("Unknown error occurred");
 			}
 		}
-		List<Place> places = new ArrayList<Place>();
+		List<GeoName> places = new ArrayList<GeoName>();
 		NodeList nodes = document.getElementsByTagName("geoname");
 		if (nodes != null)
 		{
@@ -225,7 +225,7 @@ public class GeoNamesSearch
 						colorFont = defaultColorFont;
 					}
 
-					Place place = new Place(name, country, geonameId, latlon,
+					GeoName place = new GeoName(name, country, geonameId, latlon,
 							fcl, fclName, fcode, fcodeName, colorFont);
 					places.add(place);
 				}

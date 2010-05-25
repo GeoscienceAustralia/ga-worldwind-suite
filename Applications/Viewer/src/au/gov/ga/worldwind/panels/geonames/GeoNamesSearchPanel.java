@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.panels.places;
+package au.gov.ga.worldwind.panels.geonames;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
@@ -11,6 +11,7 @@ import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
@@ -42,17 +43,17 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import au.gov.ga.worldwind.components.FlatJButton;
-import au.gov.ga.worldwind.panels.places.GeoNamesSearch.Results;
-import au.gov.ga.worldwind.panels.places.GeoNamesSearch.SearchType;
+import au.gov.ga.worldwind.panels.geonames.GeoNamesSearch.Results;
+import au.gov.ga.worldwind.panels.geonames.GeoNamesSearch.SearchType;
 import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 
-public class PlaceSearchPanel extends AbstractThemePanel
+public class GeoNamesSearchPanel extends AbstractThemePanel
 {
 	private WorldWindow wwd;
-	private static PlaceLayer placeLayer = new PlaceLayer();
+	private GeoNameLayer geonameLayer = new GeoNameLayer();
 	private DefaultListModel listModel;
 	private Thread currentSearch;
 	private Object lock = new Object();
@@ -64,7 +65,7 @@ public class PlaceSearchPanel extends AbstractThemePanel
 
 	private JScrollPane listScrollPane;
 
-	public PlaceSearchPanel()
+	public GeoNamesSearchPanel()
 	{
 		super(new GridBagLayout());
 		GridBagConstraints c;
@@ -119,12 +120,12 @@ public class PlaceSearchPanel extends AbstractThemePanel
 		buttonGroup.add(exact);
 
 		final JCheckBox showResults = new JCheckBox("Show results on globe");
-		showResults.setSelected(placeLayer.isEnabled());
+		showResults.setSelected(geonameLayer.isEnabled());
 		showResults.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				placeLayer.setEnabled(showResults.isSelected());
+				geonameLayer.setEnabled(showResults.isSelected());
 				if (wwd != null)
 					wwd.redraw();
 			}
@@ -152,6 +153,7 @@ public class PlaceSearchPanel extends AbstractThemePanel
 		listScrollPane = new JScrollPane(list);
 		listScrollPane.setBorder(BorderFactory.createLoweredBevelBorder());
 		panel.add(listScrollPane, BorderLayout.CENTER);
+		listScrollPane.setPreferredSize(new Dimension(MINIMUM_LIST_HEIGHT, MINIMUM_LIST_HEIGHT));
 
 		list.addMouseListener(new MouseAdapter()
 		{
@@ -167,7 +169,7 @@ public class PlaceSearchPanel extends AbstractThemePanel
 
 		list.addMouseMotionListener(new MouseMotionAdapter()
 		{
-			private Place lastPlace;
+			private GeoName lastPlace;
 
 			@Override
 			public void mouseMoved(MouseEvent e)
@@ -180,9 +182,9 @@ public class PlaceSearchPanel extends AbstractThemePanel
 					if (r.contains(e.getPoint()))
 					{
 						Object o = list.getModel().getElementAt(index);
-						if (o instanceof Place)
+						if (o instanceof GeoName)
 						{
-							Place place = (Place) o;
+							GeoName place = (GeoName) o;
 							text = "<html>Name: " + place.name + "<br>";
 							text += "Country: " + place.country + "<br>";
 							text +=
@@ -270,7 +272,7 @@ public class PlaceSearchPanel extends AbstractThemePanel
 		listScrollPane.setVisible(false);
 		setResizable(false);
 		currentSearch = null;
-		placeLayer.clearText();
+		geonameLayer.clearText();
 		listModel.clear();
 		clearButton.setEnabled(false);
 		if (wwd != null)
@@ -288,9 +290,9 @@ public class PlaceSearchPanel extends AbstractThemePanel
 	{
 		Object object = list.getSelectedValue();
 
-		if (object instanceof Place)
+		if (object instanceof GeoName)
 		{
-			Place place = (Place) object;
+			GeoName place = (GeoName) object;
 
 			if (wwd != null)
 			{
@@ -340,7 +342,7 @@ public class PlaceSearchPanel extends AbstractThemePanel
 
 	private void showResultsImpl(Results results)
 	{
-		placeLayer.clearText();
+		geonameLayer.clearText();
 		listModel.clear();
 
 		if (results.error != null)
@@ -355,9 +357,9 @@ public class PlaceSearchPanel extends AbstractThemePanel
 			}
 			else
 			{
-				for (Place place : results.places)
+				for (GeoName place : results.places)
 				{
-					placeLayer.addText(place);
+					geonameLayer.addText(place);
 					listModel.addElement(place);
 				}
 				clearButton.setEnabled(true);
@@ -404,9 +406,9 @@ public class PlaceSearchPanel extends AbstractThemePanel
 		public Component getListCellRendererComponent(JList list, Object value, int index,
 				boolean isSelected, boolean cellHasFocus)
 		{
-			if (value instanceof Place)
+			if (value instanceof GeoName)
 			{
-				Place place = (Place) value;
+				GeoName place = (GeoName) value;
 				String text = place.name;
 				if (place.country != null && !place.fclass.equals("PCLI"))
 				{
@@ -445,9 +447,9 @@ public class PlaceSearchPanel extends AbstractThemePanel
 	{
 		wwd = theme.getWwd();
 		LayerList layers = wwd.getModel().getLayers();
-		if (!layers.contains(placeLayer))
+		if (!layers.contains(geonameLayer))
 		{
-			layers.add(placeLayer);
+			layers.add(geonameLayer);
 		}
 	}
 

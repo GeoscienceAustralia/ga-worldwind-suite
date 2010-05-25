@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.panels.places;
+package au.gov.ga.worldwind.panels.geonames;
 
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -9,7 +9,7 @@ import java.awt.Font;
 
 import au.gov.ga.worldwind.util.ColorFont;
 
-public class Place implements GeographicText
+public class GeoName implements GeographicText
 {
 	public final String name;
 	public final String country;
@@ -23,7 +23,7 @@ public class Place implements GeographicText
 
 	public String[] parents;
 
-	public Place(String name, String country, int id, LatLon latlon,
+	public GeoName(String name, String country, int id, LatLon latlon,
 			String fclass, String fclassname, String fcode, String fcodename, ColorFont colorFont)
 	{
 		this.name = name;

@@ -31,7 +31,7 @@ public class ThemeLayersPanel extends AbstractThemePanel
 
 		JScrollPane scrollPane = new JScrollPane(tree);
 		add(scrollPane, BorderLayout.CENTER);
-		scrollPane.setPreferredSize(new Dimension(50, 50));
+		scrollPane.setPreferredSize(new Dimension(MINIMUM_LIST_HEIGHT, MINIMUM_LIST_HEIGHT));
 	}
 
 	@Override
