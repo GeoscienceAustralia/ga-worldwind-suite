@@ -233,7 +233,7 @@ public class SettingsDialog extends JDialog
 			settings.setViewIteratorSpeed(viewIteratorSpeed);
 			settings.setVerticalExaggeration(verticalExaggeration);
 			if (annotationsPause != null)
-				settings.setAnnotationsPause(annotationsPause);
+				settings.setPlacesPause(annotationsPause);
 			settings.setShowDownloads(showDownloads);
 
 			settings.setProxyEnabled(proxyEnabled);
@@ -684,7 +684,7 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel2.add(label, c);
 
-		annotationsPauseText = new JIntegerField(settings.getAnnotationsPause());
+		annotationsPauseText = new JIntegerField(settings.getPlacesPause());
 		annotationsPauseText.setPositive(true);
 		c = new GridBagConstraints();
 		c.gridx = 1;

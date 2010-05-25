@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.annotations;
+package au.gov.ga.worldwind.panels.places;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.event.SelectEvent;
@@ -18,19 +18,18 @@ import java.util.List;
 
 import au.gov.ga.worldwind.settings.Settings;
 
-
-public class AnnotationsLayer extends AbstractLayer
+public class PlaceLayer extends AbstractLayer
 {
 	private AnnotationRenderer renderer = new BasicAnnotationRenderer();
 	private List<Annotation> annotations = new ArrayList<Annotation>();
-	private RenderableAnnotation selectedAnnotation;
-	private RenderableAnnotation lastPickedAnnotation;
+	private RenderablePlace selectedAnnotation;
+	private RenderablePlace lastPickedAnnotation;
 
 	private Color savedBorderColor;
 	private WorldWindow wwd;
-	private AnnotationsPanel annotationsPanel;
+	private PlacesPanel annotationsPanel;
 
-	public AnnotationsLayer(WorldWindow wwd, AnnotationsPanel annotationsPanel)
+	public PlaceLayer(WorldWindow wwd, PlacesPanel annotationsPanel)
 	{
 		this.wwd = wwd;
 		this.annotationsPanel = annotationsPanel;
@@ -51,13 +50,13 @@ public class AnnotationsLayer extends AbstractLayer
 				{
 					if (event.hasObjects())
 					{
-						if (event.getTopObject() instanceof RenderableAnnotation)
+						if (event.getTopObject() instanceof RenderablePlace)
 						{
-							RenderableAnnotation a = (RenderableAnnotation) event.getTopObject();
+							RenderablePlace a = (RenderablePlace) event.getTopObject();
 							// Left click on an annotation - select
 							selectAnnotation(a, true);
 							if (isSelected(a))
-								annotationsPanel.selectAnnotation(a.getAnnotation());
+								annotationsPanel.selectPlace(a.getPlace());
 						}
 					}
 				}
@@ -113,9 +112,9 @@ public class AnnotationsLayer extends AbstractLayer
 		}
 
 		// Turn on highlight if object selected.
-		if (o != null && o instanceof RenderableAnnotation)
+		if (o != null && o instanceof RenderablePlace)
 		{
-			lastPickedAnnotation = (RenderableAnnotation) o;
+			lastPickedAnnotation = (RenderablePlace) o;
 			lastPickedAnnotation.getAttributes().setHighlighted(true);
 		}
 	}
@@ -123,10 +122,9 @@ public class AnnotationsLayer extends AbstractLayer
 	public void refresh()
 	{
 		annotations.clear();
-		for (au.gov.ga.worldwind.annotations.Annotation annotation : Settings.get()
-				.getAnnotations())
+		for (Place place : Settings.get().getPlaces())
 		{
-			RenderableAnnotation a = new RenderableAnnotation(annotation);
+			RenderablePlace a = new RenderablePlace(place);
 			annotations.add(a);
 		}
 	}
@@ -143,12 +141,12 @@ public class AnnotationsLayer extends AbstractLayer
 		renderer.pick(dc, annotations, pickPoint, this);
 	}
 
-	protected void selectAnnotation(au.gov.ga.worldwind.annotations.Annotation annotation)
+	protected void selectPlace(au.gov.ga.worldwind.panels.places.Place annotation)
 	{
 		for (Annotation a : annotations)
 		{
-			RenderableAnnotation ra = (RenderableAnnotation) a;
-			if (ra.getAnnotation() == annotation)
+			RenderablePlace ra = (RenderablePlace) a;
+			if (ra.getPlace() == annotation)
 			{
 				selectAnnotation(ra, false);
 				break;
@@ -156,12 +154,12 @@ public class AnnotationsLayer extends AbstractLayer
 		}
 	}
 
-	protected boolean isSelected(RenderableAnnotation annotation)
+	protected boolean isSelected(RenderablePlace annotation)
 	{
 		return annotation == selectedAnnotation;
 	}
 
-	protected void selectAnnotation(RenderableAnnotation annotation, boolean toggle)
+	protected void selectAnnotation(RenderablePlace annotation, boolean toggle)
 	{
 		if (selectedAnnotation != null)
 		{

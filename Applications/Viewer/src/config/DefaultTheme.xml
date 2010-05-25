@@ -38,7 +38,7 @@
 	<Panel name="Search"
 		className="au.gov.ga.worldwind.panels.geonames.GeoNamesSearchPanel"
 		expanded="false" />
-	<Panel name="Annotations" className="au.gov.ga.worldwind.annotations.AnnotationsPanel"
+	<Panel name="Places" className="au.gov.ga.worldwind.panels.places.PlacesPanel"
 		expanded="true" />
 	<Panel name="Layers" className="au.gov.ga.worldwind.panels.layers.LayersPanel" />
 	<Panel name="Datasets" className="au.gov.ga.worldwind.panels.dataset.DatasetPanel" />

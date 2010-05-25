@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.annotations;
+package au.gov.ga.worldwind.panels.places;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -10,18 +10,17 @@ import gov.nasa.worldwind.render.GlobeAnnotation;
 import gov.nasa.worldwind.util.WWMath;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
-public class RenderableAnnotation extends GlobeAnnotation
+public class RenderablePlace extends GlobeAnnotation
 {
-	private Annotation annotation;
+	private Place place;
 	private Position position;
 	private boolean dragging;
 
-	public RenderableAnnotation(Annotation annotation)
+	public RenderablePlace(Place place)
 	{
-		super(annotation.getLabel(), Position.fromDegrees(annotation
-				.getLatitude(), annotation.getLongitude(), 0));
-		this.annotation = annotation;
-		setAttributes(new MyAnnotationAttributes(annotation));
+		super(place.getLabel(), Position.fromDegrees(place.getLatitude(), place.getLongitude(), 0));
+		this.place = place;
+		setAttributes(new MyAnnotationAttributes(place));
 		getAttributes().setTextAlign(AVKey.CENTER);
 	}
 
@@ -36,8 +35,7 @@ public class RenderableAnnotation extends GlobeAnnotation
 		if (point == null)
 			return;
 
-		if (dc.getView().getFrustumInModelCoordinates().getNear().distanceTo(
-				point) < 0)
+		if (dc.getView().getFrustumInModelCoordinates().getNear().distanceTo(point) < 0)
 			return;
 
 		Vec4 screenPoint = dc.getView().project(point);
@@ -51,15 +49,15 @@ public class RenderableAnnotation extends GlobeAnnotation
 		double lookAtDistance = this.computeLookAtDistance(dc);
 		double eyeDistance = dc.getView().getEyePoint().distanceTo3(point);
 		double distanceFactor = Math.sqrt(lookAtDistance / eyeDistance);
-		double scale = WWMath.clamp(distanceFactor, this.attributes
-				.getDistanceMinScale(), this.attributes.getDistanceMaxScale());
-		double opacity = WWMath.clamp(distanceFactor, this.attributes
-				.getDistanceMinOpacity(), 1);
+		double scale =
+				WWMath.clamp(distanceFactor, this.attributes.getDistanceMinScale(), this.attributes
+						.getDistanceMaxScale());
+		double opacity = WWMath.clamp(distanceFactor, this.attributes.getDistanceMinOpacity(), 1);
 
-		
+
 		//added lines below
-		double minZoom = annotation.getMinZoom();
-		double maxZoom = annotation.getMaxZoom();
+		double minZoom = place.getMinZoom();
+		double maxZoom = place.getMaxZoom();
 		double zoom;
 		View view = dc.getView();
 		if (view instanceof OrbitView)
@@ -67,31 +65,29 @@ public class RenderableAnnotation extends GlobeAnnotation
 		else
 			zoom = view.getEyePosition().getElevation();
 		if (minZoom >= 0 && zoom > minZoom)
-			opacity = WWMath.clamp(1 - 5 * (zoom - minZoom) / minZoom, 0,
-					opacity);
+			opacity = WWMath.clamp(1 - 5 * (zoom - minZoom) / minZoom, 0, opacity);
 		else if (maxZoom >= 0 && zoom < maxZoom)
-			opacity = WWMath.clamp(1 - 5 * (maxZoom - zoom) / maxZoom, 0,
-					opacity);
+			opacity = WWMath.clamp(1 - 5 * (maxZoom - zoom) / maxZoom, 0, opacity);
 		if (opacity < 0.1)
 			getAttributes().setHighlighted(false);
 		//added lines above
 
 
 		this.setDepthFunc(dc, screenPoint);
-		this.drawTopLevelAnnotation(dc, (int) screenPoint.x,
-				(int) screenPoint.y, size.width, size.height, scale, opacity,
-				pos);
+		this.drawTopLevelAnnotation(dc, (int) screenPoint.x, (int) screenPoint.y, size.width,
+				size.height, scale, opacity, pos);
 	}
 
 	@Override
 	public String getText()
 	{
-		String text = annotation.getLabel();
+		String text = place.getLabel();
 		if (dragging)
 		{
-			String latlon = String.format("Lat %7.4f\u00B0\nLon %7.4f\u00B0",
-					getPosition().getLatitude().degrees, getPosition()
-							.getLongitude().degrees);
+			String latlon =
+					String.format("Lat %7.4f\u00B0\nLon %7.4f\u00B0",
+							getPosition().getLatitude().degrees,
+							getPosition().getLongitude().degrees);
 			text += "\n" + latlon;
 		}
 		return text;
@@ -100,16 +96,15 @@ public class RenderableAnnotation extends GlobeAnnotation
 	@Override
 	public void setText(String text)
 	{
-		if (annotation != null)
-			annotation.setLabel(text);
+		if (place != null)
+			place.setLabel(text);
 	}
 
 	@Override
 	public Position getPosition()
 	{
 		if (position == null)
-			position = Position.fromDegrees(annotation.getLatitude(),
-					annotation.getLongitude(), 0);
+			position = Position.fromDegrees(place.getLatitude(), place.getLongitude(), 0);
 		return position;
 	}
 
@@ -123,16 +118,16 @@ public class RenderableAnnotation extends GlobeAnnotation
 	public void move(Position position)
 	{
 		Position newPosition = getPosition().add(position);
-		annotation.setLatitude(newPosition.getLatitude().degrees);
-		annotation.setLongitude(newPosition.getLongitude().degrees);
+		place.setLatitude(newPosition.getLatitude().degrees);
+		place.setLongitude(newPosition.getLongitude().degrees);
 		this.position = null;
 	}
 
 	@Override
 	public void moveTo(Position position)
 	{
-		annotation.setLatitude(position.getLatitude().degrees);
-		annotation.setLongitude(position.getLongitude().degrees);
+		place.setLatitude(position.getLatitude().degrees);
+		place.setLongitude(position.getLongitude().degrees);
 		this.position = null;
 	}
 
@@ -146,31 +141,31 @@ public class RenderableAnnotation extends GlobeAnnotation
 		this.dragging = dragging;
 	}
 
-	public Annotation getAnnotation()
+	public Place getPlace()
 	{
-		return annotation;
+		return place;
 	}
 
 	public static class MyAnnotationAttributes extends AnnotationAttributes
 	{
-		private Annotation annotation;
+		private Place place;
 
-		public MyAnnotationAttributes(Annotation annotation)
+		public MyAnnotationAttributes(Place place)
 		{
 			super();
-			this.annotation = annotation;
+			this.place = place;
 		}
 
 		@Override
 		public boolean isVisible()
 		{
-			return annotation.isVisible();
+			return place.isVisible();
 		}
 
 		@Override
 		public void setVisible(boolean visible)
 		{
-			annotation.setVisible(visible);
+			place.setVisible(visible);
 		}
 	}
 }

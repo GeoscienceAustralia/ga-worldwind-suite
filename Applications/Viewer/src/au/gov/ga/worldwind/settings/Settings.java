@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.annotations.Annotation;
+import au.gov.ga.worldwind.panels.places.Place;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.theme.ThemeHUD;
 import au.gov.ga.worldwind.theme.ThemePanel;
@@ -90,10 +90,10 @@ public class Settings
 	private boolean stereoEnabled = false;
 	private boolean hardwareStereoEnabled = false;
 	private boolean windowMaximized = false;
-	private List<Annotation> annotations = new ArrayList<Annotation>();
+	private List<Place> places = new ArrayList<Place>();
 	private double viewIteratorSpeed = 1.0;
 	private boolean showDownloads = true;
-	private int annotationsPause = 1000;
+	private int placesPause = 1000;
 
 	private int splitLocation = 300;
 	private List<ThemePanelProperties> panelProperties = new ArrayList<ThemePanelProperties>();
@@ -356,16 +356,16 @@ public class Settings
 		this.displayId = displayId;
 	}
 
-	public List<Annotation> getAnnotations()
+	public List<Place> getPlaces()
 	{
-		return annotations;
+		return places;
 	}
 
-	public void setAnnotations(List<Annotation> annotations)
+	public void setPlaces(List<Place> places)
 	{
-		if (annotations == null)
-			annotations = new ArrayList<Annotation>();
-		this.annotations = annotations;
+		if (places == null)
+			places = new ArrayList<Place>();
+		this.places = places;
 	}
 
 	public double getViewIteratorSpeed()
@@ -388,14 +388,14 @@ public class Settings
 		this.showDownloads = showDownloads;
 	}
 
-	public int getAnnotationsPause()
+	public int getPlacesPause()
 	{
-		return annotationsPause;
+		return placesPause;
 	}
 
-	public void setAnnotationsPause(int annotationsPause)
+	public void setPlacesPause(int annotationsPause)
 	{
-		this.annotationsPause = annotationsPause;
+		this.placesPause = annotationsPause;
 	}
 
 	public List<ThemePanelProperties> getPanelProperties()

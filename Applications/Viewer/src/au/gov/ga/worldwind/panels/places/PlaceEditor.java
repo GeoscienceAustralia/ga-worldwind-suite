@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.annotations;
+package au.gov.ga.worldwind.panels.places;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
@@ -37,13 +37,13 @@ import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 
 
-public class AnnotationEditor extends JDialog
+public class PlaceEditor extends JDialog
 {
 	public static String IMPERIAL = "Imperial";
 	public static String METRIC = "Metric";
 	private static String UNITS = METRIC;
 
-	private Annotation annotation;
+	private Place place;
 	private JCheckBox visible;
 	private JTextArea text;
 	private JTextField latlon;
@@ -94,12 +94,12 @@ public class AnnotationEditor extends JDialog
 		}
 	}
 
-	public AnnotationEditor(final WorldWindow wwd, Window owner, String title,
-			final Annotation annotation)
+	public PlaceEditor(final WorldWindow wwd, Window owner, String title,
+			final Place place)
 	{
 		super(owner, title, ModalityType.APPLICATION_MODAL);
 		this.wwd = wwd;
-		this.annotation = annotation;
+		this.place = place;
 		setLayout(new BorderLayout());
 
 		Insets insets = new Insets(3, 1, 3, 1);
@@ -139,7 +139,7 @@ public class AnnotationEditor extends JDialog
 		};
 
 		panel2 = new JPanel(new GridBagLayout());
-		panel2.setBorder(BorderFactory.createTitledBorder("Annotation"));
+		panel2.setBorder(BorderFactory.createTitledBorder("Place"));
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
@@ -156,7 +156,7 @@ public class AnnotationEditor extends JDialog
 		c.insets = (Insets) insets.clone();
 		panel2.add(label, c);
 
-		text = new JTextArea(annotation.getLabel(), 3, 30);
+		text = new JTextArea(place.getLabel(), 3, 30);
 		text.setFont(Font.decode(""));
 		c = new GridBagConstraints();
 		c.gridx = 1;
@@ -179,8 +179,8 @@ public class AnnotationEditor extends JDialog
 		c.insets.bottom = 0;
 		panel2.add(label, c);
 
-		latlon = new JTextField(textFormatedLatLon(annotation.getLatitude(),
-				annotation.getLongitude()));
+		latlon = new JTextField(textFormatedLatLon(place.getLatitude(),
+				place.getLongitude()));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 1;
@@ -207,11 +207,11 @@ public class AnnotationEditor extends JDialog
 		c.insets = (Insets) insets.clone();
 		panel2.add(panel3, c);
 
-		visible = new JCheckBox("Show on globe", annotation.isVisible());
+		visible = new JCheckBox("Show on globe", place.isVisible());
 		panel3.add(visible);
 		visible.addActionListener(al);
 
-		excludeFromPlaylist = new JCheckBox("Exclude from playlist", annotation
+		excludeFromPlaylist = new JCheckBox("Exclude from playlist", place
 				.isExcludeFromPlaylist());
 		panel3.add(excludeFromPlaylist);
 		excludeFromPlaylist.addActionListener(al);
@@ -240,7 +240,7 @@ public class AnnotationEditor extends JDialog
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel2.add(panel3, c);
 
-		Double minz = Double.valueOf(annotation.getMinZoom());
+		Double minz = Double.valueOf(place.getMinZoom());
 		if (minz < 0)
 			minz = null;
 		minZoom = new JDoubleField(minz, 2);
@@ -305,7 +305,7 @@ public class AnnotationEditor extends JDialog
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel2.add(panel3, c);
 
-		Double maxz = Double.valueOf(annotation.getMaxZoom());
+		Double maxz = Double.valueOf(place.getMaxZoom());
 		if (maxz < 0)
 			maxz = null;
 		maxZoom = new JDoubleField(maxz, 2);
@@ -372,7 +372,7 @@ public class AnnotationEditor extends JDialog
 		c.gridwidth = 2;
 		panel2.add(panel3, c);
 
-		cameraInformation = new JCheckBox("Save camera information", annotation
+		cameraInformation = new JCheckBox("Save camera information", place
 				.isSaveCamera());
 		panel3.add(cameraInformation);
 		cameraInformation.addActionListener(new ActionListener()
@@ -400,14 +400,14 @@ public class AnnotationEditor extends JDialog
 					Position pos = orbitView.getCenterPosition();
 					double lat = pos.getLatitude().degrees;
 					double lon = pos.getLongitude().degrees;
-					if (Math.abs(lat - annotation.getLatitude()) > 0.1
-							|| Math.abs(lon - annotation.getLongitude()) > 0.1)
+					if (Math.abs(lat - place.getLatitude()) > 0.1
+							|| Math.abs(lon - place.getLongitude()) > 0.1)
 					{
 						int value = JOptionPane
 								.showConfirmDialog(
-										AnnotationEditor.this,
+										PlaceEditor.this,
 										"Do you want to change the Lat/Lon to match the current camera center?",
-										"Move annotation",
+										"Move place",
 										JOptionPane.YES_NO_OPTION,
 										JOptionPane.QUESTION_MESSAGE);
 						if (value == JOptionPane.YES_OPTION)
@@ -437,7 +437,7 @@ public class AnnotationEditor extends JDialog
 		c.insets = (Insets) insets.clone();
 		panel2.add(panel3, c);
 
-		heading = new JDoubleField(annotation.getHeading(), 2);
+		heading = new JDoubleField(place.getHeading(), 2);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
@@ -468,7 +468,7 @@ public class AnnotationEditor extends JDialog
 		c.insets = (Insets) insets.clone();
 		panel2.add(panel3, c);
 
-		pitch = new JDoubleField(annotation.getPitch(), 2);
+		pitch = new JDoubleField(place.getPitch(), 2);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
@@ -498,7 +498,7 @@ public class AnnotationEditor extends JDialog
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel2.add(panel3, c);
 
-		zoom = new JDoubleField(annotation.getZoom(), 2);
+		zoom = new JDoubleField(place.getZoom(), 2);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
@@ -579,13 +579,13 @@ public class AnnotationEditor extends JDialog
 	{
 		boolean valid = true;
 
-		annotation.setVisible(visible.isSelected());
+		place.setVisible(visible.isSelected());
 
 		String label = text.getText();
 		if (label.length() == 0)
 			valid = false;
 		else
-			annotation.setLabel(label);
+			place.setLabel(label);
 
 		LatLon ll = parseLatLon(latlon.getText());
 		if (ll == null)
@@ -595,9 +595,9 @@ public class AnnotationEditor extends JDialog
 		}
 		else
 		{
-			annotation.setLatitude(ll.getLatitude().degrees);
-			annotation.setLongitude(ll.getLongitude().degrees);
-			latlonLabel.setText(labelFormatedLatLon(annotation));
+			place.setLatitude(ll.getLatitude().degrees);
+			place.setLongitude(ll.getLongitude().degrees);
+			latlonLabel.setText(labelFormatedLatLon(place));
 		}
 
 		Double minz = minZoom.getValue();
@@ -616,9 +616,9 @@ public class AnnotationEditor extends JDialog
 		if (z == null || z <= 0)
 			z = wwd.getView().getEyePosition().getElevation();
 
-		annotation.setMinZoom(minz);
-		annotation.setMaxZoom(maxz);
-		annotation.setZoom(z);
+		place.setMinZoom(minz);
+		place.setMaxZoom(maxz);
+		place.setZoom(z);
 
 		Double p = pitch.getValue();
 		Double h = heading.getValue();
@@ -627,10 +627,10 @@ public class AnnotationEditor extends JDialog
 		if (h == null)
 			h = 0d;
 
-		annotation.setSaveCamera(cameraInformation.isSelected());
-		annotation.setHeading(h);
-		annotation.setPitch(p);
-		annotation.setExcludeFromPlaylist(excludeFromPlaylist.isSelected());
+		place.setSaveCamera(cameraInformation.isSelected());
+		place.setHeading(h);
+		place.setPitch(p);
+		place.setExcludeFromPlaylist(excludeFromPlaylist.isSelected());
 
 		okButton.setEnabled(valid);
 		return valid;
@@ -663,10 +663,10 @@ public class AnnotationEditor extends JDialog
 		return String.format("%7.4f %7.4f", latitude, longitude);
 	}
 
-	private String labelFormatedLatLon(Annotation annotation)
+	private String labelFormatedLatLon(Place place)
 	{
-		return String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", annotation
-				.getLatitude(), annotation.getLongitude());
+		return String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", place
+				.getLatitude(), place.getLongitude());
 	}
 
 	private LatLon parseLatLon(String text)

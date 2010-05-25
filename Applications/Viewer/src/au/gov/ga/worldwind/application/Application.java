@@ -66,7 +66,6 @@ import javax.swing.filechooser.FileFilter;
 
 import nasa.worldwind.awt.WorldWindowStereoGLCanvas;
 import nasa.worldwind.retrieve.ExtendedRetrievalService;
-import au.gov.ga.worldwind.annotations.AnnotationEditor;
 import au.gov.ga.worldwind.components.HtmlViewer;
 import au.gov.ga.worldwind.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.panels.SideBar;
@@ -74,6 +73,7 @@ import au.gov.ga.worldwind.panels.layers.ExtendedCompoundElevationModel;
 import au.gov.ga.worldwind.panels.layers.ExtendedLayerList;
 import au.gov.ga.worldwind.panels.layers.LayerFactory;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
+import au.gov.ga.worldwind.panels.places.PlaceEditor;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.SettingsDialog;
 import au.gov.ga.worldwind.stereo.StereoOrbitView;
@@ -970,13 +970,13 @@ public class Application
 		if (StatusBar.UNIT_IMPERIAL.equals(newValue))
 		{
 			this.statusBar.setElevationUnit(StatusBar.UNIT_IMPERIAL);
-			AnnotationEditor.setUnits(AnnotationEditor.IMPERIAL);
+			PlaceEditor.setUnits(PlaceEditor.IMPERIAL);
 		}
 		else
 		{
 			// Default to metric units.
 			this.statusBar.setElevationUnit(StatusBar.UNIT_METRIC);
-			AnnotationEditor.setUnits(AnnotationEditor.METRIC);
+			PlaceEditor.setUnits(PlaceEditor.METRIC);
 		}
 	}
 }

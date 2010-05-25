@@ -1,8 +1,8 @@
-package au.gov.ga.worldwind.annotations;
+package au.gov.ga.worldwind.panels.places;
 
 import java.io.Serializable;
 
-public class Annotation implements Serializable
+public class Place implements Serializable
 {
 	private String label = "";
 	private double latitude = 0;
@@ -16,16 +16,16 @@ public class Annotation implements Serializable
 	private double pitch = 0;
 	private boolean excludeFromPlaylist = false;
 
-	public Annotation()
+	public Place()
 	{
 	}
 
-	public Annotation(String label, double latitude, double longitude)
+	public Place(String label, double latitude, double longitude)
 	{
 		this(label, latitude, longitude, -1);
 	}
 
-	public Annotation(String label, double latitude, double longitude,
+	public Place(String label, double latitude, double longitude,
 			double minZoom)
 	{
 		this.label = label;
@@ -35,24 +35,24 @@ public class Annotation implements Serializable
 		this.visible = true;
 	}
 
-	public Annotation(Annotation annotation)
+	public Place(Place place)
 	{
-		setValuesFrom(annotation);
+		setValuesFrom(place);
 	}
 
-	public void setValuesFrom(Annotation annotation)
+	public void setValuesFrom(Place place)
 	{
-		this.label = annotation.label;
-		this.latitude = annotation.latitude;
-		this.longitude = annotation.longitude;
-		this.minZoom = annotation.minZoom;
-		this.maxZoom = annotation.maxZoom;
-		this.visible = annotation.visible;
-		this.saveCamera = annotation.saveCamera;
-		this.zoom = annotation.zoom;
-		this.heading = annotation.heading;
-		this.pitch = annotation.pitch;
-		this.excludeFromPlaylist = annotation.excludeFromPlaylist;
+		this.label = place.label;
+		this.latitude = place.latitude;
+		this.longitude = place.longitude;
+		this.minZoom = place.minZoom;
+		this.maxZoom = place.maxZoom;
+		this.visible = place.visible;
+		this.saveCamera = place.saveCamera;
+		this.zoom = place.zoom;
+		this.heading = place.heading;
+		this.pitch = place.pitch;
+		this.excludeFromPlaylist = place.excludeFromPlaylist;
 	}
 
 	public String getLabel()

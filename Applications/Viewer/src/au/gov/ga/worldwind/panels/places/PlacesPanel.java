@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.annotations;
+package au.gov.ga.worldwind.panels.places;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
@@ -53,13 +53,13 @@ import au.gov.ga.worldwind.util.BasicAction;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 
-public class AnnotationsPanel extends AbstractThemePanel
+public class PlacesPanel extends AbstractThemePanel
 {
 	private WorldWindow wwd;
 	private JList list;
 	private DefaultListModel model;
 	private ListItem dragging;
-	private AnnotationsLayer layer;
+	private PlaceLayer layer;
 	private Window window;
 	private boolean playing = false;
 	private BasicAction addAction, editAction, deleteAction, playAction, importAction,
@@ -69,16 +69,16 @@ public class AnnotationsPanel extends AbstractThemePanel
 	private class ListItem
 	{
 		public final JCheckBox check;
-		public final Annotation annotation;
+		public final Place place;
 
-		public ListItem(Annotation annotation, JCheckBox check)
+		public ListItem(Place place, JCheckBox check)
 		{
-			this.annotation = annotation;
+			this.place = place;
 			this.check = check;
 		}
 	}
 
-	public AnnotationsPanel()
+	public PlacesPanel()
 	{
 		super(new BorderLayout());
 
@@ -88,7 +88,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 
 	private void createPanel()
 	{
-		addAction = new BasicAction("Add", "Add annotation", Icons.add.getIcon());
+		addAction = new BasicAction("Add", "Add place", Icons.add.getIcon());
 		addAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -115,35 +115,35 @@ public class AnnotationsPanel extends AbstractThemePanel
 			}
 		});
 
-		playAction = new BasicAction("Play", "Fly through all annotations", Icons.run.getIcon());
+		playAction = new BasicAction("Play", "", Icons.run.getIcon());
 		playAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				if (playing)
-					stopAnnotations();
+					stopPlaces();
 				else
-					playAnnotations();
+					playPlaces();
 			}
 		});
 
-		importAction = new BasicAction("Import", "Import annotations", Icons.imporrt.getIcon());
+		importAction = new BasicAction("Import", "Import places", Icons.imporrt.getIcon());
 		importAction.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				importAnnotations();
+				importPlaces();
 			}
 		});
 
-		exportAction = new BasicAction("Export", "Export annotations", Icons.export.getIcon());
+		exportAction = new BasicAction("Export", "Export places", Icons.export.getIcon());
 		exportAction.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				exportAnnotations();
+				exportPlaces();
 			}
 		});
 
@@ -177,7 +177,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 				enableActions();
 				ListItem item = (ListItem) list.getSelectedValue();
 				if (item != null)
-					annotationSelected(item.annotation);
+					placeSelected(item.place);
 			}
 		};
 		list.getSelectionModel().addListSelectionListener(lsl);
@@ -267,7 +267,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 			}
 		});
 
-		stopAnnotations();
+		stopPlaces();
 	}
 
 	private void enableActions()
@@ -277,9 +277,9 @@ public class AnnotationsPanel extends AbstractThemePanel
 		deleteAction.setEnabled(list.getSelectedIndex() >= 0 && !playing);
 	}
 
-	private void annotationSelected(Annotation annotation)
+	private void placeSelected(Place place)
 	{
-		layer.selectAnnotation(annotation);
+		layer.selectPlace(place);
 		wwd.redraw();
 	}
 
@@ -306,7 +306,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 		if (item != null)
 		{
 			item.check.setSelected(!item.check.isSelected());
-			item.annotation.setVisible(item.check.isSelected());
+			item.place.setVisible(item.check.isSelected());
 			list.repaint();
 			refreshLayer();
 		}
@@ -320,24 +320,24 @@ public class AnnotationsPanel extends AbstractThemePanel
 		}
 		if (item != null)
 		{
-			flyToAnnotation(item.annotation);
+			flyToPlace(item.place);
 		}
 	}
 
 	private void populateList()
 	{
 		model.removeAllElements();
-		for (Annotation annotation : Settings.get().getAnnotations())
+		for (Place place : Settings.get().getPlaces())
 		{
-			addAnnotation(annotation);
+			addPlace(place);
 		}
 		list.repaint();
 	}
 
-	private void addAnnotation(Annotation annotation)
+	private void addPlace(Place place)
 	{
-		JCheckBox check = new JCheckBox("", annotation.isVisible());
-		ListItem item = new ListItem(annotation, check);
+		JCheckBox check = new JCheckBox("", place.isVisible());
+		ListItem item = new ListItem(place, check);
 		model.addElement(item);
 	}
 
@@ -349,34 +349,32 @@ public class AnnotationsPanel extends AbstractThemePanel
 			OrbitView orbitView = (OrbitView) view;
 			Position pos = orbitView.getCenterPosition();
 			double minZoom = orbitView.getZoom() * 5;
-			Annotation annotation =
-					new Annotation("", pos.getLatitude().degrees, pos.getLongitude().degrees,
-							minZoom);
-			annotation.setZoom(orbitView.getZoom());
-			annotation.setHeading(orbitView.getHeading().degrees);
-			annotation.setPitch(orbitView.getPitch().degrees);
-			annotation.setSaveCamera(false);
-			AnnotationEditor editor =
-					new AnnotationEditor(wwd, window, "New annotation", annotation);
+			Place place =
+					new Place("", pos.getLatitude().degrees, pos.getLongitude().degrees, minZoom);
+			place.setZoom(orbitView.getZoom());
+			place.setHeading(orbitView.getHeading().degrees);
+			place.setPitch(orbitView.getPitch().degrees);
+			place.setSaveCamera(false);
+			PlaceEditor editor = new PlaceEditor(wwd, window, "New place", place);
 			int value = editor.getOkCancel();
 			if (value == JOptionPane.OK_OPTION)
 			{
-				Settings.get().getAnnotations().add(annotation);
-				addAnnotation(annotation);
+				Settings.get().getPlaces().add(place);
+				addPlace(place);
 				list.repaint();
 				refreshLayer();
 			}
 		}
 	}
 
-	void selectAnnotation(Annotation annotation)
+	void selectPlace(Place place)
 	{
-		if (annotation != null)
+		if (place != null)
 		{
 			for (int i = 0; i < model.size(); i++)
 			{
 				ListItem item = (ListItem) model.get(i);
-				if (item.annotation == annotation)
+				if (item.place == place)
 				{
 					list.setSelectedValue(item, true);
 					break;
@@ -390,12 +388,12 @@ public class AnnotationsPanel extends AbstractThemePanel
 		ListItem item = (ListItem) list.getSelectedValue();
 		if (item != null)
 		{
-			Annotation editing = new Annotation(item.annotation);
-			AnnotationEditor editor = new AnnotationEditor(wwd, window, "Edit annotation", editing);
+			Place editing = new Place(item.place);
+			PlaceEditor editor = new PlaceEditor(wwd, window, "Edit place", editing);
 			int value = editor.getOkCancel();
 			if (value == JOptionPane.OK_OPTION)
 			{
-				item.annotation.setValuesFrom(editing);
+				item.place.setValuesFrom(editing);
 				list.repaint();
 				refreshLayer();
 			}
@@ -410,13 +408,13 @@ public class AnnotationsPanel extends AbstractThemePanel
 		{
 			int value =
 					JOptionPane.showConfirmDialog(this,
-							"Are you sure you want to delete the annotation '"
-									+ item.annotation.getLabel() + "'?", "Delete annotation",
-							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+							"Are you sure you want to delete the place '" + item.place.getLabel()
+									+ "'?", "Delete place", JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE);
 			if (value == JOptionPane.YES_OPTION)
 			{
 				model.removeElement(item);
-				Settings.get().getAnnotations().remove(item.annotation);
+				Settings.get().getPlaces().remove(item.place);
 				list.repaint();
 				if (index >= model.getSize())
 					index = model.getSize() - 1;
@@ -426,22 +424,22 @@ public class AnnotationsPanel extends AbstractThemePanel
 		}
 	}
 
-	public void deleteAllAnnotationsWarn()
+	public void deleteAllPlacesWarn()
 	{
 		int value =
-				JOptionPane.showConfirmDialog(window,
-						"All annotations will be deleted!\nAre you sure?",
-						"Delete all annotations", JOptionPane.YES_NO_OPTION,
-						JOptionPane.WARNING_MESSAGE);
+				JOptionPane
+						.showConfirmDialog(window, "All places will be deleted!\nAre you sure?",
+								"Delete all places", JOptionPane.YES_NO_OPTION,
+								JOptionPane.WARNING_MESSAGE);
 		if (value == JOptionPane.YES_OPTION)
 		{
-			deleteAllAnnotations();
+			deleteAllPlaces();
 		}
 	}
 
-	private void deleteAllAnnotations()
+	private void deleteAllPlaces()
 	{
-		Settings.get().getAnnotations().clear();
+		Settings.get().getPlaces().clear();
 		populateList();
 		refreshLayer();
 	}
@@ -453,8 +451,8 @@ public class AnnotationsPanel extends AbstractThemePanel
 		{
 			model.remove(srcIndex);
 			model.add(index, item);
-			Settings.get().getAnnotations().remove(item.annotation);
-			Settings.get().getAnnotations().add(index, item.annotation);
+			Settings.get().getPlaces().remove(item.place);
+			Settings.get().getPlaces().add(index, item.place);
 			list.setSelectedIndex(index);
 			list.repaint();
 		}
@@ -466,17 +464,17 @@ public class AnnotationsPanel extends AbstractThemePanel
 		wwd.redraw();
 	}
 
-	private synchronized void stopAnnotations()
+	private synchronized void stopPlaces()
 	{
 		if (wwd != null)
 			wwd.getView().stopAnimations();
 		playing = false;
 		playAction.setIcon(Icons.run.getIcon());
-		playAction.setToolTipText("Play through annotations");
+		playAction.setToolTipText("Play through places");
 		enableActions();
 	}
 
-	private synchronized void playAnnotations()
+	private synchronized void playPlaces()
 	{
 		if (!playing)
 		{
@@ -486,7 +484,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 				@Override
 				public void mousePressed(MouseEvent e)
 				{
-					stopAnnotations();
+					stopPlaces();
 					if (!playing)
 					{
 						wwd.getInputHandler().removeMouseListener(this);
@@ -498,13 +496,13 @@ public class AnnotationsPanel extends AbstractThemePanel
 				public void run()
 				{
 					ListItem item = (ListItem) list.getSelectedValue();
-					List<Annotation> annotations = Settings.get().getAnnotations();
+					List<Place> places = Settings.get().getPlaces();
 					int index = -1;
 					if (item != null)
 					{
-						index = annotations.indexOf(item.annotation);
+						index = places.indexOf(item.place);
 					}
-					else if (!annotations.isEmpty())
+					else if (!places.isEmpty())
 					{
 						index = 0;
 					}
@@ -512,14 +510,14 @@ public class AnnotationsPanel extends AbstractThemePanel
 					long jump = 100;
 					while (playing && index >= 0)
 					{
-						Annotation annotation = annotations.get(index);
-						if (!annotation.isExcludeFromPlaylist())
+						Place place = places.get(index);
+						if (!place.isExcludeFromPlaylist())
 						{
-							selectAnnotation(annotation);
-							long length = flyToAnnotation(annotation);
+							selectPlace(place);
+							long length = flyToPlace(place);
 							if (length < 0)
 								break;
-							length += Settings.get().getAnnotationsPause();
+							length += Settings.get().getPlacesPause();
 
 							// sleep for 'length' in 'jump' increments
 							for (; playing && length > jump; length -= jump)
@@ -533,21 +531,21 @@ public class AnnotationsPanel extends AbstractThemePanel
 						int nextIndex = index;
 						while (true)
 						{
-							if (++nextIndex >= annotations.size())
+							if (++nextIndex >= places.size())
 								nextIndex = 0;
 							if (nextIndex == index)
 							{
 								index = -1;
 								break;
 							}
-							if (!annotations.get(nextIndex).isExcludeFromPlaylist())
+							if (!places.get(nextIndex).isExcludeFromPlaylist())
 							{
 								index = nextIndex;
 								break;
 							}
 						}
 					}
-					stopAnnotations();
+					stopPlaces();
 				}
 
 				private void sleep(long millis)
@@ -562,7 +560,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 					}
 				}
 			});
-			thread.setName("Annotations");
+			thread.setName("Places playback");
 			thread.setDaemon(true);
 			thread.start();
 		}
@@ -572,30 +570,29 @@ public class AnnotationsPanel extends AbstractThemePanel
 		enableActions();
 	}
 
-	private long flyToAnnotation(Annotation annotation)
+	private long flyToPlace(Place place)
 	{
 		View view = wwd.getView();
 		if (view instanceof OrbitView)
 		{
 			OrbitView orbitView = (OrbitView) view;
 			Position center = orbitView.getCenterPosition();
-			Position newCenter =
-					Position.fromDegrees(annotation.getLatitude(), annotation.getLongitude(), 0);
+			Position newCenter = Position.fromDegrees(place.getLatitude(), place.getLongitude(), 0);
 			long lengthMillis = Util.getScaledLengthMillis(center, newCenter);
 
 			Angle heading = orbitView.getHeading();
 			Angle pitch = orbitView.getPitch();
 			double zoom = orbitView.getZoom();
-			if (annotation.isSaveCamera())
+			if (place.isSaveCamera())
 			{
-				zoom = annotation.getZoom();
-				heading = Angle.fromDegrees(annotation.getHeading());
-				pitch = Angle.fromDegrees(annotation.getPitch());
+				zoom = place.getZoom();
+				heading = Angle.fromDegrees(place.getHeading());
+				pitch = Angle.fromDegrees(place.getPitch());
 			}
 			else
 			{
-				double minZoom = annotation.getMinZoom();
-				double maxZoom = annotation.getMaxZoom();
+				double minZoom = place.getMinZoom();
+				double maxZoom = place.getMaxZoom();
 				if (minZoom >= 0 && zoom > minZoom)
 					zoom = Math.max(minZoom, 1000);
 				else if (maxZoom >= 0 && zoom < maxZoom)
@@ -642,7 +639,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 		return exportImportChooser;
 	}
 
-	private void importAnnotations()
+	private void importPlaces()
 	{
 		final JFileChooser chooser = getChooser();
 		chooser.setMultiSelectionEnabled(true);
@@ -652,7 +649,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 			{
 				try
 				{
-					importAnnotations(file);
+					importPlaces(file);
 				}
 				catch (Exception e)
 				{
@@ -664,7 +661,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 		chooser.setMultiSelectionEnabled(false);
 	}
 
-	private void importAnnotations(File file) throws Exception
+	private void importPlaces(File file) throws Exception
 	{
 		if (file.exists())
 		{
@@ -673,14 +670,14 @@ public class AnnotationsPanel extends AbstractThemePanel
 			{
 				FileInputStream fis = new FileInputStream(file);
 				xmldec = new XMLDecoder(fis);
-				List<Annotation> annotations = Settings.get().getAnnotations();
-				List<?> newAnnotations = (List<?>) xmldec.readObject();
-				if (newAnnotations != null)
+				List<Place> places = Settings.get().getPlaces();
+				List<?> newPlaces = (List<?>) xmldec.readObject();
+				if (newPlaces != null)
 				{
-					for (Object object : newAnnotations)
+					for (Object object : newPlaces)
 					{
-						if (object instanceof Annotation)
-							annotations.add((Annotation) object);
+						if (object instanceof Place)
+							places.add((Place) object);
 					}
 				}
 			}
@@ -698,7 +695,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 		}
 	}
 
-	private void exportAnnotations()
+	private void exportPlaces()
 	{
 		final JFileChooser chooser = getChooser();
 		if (chooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION)
@@ -721,7 +718,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 			{
 				try
 				{
-					exportAnnotations(file);
+					exportPlaces(file);
 				}
 				catch (Exception e)
 				{
@@ -732,14 +729,14 @@ public class AnnotationsPanel extends AbstractThemePanel
 		}
 	}
 
-	private void exportAnnotations(File file) throws Exception
+	private void exportPlaces(File file) throws Exception
 	{
 		XMLEncoder xmlenc = null;
 		try
 		{
 			FileOutputStream fos = new FileOutputStream(file);
 			xmlenc = new XMLEncoder(fos);
-			xmlenc.writeObject(Settings.get().getAnnotations());
+			xmlenc.writeObject(Settings.get().getPlaces());
 		}
 		catch (Exception e)
 		{
@@ -774,16 +771,16 @@ public class AnnotationsPanel extends AbstractThemePanel
 
 			if (value instanceof ListItem)
 			{
-				final Annotation annotation = ((ListItem) value).annotation;
+				final Place place = ((ListItem) value).place;
 				final JCheckBox check = ((ListItem) value).check;
 				if (panel.getComponentCount() != 1 || panel.getComponent(0) != check)
 				{
 					panel.removeAll();
 					panel.add(check, BorderLayout.CENTER);
 				}
-				label.setText(annotation.getLabel());
+				label.setText(place.getLabel());
 				check.setBackground(background);
-				check.setSelected(annotation.isVisible());
+				check.setSelected(place.isVisible());
 			}
 			else
 			{
@@ -802,7 +799,7 @@ public class AnnotationsPanel extends AbstractThemePanel
 	public void setup(Theme theme)
 	{
 		wwd = theme.getWwd();
-		layer = new AnnotationsLayer(wwd, this);
+		layer = new PlaceLayer(wwd, this);
 		wwd.getModel().getLayers().add(layer);
 
 		window = SwingUtilities.getWindowAncestor(this);
