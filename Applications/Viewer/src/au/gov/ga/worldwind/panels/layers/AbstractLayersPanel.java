@@ -121,18 +121,20 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			Object o = selected.getLastPathComponent();
 			if (o instanceof ILayerNode)
 			{
-				enable = true;
-
 				ILayerNode node = (ILayerNode) o;
-				double opacity = node.isEnabled() ? node.getOpacity() * 100d : 0;
-				ignoreSliderChange = true;
-				opacitySlider.setValue((int) Math.round(opacity));
-				ignoreSliderChange = false;
+				if (layerEnabler.hasLayer(node))
+				{
+					enable = true;
+					double opacity = node.isEnabled() ? node.getOpacity() * 100d : 0;
+					ignoreSliderChange = true;
+					opacitySlider.setValue((int) Math.round(opacity));
+					ignoreSliderChange = false;
+				}
 			}
 		}
 		opacitySlider.setEnabled(enable);
 	}
-	
+
 	private void setSelectedOpacity()
 	{
 		TreePath selected = tree.getSelectionPath();
@@ -142,16 +144,19 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			if (o instanceof ILayerNode)
 			{
 				ILayerNode node = (ILayerNode) o;
-				double opacity = opacitySlider.getValue() / 100d;
-				boolean enabled = opacity > 0;
-				tree.getModel().setEnabled(node, enabled);
-				tree.getModel().setOpacity(node, opacity);
+				if (layerEnabler.hasLayer(node))
+				{
+					double opacity = opacitySlider.getValue() / 100d;
+					boolean enabled = opacity > 0;
+					tree.getModel().setEnabled(node, enabled);
+					tree.getModel().setOpacity(node, opacity);
 
-				((ClearableBasicTreeUI) tree.getUI()).relayout(selected);
+					((ClearableBasicTreeUI) tree.getUI()).relayout(selected);
 
-				Rectangle bounds = tree.getPathBounds(selected);
-				if (bounds != null)
-					tree.repaint(bounds);
+					Rectangle bounds = tree.getPathBounds(selected);
+					if (bounds != null)
+						tree.repaint(bounds);
+				}
 			}
 		}
 	}

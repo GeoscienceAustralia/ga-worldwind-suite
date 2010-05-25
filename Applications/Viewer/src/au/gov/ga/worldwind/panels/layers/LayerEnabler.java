@@ -226,17 +226,19 @@ public class LayerEnabler
 		//rebuild the lists
 		for (Wrapper wrapper : wrappers)
 		{
-			if (wrapper.hasLayer())
+			if (wrapper.node.isEnabled())
 			{
-				Layer layer = wrapper.getLayer();
-				layer.setEnabled(wrapper.node.isEnabled());
-				layer.setOpacity(wrapper.node.getOpacity());
-				layers.add(layer);
-			}
-			else if (wrapper.hasElevationModel())
-			{
-				if (wrapper.node.isEnabled())
+				if (wrapper.hasLayer())
+				{
+					Layer layer = wrapper.getLayer();
+					layer.setEnabled(wrapper.node.isEnabled());
+					layer.setOpacity(wrapper.node.getOpacity());
+					layers.add(layer);
+				}
+				else if (wrapper.hasElevationModel())
+				{
 					elevationModels.add(wrapper.getElevationModel());
+				}
 			}
 		}
 
@@ -246,6 +248,13 @@ public class LayerEnabler
 		//tell the listeners that the list has been refreshed
 		for (RefreshListener listener : listeners)
 			listener.refreshed();
+	}
+
+	public synchronized boolean hasLayer(ILayerNode node)
+	{
+		if (nodeMap.containsKey(node))
+			return nodeMap.get(node).hasLayer();
+		return false;
 	}
 
 	private static class Wrapper
