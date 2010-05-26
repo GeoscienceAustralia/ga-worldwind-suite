@@ -2,6 +2,8 @@ package au.gov.ga.worldwind.theme;
 
 import gov.nasa.worldwind.Disposable;
 
+import javax.swing.Icon;
+
 public interface ThemePiece extends Disposable
 {
 	public void setup(Theme theme);
@@ -11,6 +13,7 @@ public interface ThemePiece extends Disposable
 	public void setOn(boolean on);
 	public void addListener(ThemePieceListener listener);
 	public void removeListener(ThemePieceListener listener);
+	public Icon getIcon();
 
 	public interface ThemePieceListener
 	{

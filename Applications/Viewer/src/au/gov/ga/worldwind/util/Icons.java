@@ -9,24 +9,55 @@ import javax.swing.ImageIcon;
 
 public enum Icons
 {
-	remove("remove.gif"),
-	search("search.gif"),
-	run("run.gif"),
-	stop("stop.gif"),
-	delete("delete.gif"),
-	edit("edit.gif"),
 	add("add.gif"),
-	up("up.gif"),
+	bookmark("bookmark.gif"),
+	category("category.gif"),
+	checkboxes("checkboxes.gif"),
+	compass("compass.gif"),
+	crosshair45("crosshair45.gif"),
+	crosshair("crosshair.png"),
+	datasets("datasets.gif"),
+	delete("delete.gif"),
+	deletevalue("deletevalue.gif"),
 	down("down.gif"),
-	legend("legend.gif"),
-	info("information.gif"),
-	error("error.gif"),
-	newfolder("newfolder.gif"),
-	folder("folder.gif"),
-	imporrt("import.gif"),
-	export("export.gif"),
+	earth32("earth32.png"),
 	earth("earth.png"),
-	earth32("earth32.png");
+	edit("edit.gif"),
+	error("error.gif"),
+	escape("escape.gif"),
+	exaggeration("exaggeration.png"),
+	export("export.gif"),
+	find("find.gif"),
+	flag("flag.gif"),
+	folder("folder.gif"),
+	graticule("graticule.png"),
+	help("help.gif"),
+	hierarchy("hierarchy.gif"),
+	home("home.gif"),
+	image("image.gif"),
+	imporrt("import.gif"),
+	information("information.gif"),
+	keyboard("keyboard.gif"),
+	legend("legend.gif"),
+	list("list.gif"),
+	monitor("monitor.gif"),
+	navigation("navigation.png"),
+	newfolder("newfolder.gif"),
+	offline("offline.gif"),
+	overview("overview.gif"),
+	pause("pause.gif"),
+	properties("properties.gif"),
+	remove("remove.gif"),
+	run("run.gif"),
+	save("save.gif"),
+	scalebar("scalebar.gif"),
+	screenshot("screenshot.gif"),
+	search("search.gif"),
+	settings("settings.gif"),
+	stop("stop.gif"),
+	up("up.gif"),
+	updown("updown.gif"),
+	world("world.gif");
 
 	private static final String ICON_DIRECTORY = "/au/gov/ga/worldwind/data/icons/";
 	private ImageIcon icon;
@@ -53,7 +84,7 @@ public enum Icons
 
 	public static ImageIcon newLoadingIcon()
 	{
-		return loadIcon(createURL("loading.gif"));
+		return loadIcon(createURL("progress.gif"));
 	}
 
 	private static URL createURL(String filename)

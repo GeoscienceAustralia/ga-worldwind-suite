@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
@@ -14,6 +15,7 @@ import javax.swing.event.ChangeListener;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
+import au.gov.ga.worldwind.util.Icons;
 
 public class ExaggerationPanel extends AbstractThemePanel
 {
@@ -22,7 +24,7 @@ public class ExaggerationPanel extends AbstractThemePanel
 	public ExaggerationPanel()
 	{
 		super(new GridBagLayout());
-		
+
 		setResizable(false);
 
 		GridBagConstraints c;
@@ -72,6 +74,12 @@ public class ExaggerationPanel extends AbstractThemePanel
 			}
 		};
 		slider.addChangeListener(listener);
+	}
+
+	@Override
+	public Icon getIcon()
+	{
+		return Icons.exaggeration.getIcon();
 	}
 
 	//logarithmic vertical exaggeration slider

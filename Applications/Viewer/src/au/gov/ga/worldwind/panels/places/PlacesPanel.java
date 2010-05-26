@@ -30,6 +30,7 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -79,6 +80,12 @@ public class PlacesPanel extends AbstractThemePanel
 		}
 	}
 
+	@Override
+	public ImageIcon getIcon()
+	{
+		return Icons.bookmark.getIcon();
+	}
+
 	public PlacesPanel()
 	{
 		super(new BorderLayout());
@@ -98,7 +105,7 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 		});
 
-		editAction = new BasicAction("Edit", "Edit selected", Icons.edit.getIcon());
+		editAction = new BasicAction("Edit", "Edit selected", Icons.properties.getIcon());
 		editAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -107,7 +114,7 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 		});
 
-		deleteAction = new BasicAction("Delete", "Delete selected", Icons.delete.getIcon());
+		deleteAction = new BasicAction("Delete", "Delete selected", Icons.deletevalue.getIcon());
 		deleteAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -361,7 +368,7 @@ public class PlacesPanel extends AbstractThemePanel
 			place.setHeading(orbitView.getHeading().degrees);
 			place.setPitch(orbitView.getPitch().degrees);
 			place.setSaveCamera(false);
-			PlaceEditor editor = new PlaceEditor(wwd, window, "New place", place);
+			PlaceEditor editor = new PlaceEditor(wwd, window, "New place", place, getIcon());
 			int value = editor.getOkCancel();
 			if (value == JOptionPane.OK_OPTION)
 			{
@@ -395,7 +402,7 @@ public class PlacesPanel extends AbstractThemePanel
 		if (item != null)
 		{
 			Place editing = new Place(item.place);
-			PlaceEditor editor = new PlaceEditor(wwd, window, "Edit place", editing);
+			PlaceEditor editor = new PlaceEditor(wwd, window, "Edit place", editing, getIcon());
 			int value = editor.getOkCancel();
 			if (value == JOptionPane.OK_OPTION)
 			{

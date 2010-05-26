@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.panels.dataset;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
+import javax.swing.Icon;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
@@ -13,6 +14,7 @@ import au.gov.ga.worldwind.components.lazytree.LazyTreeObjectNode;
 import au.gov.ga.worldwind.panels.layers.LayerTreeModel;
 import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
+import au.gov.ga.worldwind.util.Icons;
 
 public class DatasetPanel extends AbstractThemePanel
 {
@@ -44,6 +46,12 @@ public class DatasetPanel extends AbstractThemePanel
 		scrollPane.setPreferredSize(new Dimension(MINIMUM_LIST_HEIGHT, MINIMUM_LIST_HEIGHT));
 	}
 
+	@Override
+	public Icon getIcon()
+	{
+		return Icons.datasets.getIcon();
+	}
+
 	public JTree getTree()
 	{
 		return tree;
@@ -57,12 +65,12 @@ public class DatasetPanel extends AbstractThemePanel
 	@Override
 	public void setup(Theme theme)
 	{
-		for(IDataset dataset : theme.getDatasets())
+		for (IDataset dataset : theme.getDatasets())
 		{
 			root.getDatasets().add(dataset);
 		}
 		rootNode.refreshChildren(model);
-		
+
 		//expand root by default
 		Object[] path;
 		if (rootNode.getChildCount() <= 0)

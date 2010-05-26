@@ -474,23 +474,23 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			Object[] children)
 	{
 		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
-		for (TreeModelListener l : listeners)
-			l.treeNodesChanged(e);
+		for (int i = listeners.size() - 1; i >= 0; i--)
+			listeners.get(i).treeNodesChanged(e);
 	}
 
 	private void fireTreeNodesInserted(Object source, Object[] path, int[] childIndices,
 			Object[] children)
 	{
 		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
-		for (TreeModelListener l : listeners)
-			l.treeNodesInserted(e);
+		for (int i = listeners.size() - 1; i >= 0; i--)
+			listeners.get(i).treeNodesInserted(e);
 	}
 
 	private void fireTreeNodesRemoved(Object source, Object[] path, int[] childIndices,
 			Object[] children)
 	{
 		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
-		for (TreeModelListener l : listeners)
-			l.treeNodesRemoved(e);
+		for (int i = listeners.size() - 1; i >= 0; i--)
+			listeners.get(i).treeNodesRemoved(e);
 	}
 }

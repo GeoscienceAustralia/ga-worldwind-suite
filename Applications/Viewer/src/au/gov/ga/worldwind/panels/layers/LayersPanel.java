@@ -7,8 +7,11 @@ import java.io.File;
 import java.util.Collection;
 
 import javax.swing.DropMode;
+import javax.swing.Icon;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -45,6 +48,12 @@ public class LayersPanel extends AbstractLayersPanel
 		});
 
 		enableActions();
+	}
+
+	@Override
+	public Icon getIcon()
+	{
+		return Icons.hierarchy.getIcon();
 	}
 
 	@Override
@@ -87,7 +96,7 @@ public class LayersPanel extends AbstractLayersPanel
 					editPath = p.pathByAddingChild(node);
 				}
 				tree.scrollPathToVisible(editPath);
-				tree.startEditingAtPath(editPath);
+				editAtPath(editPath);
 			}
 		});
 
@@ -100,12 +109,12 @@ public class LayersPanel extends AbstractLayersPanel
 				TreePath p = tree.getSelectionPath();
 				if (p != null)
 				{
-					tree.startEditingAtPath(p);
+					editAtPath(p);
 				}
 			}
 		});
 
-		deleteAction = new BasicAction("Delete", "Delete selected", Icons.delete.getIcon());
+		deleteAction = new BasicAction("Delete", "Delete selected", Icons.deletevalue.getIcon());
 		deleteAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -184,5 +193,36 @@ public class LayersPanel extends AbstractLayersPanel
 			datasetTree.setTransferHandler(handler);
 			datasetTree.setDragEnabled(true);
 		}
+	}
+
+	private void editAtPath(TreePath p)
+	{
+		tree.getModel().addTreeModelListener(new TreeModelListener()
+		{
+			@Override
+			public void treeStructureChanged(TreeModelEvent e)
+			{
+			}
+
+			@Override
+			public void treeNodesRemoved(TreeModelEvent e)
+			{
+			}
+
+			@Override
+			public void treeNodesInserted(TreeModelEvent e)
+			{
+			}
+
+			@Override
+			public void treeNodesChanged(TreeModelEvent e)
+			{
+				tree.setEditable(false);
+				tree.getModel().removeTreeModelListener(this);
+			}
+		});
+
+		tree.setEditable(true);
+		tree.startEditingAtPath(p);
 	}
 }

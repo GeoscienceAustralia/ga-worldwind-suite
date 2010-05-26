@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -68,10 +69,9 @@ public class PlaceEditor extends JDialog
 
 	private enum Units
 	{
-		Kilometres("km", 1d / 1000d),
-		Metres("m", 1d),
-		Miles("mi", Util.METER_TO_MILE),
-		Feet("ft", Util.METER_TO_FEET);
+		Kilometres("km", 1d / 1000d), Metres("m", 1d), Miles("mi", Util.METER_TO_MILE), Feet(
+				"ft",
+				Util.METER_TO_FEET);
 
 		private final String label;
 		private final double scale;
@@ -94,13 +94,14 @@ public class PlaceEditor extends JDialog
 		}
 	}
 
-	public PlaceEditor(final WorldWindow wwd, Window owner, String title,
-			final Place place)
+	public PlaceEditor(final WorldWindow wwd, Window owner, String title, final Place place,
+			ImageIcon icon)
 	{
 		super(owner, title, ModalityType.APPLICATION_MODAL);
 		this.wwd = wwd;
 		this.place = place;
 		setLayout(new BorderLayout());
+		setIconImage(icon.getImage());
 
 		Insets insets = new Insets(3, 1, 3, 1);
 		GridBagConstraints c;
@@ -165,9 +166,9 @@ public class PlaceEditor extends JDialog
 		c.weighty = 1;
 		c.fill = GridBagConstraints.BOTH;
 		c.insets = (Insets) insets.clone();
-		JScrollPane scrollPane = new JScrollPane(text,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane scrollPane =
+				new JScrollPane(text, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		panel2.add(scrollPane, c);
 
 		label = new JLabel("Lat/Lon:");
@@ -179,8 +180,7 @@ public class PlaceEditor extends JDialog
 		c.insets.bottom = 0;
 		panel2.add(label, c);
 
-		latlon = new JTextField(textFormatedLatLon(place.getLatitude(),
-				place.getLongitude()));
+		latlon = new JTextField(textFormatedLatLon(place.getLatitude(), place.getLongitude()));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 1;
@@ -211,8 +211,7 @@ public class PlaceEditor extends JDialog
 		panel3.add(visible);
 		visible.addActionListener(al);
 
-		excludeFromPlaylist = new JCheckBox("Exclude from playlist", place
-				.isExcludeFromPlaylist());
+		excludeFromPlaylist = new JCheckBox("Exclude from playlist", place.isExcludeFromPlaylist());
 		panel3.add(excludeFromPlaylist);
 		excludeFromPlaylist.addActionListener(al);
 
@@ -267,8 +266,7 @@ public class PlaceEditor extends JDialog
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				minZoom.setScale(((Units) minZoomUnits.getSelectedItem())
-						.getScale());
+				minZoom.setScale(((Units) minZoomUnits.getSelectedItem()).getScale());
 			}
 		};
 		minZoomUnits.addActionListener(mzal);
@@ -332,8 +330,7 @@ public class PlaceEditor extends JDialog
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				maxZoom.setScale(((Units) maxZoomUnits.getSelectedItem())
-						.getScale());
+				maxZoom.setScale(((Units) maxZoomUnits.getSelectedItem()).getScale());
 			}
 		};
 		maxZoomUnits.addActionListener(mzal);
@@ -372,8 +369,7 @@ public class PlaceEditor extends JDialog
 		c.gridwidth = 2;
 		panel2.add(panel3, c);
 
-		cameraInformation = new JCheckBox("Save camera information", place
-				.isSaveCamera());
+		cameraInformation = new JCheckBox("Save camera information", place.isSaveCamera());
 		panel3.add(cameraInformation);
 		cameraInformation.addActionListener(new ActionListener()
 		{
@@ -403,13 +399,13 @@ public class PlaceEditor extends JDialog
 					if (Math.abs(lat - place.getLatitude()) > 0.1
 							|| Math.abs(lon - place.getLongitude()) > 0.1)
 					{
-						int value = JOptionPane
-								.showConfirmDialog(
-										PlaceEditor.this,
-										"Do you want to change the Lat/Lon to match the current camera center?",
-										"Move place",
-										JOptionPane.YES_NO_OPTION,
-										JOptionPane.QUESTION_MESSAGE);
+						int value =
+								JOptionPane
+										.showConfirmDialog(
+												PlaceEditor.this,
+												"Do you want to change the Lat/Lon to match the current camera center?",
+												"Move place", JOptionPane.YES_NO_OPTION,
+												JOptionPane.QUESTION_MESSAGE);
 						if (value == JOptionPane.YES_OPTION)
 						{
 							latlon.setText(textFormatedLatLon(lat, lon));
@@ -530,9 +526,8 @@ public class PlaceEditor extends JDialog
 
 		panel = new JPanel(new BorderLayout());
 		int spacing = 5;
-		panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory
-				.createEtchedBorder(), BorderFactory.createEmptyBorder(spacing,
-				spacing, spacing, spacing)));
+		panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
+				BorderFactory.createEmptyBorder(spacing, spacing, spacing, spacing)));
 		add(panel, BorderLayout.SOUTH);
 
 		JPanel buttonsPanel = new JPanel(new FlowLayout());
@@ -665,8 +660,8 @@ public class PlaceEditor extends JDialog
 
 	private String labelFormatedLatLon(Place place)
 	{
-		return String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", place
-				.getLatitude(), place.getLongitude());
+		return String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", place.getLatitude(), place
+				.getLongitude());
 	}
 
 	private LatLon parseLatLon(String text)

@@ -1,8 +1,11 @@
 package au.gov.ga.worldwind.theme.hud;
 
+import javax.swing.Icon;
+
 import gov.nasa.worldwind.layers.LatLonGraticuleLayer;
 import gov.nasa.worldwind.layers.Layer;
 import au.gov.ga.worldwind.theme.AbstractThemeHUD;
+import au.gov.ga.worldwind.util.Icons;
 
 public class GraticuleHUD extends AbstractThemeHUD
 {
@@ -24,5 +27,11 @@ public class GraticuleHUD extends AbstractThemeHUD
 	public String getPosition()
 	{
 		return null;
+	}
+	
+	@Override
+	public Icon getIcon()
+	{
+		return Icons.graticule.getIcon();
 	}
 }

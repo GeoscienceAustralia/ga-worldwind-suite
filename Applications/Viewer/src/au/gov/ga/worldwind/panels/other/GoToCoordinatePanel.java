@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -132,8 +133,8 @@ public class GoToCoordinatePanel extends JPanel
 
 	private void updateResult()
 	{
-		LatLon latLon = Util.computeLatLonFromString(coordInput.getText(), wwd
-				.getModel().getGlobe());
+		LatLon latLon =
+				Util.computeLatLonFromString(coordInput.getText(), wwd.getModel().getGlobe());
 		updateResult(latLon, false);
 	}
 
@@ -143,10 +144,8 @@ public class GoToCoordinatePanel extends JPanel
 		if (latlon != null)
 		{
 			// coordInput.setText(coordInput.getText().toUpperCase());
-			resultLabel.setText(String
-					.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", latlon
-							.getLatitude().degrees,
-							latlon.getLongitude().degrees));
+			resultLabel.setText(String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", latlon
+					.getLatitude().degrees, latlon.getLongitude().degrees));
 		}
 		else if (showInvalid)
 			resultLabel.setText("Invalid coordinates");
@@ -158,8 +157,8 @@ public class GoToCoordinatePanel extends JPanel
 
 	private void gotoCoords()
 	{
-		LatLon latLon = Util.computeLatLonFromString(coordInput.getText(), wwd
-				.getModel().getGlobe());
+		LatLon latLon =
+				Util.computeLatLonFromString(coordInput.getText(), wwd.getModel().getGlobe());
 		updateResult(latLon, true);
 		if (latLon != null)
 		{
@@ -169,12 +168,9 @@ public class GoToCoordinatePanel extends JPanel
 			Position center = new Position(latLon, 0);
 			long lengthMillis = Util.getScaledLengthMillis(beginCenter, center);
 
-			view.addAnimator(FlyToOrbitViewAnimator
-					.createFlyToOrbitViewAnimator(view, beginCenter, center,
-							view.getHeading(), view.getHeading(), view
-									.getPitch(), view.getPitch(), view
-									.getZoom(), view.getZoom(), lengthMillis,
-							true));
+			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter,
+					center, view.getHeading(), view.getHeading(), view.getPitch(), view.getPitch(),
+					view.getZoom(), view.getZoom(), lengthMillis, true));
 			wwd.redraw();
 		}
 	}
@@ -192,9 +188,10 @@ public class GoToCoordinatePanel extends JPanel
 		}
 	}
 
-	public static void showGotoDialog(Frame owner, WorldWindow wwd, String title)
+	public static void showGotoDialog(Frame owner, WorldWindow wwd, String title, ImageIcon icon)
 	{
 		final JDialog dialog = new JDialog(owner, title, true);
+		dialog.setIconImage(icon.getImage());
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		JPanel panel = new JPanel(new GridBagLayout());
 		dialog.add(panel);
@@ -261,8 +258,7 @@ public class GoToCoordinatePanel extends JPanel
 		rootPane.setDefaultButton(ok);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke("ESCAPE");
-		InputMap inputMap = rootPane
-				.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		inputMap.put(stroke, "ESCAPE");
 		rootPane.getActionMap().put("ESCAPE", cancelAction);
 

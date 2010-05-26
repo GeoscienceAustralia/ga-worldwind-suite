@@ -623,7 +623,8 @@ public class Application
 		menu = new JMenu("File");
 		menuBar.add(menu);
 
-		final JCheckBoxMenuItem offline = new JCheckBoxMenuItem("Work offline");
+		final JCheckBoxMenuItem offline =
+				new JCheckBoxMenuItem("Work offline", Icons.offline.getIcon());
 		menu.add(offline);
 		offline.setSelected(WorldWind.isOfflineMode());
 		offline.addActionListener(new ActionListener()
@@ -654,7 +655,7 @@ public class Application
 
 		menu.addSeparator();
 
-		menuItem = new JMenuItem("Save image");
+		menuItem = new JMenuItem("Save image", Icons.screenshot.getIcon());
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -665,7 +666,7 @@ public class Application
 		});
 
 
-		/*menuItem = new JMenuItem("Save large image");
+		/*menuItem = new JMenuItem("Save large image", Icons.screenshot.getIcon());
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -677,7 +678,7 @@ public class Application
 
 		menu.addSeparator();
 
-		menuItem = new JMenuItem("Exit");
+		menuItem = new JMenuItem("Exit", Icons.escape.getIcon());
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -690,7 +691,7 @@ public class Application
 		menu = new JMenu("View");
 		menuBar.add(menu);
 
-		menuItem = new JMenuItem("Default view");
+		menuItem = new JMenuItem("Default view", Icons.home.getIcon());
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -700,13 +701,14 @@ public class Application
 			}
 		});
 
-		menuItem = new JMenuItem("Go to coordinates...");
+		menuItem = new JMenuItem("Go to coordinates...", Icons.crosshair45.getIcon());
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				GoToCoordinatePanel.showGotoDialog(frame, wwd, "Go to coordinates");
+				GoToCoordinatePanel.showGotoDialog(frame, wwd, "Go to coordinates",
+						Icons.crosshair45.getIcon());
 			}
 		});
 
@@ -728,7 +730,7 @@ public class Application
 
 		menu.addSeparator();
 
-		menuItem = new JMenuItem("Fullscreen");
+		menuItem = new JMenuItem("Fullscreen", Icons.monitor.getIcon());
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -778,7 +780,7 @@ public class Application
 		menu = new JMenu("Options");
 		menuBar.add(menu);
 
-		menuItem = new JMenuItem("Preferences...");
+		menuItem = new JMenuItem("Preferences...", Icons.settings.getIcon());
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -800,7 +802,7 @@ public class Application
 		menu = new JMenu("Help");
 		menuBar.add(menu);
 
-		menuItem = new JMenuItem("Controls...");
+		menuItem = new JMenuItem("Controls...", Icons.keyboard.getIcon());
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -822,7 +824,7 @@ public class Application
 
 		menu.addSeparator();*/
 
-		menuItem = new JMenuItem("About");
+		menuItem = new JMenuItem("About", Icons.help.getIcon());
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -839,6 +841,7 @@ public class Application
 	{
 		final JCheckBoxMenuItem menuItem =
 				new JCheckBoxMenuItem(piece.getDisplayName(), piece.isOn());
+		menuItem.setIcon(piece.getIcon());
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)

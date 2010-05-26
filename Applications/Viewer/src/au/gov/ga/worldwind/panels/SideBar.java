@@ -32,6 +32,7 @@ public class SideBar extends JPanel
 		for (ThemePanel panel : theme.getPanels())
 		{
 			CollapsibleGroup group = new CollapsibleGroup();
+			group.setIcon(panel.getIcon());
 			group.setVisible(panel.isOn());
 			group.setCollapsed(!panel.isExpanded());
 			group.setScrollOnExpand(true);

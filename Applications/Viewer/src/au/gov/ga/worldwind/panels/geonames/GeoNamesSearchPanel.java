@@ -28,6 +28,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -155,7 +156,7 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 		listScrollPane.setBorder(BorderFactory.createLoweredBevelBorder());
 		panel.add(listScrollPane, BorderLayout.CENTER);
 		listScrollPane.setPreferredSize(new Dimension(MINIMUM_LIST_HEIGHT, MINIMUM_LIST_HEIGHT));
-		
+
 		list.setSelectionForeground(Color.black);
 		Color backgroundSelection = list.getSelectionBackground();
 		HSLColor hsl = new HSLColor(backgroundSelection);
@@ -271,6 +272,12 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 		});
 
 		clear();
+	}
+
+	@Override
+	public Icon getIcon()
+	{
+		return Icons.search.getIcon();
 	}
 
 	private void clear()

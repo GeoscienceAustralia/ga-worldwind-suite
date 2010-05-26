@@ -92,7 +92,7 @@ public class LocalLayerPanel extends JPanel
 		c.gridx = 1;
 		panel.add(slider, c);
 
-		FlatJButton edit = new FlatJButton(Icons.edit.getIcon());
+		FlatJButton edit = new FlatJButton(Icons.properties.getIcon());
 		edit.restrictSize();
 		edit.setToolTipText("Edit layer");
 		edit.addActionListener(new ActionListener()
