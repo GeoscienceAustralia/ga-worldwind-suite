@@ -11,10 +11,7 @@ import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Earth;
-import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.layers.ScalebarLayer;
-import gov.nasa.worldwind.layers.TerrainProfileLayer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.retrieve.RetrievalService;
@@ -72,7 +69,6 @@ import au.gov.ga.worldwind.panels.layers.ExtendedCompoundElevationModel;
 import au.gov.ga.worldwind.panels.layers.ExtendedLayerList;
 import au.gov.ga.worldwind.panels.layers.LayerFactory;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
-import au.gov.ga.worldwind.panels.places.PlaceEditor;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.SettingsDialog;
 import au.gov.ga.worldwind.stereo.StereoOrbitView;
@@ -778,16 +774,6 @@ public class Application
 		menu.addSeparator();
 		menu.add(screenshotAction);
 
-		/*menuItem = new JMenuItem("Save large image", Icons.screenshot.getIcon());
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				takeScreenshot(4000, 4000, new File("largescreeshot.png"));
-			}
-		});*/
-
 		menu.addSeparator();
 		menu.add(exitAction);
 
@@ -819,19 +805,6 @@ public class Application
 		menuBar.add(menu);
 
 		menu.add(controlsAction);
-
-		/*menuItem = new JMenuItem("Data sources...");
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				showDataSources();
-			}
-		});
-
-		menu.addSeparator();*/
-
 		menu.add(aboutAction);
 
 		return menuBar;
@@ -909,40 +882,5 @@ public class Application
 	private void loadSplitLocation()
 	{
 		splitPane.setDividerLocation(Settings.get().getSplitLocation());
-	}
-
-	public void updateElevationUnit(String newValue)
-	{
-		for (Layer layer : this.wwd.getModel().getLayers())
-		{
-			if (layer instanceof ScalebarLayer)
-			{
-				if (StatusBar.UNIT_IMPERIAL.equals(newValue))
-					((ScalebarLayer) layer).setUnit(ScalebarLayer.UNIT_IMPERIAL);
-				else
-					// Default to metric units.
-					((ScalebarLayer) layer).setUnit(ScalebarLayer.UNIT_METRIC);
-			}
-			else if (layer instanceof TerrainProfileLayer)
-			{
-				if (StatusBar.UNIT_IMPERIAL.equals(newValue))
-					((TerrainProfileLayer) layer).setUnit(TerrainProfileLayer.UNIT_IMPERIAL);
-				else
-					// Default to metric units.
-					((TerrainProfileLayer) layer).setUnit(TerrainProfileLayer.UNIT_METRIC);
-			}
-		}
-
-		if (StatusBar.UNIT_IMPERIAL.equals(newValue))
-		{
-			this.statusBar.setElevationUnit(StatusBar.UNIT_IMPERIAL);
-			PlaceEditor.setUnits(PlaceEditor.IMPERIAL);
-		}
-		else
-		{
-			// Default to metric units.
-			this.statusBar.setElevationUnit(StatusBar.UNIT_METRIC);
-			PlaceEditor.setUnits(PlaceEditor.METRIC);
-		}
 	}
 }
