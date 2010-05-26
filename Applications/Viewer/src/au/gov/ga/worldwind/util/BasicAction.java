@@ -12,6 +12,11 @@ import javax.swing.Icon;
 public class BasicAction extends AbstractAction
 {
 	private List<ActionListener> listeners = new ArrayList<ActionListener>();
+	
+	public BasicAction(String name, Icon icon)
+	{
+		this(name, name, icon);
+	}
 
 	public BasicAction(String name, String toolTipText, Icon icon)
 	{
@@ -22,8 +27,8 @@ public class BasicAction extends AbstractAction
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		for (ActionListener listener : listeners)
-			listener.actionPerformed(e);
+		for (int i = listeners.size() - 1; i >= 0; i--)
+			listeners.get(i).actionPerformed(e);
 	}
 
 	public void addActionListener(ActionListener listener)

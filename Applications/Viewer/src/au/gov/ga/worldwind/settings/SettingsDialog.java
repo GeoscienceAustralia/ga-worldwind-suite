@@ -21,6 +21,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -90,9 +91,10 @@ public class SettingsDialog extends JDialog
 	private JLabel proxyTypeLabel;
 	private JComboBox proxyTypeCombo;
 
-	public SettingsDialog(JFrame frame)
+	public SettingsDialog(JFrame frame, ImageIcon icon)
 	{
 		super(frame, "Settings", true);
+		setIconImage(icon.getImage());
 		settings = Settings.get();
 
 		addWindowListener(new WindowAdapter()

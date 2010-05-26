@@ -3,6 +3,7 @@
 	<!-- Theme settings -->
 	<!-- <ThemeName></ThemeName> -->
 	<MenuBar>true</MenuBar>
+	<ToolBar>true</ToolBar>
 	<StatusBar>true</StatusBar>
 
 	<InitialLatitude>-27.0</InitialLatitude>

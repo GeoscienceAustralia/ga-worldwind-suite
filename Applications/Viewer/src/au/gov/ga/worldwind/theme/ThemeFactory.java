@@ -24,6 +24,7 @@ public class ThemeFactory
 		BasicTheme theme = new BasicTheme(XMLUtil.getText(element, "ThemeName"));
 
 		theme.setMenuBar(XMLUtil.getBoolean(element, "MenuBar", false));
+		theme.setToolBar(XMLUtil.getBoolean(element, "ToolBar", false));
 		theme.setStatusBar(XMLUtil.getBoolean(element, "StatusBar", false));
 
 		theme.setHUDs(parseHUDs(element, "HUD"));

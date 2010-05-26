@@ -47,18 +47,17 @@ import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
+import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
@@ -85,8 +84,10 @@ import au.gov.ga.worldwind.theme.ThemePanel;
 import au.gov.ga.worldwind.theme.ThemePiece;
 import au.gov.ga.worldwind.theme.ThemeOpener.ThemeOpenDelegate;
 import au.gov.ga.worldwind.theme.ThemePiece.ThemePieceAdapter;
+import au.gov.ga.worldwind.util.BasicAction;
 import au.gov.ga.worldwind.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.util.Icons;
+import au.gov.ga.worldwind.util.SelectableAction;
 import au.gov.ga.worldwind.util.Util;
 
 public class Application
@@ -119,7 +120,6 @@ public class Application
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class
 				.getName());
-		//Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME, AWTInputHandler.class.getName());
 		//Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, NormalTessellator.class.getName());
 	}
 
@@ -181,7 +181,20 @@ public class Application
 	private SideBar sideBar;
 	private StatusBar statusBar;
 	private JMenuBar menuBar;
+	private JToolBar toolBar;
 	private JSplitPane splitPane;
+
+	private SelectableAction offlineAction;
+	private BasicAction screenshotAction;
+	private BasicAction exitAction;
+	private BasicAction defaultViewAction;
+	private BasicAction gotoAction;
+	private BasicAction fullscreenAction;
+	private List<SelectableAction> hudActions = new ArrayList<SelectableAction>();
+	private List<SelectableAction> panelActions = new ArrayList<SelectableAction>();
+	private BasicAction settingsAction;
+	private BasicAction controlsAction;
+	private BasicAction aboutAction;
 
 	private Application(Theme theme)
 	{
@@ -286,10 +299,18 @@ public class Application
 			});
 		}*/
 
+		createActions();
+
 		if (theme.hasMenuBar())
 		{
 			menuBar = createMenuBar();
 			frame.setJMenuBar(menuBar);
+		}
+
+		if (theme.hasToolBar())
+		{
+			toolBar = createToolBar();
+			panel.add(toolBar, BorderLayout.PAGE_START);
 		}
 
 		addWindowListeners();
@@ -309,25 +330,112 @@ public class Application
 		}
 	}
 
-	/*private void createDialogs()
+	private void createActions()
 	{
-		annotationsDialog = createDialog("Annotations");
-		annotationsPanel = new AnnotationsPanel(wwd, frame);
-		annotationsDialog.add(annotationsPanel, BorderLayout.CENTER);
-		annotationsDialog.setJMenuBar(createAnnotationsMenuBar());
-		dialogs.add(annotationsDialog);
+		offlineAction =
+				new SelectableAction("Work offline", Icons.offline.getIcon(), WorldWind
+						.isOfflineMode());
+		offlineAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				WorldWind.setOfflineMode(offlineAction.isSelected());
+			}
+		});
 
-		placesearchDialog = createDialog("Place search");
-		placesearchDialog.add(new PlaceSearchPanel(wwd), BorderLayout.CENTER);
-		dialogs.add(placesearchDialog);
+		screenshotAction = new BasicAction("Save image", Icons.screenshot.getIcon());
+		screenshotAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				saveImage();
+			}
+		});
 
+		exitAction = new BasicAction("Exit", Icons.escape.getIcon());
+		exitAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				quit();
+			}
+		});
 
-		JVisibleDialog sunPositionDialog = createDialog("Sun position");
-		sunPositionDialog.add(new SunPositionPanel(wwd), BorderLayout.CENTER);
-		dialogs.add(sunPositionDialog);
+		defaultViewAction = new BasicAction("Default view", Icons.home.getIcon());
+		defaultViewAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				resetView();
+			}
+		});
 
-		loadDialogBounds();
-	}*/
+		gotoAction = new BasicAction("Go to coordinates...", Icons.crosshair45.getIcon());
+		gotoAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				GoToCoordinatePanel.showGotoDialog(frame, wwd, "Go to coordinates",
+						Icons.crosshair45.getIcon());
+			}
+		});
+
+		for (ThemePanel panel : theme.getPanels())
+		{
+			panelActions.add(createThemePieceAction(panel));
+		}
+
+		for (ThemeHUD hud : theme.getHUDs())
+		{
+			hudActions.add(createThemePieceAction(hud));
+		}
+
+		fullscreenAction = new BasicAction("Fullscreen", Icons.monitor.getIcon());
+		fullscreenAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				setFullscreen(!isFullscreen());
+			}
+		});
+
+		settingsAction = new BasicAction("Preferences...", Icons.settings.getIcon());
+		settingsAction.addActionListener(new ActionListener()
+		{
+			private boolean visible = false;
+
+			public void actionPerformed(ActionEvent e)
+			{
+				if (!visible)
+				{
+					visible = true;
+					SettingsDialog settingsDialog =
+							new SettingsDialog(frame, Icons.settings.getIcon());
+					settingsDialog.setVisible(true);
+					visible = false;
+					afterSettingsChange();
+				}
+			}
+		});
+
+		controlsAction = new BasicAction("Controls...", Icons.keyboard.getIcon());
+		controlsAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				showControls();
+			}
+		});
+
+		aboutAction = new BasicAction("About", Icons.help.getIcon());
+		aboutAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				new AboutDialog(frame);
+			}
+		});
+	}
 
 	private void saveImage()
 	{
@@ -613,27 +721,41 @@ public class Application
 		}
 	}
 
+	private JToolBar createToolBar()
+	{
+		JToolBar toolBar = new JToolBar();
+
+		toolBar.add(screenshotAction);
+
+		toolBar.addSeparator();
+		toolBar.add(defaultViewAction);
+		toolBar.add(gotoAction);
+		toolBar.add(fullscreenAction);
+
+		toolBar.addSeparator();
+		for (SelectableAction action : panelActions)
+			action.addToToolBar(toolBar);
+
+		toolBar.addSeparator();
+		for (SelectableAction action : hudActions)
+			action.addToToolBar(toolBar);
+
+		toolBar.addSeparator();
+		toolBar.add(settingsAction);
+
+		return toolBar;
+	}
+
 	private JMenuBar createMenuBar()
 	{
 		JMenuBar menuBar = new JMenuBar();
 
 		JMenu menu;
-		JMenuItem menuItem;
 
 		menu = new JMenu("File");
 		menuBar.add(menu);
 
-		final JCheckBoxMenuItem offline =
-				new JCheckBoxMenuItem("Work offline", Icons.offline.getIcon());
-		menu.add(offline);
-		offline.setSelected(WorldWind.isOfflineMode());
-		offline.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				WorldWind.setOfflineMode(offline.isSelected());
-			}
-		});
+		offlineAction.addToMenu(menu);
 
 		/*if (LOCAL_LAYERS_ENABLED)
 		{
@@ -654,17 +776,7 @@ public class Application
 		}*/
 
 		menu.addSeparator();
-
-		menuItem = new JMenuItem("Save image", Icons.screenshot.getIcon());
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				saveImage();
-			}
-		});
-
+		menu.add(screenshotAction);
 
 		/*menuItem = new JMenuItem("Save large image", Icons.screenshot.getIcon());
 		menu.add(menuItem);
@@ -677,140 +789,36 @@ public class Application
 		});*/
 
 		menu.addSeparator();
-
-		menuItem = new JMenuItem("Exit", Icons.escape.getIcon());
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				quit();
-			}
-		});
+		menu.add(exitAction);
 
 		menu = new JMenu("View");
 		menuBar.add(menu);
 
-		menuItem = new JMenuItem("Default view", Icons.home.getIcon());
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				resetView();
-			}
-		});
-
-		menuItem = new JMenuItem("Go to coordinates...", Icons.crosshair45.getIcon());
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				GoToCoordinatePanel.showGotoDialog(frame, wwd, "Go to coordinates",
-						Icons.crosshair45.getIcon());
-			}
-		});
+		menu.add(defaultViewAction);
+		menu.add(gotoAction);
+		menu.add(fullscreenAction);
 
 		menu.addSeparator();
-
-		for (ThemePanel panel : theme.getPanels())
+		for (SelectableAction action : panelActions)
 		{
-			menuItem = createThemePieceMenuItem(panel);
-			menu.add(menuItem);
+			action.addToMenu(menu);
 		}
 
 		menu.addSeparator();
-
-		for (ThemeHUD hud : theme.getHUDs())
+		for (SelectableAction action : hudActions)
 		{
-			menuItem = createThemePieceMenuItem(hud);
-			menu.add(menuItem);
+			action.addToMenu(menu);
 		}
-
-		menu.addSeparator();
-
-		menuItem = new JMenuItem("Fullscreen", Icons.monitor.getIcon());
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				setFullscreen(!isFullscreen());
-			}
-		});
-
-		/*bookmarksMenu = new JMenu("Bookmarks");
-		menuBar.add(bookmarksMenu);
-
-		menuItem = new JMenuItem("Add bookmark...");
-		bookmarksMenu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				BookmarkManager.addBookmark(frame, wwd);
-			}
-		});
-
-		menuItem = new JMenuItem("Organise bookmarks...");
-		bookmarksMenu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				BookmarkManager bm = new BookmarkManager(frame, "Organise bookmarks");
-				bm.setSize(400, 300);
-				bm.setLocationRelativeTo(frame);
-				bm.setVisible(true);
-			}
-		});
-
-		bookmarksMenu.addSeparator();
-		BookmarkListener bl = new BookmarkListener()
-		{
-			public void modified()
-			{
-				updateBookmarksMenu();
-			}
-		};
-		Bookmarks.addBookmarkListener(bl);
-		bl.modified();*/
 
 		menu = new JMenu("Options");
 		menuBar.add(menu);
 
-		menuItem = new JMenuItem("Preferences...", Icons.settings.getIcon());
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			private boolean visible = false;
-
-			public void actionPerformed(ActionEvent e)
-			{
-				if (!visible)
-				{
-					visible = true;
-					SettingsDialog settingsDialog = new SettingsDialog(frame);
-					settingsDialog.setVisible(true);
-					visible = false;
-					afterSettingsChange();
-				}
-			}
-		});
+		menu.add(settingsAction);
 
 		menu = new JMenu("Help");
 		menuBar.add(menu);
 
-		menuItem = new JMenuItem("Controls...", Icons.keyboard.getIcon());
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				showControls();
-			}
-		});
+		menu.add(controlsAction);
 
 		/*menuItem = new JMenuItem("Data sources...");
 		menu.add(menuItem);
@@ -824,29 +832,20 @@ public class Application
 
 		menu.addSeparator();*/
 
-		menuItem = new JMenuItem("About", Icons.help.getIcon());
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				new AboutDialog(frame);
-			}
-		});
+		menu.add(aboutAction);
 
 		return menuBar;
 	}
 
-	private JMenuItem createThemePieceMenuItem(final ThemePiece piece)
+	private SelectableAction createThemePieceAction(final ThemePiece piece)
 	{
-		final JCheckBoxMenuItem menuItem =
-				new JCheckBoxMenuItem(piece.getDisplayName(), piece.isOn());
-		menuItem.setIcon(piece.getIcon());
-		menuItem.addActionListener(new ActionListener()
+		final SelectableAction action =
+				new SelectableAction(piece.getDisplayName(), piece.getIcon(), piece.isOn());
+		action.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				piece.setOn(menuItem.isSelected());
+				piece.setOn(action.isSelected());
 			}
 		});
 		piece.addListener(new ThemePieceAdapter()
@@ -854,10 +853,10 @@ public class Application
 			@Override
 			public void onToggled(ThemePiece source)
 			{
-				menuItem.setSelected(source.isOn());
+				action.setSelected(source.isOn());
 			}
 		});
-		return menuItem;
+		return action;
 	}
 
 	private void showControls()
@@ -879,42 +878,6 @@ public class Application
 		dialog.setSize(640, 480);
 		dialog.setLocationRelativeTo(frame);
 		dialog.setVisible(true);
-	}*/
-
-	/*private void updateBookmarksMenu()
-	{
-		while (bookmarksMenu.getMenuComponentCount() > 3)
-		{
-			bookmarksMenu.remove(3);
-		}
-		for (final Bookmark bookmark : Bookmarks.iterable())
-		{
-			JMenuItem mi = new JMenuItem(bookmark.getName());
-			bookmarksMenu.add(mi);
-			mi.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e)
-				{
-					View view = wwd.getView();
-					if (view instanceof OrbitView)
-					{
-						OrbitView orbitView = (OrbitView) view;
-						Position center = orbitView.getCenterPosition();
-						Position newCenter =
-								Position.fromDegrees(bookmark.getLat(), bookmark.getLon(), bookmark
-										.getElevation());
-						long lengthMillis = Util.getScaledLengthMillis(center, newCenter);
-
-						orbitView.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(
-								orbitView, center, newCenter, orbitView.getHeading(), Angle
-										.fromDegrees(bookmark.getHeading()), orbitView.getPitch(),
-								Angle.fromDegrees(bookmark.getPitch()), orbitView.getZoom(),
-								bookmark.getZoom(), lengthMillis, true));
-						wwd.redraw();
-					}
-				}
-			});
-		}
 	}*/
 
 	private void afterSettingsChange()

@@ -16,6 +16,7 @@ public interface Theme extends Disposable
 	
 	public String getName();
 	public boolean hasMenuBar();
+	public boolean hasToolBar();
 	public boolean hasStatusBar();
 	
 	public List<IDataset> getDatasets();

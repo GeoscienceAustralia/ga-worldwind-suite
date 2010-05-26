@@ -13,6 +13,7 @@ public class BasicTheme implements Theme
 
 	private String name;
 	private boolean menuBar;
+	private boolean toolBar;
 	private boolean statusBar;
 	private List<IDataset> datasets;
 	private List<ILayerDefinition> layers;
@@ -86,6 +87,17 @@ public class BasicTheme implements Theme
 	public void setMenuBar(boolean menuBar)
 	{
 		this.menuBar = menuBar;
+	}
+	
+	@Override
+	public boolean hasToolBar()
+	{
+		return toolBar;
+	}
+
+	public void setToolBar(boolean toolBar)
+	{
+		this.toolBar = toolBar;
 	}
 
 	public boolean hasStatusBar()
