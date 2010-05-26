@@ -263,6 +263,7 @@ public class Application
 		splitPane.setRightComponent(wwd);
 		splitPane.setOneTouchExpandable(true);
 		wwd.setMinimumSize(new Dimension(1, 1));
+		loadSplitLocation();
 
 		if (theme.hasStatusBar())
 		{
@@ -274,11 +275,10 @@ public class Application
 
 		if (!theme.getPanels().isEmpty())
 		{
-			sideBar = new SideBar(theme);
+			sideBar = new SideBar(theme, splitPane);
 			splitPane.setLeftComponent(sideBar);
 		}
 
-		loadSplitLocation();
 		afterSettingsChange();
 
 		// init user layers
@@ -876,7 +876,10 @@ public class Application
 
 	private void saveSplitLocation()
 	{
-		Settings.get().setSplitLocation(splitPane.getDividerLocation());
+		if (sideBar.isVisible())
+			Settings.get().setSplitLocation(splitPane.getDividerLocation());
+		else
+			Settings.get().setSplitLocation(sideBar.getSavedDividerLocation());
 	}
 
 	private void loadSplitLocation()

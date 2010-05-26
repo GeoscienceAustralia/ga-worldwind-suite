@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 
 import au.gov.ga.worldwind.components.collapsiblesplit.CollapsibleSplitConstraints;
 import au.gov.ga.worldwind.components.collapsiblesplit.CollapsibleSplitLayout;
@@ -20,10 +21,16 @@ public class SideBar extends JPanel
 {
 	private CollapsibleSplitPane pane;
 	private List<CollapsibleGroup> groups = new ArrayList<CollapsibleGroup>();
+	private JSplitPane parent;
+	private int savedDividerLocation;
+	private int savedDividerSize;
 
-	public SideBar(Theme theme)
+	public SideBar(Theme theme, JSplitPane parent)
 	{
 		super(new BorderLayout());
+		this.parent = parent;
+		savedDividerLocation = parent.getDividerLocation();
+		savedDividerSize = parent.getDividerSize();
 
 		pane = new CollapsibleSplitPane();
 		CollapsibleSplitLayout layout = pane.getLayout();
@@ -54,6 +61,12 @@ public class SideBar extends JPanel
 		}
 
 		add(pane, BorderLayout.CENTER);
+		refreshVisibility();
+	}
+
+	public int getSavedDividerLocation()
+	{
+		return savedDividerLocation;
 	}
 
 	public void refreshVisibility()
@@ -70,6 +83,17 @@ public class SideBar extends JPanel
 		if (isVisible() != anyVisible)
 		{
 			setVisible(anyVisible);
+			if (anyVisible)
+			{
+				parent.setDividerLocation(savedDividerLocation);
+				parent.setDividerSize(savedDividerSize);
+			}
+			else
+			{
+				savedDividerLocation = parent.getDividerLocation();
+				savedDividerSize = parent.getDividerSize();
+				parent.setDividerSize(0);
+			}
 		}
 		validate();
 	}
