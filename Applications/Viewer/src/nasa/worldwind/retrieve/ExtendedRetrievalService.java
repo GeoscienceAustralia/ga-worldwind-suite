@@ -49,7 +49,6 @@ import java.util.logging.Level;
 
 import au.gov.ga.worldwind.layers.geonames.GeoNamesLayer;
 import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
-import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayerOld;
 import au.gov.ga.worldwind.settings.Settings;
 
 /**
@@ -549,8 +548,7 @@ public final class ExtendedRetrievalService extends WWObjectImpl
 		{ TiledImageLayer.class, BasicElevationModel.class,
 				BasicTiledImageLayer.class, PlaceNameLayer.class,
 				RPFTiledImageLayer.class, SurfaceImage.class,
-				MercatorTiledImageLayer.class,
-				BasicMercatorTiledImageLayer.class, MaskTiledImageLayerOld.class,
+				MercatorTiledImageLayer.class, BasicMercatorTiledImageLayer.class,
 				MaskTiledImageLayer.class, GeoNamesLayer.class };
 		// Search classes above for declared classes that implement
 		// RetrivalPostProcess AND contain a Field which is a subclass of Tile,
