@@ -61,8 +61,8 @@ public class DatasetReader
 		String name = XMLUtil.getText(element, "@name");
 		URL description = XMLUtil.getURL(element, "@description", context);
 		URL icon = XMLUtil.getURL(element, "@icon", context);
-		boolean root = XMLUtil.getBoolean(element, "@root", false);
-		IDataset dataset = new Dataset(name, description, icon, root);
+		boolean base = XMLUtil.getBoolean(element, "@base", false);
+		IDataset dataset = new Dataset(name, description, icon, base);
 		parent.getDatasets().add(dataset);
 		return dataset;
 	}
@@ -74,8 +74,8 @@ public class DatasetReader
 		URL description = XMLUtil.getURL(element, "@description", context);
 		URL icon = XMLUtil.getURL(element, "@icon", context);
 		URL url = XMLUtil.getURL(element, "@url", context);
-		boolean root = XMLUtil.getBoolean(element, "@root", false);
-		IDataset dataset = new LazyDataset(name, url, description, icon, root);
+		boolean base = XMLUtil.getBoolean(element, "@base", false);
+		IDataset dataset = new LazyDataset(name, url, description, icon, base);
 		parent.getDatasets().add(dataset);
 	}
 
@@ -86,8 +86,9 @@ public class DatasetReader
 		URL description = XMLUtil.getURL(element, "@description", context);
 		URL icon = XMLUtil.getURL(element, "@icon", context);
 		URL url = XMLUtil.getURL(element, "@url", context);
-		boolean root = XMLUtil.getBoolean(element, "@root", false);
-		ILayerDefinition layer = new LayerDefinition(name, url, description, icon, root);
+		boolean base = XMLUtil.getBoolean(element, "@base", false);
+		boolean def = XMLUtil.getBoolean(element, "@default", false);
+		ILayerDefinition layer = new LayerDefinition(name, url, description, icon, base, def);
 		parent.getLayers().add(layer);
 	}
 }

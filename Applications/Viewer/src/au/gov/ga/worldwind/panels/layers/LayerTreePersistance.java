@@ -15,11 +15,10 @@ public class LayerTreePersistance
 {
 	public static INode readFromXML(Object source) throws MalformedURLException
 	{
-		INode root = new FolderNode(null, null, true);
-
 		Element elem = XMLUtil.getElementFromSource(source);
 		if (elem != null)
 		{
+			INode root = new FolderNode(null, null, true);
 			Element[] elements = XMLUtil.getElements(elem, "//LayerList", null);
 			if (elements != null)
 			{
@@ -28,9 +27,9 @@ public class LayerTreePersistance
 					addRelevant(element, root);
 				}
 			}
+			return root;
 		}
-
-		return root;
+		return null;
 	}
 
 	private static void addRelevant(Element element, INode parent) throws MalformedURLException

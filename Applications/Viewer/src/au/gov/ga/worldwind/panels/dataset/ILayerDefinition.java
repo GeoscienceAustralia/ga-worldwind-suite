@@ -6,4 +6,5 @@ public interface ILayerDefinition extends IData
 {
 	public URL getLayerURL();
 	public boolean isEnabled();
+	public boolean isDefault();
 }

@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 {
 	public static final int MINIMUM_LIST_HEIGHT = 25;
-	
+
 	private List<ThemePieceListener> listeners = new ArrayList<ThemePieceListener>();
 	private List<ThemePanelListener> panelListeners = new ArrayList<ThemePanelListener>();
 	private String displayName;
@@ -132,31 +132,31 @@ public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 
 	protected void raiseOnToggled()
 	{
-		for (ThemePieceListener listener : listeners)
-			listener.onToggled(this);
+		for (int i = listeners.size() - 1; i >= 0; i--)
+			listeners.get(i).onToggled(this);
 	}
 
 	protected void raiseDisplayNameChange()
 	{
-		for (ThemePieceListener listener : listeners)
-			listener.displayNameChanged(this);
+		for (int i = listeners.size() - 1; i >= 0; i--)
+			listeners.get(i).displayNameChanged(this);
 	}
 
 	protected void raiseResizableToggled()
 	{
-		for (ThemePanelListener listener : panelListeners)
-			listener.resizableToggled(this);
+		for (int i = panelListeners.size() - 1; i >= 0; i--)
+			panelListeners.get(i).resizableToggled(this);
 	}
 
 	protected void raiseExpandedToggled()
 	{
-		for (ThemePanelListener listener : panelListeners)
-			listener.expandedToggled(this);
+		for (int i = panelListeners.size() - 1; i >= 0; i--)
+			panelListeners.get(i).expandedToggled(this);
 	}
 
 	protected void raiseWeightChanged()
 	{
-		for (ThemePanelListener listener : panelListeners)
-			listener.weightChanged(this);
+		for (int i = panelListeners.size() - 1; i >= 0; i--)
+			panelListeners.get(i).weightChanged(this);
 	}
 }

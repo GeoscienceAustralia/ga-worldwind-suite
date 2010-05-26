@@ -1,17 +1,21 @@
 package au.gov.ga.worldwind.panels.dataset;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
+import au.gov.ga.worldwind.components.lazytree.LazyLoadListener;
 import au.gov.ga.worldwind.downloader.Downloader;
 import au.gov.ga.worldwind.downloader.RetrievalResult;
 
 public class LazyDataset extends Dataset implements ILazyDataset
 {
 	private final URL url;
+	private final List<LazyLoadListener> listeners = new ArrayList<LazyLoadListener>();
 
-	public LazyDataset(String name, URL url, URL descriptionURL, URL iconURL, boolean root)
+	public LazyDataset(String name, URL url, URL descriptionURL, URL iconURL, boolean base)
 	{
-		super(name, descriptionURL, iconURL, root);
+		super(name, descriptionURL, iconURL, base);
 		this.url = url;
 	}
 
@@ -31,5 +35,20 @@ public class LazyDataset extends Dataset implements ILazyDataset
 				getLayers().addAll(dataset.getLayers());
 			}
 		}
+
+		for (int i = listeners.size() - 1; i >= 0; i--)
+			listeners.get(i).loaded(this);
+	}
+
+	@Override
+	public void addListener(LazyLoadListener listener)
+	{
+		listeners.add(listener);
+	}
+
+	@Override
+	public void removeListener(LazyLoadListener listener)
+	{
+		listeners.remove(listener);
 	}
 }

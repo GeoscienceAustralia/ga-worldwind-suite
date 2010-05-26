@@ -122,19 +122,19 @@ public abstract class AbstractThemeHUD implements ThemeHUD
 
 	protected void raiseOnToggled()
 	{
-		for (ThemePieceListener listener : listeners)
-			listener.onToggled(this);
+		for(int i = listeners.size() - 1; i >= 0; i--)
+			listeners.get(i).onToggled(this);
 	}
 
 	protected void raiseDisplayNameChange()
 	{
-		for (ThemePieceListener listener : listeners)
-			listener.displayNameChanged(this);
+		for(int i = listeners.size() - 1; i >= 0; i--)
+			listeners.get(i).displayNameChanged(this);
 	}
 
 	protected void raisePositionChanged()
 	{
-		for (ThemeHUDListener listener : hudListeners)
-			listener.positionChanged(this);
+		for(int i = hudListeners.size() - 1; i >= 0; i--)
+			hudListeners.get(i).positionChanged(this);
 	}
 }

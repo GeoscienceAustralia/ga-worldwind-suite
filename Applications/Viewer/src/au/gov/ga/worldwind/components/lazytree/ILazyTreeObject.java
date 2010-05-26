@@ -12,4 +12,8 @@ public interface ILazyTreeObject extends ITreeObject
 	 *             If loading the children fails for some reason
 	 */
 	public void load() throws Exception;
+
+	public void addListener(LazyLoadListener listener);
+
+	public void removeListener(LazyLoadListener listener);
 }

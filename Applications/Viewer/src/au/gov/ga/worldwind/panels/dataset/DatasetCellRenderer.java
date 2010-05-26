@@ -10,9 +10,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
@@ -102,24 +100,7 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 					}
 					else
 					{
-						//create a list of parents of this layer until one of the parents is a 'root'
-						List<IData> parents = new ArrayList<IData>();
-						Object[] os = path.getPath();
-						for (int i = os.length - 1; i >= 0; i--)
-						{
-							Object o = os[i];
-							if (o == null || !(o instanceof DefaultMutableTreeNode))
-								break;
-							Object uo = ((DefaultMutableTreeNode) o).getUserObject();
-							if (uo == null || !(uo instanceof IData))
-								break;
-							IData data = (IData) uo;
-							if (data != layer)
-								parents.add(data);
-							if (data.isRoot())
-								break;
-						}
-						layerTreeModel.addLayer(layer, parents.toArray(new IData[parents.size()]));
+						layerTreeModel.addLayer(layer, path.getPath());
 					}
 					tree.repaint();
 				}

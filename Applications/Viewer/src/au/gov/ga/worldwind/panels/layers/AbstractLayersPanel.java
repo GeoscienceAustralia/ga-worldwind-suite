@@ -47,6 +47,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		add(scrollPane, BorderLayout.CENTER);
 		scrollPane.setPreferredSize(new Dimension(MINIMUM_LIST_HEIGHT, MINIMUM_LIST_HEIGHT));
 
+		createActions();
 		createToolBar();
 
 		layerEnabler.addRefreshListener(new RefreshListener()
@@ -75,6 +76,8 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		wwd = theme.getWwd();
 		layerEnabler.setWwd(theme.getWwd());
 	}
+	
+	protected abstract void createActions();
 
 	protected abstract INode createRootNode();
 
@@ -95,6 +98,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 	private void createOpacitySlider()
 	{
 		opacitySlider = new JSlider(0, 100, 100);
+		opacitySlider.setToolTipText("Layer opacity");
 		Dimension size = opacitySlider.getPreferredSize();
 		size.width = 50;
 		opacitySlider.setPreferredSize(size);

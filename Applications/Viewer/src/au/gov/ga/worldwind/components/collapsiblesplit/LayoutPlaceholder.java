@@ -59,8 +59,8 @@ public class LayoutPlaceholder
 		if (this.weight != weight)
 		{
 			this.weight = weight;
-			for (CollapsibleSplitListener listener : listeners)
-				listener.weightChanged(weight);
+			for (int i = listeners.size() - 1; i >= 0; i--)
+				listeners.get(i).weightChanged(weight);
 		}
 	}
 
@@ -79,8 +79,8 @@ public class LayoutPlaceholder
 		if (this.expanded != expanded)
 		{
 			this.expanded = expanded;
-			for (CollapsibleSplitListener listener : listeners)
-				listener.expandedToggled(expanded);
+			for (int i = listeners.size() - 1; i >= 0; i--)
+				listeners.get(i).expandedToggled(expanded);
 		}
 	}
 
@@ -94,8 +94,8 @@ public class LayoutPlaceholder
 		if (this.resizable != resizable)
 		{
 			this.resizable = resizable;
-			for (CollapsibleSplitListener listener : listeners)
-				listener.resizableToggled(resizable);
+			for (int i = listeners.size() - 1; i >= 0; i--)
+				listeners.get(i).resizableToggled(resizable);
 		}
 	}
 }

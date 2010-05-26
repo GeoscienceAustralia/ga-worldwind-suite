@@ -6,7 +6,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.swing.DropMode;
 import javax.swing.Icon;
@@ -20,7 +22,13 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.components.lazytree.ILazyTreeObject;
+import au.gov.ga.worldwind.components.lazytree.LazyLoadListener;
 import au.gov.ga.worldwind.panels.dataset.DatasetPanel;
+import au.gov.ga.worldwind.panels.dataset.IData;
+import au.gov.ga.worldwind.panels.dataset.IDataset;
+import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
+import au.gov.ga.worldwind.panels.dataset.ILazyDataset;
 import au.gov.ga.worldwind.panels.layers.drag.NodeTransferHandler;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.theme.ThemePanel;
@@ -32,6 +40,7 @@ public class LayersPanel extends AbstractLayersPanel
 {
 	private static final String LAYERS_FILENAME = "layers.xml";
 	private static final File layersFile = new File(Util.getUserDirectory(), LAYERS_FILENAME);
+	private boolean layersFileExisted;
 
 	private BasicAction newFolderAction, renameAction, deleteAction;
 
@@ -68,17 +77,21 @@ public class LayersPanel extends AbstractLayersPanel
 		try
 		{
 			root = LayerTreePersistance.readFromXML(layersFile);
+			layersFileExisted = true;
 		}
 		catch (Exception e)
 		{
 		}
 		if (root == null)
-			root = new FolderNode("root", null, true);
+		{
+			root = new FolderNode(null, null, true);
+			layersFileExisted = false;
+		}
 		return root;
 	}
 
 	@Override
-	protected void setupToolBarBeforeSlider(JToolBar toolBar)
+	protected void createActions()
 	{
 		newFolderAction =
 				new BasicAction("New Folder", "Create New Folder", Icons.newfolder.getIcon());
@@ -110,7 +123,11 @@ public class LayersPanel extends AbstractLayersPanel
 				delete();
 			}
 		});
+	}
 
+	@Override
+	protected void setupToolBarBeforeSlider(JToolBar toolBar)
+	{
 		toolBar.add(newFolderAction);
 		toolBar.add(renameAction);
 		toolBar.add(deleteAction);
@@ -218,6 +235,10 @@ public class LayersPanel extends AbstractLayersPanel
 		super.setup(theme);
 		linkPanels(theme.getPanels());
 		setupDrag();
+
+		if (!layersFileExisted)
+			for (IDataset dataset : theme.getDatasets())
+				addDefaultLayersFromDataset(dataset);
 	}
 
 	@Override
@@ -240,6 +261,43 @@ public class LayersPanel extends AbstractLayersPanel
 		{
 			datasetPanel.registerLayerTreeModel(getModel());
 		}
+	}
+
+	private void addDefaultLayersFromDataset(IDataset dataset)
+	{
+		if (dataset instanceof ILazyDataset && dataset.getDatasets().isEmpty()
+				&& dataset.getLayers().isEmpty())
+		{
+			final ILazyDataset lazy = (ILazyDataset) dataset;
+			lazy.addListener(new LazyLoadListener()
+			{
+				@Override
+				public void loaded(ILazyTreeObject object)
+				{
+					addDefaultLayersFromDataset(lazy, new ArrayList<IData>());
+					lazy.removeListener(this);
+				}
+			});
+		}
+		else
+		{
+			addDefaultLayersFromDataset(dataset, new ArrayList<IData>());
+		}
+	}
+
+	private void addDefaultLayersFromDataset(IDataset dataset, List<IData> parents)
+	{
+		parents.add(dataset);
+
+		for (ILayerDefinition layer : dataset.getLayers())
+			if (layer.isDefault())
+				getModel().addLayer(layer, parents);
+
+		//recurse
+		for (IDataset d : dataset.getDatasets())
+			addDefaultLayersFromDataset(d, parents);
+
+		parents.remove(parents.size() - 1);
 	}
 
 	private void setupDrag()

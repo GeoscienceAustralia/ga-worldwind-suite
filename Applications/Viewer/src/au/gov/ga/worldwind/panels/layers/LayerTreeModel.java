@@ -13,6 +13,7 @@ import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
@@ -75,7 +76,39 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		enabler.enable(copy);
 	}
 
-	public void addLayer(ILayerDefinition layer, IData[] parents)
+	public void addLayer(ILayerDefinition layer, Object[] pathToRoot)
+	{
+		//convert the list of parents to a list of IData parents
+		List<IData> parents = new ArrayList<IData>();
+		if (pathToRoot != null)
+		{
+			for (Object o : pathToRoot)
+			{
+				if (o == null)
+					break;
+
+				IData data = null;
+				if (o instanceof DefaultMutableTreeNode)
+				{
+					Object uo = ((DefaultMutableTreeNode) o).getUserObject();
+					if (uo != null && uo instanceof IData)
+						data = (IData) uo;
+				}
+				else if (o instanceof IData)
+				{
+					data = (IData) o;
+				}
+				if (data == null)
+					break;
+
+				if (data != layer)
+					parents.add(data);
+			}
+		}
+		addLayer(layer, parents);
+	}
+
+	public void addLayer(ILayerDefinition layer, List<IData> parents)
 	{
 		INode layerNode = LayerNode.createFromLayerDefinition(layer);
 		List<INode> expandPath = new ArrayList<INode>();
@@ -84,14 +117,25 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		INode currentParent = getRoot();
 		if (parents != null)
 		{
-			for (int i = parents.length - 1; i >= 0; i--)
+			//if the list contains any 'base' IData's, then start from that index
+			int startIndex = 0;
+			for (int i = parents.size() - 1; i >= 0; i--)
 			{
-				IData data = parents[i];
+				if (parents.get(i).isBase())
+				{
+					startIndex = i;
+					break;
+				}
+			}
+
+			for (int i = startIndex; i < parents.size(); i++)
+			{
+				IData data = parents.get(i);
 				INode node = null;
 				for (int j = 0; j < currentParent.getChildCount(); j++)
 				{
 					INode child = currentParent.getChild(j);
-					if (data.getName().equalsIgnoreCase(child.getName()))
+					if (sameFolder(data, child))
 					{
 						node = child;
 						break;
@@ -116,6 +160,12 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		//relayout the tree, and expand to make the layer node visible
 		((ClearableBasicTreeUI) tree.getUI()).relayout(expand);
 		tree.scrollPathToVisible(expand);
+	}
+
+	public boolean sameFolder(IData data, INode node)
+	{
+		return data.getName() == node.getName()
+				|| (data.getName() != null && data.getName().equalsIgnoreCase(node.getName()));
 	}
 
 	public void removeLayer(ILayerDefinition layer)
