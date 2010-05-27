@@ -1,420 +1,93 @@
 package au.gov.ga.worldwind.panels.layers;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Rectangle;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.swing.ImageIcon;
+import javax.swing.AbstractButton;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.panels.dataset.AbstractCellRenderer;
 import au.gov.ga.worldwind.util.DefaultLauncher;
-import au.gov.ga.worldwind.util.HSLColor;
-import au.gov.ga.worldwind.util.Icons;
 
-public class LayerCellRenderer extends JPanel implements TreeCellRenderer
+public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 {
-	private LayerTree tree;
-	private RendererMouseKeyListener mouseKeyListener = new RendererMouseKeyListener();
-	private Map<Integer, Rectangle> urlRows = new HashMap<Integer, Rectangle>();
-
-	private int mouseRow = -1, keyRow = -1, mouseButtonDownRow = -1, mouseLabelDownRow = -1,
-			keyDownRow = -1;
-	private int mouseX = -1, mouseY = -1;
-
-	private JCheckBox button;
-	private DefaultTreeCellRenderer label;
-	private JLabel infoLabel;
-
-	private ImageIcon loadingIcon;
-
-	public LayerCellRenderer()
+	@Override
+	protected AbstractButton createButton()
 	{
-		super(new BorderLayout(3, 3));
-		setOpaque(false);
-
-		button = new JCheckBox();
-		button.setOpaque(false);
-
-		label = new DefaultTreeCellRenderer();
-		label.setTextNonSelectionColor(Color.black);
-		label.setTextSelectionColor(Color.black);
-		Color backgroundSelection = label.getBackgroundSelectionColor();
-		HSLColor hsl = new HSLColor(backgroundSelection);
-		label.setBackgroundSelectionColor(hsl.adjustTone(80));
-		label.setBorderSelectionColor(hsl.adjustShade(40));
-
-		infoLabel = new JLabel(Icons.info.getIcon());
-		infoLabel.setOpaque(false);
-
-		add(button, BorderLayout.WEST);
-		add(label, BorderLayout.CENTER);
-		add(infoLabel, BorderLayout.EAST);
-
-		loadingIcon = Icons.newLoadingIcon();
+		return new JCheckBox();
 	}
 
-	private void toggleLayer(int row)
+	@Override
+	protected void validateTree(JTree tree)
 	{
-		TreePath path = tree.getSelectionPath();
-		Object value = path.getLastPathComponent();
-		if (value != null && value instanceof ILayerNode)
-		{
-			ILayerNode layer = (ILayerNode) value;
-			tree.getModel().setEnabled(layer, !tree.getModel().isEnabled(layer));
-		}
-	}
-
-	private void linkClicked(int row)
-	{
-		TreePath path = tree.getSelectionPath();
-		Object value = path.getLastPathComponent();
-		if (value != null && value instanceof INode)
-		{
-			INode node = (INode) value;
-			if (node.getDescriptionURL() != null)
-			{
-				DefaultLauncher.openURL(node.getDescriptionURL());
-			}
-		}
-	}
-
-	public Component getTreeCellRendererComponent(final JTree t, Object value, boolean selected,
-			boolean expanded, boolean leaf, final int row, boolean hasFocus)
-	{
-		if (!(t instanceof LayerTree))
+		if (!(tree instanceof LayerTree))
 			throw new IllegalArgumentException("Tree must be a LayerTree");
-
-		//tree has changed!
-		if (tree != t)
-		{
-			if (tree != null)
-			{
-				tree.removeMouseListener(mouseKeyListener);
-				tree.removeMouseMotionListener(mouseKeyListener);
-				tree.removeKeyListener(mouseKeyListener);
-			}
-			tree = (LayerTree) t;
-			tree.addMouseListener(mouseKeyListener);
-			tree.addMouseMotionListener(mouseKeyListener);
-			tree.addKeyListener(mouseKeyListener);
-
-			loadingIcon.setImageObserver(tree);
-		}
-
-		//update the label
-		label.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-
-		if (row < 0 || value == null || !(value instanceof INode))
-			return label;
-		
-		//for some reason we have to readd the label
-		add(label, BorderLayout.CENTER);
-
-		boolean layerRow = false;
-		boolean urlRow = false;
-		INode node = (INode) value;
-
-		if (node.isIconLoaded())
-		{
-			label.setIcon(node.getIcon());
-		}
-		else
-		{
-			Runnable afterLoad = new Runnable()
-			{
-				public void run()
-				{
-					tree.repaint();
-				}
-			};
-			node.loadIcon(afterLoad);
-		}
-
-		if (node.isLoading())
-		{
-			label.setIcon(loadingIcon);
-		}
-
-		if (node.getDescriptionURL() != null)
-		{
-			urlRow = true;
-		}
-
-		if (node instanceof ILayerNode)
-		{
-			layerRow = true;
-			ILayerNode layer = (ILayerNode) node;
-
-			if (layer.hasError())
-			{
-				//may be better to put the error on a separate line
-				label.setIcon(Icons.error.getIcon());
-				label.setText(label.getText() + " - " + layer.getError().getMessage());
-			}
-			else
-			{
-				if (layer.isEnabled() && layer.getOpacity() < 1)
-				{
-					String text =
-							label.getText() + " (" + (int) Math.round(layer.getOpacity() * 100)
-									+ "%)";
-					label.setText(text);
-				}
-			}
-
-			boolean mouseInsideButton =
-					mouseRow >= 0 && button.getBounds().contains(mouseX, mouseY);
-			boolean rollover =
-					(mouseInsideButton && row == mouseRow && mouseButtonDownRow <= 0) || (hasFocus);
-			boolean down =
-					(mouseInsideButton && row == mouseButtonDownRow)
-							|| (hasFocus && row == keyDownRow);
-
-			button.getModel().setRollover(rollover && row >= 0);
-			button.getModel().setPressed(down && row >= 0);
-			button.getModel().setArmed(down && row >= 0);
-
-			button.setSelected(layer.isEnabled());
-		}
-
-		//the checkbox is only visible if the row represents a layer
-		button.setVisible(layerRow);
-
-		//set up the info icon label
-		infoLabel.setVisible(urlRow);
-		if (selected)
-			infoLabel.setIcon(Icons.info.getIcon());
-		else
-			infoLabel.setIcon(Icons.infowhite.getIcon());
-
-		if (urlRow)
-		{
-			Rectangle labelBounds = new Rectangle(infoLabel.getPreferredSize());
-			//ensure the label is in the correct position by forcing a layout
-			validate();
-			labelBounds.x += infoLabel.getLocation().x;
-			urlRows.put(row, labelBounds);
-		}
-		else
-			urlRows.remove(row);
-
-		return this;
 	}
 
-	private class RendererMouseKeyListener extends MouseAdapter implements KeyListener
+	@Override
+	protected INode getValue(Object value)
 	{
-		private int lastRow = -1;
-		private int lastCursor = -1;
-		private int lastCursorRow = -1;
+		if (value != null && value instanceof INode)
+			return (INode) value;
+		return null;
+	}
 
-		@Override
-		public void mouseMoved(MouseEvent e)
-		{
-			setMouseRow(e.getX(), e.getY());
-			repaintMouseRow();
-			checkForLinkLabel();
-		}
+	@Override
+	protected ILayerNode getLayerValue(INode value)
+	{
+		if (value != null && value instanceof ILayerNode)
+			return (ILayerNode) value;
+		return null;
+	}
 
-		@Override
-		public void mouseDragged(MouseEvent e)
-		{
-			setMouseRow(e.getX(), e.getY());
-			repaintMouseRow();
-			checkForLinkLabel();
-		}
+	@Override
+	protected boolean isURLRow(INode value)
+	{
+		return value.getDescriptionURL() != null;
+	}
 
-		@Override
-		public void mousePressed(MouseEvent e)
+	@Override
+	protected String getLinkLabelToolTipText(Object value)
+	{
+		INode node = getValue(value);
+		if (node != null && node.getDescriptionURL() != null)
+			return node.getDescriptionURL().toExternalForm();
+		return null;
+	}
+
+	@Override
+	protected void setupButton(AbstractButton button, ILayerNode value, boolean mouseInsideButton,
+			boolean rollover, boolean down)
+	{
+		button.getModel().setRollover(rollover);
+		button.getModel().setPressed(down);
+		button.getModel().setArmed(down);
+		button.setSelected(value.isEnabled());
+	}
+
+	@Override
+	protected void buttonPressed(int row)
+	{
+		TreePath path = getTree().getPathForRow(row);
+		if (path != null)
 		{
-			if (e.getButton() == MouseEvent.BUTTON1)
+			ILayerNode layer = getLayerValue(getValue(path.getLastPathComponent()));
+			if (layer != null)
 			{
-				setMouseRow(e.getX(), e.getY());
-				if (mouseRow >= 0)
-				{
-					if (button.getBounds().contains(mouseX, mouseY))
-					{
-						mouseButtonDownRow = mouseRow;
-					}
-					else if (urlRows.containsKey(mouseRow)
-							&& urlRows.get(mouseRow).contains(mouseX, mouseY))
-					{
-						mouseLabelDownRow = mouseRow;
-					}
-				}
-				repaintMouseRow();
+				LayerTreeModel model = (LayerTreeModel) getTree().getModel();
+				model.setEnabled(layer, !model.isEnabled(layer));
 			}
 		}
+	}
 
-		@Override
-		public void mouseReleased(MouseEvent e)
+	@Override
+	protected void linkClicked(int row)
+	{
+		TreePath path = getTree().getPathForRow(row);
+		if (path != null)
 		{
-			if (e.getButton() == MouseEvent.BUTTON1)
-			{
-				setMouseRow(e.getX(), e.getY());
-
-				//only selected if it was the same row the mouse down was on
-				if (mouseRow >= 0)
-				{
-					if (mouseButtonDownRow == mouseRow
-							&& button.getBounds().contains(mouseX, mouseY))
-					{
-						toggleLayer(mouseRow);
-					}
-					else if (mouseLabelDownRow == mouseRow && urlRows.containsKey(mouseRow)
-							&& urlRows.get(mouseRow).contains(mouseX, mouseY))
-					{
-						linkClicked(mouseRow);
-					}
-				}
-
-				mouseButtonDownRow = -1;
-				repaintMouseRow();
-			}
-		}
-
-		@Override
-		public void mouseExited(MouseEvent e)
-		{
-			setMouseRow(e.getX(), e.getY());
-			repaintMouseRow();
-		}
-
-		private void setMouseRow(int x, int y)
-		{
-			mouseRow = tree.getRowForLocation(x, y);
-			if (mouseRow >= 0)
-			{
-				Rectangle bounds = tree.getRowBounds(mouseRow);
-				mouseX = x - bounds.x;
-				mouseY = y - bounds.y;
-			}
-		}
-
-		private void repaintMouseRow()
-		{
-			//mouse moved out of the last row
-			if (lastRow >= 0 && mouseRow != lastRow)
-			{
-				Rectangle bounds = tree.getRowBounds(lastRow);
-				if (bounds != null)
-					tree.repaint(bounds);
-			}
-			lastRow = mouseRow;
-			if (mouseRow >= 0)
-			{
-				Rectangle bounds = tree.getRowBounds(mouseRow);
-				if (bounds != null)
-					tree.repaint(bounds);
-			}
-		}
-
-		public void keyPressed(KeyEvent e)
-		{
-			if (e.getKeyCode() == KeyEvent.VK_SPACE)
-			{
-				setKeyRow();
-				if (keyRow >= 0)
-				{
-					keyDownRow = keyRow;
-				}
-				repaintKeyRow();
-			}
-		}
-
-		public void keyReleased(KeyEvent e)
-		{
-			if (e.getKeyCode() == KeyEvent.VK_SPACE)
-			{
-				setKeyRow();
-				if (keyRow >= 0 && keyRow == keyDownRow)
-				{
-					toggleLayer(keyRow);
-				}
-				keyDownRow = -1;
-				repaintKeyRow();
-			}
-		}
-
-		public void keyTyped(KeyEvent e)
-		{
-		}
-
-		private void setKeyRow()
-		{
-			int[] s = tree.getSelectionRows();
-			if (s != null && s.length > 0)
-			{
-				keyRow = s[0];
-			}
-			else
-			{
-				keyRow = -1;
-			}
-		}
-
-		private void repaintKeyRow()
-		{
-			if (keyRow >= 0)
-			{
-				Rectangle bounds = tree.getRowBounds(keyRow);
-				tree.repaint(bounds);
-			}
-		}
-
-		private void checkForLinkLabel()
-		{
-			int cursor = -1;
-			if (mouseRow >= 0 && urlRows.containsKey(mouseRow))
-			{
-				Rectangle labelBounds = urlRows.get(mouseRow);
-				if (labelBounds.contains(mouseX, mouseY))
-				{
-					cursor = Cursor.HAND_CURSOR;
-				}
-			}
-
-			//only set the cursor if it is not the same as the last one set
-			if (lastCursor != cursor || lastCursorRow != mouseRow)
-			{
-				lastCursor = cursor;
-				lastCursorRow = mouseRow;
-				if (cursor == -1)
-				{
-					tree.setCursor(null);
-					tree.setToolTipText(null);
-				}
-				else
-				{
-					tree.setCursor(Cursor.getPredefinedCursor(cursor));
-					TreePath path = tree.getPathForRow(mouseRow);
-					if (path != null)
-					{
-						Object value = path.getLastPathComponent();
-						if (value != null && value instanceof INode)
-						{
-							INode node = (INode) value;
-							if (node.getDescriptionURL() != null)
-							{
-								tree.setToolTipText(node.getDescriptionURL().toExternalForm());
-							}
-						}
-					}
-				}
-			}
+			INode node = getValue(path.getLastPathComponent());
+			if (node != null && node.getDescriptionURL() != null)
+				DefaultLauncher.openURL(node.getDescriptionURL());
 		}
 	}
 }
