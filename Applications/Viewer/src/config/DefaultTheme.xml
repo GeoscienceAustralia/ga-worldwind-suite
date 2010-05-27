@@ -25,7 +25,7 @@
 
 	<!-- Layers are shown in the Theme Layers panel (non editable list) -->
 	<Layer name="Potassium" url="http://www.ga.gov.au:8500/apps/world-wind/dataset/GA/Radiometrics/Potassium.xml"
-		icon="" description="" enabled="true" />
+		icon="" info="" enabled="true" />
 
 	<!-- Sidebar panels -->
 	<Panel name="Search" className="au.gov.ga.worldwind.panels.geonames.GeoNamesSearchPanel"

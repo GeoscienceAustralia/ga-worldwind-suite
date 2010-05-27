@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <DatasetList>
-	<Dataset name="NASA" icon="nasa.png" description="http://worldwind.arc.nasa.gov/java/" base="true">
+	<Dataset name="NASA" icon="nasa.png" info="http://worldwind.arc.nasa.gov/java/" base="true">
 		<Layer name="Earth Digital Elevation Model" url="NASA/earth_elevation_model.xml" icon="layer.png" default="true" />
 		<Layer name="Stars" url="NASA/stars.xml" icon="layer.png" default="true" />
 		<Layer name="Sky" url="NASA/sky.xml" icon="layer.png" default="true" />
 		<Layer name="Earth Image" url="NASA/earth_image.xml" icon="layer.png" default="true" />
 		<Layer name="Blue Marble" url="NASA/blue_marble.xml" icon="layer.png" default="true" />
 		<Layer name="Landsat" url="NASA/landsat.xml" icon="layer.png" default="true" />
+		<Layer name="Country Boundaries" url="NASA/country_boundaries.xml" icon="layer.png" default="true" />
+		<Layer name="Place Names" url="NASA/place_names.xml" icon="layer.png" default="true" />
 		<Layer name="Virtual Earth - Aerial" url="NASA/virtual_earth_aerial.xml" icon="layer.png" />
 		<Layer name="Virtual Earth - Roads" url="NASA/virtual_earth_roads.xml" icon="layer.png" />
 		<Layer name="Virtual Earth - Hybrid" url="NASA/virtual_earth_hybrid.xml" icon="layer.png" />
-		<Layer name="Country Boundaries" url="NASA/country_boundaries.xml" icon="layer.png" default="true" />
-		<Layer name="Place Names" url="NASA/place_names.xml" icon="layer.png" default="true" />
 	</Dataset>
-	<Dataset name="Geoscience Australia" icon="ga.png" description="http://www.ga.gov.au/" base="true">
-		<Dataset name="Radiometric Map of Australia" icon="GA/Radiometrics/icon.png" description="http://www.ga.gov.au/minerals/research/national/radiometric/index.jsp">
+	<Dataset name="Geoscience Australia" icon="ga.png" info="http://www.ga.gov.au/" base="true">
+		<Dataset name="Radiometric Map of Australia" icon="GA/Radiometrics/icon.png" info="http://www.ga.gov.au/minerals/research/national/radiometric/index.jsp">
 			<Dataset name="Detailed Areas" icon="GA/Radiometrics/icon.png">
 				<Layer name="Ternary (K-Th-U)" url="GA/Radiometrics/Areas/Ternary.xml" icon="layer.png" />
 				<Layer name="Potassium (K)" url="GA/Radiometrics/Areas/Potassium.xml" icon="layer.png" />
@@ -36,10 +36,10 @@
 			<Layer name="Uranium^2/Thorium Ratio" url="GA/Radiometrics/Uranium_Squared.xml" icon="layer.png" />
 		</Dataset>
 		<!-- Important to escaped ampersands in URLs! -->
-		<Dataset name="Gravity Anomaly Map of the Australian Region" icon="GA/Gravity/icon.png" description="https://www.ga.gov.au/products/servlet/controller?event=GEOCAT_DETAILS&amp;catno=65682">
+		<Dataset name="Gravity Anomaly Map of the Australian Region" icon="GA/Gravity/icon.png" info="https://www.ga.gov.au/products/servlet/controller?event=GEOCAT_DETAILS&amp;catno=65682">
 			<Layer name="Gravity" url="GA/Gravity/Gravity.xml" icon="layer.png" />
 		</Dataset>
-		<Dataset name="Magnetic Anomaly Map of the Australian Region" icon="GA/Magnetics/icon.png" description="https://www.ga.gov.au/products/servlet/controller?event=GEOCAT_DETAILS&amp;catno=61703">
+		<Dataset name="Magnetic Anomaly Map of the Australian Region" icon="GA/Magnetics/icon.png" info="https://www.ga.gov.au/products/servlet/controller?event=GEOCAT_DETAILS&amp;catno=61703">
 			<Layer name="Magnetic" url="GA/Magnetics/Magnetics.xml" icon="layer.png" />
 		</Dataset>
 	</Dataset>
