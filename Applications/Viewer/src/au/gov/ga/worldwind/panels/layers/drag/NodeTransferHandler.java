@@ -1,7 +1,11 @@
 package au.gov.ga.worldwind.panels.layers.drag;
 
 import java.awt.Rectangle;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.io.File;
+import java.net.URL;
+import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
@@ -10,19 +14,21 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
-import au.gov.ga.worldwind.panels.layers.ClearableBasicTreeUI;
+import au.gov.ga.worldwind.panels.dataset.LayerDefinition;
 import au.gov.ga.worldwind.panels.layers.INode;
 import au.gov.ga.worldwind.panels.layers.LayerNode;
+import au.gov.ga.worldwind.panels.layers.LayerTree;
 import au.gov.ga.worldwind.panels.layers.LayerTreeModel;
+import au.gov.ga.worldwind.util.Icons;
 
 public class NodeTransferHandler extends TransferHandler
 {
-	private JTree layersTree;
+	private LayerTree layersTree;
 	private JTree datasetTree;
 
 	private JTree.DropLocation dropLocation;
 
-	public NodeTransferHandler(JTree layersTree, JTree datasetTree)
+	public NodeTransferHandler(LayerTree layersTree, JTree datasetTree)
 	{
 		super();
 		this.layersTree = layersTree;
@@ -64,13 +70,7 @@ public class NodeTransferHandler extends TransferHandler
 			TreePath dragPath = datasetTree.getSelectionPath();
 			if (dragPath != null)
 			{
-				DefaultMutableTreeNode node =
-						(DefaultMutableTreeNode) dragPath.getLastPathComponent();
-				Object o = node.getUserObject();
-				if (o != null && o instanceof ILayerDefinition)
-				{
-					t = new TreeTransferable(datasetTree, dragPath);
-				}
+				t = new TreeTransferable(datasetTree, datasetTree.getSelectionPaths());
 			}
 		}
 		return t;
@@ -79,19 +79,64 @@ public class NodeTransferHandler extends TransferHandler
 	@Override
 	public boolean canImport(TransferSupport support)
 	{
+		if (!isDataFlavorValid(support))
+			return false;
+
 		return support.getComponent() == layersTree;
 	}
 
 	@Override
 	public boolean importData(TransferSupport support)
 	{
+		if (!isDataFlavorValid(support))
+			return false;
+
 		DropLocation dl = support.getDropLocation();
-		if (dl instanceof JTree.DropLocation)
+		if (!(dl instanceof JTree.DropLocation))
+			return false;
+		dropLocation = (JTree.DropLocation) dl;
+
+		Transferable transferable = support.getTransferable();
+		if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
 		{
-			dropLocation = (JTree.DropLocation) dl;
-			return true;
+			try
+			{
+				LayerTreeModel model = layersTree.getModel();
+
+				List<?> files =
+						(List<?>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+				int i = 0;
+				for (Object o : files)
+				{
+					if (o instanceof File)
+					{
+						File file = (File) o;
+						URL url = file.toURI().toURL();
+						ILayerDefinition definition =
+								new LayerDefinition(file.getName(), url, null, Icons.file.getURL(),
+										true, false);
+						INode node = LayerNode.createFromLayerDefinition(definition);
+						addNodeToTree(dropLocation, model, node, false, i++);
+					}
+				}
+
+				layersTree.getUI().relayout();
+				dropLocation = null;
+			}
+			catch (Exception e)
+			{
+				return false;
+			}
 		}
-		return false;
+
+		return true;
+	}
+
+	private boolean isDataFlavorValid(TransferSupport support)
+	{
+		//only support string flavor, or a file list (if a file has been dragged into the tree)
+		return support.isDataFlavorSupported(DataFlavor.stringFlavor)
+				|| support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
 	}
 
 	@Override
@@ -102,8 +147,39 @@ public class NodeTransferHandler extends TransferHandler
 			return;
 
 		TreeTransferable t = (TreeTransferable) data;
-		LayerTreeModel model = (LayerTreeModel) layersTree.getModel();
+		LayerTreeModel model = layersTree.getModel();
 
+		int i = 0;
+		for (TreePath path : t.getPaths())
+		{
+			if (source == layersTree)
+			{
+				INode node = (INode) path.getLastPathComponent();
+				addNodeToTree(dropLocation, model, node, true, i++);
+			}
+			else if (source == datasetTree)
+			{
+				DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
+				if (dmtn != null && dmtn.getUserObject() instanceof ILayerDefinition)
+				{
+					ILayerDefinition definition = (ILayerDefinition) dmtn.getUserObject();
+					INode node = LayerNode.createFromLayerDefinition(definition);
+					addNodeToTree(dropLocation, model, node, false, i++);
+
+					Rectangle bounds = datasetTree.getPathBounds(path);
+					if (bounds != null)
+						datasetTree.repaint(bounds);
+				}
+			}
+		}
+
+		layersTree.getUI().relayout();
+		dropLocation = null;
+	}
+
+	private void addNodeToTree(JTree.DropLocation dropLocation, LayerTreeModel model, INode node,
+			boolean alreadyInTree, int offset)
+	{
 		TreePath p = dropLocation.getPath();
 		boolean noparent = p == null;
 		INode parent = null;
@@ -116,50 +192,27 @@ public class NodeTransferHandler extends TransferHandler
 
 			if (index < 0)
 				index = parent.getChildCount();
+			else
+				index += offset;
 		}
 
-		for (TreePath path : t.getPaths())
+		if (alreadyInTree)
 		{
-			if (source == layersTree)
+			if (!noparent)
 			{
-				INode move = (INode) path.getLastPathComponent();
-
-				if (!noparent)
-				{
-					if (move == parent || nodeAncestorOf(move, parent))
-						continue;
-					if (move.getParent() == parent && index > model.getIndexOfChild(parent, move))
-						index--;
-				}
-
-				model.removeNodeFromParent(move, false);
-				if (noparent)
-					model.addToRoot(move, true);
-				else
-					model.insertNodeInto(move, parent, index++, true);
+				if (node == parent || nodeAncestorOf(node, parent))
+					return;
+				if (node.getParent() == parent && index > model.getIndexOfChild(parent, node))
+					index--;
 			}
-			else if (source == datasetTree)
-			{
-				DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
-				if (dmtn != null && dmtn.getUserObject() instanceof ILayerDefinition)
-				{
-					ILayerDefinition definition = (ILayerDefinition) dmtn.getUserObject();
-					INode node = LayerNode.createFromLayerDefinition(definition);
-					if (noparent)
-						model.addToRoot(node, true);
-					else
-						model.insertNodeInto(node, parent, index, true);
 
-					Rectangle bounds = datasetTree.getPathBounds(path);
-					if (bounds != null)
-						datasetTree.repaint(bounds);
-				}
-			}
+			model.removeNodeFromParent(node, false);
 		}
 
-		((ClearableBasicTreeUI) layersTree.getUI()).relayout();
-
-		dropLocation = null;
+		if (noparent)
+			model.addToRoot(node, true);
+		else
+			model.insertNodeInto(node, parent, index, true);
 	}
 
 	private boolean nodeAncestorOf(INode ancestor, INode child)

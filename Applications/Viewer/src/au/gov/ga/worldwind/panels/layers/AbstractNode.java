@@ -9,15 +9,17 @@ import au.gov.ga.worldwind.panels.dataset.AbstractIconItem;
 public abstract class AbstractNode extends AbstractIconItem implements INode
 {
 	private String name;
+	private URL descriptionURL;
 
 	private boolean expanded;
 	private INode parent;
 	private List<INode> children = new ArrayList<INode>();
 
-	public AbstractNode(String name, URL iconURL, boolean expanded)
+	public AbstractNode(String name, URL descriptionURL, URL iconURL, boolean expanded)
 	{
 		super(iconURL);
 		setName(name);
+		setDescriptionURL(descriptionURL);
 		setExpanded(expanded);
 	}
 
@@ -31,6 +33,16 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 		if (name == null)
 			name = "";
 		this.name = name;
+	}
+
+	public URL getDescriptionURL()
+	{
+		return descriptionURL;
+	}
+
+	public void setDescriptionURL(URL descriptionURL)
+	{
+		this.descriptionURL = descriptionURL;
 	}
 
 	public boolean isExpanded()

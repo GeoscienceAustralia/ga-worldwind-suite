@@ -84,7 +84,7 @@ public class LayersPanel extends AbstractLayersPanel
 		}
 		if (root == null)
 		{
-			root = new FolderNode(null, null, true);
+			root = new FolderNode(null, null, null, true);
 			layersFileExisted = false;
 		}
 		return root;
@@ -110,7 +110,7 @@ public class LayersPanel extends AbstractLayersPanel
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				rename();
+				renameSelected();
 			}
 		});
 
@@ -120,7 +120,7 @@ public class LayersPanel extends AbstractLayersPanel
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				delete();
+				deleteSelected();
 			}
 		});
 	}
@@ -162,7 +162,7 @@ public class LayersPanel extends AbstractLayersPanel
 
 	private void newFolder()
 	{
-		FolderNode node = new FolderNode("New Folder", Icons.folder.getURL(), true);
+		FolderNode node = new FolderNode("New Folder", null, Icons.folder.getURL(), true);
 		TreePath p = tree.getSelectionPath();
 		TreePath editPath;
 		if (p == null)
@@ -180,7 +180,7 @@ public class LayersPanel extends AbstractLayersPanel
 		editAtPath(editPath);
 	}
 
-	private void rename()
+	private void renameSelected()
 	{
 		TreePath p = tree.getSelectionPath();
 		if (p != null)
@@ -189,30 +189,55 @@ public class LayersPanel extends AbstractLayersPanel
 		}
 	}
 
-	private void delete()
+	private void deleteSelected()
 	{
-		TreePath p = tree.getSelectionPath();
-		if (p != null)
+		TreePath[] paths = tree.getSelectionPaths();
+		if (paths != null && paths.length > 0)
 		{
-			INode node = (INode) p.getLastPathComponent();
-			String type;
-			if (node instanceof ILayerNode)
-				type = "layer";
+			String text;
+			if (paths.length > 1)
+			{
+				boolean anyChildren = false;
+				for (TreePath p : paths)
+				{
+					INode node = (INode) p.getLastPathComponent();
+					if (node.getChildCount() > 0)
+					{
+						anyChildren = true;
+						break;
+					}
+				}
+				text =
+						"Are you sure you want to delete these " + paths.length + " items"
+								+ (anyChildren ? " and their children" : "") + "?";
+			}
 			else
-				type = "folder";
-			String children = "";
-			if (node.getChildCount() > 0)
-				children = " and its children";
+			{
+				TreePath p = paths[0];
+				INode node = (INode) p.getLastPathComponent();
+				String type;
+				if (node instanceof ILayerNode)
+					type = "layer";
+				else
+					type = "folder";
+				boolean anyChildren = node.getChildCount() > 0;
+				text =
+						"Are you sure you want to delete the " + type + " '" + node.getName() + "'"
+								+ (anyChildren ? " and its children" : "") + "?";
+			}
+
 			int choice =
-					JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the "
-							+ type + " '" + node.getName() + "'" + children + "?",
-							"Confirm deletion", JOptionPane.YES_NO_OPTION,
-							JOptionPane.WARNING_MESSAGE);
+					JOptionPane.showConfirmDialog(this, text, "Confirm deletion",
+							JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 			if (choice == JOptionPane.YES_OPTION)
 			{
-				getModel().removeNodeFromParent(node, true);
-				if (datasetPanel != null)
-					datasetPanel.getTree().repaint();
+				for (TreePath p : paths)
+				{
+					INode node = (INode) p.getLastPathComponent();
+					getModel().removeNodeFromParent(node, true);
+					if (datasetPanel != null)
+						datasetPanel.getTree().repaint();
+				}
 			}
 		}
 	}

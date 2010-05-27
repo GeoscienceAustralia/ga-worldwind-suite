@@ -76,7 +76,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		wwd = theme.getWwd();
 		layerEnabler.setWwd(theme.getWwd());
 	}
-	
+
 	protected abstract void createActions();
 
 	protected abstract INode createRootNode();
@@ -136,20 +136,32 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 
 	private void setSelectedOpacity()
 	{
-		TreePath selected = tree.getSelectionPath();
-		ILayerNode node = getLayer(selected);
-		if (node != null && layerEnabler.hasLayer(node))
+		TreePath[] selected = tree.getSelectionPaths();
+		ILayerNode[] nodes = new ILayerNode[selected.length];
+		for (int i = 0; i < selected.length; i++)
 		{
-			double opacity = opacitySlider.getValue() / 100d;
-			boolean enabled = opacity > 0;
-			tree.getModel().setEnabled(node, enabled);
-			tree.getModel().setOpacity(node, opacity);
+			nodes[i] = getLayer(selected[i]);
+			if (nodes[i] == null)
+				return;
+		}
 
-			((ClearableBasicTreeUI) tree.getUI()).relayout(selected);
+		for (int i = 0; i < nodes.length; i++)
+		{
+			ILayerNode node = nodes[i];
+			TreePath path = selected[i];
+			if (layerEnabler.hasLayer(node))
+			{
+				double opacity = opacitySlider.getValue() / 100d;
+				boolean enabled = opacity > 0;
+				tree.getModel().setEnabled(node, enabled);
+				tree.getModel().setOpacity(node, opacity);
 
-			Rectangle bounds = tree.getPathBounds(selected);
-			if (bounds != null)
-				tree.repaint(bounds);
+				tree.getUI().relayout(path);
+
+				Rectangle bounds = tree.getPathBounds(path);
+				if (bounds != null)
+					tree.repaint(bounds);
+			}
 		}
 	}
 

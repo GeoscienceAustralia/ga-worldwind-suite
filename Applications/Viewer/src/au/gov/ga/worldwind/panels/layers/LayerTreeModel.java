@@ -23,13 +23,13 @@ import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 public class LayerTreeModel implements TreeModel, TreeExpansionListener
 {
 	private INode root;
-	private JTree tree;
+	private LayerTree tree;
 	private List<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
 	private List<ILayerNode> layerNodes = new ArrayList<ILayerNode>();
 	private Map<URL, Set<ILayerNode>> layerURLmap = new HashMap<URL, Set<ILayerNode>>();
 	private LayerEnabler enabler;
 
-	public LayerTreeModel(JTree tree, INode root, LayerEnabler enabler)
+	public LayerTreeModel(LayerTree tree, INode root, LayerEnabler enabler)
 	{
 		this.tree = tree;
 		this.root = root;
@@ -143,7 +143,9 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				}
 				if (node == null)
 				{
-					node = new FolderNode(data.getName(), data.getIconURL(), true);
+					node =
+							new FolderNode(data.getName(), data.getDescriptionURL(), data
+									.getIconURL(), true);
 					insertNodeInto(node, currentParent, currentParent.getChildCount(), false);
 				}
 				expandPath.add(currentParent);
@@ -158,7 +160,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		TreePath expand = new TreePath(expandPath.toArray());
 
 		//relayout the tree, and expand to make the layer node visible
-		((ClearableBasicTreeUI) tree.getUI()).relayout(expand);
+		tree.getUI().relayout(expand);
 		tree.scrollPathToVisible(expand);
 	}
 

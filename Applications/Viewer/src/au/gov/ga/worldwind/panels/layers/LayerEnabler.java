@@ -141,28 +141,40 @@ public class LayerEnabler
 				handleResult(node, result);
 			}
 		};
-		setLayerLoading(node, true);
+		setLayerLoading(node, true, true);
 		Downloader.downloadIfModified(url, handler, handler);
 	}
 
-	private void setLayerLoading(ILayerNode node, boolean loading)
+	private void setError(ILayerNode node, Exception error)
+	{
+		node.setError(error);
+		if (tree != null)
+		{
+			tree.getUI().relayout();
+			tree.repaint();
+		}
+	}
+
+	private void setLayerLoading(ILayerNode node, boolean loading, boolean repaintTree)
 	{
 		node.setLayerLoading(loading);
-		if (tree != null)
+		if (repaintTree && tree != null)
+		{
 			tree.repaint();
+		}
 	}
 
 	private synchronized void handleResult(ILayerNode node, RetrievalResult result)
 	{
 		if (result.getError() != null)
 		{
-			setLayerLoading(node, false);
-			node.setError(result.getError());
+			setLayerLoading(node, false, false);
+			setError(node, result.getError());
 			return;
 		}
 
 		if (!result.isFromCache())
-			setLayerLoading(node, false);
+			setLayerLoading(node, false, true);
 
 		//data was not modified (already created layer from cache)
 		if (result.isNotModified())
@@ -171,7 +183,7 @@ public class LayerEnabler
 		if (!result.hasData())
 		{
 			//shouldn't get here
-			node.setError(new Exception("Error downloading layer"));
+			setError(node, new Exception("Error downloading layer"));
 			return;
 		}
 
@@ -183,7 +195,7 @@ public class LayerEnabler
 		}
 		catch (Exception e)
 		{
-			node.setError(e);
+			setError(node, e);
 			return;
 		}
 		if (layer == null)

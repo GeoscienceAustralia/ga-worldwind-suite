@@ -18,7 +18,7 @@ public class LayerTreePersistance
 		Element elem = XMLUtil.getElementFromSource(source);
 		if (elem != null)
 		{
-			INode root = new FolderNode(null, null, true);
+			INode root = new FolderNode(null, null, null, true);
 			Element[] elements = XMLUtil.getElements(elem, "//LayerList", null);
 			if (elements != null)
 			{
@@ -54,9 +54,10 @@ public class LayerTreePersistance
 	private static void addFolder(Element element, INode parent) throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name");
+		URL description = XMLUtil.getURL(element, "@description", null);
 		URL icon = XMLUtil.getURL(element, "@icon", null);
 		boolean expanded = XMLUtil.getBoolean(element, "@expanded", false);
-		FolderNode node = new FolderNode(name, icon, expanded);
+		FolderNode node = new FolderNode(name, description, icon, expanded);
 		parent.addChild(node);
 		addRelevant(element, node);
 	}
@@ -70,7 +71,7 @@ public class LayerTreePersistance
 		URL description = XMLUtil.getURL(element, "@description", null);
 		boolean enabled = XMLUtil.getBoolean(element, "@enabled", false);
 		double opacity = XMLUtil.getDouble(element, "@opacity", 1.0);
-		LayerNode node = new LayerNode(name, icon, expanded, layer, description, enabled, opacity);
+		LayerNode node = new LayerNode(name, description, icon, expanded, layer, enabled, opacity);
 		parent.addChild(node);
 		addRelevant(element, node);
 	}
@@ -103,8 +104,6 @@ public class LayerTreePersistance
 			LayerNode layer = (LayerNode) node;
 			if (layer.getLayerURL() != null)
 				current.setAttribute("layer", layer.getLayerURL().toExternalForm());
-			if (layer.getDescriptionURL() != null)
-				current.setAttribute("description", layer.getDescriptionURL().toExternalForm());
 			XMLUtil.setBooleanAttribute(current, "enabled", layer.isEnabled());
 			XMLUtil.setDoubleAttribute(current, "opacity", layer.getOpacity());
 		}
@@ -113,6 +112,8 @@ public class LayerTreePersistance
 		{
 			element.appendChild(current);
 			current.setAttribute("name", node.getName());
+			if (node.getDescriptionURL() != null)
+				current.setAttribute("description", node.getDescriptionURL().toExternalForm());
 			if (node.getIconURL() != null)
 				current.setAttribute("icon", node.getIconURL().toExternalForm());
 			XMLUtil.setBooleanAttribute(current, "expanded", node.isExpanded());

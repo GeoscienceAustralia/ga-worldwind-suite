@@ -15,6 +15,7 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -24,7 +25,6 @@ import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.components.lazytree.ErrorNode;
 import au.gov.ga.worldwind.components.lazytree.LoadingNode;
-import au.gov.ga.worldwind.components.lazytree.LoadingTree;
 import au.gov.ga.worldwind.panels.layers.LayerTreeModel;
 import au.gov.ga.worldwind.util.DefaultLauncher;
 import au.gov.ga.worldwind.util.HSLColor;
@@ -32,7 +32,7 @@ import au.gov.ga.worldwind.util.Icons;
 
 public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 {
-	private LoadingTree tree;
+	private DatasetTree tree;
 	private RendererMouseKeyListener mouseKeyListener = new RendererMouseKeyListener();
 	private Map<Integer, Rectangle> urlRows = new HashMap<Integer, Rectangle>();
 
@@ -42,6 +42,7 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 
 	private JButton button;
 	private DefaultTreeCellRenderer label;
+	private JLabel infoLabel;
 
 	private ImageIcon loadingIcon;
 
@@ -66,10 +67,14 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 		Color backgroundSelection = label.getBackgroundSelectionColor();
 		HSLColor hsl = new HSLColor(backgroundSelection);
 		label.setBackgroundSelectionColor(hsl.adjustTone(80));
-		label.setBorderSelectionColor(hsl.adjustTone(20));
+		label.setBorderSelectionColor(hsl.adjustShade(40));
+
+		infoLabel = new JLabel(Icons.info.getIcon());
+		infoLabel.setOpaque(false);
 
 		add(button, BorderLayout.WEST);
 		add(label, BorderLayout.CENTER);
+		add(infoLabel, BorderLayout.EAST);
 
 		loadingIcon = Icons.newLoadingIcon();
 	}
@@ -126,22 +131,22 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 		}
 	}
 
-	public Component getTreeCellRendererComponent(final JTree tree, Object value, boolean selected,
+	public Component getTreeCellRendererComponent(final JTree t, Object value, boolean selected,
 			boolean expanded, boolean leaf, final int row, boolean hasFocus)
 	{
-		if (!(tree instanceof LoadingTree))
-			throw new IllegalArgumentException("Tree must be a LoadingTree");
+		if (!(t instanceof DatasetTree))
+			throw new IllegalArgumentException("Tree must be a DatasetTree");
 
 		//tree has changed!
-		if (this.tree != tree)
+		if (tree != t)
 		{
-			if (this.tree != null)
+			if (tree != null)
 			{
-				this.tree.removeMouseListener(mouseKeyListener);
-				this.tree.removeMouseMotionListener(mouseKeyListener);
-				this.tree.removeKeyListener(mouseKeyListener);
+				tree.removeMouseListener(mouseKeyListener);
+				tree.removeMouseMotionListener(mouseKeyListener);
+				tree.removeKeyListener(mouseKeyListener);
 			}
-			this.tree = (LoadingTree) tree;
+			tree = (DatasetTree) t;
 			tree.addMouseListener(mouseKeyListener);
 			tree.addMouseMotionListener(mouseKeyListener);
 			tree.addKeyListener(mouseKeyListener);
@@ -152,115 +157,108 @@ public class DatasetCellRenderer extends JPanel implements TreeCellRenderer
 		//update the label
 		label.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
 
-		if (row < 0)
+		if (row < 0 || value == null || !(value instanceof DefaultMutableTreeNode))
 			return label;
 
-		Component returnValue = label;
+		//for some reason we have to readd the label
+		add(label, BorderLayout.CENTER);
+
 		boolean urlRow = false;
+		boolean layerRow = false;
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
 
-		if (value != null && value instanceof DefaultMutableTreeNode)
+		if (node instanceof LoadingNode)
 		{
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-			if (node instanceof LoadingNode)
+			label.setIcon(loadingIcon);
+		}
+		else if (node instanceof ErrorNode)
+		{
+			label.setIcon(Icons.error.getIcon());
+		}
+		else
+		{
+			Object userObject = node.getUserObject();
+			if (userObject != null)
 			{
-				label.setIcon(loadingIcon);
-			}
-			else if (node instanceof ErrorNode)
-			{
-				label.setIcon(Icons.error.getIcon());
-			}
-			else
-			{
-				Object userObject = node.getUserObject();
-				if (userObject != null)
+				if (userObject instanceof IData)
 				{
-					if (userObject instanceof IData)
+					IData data = (IData) userObject;
+					if (data.isIconLoaded())
 					{
-						IData data = (IData) userObject;
-						if (data.isIconLoaded())
-						{
-							label.setIcon(data.getIcon());
-						}
-						else
-						{
-							Runnable afterLoad = new Runnable()
-							{
-								public void run()
-								{
-									tree.repaint();
-								}
-							};
-							data.loadIcon(afterLoad);
-						}
-
-						if (data.getDescriptionURL() != null)
-						{
-							//make the label look like a link
-							String text =
-									"<html><font color=\"#0000CF\"><u>" + label.getText()
-											+ "</u></font></html>";
-							label.setText(text);
-							urlRow = true;
-						}
-
-						if (data.isLoading())
-						{
-							label.setIcon(loadingIcon);
-						}
+						label.setIcon(data.getIcon());
 					}
 					else
 					{
-						label.setIcon(null);
+						Runnable afterLoad = new Runnable()
+						{
+							public void run()
+							{
+								tree.repaint();
+							}
+						};
+						data.loadIcon(afterLoad);
 					}
 
-					if (userObject instanceof ILayerDefinition && layerTreeModel != null)
+					if (data.isLoading())
 					{
-						//have to add it each time? it removes itself?
-						add(label, BorderLayout.CENTER);
-						returnValue = this;
-						//doLayout();
-
-						ILayerDefinition layer = (ILayerDefinition) userObject;
-						if (layerTreeModel.containsLayer(layer))
-							button.setIcon(Icons.remove.getIcon());
-						else
-							button.setIcon(Icons.add.getIcon());
-
-						boolean mouseInsideButton =
-								mouseRow >= 0 && button.getBounds().contains(mouseX, mouseY);
-						boolean rollover =
-								(mouseInsideButton && row == mouseRow && mouseButtonDownRow <= 0)
-										|| (hasFocus);
-						boolean down =
-								(mouseInsideButton && row == mouseButtonDownRow)
-										|| (hasFocus && row == keyDownRow);
-
-						button.getModel().setRollover(rollover && row >= 0);
-						button.getModel().setSelected(down && row >= 0);
+						label.setIcon(loadingIcon);
 					}
+
+					if (data.getDescriptionURL() != null)
+					{
+						urlRow = true;
+					}
+				}
+				else
+				{
+					label.setIcon(null);
+				}
+
+				if (userObject instanceof ILayerDefinition && layerTreeModel != null)
+				{
+					layerRow = true;
+					ILayerDefinition layer = (ILayerDefinition) userObject;
+					if (layerTreeModel.containsLayer(layer))
+						button.setIcon(Icons.remove.getIcon());
+					else
+						button.setIcon(Icons.add.getIcon());
+
+					boolean mouseInsideButton =
+							mouseRow >= 0 && button.getBounds().contains(mouseX, mouseY);
+					boolean rollover =
+							(mouseInsideButton && row == mouseRow && mouseButtonDownRow <= 0)
+									|| (hasFocus);
+					boolean down =
+							(mouseInsideButton && row == mouseButtonDownRow)
+									|| (hasFocus && row == keyDownRow);
+
+					button.getModel().setRollover(rollover && row >= 0);
+					button.getModel().setSelected(down && row >= 0);
 				}
 			}
 		}
 
+		//the button is only visible if the row represents a layer
+		button.setVisible(layerRow);
+
+		//set up the info icon label
+		infoLabel.setVisible(urlRow);
+		if (selected)
+			infoLabel.setIcon(Icons.info.getIcon());
+		else
+			infoLabel.setIcon(Icons.infowhite.getIcon());
+
 		if (urlRow)
 		{
-			Rectangle labelBounds = new Rectangle(returnValue.getPreferredSize());
-			if (returnValue == this)
-			{
-				//ensure the label is in the correct position by forcing a layout
-				returnValue.doLayout();
-				labelBounds.x += label.getLocation().x;
-			}
-			if (label.getIcon() != null)
-			{
-				labelBounds.x += label.getIcon().getIconWidth() + label.getIconTextGap();
-			}
+			Rectangle labelBounds = new Rectangle(infoLabel.getPreferredSize());
+			//ensure the label is in the correct position by forcing a layout
+			labelBounds.x += infoLabel.getLocation().x;
 			urlRows.put(row, labelBounds);
 		}
 		else
 			urlRows.remove(row);
 
-		return returnValue;
+		return this;
 	}
 
 	private class RendererMouseKeyListener extends MouseAdapter implements KeyListener

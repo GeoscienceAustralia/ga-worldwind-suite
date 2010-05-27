@@ -5,11 +5,9 @@ import java.awt.Dimension;
 
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
-import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import au.gov.ga.worldwind.components.lazytree.LazyTree;
 import au.gov.ga.worldwind.components.lazytree.LazyTreeObjectNode;
 import au.gov.ga.worldwind.panels.layers.LayerTreeModel;
 import au.gov.ga.worldwind.theme.AbstractThemePanel;
@@ -18,11 +16,9 @@ import au.gov.ga.worldwind.util.Icons;
 
 public class DatasetPanel extends AbstractThemePanel
 {
-	private LazyTree tree;
+	private DatasetTree tree;
 	private Dataset root;
 	private LazyTreeObjectNode rootNode;
-	private DefaultTreeModel model;
-	private DatasetCellRenderer renderer;
 
 	public DatasetPanel()
 	{
@@ -30,16 +26,11 @@ public class DatasetPanel extends AbstractThemePanel
 		setDisplayName("Datasets");
 
 		root = new Dataset("root", null, null, true);
-		model = new DefaultTreeModel(null);
+		DefaultTreeModel model = new DefaultTreeModel(null);
 		rootNode = new LazyTreeObjectNode(root, model);
 		model.setRoot(rootNode);
-		renderer = new DatasetCellRenderer();
 
-		tree = new LazyTree(model);
-		tree.setRootVisible(false);
-		tree.setShowsRootHandles(true);
-		tree.setRowHeight(0);
-		tree.setCellRenderer(renderer);
+		tree = new DatasetTree(model);
 
 		JScrollPane scrollPane = new JScrollPane(tree);
 		add(scrollPane, BorderLayout.CENTER);
@@ -52,14 +43,14 @@ public class DatasetPanel extends AbstractThemePanel
 		return Icons.datasets.getIcon();
 	}
 
-	public JTree getTree()
+	public DatasetTree getTree()
 	{
 		return tree;
 	}
 
 	public void registerLayerTreeModel(LayerTreeModel layerTreeModel)
 	{
-		renderer.setLayerTreeModel(layerTreeModel);
+		tree.getDatasetCellRenderer().setLayerTreeModel(layerTreeModel);
 	}
 
 	@Override
@@ -69,7 +60,7 @@ public class DatasetPanel extends AbstractThemePanel
 		{
 			root.getDatasets().add(dataset);
 		}
-		rootNode.refreshChildren(model);
+		rootNode.refreshChildren(tree.getModel());
 
 		//expand root by default
 		Object[] path;

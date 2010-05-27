@@ -8,13 +8,17 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.panels.layers.ClearableBasicTreeUI;
+
 public class LazyTreeController implements TreeWillExpandListener
 {
 	private SwingWorkerFactory<MutableTreeNode[], ?> workerFactory = new DefaultWorkerFactory();
+	private LazyTree tree;
 	private DefaultTreeModel model;
 
-	public LazyTreeController(DefaultTreeModel model)
+	public LazyTreeController(LazyTree tree, DefaultTreeModel model)
 	{
+		this.tree = tree;
 		this.model = model;
 	}
 
@@ -94,6 +98,10 @@ public class LazyTreeController implements TreeWillExpandListener
 			public void done(MutableTreeNode[] nodes)
 			{
 				node.setChildren(nodes);
+				if (tree.getUI() instanceof ClearableBasicTreeUI)
+				{
+					((ClearableBasicTreeUI) tree.getUI()).relayout();
+				}
 			}
 
 			@Override

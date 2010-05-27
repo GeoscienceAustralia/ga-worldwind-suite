@@ -7,7 +7,7 @@ public class LazyTree extends LoadingTree
 	public LazyTree(DefaultTreeModel model)
 	{
 		super(model);
-		LazyTreeController controller = new LazyTreeController(model);
+		LazyTreeController controller = new LazyTreeController(this, model);
 		addTreeWillExpandListener(controller);
 	}
 }

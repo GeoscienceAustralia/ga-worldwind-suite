@@ -32,7 +32,7 @@ public class ThemeLayersPanel extends AbstractLayersPanel
 			tree.getModel().addLayer(layer, (Object[]) null);
 		}
 
-		((ClearableBasicTreeUI) tree.getUI()).relayout();
+		tree.getUI().relayout();
 		tree.repaint();
 	}
 
@@ -44,7 +44,7 @@ public class ThemeLayersPanel extends AbstractLayersPanel
 	@Override
 	protected INode createRootNode()
 	{
-		return new FolderNode("root", null, true);
+		return new FolderNode(null, null, null, true);
 	}
 
 	@Override

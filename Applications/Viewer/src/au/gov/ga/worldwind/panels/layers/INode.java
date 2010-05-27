@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.panels.layers;
 
+import java.net.URL;
+
 import au.gov.ga.worldwind.panels.dataset.IIconItem;
 
 public interface INode extends IIconItem
@@ -7,6 +9,10 @@ public interface INode extends IIconItem
 	public String getName();
 
 	public void setName(String name);
+
+	public URL getDescriptionURL();
+
+	//public void setDescriptionURL(URL descriptionURL);
 
 	public boolean isExpanded();
 

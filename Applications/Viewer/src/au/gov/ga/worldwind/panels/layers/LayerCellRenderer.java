@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -36,6 +37,7 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 
 	private JCheckBox button;
 	private DefaultTreeCellRenderer label;
+	private JLabel infoLabel;
 
 	private ImageIcon loadingIcon;
 
@@ -53,10 +55,14 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 		Color backgroundSelection = label.getBackgroundSelectionColor();
 		HSLColor hsl = new HSLColor(backgroundSelection);
 		label.setBackgroundSelectionColor(hsl.adjustTone(80));
-		label.setBorderSelectionColor(hsl.adjustTone(20));
+		label.setBorderSelectionColor(hsl.adjustShade(40));
+
+		infoLabel = new JLabel(Icons.info.getIcon());
+		infoLabel.setOpaque(false);
 
 		add(button, BorderLayout.WEST);
 		add(label, BorderLayout.CENTER);
+		add(infoLabel, BorderLayout.EAST);
 
 		loadingIcon = Icons.newLoadingIcon();
 	}
@@ -76,32 +82,32 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 	{
 		TreePath path = tree.getSelectionPath();
 		Object value = path.getLastPathComponent();
-		if (value != null && value instanceof ILayerNode)
+		if (value != null && value instanceof INode)
 		{
-			ILayerNode layer = (ILayerNode) value;
-			if (layer.getDescriptionURL() != null)
+			INode node = (INode) value;
+			if (node.getDescriptionURL() != null)
 			{
-				DefaultLauncher.openURL(layer.getDescriptionURL());
+				DefaultLauncher.openURL(node.getDescriptionURL());
 			}
 		}
 	}
 
-	public Component getTreeCellRendererComponent(final JTree tree, Object value, boolean selected,
+	public Component getTreeCellRendererComponent(final JTree t, Object value, boolean selected,
 			boolean expanded, boolean leaf, final int row, boolean hasFocus)
 	{
-		if (!(tree instanceof LayerTree))
+		if (!(t instanceof LayerTree))
 			throw new IllegalArgumentException("Tree must be a LayerTree");
 
 		//tree has changed!
-		if (this.tree != tree)
+		if (tree != t)
 		{
-			if (this.tree != null)
+			if (tree != null)
 			{
-				this.tree.removeMouseListener(mouseKeyListener);
-				this.tree.removeMouseMotionListener(mouseKeyListener);
-				this.tree.removeKeyListener(mouseKeyListener);
+				tree.removeMouseListener(mouseKeyListener);
+				tree.removeMouseMotionListener(mouseKeyListener);
+				tree.removeKeyListener(mouseKeyListener);
 			}
-			this.tree = (LayerTree) tree;
+			tree = (LayerTree) t;
 			tree.addMouseListener(mouseKeyListener);
 			tree.addMouseMotionListener(mouseKeyListener);
 			tree.addKeyListener(mouseKeyListener);
@@ -112,106 +118,101 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 		//update the label
 		label.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
 
-		if (row < 0)
+		if (row < 0 || value == null || !(value instanceof INode))
 			return label;
+		
+		//for some reason we have to readd the label
+		add(label, BorderLayout.CENTER);
 
-		Component returnValue = label;
+		boolean layerRow = false;
 		boolean urlRow = false;
+		INode node = (INode) value;
 
-		if (value != null && value instanceof INode)
+		if (node.isIconLoaded())
 		{
-			INode node = (INode) value;
-			if (node.isIconLoaded())
+			label.setIcon(node.getIcon());
+		}
+		else
+		{
+			Runnable afterLoad = new Runnable()
 			{
-				label.setIcon(node.getIcon());
+				public void run()
+				{
+					tree.repaint();
+				}
+			};
+			node.loadIcon(afterLoad);
+		}
+
+		if (node.isLoading())
+		{
+			label.setIcon(loadingIcon);
+		}
+
+		if (node.getDescriptionURL() != null)
+		{
+			urlRow = true;
+		}
+
+		if (node instanceof ILayerNode)
+		{
+			layerRow = true;
+			ILayerNode layer = (ILayerNode) node;
+
+			if (layer.hasError())
+			{
+				//may be better to put the error on a separate line
+				label.setIcon(Icons.error.getIcon());
+				label.setText(label.getText() + " - " + layer.getError().getMessage());
 			}
 			else
 			{
-				Runnable afterLoad = new Runnable()
+				if (layer.isEnabled() && layer.getOpacity() < 1)
 				{
-					public void run()
-					{
-						tree.repaint();
-					}
-				};
-				node.loadIcon(afterLoad);
-			}
-
-			if (node.isLoading())
-			{
-				label.setIcon(loadingIcon);
-			}
-
-			if (node instanceof ILayerNode)
-			{
-				ILayerNode layer = (ILayerNode) node;
-
-				if (layer.hasError())
-				{
-					//may be better to put the error on a separate line
-					label.setIcon(Icons.error.getIcon());
-					label.setText(label.getText() + " - " + layer.getError().getMessage());
+					String text =
+							label.getText() + " (" + (int) Math.round(layer.getOpacity() * 100)
+									+ "%)";
+					label.setText(text);
 				}
-				else
-				{
-					if (layer.isEnabled() && layer.getOpacity() < 1)
-					{
-						String text =
-								label.getText() + " (" + (int) Math.round(layer.getOpacity() * 100)
-										+ "%)";
-						label.setText(text);
-					}
-					if (layer.getDescriptionURL() != null)
-					{
-						//make the label look like a link
-						String text =
-								"<html><font color=\"#0000CF\"><u>" + label.getText()
-										+ "</u></font></html>";
-						label.setText(text);
-						urlRow = true;
-					}
-				}
-
-				//have to add it each time? it removes itself?
-				add(label, BorderLayout.CENTER);
-				returnValue = this;
-
-				boolean mouseInsideButton =
-						mouseRow >= 0 && button.getBounds().contains(mouseX, mouseY);
-				boolean rollover =
-						(mouseInsideButton && row == mouseRow && mouseButtonDownRow <= 0)
-								|| (hasFocus);
-				boolean down =
-						(mouseInsideButton && row == mouseButtonDownRow)
-								|| (hasFocus && row == keyDownRow);
-
-				button.getModel().setRollover(rollover && row >= 0);
-				button.getModel().setPressed(down && row >= 0);
-				button.getModel().setArmed(down && row >= 0);
-
-				button.setSelected(layer.isEnabled());
 			}
+
+			boolean mouseInsideButton =
+					mouseRow >= 0 && button.getBounds().contains(mouseX, mouseY);
+			boolean rollover =
+					(mouseInsideButton && row == mouseRow && mouseButtonDownRow <= 0) || (hasFocus);
+			boolean down =
+					(mouseInsideButton && row == mouseButtonDownRow)
+							|| (hasFocus && row == keyDownRow);
+
+			button.getModel().setRollover(rollover && row >= 0);
+			button.getModel().setPressed(down && row >= 0);
+			button.getModel().setArmed(down && row >= 0);
+
+			button.setSelected(layer.isEnabled());
 		}
+
+		//the checkbox is only visible if the row represents a layer
+		button.setVisible(layerRow);
+
+		//set up the info icon label
+		infoLabel.setVisible(urlRow);
+		if (selected)
+			infoLabel.setIcon(Icons.info.getIcon());
+		else
+			infoLabel.setIcon(Icons.infowhite.getIcon());
 
 		if (urlRow)
 		{
-			Rectangle labelBounds = new Rectangle(returnValue.getPreferredSize());
-			if (returnValue == this)
-			{
-				//ensure the label is in the correct position by forcing a layout
-				returnValue.doLayout();
-				labelBounds.x += label.getLocation().x;
-			}
-			if (label.getIcon() != null)
-			{
-				labelBounds.x += label.getIcon().getIconWidth() + label.getIconTextGap();
-			}
+			Rectangle labelBounds = new Rectangle(infoLabel.getPreferredSize());
+			//ensure the label is in the correct position by forcing a layout
+			validate();
+			labelBounds.x += infoLabel.getLocation().x;
 			urlRows.put(row, labelBounds);
 		}
 		else
 			urlRows.remove(row);
 
-		return returnValue;
+		return this;
 	}
 
 	private class RendererMouseKeyListener extends MouseAdapter implements KeyListener
@@ -403,12 +404,12 @@ public class LayerCellRenderer extends JPanel implements TreeCellRenderer
 					if (path != null)
 					{
 						Object value = path.getLastPathComponent();
-						if (value != null && value instanceof ILayerNode)
+						if (value != null && value instanceof INode)
 						{
-							ILayerNode layer = (ILayerNode) value;
-							if (layer.getDescriptionURL() != null)
+							INode node = (INode) value;
+							if (node.getDescriptionURL() != null)
 							{
-								tree.setToolTipText(layer.getDescriptionURL().toExternalForm());
+								tree.setToolTipText(node.getDescriptionURL().toExternalForm());
 							}
 						}
 					}

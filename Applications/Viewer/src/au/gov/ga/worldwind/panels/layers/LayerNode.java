@@ -7,18 +7,16 @@ import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 public class LayerNode extends AbstractNode implements ILayerNode
 {
 	private URL layerURL;
-	private URL descriptionURL;
 	private boolean enabled;
 	private double opacity;
 	private Exception error = null;
 	private boolean layerLoading = false;
 
-	public LayerNode(String name, URL iconURL, boolean expanded, URL layerURL, URL descriptionURL,
+	public LayerNode(String name, URL descriptionURL, URL iconURL, boolean expanded, URL layerURL,
 			boolean enabled, double opacity)
 	{
-		super(name, iconURL, expanded);
+		super(name, descriptionURL, iconURL, expanded);
 		setLayerURL(layerURL);
-		setDescriptionURL(descriptionURL);
 		setEnabled(enabled);
 		setOpacity(opacity);
 	}
@@ -31,16 +29,6 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	public void setLayerURL(URL layerURL)
 	{
 		this.layerURL = layerURL;
-	}
-
-	public URL getDescriptionURL()
-	{
-		return descriptionURL;
-	}
-
-	public void setDescriptionURL(URL descriptionURL)
-	{
-		this.descriptionURL = descriptionURL;
 	}
 
 	public boolean isEnabled()
@@ -57,8 +45,8 @@ public class LayerNode extends AbstractNode implements ILayerNode
 
 	public static LayerNode createFromLayerDefinition(ILayerDefinition definition)
 	{
-		return new LayerNode(definition.getName(), definition.getIconURL(), true, definition
-				.getLayerURL(), definition.getDescriptionURL(), definition.isEnabled(), 1.0);
+		return new LayerNode(definition.getName(), definition.getDescriptionURL(), definition
+				.getIconURL(), true, definition.getLayerURL(), definition.isEnabled(), 1.0);
 	}
 
 	@Override

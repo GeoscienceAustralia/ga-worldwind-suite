@@ -8,10 +8,6 @@ public interface ILayerNode extends INode
 
 	//public void setLayerURL(URL layerURL);
 
-	public URL getDescriptionURL();
-
-	//public void setDescriptionURL(URL descriptionURL);
-
 	public boolean isEnabled();
 
 	public void setEnabled(boolean enabled);

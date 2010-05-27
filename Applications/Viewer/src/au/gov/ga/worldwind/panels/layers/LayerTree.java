@@ -32,6 +32,12 @@ public class LayerTree extends LoadingTree
 		return (LayerTreeModel) super.getModel();
 	}
 
+	@Override
+	public ClearableBasicTreeUI getUI()
+	{
+		return (ClearableBasicTreeUI) super.getUI();
+	}
+
 	private static class LayerTreeCellEditor extends DefaultTreeCellEditor
 	{
 		public LayerTreeCellEditor(JTree tree)
