@@ -10,9 +10,9 @@ public interface INode extends IIconItem
 
 	public void setName(String name);
 
-	public URL getDescriptionURL();
+	public URL getInfoURL();
 
-	//public void setDescriptionURL(URL descriptionURL);
+	//public void setInfoURL(URL infoURL);
 
 	public boolean isExpanded();
 

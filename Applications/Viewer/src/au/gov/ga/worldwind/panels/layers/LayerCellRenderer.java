@@ -42,15 +42,15 @@ public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 	@Override
 	protected boolean isURLRow(INode value)
 	{
-		return value.getDescriptionURL() != null;
+		return value.getInfoURL() != null;
 	}
 
 	@Override
 	protected String getLinkLabelToolTipText(Object value)
 	{
 		INode node = getValue(value);
-		if (node != null && node.getDescriptionURL() != null)
-			return node.getDescriptionURL().toExternalForm();
+		if (node != null && node.getInfoURL() != null)
+			return node.getInfoURL().toExternalForm();
 		return null;
 	}
 
@@ -86,8 +86,8 @@ public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 		if (path != null)
 		{
 			INode node = getValue(path.getLastPathComponent());
-			if (node != null && node.getDescriptionURL() != null)
-				DefaultLauncher.openURL(node.getDescriptionURL());
+			if (node != null && node.getInfoURL() != null)
+				DefaultLauncher.openURL(node.getInfoURL());
 		}
 	}
 }

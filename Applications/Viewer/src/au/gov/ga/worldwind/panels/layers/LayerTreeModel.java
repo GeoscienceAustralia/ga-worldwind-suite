@@ -144,7 +144,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				if (node == null)
 				{
 					node =
-							new FolderNode(data.getName(), data.getDescriptionURL(), data
+							new FolderNode(data.getName(), data.getInfoURL(), data
 									.getIconURL(), true);
 					insertNodeInto(node, currentParent, currentParent.getChildCount(), false);
 				}

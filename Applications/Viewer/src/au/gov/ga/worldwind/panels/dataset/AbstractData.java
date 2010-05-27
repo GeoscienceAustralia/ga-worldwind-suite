@@ -5,14 +5,14 @@ import java.net.URL;
 public abstract class AbstractData extends AbstractIconItem implements IData
 {
 	private String name;
-	private URL descriptionURL;
+	private URL infoURL;
 	private boolean base;
 
-	public AbstractData(String name, URL descriptionURL, URL iconURL, boolean base)
+	public AbstractData(String name, URL infoURL, URL iconURL, boolean base)
 	{
 		super(iconURL);
 		this.name = name;
-		this.descriptionURL = descriptionURL;
+		this.infoURL = infoURL;
 		this.base = base;
 	}
 
@@ -21,9 +21,9 @@ public abstract class AbstractData extends AbstractIconItem implements IData
 		return name;
 	}
 
-	public URL getDescriptionURL()
+	public URL getInfoURL()
 	{
-		return descriptionURL;
+		return infoURL;
 	}
 
 	@Override

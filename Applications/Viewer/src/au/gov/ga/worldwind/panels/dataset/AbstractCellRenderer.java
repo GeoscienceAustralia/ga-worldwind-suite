@@ -35,7 +35,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 	private Map<Integer, Rectangle> urlRows = new HashMap<Integer, Rectangle>();
 
 	private int mouseRow = -1, keyRow = -1, mouseButtonDownRow = -1, mouseLabelDownRow = -1,
-			keyDownRow = -1;
+			keyDownRow = -1, mouseInfoRow = -1;
 	private int mouseX = -1, mouseY = -1;
 
 	private AbstractButton button;
@@ -60,7 +60,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		label.setBackgroundSelectionColor(hsl.adjustTone(80));
 		label.setBorderSelectionColor(hsl.adjustShade(40));
 
-		infoLabel = new JLabel(Icons.info.getIcon());
+		infoLabel = new JLabel(Icons.infowhite.getIcon());
 		infoLabel.setOpaque(false);
 
 		add(button, BorderLayout.WEST);
@@ -138,6 +138,12 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 				}
 			};
 			item.loadIcon(afterLoad);
+
+			//icon may have loaded straight away; check
+			if (item.isIconLoaded())
+			{
+				label.setIcon(item.getIcon());
+			}
 		}
 
 		if (item.isLoading())
@@ -167,7 +173,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 
 		//set up the info icon label
 		infoLabel.setVisible(urlRow);
-		if (selected)
+		if (mouseInfoRow == row)
 			infoLabel.setIcon(Icons.info.getIcon());
 		else
 			infoLabel.setIcon(Icons.infowhite.getIcon());
@@ -176,6 +182,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		{
 			Rectangle labelBounds = new Rectangle(infoLabel.getPreferredSize());
 			//ensure the label is in the correct position by forcing a layout
+			validate();
 			labelBounds.x += infoLabel.getLocation().x;
 			urlRows.put(row, labelBounds);
 		}
@@ -367,12 +374,14 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		private void checkForLinkLabel()
 		{
 			int cursor = -1;
+			mouseInfoRow = -1;
 			if (mouseRow >= 0 && urlRows.containsKey(mouseRow))
 			{
 				Rectangle labelBounds = urlRows.get(mouseRow);
 				if (labelBounds.contains(mouseX, mouseY))
 				{
 					cursor = Cursor.HAND_CURSOR;
+					mouseInfoRow = mouseRow;
 				}
 			}
 

@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.panels.layers;
 
 import java.awt.BorderLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -11,11 +12,12 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.swing.DropMode;
-import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -42,7 +44,9 @@ public class LayersPanel extends AbstractLayersPanel
 	private static final File layersFile = new File(Util.getUserDirectory(), LAYERS_FILENAME);
 	private boolean layersFileExisted;
 
-	private BasicAction newFolderAction, renameAction, deleteAction;
+	private Window window;
+
+	private BasicAction newFolderAction, newLayerAction, renameAction, editAction, deleteAction;
 
 	private DatasetPanel datasetPanel;
 
@@ -65,7 +69,7 @@ public class LayersPanel extends AbstractLayersPanel
 	}
 
 	@Override
-	public Icon getIcon()
+	public ImageIcon getIcon()
 	{
 		return Icons.hierarchy.getIcon();
 	}
@@ -104,6 +108,16 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
+		newLayerAction = new BasicAction("New Layer", "Add New Layer", Icons.add.getIcon());
+		newLayerAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				newLayer();
+			}
+		});
+
 		renameAction = new BasicAction("Rename", "Rename selected", Icons.edit.getIcon());
 		renameAction.addActionListener(new ActionListener()
 		{
@@ -111,6 +125,16 @@ public class LayersPanel extends AbstractLayersPanel
 			public void actionPerformed(ActionEvent e)
 			{
 				renameSelected();
+			}
+		});
+
+		editAction = new BasicAction("Edit", "Edit selected", Icons.properties.getIcon());
+		editAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				editSelected();
 			}
 		});
 
@@ -129,7 +153,10 @@ public class LayersPanel extends AbstractLayersPanel
 	protected void setupToolBarBeforeSlider(JToolBar toolBar)
 	{
 		toolBar.add(newFolderAction);
+		toolBar.addSeparator();
+		toolBar.add(newLayerAction);
 		toolBar.add(renameAction);
+		toolBar.add(editAction);
 		toolBar.add(deleteAction);
 		toolBar.addSeparator();
 	}
@@ -137,10 +164,12 @@ public class LayersPanel extends AbstractLayersPanel
 	private void createPopupMenu()
 	{
 		final JPopupMenu popupMenu = new JPopupMenu();
-		popupMenu.add(renameAction);
-		popupMenu.add(deleteAction);
-		popupMenu.addSeparator();
 		popupMenu.add(newFolderAction);
+		popupMenu.addSeparator();
+		popupMenu.add(newLayerAction);
+		popupMenu.add(renameAction);
+		popupMenu.add(editAction);
+		popupMenu.add(deleteAction);
 
 		tree.addMouseListener(new MouseAdapter()
 		{
@@ -186,6 +215,62 @@ public class LayersPanel extends AbstractLayersPanel
 		if (p != null)
 		{
 			editAtPath(p);
+		}
+	}
+
+	private void newLayer()
+	{
+		LayerNode layerNode = new LayerNode("", null, null, true, null, true, 1);
+		LayerEditor editor = new LayerEditor(window, "New layer", layerNode, getIcon());
+		int value = editor.getOkCancel();
+		if (value == JOptionPane.OK_OPTION)
+		{
+			TreePath p = tree.getSelectionPath();
+			TreePath newPath;
+			if (p == null)
+			{
+				getModel().addToRoot(layerNode, false);
+				newPath = new TreePath(new Object[] { root, layerNode });
+			}
+			else
+			{
+				INode parent = (INode) p.getLastPathComponent();
+				getModel().insertNodeInto(layerNode, parent, parent.getChildCount(), false);
+				newPath = p.pathByAddingChild(layerNode);
+			}
+			tree.getUI().relayout(newPath);
+			tree.scrollPathToVisible(newPath);
+		}
+	}
+
+	private void editSelected()
+	{
+		TreePath p = tree.getSelectionPath();
+		if (p != null)
+		{
+			INode node = (INode) p.getLastPathComponent();
+			AbstractNode editing = null;
+			if (node instanceof ILayerNode)
+			{
+				editing = new LayerNode((ILayerNode) node);
+			}
+			else
+			{
+				editing = new FolderNode(node);
+			}
+			LayerEditor editor = new LayerEditor(window, "New layer", editing, getIcon());
+			int value = editor.getOkCancel();
+			if (value == JOptionPane.OK_OPTION)
+			{
+				INode parent = node.getParent();
+				int index = getModel().getIndexOfChild(parent, node);
+				getModel().removeNodeFromParent(node, false);
+				getModel().insertNodeInto(editing, parent, index, true);
+
+				p = p.getParentPath().pathByAddingChild(editing);
+				tree.scrollPathToVisible(p);
+				tree.getUI().relayout();
+			}
 		}
 	}
 
@@ -238,6 +323,8 @@ public class LayersPanel extends AbstractLayersPanel
 					if (datasetPanel != null)
 						datasetPanel.getTree().repaint();
 				}
+
+				tree.getUI().relayout();
 			}
 		}
 	}
@@ -246,6 +333,7 @@ public class LayersPanel extends AbstractLayersPanel
 	{
 		boolean anySelected = tree.getSelectionPath() != null;
 		renameAction.setEnabled(anySelected);
+		editAction.setEnabled(anySelected);
 		deleteAction.setEnabled(anySelected);
 	}
 
@@ -264,6 +352,8 @@ public class LayersPanel extends AbstractLayersPanel
 		if (!layersFileExisted)
 			for (IDataset dataset : theme.getDatasets())
 				addDefaultLayersFromDataset(dataset);
+
+		window = SwingUtilities.getWindowAncestor(this);
 	}
 
 	@Override

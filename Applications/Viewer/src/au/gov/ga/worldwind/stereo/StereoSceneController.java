@@ -90,19 +90,6 @@ public class StereoSceneController extends AbstractSceneController
 		}
 	}
 
-	/*@Override
-	protected void draw(DrawContext dc)
-	{
-		try
-		{
-			super.draw(dc);
-		}
-		catch (NumberFormatException e)
-		{
-			//scale bar layer sometimes throws this exception: ignore it
-		}
-	}*/
-
 	private void setupBuffer(GL gl, StereoMode mode, Eye eye)
 	{
 		boolean left = eye == Eye.LEFT;
@@ -137,49 +124,4 @@ public class StereoSceneController extends AbstractSceneController
 				break;
 		}
 	}
-
-	/*private ArrayList<Point> pickPoints = new ArrayList<Point>();
-
-	protected void pickTerrain(DrawContext dc)
-	{
-		try
-		{
-			if (dc.isPickingMode() && dc.getVisibleSector() != null
-					&& dc.getSurfaceGeometry() != null
-					&& dc.getSurfaceGeometry().size() > 0)
-			{
-				this.pickPoints.clear();
-				if (dc.getPickPoint() != null)
-					this.pickPoints.add(dc.getPickPoint());
-
-				// Clear viewportCenterPosition.
-				dc.setViewportCenterPosition(null);
-				Point vpc = dc.getViewportCenterScreenPoint();
-				if (vpc != null)
-					this.pickPoints.add(vpc);
-
-				if (this.pickPoints.size() == 0)
-					return;
-
-				List<PickedObject> pickedObjects = dc.getSurfaceGeometry()
-						.pick(dc, this.pickPoints);
-				if (pickedObjects == null || pickedObjects.size() == 0)
-					return;
-
-				for (PickedObject po : pickedObjects)
-				{
-					if (po == null)
-						continue;
-					if (po.getPickPoint().equals(dc.getPickPoint()))
-						dc.addPickedObject(po);
-					else if (po.getPickPoint().equals(vpc))
-						dc.setViewportCenterPosition((Position) po.getObject());
-				}
-			}
-		}
-		catch (IndexOutOfBoundsException e)
-		{
-			//ignore (bug in nasa code)
-		}
-	}*/
 }

@@ -8,16 +8,15 @@ public class LayerDefinition extends AbstractData implements ILayerDefinition
 	private boolean enabled;
 	private boolean def;
 
-	public LayerDefinition(String name, URL url, URL descriptionURL, URL iconURL, boolean base,
-			boolean def)
+	public LayerDefinition(String name, URL url, URL infoURL, URL iconURL, boolean base, boolean def)
 	{
-		this(name, url, descriptionURL, iconURL, base, def, true);
+		this(name, url, infoURL, iconURL, base, def, true);
 	}
 
-	public LayerDefinition(String name, URL url, URL descriptionURL, URL iconURL, boolean base,
+	public LayerDefinition(String name, URL url, URL infoURL, URL iconURL, boolean base,
 			boolean def, boolean enabled)
 	{
-		super(name, descriptionURL, iconURL, base);
+		super(name, infoURL, iconURL, base);
 		this.url = url;
 		this.def = def;
 		this.enabled = enabled;

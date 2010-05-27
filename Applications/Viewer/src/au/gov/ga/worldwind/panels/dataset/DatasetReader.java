@@ -59,10 +59,10 @@ public class DatasetReader
 			throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name");
-		URL description = XMLUtil.getURL(element, "@description", context);
+		URL info = XMLUtil.getURL(element, "@info", context);
 		URL icon = XMLUtil.getURL(element, "@icon", context);
 		boolean base = XMLUtil.getBoolean(element, "@base", false);
-		IDataset dataset = new Dataset(name, description, icon, base);
+		IDataset dataset = new Dataset(name, info, icon, base);
 		parent.getDatasets().add(dataset);
 		return dataset;
 	}
@@ -71,11 +71,11 @@ public class DatasetReader
 			throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name");
-		URL description = XMLUtil.getURL(element, "@description", context);
+		URL info = XMLUtil.getURL(element, "@info", context);
 		URL icon = XMLUtil.getURL(element, "@icon", context);
 		URL url = XMLUtil.getURL(element, "@url", context);
 		boolean base = XMLUtil.getBoolean(element, "@base", false);
-		IDataset dataset = new LazyDataset(name, url, description, icon, base);
+		IDataset dataset = new LazyDataset(name, url, info, icon, base);
 		parent.getDatasets().add(dataset);
 	}
 
@@ -83,12 +83,12 @@ public class DatasetReader
 			throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name");
-		URL description = XMLUtil.getURL(element, "@description", context);
+		URL info = XMLUtil.getURL(element, "@info", context);
 		URL icon = XMLUtil.getURL(element, "@icon", context);
 		URL url = XMLUtil.getURL(element, "@url", context);
 		boolean base = XMLUtil.getBoolean(element, "@base", false);
 		boolean def = XMLUtil.getBoolean(element, "@default", false);
-		ILayerDefinition layer = new LayerDefinition(name, url, description, icon, base, def);
+		ILayerDefinition layer = new LayerDefinition(name, url, info, icon, base, def);
 		parent.getLayers().add(layer);
 	}
 }

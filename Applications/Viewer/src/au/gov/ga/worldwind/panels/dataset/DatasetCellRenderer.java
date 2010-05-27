@@ -64,15 +64,15 @@ public class DatasetCellRenderer extends AbstractCellRenderer<IData, ILayerDefin
 	@Override
 	protected boolean isURLRow(IData value)
 	{
-		return value.getDescriptionURL() != null;
+		return value.getInfoURL() != null;
 	}
 
 	@Override
 	protected String getLinkLabelToolTipText(Object value)
 	{
 		IData data = getValue(value);
-		if (data != null && data.getDescriptionURL() != null)
-			return data.getDescriptionURL().toExternalForm();
+		if (data != null && data.getInfoURL() != null)
+			return data.getInfoURL().toExternalForm();
 		return null;
 	}
 
@@ -117,9 +117,9 @@ public class DatasetCellRenderer extends AbstractCellRenderer<IData, ILayerDefin
 		if (path != null)
 		{
 			IData data = getValue(path.getLastPathComponent());
-			if (data != null && data.getDescriptionURL() != null)
+			if (data != null && data.getInfoURL() != null)
 			{
-				DefaultLauncher.openURL(data.getDescriptionURL());
+				DefaultLauncher.openURL(data.getInfoURL());
 			}
 		}
 	}

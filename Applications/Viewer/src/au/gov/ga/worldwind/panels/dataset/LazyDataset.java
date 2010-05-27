@@ -13,9 +13,9 @@ public class LazyDataset extends Dataset implements ILazyDataset
 	private final URL url;
 	private final List<LazyLoadListener> listeners = new ArrayList<LazyLoadListener>();
 
-	public LazyDataset(String name, URL url, URL descriptionURL, URL iconURL, boolean base)
+	public LazyDataset(String name, URL url, URL infoURL, URL iconURL, boolean base)
 	{
-		super(name, descriptionURL, iconURL, base);
+		super(name, infoURL, iconURL, base);
 		this.url = url;
 	}
 

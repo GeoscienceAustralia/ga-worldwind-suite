@@ -5,6 +5,6 @@ import java.net.URL;
 public interface IData extends IIconItem
 {
 	public String getName();
-	public URL getDescriptionURL();
+	public URL getInfoURL();
 	public boolean isBase();
 }

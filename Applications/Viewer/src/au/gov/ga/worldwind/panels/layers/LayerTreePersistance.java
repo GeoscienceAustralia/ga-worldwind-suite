@@ -54,10 +54,10 @@ public class LayerTreePersistance
 	private static void addFolder(Element element, INode parent) throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name");
-		URL description = XMLUtil.getURL(element, "@description", null);
+		URL info = XMLUtil.getURL(element, "@info", null);
 		URL icon = XMLUtil.getURL(element, "@icon", null);
 		boolean expanded = XMLUtil.getBoolean(element, "@expanded", false);
-		FolderNode node = new FolderNode(name, description, icon, expanded);
+		FolderNode node = new FolderNode(name, info, icon, expanded);
 		parent.addChild(node);
 		addRelevant(element, node);
 	}
@@ -68,10 +68,10 @@ public class LayerTreePersistance
 		URL icon = XMLUtil.getURL(element, "@icon", null);
 		boolean expanded = XMLUtil.getBoolean(element, "@expanded", false);
 		URL layer = XMLUtil.getURL(element, "@layer", null);
-		URL description = XMLUtil.getURL(element, "@description", null);
+		URL info = XMLUtil.getURL(element, "@info", null);
 		boolean enabled = XMLUtil.getBoolean(element, "@enabled", false);
 		double opacity = XMLUtil.getDouble(element, "@opacity", 1.0);
-		LayerNode node = new LayerNode(name, description, icon, expanded, layer, enabled, opacity);
+		LayerNode node = new LayerNode(name, info, icon, expanded, layer, enabled, opacity);
 		parent.addChild(node);
 		addRelevant(element, node);
 	}
@@ -112,8 +112,8 @@ public class LayerTreePersistance
 		{
 			element.appendChild(current);
 			current.setAttribute("name", node.getName());
-			if (node.getDescriptionURL() != null)
-				current.setAttribute("description", node.getDescriptionURL().toExternalForm());
+			if (node.getInfoURL() != null)
+				current.setAttribute("info", node.getInfoURL().toExternalForm());
 			if (node.getIconURL() != null)
 				current.setAttribute("icon", node.getIconURL().toExternalForm());
 			XMLUtil.setBooleanAttribute(current, "expanded", node.isExpanded());

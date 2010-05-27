@@ -12,13 +12,19 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	private Exception error = null;
 	private boolean layerLoading = false;
 
-	public LayerNode(String name, URL descriptionURL, URL iconURL, boolean expanded, URL layerURL,
+	public LayerNode(String name, URL infoURL, URL iconURL, boolean expanded, URL layerURL,
 			boolean enabled, double opacity)
 	{
-		super(name, descriptionURL, iconURL, expanded);
+		super(name, infoURL, iconURL, expanded);
 		setLayerURL(layerURL);
 		setEnabled(enabled);
 		setOpacity(opacity);
+	}
+
+	public LayerNode(ILayerNode node)
+	{
+		this(node.getName(), node.getInfoURL(), node.getIconURL(), node.isExpanded(), node
+				.getLayerURL(), node.isEnabled(), node.getOpacity());
 	}
 
 	public URL getLayerURL()
@@ -45,8 +51,9 @@ public class LayerNode extends AbstractNode implements ILayerNode
 
 	public static LayerNode createFromLayerDefinition(ILayerDefinition definition)
 	{
-		return new LayerNode(definition.getName(), definition.getDescriptionURL(), definition
-				.getIconURL(), true, definition.getLayerURL(), definition.isEnabled(), 1.0);
+		return new LayerNode(definition.getName(), definition.getInfoURL(),
+				definition.getIconURL(), true, definition.getLayerURL(), definition.isEnabled(),
+				1.0);
 	}
 
 	@Override
