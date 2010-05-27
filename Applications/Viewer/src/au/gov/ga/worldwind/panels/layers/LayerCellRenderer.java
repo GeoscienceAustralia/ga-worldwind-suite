@@ -7,7 +7,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.panels.dataset.AbstractCellRenderer;
-import au.gov.ga.worldwind.panels.dataset.IData;
 import au.gov.ga.worldwind.util.DefaultLauncher;
 
 public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
