@@ -3,9 +3,11 @@ package au.gov.ga.worldwind.panels.layers;
 import javax.swing.AbstractButton;
 import javax.swing.JCheckBox;
 import javax.swing.JTree;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.panels.dataset.AbstractCellRenderer;
+import au.gov.ga.worldwind.panels.dataset.IData;
 import au.gov.ga.worldwind.util.DefaultLauncher;
 
 public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
@@ -52,6 +54,20 @@ public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 		if (node != null && node.getInfoURL() != null)
 			return node.getInfoURL().toExternalForm();
 		return null;
+	}
+
+	@Override
+	protected void setupLabel(DefaultTreeCellRenderer label, INode value)
+	{
+		ILayerNode layer = getLayerValue(value);
+		if (layer != null)
+		{
+			if (layer.getOpacity() != 0d && layer.getOpacity() != 1d)
+			{
+				label.setText(label.getText() + " (" + (int) Math.round(layer.getOpacity() * 100d)
+						+ "%)");
+			}
+		}
 	}
 
 	@Override

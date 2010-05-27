@@ -195,8 +195,10 @@ public class LayerEditor extends JDialog
 
 		pack();
 		Dimension size = getSize();
-		size.width = 300;
+		setMinimumSize(new Dimension(200, size.height));
+		size.width = Math.max(400, Math.min(800, size.width + 20));
 		setSize(size);
+
 		setLocationRelativeTo(owner);
 		checkValidity();
 

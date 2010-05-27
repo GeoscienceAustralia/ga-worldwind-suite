@@ -120,6 +120,8 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 			label.setIcon(null);
 			return label;
 		}
+		
+		setupLabel(label, item);
 
 		//for some reason we have to readd the label
 		add(label, BorderLayout.CENTER);
@@ -201,6 +203,8 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 	protected abstract boolean isURLRow(E value);
 
 	protected abstract L getLayerValue(E value);
+	
+	protected abstract void setupLabel(DefaultTreeCellRenderer label, E value);
 
 	protected abstract void setupButton(AbstractButton button, L value, boolean mouseInsideButton,
 			boolean rollover, boolean down);

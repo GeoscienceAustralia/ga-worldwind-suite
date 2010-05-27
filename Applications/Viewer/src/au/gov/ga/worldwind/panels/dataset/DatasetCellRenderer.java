@@ -6,6 +6,7 @@ import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.panels.layers.LayerTreeModel;
@@ -74,6 +75,11 @@ public class DatasetCellRenderer extends AbstractCellRenderer<IData, ILayerDefin
 		if (data != null && data.getInfoURL() != null)
 			return data.getInfoURL().toExternalForm();
 		return null;
+	}
+
+	@Override
+	protected void setupLabel(DefaultTreeCellRenderer label, IData value)
+	{
 	}
 
 	@Override

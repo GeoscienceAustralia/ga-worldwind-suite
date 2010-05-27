@@ -114,7 +114,7 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 		});
 
-		deleteAction = new BasicAction("Delete", "Delete selected", Icons.deletevalue.getIcon());
+		deleteAction = new BasicAction("Delete", "Delete selected", Icons.delete.getIcon());
 		deleteAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)

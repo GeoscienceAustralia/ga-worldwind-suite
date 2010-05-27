@@ -138,7 +138,7 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
-		deleteAction = new BasicAction("Delete", "Delete selected", Icons.deletevalue.getIcon());
+		deleteAction = new BasicAction("Delete", "Delete selected", Icons.delete.getIcon());
 		deleteAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -258,7 +258,7 @@ public class LayersPanel extends AbstractLayersPanel
 			{
 				editing = new FolderNode(node);
 			}
-			LayerEditor editor = new LayerEditor(window, "New layer", editing, getIcon());
+			LayerEditor editor = new LayerEditor(window, "Edit layer", editing, getIcon());
 			int value = editor.getOkCancel();
 			if (value == JOptionPane.OK_OPTION)
 			{
