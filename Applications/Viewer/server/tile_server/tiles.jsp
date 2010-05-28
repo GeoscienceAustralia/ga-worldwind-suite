@@ -1,4 +1,4 @@
-<%@ page import="java.io.*, java.net.URL" %>
+<%@ page import="java.io.*,java.net.URL"%>
 <%!
 	String paddedInt(String value, int charcount)
 	{
@@ -10,61 +10,79 @@
 	}
 %>
 <%
+	//path to root directory of tiles
+	String path = "/web/html/test_root/docs/resources/images/world-wind/tiles";
+	
+	//get the parameters from the request
 	String X = request.getParameter("X");
 	String Y = request.getParameter("Y");
 	String L = request.getParameter("L");
 	String T = request.getParameter("T");
-	String mask = request.getParameter("mask");
-	String path = "/web/html/test_root/docs/resources/images/world-wind";
+	String F = request.getParameter("F");
+	boolean mask = request.getParameter("mask") != null;
+	boolean returnBlankOnError = false;
+	
+	//if the essential parameters are not defined, just return
+	if(X == null || Y == null || L == null || T == null)
+	{
+		return;
+	}
+	
+	//default to JPG tiles
 	String ext = ".jpg";
 	String content = "image/jpeg";
 
-	if(X == null || Y == null || L == null || T == null)
-		return;
-	
-	if(mask != null)
+	//if the mask is requested, the default tile type changes to PNG
+	if(mask)
 	{
 		ext = ".png";
 		content = "image/png";
 	}
 	
-	if(T.startsWith("radio_"))
+	//if the F (format) parameter was passed, set the extension and content type accordingly
+	if(F != null)
 	{
-		if(mask != null)
+		F = F.toLowerCase();
+		if(F.contains("png"))
 		{
-			T = "radio_mask";
+			ext = ".png";
+			content = "image/png";
 		}
-		T = "radiometrics/" + T;
+		else if(F.contains("jpg") || F.contains("jpeg"))
+		{
+			ext = ".jpg";
+			content = "image/jpeg";
+		}
+		else if(F.contains("dds"))
+		{
+			ext = ".dds";
+			content = "image/dds";
+		}
 	}
-	else if(T.startsWith("radioareas_"))
+	
+	//if the mask is requested, change the last directory to 'mask'
+	if(mask)
 	{
-		if(mask != null)
+		int indexOfLastSlash = T.lastIndexOf('/');
+		if(indexOfLastSlash >= 0)
 		{
-			T = "radioareas_mask";
-		}
-		T = "radiometrics/" + T;
-	}
-	else
-	{
-		if(mask != null)
-		{
-			T += "/mask";
-		}
-		else
-		{
-			T += "/image";
+			T = T.substring(0, indexOfLastSlash) + "/mask";
 		}
 	}
 
-	String url = path + "/" + T + "/" + L + "/" + paddedInt(Y, 4) + "/" + paddedInt(Y, 4) + "_" + paddedInt(X, 4) + ext;
-	response.setContentType(content);
-	File file = new File(url);
+	String filepath = path + "/" + T + "/" + L + "/" + paddedInt(Y, 4) + "/" + paddedInt(Y, 4) + "_" + paddedInt(X, 4) + ext;
+	File file = new File(filepath);
+	if(!file.exists() && returnBlankOnError)
+	{
+		filepath = path + "/blank" + ext;
+		file = new File(filepath);
+	}
 	if(!file.exists())
 	{
-		url = path + "/blank" + ext;
-		file = new File(url);
+		return;
 	}
 
+	response.setContentType(content);
 	InputStream is = new FileInputStream(file);
 	ServletOutputStream os = response.getOutputStream();
 	byte[] buffer = new byte[1024];
