@@ -181,10 +181,10 @@ public class Console
 		Integer tilesize = (Integer) parser.getOptionValue(tilesizeO, elevations ? 150 : 512);
 		Double lzts = (Double) parser.getOptionValue(lztsO, elevations ? 20d : 36d);
 
-		String imageFormat = ((String) parser.getOptionValue(formatO, "JPG")).toUpperCase();
-		if (!(imageFormat.equals("JPG") || imageFormat.equals("PNG")))
+		String imageFormat = ((String) parser.getOptionValue(formatO, "jpg")).toLowerCase();
+		if (!(imageFormat.equals("jpg") || imageFormat.equals("png")))
 		{
-			exitWithMessage("Unknown image format: " + imageFormat);
+			exitWithMessage("Unknown image format: " + imageFormat.toUpperCase());
 		}
 
 		boolean isFloat = false;
