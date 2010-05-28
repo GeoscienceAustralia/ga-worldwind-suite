@@ -89,6 +89,8 @@ import au.gov.ga.worldwind.util.Util;
 public class Application
 {
 	//public final static boolean LOCAL_LAYERS_ENABLED = true;
+	
+	public final static boolean SANDPIT = true;
 
 	static
 	{

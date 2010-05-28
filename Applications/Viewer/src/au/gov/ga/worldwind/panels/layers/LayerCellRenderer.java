@@ -8,6 +8,7 @@ import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.panels.dataset.AbstractCellRenderer;
 import au.gov.ga.worldwind.util.DefaultLauncher;
+import au.gov.ga.worldwind.util.Icons;
 
 public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 {
@@ -61,7 +62,15 @@ public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 		ILayerNode layer = getLayerValue(value);
 		if (layer != null)
 		{
-			if (layer.getOpacity() != 0d && layer.getOpacity() != 1d)
+			if (layer.hasError())
+			{
+				String message = layer.getError().getLocalizedMessage();
+				if (message == null || message.length() == 0)
+					message = layer.getError().toString();
+				label.setText(label.getText() + " - " + message);
+				label.setIcon(Icons.error.getIcon());
+			}
+			else if (layer.getOpacity() != 0d && layer.getOpacity() != 1d)
 			{
 				label.setText(label.getText() + " (" + (int) Math.round(layer.getOpacity() * 100d)
 						+ "%)");

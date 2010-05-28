@@ -120,8 +120,6 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 			label.setIcon(null);
 			return label;
 		}
-		
-		setupLabel(label, item);
 
 		//for some reason we have to readd the label
 		add(label, BorderLayout.CENTER);
@@ -152,6 +150,8 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		{
 			label.setIcon(loadingIcon);
 		}
+		
+		setupLabel(label, item);
 
 		boolean urlRow = isURLRow(item);
 		L layerItem = getLayerValue(item);

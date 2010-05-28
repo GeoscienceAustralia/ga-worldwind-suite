@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="TiledImageLayer">
+	<DisplayName>Magnetics</DisplayName>
+	<Service serviceName="MaskedTileService">
+		<URL>http://www.ga.gov.au/apps/world-wind/tiles.jsp</URL>
+	</Service>
+	<!-- day month year hours:minutes:seconds timezone -->
+	<LastUpdate>28 05 2010 00:00:00 GMT</LastUpdate>
+	<DatasetName>magnetics/edition5/magnetics</DatasetName>
+	<DataCacheName>GA/Magnetics/Edition5</DataCacheName>
+	<ImageFormat>image/jpg</ImageFormat>
+	<AvailableImageFormats>
+		<ImageFormat>image/jpg</ImageFormat>
+	</AvailableImageFormats>
+	<FormatSuffix>.dds</FormatSuffix>
+	<NumLevels count="8" numEmpty="0" />
+	<TileOrigin>
+		<LatLon units="degrees" latitude="-90" longitude="-180" />
+	</TileOrigin>
+	<LevelZeroTileDelta>
+		<LatLon units="degrees" latitude="36" longitude="36" />
+	</LevelZeroTileDelta>
+	<TileSize>
+		<Dimension width="512" height="512" />
+	</TileSize>
+	<Sector>
+		<SouthWest>
+			<LatLon units="degrees" latitude="-43.923147541499944" longitude="112.50336544294441" />
+		</SouthWest>
+		<NorthEast>
+			<LatLon units="degrees" latitude="-9.026494833499997" longitude="154.66334857894435" />
+		</NorthEast>
+	</Sector>
+	<UseTransparentTextures>true</UseTransparentTextures>
+	<ForceLevelZeroLoads>true</ForceLevelZeroLoads>
+	<RetainLevelZeroTiles>true</RetainLevelZeroTiles>
+	<UseMipMaps>true</UseMipMaps>
+	<SplitScale>0.9</SplitScale>
+</Layer>

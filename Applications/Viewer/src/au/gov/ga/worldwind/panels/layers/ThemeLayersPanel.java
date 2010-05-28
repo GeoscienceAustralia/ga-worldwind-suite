@@ -14,6 +14,7 @@ public class ThemeLayersPanel extends AbstractLayersPanel
 	{
 		super(new BorderLayout());
 		setDisplayName("Theme Layers");
+		tree.setShowsRootHandles(false);
 	}
 
 	@Override

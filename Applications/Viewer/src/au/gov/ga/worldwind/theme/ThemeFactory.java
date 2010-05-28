@@ -158,7 +158,7 @@ public class ThemeFactory
 					boolean enabled = XMLUtil.getBoolean(element, "@enabled", true);
 
 					ILayerDefinition layer =
-							new LayerDefinition(name, url, description, icon, true, enabled);
+							new LayerDefinition(name, url, description, icon, true, true, enabled);
 					layers.add(layer);
 				}
 				catch (Exception e)

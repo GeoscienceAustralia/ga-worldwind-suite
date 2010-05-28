@@ -24,8 +24,9 @@
 	<Dataset name="Datasets" url="http://www.ga.gov.au:8500/apps/world-wind/dataset/dataset.xml" />
 
 	<!-- Layers are shown in the Theme Layers panel (non editable list) -->
-	<Layer name="Potassium" url="http://www.ga.gov.au:8500/apps/world-wind/dataset/GA/Radiometrics/Potassium.xml"
-		icon="" info="" enabled="true" />
+	<Layer name="Potassium"
+		url="http://www.ga.gov.au:8500/apps/world-wind/dataset/ga/radiometrics/edition1/potassium.xml"
+		icon="" info="" enabled="false" />
 
 	<!-- Sidebar panels -->
 	<Panel name="Search" className="au.gov.ga.worldwind.panels.geonames.GeoNamesSearchPanel"

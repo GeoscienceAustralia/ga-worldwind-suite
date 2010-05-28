@@ -40,7 +40,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		tree = new LayerTree(root, layerEnabler);
 		layerEnabler.setTree(tree);
 
-		tree.setShowsRootHandles(false);
+		tree.setRootVisible(false);
 		tree.setEditable(false);
 
 		JScrollPane scrollPane = new JScrollPane(tree);

@@ -32,6 +32,7 @@ import javax.imageio.ImageIO;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.application.Application;
 import au.gov.ga.worldwind.downloader.FileRetriever;
 
 public class MaskTiledImageLayer extends BasicTiledImageLayer
@@ -342,14 +343,28 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 
 		public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 		{
-			boolean mask = "mask".equalsIgnoreCase(imageFormat);
 			String service = tile.getLevel().getService();
 			if (service == null || service.length() < 1)
 				return null;
 
-			StringBuffer sb = new StringBuffer(tile.getLevel().getService());
-			if (sb.lastIndexOf("?") != sb.length() - 1)
+			//TEMP!!!!
+			if (Application.SANDPIT)
+			{
+				String externalga = "http://www.ga.gov.au";
+				String sandpitga = externalga + ":8500";
+				if (service.startsWith(externalga))
+				{
+					service = sandpitga + service.substring(externalga.length());
+				}
+			}
+			//TEMP!!!!
+
+			StringBuffer sb = new StringBuffer(service);
+			if (sb.lastIndexOf("?") < 0)
 				sb.append("?");
+			else
+				sb.append("&");
+
 			sb.append("T=");
 			sb.append(tile.getLevel().getDataset());
 			sb.append("&L=");
@@ -359,6 +374,7 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 			sb.append("&Y=");
 			sb.append(tile.getRow());
 
+			boolean mask = "mask".equalsIgnoreCase(imageFormat);
 			if (mask)
 				sb.append("&mask");
 
