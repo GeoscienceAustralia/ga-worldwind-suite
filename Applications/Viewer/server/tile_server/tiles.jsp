@@ -10,9 +10,6 @@
 	}
 %>
 <%
-	//path to root directory of tiles
-	String path = "/web/html/test_root/docs/resources/images/world-wind/tiles";
-	
 	//get the parameters from the request
 	String X = request.getParameter("X");
 	String Y = request.getParameter("Y");
@@ -20,6 +17,7 @@
 	String T = request.getParameter("T");
 	String F = request.getParameter("F");
 	boolean mask = request.getParameter("mask") != null;
+	String path = "/web/html/test_root/docs/resources/images/world-wind/tiles";
 	boolean returnBlankOnError = false;
 	
 	//if the essential parameters are not defined, just return
@@ -66,12 +64,18 @@
 		int indexOfLastSlash = T.lastIndexOf('/');
 		if(indexOfLastSlash >= 0)
 		{
-			T = T.substring(0, indexOfLastSlash) + "/mask";
+			T = T.substring(0, indexOfLastSlash + 1);
 		}
+		else
+		{
+			T = "";
+		}
+		T += "mask";
 	}
 
 	String filepath = path + "/" + T + "/" + L + "/" + paddedInt(Y, 4) + "/" + paddedInt(Y, 4) + "_" + paddedInt(X, 4) + ext;
 	File file = new File(filepath);
+	
 	if(!file.exists() && returnBlankOnError)
 	{
 		filepath = path + "/blank" + ext;

@@ -7,6 +7,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
 
+import au.gov.ga.worldwind.util.Util;
+
 public class ExtendedFileRetriever extends FileRetriever implements ExtendedRetriever
 {
 	private Long ifModifiedSince;
@@ -43,21 +45,7 @@ public class ExtendedFileRetriever extends FileRetriever implements ExtendedRetr
 
 	private boolean checkIfModified(URL url, long ifModifiedSince)
 	{
-		File file = null;
-		try
-		{
-			file = new File(url.toURI());
-		}
-		catch (Exception e1)
-		{
-			try
-			{
-				file = new File(url.getPath());
-			}
-			catch (Exception e2)
-			{
-			}
-		}
+		File file = Util.urlToFile(url);
 		return file != null && file.exists() && file.lastModified() <= ifModifiedSince;
 	}
 

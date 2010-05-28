@@ -7,6 +7,8 @@ import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
 
 import java.io.File;
+import java.net.URL;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +27,38 @@ public class Util
 		if (!dir.exists())
 			dir.mkdirs();
 		return dir;
+	}
+
+	public static File urlToFile(URL url)
+	{
+		try
+		{
+			return new File(url.toURI());
+		}
+		catch (Exception e1)
+		{
+			try
+			{
+				return new File(url.getPath());
+			}
+			catch (Exception e2)
+			{
+			}
+		}
+		return null;
+	}
+	
+	public static String randomString(int length)
+	{
+		String chars = new String(
+				"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+		Random random = new Random();
+		StringBuilder sb = new StringBuilder(length);
+		for (int i = 0; i < length; i++)
+		{
+			sb.append(chars.charAt(random.nextInt(chars.length())));
+		}
+		return sb.toString();
 	}
 
 	public static long getScaledLengthMillis(LatLon beginLatLon, LatLon endLatLon)

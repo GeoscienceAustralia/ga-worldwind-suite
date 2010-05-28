@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.layers.local;
 
-import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -20,7 +19,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
@@ -53,45 +51,32 @@ public class LocalLayer extends TiledImageLayer
 
 	protected static LevelSet makeLevels(LocalLayerDefinition definition)
 	{
-		Sector sector = Sector.fromDegrees(definition.getMinLat(), definition
-				.getMaxLat(), definition.getMinLon(), definition.getMaxLon());
+		Sector sector =
+				Sector.fromDegrees(definition.getMinLat(), definition.getMaxLat(), definition
+						.getMinLon(), definition.getMaxLon());
 
 		AVList params = new AVListImpl();
 		params.setValue(AVKey.TILE_WIDTH, definition.getTilesize());
 		params.setValue(AVKey.TILE_HEIGHT, definition.getTilesize());
-		params.setValue(AVKey.DATA_CACHE_NAME, "Local/" + definition.getName()
-				+ "/" + randomString(8));
+		params.setValue(AVKey.DATA_CACHE_NAME, "Local/" + definition.getName() + "/"
+				+ Util.randomString(8));
 		params.setValue(AVKey.SERVICE, null);
 		params.setValue(AVKey.DATASET_NAME, definition.getName());
 		params.setValue(AVKey.FORMAT_SUFFIX, "." + definition.getExtension());
 		params.setValue(AVKey.NUM_LEVELS, definition.getLevelcount());
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
-		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, LatLon.fromDegrees(
-				definition.getLztsd(), definition.getLztsd()));
+		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, LatLon.fromDegrees(definition.getLztsd(),
+				definition.getLztsd()));
 		params.setValue(AVKey.SECTOR, sector);
 		params.setValue(AVKey.TILE_URL_BUILDER, new TileUrlBuilder()
 		{
-			public URL getURL(Tile tile, String imageFormat)
-					throws MalformedURLException
+			public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 			{
 				return null;
 			}
 		});
 
 		return new LevelSet(params);
-	}
-
-	private static String randomString(int length)
-	{
-		String chars = new String(
-				"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
-		Random random = new Random();
-		StringBuilder sb = new StringBuilder(length);
-		for (int i = 0; i < length; i++)
-		{
-			sb.append(chars.charAt(random.nextInt(chars.length())));
-		}
-		return sb.toString();
 	}
 
 	@Override
@@ -134,9 +119,8 @@ public class LocalLayer extends TiledImageLayer
 	{
 		return new File(directory, tile.getLevelNumber() + File.separator
 				+ Util.paddedInt(tile.getRow(), 4) + File.separator
-				+ Util.paddedInt(tile.getRow(), 4) + "_"
-				+ Util.paddedInt(tile.getColumn(), 4) + "."
-				+ definition.getExtension());
+				+ Util.paddedInt(tile.getRow(), 4) + "_" + Util.paddedInt(tile.getColumn(), 4)
+				+ "." + definition.getExtension());
 	}
 
 	private boolean loadTexture(TextureTile tile, File file)
@@ -147,8 +131,7 @@ public class LocalLayer extends TiledImageLayer
 		{
 			try
 			{
-				textureData = readTexture(file.toURI().toURL(), this
-						.isUseMipMaps());
+				textureData = readTexture(file.toURI().toURL(), this.isUseMipMaps());
 			}
 			catch (MalformedURLException e)
 			{
@@ -175,8 +158,9 @@ public class LocalLayer extends TiledImageLayer
 
 			int fuzz = Math.max(0, definition.getTransparentFuzz() * 255 / 100);
 			BufferedImage image = ImageIO.read(url);
-			BufferedImage trans = new BufferedImage(image.getWidth(), image
-					.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			BufferedImage trans =
+					new BufferedImage(image.getWidth(), image.getHeight(),
+							BufferedImage.TYPE_INT_ARGB);
 
 			for (int x = 0; x < image.getWidth(); x++)
 			{
@@ -189,9 +173,8 @@ public class LocalLayer extends TiledImageLayer
 					int cr = transparent.getRed();
 					int cg = transparent.getGreen();
 					int cb = transparent.getBlue();
-					if (cr - fuzz <= sr && sr <= cr + fuzz && cg - fuzz <= sg
-							&& sg <= cg + fuzz && cb - fuzz <= sb
-							&& sb <= cb + fuzz)
+					if (cr - fuzz <= sr && sr <= cr + fuzz && cg - fuzz <= sg && sg <= cg + fuzz
+							&& cb - fuzz <= sb && sb <= cb + fuzz)
 					{
 						rgb = (rgb & 0xffffff);
 					}
@@ -203,16 +186,14 @@ public class LocalLayer extends TiledImageLayer
 		catch (Exception e)
 		{
 			Logging.logger().log(java.util.logging.Level.SEVERE,
-					"layers.TextureLayer.ExceptionAttemptingToReadTextureFile",
-					e);
+					"layers.TextureLayer.ExceptionAttemptingToReadTextureFile", e);
 			return null;
 		}
 	}
 
 	private void addTileToCache(TextureTile tile)
 	{
-		WorldWind.getMemoryCache(TextureTile.class.getName()).add(
-				tile.getTileKey(), tile);
+		TextureTile.getMemoryCache().add(tile.getTileKey(), tile);
 	}
 
 	@Override
@@ -225,8 +206,7 @@ public class LocalLayer extends TiledImageLayer
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	private static class RequestTask implements Runnable,
-			Comparable<RequestTask>
+	private static class RequestTask implements Runnable, Comparable<RequestTask>
 	{
 		private final LocalLayer layer;
 		private final TextureTile tile;
@@ -251,8 +231,7 @@ public class LocalLayer extends TiledImageLayer
 				throw new IllegalArgumentException(msg);
 			}
 			return this.tile.getPriority() == that.tile.getPriority() ? 0
-					: this.tile.getPriority() < that.tile.getPriority() ? -1
-							: 1;
+					: this.tile.getPriority() < that.tile.getPriority() ? -1 : 1;
 		}
 
 		@Override
