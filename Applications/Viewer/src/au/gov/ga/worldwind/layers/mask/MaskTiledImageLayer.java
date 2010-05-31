@@ -350,73 +350,36 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 
 			boolean mask = "mask".equalsIgnoreCase(imageFormat);
 
-			if (service.toLowerCase().startsWith("file:"))
+			//TEMP!!!!
+			if (Application.SANDPIT)
 			{
-				//file protocol, so must be a local tileset
-
-				String ext = ".jpg";
-
-				String dataset = tile.getLevel().getDataset();
-				if (mask)
+				String externalga = "http://www.ga.gov.au";
+				String sandpitga = externalga + ":8500";
+				if (service.startsWith(externalga))
 				{
-					int indexOfLastSlash = dataset.lastIndexOf('/');
-					if (indexOfLastSlash >= 0)
-					{
-						dataset = dataset.substring(0, indexOfLastSlash) + "/mask";
-					}
-					ext = ".png";
+					service = sandpitga + service.substring(externalga.length());
 				}
-
-				URL directoryUrl = new URL(service);
-				File directory = Util.urlToFile(directoryUrl);
-				if (directory == null || !directory.isDirectory())
-					return null;
-
-				String level = tile.getLevel().getLevelName();
-				String X = Util.paddedInt(tile.getColumn(), 4);
-				String Y = Util.paddedInt(tile.getRow(), 4);
-				String path =
-						directory.getAbsolutePath() + "/" + dataset + "/" + level + "/" + Y + "/"
-								+ Y + "_" + X + ext;
-				File file = new File(path);
-				if (!file.exists())
-					return null;
-
-				return file.toURI().toURL();
 			}
+			//TEMP!!!!
+
+			StringBuffer sb = new StringBuffer(service);
+			if (sb.lastIndexOf("?") < 0)
+				sb.append("?");
 			else
-			{
-				//TEMP!!!!
-				if (Application.SANDPIT)
-				{
-					String externalga = "http://www.ga.gov.au";
-					String sandpitga = externalga + ":8500";
-					if (service.startsWith(externalga))
-					{
-						service = sandpitga + service.substring(externalga.length());
-					}
-				}
-				//TEMP!!!!
+				sb.append("&");
 
-				StringBuffer sb = new StringBuffer(service);
-				if (sb.lastIndexOf("?") < 0)
-					sb.append("?");
-				else
-					sb.append("&");
+			sb.append("T=");
+			sb.append(tile.getLevel().getDataset());
+			sb.append("&L=");
+			sb.append(tile.getLevel().getLevelName());
+			sb.append("&X=");
+			sb.append(tile.getColumn());
+			sb.append("&Y=");
+			sb.append(tile.getRow());
+			if (mask)
+				sb.append("&mask");
 
-				sb.append("T=");
-				sb.append(tile.getLevel().getDataset());
-				sb.append("&L=");
-				sb.append(tile.getLevel().getLevelName());
-				sb.append("&X=");
-				sb.append(tile.getColumn());
-				sb.append("&Y=");
-				sb.append(tile.getRow());
-				if (mask)
-					sb.append("&mask");
-
-				return new URL(sb.toString());
-			}
+			return new URL(sb.toString());
 		}
 	}
 }
