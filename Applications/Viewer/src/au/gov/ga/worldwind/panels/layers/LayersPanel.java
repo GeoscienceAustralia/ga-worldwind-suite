@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.panels.layers;
 
-import java.awt.BorderLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -46,13 +45,14 @@ public class LayersPanel extends AbstractLayersPanel
 
 	private Window window;
 
-	private BasicAction newFolderAction, newLayerAction, renameAction, editAction, deleteAction;
+	private BasicAction newLayerAction, renameAction, editAction, deleteAction, newFolderAction,
+			expandAllAction, collapseAllAction;
 
 	private DatasetPanel datasetPanel;
 
 	public LayersPanel()
 	{
-		super(new BorderLayout());
+		super();
 		setDisplayName("Layers");
 
 		tree.addTreeSelectionListener(new TreeSelectionListener()
@@ -97,6 +97,8 @@ public class LayersPanel extends AbstractLayersPanel
 	@Override
 	protected void createActions()
 	{
+		super.createActions();
+
 		newFolderAction =
 				new BasicAction("New Folder", "Create New Folder", Icons.newfolder.getIcon());
 		newFolderAction.addActionListener(new ActionListener()
@@ -147,6 +149,26 @@ public class LayersPanel extends AbstractLayersPanel
 				deleteSelected();
 			}
 		});
+
+		expandAllAction = new BasicAction("Expand all", Icons.expandall.getIcon());
+		expandAllAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				expandAll();
+			}
+		});
+
+		collapseAllAction = new BasicAction("Collapse all", Icons.collapseall.getIcon());
+		collapseAllAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				collapseAll();
+			}
+		});
 	}
 
 	@Override
@@ -158,6 +180,9 @@ public class LayersPanel extends AbstractLayersPanel
 		toolBar.add(renameAction);
 		toolBar.add(editAction);
 		toolBar.add(deleteAction);
+		toolBar.addSeparator();
+		toolBar.add(expandAllAction);
+		toolBar.add(collapseAllAction);
 		toolBar.addSeparator();
 	}
 
@@ -460,5 +485,32 @@ public class LayersPanel extends AbstractLayersPanel
 
 		tree.setEditable(true);
 		tree.startEditingAtPath(p);
+	}
+
+	protected void collapseAll()
+	{
+		while (collapseLast())
+			;
+	}
+
+	private boolean collapseLast()
+	{
+		for (int i = tree.getRowCount() - 1; i >= 0; i--)
+		{
+			if (tree.isExpanded(i))
+			{
+				tree.collapseRow(i);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected void expandAll()
+	{
+		for (int i = 0; i < tree.getRowCount(); i++)
+		{
+			tree.expandRow(i);
+		}
 	}
 }

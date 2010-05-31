@@ -1,7 +1,5 @@
 package au.gov.ga.worldwind.panels.layers;
 
-import java.awt.BorderLayout;
-
 import javax.swing.Icon;
 
 import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
@@ -12,7 +10,7 @@ public class ThemeLayersPanel extends AbstractLayersPanel
 {
 	public ThemeLayersPanel()
 	{
-		super(new BorderLayout());
+		super();
 		setDisplayName("Theme Layers");
 		tree.setShowsRootHandles(false);
 	}
@@ -46,10 +44,5 @@ public class ThemeLayersPanel extends AbstractLayersPanel
 	protected INode createRootNode()
 	{
 		return new FolderNode(null, null, null, true);
-	}
-
-	@Override
-	protected void createActions()
-	{
 	}
 }

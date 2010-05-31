@@ -4,8 +4,13 @@ import gov.nasa.worldwind.WorldWindow;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.LayoutManager;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
@@ -16,9 +21,12 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.components.resizabletoolbar.ResizableToolBar;
 import au.gov.ga.worldwind.panels.layers.LayerEnabler.RefreshListener;
 import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
+import au.gov.ga.worldwind.util.BasicAction;
+import au.gov.ga.worldwind.util.Icons;
 
 public abstract class AbstractLayersPanel extends AbstractThemePanel
 {
@@ -27,13 +35,16 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 	protected LayerTree tree;
 	protected INode root;
 
+	protected BasicAction enableAction;
+	protected BasicAction disableAction;
+
 	protected LayerEnabler layerEnabler;
 	protected JSlider opacitySlider;
-	private boolean ignoreSliderChange = false;
+	private boolean ignoreOpacityChange = false;
 
-	public AbstractLayersPanel(LayoutManager layout)
+	public AbstractLayersPanel()
 	{
-		super(layout);
+		super(new BorderLayout());
 
 		root = createRootNode();
 		layerEnabler = new LayerEnabler();
@@ -55,7 +66,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			@Override
 			public void refreshed()
 			{
-				enableSlider();
+				enableComponents();
 			}
 		});
 		tree.addTreeSelectionListener(new TreeSelectionListener()
@@ -63,11 +74,22 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			@Override
 			public void valueChanged(TreeSelectionEvent e)
 			{
-				enableSlider();
+				enableComponents();
 			}
 		});
 
-		enableSlider();
+		addComponentListener(new ComponentAdapter()
+		{
+			@Override
+			public void componentResized(ComponentEvent e)
+			{
+				Dimension size = getLayout().preferredLayoutSize(AbstractLayersPanel.this);
+				size.width = 100;
+				setPreferredSize(size);
+			}
+		});
+
+		enableComponents();
 	}
 
 	@Override
@@ -77,18 +99,40 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		layerEnabler.setWwd(theme.getWwd());
 	}
 
-	protected abstract void createActions();
-
 	protected abstract INode createRootNode();
+
+	protected void createActions()
+	{
+		enableAction = new BasicAction("Enable selected", Icons.check.getIcon());
+		enableAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				enableSelected(true);
+			}
+		});
+
+		disableAction = new BasicAction("Disable selected", Icons.uncheck.getIcon());
+		disableAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				enableSelected(false);
+			}
+		});
+	}
 
 	private void createToolBar()
 	{
-		JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
-		toolBar.setFloatable(false);
+		JToolBar toolBar = new ResizableToolBar();
 		add(toolBar, BorderLayout.PAGE_START);
 
 		setupToolBarBeforeSlider(toolBar);
 
+		toolBar.add(enableAction);
+		toolBar.add(disableAction);
 		createOpacitySlider();
 		toolBar.add(opacitySlider);
 
@@ -110,72 +154,160 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			@Override
 			public void stateChanged(ChangeEvent e)
 			{
-				if (!ignoreSliderChange)
-					setSelectedOpacity();
+				setSelectedOpacity();
 			}
 		});
 	}
 
-	private void enableSlider()
+	private void enableComponents()
 	{
-		TreePath selected = tree.getSelectionPath();
-		ILayerNode node = getLayer(selected);
-		if (node != null && layerEnabler.hasLayer(node))
+		setOpacitySlider();
+
+		TreePath[] selected = tree.getSelectionPaths();
+		ILayerNode layer = firstChildLayer(selected, false);
+		enableAction.setEnabled(layer != null);
+		disableAction.setEnabled(layer != null);
+	}
+
+	private void enableSelected(boolean enabled)
+	{
+		TreePath[] selected = tree.getSelectionPaths();
+		Set<ILayerNode> nodes = getChildLayers(selected, false);
+
+		for (ILayerNode node : nodes)
 		{
-			double opacity = node.isEnabled() ? node.getOpacity() * 100d : 0;
-			ignoreSliderChange = true;
-			opacitySlider.setValue((int) Math.round(opacity));
-			ignoreSliderChange = false;
-			opacitySlider.setEnabled(true);
+			if (tree.getModel().isEnabled(node) != enabled)
+			{
+				tree.getModel().setEnabled(node, enabled);
+				relayoutRepaint(node);
+			}
 		}
-		else
+	}
+
+	private void setOpacitySlider()
+	{
+		if (!ignoreOpacityChange)
 		{
-			opacitySlider.setEnabled(false);
+			TreePath[] selected = tree.getSelectionPaths();
+			ILayerNode layer = firstChildLayer(selected, true);
+			if (layer != null)
+			{
+				double opacity = layer.isEnabled() ? layer.getOpacity() * 100d : 0;
+				ignoreOpacityChange = true;
+				opacitySlider.setValue((int) Math.round(opacity));
+				ignoreOpacityChange = false;
+				opacitySlider.setEnabled(true);
+			}
+			else
+			{
+				opacitySlider.setEnabled(false);
+			}
 		}
 	}
 
 	private void setSelectedOpacity()
 	{
-		TreePath[] selected = tree.getSelectionPaths();
-		ILayerNode[] nodes = new ILayerNode[selected.length];
-		for (int i = 0; i < selected.length; i++)
+		if (!ignoreOpacityChange)
 		{
-			nodes[i] = getLayer(selected[i]);
-			if (nodes[i] == null)
-				return;
-		}
+			ignoreOpacityChange = true;
 
-		for (int i = 0; i < nodes.length; i++)
-		{
-			ILayerNode node = nodes[i];
-			TreePath path = selected[i];
-			if (layerEnabler.hasLayer(node))
+			TreePath[] selected = tree.getSelectionPaths();
+			Set<ILayerNode> nodes = getChildLayers(selected, true);
+
+			double opacity = opacitySlider.getValue() / 100d;
+			boolean enabled = opacity > 0;
+
+			for (ILayerNode node : nodes)
 			{
-				double opacity = opacitySlider.getValue() / 100d;
-				boolean enabled = opacity > 0;
 				tree.getModel().setEnabled(node, enabled);
 				tree.getModel().setOpacity(node, opacity);
-
-				tree.getUI().relayout(path);
-
-				Rectangle bounds = tree.getPathBounds(path);
-				if (bounds != null)
-					tree.repaint(bounds);
+				relayoutRepaint(node);
 			}
+
+			ignoreOpacityChange = false;
+			setOpacitySlider();
 		}
 	}
 
-	private ILayerNode getLayer(TreePath path)
+	private void relayoutRepaint(INode node)
 	{
-		if (path != null)
+		TreePath path = new TreePath(tree.getModel().getPathToRoot(node));
+		tree.getUI().relayout(path);
+
+		Rectangle bounds = tree.getPathBounds(path);
+		if (bounds != null)
+			tree.repaint(bounds);
+	}
+
+	protected ILayerNode firstChildLayer(TreePath[] selected, boolean hasLayer)
+	{
+		if (selected == null)
+			return null;
+
+		for (TreePath path : selected)
 		{
 			Object o = path.getLastPathComponent();
-			if (o instanceof ILayerNode)
+			if (o instanceof INode)
 			{
-				return (ILayerNode) o;
+				ILayerNode layer = firstChildLayer((INode) o, hasLayer);
+				if (layer != null)
+					return layer;
 			}
 		}
 		return null;
+	}
+
+	protected ILayerNode firstChildLayer(INode node, boolean hasLayer)
+	{
+		if (node instanceof ILayerNode)
+		{
+			ILayerNode layer = (ILayerNode) node;
+			if (!hasLayer || layerEnabler.hasLayer(layer))
+				return layer;
+		}
+		for (int i = 0; i < node.getChildCount(); i++)
+		{
+			ILayerNode layer = firstChildLayer(node.getChild(i), hasLayer);
+			if (layer != null)
+				return layer;
+		}
+		return null;
+	}
+
+	protected Set<ILayerNode> getChildLayers(TreePath[] selected, boolean hasLayer)
+	{
+		Set<ILayerNode> layers = new HashSet<ILayerNode>();
+		if (selected != null)
+		{
+			for (TreePath path : selected)
+			{
+				Object o = path.getLastPathComponent();
+				if (o instanceof INode)
+					addChildLayers((INode) o, layers, hasLayer);
+			}
+		}
+		return layers;
+	}
+
+	protected Set<ILayerNode> getChildLayers(INode node, boolean hasLayer)
+	{
+		Set<ILayerNode> layers = new HashSet<ILayerNode>();
+		addChildLayers(node, layers, hasLayer);
+		return layers;
+	}
+
+	private void addChildLayers(INode node, Set<ILayerNode> list, boolean hasLayer)
+	{
+		if (node instanceof ILayerNode)
+		{
+			ILayerNode layer = (ILayerNode) node;
+			if (!hasLayer || layerEnabler.hasLayer(layer))
+				list.add(layer);
+		}
+		for (int i = 0; i < node.getChildCount(); i++)
+		{
+			addChildLayers(node.getChild(i), list, hasLayer);
+		}
 	}
 
 	protected void setupToolBarBeforeSlider(JToolBar toolBar)

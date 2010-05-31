@@ -144,8 +144,8 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				if (node == null)
 				{
 					node =
-							new FolderNode(data.getName(), data.getInfoURL(), data
-									.getIconURL(), true);
+							new FolderNode(data.getName(), data.getInfoURL(), data.getIconURL(),
+									true);
 					insertNodeInto(node, currentParent, currentParent.getChildCount(), false);
 				}
 				expandPath.add(currentParent);
@@ -489,7 +489,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		}
 	}
 
-	private INode[] getPathToRoot(INode aNode)
+	public INode[] getPathToRoot(INode aNode)
 	{
 		return getPathToRoot(aNode, 0);
 	}

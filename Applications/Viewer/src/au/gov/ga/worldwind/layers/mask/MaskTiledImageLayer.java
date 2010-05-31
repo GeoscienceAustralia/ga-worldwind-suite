@@ -34,7 +34,6 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.application.Application;
 import au.gov.ga.worldwind.downloader.FileRetriever;
-import au.gov.ga.worldwind.util.Util;
 
 public class MaskTiledImageLayer extends BasicTiledImageLayer
 {
