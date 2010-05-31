@@ -26,6 +26,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	private LayerTree tree;
 	private List<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
 	private List<ILayerNode> layerNodes = new ArrayList<ILayerNode>();
+	private List<ILayerNode> invisibleLayers = new ArrayList<ILayerNode>();
 	private Map<URL, Set<ILayerNode>> layerURLmap = new HashMap<URL, Set<ILayerNode>>();
 	private LayerEnabler enabler;
 
@@ -73,7 +74,15 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	private void refreshLayers()
 	{
 		List<ILayerNode> copy = new ArrayList<ILayerNode>(layerNodes);
+		copy.addAll(invisibleLayers);
 		enabler.enable(copy);
+	}
+
+	public void addInvisibleLayer(ILayerDefinition layer)
+	{
+		ILayerNode layerNode = LayerNode.createFromLayerDefinition(layer);
+		invisibleLayers.add(layerNode);
+		refreshLayers();
 	}
 
 	public void addLayer(ILayerDefinition layer, Object[] pathToRoot)

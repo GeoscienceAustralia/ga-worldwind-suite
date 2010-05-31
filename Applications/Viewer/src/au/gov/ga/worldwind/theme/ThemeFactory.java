@@ -7,8 +7,6 @@ import java.util.List;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.panels.dataset.IDataset;
-import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
-import au.gov.ga.worldwind.panels.dataset.LayerDefinition;
 import au.gov.ga.worldwind.panels.dataset.LazyDataset;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.XMLUtil;
@@ -141,9 +139,9 @@ public class ThemeFactory
 		return datasets;
 	}
 
-	private static List<ILayerDefinition> parseLayers(Element context, String path, URL urlContext)
+	private static List<ThemeLayer> parseLayers(Element context, String path, URL urlContext)
 	{
-		List<ILayerDefinition> layers = new ArrayList<ILayerDefinition>();
+		List<ThemeLayer> layers = new ArrayList<ThemeLayer>();
 		Element[] elements = XMLUtil.getElements(context, path, null);
 		if (elements != null)
 		{
@@ -156,9 +154,10 @@ public class ThemeFactory
 					URL description = XMLUtil.getURL(element, "@description", urlContext);
 					URL icon = XMLUtil.getURL(element, "@icon", urlContext);
 					boolean enabled = XMLUtil.getBoolean(element, "@enabled", true);
+					boolean visible = XMLUtil.getBoolean(element, "@visible", true);
 
-					ILayerDefinition layer =
-							new LayerDefinition(name, url, description, icon, true, true, enabled);
+					ThemeLayer layer =
+							new BasicThemeLayer(name, url, description, icon, enabled, visible);
 					layers.add(layer);
 				}
 				catch (Exception e)

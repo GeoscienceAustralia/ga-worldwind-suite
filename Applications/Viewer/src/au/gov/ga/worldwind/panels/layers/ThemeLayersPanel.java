@@ -2,8 +2,8 @@ package au.gov.ga.worldwind.panels.layers;
 
 import javax.swing.Icon;
 
-import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.theme.Theme;
+import au.gov.ga.worldwind.theme.ThemeLayer;
 import au.gov.ga.worldwind.util.Icons;
 
 public class ThemeLayersPanel extends AbstractLayersPanel
@@ -26,9 +26,12 @@ public class ThemeLayersPanel extends AbstractLayersPanel
 	{
 		super.setup(theme);
 
-		for (ILayerDefinition layer : theme.getLayers())
+		for (ThemeLayer layer : theme.getLayers())
 		{
-			tree.getModel().addLayer(layer, (Object[]) null);
+			if (layer.isVisible())
+				tree.getModel().addLayer(layer, (Object[]) null);
+			else
+				tree.getModel().addInvisibleLayer(layer);
 		}
 
 		tree.getUI().relayout();

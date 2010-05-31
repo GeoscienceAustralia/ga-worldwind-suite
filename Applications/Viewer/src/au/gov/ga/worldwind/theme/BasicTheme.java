@@ -5,7 +5,6 @@ import gov.nasa.worldwind.WorldWindow;
 import java.util.List;
 
 import au.gov.ga.worldwind.panels.dataset.IDataset;
-import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 
 public class BasicTheme implements Theme
 {
@@ -16,7 +15,7 @@ public class BasicTheme implements Theme
 	private boolean toolBar;
 	private boolean statusBar;
 	private List<IDataset> datasets;
-	private List<ILayerDefinition> layers;
+	private List<ThemeLayer> layers;
 	private List<ThemeHUD> HUDs;
 	private List<ThemePanel> panels;
 	
@@ -120,12 +119,12 @@ public class BasicTheme implements Theme
 		this.datasets = datasets;
 	}
 
-	public List<ILayerDefinition> getLayers()
+	public List<ThemeLayer> getLayers()
 	{
 		return layers;
 	}
 
-	public void setLayers(List<ILayerDefinition> layers)
+	public void setLayers(List<ThemeLayer> layers)
 	{
 		this.layers = layers;
 	}

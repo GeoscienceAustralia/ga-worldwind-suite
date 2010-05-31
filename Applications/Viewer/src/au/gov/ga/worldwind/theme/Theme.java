@@ -6,8 +6,6 @@ import gov.nasa.worldwind.WorldWindow;
 import java.util.List;
 
 import au.gov.ga.worldwind.panels.dataset.IDataset;
-import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
-
 
 public interface Theme extends Disposable
 {
@@ -20,7 +18,7 @@ public interface Theme extends Disposable
 	public boolean hasStatusBar();
 	
 	public List<IDataset> getDatasets();
-	public List<ILayerDefinition> getLayers();
+	public List<ThemeLayer> getLayers();
 	public List<ThemeHUD> getHUDs();
 	public List<ThemePanel> getPanels();
 	

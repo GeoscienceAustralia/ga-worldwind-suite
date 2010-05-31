@@ -27,6 +27,8 @@
 	<Layer name="Potassium"
 		url="http://www.ga.gov.au:8500/apps/world-wind/dataset/ga/radiometrics/edition1/potassium.xml"
 		icon="" info="" enabled="false" />
+	<Layer name="Atmosphere" url="http://www.ga.gov.au:8500/apps/world-wind/dataset/nasa/sky.xml"
+		icon="" info="" visible="false" />
 
 	<!-- Sidebar panels -->
 	<Panel name="Search" className="au.gov.ga.worldwind.panels.geonames.GeoNamesSearchPanel"
