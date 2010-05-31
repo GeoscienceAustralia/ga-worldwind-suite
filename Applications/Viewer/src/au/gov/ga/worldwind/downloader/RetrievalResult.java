@@ -1,10 +1,12 @@
 package au.gov.ga.worldwind.downloader;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
 
 public interface RetrievalResult
 {
+	public URL getSourceURL();
 	public boolean hasData();
 	public ByteBuffer getAsBuffer();
 	public String getAsString();

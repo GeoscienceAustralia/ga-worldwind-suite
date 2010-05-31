@@ -2,15 +2,16 @@ package au.gov.ga.worldwind.downloader;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
 
 public class FileRetrievalResult extends ByteBufferRetrievalResult
 {
 	private File file;
 
-	public FileRetrievalResult(File file, boolean fromCache)
+	public FileRetrievalResult(URL sourceURL, File file, boolean fromCache)
 	{
-		super(readFile(file), fromCache, false, null);
+		super(sourceURL, readFile(file), fromCache, false, null);
 		this.file = file;
 	}
 

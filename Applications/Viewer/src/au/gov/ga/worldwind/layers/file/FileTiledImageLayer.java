@@ -16,6 +16,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
@@ -31,17 +32,20 @@ import com.sun.opengl.util.texture.TextureIO;
 public class FileTiledImageLayer extends AVListTiledImageLayer
 {
 	private boolean masked;
+	private URL context;
 
 	public FileTiledImageLayer(LevelSet levelSet, boolean masked)
 	{
 		super(levelSet);
 		this.masked = masked;
+		getFileParams(levelSet.getFirstLevel().getParams());
 	}
 
 	public FileTiledImageLayer(AVList params, boolean masked)
 	{
 		super(params);
 		this.masked = masked;
+		getFileParams(params);
 	}
 
 	public FileTiledImageLayer(Element domElement, AVList params, boolean masked)
@@ -64,6 +68,16 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 		list.setValue(AVKey.DATA_CACHE_NAME, dataCacheName);
 
 		return list;
+	}
+
+	protected void getFileParams(AVList params)
+	{
+		if (params == null)
+			return;
+
+		Object o = params.getValue(AVKey.URL);
+		if (o != null && o instanceof URL)
+			context = (URL) o;
 	}
 
 	protected File getTileFile(TextureTile tile, boolean mask)
@@ -92,8 +106,8 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 			dataset += "mask";
 		}
 
-		File directory = new File(dataset);
-		if (!directory.isDirectory())
+		File directory = getDirectory(context, dataset);
+		if (directory == null)
 			return null;
 
 		//default to JPG
@@ -123,6 +137,54 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 				+ Util.paddedInt(tile.getRow(), 4) + File.separator
 				+ Util.paddedInt(tile.getRow(), 4) + "_" + Util.paddedInt(tile.getColumn(), 4)
 				+ "." + ext);
+	}
+
+	protected File getDirectory(URL context, String path)
+	{
+		//first attempt finding of the directory using a URL
+		try
+		{
+			URL url = context == null ? new URL(path) : new URL(context, path);
+			File file = Util.urlToFile(url);
+			if (file != null && file.isDirectory())
+				return file;
+		}
+		catch (Exception e)
+		{
+		}
+
+		//next try parsing the context to pull out a parent file
+		File parent = null;
+		if (context != null)
+		{
+			File file = Util.urlToFile(context);
+			if (file != null && file.isFile())
+			{
+				parent = file.getParentFile();
+				if (parent != null && !parent.isDirectory())
+					parent = null;
+			}
+		}
+
+		//if the parent isn't null, try using it as a parent file
+		if (parent != null)
+		{
+			try
+			{
+				File dir = new File(parent, path);
+				if (dir.isDirectory())
+					return dir;
+			}
+			catch (Exception e)
+			{
+			}
+		}
+
+		//otherwise ignore the parent and just attempt the path
+		File dir = new File(path);
+		if (dir.isDirectory())
+			return dir;
+		return null;
 	}
 
 	@Override

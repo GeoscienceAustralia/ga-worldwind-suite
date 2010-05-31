@@ -2,22 +2,30 @@ package au.gov.ga.worldwind.downloader;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
 
 public class ByteBufferRetrievalResult implements RetrievalResult
 {
+	private final URL sourceURL;
 	private final Exception error;
 	private final ByteBuffer buffer;
 	private final boolean fromCache;
 	private final boolean notModified;
 
-	public ByteBufferRetrievalResult(ByteBuffer buffer, boolean fromCache, boolean notModified,
+	public ByteBufferRetrievalResult(URL sourceURL, ByteBuffer buffer, boolean fromCache, boolean notModified,
 			Exception error)
 	{
+		this.sourceURL = sourceURL;
 		this.buffer = buffer;
 		this.fromCache = fromCache;
 		this.notModified = notModified;
 		this.error = error;
+	}
+
+	public URL getSourceURL()
+	{
+		return sourceURL;
 	}
 
 	@Override

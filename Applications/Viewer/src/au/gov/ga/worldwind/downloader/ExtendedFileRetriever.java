@@ -26,8 +26,7 @@ public class ExtendedFileRetriever extends FileRetriever implements ExtendedRetr
 	{
 		try
 		{
-			if (ifModifiedSince != null
-					&& "file".equalsIgnoreCase(connection.getURL().getProtocol()))
+			if (ifModifiedSince != null)
 			{
 				notModified = checkIfModified(connection.getURL(), ifModifiedSince);
 				if (notModified)

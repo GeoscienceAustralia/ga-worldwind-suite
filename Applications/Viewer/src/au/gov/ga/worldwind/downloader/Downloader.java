@@ -48,7 +48,7 @@ public class Downloader
 		}
 
 		ImmediateRetrievalHandler immediateHandler = new ImmediateRetrievalHandler();
-		HandlerPostProcessor postProcessor = new HandlerPostProcessor(immediateHandler);
+		HandlerPostProcessor postProcessor = new HandlerPostProcessor(url, immediateHandler);
 		URLRetriever retriever = createRetriever(url, null, postProcessor);
 
 		//check if the request is a duplicate
@@ -97,7 +97,7 @@ public class Downloader
 			lastModified = cachedResult.lastModified();
 
 		ImmediateRetrievalHandler immediateHandler = new ImmediateRetrievalHandler();
-		HandlerPostProcessor postProcessor = new HandlerPostProcessor(immediateHandler);
+		HandlerPostProcessor postProcessor = new HandlerPostProcessor(url, immediateHandler);
 		//download if lastModified is null or server's modification date is greater than lastModified
 		URLRetriever retriever = createRetriever(url, lastModified, postProcessor);
 
@@ -169,7 +169,7 @@ public class Downloader
 			}
 		};
 
-		HandlerPostProcessor postProcessor = new HandlerPostProcessor(cacherHandler);
+		HandlerPostProcessor postProcessor = new HandlerPostProcessor(url, cacherHandler);
 		URLRetriever retriever = createRetriever(url, null, postProcessor);
 
 		HandlerPostProcessor activeHandler = retrieverCache.getActiveRetriever(retriever);
@@ -250,7 +250,7 @@ public class Downloader
 			}
 		};
 
-		HandlerPostProcessor postProcessor = new HandlerPostProcessor(cacherHandler);
+		HandlerPostProcessor postProcessor = new HandlerPostProcessor(url, cacherHandler);
 		URLRetriever retriever = createRetriever(url, lastModified, postProcessor);
 
 		HandlerPostProcessor currentHandler = retrieverCache.getActiveRetriever(retriever);
@@ -274,7 +274,7 @@ public class Downloader
 				try
 				{
 					File file = new File(fileUrl.toURI());
-					return new FileRetrievalResult(file, true);
+					return new FileRetrievalResult(url, file, true);
 				}
 				catch (Exception e)
 				{

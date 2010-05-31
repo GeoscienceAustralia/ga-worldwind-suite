@@ -191,7 +191,7 @@ public class LayerEnabler
 		Object layer;
 		try
 		{
-			layer = LayerLoader.load(result.getAsInputStream());
+			layer = LayerLoader.load(result.getSourceURL(), result.getAsInputStream());
 		}
 		catch (Exception e)
 		{

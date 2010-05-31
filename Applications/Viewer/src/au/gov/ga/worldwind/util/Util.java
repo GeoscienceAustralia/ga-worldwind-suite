@@ -31,27 +31,29 @@ public class Util
 
 	public static File urlToFile(URL url)
 	{
-		try
-		{
-			return new File(url.toURI());
-		}
-		catch (Exception e1)
+		if ("file".equalsIgnoreCase(url.getProtocol()))
 		{
 			try
 			{
-				return new File(url.getPath());
+				return new File(url.toURI());
 			}
-			catch (Exception e2)
+			catch (Exception e1)
 			{
+				try
+				{
+					return new File(url.getPath());
+				}
+				catch (Exception e2)
+				{
+				}
 			}
 		}
 		return null;
 	}
-	
+
 	public static String randomString(int length)
 	{
-		String chars = new String(
-				"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+		String chars = new String("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 		Random random = new Random();
 		StringBuilder sb = new StringBuilder(length);
 		for (int i = 0; i < length; i++)
