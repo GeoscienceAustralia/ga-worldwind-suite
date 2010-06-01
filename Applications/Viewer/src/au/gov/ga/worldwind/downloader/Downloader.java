@@ -399,7 +399,6 @@ public class Downloader
 			try
 			{
 				is = Downloader.class.getResourceAsStream(resource);
-				System.out.println(resource + " = " + is);
 			}
 			catch (Exception e)
 			{
