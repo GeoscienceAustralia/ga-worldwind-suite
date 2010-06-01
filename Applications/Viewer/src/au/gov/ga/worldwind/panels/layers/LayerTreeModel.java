@@ -73,8 +73,8 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 	private void refreshLayers()
 	{
-		List<ILayerNode> copy = new ArrayList<ILayerNode>(layerNodes);
-		copy.addAll(invisibleLayers);
+		List<ILayerNode> copy = new ArrayList<ILayerNode>(invisibleLayers);
+		copy.addAll(layerNodes);
 		enabler.enable(copy);
 	}
 

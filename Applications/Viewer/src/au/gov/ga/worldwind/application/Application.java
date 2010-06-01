@@ -68,6 +68,9 @@ import au.gov.ga.worldwind.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.panels.SideBar;
 import au.gov.ga.worldwind.panels.layers.ExtendedCompoundElevationModel;
 import au.gov.ga.worldwind.panels.layers.ExtendedLayerList;
+import au.gov.ga.worldwind.panels.layers.ILayerNode;
+import au.gov.ga.worldwind.panels.layers.LayerEnabler;
+import au.gov.ga.worldwind.panels.layers.LayerNode;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.SettingsDialog;
@@ -75,11 +78,13 @@ import au.gov.ga.worldwind.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.stereo.StereoSceneController;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.theme.ThemeHUD;
+import au.gov.ga.worldwind.theme.ThemeLayer;
 import au.gov.ga.worldwind.theme.ThemeOpener;
 import au.gov.ga.worldwind.theme.ThemePanel;
 import au.gov.ga.worldwind.theme.ThemePiece;
 import au.gov.ga.worldwind.theme.ThemeOpener.ThemeOpenDelegate;
 import au.gov.ga.worldwind.theme.ThemePiece.ThemePieceAdapter;
+import au.gov.ga.worldwind.theme.hud.WorldMapHUD;
 import au.gov.ga.worldwind.util.BasicAction;
 import au.gov.ga.worldwind.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.util.Icons;
@@ -89,7 +94,7 @@ import au.gov.ga.worldwind.util.Util;
 public class Application
 {
 	//public final static boolean LOCAL_LAYERS_ENABLED = true;
-	
+
 	public final static boolean SANDPIT = true;
 
 	static
@@ -163,6 +168,9 @@ public class Application
 			Configuration.setValue(AVKey.INITIAL_HEADING, theme.getInitialHeading());
 		if (theme.getInitialPitch() != null)
 			Configuration.setValue(AVKey.INITIAL_PITCH, theme.getInitialPitch());
+
+		if (theme.getVerticalExaggeration() != null)
+			Settings.get().setVerticalExaggeration(theme.getVerticalExaggeration());
 
 		WorldWind.getDataFileStore().addLocation("cache", false);
 
@@ -279,6 +287,24 @@ public class Application
 		{
 			sideBar = new SideBar(theme, splitPane);
 			splitPane.setLeftComponent(sideBar);
+		}
+		else
+		{
+			splitPane.setDividerSize(0);
+		}
+
+		//if the theme has some theme layers defined, and the ThemeLayersPanel has not been
+		//added, then we need to create a local LayerEnabler and enable the layers manually
+		if (!theme.getLayers().isEmpty() && !theme.hasThemeLayersPanel())
+		{
+			LayerEnabler enabler = new LayerEnabler();
+			enabler.setWwd(wwd);
+			List<ILayerNode> nodes = new ArrayList<ILayerNode>();
+			for (ThemeLayer layer : theme.getLayers())
+			{
+				nodes.add(LayerNode.createFromLayerDefinition(layer));
+			}
+			enabler.enable(nodes);
 		}
 
 		afterSettingsChange();
@@ -861,8 +887,15 @@ public class Application
 				&& Settings.get().getProjectionMode() == ProjectionMode.ASYMMETRIC_FRUSTUM)
 		{
 			layersPanel.turnOffAtmosphere();
+		}*/
+		for (ThemeHUD hud : theme.getHUDs())
+		{
+			if (hud instanceof WorldMapHUD)
+			{
+				((WorldMapHUD) hud).setPickEnabled(!(Settings.get().isStereoEnabled() && Settings
+						.get().isStereoCursor()));
+			}
 		}
-		map.setPickEnabled(!(Settings.get().isStereoEnabled() && Settings.get().isStereoCursor()));*/
 		enableMouseLayer();
 	}
 
@@ -878,10 +911,13 @@ public class Application
 
 	private void saveSplitLocation()
 	{
-		if (sideBar.isVisible())
-			Settings.get().setSplitLocation(splitPane.getDividerLocation());
-		else
-			Settings.get().setSplitLocation(sideBar.getSavedDividerLocation());
+		if (sideBar != null)
+		{
+			if (sideBar.isVisible())
+				Settings.get().setSplitLocation(splitPane.getDividerLocation());
+			else
+				Settings.get().setSplitLocation(sideBar.getSavedDividerLocation());
+		}
 	}
 
 	private void loadSplitLocation()

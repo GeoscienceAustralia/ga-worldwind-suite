@@ -35,4 +35,9 @@ public class WorldMapHUD extends AbstractThemeHUD
 	{
 		return Icons.world.getIcon();
 	}
+	
+	public void setPickEnabled(boolean pickable)
+	{
+		layer.setPickEnabled(pickable);
+	}
 }

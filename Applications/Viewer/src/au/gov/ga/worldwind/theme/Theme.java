@@ -22,9 +22,12 @@ public interface Theme extends Disposable
 	public List<ThemeHUD> getHUDs();
 	public List<ThemePanel> getPanels();
 	
+	public boolean hasThemeLayersPanel();
+	
 	public Double getInitialLatitude();
 	public Double getInitialLongitude();
 	public Double getInitialAltitude();
 	public Double getInitialHeading();
 	public Double getInitialPitch();
+	public Double getVerticalExaggeration();
 }

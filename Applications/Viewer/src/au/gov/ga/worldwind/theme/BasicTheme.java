@@ -5,6 +5,7 @@ import gov.nasa.worldwind.WorldWindow;
 import java.util.List;
 
 import au.gov.ga.worldwind.panels.dataset.IDataset;
+import au.gov.ga.worldwind.panels.layers.ThemeLayersPanel;
 
 public class BasicTheme implements Theme
 {
@@ -18,12 +19,13 @@ public class BasicTheme implements Theme
 	private List<ThemeLayer> layers;
 	private List<ThemeHUD> HUDs;
 	private List<ThemePanel> panels;
-	
+
 	private Double initialLatitude;
 	private Double initialLongitude;
 	private Double initialAltitude;
 	private Double initialHeading;
 	private Double initialPitch;
+	private Double verticalExaggeration;
 
 	public BasicTheme(String name)
 	{
@@ -87,7 +89,7 @@ public class BasicTheme implements Theme
 	{
 		this.menuBar = menuBar;
 	}
-	
+
 	@Override
 	public boolean hasToolBar()
 	{
@@ -197,5 +199,24 @@ public class BasicTheme implements Theme
 	public void setInitialPitch(Double initialPitch)
 	{
 		this.initialPitch = initialPitch;
+	}
+
+	public Double getVerticalExaggeration()
+	{
+		return verticalExaggeration;
+	}
+
+	public void setVerticalExaggeration(Double verticalExaggeration)
+	{
+		this.verticalExaggeration = verticalExaggeration;
+	}
+
+	@Override
+	public boolean hasThemeLayersPanel()
+	{
+		for (ThemePanel panel : getPanels())
+			if (panel instanceof ThemeLayersPanel)
+				return true;
+		return false;
 	}
 }

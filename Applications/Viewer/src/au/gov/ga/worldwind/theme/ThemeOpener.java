@@ -2,10 +2,8 @@ package au.gov.ga.worldwind.theme;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.JOptionPane;
-import javax.swing.SwingWorker;
 
 import au.gov.ga.worldwind.downloader.Downloader;
 import au.gov.ga.worldwind.downloader.RetrievalResult;
@@ -16,57 +14,45 @@ public class ThemeOpener
 	{
 		if (url == null)
 			throw new IllegalArgumentException("Theme URL cannot be null");
-		
+
 		//TODO create loading frame
 
-		SwingWorker<Theme, ?> worker = new SwingWorker<Theme, Object>()
+		final ThemeOpenDelegate innerDelegate = new ThemeOpenDelegate()
 		{
 			@Override
-			protected Theme doInBackground() throws Exception
+			public void opened(Theme theme)
 			{
-				RetrievalResult result = Downloader.downloadImmediatelyIfModified(url);
-				InputStream is = result.getAsInputStream();
-				Theme theme = ThemeFactory.createFromXML(is, url);
-				if (theme == null)
-					throw new Exception("Could not create theme from XML document");
-				return theme;
+				//TODO close loading frame
+				delegate.opened(theme);
 			}
+		};
 
+		Runnable runnable = new Runnable()
+		{
 			@Override
-			protected void done()
+			public void run()
 			{
-				Theme theme = null;
 				try
 				{
-					try
-					{
-						theme = get();
-					}
-					catch (InterruptedException e)
-					{
-						//ignore
-					}
-					catch (ExecutionException ee)
-					{
-						Throwable e = ee.getCause();
-						if (e == null)
-							e = ee;
-						throw e;
-					}
+					RetrievalResult result = Downloader.downloadImmediatelyIfModified(url);
+					InputStream is = result.getAsInputStream();
+					Theme theme = ThemeFactory.createFromXML(is, url);
+					if (theme == null)
+						throw new Exception("Could not create theme from XML document");
+					innerDelegate.opened(theme);
 				}
-				catch (Throwable e)
+				catch (Exception e)
 				{
 					JOptionPane.showMessageDialog(null, "Could not open theme " + url + ": "
 							+ e.getLocalizedMessage() + "\n\nUsing default theme", "Error",
 							JOptionPane.ERROR_MESSAGE);
-					openDefault(delegate);
+					openDefault(innerDelegate);
 				}
-
-				if (theme != null)
-					delegate.opened(theme);
 			}
 		};
-		worker.execute();
+		Thread thread = new Thread(runnable);
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	public static void openDefault(ThemeOpenDelegate delegate)

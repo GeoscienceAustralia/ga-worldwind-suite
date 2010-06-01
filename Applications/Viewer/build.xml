@@ -45,6 +45,8 @@
 		<delete dir="${build_dir}" />
 		<delete file="${webstart_dir}/${app_unsigned_jar}" />
 		<delete file="${webstart_dir}/${app_signed_jar}" />
+		<delete file="${webstart_dir}/${ww_unsigned_jar}" />
+		<delete file="${webstart_dir}/${ww_signed_jar}" />
 		<delete file="${executable_dir}/${executable_jar}" />
 		<delete file="${executable_dir}/${offline_jar}" />
 	</target>
