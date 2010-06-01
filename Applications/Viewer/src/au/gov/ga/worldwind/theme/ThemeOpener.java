@@ -34,7 +34,8 @@ public class ThemeOpener
 			{
 				try
 				{
-					RetrievalResult result = Downloader.downloadImmediatelyIfModified(url);
+					//RetrievalResult result = Downloader.downloadImmediatelyIfModified(url);
+					RetrievalResult result = Downloader.downloadImmediately(url, false);
 					InputStream is = result.getAsInputStream();
 					Theme theme = ThemeFactory.createFromXML(is, url);
 					if (theme == null)
@@ -51,7 +52,6 @@ public class ThemeOpener
 			}
 		};
 		Thread thread = new Thread(runnable);
-		thread.setDaemon(true);
 		thread.start();
 	}
 
