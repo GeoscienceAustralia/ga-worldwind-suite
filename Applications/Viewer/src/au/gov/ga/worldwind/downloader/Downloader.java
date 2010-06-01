@@ -8,8 +8,12 @@ import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.retrieve.URLRetriever;
 import gov.nasa.worldwind.util.WWIO;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +43,15 @@ public class Downloader
 	public static synchronized RetrievalResult downloadImmediately(final URL url,
 			final boolean cache) throws Exception
 	{
+		if (isJarProtocol(url))
+		{
+			RetrievalResult result = getResultFromJar(url);
+			if (result.getError() != null)
+				throw result.getError();
+			else if (result.hasData())
+				return result;
+		}
+
 		//if the URL is cached, return it directly without downloading
 		if (cache)
 		{
@@ -91,6 +104,14 @@ public class Downloader
 	public static synchronized RetrievalResult downloadImmediatelyIfModified(final URL url)
 			throws Exception
 	{
+		if (isJarProtocol(url))
+		{
+			RetrievalResult result = getResultFromJar(url);
+			if (result.getError() != null)
+				throw result.getError();
+			return result;
+		}
+
 		FileRetrievalResult cachedResult = getFromCache(url);
 		Long lastModified = null;
 		if (cachedResult != null && cachedResult.hasData())
@@ -146,6 +167,13 @@ public class Downloader
 	public static synchronized void download(final URL url, final RetrievalHandler downloadHandler,
 			final boolean cache)
 	{
+		if (isJarProtocol(url))
+		{
+			RetrievalResult result = getResultFromJar(url);
+			downloadHandler.handle(result);
+			return;
+		}
+
 		if (cache)
 		{
 			RetrievalResult result = getFromCache(url);
@@ -228,6 +256,13 @@ public class Downloader
 	private static synchronized void download(final URL url, final RetrievalHandler cacheHandler,
 			final RetrievalHandler downloadHandler, final boolean checkIfModified)
 	{
+		if (isJarProtocol(url))
+		{
+			RetrievalResult result = getResultFromJar(url);
+			downloadHandler.handle(result);
+			return;
+		}
+
 		FileRetrievalResult result = getFromCache(url);
 		Long lastModified = null;
 		if (result != null && result.hasData())
@@ -339,6 +374,66 @@ public class Downloader
 	{
 		retrieverCache.addRetriever(retriever, postProcessor);
 		service.runRetriever(retriever);
+	}
+
+	private static boolean isJarProtocol(URL url)
+	{
+		if (url == null)
+			return false;
+		return "jar".equalsIgnoreCase(url.getProtocol());
+	}
+
+	private static ByteBuffer getJarByteBuffer(URL url) throws IOException
+	{
+		if (url == null)
+			throw new NullPointerException("url is null");
+		if (!"jar".equalsIgnoreCase(url.getProtocol()))
+			throw new IllegalArgumentException("url is not using the 'jar' protocol");
+
+		InputStream is = null;
+		String external = url.toExternalForm();
+		int index = external.lastIndexOf('!');
+		if (index >= 0)
+		{
+			String resource = external.substring(index + 1);
+			try
+			{
+				is = Downloader.class.getResourceAsStream(resource);
+				System.out.println(resource + " = " + is);
+			}
+			catch (Exception e)
+			{
+				is = null;
+			}
+		}
+		if (is == null)
+			is = url.openStream();
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int read;
+		while ((read = is.read(buffer)) >= 0)
+		{
+			baos.write(buffer, 0, read);
+		}
+
+		ByteBuffer bb = ByteBuffer.wrap(baos.toByteArray());
+		return bb;
+	}
+
+	private static RetrievalResult getResultFromJar(URL url)
+	{
+		ByteBuffer bb = null;
+		Exception e = null;
+		try
+		{
+			bb = getJarByteBuffer(url);
+		}
+		catch (Exception ex)
+		{
+			e = ex;
+		}
+		return new ByteBufferRetrievalResult(url, bb, false, false, e);
 	}
 
 	private static class ImmediateRetrievalHandler implements RetrievalHandler
