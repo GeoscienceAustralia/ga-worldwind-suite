@@ -6,6 +6,7 @@ import gov.nasa.worldwind.WorldWindow;
 import java.util.List;
 
 import au.gov.ga.worldwind.panels.dataset.IDataset;
+import au.gov.ga.worldwind.panels.layers.LayersPanel;
 
 public interface Theme extends Disposable
 {
@@ -22,7 +23,9 @@ public interface Theme extends Disposable
 	public List<ThemeHUD> getHUDs();
 	public List<ThemePanel> getPanels();
 	
+	public boolean hasLayersPanel();
 	public boolean hasThemeLayersPanel();
+	public LayersPanel getLayersPanel();
 	
 	public Double getInitialLatitude();
 	public Double getInitialLongitude();

@@ -64,13 +64,16 @@ import nasa.worldwind.awt.WorldWindowStereoGLCanvas;
 import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import au.gov.ga.worldwind.components.HtmlViewer;
 import au.gov.ga.worldwind.layers.LayerFactory;
+import au.gov.ga.worldwind.layers.file.FileLayerCreator;
 import au.gov.ga.worldwind.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.panels.SideBar;
+import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.panels.layers.ExtendedCompoundElevationModel;
 import au.gov.ga.worldwind.panels.layers.ExtendedLayerList;
 import au.gov.ga.worldwind.panels.layers.ILayerNode;
 import au.gov.ga.worldwind.panels.layers.LayerEnabler;
 import au.gov.ga.worldwind.panels.layers.LayerNode;
+import au.gov.ga.worldwind.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.SettingsDialog;
@@ -93,8 +96,6 @@ import au.gov.ga.worldwind.util.Util;
 
 public class Application
 {
-	//public final static boolean LOCAL_LAYERS_ENABLED = true;
-
 	public final static boolean SANDPIT = true;
 
 	static
@@ -190,6 +191,8 @@ public class Application
 	private JToolBar toolBar;
 	private JSplitPane splitPane;
 
+	private BasicAction openLayerAction;
+	private BasicAction createLayerFromDirectoryAction;
 	private SelectableAction offlineAction;
 	private BasicAction screenshotAction;
 	private BasicAction exitAction;
@@ -309,20 +312,6 @@ public class Application
 
 		afterSettingsChange();
 
-		// init user layers
-		/*if (LOCAL_LAYERS_ENABLED)
-		{
-			LocalLayers.init(wwd);
-			layersPanel.updateLocalLayers();
-			LocalLayers.get().addChangeListener(new ChangeListener()
-			{
-				public void stateChanged(ChangeEvent e)
-				{
-					layersPanel.updateLocalLayers();
-				}
-			});
-		}*/
-
 		createActions();
 
 		if (theme.hasMenuBar())
@@ -356,6 +345,28 @@ public class Application
 
 	private void createActions()
 	{
+		openLayerAction = new BasicAction("Open layer", Icons.folder.getIcon());
+		openLayerAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				openLayer();
+			}
+		});
+
+		createLayerFromDirectoryAction =
+				new BasicAction("From tileset directory", "Create layer from tileset directory",
+						Icons.newfolder.getIcon());
+		createLayerFromDirectoryAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				createLayerFromDirectory();
+			}
+		});
+
 		offlineAction =
 				new SelectableAction("Work offline", Icons.offline.getIcon(), WorldWind
 						.isOfflineMode());
@@ -459,6 +470,28 @@ public class Application
 				new AboutDialog(frame);
 			}
 		});
+	}
+
+	private void openLayer()
+	{
+		LayersPanel panel = theme.getLayersPanel();
+		if (panel != null)
+			panel.openLayerFile();
+	}
+
+	private void createLayerFromDirectory()
+	{
+		LayersPanel panel = theme.getLayersPanel();
+		if (panel != null)
+		{
+			ILayerDefinition layer =
+					FileLayerCreator.createDefinition(frame, createLayerFromDirectoryAction
+							.getToolTipText(), panel.getIcon());
+			if (layer != null)
+			{
+				panel.addLayer(layer);
+			}
+		}
 	}
 
 	private void saveImage()
@@ -749,6 +782,12 @@ public class Application
 	{
 		JToolBar toolBar = new JToolBar();
 
+		if (theme.hasLayersPanel())
+		{
+			toolBar.add(openLayerAction);
+			toolBar.addSeparator();
+		}
+
 		toolBar.add(screenshotAction);
 
 		toolBar.addSeparator();
@@ -774,30 +813,25 @@ public class Application
 	{
 		JMenuBar menuBar = new JMenuBar();
 
-		JMenu menu;
+		JMenu menu, submenu;
 
 		menu = new JMenu("File");
 		menuBar.add(menu);
 
-		offlineAction.addToMenu(menu);
-
-		/*if (LOCAL_LAYERS_ENABLED)
+		if (theme.hasLayersPanel())
 		{
-			menuItem = new JMenuItem("Add local tileset...");
-			menu.add(menuItem);
-			menuItem.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e)
-				{
-					LocalLayerDefinition def = new LocalLayerDefinition();
-					def = LocalLayerEditor.editDefinition(frame, "New local tileset", def);
-					if (def != null)
-					{
-						LocalLayers.get().addLayer(def);
-					}
-				}
-			});
-		}*/
+			menu.add(openLayerAction);
+
+			submenu = new JMenu("Create layer");
+			submenu.setIcon(Icons.newfile.getIcon());
+			menu.add(submenu);
+
+			submenu.add(createLayerFromDirectoryAction);
+
+			menu.addSeparator();
+		}
+
+		offlineAction.addToMenu(menu);
 
 		menu.addSeparator();
 		menu.add(screenshotAction);

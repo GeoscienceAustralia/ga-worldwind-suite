@@ -50,6 +50,7 @@ public enum Icons
 	list("list.gif"),
 	monitor("monitor.gif"),
 	navigation("navigation.png"),
+	newfile("newfile.gif"),
 	newfolder("newfolder.gif"),
 	offline("offline.gif"),
 	overview("overview.gif"),

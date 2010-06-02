@@ -12,7 +12,7 @@ import javax.swing.Icon;
 public class BasicAction extends AbstractAction
 {
 	private List<ActionListener> listeners = new ArrayList<ActionListener>();
-	
+
 	public BasicAction(String name, Icon icon)
 	{
 		this(name, name, icon);
@@ -39,6 +39,16 @@ public class BasicAction extends AbstractAction
 	public void removeActionListener(ActionListener listener)
 	{
 		listeners.remove(listener);
+	}
+
+	public String getName()
+	{
+		return (String) getValue(Action.NAME);
+	}
+
+	public void setName(String name)
+	{
+		putValue(Action.NAME, name);
 	}
 
 	public Icon getIcon()

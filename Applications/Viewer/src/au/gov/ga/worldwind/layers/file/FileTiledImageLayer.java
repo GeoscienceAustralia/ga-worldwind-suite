@@ -10,8 +10,10 @@ import gov.nasa.worldwind.util.ImageUtil;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWIO;
+import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -24,7 +26,9 @@ import javax.media.opengl.GL;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.util.AVKeyExtra;
 import au.gov.ga.worldwind.util.Util;
+import au.gov.ga.worldwind.util.XMLUtil;
 
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
@@ -63,11 +67,27 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 		if (dataCacheName == null)
 			dataCacheName = "";
 		else
-			dataCacheName = "_";
+			dataCacheName += "_";
 		dataCacheName += Util.randomString(8);
 		list.setValue(AVKey.DATA_CACHE_NAME, dataCacheName);
 
+		WWXML.checkAndSetColorParam(domElement, params, AVKeyExtra.TRANSPARENT_COLOR,
+				"TransparentColor", null);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyExtra.TRANSPARENT_FUZZ,
+				"TransparentFuzz", null);
+
 		return list;
+	}
+
+	public static void createTiledImageLayerElements(Element context, AVList params)
+	{
+		Color color = (Color) params.getValue(AVKeyExtra.TRANSPARENT_COLOR);
+		if (color != null)
+			XMLUtil.appendColor(context, "TransparentColor", color);
+
+		Double fuzz = (Double) params.getValue(AVKeyExtra.TRANSPARENT_FUZZ);
+		if (fuzz != null)
+			WWXML.appendDouble(context, "TransparentFuzz", fuzz);
 	}
 
 	protected void getFileParams(AVList params)
@@ -90,15 +110,12 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 		else if (service != null && service.length() > 0)
 			dataset = service + "/" + dataset;
 
-		if (dataset == null || dataset.length() <= 1)
-			return null;
+		if (dataset == null)
+			dataset = "";
 
 		if (mask)
 		{
-			int lastIndexOfSlash = dataset.lastIndexOf('/');
-			if (lastIndexOfSlash < 0)
-				lastIndexOfSlash = dataset.lastIndexOf('\\');
-
+			int lastIndexOfSlash = Math.max(dataset.lastIndexOf('/'), dataset.lastIndexOf('\\'));
 			if (lastIndexOfSlash < 0)
 				dataset = "";
 			else
@@ -130,6 +147,10 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 					ext = "png";
 				else if (format.contains("dds"))
 					ext = "dds";
+				else if (format.contains("bmp"))
+					ext = "bmp";
+				else if (format.contains("gif"))
+					ext = "gif";
 			}
 		}
 
@@ -240,16 +261,23 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 		return true;
 	}
 
-	private TextureData readTexture(TextureTile tile, File file, File mask,
+	protected TextureData readTexture(TextureTile tile, File file, File mask,
 			boolean compressTextures, boolean useMipMaps)
 	{
 		try
 		{
 			//are there any transparent colors defined?
-			int[] colors = null;
+			int[] transparencyColors = null;
+			Color transparentColor = null;
+			Double transparentFuzz = null;
 			if (tile.getLevel().getParams() != null)
 			{
-				colors = (int[]) tile.getLevel().getParams().getValue(AVKey.TRANSPARENCY_COLORS);
+				transparencyColors =
+						(int[]) tile.getLevel().getParams().getValue(AVKey.TRANSPARENCY_COLORS);
+				transparentColor =
+						(Color) tile.getLevel().getParams().getValue(AVKeyExtra.TRANSPARENT_COLOR);
+				transparentFuzz =
+						(Double) tile.getLevel().getParams().getValue(AVKeyExtra.TRANSPARENT_FUZZ);
 			}
 
 			//extract the file extension from the filename
@@ -264,16 +292,28 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 			boolean useDDS = format == null ? false : format.toLowerCase().contains("dds");
 
 			//if we don't need to do any processing, then load the file directly
-			if (isDDS || (mask == null && colors == null && !useDDS))
+			if (isDDS
+					|| (!useDDS && mask == null && transparencyColors == null && transparentColor == null))
 			{
 				return TextureIO.newTextureData(file, useMipMaps, ext);
 			}
 
 			//read the file into an image
 			BufferedImage image = ImageIO.read(file);
-			if (colors != null)
+
+			//if the standard transparency colors have been defined, map them
+			if (transparencyColors != null)
 			{
-				image = ImageUtil.mapTransparencyColors(image, colors);
+				image = ImageUtil.mapTransparencyColors(image, transparencyColors);
+			}
+
+			//if the custom fuzzy transparency color has been defined, map it
+			if (transparentColor != null)
+			{
+				if (transparentFuzz == null)
+					transparentFuzz = 0d;
+
+				image = mapFuzzyTransparency(image, transparentColor, transparentFuzz);
 			}
 
 			//if the texture is masked, read the mask image, and then composite them together
@@ -317,6 +357,37 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 		super.setBlendingFunction(dc);
 		GL gl = dc.getGL();
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	protected BufferedImage mapFuzzyTransparency(BufferedImage image, Color color,
+			double fuzzPercent)
+	{
+		int fuzz = Math.max(0, (int) Math.round(fuzzPercent * 255d));
+		BufferedImage trans =
+				new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+		int cr = color.getRed();
+		int cg = color.getGreen();
+		int cb = color.getBlue();
+
+		for (int x = 0; x < image.getWidth(); x++)
+		{
+			for (int y = 0; y < image.getHeight(); y++)
+			{
+				int rgb = image.getRGB(x, y);
+				int sr = (rgb >> 16) & 0xff;
+				int sg = (rgb >> 8) & 0xff;
+				int sb = (rgb >> 0) & 0xff;
+				if (cr - fuzz <= sr && sr <= cr + fuzz && cg - fuzz <= sg && sg <= cg + fuzz
+						&& cb - fuzz <= sb && sb <= cb + fuzz)
+				{
+					rgb = (rgb & 0xffffff);
+				}
+				trans.setRGB(x, y, rgb);
+			}
+		}
+
+		return trans;
 	}
 
 	protected static class RequestTask implements Runnable, Comparable<RequestTask>

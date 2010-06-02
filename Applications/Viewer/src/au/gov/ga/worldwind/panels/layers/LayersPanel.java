@@ -6,12 +6,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import javax.swing.DropMode;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JToolBar;
@@ -21,6 +23,7 @@ import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.components.lazytree.ILazyTreeObject;
@@ -30,6 +33,7 @@ import au.gov.ga.worldwind.panels.dataset.IData;
 import au.gov.ga.worldwind.panels.dataset.IDataset;
 import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.panels.dataset.ILazyDataset;
+import au.gov.ga.worldwind.panels.dataset.LayerDefinition;
 import au.gov.ga.worldwind.panels.layers.drag.NodeTransferHandler;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.theme.ThemePanel;
@@ -45,10 +49,12 @@ public class LayersPanel extends AbstractLayersPanel
 
 	private Window window;
 
-	private BasicAction newLayerAction, renameAction, editAction, deleteAction, newFolderAction,
-			expandAllAction, collapseAllAction;
+	private BasicAction newLayerAction, openLayerAction, renameAction, editAction, deleteAction,
+			newFolderAction, expandAllAction, collapseAllAction;
 
 	private DatasetPanel datasetPanel;
+
+	private JFileChooser chooser;
 
 	public LayersPanel()
 	{
@@ -100,7 +106,7 @@ public class LayersPanel extends AbstractLayersPanel
 		super.createActions();
 
 		newFolderAction =
-				new BasicAction("New Folder", "Create New Folder", Icons.newfolder.getIcon());
+				new BasicAction("New folder", "Create new folder", Icons.newfolder.getIcon());
 		newFolderAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -110,13 +116,23 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
-		newLayerAction = new BasicAction("New Layer", "Add New Layer", Icons.add.getIcon());
+		newLayerAction = new BasicAction("New layer", "Add new layer", Icons.add.getIcon());
 		newLayerAction.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				newLayer();
+			}
+		});
+
+		openLayerAction = new BasicAction("Open layer", Icons.folder.getIcon());
+		openLayerAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				openLayerFile();
 			}
 		});
 
@@ -177,6 +193,7 @@ public class LayersPanel extends AbstractLayersPanel
 		toolBar.add(newFolderAction);
 		toolBar.addSeparator();
 		toolBar.add(newLayerAction);
+		toolBar.add(openLayerAction);
 		toolBar.add(renameAction);
 		toolBar.add(editAction);
 		toolBar.add(deleteAction);
@@ -191,7 +208,6 @@ public class LayersPanel extends AbstractLayersPanel
 		final JPopupMenu popupMenu = new JPopupMenu();
 		popupMenu.add(newFolderAction);
 		popupMenu.addSeparator();
-		popupMenu.add(newLayerAction);
 		popupMenu.add(renameAction);
 		popupMenu.add(editAction);
 		popupMenu.add(deleteAction);
@@ -511,6 +527,85 @@ public class LayersPanel extends AbstractLayersPanel
 		for (int i = 0; i < tree.getRowCount(); i++)
 		{
 			tree.expandRow(i);
+		}
+	}
+
+	private void createFileChooserIfRequired()
+	{
+		if (chooser == null)
+		{
+			chooser = new JFileChooser();
+			chooser.setMultiSelectionEnabled(true);
+			chooser.setDialogTitle("Open layer");
+			chooser.setFileFilter(new LayerDefinitionFileFilter());
+		}
+	}
+
+	public void openLayerFile()
+	{
+		createFileChooserIfRequired();
+
+		int result = chooser.showOpenDialog(this);
+		if (result == JFileChooser.APPROVE_OPTION)
+		{
+			try
+			{
+				File[] files = chooser.getSelectedFiles();
+				for (File file : files)
+				{
+					URL url = file.toURI().toURL();
+					ILayerDefinition definition =
+							new LayerDefinition(file.getName(), url, null, Icons.file.getURL(),
+									true, false);
+					addLayer(definition);
+				}
+			}
+			catch (Exception e)
+			{
+				JOptionPane.showMessageDialog(this, "Error adding layer file: " + e, "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	public void addLayer(ILayerDefinition definition)
+	{
+		INode parent = null;
+		int index = -1;
+		/*TreePath p = tree.getSelectionPath();
+		if (p != null && isOn())
+		{
+			Object o = p.getLastPathComponent();
+			if (o instanceof INode)
+			{
+				parent = (INode) o;
+				index = parent.getChildCount();
+			}
+		}*/
+
+		INode node = LayerNode.createFromLayerDefinition(definition);
+		if (parent == null)
+			getModel().addToRoot(node, true);
+		else
+			getModel().insertNodeInto(node, parent, index, true);
+
+		tree.getUI().relayout();
+	}
+
+	public static class LayerDefinitionFileFilter extends FileFilter
+	{
+		@Override
+		public String getDescription()
+		{
+			return "Layer definition file (*.xml)";
+		}
+
+		@Override
+		public boolean accept(File f)
+		{
+			if (f.isDirectory())
+				return true;
+			return f.getName().toLowerCase().endsWith(".xml");
 		}
 	}
 }

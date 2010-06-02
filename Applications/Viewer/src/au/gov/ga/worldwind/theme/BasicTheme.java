@@ -5,6 +5,7 @@ import gov.nasa.worldwind.WorldWindow;
 import java.util.List;
 
 import au.gov.ga.worldwind.panels.dataset.IDataset;
+import au.gov.ga.worldwind.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.panels.layers.ThemeLayersPanel;
 
 public class BasicTheme implements Theme
@@ -212,11 +213,29 @@ public class BasicTheme implements Theme
 	}
 
 	@Override
+	public boolean hasLayersPanel()
+	{
+		for (ThemePanel panel : getPanels())
+			if (panel instanceof LayersPanel)
+				return true;
+		return false;
+	}
+
+	@Override
 	public boolean hasThemeLayersPanel()
 	{
 		for (ThemePanel panel : getPanels())
 			if (panel instanceof ThemeLayersPanel)
 				return true;
 		return false;
+	}
+
+	@Override
+	public LayersPanel getLayersPanel()
+	{
+		for (ThemePanel panel : getPanels())
+			if (panel instanceof LayersPanel)
+				return (LayersPanel) panel;
+		return null;
 	}
 }
