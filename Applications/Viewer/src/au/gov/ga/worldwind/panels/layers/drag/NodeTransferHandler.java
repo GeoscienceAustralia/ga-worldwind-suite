@@ -5,6 +5,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JComponent;
@@ -59,18 +60,35 @@ public class NodeTransferHandler extends TransferHandler
 		TreeTransferable t = null;
 		if (source == layersTree)
 		{
-			TreePath dragPath = layersTree.getSelectionPath();
-			if (dragPath != null)
+			TreePath[] dragPaths = layersTree.getSelectionPaths();
+			if (dragPaths != null)
 			{
-				t = new TreeTransferable(layersTree, layersTree.getSelectionPaths());
+				t = new TreeTransferable(layersTree, dragPaths);
 			}
 		}
 		else if (source == datasetTree)
 		{
-			TreePath dragPath = datasetTree.getSelectionPath();
-			if (dragPath != null)
+			TreePath[] dragPaths = datasetTree.getSelectionPaths();
+			if (dragPaths != null)
 			{
-				t = new TreeTransferable(datasetTree, datasetTree.getSelectionPaths());
+				List<TreePath> paths = new ArrayList<TreePath>();
+
+				for (TreePath dragPath : dragPaths)
+				{
+					Object o = dragPath.getLastPathComponent();
+					if (o != null && o instanceof DefaultMutableTreeNode)
+					{
+						Object uo = ((DefaultMutableTreeNode) o).getUserObject();
+						if (uo != null && uo instanceof ILayerDefinition)
+							paths.add(dragPath);
+					}
+				}
+
+				if (!paths.isEmpty())
+				{
+					TreePath[] p = paths.toArray(new TreePath[paths.size()]);
+					t = new TreeTransferable(datasetTree, p);
+				}
 			}
 		}
 		return t;
