@@ -18,6 +18,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.panels.dataset.IData;
+import au.gov.ga.worldwind.panels.dataset.IDataset;
 import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 
 public class LayerTreeModel implements TreeModel, TreeExpansionListener
@@ -124,8 +125,12 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 		//add any parents of this layer that don't already exist in the tree
 		INode currentParent = getRoot();
+		IData directParent = null;
 		if (parents != null)
 		{
+			if (!parents.isEmpty())
+				directParent = parents.get(parents.size() - 1);
+
 			//if the list contains any 'base' IData's, then start from that index
 			int startIndex = 0;
 			for (int i = parents.size() - 1; i >= 0; i--)
@@ -164,8 +169,18 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		expandPath.add(currentParent);
 		expandPath.add(layerNode);
 
+		//attempt to insert the layer into the same position as it is defined in the dataset
+		int index = currentParent.getChildCount();
+		if (directParent != null && directParent instanceof IDataset)
+		{
+			IDataset dataset = (IDataset) directParent;
+			int insertionIndex = findInsertionIndex(layer, dataset, currentParent);
+			if (insertionIndex >= 0)
+				index = insertionIndex;
+		}
+
 		//add the layer
-		insertNodeInto(layerNode, currentParent, currentParent.getChildCount(), true);
+		insertNodeInto(layerNode, currentParent, index, true);
 		TreePath expand = new TreePath(expandPath.toArray());
 
 		//relayout the tree, and expand to make the layer node visible
@@ -173,7 +188,39 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		tree.scrollPathToVisible(expand);
 	}
 
-	public boolean sameFolder(IData data, INode node)
+	protected int findInsertionIndex(ILayerDefinition layer, IDataset directParent,
+			INode currentParent)
+	{
+		int indexOfChild = directParent.getLayers().indexOf(layer);
+		if (indexOfChild >= 0)
+		{
+			for (int i = indexOfChild - 1; i >= 0; i--)
+			{
+				ILayerDefinition l = directParent.getLayers().get(i);
+				int j = indexOfLayerName(l.getName(), currentParent);
+				if (j >= 0)
+					return j + 1;
+			}
+			for (int i = indexOfChild + 1; i < directParent.getLayers().size(); i++)
+			{
+				ILayerDefinition l = directParent.getLayers().get(i);
+				int j = indexOfLayerName(l.getName(), currentParent);
+				if (j >= 0)
+					return j;
+			}
+		}
+		return -1;
+	}
+
+	protected int indexOfLayerName(String layerName, INode parent)
+	{
+		for (int i = 0; i < parent.getChildCount(); i++)
+			if (layerName.equalsIgnoreCase(parent.getChild(i).getName()))
+				return i;
+		return -1;
+	}
+
+	protected boolean sameFolder(IData data, INode node)
 	{
 		return data.getName() == node.getName()
 				|| (data.getName() != null && data.getName().equalsIgnoreCase(node.getName()));
