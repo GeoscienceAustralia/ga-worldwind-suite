@@ -61,7 +61,7 @@
 				<patternset refid="manifest.exclude" />
 			</zipfileset>
 			<manifest>
-				<attribute name="Main-Class" value="tiler.Executable" />
+				<attribute name="Main-Class" value="au.gov.ga.worldwind.tiler.application.Executable" />
 
 			</manifest>
 		</jar>
