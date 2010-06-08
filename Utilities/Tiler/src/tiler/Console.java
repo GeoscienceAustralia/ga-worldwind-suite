@@ -26,6 +26,7 @@ import util.NullableNumberArray;
 import util.NumberArray;
 import util.ProgressReporter;
 import util.Sector;
+import util.Util;
 
 public class Console
 {
@@ -226,7 +227,7 @@ public class Console
 			Dataset dataset = GDALUtil.open(input);
 			Sector sector = GDALUtil.getSector(dataset);
 			if (levels == null)
-				levels = GDALUtil.levelCount(dataset, lzts, sector, tilesize);
+				levels = Util.levelCount(dataset, lzts, sector, tilesize);
 			int level = levels - 1;
 			int bandCount = dataset.getRasterCount();
 			if (addAlpha && bandCount == 3)

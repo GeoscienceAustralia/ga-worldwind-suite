@@ -96,6 +96,7 @@ import util.Prefs;
 import util.ProgressReporterImpl;
 import util.Sector;
 import util.TilerException;
+import util.Util;
 
 public class Application implements UncaughtExceptionHandler
 {
@@ -2231,7 +2232,7 @@ public class Application implements UncaughtExceptionHandler
 				{
 					if (gdalRadio.isSelected())
 					{
-						levels = GDALUtil.levelCount(dataset, lzts, sector, tilesize);
+						levels = Util.levelCount(dataset, lzts, sector, tilesize);
 					}
 					else
 					{

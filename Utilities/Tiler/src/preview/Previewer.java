@@ -1,7 +1,6 @@
 package preview;
 
 import gdal.GDALTile;
-import gdal.GDALUtil;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -33,6 +32,7 @@ import javax.swing.JFrame;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 
+import util.Util;
 import util.FileFilters.DirectoryFileFilter;
 
 public class Previewer extends JFrame
@@ -287,9 +287,9 @@ public class Previewer extends JFrame
 					int Y = y + ypos;
 					labels[index] = X + "," + Y;
 
-					File rowDir = new File(levelDir, GDALUtil.paddedInt(Y, 4));
-					File file = new File(rowDir, GDALUtil.paddedInt(Y, 4) + "_"
-							+ GDALUtil.paddedInt(X, 4) + "." + extension);
+					File rowDir = new File(levelDir, Util.paddedInt(Y, 4));
+					File file = new File(rowDir, Util.paddedInt(Y, 4) + "_"
+							+ Util.paddedInt(X, 4) + "." + extension);
 					images[index] = null;
 					if (file.exists())
 					{

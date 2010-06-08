@@ -9,8 +9,7 @@ public class Sector
 	private final double maxLatitude;
 	private final double maxLongitude;
 
-	public Sector(double minLatitude, double minLongitude, double maxLatitude,
-			double maxLongitude)
+	public Sector(double minLatitude, double minLongitude, double maxLatitude, double maxLongitude)
 	{
 		this.minLatitude = minLatitude;
 		this.minLongitude = minLongitude;
@@ -48,10 +47,26 @@ public class Sector
 		return maxLongitude - minLongitude;
 	}
 
+	public double getCenterLatitude()
+	{
+		return minLatitude + getDeltaLatitude() / 2d;
+	}
+
+	public double getCenterLongitude()
+	{
+		return minLongitude + getDeltaLongitude() / 2d;
+	}
+
+	public boolean containsPoint(double latitude, double longitude)
+	{
+		return getMinLatitude() <= latitude && latitude <= getMaxLatitude()
+				&& getMinLongitude() <= longitude && longitude <= getMaxLongitude();
+	}
+
 	@Override
 	public String toString()
 	{
-		return "(" + minLatitude + "," + minLongitude + "," + maxLatitude + ","
-				+ maxLongitude + ")";
+		return "(" + minLatitude + "," + minLongitude + "," + maxLatitude + "," + maxLongitude
+				+ ")";
 	}
 }

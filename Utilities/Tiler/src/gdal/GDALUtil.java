@@ -130,56 +130,6 @@ public class GDALUtil
 		return new Sector(minlat, minlon, maxlat, maxlon);
 	}
 
-	public static int levelCount(Dataset dataset, double lztd, Sector sector,
-			int tilesize)
-	{
-		double width = dataset.getRasterXSize();
-		double height = dataset.getRasterYSize();
-		double lonPixels = sector.getDeltaLongitude() / width;
-		double latPixels = sector.getDeltaLatitude() / height;
-		double texelSize = Math.min(latPixels, lonPixels);
-		int level = (int) Math.ceil(Math.log10(texelSize * tilesize / lztd)
-				/ Math.log10(0.5)) + 1;
-		return Math.max(level, 1);
-	}
-
-	public static int tileCount(Sector sector, int level, double lztsd)
-	{
-		int minX = GDALUtil.getTileX(sector.getMinLongitude() + 1e-10, level,
-				lztsd);
-		int maxX = GDALUtil.getTileX(sector.getMaxLongitude() - 1e-10, level,
-				lztsd);
-		int minY = GDALUtil.getTileY(sector.getMinLatitude() + 1e-10, level,
-				lztsd);
-		int maxY = GDALUtil.getTileY(sector.getMaxLatitude() - 1e-10, level,
-				lztsd);
-		return (maxX - minX + 1) * (maxY - minY + 1);
-	}
-
-	public static int getTileX(double longitude, int level, double lztsd)
-	{
-		double layerpow = Math.pow(0.5, level);
-		double X = (longitude + 180) / (lztsd * layerpow);
-		return (int) X;
-	}
-
-	public static int getTileY(double latitude, int level, double lztsd)
-	{
-		double layerpow = Math.pow(0.5, level);
-		double Y = (latitude + 90) / (lztsd * layerpow);
-		return (int) Y;
-	}
-
-	public static String paddedInt(int value, int charcount)
-	{
-		String str = String.valueOf(value);
-		while (str.length() < charcount)
-		{
-			str = "0" + str;
-		}
-		return str;
-	}
-
 	public static String getInfoText(Dataset dataset, Sector sector)
 	{
 		int width = dataset.getRasterXSize();
@@ -252,7 +202,7 @@ public class GDALUtil
 
 		for (int i = overviews ? 0 : levels - 1; i < levels; i++)
 		{
-			tileCount[i] = GDALUtil.tileCount(sector, i, lzts);
+			tileCount[i] = Util.tileCount(sector, i, lzts);
 			totalCount += tileCount[i];
 		}
 

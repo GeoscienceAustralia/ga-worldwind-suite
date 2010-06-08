@@ -1,7 +1,6 @@
 package tiler;
 
 import gdal.GDALTile;
-import gdal.GDALUtil;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
@@ -37,6 +36,7 @@ import util.FileUtil;
 import util.NullableNumberArray;
 import util.ProgressReporter;
 import util.Sector;
+import util.Util;
 import util.FileFilters.DirectoryFileFilter;
 import util.FileFilters.ExtensionFileFilter;
 
@@ -99,7 +99,7 @@ public class Overviewer
 			int size = 0;
 			for (int i = 0; i < maxlevel; i++)
 			{
-				size += GDALUtil.tileCount(sector, i, lzts);
+				size += Util.tileCount(sector, i, lzts);
 			}
 
 			for (int level = maxlevel; level > 0; level--)

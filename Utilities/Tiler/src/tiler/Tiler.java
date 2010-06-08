@@ -2,7 +2,6 @@ package tiler;
 
 import gdal.GDALTile;
 import gdal.GDALTileParameters;
-import gdal.GDALUtil;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -23,6 +22,7 @@ import util.NullableNumberArray;
 import util.NumberArray;
 import util.ProgressReporter;
 import util.Sector;
+import util.Util;
 
 public class Tiler
 {
@@ -73,10 +73,10 @@ public class Tiler
 		String outputExt = type == TilingType.Elevations ? "bil" : imageFormat;
 
 		double tilesizedegrees = Math.pow(0.5, level) * lzts;
-		int minX = GDALUtil.getTileX(sector.getMinLongitude() + 1e-10, level, lzts);
-		int maxX = GDALUtil.getTileX(sector.getMaxLongitude() - 1e-10, level, lzts);
-		int minY = GDALUtil.getTileY(sector.getMinLatitude() + 1e-10, level, lzts);
-		int maxY = GDALUtil.getTileY(sector.getMaxLatitude() - 1e-10, level, lzts);
+		int minX = Util.getTileX(sector.getMinLongitude() + 1e-10, level, lzts);
+		int maxX = Util.getTileX(sector.getMaxLongitude() - 1e-10, level, lzts);
+		int minY = Util.getTileY(sector.getMinLatitude() + 1e-10, level, lzts);
+		int maxY = Util.getTileY(sector.getMaxLatitude() - 1e-10, level, lzts);
 
 		int size = (maxX - minX + 1) * (maxY - minY + 1);
 		int count = 0;
@@ -86,7 +86,7 @@ public class Tiler
 				break;
 
 			File rowDir = new File(outputDirectory, String.valueOf(level));
-			rowDir = new File(rowDir, GDALUtil.paddedInt(Y, 4));
+			rowDir = new File(rowDir, Util.paddedInt(Y, 4));
 			if (!rowDir.exists())
 			{
 				rowDir.mkdirs();
@@ -112,7 +112,7 @@ public class Tiler
 				Sector s = new Sector(lat1, lon1, lat2, lon2);
 
 				final File dst =
-						new File(rowDir, GDALUtil.paddedInt(Y, 4) + "_" + GDALUtil.paddedInt(X, 4)
+						new File(rowDir, Util.paddedInt(Y, 4) + "_" + Util.paddedInt(X, 4)
 								+ "." + outputExt);
 				if (dst.exists())
 				{
