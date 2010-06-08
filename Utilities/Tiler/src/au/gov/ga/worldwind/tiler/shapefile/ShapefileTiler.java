@@ -13,10 +13,7 @@ import gistoolkit.features.Polygon;
 import gistoolkit.features.Record;
 import gistoolkit.features.Shape;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -29,9 +26,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.imageio.ImageIO;
-
-import au.gov.ga.worldwind.tiler.shapefile.ShapefileTile.TilePoints;
 import au.gov.ga.worldwind.tiler.util.MultiMap;
 import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.Util;
@@ -200,7 +194,8 @@ public class ShapefileTiler
 		}
 	}
 
-	public static void saveShapefileZip(ShapefileTile tile, File file, boolean polygon) throws IOException
+	public static void saveShapefileZip(ShapefileTile tile, File file, boolean polygon)
+			throws IOException
 	{
 		if (file.exists())
 		{
@@ -280,8 +275,8 @@ public class ShapefileTiler
 		}
 	}
 
-	public static int addMultiPolygon(int shapeId, MultiPolygon polygon, ShapefileTile[] tiles, int level,
-			double lzts, java.awt.Point min, Dimension size)
+	public static int addMultiPolygon(int shapeId, MultiPolygon polygon, ShapefileTile[] tiles,
+			int level, double lzts, java.awt.Point min, Dimension size)
 	{
 		for (Polygon p : polygon.getPolygons())
 		{
@@ -320,8 +315,8 @@ public class ShapefileTiler
 		return shapeId;
 	}
 
-	public static int addLineString(int shapeId, LineString lineString, ShapefileTile[] tiles, int level,
-			double lzts, java.awt.Point min, Dimension size)
+	public static int addLineString(int shapeId, LineString lineString, ShapefileTile[] tiles,
+			int level, double lzts, java.awt.Point min, Dimension size)
 	{
 		return addPoints(shapeId, lineString.getXCoordinates(), lineString.getYCoordinates(),
 				false, false, tiles, level, lzts, min, size);
@@ -461,73 +456,6 @@ public class ShapefileTiler
 						maxy = Math.max(maxy, tile.row);
 					}
 
-
-
-					BufferedImage image = null;
-					Graphics2D g = null;
-					File output = new File("C:/WINNT/Profiles/u97852/Desktop/GSHHS_shp/test.bmp");
-					int sz = 100;
-					if (!output.exists())
-					{
-						image =
-								new BufferedImage((maxx - minx + 1) * sz + 1, (maxy - miny + 1)
-										* sz + 1, BufferedImage.TYPE_INT_RGB);
-						g = image.createGraphics();
-						g.setColor(Color.white);
-						g.fillRect(0, 0, image.getWidth(), image.getHeight());
-						ShapefileTile lTile = null;
-						for (ShapefileTile tile : tilesAffected)
-						{
-							g.setColor(Color.black);
-							g.drawRect((tile.col - minx) * sz + 2, (tile.row - miny) * sz + 2,
-									sz - 4, sz - 4);
-
-							for (TilePoints points : tile.points)
-							{
-								int lastx = -1, lasty = -1;
-								for (Point p : points.points)
-								{
-									int x =
-											(int) (((p.x - tile.sector.getMinLongitude()) / tile.sector
-													.getDeltaLongitude()) * sz)
-													+ (tile.col - minx) * sz;
-									int y =
-											(int) (((p.y - tile.sector.getMinLatitude()) / tile.sector
-													.getDeltaLatitude()) * sz)
-													+ (tile.row - miny) * sz;
-									if (lastx > 0)
-									{
-										g.drawLine(lastx, lasty, x, y);
-									}
-									lastx = x;
-									lasty = y;
-								}
-							}
-
-							if (lTile != null)
-							{
-								g.setColor(Color.green);
-								int minrow = Math.min(tile.row, lTile.row);
-								int maxrow = Math.max(tile.row, lTile.row);
-								int mincol = Math.min(tile.col, lTile.col);
-								int maxcol = Math.max(tile.col, lTile.col);
-								if (minrow != maxrow)
-								{
-									g.fillRect((mincol - minx) * sz + sz / 2 - sz / 20, (minrow
-											- miny + 1)
-											* sz - sz / 20, sz / 10, sz / 10);
-								}
-								if (mincol != maxcol)
-								{
-									g.fillRect((mincol - minx + 1) * sz - sz / 20, (minrow - miny)
-											* sz + sz / 2 - sz / 20, sz / 10, sz / 10);
-								}
-							}
-
-							lTile = tile;
-						}
-					}
-
 					//create a map of tiles affected for efficient querying
 					MultiMap<Integer, Integer> intersectionIndices =
 							new MultiMap<Integer, Integer>();
@@ -617,37 +545,8 @@ public class ShapefileTiler
 									//crossings is odd, so fill in tile
 									ShapefileTile tile = tiles[index];
 									tile.fillSector();
-									//System.out.println(tile.row + "," + tile.col + " @ " + tile.level);
-
-									if (g != null)
-									{
-										g.setColor(Color.black);
-										g.fillRect((tile.col - minx) * sz + sz / 4,
-												(tile.row - miny) * sz + sz / 4, sz / 2, sz / 2);
-									}
 								}
 							}
-
-							if (g != null)
-							{
-								/*HSLColor c = new HSLColor(crossings * 60, 100, 50);
-								g.setColor(c.getRGB());*/
-								g.drawRect((x - minx) * sz + sz / 4, (y - miny) * sz + sz / 4,
-										sz / 2, sz / 2);
-							}
-						}
-					}
-
-					if (g != null)
-					{
-						g.dispose();
-						try
-						{
-							ImageIO.write(image, "bmp", output);
-						}
-						catch (IOException e)
-						{
-							e.printStackTrace();
 						}
 					}
 				}
