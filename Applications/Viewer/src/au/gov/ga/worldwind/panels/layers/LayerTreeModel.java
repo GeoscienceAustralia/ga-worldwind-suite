@@ -194,19 +194,19 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		int indexOfChild = directParent.getLayers().indexOf(layer);
 		if (indexOfChild >= 0)
 		{
-			for (int i = indexOfChild - 1; i >= 0; i--)
-			{
-				ILayerDefinition l = directParent.getLayers().get(i);
-				int j = indexOfLayerName(l.getName(), currentParent);
-				if (j >= 0)
-					return j + 1;
-			}
 			for (int i = indexOfChild + 1; i < directParent.getLayers().size(); i++)
 			{
 				ILayerDefinition l = directParent.getLayers().get(i);
 				int j = indexOfLayerName(l.getName(), currentParent);
 				if (j >= 0)
 					return j;
+			}
+			for (int i = indexOfChild - 1; i >= 0; i--)
+			{
+				ILayerDefinition l = directParent.getLayers().get(i);
+				int j = indexOfLayerName(l.getName(), currentParent);
+				if (j >= 0)
+					return j + 1;
 			}
 		}
 		return -1;

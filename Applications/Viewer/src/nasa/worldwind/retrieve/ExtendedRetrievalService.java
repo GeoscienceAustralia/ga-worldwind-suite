@@ -666,7 +666,7 @@ public final class ExtendedRetrievalService extends WWObjectImpl
 		return null;
 	}
 
-	public class SectorPolyline extends Polyline
+	public static class SectorPolyline extends Polyline
 	{
 		public SectorPolyline(Sector sector)
 		{

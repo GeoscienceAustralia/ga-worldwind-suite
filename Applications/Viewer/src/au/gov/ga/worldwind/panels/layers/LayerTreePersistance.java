@@ -87,7 +87,7 @@ public class LayerTreePersistance
 			INode child = root.getChild(i);
 			saveNodeToElement(document, element, child);
 		}
-		XMLUtil.saveDocumentToFile(document, output.getAbsolutePath());
+		XMLUtil.saveDocumentToFormattedFile(document, output.getAbsolutePath());
 	}
 
 	private static void saveNodeToElement(Document document, Element element, INode node)
