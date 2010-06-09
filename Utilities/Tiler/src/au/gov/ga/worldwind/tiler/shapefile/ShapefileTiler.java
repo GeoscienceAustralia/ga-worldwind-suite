@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import au.gov.ga.worldwind.tiler.util.MultiMap;
 import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.Util;
 
@@ -45,10 +44,6 @@ public class ShapefileTiler
 		int levelCount = 1;
 		int startLevel = 0;
 		double lzts = 36;
-
-		//TODO need to work out a way of filling in all tiles that are surrounded by a polygon
-		//but don't contain any polygon edges. This includes tiles that only contain negative
-		//holes but no positive edges.
 
 		try
 		{
@@ -288,6 +283,8 @@ public class ShapefileTiler
 	public static int addPolygon(int shapeId, Polygon polygon, ShapefileTile[] tiles, int level,
 			double lzts, java.awt.Point min, Dimension size)
 	{
+		//TODO filling in the positive ring will not work if holes exist that cross the borders of a filled tile
+
 		LinearRing ring = polygon.getPosativeRing();
 		shapeId = addLinearRing(shapeId, ring, tiles, level, lzts, min, size, true);
 
@@ -342,7 +339,7 @@ public class ShapefileTiler
 			int y = Util.getTileY(point.y, level, lzts);
 
 			//limit tile x/y on the edges
-			//(eg lon=180 will go to x=11 at level 0 lzts 36, but should be x=10)
+			//(eg lon=180 will resolve to x=11 at level 0 lzts 36, but should be x=10)
 			x = Util.limitRange(x, min.x, min.x + size.width - 1);
 			y = Util.limitRange(y, min.y, min.y + size.height - 1);
 
@@ -366,34 +363,44 @@ public class ShapefileTiler
 					int diffCol = Math.abs(lastTile.col - tile.col);
 					if (diffRow + diffCol > 1)
 					{
-						//if tile is not next (vertically/horizontally, not diagonally) to lastTile,
-						//it means that the points have moved diagonally from one tile, across another
-						//tile (with no points inside), into another tile. We must add two edge points
-						//to the in-between tile, an entry and an exit.
-						//(Also, don't forget to add it to tilesAffected!)
+						//If tile is not next (vertically/horizontally, not diagonally) to lastTile,
+						//it means that the points have moved diagonally from one tile, across other
+						//tile(s) (with no points inside), into another tile. We must add two edge
+						//points to the in-between tile(s) (an entry and an exit).
 
+						//get the fractional position of the points within their corresponding tile's
+						//sector, in the range -0.5 to 0.5
 						float x1 =
-								(float) (lastTile.col
-										+ (lastPoint.x - lastTile.sector.getMinLongitude())
+								(float) ((lastPoint.x - lastTile.sector.getMinLongitude())
 										/ lastTile.sector.getDeltaLongitude() - 0.5);
 						float y1 =
-								(float) (lastTile.row
-										+ (lastPoint.y - lastTile.sector.getMinLatitude())
+								(float) ((lastPoint.y - lastTile.sector.getMinLatitude())
 										/ lastTile.sector.getDeltaLatitude() - 0.5);
 						float x2 =
-								(float) (tile.col + (point.x - tile.sector.getMinLongitude())
+								(float) ((point.x - tile.sector.getMinLongitude())
 										/ tile.sector.getDeltaLongitude() - 0.5);
 						float y2 =
-								(float) (tile.row + (point.y - tile.sector.getMinLatitude())
+								(float) ((point.y - tile.sector.getMinLatitude())
 										/ tile.sector.getDeltaLatitude() - 0.5);
 
-						List<java.awt.Point> line = Util.linePoints(x1, y1, x2, y2);
+						//create a list of possible tiles that may be affected by the line between the two tiles
+						List<java.awt.Point> line =
+								linePoints(lastTile.col + x1, lastTile.row + y1, tile.col + x2,
+										tile.row + y2);
+						//loop through each tile, calling crossShape() (ignoring the first/last tiles)
 						for (int j = 1; j < line.size() - 1; j++)
 						{
 							java.awt.Point p = line.get(j);
-							int px0 = p.x - min.x;
-							int py0 = p.y - min.y;
-							int ptileIndex = py0 * size.width + px0;
+							//check that p lies within tile array's bounds
+							if (p.x < min.x || p.x > min.x + size.width || p.y < min.y
+									|| p.y > min.y + size.height)
+							{
+								System.out
+										.println("WARNING: crossed tile " + p + " outside bounds");
+								continue;
+							}
+
+							int ptileIndex = (p.y - min.y) * size.width + (p.x - min.x);
 							ShapefileTile crossTile = tiles[ptileIndex];
 							boolean crossed = crossTile.crossShape(shapeId, lastPoint, point);
 							if (crossed && polygon)
@@ -430,129 +437,172 @@ public class ShapefileTiler
 
 			if (fillInside)
 			{
-				if (tilesAffected.get(0) != tilesAffected.get(tilesAffected.size() - 1))
-				{
-					throw new IllegalStateException(
-							"First tile doesn't equal last tile; cannot fill inside polygon");
-				}
-
-				//remove last tile (it is the same as the first)
-				tilesAffected.remove(tilesAffected.size() - 1);
-				int count = tilesAffected.size();
-
-
-				//we may have just emptied the list; check
-				if (count > 0)
-				{
-					//find the bounds of the tiles affected
-					int minx, miny, maxx, maxy;
-					minx = miny = Integer.MAX_VALUE;
-					maxx = maxy = Integer.MIN_VALUE;
-					for (ShapefileTile tile : tilesAffected)
-					{
-						minx = Math.min(minx, tile.col);
-						maxx = Math.max(maxx, tile.col);
-						miny = Math.min(miny, tile.row);
-						maxy = Math.max(maxy, tile.row);
-					}
-
-					//create a map of tiles affected for efficient querying
-					MultiMap<Integer, Integer> intersectionIndices =
-							new MultiMap<Integer, Integer>();
-					for (int i = 0; i < tilesAffected.size(); i++)
-					{
-						ShapefileTile tile = tilesAffected.get(i);
-						int index = (tile.row - min.y) * size.width + (tile.col - min.x);
-						intersectionIndices.put(index, i);
-					}
-
-					List<Map<Integer, Integer>> crossingsMaps =
-							new ArrayList<Map<Integer, Integer>>(maxy - miny + 1);
-					for (int y = miny; y <= maxy; y++)
-					{
-						int y0 = y - min.y;
-						Map<Integer, Integer> crossingsMap = new HashMap<Integer, Integer>();
-						crossingsMaps.add(crossingsMap);
-
-						for (int x = minx; x <= maxx; x++)
-						{
-							int x0 = x - min.x;
-							int index = y0 * size.width + x0;
-							if (intersectionIndices.containsKey(index))
-							{
-								int crossings = 0;
-								if (crossingsMap.containsKey(index))
-									crossings = crossingsMap.get(index);
-
-								List<Integer> indices = intersectionIndices.get(index);
-								for (int i : indices)
-								{
-									int prevI = (i - 1 + count) % count;
-									int nextI = (i + 1) % count;
-									ShapefileTile curr = tilesAffected.get(i);
-									ShapefileTile prev = tilesAffected.get(prevI);
-									ShapefileTile next = tilesAffected.get(nextI);
-									int prevRowDelta = curr.row - prev.row;
-									int nextRowDelta = curr.row - next.row;
-									int prevPos = prevRowDelta < 0 ? -1 : prevRowDelta == 0 ? 0 : 1;
-									int nextPos = nextRowDelta < 0 ? -1 : nextRowDelta == 0 ? 0 : 1;
-
-									//both above, below, or on line
-									if (prevPos == nextPos)
-									{
-										//do nothing
-									}
-									//one above, one below
-									else if (Math.abs(prevPos) == 1 && Math.abs(nextPos) == 1)
-									{
-										crossings++;
-									}
-									//one above, one on line
-									else if (prevPos == 1 || nextPos == 1)
-									{
-										crossings++;
-									}
-								}
-
-								crossingsMap.put(index, crossings);
-							}
-						}
-					}
-
-					//fill in the polygons
-					for (int y = miny; y <= maxy; y++)
-					{
-						int crossings = 0;
-						int y0 = y - min.y;
-						Map<Integer, Integer> crossingsMap = crossingsMaps.get(y - miny);
-
-						for (int x = minx; x <= maxx; x++)
-						{
-							int x0 = x - min.x;
-							int index = y0 * size.width + x0;
-							if (intersectionIndices.containsKey(index))
-							{
-								//tile was affected by polygon, so don't need to fill
-
-								//increment crossings int
-								if (crossingsMap.containsKey(index))
-									crossings += crossingsMap.get(index);
-							}
-							else
-							{
-								if (crossings % 2 == 1)
-								{
-									//crossings is odd, so fill in tile
-									ShapefileTile tile = tiles[index];
-									tile.fillSector();
-								}
-							}
-						}
-					}
-				}
+				fillInside(tiles, tilesAffected, min, size);
 			}
 		}
 
 		return shapeId + 1;
+	}
+
+	private static void fillInside(ShapefileTile[] tiles, List<ShapefileTile> tilesAffected,
+			java.awt.Point min, Dimension size)
+	{
+		if (tilesAffected.get(0) != tilesAffected.get(tilesAffected.size() - 1))
+		{
+			throw new IllegalStateException(
+					"First tile doesn't equal last tile; cannot fill inside polygon");
+		}
+
+		//ignore the last tile (it is the same as the first)
+		int count = tilesAffected.size() - 1;
+
+		//check that the list is not empty (ignoring the last tile)
+		if (count > 0)
+		{
+			Map<Integer, Integer> crossingsMap = new HashMap<Integer, Integer>();
+			int minx, miny, maxx, maxy;
+			minx = miny = Integer.MAX_VALUE;
+			maxx = maxy = Integer.MIN_VALUE;
+			for (int i = 0; i < count; i++)
+			{
+				//note: tiles may appear multiple tiles in the tilesAffected list;
+				//we need to increment crossings int rather than set it
+
+				ShapefileTile curr = tilesAffected.get(i);
+				int index = (curr.row - min.y) * size.width + (curr.col - min.x);
+
+				//update col/row bounds of tiles affected (to make loop below faster)
+				minx = Math.min(minx, curr.col);
+				maxx = Math.max(maxx, curr.col);
+				miny = Math.min(miny, curr.row);
+				maxy = Math.max(maxy, curr.row);
+
+				//has this tile appeared in the list before? retrieve the last value
+				int crossings = 0;
+				if (crossingsMap.containsKey(index))
+					crossings = crossingsMap.get(index);
+
+				//find out the spatial relationship between the prev/next tiles
+				ShapefileTile prev = tilesAffected.get((i - 1 + count) % count);
+				ShapefileTile next = tilesAffected.get((i + 1) % count);
+				int prevRowDelta = curr.row - prev.row;
+				int nextRowDelta = curr.row - next.row;
+
+				//increment crossings if either the previous tile or next tile is above
+				//the current tile, but not both
+				if (prevRowDelta >= 1 ^ nextRowDelta >= 1)
+					crossings++;
+
+				//update the crossings map
+				crossingsMap.put(index, crossings);
+			}
+
+			//fill in the tiles within the polygon but not touched by the polygon
+			for (int y = miny; y <= maxy; y++)
+			{
+				int y0 = y - min.y;
+				int crossings = 0;
+
+				//move along each scanline, filling in tiles for which the sum of crossings before the tile is odd
+				for (int x = minx; x <= maxx; x++)
+				{
+					int x0 = x - min.x;
+					int index = y0 * size.width + x0;
+					if (crossingsMap.containsKey(index))
+					{
+						//tile was entered by polygon, so don't need to fill
+						crossings += crossingsMap.get(index);
+					}
+					else if (crossings % 2 == 1)
+					{
+						//crossings is odd, so fill in tile
+						ShapefileTile tile = tiles[index];
+						tile.fillSector();
+					}
+				}
+			}
+		}
+	}
+
+	private static List<java.awt.Point> linePoints(float x1, float y1, float x2, float y2)
+	{
+		List<java.awt.Point> points = new ArrayList<java.awt.Point>();
+
+		int x1i = Math.round(x1);
+		int y1i = Math.round(y1);
+		int x2i = Math.round(x2);
+		int y2i = Math.round(y2);
+
+		//handle special vertical/horizontal line cases
+		if (x1i == x2i || y1i == y2i)
+		{
+			if (x1i == x2i)
+			{
+				for (int y = y1i; y <= y2i; y++)
+					points.add(new java.awt.Point(x1i, y));
+			}
+			else
+			{
+				for (int x = x1i; x <= x2i; x++)
+					points.add(new java.awt.Point(x, y1i));
+			}
+			return points;
+		}
+
+		boolean steep = Math.abs(x2 - x1) < Math.abs(y2 - y1);
+		if (steep)
+		{
+			//swap x/y variables
+			float temp = x1;
+			x1 = y1;
+			y1 = temp;
+			temp = x2;
+			x2 = y2;
+			y2 = temp;
+		}
+		if (x1 > x2)
+		{
+			//swap p1/p2 points
+			float temp = x1;
+			x1 = x2;
+			x2 = temp;
+			temp = y1;
+			y1 = y2;
+			y2 = temp;
+		}
+
+		float dx = x2 - x1;
+		float dy = y2 - y1;
+		float gradient = dy / dx;
+		float intery = y1;
+		int startX = Math.round(x1);
+		int endX = Math.round(x2);
+		float centerDiff = (startX - x1) * gradient;
+
+		for (int x = startX; x <= endX; x++)
+		{
+			int y = Math.round(intery);
+			int add = (intery + centerDiff - y < 0) ? -1 : 1;
+			boolean first = add > 0 ^ gradient < 0;
+
+			java.awt.Point p1 = steep ? new java.awt.Point(y, x) : new java.awt.Point(x, y);
+			java.awt.Point p2 =
+					steep ? new java.awt.Point(y + add, x) : new java.awt.Point(x, y + add);
+
+			if (first)
+			{
+				points.add(p1);
+				points.add(p2);
+			}
+			else
+			{
+				points.add(p2);
+				points.add(p1);
+			}
+
+			intery += gradient;
+		}
+
+		return points;
 	}
 }
