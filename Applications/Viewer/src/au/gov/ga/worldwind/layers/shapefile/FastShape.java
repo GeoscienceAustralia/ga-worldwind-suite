@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.layers.shapefile;
 
+import gov.nasa.worldwind.cache.Cacheable;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
@@ -21,13 +22,13 @@ import javax.media.opengl.GL;
 
 import com.sun.opengl.util.BufferUtil;
 
-public class FastShape implements Renderable
+public class FastShape implements Renderable, Cacheable
 {
 	protected List<? extends LatLon> positions;
 	protected Object positionLock = new Object();
 
 	protected DoubleBuffer colorBuffer;
-	protected List<IntBuffer> indices;
+	protected IntBuffer[] indices;
 	protected int mode;
 
 	protected DoubleBuffer vertexBuffer;
@@ -47,19 +48,17 @@ public class FastShape implements Renderable
 		this(positions, null, null, mode);
 	}
 
-	public FastShape(List<? extends LatLon> positions, List<IntBuffer> indices,
-			int mode)
+	public FastShape(List<? extends LatLon> positions, IntBuffer[] indices, int mode)
 	{
 		this(positions, indices, null, mode);
 	}
 
-	public FastShape(List<? extends LatLon> positions,
-			DoubleBuffer colorBuffer, int mode)
+	public FastShape(List<? extends LatLon> positions, DoubleBuffer colorBuffer, int mode)
 	{
 		this(positions, null, colorBuffer, mode);
 	}
 
-	public FastShape(List<? extends LatLon> positions, List<IntBuffer> indices,
+	public FastShape(List<? extends LatLon> positions, IntBuffer[] indices,
 			DoubleBuffer colorBuffer, int mode)
 	{
 		setPositions(positions);
@@ -70,8 +69,8 @@ public class FastShape implements Renderable
 
 	public void render(DrawContext dc)
 	{
-		boolean recalculate = followTerrain
-				|| lastVerticalExaggeration != dc.getVerticalExaggeration();
+		boolean recalculate =
+				followTerrain || lastVerticalExaggeration != dc.getVerticalExaggeration();
 		boolean recalculateNow = verticesDirty || lastGlobe != dc.getGlobe();
 		if (recalculate || recalculateNow)
 		{
@@ -105,8 +104,7 @@ public class FastShape implements Renderable
 		{
 			alpha *= dc.getCurrentLayer().getOpacity();
 		}
-		gl.glColor4d(color.getRed() / 255d, color.getGreen() / 255d, color
-				.getBlue() / 255d, alpha);
+		gl.glColor4d(color.getRed() / 255d, color.getGreen() / 255d, color.getBlue() / 255d, alpha);
 		if (alpha < 1.0)
 		{
 			gl.glEnable(GL.GL_BLEND);
@@ -128,8 +126,7 @@ public class FastShape implements Renderable
 			{
 				for (IntBuffer ind : indices)
 				{
-					gl.glDrawElements(mode, ind.limit(), GL.GL_UNSIGNED_INT,
-							ind.rewind());
+					gl.glDrawElements(mode, ind.limit(), GL.GL_UNSIGNED_INT, ind.rewind());
 				}
 			}
 		}
@@ -140,8 +137,8 @@ public class FastShape implements Renderable
 		gl.glPopClientAttrib();
 	}
 
-	protected synchronized void recalculateVertices(final DrawContext dc,
-			boolean runNow)
+	//TODO change back to protected
+	public synchronized void recalculateVertices(final DrawContext dc, boolean runNow)
 	{
 		Runnable runnable = new Runnable()
 		{
@@ -178,19 +175,17 @@ public class FastShape implements Renderable
 				double elevation = 0;
 				if (followTerrain)
 				{
-					elevation = globe.getElevation(position.getLatitude(),
-							position.getLongitude());
+					elevation = globe.getElevation(position.getLatitude(), position.getLongitude());
 				}
 				if (position instanceof Position)
 				{
 					elevation += ((Position) position).getElevation();
 				}
 				elevation *= dc.getVerticalExaggeration();
-				elevation = Math.max(elevation, -dc.getGlobe()
-						.getMaximumRadius());
-				Vec4 v = dc.getGlobe().computePointFromPosition(
-						position.getLatitude(), position.getLongitude(),
-						elevation);
+				elevation = Math.max(elevation, -dc.getGlobe().getMaximumRadius());
+				Vec4 v =
+						dc.getGlobe().computePointFromPosition(position.getLatitude(),
+								position.getLongitude(), elevation);
 				modVertexBuffer.put(v.x).put(v.y).put(v.z);
 			}
 			return modVertexBuffer;
@@ -240,19 +235,18 @@ public class FastShape implements Renderable
 			{
 				this.positions = positions;
 				vertexBuffer = BufferUtil.newDoubleBuffer(positions.size() * 3);
-				modVertexBuffer = BufferUtil
-						.newDoubleBuffer(positions.size() * 3);
+				modVertexBuffer = BufferUtil.newDoubleBuffer(positions.size() * 3);
 				verticesDirty = true;
 			}
 		}
 	}
 
-	public List<IntBuffer> getIndices()
+	public IntBuffer[] getIndices()
 	{
 		return indices;
 	}
 
-	public void setIndices(List<IntBuffer> indices)
+	public void setIndices(IntBuffer[] indices)
 	{
 		this.indices = indices;
 	}
@@ -282,9 +276,10 @@ public class FastShape implements Renderable
 
 	private static class VertexUpdater
 	{
-		private static BlockingQueue<OwnerRunnable> queue = new LinkedBlockingQueue<OwnerRunnable>();
-		private static Set<OwnerRunnable> set = Collections
-				.synchronizedSet(new HashSet<OwnerRunnable>());
+		private static BlockingQueue<OwnerRunnable> queue =
+				new LinkedBlockingQueue<OwnerRunnable>();
+		private static Set<OwnerRunnable> set =
+				Collections.synchronizedSet(new HashSet<OwnerRunnable>());
 		private static final int THREAD_COUNT = 1;
 
 		static
@@ -360,10 +355,17 @@ public class FastShape implements Renderable
 		DoubleBuffer cb = BufferUtil.newDoubleBuffer(colors.size() * 4);
 		for (Color color : colors)
 		{
-			cb.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(
-					color.getBlue() / 255d).put(color.getAlpha() / 255d);
+			cb.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d)
+					.put(color.getAlpha() / 255d);
 		}
 		cb.rewind();
 		return cb;
+	}
+
+	@Override
+	public long getSizeInBytes()
+	{
+		//very approximate, measured by checking JVM memory usage over many object creations
+		return 500 + 80 * getPositions().size();
 	}
 }

@@ -16,6 +16,7 @@ import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.util.VecBuffer;
 
 import java.awt.Color;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -24,10 +25,13 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.util.HSLColor;
 
+import com.sun.opengl.util.BufferUtil;
+
 public class ShapefileTileData implements Renderable, Cacheable
 {
-	private List<Renderable> renderables = new ArrayList<Renderable>();
-	private long size = 4l;
+	private List<FastShape> shapes = new ArrayList<FastShape>();
+	private long size;
+	private boolean sizeDirty = true;
 	private boolean mergeLines = true;
 
 	public static synchronized MemoryCache getMemoryCache()
@@ -45,7 +49,8 @@ public class ShapefileTileData implements Renderable, Cacheable
 
 	public ShapefileTileData(Shapefile shapefile)
 	{
-		addShapefile(shapefile);
+		if (shapefile != null)
+			addShapefile(shapefile);
 	}
 
 	public void addShapefile(Shapefile shapefile)
@@ -67,12 +72,13 @@ public class ShapefileTileData implements Renderable, Cacheable
 			for (FastShape shape : shapes)
 			{
 				shape.setColor(randomColor());
-				renderables.add(shape);
+				this.shapes.add(shape);
 			}
 		}
 		else
 		{
 			List<Position> mergedLines = new ArrayList<Position>();
+			List<Integer> mergedIndices = new ArrayList<Integer>();
 			List<List<Position>> lines = new ArrayList<List<Position>>();
 			List<Position> points = new ArrayList<Position>();
 
@@ -89,7 +95,6 @@ public class ShapefileTileData implements Renderable, Cacheable
 							lines.add(line);
 						}
 
-						Position last = null;
 						VecBuffer buffer = record.getBuffer(part);
 						int size = buffer.getSize();
 						for (int i = 0; i < size; i++)
@@ -97,12 +102,13 @@ public class ShapefileTileData implements Renderable, Cacheable
 							Position position = buffer.getPosition(i);
 							if (mergeLines)
 							{
-								if (last != null)
+								if (i > 0)
 								{
-									mergedLines.add(last);
-									mergedLines.add(position);
+									int index = mergedLines.size();
+									mergedIndices.add(index - 1);
+									mergedIndices.add(index);
 								}
-								last = position;
+								mergedLines.add(position);
 							}
 							else
 							{
@@ -128,15 +134,20 @@ public class ShapefileTileData implements Renderable, Cacheable
 
 			if (!mergedLines.isEmpty())
 			{
-				FastShape shape = new FastShape(mergedLines, GL.GL_LINES);
+				IntBuffer indices = BufferUtil.newIntBuffer(mergedIndices.size());
+				for (Integer i : mergedIndices)
+					indices.put(i);
+
+				FastShape shape =
+						new FastShape(mergedLines, new IntBuffer[] { indices }, GL.GL_LINES);
 				shape.setColor(randomColor());
-				renderables.add(shape);
+				shapes.add(shape);
 			}
 			if (!points.isEmpty())
 			{
 				FastShape shape = new FastShape(points, GL.GL_POINTS);
 				shape.setColor(randomColor());
-				renderables.add(shape);
+				shapes.add(shape);
 			}
 			for (List<Position> line : lines)
 			{
@@ -144,10 +155,12 @@ public class ShapefileTileData implements Renderable, Cacheable
 				{
 					FastShape shape = new FastShape(line, GL.GL_LINE_STRIP);
 					shape.setColor(randomColor());
-					renderables.add(shape);
+					shapes.add(shape);
 				}
 			}
 		}
+
+		sizeDirty = true;
 	}
 
 	private Color randomColor()
@@ -159,13 +172,20 @@ public class ShapefileTileData implements Renderable, Cacheable
 	@Override
 	public void render(DrawContext dc)
 	{
-		for (Renderable renderable : renderables)
+		for (Renderable renderable : shapes)
 			renderable.render(dc);
 	}
 
 	@Override
 	public long getSizeInBytes()
 	{
+		if (sizeDirty)
+		{
+			size = 20l; //at least
+			for (FastShape shape : shapes)
+				size += shape.getSizeInBytes();
+			sizeDirty = false;
+		}
 		return size;
 	}
 }
