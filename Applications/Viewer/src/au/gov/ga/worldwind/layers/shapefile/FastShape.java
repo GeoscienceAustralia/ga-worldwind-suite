@@ -137,8 +137,7 @@ public class FastShape implements Renderable, Cacheable
 		gl.glPopClientAttrib();
 	}
 
-	//TODO change back to protected
-	public synchronized void recalculateVertices(final DrawContext dc, boolean runNow)
+	protected synchronized void recalculateVertices(final DrawContext dc, boolean runNow)
 	{
 		Runnable runnable = new Runnable()
 		{
@@ -274,6 +273,25 @@ public class FastShape implements Renderable, Cacheable
 		this.mode = mode;
 	}
 
+	@Override
+	public long getSizeInBytes()
+	{
+		//very approximate, measured by checking JVM memory usage over many object creations
+		return 500 + 80 * getPositions().size();
+	}
+
+	public static DoubleBuffer colorToDoubleBuffer(List<Color> colors)
+	{
+		DoubleBuffer cb = BufferUtil.newDoubleBuffer(colors.size() * 4);
+		for (Color color : colors)
+		{
+			cb.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d)
+					.put(color.getAlpha() / 255d);
+		}
+		cb.rewind();
+		return cb;
+	}
+
 	private static class VertexUpdater
 	{
 		private static BlockingQueue<OwnerRunnable> queue =
@@ -348,24 +366,5 @@ public class FastShape implements Renderable, Cacheable
 				return obj.equals(this);
 			}
 		}
-	}
-
-	public static DoubleBuffer colorToDoubleBuffer(List<Color> colors)
-	{
-		DoubleBuffer cb = BufferUtil.newDoubleBuffer(colors.size() * 4);
-		for (Color color : colors)
-		{
-			cb.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d)
-					.put(color.getAlpha() / 255d);
-		}
-		cb.rewind();
-		return cb;
-	}
-
-	@Override
-	public long getSizeInBytes()
-	{
-		//very approximate, measured by checking JVM memory usage over many object creations
-		return 500 + 80 * getPositions().size();
 	}
 }
