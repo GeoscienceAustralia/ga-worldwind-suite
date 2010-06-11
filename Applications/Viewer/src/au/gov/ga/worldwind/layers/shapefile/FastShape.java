@@ -3,7 +3,6 @@ package au.gov.ga.worldwind.layers.shapefile;
 import gov.nasa.worldwind.cache.Cacheable;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.render.DrawContext;
@@ -12,7 +11,6 @@ import gov.nasa.worldwind.render.Renderable;
 import java.awt.Color;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -68,61 +66,6 @@ public class FastShape implements Renderable, Cacheable
 		setIndices(indices);
 		setMode(mode);
 	}
-
-	/*public void addPointsInsideSector(Sector sector, int pointCount)
-	{
-		if (mode != GL.GL_TRIANGLES || indices != null || colorBuffer != null)
-			throw new IllegalStateException("cannot add points within polygon");
-
-		List<PositionTriangle> triangles = new ArrayList<PositionTriangle>();
-		for (int i = 0; i < positions.size() - 2; i += 3)
-		{
-			Position p0 = positions.get(i);
-			Position p1 = positions.get(i + 1);
-			Position p2 = positions.get(i + 2);
-			PositionTriangle tri = new PositionTriangle(p0, p1, p2);
-			triangles.add(tri);
-		}
-
-		double deltaLat = sector.getDeltaLatDegrees() / pointCount;
-		double deltaLon = sector.getDeltaLonDegrees() / pointCount;
-		for (double lat = sector.getMinLatitude().degrees + deltaLat; lat < sector.getMaxLatitude().degrees; lat +=
-				deltaLat)
-		{
-			for (double lon = sector.getMinLongitude().degrees + deltaLon; lon < sector
-					.getMaxLongitude().degrees; lon += deltaLon)
-			{
-				LatLon latlon = LatLon.fromDegrees(lat, lon);
-				for (int i = 0; i < triangles.size(); i++)
-				{
-					PositionTriangle tri = triangles.get(i);
-					if (tri.contains(latlon))
-					{
-						//Position add = new Position(latlon, tri.getInterpolatedElevation(latlon));
-						Position add = new Position(latlon, 0);
-
-						PositionTriangle t1 = new PositionTriangle(tri.b, tri.c, add);
-						PositionTriangle t2 = new PositionTriangle(tri.c, tri.a, add);
-						tri.c = add;
-						triangles.add(t1);
-						triangles.add(t2);
-
-						break;
-					}
-				}
-			}
-		}
-
-		List<Position> newPositions = new ArrayList<Position>();
-		for (PositionTriangle tri : triangles)
-		{
-			newPositions.add(tri.a);
-			newPositions.add(tri.b);
-			newPositions.add(tri.c);
-		}
-
-		setPositions(newPositions);
-	}*/
 
 	public void render(DrawContext dc)
 	{

@@ -7,29 +7,17 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.VecBuffer;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
-import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
 import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 
-import au.gov.ga.worldwind.util.HSLColor;
-
 public class PolygonTessellator
 {
-	private static int addPoints = 50;
+	private static int addPoints = 20;
 
 	public static List<FastShape> tessellateShapefile(Shapefile shapefile, Sector sector)
 	{
@@ -241,30 +229,6 @@ public class PolygonTessellator
 			}
 
 			return count;
-
-			/*double distance = distance(p0, p1);
-			double addPointEvery = angleDistance(p0, p1, deltaLon, deltaLat);
-			int count = (int) (distance / addPointEvery);
-			if (count > 0)
-			{
-				double remain = distance - addPointEvery * (count - 1);
-				double startPercent = (remain / 2d) / distance;
-				double addPercent = addPointEvery / distance;
-
-				for (int i = 0; i < count; i++)
-				{
-					double percent = startPercent + addPercent * i;
-					//Position p = Position.interpolate(percent, p0, p1);
-					Position p =
-							Position.fromDegrees(p0.getLatitude().degrees * (1d - percent)
-									+ p1.getLatitude().degrees * percent, p0.getLongitude().degrees
-									* (1d - percent) + p1.getLongitude().degrees * percent, p0
-									.getElevation()
-									* (1d - percent) + p1.getElevation() * percent);
-					list.add(p);
-				}
-			}
-			return count;*/
 		}
 
 		private static List<Position> createTriangles(List<Position> points, int countA,
@@ -324,156 +288,11 @@ public class PolygonTessellator
 			return triangles;
 		}
 
-		/*private static double angleDistance(Position p0, Position p1, double width, double height)
-		{
-			double latDiff = Math.abs(p0.getLatitude().degrees - p1.getLatitude().degrees);
-			double lonDiff = Math.abs(p0.getLongitude().degrees - p1.getLongitude().degrees);
-
-			if (latDiff == 0)
-				return width;
-			if (lonDiff == 0)
-				return height;
-
-			double angle = Math.atan(latDiff / lonDiff);
-			if (angle > Math.PI / 4d)
-				return height / Math.sin(angle);
-			else
-				return width / Math.cos(angle);
-		}
-
-		private static double distance(Position p0, Position p1)
-		{
-			return Math.sqrt(distanceSquared(p0, p1));
-		}
-
-		private static double distanceSquared(Position p0, Position p1)
-		{
-			double temp = p0.getLongitude().degrees - p1.getLongitude().degrees;
-			double result = temp * temp;
-			temp = p0.getLatitude().degrees - p1.getLatitude().degrees;
-			result += temp * temp;
-			temp = p0.getElevation() - p1.getElevation();
-			result += temp * temp;
-			return result;
-		}*/
-
 		@Override
 		public void error(int error)
 		{
 			String message = "GLU error: " + glu.gluErrorString(error) + " (" + error + ")";
 			Logging.logger().severe(message);
-		}
-	}
-
-	public static void main(String[] args)
-	{
-		TessellatorCallback callback =
-				new TessellatorCallback(null, Sector.fromDegrees(0, 100, 0, 100));
-		Position[] triangle =
-				new Position[] { Position.fromDegrees(0, 35, 0), Position.fromDegrees(50, 70, 0),
-						Position.fromDegrees(100, 35, 0) };
-		triangle =
-				new Position[] { Position.fromDegrees(0, 10, 0), Position.fromDegrees(100, 20, 0),
-						Position.fromDegrees(100, 0, 0) };
-
-		callback.begin(GL.GL_TRIANGLES);
-		try
-		{
-			callback.addTriangle(triangle);
-		}
-		catch (StackOverflowError e)
-		{
-			System.out.println("STACK OVERFLOW!");
-		}
-
-		double s = 7;
-
-		BufferedImage image = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB);
-		Graphics2D g = image.createGraphics();
-		g.setColor(Color.white);
-		g.fillRect(0, 0, image.getWidth(), image.getHeight());
-		g.setColor(Color.black);
-		g.setTransform(AffineTransform.getTranslateInstance(10, 10));
-
-		Position p0 = triangle[0];
-		Position p1 = triangle[1];
-		Position p2 = triangle[2];
-
-		g.setStroke(new BasicStroke(1));
-		g.drawLine((int) (p0.getLongitude().degrees * s), (int) (p0.getLatitude().degrees * s),
-				(int) (p1.getLongitude().degrees * s), (int) (p1.getLatitude().degrees * s));
-		g.setStroke(new BasicStroke(3));
-		g.drawLine((int) (p2.getLongitude().degrees * s), (int) (p2.getLatitude().degrees * s),
-				(int) (p1.getLongitude().degrees * s), (int) (p1.getLatitude().degrees * s));
-		g.setStroke(new BasicStroke(5));
-		g.drawLine((int) (p0.getLongitude().degrees * s), (int) (p0.getLatitude().degrees * s),
-				(int) (p2.getLongitude().degrees * s), (int) (p2.getLatitude().degrees * s));
-
-		Random random = new Random();
-
-		int count = callback.currentPositions.size();
-		for (int i = 0; i < count; i += 3)
-		{
-			//g.setTransform(AffineTransform.getTranslateInstance(10 + i * 3, 10 + i * 3));
-
-			HSLColor color = new HSLColor(3 * i * 360 / count, 100, 50);
-			g.setColor(color.getRGB());
-
-			p0 = callback.currentPositions.get(i);
-			p1 = callback.currentPositions.get(i + 1);
-			p2 = callback.currentPositions.get(i + 2);
-
-			Position center =
-					Position.fromDegrees((p0.getLatitude().degrees + p1.getLatitude().degrees + p2
-							.getLatitude().degrees) / 3d, (p0.getLongitude().degrees
-							+ p1.getLongitude().degrees + p2.getLongitude().degrees) / 3d, (p0
-							.getElevation()
-							+ p1.getElevation() + p2.getElevation()) / 3d);
-
-			int move = 0;
-			p0 =
-					Position.fromDegrees(p0.getLatitude().degrees
-							+ (p0.getLatitude().degrees > center.getLatitude().degrees ? -move : p0
-									.getLatitude().degrees == center.getLatitude().degrees ? 0
-									: move), p0.getLongitude().degrees
-							+ (p0.getLongitude().degrees > center.getLongitude().degrees ? -move
-									: p0.getLongitude().degrees == center.getLongitude().degrees
-											? 0 : move), p0.getElevation());
-			p1 =
-					Position.fromDegrees(p1.getLatitude().degrees
-							+ (p1.getLatitude().degrees > center.getLatitude().degrees ? -move : p1
-									.getLatitude().degrees == center.getLatitude().degrees ? 0
-									: move), p1.getLongitude().degrees
-							+ (p1.getLongitude().degrees > center.getLongitude().degrees ? -move
-									: p1.getLongitude().degrees == center.getLongitude().degrees
-											? 0 : move), p1.getElevation());
-			p2 =
-					Position.fromDegrees(p2.getLatitude().degrees
-							+ (p2.getLatitude().degrees > center.getLatitude().degrees ? -move : p2
-									.getLatitude().degrees == center.getLatitude().degrees ? 0
-									: move), p2.getLongitude().degrees
-							+ (p2.getLongitude().degrees > center.getLongitude().degrees ? -move
-									: p2.getLongitude().degrees == center.getLongitude().degrees
-											? 0 : move), p2.getElevation());
-
-			g.setStroke(new BasicStroke(1));
-			g.drawLine((int) (p0.getLongitude().degrees * s), (int) (p0.getLatitude().degrees * s),
-					(int) (p1.getLongitude().degrees * s), (int) (p1.getLatitude().degrees * s));
-			g.setStroke(new BasicStroke(3));
-			g.drawLine((int) (p2.getLongitude().degrees * s), (int) (p2.getLatitude().degrees * s),
-					(int) (p1.getLongitude().degrees * s), (int) (p1.getLatitude().degrees * s));
-			g.setStroke(new BasicStroke(5));
-			g.drawLine((int) (p0.getLongitude().degrees * s), (int) (p0.getLatitude().degrees * s),
-					(int) (p2.getLongitude().degrees * s), (int) (p2.getLatitude().degrees * s));
-		}
-
-		try
-		{
-			ImageIO.write(image, "bmp", new File("test.bmp"));
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
 		}
 	}
 }

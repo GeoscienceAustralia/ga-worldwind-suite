@@ -32,7 +32,7 @@ public class Sandpit extends ApplicationTemplate
 			Angle delta = Angle.fromDegrees(36);
 			params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(delta, delta));
 			params.setValue(AVKey.SECTOR, Sector.FULL_SPHERE);
-			params.setValue(AVKey.NUM_LEVELS, 1);
+			params.setValue(AVKey.NUM_LEVELS, 5);
 			params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 			params.setValue(AVKey.DATASET_NAME, "shapefile");
 			params.setValue(AVKey.DATA_CACHE_NAME, "shapefile");
