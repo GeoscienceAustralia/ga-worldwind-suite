@@ -1,6 +1,8 @@
 package au.gov.ga.worldwind.layers.shapefile;
 
+import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.cache.BasicMemoryCache;
 import gov.nasa.worldwind.cache.Cacheable;
 import gov.nasa.worldwind.cache.MemoryCache;
@@ -11,6 +13,7 @@ import gov.nasa.worldwind.formats.shapefile.ShapefileRecordPoint;
 import gov.nasa.worldwind.formats.shapefile.ShapefileRecordPolygon;
 import gov.nasa.worldwind.formats.shapefile.ShapefileRecordPolyline;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.util.VecBuffer;
@@ -29,7 +32,9 @@ import com.sun.opengl.util.BufferUtil;
 
 public class ShapefileTileData implements Renderable, Cacheable
 {
+	private Sector sector;
 	private List<FastShape> shapes = new ArrayList<FastShape>();
+	private List<Renderable> renderables = new ArrayList<Renderable>();
 	private long size;
 	private boolean sizeDirty = true;
 	private boolean mergeLines = true;
@@ -38,8 +43,8 @@ public class ShapefileTileData implements Renderable, Cacheable
 	{
 		if (!WorldWind.getMemoryCacheSet().containsCache(ShapefileTileData.class.getName()))
 		{
-			//long size = Configuration.getLongValue(AVKey.TEXTURE_IMAGE_CACHE_SIZE, 3000000L);
-			long size = 300 * 1024 * 1024;
+			long size = Configuration.getLongValue(AVKey.TEXTURE_IMAGE_CACHE_SIZE, 3000000L) * 10;
+			//long size = 300 * 1024 * 1024;
 			MemoryCache cache = new BasicMemoryCache((long) (0.85 * size), size);
 			cache.setName("Shapefile Tile Data");
 			WorldWind.getMemoryCacheSet().addCache(ShapefileTileData.class.getName(), cache);
@@ -47,8 +52,15 @@ public class ShapefileTileData implements Renderable, Cacheable
 		return WorldWind.getMemoryCacheSet().getCache(ShapefileTileData.class.getName());
 	}
 
-	public ShapefileTileData(Shapefile shapefile)
+	public ShapefileTileData(Sector sector)
 	{
+		this(sector, null);
+	}
+
+	public ShapefileTileData(Sector sector, Shapefile shapefile)
+	{
+		this.sector = sector;
+
 		if (shapefile != null)
 			addShapefile(shapefile);
 	}
@@ -56,6 +68,31 @@ public class ShapefileTileData implements Renderable, Cacheable
 	public void addShapefile(Shapefile shapefile)
 	{
 		List<ShapefileRecord> records = shapefile.getRecords();
+
+		/*for (ShapefileRecord record : records)
+		{
+			if (record instanceof ShapefileRecordPolyline)
+			{
+				for (int part = 0; part < record.getNumberOfParts(); part++)
+				{
+					List<Position> positions = new ArrayList<Position>();
+
+					VecBuffer buffer = record.getBuffer(part);
+					int size = buffer.getSize();
+					for (int i = 0; i < size; i++)
+					{
+						Position position = buffer.getPosition(i);
+						positions.add(position);
+					}
+
+					BetterPolygon polygon = new BetterPolygon(positions);
+					polygon.setEnableLevelOfDetail(false);
+					polygon.setTerrainConforming(true);
+					renderables.add(polygon);
+				}
+			}
+		}*/
+
 		boolean anyPolygons = false;
 		for (ShapefileRecord record : records)
 		{
@@ -68,10 +105,12 @@ public class ShapefileTileData implements Renderable, Cacheable
 
 		if (anyPolygons)
 		{
-			List<FastShape> shapes = PolygonTessellator.tessellateShapefile(shapefile);
+			List<FastShape> shapes = PolygonTessellator.tessellateShapefile(shapefile, sector);
 			for (FastShape shape : shapes)
 			{
 				shape.setColor(randomColor());
+				//shape.addPointsInsideSector(sector, 10);
+				shape.setFollowTerrain(true);
 				this.shapes.add(shape);
 			}
 		}
@@ -172,7 +211,15 @@ public class ShapefileTileData implements Renderable, Cacheable
 	@Override
 	public void render(DrawContext dc)
 	{
+		GL gl = dc.getGL();
+
+		//gl.glCullFace(GL.GL_NONE);
+		//gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+		//gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+
 		for (Renderable renderable : shapes)
+			renderable.render(dc);
+		for (Renderable renderable : renderables)
 			renderable.render(dc);
 	}
 

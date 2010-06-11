@@ -51,7 +51,7 @@ public class FileTiledShapefileLayer extends TiledShapefileLayer
 			{
 				File file = new File(url.toURI());
 				Shapefile shapefile = loadFromZip(file);
-				ShapefileTileData data = new ShapefileTileData(shapefile);
+				ShapefileTileData data = new ShapefileTileData(tile.getSector(), shapefile);
 				tile.setData(data);
 			}
 			catch (Exception e)

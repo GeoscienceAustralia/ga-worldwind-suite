@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.layers.shapefile;
 
+import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -31,7 +32,7 @@ public class Sandpit extends ApplicationTemplate
 			Angle delta = Angle.fromDegrees(36);
 			params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(delta, delta));
 			params.setValue(AVKey.SECTOR, Sector.FULL_SPHERE);
-			params.setValue(AVKey.NUM_LEVELS, 5);
+			params.setValue(AVKey.NUM_LEVELS, 1);
 			params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 			params.setValue(AVKey.DATASET_NAME, "shapefile");
 			params.setValue(AVKey.DATA_CACHE_NAME, "shapefile");
@@ -67,7 +68,7 @@ public class Sandpit extends ApplicationTemplate
 
 	public static void main(String[] args)
 	{
-		//Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 100d);
+		Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 100d);
 
 		ApplicationTemplate.start("Sandpit", AppFrame.class);
 	}
