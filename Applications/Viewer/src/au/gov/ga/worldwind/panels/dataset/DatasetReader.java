@@ -86,9 +86,12 @@ public class DatasetReader
 		URL info = XMLUtil.getURL(element, "@info", context);
 		URL icon = XMLUtil.getURL(element, "@icon", context);
 		URL url = XMLUtil.getURL(element, "@url", context);
+		URL legend = XMLUtil.getURL(element, "@legend", context);
+		URL query = XMLUtil.getURL(element, "@query", context);
 		boolean base = XMLUtil.getBoolean(element, "@base", false);
 		boolean def = XMLUtil.getBoolean(element, "@default", false);
-		ILayerDefinition layer = new LayerDefinition(name, url, info, icon, base, def);
+		ILayerDefinition layer =
+				new LayerDefinition(name, url, info, icon, legend, query, base, def);
 		parent.getLayers().add(layer);
 	}
 }

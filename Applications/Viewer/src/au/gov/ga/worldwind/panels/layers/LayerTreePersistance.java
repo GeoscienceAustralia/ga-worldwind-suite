@@ -69,9 +69,12 @@ public class LayerTreePersistance
 		boolean expanded = XMLUtil.getBoolean(element, "@expanded", false);
 		URL layer = XMLUtil.getURL(element, "@layer", null);
 		URL info = XMLUtil.getURL(element, "@info", null);
+		URL legend = XMLUtil.getURL(element, "@legend", null);
+		URL query = XMLUtil.getURL(element, "@query", null);
 		boolean enabled = XMLUtil.getBoolean(element, "@enabled", false);
 		double opacity = XMLUtil.getDouble(element, "@opacity", 1.0);
-		LayerNode node = new LayerNode(name, info, icon, expanded, layer, enabled, opacity);
+		LayerNode node =
+				new LayerNode(name, info, icon, expanded, layer, legend, query, enabled, opacity);
 		parent.addChild(node);
 		addRelevant(element, node);
 	}
@@ -104,6 +107,10 @@ public class LayerTreePersistance
 			LayerNode layer = (LayerNode) node;
 			if (layer.getLayerURL() != null)
 				current.setAttribute("layer", layer.getLayerURL().toExternalForm());
+			if (layer.getLegendURL() != null)
+				current.setAttribute("legend", layer.getLegendURL().toExternalForm());
+			if (layer.getQueryURL() != null)
+				current.setAttribute("query", layer.getQueryURL().toExternalForm());
 			XMLUtil.setBooleanAttribute(current, "enabled", layer.isEnabled());
 			XMLUtil.setDoubleAttribute(current, "opacity", layer.getOpacity());
 		}

@@ -918,7 +918,7 @@ public class FileLayerCreator extends JDialog
 				URL url = file.toURI().toURL();
 				layer =
 						new LayerDefinition(nameField.getText(), url, null, Icons.file.getURL(),
-								true, false);
+								null, null, true, false);
 			}
 			catch (MalformedURLException e)
 			{

@@ -63,19 +63,31 @@ public class DatasetCellRenderer extends AbstractCellRenderer<IData, ILayerDefin
 	}
 
 	@Override
-	protected boolean isURLRow(IData value)
+	protected boolean isInfoRow(IData value)
 	{
 		return value.getInfoURL() != null;
 	}
 
 	@Override
+	protected boolean isLegendRow(ILayerDefinition value)
+	{
+		return false;
+	}
+	
+	@Override
+	protected boolean isQueryRow(ILayerDefinition value)
+	{
+		return false;
+	}
+
+	/*@Override
 	protected String getLinkLabelToolTipText(Object value)
 	{
 		IData data = getValue(value);
 		if (data != null && data.getInfoURL() != null)
 			return data.getInfoURL().toExternalForm();
 		return null;
-	}
+	}*/
 
 	@Override
 	protected void setupLabel(DefaultTreeCellRenderer label, IData value)
@@ -117,7 +129,7 @@ public class DatasetCellRenderer extends AbstractCellRenderer<IData, ILayerDefin
 	}
 
 	@Override
-	protected void linkClicked(int row)
+	protected void infoClicked(int row)
 	{
 		TreePath path = getTree().getPathForRow(row);
 		if (path != null)
@@ -128,5 +140,15 @@ public class DatasetCellRenderer extends AbstractCellRenderer<IData, ILayerDefin
 				DefaultLauncher.openURL(data.getInfoURL());
 			}
 		}
+	}
+
+	@Override
+	protected void legendClicked(int row)
+	{
+	}
+
+	@Override
+	protected void queryClicked(int row)
+	{
 	}
 }

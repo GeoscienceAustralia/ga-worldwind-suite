@@ -6,14 +6,16 @@ public interface ILayerNode extends INode
 {
 	public URL getLayerURL();
 
-	//public void setLayerURL(URL layerURL);
+	public URL getLegendURL();
+
+	public URL getQueryURL();
 
 	public boolean isEnabled();
 
 	public void setEnabled(boolean enabled);
-	
+
 	public double getOpacity();
-	
+
 	public void setOpacity(double opacity);
 
 	public boolean hasError();

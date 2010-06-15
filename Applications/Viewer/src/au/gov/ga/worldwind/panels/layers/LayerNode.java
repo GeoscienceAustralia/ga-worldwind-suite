@@ -7,16 +7,20 @@ import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 public class LayerNode extends AbstractNode implements ILayerNode
 {
 	private URL layerURL;
+	private URL legendURL;
+	private URL queryURL;
 	private boolean enabled;
 	private double opacity;
 	private Exception error = null;
 	private boolean layerLoading = false;
 
 	public LayerNode(String name, URL infoURL, URL iconURL, boolean expanded, URL layerURL,
-			boolean enabled, double opacity)
+			URL legendURL, URL queryURL, boolean enabled, double opacity)
 	{
 		super(name, infoURL, iconURL, expanded);
 		setLayerURL(layerURL);
+		setLegendURL(legendURL);
+		setQueryURL(queryURL);
 		setEnabled(enabled);
 		setOpacity(opacity);
 	}
@@ -24,7 +28,8 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	public LayerNode(ILayerNode node)
 	{
 		this(node.getName(), node.getInfoURL(), node.getIconURL(), node.isExpanded(), node
-				.getLayerURL(), node.isEnabled(), node.getOpacity());
+				.getLayerURL(), node.getLegendURL(), node.getQueryURL(), node.isEnabled(), node
+				.getOpacity());
 	}
 
 	public URL getLayerURL()
@@ -35,6 +40,26 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	public void setLayerURL(URL layerURL)
 	{
 		this.layerURL = layerURL;
+	}
+
+	public URL getLegendURL()
+	{
+		return legendURL;
+	}
+
+	public void setLegendURL(URL legendURL)
+	{
+		this.legendURL = legendURL;
+	}
+
+	public URL getQueryURL()
+	{
+		return queryURL;
+	}
+
+	public void setQueryURL(URL queryURL)
+	{
+		this.queryURL = queryURL;
 	}
 
 	public boolean isEnabled()
@@ -52,8 +77,8 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	public static LayerNode createFromLayerDefinition(ILayerDefinition definition)
 	{
 		return new LayerNode(definition.getName(), definition.getInfoURL(),
-				definition.getIconURL(), true, definition.getLayerURL(), definition.isEnabled(),
-				1.0);
+				definition.getIconURL(), true, definition.getLayerURL(), definition.getLegendURL(),
+				definition.getQueryURL(), definition.isEnabled(), 1.0);
 	}
 
 	@Override

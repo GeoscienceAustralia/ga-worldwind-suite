@@ -271,7 +271,7 @@ public class LayersPanel extends AbstractLayersPanel
 
 	private void newLayer()
 	{
-		LayerNode layerNode = new LayerNode("", null, null, true, null, true, 1);
+		LayerNode layerNode = new LayerNode("", null, null, true, null, null, null, true, 1);
 		LayerEditor editor = new LayerEditor(window, "New layer", layerNode, getIcon());
 		int value = editor.getOkCancel();
 		if (value == JOptionPane.OK_OPTION)
@@ -566,7 +566,7 @@ public class LayersPanel extends AbstractLayersPanel
 					URL url = file.toURI().toURL();
 					ILayerDefinition definition =
 							new LayerDefinition(file.getName(), url, null, Icons.file.getURL(),
-									true, false);
+									null, null, true, false);
 					addLayer(definition);
 				}
 			}

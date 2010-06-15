@@ -155,11 +155,14 @@ public class ThemeFactory
 					URL url = XMLUtil.getURL(element, "@url", urlContext);
 					URL description = XMLUtil.getURL(element, "@description", urlContext);
 					URL icon = XMLUtil.getURL(element, "@icon", urlContext);
+					URL legend = XMLUtil.getURL(element, "@legend", urlContext);
+					URL query = XMLUtil.getURL(element, "@query", urlContext);
 					boolean enabled = XMLUtil.getBoolean(element, "@enabled", true);
 					boolean visible = XMLUtil.getBoolean(element, "@visible", true);
 
 					ThemeLayer layer =
-							new BasicThemeLayer(name, url, description, icon, enabled, visible);
+							new BasicThemeLayer(name, url, description, icon, legend, query,
+									enabled, visible);
 					layers.add(layer);
 				}
 				catch (Exception e)

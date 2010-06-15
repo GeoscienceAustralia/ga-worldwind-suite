@@ -38,8 +38,7 @@ public class HtmlViewer extends JDialog
 		this(owner, title, false, resource, false);
 	}
 
-	public HtmlViewer(Frame owner, String title, boolean modal,
-			String resource, boolean showOk)
+	public HtmlViewer(Frame owner, String title, boolean modal, String resource, boolean showOk)
 	{
 		super(owner, title, modal);
 		URL url = null, base = null;
@@ -52,8 +51,7 @@ public class HtmlViewer extends JDialog
 		}
 		try
 		{
-			base = this.getClass().getResource(
-					resource.substring(0, resource.lastIndexOf('/')));
+			base = this.getClass().getResource(resource.substring(0, resource.lastIndexOf('/')));
 		}
 		catch (Exception e)
 		{
@@ -66,14 +64,12 @@ public class HtmlViewer extends JDialog
 		this(owner, title, false, page, base, false);
 	}
 
-	public HtmlViewer(Frame owner, String title, boolean modal, URL page,
-			URL base)
+	public HtmlViewer(Frame owner, String title, boolean modal, URL page, URL base)
 	{
 		this(owner, title, modal, page, base, false);
 	}
 
-	public HtmlViewer(Frame owner, String title, boolean modal, URL page,
-			URL base, boolean showOk)
+	public HtmlViewer(Frame owner, String title, boolean modal, URL page, URL base, boolean showOk)
 	{
 		super(owner, title, modal);
 		init(page, base, showOk, title);
@@ -152,8 +148,7 @@ public class HtmlViewer extends JDialog
 
 		JRootPane rootPane = getRootPane();
 		KeyStroke stroke = KeyStroke.getKeyStroke("ESCAPE");
-		InputMap inputMap = rootPane
-				.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 		inputMap.put(stroke, "ESCAPE");
 		rootPane.getActionMap().put("ESCAPE", disposeAction);
 

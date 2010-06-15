@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -13,13 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.AbstractButton;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
-import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.components.lazytree.ErrorNode;
 import au.gov.ga.worldwind.components.lazytree.LoadingNode;
@@ -32,15 +33,21 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 {
 	private LoadingTree tree;
 	private RendererMouseKeyListener mouseKeyListener = new RendererMouseKeyListener();
-	private Map<Integer, Rectangle> urlRows = new HashMap<Integer, Rectangle>();
+	private Map<Integer, Rectangle> infoRows = new HashMap<Integer, Rectangle>();
+	private Map<Integer, Rectangle> legendRows = new HashMap<Integer, Rectangle>();
+	private Map<Integer, Rectangle> queryRows = new HashMap<Integer, Rectangle>();
 
-	private int mouseRow = -1, keyRow = -1, mouseButtonDownRow = -1, mouseLabelDownRow = -1,
-			keyDownRow = -1, mouseInfoRow = -1;
+	private int mouseRow = -1, keyRow = -1, mouseButtonDownRow = -1, keyDownRow = -1;
+	private int mouseInfoRow = -1, mouseLegendRow = -1, mouseQueryRow = -1;
+	private int mouseInfoDownRow = -1, mouseLegendDownRow = -1, mouseQueryDownRow = -1;
 	private int mouseX = -1, mouseY = -1;
 
 	private AbstractButton button;
 	private DefaultTreeCellRenderer label;
+	private JPanel buttonPanel;
 	private JLabel infoLabel;
+	private JLabel legendLabel;
+	private JLabel queryLabel;
 
 	private ImageIcon loadingIcon;
 
@@ -62,10 +69,19 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 
 		infoLabel = new JLabel(Icons.infowhite.getIcon());
 		infoLabel.setOpaque(false);
+		legendLabel = new JLabel(Icons.legendwhite.getIcon());
+		legendLabel.setOpaque(false);
+		queryLabel = new JLabel(Icons.crosshairwhite.getIcon());
+		queryLabel.setOpaque(false);
 
 		add(button, BorderLayout.WEST);
 		add(label, BorderLayout.CENTER);
-		add(infoLabel, BorderLayout.EAST);
+		buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 2, 0));
+		buttonPanel.setOpaque(false);
+		add(buttonPanel, BorderLayout.EAST);
+		buttonPanel.add(infoLabel);
+		buttonPanel.add(legendLabel);
+		buttonPanel.add(queryLabel);
 
 		loadingIcon = Icons.newLoadingIcon();
 	}
@@ -150,12 +166,14 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		{
 			label.setIcon(loadingIcon);
 		}
-		
+
 		setupLabel(label, item);
 
-		boolean urlRow = isURLRow(item);
+		boolean infoRow = isInfoRow(item);
 		L layerItem = getLayerValue(item);
 		boolean layerRow = layerItem != null;
+		boolean legendRow = layerRow ? isLegendRow(layerItem) : false;
+		boolean queryRow = layerRow ? isQueryRow(layerItem) : false;
 
 		if (layerRow)
 		{
@@ -173,25 +191,45 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		//the button is only visible if the row represents a layer
 		button.setVisible(layerRow);
 
-		//set up the info icon label
-		infoLabel.setVisible(urlRow);
-		if (mouseInfoRow == row)
-			infoLabel.setIcon(Icons.info.getIcon());
-		else
-			infoLabel.setIcon(Icons.infowhite.getIcon());
+		//set up the icon labels
+		updateLabel(row, mouseInfoRow, infoRow, infoLabel, Icons.info.getIcon(), Icons.infowhite
+				.getIcon());
+		updateLabel(row, mouseLegendRow, legendRow, legendLabel, Icons.legend.getIcon(),
+				Icons.legendwhite.getIcon());
+		updateLabel(row, mouseQueryRow, queryRow, queryLabel, Icons.crosshair.getIcon(),
+				Icons.crosshairwhite.getIcon());
 
-		if (urlRow)
-		{
-			Rectangle labelBounds = new Rectangle(infoLabel.getPreferredSize());
-			//ensure the label is in the correct position by forcing a layout
-			validate();
-			labelBounds.x += infoLabel.getLocation().x;
-			urlRows.put(row, labelBounds);
-		}
-		else
-			urlRows.remove(row);
+		//ensure the labels are in the correct position by forcing a layout
+		validate();
+
+		//update the row/rectangle maps
+		updateLabelMap(row, infoRow, infoRows, infoLabel);
+		updateLabelMap(row, legendRow, legendRows, legendLabel);
+		updateLabelMap(row, queryRow, queryRows, queryLabel);
 
 		return this;
+	}
+
+	private void updateLabel(int row, int mouseRow, boolean isRow, JLabel label, Icon overIcon,
+			Icon otherIcon)
+	{
+		label.setVisible(isRow);
+		if (row == mouseRow)
+			label.setIcon(overIcon);
+		else
+			label.setIcon(otherIcon);
+	}
+
+	private void updateLabelMap(int row, boolean isRow, Map<Integer, Rectangle> map, JLabel label)
+	{
+		if (isRow)
+		{
+			Rectangle labelBounds = new Rectangle(label.getPreferredSize());
+			labelBounds.x += label.getLocation().x + buttonPanel.getLocation().x;
+			map.put(row, labelBounds);
+		}
+		else
+			map.remove(row);
 	}
 
 	protected abstract AbstractButton createButton();
@@ -200,20 +238,28 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 
 	protected abstract E getValue(Object value);
 
-	protected abstract boolean isURLRow(E value);
+	protected abstract boolean isInfoRow(E value);
+
+	protected abstract boolean isLegendRow(L value);
+
+	protected abstract boolean isQueryRow(L value);
 
 	protected abstract L getLayerValue(E value);
-	
+
 	protected abstract void setupLabel(DefaultTreeCellRenderer label, E value);
 
 	protected abstract void setupButton(AbstractButton button, L value, boolean mouseInsideButton,
 			boolean rollover, boolean down);
 
-	protected abstract String getLinkLabelToolTipText(Object value);
+	//protected abstract String getLinkLabelToolTipText(Object value);
 
 	protected abstract void buttonPressed(int row);
 
-	protected abstract void linkClicked(int row);
+	protected abstract void infoClicked(int row);
+
+	protected abstract void legendClicked(int row);
+
+	protected abstract void queryClicked(int row);
 
 	private class RendererMouseKeyListener extends MouseAdapter implements KeyListener
 	{
@@ -249,10 +295,20 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 					{
 						mouseButtonDownRow = mouseRow;
 					}
-					else if (urlRows.containsKey(mouseRow)
-							&& urlRows.get(mouseRow).contains(mouseX, mouseY))
+					else
 					{
-						mouseLabelDownRow = mouseRow;
+						if (mouseInsideMapBounds(infoRows))
+						{
+							mouseInfoDownRow = mouseRow;
+						}
+						else if (mouseInsideMapBounds(legendRows))
+						{
+							mouseLegendDownRow = mouseRow;
+						}
+						else if (mouseInsideMapBounds(queryRows))
+						{
+							mouseQueryDownRow = mouseRow;
+						}
 					}
 				}
 				repaintMouseRow();
@@ -274,16 +330,28 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 					{
 						buttonPressed(mouseRow);
 					}
-					else if (mouseLabelDownRow == mouseRow && urlRows.containsKey(mouseRow)
-							&& urlRows.get(mouseRow).contains(mouseX, mouseY))
+					else if (mouseInfoDownRow == mouseRow && mouseInsideMapBounds(infoRows))
 					{
-						linkClicked(mouseRow);
+						infoClicked(mouseRow);
+					}
+					else if (mouseLegendDownRow == mouseRow && mouseInsideMapBounds(legendRows))
+					{
+						legendClicked(mouseRow);
+					}
+					else if (mouseQueryDownRow == mouseRow && mouseInsideMapBounds(queryRows))
+					{
+						queryClicked(mouseRow);
 					}
 				}
 
 				mouseButtonDownRow = -1;
 				repaintMouseRow();
 			}
+		}
+
+		private boolean mouseInsideMapBounds(Map<Integer, Rectangle> map)
+		{
+			return map.containsKey(mouseRow) && map.get(mouseRow).contains(mouseX, mouseY);
 		}
 
 		@Override
@@ -379,13 +447,36 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		{
 			int cursor = -1;
 			mouseInfoRow = -1;
-			if (mouseRow >= 0 && urlRows.containsKey(mouseRow))
+			mouseLegendRow = -1;
+			mouseQueryRow = -1;
+			if (mouseRow >= 0)
 			{
-				Rectangle labelBounds = urlRows.get(mouseRow);
-				if (labelBounds.contains(mouseX, mouseY))
+				if (infoRows.containsKey(mouseRow))
 				{
-					cursor = Cursor.HAND_CURSOR;
-					mouseInfoRow = mouseRow;
+					Rectangle labelBounds = infoRows.get(mouseRow);
+					if (labelBounds.contains(mouseX, mouseY))
+					{
+						cursor = Cursor.HAND_CURSOR;
+						mouseInfoRow = mouseRow;
+					}
+				}
+				if (legendRows.containsKey(mouseRow))
+				{
+					Rectangle labelBounds = legendRows.get(mouseRow);
+					if (labelBounds.contains(mouseX, mouseY))
+					{
+						cursor = Cursor.HAND_CURSOR;
+						mouseLegendRow = mouseRow;
+					}
+				}
+				if (queryRows.containsKey(mouseRow))
+				{
+					Rectangle labelBounds = queryRows.get(mouseRow);
+					if (labelBounds.contains(mouseX, mouseY))
+					{
+						cursor = Cursor.CROSSHAIR_CURSOR;
+						mouseQueryRow = mouseRow;
+					}
 				}
 			}
 
@@ -397,17 +488,17 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 				if (cursor == -1)
 				{
 					tree.setCursor(null);
-					tree.setToolTipText(null);
+					//tree.setToolTipText(null);
 				}
 				else
 				{
 					tree.setCursor(Cursor.getPredefinedCursor(cursor));
-					TreePath path = tree.getPathForRow(mouseRow);
+					/*TreePath path = tree.getPathForRow(mouseRow);
 					if (path != null)
 					{
 						Object value = path.getLastPathComponent();
 						tree.setToolTipText(getLinkLabelToolTipText(value));
-					}
+					}*/
 				}
 			}
 		}

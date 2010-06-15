@@ -3,22 +3,24 @@ package au.gov.ga.worldwind.components;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 
+import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 
 public class ImageDialog extends JDialog
 {
 	private final static int BORDER = 5;
 
-	public ImageDialog(Frame frame, String title, boolean modal,
-			final Image image)
+	public ImageDialog(Frame frame, String title, boolean modal, final Image image, ImageIcon icon)
 	{
 		super(frame, title, modal);
+		setIconImage(icon.getImage());
 
 		setLayout(new BorderLayout());
 		Canvas canvas = new Canvas()
@@ -27,12 +29,11 @@ public class ImageDialog extends JDialog
 			public void paint(Graphics g)
 			{
 				super.paint(g);
-				int x = BORDER, y = BORDER, width = getWidth() - BORDER * 2, height = getHeight()
-						- BORDER * 2;
+				int x = BORDER, y = BORDER, width = getWidth() - BORDER * 2, height =
+						getHeight() - BORDER * 2;
 				if (width < 0 || height < 0)
 					return;
-				int imageWidth = image.getWidth(null), imageHeight = image
-						.getHeight(null);
+				int imageWidth = image.getWidth(null), imageHeight = image.getHeight(null);
 				float canvasAspect = (float) width / (float) height;
 				float imageAspect = (float) imageWidth / (float) imageHeight;
 
@@ -59,5 +60,7 @@ public class ImageDialog extends JDialog
 		};
 		add(canvas, BorderLayout.CENTER);
 		canvas.setBackground(Color.white);
+		canvas.setPreferredSize(new Dimension(image.getWidth(null), image.getHeight(null)));
+		pack();
 	}
 }
