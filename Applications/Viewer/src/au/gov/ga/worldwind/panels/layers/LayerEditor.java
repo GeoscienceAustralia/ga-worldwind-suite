@@ -30,6 +30,8 @@ public class LayerEditor extends JDialog
 	private JTextField layerText;
 	private JTextField infoText;
 	private JTextField iconText;
+	private JTextField legendText;
+	private JTextField queryText;
 	private int returnValue = JOptionPane.CANCEL_OPTION;
 	private JButton okButton;
 
@@ -152,6 +154,41 @@ public class LayerEditor extends JDialog
 		c.insets = (Insets) insets.clone();
 		panel2.add(iconText, c);
 
+		if (layer != null)
+		{
+			label = new JLabel("Legend URL:");
+			c = new GridBagConstraints();
+			c.gridx = 0;
+			c.gridy = i;
+			c.anchor = GridBagConstraints.EAST;
+			c.insets = (Insets) insets.clone();
+			panel2.add(label, c);
+
+			legendText = new JTextField(toString(layer.getLegendURL()));
+			c = new GridBagConstraints();
+			c.gridx = 1;
+			c.gridy = i++;
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.insets = (Insets) insets.clone();
+			panel2.add(legendText, c);
+
+			label = new JLabel("Query URL:");
+			c = new GridBagConstraints();
+			c.gridx = 0;
+			c.gridy = i;
+			c.anchor = GridBagConstraints.EAST;
+			c.insets = (Insets) insets.clone();
+			panel2.add(label, c);
+
+			queryText = new JTextField(toString(layer.getQueryURL()));
+			c = new GridBagConstraints();
+			c.gridx = 1;
+			c.gridy = i++;
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.insets = (Insets) insets.clone();
+			panel2.add(queryText, c);
+		}
+
 		//filler
 		panel3 = new JPanel();
 		c = new GridBagConstraints();
@@ -222,6 +259,8 @@ public class LayerEditor extends JDialog
 		URL layerURL = layer == null ? null : toURL(layerText.getText());
 		URL infoURL = toURL(infoText.getText());
 		URL iconURL = toURL(iconText.getText());
+		URL legendURL = layer == null ? null : toURL(legendText.getText());
+		URL queryURL = layer == null ? null : toURL(queryText.getText());
 
 		if (layer != null && (layerText.getText().length() == 0 || layerURL == null))
 			valid = false;
@@ -229,14 +268,22 @@ public class LayerEditor extends JDialog
 			valid = false;
 		if (iconText.getText().length() != 0 && iconURL == null)
 			valid = false;
+		if (layer != null && legendText.getText().length() != 0 && legendURL == null)
+			valid = false;
+		if (layer != null && queryText.getText().length() != 0 && queryURL == null)
+			valid = false;
 
 		if (valid)
 		{
 			node.setName(nameText.getText());
-			if (layer != null)
-				layer.setLayerURL(layerURL);
 			node.setInfoURL(infoURL);
 			node.setIconURL(iconURL);
+			if (layer != null)
+			{
+				layer.setLayerURL(layerURL);
+				layer.setLegendURL(legendURL);
+				layer.setQueryURL(queryURL);
+			}
 		}
 
 		okButton.setEnabled(valid);
