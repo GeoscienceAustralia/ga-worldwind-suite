@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -167,6 +168,8 @@ public class NodeTransferHandler extends TransferHandler
 		TreeTransferable t = (TreeTransferable) data;
 		LayerTreeModel model = layersTree.getModel();
 
+		Boolean moveIntoFolders = null;
+
 		int i = 0;
 		for (TreePath path : t.getPaths())
 		{
@@ -180,9 +183,27 @@ public class NodeTransferHandler extends TransferHandler
 				DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) path.getLastPathComponent();
 				if (dmtn != null && dmtn.getUserObject() instanceof ILayerDefinition)
 				{
+					if (moveIntoFolders == null)
+					{
+						String message =
+								"Would you like to include the folder hierarchy with the dragged layers?";
+						int result =
+								JOptionPane.showConfirmDialog(layersTree, message,
+										"Include folders", JOptionPane.YES_NO_OPTION,
+										JOptionPane.QUESTION_MESSAGE);
+						moveIntoFolders = result == JOptionPane.YES_OPTION;
+					}
+
 					ILayerDefinition definition = (ILayerDefinition) dmtn.getUserObject();
-					INode node = LayerNode.createFromLayerDefinition(definition);
-					addNodeToTree(dropLocation, model, node, false, i++);
+					if (moveIntoFolders)
+					{
+						layersTree.getModel().addLayer(definition, path.getPath());
+					}
+					else
+					{
+						INode node = LayerNode.createFromLayerDefinition(definition);
+						addNodeToTree(dropLocation, model, node, false, i++);
+					}
 
 					Rectangle bounds = datasetTree.getPathBounds(path);
 					if (bounds != null)
