@@ -367,6 +367,7 @@ public class PlacesPanel extends AbstractThemePanel
 			place.setZoom(orbitView.getZoom());
 			place.setHeading(orbitView.getHeading().degrees);
 			place.setPitch(orbitView.getPitch().degrees);
+			place.setElevation(pos.getElevation());
 			place.setSaveCamera(false);
 			PlaceEditor editor = new PlaceEditor(wwd, window, "New place", place, getIcon());
 			int value = editor.getOkCancel();
@@ -504,6 +505,12 @@ public class PlacesPanel extends AbstractThemePanel
 					}
 				}
 			});
+
+			//if there are any current movements or animations, they will change the view
+			//after the place animation has been applied, so stop them
+			wwd.getView().stopMovement();
+			wwd.getView().stopAnimations();
+
 			Thread thread = new Thread(new Runnable()
 			{
 				public void run()
@@ -589,18 +596,19 @@ public class PlacesPanel extends AbstractThemePanel
 		if (view instanceof OrbitView)
 		{
 			OrbitView orbitView = (OrbitView) view;
-			Position center = orbitView.getCenterPosition();
-			Position newCenter = Position.fromDegrees(place.getLatitude(), place.getLongitude(), 0);
-			long lengthMillis = Util.getScaledLengthMillis(center, newCenter);
 
 			Angle heading = orbitView.getHeading();
 			Angle pitch = orbitView.getPitch();
 			double zoom = orbitView.getZoom();
+			double elevation = 0d;
+			boolean endCenterOnSurface = true;
 			if (place.isSaveCamera())
 			{
 				zoom = place.getZoom();
 				heading = Angle.fromDegrees(place.getHeading());
 				pitch = Angle.fromDegrees(place.getPitch());
+				elevation = place.getElevation();
+				endCenterOnSurface = false;
 			}
 			else
 			{
@@ -612,9 +620,19 @@ public class PlacesPanel extends AbstractThemePanel
 					zoom = maxZoom;
 			}
 
+			Position center = orbitView.getCenterPosition();
+			Position newCenter =
+					Position.fromDegrees(place.getLatitude(), place.getLongitude(), elevation);
+			long lengthMillis = Util.getScaledLengthMillis(center, newCenter);
+
 			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView, center,
 					newCenter, orbitView.getHeading(), heading, orbitView.getPitch(), pitch,
-					orbitView.getZoom(), zoom, lengthMillis, true));
+					orbitView.getZoom(), zoom, lengthMillis, endCenterOnSurface));
+			/*orbitView.setCenterPosition(newCenter);
+			orbitView.setHeading(heading);
+			orbitView.setPitch(pitch);
+			orbitView.setZoom(zoom);*/
+
 			wwd.redraw();
 
 			return lengthMillis;

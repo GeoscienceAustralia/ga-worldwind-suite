@@ -27,6 +27,7 @@ public class BasicTheme implements Theme
 	private Double initialHeading;
 	private Double initialPitch;
 	private Double verticalExaggeration;
+	private Double fieldOfView;
 
 	public BasicTheme(String name)
 	{
@@ -210,6 +211,16 @@ public class BasicTheme implements Theme
 	public void setVerticalExaggeration(Double verticalExaggeration)
 	{
 		this.verticalExaggeration = verticalExaggeration;
+	}
+
+	public Double getFieldOfView()
+	{
+		return fieldOfView;
+	}
+
+	public void setFieldOfView(Double fieldOfView)
+	{
+		this.fieldOfView = fieldOfView;
 	}
 
 	@Override

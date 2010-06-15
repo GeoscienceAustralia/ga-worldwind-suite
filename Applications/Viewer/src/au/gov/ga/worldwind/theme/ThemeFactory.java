@@ -36,6 +36,7 @@ public class ThemeFactory
 		theme.setInitialHeading(XMLUtil.getDouble(element, "InitialHeading", null));
 		theme.setInitialPitch(XMLUtil.getDouble(element, "InitialPitch", null));
 		theme.setVerticalExaggeration(XMLUtil.getDouble(element, "VerticalExaggeration", null));
+		theme.setFieldOfView(XMLUtil.getDouble(element, "FieldOfView", null));
 
 		return theme;
 	}

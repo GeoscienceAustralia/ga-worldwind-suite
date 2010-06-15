@@ -33,4 +33,5 @@ public interface Theme extends Disposable
 	public Double getInitialHeading();
 	public Double getInitialPitch();
 	public Double getVerticalExaggeration();
+	public Double getFieldOfView();
 }

@@ -94,6 +94,7 @@ public class Settings
 	private double viewIteratorSpeed = 1.0;
 	private boolean showDownloads = true;
 	private int placesPause = 1000;
+	private double fieldOfView = 45.0;
 
 	private int splitLocation = 300;
 	private List<ThemePanelProperties> panelProperties = new ArrayList<ThemePanelProperties>();
@@ -398,6 +399,20 @@ public class Settings
 		this.placesPause = annotationsPause;
 	}
 
+	public double getFieldOfView()
+	{
+		return fieldOfView;
+	}
+
+	public void setFieldOfView(double fieldOfView)
+	{
+		if (fieldOfView <= 0d)
+			fieldOfView = 1d;
+		else if (fieldOfView > 180)
+			fieldOfView = 180;
+		this.fieldOfView = fieldOfView;
+	}
+
 	public List<ThemePanelProperties> getPanelProperties()
 	{
 		return panelProperties;
@@ -475,6 +490,18 @@ public class Settings
 				}
 			}
 		}
+
+		boolean settingsAvailable = theme.hasMenuBar() || theme.hasToolBar();
+
+		if (theme.getVerticalExaggeration() != null)
+			setVerticalExaggeration(theme.getVerticalExaggeration());
+		else if (!settingsAvailable)
+			setVerticalExaggeration(1d);
+
+		if (theme.getFieldOfView() != null)
+			setFieldOfView(theme.getFieldOfView());
+		else if (!settingsAvailable)
+			setFieldOfView(45d);
 	}
 
 	public void saveThemeProperties(Theme theme)

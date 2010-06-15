@@ -170,9 +170,6 @@ public class Application
 		if (theme.getInitialPitch() != null)
 			Configuration.setValue(AVKey.INITIAL_PITCH, theme.getInitialPitch());
 
-		if (theme.getVerticalExaggeration() != null)
-			Settings.get().setVerticalExaggeration(theme.getVerticalExaggeration());
-
 		WorldWind.getDataFileStore().addLocation("cache", false);
 
 		return new Application(theme);
@@ -445,7 +442,7 @@ public class Application
 				{
 					visible = true;
 					SettingsDialog settingsDialog =
-							new SettingsDialog(frame, Icons.settings.getIcon());
+							new SettingsDialog(frame, "Preferences", Icons.settings.getIcon());
 					settingsDialog.setVisible(true);
 					visible = false;
 					afterSettingsChange();

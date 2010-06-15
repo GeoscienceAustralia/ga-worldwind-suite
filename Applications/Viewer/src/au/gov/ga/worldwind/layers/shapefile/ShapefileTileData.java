@@ -214,8 +214,8 @@ public class ShapefileTileData implements Renderable, Cacheable
 		GL gl = dc.getGL();
 
 		//gl.glCullFace(GL.GL_NONE);
-		//gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
-		gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+		gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+		//gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
 
 		for (Renderable renderable : shapes)
 			renderable.render(dc);

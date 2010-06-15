@@ -71,7 +71,7 @@ public class LayersPanel extends AbstractLayersPanel
 		});
 
 		enableActions();
-		createPopupMenu();
+		createPopupMenus();
 	}
 
 	@Override
@@ -198,32 +198,42 @@ public class LayersPanel extends AbstractLayersPanel
 		toolBar.add(editAction);
 		toolBar.add(deleteAction);
 		toolBar.addSeparator();
-		toolBar.add(expandAllAction);
+		/*toolBar.add(expandAllAction);
 		toolBar.add(collapseAllAction);
-		toolBar.addSeparator();
+		toolBar.addSeparator();*/
 	}
 
-	private void createPopupMenu()
+	private void createPopupMenus()
 	{
-		final JPopupMenu popupMenu = new JPopupMenu();
-		popupMenu.add(newFolderAction);
-		popupMenu.addSeparator();
-		popupMenu.add(renameAction);
-		popupMenu.add(editAction);
-		popupMenu.add(deleteAction);
+		final JPopupMenu itemPopupMenu = new JPopupMenu();
+		itemPopupMenu.add(newFolderAction);
+		itemPopupMenu.addSeparator();
+		itemPopupMenu.add(renameAction);
+		itemPopupMenu.add(editAction);
+		itemPopupMenu.add(deleteAction);
+
+		final JPopupMenu otherPopupMenu = new JPopupMenu();
+		otherPopupMenu.add(newFolderAction);
+		otherPopupMenu.addSeparator();
+		otherPopupMenu.add(expandAllAction);
+		otherPopupMenu.add(collapseAllAction);
 
 		tree.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mouseClicked(MouseEvent e)
 			{
-				int row = tree.getRowForLocation(e.getX(), e.getY());
-				if (row >= 0)
+				if (e.getButton() == MouseEvent.BUTTON3)
 				{
-					if (e.getButton() == MouseEvent.BUTTON3)
+					int row = tree.getRowForLocation(e.getX(), e.getY());
+					if (row >= 0)
 					{
 						tree.setSelectionRow(row);
-						popupMenu.show(tree, e.getX(), e.getY());
+						itemPopupMenu.show(tree, e.getX(), e.getY());
+					}
+					else
+					{
+						otherPopupMenu.show(tree, e.getX(), e.getY());
 					}
 				}
 			}

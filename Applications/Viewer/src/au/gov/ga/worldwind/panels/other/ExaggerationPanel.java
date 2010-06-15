@@ -23,44 +23,44 @@ import au.gov.ga.worldwind.util.Icons;
 public class ExaggerationPanel extends AbstractThemePanel
 {
 	private WorldWindow wwd;
-	private JSlider slider;
-	private JLabel sliderLabel;
-	private boolean ignoreChange = false;
+
+	private JSlider exaggerationSlider;
+	private JLabel exaggerationLabel;
+	private boolean ignoreExaggerationChange = false;
 
 	public ExaggerationPanel()
 	{
 		super(new GridBagLayout());
-
 		setResizable(false);
-
 		GridBagConstraints c;
+		int i = 0;
 
 		double settingsExaggeration = Settings.get().getVerticalExaggeration();
-		slider = new JSlider(0, 200, exaggerationToSlider(settingsExaggeration));
-		Dimension size = slider.getPreferredSize();
+		exaggerationSlider = new JSlider(0, 2000, exaggerationToSlider(settingsExaggeration));
+		Dimension size = exaggerationSlider.getPreferredSize();
 		size.width = 50;
-		slider.setPreferredSize(size);
+		exaggerationSlider.setPreferredSize(size);
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = i;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weightx = 1;
-		add(slider, c);
+		add(exaggerationSlider, c);
 
-		sliderLabel = new JLabel();
+		exaggerationLabel = new JLabel();
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 0;
+		c.gridy = i++;
 		c.anchor = GridBagConstraints.WEST;
-		add(sliderLabel, c);
+		add(exaggerationLabel, c);
 
 		set(settingsExaggeration, false);
-		slider.addChangeListener(new ChangeListener()
+		exaggerationSlider.addChangeListener(new ChangeListener()
 		{
 			public void stateChanged(ChangeEvent e)
 			{
-				set(sliderToExaggeration(slider.getValue()), true);
+				set(sliderToExaggeration(exaggerationSlider.getValue()), true);
 			}
 		});
 	}
@@ -76,25 +76,30 @@ public class ExaggerationPanel extends AbstractThemePanel
 	private int exaggerationToSlider(double exaggeration)
 	{
 		double y = exaggeration;
-		double x = Math.log10(y + (100d - y) / 100d);
-		return (int) Math.round(x * 100d);
+		double x = Math.log10(y + (1000d - y) / 1000d);
+		return (int) Math.round(x * 1000d);
 	}
 
 	private double sliderToExaggeration(int slider)
 	{
-		double x = slider / 100d;
+		double x = slider / 1000d;
 		double y = Math.pow(10d, x) - (2d - x) / 2d;
 		return y;
 	}
 
 	private void set(double exaggeration, boolean valueFromSlider)
 	{
-		if (ignoreChange)
+		if (ignoreExaggerationChange)
 			return;
 
-		ignoreChange = true;
+		ignoreExaggerationChange = true;
 
-		sliderLabel.setText(String.valueOf(Math.round(exaggeration * 10d) / 10d));
+		String format = "%1." + (exaggeration < 10 ? "2" : exaggeration < 100 ? "1" : "0") + "f";
+		String text = String.format(format, exaggeration);
+		if (text.indexOf('.') < 0)
+			text += ".";
+		exaggerationLabel.setText(text + " x");
+
 		if (valueFromSlider)
 		{
 			Settings.get().setVerticalExaggeration(exaggeration);
@@ -107,12 +112,12 @@ public class ExaggerationPanel extends AbstractThemePanel
 		else
 		{
 			//only change slider if current value doesn't resolve to current exaggeration
-			double currentSliderExaggeration = sliderToExaggeration(slider.getValue());
+			double currentSliderExaggeration = sliderToExaggeration(exaggerationSlider.getValue());
 			if (currentSliderExaggeration != exaggeration)
-				slider.setValue(exaggerationToSlider(exaggeration));
+				exaggerationSlider.setValue(exaggerationToSlider(exaggeration));
 		}
 
-		ignoreChange = false;
+		ignoreExaggerationChange = false;
 	}
 
 	@Override

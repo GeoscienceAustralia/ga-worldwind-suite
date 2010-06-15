@@ -144,7 +144,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		opacitySlider = new JSlider(0, 100, 100);
 		opacitySlider.setToolTipText("Layer opacity");
 		Dimension size = opacitySlider.getPreferredSize();
-		size.width = 50;
+		size.width = 60;
 		opacitySlider.setPreferredSize(size);
 		opacitySlider.setMinimumSize(size);
 		opacitySlider.setMaximumSize(size);

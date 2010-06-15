@@ -19,7 +19,7 @@ public class ControlsHUD extends AbstractThemeHUD
 	{
 		layer = new ViewControlsLayer();
 		layer.setShowVeControls(false);
-		layer.setShowFovControls(true);
+		layer.setShowFovControls(false);
 		return layer;
 	}
 

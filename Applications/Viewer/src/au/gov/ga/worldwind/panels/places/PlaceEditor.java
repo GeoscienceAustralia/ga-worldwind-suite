@@ -59,9 +59,12 @@ public class PlaceEditor extends JDialog
 	private JLabel zoomLabel;
 	private JLabel headingLabel;
 	private JLabel pitchLabel;
+	private JLabel elevationLabel;
 	private JDoubleField zoom;
 	private JDoubleField heading;
 	private JDoubleField pitch;
+	private JDoubleField elevation;
+	private JComboBox elevationUnits;
 	private JComboBox zoomUnits;
 	private WorldWindow wwd;
 	private int returnValue = JOptionPane.CANCEL_OPTION;
@@ -394,6 +397,7 @@ public class PlaceEditor extends JDialog
 					pitch.setValue(orbitView.getPitch().degrees);
 					zoom.setValue(orbitView.getZoom());
 					Position pos = orbitView.getCenterPosition();
+					elevation.setValue(pos.getElevation());
 					double lat = pos.getLatitude().degrees;
 					double lon = pos.getLongitude().degrees;
 					if (Math.abs(lat - place.getLatitude()) > 0.1
@@ -523,6 +527,50 @@ public class PlaceEditor extends JDialog
 		zoomUnits.addActionListener(mzal);
 		mzal.actionPerformed(null);
 
+		elevationLabel = new JLabel("Elevation:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 4;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = (Insets) insets.clone();
+		panel2.add(elevationLabel, c);
+
+		panel3 = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 4;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel2.add(panel3, c);
+
+		elevation = new JDoubleField(place.getElevation(), 2);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = (Insets) insets.clone();
+		c.weightx = 1;
+		panel3.add(elevation, c);
+
+		elevationUnits = new JComboBox(Units.values());
+		if (UNITS == IMPERIAL)
+			elevationUnits.setSelectedItem(Units.Miles);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = (Insets) insets.clone();
+		panel3.add(elevationUnits, c);
+
+		mzal = new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				elevation.setScale(((Units) elevationUnits.getSelectedItem()).getScale());
+			}
+		};
+		elevationUnits.addActionListener(mzal);
+		mzal.actionPerformed(null);
+
 
 		panel = new JPanel(new BorderLayout());
 		int spacing = 5;
@@ -568,6 +616,7 @@ public class PlaceEditor extends JDialog
 		zoom.getDocument().addDocumentListener(dl);
 		heading.getDocument().addDocumentListener(dl);
 		pitch.getDocument().addDocumentListener(dl);
+		elevation.getDocument().addDocumentListener(dl);
 	}
 
 	private boolean checkValidity()
@@ -617,14 +666,18 @@ public class PlaceEditor extends JDialog
 
 		Double p = pitch.getValue();
 		Double h = heading.getValue();
+		Double e = elevation.getValue();
 		if (p == null)
 			p = 0d;
 		if (h == null)
 			h = 0d;
+		if (e == null)
+			e = 0d;
 
 		place.setSaveCamera(cameraInformation.isSelected());
 		place.setHeading(h);
 		place.setPitch(p);
+		place.setElevation(e);
 		place.setExcludeFromPlaylist(excludeFromPlaylist.isSelected());
 
 		okButton.setEnabled(valid);
@@ -647,10 +700,13 @@ public class PlaceEditor extends JDialog
 		headingLabel.setEnabled(enabled);
 		zoomLabel.setEnabled(enabled);
 		pitchLabel.setEnabled(enabled);
+		elevationLabel.setEnabled(enabled);
 		heading.setEnabled(enabled);
 		zoom.setEnabled(enabled);
 		pitch.setEnabled(enabled);
+		elevation.setEnabled(enabled);
 		zoomUnits.setEnabled(enabled);
+		elevationUnits.setEnabled(enabled);
 	}
 
 	private String textFormatedLatLon(double latitude, double longitude)

@@ -14,6 +14,7 @@ public class Place implements Serializable
 	private double zoom = 0;
 	private double heading = 0;
 	private double pitch = 0;
+	private double elevation = 0;
 	private boolean excludeFromPlaylist = false;
 
 	public Place()
@@ -52,6 +53,7 @@ public class Place implements Serializable
 		this.zoom = place.zoom;
 		this.heading = place.heading;
 		this.pitch = place.pitch;
+		this.elevation = place.elevation;
 		this.excludeFromPlaylist = place.excludeFromPlaylist;
 	}
 
@@ -163,5 +165,15 @@ public class Place implements Serializable
 	public void setExcludeFromPlaylist(boolean excludeFromPlaylist)
 	{
 		this.excludeFromPlaylist = excludeFromPlaylist;
+	}
+
+	public double getElevation()
+	{
+		return elevation;
+	}
+
+	public void setElevation(double elevation)
+	{
+		this.elevation = elevation;
 	}
 }

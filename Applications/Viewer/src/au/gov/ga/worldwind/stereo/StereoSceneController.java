@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.stereo;
 
 import gov.nasa.worldwind.AbstractSceneController;
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.render.DrawContext;
 
 import java.nio.ByteBuffer;
@@ -17,6 +18,7 @@ import com.sun.opengl.util.BufferUtil;
 public class StereoSceneController extends AbstractSceneController
 {
 	private double lastVerticalExaggeration = -1;
+	private double lastFieldOfView = -1;
 	private boolean stereoTested = false;
 
 	@Override
@@ -28,6 +30,13 @@ public class StereoSceneController extends AbstractSceneController
 		{
 			setVerticalExaggeration(verticalExaggeration);
 			lastVerticalExaggeration = verticalExaggeration;
+		}
+
+		double fieldOfView = settings.getFieldOfView();
+		if (lastFieldOfView != fieldOfView)
+		{
+			dc.getView().setFieldOfView(Angle.fromDegrees(fieldOfView));
+			lastFieldOfView = fieldOfView;
 		}
 
 		GL gl = dc.getGL();
@@ -95,18 +104,18 @@ public class StereoSceneController extends AbstractSceneController
 		boolean left = eye == Eye.LEFT;
 		switch (mode)
 		{
-			case RC_ANAGLYPH:
-				gl.glColorMask(left, !left, !left, true);
-				break;
-			case GM_ANAGLYPH:
-				gl.glColorMask(!left, left, !left, true);
-				break;
-			case BY_ANAGLYPH:
-				gl.glColorMask(!left, !left, left, true);
-				break;
-			case STEREO_BUFFER:
-				gl.glDrawBuffer(left ? GL.GL_BACK_LEFT : GL.GL_BACK_RIGHT);
-				break;
+		case RC_ANAGLYPH:
+			gl.glColorMask(left, !left, !left, true);
+			break;
+		case GM_ANAGLYPH:
+			gl.glColorMask(!left, left, !left, true);
+			break;
+		case BY_ANAGLYPH:
+			gl.glColorMask(!left, !left, left, true);
+			break;
+		case STEREO_BUFFER:
+			gl.glDrawBuffer(left ? GL.GL_BACK_LEFT : GL.GL_BACK_RIGHT);
+			break;
 		}
 	}
 
@@ -114,14 +123,14 @@ public class StereoSceneController extends AbstractSceneController
 	{
 		switch (mode)
 		{
-			case BY_ANAGLYPH:
-			case GM_ANAGLYPH:
-			case RC_ANAGLYPH:
-				gl.glColorMask(true, true, true, true);
-				break;
-			case STEREO_BUFFER:
-				gl.glDrawBuffer(GL.GL_BACK);
-				break;
+		case BY_ANAGLYPH:
+		case GM_ANAGLYPH:
+		case RC_ANAGLYPH:
+			gl.glColorMask(true, true, true, true);
+			break;
+		case STEREO_BUFFER:
+			gl.glDrawBuffer(GL.GL_BACK);
+			break;
 		}
 	}
 }
