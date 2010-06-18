@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.layers.shapefile.tessellator;
 
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.util.Logging;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,29 +33,6 @@ public class SubTile
 	public List<SubTileContour> getContours()
 	{
 		return contours;
-	}
-
-	private void updateCurrentShapeIfRequired(int shapeId, boolean entered)
-	{
-		//create a new pointset if:
-		// - the record has entered the tile (each entry creates a new shape)
-		// - no current pointset exists (continueShape is called without an enter)
-		// - the shape id is different (a new shape has started, through continueShape without an enter)
-
-		boolean newShapeId = current == null || current.shapeId != shapeId;
-
-		if (entered || newShapeId)
-		{
-			if (newShapeId)
-				startPointsIndex = contours.size();
-
-			current = new SubTileContour(shapeId, entered);
-			contours.add(current);
-
-			//if this shape was not created by a record entering the tile, then a 'noEntryShapeExists'
-			if (!entered)
-				noEntryShapeExists = true;
-		}
 	}
 
 	public void enterShape(int shapeId, LatLon outsidePoint, LatLon insidePoint)
@@ -127,11 +105,32 @@ public class SubTile
 		return true;
 	}
 
+	private void updateCurrentShapeIfRequired(int shapeId, boolean entered)
+	{
+		//create a new pointset if:
+		// - the record has entered the tile (each entry creates a new shape)
+		// - no current pointset exists (continueShape is called without an enter)
+		// - the shape id is different (a new shape has started, through continueShape without an enter)
+
+		boolean newShapeId = current == null || current.shapeId != shapeId;
+
+		if (entered || newShapeId)
+		{
+			if (newShapeId)
+				startPointsIndex = contours.size();
+
+			current = new SubTileContour(shapeId, entered);
+			contours.add(current);
+
+			//if this shape was not created by a record entering the tile, then a 'noEntryShapeExists'
+			if (!entered)
+				noEntryShapeExists = true;
+		}
+	}
+
 	public void markFilled()
 	{
-		//TODO swap back
-		//sectorFilled = true;
-		fillSector();
+		sectorFilled = true;
 	}
 
 	private void fillSector()
@@ -184,8 +183,8 @@ public class SubTile
 				}
 				else
 				{
-					System.out
-							.println("WARNING: first entry point doesn't join up with last exit point");
+					String message = "First entry point doesn't join up with last exit point";
+					Logging.logger().warning(message);
 					start = 0;
 				}
 
@@ -319,8 +318,6 @@ public class SubTile
 		double p4x = p4.longitude.degrees;
 		double p4y = p4.latitude.degrees;
 
-		//System.out.println(p1 + " to " + p2 + ", " + p3 + " to " + p4);
-
 		double ud = (p4y - p3y) * (p2x - p1x) - (p4x - p3x) * (p2y - p1y);
 
 		//lines are parallel (don't care about coincident lines)
@@ -390,6 +387,8 @@ public class SubTile
 			return minDistanceIntersect;
 
 		//TODO find out why we get here!
+		String message = "Did not find an edge point in the sector";
+		Logging.logger().fine(message);
 		return inside;
 	}
 

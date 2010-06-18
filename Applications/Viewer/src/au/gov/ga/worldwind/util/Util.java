@@ -309,15 +309,15 @@ public class Util
 		return Math.max(min, Math.min(max, value));
 	}
 
-	public static Position limitPosition(Position position, Sector sector)
+	public static LatLon limitLatLon(LatLon latlon, Sector sector)
 	{
 		double lat =
-				limitRange(position.latitude.degrees, sector.getMinLatitude().degrees, sector
+				limitRange(latlon.latitude.degrees, sector.getMinLatitude().degrees, sector
 						.getMaxLatitude().degrees);
 		double lon =
-				limitRange(position.longitude.degrees, sector.getMinLongitude().degrees, sector
+				limitRange(latlon.longitude.degrees, sector.getMinLongitude().degrees, sector
 						.getMaxLongitude().degrees);
 
-		return Position.fromDegrees(lat, lon, position.elevation);
+		return LatLon.fromDegrees(lat, lon);
 	}
 }

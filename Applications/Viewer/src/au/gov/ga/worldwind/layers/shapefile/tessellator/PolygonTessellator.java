@@ -3,8 +3,8 @@ package au.gov.ga.worldwind.layers.shapefile.tessellator;
 import gov.nasa.worldwind.formats.shapefile.Shapefile;
 import gov.nasa.worldwind.formats.shapefile.ShapefileRecord;
 import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.VecBuffer;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class PolygonTessellator
 	public static List<FastShape> tessellateShapefile(Shapefile shapefile, Sector sector,
 			int subdivisions)
 	{
-		subdivisions = 4;
+		//subdivisions = 4;
 
 		if (subdivisions <= 0)
 			throw new IllegalArgumentException("Number of subdivisions must be greater than zero");
@@ -56,7 +56,7 @@ public class PolygonTessellator
 			for (int part = 0; part < record.getNumberOfParts(); part++)
 			{
 				shapeId++;
-				Position lastPosition = null;
+				LatLon lastLatlon = null;
 				SubTile lastTile = null;
 				int lastTileIndex = -1;
 				List<SubTile> tilesAffected = new ArrayList<SubTile>();
@@ -65,28 +65,28 @@ public class PolygonTessellator
 				int size = buffer.getSize();
 				for (int i = 0; i <= size; i++)
 				{
-					Position position = buffer.getPosition(i % size);
+					LatLon latlon = buffer.getLocation(i % size);
 					int x =
-							(int) ((position.longitude.degrees - sector.getMinLongitude().degrees) / deltaLon);
+							(int) ((latlon.longitude.degrees - sector.getMinLongitude().degrees) / deltaLon);
 					int y =
-							(int) ((position.latitude.degrees - sector.getMinLatitude().degrees) / deltaLat);
+							(int) ((latlon.latitude.degrees - sector.getMinLatitude().degrees) / deltaLat);
 					x = Util.limitRange(x, 0, subdivisions - 1);
 					y = Util.limitRange(y, 0, subdivisions - 1);
 
 					int tileIndex = y * subdivisions + x;
 					SubTile tile = tiles[tileIndex];
-					if (!tile.sector.contains(position))
+					if (!tile.sector.contains(latlon))
 					{
-						//TODO log properly
-						System.out.println("WARNING: " + position + " outside bounds");
-						position = Util.limitPosition(position, tile.sector);
+						String message = latlon + " outside bounds";
+						Logging.logger().warning(message);
+						latlon = Util.limitLatLon(latlon, tile.sector);
 					}
 
 					if (tile != lastTile)
 					{
 						if (lastTile != null)
 						{
-							lastTile.exitShape(shapeId, lastPosition, position);
+							lastTile.exitShape(shapeId, lastLatlon, latlon);
 
 							int diffX = Math.abs(lastTile.x - tile.x);
 							int diffY = Math.abs(lastTile.y - tile.y);
@@ -100,19 +100,19 @@ public class PolygonTessellator
 								//get the fractional position of the points within their corresponding tile's
 								//sector, in the range -0.5 to 0.5
 								float x1 =
-										(float) ((lastPosition.longitude.degrees - lastTile.sector
+										(float) ((lastLatlon.longitude.degrees - lastTile.sector
 												.getMinLongitude().degrees)
 												/ lastTile.sector.getDeltaLonDegrees() - 0.5);
 								float y1 =
-										(float) ((lastPosition.latitude.degrees - lastTile.sector
+										(float) ((lastLatlon.latitude.degrees - lastTile.sector
 												.getMinLatitude().degrees)
 												/ lastTile.sector.getDeltaLatDegrees() - 0.5);
 								float x2 =
-										(float) ((position.longitude.degrees - tile.sector
+										(float) ((latlon.longitude.degrees - tile.sector
 												.getMinLongitude().degrees)
 												/ tile.sector.getDeltaLonDegrees() - 0.5);
 								float y2 =
-										(float) ((position.latitude.degrees - tile.sector
+										(float) ((latlon.latitude.degrees - tile.sector
 												.getMinLatitude().degrees)
 												/ tile.sector.getDeltaLatDegrees() - 0.5);
 
@@ -138,7 +138,7 @@ public class PolygonTessellator
 
 									SubTile crossTile = tiles[crossTileIndex];
 									boolean crossed =
-											crossTile.crossShape(shapeId, lastPosition, position);
+											crossTile.crossShape(shapeId, lastLatlon, latlon);
 									if (crossed)
 									{
 										tilesAffected.add(crossTile);
@@ -149,22 +149,22 @@ public class PolygonTessellator
 
 						tilesAffected.add(tile);
 
-						if (lastPosition != null)
+						if (lastLatlon != null)
 						{
-							tile.enterShape(shapeId, lastPosition, position);
+							tile.enterShape(shapeId, lastLatlon, latlon);
 						}
 						else
 						{
-							tile.continueShape(shapeId, position);
+							tile.continueShape(shapeId, latlon);
 						}
 					}
 					else
 					{
-						tile.continueShape(shapeId, position);
+						tile.continueShape(shapeId, latlon);
 					}
 
 					lastTile = tile;
-					lastPosition = position;
+					lastLatlon = latlon;
 					lastTileIndex = tileIndex;
 				}
 
@@ -187,6 +187,7 @@ public class PolygonTessellator
 		glu.gluTessCallback(tess, GLU.GLU_TESS_END, callback);
 		glu.gluTessCallback(tess, GLU.GLU_TESS_ERROR, callback);
 		glu.gluTessCallback(tess, GLU.GLU_TESS_EDGE_FLAG, callback);
+		glu.gluTessNormal(tess, 0.0, 0.0, 1.0);
 
 		for (SubTile tile : tiles)
 		{

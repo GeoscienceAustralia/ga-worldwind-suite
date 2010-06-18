@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.layers.shapefile;
 
+import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -25,7 +26,7 @@ public class Sandpit extends ApplicationTemplate
 		System.setProperty("http.proxyPort", "8080");
 		System.setProperty("http.nonProxyHosts", "localhost");
 
-		//Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 100d);
+		Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 20d);
 
 		ApplicationTemplate.start("Sandpit", AppFrame.class);
 	}
@@ -45,7 +46,7 @@ public class Sandpit extends ApplicationTemplate
 			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(18, 53, 72, 107));
 			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(-18, 17, 144, 179));
 			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(-18, 17, -36, -1));
-			params.setValue(AVKey.NUM_LEVELS, 1);
+			params.setValue(AVKey.NUM_LEVELS, 5);
 			params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 			params.setValue(AVKey.DATASET_NAME, "shapefile");
 			params.setValue(AVKey.DATA_CACHE_NAME, "shapefile");
@@ -76,6 +77,9 @@ public class Sandpit extends ApplicationTemplate
 
 			// Update layer panel
 			this.getLayerPanel().update(getWwd());
+
+			//getWwd().getModel().setShowWireframeExterior(true);
+			//getWwd().getModel().setShowWireframeInterior(true);
 		}
 	}
 }

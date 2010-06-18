@@ -33,6 +33,8 @@ public class FastShape implements Renderable, Cacheable
 
 	protected DoubleBuffer vertexBuffer;
 	protected DoubleBuffer modVertexBuffer;
+	protected DoubleBuffer normalBuffer;
+	protected DoubleBuffer modNormalBuffer;
 	protected Object vertexLock = new Object();
 
 	protected Color color = Color.white;
@@ -42,6 +44,9 @@ public class FastShape implements Renderable, Cacheable
 	protected double lastVerticalExaggeration = -1;
 	protected Globe lastGlobe = null;
 	protected boolean verticesDirty = true;
+
+	protected double elevation = 0d;
+	protected boolean calculateNormals;
 
 	public FastShape(List<Position> positions, int mode)
 	{
@@ -143,12 +148,19 @@ public class FastShape implements Renderable, Cacheable
 		{
 			public void run()
 			{
+				ensureBuffersExist();
 				calculateVertices(dc);
 				synchronized (vertexLock)
 				{
 					DoubleBuffer temp = vertexBuffer;
 					vertexBuffer = modVertexBuffer;
 					modVertexBuffer = temp;
+					if (isCalculateNormals())
+					{
+						temp = normalBuffer;
+						normalBuffer = modNormalBuffer;
+						modNormalBuffer = temp;
+					}
 				}
 			}
 		};
@@ -163,7 +175,7 @@ public class FastShape implements Renderable, Cacheable
 		}
 	}
 
-	public DoubleBuffer calculateVertices(DrawContext dc)
+	public void calculateVertices(DrawContext dc)
 	{
 		synchronized (positionLock)
 		{
@@ -171,10 +183,11 @@ public class FastShape implements Renderable, Cacheable
 			Globe globe = dc.getGlobe();
 			for (LatLon position : positions)
 			{
-				double elevation = 0;
+				double elevation = this.elevation;
 				if (followTerrain)
 				{
-					elevation = globe.getElevation(position.getLatitude(), position.getLongitude());
+					elevation +=
+							globe.getElevation(position.getLatitude(), position.getLongitude());
 				}
 				if (position instanceof Position)
 				{
@@ -187,7 +200,29 @@ public class FastShape implements Renderable, Cacheable
 								position.getLongitude(), elevation);
 				modVertexBuffer.put(v.x).put(v.y).put(v.z);
 			}
-			return modVertexBuffer;
+
+			if (isCalculateNormals() && getMode() == GL.GL_TRIANGLES)
+			{
+
+			}
+		}
+	}
+
+	protected void ensureBuffersExist()
+	{
+		synchronized (vertexLock)
+		{
+			int size = positions.size() * 3;
+			if (vertexBuffer == null || vertexBuffer.limit() != size)
+			{
+				vertexBuffer = BufferUtil.newDoubleBuffer(size);
+				modVertexBuffer = BufferUtil.newDoubleBuffer(size);
+			}
+			if (isCalculateNormals() && (normalBuffer == null || normalBuffer.limit() != size))
+			{
+				normalBuffer = BufferUtil.newDoubleBuffer(size);
+				modNormalBuffer = BufferUtil.newDoubleBuffer(size);
+			}
 		}
 	}
 
@@ -228,15 +263,10 @@ public class FastShape implements Renderable, Cacheable
 
 	public void setPositions(List<Position> positions)
 	{
-		synchronized (vertexLock)
+		synchronized (positionLock)
 		{
-			synchronized (positionLock)
-			{
-				this.positions = positions;
-				vertexBuffer = BufferUtil.newDoubleBuffer(positions.size() * 3);
-				modVertexBuffer = BufferUtil.newDoubleBuffer(positions.size() * 3);
-				verticesDirty = true;
-			}
+			this.positions = positions;
+			verticesDirty = true;
 		}
 	}
 
@@ -271,6 +301,26 @@ public class FastShape implements Renderable, Cacheable
 	public void setMode(int mode)
 	{
 		this.mode = mode;
+	}
+
+	public double getElevation()
+	{
+		return elevation;
+	}
+
+	public void setElevation(double elevation)
+	{
+		this.elevation = elevation;
+	}
+
+	public boolean isCalculateNormals()
+	{
+		return calculateNormals;
+	}
+
+	public void setCalculateNormals(boolean calculateNormals)
+	{
+		this.calculateNormals = calculateNormals;
 	}
 
 	@Override

@@ -40,9 +40,9 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 	private double splitScale = 0.9;
 
 	// Diagnostic flags
-	private boolean showImageTileOutlines = true;
+	private boolean showImageTileOutlines = false;
 	private boolean drawTileBoundaries = false;
-	private boolean drawTileIDs = true;
+	private boolean drawTileIDs = false;
 	private boolean drawBoundingVolumes = false;
 
 	// Stuff computed each frame
@@ -56,6 +56,8 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 	abstract protected void requestTile(DrawContext dc, ShapefileTile tile);
 
 	abstract protected void forceTileLoad(ShapefileTile tile);
+
+	//TODO put in proper constructors with AVList params
 
 	public TiledShapefileLayer(LevelSet levelSet)
 	{
@@ -71,6 +73,9 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 		//        this.createTopLevelTiles();
 
 		this.tileCountName = this.getName() + " Tiles";
+
+		//TODO remove?
+		setSplitScale(0.82);
 	}
 
 	@Override
