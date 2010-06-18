@@ -38,6 +38,11 @@ public class LayerTree extends LoadingTree
 		return (ClearableBasicTreeUI) super.getUI();
 	}
 
+	public LayerCellRenderer getLayerCellRenderer()
+	{
+		return (LayerCellRenderer) getCellRenderer();
+	}
+
 	private static class LayerTreeCellEditor extends DefaultTreeCellEditor
 	{
 		public LayerTreeCellEditor(JTree tree)

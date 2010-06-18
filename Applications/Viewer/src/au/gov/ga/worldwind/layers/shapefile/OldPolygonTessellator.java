@@ -15,15 +15,13 @@ import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
 import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 
-public class PolygonTessellator
+public class OldPolygonTessellator
 {
-	private static int addPoints = 20;
-
-	public static List<FastShape> tessellateShapefile(Shapefile shapefile, Sector sector)
+	public static List<FastShape> tessellateShapefile(Shapefile shapefile, Sector sector, int subdivisions)
 	{
 		GLU glu = new GLU();
 		GLUtessellator tess = glu.gluNewTess();
-		TessellatorCallback callback = new TessellatorCallback(glu, sector);
+		TessellatorCallback callback = new TessellatorCallback(glu, sector, subdivisions);
 
 		glu.gluTessProperty(tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD);
 		//glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL.GL_TRUE);
@@ -77,13 +75,13 @@ public class PolygonTessellator
 
 		private List<FastShape> shapes = new ArrayList<FastShape>();
 
-		public TessellatorCallback(GLU glu, Sector sector)
+		public TessellatorCallback(GLU glu, Sector sector, int subdivisions)
 		{
 			this.glu = glu;
 			this.sector = sector;
 
-			deltaLat = sector.getDeltaLatDegrees() / (addPoints + 1);
-			deltaLon = sector.getDeltaLonDegrees() / (addPoints + 1);
+			deltaLat = sector.getDeltaLatDegrees() / (subdivisions + 1);
+			deltaLon = sector.getDeltaLonDegrees() / (subdivisions + 1);
 		}
 
 		@Override

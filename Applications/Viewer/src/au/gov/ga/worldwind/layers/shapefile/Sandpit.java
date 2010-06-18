@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.layers.shapefile;
 
-import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -20,6 +19,17 @@ import au.gov.ga.worldwind.util.Util;
 
 public class Sandpit extends ApplicationTemplate
 {
+	public static void main(String[] args)
+	{
+		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
+		System.setProperty("http.proxyPort", "8080");
+		System.setProperty("http.nonProxyHosts", "localhost");
+
+		//Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 100d);
+
+		ApplicationTemplate.start("Sandpit", AppFrame.class);
+	}
+
 	public static class AppFrame extends ApplicationTemplate.AppFrame
 	{
 		public AppFrame()
@@ -32,7 +42,10 @@ public class Sandpit extends ApplicationTemplate
 			Angle delta = Angle.fromDegrees(36);
 			params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(delta, delta));
 			params.setValue(AVKey.SECTOR, Sector.FULL_SPHERE);
-			params.setValue(AVKey.NUM_LEVELS, 5);
+			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(18, 53, 72, 107));
+			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(-18, 17, 144, 179));
+			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(-18, 17, -36, -1));
+			params.setValue(AVKey.NUM_LEVELS, 1);
 			params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 			params.setValue(AVKey.DATASET_NAME, "shapefile");
 			params.setValue(AVKey.DATA_CACHE_NAME, "shapefile");
@@ -64,12 +77,5 @@ public class Sandpit extends ApplicationTemplate
 			// Update layer panel
 			this.getLayerPanel().update(getWwd());
 		}
-	}
-
-	public static void main(String[] args)
-	{
-		Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 100d);
-
-		ApplicationTemplate.start("Sandpit", AppFrame.class);
 	}
 }

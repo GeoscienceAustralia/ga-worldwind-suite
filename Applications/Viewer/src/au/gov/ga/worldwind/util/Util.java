@@ -2,6 +2,8 @@ package au.gov.ga.worldwind.util;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.coords.MGRSCoord;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
@@ -295,5 +297,27 @@ public class Util
 		if (s.isEmpty())
 			return s;
 		return s.substring(0, 1).toUpperCase() + s.substring(1);
+	}
+
+	public static int limitRange(int value, int min, int max)
+	{
+		return Math.max(min, Math.min(max, value));
+	}
+
+	public static double limitRange(double value, double min, double max)
+	{
+		return Math.max(min, Math.min(max, value));
+	}
+
+	public static Position limitPosition(Position position, Sector sector)
+	{
+		double lat =
+				limitRange(position.latitude.degrees, sector.getMinLatitude().degrees, sector
+						.getMaxLatitude().degrees);
+		double lon =
+				limitRange(position.longitude.degrees, sector.getMinLongitude().degrees, sector
+						.getMaxLongitude().degrees);
+
+		return Position.fromDegrees(lat, lon, position.elevation);
 	}
 }

@@ -68,12 +68,14 @@ import au.gov.ga.worldwind.layers.file.FileLayerCreator;
 import au.gov.ga.worldwind.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.panels.SideBar;
 import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
+import au.gov.ga.worldwind.panels.layers.AbstractLayersPanel;
 import au.gov.ga.worldwind.panels.layers.ExtendedCompoundElevationModel;
 import au.gov.ga.worldwind.panels.layers.ExtendedLayerList;
 import au.gov.ga.worldwind.panels.layers.ILayerNode;
 import au.gov.ga.worldwind.panels.layers.LayerEnabler;
 import au.gov.ga.worldwind.panels.layers.LayerNode;
 import au.gov.ga.worldwind.panels.layers.LayersPanel;
+import au.gov.ga.worldwind.panels.layers.QueryClickListener;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.SettingsDialog;
@@ -308,8 +310,8 @@ public class Application
 		}
 
 		afterSettingsChange();
-
 		createActions();
+		createThemeListeners();
 
 		if (theme.hasMenuBar())
 		{
@@ -900,6 +902,57 @@ public class Application
 		dialog.setSize(640, 480);
 		dialog.setLocationRelativeTo(frame);
 		dialog.setVisible(true);
+	}
+
+	private void createThemeListeners()
+	{
+		for (ThemePanel panel : theme.getPanels())
+		{
+			if (panel instanceof AbstractLayersPanel)
+			{
+				AbstractLayersPanel layersPanel = (AbstractLayersPanel) panel;
+				layersPanel.addQueryClickListener(new QueryClickListener()
+				{
+					@Override
+					public void queryURLClicked(URL url)
+					{
+						initDataQuery(url);
+					}
+				});
+			}
+		}
+	}
+
+	private void initDataQuery(URL queryURL)
+	{
+		Position pos = ((OrbitView) wwd.getView()).getCenterPosition();
+		double small = 1e-5;
+		String bbox =
+				(pos.getLongitude().degrees - small) + "," + (pos.getLatitude().degrees - small)
+						+ "," + (pos.getLongitude().degrees + small) + ","
+						+ (pos.getLatitude().degrees + small);
+		String external = queryURL.toExternalForm();
+		String placeholder = "#bbox#";
+		int index = external.indexOf(placeholder);
+		if (index >= 0)
+		{
+			external =
+					external.substring(0, index) + bbox
+							+ external.substring(index + placeholder.length());
+		}
+
+		System.out.println(external);
+		try
+		{
+			URL url = new URL(external);
+			HtmlViewer viewer = new HtmlViewer(frame, "Data", url, null);
+			viewer.setSize(640, 480);
+			viewer.setVisible(true);
+		}
+		catch (MalformedURLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	/*private void showDataSources()

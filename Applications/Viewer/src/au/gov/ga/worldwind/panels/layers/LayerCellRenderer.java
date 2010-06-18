@@ -2,6 +2,9 @@ package au.gov.ga.worldwind.panels.layers;
 
 import java.awt.Frame;
 import java.awt.Image;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
@@ -18,6 +21,8 @@ import au.gov.ga.worldwind.util.Icons;
 
 public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 {
+	private List<QueryClickListener> queryClickListeners = new ArrayList<QueryClickListener>();
+
 	@Override
 	protected AbstractButton createButton()
 	{
@@ -167,6 +172,27 @@ public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 	@Override
 	protected void queryClicked(int row)
 	{
-		// TODO Auto-generated method stub
+		TreePath path = getTree().getPathForRow(row);
+		if (path != null)
+		{
+			INode node = getValue(path.getLastPathComponent());
+			ILayerNode layer = getLayerValue(node);
+			if (layer != null && layer.getQueryURL() != null)
+			{
+				URL url = layer.getQueryURL();
+				for (int i = queryClickListeners.size() - 1; i >= 0; i--)
+					queryClickListeners.get(i).queryURLClicked(url);
+			}
+		}
+	}
+	
+	public void addQueryClickListener(QueryClickListener listener)
+	{
+		queryClickListeners.add(listener);
+	}
+	
+	public void removeQueryClickListener(QueryClickListener listener)
+	{
+		queryClickListeners.remove(listener);
 	}
 }

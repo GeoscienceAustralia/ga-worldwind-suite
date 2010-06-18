@@ -317,4 +317,14 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 	protected void setupToolBarAfterSlider(JToolBar toolBar)
 	{
 	}
+
+	public void addQueryClickListener(QueryClickListener listener)
+	{
+		tree.getLayerCellRenderer().addQueryClickListener(listener);
+	}
+
+	public void removeQueryClickListener(QueryClickListener listener)
+	{
+		tree.getLayerCellRenderer().removeQueryClickListener(listener);
+	}
 }

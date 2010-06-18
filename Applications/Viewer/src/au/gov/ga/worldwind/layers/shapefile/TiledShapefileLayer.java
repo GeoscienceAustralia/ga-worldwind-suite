@@ -40,9 +40,9 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 	private double splitScale = 0.9;
 
 	// Diagnostic flags
-	private boolean showImageTileOutlines = false;
+	private boolean showImageTileOutlines = true;
 	private boolean drawTileBoundaries = false;
-	private boolean drawTileIDs = false;
+	private boolean drawTileIDs = true;
 	private boolean drawBoundingVolumes = false;
 
 	// Stuff computed each frame

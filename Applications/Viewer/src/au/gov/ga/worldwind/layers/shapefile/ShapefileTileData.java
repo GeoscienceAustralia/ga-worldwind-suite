@@ -26,6 +26,7 @@ import java.util.Random;
 
 import javax.media.opengl.GL;
 
+import au.gov.ga.worldwind.layers.shapefile.tessellator.PolygonTessellator;
 import au.gov.ga.worldwind.util.HSLColor;
 
 import com.sun.opengl.util.BufferUtil;
@@ -105,7 +106,7 @@ public class ShapefileTileData implements Renderable, Cacheable
 
 		if (anyPolygons)
 		{
-			List<FastShape> shapes = PolygonTessellator.tessellateShapefile(shapefile, sector);
+			List<FastShape> shapes = PolygonTessellator.tessellateShapefile(shapefile, sector, 50);
 			for (FastShape shape : shapes)
 			{
 				shape.setColor(randomColor());
@@ -215,7 +216,7 @@ public class ShapefileTileData implements Renderable, Cacheable
 
 		//gl.glCullFace(GL.GL_NONE);
 		gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
-		//gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+		gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
 
 		for (Renderable renderable : shapes)
 			renderable.render(dc);

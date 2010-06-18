@@ -152,11 +152,12 @@ public class Settings
 	{
 		if (isProxyEnabled())
 		{
-			Configuration.setValue(AVKey.URL_PROXY_HOST, getProxyHost());
+			String host = getProxyHost() == null ? "" : getProxyHost();
+			Configuration.setValue(AVKey.URL_PROXY_HOST, host);
 			Configuration.setValue(AVKey.URL_PROXY_PORT, getProxyPort());
 			Configuration.setValue(AVKey.URL_PROXY_TYPE, getProxyType().getType());
 
-			System.setProperty("http.proxyHost", getProxyHost() == null ? "" : getProxyHost());
+			System.setProperty("http.proxyHost", host);
 			System.setProperty("http.proxyPort", String.valueOf(getProxyPort()));
 		}
 		else

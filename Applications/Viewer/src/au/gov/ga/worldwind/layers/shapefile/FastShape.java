@@ -363,7 +363,7 @@ public class FastShape implements Renderable, Cacheable
 					return false;
 				if (obj.equals(owner))
 					return true;
-				return obj.equals(this);
+				return super.equals(obj);
 			}
 		}
 	}
