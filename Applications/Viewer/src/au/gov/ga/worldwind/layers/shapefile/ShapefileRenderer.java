@@ -36,7 +36,9 @@ public class ShapefileRenderer
 	{
 		//beginRendering(dc);
 
-		dc.getGL().glClear(GL.GL_DEPTH_BUFFER_BIT);
+		GL gl = dc.getGL();
+		gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+		gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
 
 		for (ShapefileTile tile : tiles)
 		{

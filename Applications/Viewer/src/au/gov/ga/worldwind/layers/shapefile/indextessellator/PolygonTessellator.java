@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
+import javax.media.opengl.glu.GLUtessellator;
 
 import au.gov.ga.worldwind.layers.shapefile.FastShape;
 import au.gov.ga.worldwind.util.Util;
@@ -220,16 +222,76 @@ public class PolygonTessellator
 			tile.completePolygons(vertices);
 		}
 
-		//TODO tessellate (after calling complete polygon on each tile)
-		//completePolygons() must use vertices from the tileCorners array
-
-		List<Position> positions = new ArrayList<Position>();
-		for (LatLon v : vertices)
+		List<Position> positions = new ArrayList<Position>(vertices.size());
+		double[] dVertices = new double[3 * vertices.size()];
+		for (int i = 0; i < vertices.size(); i++)
 		{
+			LatLon v = vertices.get(i);
 			positions.add(new Position(v, 0));
+			dVertices[i * 3] = v.longitude.degrees;
+			dVertices[i * 3 + 1] = v.latitude.degrees;
+			dVertices[i * 3 + 2] = 0;
 		}
 
-		List<IntBuffer> indices = new ArrayList<IntBuffer>();
+		GLU glu = new GLU();
+		GLUtessellator tess = glu.gluNewTess();
+		TessellatorCallback callback = new TessellatorCallback(glu);
+
+		glu.gluTessProperty(tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD);
+		//glu.gluTessProperty(tess, GLU.GLU_TESS_BOUNDARY_ONLY, GL.GL_TRUE);
+
+		glu.gluTessCallback(tess, GLU.GLU_TESS_BEGIN, callback);
+		glu.gluTessCallback(tess, GLU.GLU_TESS_VERTEX, callback);
+		glu.gluTessCallback(tess, GLU.GLU_TESS_END, callback);
+		glu.gluTessCallback(tess, GLU.GLU_TESS_ERROR, callback);
+		glu.gluTessCallback(tess, GLU.GLU_TESS_EDGE_FLAG, callback);
+		glu.gluTessNormal(tess, 0.0, 0.0, 1.0);
+
+		for (SubTile tile : tiles)
+		{
+			List<IndexedContour> contours = tile.getContours();
+			if (contours.isEmpty())
+				continue;
+
+			int pointCount = 0;
+			for (IndexedContour contour : contours)
+				pointCount += contour.indices.size();
+
+			if (pointCount == 0)
+				continue;
+
+			glu.gluTessBeginPolygon(tess, null);
+
+			for (IndexedContour contour : contours)
+			{
+				if (contour.indices.isEmpty())
+					continue;
+
+				glu.gluTessBeginContour(tess);
+
+				for (int i = contour.indices.size(); i >= 0; i--)
+				{
+					Integer index = contour.indices.get(i % contour.indices.size());
+					glu.gluTessVertex(tess, dVertices, index * 3, index);
+				}
+
+				glu.gluTessEndContour(tess);
+			}
+
+			glu.gluTessEndPolygon(tess);
+		}
+
+		glu.gluDeleteTess(tess);
+
+		List<Integer> indices = callback.indices;
+		IntBuffer ib = BufferUtil.newIntBuffer(indices.size());
+		for (Integer i : indices)
+			ib.put(i);
+
+		FastShape shape = new FastShape(positions, new IntBuffer[] { ib }, GL.GL_TRIANGLES);
+		return shape;
+
+		/*List<IntBuffer> indices = new ArrayList<IntBuffer>();
 		for (SubTile tile : tiles)
 		{
 			List<IndexedContour> contours = tile.getContours();
@@ -252,32 +314,7 @@ public class PolygonTessellator
 
 		IntBuffer[] ibs = indices.toArray(new IntBuffer[indices.size()]);
 		FastShape shape = new FastShape(positions, ibs, GL.GL_LINES);
-		return shape;
-
-		/*List<FastShape> shapes = new ArrayList<FastShape>();
-		for (SubTile tile : tiles)
-		{
-			List<IndexedContour> contours = tile.getContours();
-			for (IndexedContour contour : contours)
-			{
-				IntBuffer ib = BufferUtil.newIntBuffer((contour.indices.size() - 1) * 2);
-				Integer lastI = null;
-				for (Integer i : contour.indices)
-				{
-					if (lastI != null)
-					{
-						ib.put(lastI);
-						ib.put(i);
-					}
-					lastI = i;
-				}
-
-				FastShape shape = new FastShape(positions, new IntBuffer[] { ib }, GL.GL_LINES);
-				shapes.add(shape);
-			}
-		}
-
-		return shapes;*/
+		return shape;*/
 	}
 
 	private static List<Point> linePoints(float x1, float y1, float x2, float y2)
