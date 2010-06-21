@@ -28,7 +28,7 @@ public class PolygonTessellator
 	public static List<FastShape> tessellateShapefile(Shapefile shapefile, Sector sector,
 			int subdivisions)
 	{
-		subdivisions = 2;
+		//subdivisions = 3;
 
 		List<FastShape> shapes = new ArrayList<FastShape>();
 		List<ShapefileRecord> records = shapefile.getRecords();
@@ -142,20 +142,31 @@ public class PolygonTessellator
 										+ y2);
 
 						SubTile lastCrossTile = lastTile;
-						for (int j = 1; j < line.size() - 1; j++) //ignore first and last
+						for (int j = 1; j < line.size() - 1; j++)
 						{
 							Point p = line.get(j);
 							p.x = Util.limitRange(p.x, 0, subdivisions - 1);
 							p.y = Util.limitRange(p.y, 0, subdivisions - 1);
 
 							int crossTileIndex = p.y * subdivisions + p.x;
+							//ignore first and last
 							if (crossTileIndex == tileIndex || crossTileIndex == lastTileIndex)
 								continue;
 
 							SubTile crossTile = tiles[crossTileIndex];
+							if (crossTile == lastCrossTile) //not required?
+								continue;
+
 							LatLon edge = edgePoint(lastLatlon, latlon, crossTile);
 							if (edge != null)
 							{
+								if (lastCrossTile.x != crossTile.x
+										&& lastCrossTile.y != crossTile.y)
+								{
+									String message = "Crossed tiles are not adjacent";
+									Logging.logger().warning(message);
+								}
+
 								IndexedLatLon edgeIndexed = new IndexedLatLon(edge);
 								edgeIndexed.index(vertices);
 								int vertexIndex = edgeIndexed.getIndex();
@@ -187,17 +198,11 @@ public class PolygonTessellator
 							tile.addVertex(shapeId, vertexIndex, true, false);
 						}
 					}
-					else
-					{
-						tile.addVertex(shapeId, index, false, false);
-					}
 
 					tilesAffected.add(tile);
 				}
-				else
-				{
-					tile.addVertex(shapeId, index, false, false);
-				}
+
+				tile.addVertex(shapeId, index, false, false);
 
 				lastTile = tile;
 				lastLatlon = latlon;
@@ -210,22 +215,27 @@ public class PolygonTessellator
 			markFilledTilesInside(tiles, tilesAffected, subdivisions);
 		}
 
+		for (SubTile tile : tiles)
+		{
+			tile.completePolygons(vertices);
+		}
+
 		//TODO tessellate (after calling complete polygon on each tile)
 		//completePolygons() must use vertices from the tileCorners array
 
 		List<Position> positions = new ArrayList<Position>();
 		for (LatLon v : vertices)
+		{
 			positions.add(new Position(v, 0));
+		}
 
 		List<IntBuffer> indices = new ArrayList<IntBuffer>();
 		for (SubTile tile : tiles)
 		{
-			//tile.completePolygons();
-
 			List<IndexedContour> contours = tile.getContours();
 			for (IndexedContour contour : contours)
 			{
-				IntBuffer ib = BufferUtil.newIntBuffer(contour.indices.size() * 2 - 2);
+				IntBuffer ib = BufferUtil.newIntBuffer((contour.indices.size() - 1) * 2);
 				indices.add(ib);
 				Integer lastI = null;
 				for (Integer i : contour.indices)
@@ -243,6 +253,31 @@ public class PolygonTessellator
 		IntBuffer[] ibs = indices.toArray(new IntBuffer[indices.size()]);
 		FastShape shape = new FastShape(positions, ibs, GL.GL_LINES);
 		return shape;
+
+		/*List<FastShape> shapes = new ArrayList<FastShape>();
+		for (SubTile tile : tiles)
+		{
+			List<IndexedContour> contours = tile.getContours();
+			for (IndexedContour contour : contours)
+			{
+				IntBuffer ib = BufferUtil.newIntBuffer((contour.indices.size() - 1) * 2);
+				Integer lastI = null;
+				for (Integer i : contour.indices)
+				{
+					if (lastI != null)
+					{
+						ib.put(lastI);
+						ib.put(i);
+					}
+					lastI = i;
+				}
+
+				FastShape shape = new FastShape(positions, new IntBuffer[] { ib }, GL.GL_LINES);
+				shapes.add(shape);
+			}
+		}
+
+		return shapes;*/
 	}
 
 	private static List<Point> linePoints(float x1, float y1, float x2, float y2)
@@ -349,7 +384,7 @@ public class PolygonTessellator
 		{
 			if (intersect != null)
 			{
-				double distance = distanceSquared(p2, intersect);
+				double distance = distanceSquared(p1, intersect);
 				if (distance < minDistance)
 				{
 					minDistance = distance;

@@ -29,6 +29,12 @@ public class IndexedLatLon extends LatLon
 		return index;
 	}
 
+	public void indexIfNot(List<IndexedLatLon> list)
+	{
+		if (!isIndexed())
+			index(list);
+	}
+
 	public void index(List<IndexedLatLon> list)
 	{
 		if (isIndexed())
