@@ -61,6 +61,8 @@ public class DocumentLogger extends Logger
 		String prefix = df.format(new Date()) + " - " + level + " - ";
 		String suffix = System.getProperty("line.separator");
 		String text = prefix + line + suffix;
+		if (record.getThrown() != null)
+			text += ": " + record.getThrown();
 
 		Style style = document.getStyle(level);
 		if (style == null)

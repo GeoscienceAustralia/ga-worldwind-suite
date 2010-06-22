@@ -25,12 +25,14 @@ public class ShapefileTile
 	public final int row;
 	public final int col;
 
-	List<TilePoints> points = new ArrayList<TilePoints>();
+	List<TileRecord> points = new ArrayList<TileRecord>();
 
-	private TilePoints current = null;
+	private TileRecord current = null;
 
 	private int startPointsIndex;
 	private boolean noEntryShapeExists = false;
+	private boolean filled = false;
+	private Attributes filledAttributes;
 
 	public ShapefileTile(Sector sector, int level, int col, int row)
 	{
@@ -43,18 +45,18 @@ public class ShapefileTile
 	//x = longitude
 	//y = latitude
 
-	public void enterShape(int shapeId, Point outsidePoint, Point insidePoint)
+	public void enterShape(int shapeId, Point outsidePoint, Point insidePoint, Attributes attributes)
 	{
-		updateCurrentShapeIfRequired(shapeId, true);
+		updateCurrentShapeIfRequired(shapeId, true, attributes);
 
 		Point edge = edgePoint(outsidePoint, insidePoint, sector);
 		current.points.add(edge);
 		current.points.add(insidePoint);
 	}
 
-	public void continueShape(int shapeId, Point insidePoint)
+	public void continueShape(int shapeId, Point insidePoint, Attributes attributes)
 	{
-		updateCurrentShapeIfRequired(shapeId, false);
+		updateCurrentShapeIfRequired(shapeId, false, attributes);
 
 		current.points.add(insidePoint);
 	}
@@ -66,7 +68,7 @@ public class ShapefileTile
 		current.exited = true;
 	}
 
-	public boolean crossShape(int shapeId, Point fromPoint1, Point toPoint2)
+	public boolean crossShape(int shapeId, Point fromPoint1, Point toPoint2, Attributes attributes)
 	{
 		Point minXminY = new Point(sector.getMinLongitude(), sector.getMinLatitude());
 		Point minXmaxY = new Point(sector.getMinLongitude(), sector.getMaxLatitude());
@@ -104,11 +106,21 @@ public class ShapefileTile
 			notNull[1] = temp;
 		}
 
-		updateCurrentShapeIfRequired(shapeId, true);
+		updateCurrentShapeIfRequired(shapeId, true, attributes);
 		current.points.add(notNull[0]);
 		current.points.add(notNull[1]);
 		current.exited = true;
 		return true;
+	}
+
+	public void addHole(List<Point> points, Attributes attributes)
+	{
+		if (current == null)
+			throw new IllegalStateException("Cannot add hole to " + this
+					+ ", as it has no current shape");
+
+		TileRecord hole = new TileRecord(-1, false, attributes, points);
+		current.holes.add(hole);
 	}
 
 	private static Point lineSegmentIntersection(Point p1, Point p2, Point p3, Point p4)
@@ -133,9 +145,15 @@ public class ShapefileTile
 		return new Point(x, y);
 	}
 
-	public void fillSector()
+	public void markFilled(Attributes attributes)
 	{
-		TilePoints current = new TilePoints(-1, false);
+		filled = true;
+		filledAttributes = attributes;
+	}
+
+	private void fillSector()
+	{
+		TileRecord current = new TileRecord(-1, false, filledAttributes);
 		points.add(current);
 		current.exited = false;
 		current.points.add(new Point(sector.getMinLongitude(), sector.getMinLatitude()));
@@ -144,7 +162,7 @@ public class ShapefileTile
 		current.points.add(new Point(sector.getMaxLongitude(), sector.getMinLatitude()));
 	}
 
-	private void updateCurrentShapeIfRequired(int shapeId, boolean entered)
+	private void updateCurrentShapeIfRequired(int shapeId, boolean entered, Attributes attributes)
 	{
 		//create a new pointset if:
 		// - the record has entered the tile (each entry creates a new shape)
@@ -158,7 +176,7 @@ public class ShapefileTile
 			if (newShapeId)
 				startPointsIndex = points.size();
 
-			current = new TilePoints(shapeId, entered);
+			current = new TileRecord(shapeId, entered, attributes);
 			points.add(current);
 
 			//if this shape was not created by a record entering the tile, then a 'noEntryShapeExists'
@@ -236,7 +254,7 @@ public class ShapefileTile
 			int noExitIndex = -1, noEntryIndex = -1;
 			for (int i = startPointsIndex; i < points.size(); i++)
 			{
-				TilePoints p = points.get(i);
+				TileRecord p = points.get(i);
 				if (p.entered != p.exited)
 				{
 					if (!p.entered)
@@ -251,8 +269,8 @@ public class ShapefileTile
 
 			if (noEntryIndex >= 0 && noExitIndex >= 0)
 			{
-				TilePoints noEntry = points.get(noEntryIndex);
-				TilePoints noExit = points.get(noExitIndex);
+				TileRecord noEntry = points.get(noEntryIndex);
+				TileRecord noExit = points.get(noExitIndex);
 
 				//check if the two pointsets share a point
 				Point p1 = noEntry.points.get(0);
@@ -286,19 +304,19 @@ public class ShapefileTile
 
 	public void completePolygons()
 	{
-		Map<EntryExitPoint, TilePoints> pointMap = new HashMap<EntryExitPoint, TilePoints>();
-		Map<TilePoints, EntryExitPoint> reverseExitMap = new HashMap<TilePoints, EntryExitPoint>();
+		Map<EntryExitPoint, TileRecord> pointMap = new HashMap<EntryExitPoint, TileRecord>();
+		Map<TileRecord, EntryExitPoint> reverseExitMap = new HashMap<TileRecord, EntryExitPoint>();
 		List<EntryExitPoint> entryExits = new ArrayList<EntryExitPoint>();
 
-		for (TilePoints p : points)
+		for (TileRecord p : points)
 		{
 			if (p.entered && p.exited)
 			{
 				Point en = p.points.get(0);
 				Point ex = p.points.get(p.points.size() - 1);
 
-				EntryExitPoint entry = new EntryExitPoint(en, true);
-				EntryExitPoint exit = new EntryExitPoint(ex, false);
+				EntryExitPoint entry = new EntryExitPoint(en, sector, true);
+				EntryExitPoint exit = new EntryExitPoint(ex, sector, false);
 
 				pointMap.put(entry, p);
 				pointMap.put(exit, p);
@@ -310,7 +328,16 @@ public class ShapefileTile
 
 		//no polygons have entered/exited this tile's sector's edges
 		if (entryExits.isEmpty())
+		{
+			//if this tile's sector is inside a polygon, then fill the entire sector
+			//(if it is inside a polygon, but there are some entry/exits, then the code
+			//below will fill the sector properly)
+			if (filled)
+			{
+				fillSector();
+			}
 			return;
+		}
 
 		//sort the list and ensure entry's/exit's alternate
 		sortEntryExitList(entryExits);
@@ -329,8 +356,8 @@ public class ShapefileTile
 
 			//join curves from exit to entry
 
-			TilePoints exitPoints = pointMap.remove(exit);
-			TilePoints entryPoints = pointMap.remove(entry);
+			TileRecord exitPoints = pointMap.remove(exit);
+			TileRecord entryPoints = pointMap.remove(entry);
 
 			//add any required sector corner points clockwise from exit to entry
 			addCornerPoints(exitPoints, entry.point, exit.point, sector);
@@ -415,7 +442,7 @@ public class ShapefileTile
 		return false;
 	}
 
-	private static void addCornerPoints(TilePoints addTo, Point entry, Point exit, Sector sector)
+	private static void addCornerPoints(TileRecord addTo, Point entry, Point exit, Sector sector)
 	{
 		if (entry.equals(exit))
 			return;
@@ -453,7 +480,7 @@ public class ShapefileTile
 	public List<Record> createRecords(boolean polygon)
 	{
 		List<Record> records = new ArrayList<Record>();
-		for (TilePoints p : points)
+		for (TileRecord p : points)
 		{
 			Point[] points = p.points.toArray(new Point[p.points.size()]);
 
@@ -461,7 +488,20 @@ public class ShapefileTile
 			if (polygon)
 			{
 				LinearRing ring = new LinearRing(points);
-				shp = new Polygon(ring);
+				Polygon poly = new Polygon(ring);
+				shp = poly;
+
+				if (!p.holes.isEmpty())
+				{
+					int i = 0;
+					for (TileRecord h : p.holes)
+					{
+						Point[] holePoints = h.points.toArray(new Point[h.points.size()]);
+						LinearRing hole = new LinearRing(holePoints);
+						poly.addHole(i, hole);
+						i++;
+					}
+				}
 			}
 			else
 			{
@@ -469,12 +509,26 @@ public class ShapefileTile
 			}
 
 			Record record = new Record();
-			record.setAttributeNames(new String[] { "level" });
-			record.setAttributes(new Object[] { level });
-			record.setAttributeTypes(new AttributeType[] { new AttributeType(AttributeType.INTEGER,
-					-1, 0) });
 			record.setShape(shp);
 			records.add(record);
+
+			//set the records attributes
+			Attributes attributes = p.attributes;
+			if (attributes == null || attributes.getAttributeNames() == null
+					|| attributes.getAttributeNames().length == 0)
+			{
+				//shapefile writer throws an error if there are no attributes, so add level as an attribute
+				record.setAttributeNames(new String[] { "level" });
+				record.setAttributeTypes(new AttributeType[] { new AttributeType(
+						AttributeType.INTEGER, -1, 0) });
+				record.setAttributes(new Object[] { level });
+			}
+			else
+			{
+				record.setAttributeNames(attributes.getAttributeNames());
+				record.setAttributeTypes(attributes.getAttributeTypes());
+				record.setAttributes(attributes.getAttributes());
+			}
 		}
 		return records;
 	}
@@ -499,68 +553,5 @@ public class ShapefileTile
 		if (inEnvelope.getMaxY() < sector.getMinLatitude())
 			return false;
 		return true;
-	}
-
-	public class TilePoints
-	{
-		public final int shapeId;
-		public List<Point> points = new ArrayList<Point>();
-		public boolean exited = false;
-		public boolean entered = false;
-
-		public TilePoints(int shapeId, boolean entered)
-		{
-			this.shapeId = shapeId;
-			this.entered = entered;
-		}
-	}
-
-	public class EntryExitPoint implements Comparable<EntryExitPoint>
-	{
-		public final Point point;
-		private boolean entry;
-
-		public EntryExitPoint(Point point, boolean entry)
-		{
-			if (point == null)
-				throw new NullPointerException();
-
-			this.point = point;
-			this.entry = entry;
-		}
-
-		public boolean isEntry()
-		{
-			return entry;
-		}
-
-		public boolean isExit()
-		{
-			return !entry;
-		}
-
-		@Override
-		public int compareTo(EntryExitPoint o)
-		{
-			//point comparison is done via clockwise angle
-			//whatever is more clockwise from sector center is 'greater'
-
-			if (o == null)
-				throw new NullPointerException();
-
-			if (point.equals(o.point))
-				return 0;
-
-			double tX = point.x - sector.getCenterLongitude();
-			double tY = point.y - sector.getCenterLatitude();
-			double oX = o.point.x - sector.getCenterLongitude();
-			double oY = o.point.y - sector.getCenterLatitude();
-
-			//negative atan2 for clockwise direction
-			double ta = -Math.atan2(tY, tX);
-			double oa = -Math.atan2(oY, oX);
-
-			return ta < oa ? -1 : ta == oa ? 0 : 1;
-		}
 	}
 }

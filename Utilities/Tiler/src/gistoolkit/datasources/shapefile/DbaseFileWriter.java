@@ -403,6 +403,7 @@ public class DbaseFileWriter extends DbaseFileStream {
                             }
                         }
                     }
+                    break;
                     
                 default:
                     System.err.println("Do not know how to parse/write field type " + tempFieldType);

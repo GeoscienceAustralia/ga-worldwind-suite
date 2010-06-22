@@ -410,7 +410,7 @@ public class Console
 		public NullableNumberArray otherwise;
 	}
 
-	private static class ConsoleProgressReporter implements ProgressReporter
+	public static class ConsoleProgressReporter implements ProgressReporter
 	{
 		private Logger logger;
 		private int oldforty = -1;
@@ -492,6 +492,8 @@ public class Console
 				DateFormat df = new SimpleDateFormat("[HH:mm:ss]");
 				String prefix = df.format(new Date()) + " - " + level + " - ";
 				String text = prefix + line;
+				if (record.getThrown() != null)
+					text += ": " + record.getThrown();
 
 				if (record.getLevel() == Level.SEVERE)
 				{

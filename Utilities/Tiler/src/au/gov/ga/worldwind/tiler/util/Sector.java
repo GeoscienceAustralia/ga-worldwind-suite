@@ -49,12 +49,12 @@ public class Sector
 
 	public double getCenterLatitude()
 	{
-		return minLatitude + getDeltaLatitude() / 2d;
+		return 0.5 * (maxLatitude + minLatitude);
 	}
 
 	public double getCenterLongitude()
 	{
-		return minLongitude + getDeltaLongitude() / 2d;
+		return 0.5 * (maxLongitude + minLongitude);
 	}
 
 	public boolean containsPoint(double latitude, double longitude)

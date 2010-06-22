@@ -20,206 +20,196 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import au.gov.ga.worldwind.tiler.util.ProgressReporter;
 import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.Util;
 
 
 public class ShapefileTiler
 {
-	public static void main(String[] args)
+	public static void tile(File input, File output, int level, double lzts,
+			ProgressReporter progress)
 	{
-		File level0 = new File("C:/WINNT/Profiles/u97852/Desktop/GSHHS_shp/c/GSHHS_c_L1.shp");
-		File level1 = new File("C:/WINNT/Profiles/u97852/Desktop/GSHHS_shp/l/GSHHS_l_L1.shp");
-		File level2 = new File("C:/WINNT/Profiles/u97852/Desktop/GSHHS_shp/i/GSHHS_i_L1.shp");
-		File level3 = new File("C:/WINNT/Profiles/u97852/Desktop/GSHHS_shp/h/GSHHS_h_L1.shp");
-		File level4 = new File("C:/WINNT/Profiles/u97852/Desktop/GSHHS_shp/f/GSHHS_f_L1.shp");
-		File[] levels = new File[] { level0, level1, level2, level3, level4 };
-		File output = new File("C:/WINNT/Profiles/u97852/Desktop/GSHHS_shp/tiled");
-		int levelCount = 1;
-		int startLevel = 0;
-		double lzts = 36;
-
 		try
 		{
-			for (int i = 0; i < 5; i++)
+			progress.getLogger().info("Parsing " + input);
+
+			ShapeFileReader reader = new ShapeFileReader(input.getAbsolutePath());
+			Envelope envelope = reader.getHeader().getFileEnvelope();
+			Sector sector =
+					new Sector(envelope.getMinY(), envelope.getMinX(), envelope.getMaxY(), envelope
+							.getMaxX());
+
+			double tilesizedegrees = Math.pow(0.5, level) * lzts;
+			int minX = Util.getTileX(sector.getMinLongitude() + 1e-10, level, lzts);
+			int maxX = Util.getTileX(sector.getMaxLongitude() - 1e-10, level, lzts);
+			int minY = Util.getTileY(sector.getMinLatitude() + 1e-10, level, lzts);
+			int maxY = Util.getTileY(sector.getMaxLatitude() - 1e-10, level, lzts);
+
+			java.awt.Point min = new java.awt.Point(minX, minY);
+			Dimension size = new Dimension(maxX - minX + 1, maxY - minY + 1);
+			ShapefileTile[] tiles = new ShapefileTile[size.width * size.height];
+
+			for (int y = minY; y <= maxY; y++)
 			{
-				File input = levels[i];
-				startLevel = i;
-
-				System.out.println("Parsing " + input);
-				ShapeFileReader reader = new ShapeFileReader(input.getAbsolutePath());
-				Envelope envelope = reader.getHeader().getFileEnvelope();
-				Sector sector =
-						new Sector(envelope.getMinY(), envelope.getMinX(), envelope.getMaxY(),
-								envelope.getMaxX());
-
-				ShapefileTile[][] tiles = new ShapefileTile[levelCount][];
-				Dimension[] sizes = new Dimension[levelCount];
-				java.awt.Point[] mins = new java.awt.Point[levelCount];
-
-				for (int level = startLevel; level < startLevel + levelCount; level++)
+				int y0 = y - minY;
+				for (int x = minX; x <= maxX; x++)
 				{
-					int l = level - startLevel;
-					double tilesizedegrees = Math.pow(0.5, level) * lzts;
-					int minX = Util.getTileX(sector.getMinLongitude() + 1e-10, level, lzts);
-					int maxX = Util.getTileX(sector.getMaxLongitude() - 1e-10, level, lzts);
-					int minY = Util.getTileY(sector.getMinLatitude() + 1e-10, level, lzts);
-					int maxY = Util.getTileY(sector.getMaxLatitude() - 1e-10, level, lzts);
+					int x0 = x - minX;
+					double lat1 = (y * tilesizedegrees) - 90;
+					double lon1 = (x * tilesizedegrees) - 180;
+					double lat2 = lat1 + tilesizedegrees;
+					double lon2 = lon1 + tilesizedegrees;
+					Sector ts = new Sector(lat1, lon1, lat2, lon2);
 
-					mins[l] = new java.awt.Point(minX, minY);
-					sizes[l] = new Dimension(maxX - minX + 1, maxY - minY + 1);
-					int size = sizes[l].width * sizes[l].height;
-					tiles[l] = new ShapefileTile[size];
-
-					for (int y = minY; y <= maxY; y++)
-					{
-						int y0 = y - minY;
-						for (int x = minX; x <= maxX; x++)
-						{
-							int x0 = x - minX;
-							final double lat1 = (y * tilesizedegrees) - 90;
-							final double lon1 = (x * tilesizedegrees) - 180;
-							final double lat2 = lat1 + tilesizedegrees;
-							final double lon2 = lon1 + tilesizedegrees;
-							Sector s = new Sector(lat1, lon1, lat2, lon2);
-
-							ShapefileTile tile = new ShapefileTile(s, level, x, y);
-							tiles[l][y0 * sizes[l].width + x0] = tile;
-						}
-					}
+					ShapefileTile tile = new ShapefileTile(ts, level, x, y);
+					tiles[y0 * size.width + x0] = tile;
 				}
-
-				boolean anyPolygons = false;
-
-				System.out.println("Reading records");
-				ShapeFileRecord record;
-				int shapeId = 0;
-				while ((record = reader.read()) != null)
-				{
-					for (int level = startLevel; level < startLevel + levelCount; level++)
-					{
-						int l = level - startLevel;
-						ShapefileTile[] ts = tiles[l];
-						Dimension size = sizes[l];
-						java.awt.Point min = mins[l];
-
-						Shape shape = record.getShape();
-						boolean polygon =
-								shape instanceof MultiPolygon || shape instanceof Polygon
-										|| shape instanceof LinearRing;
-
-						anyPolygons |= polygon;
-						if (anyPolygons && !polygon)
-							System.out.println("ERROR: polygons mixed with non-polygons");
-
-						if (shape instanceof MultiPolygon)
-						{
-							MultiPolygon mp = (MultiPolygon) shape;
-							shapeId = addMultiPolygon(shapeId, mp, ts, level, lzts, min, size);
-						}
-						else if (shape instanceof Polygon)
-						{
-							Polygon p = (Polygon) shape;
-							shapeId = addPolygon(shapeId, p, ts, level, lzts, min, size);
-						}
-						else if (shape instanceof LinearRing)
-						{
-							LinearRing lr = (LinearRing) shape;
-							shapeId = addLinearRing(shapeId, lr, ts, level, lzts, min, size, true);
-						}
-						else if (shape instanceof MultiLineString)
-						{
-							MultiLineString mls = (MultiLineString) shape;
-							shapeId = addMultiLineString(shapeId, mls, ts, level, lzts, min, size);
-						}
-						else if (shape instanceof LineString)
-						{
-							LineString ls = (LineString) shape;
-							shapeId = addLineString(shapeId, ls, ts, level, lzts, min, size);
-						}
-						else
-						{
-							System.out.println("ERROR: unsupported shape type: " + shape);
-						}
-					}
-				}
-
-				int amount = 0;
-				System.out.println("Saving tiles");
-				for (int level = startLevel; level < startLevel + levelCount; level++)
-				{
-					System.out.println("Saving level: " + level);
-					int l = level - startLevel;
-					ShapefileTile[] ts = tiles[l];
-
-					for (ShapefileTile tile : ts)
-					{
-						amount++;
-						if (amount * 100 / ts.length > (amount - 1) * 100 / ts.length)
-							System.out.println((amount * 100 / ts.length) + "%");
-
-						if (anyPolygons)
-							tile.completePolygons();
-
-						File rowDir = new File(output, String.valueOf(tile.level));
-						rowDir = new File(rowDir, Util.paddedInt(tile.row, 4));
-						if (!rowDir.exists())
-							rowDir.mkdirs();
-
-						File dst =
-								new File(rowDir, Util.paddedInt(tile.row, 4) + "_"
-										+ Util.paddedInt(tile.col, 4) + ".zip");
-
-						saveShapefileZip(tile, dst, anyPolygons);
-					}
-				}
-
-				System.out.println("Done");
 			}
+
+			boolean anyPolygons = false;
+			Boolean lastPolygon = null;
+
+			progress.getLogger().info("Reading records");
+			ShapeFileRecord record;
+			int shapeId = 0;
+			while ((record = reader.read()) != null)
+			{
+				if (progress.isCancelled())
+					return;
+
+				Shape shape = record.getShape();
+				boolean polygon =
+						shape instanceof MultiPolygon || shape instanceof Polygon
+								|| shape instanceof LinearRing;
+
+				anyPolygons |= polygon;
+				if (lastPolygon != null && polygon != lastPolygon.booleanValue())
+				{
+					progress.getLogger().warning("Polygons mixed with non-polygons");
+				}
+				lastPolygon = polygon;
+
+				Attributes attributes = new Attributes(record);
+
+				if (shape instanceof MultiPolygon)
+				{
+					MultiPolygon mp = (MultiPolygon) shape;
+					shapeId =
+							addMultiPolygon(shapeId, mp, attributes, tiles, level, lzts, min, size,
+									progress);
+				}
+				else if (shape instanceof Polygon)
+				{
+					Polygon p = (Polygon) shape;
+					shapeId =
+							addPolygon(shapeId, p, attributes, tiles, level, lzts, min, size,
+									progress);
+				}
+				else if (shape instanceof LinearRing)
+				{
+					LinearRing lr = (LinearRing) shape;
+					shapeId =
+							addLinearRing(shapeId, lr, attributes, tiles, level, lzts, min, size,
+									true, progress);
+				}
+				else if (shape instanceof MultiLineString)
+				{
+					MultiLineString mls = (MultiLineString) shape;
+					shapeId =
+							addMultiLineString(shapeId, mls, attributes, tiles, level, lzts, min,
+									size, progress);
+				}
+				else if (shape instanceof LineString)
+				{
+					LineString ls = (LineString) shape;
+					shapeId =
+							addLineString(shapeId, ls, attributes, tiles, level, lzts, min, size,
+									progress);
+				}
+				else
+				{
+					progress.getLogger().severe("Unsupported shape type: " + shape);
+				}
+			}
+
+			progress.getLogger().info("Saving tiles");
+
+			int amount = 0;
+			for (ShapefileTile tile : tiles)
+			{
+				if (progress.isCancelled())
+					return;
+
+				amount++;
+				progress.progress(amount / (double) tiles.length);
+
+				if (anyPolygons)
+					tile.completePolygons();
+
+				File rowDir = new File(output, String.valueOf(tile.level));
+				rowDir = new File(rowDir, Util.paddedInt(tile.row, 4));
+				if (!rowDir.exists())
+					rowDir.mkdirs();
+
+				File dst =
+						new File(rowDir, Util.paddedInt(tile.row, 4) + "_"
+								+ Util.paddedInt(tile.col, 4) + ".zip");
+
+				saveShapefileZip(tile, dst, anyPolygons, progress);
+			}
+
+			progress.done();
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			progress.getLogger().log(Level.SEVERE, "Error tiling shapefile", e);
 		}
 	}
 
-	public static void saveShapefileZip(ShapefileTile tile, File file, boolean polygon)
-			throws IOException
+	protected static void saveShapefileZip(ShapefileTile tile, File file, boolean polygon,
+			ProgressReporter progress) throws IOException
 	{
 		if (file.exists())
 		{
-			System.out.println(file + " already exists");
+			progress.getLogger().warning(file + " already exists");
 			return;
 		}
 
-		if (!file.getName().toLowerCase().endsWith(".zip"))
-			throw new IllegalArgumentException("unknown zip file extension: " + file.getName());
+		int indexOfDot = file.getName().lastIndexOf('.');
+		if (indexOfDot < 0)
+			throw new IllegalArgumentException("Filename does not have an extension");
 
-		final String filenameNoExt = file.getName().substring(0, file.getName().length() - 4);
+		final String filenameNoExt = file.getName().substring(0, indexOfDot);
 		File shapefile = new File(file.getParentFile(), filenameNoExt + ".shp");
-
-		if (shapefile.exists())
-		{
-			System.out.println(shapefile + " already exists");
-			return;
-		}
 
 		List<Record> records = tile.createRecords(polygon);
 		if (!records.isEmpty())
 		{
-			ShapeFileWriter writer = new ShapeFileWriter(shapefile.getAbsolutePath());
-			for (Record rec : records)
+			boolean deleteZippedFiles = false;
+			if (shapefile.exists())
 			{
-				if (rec != null)
-					writer.write(rec);
+				progress.getLogger().warning(shapefile + " already exists");
 			}
-			writer.close();
+			else
+			{
+				ShapeFileWriter writer = new ShapeFileWriter(shapefile.getAbsolutePath());
+				for (Record rec : records)
+				{
+					if (rec != null)
+						writer.write(rec);
+				}
+				writer.close();
+				deleteZippedFiles = true;
+			}
 
 			//list all filenames with the same prefix (different extensions)
 			File[] files = file.getParentFile().listFiles(new FilenameFilter()
@@ -262,66 +252,88 @@ public class ShapefileTiler
 					out.close();
 			}
 
-			//delete all the files that we just zipped
-			for (File f : files)
+			if (deleteZippedFiles)
 			{
-				f.delete();
+				//delete all the files that we just zipped
+				for (File f : files)
+				{
+					f.delete();
+				}
 			}
 		}
 	}
 
-	public static int addMultiPolygon(int shapeId, MultiPolygon polygon, ShapefileTile[] tiles,
-			int level, double lzts, java.awt.Point min, Dimension size)
+	protected static int addMultiPolygon(int shapeId, MultiPolygon polygon, Attributes attributes,
+			ShapefileTile[] tiles, int level, double lzts, java.awt.Point min, Dimension size,
+			ProgressReporter progress)
 	{
 		for (Polygon p : polygon.getPolygons())
 		{
-			shapeId = addPolygon(shapeId, p, tiles, level, lzts, min, size);
+			shapeId = addPolygon(shapeId, p, attributes, tiles, level, lzts, min, size, progress);
 		}
 		return shapeId;
 	}
 
-	public static int addPolygon(int shapeId, Polygon polygon, ShapefileTile[] tiles, int level,
-			double lzts, java.awt.Point min, Dimension size)
+	protected static int addPolygon(int shapeId, Polygon polygon, Attributes attributes,
+			ShapefileTile[] tiles, int level, double lzts, java.awt.Point min, Dimension size,
+			ProgressReporter progress)
 	{
-		//TODO filling in the positive ring will not work if holes exist that cross the borders of a filled tile
-
 		LinearRing ring = polygon.getPosativeRing();
-		shapeId = addLinearRing(shapeId, ring, tiles, level, lzts, min, size, true);
+		shapeId =
+				addLinearRing(shapeId, ring, attributes, tiles, level, lzts, min, size, true,
+						progress);
 
 		for (LinearRing hole : polygon.getHoles())
 		{
-			shapeId = addLinearRing(shapeId, hole, tiles, level, lzts, min, size, false);
+			ShapefileTile containing =
+					allPointsWithin(hole.getXCoordinates(), hole.getYCoordinates(), tiles, level,
+							lzts, min, size);
+			if (containing != null)
+			{
+				addHole(hole.getXCoordinates(), hole.getYCoordinates(), containing, attributes);
+			}
+			else
+			{
+				shapeId =
+						addLinearRing(shapeId, hole, attributes, tiles, level, lzts, min, size,
+								false, progress);
+			}
 		}
 		return shapeId;
 	}
 
-	public static int addLinearRing(int shapeId, LinearRing ring, ShapefileTile[] tiles, int level,
-			double lzts, java.awt.Point min, Dimension size, boolean fillInside)
+	protected static int addLinearRing(int shapeId, LinearRing ring, Attributes attributes,
+			ShapefileTile[] tiles, int level, double lzts, java.awt.Point min, Dimension size,
+			boolean fillInside, ProgressReporter progress)
 	{
-		return addPoints(shapeId, ring.getXCoordinates(), ring.getYCoordinates(), true, fillInside,
-				tiles, level, lzts, min, size);
+		return addPoints(shapeId, ring.getXCoordinates(), ring.getYCoordinates(), attributes, true,
+				fillInside, tiles, level, lzts, min, size, progress);
 	}
 
-	public static int addMultiLineString(int shapeId, MultiLineString multiLineString,
-			ShapefileTile[] tiles, int level, double lzts, java.awt.Point min, Dimension size)
+	protected static int addMultiLineString(int shapeId, MultiLineString multiLineString,
+			Attributes attributes, ShapefileTile[] tiles, int level, double lzts,
+			java.awt.Point min, Dimension size, ProgressReporter progress)
 	{
 		for (LineString lineString : multiLineString.getLines())
 		{
-			shapeId = addLineString(shapeId, lineString, tiles, level, lzts, min, size);
+			shapeId =
+					addLineString(shapeId, lineString, attributes, tiles, level, lzts, min, size,
+							progress);
 		}
 		return shapeId;
 	}
 
-	public static int addLineString(int shapeId, LineString lineString, ShapefileTile[] tiles,
-			int level, double lzts, java.awt.Point min, Dimension size)
+	protected static int addLineString(int shapeId, LineString lineString, Attributes attributes,
+			ShapefileTile[] tiles, int level, double lzts, java.awt.Point min, Dimension size,
+			ProgressReporter progress)
 	{
 		return addPoints(shapeId, lineString.getXCoordinates(), lineString.getYCoordinates(),
-				false, false, tiles, level, lzts, min, size);
+				attributes, false, false, tiles, level, lzts, min, size, progress);
 	}
 
-	public static int addPoints(int shapeId, double[] xpoints, double[] ypoints, boolean polygon,
-			boolean fillInside, ShapefileTile[] tiles, int level, double lzts, java.awt.Point min,
-			Dimension size)
+	protected static int addPoints(int shapeId, double[] xpoints, double[] ypoints,
+			Attributes attributes, boolean polygon, boolean fillInside, ShapefileTile[] tiles,
+			int level, double lzts, java.awt.Point min, Dimension size, ProgressReporter progress)
 	{
 		if (xpoints.length != ypoints.length)
 			throw new IllegalArgumentException("arrays don't have equal length");
@@ -350,7 +362,7 @@ public class ShapefileTiler
 
 			if (!tile.sector.containsPoint(point.y, point.x))
 			{
-				System.out.println("ERROR: " + point + " outside bounds");
+				progress.getLogger().warning(point + " outside bounds");
 			}
 
 			if (tile != lastTile)
@@ -395,14 +407,15 @@ public class ShapefileTiler
 							if (p.x < min.x || p.x > min.x + size.width || p.y < min.y
 									|| p.y > min.y + size.height)
 							{
-								System.out
-										.println("WARNING: crossed tile " + p + " outside bounds");
+								progress.getLogger().warning(
+										"Crossed tile " + p + " outside bounds");
 								continue;
 							}
 
 							int ptileIndex = (p.y - min.y) * size.width + (p.x - min.x);
 							ShapefileTile crossTile = tiles[ptileIndex];
-							boolean crossed = crossTile.crossShape(shapeId, lastPoint, point);
+							boolean crossed =
+									crossTile.crossShape(shapeId, lastPoint, point, attributes);
 							if (crossed && polygon)
 								tilesAffected.add(crossTile);
 						}
@@ -414,16 +427,16 @@ public class ShapefileTiler
 
 				if (lastPoint != null)
 				{
-					tile.enterShape(shapeId, lastPoint, point);
+					tile.enterShape(shapeId, lastPoint, point, attributes);
 				}
 				else
 				{
-					tile.continueShape(shapeId, point);
+					tile.continueShape(shapeId, point, attributes);
 				}
 			}
 			else
 			{
-				tile.continueShape(shapeId, point);
+				tile.continueShape(shapeId, point, attributes);
 			}
 
 			lastTile = tile;
@@ -437,15 +450,66 @@ public class ShapefileTiler
 
 			if (fillInside)
 			{
-				fillInside(tiles, tilesAffected, min, size);
+				markFilledTilesInside(tiles, tilesAffected, min, size, attributes);
 			}
 		}
 
 		return shapeId + 1;
 	}
 
-	private static void fillInside(ShapefileTile[] tiles, List<ShapefileTile> tilesAffected,
-			java.awt.Point min, Dimension size)
+	protected static ShapefileTile allPointsWithin(double[] xpoints, double[] ypoints,
+			ShapefileTile[] tiles, int level, double lzts, java.awt.Point min, Dimension size)
+	{
+		if (xpoints == null || xpoints.length == 0)
+			return null;
+
+		if (xpoints.length != ypoints.length)
+			throw new IllegalArgumentException("arrays don't have equal length");
+
+		Integer X = null, Y = null;
+		for (int i = 0; i < xpoints.length; i++)
+		{
+			int x = Util.getTileX(xpoints[i], level, lzts);
+			int y = Util.getTileY(ypoints[i], level, lzts);
+
+			x = Util.limitRange(x, min.x, min.x + size.width - 1);
+			y = Util.limitRange(y, min.y, min.y + size.height - 1);
+
+			//if tile has changed
+			if (X != null && X != x)
+				return null;
+			if (Y != null && Y != y)
+				return null;
+
+			X = x;
+			Y = y;
+		}
+
+		int x0 = X - min.x;
+		int y0 = Y - min.y;
+		int tileIndex = y0 * size.width + x0;
+		return tiles[tileIndex];
+	}
+
+	protected static void addHole(double[] xpoints, double[] ypoints, ShapefileTile tile,
+			Attributes attributes)
+	{
+		if (xpoints.length != ypoints.length)
+			throw new IllegalArgumentException("arrays don't have equal length");
+
+		List<Point> points = new ArrayList<Point>(xpoints.length);
+		for (int i = 0; i < xpoints.length; i++)
+		{
+			Point point = new Point(xpoints[i], ypoints[i]);
+			points.add(point);
+		}
+
+		tile.addHole(points, attributes);
+	}
+
+	protected static void markFilledTilesInside(ShapefileTile[] tiles,
+			List<ShapefileTile> tilesAffected, java.awt.Point min, Dimension size,
+			Attributes attributes)
 	{
 		if (tilesAffected.get(0) != tilesAffected.get(tilesAffected.size() - 1))
 		{
@@ -517,37 +581,16 @@ public class ShapefileTiler
 					{
 						//crossings is odd, so fill in tile
 						ShapefileTile tile = tiles[index];
-						tile.fillSector();
+						tile.markFilled(attributes);
 					}
 				}
 			}
 		}
 	}
 
-	private static List<java.awt.Point> linePoints(float x1, float y1, float x2, float y2)
+	protected static List<java.awt.Point> linePoints(float x1, float y1, float x2, float y2)
 	{
 		List<java.awt.Point> points = new ArrayList<java.awt.Point>();
-
-		int x1i = Math.round(x1);
-		int y1i = Math.round(y1);
-		int x2i = Math.round(x2);
-		int y2i = Math.round(y2);
-
-		//handle special vertical/horizontal line cases
-		if (x1i == x2i || y1i == y2i)
-		{
-			if (x1i == x2i)
-			{
-				for (int y = y1i; y <= y2i; y++)
-					points.add(new java.awt.Point(x1i, y));
-			}
-			else
-			{
-				for (int x = x1i; x <= x2i; x++)
-					points.add(new java.awt.Point(x, y1i));
-			}
-			return points;
-		}
 
 		boolean steep = Math.abs(x2 - x1) < Math.abs(y2 - y1);
 		if (steep)
@@ -560,7 +603,8 @@ public class ShapefileTiler
 			x2 = y2;
 			y2 = temp;
 		}
-		if (x1 > x2)
+		boolean swap = x1 > x2;
+		if (swap)
 		{
 			//swap p1/p2 points
 			float temp = x1;
@@ -571,37 +615,57 @@ public class ShapefileTiler
 			y2 = temp;
 		}
 
-		float dx = x2 - x1;
-		float dy = y2 - y1;
-		float gradient = dy / dx;
-		float intery = y1;
-		int startX = Math.round(x1);
-		int endX = Math.round(x2);
-		float centerDiff = (startX - x1) * gradient;
-
-		for (int x = startX; x <= endX; x++)
+		int y1i = Math.round(y1);
+		int y2i = Math.round(y2);
+		if (y1i == y2i)
 		{
-			int y = Math.round(intery);
-			int add = (intery + centerDiff - y < 0) ? -1 : 1;
-			boolean first = add > 0 ^ gradient < 0;
+			//handle special horizontal/vertical line case
 
-			java.awt.Point p1 = steep ? new java.awt.Point(y, x) : new java.awt.Point(x, y);
-			java.awt.Point p2 =
-					steep ? new java.awt.Point(y + add, x) : new java.awt.Point(x, y + add);
-
-			if (first)
+			int x1i = Math.round(x1);
+			int x2i = Math.round(x2);
+			for (int x = x1i; x <= x2i; x++)
 			{
-				points.add(p1);
-				points.add(p2);
+				points.add(steep ? new java.awt.Point(y1i, x) : new java.awt.Point(x, y1i));
 			}
-			else
-			{
-				points.add(p2);
-				points.add(p1);
-			}
-
-			intery += gradient;
 		}
+		else
+		{
+			float dx = x2 - x1;
+			float dy = y2 - y1;
+			float gradient = dy / dx;
+			float intery = y1;
+			int startX = Math.round(x1);
+			int endX = Math.round(x2);
+			float centerDiff = (startX - x1) * gradient;
+
+			for (int x = startX; x <= endX; x++)
+			{
+				int y = Math.round(intery);
+				int add = (intery + centerDiff - y < 0) ? -1 : 1;
+				boolean first = add > 0 ^ gradient < 0;
+
+				java.awt.Point p1 = steep ? new java.awt.Point(y, x) : new java.awt.Point(x, y);
+				java.awt.Point p2 =
+						steep ? new java.awt.Point(y + add, x) : new java.awt.Point(x, y + add);
+
+				if (first)
+				{
+					points.add(p1);
+					points.add(p2);
+				}
+				else
+				{
+					points.add(p2);
+					points.add(p1);
+				}
+
+				intery += gradient;
+			}
+		}
+
+		//if points were swapped, reverse the list
+		if (swap)
+			Collections.reverse(points);
 
 		return points;
 	}

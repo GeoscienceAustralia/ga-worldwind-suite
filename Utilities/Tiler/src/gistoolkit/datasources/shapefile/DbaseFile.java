@@ -571,6 +571,7 @@ public class DbaseFile {
                                 }
                             }
                         }
+                        break;
                         
                     default:
                         System.out.println("Do not know how to parse/write field type "+tempFieldType);
