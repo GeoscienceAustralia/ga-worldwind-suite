@@ -1,15 +1,15 @@
 package au.gov.ga.worldwind.tiler.shapefile;
 
-import gistoolkit.features.Point;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 public class TileRecord
 {
 	public final int shapeId;
 	public final Attributes attributes;
-	public final List<Point> points;
+	public final List<Coordinate> points;
 	public final List<TileRecord> holes = new ArrayList<TileRecord>();
 
 	public boolean exited = false;
@@ -17,10 +17,10 @@ public class TileRecord
 
 	public TileRecord(int shapeId, boolean entered, Attributes attributes)
 	{
-		this(shapeId, entered, attributes, new ArrayList<Point>());
+		this(shapeId, entered, attributes, new ArrayList<Coordinate>());
 	}
 
-	public TileRecord(int shapeId, boolean entered, Attributes attributes, List<Point> points)
+	public TileRecord(int shapeId, boolean entered, Attributes attributes, List<Coordinate> points)
 	{
 		this.shapeId = shapeId;
 		this.entered = entered;

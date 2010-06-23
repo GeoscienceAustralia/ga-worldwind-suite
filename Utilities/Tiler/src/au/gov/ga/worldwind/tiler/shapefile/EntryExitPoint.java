@@ -1,15 +1,16 @@
 package au.gov.ga.worldwind.tiler.shapefile;
 
-import gistoolkit.features.Point;
 import au.gov.ga.worldwind.tiler.util.Sector;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 public class EntryExitPoint implements Comparable<EntryExitPoint>
 {
-	public final Point point;
+	public final Coordinate point;
 	private final Sector sector;
 	private boolean entry;
 
-	public EntryExitPoint(Point point, Sector sector, boolean entry)
+	public EntryExitPoint(Coordinate point, Sector sector, boolean entry)
 	{
 		if (point == null)
 			throw new NullPointerException();

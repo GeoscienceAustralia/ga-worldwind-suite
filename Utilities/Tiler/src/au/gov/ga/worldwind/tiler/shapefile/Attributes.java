@@ -1,29 +1,14 @@
 package au.gov.ga.worldwind.tiler.shapefile;
 
-import gistoolkit.features.AttributeType;
-import gistoolkit.features.Record;
+import com.vividsolutions.jump.feature.Feature;
 
 public class Attributes
 {
-	private final AttributeType[] attributeTypes;
-	private final String[] attributeNames;
 	private final Object[] attributes;
 
-	public Attributes(Record fromRecord)
+	public Attributes(Feature fromFeature)
 	{
-		attributeTypes = fromRecord.getAttributeTypes();
-		attributeNames = fromRecord.getAttributeNames();
-		attributes = fromRecord.getAttributes();
-	}
-
-	public AttributeType[] getAttributeTypes()
-	{
-		return attributeTypes;
-	}
-
-	public String[] getAttributeNames()
-	{
-		return attributeNames;
+		attributes = fromFeature.getAttributes();
 	}
 
 	public Object[] getAttributes()
