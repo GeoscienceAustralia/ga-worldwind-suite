@@ -12,7 +12,6 @@ import org.geotools.dbffile.DbfFileException;
 import org.geotools.shapefile.ShapeHandler;
 import org.geotools.shapefile.ShapeTypeNotSupportedException;
 import org.geotools.shapefile.Shapefile;
-import org.geotools.shapefile.ShapefileHeader;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -64,7 +63,7 @@ public class ShapefileReader
 		edis = new EndianDataInputStream(shpIS);
 		ShapefileHeader header = new ShapefileHeader(edis);
 
-		if (header.getVersion() != 1000)
+		if (header.getVersion() != ShapefileHeader.VERSION)
 			System.err.println("Unknown shapefile version, attempting to read anyway");
 
 		shapeType = header.getShapeType();

@@ -8,5 +8,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Tiler/gdal"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/jts-1.7.2.jar"/>
+	<classpathentry kind="lib" path="lib/jump-core-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

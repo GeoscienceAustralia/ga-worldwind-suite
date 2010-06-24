@@ -720,11 +720,7 @@ public class ShapefileTile
 
 			Feature feature = new BasicFeature(schema);
 			feature.setGeometry(geometry);
-			//skip attribute 0, as it is the geometry
-			for (int i = 1; i < schema.getAttributeCount(); i++)
-			{
-				feature.setAttribute(i, p.attributes.getAttributes()[i]);
-			}
+			p.attributes.saveAttributes(feature);
 
 			fc.add(feature);
 		}

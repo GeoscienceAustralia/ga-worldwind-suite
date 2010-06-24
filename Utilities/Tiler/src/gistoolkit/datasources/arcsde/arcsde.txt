@@ -1,8 +1,0 @@
-arcsde uses proprietary interface java clases.
-As such if they are included here, then most people
-can not compile the gistoolkit project.
-
-They have been moved to the "proprietary" package at the
-same level as geotools.  If you have ArcSDE, you should be 
-able to compile this proprietary package intependently.
-

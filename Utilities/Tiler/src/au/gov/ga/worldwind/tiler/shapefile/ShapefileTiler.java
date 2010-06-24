@@ -48,10 +48,13 @@ public class ShapefileTiler
 			reader = new ShapefileReader(input);
 			reader.open();
 			Envelope envelope = reader.getBounds();
-			System.out.println(envelope);
 			Sector sector =
 					new Sector(envelope.getMinY(), envelope.getMinX(), envelope.getMaxY(), envelope
 							.getMaxX());
+
+			//TODO replace this schema with a customisable one, so users can select a subset of attributes
+			FeatureSchema schema = reader.getSchema();
+
 
 			double tilesizedegrees = Math.pow(0.5, level) * lzts;
 			int minX = Util.getTileX(sector.getMinLongitude() + 1e-10, level, lzts);
@@ -101,7 +104,8 @@ public class ShapefileTiler
 				}
 				lastPolygon = polygon;
 
-				Attributes attributes = new Attributes(feature);
+				Attributes attributes = new Attributes();
+				attributes.loadAttributes(feature, schema);
 
 				if (geometry instanceof MultiPolygon)
 				{
@@ -167,8 +171,7 @@ public class ShapefileTiler
 						new File(rowDir, Util.paddedInt(tile.row, 4) + "_"
 								+ Util.paddedInt(tile.col, 4) + ".zip");
 
-				saveShapefileZip(tile, reader.getFactory(), reader.getSchema(), dst, anyPolygons,
-						progress);
+				saveShapefileZip(tile, reader.getFactory(), schema, dst, anyPolygons, progress);
 			}
 
 			progress.done();
