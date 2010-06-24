@@ -161,24 +161,24 @@ public class SubTile
 		return LatLon.fromDegrees(lat, lon);
 	}
 
-	public double deltaLatDegrees()
+	public double deltaLatitudeDegrees()
 	{
 		return maxmax.latitude.degrees - minmin.latitude.degrees;
 	}
 
-	public double deltaLonDegrees()
+	public double deltaLongitudeDegrees()
 	{
 		return maxmax.longitude.degrees - minmin.longitude.degrees;
 	}
 
-	public double latFract(LatLon latlon)
+	public double latitudeFract(LatLon latlon)
 	{
-		return (latlon.latitude.degrees - minmin.latitude.degrees) / deltaLatDegrees();
+		return (latlon.latitude.degrees - minmin.latitude.degrees) / deltaLatitudeDegrees();
 	}
 
-	public double lonFract(LatLon latlon)
+	public double longitudeFract(LatLon latlon)
 	{
-		return (latlon.longitude.degrees - minmin.longitude.degrees) / deltaLonDegrees();
+		return (latlon.longitude.degrees - minmin.longitude.degrees) / deltaLongitudeDegrees();
 	}
 
 	public void completePolygons(List<IndexedLatLon> vertices)

@@ -121,7 +121,7 @@ public class ThemeFactory
 				{
 					String name = XMLUtil.getText(element, "@name");
 					URL url = XMLUtil.getURL(element, "@url", urlContext);
-					URL description = XMLUtil.getURL(element, "@description", urlContext);
+					URL info = XMLUtil.getURL(element, "@info", urlContext);
 					String icon = XMLUtil.getText(element, "@icon");
 					URL iconURL = null;
 					if (icon == null)
@@ -129,7 +129,7 @@ public class ThemeFactory
 					else
 						iconURL = XMLUtil.getURL(icon, urlContext);
 
-					IDataset dataset = new LazyDataset(name, url, description, iconURL, true);
+					IDataset dataset = new LazyDataset(name, url, info, iconURL, true);
 					datasets.add(dataset);
 				}
 				catch (Exception e)
@@ -153,16 +153,12 @@ public class ThemeFactory
 				{
 					String name = XMLUtil.getText(element, "@name");
 					URL url = XMLUtil.getURL(element, "@url", urlContext);
-					URL description = XMLUtil.getURL(element, "@description", urlContext);
+					URL info = XMLUtil.getURL(element, "@info", urlContext);
 					URL icon = XMLUtil.getURL(element, "@icon", urlContext);
-					URL legend = XMLUtil.getURL(element, "@legend", urlContext);
-					URL query = XMLUtil.getURL(element, "@query", urlContext);
 					boolean enabled = XMLUtil.getBoolean(element, "@enabled", true);
 					boolean visible = XMLUtil.getBoolean(element, "@visible", true);
 
-					ThemeLayer layer =
-							new BasicThemeLayer(name, url, description, icon, legend, query,
-									enabled, visible);
+					ThemeLayer layer = new BasicThemeLayer(name, url, info, icon, enabled, visible);
 					layers.add(layer);
 				}
 				catch (Exception e)

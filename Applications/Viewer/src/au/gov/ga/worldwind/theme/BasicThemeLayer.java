@@ -8,10 +8,10 @@ public class BasicThemeLayer extends LayerDefinition implements ThemeLayer
 {
 	private boolean visible;
 
-	public BasicThemeLayer(String name, URL url, URL infoURL, URL iconURL, URL legendURL,
-			URL queryURL, boolean enabled, boolean visible)
+	public BasicThemeLayer(String name, URL url, URL infoURL, URL iconURL, boolean enabled,
+			boolean visible)
 	{
-		super(name, url, infoURL, iconURL, legendURL, queryURL, true, true, enabled);
+		super(name, url, infoURL, iconURL, true, true, enabled);
 		setVisible(visible);
 	}
 

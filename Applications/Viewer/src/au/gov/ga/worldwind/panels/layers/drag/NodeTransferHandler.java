@@ -133,7 +133,7 @@ public class NodeTransferHandler extends TransferHandler
 						URL url = file.toURI().toURL();
 						ILayerDefinition definition =
 								new LayerDefinition(file.getName(), url, null, Icons.file.getURL(),
-										null, null, true, false);
+										true, false);
 						INode node = LayerNode.createFromLayerDefinition(definition);
 						addNodeToTree(dropLocation, model, node, false, i++);
 					}

@@ -51,7 +51,7 @@ import au.gov.ga.worldwind.components.JIntegerField;
 import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.panels.dataset.LayerDefinition;
 import au.gov.ga.worldwind.panels.layers.LayersPanel.LayerDefinitionFileFilter;
-import au.gov.ga.worldwind.util.AVKeyExtra;
+import au.gov.ga.worldwind.util.AVKeyMore;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 import au.gov.ga.worldwind.util.XMLUtil;
@@ -904,8 +904,8 @@ public class FileLayerCreator extends JDialog
 			params.setValue(AVKey.FORCE_LEVEL_ZERO_LOADS, true);
 			if (transparentCheck.isSelected())
 			{
-				params.setValue(AVKeyExtra.TRANSPARENT_COLOR, transparentColor.getColor());
-				params.setValue(AVKeyExtra.TRANSPARENT_FUZZ, fuzz);
+				params.setValue(AVKeyMore.TRANSPARENT_COLOR, transparentColor.getColor());
+				params.setValue(AVKeyMore.TRANSPARENT_FUZZ, fuzz);
 			}
 
 			Document document = LayerConfiguration.createTiledImageLayerDocument(params);
@@ -918,7 +918,7 @@ public class FileLayerCreator extends JDialog
 				URL url = file.toURI().toURL();
 				layer =
 						new LayerDefinition(nameField.getText(), url, null, Icons.file.getURL(),
-								null, null, true, false);
+								true, false);
 			}
 			catch (MalformedURLException e)
 			{

@@ -26,7 +26,7 @@ import javax.media.opengl.GL;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.util.AVKeyExtra;
+import au.gov.ga.worldwind.util.AVKeyMore;
 import au.gov.ga.worldwind.util.Util;
 import au.gov.ga.worldwind.util.XMLUtil;
 
@@ -71,9 +71,9 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 		dataCacheName += Util.randomString(8);
 		list.setValue(AVKey.DATA_CACHE_NAME, dataCacheName);
 
-		WWXML.checkAndSetColorParam(domElement, params, AVKeyExtra.TRANSPARENT_COLOR,
+		WWXML.checkAndSetColorParam(domElement, params, AVKeyMore.TRANSPARENT_COLOR,
 				"TransparentColor", null);
-		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyExtra.TRANSPARENT_FUZZ,
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.TRANSPARENT_FUZZ,
 				"TransparentFuzz", null);
 
 		return list;
@@ -81,11 +81,11 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 
 	public static void createTiledImageLayerElements(Element context, AVList params)
 	{
-		Color color = (Color) params.getValue(AVKeyExtra.TRANSPARENT_COLOR);
+		Color color = (Color) params.getValue(AVKeyMore.TRANSPARENT_COLOR);
 		if (color != null)
 			XMLUtil.appendColor(context, "TransparentColor", color);
 
-		Double fuzz = (Double) params.getValue(AVKeyExtra.TRANSPARENT_FUZZ);
+		Double fuzz = (Double) params.getValue(AVKeyMore.TRANSPARENT_FUZZ);
 		if (fuzz != null)
 			WWXML.appendDouble(context, "TransparentFuzz", fuzz);
 	}
@@ -95,7 +95,7 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 		if (params == null)
 			return;
 
-		Object o = params.getValue(AVKey.URL);
+		Object o = params.getValue(AVKeyMore.CONTEXT_URL);
 		if (o != null && o instanceof URL)
 			context = (URL) o;
 	}
@@ -275,9 +275,9 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 				transparencyColors =
 						(int[]) tile.getLevel().getParams().getValue(AVKey.TRANSPARENCY_COLORS);
 				transparentColor =
-						(Color) tile.getLevel().getParams().getValue(AVKeyExtra.TRANSPARENT_COLOR);
+						(Color) tile.getLevel().getParams().getValue(AVKeyMore.TRANSPARENT_COLOR);
 				transparentFuzz =
-						(Double) tile.getLevel().getParams().getValue(AVKeyExtra.TRANSPARENT_FUZZ);
+						(Double) tile.getLevel().getParams().getValue(AVKeyMore.TRANSPARENT_FUZZ);
 			}
 
 			//extract the file extension from the filename

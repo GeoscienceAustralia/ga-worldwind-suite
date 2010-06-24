@@ -47,7 +47,7 @@ public class Sandpit extends ApplicationTemplate
 			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(18, 53, 72, 107));
 			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(-18, 17, 144, 179));
 			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(-18, 17, -36, -1));
-			params.setValue(AVKey.NUM_LEVELS, 1);
+			params.setValue(AVKey.NUM_LEVELS, 5);
 			params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 			params.setValue(AVKey.DATASET_NAME, "shapefile");
 			params.setValue(AVKey.DATA_CACHE_NAME, "shapefile");
@@ -58,9 +58,10 @@ public class Sandpit extends ApplicationTemplate
 				@Override
 				public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 				{
+					//String directory = "C:/WINNT/Profiles/u97852/Desktop/GSHHS_shp/tiled";
+					String directory = "C:/WINNT/Profiles/u97852/Desktop/calcrete/tiled";
 					String filename =
-							"C:/WINNT/Profiles/u97852/Desktop/GSHHS_shp/tiled/"
-									+ tile.getLevelNumber() + "/"
+							directory + "/" + tile.getLevelNumber() + "/"
 									+ Util.paddedInt(tile.getRow(), 4) + "/"
 									+ Util.paddedInt(tile.getRow(), 4) + "_"
 									+ Util.paddedInt(tile.getColumn(), 4) + ".zip";

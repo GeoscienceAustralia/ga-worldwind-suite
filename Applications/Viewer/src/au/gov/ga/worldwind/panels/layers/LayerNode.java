@@ -15,12 +15,10 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	private boolean layerLoading = false;
 
 	public LayerNode(String name, URL infoURL, URL iconURL, boolean expanded, URL layerURL,
-			URL legendURL, URL queryURL, boolean enabled, double opacity)
+			boolean enabled, double opacity)
 	{
 		super(name, infoURL, iconURL, expanded);
 		setLayerURL(layerURL);
-		setLegendURL(legendURL);
-		setQueryURL(queryURL);
 		setEnabled(enabled);
 		setOpacity(opacity);
 	}
@@ -28,8 +26,9 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	public LayerNode(ILayerNode node)
 	{
 		this(node.getName(), node.getInfoURL(), node.getIconURL(), node.isExpanded(), node
-				.getLayerURL(), node.getLegendURL(), node.getQueryURL(), node.isEnabled(), node
-				.getOpacity());
+				.getLayerURL(), node.isEnabled(), node.getOpacity());
+		setLegendURL(node.getLegendURL());
+		setQueryURL(node.getQueryURL());
 	}
 
 	public URL getLayerURL()
@@ -77,8 +76,8 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	public static LayerNode createFromLayerDefinition(ILayerDefinition definition)
 	{
 		return new LayerNode(definition.getName(), definition.getInfoURL(),
-				definition.getIconURL(), true, definition.getLayerURL(), definition.getLegendURL(),
-				definition.getQueryURL(), definition.isEnabled(), 1.0);
+				definition.getIconURL(), true, definition.getLayerURL(), definition.isEnabled(),
+				1.0);
 	}
 
 	@Override

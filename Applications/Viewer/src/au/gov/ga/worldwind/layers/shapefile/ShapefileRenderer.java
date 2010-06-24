@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.media.opengl.GL;
 
-import nasa.worldwind.retrieve.ExtendedRetrievalService.SectorPolyline;
 import au.gov.ga.worldwind.util.HSLColor;
 
 public class ShapefileRenderer
@@ -21,7 +20,7 @@ public class ShapefileRenderer
 	private boolean enableBlending = false;
 	private boolean enableDepthOffset = false;
 	private boolean enableLighting = false;
-	private boolean drawWireframe = false;
+	private boolean drawWireframe = true;
 	private boolean showImageTileOutlines = false;
 	private Material lightMaterial = Material.WHITE;
 	private Vec4 lightDirection = new Vec4(1.0, 0.5, 1.0);
@@ -34,25 +33,25 @@ public class ShapefileRenderer
 
 	public void renderTiles(DrawContext dc, List<ShapefileTile> tiles)
 	{
-		//beginRendering(dc);
+		beginRendering(dc);
 
 		GL gl = dc.getGL();
 		gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
-		gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+		//gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
 
 		for (ShapefileTile tile : tiles)
 		{
 			tile.render(dc);
 
-			if (showImageTileOutlines)
+			/*if (showImageTileOutlines)
 			{
 				SectorPolyline polyline = new SectorPolyline(tile.getSector());
 				polyline.setColor(getColor(tile.getLevelNumber()));
 				polyline.render(dc);
-			}
+			}*/
 		}
 
-		//endRendering(dc);
+		endRendering(dc);
 	}
 
 	protected void beginRendering(DrawContext dc)
@@ -73,7 +72,7 @@ public class ShapefileRenderer
 		GL gl = dc.getGL();
 
 		gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-		//gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+		gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
 
 		if (!dc.isPickingMode())
 		{
@@ -142,7 +141,7 @@ public class ShapefileRenderer
 		GL gl = dc.getGL();
 
 		gl.glPopAttrib();
-		//gl.glPopClientAttrib();
+		gl.glPopClientAttrib();
 	}
 
 	public void setBlending(DrawContext dc)

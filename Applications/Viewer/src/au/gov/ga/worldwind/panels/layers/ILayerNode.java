@@ -7,8 +7,12 @@ public interface ILayerNode extends INode
 	public URL getLayerURL();
 
 	public URL getLegendURL();
+	
+	public void setLegendURL(URL legendURL);
 
 	public URL getQueryURL();
+	
+	public void setQueryURL(URL queryURL);
 
 	public boolean isEnabled();
 

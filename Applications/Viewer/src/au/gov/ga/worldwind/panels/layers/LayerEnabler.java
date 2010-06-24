@@ -188,17 +188,17 @@ public class LayerEnabler
 		}
 
 		//create a layer or elevation model from the downloaded result
-		Object layer;
+		LoadedLayer loaded;
 		try
 		{
-			layer = LayerLoader.load(result.getSourceURL(), result.getAsInputStream());
+			loaded = LayerLoader.load(result.getSourceURL(), result.getAsInputStream());
 		}
 		catch (Exception e)
 		{
 			setError(node, e);
 			return;
 		}
-		if (layer == null)
+		if (loaded == null)
 			return;
 
 		int index = nodes.indexOf(node);
@@ -206,14 +206,7 @@ public class LayerEnabler
 			return;
 
 		Wrapper wrapper = wrappers.get(index);
-		if (layer instanceof Layer)
-		{
-			wrapper.setLayer((Layer) layer);
-		}
-		else if (layer instanceof ElevationModel)
-		{
-			wrapper.setElevationModel((ElevationModel) layer);
-		}
+		wrapper.setLoaded(loaded);
 
 		//must've been a download, so have to refresh the layer list
 		if (!result.isFromCache())
@@ -252,6 +245,12 @@ public class LayerEnabler
 					elevationModels.add(wrapper.getElevationModel());
 				}
 			}
+
+			if (wrapper.isLoaded())
+			{
+				wrapper.node.setLegendURL(wrapper.getLoaded().getLegendURL());
+				wrapper.node.setQueryURL(wrapper.getLoaded().getQueryURL());
+			}
 		}
 
 		layerList.addAllFromSection(this, layers);
@@ -260,6 +259,9 @@ public class LayerEnabler
 		//tell the listeners that the list has been refreshed
 		for (RefreshListener listener : listeners)
 			listener.refreshed();
+		
+		tree.getUI().relayout();
+		tree.repaint();
 	}
 
 	public synchronized boolean hasLayer(ILayerNode node)
@@ -272,51 +274,46 @@ public class LayerEnabler
 	private static class Wrapper
 	{
 		public final ILayerNode node;
-
-		private Layer layer;
-		private ElevationModel elevationModel;
+		private LoadedLayer loaded;
 
 		public Wrapper(ILayerNode node)
 		{
 			this.node = node;
 		}
 
-		public boolean hasLayer()
+		public ElevationModel getElevationModel()
 		{
-			return layer != null;
-		}
-
-		public Layer getLayer()
-		{
-			return layer;
-		}
-
-		public void setLayer(Layer layer)
-		{
-			this.layer = layer;
-			if (layer != null)
-			{
-				setElevationModel(null);
-			}
+			return loaded != null ? loaded.getElevationModel() : null;
 		}
 
 		public boolean hasElevationModel()
 		{
-			return elevationModel != null;
+			return loaded != null && loaded.isElevationModel();
 		}
 
-		public ElevationModel getElevationModel()
+		public Layer getLayer()
 		{
-			return elevationModel;
+			return loaded != null ? loaded.getLayer() : null;
 		}
 
-		public void setElevationModel(ElevationModel elevationModel)
+		public boolean hasLayer()
 		{
-			this.elevationModel = elevationModel;
-			if (elevationModel != null)
-			{
-				setLayer(null);
-			}
+			return loaded != null && loaded.isLayer();
+		}
+
+		public boolean isLoaded()
+		{
+			return loaded != null;
+		}
+
+		public LoadedLayer getLoaded()
+		{
+			return loaded;
+		}
+
+		public void setLoaded(LoadedLayer loaded)
+		{
+			this.loaded = loaded;
 		}
 	}
 

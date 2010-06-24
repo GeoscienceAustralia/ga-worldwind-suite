@@ -30,7 +30,7 @@ public class PolygonTessellator
 	public static List<FastShape> tessellateShapefile(Shapefile shapefile, Sector sector,
 			int subdivisions)
 	{
-		//subdivisions = 3;
+		//subdivisions = 20;
 
 		List<FastShape> shapes = new ArrayList<FastShape>();
 		List<ShapefileRecord> records = shapefile.getRecords();
@@ -133,10 +133,10 @@ public class PolygonTessellator
 					{
 						//get the fractional position of the points within their corresponding tile's
 						//sector, in the range -0.5 to 0.5
-						float x1 = (float) (lastTile.lonFract(lastLatlon) - 0.5);
-						float y1 = (float) (lastTile.latFract(lastLatlon) - 0.5);
-						float x2 = (float) (tile.lonFract(latlon) - 0.5);
-						float y2 = (float) (tile.latFract(latlon) - 0.5);
+						float x1 = (float) (lastTile.longitudeFract(lastLatlon) - 0.5);
+						float y1 = (float) (lastTile.latitudeFract(lastLatlon) - 0.5);
+						float x2 = (float) (tile.longitudeFract(latlon) - 0.5);
+						float y2 = (float) (tile.latitudeFract(latlon) - 0.5);
 
 						//calculate a line between the lastTile and this tile
 						List<Point> line =
@@ -289,6 +289,7 @@ public class PolygonTessellator
 			ib.put(i);
 
 		FastShape shape = new FastShape(positions, new IntBuffer[] { ib }, GL.GL_TRIANGLES);
+		shape.setCalculateNormals(true);
 		return shape;
 
 		/*List<IntBuffer> indices = new ArrayList<IntBuffer>();

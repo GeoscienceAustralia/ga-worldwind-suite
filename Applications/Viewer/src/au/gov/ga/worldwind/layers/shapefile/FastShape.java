@@ -46,7 +46,7 @@ public class FastShape implements Renderable, Cacheable
 	protected boolean verticesDirty = true;
 
 	protected double elevation = 0d;
-	protected boolean calculateNormals;
+	protected boolean calculateNormals = false;
 
 	public FastShape(List<Position> positions, int mode)
 	{
@@ -87,7 +87,8 @@ public class FastShape implements Renderable, Cacheable
 
 		GL gl = dc.getGL();
 
-		int push = GL.GL_CLIENT_VERTEX_ARRAY_BIT;
+		//int push = GL.GL_CLIENT_VERTEX_ARRAY_BIT;
+		/*int push = 0;
 		if (colorBuffer != null)
 		{
 			push |= GL.GL_COLOR_BUFFER_BIT;
@@ -96,7 +97,8 @@ public class FastShape implements Renderable, Cacheable
 		{
 			push |= GL.GL_CURRENT_BIT;
 		}
-		gl.glPushClientAttrib(push);
+		//gl.glPushClientAttrib(push);
+		gl.glPushAttrib(push);*/
 
 		if (colorBuffer != null)
 		{
@@ -120,8 +122,14 @@ public class FastShape implements Renderable, Cacheable
 
 		synchronized (vertexLock)
 		{
-			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+			//gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
 			gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vertexBuffer.rewind());
+
+			if (isCalculateNormals() && getMode() == GL.GL_TRIANGLES)
+			{
+				//gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
+				gl.glNormalPointer(GL.GL_DOUBLE, 0, normalBuffer.rewind());
+			}
 
 			if (indices == null)
 			{
@@ -139,7 +147,8 @@ public class FastShape implements Renderable, Cacheable
 		gl.glPointSize(1f);
 
 		gl.glColor4d(1, 1, 1, 1);
-		gl.glPopClientAttrib();
+		//gl.glPopAttrib();
+		//gl.glPopClientAttrib();
 	}
 
 	protected synchronized void recalculateVertices(final DrawContext dc, boolean runNow)
@@ -149,7 +158,10 @@ public class FastShape implements Renderable, Cacheable
 			public void run()
 			{
 				ensureBuffersExist();
+
 				calculateVertices(dc);
+				calculateNormals();
+
 				synchronized (vertexLock)
 				{
 					DoubleBuffer temp = vertexBuffer;
@@ -175,7 +187,7 @@ public class FastShape implements Renderable, Cacheable
 		}
 	}
 
-	public void calculateVertices(DrawContext dc)
+	protected void calculateVertices(DrawContext dc)
 	{
 		synchronized (positionLock)
 		{
@@ -200,10 +212,75 @@ public class FastShape implements Renderable, Cacheable
 								position.getLongitude(), elevation);
 				modVertexBuffer.put(v.x).put(v.y).put(v.z);
 			}
+		}
+	}
 
-			if (isCalculateNormals() && getMode() == GL.GL_TRIANGLES)
+	protected void calculateNormals()
+	{
+		if (isCalculateNormals() && getMode() == GL.GL_TRIANGLES)
+		{
+			int size = modNormalBuffer.limit() / 3;
+			int[] count = new int[size];
+
+			if (indices == null)
 			{
+				//TODO
+			}
+			else
+			{
+				Vec4[] vertices = new Vec4[size];
+				Vec4[] normals = new Vec4[size];
 
+				int j = 0;
+				modVertexBuffer.rewind();
+				while (modVertexBuffer.hasRemaining())
+				{
+					vertices[j] =
+							new Vec4(modVertexBuffer.get(), modVertexBuffer.get(), modVertexBuffer
+									.get());
+					normals[j] = new Vec4(0);
+					j++;
+				}
+
+				for (IntBuffer ib : indices)
+				{
+					//don't touch ib's position/mark, because it may currently be in use by OpenGL thread
+					for (int i = 0; i < ib.limit(); i += 3)
+					{
+						int index0 = ib.get(i);
+						int index1 = ib.get(i + 1);
+						int index2 = ib.get(i + 2);
+						Vec4 v0 = vertices[index0];
+						Vec4 v1 = vertices[index1];
+						Vec4 v2 = vertices[index2];
+
+						Vec4 e1 = v1.subtract3(v0);
+						Vec4 e2 = v2.subtract3(v0);
+						Vec4 N = e1.cross3(e2).normalize3(); // if N is 0, the triangle is degenerate
+
+						if (N.getLength3() > 0)
+						{
+							normals[index0] = normals[index0].add3(N);
+							normals[index1] = normals[index1].add3(N);
+							normals[index2] = normals[index2].add3(N);
+
+							count[index0]++;
+							count[index1]++;
+							count[index2]++;
+						}
+					}
+				}
+
+				j = 0;
+				modNormalBuffer.rewind();
+				while (modNormalBuffer.hasRemaining())
+				{
+					int c = count[j] > 0 ? count[j] : 1; //prevent divide by zero
+					modNormalBuffer.put(normals[j].x / c);
+					modNormalBuffer.put(normals[j].y / c);
+					modNormalBuffer.put(normals[j].z / c);
+					j++;
+				}
 			}
 		}
 	}
