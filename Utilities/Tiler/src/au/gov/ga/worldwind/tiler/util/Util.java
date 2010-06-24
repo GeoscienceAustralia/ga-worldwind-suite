@@ -58,4 +58,9 @@ public class Util
 	{
 		return Math.max(min, Math.min(max, value));
 	}
+
+	public static double limitRange(double value, double min, double max)
+	{
+		return Math.max(min, Math.min(max, value));
+	}
 }

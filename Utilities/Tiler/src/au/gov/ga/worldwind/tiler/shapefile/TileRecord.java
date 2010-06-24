@@ -9,7 +9,7 @@ public class TileRecord
 {
 	public final int shapeId;
 	public final Attributes attributes;
-	public final List<Coordinate> points;
+	public final List<Coordinate> coordinates;
 	public final List<TileRecord> holes = new ArrayList<TileRecord>();
 
 	public boolean exited = false;
@@ -20,11 +20,12 @@ public class TileRecord
 		this(shapeId, entered, attributes, new ArrayList<Coordinate>());
 	}
 
-	public TileRecord(int shapeId, boolean entered, Attributes attributes, List<Coordinate> points)
+	public TileRecord(int shapeId, boolean entered, Attributes attributes,
+			List<Coordinate> coordinates)
 	{
 		this.shapeId = shapeId;
 		this.entered = entered;
 		this.attributes = attributes;
-		this.points = points;
+		this.coordinates = coordinates;
 	}
 }

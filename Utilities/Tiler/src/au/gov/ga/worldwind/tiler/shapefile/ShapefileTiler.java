@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.tiler.shapefile;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,6 +15,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import au.gov.ga.worldwind.tiler.util.ProgressReporter;
+import au.gov.ga.worldwind.tiler.util.Sector;
+import au.gov.ga.worldwind.tiler.util.Util;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -29,11 +34,6 @@ import com.vividsolutions.jump.feature.FeatureCollection;
 import com.vividsolutions.jump.feature.FeatureSchema;
 import com.vividsolutions.jump.io.DriverProperties;
 import com.vividsolutions.jump.io.ShapefileWriter;
-
-import au.gov.ga.worldwind.tiler.util.ProgressReporter;
-import au.gov.ga.worldwind.tiler.util.Sector;
-import au.gov.ga.worldwind.tiler.util.Util;
-
 
 public class ShapefileTiler
 {
@@ -75,7 +75,7 @@ public class ShapefileTiler
 					double lon2 = lon1 + tilesizedegrees;
 					Sector ts = new Sector(lat1, lon1, lat2, lon2);
 
-					ShapefileTile tile = new ShapefileTile(ts, level, x, y);
+					ShapefileTile tile = new ShapefileTile(ts, x, y);
 					tiles[y0 * size.width + x0] = tile;
 				}
 			}
@@ -158,7 +158,7 @@ public class ShapefileTiler
 				if (anyPolygons)
 					tile.completePolygons();
 
-				File rowDir = new File(output, String.valueOf(tile.level));
+				File rowDir = new File(output, String.valueOf(level));
 				rowDir = new File(rowDir, Util.paddedInt(tile.row, 4));
 				if (!rowDir.exists())
 					rowDir.mkdirs();
@@ -367,6 +367,7 @@ public class ShapefileTiler
 	{
 		Coordinate lastCoordinate = null;
 		ShapefileTile lastTile = null;
+		int lastTileIndex = -1;
 
 		List<ShapefileTile> tilesAffected = new ArrayList<ShapefileTile>();
 
@@ -387,94 +388,95 @@ public class ShapefileTiler
 			int tileIndex = y0 * size.width + x0;
 			ShapefileTile tile = tiles[tileIndex];
 
-			if (!tile.sector.containsPoint(coordinate.y, coordinate.x))
+			if (!tile.contains(coordinate))
 			{
 				progress.getLogger().warning(coordinate + " outside bounds");
+
+				//move coordinate within the tile's bounds
+				coordinate = tile.limitCoordinateWithinTile(coordinate);
 			}
 
 			if (tile != lastTile)
 			{
 				if (lastTile != null)
 				{
-					lastTile.exitShape(shapeId, lastCoordinate, coordinate);
+					//get the fractional position of the points within their corresponding tile's
+					//sector, in the range -0.5 to 0.5
+					float x1 = (float) (lastTile.longitudeFract(lastCoordinate) - 0.5);
+					float y1 = (float) (lastTile.latitudeFract(lastCoordinate) - 0.5);
+					float x2 = (float) (tile.longitudeFract(coordinate) - 0.5);
+					float y2 = (float) (tile.latitudeFract(coordinate) - 0.5);
 
-					int diffRow = Math.abs(lastTile.row - tile.row);
-					int diffCol = Math.abs(lastTile.col - tile.col);
-					if (diffRow + diffCol > 1)
+					//create a list of possible tiles that may be affected by the line between the two tiles
+					List<Point> line =
+							linePoints(lastTile.col + x1, lastTile.row + y1, tile.col + x2,
+									tile.row + y2);
+
+					ShapefileTile lastCrossTile = lastTile;
+					for (int j = 1; j < line.size() - 1; j++)
 					{
-						//If tile is not next (vertically/horizontally, not diagonally) to lastTile,
-						//it means that the points have moved diagonally from one tile, across other
-						//tile(s) (with no points inside), into another tile. We must add two edge
-						//points to the in-between tile(s) (an entry and an exit).
+						Point p = line.get(j);
+						p.x = Util.limitRange(p.x, min.x, min.x + size.width - 1);
+						p.y = Util.limitRange(p.y, min.y, min.y + size.height - 1);
 
-						//get the fractional position of the points within their corresponding tile's
-						//sector, in the range -0.5 to 0.5
-						float x1 =
-								(float) ((lastCoordinate.x - lastTile.sector.getMinLongitude())
-										/ lastTile.sector.getDeltaLongitude() - 0.5);
-						float y1 =
-								(float) ((lastCoordinate.y - lastTile.sector.getMinLatitude())
-										/ lastTile.sector.getDeltaLatitude() - 0.5);
-						float x2 =
-								(float) ((coordinate.x - tile.sector.getMinLongitude())
-										/ tile.sector.getDeltaLongitude() - 0.5);
-						float y2 =
-								(float) ((coordinate.y - tile.sector.getMinLatitude())
-										/ tile.sector.getDeltaLatitude() - 0.5);
+						int crossTileIndex = (p.y - min.y) * size.width + (p.x - min.x);
+						//ignore first and last
+						if (crossTileIndex == tileIndex || crossTileIndex == lastTileIndex)
+							continue;
 
-						//create a list of possible tiles that may be affected by the line between the two tiles
-						List<java.awt.Point> line =
-								linePoints(lastTile.col + x1, lastTile.row + y1, tile.col + x2,
-										tile.row + y2);
-						//loop through each tile, calling crossShape() (ignoring the first/last tiles)
-						for (int j = 1; j < line.size() - 1; j++)
+						ShapefileTile crossTile = tiles[crossTileIndex];
+						if (crossTile == lastCrossTile) //not required?
+							continue;
+
+						Coordinate edge = edgePoint(lastCoordinate, coordinate, crossTile);
+						if (edge != null)
 						{
-							java.awt.Point p = line.get(j);
-							//check that p lies within tile array's bounds
-							if (p.x < min.x || p.x > min.x + size.width || p.y < min.y
-									|| p.y > min.y + size.height)
+							if (lastCrossTile.col != crossTile.col
+									&& lastCrossTile.row != crossTile.row)
 							{
-								progress.getLogger().warning(
-										"Crossed tile " + p + " outside bounds");
-								continue;
+								String message = "Crossed tiles are not adjacent";
+								progress.getLogger().warning(message);
 							}
 
-							int ptileIndex = (p.y - min.y) * size.width + (p.x - min.x);
-							ShapefileTile crossTile = tiles[ptileIndex];
-							boolean crossed =
-									crossTile.crossShape(shapeId, lastCoordinate, coordinate,
-											attributes);
-							if (crossed && polygon)
-								tilesAffected.add(crossTile);
+							lastCrossTile.addCoordinate(shapeId, edge, false, true, attributes);
+							crossTile.addCoordinate(shapeId, edge, true, false, attributes);
+
+							tilesAffected.add(crossTile);
+							lastCrossTile = crossTile;
 						}
+					}
+
+					Coordinate edge = edgePoint(lastCoordinate, coordinate, tile);
+					if (edge == null)
+					{
+						String message = "Did not find an edge point in the sector";
+						progress.getLogger().warning(message);
+
+						//edge = latlon; TODO ???
+					}
+
+					if (edge != null)
+					{
+						lastCrossTile.addCoordinate(shapeId, edge, false, true, attributes);
+						tile.addCoordinate(shapeId, edge, true, false, attributes);
 					}
 				}
 
 				if (polygon)
 					tilesAffected.add(tile);
+			}
 
-				if (lastCoordinate != null)
-				{
-					tile.enterShape(shapeId, lastCoordinate, coordinate, attributes);
-				}
-				else
-				{
-					tile.continueShape(shapeId, coordinate, attributes);
-				}
-			}
-			else
-			{
-				tile.continueShape(shapeId, coordinate, attributes);
-			}
+			tile.addCoordinate(shapeId, coordinate, false, false, attributes);
 
 			lastTile = tile;
 			lastCoordinate = coordinate;
+			lastTileIndex = tileIndex;
 		}
 
 		if (polygon)
 		{
 			for (ShapefileTile tile : tilesAffected)
-				tile.joinOrphanPolygons(shapeId);
+				tile.joinOrphanPolygons(shapeId, progress);
 
 			if (fillInside)
 			{
@@ -690,5 +692,74 @@ public class ShapefileTiler
 			Collections.reverse(points);
 
 		return points;
+	}
+
+	/**
+	 * Returns a point on the edge of the tile (if exists) closest to p2
+	 */
+	private static Coordinate edgePoint(Coordinate p1, Coordinate p2, ShapefileTile tile)
+	{
+		Coordinate minmin = tile.minmin;
+		Coordinate minmax = tile.minmax;
+		Coordinate maxmax = tile.maxmax;
+		Coordinate maxmin = tile.maxmin;
+
+		Coordinate minXintersect = lineSegmentIntersection(p1, p2, minmin, maxmin);
+		Coordinate minYintersect = lineSegmentIntersection(p1, p2, minmin, minmax);
+		Coordinate maxXintersect = lineSegmentIntersection(p1, p2, minmax, maxmax);
+		Coordinate maxYintersect = lineSegmentIntersection(p1, p2, maxmin, maxmax);
+		Coordinate[] intersects =
+				new Coordinate[] { minXintersect, minYintersect, maxXintersect, maxYintersect };
+		double minDistance = Double.MAX_VALUE;
+		Coordinate minDistanceIntersect = null;
+
+		for (Coordinate intersect : intersects)
+		{
+			if (intersect != null)
+			{
+				double distance = distanceSquared(p1, intersect);
+				if (distance < minDistance)
+				{
+					minDistance = distance;
+					minDistanceIntersect = intersect;
+				}
+			}
+		}
+
+		return minDistanceIntersect;
+	}
+
+	private static Coordinate lineSegmentIntersection(Coordinate p1, Coordinate p2, Coordinate p3,
+			Coordinate p4)
+	{
+		double ud = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
+
+		//lines are parallel (don't care about coincident lines)
+		if (ud == 0)
+			return null;
+
+		double uan = (p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x);
+		double ubn = (p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x);
+		double ua = uan / ud;
+		double ub = ubn / ud;
+
+		//intersection is not within the line segments
+		if (ua < 0 || 1 < ua || ub < 0 || 1 < ub)
+			return null;
+
+		double x = p1.x + ua * (p2.x - p1.x);
+		double y = p1.y + ua * (p2.y - p1.y);
+		return new Coordinate(x, y);
+	}
+
+	private static double distanceSquared(Coordinate p1, Coordinate p2)
+	{
+		double delta;
+		double result = 0d;
+		delta = p1.x - p2.x;
+		result += delta * delta;
+		delta = p1.y - p2.y;
+		result += delta * delta;
+		return result;
 	}
 }
