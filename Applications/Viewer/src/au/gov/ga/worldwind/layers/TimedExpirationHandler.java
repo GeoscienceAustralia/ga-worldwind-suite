@@ -28,7 +28,7 @@ public class TimedExpirationHandler
 				"TimedExpiry/Start", xpath);
 		WWXML.checkAndSetDateTimeParam(domElement, params, AVKeyMore.EXPIRY_START_TIME,
 				"TimedExpiry/StartDate", DATE_TIME_PATTERN, xpath);
-		WWXML.checkAndSetTimeParamAsInteger(domElement, params, AVKeyMore.EXPIRY_TIMESPAN,
+		WWXML.checkAndSetTimeParam(domElement, params, AVKeyMore.EXPIRY_TIMESPAN,
 				"TimedExpiry/Time", xpath);
 
 		return params;
