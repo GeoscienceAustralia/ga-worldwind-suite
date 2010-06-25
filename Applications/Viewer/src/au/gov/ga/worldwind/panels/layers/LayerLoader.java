@@ -19,10 +19,9 @@ public class LayerLoader
 	{
 		Element element = XMLUtil.getElementFromSource(source);
 
-		AVList params = null;
+		AVList params = new AVListImpl();
 		if (sourceURL != null)
 		{
-			params = new AVListImpl();
 			params.setValue(AVKeyMore.CONTEXT_URL, sourceURL);
 		}
 
@@ -63,7 +62,7 @@ public class LayerLoader
 			throw new Exception("Error reading file");
 		}
 
-		LoadedLayer loaded = new LoadedLayer(o);
+		LoadedLayer loaded = new LoadedLayer(o, params);
 		loaded.setLegendURL(legend);
 		loaded.setQueryURL(query);
 		return loaded;

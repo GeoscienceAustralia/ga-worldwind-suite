@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.panels.layers;
 
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 
@@ -9,11 +10,14 @@ public class LoadedLayer
 {
 	private Layer layer;
 	private ElevationModel elevationModel;
+	private final AVList params;
 	private URL legendURL;
 	private URL queryURL;
 
-	public LoadedLayer(Object o)
+	public LoadedLayer(Object o, AVList params)
 	{
+		this.params = params;
+
 		if (o == null)
 		{
 			throw new NullPointerException("Null layer loaded");
@@ -70,5 +74,10 @@ public class LoadedLayer
 	public void setQueryURL(URL queryURL)
 	{
 		this.queryURL = queryURL;
+	}
+
+	public AVList getParams()
+	{
+		return params;
 	}
 }

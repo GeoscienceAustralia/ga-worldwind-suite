@@ -7,11 +7,11 @@ public interface ILayerNode extends INode
 	public URL getLayerURL();
 
 	public URL getLegendURL();
-	
+
 	public void setLegendURL(URL legendURL);
 
 	public URL getQueryURL();
-	
+
 	public void setQueryURL(URL queryURL);
 
 	public boolean isEnabled();
@@ -31,4 +31,8 @@ public interface ILayerNode extends INode
 	public boolean isLayerLoading();
 
 	public void setLayerLoading(boolean layerLoading);
+
+	public Long getExpiryTime();
+
+	public void setExpiryTime(Long expiryTime);
 }

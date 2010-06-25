@@ -71,7 +71,9 @@ public class LayerTreePersistance
 		URL info = XMLUtil.getURL(element, "@info", null);
 		boolean enabled = XMLUtil.getBoolean(element, "@enabled", false);
 		double opacity = XMLUtil.getDouble(element, "@opacity", 1.0);
-		LayerNode node = new LayerNode(name, info, icon, expanded, layer, enabled, opacity);
+		Long expiryTime = XMLUtil.getLong(element, "@expiry", null);
+		LayerNode node =
+				new LayerNode(name, info, icon, expanded, layer, enabled, opacity, expiryTime);
 		parent.addChild(node);
 		addRelevant(element, node);
 	}
@@ -106,6 +108,8 @@ public class LayerTreePersistance
 				current.setAttribute("layer", layer.getLayerURL().toExternalForm());
 			XMLUtil.setBooleanAttribute(current, "enabled", layer.isEnabled());
 			XMLUtil.setDoubleAttribute(current, "opacity", layer.getOpacity());
+			if (layer.getExpiryTime() != null)
+				XMLUtil.setLongAttribute(current, "expiry", layer.getExpiryTime());
 		}
 
 		if (current != null)

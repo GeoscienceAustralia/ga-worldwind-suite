@@ -50,7 +50,7 @@ public class LayersPanel extends AbstractLayersPanel
 	private Window window;
 
 	private BasicAction newLayerAction, openLayerAction, renameAction, editAction, deleteAction,
-			newFolderAction, expandAllAction, collapseAllAction;
+			newFolderAction, expandAllAction, collapseAllAction, refreshAction;
 
 	private DatasetPanel datasetPanel;
 
@@ -66,10 +66,12 @@ public class LayersPanel extends AbstractLayersPanel
 			@Override
 			public void valueChanged(TreeSelectionEvent e)
 			{
+				treeSelectionChanged();
 				enableActions();
 			}
 		});
 
+		treeSelectionChanged();
 		enableActions();
 		createPopupMenus();
 	}
@@ -185,6 +187,16 @@ public class LayersPanel extends AbstractLayersPanel
 				collapseAll();
 			}
 		});
+
+		refreshAction = new BasicAction("Refresh layer", Icons.refresh.getIcon());
+		refreshAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				refreshSelected();
+			}
+		});
 	}
 
 	@Override
@@ -211,6 +223,8 @@ public class LayersPanel extends AbstractLayersPanel
 		itemPopupMenu.add(renameAction);
 		itemPopupMenu.add(editAction);
 		itemPopupMenu.add(deleteAction);
+		itemPopupMenu.addSeparator();
+		itemPopupMenu.add(refreshAction);
 
 		final JPopupMenu otherPopupMenu = new JPopupMenu();
 		otherPopupMenu.add(newFolderAction);
@@ -271,7 +285,7 @@ public class LayersPanel extends AbstractLayersPanel
 
 	private void newLayer()
 	{
-		LayerNode layerNode = new LayerNode("", null, null, true, null, true, 1);
+		LayerNode layerNode = new LayerNode("", null, null, true, null, true, 1, null);
 		LayerEditor editor = new LayerEditor(window, "New layer", layerNode, getIcon());
 		int value = editor.getOkCancel();
 		if (value == JOptionPane.OK_OPTION)
@@ -376,6 +390,44 @@ public class LayersPanel extends AbstractLayersPanel
 				}
 
 				tree.getUI().relayout();
+			}
+		}
+	}
+
+	private void treeSelectionChanged()
+	{
+		ILayerNode layer = null;
+		TreePath p = tree.getSelectionPath();
+		if (p != null)
+		{
+			Object o = p.getLastPathComponent();
+			if (o instanceof ILayerNode)
+				layer = (ILayerNode) o;
+		}
+
+		refreshAction.setEnabled(layer != null);
+	}
+
+	private void refreshSelected()
+	{
+		TreePath p = tree.getSelectionPath();
+		if (p != null)
+		{
+			Object o = p.getLastPathComponent();
+			if (o instanceof ILayerNode)
+			{
+				ILayerNode layer = (ILayerNode) o;
+				int choice =
+						JOptionPane
+								.showConfirmDialog(
+										this,
+										"This will refresh all previously downloaded data for this layer. Are you sure?",
+										refreshAction.getName(), JOptionPane.YES_NO_OPTION,
+										JOptionPane.WARNING_MESSAGE);
+				if (choice == JOptionPane.YES_OPTION)
+				{
+					getModel().setExpiryTime(layer, System.currentTimeMillis());
+				}
 			}
 		}
 	}

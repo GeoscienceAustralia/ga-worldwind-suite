@@ -13,20 +13,22 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	private double opacity;
 	private Exception error = null;
 	private boolean layerLoading = false;
+	private Long expiryTime;
 
 	public LayerNode(String name, URL infoURL, URL iconURL, boolean expanded, URL layerURL,
-			boolean enabled, double opacity)
+			boolean enabled, double opacity, Long expiryTime)
 	{
 		super(name, infoURL, iconURL, expanded);
 		setLayerURL(layerURL);
 		setEnabled(enabled);
 		setOpacity(opacity);
+		setExpiryTime(expiryTime);
 	}
 
 	public LayerNode(ILayerNode node)
 	{
 		this(node.getName(), node.getInfoURL(), node.getIconURL(), node.isExpanded(), node
-				.getLayerURL(), node.isEnabled(), node.getOpacity());
+				.getLayerURL(), node.isEnabled(), node.getOpacity(), node.getExpiryTime());
 		setLegendURL(node.getLegendURL());
 		setQueryURL(node.getQueryURL());
 	}
@@ -77,7 +79,7 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	{
 		return new LayerNode(definition.getName(), definition.getInfoURL(),
 				definition.getIconURL(), true, definition.getLayerURL(), definition.isEnabled(),
-				1.0);
+				1.0, null);
 	}
 
 	@Override
@@ -126,5 +128,15 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	public void setOpacity(double opacity)
 	{
 		this.opacity = opacity;
+	}
+
+	public Long getExpiryTime()
+	{
+		return expiryTime;
+	}
+
+	public void setExpiryTime(Long expiryTime)
+	{
+		this.expiryTime = expiryTime;
 	}
 }

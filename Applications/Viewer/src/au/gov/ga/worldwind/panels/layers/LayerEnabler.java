@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.panels.layers;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
@@ -217,6 +218,7 @@ public class LayerEnabler
 	{
 		//TODO instead of clearing layers and readding, only remove those that need to be removed,
 		//and only add those that need to be added, and move those that need to be moved
+
 		if (wwd == null)
 			return;
 
@@ -242,7 +244,8 @@ public class LayerEnabler
 				}
 				else if (wrapper.hasElevationModel())
 				{
-					elevationModels.add(wrapper.getElevationModel());
+					ElevationModel elevationModel = wrapper.getElevationModel();
+					elevationModels.add(elevationModel);
 				}
 			}
 
@@ -250,6 +253,8 @@ public class LayerEnabler
 			{
 				wrapper.node.setLegendURL(wrapper.getLoaded().getLegendURL());
 				wrapper.node.setQueryURL(wrapper.getLoaded().getQueryURL());
+
+				wrapper.updateExpiryTime();
 			}
 		}
 
@@ -259,7 +264,8 @@ public class LayerEnabler
 		//tell the listeners that the list has been refreshed
 		for (RefreshListener listener : listeners)
 			listener.refreshed();
-		
+
+		//relayout and repaint the tree, as the labels may have changed (maybe legend button added)
 		tree.getUI().relayout();
 		tree.repaint();
 	}
@@ -314,6 +320,43 @@ public class LayerEnabler
 		public void setLoaded(LoadedLayer loaded)
 		{
 			this.loaded = loaded;
+		}
+
+		public void updateExpiryTime()
+		{
+			if (node.getExpiryTime() != null)
+			{
+				if (useNodesExpiryTime())
+				{
+					if (hasLayer())
+						getLayer().setExpiryTime(node.getExpiryTime());
+					else if (hasElevationModel())
+						getElevationModel().setExpiryTime(node.getExpiryTime());
+				}
+				else
+				{
+					node.setExpiryTime(null);
+				}
+			}
+		}
+
+		private boolean useNodesExpiryTime()
+		{
+			if (node.getExpiryTime() == null)
+				return false;
+
+			if (loaded.getParams() == null)
+				return true;
+
+			Object o = loaded.getParams().getValue(AVKey.EXPIRY_TIME);
+			if (o == null || !(o instanceof Long))
+				return true;
+
+			Long l = (Long) o;
+			if (l < node.getExpiryTime())
+				return true;
+
+			return false;
 		}
 	}
 

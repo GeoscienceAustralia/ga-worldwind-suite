@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.util;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.coords.MGRSCoord;
 import gov.nasa.worldwind.globes.Globe;

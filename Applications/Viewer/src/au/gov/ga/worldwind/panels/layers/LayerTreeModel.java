@@ -71,6 +71,20 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	{
 		return layer.getOpacity();
 	}
+	
+	public void setExpiryTime(ILayerNode layer, Long expiryTime)
+	{
+		if(layer.getExpiryTime() != expiryTime)
+		{
+			layer.setExpiryTime(expiryTime);
+			refreshLayers();
+		}
+	}
+	
+	public Long getExpiryTime(ILayerNode layer)
+	{
+		return layer.getExpiryTime();
+	}
 
 	private void refreshLayers()
 	{
