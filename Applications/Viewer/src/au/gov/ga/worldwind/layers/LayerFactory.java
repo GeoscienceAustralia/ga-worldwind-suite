@@ -33,6 +33,10 @@ public class LayerFactory extends BasicLayerFactory
 		{
 			layer = new FileTiledImageLayer(domElement, params, true);
 		}
+		else if ("WWTileService".equals(serviceName))
+		{
+			layer = new ExtendedTiledImageLayer(domElement, params);
+		}
 		else
 		{
 			layer = super.createTiledImageLayer(domElement, params);

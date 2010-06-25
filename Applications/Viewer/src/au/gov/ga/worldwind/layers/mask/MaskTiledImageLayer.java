@@ -10,7 +10,6 @@ import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.retrieve.HTTPRetriever;
 import gov.nasa.worldwind.retrieve.Retriever;
-import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
@@ -29,7 +28,6 @@ import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.application.Application;
@@ -37,21 +35,6 @@ import au.gov.ga.worldwind.downloader.FileRetriever;
 
 public class MaskTiledImageLayer extends BasicTiledImageLayer
 {
-	public MaskTiledImageLayer(AVList params)
-	{
-		super(setupParams(params));
-	}
-
-	public MaskTiledImageLayer(LevelSet levelSet)
-	{
-		super(levelSet);
-	}
-
-	public MaskTiledImageLayer(Document dom, AVList params)
-	{
-		super(dom, setupParams(params));
-	}
-
 	public MaskTiledImageLayer(Element domElement, AVList params)
 	{
 		super(domElement, setupParams(params));
@@ -337,10 +320,6 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 
 	protected static class MaskUrlBuilder implements TileUrlBuilder
 	{
-		public MaskUrlBuilder()
-		{
-		}
-
 		public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 		{
 			String service = tile.getLevel().getService();
