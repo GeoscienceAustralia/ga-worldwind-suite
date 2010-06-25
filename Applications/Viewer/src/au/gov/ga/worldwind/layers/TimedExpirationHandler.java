@@ -16,7 +16,9 @@ import au.gov.ga.worldwind.util.AVKeyMore;
 
 public class TimedExpirationHandler
 {
-	protected static final String DATE_TIME_PATTERN = "dd MM yyyy HH:mm:ss z";
+	protected final static String DATE_TIME_PATTERN = "dd MM yyyy HH:mm:ss z";
+
+	private final static ExpiryUpdater updater = new ExpiryUpdater();
 
 	public static AVList getExpirationParams(Element domElement, AVList params)
 	{
@@ -74,51 +76,64 @@ public class TimedExpirationHandler
 		layer.setExpiryTime(last);
 	}
 
-	private static ExpiryUpdaterThread updater;
-	static
-	{
-		updater = new ExpiryUpdaterThread();
-		updater.setDaemon(true);
-		updater.setName("Layer timed expiry updater");
-		updater.start();
-	}
-
-	private static class ExpiryUpdaterThread extends Thread
+	private static class ExpiryUpdater
 	{
 		private Set<Layer> layers = new HashSet<Layer>();
-
-		@Override
-		public void run()
-		{
-			while (true)
-			{
-				try
-				{
-					Thread.sleep(1000);
-				}
-				catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-
-				synchronized (layers)
-				{
-					long current = System.currentTimeMillis();
-					for (Layer layer : layers)
-					{
-						if (layer.isEnabled())
-							updateExpiry(layer, current);
-					}
-				}
-			}
-		}
+		private boolean threadStarted = false;
 
 		public void registerLayer(Layer layer)
 		{
 			synchronized (layers)
 			{
+				startThreadIfRequired();
 				layers.add(layer);
 			}
+		}
+
+		private void startThreadIfRequired()
+		{
+			if (!threadStarted)
+			{
+				startUpdaterThread();
+				threadStarted = true;
+			}
+		}
+
+		private void startUpdaterThread()
+		{
+			Runnable runnable = new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					while (true)
+					{
+						try
+						{
+							Thread.sleep(1000);
+						}
+						catch (InterruptedException e)
+						{
+							e.printStackTrace();
+						}
+
+						synchronized (layers)
+						{
+							long current = System.currentTimeMillis();
+							for (Layer layer : layers)
+							{
+								if (layer.isEnabled())
+									updateExpiry(layer, current);
+							}
+						}
+					}
+				}
+			};
+
+			Thread thread = new Thread(runnable);
+			thread.setDaemon(true);
+			thread.setName("Layer timed expiry updater");
+			thread.start();
 		}
 	}
 }
