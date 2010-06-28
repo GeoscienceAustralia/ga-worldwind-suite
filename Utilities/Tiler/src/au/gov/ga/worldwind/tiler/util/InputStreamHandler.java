@@ -10,13 +10,13 @@ public abstract class InputStreamHandler
 		{
 			public void run()
 			{
-				byte[] text = new byte[10240];
-				int len = 0;
+				byte[] buffer = new byte[10240];
 				try
 				{
-					while ((len = is.read(text)) > 0)
+					int len;
+					while ((len = is.read(buffer)) > 0)
 					{
-						handle(new String(text, 0, len));
+						handle(new String(buffer, 0, len));
 					}
 				}
 				catch (Exception e)
