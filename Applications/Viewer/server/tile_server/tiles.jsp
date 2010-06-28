@@ -83,6 +83,7 @@
 	}
 	if(!file.exists())
 	{
+		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		return;
 	}
 
