@@ -33,9 +33,9 @@ public class PolygonTessellator
 		//subdivisions = 20;
 
 		List<FastShape> shapes = new ArrayList<FastShape>();
-		List<ShapefileRecord> records = shapefile.getRecords();
-		for (ShapefileRecord record : records)
+		while (shapefile.hasNext())
 		{
+			ShapefileRecord record = shapefile.nextRecord();
 			FastShape shape = tessellateRecord(record, sector, subdivisions);
 			shapes.add(shape);
 		}
@@ -84,7 +84,7 @@ public class PolygonTessellator
 		{
 			shapeId++;
 
-			VecBuffer buffer = record.getBuffer(part);
+			VecBuffer buffer = record.getPointBuffer(part);
 			int size = buffer.getSize();
 			int start = vertices.size();
 			for (int i = 0; i < size; i++)
@@ -117,11 +117,17 @@ public class PolygonTessellator
 
 				if (!tile.contains(latlon))
 				{
-					String message = latlon + " outside bounds";
-					Logging.logger().warning(message);
-
-					//replace current vertex with a new one that is within the tile's bounds
+					//find a latlon within the tile's bounds
 					LatLon newLL = tile.limitLatLonWithinTile(latlon);
+
+					//only log a warning if the limited latlon isn't super-close to the original latlon
+					if (distanceSquared(latlon, newLL) > 10e-10)
+					{
+						String message = latlon + " outside bounds";
+						Logging.logger().warning(message);
+					}
+
+					//replace the current vertex with the new one
 					IndexedLatLon newILL = new IndexedLatLon(newLL);
 					latlon.replace(vertices, newILL);
 					latlon = newILL;

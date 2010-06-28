@@ -5,7 +5,7 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.layers.LayerConfiguration;
+import gov.nasa.worldwind.layers.TiledImageLayer;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -908,7 +908,7 @@ public class FileLayerCreator extends JDialog
 				params.setValue(AVKeyMore.TRANSPARENT_FUZZ, fuzz);
 			}
 
-			Document document = LayerConfiguration.createTiledImageLayerDocument(params);
+			Document document = TiledImageLayer.createTiledImageLayerConfigDocument(params);
 			Element element = document.getDocumentElement();
 			FileTiledImageLayer.createTiledImageLayerElements(element, params);
 			XMLUtil.saveDocumentToFormattedFile(document, file.getAbsolutePath());

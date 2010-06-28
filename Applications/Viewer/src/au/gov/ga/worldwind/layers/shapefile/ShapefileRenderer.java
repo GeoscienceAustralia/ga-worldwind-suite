@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.media.opengl.GL;
 
+import nasa.worldwind.retrieve.ExtendedRetrievalService.SectorPolyline;
 import au.gov.ga.worldwind.util.HSLColor;
 
 public class ShapefileRenderer
@@ -43,12 +44,12 @@ public class ShapefileRenderer
 		{
 			tile.render(dc);
 
-			/*if (showImageTileOutlines)
+			if (showImageTileOutlines)
 			{
 				SectorPolyline polyline = new SectorPolyline(tile.getSector());
 				polyline.setColor(getColor(tile.getLevelNumber()));
 				polyline.render(dc);
-			}*/
+			}
 		}
 
 		endRendering(dc);

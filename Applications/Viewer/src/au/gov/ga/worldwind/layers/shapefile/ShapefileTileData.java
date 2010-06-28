@@ -8,10 +8,6 @@ import gov.nasa.worldwind.cache.Cacheable;
 import gov.nasa.worldwind.cache.MemoryCache;
 import gov.nasa.worldwind.formats.shapefile.Shapefile;
 import gov.nasa.worldwind.formats.shapefile.ShapefileRecord;
-import gov.nasa.worldwind.formats.shapefile.ShapefileRecordMultiPoint;
-import gov.nasa.worldwind.formats.shapefile.ShapefileRecordPoint;
-import gov.nasa.worldwind.formats.shapefile.ShapefileRecordPolygon;
-import gov.nasa.worldwind.formats.shapefile.ShapefileRecordPolyline;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.render.DrawContext;
@@ -67,142 +63,127 @@ public class ShapefileTileData implements Renderable, Cacheable
 
 	public void addShapefile(Shapefile shapefile)
 	{
-		List<ShapefileRecord> records = shapefile.getRecords();
+		String shapeType = shapefile.getShapeType();
 
-		/*for (ShapefileRecord record : records)
+		if (Shapefile.isPolygonType(shapeType))
 		{
-			if (record instanceof ShapefileRecordPolyline)
-			{
-				for (int part = 0; part < record.getNumberOfParts(); part++)
-				{
-					List<Position> positions = new ArrayList<Position>();
-
-					VecBuffer buffer = record.getBuffer(part);
-					int size = buffer.getSize();
-					for (int i = 0; i < size; i++)
-					{
-						Position position = buffer.getPosition(i);
-						positions.add(position);
-					}
-
-					BetterPolygon polygon = new BetterPolygon(positions);
-					polygon.setEnableLevelOfDetail(false);
-					polygon.setTerrainConforming(true);
-					renderables.add(polygon);
-				}
-			}
-		}*/
-
-		boolean anyPolygons = false;
-		for (ShapefileRecord record : records)
-		{
-			if (record instanceof ShapefileRecordPolygon)
-			{
-				anyPolygons = true;
-				break;
-			}
+			addPolygons(shapefile);
 		}
-
-		if (anyPolygons)
+		else if (Shapefile.isPolygonType(shapeType))
 		{
-			List<FastShape> shapes = PolygonTessellator.tessellateShapefile(shapefile, sector, 40);
-			for (FastShape shape : shapes)
-			{
-				shape.setColor(randomColor());
-				//shape.addPointsInsideSector(sector, 10);
-				shape.setFollowTerrain(true);
-				this.shapes.add(shape);
-			}
+			addLines(shapefile);
 		}
 		else
 		{
-			List<Position> mergedLines = new ArrayList<Position>();
-			List<Integer> mergedIndices = new ArrayList<Integer>();
-			List<List<Position>> lines = new ArrayList<List<Position>>();
-			List<Position> points = new ArrayList<Position>();
-
-			for (ShapefileRecord record : records)
-			{
-				if (record instanceof ShapefileRecordPolyline)
-				{
-					for (int part = 0; part < record.getNumberOfParts(); part++)
-					{
-						List<Position> line = null;
-						if (!mergeLines)
-						{
-							line = new ArrayList<Position>();
-							lines.add(line);
-						}
-
-						VecBuffer buffer = record.getBuffer(part);
-						int size = buffer.getSize();
-						for (int i = 0; i < size; i++)
-						{
-							Position position = buffer.getPosition(i);
-							if (mergeLines)
-							{
-								if (i > 0)
-								{
-									int index = mergedLines.size();
-									mergedIndices.add(index - 1);
-									mergedIndices.add(index);
-								}
-								mergedLines.add(position);
-							}
-							else
-							{
-								line.add(position);
-							}
-						}
-					}
-				}
-				else if (record instanceof ShapefileRecordPoint
-						|| record instanceof ShapefileRecordMultiPoint)
-				{
-					for (int part = 0; part < record.getNumberOfParts(); part++)
-					{
-						VecBuffer buffer = record.getBuffer(part);
-						int size = buffer.getSize();
-						for (int i = 0; i < size; i++)
-						{
-							points.add(buffer.getPosition(i));
-						}
-					}
-				}
-			}
-
-			if (!mergedLines.isEmpty())
-			{
-				IntBuffer indices = BufferUtil.newIntBuffer(mergedIndices.size());
-				for (Integer i : mergedIndices)
-					indices.put(i);
-
-				FastShape shape =
-						new FastShape(mergedLines, new IntBuffer[] { indices }, GL.GL_LINES);
-				shape.setColor(randomColor());
-				shapes.add(shape);
-			}
-			if (!points.isEmpty())
-			{
-				FastShape shape = new FastShape(points, GL.GL_POINTS);
-				shape.setColor(randomColor());
-				shapes.add(shape);
-			}
-			for (List<Position> line : lines)
-			{
-				if (line.size() > 1)
-				{
-					FastShape shape = new FastShape(line, GL.GL_LINE_STRIP);
-					shape.setColor(randomColor());
-					shapes.add(shape);
-				}
-			}
+			addPoints(shapefile);
 		}
 
 		sizeDirty = true;
 	}
 
-	private Color randomColor()
+	protected void addPolygons(Shapefile shapefile)
+	{
+		List<FastShape> shapes = PolygonTessellator.tessellateShapefile(shapefile, sector, 40);
+		for (FastShape shape : shapes)
+		{
+			shape.setColor(randomColor());
+			//shape.addPointsInsideSector(sector, 10);
+			shape.setFollowTerrain(true);
+			this.shapes.add(shape);
+		}
+	}
+
+	protected void addLines(Shapefile shapefile)
+	{
+		List<Position> mergedLines = new ArrayList<Position>();
+		List<Integer> mergedIndices = new ArrayList<Integer>();
+		List<List<Position>> lines = new ArrayList<List<Position>>();
+
+		while (shapefile.hasNext())
+		{
+			ShapefileRecord record = shapefile.nextRecord();
+
+			for (int part = 0; part < record.getNumberOfParts(); part++)
+			{
+				List<Position> line = null;
+				if (!mergeLines)
+				{
+					line = new ArrayList<Position>();
+					lines.add(line);
+				}
+
+				VecBuffer buffer = record.getPointBuffer(part);
+				int size = buffer.getSize();
+				for (int i = 0; i < size; i++)
+				{
+					Position position = buffer.getPosition(i);
+					if (mergeLines)
+					{
+						if (i > 0)
+						{
+							int index = mergedLines.size();
+							mergedIndices.add(index - 1);
+							mergedIndices.add(index);
+						}
+						mergedLines.add(position);
+					}
+					else
+					{
+						line.add(position);
+					}
+				}
+			}
+		}
+
+		if (!mergedLines.isEmpty())
+		{
+			IntBuffer indices = BufferUtil.newIntBuffer(mergedIndices.size());
+			for (Integer i : mergedIndices)
+				indices.put(i);
+
+			FastShape shape = new FastShape(mergedLines, new IntBuffer[] { indices }, GL.GL_LINES);
+			shape.setColor(randomColor());
+			shapes.add(shape);
+		}
+		for (List<Position> line : lines)
+		{
+			if (line.size() > 1)
+			{
+				FastShape shape = new FastShape(line, GL.GL_LINE_STRIP);
+				shape.setColor(randomColor());
+				shapes.add(shape);
+			}
+		}
+	}
+
+	protected void addPoints(Shapefile shapefile)
+	{
+		List<Position> points = new ArrayList<Position>();
+
+		while (shapefile.hasNext())
+		{
+			ShapefileRecord record = shapefile.nextRecord();
+
+			for (int part = 0; part < record.getNumberOfParts(); part++)
+			{
+				VecBuffer buffer = record.getPointBuffer(part);
+				int size = buffer.getSize();
+				for (int i = 0; i < size; i++)
+				{
+					points.add(buffer.getPosition(i));
+				}
+			}
+		}
+
+		if (!points.isEmpty())
+		{
+			FastShape shape = new FastShape(points, GL.GL_POINTS);
+			shape.setColor(randomColor());
+			shapes.add(shape);
+		}
+	}
+
+	protected Color randomColor()
 	{
 		HSLColor color = new HSLColor(new Random().nextFloat() * 360f, 100f, 50f);
 		return color.getRGB();

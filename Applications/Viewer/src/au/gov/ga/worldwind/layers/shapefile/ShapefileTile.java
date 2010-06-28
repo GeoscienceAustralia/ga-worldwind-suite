@@ -65,8 +65,8 @@ public class ShapefileTile extends Tile implements Renderable
 			throw new IllegalArgumentException(msg);
 		}
 
-		return dc.getGlobe()
-				.computeBoundingCylinder(dc.getVerticalExaggeration(), this.getSector());
+		return Sector.computeBoundingBox(dc.getGlobe(), dc.getVerticalExaggeration(), this
+				.getSector());
 	}
 
 	public boolean isTileExpired()

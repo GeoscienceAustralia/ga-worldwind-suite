@@ -3,13 +3,14 @@ package au.gov.ga.worldwind.layers.shapefile;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.geom.Cylinder;
+import gov.nasa.worldwind.geom.Box;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.util.Level;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
@@ -725,25 +726,24 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 		textRenderer.endRendering();
 	}
 
-	private void drawBoundingVolumes(DrawContext dc, ArrayList<ShapefileTile> tiles)
-	{
-		float[] previousColor = new float[4];
-		dc.getGL().glGetFloatv(GL.GL_CURRENT_COLOR, previousColor, 0);
-		dc.getGL().glColor3d(0, 1, 0);
+    private void drawBoundingVolumes(DrawContext dc, ArrayList<ShapefileTile> tiles)
+    {
+        float[] previousColor = new float[4];
+        dc.getGL().glGetFloatv(GL.GL_CURRENT_COLOR, previousColor, 0);
+        dc.getGL().glColor3d(0, 1, 0);
 
-		for (ShapefileTile tile : tiles)
-		{
-			((Cylinder) tile.getExtent(dc)).render(dc);
-		}
+        for (ShapefileTile tile : tiles)
+        {
+            if (tile.getExtent(dc) instanceof Renderable)
+                ((Renderable) tile.getExtent(dc)).render(dc);
+        }
 
-		Cylinder c =
-				dc.getGlobe().computeBoundingCylinder(dc.getVerticalExaggeration(),
-						this.levels.getSector());
-		dc.getGL().glColor3d(1, 1, 0);
-		c.render(dc);
+        Box c = Sector.computeBoundingBox(dc.getGlobe(), dc.getVerticalExaggeration(), this.levels.getSector());
+        dc.getGL().glColor3d(1, 1, 0);
+        c.render(dc);
 
-		dc.getGL().glColor4fv(previousColor, 0);
-	}
+        dc.getGL().glColor4fv(previousColor, 0);
+    }
 
 	/*public int computeLevelForResolution(Sector sector, double resolution)
 	{

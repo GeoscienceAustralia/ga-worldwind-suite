@@ -50,9 +50,9 @@ public class PolygonTessellator
 		}
 
 		int shapeId = 0;
-		List<ShapefileRecord> records = shapefile.getRecords();
-		for (ShapefileRecord record : records)
+		while(shapefile.hasNext())
 		{
+			ShapefileRecord record = shapefile.nextRecord();
 			for (int part = 0; part < record.getNumberOfParts(); part++)
 			{
 				shapeId++;
@@ -61,7 +61,7 @@ public class PolygonTessellator
 				int lastTileIndex = -1;
 				List<SubTile> tilesAffected = new ArrayList<SubTile>();
 
-				VecBuffer buffer = record.getBuffer(part);
+				VecBuffer buffer = record.getPointBuffer(part);
 				int size = buffer.getSize();
 				for (int i = 0; i <= size; i++)
 				{

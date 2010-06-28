@@ -3,7 +3,7 @@
 <project name="Viewer" basedir="." default="run">
 
 	<property name="src_dir" value="${basedir}/src" />
-	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-0.6.442.13312" />
+	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-0.6.516.13497" />
 	<property name="worldwind_jar" value="worldwind.jar" />
 	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
 
