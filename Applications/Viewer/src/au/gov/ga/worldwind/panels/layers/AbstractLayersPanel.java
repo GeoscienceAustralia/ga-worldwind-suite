@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.panels.layers;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Sector;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -9,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -75,6 +78,31 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			public void valueChanged(TreeSelectionEvent e)
 			{
 				enableComponents();
+			}
+		});
+
+		tree.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1)
+				{
+					TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+					if (path != null)
+					{
+						Object o = path.getLastPathComponent();
+						if (o != null && o instanceof ILayerNode)
+						{
+							ILayerNode layer = (ILayerNode) o;
+							Sector sector = layerEnabler.getLayerExtents(layer);
+							if (sector != null)
+							{
+								//TODO animate the view so that sector is visible
+							}
+						}
+					}
+				}
 			}
 		});
 

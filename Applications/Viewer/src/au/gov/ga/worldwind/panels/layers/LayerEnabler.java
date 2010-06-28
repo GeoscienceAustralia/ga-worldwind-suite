@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.panels.layers;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
@@ -275,6 +276,21 @@ public class LayerEnabler
 		if (nodeMap.containsKey(node))
 			return nodeMap.get(node).hasLayer();
 		return false;
+	}
+	
+	public synchronized Sector getLayerExtents(ILayerNode node)
+	{
+		if(!nodeMap.containsKey(node))
+			return null;
+		
+		Wrapper wrapper = nodeMap.get(node);
+		if(wrapper.hasLayer())
+		{
+			//Layer layer = wrapper.getLayer();
+			//TODO how can we calculate the extends of a layer?
+		}
+		
+		return null;
 	}
 
 	private static class Wrapper
