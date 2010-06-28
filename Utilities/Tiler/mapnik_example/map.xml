@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map srs="+proj=latlong +datum=WGS84">
+
+  <Style name="Roads">
+    <Rule>
+      <LineSymbolizer>
+        <CssParameter name="stroke">white</CssParameter>
+        <CssParameter name="stroke-width">8.0</CssParameter>
+        <CssParameter name="stroke-linejoin">round</CssParameter>
+        <CssParameter name="stroke-linecap">round</CssParameter>
+      </LineSymbolizer>
+    </Rule>
+  </Style>
+
+  <Layer name="world">
+    <StyleName>Roads</StyleName>
+    <Datasource>
+      <Parameter name="type">shape</Parameter>
+      <Parameter name="file">C:/WINNT/Profiles/u97852/Desktop/calcrete/calcrete</Parameter>
+    </Datasource>
+  </Layer>
+  
+</Map>
