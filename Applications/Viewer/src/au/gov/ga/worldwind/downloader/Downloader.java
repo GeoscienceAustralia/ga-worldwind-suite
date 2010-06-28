@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.downloader;
 
+import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.retrieve.BasicRetrievalService;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import au.gov.ga.worldwind.util.AVKeyMore;
 
 public class Downloader
 {
@@ -362,6 +365,18 @@ public class Downloader
 	}
 
 	private static URLRetriever createRetriever(URL url, Long ifModifiedSince,
+			RetrievalPostProcessor postProcessor)
+	{
+		URLRetriever retriever = doCreateRetriever(url, ifModifiedSince, postProcessor);
+		int connectTimeout =
+				Configuration.getIntegerValue(AVKeyMore.DOWNLOADER_CONNECT_TIMEOUT, 30000);
+		int readTimeout = Configuration.getIntegerValue(AVKeyMore.DOWNLOADER_READ_TIMEOUT, 30000);
+		retriever.setConnectTimeout(connectTimeout);
+		retriever.setReadTimeout(readTimeout);
+		return retriever;
+	}
+
+	private static URLRetriever doCreateRetriever(URL url, Long ifModifiedSince,
 			RetrievalPostProcessor postProcessor)
 	{
 		if ("http".equalsIgnoreCase(url.getProtocol())
