@@ -5,7 +5,7 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.cache.FileStore;
-import gov.nasa.worldwind.formats.dds.DDSConverter;
+import gov.nasa.worldwind.formats.dds.DDSCompressor;
 import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.retrieve.HTTPRetriever;
@@ -298,11 +298,7 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 
 		private void saveDDS(BufferedImage image, File file) throws IOException
 		{
-			ByteBuffer buffer;
-			if (image.getColorModel().hasAlpha())
-				buffer = DDSConverter.convertToDxt3(image);
-			else
-				buffer = DDSConverter.convertToDxt1NoTransparency(image);
+			ByteBuffer buffer = DDSCompressor.compressImage(image);
 			synchronized (this.getFileLock())
 			{
 				WWIO.saveBuffer(buffer, file);
