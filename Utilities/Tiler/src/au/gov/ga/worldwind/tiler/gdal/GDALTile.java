@@ -762,9 +762,9 @@ public class GDALTile
 		long[] longValues = new long[bufferBandCount];
 		int[] indices = new int[bufferBandCount];
 
-		for (int y = replaceRegion.y; y < replaceRegion.height; y++)
+		for (int y = replaceRegion.y; y < replaceRegion.y + replaceRegion.height; y++)
 		{
-			for (int x = replaceRegion.x; x < replaceRegion.width; x++)
+			for (int x = replaceRegion.x; x < replaceRegion.x + replaceRegion.width; x++)
 			{
 				boolean between = false;
 
