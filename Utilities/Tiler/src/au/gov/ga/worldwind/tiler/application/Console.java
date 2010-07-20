@@ -40,7 +40,8 @@ public class Console
 						+ "       [{-z,--lzts} lzts] [{-t,--tilesize} size] [{-f,--format} {JPG|PNG}]\n"
 						+ "       [{-d,--datatype} {BYTE|INT16|INT32|FLOAT32}] [{-a,--addalpha}]\n"
 						+ "       [{-b,--band} band] [{-n,--nooverviews}] [{-l,--levels} levels]\n"
-						+ "       [{-m,--bilinear}] [{-o,--setoutside} \"value[,value...]]\"\n"
+						+ "       [{-m,--nomagnification}] [{-g,--nominification}]\n"
+						+ "       [{-o,--setoutside} \"value[,value...]]\"\n"
 						+ "       [{-r,--replacevalues} \"min1[,min1...] max1[,max1...] min2[,min2...]\n"
 						+ "                              max2[,max2...] with[,with...] else[,else...]\"\n"
 						+ "       input_file output_directory\n"
@@ -57,8 +58,9 @@ public class Console
 						+ "             elevations)\n"
 						+ "  -n         Don't generate overviews\n"
 						+ "  -l levels  Number of levels to generate (default: calculated optimal)\n"
-						+ "  -m         Use bilinear magnification if the top level tiles generated have\n"
-						+ "             a higher resolution than the dataset\n"
+						+ "  -m         Disable bilinear magnification (if the top level tiles generated\n"
+						+ "             have a higher resolution than the dataset)\n"
+						+ "  -g         Disable bilinear minification when generating overviews\n"
 						+ "  -o \"...\"   Set values outside extends to (number of values must equal the\n"
 						+ "             number of output bands, blanks permitted)\n"
 						+ "  -r \"...\"   Replace values between (number of values in each group must\n"
@@ -99,7 +101,8 @@ public class Console
 		//-b --band 1      (elevations)
 		//-n --nooverviews
 		//-l --levels n
-		//-m --bilinear
+		//-m --nomagnification
+		//-g --nominification
 		//-s --setoutside n,n,n
 		//-r --replacevalues "n,n,n n,n,n n,n,n n,n,n n,n,n n,n,n"
 
@@ -117,7 +120,8 @@ public class Console
 		Option bandO = parser.addIntegerOption('b', "band");
 		Option nooverviewsO = parser.addBooleanOption('n', "nooverviews");
 		Option levelsO = parser.addIntegerOption('l', "levels");
-		Option bilinearO = parser.addBooleanOption('m', "bilinear");
+		Option bilinearO = parser.addBooleanOption('m', "nomagnification");
+		Option bilinearOverviewsO = parser.addBooleanOption('g', "nominification");
 		Option outsideO = new Option('o', "setoutside", true)
 		{
 			@Override
@@ -178,7 +182,10 @@ public class Console
 		Boolean images = (Boolean) parser.getOptionValue(imagesO, true);
 		Boolean elevations = (Boolean) parser.getOptionValue(elevationsO, false) && !images;
 		Boolean reproject = (Boolean) parser.getOptionValue(reprojectO, false);
-		Boolean bilinear = (Boolean) parser.getOptionValue(bilinearO, false);
+		Boolean nobilinear = (Boolean) parser.getOptionValue(bilinearO, false);
+		Boolean nobilinearOverviews = (Boolean) parser.getOptionValue(bilinearOverviewsO, false);
+		boolean bilinear = !nobilinear;
+		boolean bilinearOverviews = !nobilinearOverviews;
 
 		Integer tilesize = (Integer) parser.getOptionValue(tilesizeO, elevations ? 150 : 512);
 		Double lzts = (Double) parser.getOptionValue(lztsO, elevations ? 20d : 36d);
@@ -269,7 +276,8 @@ public class Console
 					if (!nooverviews)
 					{
 						Overviewer.createElevationOverviews(output, tilesize, tilesize, bufferType,
-								ByteOrder.LITTLE_ENDIAN, outside, sector, lzts, reporter);
+								ByteOrder.LITTLE_ENDIAN, outside, sector, lzts, bilinearOverviews,
+								reporter);
 					}
 					logWriter.logMinMax(minMax, isFloat);
 				}
@@ -286,7 +294,7 @@ public class Console
 					if (!nooverviews)
 					{
 						Overviewer.createImageOverviews(output, imageFormat, tilesize, tilesize,
-								outside, sector, lzts, reporter);
+								outside, sector, lzts, bilinearOverviews, reporter);
 					}
 				}
 			}

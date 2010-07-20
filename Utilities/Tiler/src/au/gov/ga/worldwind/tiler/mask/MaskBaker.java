@@ -35,11 +35,16 @@ public class MaskBaker
 			addImages(imageDir, images, masks, outputs, imageDir, imageExt, maskDir, maskExt,
 					outputDir, outputExt);
 
+			System.out.println("Found " + images.size() + " images");
+
 			for (int i = 0; i < images.size(); i++)
 			{
 				File imageFile = images.get(i);
 				File maskFile = masks.get(i);
 				File outputFile = outputs.get(i);
+
+				System.out.println("Writing " + outputFile + " (" + (i + 1) + "/" + images.size()
+						+ " - " + ((i + 1) * 100 / images.size()) + "%)");
 
 				BufferedImage image = ImageIO.read(imageFile);
 				BufferedImage mask = ImageIO.read(maskFile);
@@ -55,6 +60,8 @@ public class MaskBaker
 				}
 				ImageIO.write(mask, outputExt, outputFile);
 			}
+
+			System.out.println("Complete");
 		}
 		catch (IOException e)
 		{

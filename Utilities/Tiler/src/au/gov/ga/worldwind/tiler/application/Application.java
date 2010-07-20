@@ -73,7 +73,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 
-
 import org.gdal.gdal.Dataset;
 import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
@@ -150,6 +149,7 @@ public class Application implements UncaughtExceptionHandler
 	private JRadioButton elevationRadio;
 	private JCheckBox reprojectCheck;
 	private JCheckBox bilinearCheck;
+	private JCheckBox bilinearOverviewsCheck;
 	private JDoubleField lztsField;
 	private JIntegerField tilesizeField;
 	private JCheckBox outsideCheck;
@@ -969,7 +969,7 @@ public class Application implements UncaughtExceptionHandler
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(reprojectCheck, c);
 
-		bilinearCheck = new JCheckBox("Use bilinear interpolation if required");
+		bilinearCheck = new JCheckBox("Use bilinear magnification if required");
 		bilinearCheck.setSelected(true);
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -978,6 +978,16 @@ public class Application implements UncaughtExceptionHandler
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(bilinearCheck, c);
+
+		bilinearOverviewsCheck = new JCheckBox("Use bilinear minification in overviews");
+		bilinearOverviewsCheck.setSelected(true);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = ++row;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(bilinearOverviewsCheck, c);
 
 		panel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -2057,6 +2067,7 @@ public class Application implements UncaughtExceptionHandler
 		overviewsCheck.setEnabled(standard);
 		reprojectCheck.setEnabled(standard && !mapnik);
 		bilinearCheck.setEnabled(standard && !mapnik);
+		bilinearOverviewsCheck.setEnabled(standard && !mapnik);
 		overrideLevelsCheck.setEnabled(standard && !mapnik);
 		pngRadio.setEnabled(standard);
 		tilesizeField.setEnabled(standard);
@@ -2174,6 +2185,7 @@ public class Application implements UncaughtExceptionHandler
 		overrideLevelsSpinner.setVisible(!mapnik);
 		reprojectCheck.setVisible(!mapnik);
 		bilinearCheck.setVisible(!mapnik);
+		bilinearOverviewsCheck.setVisible(!mapnik);
 		outsideCheck.setVisible(!mapnik);
 		outsidePanel.setVisible(!mapnik);
 		replaceCheck.setVisible(!mapnik);
@@ -2375,6 +2387,7 @@ public class Application implements UncaughtExceptionHandler
 				boolean overviews = overviewsCheck.isSelected();
 				boolean reproject = reprojectCheck.isSelected();
 				boolean bilinear = bilinearCheck.isSelected();
+				boolean bilinearOverviews = bilinearOverviewsCheck.isSelected();
 
 				LogWriter logWriter = null;
 				try
@@ -2395,7 +2408,7 @@ public class Application implements UncaughtExceptionHandler
 						if (overviews && !reporter.isCancelled())
 						{
 							Overviewer.createImageOverviews(outDir, imageFormat, tilesize,
-									tilesize, null, sector, lzts, reporter);
+									tilesize, null, sector, lzts, bilinearOverviews, reporter);
 						}
 					}
 					else
@@ -2473,7 +2486,8 @@ public class Application implements UncaughtExceptionHandler
 							if (overviews && !reporter.isCancelled())
 							{
 								Overviewer.createImageOverviews(outDir, imageFormat, tilesize,
-										tilesize, outsideValues, sector, lzts, reporter);
+										tilesize, outsideValues, sector, lzts, bilinearOverviews,
+										reporter);
 							}
 						}
 						else if (elevationRadio.isSelected())
@@ -2506,7 +2520,7 @@ public class Application implements UncaughtExceptionHandler
 							{
 								Overviewer.createElevationOverviews(outDir, tilesize, tilesize,
 										bufferType, ByteOrder.LITTLE_ENDIAN, /*TODO remove hardcoded byteorder*/
-										outsideValues, sector, lzts, reporter);
+										outsideValues, sector, lzts, bilinearOverviews, reporter);
 							}
 
 							if (isFloat)

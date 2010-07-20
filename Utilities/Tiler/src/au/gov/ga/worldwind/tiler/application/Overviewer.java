@@ -43,31 +43,28 @@ import au.gov.ga.worldwind.tiler.util.FileFilters.ExtensionFileFilter;
 
 public class Overviewer
 {
-	public static void createImageOverviews(File directory, String extension,
-			int width, int height, NullableNumberArray outsideValues,
-			Sector sector, double lzts, ProgressReporter reporter)
+	public static void createImageOverviews(File directory, String extension, int width,
+			int height, NullableNumberArray outsideValues, Sector sector, double lzts,
+			boolean bilinear, ProgressReporter reporter)
 	{
-		OverviewCreator overviewCreator = new ImageOverviewCreator(width,
-				height, outsideValues);
-		createOverviews(overviewCreator, directory, extension, sector, lzts,
-				reporter);
+		OverviewCreator overviewCreator =
+				new ImageOverviewCreator(width, height, outsideValues, bilinear);
+		createOverviews(overviewCreator, directory, extension, sector, lzts, reporter);
 	}
 
-	public static void createElevationOverviews(File directory, int width,
-			int height, int bufferType, ByteOrder byteOrder,
-			NullableNumberArray outsideValues, Sector sector, double lzts,
-			ProgressReporter reporter)
+	public static void createElevationOverviews(File directory, int width, int height,
+			int bufferType, ByteOrder byteOrder, NullableNumberArray outsideValues, Sector sector,
+			double lzts, boolean bilinear, ProgressReporter reporter)
 	{
 		int bands = 1;
-		OverviewCreator overviewCreator = new ElevationOverviewCreator(width,
-				height, bands, bufferType, byteOrder, outsideValues);
-		createOverviews(overviewCreator, directory, "bil", sector, lzts,
-				reporter);
+		OverviewCreator overviewCreator =
+				new ElevationOverviewCreator(width, height, bands, bufferType, byteOrder,
+						outsideValues, bilinear);
+		createOverviews(overviewCreator, directory, "bil", sector, lzts, reporter);
 	}
 
-	private static void createOverviews(OverviewCreator overviewCreator,
-			File directory, String extension, Sector sector, double lzts,
-			ProgressReporter progress)
+	private static void createOverviews(OverviewCreator overviewCreator, File directory,
+			String extension, Sector sector, double lzts, ProgressReporter progress)
 	{
 		progress.getLogger().info("Generating overviews...");
 
@@ -112,8 +109,7 @@ public class Overviewer
 				File dir = new File(directory.getAbsolutePath() + "/" + level);
 
 				// create a list of files to process
-				ExtensionFileFilter fileFilter = new ExtensionFileFilter(
-						extension);
+				ExtensionFileFilter fileFilter = new ExtensionFileFilter(extension);
 				Set<File> sourceFiles = new HashSet<File>();
 				FileUtil.recursivelyAddFiles(sourceFiles, dir, fileFilter);
 
@@ -124,8 +120,7 @@ public class Overviewer
 
 					count++;
 					progress.getLogger().fine(
-							"Overview " + count + "/" + size + " ("
-									+ (count * 100 / size) + "%)");
+							"Overview " + count + "/" + size + " (" + (count * 100 / size) + "%)");
 					progress.progress(count / (double) size);
 
 					File file = sourceFiles.iterator().next();
@@ -140,27 +135,23 @@ public class Overviewer
 					int rowabove = row / 2;
 					int colabove = col / 2;
 
-					final File src0 = tileFile(dir, extension, rowabove * 2,
-							colabove * 2);
-					final File src1 = tileFile(dir, extension,
-							rowabove * 2 + 1, colabove * 2);
-					final File src2 = tileFile(dir, extension, rowabove * 2,
-							colabove * 2 + 1);
-					final File src3 = tileFile(dir, extension,
-							rowabove * 2 + 1, colabove * 2 + 1);
+					final File src0 = tileFile(dir, extension, rowabove * 2, colabove * 2);
+					final File src1 = tileFile(dir, extension, rowabove * 2 + 1, colabove * 2);
+					final File src2 = tileFile(dir, extension, rowabove * 2, colabove * 2 + 1);
+					final File src3 = tileFile(dir, extension, rowabove * 2 + 1, colabove * 2 + 1);
 
 					sourceFiles.remove(src0);
 					sourceFiles.remove(src1);
 					sourceFiles.remove(src2);
 					sourceFiles.remove(src3);
 
-					final File dst = tileFile(new File(dir.getParent() + "/"
-							+ (level - 1)), extension, rowabove, colabove);
+					final File dst =
+							tileFile(new File(dir.getParent() + "/" + (level - 1)), extension,
+									rowabove, colabove);
 					dst.getParentFile().mkdirs();
 					if (dst.exists())
 					{
-						progress.getLogger().warning(
-								dst.getAbsolutePath() + " already exists");
+						progress.getLogger().warning(dst.getAbsolutePath() + " already exists");
 					}
 					else
 					{
@@ -178,21 +169,18 @@ public class Overviewer
 		}
 
 		progress.getLogger().info(
-				"Overview generation "
-						+ (progress.isCancelled() ? "cancelled" : "complete"));
+				"Overview generation " + (progress.isCancelled() ? "cancelled" : "complete"));
 	}
 
 	private static File tileFile(File dir, String extension, int row, int col)
 	{
-		return new File(dir.getAbsolutePath() + "/"
-				+ FileUtil.paddedInt(row, 4) + "/" + FileUtil.paddedInt(row, 4)
-				+ "_" + FileUtil.paddedInt(col, 4) + "." + extension);
+		return new File(dir.getAbsolutePath() + "/" + FileUtil.paddedInt(row, 4) + "/"
+				+ FileUtil.paddedInt(row, 4) + "_" + FileUtil.paddedInt(col, 4) + "." + extension);
 	}
 
 	private interface OverviewCreator
 	{
-		void mix(File src0, File src1, File src2, File src3, File dst)
-				throws IOException;
+		void mix(File src0, File src1, File src2, File src3, File dst) throws IOException;
 	}
 
 	private static class ImageOverviewCreator implements OverviewCreator
@@ -200,12 +188,14 @@ public class Overviewer
 		private BufferedImage outsideImage;
 		private int width;
 		private int height;
+		private boolean bilinear;
 
-		public ImageOverviewCreator(int width, int height,
-				NullableNumberArray outsideValues)
+		public ImageOverviewCreator(int width, int height, NullableNumberArray outsideValues,
+				boolean bilinear)
 		{
 			this.width = width;
 			this.height = height;
+			this.bilinear = bilinear;
 
 			// create image for tiles outside extents (tiles that don't
 			// exist)
@@ -232,21 +222,20 @@ public class Overviewer
 				}
 
 				DataBuffer db = new DataBufferByte(bytes, bytes.length);
-				SampleModel sampleModel = new ComponentSampleModel(
-						DataBuffer.TYPE_BYTE, width, height, 1, width, offsets);
-				WritableRaster raster = Raster.createWritableRaster(
-						sampleModel, db, null);
-				int imageType = bandCount == 1 ? BufferedImage.TYPE_BYTE_GRAY
-						: bandCount == 3 ? BufferedImage.TYPE_INT_RGB
-								: BufferedImage.TYPE_INT_ARGB_PRE;
+				SampleModel sampleModel =
+						new ComponentSampleModel(DataBuffer.TYPE_BYTE, width, height, 1, width,
+								offsets);
+				WritableRaster raster = Raster.createWritableRaster(sampleModel, db, null);
+				int imageType =
+						bandCount == 1 ? BufferedImage.TYPE_BYTE_GRAY : bandCount == 3
+								? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB_PRE;
 				outsideImage = new BufferedImage(width, height, imageType);
 				outsideImage.setData(raster);
 			}
 		}
 
 		@Override
-		public void mix(File src0, File src1, File src2, File src3, File dst)
-				throws IOException
+		public void mix(File src0, File src1, File src2, File src3, File dst) throws IOException
 		{
 			if (dst.exists())
 				throw new IllegalArgumentException("Destination already exists");
@@ -290,10 +279,12 @@ public class Overviewer
 				throw new IOException("Error reading " + src3, e);
 			}
 
-			BufferedImage image = i0 != null ? i0 : i1 != null ? i1
-					: i2 != null ? i2 : i3 != null ? i3 : outsideImage;
-			int type = image != null && image.getType() != 0 ? image.getType()
-					: BufferedImage.TYPE_INT_ARGB;
+			BufferedImage image =
+					i0 != null ? i0 : i1 != null ? i1 : i2 != null ? i2 : i3 != null ? i3
+							: outsideImage;
+			int type =
+					image != null && image.getType() != 0 ? image.getType()
+							: BufferedImage.TYPE_INT_ARGB;
 
 			// TODO warn if image == outsideImage (no src files exist)
 
@@ -309,15 +300,17 @@ public class Overviewer
 
 			BufferedImage id = new BufferedImage(w, h, type);
 			Graphics2D g = id.createGraphics();
-			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-					RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			if (bilinear)
+				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+						RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			else
+				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+						RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
-			if (outsideImage == null
-					&& (image == null || image.getColorModel().hasAlpha()))
+			if (outsideImage == null && (image == null || image.getColorModel().hasAlpha()))
 			{
 				Composite c = g.getComposite();
-				g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR,
-						0.0f));
+				g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 0.0f));
 				g.fillRect(0, 0, w, h);
 				g.setComposite(c);
 			}
@@ -341,8 +334,8 @@ public class Overviewer
 			g.dispose();
 
 			dst.getParentFile().mkdirs();
-			String imageformat = dst.getName().substring(
-					dst.getName().lastIndexOf('.') + 1).toLowerCase();
+			String imageformat =
+					dst.getName().substring(dst.getName().lastIndexOf('.') + 1).toLowerCase();
 			ImageIO.write(id, imageformat, dst);
 		}
 	}
@@ -357,10 +350,10 @@ public class Overviewer
 		private int height;
 		private int bands;
 		private TypeHandler typeHandler;
+		private boolean bilinear;
 
-		public ElevationOverviewCreator(int width, int height, int bands,
-				int bufferType, ByteOrder byteOrder,
-				NullableNumberArray outsideValues)
+		public ElevationOverviewCreator(int width, int height, int bands, int bufferType,
+				ByteOrder byteOrder, NullableNumberArray outsideValues, boolean bilinear)
 		{
 			floatingPoint = GDALTile.isTypeFloatingPoint(bufferType);
 
@@ -371,8 +364,7 @@ public class Overviewer
 			bufferTypeSize /= 8;
 
 			if (width % 2 != 0 || height % 2 != 0)
-				throw new IllegalArgumentException(
-						"Width/Height must be multiples of 2");
+				throw new IllegalArgumentException("Width/Height must be multiples of 2");
 
 			if (outsideValues != null && outsideValues.length() != bands)
 				throw new IllegalArgumentException(
@@ -385,6 +377,7 @@ public class Overviewer
 			this.width = width;
 			this.height = height;
 			this.bands = bands;
+			this.bilinear = bilinear;
 		}
 
 		private TypeHandler createTypeHandler()
@@ -396,8 +389,7 @@ public class Overviewer
 			case 2:
 				return new ShortTypeHandler();
 			case 4:
-				return floatingPoint ? new FloatTypeHandler()
-						: new IntTypeHandler();
+				return floatingPoint ? new FloatTypeHandler() : new IntTypeHandler();
 			case 8:
 				return new DoubleTypeHandler();
 			}
@@ -405,8 +397,7 @@ public class Overviewer
 		}
 
 		@Override
-		public void mix(File src0, File src1, File src2, File src3, File dst)
-				throws IOException
+		public void mix(File src0, File src1, File src2, File src3, File dst) throws IOException
 		{
 			if (dst.exists())
 				throw new IllegalArgumentException("Destination already exists");
@@ -420,25 +411,22 @@ public class Overviewer
 				src2 = src2 != null && src2.exists() ? src2 : null;
 				src3 = src3 != null && src3.exists() ? src3 : null;
 
-				long length = src0 != null ? src0.length()
-						: src1 != null ? src1.length() : src2 != null ? src2
-								.length() : src3 != null ? src3.length() : -1;
+				long length =
+						src0 != null ? src0.length() : src1 != null ? src1.length() : src2 != null
+								? src2.length() : src3 != null ? src3.length() : -1;
 
 				if ((src1 != null && src1.length() != length)
 						|| (src2 != null && src2.length() != length)
 						|| (src3 != null && src3.length() != length))
-					throw new IllegalArgumentException(
-							"Source file(s) don't have equal sizes");
+					throw new IllegalArgumentException("Source file(s) don't have equal sizes");
 
-				if (length > 0
-						&& length != width * height * bands * bufferTypeSize)
-					throw new IllegalArgumentException(
-							"Source file(s) have an invalid size");
+				if (length > 0 && length != width * height * bands * bufferTypeSize)
+					throw new IllegalArgumentException("Source file(s) have an invalid size");
 
 				dstraf = new RandomAccessFile(dst, "rw");
 				FileChannel dstfc = dstraf.getChannel();
-				MappedByteBuffer dstbb = dstfc.map(MapMode.READ_WRITE, 0, width
-						* height * bands * bufferTypeSize);
+				MappedByteBuffer dstbb =
+						dstfc.map(MapMode.READ_WRITE, 0, width * height * bands * bufferTypeSize);
 				dstbb.order(byteOrder);
 
 				src0fis = src0 != null ? new FileInputStream(src0) : null;
@@ -446,24 +434,25 @@ public class Overviewer
 				src2fis = src2 != null ? new FileInputStream(src2) : null;
 				src3fis = src3 != null ? new FileInputStream(src3) : null;
 
-				ByteBuffer src0bb = src0fis != null ? getFileChannelAsByteBuffer(
-						src0fis.getChannel(), (int) src0.length(), byteOrder)
-						: null;
-				ByteBuffer src1bb = src1fis != null ? getFileChannelAsByteBuffer(
-						src1fis.getChannel(), (int) src1.length(), byteOrder)
-						: null;
-				ByteBuffer src2bb = src2fis != null ? getFileChannelAsByteBuffer(
-						src2fis.getChannel(), (int) src2.length(), byteOrder)
-						: null;
-				ByteBuffer src3bb = src3fis != null ? getFileChannelAsByteBuffer(
-						src3fis.getChannel(), (int) src3.length(), byteOrder)
-						: null;
+				ByteBuffer src0bb =
+						src0fis != null ? getFileChannelAsByteBuffer(src0fis.getChannel(),
+								(int) src0.length(), byteOrder) : null;
+				ByteBuffer src1bb =
+						src1fis != null ? getFileChannelAsByteBuffer(src1fis.getChannel(),
+								(int) src1.length(), byteOrder) : null;
+				ByteBuffer src2bb =
+						src2fis != null ? getFileChannelAsByteBuffer(src2fis.getChannel(),
+								(int) src2.length(), byteOrder) : null;
+				ByteBuffer src3bb =
+						src3fis != null ? getFileChannelAsByteBuffer(src3fis.getChannel(),
+								(int) src3.length(), byteOrder) : null;
 
 				for (int b = 0; b < bands; b++)
 				{
 					int offset = b * width * height * bufferTypeSize;
-					Object outsideValue = outsideValues == null ? null
-							: typeHandler.getNumberArrayValue(b, outsideValues);
+					Object outsideValue =
+							outsideValues == null ? null : typeHandler.getNumberArrayValue(b,
+									outsideValues);
 
 					for (int y = 0; y < height; y++)
 					{
@@ -471,41 +460,50 @@ public class Overviewer
 						for (int x = 0; x < width; x++)
 						{
 							int sx = x % (width / 2);
-							ByteBuffer buffer = selectBuffer(src0bb, src1bb,
-									src2bb, src3bb, x, y, width, height);
+							ByteBuffer buffer =
+									selectBuffer(src0bb, src1bb, src2bb, src3bb, x, y, width,
+											height);
 							Object value = outsideValue;
 							if (buffer != null)
 							{
-								int index0 = ((sy * 2) * width + (sx * 2))
-										* bufferTypeSize + offset;
-								int index1 = ((sy * 2) * width + (sx * 2 + 1))
-										* bufferTypeSize + offset;
-								int index2 = ((sy * 2 + 1) * width + sx * 2)
-										* bufferTypeSize + offset;
-								int index3 = ((sy * 2 + 1) * width + (sx * 2 + 1))
-										* bufferTypeSize + offset;
+								int index0 =
+										((sy * 2) * width + (sx * 2)) * bufferTypeSize + offset;
+								Object v0 = typeHandler.getBufferValue(index0, buffer);
 
-								Object v0 = typeHandler.getBufferValue(index0,
-										buffer);
-								Object v1 = typeHandler.getBufferValue(index1,
-										buffer);
-								Object v2 = typeHandler.getBufferValue(index2,
-										buffer);
-								Object v3 = typeHandler.getBufferValue(index3,
-										buffer);
-
-								if (outsideValue == null
-										|| !(v0.equals(outsideValue)
-												|| v1.equals(outsideValue)
-												|| v2.equals(outsideValue) || v3
-												.equals(outsideValue)))
+								if (bilinear)
 								{
-									value = typeHandler.average(v0, v1, v2, v3);
+									int index1 =
+											((sy * 2) * width + (sx * 2 + 1)) * bufferTypeSize
+													+ offset;
+									int index2 =
+											((sy * 2 + 1) * width + sx * 2) * bufferTypeSize
+													+ offset;
+									int index3 =
+											((sy * 2 + 1) * width + (sx * 2 + 1)) * bufferTypeSize
+													+ offset;
+
+									Object v1 = typeHandler.getBufferValue(index1, buffer);
+									Object v2 = typeHandler.getBufferValue(index2, buffer);
+									Object v3 = typeHandler.getBufferValue(index3, buffer);
+
+									if (outsideValue == null
+											|| !(v0.equals(outsideValue) || v1.equals(outsideValue)
+													|| v2.equals(outsideValue) || v3
+													.equals(outsideValue)))
+									{
+										value = typeHandler.average(v0, v1, v2, v3);
+									}
+								}
+								else
+								{
+									if (outsideValue == null || !v0.equals(outsideValue))
+									{
+										value = v0;
+									}
 								}
 							}
 							if (value == null)
-								dstbb.position(dstbb.position()
-										+ bufferTypeSize);
+								dstbb.position(dstbb.position() + bufferTypeSize);
 							else
 								typeHandler.putBufferValue(dstbb, value);
 						}
@@ -527,8 +525,8 @@ public class Overviewer
 			}
 		}
 
-		private ByteBuffer getFileChannelAsByteBuffer(FileChannel fileChannel,
-				int length, ByteOrder byteOrder) throws IOException
+		private ByteBuffer getFileChannelAsByteBuffer(FileChannel fileChannel, int length,
+				ByteOrder byteOrder) throws IOException
 		{
 			ByteBuffer bb = ByteBuffer.allocate(length);
 			bb.order(byteOrder);
@@ -537,16 +535,15 @@ public class Overviewer
 			return bb;
 		}
 
-		private <E extends Buffer> E selectBuffer(E src0, E src1, E src2,
-				E src3, int x, int y, int w, int h)
+		private <E extends Buffer> E selectBuffer(E src0, E src1, E src2, E src3, int x, int y,
+				int w, int h)
 		{
 			// +--+--+
 			// |i1|i3|
 			// +--+--+
 			// |i0|i2|
 			// +--+--+
-			return (x < w / 2) ? (y < h / 2 ? src1 : src0) : (y < h / 2 ? src3
-					: src2);
+			return (x < w / 2) ? (y < h / 2 ? src1 : src0) : (y < h / 2 ? src3 : src2);
 		}
 	}
 
@@ -628,9 +625,8 @@ public class Overviewer
 
 		public Object average(Object v0, Object v1, Object v2, Object v3)
 		{
-			return (int) ((((Integer) v0).longValue()
-					+ ((Integer) v1).longValue() + ((Integer) v2).longValue() + ((Integer) v3)
-					.longValue()) / 4l);
+			return (int) ((((Integer) v0).longValue() + ((Integer) v1).longValue()
+					+ ((Integer) v2).longValue() + ((Integer) v3).longValue()) / 4l);
 		}
 	}
 
@@ -653,9 +649,8 @@ public class Overviewer
 
 		public Object average(Object v0, Object v1, Object v2, Object v3)
 		{
-			return (float) ((((Float) v0).doubleValue()
-					+ ((Float) v1).doubleValue() + ((Float) v2).doubleValue() + ((Float) v3)
-					.doubleValue()) / 4d);
+			return (float) ((((Float) v0).doubleValue() + ((Float) v1).doubleValue()
+					+ ((Float) v2).doubleValue() + ((Float) v3).doubleValue()) / 4d);
 		}
 	}
 
