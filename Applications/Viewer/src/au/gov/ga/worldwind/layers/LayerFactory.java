@@ -9,6 +9,8 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.layers.file.FileTiledImageLayer;
 import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
+import au.gov.ga.worldwind.layers.nearestneighbor.NearestNeighborMaskTiledImageLayer;
+import au.gov.ga.worldwind.layers.nearestneighbor.NearestNeighbourTiledImageLayer;
 import au.gov.ga.worldwind.util.XMLUtil;
 
 public class LayerFactory extends BasicLayerFactory
@@ -24,6 +26,14 @@ public class LayerFactory extends BasicLayerFactory
 		if ("MaskedTileService".equals(serviceName))
 		{
 			layer = new MaskTiledImageLayer(domElement, params);
+		}
+		else if ("NearestNeighborMaskedTileService".equals(serviceName))
+		{
+			layer = new NearestNeighborMaskTiledImageLayer(domElement, params);
+		}
+		else if("NearestNeighborTileService".equals(serviceName))
+		{
+			layer = new NearestNeighbourTiledImageLayer(domElement, params);
 		}
 		else if ("FileTileService".equals(serviceName))
 		{
