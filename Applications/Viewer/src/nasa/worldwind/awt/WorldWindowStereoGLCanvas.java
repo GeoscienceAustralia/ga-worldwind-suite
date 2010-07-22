@@ -79,6 +79,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
+            this.wwd.endInitalization();
         }
         catch (Exception e)
         {
@@ -102,6 +103,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
+            this.wwd.endInitalization();
         }
         catch (Exception e)
         {
@@ -140,6 +142,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
+            this.wwd.endInitalization();
         }
         catch (Exception e)
         {
@@ -179,6 +182,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
+            this.wwd.endInitalization();
         }
         catch (Exception e)
         {
