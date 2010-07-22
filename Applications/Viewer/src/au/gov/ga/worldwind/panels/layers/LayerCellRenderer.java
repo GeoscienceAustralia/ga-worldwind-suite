@@ -1,12 +1,10 @@
 package au.gov.ga.worldwind.panels.layers;
 
 import java.awt.Frame;
-import java.awt.Image;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.JCheckBox;
 import javax.swing.JTree;
@@ -14,7 +12,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
-import au.gov.ga.worldwind.components.ImageDialog;
 import au.gov.ga.worldwind.panels.dataset.AbstractCellRenderer;
 import au.gov.ga.worldwind.util.DefaultLauncher;
 import au.gov.ga.worldwind.util.Icons;
@@ -148,23 +145,10 @@ public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 			ILayerNode layer = getLayerValue(node);
 			if (layer != null && layer.getLegendURL() != null)
 			{
-				try
-				{
-					//TODO create a loading dialog while downloading legend image
-					//TODO cache downloaded legend?
-					Image image = ImageIO.read(layer.getLegendURL());
-					//TODO check that returned value is an instanceof Frame (or implement a better way)
-					Frame frame = (Frame) SwingUtilities.getWindowAncestor(getTree());
-					ImageDialog dialog =
-							new ImageDialog(frame, layer.getName() + " legend", false, image,
-									Icons.legend.getIcon());
-					dialog.setLocationRelativeTo(frame);
-					dialog.setVisible(true);
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
+				URL url = layer.getLegendURL();
+				String title = layer.getName() + " legend";
+				Frame frame = (Frame) SwingUtilities.getWindowAncestor(getTree());
+				LegendViewer.openLegend(url, title, frame);
 			}
 		}
 	}
@@ -185,12 +169,12 @@ public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 			}
 		}
 	}
-	
+
 	public void addQueryClickListener(QueryClickListener listener)
 	{
 		queryClickListeners.add(listener);
 	}
-	
+
 	public void removeQueryClickListener(QueryClickListener listener)
 	{
 		queryClickListeners.remove(listener);

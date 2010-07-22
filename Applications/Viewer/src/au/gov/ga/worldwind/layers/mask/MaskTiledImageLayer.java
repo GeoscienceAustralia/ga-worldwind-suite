@@ -101,7 +101,7 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 
 		Retriever textureRetriever = null;
 		Retriever maskRetriever = null;
-		DownloadPostProcessor dpp = new DownloadPostProcessor(tile, this);
+		DownloadPostProcessor dpp = createPostProcessor(tile);
 
 		if (textureFileProtocol)
 			textureRetriever = new FileRetriever(textureUrl, dpp);
@@ -149,6 +149,11 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 				textureFileProtocol ? tile.getPriority() - 1e100 : tile.getPriority());
 		WorldWind.getRetrievalService().runRetriever(maskRetriever,
 				maskFileProtocol ? tile.getPriority() - 1e100 : tile.getPriority());
+	}
+	
+	protected DownloadPostProcessor createPostProcessor(TextureTile tile)
+	{
+		return new DownloadPostProcessor(tile, this);
 	}
 
 	protected static class DownloadPostProcessor extends BasicTiledImageLayer.DownloadPostProcessor
@@ -279,13 +284,14 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 			g2d.drawImage(texture, 0, 0, null);
 			g2d.dispose();
 
+			BufferedImage image = transformPixels(mask);
 			try
 			{
 				String ext = outFile.getName().substring(outFile.getName().lastIndexOf('.') + 1);
 				if (ext.toLowerCase().equals("dds"))
-					saveDDS(mask, outFile);
+					saveDDS(image, outFile);
 				else
-					saveImage(mask, ext, outFile);
+					saveImage(image, ext, outFile);
 			}
 			catch (IOException e)
 			{
@@ -294,6 +300,11 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 			}
 
 			return true;
+		}
+
+		protected BufferedImage transformPixels(BufferedImage image)
+		{
+			return image;
 		}
 
 		private void saveDDS(BufferedImage image, File file) throws IOException

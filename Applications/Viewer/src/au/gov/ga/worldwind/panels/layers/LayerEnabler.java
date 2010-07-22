@@ -51,30 +51,30 @@ public class LayerEnabler
 		listeners.remove(listener);
 	}
 
+	@SuppressWarnings("unchecked")
 	public synchronized void setWwd(WorldWindow wwd)
 	{
 		this.wwd = wwd;
 
 		LayerList ll = wwd.getModel().getLayers();
-		if (ll instanceof ExtendedLayerList)
+		if (ll instanceof SectionList<?>)
 		{
-			layerList = (ExtendedLayerList) ll;
+			layerList = (SectionList) ll;
 		}
 		else
 		{
-			throw new IllegalStateException(
-					"Model's layer list must be an instance of ExtendedLayerList");
+			throw new IllegalStateException("Model's layer list must implement SectionList<Layer>");
 		}
 
 		ElevationModel em = wwd.getModel().getGlobe().getElevationModel();
-		if (em instanceof ExtendedCompoundElevationModel)
+		if (em instanceof SectionList<?>)
 		{
-			elevationModel = (ExtendedCompoundElevationModel) em;
+			elevationModel = (SectionList) em;
 		}
 		else
 		{
 			throw new IllegalStateException(
-					"Globe's elevation model must be an instance of ExtendedCompoundElevationModel");
+					"Globe's elevation model must implement SectionList<ElevationModel>");
 		}
 
 		layerList.registerSectionObject(this);
@@ -277,19 +277,19 @@ public class LayerEnabler
 			return nodeMap.get(node).hasLayer();
 		return false;
 	}
-	
+
 	public synchronized Sector getLayerExtents(ILayerNode node)
 	{
-		if(!nodeMap.containsKey(node))
+		if (!nodeMap.containsKey(node))
 			return null;
-		
+
 		Wrapper wrapper = nodeMap.get(node);
-		if(wrapper.hasLayer())
+		if (wrapper.hasLayer())
 		{
 			//Layer layer = wrapper.getLayer();
 			//TODO how can we calculate the extends of a layer?
 		}
-		
+
 		return null;
 	}
 

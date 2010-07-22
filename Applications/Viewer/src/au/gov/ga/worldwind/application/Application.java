@@ -69,7 +69,6 @@ import au.gov.ga.worldwind.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.panels.SideBar;
 import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.panels.layers.AbstractLayersPanel;
-import au.gov.ga.worldwind.panels.layers.ExtendedCompoundElevationModel;
 import au.gov.ga.worldwind.panels.layers.ExtendedLayerList;
 import au.gov.ga.worldwind.panels.layers.ILayerNode;
 import au.gov.ga.worldwind.panels.layers.LayerEnabler;
@@ -81,6 +80,8 @@ import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.SettingsDialog;
 import au.gov.ga.worldwind.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.stereo.StereoSceneController;
+import au.gov.ga.worldwind.terrain.ElevationModelFactory;
+import au.gov.ga.worldwind.terrain.SectionListCompoundElevationModel;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.theme.ThemeHUD;
 import au.gov.ga.worldwind.theme.ThemeLayer;
@@ -120,6 +121,8 @@ public class Application
 		}
 
 		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
+		Configuration
+				.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
 		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, StereoSceneController.class
 				.getName());
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class.getName());
@@ -226,7 +229,7 @@ public class Application
 			wwd = new WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas.defaultCaps);
 		Model model = new BasicModel();
 		model.setLayers(new ExtendedLayerList());
-		model.getGlobe().setElevationModel(new ExtendedCompoundElevationModel());
+		model.getGlobe().setElevationModel(new SectionListCompoundElevationModel());
 		wwd.setModel(model);
 		wwd.addSelectListener(new ClickAndGoSelectListener(wwd, WorldMapLayer.class));
 		create3DMouse();

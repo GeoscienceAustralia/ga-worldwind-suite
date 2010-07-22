@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.panels.layers;
+package au.gov.ga.worldwind.terrain;
 
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
@@ -7,16 +7,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ExtendedCompoundElevationModel extends CompoundElevationModel implements
+import au.gov.ga.worldwind.panels.layers.SectionList;
+
+public class SectionListCompoundElevationModel extends CompoundElevationModel implements
 		SectionList<ElevationModel>
 {
-	private Map<Object, ExtendedCompoundElevationModel> sectionMap =
-			new HashMap<Object, ExtendedCompoundElevationModel>();
+	private Map<Object, SectionListCompoundElevationModel> sectionMap =
+			new HashMap<Object, SectionListCompoundElevationModel>();
 
 	@Override
 	public void registerSectionObject(Object section)
 	{
-		ExtendedCompoundElevationModel em = new ExtendedCompoundElevationModel();
+		SectionListCompoundElevationModel em = new SectionListCompoundElevationModel();
 		sectionMap.put(section, em);
 		addElevationModel(em);
 	}
@@ -24,7 +26,7 @@ public class ExtendedCompoundElevationModel extends CompoundElevationModel imple
 	@Override
 	public void addAllFromSection(Object section, Collection<? extends ElevationModel> c)
 	{
-		ExtendedCompoundElevationModel model = this;
+		SectionListCompoundElevationModel model = this;
 		if (sectionMap.containsKey(section))
 			model = sectionMap.get(section);
 		model.addAll(c);
@@ -33,7 +35,7 @@ public class ExtendedCompoundElevationModel extends CompoundElevationModel imple
 	@Override
 	public void removeAllFromSection(Object section, Collection<? extends ElevationModel> c)
 	{
-		ExtendedCompoundElevationModel model = this;
+		SectionListCompoundElevationModel model = this;
 		if (sectionMap.containsKey(section))
 			model = sectionMap.get(section);
 		model.removeAll(c);

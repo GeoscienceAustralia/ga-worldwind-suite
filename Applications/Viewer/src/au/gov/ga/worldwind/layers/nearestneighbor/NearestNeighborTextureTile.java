@@ -27,11 +27,7 @@ public class NearestNeighborTextureTile extends TextureTile
 		if (o != null && o instanceof Integer)
 			numLevels = (Integer) o;
 	}
-
-	//*****************************************************************
-	//Below here is copied (with slight modifications) from TextureTile
-	//*****************************************************************
-
+	
 	@Override
 	protected void setTextureParameters(DrawContext dc, Texture t)
 	{
@@ -44,6 +40,10 @@ public class NearestNeighborTextureTile extends TextureTile
 			dc.getGL().glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
 		}
 	}
+
+	//*****************************************************************
+	//Below here is copied (with slight modifications) from TextureTile
+	//*****************************************************************
 
 	@Override
 	public TextureTile[] createSubTiles(Level nextLevel)

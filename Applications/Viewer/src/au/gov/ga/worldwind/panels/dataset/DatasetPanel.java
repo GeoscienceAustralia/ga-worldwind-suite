@@ -63,12 +63,24 @@ public class DatasetPanel extends AbstractThemePanel
 		rootNode.refreshChildren(tree.getModel());
 
 		//expand root by default
-		Object[] path;
 		if (rootNode.getChildCount() <= 0)
-			path = new Object[] { rootNode };
+		{
+			Object[] path = new Object[] { rootNode };
+			tree.expandPath(new TreePath(path));
+		}
 		else
-			path = new Object[] { rootNode, rootNode.getChildAt(rootNode.getChildCount() - 1) };
-		tree.expandPath(new TreePath(path));
+		{
+			int count = rootNode.getChildCount();
+			Object[][] paths = new Object[count][];
+			for (int i = 0; i < count; i++)
+			{
+				paths[i] = new Object[] { rootNode, rootNode.getChildAt(i) };
+			}
+			for (Object[] path : paths)
+			{
+				tree.expandPath(new TreePath(path));
+			}
+		}
 	}
 
 	@Override
