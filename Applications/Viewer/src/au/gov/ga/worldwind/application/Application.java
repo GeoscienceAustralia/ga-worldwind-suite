@@ -15,6 +15,7 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.retrieve.RetrievalService;
+import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
@@ -82,6 +83,7 @@ import au.gov.ga.worldwind.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.stereo.StereoSceneController;
 import au.gov.ga.worldwind.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.terrain.SectionListCompoundElevationModel;
+import au.gov.ga.worldwind.terrain.WireframeRectangularTessellator;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.theme.ThemeHUD;
 import au.gov.ga.worldwind.theme.ThemeLayer;
@@ -129,7 +131,8 @@ public class Application
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class
 				.getName());
-		//Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, NormalTessellator.class.getName());
+		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, WireframeRectangularTessellator.class
+				.getName());
 	}
 
 	public static void main(String[] args)
@@ -203,6 +206,9 @@ public class Application
 	private BasicAction fullscreenAction;
 	private List<SelectableAction> hudActions = new ArrayList<SelectableAction>();
 	private List<SelectableAction> panelActions = new ArrayList<SelectableAction>();
+	private SelectableAction skirtAction;
+	private SelectableAction wireframeAction;
+	private SelectableAction wireframeDepthAction;
 	private BasicAction settingsAction;
 	private BasicAction controlsAction;
 	private BasicAction aboutAction;
@@ -426,6 +432,51 @@ public class Application
 		{
 			hudActions.add(createThemePieceAction(hud));
 		}
+
+		final Tessellator tess = wwd.getModel().getGlobe().getTessellator();
+		skirtAction =
+				new SelectableAction("Render tile skirts", Icons.skirts.getIcon(), tess
+						.isMakeTileSkirts());
+		skirtAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				tess.setMakeTileSkirts(skirtAction.isSelected());
+				wwd.redraw();
+			}
+		});
+
+		wireframeAction =
+				new SelectableAction("Wireframe", Icons.wireframe.getIcon(), wwd.getModel()
+						.isShowWireframeInterior());
+		wireframeAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				wireframeDepthAction.setEnabled(wireframeAction.isSelected());
+				wwd.getModel().setShowWireframeInterior(wireframeAction.isSelected());
+				wwd.redraw();
+			}
+		});
+
+		final WireframeRectangularTessellator tessellator =
+				tess instanceof WireframeRectangularTessellator
+						? (WireframeRectangularTessellator) tess : null;
+		boolean depth = tessellator != null && tessellator.isWireframeDepthTesting();
+		wireframeDepthAction =
+				new SelectableAction("Wireframe depth testing", Icons.zwireframe.getIcon(), depth);
+		wireframeDepthAction.setEnabled(wireframeAction.isSelected());
+		wireframeDepthAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				tessellator.setWireframeDepthTesting(wireframeDepthAction.isSelected());
+				wwd.redraw();
+			}
+		});
 
 		fullscreenAction = new BasicAction("Fullscreen", Icons.monitor.getIcon());
 		fullscreenAction.addActionListener(new ActionListener()
@@ -847,6 +898,11 @@ public class Application
 		menu.add(defaultViewAction);
 		menu.add(gotoAction);
 		menu.add(fullscreenAction);
+
+		menu.addSeparator();
+		skirtAction.addToMenu(menu);
+		wireframeAction.addToMenu(menu);
+		wireframeDepthAction.addToMenu(menu);
 
 		menu.addSeparator();
 		for (SelectableAction action : panelActions)

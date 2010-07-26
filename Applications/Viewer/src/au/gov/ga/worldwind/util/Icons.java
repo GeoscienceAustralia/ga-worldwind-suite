@@ -66,12 +66,15 @@ public enum Icons
 	screenshot("screenshot.gif"),
 	search("search.gif"),
 	settings("settings.gif"),
+	skirts("skirts.png"),
 	stop("stop.gif"),
 	uncheck("uncheck.gif"),
 	uncheckall("uncheckall.gif"),
 	up("up.gif"),
 	updown("updown.gif"),
-	world("world.gif");
+	wireframe("wireframe.png"),
+	world("world.gif"),
+	zwireframe("zwireframe.png");
 
 	private static final String ICON_DIRECTORY = "/au/gov/ga/worldwind/data/icons/";
 	private ImageIcon icon;

@@ -1,9 +1,9 @@
-package au.gov.ga.worldwind.layers;
+package au.gov.ga.worldwind.terrain;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
-import gov.nasa.worldwind.layers.BasicTiledImageLayer;
+import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
@@ -14,18 +14,11 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.application.Application;
 
-public class ExtendedTiledImageLayer extends BasicTiledImageLayer
+public class ExtendedElevationModel extends BasicElevationModel
 {
-	public ExtendedTiledImageLayer(Element domElement, AVList params)
+	public ExtendedElevationModel(Element domElement, AVList params)
 	{
 		super(domElement, setupParams(params));
-
-		TileUrlBuilder builder = (TileUrlBuilder) params.getValue(AVKey.TILE_URL_BUILDER);
-		if (builder != null && builder instanceof ExtendedUrlBuilder)
-		{
-			String imageFormat = (String) params.getValue(AVKey.IMAGE_FORMAT);
-			((ExtendedUrlBuilder) builder).overrideFormat(imageFormat);
-		}
 	}
 
 	protected static AVList setupParams(AVList params)
@@ -43,14 +36,7 @@ public class ExtendedTiledImageLayer extends BasicTiledImageLayer
 
 	protected static class ExtendedUrlBuilder implements TileUrlBuilder
 	{
-		private String imageFormat;
-
-		public void overrideFormat(String imageFormat)
-		{
-			this.imageFormat = imageFormat;
-		}
-
-		public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
+		public URL getURL(Tile tile, String altImageFormat) throws MalformedURLException
 		{
 			String service = tile.getLevel().getService();
 			if (service == null || service.length() < 1)
@@ -83,11 +69,9 @@ public class ExtendedTiledImageLayer extends BasicTiledImageLayer
 			sb.append("&Y=");
 			sb.append(tile.getRow());
 
-			String format = imageFormat != null ? imageFormat : this.imageFormat;
-			if (format != null)
-				sb.append("&F=" + format);
-
-			return new URL(sb.toString());
+			// Convention for NASA WWN tiles is to request them with common dataset name but without dds.
+			return new URL(altImageFormat == null ? sb.toString() : sb.toString()
+					.replace("dds", ""));
 		}
 	}
 }

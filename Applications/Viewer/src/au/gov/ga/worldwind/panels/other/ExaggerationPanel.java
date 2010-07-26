@@ -36,7 +36,9 @@ public class ExaggerationPanel extends AbstractThemePanel
 		int i = 0;
 
 		double settingsExaggeration = Settings.get().getVerticalExaggeration();
-		exaggerationSlider = new JSlider(0, 2000, exaggerationToSlider(settingsExaggeration));
+		exaggerationSlider =
+				new JSlider(0, 2000, Math.max(0, Math.min(2000,
+						exaggerationToSlider(settingsExaggeration))));
 		Dimension size = exaggerationSlider.getPreferredSize();
 		size.width = 50;
 		exaggerationSlider.setPreferredSize(size);

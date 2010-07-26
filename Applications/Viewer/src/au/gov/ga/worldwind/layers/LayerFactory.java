@@ -7,6 +7,7 @@ import gov.nasa.worldwind.layers.Layer;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.layers.combine.CombineMaskTiledImageLayer;
 import au.gov.ga.worldwind.layers.file.FileTiledImageLayer;
 import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
 import au.gov.ga.worldwind.layers.nearestneighbor.NearestNeighborMaskTiledImageLayer;
@@ -23,17 +24,13 @@ public class LayerFactory extends BasicLayerFactory
 
 		Layer layer;
 		String serviceName = XMLUtil.getText(domElement, "Service/@serviceName");
-		if ("MaskedTileService".equals(serviceName))
+		if ("WWTileService".equals(serviceName))
+		{
+			layer = new ExtendedTiledImageLayer(domElement, params);
+		}
+		else if ("MaskedTileService".equals(serviceName))
 		{
 			layer = new MaskTiledImageLayer(domElement, params);
-		}
-		else if ("NearestNeighborMaskedTileService".equals(serviceName))
-		{
-			layer = new NearestNeighborMaskTiledImageLayer(domElement, params);
-		}
-		else if("NearestNeighborTileService".equals(serviceName))
-		{
-			layer = new NearestNeighbourTiledImageLayer(domElement, params);
 		}
 		else if ("FileTileService".equals(serviceName))
 		{
@@ -43,9 +40,17 @@ public class LayerFactory extends BasicLayerFactory
 		{
 			layer = new FileTiledImageLayer(domElement, params, true);
 		}
-		else if ("WWTileService".equals(serviceName))
+		else if ("NearestNeighborMaskedTileService".equals(serviceName))
 		{
-			layer = new ExtendedTiledImageLayer(domElement, params);
+			layer = new NearestNeighborMaskTiledImageLayer(domElement, params);
+		}
+		else if ("NearestNeighborTileService".equals(serviceName))
+		{
+			layer = new NearestNeighbourTiledImageLayer(domElement, params);
+		}
+		else if ("CombineMaskedTileService".equals(serviceName))
+		{
+			layer = new CombineMaskTiledImageLayer(domElement, params);
 		}
 		else
 		{

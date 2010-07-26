@@ -340,7 +340,7 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 			{
 				String externalga = "http://www.ga.gov.au";
 				String sandpitga = externalga + ":8500";
-				if (service.startsWith(externalga))
+				if (service.startsWith(externalga + "/"))
 				{
 					service = sandpitga + service.substring(externalga.length());
 				}
