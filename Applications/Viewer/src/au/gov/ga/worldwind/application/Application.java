@@ -101,8 +101,6 @@ import au.gov.ga.worldwind.util.Util;
 
 public class Application
 {
-	public final static boolean SANDPIT = true;
-
 	static
 	{
 		if (Configuration.isMacOS())

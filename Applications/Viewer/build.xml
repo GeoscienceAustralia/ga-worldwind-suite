@@ -20,7 +20,7 @@
 	<property name="offline_jar" value="offline.jar" />
 
 	<property name="keystore_file" value="${basedir}/keystore" />
-	<property name="keystore_alias" value="myself" />
+	<property name="keystore_alias" value="selfsigned" />
 	<property name="keystore_password" value="password" />
 	<property name="javac_debug" value="false" />
 

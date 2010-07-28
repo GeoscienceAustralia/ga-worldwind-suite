@@ -12,7 +12,7 @@ import java.net.URL;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.application.Application;
+import au.gov.ga.worldwind.application.Sandpit;
 
 public class ExtendedElevationModel extends BasicElevationModel
 {
@@ -42,17 +42,7 @@ public class ExtendedElevationModel extends BasicElevationModel
 			if (service == null || service.length() < 1)
 				return null;
 
-			//TEMP!!!!
-			if (Application.SANDPIT)
-			{
-				String externalga = "http://www.ga.gov.au";
-				String sandpitga = externalga + ":8500";
-				if (service.startsWith(externalga + "/"))
-				{
-					service = sandpitga + service.substring(externalga.length());
-				}
-			}
-			//TEMP!!!!
+			service = Sandpit.replace(service);
 
 			StringBuffer sb = new StringBuffer(service);
 			if (sb.lastIndexOf("?") < 0)

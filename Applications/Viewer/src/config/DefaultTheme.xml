@@ -21,15 +21,14 @@
 	<HUD name="Crosshair" className="au.gov.ga.worldwind.theme.hud.CrosshairHUD" enabled="false" />
 
 	<!-- Datasets are shown in the Dataset panel -->
-	<Dataset name="Datasets" url="http://www.ga.gov.au:8500/apps/world-wind/dataset/dataset.xml" />
+	<Dataset name="Datasets" url="http://www.ga.gov.au/apps/world-wind/dataset/dataset.xml" />
 
 	<!-- Layers are shown in the Theme Layers panel (non editable list) -->
 	<!--
 		<Layer name="Potassium"
-		url="http://www.ga.gov.au:8500/apps/world-wind/dataset/ga/radiometrics/edition1/potassium.xml"
-		icon="" info="" enabled="false" /> <Layer name="Atmosphere"
-		url="http://www.ga.gov.au:8500/apps/world-wind/dataset/nasa/sky.xml" icon="" info=""
-		visible="false" />
+		url="http://www.ga.gov.au/apps/world-wind/dataset/ga/radiometrics/edition1/potassium.xml" icon=""
+		info="" enabled="false" /> <Layer name="Atmosphere"
+		url="http://www.ga.gov.au/apps/world-wind/dataset/nasa/sky.xml" icon="" info="" visible="false" />
 	-->
 
 	<!-- Sidebar panels -->

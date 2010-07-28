@@ -30,7 +30,7 @@ import javax.imageio.ImageIO;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.application.Application;
+import au.gov.ga.worldwind.application.Sandpit;
 import au.gov.ga.worldwind.downloader.FileRetriever;
 
 public class MaskTiledImageLayer extends BasicTiledImageLayer
@@ -335,17 +335,7 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 
 			boolean mask = "mask".equalsIgnoreCase(imageFormat);
 
-			//TEMP!!!!
-			if (Application.SANDPIT)
-			{
-				String externalga = "http://www.ga.gov.au";
-				String sandpitga = externalga + ":8500";
-				if (service.startsWith(externalga + "/"))
-				{
-					service = sandpitga + service.substring(externalga.length());
-				}
-			}
-			//TEMP!!!!
+			service = Sandpit.replace(service);
 
 			StringBuffer sb = new StringBuffer(service);
 			if (sb.lastIndexOf("?") < 0)
