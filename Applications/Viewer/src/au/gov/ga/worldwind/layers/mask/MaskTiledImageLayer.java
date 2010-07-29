@@ -30,7 +30,7 @@ import javax.imageio.ImageIO;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.application.Sandpit;
+import au.gov.ga.worldwind.application.GASandpit;
 import au.gov.ga.worldwind.downloader.FileRetriever;
 
 public class MaskTiledImageLayer extends BasicTiledImageLayer
@@ -335,7 +335,7 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 
 			boolean mask = "mask".equalsIgnoreCase(imageFormat);
 
-			service = Sandpit.replace(service);
+			service = GASandpit.replace(service);
 
 			StringBuffer sb = new StringBuffer(service);
 			if (sb.lastIndexOf("?") < 0)

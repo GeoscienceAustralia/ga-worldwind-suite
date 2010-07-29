@@ -138,8 +138,16 @@ public class Application
 		//Settings need to be initialised before Theme is opened, so that proxy values are set
 		Settings.get();
 
+		int argsLength = args.length;
+
+		String lastArg = argsLength > 0 ? args[argsLength - 1].toLowerCase().trim() : null;
+		boolean sandpit = "-sandpit".equals(lastArg) || "--sandpit".equals(lastArg);
+		GASandpit.setSandpitMode(sandpit);
+		if (sandpit)
+			argsLength--; //ensure the sandpit argument is not used for the theme URL
+
 		URL themeUrl = null;
-		if (args.length > 0)
+		if (argsLength > 0)
 		{
 			try
 			{
@@ -220,6 +228,8 @@ public class Application
 		String title = "Geoscience Australia – World Wind";
 		if (theme.getName() != null && theme.getName().length() > 0)
 			title += " - " + theme.getName();
+		if (GASandpit.isSandpitMode())
+			title += " (SANDPIT)";
 		frame = new JFrame(title);
 		frame.setIconImage(Icons.earth32.getIcon().getImage());
 

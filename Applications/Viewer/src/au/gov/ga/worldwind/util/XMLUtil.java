@@ -19,7 +19,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.application.Sandpit;
+import au.gov.ga.worldwind.application.GASandpit;
 
 public class XMLUtil extends WWXML
 {
@@ -67,7 +67,7 @@ public class XMLUtil extends WWXML
 	public static URL getURL(String text, URL context) throws MalformedURLException
 	{
 		URL url = getURL2(text, context);
-		url = Sandpit.replace(url); //XXX: dodgy hack to have this in such a general purpose class
+		url = GASandpit.replace(url); //XXX: dodgy hack to have this in such a general purpose class
 		return url;
 	}
 

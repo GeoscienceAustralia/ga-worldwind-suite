@@ -44,8 +44,9 @@ public class ThemeOpener
 				}
 				catch (Exception e)
 				{
+					//TODO if response is 403 or 407, allow setting of proxy
 					JOptionPane.showMessageDialog(null, "Could not open theme " + url + ": "
-							+ e.getLocalizedMessage() + "\n\nUsing default theme", "Error",
+							+ e.getLocalizedMessage() + ".\n\nUsing default theme.", "Error",
 							JOptionPane.ERROR_MESSAGE);
 					openDefault(innerDelegate);
 				}

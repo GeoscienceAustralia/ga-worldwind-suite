@@ -3,9 +3,19 @@ package au.gov.ga.worldwind.application;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class Sandpit
+public class GASandpit
 {
-	public final static boolean SANDPIT = true;
+	private static boolean SANDPIT = false;
+	
+	public static void setSandpitMode(boolean enabled)
+	{
+		SANDPIT = enabled;
+	}	
+
+	public static boolean isSandpitMode()
+	{
+		return SANDPIT;
+	}
 
 	public static URL replace(URL url) throws MalformedURLException
 	{

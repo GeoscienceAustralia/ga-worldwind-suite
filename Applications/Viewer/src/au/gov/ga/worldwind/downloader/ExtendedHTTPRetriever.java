@@ -26,13 +26,23 @@ public class ExtendedHTTPRetriever extends HTTPRetriever implements ExtendedRetr
 			connection.setIfModifiedSince(ifModifiedSince.longValue());
 		try
 		{
-			return super.doRead(connection);
+			ByteBuffer buffer = super.doRead(connection);
+			if (buffer == null && !isOk() && !isNotModified())
+			{
+				throw new Exception(getResponseCode() + ": " + getResponseMessage());
+			}
+			return buffer;
 		}
 		catch (Exception e)
 		{
 			error = e;
 			throw e;
 		}
+	}
+
+	public boolean isOk()
+	{
+		return getResponseCode() == HttpURLConnection.HTTP_OK;
 	}
 
 	public boolean isNotModified()

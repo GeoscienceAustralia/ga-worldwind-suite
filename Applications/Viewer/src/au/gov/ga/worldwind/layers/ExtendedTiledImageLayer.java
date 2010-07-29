@@ -12,7 +12,7 @@ import java.net.URL;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.application.Sandpit;
+import au.gov.ga.worldwind.application.GASandpit;
 
 public class ExtendedTiledImageLayer extends BasicTiledImageLayer
 {
@@ -56,7 +56,7 @@ public class ExtendedTiledImageLayer extends BasicTiledImageLayer
 			if (service == null || service.length() < 1)
 				return null;
 
-			service = Sandpit.replace(service);
+			service = GASandpit.replace(service);
 
 			StringBuffer sb = new StringBuffer(service);
 			if (sb.lastIndexOf("?") < 0)
