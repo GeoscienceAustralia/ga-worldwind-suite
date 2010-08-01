@@ -6,6 +6,7 @@ import java.net.URL;
 import javax.swing.JOptionPane;
 
 import au.gov.ga.worldwind.downloader.Downloader;
+import au.gov.ga.worldwind.downloader.HttpException;
 import au.gov.ga.worldwind.downloader.RetrievalResult;
 
 public class ThemeOpener
@@ -44,10 +45,24 @@ public class ThemeOpener
 				}
 				catch (Exception e)
 				{
-					//TODO if response is 403 or 407, allow setting of proxy
-					JOptionPane.showMessageDialog(null, "Could not open theme " + url + ": "
-							+ e.getLocalizedMessage() + ".\n\nUsing default theme.", "Error",
-							JOptionPane.ERROR_MESSAGE);
+					//TODO if response is 403 (forbidden) or 407 (authentication required), allow setting of proxy?
+					//for now, just display a message
+
+					int response =
+							(e instanceof HttpException) ? ((HttpException) e).getResponseCode()
+									: -1;
+					boolean forbidden = response == 403 || response == 407;
+					String message =
+							"Could not open theme "
+									+ url
+									+ ": "
+									+ e.getLocalizedMessage()
+									+ ".\n\nUsing default theme."
+									+ (forbidden
+											? " If you are behind a proxy server, please setup the proxy in Options/Preferences/Network."
+											: "");
+					JOptionPane
+							.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
 					openDefault(innerDelegate);
 				}
 			}

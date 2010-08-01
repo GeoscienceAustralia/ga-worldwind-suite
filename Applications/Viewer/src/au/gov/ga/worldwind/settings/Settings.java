@@ -25,10 +25,16 @@ public class Settings
 
 	private static Settings instance;
 	private static boolean stereoSupported = false;
+	private static boolean newSettings = false;
 
 	static
 	{
 		instance = SettingsPersistance.load(getSettingsFile());
+		if (instance == null)
+		{
+			instance = new Settings();
+			newSettings = true;
+		}
 	}
 
 	public static Settings get()
@@ -55,7 +61,11 @@ public class Settings
 		}
 	}
 
-	//TODO: package private constructor
+	public static boolean isNewSettings()
+	{
+		return newSettings;
+	}
+
 	public Settings()
 	{
 		init();

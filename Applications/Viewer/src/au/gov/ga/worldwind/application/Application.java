@@ -34,6 +34,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.io.File;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -79,6 +80,7 @@ import au.gov.ga.worldwind.panels.layers.QueryClickListener;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.SettingsDialog;
+import au.gov.ga.worldwind.settings.Settings.ProxyType;
 import au.gov.ga.worldwind.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.stereo.StereoSceneController;
 import au.gov.ga.worldwind.terrain.ElevationModelFactory;
@@ -137,6 +139,25 @@ public class Application
 	{
 		//Settings need to be initialised before Theme is opened, so that proxy values are set
 		Settings.get();
+
+		if (Settings.isNewSettings())
+		{
+			try
+			{
+				//check for a GA machine; if so, setup the default GA proxy
+				String hostname = InetAddress.getLocalHost().getCanonicalHostName();
+				if (hostname.endsWith(".agso.gov.au"))
+				{
+					Settings.get().setProxyHost("proxy.agso.gov.au");
+					Settings.get().setProxyPort(8080);
+					Settings.get().setProxyType(ProxyType.HTTP);
+					Settings.get().setProxyEnabled(true);
+				}
+			}
+			catch (Throwable t)
+			{
+			}
+		}
 
 		int argsLength = args.length;
 

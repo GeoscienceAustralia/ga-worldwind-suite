@@ -29,7 +29,8 @@ public class ExtendedHTTPRetriever extends HTTPRetriever implements ExtendedRetr
 			ByteBuffer buffer = super.doRead(connection);
 			if (buffer == null && !isOk() && !isNotModified())
 			{
-				throw new Exception(getResponseCode() + ": " + getResponseMessage());
+				throw new HttpException(getResponseCode() + ": " + getResponseMessage(),
+						getResponseCode());
 			}
 			return buffer;
 		}

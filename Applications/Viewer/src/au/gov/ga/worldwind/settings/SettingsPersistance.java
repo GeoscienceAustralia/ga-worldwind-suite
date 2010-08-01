@@ -44,8 +44,6 @@ public class SettingsPersistance
 					xmldec.close();
 			}
 		}
-		if (settings == null)
-			settings = new Settings();
 		return settings;
 	}
 
