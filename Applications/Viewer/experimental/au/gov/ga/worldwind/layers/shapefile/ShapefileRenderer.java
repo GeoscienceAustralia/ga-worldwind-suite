@@ -1,8 +1,12 @@
 package au.gov.ga.worldwind.layers.shapefile;
 
+import gov.nasa.worldwind.geom.Extent;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Material;
+import gov.nasa.worldwind.render.SurfaceTile;
 import gov.nasa.worldwind.util.Logging;
 
 import java.awt.Color;
@@ -27,6 +31,10 @@ public class ShapefileRenderer
 	private Vec4 lightDirection = new Vec4(1.0, 0.5, 1.0);
 	private boolean useEXTBlendFuncSeparate = false;
 	private boolean haveEXTBlendFuncSeparate = false;
+	private double depthOffsetFactor = -2;
+	private double depthOffsetUnits = -4;
+	
+	private DepthTile depthTile = new DepthTile();
 
 	public ShapefileRenderer()
 	{
@@ -37,22 +45,62 @@ public class ShapefileRenderer
 		beginRendering(dc);
 
 		GL gl = dc.getGL();
+
 		gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
-		//gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+		
+		gl.glEnable(GL.GL_CULL_FACE);
+		gl.glCullFace(GL.GL_FRONT);
+		gl.glColorMask(false, false, false, false);
+		dc.getGeographicSurfaceTileRenderer().renderTile(dc, depthTile);
+		gl.glColorMask(true, true, true, true);
+		
+		gl.glDisable(GL.GL_CULL_FACE); //TODO ?
+		
 
-		for (ShapefileTile tile : tiles)
+		if (isEnableDepthOffset())
 		{
-			tile.render(dc);
+			gl.glColorMask(false, false, false, false);
+			gl.glDepthMask(true);
+			gl.glPolygonOffset(0, 0);
 
-			if (showImageTileOutlines)
+			for (ShapefileTile tile : tiles)
+			{
+				tile.render(dc);
+			}
+
+			gl.glColorMask(true, true, true, true);
+			gl.glDepthMask(false);
+			gl.glPolygonOffset((float) this.getDepthOffsetFactor(), (float) this
+					.getDepthOffsetUnits());
+
+			for (ShapefileTile tile : tiles)
+			{
+				tile.render(dc);
+			}
+		}
+		else
+		{
+			gl.glColorMask(true, true, true, true);
+			gl.glDepthMask(true);
+
+			for (ShapefileTile tile : tiles)
+			{
+				tile.render(dc);
+			}
+		}
+
+		endRendering(dc);
+
+		//draw tile outlines if required
+		if (showImageTileOutlines && !dc.isPickingMode())
+		{
+			for (ShapefileTile tile : tiles)
 			{
 				SectorPolyline polyline = new SectorPolyline(tile.getSector());
 				polyline.setColor(getColor(tile.getLevelNumber()));
 				polyline.render(dc);
 			}
 		}
-
-		endRendering(dc);
 	}
 
 	protected void beginRendering(DrawContext dc)
@@ -300,6 +348,26 @@ public class ShapefileRenderer
 		this.haveEXTBlendFuncSeparate = haveEXTBlendFuncSeparate;
 	}
 
+	public double getDepthOffsetFactor()
+	{
+		return depthOffsetFactor;
+	}
+
+	public void setDepthOffsetFactor(double depthOffsetFactor)
+	{
+		this.depthOffsetFactor = depthOffsetFactor;
+	}
+
+	public double getDepthOffsetUnits()
+	{
+		return depthOffsetUnits;
+	}
+
+	public void setDepthOffsetUnits(double depthOffsetUnits)
+	{
+		this.depthOffsetUnits = depthOffsetUnits;
+	}
+
 	protected static void setLightModel(GL gl)
 	{
 		if (gl == null)
@@ -398,5 +466,32 @@ public class ShapefileRenderer
 		gl.glLightfv(light, GL.GL_POSITION, params, 0);
 
 		gl.glPopMatrix();
+	}
+	
+	private class DepthTile implements SurfaceTile
+	{
+		public void applyInternalTransform(DrawContext dc)
+		{
+		}
+
+		public boolean bind(DrawContext dc)
+		{
+			return true;
+		}
+
+		public Extent getExtent(DrawContext dc)
+		{
+			return null;
+		}
+
+		public Sector getSector()
+		{
+			return Sector.FULL_SPHERE;
+		}
+
+		public List<? extends LatLon> getCorners()
+		{
+			return null;
+		}
 	}
 }

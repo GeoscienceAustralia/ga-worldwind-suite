@@ -27,7 +27,6 @@ public class FastShape implements Renderable, Cacheable
 	protected List<Position> positions;
 	protected Object positionLock = new Object();
 
-	protected DoubleBuffer colorBuffer;
 	protected IntBuffer[] indices;
 	protected int mode;
 
@@ -50,24 +49,12 @@ public class FastShape implements Renderable, Cacheable
 
 	public FastShape(List<Position> positions, int mode)
 	{
-		this(positions, null, null, mode);
+		this(positions, null, mode);
 	}
 
 	public FastShape(List<Position> positions, IntBuffer[] indices, int mode)
 	{
-		this(positions, indices, null, mode);
-	}
-
-	public FastShape(List<Position> positions, DoubleBuffer colorBuffer, int mode)
-	{
-		this(positions, null, colorBuffer, mode);
-	}
-
-	public FastShape(List<Position> positions, IntBuffer[] indices, DoubleBuffer colorBuffer,
-			int mode)
-	{
 		setPositions(positions);
-		setColorBuffer(colorBuffer);
 		setIndices(indices);
 		setMode(mode);
 	}
@@ -99,12 +86,6 @@ public class FastShape implements Renderable, Cacheable
 		}
 		//gl.glPushClientAttrib(push);
 		gl.glPushAttrib(push);*/
-
-		if (colorBuffer != null)
-		{
-			gl.glEnableClientState(GL.GL_COLOR_ARRAY);
-			gl.glColorPointer(4, GL.GL_DOUBLE, 0, colorBuffer.rewind());
-		}
 
 		double alpha = getOpacity();
 		if (dc.getCurrentLayer() != null)
@@ -301,16 +282,6 @@ public class FastShape implements Renderable, Cacheable
 				modNormalBuffer = BufferUtil.newDoubleBuffer(size);
 			}
 		}
-	}
-
-	public DoubleBuffer getColorBuffer()
-	{
-		return colorBuffer;
-	}
-
-	public void setColorBuffer(DoubleBuffer colorBuffer)
-	{
-		this.colorBuffer = colorBuffer;
 	}
 
 	public Color getColor()

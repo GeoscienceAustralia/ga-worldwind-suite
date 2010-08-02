@@ -10,22 +10,12 @@ import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 
 public class TessellatorCallback extends GLUtessellatorCallbackAdapter
 {
-	private GLU glu;
+	private final GLU glu;
 	public final List<Integer> indices = new ArrayList<Integer>();
 
 	public TessellatorCallback(GLU glu)
 	{
 		this.glu = glu;
-	}
-
-	@Override
-	public void begin(int type)
-	{
-	}
-
-	@Override
-	public void end()
-	{
 	}
 
 	@Override

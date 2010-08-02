@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.layers.shapefile;
 
-import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -26,7 +25,7 @@ public class Sandpit extends ApplicationTemplate
 		System.setProperty("http.proxyPort", "8080");
 		System.setProperty("http.nonProxyHosts", "localhost");
 
-		Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 20d);
+		//Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 100d);
 
 		ApplicationTemplate.start("Sandpit", AppFrame.class);
 	}
@@ -47,8 +46,10 @@ public class Sandpit extends ApplicationTemplate
 			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(18, 53, 72, 107));
 			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(-18, 17, 144, 179));
 			//params.setValue(AVKey.SECTOR, Sector.fromDegrees(-18, 17, -36, -1));
-			params.setValue(AVKey.NUM_LEVELS, 5);
+			params.setValue(AVKey.NUM_LEVELS, 10);
 			params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
+			params.setValue(AVKey.USE_TRANSPARENT_TEXTURES, true);
+			params.setValue(AVKey.USE_MIP_MAPS, true);
 			params.setValue(AVKey.DATASET_NAME, "shapefile");
 			params.setValue(AVKey.DATA_CACHE_NAME, "shapefile");
 			params.setValue(AVKey.TILE_ORIGIN, LatLon.fromDegrees(-90, -180));
@@ -58,13 +59,23 @@ public class Sandpit extends ApplicationTemplate
 				@Override
 				public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 				{
-					//String directory = "C:/WINNT/Profiles/u97852/Desktop/GSHHS_shp/tiled";
-					String directory = "C:/WINNT/Profiles/u97852/Desktop/calcrete/tiled";
+					//TODO strange to do this here: remove!
+					int level = tile.getLevelNumber();
+					int row = tile.getRow();
+					int column = tile.getColumn();
+					while (level > 4)
+					{
+						level--;
+						row /= 2;
+						column /= 2;
+					}
+
+					String directory = "C:/WINNT/Profiles/u97852/Desktop/GSHHS_shp/tiled";
+					//String directory = "C:/WINNT/Profiles/u97852/Desktop/calcrete/tiled";
 					String filename =
-							directory + "/" + tile.getLevelNumber() + "/"
-									+ Util.paddedInt(tile.getRow(), 4) + "/"
-									+ Util.paddedInt(tile.getRow(), 4) + "_"
-									+ Util.paddedInt(tile.getColumn(), 4) + ".zip";
+							directory + "/" + level + "/" + Util.paddedInt(row, 4) + "/"
+									+ Util.paddedInt(row, 4) + "_" + Util.paddedInt(column, 4)
+									+ ".zip";
 					File file = new File(filename);
 					if (file.exists())
 						return file.toURI().toURL();
@@ -74,7 +85,11 @@ public class Sandpit extends ApplicationTemplate
 			});
 
 			LevelSet levels = new LevelSet(params);
-			TiledShapefileLayer shapefile = new FileTiledShapefileLayer(levels);
+			//TiledShapefileLayer shapefile = new FileTiledShapefileLayer(levels);
+			au.gov.ga.worldwind.layers.shapefile.textured.TiledShapefileLayer shapefile =
+					new au.gov.ga.worldwind.layers.shapefile.textured.FileTiledShapefileLayer(
+							levels);
+			shapefile.setUseTransparentTextures(true);
 			insertAfterPlacenames(getWwd(), shapefile);
 
 			// Update layer panel

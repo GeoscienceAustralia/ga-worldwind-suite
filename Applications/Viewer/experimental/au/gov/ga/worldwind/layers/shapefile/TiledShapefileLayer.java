@@ -3,23 +3,20 @@ package au.gov.ga.worldwind.layers.shapefile;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.geom.Box;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.util.Level;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.OGLTextRenderer;
-import gov.nasa.worldwind.util.PerformanceStatistic;
 import gov.nasa.worldwind.util.Tile;
 
+import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -31,18 +28,15 @@ import com.sun.opengl.util.j2d.TextRenderer;
 public abstract class TiledShapefileLayer extends AbstractLayer
 {
 	// Infrastructure
-	private static final LevelComparer levelComparer = new LevelComparer();
 	private final LevelSet levels;
 	private ArrayList<ShapefileTile> topLevels;
 	private boolean forceLevelZeroLoads = false;
 	private boolean levelZeroLoaded = false;
 	private boolean retainLevelZeroTiles = false;
-	private String tileCountName;
 	private double splitScale = 0.9;
 
 	// Diagnostic flags
 	private boolean showImageTileOutlines = false;
-	private boolean drawTileBoundaries = false;
 	private boolean drawTileIDs = false;
 	private boolean drawBoundingVolumes = false;
 
@@ -73,8 +67,6 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 
 		//        this.createTopLevelTiles();
 
-		this.tileCountName = this.getName() + " Tiles";
-
 		//TODO remove?
 		setSplitScale(0.82);
 	}
@@ -101,7 +93,6 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 	public void setName(String name)
 	{
 		super.setName(name);
-		this.tileCountName = this.getName() + " Tiles";
 	}
 
 	public boolean isForceLevelZeroLoads()
@@ -132,16 +123,6 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 	public void setDrawTileIDs(boolean drawTileIDs)
 	{
 		this.drawTileIDs = drawTileIDs;
-	}
-
-	public boolean isDrawTileBoundaries()
-	{
-		return drawTileBoundaries;
-	}
-
-	public void setDrawTileBoundaries(boolean drawTileBoundaries)
-	{
-		this.drawTileBoundaries = drawTileBoundaries;
 	}
 
 	public boolean isShowImageTileOutlines()
@@ -520,6 +501,12 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 	// ============== Rendering ======================= //
 
 	@Override
+	protected void doPreRender(DrawContext dc)
+	{
+		this.assembleTiles(dc); // Determine the tiles to draw.
+	}
+
+	@Override
 	public void render(DrawContext dc)
 	{
 		this.atMaxResolution = this.atMaxLevel(dc);
@@ -539,61 +526,41 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 		draw(dc);
 	}
 
+	@Override
+	protected void doPick(DrawContext dc, Point point)
+	{
+		if (!currentTiles.isEmpty())
+		{
+			renderer.renderTiles(dc, currentTiles);
+		}
+	}
+
 	private void draw(DrawContext dc)
 	{
-		this.assembleTiles(dc); // Determine the tiles to draw.
-
-		if (this.currentTiles.size() >= 1)
+		if (!currentTiles.isEmpty())
 		{
-			if (this.getScreenCredit() != null)
+			if (getScreenCredit() != null)
 			{
-				dc.addScreenCredit(this.getScreenCredit());
+				dc.addScreenCredit(getScreenCredit());
 			}
 
-			ShapefileTile[] sortedTiles = new ShapefileTile[this.currentTiles.size()];
-			sortedTiles = this.currentTiles.toArray(sortedTiles);
-			Arrays.sort(sortedTiles, levelComparer);
+			renderer.renderTiles(dc, currentTiles);
 
-			GL gl = dc.getGL();
-
-			if (this.getOpacity() < 1)
-			{
-				gl.glPushAttrib(GL.GL_COLOR_BUFFER_BIT | GL.GL_POLYGON_BIT | GL.GL_CURRENT_BIT);
-				this.setBlendingFunction(dc);
-			}
-			else
-			{
-				gl.glPushAttrib(GL.GL_COLOR_BUFFER_BIT | GL.GL_POLYGON_BIT);
-			}
-
-			gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
-			gl.glEnable(GL.GL_CULL_FACE);
-			gl.glCullFace(GL.GL_BACK);
-
-			dc.setPerFrameStatistic(PerformanceStatistic.IMAGE_TILE_COUNT, this.tileCountName,
-					this.currentTiles.size());
-			renderer.renderTiles(dc, this.currentTiles);
-
-			gl.glPopAttrib();
-
-			if (this.drawTileIDs)
-				this.drawTileIDs(dc, this.currentTiles);
-
-			if (this.drawBoundingVolumes)
-				this.drawBoundingVolumes(dc, this.currentTiles);
+			if (drawTileIDs)
+				drawTileIDs(dc, currentTiles);
 
 			// Check texture expiration. Memory-cached textures are checked for expiration only when an explicit,
 			// non-zero expiry time has been set for the layer. If none has been set, the expiry times of the layer's
 			// individual levels are used, but only for images in the local file cache, not textures in memory. This is
 			// to avoid incurring the overhead of checking expiration of in-memory textures, a very rarely used feature.
-			if (this.getExpiryTime() > 0 && this.getExpiryTime() < System.currentTimeMillis())
-				this.checkTileExpiration(dc, this.currentTiles);
+			if (getExpiryTime() > 0 && getExpiryTime() < System.currentTimeMillis())
+				checkTileExpiration(dc, currentTiles);
 
-			this.currentTiles.clear();
+			currentTiles.clear();
 		}
 
-		this.sendRequests();
-		this.requestQ.clear();
+		sendRequests();
+		requestQ.clear();
 	}
 
 	private void checkTileExpiration(DrawContext dc, List<ShapefileTile> tiles)
@@ -725,174 +692,4 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 		textRenderer.setColor(java.awt.Color.WHITE);
 		textRenderer.endRendering();
 	}
-
-    private void drawBoundingVolumes(DrawContext dc, ArrayList<ShapefileTile> tiles)
-    {
-        float[] previousColor = new float[4];
-        dc.getGL().glGetFloatv(GL.GL_CURRENT_COLOR, previousColor, 0);
-        dc.getGL().glColor3d(0, 1, 0);
-
-        for (ShapefileTile tile : tiles)
-        {
-            if (tile.getExtent(dc) instanceof Renderable)
-                ((Renderable) tile.getExtent(dc)).render(dc);
-        }
-
-        Box c = Sector.computeBoundingBox(dc.getGlobe(), dc.getVerticalExaggeration(), this.levels.getSector());
-        dc.getGL().glColor3d(1, 1, 0);
-        c.render(dc);
-
-        dc.getGL().glColor4fv(previousColor, 0);
-    }
-
-	/*public int computeLevelForResolution(Sector sector, double resolution)
-	{
-		if (sector == null)
-		{
-			String message = Logging.getMessage("nullValue.SectorIsNull");
-			Logging.logger().severe(message);
-			throw new IllegalStateException(message);
-		}
-
-		// Find the first level exceeding the desired resolution
-		double texelSize;
-		Level targetLevel = this.levels.getLastLevel();
-		for (int i = 0; i < this.getLevels().getLastLevel().getLevelNumber(); i++)
-		{
-			if (this.levels.isLevelEmpty(i))
-				continue;
-
-			texelSize = this.levels.getLevel(i).getTexelSize();
-			if (texelSize > resolution)
-				continue;
-
-			targetLevel = this.levels.getLevel(i);
-			break;
-		}
-
-		// Choose the level closest to the resolution desired
-		if (targetLevel.getLevelNumber() != 0
-				&& !this.levels.isLevelEmpty(targetLevel.getLevelNumber() - 1))
-		{
-			Level nextLowerLevel = this.levels.getLevel(targetLevel.getLevelNumber() - 1);
-			double dless = Math.abs(nextLowerLevel.getTexelSize() - resolution);
-			double dmore = Math.abs(targetLevel.getTexelSize() - resolution);
-			if (dless < dmore)
-				targetLevel = nextLowerLevel;
-		}
-
-		Logging.logger().fine(
-				Logging.getMessage("layers.TiledImageLayer.LevelSelection", targetLevel
-						.getLevelNumber(), Double.toString(targetLevel.getTexelSize())));
-		return targetLevel.getLevelNumber();
-	}
-
-	public long countImagesInSector(Sector sector)
-	{
-		long count = 0;
-		for (int i = 0; i <= this.getLevels().getLastLevel().getLevelNumber(); i++)
-		{
-			if (!this.levels.isLevelEmpty(i))
-				count += countImagesInSector(sector, i);
-		}
-		return count;
-	}
-
-	public long countImagesInSector(Sector sector, int levelNumber)
-	{
-		if (sector == null)
-		{
-			String msg = Logging.getMessage("nullValue.SectorIsNull");
-			Logging.logger().severe(msg);
-			throw new IllegalArgumentException(msg);
-		}
-
-		Level targetLevel = this.levels.getLastLevel();
-		if (levelNumber >= 0)
-		{
-			for (int i = levelNumber; i < this.getLevels().getLastLevel().getLevelNumber(); i++)
-			{
-				if (this.levels.isLevelEmpty(i))
-					continue;
-
-				targetLevel = this.levels.getLevel(i);
-				break;
-			}
-		}
-
-		// Collect all the tiles intersecting the input sector.
-		LatLon delta = targetLevel.getTileDelta();
-		LatLon origin = this.levels.getTileOrigin();
-		final int nwRow =
-				Tile.computeRow(delta.getLatitude(), sector.getMaxLatitude(), origin.getLatitude());
-		final int nwCol =
-				Tile.computeColumn(delta.getLongitude(), sector.getMinLongitude(), origin
-						.getLongitude());
-		final int seRow =
-				Tile.computeRow(delta.getLatitude(), sector.getMinLatitude(), origin.getLatitude());
-		final int seCol =
-				Tile.computeColumn(delta.getLongitude(), sector.getMaxLongitude(), origin
-						.getLongitude());
-
-		long numRows = nwRow - seRow + 1;
-		long numCols = seCol - nwCol + 1;
-
-		return numRows * numCols;
-	}
-
-	public ShapefileTile[][] getTilesInSector(Sector sector, int levelNumber)
-	{
-		if (sector == null)
-		{
-			String msg = Logging.getMessage("nullValue.SectorIsNull");
-			Logging.logger().severe(msg);
-			throw new IllegalArgumentException(msg);
-		}
-
-		Level targetLevel = this.levels.getLastLevel();
-		if (levelNumber >= 0)
-		{
-			for (int i = levelNumber; i < this.getLevels().getLastLevel().getLevelNumber(); i++)
-			{
-				if (this.levels.isLevelEmpty(i))
-					continue;
-
-				targetLevel = this.levels.getLevel(i);
-				break;
-			}
-		}
-
-		// Collect all the tiles intersecting the input sector.
-		LatLon delta = targetLevel.getTileDelta();
-		LatLon origin = this.levels.getTileOrigin();
-		final int nwRow =
-				Tile.computeRow(delta.getLatitude(), sector.getMaxLatitude(), origin.getLatitude());
-		final int nwCol =
-				Tile.computeColumn(delta.getLongitude(), sector.getMinLongitude(), origin
-						.getLongitude());
-		final int seRow =
-				Tile.computeRow(delta.getLatitude(), sector.getMinLatitude(), origin.getLatitude());
-		final int seCol =
-				Tile.computeColumn(delta.getLongitude(), sector.getMaxLongitude(), origin
-						.getLongitude());
-
-		int numRows = nwRow - seRow + 1;
-		int numCols = seCol - nwCol + 1;
-		ShapefileTile[][] sectorTiles = new ShapefileTile[numRows][numCols];
-
-		for (int row = nwRow; row >= seRow; row--)
-		{
-			for (int col = nwCol; col <= seCol; col++)
-			{
-				TileKey key =
-						new TileKey(targetLevel.getLevelNumber(), row, col, targetLevel
-								.getCacheName());
-				Sector tileSector = this.levels.computeSectorForKey(key);
-				sectorTiles[nwRow - row][col - nwCol] =
-						new ShapefileTile(tileSector, targetLevel, row, col);
-			}
-		}
-
-		return sectorTiles;
-	}*/
 }
