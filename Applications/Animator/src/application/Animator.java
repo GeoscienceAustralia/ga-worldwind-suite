@@ -75,7 +75,7 @@ import layers.other.ImmediateBMNGWMSLayer;
 import layers.other.ImmediateLandsatI3WMSLayer;
 import layers.other.MagneticsLayer;
 import nasa.worldwind.awt.WorldWindowGLCanvas;
-import terrain.DetailedCompoundElevationModel;
+import terrain.DetailedElevationModel;
 import util.ChangeFrameListener;
 import util.FileUtil;
 import util.FrameSlider;
@@ -145,7 +145,7 @@ public class Animator
 	private boolean settingSlider = false;
 	private ChangeListener animationChangeListener;
 	private Layer crosshair;
-	private DetailedCompoundElevationModel ocem;
+	private DetailedElevationModel dem;
 	private LensFlareLayer lensFlare;
 	private JCheckBoxMenuItem useScaledZoomCheck;
 
@@ -213,8 +213,9 @@ public class Animator
 		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(
 				Angle.ZERO, Angle.POS180);
 
-		ocem = new DetailedCompoundElevationModel();
-		model.getGlobe().setElevationModel(ocem);
+		CompoundElevationModel cem = new CompoundElevationModel();
+		dem = new DetailedElevationModel(cem);
+		model.getGlobe().setElevationModel(dem);
 
 		// tesselator.setMakeTileSkirts(false);
 		// model.setShowWireframeInterior(true);
@@ -331,8 +332,8 @@ public class Animator
 						.fromDegrees(20d, 20d), semSector, -6400, -2310, AVKey.INT16);
 		sem.setMissingDataSignal(-9999);
 
-		ocem.addElevationModel(eem);
-		ocem.addElevationModel(bem);
+		cem.addElevationModel(eem);
+		cem.addElevationModel(bem);
 		// ocem.addElevationModel(sem);
 
 		/*map1 = FileLayer.createLayer("WestMac Map Page 1",
@@ -1599,8 +1600,8 @@ public class Animator
 							.getHeight());
 
 					crosshair.setEnabled(false);
-					double detailHintBackup = ocem.getDetailHint();
-					ocem.setDetailHint(detailHint);
+					double detailHintBackup = dem.getDetailHint();
+					dem.setDetailHint(detailHint);
 					frame.setAlwaysOnTop(true);
 
 					View view = wwd.getView();
@@ -1625,7 +1626,7 @@ public class Animator
 							break;
 					}
 
-					ocem.setDetailHint(detailHintBackup);
+					dem.setDetailHint(detailHintBackup);
 					crosshair.setEnabled(true);
 					orbitView.setDetectCollisions(detectCollisions);
 					frame.setAlwaysOnTop(false);
