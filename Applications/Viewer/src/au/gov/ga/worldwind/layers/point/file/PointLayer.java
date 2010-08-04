@@ -1,7 +1,4 @@
-package au.gov.ga.worldwind.layers.point;
-
-import java.util.HashMap;
-import java.util.Map;
+package au.gov.ga.worldwind.layers.point.file;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -10,7 +7,13 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.w3c.dom.Element;
+
+import au.gov.ga.worldwind.layers.point.Attribute;
+import au.gov.ga.worldwind.layers.point.Style;
 
 public abstract class PointLayer extends AbstractLayer
 {

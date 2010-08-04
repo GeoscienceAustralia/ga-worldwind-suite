@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.layers.point;
+package au.gov.ga.worldwind.layers.point.file;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -13,6 +13,8 @@ import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.layers.point.Attribute;
+import au.gov.ga.worldwind.layers.point.Style;
 import au.gov.ga.worldwind.util.XMLUtil;
 
 public class PointLayerUtils extends DataConfigurationUtils

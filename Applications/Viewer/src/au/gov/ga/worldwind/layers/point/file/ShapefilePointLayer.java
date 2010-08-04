@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.layers.point;
+package au.gov.ga.worldwind.layers.point.file;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.formats.shapefile.DBaseRecord;
