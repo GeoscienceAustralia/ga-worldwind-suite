@@ -59,7 +59,7 @@ public class LayerEnabler
 		LayerList ll = wwd.getModel().getLayers();
 		if (ll instanceof SectionList<?>)
 		{
-			layerList = (SectionList) ll;
+			layerList = (SectionList<Layer>) ll;
 		}
 		else
 		{
@@ -69,7 +69,7 @@ public class LayerEnabler
 		ElevationModel em = wwd.getModel().getGlobe().getElevationModel();
 		if (em instanceof SectionList<?>)
 		{
-			elevationModel = (SectionList) em;
+			elevationModel = (SectionList<ElevationModel>) em;
 		}
 		else
 		{

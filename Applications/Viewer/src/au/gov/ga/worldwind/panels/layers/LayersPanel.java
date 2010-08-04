@@ -632,9 +632,9 @@ public class LayersPanel extends AbstractLayersPanel
 
 	public void addLayer(ILayerDefinition definition)
 	{
-		INode parent = null;
+		/*INode parent = null;
 		int index = -1;
-		/*TreePath p = tree.getSelectionPath();
+		TreePath p = tree.getSelectionPath();
 		if (p != null && isOn())
 		{
 			Object o = p.getLastPathComponent();
@@ -643,13 +643,16 @@ public class LayersPanel extends AbstractLayersPanel
 				parent = (INode) o;
 				index = parent.getChildCount();
 			}
-		}*/
+		}
 
 		INode node = LayerNode.createFromLayerDefinition(definition);
 		if (parent == null)
 			getModel().addToRoot(node, true);
 		else
-			getModel().insertNodeInto(node, parent, index, true);
+			getModel().insertNodeInto(node, parent, index, true);*/
+
+		INode node = LayerNode.createFromLayerDefinition(definition);
+		getModel().addToRoot(node, true);
 
 		tree.getUI().relayout();
 	}
