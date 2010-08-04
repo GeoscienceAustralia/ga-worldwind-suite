@@ -6,7 +6,7 @@ import java.util.List;
 
 public class MultiMap<K, V> extends HashMap<K, List<V>>
 {
-	public void put(K key, V value)
+	public void putSingle(K key, V value)
 	{
 		List<V> values = null;
 		if (containsKey(key))
