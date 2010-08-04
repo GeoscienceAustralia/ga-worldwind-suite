@@ -327,6 +327,7 @@ public class MaskTiledImageLayer extends BasicTiledImageLayer
 
 	protected static class MaskUrlBuilder implements TileUrlBuilder
 	{
+		@Override
 		public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 		{
 			String service = tile.getLevel().getService();

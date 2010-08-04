@@ -190,6 +190,7 @@ public class CollapsibleGroup extends AbstractCollapsiblePanel implements
 				JCollapsiblePane.ANIMATION_STATE_KEY,
 				new PropertyChangeListener()
 				{
+					@Override
 					public void propertyChange(PropertyChangeEvent evt)
 					{
 						CollapsibleGroup.this.firePropertyChange(evt
@@ -366,6 +367,7 @@ public class CollapsibleGroup extends AbstractCollapsiblePanel implements
 	 *            false to expand the group, true to collapse it
 	 * @javabean.property bound="true" preferred="true"
 	 */
+	@Override
 	public void setCollapsed(boolean collapsed)
 	{
 		if (this.collapsed != collapsed)
@@ -381,6 +383,7 @@ public class CollapsibleGroup extends AbstractCollapsiblePanel implements
 	 * 
 	 * @return false if this taskpane is expanded, true if it is collapsed.
 	 */
+	@Override
 	public boolean isCollapsed()
 	{
 		return collapsed;
@@ -454,6 +457,7 @@ public class CollapsibleGroup extends AbstractCollapsiblePanel implements
 		return c;
 	}
 
+	@Override
 	public Container getValidatingContainer()
 	{
 		return getParent();

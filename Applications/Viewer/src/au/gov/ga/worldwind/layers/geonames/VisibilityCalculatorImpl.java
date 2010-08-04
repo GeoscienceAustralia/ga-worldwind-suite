@@ -18,6 +18,7 @@ public class VisibilityCalculatorImpl implements VisibilityCalculator
 	{
 	}
 
+	@Override
 	public boolean isVisible(GeoName geoname)
 	{
 		synchronized (lock)

@@ -125,6 +125,7 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 		showResults.setSelected(geonameLayer.isEnabled());
 		showResults.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				geonameLayer.setEnabled(showResults.isSelected());
@@ -216,6 +217,7 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 
 		ActionListener al = new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				String str = searchText.getText();
@@ -246,16 +248,19 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 
 		searchText.getDocument().addDocumentListener(new DocumentListener()
 		{
+			@Override
 			public void changedUpdate(DocumentEvent e)
 			{
 				searchTextChanged();
 			}
 
+			@Override
 			public void insertUpdate(DocumentEvent e)
 			{
 				searchTextChanged();
 			}
 
+			@Override
 			public void removeUpdate(DocumentEvent e)
 			{
 				searchTextChanged();
@@ -264,6 +269,7 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 
 		clearButton.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				searchText.setText("");
@@ -341,6 +347,7 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 			{
 				EventQueue.invokeAndWait(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						showResultsImpl(results);
@@ -389,6 +396,7 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 		{
 			currentSearch = new Thread(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					Results results = GeoNamesSearch.search(text, type);
@@ -416,6 +424,7 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 			setBorder(new EmptyBorder(1, 1, 1, 1));
 		}
 
+		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index,
 				boolean isSelected, boolean cellHasFocus)
 		{

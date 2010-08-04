@@ -37,65 +37,79 @@ public class GeoName implements GeographicText
 		this.colorFont = colorFont;
 	}
 
+	@Override
 	public Color getBackgroundColor()
 	{
 		return colorFont.backgroundColor;
 	}
 
+	@Override
 	public Color getColor()
 	{
 		return colorFont.color;
 	}
 
+	@Override
 	public Font getFont()
 	{
 		return colorFont.font;
 	}
 
+	@Override
 	public Position getPosition()
 	{
 		return new Position(latlon, 0);
 	}
 
+	@Override
 	public CharSequence getText()
 	{
 		return name;
 	}
 
+	@Override
 	public boolean isVisible()
 	{
 		return true;
 	}
 	
+	@Override
 	public double getPriority()
 	{
 		return 0;
 	}
 
+	@Override
 	public void setBackgroundColor(Color background)
 	{
 	}
 
+	@Override
 	public void setColor(Color color)
 	{
 	}
 
+	@Override
 	public void setFont(Font font)
 	{
 	}
 
+	@Override
 	public void setPosition(Position position)
 	{
 	}
 
+	@Override
 	public void setText(CharSequence text)
 	{
 	}
 
+	@Override
 	public void setVisible(boolean visible)
 	{
 	}
 
+	@Override
 	public void setPriority(double d)
 	{
 	}

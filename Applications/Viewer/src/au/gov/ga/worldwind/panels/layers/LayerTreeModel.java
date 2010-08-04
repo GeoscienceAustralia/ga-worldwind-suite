@@ -358,6 +358,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			addLayersToLayerList(node.getChild(i), layerNodes);
 	}
 
+	@Override
 	public Object getChild(Object parent, int index)
 	{
 		INode node = (INode) parent;
@@ -366,28 +367,33 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		return node.getChild(index);
 	}
 
+	@Override
 	public int getChildCount(Object parent)
 	{
 		INode node = (INode) parent;
 		return node.getChildCount();
 	}
 
+	@Override
 	public int getIndexOfChild(Object parent, Object child)
 	{
 		INode node = (INode) parent;
 		return node.getChildIndex(child);
 	}
 
+	@Override
 	public INode getRoot()
 	{
 		return root;
 	}
 
+	@Override
 	public boolean isLeaf(Object node)
 	{
 		return getChildCount(node) == 0;
 	}
 
+	@Override
 	public void valueForPathChanged(TreePath path, Object newValue)
 	{
 		if (newValue instanceof String)
@@ -402,11 +408,13 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		}
 	}
 
+	@Override
 	public void addTreeModelListener(TreeModelListener l)
 	{
 		listeners.add(l);
 	}
 
+	@Override
 	public void removeTreeModelListener(TreeModelListener l)
 	{
 		listeners.remove(l);
@@ -447,6 +455,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		return targetNode.getParent();
 	}
 
+	@Override
 	public void treeCollapsed(TreeExpansionEvent event)
 	{
 		Object o = event.getPath().getLastPathComponent();
@@ -454,6 +463,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		node.setExpanded(false);
 	}
 
+	@Override
 	public void treeExpanded(TreeExpansionEvent event)
 	{
 		Object o = event.getPath().getLastPathComponent();

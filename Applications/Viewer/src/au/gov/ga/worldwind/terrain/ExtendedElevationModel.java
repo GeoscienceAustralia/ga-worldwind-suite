@@ -36,6 +36,7 @@ public class ExtendedElevationModel extends BasicElevationModel
 
 	protected static class ExtendedUrlBuilder implements TileUrlBuilder
 	{
+		@Override
 		public URL getURL(Tile tile, String altImageFormat) throws MalformedURLException
 		{
 			String service = tile.getLevel().getService();

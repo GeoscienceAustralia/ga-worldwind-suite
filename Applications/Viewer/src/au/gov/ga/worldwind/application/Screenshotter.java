@@ -36,6 +36,7 @@ public class Screenshotter
 	{
 		Thread thread = new Thread(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				takeScreenshotThread(wwd, width, height, file);
@@ -165,6 +166,7 @@ public class Screenshotter
 			this.height = height;
 		}
 
+		@Override
 		public void stageChanged(RenderingEvent event)
 		{
 			if (!doing && event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)
@@ -193,6 +195,7 @@ public class Screenshotter
 			this.height = height;
 		}
 
+		@Override
 		public void stageChanged(RenderingEvent event)
 		{
 			if (event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)

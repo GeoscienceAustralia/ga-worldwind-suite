@@ -22,6 +22,7 @@ public class LazyTreeController implements TreeWillExpandListener
 		this.model = model;
 	}
 
+	@Override
 	public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException
 	{
 		TreePath path = event.getPath();
@@ -32,6 +33,7 @@ public class LazyTreeController implements TreeWillExpandListener
 		}
 	}
 
+	@Override
 	public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException
 	{
 		TreePath path = event.getPath();
@@ -140,6 +142,7 @@ public class LazyTreeController implements TreeWillExpandListener
 	public static class DefaultWorkerFactory implements
 			SwingWorkerFactory<MutableTreeNode[], Object>
 	{
+		@Override
 		public SwingWorker<MutableTreeNode[], Object> getInstance(
 				final IWorker<MutableTreeNode[]> worker)
 		{

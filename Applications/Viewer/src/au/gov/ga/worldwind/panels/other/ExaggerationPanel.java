@@ -60,6 +60,7 @@ public class ExaggerationPanel extends AbstractThemePanel
 		set(settingsExaggeration, false);
 		exaggerationSlider.addChangeListener(new ChangeListener()
 		{
+			@Override
 			public void stateChanged(ChangeEvent e)
 			{
 				set(sliderToExaggeration(exaggerationSlider.getValue()), true);

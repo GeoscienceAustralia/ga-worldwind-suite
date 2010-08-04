@@ -48,8 +48,8 @@ public class OpenStreetMapTransparentLayer extends BasicMercatorTiledImageLayer
 
 	private static class URLBuilder implements TileUrlBuilder
 	{
-		public URL getURL(Tile tile, String imageFormat)
-				throws MalformedURLException
+		@Override
+		public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 		{
 			int level = tile.getLevelNumber() + 3;
 			int column = tile.getColumn();

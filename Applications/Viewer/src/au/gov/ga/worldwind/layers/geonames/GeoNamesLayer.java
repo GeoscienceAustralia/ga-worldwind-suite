@@ -60,6 +60,7 @@ public class GeoNamesLayer extends AbstractLayer
 		requestQ = new PriorityBlockingQueue<GeoName>(64,
 				new Comparator<GeoName>()
 				{
+					@Override
 					public int compare(GeoName o1, GeoName o2)
 					{
 						double distance1 = visibilityCalculator
@@ -159,6 +160,7 @@ public class GeoNamesLayer extends AbstractLayer
 			this.geoname = geoname;
 		}
 
+		@Override
 		public void run()
 		{
 			if (geoname.cacheFileExists())
@@ -290,6 +292,7 @@ public class GeoNamesLayer extends AbstractLayer
 			this.geoname = geoname;
 		}
 
+		@Override
 		public ByteBuffer run(Retriever retriever)
 		{
 			ByteBuffer buffer = getBuffer(retriever);

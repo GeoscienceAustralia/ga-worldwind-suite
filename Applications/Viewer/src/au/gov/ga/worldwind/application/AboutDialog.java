@@ -86,6 +86,7 @@ public class AboutDialog extends JDialog
 		}
 		editorPane.addHyperlinkListener(new HyperlinkListener()
 		{
+			@Override
 			public void hyperlinkUpdate(HyperlinkEvent e)
 			{
 				if (e.getEventType() == EventType.ACTIVATED)
@@ -115,6 +116,7 @@ public class AboutDialog extends JDialog
 		panel.add(button, BorderLayout.EAST);
 		button.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				dispose();

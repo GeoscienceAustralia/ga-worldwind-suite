@@ -46,11 +46,13 @@ public class ExtendedHTTPRetriever extends HTTPRetriever implements ExtendedRetr
 		return getResponseCode() == HttpURLConnection.HTTP_OK;
 	}
 
+	@Override
 	public boolean isNotModified()
 	{
 		return getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED;
 	}
 
+	@Override
 	public Exception getError()
 	{
 		return error;

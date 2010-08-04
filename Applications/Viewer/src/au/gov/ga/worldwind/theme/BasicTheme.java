@@ -62,6 +62,7 @@ public class BasicTheme implements Theme
 
 	/*-- GETTERS AND SETTERS --*/
 
+	@Override
 	public WorldWindow getWwd()
 	{
 		return wwd;
@@ -72,6 +73,7 @@ public class BasicTheme implements Theme
 		this.wwd = wwd;
 	}
 
+	@Override
 	public String getName()
 	{
 		return name;
@@ -82,6 +84,7 @@ public class BasicTheme implements Theme
 		this.name = name;
 	}
 
+	@Override
 	public boolean hasMenuBar()
 	{
 		return menuBar;
@@ -103,6 +106,7 @@ public class BasicTheme implements Theme
 		this.toolBar = toolBar;
 	}
 
+	@Override
 	public boolean hasStatusBar()
 	{
 		return statusBar;
@@ -113,6 +117,7 @@ public class BasicTheme implements Theme
 		this.statusBar = statusBar;
 	}
 
+	@Override
 	public List<IDataset> getDatasets()
 	{
 		return datasets;
@@ -123,6 +128,7 @@ public class BasicTheme implements Theme
 		this.datasets = datasets;
 	}
 
+	@Override
 	public List<ThemeLayer> getLayers()
 	{
 		return layers;
@@ -133,6 +139,7 @@ public class BasicTheme implements Theme
 		this.layers = layers;
 	}
 
+	@Override
 	public List<ThemeHUD> getHUDs()
 	{
 		return HUDs;
@@ -143,6 +150,7 @@ public class BasicTheme implements Theme
 		HUDs = hUDs;
 	}
 
+	@Override
 	public List<ThemePanel> getPanels()
 	{
 		return panels;
@@ -153,6 +161,7 @@ public class BasicTheme implements Theme
 		this.panels = panels;
 	}
 
+	@Override
 	public Double getInitialLatitude()
 	{
 		return initialLatitude;
@@ -163,6 +172,7 @@ public class BasicTheme implements Theme
 		this.initialLatitude = initialLatitude;
 	}
 
+	@Override
 	public Double getInitialLongitude()
 	{
 		return initialLongitude;
@@ -173,6 +183,7 @@ public class BasicTheme implements Theme
 		this.initialLongitude = initialLongitude;
 	}
 
+	@Override
 	public Double getInitialAltitude()
 	{
 		return initialAltitude;
@@ -183,6 +194,7 @@ public class BasicTheme implements Theme
 		this.initialAltitude = initialAltitude;
 	}
 
+	@Override
 	public Double getInitialHeading()
 	{
 		return initialHeading;
@@ -193,6 +205,7 @@ public class BasicTheme implements Theme
 		this.initialHeading = initialHeading;
 	}
 
+	@Override
 	public Double getInitialPitch()
 	{
 		return initialPitch;
@@ -203,6 +216,7 @@ public class BasicTheme implements Theme
 		this.initialPitch = initialPitch;
 	}
 
+	@Override
 	public Double getVerticalExaggeration()
 	{
 		return verticalExaggeration;
@@ -213,6 +227,7 @@ public class BasicTheme implements Theme
 		this.verticalExaggeration = verticalExaggeration;
 	}
 
+	@Override
 	public Double getFieldOfView()
 	{
 		return fieldOfView;

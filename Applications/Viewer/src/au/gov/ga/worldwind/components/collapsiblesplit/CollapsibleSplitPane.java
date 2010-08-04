@@ -273,6 +273,7 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 			updateDrag(e.getX(), e.getY());
 		}
 
+		@Override
 		public void keyPressed(KeyEvent e)
 		{
 			if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
@@ -281,10 +282,12 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 			}
 		}
 
+		@Override
 		public void keyReleased(KeyEvent e)
 		{
 		}
 
+		@Override
 		public void keyTyped(KeyEvent e)
 		{
 		}

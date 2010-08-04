@@ -66,12 +66,14 @@ public class FlatJButton extends JButton
 		
 		addFocusListener(new FocusListener()
 		{
+			@Override
 			public void focusGained(FocusEvent e)
 			{
 				hasFocus = true;
 				setContentAreaFilled(true);
 			}
 			
+			@Override
 			public void focusLost(FocusEvent e)
 			{
 				hasFocus = false;

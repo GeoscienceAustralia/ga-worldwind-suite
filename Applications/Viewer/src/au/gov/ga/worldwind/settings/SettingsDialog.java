@@ -127,6 +127,7 @@ public class SettingsDialog extends JDialog
 
 		ok.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				if (verifyAndSave())
@@ -138,6 +139,7 @@ public class SettingsDialog extends JDialog
 
 		Action cancelAction = new AbstractAction()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				cancel();
@@ -352,6 +354,7 @@ public class SettingsDialog extends JDialog
 
 		ActionListener al = new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				displayLabel.setEnabled(singleDisplayRadio.isSelected());
@@ -448,6 +451,7 @@ public class SettingsDialog extends JDialog
 		stereoEnabledCheck.setSelected(settings.isStereoEnabled());
 		stereoEnabledCheck.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				enableStereoSettings();
@@ -503,6 +507,7 @@ public class SettingsDialog extends JDialog
 		panel.add(projectionModeCombo, c);
 		projectionModeCombo.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				enableStereoSettings();
@@ -602,6 +607,7 @@ public class SettingsDialog extends JDialog
 
 		ChangeListener cl = new ChangeListener()
 		{
+			@Override
 			public void stateChanged(ChangeEvent e)
 			{
 				double exaggeration = sliderToExaggeration(verticalExaggerationSlider.getValue());
@@ -655,6 +661,7 @@ public class SettingsDialog extends JDialog
 		panel2.add(fovSlider, c);
 		cl = new ChangeListener()
 		{
+			@Override
 			public void stateChanged(ChangeEvent e)
 			{
 				int value = fovSlider.getValue();
@@ -713,6 +720,7 @@ public class SettingsDialog extends JDialog
 		panel2.add(viewIteratorSpeedSlider, c);
 		cl = new ChangeListener()
 		{
+			@Override
 			public void stateChanged(ChangeEvent e)
 			{
 				double value = sliderToSpeed(viewIteratorSpeedSlider.getValue());
@@ -779,6 +787,7 @@ public class SettingsDialog extends JDialog
 		proxyEnabledCheck.setSelected(settings.isProxyEnabled());
 		proxyEnabledCheck.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				enableProxySettings();

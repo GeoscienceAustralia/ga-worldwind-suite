@@ -23,11 +23,13 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 		setExpanded(expanded);
 	}
 
+	@Override
 	public String getName()
 	{
 		return name;
 	}
 
+	@Override
 	public void setName(String name)
 	{
 		if (name == null)
@@ -35,6 +37,7 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 		this.name = name;
 	}
 
+	@Override
 	public URL getInfoURL()
 	{
 		return infoURL;
@@ -45,22 +48,26 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 		this.infoURL = infoURL;
 	}
 
+	@Override
 	public boolean isExpanded()
 	{
 		return expanded;
 	}
 
+	@Override
 	public void setExpanded(boolean expanded)
 	{
 		this.expanded = expanded;
 	}
 
+	@Override
 	public void addChild(INode child)
 	{
 		children.add(child);
 		child.setParent(this);
 	}
 
+	@Override
 	public void insertChild(int index, INode child)
 	{
 		if (index < 0 || index > getChildCount())
@@ -72,32 +79,38 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 		child.setParent(this);
 	}
 
+	@Override
 	public void removeChild(INode child)
 	{
 		if (children.remove(child))
 			child.setParent(null);
 	}
 
+	@Override
 	public int getChildCount()
 	{
 		return children.size();
 	}
 
+	@Override
 	public INode getChild(int index)
 	{
 		return children.get(index);
 	}
 
+	@Override
 	public int getChildIndex(Object child)
 	{
 		return children.indexOf(child);
 	}
 
+	@Override
 	public INode getParent()
 	{
 		return parent;
 	}
 
+	@Override
 	public void setParent(INode parent)
 	{
 		this.parent = parent;

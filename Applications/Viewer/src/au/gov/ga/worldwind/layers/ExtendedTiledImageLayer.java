@@ -50,6 +50,7 @@ public class ExtendedTiledImageLayer extends BasicTiledImageLayer
 			this.imageFormat = imageFormat;
 		}
 
+		@Override
 		public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 		{
 			String service = tile.getLevel().getService();

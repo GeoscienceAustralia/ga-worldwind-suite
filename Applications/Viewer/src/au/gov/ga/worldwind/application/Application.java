@@ -273,6 +273,7 @@ public class Application
 		//hide splash screen when first frame is rendered
 		wwd.addRenderingListener(new RenderingListener()
 		{
+			@Override
 			public void stageChanged(RenderingEvent event)
 			{
 				if (event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)
@@ -369,6 +370,7 @@ public class Application
 		{
 			java.awt.EventQueue.invokeAndWait(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					frame.setVisible(true);
@@ -409,6 +411,7 @@ public class Application
 						.isOfflineMode());
 		offlineAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				WorldWind.setOfflineMode(offlineAction.isSelected());
@@ -418,6 +421,7 @@ public class Application
 		screenshotAction = new BasicAction("Save image", Icons.screenshot.getIcon());
 		screenshotAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				saveImage();
@@ -427,6 +431,7 @@ public class Application
 		exitAction = new BasicAction("Exit", Icons.escape.getIcon());
 		exitAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				quit();
@@ -436,6 +441,7 @@ public class Application
 		defaultViewAction = new BasicAction("Default view", Icons.home.getIcon());
 		defaultViewAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				resetView();
@@ -445,6 +451,7 @@ public class Application
 		gotoAction = new BasicAction("Go to coordinates...", Icons.crosshair45.getIcon());
 		gotoAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				GoToCoordinatePanel.showGotoDialog(frame, wwd, "Go to coordinates",
@@ -510,6 +517,7 @@ public class Application
 		fullscreenAction = new BasicAction("Fullscreen", Icons.monitor.getIcon());
 		fullscreenAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				setFullscreen(!isFullscreen());
@@ -521,6 +529,7 @@ public class Application
 		{
 			private boolean visible = false;
 
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				if (!visible)
@@ -538,6 +547,7 @@ public class Application
 		controlsAction = new BasicAction("Controls...", Icons.keyboard.getIcon());
 		controlsAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				showControls();
@@ -547,6 +557,7 @@ public class Application
 		aboutAction = new BasicAction("About", Icons.help.getIcon());
 		aboutAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				new AboutDialog(frame);
@@ -683,6 +694,7 @@ public class Application
 
 		frame.addWindowStateListener(new WindowStateListener()
 		{
+			@Override
 			public void windowStateChanged(WindowEvent e)
 			{
 				Settings.get().setWindowMaximized(isMaximized());
@@ -812,6 +824,7 @@ public class Application
 
 				Action action = new AbstractAction()
 				{
+					@Override
 					public void actionPerformed(ActionEvent e)
 					{
 						setFullscreen(false);
@@ -965,6 +978,7 @@ public class Application
 				new SelectableAction(piece.getDisplayName(), piece.getIcon(), piece.isOn());
 		action.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				piece.setOn(action.isSelected());

@@ -193,6 +193,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 			}
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e)
 		{
 			setCollapsed(!isCollapsed());
@@ -210,6 +211,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 			}
 		}
 
+		@Override
 		public void collapseToggled(ICollapsible component, boolean collapsed)
 		{
 			updateIcon();
@@ -335,6 +337,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 	/**
 	 * @return true if the pane is collapsed, false if expanded
 	 */
+	@Override
 	public boolean isCollapsed()
 	{
 		return collapsed;
@@ -359,6 +362,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 	 * @see #setAnimated(boolean)
 	 * @javabean.property bound="true" preferred="true"
 	 */
+	@Override
 	public void setCollapsed(boolean val)
 	{
 		if (collapsed != val)
@@ -542,6 +546,7 @@ public class JCollapsiblePane extends AbstractCollapsiblePanel
 		 */
 		private float animateAlpha = 1.0f;
 
+		@Override
 		public void actionPerformed(ActionEvent e)
 		{
 			/*

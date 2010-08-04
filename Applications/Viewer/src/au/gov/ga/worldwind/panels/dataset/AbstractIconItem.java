@@ -24,6 +24,7 @@ public abstract class AbstractIconItem implements IIconItem
 		iconLoaded = iconURL == null;
 	}
 
+	@Override
 	public boolean isIconLoaded()
 	{
 		synchronized (iconLock)
@@ -32,6 +33,7 @@ public abstract class AbstractIconItem implements IIconItem
 		}
 	}
 
+	@Override
 	public void loadIcon(final Runnable afterLoad)
 	{
 		synchronized (iconLock)
@@ -41,6 +43,7 @@ public abstract class AbstractIconItem implements IIconItem
 				iconDownloading = true;
 				RetrievalHandler setIconHandler = new RetrievalHandler()
 				{
+					@Override
 					public void handle(RetrievalResult result)
 					{
 						synchronized (iconLock)
@@ -64,6 +67,7 @@ public abstract class AbstractIconItem implements IIconItem
 		}
 	}
 
+	@Override
 	public ImageIcon getIcon()
 	{
 		synchronized (iconLock)
@@ -72,11 +76,13 @@ public abstract class AbstractIconItem implements IIconItem
 		}
 	}
 
+	@Override
 	public URL getIconURL()
 	{
 		return iconURL;
 	}
 
+	@Override
 	public void setIconURL(URL iconURL)
 	{
 		if (iconURL == null && this.iconURL == null)

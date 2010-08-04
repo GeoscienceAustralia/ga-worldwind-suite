@@ -43,6 +43,7 @@ public class PlaceLayer extends AbstractLayer
 		{
 			private BasicDragger dragger = new BasicDragger(wwd);
 
+			@Override
 			public void selected(SelectEvent event)
 			{
 				// Select/unselect on left click on annotations

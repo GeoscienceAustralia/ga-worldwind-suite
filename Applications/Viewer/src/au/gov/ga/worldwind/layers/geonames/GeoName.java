@@ -246,71 +246,85 @@ public class GeoName implements GeographicText
 		return children;
 	}
 
+	@Override
 	public Color getBackgroundColor()
 	{
 		return font.backgroundColor;
 	}
 
+	@Override
 	public Color getColor()
 	{
 		return font.color;
 	}
 
+	@Override
 	public Font getFont()
 	{
 		return font.font;
 	}
 
+	@Override
 	public Position getPosition()
 	{
 		return position;
 	}
 
+	@Override
 	public CharSequence getText()
 	{
 		return name;
 	}
 
+	@Override
 	public boolean isVisible()
 	{
 		return visibilityCalculator.isVisible(this);
 	}
 	
+	@Override
 	public double getPriority()
 	{
 		return 0;
 	}
 
+	@Override
 	@Deprecated
 	public void setBackgroundColor(Color background)
 	{
 	}
 
+	@Override
 	@Deprecated
 	public void setColor(Color color)
 	{
 	}
 
+	@Override
 	@Deprecated
 	public void setFont(Font font)
 	{
 	}
 
+	@Override
 	@Deprecated
 	public void setPosition(Position position)
 	{
 	}
 
+	@Override
 	@Deprecated
 	public void setText(CharSequence text)
 	{
 	}
 
+	@Override
 	@Deprecated
 	public void setVisible(boolean visible)
 	{
 	}
 
+	@Override
 	@Deprecated
 	public void setPriority(double d)
 	{

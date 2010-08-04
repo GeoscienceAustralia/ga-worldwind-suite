@@ -97,16 +97,19 @@ public class FileLayerCreator extends JDialog
 
 		DocumentListener filedl = new DocumentListener()
 		{
+			@Override
 			public void removeUpdate(DocumentEvent e)
 			{
 				updateOutputField();
 			}
 
+			@Override
 			public void insertUpdate(DocumentEvent e)
 			{
 				updateOutputField();
 			}
 
+			@Override
 			public void changedUpdate(DocumentEvent e)
 			{
 				updateOutputField();
@@ -114,16 +117,19 @@ public class FileLayerCreator extends JDialog
 		};
 		DocumentListener dl = new DocumentListener()
 		{
+			@Override
 			public void changedUpdate(DocumentEvent e)
 			{
 				checkFields();
 			}
 
+			@Override
 			public void insertUpdate(DocumentEvent e)
 			{
 				checkFields();
 			}
 
+			@Override
 			public void removeUpdate(DocumentEvent e)
 			{
 				checkFields();
@@ -131,6 +137,7 @@ public class FileLayerCreator extends JDialog
 		};
 		ActionListener al = new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				checkFields();
@@ -138,6 +145,7 @@ public class FileLayerCreator extends JDialog
 		};
 		ActionListener transAl = new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				enableTransparent();
@@ -213,6 +221,7 @@ public class FileLayerCreator extends JDialog
 		browse.setToolTipText("Browse");
 		browse.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				chooser.setDialogTitle("Select layer tileset directory");
@@ -250,16 +259,19 @@ public class FileLayerCreator extends JDialog
 		outputField.getDocument().addDocumentListener(dl);
 		outputField.getDocument().addDocumentListener(new DocumentListener()
 		{
+			@Override
 			public void removeUpdate(DocumentEvent e)
 			{
 				outputFieldChanged();
 			}
 
+			@Override
 			public void insertUpdate(DocumentEvent e)
 			{
 				outputFieldChanged();
 			}
 
+			@Override
 			public void changedUpdate(DocumentEvent e)
 			{
 				outputFieldChanged();
@@ -276,6 +288,7 @@ public class FileLayerCreator extends JDialog
 		browse.setToolTipText("Browse");
 		browse.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				chooser.setDialogTitle("Select output layer file");
@@ -405,6 +418,7 @@ public class FileLayerCreator extends JDialog
 		panel.add(calculateExtents, c);
 		calculateExtents.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				File directory = new File(dirField.getText());
@@ -605,6 +619,7 @@ public class FileLayerCreator extends JDialog
 		buttonsPanel.add(okButton);
 		okButton.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				saveFile();
@@ -619,6 +634,7 @@ public class FileLayerCreator extends JDialog
 		buttonsPanel.add(button);
 		button.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				dispose();

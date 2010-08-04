@@ -244,6 +244,7 @@ public class CollapsibleGroupUI extends ComponentUI
 	{
 		SwingUtilities.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				group.scrollRectToVisible(new Rectangle(group.getWidth(), group
@@ -254,11 +255,13 @@ public class CollapsibleGroupUI extends ComponentUI
 
 	static class RepaintOnFocus implements FocusListener
 	{
+		@Override
 		public void focusGained(FocusEvent e)
 		{
 			e.getComponent().repaint();
 		}
 
+		@Override
 		public void focusLost(FocusEvent e)
 		{
 			e.getComponent().repaint();
@@ -267,6 +270,7 @@ public class CollapsibleGroupUI extends ComponentUI
 
 	class ChangeListener implements PropertyChangeListener, CollapseListener
 	{
+		@Override
 		public void propertyChange(PropertyChangeEvent evt)
 		{
 			// if group is expanded but not animated
@@ -365,6 +369,7 @@ public class CollapsibleGroupUI extends ComponentUI
 			super("toggleExpanded");
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e)
 		{
 			group.setCollapsed(!group.isCollapsed());
@@ -386,16 +391,19 @@ public class CollapsibleGroupUI extends ComponentUI
 			this.up = up;
 		}
 
+		@Override
 		public int getIconHeight()
 		{
 			return 3;
 		}
 
+		@Override
 		public int getIconWidth()
 		{
 			return 6;
 		}
 
+		@Override
 		public void paintIcon(Component c, Graphics g, int x, int y)
 		{
 			if (up)
@@ -423,16 +431,19 @@ public class CollapsibleGroupUI extends ComponentUI
 			this.color = color;
 		}
 
+		@Override
 		public Insets getBorderInsets(Component c)
 		{
 			return new Insets(0, 1, 1, 1);
 		}
 
+		@Override
 		public boolean isBorderOpaque()
 		{
 			return true;
 		}
 
+		@Override
 		public void paintBorder(Component c, Graphics g, int x, int y,
 				int width, int height)
 		{
@@ -497,11 +508,13 @@ public class CollapsibleGroupUI extends ComponentUI
 			label.setIconTextGap(8);
 		}
 
+		@Override
 		public Insets getBorderInsets(Component c)
 		{
 			return new Insets(getTitleHeight(), 0, 0, 0);
 		}
 
+		@Override
 		public boolean isBorderOpaque()
 		{
 			return true;
@@ -580,6 +593,7 @@ public class CollapsibleGroupUI extends ComponentUI
 			return paintColor;
 		}
 
+		@Override
 		public void paintBorder(Component c, Graphics g, int x, int y,
 				int width, int height)
 		{

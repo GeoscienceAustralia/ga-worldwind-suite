@@ -33,6 +33,7 @@ public class LayerNode extends AbstractNode implements ILayerNode
 		setQueryURL(node.getQueryURL());
 	}
 
+	@Override
 	public URL getLayerURL()
 	{
 		return layerURL;
@@ -43,31 +44,37 @@ public class LayerNode extends AbstractNode implements ILayerNode
 		this.layerURL = layerURL;
 	}
 
+	@Override
 	public URL getLegendURL()
 	{
 		return legendURL;
 	}
 
+	@Override
 	public void setLegendURL(URL legendURL)
 	{
 		this.legendURL = legendURL;
 	}
 
+	@Override
 	public URL getQueryURL()
 	{
 		return queryURL;
 	}
 
+	@Override
 	public void setQueryURL(URL queryURL)
 	{
 		this.queryURL = queryURL;
 	}
 
+	@Override
 	public boolean isEnabled()
 	{
 		return enabled;
 	}
 
+	@Override
 	public void setEnabled(boolean enabled)
 	{
 		this.enabled = enabled;
@@ -130,11 +137,13 @@ public class LayerNode extends AbstractNode implements ILayerNode
 		this.opacity = opacity;
 	}
 
+	@Override
 	public Long getExpiryTime()
 	{
 		return expiryTime;
 	}
 
+	@Override
 	public void setExpiryTime(Long expiryTime)
 	{
 		this.expiryTime = expiryTime;

@@ -401,11 +401,13 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 			this.tile = tile;
 		}
 
+		@Override
 		public void run()
 		{
 			layer.requestTextureLoad(tile);
 		}
 
+		@Override
 		public int compareTo(RequestTask that)
 		{
 			if (that == null)

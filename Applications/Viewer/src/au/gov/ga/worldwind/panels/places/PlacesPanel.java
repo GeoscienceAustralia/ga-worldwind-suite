@@ -99,6 +99,7 @@ public class PlacesPanel extends AbstractThemePanel
 		addAction = new BasicAction("Add", "Add place", Icons.add.getIcon());
 		addAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				addNew();
@@ -108,6 +109,7 @@ public class PlacesPanel extends AbstractThemePanel
 		editAction = new BasicAction("Edit", "Edit selected", Icons.properties.getIcon());
 		editAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				editSelected();
@@ -117,6 +119,7 @@ public class PlacesPanel extends AbstractThemePanel
 		deleteAction = new BasicAction("Delete", "Delete selected", Icons.delete.getIcon());
 		deleteAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				deleteSelected();
@@ -126,6 +129,7 @@ public class PlacesPanel extends AbstractThemePanel
 		playAction = new BasicAction("Play", "", Icons.run.getIcon());
 		playAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				if (playing)
@@ -185,6 +189,7 @@ public class PlacesPanel extends AbstractThemePanel
 
 		ListSelectionListener lsl = new ListSelectionListener()
 		{
+			@Override
 			public void valueChanged(ListSelectionEvent e)
 			{
 				enableActions();
@@ -513,6 +518,7 @@ public class PlacesPanel extends AbstractThemePanel
 
 			Thread thread = new Thread(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					ListItem item = (ListItem) list.getSelectedValue();
@@ -795,6 +801,7 @@ public class PlacesPanel extends AbstractThemePanel
 			add(label, BorderLayout.CENTER);
 		}
 
+		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index,
 				boolean isSelected, boolean cellHasFocus)
 		{

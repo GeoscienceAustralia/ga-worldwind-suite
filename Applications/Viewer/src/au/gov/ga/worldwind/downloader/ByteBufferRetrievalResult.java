@@ -23,6 +23,7 @@ public class ByteBufferRetrievalResult implements RetrievalResult
 		this.error = error;
 	}
 
+	@Override
 	public URL getSourceURL()
 	{
 		return sourceURL;
@@ -70,16 +71,19 @@ public class ByteBufferRetrievalResult implements RetrievalResult
 		return buffer != null;
 	}
 
+	@Override
 	public boolean isFromCache()
 	{
 		return fromCache;
 	}
 
+	@Override
 	public boolean isNotModified()
 	{
 		return notModified;
 	}
 
+	@Override
 	public Exception getError()
 	{
 		return error;

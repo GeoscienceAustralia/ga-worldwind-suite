@@ -11,6 +11,7 @@ public class IterableProxy<E> implements Iterable<E>
 		this.source = source;
 	}
 
+	@Override
 	public Iterator<E> iterator()
 	{
 		return new IteratorProxy<E>(source.iterator());
@@ -25,16 +26,19 @@ public class IterableProxy<E> implements Iterable<E>
 			this.iterator = iterator;
 		}
 
+		@Override
 		public boolean hasNext()
 		{
 			return iterator.hasNext();
 		}
 
+		@Override
 		public O next()
 		{
 			return iterator.next();
 		}
 
+		@Override
 		public void remove()
 		{
 			iterator.remove();

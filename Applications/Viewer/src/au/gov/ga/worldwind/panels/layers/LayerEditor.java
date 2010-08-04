@@ -57,16 +57,19 @@ public class LayerEditor extends JDialog
 
 		DocumentListener dl = new DocumentListener()
 		{
+			@Override
 			public void changedUpdate(DocumentEvent e)
 			{
 				checkValidity();
 			}
 
+			@Override
 			public void insertUpdate(DocumentEvent e)
 			{
 				checkValidity();
 			}
 
+			@Override
 			public void removeUpdate(DocumentEvent e)
 			{
 				checkValidity();
@@ -174,6 +177,7 @@ public class LayerEditor extends JDialog
 		buttonsPanel.add(okButton);
 		okButton.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				returnValue = JOptionPane.OK_OPTION;
@@ -187,6 +191,7 @@ public class LayerEditor extends JDialog
 		buttonsPanel.add(button);
 		button.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				dispose();

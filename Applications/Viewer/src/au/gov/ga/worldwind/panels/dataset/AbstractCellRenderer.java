@@ -91,6 +91,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		return tree;
 	}
 
+	@Override
 	public Component getTreeCellRendererComponent(final JTree t, Object value, boolean selected,
 			boolean expanded, boolean leaf, final int row, boolean hasFocus)
 	{
@@ -148,6 +149,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		{
 			Runnable afterLoad = new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					tree.repaint();
@@ -390,6 +392,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 			}
 		}
 
+		@Override
 		public void keyPressed(KeyEvent e)
 		{
 			if (e.getKeyCode() == KeyEvent.VK_SPACE)
@@ -403,6 +406,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 			}
 		}
 
+		@Override
 		public void keyReleased(KeyEvent e)
 		{
 			if (e.getKeyCode() == KeyEvent.VK_SPACE)
@@ -417,6 +421,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 			}
 		}
 
+		@Override
 		public void keyTyped(KeyEvent e)
 		{
 		}

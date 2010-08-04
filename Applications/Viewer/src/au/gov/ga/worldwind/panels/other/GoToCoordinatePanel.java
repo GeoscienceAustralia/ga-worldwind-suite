@@ -95,6 +95,7 @@ public class GoToCoordinatePanel extends JPanel
 
 			ActionListener al = new ActionListener()
 			{
+				@Override
 				public void actionPerformed(ActionEvent e)
 				{
 					gotoCoords();
@@ -112,16 +113,19 @@ public class GoToCoordinatePanel extends JPanel
 
 		coordInput.getDocument().addDocumentListener(new DocumentListener()
 		{
+			@Override
 			public void changedUpdate(DocumentEvent e)
 			{
 				updateResult();
 			}
 
+			@Override
 			public void insertUpdate(DocumentEvent e)
 			{
 				updateResult();
 			}
 
+			@Override
 			public void removeUpdate(DocumentEvent e)
 			{
 				updateResult();
@@ -218,6 +222,7 @@ public class GoToCoordinatePanel extends JPanel
 		panel.add(ok, c);
 		ok.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				if (gtp.inputValid)
@@ -236,6 +241,7 @@ public class GoToCoordinatePanel extends JPanel
 		panel.add(cancel, c);
 		Action cancelAction = new AbstractAction()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				dialog.dispose();
@@ -245,6 +251,7 @@ public class GoToCoordinatePanel extends JPanel
 
 		ChangeListener cl = new ChangeListener()
 		{
+			@Override
 			public void stateChanged(ChangeEvent e)
 			{
 				ok.setEnabled(gtp.inputValid);

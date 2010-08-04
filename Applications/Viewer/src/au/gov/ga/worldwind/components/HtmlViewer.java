@@ -88,6 +88,7 @@ public class HtmlViewer extends JDialog
 			setTitle(title + " - loading...");
 			editorPane.addPropertyChangeListener(new PropertyChangeListener()
 			{
+				@Override
 				public void propertyChange(PropertyChangeEvent evt)
 				{
 					if (evt.getPropertyName().equals("page"))
@@ -118,6 +119,7 @@ public class HtmlViewer extends JDialog
 
 		editorPane.addHyperlinkListener(new HyperlinkListener()
 		{
+			@Override
 			public void hyperlinkUpdate(HyperlinkEvent e)
 			{
 				if (e.getEventType() == EventType.ACTIVATED)
@@ -140,6 +142,7 @@ public class HtmlViewer extends JDialog
 
 		Action disposeAction = new AbstractAction()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				dispose();

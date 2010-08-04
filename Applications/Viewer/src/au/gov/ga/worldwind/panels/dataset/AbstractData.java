@@ -16,11 +16,13 @@ public abstract class AbstractData extends AbstractIconItem implements IData
 		this.base = base;
 	}
 
+	@Override
 	public String getName()
 	{
 		return name;
 	}
 
+	@Override
 	public URL getInfoURL()
 	{
 		return infoURL;

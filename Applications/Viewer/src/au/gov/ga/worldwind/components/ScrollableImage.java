@@ -35,10 +35,12 @@ public class ScrollableImage extends JLabel implements Scrollable, MouseMotionLi
 	}
 
 	//Methods required by the MouseMotionListener interface:
+	@Override
 	public void mouseMoved(MouseEvent e)
 	{
 	}
 
+	@Override
 	public void mouseDragged(MouseEvent e)
 	{
 		//The user is dragging us, so scroll!
@@ -59,11 +61,13 @@ public class ScrollableImage extends JLabel implements Scrollable, MouseMotionLi
 		}
 	}
 
+	@Override
 	public Dimension getPreferredScrollableViewportSize()
 	{
 		return getPreferredSize();
 	}
 
+	@Override
 	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction)
 	{
 		//Get the current position.
@@ -91,6 +95,7 @@ public class ScrollableImage extends JLabel implements Scrollable, MouseMotionLi
 		}
 	}
 
+	@Override
 	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction)
 	{
 		if (orientation == SwingConstants.HORIZONTAL)
@@ -103,11 +108,13 @@ public class ScrollableImage extends JLabel implements Scrollable, MouseMotionLi
 		}
 	}
 
+	@Override
 	public boolean getScrollableTracksViewportWidth()
 	{
 		return false;
 	}
 
+	@Override
 	public boolean getScrollableTracksViewportHeight()
 	{
 		return false;

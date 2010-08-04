@@ -57,6 +57,7 @@ public class MouseLayer extends AbstractLayer implements PositionListener
 		//don't pick
 	}
 
+	@Override
 	public void moved(PositionEvent event)
 	{
 		if (isEnabled())

@@ -119,16 +119,19 @@ public class PlaceEditor extends JDialog
 
 		DocumentListener dl = new DocumentListener()
 		{
+			@Override
 			public void changedUpdate(DocumentEvent e)
 			{
 				checkValidity();
 			}
 
+			@Override
 			public void insertUpdate(DocumentEvent e)
 			{
 				checkValidity();
 			}
 
+			@Override
 			public void removeUpdate(DocumentEvent e)
 			{
 				checkValidity();
@@ -136,6 +139,7 @@ public class PlaceEditor extends JDialog
 		};
 		ActionListener al = new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				checkValidity();
@@ -267,6 +271,7 @@ public class PlaceEditor extends JDialog
 
 		ActionListener mzal = new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				minZoom.setScale(((Units) minZoomUnits.getSelectedItem()).getScale());
@@ -285,6 +290,7 @@ public class PlaceEditor extends JDialog
 		panel3.add(flat, c);
 		flat.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				minZoom.setValue(null);
@@ -331,6 +337,7 @@ public class PlaceEditor extends JDialog
 
 		mzal = new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				maxZoom.setScale(((Units) maxZoomUnits.getSelectedItem()).getScale());
@@ -349,6 +356,7 @@ public class PlaceEditor extends JDialog
 		panel3.add(flat, c);
 		flat.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				maxZoom.setValue(null);
@@ -376,6 +384,7 @@ public class PlaceEditor extends JDialog
 		panel3.add(cameraInformation);
 		cameraInformation.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				enableCameraInformation();
@@ -387,6 +396,7 @@ public class PlaceEditor extends JDialog
 		panel3.add(copyCamera);
 		copyCamera.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				View view = wwd.getView();
@@ -519,6 +529,7 @@ public class PlaceEditor extends JDialog
 
 		mzal = new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				zoom.setScale(((Units) zoomUnits.getSelectedItem()).getScale());
@@ -563,6 +574,7 @@ public class PlaceEditor extends JDialog
 
 		mzal = new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				elevation.setScale(((Units) elevationUnits.getSelectedItem()).getScale());
@@ -585,6 +597,7 @@ public class PlaceEditor extends JDialog
 		buttonsPanel.add(okButton);
 		okButton.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				returnValue = JOptionPane.OK_OPTION;
@@ -598,6 +611,7 @@ public class PlaceEditor extends JDialog
 		buttonsPanel.add(button);
 		button.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				dispose();
