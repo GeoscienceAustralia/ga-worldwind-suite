@@ -59,6 +59,7 @@ public enum Icons
 	pause("pause.gif"),
 	properties("properties.gif"),
 	refresh("refresh.gif"),
+	reload("reload.gif"),
 	remove("remove.gif"),
 	run("run.gif"),
 	save("save.gif"),

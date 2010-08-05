@@ -4,6 +4,7 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
 
@@ -12,13 +13,30 @@ import au.gov.ga.worldwind.layers.file.FileTiledImageLayer;
 import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
 import au.gov.ga.worldwind.layers.nearestneighbor.NearestNeighborMaskTiledImageLayer;
 import au.gov.ga.worldwind.layers.nearestneighbor.NearestNeighbourTiledImageLayer;
+import au.gov.ga.worldwind.layers.shapefile.surfaceshape.SurfaceShapeShapefileLayerFactory;
 import au.gov.ga.worldwind.util.XMLUtil;
 
 public class LayerFactory extends BasicLayerFactory
 {
 	@Override
+	protected Layer createFromLayerDocument(Element domElement, AVList params)
+	{
+		//overridden to allow extra layer types
+
+		String layerType = WWXML.getText(domElement, "@layerType");
+		if ("SurfaceShapeShapefileLayer".equals(layerType))
+		{
+			return SurfaceShapeShapefileLayerFactory.createLayer(domElement, params);
+		}
+
+		return super.createFromLayerDocument(domElement, params);
+	}
+
+	@Override
 	protected Layer createTiledImageLayer(Element domElement, AVList params)
 	{
+		//overridden to allow extra service names for the TiledImageLayer type
+
 		if (params == null)
 			params = new AVListImpl();
 

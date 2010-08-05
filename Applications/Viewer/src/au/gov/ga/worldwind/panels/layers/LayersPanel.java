@@ -50,7 +50,7 @@ public class LayersPanel extends AbstractLayersPanel
 	private Window window;
 
 	private BasicAction newLayerAction, openLayerAction, renameAction, editAction, deleteAction,
-			newFolderAction, expandAllAction, collapseAllAction, refreshAction;
+			newFolderAction, expandAllAction, collapseAllAction, refreshAction, reloadAction;
 
 	private DatasetPanel datasetPanel;
 
@@ -197,6 +197,16 @@ public class LayersPanel extends AbstractLayersPanel
 				refreshSelected();
 			}
 		});
+
+		reloadAction = new BasicAction("Reload layer", Icons.reload.getIcon());
+		reloadAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent arg0)
+			{
+				reloadSelected();
+			}
+		});
 	}
 
 	@Override
@@ -225,6 +235,7 @@ public class LayersPanel extends AbstractLayersPanel
 		itemPopupMenu.add(deleteAction);
 		itemPopupMenu.addSeparator();
 		itemPopupMenu.add(refreshAction);
+		itemPopupMenu.add(reloadAction);
 
 		final JPopupMenu otherPopupMenu = new JPopupMenu();
 		otherPopupMenu.add(newFolderAction);
@@ -406,6 +417,7 @@ public class LayersPanel extends AbstractLayersPanel
 		}
 
 		refreshAction.setEnabled(layer != null);
+		reloadAction.setEnabled(layer != null);
 	}
 
 	private void refreshSelected()
@@ -428,6 +440,23 @@ public class LayersPanel extends AbstractLayersPanel
 				{
 					getModel().setExpiryTime(layer, System.currentTimeMillis());
 				}
+			}
+		}
+	}
+
+	private void reloadSelected()
+	{
+		TreePath p = tree.getSelectionPath();
+		if (p != null)
+		{
+			Object o = p.getLastPathComponent();
+			if (o instanceof ILayerNode)
+			{
+				ILayerNode layer = (ILayerNode) o;
+				layerEnabler.reloadLayer(layer);
+				
+				tree.scrollPathToVisible(p);
+				tree.getUI().relayout();
 			}
 		}
 	}

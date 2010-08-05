@@ -123,7 +123,7 @@ public class LayerEnabler
 
 				//load the layer if it has been added in this refresh
 				if (added.contains(node))
-					loadLayer(node);
+					loadLayer(node, true);
 			}
 		}
 
@@ -132,7 +132,12 @@ public class LayerEnabler
 		refreshLists();
 	}
 
-	private void loadLayer(final ILayerNode node)
+	public void reloadLayer(ILayerNode node)
+	{
+		loadLayer(node, false);
+	}
+
+	private void loadLayer(final ILayerNode node, boolean onlyIfModified)
 	{
 		URL url = node.getLayerURL();
 		RetrievalHandler handler = new RetrievalHandler()
@@ -144,7 +149,10 @@ public class LayerEnabler
 			}
 		};
 		setLayerLoading(node, true, true);
-		Downloader.downloadIfModified(url, handler, handler);
+		if (onlyIfModified)
+			Downloader.downloadIfModified(url, handler, handler);
+		else
+			Downloader.download(url, handler, false);
 	}
 
 	private void setError(ILayerNode node, Exception error)
