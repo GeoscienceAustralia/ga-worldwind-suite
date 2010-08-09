@@ -26,8 +26,7 @@ public class DoubleClickZoomListener extends MouseAdapter
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
-		if (e.getButton() != MouseEvent.BUTTON1
-				&& e.getButton() != MouseEvent.BUTTON3)
+		if (e.getButton() != MouseEvent.BUTTON1 && e.getButton() != MouseEvent.BUTTON3)
 			return;
 
 		if (!(wwd.getView() instanceof OrbitView))
@@ -48,7 +47,8 @@ public class DoubleClickZoomListener extends MouseAdapter
 				return;
 
 			latlon = top.getPosition();
-		} else
+		}
+		else
 		{
 			// double click
 			if (latlon != null)
@@ -56,20 +56,20 @@ public class DoubleClickZoomListener extends MouseAdapter
 				double zoom = view.getZoom();
 				if (zoom > minElevation)
 				{
-					zoom = Math.max(minElevation,
-							e.getButton() == MouseEvent.BUTTON1 ? zoom / 3
+					zoom =
+							Math.max(minElevation, e.getButton() == MouseEvent.BUTTON1 ? zoom / 3
 									: zoom * 3);
 				}
 				Position beginCenter = view.getCenterPosition();
-				Position endCenter = new Position(latlon, beginCenter
-						.getElevation());
+				Position endCenter = new Position(latlon, beginCenter.getElevation());
+
+				view.stopMovement();
 				view.stopAnimations();
-				view.addAnimator(FlyToOrbitViewAnimator
-						.createFlyToOrbitViewAnimator(view, beginCenter,
-								endCenter, view.getHeading(),
-								view.getHeading(), view.getPitch(), view
-										.getPitch(), view.getZoom(), zoom,
-								1000, true));
+
+				view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view,
+						beginCenter, endCenter, view.getHeading(), view.getHeading(),
+						view.getPitch(), view.getPitch(), view.getZoom(), zoom, 1000, true));
+				e.consume();
 				wwd.redraw();
 				latlon = null;
 			}

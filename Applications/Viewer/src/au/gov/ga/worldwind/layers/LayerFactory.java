@@ -8,7 +8,6 @@ import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.layers.combine.CombineMaskTiledImageLayer;
 import au.gov.ga.worldwind.layers.file.FileTiledImageLayer;
 import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
 import au.gov.ga.worldwind.layers.nearestneighbor.NearestNeighborMaskTiledImageLayer;
@@ -66,10 +65,10 @@ public class LayerFactory extends BasicLayerFactory
 		{
 			layer = new NearestNeighbourTiledImageLayer(domElement, params);
 		}
-		else if ("CombineMaskedTileService".equals(serviceName))
+		/*else if ("CombineMaskedTileService".equals(serviceName))
 		{
 			layer = new CombineMaskTiledImageLayer(domElement, params);
-		}
+		}*/
 		else
 		{
 			layer = super.createTiledImageLayer(domElement, params);
