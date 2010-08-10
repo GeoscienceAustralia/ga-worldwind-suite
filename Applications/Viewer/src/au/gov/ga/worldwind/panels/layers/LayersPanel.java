@@ -43,8 +43,11 @@ import au.gov.ga.worldwind.util.Util;
 
 public class LayersPanel extends AbstractLayersPanel
 {
-	private static final String LAYERS_FILENAME = "layers.xml";
-	private static final File layersFile = new File(Util.getUserDirectory(), LAYERS_FILENAME);
+	protected static final File getLayersFile()
+	{
+		return Util.getSettingsFile("layers.xml");
+	}
+
 	private boolean layersFileExisted;
 
 	private Window window;
@@ -88,7 +91,7 @@ public class LayersPanel extends AbstractLayersPanel
 		INode root = null;
 		try
 		{
-			root = LayerTreePersistance.readFromXML(layersFile);
+			root = LayerTreePersistance.readFromXML(getLayersFile());
 			layersFileExisted = true;
 		}
 		catch (Exception e)
@@ -454,7 +457,7 @@ public class LayersPanel extends AbstractLayersPanel
 			{
 				ILayerNode layer = (ILayerNode) o;
 				layerEnabler.reloadLayer(layer);
-				
+
 				tree.scrollPathToVisible(p);
 				tree.getUI().relayout();
 			}
@@ -491,7 +494,7 @@ public class LayersPanel extends AbstractLayersPanel
 	@Override
 	public void dispose()
 	{
-		LayerTreePersistance.saveToXML(root, layersFile);
+		LayerTreePersistance.saveToXML(root, getLayersFile());
 	}
 
 	private void linkPanels(Collection<ThemePanel> panels)

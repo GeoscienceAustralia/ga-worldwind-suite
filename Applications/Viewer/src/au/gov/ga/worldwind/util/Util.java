@@ -13,6 +13,7 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import au.gov.ga.worldwind.application.GASandpit;
 import au.gov.ga.worldwind.settings.Settings;
 
 public class Util
@@ -28,6 +29,29 @@ public class Util
 		if (!dir.exists())
 			dir.mkdirs();
 		return dir;
+	}
+
+	public static File getSettingsFile(String filename)
+	{
+		if (GASandpit.isSandpitMode())
+		{
+			//Sandpit mode is enabled, so insert '.sandpit' in the filename
+			String prefix, suffix;
+			int lastIndexOfPeriod = filename.lastIndexOf('.');
+			if (lastIndexOfPeriod >= 0)
+			{
+				prefix = filename.substring(0, lastIndexOfPeriod);
+				suffix = filename.substring(lastIndexOfPeriod, filename.length());
+			}
+			else
+			{
+				prefix = filename;
+				suffix = "";
+			}
+			filename = prefix + ".sandpit" + suffix;
+		}
+
+		return new File(getUserDirectory(), filename);
 	}
 
 	public static File urlToFile(URL url)
@@ -311,11 +335,11 @@ public class Util
 	public static LatLon limitLatLon(LatLon latlon, Sector sector)
 	{
 		double lat =
-				limitRange(latlon.latitude.degrees, sector.getMinLatitude().degrees, sector
-						.getMaxLatitude().degrees);
+				limitRange(latlon.latitude.degrees, sector.getMinLatitude().degrees,
+						sector.getMaxLatitude().degrees);
 		double lon =
-				limitRange(latlon.longitude.degrees, sector.getMinLongitude().degrees, sector
-						.getMaxLongitude().degrees);
+				limitRange(latlon.longitude.degrees, sector.getMinLongitude().degrees,
+						sector.getMaxLongitude().degrees);
 
 		return LatLon.fromDegrees(lat, lon);
 	}

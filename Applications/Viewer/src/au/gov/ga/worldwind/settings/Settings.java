@@ -21,8 +21,6 @@ import au.gov.ga.worldwind.util.Util;
 
 public class Settings
 {
-	private final static String SETTINGS_FILENAME = "settings.xml";
-
 	private static Settings instance;
 	private static boolean stereoSupported = false;
 	private static boolean newSettings = false;
@@ -44,7 +42,7 @@ public class Settings
 
 	private static File getSettingsFile()
 	{
-		return new File(Util.getUserDirectory(), SETTINGS_FILENAME);
+		return Util.getSettingsFile("settings.xml");
 	}
 
 	public static boolean isStereoSupported()
