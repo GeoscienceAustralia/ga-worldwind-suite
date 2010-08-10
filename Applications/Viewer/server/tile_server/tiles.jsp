@@ -10,6 +10,14 @@
 	}
 %>
 <%
+	//absolute path of the tiles directory on the web server
+	String path = "/web/html/test_root/docs/resources/images/world-wind/tiles";
+	
+	//return a blank tile if the requested tile doesn't exist?
+	boolean returnBlankOnError = false;
+	//return a blank tile if the requested tile row/col doesn't exist but the level (L) and dataset (T) are valid?
+	boolean returnBlankOnRowColError = true;
+	
 	//get the parameters from the request
 	String X = request.getParameter("X");
 	String Y = request.getParameter("Y");
@@ -17,8 +25,6 @@
 	String T = request.getParameter("T");
 	String F = request.getParameter("F");
 	boolean mask = request.getParameter("mask") != null;
-	String path = "/web/html/test_root/docs/resources/images/world-wind/tiles";
-	boolean returnBlankOnError = false;
 	
 	//if the essential parameters are not defined, just return
 	if(X == null || Y == null || L == null || T == null)
@@ -73,10 +79,12 @@
 		T += "mask";
 	}
 
-	String filepath = path + "/" + T + "/" + L + "/" + paddedInt(Y, 4) + "/" + paddedInt(Y, 4) + "_" + paddedInt(X, 4) + ext;
+	String datasetLevel = path + "/" + T + "/" + L;
+	String rowColumn = paddedInt(Y, 4) + "/" + paddedInt(Y, 4) + "_" + paddedInt(X, 4) + ext;
+	String filepath = datasetLevel + "/" + rowColumn;
 	File file = new File(filepath);
 	
-	if(!file.exists() && returnBlankOnError)
+	if(!file.exists() && (returnBlankOnError || (returnBlankOnRowColError && new File(datasetLevel).exists())))
 	{
 		filepath = path + "/blank" + ext;
 		file = new File(filepath);

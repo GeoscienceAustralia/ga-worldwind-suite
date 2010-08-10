@@ -29,6 +29,7 @@ public class LayerLoader
 		URL query = XMLUtil.getURL(element, "Query", sourceURL);
 
 		Object o = null;
+		Exception exception = null;
 
 		//if (o == null)
 		{
@@ -40,6 +41,8 @@ public class LayerLoader
 			}
 			catch (Exception e)
 			{
+				//if (exception == null)
+				exception = e;
 			}
 		}
 
@@ -54,11 +57,15 @@ public class LayerLoader
 			}
 			catch (Exception e)
 			{
+				if (exception == null)
+					exception = e;
 			}
 		}
 
 		if (o == null)
 		{
+			if (exception != null)
+				throw exception;
 			throw new Exception("Error reading file");
 		}
 
