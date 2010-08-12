@@ -1,4 +1,4 @@
-package layers.metacarta;
+package au.gov.ga.worldwind.animator.layers.metacarta;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;

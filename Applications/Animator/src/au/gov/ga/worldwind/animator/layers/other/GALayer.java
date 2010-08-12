@@ -1,4 +1,4 @@
-package layers.other;
+package au.gov.ga.worldwind.animator.layers.other;
 
 public class GALayer
 {

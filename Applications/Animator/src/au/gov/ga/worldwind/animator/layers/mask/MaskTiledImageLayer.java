@@ -1,4 +1,4 @@
-package layers.mask;
+package au.gov.ga.worldwind.animator.layers.mask;
 
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.WorldWind;
@@ -40,7 +40,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 
-import layers.file.FileRetriever;
+import au.gov.ga.worldwind.animator.layers.file.FileRetriever;
 import nasa.worldwind.layers.TiledImageLayer;
 
 import com.sun.opengl.util.texture.TextureData;

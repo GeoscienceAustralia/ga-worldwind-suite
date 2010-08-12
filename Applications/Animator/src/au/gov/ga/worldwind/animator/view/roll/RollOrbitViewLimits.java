@@ -1,4 +1,4 @@
-package view.roll;
+package au.gov.ga.worldwind.animator.view.roll;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.view.orbit.OrbitViewLimits;

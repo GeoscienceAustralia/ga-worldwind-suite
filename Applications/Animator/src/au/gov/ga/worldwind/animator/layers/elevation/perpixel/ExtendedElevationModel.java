@@ -1,4 +1,4 @@
-package layers.elevation.perpixel;
+package au.gov.ga.worldwind.animator.layers.elevation.perpixel;
 
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.util.BufferWrapper;

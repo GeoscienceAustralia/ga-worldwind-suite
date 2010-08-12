@@ -1,4 +1,4 @@
-package animation;
+package au.gov.ga.worldwind.animator.animation;
 
 import gov.nasa.worldwind.Restorable;
 
@@ -13,7 +13,7 @@ import java.util.TreeMap;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import math.vector.Vector2;
+import au.gov.ga.worldwind.animator.math.vector.Vector2;
 import nasa.worldwind.util.RestorableSupport;
 
 public class Parameter implements Serializable, Restorable

@@ -1,4 +1,4 @@
-package layers.file;
+package au.gov.ga.worldwind.animator.layers.file;
 
 import java.net.URL;
 

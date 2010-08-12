@@ -1,4 +1,4 @@
-package layers.elevation.perpixel;
+package au.gov.ga.worldwind.animator.layers.elevation.perpixel;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -21,7 +21,7 @@ import java.net.URL;
 
 import javax.media.opengl.GL;
 
-import layers.immediate.ImmediateMode;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
 import nasa.worldwind.layers.TiledImageLayer;
 
 import com.sun.opengl.util.texture.Texture;

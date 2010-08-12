@@ -1,4 +1,4 @@
-package application;
+package au.gov.ga.worldwind.animator.application;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -15,9 +15,9 @@ import javax.swing.JFrame;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import math.vector.Vector2;
+import au.gov.ga.worldwind.animator.math.vector.Vector2;
 
-import animation.Parameter;
+import au.gov.ga.worldwind.animator.animation.Parameter;
 
 
 public class ParameterEditor extends JComponent

@@ -1,4 +1,4 @@
-package layers.file;
+package au.gov.ga.worldwind.animator.layers.file;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVList;
@@ -15,7 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
-import layers.immediate.ImmediateBasicElevationModel;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateBasicElevationModel;
 
 public class FileBasicElevationModel extends ImmediateBasicElevationModel
 {

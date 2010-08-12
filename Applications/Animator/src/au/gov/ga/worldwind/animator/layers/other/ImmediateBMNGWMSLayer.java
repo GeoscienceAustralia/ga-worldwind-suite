@@ -1,6 +1,6 @@
-package layers.other;
+package au.gov.ga.worldwind.animator.layers.other;
 
-import layers.immediate.ImmediateWMSTiledImageLayer;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateWMSTiledImageLayer;
 import gov.nasa.worldwind.util.Logging;
 
 public class ImmediateBMNGWMSLayer extends ImmediateWMSTiledImageLayer

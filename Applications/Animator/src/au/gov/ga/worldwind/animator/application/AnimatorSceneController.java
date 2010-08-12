@@ -1,10 +1,10 @@
-package application;
+package au.gov.ga.worldwind.animator.application;
 
 import gov.nasa.worldwind.render.DrawContext;
 
 import java.io.File;
 
-import util.TGAScreenshot;
+import au.gov.ga.worldwind.animator.util.TGAScreenshot;
 
 public class AnimatorSceneController extends QualitySceneController
 {

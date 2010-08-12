@@ -1,7 +1,7 @@
-package layers.other;
+package au.gov.ga.worldwind.animator.layers.other;
 
 import gov.nasa.worldwind.util.Logging;
-import layers.immediate.ImmediateWMSTiledImageLayer;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateWMSTiledImageLayer;
 
 /**
  * @author tag

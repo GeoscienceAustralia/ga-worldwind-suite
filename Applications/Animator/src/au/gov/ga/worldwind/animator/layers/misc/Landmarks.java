@@ -1,4 +1,4 @@
-package layers.misc;
+package au.gov.ga.worldwind.animator.layers.misc;
 
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import util.FileUtil;
+import au.gov.ga.worldwind.animator.util.FileUtil;
 
 public class Landmarks extends RenderableLayer
 {

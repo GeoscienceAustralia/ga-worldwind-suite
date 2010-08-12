@@ -1,4 +1,4 @@
-package layers.immediate;
+package au.gov.ga.worldwind.animator.layers.immediate;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-import layers.elevation.perpixel.ExtendedBasicElevationModel;
+import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModel;
 
 public class ImmediateBasicElevationModel extends ExtendedBasicElevationModel
 {

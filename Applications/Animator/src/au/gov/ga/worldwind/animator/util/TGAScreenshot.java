@@ -1,4 +1,4 @@
-package util;
+package au.gov.ga.worldwind.animator.util;
 
 import java.io.File;
 import java.io.IOException;

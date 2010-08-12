@@ -1,4 +1,4 @@
-package application;
+package au.gov.ga.worldwind.animator.application;
 
 import gov.nasa.worldwind.BasicSceneController;
 import gov.nasa.worldwind.render.DrawContext;

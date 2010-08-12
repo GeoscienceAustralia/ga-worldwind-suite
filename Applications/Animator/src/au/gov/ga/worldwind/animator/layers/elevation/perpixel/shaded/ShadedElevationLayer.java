@@ -1,4 +1,4 @@
-package layers.elevation.perpixel.shaded;
+package au.gov.ga.worldwind.animator.layers.elevation.perpixel.shaded;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -32,8 +32,8 @@ import java.net.URL;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLException;
 
-import layers.elevation.perpixel.ElevationLayer;
-import layers.elevation.perpixel.ExtendedElevationModel;
+import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ElevationLayer;
+import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedElevationModel;
 
 import com.sun.opengl.util.texture.SubclassableTexture;
 import com.sun.opengl.util.texture.Texture;

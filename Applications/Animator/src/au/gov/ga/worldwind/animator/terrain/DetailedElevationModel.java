@@ -1,4 +1,4 @@
-package terrain;
+package au.gov.ga.worldwind.animator.terrain;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;

@@ -1,8 +1,8 @@
-package math.bezier;
+package au.gov.ga.worldwind.animator.math.bezier;
 
 import java.io.Serializable;
 
-import math.vector.Vector;
+import au.gov.ga.worldwind.animator.math.vector.Vector;
 
 
 public class Bezier<V extends Vector<V>> implements Serializable

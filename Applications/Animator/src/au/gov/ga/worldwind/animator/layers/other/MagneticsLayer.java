@@ -1,4 +1,4 @@
-package layers.other;
+package au.gov.ga.worldwind.animator.layers.other;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -7,8 +7,8 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.immediate.ImmediateMaskTiledImageLayer;
-import layers.mask.MaskTiledImageLayer;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMaskTiledImageLayer;
+import au.gov.ga.worldwind.animator.layers.mask.MaskTiledImageLayer;
 
 public class MagneticsLayer extends ImmediateMaskTiledImageLayer
 {

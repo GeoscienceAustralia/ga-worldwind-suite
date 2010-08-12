@@ -1,4 +1,4 @@
-package util;
+package au.gov.ga.worldwind.animator.util;
 
 import java.awt.Color;
 import java.awt.Dimension;

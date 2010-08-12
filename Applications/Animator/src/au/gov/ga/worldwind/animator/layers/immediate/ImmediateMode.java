@@ -1,4 +1,4 @@
-package layers.immediate;
+package au.gov.ga.worldwind.animator.layers.immediate;
 
 public class ImmediateMode
 {

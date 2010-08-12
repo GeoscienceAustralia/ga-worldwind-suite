@@ -1,4 +1,4 @@
-package layers.file;
+package au.gov.ga.worldwind.animator.layers.file;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -12,9 +12,9 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import layers.elevation.perpixel.ExtendedBasicElevationModel;
 import nasa.worldwind.layers.TiledImageLayer;
-import util.FileUtil;
+import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModel;
+import au.gov.ga.worldwind.animator.util.FileUtil;
 
 public class FileLayer
 {

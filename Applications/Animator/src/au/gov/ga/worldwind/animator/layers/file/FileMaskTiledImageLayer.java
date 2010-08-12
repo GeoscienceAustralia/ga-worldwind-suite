@@ -1,8 +1,8 @@
-package layers.file;
+package au.gov.ga.worldwind.animator.layers.file;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.LevelSet;
-import layers.immediate.ImmediateMaskTiledImageLayer;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMaskTiledImageLayer;
 
 public class FileMaskTiledImageLayer extends ImmediateMaskTiledImageLayer
 {

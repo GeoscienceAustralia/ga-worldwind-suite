@@ -1,4 +1,4 @@
-package layers.sky;
+package au.gov.ga.worldwind.animator.layers.sky;
 
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.geom.Angle;
@@ -18,7 +18,7 @@ import java.nio.IntBuffer;
 
 import javax.media.opengl.GL;
 
-import view.roll.RollOrbitView;
+import au.gov.ga.worldwind.animator.view.roll.RollOrbitView;
 
 import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.texture.Texture;

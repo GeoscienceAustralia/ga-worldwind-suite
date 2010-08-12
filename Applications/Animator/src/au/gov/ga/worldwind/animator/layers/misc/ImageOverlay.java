@@ -1,4 +1,4 @@
-package layers.misc;
+package au.gov.ga.worldwind.animator.layers.misc;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.exception.WWRuntimeException;

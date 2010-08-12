@@ -1,4 +1,4 @@
-package math.vector;
+package au.gov.ga.worldwind.animator.math.vector;
 
 public class Vector3 implements Vector<Vector3>
 {

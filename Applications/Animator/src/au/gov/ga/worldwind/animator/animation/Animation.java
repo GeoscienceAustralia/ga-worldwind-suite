@@ -1,4 +1,4 @@
-package animation;
+package au.gov.ga.worldwind.animator.animation;
 
 import gov.nasa.worldwind.Restorable;
 import gov.nasa.worldwind.geom.Position;
@@ -13,10 +13,10 @@ import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import math.vector.Vector2;
-import math.vector.Vector3;
+import au.gov.ga.worldwind.animator.math.vector.Vector2;
+import au.gov.ga.worldwind.animator.math.vector.Vector3;
 import nasa.worldwind.util.RestorableSupport;
-import util.FileUtil;
+import au.gov.ga.worldwind.animator.util.FileUtil;
 
 public class Animation implements Serializable, ChangeListener,
 		Restorable

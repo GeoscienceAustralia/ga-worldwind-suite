@@ -1,4 +1,4 @@
-package application;
+package au.gov.ga.worldwind.animator.application;
 
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
@@ -57,30 +57,30 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import layers.depth.DepthLayer;
-import layers.elevation.perpixel.ExtendedBasicElevationModel;
-import layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
-import layers.elevation.perpixel.ExtendedElevationModel;
-import layers.elevation.perpixel.shaded.ShadedElevationLayer;
-import layers.elevation.perpixel.shadows.ShadowsElevationLayer;
-import layers.elevation.pervetex.ElevationTesselator;
-import layers.file.FileLayer;
-import layers.immediate.ImmediateMode;
-import layers.immediate.ImmediateRetrievalService;
-import layers.immediate.ImmediateTaskService;
-import layers.metacarta.MetacartaCoastlineLayer;
-import layers.metacarta.MetacartaStateBoundariesLayer;
-import layers.other.GravityLayer;
-import layers.other.ImmediateBMNGWMSLayer;
-import layers.other.ImmediateLandsatI3WMSLayer;
-import layers.other.MagneticsLayer;
+import au.gov.ga.worldwind.animator.layers.depth.DepthLayer;
+import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModel;
+import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
+import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedElevationModel;
+import au.gov.ga.worldwind.animator.layers.elevation.perpixel.shaded.ShadedElevationLayer;
+import au.gov.ga.worldwind.animator.layers.elevation.perpixel.shadows.ShadowsElevationLayer;
+import au.gov.ga.worldwind.animator.layers.elevation.pervetex.ElevationTesselator;
+import au.gov.ga.worldwind.animator.layers.file.FileLayer;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateRetrievalService;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateTaskService;
+import au.gov.ga.worldwind.animator.layers.metacarta.MetacartaCoastlineLayer;
+import au.gov.ga.worldwind.animator.layers.metacarta.MetacartaStateBoundariesLayer;
+import au.gov.ga.worldwind.animator.layers.other.GravityLayer;
+import au.gov.ga.worldwind.animator.layers.other.ImmediateBMNGWMSLayer;
+import au.gov.ga.worldwind.animator.layers.other.ImmediateLandsatI3WMSLayer;
+import au.gov.ga.worldwind.animator.layers.other.MagneticsLayer;
 import nasa.worldwind.awt.WorldWindowGLCanvas;
-import terrain.DetailedElevationModel;
-import util.ChangeFrameListener;
-import util.FileUtil;
-import util.FrameSlider;
-import view.roll.BasicRollOrbitView;
-import animation.Animation;
+import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
+import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
+import au.gov.ga.worldwind.animator.util.FileUtil;
+import au.gov.ga.worldwind.animator.util.FrameSlider;
+import au.gov.ga.worldwind.animator.view.roll.BasicRollOrbitView;
+import au.gov.ga.worldwind.animator.animation.Animation;
 
 public class Animator
 {

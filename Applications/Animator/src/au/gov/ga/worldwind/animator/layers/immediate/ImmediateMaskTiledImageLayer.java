@@ -1,4 +1,4 @@
-package layers.immediate;
+package au.gov.ga.worldwind.animator.layers.immediate;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -7,7 +7,7 @@ import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
-import layers.mask.MaskTiledImageLayer;
+import au.gov.ga.worldwind.animator.layers.mask.MaskTiledImageLayer;
 
 public class ImmediateMaskTiledImageLayer extends MaskTiledImageLayer
 {

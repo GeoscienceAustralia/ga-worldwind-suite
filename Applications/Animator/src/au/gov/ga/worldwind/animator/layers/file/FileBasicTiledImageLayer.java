@@ -1,4 +1,4 @@
-package layers.file;
+package au.gov.ga.worldwind.animator.layers.file;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVList;
@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
 
-import layers.immediate.ImmediateBasicTiledImageLayer;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateBasicTiledImageLayer;
 import nasa.worldwind.layers.BasicTiledImageLayer;
 
 public class FileBasicTiledImageLayer extends ImmediateBasicTiledImageLayer

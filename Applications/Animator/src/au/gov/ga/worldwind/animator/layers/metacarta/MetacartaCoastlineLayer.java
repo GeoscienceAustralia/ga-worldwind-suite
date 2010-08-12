@@ -1,10 +1,10 @@
-package layers.metacarta;
+package au.gov.ga.worldwind.animator.layers.metacarta;
 
 import gov.nasa.worldwind.render.DrawContext;
 
 import javax.media.opengl.GL;
 
-import layers.immediate.ImmediateBasicTiledImageLayer;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateBasicTiledImageLayer;
 
 public class MetacartaCoastlineLayer extends ImmediateBasicTiledImageLayer
 {
