@@ -43,12 +43,11 @@ import au.gov.ga.worldwind.util.Util;
 
 public class LayersPanel extends AbstractLayersPanel
 {
-	protected static final File getLayersFile()
-	{
-		return Util.getSettingsFile("layers.xml");
-	}
+	private static final String DEFAULT_LAYERS_PERSISTANCE_FILENAME = "layers.xml";
 
 	private boolean layersFileExisted;
+	private boolean persistLayers;
+	private String layersPersistanceFilename = DEFAULT_LAYERS_PERSISTANCE_FILENAME;
 
 	private Window window;
 
@@ -63,6 +62,12 @@ public class LayersPanel extends AbstractLayersPanel
 	{
 		super();
 		setDisplayName("Layers");
+	}
+
+	@Override
+	public void setup(Theme theme)
+	{
+		super.setup(theme);
 
 		tree.addTreeSelectionListener(new TreeSelectionListener()
 		{
@@ -77,6 +82,15 @@ public class LayersPanel extends AbstractLayersPanel
 		treeSelectionChanged();
 		enableActions();
 		createPopupMenus();
+
+		linkPanels(theme.getPanels());
+		setupDrag();
+
+		if (!layersFileExisted)
+			for (IDataset dataset : theme.getDatasets())
+				addDefaultLayersFromDataset(dataset);
+
+		window = SwingUtilities.getWindowAncestor(this);
 	}
 
 	@Override
@@ -86,16 +100,26 @@ public class LayersPanel extends AbstractLayersPanel
 	}
 
 	@Override
-	protected INode createRootNode()
+	protected INode createRootNode(Theme theme)
 	{
-		INode root = null;
-		try
+		persistLayers = theme.isPersistLayers();
+		if (theme.getLayerPersistanceFilename() != null
+				&& theme.getLayerPersistanceFilename().length() > 0)
 		{
-			root = LayerTreePersistance.readFromXML(getLayersFile());
-			layersFileExisted = true;
+			layersPersistanceFilename = theme.getLayerPersistanceFilename();
 		}
-		catch (Exception e)
+
+		INode root = null;
+		if (persistLayers)
 		{
+			try
+			{
+				root = LayerTreePersistance.readFromXML(getLayersFile());
+				layersFileExisted = true;
+			}
+			catch (Exception e)
+			{
+			}
 		}
 		if (root == null)
 		{
@@ -478,23 +502,15 @@ public class LayersPanel extends AbstractLayersPanel
 	}
 
 	@Override
-	public void setup(Theme theme)
-	{
-		super.setup(theme);
-		linkPanels(theme.getPanels());
-		setupDrag();
-
-		if (!layersFileExisted)
-			for (IDataset dataset : theme.getDatasets())
-				addDefaultLayersFromDataset(dataset);
-
-		window = SwingUtilities.getWindowAncestor(this);
-	}
-
-	@Override
 	public void dispose()
 	{
-		LayerTreePersistance.saveToXML(root, getLayersFile());
+		if (persistLayers)
+			LayerTreePersistance.saveToXML(root, getLayersFile());
+	}
+
+	protected File getLayersFile()
+	{
+		return new File(Util.getUserDirectory(), layersPersistanceFilename);
 	}
 
 	private void linkPanels(Collection<ThemePanel> panels)

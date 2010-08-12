@@ -96,6 +96,7 @@ import au.gov.ga.worldwind.theme.ThemeOpener.ThemeOpenDelegate;
 import au.gov.ga.worldwind.theme.ThemePiece.ThemePieceAdapter;
 import au.gov.ga.worldwind.theme.hud.WorldMapHUD;
 import au.gov.ga.worldwind.util.BasicAction;
+import au.gov.ga.worldwind.util.DefaultLauncher;
 import au.gov.ga.worldwind.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.SelectableAction;
@@ -103,6 +104,8 @@ import au.gov.ga.worldwind.util.Util;
 
 public class Application
 {
+	private static final String HELP_URL = "http://www.ga.gov.au/apps/world-wind/help/index.jsp";
+
 	static
 	{
 		if (Configuration.isMacOS())
@@ -125,14 +128,14 @@ public class Application
 		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
 		Configuration
 				.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
-		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, StereoSceneController.class
-				.getName());
+		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME,
+				StereoSceneController.class.getName());
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
-		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class
-				.getName());
-		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, WireframeRectangularTessellator.class
-				.getName());
+		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
+				ExtendedRetrievalService.class.getName());
+		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
+				WireframeRectangularTessellator.class.getName());
 	}
 
 	public static void main(String[] args)
@@ -178,6 +181,20 @@ public class Application
 			{
 			}
 		}
+		if (themeUrl == null)
+		{
+			File file = new File("theme.xml");
+			if (file.exists())
+			{
+				try
+				{
+					themeUrl = file.toURI().toURL();
+				}
+				catch (MalformedURLException e)
+				{
+				}
+			}
+		}
 		ThemeOpenDelegate delegate = new ThemeOpenDelegate()
 		{
 			@Override
@@ -205,7 +222,11 @@ public class Application
 		if (theme.getInitialPitch() != null)
 			Configuration.setValue(AVKey.INITIAL_PITCH, theme.getInitialPitch());
 
-		WorldWind.getDataFileStore().addLocation("cache", false);
+		if (theme.getCacheLocations() != null)
+		{
+			for (String location : theme.getCacheLocations())
+				WorldWind.getDataFileStore().addLocation(location, false);
+		}
 
 		return new Application(theme);
 	}
@@ -237,6 +258,7 @@ public class Application
 	private SelectableAction wireframeAction;
 	private SelectableAction wireframeDepthAction;
 	private BasicAction settingsAction;
+	private BasicAction helpAction;
 	private BasicAction controlsAction;
 	private BasicAction aboutAction;
 
@@ -407,8 +429,8 @@ public class Application
 		});
 
 		offlineAction =
-				new SelectableAction("Work offline", Icons.offline.getIcon(), WorldWind
-						.isOfflineMode());
+				new SelectableAction("Work offline", Icons.offline.getIcon(),
+						WorldWind.isOfflineMode());
 		offlineAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -471,8 +493,8 @@ public class Application
 
 		final Tessellator tess = wwd.getModel().getGlobe().getTessellator();
 		skirtAction =
-				new SelectableAction("Render tile skirts", Icons.skirts.getIcon(), tess
-						.isMakeTileSkirts());
+				new SelectableAction("Render tile skirts", Icons.skirts.getIcon(),
+						tess.isMakeTileSkirts());
 		skirtAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -544,6 +566,22 @@ public class Application
 			}
 		});
 
+		helpAction = new BasicAction("Help", Icons.help.getIcon());
+		helpAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				try
+				{
+					DefaultLauncher.openURL(GASandpit.replace(new URL(HELP_URL)));
+				}
+				catch (MalformedURLException e1)
+				{
+				}
+			}
+		});
+
 		controlsAction = new BasicAction("Controls...", Icons.keyboard.getIcon());
 		controlsAction.addActionListener(new ActionListener()
 		{
@@ -554,7 +592,7 @@ public class Application
 			}
 		});
 
-		aboutAction = new BasicAction("About", Icons.help.getIcon());
+		aboutAction = new BasicAction("About", Icons.about.getIcon());
 		aboutAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -578,8 +616,8 @@ public class Application
 		if (panel != null)
 		{
 			ILayerDefinition layer =
-					FileLayerCreator.createDefinition(frame, createLayerFromDirectoryAction
-							.getToolTipText(), panel.getIcon());
+					FileLayerCreator.createDefinition(frame,
+							createLayerFromDirectoryAction.getToolTipText(), panel.getIcon());
 			if (layer != null)
 			{
 				panel.addLayer(layer);
@@ -966,6 +1004,7 @@ public class Application
 		menu = new JMenu("Help");
 		menuBar.add(menu);
 
+		menu.add(helpAction);
 		menu.add(controlsAction);
 		menu.add(aboutAction);
 

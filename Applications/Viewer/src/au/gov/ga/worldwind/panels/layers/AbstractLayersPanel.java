@@ -48,8 +48,12 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 	public AbstractLayersPanel()
 	{
 		super(new BorderLayout());
+	}
 
-		root = createRootNode();
+	@Override
+	public void setup(Theme theme)
+	{
+		root = createRootNode(theme);
 		layerEnabler = new LayerEnabler();
 		tree = new LayerTree(root, layerEnabler);
 		layerEnabler.setTree(tree);
@@ -118,16 +122,12 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		});
 
 		enableComponents();
-	}
-
-	@Override
-	public void setup(Theme theme)
-	{
+		
 		wwd = theme.getWwd();
 		layerEnabler.setWwd(theme.getWwd());
 	}
 
-	protected abstract INode createRootNode();
+	protected abstract INode createRootNode(Theme theme);
 
 	protected void createActions()
 	{

@@ -9,6 +9,7 @@ import javax.swing.ImageIcon;
 
 public enum Icons
 {
+	about("about.gif"),
 	add("add.gif"),
 	bookmark("bookmark.gif"),
 	category("category.gif"),

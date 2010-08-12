@@ -25,6 +25,10 @@ public class ThemeFactory
 		theme.setToolBar(XMLUtil.getBoolean(element, "ToolBar", false));
 		theme.setStatusBar(XMLUtil.getBoolean(element, "StatusBar", false));
 
+		theme.setPersistLayers(XMLUtil.getBoolean(element, "PersistLayers", true));
+		theme.setLayerPersistanceFilename(XMLUtil.getText(element, "LayersFilename"));
+		theme.setCacheLocations(parseCacheLocations(element, "CacheLocation"));
+
 		theme.setHUDs(parseHUDs(element, "HUD"));
 		theme.setPanels(parsePanels(element, "Panel"));
 		theme.setDatasets(parseDatasets(element, "Dataset", context));
@@ -39,6 +43,22 @@ public class ThemeFactory
 		theme.setFieldOfView(XMLUtil.getDouble(element, "FieldOfView", null));
 
 		return theme;
+	}
+
+	private static List<String> parseCacheLocations(Element context, String path)
+	{
+		List<String> locations = new ArrayList<String>();
+		Element[] elements = XMLUtil.getElements(context, path, null);
+		if (elements != null)
+		{
+			for (Element element : elements)
+			{
+				String location = element.getTextContent();
+				if (location != null && location.length() > 0)
+					locations.add(location);
+			}
+		}
+		return locations;
 	}
 
 	private static List<ThemeHUD> parseHUDs(Element context, String path)

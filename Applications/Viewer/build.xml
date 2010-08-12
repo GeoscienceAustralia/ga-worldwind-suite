@@ -17,7 +17,6 @@
 	<property name="ww_signed_jar" value="worldwind.jar" />
 
 	<property name="executable_jar" value="executable.jar" />
-	<property name="offline_jar" value="offline.jar" />
 
 	<property name="keystore_file" value="${basedir}/keystore" />
 	<property name="keystore_alias" value="selfsigned" />
@@ -93,19 +92,6 @@
 		</zip>
 
 		<jar destfile="${executable_dir}/${executable_jar}">
-			<fileset dir="${build_dir}" />
-			<fileset dir="${jogl_dir}" includes="native/**" />
-
-			<zipfileset src="${executable_dir}/temp.zip">
-				<patternset refid="manifest_exclude" />
-			</zipfileset>
-
-			<manifest>
-				<attribute name="Main-Class" value="au.gov.ga.worldwind.application.Executable" />
-			</manifest>
-		</jar>
-
-		<jar destfile="${executable_dir}/${offline_jar}">
 			<fileset dir="${build_dir}" />
 			<fileset dir="${jogl_dir}" includes="native/**" />
 

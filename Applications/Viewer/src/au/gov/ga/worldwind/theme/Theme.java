@@ -18,6 +18,10 @@ public interface Theme extends Disposable
 	public boolean hasToolBar();
 	public boolean hasStatusBar();
 	
+	public boolean isPersistLayers();
+	public String getLayerPersistanceFilename();
+	public List<String> getCacheLocations();
+	
 	public List<IDataset> getDatasets();
 	public List<ThemeLayer> getLayers();
 	public List<ThemeHUD> getHUDs();

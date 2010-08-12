@@ -44,7 +44,7 @@ public class ThemeLayersPanel extends AbstractLayersPanel
 	}
 
 	@Override
-	protected INode createRootNode()
+	protected INode createRootNode(Theme theme)
 	{
 		return new FolderNode(null, null, null, true);
 	}

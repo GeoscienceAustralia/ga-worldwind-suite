@@ -16,6 +16,11 @@ public class BasicTheme implements Theme
 	private boolean menuBar;
 	private boolean toolBar;
 	private boolean statusBar;
+	
+	private boolean persistLayers;
+	private String layerPersistanceFilename;
+	private List<String> cacheLocations;
+	
 	private List<IDataset> datasets;
 	private List<ThemeLayer> layers;
 	private List<ThemeHUD> HUDs;
@@ -115,6 +120,39 @@ public class BasicTheme implements Theme
 	public void setStatusBar(boolean statusBar)
 	{
 		this.statusBar = statusBar;
+	}
+
+	@Override
+	public boolean isPersistLayers()
+	{
+		return persistLayers;
+	}
+
+	public void setPersistLayers(boolean persistLayers)
+	{
+		this.persistLayers = persistLayers;
+	}
+
+	@Override
+	public String getLayerPersistanceFilename()
+	{
+		return layerPersistanceFilename;
+	}
+
+	public void setLayerPersistanceFilename(String layerPersistanceFilename)
+	{
+		this.layerPersistanceFilename = layerPersistanceFilename;
+	}
+
+	@Override
+	public List<String> getCacheLocations()
+	{
+		return cacheLocations;
+	}
+
+	public void setCacheLocations(List<String> cacheLocations)
+	{
+		this.cacheLocations = cacheLocations;
 	}
 
 	@Override
