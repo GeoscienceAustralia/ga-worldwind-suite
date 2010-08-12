@@ -1,0 +1,104 @@
+<?xml version="1.0" ?>
+
+<project name="Animator" basedir="." default="executables">
+
+	<property name="application_version" value="2.0-SNAPSHOT"/>
+	<property name="application_class" value="application.Animator"/>
+	<property name="application_jar" value="ga-animator-${application_version}.jar" />
+	<property name="application_uber_jar" value="ga-animator-full-${application_version}.jar" />
+	
+	<property name="worldwind_version" value="0.6.442.13312"/>
+	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-${worldwind_version}" />
+	<property name="worldwind_jar" value="worldwind.jar" />
+	
+	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
+	<property name="jogl_windows_location" value="./lib/native/windows-i586" />
+	
+	<property name="src_dir" value="${basedir}/src" />
+	<property name="build_dir" value="${basedir}/build" />
+	<property name="target_dir" value="${basedir}/target" />
+	<property name="lib_dir" value="${target_dir}/lib" />
+	
+	<property name="run_file" value="run.bat"/>
+
+	<property name="javac_debug" value="false" />
+
+	<path id="classpath">
+		<fileset dir="${worldwind_dir}">
+			<include name="${worldwind_jar}" />
+		</fileset>
+		<fileset dir="${jogl_dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<patternset id="manifest_exclude">
+		<exclude name="META-INF/*.DSA" />
+		<exclude name="META-INF/*.RSA" />
+		<exclude name="META-INF/*.SF" />
+		<exclude name="META-INF/MANIFEST.MF" />
+		<exclude name="META-INF/INDEX.LIST" />
+	</patternset>
+
+	<target name="clean">
+		<delete dir="${build_dir}" />
+		<delete dir="${target_dir}" />
+	</target>
+
+	<target name="build">
+		<mkdir dir="${build_dir}" />
+		<copy todir="${build_dir}">
+			<fileset dir="${src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<javac source="1.6" target="1.6" srcdir="${src_dir}" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" />
+	</target>
+
+	<target name="package" depends="build">
+		<jar destfile="${build_dir}/${application_jar}" basedir="${build_dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${application_class}" />
+			</manifest>
+		</jar>
+		<jar destfile="${build_dir}/${worldwind_jar}">
+			<zipfileset src="${worldwind_dir}/${worldwind_jar}">
+				<patternset refid="manifest_exclude" />
+			</zipfileset>
+		</jar>
+	</target>
+
+	<target name="executables" depends="clean, build, package">
+		<mkdir dir="${target_dir}" />
+		
+		<zip destfile="${target_dir}/temp.zip">
+			<zipgroupfileset dir="${jogl_dir}">
+				<include name="**/*.jar" />
+			</zipgroupfileset>
+			<zipgroupfileset dir="${worldwind_dir}">
+				<include name="${worldwind_jar}" />
+			</zipgroupfileset>
+		</zip>
+
+		<jar destfile="${target_dir}/${application_uber_jar}">
+			<fileset dir="${build_dir}" excludes="**/*.jar,**/*.zip"/>
+			<zipfileset src="${target_dir}/temp.zip">
+				<patternset refid="manifest_exclude" />
+			</zipfileset>
+
+			<manifest>
+				<attribute name="Main-Class" value="${application_class}" />
+			</manifest>
+		</jar>
+
+		<delete file="${target_dir}/temp.zip" />
+		
+		<copy todir="${lib_dir}">
+			<fileset dir="${jogl_dir}" includes="native/**" />
+		</copy>
+		
+		<echo file="${target_dir}/${run_file}">java -Djava.library.path=${jogl_windows_location} -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${application_uber_jar}</echo>
+		
+	</target>
+
+</project>
