@@ -42,6 +42,7 @@ public class GDALTile
 	private int bufferType;
 	private int bufferTypeSize;
 	private boolean floatingPoint;
+	private boolean isBlank;
 
 	private Rectangle dataRectangle;
 	private int bufferBandCount;
@@ -364,6 +365,8 @@ public class GDALTile
 			fillAlphaChannel(buffer, parameters.size, dataRectangle, bufferTypeSize);
 		}
 
+		isBlank = isEqual(parameters.noData);
+
 		//fill the pixels outside the dataset extents
 		fillOutside(parameters.noData);
 
@@ -679,7 +682,73 @@ public class GDALTile
 		return img;
 	}
 
-	private void fillOutside(NullableNumberArray values) throws TilerException
+	private boolean isEqual(NullableNumberArray values)
+	{
+		if (values == null)
+			return false;
+
+		if (values.length() != bufferBandCount)
+			throw new IllegalArgumentException("Array size does not equal band count");
+
+		boolean allNull = true;
+		for (int b = 0; b < bufferBandCount; b++)
+		{
+			if (floatingPoint)
+			{
+				if (values.getDouble(b) == null)
+					continue;
+			}
+			else
+			{
+				if (values.getLong(b) == null)
+					continue;
+			}
+
+			allNull = false;
+			break;
+		}
+
+		if (allNull)
+			return false;
+
+		for (int b = 0; b < bufferBandCount; b++)
+		{
+			if (floatingPoint)
+			{
+				if (values.getDouble(b) == null)
+					continue;
+			}
+			else
+			{
+				if (values.getLong(b) == null)
+					continue;
+			}
+
+			for (int x = 0; x < dataRectangle.width; x++)
+			{
+				for (int y = 0; y < dataRectangle.height; y++)
+				{
+					int index =
+							getBufferIndex(x, y, b, dataRectangle.width, dataRectangle.height)
+									* bufferTypeSize;
+					if (floatingPoint)
+					{
+						if (getDoubleValue(index, buffer, bufferType) != values.getDouble(b))
+							return false;
+					}
+					else
+					{
+						if (getLongValue(index, buffer, bufferType) != values.getLong(b))
+							return false;
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private void fillOutside(NullableNumberArray values)
 	{
 		if (values == null)
 			return;
@@ -860,6 +929,11 @@ public class GDALTile
 	protected static int getBufferIndex(int x, int y, int b, int width, int height)
 	{
 		return b * width * height + y * width + x;
+	}
+
+	public boolean isBlank()
+	{
+		return isBlank;
 	}
 
 	public ByteBuffer getBuffer()

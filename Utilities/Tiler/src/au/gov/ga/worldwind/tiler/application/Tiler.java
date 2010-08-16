@@ -11,7 +11,6 @@ import java.nio.channels.FileChannel.MapMode;
 
 import javax.imageio.ImageIO;
 
-
 import org.gdal.gdal.Dataset;
 
 import au.gov.ga.worldwind.tiler.gdal.GDALTile;
@@ -35,12 +34,12 @@ public class Tiler
 	public static void tileImages(Dataset dataset, boolean reprojectIfRequired,
 			boolean linearInterpolationIfRequired, Sector sector, int level, int tilesize,
 			double lzts, String imageFormat, boolean addAlpha, NullableNumberArray outsideValues,
-			MinMaxArray[] replaceMinMaxs, NullableNumberArray replace,
+			boolean ignoreBlank, MinMaxArray[] replaceMinMaxs, NullableNumberArray replace,
 			NullableNumberArray otherwise, File outputDirectory, ProgressReporter progress)
 	{
 		tile(TilingType.Images, dataset, reprojectIfRequired, linearInterpolationIfRequired, null,
 				sector, level, tilesize, lzts, imageFormat, addAlpha, -1, -1, outsideValues,
-				replaceMinMaxs, replace, otherwise, null, outputDirectory, progress);
+				ignoreBlank, replaceMinMaxs, replace, otherwise, null, outputDirectory, progress);
 	}
 
 	public static void tileElevations(Dataset dataset, boolean reprojectIfRequired,
@@ -52,22 +51,25 @@ public class Tiler
 	{
 		tile(TilingType.Elevations, dataset, reprojectIfRequired, linearInterpolationIfRequired,
 				null, sector, level, tilesize, lzts, null, false, bufferType, band, outsideValues,
-				replaceMinMaxs, replace, otherwise, minMax, outputDirectory, progress);
+				false, replaceMinMaxs, replace, otherwise, minMax, outputDirectory, progress);
 	}
 
 	public static void tileMapnik(File mapFile, Sector sector, int level, int tilesize,
-			double lzts, String imageFormat, File outputDirectory, ProgressReporter progress)
+			double lzts, String imageFormat, boolean ignoreBlank, File outputDirectory,
+			ProgressReporter progress)
 	{
 		tile(TilingType.Mapnik, null, false, false, mapFile, sector, level, tilesize, lzts,
-				imageFormat, false, -1, -1, null, null, null, null, null, outputDirectory, progress);
+				imageFormat, false, -1, -1, null, ignoreBlank, null, null, null, null,
+				outputDirectory, progress);
 	}
 
 	private static void tile(TilingType type, Dataset dataset, boolean reprojectIfRequired,
 			boolean linearInterpolationIfRequired, File mapFile, Sector sector, int level,
 			int tilesize, double lzts, String imageFormat, boolean addAlpha, int bufferType,
-			int band, NullableNumberArray outsideValues, MinMaxArray[] replaceMinMaxs,
-			NullableNumberArray replace, NullableNumberArray otherwise, NumberArray minMax,
-			File outputDirectory, ProgressReporter progress)
+			int band, NullableNumberArray outsideValues, boolean ignoreBlank,
+			MinMaxArray[] replaceMinMaxs, NullableNumberArray replace,
+			NullableNumberArray otherwise, NumberArray minMax, File outputDirectory,
+			ProgressReporter progress)
 	{
 		progress.getLogger().info("Generating tiles...");
 
@@ -113,8 +115,8 @@ public class Tiler
 				Sector s = new Sector(lat1, lon1, lat2, lon2);
 
 				final File dst =
-						new File(rowDir, Util.paddedInt(Y, 4) + "_" + Util.paddedInt(X, 4)
-								+ "." + outputExt);
+						new File(rowDir, Util.paddedInt(Y, 4) + "_" + Util.paddedInt(X, 4) + "."
+								+ outputExt);
 				if (dst.exists())
 				{
 					progress.getLogger().warning(dst.getAbsolutePath() + " already exists");
@@ -125,8 +127,8 @@ public class Tiler
 					{
 						if (type == TilingType.Mapnik)
 						{
-							MapnikUtil.tile(s, tilesize, tilesize, mapFile, dst, progress
-									.getLogger());
+							MapnikUtil.tile(s, tilesize, tilesize, ignoreBlank, mapFile, dst,
+									progress.getLogger());
 						}
 						else
 						{
@@ -142,14 +144,13 @@ public class Tiler
 							parameters.minMaxs = replaceMinMaxs;
 							parameters.replacement = replace;
 							parameters.otherwise = otherwise;
-							
+							parameters.ignoreBlank = ignoreBlank;
+
 							GDALTile tile = new GDALTile(parameters);
 							if (type == TilingType.Elevations)
 							{
 								tile = tile.convertToType(bufferType);
-							}
-							if (type == TilingType.Elevations)
-							{
+
 								tile.updateMinMax(minMax, outsideValues);
 
 								ByteBuffer bb = tile.getBuffer();
@@ -171,8 +172,11 @@ public class Tiler
 							}
 							else
 							{
-								BufferedImage image = tile.getAsImage();
-								ImageIO.write(image, outputExt, dst);
+								if (!(parameters.ignoreBlank && tile.isBlank()))
+								{
+									BufferedImage image = tile.getAsImage();
+									ImageIO.write(image, outputExt, dst);
+								}
 							}
 						}
 					}

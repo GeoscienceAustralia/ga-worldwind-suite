@@ -26,6 +26,7 @@ public class GDALTileParameters
 	public int selectedBand = -1;
 	public boolean reprojectIfRequired = false;
 	public boolean bilinearInterpolationIfRequired = true;
+	public boolean ignoreBlank = true;
 
 	//Use noData values for:
 	//1. Pixels outside dataset extents

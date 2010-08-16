@@ -155,6 +155,7 @@ public class Application implements UncaughtExceptionHandler
 	private JCheckBox outsideCheck;
 	private JPanel outsidePanel;
 	private JTextField[] outsideFields = new JTextField[0];
+	private JCheckBox ignoreBlankCheck;
 	private JLabel levelsLabel;
 	private JSpinner levelsSpinner;
 	private JCheckBox overviewsCheck;
@@ -1021,6 +1022,7 @@ public class Application implements UncaughtExceptionHandler
 		panel.add(overrideLevelsSpinner, c);
 
 		outsideCheck = new JCheckBox("");
+		outsideCheck.setSelected(true);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = ++row;
@@ -1042,6 +1044,15 @@ public class Application implements UncaughtExceptionHandler
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(outsidePanel, c);
+
+		ignoreBlankCheck = new JCheckBox("Ignore blank tiles");
+		ignoreBlankCheck.setSelected(true);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = ++row;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		trPanel.add(ignoreBlankCheck, c);
 
 		replaceCheck = new JCheckBox("Set pixels with values:");
 		c = new GridBagConstraints();
@@ -1652,8 +1663,8 @@ public class Application implements UncaughtExceptionHandler
 									g.setFont(font);
 									int width = g.getFontMetrics().stringWidth(s);
 									int height = g.getFontMetrics().getAscent();
-									g.drawString(s, (image.getWidth() - width) / 2, (image
-											.getHeight() + height) / 2);
+									g.drawString(s, (image.getWidth() - width) / 2,
+											(image.getHeight() + height) / 2);
 								}
 								finally
 								{
@@ -1721,8 +1732,8 @@ public class Application implements UncaughtExceptionHandler
 							{
 								File dst = File.createTempFile("preview", ".png");
 								dst.deleteOnExit();
-								MapnikUtil.tile(sector, previewCanvas.getWidth(), previewCanvas
-										.getHeight(), mapFile, dst, logger);
+								MapnikUtil.tile(sector, previewCanvas.getWidth(),
+										previewCanvas.getHeight(), false, mapFile, dst, logger);
 								BufferedImage image = ImageIO.read(dst);
 								ImageIcon icon = new ImageIcon(image);
 								previewCanvas.setIcon(icon);
@@ -2096,6 +2107,7 @@ public class Application implements UncaughtExceptionHandler
 		{
 			field.setEnabled(outsideCheck.isSelected() && standard);
 		}
+		ignoreBlankCheck.setEnabled(outsideCheck.isSelected() && standard);
 
 		if (!elevationRadio.isSelected())
 		{
@@ -2166,6 +2178,7 @@ public class Application implements UncaughtExceptionHandler
 		imageFormatLabel.setVisible(images);
 		jpegRadio.setVisible(images);
 		pngRadio.setVisible(images);
+		ignoreBlankCheck.setVisible(images);
 
 		alphaCheck.setVisible(pngRadio.isSelected() && bandCount == 3 && !mapnik
 				&& !elevationRadio.isSelected());
@@ -2388,6 +2401,7 @@ public class Application implements UncaughtExceptionHandler
 				boolean reproject = reprojectCheck.isSelected();
 				boolean bilinear = bilinearCheck.isSelected();
 				boolean bilinearOverviews = bilinearOverviewsCheck.isSelected();
+				boolean ignoreBlank = ignoreBlankCheck.isSelected();
 
 				LogWriter logWriter = null;
 				try
@@ -2399,16 +2413,17 @@ public class Application implements UncaughtExceptionHandler
 					if (mapnikRadio.isSelected())
 					{
 						logWriter.startLog(TilingType.Mapnik, mapFile, outDir, sector, level,
-								tilesize, lzts, imageFormat, false, 0, 0, false, false, infoText
-										.getText(), tileText.getText(), null, null, null, null,
+								tilesize, lzts, imageFormat, false, 0, 0, false, false,
+								infoText.getText(), tileText.getText(), null, null, null, null,
 								false);
 
 						Tiler.tileMapnik(mapFile, sector, level, tilesize, lzts, imageFormat,
-								outDir, reporter);
+								ignoreBlank, outDir, reporter);
 						if (overviews && !reporter.isCancelled())
 						{
 							Overviewer.createImageOverviews(outDir, imageFormat, tilesize,
-									tilesize, null, sector, lzts, bilinearOverviews, reporter);
+									tilesize, null, sector, lzts, bilinearOverviews, ignoreBlank,
+									reporter);
 						}
 					}
 					else
@@ -2426,13 +2441,13 @@ public class Application implements UncaughtExceptionHandler
 							{
 								if (isFloat)
 								{
-									outsideValues.setDouble(b, ((JDoubleField) outsideFields[b])
-											.getValue());
+									outsideValues.setDouble(b,
+											((JDoubleField) outsideFields[b]).getValue());
 								}
 								else
 								{
-									outsideValues.setLong(b, ((JLongField) outsideFields[b])
-											.getValue());
+									outsideValues.setLong(b,
+											((JLongField) outsideFields[b]).getValue());
 								}
 							}
 						}
@@ -2453,20 +2468,22 @@ public class Application implements UncaughtExceptionHandler
 									minMaxReplaces[1].setMinMaxDouble(b,
 											((JDoubleField) min2Fields[b]).getValue(),
 											((JDoubleField) max2Fields[b]).getValue());
-									replace.setDouble(b, ((JDoubleField) replaceFields[b])
-											.getValue());
-									otherwise.setDouble(b, ((JDoubleField) otherwiseFields[b])
-											.getValue());
+									replace.setDouble(b,
+											((JDoubleField) replaceFields[b]).getValue());
+									otherwise.setDouble(b,
+											((JDoubleField) otherwiseFields[b]).getValue());
 								}
 								else
 								{
-									minMaxReplaces[0].setMinMaxLong(b, ((JLongField) minFields[b])
-											.getValue(), ((JLongField) maxFields[b]).getValue());
-									minMaxReplaces[1].setMinMaxLong(b, ((JLongField) min2Fields[b])
-											.getValue(), ((JLongField) max2Fields[b]).getValue());
+									minMaxReplaces[0].setMinMaxLong(b,
+											((JLongField) minFields[b]).getValue(),
+											((JLongField) maxFields[b]).getValue());
+									minMaxReplaces[1].setMinMaxLong(b,
+											((JLongField) min2Fields[b]).getValue(),
+											((JLongField) max2Fields[b]).getValue());
 									replace.setLong(b, ((JLongField) replaceFields[b]).getValue());
-									otherwise.setLong(b, ((JLongField) otherwiseFields[b])
-											.getValue());
+									otherwise.setLong(b,
+											((JLongField) otherwiseFields[b]).getValue());
 								}
 							}
 						}
@@ -2481,13 +2498,13 @@ public class Application implements UncaughtExceptionHandler
 									outsideValues, minMaxReplaces, replace, otherwise, isFloat);
 
 							Tiler.tileImages(dataset, reproject, bilinear, sector, level, tilesize,
-									lzts, imageFormat, addAlpha, outsideValues, minMaxReplaces,
-									replace, otherwise, outDir, reporter);
+									lzts, imageFormat, addAlpha, outsideValues, ignoreBlank,
+									minMaxReplaces, replace, otherwise, outDir, reporter);
 							if (overviews && !reporter.isCancelled())
 							{
 								Overviewer.createImageOverviews(outDir, imageFormat, tilesize,
 										tilesize, outsideValues, sector, lzts, bilinearOverviews,
-										reporter);
+										ignoreBlank, reporter);
 							}
 						}
 						else if (elevationRadio.isSelected())
@@ -2520,7 +2537,8 @@ public class Application implements UncaughtExceptionHandler
 							{
 								Overviewer.createElevationOverviews(outDir, tilesize, tilesize,
 										bufferType, ByteOrder.LITTLE_ENDIAN, /*TODO remove hardcoded byteorder*/
-										outsideValues, sector, lzts, bilinearOverviews, reporter);
+										outsideValues, sector, lzts, bilinearOverviews,
+										ignoreBlank, reporter);
 							}
 
 							if (isFloat)

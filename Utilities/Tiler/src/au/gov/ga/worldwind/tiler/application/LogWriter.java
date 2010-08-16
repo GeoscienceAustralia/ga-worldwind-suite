@@ -44,7 +44,7 @@ public class LogWriter
 			writer.writeLine("Mapnik script: " + MapnikUtil.getMapnikScript());
 			writer.writeLine("Sector: " + sector);
 			writer.writeLine("Output directory: " + outDir.getAbsolutePath());
-			writer.writeLine("Level count: " + level);
+			writer.writeLine("Level count: " + (level + 1));
 			writer.writeLine("Tilesize: " + tilesize);
 			writer.writeLine("Level zero tile size: " + lzts);
 			writer.writeLine("Image format: " + imageFormat);
@@ -63,7 +63,7 @@ public class LogWriter
 			writer.writeLine("Output parameters:");
 			writer.writeLine("Sector: " + sector);
 			writer.writeLine("Output directory: " + outDir.getAbsolutePath());
-			writer.writeLine("Level count: " + level);
+			writer.writeLine("Level count: " + (level + 1));
 			writer.writeLine("Tilesize: " + tilesize);
 			writer.writeLine("Level zero tile size: " + lzts);
 			writer.writeLine("Bilinear magnification: " + bilinear);

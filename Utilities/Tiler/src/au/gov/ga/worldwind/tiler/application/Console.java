@@ -40,7 +40,7 @@ public class Console
 						+ "       [{-z,--lzts} lzts] [{-t,--tilesize} size] [{-f,--format} {JPG|PNG}]\n"
 						+ "       [{-d,--datatype} {BYTE|INT16|INT32|FLOAT32}] [{-a,--addalpha}]\n"
 						+ "       [{-b,--band} band] [{-n,--nooverviews}] [{-l,--levels} levels]\n"
-						+ "       [{-m,--nomagnification}] [{-g,--nominification}]\n"
+						+ "       [{-m,--nomagnification}] [{-g,--nominification}] [{-k,--includeblank}]\n"
 						+ "       [{-o,--setoutside} \"value[,value...]]\"\n"
 						+ "       [{-r,--replacevalues} \"min1[,min1...] max1[,max1...] min2[,min2...]\n"
 						+ "                              max2[,max2...] with[,with...] else[,else...]\"\n"
@@ -61,6 +61,7 @@ public class Console
 						+ "  -m         Disable bilinear magnification (if the top level tiles generated\n"
 						+ "             have a higher resolution than the dataset)\n"
 						+ "  -g         Disable bilinear minification when generating overviews\n"
+						+ "  -k         Generate blank tiles"
 						+ "  -o \"...\"   Set values outside extends to (number of values must equal the\n"
 						+ "             number of output bands, blanks permitted)\n"
 						+ "  -r \"...\"   Replace values between (number of values in each group must\n"
@@ -105,6 +106,7 @@ public class Console
 		//-g --nominification
 		//-s --setoutside n,n,n
 		//-r --replacevalues "n,n,n n,n,n n,n,n n,n,n n,n,n n,n,n"
+		//-k --includeblank
 
 		CmdLineParser parser = new CmdLineParser();
 
@@ -122,6 +124,7 @@ public class Console
 		Option levelsO = parser.addIntegerOption('l', "levels");
 		Option bilinearO = parser.addBooleanOption('m', "nomagnification");
 		Option bilinearOverviewsO = parser.addBooleanOption('g', "nominification");
+		Option includeBlankO = parser.addBooleanOption('k', "includeblank");
 		Option outsideO = new Option('o', "setoutside", true)
 		{
 			@Override
@@ -186,6 +189,7 @@ public class Console
 		Boolean nobilinearOverviews = (Boolean) parser.getOptionValue(bilinearOverviewsO, false);
 		boolean bilinear = !nobilinear;
 		boolean bilinearOverviews = !nobilinearOverviews;
+		Boolean includeBlank = (Boolean) parser.getOptionValue(includeBlankO, false);
 
 		Integer tilesize = (Integer) parser.getOptionValue(tilesizeO, elevations ? 150 : 512);
 		Double lzts = (Double) parser.getOptionValue(lztsO, elevations ? 20d : 36d);
@@ -277,7 +281,7 @@ public class Console
 					{
 						Overviewer.createElevationOverviews(output, tilesize, tilesize, bufferType,
 								ByteOrder.LITTLE_ENDIAN, outside, sector, lzts, bilinearOverviews,
-								reporter);
+								!includeBlank, reporter);
 					}
 					logWriter.logMinMax(minMax, isFloat);
 				}
@@ -289,12 +293,12 @@ public class Console
 							replaces.otherwise, isFloat);
 
 					Tiler.tileImages(dataset, reproject, bilinear, sector, level, tilesize, lzts,
-							imageFormat, addAlpha, outside, replaces.replaceMinMaxs,
+							imageFormat, addAlpha, outside, !includeBlank, replaces.replaceMinMaxs,
 							replaces.replace, replaces.otherwise, output, reporter);
 					if (!nooverviews)
 					{
 						Overviewer.createImageOverviews(output, imageFormat, tilesize, tilesize,
-								outside, sector, lzts, bilinearOverviews, reporter);
+								outside, sector, lzts, bilinearOverviews, !includeBlank, reporter);
 					}
 				}
 			}

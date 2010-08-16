@@ -14,9 +14,9 @@ public class MaskBaker
 {
 	public static void main(String[] args)
 	{
-		File imageDir = new File("F:/LandCover/Trend in the maximum EVI values1_stretched/tiles");
+		File imageDir = new File("F:/LandCover/min_trend_values1_nomask");
 		File maskDir = new File("F:/LandCover/DLCM_RGB/mask");
-		File outputDir = new File("F:/LandCover/Trend in the maximum EVI values1_stretched/baked");
+		File outputDir = new File("F:/LandCover/min_trend_values1");
 		String imageExt = "png";
 		String maskExt = "png";
 		String outputExt = "png";

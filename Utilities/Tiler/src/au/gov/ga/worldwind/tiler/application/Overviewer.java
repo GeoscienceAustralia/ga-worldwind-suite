@@ -45,26 +45,27 @@ public class Overviewer
 {
 	public static void createImageOverviews(File directory, String extension, int width,
 			int height, NullableNumberArray outsideValues, Sector sector, double lzts,
-			boolean bilinear, ProgressReporter reporter)
+			boolean bilinear, boolean ignoreBlank, ProgressReporter reporter)
 	{
 		OverviewCreator overviewCreator =
 				new ImageOverviewCreator(width, height, outsideValues, bilinear);
-		createOverviews(overviewCreator, directory, extension, sector, lzts, reporter);
+		createOverviews(overviewCreator, directory, extension, sector, lzts, ignoreBlank, reporter);
 	}
 
 	public static void createElevationOverviews(File directory, int width, int height,
 			int bufferType, ByteOrder byteOrder, NullableNumberArray outsideValues, Sector sector,
-			double lzts, boolean bilinear, ProgressReporter reporter)
+			double lzts, boolean bilinear, boolean ignoreBlank, ProgressReporter reporter)
 	{
 		int bands = 1;
 		OverviewCreator overviewCreator =
 				new ElevationOverviewCreator(width, height, bands, bufferType, byteOrder,
 						outsideValues, bilinear);
-		createOverviews(overviewCreator, directory, "bil", sector, lzts, reporter);
+		createOverviews(overviewCreator, directory, "bil", sector, lzts, ignoreBlank, reporter);
 	}
 
 	private static void createOverviews(OverviewCreator overviewCreator, File directory,
-			String extension, Sector sector, double lzts, ProgressReporter progress)
+			String extension, Sector sector, double lzts, boolean ignoreBlank,
+			ProgressReporter progress)
 	{
 		progress.getLogger().info("Generating overviews...");
 
@@ -157,7 +158,7 @@ public class Overviewer
 					{
 						try
 						{
-							overviewCreator.mix(src0, src1, src2, src3, dst);
+							overviewCreator.mix(src0, src1, src2, src3, dst, ignoreBlank);
 						}
 						catch (IOException e)
 						{
@@ -180,7 +181,8 @@ public class Overviewer
 
 	private interface OverviewCreator
 	{
-		void mix(File src0, File src1, File src2, File src3, File dst) throws IOException;
+		void mix(File src0, File src1, File src2, File src3, File dst, boolean ignoreBlank)
+				throws IOException;
 	}
 
 	private static class ImageOverviewCreator implements OverviewCreator
@@ -235,7 +237,8 @@ public class Overviewer
 		}
 
 		@Override
-		public void mix(File src0, File src1, File src2, File src3, File dst) throws IOException
+		public void mix(File src0, File src1, File src2, File src3, File dst, boolean ignoreBlank)
+				throws IOException
 		{
 			if (dst.exists())
 				throw new IllegalArgumentException("Destination already exists");
@@ -280,13 +283,19 @@ public class Overviewer
 			}
 
 			BufferedImage image =
-					i0 != null ? i0 : i1 != null ? i1 : i2 != null ? i2 : i3 != null ? i3
-							: outsideImage;
+					i0 != null ? i0 : i1 != null ? i1 : i2 != null ? i2 : i3 != null ? i3 : null;
+
+			//if no images exist
+			if (image == null)
+			{
+				if (ignoreBlank)
+					return;
+				throw new IOException("No children images exist for " + dst);
+			}
+
 			int type =
 					image != null && image.getType() != 0 ? image.getType()
 							: BufferedImage.TYPE_INT_ARGB;
-
-			// TODO warn if image == outsideImage (no src files exist)
 
 			i0 = i0 != null ? i0 : outsideImage;
 			i1 = i1 != null ? i1 : outsideImage;
@@ -397,7 +406,8 @@ public class Overviewer
 		}
 
 		@Override
-		public void mix(File src0, File src1, File src2, File src3, File dst) throws IOException
+		public void mix(File src0, File src1, File src2, File src3, File dst, boolean ignoreBlank)
+				throws IOException
 		{
 			if (dst.exists())
 				throw new IllegalArgumentException("Destination already exists");
@@ -422,6 +432,13 @@ public class Overviewer
 
 				if (length > 0 && length != width * height * bands * bufferTypeSize)
 					throw new IllegalArgumentException("Source file(s) have an invalid size");
+
+				if (src0 == null && src1 == null && src2 == null && src3 == null)
+				{
+					if (ignoreBlank)
+						return;
+					throw new IOException("No children elevation files exist for " + dst);
+				}
 
 				dstraf = new RandomAccessFile(dst, "rw");
 				FileChannel dstfc = dstraf.getChannel();

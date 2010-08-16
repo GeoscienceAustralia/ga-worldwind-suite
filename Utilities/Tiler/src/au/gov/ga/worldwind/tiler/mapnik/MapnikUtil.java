@@ -145,8 +145,8 @@ public class MapnikUtil
 		return null;
 	}
 
-	public static void tile(Sector sector, int width, int height, File input, File dst,
-			final Logger logger) throws TilerException
+	public static void tile(Sector sector, int width, int height, boolean ignoreBlank, File input,
+			File dst, final Logger logger) throws TilerException
 	{
 		File python = getPythonBinaryFile();
 		File mapnik = getMapnikScriptFile();
