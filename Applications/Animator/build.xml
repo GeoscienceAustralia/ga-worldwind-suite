@@ -18,6 +18,12 @@
 	<property name="build_dir" value="${basedir}/build" />
 	<property name="target_dir" value="${basedir}/target" />
 	<property name="lib_dir" value="${target_dir}/lib" />
+
+	<property name="test_src_dir" value="${basedir}/test/src"/>
+	<property name="test_lib_dir" value="${basedir}/test/lib"/>
+	<property name="test_build_dir" value="${basedir}/test/build"/>
+	<property name="test_results_dir" value="${basedir}/test/results"/>
+	<property name="test_reports_dir" value="${basedir}/test/reports"/>
 	
 	<property name="run_file" value="run.bat"/>
 
@@ -31,6 +37,14 @@
 			<include name="**/*.jar" />
 		</fileset>
 	</path>
+	
+	<path id="test_classpath">
+		<path refid="classpath"/>
+		<fileset dir="${test_lib_dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<path path="${build_dir}"/>
+	</path>
 
 	<patternset id="manifest_exclude">
 		<exclude name="META-INF/*.DSA" />
@@ -43,6 +57,9 @@
 	<target name="clean">
 		<delete dir="${build_dir}" />
 		<delete dir="${target_dir}" />
+		<delete dir="${test_build_dir}" />
+		<delete dir="${test_results_dir}" />
+		<delete dir="${test_reports_dir}" />
 	</target>
 
 	<target name="build">
@@ -55,6 +72,31 @@
 		<javac source="1.6" target="1.6" srcdir="${src_dir}" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" />
 	</target>
 
+	<target name="build-test" depends="build">
+		<mkdir dir="${test_build_dir}"/>
+		<javac source="1.6" target="1.6" srcdir="${test_src_dir}" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}" />
+	</target>
+	
+	<target name="test" description="Execute unit tests on the project" depends="build-test">
+		<mkdir dir="${test_results_dir}"/>
+		<mkdir dir="${test_reports_dir}"/>
+		<junit printsummary="withOutAndErr" failureproperty="junit.failure">
+			<classpath refid="test_classpath"/>
+			<classpath path="classes:${test_build_dir}"/>
+			<batchtest todir="${test_results_dir}">
+				<fileset dir="${test_build_dir}">
+					<include name="**/*Test.class"/>
+				</fileset>
+				<formatter type="xml"/>
+			</batchtest>
+		</junit>
+		<junitreport todir="${test_reports_dir}">
+			<fileset dir="${test_results_dir}"/>
+			<report todir="${test_reports_dir}"/>
+		</junitreport>
+		<fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
+	</target>
+	
 	<target name="package" depends="build">
 		<jar destfile="${build_dir}/${application_jar}" basedir="${build_dir}">
 			<manifest>
