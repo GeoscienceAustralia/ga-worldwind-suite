@@ -57,6 +57,7 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
 import au.gov.ga.worldwind.animator.layers.depth.DepthLayer;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModel;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
@@ -403,6 +404,10 @@ public class Animator
 		coast.setSplitScale(1.2);
 		layers.add(coast);
 
+		
+//		CameraPathLayer cameraPathLayer = new CameraPathLayer(animation);
+//		layers.add(cameraPathLayer);
+		
 		/*Landmarks landmarks = new Landmarks(model.getGlobe());
 		layers.add(landmarks);*/
 
@@ -422,18 +427,19 @@ public class Animator
 		// layers.add(annos);
 
 
-		stars.setEnabled(true);
+		//stars.setEnabled(true);
 		sky.setEnabled(true);
 
-		depth.setEnabled(true);
-		bmng.setEnabled(true);
+		//depth.setEnabled(true);
+		//bmng.setEnabled(true);
 
-		// landsat.setEnabled(true);
+		landsat.setEnabled(true);
 
-		elevationEarth.setEnabled(true);
-		elevationSW.setEnabled(true);
-		elevationSONNE.setEnabled(true);
+		//elevationEarth.setEnabled(true);
+		//elevationSW.setEnabled(true);
+		//elevationSONNE.setEnabled(true);
 
+//		cameraPathLayer.setEnabled(true);
 
 		// shadowsEarth.setEnabled(true);
 		// shadowsSW.setEnabled(true);

@@ -18,8 +18,7 @@ import au.gov.ga.worldwind.animator.math.vector.Vector3;
 import nasa.worldwind.util.RestorableSupport;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 
-public class Animation implements Serializable, ChangeListener,
-		Restorable
+public class Animation implements Serializable, ChangeListener, Restorable
 {
 	private Parameter eyeLat = new Parameter();
 	private Parameter eyeLon = new Parameter();
@@ -81,14 +80,13 @@ public class Animation implements Serializable, ChangeListener,
 	public synchronized void applyFrame(OrbitView view, int frame)
 	{
 		double zoom = eyeZoom.getInterpolatedValue(frame);
-		Position eye = Position.fromDegrees(eyeLat.getInterpolatedValue(frame),
-				eyeLon.getInterpolatedValue(frame),
-				scaledZoom ? fromScaledZoom(zoom) : zoom);
+		Position eye =
+				Position.fromDegrees(eyeLat.getInterpolatedValue(frame), eyeLon
+						.getInterpolatedValue(frame), scaledZoom ? fromScaledZoom(zoom) : zoom);
 		zoom = centerZoom.getInterpolatedValue(frame);
-		Position center = Position.fromDegrees(centerLat
-				.getInterpolatedValue(frame), centerLon
-				.getInterpolatedValue(frame), scaledZoom ? fromScaledZoom(zoom)
-				: zoom);
+		Position center =
+				Position.fromDegrees(centerLat.getInterpolatedValue(frame), centerLon
+						.getInterpolatedValue(frame), scaledZoom ? fromScaledZoom(zoom) : zoom);
 		view.stopMovement();
 		view.setOrientation(eye, center);
 	}
@@ -106,12 +104,11 @@ public class Animation implements Serializable, ChangeListener,
 
 		eyeLat.addKey(frame, eye.getLatitude().degrees);
 		eyeLon.addKey(frame, eye.getLongitude().degrees);
-		eyeZoom.addKey(frame, scaledZoom ? toScaledZoom(eye.getElevation())
-				: eye.getElevation());
+		eyeZoom.addKey(frame, scaledZoom ? toScaledZoom(eye.getElevation()) : eye.getElevation());
 		centerLat.addKey(frame, center.getLatitude().degrees);
 		centerLon.addKey(frame, center.getLongitude().degrees);
-		centerZoom.addKey(frame, scaledZoom ? toScaledZoom(center
-				.getElevation()) : center.getElevation());
+		centerZoom.addKey(frame,
+				scaledZoom ? toScaledZoom(center.getElevation()) : center.getElevation());
 
 		int index = eyeLat.indexOf(frame);
 		smoothAll(index);
@@ -205,8 +202,7 @@ public class Animation implements Serializable, ChangeListener,
 	{
 		ignoreChange = true;
 
-		int newFrameCount = (int) Math.ceil(scale * getLastFrame() - scale
-				* getFirstFrame());
+		int newFrameCount = (int) Math.ceil(scale * getLastFrame() - scale * getFirstFrame());
 		if (getFrameCount() < newFrameCount)
 		{
 			setFrameCount(newFrameCount);
@@ -272,8 +268,7 @@ public class Animation implements Serializable, ChangeListener,
 					Vector3 vEnd = new Vector3(x, y, z);
 					if (vStart != null)
 					{
-						cumulativeDistance[i] += vStart.subtract(vEnd)
-								.distance();
+						cumulativeDistance[i] += vStart.subtract(vEnd).distance();
 					}
 					vStart = vEnd;
 				}
@@ -287,10 +282,9 @@ public class Animation implements Serializable, ChangeListener,
 
 			for (int i = 1; i < size - 1; i++)
 			{
-				frames[i] = (int) Math
-						.round((getLastFrame() - getFirstFrame() + 1)
-								* cumulativeDistance[i - 1]
-								/ cumulativeDistance[size - 2]);
+				frames[i] =
+						(int) Math.round((getLastFrame() - getFirstFrame() + 1)
+								* cumulativeDistance[i - 1] / cumulativeDistance[size - 2]);
 			}
 
 			//fix any frames that are equal
@@ -343,8 +337,7 @@ public class Animation implements Serializable, ChangeListener,
 				in = eyeZoom.getInPercent(i);
 				in.y = scaledZoom ? toScaledZoom(in.y) : fromScaledZoom(in.y);
 				out = eyeZoom.getOutPercent(i);
-				out.y = scaledZoom ? toScaledZoom(out.y)
-						: fromScaledZoom(out.y);
+				out.y = scaledZoom ? toScaledZoom(out.y) : fromScaledZoom(out.y);
 
 				eyeZoom.setValue(i, z);
 				eyeZoom.setInPercent(i, in.x, in.y);
@@ -355,14 +348,13 @@ public class Animation implements Serializable, ChangeListener,
 				in = centerZoom.getInPercent(i);
 				in.y = scaledZoom ? toScaledZoom(in.y) : fromScaledZoom(in.y);
 				out = centerZoom.getOutPercent(i);
-				out.y = scaledZoom ? toScaledZoom(out.y)
-						: fromScaledZoom(out.y);
+				out.y = scaledZoom ? toScaledZoom(out.y) : fromScaledZoom(out.y);
 
 				centerZoom.setValue(i, z);
 				centerZoom.setInPercent(i, in.x, in.y);
 				centerZoom.setOutPercent(i, out.x, out.y);
 			}
-			
+
 			for (int i = 0; i < size; i++)
 			{
 				smooth(i);
@@ -466,8 +458,7 @@ public class Animation implements Serializable, ChangeListener,
 
 	public String getRestorableState()
 	{
-		RestorableSupport restorableSupport = RestorableSupport
-				.newRestorableSupport();
+		RestorableSupport restorableSupport = RestorableSupport.newRestorableSupport();
 		if (restorableSupport == null)
 			return null;
 
@@ -508,21 +499,16 @@ public class Animation implements Serializable, ChangeListener,
 		Integer height = restorableSupport.getStateValueAsInteger("height");
 		if (height != null)
 			this.height = height;
-		Boolean scaledZoom = restorableSupport
-				.getStateValueAsBoolean("scaledZoom");
+		Boolean scaledZoom = restorableSupport.getStateValueAsBoolean("scaledZoom");
 		if (scaledZoom != null)
 			this.scaledZoom = scaledZoom;
 
 		eyeLat = restorableSupport.getStateValueAsRestorable("eyeLat", eyeLat);
 		eyeLon = restorableSupport.getStateValueAsRestorable("eyeLon", eyeLon);
-		eyeZoom = restorableSupport.getStateValueAsRestorable("eyeZoom",
-				eyeZoom);
-		centerLat = restorableSupport.getStateValueAsRestorable("centerLat",
-				centerLat);
-		centerLon = restorableSupport.getStateValueAsRestorable("centerLon",
-				centerLon);
-		centerZoom = restorableSupport.getStateValueAsRestorable("centerZoom",
-				centerZoom);
+		eyeZoom = restorableSupport.getStateValueAsRestorable("eyeZoom", eyeZoom);
+		centerLat = restorableSupport.getStateValueAsRestorable("centerLat", centerLat);
+		centerLon = restorableSupport.getStateValueAsRestorable("centerLon", centerLon);
+		centerZoom = restorableSupport.getStateValueAsRestorable("centerZoom", centerZoom);
 
 		/*if (eyeLat != null && eyeLon != null && eyeZoom != null
 				&& centerLat != null && centerLon != null && centerZoom != null)
@@ -537,5 +523,35 @@ public class Animation implements Serializable, ChangeListener,
 		}*/
 
 		notifyChange();
+	}
+
+	/**
+	 * Returns the position of the eye location at the provided frame
+	 * 
+	 * @param frame
+	 *            The frame at which the eye location is required
+	 */
+	public Position getEyeLocationAtFrame(int frame)
+	{
+		double zoom = eyeZoom.getInterpolatedValue(frame);
+		Position result = Position.fromDegrees(eyeLat.getInterpolatedValue(frame), 
+				   							   eyeLon.getInterpolatedValue(frame),
+				   							   scaledZoom ? fromScaledZoom(zoom) : zoom);
+		return result;
+	}
+	
+	/**
+	 * Returns the position of the center location at the provided frame
+	 * 
+	 * @param frame
+	 *            The frame at which the eye location is required
+	 */
+	public Position getCenterLocationAtFrame(int frame)
+	{
+		double zoom = centerZoom.getInterpolatedValue(frame);
+		Position result = Position.fromDegrees(centerLat.getInterpolatedValue(frame), 
+											   centerLon.getInterpolatedValue(frame),
+				   							   scaledZoom ? fromScaledZoom(zoom) : zoom);
+		return result;
 	}
 }

@@ -16,11 +16,17 @@ import javax.swing.event.ChangeListener;
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
 import nasa.worldwind.util.RestorableSupport;
 
+/**
+ * A {@link Parameter} represents a single animatable property of some {@link Animatable} object (e.g. Camera position, layer opacity etc.).
+ * <p/>
+ * TODO: Refactor into new structure
+ * 
+ */
 public class Parameter implements Serializable, Restorable
 {
 	private final static int BEZIER_SUBDIVISIONS_PER_FRAME = 10;
 	private final static boolean DEFAULT_LOCK_INOUT = true;
-	private final static double DEFAULT_INOUT_PERCENT = 0.4;
+	final static double DEFAULT_INOUT_PERCENT = 0.4;
 
 	private SortedMap<Integer, KeyFrame> map = new TreeMap<Integer, KeyFrame>();
 	private List<KeyFrame> keys = new ArrayList<KeyFrame>();
@@ -35,14 +41,18 @@ public class Parameter implements Serializable, Restorable
 	public int getFirstFrame()
 	{
 		if (map.isEmpty())
+		{
 			return 0;
+		}
 		return map.firstKey();
 	}
 
 	public int getLastFrame()
 	{
 		if (map.isEmpty())
+		{
 			return 0;
+		}
 		return map.lastKey();
 	}
 
@@ -53,14 +63,16 @@ public class Parameter implements Serializable, Restorable
 
 	public int getFrame(int index)
 	{
-		return keys.get(index).frame;
+		return keys.get(index).getFrame();
 	}
 
 	public int indexOf(int frame)
 	{
 		KeyFrame key = map.get(frame);
 		if (key == null)
+		{
 			return -1;
+		}
 		return keys.indexOf(key);
 	}
 
@@ -69,10 +81,10 @@ public class Parameter implements Serializable, Restorable
 		double max = Double.NEGATIVE_INFINITY;
 		for (KeyFrame key : keys)
 		{
-			max = Math.max(max, key.maxValue);
-			max = Math.max(max, key.value);
-			max = Math.max(max, key.inValue);
-			max = Math.max(max, key.outValue);
+			max = Math.max(max, key.getMaxValue());
+			max = Math.max(max, key.getValue());
+			max = Math.max(max, key.getInValue());
+			max = Math.max(max, key.getOutValue());
 		}
 		return max;
 	}
@@ -82,10 +94,10 @@ public class Parameter implements Serializable, Restorable
 		double min = Double.POSITIVE_INFINITY;
 		for (KeyFrame key : keys)
 		{
-			min = Math.min(min, key.minValue);
-			min = Math.min(min, key.value);
-			min = Math.min(min, key.inValue);
-			min = Math.min(min, key.outValue);
+			min = Math.min(min, key.getMinValue());
+			min = Math.min(min, key.getValue());
+			min = Math.min(min, key.getInValue());
+			min = Math.min(min, key.getOutValue());
 		}
 		return min;
 	}
@@ -114,7 +126,9 @@ public class Parameter implements Serializable, Restorable
 
 		setLockInOut(index, DEFAULT_LOCK_INOUT);
 		if (!DEFAULT_LOCK_INOUT)
+		{
 			updateBezier(index);
+		}
 
 		notifyChange();
 	}
@@ -123,7 +137,7 @@ public class Parameter implements Serializable, Restorable
 	{
 		KeyFrame key = keys.get(index);
 		keys.remove(key);
-		map.remove(key.frame);
+		map.remove(key.getFrame());
 		updateBezier(index - 1);
 
 		notifyChange();
@@ -132,10 +146,10 @@ public class Parameter implements Serializable, Restorable
 	public void setValue(int index, double value)
 	{
 		KeyFrame key = keys.get(index);
-		double diff = value - key.value;
-		key.value = value;
-		key.inValue += diff;
-		key.outValue += diff;
+		double diff = value - key.getValue();
+		key.setValue(value);
+		key.setInValue(key.getInValue() + diff);
+		key.setInValue(key.getOutValue() + diff);
 		updateBezier(index - 1);
 		updateBezier(index);
 
@@ -145,7 +159,7 @@ public class Parameter implements Serializable, Restorable
 	public double getValue(int index)
 	{
 		KeyFrame key = keys.get(index);
-		return key.value;
+		return key.getValue();
 	}
 
 	public Vector2 getIn(int index)
@@ -153,15 +167,17 @@ public class Parameter implements Serializable, Restorable
 		KeyFrame key = keys.get(index);
 		KeyFrame p = getOrNull(index - 1);
 		if (p == null)
+		{
 			return null;
-		double frame = key.frame - key.inPercent * (key.frame - p.frame);
-		return new Vector2(frame, key.inValue);
+		}
+		double frame = key.getFrame() - key.getInPercent() * (key.getFrame() - p.getFrame());
+		return new Vector2(frame, key.getInValue());
 	}
 
 	public Vector2 getInPercent(int index)
 	{
 		KeyFrame key = keys.get(index);
-		return new Vector2(key.inPercent, key.inValue);
+		return new Vector2(key.getInPercent(), key.getInValue());
 	}
 
 	public void setIn(int index, Vector2 v)
@@ -175,18 +191,20 @@ public class Parameter implements Serializable, Restorable
 		KeyFrame p = getOrNull(index - 1);
 		double inPercent = 0;
 		if (p != null)
-			inPercent = (key.frame - inFrame) / (double) (key.frame - p.frame);
+		{
+			inPercent = (key.getFrame() - inFrame) / (double) (key.getFrame() - p.getFrame());
+		}
 		setInPercent(index, inPercent, inValue);
 	}
 
 	public void setInPercent(int index, double inPercent, double inValue)
 	{
 		KeyFrame key = keys.get(index);
-		key.inValue = inValue;
-		key.inPercent = clampPercent(inPercent);
+		key.setInValue(inValue);
+		key.setInPercent(clampPercent(inPercent));
 		updateBezier(index - 1);
 
-		if (key.lockInOut)
+		if (key.isLockInOut())
 		{
 			lockOut(index);
 		}
@@ -200,14 +218,14 @@ public class Parameter implements Serializable, Restorable
 		KeyFrame s = getOrNull(index + 1);
 		if (s == null)
 			return null;
-		double frame = key.frame + key.outPercent * (s.frame - key.frame);
-		return new Vector2(frame, key.outValue);
+		double frame = key.getFrame() + key.getOutPercent() * (s.getFrame() - key.getFrame());
+		return new Vector2(frame, key.getOutValue());
 	}
 
 	public Vector2 getOutPercent(int index)
 	{
 		KeyFrame key = keys.get(index);
-		return new Vector2(key.outPercent, key.outValue);
+		return new Vector2(key.getOutPercent(), key.getOutValue());
 	}
 
 	public void setOut(int index, Vector2 v)
@@ -221,19 +239,18 @@ public class Parameter implements Serializable, Restorable
 		KeyFrame s = getOrNull(index + 1);
 		double outPercent = 0;
 		if (s != null)
-			outPercent = (outFrame - key.frame)
-					/ (double) (s.frame - key.frame);
+			outPercent = (outFrame - key.getFrame()) / (double) (s.getFrame() - key.getFrame());
 		setOutPercent(index, outPercent, outValue);
 	}
 
 	public void setOutPercent(int index, double outPercent, double outValue)
 	{
 		KeyFrame key = keys.get(index);
-		key.outValue = outValue;
-		key.outPercent = clampPercent(outPercent);
+		key.setOutValue(outValue);
+		key.setOutPercent(clampPercent(outPercent));
 		updateBezier(index);
 
-		if (key.lockInOut)
+		if (key.isLockInOut())
 		{
 			lockIn(index);
 		}
@@ -244,15 +261,17 @@ public class Parameter implements Serializable, Restorable
 	public boolean isLockInOut(int index)
 	{
 		KeyFrame key = keys.get(index);
-		return key.lockInOut;
+		return key.isLockInOut();
 	}
 
 	public void setLockInOut(int index, boolean lock)
 	{
 		KeyFrame key = keys.get(index);
-		key.lockInOut = lock;
+		key.setLockInOut(lock);
 		if (lock)
+		{
 			lockOut(index);
+		}
 
 		notifyChange();
 	}
@@ -266,13 +285,13 @@ public class Parameter implements Serializable, Restorable
 		if (p == null || s == null)
 			return;
 
-		double deltaOutX = (s.frame - key.frame) * key.outPercent;
-		double deltaOutY = key.inValue - key.value;
-		double deltaInX = (key.frame - p.frame) * key.outPercent;
+		double deltaOutX = (s.getFrame() - key.getFrame()) * key.getOutPercent();
+		double deltaOutY = key.getInValue() - key.getValue();
+		double deltaInX = (key.getFrame() - p.getFrame()) * key.getOutPercent();
 		double deltaInY = (deltaOutY / deltaOutX) * deltaInX;
 
-		key.inPercent = key.outPercent;
-		key.inValue = key.value - deltaInY;
+		key.setInPercent(key.getOutPercent());
+		key.setInValue(key.getValue() - deltaInY);
 		updateBezier(index - 1);
 	}
 
@@ -285,13 +304,13 @@ public class Parameter implements Serializable, Restorable
 		if (p == null || s == null)
 			return;
 
-		double deltaInX = (key.frame - p.frame) * key.inPercent;
-		double deltaInY = key.inValue - key.value;
-		double deltaOutX = (s.frame - key.frame) * key.inPercent;
+		double deltaInX = (key.getFrame() - p.getFrame()) * key.getInPercent();
+		double deltaInY = key.getInValue() - key.getValue();
+		double deltaOutX = (s.getFrame() - key.getFrame()) * key.getInPercent();
 		double deltaOutY = (deltaInY / deltaInX) * deltaOutX;
 
-		key.outPercent = key.inPercent;
-		key.outValue = key.value - deltaOutY;
+		key.setOutPercent(key.getInPercent());
+		key.setOutValue(key.getValue() - deltaOutY);
 
 		updateBezier(index);
 	}
@@ -302,10 +321,11 @@ public class Parameter implements Serializable, Restorable
 		KeyFrame p = getOrNull(index - 1);
 		KeyFrame s = getOrNull(index + 1);
 
-		frame = clamp(frame, p == null ? Integer.MIN_VALUE : p.frame + 1,
-				s == null ? Integer.MAX_VALUE : s.frame - 1);
-		map.remove(key.frame);
-		key.frame = frame;
+		frame =
+				clamp(frame, p == null ? Integer.MIN_VALUE : p.getFrame() + 1,
+						s == null ? Integer.MAX_VALUE : s.getFrame() - 1);
+		map.remove(key.getFrame());
+		key.setFrame(frame);
 		map.put(frame, key);
 
 		updateBezier(index - 1);
@@ -324,8 +344,8 @@ public class Parameter implements Serializable, Restorable
 		for (int i = 0; i < size(); i++)
 		{
 			KeyFrame key = keys.get(i);
-			map.remove(key.frame);
-			key.frame = frames[i];
+			map.remove(key.getFrame());
+			key.setFrame(frames[i]);
 			map.put(frames[i], key);
 		}
 
@@ -344,26 +364,27 @@ public class Parameter implements Serializable, Restorable
 		KeyFrame s = getOrNull(index + 1);
 		if (p != null && s != null)
 		{
-			double y = key.value;
-			if (Math.signum(key.value - p.value) != Math.signum(key.value
-					- s.value))
+			double y = key.getValue();
+			if (Math.signum(key.getValue() - p.getValue()) != Math.signum(key.getValue() - s.getValue()))
 			{
 				//same direction
-				key.inPercent = DEFAULT_INOUT_PERCENT / 2.0;
-				key.outPercent = DEFAULT_INOUT_PERCENT / 2.0;
-				double m = (s.value - p.value) / (s.frame - p.frame);
-				double x = (key.frame - p.frame) * key.inPercent;
-				y = key.value - m * x;
+				key.setInPercent(DEFAULT_INOUT_PERCENT / 2.0);
+				key.setOutPercent(DEFAULT_INOUT_PERCENT / 2.0);
+				double m = (s.getValue() - p.getValue()) / (s.getFrame() - p.getFrame());
+				double x = (key.getFrame() - p.getFrame()) * key.getInPercent();
+				y = key.getValue() - m * x;
 
 			}
 			else
 			{
-				key.inPercent = DEFAULT_INOUT_PERCENT;
-				key.outPercent = DEFAULT_INOUT_PERCENT;
+				key.setInPercent(DEFAULT_INOUT_PERCENT);
+				key.setOutPercent(DEFAULT_INOUT_PERCENT);
 			}
-			setInPercent(index, key.inPercent, y);
-			if (!key.lockInOut)
+			setInPercent(index, key.getInPercent(), y);
+			if (!key.isLockInOut())
+			{
 				lockOut(index);
+			}
 
 			notifyChange();
 		}
@@ -373,9 +394,9 @@ public class Parameter implements Serializable, Restorable
 	{
 		for (KeyFrame key : keys)
 		{
-			key.value *= scale;
-			key.inValue *= scale;
-			key.outValue *= scale;
+			key.setValue(key.getValue() * scale);
+			key.setInValue(key.getInValue() * scale);
+			key.setOutValue(key.getOutValue() * scale);
 		}
 
 		for (int i = 0; i < size() - 1; i++)
@@ -389,7 +410,9 @@ public class Parameter implements Serializable, Restorable
 	private KeyFrame getOrNull(int index)
 	{
 		if (index < 0 || index >= size())
+		{
 			return null;
+		}
 		return keys.get(index);
 	}
 
@@ -402,37 +425,40 @@ public class Parameter implements Serializable, Restorable
 	private void updateBezier(int index)
 	{
 		if (index < 0 || index >= keys.size())
+		{
 			return;
+		}
 
 		KeyFrame key = keys.get(index);
-		key.values = null;
-		key.maxValue = Double.NEGATIVE_INFINITY;
-		key.minValue = Double.POSITIVE_INFINITY;
+		key.setValues(null);
+		key.setMaxValue(Double.NEGATIVE_INFINITY);
+		key.setMinValue(Double.POSITIVE_INFINITY);
 
 		//is this the last key?
 		if (index >= keys.size() - 1)
+		{
 			return;
+		}
 
 		KeyFrame end = keys.get(index + 1);
-		double sf = key.frame + key.outPercent * (end.frame - key.frame);
-		double ef = end.frame - end.inPercent * (end.frame - key.frame);
-		Vector2 out = new Vector2(sf, key.outValue);
-		Vector2 in = new Vector2(ef, end.inValue);
-		Vector2 begin = new Vector2(key.frame, key.value);
-		Vector2 endv = new Vector2(end.frame, end.value);
+		double sf = key.getFrame() + key.getOutPercent() * (end.getFrame() - key.getFrame());
+		double ef = end.getFrame() - end.getInPercent() * (end.getFrame() - key.getFrame());
+		Vector2 out = new Vector2(sf, key.getOutValue());
+		Vector2 in = new Vector2(ef, end.getInValue());
+		Vector2 begin = new Vector2(key.getFrame(), key.getValue());
+		Vector2 endv = new Vector2(end.getFrame(), end.getValue());
 
-		int frames = end.frame - key.frame;
+		int frames = end.getFrame() - key.getFrame();
 		int subdivisions = frames * BEZIER_SUBDIVISIONS_PER_FRAME;
-		key.values = new double[frames];
-		key.values[0] = key.value;
+		key.setValues(new double[frames]);
+		key.getValues()[0] = key.getValue();
 		int current = 1;
 		Vector2 vNext, vLast = null;
 		for (int i = 0; i < subdivisions; i++)
 		{
-			vNext = bezierPointAt(i / (double) subdivisions, begin, out, in,
-					endv);
+			vNext = bezierPointAt(i / (double) subdivisions, begin, out, in, endv);
 
-			if (vNext.x > current + key.frame)
+			if (vNext.x > current + key.getFrame())
 			{
 				double value;
 				if (vLast == null)
@@ -441,13 +467,12 @@ public class Parameter implements Serializable, Restorable
 				}
 				else
 				{
-					double percent = ((current + key.frame) - vLast.x)
-							/ (vNext.x - vLast.x);
+					double percent = ((current + key.getFrame()) - vLast.x) / (vNext.x - vLast.x);
 					value = vLast.y + (vNext.y - vLast.y) * percent;
 				}
-				key.values[current++] = value;
-				key.minValue = Math.min(key.minValue, value);
-				key.maxValue = Math.max(key.maxValue, value);
+				key.getValues()[current++] = value;
+				key.setMinValue(Math.min(key.getMinValue(), value));
+				key.setMaxValue(Math.max(key.getMaxValue(), value));
 			}
 
 			if (current >= frames)
@@ -457,8 +482,7 @@ public class Parameter implements Serializable, Restorable
 		}
 	}
 
-	private Vector2 bezierPointAt(double t, Vector2 begin, Vector2 out,
-			Vector2 in, Vector2 end)
+	private Vector2 bezierPointAt(double t, Vector2 begin, Vector2 out, Vector2 in, Vector2 end)
 	{
 		t = clampPercent(t);
 		double t2 = t * t;
@@ -488,24 +512,32 @@ public class Parameter implements Serializable, Restorable
 		if (key == null)
 		{
 			if (keys.isEmpty())
+			{
 				return 0;
+			}
 			else
-				return keys.get(0).value;
+			{
+				return keys.get(0).getValue();
+			}
 		}
-		int index = frame - key.frame;
-		if (key.values == null || index >= key.values.length)
-			return key.value;
-		return key.values[index];
+		int index = frame - key.getFrame();
+		if (key.getValues() == null || index >= key.getValues().length)
+		{
+			return key.getValue();
+		}
+		return key.getValues()[index];
 	}
 
 	private KeyFrame getPreviousKey(int frame)
 	{
-		if (lastPrevious == null || frame < lastPrevious.frame
-				|| (lastNext != null && frame >= lastNext.frame))
+		if (lastPrevious == null || frame < lastPrevious.getFrame()
+				|| (lastNext != null && frame >= lastNext.getFrame()))
 		{
 			lastPrevious = getPreviousKeyFromMap(frame);
 			if (lastPrevious != null)
+			{
 				lastNext = getOrNull(keys.indexOf(lastPrevious) + 1);
+			}
 		}
 		return lastPrevious;
 	}
@@ -513,10 +545,14 @@ public class Parameter implements Serializable, Restorable
 	private KeyFrame getPreviousKeyFromMap(int frame)
 	{
 		if (map.containsKey(frame))
+		{
 			return map.get(frame);
+		}
 		SortedMap<Integer, KeyFrame> head = map.headMap(frame);
 		if (head.isEmpty())
+		{
 			return null;
+		}
 		return map.get(head.lastKey());
 	}
 
@@ -556,128 +592,32 @@ public class Parameter implements Serializable, Restorable
 			changeListeners = new ArrayList<ChangeListener>();
 	}
 
-	private static class KeyFrame implements Comparable<KeyFrame>,
-			Serializable, Restorable
-	{
-		private int frame;
-		private double value;
-		private double inValue;
-		private double inPercent;
-		private double outValue;
-		private double outPercent;
-		private boolean lockInOut;
-
-		private double[] values;
-		private double maxValue = Double.NEGATIVE_INFINITY;
-		private double minValue = Double.POSITIVE_INFINITY;
-
-		public KeyFrame(int frame, double value)
-		{
-			this.frame = frame;
-			this.value = value;
-			this.inValue = value;
-			this.outValue = value;
-			this.inPercent = DEFAULT_INOUT_PERCENT;
-			this.outPercent = DEFAULT_INOUT_PERCENT;
-		}
-
-		private KeyFrame()
-		{
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (!(obj instanceof KeyFrame))
-				return false;
-			return ((KeyFrame) obj).frame == this.frame;
-		}
-
-		public int compareTo(KeyFrame o)
-		{
-			return this.frame - o.frame;
-		}
-
-		public String getRestorableState()
-		{
-			RestorableSupport restorableSupport = RestorableSupport
-					.newRestorableSupport();
-			if (restorableSupport == null)
-				return null;
-
-			restorableSupport.addStateValueAsInteger("frame", frame);
-			restorableSupport.addStateValueAsDouble("value", value);
-			restorableSupport.addStateValueAsDouble("inValue", inValue);
-			restorableSupport.addStateValueAsDouble("inPercent", inPercent);
-			restorableSupport.addStateValueAsDouble("outValue", outValue);
-			restorableSupport.addStateValueAsDouble("outPercent", outPercent);
-			restorableSupport.addStateValueAsBoolean("lockInOut", lockInOut);
-
-			return restorableSupport.getStateAsXml();
-		}
-
-		public void restoreState(String stateInXml)
-		{
-			if (stateInXml == null)
-				throw new IllegalArgumentException();
-
-			RestorableSupport restorableSupport;
-			try
-			{
-				restorableSupport = RestorableSupport.parse(stateInXml);
-			}
-			catch (Exception e)
-			{
-				throw new IllegalArgumentException("Parsing failed", e);
-			}
-
-			frame = restorableSupport.getStateValueAsInteger("frame");
-			value = restorableSupport.getStateValueAsDouble("value");
-			inValue = restorableSupport.getStateValueAsDouble("inValue");
-			inPercent = restorableSupport.getStateValueAsDouble("inPercent");
-			outValue = restorableSupport.getStateValueAsDouble("outValue");
-			outPercent = restorableSupport.getStateValueAsDouble("outPercent");
-			lockInOut = restorableSupport.getStateValueAsBoolean("lockInOut");
-		}
-
-		public static KeyFrame fromStateXml(String stateInXml)
-		{
-			try
-			{
-				KeyFrame keyFrame = new KeyFrame();
-				keyFrame.restoreState(stateInXml);
-				return keyFrame;
-			}
-			catch (Exception e)
-			{
-				return null;
-			}
-		}
-	}
-
+	@Override
 	public String getRestorableState()
 	{
-		RestorableSupport restorableSupport = RestorableSupport
-				.newRestorableSupport();
+		RestorableSupport restorableSupport = RestorableSupport.newRestorableSupport();
 		if (restorableSupport == null)
+		{
 			return null;
+		}
 
-		RestorableSupport.StateObject keysState = restorableSupport
-				.addStateObject("keys");
+		RestorableSupport.StateObject keysState = restorableSupport.addStateObject("keys");
 		for (KeyFrame key : keys)
 		{
-			RestorableSupport.StateObject keyState = restorableSupport
-					.addStateObject(keysState, "key");
+			RestorableSupport.StateObject keyState = restorableSupport.addStateObject(keysState, "key");
 			restorableSupport.addStateValueAsRestorable(keyState, "key", key);
 		}
 
 		return restorableSupport.getStateAsXml();
 	}
 
+	@Override
 	public void restoreState(String stateInXml)
 	{
 		if (stateInXml == null)
+		{
 			throw new IllegalArgumentException();
+		}
 
 		RestorableSupport restorableSupport;
 		try
@@ -692,12 +632,10 @@ public class Parameter implements Serializable, Restorable
 		map.clear();
 		keys.clear();
 
-		RestorableSupport.StateObject keysState = restorableSupport
-				.getStateObject("keys");
+		RestorableSupport.StateObject keysState = restorableSupport.getStateObject("keys");
 		if (keysState != null)
 		{
-			RestorableSupport.StateObject[] keyStateArray = restorableSupport
-					.getAllStateObjects(keysState, "key");
+			RestorableSupport.StateObject[] keyStateArray = restorableSupport.getAllStateObjects(keysState, "key");
 			if (keyStateArray != null)
 			{
 				for (RestorableSupport.StateObject keyState : keyStateArray)
@@ -705,12 +643,11 @@ public class Parameter implements Serializable, Restorable
 					if (keyState != null)
 					{
 						KeyFrame keyFrame = new KeyFrame();
-						keyFrame = restorableSupport.getStateValueAsRestorable(
-								keyState, "key", keyFrame);
+						keyFrame = restorableSupport.getStateValueAsRestorable(keyState, "key", keyFrame);
 						if (keyFrame != null)
 						{
 							keys.add(keyFrame);
-							map.put(keyFrame.frame, keyFrame);
+							map.put(keyFrame.getFrame(), keyFrame);
 						}
 					}
 				}
