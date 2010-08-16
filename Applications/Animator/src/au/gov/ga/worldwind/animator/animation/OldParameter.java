@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
 import nasa.worldwind.util.RestorableSupport;
 

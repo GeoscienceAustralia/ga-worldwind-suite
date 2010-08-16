@@ -14,7 +14,7 @@ import nasa.worldwind.util.RestorableSupport;
  * A Key frame contains all ParameterValues that have been recorded at that
  * frame, along with the index of the animation frame it corresponds to.
  */
-class KeyFrame implements Comparable<KeyFrame>, Serializable, Restorable
+public class KeyFrame implements Comparable<KeyFrame>, Serializable, Restorable
 {
 	private int frame;
 	private double value;
