@@ -140,8 +140,16 @@ public class Application
 
 	public static void main(String[] args)
 	{
+		int argsLength = args.length;
+
+		String lastArg = argsLength > 0 ? args[argsLength - 1].toLowerCase().trim() : null;
+		boolean sandpit = "-sandpit".equals(lastArg) || "--sandpit".equals(lastArg);
+		GASandpit.setSandpitMode(sandpit);
+		if (sandpit)
+			argsLength--; //ensure the sandpit argument is not used for the theme URL
+
 		//Settings need to be initialised before Theme is opened, so that proxy values are set
-		Settings.get();
+		Settings.init();
 
 		if (Settings.isNewSettings())
 		{
@@ -161,14 +169,6 @@ public class Application
 			{
 			}
 		}
-
-		int argsLength = args.length;
-
-		String lastArg = argsLength > 0 ? args[argsLength - 1].toLowerCase().trim() : null;
-		boolean sandpit = "-sandpit".equals(lastArg) || "--sandpit".equals(lastArg);
-		GASandpit.setSandpitMode(sandpit);
-		if (sandpit)
-			argsLength--; //ensure the sandpit argument is not used for the theme URL
 
 		URL themeUrl = null;
 		if (argsLength > 0)
@@ -440,7 +440,7 @@ public class Application
 			}
 		});
 
-		screenshotAction = new BasicAction("Save image", Icons.screenshot.getIcon());
+		screenshotAction = new BasicAction("Save image...", Icons.screenshot.getIcon());
 		screenshotAction.addActionListener(new ActionListener()
 		{
 			@Override

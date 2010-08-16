@@ -25,7 +25,7 @@ public class Settings
 	private static boolean stereoSupported = false;
 	private static boolean newSettings = false;
 
-	static
+	public static void init()
 	{
 		instance = SettingsPersistance.load(getSettingsFile());
 		if (instance == null)
@@ -37,6 +37,11 @@ public class Settings
 
 	public static Settings get()
 	{
+		if (instance == null)
+		{
+			throw new IllegalStateException(
+					"Settings have not yet been initialised; must call init() first");
+		}
 		return instance;
 	}
 
@@ -65,11 +70,6 @@ public class Settings
 	}
 
 	public Settings()
-	{
-		init();
-	}
-
-	private void init()
 	{
 		//force configuration update
 		updateProxyConfiguration();
