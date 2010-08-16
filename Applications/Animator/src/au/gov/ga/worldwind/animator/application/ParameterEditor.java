@@ -17,15 +17,15 @@ import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
 
-import au.gov.ga.worldwind.animator.animation.Parameter;
+import au.gov.ga.worldwind.animator.animation.OldParameter;
 
 
 public class ParameterEditor extends JComponent
 {
-	private Parameter parameter;
+	private OldParameter parameter;
 	private KeyFramePoint[] points;
 
-	public ParameterEditor(final Parameter parameter)
+	public ParameterEditor(final OldParameter parameter)
 	{
 		this.parameter = parameter;
 		points = calculatePoints(parameter);
@@ -71,7 +71,7 @@ public class ParameterEditor extends JComponent
 		drawParameter(parameter, g2, new Color(0, 128, 0));
 	}
 
-	private void drawParameter(Parameter parameter, Graphics2D g2, Color color)
+	private void drawParameter(OldParameter parameter, Graphics2D g2, Color color)
 	{
 		int ff = parameter.getFirstFrame();
 		int lf = parameter.getLastFrame() + 1;
@@ -141,7 +141,7 @@ public class ParameterEditor extends JComponent
 		return h - h * (value - min) / window + 10;
 	}
 
-	private KeyFramePoint[] calculatePoints(Parameter parameter)
+	private KeyFramePoint[] calculatePoints(OldParameter parameter)
 	{
 		int firstFrame = parameter.getFirstFrame();
 		int lastFrame = parameter.getLastFrame();
@@ -177,7 +177,7 @@ public class ParameterEditor extends JComponent
 
 	public static void main(String[] args)
 	{
-		Parameter parameter = new Parameter();
+		OldParameter parameter = new OldParameter();
 		parameter.addKey(0, -100);
 		parameter.addKey(100, 200);
 		parameter.addKey(2000, 300);

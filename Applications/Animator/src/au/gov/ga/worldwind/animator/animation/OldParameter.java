@@ -22,7 +22,7 @@ import nasa.worldwind.util.RestorableSupport;
  * TODO: Refactor into new structure
  * 
  */
-public class Parameter implements Serializable, Restorable
+public class OldParameter implements Serializable, Restorable
 {
 	private final static int BEZIER_SUBDIVISIONS_PER_FRAME = 10;
 	private final static boolean DEFAULT_LOCK_INOUT = true;
@@ -34,7 +34,7 @@ public class Parameter implements Serializable, Restorable
 
 	private transient List<ChangeListener> changeListeners;
 
-	public Parameter()
+	public OldParameter()
 	{
 	}
 

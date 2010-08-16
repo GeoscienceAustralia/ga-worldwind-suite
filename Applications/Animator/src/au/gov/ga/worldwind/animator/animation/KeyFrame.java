@@ -65,8 +65,8 @@ class KeyFrame implements Comparable<KeyFrame>, Serializable, Restorable
 		this.value = value;
 		this.inValue = value;
 		this.outValue = value;
-		this.inPercent = Parameter.DEFAULT_INOUT_PERCENT;
-		this.outPercent = Parameter.DEFAULT_INOUT_PERCENT;
+		this.inPercent = OldParameter.DEFAULT_INOUT_PERCENT;
+		this.outPercent = OldParameter.DEFAULT_INOUT_PERCENT;
 	}
 
 	/**

@@ -20,12 +20,12 @@ import au.gov.ga.worldwind.animator.util.FileUtil;
 
 public class Animation implements Serializable, ChangeListener, Restorable
 {
-	private Parameter eyeLat = new Parameter();
-	private Parameter eyeLon = new Parameter();
-	private Parameter eyeZoom = new Parameter();
-	private Parameter centerLat = new Parameter();
-	private Parameter centerLon = new Parameter();
-	private Parameter centerZoom = new Parameter();
+	private OldParameter eyeLat = new OldParameter();
+	private OldParameter eyeLon = new OldParameter();
+	private OldParameter eyeZoom = new OldParameter();
+	private OldParameter centerLat = new OldParameter();
+	private OldParameter centerLon = new OldParameter();
+	private OldParameter centerZoom = new OldParameter();
 	private int frameCount = 100;
 	private boolean ignoreChange = false;
 	private int width = 1024;

@@ -97,7 +97,7 @@
 		<fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
 	</target>
 	
-	<target name="package" depends="build">
+	<target name="package" depends="test">
 		<jar destfile="${build_dir}/${application_jar}" basedir="${build_dir}">
 			<manifest>
 				<attribute name="Main-Class" value="${application_class}" />
@@ -110,7 +110,7 @@
 		</jar>
 	</target>
 
-	<target name="executables" depends="clean, build, package">
+	<target name="executables" depends="clean, package">
 		<mkdir dir="${target_dir}" />
 		
 		<zip destfile="${target_dir}/temp.zip">
