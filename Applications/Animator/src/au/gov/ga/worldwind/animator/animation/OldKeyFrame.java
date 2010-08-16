@@ -14,7 +14,7 @@ import nasa.worldwind.util.RestorableSupport;
  * A Key frame contains all ParameterValues that have been recorded at that
  * frame, along with the index of the animation frame it corresponds to.
  */
-public class KeyFrame implements Comparable<KeyFrame>, Serializable, Restorable
+public class OldKeyFrame implements Comparable<OldKeyFrame>, Serializable, Restorable
 {
 	private int frame;
 	private double value;
@@ -38,11 +38,11 @@ public class KeyFrame implements Comparable<KeyFrame>, Serializable, Restorable
 	 * @return The created {@link KeyFrame}, or <code>null</code> if an problem 
 	 * occurred during creation
 	 */
-	public static KeyFrame fromStateXml(String stateInXml)
+	public static OldKeyFrame fromStateXml(String stateInXml)
 	{
 		try
 		{
-			KeyFrame keyFrame = new KeyFrame();
+			OldKeyFrame keyFrame = new OldKeyFrame();
 			keyFrame.restoreState(stateInXml);
 			return keyFrame;
 		}
@@ -59,7 +59,7 @@ public class KeyFrame implements Comparable<KeyFrame>, Serializable, Restorable
 	 * @param frame the animation frame this key frame is associated with
 	 * @param value the value associated with this key frame
 	 */
-	public KeyFrame(int frame, double value)
+	public OldKeyFrame(int frame, double value)
 	{
 		this.frame = frame;
 		this.value = value;
@@ -72,20 +72,20 @@ public class KeyFrame implements Comparable<KeyFrame>, Serializable, Restorable
 	/**
 	 * Empty constructor for use when de-serialising
 	 */
-	KeyFrame(){};
+	OldKeyFrame(){};
 	
 	@Override
 	public boolean equals(Object obj)
 	{
-		if (!(obj instanceof KeyFrame))
+		if (!(obj instanceof OldKeyFrame))
 		{
 			return false;
 		}
-		return ((KeyFrame) obj).frame == this.frame;
+		return ((OldKeyFrame) obj).frame == this.frame;
 	}
 
 	@Override
-	public int compareTo(KeyFrame o)
+	public int compareTo(OldKeyFrame o)
 	{
 		return this.frame - o.frame;
 	}

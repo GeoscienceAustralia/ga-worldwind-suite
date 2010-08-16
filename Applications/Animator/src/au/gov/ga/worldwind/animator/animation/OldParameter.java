@@ -29,9 +29,9 @@ public class OldParameter implements Serializable, Restorable
 	private final static boolean DEFAULT_LOCK_INOUT = true;
 	final static double DEFAULT_INOUT_PERCENT = 0.4;
 
-	private SortedMap<Integer, KeyFrame> map = new TreeMap<Integer, KeyFrame>();
-	private List<KeyFrame> keys = new ArrayList<KeyFrame>();
-	private KeyFrame lastPrevious, lastNext;
+	private SortedMap<Integer, OldKeyFrame> map = new TreeMap<Integer, OldKeyFrame>();
+	private List<OldKeyFrame> keys = new ArrayList<OldKeyFrame>();
+	private OldKeyFrame lastPrevious, lastNext;
 
 	private transient List<ChangeListener> changeListeners;
 
@@ -69,7 +69,7 @@ public class OldParameter implements Serializable, Restorable
 
 	public int indexOf(int frame)
 	{
-		KeyFrame key = map.get(frame);
+		OldKeyFrame key = map.get(frame);
 		if (key == null)
 		{
 			return -1;
@@ -80,7 +80,7 @@ public class OldParameter implements Serializable, Restorable
 	public double getMaximumValue()
 	{
 		double max = Double.NEGATIVE_INFINITY;
-		for (KeyFrame key : keys)
+		for (OldKeyFrame key : keys)
 		{
 			max = Math.max(max, key.getMaxValue());
 			max = Math.max(max, key.getValue());
@@ -93,7 +93,7 @@ public class OldParameter implements Serializable, Restorable
 	public double getMinimumValue()
 	{
 		double min = Double.POSITIVE_INFINITY;
-		for (KeyFrame key : keys)
+		for (OldKeyFrame key : keys)
 		{
 			min = Math.min(min, key.getMinValue());
 			min = Math.min(min, key.getValue());
@@ -112,11 +112,11 @@ public class OldParameter implements Serializable, Restorable
 	{
 		if (map.containsKey(frame))
 		{
-			KeyFrame key = map.remove(frame);
+			OldKeyFrame key = map.remove(frame);
 			keys.remove(key);
 		}
 
-		KeyFrame key = new KeyFrame(frame, value);
+		OldKeyFrame key = new OldKeyFrame(frame, value);
 		keys.add(key);
 		Collections.sort(keys);
 		map.put(frame, key);
@@ -136,7 +136,7 @@ public class OldParameter implements Serializable, Restorable
 
 	public void removeKey(int index)
 	{
-		KeyFrame key = keys.get(index);
+		OldKeyFrame key = keys.get(index);
 		keys.remove(key);
 		map.remove(key.getFrame());
 		updateBezier(index - 1);
@@ -146,7 +146,7 @@ public class OldParameter implements Serializable, Restorable
 
 	public void setValue(int index, double value)
 	{
-		KeyFrame key = keys.get(index);
+		OldKeyFrame key = keys.get(index);
 		double diff = value - key.getValue();
 		key.setValue(value);
 		key.setInValue(key.getInValue() + diff);
@@ -159,14 +159,14 @@ public class OldParameter implements Serializable, Restorable
 
 	public double getValue(int index)
 	{
-		KeyFrame key = keys.get(index);
+		OldKeyFrame key = keys.get(index);
 		return key.getValue();
 	}
 
 	public Vector2 getIn(int index)
 	{
-		KeyFrame key = keys.get(index);
-		KeyFrame p = getOrNull(index - 1);
+		OldKeyFrame key = keys.get(index);
+		OldKeyFrame p = getOrNull(index - 1);
 		if (p == null)
 		{
 			return null;
@@ -177,7 +177,7 @@ public class OldParameter implements Serializable, Restorable
 
 	public Vector2 getInPercent(int index)
 	{
-		KeyFrame key = keys.get(index);
+		OldKeyFrame key = keys.get(index);
 		return new Vector2(key.getInPercent(), key.getInValue());
 	}
 
@@ -188,8 +188,8 @@ public class OldParameter implements Serializable, Restorable
 
 	public void setIn(int index, double inFrame, double inValue)
 	{
-		KeyFrame key = keys.get(index);
-		KeyFrame p = getOrNull(index - 1);
+		OldKeyFrame key = keys.get(index);
+		OldKeyFrame p = getOrNull(index - 1);
 		double inPercent = 0;
 		if (p != null)
 		{
@@ -200,7 +200,7 @@ public class OldParameter implements Serializable, Restorable
 
 	public void setInPercent(int index, double inPercent, double inValue)
 	{
-		KeyFrame key = keys.get(index);
+		OldKeyFrame key = keys.get(index);
 		key.setInValue(inValue);
 		key.setInPercent(clampPercent(inPercent));
 		updateBezier(index - 1);
@@ -215,8 +215,8 @@ public class OldParameter implements Serializable, Restorable
 
 	public Vector2 getOut(int index)
 	{
-		KeyFrame key = keys.get(index);
-		KeyFrame s = getOrNull(index + 1);
+		OldKeyFrame key = keys.get(index);
+		OldKeyFrame s = getOrNull(index + 1);
 		if (s == null)
 			return null;
 		double frame = key.getFrame() + key.getOutPercent() * (s.getFrame() - key.getFrame());
@@ -225,7 +225,7 @@ public class OldParameter implements Serializable, Restorable
 
 	public Vector2 getOutPercent(int index)
 	{
-		KeyFrame key = keys.get(index);
+		OldKeyFrame key = keys.get(index);
 		return new Vector2(key.getOutPercent(), key.getOutValue());
 	}
 
@@ -236,8 +236,8 @@ public class OldParameter implements Serializable, Restorable
 
 	public void setOut(int index, double outFrame, double outValue)
 	{
-		KeyFrame key = keys.get(index);
-		KeyFrame s = getOrNull(index + 1);
+		OldKeyFrame key = keys.get(index);
+		OldKeyFrame s = getOrNull(index + 1);
 		double outPercent = 0;
 		if (s != null)
 			outPercent = (outFrame - key.getFrame()) / (double) (s.getFrame() - key.getFrame());
@@ -246,7 +246,7 @@ public class OldParameter implements Serializable, Restorable
 
 	public void setOutPercent(int index, double outPercent, double outValue)
 	{
-		KeyFrame key = keys.get(index);
+		OldKeyFrame key = keys.get(index);
 		key.setOutValue(outValue);
 		key.setOutPercent(clampPercent(outPercent));
 		updateBezier(index);
@@ -261,13 +261,13 @@ public class OldParameter implements Serializable, Restorable
 
 	public boolean isLockInOut(int index)
 	{
-		KeyFrame key = keys.get(index);
+		OldKeyFrame key = keys.get(index);
 		return key.isLockInOut();
 	}
 
 	public void setLockInOut(int index, boolean lock)
 	{
-		KeyFrame key = keys.get(index);
+		OldKeyFrame key = keys.get(index);
 		key.setLockInOut(lock);
 		if (lock)
 		{
@@ -279,9 +279,9 @@ public class OldParameter implements Serializable, Restorable
 
 	private void lockIn(int index)
 	{
-		KeyFrame key = keys.get(index);
-		KeyFrame p = getOrNull(index - 1);
-		KeyFrame s = getOrNull(index + 1);
+		OldKeyFrame key = keys.get(index);
+		OldKeyFrame p = getOrNull(index - 1);
+		OldKeyFrame s = getOrNull(index + 1);
 
 		if (p == null || s == null)
 			return;
@@ -298,9 +298,9 @@ public class OldParameter implements Serializable, Restorable
 
 	private void lockOut(int index)
 	{
-		KeyFrame key = keys.get(index);
-		KeyFrame p = getOrNull(index - 1);
-		KeyFrame s = getOrNull(index + 1);
+		OldKeyFrame key = keys.get(index);
+		OldKeyFrame p = getOrNull(index - 1);
+		OldKeyFrame s = getOrNull(index + 1);
 
 		if (p == null || s == null)
 			return;
@@ -318,9 +318,9 @@ public class OldParameter implements Serializable, Restorable
 
 	public void setFrame(int index, int frame)
 	{
-		KeyFrame key = keys.get(index);
-		KeyFrame p = getOrNull(index - 1);
-		KeyFrame s = getOrNull(index + 1);
+		OldKeyFrame key = keys.get(index);
+		OldKeyFrame p = getOrNull(index - 1);
+		OldKeyFrame s = getOrNull(index + 1);
 
 		frame =
 				clamp(frame, p == null ? Integer.MIN_VALUE : p.getFrame() + 1,
@@ -344,7 +344,7 @@ public class OldParameter implements Serializable, Restorable
 
 		for (int i = 0; i < size(); i++)
 		{
-			KeyFrame key = keys.get(i);
+			OldKeyFrame key = keys.get(i);
 			map.remove(key.getFrame());
 			key.setFrame(frames[i]);
 			map.put(frames[i], key);
@@ -360,9 +360,9 @@ public class OldParameter implements Serializable, Restorable
 
 	public void smooth(int index)
 	{
-		KeyFrame key = keys.get(index);
-		KeyFrame p = getOrNull(index - 1);
-		KeyFrame s = getOrNull(index + 1);
+		OldKeyFrame key = keys.get(index);
+		OldKeyFrame p = getOrNull(index - 1);
+		OldKeyFrame s = getOrNull(index + 1);
 		if (p != null && s != null)
 		{
 			double y = key.getValue();
@@ -393,7 +393,7 @@ public class OldParameter implements Serializable, Restorable
 
 	public void scaleValues(double scale)
 	{
-		for (KeyFrame key : keys)
+		for (OldKeyFrame key : keys)
 		{
 			key.setValue(key.getValue() * scale);
 			key.setInValue(key.getInValue() * scale);
@@ -408,7 +408,7 @@ public class OldParameter implements Serializable, Restorable
 		notifyChange();
 	}
 
-	private KeyFrame getOrNull(int index)
+	private OldKeyFrame getOrNull(int index)
 	{
 		if (index < 0 || index >= size())
 		{
@@ -430,7 +430,7 @@ public class OldParameter implements Serializable, Restorable
 			return;
 		}
 
-		KeyFrame key = keys.get(index);
+		OldKeyFrame key = keys.get(index);
 		key.setValues(null);
 		key.setMaxValue(Double.NEGATIVE_INFINITY);
 		key.setMinValue(Double.POSITIVE_INFINITY);
@@ -441,7 +441,7 @@ public class OldParameter implements Serializable, Restorable
 			return;
 		}
 
-		KeyFrame end = keys.get(index + 1);
+		OldKeyFrame end = keys.get(index + 1);
 		double sf = key.getFrame() + key.getOutPercent() * (end.getFrame() - key.getFrame());
 		double ef = end.getFrame() - end.getInPercent() * (end.getFrame() - key.getFrame());
 		Vector2 out = new Vector2(sf, key.getOutValue());
@@ -509,7 +509,7 @@ public class OldParameter implements Serializable, Restorable
 
 	public double getInterpolatedValue(int frame)
 	{
-		KeyFrame key = getPreviousKey(frame);
+		OldKeyFrame key = getPreviousKey(frame);
 		if (key == null)
 		{
 			if (keys.isEmpty())
@@ -529,7 +529,7 @@ public class OldParameter implements Serializable, Restorable
 		return key.getValues()[index];
 	}
 
-	private KeyFrame getPreviousKey(int frame)
+	private OldKeyFrame getPreviousKey(int frame)
 	{
 		if (lastPrevious == null || frame < lastPrevious.getFrame()
 				|| (lastNext != null && frame >= lastNext.getFrame()))
@@ -543,13 +543,13 @@ public class OldParameter implements Serializable, Restorable
 		return lastPrevious;
 	}
 
-	private KeyFrame getPreviousKeyFromMap(int frame)
+	private OldKeyFrame getPreviousKeyFromMap(int frame)
 	{
 		if (map.containsKey(frame))
 		{
 			return map.get(frame);
 		}
-		SortedMap<Integer, KeyFrame> head = map.headMap(frame);
+		SortedMap<Integer, OldKeyFrame> head = map.headMap(frame);
 		if (head.isEmpty())
 		{
 			return null;
@@ -603,7 +603,7 @@ public class OldParameter implements Serializable, Restorable
 		}
 
 		RestorableSupport.StateObject keysState = restorableSupport.addStateObject("keys");
-		for (KeyFrame key : keys)
+		for (OldKeyFrame key : keys)
 		{
 			RestorableSupport.StateObject keyState = restorableSupport.addStateObject(keysState, "key");
 			restorableSupport.addStateValueAsRestorable(keyState, "key", key);
@@ -643,7 +643,7 @@ public class OldParameter implements Serializable, Restorable
 				{
 					if (keyState != null)
 					{
-						KeyFrame keyFrame = new KeyFrame();
+						OldKeyFrame keyFrame = new OldKeyFrame();
 						keyFrame = restorableSupport.getStateValueAsRestorable(keyState, "key", keyFrame);
 						if (keyFrame != null)
 						{
