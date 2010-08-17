@@ -20,6 +20,10 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
  * the three values '<code>in</code>', '<code>value</code>' and '<code>out</code>' remain
  * colinear, with the '<code>in</code>' and '<code>out</code>' values maintaining an equal distance
  * from '<code>value</code>'.
+ * <p/>
+ * The <code>in</code> and <code>out</code> control points also have a percentage weighting associated
+ * with them. This is a time-related dimension that is used during interpolation to control the rate
+ * of change of the parameter value. 
  * 
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
@@ -41,6 +45,18 @@ public interface BezierParameterValue<V extends Vector<V>> extends ParameterValu
 	V getInValue();
 	
 	/**
+	 * Set the '<code>in</code>' time percent weighting
+	 * 
+	 * @param percent The percent to set
+	 */
+	void setInPercent(double percent);
+	
+	/**
+	 * @return The '<code>in</code>' time percent weighting
+	 */
+	double getInPercent();
+	
+	/**
 	 * Set the '<code>in</code>' value.
 	 * 
 	 * @param value The value to set for '<code>out</code>'
@@ -53,6 +69,18 @@ public interface BezierParameterValue<V extends Vector<V>> extends ParameterValu
 	 * @return the '<code>out</code>' value
 	 */
 	V getOutValue();
+	
+	/**
+	 * Set the '<code>out</code>' time percent weighting
+	 * 
+	 * @param percent The percent to set
+	 */
+	void setOutPercent(double percent);
+	
+	/**
+	 * @return The '<code>out</code>' time percent weighting
+	 */
+	double getOutPercent();
 	
 	/**
 	 * @return Whether this bezier value is <code>locked</code>.
