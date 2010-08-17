@@ -19,6 +19,7 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
  * <p/>
  * A {@link Parameter} can be configured with an {@link Interpolator} to interpolate between key frames.
  * 
+ * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
 public interface Parameter<V extends Vector<V>> extends Restorable, Serializable

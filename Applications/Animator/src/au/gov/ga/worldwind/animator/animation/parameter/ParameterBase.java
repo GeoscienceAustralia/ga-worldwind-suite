@@ -13,6 +13,7 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
  * Provides basic implementation of many {@link Parameter} methods, along with some 
  * helper methods to assist in implementing {@link Parameter} subclasses.
  * 
+ * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
 public abstract class ParameterBase<V extends Vector<V>> implements Parameter<V>
@@ -61,18 +62,44 @@ public abstract class ParameterBase<V extends Vector<V>> implements Parameter<V>
 		// If there is no previous key value, return the next one
 		if (previousKeyFrame == null) 
 		{
-			return nextKeyFrame;
+			return nextKeyFrame.getValueForParameter(this);
 		}
 		
 		// If there is no next key value, return the previous one
 		if (nextKeyFrame == null)
 		{
-			return previousKeyFrame;
+			return previousKeyFrame.getValueForParameter(this);
 		}
 		
-		// Otherwise, 
-		
-		return null;
+		// Otherwise, use the configured interpolator to interpolate between the two values
+		double percent = calculatePercentOfInterval(previousKeyFrame.getFrame(), nextKeyFrame.getFrame(), frame);
+		initialiseInterpolator(previousKeyFrame.getValueForParameter(this), nextKeyFrame.getValueForParameter(this));
+		V interpolatedValue = getInterpolator().computeValue(percent);
+		return new BasicParameterValue<V>(interpolatedValue, this);
+	}
+
+	/**
+	 * Perform any required initialisation of the configured interpolator
+	 * 
+	 * @param startValue The value to use as the start of the interpolation (0%)
+	 * @param endValue The value to use as the end of the interpolation (100%)
+	 */
+	protected abstract void initialiseInterpolator(ParameterValue<V> startValue, ParameterValue<V> endValue);
+
+	/**
+	 * Calculate where the <code>target</code> lies on the interval <code>[start,end]</code>
+	 * as a percentage of the interval.
+	 * 
+	 * @param start The start of the interval
+	 * @param end The end of the interval
+	 * @param target The target point on the interval for which the percentage is required
+	 * 
+	 * @return where the <code>target</code> lies on the interval <code>[start,end]</code>
+	 * as a percentage of the interval.
+	 */
+	private static double calculatePercentOfInterval(int start, int end, int target)
+	{
+		return (target - start)/(end - start);
 	}
 	
 }

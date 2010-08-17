@@ -16,6 +16,7 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
  * {@link ParameterValue}s can be associated with key frames to record the state of a {@link Parameter}
  * at a given key frame, or can be calculated by interpolating between two key frames.
  * 
+ * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
 public interface ParameterValue<V extends Vector<V>> extends Restorable, Serializable
