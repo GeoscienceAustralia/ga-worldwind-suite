@@ -13,7 +13,6 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
  */
 public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParameterValue<V> implements BezierParameterValue<V>
 {
-
 	/** The default control point percentage to use */
 	private static final double DEFAULT_CONTROL_POINT_PERCENTAGE = 0.4;
 	
@@ -39,6 +38,12 @@ public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParamet
 	public BasicBezierParameterValue(V value, Parameter<V> owner)
 	{
 		super(value, owner);
+	}
+	
+	@Override
+	public ParameterValueType getType()
+	{
+		return ParameterValueType.BEZIER;
 	}
 	
 	@Override

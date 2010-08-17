@@ -37,4 +37,9 @@ public interface ParameterValue<V extends Vector<V>> extends Restorable, Seriali
 	 * @return The {@link Parameter} that 'owns' this value
 	 */
 	Parameter<V> getOwner();
+	
+	/**
+	 * @return The type of this parameter value
+	 */
+	ParameterValueType getType();
 }

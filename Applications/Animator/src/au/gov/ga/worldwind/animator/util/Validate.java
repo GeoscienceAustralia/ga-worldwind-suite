@@ -11,6 +11,10 @@ package au.gov.ga.worldwind.animator.util;
 public class Validate
 {
 
+	private static final String DEFAULT_NOT_NULL_MSG = "Value cannot be null";
+	private static final String DEFAULT_IS_TRUE_MSG = "Value is false when expected true";
+	
+
 	/**
 	 * Validate that the provided object is not <code>null</code>.
 	 * 
@@ -22,7 +26,22 @@ public class Validate
 	public static void notNull(Object object, String msg) throws IllegalArgumentException
 	{
 		if (object == null) {
-			throw new IllegalArgumentException(msg);
+			throw new IllegalArgumentException(msg == null ? DEFAULT_NOT_NULL_MSG : msg);
+		}
+	}
+	
+	/**
+	 * Validate that the provided boolean value is <code>true</code>.
+	 * 
+	 * @param value The value to validate
+	 * @param msg The message to include in any generated exceptions
+	 * 
+	 * @throws IllegalArgumentException if the provided boolean value is <code>false</code>
+	 */
+	public static void isTrue(boolean value, String msg) throws IllegalArgumentException
+	{
+		if (value == false) {
+			throw new IllegalArgumentException(msg == null ? DEFAULT_IS_TRUE_MSG : msg);
 		}
 	}
 }

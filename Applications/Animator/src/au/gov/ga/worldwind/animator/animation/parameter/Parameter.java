@@ -16,26 +16,12 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
 
 /**
  * A {@link Parameter} represents a single animatable property of some {@link Animatable} object (e.g. Camera position, layer opacity etc.).
- * <p/>
- * A {@link Parameter} can be configured with an {@link Interpolator} to interpolate between key frames.
  * 
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
 public interface Parameter<V extends Vector<V>> extends Restorable, Serializable
 {
-
-	/**
-	 * @return The interpolator configured for this {@link Parameter}, or <code>null</code> if no interpolator is configured.
-	 */
-	Interpolator<V> getInterpolator();
-	
-	/**
-	 * Set the interpolator to use for this {@link Parameter}
-	 * 
-	 * @param interpolator the interpolator to use for this {@link Parameter}, or <code>null</code> if no interpolation is to be performed.
-	 */
-	void setInterpolator(Interpolator<V> interpolator);
 	
 	/**
 	 * Return whether this parameter is currently enabled for the current {@link Animation}.
@@ -77,7 +63,8 @@ public interface Parameter<V extends Vector<V>> extends Restorable, Serializable
 	 * the {@link ParameterValue} on that {@link KeyFrame} will be returned.
 	 * <p/>
 	 * If the provided frame lies between two {@link KeyFrame}s with {@link ParameterValue}s recorded for this {@link Parameter},
-	 * an interpolated {@link ParameterValue} will be returned, with interpolation performed using the configured {@link Interpolator}.
+	 * an interpolated {@link ParameterValue} will be returned, with interpolation performed using an {@link Interpolator} determined
+	 * by the type of parameter value.
 	 * 
 	 * @param context The context of the current animation
 	 * @param frame The frame for which the value of the parameter is required

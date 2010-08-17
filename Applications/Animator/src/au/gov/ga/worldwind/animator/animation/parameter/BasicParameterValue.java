@@ -64,4 +64,9 @@ public class BasicParameterValue<V extends Vector<V>> implements ParameterValue<
 		return owner;
 	}
 
+	@Override
+	public ParameterValueType getType()
+	{
+		return ParameterValueType.LINEAR;
+	}
 }
