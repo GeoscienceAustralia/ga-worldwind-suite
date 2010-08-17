@@ -1,7 +1,11 @@
 package au.gov.ga.worldwind.panels.layers;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
+import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -29,7 +33,9 @@ import au.gov.ga.worldwind.panels.layers.LayerEnabler.RefreshListener;
 import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.util.BasicAction;
+import au.gov.ga.worldwind.util.FlyToSectorAnimator;
 import au.gov.ga.worldwind.util.Icons;
+import au.gov.ga.worldwind.util.Util;
 
 public abstract class AbstractLayersPanel extends AbstractThemePanel
 {
@@ -102,7 +108,36 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 							Sector sector = layerEnabler.getLayerExtents(layer);
 							if (sector != null)
 							{
-								//TODO animate the view so that sector is visible
+								if (wwd.getView() instanceof OrbitView)
+								{
+									OrbitView orbitView = (OrbitView) wwd.getView();
+									Position center = orbitView.getCenterPosition();
+									Position newCenter;
+									if (sector.contains(center) && sector.getDeltaLatDegrees() > 90
+											&& sector.getDeltaLonDegrees() > 90)
+									{
+										newCenter = center;
+									}
+									else
+									{
+										newCenter = new Position(sector.getCentroid(), 0);
+									}
+
+									LatLon endVisibleDelta =
+											new LatLon(sector.getDeltaLat(), sector.getDeltaLon());
+									long lengthMillis =
+											Util.getScaledLengthMillis(center, newCenter);
+
+									FlyToOrbitViewAnimator animator =
+											FlyToSectorAnimator.createFlyToSectorAnimator(
+													orbitView, center, newCenter,
+													orbitView.getHeading(), orbitView.getPitch(),
+													orbitView.getZoom(), endVisibleDelta,
+													lengthMillis);
+									orbitView.addAnimator(animator);
+
+									wwd.redraw();
+								}
 							}
 						}
 					}
@@ -122,7 +157,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		});
 
 		enableComponents();
-		
+
 		wwd = theme.getWwd();
 		layerEnabler.setWwd(theme.getWwd());
 	}

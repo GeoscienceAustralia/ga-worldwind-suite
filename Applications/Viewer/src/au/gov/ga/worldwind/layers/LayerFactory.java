@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.layers;
 
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.layers.BasicLayerFactory;
@@ -11,7 +12,8 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.layers.file.FileTiledImageLayer;
 import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
 import au.gov.ga.worldwind.layers.nearestneighbor.NearestNeighborMaskTiledImageLayer;
-import au.gov.ga.worldwind.layers.nearestneighbor.NearestNeighbourTiledImageLayer;
+import au.gov.ga.worldwind.layers.nearestneighbor.NearestNeighborFileTiledImageLayer;
+import au.gov.ga.worldwind.layers.nearestneighbor.NearestNeighborTiledImageLayer;
 import au.gov.ga.worldwind.layers.shapefile.surfaceshape.SurfaceShapeShapefileLayerFactory;
 import au.gov.ga.worldwind.util.XMLUtil;
 
@@ -41,7 +43,7 @@ public class LayerFactory extends BasicLayerFactory
 
 		Layer layer;
 		String serviceName = XMLUtil.getText(domElement, "Service/@serviceName");
-		if ("WWTileService".equals(serviceName))
+		if ("WWTileService".equals(serviceName) || "TileService".equals(serviceName))
 		{
 			layer = new ExtendedTiledImageLayer(domElement, params);
 		}
@@ -57,13 +59,21 @@ public class LayerFactory extends BasicLayerFactory
 		{
 			layer = new FileTiledImageLayer(domElement, params, true);
 		}
+		else if ("NearestNeighborTileService".equals(serviceName))
+		{
+			layer = new NearestNeighborTiledImageLayer(domElement, params);
+		}
 		else if ("NearestNeighborMaskedTileService".equals(serviceName))
 		{
 			layer = new NearestNeighborMaskTiledImageLayer(domElement, params);
 		}
-		else if ("NearestNeighborTileService".equals(serviceName))
+		else if ("NearestNeighborFileTileService".equals(serviceName))
 		{
-			layer = new NearestNeighbourTiledImageLayer(domElement, params);
+			layer = new NearestNeighborFileTiledImageLayer(domElement, params, false);
+		}
+		else if ("NearestNeighborMaskedFileTileService".equals(serviceName))
+		{
+			layer = new NearestNeighborFileTiledImageLayer(domElement, params, true);
 		}
 		/*else if ("CombineMaskedTileService".equals(serviceName))
 		{
@@ -72,6 +82,8 @@ public class LayerFactory extends BasicLayerFactory
 		else
 		{
 			layer = super.createTiledImageLayer(domElement, params);
+			if (params.getValue(AVKey.SECTOR) != null)
+				layer.setValue(AVKey.SECTOR, params.getValue(AVKey.SECTOR));
 		}
 
 		params = TimedExpirationHandler.getExpirationParams(domElement, params);

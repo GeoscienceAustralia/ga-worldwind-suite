@@ -26,6 +26,7 @@ import javax.media.opengl.GL;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.layers.AVListTiledImageLayer;
 import au.gov.ga.worldwind.util.AVKeyMore;
 import au.gov.ga.worldwind.util.Util;
 import au.gov.ga.worldwind.util.XMLUtil;

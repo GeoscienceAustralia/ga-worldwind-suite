@@ -18,6 +18,7 @@ import java.util.Set;
 import au.gov.ga.worldwind.downloader.Downloader;
 import au.gov.ga.worldwind.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.downloader.RetrievalResult;
+import au.gov.ga.worldwind.util.Bounded;
 
 public class LayerEnabler
 {
@@ -292,13 +293,11 @@ public class LayerEnabler
 			return null;
 
 		Wrapper wrapper = nodeMap.get(node);
-		if (wrapper.hasLayer())
-		{
-			//Layer layer = wrapper.getLayer();
-			//TODO how can we calculate the extends of a layer?
-		}
+		Object wrapped =
+				wrapper.hasLayer() ? wrapper.getLayer() : wrapper.hasElevationModel() ? wrapper
+						.getElevationModel() : null;
 
-		return null;
+		return Bounded.Reader.getSector(wrapped);
 	}
 
 	private static class Wrapper

@@ -634,10 +634,6 @@ public class PlacesPanel extends AbstractThemePanel
 			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView, center,
 					newCenter, orbitView.getHeading(), heading, orbitView.getPitch(), pitch,
 					orbitView.getZoom(), zoom, lengthMillis, endCenterOnSurface));
-			/*orbitView.setCenterPosition(newCenter);
-			orbitView.setHeading(heading);
-			orbitView.setPitch(pitch);
-			orbitView.setZoom(zoom);*/
 
 			wwd.redraw();
 

@@ -1,18 +1,17 @@
-package au.gov.ga.worldwind.layers.file;
+package au.gov.ga.worldwind.layers;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.layers.TiledImageLayer;
 import gov.nasa.worldwind.render.ScreenCredit;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
 
 import org.w3c.dom.Element;
 
-public abstract class AVListTiledImageLayer extends TiledImageLayer
+public abstract class AVListTiledImageLayer extends BoundedTiledImageLayer
 {
 	public AVListTiledImageLayer(LevelSet levelSet)
 	{

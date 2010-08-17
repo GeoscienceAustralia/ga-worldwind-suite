@@ -5,6 +5,7 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.examples.util.ShapefileLoader;
 import gov.nasa.worldwind.formats.shapefile.Shapefile;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.SurfaceShapeLayer;
@@ -54,6 +55,10 @@ public class SurfaceShapeShapefileLayerFactory
 
 		Shapefile shapefile = new Shapefile(url);
 		Layer layer = ShapefileLoader.makeLayerFromShapefile(shapefile);
+		if (params.getValue(AVKey.SECTOR) == null)
+		{
+			layer.setValue(AVKey.SECTOR, Sector.fromDegrees(shapefile.getBoundingRectangle()));
+		}
 
 		if (layer instanceof SurfaceShapeLayer)
 		{
@@ -75,7 +80,7 @@ public class SurfaceShapeShapefileLayerFactory
 				if (renderable instanceof SurfaceShape)
 					((SurfaceShape) renderable).setAttributes(attributes);
 			}
-			
+
 			ssl.setPickEnabled(false);
 
 			return ssl;

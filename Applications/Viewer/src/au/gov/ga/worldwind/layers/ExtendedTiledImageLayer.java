@@ -3,7 +3,6 @@ package au.gov.ga.worldwind.layers;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
-import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
@@ -14,7 +13,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.application.GASandpit;
 
-public class ExtendedTiledImageLayer extends BasicTiledImageLayer
+public class ExtendedTiledImageLayer extends BoundedBasicTiledImageLayer
 {
 	public ExtendedTiledImageLayer(Element domElement, AVList params)
 	{

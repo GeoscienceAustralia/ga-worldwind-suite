@@ -15,13 +15,13 @@ import java.util.ArrayList;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.layers.ExtendedTiledImageLayer;
+import au.gov.ga.worldwind.layers.file.FileTiledImageLayer;
 
-public class NearestNeighbourTiledImageLayer extends ExtendedTiledImageLayer
+public class NearestNeighborFileTiledImageLayer extends FileTiledImageLayer
 {
-	public NearestNeighbourTiledImageLayer(Element domElement, AVList params)
+	public NearestNeighborFileTiledImageLayer(Element domElement, AVList params, boolean masked)
 	{
-		super(domElement, params);
+		super(domElement, params, masked);
 	}
 
 	//*********************************************************************
