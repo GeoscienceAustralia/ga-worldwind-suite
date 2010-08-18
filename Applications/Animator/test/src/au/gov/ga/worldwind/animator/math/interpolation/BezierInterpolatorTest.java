@@ -115,7 +115,7 @@ public class BezierInterpolatorTest
 	 * Asset that the provided double value is within an allowable error margin of the expected value
 	 */
 	private static void assertEqualsWithError(double expected, double allowableError, double actual) {
-		assertTrue("Value '" + actual + "' does not equal '" + expected + "' within '" + allowableError +"' tolerance.", Math.abs(expected - actual) <= allowableError);
+		assertEquals(expected, actual, allowableError);
 	}
 	
 }

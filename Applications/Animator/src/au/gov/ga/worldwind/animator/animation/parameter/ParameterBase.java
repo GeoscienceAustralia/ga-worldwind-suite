@@ -3,8 +3,10 @@
  */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
+import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
+import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
  * Base implementation of the {@link Parameter} interface.
@@ -17,7 +19,6 @@ import au.gov.ga.worldwind.animator.animation.KeyFrame;
  */
 public abstract class ParameterBase implements Parameter
 {
-
 	/** Whether this parameter is currently enabled */
 	private boolean enabled;
 
@@ -26,6 +27,18 @@ public abstract class ParameterBase implements Parameter
 	 * with a value for this {@link Parameter}
 	 */
 	private double defaultValue = 0.0;
+	
+	/** The animation this parameter is associated with */
+	private Animation animation;
+	
+	/**
+	 * Constructor. Initialises the mandatory {@link Animation} parameter.
+	 */
+	public ParameterBase(Animation animation)
+	{
+		Validate.notNull(animation, "An animation is required");
+		this.animation = animation;
+	}
 	
 	@Override
 	public final boolean isEnabled()
@@ -110,4 +123,25 @@ public abstract class ParameterBase implements Parameter
 
 	}
 	
+	@Override
+	public ParameterValue getValueAtKeyFrameBeforeFrame(int frame)
+	{
+		KeyFrame keyFrame = animation.getKeyFrameWithParameterBeforeFrame(this, frame);
+		if (keyFrame == null)
+		{
+			return null;
+		}
+		return keyFrame.getValueForParameter(this);
+	}
+	
+	@Override
+	public ParameterValue getValueAtKeyFrameAfterFrame(int frame)
+	{
+		KeyFrame keyFrame = animation.getKeyFrameWithParameterAfterFrame(this, frame);
+		if (keyFrame == null)
+		{
+			return null;
+		}
+		return keyFrame.getValueForParameter(this);
+	}
 }

@@ -5,8 +5,7 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 
 
 /**
- * A factory class that maintains the current 'default' value type, 
- * and knows how to convert between value types.
+ * A factory class that maintains the current 'default' value type 
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
@@ -71,51 +70,4 @@ public class ParameterValueFactory
 				return new BasicBezierParameterValue(value, frame, parameter);
 		}
 	}
-	
-	/**
-	 * Convert the provided {@link ParameterValue} to a {@link BezierParameterValue}. 
-	 * <p/>
-	 * If the value already is a bezier value, it will be returned unchanged. Otherwise, a new {@link BezierParameterValue} will be created
-	 * with control points set to provide a smooth transition between <code>previous -> this -> next</code> values.
-	 * <p/>
-	 * If either of the <code>previousValue</code> or <code>nextValue</code> are <code>null</code>, it will be considered that <code>value</code> is a start-
-	 * or end-point.
-	 * 
-	 * @param valueToConvert The parameter value to convert to a bezier value
-	 * @param previousValue The previous value. Used to set initial values for the result control points.
-	 * @param nextValue The next value. Used to set initial values for the result control points.
-	 * 
-	 * @return The converted bezier parameter
-	 */
-	public static BezierParameterValue convertToBezierParameterValue(ParameterValue valueToConvert, ParameterValue previousValue, ParameterValue nextValue)
-	{
-		if (valueToConvert.getType() == ParameterValueType.BEZIER)
-		{
-			return (BezierParameterValue)valueToConvert;
-		}
-		
-		// Create the bezier with the same value and owner as the provided value
-		BezierParameterValue result = new BasicBezierParameterValue(valueToConvert.getValue(), valueToConvert.getFrame(), valueToConvert.getOwner());
-		result.setLocked(true);
-		
-		// Default 'in value' to the same as the 'value'. This will result in a horizontal 'in-value-out' control line
-		double inValue = valueToConvert.getValue();
-		
-		// If previous and next points exist, and they exist on different sides of 'value' vertically,
-		// use them to choose a better value for 'in' based on the line joining 'previous' and 'next'
-		if (previousValue != null && nextValue != null && Math.signum(valueToConvert.getValue() - previousValue.getValue()) != Math.signum(valueToConvert.getValue() - nextValue.getValue()))
-		{
-			// Compute the gradient of the line joining the previous and next points
-			double m = (nextValue.getValue() - previousValue.getValue()) / (nextValue.getFrame() - previousValue.getFrame());
-			double x = (nextValue.getFrame() - previousValue.getFrame()) * result.getInPercent();
-			
-			// Compute the value to use for the in control point such that it lies on the line joining the previous and next lines
-			inValue = valueToConvert.getValue() - m * x;
-		}
-		
-		result.setInValue(inValue);
-		
-		return null;
-	}
-	
 }

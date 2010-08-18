@@ -11,7 +11,7 @@ import javax.media.opengl.GL;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.OldAnimation;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -27,7 +27,7 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 	private static final Color DEFAULT_CAMERA_PATH_COLOUR = Color.WHITE;
 	
 	/** The animation whose camera path is to be displayed on this layer */
-	private Animation animation;
+	private OldAnimation animation;
 
 	/** The 'front' buffer, used to hold vertices ready for drawing */
 	private DoubleBuffer drawVertexBuffer;
@@ -48,7 +48,7 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 	 * 
 	 * @param animation The animation instance whose camera path will be displayed by this layer
 	 */
-	public CameraPathLayer(Animation animation)
+	public CameraPathLayer(OldAnimation animation)
 	{
 		Validate.notNull(animation, "An animation instance is required");
 		this.animation = animation;

@@ -80,4 +80,28 @@ public interface Parameter extends Restorable, Serializable
 	 * @param value The default value of this this {@link Parameter}
 	 */
 	void setDefaultValue(double value);
+	
+	/**
+	 * Gets the first recorded value of this parameter on a key frame before the provided frame.
+	 * <p/>
+	 * If one cannot be found, returns <code>null</code>.
+	 * 
+	 * @param frame The frame before which to retrieve the value
+	 * 
+	 * @return the first recorded value of this parameter on a key frame before the 
+	 * provided frame, or <code>null</code> if one cannot be found
+	 */
+	ParameterValue getValueAtKeyFrameBeforeFrame(int frame);
+	
+	/**
+	 * Gets the first recorded value of this parameter on a key frame after the provided frame.
+	 * <p/>
+	 * If one cannot be found, returns <code>null</code>.
+	 * 
+	 * @param frame The frame after which to retrieve the value
+	 * 
+	 * @return the first recorded value of this parameter on a key frame after the 
+	 * provided frame, or <code>null</code> if one cannot be found
+	 */
+	ParameterValue getValueAtKeyFrameAfterFrame(int frame);
 }

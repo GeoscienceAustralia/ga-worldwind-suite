@@ -36,7 +36,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	public BasicBezierParameterValue(double value, int frame, Parameter owner)
 	{
 		super(value, frame, owner);
-		// TODO Auto-generated constructor stub
+		smooth();
 	}
 	
 	@Override
@@ -150,6 +150,36 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		}
 		double inValueDelta = in.getValue() - getValue();
 		out.setValue(getValue() - inValueDelta);
+	}
+	
+	/**
+	 * 
+	 */
+	private void smooth()
+	{
+		// Default 'in' and 'out' value to the same as the 'value'. This will result in a horizontal 'in-value-out' control line
+		double inValue = getValue();
+		double outValue = getValue();
+		
+		// If previous and next points exist, and they exist on different sides of 'value' vertically,
+		// use them to choose a better value for 'in' based on the line joining 'previous' and 'next'
+		ParameterValue previousValue = getOwner().getValueAtKeyFrameBeforeFrame(getFrame());
+		ParameterValue nextValue = getOwner().getValueAtKeyFrameAfterFrame(getFrame());
+		if (previousValue != null && nextValue != null && 
+				Math.signum(getValue() - previousValue.getValue()) != Math.signum(getValue() - nextValue.getValue()))
+		{
+			// Compute the gradient of the line joining the previous and next points
+			double m = (nextValue.getValue() - previousValue.getValue()) / (nextValue.getFrame() - previousValue.getFrame());
+			double xIn = (getFrame() - previousValue.getFrame()) * getInPercent();
+			double xOut = (nextValue.getFrame() - getFrame()) * getOutPercent();
+			
+			// Compute the value to use for the in control point such that it lies on the line joining the previous and next lines
+			inValue = getValue() - m * xIn;
+			outValue = getValue() + m * xOut;
+		}
+		
+		setInValue(inValue);
+		setOutValue(outValue);
 	}
 	
 	/**

@@ -57,7 +57,8 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
+import nasa.worldwind.awt.WorldWindowGLCanvas;
+import au.gov.ga.worldwind.animator.animation.OldAnimation;
 import au.gov.ga.worldwind.animator.layers.depth.DepthLayer;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModel;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
@@ -75,13 +76,11 @@ import au.gov.ga.worldwind.animator.layers.other.GravityLayer;
 import au.gov.ga.worldwind.animator.layers.other.ImmediateBMNGWMSLayer;
 import au.gov.ga.worldwind.animator.layers.other.ImmediateLandsatI3WMSLayer;
 import au.gov.ga.worldwind.animator.layers.other.MagneticsLayer;
-import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.FrameSlider;
 import au.gov.ga.worldwind.animator.view.roll.BasicRollOrbitView;
-import au.gov.ga.worldwind.animator.animation.Animation;
 
 public class Animator
 {
@@ -136,7 +135,7 @@ public class Animator
 
 	private WorldWindowGLCanvas wwd;
 	private FrameSlider slider;
-	private Animation animation = null;
+	private OldAnimation animation = null;
 	private File file = null;
 	private boolean autokey = false;
 	private boolean applying = false;
@@ -189,7 +188,7 @@ public class Animator
 			}
 		};
 
-		animation = new Animation();
+		animation = new OldAnimation();
 		resetChanged();
 		updater = new Updater();
 
@@ -1382,7 +1381,7 @@ public class Animator
 		}
 	}
 
-	private void setAnimation(Animation animation)
+	private void setAnimation(OldAnimation animation)
 	{
 		this.animation = animation;
 		if (useScaledZoomCheck != null)
@@ -1393,7 +1392,7 @@ public class Animator
 	{
 		if (querySave())
 		{
-			setAnimation(new Animation());
+			setAnimation(new OldAnimation());
 			resetChanged();
 			setFile(null);
 			updateSlider();
@@ -1409,7 +1408,7 @@ public class Animator
 			if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
 				File newFile = chooser.getSelectedFile();
-				Animation newAnimation = new Animation();
+				OldAnimation newAnimation = new OldAnimation();
 				try
 				{
 					newAnimation.load(newFile);
