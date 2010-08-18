@@ -11,6 +11,8 @@ import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.terrain.file.FileElevationModel;
+
 public class ElevationModelFactory extends BasicElevationModelFactory
 {
 	//functions copied from superclass, replacing the model objects with our extensions 
@@ -55,6 +57,10 @@ public class ElevationModelFactory extends BasicElevationModelFactory
 		else if ("WWTileService".equals(serviceName))
 		{
 			em = new ExtendedElevationModel(domElement, params);
+		}
+		else if ("FileTileService".equals(serviceName))
+		{
+			em = new FileElevationModel(domElement, params);
 		}
 		else if (OGCConstants.WMS_SERVICE_NAME.equals(serviceName))
 		{

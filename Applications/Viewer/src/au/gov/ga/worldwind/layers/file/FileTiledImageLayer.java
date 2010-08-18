@@ -9,6 +9,7 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.ImageUtil;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.WWIO;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -101,7 +102,7 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 			context = (URL) o;
 	}
 
-	protected File getTileFile(TextureTile tile, boolean mask)
+	protected File getTileFile(Tile tile, boolean mask)
 	{
 		String service = tile.getLevel().getService();
 		String dataset = tile.getLevel().getDataset();
@@ -124,7 +125,7 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 			dataset += "mask";
 		}
 
-		File directory = getDirectory(context, dataset);
+		File directory = Util.getPathWithinContext(dataset, context);;
 		if (directory == null)
 			return null;
 
@@ -159,54 +160,6 @@ public class FileTiledImageLayer extends AVListTiledImageLayer
 				+ Util.paddedInt(tile.getRow(), 4) + File.separator
 				+ Util.paddedInt(tile.getRow(), 4) + "_" + Util.paddedInt(tile.getColumn(), 4)
 				+ "." + ext);
-	}
-
-	protected File getDirectory(URL context, String path)
-	{
-		//first attempt finding of the directory using a URL
-		try
-		{
-			URL url = context == null ? new URL(path) : new URL(context, path);
-			File file = Util.urlToFile(url);
-			if (file != null && file.isDirectory())
-				return file;
-		}
-		catch (Exception e)
-		{
-		}
-
-		//next try parsing the context to pull out a parent file
-		File parent = null;
-		if (context != null)
-		{
-			File file = Util.urlToFile(context);
-			if (file != null && file.isFile())
-			{
-				parent = file.getParentFile();
-				if (parent != null && !parent.isDirectory())
-					parent = null;
-			}
-		}
-
-		//if the parent isn't null, try using it as a parent file
-		if (parent != null)
-		{
-			try
-			{
-				File dir = new File(parent, path);
-				if (dir.isDirectory())
-					return dir;
-			}
-			catch (Exception e)
-			{
-			}
-		}
-
-		//otherwise ignore the parent and just attempt the path
-		File dir = new File(path);
-		if (dir.isDirectory())
-			return dir;
-		return null;
 	}
 
 	@Override

@@ -75,6 +75,54 @@ public class Util
 		}
 		return null;
 	}
+	
+	public static File getPathWithinContext(String path, URL context)
+	{
+		//first attempt finding of the directory using a URL
+		try
+		{
+			URL url = context == null ? new URL(path) : new URL(context, path);
+			File file = Util.urlToFile(url);
+			if (file != null && file.isDirectory())
+				return file;
+		}
+		catch (Exception e)
+		{
+		}
+
+		//next try parsing the context to pull out a parent file
+		File parent = null;
+		if (context != null)
+		{
+			File file = Util.urlToFile(context);
+			if (file != null && file.isFile())
+			{
+				parent = file.getParentFile();
+				if (parent != null && !parent.isDirectory())
+					parent = null;
+			}
+		}
+
+		//if the parent isn't null, try using it as a parent file
+		if (parent != null)
+		{
+			try
+			{
+				File dir = new File(parent, path);
+				if (dir.isDirectory())
+					return dir;
+			}
+			catch (Exception e)
+			{
+			}
+		}
+
+		//otherwise ignore the parent and just attempt the path
+		File dir = new File(path);
+		if (dir.isDirectory())
+			return dir;
+		return null;
+	}
 
 	public static String randomString(int length)
 	{
