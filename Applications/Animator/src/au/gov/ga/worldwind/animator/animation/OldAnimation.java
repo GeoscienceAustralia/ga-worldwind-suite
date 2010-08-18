@@ -18,7 +18,7 @@ import au.gov.ga.worldwind.animator.math.vector.Vector3;
 import nasa.worldwind.util.RestorableSupport;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 
-public class Animation implements Serializable, ChangeListener, Restorable
+public class OldAnimation implements Serializable, ChangeListener, Restorable
 {
 	private OldParameter eyeLat = new OldParameter();
 	private OldParameter eyeLon = new OldParameter();
@@ -34,7 +34,7 @@ public class Animation implements Serializable, ChangeListener, Restorable
 
 	private transient List<ChangeListener> changeListeners;
 
-	public Animation()
+	public OldAnimation()
 	{
 		addChangeListener();
 
