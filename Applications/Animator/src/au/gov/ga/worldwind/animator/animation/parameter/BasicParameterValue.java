@@ -19,15 +19,19 @@ public class BasicParameterValue implements ParameterValue
 	/** The value of this {@link ParameterValue}*/
 	private double value;
 	
+	/** The frame this {@link ParameterValue} is associated with */
+	private int frame;
+	
 	/**
 	 * Constructor. 
 	 * <p/>
 	 * Initialises the mandatory {@link #owner} and {@link #value} fields
 	 */
-	public BasicParameterValue(double value, Parameter owner) 
+	public BasicParameterValue(double value, int frame, Parameter owner) 
 	{
 		Validate.notNull(owner, "An owner is required");
 		this.value = value;
+		this.frame = frame;
 		this.owner = owner;
 	}
 	
@@ -66,5 +70,11 @@ public class BasicParameterValue implements ParameterValue
 	public ParameterValueType getType()
 	{
 		return ParameterValueType.LINEAR;
+	}
+	
+	@Override
+	public int getFrame()
+	{
+		return frame;
 	}
 }

@@ -40,4 +40,9 @@ public interface ParameterValue extends Restorable, Serializable
 	 * @return The type of this parameter value
 	 */
 	ParameterValueType getType();
+	
+	/**
+	 * @return The frame this parameter value is associated with
+	 */
+	int getFrame();
 }

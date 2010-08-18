@@ -25,7 +25,7 @@ public abstract class ParameterBase implements Parameter
 	 * The default value to use in the case that no {@link KeyFrame}s can be found
 	 * with a value for this {@link Parameter}
 	 */
-	private ParameterValue defaultValue;
+	private double defaultValue = 0.0;
 	
 	@Override
 	public final boolean isEnabled()
@@ -40,7 +40,7 @@ public abstract class ParameterBase implements Parameter
 	}
 	
 	@Override
-	public final void setDefaultValue(ParameterValue value)
+	public final void setDefaultValue(double value)
 	{
 		this.defaultValue = value;
 	}
@@ -54,7 +54,7 @@ public abstract class ParameterBase implements Parameter
 		// If no key values exist, return the default value
 		if (previousKeyFrame == null && nextKeyFrame == null)
 		{
-			return defaultValue;
+			return ParameterValueFactory.createParameterValue(this, defaultValue, frame);
 		}
 		
 		// If there is no previous key value, return the next one
@@ -77,7 +77,7 @@ public abstract class ParameterBase implements Parameter
 //		V interpolatedValue = getInterpolator().computeValue(percent);
 		double interpolatedValue = previousKeyFrame.getValueForParameter(this).getValue();
 		
-		return ParameterValueFactory.createParameterValue(this, interpolatedValue);
+		return ParameterValueFactory.createParameterValue(this, interpolatedValue, frame);
 	}
 
 	/**

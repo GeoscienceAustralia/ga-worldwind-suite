@@ -40,12 +40,13 @@ public class ParameterValueFactory
 	 *  
 	 * @param parameter The parameter to create the value for
 	 * @param value The value of the parameter
+	 * @param value The frame the value is associated with
 	 * 
 	 * @return a new parameter value for the given parameter
 	 */
-	public static ParameterValue createParameterValue(Parameter parameter, double value)
+	public static ParameterValue createParameterValue(Parameter parameter, double value, int frame)
 	{
-		return createParameterValue(defaultValueType, parameter, value);
+		return createParameterValue(defaultValueType, parameter, value, frame);
 	}
 	
 	/**
@@ -54,19 +55,20 @@ public class ParameterValueFactory
 	 * @param type the type of the value to create
 	 * @param parameter The parameter to create the value for
 	 * @param value The value of the parameter
+	 * @param frame The frame the value is associated with
 	 * 
 	 * @return a new parameter value for the given parameter
 	 */
-	public static ParameterValue createParameterValue(ParameterValueType type, Parameter parameter, double value)
+	public static ParameterValue createParameterValue(ParameterValueType type, Parameter parameter, double value, int frame)
 	{
 		switch (type)
 		{
 			case LINEAR:
-				return new BasicParameterValue(value, parameter);
+				return new BasicParameterValue(value, frame, parameter);
 			
 			// Default case is BEZIER
 			default:
-				return new BasicBezierParameterValue(value, parameter);
+				return new BasicBezierParameterValue(value, frame, parameter);
 		}
 	}
 	
@@ -93,13 +95,25 @@ public class ParameterValueFactory
 		}
 		
 		// Create the bezier with the same value and owner as the provided value
-		BezierParameterValue result = new BasicBezierParameterValue(valueToConvert.getValue(), valueToConvert.getOwner());
+		BezierParameterValue result = new BasicBezierParameterValue(valueToConvert.getValue(), valueToConvert.getFrame(), valueToConvert.getOwner());
+		result.setLocked(true);
 		
-		// If there are no other points to use, we can't do much better than this
-		if (previousValue == null && nextValue == null)
+		// Default 'in value' to the same as the 'value'. This will result in a horizontal 'in-value-out' control line
+		double inValue = valueToConvert.getValue();
+		
+		// If previous and next points exist, and they exist on different sides of 'value' vertically,
+		// use them to choose a better value for 'in' based on the line joining 'previous' and 'next'
+		if (previousValue != null && nextValue != null && Math.signum(valueToConvert.getValue() - previousValue.getValue()) != Math.signum(valueToConvert.getValue() - nextValue.getValue()))
 		{
-			return result;
+			// Compute the gradient of the line joining the previous and next points
+			double m = (nextValue.getValue() - previousValue.getValue()) / (nextValue.getFrame() - previousValue.getFrame());
+			double x = (nextValue.getFrame() - previousValue.getFrame()) * result.getInPercent();
+			
+			// Compute the value to use for the in control point such that it lies on the line joining the previous and next lines
+			inValue = valueToConvert.getValue() - m * x;
 		}
+		
+		result.setInValue(inValue);
 		
 		return null;
 	}

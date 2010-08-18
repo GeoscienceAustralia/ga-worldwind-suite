@@ -68,7 +68,7 @@ public class InterpolatorFactory<V extends Vector<V>>
 			return (BezierParameterValue)valueToConvert;
 		}
 		
-		BezierParameterValue result = new BasicBezierParameterValue(valueToConvert.getValue(), valueToConvert.getOwner());
+		BezierParameterValue result = new BasicBezierParameterValue(valueToConvert.getValue(), valueToConvert.getFrame(), valueToConvert.getOwner());
 		
 		// Otherwise, set the appropriate control point to point at the other value
 		double controlPoint = valueToConvert.getValue() - otherValue.getValue();

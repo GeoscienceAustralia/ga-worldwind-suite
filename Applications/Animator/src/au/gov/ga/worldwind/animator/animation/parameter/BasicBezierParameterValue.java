@@ -30,13 +30,13 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	
 	/**
 	 * @param value
+	 * @param frame
 	 * @param owner
-	 * 
-	 * TODO: Make this more applicable to beziers
 	 */
-	public BasicBezierParameterValue(double value, Parameter owner)
+	public BasicBezierParameterValue(double value, int frame, Parameter owner)
 	{
-		super(value, owner);
+		super(value, frame, owner);
+		// TODO Auto-generated constructor stub
 	}
 	
 	@Override

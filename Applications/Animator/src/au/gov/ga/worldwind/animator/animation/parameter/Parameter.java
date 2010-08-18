@@ -79,5 +79,5 @@ public interface Parameter extends Restorable, Serializable
 	 * 
 	 * @param value The default value of this this {@link Parameter}
 	 */
-	void setDefaultValue(ParameterValue value);
+	void setDefaultValue(double value);
 }
