@@ -14,16 +14,16 @@ public class AnimationContextImpl implements AnimationContext
 {
 
 	@Override
-	public KeyFrame getKeyFrameWithParameterBeforeFrame(Parameter<?> p, int frame)
+	public KeyFrame getKeyFrameWithParameterBeforeFrame(Parameter p, int frame)
 	{
-		// TODO Auto-generated method stub
+		// TODO Implement me!
 		return null;
 	}
 
 	@Override
-	public KeyFrame getKeyFrameWithParameterAfterFrame(Parameter<?> p, int frame)
+	public KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame)
 	{
-		// TODO Auto-generated method stub
+		// TODO Implement me!
 		return null;
 	}
 

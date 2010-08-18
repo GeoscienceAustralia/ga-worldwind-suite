@@ -7,8 +7,6 @@ import gov.nasa.worldwind.Restorable;
 
 import java.io.Serializable;
 
-import au.gov.ga.worldwind.animator.math.vector.Vector;
-
 /**
  * A {@link ParameterValue} represents a snapshot of the value of a {@link Parameter}
  * at a given frame.
@@ -19,24 +17,24 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface ParameterValue<V extends Vector<V>> extends Restorable, Serializable
+public interface ParameterValue extends Restorable, Serializable
 {
 	/**
 	 * @return The value of this parameter value
 	 */
-	V getValue();
+	double getValue();
 	
 	/**
 	 * Set the value of this parameter value
 	 * 
 	 * @param value The value to set
 	 */
-	void setValue(V value);
+	void setValue(double value);
 	
 	/**
 	 * @return The {@link Parameter} that 'owns' this value
 	 */
-	Parameter<V> getOwner();
+	Parameter getOwner();
 	
 	/**
 	 * @return The type of this parameter value

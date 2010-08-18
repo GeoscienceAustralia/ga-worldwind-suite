@@ -10,7 +10,6 @@ import java.util.Collection;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.math.vector.Vector;
 
 /**
  * Represents a key frame in an animation.
@@ -30,7 +29,7 @@ public interface KeyFrame extends Serializable, Restorable
 	 *
 	 * @return The set of parameter values stored on this key frame.
 	 */
-	Collection<ParameterValue<? extends Vector<?>>> getParameterValues();
+	Collection<ParameterValue> getParameterValues();
 
 	/**
 	 * Return the {@link ParameterValue} stored on this key frame for the provided 
@@ -41,14 +40,14 @@ public interface KeyFrame extends Serializable, Restorable
 	 * @return the {@link ParameterValue} stored on this key frame for the provided 
 	 * {@link Parameter}, or <code>null</code> if one does not exist
 	 */
-	<V extends Vector<V>> ParameterValue<V> getValueForParameter(Parameter<V> p); 
+	ParameterValue getValueForParameter(Parameter p); 
 	
 	/**
 	 * Add the provided parameter value to this key frame
 	 * 
 	 * @param value The value to add
 	 */
-	<V extends Vector<V>> void addParameterValue(ParameterValue<V> value);
+	void addParameterValue(ParameterValue value);
 	
 	/**
 	 * Get the animation frame this key frame corresponds to

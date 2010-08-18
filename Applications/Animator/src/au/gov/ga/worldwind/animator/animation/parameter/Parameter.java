@@ -12,7 +12,6 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
-import au.gov.ga.worldwind.animator.math.vector.Vector;
 
 /**
  * A {@link Parameter} represents a single animatable property of some {@link Animatable} object (e.g. Camera position, layer opacity etc.).
@@ -20,7 +19,7 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Parameter<V extends Vector<V>> extends Restorable, Serializable
+public interface Parameter extends Restorable, Serializable
 {
 	
 	/**
@@ -48,7 +47,7 @@ public interface Parameter<V extends Vector<V>> extends Restorable, Serializable
 	 * 
 	 * @return the current value of this {@link Parameter} in the current {@link AnimationContext}.
 	 */
-	ParameterValue<V> getCurrentValue(AnimationContext context);
+	ParameterValue getCurrentValue(AnimationContext context);
 	
 	/**
 	 * Get the value of this {@link Parameter} at the provided frame.
@@ -71,7 +70,7 @@ public interface Parameter<V extends Vector<V>> extends Restorable, Serializable
 	 * 
 	 * @return The value of this {@link Parameter} at the provided frame.
 	 */
-	ParameterValue<V> getValueAtFrame(AnimationContext context, int frame);
+	ParameterValue getValueAtFrame(AnimationContext context, int frame);
 	
 	/**
 	 * Set the default value of this {@link Parameter}. This is the value this {@link Parameter} will use if no recorded {@link KeyFrame}s
@@ -80,5 +79,5 @@ public interface Parameter<V extends Vector<V>> extends Restorable, Serializable
 	 * 
 	 * @param value The default value of this this {@link Parameter}
 	 */
-	void setDefaultValue(ParameterValue<V> value);
+	void setDefaultValue(ParameterValue value);
 }

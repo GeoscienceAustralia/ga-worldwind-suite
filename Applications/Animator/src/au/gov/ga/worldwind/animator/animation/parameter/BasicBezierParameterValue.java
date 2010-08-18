@@ -3,7 +3,6 @@
  */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
-import au.gov.ga.worldwind.animator.math.vector.Vector;
 
 /**
  * A basic implementation of the {@link BezierParameterValue} interface.
@@ -11,7 +10,7 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParameterValue<V> implements BezierParameterValue<V>
+public class BasicBezierParameterValue extends BasicParameterValue implements BezierParameterValue
 {
 	/** The default control point percentage to use */
 	private static final double DEFAULT_CONTROL_POINT_PERCENTAGE = 0.4;
@@ -24,10 +23,10 @@ public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParamet
 	private boolean locked;
 	
 	/** The '<code>in</code>' control point value */
-	private BezierContolPoint<V> in = new BezierContolPoint<V>();
+	private BezierContolPoint in = new BezierContolPoint();
 	
 	/** The '<code>out</code>' control point value */
-	private BezierContolPoint<V> out = new BezierContolPoint<V>();
+	private BezierContolPoint out = new BezierContolPoint();
 	
 	/**
 	 * @param value
@@ -35,7 +34,7 @@ public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParamet
 	 * 
 	 * TODO: Make this more applicable to beziers
 	 */
-	public BasicBezierParameterValue(V value, Parameter<V> owner)
+	public BasicBezierParameterValue(double value, Parameter owner)
 	{
 		super(value, owner);
 	}
@@ -47,7 +46,7 @@ public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParamet
 	}
 	
 	@Override
-	public void setInValue(V value)
+	public void setInValue(double value)
 	{
 		this.in.setValue(value);
 		if (isLocked() && in.hasValue()) 
@@ -57,7 +56,7 @@ public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParamet
 	}
 
 	@Override
-	public V getInValue()
+	public double getInValue()
 	{
 		return in.getValue();
 	}
@@ -75,7 +74,7 @@ public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParamet
 	}
 
 	@Override
-	public void setOutValue(V value)
+	public void setOutValue(double value)
 	{
 		this.out.setValue(value);
 		if (isLocked() && out.hasValue())
@@ -85,7 +84,7 @@ public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParamet
 	}
 
 	@Override
-	public V getOutValue()
+	public double getOutValue()
 	{
 		return out.getValue();
 	}
@@ -130,8 +129,8 @@ public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParamet
 			return;
 		}
 		
-		V outValueVector = out.getValue().subtract(getValue());
-		in.setValue(getValue().subtract(outValueVector));
+		double outValueDelta = out.getValue() - getValue();
+		in.setValue(getValue() - outValueDelta);
 	}
 	
 	/**
@@ -149,16 +148,16 @@ public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParamet
 		{
 			return;
 		}
-		V inValueVector = in.getValue().subtract(getValue());
-		out.setValue(getValue().subtract(inValueVector));
+		double inValueDelta = in.getValue() - getValue();
+		out.setValue(getValue() - inValueDelta);
 	}
 	
 	/**
 	 * A simple container class that holds a value and time percent
 	 */
-	private static class BezierContolPoint<V extends Vector<V>>
+	private static class BezierContolPoint
 	{
-		private V value;
+		private Double value;
 		private double percent = DEFAULT_CONTROL_POINT_PERCENTAGE;
 		
 		private boolean hasValue()
@@ -166,12 +165,12 @@ public class BasicBezierParameterValue<V extends Vector<V>> extends BasicParamet
 			return value != null;
 		}
 		
-		public void setValue(V value)
+		public void setValue(Double value)
 		{
 			this.value = value;
 		}
 		
-		public V getValue()
+		public Double getValue()
 		{
 			return value;
 		}

@@ -5,10 +5,6 @@ package au.gov.ga.worldwind.animator.animation.camera;
 
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
-import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
-import au.gov.ga.worldwind.animator.math.vector.Vector1;
 
 /**
  * A default implementation of the {@link Camera} interface
@@ -21,13 +17,13 @@ public class CameraImpl implements Camera
 	
 	// Note: Camera properties are stored individually so that more fine-grained control
 	// can be achieved
-	private Parameter<Vector1> eyeLat;
-	private Parameter<Vector1> eyeLon;
-	private Parameter<Vector1> eyeElevation;
+	private Parameter eyeLat;
+	private Parameter eyeLon;
+	private Parameter eyeElevation;
 	
-	private Parameter<Vector1> lookAtLat;
-	private Parameter<Vector1> lookAtLon;
-	private Parameter<Vector1> lookAtElevation;
+	private Parameter lookAtLat;
+	private Parameter lookAtLon;
+	private Parameter lookAtElevation;
 	
 	@Override
 	public void apply(AnimationContext animationContext, int frame)
@@ -51,37 +47,37 @@ public class CameraImpl implements Camera
 	}
 
 	@Override
-	public Parameter<Vector1> getEyeLat()
+	public Parameter getEyeLat()
 	{
 		return eyeLat;
 	}
 
 	@Override
-	public Parameter<Vector1> getEyeLon()
+	public Parameter getEyeLon()
 	{
 		return eyeLon;
 	}
 
 	@Override
-	public Parameter<Vector1> getEyeElevation()
+	public Parameter getEyeElevation()
 	{
 		return eyeElevation;
 	}
 
 	@Override
-	public Parameter<Vector1> getLookAtLat()
+	public Parameter getLookAtLat()
 	{
 		return lookAtLat;
 	}
 
 	@Override
-	public Parameter<Vector1> getLookAtLon()
+	public Parameter getLookAtLon()
 	{
 		return lookAtLon;
 	}
 
 	@Override
-	public Parameter<Vector1> getLookAtElevation()
+	public Parameter getLookAtElevation()
 	{
 		return lookAtElevation;
 	}

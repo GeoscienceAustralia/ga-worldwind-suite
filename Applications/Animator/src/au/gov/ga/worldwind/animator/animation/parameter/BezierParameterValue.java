@@ -3,7 +3,6 @@
  */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
-import au.gov.ga.worldwind.animator.math.vector.Vector;
 
 /**
  * An extension of the {@link ParameterValue} interface that includes an additional
@@ -28,21 +27,21 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface BezierParameterValue<V extends Vector<V>> extends ParameterValue<V>
+public interface BezierParameterValue extends ParameterValue
 {
 	/**
 	 * Set the '<code>in</code>' value.
 	 * 
 	 * @param value The value to set for '<code>in</code>'
 	 */
-	void setInValue(V value);
+	void setInValue(double value);
 	
 	/**
 	 * Return the '<code>in</code>' value
 	 * 
 	 * @return the '<code>in</code>' value
 	 */
-	V getInValue();
+	double getInValue();
 	
 	/**
 	 * Set the '<code>in</code>' time percent weighting
@@ -61,14 +60,14 @@ public interface BezierParameterValue<V extends Vector<V>> extends ParameterValu
 	 * 
 	 * @param value The value to set for '<code>out</code>'
 	 */
-	void setOutValue(V value);
+	void setOutValue(double value);
 	
 	/**
 	 * Return the '<code>out</code>' value
 	 * 
 	 * @return the '<code>out</code>' value
 	 */
-	V getOutValue();
+	double getOutValue();
 	
 	/**
 	 * Set the '<code>out</code>' time percent weighting

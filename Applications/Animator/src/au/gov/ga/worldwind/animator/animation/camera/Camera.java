@@ -5,7 +5,6 @@ package au.gov.ga.worldwind.animator.animation.camera;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.animator.math.vector.Vector1;
 
 /**
  * A {@link Camera} is an {@link Animatable} object defined by an eye location and a look-at position.
@@ -20,31 +19,31 @@ public interface Camera extends Animatable
 	/**
 	 * @return The parameter that represents the latitude of the camera 'eye'
 	 */
-	Parameter<Vector1> getEyeLat();
+	Parameter getEyeLat();
 	
 	/**
 	 * @return The parameter that represents the longitude of the camera 'eye'
 	 */
-	Parameter<Vector1> getEyeLon();
+	Parameter getEyeLon();
 	
 	/**
 	 * @return The parameter that represents the elevation of the camera 'eye'
 	 */
-	Parameter<Vector1> getEyeElevation();
+	Parameter getEyeElevation();
 
 	/**
 	 * @return The parameter that represents the latitude of the camera 'look-at' point
 	 */
-	Parameter<Vector1> getLookAtLat();
+	Parameter getLookAtLat();
 	
 	/**
 	 * @return The parameter that represents the longitude of the camera 'look-at' point
 	 */
-	Parameter<Vector1> getLookAtLon();
+	Parameter getLookAtLon();
 	
 	/**
 	 * @return The parameter that represents the elevation of the camera 'look-at' point
 	 */
-	Parameter<Vector1> getLookAtElevation();
+	Parameter getLookAtElevation();
 	
 }

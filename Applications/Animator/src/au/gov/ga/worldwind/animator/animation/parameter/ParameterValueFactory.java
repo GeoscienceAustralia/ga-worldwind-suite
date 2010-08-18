@@ -3,7 +3,6 @@
  */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
-import au.gov.ga.worldwind.animator.math.vector.Vector;
 
 /**
  * A factory class that maintains the current 'default' value type, 
@@ -44,7 +43,7 @@ public class ParameterValueFactory
 	 * 
 	 * @return a new parameter value for the given parameter
 	 */
-	public static <V extends Vector<V>> ParameterValue<V> createParameterValue(Parameter<V> parameter, V value)
+	public static ParameterValue createParameterValue(Parameter parameter, double value)
 	{
 		return createParameterValue(defaultValueType, parameter, value);
 	}
@@ -58,16 +57,16 @@ public class ParameterValueFactory
 	 * 
 	 * @return a new parameter value for the given parameter
 	 */
-	public static <V extends Vector<V>> ParameterValue<V> createParameterValue(ParameterValueType type, Parameter<V> parameter, V value)
+	public static ParameterValue createParameterValue(ParameterValueType type, Parameter parameter, double value)
 	{
 		switch (type)
 		{
 			case LINEAR:
-				return new BasicParameterValue<V>(value, parameter);
+				return new BasicParameterValue(value, parameter);
 			
 			// Default case is BEZIER
 			default:
-				return new BasicBezierParameterValue<V>(value, parameter);
+				return new BasicBezierParameterValue(value, parameter);
 		}
 	}
 	
@@ -86,15 +85,15 @@ public class ParameterValueFactory
 	 * 
 	 * @return The converted bezier parameter
 	 */
-	public static <V extends Vector<V>> BezierParameterValue<V> convertToBezierParameterValue(ParameterValue<V> valueToConvert, ParameterValue<V> previousValue, ParameterValue<V> nextValue)
+	public static BezierParameterValue convertToBezierParameterValue(ParameterValue valueToConvert, ParameterValue previousValue, ParameterValue nextValue)
 	{
 		if (valueToConvert.getType() == ParameterValueType.BEZIER)
 		{
-			return (BezierParameterValue<V>)valueToConvert;
+			return (BezierParameterValue)valueToConvert;
 		}
 		
 		// Create the bezier with the same value and owner as the provided value
-		BezierParameterValue<V> result = new BasicBezierParameterValue<V>(valueToConvert.getValue(), valueToConvert.getOwner());
+		BezierParameterValue result = new BasicBezierParameterValue(valueToConvert.getValue(), valueToConvert.getOwner());
 		
 		// If there are no other points to use, we can't do much better than this
 		if (previousValue == null && nextValue == null)

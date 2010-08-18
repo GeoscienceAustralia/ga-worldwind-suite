@@ -27,7 +27,7 @@ public interface AnimationContext
 	 * contains a value for the provided {@link Parameter}, or <code>null</code> if
 	 * one cannot be found
 	 */
-	KeyFrame getKeyFrameWithParameterBeforeFrame(Parameter<?> p, int frame);
+	KeyFrame getKeyFrameWithParameterBeforeFrame(Parameter p, int frame);
 	
 	/**
 	 * Returns the first {@link KeyFrame} <em>after</em> the provided frame that 
@@ -41,5 +41,5 @@ public interface AnimationContext
 	 * contains a value for the provided {@link Parameter}, or <code>null</code> if
 	 * one cannot be found
 	 */
-	KeyFrame getKeyFrameWithParameterAfterFrame(Parameter<?> p, int frame);
+	KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame);
 }

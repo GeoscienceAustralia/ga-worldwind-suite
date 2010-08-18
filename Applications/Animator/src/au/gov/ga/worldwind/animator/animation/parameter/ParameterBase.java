@@ -5,8 +5,6 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
-import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
-import au.gov.ga.worldwind.animator.math.vector.Vector;
 
 /**
  * Base implementation of the {@link Parameter} interface.
@@ -17,7 +15,7 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public abstract class ParameterBase<V extends Vector<V>> implements Parameter<V>
+public abstract class ParameterBase implements Parameter
 {
 
 	/** Whether this parameter is currently enabled */
@@ -27,10 +25,7 @@ public abstract class ParameterBase<V extends Vector<V>> implements Parameter<V>
 	 * The default value to use in the case that no {@link KeyFrame}s can be found
 	 * with a value for this {@link Parameter}
 	 */
-	private ParameterValue<V> defaultValue;
-	
-	/** The interpolator to use for this parameter */
-	private Interpolator<V> interpolator;
+	private ParameterValue defaultValue;
 	
 	@Override
 	public final boolean isEnabled()
@@ -45,14 +40,13 @@ public abstract class ParameterBase<V extends Vector<V>> implements Parameter<V>
 	}
 	
 	@Override
-	public final void setDefaultValue(ParameterValue<V> value)
+	public final void setDefaultValue(ParameterValue value)
 	{
 		this.defaultValue = value;
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public final ParameterValue<V> getValueAtFrame(AnimationContext context, int frame)
+	public final ParameterValue getValueAtFrame(AnimationContext context, int frame)
 	{
 		KeyFrame previousKeyFrame = context.getKeyFrameWithParameterBeforeFrame(this, frame);
 		KeyFrame nextKeyFrame = context.getKeyFrameWithParameterAfterFrame(this, frame);
@@ -66,13 +60,13 @@ public abstract class ParameterBase<V extends Vector<V>> implements Parameter<V>
 		// If there is no previous key value, return the next one
 		if (previousKeyFrame == null) 
 		{
-			return (ParameterValue<V>)nextKeyFrame.getValueForParameter(this);
+			return nextKeyFrame.getValueForParameter(this);
 		}
 		
 		// If there is no next key value, return the previous one
 		if (nextKeyFrame == null)
 		{
-			return (ParameterValue<V>)previousKeyFrame.getValueForParameter(this);
+			return previousKeyFrame.getValueForParameter(this);
 		}
 		
 		// Otherwise, use an interpolator to interpolate between the two values
@@ -81,7 +75,7 @@ public abstract class ParameterBase<V extends Vector<V>> implements Parameter<V>
 		// TODO: Implement interpolation
 //		initialiseInterpolator(previousKeyFrame.getValueForParameter(this), nextKeyFrame.getValueForParameter(this));
 //		V interpolatedValue = getInterpolator().computeValue(percent);
-		V interpolatedValue = previousKeyFrame.getValueForParameter(this).getValue();
+		double interpolatedValue = previousKeyFrame.getValueForParameter(this).getValue();
 		
 		return ParameterValueFactory.createParameterValue(this, interpolatedValue);
 	}

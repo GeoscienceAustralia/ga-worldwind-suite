@@ -30,7 +30,7 @@ public class InterpolatorFactory<V extends Vector<V>>
 	 * @return an {@link Interpolator} configured for interpolation between 
 	 * the two provided parameter values.
 	 */
-	public Interpolator<V> getInterpolator(ParameterValue<V> startValue, ParameterValue<V> endValue)
+	public Interpolator<V> getInterpolator(ParameterValue startValue, ParameterValue endValue)
 	{
 		Validate.notNull(startValue, "A start value is required");
 		Validate.notNull(endValue, "An end value is required");
@@ -53,27 +53,27 @@ public class InterpolatorFactory<V extends Vector<V>>
 	 * 
 	 * @return a {@link BezierInterpolator} using the provided start and end values
 	 */
-	private Interpolator<V> createBezierInterpolator(ParameterValue<V> startValue, ParameterValue<V> endValue)
+	private Interpolator<V> createBezierInterpolator(ParameterValue startValue, ParameterValue endValue)
 	{
 		// TODO: Implement me!
 		return null;
 		
 	}
 
-	private BezierParameterValue<V> asBezierValue(ParameterValue<V> valueToConvert, boolean isStart, ParameterValue<V> otherValue)
+	private BezierParameterValue asBezierValue(ParameterValue valueToConvert, boolean isStart, ParameterValue otherValue)
 	{
 		// If it already is a bezier value, don't need to do anything
 		if (valueToConvert.getType() == ParameterValueType.BEZIER)
 		{
-			return (BezierParameterValue<V>)valueToConvert;
+			return (BezierParameterValue)valueToConvert;
 		}
 		
-		BezierParameterValue<V> result = new BasicBezierParameterValue<V>(valueToConvert.getValue(), valueToConvert.getOwner());
+		BezierParameterValue result = new BasicBezierParameterValue(valueToConvert.getValue(), valueToConvert.getOwner());
 		
 		// Otherwise, set the appropriate control point to point at the other value
-		V controlPoint = valueToConvert.getValue().subtract(otherValue.getValue());
-		controlPoint.mult(DEFAULT_BEZIER_CONTROL_SCALE);
-		controlPoint = valueToConvert.getValue().add(controlPoint);
+		double controlPoint = valueToConvert.getValue() - otherValue.getValue();
+		controlPoint *= DEFAULT_BEZIER_CONTROL_SCALE;
+		controlPoint = valueToConvert.getValue() + controlPoint;
 		if (isStart)
 		{
 			result.setOutValue(controlPoint);

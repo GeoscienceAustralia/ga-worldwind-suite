@@ -3,7 +3,6 @@
  */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
-import au.gov.ga.worldwind.animator.math.vector.Vector;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -11,23 +10,22 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public class BasicParameterValue<V extends Vector<V>> implements ParameterValue<V>
+public class BasicParameterValue implements ParameterValue
 {
 
 	/** The owner of this value */
-	private Parameter<V> owner;
+	private Parameter owner;
 	
 	/** The value of this {@link ParameterValue}*/
-	private V value;
+	private double value;
 	
 	/**
 	 * Constructor. 
 	 * <p/>
 	 * Initialises the mandatory {@link #owner} and {@link #value} fields
 	 */
-	public BasicParameterValue(V value, Parameter<V> owner) 
+	public BasicParameterValue(double value, Parameter owner) 
 	{
-		Validate.notNull(value, "A value is required");
 		Validate.notNull(owner, "An owner is required");
 		this.value = value;
 		this.owner = owner;
@@ -47,19 +45,19 @@ public class BasicParameterValue<V extends Vector<V>> implements ParameterValue<
 	}
 
 	@Override
-	public V getValue()
+	public double getValue()
 	{
 		return value;
 	}
 
 	@Override
-	public void setValue(V value)
+	public void setValue(double value)
 	{
 		this.value = value;
 	}
 
 	@Override
-	public Parameter<V> getOwner()
+	public Parameter getOwner()
 	{
 		return owner;
 	}

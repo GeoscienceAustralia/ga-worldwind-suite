@@ -9,7 +9,6 @@ import java.util.Map;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.math.vector.Vector;
 
 /**
  * The default implementation of the {@link KeyFrame} interface
@@ -24,8 +23,7 @@ public class KeyFrameImpl implements KeyFrame
 	/**
 	 * The map of Parameter->ParameterValue of values recorded in this key frame 
 	 */
-	private Map<Parameter<? extends Vector<?>>, ParameterValue<? extends Vector<?>>> parameterValueMap = 
-		new HashMap<Parameter<? extends Vector<?>>, ParameterValue<? extends Vector<?>>>();
+	private Map<Parameter, ParameterValue> parameterValueMap = new HashMap<Parameter, ParameterValue>();
 	
 	/**
 	 * The frame of the animation this key frame corresponds to
@@ -47,20 +45,19 @@ public class KeyFrameImpl implements KeyFrame
 	}
 	
 	@Override
-	public Collection<ParameterValue<? extends Vector<?>>> getParameterValues()
+	public Collection<ParameterValue> getParameterValues()
 	{
 		return parameterValueMap.values();
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public <V extends Vector<V>> ParameterValue<V> getValueForParameter(Parameter<V> p)
+	public ParameterValue getValueForParameter(Parameter p)
 	{
-		return (ParameterValue<V>)parameterValueMap.get(p);
+		return parameterValueMap.get(p);
 	}
 
 	@Override
-	public <V extends Vector<V>> void addParameterValue(ParameterValue<V> value)
+	public void addParameterValue(ParameterValue value)
 	{
 		if (value != null)
 		{
