@@ -81,4 +81,6 @@ public interface Vector<V> extends Cloneable, Serializable
 	public V normalize(V store);
 
 	public V normalizeLocal();
+	
+	public boolean equals(V other);
 }

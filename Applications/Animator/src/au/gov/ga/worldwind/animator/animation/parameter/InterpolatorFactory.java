@@ -5,7 +5,7 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 
 import au.gov.ga.worldwind.animator.math.interpolation.BezierInterpolator;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
-import au.gov.ga.worldwind.animator.math.vector.Vector;
+import au.gov.ga.worldwind.animator.math.vector.Vector2;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -15,7 +15,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class InterpolatorFactory<V extends Vector<V>>
+public class InterpolatorFactory
 {
 	/** The default scaling to apply to generated bezier control points when generating from linear values */
 	private static final double DEFAULT_BEZIER_CONTROL_SCALE = 0.4;
@@ -28,9 +28,10 @@ public class InterpolatorFactory<V extends Vector<V>>
 	 * @param endValue The end value of the interpolation
 	 * 
 	 * @return an {@link Interpolator} configured for interpolation between 
-	 * the two provided parameter values.
+	 * the two provided parameter values. The interpolator will be configured to interpolate
+	 * between 2 dimensional vectors <code>[frame, value]</code>
 	 */
-	public Interpolator<V> getInterpolator(ParameterValue startValue, ParameterValue endValue)
+	public static Interpolator<Vector2> getInterpolator(ParameterValue startValue, ParameterValue endValue)
 	{
 		Validate.notNull(startValue, "A start value is required");
 		Validate.notNull(endValue, "An end value is required");
@@ -51,16 +52,36 @@ public class InterpolatorFactory<V extends Vector<V>>
 	 * @param startValue The start value to use
 	 * @param endValue The end value to use
 	 * 
-	 * @return a {@link BezierInterpolator} using the provided start and end values
+	 * @return a {@link BezierInterpolator} using the provided start and end values.
 	 */
-	private Interpolator<V> createBezierInterpolator(ParameterValue startValue, ParameterValue endValue)
+	private static Interpolator<Vector2> createBezierInterpolator(ParameterValue startValue, ParameterValue endValue)
 	{
-		// TODO: Implement me!
-		return null;
+		BezierParameterValue startBezier = asBezierValue(startValue, true, endValue);
+		BezierParameterValue endBezier = asBezierValue(endValue, false, startValue);
+		
+		// Interpolation is on a scaled interval [0,1] in the time dimension
+		Vector2 begin = new Vector2(0, startBezier.getValue());
+		Vector2 out = new Vector2(startBezier.getOutPercent(), startBezier.getOutValue());
+		Vector2 in = new Vector2(endBezier.getInPercent(), startBezier.getInValue());
+		Vector2 end = new Vector2(1, endBezier.getValue());
+		
+		BezierInterpolator<Vector2> result = new BezierInterpolator<Vector2>(begin, out, in, end);
+		return result;
 		
 	}
 
-	private BezierParameterValue asBezierValue(ParameterValue valueToConvert, boolean isStart, ParameterValue otherValue)
+	/**
+	 * Convert the provided parameter value to a Bezier value.
+	 * <p/>
+	 * If is already a bezier value, won't change anything. Otherwise, will create a 'linear' bezier value
+	 * (i.e. a bezier value whose control points are setup to mimic a linear point).
+	 * 
+	 * @param valueToConvert The value to convert
+	 * @param isStart Whether or not the value to convert is the start or end point on the interval. Used to determine whether to set 'in' or 'out' values.
+	 * @param otherValue The other value in the interval
+	 * @return
+	 */
+	private static BezierParameterValue asBezierValue(ParameterValue valueToConvert, boolean isStart, ParameterValue otherValue)
 	{
 		// If it already is a bezier value, don't need to do anything
 		if (valueToConvert.getType() == ParameterValueType.BEZIER)
@@ -68,21 +89,20 @@ public class InterpolatorFactory<V extends Vector<V>>
 			return (BezierParameterValue)valueToConvert;
 		}
 		
+		// Otherwise, set the appropriate control point to point at the other value (mimic a linear point)
 		BezierParameterValue result = new BasicBezierParameterValue(valueToConvert.getValue(), valueToConvert.getFrame(), valueToConvert.getOwner());
 		
-		// Otherwise, set the appropriate control point to point at the other value
-		double controlPoint = valueToConvert.getValue() - otherValue.getValue();
-		controlPoint *= DEFAULT_BEZIER_CONTROL_SCALE;
-		controlPoint = valueToConvert.getValue() + controlPoint;
+		Vector2 thisPoint = new Vector2(valueToConvert.getFrame(), valueToConvert.getValue());
+		Vector2 otherPoint = new Vector2(otherValue.getFrame(), otherValue.getValue());
+		Vector2 controlPoint = thisPoint.add((otherPoint.subtract(thisPoint)).mult(DEFAULT_BEZIER_CONTROL_SCALE));
 		if (isStart)
 		{
-			result.setOutValue(controlPoint);
+			result.setOutValue(controlPoint.y);
 		} 
 		else
 		{
-			result.setInValue(controlPoint);
+			result.setInValue(controlPoint.y);
 		}
-		
 		return result;
 	}
 	

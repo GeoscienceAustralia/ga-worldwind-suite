@@ -30,14 +30,12 @@ public class BezierInterpolatorTest
 	@Test
 	public void testInterpolationV1() 
 	{
-		BezierInterpolator<Vector1> classToBeTested = new BezierInterpolator<Vector1>();
-		
 		Vector1 begin = new Vector1(0);
 		Vector1 out = new Vector1(1);
 		Vector1 in = new Vector1(9);
 		Vector1 end = new Vector1(10);
 		
-		classToBeTested.setControlPoints(begin, out, in, end);
+		BezierInterpolator<Vector1> classToBeTested = new BezierInterpolator<Vector1>(begin, out, in, end);
 		
 		// Bezier should pass through start and end points
 		assertEqualsWithError(0.0, allowableError, classToBeTested.computeValue(0).x);
@@ -57,14 +55,12 @@ public class BezierInterpolatorTest
 	@Test
 	public void testInterpolationV2() 
 	{
-		BezierInterpolator<Vector2> classToBeTested = new BezierInterpolator<Vector2>();
-		
 		Vector2 begin = new Vector2(0,0);
 		Vector2 out = new Vector2(0,1);
 		Vector2 in = new Vector2(10,1);
 		Vector2 end = new Vector2(10,0);
 		
-		classToBeTested.setControlPoints(begin, out, in, end);
+		BezierInterpolator<Vector2> classToBeTested = new BezierInterpolator<Vector2>(begin, out, in, end);
 		
 		// Bezier should pass through start and end points
 		assertEqualsWithError(0.0, allowableError, classToBeTested.computeValue(0).x);
@@ -86,14 +82,12 @@ public class BezierInterpolatorTest
 	@Test
 	public void testInterpolationV3() 
 	{
-		BezierInterpolator<Vector3> classToBeTested = new BezierInterpolator<Vector3>();
-		
 		Vector3 begin = new Vector3(0,0,0);
 		Vector3 out = new Vector3(0,1,1);
 		Vector3 in = new Vector3(10,1,2);
 		Vector3 end = new Vector3(10,0,3);
 		
-		classToBeTested.setControlPoints(begin, out, in, end);
+		BezierInterpolator<Vector3> classToBeTested = new BezierInterpolator<Vector3>(begin, out, in, end);
 		
 		// Bezier should pass through start and end points
 		assertEqualsWithError(0.0, allowableError, classToBeTested.computeValue(0).x);

@@ -25,6 +25,7 @@ public class Vector3 implements Vector<Vector3>
 		set(x, y, z);
 	}
 
+	@Override
 	public Vector3 createNew()
 	{
 		return new Vector3();
@@ -36,6 +37,7 @@ public class Vector3 implements Vector<Vector3>
 		return new Vector3(this);
 	}
 
+	@Override
 	public Vector3 set(Vector3 v)
 	{
 		return set(v.x, v.y, v.z);
@@ -49,11 +51,13 @@ public class Vector3 implements Vector<Vector3>
 		return this;
 	}
 
+	@Override
 	public Vector3 mult(Vector3 v)
 	{
 		return mult(v, null);
 	}
 
+	@Override
 	public Vector3 mult(Vector3 v, Vector3 store)
 	{
 		if (store == null)
@@ -64,6 +68,7 @@ public class Vector3 implements Vector<Vector3>
 		return store;
 	}
 
+	@Override
 	public Vector3 multLocal(Vector3 v)
 	{
 		x *= v.x;
@@ -72,11 +77,13 @@ public class Vector3 implements Vector<Vector3>
 		return this;
 	}
 
+	@Override
 	public Vector3 mult(double s)
 	{
 		return mult(s, null);
 	}
 
+	@Override
 	public Vector3 mult(double s, Vector3 store)
 	{
 		if (store == null)
@@ -87,6 +94,7 @@ public class Vector3 implements Vector<Vector3>
 		return store;
 	}
 
+	@Override
 	public Vector3 multLocal(double s)
 	{
 		x *= s;
@@ -95,11 +103,13 @@ public class Vector3 implements Vector<Vector3>
 		return this;
 	}
 
+	@Override
 	public Vector3 divide(Vector3 v)
 	{
 		return divide(v, null);
 	}
 
+	@Override
 	public Vector3 divide(Vector3 v, Vector3 store)
 	{
 		if (store == null)
@@ -110,6 +120,7 @@ public class Vector3 implements Vector<Vector3>
 		return store;
 	}
 
+	@Override
 	public Vector3 divideLocal(Vector3 v)
 	{
 		x /= v.x;
@@ -118,11 +129,13 @@ public class Vector3 implements Vector<Vector3>
 		return this;
 	}
 
+	@Override
 	public Vector3 divide(double s)
 	{
 		return divide(s, null);
 	}
 
+	@Override
 	public Vector3 divide(double s, Vector3 store)
 	{
 		if (store == null)
@@ -133,6 +146,7 @@ public class Vector3 implements Vector<Vector3>
 		return store;
 	}
 
+	@Override
 	public Vector3 divideLocal(double s)
 	{
 		x /= s;
@@ -141,11 +155,13 @@ public class Vector3 implements Vector<Vector3>
 		return this;
 	}
 
+	@Override
 	public Vector3 add(Vector3 v)
 	{
 		return add(v, null);
 	}
 
+	@Override
 	public Vector3 add(Vector3 v, Vector3 store)
 	{
 		if (store == null)
@@ -156,6 +172,7 @@ public class Vector3 implements Vector<Vector3>
 		return store;
 	}
 
+	@Override
 	public Vector3 addLocal(Vector3 v)
 	{
 		x += v.x;
@@ -164,11 +181,13 @@ public class Vector3 implements Vector<Vector3>
 		return this;
 	}
 
+	@Override
 	public Vector3 subtract(Vector3 v)
 	{
 		return subtract(v, null);
 	}
 
+	@Override
 	public Vector3 subtract(Vector3 v, Vector3 store)
 	{
 		if (store == null)
@@ -179,6 +198,7 @@ public class Vector3 implements Vector<Vector3>
 		return store;
 	}
 
+	@Override
 	public Vector3 subtractLocal(Vector3 v)
 	{
 		x -= v.x;
@@ -187,11 +207,13 @@ public class Vector3 implements Vector<Vector3>
 		return this;
 	}
 
+	@Override
 	public Vector3 max(Vector3 v)
 	{
 		return max(v, null);
 	}
 
+	@Override
 	public Vector3 max(Vector3 v, Vector3 store)
 	{
 		if (store == null)
@@ -202,6 +224,7 @@ public class Vector3 implements Vector<Vector3>
 		return store;
 	}
 
+	@Override
 	public Vector3 maxLocal(Vector3 v)
 	{
 		x = Math.max(x, v.x);
@@ -210,11 +233,13 @@ public class Vector3 implements Vector<Vector3>
 		return this;
 	}
 
+	@Override
 	public Vector3 min(Vector3 v)
 	{
 		return min(v, null);
 	}
 
+	@Override
 	public Vector3 min(Vector3 v, Vector3 store)
 	{
 		if (store == null)
@@ -225,6 +250,7 @@ public class Vector3 implements Vector<Vector3>
 		return store;
 	}
 
+	@Override
 	public Vector3 minLocal(Vector3 v)
 	{
 		x = Math.min(x, v.x);
@@ -233,16 +259,19 @@ public class Vector3 implements Vector<Vector3>
 		return this;
 	}
 
+	@Override
 	public double distanceSquared()
 	{
 		return x * x + y * y + z * z;
 	}
 
+	@Override
 	public double distance()
 	{
 		return Math.sqrt(distanceSquared());
 	}
 
+	@Override
 	public Vector3 zeroLocal()
 	{
 		x = 0d;
@@ -251,11 +280,13 @@ public class Vector3 implements Vector<Vector3>
 		return this;
 	}
 
+	@Override
 	public Vector3 negate()
 	{
 		return negate(null);
 	}
 
+	@Override
 	public Vector3 negate(Vector3 store)
 	{
 		if (store == null)
@@ -266,6 +297,7 @@ public class Vector3 implements Vector<Vector3>
 		return store;
 	}
 
+	@Override
 	public Vector3 negateLocal()
 	{
 		x = -x;
@@ -274,11 +306,13 @@ public class Vector3 implements Vector<Vector3>
 		return this;
 	}
 
+	@Override
 	public Vector3 interpolate(Vector3 v, double percent)
 	{
 		return interpolate(v, percent, null);
 	}
 
+	@Override
 	public Vector3 interpolate(Vector3 v, double percent, Vector3 store)
 	{
 		if (store == null)
@@ -289,6 +323,7 @@ public class Vector3 implements Vector<Vector3>
 		return store;
 	}
 
+	@Override
 	public Vector3 interpolateLocal(Vector3 v, double percent)
 	{
 		x = interpolate(x, v.x, percent);
@@ -302,11 +337,13 @@ public class Vector3 implements Vector<Vector3>
 		return d1 * (1 - percent) + d2 * percent;
 	}
 
+	@Override
 	public Vector3 normalize()
 	{
 		return normalize(null);
 	}
 
+	@Override
 	public Vector3 normalize(Vector3 store)
 	{
 		if (store == null)
@@ -315,9 +352,19 @@ public class Vector3 implements Vector<Vector3>
 		return store;
 	}
 
+	@Override
 	public Vector3 normalizeLocal()
 	{
 		return divideLocal(distance());
+	}
+	
+	@Override
+	public boolean equals(Vector3 other)
+	{
+		return other != null &&
+				this.x == other.x &&
+				this.y == other.y &&
+				this.z == other.z;
 	}
 	
 	@Override

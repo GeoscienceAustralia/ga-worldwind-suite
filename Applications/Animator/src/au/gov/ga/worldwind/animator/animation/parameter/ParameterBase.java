@@ -6,6 +6,8 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
+import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
+import au.gov.ga.worldwind.animator.math.vector.Vector2;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -84,11 +86,8 @@ public abstract class ParameterBase implements Parameter
 		
 		// Otherwise, use an interpolator to interpolate between the two values
 		double percent = calculatePercentOfInterval(previousKeyFrame.getFrame(), nextKeyFrame.getFrame(), frame);
-		
-		// TODO: Implement interpolation
-//		initialiseInterpolator(previousKeyFrame.getValueForParameter(this), nextKeyFrame.getValueForParameter(this));
-//		V interpolatedValue = getInterpolator().computeValue(percent);
-		double interpolatedValue = previousKeyFrame.getValueForParameter(this).getValue();
+		Interpolator<Vector2> interpolator = InterpolatorFactory.getInterpolator(previousKeyFrame.getValueForParameter(this), nextKeyFrame.getValueForParameter(this));
+		double interpolatedValue = interpolator.computeValue(percent).y;
 		
 		return ParameterValueFactory.createParameterValue(this, interpolatedValue, frame);
 	}

@@ -21,6 +21,7 @@ public class Vector1 implements Vector<Vector1>
 		set(x);
 	}
 
+	@Override
 	public Vector1 createNew()
 	{
 		return new Vector1();
@@ -32,6 +33,7 @@ public class Vector1 implements Vector<Vector1>
 		return new Vector1(this);
 	}
 
+	@Override
 	public Vector1 set(Vector1 v)
 	{
 		return set(v.x);
@@ -43,11 +45,13 @@ public class Vector1 implements Vector<Vector1>
 		return this;
 	}
 
+	@Override
 	public Vector1 mult(Vector1 v)
 	{
 		return mult(v, null);
 	}
 
+	@Override
 	public Vector1 mult(Vector1 v, Vector1 store)
 	{
 		if (store == null)
@@ -56,17 +60,20 @@ public class Vector1 implements Vector<Vector1>
 		return store;
 	}
 
+	@Override
 	public Vector1 multLocal(Vector1 v)
 	{
 		x *= v.x;
 		return this;
 	}
 
+	@Override
 	public Vector1 mult(double s)
 	{
 		return mult(s, null);
 	}
 
+	@Override
 	public Vector1 mult(double s, Vector1 store)
 	{
 		if (store == null)
@@ -75,17 +82,20 @@ public class Vector1 implements Vector<Vector1>
 		return store;
 	}
 
+	@Override
 	public Vector1 multLocal(double s)
 	{
 		x *= s;
 		return this;
 	}
 
+	@Override
 	public Vector1 divide(Vector1 v)
 	{
 		return divide(v, null);
 	}
 
+	@Override
 	public Vector1 divide(Vector1 v, Vector1 store)
 	{
 		if (store == null)
@@ -94,17 +104,20 @@ public class Vector1 implements Vector<Vector1>
 		return store;
 	}
 
+	@Override
 	public Vector1 divideLocal(Vector1 v)
 	{
 		x /= v.x;
 		return this;
 	}
 
+	@Override
 	public Vector1 divide(double s)
 	{
 		return divide(s, null);
 	}
 
+	@Override
 	public Vector1 divide(double s, Vector1 store)
 	{
 		if (store == null)
@@ -113,17 +126,20 @@ public class Vector1 implements Vector<Vector1>
 		return store;
 	}
 
+	@Override
 	public Vector1 divideLocal(double s)
 	{
 		x /= s;
 		return this;
 	}
 
+	@Override
 	public Vector1 add(Vector1 v)
 	{
 		return add(v, null);
 	}
 
+	@Override
 	public Vector1 add(Vector1 v, Vector1 store)
 	{
 		if (store == null)
@@ -132,17 +148,20 @@ public class Vector1 implements Vector<Vector1>
 		return store;
 	}
 
+	@Override
 	public Vector1 addLocal(Vector1 v)
 	{
 		x += v.x;
 		return this;
 	}
 
+	@Override
 	public Vector1 subtract(Vector1 v)
 	{
 		return subtract(v, null);
 	}
 
+	@Override
 	public Vector1 subtract(Vector1 v, Vector1 store)
 	{
 		if (store == null)
@@ -151,17 +170,20 @@ public class Vector1 implements Vector<Vector1>
 		return store;
 	}
 
+	@Override
 	public Vector1 subtractLocal(Vector1 v)
 	{
 		x -= v.x;
 		return this;
 	}
 
+	@Override
 	public Vector1 max(Vector1 v)
 	{
 		return max(v, null);
 	}
 
+	@Override
 	public Vector1 max(Vector1 v, Vector1 store)
 	{
 		if (store == null)
@@ -170,17 +192,20 @@ public class Vector1 implements Vector<Vector1>
 		return store;
 	}
 
+	@Override
 	public Vector1 maxLocal(Vector1 v)
 	{
 		x = Math.max(x, v.x);
 		return this;
 	}
 
+	@Override
 	public Vector1 min(Vector1 v)
 	{
 		return min(v, null);
 	}
 
+	@Override
 	public Vector1 min(Vector1 v, Vector1 store)
 	{
 		if (store == null)
@@ -189,33 +214,39 @@ public class Vector1 implements Vector<Vector1>
 		return store;
 	}
 
+	@Override
 	public Vector1 minLocal(Vector1 v)
 	{
 		x = Math.min(x, v.x);
 		return this;
 	}
 
+	@Override
 	public double distanceSquared()
 	{
 		return x * x;
 	}
 
+	@Override
 	public double distance()
 	{
 		return Math.abs(x);
 	}
 
+	@Override
 	public Vector1 zeroLocal()
 	{
 		x = 0d;
 		return this;
 	}
 
+	@Override
 	public Vector1 negate()
 	{
 		return negate(null);
 	}
 
+	@Override
 	public Vector1 negate(Vector1 store)
 	{
 		if (store == null)
@@ -224,17 +255,20 @@ public class Vector1 implements Vector<Vector1>
 		return store;
 	}
 
+	@Override
 	public Vector1 negateLocal()
 	{
 		x = -x;
 		return this;
 	}
 
+	@Override
 	public Vector1 interpolate(Vector1 v, double percent)
 	{
 		return interpolate(v, percent, null);
 	}
 
+	@Override
 	public Vector1 interpolate(Vector1 v, double percent, Vector1 store)
 	{
 		if (store == null)
@@ -243,6 +277,7 @@ public class Vector1 implements Vector<Vector1>
 		return store;
 	}
 
+	@Override
 	public Vector1 interpolateLocal(Vector1 v, double percent)
 	{
 		x = interpolate(x, v.x, percent);
@@ -254,11 +289,13 @@ public class Vector1 implements Vector<Vector1>
 		return d1 * (1 - percent) + d2 * percent;
 	}
 
+	@Override
 	public Vector1 normalize()
 	{
 		return normalize(null);
 	}
 
+	@Override
 	public Vector1 normalize(Vector1 store)
 	{
 		if (store == null)
@@ -267,9 +304,16 @@ public class Vector1 implements Vector<Vector1>
 		return store;
 	}
 
+	@Override
 	public Vector1 normalizeLocal()
 	{
 		return divideLocal(distance());
+	}
+	
+	@Override
+	public boolean equals(Vector1 other)
+	{
+		return other != null && this.x == other.x;
 	}
 	
 	@Override
@@ -277,4 +321,5 @@ public class Vector1 implements Vector<Vector1>
 	{
 		return this.getClass().getName() + " (" + x + ")";
 	}
+
 }

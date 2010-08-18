@@ -34,6 +34,14 @@ public class BezierInterpolator<V extends Vector<V>> implements Interpolator<V>
 	/** The bezier curve to use to calculate the interpolation */
 	private Bezier<V> bezier;
 	
+	/**
+	 * Constructor. Initialises the control points.
+	 */
+	public BezierInterpolator(V begin, V out, V in, V end)
+	{
+		setControlPoints(begin, out, in, end);
+	}
+	
 	@Override
 	public V computeValue(double percent)
 	{
