@@ -29,9 +29,11 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	private BezierContolPoint out = new BezierContolPoint();
 	
 	/**
-	 * @param value
-	 * @param frame
-	 * @param owner
+	 * Construct a new bezier parameter value.
+	 * 
+	 * @param value The value to store on this {@link ParameterValue}
+	 * @param frame The frame at which this value applies
+	 * @param owner The {@link Parameter} that 'owns' this parameter value
 	 */
 	public BasicBezierParameterValue(double value, int frame, Parameter owner)
 	{
@@ -119,7 +121,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	 * This will:
 	 * <ul>
 	 * 	<li>Adjust <code>in</code> so that <code>in</code>, <code>value</code> and <code>out</code> are colinear
-	 *  <li>Adjust <code>in</code> so that <code>out</code> and <code>in</code> are equidistant from <code>value</code>
+	 *  <li>Lock the <code>in</code> percentage to the same as the <code>out</code> percentage
 	 * </ul>
 	 */
 	private void lockIn()
@@ -131,6 +133,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		
 		double outValueDelta = out.getValue() - getValue();
 		in.setValue(getValue() - outValueDelta);
+		in.setPercent(out.getPercent());
 	}
 	
 	/**
@@ -139,7 +142,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	 * This will:
 	 * <ul>
 	 * 	<li>Adjust <code>out</code> so that <code>in</code>, <code>value</code> and <code>out</code> are colinear
-	 *  <li>Adjust <code>out</code> so that <code>out</code> and <code>in</code> are equidistant from <code>value</code>
+	 *  <li>Lock the <code>out</code> percentage to the same as the <code>in</code> percentage
 	 * </ul>
 	 */
 	private void lockOut()
@@ -150,10 +153,16 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		}
 		double inValueDelta = in.getValue() - getValue();
 		out.setValue(getValue() - inValueDelta);
+		out.setPercent(in.getPercent());
 	}
 	
 	/**
-	 * 
+	 * Use a 3-point window to 'smooth' the curve at this point.
+	 * <p/>
+	 * This examines the 'previous' and 'next' points, and sets the control points for this value
+	 * such that a smooth transition is obtained.
+	 * <p/>
+	 * If there are no 'previous' or 'next' points, this method will reset the control points to their default values.
 	 */
 	private void smooth()
 	{
@@ -178,8 +187,14 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 			outValue = getValue() + m * xOut;
 		}
 		
+		// Set the values (bypass the locking as we have calculated what we need here)
+		boolean wasLocked = isLocked();
+		setLocked(false);
+		
 		setInValue(inValue);
 		setOutValue(outValue);
+		
+		setLocked(wasLocked);
 	}
 	
 	/**
