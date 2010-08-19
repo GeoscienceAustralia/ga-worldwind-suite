@@ -3,6 +3,8 @@
  */
 package au.gov.ga.worldwind.animator.animation;
 
+import java.util.Collection;
+
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
@@ -10,7 +12,6 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
  * 
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public interface Animation
 {
@@ -43,4 +44,69 @@ public interface Animation
 	 */
 	KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame);
 	
+	/**
+	 * @return A collection of all parameters associated with this animation
+	 */
+	Collection<Parameter> getAllParameters();
+	
+	/**
+	 * @return A collection of all parameters associated with this animation that are currently enabled
+	 */
+	Collection<Parameter> getEnabledParameters();
+	
+	/**
+	 * @return A collection of all objects being animated in this animation
+	 */
+	Collection<Animatable> getAnimatableObjects();
+	
+	/**
+	 * @return The number of frames in this animation
+	 */
+	int getFrameCount();
+	
+	/**
+	 * Set the frame count of this animation.
+	 * <p/>
+	 * If this will result in a decrease in the frame count of the animation, any key frames at a 
+	 * frame > <code>newCount</code> will be lost.
+	 * 
+	 * @param newCount The new frame count to set.
+	 */
+	void setFrameCount(int newCount);
+	
+	/**
+	 * Apply this animation's state at the given frame to the 'world'
+	 * 
+	 * @param frame The frame at which the state of the animation is to be applied
+	 * 
+	 * @throws IllegalArgumentException if <code>frame</code> is less than 0 or greater than <code>frameCount</code>
+	 */
+	void applyFrame(int frame);
+	
+	/**
+	 * Record a key frame at the given frame with the current value of all <em>enabled</em> parameters.
+	 * <p/>
+	 * If there are no enabled parameters, no key frame will be created.
+	 * <p/>
+	 * Equivalent to the call <code>recordKeyFrame(frame, getEnabledParameters());</code>
+	 * 
+	 * @param frame The frame to record the key frame at
+	 */
+	void recordKeyFrame(int frame);
+	
+	/**
+	 * Record a key frame at the given frame with the current value of the parameters 
+	 * provided in the given collection.
+	 * <p/>
+	 * If the provided list of parameters is empty, no key frame will be created.
+	 * 
+	 * @param frame The frame to record the key frame at
+	 * @param parameters The collection of parameters to record on the key frame
+	 */
+	void recordKeyFrame(int frame, Collection<Parameter> parameters);
+	
+	/**
+	 * @return The render parameters for this animation.
+	 */
+	RenderParameters getRenderParameters();
 }
