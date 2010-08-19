@@ -31,6 +31,10 @@ public interface ILayerNode extends INode
 	public boolean isLayerLoading();
 
 	public void setLayerLoading(boolean layerLoading);
+	
+	public boolean isLayerDataLoading();
+	
+	public void setLayerDataLoading(boolean layerDataLoading);
 
 	public Long getExpiryTime();
 

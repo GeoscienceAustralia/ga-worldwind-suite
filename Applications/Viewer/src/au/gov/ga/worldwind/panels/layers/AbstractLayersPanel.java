@@ -1,9 +1,11 @@
 package au.gov.ga.worldwind.panels.layers;
 
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.retrieve.RetrievalService;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
@@ -28,8 +30,11 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
+import nasa.worldwind.retrieve.ExtendedRetrievalService;
+
 import au.gov.ga.worldwind.components.resizabletoolbar.ResizableToolBar;
 import au.gov.ga.worldwind.panels.layers.LayerEnabler.RefreshListener;
+import au.gov.ga.worldwind.retrieve.LayerTreeRetrievalListener;
 import au.gov.ga.worldwind.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.theme.Theme;
 import au.gov.ga.worldwind.util.BasicAction;
@@ -63,6 +68,13 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		layerEnabler = new LayerEnabler();
 		tree = new LayerTree(root, layerEnabler);
 		layerEnabler.setTree(tree);
+
+		RetrievalService rs = WorldWind.getRetrievalService();
+		if (rs instanceof ExtendedRetrievalService)
+		{
+			LayerTreeRetrievalListener listener = new LayerTreeRetrievalListener(layerEnabler);
+			((ExtendedRetrievalService) rs).addRetrievalListener(listener);
+		}
 
 		tree.setRootVisible(false);
 		tree.setEditable(false);

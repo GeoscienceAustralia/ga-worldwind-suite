@@ -13,6 +13,7 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	private double opacity;
 	private Exception error = null;
 	private boolean layerLoading = false;
+	private boolean layerDataLoading = false;
 	private Long expiryTime;
 
 	public LayerNode(String name, URL infoURL, URL iconURL, boolean expanded, URL layerURL,
@@ -92,7 +93,7 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	@Override
 	public boolean isLoading()
 	{
-		return super.isLoading() || isLayerLoading();
+		return super.isLoading() || isLayerLoading() || isLayerDataLoading();
 	}
 
 	@Override
@@ -105,6 +106,18 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	public void setLayerLoading(boolean layerLoading)
 	{
 		this.layerLoading = layerLoading;
+	}
+
+	@Override
+	public boolean isLayerDataLoading()
+	{
+		return layerDataLoading;
+	}
+
+	@Override
+	public void setLayerDataLoading(boolean layerDataLoading)
+	{
+		this.layerDataLoading = layerDataLoading;
 	}
 
 	@Override

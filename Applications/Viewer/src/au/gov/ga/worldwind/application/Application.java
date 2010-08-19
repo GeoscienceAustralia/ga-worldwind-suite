@@ -80,6 +80,7 @@ import au.gov.ga.worldwind.panels.layers.LayerNode;
 import au.gov.ga.worldwind.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.panels.layers.QueryClickListener;
 import au.gov.ga.worldwind.panels.other.GoToCoordinatePanel;
+import au.gov.ga.worldwind.retrieve.PolylineLayerRetrievalListener;
 import au.gov.ga.worldwind.settings.Settings;
 import au.gov.ga.worldwind.settings.Settings.ProxyType;
 import au.gov.ga.worldwind.settings.SettingsDialog;
@@ -326,7 +327,9 @@ public class Application
 		RetrievalService rs = WorldWind.getRetrievalService();
 		if (rs instanceof ExtendedRetrievalService)
 		{
-			model.getLayers().add(((ExtendedRetrievalService) rs).getLayer());
+			PolylineLayerRetrievalListener layer = new PolylineLayerRetrievalListener();
+			model.getLayers().add(layer);
+			((ExtendedRetrievalService) rs).addRetrievalListener(layer);
 		}
 
 		//link theme to WorldWindow
@@ -376,13 +379,14 @@ public class Application
 		//added, then we need to create a local LayerEnabler and enable the layers manually
 		if (!theme.getLayers().isEmpty() && !theme.hasThemeLayersPanel())
 		{
-			LayerEnabler enabler = new LayerEnabler();
-			enabler.setWwd(wwd);
 			List<ILayerNode> nodes = new ArrayList<ILayerNode>();
 			for (ThemeLayer layer : theme.getLayers())
 			{
 				nodes.add(LayerNode.createFromLayerDefinition(layer));
 			}
+			
+			LayerEnabler enabler = new LayerEnabler();
+			enabler.setWwd(wwd);
 			enabler.enable(nodes);
 		}
 
@@ -855,9 +859,6 @@ public class Application
 				boolean span = Settings.get().isSpanDisplays();
 				String id = Settings.get().getDisplayId();
 
-				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-				GraphicsDevice[] gds = ge.getScreenDevices();
-
 				saveSplitLocation();
 				fullscreenFrame = new JFrame(frame.getTitle());
 				JPanel panel = new JPanel(new BorderLayout());
@@ -888,9 +889,11 @@ public class Application
 						KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), action);
 				panel.getActionMap().put(action, action);
 
+				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 				if (span)
 				{
 					Rectangle fullBounds = new Rectangle();
+					GraphicsDevice[] gds = ge.getScreenDevices();
 					for (GraphicsDevice g : gds)
 					{
 						GraphicsConfiguration gc = g.getDefaultConfiguration();
@@ -898,17 +901,10 @@ public class Application
 					}
 					fullscreenFrame.setBounds(fullBounds);
 				}
-				else if (id != null)
+				else
 				{
-					for (GraphicsDevice g : gds)
-					{
-						if (id.equals(g.getIDstring()))
-						{
-							GraphicsConfiguration gc = g.getDefaultConfiguration();
-							fullscreenFrame.setBounds(gc.getBounds());
-							break;
-						}
-					}
+					Rectangle bounds = getGraphicsDeviceBounds(id, ge);
+					fullscreenFrame.setBounds(bounds);
 				}
 				fullscreenFrame.setVisible(true);
 				frame.setVisible(false);
@@ -925,6 +921,25 @@ public class Application
 				}
 			}
 		}
+	}
+
+	private Rectangle getGraphicsDeviceBounds(String deviceId, GraphicsEnvironment environment)
+	{
+		if (deviceId != null)
+		{
+			GraphicsDevice[] gds = environment.getScreenDevices();
+			for (GraphicsDevice g : gds)
+			{
+				if (deviceId.equals(g.getIDstring()))
+				{
+					GraphicsConfiguration gc = g.getDefaultConfiguration();
+					return gc.getBounds();
+				}
+			}
+		}
+
+		GraphicsConfiguration gc = environment.getDefaultScreenDevice().getDefaultConfiguration();
+		return gc.getBounds();
 	}
 
 	private JToolBar createToolBar()

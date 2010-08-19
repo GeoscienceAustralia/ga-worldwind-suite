@@ -6,6 +6,7 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.terrain.CompoundElevationModel;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -34,12 +35,20 @@ public class LayerEnabler
 
 	private List<Layer> layers = new ArrayList<Layer>();
 	private List<ElevationModel> elevationModels = new ArrayList<ElevationModel>();
+	private Map<Layer, ILayerNode> layerMap = new HashMap<Layer, ILayerNode>();
+	private Map<ElevationModel, ILayerNode> elevationModelMap =
+			new HashMap<ElevationModel, ILayerNode>();
 
 	private List<RefreshListener> listeners = new ArrayList<RefreshListener>();
 
 	public void setTree(LayerTree tree)
 	{
 		this.tree = tree;
+	}
+
+	public LayerTree getTree()
+	{
+		return tree;
 	}
 
 	public void addRefreshListener(RefreshListener listener)
@@ -251,11 +260,13 @@ public class LayerEnabler
 					layer.setEnabled(wrapper.node.isEnabled());
 					layer.setOpacity(wrapper.node.getOpacity());
 					layers.add(layer);
+					layerMap.put(layer, wrapper.node);
 				}
 				else if (wrapper.hasElevationModel())
 				{
 					ElevationModel elevationModel = wrapper.getElevationModel();
 					elevationModels.add(elevationModel);
+					mapChildElevationModelsToNode(elevationModel, wrapper.node);
 				}
 			}
 
@@ -280,6 +291,19 @@ public class LayerEnabler
 		tree.repaint();
 	}
 
+	private void mapChildElevationModelsToNode(ElevationModel elevationModel, ILayerNode node)
+	{
+		elevationModelMap.put(elevationModel, node);
+		if (elevationModel instanceof CompoundElevationModel)
+		{
+			CompoundElevationModel cem = (CompoundElevationModel) elevationModel;
+			for (ElevationModel em : cem.getElevationModels())
+			{
+				mapChildElevationModelsToNode(em, node);
+			}
+		}
+	}
+
 	public synchronized boolean hasLayer(ILayerNode node)
 	{
 		if (nodeMap.containsKey(node))
@@ -298,6 +322,16 @@ public class LayerEnabler
 						.getElevationModel() : null;
 
 		return Bounded.Reader.getSector(wrapped);
+	}
+
+	public ILayerNode getLayerNode(Layer layer)
+	{
+		return layerMap.get(layer);
+	}
+
+	public ILayerNode getLayerNode(ElevationModel elevationModel)
+	{
+		return elevationModelMap.get(elevationModel);
 	}
 
 	private static class Wrapper

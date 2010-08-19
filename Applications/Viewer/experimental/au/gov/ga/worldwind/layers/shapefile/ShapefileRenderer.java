@@ -14,7 +14,7 @@ import java.util.List;
 
 import javax.media.opengl.GL;
 
-import nasa.worldwind.retrieve.ExtendedRetrievalService.SectorPolyline;
+import au.gov.ga.worldwind.retrieve.SectorPolyline;
 import au.gov.ga.worldwind.util.HSLColor;
 
 public class ShapefileRenderer

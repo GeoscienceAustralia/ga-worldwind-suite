@@ -9,36 +9,14 @@ package nasa.worldwind.retrieve;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.WWObjectImpl;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.layers.BasicTiledImageLayer;
-import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.RenderableLayer;
-import gov.nasa.worldwind.layers.TiledImageLayer;
-import gov.nasa.worldwind.layers.Mercator.BasicMercatorTiledImageLayer;
-import gov.nasa.worldwind.layers.Mercator.MercatorTiledImageLayer;
-import gov.nasa.worldwind.layers.placename.PlaceNameLayer;
-import gov.nasa.worldwind.layers.rpf.RPFTiledImageLayer;
-import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.Polyline;
-import gov.nasa.worldwind.render.Renderable;
-import gov.nasa.worldwind.render.SurfaceImage;
 import gov.nasa.worldwind.retrieve.RetrievalFuture;
-import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
 import gov.nasa.worldwind.retrieve.RetrievalService;
 import gov.nasa.worldwind.retrieve.Retriever;
-import gov.nasa.worldwind.retrieve.URLRetriever;
-import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.Logging;
-import gov.nasa.worldwind.util.Tile;
 
-import java.awt.Color;
-import java.lang.reflect.Field;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -46,10 +24,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-
-import au.gov.ga.worldwind.layers.geonames.GeoNamesLayer;
-import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
-import au.gov.ga.worldwind.settings.Settings;
 
 /**
  * Performs threaded retrieval of data.
@@ -243,7 +217,8 @@ public final class ExtendedRetrievalService extends WWObjectImpl
             }
 
             ExtendedRetrievalService.this.activeTasks.add(task);
-            // ADDED
+            
+			// ADDED
 			if (!task.isCancelled())
 				beforeDownload(task);
 			// ADDED
@@ -272,9 +247,11 @@ public final class ExtendedRetrievalService extends WWObjectImpl
             super.afterExecute(runnable, throwable);
 
             RetrievalTask task = (RetrievalTask) runnable;
-            // ADDED
-            afterDownload(task);
-            // ADDED
+            
+			// ADDED
+			afterDownload(task);
+			// ADDED
+            
             ExtendedRetrievalService.this.activeTasks.remove(task);
             task.retriever.setEndTime(System.currentTimeMillis());
 
@@ -537,197 +514,49 @@ public final class ExtendedRetrievalService extends WWObjectImpl
 
 	// CODE BELOW ADDED 2009-02-02, last modified 2009-09-09
 
-	private static final Field[] FIELDS;
-	private Map<RetrievalTask, SectorPolyline> sectors = new HashMap<RetrievalTask, SectorPolyline>();
-	private RenderableLayer layer = null;
-	private static final Color COLOR = new Color(1f, 0f, 0f, 0.5f);
+	private final List<RetrievalListener> listeners = new ArrayList<RetrievalListener>();
 
-	static
+	public interface RetrievalListener
 	{
-		Class<?>[] classes = new Class<?>[]
-		{ TiledImageLayer.class, BasicElevationModel.class,
-				BasicTiledImageLayer.class, PlaceNameLayer.class,
-				RPFTiledImageLayer.class, SurfaceImage.class,
-				MercatorTiledImageLayer.class, BasicMercatorTiledImageLayer.class,
-				MaskTiledImageLayer.class, GeoNamesLayer.class };
-		// Search classes above for declared classes that implement
-		// RetrivalPostProcess AND contain a Field which is a subclass of Tile,
-		// and add those Fields to an array
-		List<Field> tileFields = new ArrayList<Field>();
-		for (Class<?> c : classes)
-		{
-			for (Class<?> dc : c.getDeclaredClasses())
-			{
-				for (Class<?> i : getInterfaces(dc))
-				{
-					if (i == RetrievalPostProcessor.class)
-					{
-						for (Field field : dc.getDeclaredFields())
-						{
-							Class<?> type = field.getType();
-							boolean found = false;
-							while (type != null)
-							{
-								if (type == Tile.class)
-								{
-									found = true;
-									break;
-								}
-								type = type.getSuperclass();
-							}
-							if (found)
-							{
-								field.setAccessible(true);
-								tileFields.add(field);
-								break;
-							}
-						}
-						break;
-					}
-				}
-			}
-		}
-		FIELDS = tileFields.toArray(new Field[tileFields.size()]);
+		void beforeRetrieve(Retriever retriever);
+		void afterRetrieve(Retriever retriever);
 	}
 
-	private static List<Class<?>> getInterfaces(Class<?> c)
+	public void addRetrievalListener(RetrievalListener listener)
 	{
-		List<Class<?>> cs = new ArrayList<Class<?>>();
-		while (c != null)
+		synchronized (listeners)
 		{
-			for (Class<?> i : c.getInterfaces())
-				cs.add(i);
-			c = c.getSuperclass();
+			listeners.add(listener);
 		}
-		return cs;
 	}
 
-	public synchronized Layer getLayer()
+	public void removeRetrievalListener(RetrievalListener listener)
 	{
-		if (layer == null)
+		synchronized (listeners)
 		{
-			layer = new SynchronizedRenderableLayer();
+			listeners.remove(listener);
 		}
-		return layer;
 	}
 
 	private void beforeDownload(RetrievalTask task)
 	{
-		if (Settings.get().isShowDownloads())
+		synchronized (listeners)
 		{
-			Tile tile = getTile(task);
-			if (tile != null)
+			for (int i = listeners.size() - 1; i >= 0; i--)
 			{
-				SectorPolyline s = new SectorPolyline(tile.getSector());
-				s.setColor(COLOR);
-				s.setLineWidth(2.0);
-				s.setAntiAliasHint(Polyline.ANTIALIAS_NICEST);
-				sectors.put(task, s);
-				layer.addRenderable(s);
+				listeners.get(i).beforeRetrieve(task.getRetriever());
 			}
 		}
 	}
 
 	private void afterDownload(RetrievalTask task)
 	{
-		SectorPolyline s = sectors.remove(task);
-		if (s != null)
+		synchronized (listeners)
 		{
-			layer.removeRenderable(s);
-			layer.firePropertyChange(AVKey.LAYER, null, this);
-		}
-	}
-
-	private Tile getTile(RetrievalTask task)
-	{
-		Retriever retriever = task.getRetriever();
-		if (retriever instanceof URLRetriever)
-		{
-			URLRetriever ur = (URLRetriever) retriever;
-			RetrievalPostProcessor rpp = ur.getPostProcessor();
-			for (Field field : FIELDS)
+			for (int i = listeners.size() - 1; i >= 0; i--)
 			{
-				if (rpp.getClass() == field.getDeclaringClass())
-				{
-					try
-					{
-						Object object = field.get(rpp);
-						if (object instanceof Tile)
-						{
-							return (Tile) object;
-						}
-					}
-					catch (Exception e)
-					{
-					}
-				}
+				listeners.get(i).afterRetrieve(task.getRetriever());
 			}
-		}
-		return null;
-	}
-
-	public static class SectorPolyline extends Polyline
-	{
-		public SectorPolyline(Sector sector)
-		{
-			List<LatLon> latlons = new ArrayList<LatLon>();
-			latlons.add(new LatLon(sector.getMinLatitude(), sector
-					.getMinLongitude()));
-			latlons.add(new LatLon(sector.getMinLatitude(), sector
-					.getMaxLongitude()));
-			latlons.add(new LatLon(sector.getMaxLatitude(), sector
-					.getMaxLongitude()));
-			latlons.add(new LatLon(sector.getMaxLatitude(), sector
-					.getMinLongitude()));
-			setPositions(latlons, 0);
-			setFollowTerrain(true);
-			setClosed(true);
-			setPathType(RHUMB_LINE);
-		}
-
-		@Override
-		public void render(DrawContext dc)
-		{
-			try
-			{
-				super.render(dc);
-			}
-			catch (NullPointerException e)
-			{
-				// catch bug in Position.interpolate
-				boolean followTerrain = isFollowTerrain();
-				setFollowTerrain(false);
-				super.render(dc);
-				setFollowTerrain(followTerrain);
-			}
-		}
-	}
-
-	public class SynchronizedRenderableLayer extends RenderableLayer
-	{
-		public SynchronizedRenderableLayer()
-		{
-			super();
-			setPickEnabled(false);
-			setName("tile retrieval");
-		}
-
-		@Override
-		protected synchronized void doRender(DrawContext dc)
-		{
-			super.doRender(dc);
-		}
-
-		@Override
-		public synchronized void addRenderable(Renderable renderable)
-		{
-			super.addRenderable(renderable);
-		}
-
-		@Override
-		public synchronized void removeRenderable(Renderable renderable)
-		{
-			super.removeRenderable(renderable);
 		}
 	}
 }
