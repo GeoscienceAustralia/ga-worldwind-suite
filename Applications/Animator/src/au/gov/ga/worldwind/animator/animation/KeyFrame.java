@@ -43,6 +43,15 @@ public interface KeyFrame extends Serializable, Restorable
 	ParameterValue getValueForParameter(Parameter p); 
 	
 	/**
+	 * Return whether or not this {@link KeyFrame} has a value recorded for the provided parameter.
+	 * 
+	 * @param p The parameter to check for
+	 * 
+	 * @return <code>true</code> if a value is recorded for the provided parameter, <code>false</code> otherwise.
+	 */
+	boolean hasValueForParameter(Parameter p);
+	
+	/**
 	 * Add the provided parameter value to this key frame
 	 * 
 	 * @param value The value to add

@@ -58,6 +58,12 @@ public class KeyFrameImpl implements KeyFrame
 	}
 
 	@Override
+	public boolean hasValueForParameter(Parameter p)
+	{
+		return parameterValueMap.containsKey(p);
+	}
+	
+	@Override
 	public void addParameterValue(ParameterValue value)
 	{
 		if (value != null)
