@@ -62,7 +62,7 @@ public class InterpolatorFactory
 		// Interpolation is on a scaled interval [0,1] in the time dimension
 		Vector2 begin = new Vector2(0, startBezier.getValue());
 		Vector2 out = new Vector2(startBezier.getOutPercent(), startBezier.getOutValue());
-		Vector2 in = new Vector2(1 - endBezier.getInPercent(), startBezier.getInValue());
+		Vector2 in = new Vector2(1 - endBezier.getInPercent(), endBezier.getInValue());
 		Vector2 end = new Vector2(1, endBezier.getValue());
 		
 		BezierInterpolator<Vector2> result = new BezierInterpolator<Vector2>(begin, out, in, end);
