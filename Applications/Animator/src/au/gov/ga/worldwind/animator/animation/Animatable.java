@@ -6,6 +6,9 @@ package au.gov.ga.worldwind.animator.animation;
 import gov.nasa.worldwind.Restorable;
 
 import java.io.Serializable;
+import java.util.Collection;
+
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
  * An interface for objects that can be animated within an {@link Animation}
@@ -21,4 +24,14 @@ public interface Animatable extends Serializable, Restorable
 	 * @param frame The current frame of the animation
 	 */
 	void apply(AnimationContext animationContext, int frame);
+	
+	/**
+	 * @return The collection of all parameters associated with this animatable object
+	 */
+	Collection<Parameter> getParameters();
+	
+	/**
+	 * @return The collection of all <em>enabled</em> parameters associated with this animatable object
+	 */
+	Collection<Parameter> getEnabledParameters();
 }

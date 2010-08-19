@@ -3,6 +3,8 @@
  */
 package au.gov.ga.worldwind.animator.animation.camera;
 
+import java.util.Collection;
+
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
@@ -80,5 +82,19 @@ public class CameraImpl implements Camera
 	public Parameter getLookAtElevation()
 	{
 		return lookAtElevation;
+	}
+	
+	@Override
+	public Collection<Parameter> getParameters()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Collection<Parameter> getEnabledParameters()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

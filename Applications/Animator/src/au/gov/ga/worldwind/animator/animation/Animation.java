@@ -4,6 +4,7 @@
 package au.gov.ga.worldwind.animator.animation;
 
 import java.util.Collection;
+import java.util.List;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
@@ -16,6 +17,14 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 public interface Animation
 {
 
+	/**
+	 * Returns the list of all key frames associated with this animation, ordered by
+	 * frame.
+	 * 
+	 * @return All key frames, ordered by frame.
+	 */
+	List<KeyFrame> getKeyFrames();
+	
 	/**
 	 * Returns the first {@link KeyFrame} <em>before</em> the provided frame that 
 	 * contains a value for the provided {@link Parameter}.
