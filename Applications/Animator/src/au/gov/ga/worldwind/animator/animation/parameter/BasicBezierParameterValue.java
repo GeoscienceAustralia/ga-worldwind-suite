@@ -1,6 +1,3 @@
-/**
- * 
- */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
 
@@ -12,6 +9,8 @@ package au.gov.ga.worldwind.animator.animation.parameter;
  */
 public class BasicBezierParameterValue extends BasicParameterValue implements BezierParameterValue
 {
+	private static final long serialVersionUID = 20100819L;
+
 	/** The default control point percentage to use */
 	private static final double DEFAULT_CONTROL_POINT_PERCENTAGE = 0.4;
 	
@@ -30,6 +29,10 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	
 	/**
 	 * Construct a new bezier parameter value.
+	 * <p/>
+	 * Uses the {@link #smooth()} method to infer values for <code>in</code> and <code>out</code>.
+	 * <p/>
+	 * The bezier value will be locked.
 	 * 
 	 * @param value The value to store on this {@link ParameterValue}
 	 * @param frame The frame at which this value applies
@@ -40,6 +43,56 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		super(value, frame, owner);
 		smooth();
 	}
+	
+	/**
+	 * Construct a new bezier parameter value.
+	 * <p/>
+	 * Allows <code>in</code> and <code>out</code> values to be specified.
+	 * <p/>
+	 * The resuling bezier value will be unlocked.
+	 * 
+	 * @param value The value to store on this {@link ParameterValue}
+	 * @param frame The frame at which this value applies
+	 * @param owner The {@link Parameter} that 'owns' this parameter value
+	 * @param inValue The value to use for the <code>in</code> control point
+	 * @param inPercent The relative time percentage to use for the <code>in</code> control point
+	 * @param outValue The value to use for the <code>out</code> control point
+	 * @param outPercent The relative time percentage to use for the <code>out</code> control point
+	 * 
+	 */
+	public BasicBezierParameterValue(double value, int frame, Parameter owner, double inValue, double inPercent, double outValue, double outPercent)
+	{
+		super(value, frame, owner);
+		this.locked = false;
+		this.in.setValue(inValue);
+		this.in.setPercent(inPercent);
+		this.out.setValue(outValue);
+		this.out.setPercent(outPercent);
+	}
+	
+	/**
+	 * Construct a new bezier parameter value.
+	 * <p/>
+	 * Allows <code>in</code> value to be specified, with the <code>out</code> value locked to the <code>in</code> value
+	 * <p/>
+	 * The resuling bezier value will be locked.
+	 * 
+	 * @param value The value to store on this {@link ParameterValue}
+	 * @param frame The frame at which this value applies
+	 * @param owner The {@link Parameter} that 'owns' this parameter value
+	 * @param inValue The value to use for the <code>in</code> control point
+	 * @param inPercent The relative time percentage to use for the <code>in</code> control point
+	 * 
+	 */
+	public BasicBezierParameterValue(double value, int frame, Parameter owner, double inValue, double inPercent)
+	{
+		super(value, frame, owner);
+		this.locked = true;
+		this.in.setValue(inValue);
+		this.in.setPercent(inPercent);
+		lockOut();
+	}
+	
 	
 	@Override
 	public ParameterValueType getType()
@@ -164,7 +217,8 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	 * <p/>
 	 * If there are no 'previous' or 'next' points, this method will reset the control points to their default values.
 	 */
-	private void smooth()
+	@Override
+	public void smooth()
 	{
 		// Default 'in' and 'out' value to the same as the 'value'. This will result in a horizontal 'in-value-out' control line
 		double inValue = getValue();
