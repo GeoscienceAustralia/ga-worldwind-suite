@@ -19,6 +19,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
  */
 public class KeyFrameImpl implements KeyFrame
 {
+	private static final long serialVersionUID = 20100819L;
 
 	/**
 	 * The map of Parameter->ParameterValue of values recorded in this key frame 
