@@ -51,8 +51,6 @@ public class LayerTreeRetrievalListener implements RetrievalListener
 
 				layerNode.setLayerDataLoading(true);
 				layerEnabler.getTree().repaint();
-
-				System.out.println(layerNode.getName() + " = " + count);
 			}
 		}
 	}
@@ -80,8 +78,6 @@ public class LayerTreeRetrievalListener implements RetrievalListener
 					layerNode.setLayerDataLoading(false);
 					layerEnabler.getTree().repaint();
 				}
-
-				System.out.println(layerNode.getName() + " = " + count);
 			}
 		}
 	}
