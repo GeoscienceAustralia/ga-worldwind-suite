@@ -9,6 +9,7 @@ import java.util.Map;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
  * The default implementation of the {@link KeyFrame} interface
@@ -30,6 +31,28 @@ public class KeyFrameImpl implements KeyFrame
 	 * The frame of the animation this key frame corresponds to
 	 */
 	private int frame;
+	
+	/**
+	 * Constructor.
+	 * <p/>
+	 * Initialises the mandatory frame and parameter values
+	 * 
+	 * @param frame The frame at which this key frame applies
+	 * @param parameterValues The parameter values associated with this key frame. 
+	 * 						  At least one value must be provided.
+	 */
+	public KeyFrameImpl(int frame, Collection<ParameterValue> parameterValues)
+	{
+		// At least one parameter value is required.
+		Validate.notNull(parameterValues, "Parameter values are required");
+		Validate.isTrue(!parameterValues.isEmpty(), "Parameter values are required");
+		
+		this.frame = frame;
+		for (ParameterValue parameterValue : parameterValues)
+		{
+			addParameterValue(parameterValue);
+		}
+	}
 	
 	@Override
 	public String getRestorableState()
@@ -70,6 +93,16 @@ public class KeyFrameImpl implements KeyFrame
 		{
 			this.parameterValueMap.put(value.getOwner(), value);
 		}
+	}
+	
+	@Override
+	public void addParameterValues(Collection<ParameterValue> values)
+	{
+		for (ParameterValue parameterValue : values)
+		{
+			addParameterValue(parameterValue);
+		}
+		
 	}
 
 	@Override

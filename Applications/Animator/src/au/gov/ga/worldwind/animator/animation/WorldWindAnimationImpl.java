@@ -7,6 +7,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 
 /**
  * An implementation of the {@link Animation} interface for animations using the
@@ -128,8 +129,11 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public void applyFrame(int frame)
 	{
-		// TODO Auto-generated method stub
-		
+		AnimationContext context = createAnimationContext();
+		for (Animatable animatable : animatableObjects)
+		{
+			animatable.apply(context, frame);
+		}
 	}
 
 	@Override
@@ -142,8 +146,34 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public void recordKeyFrame(int frame, Collection<Parameter> parameters)
 	{
-		// TODO Auto-generated method stub
+		Collection<ParameterValue> parameterValues = new ArrayList<ParameterValue>();
+		for (Parameter parameter : parameters)
+		{
+			parameterValues.add(parameter.getCurrentValue(createAnimationContext()));
+		}
 		
+		// If a keyframe already exists at this frame, merge the parameter values
+		// Otherwise, create a new key frame
+		if (this.keyFrameMap.containsKey(frame))
+		{
+			KeyFrame existingFrame = this.keyFrameMap.get(frame);
+			existingFrame.addParameterValues(parameterValues);
+		} 
+		else
+		{
+			KeyFrame newFrame = new KeyFrameImpl(frame, parameterValues);
+			this.keyFrameMap.put(frame, newFrame);
+		}
+	}
+	
+
+	/**
+	 * @return An animation context that reflects the current state of the animation
+	 */
+	private AnimationContext createAnimationContext()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override

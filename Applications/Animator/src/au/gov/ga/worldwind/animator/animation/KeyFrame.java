@@ -53,10 +53,25 @@ public interface KeyFrame extends Serializable, Restorable
 	
 	/**
 	 * Add the provided parameter value to this key frame
+	 * <p/>
+	 * If a value is already recorded for the owner of the new value it will be replaced
+	 * by the new value.
 	 * 
 	 * @param value The value to add
 	 */
 	void addParameterValue(ParameterValue value);
+	
+	/**
+	 * Add all of the provided parameter to this key frame.
+	 * <p/>
+	 * Parameter values will be added in the order the returned by the collection's iterator.
+	 * <p/>
+	 * As with the {@link #addParameterValue()} method, if a parameter value already exists for
+	 * a parameter it will be replaced (i.e. last value wins).
+	 * 
+	 * @param values The values to add
+	 */
+	void addParameterValues(Collection<ParameterValue> values);
 	
 	/**
 	 * Get the animation frame this key frame corresponds to
