@@ -74,6 +74,11 @@
 
 	<target name="build-test" depends="build">
 		<mkdir dir="${test_build_dir}"/>
+		<copy todir="${test_build_dir}">
+			<fileset dir="${test_src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
 		<javac source="1.6" target="1.6" srcdir="${test_src_dir}" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}" />
 	</target>
 	
