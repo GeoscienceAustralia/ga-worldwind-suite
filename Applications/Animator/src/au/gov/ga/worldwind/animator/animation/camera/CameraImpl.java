@@ -7,6 +7,8 @@ import java.util.Collection;
 
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
+import au.gov.ga.worldwind.animator.util.message.MessageSourceAccessor;
 
 /**
  * A default implementation of the {@link Camera} interface
@@ -17,6 +19,8 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 public class CameraImpl implements Camera
 {
 	private static final long serialVersionUID = 20100819L;
+
+	private static final String DEFAULT_CAMERA_NAME = "Render Camera";
 	
 	private Parameter eyeLat;
 	private Parameter eyeLon;
@@ -25,6 +29,9 @@ public class CameraImpl implements Camera
 	private Parameter lookAtLat;
 	private Parameter lookAtLon;
 	private Parameter lookAtElevation;
+
+	/** The name of this camera */
+	private String name = MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraNameKey(), DEFAULT_CAMERA_NAME); 
 	
 	@Override
 	public void apply(AnimationContext animationContext, int frame)
@@ -100,14 +107,12 @@ public class CameraImpl implements Camera
 	@Override
 	public String getName()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return name;
 	}
 
 	@Override
 	public void setName(String name)
 	{
-		// TODO Auto-generated method stub
-		
+		this.name = name;
 	}
 }
