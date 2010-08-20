@@ -16,9 +16,8 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
  */
 public class CameraImpl implements Camera
 {
+	private static final long serialVersionUID = 20100819L;
 	
-	// Note: Camera properties are stored individually so that more fine-grained control
-	// can be achieved
 	private Parameter eyeLat;
 	private Parameter eyeLon;
 	private Parameter eyeElevation;
@@ -96,5 +95,19 @@ public class CameraImpl implements Camera
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String getName()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setName(String name)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }

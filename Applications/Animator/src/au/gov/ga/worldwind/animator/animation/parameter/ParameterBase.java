@@ -21,6 +21,8 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 public abstract class ParameterBase implements Parameter
 {
+	private static final long serialVersionUID = 20100819L;
+
 	/** Whether this parameter is currently enabled */
 	private boolean enabled;
 
@@ -32,13 +34,18 @@ public abstract class ParameterBase implements Parameter
 	
 	/** The animation this parameter is associated with */
 	private Animation animation;
+
+	/** The name of this parameter (can be used for display purposes) */
+	private String name;
 	
 	/**
 	 * Constructor. Initialises the mandatory {@link Animation} parameter.
 	 */
-	public ParameterBase(Animation animation)
+	public ParameterBase(String name, Animation animation)
 	{
+		Validate.notNull(name, "A name is required");
 		Validate.notNull(animation, "An animation is required");
+		this.name = name;
 		this.animation = animation;
 	}
 	
@@ -142,5 +149,19 @@ public abstract class ParameterBase implements Parameter
 			return null;
 		}
 		return keyFrame.getValueForParameter(this);
+	}
+	
+	@Override
+	public String getName()
+	{
+		return name;
+	}
+	
+	@Override
+	public void setName(String name)
+	{
+		Validate.notNull(name, "A name is required");
+		this.name = name;
+		
 	}
 }
