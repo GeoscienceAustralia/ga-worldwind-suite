@@ -152,7 +152,7 @@ public class WorldWindAnimationImpl implements Animation
 			parameterValues.add(parameter.getCurrentValue(createAnimationContext()));
 		}
 		
-		// If a keyframe already exists at this frame, merge the parameter values
+		// If a key frame already exists at this frame, merge the parameter values
 		// Otherwise, create a new key frame
 		if (this.keyFrameMap.containsKey(frame))
 		{
@@ -172,8 +172,7 @@ public class WorldWindAnimationImpl implements Animation
 	 */
 	private AnimationContext createAnimationContext()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new AnimationContextImpl(this);
 	}
 
 	@Override
