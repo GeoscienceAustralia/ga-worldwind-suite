@@ -74,4 +74,9 @@ public interface AnimationContext
 	 * @return the zoom scaled according to the animation's current settings
 	 */
 	double unapplyZoomScaling(double zoomed);
+
+	/**
+	 * @return The current frame of the animation
+	 */
+	int getCurrentFrame();
 }

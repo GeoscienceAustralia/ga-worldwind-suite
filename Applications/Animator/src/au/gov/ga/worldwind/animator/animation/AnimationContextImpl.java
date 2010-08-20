@@ -68,4 +68,11 @@ public class AnimationContextImpl implements AnimationContext
 		return zoomed;
 	}
 	
+	@Override
+	public int getCurrentFrame()
+	{
+		// TODO Implement me!
+		return 0;
+	}
+	
 }

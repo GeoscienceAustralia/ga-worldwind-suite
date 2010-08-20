@@ -39,7 +39,7 @@ public class ParameterValueFactory
 	 *  
 	 * @param parameter The parameter to create the value for
 	 * @param value The value of the parameter
-	 * @param value The frame the value is associated with
+	 * @param frame The frame the value is associated with
 	 * 
 	 * @return a new parameter value for the given parameter
 	 */
