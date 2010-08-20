@@ -80,6 +80,9 @@ import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.FrameSlider;
+import au.gov.ga.worldwind.animator.util.message.MessageSource;
+import au.gov.ga.worldwind.animator.util.message.MessageSourceAccessor;
+import au.gov.ga.worldwind.animator.util.message.ResourceBundleMessageSource;
 import au.gov.ga.worldwind.animator.view.roll.BasicRollOrbitView;
 
 public class Animator
@@ -158,8 +161,14 @@ public class Animator
 
 	private Layer bmng, landsat;
 
+	/** The message source for the application */
+	private MessageSource messageSource;
+	
 	public Animator()
 	{
+		messageSource = new ResourceBundleMessageSource("au.gov.ga.worldwind.animator.data.messages.animatorMessages");
+		MessageSourceAccessor.set(messageSource);
+		
 		// ImmediateMode.setImmediate(true);
 
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
