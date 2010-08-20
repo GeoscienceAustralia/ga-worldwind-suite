@@ -75,7 +75,11 @@ public class ResourceBundleMessageSource implements MessageSource
 			}
 		}
 		
-		return message.format(params, new StringBuffer(), new FieldPosition(0)).toString();
+		// Message formats aren't synchronised, so need this to ensure consistent results
+		synchronized (message)
+		{
+			return message.format(params, new StringBuffer(), new FieldPosition(0)).toString();
+		}
 	}
 	
 	/**
@@ -89,19 +93,28 @@ public class ResourceBundleMessageSource implements MessageSource
 	 */
 	private MessageFormat getMessageInternal(String key)
 	{
+		// Check the cache first
 		if (cachedMessages.containsKey(key))
 		{
 			return cachedMessages.get(key);
 		}
 		
 		// Check each bundle in turn. First one wins.
-		for (ResourceBundle bundle : this.bundles)
+		synchronized (cachedMessages)
 		{
-			if (bundle.containsKey(key))
+			// Just in case another thread populated the cache while we were blocked...
+			if (cachedMessages.containsKey(key))
 			{
-				MessageFormat message = new MessageFormat(bundle.getString(key));
-				cachedMessages.put(key, message);
-				return message;
+				return cachedMessages.get(key);
+			}
+			for (ResourceBundle bundle : this.bundles)
+			{
+				if (bundle.containsKey(key))
+				{
+					MessageFormat message = new MessageFormat(bundle.getString(key));
+					cachedMessages.put(key, message);
+					return message;
+				}
 			}
 		}
 		return null;
