@@ -118,4 +118,9 @@ public interface Animation
 	 * @return The render parameters for this animation.
 	 */
 	RenderParameters getRenderParameters();
+	
+	/**
+	 * @return Whether zoom scaling should be applied in this animation
+	 */
+	boolean isZoomScalingRequired();
 }

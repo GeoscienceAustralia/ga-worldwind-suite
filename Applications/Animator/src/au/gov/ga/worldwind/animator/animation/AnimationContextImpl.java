@@ -3,6 +3,7 @@
  */
 package au.gov.ga.worldwind.animator.animation;
 
+import gov.nasa.worldwind.View;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -40,4 +41,31 @@ public class AnimationContextImpl implements AnimationContext
 		return animation.getKeyFrameWithParameterAfterFrame(p, frame);
 	}
 
+	@Override
+	public View getView()
+	{
+		// TODO Implement me!
+		return null;
+	}
+	
+	@Override
+	public double applyZoomScaling(double unzoomed)
+	{
+		if (animation.isZoomScalingRequired())
+		{
+			return Math.log(Math.max(0, unzoomed) + 1);
+		}
+		return unzoomed;
+	}
+	
+	@Override
+	public double unapplyZoomScaling(double zoomed)
+	{
+		if (animation.isZoomScalingRequired())
+		{
+			return Math.pow(Math.E, zoomed) - 1;
+		}
+		return zoomed;
+	}
+	
 }

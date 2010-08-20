@@ -34,6 +34,9 @@ public class WorldWindAnimationImpl implements Animation
 	/** The list of animatable objects in this animation */
 	private List<Animatable> animatableObjects = new ArrayList<Animatable>();
 	
+	/** Whether or not zoom scaling should be applied */
+	boolean zoomRequired = true;
+	
 	/**
 	 * Constructor. Initialises default values.
 	 */
@@ -179,6 +182,12 @@ public class WorldWindAnimationImpl implements Animation
 	public RenderParameters getRenderParameters()
 	{
 		return renderParameters;
+	}
+
+	@Override
+	public boolean isZoomScalingRequired()
+	{
+		return zoomRequired;
 	}
 
 	
