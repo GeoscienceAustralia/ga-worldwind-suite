@@ -34,7 +34,6 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -58,7 +57,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import nasa.worldwind.awt.WorldWindowGLCanvas;
-import au.gov.ga.worldwind.animator.animation.OldAnimation;
+import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.KeyFrame;
+import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
 import au.gov.ga.worldwind.animator.layers.depth.DepthLayer;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModel;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
@@ -77,7 +78,6 @@ import au.gov.ga.worldwind.animator.layers.other.ImmediateBMNGWMSLayer;
 import au.gov.ga.worldwind.animator.layers.other.ImmediateLandsatI3WMSLayer;
 import au.gov.ga.worldwind.animator.layers.other.MagneticsLayer;
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
-import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.FrameSlider;
 import au.gov.ga.worldwind.animator.util.message.MessageSource;
@@ -108,11 +108,8 @@ public class Animator
 		if (Configuration.isMacOS())
 		{
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			System.setProperty(
-					"com.apple.mrj.application.apple.menu.about.name",
-					"World Wind Application");
-			System.setProperty("com.apple.mrj.application.growbox.intrudes",
-					"false");
+			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "World Wind Application");
+			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
 			System.setProperty("apple.awt.brushMetalLook", "true");
 		}
 
@@ -138,7 +135,7 @@ public class Animator
 
 	private WorldWindowGLCanvas wwd;
 	private FrameSlider slider;
-	private OldAnimation animation = null;
+	private Animation animation = null;
 	private File file = null;
 	private boolean autokey = false;
 	private boolean applying = false;
@@ -152,8 +149,7 @@ public class Animator
 	private LensFlareLayer lensFlare;
 	private JCheckBoxMenuItem useScaledZoomCheck;
 
-	private Vec4 sunPosition = new Vec4(0.0, 0.0,
-			Earth.WGS84_EQUATORIAL_RADIUS * 2);
+	private Vec4 sunPosition = new Vec4(0.0, 0.0, Earth.WGS84_EQUATORIAL_RADIUS * 2);
 	private JSlider xRotate, yRotate, zRotate;
 
 	private ShadedElevationLayer elevationEarth, elevationSW, elevationSONNE;
@@ -163,30 +159,24 @@ public class Animator
 
 	/** The message source for the application */
 	private MessageSource messageSource;
-	
+
 	public Animator()
 	{
 		messageSource = new ResourceBundleMessageSource("au.gov.ga.worldwind.animator.data.messages.animatorMessages");
 		MessageSourceAccessor.set(messageSource);
-		
+
 		// ImmediateMode.setImmediate(true);
 
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
-		Configuration.setValue(AVKey.VIEW_CLASS_NAME, BasicRollOrbitView.class
-				.getName());
-		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME,
-				AnimatorSceneController.class.getName());
+		Configuration.setValue(AVKey.VIEW_CLASS_NAME, BasicRollOrbitView.class.getName());
+		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, AnimatorSceneController.class.getName());
 
-		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME,
-				ImmediateTaskService.class.getName());
-		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
-				ImmediateRetrievalService.class.getName());
+		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME, ImmediateTaskService.class.getName());
+		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ImmediateRetrievalService.class.getName());
 
-		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
-				ElevationTesselator.class.getName());
+		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, ElevationTesselator.class.getName());
 
-		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE,
-				16777216L * 8); // 128 mb
+		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE, 16777216L * 8); // 128 mb
 
 		animationChangeListener = new ChangeListener()
 		{
@@ -197,7 +187,7 @@ public class Animator
 			}
 		};
 
-		animation = new OldAnimation();
+		animation = new WorldWindAnimationImpl();
 		resetChanged();
 		updater = new Updater();
 
@@ -216,11 +206,10 @@ public class Animator
 		wwd = new WorldWindowGLCanvas(caps);
 		Model model = new BasicModel();
 		wwd.setModel(model);
-		setAnimationSize(1024, 576);
+		setAnimationSize(animation.getRenderParameters().getImageDimension());
 		frame.add(wwd, BorderLayout.CENTER);
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
-		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(
-				Angle.ZERO, Angle.POS180);
+		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(Angle.ZERO, Angle.POS180);
 
 		CompoundElevationModel cem = new CompoundElevationModel();
 		dem = new DetailedElevationModel(cem);
@@ -320,25 +309,23 @@ public class Animator
 		landsat = new ImmediateLandsatI3WMSLayer();
 		layers.add(landsat);
 
-		ElevationModel earthem = (ElevationModel) new ExtendedBasicElevationModelFactory()
-				.createFromConfigSource(
+		ElevationModel earthem =
+				(ElevationModel) new ExtendedBasicElevationModelFactory().createFromConfigSource(
 						"config/Earth/EarthElevationModelAsBil16.xml", null);
 		ExtendedElevationModel eem = getEBEM(earthem);
 
-		Sector bemSector = Sector.fromDegrees(-59.99875, -7.99875, 91.99875,
-				171.99875);
-		ExtendedBasicElevationModel bem = FileLayer.createElevationModel(
-				"SW Margins DEM", "GA/SW Margins DEM", new File(DATA_DRIVE
-						+ ":/SW Margins/bathy/tiled"), 7, 150, LatLon
-						.fromDegrees(20d, 20d), bemSector, -8922, 3958, AVKey.INT16);
+		Sector bemSector = Sector.fromDegrees(-59.99875, -7.99875, 91.99875, 171.99875);
+		ExtendedBasicElevationModel bem =
+				FileLayer.createElevationModel("SW Margins DEM", "GA/SW Margins DEM", new File(DATA_DRIVE
+						+ ":/SW Margins/bathy/tiled"), 7, 150, LatLon.fromDegrees(20d, 20d), bemSector, -8922, 3958,
+						AVKey.INT16);
 		bem.setMissingDataSignal(-32768);
 
-		Sector semSector = Sector.fromDegrees(-27.0015, -22.5005, 106.5005,
-				110.5025);
-		ExtendedBasicElevationModel sem = FileLayer.createElevationModel(
-				"SONNE DEM", "GA/SONNE DEM", new File(DATA_DRIVE
-						+ ":/SW Margins/sonne/tiledB"), 7, 150, LatLon
-						.fromDegrees(20d, 20d), semSector, -6400, -2310, AVKey.INT16);
+		Sector semSector = Sector.fromDegrees(-27.0015, -22.5005, 106.5005, 110.5025);
+		ExtendedBasicElevationModel sem =
+				FileLayer.createElevationModel("SONNE DEM", "GA/SONNE DEM", new File(DATA_DRIVE
+						+ ":/SW Margins/sonne/tiledB"), 7, 150, LatLon.fromDegrees(20d, 20d), semSector, -6400, -2310,
+						AVKey.INT16);
 		sem.setMissingDataSignal(-9999);
 
 		cem.addElevationModel(eem);
@@ -352,8 +339,7 @@ public class Animator
 						-24.0536281, -23.4102781, 132.0746805, 133.9779805));
 		layers.add(map1);*/
 
-		sunPosition = new Vec4(7649434.404798721, 4779897.118999491,
-				-9020047.848073645, 0.0);
+		sunPosition = new Vec4(7649434.404798721, 4779897.118999491, -9020047.848073645, 0.0);
 
 		elevationEarth = new ShadedElevationLayer(eem);
 		elevationEarth.setSunPosition(sunPosition);
@@ -362,10 +348,9 @@ public class Animator
 		elevationEarth.setMinElevationClamp(bem.getMinElevation());
 		layers.add(elevationEarth);
 
-		Sector belevSector = new Sector(bemSector.getMinLatitude()
-				.addDegrees(1), bemSector.getMaxLatitude().addDegrees(-1),
-				bemSector.getMinLongitude().addDegrees(1), bemSector
-						.getMaxLongitude().addDegrees(-1));
+		Sector belevSector =
+				new Sector(bemSector.getMinLatitude().addDegrees(1), bemSector.getMaxLatitude().addDegrees(-1),
+						bemSector.getMinLongitude().addDegrees(1), bemSector.getMaxLongitude().addDegrees(-1));
 		elevationSW = new ShadedElevationLayer(bem, belevSector);
 		elevationSW.setSunPosition(sunPosition);
 		elevationSW.setExaggeration(50);
@@ -374,9 +359,9 @@ public class Animator
 		elevationSW.setMinElevationClamp(bem.getMinElevation());
 		layers.add(elevationSW);
 
-		Sector selevSector = new Sector(semSector.getMinLatitude(), semSector
-				.getMaxLatitude(), semSector.getMinLongitude().addDegrees(0.1),
-				semSector.getMaxLongitude());
+		Sector selevSector =
+				new Sector(semSector.getMinLatitude(), semSector.getMaxLatitude(), semSector.getMinLongitude()
+						.addDegrees(0.1), semSector.getMaxLongitude());
 		elevationSONNE = new ShadedElevationLayer(sem, selevSector);
 		elevationSONNE.setSunPosition(sunPosition);
 		elevationSONNE.setExaggeration(50);
@@ -412,10 +397,10 @@ public class Animator
 		coast.setSplitScale(1.2);
 		layers.add(coast);
 
-		
-//		CameraPathLayer cameraPathLayer = new CameraPathLayer(animation);
-//		layers.add(cameraPathLayer);
-		
+
+		//		CameraPathLayer cameraPathLayer = new CameraPathLayer(animation);
+		//		layers.add(cameraPathLayer);
+
 		/*Landmarks landmarks = new Landmarks(model.getGlobe());
 		layers.add(landmarks);*/
 
@@ -447,7 +432,7 @@ public class Animator
 		//elevationSW.setEnabled(true);
 		//elevationSONNE.setEnabled(true);
 
-//		cameraPathLayer.setEnabled(true);
+		//		cameraPathLayer.setEnabled(true);
 
 		// shadowsEarth.setEnabled(true);
 		// shadowsSW.setEnabled(true);
@@ -574,7 +559,7 @@ public class Animator
 			{
 				if (!settingSlider)
 				{
-					if (animation.size() > 0)
+					if (animation.getKeyFrameCount() > 0)
 					{
 						applyView(getView());
 						wwd.redraw();
@@ -583,16 +568,17 @@ public class Animator
 				}
 			}
 		});
-		slider.addChangeFrameListener(new ChangeFrameListener()
-		{
-			public void frameChanged(int index, int oldFrame, int newFrame)
-			{
-				animation.setFrame(index, newFrame);
-				updateSlider();
-				applyView(getView());
-				wwd.redraw();
-			}
-		});
+		// TODO: Implement frame dragging
+//		slider.addChangeFrameListener(new ChangeFrameListener()
+//		{
+//			public void frameChanged(int index, int oldFrame, int newFrame)
+//			{
+//				animation.setFrame(index, newFrame);
+//				updateSlider();
+//				applyView(getView());
+//				wwd.redraw();
+//			}
+//		});
 
 		/*JScrollPane scrollPane = new JScrollPane(slider,
 				JScrollPane.VERTICAL_SCROLLBAR_NEVER,
@@ -604,17 +590,16 @@ public class Animator
 		sps.width *= 2;
 		slider.setMinimumSize(sps);*/
 
-		getView().addPropertyChangeListener(AVKey.VIEW,
-				new PropertyChangeListener()
+		getView().addPropertyChangeListener(AVKey.VIEW, new PropertyChangeListener()
+		{
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				if (autokey && !applying)
 				{
-					public void propertyChange(PropertyChangeEvent evt)
-					{
-						if (autokey && !applying)
-						{
-							addFrame();
-						}
-					}
-				});
+					addFrame();
+				}
+			}
+		});
 
 		StatusBar statusBar = new StatusBar();
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -773,8 +758,7 @@ public class Animator
 
 	private void rotateSunPosition(double x, double y, double z)
 	{
-		Quaternion q = Quaternion.fromRotationXYZ(Angle.fromDegrees(x), Angle
-				.fromDegrees(y), Angle.fromDegrees(z));
+		Quaternion q = Quaternion.fromRotationXYZ(Angle.fromDegrees(x), Angle.fromDegrees(y), Angle.fromDegrees(z));
 		Vec4 newPosition = sunPosition.transformBy3(q);
 		elevationEarth.setSunPosition(newPosition);
 		elevationSW.setSunPosition(newPosition);
@@ -807,15 +791,14 @@ public class Animator
 		return null;
 	}
 
-	private void setAnimationSize(int width, int height)
+	private void setAnimationSize(Dimension animationSize)
 	{
 		if (!frame.isVisible())
 		{
-			Dimension wwdSize = new Dimension(width, height);
-			wwd.setMinimumSize(wwdSize);
-			wwd.setMaximumSize(wwdSize);
-			wwd.setPreferredSize(wwdSize);
-			wwd.setSize(wwdSize);
+			wwd.setMinimumSize(animationSize);
+			wwd.setMaximumSize(animationSize);
+			wwd.setPreferredSize(animationSize);
+			wwd.setSize(animationSize);
 			frame.pack();
 		}
 		else
@@ -825,7 +808,7 @@ public class Animator
 			int deltaWidth = frameSize.width - wwdSize.width;
 			int deltaHeight = frameSize.height - wwdSize.height;
 
-			frameSize = new Dimension(width + deltaWidth, height + deltaHeight);
+			frameSize = new Dimension(animationSize.width + deltaWidth, animationSize.height + deltaHeight);
 			frame.setPreferredSize(frameSize);
 			frame.setMinimumSize(frameSize);
 			frame.setMaximumSize(frameSize);
@@ -833,13 +816,11 @@ public class Animator
 			frame.pack();
 
 			wwdSize = wwd.getSize();
-			if (wwdSize.width != width || wwdSize.height != height)
+			if (wwdSize.width != animationSize.width || wwdSize.height != animationSize.height)
 			{
-				JOptionPane.showMessageDialog(frame,
-						"Could not set animation dimensions to " + width + "x"
-								+ height + " (currently " + wwdSize.width + "x"
-								+ wwdSize.height + ")",
-						"Could not set dimensions", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(frame, "Could not set animation dimensions to " + animationSize.width + "x" + animationSize.height
+						+ " (currently " + wwdSize.width + "x" + wwdSize.height + ")", "Could not set dimensions",
+						JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
@@ -857,8 +838,7 @@ public class Animator
 		menuBar.add(menu);
 
 		menuItem = new JMenuItem("New");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke('N',
-				ActionEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke('N', ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('N');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -870,8 +850,7 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("Open...");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke('O',
-				ActionEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke('O', ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('O');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -883,8 +862,7 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("Save");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke('S',
-				ActionEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke('S', ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('S');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -909,8 +887,7 @@ public class Animator
 		menu.addSeparator();
 
 		menuItem = new JMenuItem("Exit");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4,
-				ActionEvent.ALT_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
 		menuItem.setMnemonic('x');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -942,18 +919,19 @@ public class Animator
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
 		menuItem.setMnemonic('D');
 		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				int index = animation.indexOf(slider.getValue());
-				if (index >= 0)
-				{
-					animation.removeFrame(index);
-				}
-				updateSlider();
-			}
-		});
+		// TODO: Add frame deletion
+//		menuItem.addActionListener(new ActionListener()
+//		{
+//			public void actionPerformed(ActionEvent e)
+//			{
+//				int index = animation.indexOf(slider.getValue());
+//				if (index >= 0)
+//				{
+//					animation.removeFrame(index);
+//				}
+//				updateSlider();
+//			}
+//		});
 
 		menu.addSeparator();
 
@@ -964,8 +942,7 @@ public class Animator
 		
 		menu.addSeparator();*/
 
-		final JCheckBoxMenuItem autoKeyItem = new JCheckBoxMenuItem("Auto key",
-				autokey);
+		final JCheckBoxMenuItem autoKeyItem = new JCheckBoxMenuItem("Auto key", autokey);
 		menuItem.setMnemonic('k');
 		menu.add(autoKeyItem);
 		autoKeyItem.addActionListener(new ActionListener()
@@ -984,9 +961,9 @@ public class Animator
 			public void actionPerformed(ActionEvent e)
 			{
 				int frames = slider.getLength() - 1;
-				Object value = JOptionPane.showInputDialog(frame,
-						"Number of frames:", "Set frame count",
-						JOptionPane.QUESTION_MESSAGE, null, null, frames);
+				Object value =
+						JOptionPane.showInputDialog(frame, "Number of frames:", "Set frame count",
+								JOptionPane.QUESTION_MESSAGE, null, null, frames);
 				try
 				{
 					frames = Integer.parseInt((String) value);
@@ -1026,8 +1003,7 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("Previous 10");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA,
-				KeyEvent.SHIFT_DOWN_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, KeyEvent.SHIFT_DOWN_MASK));
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -1038,8 +1014,7 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("Next 10");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD,
-				KeyEvent.SHIFT_DOWN_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, KeyEvent.SHIFT_DOWN_MASK));
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -1050,28 +1025,26 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("First");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA,
-				ActionEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('F');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				slider.setValue(animation.getFirstFrame());
+				slider.setValue(animation.getFrameOfFirstKeyFrame());
 			}
 		});
 
 		menuItem = new JMenuItem("Last");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD,
-				ActionEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('L');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				slider.setValue(animation.getLastFrame());
+				slider.setValue(animation.getFrameOfLastKeyFrame());
 			}
 		});
 
@@ -1081,86 +1054,88 @@ public class Animator
 		menuBar.add(menu);
 
 		useScaledZoomCheck = new JCheckBoxMenuItem("Use scaled zoom");
-		useScaledZoomCheck.setSelected(animation.isScaledZoom());
+		useScaledZoomCheck.setSelected(animation.isZoomScalingRequired());
 		menu.add(useScaledZoomCheck);
 		useScaledZoomCheck.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animation.setScaledZoom(useScaledZoomCheck.isSelected());
+				animation.setZoomScalingRequired(useScaledZoomCheck.isSelected());
 			}
 		});
 
 		menuItem = new JMenuItem("Scale animation...");
 		menuItem.setMnemonic('S');
 		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				double scale = -1.0;
-				Object value = JOptionPane.showInputDialog(frame,
-						"Scale factor:", "Scale animation",
-						JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
-				try
-				{
-					scale = Double.parseDouble((String) value);
-				}
-				catch (Exception ex)
-				{
-				}
-				if (scale != 1.0 && scale > 0)
-				{
-					animation.scale(scale);
-				}
-				updateSlider();
-			}
-		});
+		// TODO: Implement animation scaling
+//		menuItem.addActionListener(new ActionListener()
+//		{
+//			public void actionPerformed(ActionEvent e)
+//			{
+//				double scale = -1.0;
+//				Object value =
+//						JOptionPane.showInputDialog(frame, "Scale factor:", "Scale animation",
+//								JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
+//				try
+//				{
+//					scale = Double.parseDouble((String) value);
+//				}
+//				catch (Exception ex)
+//				{
+//				}
+//				if (scale != 1.0 && scale > 0)
+//				{
+//					animation.scale(scale);
+//				}
+//				updateSlider();
+//			}
+//		});
 
 		menuItem = new JMenuItem("Scale height...");
 		menuItem.setMnemonic('h');
 		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				double scale = -1.0;
-				Object value = JOptionPane.showInputDialog(frame,
-						"Scale factor:", "Scale height",
-						JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
-				try
-				{
-					scale = Double.parseDouble((String) value);
-				}
-				catch (Exception ex)
-				{
-				}
-				if (scale != 1.0 && scale > 0)
-				{
-					animation.scaleHeight(scale);
-				}
-			}
-		});
+		// TODO: Implement height scaling
+//		menuItem.addActionListener(new ActionListener()
+//		{
+//			public void actionPerformed(ActionEvent e)
+//			{
+//				double scale = -1.0;
+//				Object value =
+//						JOptionPane.showInputDialog(frame, "Scale factor:", "Scale height",
+//								JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
+//				try
+//				{
+//					scale = Double.parseDouble((String) value);
+//				}
+//				catch (Exception ex)
+//				{
+//				}
+//				if (scale != 1.0 && scale > 0)
+//				{
+//					animation.scaleHeight(scale);
+//				}
+//			}
+//		});
 
 		menuItem = new JMenuItem("Smooth eye speed");
 		menuItem.setMnemonic('m');
 		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				if (JOptionPane
-						.showConfirmDialog(
-								frame,
-								"This will redistribute keyframes to attempt to smooth the eye speed.\nDo you wish to continue?",
-								"Smooth eye speed", JOptionPane.YES_NO_OPTION,
-								JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
-				{
-					animation.smoothEyeSpeed();
-					updateSlider();
-				}
-			}
-		});
+		// TODO: Implement eye smoothing
+//		menuItem.addActionListener(new ActionListener()
+//		{
+//			public void actionPerformed(ActionEvent e)
+//			{
+//				if (JOptionPane
+//						.showConfirmDialog(
+//								frame,
+//								"This will redistribute keyframes to attempt to smooth the eye speed.\nDo you wish to continue?",
+//								"Smooth eye speed", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+//				{
+//					animation.smoothEyeSpeed();
+//					updateSlider();
+//				}
+//			}
+//		});
 
 		menu.addSeparator();
 
@@ -1197,8 +1172,7 @@ public class Animator
 		});
 
 		menuItem = new JMenuItem("Render (high-res)...");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke('R',
-				ActionEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke('R', ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('R');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -1231,8 +1205,8 @@ public class Animator
 					{
 						double detail = 1.0;
 
-						int first = animation.getFirstFrame();
-						int last = animation.getLastFrame();
+						int first = animation.getFrameOfFirstKeyFrame();
+						int last = animation.getFrameOfLastKeyFrame();
 
 						first = 590;
 						last = 595;
@@ -1372,11 +1346,10 @@ public class Animator
 	private void applyView(OrbitView view)
 	{
 		int frame = slider.getValue();
-		if (animation.getFirstFrame() <= frame
-				&& frame <= animation.getLastFrame())
+		if (animation.getFrameOfFirstKeyFrame() <= frame && frame <= animation.getFrameOfLastKeyFrame())
 		{
 			applying = true;
-			animation.applyFrame(view, frame);
+			animation.applyFrame(frame);
 			applying = false;
 		}
 	}
@@ -1390,18 +1363,20 @@ public class Animator
 		}
 	}
 
-	private void setAnimation(OldAnimation animation)
+	private void setAnimation(Animation animation)
 	{
 		this.animation = animation;
 		if (useScaledZoomCheck != null)
-			useScaledZoomCheck.setSelected(animation.isScaledZoom());
+		{
+			useScaledZoomCheck.setSelected(animation.isZoomScalingRequired());
+		}
 	}
 
 	private void newFile()
 	{
 		if (querySave())
 		{
-			setAnimation(new OldAnimation());
+			setAnimation(new WorldWindAnimationImpl());
 			resetChanged();
 			setFile(null);
 			updateSlider();
@@ -1417,19 +1392,19 @@ public class Animator
 			if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
 				File newFile = chooser.getSelectedFile();
-				OldAnimation newAnimation = new OldAnimation();
+				Animation newAnimation = new WorldWindAnimationImpl();
 				try
 				{
-					newAnimation.load(newFile);
+					// TODO: Implement animation opening
+					//newAnimation.load(newFile);
 					setAnimation(newAnimation);
 					resetChanged();
 					setFile(newFile);
 				}
 				catch (Exception e)
 				{
-					JOptionPane.showMessageDialog(frame, "Could not open '"
-							+ newFile.getAbsolutePath() + "'.\n" + e, "Error",
-							JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frame, "Could not open '" + newFile.getAbsolutePath() + "'.\n" + e,
+							"Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 			updateSlider();
@@ -1457,17 +1432,15 @@ public class Animator
 			File newFile = chooser.getSelectedFile();
 			if (!newFile.getName().toLowerCase().endsWith(".xml"))
 			{
-				newFile = new File(newFile.getParent(), newFile.getName()
-						+ ".xml");
+				newFile = new File(newFile.getParent(), newFile.getName() + ".xml");
 			}
 			boolean override = true;
 			if (newFile.exists())
 			{
-				override = JOptionPane.showConfirmDialog(frame, newFile
-						.getAbsolutePath()
-						+ " already exists.\nDo you want to replace it?",
-						"Save As", JOptionPane.YES_NO_OPTION,
-						JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION;
+				override =
+						JOptionPane.showConfirmDialog(frame, newFile.getAbsolutePath()
+								+ " already exists.\nDo you want to replace it?", "Save As", JOptionPane.YES_NO_OPTION,
+								JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION;
 			}
 			if (override)
 			{
@@ -1482,17 +1455,16 @@ public class Animator
 	{
 		if (file != null)
 		{
-			try
-			{
-				animation.save(file);
-				resetChanged();
-			}
-			catch (IOException e)
-			{
-				JOptionPane.showMessageDialog(frame, "Saving failed.\n" + e,
-						"Error", JOptionPane.ERROR_MESSAGE);
-			}
-			setTitleBar();
+//			try
+//			{
+//				animation.save(file);
+//				resetChanged();
+//			}
+//			catch (IOException e)
+//			{
+//				JOptionPane.showMessageDialog(frame, "Saving failed.\n" + e, "Error", JOptionPane.ERROR_MESSAGE);
+//			}
+//			setTitleBar();
 		}
 	}
 
@@ -1504,20 +1476,20 @@ public class Animator
 
 	private void resetChanged()
 	{
-		animation.removeChangeListener(animationChangeListener);
-		animation.addChangeListener(animationChangeListener);
-		changed = false;
+//		animation.removeChangeListener(animationChangeListener);
+//		animation.addChangeListener(animationChangeListener);
+//		changed = false;
 	}
 
 	private boolean querySave()
 	{
 		if (!changed)
 			return true;
-		String file = this.file == null ? "Animation" : "'"
-				+ this.file.getName() + "'";
+		String file = this.file == null ? "Animation" : "'" + this.file.getName() + "'";
 		String message = file + " has been modified. Save changes?";
-		int value = JOptionPane.showConfirmDialog(frame, message, "Save",
-				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+		int value =
+				JOptionPane.showConfirmDialog(frame, message, "Save", JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE);
 		if (value == JOptionPane.CANCEL_OPTION)
 			return false;
 		if (value == JOptionPane.YES_OPTION)
@@ -1542,9 +1514,9 @@ public class Animator
 	private void updateSlider()
 	{
 		slider.clearKeys();
-		for (int i = 0; i < animation.size(); i++)
+		for (KeyFrame keyFrame : animation.getKeyFrames())
 		{
-			slider.addKey(animation.getFrame(i));
+			slider.addKey(keyFrame.getFrame());
 		}
 		slider.setMin(0);
 		slider.setMax(animation.getFrameCount());
@@ -1559,7 +1531,7 @@ public class Animator
 
 	private void preview(final int frameSkip)
 	{
-		if (animation != null && animation.size() > 0)
+		if (animation != null && animation.hasKeyFrames())
 		{
 			Thread thread = new Thread(new Runnable()
 			{
@@ -1567,9 +1539,8 @@ public class Animator
 				{
 					stop = false;
 
-					int firstFrame = Math.max(slider.getValue(), animation
-							.getFirstFrame());
-					int lastFrame = animation.getLastFrame();
+					int firstFrame = Math.max(slider.getValue(), animation.getFrameOfFirstKeyFrame());
+					int lastFrame = animation.getFrameOfLastKeyFrame();
 
 					for (int frame = firstFrame; frame <= lastFrame; frame += frameSkip)
 					{
@@ -1578,7 +1549,9 @@ public class Animator
 						wwd.redrawNow();
 
 						if (stop)
+						{
 							break;
+						}
 					}
 				}
 			});
@@ -1588,16 +1561,15 @@ public class Animator
 
 	private Thread animate(final double detailHint)
 	{
-		int firstFrame = Math.max(slider.getValue(), animation.getFirstFrame());
-		int lastFrame = animation.getLastFrame();
-		return animate(detailHint, firstFrame, lastFrame, new File(DATA_DRIVE
-				+ ":/frames"), true);
+		int firstFrame = Math.max(slider.getValue(), animation.getFrameOfFirstKeyFrame());
+		int lastFrame = animation.getFrameOfLastKeyFrame();
+		return animate(detailHint, firstFrame, lastFrame, new File(DATA_DRIVE + ":/frames"), true);
 	}
 
-	private Thread animate(final double detailHint, final int firstFrame,
-			final int lastFrame, final File outputDir, final boolean alpha)
+	private Thread animate(final double detailHint, final int firstFrame, final int lastFrame, final File outputDir,
+			final boolean alpha)
 	{
-		if (animation != null && animation.size() > 0)
+		if (animation != null && animation.hasKeyFrames())
 		{
 			Thread thread = new Thread(new Runnable()
 			{
@@ -1607,11 +1579,9 @@ public class Animator
 
 					boolean immediate = ImmediateMode.isImmediate();
 					ImmediateMode.setImmediate(true);
-					AnimatorSceneController asc = (AnimatorSceneController) wwd
-							.getSceneController();
+					AnimatorSceneController asc = (AnimatorSceneController) wwd.getSceneController();
 
-					setAnimationSize(animation.getWidth(), animation
-							.getHeight());
+					setAnimationSize(animation.getRenderParameters().getImageDimension());
 
 					crosshair.setEnabled(false);
 					double detailHintBackup = dem.getDetailHint();
@@ -1630,8 +1600,7 @@ public class Animator
 						setSlider(frame);
 						applyView(getView());
 
-						asc.takeScreenshot(new File(outputDir, "frame"
-								+ FileUtil.paddedInt(frame, filenameLength)
+						asc.takeScreenshot(new File(outputDir, "frame" + FileUtil.paddedInt(frame, filenameLength)
 								+ ".tga"), alpha);
 						wwd.redraw();
 						asc.waitForScreenshot();
@@ -1671,8 +1640,7 @@ public class Animator
 						Integer key = getNextKey();
 						if (key != null)
 						{
-							ViewParameters vp = removeValue(key);
-							animation.addFrame(key, vp.eye, vp.center);
+							animation.recordKeyFrame(key);
 							updateSlider();
 						}
 						else

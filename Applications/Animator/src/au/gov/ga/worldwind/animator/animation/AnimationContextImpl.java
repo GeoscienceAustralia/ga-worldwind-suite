@@ -71,8 +71,7 @@ public class AnimationContextImpl implements AnimationContext
 	@Override
 	public int getCurrentFrame()
 	{
-		// TODO Implement me!
-		return 0;
+		return animation.getCurrentFrame();
 	}
 	
 }

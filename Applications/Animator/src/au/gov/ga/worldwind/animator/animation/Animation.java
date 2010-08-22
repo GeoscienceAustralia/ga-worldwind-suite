@@ -26,6 +26,17 @@ public interface Animation
 	List<KeyFrame> getKeyFrames();
 	
 	/**
+	 * @return <code>true</code> if there are key frames recorded for this animation, 
+	 * <code>false</code> otherwise
+	 */
+	boolean hasKeyFrames();
+	
+	/**
+	 * @return The number of key frames associated with this animation
+	 */
+	int getKeyFrameCount();
+	
+	/**
 	 * Returns the first {@link KeyFrame} <em>before</em> the provided frame that 
 	 * contains a value for the provided {@link Parameter}.
 	 * <p/>
@@ -52,6 +63,30 @@ public interface Animation
 	 * one cannot be found
 	 */
 	KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame);
+	
+	/**
+	 * @return The first key frame in the animation, or <code>null</code> if no key frames are recorded
+	 */
+	KeyFrame getFirstKeyFrame();
+	
+	/**
+	 * Convenience method.
+	 * 
+	 * @return The frame of the first key frame in the animation, or '0' if no key frames are recorded
+	 */
+	int getFrameOfFirstKeyFrame();
+	
+	/**
+	 * @return The last key frame in the animation, or <code>null</code> if no key frames are recorded
+	 */
+	KeyFrame getLastKeyFrame();
+	
+	/**
+	 * Convenience method.
+	 * 
+	 * @return The frame of the last key frame in the animation, or '0' if no key frames are recorded
+	 */
+	int getFrameOfLastKeyFrame();
 	
 	/**
 	 * @return A collection of all parameters associated with this animation
@@ -123,4 +158,23 @@ public interface Animation
 	 * @return Whether zoom scaling should be applied in this animation
 	 */
 	boolean isZoomScalingRequired();
+	
+	/**
+	 * Set whether or not zoom scaling should be applied in this animation.
+	 * 
+	 * @param zoomScalingRequired Whether zoom scaling should be applied in this animation
+	 */
+	void setZoomScalingRequired(boolean zoomScalingRequired);
+	
+	/**
+	 * @return The current frame in the animation
+	 */
+	int getCurrentFrame();
+	
+	/**
+	 * Sets the current frame of the animation
+	 * 
+	 * @param frame The current frame to set
+	 */
+	void setCurrentFrame(int frame);
 }

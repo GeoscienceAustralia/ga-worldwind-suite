@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import au.gov.ga.worldwind.animator.animation.camera.Camera;
+import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 
@@ -31,11 +33,17 @@ public class WorldWindAnimationImpl implements Animation
 	/** The render parameters for this animation */
 	private RenderParameters renderParameters;
 	
+	/** The camera to use for rendering the animation */
+	private Camera renderCamera;
+	
 	/** The list of animatable objects in this animation */
 	private List<Animatable> animatableObjects = new ArrayList<Animatable>();
 	
 	/** Whether or not zoom scaling should be applied */
-	boolean zoomRequired = true;
+	private boolean zoomRequired = true;
+	
+	/** The current frame of the animation */
+	private int currentFrame = 0;
 	
 	/**
 	 * Constructor. Initialises default values.
@@ -44,6 +52,20 @@ public class WorldWindAnimationImpl implements Animation
 	{
 		this.frameCount = DEFAULT_FRAME_COUNT;
 		this.renderParameters = new RenderParameters();
+		this.renderCamera = new CameraImpl(this);
+		this.animatableObjects.add(renderCamera);
+	}
+	
+	@Override
+	public int getKeyFrameCount()
+	{
+		return keyFrameMap.size();
+	}
+	
+	@Override
+	public boolean hasKeyFrames()
+	{
+		return !keyFrameMap.isEmpty();
 	}
 	
 	@Override
@@ -83,6 +105,32 @@ public class WorldWindAnimationImpl implements Animation
 		return null;
 	}
 
+	@Override
+	public KeyFrame getFirstKeyFrame()
+	{
+		List<KeyFrame> keyFrames = getKeyFrames();
+		return keyFrames.isEmpty() ? null : keyFrames.get(0);
+	}
+	
+	@Override
+	public int getFrameOfFirstKeyFrame()
+	{
+		return keyFrameMap.isEmpty() ? 0 : keyFrameMap.firstKey();
+	}
+	
+	@Override
+	public KeyFrame getLastKeyFrame()
+	{
+		List<KeyFrame> keyFrames = getKeyFrames();
+		return keyFrames.isEmpty() ? null : keyFrames.get(keyFrames.size() - 1);
+	}
+	
+	@Override
+	public int getFrameOfLastKeyFrame()
+	{
+		return keyFrameMap.isEmpty() ? 0 : keyFrameMap.lastKey();
+	}
+	
 	@Override
 	public Collection<Parameter> getAllParameters()
 	{
@@ -169,7 +217,6 @@ public class WorldWindAnimationImpl implements Animation
 		}
 	}
 	
-
 	/**
 	 * @return An animation context that reflects the current state of the animation
 	 */
@@ -190,6 +237,22 @@ public class WorldWindAnimationImpl implements Animation
 		return zoomRequired;
 	}
 
-	
+	@Override
+	public void setZoomScalingRequired(boolean zoomScalingRequired)
+	{
+		this.zoomRequired = zoomScalingRequired;
+	}
+
+	@Override
+	public int getCurrentFrame()
+	{
+		return this.currentFrame;
+	}
+
+	@Override
+	public void setCurrentFrame(int frame)
+	{
+		this.currentFrame = frame;
+	}
 
 }
