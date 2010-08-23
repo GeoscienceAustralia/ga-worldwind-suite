@@ -90,7 +90,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 			@Override
 			public ParameterValue getCurrentValue(AnimationContext context)
 			{
-				double value = context.getView().getEyePosition().getElevation();
+				double value = context.applyZoomScaling(context.getView().getEyePosition().getElevation());
 				return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
 			}
 		};
@@ -120,7 +120,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 			@Override
 			public ParameterValue getCurrentValue(AnimationContext context)
 			{
-				double value = ((OrbitView)context.getView()).getCenterPosition().getElevation();
+				double value = context.applyZoomScaling(((OrbitView)context.getView()).getCenterPosition().getElevation());
 				return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
 			}
 		};
