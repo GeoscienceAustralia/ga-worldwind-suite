@@ -164,6 +164,12 @@ public class WorldWindAnimationImpl implements Animation
 	}
 
 	@Override
+	public Camera getCamera()
+	{
+		return this.renderCamera;
+	}
+	
+	@Override
 	public Collection<Animatable> getAnimatableObjects()
 	{
 		return this.animatableObjects;

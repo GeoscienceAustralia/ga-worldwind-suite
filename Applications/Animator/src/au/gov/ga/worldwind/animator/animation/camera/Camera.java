@@ -3,7 +3,9 @@
  */
 package au.gov.ga.worldwind.animator.animation.camera;
 
+import gov.nasa.worldwind.geom.Position;
 import au.gov.ga.worldwind.animator.animation.Animatable;
+import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
@@ -45,5 +47,25 @@ public interface Camera extends Animatable
 	 * @return The parameter that represents the elevation of the camera 'look-at' point
 	 */
 	Parameter getLookAtElevation();
+	
+	/**
+	 * Return the eye position of the camera at the provided frame
+	 * 
+	 * @param context The context in which the animation is running
+	 * @param frame The frame at which the eye position is required
+	 * 
+	 * @return The eye position of the camera at the provided frame
+	 */
+	Position getEyePositionAtFrame(AnimationContext context, int frame);
+
+	/**
+	 * Return the look-at position of the camera at the provided frame
+	 * 
+	 * @param context The context in which the animation is running
+	 * @param frame The frame at which the eye position is required
+	 * 
+	 * @return The eye position of the camera at the provided frame
+	 */
+	Position getLookatPositionAtFrame(AnimationContext animationContext, int frame);
 	
 }

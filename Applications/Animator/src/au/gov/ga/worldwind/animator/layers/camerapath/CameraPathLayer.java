@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.animator.layers.camerapath;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.util.WWBufferUtil;
 
 import java.awt.Color;
 import java.nio.DoubleBuffer;
@@ -11,7 +12,12 @@ import javax.media.opengl.GL;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import au.gov.ga.worldwind.animator.animation.OldAnimation;
+import com.sun.opengl.util.BufferUtil;
+
+import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.AnimationContext;
+import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
+import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -27,7 +33,7 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 	private static final Color DEFAULT_CAMERA_PATH_COLOUR = Color.WHITE;
 	
 	/** The animation whose camera path is to be displayed on this layer */
-	private OldAnimation animation;
+	private Animation animation;
 
 	/** The 'front' buffer, used to hold vertices ready for drawing */
 	private DoubleBuffer drawVertexBuffer;
@@ -48,36 +54,48 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 	 * 
 	 * @param animation The animation instance whose camera path will be displayed by this layer
 	 */
-	public CameraPathLayer(OldAnimation animation)
+	public CameraPathLayer(Animation animation)
 	{
 		Validate.notNull(animation, "An animation instance is required");
 		this.animation = animation;
-		this.animation.addChangeListener(this);
 		
-		this.drawVertexBuffer = DoubleBuffer.allocate(animation.getFrameCount() * 3);
-		this.updateVertexBuffer = DoubleBuffer.allocate(animation.getFrameCount() * 3);
+		this.drawVertexBuffer = BufferUtil.newDoubleBuffer(animation.getFrameCount() * 3);
+		this.updateVertexBuffer = BufferUtil.newDoubleBuffer(animation.getFrameCount() * 3);
 	}
 
 	@Override
 	protected void doRender(DrawContext dc)
 	{
+		populateVertexBuffer(dc);
+		swapBuffers();
+		
 		GL gl = dc.getGL();
-		gl.glPushAttrib(GL.GL_LINE_BIT);
 		gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 		try
 		{
+			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
 			gl.glColor3fv(cameraPathColour.getColorComponents(null), 0);
 			synchronized (vertexBufferLock)
 			{
-				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, drawVertexBuffer.rewind());
-				gl.glDrawArrays(GL.GL_LINE_STRIP, 0, animation.getLastFrame());
+				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, drawVertexBuffer);
+				gl.glDrawArrays(GL.GL_LINE_STRIP, 0, animation.getFrameOfLastKeyFrame());
 			}
 		}
 		finally
 		{
-			gl.glPopAttrib();
 			gl.glPopClientAttrib();
 		}
+	}
+
+	/**
+	 * Swap the two buffers 
+	 */
+	private synchronized void swapBuffers()
+	{
+		DoubleBuffer tmp = drawVertexBuffer;
+		drawVertexBuffer = updateVertexBuffer;
+		updateVertexBuffer = tmp;
+		drawVertexBuffer.rewind();
 	}
 
 	/**
@@ -89,9 +107,11 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 	 */
 	private synchronized void populateVertexBuffer(DrawContext dc)
 	{
-		for (int frame = 0; frame < animation.getLastFrame(); frame ++)
+		Camera renderCamera = animation.getCamera();
+		AnimationContext context = new AnimationContextImpl(animation);
+		for (int frame = animation.getFrameOfFirstKeyFrame(); frame < animation.getFrameOfLastKeyFrame(); frame ++)
 		{
-			Vec4 eyeVector = dc.getGlobe().computePointFromPosition(animation.getEyeLocationAtFrame(frame));
+			Vec4 eyeVector = dc.getGlobe().computePointFromPosition(renderCamera.getEyePositionAtFrame(context, frame));
 			updateVertexBuffer.put(eyeVector.x);
 			updateVertexBuffer.put(eyeVector.y);
 			updateVertexBuffer.put(eyeVector.z);

@@ -62,6 +62,7 @@ import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
+import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
 import au.gov.ga.worldwind.animator.layers.depth.DepthLayer;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModel;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
@@ -403,8 +404,8 @@ public class Animator
 		layers.add(coast);
 
 
-		//		CameraPathLayer cameraPathLayer = new CameraPathLayer(animation);
-		//		layers.add(cameraPathLayer);
+		CameraPathLayer cameraPathLayer = new CameraPathLayer(animation);
+		layers.add(cameraPathLayer);
 
 		/*Landmarks landmarks = new Landmarks(model.getGlobe());
 		layers.add(landmarks);*/
@@ -437,7 +438,7 @@ public class Animator
 		//elevationSW.setEnabled(true);
 		//elevationSONNE.setEnabled(true);
 
-		//		cameraPathLayer.setEnabled(true);
+		cameraPathLayer.setEnabled(true);
 
 		// shadowsEarth.setEnabled(true);
 		// shadowsSW.setEnabled(true);

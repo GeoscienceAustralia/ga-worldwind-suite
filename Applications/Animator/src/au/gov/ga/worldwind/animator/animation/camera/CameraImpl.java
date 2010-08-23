@@ -139,17 +139,29 @@ public class CameraImpl extends AnimatableBase implements Camera
 	@Override
 	public void apply(AnimationContext animationContext, int frame)
 	{
-		Position eye = Position.fromDegrees(eyeLat.getValueAtFrame(animationContext, frame).getValue(),
-											eyeLon.getValueAtFrame(animationContext, frame).getValue(), 
-											animationContext.unapplyZoomScaling(eyeElevation.getValueAtFrame(animationContext, frame).getValue()));
+		Position eye = getEyePositionAtFrame(animationContext, frame);
 		
-		Position center = Position.fromDegrees(lookAtLat.getValueAtFrame(animationContext, frame).getValue(),
-											   lookAtLon.getValueAtFrame(animationContext, frame).getValue(), 
-											   animationContext.unapplyZoomScaling(lookAtElevation.getValueAtFrame(animationContext, frame).getValue()));
+		Position center = getLookatPositionAtFrame(animationContext, frame);
 		
 		View view = animationContext.getView();
 		view.stopMovement();
 		view.setOrientation(eye, center);
+	}
+	
+	@Override
+	public Position getEyePositionAtFrame(AnimationContext animationContext, int frame)
+	{
+		return Position.fromDegrees(eyeLat.getValueAtFrame(animationContext, frame).getValue(),
+							        eyeLon.getValueAtFrame(animationContext, frame).getValue(), 
+							        animationContext.unapplyZoomScaling(eyeElevation.getValueAtFrame(animationContext, frame).getValue()));
+	}
+	
+	@Override
+	public Position getLookatPositionAtFrame(AnimationContext animationContext, int frame)
+	{
+		return Position.fromDegrees(lookAtLat.getValueAtFrame(animationContext, frame).getValue(),
+				   					lookAtLon.getValueAtFrame(animationContext, frame).getValue(), 
+				   					animationContext.unapplyZoomScaling(lookAtElevation.getValueAtFrame(animationContext, frame).getValue()));
 	}
 
 	@Override
@@ -207,4 +219,5 @@ public class CameraImpl extends AnimatableBase implements Camera
 	{
 		return Collections.unmodifiableCollection(parameters);
 	}
+	
 }

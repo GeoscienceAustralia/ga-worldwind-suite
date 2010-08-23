@@ -6,6 +6,7 @@ package au.gov.ga.worldwind.animator.animation;
 import java.util.Collection;
 import java.util.List;
 
+import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
@@ -97,6 +98,11 @@ public interface Animation
 	 * @return A collection of all parameters associated with this animation that are currently enabled
 	 */
 	Collection<Parameter> getEnabledParameters();
+	
+	/**
+	 * @return The camera used in this animation
+	 */
+	Camera getCamera();
 	
 	/**
 	 * @return A collection of all objects being animated in this animation
