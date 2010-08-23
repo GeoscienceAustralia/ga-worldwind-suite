@@ -10,8 +10,8 @@ import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
+import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
@@ -28,7 +28,7 @@ import au.gov.ga.worldwind.animator.util.message.MessageSourceAccessor;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class CameraImpl implements Camera
+public class CameraImpl extends AnimatableBase implements Camera
 {
 	private static final long serialVersionUID = 20100819L;
 
@@ -47,11 +47,24 @@ public class CameraImpl implements Camera
 	/**
 	 * Constructor. Initialises the camera parameters.
 	 */
-	@SuppressWarnings("serial")
 	public CameraImpl(Animation animation)
 	{
+		super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraNameKey(), DEFAULT_CAMERA_NAME));
+		
 		Validate.notNull(animation, "An animation instance is required");
 		
+		initialiseParameters(animation);
+		
+	}
+
+
+	/**
+	 * Initialise the camera parameters
+	 * @param animation
+	 */
+	@SuppressWarnings("serial")
+	private void initialiseParameters(Animation animation)
+	{
 		eyeLat = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLatNameKey()), animation)
 		{
 			@Override
@@ -119,11 +132,8 @@ public class CameraImpl implements Camera
 		parameters.add(lookAtLat);
 		parameters.add(lookAtLon);
 		parameters.add(lookAtElevation);
-		
 	}
 	
-	/** The name of this camera */
-	private String name = MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraNameKey(), DEFAULT_CAMERA_NAME); 
 
 	@Override
 	public void apply(AnimationContext animationContext, int frame)
@@ -195,32 +205,5 @@ public class CameraImpl implements Camera
 	public Collection<Parameter> getParameters()
 	{
 		return Collections.unmodifiableCollection(parameters);
-	}
-	
-	@Override
-	public Collection<Parameter> getEnabledParameters()
-	{
-		Collection<Parameter> result = new ArrayList<Parameter>();
-		for (Iterator<Parameter> parameterIterator = getParameters().iterator(); parameterIterator.hasNext();)
-		{
-			Parameter parameter = (Parameter) parameterIterator.next();
-			if (parameter.isEnabled())
-			{
-				result.add(parameter);
-			}
-		}
-		return result;
-	}
-
-	@Override
-	public String getName()
-	{
-		return name;
-	}
-
-	@Override
-	public void setName(String name)
-	{
-		this.name = name;
 	}
 }

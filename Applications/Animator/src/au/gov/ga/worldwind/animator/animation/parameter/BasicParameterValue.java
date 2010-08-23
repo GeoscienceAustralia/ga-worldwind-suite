@@ -12,6 +12,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 public class BasicParameterValue implements ParameterValue
 {
+	private static final long serialVersionUID = 20100823L;
 
 	/** The owner of this value */
 	private Parameter owner;

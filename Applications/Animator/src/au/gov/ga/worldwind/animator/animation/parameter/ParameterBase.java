@@ -24,7 +24,7 @@ public abstract class ParameterBase implements Parameter
 	private static final long serialVersionUID = 20100819L;
 
 	/** Whether this parameter is currently enabled */
-	private boolean enabled;
+	private boolean enabled = true;
 
 	/** 
 	 * The default value to use in the case that no {@link KeyFrame}s can be found
