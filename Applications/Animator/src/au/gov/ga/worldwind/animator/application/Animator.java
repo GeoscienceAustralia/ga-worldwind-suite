@@ -21,6 +21,7 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.layers.StarsLayer;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
+import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
@@ -37,6 +38,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.media.opengl.GLCapabilities;
 import javax.swing.BorderFactory;
@@ -124,6 +126,7 @@ public class Animator
 		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
 		System.setProperty("http.proxyPort", "8080");
 		System.setProperty("http.nonProxyHosts", "localhost");
+		
 	}
 
 	public static void main(String[] args)
@@ -162,6 +165,8 @@ public class Animator
 
 	public Animator()
 	{
+		Logging.logger().setLevel(Level.FINER);
+		
 		messageSource = new ResourceBundleMessageSource("au.gov.ga.worldwind.animator.data.messages.animatorMessages");
 		MessageSourceAccessor.set(messageSource);
 
@@ -1339,8 +1344,8 @@ public class Animator
 			wwd.redrawNow();
 		}
 		updater.addFrame(slider.getValue(), view);
-		// animation.addFrame(slider.getValue(), view);
-		// updateAnimation();
+		animation.recordKeyFrame(slider.getValue());
+		//updateAnimation();
 	}
 
 	private void applyView(OrbitView view)
@@ -1642,6 +1647,7 @@ public class Animator
 						{
 							animation.recordKeyFrame(key);
 							updateSlider();
+							removeValue(key);
 						}
 						else
 						{
@@ -1668,7 +1674,9 @@ public class Animator
 		{
 			Set<Integer> keyset = toApply.keySet();
 			if (keyset.isEmpty())
+			{
 				return null;
+			}
 			return keyset.iterator().next();
 		}
 
@@ -1708,7 +1716,9 @@ public class Animator
 		public boolean accept(File f)
 		{
 			if (f.isDirectory())
+			{
 				return true;
+			}
 			return f.getName().toLowerCase().endsWith(".xml");
 		}
 
