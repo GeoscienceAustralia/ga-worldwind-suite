@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.animator.animation;
 
+import gov.nasa.worldwind.WorldWindow;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,6 +12,7 @@ import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
  * An implementation of the {@link Animation} interface for animations using the
@@ -45,11 +48,16 @@ public class WorldWindAnimationImpl implements Animation
 	/** The current frame of the animation */
 	private int currentFrame = 0;
 	
+	/** The worldwind window */
+	private WorldWindow worldWindow;
+	
 	/**
 	 * Constructor. Initialises default values.
 	 */
-	public WorldWindAnimationImpl()
+	public WorldWindAnimationImpl(WorldWindow worldWindow)
 	{
+		Validate.notNull(worldWindow, "A world window is required");
+		this.worldWindow = worldWindow;
 		this.frameCount = DEFAULT_FRAME_COUNT;
 		this.renderParameters = new RenderParameters();
 		this.renderCamera = new CameraImpl(this);
@@ -255,4 +263,12 @@ public class WorldWindAnimationImpl implements Animation
 		this.currentFrame = frame;
 	}
 
+	/**
+	 * @return The WorldWindow used in this animation 
+	 */
+	public WorldWindow getWorldWindow()
+	{
+		return this.worldWindow;
+	}
+	
 }

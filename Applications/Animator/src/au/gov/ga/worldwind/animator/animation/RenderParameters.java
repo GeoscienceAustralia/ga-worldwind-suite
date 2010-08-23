@@ -10,7 +10,7 @@ import java.awt.Dimension;
  */
 public class RenderParameters
 {
-	private static final Dimension DEFAULT_DIMENSIONS = new Dimension(576, 1024);
+	private static final Dimension DEFAULT_DIMENSIONS = new Dimension(1024, 576);
 	
 	private static final int DEFAULT_FRAME_RATE = 25;
 	

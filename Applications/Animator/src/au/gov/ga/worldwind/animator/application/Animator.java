@@ -187,7 +187,8 @@ public class Animator
 			}
 		};
 
-		animation = new WorldWindAnimationImpl();
+		wwd = new WorldWindowGLCanvas(caps);
+		animation = new WorldWindAnimationImpl(wwd);
 		resetChanged();
 		updater = new Updater();
 
@@ -203,7 +204,6 @@ public class Animator
 		});
 
 		frame.setLayout(new BorderLayout());
-		wwd = new WorldWindowGLCanvas(caps);
 		Model model = new BasicModel();
 		wwd.setModel(model);
 		setAnimationSize(animation.getRenderParameters().getImageDimension());
@@ -1376,7 +1376,7 @@ public class Animator
 	{
 		if (querySave())
 		{
-			setAnimation(new WorldWindAnimationImpl());
+			setAnimation(new WorldWindAnimationImpl(wwd));
 			resetChanged();
 			setFile(null);
 			updateSlider();
@@ -1392,7 +1392,7 @@ public class Animator
 			if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
 				File newFile = chooser.getSelectedFile();
-				Animation newAnimation = new WorldWindAnimationImpl();
+				Animation newAnimation = new WorldWindAnimationImpl(wwd);
 				try
 				{
 					// TODO: Implement animation opening
