@@ -1,12 +1,14 @@
 package au.gov.ga.worldwind.animator.animation;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.util.Logging;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.logging.Level;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
@@ -211,6 +213,12 @@ public class WorldWindAnimationImpl implements Animation
 			parameterValues.add(parameter.getCurrentValue(createAnimationContext()));
 		}
 		
+		// If there are no parameter values to record, do nothing
+		if (parameterValues.isEmpty())
+		{
+			return;
+		}
+		
 		// If a key frame already exists at this frame, merge the parameter values
 		// Otherwise, create a new key frame
 		if (this.keyFrameMap.containsKey(frame))
@@ -223,6 +231,8 @@ public class WorldWindAnimationImpl implements Animation
 			KeyFrame newFrame = new KeyFrameImpl(frame, parameterValues);
 			this.keyFrameMap.put(frame, newFrame);
 		}
+		
+		Logging.logger().log(Level.FINER, "WorldWindAnimationImpl::recordKeyFrame - Recorded frame " + frame + ": " + this.keyFrameMap.get(frame));
 	}
 	
 	/**
