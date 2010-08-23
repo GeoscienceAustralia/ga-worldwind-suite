@@ -70,6 +70,14 @@ public abstract class ParameterBase implements Parameter
 	@Override
 	public final ParameterValue getValueAtFrame(AnimationContext context, int frame)
 	{
+		// If the provided value is a keyframe for this parameter, return it's value from the key frame
+		KeyFrame keyAtFrame = animation.getKeyFrame(frame);
+		if (keyAtFrame != null && keyAtFrame.hasValueForParameter(this))
+		{
+			return keyAtFrame.getValueForParameter(this);
+		}
+		
+		// Otherwise, interpolate between the two surrounding frames
 		KeyFrame previousKeyFrame = context.getKeyFrameWithParameterBeforeFrame(this, frame);
 		KeyFrame nextKeyFrame = context.getKeyFrameWithParameterAfterFrame(this, frame);
 		

@@ -33,9 +33,24 @@ public interface Animation
 	boolean hasKeyFrames();
 	
 	/**
+	 * @return <code>true</code> if there is a key frame at the given frame, <code>false</code> otherwise
+	 */
+	boolean hasKeyFrame(int frame);
+	
+	/**
+	 * @return <code>true</code> if there is a key frame with a value for the given parameter, <code>false</code> otherwise
+	 */
+	boolean hasKeyFrame(Parameter p);
+	
+	/**
 	 * @return The number of key frames associated with this animation
 	 */
 	int getKeyFrameCount();
+	
+	/**
+	 * @return The key frame at the given frame, or <code>null</code> if no key frame is recorded at that frame
+	 */
+	KeyFrame getKeyFrame(int frame);
 	
 	/**
 	 * Returns the first {@link KeyFrame} <em>before</em> the provided frame that 

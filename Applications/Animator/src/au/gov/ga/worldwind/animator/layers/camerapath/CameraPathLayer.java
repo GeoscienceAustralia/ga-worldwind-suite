@@ -14,6 +14,7 @@ import javax.swing.event.ChangeListener;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
+import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -64,6 +65,33 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 
 	@Override
 	protected void doRender(DrawContext dc)
+	{
+		drawPath(dc);
+		drawEyePositionNodes(dc);
+	}
+
+	/**
+	 * Draw the camera eye position nodes
+	 */
+	private void drawEyePositionNodes(DrawContext dc)
+	{
+		AnimationContext context = new AnimationContextImpl(animation);
+		for (KeyFrame keyFrame : animation.getKeyFrames())
+		{
+			if (keyFrame.hasValueForParameter(animation.getCamera().getEyeLat()) || 
+					keyFrame.hasValueForParameter(animation.getCamera().getEyeLon()) || 
+					keyFrame.hasValueForParameter(animation.getCamera().getEyeElevation()))
+			{
+				Vec4 eyeVector = dc.getGlobe().computePointFromPosition(animation.getCamera().getEyePositionAtFrame(context, keyFrame.getFrame()));
+			}
+		}
+		
+	}
+
+	/**
+	 * Draw the camera path
+	 */
+	private void drawPath(DrawContext dc)
 	{
 		populateVertexBuffer(dc);
 		swapBuffers();

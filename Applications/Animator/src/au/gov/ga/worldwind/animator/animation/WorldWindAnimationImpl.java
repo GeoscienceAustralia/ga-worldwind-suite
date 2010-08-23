@@ -344,5 +344,30 @@ public class WorldWindAnimationImpl implements Animation
 	{
 		return this.worldWindow;
 	}
+
+	@Override
+	public boolean hasKeyFrame(int frame)
+	{
+		return this.keyFrameMap.containsKey(frame);
+	}
+
+	@Override
+	public boolean hasKeyFrame(Parameter p)
+	{
+		for (KeyFrame keyFrame : getKeyFrames())
+		{
+			if (keyFrame.hasValueForParameter(p))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public KeyFrame getKeyFrame(int frame)
+	{
+		return this.keyFrameMap.get(frame);
+	}
 	
 }
