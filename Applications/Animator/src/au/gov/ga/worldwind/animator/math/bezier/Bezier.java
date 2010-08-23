@@ -20,6 +20,8 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 public class Bezier<V extends Vector<V>> implements Serializable
 {
+	private static final long serialVersionUID = 20100823L;
+
 	/** The default number of points to sample along the curve */
 	private final static int DEFAULT_NUM_SUBDIVISIONS = 1000;
 
@@ -180,5 +182,13 @@ public class Bezier<V extends Vector<V>> implements Serializable
 		v2 = v2.subtractLocal(v1).multLocal(t).addLocal(v1);
 
 		return v3.subtractLocal(v2).multLocal(t).addLocal(v2);
+	}
+	
+	/**
+	 * @return The number or subdivisions used in this bezier
+	 */
+	public int getNumSubdivisions()
+	{
+		return numSubdivisions;
 	}
 }
