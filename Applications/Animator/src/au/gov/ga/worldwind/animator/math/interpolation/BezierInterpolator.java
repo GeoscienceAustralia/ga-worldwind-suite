@@ -3,6 +3,7 @@
  */
 package au.gov.ga.worldwind.animator.math.interpolation;
 
+import gov.nasa.worldwind.cache.BasicMemoryCache;
 import au.gov.ga.worldwind.animator.math.bezier.Bezier;
 import au.gov.ga.worldwind.animator.math.vector.Vector;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -18,6 +19,10 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 public class BezierInterpolator<V extends Vector<V>> implements Interpolator<V>
 {
+	/** A cache for computed beziers */
+	private static final int DEFAULT_CACHE_SIZE = 30000000;
+	private static final BasicMemoryCache BEZIER_CACHE = new BasicMemoryCache((int)0.85*DEFAULT_CACHE_SIZE, DEFAULT_CACHE_SIZE);
+	
 	// The four points needed to describe the cubic bezier control curve
 	/** The beginning value of the bezier. The curve will pass through this point. */
 	private V begin;
@@ -47,9 +52,33 @@ public class BezierInterpolator<V extends Vector<V>> implements Interpolator<V>
 	{
 		if (bezier == null) 
 		{
-			bezier = new Bezier<V>(begin, out, begin, end);
+			bezier = getBezier();
 		}
 		return bezier.pointAt(percent);
+	}
+
+	/**
+	 * @return A bezier to use from the current control points
+	 */
+	@SuppressWarnings("unchecked")
+	private Bezier<V> getBezier()
+	{
+		String cacheKey = createCacheKey();
+		if (BEZIER_CACHE.contains(cacheKey))
+		{
+			return (Bezier<V>)BEZIER_CACHE.getObject(cacheKey);
+		}
+		Bezier<V> result = new Bezier<V>(begin, out, begin, end);
+		BEZIER_CACHE.add(cacheKey, result, result.getNumSubdivisions() * (Double.SIZE / 8));
+		return result;
+	}
+
+	/**
+	 * @return A cache key to use for the current bezier values
+	 */
+	private String createCacheKey()
+	{
+		return "[" + begin + out + in + end + "]";
 	}
 
 	/**
