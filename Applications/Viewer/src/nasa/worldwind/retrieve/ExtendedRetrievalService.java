@@ -512,7 +512,7 @@ public final class ExtendedRetrievalService extends WWObjectImpl
         return progress;
     }
 
-	// CODE BELOW ADDED 2009-02-02, last modified 2009-09-09
+	// CODE BELOW ADDED 2010-08-24
 
 	private final List<RetrievalListener> listeners = new ArrayList<RetrievalListener>();
 

@@ -1,8 +1,9 @@
-package au.gov.ga.worldwind.layers;
+package au.gov.ga.worldwind.layers.tiled.image;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
+import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
@@ -13,11 +14,14 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.application.GASandpit;
 
-public class ExtendedTiledImageLayer extends BoundedBasicTiledImageLayer
+public class GABasicTiledImageLayer extends BasicTiledImageLayer
 {
-	public ExtendedTiledImageLayer(Element domElement, AVList params)
+	public GABasicTiledImageLayer(Element domElement, AVList params)
 	{
 		super(domElement, setupParams(params));
+
+		if (params == null)
+			params = (AVList) getValue(AVKey.CONSTRUCTION_PARAMETERS);
 
 		TileUrlBuilder builder = (TileUrlBuilder) params.getValue(AVKey.TILE_URL_BUILDER);
 		if (builder != null && builder instanceof ExtendedUrlBuilder)
@@ -31,6 +35,7 @@ public class ExtendedTiledImageLayer extends BoundedBasicTiledImageLayer
 	{
 		if (params == null)
 			params = new AVListImpl();
+		
 		params.setValue(AVKey.TILE_URL_BUILDER, createURLBuilder(params));
 		return params;
 	}

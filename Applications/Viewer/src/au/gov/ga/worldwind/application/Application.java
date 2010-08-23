@@ -66,9 +66,9 @@ import javax.swing.filechooser.FileFilter;
 import nasa.worldwind.awt.WorldWindowStereoGLCanvas;
 import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import au.gov.ga.worldwind.components.HtmlViewer;
+import au.gov.ga.worldwind.components.locallayer.LocalLayerCreator;
 import au.gov.ga.worldwind.downloader.Downloader;
 import au.gov.ga.worldwind.layers.LayerFactory;
-import au.gov.ga.worldwind.layers.file.FileLayerCreator;
 import au.gov.ga.worldwind.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.panels.SideBar;
 import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
@@ -636,7 +636,7 @@ public class Application
 		if (panel != null)
 		{
 			ILayerDefinition layer =
-					FileLayerCreator.createDefinition(frame,
+					LocalLayerCreator.createDefinition(frame,
 							createLayerFromDirectoryAction.getToolTipText(), panel.getIcon());
 			if (layer != null)
 			{

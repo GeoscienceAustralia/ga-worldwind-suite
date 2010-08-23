@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.gov.ga.worldwind.layers.geonames.GeoNamesLayer;
-import au.gov.ga.worldwind.layers.mask.MaskTiledImageLayer;
+import au.gov.ga.worldwind.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 
 public class RetrievalListenerHelper
 {
@@ -31,10 +31,10 @@ public class RetrievalListenerHelper
 	static
 	{
 		Class<?>[] classes =
-				new Class<?>[] { TiledImageLayer.class, BasicElevationModel.class,
-						BasicTiledImageLayer.class, PlaceNameLayer.class, RPFTiledImageLayer.class,
-						SurfaceImage.class, MercatorTiledImageLayer.class,
-						BasicMercatorTiledImageLayer.class, MaskTiledImageLayer.class,
+				new Class<?>[] { DelegatorTiledImageLayer.class, TiledImageLayer.class,
+						BasicElevationModel.class, BasicTiledImageLayer.class,
+						PlaceNameLayer.class, RPFTiledImageLayer.class, SurfaceImage.class,
+						MercatorTiledImageLayer.class, BasicMercatorTiledImageLayer.class,
 						GeoNamesLayer.class };
 
 		// Search classes above for declared classes that implement

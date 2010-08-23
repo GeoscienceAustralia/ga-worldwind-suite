@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.layers.file;
+package au.gov.ga.worldwind.components.locallayer;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -6,6 +6,7 @@ import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.TiledImageLayer;
+import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -56,7 +57,7 @@ import au.gov.ga.worldwind.util.Icons;
 import au.gov.ga.worldwind.util.Util;
 import au.gov.ga.worldwind.util.XMLUtil;
 
-public class FileLayerCreator extends JDialog
+public class LocalLayerCreator extends JDialog
 {
 	private JTextField nameField;
 	private JTextField dirField;
@@ -85,7 +86,7 @@ public class FileLayerCreator extends JDialog
 
 	private JFileChooser chooser;
 
-	private FileLayerCreator(Frame owner, String title, ImageIcon icon)
+	private LocalLayerCreator(Frame owner, String title, ImageIcon icon)
 	{
 		super(owner, title, true);
 		setIconImage(icon.getImage());
@@ -228,7 +229,7 @@ public class FileLayerCreator extends JDialog
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				chooser.setAcceptAllFileFilterUsed(false);
 				chooser.setFileFilter(null);
-				if (chooser.showOpenDialog(FileLayerCreator.this) == JFileChooser.APPROVE_OPTION)
+				if (chooser.showOpenDialog(LocalLayerCreator.this) == JFileChooser.APPROVE_OPTION)
 				{
 					dirField.setText(chooser.getSelectedFile().getAbsolutePath());
 				}
@@ -295,7 +296,7 @@ public class FileLayerCreator extends JDialog
 				chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				chooser.setAcceptAllFileFilterUsed(false);
 				chooser.setFileFilter(new LayerDefinitionFileFilter());
-				if (chooser.showSaveDialog(FileLayerCreator.this) == JFileChooser.APPROVE_OPTION)
+				if (chooser.showSaveDialog(LocalLayerCreator.this) == JFileChooser.APPROVE_OPTION)
 				{
 					outputField.setText(chooser.getSelectedFile().getAbsolutePath());
 				}
@@ -718,7 +719,7 @@ public class FileLayerCreator extends JDialog
 
 	public static ILayerDefinition createDefinition(Frame owner, String title, ImageIcon icon)
 	{
-		FileLayerCreator editor = new FileLayerCreator(owner, title, icon);
+		LocalLayerCreator editor = new LocalLayerCreator(owner, title, icon);
 		editor.setVisible(true);
 		if (editor.okPressed)
 		{
@@ -926,7 +927,7 @@ public class FileLayerCreator extends JDialog
 
 			Document document = TiledImageLayer.createTiledImageLayerConfigDocument(params);
 			Element element = document.getDocumentElement();
-			FileTiledImageLayer.createTiledImageLayerElements(element, params);
+			createTiledImageLayerElements(element, params);
 			XMLUtil.saveDocumentToFormattedFile(document, file.getAbsolutePath());
 
 			try
@@ -942,5 +943,16 @@ public class FileLayerCreator extends JDialog
 						JOptionPane.ERROR_MESSAGE);
 			}
 		}
+	}
+	
+	private static void createTiledImageLayerElements(Element context, AVList params)
+	{
+		Color color = (Color) params.getValue(AVKeyMore.TRANSPARENT_COLOR);
+		if (color != null)
+			XMLUtil.appendColor(context, "TransparentColor", color);
+
+		Double fuzz = (Double) params.getValue(AVKeyMore.TRANSPARENT_FUZZ);
+		if (fuzz != null)
+			WWXML.appendDouble(context, "TransparentFuzz", fuzz);
 	}
 }
