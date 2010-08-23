@@ -12,6 +12,7 @@ import java.util.logging.Level;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
+import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -104,7 +105,7 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame)
 	{
-		Collection<KeyFrame> candidateKeys = keyFrameMap.tailMap(frame).values();
+		Collection<KeyFrame> candidateKeys = keyFrameMap.tailMap(frame + 1).values();
 		for (KeyFrame candidateKey : candidateKeys)
 		{
 			if (candidateKey.hasValueForParameter(p))
@@ -250,6 +251,52 @@ public class WorldWindAnimationImpl implements Animation
 			this.keyFrameMap.put(keyFrame.getFrame(), keyFrame);
 		}
 		
+		// Smooth the key frames around this one
+		smoothKeyFrames(keyFrame);
+	}
+	
+	/**
+	 * Smooth the transition into- and out-of the provided key frame
+	 * <p/>
+	 * Applies value smoothing to the bezier values of the provided key frames, 
+	 * as well as those in key frames on either side of the frame.
+	 * 
+	 * @param keyFrame
+	 */
+	private void smoothKeyFrames(KeyFrame keyFrame)
+	{
+		for (ParameterValue parameterValue : keyFrame.getParameterValues())
+		{
+			if (parameterValue instanceof BezierParameterValue)
+			{
+				((BezierParameterValue)parameterValue).smooth();
+			}
+			
+			// Smooth the previous value for this parameter
+			KeyFrame previousFrame = getKeyFrameWithParameterBeforeFrame(parameterValue.getOwner(), keyFrame.getFrame());
+			if (previousFrame != null)
+			{
+				ParameterValue previousValue = previousFrame.getValueForParameter(parameterValue.getOwner());
+				if (previousValue instanceof BezierParameterValue)
+				{
+					((BezierParameterValue)previousValue).smooth();
+				}
+				
+			}
+			
+			// Smooth the next value for this parameter
+			KeyFrame nextFrame = getKeyFrameWithParameterAfterFrame(parameterValue.getOwner(), keyFrame.getFrame());
+			if (nextFrame != null)
+			{
+				ParameterValue nextValue = nextFrame.getValueForParameter(parameterValue.getOwner());
+				if (nextValue instanceof BezierParameterValue)
+				{
+					((BezierParameterValue)nextValue).smooth();
+				}
+				
+			}
+			
+		}
 	}
 	
 	/**

@@ -107,18 +107,18 @@ public class WorldWindAnimationImplTest
 		classToBeTested.insertKeyFrame(kf2);
 		classToBeTested.insertKeyFrame(kf3);
 		
-		assertEquals(0, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(0), 0).getFrame());
+		assertEquals(50, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(0), 0).getFrame());
 		assertEquals(50, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(0), 25).getFrame());
-		assertEquals(50, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(0), 50).getFrame());
+		assertEquals(100, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(0), 50).getFrame());
 		assertEquals(100, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(0), 75).getFrame());
-		assertEquals(100, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(0), 100).getFrame());
+		assertEquals(null, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(0), 100));
 		assertEquals(null, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(0), 125));
 		
 		assertEquals(50, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(1), 0).getFrame());
 		assertEquals(50, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(1), 25).getFrame());
-		assertEquals(50, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(1), 50).getFrame());
+		assertEquals(100, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(1), 50).getFrame());
 		assertEquals(100, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(1), 75).getFrame());
-		assertEquals(100, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(1), 100).getFrame());
+		assertEquals(null, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(1), 100));
 		assertEquals(null, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(1), 125));
 		
 		assertEquals(null, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(2), 0));

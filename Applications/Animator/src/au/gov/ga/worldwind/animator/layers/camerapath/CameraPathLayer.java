@@ -3,7 +3,6 @@ package au.gov.ga.worldwind.animator.layers.camerapath;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.util.WWBufferUtil;
 
 import java.awt.Color;
 import java.nio.DoubleBuffer;
@@ -12,13 +11,13 @@ import javax.media.opengl.GL;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.sun.opengl.util.BufferUtil;
-
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.util.Validate;
+
+import com.sun.opengl.util.BufferUtil;
 
 /**
  * A WorldWind Layer that displays the camera path of a given {@link Animation}
