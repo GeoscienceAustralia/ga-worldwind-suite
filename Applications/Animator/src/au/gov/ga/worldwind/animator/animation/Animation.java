@@ -150,6 +150,16 @@ public interface Animation
 	void recordKeyFrame(int frame, Collection<Parameter> parameters);
 	
 	/**
+	 * Insert the provided key frame into the animation
+	 * <p/>
+	 * If a key frame already exists at the frame at which the key frame is inserted, the parameter values of the two key frames will be merged,
+	 * with those in the new key frame taking precedence.
+	 * 
+	 * @param keyFrame The key frame to insert.
+	 */
+	void insertKeyFrame(KeyFrame keyFrame);
+	
+	/**
 	 * @return The render parameters for this animation.
 	 */
 	RenderParameters getRenderParameters();

@@ -33,6 +33,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	private static final long serialVersionUID = 20100819L;
 
 	private static final String DEFAULT_CAMERA_NAME = "Render Camera";
+	private static final String DEFAULT_PARAMETER_NAME = "Render Camera - Param";
 	
 	private Parameter eyeLat;
 	private Parameter eyeLon;
@@ -65,7 +66,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	@SuppressWarnings("serial")
 	private void initialiseParameters(Animation animation)
 	{
-		eyeLat = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLatNameKey()), animation)
+		eyeLat = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLatNameKey(), DEFAULT_PARAMETER_NAME), animation)
 		{
 			@Override
 			public ParameterValue getCurrentValue(AnimationContext context)
@@ -75,7 +76,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 			}
 		};
 		
-		eyeLon = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLonNameKey()), animation)
+		eyeLon = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLonNameKey(), DEFAULT_PARAMETER_NAME), animation)
 		{
 			@Override
 			public ParameterValue getCurrentValue(AnimationContext context)
@@ -85,7 +86,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 			}
 		};
 		
-		eyeElevation = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeZoomNameKey()), animation)
+		eyeElevation = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeZoomNameKey(), DEFAULT_PARAMETER_NAME), animation)
 		{
 			@Override
 			public ParameterValue getCurrentValue(AnimationContext context)
@@ -95,7 +96,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 			}
 		};
 		
-		lookAtLat = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLatNameKey()), animation)
+		lookAtLat = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLatNameKey(), DEFAULT_PARAMETER_NAME), animation)
 		{
 			@Override
 			public ParameterValue getCurrentValue(AnimationContext context)
@@ -105,7 +106,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 			}
 		};
 		
-		lookAtLon = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLonNameKey()), animation)
+		lookAtLon = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLonNameKey(), DEFAULT_PARAMETER_NAME), animation)
 		{
 			@Override
 			public ParameterValue getCurrentValue(AnimationContext context)
@@ -115,7 +116,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 			}
 		};
 		
-		lookAtElevation = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatZoomNameKey()), animation)
+		lookAtElevation = new ParameterBase(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatZoomNameKey(), DEFAULT_PARAMETER_NAME), animation)
 		{
 			@Override
 			public ParameterValue getCurrentValue(AnimationContext context)

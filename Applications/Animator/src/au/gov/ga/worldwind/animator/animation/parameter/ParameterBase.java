@@ -112,7 +112,7 @@ public abstract class ParameterBase implements Parameter
 	 */
 	private static double calculatePercentOfInterval(int start, int end, int target)
 	{
-		return (target - start)/(end - start);
+		return ((double)(target - start))/((double)(end - start));
 	}
 	
 	@Override

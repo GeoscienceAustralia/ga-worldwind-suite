@@ -219,20 +219,31 @@ public class WorldWindAnimationImpl implements Animation
 			return;
 		}
 		
+		insertKeyFrame(new KeyFrameImpl(frame, parameterValues));
+		
+		Logging.logger().log(Level.FINER, "WorldWindAnimationImpl::recordKeyFrame - Recorded frame " + frame + ": " + this.keyFrameMap.get(frame));
+	}
+	
+	@Override
+	public void insertKeyFrame(KeyFrame keyFrame)
+	{
+		if (keyFrame == null)
+		{
+			return;
+		}
+		
 		// If a key frame already exists at this frame, merge the parameter values
 		// Otherwise, create a new key frame
-		if (this.keyFrameMap.containsKey(frame))
+		if (this.keyFrameMap.containsKey(keyFrame.getFrame()))
 		{
-			KeyFrame existingFrame = this.keyFrameMap.get(frame);
-			existingFrame.addParameterValues(parameterValues);
+			KeyFrame existingFrame = this.keyFrameMap.get(keyFrame.getFrame());
+			existingFrame.addParameterValues(keyFrame.getParameterValues());
 		} 
 		else
 		{
-			KeyFrame newFrame = new KeyFrameImpl(frame, parameterValues);
-			this.keyFrameMap.put(frame, newFrame);
+			this.keyFrameMap.put(keyFrame.getFrame(), keyFrame);
 		}
 		
-		Logging.logger().log(Level.FINER, "WorldWindAnimationImpl::recordKeyFrame - Recorded frame " + frame + ": " + this.keyFrameMap.get(frame));
 	}
 	
 	/**
