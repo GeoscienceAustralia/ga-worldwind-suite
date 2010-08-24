@@ -359,12 +359,13 @@ public class Vector3 implements Vector<Vector3>
 	}
 	
 	@Override
-	public boolean equals(Vector3 other)
+	public boolean equals(Object other)
 	{
-		return other != null &&
-				this.x == other.x &&
-				this.y == other.y &&
-				this.z == other.z;
+		return (other instanceof Vector3) &&
+				other != null &&
+				this.x == ((Vector3)other).x &&
+				this.y == ((Vector3)other).y &&
+				this.z == ((Vector3)other).z;
 	}
 	
 	@Override

@@ -88,6 +88,7 @@ public class BasicBezierParameterValueTest
 		setNextValue(new BasicParameterValue(10, 10, owner));
 		
 		BezierParameterValue result = new BasicBezierParameterValue(5, 5, owner);
+		result.smooth();
 		
 		assertNotNull(result);
 		assertEquals(5, result.getValue(), ACCEPTABLE_DELTA);
@@ -119,6 +120,7 @@ public class BasicBezierParameterValueTest
 		setNextValue(new BasicParameterValue(10, 10, owner));
 		
 		BezierParameterValue result = new BasicBezierParameterValue(5, 1, owner);
+		result.smooth();
 		
 		assertNotNull(result);
 		assertEquals(5, result.getValue(), ACCEPTABLE_DELTA);
@@ -150,6 +152,7 @@ public class BasicBezierParameterValueTest
 		setNextValue(new BasicParameterValue(0, 10, owner));
 		
 		BezierParameterValue result = new BasicBezierParameterValue(5, 1, owner);
+		result.smooth();
 		
 		assertNotNull(result);
 		assertEquals(5, result.getValue(), ACCEPTABLE_DELTA);

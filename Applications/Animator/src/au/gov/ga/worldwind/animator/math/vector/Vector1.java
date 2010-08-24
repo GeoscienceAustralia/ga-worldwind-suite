@@ -311,9 +311,11 @@ public class Vector1 implements Vector<Vector1>
 	}
 	
 	@Override
-	public boolean equals(Vector1 other)
+	public boolean equals(Object other)
 	{
-		return other != null && this.x == other.x;
+		return (other instanceof Vector1) && 
+				other != null && 
+				this.x == ((Vector1)other).x;
 	}
 	
 	@Override
