@@ -181,6 +181,22 @@ public interface Animation
 	void insertKeyFrame(KeyFrame keyFrame);
 	
 	/**
+	 * Remove the key frame at the given frame from the animation
+	 * <p/>
+	 * If there is no key frame at the frame, this will have no effect
+	 * 
+	 * @param frame The frame of the key frame to remove
+	 */
+	void removeKeyFrame(int frame);
+	
+	/**
+	 * Remove the key frame at the given frame
+	 * 
+	 * @param keyFrame The key frame to remove from the animation
+	 */
+	void removeKeyFrame(KeyFrame keyFrame);
+	
+	/**
 	 * @return The render parameters for this animation.
 	 */
 	RenderParameters getRenderParameters();

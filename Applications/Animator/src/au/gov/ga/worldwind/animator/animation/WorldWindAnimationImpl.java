@@ -363,4 +363,25 @@ public class WorldWindAnimationImpl implements Animation
 		return this.keyFrameMap.get(frame);
 	}
 	
+	@Override
+	public void removeKeyFrame(int frame)
+	{
+		this.keyFrameMap.remove(frame);
+	}
+	
+	@Override
+	public void removeKeyFrame(KeyFrame keyFrame)
+	{
+		if (keyFrame == null)
+		{
+			return;
+		}
+		
+		if (keyFrameMap.containsValue(keyFrame))
+		{
+			keyFrameMap.remove(keyFrame.getFrame());
+		}
+		
+	}
+	
 }

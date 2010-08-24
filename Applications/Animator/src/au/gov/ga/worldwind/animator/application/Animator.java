@@ -933,19 +933,18 @@ public class Animator
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
 		menuItem.setMnemonic('D');
 		menu.add(menuItem);
-		// TODO: Add frame deletion
-		//		menuItem.addActionListener(new ActionListener()
-		//		{
-		//			public void actionPerformed(ActionEvent e)
-		//			{
-		//				int index = animation.indexOf(slider.getValue());
-		//				if (index >= 0)
-		//				{
-		//					animation.removeFrame(index);
-		//				}
-		//				updateSlider();
-		//			}
-		//		});
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				int frame = slider.getValue();
+				if (frame >= 0)
+				{
+					animation.removeKeyFrame(frame);
+				}
+				updateSlider();
+			}
+		});
 
 		menu.addSeparator();
 
