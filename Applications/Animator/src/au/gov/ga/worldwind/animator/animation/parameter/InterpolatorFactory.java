@@ -5,6 +5,7 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 
 import au.gov.ga.worldwind.animator.math.interpolation.BezierInterpolator;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
+import au.gov.ga.worldwind.animator.math.vector.TimeVector;
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -60,10 +61,10 @@ public class InterpolatorFactory
 		BezierParameterValue endBezier = asBezierValue(endValue, false, startValue);
 		
 		// Interpolation is on a scaled interval [0,1] in the time dimension
-		Vector2 begin = new Vector2(0, startBezier.getValue());
-		Vector2 out = new Vector2(startBezier.getOutPercent(), startBezier.getOutValue());
-		Vector2 in = new Vector2(1 - endBezier.getInPercent(), endBezier.getInValue());
-		Vector2 end = new Vector2(1, endBezier.getValue());
+		Vector2 begin = new TimeVector(0, startBezier.getValue());
+		Vector2 out = new TimeVector(startBezier.getOutPercent(), startBezier.getOutValue());
+		Vector2 in = new TimeVector(1 - endBezier.getInPercent(), endBezier.getInValue());
+		Vector2 end = new TimeVector(1, endBezier.getValue());
 		
 		BezierInterpolator<Vector2> result = new BezierInterpolator<Vector2>(begin, out, in, end);
 		return result;

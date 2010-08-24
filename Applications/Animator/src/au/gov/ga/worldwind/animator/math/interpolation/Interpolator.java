@@ -12,7 +12,7 @@ import au.gov.ga.worldwind.animator.math.vector.Vector;
  * Subclasses might include linear or bezier interpolators and may 
  * require specific initialisation.
  */
-public interface Interpolator<V extends Vector<V>>
+public interface Interpolator<V extends Vector<?>>
 {
 	
 	/**

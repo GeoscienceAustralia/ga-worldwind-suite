@@ -56,7 +56,7 @@ public class Vector2 implements Vector<Vector2>
 	public Vector2 mult(Vector2 v, Vector2 store)
 	{
 		if (store == null)
-			store = new Vector2();
+			store = createNew();
 		store.x = x * v.x;
 		store.y = y * v.y;
 		return store;
@@ -80,7 +80,7 @@ public class Vector2 implements Vector<Vector2>
 	public Vector2 mult(double s, Vector2 store)
 	{
 		if (store == null)
-			store = new Vector2();
+			store = createNew();
 		store.x = x * s;
 		store.y = y * s;
 		return store;
@@ -104,7 +104,7 @@ public class Vector2 implements Vector<Vector2>
 	public Vector2 divide(Vector2 v, Vector2 store)
 	{
 		if (store == null)
-			store = new Vector2();
+			store = createNew();
 		store.x = x / v.x;
 		store.y = y / v.y;
 		return store;
@@ -128,7 +128,7 @@ public class Vector2 implements Vector<Vector2>
 	public Vector2 divide(double s, Vector2 store)
 	{
 		if (store == null)
-			store = new Vector2();
+			store = createNew();
 		store.x = x / s;
 		store.y = y / s;
 		return store;
@@ -152,7 +152,7 @@ public class Vector2 implements Vector<Vector2>
 	public Vector2 add(Vector2 v, Vector2 store)
 	{
 		if (store == null)
-			store = new Vector2();
+			store = createNew();
 		store.x = x + v.x;
 		store.y = y + v.y;
 		return store;
@@ -176,7 +176,7 @@ public class Vector2 implements Vector<Vector2>
 	public Vector2 subtract(Vector2 v, Vector2 store)
 	{
 		if (store == null)
-			store = new Vector2();
+			store = createNew();
 		store.x = x - v.x;
 		store.y = y - v.y;
 		return store;
@@ -200,7 +200,7 @@ public class Vector2 implements Vector<Vector2>
 	public Vector2 max(Vector2 v, Vector2 store)
 	{
 		if (store == null)
-			store = new Vector2();
+			store = createNew();
 		store.x = Math.max(x, v.x);
 		store.y = Math.max(y, v.y);
 		return store;
@@ -224,7 +224,7 @@ public class Vector2 implements Vector<Vector2>
 	public Vector2 min(Vector2 v, Vector2 store)
 	{
 		if (store == null)
-			store = new Vector2();
+			store = createNew();
 		store.x = Math.min(x, v.x);
 		store.y = Math.min(y, v.y);
 		return store;
@@ -268,7 +268,7 @@ public class Vector2 implements Vector<Vector2>
 	public Vector2 negate(Vector2 store)
 	{
 		if (store == null)
-			store = new Vector2();
+			store = createNew();
 		store.x = -x;
 		store.y = -y;
 		return store;
@@ -292,7 +292,7 @@ public class Vector2 implements Vector<Vector2>
 	public Vector2 interpolate(Vector2 v, double percent, Vector2 store)
 	{
 		if (store == null)
-			store = new Vector2();
+			store = createNew();
 		store.x = interpolate(x, v.x, percent);
 		store.y = interpolate(y, v.y, percent);
 		return store;
@@ -321,7 +321,7 @@ public class Vector2 implements Vector<Vector2>
 	public Vector2 normalize(Vector2 store)
 	{
 		if (store == null)
-			store = new Vector2();
+			store = createNew();
 		store.divide(distance());
 		return store;
 	}
