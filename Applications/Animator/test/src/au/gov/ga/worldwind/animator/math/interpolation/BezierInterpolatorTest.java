@@ -75,7 +75,7 @@ public class BezierInterpolatorTest
 		for (double percent = 0; percent <= 1.0; percent+=0.01)
 		{
 			Vector2 computedValue = classToBeTested.computeValue(percent);
-			System.out.println(percent*10 + ", " + computedValue.y);
+			//System.out.println(percent*10 + ", " + computedValue.y);
 		}
 	}
 	
