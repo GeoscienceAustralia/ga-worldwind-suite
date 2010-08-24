@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.animator.layers.camerapath;
 
+import gov.nasa.worldwind.geom.Sphere;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
@@ -83,6 +84,8 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 					keyFrame.hasValueForParameter(animation.getCamera().getEyeElevation()))
 			{
 				Vec4 eyeVector = dc.getGlobe().computePointFromPosition(animation.getCamera().getEyePositionAtFrame(context, keyFrame.getFrame()));
+				Sphere marker = new Sphere(eyeVector, 50);
+				marker.render(dc);
 			}
 		}
 		

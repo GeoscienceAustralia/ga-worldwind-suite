@@ -214,10 +214,11 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public void recordKeyFrame(int frame, Collection<Parameter> parameters)
 	{
+		AnimationContext animationContext = createAnimationContext();
 		Collection<ParameterValue> parameterValues = new ArrayList<ParameterValue>();
 		for (Parameter parameter : parameters)
 		{
-			parameterValues.add(parameter.getCurrentValue(createAnimationContext()));
+			parameterValues.add(parameter.getCurrentValue(animationContext));
 		}
 		
 		// If there are no parameter values to record, do nothing

@@ -34,7 +34,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +66,8 @@ import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
+import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
 import au.gov.ga.worldwind.animator.layers.depth.DepthLayer;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModel;
@@ -127,7 +133,7 @@ public class Animator
 		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
 		System.setProperty("http.proxyPort", "8080");
 		System.setProperty("http.nonProxyHosts", "localhost");
-		
+
 	}
 
 	public static void main(String[] args)
@@ -167,7 +173,7 @@ public class Animator
 	public Animator()
 	{
 		Logging.logger().setLevel(Level.FINER);
-		
+
 		messageSource = new ResourceBundleMessageSource("au.gov.ga.worldwind.animator.data.messages.animatorMessages");
 		MessageSourceAccessor.set(messageSource);
 
@@ -575,16 +581,16 @@ public class Animator
 			}
 		});
 		// TODO: Implement frame dragging
-//		slider.addChangeFrameListener(new ChangeFrameListener()
-//		{
-//			public void frameChanged(int index, int oldFrame, int newFrame)
-//			{
-//				animation.setFrame(index, newFrame);
-//				updateSlider();
-//				applyView(getView());
-//				wwd.redraw();
-//			}
-//		});
+		//		slider.addChangeFrameListener(new ChangeFrameListener()
+		//		{
+		//			public void frameChanged(int index, int oldFrame, int newFrame)
+		//			{
+		//				animation.setFrame(index, newFrame);
+		//				updateSlider();
+		//				applyView(getView());
+		//				wwd.redraw();
+		//			}
+		//		});
 
 		/*JScrollPane scrollPane = new JScrollPane(slider,
 				JScrollPane.VERTICAL_SCROLLBAR_NEVER,
@@ -762,6 +768,44 @@ public class Animator
 		exaggeration.setVisible(true);*/
 	}
 
+	/**
+	 * Dump the parameter values of key frame values into a file for debugging purposes
+	 */
+	private void dumpKeyFrameValues()
+	{
+		try
+		{
+			OutputStream os = new BufferedOutputStream(new FileOutputStream("animationKeysDebug.txt", false));
+			for (KeyFrame keyFrame : animation.getKeyFrames())
+			{
+				StringBuffer buffer = new StringBuffer();
+				buffer.append("Frame: ").append(keyFrame.getFrame()).append('\n');
+				for (ParameterValue value : keyFrame.getParameterValues())
+				{
+					buffer.append("Value: ").append(value.getOwner().getName()).append('\n');
+					buffer.append(value.getValue()).append('|');
+					if (value instanceof BezierParameterValue)
+					{
+						BezierParameterValue bezierValue = (BezierParameterValue) value;
+						buffer.append(bezierValue.getInValue()).append(',').append(bezierValue.getInPercent()).append('|');
+						buffer.append(bezierValue.getOutValue()).append(',').append(bezierValue.getOutPercent()).append('\n');
+					}
+				}
+				os.write(buffer.toString().getBytes());
+			}
+			os.flush();
+			os.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return;
+		}
+		
+		
+		
+	}
+	
 	private void rotateSunPosition(double x, double y, double z)
 	{
 		Quaternion q = Quaternion.fromRotationXYZ(Angle.fromDegrees(x), Angle.fromDegrees(y), Angle.fromDegrees(z));
@@ -824,9 +868,9 @@ public class Animator
 			wwdSize = wwd.getSize();
 			if (wwdSize.width != animationSize.width || wwdSize.height != animationSize.height)
 			{
-				JOptionPane.showMessageDialog(frame, "Could not set animation dimensions to " + animationSize.width + "x" + animationSize.height
-						+ " (currently " + wwdSize.width + "x" + wwdSize.height + ")", "Could not set dimensions",
-						JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(frame, "Could not set animation dimensions to " + animationSize.width
+						+ "x" + animationSize.height + " (currently " + wwdSize.width + "x" + wwdSize.height + ")",
+						"Could not set dimensions", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
@@ -926,18 +970,18 @@ public class Animator
 		menuItem.setMnemonic('D');
 		menu.add(menuItem);
 		// TODO: Add frame deletion
-//		menuItem.addActionListener(new ActionListener()
-//		{
-//			public void actionPerformed(ActionEvent e)
-//			{
-//				int index = animation.indexOf(slider.getValue());
-//				if (index >= 0)
-//				{
-//					animation.removeFrame(index);
-//				}
-//				updateSlider();
-//			}
-//		});
+		//		menuItem.addActionListener(new ActionListener()
+		//		{
+		//			public void actionPerformed(ActionEvent e)
+		//			{
+		//				int index = animation.indexOf(slider.getValue());
+		//				if (index >= 0)
+		//				{
+		//					animation.removeFrame(index);
+		//				}
+		//				updateSlider();
+		//			}
+		//		});
 
 		menu.addSeparator();
 
@@ -1074,74 +1118,74 @@ public class Animator
 		menuItem.setMnemonic('S');
 		menu.add(menuItem);
 		// TODO: Implement animation scaling
-//		menuItem.addActionListener(new ActionListener()
-//		{
-//			public void actionPerformed(ActionEvent e)
-//			{
-//				double scale = -1.0;
-//				Object value =
-//						JOptionPane.showInputDialog(frame, "Scale factor:", "Scale animation",
-//								JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
-//				try
-//				{
-//					scale = Double.parseDouble((String) value);
-//				}
-//				catch (Exception ex)
-//				{
-//				}
-//				if (scale != 1.0 && scale > 0)
-//				{
-//					animation.scale(scale);
-//				}
-//				updateSlider();
-//			}
-//		});
+		//		menuItem.addActionListener(new ActionListener()
+		//		{
+		//			public void actionPerformed(ActionEvent e)
+		//			{
+		//				double scale = -1.0;
+		//				Object value =
+		//						JOptionPane.showInputDialog(frame, "Scale factor:", "Scale animation",
+		//								JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
+		//				try
+		//				{
+		//					scale = Double.parseDouble((String) value);
+		//				}
+		//				catch (Exception ex)
+		//				{
+		//				}
+		//				if (scale != 1.0 && scale > 0)
+		//				{
+		//					animation.scale(scale);
+		//				}
+		//				updateSlider();
+		//			}
+		//		});
 
 		menuItem = new JMenuItem("Scale height...");
 		menuItem.setMnemonic('h');
 		menu.add(menuItem);
 		// TODO: Implement height scaling
-//		menuItem.addActionListener(new ActionListener()
-//		{
-//			public void actionPerformed(ActionEvent e)
-//			{
-//				double scale = -1.0;
-//				Object value =
-//						JOptionPane.showInputDialog(frame, "Scale factor:", "Scale height",
-//								JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
-//				try
-//				{
-//					scale = Double.parseDouble((String) value);
-//				}
-//				catch (Exception ex)
-//				{
-//				}
-//				if (scale != 1.0 && scale > 0)
-//				{
-//					animation.scaleHeight(scale);
-//				}
-//			}
-//		});
+		//		menuItem.addActionListener(new ActionListener()
+		//		{
+		//			public void actionPerformed(ActionEvent e)
+		//			{
+		//				double scale = -1.0;
+		//				Object value =
+		//						JOptionPane.showInputDialog(frame, "Scale factor:", "Scale height",
+		//								JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
+		//				try
+		//				{
+		//					scale = Double.parseDouble((String) value);
+		//				}
+		//				catch (Exception ex)
+		//				{
+		//				}
+		//				if (scale != 1.0 && scale > 0)
+		//				{
+		//					animation.scaleHeight(scale);
+		//				}
+		//			}
+		//		});
 
 		menuItem = new JMenuItem("Smooth eye speed");
 		menuItem.setMnemonic('m');
 		menu.add(menuItem);
 		// TODO: Implement eye smoothing
-//		menuItem.addActionListener(new ActionListener()
-//		{
-//			public void actionPerformed(ActionEvent e)
-//			{
-//				if (JOptionPane
-//						.showConfirmDialog(
-//								frame,
-//								"This will redistribute keyframes to attempt to smooth the eye speed.\nDo you wish to continue?",
-//								"Smooth eye speed", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
-//				{
-//					animation.smoothEyeSpeed();
-//					updateSlider();
-//				}
-//			}
-//		});
+		//		menuItem.addActionListener(new ActionListener()
+		//		{
+		//			public void actionPerformed(ActionEvent e)
+		//			{
+		//				if (JOptionPane
+		//						.showConfirmDialog(
+		//								frame,
+		//								"This will redistribute keyframes to attempt to smooth the eye speed.\nDo you wish to continue?",
+		//								"Smooth eye speed", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+		//				{
+		//					animation.smoothEyeSpeed();
+		//					updateSlider();
+		//				}
+		//			}
+		//		});
 
 		menu.addSeparator();
 
@@ -1196,6 +1240,18 @@ public class Animator
 			public void actionPerformed(ActionEvent e)
 			{
 				animate(0);
+			}
+		});
+		
+		menuItem = new JMenuItem("Debug key frame output...");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
+		menuItem.setMnemonic('R');
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				dumpKeyFrameValues();
 			}
 		});
 
@@ -1345,8 +1401,7 @@ public class Animator
 			wwd.redrawNow();
 		}
 		updater.addFrame(slider.getValue(), view);
-		animation.recordKeyFrame(slider.getValue());
-		//updateAnimation();
+		
 	}
 
 	private void applyView(OrbitView view)
@@ -1461,16 +1516,16 @@ public class Animator
 	{
 		if (file != null)
 		{
-//			try
-//			{
-//				animation.save(file);
-//				resetChanged();
-//			}
-//			catch (IOException e)
-//			{
-//				JOptionPane.showMessageDialog(frame, "Saving failed.\n" + e, "Error", JOptionPane.ERROR_MESSAGE);
-//			}
-//			setTitleBar();
+			//			try
+			//			{
+			//				animation.save(file);
+			//				resetChanged();
+			//			}
+			//			catch (IOException e)
+			//			{
+			//				JOptionPane.showMessageDialog(frame, "Saving failed.\n" + e, "Error", JOptionPane.ERROR_MESSAGE);
+			//			}
+			//			setTitleBar();
 		}
 	}
 
@@ -1482,9 +1537,9 @@ public class Animator
 
 	private void resetChanged()
 	{
-//		animation.removeChangeListener(animationChangeListener);
-//		animation.addChangeListener(animationChangeListener);
-//		changed = false;
+		//		animation.removeChangeListener(animationChangeListener);
+		//		animation.addChangeListener(animationChangeListener);
+		//		changed = false;
 	}
 
 	private boolean querySave()
