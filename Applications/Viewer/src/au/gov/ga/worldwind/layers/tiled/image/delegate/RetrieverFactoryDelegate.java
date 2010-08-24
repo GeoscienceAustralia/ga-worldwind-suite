@@ -5,7 +5,7 @@ import gov.nasa.worldwind.retrieve.Retriever;
 
 import java.net.URL;
 
-public interface RetrieverFactoryDelegate
+public interface RetrieverFactoryDelegate extends Delegate
 {
 	Retriever createRetriever(URL url, RetrievalPostProcessor postProcessor);
 }

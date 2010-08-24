@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 
-public interface ImageReaderDelegate
+public interface ImageReaderDelegate extends Delegate
 {
 	BufferedImage readImage(URL url) throws IOException;
 }

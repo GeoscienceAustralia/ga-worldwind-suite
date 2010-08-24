@@ -2,16 +2,57 @@ package au.gov.ga.worldwind.layers.tiled.image.delegate.colortoalpha;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import au.gov.ga.worldwind.layers.tiled.image.delegate.Delegate;
 import au.gov.ga.worldwind.layers.tiled.image.delegate.ImageTransformerDelegate;
 
 public class ColorToAlphaTransformerDelegate implements ImageTransformerDelegate
 {
+	private final static String DEFINITION_STRING = "ColorToAlphaTransformer";
+
 	protected final Color color;
+
+	public ColorToAlphaTransformerDelegate()
+	{
+		this(Color.black);
+	}
 
 	public ColorToAlphaTransformerDelegate(Color color)
 	{
 		this.color = color;
+	}
+
+	public Color getColor()
+	{
+		return color;
+	}
+
+	@Override
+	public String toDefinition()
+	{
+		return DEFINITION_STRING + "(" + color.getRed() + "," + color.getGreen() + ","
+				+ color.getBlue() + ")";
+	}
+
+	@Override
+	public Delegate fromDefinition(String definition)
+	{
+		if (definition.toLowerCase().startsWith(DEFINITION_STRING.toLowerCase()))
+		{
+			Pattern pattern = Pattern.compile("(?:(\\d+),(\\d+),(\\d+))");
+			Matcher matcher = pattern.matcher(definition);
+			if (matcher.find())
+			{
+				int r = Integer.parseInt(matcher.group(1));
+				int g = Integer.parseInt(matcher.group(2));
+				int b = Integer.parseInt(matcher.group(3));
+				Color color = new Color(r, g, b);
+				return new ColorToAlphaTransformerDelegate(color);
+			}
+		}
+		return null;
 	}
 
 	@Override

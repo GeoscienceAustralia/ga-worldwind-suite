@@ -101,7 +101,7 @@ public class DelegatorTiledImageLayer extends GABasicTiledImageLayer implements 
 	@Override
 	protected void forceTextureLoad(TextureTile tile)
 	{
-		delegateKit.getRequesterDelegate().forceTextureLoad(tile, this);
+		delegateKit.forceTextureLoad(tile, this);
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class DelegatorTiledImageLayer extends GABasicTiledImageLayer implements 
 		if (referencePoint != null)
 			tile.setPriority(centroid.distanceTo3(referencePoint));
 
-		Runnable task = delegateKit.getRequesterDelegate().createRequestTask(tile, this);
+		Runnable task = delegateKit.createRequestTask(tile, this);
 		this.getRequestQ().add(task);
 	}
 
@@ -143,21 +143,13 @@ public class DelegatorTiledImageLayer extends GABasicTiledImageLayer implements 
 			boolean isDDS = url.toString().toLowerCase().endsWith("dds");
 			if (!isDDS)
 			{
-				BufferedImage image = null;
-				if (delegateKit.getReaderDelegate() != null)
+				BufferedImage image = delegateKit.readImage(url);
+				if (image == null)
 				{
-					image = delegateKit.getReaderDelegate().readImage(url);
+					image = ImageIO.read(url);
 				}
 
-				if (delegateKit.getTransformerDelegate() != null)
-				{
-					if (image == null)
-					{
-						image = ImageIO.read(url);
-					}
-
-					image = delegateKit.getTransformerDelegate().transformImage(image);
-				}
+				image = delegateKit.transformImage(image);
 
 				if (isCompressTextures())
 				{
@@ -246,8 +238,8 @@ public class DelegatorTiledImageLayer extends GABasicTiledImageLayer implements 
 				t2 = t1.add(dLon);
 
 				//MODIFIED
-				this.topLevels.add(delegateKit.getFactoryDelegate().createTextureTile(
-						new Sector(p1, p2, t1, t2), level, row, col));
+				this.topLevels.add(delegateKit.createTextureTile(new Sector(p1, p2, t1, t2), level,
+						row, col));
 				//MODIFIED
 				t1 = t2;
 			}
@@ -306,8 +298,7 @@ public class DelegatorTiledImageLayer extends GABasicTiledImageLayer implements 
 				Sector tileSector = this.getLevels().computeSectorForKey(key);
 				//MODIFIED
 				sectorTiles[nwRow - row][col - nwCol] =
-						delegateKit.getFactoryDelegate().createTextureTile(tileSector, targetLevel,
-								row, col); //new TextureTile(tileSector, targetLevel, row, col);
+						delegateKit.createTextureTile(tileSector, targetLevel, row, col); //new TextureTile(tileSector, targetLevel, row, col);
 				//MODIFIED
 			}
 		}
@@ -357,7 +348,7 @@ public class DelegatorTiledImageLayer extends GABasicTiledImageLayer implements 
 				postProcessor = new DownloadPostProcessor(tile, this);
 			//MODIFIED
 			//retriever = new HTTPRetriever(url, postProcessor);
-			retriever = delegateKit.getRetrieverDelegate().createRetriever(url, postProcessor);
+			retriever = delegateKit.createRetriever(url, postProcessor);
 			//MODIFIED
 		}
 		else

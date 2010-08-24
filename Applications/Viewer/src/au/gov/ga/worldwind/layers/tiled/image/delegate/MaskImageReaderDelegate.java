@@ -15,6 +15,8 @@ import au.gov.ga.worldwind.util.Util;
 
 public class MaskImageReaderDelegate implements ImageReaderDelegate
 {
+	public final static String DEFINITION_STRING = "MaskReader";
+
 	//dataset/level/row/tile.jpg
 	//mask/level/row/tile.png
 	private int upDirectoryCount = 3;
@@ -33,7 +35,7 @@ public class MaskImageReaderDelegate implements ImageReaderDelegate
 			{
 				try
 				{
-					BufferedImage bi = ImageIO.read(zis); 
+					BufferedImage bi = ImageIO.read(zis);
 					String lower = entry.getName().toLowerCase();
 					if (lower.contains("mask") || bi.getColorModel().hasAlpha())
 					{
@@ -103,5 +105,19 @@ public class MaskImageReaderDelegate implements ImageReaderDelegate
 		g2d.drawImage(image, 0, 0, null);
 		g2d.dispose();
 		return mask;
+	}
+
+	@Override
+	public Delegate fromDefinition(String definition)
+	{
+		if (definition.equalsIgnoreCase(DEFINITION_STRING))
+			return new MaskImageReaderDelegate();
+		return null;
+	}
+
+	@Override
+	public String toDefinition()
+	{
+		return DEFINITION_STRING;
 	}
 }

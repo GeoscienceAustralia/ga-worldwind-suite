@@ -12,9 +12,6 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.layers.shapefile.surfaceshape.SurfaceShapeShapefileLayerFactory;
 import au.gov.ga.worldwind.layers.tiled.image.delegate.DelegateKit;
 import au.gov.ga.worldwind.layers.tiled.image.delegate.DelegatorTiledImageLayer;
-import au.gov.ga.worldwind.layers.tiled.image.delegate.LocalRequesterDelegate;
-import au.gov.ga.worldwind.layers.tiled.image.delegate.MaskImageReaderDelegate;
-import au.gov.ga.worldwind.layers.tiled.image.delegate.nearestneighbor.NearestNeighborTextureTileFactoryDelegate;
 import au.gov.ga.worldwind.util.XMLUtil;
 
 public class LayerFactory extends BasicLayerFactory
@@ -41,51 +38,13 @@ public class LayerFactory extends BasicLayerFactory
 		if (params == null)
 			params = new AVListImpl();
 
-		DelegateKit kit = DelegateKit.defaultDelegateKit();
 		Layer layer;
 		String serviceName = XMLUtil.getText(domElement, "Service/@serviceName");
-		if ("WWTileService".equals(serviceName) || "TileService".equals(serviceName))
+		
+		if ("DelegatorTileService".equals(serviceName))
 		{
-			layer = new DelegatorTiledImageLayer(domElement, params, kit);
-		}
-		else if ("MaskedTileService".equals(serviceName))
-		{
-			kit.setReaderDelegate(new MaskImageReaderDelegate());
-			layer = new DelegatorTiledImageLayer(domElement, params, kit);
-		}
-		else if ("FileTileService".equals(serviceName))
-		{
-			kit.setRequesterDelegate(new LocalRequesterDelegate());
-			layer = new DelegatorTiledImageLayer(domElement, params, kit);
-		}
-		else if ("MaskedFileTileService".equals(serviceName))
-		{
-			kit.setReaderDelegate(new MaskImageReaderDelegate());
-			kit.setRequesterDelegate(new LocalRequesterDelegate());
-			layer = new DelegatorTiledImageLayer(domElement, params, kit);
-		}
-		else if ("NearestNeighborTileService".equals(serviceName))
-		{
-			kit.setFactoryDelegate(new NearestNeighborTextureTileFactoryDelegate());
-			layer = new DelegatorTiledImageLayer(domElement, params, kit);
-		}
-		else if ("NearestNeighborMaskedTileService".equals(serviceName))
-		{
-			kit.setReaderDelegate(new MaskImageReaderDelegate());
-			kit.setFactoryDelegate(new NearestNeighborTextureTileFactoryDelegate());
-			layer = new DelegatorTiledImageLayer(domElement, params, kit);
-		}
-		else if ("NearestNeighborFileTileService".equals(serviceName))
-		{
-			kit.setRequesterDelegate(new LocalRequesterDelegate());
-			kit.setFactoryDelegate(new NearestNeighborTextureTileFactoryDelegate());
-			layer = new DelegatorTiledImageLayer(domElement, params, kit);
-		}
-		else if ("NearestNeighborMaskedFileTileService".equals(serviceName))
-		{
-			kit.setRequesterDelegate(new LocalRequesterDelegate());
-			kit.setReaderDelegate(new MaskImageReaderDelegate());
-			kit.setFactoryDelegate(new NearestNeighborTextureTileFactoryDelegate());
+			Element serviceElement = XMLUtil.getElement(domElement, "Service", null);
+			DelegateKit kit = DelegateKit.createFromXML(serviceElement);
 			layer = new DelegatorTiledImageLayer(domElement, params, kit);
 		}
 		else

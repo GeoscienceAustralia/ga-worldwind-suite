@@ -9,9 +9,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
 
-public class IgnoreZipRetriever extends HTTPRetriever
+public class PassThroughZipRetriever extends HTTPRetriever
 {
-	public IgnoreZipRetriever(URL url, RetrievalPostProcessor postProcessor)
+	public PassThroughZipRetriever(URL url, RetrievalPostProcessor postProcessor)
 	{
 		super(url, postProcessor);
 	}

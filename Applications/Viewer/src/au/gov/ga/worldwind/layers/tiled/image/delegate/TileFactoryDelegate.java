@@ -4,7 +4,7 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.util.Level;
 
-public interface TileFactoryDelegate
+public interface TileFactoryDelegate extends Delegate
 {
 	TextureTile createTextureTile(Sector sector, Level level, int row, int col);
 }

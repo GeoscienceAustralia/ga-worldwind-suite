@@ -13,6 +13,8 @@ import au.gov.ga.worldwind.util.Util;
 
 public class LocalRequesterDelegate implements TileRequesterDelegate
 {
+	public final static String DEFINITION_STRING = "LocalRequester";
+
 	@Override
 	public void forceTextureLoad(TextureTile tile, DelegatorTiledImageLayer layer)
 	{
@@ -72,6 +74,8 @@ public class LocalRequesterDelegate implements TileRequesterDelegate
 				ext = "jpg";
 			else if (format.contains("png"))
 				ext = "png";
+			else if (format.contains("zip"))
+				ext = "zip";
 			else if (format.contains("dds"))
 				ext = "dds";
 			else if (format.contains("bmp"))
@@ -149,5 +153,19 @@ public class LocalRequesterDelegate implements TileRequesterDelegate
 		{
 			return this.tile.toString();
 		}
+	}
+
+	@Override
+	public Delegate fromDefinition(String definition)
+	{
+		if (definition.equalsIgnoreCase(DEFINITION_STRING))
+			return new LocalRequesterDelegate();
+		return null;
+	}
+
+	@Override
+	public String toDefinition()
+	{
+		return DEFINITION_STRING;
 	}
 }

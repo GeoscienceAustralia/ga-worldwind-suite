@@ -8,6 +8,8 @@ import java.net.URL;
 
 public class URLRequesterDelegate implements TileRequesterDelegate
 {
+	public final static String DEFINITION_STRING = "UrlRequester";
+
 	@Override
 	public void forceTextureLoad(TextureTile tile, DelegatorTiledImageLayer layer)
 	{
@@ -30,7 +32,7 @@ public class URLRequesterDelegate implements TileRequesterDelegate
 	{
 		return layer.loadTexture(tile, textureURL);
 	}
-	
+
 	/* **********************************************************************************************
 	 * Below here is copied from BasicTiledImageLayer, with some modifications to use the delegates *
 	 ********************************************************************************************** */
@@ -124,5 +126,19 @@ public class URLRequesterDelegate implements TileRequesterDelegate
 		{
 			return this.tile.toString();
 		}
+	}
+
+	@Override
+	public Delegate fromDefinition(String definition)
+	{
+		if (definition.equalsIgnoreCase(DEFINITION_STRING))
+			return new URLRequesterDelegate();
+		return null;
+	}
+
+	@Override
+	public String toDefinition()
+	{
+		return DEFINITION_STRING;
 	}
 }
