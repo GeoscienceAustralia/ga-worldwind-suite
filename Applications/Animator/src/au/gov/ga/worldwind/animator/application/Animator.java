@@ -64,6 +64,7 @@ import javax.swing.event.ChangeListener;
 
 import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
@@ -768,43 +769,6 @@ public class Animator
 		exaggeration.setVisible(true);*/
 	}
 
-	/**
-	 * Dump the parameter values of key frame values into a file for debugging purposes
-	 */
-	private void dumpKeyFrameValues()
-	{
-		try
-		{
-			OutputStream os = new BufferedOutputStream(new FileOutputStream("animationKeysDebug.txt", false));
-			for (KeyFrame keyFrame : animation.getKeyFrames())
-			{
-				StringBuffer buffer = new StringBuffer();
-				buffer.append("Frame: ").append(keyFrame.getFrame()).append('\n');
-				for (ParameterValue value : keyFrame.getParameterValues())
-				{
-					buffer.append("Value: ").append(value.getOwner().getName()).append('\n');
-					buffer.append(value.getValue()).append('|');
-					if (value instanceof BezierParameterValue)
-					{
-						BezierParameterValue bezierValue = (BezierParameterValue) value;
-						buffer.append(bezierValue.getInValue()).append(',').append(bezierValue.getInPercent()).append('|');
-						buffer.append(bezierValue.getOutValue()).append(',').append(bezierValue.getOutPercent()).append('\n');
-					}
-				}
-				os.write(buffer.toString().getBytes());
-			}
-			os.flush();
-			os.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return;
-		}
-		
-		
-		
-	}
 	
 	private void rotateSunPosition(double x, double y, double z)
 	{
@@ -1243,18 +1207,6 @@ public class Animator
 			}
 		});
 		
-		menuItem = new JMenuItem("Debug key frame output...");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
-		menuItem.setMnemonic('R');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				dumpKeyFrameValues();
-			}
-		});
-
 		menuItem = new JMenuItem("Custom render (TO BE REMOVED!)");
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -1383,6 +1335,34 @@ public class Animator
 						e.printStackTrace();
 					}
 				}
+			}
+		});
+		
+		menu = new JMenu("Debug");
+		menu.setMnemonic('D');
+		menuBar.add(menu);
+		
+		menuItem = new JMenuItem("Output key frame values");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
+		menu.setMnemonic('k');
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				DebugWriter.dumpKeyFrameValues("keyFrames.txt", animation);
+			}
+		});
+		
+		menuItem = new JMenuItem("Output parameter values");
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.CTRL_MASK));
+		menu.setMnemonic('k');
+		menu.add(menuItem);
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				DebugWriter.dumpParameterValues("parameterValues.txt", animation.getAllParameters(), animation.getFrameOfFirstKeyFrame(), animation.getFrameOfLastKeyFrame(), new AnimationContextImpl(animation));
 			}
 		});
 	}

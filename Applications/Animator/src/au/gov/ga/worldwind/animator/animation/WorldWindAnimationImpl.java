@@ -197,6 +197,7 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public void applyFrame(int frame)
 	{
+		setCurrentFrame(frame);
 		AnimationContext context = createAnimationContext();
 		for (Animatable animatable : animatableObjects)
 		{
@@ -214,6 +215,7 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public void recordKeyFrame(int frame, Collection<Parameter> parameters)
 	{
+		setCurrentFrame(frame);
 		AnimationContext animationContext = createAnimationContext();
 		Collection<ParameterValue> parameterValues = new ArrayList<ParameterValue>();
 		for (Parameter parameter : parameters)
@@ -239,6 +241,8 @@ public class WorldWindAnimationImpl implements Animation
 		{
 			return;
 		}
+		
+		setCurrentFrame(keyFrame.getFrame());
 		
 		// If a key frame already exists at this frame, merge the parameter values
 		// Otherwise, create a new key frame
