@@ -78,4 +78,10 @@ public class BasicParameterValue implements ParameterValue
 	{
 		return frame;
 	}
+	
+	@Override
+	public void smooth()
+	{
+		// No smoothing applied to basic parameter values
+	}
 }

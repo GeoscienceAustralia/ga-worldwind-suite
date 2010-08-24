@@ -45,4 +45,12 @@ public interface ParameterValue extends Restorable, Serializable
 	 * @return The frame this parameter value is associated with
 	 */
 	int getFrame();
+
+	/**
+	 * Apply a smoothing algorithm to this point to provide a smooth transition into and out-of this value
+	 * during animation.
+	 * <p/>
+	 * The algorithm used to achieve smoothing is up to the implementing class. 
+	 */
+	void smooth();
 }

@@ -98,14 +98,4 @@ public interface BezierParameterValue extends ParameterValue
 	 * @see #isLocked()
 	 */
 	void setLocked(boolean locked);
-
-	/**
-	 * Apply a smoothing algorithm to this point to provide a smooth transition into and out-of this value
-	 * during animation.
-	 * <p/>
-	 * This method may adjust the <code>in</code> and <code>out</code> values to achieve a smooth curve.
-	 * <p/>
-	 * The algorithm used to achieve smoothing is up to the implementing class. 
-	 */
-	void smooth();
 }
