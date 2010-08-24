@@ -70,9 +70,10 @@ public class BezierInterpolatorTest
 		assertEqualsWithError(0.0, allowableError, classToBeTested.computeValue(1).y);
 		
 		// Make sure nothing odd happens in between
-		for (double percent = 0; percent <= 1.0; percent+=0.1)
+		for (double percent = 0; percent <= 1.0; percent+=0.01)
 		{
-			classToBeTested.computeValue(percent);
+			Vector2 computedValue = classToBeTested.computeValue(percent);
+			System.out.println(percent + ", " + computedValue.y);
 		}
 	}
 	

@@ -41,7 +41,11 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	public BasicBezierParameterValue(double value, int frame, Parameter owner)
 	{
 		super(value, frame, owner);
-		smooth();
+		this.in.setValue(value);
+		this.in.setPercent(DEFAULT_CONTROL_POINT_PERCENTAGE);
+		this.out.setValue(value);
+		this.out.setPercent(DEFAULT_CONTROL_POINT_PERCENTAGE);
+		this.locked = true;
 	}
 	
 	/**
