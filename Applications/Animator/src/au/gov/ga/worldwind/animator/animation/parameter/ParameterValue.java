@@ -45,6 +45,13 @@ public interface ParameterValue extends Restorable, Serializable
 	 * @return The frame this parameter value is associated with
 	 */
 	int getFrame();
+	
+	/**
+	 * Set the frame this parameter value is associated with
+	 * 
+	 * @param frame The frame this parameter value is associated with
+	 */
+	void setFrame(int frame);
 
 	/**
 	 * Apply a smoothing algorithm to this point to provide a smooth transition into and out-of this value

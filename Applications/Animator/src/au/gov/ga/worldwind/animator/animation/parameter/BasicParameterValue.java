@@ -80,6 +80,12 @@ public class BasicParameterValue implements ParameterValue
 	}
 	
 	@Override
+	public void setFrame(int frame)
+	{
+		this.frame = frame;
+	}
+	
+	@Override
 	public void smooth()
 	{
 		// No smoothing applied to basic parameter values

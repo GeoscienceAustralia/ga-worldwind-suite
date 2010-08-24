@@ -91,6 +91,9 @@ public class KeyFrameImpl implements KeyFrame
 	{
 		if (value != null)
 		{
+			// Make sure the parameter value frame is consistent
+			value.setFrame(frame);
+			
 			this.parameterValueMap.put(value.getOwner(), value);
 		}
 	}

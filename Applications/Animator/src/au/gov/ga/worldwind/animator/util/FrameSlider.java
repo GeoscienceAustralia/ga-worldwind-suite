@@ -23,8 +23,18 @@ import javax.swing.JComponent;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+/**
+ * A Swing component used to display a frame slider.
+ * <p/>
+ * Provides hooks to listen in on changes to frames, as well as changes to 
+ * the slider state.
+ * 
+ * @author Michael de Hoog (michael.deHoog@ga.gov.au)
+ */
 public class FrameSlider extends JComponent
 {
+	private static final long serialVersionUID = 20100824L;
+
 	private final static int SLIDER_BORDER = 2;
 	private final static int PIXELS_PER_MAJOR_TICK = 48;
 	private final static int PIXELS_PER_MINOR_TICK = 8;
@@ -191,10 +201,8 @@ public class FrameSlider extends JComponent
 				boolean insideRightRect = rightRect.contains(e.getPoint());
 				if (insideLeftRect || insideRightRect)
 				{
-					int newValue = insideLeftRect ? getValue() - 1
-							: getValue() + 1;
-					int positionDiff = calculatePositionFromFrame(newValue)
-							- position;
+					int newValue = insideLeftRect ? getValue() - 1 : getValue() + 1;
+					int positionDiff = calculatePositionFromFrame(newValue) - position;
 					setValue(newValue);
 
 					Point los = getLocationOnScreen();
@@ -214,8 +222,7 @@ public class FrameSlider extends JComponent
 					int frame = getKey(keyFrameIndex);
 					setValue(frame);
 				}
-				else if (scrollRect.contains(e.getPoint()) && !draggingSlider
-						&& !draggingKeyFrame)
+				else if (scrollRect.contains(e.getPoint()) && !draggingSlider && !draggingKeyFrame)
 				{
 					int frame = calculateFrameFromPosition(e.getX() + 1);
 					setValue(frame);
@@ -236,8 +243,7 @@ public class FrameSlider extends JComponent
 				else if (sliderRect.contains(e.getPoint()))
 				{
 					draggingSlider = true;
-					dragPoint = new Point(e.getX() - sliderRect.x, e.getY()
-							- sliderRect.y);
+					dragPoint = new Point(e.getX() - sliderRect.x, e.getY() - sliderRect.y);
 				}
 				else
 				{
@@ -248,9 +254,7 @@ public class FrameSlider extends JComponent
 						{
 							draggingKeyFrame = true;
 							draggingKeyFrameIndex = i;
-							dragPoint = new Point(e.getX() - keyRect.x, e
-									.getY()
-									- keyRect.y);
+							dragPoint = new Point(e.getX() - keyRect.x, e.getY() - keyRect.y);
 							break;
 						}
 					}
@@ -284,20 +288,17 @@ public class FrameSlider extends JComponent
 				}
 				if (draggingSlider)
 				{
-					int frame = calculateFrameFromPosition(e.getX()
-							- dragPoint.x + sliderRect.width / 2);
+					int frame = calculateFrameFromPosition(e.getX() - dragPoint.x + sliderRect.width / 2);
 					setValue(frame);
 				}
 				else if (draggingKeyFrame)
 				{
 					Rectangle keyRect = keyRects.get(draggingKeyFrameIndex);
 					int oldFrame = keys.get(draggingKeyFrameIndex);
-					int newFrame = calculateFrameFromPosition(e.getX()
-							- dragPoint.x + keyRect.width / 2);
+					int newFrame = calculateFrameFromPosition(e.getX() - dragPoint.x + keyRect.width / 2);
 					keys.remove(draggingKeyFrameIndex);
 					keys.add(draggingKeyFrameIndex, newFrame);
-					notifyChangeFrameListeners(draggingKeyFrameIndex, oldFrame,
-							newFrame);
+					notifyChangeFrameListeners(draggingKeyFrameIndex, oldFrame, newFrame);
 				}
 				repaint();
 			}
@@ -315,8 +316,7 @@ public class FrameSlider extends JComponent
 	private int calculatePositionFromFrame(int frame)
 	{
 		frame = clamp(frame, getMin(), getMax());
-		int position = (getWidth() - moverWidth) * (frame - getMin())
-				/ (getLength() - 1) + moverWidth / 2;
+		int position = (getWidth() - moverWidth) * (frame - getMin()) / (getLength() - 1) + moverWidth / 2;
 		return position;
 	}
 
@@ -372,8 +372,7 @@ public class FrameSlider extends JComponent
 	{
 		int width = getWidth();
 		FontMetrics fm = g2.getFontMetrics();
-		String stringBoundsTest = "m " + getMax() + " / " + (getLength() - 1)
-				+ " m";
+		String stringBoundsTest = "m " + getMax() + " / " + (getLength() - 1) + " m";
 		Rectangle2D stringBounds = fm.getStringBounds(stringBoundsTest, g2);
 		ascent = fm.getLineMetrics(stringBoundsTest, g2).getAscent();
 		int fontWidth = (int) Math.ceil(stringBounds.getWidth());
@@ -386,8 +385,7 @@ public class FrameSlider extends JComponent
 		scrollRect = new Rectangle(0, 0, width, height + 3 + MAJOR_TICK_LENGTH);
 		leftRect = new Rectangle(0, 0, buttonWidth, height);
 		sliderRect = new Rectangle(buttonWidth, 0, sliderWidth, height);
-		rightRect = new Rectangle(buttonWidth + sliderWidth, 0, buttonWidth,
-				height);
+		rightRect = new Rectangle(buttonWidth + sliderWidth, 0, buttonWidth, height);
 		this.moverWidth = buttonWidth * 2 + sliderWidth;
 		this.moverHeight = height;
 	}
@@ -406,8 +404,7 @@ public class FrameSlider extends JComponent
 			{
 				framesPerMinorTick = i * multiple;
 				minorTicks = (int) (getLength() / framesPerMinorTick);
-				if (minorTicks == 0
-						|| availableTickWidth / minorTicks >= PIXELS_PER_MINOR_TICK)
+				if (minorTicks == 0 || availableTickWidth / minorTicks >= PIXELS_PER_MINOR_TICK)
 					break;
 			}
 			multiple *= 10;
@@ -422,17 +419,14 @@ public class FrameSlider extends JComponent
 			{
 				framesPerMajorTick = i * multiple;
 				majorTicks = (int) (getLength() / framesPerMajorTick);
-				if (majorTicks == 0
-						|| availableTickWidth / majorTicks >= PIXELS_PER_MAJOR_TICK)
+				if (majorTicks == 0 || availableTickWidth / majorTicks >= PIXELS_PER_MAJOR_TICK)
 					break;
 			}
 			multiple *= 10;
 		}
 
-		int firstMinorTick = min - (min + framesPerMinorTick - 1)
-				% framesPerMinorTick + framesPerMinorTick - 1;
-		int firstMajorTick = min - (min + framesPerMajorTick - 1)
-				% framesPerMajorTick + framesPerMajorTick - 1;
+		int firstMinorTick = min - (min + framesPerMinorTick - 1) % framesPerMinorTick + framesPerMinorTick - 1;
+		int firstMajorTick = min - (min + framesPerMajorTick - 1) % framesPerMajorTick + framesPerMajorTick - 1;
 
 		//add one if last tick equals max
 		if (firstMinorTick + framesPerMinorTick * minorTicks <= max)
@@ -478,9 +472,7 @@ public class FrameSlider extends JComponent
 		String sliderText = value + " / " + (getLength() - 1);
 		Rectangle2D stringBounds = fm.getStringBounds(sliderText, g2);
 		int textY = (int) (moverHeight / 2 + ascent / 2 - 1);
-		g2.drawString(sliderText,
-				(int) (sliderRect.x + sliderRect.width / 2 - stringBounds
-						.getWidth() / 2), textY);
+		g2.drawString(sliderText, (int) (sliderRect.x + sliderRect.width / 2 - stringBounds.getWidth() / 2), textY);
 
 		//button arrows
 		int arrowSize = 4;
@@ -503,27 +495,24 @@ public class FrameSlider extends JComponent
 		g2.setColor(dark);
 		for (int i = 0; i < minorTicks; i++)
 		{
-			int x = moverWidth / 2 + availableTickWidth
-					* (firstMinorTick + (i * framesPerMinorTick) - min)
-					/ (getLength() - 1);
+			int x =
+					moverWidth / 2 + availableTickWidth * (firstMinorTick + (i * framesPerMinorTick) - min)
+							/ (getLength() - 1);
 			g2.drawLine(x, tickY, x, tickY + MINOR_TICK_LENGTH);
 		}
 
 		for (int i = 0; i < majorTicks; i++)
 		{
 			int frame = firstMajorTick + (i * framesPerMajorTick);
-			int x = moverWidth / 2 + availableTickWidth * (frame - min)
-					/ (getLength() - 1);
+			int x = moverWidth / 2 + availableTickWidth * (frame - min) / (getLength() - 1);
 			g2.setColor(dark);
 			g2.drawLine(x, tickY, x, tickY + MAJOR_TICK_LENGTH);
 
 			g2.setColor(text);
 			String frameString = String.valueOf(frame);
 			stringBounds = fm.getStringBounds(frameString, g2);
-			g2.drawString(frameString, (int) (x - stringBounds.getWidth() / 2),
-					tickY + MAJOR_TICK_LENGTH + ascent);
-			tickHeight = Math.max(tickHeight,
-					(int) (MAJOR_TICK_LENGTH + stringBounds.getHeight()));
+			g2.drawString(frameString, (int) (x - stringBounds.getWidth() / 2), tickY + MAJOR_TICK_LENGTH + ascent);
+			tickHeight = Math.max(tickHeight, (int) (MAJOR_TICK_LENGTH + stringBounds.getHeight()));
 		}
 
 		//keyframes
@@ -539,9 +528,7 @@ public class FrameSlider extends JComponent
 			g2.setColor(dark);
 			g2.drawRect(rect.x, rect.y, rect.width, rect.height);
 			g2.setColor(new Color(255, 0, 0, 128));
-			g2
-					.fillRect(rect.x + 1, rect.y + 1, rect.width - 1,
-							rect.height - 1);
+			g2.fillRect(rect.x + 1, rect.y + 1, rect.width - 1, rect.height - 1);
 		}
 
 		//selection box
@@ -557,7 +544,7 @@ public class FrameSlider extends JComponent
 		setMinimumSize(size);
 		setPreferredSize(size);
 	}
-	
+
 	/*public void setZoom(double scale)
 	{
 		
@@ -572,21 +559,17 @@ public class FrameSlider extends JComponent
 		min.width
 	}*/
 
-	private void drawArrow(Rectangle inside, int arrowSize, Graphics2D g2,
-			boolean right, int offset)
+	private void drawArrow(Rectangle inside, int arrowSize, Graphics2D g2, boolean right, int offset)
 	{
 		if (right)
 			arrowSize = -arrowSize;
-		g2.drawLine(inside.x + inside.width / 2 - arrowSize / 2 + offset,
-				inside.height / 2, inside.x + inside.width / 2 + arrowSize / 2
-						+ offset, inside.height / 2 - arrowSize);
-		g2.drawLine(inside.x + inside.width / 2 - arrowSize / 2 + offset,
-				inside.height / 2, inside.x + inside.width / 2 + arrowSize / 2
-						+ offset, inside.height / 2 + arrowSize);
+		g2.drawLine(inside.x + inside.width / 2 - arrowSize / 2 + offset, inside.height / 2, inside.x + inside.width
+				/ 2 + arrowSize / 2 + offset, inside.height / 2 - arrowSize);
+		g2.drawLine(inside.x + inside.width / 2 - arrowSize / 2 + offset, inside.height / 2, inside.x + inside.width
+				/ 2 + arrowSize / 2 + offset, inside.height / 2 + arrowSize);
 	}
 
-	private void drawRaisedRect(Rectangle rect, Graphics2D g2, Color c1,
-			Color c2, boolean lowered)
+	private void drawRaisedRect(Rectangle rect, Graphics2D g2, Color c1, Color c2, boolean lowered)
 	{
 		if (lowered)
 		{
@@ -598,10 +581,8 @@ public class FrameSlider extends JComponent
 		g2.drawLine(rect.x, rect.y, rect.x + rect.width - 2, rect.y);
 		g2.drawLine(rect.x, rect.y + 1, rect.x, rect.y + rect.height - 1);
 		g2.setColor(c2);
-		g2.drawLine(rect.x + 1, rect.y + rect.height - 1, rect.x + rect.width
-				- 2, rect.y + rect.height - 1);
-		g2.drawLine(rect.x + rect.width - 1, rect.y, rect.x + rect.width - 1,
-				rect.y + rect.height - 1);
+		g2.drawLine(rect.x + 1, rect.y + rect.height - 1, rect.x + rect.width - 2, rect.y + rect.height - 1);
+		g2.drawLine(rect.x + rect.width - 1, rect.y, rect.x + rect.width - 1, rect.y + rect.height - 1);
 	}
 
 	public void addChangeListener(ChangeListener changeListener)
@@ -626,14 +607,12 @@ public class FrameSlider extends JComponent
 		changeFrameListeners.add(changeFrameListener);
 	}
 
-	public void removeChangeFrameListener(
-			ChangeFrameListener changeFrameListener)
+	public void removeChangeFrameListener(ChangeFrameListener changeFrameListener)
 	{
 		changeFrameListeners.remove(changeFrameListener);
 	}
 
-	private void notifyChangeFrameListeners(int index, int oldFrame,
-			int newFrame)
+	private void notifyChangeFrameListeners(int index, int oldFrame, int newFrame)
 	{
 		for (ChangeFrameListener changeFrameListener : changeFrameListeners)
 			changeFrameListener.frameChanged(index, oldFrame, newFrame);

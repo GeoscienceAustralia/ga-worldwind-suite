@@ -66,6 +66,7 @@ import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
+import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -88,6 +89,7 @@ import au.gov.ga.worldwind.animator.layers.other.ImmediateBMNGWMSLayer;
 import au.gov.ga.worldwind.animator.layers.other.ImmediateLandsatI3WMSLayer;
 import au.gov.ga.worldwind.animator.layers.other.MagneticsLayer;
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
+import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.FrameSlider;
 import au.gov.ga.worldwind.animator.util.message.MessageSource;
@@ -574,7 +576,7 @@ public class Animator
 				{
 					if (animation.getKeyFrameCount() > 0)
 					{
-						applyView(getView());
+						applyAnimationState();
 						wwd.redraw();
 					}
 					stop = true;
@@ -582,16 +584,21 @@ public class Animator
 			}
 		});
 		// TODO: Implement frame dragging
-		//		slider.addChangeFrameListener(new ChangeFrameListener()
-		//		{
-		//			public void frameChanged(int index, int oldFrame, int newFrame)
-		//			{
-		//				animation.setFrame(index, newFrame);
-		//				updateSlider();
-		//				applyView(getView());
-		//				wwd.redraw();
-		//			}
-		//		});
+		slider.addChangeFrameListener(new ChangeFrameListener()
+		{
+			public void frameChanged(int index, int oldFrame, int newFrame)
+			{
+				KeyFrame oldKey = animation.getKeyFrame(oldFrame);
+				KeyFrame newKey = new KeyFrameImpl(newFrame, oldKey.getParameterValues());
+
+				animation.removeKeyFrame(oldKey);
+				animation.insertKeyFrame(newKey);
+				
+				updateSlider();
+				applyAnimationState();
+				wwd.redraw();
+			}
+		});
 
 		/*JScrollPane scrollPane = new JScrollPane(slider,
 				JScrollPane.VERTICAL_SCROLLBAR_NEVER,
@@ -1383,7 +1390,10 @@ public class Animator
 		
 	}
 
-	private void applyView(OrbitView view)
+	/**
+	 * Apply the animation state at the frame selected on the frame slider
+	 */
+	private void applyAnimationState()
 	{
 		int frame = slider.getValue();
 		if (animation.getFrameOfFirstKeyFrame() <= frame && frame <= animation.getFrameOfLastKeyFrame())
@@ -1585,7 +1595,7 @@ public class Animator
 					for (int frame = firstFrame; frame <= lastFrame; frame += frameSkip)
 					{
 						setSlider(frame);
-						applyView(getView());
+						applyAnimationState();
 						wwd.redrawNow();
 
 						if (stop)
@@ -1638,7 +1648,7 @@ public class Animator
 					for (int frame = firstFrame; frame <= lastFrame; frame += 1)
 					{
 						setSlider(frame);
-						applyView(getView());
+						applyAnimationState();
 
 						asc.takeScreenshot(new File(outputDir, "frame" + FileUtil.paddedInt(frame, filenameLength)
 								+ ".tga"), alpha);
