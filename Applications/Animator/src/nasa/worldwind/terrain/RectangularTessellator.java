@@ -43,7 +43,7 @@ public class RectangularTessellator extends WWObjectImpl implements Tessellator
         private final Integer bufferIdIndicies;
         private final Integer bufferIdTexCoords;
 
-        protected RenderInfo(DrawContext dc, int density, DoubleBuffer vertices, Integer verticesBuffer, Vec4 refCenter)
+        public RenderInfo(DrawContext dc, int density, DoubleBuffer vertices, Integer verticesBuffer, Vec4 refCenter)
         {
             //Fill in the buffers and buffer IDs and store them in hashmaps by density
             processIndices(dc, density);
