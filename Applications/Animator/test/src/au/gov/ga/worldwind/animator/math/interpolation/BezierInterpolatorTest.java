@@ -3,9 +3,11 @@
  */
 package au.gov.ga.worldwind.animator.math.interpolation;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
+
+import au.gov.ga.worldwind.animator.math.vector.TimeVector;
 import au.gov.ga.worldwind.animator.math.vector.Vector1;
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
 import au.gov.ga.worldwind.animator.math.vector.Vector3;
@@ -56,8 +58,8 @@ public class BezierInterpolatorTest
 	public void testInterpolationV2() 
 	{
 		Vector2 begin = new Vector2(0,0);
-		Vector2 out = new Vector2(0,1);
-		Vector2 in = new Vector2(10,1);
+		Vector2 out = new Vector2(0,100);
+		Vector2 in = new Vector2(10,100);
 		Vector2 end = new Vector2(10,0);
 		
 		BezierInterpolator<Vector2> classToBeTested = new BezierInterpolator<Vector2>(begin, out, in, end);
@@ -74,6 +76,34 @@ public class BezierInterpolatorTest
 		{
 			Vector2 computedValue = classToBeTested.computeValue(percent);
 			System.out.println(percent*10 + ", " + computedValue.y);
+		}
+	}
+	
+	/**
+	 * Test the {@link BezierInterpolator} with a 2D time vector
+	 */
+	@Test
+	public void testInterpolationTimeVector() 
+	{
+		TimeVector begin = new TimeVector(0,0);
+		TimeVector out = new TimeVector(0,100);
+		TimeVector in = new TimeVector(10,100);
+		TimeVector end = new TimeVector(10,0);
+		
+		BezierInterpolator<Vector2> classToBeTested = new BezierInterpolator<Vector2>(begin, out, in, end);
+		
+		// Bezier should pass through start and end points
+		assertEqualsWithError(0.0, allowableError, classToBeTested.computeValue(0).x);
+		assertEqualsWithError(0.0, allowableError, classToBeTested.computeValue(0).y);
+		
+		assertEqualsWithError(10.0, allowableError, classToBeTested.computeValue(1).x);
+		assertEqualsWithError(0.0, allowableError, classToBeTested.computeValue(1).y);
+		
+		// Make sure nothing odd happens in between
+		for (double percent = 0; percent <= 1.0; percent+=0.01)
+		{
+			Vector2 computedValue = classToBeTested.computeValue(percent);
+			//System.out.println(percent*10 + ", " + computedValue.y);
 		}
 	}
 	
