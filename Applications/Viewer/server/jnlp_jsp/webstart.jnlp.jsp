@@ -1,16 +1,12 @@
-<%@ page
-	contentType="application/x-java-jnlp-file"
-	info="World Wind Viewer JNLP"
-%>
-
 <%
-	String worldwind = "worldwind.jnlp.jsp";
-
 	StringBuffer url = HttpUtils.getRequestURL(request);
 	int indexOfLastSlash = url.lastIndexOf("/");
 	String codebase = url.substring(0, indexOfLastSlash + 1);
 	String document = url.substring(indexOfLastSlash + 1);
-	String worldwindUrl = codebase + worldwind;
+	
+	response.setContentType("application/x-java-jnlp-file");
+	String filename = document.substring(0, document.indexOf('.')) + ".jnlp";	
+	response.addHeader("Content-Disposition", "Inline; fileName=" + filename);
 	
 	boolean sandpit = request.getServerPort() == 8500;
 	String query = request.getQueryString();
@@ -43,7 +39,7 @@
 		<j2se href="http://java.sun.com/products/autodl/j2se" version="1.6+" initial-heap-size="512m" max-heap-size="512m" />
 		<property name="sun.java2d.noddraw" value="true" />
 		<jar href="application.jar" main="true" />
-		<extension name="worldwind" href="<%= worldwindUrl %>" />
+		<extension name="worldwind" href="<%= codebase %>worldwind.jnlp.jsp" />
 	</resources>
 	<application-desc main-class="au.gov.ga.worldwind.application.Application"><%
 			if(theme != null)

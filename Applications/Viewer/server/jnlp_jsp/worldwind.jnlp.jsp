@@ -1,13 +1,12 @@
-<%@ page
-	contentType="application/x-java-jnlp-file"
-	info="World Wind Viewer JNLP"
-%>
-
 <%
 	StringBuffer url = HttpUtils.getRequestURL(request);
 	int indexOfLastSlash = url.lastIndexOf("/");
 	String codebase = url.substring(0, indexOfLastSlash + 1);
 	String document = url.substring(indexOfLastSlash + 1);
+	
+	response.setContentType("application/x-java-jnlp-file");
+	String filename = document.substring(0, document.indexOf('.')) + ".jnlp";	
+	response.addHeader("Content-Disposition", "Inline; fileName=" + filename);
 %>
 
 <?xml version="1.0" encoding="utf-8"?>
