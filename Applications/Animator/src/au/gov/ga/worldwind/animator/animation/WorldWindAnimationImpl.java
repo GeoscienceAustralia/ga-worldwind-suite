@@ -408,4 +408,47 @@ public class WorldWindAnimationImpl implements Animation
 		}
 	}
 	
+	@Override
+	public void scale(double scaleFactor)
+	{
+		Validate.isTrue(scaleFactor > 0.0, "Scale factor must be greater than 0");
+		
+		// Don't bother scaling if the scale factor is 1
+		if (scaleFactor == 1.0)
+		{
+			return;
+		}
+		
+		// Expand the frame count if required
+		int newFrameCount = (int) Math.ceil(scaleFactor * getFrameOfLastKeyFrame());
+		if (getFrameCount() < newFrameCount)
+		{
+			setFrameCount(newFrameCount);
+		}
+
+		List<KeyFrame> oldKeyFrames = getKeyFrames();
+		
+		// Scale each key frame, and add it to the list
+		int[] newFrames = new int[oldKeyFrames.size()];
+		for (int i = 0; i < oldKeyFrames.size(); i++)
+		{
+			// Apply the scale factor
+			newFrames[i] = (int) Math.round(oldKeyFrames.get(i).getFrame() * scaleFactor);
+			
+			// Adjust any key frames that now lie on top of each other
+			if (i > 0 && newFrames[i] <= newFrames[i-1])
+			{
+				newFrames[i] = newFrames[i-1] + 1;
+			}
+		}
+
+		// Create the new key frames
+		this.keyFrameMap.clear();
+		for (int i = 0; i < oldKeyFrames.size(); i++)
+		{
+			insertKeyFrame(new KeyFrameImpl(newFrames[i], oldKeyFrames.get(i).getParameterValues()));
+		}
+		
+	}
+	
 }

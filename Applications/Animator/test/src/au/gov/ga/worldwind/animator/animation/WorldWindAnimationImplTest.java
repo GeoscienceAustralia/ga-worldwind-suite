@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.animator.animation;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import gov.nasa.worldwind.WorldWindow;
 
 import java.util.ArrayList;
@@ -129,6 +129,178 @@ public class WorldWindAnimationImplTest
 		assertEquals(null, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(2), 125));
 	}
 
+	/**
+	 * Tests the scale method with scale factor of 0
+	 */
+	@Test
+	public void testScaleWith0()
+	{
+		KeyFrame kf1 = createKeyFrame(0, testParameters.get(0));
+		KeyFrame kf2 = createKeyFrame(50, testParameters.get(1));
+		KeyFrame kf3 = createKeyFrame(100, testParameters.get(2));
+		
+		classToBeTested.setFrameCount(100);
+		
+		classToBeTested.insertKeyFrame(kf1);
+		classToBeTested.insertKeyFrame(kf2);
+		classToBeTested.insertKeyFrame(kf3);
+		
+		try 
+		{
+			classToBeTested.scale(0.0);
+			fail("Expected an exception but got none");
+		}
+		catch (IllegalArgumentException e)
+		{
+			// pass
+		}
+	}
+	
+	/**
+	 * Tests the scale method with scale factor of < 1
+	 */
+	@Test
+	public void testScaleWithLT1()
+	{
+		KeyFrame kf1 = createKeyFrame(0, testParameters.get(0));
+		KeyFrame kf2 = createKeyFrame(50, testParameters.get(1));
+		KeyFrame kf3 = createKeyFrame(100, testParameters.get(2));
+		
+		classToBeTested.setFrameCount(100);
+		
+		classToBeTested.insertKeyFrame(kf1);
+		classToBeTested.insertKeyFrame(kf2);
+		classToBeTested.insertKeyFrame(kf3);
+		
+		try 
+		{
+			classToBeTested.scale(0.5);
+		}
+		catch (IllegalArgumentException e)
+		{
+			e.printStackTrace();
+			fail("Got an exception when one was not expected");
+		}
+		
+		assertEquals(100, classToBeTested.getFrameCount());
+		
+		List<KeyFrame> keyFrames = classToBeTested.getKeyFrames();
+		assertEquals(3, keyFrames.size());
+		
+		// Check the frames have been updated, and the key frames are in the right order, and have the correct parameter values
+		assertEquals(0, keyFrames.get(0).getFrame());
+		assertEquals(0, keyFrames.get(0).getValueForParameter(testParameters.get(0)).getFrame());
+		assertEquals(null, keyFrames.get(0).getValueForParameter(testParameters.get(1)));
+		assertEquals(null, keyFrames.get(0).getValueForParameter(testParameters.get(2)));
+		
+		assertEquals(25, keyFrames.get(1).getFrame());
+		assertEquals(null, keyFrames.get(1).getValueForParameter(testParameters.get(0)));
+		assertEquals(25, keyFrames.get(1).getValueForParameter(testParameters.get(1)).getFrame());
+		assertEquals(null, keyFrames.get(1).getValueForParameter(testParameters.get(2)));
+		
+		assertEquals(50, keyFrames.get(2).getFrame());
+		assertEquals(null, keyFrames.get(2).getValueForParameter(testParameters.get(0)));
+		assertEquals(null, keyFrames.get(2).getValueForParameter(testParameters.get(1)));
+		assertEquals(50, keyFrames.get(2).getValueForParameter(testParameters.get(2)).getFrame());
+	}
+	
+	/**
+	 * Tests the scale method with scale factor of = 1
+	 */
+	@Test
+	public void testScaleWithEQ1()
+	{
+		KeyFrame kf1 = createKeyFrame(0, testParameters.get(0));
+		KeyFrame kf2 = createKeyFrame(50, testParameters.get(1));
+		KeyFrame kf3 = createKeyFrame(100, testParameters.get(2));
+		
+		classToBeTested.setFrameCount(100);
+		
+		classToBeTested.insertKeyFrame(kf1);
+		classToBeTested.insertKeyFrame(kf2);
+		classToBeTested.insertKeyFrame(kf3);
+		
+		try 
+		{
+			classToBeTested.scale(1.0);
+		}
+		catch (IllegalArgumentException e)
+		{
+			e.printStackTrace();
+			fail("Got an exception when one was not expected");
+		}
+		
+		assertEquals(100, classToBeTested.getFrameCount());
+		
+		List<KeyFrame> keyFrames = classToBeTested.getKeyFrames();
+		assertEquals(3, keyFrames.size());
+		
+		// Check the frames have been updated, and the key frames are in the right order, and have the correct parameter values
+		assertEquals(0, keyFrames.get(0).getFrame());
+		assertEquals(0, keyFrames.get(0).getValueForParameter(testParameters.get(0)).getFrame());
+		assertEquals(null, keyFrames.get(0).getValueForParameter(testParameters.get(1)));
+		assertEquals(null, keyFrames.get(0).getValueForParameter(testParameters.get(2)));
+		
+		assertEquals(50, keyFrames.get(1).getFrame());
+		assertEquals(null, keyFrames.get(1).getValueForParameter(testParameters.get(0)));
+		assertEquals(50, keyFrames.get(1).getValueForParameter(testParameters.get(1)).getFrame());
+		assertEquals(null, keyFrames.get(1).getValueForParameter(testParameters.get(2)));
+		
+		assertEquals(100, keyFrames.get(2).getFrame());
+		assertEquals(null, keyFrames.get(2).getValueForParameter(testParameters.get(0)));
+		assertEquals(null, keyFrames.get(2).getValueForParameter(testParameters.get(1)));
+		assertEquals(100, keyFrames.get(2).getValueForParameter(testParameters.get(2)).getFrame());
+	}
+	
+	/**
+	 * Tests the scale method with scale factor of > 1
+	 */
+	@Test
+	public void testScaleWithGT1()
+	{
+		KeyFrame kf1 = createKeyFrame(0, testParameters.get(0));
+		KeyFrame kf2 = createKeyFrame(50, testParameters.get(1));
+		KeyFrame kf3 = createKeyFrame(100, testParameters.get(2));
+		
+		classToBeTested.setFrameCount(100);
+		
+		classToBeTested.insertKeyFrame(kf1);
+		classToBeTested.insertKeyFrame(kf2);
+		classToBeTested.insertKeyFrame(kf3);
+		
+		try 
+		{
+			classToBeTested.scale(2.0);
+		}
+		catch (IllegalArgumentException e)
+		{
+			e.printStackTrace();
+			fail("Got an exception when one was not expected");
+		}
+		
+		assertEquals(200, classToBeTested.getFrameCount());
+		
+		List<KeyFrame> keyFrames = classToBeTested.getKeyFrames();
+		assertEquals(3, keyFrames.size());
+		
+		// Check the frames have been updated, and the key frames are in the right order, and have the correct parameter values
+		assertEquals(0, keyFrames.get(0).getFrame());
+		assertEquals(0, keyFrames.get(0).getValueForParameter(testParameters.get(0)).getFrame());
+		assertEquals(null, keyFrames.get(0).getValueForParameter(testParameters.get(1)));
+		assertEquals(null, keyFrames.get(0).getValueForParameter(testParameters.get(2)));
+		
+		assertEquals(100, keyFrames.get(1).getFrame());
+		assertEquals(null, keyFrames.get(1).getValueForParameter(testParameters.get(0)));
+		assertEquals(100, keyFrames.get(1).getValueForParameter(testParameters.get(1)).getFrame());
+		assertEquals(null, keyFrames.get(1).getValueForParameter(testParameters.get(2)));
+		
+		assertEquals(200, keyFrames.get(2).getFrame());
+		assertEquals(null, keyFrames.get(2).getValueForParameter(testParameters.get(0)));
+		assertEquals(null, keyFrames.get(2).getValueForParameter(testParameters.get(1)));
+		assertEquals(200, keyFrames.get(2).getValueForParameter(testParameters.get(2)).getFrame());
+	}
+	
+	
 	/**
 	 * @return A new key frame at the provided frame, containing a value for each provided parameter
 	 */

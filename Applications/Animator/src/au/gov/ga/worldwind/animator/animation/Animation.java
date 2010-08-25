@@ -239,4 +239,17 @@ public interface Animation
 	 * @param frame The current frame to set
 	 */
 	void setCurrentFrame(int frame);
+	
+	/**
+	 * Scales the animation by the provided scaling factor.
+	 * <p/>
+	 * If the scaling factor is in the interval <code>(0,1)</code>, the animation's key frames will be 
+	 * compressed together by the scale amount.
+	 * <p/>
+	 * If the scaling factor is in the interval <code>(1,)</code>, the animation's key frames will be
+	 * expanded by the scale amount.
+	 * 
+	 * @param scaleFactor The factor by which to scale the animation
+	 */
+	void scale(double scaleFactor);
 }

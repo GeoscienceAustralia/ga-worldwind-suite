@@ -1087,29 +1087,26 @@ public class Animator
 		menuItem = new JMenuItem("Scale animation...");
 		menuItem.setMnemonic('S');
 		menu.add(menuItem);
-		// TODO: Implement animation scaling
-		//		menuItem.addActionListener(new ActionListener()
-		//		{
-		//			public void actionPerformed(ActionEvent e)
-		//			{
-		//				double scale = -1.0;
-		//				Object value =
-		//						JOptionPane.showInputDialog(frame, "Scale factor:", "Scale animation",
-		//								JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
-		//				try
-		//				{
-		//					scale = Double.parseDouble((String) value);
-		//				}
-		//				catch (Exception ex)
-		//				{
-		//				}
-		//				if (scale != 1.0 && scale > 0)
-		//				{
-		//					animation.scale(scale);
-		//				}
-		//				updateSlider();
-		//			}
-		//		});
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				double scale = -1.0;
+				Object value = JOptionPane.showInputDialog(frame, "Scale factor:", "Scale animation", JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
+				try
+				{
+					scale = Double.parseDouble((String) value);
+				}
+				catch (Exception ex)
+				{
+				}
+				if (scale != 1.0 && scale > 0)
+				{
+					animation.scale(scale);
+				}
+				updateSlider();
+			}
+		});
 
 		menuItem = new JMenuItem("Scale height...");
 		menuItem.setMnemonic('h');
