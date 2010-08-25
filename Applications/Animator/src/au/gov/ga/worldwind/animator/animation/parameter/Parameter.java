@@ -6,6 +6,7 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 import gov.nasa.worldwind.Restorable;
 
 import java.io.Serializable;
+import java.util.List;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
@@ -105,4 +106,13 @@ public interface Parameter extends Restorable, Serializable, Nameable
 	 * provided frame, or <code>null</code> if one cannot be found
 	 */
 	ParameterValue getValueAtKeyFrameAfterFrame(int frame);
+	
+	/**
+	 * Gets the ordered list of key frames that contain a recorded value for this parameter
+	 * <p/>
+	 * If no key frames exist with a value for this parameter, an empty list will be returned.
+	 * 
+	 * @return The key frames that contain a recorded value for this parameter.
+	 */
+	List<KeyFrame> getKeyFramesWithThisParameter();
 }

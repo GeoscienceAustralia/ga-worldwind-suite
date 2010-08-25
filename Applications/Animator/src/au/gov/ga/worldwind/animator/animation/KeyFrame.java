@@ -43,6 +43,16 @@ public interface KeyFrame extends Serializable, Restorable
 	ParameterValue getValueForParameter(Parameter p); 
 	
 	/**
+	 * Return a collection containing the {@link ParameterValue}s stored on this key frame
+	 * for each {@link Parameter} in the provided collection, if one exists.
+
+	 * @param parameters The collection of parameters whose values are required
+	 * 
+	 * @return The parameter values stored on this key frame of the provided parameters, if they exist.
+	 */
+	Collection<ParameterValue> getValuesForParameters(Collection<Parameter> parameters);
+	
+	/**
 	 * Return whether or not this {@link KeyFrame} has a value recorded for the provided parameter.
 	 * 
 	 * @param p The parameter to check for
@@ -50,6 +60,20 @@ public interface KeyFrame extends Serializable, Restorable
 	 * @return <code>true</code> if a value is recorded for the provided parameter, <code>false</code> otherwise.
 	 */
 	boolean hasValueForParameter(Parameter p);
+	
+	/**
+	 * Remove any recorded value for the provided parameter from this key frame.
+	 * 
+	 * @param p The parameter whose value is to be removed
+	 */
+	void removeValueForParameter(Parameter p);
+	
+	/**
+	 * Remove any recorded values for the provided {@link Parameter}s.
+	 * 
+	 * @param parameters The parameters whose values are to be removed from this key frame
+	 */
+	void removeValuesForParameters(Collection<Parameter> parameters);
 	
 	/**
 	 * Add the provided parameter value to this key frame
@@ -79,4 +103,9 @@ public interface KeyFrame extends Serializable, Restorable
 	 * @return The animation frame this Key Frame corresponds to
 	 */
 	int getFrame();
+
+	/**
+	 * @return Whether this key frame has any recorded {@link ParameterValue}s
+	 */
+	boolean hasParameterValues();
 }

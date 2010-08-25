@@ -3,6 +3,8 @@
  */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
+import java.util.List;
+
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
@@ -157,6 +159,12 @@ public abstract class ParameterBase implements Parameter
 			return null;
 		}
 		return keyFrame.getValueForParameter(this);
+	}
+	
+	@Override
+	public List<KeyFrame> getKeyFramesWithThisParameter()
+	{
+		return animation.getKeyFrames(this);
 	}
 	
 	@Override

@@ -85,6 +85,20 @@ public class WorldWindAnimationImpl implements Animation
 	}
 	
 	@Override
+	public List<KeyFrame> getKeyFrames(Parameter p)
+	{
+		List<KeyFrame> result = new ArrayList<KeyFrame>();
+		for (KeyFrame keyFrame : getKeyFrames())
+		{
+			if (keyFrame.hasValueForParameter(p))
+			{
+				result.add(keyFrame);
+			}
+		}
+		return result;
+	}
+	
+	@Override
 	public KeyFrame getKeyFrameWithParameterBeforeFrame(Parameter p, int frame)
 	{
 		// Note: The ArrayList is used to achieve good random access performance so we can iterate backwards.
@@ -118,8 +132,7 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public KeyFrame getFirstKeyFrame()
 	{
-		List<KeyFrame> keyFrames = getKeyFrames();
-		return keyFrames.isEmpty() ? null : keyFrames.get(0);
+		return keyFrameMap.isEmpty() ? null : keyFrameMap.get(keyFrameMap.firstKey());
 	}
 	
 	@Override
@@ -131,8 +144,7 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public KeyFrame getLastKeyFrame()
 	{
-		List<KeyFrame> keyFrames = getKeyFrames();
-		return keyFrames.isEmpty() ? null : keyFrames.get(keyFrames.size() - 1);
+		return keyFrameMap.isEmpty() ? null : keyFrameMap.get(keyFrameMap.lastKey());
 	}
 	
 	@Override
@@ -382,6 +394,18 @@ public class WorldWindAnimationImpl implements Animation
 			keyFrameMap.remove(keyFrame.getFrame());
 		}
 		
+	}
+	
+	@Override
+	public void removeEmptyKeyFrames()
+	{
+		for (KeyFrame keyFrame : getKeyFrames())
+		{
+			if (!keyFrame.hasParameterValues())
+			{
+				removeKeyFrame(keyFrame.getFrame());
+			}
+		}
 	}
 	
 }

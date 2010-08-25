@@ -64,6 +64,7 @@ import javax.swing.event.ChangeListener;
 
 import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
@@ -583,7 +584,6 @@ public class Animator
 				}
 			}
 		});
-		// TODO: Implement frame dragging
 		slider.addChangeFrameListener(new ChangeFrameListener()
 		{
 			public void frameChanged(int index, int oldFrame, int newFrame)
@@ -1140,22 +1140,21 @@ public class Animator
 		menuItem = new JMenuItem("Smooth eye speed");
 		menuItem.setMnemonic('m');
 		menu.add(menuItem);
-		// TODO: Implement eye smoothing
-		//		menuItem.addActionListener(new ActionListener()
-		//		{
-		//			public void actionPerformed(ActionEvent e)
-		//			{
-		//				if (JOptionPane
-		//						.showConfirmDialog(
-		//								frame,
-		//								"This will redistribute keyframes to attempt to smooth the eye speed.\nDo you wish to continue?",
-		//								"Smooth eye speed", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
-		//				{
-		//					animation.smoothEyeSpeed();
-		//					updateSlider();
-		//				}
-		//			}
-		//		});
+		menuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (JOptionPane.showConfirmDialog(frame,
+												  "This will redistribute keyframes to attempt to smooth the eye speed.\nDo you wish to continue?",
+												  "Smooth eye speed", 
+												  JOptionPane.YES_NO_OPTION, 
+												  JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+				{
+					animation.getCamera().smoothEyeSpeed(createAnimationContext());
+					updateSlider();
+				}
+			}
+		});
 
 		menu.addSeparator();
 
@@ -1372,6 +1371,15 @@ public class Animator
 			}
 		});
 	}
+
+	/**
+	 * @return A new animation context
+	 */
+	protected AnimationContext createAnimationContext()
+	{
+		return new AnimationContextImpl(animation);
+	}
+
 
 	private OrbitView getView()
 	{

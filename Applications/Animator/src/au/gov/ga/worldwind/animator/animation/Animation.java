@@ -8,6 +8,7 @@ import java.util.List;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 
 /**
  * An animation.
@@ -25,6 +26,15 @@ public interface Animation
 	 * @return All key frames, ordered by frame.
 	 */
 	List<KeyFrame> getKeyFrames();
+	
+	/**
+	 * Returns the ordered list of all key frames that contain a value for the provided parameter.
+	 * 
+	 * @param p The parameter in question
+	 * 
+	 * @return The list of key frames with a value for the provided parameter, ordered by frame
+	 */
+	List<KeyFrame> getKeyFrames(Parameter p);
 	
 	/**
 	 * @return <code>true</code> if there are key frames recorded for this animation, 
@@ -195,6 +205,11 @@ public interface Animation
 	 * @param keyFrame The key frame to remove from the animation
 	 */
 	void removeKeyFrame(KeyFrame keyFrame);
+	
+	/**
+	 * Remove all key frames that have no associated {@link ParameterValue}s
+	 */
+	void removeEmptyKeyFrames();
 	
 	/**
 	 * @return The render parameters for this animation.

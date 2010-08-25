@@ -3,6 +3,7 @@
  */
 package au.gov.ga.worldwind.animator.animation;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,9 +82,47 @@ public class KeyFrameImpl implements KeyFrame
 	}
 
 	@Override
+	public Collection<ParameterValue> getValuesForParameters(Collection<Parameter> parameters)
+	{
+		Collection<ParameterValue> result = new ArrayList<ParameterValue>();
+		if (parameters == null)
+		{
+			return result;
+		}
+		for (Parameter parameter : parameters)
+		{
+			ParameterValue value = getValueForParameter(parameter);
+			if (value != null)
+			{
+				result.add(value);
+			}
+		}
+		return result;
+	}
+	
+	@Override
 	public boolean hasValueForParameter(Parameter p)
 	{
 		return parameterValueMap.containsKey(p);
+	}
+	
+	@Override
+	public void removeValueForParameter(Parameter p)
+	{
+		parameterValueMap.remove(p);
+	}
+	
+	@Override
+	public void removeValuesForParameters(Collection<Parameter> parameters)
+	{
+		if (parameters == null || parameters.isEmpty())
+		{
+			return;
+		}
+		for (Parameter parameter : parameters)
+		{
+			removeValueForParameter(parameter);
+		}
 	}
 	
 	@Override
@@ -114,4 +153,10 @@ public class KeyFrameImpl implements KeyFrame
 		return frame;
 	}
 
+	@Override
+	public boolean hasParameterValues()
+	{
+		return !parameterValueMap.isEmpty();
+	}
+	
 }

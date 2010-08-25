@@ -68,4 +68,14 @@ public interface Camera extends Animatable
 	 */
 	Position getLookatPositionAtFrame(AnimationContext animationContext, int frame);
 	
+	/**
+	 * Smooths the camera's eye speed through the animation.
+	 * <p/>
+	 * This may result in key frames related to the camera being re-adjusted to 
+	 * provide a smooth camera transition.
+	 * 
+	 * @param context The context of the animation
+	 */
+	void smoothEyeSpeed(AnimationContext context);
+	
 }
