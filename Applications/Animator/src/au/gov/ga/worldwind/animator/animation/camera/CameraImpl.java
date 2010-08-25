@@ -289,7 +289,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 
 		for (int i = 1; i < numberOfKeys - 1; i++)
 		{
-			newFrames[i] = (int) Math.abs(Math.round((firstFrame - lastFrame + 1) * cumulativeDistance[i - 1] / cumulativeDistance[numberOfKeys - 2]));
+			newFrames[i] = (int) Math.round(Math.abs((firstFrame - lastFrame + 1) * cumulativeDistance[i - 1] / cumulativeDistance[numberOfKeys - 2]));
 		}
 
 		// Fix any frames that have been swapped over by mistake

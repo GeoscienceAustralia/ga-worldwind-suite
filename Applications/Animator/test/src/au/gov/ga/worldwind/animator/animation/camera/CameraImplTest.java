@@ -71,6 +71,8 @@ public class CameraImplTest
 	
 	/**
 	 * Tests the {@link CameraImpl#smoothEyeSpeed} class with one frame recorded
+	 * <p/>
+	 * Expect no changes.
 	 */
 	@Test
 	public void testSmoothEyeOneFrame()
@@ -90,6 +92,8 @@ public class CameraImplTest
 	
 	/**
 	 * Tests the {@link CameraImpl#smoothEyeSpeed} class with two frames recorded
+	 * <p/>
+	 * Expect no changes.
 	 */
 	@Test
 	public void testSmoothEyeTwoFrames()
@@ -109,6 +113,73 @@ public class CameraImplTest
 		asserteyeKeyFrameEquals(10, 10.0, 10.0, 10.0, newKeyFrames.get(1));
 	}
 
+	/**
+	 * Tests the {@link CameraImpl#smoothEyeSpeed} class with three frames recorded
+	 * <p/>
+	 * Expect end frames untouched, middle frame adjusted appropriately.
+	 */
+	@Test
+	public void testSmoothEyeThreeFrames()
+	{
+		ArrayList<KeyFrame> keyFrames = new ArrayList<KeyFrame>();
+		keyFrames.add(createEyeKeyFrame(0, 0.0, 0.0, 0.0));
+		keyFrames.add(createEyeKeyFrame(8, 5.0, 5.0, 5.0));
+		keyFrames.add(createEyeKeyFrame(10, 10.0, 10.0, 10.0));
+		
+		setCameraKeyFrames(keyFrames);
+		
+		classToBeTested.smoothEyeSpeed(animationContext);
+		
+		List<KeyFrame> newKeyFrames = animation.getKeyFrames();
+		assertNotNull(newKeyFrames);
+		assertEquals(3, newKeyFrames.size());
+		asserteyeKeyFrameEquals(0, 0.0, 0.0, 0.0, newKeyFrames.get(0));
+		asserteyeKeyFrameEquals(5, 5.0, 5.0, 5.0, newKeyFrames.get(1));
+		asserteyeKeyFrameEquals(10, 10.0, 10.0, 10.0, newKeyFrames.get(2));
+	}
+	
+	/**
+	 * Tests the {@link CameraImpl#smoothEyeSpeed} called multiple times.
+	 * <p/>
+	 * Expect no changes after first call
+	 */
+	@Test
+	public void testSmoothEyeMultipleTimes()
+	{
+		ArrayList<KeyFrame> keyFrames = new ArrayList<KeyFrame>();
+		keyFrames.add(createEyeKeyFrame(0, 0.0, 0.0, 0.0));
+		keyFrames.add(createEyeKeyFrame(8, 5.0, 5.0, 5.0));
+		keyFrames.add(createEyeKeyFrame(10, 10.0, 10.0, 10.0));
+		
+		setCameraKeyFrames(keyFrames);
+		
+		classToBeTested.smoothEyeSpeed(animationContext);
+		
+		List<KeyFrame> newKeyFrames = animation.getKeyFrames();
+		assertNotNull(newKeyFrames);
+		assertEquals(3, newKeyFrames.size());
+		asserteyeKeyFrameEquals(0, 0.0, 0.0, 0.0, newKeyFrames.get(0));
+		asserteyeKeyFrameEquals(5, 5.0, 5.0, 5.0, newKeyFrames.get(1));
+		asserteyeKeyFrameEquals(10, 10.0, 10.0, 10.0, newKeyFrames.get(2));
+		
+		classToBeTested.smoothEyeSpeed(animationContext);
+		
+		newKeyFrames = animation.getKeyFrames();
+		assertNotNull(newKeyFrames);
+		assertEquals(3, newKeyFrames.size());
+		asserteyeKeyFrameEquals(0, 0.0, 0.0, 0.0, newKeyFrames.get(0));
+		asserteyeKeyFrameEquals(5, 5.0, 5.0, 5.0, newKeyFrames.get(1));
+		asserteyeKeyFrameEquals(10, 10.0, 10.0, 10.0, newKeyFrames.get(2));
+		
+		classToBeTested.smoothEyeSpeed(animationContext);
+		
+		newKeyFrames = animation.getKeyFrames();
+		assertNotNull(newKeyFrames);
+		assertEquals(3, newKeyFrames.size());
+		asserteyeKeyFrameEquals(0, 0.0, 0.0, 0.0, newKeyFrames.get(0));
+		asserteyeKeyFrameEquals(5, 5.0, 5.0, 5.0, newKeyFrames.get(1));
+		asserteyeKeyFrameEquals(10, 10.0, 10.0, 10.0, newKeyFrames.get(2));
+	}
 	
 	private void asserteyeKeyFrameEquals(int frame, double eyeLat, double eyeLon, double eyeEl, KeyFrame keyFrame)
 	{
