@@ -8,6 +8,7 @@ import java.util.Set;
 
 import au.gov.ga.worldwind.layers.tiled.image.delegate.colortoalpha.ColorToAlphaTransformerDelegate;
 import au.gov.ga.worldwind.layers.tiled.image.delegate.nearestneighbor.NearestNeighborTextureTileFactoryDelegate;
+import au.gov.ga.worldwind.layers.tiled.image.delegate.transparentcolor.TransparentColorTransformerDelegate;
 
 public class DelegateFactory
 {
@@ -29,6 +30,7 @@ public class DelegateFactory
 		registerDelegate(MaskImageReaderDelegate.class);
 
 		registerDelegate(ColorToAlphaTransformerDelegate.class);
+		registerDelegate(TransparentColorTransformerDelegate.class);
 	}
 
 	public static void registerDelegate(Class<? extends Delegate> delegateClass)

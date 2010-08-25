@@ -10,7 +10,6 @@ import gov.nasa.worldwind.util.WWXML;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.layers.shapefile.surfaceshape.SurfaceShapeShapefileLayerFactory;
-import au.gov.ga.worldwind.layers.tiled.image.delegate.DelegateKit;
 import au.gov.ga.worldwind.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 import au.gov.ga.worldwind.util.XMLUtil;
 
@@ -43,9 +42,7 @@ public class LayerFactory extends BasicLayerFactory
 		
 		if ("DelegatorTileService".equals(serviceName))
 		{
-			Element serviceElement = XMLUtil.getElement(domElement, "Service", null);
-			DelegateKit kit = DelegateKit.createFromXML(serviceElement);
-			layer = new DelegatorTiledImageLayer(domElement, params, kit);
+			layer = new DelegatorTiledImageLayer(domElement, params);
 		}
 		else
 		{

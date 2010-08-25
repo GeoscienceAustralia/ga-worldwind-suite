@@ -13,7 +13,7 @@ import au.gov.ga.worldwind.util.Util;
 
 public class LocalRequesterDelegate implements TileRequesterDelegate
 {
-	public final static String DEFINITION_STRING = "LocalRequester";
+	private final static String DEFINITION_STRING = "LocalRequester";
 
 	@Override
 	public void forceTextureLoad(TextureTile tile, DelegatorTiledImageLayer layer)

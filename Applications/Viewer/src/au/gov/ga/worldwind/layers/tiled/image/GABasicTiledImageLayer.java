@@ -16,28 +16,52 @@ import au.gov.ga.worldwind.application.GASandpit;
 
 public class GABasicTiledImageLayer extends BasicTiledImageLayer
 {
+	public GABasicTiledImageLayer(AVList params)
+	{
+		this(setupParams(params), false);
+	}
+
 	public GABasicTiledImageLayer(Element domElement, AVList params)
 	{
-		super(domElement, setupParams(params));
+		this(domElement, setupParams(params), false);
+	}
 
-		if (params == null)
-			params = (AVList) getValue(AVKey.CONSTRUCTION_PARAMETERS);
+	/* The private constructors below are analogous to those above, except that
+	 * params is never null (as the result from setupParams() is passed to the
+	 * private constructor). This means that the constructor can pull out params
+	 * set by the superclass from the params variable. */
 
-		TileUrlBuilder builder = (TileUrlBuilder) params.getValue(AVKey.TILE_URL_BUILDER);
-		if (builder != null && builder instanceof ExtendedUrlBuilder)
-		{
-			String imageFormat = (String) params.getValue(AVKey.IMAGE_FORMAT);
-			((ExtendedUrlBuilder) builder).overrideFormat(imageFormat);
-		}
+	private GABasicTiledImageLayer(AVList params, boolean nothing)
+	{
+		super(params);
+		initBuilder(params);
+	}
+
+	private GABasicTiledImageLayer(Element domElement, AVList params, boolean nothing)
+	{
+		super(domElement, params);
+		initBuilder(params);
 	}
 
 	protected static AVList setupParams(AVList params)
 	{
 		if (params == null)
 			params = new AVListImpl();
+
+		if (params.getValue(AVKey.TILE_URL_BUILDER) == null)
+			params.setValue(AVKey.TILE_URL_BUILDER, createURLBuilder(params));
 		
-		params.setValue(AVKey.TILE_URL_BUILDER, createURLBuilder(params));
 		return params;
+	}
+
+	protected void initBuilder(AVList params)
+	{
+		TileUrlBuilder builder = (TileUrlBuilder) params.getValue(AVKey.TILE_URL_BUILDER);
+		if (builder != null && builder instanceof ExtendedUrlBuilder)
+		{
+			String imageFormat = (String) params.getValue(AVKey.IMAGE_FORMAT);
+			((ExtendedUrlBuilder) builder).overrideFormat(imageFormat);
+		}
 	}
 
 	protected static TileUrlBuilder createURLBuilder(AVList params)

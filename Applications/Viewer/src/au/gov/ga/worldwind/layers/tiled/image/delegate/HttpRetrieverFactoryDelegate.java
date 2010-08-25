@@ -8,7 +8,7 @@ import java.net.URL;
 
 public class HttpRetrieverFactoryDelegate implements RetrieverFactoryDelegate
 {
-	public final static String DEFINITION_STRING = "HttpRetriever";
+	private final static String DEFINITION_STRING = "HttpRetriever";
 
 	@Override
 	public Retriever createRetriever(URL url, RetrievalPostProcessor postProcessor)

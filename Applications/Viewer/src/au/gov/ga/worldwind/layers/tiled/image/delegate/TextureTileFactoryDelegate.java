@@ -6,7 +6,7 @@ import gov.nasa.worldwind.util.Level;
 
 public class TextureTileFactoryDelegate implements TileFactoryDelegate
 {
-	public final static String DEFINITION_STRING = "TextureTile";
+	private final static String DEFINITION_STRING = "TextureTile";
 	
 	@Override
 	public TextureTile createTextureTile(Sector sector, Level level, int row, int col)

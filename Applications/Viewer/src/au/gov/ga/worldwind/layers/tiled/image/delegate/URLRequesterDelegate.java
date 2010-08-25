@@ -8,7 +8,7 @@ import java.net.URL;
 
 public class URLRequesterDelegate implements TileRequesterDelegate
 {
-	public final static String DEFINITION_STRING = "UrlRequester";
+	private final static String DEFINITION_STRING = "UrlRequester";
 
 	@Override
 	public void forceTextureLoad(TextureTile tile, DelegatorTiledImageLayer layer)

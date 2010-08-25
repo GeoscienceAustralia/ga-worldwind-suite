@@ -7,7 +7,7 @@ import java.net.URL;
 
 public class PassThroughZipRetrieverFactoryDelegate implements RetrieverFactoryDelegate
 {
-	public final static String DEFINITION_STRING = "PassThroughZipRetriever";
+	private final static String DEFINITION_STRING = "PassThroughZipRetriever";
 
 	@Override
 	public Retriever createRetriever(URL url, RetrievalPostProcessor postProcessor)

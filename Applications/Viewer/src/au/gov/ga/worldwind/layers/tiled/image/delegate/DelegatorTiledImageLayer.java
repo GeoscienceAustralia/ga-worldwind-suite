@@ -17,6 +17,7 @@ import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.util.DataConfigurationUtils;
+import gov.nasa.worldwind.util.ImageUtil;
 import gov.nasa.worldwind.util.Level;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.layers.tiled.image.GABasicTiledImageLayer;
@@ -46,19 +48,57 @@ public class DelegatorTiledImageLayer extends GABasicTiledImageLayer implements 
 	protected final URL context;
 	protected final DelegateKit delegateKit;
 
-	public DelegatorTiledImageLayer(Element domElement, AVList params, DelegateKit delegateKit)
+	public DelegatorTiledImageLayer(AVList params)
 	{
-		super(domElement, params);
+		super(params);
 
-		this.delegateKit = delegateKit;
+		Object o = params.getValue(AVKeyMore.DELEGATE_KIT);
+		if (o != null && o instanceof DelegateKit)
+			delegateKit = (DelegateKit) o;
+		else
+			delegateKit = new DelegateKit();
 
-		Object o = params.getValue(AVKeyMore.CONTEXT_URL);
+		o = params.getValue(AVKeyMore.CONTEXT_URL);
 		if (o != null && o instanceof URL)
 			context = (URL) o;
 		else
 			context = null;
 
 		fileLock = FileLockSharer.getLock(getLevels().getFirstLevel().getCacheName());
+	}
+
+	public DelegatorTiledImageLayer(Element domElement, AVList params)
+	{
+		this(getParamsFromDocument(domElement, params));
+	}
+
+	protected static AVList getParamsFromDocument(Element domElement, AVList params)
+	{
+		params = BasicTiledImageLayer.getParamsFromDocument(domElement, params);
+
+		DelegateKit delegateKit = DelegateKit.createFromXML(domElement);
+		params.setValue(AVKeyMore.DELEGATE_KIT, delegateKit);
+
+		return params;
+	}
+
+	public static Document createDelegatorTiledImageLayerConfigDocument(AVList params)
+	{
+		Document document = BasicTiledImageLayer.createTiledImageLayerConfigDocument(params);
+		Element context = document.getDocumentElement();
+		createDelegatorTiledImageLayerConfigElements(params, context);
+		return document;
+	}
+
+	public static Element createDelegatorTiledImageLayerConfigElements(AVList params,
+			Element context)
+	{
+		Object o = params.getValue(AVKeyMore.DELEGATE_KIT);
+		if (o != null && o instanceof DelegateKit)
+		{
+			DelegateKit.createDelegateElements((DelegateKit) o, context);
+		}
+		return context;
 	}
 
 	@Override
@@ -150,6 +190,10 @@ public class DelegatorTiledImageLayer extends GABasicTiledImageLayer implements 
 				}
 
 				image = delegateKit.transformImage(image);
+				
+				int[] colors = (int[]) this.getValue(AVKey.TRANSPARENCY_COLORS);
+				if (colors != null)
+					image = ImageUtil.mapTransparencyColors(image, colors);
 
 				if (isCompressTextures())
 				{

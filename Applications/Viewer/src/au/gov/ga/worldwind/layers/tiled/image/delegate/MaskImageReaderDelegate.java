@@ -15,7 +15,7 @@ import au.gov.ga.worldwind.util.Util;
 
 public class MaskImageReaderDelegate implements ImageReaderDelegate
 {
-	public final static String DEFINITION_STRING = "MaskReader";
+	private final static String DEFINITION_STRING = "MaskReader";
 
 	//dataset/level/row/tile.jpg
 	//mask/level/row/tile.png

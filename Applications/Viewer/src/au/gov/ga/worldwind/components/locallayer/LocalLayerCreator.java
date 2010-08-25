@@ -5,8 +5,6 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.layers.TiledImageLayer;
-import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -45,10 +43,14 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.components.JDoubleField;
 import au.gov.ga.worldwind.components.JIntegerField;
+import au.gov.ga.worldwind.layers.tiled.image.delegate.DelegateKit;
+import au.gov.ga.worldwind.layers.tiled.image.delegate.DelegatorTiledImageLayer;
+import au.gov.ga.worldwind.layers.tiled.image.delegate.LocalRequesterDelegate;
+import au.gov.ga.worldwind.layers.tiled.image.delegate.MaskImageReaderDelegate;
+import au.gov.ga.worldwind.layers.tiled.image.delegate.transparentcolor.TransparentColorTransformerDelegate;
 import au.gov.ga.worldwind.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.panels.dataset.LayerDefinition;
 import au.gov.ga.worldwind.panels.layers.LayersPanel.LayerDefinitionFileFilter;
@@ -63,6 +65,7 @@ public class LocalLayerCreator extends JDialog
 	private JTextField dirField;
 	private JTextField outputField;
 	private JComboBox extensionCombo;
+	private JCheckBox maskedCheck;
 	private JIntegerField tilesizeField;
 	private JDoubleField lztsdField;
 	private JIntegerField levelcountField;
@@ -82,7 +85,7 @@ public class LocalLayerCreator extends JDialog
 
 	private ILayerDefinition layer;
 
-	private final static String[] FILE_EXTENSIONS = { "JPG", "PNG", "DDS", "BMP", "GIF" };
+	private final static String[] FILE_EXTENSIONS = { "JPG", "PNG", "ZIP", "DDS", "BMP", "GIF" };
 
 	private JFileChooser chooser;
 
@@ -316,15 +319,30 @@ public class LocalLayerCreator extends JDialog
 		c.insets = new Insets(s, s, 0, 0);
 		panel.add(label, c);
 
-		extensionCombo = new JComboBox(FILE_EXTENSIONS);
-		extensionCombo.addActionListener(al);
-		extensionCombo.addActionListener(transAl);
+		panel2 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = i++;
 		c.anchor = GridBagConstraints.WEST;
+		panel.add(panel2, c);
+
+		extensionCombo = new JComboBox(FILE_EXTENSIONS);
+		extensionCombo.addActionListener(al);
+		extensionCombo.addActionListener(transAl);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(s, s, 0, s);
-		panel.add(extensionCombo, c);
+		panel2.add(extensionCombo, c);
+
+		maskedCheck = new JCheckBox("Use separate PNG mask");
+		maskedCheck.addActionListener(al);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.anchor = GridBagConstraints.WEST;
+		c.weightx = 1;
+		c.insets = new Insets(s, s * 2, 0, s);
+		panel2.add(maskedCheck, c);
 
 
 		i = 0;
@@ -447,10 +465,10 @@ public class LocalLayerCreator extends JDialog
 						sector(directory, (String) extensionCombo.getSelectedItem(), levels,
 								lztsdField.getValue());
 				levelcountField.setValue(levels);
-				topleftField.setText(formatLatLon(sector.getMinLatitude().degrees, sector
-						.getMinLongitude().degrees));
-				bottomrightField.setText(formatLatLon(sector.getMaxLatitude().degrees, sector
-						.getMaxLongitude().degrees));
+				topleftField.setText(formatLatLon(sector.getMinLatitude().degrees,
+						sector.getMinLongitude().degrees));
+				bottomrightField.setText(formatLatLon(sector.getMaxLatitude().degrees,
+						sector.getMaxLongitude().degrees));
 			}
 		});
 
@@ -779,8 +797,9 @@ public class LocalLayerCreator extends JDialog
 		File lastLevelDirectory = new File(directory, String.valueOf(level));
 		MinMax rowMinMax = getMinMaxRow(lastLevelDirectory);
 		MinMax colMinMax = getMinMaxCol(lastLevelDirectory, extension);
-		return Sector.fromDegrees(getTileLat(rowMinMax.min, level, lztsd), getTileLat(
-				rowMinMax.max + 1, level, lztsd), getTileLon(colMinMax.min, level, lztsd),
+		return Sector.fromDegrees(getTileLat(rowMinMax.min, level, lztsd),
+				getTileLat(rowMinMax.max + 1, level, lztsd),
+				getTileLon(colMinMax.min, level, lztsd),
 				getTileLon(colMinMax.max + 1, level, lztsd));
 	}
 
@@ -900,14 +919,14 @@ public class LocalLayerCreator extends JDialog
 			AVList params = new AVListImpl();
 
 			params.setValue(AVKey.DISPLAY_NAME, nameField.getText());
-			params.setValue(AVKey.SERVICE_NAME, "FileTileService");
+			params.setValue(AVKey.SERVICE_NAME, "DelegatorTileService");
 			params.setValue(AVKey.SERVICE, directory);
 			params.setValue(AVKey.EXPIRY_TIME, date.getTime());
 			params.setValue(AVKey.DATASET_NAME, ".");
 			params.setValue(AVKey.DATA_CACHE_NAME, nameField.getText());
 			params.setValue(AVKey.IMAGE_FORMAT, imageFormat);
 			params.setValue(AVKey.AVAILABLE_IMAGE_FORMATS, new String[] { imageFormat });
-			params.setValue(AVKey.FORMAT_SUFFIX, ".dds");
+			params.setValue(AVKey.FORMAT_SUFFIX, "." + ext);
 			params.setValue(AVKey.NUM_LEVELS, levels);
 			params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 			params.setValue(AVKey.TILE_ORIGIN, LatLon.fromDegrees(-90d, -180d));
@@ -916,18 +935,28 @@ public class LocalLayerCreator extends JDialog
 			params.setValue(AVKey.TILE_HEIGHT, tilesize);
 			params.setValue(AVKey.SECTOR, sector);
 			params.setValue(AVKey.USE_TRANSPARENT_TEXTURES, true);
+			params.setValue(AVKey.COMPRESS_TEXTURES, true);
 			params.setValue(AVKey.USE_MIP_MAPS, true);
 			params.setValue(AVKey.RETAIN_LEVEL_ZERO_TILES, true);
 			params.setValue(AVKey.FORCE_LEVEL_ZERO_LOADS, true);
+
+			DelegateKit kit = new DelegateKit();
+			params.setValue(AVKeyMore.DELEGATE_KIT, kit);
+
+			kit.setRequesterDelegate(new LocalRequesterDelegate());
+			
 			if (transparentCheck.isSelected())
 			{
-				params.setValue(AVKeyMore.TRANSPARENT_COLOR, transparentColor.getColor());
-				params.setValue(AVKeyMore.TRANSPARENT_FUZZ, fuzz);
+				kit.addTransformerDelegate(new TransparentColorTransformerDelegate(transparentColor
+						.getColor(), fuzz));
+			}
+			if (maskedCheck.isSelected())
+			{
+				kit.addReaderDelegate(new MaskImageReaderDelegate());
 			}
 
-			Document document = TiledImageLayer.createTiledImageLayerConfigDocument(params);
-			Element element = document.getDocumentElement();
-			createTiledImageLayerElements(element, params);
+			Document document =
+					DelegatorTiledImageLayer.createDelegatorTiledImageLayerConfigDocument(params);
 			XMLUtil.saveDocumentToFormattedFile(document, file.getAbsolutePath());
 
 			try
@@ -943,16 +972,5 @@ public class LocalLayerCreator extends JDialog
 						JOptionPane.ERROR_MESSAGE);
 			}
 		}
-	}
-	
-	private static void createTiledImageLayerElements(Element context, AVList params)
-	{
-		Color color = (Color) params.getValue(AVKeyMore.TRANSPARENT_COLOR);
-		if (color != null)
-			XMLUtil.appendColor(context, "TransparentColor", color);
-
-		Double fuzz = (Double) params.getValue(AVKeyMore.TRANSPARENT_FUZZ);
-		if (fuzz != null)
-			WWXML.appendDouble(context, "TransparentFuzz", fuzz);
 	}
 }

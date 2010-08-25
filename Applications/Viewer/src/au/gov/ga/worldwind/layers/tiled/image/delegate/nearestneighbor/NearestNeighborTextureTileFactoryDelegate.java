@@ -8,7 +8,7 @@ import au.gov.ga.worldwind.layers.tiled.image.delegate.TileFactoryDelegate;
 
 public class NearestNeighborTextureTileFactoryDelegate implements TileFactoryDelegate
 {
-	public final static String DEFINITION_STRING = "NearestNeighborTile";
+	private final static String DEFINITION_STRING = "NearestNeighborTile";
 	
 	@Override
 	public TextureTile createTextureTile(Sector sector, Level level, int row, int col)

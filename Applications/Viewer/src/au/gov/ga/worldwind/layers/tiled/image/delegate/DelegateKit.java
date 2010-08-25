@@ -11,16 +11,32 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Element;
 
 public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDelegate,
 		TileFactoryDelegate, ImageReaderDelegate, ImageTransformerDelegate
 {
+	private final static Collection<String> defaultDelegateDefinitions = new HashSet<String>();
+
+	static
+	{
+		Collection<Delegate> defaultDelegates = new DelegateKit().getDelegates();
+		for (Delegate delegate : defaultDelegates)
+		{
+			defaultDelegateDefinitions.add(delegate.toDefinition());
+		}
+	}
+
+	//default delegate implementations
 	private TileRequesterDelegate requesterDelegate = new URLRequesterDelegate();
-	private RetrieverFactoryDelegate retrieverDelegate =
-			new PassThroughZipRetrieverFactoryDelegate();
+	private RetrieverFactoryDelegate retrieverDelegate = new HttpRetrieverFactoryDelegate();
 	private TileFactoryDelegate factoryDelegate = new TextureTileFactoryDelegate();
 	private final List<ImageReaderDelegate> readerDelegates = new ArrayList<ImageReaderDelegate>();
 	private final List<ImageTransformerDelegate> transformerDelegates =
@@ -51,17 +67,26 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 		transformerDelegates.add(transformerDelegate);
 	}
 
-	public static DelegateKit createFromXML(Element element)
+	public static DelegateKit createFromXML(Element domElement)
 	{
 		DelegateKit kit = new DelegateKit();
-		Element[] elements = WWXML.getElements(element, "Delegate", null);
-		for (Element elem : elements)
+
+		XPath xpath = WWXML.makeXPath();
+		Element delegatesElement = WWXML.getElement(domElement, "Delegates", xpath);
+		if (delegatesElement != null)
 		{
-			String definition = elem.getTextContent();
-			if (definition != null && definition.length() > 0)
+			Element[] elements = WWXML.getElements(delegatesElement, "Delegate", xpath);
+			if (elements != null)
 			{
-				Delegate delegate = DelegateFactory.createDelegate(definition);
-				kit.setOrAddDelegate(delegate);
+				for (Element element : elements)
+				{
+					String definition = element.getTextContent();
+					if (definition != null && definition.length() > 0)
+					{
+						Delegate delegate = DelegateFactory.createDelegate(definition);
+						kit.setOrAddDelegate(delegate);
+					}
+				}
 			}
 		}
 		return kit;
@@ -69,10 +94,16 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 
 	public static Element createDelegateElements(DelegateKit kit, Element context)
 	{
-		List<Delegate> delegates = kit.getDelegates();
-		for(Delegate delegate : delegates)
+		Collection<Delegate> delegates = kit.getDelegates();
+		Element delegatesElement = WWXML.appendElement(context, "Delegates");
+		for (Delegate delegate : delegates)
 		{
-			WWXML.appendText(context, "Delegate", delegate.toDefinition());
+			String definition = delegate.toDefinition();
+			//only append the XML element if the delegate is not one of the defaults
+			if (!defaultDelegateDefinitions.contains(definition))
+			{
+				WWXML.appendText(delegatesElement, "Delegate", definition);
+			}
 		}
 		return context;
 	}
@@ -111,9 +142,9 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 		}
 	}
 
-	private List<Delegate> getDelegates()
+	private Collection<Delegate> getDelegates()
 	{
-		List<Delegate> delegates = new ArrayList<Delegate>();
+		Set<Delegate> delegates = new HashSet<Delegate>();
 		delegates.add(requesterDelegate);
 		delegates.add(retrieverDelegate);
 		delegates.add(factoryDelegate);
