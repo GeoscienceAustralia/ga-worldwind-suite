@@ -5,6 +5,7 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 
 import au.gov.ga.worldwind.animator.math.interpolation.BezierInterpolator;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
+import au.gov.ga.worldwind.animator.math.interpolation.LinearInterpolator;
 import au.gov.ga.worldwind.animator.math.vector.TimeVector;
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -43,10 +44,25 @@ public class InterpolatorFactory
 			return createBezierInterpolator(startValue, endValue);
 		}
 		
-		// TODO: Handle linear case
-		return null;
+		return createLinearInterpolator(startValue, endValue);
 	}
 
+	/**
+	 * Create a new {@link LinearInterpolator} using the provided start and end values
+	 * 
+	 * @param startValue The start value to use
+	 * @param endValue The end value to use
+	 * 
+	 * @return a {@link LinearInterpolator} using the provided start and end values.
+	 */
+	private static Interpolator<Vector2> createLinearInterpolator(ParameterValue startValue, ParameterValue endValue)
+	{
+		Vector2 start = new TimeVector(startValue.getFrame(), startValue.getValue());
+		Vector2 end = new TimeVector(endValue.getFrame(), endValue.getValue());
+		
+		return new LinearInterpolator<Vector2>(start, end);
+	}
+	
 	/**
 	 * Create a {@link BezierInterpolator} using the provided start and end values
 	 * 
