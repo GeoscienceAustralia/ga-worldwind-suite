@@ -230,7 +230,13 @@ public class LayerEnabler
 
 		//must've been a download, so have to refresh the layer list
 		if (!result.isFromCache())
+		{
 			refreshLists();
+			if(node.hasError())
+			{
+				setError(node, null);
+			}
+		}
 	}
 
 	private void refreshLists()
