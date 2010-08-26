@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatasetList>
+
+	<Layer name="Magnetic - 5th Edition" url="edition5/magnetic.xml" icon="../../imagery.png" info="edition5/metadata/info.html" />
+
+</DatasetList>

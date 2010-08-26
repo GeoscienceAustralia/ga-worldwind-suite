@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatasetList>
+
+	<Layer name="Ternary (K-Th-U)" url="layers/ternary.xml" icon="../../../imagery.png" />
+	<Layer name="Potassium (K)" url="layers/potassium.xml" icon="../../../imagery.png" />
+	<Layer name="Thorium (Th)" url="layers/thorium.xml" icon="../../../imagery.png" />
+	<Layer name="Uranium (U)" url="layers/uranium.xml" icon="../../../imagery.png" />
+	<Layer name="Dose Rate" url="layers/dose.xml" icon="../../../imagery.png" />
+	<Layer name="Total Dose" url="layers/totaldose.xml" icon="../../../imagery.png" />
+	<Layer name="Thorium/Potassium Ratio" url="layers/ratio_tk.xml" icon="../../../imagery.png" />
+	<Layer name="Uranium/Potassium Ratio" url="layers/ratio_uk.xml" icon="../../../imagery.png" />
+	<Layer name="Uranium/Thorium Ratio" url="layers/ratio_ut.xml" icon="../../../imagery.png" />
+	<Layer name="Uranium&#0178;/Thorium Ratio" url="layers/ratio_uut.xml" icon="../../../imagery.png" />
+
+</DatasetList>

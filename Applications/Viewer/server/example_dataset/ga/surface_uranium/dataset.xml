@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatasetList>
+
+	<Layer name="Uranium (U)" url="../radiometric/edition2/layers/uranium.xml" icon="../../imagery.png" />
+	<Layer name="U&#0178;/Th median for geology polygons" url="layers/u2th.xml" icon="../../imagery.png" />
+	<Layer name="Uranium&#0178;/Thorium Ratio (enhanced)" url="layers/ratio_uut_enhanced.xml" icon="../../imagery.png" />
+	<Layer name="Uranium&#0178;/Thorium Ratio (clipped)" url="layers/ratio_uut_clipped.xml" icon="../../imagery.png" />
+	<Layer name="MRVBF - topographic gradient" url="../terrain/layers/MRVBF.xml" icon="../../imagery.png" />
+	<Layer name="MRVBF - topographic gradient (low flat)" url="../terrain/layers/MRVBF_clipped.xml" icon="../../imagery.png" />
+	<Layer name="Calcrete" url="layers/calcrete.xml" icon="../../polygons.png" />
+	<Layer name="Australia hill shading" url="../terrain/layers/ozhill2.xml" icon="../../imagery.png" />
+
+</DatasetList>

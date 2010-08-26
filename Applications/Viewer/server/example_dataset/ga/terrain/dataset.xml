@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatasetList>
+
+	<Layer name="MRVBF - topographic gradient" url="layers/MRVBF.xml" icon="../../imagery.png" />
+	<Layer name="MRVBF - topographic gradient (low flat)" url="layers/MRVBF_clipped.xml" icon="../../imagery.png" />
+	<Layer name="Australia hill shading" url="layers/ozhill2.xml" icon="../../imagery.png" />
+
+</DatasetList>

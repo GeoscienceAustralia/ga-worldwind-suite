@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DatasetList>
+
+	<Link name="Geoscience Australia" url="ga/legacy.xml" icon="ga/ga.png" info="http://www.ga.gov.au/" base="true" />
+
+</DatasetList>
