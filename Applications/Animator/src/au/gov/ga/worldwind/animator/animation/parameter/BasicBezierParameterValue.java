@@ -32,6 +32,14 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	private BezierContolPoint out = new BezierContolPoint();
 	
 	/**
+	 * Constructor. Required for de-serialisation. Not for general use.
+	 */
+	@SuppressWarnings("unused")
+	private BasicBezierParameterValue(){
+		super();
+	}
+	
+	/**
 	 * Construct a new bezier parameter value.
 	 * <p/>
 	 * Uses the {@link #smooth()} method to infer values for <code>in</code> and <code>out</code>.
@@ -271,6 +279,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		WWXML.setDoubleAttribute(result, "inPercent", getInPercent());
 		WWXML.setDoubleAttribute(result, "outValue", getOutValue());
 		WWXML.setDoubleAttribute(result, "outPercent", getOutPercent());
+		WWXML.setBooleanAttribute(result, "locked", isLocked());
 		
 		return result;
 	}

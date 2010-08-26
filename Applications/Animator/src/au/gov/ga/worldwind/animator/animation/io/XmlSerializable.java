@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.util;
+package au.gov.ga.worldwind.animator.animation.io;
 
 import gov.nasa.worldwind.avlist.AVList;
 

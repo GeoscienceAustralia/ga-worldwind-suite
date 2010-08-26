@@ -5,7 +5,7 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 
 import java.io.Serializable;
 
-import au.gov.ga.worldwind.animator.util.XmlSerializable;
+import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 
 /**
  * A {@link ParameterValue} represents a snapshot of the value of a {@link Parameter}

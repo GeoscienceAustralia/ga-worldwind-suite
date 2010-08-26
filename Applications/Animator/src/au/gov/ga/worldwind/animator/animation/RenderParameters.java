@@ -7,7 +7,7 @@ import java.awt.Dimension;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.util.XmlSerializable;
+import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 
 /**
  * A class that holds the render parameters associated with an animation 

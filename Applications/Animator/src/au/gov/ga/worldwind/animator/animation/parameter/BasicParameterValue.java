@@ -41,6 +41,11 @@ public class BasicParameterValue implements ParameterValue
 		this.owner = owner;
 	}
 	
+	/**
+	 * Constructor. Required for de-serialisation. Not for general use.
+	 */
+	protected BasicParameterValue()	{}
+
 	@Override
 	public double getValue()
 	{
@@ -98,7 +103,6 @@ public class BasicParameterValue implements ParameterValue
 	@Override
 	public ParameterValue fromXml(Element element, String versionId, AVList context)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 	

@@ -6,9 +6,9 @@ package au.gov.ga.worldwind.animator.animation;
 import java.io.Serializable;
 import java.util.Collection;
 
+import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Nameable;
-import au.gov.ga.worldwind.animator.util.XmlSerializable;
 
 /**
  * An interface for objects that can be animated within an {@link Animation}

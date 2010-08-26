@@ -38,6 +38,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,6 +70,8 @@ import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
+import au.gov.ga.worldwind.animator.animation.io.AnimationWriter;
+import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
@@ -1409,6 +1412,9 @@ public class Animator
 		}
 	}
 
+	/**
+	 * Quit the application, prompting the user to save any changes if required.
+	 */
 	public void quit()
 	{
 		if (querySave())
@@ -1427,6 +1433,9 @@ public class Animator
 		}
 	}
 
+	/**
+	 * Create a new animation, prompting the user to save any changes if required.
+	 */
 	private void newFile()
 	{
 		if (querySave())
@@ -1466,6 +1475,9 @@ public class Animator
 		}
 	}
 
+	/**
+	 * Save the animation, prompting the user to choose a file if necessary.
+	 */
 	private void save()
 	{
 		if (file == null)
@@ -1478,6 +1490,11 @@ public class Animator
 		}
 	}
 
+	/**
+	 * Launch the 'save as' dialog and prompt the user to choose a file.
+	 * <p/>
+	 * If the user selects an existing file, prompt to overwrite it.
+	 */
 	private void saveAs()
 	{
 		JFileChooser chooser = new JFileChooser();
@@ -1492,37 +1509,47 @@ public class Animator
 			boolean override = true;
 			if (newFile.exists())
 			{
-				override =
-						JOptionPane.showConfirmDialog(frame, newFile.getAbsolutePath()
-								+ " already exists.\nDo you want to replace it?", "Save As", JOptionPane.YES_NO_OPTION,
-								JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION;
+				override = JOptionPane.showConfirmDialog(frame, newFile.getAbsolutePath() + " already exists.\nDo you want to replace it?", "Save As", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION;
 			}
 			if (override)
 			{
 				setFile(newFile);
 				if (file != null)
+				{
 					save(file);
+				}
 			}
 		}
 	}
 
+	/**
+	 * Save the animation to the provided file
+	 * 
+	 * @param file The file to save the animation to
+	 */
 	private void save(File file)
 	{
 		if (file != null)
 		{
-			//			try
-			//			{
-			//				animation.save(file);
-			//				resetChanged();
-			//			}
-			//			catch (IOException e)
-			//			{
-			//				JOptionPane.showMessageDialog(frame, "Saving failed.\n" + e, "Error", JOptionPane.ERROR_MESSAGE);
-			//			}
-			//			setTitleBar();
+			try
+			{
+				AnimationWriter writer = new XmlAnimationWriter();
+				writer.writeAnimation(file, animation);
+				resetChanged();
+			}
+			catch (IOException e)
+			{
+				JOptionPane.showMessageDialog(frame, "Saving failed.\n" + e, "Error", JOptionPane.ERROR_MESSAGE);
+			}
+			setTitleBar();
 		}
 	}
 
+	/**
+	 * Set the current file for the animation
+	 * 
+	 * @param file The current file for the animation
+	 */
 	private void setFile(File file)
 	{
 		this.file = file;
@@ -1536,32 +1563,54 @@ public class Animator
 		//		changed = false;
 	}
 
+	/**
+	 * Prompt the user to save their changes if any exist.
+	 * 
+	 * @return <code>false</code> if the user cancelled the operation. <code>true</code> otherwise.
+	 */
 	private boolean querySave()
 	{
 		if (!changed)
+		{
 			return true;
+		}
 		String file = this.file == null ? "Animation" : "'" + this.file.getName() + "'";
 		String message = file + " has been modified. Save changes?";
-		int value =
-				JOptionPane.showConfirmDialog(frame, message, "Save", JOptionPane.YES_NO_CANCEL_OPTION,
-						JOptionPane.QUESTION_MESSAGE);
-		if (value == JOptionPane.CANCEL_OPTION)
+		
+		int response = JOptionPane.showConfirmDialog(frame, message, "Save", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+		
+		if (response == JOptionPane.CANCEL_OPTION)
+		{
 			return false;
-		if (value == JOptionPane.YES_OPTION)
+		}
+		if (response == JOptionPane.YES_OPTION)
+		{
 			save();
+		}
 		return true;
 	}
 
+	/**
+	 * Set the title bar of the application window. 
+	 * <p/>
+	 * The application title will include the file name of the current animation, and an 'isChanged' indicator. 
+	 */
 	private void setTitleBar()
 	{
 		String file;
 		String title = "World Wind Animator";
 		if (this.file != null)
+		{
 			file = this.file.getName();
+		}
 		else
+		{
 			file = "New animation";
+		}
 		if (changed)
+		{
 			file += " *";
+		}
 		title = file + " - " + title;
 		frame.setTitle(title);
 	}

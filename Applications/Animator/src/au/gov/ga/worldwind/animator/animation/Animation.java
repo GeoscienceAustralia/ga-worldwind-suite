@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.List;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
+import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.util.XmlSerializable;
 
 /**
  * An animation.
