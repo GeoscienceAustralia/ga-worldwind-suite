@@ -12,6 +12,7 @@ import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
 import au.gov.ga.worldwind.animator.util.Nameable;
+import au.gov.ga.worldwind.animator.util.XmlSerializable;
 
 /**
  * A {@link Parameter} represents a single animatable property of some {@link Animatable} object (e.g. Camera position, layer opacity etc.).
@@ -19,7 +20,7 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Parameter extends Serializable, Nameable
+public interface Parameter extends Serializable, Nameable, XmlSerializable<Parameter>
 {
 	
 	/**

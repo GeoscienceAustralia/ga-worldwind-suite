@@ -1,7 +1,9 @@
 package au.gov.ga.worldwind.animator.animation;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.WWXML;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,6 +11,8 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
+
+import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
@@ -449,6 +453,32 @@ public class WorldWindAnimationImpl implements Animation
 			insertKeyFrame(new KeyFrameImpl(newFrames[i], oldKeyFrames.get(i).getParameterValues()));
 		}
 		
+	}
+
+	@Override
+	public Element toXml(Element parent)
+	{
+		Element result = WWXML.appendElement(parent, "animation");
+		
+		WWXML.setIntegerAttribute(result, "frameCount", frameCount);
+		WWXML.setBooleanAttribute(result, "zoomRequired", isZoomScalingRequired());
+		
+		renderParameters.toXml(result);
+		
+		Element animatableContainer = WWXML.appendElement(result, "animatableObjects");
+		for (Animatable animatable : animatableObjects)
+		{
+			result.appendChild(animatable.toXml(animatableContainer));
+		}
+		
+		return result;
+	}
+
+	@Override
+	public Animation fromXml(Element element, String versionId, AVList context)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

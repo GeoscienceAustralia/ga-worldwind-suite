@@ -35,8 +35,12 @@ public class V2XmlAnimationWriter implements AnimationWriter
 	{
 		Document document = WWXML.createDocumentBuilder(false).newDocument();
 		
-		Element animationElement = document.createElement("animation");
-		WWXML.setTextAttribute(animationElement, "version", "2.0");
+		Element rootElement = document.createElement("worldWindAnimation");
+		document.appendChild(rootElement);
+		
+		WWXML.setTextAttribute(rootElement, "version", "2.0");
+
+		rootElement.appendChild(animation.toXml(rootElement));
 		
 		WWXML.saveDocumentToStream(document, new FileOutputStream(file));
 	}

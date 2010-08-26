@@ -3,7 +3,12 @@
  */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
+import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.util.WWXML;
+
 import java.util.List;
+
+import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
@@ -165,5 +170,30 @@ public abstract class ParameterBase implements Parameter
 		Validate.notNull(name, "A name is required");
 		this.name = name;
 		
+	}
+	
+	@Override
+	public Element toXml(Element parent)
+	{
+		Element result = WWXML.appendElement(parent, "parameter");
+		
+		WWXML.setTextAttribute(result, "name", getName());
+		WWXML.setDoubleAttribute(result, "defaultValue", defaultValue);
+		WWXML.setBooleanAttribute(result, "enabled", enabled);
+		
+		List<KeyFrame> keyFrames = getKeyFramesWithThisParameter();
+		for (KeyFrame keyFrame : keyFrames)
+		{
+			result.appendChild(keyFrame.getValueForParameter(this).toXml(result));
+		}
+		
+		return result;
+	}
+	
+	@Override
+	public Parameter fromXml(Element element, String versionId, AVList context)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

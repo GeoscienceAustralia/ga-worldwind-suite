@@ -3,6 +3,11 @@
  */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
+import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.util.WWXML;
+
+import org.w3c.dom.Element;
+
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -77,4 +82,25 @@ public class BasicParameterValue implements ParameterValue
 	{
 		// No smoothing applied to basic parameter values
 	}
+
+	@Override
+	public Element toXml(Element parent)
+	{
+		Element result = WWXML.appendElement(parent, "parameterValue");
+		
+		WWXML.setTextAttribute(result, "type", getType().name());
+		WWXML.setIntegerAttribute(result, "frame", getFrame());
+		WWXML.setDoubleAttribute(result, "value", getValue());
+		
+		return result;
+	}
+
+	@Override
+	public ParameterValue fromXml(Element element, String versionId, AVList context)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
 }

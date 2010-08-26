@@ -4,7 +4,9 @@
 package au.gov.ga.worldwind.animator.animation.camera;
 
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.util.WWXML;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.util.ArrayList;
@@ -12,6 +14,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.w3c.dom.Element;
+
+import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
@@ -186,20 +191,6 @@ public class CameraImpl extends AnimatableBase implements Camera
 	}
 
 	@Override
-	public String getRestorableState()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void restoreState(String stateInXml)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public Parameter getEyeLat()
 	{
 		return eyeLat;
@@ -333,4 +324,32 @@ public class CameraImpl extends AnimatableBase implements Camera
 		animation.removeEmptyKeyFrames();
 	}
 
+
+	@Override
+	public Element toXml(Element parent)
+	{
+		Element result = WWXML.appendElement(parent, "camera");
+		
+		WWXML.setTextAttribute(result, "name", getName());
+
+		result.appendChild(eyeLat.toXml(WWXML.appendElement(parent, "eyeLat")));
+		result.appendChild(eyeLon.toXml(WWXML.appendElement(parent, "eyeLon")));
+		result.appendChild(eyeElevation.toXml(WWXML.appendElement(parent, "eyeElevation")));
+		result.appendChild(lookAtLat.toXml(WWXML.appendElement(parent, "lookAtLat")));
+		result.appendChild(lookAtLon.toXml(WWXML.appendElement(parent, "lookAtLon")));
+		result.appendChild(lookAtElevation.toXml(WWXML.appendElement(parent, "lookAtElevation")));
+		
+		return result;
+	}
+
+
+	@Override
+	public Animatable fromXml(Element element, String versionId, AVList context)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
+	
 }

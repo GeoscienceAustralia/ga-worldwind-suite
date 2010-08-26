@@ -3,20 +3,19 @@
  */
 package au.gov.ga.worldwind.animator.animation;
 
-import gov.nasa.worldwind.Restorable;
-
 import java.io.Serializable;
 import java.util.Collection;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Nameable;
+import au.gov.ga.worldwind.animator.util.XmlSerializable;
 
 /**
  * An interface for objects that can be animated within an {@link Animation}
  *
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Animatable extends Serializable, Restorable, Nameable
+public interface Animatable extends Serializable, Nameable, XmlSerializable<Animatable>
 {
 	/**
 	 * Apply this object's behaviour/changes to the 'world' for the given frame

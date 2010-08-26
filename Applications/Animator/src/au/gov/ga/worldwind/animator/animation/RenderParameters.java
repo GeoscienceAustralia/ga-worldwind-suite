@@ -1,6 +1,13 @@
 package au.gov.ga.worldwind.animator.animation;
 
+import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.util.WWXML;
+
 import java.awt.Dimension;
+
+import org.w3c.dom.Element;
+
+import au.gov.ga.worldwind.animator.util.XmlSerializable;
 
 /**
  * A class that holds the render parameters associated with an animation 
@@ -8,7 +15,7 @@ import java.awt.Dimension;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public class RenderParameters
+public class RenderParameters implements XmlSerializable<RenderParameters>
 {
 	private static final Dimension DEFAULT_DIMENSIONS = new Dimension(1024, 576);
 	
@@ -59,6 +66,25 @@ public class RenderParameters
 	public void setFrameRate(int frameRate)
 	{
 		this.frameRate = frameRate;
+	}
+
+	@Override
+	public Element toXml(Element parent)
+	{
+		Element result = WWXML.appendElement(parent, "renderParameters");
+		
+		WWXML.appendInteger(result, "frameRate", getFrameRate());
+		WWXML.appendLong(result, "width", Math.round(imageDimension.getWidth()));
+		WWXML.appendLong(result, "height", Math.round(imageDimension.getHeight()));
+		
+		return result;
+	}
+
+	@Override
+	public RenderParameters fromXml(Element element, String versionId, AVList context)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

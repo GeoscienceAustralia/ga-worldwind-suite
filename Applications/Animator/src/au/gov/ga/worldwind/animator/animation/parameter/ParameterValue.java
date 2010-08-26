@@ -5,6 +5,8 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 
 import java.io.Serializable;
 
+import au.gov.ga.worldwind.animator.util.XmlSerializable;
+
 /**
  * A {@link ParameterValue} represents a snapshot of the value of a {@link Parameter}
  * at a given frame.
@@ -15,7 +17,7 @@ import java.io.Serializable;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface ParameterValue extends Serializable
+public interface ParameterValue extends Serializable, XmlSerializable<ParameterValue>
 {
 	/**
 	 * @return The value of this parameter value
