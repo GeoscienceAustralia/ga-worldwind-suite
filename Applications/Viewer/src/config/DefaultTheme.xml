@@ -13,12 +13,12 @@
 	<!--<InitialPitch></InitialPitch>-->
 
 	<!-- Heads-up-display elements (can also include special layers) -->
-	<HUD name="World Map" className="au.gov.ga.worldwind.theme.hud.WorldMapHUD" position="NorthWest" />
-	<HUD name="Compass" className="au.gov.ga.worldwind.theme.hud.CompassHUD" position="NorthEast" />
-	<HUD name="Scalebar" className="au.gov.ga.worldwind.theme.hud.ScalebarHUD" position="SouthEast" />
-	<HUD name="Navigation Controls" className="au.gov.ga.worldwind.theme.hud.ControlsHUD" position="SouthWest" />
-	<HUD name="Graticule" className="au.gov.ga.worldwind.theme.hud.GraticuleHUD" enabled="false" />
-	<HUD name="Crosshair" className="au.gov.ga.worldwind.theme.hud.CrosshairHUD" enabled="false" />
+	<HUD name="World Map" className="au.gov.ga.worldwind.viewer.theme.hud.WorldMapHUD" position="NorthWest" />
+	<HUD name="Compass" className="au.gov.ga.worldwind.viewer.theme.hud.CompassHUD" position="NorthEast" />
+	<HUD name="Scalebar" className="au.gov.ga.worldwind.viewer.theme.hud.ScalebarHUD" position="SouthEast" />
+	<HUD name="Navigation Controls" className="au.gov.ga.worldwind.viewer.theme.hud.ControlsHUD" position="SouthWest" />
+	<HUD name="Graticule" className="au.gov.ga.worldwind.viewer.theme.hud.GraticuleHUD" enabled="false" />
+	<HUD name="Crosshair" className="au.gov.ga.worldwind.viewer.theme.hud.CrosshairHUD" enabled="false" />
 
 	<!-- Datasets are shown in the Dataset panel -->
 	<Dataset name="Datasets" url="http://www.ga.gov.au/apps/world-wind/dataset/dataset.xml" />
@@ -32,15 +32,15 @@
 	-->
 
 	<!-- Sidebar panels -->
-	<Panel name="Search" className="au.gov.ga.worldwind.panels.geonames.GeoNamesSearchPanel"
+	<Panel name="Search" className="au.gov.ga.worldwind.viewer.panels.geonames.GeoNamesSearchPanel"
 		enabled="false" />
-	<Panel name="Places" className="au.gov.ga.worldwind.panels.places.PlacesPanel" enabled="false" />
-	<Panel name="Layers" className="au.gov.ga.worldwind.panels.layers.LayersPanel" />
-	<Panel name="Datasets" className="au.gov.ga.worldwind.panels.dataset.DatasetPanel" />
+	<Panel name="Places" className="au.gov.ga.worldwind.viewer.panels.places.PlacesPanel" enabled="false" />
+	<Panel name="Layers" className="au.gov.ga.worldwind.viewer.panels.layers.LayersPanel" />
+	<Panel name="Datasets" className="au.gov.ga.worldwind.viewer.panels.dataset.DatasetPanel" />
 	<!--
-		<Panel name="Theme Layers" className="au.gov.ga.worldwind.panels.layers.ThemeLayersPanel" />
+		<Panel name="Theme Layers" className="au.gov.ga.worldwind.viewer.panels.layers.ThemeLayersPanel" />
 	-->
-	<Panel name="Vertical Exaggeration" className="au.gov.ga.worldwind.panels.other.ExaggerationPanel"
+	<Panel name="Vertical Exaggeration" className="au.gov.ga.worldwind.viewer.panels.other.ExaggerationPanel"
 		enabled="false" />
 
 </Theme>
