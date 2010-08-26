@@ -6,7 +6,7 @@
 	
 	response.setContentType("application/x-java-jnlp-file");
 	String filename = document.substring(0, document.indexOf('.')) + ".jnlp";	
-	response.addHeader("Content-Disposition", "Inline; fileName=" + filename);
+	response.addHeader("Content-disposition", "inline; filename=" + filename);
 %>
 
 <?xml version="1.0" encoding="utf-8"?>
