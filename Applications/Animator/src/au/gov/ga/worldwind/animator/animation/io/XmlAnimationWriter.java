@@ -19,7 +19,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class V2XmlAnimationWriter implements AnimationWriter
+public class XmlAnimationWriter implements AnimationWriter
 {
 
 	@Override
