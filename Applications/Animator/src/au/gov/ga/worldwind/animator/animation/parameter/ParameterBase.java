@@ -13,6 +13,7 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -191,7 +192,7 @@ public abstract class ParameterBase implements Parameter
 	}
 	
 	@Override
-	public Parameter fromXml(Element element, String versionId, AVList context)
+	public Parameter fromXml(Element element, AnimationFileVersion versionId, AVList context)
 	{
 		// TODO Auto-generated method stub
 		return null;

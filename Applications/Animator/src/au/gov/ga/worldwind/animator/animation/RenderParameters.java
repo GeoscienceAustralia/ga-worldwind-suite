@@ -7,6 +7,7 @@ import java.awt.Dimension;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 
 /**
@@ -81,7 +82,7 @@ public class RenderParameters implements XmlSerializable<RenderParameters>
 	}
 
 	@Override
-	public RenderParameters fromXml(Element element, String versionId, AVList context)
+	public RenderParameters fromXml(Element element, AnimationFileVersion versionId, AVList context)
 	{
 		// TODO Auto-generated method stub
 		return null;

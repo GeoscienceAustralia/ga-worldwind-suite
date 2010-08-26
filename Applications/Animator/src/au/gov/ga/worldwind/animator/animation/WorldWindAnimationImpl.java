@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -483,7 +484,7 @@ public class WorldWindAnimationImpl implements Animation
 	}
 
 	@Override
-	public Animation fromXml(Element element, String versionId, AVList context)
+	public Animation fromXml(Element element, AnimationFileVersion versionId, AVList context)
 	{
 		// TODO Auto-generated method stub
 		return null;

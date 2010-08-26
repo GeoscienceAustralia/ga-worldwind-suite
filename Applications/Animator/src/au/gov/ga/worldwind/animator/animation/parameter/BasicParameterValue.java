@@ -8,6 +8,7 @@ import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -101,7 +102,7 @@ public class BasicParameterValue implements ParameterValue
 	}
 
 	@Override
-	public ParameterValue fromXml(Element element, String versionId, AVList context)
+	public ParameterValue fromXml(Element element, AnimationFileVersion versionId, AVList context)
 	{
 		return null;
 	}

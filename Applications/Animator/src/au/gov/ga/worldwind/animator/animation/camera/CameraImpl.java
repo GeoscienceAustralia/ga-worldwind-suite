@@ -22,6 +22,7 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -355,7 +356,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 
 
 	@Override
-	public Animatable fromXml(Element element, String versionId, AVList context)
+	public Animatable fromXml(Element element, AnimationFileVersion versionId, AVList context)
 	{
 		// TODO Auto-generated method stub
 		return null;

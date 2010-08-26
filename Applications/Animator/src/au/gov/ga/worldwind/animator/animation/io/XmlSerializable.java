@@ -35,5 +35,5 @@ public interface XmlSerializable<S>
 	 * 
 	 * @return The de-serialised object
 	 */
-	S fromXml(Element element, String versionId, AVList context);
+	S fromXml(Element element, AnimationFileVersion versionId, AVList context);
 }
