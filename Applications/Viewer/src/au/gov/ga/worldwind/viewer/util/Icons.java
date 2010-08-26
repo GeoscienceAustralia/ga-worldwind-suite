@@ -78,7 +78,7 @@ public enum Icons
 	world("world.gif"),
 	zwireframe("zwireframe.png");
 
-	private static final String ICON_DIRECTORY = "/au/gov/ga/worldwind/data/icons/";
+	private static final String ICON_DIRECTORY = "/au/gov/ga/worldwind/viewer/data/icons/";
 	private ImageIcon icon;
 	private URL url;
 
