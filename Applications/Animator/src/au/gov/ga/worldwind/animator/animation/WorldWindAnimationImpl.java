@@ -252,6 +252,12 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public void insertKeyFrame(KeyFrame keyFrame)
 	{
+		insertKeyFrame(keyFrame, true);
+	}
+	
+	@Override
+	public void insertKeyFrame(KeyFrame keyFrame, boolean applySmoothing)
+	{
 		if (keyFrame == null)
 		{
 			return;
@@ -271,8 +277,11 @@ public class WorldWindAnimationImpl implements Animation
 			this.keyFrameMap.put(keyFrame.getFrame(), keyFrame);
 		}
 		
-		// Smooth the key frames around this one
-		smoothKeyFrames(keyFrame);
+		if (applySmoothing)
+		{
+			// Smooth the key frames around this one
+			smoothKeyFrames(keyFrame);
+		}
 	}
 	
 	/**
@@ -468,9 +477,8 @@ public class WorldWindAnimationImpl implements Animation
 		Element animatableContainer = WWXML.appendElement(result, "animatableObjects");
 		for (Animatable animatable : animatableObjects)
 		{
-			result.appendChild(animatable.toXml(animatableContainer));
+			animatableContainer.appendChild(animatable.toXml(animatableContainer));
 		}
-		
 		return result;
 	}
 

@@ -26,6 +26,8 @@ public class XmlAnimationWriter implements AnimationWriter
 	public void writeAnimation(String fileName, Animation animation) throws IOException
 	{
 		Validate.notBlank(fileName, "A filename must be provided");
+		Validate.notNull(animation, "An animation must be provided");
+		
 		File outputFile = new File(fileName);
 		writeAnimation(outputFile, animation);
 	}
@@ -33,6 +35,9 @@ public class XmlAnimationWriter implements AnimationWriter
 	@Override
 	public void writeAnimation(File file, Animation animation) throws IOException
 	{
+		Validate.notNull(file, "A file must be provided");
+		Validate.notNull(animation, "An animation must be provided");
+		
 		Document document = WWXML.createDocumentBuilder(false).newDocument();
 		
 		Element rootElement = document.createElement("worldWindAnimation");

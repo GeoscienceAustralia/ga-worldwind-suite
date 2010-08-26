@@ -1,5 +1,9 @@
 package au.gov.ga.worldwind.animator.animation.parameter;
 
+import gov.nasa.worldwind.util.WWXML;
+
+import org.w3c.dom.Element;
+
 
 /**
  * A basic implementation of the {@link BezierParameterValue} interface.
@@ -253,6 +257,22 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		setOutValue(outValue);
 		
 		setLocked(wasLocked);
+	}
+	
+	@Override
+	public Element toXml(Element parent)
+	{
+		Element result = WWXML.appendElement(parent, "parameterValue");
+		
+		WWXML.setTextAttribute(result, "type", getType().name());
+		WWXML.setIntegerAttribute(result, "frame", getFrame());
+		WWXML.setDoubleAttribute(result, "value", getValue());
+		WWXML.setDoubleAttribute(result, "inValue", getInValue());
+		WWXML.setDoubleAttribute(result, "inPercent", getInPercent());
+		WWXML.setDoubleAttribute(result, "outValue", getOutValue());
+		WWXML.setDoubleAttribute(result, "outPercent", getOutPercent());
+		
+		return result;
 	}
 	
 	/**

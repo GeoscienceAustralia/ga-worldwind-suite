@@ -186,10 +186,25 @@ public interface Animation extends XmlSerializable<Animation>
 	 * <p/>
 	 * If a key frame already exists at the frame at which the key frame is inserted, the parameter values of the two key frames will be merged,
 	 * with those in the new key frame taking precedence.
+	 * <p/>
+	 * The inserted key frame, and those around it, will be smoothed.
 	 * 
 	 * @param keyFrame The key frame to insert.
 	 */
 	void insertKeyFrame(KeyFrame keyFrame);
+	
+	/**
+	 * Insert the provided key frame into the animation
+	 * <p/>
+	 * If a key frame already exists at the frame at which the key frame is inserted, the parameter values of the two key frames will be merged,
+	 * with those in the new key frame taking precedence.
+	 * <p/>
+	 * If <code>applySmoothing</code> is true, smoothing will be applied to the inserted key frame, and those around it to ensure
+	 * a smooth transition through the inserted key frame.
+	 * 
+	 * @param keyFrame The key frame to insert.
+	 */
+	void insertKeyFrame(KeyFrame keyFrame, boolean applySmoothing);
 	
 	/**
 	 * Remove the key frame at the given frame from the animation

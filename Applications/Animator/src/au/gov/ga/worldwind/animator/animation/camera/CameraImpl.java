@@ -332,12 +332,23 @@ public class CameraImpl extends AnimatableBase implements Camera
 		
 		WWXML.setTextAttribute(result, "name", getName());
 
-		result.appendChild(eyeLat.toXml(WWXML.appendElement(parent, "eyeLat")));
-		result.appendChild(eyeLon.toXml(WWXML.appendElement(parent, "eyeLon")));
-		result.appendChild(eyeElevation.toXml(WWXML.appendElement(parent, "eyeElevation")));
-		result.appendChild(lookAtLat.toXml(WWXML.appendElement(parent, "lookAtLat")));
-		result.appendChild(lookAtLon.toXml(WWXML.appendElement(parent, "lookAtLon")));
-		result.appendChild(lookAtElevation.toXml(WWXML.appendElement(parent, "lookAtElevation")));
+		Element eyeLatElement = WWXML.appendElement(result, "eyeLat");
+		eyeLatElement.appendChild(eyeLat.toXml(eyeLatElement));
+		
+		Element eyeLonElement = WWXML.appendElement(result, "eyeLon");
+		eyeLonElement.appendChild(eyeLon.toXml(eyeLonElement));
+		
+		Element eyeElevationElement = WWXML.appendElement(result, "eyeElevation");
+		eyeElevationElement.appendChild(eyeElevation.toXml(eyeElevationElement));
+		
+		Element lookAtLatElement = WWXML.appendElement(result, "lookAtLat");
+		lookAtLatElement.appendChild(lookAtLat.toXml(lookAtLatElement));
+		
+		Element lookAtLonElement = WWXML.appendElement(result, "lookAtLon");
+		lookAtLonElement.appendChild(lookAtLon.toXml(lookAtLonElement));
+		
+		Element lookAtElevationElement = WWXML.appendElement(result, "lookAtElevation");
+		lookAtElevationElement.appendChild(lookAtElevation.toXml(lookAtElevationElement));
 		
 		return result;
 	}
