@@ -64,7 +64,7 @@
 		<mkdir dir="${webstart_dir}" />
 		<jar destfile="${webstart_dir}/${app_unsigned_jar}" basedir="${build_dir}">
 			<manifest>
-				<attribute name="Main-Class" value="au.gov.ga.worldwind.application.Application" />
+				<attribute name="Main-Class" value="au.gov.ga.worldwind.viewer.application.Application" />
 			</manifest>
 		</jar>
 		<jar destfile="${webstart_dir}/${ww_unsigned_jar}">
@@ -100,7 +100,7 @@
 			</zipfileset>
 
 			<manifest>
-				<attribute name="Main-Class" value="au.gov.ga.worldwind.application.Executable" />
+				<attribute name="Main-Class" value="au.gov.ga.worldwind.viewer.application.Executable" />
 			</manifest>
 		</jar>
 

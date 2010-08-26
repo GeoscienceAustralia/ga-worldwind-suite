@@ -1,0 +1,90 @@
+package au.gov.ga.worldwind.viewer.panels.dataset;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+
+import javax.swing.Icon;
+import javax.swing.JScrollPane;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+
+import au.gov.ga.worldwind.viewer.components.lazytree.LazyTreeObjectNode;
+import au.gov.ga.worldwind.viewer.panels.layers.LayerTreeModel;
+import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
+import au.gov.ga.worldwind.viewer.theme.Theme;
+import au.gov.ga.worldwind.viewer.util.Icons;
+
+public class DatasetPanel extends AbstractThemePanel
+{
+	private DatasetTree tree;
+	private Dataset root;
+	private LazyTreeObjectNode rootNode;
+
+	public DatasetPanel()
+	{
+		super(new BorderLayout());
+		setDisplayName("Datasets");
+
+		root = new Dataset("root", null, null, true);
+		DefaultTreeModel model = new DefaultTreeModel(null);
+		rootNode = new LazyTreeObjectNode(root, model);
+		model.setRoot(rootNode);
+
+		tree = new DatasetTree(model);
+
+		JScrollPane scrollPane = new JScrollPane(tree);
+		add(scrollPane, BorderLayout.CENTER);
+		scrollPane.setPreferredSize(new Dimension(MINIMUM_LIST_HEIGHT, MINIMUM_LIST_HEIGHT));
+	}
+
+	@Override
+	public Icon getIcon()
+	{
+		return Icons.datasets.getIcon();
+	}
+
+	public DatasetTree getTree()
+	{
+		return tree;
+	}
+
+	public void registerLayerTreeModel(LayerTreeModel layerTreeModel)
+	{
+		tree.getDatasetCellRenderer().setLayerTreeModel(layerTreeModel);
+	}
+
+	@Override
+	public void setup(Theme theme)
+	{
+		for (IDataset dataset : theme.getDatasets())
+		{
+			root.getDatasets().add(dataset);
+		}
+		rootNode.refreshChildren(tree.getModel());
+
+		//expand root by default
+		if (rootNode.getChildCount() <= 0)
+		{
+			Object[] path = new Object[] { rootNode };
+			tree.expandPath(new TreePath(path));
+		}
+		else
+		{
+			int count = rootNode.getChildCount();
+			Object[][] paths = new Object[count][];
+			for (int i = 0; i < count; i++)
+			{
+				paths[i] = new Object[] { rootNode, rootNode.getChildAt(i) };
+			}
+			for (Object[] path : paths)
+			{
+				tree.expandPath(new TreePath(path));
+			}
+		}
+	}
+
+	@Override
+	public void dispose()
+	{
+	}
+}

@@ -41,7 +41,7 @@
 		<jar href="application.jar" main="true" />
 		<extension name="worldwind" href="<%= codebase %>worldwind.jnlp.jsp" />
 	</resources>
-	<application-desc main-class="au.gov.ga.worldwind.application.Application"><%
+	<application-desc main-class="au.gov.ga.worldwind.viewer.application.Application"><%
 			if(theme != null)
 			{
 		%>
