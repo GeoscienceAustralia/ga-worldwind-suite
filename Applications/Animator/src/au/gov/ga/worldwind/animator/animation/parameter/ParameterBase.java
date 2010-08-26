@@ -126,20 +126,6 @@ public abstract class ParameterBase implements Parameter
 	}
 	
 	@Override
-	public final String getRestorableState()
-	{
-		// TODO Implement me!
-		return null;
-	}
-
-	@Override
-	public final void restoreState(String stateInXml)
-	{
-		// TODO Implement me!
-
-	}
-	
-	@Override
 	public ParameterValue getValueAtKeyFrameBeforeFrame(int frame)
 	{
 		KeyFrame keyFrame = animation.getKeyFrameWithParameterBeforeFrame(this, frame);

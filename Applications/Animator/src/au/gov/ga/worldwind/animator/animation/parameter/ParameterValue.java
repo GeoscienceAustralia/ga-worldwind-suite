@@ -3,8 +3,6 @@
  */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
-import gov.nasa.worldwind.Restorable;
-
 import java.io.Serializable;
 
 /**
@@ -17,7 +15,7 @@ import java.io.Serializable;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface ParameterValue extends Restorable, Serializable
+public interface ParameterValue extends Serializable
 {
 	/**
 	 * @return The value of this parameter value

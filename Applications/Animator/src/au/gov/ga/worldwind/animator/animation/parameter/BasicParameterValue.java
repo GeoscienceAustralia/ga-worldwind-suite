@@ -37,19 +37,6 @@ public class BasicParameterValue implements ParameterValue
 	}
 	
 	@Override
-	public String getRestorableState()
-	{
-		// TODO Implement me!
-		return null;
-	}
-
-	@Override
-	public void restoreState(String stateInXml)
-	{
-		// TODO Implement me!
-	}
-
-	@Override
 	public double getValue()
 	{
 		return value;
