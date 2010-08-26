@@ -9,6 +9,7 @@ import gov.nasa.worldwind.util.WWXML;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -102,9 +103,30 @@ public class BasicParameterValue implements ParameterValue
 	}
 
 	@Override
-	public ParameterValue fromXml(Element element, AnimationFileVersion versionId, AVList context)
+	public ParameterValue fromXml(Element element, AnimationFileVersion version, AVList context)
 	{
-		return null;
+		Validate.notNull(element, "An XML element is required");
+		Validate.notNull(version, "A version ID is required");
+		Validate.notNull(context, "A context is required");
+		
+		switch (version)
+		{
+			case VERSION020:
+			{
+				BasicParameterValue result = new BasicParameterValue();
+				result.setValue(WWXML.getDouble(element, "@value", null));
+				result.setFrame(WWXML.getInteger(element, "@frame", null));
+				result.owner = (Parameter)context.getValue(version.getConstants().getParameterValueOwnerKey());
+				
+				Validate.notNull(result.owner, "No owner found in the context. Expected type Parameter under key " + version.getConstants().getParameterValueOwnerKey());
+
+				return result;
+			}
+			default:
+			{
+				return null;
+			}
+		}
 	}
 	
 	

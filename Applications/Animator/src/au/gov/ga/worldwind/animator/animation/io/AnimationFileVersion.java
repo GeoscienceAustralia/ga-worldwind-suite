@@ -12,8 +12,8 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 public enum AnimationFileVersion
 {
-	VERSION010("1.0"),
-	VERSION020("2.0");
+	VERSION010("1.0", new AnimationIOConstants.V2()),
+	VERSION020("2.0", new AnimationIOConstants.V2());
 
 	// The map of display names -> enums
 	private static final Map<String, AnimationFileVersion> DISPLAY_NAME_MAP = new HashMap<String, AnimationFileVersion>();
@@ -26,9 +26,13 @@ public enum AnimationFileVersion
 	/** The display name of this enum */
 	private String displayName;
 
-	private AnimationFileVersion(String display)
+	/** The IO constants to use for this version */
+	private AnimationIOConstants constants;
+	
+	private AnimationFileVersion(String display, AnimationIOConstants constants)
 	{
 		this.displayName = display;
+		this.constants = constants;
 	}
 	
 	/**
@@ -37,6 +41,20 @@ public enum AnimationFileVersion
 	public String getDisplayName()
 	{
 		return displayName;
+	}
+
+	/**
+	 * @return the constants used in files of this version
+	 */
+	public AnimationIOConstants getConstants()
+	{
+		return constants;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "Version " + getDisplayName();
 	}
 	
 	/**
@@ -50,11 +68,5 @@ public enum AnimationFileVersion
 	{
 		Validate.notBlank(displayName, "A display name must be provided");
 		return DISPLAY_NAME_MAP.get(displayName);
-	}
-	
-	@Override
-	public String toString()
-	{
-		return "Version " + getDisplayName();
 	}
 }
