@@ -22,6 +22,8 @@ import au.gov.ga.worldwind.animator.util.Validate;
 public class XmlAnimationWriter implements AnimationWriter
 {
 
+	private static final AnimationFileVersion CURRENT_FILE_VERSION = AnimationFileVersion.VERSION020;
+	
 	@Override
 	public void writeAnimation(String fileName, Animation animation) throws IOException
 	{
@@ -43,7 +45,7 @@ public class XmlAnimationWriter implements AnimationWriter
 		Element rootElement = document.createElement("worldWindAnimation");
 		document.appendChild(rootElement);
 		
-		WWXML.setTextAttribute(rootElement, "version", "2.0");
+		WWXML.setTextAttribute(rootElement, "version", CURRENT_FILE_VERSION.getDisplayName());
 
 		rootElement.appendChild(animation.toXml(rootElement));
 		
