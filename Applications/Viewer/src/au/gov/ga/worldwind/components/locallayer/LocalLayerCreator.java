@@ -892,7 +892,7 @@ public class LocalLayerCreator extends JDialog
 			//String lastUpdate = dateFormat.format(date);
 
 			String ext = extensionCombo.getSelectedItem().toString().toLowerCase();
-			String imageFormat = "image/" + ext;
+			String imageFormat = (ext.equals("zip") ? "application/" : "image/") + ext;
 
 			Integer levelsI = levelcountField.getValue();
 			int levels = levelsI == null ? 0 : levelsI;
@@ -944,7 +944,7 @@ public class LocalLayerCreator extends JDialog
 			params.setValue(AVKeyMore.DELEGATE_KIT, kit);
 
 			kit.setRequesterDelegate(new LocalRequesterDelegate());
-			
+
 			if (transparentCheck.isSelected())
 			{
 				kit.addTransformerDelegate(new TransparentColorTransformerDelegate(transparentColor

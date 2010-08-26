@@ -40,7 +40,7 @@ public class DelegateFactory
 			delegateClasses.add(delegateClass);
 			try
 			{
-				Constructor<? extends Delegate> c = delegateClass.getConstructor();
+				Constructor<? extends Delegate> c = delegateClass.getDeclaredConstructor();
 				c.setAccessible(true);
 				delegates.add(c.newInstance());
 			}

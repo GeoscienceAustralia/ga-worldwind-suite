@@ -15,7 +15,9 @@ public class TransparentColorTransformerDelegate implements ImageTransformerDele
 	protected final Color color;
 	protected final double fuzz;
 
-	public TransparentColorTransformerDelegate()
+	//for reflection instantiation
+	@SuppressWarnings("unused")
+	private TransparentColorTransformerDelegate()
 	{
 		this(Color.black, 0d);
 	}

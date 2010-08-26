@@ -14,7 +14,9 @@ public class ColorToAlphaTransformerDelegate implements ImageTransformerDelegate
 
 	protected final Color color;
 
-	public ColorToAlphaTransformerDelegate()
+	//for reflection instantiation
+	@SuppressWarnings("unused")
+	private ColorToAlphaTransformerDelegate()
 	{
 		this(Color.black);
 	}
