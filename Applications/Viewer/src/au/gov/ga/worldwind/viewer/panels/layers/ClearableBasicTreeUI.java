@@ -8,32 +8,35 @@ import javax.swing.tree.TreePath;
 
 public class ClearableBasicTreeUI extends BasicTreeUI
 {
-	private Object lock = new Object();
+	private boolean relayout = false;
+	private TreePath invalidatePath = null;
 
 	public void relayout(TreePath path)
 	{
-		treeState.invalidatePathBounds(path);
-		updateSize();
+		invalidatePath = path;
 	}
 
 	public void relayout()
 	{
-		synchronized (lock)
-		{
-			treeState.invalidateSizes();
-			updateSize();
-		}
+		relayout = true;
 	}
 
 	@Override
 	public void paint(Graphics g, JComponent c)
 	{
-		//TODO uncommenting this causes a deadlock, but if relayout() is called while
-		//painting, tree cell bounds can be broken. need some other way of synchronizing
-		
-		//synchronized (lock)
+		if (relayout || invalidatePath != null)
 		{
-			super.paint(g, c);
+			if (invalidatePath == null)
+				treeState.invalidateSizes();
+			else
+				treeState.invalidatePathBounds(invalidatePath);
+
+			updateSize();
+
+			relayout = false;
+			invalidatePath = null;
 		}
+
+		super.paint(g, c);
 	}
 }
