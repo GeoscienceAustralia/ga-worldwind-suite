@@ -5,7 +5,7 @@ import java.net.URL;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.viewer.util.XMLUtil;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 
 public class DatasetReader
 {

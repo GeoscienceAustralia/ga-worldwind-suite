@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.viewer.panels.dataset.IDataset;
 import au.gov.ga.worldwind.viewer.panels.dataset.LazyDataset;
 import au.gov.ga.worldwind.viewer.util.Icons;
-import au.gov.ga.worldwind.viewer.util.XMLUtil;
 
 public class ThemeFactory
 {

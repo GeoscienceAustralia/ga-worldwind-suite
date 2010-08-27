@@ -1,11 +1,11 @@
 package au.gov.ga.worldwind.viewer.terrain;
 
-import javax.media.opengl.GL;
-
 import gov.nasa.worldwind.render.DrawContext;
+import nasa.worldwind.terrain.RectangularTessellator;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.OGLStackHandler;
-import nasa.worldwind.terrain.RectangularTessellator;
+
+import javax.media.opengl.GL;
 
 public class WireframeRectangularTessellator extends RectangularTessellator
 {

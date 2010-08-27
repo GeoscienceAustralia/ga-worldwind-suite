@@ -7,15 +7,15 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-import au.gov.ga.worldwind.viewer.components.collapsiblesplit.CollapsibleSplitConstraints;
-import au.gov.ga.worldwind.viewer.components.collapsiblesplit.CollapsibleSplitLayout;
-import au.gov.ga.worldwind.viewer.components.collapsiblesplit.CollapsibleSplitListener;
-import au.gov.ga.worldwind.viewer.components.collapsiblesplit.CollapsibleSplitPane;
-import au.gov.ga.worldwind.viewer.components.collapsiblesplit.l2fprod.CollapsibleGroup;
+import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitConstraints;
+import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitLayout;
+import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitListener;
+import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
+import au.gov.ga.worldwind.common.ui.collapsiblesplit.l2fprod.CollapsibleGroup;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel;
-import au.gov.ga.worldwind.viewer.theme.ThemePiece;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel.ThemePanelListener;
+import au.gov.ga.worldwind.viewer.theme.ThemePiece;
 
 public class SideBar extends JPanel
 {

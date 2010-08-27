@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import au.gov.ga.worldwind.viewer.util.Util;
+import au.gov.ga.worldwind.common.util.Util;
 
 public class SubTile
 {

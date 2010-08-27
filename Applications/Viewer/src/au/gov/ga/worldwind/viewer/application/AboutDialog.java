@@ -21,10 +21,10 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent.EventType;
+import javax.swing.event.HyperlinkListener;
 
-import au.gov.ga.worldwind.viewer.util.DefaultLauncher;
+import au.gov.ga.worldwind.common.util.DefaultLauncher;
 
 
 public class AboutDialog extends JDialog

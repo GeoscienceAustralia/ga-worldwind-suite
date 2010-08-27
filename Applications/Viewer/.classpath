@@ -3,6 +3,6 @@
 	<classpathentry excluding="**/.svn/*" kind="src" path="src"/>
 	<classpathentry kind="src" path="experimental"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/worldwind-0.6.516.13497"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Common"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

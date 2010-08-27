@@ -32,10 +32,10 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import au.gov.ga.worldwind.viewer.components.FlatJButton;
-import au.gov.ga.worldwind.viewer.components.JDoubleField;
+import au.gov.ga.worldwind.common.ui.FlatJButton;
+import au.gov.ga.worldwind.common.ui.JDoubleField;
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.viewer.util.Icons;
-import au.gov.ga.worldwind.viewer.util.Util;
 
 
 public class PlaceEditor extends JDialog
@@ -730,8 +730,8 @@ public class PlaceEditor extends JDialog
 
 	private String labelFormatedLatLon(Place place)
 	{
-		return String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", place.getLatitude(), place
-				.getLongitude());
+		return String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", place.getLatitude(),
+				place.getLongitude());
 	}
 
 	private LatLon parseLatLon(String text)

@@ -12,12 +12,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import au.gov.ga.worldwind.common.util.EnumPersistenceDelegate;
 import au.gov.ga.worldwind.viewer.panels.places.Place;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel;
-import au.gov.ga.worldwind.viewer.util.EnumPersistenceDelegate;
-import au.gov.ga.worldwind.viewer.util.Util;
+import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public class Settings
 {
@@ -47,7 +47,7 @@ public class Settings
 
 	private static File getSettingsFile()
 	{
-		return Util.getSettingsFile("settings.xml");
+		return SettingsUtil.getSettingsFile("settings.xml");
 	}
 
 	public static boolean isStereoSupported()

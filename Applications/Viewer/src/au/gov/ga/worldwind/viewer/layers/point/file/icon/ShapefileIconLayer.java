@@ -17,9 +17,9 @@ import java.net.URL;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.viewer.layers.point.Style;
 import au.gov.ga.worldwind.viewer.layers.point.file.ShapefilePointLayer;
-import au.gov.ga.worldwind.viewer.util.DefaultLauncher;
 
 public class ShapefileIconLayer extends ShapefilePointLayer implements SelectListener
 {

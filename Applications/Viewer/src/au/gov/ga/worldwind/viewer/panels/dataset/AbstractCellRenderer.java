@@ -22,10 +22,10 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
+import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.viewer.components.lazytree.ErrorNode;
 import au.gov.ga.worldwind.viewer.components.lazytree.LoadingNode;
 import au.gov.ga.worldwind.viewer.components.lazytree.LoadingTree;
-import au.gov.ga.worldwind.viewer.util.HSLColor;
 import au.gov.ga.worldwind.viewer.util.Icons;
 
 public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconItem> extends JPanel

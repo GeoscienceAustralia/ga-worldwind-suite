@@ -43,14 +43,15 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import au.gov.ga.worldwind.viewer.components.FlatJButton;
+import au.gov.ga.worldwind.common.ui.FlatJButton;
+import au.gov.ga.worldwind.common.util.HSLColor;
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.viewer.panels.geonames.GeoNamesSearch.Results;
 import au.gov.ga.worldwind.viewer.panels.geonames.GeoNamesSearch.SearchType;
+import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
-import au.gov.ga.worldwind.viewer.util.HSLColor;
 import au.gov.ga.worldwind.viewer.util.Icons;
-import au.gov.ga.worldwind.viewer.util.Util;
 
 public class GeoNamesSearchPanel extends AbstractThemePanel
 {
@@ -321,13 +322,15 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 					OrbitView orbitView = (OrbitView) view;
 					Position center = orbitView.getCenterPosition();
 					Position newCenter = place.getPosition();
-					long lengthMillis = Util.getScaledLengthMillis(center, newCenter);
+					long lengthMillis =
+							Util.getScaledLengthMillis(Settings.get().getViewIteratorSpeed(),
+									center, newCenter);
 
 					double zoom = Math.max(1e4, Math.min(1e5, orbitView.getZoom()));
 
 					view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView,
-							center, newCenter, orbitView.getHeading(), Angle.ZERO, orbitView
-									.getPitch(), Angle.ZERO, orbitView.getZoom(), zoom,
+							center, newCenter, orbitView.getHeading(), Angle.ZERO,
+							orbitView.getPitch(), Angle.ZERO, orbitView.getZoom(), zoom,
 							lengthMillis, true));
 					wwd.redraw();
 				}

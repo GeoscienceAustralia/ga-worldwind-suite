@@ -65,10 +65,16 @@ import javax.swing.filechooser.FileFilter;
 
 import nasa.worldwind.awt.WorldWindowStereoGLCanvas;
 import nasa.worldwind.retrieve.ExtendedRetrievalService;
-import au.gov.ga.worldwind.viewer.components.HtmlViewer;
+import au.gov.ga.worldwind.common.downloader.Downloader;
+import au.gov.ga.worldwind.common.layers.LayerFactory;
+import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
+import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.HtmlViewer;
+import au.gov.ga.worldwind.common.ui.SelectableAction;
+import au.gov.ga.worldwind.common.util.DefaultLauncher;
+import au.gov.ga.worldwind.common.util.DoubleClickZoomListener;
+import au.gov.ga.worldwind.common.util.URLTransformer;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
-import au.gov.ga.worldwind.viewer.downloader.Downloader;
-import au.gov.ga.worldwind.viewer.layers.LayerFactory;
 import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.viewer.panels.SideBar;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
@@ -82,28 +88,24 @@ import au.gov.ga.worldwind.viewer.panels.layers.QueryClickListener;
 import au.gov.ga.worldwind.viewer.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.viewer.retrieve.PolylineLayerRetrievalListener;
 import au.gov.ga.worldwind.viewer.settings.Settings;
-import au.gov.ga.worldwind.viewer.settings.SettingsDialog;
 import au.gov.ga.worldwind.viewer.settings.Settings.ProxyType;
+import au.gov.ga.worldwind.viewer.settings.SettingsDialog;
 import au.gov.ga.worldwind.viewer.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
-import au.gov.ga.worldwind.viewer.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.viewer.terrain.SectionListCompoundElevationModel;
 import au.gov.ga.worldwind.viewer.terrain.WireframeRectangularTessellator;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
 import au.gov.ga.worldwind.viewer.theme.ThemeLayer;
 import au.gov.ga.worldwind.viewer.theme.ThemeOpener;
+import au.gov.ga.worldwind.viewer.theme.ThemeOpener.ThemeOpenDelegate;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel;
 import au.gov.ga.worldwind.viewer.theme.ThemePiece;
-import au.gov.ga.worldwind.viewer.theme.ThemeOpener.ThemeOpenDelegate;
 import au.gov.ga.worldwind.viewer.theme.ThemePiece.ThemePieceAdapter;
 import au.gov.ga.worldwind.viewer.theme.hud.WorldMapHUD;
-import au.gov.ga.worldwind.viewer.util.BasicAction;
-import au.gov.ga.worldwind.viewer.util.DefaultLauncher;
-import au.gov.ga.worldwind.viewer.util.DoubleClickZoomListener;
+import au.gov.ga.worldwind.viewer.util.GASandpit;
 import au.gov.ga.worldwind.viewer.util.Icons;
-import au.gov.ga.worldwind.viewer.util.SelectableAction;
-import au.gov.ga.worldwind.viewer.util.Util;
+import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public class Application
 {
@@ -594,7 +596,7 @@ public class Application
 			{
 				try
 				{
-					DefaultLauncher.openURL(GASandpit.replace(new URL(HELP_URL)));
+					DefaultLauncher.openURL(URLTransformer.transform(new URL(HELP_URL)));
 				}
 				catch (MalformedURLException e1)
 				{
@@ -807,7 +809,7 @@ public class Application
 			initPitch = 0d;
 
 		Position endCenter = Position.fromDegrees(initLat, initLon, beginCenter.getElevation());
-		long lengthMillis = Util.getScaledLengthMillis(beginCenter, endCenter);
+		long lengthMillis = SettingsUtil.getScaledLengthMillis(beginCenter, endCenter);
 
 		view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter,
 				endCenter, view.getHeading(), Angle.fromDegrees(initHeading), view.getPitch(),

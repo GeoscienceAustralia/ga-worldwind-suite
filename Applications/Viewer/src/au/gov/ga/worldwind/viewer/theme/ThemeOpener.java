@@ -5,9 +5,9 @@ import java.net.URL;
 
 import javax.swing.JOptionPane;
 
-import au.gov.ga.worldwind.viewer.downloader.Downloader;
-import au.gov.ga.worldwind.viewer.downloader.HttpException;
-import au.gov.ga.worldwind.viewer.downloader.RetrievalResult;
+import au.gov.ga.worldwind.common.downloader.Downloader;
+import au.gov.ga.worldwind.common.downloader.HttpException;
+import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 
 public class ThemeOpener
 {

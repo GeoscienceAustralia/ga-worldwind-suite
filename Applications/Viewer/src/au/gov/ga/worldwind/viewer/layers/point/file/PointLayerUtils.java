@@ -13,9 +13,9 @@ import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.viewer.layers.point.Attribute;
 import au.gov.ga.worldwind.viewer.layers.point.Style;
-import au.gov.ga.worldwind.viewer.util.XMLUtil;
 
 public class PointLayerUtils extends DataConfigurationUtils
 {

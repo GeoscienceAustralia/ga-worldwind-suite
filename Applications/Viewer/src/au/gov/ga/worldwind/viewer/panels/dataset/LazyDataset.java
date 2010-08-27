@@ -4,9 +4,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import au.gov.ga.worldwind.common.downloader.Downloader;
+import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.viewer.components.lazytree.LazyLoadListener;
-import au.gov.ga.worldwind.viewer.downloader.Downloader;
-import au.gov.ga.worldwind.viewer.downloader.RetrievalResult;
 
 public class LazyDataset extends Dataset implements ILazyDataset
 {

@@ -6,9 +6,9 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import au.gov.ga.worldwind.viewer.downloader.Downloader;
-import au.gov.ga.worldwind.viewer.downloader.RetrievalHandler;
-import au.gov.ga.worldwind.viewer.downloader.RetrievalResult;
+import au.gov.ga.worldwind.common.downloader.Downloader;
+import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
+import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 
 public abstract class AbstractIconItem implements IIconItem
 {

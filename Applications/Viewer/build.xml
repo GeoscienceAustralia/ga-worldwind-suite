@@ -3,6 +3,7 @@
 <project name="Viewer" basedir="." default="run">
 
 	<property name="src_dir" value="${basedir}/src" />
+	<property name="common_src_dir" value="${basedir}/../Common/src" />
 	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-0.6.516.13497" />
 	<property name="worldwind_jar" value="worldwind.jar" />
 	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
@@ -47,7 +48,6 @@
 		<delete file="${webstart_dir}/${ww_unsigned_jar}" />
 		<delete file="${webstart_dir}/${ww_signed_jar}" />
 		<delete file="${executable_dir}/${executable_jar}" />
-		<delete file="${executable_dir}/${offline_jar}" />
 	</target>
 
 	<target name="build">
@@ -56,8 +56,14 @@
 			<fileset dir="${src_dir}">
 				<exclude name="**/*.java" />
 			</fileset>
+			<fileset dir="${common_src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
 		</copy>
-		<javac source="1.5" target="1.5" srcdir="${src_dir}" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" />
+		<javac source="1.5" target="1.5" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}">
+			<src path="${src_dir}" />
+			<src path="${common_src_dir}" />
+		</javac>
 	</target>
 
 	<target name="package" depends="build">
@@ -79,7 +85,7 @@
 		<signjar jar="${webstart_dir}/${ww_unsigned_jar}" signedjar="${webstart_dir}/${ww_signed_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
 	</target>
 
-	<target name="executables" depends="build">
+	<target name="executable" depends="build">
 		<mkdir dir="${executable_dir}" />
 
 		<zip destfile="${executable_dir}/temp.zip">
@@ -107,5 +113,5 @@
 		<delete file="${executable_dir}/temp.zip" />
 	</target>
 
-	<target name="run" depends="sign, executables" />
+	<target name="run" depends="sign, executable" />
 </project>

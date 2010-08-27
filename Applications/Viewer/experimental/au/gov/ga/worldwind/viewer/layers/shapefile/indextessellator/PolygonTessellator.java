@@ -20,8 +20,8 @@ import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
 
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.viewer.layers.shapefile.FastShape;
-import au.gov.ga.worldwind.viewer.util.Util;
 
 import com.sun.opengl.util.BufferUtil;
 

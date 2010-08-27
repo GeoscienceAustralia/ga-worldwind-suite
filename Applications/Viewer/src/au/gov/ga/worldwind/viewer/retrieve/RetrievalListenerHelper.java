@@ -19,8 +19,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 import au.gov.ga.worldwind.viewer.layers.geonames.GeoNamesLayer;
-import au.gov.ga.worldwind.viewer.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 
 public class RetrievalListenerHelper
 {

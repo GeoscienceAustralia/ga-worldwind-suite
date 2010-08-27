@@ -47,13 +47,13 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
+import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
-import au.gov.ga.worldwind.viewer.util.BasicAction;
-import au.gov.ga.worldwind.viewer.util.HSLColor;
 import au.gov.ga.worldwind.viewer.util.Icons;
-import au.gov.ga.worldwind.viewer.util.Util;
+import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public class PlacesPanel extends AbstractThemePanel
 {
@@ -629,7 +629,7 @@ public class PlacesPanel extends AbstractThemePanel
 			Position center = orbitView.getCenterPosition();
 			Position newCenter =
 					Position.fromDegrees(place.getLatitude(), place.getLongitude(), elevation);
-			long lengthMillis = Util.getScaledLengthMillis(center, newCenter);
+			long lengthMillis = SettingsUtil.getScaledLengthMillis(center, newCenter);
 
 			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView, center,
 					newCenter, orbitView.getHeading(), heading, orbitView.getPitch(), pitch,

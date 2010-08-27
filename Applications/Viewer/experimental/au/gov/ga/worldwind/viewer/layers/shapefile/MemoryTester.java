@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.viewer.util.Util;
+import au.gov.ga.worldwind.common.util.Util;
 
 public class MemoryTester
 {

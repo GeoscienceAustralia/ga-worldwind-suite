@@ -44,20 +44,20 @@ import javax.swing.event.DocumentListener;
 
 import org.w3c.dom.Document;
 
-import au.gov.ga.worldwind.viewer.components.JDoubleField;
-import au.gov.ga.worldwind.viewer.components.JIntegerField;
-import au.gov.ga.worldwind.viewer.layers.tiled.image.delegate.DelegateKit;
-import au.gov.ga.worldwind.viewer.layers.tiled.image.delegate.DelegatorTiledImageLayer;
-import au.gov.ga.worldwind.viewer.layers.tiled.image.delegate.LocalRequesterDelegate;
-import au.gov.ga.worldwind.viewer.layers.tiled.image.delegate.MaskImageReaderDelegate;
-import au.gov.ga.worldwind.viewer.layers.tiled.image.delegate.transparentcolor.TransparentColorTransformerDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegateKit;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.LocalRequesterDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.MaskImageReaderDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.transparentcolor.TransparentColorTransformerDelegate;
+import au.gov.ga.worldwind.common.ui.JDoubleField;
+import au.gov.ga.worldwind.common.ui.JIntegerField;
+import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.dataset.LayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel.LayerDefinitionFileFilter;
-import au.gov.ga.worldwind.viewer.util.AVKeyMore;
 import au.gov.ga.worldwind.viewer.util.Icons;
-import au.gov.ga.worldwind.viewer.util.Util;
-import au.gov.ga.worldwind.viewer.util.XMLUtil;
 
 public class LocalLayerCreator extends JDialog
 {

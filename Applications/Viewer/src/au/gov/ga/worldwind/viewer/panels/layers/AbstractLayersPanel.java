@@ -31,16 +31,15 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
 import nasa.worldwind.retrieve.ExtendedRetrievalService;
-
-import au.gov.ga.worldwind.viewer.components.resizabletoolbar.ResizableToolBar;
+import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.resizabletoolbar.ResizableToolBar;
+import au.gov.ga.worldwind.common.util.FlyToSectorAnimator;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerEnabler.RefreshListener;
 import au.gov.ga.worldwind.viewer.retrieve.LayerTreeRetrievalListener;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
-import au.gov.ga.worldwind.viewer.util.BasicAction;
-import au.gov.ga.worldwind.viewer.util.FlyToSectorAnimator;
 import au.gov.ga.worldwind.viewer.util.Icons;
-import au.gov.ga.worldwind.viewer.util.Util;
+import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public abstract class AbstractLayersPanel extends AbstractThemePanel
 {
@@ -110,45 +109,58 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			{
 				if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1)
 				{
-					TreePath path = tree.getPathForLocation(e.getX(), e.getY());
-					if (path != null)
+					int row = tree.getRowForLocation(e.getX(), e.getY());
+					Rectangle bounds = tree.getRowBounds(row);
+
+					//remove height from left edge to ignore space taken by the checkbox
+					bounds.width -= bounds.height;
+					bounds.x += bounds.height;
+
+					if (bounds.contains(e.getX(), e.getY()))
 					{
-						Object o = path.getLastPathComponent();
-						if (o != null && o instanceof ILayerNode)
+						TreePath path = tree.getPathForRow(row);
+						if (path != null)
 						{
-							ILayerNode layer = (ILayerNode) o;
-							Sector sector = layerEnabler.getLayerExtents(layer);
-							if (sector != null)
+							Object o = path.getLastPathComponent();
+							if (o != null && o instanceof ILayerNode)
 							{
-								if (wwd.getView() instanceof OrbitView)
+								ILayerNode layer = (ILayerNode) o;
+								Sector sector = layerEnabler.getLayerExtents(layer);
+								if (sector != null)
 								{
-									OrbitView orbitView = (OrbitView) wwd.getView();
-									Position center = orbitView.getCenterPosition();
-									Position newCenter;
-									if (sector.contains(center) && sector.getDeltaLatDegrees() > 90
-											&& sector.getDeltaLonDegrees() > 90)
+									if (wwd.getView() instanceof OrbitView)
 									{
-										newCenter = center;
+										OrbitView orbitView = (OrbitView) wwd.getView();
+										Position center = orbitView.getCenterPosition();
+										Position newCenter;
+										if (sector.contains(center)
+												&& sector.getDeltaLatDegrees() > 90
+												&& sector.getDeltaLonDegrees() > 90)
+										{
+											newCenter = center;
+										}
+										else
+										{
+											newCenter = new Position(sector.getCentroid(), 0);
+										}
+
+										LatLon endVisibleDelta =
+												new LatLon(sector.getDeltaLat(), sector
+														.getDeltaLon());
+										long lengthMillis =
+												SettingsUtil.getScaledLengthMillis(center,
+														newCenter);
+
+										FlyToOrbitViewAnimator animator =
+												FlyToSectorAnimator.createFlyToSectorAnimator(
+														orbitView, center, newCenter,
+														orbitView.getHeading(),
+														orbitView.getPitch(), orbitView.getZoom(),
+														endVisibleDelta, lengthMillis);
+										orbitView.addAnimator(animator);
+
+										wwd.redraw();
 									}
-									else
-									{
-										newCenter = new Position(sector.getCentroid(), 0);
-									}
-
-									LatLon endVisibleDelta =
-											new LatLon(sector.getDeltaLat(), sector.getDeltaLon());
-									long lengthMillis =
-											Util.getScaledLengthMillis(center, newCenter);
-
-									FlyToOrbitViewAnimator animator =
-											FlyToSectorAnimator.createFlyToSectorAnimator(
-													orbitView, center, newCenter,
-													orbitView.getHeading(), orbitView.getPitch(),
-													orbitView.getZoom(), endVisibleDelta,
-													lengthMillis);
-									orbitView.addAnimator(animator);
-
-									wwd.redraw();
 								}
 							}
 						}

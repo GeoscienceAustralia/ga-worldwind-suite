@@ -15,7 +15,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import au.gov.ga.worldwind.viewer.util.Util;
+import au.gov.ga.worldwind.common.util.Util;
 
 public class Sandpit extends ApplicationTemplate
 {

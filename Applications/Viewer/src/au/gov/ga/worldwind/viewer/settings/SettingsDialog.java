@@ -44,7 +44,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import au.gov.ga.worldwind.viewer.components.JIntegerField;
+import au.gov.ga.worldwind.common.ui.JIntegerField;
 import au.gov.ga.worldwind.viewer.settings.Settings.ProjectionMode;
 import au.gov.ga.worldwind.viewer.settings.Settings.ProxyType;
 import au.gov.ga.worldwind.viewer.settings.Settings.StereoMode;

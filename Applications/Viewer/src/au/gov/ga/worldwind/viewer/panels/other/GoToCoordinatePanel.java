@@ -38,9 +38,10 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import au.gov.ga.worldwind.viewer.components.FlatJButton;
+import au.gov.ga.worldwind.common.ui.FlatJButton;
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.viewer.util.Icons;
-import au.gov.ga.worldwind.viewer.util.Util;
+import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public class GoToCoordinatePanel extends JPanel
 {
@@ -148,8 +149,8 @@ public class GoToCoordinatePanel extends JPanel
 		if (latlon != null)
 		{
 			// coordInput.setText(coordInput.getText().toUpperCase());
-			resultLabel.setText(String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", latlon
-					.getLatitude().degrees, latlon.getLongitude().degrees));
+			resultLabel.setText(String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0",
+					latlon.getLatitude().degrees, latlon.getLongitude().degrees));
 		}
 		else if (showInvalid)
 			resultLabel.setText("Invalid coordinates");
@@ -170,7 +171,7 @@ public class GoToCoordinatePanel extends JPanel
 
 			Position beginCenter = view.getCenterPosition();
 			Position center = new Position(latLon, 0);
-			long lengthMillis = Util.getScaledLengthMillis(beginCenter, center);
+			long lengthMillis = SettingsUtil.getScaledLengthMillis(beginCenter, center);
 
 			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter,
 					center, view.getHeading(), view.getHeading(), view.getPitch(), view.getPitch(),

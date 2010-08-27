@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import au.gov.ga.worldwind.viewer.downloader.Downloader;
-import au.gov.ga.worldwind.viewer.downloader.RetrievalHandler;
-import au.gov.ga.worldwind.viewer.downloader.RetrievalResult;
-import au.gov.ga.worldwind.viewer.util.Bounded;
+import au.gov.ga.worldwind.common.downloader.Downloader;
+import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
+import au.gov.ga.worldwind.common.downloader.RetrievalResult;
+import au.gov.ga.worldwind.common.layers.Bounded;
 
 public class LayerEnabler
 {
