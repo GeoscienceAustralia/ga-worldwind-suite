@@ -76,82 +76,15 @@ public class CameraImpl extends AnimatableBase implements Camera
 	 * 
 	 * @param animation
 	 */
-	@SuppressWarnings("serial")
 	private void initialiseParameters(Animation animation)
 	{
-		eyeLat =
-				new ParameterBase(MessageSourceAccessor.get().getMessage(
-						AnimationMessageConstants.getCameraEyeLatNameKey(), DEFAULT_PARAMETER_NAME), animation)
-				{
-					@Override
-					public ParameterValue getCurrentValue(AnimationContext context)
-					{
-						double value = context.getView().getEyePosition().getLatitude().getDegrees();
-						return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-					}
-				};
+		eyeLat = new EyeLatParameter(animation);
+		eyeLon = new EyeLonParameter(animation);
+		eyeElevation = new EyeElevationParameter(animation);
 
-		eyeLon =
-				new ParameterBase(MessageSourceAccessor.get().getMessage(
-						AnimationMessageConstants.getCameraEyeLonNameKey(), DEFAULT_PARAMETER_NAME), animation)
-				{
-					@Override
-					public ParameterValue getCurrentValue(AnimationContext context)
-					{
-						double value = context.getView().getEyePosition().getLongitude().getDegrees();
-						return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-					}
-				};
-
-		eyeElevation =
-				new ParameterBase(MessageSourceAccessor.get().getMessage(
-						AnimationMessageConstants.getCameraEyeZoomNameKey(), DEFAULT_PARAMETER_NAME), animation)
-				{
-					@Override
-					public ParameterValue getCurrentValue(AnimationContext context)
-					{
-						double value = context.applyZoomScaling(context.getView().getEyePosition().getElevation());
-						return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-					}
-				};
-
-		lookAtLat =
-				new ParameterBase(MessageSourceAccessor.get().getMessage(
-						AnimationMessageConstants.getCameraLookatLatNameKey(), DEFAULT_PARAMETER_NAME), animation)
-				{
-					@Override
-					public ParameterValue getCurrentValue(AnimationContext context)
-					{
-						double value = ((OrbitView) context.getView()).getCenterPosition().getLatitude().getDegrees();
-						return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-					}
-				};
-
-		lookAtLon =
-				new ParameterBase(MessageSourceAccessor.get().getMessage(
-						AnimationMessageConstants.getCameraLookatLonNameKey(), DEFAULT_PARAMETER_NAME), animation)
-				{
-					@Override
-					public ParameterValue getCurrentValue(AnimationContext context)
-					{
-						double value = ((OrbitView) context.getView()).getCenterPosition().getLongitude().getDegrees();
-						return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-					}
-				};
-
-		lookAtElevation =
-				new ParameterBase(MessageSourceAccessor.get().getMessage(
-						AnimationMessageConstants.getCameraLookatZoomNameKey(), DEFAULT_PARAMETER_NAME), animation)
-				{
-					@Override
-					public ParameterValue getCurrentValue(AnimationContext context)
-					{
-						double value =
-								context.applyZoomScaling(((OrbitView) context.getView()).getCenterPosition()
-										.getElevation());
-						return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-					}
-				};
+		lookAtLat = new LookatLatParameter(animation);
+		lookAtLon = new LookatLonParameter(animation);
+		lookAtElevation = new LookatElevationParameter(animation);
 
 		parameters = new ArrayList<Parameter>(6);
 		parameters.add(eyeLat);
@@ -362,6 +295,166 @@ public class CameraImpl extends AnimatableBase implements Camera
 		return null;
 	}
 
+	/**
+	 * Parameter for eye latitude
+	 */
+	@SuppressWarnings("serial")
+	private static class EyeLatParameter extends ParameterBase
+	{
+		public EyeLatParameter(Animation animation)
+		{
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLatNameKey(), DEFAULT_PARAMETER_NAME), animation);
+		}
+		
+		private EyeLatParameter(){super();}
+		
+		@Override
+		public ParameterValue getCurrentValue(AnimationContext context)
+		{
+			double value = context.getView().getEyePosition().getLatitude().getDegrees();
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+		}
+
+		@Override
+		protected ParameterBase createParameter()
+		{
+			return new EyeLatParameter();
+		}
+	}
 	
+	/**
+	 * Parameter for eye longitude
+	 */
+	@SuppressWarnings("serial")
+	private static class EyeLonParameter extends ParameterBase
+	{
+		public EyeLonParameter(Animation animation)
+		{
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLonNameKey(), DEFAULT_PARAMETER_NAME), animation);
+		}
+		
+		private EyeLonParameter(){super();}
+		
+		@Override
+		public ParameterValue getCurrentValue(AnimationContext context)
+		{
+			double value = context.getView().getEyePosition().getLongitude().getDegrees();
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+		}
+
+		@Override
+		protected ParameterBase createParameter()
+		{
+			return new EyeLonParameter();
+		}
+	}
+	
+	/**
+	 * Parameter for eye elevation
+	 */
+	@SuppressWarnings("serial")
+	private static class EyeElevationParameter extends ParameterBase
+	{
+		public EyeElevationParameter(Animation animation)
+		{
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeZoomNameKey(), DEFAULT_PARAMETER_NAME), animation);
+		}
+		
+		private EyeElevationParameter(){super();}
+		
+		@Override
+		public ParameterValue getCurrentValue(AnimationContext context)
+		{
+			double value = context.applyZoomScaling(context.getView().getEyePosition().getElevation());
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+		}
+
+		@Override
+		protected ParameterBase createParameter()
+		{
+			return new EyeElevationParameter();
+		}
+	}
+	
+	/**
+	 * Parameter for look-at latitude
+	 */
+	@SuppressWarnings("serial")
+	private static class LookatLatParameter extends ParameterBase
+	{
+		public LookatLatParameter(Animation animation)
+		{
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLatNameKey(), DEFAULT_PARAMETER_NAME), animation);
+		}
+		
+		private LookatLatParameter(){super();}
+		
+		@Override
+		public ParameterValue getCurrentValue(AnimationContext context)
+		{
+			double value = ((OrbitView) context.getView()).getCenterPosition().getLatitude().getDegrees();
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+		}
+
+		@Override
+		protected ParameterBase createParameter()
+		{
+			return new LookatLatParameter();
+		}
+	}
+	
+	/**
+	 * Parameter for look-at longitude
+	 */
+	@SuppressWarnings("serial")
+	private static class LookatLonParameter extends ParameterBase
+	{
+		public LookatLonParameter(Animation animation)
+		{
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLonNameKey(), DEFAULT_PARAMETER_NAME), animation);
+		}
+		
+		private LookatLonParameter(){super();}
+		
+		@Override
+		public ParameterValue getCurrentValue(AnimationContext context)
+		{
+			double value = ((OrbitView) context.getView()).getCenterPosition().getLongitude().getDegrees();
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+		}
+
+		@Override
+		protected ParameterBase createParameter()
+		{
+			return new LookatLonParameter();
+		}
+	}
+	
+	/**
+	 * Parameter for look-at elevation
+	 */
+	@SuppressWarnings("serial")
+	private static class LookatElevationParameter extends ParameterBase
+	{
+		public LookatElevationParameter(Animation animation)
+		{
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatZoomNameKey(), DEFAULT_PARAMETER_NAME), animation);
+		}
+		
+		private LookatElevationParameter(){super();}
+		
+		@Override
+		public ParameterValue getCurrentValue(AnimationContext context)
+		{
+			double value = context.applyZoomScaling(((OrbitView) context.getView()).getCenterPosition().getElevation());
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+		}
+
+		@Override
+		protected ParameterBase createParameter()
+		{
+			return new LookatElevationParameter();
+		}
+	}
 	
 }

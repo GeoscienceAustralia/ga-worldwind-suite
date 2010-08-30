@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.animator.animation.io;
 
+import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
@@ -9,10 +10,23 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
  */
 public interface AnimationIOConstants
 {
+	// -------------------------------------
+	// Context keys
+	// -------------------------------------
+	
+	/**
+	 * @return The context key for the animation in context. Of type {@link Animation}.
+	 */
+	String getAnimationKey();
+	
 	/**
 	 * @return The context key for the parameter value owner. Of type {@link Parameter}.
 	 */
 	String getParameterValueOwnerKey();
+	
+	// -------------------------------------
+	// XML elements and attributes
+	// -------------------------------------
 	
 	/**
 	 * @return The name of the 'parameter value' element
@@ -59,6 +73,20 @@ public interface AnimationIOConstants
 	 */
 	String getBezierValueAttributeLocked();
 
+	/**
+	 * @return The name of the 'default value' attribute on the parameter element
+	 */
+	String getParameterAttributeDefaultValue();
+	
+	/**
+	 * @return The name of the 'name' attribute on the parameter element
+	 */
+	String getParameterAttributeName();
+	
+	/**
+	 * @return The name of the 'enabled' attribute on the parameter element
+	 */
+	String getParameterAttributeEnabled();
 	
 	/**
 	 * Common constants that don't change across versions
@@ -68,6 +96,8 @@ public interface AnimationIOConstants
 		@Override
 		public String getParameterValueOwnerKey() {return "parameterValueOwner";}
 		
+		@Override
+		public String getAnimationKey() {return "currentAnimation";}
 	}
 	
 	/**
@@ -98,9 +128,17 @@ public interface AnimationIOConstants
 
 		@Override
 		public String getBezierValueAttributeOutPercent() {return "outPercent";}
+		
 		@Override
 		public String getBezierValueAttributeLocked() {return "locked";}
 		
+		@Override
+		public String getParameterAttributeDefaultValue() {return "defaultValue";}
+		
+		@Override
+		public String getParameterAttributeName() {return "name";}
+		
+		@Override
+		public String getParameterAttributeEnabled() {return "enabled";}
 	}
-
 }

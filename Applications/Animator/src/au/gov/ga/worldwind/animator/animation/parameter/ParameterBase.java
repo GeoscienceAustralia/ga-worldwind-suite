@@ -13,7 +13,9 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
+import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -56,6 +58,11 @@ public abstract class ParameterBase implements Parameter
 		this.name = name;
 		this.animation = animation;
 	}
+	
+	/**
+	 * Constructor. For use during de-serialisation.
+	 */
+	protected ParameterBase(){}
 	
 	@Override
 	public final boolean isEnabled()
@@ -176,11 +183,13 @@ public abstract class ParameterBase implements Parameter
 	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
+		AnimationIOConstants constants = version.getConstants();
+		
 		Element result = WWXML.appendElement(parent, "parameter");
 		
-		WWXML.setTextAttribute(result, "name", getName());
-		WWXML.setDoubleAttribute(result, "defaultValue", defaultValue);
-		WWXML.setBooleanAttribute(result, "enabled", enabled);
+		WWXML.setTextAttribute(result, constants.getParameterAttributeName(), getName());
+		WWXML.setDoubleAttribute(result, constants.getParameterAttributeDefaultValue(), defaultValue);
+		WWXML.setBooleanAttribute(result, constants.getParameterAttributeEnabled(), enabled);
 		
 		List<KeyFrame> keyFrames = getKeyFramesWithThisParameter();
 		for (KeyFrame keyFrame : keyFrames)
@@ -192,9 +201,41 @@ public abstract class ParameterBase implements Parameter
 	}
 	
 	@Override
-	public Parameter fromXml(Element element, AnimationFileVersion versionId, AVList context)
+	public Parameter fromXml(Element element, AnimationFileVersion version, AVList context)
 	{
-		// TODO Auto-generated method stub
+		Validate.notNull(element, "An XML element is required");
+		Validate.notNull(version, "A version ID is required");
+		Validate.notNull(context, "A context is required");
+		
+		AnimationIOConstants constants = version.getConstants();
+		
+		switch (version)
+		{
+			case VERSION020:
+			{
+				Validate.isTrue(context.hasKey(constants.getAnimationKey()), "An animation is required in context.");
+				
+				ParameterBase result = createParameter();
+				result.animation = (Animation)context.getValue(constants.getAnimationKey());
+				result.setDefaultValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeDefaultValue(), null));
+				result.setName(WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeName()));
+				result.setEnabled(WWXML.getBoolean(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeEnabled(), null));
+				
+				// Create a parameter value for each child element
+				// Insert it as a key frame
+				context.setValue(constants.getParameterValueOwnerKey(), result);
+				for (Element e : WWXML.getElements(element, constants.getParameterValueElementName(), null))
+				{
+					ParameterValue v = ParameterValueFactory.fromXml(e, version, context);
+					animation.insertKeyFrame(new KeyFrameImpl(v.getFrame(), v), false);
+				}
+			}
+		}
 		return null;
 	}
+	
+	/**
+	 * @return A new instance of this parameter
+	 */
+	protected abstract ParameterBase createParameter();
 }

@@ -4,6 +4,7 @@
 package au.gov.ga.worldwind.animator.animation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,20 @@ public class KeyFrameImpl implements KeyFrame
 		{
 			addParameterValue(parameterValue);
 		}
+	}
+	
+	/**
+	 * Constructor.
+	 * <p/>
+	 * Initialises the mandatory frame and parameter values
+	 * 
+	 * @param frame The frame at which this key frame applies
+	 * @param parameterValues The parameter values associated with this key frame. 
+	 * 						  At least one value must be provided.
+	 */
+	public KeyFrameImpl(int frame, ParameterValue... parameterValues)
+	{
+		this(frame, Arrays.asList(parameterValues));
 	}
 	
 	@Override
