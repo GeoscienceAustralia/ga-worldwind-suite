@@ -6,8 +6,10 @@ import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.RenderingEvent;
+import gov.nasa.worldwind.event.RenderingExceptionListener;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
+import gov.nasa.worldwind.exception.WWAbsentRequirementException;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Earth;
@@ -311,6 +313,25 @@ public class Application
 		create3DMouse();
 		createDoubleClickListener();
 
+		wwd.addRenderingExceptionListener(new RenderingExceptionListener()
+		{
+			@Override
+			public void exceptionThrown(Throwable t)
+			{
+				if (t instanceof WWAbsentRequirementException)
+				{
+					String message = "Computer does not meet minimum graphics requirements.\n";
+					message += "Please install up-to-date graphics driver and try again.\n";
+					message += "Reason: " + t.getMessage() + "\n";
+					message += "This program will end when you press OK.";
+
+					JOptionPane.showMessageDialog(frame, message, "Unable to Start Program",
+							JOptionPane.ERROR_MESSAGE);
+					System.exit(-1);
+				}
+			}
+		});
+
 		//hide splash screen when first frame is rendered
 		wwd.addRenderingListener(new RenderingListener()
 		{
@@ -386,7 +407,7 @@ public class Application
 			{
 				nodes.add(LayerNode.createFromLayerDefinition(layer));
 			}
-			
+
 			LayerEnabler enabler = new LayerEnabler();
 			enabler.setWwd(wwd);
 			enabler.enable(nodes);
