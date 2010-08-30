@@ -174,7 +174,7 @@ public abstract class ParameterBase implements Parameter
 	}
 	
 	@Override
-	public Element toXml(Element parent)
+	public Element toXml(Element parent, AnimationFileVersion version)
 	{
 		Element result = WWXML.appendElement(parent, "parameter");
 		
@@ -185,7 +185,7 @@ public abstract class ParameterBase implements Parameter
 		List<KeyFrame> keyFrames = getKeyFramesWithThisParameter();
 		for (KeyFrame keyFrame : keyFrames)
 		{
-			result.appendChild(keyFrame.getValueForParameter(this).toXml(result));
+			result.appendChild(keyFrame.getValueForParameter(this).toXml(result, version));
 		}
 		
 		return result;

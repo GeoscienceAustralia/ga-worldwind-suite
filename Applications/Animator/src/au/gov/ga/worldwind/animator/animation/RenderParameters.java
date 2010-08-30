@@ -70,7 +70,7 @@ public class RenderParameters implements XmlSerializable<RenderParameters>
 	}
 
 	@Override
-	public Element toXml(Element parent)
+	public Element toXml(Element parent, AnimationFileVersion version)
 	{
 		Element result = WWXML.appendElement(parent, "renderParameters");
 		

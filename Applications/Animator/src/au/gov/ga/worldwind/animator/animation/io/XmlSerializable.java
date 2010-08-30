@@ -21,10 +21,11 @@ public interface XmlSerializable<S>
 	 * The returned {@link Element} will be set as a child of the provided parent.
 	 * 
 	 * @param parent The parent element for this {@link XmlSerializable}
+	 * @param version TODO
 	 * 
 	 * @return The element that represents this object
 	 */
-	Element toXml(Element parent);
+	Element toXml(Element parent, AnimationFileVersion version);
 
 	/**
 	 * Create and return a new instance of this class from the provided {@link Element}.
@@ -36,4 +37,9 @@ public interface XmlSerializable<S>
 	 * @return The de-serialised object
 	 */
 	S fromXml(Element element, AnimationFileVersion versionId, AVList context);
+	
+	/**
+	 * The prefix to use for accessing attributes via XPath
+	 */
+	String ATTRIBUTE_PATH_PREFIX = "@";
 }

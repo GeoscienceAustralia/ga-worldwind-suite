@@ -90,14 +90,24 @@ public class BasicParameterValue implements ParameterValue
 		// No smoothing applied to basic parameter values
 	}
 
-	@Override
-	public Element toXml(Element parent)
+	/**
+	 * Set the owner of this value. Should only be invoked during de-serialisation.
+	 */
+	protected void setOwner(Parameter p)
 	{
-		Element result = WWXML.appendElement(parent, "parameterValue");
+		this.owner = p;
+	}
+	
+	@Override
+	public Element toXml(Element parent, AnimationFileVersion version)
+	{
+		AnimationIOConstants constants = version.getConstants();
 		
-		WWXML.setTextAttribute(result, "type", getType().name());
-		WWXML.setIntegerAttribute(result, "frame", getFrame());
-		WWXML.setDoubleAttribute(result, "value", getValue());
+		Element result = WWXML.appendElement(parent, constants.getParameterValueElementName());
+		
+		WWXML.setTextAttribute(result, constants.getParameterValueAttributeType(), getType().name());
+		WWXML.setIntegerAttribute(result, constants.getParameterValueAttributeFrame(), getFrame());
+		WWXML.setDoubleAttribute(result, constants.getParameterValueAttributeValue(), getValue());
 		
 		return result;
 	}
@@ -109,16 +119,19 @@ public class BasicParameterValue implements ParameterValue
 		Validate.notNull(version, "A version ID is required");
 		Validate.notNull(context, "A context is required");
 		
+		AnimationIOConstants constants = version.getConstants();
+		
 		switch (version)
 		{
 			case VERSION020:
 			{
 				BasicParameterValue result = new BasicParameterValue();
-				result.setValue(WWXML.getDouble(element, "@value", null));
-				result.setFrame(WWXML.getInteger(element, "@frame", null));
-				result.owner = (Parameter)context.getValue(version.getConstants().getParameterValueOwnerKey());
+				result.setValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterValueAttributeValue(), null));
+				result.setFrame(WWXML.getInteger(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterValueAttributeFrame(), null));
 				
-				Validate.notNull(result.owner, "No owner found in the context. Expected type Parameter under key " + version.getConstants().getParameterValueOwnerKey());
+				result.owner = (Parameter)context.getValue(constants.getParameterValueOwnerKey());
+				
+				Validate.notNull(result.owner, "No owner found in the context. Expected type Parameter under key " + constants.getParameterValueOwnerKey());
 
 				return result;
 			}

@@ -327,29 +327,29 @@ public class CameraImpl extends AnimatableBase implements Camera
 
 
 	@Override
-	public Element toXml(Element parent)
+	public Element toXml(Element parent, AnimationFileVersion version)
 	{
 		Element result = WWXML.appendElement(parent, "camera");
 		
 		WWXML.setTextAttribute(result, "name", getName());
 
 		Element eyeLatElement = WWXML.appendElement(result, "eyeLat");
-		eyeLatElement.appendChild(eyeLat.toXml(eyeLatElement));
+		eyeLatElement.appendChild(eyeLat.toXml(eyeLatElement, version));
 		
 		Element eyeLonElement = WWXML.appendElement(result, "eyeLon");
-		eyeLonElement.appendChild(eyeLon.toXml(eyeLonElement));
+		eyeLonElement.appendChild(eyeLon.toXml(eyeLonElement, version));
 		
 		Element eyeElevationElement = WWXML.appendElement(result, "eyeElevation");
-		eyeElevationElement.appendChild(eyeElevation.toXml(eyeElevationElement));
+		eyeElevationElement.appendChild(eyeElevation.toXml(eyeElevationElement, version));
 		
 		Element lookAtLatElement = WWXML.appendElement(result, "lookAtLat");
-		lookAtLatElement.appendChild(lookAtLat.toXml(lookAtLatElement));
+		lookAtLatElement.appendChild(lookAtLat.toXml(lookAtLatElement, version));
 		
 		Element lookAtLonElement = WWXML.appendElement(result, "lookAtLon");
-		lookAtLonElement.appendChild(lookAtLon.toXml(lookAtLonElement));
+		lookAtLonElement.appendChild(lookAtLon.toXml(lookAtLonElement, version));
 		
 		Element lookAtElevationElement = WWXML.appendElement(result, "lookAtElevation");
-		lookAtElevationElement.appendChild(lookAtElevation.toXml(lookAtElevationElement));
+		lookAtElevationElement.appendChild(lookAtElevation.toXml(lookAtElevationElement, version));
 		
 		return result;
 	}

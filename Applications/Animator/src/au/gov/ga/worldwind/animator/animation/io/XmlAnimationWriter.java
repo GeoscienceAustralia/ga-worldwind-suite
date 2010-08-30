@@ -24,6 +24,14 @@ public class XmlAnimationWriter implements AnimationWriter
 
 	private static final AnimationFileVersion CURRENT_FILE_VERSION = AnimationFileVersion.VERSION020;
 	
+	/**
+	 * @return The current version of the XML file format to use for writing
+	 */
+	public static AnimationFileVersion getCurrentFileVersion()
+	{
+		return CURRENT_FILE_VERSION;
+	}
+	
 	@Override
 	public void writeAnimation(String fileName, Animation animation) throws IOException
 	{
@@ -47,7 +55,7 @@ public class XmlAnimationWriter implements AnimationWriter
 		
 		WWXML.setTextAttribute(rootElement, "version", CURRENT_FILE_VERSION.getDisplayName());
 
-		rootElement.appendChild(animation.toXml(rootElement));
+		rootElement.appendChild(animation.toXml(rootElement, CURRENT_FILE_VERSION));
 		
 		WWXML.saveDocumentToStream(document, new FileOutputStream(file));
 	}

@@ -1,8 +1,13 @@
 package au.gov.ga.worldwind.animator.animation.parameter;
 
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
+
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
+import au.gov.ga.worldwind.animator.util.Validate;
 
 
 /**
@@ -34,8 +39,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	/**
 	 * Constructor. Required for de-serialisation. Not for general use.
 	 */
-	@SuppressWarnings("unused")
-	private BasicBezierParameterValue(){
+	protected BasicBezierParameterValue(){
 		super();
 	}
 	
@@ -268,20 +272,57 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	}
 	
 	@Override
-	public Element toXml(Element parent)
+	public Element toXml(Element parent, AnimationFileVersion version)
 	{
-		Element result = WWXML.appendElement(parent, "parameterValue");
+		AnimationIOConstants constants = version.getConstants();
 		
-		WWXML.setTextAttribute(result, "type", getType().name());
-		WWXML.setIntegerAttribute(result, "frame", getFrame());
-		WWXML.setDoubleAttribute(result, "value", getValue());
-		WWXML.setDoubleAttribute(result, "inValue", getInValue());
-		WWXML.setDoubleAttribute(result, "inPercent", getInPercent());
-		WWXML.setDoubleAttribute(result, "outValue", getOutValue());
-		WWXML.setDoubleAttribute(result, "outPercent", getOutPercent());
-		WWXML.setBooleanAttribute(result, "locked", isLocked());
+		Element result = WWXML.appendElement(parent, constants.getParameterValueElementName());
+		
+		WWXML.setTextAttribute(result, constants.getParameterValueAttributeType(), getType().name());
+		WWXML.setIntegerAttribute(result, constants.getParameterValueAttributeFrame(), getFrame());
+		WWXML.setDoubleAttribute(result, constants.getParameterValueAttributeValue(), getValue());
+		WWXML.setDoubleAttribute(result, constants.getBezierValueAttributeInValue(), getInValue());
+		WWXML.setDoubleAttribute(result, constants.getBezierValueAttributeInPercent(), getInPercent());
+		WWXML.setDoubleAttribute(result, constants.getBezierValueAttributeOutValue(), getOutValue());
+		WWXML.setDoubleAttribute(result, constants.getBezierValueAttributeOutPercent(), getOutPercent());
+		WWXML.setBooleanAttribute(result, constants.getBezierValueAttributeLocked(), isLocked());
 		
 		return result;
+	}
+	
+	@Override
+	public ParameterValue fromXml(Element element, AnimationFileVersion version, AVList context)
+	{
+		Validate.notNull(element, "An XML element is required");
+		Validate.notNull(version, "A version ID is required");
+		Validate.notNull(context, "A context is required");
+		
+		AnimationIOConstants constants = version.getConstants();
+		
+		switch (version)
+		{
+			case VERSION020:
+			{
+				BasicBezierParameterValue result = new BasicBezierParameterValue();
+				result.setValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterValueAttributeValue(), null));
+				result.setFrame(WWXML.getInteger(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterValueAttributeFrame(), null));
+				result.setInValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getBezierValueAttributeInValue(), null));
+				result.setInPercent(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getBezierValueAttributeInPercent(), null));
+				result.setOutValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getBezierValueAttributeOutValue(), null));
+				result.setOutPercent(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getBezierValueAttributeOutPercent(), null));
+				result.setLocked(WWXML.getBoolean(element, ATTRIBUTE_PATH_PREFIX + constants.getBezierValueAttributeLocked(), null));
+				
+				result.setOwner((Parameter)context.getValue(constants.getParameterValueOwnerKey()));
+				
+				Validate.notNull(result.getOwner(), "No owner found in the context. Expected type Parameter under key " + constants.getParameterValueOwnerKey());
+
+				return result;
+			}
+			default:
+			{
+				return null;
+			}
+		}
 	}
 	
 	/**

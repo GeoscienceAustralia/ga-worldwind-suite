@@ -466,19 +466,19 @@ public class WorldWindAnimationImpl implements Animation
 	}
 
 	@Override
-	public Element toXml(Element parent)
+	public Element toXml(Element parent, AnimationFileVersion version)
 	{
 		Element result = WWXML.appendElement(parent, "animation");
 		
 		WWXML.setIntegerAttribute(result, "frameCount", frameCount);
 		WWXML.setBooleanAttribute(result, "zoomRequired", isZoomScalingRequired());
 		
-		renderParameters.toXml(result);
+		renderParameters.toXml(result, version);
 		
 		Element animatableContainer = WWXML.appendElement(result, "animatableObjects");
 		for (Animatable animatable : animatableObjects)
 		{
-			animatableContainer.appendChild(animatable.toXml(animatableContainer));
+			animatableContainer.appendChild(animatable.toXml(animatableContainer, version));
 		}
 		return result;
 	}
