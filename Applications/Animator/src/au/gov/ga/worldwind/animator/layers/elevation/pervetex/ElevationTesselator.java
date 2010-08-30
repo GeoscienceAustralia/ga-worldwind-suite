@@ -113,7 +113,7 @@ public class ElevationTesselator extends VerticalExaggerationTessellator
 
 	private boolean isPointInScreen(DrawContext dc, Vec4 point)
 	{
-		Vec4 screenpoint = dc.getScreenPoint(point);
+		Vec4 screenpoint = dc.getView().project(point);
 		return screenpoint.z < 1.0
 				&& dc.getView().getViewport().contains(screenpoint.x, screenpoint.y);
 	}

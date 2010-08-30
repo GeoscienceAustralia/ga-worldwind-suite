@@ -6,31 +6,65 @@ All Rights Reserved.
 */
 package nasa.worldwind.terrain;
 
+import gov.nasa.worldwind.Configuration;
+import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.WWObjectImpl;
+import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.cache.BasicMemoryCache;
+import gov.nasa.worldwind.cache.MemoryCache;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Box;
+import gov.nasa.worldwind.geom.Cylinder;
+import gov.nasa.worldwind.geom.Extent;
+import gov.nasa.worldwind.geom.Frustum;
+import gov.nasa.worldwind.geom.Intersection;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Line;
+import gov.nasa.worldwind.geom.Plane;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.geom.Triangle;
+import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.globes.Globe;
+import gov.nasa.worldwind.pick.PickSupport;
+import gov.nasa.worldwind.pick.PickedObject;
+import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.Renderable;
+import gov.nasa.worldwind.terrain.SectorGeometry;
+import gov.nasa.worldwind.terrain.SectorGeometry.ExtractedShapeDescription;
+import gov.nasa.worldwind.terrain.SectorGeometry.GeographicTextureCoordinateComputer;
+import gov.nasa.worldwind.terrain.SectorGeometryList;
+import gov.nasa.worldwind.terrain.Tessellator;
+import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.OGLStackHandler;
+import gov.nasa.worldwind.util.OGLTextRenderer;
+
+import java.awt.Color;
+import java.awt.Point;
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GLContext;
+
 import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.j2d.TextRenderer;
-import gov.nasa.worldwind.*;
-import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.cache.*;
-import gov.nasa.worldwind.geom.*;
-import gov.nasa.worldwind.globes.Globe;
-import gov.nasa.worldwind.pick.*;
-import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.util.*;
-import gov.nasa.worldwind.terrain.*;
-
-import javax.media.opengl.*;
-import java.awt.*;
-import java.nio.*;
-import java.util.*;
-import java.util.List;
 
 /**
  * @author tag
- * @version $Id: RectangularTessellator.java 13307 2010-04-13 06:19:40Z tgaskins $
+ * @version $Id: RectangularTessellator.java 13350 2010-04-30 03:35:45Z tgaskins $
  */
 public class RectangularTessellator extends WWObjectImpl implements Tessellator
 {
-    protected static class RenderInfo
+    public static class RenderInfo
     {
         public final int density;
         private final Vec4 referenceCenter;
@@ -365,10 +399,10 @@ public class RectangularTessellator extends WWObjectImpl implements Tessellator
 
     private RectTile createTile(DrawContext dc, Sector tileSector, int level)
     {
-        Cylinder cylinder = dc.getGlobe().computeBoundingCylinder(dc.getVerticalExaggeration(), tileSector);
+        Extent extent = Sector.computeBoundingBox(dc.getGlobe(), dc.getVerticalExaggeration(), tileSector);
         double cellSize = tileSector.getDeltaLatRadians() * dc.getGlobe().getRadius() / this.density;
 
-        return new RectTile(this, cylinder, level, this.density, tileSector, cellSize);
+        return new RectTile(this, extent, level, this.density, tileSector, cellSize);
     }
 
     public boolean isMakeTileSkirts()
@@ -802,8 +836,8 @@ public class RectangularTessellator extends WWObjectImpl implements Tessellator
         if (extent == null)
             return;
 
-        if (extent instanceof Cylinder)
-            ((Cylinder) extent).render(dc);
+        if (extent instanceof Renderable)
+            ((Renderable) extent).render(dc);
     }
 
     private void renderTileID(DrawContext dc, RectTile tile)
@@ -1191,8 +1225,11 @@ public class RectangularTessellator extends WWObjectImpl implements Tessellator
         double cellSide = tile.getSector().getDeltaLatRadians() * globe.getRadius() / density;
         double maxCellRadius = Math.sqrt(cellSide * cellSide * 2) / 2;   // half cell diagonal
 
-        // Compute maximum elevation difference - assume cylinder as Extent
-        double elevationSpan = ((Cylinder) tile.getExtent()).getCylinderHeight();
+        // Compute maximum elevation difference
+        Extent ext = tile.getExtent();
+        double elevationSpan = ext instanceof Box ? ((Box) ext).getTLength()
+            : ext instanceof Cylinder ? ((Cylinder) ext).getCylinderHeight()
+                : tile.getExtent().getDiameter();
 
         // TODO: ignore back facing triangles?
         // Loop through all tile cells - triangle pairs
@@ -1294,10 +1331,14 @@ public class RectangularTessellator extends WWObjectImpl implements Tessellator
             return null;
 
         // Check whether the tile includes the intersection elevation - assume cylinder as Extent
-        Cylinder cylinder = ((Cylinder) tile.getExtent());
-        if (!(globe.isPointAboveElevation(cylinder.getBottomCenter(), elevation)
-            ^ globe.isPointAboveElevation(cylinder.getTopCenter(), elevation)))
-            return null;
+        // TODO: replace this test with a generic test against Extent
+        if (tile.getExtent() instanceof Cylinder)
+        {
+            Cylinder cylinder = ((Cylinder) tile.getExtent());
+            if (!(globe.isPointAboveElevation(cylinder.getBottomCenter(), elevation)
+                ^ globe.isPointAboveElevation(cylinder.getTopCenter(), elevation)))
+                return null;
+        }
 
         Intersection[] hits;
         ArrayList<Intersection> list = new ArrayList<Intersection>();

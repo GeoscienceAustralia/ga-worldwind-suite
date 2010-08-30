@@ -1,31 +1,46 @@
 /*
-Copyright (C) 2001, 2006 United States Government
+Copyright (C) 2001, 2010 United States Government
 as represented by the Administrator of the
 National Aeronautics and Space Administration.
 All Rights Reserved.
 */
 package nasa.worldwind.wms;
 
-import gov.nasa.worldwind.avlist.*;
+import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.exception.WWRuntimeException;
-import gov.nasa.worldwind.geom.*;
-import gov.nasa.worldwind.layers.LayerConfiguration;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
-import gov.nasa.worldwind.util.*;
-import gov.nasa.worldwind.wms.*;
-import nasa.worldwind.layers.BasicTiledImageLayer;
+import gov.nasa.worldwind.util.DataConfigurationUtils;
+import gov.nasa.worldwind.util.ImageUtil;
+import gov.nasa.worldwind.util.Level;
+import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.RestorableSupport;
+import gov.nasa.worldwind.util.Tile;
+import gov.nasa.worldwind.util.TileUrlBuilder;
+import gov.nasa.worldwind.util.WWIO;
+import gov.nasa.worldwind.util.WWXML;
 
-import org.w3c.dom.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
-import java.awt.image.*;
-import java.io.*;
-import java.net.*;
+
+import nasa.worldwind.layers.BasicTiledImageLayer;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * @author tag
- * @version $Id: WMSTiledImageLayer.java 13265 2010-04-10 02:41:16Z tgaskins $
+ * @version $Id: WMSTiledImageLayer.java 13481 2010-06-24 00:03:34Z tgaskins $
  */
 public class WMSTiledImageLayer extends BasicTiledImageLayer
 {
@@ -47,11 +62,6 @@ public class WMSTiledImageLayer extends BasicTiledImageLayer
     public WMSTiledImageLayer(Element domElement, AVList params)
     {
         this(wmsGetParamsFromDocument(domElement, params));
-    }
-
-    public WMSTiledImageLayer(Capabilities caps, AVList params)
-    {
-        this(wmsGetParamsFromCapsDoc(caps, params));
     }
 
     public WMSTiledImageLayer(WMSCapabilities caps, AVList params)
@@ -79,6 +89,18 @@ public class WMSTiledImageLayer extends BasicTiledImageLayer
         this.doRestoreState(rs, null);
     }
 
+    /**
+     * Extracts parameters necessary to configure the layer from an XML DOM element.
+     *
+     * @param domElement the element to search for parameters.
+     * @param params     an attribute-value list in which to place the extracted parameters. May be null, in which case
+     *                   a new attribue-value list is created and returned.
+     *
+     * @return the attribute-value list passed as the second parameter, or the list created if the second parameter is
+     *         null.
+     *
+     * @throws IllegalArgumentException if the DOM element is null.
+     */
     protected static AVList wmsGetParamsFromDocument(Element domElement, AVList params)
     {
         if (domElement == null)
@@ -91,7 +113,7 @@ public class WMSTiledImageLayer extends BasicTiledImageLayer
         if (params == null)
             params = new AVListImpl();
 
-        LayerConfiguration.getWMSTiledImageLayerParams(domElement, params);
+        DataConfigurationUtils.getWMSLayerConfigParams(domElement, params);
         BasicTiledImageLayer.getParamsFromDocument(domElement, params);
 
         params.setValue(AVKey.TILE_URL_BUILDER, new URLBuilder(params));
@@ -99,7 +121,19 @@ public class WMSTiledImageLayer extends BasicTiledImageLayer
         return params;
     }
 
-    protected static AVList wmsGetParamsFromCapsDoc(Capabilities caps, AVList params)
+    /**
+     * Extracts parameters necessary to configure the layer from a WMS capabilities document.
+     *
+     * @param caps   the capabilities document.
+     * @param params an attribute-value list in which to place the extracted parameters. May be null, in which case a
+     *               new attribue-value list is created and returned.
+     *
+     * @return the attribute-value list passed as the second parameter, or the list created if the second parameter is
+     *         null.
+     *
+     * @throws IllegalArgumentException if the capabilities document reference is null.
+     */
+    public static AVList wmsGetParamsFromCapsDoc(WMSCapabilities caps, AVList params)
     {
         if (caps == null)
         {
@@ -117,51 +151,7 @@ public class WMSTiledImageLayer extends BasicTiledImageLayer
 
         try
         {
-            DataConfigurationUtils.getWMSLayerParams(caps, formatOrderPreference, params);
-        }
-        catch (IllegalArgumentException e)
-        {
-            String message = Logging.getMessage("WMS.MissingLayerParameters");
-            Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
-            throw new IllegalArgumentException(message, e);
-        }
-        catch (WWRuntimeException e)
-        {
-            String message = Logging.getMessage("WMS.MissingCapabilityValues");
-            Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
-            throw new IllegalArgumentException(message, e);
-        }
-
-        setFallbacks(params);
-
-        // Setup WMS URL builder.
-        params.setValue(AVKey.WMS_VERSION, caps.getVersion());
-        params.setValue(AVKey.TILE_URL_BUILDER, new URLBuilder(params));
-        // Setup default WMS tiled image layer behaviors.
-        params.setValue(AVKey.USE_TRANSPARENT_TEXTURES, true);
-
-        return params;
-    }
-
-    protected static AVList wmsGetParamsFromCapsDoc(WMSCapabilities caps, AVList params)
-    {
-        if (caps == null)
-        {
-            String message = Logging.getMessage("nullValue.WMSCapabilities");
-            Logging.logger().severe(message);
-            throw new IllegalArgumentException(message);
-        }
-
-        if (params == null)
-        {
-            String message = Logging.getMessage("nullValue.LayerConfigParams");
-            Logging.logger().severe(message);
-            throw new IllegalArgumentException(message);
-        }
-
-        try
-        {
-            DataConfigurationUtils.getWMSLayerParams(caps, formatOrderPreference, params);
+            DataConfigurationUtils.getWMSLayerConfigParams(caps, formatOrderPreference, params);
         }
         catch (IllegalArgumentException e)
         {
@@ -267,11 +257,11 @@ public class WMSTiledImageLayer extends BasicTiledImageLayer
         }
     }
 
-    private static class ComposeImageTile extends TextureTile
+    protected static class ComposeImageTile extends TextureTile
     {
-        private int width;
-        private int height;
-        private File file;
+        protected int width;
+        protected int height;
+        protected File file;
 
         public ComposeImageTile(Sector sector, String mimeType, Level level, int width, int height)
             throws IOException
@@ -354,7 +344,7 @@ public class WMSTiledImageLayer extends BasicTiledImageLayer
     }
 
     //**************************************************************//
-    //********************  Configuration File  ********************//
+    //********************  Configuration  *************************//
     //**************************************************************//
 
     /**
@@ -366,12 +356,11 @@ public class WMSTiledImageLayer extends BasicTiledImageLayer
      */
     protected Document createConfigurationDocument(AVList params)
     {
-
         Document doc = super.createConfigurationDocument(params);
         if (doc == null || doc.getDocumentElement() == null)
             return doc;
 
-        LayerConfiguration.createWMSTiledImageLayerElements(params, doc.getDocumentElement());
+        DataConfigurationUtils.createWMSLayerConfigElements(params, doc.getDocumentElement());
 
         return doc;
     }
@@ -380,7 +369,7 @@ public class WMSTiledImageLayer extends BasicTiledImageLayer
     //********************  Restorable Support  ********************//
     //**************************************************************//
 
-    protected void doGetRestorableStateForAVPair(String key, Object value,
+    public void getRestorableStateForAVPair(String key, Object value,
         RestorableSupport rs, RestorableSupport.StateObject context)
     {
         if (value instanceof URLBuilder)
@@ -390,11 +379,20 @@ public class WMSTiledImageLayer extends BasicTiledImageLayer
         }
         else
         {
-            super.doGetRestorableStateForAVPair(key, value, rs, context);
+            super.getRestorableStateForAVPair(key, value, rs, context);
         }
     }
 
-    protected static AVList wmsRestorableStateToParams(String stateInXml)
+    /**
+     * Creates an attribute-value list from an xml document containing restorable state for this layer.
+     *
+     * @param stateInXml an xml document specifed in a {@link String}.
+     *
+     * @return an attribute-value list containing the parameters in the specified restorable state.
+     *
+     * @throws IllegalArgumentException if the state reference is null.
+     */
+    public static AVList wmsRestorableStateToParams(String stateInXml)
     {
         if (stateInXml == null)
         {

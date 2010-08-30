@@ -5,7 +5,6 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
-import gov.nasa.worldwind.wms.Capabilities;
 
 import java.net.URL;
 
@@ -23,10 +22,10 @@ public class ImmediateWMSTiledImageLayer extends WMSTiledImageLayer
 		super(params);
 	}
 
-	public ImmediateWMSTiledImageLayer(Capabilities caps, AVList params)
+	/*public ImmediateWMSTiledImageLayer(Capabilities caps, AVList params)
 	{
 		super(caps, params);
-	}
+	}*/
 
 	@Override
 	protected void requestTexture(DrawContext dc, TextureTile tile)

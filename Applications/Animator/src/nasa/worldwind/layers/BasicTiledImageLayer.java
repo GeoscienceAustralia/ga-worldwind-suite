@@ -1,37 +1,62 @@
 /*
-Copyright (C) 2001, 2006 United States Government
+Copyright (C) 2001, 2010 United States Government
 as represented by the Administrator of the
 National Aeronautics and Space Administration.
 All Rights Reserved.
 */
 package nasa.worldwind.layers;
 
-import com.sun.opengl.util.texture.*;
 import gov.nasa.worldwind.WorldWind;
-import gov.nasa.worldwind.avlist.*;
-import gov.nasa.worldwind.cache.*;
+import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.avlist.AVListImpl;
+import gov.nasa.worldwind.cache.FileStore;
 import gov.nasa.worldwind.event.BulkRetrievalListener;
 import gov.nasa.worldwind.exception.WWRuntimeException;
-import gov.nasa.worldwind.formats.dds.*;
-import gov.nasa.worldwind.geom.*;
-import gov.nasa.worldwind.render.*;
-import gov.nasa.worldwind.retrieve.*;
-import gov.nasa.worldwind.util.*;
-import gov.nasa.worldwind.wms.Capabilities;
-import org.w3c.dom.*;
-import gov.nasa.worldwind.layers.*;
+import gov.nasa.worldwind.formats.dds.DDSCompressor;
+import gov.nasa.worldwind.formats.dds.DXTCompressionAttributes;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.layers.TextureTile;
+import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
+import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.ScreenCredit;
+import gov.nasa.worldwind.retrieve.AbstractRetrievalPostProcessor;
+import gov.nasa.worldwind.retrieve.BulkRetrievable;
+import gov.nasa.worldwind.retrieve.BulkRetrievalThread;
+import gov.nasa.worldwind.retrieve.HTTPRetriever;
+import gov.nasa.worldwind.retrieve.Retriever;
+import gov.nasa.worldwind.util.AbsentResourceList;
+import gov.nasa.worldwind.util.DataConfigurationUtils;
+import gov.nasa.worldwind.util.LevelSet;
+import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.RestorableSupport;
+import gov.nasa.worldwind.util.SessionCacheUtils;
+import gov.nasa.worldwind.util.WWIO;
+import gov.nasa.worldwind.util.WWXML;
 
-import javax.swing.*;
-import java.awt.*;
-import java.io.*;
+import java.awt.Color;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.SwingUtilities;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.sun.opengl.util.texture.TextureData;
+import com.sun.opengl.util.texture.TextureIO;
 
 /**
  * @author tag
- * @version $Id: BasicTiledImageLayer.java 13257 2010-04-08 16:55:59Z dcollins $
+ * @version $Id: BasicTiledImageLayer.java 13382 2010-05-10 17:45:11Z tgaskins $
  */
 public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetrievable
 {
@@ -190,8 +215,7 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
         if (params == null)
             params = new AVListImpl();
 
-        LayerConfiguration.getLayerParams(domElement, params);
-        LayerConfiguration.getTiledImageLayerParams(domElement, params);
+        getTiledImageLayerConfigParams(domElement, params);
         setFallbacks(params);
 
         return params;
@@ -700,11 +724,8 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
         // the cache invokes the methods Object.hashCode() and Object.equals() on the cache key. URL's implementations
         // of hashCode() and equals() perform blocking IO calls. World Wind does not perform blocking calls during
         // rendering, and this method is likely to be called from the rendering thread.
-        SessionCache cache = WorldWind.getSessionCache();
-        RetrievalService retrievalService = WorldWind.getRetrievalService();
-        Object cacheKey = url.toString();
-        Capabilities caps = SessionCacheUtils.getOrRetrieveSessionCapabilities(url, retrievalService, cache, cacheKey,
-            this.absentResources, RESOURCE_ID_OGC_CAPABILITIES, null, null);
+        WMSCapabilities caps = SessionCacheUtils.getOrRetrieveSessionCapabilities(url, WorldWind.getSessionCache(),
+            url.toString(), this.absentResources, RESOURCE_ID_OGC_CAPABILITIES, null, null);
 
         // The OGC Capabilities resource retrieval is either currently running in another thread, or has failed. In
         // either case, return null indicating that that the retrieval was not successful, and we should try again
@@ -729,7 +750,7 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
      *
      * @throws IllegalArgumentException if either the Capabilities or the parameter list is null.
      */
-    protected void initFromOGCCapabilitiesResource(Capabilities caps, AVList params)
+    protected void initFromOGCCapabilitiesResource(WMSCapabilities caps, AVList params)
     {
         if (caps == null)
         {
@@ -913,7 +934,7 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
     }
 
     //**************************************************************//
-    //********************  Configuration File  ********************//
+    //********************  Configuration  *************************//
     //**************************************************************//
 
     protected void writeConfigurationFile(FileStore fileStore)
@@ -965,9 +986,19 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
 
     protected void doWriteConfigurationParams(FileStore fileStore, String fileName, AVList params)
     {
-        Document doc = this.createConfigurationDocument(params);
+        java.io.File file = fileStore.newFile(fileName);
+        if (file == null)
+        {
+            String message = Logging.getMessage("generic.CannotCreateFile", fileName);
+            Logging.logger().severe(message);
+            throw new WWRuntimeException(message);
+        }
 
-        DataConfigurationUtils.saveDataConfigDocument(doc, fileStore, fileName);
+        Document doc = this.createConfigurationDocument(params);
+        WWXML.saveDocumentToFile(doc, file.getPath());
+
+        String message = Logging.getMessage("generic.ConfigurationFileCreated", fileName);
+        Logging.logger().fine(message);
     }
 
     protected boolean needsConfigurationFile(FileStore fileStore, String fileName, AVList params,
@@ -991,14 +1022,14 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
             params.setValues(constructionParams);
 
         // Gather any missing LevelSet parameters from the LevelSet itself.
-        DataConfigurationUtils.getLevelSetParams(this.getLevels(), params);
+        DataConfigurationUtils.getLevelSetConfigParams(this.getLevels(), params);
 
         return params;
     }
 
     protected Document createConfigurationDocument(AVList params)
     {
-        return LayerConfiguration.createTiledImageLayerDocument(params);
+        return createTiledImageLayerConfigDocument(params);
     }
 
     //**************************************************************//
@@ -1035,7 +1066,7 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
         {
             for (Map.Entry<String, Object> avp : constructionParams.getEntries())
             {
-                this.doGetRestorableStateForAVPair(avp.getKey(), avp.getValue(), rs, context);
+                this.getRestorableStateForAVPair(avp.getKey(), avp.getValue(), rs, context);
             }
         }
 
@@ -1051,11 +1082,11 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
         RestorableSupport.StateObject so = rs.addStateObject(context, "avlist");
         for (Map.Entry<String, Object> avp : this.getEntries())
         {
-            this.doGetRestorableStateForAVPair(avp.getKey(), avp.getValue(), rs, so);
+            this.getRestorableStateForAVPair(avp.getKey(), avp.getValue(), rs, so);
         }
     }
 
-    protected void doGetRestorableStateForAVPair(String key, Object value,
+    public void getRestorableStateForAVPair(String key, Object value,
         RestorableSupport rs, RestorableSupport.StateObject context)
     {
         if (value == null)
@@ -1078,7 +1109,7 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
         }
         else
         {
-            rs.addStateValueAsString(context, key, value.toString());
+            super.getRestorableStateForAVPair(key, value, rs, context);
         }
     }
 

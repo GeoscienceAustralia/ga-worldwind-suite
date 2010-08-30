@@ -5,7 +5,6 @@ import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.terrain.WMSBasicElevationModel;
 import gov.nasa.worldwind.util.BufferWrapper;
 import gov.nasa.worldwind.util.TileKey;
-import gov.nasa.worldwind.wms.Capabilities;
 
 import org.w3c.dom.Element;
 
@@ -21,10 +20,10 @@ public class ExtendedWMSBasicElevationModel extends WMSBasicElevationModel imple
         super(domElement, params);
     }
 
-    public ExtendedWMSBasicElevationModel(Capabilities caps, AVList params)
+    /*public ExtendedWMSBasicElevationModel(Capabilities caps, AVList params)
     {
         super(caps, params);
-    }
+    }*/
 
     public ExtendedWMSBasicElevationModel(WMSCapabilities caps, AVList params)
     {
