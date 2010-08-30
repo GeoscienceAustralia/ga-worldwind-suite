@@ -23,6 +23,7 @@ import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -70,6 +71,10 @@ public class CameraImpl extends AnimatableBase implements Camera
 		initialiseParameters(animation);
 	}
 
+	/**
+	 * Constructor used for de-serialising. Not for general use.
+	 */
+	private CameraImpl(){super();}
 
 	/**
 	 * Initialise the camera parameters
@@ -163,6 +168,15 @@ public class CameraImpl extends AnimatableBase implements Camera
 	@Override
 	public Collection<Parameter> getParameters()
 	{
+		if (parameters.isEmpty())
+		{
+			parameters.add(eyeLat);
+			parameters.add(eyeLon);
+			parameters.add(eyeElevation);
+			parameters.add(lookAtLat);
+			parameters.add(lookAtLon);
+			parameters.add(lookAtElevation);
+		}
 		return Collections.unmodifiableCollection(parameters);
 	}
 
@@ -262,26 +276,28 @@ public class CameraImpl extends AnimatableBase implements Camera
 	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
-		Element result = WWXML.appendElement(parent, "camera");
+		AnimationIOConstants constants = version.getConstants();
 		
-		WWXML.setTextAttribute(result, "name", getName());
+		Element result = WWXML.appendElement(parent, constants.getCameraElementName());
+		
+		WWXML.setTextAttribute(result, constants.getCameraAttributeName(), getName());
 
-		Element eyeLatElement = WWXML.appendElement(result, "eyeLat");
+		Element eyeLatElement = WWXML.appendElement(result, constants.getCameraEyeLatElementName());
 		eyeLatElement.appendChild(eyeLat.toXml(eyeLatElement, version));
 		
-		Element eyeLonElement = WWXML.appendElement(result, "eyeLon");
+		Element eyeLonElement = WWXML.appendElement(result, constants.getCameraEyeLonElementName());
 		eyeLonElement.appendChild(eyeLon.toXml(eyeLonElement, version));
 		
-		Element eyeElevationElement = WWXML.appendElement(result, "eyeElevation");
+		Element eyeElevationElement = WWXML.appendElement(result, constants.getCameraEyeElevationElementName());
 		eyeElevationElement.appendChild(eyeElevation.toXml(eyeElevationElement, version));
 		
-		Element lookAtLatElement = WWXML.appendElement(result, "lookAtLat");
+		Element lookAtLatElement = WWXML.appendElement(result, constants.getCameraLookatLatElementName());
 		lookAtLatElement.appendChild(lookAtLat.toXml(lookAtLatElement, version));
 		
-		Element lookAtLonElement = WWXML.appendElement(result, "lookAtLon");
+		Element lookAtLonElement = WWXML.appendElement(result, constants.getCameraLookatLonElementName());
 		lookAtLonElement.appendChild(lookAtLon.toXml(lookAtLonElement, version));
 		
-		Element lookAtElevationElement = WWXML.appendElement(result, "lookAtElevation");
+		Element lookAtElevationElement = WWXML.appendElement(result, constants.getCameraLookatElevationElementName());
 		lookAtElevationElement.appendChild(lookAtElevation.toXml(lookAtElevationElement, version));
 		
 		return result;
@@ -289,9 +305,36 @@ public class CameraImpl extends AnimatableBase implements Camera
 
 
 	@Override
-	public Animatable fromXml(Element element, AnimationFileVersion versionId, AVList context)
+	public Animatable fromXml(Element element, AnimationFileVersion version, AVList context)
 	{
-		// TODO Auto-generated method stub
+		Validate.notNull(element, "An XML element is required");
+		Validate.notNull(version, "A version ID is required");
+		Validate.notNull(context, "A context is required");
+		
+		AnimationIOConstants constants = version.getConstants();
+		
+		switch (version)
+		{
+			case VERSION020:
+			{
+				Validate.isTrue(context.hasKey(constants.getAnimationKey()), "An animation is required in context.");
+				
+				CameraImpl result = new CameraImpl();
+				result.animation = (Animation)context.getValue(constants.getAnimationKey());
+				result.setName(WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getCameraAttributeName()));
+				
+				result.eyeLat = new EyeLatParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLatElementName()+ "." + constants.getParameterElementName(), null), version, context);
+				result.eyeLon = new EyeLonParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLonElementName()+ "." + constants.getParameterElementName(), null), version, context);
+				result.eyeElevation = new EyeElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeElevationElementName()+ "." + constants.getParameterElementName(), null), version, context);
+				
+				result.lookAtLat = new LookatLatParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLatElementName()+ "." + constants.getParameterElementName(), null), version, context);
+				result.lookAtLon = new LookatLonParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLonElementName()+ "." + constants.getParameterElementName(), null), version, context);
+				result.lookAtElevation = new LookatElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatElevationElementName()+ "." + constants.getParameterElementName(), null), version, context);
+				
+				return result;
+			}
+		}
+		
 		return null;
 	}
 

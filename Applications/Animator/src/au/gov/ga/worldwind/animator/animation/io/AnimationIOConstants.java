@@ -89,6 +89,51 @@ public interface AnimationIOConstants
 	String getParameterAttributeEnabled();
 	
 	/**
+	 * @return The name of the 'parameter' element
+	 */
+	String getParameterElementName();
+	
+	/**
+	 * @return The name of the 'eye lat' element of the camera
+	 */
+	String getCameraEyeLatElementName();
+	
+	/**
+	 * @return The name of the 'eye lon' element of the camera
+	 */
+	String getCameraEyeLonElementName();
+	
+	/**
+	 * @return The name of the 'eye elevation' element of the camera
+	 */
+	String getCameraEyeElevationElementName();
+	
+	/**
+	 * @return The name of the 'Lookat lat' element of the camera
+	 */
+	String getCameraLookatLatElementName();
+	
+	/**
+	 * @return The name of the 'Lookat lon' element of the camera
+	 */
+	String getCameraLookatLonElementName();
+	
+	/**
+	 * @return The name of the 'Lookat elevation' element of the camera
+	 */
+	String getCameraLookatElevationElementName();
+	
+	/**
+	 * @return The name of the 'name' attribute of the camera
+	 */
+	String getCameraAttributeName();
+	
+	/**
+	 * @return The name of the 'camera' element
+	 */
+	String getCameraElementName();
+	
+	/**
 	 * Common constants that don't change across versions
 	 */
 	public static abstract class BaseConstants implements AnimationIOConstants
@@ -139,6 +184,33 @@ public interface AnimationIOConstants
 		public String getParameterAttributeName() {return "name";}
 		
 		@Override
+		public String getParameterElementName() {return "parameter";}
+		
+		@Override
 		public String getParameterAttributeEnabled() {return "enabled";}
+		
+		@Override
+		public String getCameraEyeLatElementName() {return "eyeLat";}
+		
+		@Override
+		public String getCameraEyeLonElementName() {return "eyeLon";}
+		
+		@Override
+		public String getCameraEyeElevationElementName() {return "eyeElevation";}
+		
+		@Override
+		public String getCameraLookatLatElementName() {return "lookAtLat";}
+		
+		@Override
+		public String getCameraLookatLonElementName() {return "lookAtLon";}
+		
+		@Override
+		public String getCameraLookatElevationElementName() {return "lookAtElevation";}
+		
+		@Override
+		public String getCameraAttributeName() {return "name";}
+		
+		@Override
+		public String getCameraElementName() {return "camera";}
 	}
 }

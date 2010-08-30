@@ -33,6 +33,13 @@ public abstract class AnimatableBase implements Animatable
 		this.name = name;
 	}
 
+	/**
+	 * Constructor. For de-serialising. Not for general use.
+	 */
+	protected AnimatableBase()
+	{
+	}
+
 	@Override
 	public String getName()
 	{

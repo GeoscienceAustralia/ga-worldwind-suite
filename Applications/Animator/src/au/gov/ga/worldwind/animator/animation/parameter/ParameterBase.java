@@ -222,13 +222,15 @@ public abstract class ParameterBase implements Parameter
 				result.setEnabled(WWXML.getBoolean(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeEnabled(), null));
 				
 				// Create a parameter value for each child element
-				// Insert it as a key frame
+				// Insert it as a key frame (relies on key frames being merged)
 				context.setValue(constants.getParameterValueOwnerKey(), result);
 				for (Element e : WWXML.getElements(element, constants.getParameterValueElementName(), null))
 				{
 					ParameterValue v = ParameterValueFactory.fromXml(e, version, context);
 					animation.insertKeyFrame(new KeyFrameImpl(v.getFrame(), v), false);
 				}
+				
+				return result;
 			}
 		}
 		return null;
