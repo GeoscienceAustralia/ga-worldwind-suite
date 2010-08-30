@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
@@ -12,8 +11,7 @@ import au.gov.ga.worldwind.viewer.components.lazytree.LazyTreeObjectNode;
 
 public class Dataset extends AbstractData implements IDataset
 {
-	private List<ILayerDefinition> layers = new ArrayList<ILayerDefinition>();
-	private List<IDataset> datasets = new ArrayList<IDataset>();
+	private final List<IData> children = new ArrayList<IData>();
 
 	public Dataset(String name, URL infoURL, URL iconURL, boolean base)
 	{
@@ -21,30 +19,38 @@ public class Dataset extends AbstractData implements IDataset
 	}
 
 	@Override
-	public List<IDataset> getDatasets()
+	public List<IData> getChildren()
 	{
-		return datasets;
+		return children;
 	}
 
 	@Override
-	public List<ILayerDefinition> getLayers()
+	public void addChild(IData child)
 	{
-		return layers;
+		synchronized (children)
+		{
+			children.add(child);
+		}
 	}
 
 	@Override
 	public MutableTreeNode[] getChildren(DefaultTreeModel model)
 	{
-		MutableTreeNode[] array = new MutableTreeNode[datasets.size() + layers.size()];
-		int i = 0;
-		for (IDataset dataset : datasets)
+		synchronized (children)
 		{
-			array[i++] = new LazyTreeObjectNode(dataset, model);
+			MutableTreeNode[] array = new MutableTreeNode[children.size()];
+			int i = 0;
+			for (IData child : children)
+			{
+				array[i++] = child.createMutableTreeNode(model);
+			}
+			return array;
 		}
-		for (ILayerDefinition layer : layers)
-		{
-			array[i++] = new DefaultMutableTreeNode(layer, false);
-		}
-		return array;
+	}
+
+	@Override
+	public MutableTreeNode createMutableTreeNode(DefaultTreeModel model)
+	{
+		return new LazyTreeObjectNode(this, model);
 	}
 }

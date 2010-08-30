@@ -32,8 +32,9 @@ public class LazyDataset extends Dataset implements ILazyDataset
 			IDataset dataset = DatasetReader.read(result.getAsInputStream(), url);
 			if (dataset != null)
 			{
-				getDatasets().addAll(dataset.getDatasets());
-				getLayers().addAll(dataset.getLayers());
+				List<IData> children = dataset.getChildren();
+				for (IData child : children)
+					addChild(child);
 			}
 		}
 

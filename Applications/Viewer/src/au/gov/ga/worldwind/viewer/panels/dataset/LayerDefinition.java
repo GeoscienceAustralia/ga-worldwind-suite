@@ -2,6 +2,10 @@ package au.gov.ga.worldwind.viewer.panels.dataset;
 
 import java.net.URL;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+
 public class LayerDefinition extends AbstractData implements ILayerDefinition
 {
 	private URL layerURL;
@@ -39,5 +43,11 @@ public class LayerDefinition extends AbstractData implements ILayerDefinition
 	public boolean isDefault()
 	{
 		return def;
+	}
+
+	@Override
+	public MutableTreeNode createMutableTreeNode(DefaultTreeModel model)
+	{
+		return new DefaultMutableTreeNode(this, false);
 	}
 }

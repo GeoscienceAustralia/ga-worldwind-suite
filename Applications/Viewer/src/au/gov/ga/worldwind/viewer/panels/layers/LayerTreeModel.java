@@ -71,16 +71,16 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	{
 		return layer.getOpacity();
 	}
-	
+
 	public void setExpiryTime(ILayerNode layer, Long expiryTime)
 	{
-		if(layer.getExpiryTime() != expiryTime)
+		if (layer.getExpiryTime() != expiryTime)
 		{
 			layer.setExpiryTime(expiryTime);
 			refreshLayers();
 		}
 	}
-	
+
 	public Long getExpiryTime(ILayerNode layer)
 	{
 		return layer.getExpiryTime();
@@ -205,19 +205,27 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	protected int findInsertionIndex(ILayerDefinition layer, IDataset directParent,
 			INode currentParent)
 	{
-		int indexOfChild = directParent.getLayers().indexOf(layer);
+		List<ILayerDefinition> layers = new ArrayList<ILayerDefinition>();
+		List<IData> children = directParent.getChildren();
+		for (IData child : children)
+		{
+			if (child instanceof ILayerDefinition)
+				layers.add((ILayerDefinition) child);
+		}
+
+		int indexOfChild = layers.indexOf(layer);
 		if (indexOfChild >= 0)
 		{
-			for (int i = indexOfChild + 1; i < directParent.getLayers().size(); i++)
+			for (int i = indexOfChild + 1; i < layers.size(); i++)
 			{
-				ILayerDefinition l = directParent.getLayers().get(i);
+				ILayerDefinition l = layers.get(i);
 				int j = indexOfLayerName(l.getName(), currentParent);
 				if (j >= 0)
 					return j;
 			}
 			for (int i = indexOfChild - 1; i >= 0; i--)
 			{
-				ILayerDefinition l = directParent.getLayers().get(i);
+				ILayerDefinition l = layers.get(i);
 				int j = indexOfLayerName(l.getName(), currentParent);
 				if (j >= 0)
 					return j + 1;

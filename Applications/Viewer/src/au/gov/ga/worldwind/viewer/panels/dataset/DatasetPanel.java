@@ -58,7 +58,7 @@ public class DatasetPanel extends AbstractThemePanel
 	{
 		for (IDataset dataset : theme.getDatasets())
 		{
-			root.getDatasets().add(dataset);
+			root.addChild(dataset);
 		}
 		rootNode.refreshChildren(tree.getModel());
 

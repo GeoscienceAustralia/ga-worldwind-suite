@@ -6,6 +6,6 @@ import au.gov.ga.worldwind.viewer.components.lazytree.ITreeObject;
 
 public interface IDataset extends IData, ITreeObject
 {
-	public List<IDataset> getDatasets();
-	public List<ILayerDefinition> getLayers();
+	List<IData> getChildren();
+	void addChild(IData child);
 }

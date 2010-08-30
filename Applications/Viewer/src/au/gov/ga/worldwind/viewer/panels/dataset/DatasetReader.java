@@ -63,7 +63,7 @@ public class DatasetReader
 		URL icon = XMLUtil.getURL(element, "@icon", context);
 		boolean base = XMLUtil.getBoolean(element, "@base", false);
 		IDataset dataset = new Dataset(name, info, icon, base);
-		parent.getDatasets().add(dataset);
+		parent.addChild(dataset);
 		return dataset;
 	}
 
@@ -76,7 +76,7 @@ public class DatasetReader
 		URL url = XMLUtil.getURL(element, "@url", context);
 		boolean base = XMLUtil.getBoolean(element, "@base", false);
 		IDataset dataset = new LazyDataset(name, url, info, icon, base);
-		parent.getDatasets().add(dataset);
+		parent.addChild(dataset);
 	}
 
 	private static void addLayer(Element element, IDataset parent, URL context)
@@ -89,6 +89,6 @@ public class DatasetReader
 		boolean base = XMLUtil.getBoolean(element, "@base", false);
 		boolean def = XMLUtil.getBoolean(element, "@default", false);
 		ILayerDefinition layer = new LayerDefinition(name, url, info, icon, base, def);
-		parent.getLayers().add(layer);
+		parent.addChild(layer);
 	}
 }

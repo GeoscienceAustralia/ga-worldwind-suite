@@ -531,8 +531,7 @@ public class LayersPanel extends AbstractLayersPanel
 
 	private void addDefaultLayersFromDataset(IDataset dataset)
 	{
-		if (dataset instanceof ILazyDataset && dataset.getDatasets().isEmpty()
-				&& dataset.getLayers().isEmpty())
+		if (dataset instanceof ILazyDataset && dataset.getChildren().isEmpty())
 		{
 			final ILazyDataset lazy = (ILazyDataset) dataset;
 			lazy.addListener(new LazyLoadListener()
@@ -555,13 +554,27 @@ public class LayersPanel extends AbstractLayersPanel
 	{
 		parents.add(dataset);
 
-		for (ILayerDefinition layer : dataset.getLayers())
-			if (layer.isDefault())
-				getModel().addLayer(layer, parents);
+		List<IData> children = dataset.getChildren();
+
+		for (IData child : children)
+		{
+			if (child instanceof ILayerDefinition)
+			{
+				ILayerDefinition layer = (ILayerDefinition) child;
+				if (layer.isDefault())
+					getModel().addLayer(layer, parents);
+			}
+		}
 
 		//recurse
-		for (IDataset d : dataset.getDatasets())
-			addDefaultLayersFromDataset(d, parents);
+		for (IData child : children)
+		{
+			if (child instanceof IDataset)
+			{
+				IDataset d = (IDataset) child;
+				addDefaultLayersFromDataset(d, parents);
+			}
+		}
 
 		parents.remove(parents.size() - 1);
 	}
