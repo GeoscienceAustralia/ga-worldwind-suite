@@ -224,10 +224,16 @@ public abstract class ParameterBase implements Parameter
 				// Create a parameter value for each child element
 				// Insert it as a key frame (relies on key frames being merged)
 				context.setValue(constants.getParameterValueOwnerKey(), result);
-				for (Element e : WWXML.getElements(element, constants.getParameterValueElementName(), null))
+				Element[] parameterValueElements = WWXML.getElements(element, constants.getParameterValueElementName(), null);
+				if (parameterValueElements == null)
+				{
+					return result;
+				}
+				
+				for (Element e : parameterValueElements)
 				{
 					ParameterValue v = ParameterValueFactory.fromXml(e, version, context);
-					animation.insertKeyFrame(new KeyFrameImpl(v.getFrame(), v), false);
+					result.animation.insertKeyFrame(new KeyFrameImpl(v.getFrame(), v), false);
 				}
 				
 				return result;

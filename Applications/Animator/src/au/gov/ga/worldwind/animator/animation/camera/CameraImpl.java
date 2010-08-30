@@ -74,7 +74,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	/**
 	 * Constructor used for de-serialising. Not for general use.
 	 */
-	private CameraImpl(){super();}
+	protected CameraImpl(){super();}
 
 	/**
 	 * Initialise the camera parameters
@@ -323,13 +323,13 @@ public class CameraImpl extends AnimatableBase implements Camera
 				result.animation = (Animation)context.getValue(constants.getAnimationKey());
 				result.setName(WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getCameraAttributeName()));
 				
-				result.eyeLat = new EyeLatParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLatElementName()+ "." + constants.getParameterElementName(), null), version, context);
-				result.eyeLon = new EyeLonParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLonElementName()+ "." + constants.getParameterElementName(), null), version, context);
-				result.eyeElevation = new EyeElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeElevationElementName()+ "." + constants.getParameterElementName(), null), version, context);
+				result.eyeLat = new EyeLatParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLatElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+				result.eyeLon = new EyeLonParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLonElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+				result.eyeElevation = new EyeElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeElevationElementName()+ "/" + constants.getParameterElementName(), null), version, context);
 				
-				result.lookAtLat = new LookatLatParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLatElementName()+ "." + constants.getParameterElementName(), null), version, context);
-				result.lookAtLon = new LookatLonParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLonElementName()+ "." + constants.getParameterElementName(), null), version, context);
-				result.lookAtElevation = new LookatElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatElevationElementName()+ "." + constants.getParameterElementName(), null), version, context);
+				result.lookAtLat = new LookatLatParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLatElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+				result.lookAtLon = new LookatLonParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLonElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+				result.lookAtElevation = new LookatElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatElevationElementName()+ "/" + constants.getParameterElementName(), null), version, context);
 				
 				return result;
 			}

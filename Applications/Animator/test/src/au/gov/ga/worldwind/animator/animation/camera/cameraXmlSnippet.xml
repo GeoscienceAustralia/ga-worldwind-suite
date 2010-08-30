@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<camera name="Test Render Camera">
+  <eyeLat>
+    <parameter defaultValue="0.0" enabled="true" name="Test Render Camera - EyeLat">
+      <parameterValue frame="0" inPercent="1.2" inValue="1.1" locked="false" outPercent="1.4" outValue="1.3" type="BEZIER" value="1.0" />
+      <parameterValue frame="10" inPercent="2.2" inValue="2.1" locked="false" outPercent="2.4" outValue="2.3" type="BEZIER" value="2.0" />
+      <parameterValue frame="20" inPercent="3.2" inValue="3.1" locked="false" outPercent="3.4" outValue="3.3" type="BEZIER" value="3.0" />
+    </parameter>
+  </eyeLat>
+  <eyeLon>
+    <parameter defaultValue="0.0" enabled="false" name="Test Render Camera - EyeLon">
+      <parameterValue frame="0" type="LINEAR" value="11.0" />
+      <parameterValue frame="11" inPercent="12.2" inValue="12.1" locked="false" outPercent="12.4" outValue="12.3" type="BEZIER" value="12.0" />
+    </parameter>
+  </eyeLon>
+  <eyeElevation>
+    <parameter defaultValue="0.0" enabled="true" name="Test Render Camera - EyeElevation">
+      <parameterValue frame="31" inPercent="22.2" inValue="22.1" locked="false" outPercent="22.4" outValue="22.3" type="BEZIER" value="21.0" />
+    </parameter>
+  </eyeElevation>
+  <lookAtLat>
+    <parameter defaultValue="0.0" enabled="true" name="Test Render Camera - LookAtLat" />
+  </lookAtLat>
+  <lookAtLon>
+    <parameter defaultValue="0.0" enabled="true" name="Test Render Camera - LookAtLon" />
+  </lookAtLon>
+  <lookAtElevation>
+    <parameter defaultValue="0.0" enabled="false" name="Test Render Camera - LookAtElevation" />
+  </lookAtElevation>
+</camera>
