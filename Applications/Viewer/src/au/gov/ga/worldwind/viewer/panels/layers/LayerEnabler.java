@@ -232,7 +232,7 @@ public class LayerEnabler
 		if (!result.isFromCache())
 		{
 			refreshLists();
-			if(node.hasError())
+			if (node.hasError())
 			{
 				setError(node, null);
 			}
@@ -328,6 +328,15 @@ public class LayerEnabler
 						.getElevationModel() : null;
 
 		return Bounded.Reader.getSector(wrapped);
+	}
+
+	public synchronized Layer getLayer(ILayerNode node)
+	{
+		if (!nodeMap.containsKey(node))
+			return null;
+
+		Wrapper wrapper = nodeMap.get(node);
+		return wrapper.hasLayer() ? wrapper.getLayer() : null;
 	}
 
 	public ILayerNode getLayerNode(Layer layer)

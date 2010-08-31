@@ -77,6 +77,7 @@ import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.common.util.URLTransformer;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
+import au.gov.ga.worldwind.viewer.components.sectorsaver.ImageSectorSaver;
 import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.viewer.panels.SideBar;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
@@ -282,6 +283,7 @@ public class Application
 	private BasicAction helpAction;
 	private BasicAction controlsAction;
 	private BasicAction aboutAction;
+	private BasicAction saveSectorAction;
 
 	private Application(Theme theme)
 	{
@@ -483,7 +485,7 @@ public class Application
 			}
 		});
 
-		screenshotAction = new BasicAction("Save image...", Icons.screenshot.getIcon());
+		screenshotAction = new BasicAction("Save screenshot...", Icons.screenshot.getIcon());
 		screenshotAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -642,6 +644,16 @@ public class Application
 			public void actionPerformed(ActionEvent e)
 			{
 				new AboutDialog(frame);
+			}
+		});
+
+		saveSectorAction = new BasicAction("Save sector as GeoTIFF...", Icons.save.getIcon());
+		saveSectorAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				saveSector();
 			}
 		});
 	}
@@ -1022,6 +1034,7 @@ public class Application
 
 		menu.addSeparator();
 		menu.add(screenshotAction);
+		menu.add(saveSectorAction);
 
 		menu.addSeparator();
 		menu.add(exitAction);
@@ -1202,5 +1215,10 @@ public class Application
 	private void loadSplitLocation()
 	{
 		splitPane.setDividerLocation(Settings.get().getSplitLocation());
+	}
+
+	private void saveSector()
+	{
+		ImageSectorSaver.beginSelection(frame, "Save sector as GeoTIFF", wwd);
 	}
 }

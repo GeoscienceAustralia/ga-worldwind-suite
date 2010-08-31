@@ -434,17 +434,17 @@ public class LayersPanel extends AbstractLayersPanel
 
 	private void treeSelectionChanged()
 	{
-		ILayerNode layer = null;
+		ILayerNode node = null;
 		TreePath p = tree.getSelectionPath();
 		if (p != null)
 		{
 			Object o = p.getLastPathComponent();
 			if (o instanceof ILayerNode)
-				layer = (ILayerNode) o;
+				node = (ILayerNode) o;
 		}
 
-		refreshAction.setEnabled(layer != null);
-		reloadAction.setEnabled(layer != null);
+		refreshAction.setEnabled(node != null);
+		reloadAction.setEnabled(node != null);
 	}
 
 	private void refreshSelected()

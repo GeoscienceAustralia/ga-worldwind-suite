@@ -69,8 +69,8 @@ public class LocalLayerCreator extends JDialog
 	private JIntegerField tilesizeField;
 	private JDoubleField lztsdField;
 	private JIntegerField levelcountField;
-	private JTextField topleftField;
-	private JTextField bottomrightField;
+	private JTextField bottomleftField;
+	private JTextField toprightField;
 	private JCheckBox transparentCheck;
 	private JColorComponent transparentColor;
 	private JIntegerField fuzzField;
@@ -465,9 +465,9 @@ public class LocalLayerCreator extends JDialog
 						sector(directory, (String) extensionCombo.getSelectedItem(), levels,
 								lztsdField.getValue());
 				levelcountField.setValue(levels);
-				topleftField.setText(formatLatLon(sector.getMinLatitude().degrees,
+				bottomleftField.setText(formatLatLon(sector.getMinLatitude().degrees,
 						sector.getMinLongitude().degrees));
-				bottomrightField.setText(formatLatLon(sector.getMaxLatitude().degrees,
+				toprightField.setText(formatLatLon(sector.getMaxLatitude().degrees,
 						sector.getMaxLongitude().degrees));
 			}
 		});
@@ -501,15 +501,15 @@ public class LocalLayerCreator extends JDialog
 		c.insets = new Insets(s, s, 0, 0);
 		panel.add(label, c);
 
-		topleftField = new JTextField();
-		topleftField.getDocument().addDocumentListener(dl);
+		bottomleftField = new JTextField();
+		bottomleftField.getDocument().addDocumentListener(dl);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = i++;
 		c.insets = new Insets(s, s, 0, s);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.WEST;
-		panel.add(topleftField, c);
+		panel.add(bottomleftField, c);
 
 		label = new JLabel("Top right lat/lon:");
 		c = new GridBagConstraints();
@@ -519,15 +519,15 @@ public class LocalLayerCreator extends JDialog
 		c.insets = new Insets(s, s, 0, 0);
 		panel.add(label, c);
 
-		bottomrightField = new JTextField();
-		bottomrightField.getDocument().addDocumentListener(dl);
+		toprightField = new JTextField();
+		toprightField.getDocument().addDocumentListener(dl);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = i++;
 		c.insets = new Insets(s, s, 0, s);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.WEST;
-		panel.add(bottomrightField, c);
+		panel.add(toprightField, c);
 
 		i = 0;
 		panel = new JPanel(new GridBagLayout());
@@ -708,8 +708,8 @@ public class LocalLayerCreator extends JDialog
 		valid = valid && lztsdField.getValue() != null && lztsdField.getValue() > 0;
 		valid = valid && tilesizeField.getValue() != null && tilesizeField.getValue() > 0;
 		valid = valid && levelcountField.getValue() != null && levelcountField.getValue() > 0;
-		valid = valid && Util.computeLatLonFromString(topleftField.getText()) != null;
-		valid = valid && Util.computeLatLonFromString(bottomrightField.getText()) != null;
+		valid = valid && Util.computeLatLonFromString(bottomleftField.getText()) != null;
+		valid = valid && Util.computeLatLonFromString(toprightField.getText()) != null;
 		if (transparentCheck.isSelected())
 		{
 			valid = valid && transparentColor.getColor() != null;
@@ -903,8 +903,8 @@ public class LocalLayerCreator extends JDialog
 			Integer tilesizeI = tilesizeField.getValue();
 			int tilesize = tilesizeI == null ? 512 : tilesizeI;
 
-			LatLon topleft = Util.computeLatLonFromString(topleftField.getText());
-			LatLon bottomright = Util.computeLatLonFromString(bottomrightField.getText());
+			LatLon topleft = Util.computeLatLonFromString(bottomleftField.getText());
+			LatLon bottomright = Util.computeLatLonFromString(toprightField.getText());
 			Sector sector =
 					new Sector(topleft.latitude, bottomright.latitude, topleft.longitude,
 							bottomright.longitude);
