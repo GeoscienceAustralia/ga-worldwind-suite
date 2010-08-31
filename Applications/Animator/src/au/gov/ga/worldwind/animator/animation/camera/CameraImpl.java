@@ -168,8 +168,9 @@ public class CameraImpl extends AnimatableBase implements Camera
 	@Override
 	public Collection<Parameter> getParameters()
 	{
-		if (parameters.isEmpty())
+		if (parameters == null || parameters.isEmpty())
 		{
+			parameters = new ArrayList<Parameter>();
 			parameters.add(eyeLat);
 			parameters.add(eyeLon);
 			parameters.add(eyeElevation);

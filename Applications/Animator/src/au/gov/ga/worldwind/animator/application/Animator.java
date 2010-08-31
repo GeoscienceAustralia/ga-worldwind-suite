@@ -1483,13 +1483,15 @@ public class Animator
 					setAnimation(newAnimation);
 					resetChanged();
 					setFile(animationFile);
+					updateSlider();
+					setSlider(0);
+					animation.applyFrame(0);
 				}
 				catch (Exception e)
 				{
 					JOptionPane.showMessageDialog(frame, "Could not open '" + animationFile.getAbsolutePath() + "'.\n" + e, "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
-			updateSlider();
 		}
 	}
 
