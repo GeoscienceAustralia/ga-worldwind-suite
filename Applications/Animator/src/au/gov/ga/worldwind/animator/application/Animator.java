@@ -71,6 +71,7 @@ import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
 import au.gov.ga.worldwind.animator.animation.io.AnimationWriter;
+import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -1455,19 +1456,17 @@ public class Animator
 			chooser.setFileFilter(new XmlFilter());
 			if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
-				File newFile = chooser.getSelectedFile();
-				Animation newAnimation = new WorldWindAnimationImpl(wwd);
+				File animationFile = chooser.getSelectedFile();
 				try
 				{
-					// TODO: Implement animation opening
-					//newAnimation.load(newFile);
+					Animation newAnimation = new XmlAnimationReader().readAnimation(animationFile, wwd);
 					setAnimation(newAnimation);
 					resetChanged();
-					setFile(newFile);
+					setFile(animationFile);
 				}
 				catch (Exception e)
 				{
-					JOptionPane.showMessageDialog(frame, "Could not open '" + newFile.getAbsolutePath() + "'.\n" + e,
+					JOptionPane.showMessageDialog(frame, "Could not open '" + animationFile.getAbsolutePath() + "'.\n" + e,
 							"Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}

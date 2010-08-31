@@ -51,7 +51,7 @@ public class XmlAnimationReader implements AnimationReader
 		if (rootElement.getNodeName().equals(WORLD_WIND_ANIMATION_ELEMENT_NAME))
 		{
 			// V2 or above - extract the version from the element
-			version = AnimationFileVersion.valueOf(WWXML.getText(rootElement, XmlSerializable.ATTRIBUTE_PATH_PREFIX + WORLD_WIND_ANIMATION_VERSION, null));
+			version = AnimationFileVersion.fromDisplayName(WWXML.getText(rootElement, XmlSerializable.ATTRIBUTE_PATH_PREFIX + WORLD_WIND_ANIMATION_VERSION, null));
 		}
 		
 		switch (version)
