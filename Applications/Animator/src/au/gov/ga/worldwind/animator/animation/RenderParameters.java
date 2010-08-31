@@ -8,7 +8,9 @@ import java.awt.Dimension;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
+import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
  * A class that holds the render parameters associated with an animation 
@@ -25,7 +27,7 @@ public class RenderParameters implements XmlSerializable<RenderParameters>
 	/** 
 	 * The dimension of the output image (in pixels)
 	 * <p/>
-	 * Defaults to 
+	 * Defaults to 1024x576
 	 */
 	private Dimension imageDimension = DEFAULT_DIMENSIONS;
 	
@@ -72,19 +74,44 @@ public class RenderParameters implements XmlSerializable<RenderParameters>
 	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
-		Element result = WWXML.appendElement(parent, "renderParameters");
+		Validate.notNull(parent, "An XML element is required");
+		Validate.notNull(version, "A version ID is required");
 		
-		WWXML.appendInteger(result, "frameRate", getFrameRate());
-		WWXML.appendLong(result, "width", Math.round(imageDimension.getWidth()));
-		WWXML.appendLong(result, "height", Math.round(imageDimension.getHeight()));
+		AnimationIOConstants constants = version.getConstants();
+		
+		Element result = WWXML.appendElement(parent, constants.getRenderParametersElementName());
+		
+		WWXML.appendInteger(result, constants.getFrameRateElementName(), getFrameRate());
+		WWXML.appendLong(result, constants.getWidthElementName(), Math.round(imageDimension.getWidth()));
+		WWXML.appendLong(result, constants.getHeightElementName(), Math.round(imageDimension.getHeight()));
 		
 		return result;
 	}
 
 	@Override
-	public RenderParameters fromXml(Element element, AnimationFileVersion versionId, AVList context)
+	public RenderParameters fromXml(Element element, AnimationFileVersion version, AVList context)
 	{
-		// TODO Auto-generated method stub
+		Validate.notNull(element, "An XML element is required");
+		Validate.notNull(version, "A version ID is required");
+		Validate.notNull(context, "A context is required");
+		
+		AnimationIOConstants constants = version.getConstants();
+		
+		switch (version)
+		{
+			case VERSION020:
+			{
+				RenderParameters result = new RenderParameters();
+				result.setFrameRate(WWXML.getInteger(element, constants.getFrameRateElementName(), null));
+				
+				int width = WWXML.getInteger(element, constants.getWidthElementName(), null);
+				int height = WWXML.getInteger(element, constants.getHeightElementName(), null);
+				result.setImageDimension(new Dimension(width, height));
+				
+				return result;
+			}
+		}
+		
 		return null;
 	}
 	

@@ -17,6 +17,7 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -468,14 +469,19 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
-		Element result = WWXML.appendElement(parent, "animation");
+		Validate.notNull(parent, "An XML element is required");
+		Validate.notNull(version, "A version ID is required");
 		
-		WWXML.setIntegerAttribute(result, "frameCount", frameCount);
-		WWXML.setBooleanAttribute(result, "zoomRequired", isZoomScalingRequired());
+		AnimationIOConstants constants = version.getConstants();
+		
+		Element result = WWXML.appendElement(parent, constants.getAnimationElementName());
+		
+		WWXML.setIntegerAttribute(result, constants.getAnimationAttributeFrameCount(), frameCount);
+		WWXML.setBooleanAttribute(result, constants.getAnimationAttributeZoomRequired(), isZoomScalingRequired());
 		
 		renderParameters.toXml(result, version);
 		
-		Element animatableContainer = WWXML.appendElement(result, "animatableObjects");
+		Element animatableContainer = WWXML.appendElement(result, constants.getAnimatableObjectsElementName());
 		for (Animatable animatable : animatableObjects)
 		{
 			animatableContainer.appendChild(animatable.toXml(animatableContainer, version));
@@ -484,9 +490,55 @@ public class WorldWindAnimationImpl implements Animation
 	}
 
 	@Override
-	public Animation fromXml(Element element, AnimationFileVersion versionId, AVList context)
+	public Animation fromXml(Element element, AnimationFileVersion version, AVList context)
 	{
-		// TODO Auto-generated method stub
+		Validate.notNull(element, "An XML element is required");
+		Validate.notNull(version, "A version ID is required");
+		Validate.notNull(context, "A context is required");
+		
+		AnimationIOConstants constants = version.getConstants();
+		
+		switch (version)
+		{
+			case VERSION020:
+			{
+				WorldWindAnimationImpl result = new WorldWindAnimationImpl((WorldWindow)context.getValue(constants.getWorldWindowKey()));
+				
+				context.setValue(constants.getAnimationKey(), result);
+				
+				result.setCurrentFrame(0);
+				result.setFrameCount(WWXML.getInteger(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimationAttributeFrameCount(), null));
+				result.setZoomScalingRequired(WWXML.getBoolean(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimationAttributeZoomRequired(), null));
+				
+				// Add the render parameters
+				result.renderParameters = new RenderParameters().fromXml(WWXML.getElement(element, constants.getRenderParametersElementName(), null), version, context);
+				
+				// Add each animatable object
+				Element[] animatableObjectElements = WWXML.getElements(element, constants.getAnimatableObjectsElementName() + "/*", null);
+				if (animatableObjectElements == null)
+				{
+					return null;
+				}
+				for (Element animatableObjectElement : animatableObjectElements)
+				{
+					Animatable animatable = AnimatableFactory.fromXml(animatableObjectElement, version, context);
+					if (animatable == null)
+					{
+						continue;
+					}
+					result.animatableObjects.add(animatable);
+					
+					// If this is the camera, set it as the render camera
+					if (animatable instanceof Camera)
+					{
+						result.renderCamera = (Camera)animatable;
+					}
+				}
+				
+				return result;
+			}
+		}
+		
 		return null;
 	}
 	
