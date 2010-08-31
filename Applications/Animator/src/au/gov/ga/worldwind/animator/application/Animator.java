@@ -1479,6 +1479,7 @@ public class Animator
 					
 					// Load the file
 					Animation newAnimation = animationReader.readAnimation(animationFile, wwd);
+					
 					setAnimation(newAnimation);
 					resetChanged();
 					setFile(animationFile);

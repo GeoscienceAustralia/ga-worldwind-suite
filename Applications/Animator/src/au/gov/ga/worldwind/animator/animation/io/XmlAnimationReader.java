@@ -76,6 +76,7 @@ public class XmlAnimationReader implements AnimationReader
 				{
 					throw new IllegalArgumentException("File " + file.getName() + " is not a valid XML animation file.", e);
 				}
+				version = AnimationFileVersion.VERSION020;
 				
 			}
 			default:
