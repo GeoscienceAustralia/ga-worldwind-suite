@@ -104,9 +104,43 @@ public class XMLUtil extends WWXML
 			throw new IllegalArgumentException(message);
 		}
 
+		
 		try
 		{
 			FileOutputStream outputStream = new FileOutputStream(filePath);
+			saveDocumentToFormattedStream(doc, outputStream);
+		}
+		catch (Exception e)
+		{
+			String message = Logging.getMessage("generic.ExceptionAttemptingToWriteXml", filePath);
+			Logging.logger().severe(message);
+			throw new WWRuntimeException(e);
+		}
+	}
+
+	/**
+	 * @param document
+	 * @param fileOutputStream
+	 */
+	public static void saveDocumentToFormattedStream(Document doc, FileOutputStream outputStream)
+	{
+		if (doc == null)
+		{
+			String message = Logging.getMessage("nullValue.DocumentIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		
+		if (outputStream == null)
+		{
+			String message = Logging.getMessage("nullValue.FilePathIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+		
+		try
+		{
 			Source source = new DOMSource(doc);
 			Result result = new StreamResult(outputStream);
 			Transformer transformer = createTransformer();
@@ -117,9 +151,10 @@ public class XMLUtil extends WWXML
 		}
 		catch (Exception e)
 		{
-			String message = Logging.getMessage("generic.ExceptionAttemptingToWriteXml", filePath);
+			String message = Logging.getMessage("generic.ExceptionAttemptingToWriteXml");
 			Logging.logger().severe(message);
 			throw new WWRuntimeException(e);
 		}
+		
 	}
 }
