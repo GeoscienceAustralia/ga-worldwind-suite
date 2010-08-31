@@ -11,6 +11,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
  * An {@link AnimationWriter} that writes an {@link Animation} in the <em>version 2</em>
@@ -57,7 +58,7 @@ public class XmlAnimationWriter implements AnimationWriter
 
 		rootElement.appendChild(animation.toXml(rootElement, CURRENT_FILE_VERSION));
 		
-		WWXML.saveDocumentToStream(document, new FileOutputStream(file));
+		XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(file));
 	}
 
 
