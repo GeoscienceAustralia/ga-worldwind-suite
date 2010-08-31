@@ -14,7 +14,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
  * An {@link AnimationWriter} that writes an {@link Animation} in the <em>version 2</em>
- * xml format.
+ * XML format.
  * 
  * @author James Navin (james.navin@ga.gov.au)
  *

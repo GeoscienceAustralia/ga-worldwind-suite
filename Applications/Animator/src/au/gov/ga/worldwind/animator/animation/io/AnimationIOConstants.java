@@ -11,6 +11,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
  */
 public interface AnimationIOConstants
 {
+	
 	// -------------------------------------
 	// Context keys
 	// -------------------------------------
@@ -33,6 +34,16 @@ public interface AnimationIOConstants
 	// -------------------------------------
 	// XML elements and attributes
 	// -------------------------------------
+	
+	/**
+	 * @return The root world wind animation element name
+	 */
+	String getWorldWindAnimationElementName();
+	
+	/**
+	 * @return The world wind animation version attribute name
+	 */
+	String getWorldWindAnimationAttributeVersion();
 	
 	/**
 	 * @return The name of the 'parameter value' element
@@ -192,6 +203,12 @@ public interface AnimationIOConstants
 		
 		@Override
 		public String getWorldWindowKey() {return "worldWindow";}
+		
+		@Override
+		public String getWorldWindAnimationElementName() {return "worldWindAnimation";}
+		
+		@Override
+		public String getWorldWindAnimationAttributeVersion() {return "version";}
 	}
 	
 	/**

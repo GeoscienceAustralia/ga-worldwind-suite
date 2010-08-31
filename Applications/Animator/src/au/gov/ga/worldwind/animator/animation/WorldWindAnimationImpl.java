@@ -519,6 +519,7 @@ public class WorldWindAnimationImpl implements Animation
 				{
 					return null;
 				}
+				result.animatableObjects = new ArrayList<Animatable>();
 				for (Element animatableObjectElement : animatableObjectElements)
 				{
 					Animatable animatable = AnimatableFactory.fromXml(animatableObjectElement, version, context);
