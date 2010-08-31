@@ -34,12 +34,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -70,11 +66,10 @@ import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationWriter;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
-import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
-import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
 import au.gov.ga.worldwind.animator.layers.depth.DepthLayer;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModel;
@@ -1448,6 +1443,9 @@ public class Animator
 		}
 	}
 
+	/**
+	 * Prompt the user to open an animation file.
+	 */
 	private void open()
 	{
 		if (querySave())
@@ -1459,15 +1457,35 @@ public class Animator
 				File animationFile = chooser.getSelectedFile();
 				try
 				{
-					Animation newAnimation = new XmlAnimationReader().readAnimation(animationFile, wwd);
+					XmlAnimationReader animationReader = new XmlAnimationReader();
+					
+					// Check the file version and display appropriate messages
+					AnimationFileVersion version = animationReader.getFileVersion(animationFile);
+					if (version == null)
+					{
+						JOptionPane.showMessageDialog(frame, "Could not open '" + animationFile.getAbsolutePath() + "'.\nNot a valid file format.", "Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					if (version == AnimationFileVersion.VERSION010)
+					{
+						String message = "File '" + animationFile.getAbsolutePath() + "' is a version 1.0 file. Changes will be saved in version " + XmlAnimationWriter.getCurrentFileVersion().getDisplayName() + ".\n";
+						message += "Are you sure you want to continue?";
+						int response = JOptionPane.showConfirmDialog(frame, message, "Open", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						if (response == JOptionPane.NO_OPTION)
+						{
+							return;
+						}
+					}
+					
+					// Load the file
+					Animation newAnimation = animationReader.readAnimation(animationFile, wwd);
 					setAnimation(newAnimation);
 					resetChanged();
 					setFile(animationFile);
 				}
 				catch (Exception e)
 				{
-					JOptionPane.showMessageDialog(frame, "Could not open '" + animationFile.getAbsolutePath() + "'.\n" + e,
-							"Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frame, "Could not open '" + animationFile.getAbsolutePath() + "'.\n" + e, "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 			updateSlider();

@@ -12,6 +12,11 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 public interface AnimationIOConstants
 {
 	
+	/**
+	 * @return The name of the root element in the file
+	 */
+	String getRootElementName();
+	
 	// -------------------------------------
 	// Context keys
 	// -------------------------------------
@@ -204,11 +209,6 @@ public interface AnimationIOConstants
 		@Override
 		public String getWorldWindowKey() {return "worldWindow";}
 		
-		@Override
-		public String getWorldWindAnimationElementName() {return "worldWindAnimation";}
-		
-		@Override
-		public String getWorldWindAnimationAttributeVersion() {return "version";}
 	}
 	
 	/**
@@ -216,6 +216,9 @@ public interface AnimationIOConstants
 	 */
 	public static class V2 extends BaseConstants implements AnimationIOConstants
 	{
+		@Override
+		public String getRootElementName() {return getWorldWindAnimationElementName();}
+		
 		@Override
 		public String getParameterValueElementName() {return "parameterValue";}
 		
@@ -302,5 +305,114 @@ public interface AnimationIOConstants
 		
 		@Override
 		public String getHeightElementName() {return "height";}
+		
+		@Override
+		public String getWorldWindAnimationElementName() {return "worldWindAnimation";}
+		
+		@Override
+		public String getWorldWindAnimationAttributeVersion() {return "version";}
+	}
+	
+	/**
+	 * Implementation of the {@link AnimationIOConstants} for V1 files
+	 */
+	public static class V1 extends BaseConstants implements AnimationIOConstants
+	{
+		@Override
+		public String getRootElementName() {return "restorableState";}
+
+		@Override
+		public String getWorldWindAnimationElementName(){return null;}
+
+		@Override
+		public String getWorldWindAnimationAttributeVersion(){return null;}
+
+		@Override
+		public String getParameterValueElementName(){return null;}
+
+		@Override
+		public String getParameterValueAttributeValue(){return null;}
+
+		@Override
+		public String getParameterValueAttributeFrame(){return null;}
+
+		@Override
+		public String getParameterValueAttributeType(){return null;}
+
+		@Override
+		public String getBezierValueAttributeInValue(){return null;}
+
+		@Override
+		public String getBezierValueAttributeInPercent(){return null;}
+
+		@Override
+		public String getBezierValueAttributeOutValue(){return null;}
+
+		@Override
+		public String getBezierValueAttributeOutPercent(){return null;}
+
+		@Override
+		public String getBezierValueAttributeLocked(){return null;}
+
+		@Override
+		public String getParameterAttributeDefaultValue(){return null;}
+
+		@Override
+		public String getParameterAttributeName(){return null;}
+
+		@Override
+		public String getParameterAttributeEnabled(){return null;}
+
+		@Override
+		public String getParameterElementName(){return null;}
+
+		@Override
+		public String getCameraEyeLatElementName(){return null;}
+
+		@Override
+		public String getCameraEyeLonElementName(){return null;}
+
+		@Override
+		public String getCameraEyeElevationElementName(){return null;}
+
+		@Override
+		public String getCameraLookatLatElementName(){return null;}
+
+		@Override
+		public String getCameraLookatLonElementName(){return null;}
+
+		@Override
+		public String getCameraLookatElevationElementName(){return null;}
+
+		@Override
+		public String getCameraAttributeName(){return null;}
+
+		@Override
+		public String getCameraElementName(){return null;}
+
+		@Override
+		public String getAnimationAttributeFrameCount(){return null;}
+
+		@Override
+		public String getAnimationAttributeZoomRequired(){return null;}
+
+		@Override
+		public String getAnimatableObjectsElementName(){return null;}
+
+		@Override
+		public String getAnimationElementName(){return null;}
+		
+		@Override
+		public String getRenderParametersElementName(){return null;}
+
+		@Override
+		public String getHeightElementName(){return null;}
+
+		@Override
+		public String getWidthElementName(){return null;}
+
+		@Override
+		public String getFrameRateElementName(){return null;}
+
 	}
 }

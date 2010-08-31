@@ -33,4 +33,22 @@ public interface AnimationReader
 	 */
 	Animation readAnimation(File file, WorldWindow worldWindow);
 	
+	/**
+	 * Return the file format version of the provided animation file
+	 * 
+	 * @param fileName The name of the file to read the animation from
+	 * 
+	 * @return The file format version of the provided animation file, or <code>null</code> if it is not a valid animation file
+	 */
+	AnimationFileVersion getFileVersion(String fileName);
+	
+	/**
+	 * Return the file format version of the provided animation file
+	 * 
+	 * @param file The file to read the animation from
+	 * 
+	 * @return The file format version of the provided animation file, or <code>null</code> if it is not a valid animation file
+	 */
+	AnimationFileVersion getFileVersion(File file);
+	
 }

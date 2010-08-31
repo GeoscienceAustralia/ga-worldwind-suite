@@ -12,7 +12,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 public enum AnimationFileVersion
 {
-	VERSION010("1.0", new AnimationIOConstants.V2()),
+	VERSION010("1.0", new AnimationIOConstants.V1()),
 	VERSION020("2.0", new AnimationIOConstants.V2());
 
 	// The map of display names -> enums
