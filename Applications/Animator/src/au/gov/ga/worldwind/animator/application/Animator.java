@@ -154,8 +154,7 @@ public class Animator
 	{
 		Logging.logger().setLevel(Level.FINER);
 
-		messageSource = new ResourceBundleMessageSource("au.gov.ga.worldwind.animator.data.messages.animatorMessages");
-		MessageSourceAccessor.set(messageSource);
+		setupMessageSource();
 
 		// ImmediateMode.setImmediate(true);
 
@@ -290,6 +289,16 @@ public class Animator
 
 		frame.pack();
 		frame.setVisible(true);
+	}
+
+	/**
+	 * Sets up the message source used in the application.
+	 */
+	private void setupMessageSource()
+	{
+		messageSource = new ResourceBundleMessageSource("au.gov.ga.worldwind.animator.data.messages.animatorMessages",
+														"au.gov.ga.worldwind.common.data.messages.commonUIMessages");
+		MessageSourceAccessor.set(messageSource);
 	}
 
 	private ExtendedElevationModel getEBEM(ElevationModel elevationModel)
