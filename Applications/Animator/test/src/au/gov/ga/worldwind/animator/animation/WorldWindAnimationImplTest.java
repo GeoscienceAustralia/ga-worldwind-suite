@@ -14,8 +14,8 @@ import org.junit.Test;
 import au.gov.ga.worldwind.animator.animation.parameter.BasicParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.util.message.MessageSourceAccessor;
-import au.gov.ga.worldwind.animator.util.message.StaticMessageSource;
+import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
+import au.gov.ga.worldwind.common.util.message.StaticMessageSource;
 
 /**
  * Unit tests for the {@link WorldWindAnimationImpl} class

@@ -19,8 +19,8 @@ import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
 import au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.util.message.MessageSourceAccessor;
-import au.gov.ga.worldwind.animator.util.message.StaticMessageSource;
+import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
+import au.gov.ga.worldwind.common.util.message.StaticMessageSource;
 
 /**
  * Tests for the {@link XmlAnimationWriter} class
