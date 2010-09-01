@@ -265,4 +265,20 @@ public class AnimationMessageConstants extends CommonMessageConstants
 		return "animator.animation.camera.lookat.zoom.name";
 	}
 	
+	/**
+	 * @return The key for the open failed message
+	 */
+	public static String getOpenFailedMessageKey()
+	{
+		return "animator.message.openfailed.message";
+	}
+	
+	/**
+	 * @return The key for the open failed caption
+	 */
+	public static String getOpenFailedCaptionKey()
+	{
+		return "animator.message.openfailed.caption";
+	}
+	
 }

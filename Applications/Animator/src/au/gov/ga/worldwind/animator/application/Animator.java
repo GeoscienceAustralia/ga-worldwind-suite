@@ -116,6 +116,7 @@ public class Animator
 		}
 		catch (Exception e)
 		{
+			ExceptionLogger.logException(e);
 		}
 
 		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
@@ -496,15 +497,14 @@ public class Animator
 			public void actionPerformed(ActionEvent e)
 			{
 				int frames = slider.getLength() - 1;
-				Object value =
-						JOptionPane.showInputDialog(frame, "Number of frames:", "Set frame count",
-								JOptionPane.QUESTION_MESSAGE, null, null, frames);
+				Object value = JOptionPane.showInputDialog(frame, "Number of frames:", "Set frame count", JOptionPane.QUESTION_MESSAGE, null, null, frames);
 				try
 				{
 					frames = Integer.parseInt((String) value);
 				}
 				catch (Exception ex)
 				{
+					ExceptionLogger.logException(ex);
 				}
 				animation.setFrameCount(frames);
 				updateSlider();
@@ -623,6 +623,7 @@ public class Animator
 				}
 				catch (Exception ex)
 				{
+					ExceptionLogger.logException(ex);
 				}
 				if (scale != 1.0 && scale > 0)
 				{
@@ -831,6 +832,8 @@ public class Animator
 			chooser.setFileFilter(new XmlFilter());
 			if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
+				Animation oldAnimation = animation;
+				
 				File animationFile = chooser.getSelectedFile();
 				try
 				{
@@ -840,7 +843,10 @@ public class Animator
 					AnimationFileVersion version = animationReader.getFileVersion(animationFile);
 					if (version == null)
 					{
-						JOptionPane.showMessageDialog(frame, "Could not open '" + animationFile.getAbsolutePath() + "'.\nNot a valid file format.", "Error", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(frame, 
+													  messageSource.getMessage(AnimationMessageConstants.getOpenFailedMessageKey(), null, animationFile.getAbsolutePath()),
+													  messageSource.getMessage(AnimationMessageConstants.getOpenFailedCaptionKey()),
+													  JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 					if (version == AnimationFileVersion.VERSION010)
@@ -856,18 +862,24 @@ public class Animator
 					
 					// Load the file
 					Animation newAnimation = animationReader.readAnimation(animationFile, wwd);
-					
 					setAnimation(newAnimation);
+					animation.applyFrame(0);
+					setSlider(0);
+					
 					resetChanged();
 					setFile(animationFile);
 					updateSlider();
-					setSlider(0);
-					animation.applyFrame(0);
 				}
 				catch (Exception e)
 				{
+					setAnimation(oldAnimation);
+					updateSlider();
+					
 					ExceptionLogger.logException(e);
-					JOptionPane.showMessageDialog(frame, "Could not open '" + animationFile.getAbsolutePath() + "'.\n" + e, "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frame, 
+												  messageSource.getMessage(AnimationMessageConstants.getOpenFailedMessageKey(), null, animationFile.getAbsolutePath()),
+												  messageSource.getMessage(AnimationMessageConstants.getOpenFailedCaptionKey()),
+												  JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}
@@ -937,6 +949,7 @@ public class Animator
 			}
 			catch (IOException e)
 			{
+				ExceptionLogger.logException(e);
 				JOptionPane.showMessageDialog(frame, "Saving failed.\n" + e, "Error", JOptionPane.ERROR_MESSAGE);
 			}
 			setTitleBar();
@@ -1156,7 +1169,7 @@ public class Animator
 								}
 								catch (InterruptedException e)
 								{
-									e.printStackTrace();
+									ExceptionLogger.logException(e);
 								}
 							}
 						}
