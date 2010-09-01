@@ -6,20 +6,12 @@ import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
-import gov.nasa.worldwind.examples.sunlight.LensFlareLayer;
 import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Quaternion;
-import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.geom.Vec4;
-import gov.nasa.worldwind.globes.Earth;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.layers.SkyGradientLayer;
-import gov.nasa.worldwind.layers.StarsLayer;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.StatusBar;
@@ -52,7 +44,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JSlider;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
@@ -72,24 +63,17 @@ import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
 import au.gov.ga.worldwind.animator.layers.depth.DepthLayer;
-import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModel;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedElevationModel;
-import au.gov.ga.worldwind.animator.layers.elevation.perpixel.shaded.ShadedElevationLayer;
-import au.gov.ga.worldwind.animator.layers.elevation.perpixel.shadows.ShadowsElevationLayer;
 import au.gov.ga.worldwind.animator.layers.elevation.pervetex.ElevationTesselator;
-import au.gov.ga.worldwind.animator.layers.file.FileLayer;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateRetrievalService;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateTaskService;
-import au.gov.ga.worldwind.animator.layers.metacarta.MetacartaCoastlineLayer;
-import au.gov.ga.worldwind.animator.layers.metacarta.MetacartaStateBoundariesLayer;
-import au.gov.ga.worldwind.animator.layers.other.GravityLayer;
 import au.gov.ga.worldwind.animator.layers.other.ImmediateBMNGWMSLayer;
 import au.gov.ga.worldwind.animator.layers.other.ImmediateLandsatI3WMSLayer;
-import au.gov.ga.worldwind.animator.layers.other.MagneticsLayer;
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
+import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.FrameSlider;
 import au.gov.ga.worldwind.animator.util.message.MessageSource;
@@ -223,11 +207,6 @@ public class Animator
 		dem = new DetailedElevationModel(cem);
 		model.getGlobe().setElevationModel(dem);
 
-		// tesselator.setMakeTileSkirts(false);
-		// model.setShowWireframeInterior(true);
-		//wwd.getSceneController().setVerticalExaggeration(10);
-		// ocem.setElevationOffset(200);
-
 		LayerList layers = model.getLayers();
 
 		Layer depth = new DepthLayer();
@@ -239,16 +218,12 @@ public class Animator
 		landsat = new ImmediateLandsatI3WMSLayer();
 		layers.add(landsat);
 
-		ElevationModel earthem =
-				(ElevationModel) new ExtendedBasicElevationModelFactory().createFromConfigSource(
-						"config/Earth/EarthElevationModelAsBil16.xml", null);
+		ElevationModel earthem = (ElevationModel) new ExtendedBasicElevationModelFactory().createFromConfigSource("config/Earth/EarthElevationModelAsBil16.xml", null);
 		ExtendedElevationModel eem = getEBEM(earthem);
 		cem.addElevationModel(eem);
-		
 
 		CameraPathLayer cameraPathLayer = new CameraPathLayer(animation);
 		layers.add(cameraPathLayer);
-
 		
 		crosshair = new CrosshairLayer();
 		layers.add(crosshair);
@@ -289,16 +264,6 @@ public class Animator
 				wwd.redraw();
 			}
 		});
-
-		/*JScrollPane scrollPane = new JScrollPane(slider,
-				JScrollPane.VERTICAL_SCROLLBAR_NEVER,
-				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		scrollPane.setBorder(null);
-		bottom.add(scrollPane, BorderLayout.CENTER);
-		
-		Dimension sps = slider.getMinimumSize();
-		sps.width *= 2;
-		slider.setMinimumSize(sps);*/
 
 		getView().addPropertyChangeListener(AVKey.VIEW, new PropertyChangeListener()
 		{
@@ -1026,6 +991,7 @@ public class Animator
 				}
 				catch (Exception e)
 				{
+					ExceptionLogger.logException(e);
 					JOptionPane.showMessageDialog(frame, "Could not open '" + animationFile.getAbsolutePath() + "'.\n" + e, "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
@@ -1227,8 +1193,7 @@ public class Animator
 		return animate(detailHint, firstFrame, lastFrame, new File(DATA_DRIVE + ":/frames"), true);
 	}
 
-	private Thread animate(final double detailHint, final int firstFrame, final int lastFrame, final File outputDir,
-			final boolean alpha)
+	private Thread animate(final double detailHint, final int firstFrame, final int lastFrame, final File outputDir, final boolean alpha)
 	{
 		if (animation != null && animation.hasKeyFrames())
 		{
@@ -1261,13 +1226,14 @@ public class Animator
 						setSlider(frame);
 						applyAnimationState();
 
-						asc.takeScreenshot(new File(outputDir, "frame" + FileUtil.paddedInt(frame, filenameLength)
-								+ ".tga"), alpha);
+						asc.takeScreenshot(new File(outputDir, "frame" + FileUtil.paddedInt(frame, filenameLength)+ ".tga"), alpha);
 						wwd.redraw();
 						asc.waitForScreenshot();
 
 						if (stop)
+						{
 							break;
+						}
 					}
 
 					dem.setDetailHint(detailHintBackup);
