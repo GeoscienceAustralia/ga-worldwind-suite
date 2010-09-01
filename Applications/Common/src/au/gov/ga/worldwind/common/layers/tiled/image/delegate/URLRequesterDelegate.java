@@ -20,7 +20,7 @@ public class URLRequesterDelegate implements TileRequesterDelegate
 	@Override
 	public void forceTextureLoad(TextureTile tile, DelegatorTiledImageLayer layer)
 	{
-		final URL textureURL = layer.getDataFileStore().findFile(tile.getPath(), true);
+		final URL textureURL = getLocalTileURL(tile, layer, true);
 
 		if (textureURL != null
 				&& !layer.isTextureFileExpired(tile, textureURL, layer.getDataFileStore()))
@@ -33,6 +33,13 @@ public class URLRequesterDelegate implements TileRequesterDelegate
 	public Runnable createRequestTask(TextureTile tile, DelegatorTiledImageLayer layer)
 	{
 		return new RequestTask(tile, layer);
+	}
+
+	@Override
+	public URL getLocalTileURL(TextureTile tile, DelegatorTiledImageLayer layer,
+			boolean searchClassPath)
+	{
+		return layer.getDataFileStore().findFile(tile.getPath(), searchClassPath);
 	}
 
 	protected boolean loadTexture(TextureTile tile, URL textureURL, DelegatorTiledImageLayer layer)
@@ -74,8 +81,7 @@ public class URLRequesterDelegate implements TileRequesterDelegate
 		{
 			// TODO: check to ensure load is still needed
 
-			final java.net.URL textureURL =
-					this.layer.getDataFileStore().findFile(tile.getPath(), false);
+			final java.net.URL textureURL = getLocalTileURL(tile, layer, false);
 			if (textureURL != null
 					&& !this.layer.isTextureFileExpired(tile, textureURL,
 							this.layer.getDataFileStore()))

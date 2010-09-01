@@ -264,6 +264,13 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 	}
 
 	@Override
+	public URL getLocalTileURL(TextureTile tile, DelegatorTiledImageLayer layer,
+			boolean searchClassPath)
+	{
+		return requesterDelegate.getLocalTileURL(tile, layer, searchClassPath);
+	}
+
+	@Override
 	public Runnable createRequestTask(TextureTile tile, DelegatorTiledImageLayer layer)
 	{
 		return requesterDelegate.createRequestTask(tile, layer);

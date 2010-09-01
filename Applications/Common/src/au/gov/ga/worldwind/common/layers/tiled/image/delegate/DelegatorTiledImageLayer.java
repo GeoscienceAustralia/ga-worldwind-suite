@@ -27,6 +27,9 @@ import gov.nasa.worldwind.util.WWIO;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -231,26 +234,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 			if (url.toString().toLowerCase().endsWith("dds"))
 				return TextureIO.newTextureData(url, isUseMipMaps(), null);
 
-			//first try to read the image via the ImageReaderDelegates
-			BufferedImage image = delegateKit.readImage(url);
-			if (image == null)
-			{
-				//if that doesn't work, just read it with ImageIO class
-				image = ImageIO.read(url);
-
-				if (image == null)
-				{
-					throw new IOException("Could not read image");
-				}
-			}
-
-			//perform any transformations on the image
-			image = delegateKit.transformImage(image);
-
-			//manually do the TRANSPARENCY_COLORS transform, for compatibility with AbstractRetrievalPostProcessor
-			int[] colors = (int[]) this.getValue(AVKey.TRANSPARENCY_COLORS);
-			if (colors != null)
-				image = ImageUtil.mapTransparencyColors(image, colors);
+			BufferedImage image = readImage(url);
 
 			if (isCompressTextures())
 			{
@@ -283,8 +267,43 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 					Logging.getMessage("layers.TextureLayer.ExceptionAttemptingToReadTextureFile",
 							url);
 			Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
-			return null;
 		}
+		return null;
+	}
+
+	/**
+	 * Read image from a File URL and return it as a {@link BufferedImage}.
+	 * 
+	 * @param url
+	 *            File URL to read from
+	 * @return Image read from URL
+	 * @throws IOException
+	 *             If image could not be read
+	 */
+	protected BufferedImage readImage(URL url) throws IOException
+	{
+		//first try to read the image via the ImageReaderDelegates
+		BufferedImage image = delegateKit.readImage(url);
+		if (image == null)
+		{
+			//if that doesn't work, just read it with ImageIO class
+			image = ImageIO.read(url);
+
+			if (image == null)
+			{
+				throw new IOException("Could not read image");
+			}
+		}
+
+		//perform any transformations on the image
+		image = delegateKit.transformImage(image);
+
+		//manually do the TRANSPARENCY_COLORS transform, for compatibility with AbstractRetrievalPostProcessor
+		int[] colors = (int[]) this.getValue(AVKey.TRANSPARENCY_COLORS);
+		if (colors != null)
+			image = ImageUtil.mapTransparencyColors(image, colors);
+
+		return image;
 	}
 
 	/**
@@ -305,6 +324,41 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 		{
 			return fileLock;
 		}
+	}
+
+	@Override
+	protected BufferedImage requestImage(TextureTile tile, String mimeType)
+			throws URISyntaxException, InterruptedIOException, MalformedURLException
+	{
+		//ignores mimeType parameter
+
+		URL url = delegateKit.getLocalTileURL(tile, this, false);
+		if (url != null)
+		{
+			try
+			{
+				return readImage(url);
+			}
+			catch (IOException e)
+			{
+				String msg =
+						Logging.getMessage(
+								"layers.TextureLayer.ExceptionAttemptingToReadTextureFile", url);
+				Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	protected void downloadImage(TextureTile tile, String mimeType, int timeout) throws Exception
+	{
+		//ignores mimeType parameter
+
+		Retriever retriever = createRetriever(tile, null);
+		retriever.setConnectTimeout(10000);
+		retriever.setReadTimeout(timeout);
+		retriever.call();
 	}
 
 	/* **********************************************************************************************
@@ -428,33 +482,45 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	public void downloadTexture(final TextureTile tile,
 			BasicTiledImageLayer.DownloadPostProcessor postProcessor)
 	{
+		Retriever retriever = createRetriever(tile, postProcessor);
+		if (retriever != null)
+			WorldWind.getRetrievalService().runRetriever(retriever, tile.getPriority());
+	}
+
+	protected Retriever createRetriever(final TextureTile tile,
+			BasicTiledImageLayer.DownloadPostProcessor postProcessor)
+	{
+		//copied from BasicTiledImageLayer.downloadTexture(), with the following modifications:
+		// - uses the delegateKit to instanciate the Retriever
+		// - returns the Retriever instead of adding it to the RetrievalService
+
 		if (!this.isNetworkRetrievalEnabled())
 		{
 			this.getLevels().markResourceAbsent(tile);
-			return;
+			return null;
 		}
 
 		if (!WorldWind.getRetrievalService().isAvailable())
-			return;
+			return null;
 
 		java.net.URL url;
 		try
 		{
 			url = tile.getResourceURL();
 			if (url == null)
-				return;
+				return null;
 
 			if (WorldWind.getNetworkStatus().isHostUnavailable(url))
 			{
 				this.getLevels().markResourceAbsent(tile);
-				return;
+				return null;
 			}
 		}
 		catch (java.net.MalformedURLException e)
 		{
 			Logging.logger().log(java.util.logging.Level.SEVERE,
 					Logging.getMessage("layers.TextureLayer.ExceptionCreatingTextureUrl", tile), e);
-			return;
+			return null;
 		}
 
 		Retriever retriever;
@@ -474,7 +540,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 			Logging.logger().severe(
 					Logging.getMessage("layers.TextureLayer.UnknownRetrievalProtocol",
 							url.toString()));
-			return;
+			return null;
 		}
 
 		// Apply any overridden timeouts.
@@ -488,7 +554,10 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 		if (srl != null && srl > 0)
 			retriever.setStaleRequestLimit(srl);
 
-		WorldWind.getRetrievalService().runRetriever(retriever, tile.getPriority());
+		//MODIFIED
+		//WorldWind.getRetrievalService().runRetriever(retriever, tile.getPriority());
+		return retriever;
+		//MODIFIED
 	}
 
 	@Override

@@ -34,6 +34,26 @@ public class LocalRequesterDelegate implements TileRequesterDelegate
 		return new RequestTask(tile, layer);
 	}
 
+	@Override
+	public URL getLocalTileURL(TextureTile tile, DelegatorTiledImageLayer layer,
+			boolean searchClassPath)
+	{
+		File file = getTileFile(tile, layer);
+		if (file != null && file.exists())
+		{
+			try
+			{
+				return file.toURI().toURL();
+			}
+			catch (MalformedURLException e)
+			{
+				String msg = "Converting tile file to URL failed";
+				Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Load the texture for a tile.
 	 * 
@@ -45,21 +65,10 @@ public class LocalRequesterDelegate implements TileRequesterDelegate
 	 */
 	protected boolean loadTexture(TextureTile tile, DelegatorTiledImageLayer layer)
 	{
-		File file = getTileFile(tile, layer);
-		if (file != null && file.exists())
-		{
-			try
-			{
-				URL url = file.toURI().toURL();
-				return layer.loadTexture(tile, url);
-			}
-			catch (MalformedURLException e)
-			{
-				String msg = "Converting tile file to URL failed";
-				Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
-			}
-		}
-		return false;
+		URL url = getLocalTileURL(tile, layer, false);
+		if (url == null)
+			return false;
+		return layer.loadTexture(tile, url);
 	}
 
 	/**
