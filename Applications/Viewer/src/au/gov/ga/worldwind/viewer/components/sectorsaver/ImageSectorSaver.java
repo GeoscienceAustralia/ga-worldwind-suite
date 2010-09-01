@@ -10,7 +10,6 @@ import gov.nasa.worldwind.formats.tiff.GeotiffWriter;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.TiledImageLayer;
 
 import java.awt.BorderLayout;
@@ -29,6 +28,8 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -443,6 +444,10 @@ public class ImageSectorSaver
 
 	private void saveSector(final Frame frame, final WorldWindow wwd)
 	{
+		//create a local copy of the list of layers, so that it doesn't change
+		final List<Layer> layers = new ArrayList<Layer>();
+		layers.addAll(wwd.getModel().getLayers());
+
 		final JDialog dialog = new JDialog(frame, "Saving image...", false);
 		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		dialog.setLayout(new BorderLayout());
@@ -483,8 +488,7 @@ public class ImageSectorSaver
 			{
 				try
 				{
-					saveSector(frame, wwd.getModel().getLayers(), sector, size,
-							output.getAbsoluteFile());
+					saveSector(frame, layers, sector, size, output.getAbsoluteFile());
 				}
 				catch (Exception e)
 				{
@@ -499,7 +503,7 @@ public class ImageSectorSaver
 		thread.start();
 	}
 
-	private void saveSector(Frame frame, LayerList layers, Sector sector, Dimension size,
+	private void saveSector(Frame frame, List<Layer> layers, Sector sector, Dimension size,
 			File output) throws Exception
 	{
 		double texelSize = Math.abs(sector.getDeltaLonRadians()) / (double) size.width;
@@ -584,7 +588,7 @@ public class ImageSectorSaver
 			getShape().setSector(sector);
 			wwd.redraw();
 		}
-		
+
 		@Override
 		public void disable()
 		{
