@@ -76,6 +76,7 @@ import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.FrameSlider;
+import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 import au.gov.ga.worldwind.common.util.message.MessageSource;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
@@ -364,11 +365,13 @@ public class Animator
 		JMenu menu;
 		JMenuItem menuItem;
 
-		menu = new JMenu("File");
+		// File
+		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getFileMenuLabelKey()));
 		menu.setMnemonic('F');
 		menuBar.add(menu);
 
-		menuItem = new JMenuItem("New");
+		// New
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getNewMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke('N', ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('N');
 		menu.add(menuItem);
@@ -380,7 +383,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Open...");
+		// Open
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getOpenMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke('O', ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('O');
 		menu.add(menuItem);
@@ -392,7 +396,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Save");
+		// Save
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getSaveMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke('S', ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('S');
 		menu.add(menuItem);
@@ -404,7 +409,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Save As...");
+		// Save as
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getSaveAsMenuLabelKey()));
 		menuItem.setMnemonic('A');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -417,7 +423,8 @@ public class Animator
 
 		menu.addSeparator();
 
-		menuItem = new JMenuItem("Exit");
+		// Exit
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getExitMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
 		menuItem.setMnemonic('x');
 		menu.add(menuItem);
@@ -430,11 +437,13 @@ public class Animator
 		});
 
 
-		menu = new JMenu("Frame");
+		// Frame
+		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getFrameMenuLabelKey()));
 		menu.setMnemonic('r');
 		menuBar.add(menu);
 
-		menuItem = new JMenuItem("Add key");
+		// Add key
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getAddKeyMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0));
 		menuItem.setMnemonic('A');
 		menu.add(menuItem);
@@ -446,7 +455,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Delete key");
+		// Delete key
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getDeleteKeyMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
 		menuItem.setMnemonic('D');
 		menu.add(menuItem);
@@ -464,15 +474,9 @@ public class Animator
 		});
 
 		menu.addSeparator();
-
-		/*menuItem = new JMenuItem("Set key in percent");
-		menuItem.setMnemonic('I');
-		menu.add(menuItem);
-		menu
 		
-		menu.addSeparator();*/
-
-		final JCheckBoxMenuItem autoKeyItem = new JCheckBoxMenuItem("Auto key", autokey);
+		// Auto key
+		final JCheckBoxMenuItem autoKeyItem = new JCheckBoxMenuItem(messageSource.getMessage(AnimationMessageConstants.getAutoKeyMenuLabelKey()), autokey);
 		menuItem.setMnemonic('k');
 		menu.add(autoKeyItem);
 		autoKeyItem.addActionListener(new ActionListener()
@@ -483,7 +487,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Set frame count...");
+		// Set frame count
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getSetFrameCountMenuLabelKey()));
 		menuItem.setMnemonic('c');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -508,7 +513,8 @@ public class Animator
 
 		menu.addSeparator();
 
-		menuItem = new JMenuItem("Previous");
+		// Previous frame
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getPreviousFrameMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, 0));
 		menuItem.setMnemonic('P');
 		menu.add(menuItem);
@@ -520,7 +526,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Next");
+		// Next frame
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getNextFrameMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, 0));
 		menuItem.setMnemonic('N');
 		menu.add(menuItem);
@@ -532,7 +539,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Previous 10");
+		// Previous 10 frames
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getPrevious10FrameMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, KeyEvent.SHIFT_DOWN_MASK));
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -543,7 +551,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Next 10");
+		// Next 10 frames
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getNext10FrameMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, KeyEvent.SHIFT_DOWN_MASK));
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -554,7 +563,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("First");
+		// First frame
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getFirstFrameMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('F');
 		menu.add(menuItem);
@@ -566,7 +576,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Last");
+		// Last frame
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getLastFrameMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('L');
 		menu.add(menuItem);
@@ -579,11 +590,13 @@ public class Animator
 		});
 
 
-		menu = new JMenu("Animation");
+		// Animation
+		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getAnimationMenuLabelKey()));
 		menu.setMnemonic('A');
 		menuBar.add(menu);
 
-		useScaledZoomCheck = new JCheckBoxMenuItem("Use scaled zoom");
+		// Use scaled zoom
+		useScaledZoomCheck = new JCheckBoxMenuItem(messageSource.getMessage(AnimationMessageConstants.getUseZoomScalingMenuLabelKey()));
 		useScaledZoomCheck.setSelected(animation.isZoomScalingRequired());
 		menu.add(useScaledZoomCheck);
 		useScaledZoomCheck.addActionListener(new ActionListener()
@@ -594,7 +607,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Scale animation...");
+		// Scale animation
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getScaleAnimationMenuLabelKey()));
 		menuItem.setMnemonic('S');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -618,33 +632,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Scale height...");
-		menuItem.setMnemonic('h');
-		menu.add(menuItem);
-		// TODO: Implement height scaling
-		//		menuItem.addActionListener(new ActionListener()
-		//		{
-		//			public void actionPerformed(ActionEvent e)
-		//			{
-		//				double scale = -1.0;
-		//				Object value =
-		//						JOptionPane.showInputDialog(frame, "Scale factor:", "Scale height",
-		//								JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
-		//				try
-		//				{
-		//					scale = Double.parseDouble((String) value);
-		//				}
-		//				catch (Exception ex)
-		//				{
-		//				}
-		//				if (scale != 1.0 && scale > 0)
-		//				{
-		//					animation.scaleHeight(scale);
-		//				}
-		//			}
-		//		});
-
-		menuItem = new JMenuItem("Smooth eye speed");
+		// Smooth eye speed
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getSmoothEyeSpeedMenuLabelKey()));
 		menuItem.setMnemonic('m');
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
@@ -665,7 +654,8 @@ public class Animator
 
 		menu.addSeparator();
 
-		menuItem = new JMenuItem("Preview");
+		// Preview
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getPreviewMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
 		menuItem.setMnemonic('P');
 		menu.add(menuItem);
@@ -677,7 +667,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Preview x2");
+		// Preview x2
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getPreviewX2MenuLabelKey()));
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -687,7 +678,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Preview x10");
+		// Preview x10
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getPreviewX10MenuLabelKey()));
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -697,7 +689,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Render (high-res)...");
+		// Render hi-res
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getRenderHighResMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke('R', ActionEvent.CTRL_MASK));
 		menuItem.setMnemonic('R');
 		menu.add(menuItem);
@@ -709,7 +702,8 @@ public class Animator
 			}
 		});
 
-		menuItem = new JMenuItem("Render (standard-res)...");
+		// Render standard-res
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getRenderStandardResMenuLabelKey()));
 		menu.add(menuItem);
 		menuItem.addActionListener(new ActionListener()
 		{
@@ -719,142 +713,13 @@ public class Animator
 			}
 		});
 		
-		menuItem = new JMenuItem("Custom render (TO BE REMOVED!)");
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				Thread thread = new Thread(new Runnable()
-				{
-					public void run()
-					{
-						double detail = 1.0;
-
-						int first = animation.getFrameOfFirstKeyFrame();
-						int last = animation.getFrameOfLastKeyFrame();
-
-						first = 590;
-						last = 595;
-
-						// last = 600;
-
-						animate(detail, first, last, new File("frames"), false);
-
-						/*joinThread(animate(
-								detail,
-								0,
-								1,
-								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/map1")));
-
-						joinThread(animate(
-								detail,
-								first,
-								last,
-								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/map1")));*/
-
-						/*
-						int endFirst = 2000;
-						int startSecond = 7000;
-						
-						alos.setEnabled(true);
-						map1.setEnabled(false);
-						map2.setEnabled(false);
-						roads.setEnabled(false);
-
-						joinThread(animate(
-								detail,
-								first,
-								last,
-								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/landsat")));
-
-						alos.setEnabled(false);
-						map1.setEnabled(false);
-						map2.setEnabled(false);
-						roads.setEnabled(true);
-
-						joinThread(animate(
-								detail,
-								first,
-								last,
-								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/roads")));
-
-						alos.setEnabled(false);
-						map1.setEnabled(true);
-						map2.setEnabled(false);
-						roads.setEnabled(false);
-
-						joinThread(animate(
-								detail,
-								first,
-								endFirst,
-								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/map1")));
-						joinThread(animate(
-								detail,
-								startSecond,
-								last,
-								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/map1")));
-
-						alos.setEnabled(false);
-						map1.setEnabled(false);
-						map2.setEnabled(true);
-						roads.setEnabled(false);
-
-						joinThread(animate(
-								detail,
-								first,
-								endFirst,
-								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/map2")));
-						joinThread(animate(
-								detail,
-								startSecond,
-								last,
-								new File(
-										"F:/West Macs Imagery/animation_frames_filtered/map2")));
-
-						try
-						{
-							Runtime.getRuntime().exec(
-									"c:/winnt/system32/shutdown.exe -s -t 60");
-						}
-						catch (IOException e)
-						{
-							e.printStackTrace();
-						}*/
-					}
-				});
-				thread.setDaemon(true);
-				thread.start();
-			}
-
-			private void joinThread(Thread thread)
-			{
-				while (thread.isAlive())
-				{
-					try
-					{
-						thread.join();
-					}
-					catch (InterruptedException e)
-					{
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		
-		menu = new JMenu("Debug");
+		// Debug
+		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getDebugMenuLabelKey()));
 		menu.setMnemonic('D');
 		menuBar.add(menu);
 		
-		menuItem = new JMenuItem("Output key frame values");
+		// Output key frame values
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getKeyValuesMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
 		menu.setMnemonic('k');
 		menu.add(menuItem);
@@ -866,7 +731,8 @@ public class Animator
 			}
 		});
 		
-		menuItem = new JMenuItem("Output parameter values");
+		// Output parameter values
+		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getParameterValuesMenuLabelKey()));
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.CTRL_MASK));
 		menu.setMnemonic('k');
 		menu.add(menuItem);
