@@ -90,16 +90,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		lookAtLat = new LookatLatParameter(animation);
 		lookAtLon = new LookatLonParameter(animation);
 		lookAtElevation = new LookatElevationParameter(animation);
-
-		parameters = new ArrayList<Parameter>(6);
-		parameters.add(eyeLat);
-		parameters.add(eyeLon);
-		parameters.add(eyeElevation);
-		parameters.add(lookAtLat);
-		parameters.add(lookAtLon);
-		parameters.add(lookAtElevation);
 	}
-
 
 	@Override
 	public void apply(AnimationContext animationContext, int frame)
@@ -170,7 +161,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	{
 		if (parameters == null || parameters.isEmpty())
 		{
-			parameters = new ArrayList<Parameter>();
+			parameters = new ArrayList<Parameter>(6);
 			parameters.add(eyeLat);
 			parameters.add(eyeLon);
 			parameters.add(eyeElevation);

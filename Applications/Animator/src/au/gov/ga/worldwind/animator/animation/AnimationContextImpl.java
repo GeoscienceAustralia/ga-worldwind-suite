@@ -50,21 +50,13 @@ public class AnimationContextImpl implements AnimationContext
 	@Override
 	public double applyZoomScaling(double unzoomed)
 	{
-		if (animation.isZoomScalingRequired())
-		{
-			return Math.log(Math.max(0, unzoomed) + 1);
-		}
-		return unzoomed;
+		return animation.applyZoomScaling(unzoomed);
 	}
 	
 	@Override
 	public double unapplyZoomScaling(double zoomed)
 	{
-		if (animation.isZoomScalingRequired())
-		{
-			return Math.pow(Math.E, zoomed) - 1;
-		}
-		return zoomed;
+		return animation.unapplyZoomScaling(zoomed);
 	}
 	
 	@Override

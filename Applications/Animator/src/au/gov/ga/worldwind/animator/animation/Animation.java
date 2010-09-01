@@ -268,4 +268,22 @@ public interface Animation extends XmlSerializable<Animation>
 	 * @param scaleFactor The factor by which to scale the animation
 	 */
 	void scale(double scaleFactor);
+
+	/**
+	 * Helper method. Applies zoom scaling to the provided unzoomed value if zoom scaling is enabled.
+	 * 
+	 * @param unzoomed The unzoomed value to scale
+	 * 
+	 * @return The unzoomed value, scaled appropriately.
+	 */
+	double applyZoomScaling(double unzoomed);
+
+	/**
+	 * Helper method. Removed zoom scaling from the provided zoomed value if zoom scaling is enabled.
+	 * 
+	 * @param zoomed The zoomed value to scale
+	 * 
+	 * @return The zoomed value, scaled appropriately.
+	 */
+	double unapplyZoomScaling(double zoomed);
 }

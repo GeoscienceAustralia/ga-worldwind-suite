@@ -18,6 +18,7 @@ import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
+import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -342,9 +343,96 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public void setZoomScalingRequired(boolean zoomScalingRequired)
 	{
-		this.zoomRequired = zoomScalingRequired;
+		// If the zoom scaling is changing, update all of the camera parameters to reflect the change
+		if (this.zoomRequired != zoomScalingRequired)
+		{
+			this.zoomRequired = zoomScalingRequired;
+			
+			// Apply / Un-apply the zoom scaling to the camera's elevation parameters 
+			for (KeyFrame eyeElevationFrame : getKeyFrames(renderCamera.getEyeElevation()))
+			{
+				applyScalingChangeToValue(eyeElevationFrame.getValueForParameter(renderCamera.getEyeElevation()), zoomScalingRequired);
+			}
+			for (KeyFrame lookAtElevationFrame : getKeyFrames(renderCamera.getLookAtElevation()))
+			{
+				applyScalingChangeToValue(lookAtElevationFrame.getValueForParameter(renderCamera.getLookAtElevation()), zoomScalingRequired);
+			}
+			
+			// Smooth the frames we just changed
+			for (KeyFrame eyeElevationFrame : getKeyFrames(renderCamera.getEyeElevation()))
+			{
+				eyeElevationFrame.getValueForParameter(renderCamera.getEyeElevation()).smooth();
+			}
+			for (KeyFrame lookAtElevationFrame : getKeyFrames(renderCamera.getLookAtElevation()))
+			{
+				lookAtElevationFrame.getValueForParameter(renderCamera.getLookAtElevation()).smooth();
+			}
+		}
 	}
 
+	/**
+	 * Apply the zoom scaling change to the provided parameter value
+	 * 
+	 * @param value The parameter value to apply the change to
+	 * @param scale Whether scaling should be applied or unapplied
+	 */
+	private void applyScalingChangeToValue(ParameterValue value, boolean scale)
+	{
+		value.setValue(scale ? applyZoomScaling(value.getValue()) : unapplyZoomScaling(value.getValue()));
+		if (value instanceof BezierParameterValue)
+		{
+			BezierParameterValue bezierValue = (BezierParameterValue)value;
+			boolean wasLocked = bezierValue.isLocked();
+			bezierValue.setLocked(false);
+			bezierValue.setInValue(scale ? doApplyZoomScaling(bezierValue.getInValue(), true) : doUnapplyZoomScaling(bezierValue.getInValue(), true));
+			bezierValue.setOutValue(scale ? doApplyZoomScaling(bezierValue.getOutValue(), true) : doUnapplyZoomScaling(bezierValue.getOutValue(), true));
+			bezierValue.setLocked(wasLocked);
+		}
+	}
+	
+	@Override
+	public double applyZoomScaling(double unzoomed)
+	{
+		return doApplyZoomScaling(unzoomed, false);
+	}
+	
+	/**
+	 * Perform zoom scaling.
+	 * 
+	 * @param unzoomed The value to scale
+	 * @param force Whether to override the current 'zoom scaling required' setting
+	 */
+	private double doApplyZoomScaling(double unzoomed, boolean force)
+	{
+		if (isZoomScalingRequired() || force)
+		{
+			return Math.log(Math.max(0, unzoomed) + 1);
+		}
+		return unzoomed;
+	}
+	
+	@Override
+	public double unapplyZoomScaling(double zoomed)
+	{
+		return doUnapplyZoomScaling(zoomed, false);
+	}
+	
+	/**
+	 * Perform zoom un-scaling.
+	 * 
+	 * @param zoomed The value to scale
+	 * @param force Whether to override the current 'zoom scaling required' setting
+	 */
+	private double doUnapplyZoomScaling(double zoomed, boolean force)
+	{
+		if (isZoomScalingRequired() || force)
+		{
+			return Math.pow(Math.E, zoomed) - 1;
+		}
+		return zoomed;
+	}
+	
+	
 	@Override
 	public int getCurrentFrame()
 	{
