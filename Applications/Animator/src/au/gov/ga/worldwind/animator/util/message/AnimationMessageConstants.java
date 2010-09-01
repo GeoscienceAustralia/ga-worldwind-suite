@@ -281,4 +281,53 @@ public class AnimationMessageConstants extends CommonMessageConstants
 		return "animator.message.openfailed.caption";
 	}
 	
+	/**
+	 * @return The key for the open v1 file message
+	 */
+	public static String getOpenV1FileMessageKey()
+	{
+		return "animator.message.openv1file.message";
+	}
+	
+	/**
+	 * @return The key for the open v1 file caption
+	 */
+	public static String getOpenV1FileCaptionKey()
+	{
+		return "animator.message.openv1file.caption";
+	}
+	
+	/**
+	 * @return The key for the open dialog title
+	 */
+	public static String getOpenDialogTitleKey()
+	{
+		return "animator.gui.dialog.open.title";
+	}
+	
+	/**
+	 * @return The key for the Save As dialog title
+	 */
+	public static String getSaveAsDialogTitleKey()
+	{
+		return "animator.gui.dialog.saveas.title";
+	}
+	
+	/**
+	 * @return The key for the confirm overwrite message
+	 */
+	public static String getConfirmOverwriteMessageKey()
+	{
+		return "animator.message.overwriteconfirm.message";
+	}
+	
+	/**
+	 * @return The key for the confirm overwrite caption
+	 */
+	public static String getConfirmOverwriteCaptionKey()
+	{
+		return "animator.message.overwriteconfirm.caption";
+	}
+	
+	
 }

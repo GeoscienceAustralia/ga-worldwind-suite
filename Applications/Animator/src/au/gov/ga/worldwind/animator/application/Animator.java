@@ -148,6 +148,9 @@ public class Animator
 
 	private DetailedElevationModel dem;
 	private Layer bmng, landsat;
+	
+	/** The file chooser used for open and save. Instance variable so it will remember last used folders. */
+	private JFileChooser fileChooser = new JFileChooser();
 
 	/** The message source for the application */
 	private MessageSource messageSource;
@@ -828,13 +831,13 @@ public class Animator
 	{
 		if (querySave())
 		{
-			JFileChooser chooser = new JFileChooser();
-			chooser.setFileFilter(new XmlFilter());
-			if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
+			fileChooser.setFileFilter(new XmlFilter());
+			fileChooser.setDialogTitle(messageSource.getMessage(AnimationMessageConstants.getOpenDialogTitleKey()));
+			if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
 				Animation oldAnimation = animation;
 				
-				File animationFile = chooser.getSelectedFile();
+				File animationFile = fileChooser.getSelectedFile();
 				try
 				{
 					XmlAnimationReader animationReader = new XmlAnimationReader();
@@ -851,9 +854,10 @@ public class Animator
 					}
 					if (version == AnimationFileVersion.VERSION010)
 					{
-						String message = "File '" + animationFile.getAbsolutePath() + "' is a version 1.0 file. Changes will be saved in version " + XmlAnimationWriter.getCurrentFileVersion().getDisplayName() + ".\n";
-						message += "Are you sure you want to continue?";
-						int response = JOptionPane.showConfirmDialog(frame, message, "Open", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						int response = JOptionPane.showConfirmDialog(frame, 
+																	 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileMessageKey(), null, animationFile.getAbsolutePath(), XmlAnimationWriter.getCurrentFileVersion().getDisplayName()),
+																	 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileCaptionKey()), 
+																	 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 						if (response == JOptionPane.NO_OPTION)
 						{
 							return;
@@ -907,19 +911,24 @@ public class Animator
 	 */
 	private void saveAs()
 	{
-		JFileChooser chooser = new JFileChooser();
-		chooser.setFileFilter(new XmlFilter());
-		if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
+		fileChooser.setFileFilter(new XmlFilter());
+		fileChooser.setDialogTitle(messageSource.getMessage(AnimationMessageConstants.getSaveAsDialogTitleKey()));
+		if (fileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
-			File newFile = chooser.getSelectedFile();
-			if (!newFile.getName().toLowerCase().endsWith(".xml"))
+			File newFile = fileChooser.getSelectedFile();
+			if (!newFile.getName().toLowerCase().endsWith(XmlFilter.getFileExtension()))
 			{
-				newFile = new File(newFile.getParent(), newFile.getName() + ".xml");
+				newFile = new File(newFile.getParent(), newFile.getName() + XmlFilter.getFileExtension());
 			}
 			boolean override = true;
 			if (newFile.exists())
 			{
-				override = JOptionPane.showConfirmDialog(frame, newFile.getAbsolutePath() + " already exists.\nDo you want to replace it?", "Save As", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION;
+				int response = JOptionPane.showConfirmDialog(frame, 
+														 	 messageSource.getMessage(AnimationMessageConstants.getConfirmOverwriteMessageKey(), null, newFile.getAbsolutePath()),
+														 	 messageSource.getMessage(AnimationMessageConstants.getConfirmOverwriteCaptionKey()),
+														 	 JOptionPane.YES_NO_OPTION,
+														 	 JOptionPane.WARNING_MESSAGE);
+				override = response == JOptionPane.YES_OPTION;
 			}
 			if (override)
 			{
@@ -1220,8 +1229,16 @@ public class Animator
 		}
 	}
 
+	/**
+	 * A simple file filter that matches XML files with extension <code>.xml</code> 
+	 */
 	private static class XmlFilter extends javax.swing.filechooser.FileFilter
 	{
+		/**
+		 * @return The file extension associated with this filter
+		 */
+		public static String getFileExtension() { return ".xml";}
+		
 		@Override
 		public boolean accept(File f)
 		{
@@ -1229,7 +1246,7 @@ public class Animator
 			{
 				return true;
 			}
-			return f.getName().toLowerCase().endsWith(".xml");
+			return f.getName().toLowerCase().endsWith(getFileExtension());
 		}
 
 		@Override
