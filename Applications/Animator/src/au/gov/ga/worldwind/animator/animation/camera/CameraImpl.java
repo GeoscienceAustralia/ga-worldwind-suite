@@ -30,8 +30,8 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.math.vector.Vector3;
 import au.gov.ga.worldwind.animator.util.Validate;
-import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
-import au.gov.ga.worldwind.animator.util.message.MessageSourceAccessor;
+import au.gov.ga.worldwind.common.util.message.AnimationMessageConstants;
+import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
  * A default implementation of the {@link Camera} interface

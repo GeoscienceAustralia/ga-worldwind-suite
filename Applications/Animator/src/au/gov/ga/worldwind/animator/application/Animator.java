@@ -76,10 +76,10 @@ import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.FrameSlider;
-import au.gov.ga.worldwind.animator.util.message.MessageSource;
-import au.gov.ga.worldwind.animator.util.message.MessageSourceAccessor;
-import au.gov.ga.worldwind.animator.util.message.ResourceBundleMessageSource;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
+import au.gov.ga.worldwind.common.util.message.MessageSource;
+import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
+import au.gov.ga.worldwind.common.util.message.ResourceBundleMessageSource;
 
 public class Animator
 {

@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.util.message;
+package au.gov.ga.worldwind.common.util.message;
 
 /**
  * A static accessor to get access to the message source from anywhere in the application

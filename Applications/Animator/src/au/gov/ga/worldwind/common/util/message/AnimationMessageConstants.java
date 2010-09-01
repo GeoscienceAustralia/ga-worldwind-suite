@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.util.message;
+package au.gov.ga.worldwind.common.util.message;
 
 /**
  * Constants class that contains the keys into the animation message bundle

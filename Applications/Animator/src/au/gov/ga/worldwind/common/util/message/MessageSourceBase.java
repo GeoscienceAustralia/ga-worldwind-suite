@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.util.message;
+package au.gov.ga.worldwind.common.util.message;
 
 import java.text.FieldPosition;
 import java.text.MessageFormat;
