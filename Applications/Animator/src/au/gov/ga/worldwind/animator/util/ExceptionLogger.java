@@ -2,8 +2,8 @@ package au.gov.ga.worldwind.animator.util;
 
 import java.io.PrintStream;
 import java.util.Date;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * A simple helper class that can be used to control exception logging.
@@ -13,11 +13,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class ExceptionLogger
 {
-	/**
-	 * The period between polls of the exception queue. Defaults to 1 second.
-	 */
-	private static final long POLLING_PERIOD = 1000;
-	
 	/**
 	 * The target stream to log to. Defaults to <code>System.err</code>
 	 */
@@ -31,7 +26,7 @@ public class ExceptionLogger
 	/**
 	 * The queue of exceptions waiting to be logged
 	 */
-	private static Queue<ExceptionOccurance> queuedExceptions = new ConcurrentLinkedQueue<ExceptionOccurance>();
+	private static BlockingQueue<ExceptionOccurance> queuedExceptions = new LinkedBlockingQueue<ExceptionOccurance>();
 	
 	/**
 	 * The thread that performs the logging
@@ -45,23 +40,18 @@ public class ExceptionLogger
 				try
 				{
 					// Poll the queue for an exception to log
-					ExceptionOccurance occurance = null;
-					while ((occurance = queuedExceptions.poll()) != null)
-					{
-						targetStream.println(">> Exception occurred at " + occurance.date);
+					ExceptionOccurance occurance = queuedExceptions.take();
+					targetStream.println(">> Exception occurred at " + occurance.date);
 						
-						if (loggingLevel == Level.DETAILED)
-						{
-							occurance.exception.printStackTrace(targetStream);
-						}
-						else 
-						{
-							targetStream.println(occurance.exception.getMessage());
-						}
+					if (loggingLevel == Level.DETAILED)
+					{
+						occurance.exception.printStackTrace(targetStream);
 					}
-					// If there are no entries, sleep for a bit
-					targetStream.flush();
-					sleep(POLLING_PERIOD);
+					else 
+					{
+						targetStream.println(occurance.exception.getMessage());
+					}
+				
 				}
 				catch (InterruptedException e)
 				{
@@ -72,6 +62,7 @@ public class ExceptionLogger
 	};
 	static
 	{
+		loggingThread.setDaemon(true);
 		loggingThread.start();
 	}
 	
