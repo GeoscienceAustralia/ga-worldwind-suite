@@ -120,8 +120,11 @@ public class KeyFrameImpl implements KeyFrame
 	@Override
 	public void removeValueForParameter(Parameter p)
 	{
-		parameterValueMap.get(p).removeChangeListener(this);
-		parameterValueMap.remove(p);
+		if (parameterValueMap.containsKey(p))
+		{
+			parameterValueMap.get(p).removeChangeListener(this);
+			parameterValueMap.remove(p);
+		}
 	}
 	
 	@Override

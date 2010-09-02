@@ -13,8 +13,8 @@ import org.junit.Test;
 public class ResourceBundleMessageSourceTest
 {
 
-	private ResourceBundleMessageSource classToBeTested = new ResourceBundleMessageSource("au.gov.ga.worldwind.animator.util.message.testMessages1",
-																						  "au.gov.ga.worldwind.animator.util.message.testMessages2");
+	private ResourceBundleMessageSource classToBeTested = new ResourceBundleMessageSource("au.gov.ga.worldwind.common.util.message.testMessages1",
+																						  "au.gov.ga.worldwind.common.util.message.testMessages2");
 	
 	/**
 	 * Tests the {@link ResourceBundleMessageSource#getMessage(String, String, Object...)} method with

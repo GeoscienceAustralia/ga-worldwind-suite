@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.swing.event.ChangeEvent;
+
+import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +54,11 @@ public class WorldWindAnimationImplTest
 		testParameters = new ArrayList<Parameter>();
 		for (int i = 0; i < 10; i++)
 		{
-			testParameters.add(mockContext.mock(Parameter.class, "Parameter" + i));
+			final Parameter parameter = mockContext.mock(Parameter.class, "Parameter" + i);
+			mockContext.checking(new Expectations(){{
+				oneOf(parameter).stateChanged(with(any(ChangeEvent.class)));
+			}});
+			testParameters.add(parameter);
 		}
 	}
 	
