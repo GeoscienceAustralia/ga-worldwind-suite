@@ -49,6 +49,8 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.animation.Animation;
@@ -84,8 +86,6 @@ import au.gov.ga.worldwind.common.util.message.ResourceBundleMessageSource;
 
 public class Animator
 {
-	private final static String DATA_DRIVE = "Z";
-
 	private static final GLCapabilities caps = new GLCapabilities();
 
 	static
@@ -719,7 +719,7 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animate(1);
+				renderAnimation(1);
 			}
 		});
 
@@ -730,7 +730,7 @@ public class Animator
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				animate(0);
+				renderAnimation(0);
 			}
 		});
 		
@@ -848,8 +848,7 @@ public class Animator
 	{
 		if (querySave())
 		{
-			fileChooser.setFileFilter(new XmlFilter());
-			fileChooser.setDialogTitle(messageSource.getMessage(AnimationMessageConstants.getOpenDialogTitleKey()));
+			setupFileChooser(messageSource.getMessage(AnimationMessageConstants.getOpenDialogTitleKey()), new XmlFilter());
 			if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
 				Animation oldAnimation = animation;
@@ -928,8 +927,7 @@ public class Animator
 	 */
 	private void saveAs()
 	{
-		fileChooser.setFileFilter(new XmlFilter());
-		fileChooser.setDialogTitle(messageSource.getMessage(AnimationMessageConstants.getSaveAsDialogTitleKey()));
+		setupFileChooser(messageSource.getMessage(AnimationMessageConstants.getSaveAsDialogTitleKey()), new XmlFilter());
 		if (fileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
 			File newFile = fileChooser.getSelectedFile();
@@ -958,6 +956,19 @@ public class Animator
 		}
 	}
 
+	/**
+	 * Setup the file chooser for use
+	 * 
+	 * @param title The title to display in the dialog title bar
+	 * @param fileFilter The file filter to use for the chooser
+	 */
+	private void setupFileChooser(String title, FileFilter fileFilter)
+	{
+		fileChooser.resetChoosableFileFilters();
+		fileChooser.setFileFilter(fileFilter);
+		fileChooser.setDialogTitle(title);
+	}
+	
 	/**
 	 * Save the animation to the provided file
 	 * 
@@ -1078,7 +1089,16 @@ public class Animator
 		settingSlider = false;
 	}
 
-	private void preview(final int frameSkip)
+	/**
+	 * Preview the animation, skipping every <code>frameSkip</code> frames
+	 * <p/>
+	 * Preview speed can be increased by increasing the number of frames skipped.
+	 * 
+	 * @param frameSkip The number of frames to skip during preview playback
+	 * 
+	 * @return the thread in which the preview render is occurring. Can be used to stop the preview.
+	 */
+	private Thread preview(final int frameSkip)
 	{
 		if (animation != null && animation.hasKeyFrames())
 		{
@@ -1105,17 +1125,115 @@ public class Animator
 				}
 			});
 			thread.start();
+			return thread;
 		}
+		return null;
 	}
 
-	private Thread animate(final double detailHint)
+	/**
+	 * Render the current animation, from frame 0 through to <code>frameCount</code>
+	 * <p/>
+	 * Prompts the user to choose a location to save the rendered image sequence to.
+	 * 
+	 * @param detailHint The level of detail to use when rendering, on the interval <code>[0,1]</code>
+	 * 
+	 * @return The thread performing the animation
+	 */
+	private Thread renderAnimation(final double detailHint)
 	{
 		int firstFrame = Math.max(slider.getValue(), animation.getFrameOfFirstKeyFrame());
 		int lastFrame = animation.getFrameOfLastKeyFrame();
-		return animate(detailHint, firstFrame, lastFrame, new File(DATA_DRIVE + ":/frames"), true);
+		
+		File destination = promptForImageSequenceLocation();
+		if (destination == null)
+		{
+			return null;
+		}
+		
+		return renderAnimation(detailHint, firstFrame, lastFrame, destination.getParentFile(), destination.getName(), true);
 	}
 
-	private Thread animate(final double detailHint, final int firstFrame, final int lastFrame, final File outputDir, final boolean alpha)
+	/**
+	 * Prompt the user for a location to save a rendered TGA image sequence to.
+	 * <p/>
+	 * Returns the file in format <code>{destinationFolder}\{sequencePrefixe}</code> (e.g. <code>c:\data\myAnimation\myAnimation</code>)
+	 * 
+	 * @return The location to save a rendered TGA image sequence to, or <code>null</code> if the user cancelled the operation
+	 */
+	private File promptForImageSequenceLocation()
+	{
+		// Prompt for a location to save the image sequence to
+		setupFileChooser(messageSource.getMessage(AnimationMessageConstants.getSaveRenderDialogTitleKey()), new FileNameExtensionFilter("TGA Image Sequence", "tga"));
+		if (fileChooser.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION)
+		{
+			return null;
+		}
+		
+		File destinationFile = fileChooser.getSelectedFile();
+		if (destinationFile == null)
+		{
+			return null;
+		}
+		
+		// Get the selected name for the image sequence, if one was provided
+		String fileName = "frame";
+		if (!destinationFile.isDirectory())
+		{
+			fileName = FileUtil.stripExtension(destinationFile.getName());
+			destinationFile = destinationFile.getParentFile();
+		}
+		
+		// Check for existing files and prompt for confirmation if they exist
+		int firstFrame = Math.max(slider.getValue(), animation.getFrameOfFirstKeyFrame());
+		int lastFrame = animation.getFrameOfLastKeyFrame();
+		int filenameLength = String.valueOf(lastFrame).length();
+		boolean promptForOverwrite = false;
+		for (int i = firstFrame; i <= lastFrame; i++)
+		{
+			if (new File(destinationFile, createImageSequenceName(fileName, i, filenameLength)).exists())
+			{
+				promptForOverwrite = true;
+				break;
+			}
+		}
+		if (promptForOverwrite)
+		{
+			int response = JOptionPane.showConfirmDialog(frame, 
+					 									 messageSource.getMessage(AnimationMessageConstants.getConfirmRenderOverwriteMessageKey(), null, createImageSequenceName(fileName, firstFrame, filenameLength), createImageSequenceName(fileName, lastFrame, filenameLength)), 
+					 									 messageSource.getMessage(AnimationMessageConstants.getConfirmRenderOverwriteCaptionKey()),
+					 									 JOptionPane.YES_NO_OPTION,
+					 									 JOptionPane.QUESTION_MESSAGE);
+			if (response == JOptionPane.NO_OPTION)
+			{
+				return null;
+			}
+		}
+		
+		return new File(destinationFile, fileName);
+	}
+	
+	/**
+	 * @return The name of a file in an image sequence, of the form <code>{prefix}{padded sequence number}.tga</code>
+	 */
+	private String createImageSequenceName(String prefix, int sequenceNumber, int padTo)
+	{
+		return prefix + FileUtil.paddedInt(sequenceNumber, padTo) + ".tga";
+	}
+	
+	/**
+	 * Render the current animation, between the provided first and last frames, storing the resulting frame images in the provided
+	 * output directory.
+	 * 
+	 * @param detailHint The level of detail to use when rendering, on the interval <code>[0,1]</code>
+	 * @param firstFrame The frame to start the animation at
+	 * @param lastFrame The frame to finish the animation at
+	 * @param outputDir The directory to output the animation files to
+	 * @param frameName The name to use as the prefix for the image sequence files (e.g. "myAnimation" results in "myAnimation001.tga", "myAnimation002.tga"...)
+	 * @param alpha Whether to include an alpha channel in the rendered image sequence
+	 * 
+	 * @return The thread performing the rendering
+	 */
+	private Thread renderAnimation(final double detailHint, final int firstFrame, final int lastFrame, final File outputDir, final String frameName, final boolean alpha)
 	{
 		if (animation != null && animation.hasKeyFrames())
 		{
@@ -1148,7 +1266,7 @@ public class Animator
 						setSlider(frame);
 						applyAnimationState();
 
-						asc.takeScreenshot(new File(outputDir, "frame" + FileUtil.paddedInt(frame, filenameLength)+ ".tga"), alpha);
+						asc.takeScreenshot(new File(outputDir, createImageSequenceName(frameName, frame, filenameLength)), alpha);
 						wwd.redraw();
 						asc.waitForScreenshot();
 
@@ -1257,7 +1375,7 @@ public class Animator
 	/**
 	 * A simple file filter that matches XML files with extension <code>.xml</code> 
 	 */
-	private static class XmlFilter extends javax.swing.filechooser.FileFilter
+	private static class XmlFilter extends FileFilter
 	{
 		/**
 		 * @return The file extension associated with this filter

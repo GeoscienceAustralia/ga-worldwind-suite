@@ -433,4 +433,28 @@ public class AnimationMessageConstants extends CommonMessageConstants
 		return "animator.message.setdimensionfailed.caption";
 	}
 	
+	/**
+	 * @return The key for the Save Render dialog title
+	 */
+	public static String getSaveRenderDialogTitleKey()
+	{
+		return "animator.gui.dialog.saverender.title";
+	}
+	
+	/**
+	 * @return The key for the confirm render overwrite message
+	 */
+	public static String getConfirmRenderOverwriteMessageKey()
+	{
+		return "animator.message.renderoverwriteconfirm.message";
+	}
+	
+	/**
+	 * @return The key for the confirm render overwrite caption
+	 */
+	public static String getConfirmRenderOverwriteCaptionKey()
+	{
+		return "animator.message.renderoverwriteconfirm.caption";
+	}
+	
 }
