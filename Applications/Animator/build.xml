@@ -14,11 +14,16 @@
 	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
 	<property name="jogl_windows_location" value="./lib/native/windows-i586" />
 	
+	<property name="common_src_dir" value="${basedir}/../Common/src" />
+	
 	<property name="src_dir" value="${basedir}/src" />
+	<property name="working_src_dir" value="${basedir}/tmp_src" />
 	<property name="build_dir" value="${basedir}/build" />
 	<property name="target_dir" value="${basedir}/target" />
 	<property name="lib_dir" value="${target_dir}/lib" />
 
+	
+	
 	<property name="test_src_dir" value="${basedir}/test/src"/>
 	<property name="test_lib_dir" value="${basedir}/test/lib"/>
 	<property name="test_build_dir" value="${basedir}/test/build"/>
@@ -63,13 +68,23 @@
 	</target>
 
 	<target name="build">
+		<mkdir dir="${working_src_dir}" />
+		<copy todir="${working_src_dir}">
+			<fileset dir="${common_src_dir}"/>
+		</copy>
+		<copy todir="${working_src_dir}" overwrite="true">
+			<fileset dir="${src_dir}"/>
+		</copy>
+		
 		<mkdir dir="${build_dir}" />
 		<copy todir="${build_dir}">
-			<fileset dir="${src_dir}">
+			<fileset dir="${working_src_dir}">
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javac source="1.6" target="1.6" srcdir="${src_dir}" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" />
+		<javac source="1.6" target="1.6" srcdir="${working_src_dir}" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" />
+		
+		<delete dir="${working_src_dir}" />
 	</target>
 
 	<target name="build-test" depends="build">
