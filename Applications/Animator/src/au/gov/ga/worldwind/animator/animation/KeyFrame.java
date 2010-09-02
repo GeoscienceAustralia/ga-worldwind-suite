@@ -3,13 +3,14 @@
  */
 package au.gov.ga.worldwind.animator.animation;
 
-import gov.nasa.worldwind.Restorable;
-
 import java.io.Serializable;
 import java.util.Collection;
 
+import javax.swing.event.ChangeListener;
+
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.util.Changeable;
 
 /**
  * Represents a key frame in an animation.
@@ -21,7 +22,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public interface KeyFrame extends Serializable, Restorable
+public interface KeyFrame extends Serializable, ChangeListener, Changeable
 {
 	
 	/**

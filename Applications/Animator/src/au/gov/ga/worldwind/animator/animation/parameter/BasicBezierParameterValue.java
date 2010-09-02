@@ -123,7 +123,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	@Override
 	public void setInValue(double value)
 	{
-		boolean changed = this.in.getValue() != value;
+		boolean changed = !this.in.hasValue() || this.in.getValue() != value;
 		
 		this.in.setValue(value);
 		if (isLocked() && in.hasValue()) 
@@ -165,7 +165,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	@Override
 	public void setOutValue(double value)
 	{
-		boolean changed = this.out.getValue() != value;
+		boolean changed = !this.out.hasValue() || this.out.getValue() != value;
 		
 		this.out.setValue(value);
 		if (isLocked() && out.hasValue())

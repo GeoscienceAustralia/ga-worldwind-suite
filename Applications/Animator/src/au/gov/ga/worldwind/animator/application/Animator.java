@@ -996,11 +996,14 @@ public class Animator
 		setTitleBar();
 	}
 
+	/**
+	 * Reset the changed flag for the application
+	 */
 	private void resetChanged()
 	{
-		//		animation.removeChangeListener(animationChangeListener);
-		//		animation.addChangeListener(animationChangeListener);
-		//		changed = false;
+		animation.removeChangeListener(animationChangeListener);
+		animation.addChangeListener(animationChangeListener);
+		changed = false;
 	}
 
 	/**

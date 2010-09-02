@@ -12,6 +12,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
@@ -59,6 +62,11 @@ public class WorldWindAnimationImpl implements Animation
 	
 	/** The worldwind window */
 	private WorldWindow worldWindow;
+	
+	/**
+	 * The list of registered change listeners
+	 */
+	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
 	
 	/**
 	 * Constructor. Initialises default values.
@@ -203,13 +211,20 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public void setFrameCount(int newCount)
 	{
+		boolean changed = newCount != frameCount;
+		
 		// If we are decreasing the frame count, remove any keyframes after the new frame count
 		if (newCount < frameCount)
 		{
 			this.keyFrameMap = this.keyFrameMap.headMap(newCount);
 		}
+		
 		this.frameCount = newCount;
 		
+		if (changed)
+		{
+			notifyChange();
+		}
 	}
 
 	@Override
@@ -277,6 +292,7 @@ public class WorldWindAnimationImpl implements Animation
 		} 
 		else
 		{
+			keyFrame.addChangeListener(this);
 			this.keyFrameMap.put(keyFrame.getFrame(), keyFrame);
 		}
 		
@@ -285,6 +301,8 @@ public class WorldWindAnimationImpl implements Animation
 			// Smooth the key frames around this one
 			smoothKeyFrames(keyFrame);
 		}
+		
+		notifyChange();
 	}
 	
 	/**
@@ -367,6 +385,8 @@ public class WorldWindAnimationImpl implements Animation
 			{
 				lookAtElevationFrame.getValueForParameter(renderCamera.getLookAtElevation()).smooth();
 			}
+			
+			notifyChange();
 		}
 	}
 
@@ -481,7 +501,12 @@ public class WorldWindAnimationImpl implements Animation
 	@Override
 	public void removeKeyFrame(int frame)
 	{
-		this.keyFrameMap.remove(frame);
+		if (this.keyFrameMap.containsKey(frame))
+		{
+			this.keyFrameMap.get(frame).removeChangeListener(this);
+			this.keyFrameMap.remove(frame);
+			notifyChange();
+		}
 	}
 	
 	@Override
@@ -494,7 +519,9 @@ public class WorldWindAnimationImpl implements Animation
 		
 		if (keyFrameMap.containsValue(keyFrame))
 		{
+			keyFrame.removeChangeListener(this);
 			keyFrameMap.remove(keyFrame.getFrame());
+			notifyChange();
 		}
 		
 	}
@@ -629,6 +656,46 @@ public class WorldWindAnimationImpl implements Animation
 		}
 		
 		return null;
+	}
+	
+	@Override
+	public void addChangeListener(ChangeListener changeListener)
+	{
+		if (changeListener == null)
+		{
+			return;
+		}
+		this.changeListeners.add(changeListener);
+	}
+	
+	@Override
+	public void removeChangeListener(ChangeListener changeListener)
+	{
+		if (changeListener == null)
+		{
+			return;
+		}
+		this.changeListeners.remove(changeListener);
+	}
+	
+	@Override
+	public void notifyChange()
+	{
+		ChangeEvent event = new ChangeEvent(this);
+		for (ChangeListener listener : changeListeners)
+		{
+			listener.stateChanged(event);
+		}
+	}
+	
+	@Override
+	public void stateChanged(ChangeEvent e)
+	{
+		/// Propagate the change upwards
+		for (ChangeListener listener : changeListeners)
+		{
+			listener.stateChanged(e);
+		}
 	}
 	
 }

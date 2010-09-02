@@ -7,7 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -33,6 +37,11 @@ public class KeyFrameImpl implements KeyFrame
 	 * The frame of the animation this key frame corresponds to
 	 */
 	private int frame;
+	
+	/**
+	 * The list of registered change listeners
+	 */
+	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
 	
 	/**
 	 * Constructor.
@@ -70,19 +79,6 @@ public class KeyFrameImpl implements KeyFrame
 		this(frame, Arrays.asList(parameterValues));
 	}
 	
-	@Override
-	public String getRestorableState()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void restoreState(String stateInXml)
-	{
-		// TODO Auto-generated method stub
-
-	}
 	
 	@Override
 	public Collection<ParameterValue> getParameterValues()
@@ -124,6 +120,7 @@ public class KeyFrameImpl implements KeyFrame
 	@Override
 	public void removeValueForParameter(Parameter p)
 	{
+		parameterValueMap.get(p).removeChangeListener(this);
 		parameterValueMap.remove(p);
 	}
 	
@@ -149,6 +146,7 @@ public class KeyFrameImpl implements KeyFrame
 			value.setFrame(frame);
 			
 			this.parameterValueMap.put(value.getOwner(), value);
+			value.addChangeListener(this);
 		}
 	}
 	
@@ -172,6 +170,46 @@ public class KeyFrameImpl implements KeyFrame
 	public boolean hasParameterValues()
 	{
 		return !parameterValueMap.isEmpty();
+	}
+	
+	@Override
+	public void addChangeListener(ChangeListener changeListener)
+	{
+		if (changeListener == null)
+		{
+			return;
+		}
+		this.changeListeners.add(changeListener);
+	}
+	
+	@Override
+	public void removeChangeListener(ChangeListener changeListener)
+	{
+		if (changeListener == null)
+		{
+			return;
+		}
+		this.changeListeners.remove(changeListener);
+	}
+	
+	@Override
+	public void notifyChange()
+	{
+		ChangeEvent event = new ChangeEvent(this);
+		for (ChangeListener listener : changeListeners)
+		{
+			listener.stateChanged(event);
+		}
+	}
+	
+	@Override
+	public void stateChanged(ChangeEvent e)
+	{
+		/// Propagate the change upwards
+		for (ChangeListener listener : changeListeners)
+		{
+			listener.stateChanged(e);
+		}
 	}
 	
 }
