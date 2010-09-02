@@ -159,7 +159,7 @@ public class Animator
 	{
 		Logging.logger().setLevel(Level.FINER);
 
-		setupMessageSource();
+		initialiseMessageSource();
 
 		// ImmediateMode.setImmediate(true);
 
@@ -297,10 +297,11 @@ public class Animator
 	}
 
 	/**
-	 * Sets up the message source used in the application.
+	 * Initialise the message source used in the application
 	 */
-	private void setupMessageSource()
+	private void initialiseMessageSource()
 	{
+		// Initialise the message source
 		messageSource = new ResourceBundleMessageSource("au.gov.ga.worldwind.animator.data.messages.animatorMessages",
 														"au.gov.ga.worldwind.common.data.messages.commonUIMessages");
 		MessageSourceAccessor.set(messageSource);
@@ -354,13 +355,17 @@ public class Animator
 			wwdSize = wwd.getSize();
 			if (wwdSize.width != animationSize.width || wwdSize.height != animationSize.height)
 			{
-				JOptionPane.showMessageDialog(frame, "Could not set animation dimensions to " + animationSize.width
-						+ "x" + animationSize.height + " (currently " + wwdSize.width + "x" + wwdSize.height + ")",
-						"Could not set dimensions", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(frame, 
+											  messageSource.getMessage(AnimationMessageConstants.getSetDimensionFailedMessageKey(), animationSize.width, animationSize.height, wwdSize.width, wwdSize.height),
+											  messageSource.getMessage(AnimationMessageConstants.getSetDimensionFailedCaptionKey()),
+											  JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
+	/**
+	 * Create the application menu bar
+	 */
 	private void createMenuBar()
 	{
 		JMenuBar menuBar = new JMenuBar();
@@ -500,7 +505,13 @@ public class Animator
 			public void actionPerformed(ActionEvent e)
 			{
 				int frames = slider.getLength() - 1;
-				Object value = JOptionPane.showInputDialog(frame, "Number of frames:", "Set frame count", JOptionPane.QUESTION_MESSAGE, null, null, frames);
+				Object value = JOptionPane.showInputDialog(frame, 
+														   messageSource.getMessage(AnimationMessageConstants.getSetFrameCountMessageKey()),
+														   messageSource.getMessage(AnimationMessageConstants.getSetFrameCountCaptionKey()),
+														   JOptionPane.QUESTION_MESSAGE,
+														   null,
+														   null,
+														   frames);
 				try
 				{
 					frames = Integer.parseInt((String) value);
@@ -619,7 +630,13 @@ public class Animator
 			public void actionPerformed(ActionEvent e)
 			{
 				double scale = -1.0;
-				Object value = JOptionPane.showInputDialog(frame, "Scale factor:", "Scale animation", JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
+				Object value = JOptionPane.showInputDialog(frame, 
+														   messageSource.getMessage(AnimationMessageConstants.getScaleAnimationMessageKey()),
+														   messageSource.getMessage(AnimationMessageConstants.getScaleAnimationCaptionKey()),
+														   JOptionPane.QUESTION_MESSAGE,
+														   null,
+														   null,
+														   1.0);
 				try
 				{
 					scale = Double.parseDouble((String) value);
@@ -645,8 +662,8 @@ public class Animator
 			public void actionPerformed(ActionEvent e)
 			{
 				if (JOptionPane.showConfirmDialog(frame,
-												  "This will redistribute keyframes to attempt to smooth the eye speed.\nDo you wish to continue?",
-												  "Smooth eye speed", 
+												  messageSource.getMessage(AnimationMessageConstants.getQuerySmoothEyeSpeedMessageKey()),
+												  messageSource.getMessage(AnimationMessageConstants.getQuerySmoothEyeSpeedCaptionKey()), 
 												  JOptionPane.YES_NO_OPTION, 
 												  JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
 				{
@@ -959,7 +976,10 @@ public class Animator
 			catch (IOException e)
 			{
 				ExceptionLogger.logException(e);
-				JOptionPane.showMessageDialog(frame, "Saving failed.\n" + e, "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(frame, 
+											  messageSource.getMessage(AnimationMessageConstants.getSaveFailedMessageKey(), e),
+											  messageSource.getMessage(AnimationMessageConstants.getSaveFailedCaptionKey()),
+											  JOptionPane.ERROR_MESSAGE);
 			}
 			setTitleBar();
 		}
@@ -995,9 +1015,11 @@ public class Animator
 			return true;
 		}
 		String file = this.file == null ? "Animation" : "'" + this.file.getName() + "'";
-		String message = file + " has been modified. Save changes?";
-		
-		int response = JOptionPane.showConfirmDialog(frame, message, "Save", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+		int response = JOptionPane.showConfirmDialog(frame, 
+													 messageSource.getMessage(AnimationMessageConstants.getQuerySaveMessageKey(), null, file), 
+													 messageSource.getMessage(AnimationMessageConstants.getQuerySaveCaptionKey()),
+													 JOptionPane.YES_NO_CANCEL_OPTION,
+													 JOptionPane.QUESTION_MESSAGE);
 		
 		if (response == JOptionPane.CANCEL_OPTION)
 		{
@@ -1018,14 +1040,14 @@ public class Animator
 	private void setTitleBar()
 	{
 		String file;
-		String title = "World Wind Animator";
+		String title = messageSource.getMessage(AnimationMessageConstants.getAnimatorApplicationTitleKey());
 		if (this.file != null)
 		{
 			file = this.file.getName();
 		}
 		else
 		{
-			file = "New animation";
+			file = messageSource.getMessage(AnimationMessageConstants.getNewAnimationNameKey());
 		}
 		if (changed)
 		{

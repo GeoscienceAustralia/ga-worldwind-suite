@@ -18,6 +18,14 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	}
 	
 	/**
+	 * @return The key for the name of new animations
+	 */
+	public static String getNewAnimationNameKey()
+	{
+		return "animator.animation.newanimationtitle";
+	}
+	
+	/**
 	 * @return The key for the 'frame' menu item
 	 */
 	public static String getFrameMenuLabelKey()
@@ -282,6 +290,22 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	}
 	
 	/**
+	 * @return The key for the save failed message
+	 */
+	public static String getSaveFailedMessageKey()
+	{
+		return "animator.message.savefailed.message";
+	}
+	
+	/**
+	 * @return The key for the save failed caption
+	 */
+	public static String getSaveFailedCaptionKey()
+	{
+		return "animator.message.savefailed.caption";
+	}
+	
+	/**
 	 * @return The key for the open v1 file message
 	 */
 	public static String getOpenV1FileMessageKey()
@@ -329,5 +353,84 @@ public class AnimationMessageConstants extends CommonMessageConstants
 		return "animator.message.overwriteconfirm.caption";
 	}
 	
+	/**
+	 * @return The key for the query save message
+	 */
+	public static String getQuerySaveMessageKey()
+	{
+		return "animator.message.querysave.message";
+	}
+	
+	/**
+	 * @return The key for the query save caption
+	 */
+	public static String getQuerySaveCaptionKey()
+	{
+		return "animator.message.querysave.caption";
+	}
+	
+	/**
+	 * @return The key for the query smooth eye speed message
+	 */
+	public static String getQuerySmoothEyeSpeedMessageKey()
+	{
+		return "animator.message.smootheyespeed.message";
+	}
+	
+	/**
+	 * @return The key for the query smooth eye speed caption
+	 */
+	public static String getQuerySmoothEyeSpeedCaptionKey()
+	{
+		return "animator.message.smootheyespeed.caption";
+	}
+	
+	/**
+	 * @return The key for the scale animation message
+	 */
+	public static String getScaleAnimationMessageKey()
+	{
+		return "animator.message.scaleanimation.message";
+	}
+	
+	/**
+	 * @return The key for the scale animation caption
+	 */
+	public static String getScaleAnimationCaptionKey()
+	{
+		return "animator.message.scaleanimation.caption";
+	}
+	
+	/**
+	 * @return The key for the set frame count message
+	 */
+	public static String getSetFrameCountMessageKey()
+	{
+		return "animator.message.setframecount.message";
+	}
+	
+	/**
+	 * @return The key for the set frame count caption
+	 */
+	public static String getSetFrameCountCaptionKey()
+	{
+		return "animator.message.setframecount.caption";
+	}
+	
+	/**
+	 * @return The key for the set dimension failed message
+	 */
+	public static String getSetDimensionFailedMessageKey()
+	{
+		return "animator.message.setdimensionfailed.message";
+	}
+	
+	/**
+	 * @return The key for the set dimension failed caption
+	 */
+	public static String getSetDimensionFailedCaptionKey()
+	{
+		return "animator.message.setdimensionfailed.caption";
+	}
 	
 }
