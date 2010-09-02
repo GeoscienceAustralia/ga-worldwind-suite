@@ -6,8 +6,11 @@ package au.gov.ga.worldwind.animator.animation;
 import java.io.Serializable;
 import java.util.Collection;
 
+import javax.swing.event.ChangeListener;
+
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.util.Changeable;
 import au.gov.ga.worldwind.animator.util.Nameable;
 
 /**
@@ -15,7 +18,7 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  *
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Animatable extends Serializable, Nameable, XmlSerializable<Animatable>
+public interface Animatable extends Serializable, Nameable, XmlSerializable<Animatable>, ChangeListener, Changeable
 {
 	/**
 	 * Apply this object's behaviour/changes to the 'world' for the given frame

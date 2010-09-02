@@ -90,6 +90,12 @@ public class CameraImpl extends AnimatableBase implements Camera
 		lookAtLat = new LookatLatParameter(animation);
 		lookAtLon = new LookatLonParameter(animation);
 		lookAtElevation = new LookatElevationParameter(animation);
+		
+		// Add this camera as a change listener to the camera parameters
+		for (Parameter p : getParameters())
+		{
+			p.addChangeListener(this);
+		}
 	}
 
 	@Override

@@ -3,6 +3,10 @@ package au.gov.ga.worldwind.animator.animation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -22,6 +26,11 @@ public abstract class AnimatableBase implements Animatable
 	/** The name of this {@link Animatable} object */
 	private String name; 
 
+	/**
+	 * The list of registered change listeners
+	 */
+	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
+	
 	/**
 	 * Constructor. Initialises the name of the animatable object.
 	 * 
@@ -66,6 +75,46 @@ public abstract class AnimatableBase implements Animatable
 			}
 		}
 		return result;
+	}
+	
+	@Override
+	public void addChangeListener(ChangeListener changeListener)
+	{
+		if (changeListener == null)
+		{
+			return;
+		}
+		this.changeListeners.add(changeListener);
+	}
+	
+	@Override
+	public void removeChangeListener(ChangeListener changeListener)
+	{
+		if (changeListener == null)
+		{
+			return;
+		}
+		this.changeListeners.remove(changeListener);
+	}
+	
+	@Override
+	public void notifyChange()
+	{
+		ChangeEvent event = new ChangeEvent(this);
+		for (ChangeListener listener : changeListeners)
+		{
+			listener.stateChanged(event);
+		}
+	}
+	
+	@Override
+	public void stateChanged(ChangeEvent e)
+	{
+		/// Propagate the change upwards
+		for (ChangeListener listener : changeListeners)
+		{
+			listener.stateChanged(e);
+		}
 	}
 
 }

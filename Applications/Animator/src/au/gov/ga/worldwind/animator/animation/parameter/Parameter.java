@@ -6,12 +6,15 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.swing.event.ChangeListener;
+
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
+import au.gov.ga.worldwind.animator.util.Changeable;
 import au.gov.ga.worldwind.animator.util.Nameable;
 
 /**
@@ -20,7 +23,7 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Parameter extends Serializable, Nameable, XmlSerializable<Parameter>
+public interface Parameter extends Serializable, Nameable, XmlSerializable<Parameter>, ChangeListener, Changeable
 {
 	
 	/**

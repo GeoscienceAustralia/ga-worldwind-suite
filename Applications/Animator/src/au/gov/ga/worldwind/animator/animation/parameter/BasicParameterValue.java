@@ -3,6 +3,12 @@
  */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -31,6 +37,11 @@ public class BasicParameterValue implements ParameterValue
 	private int frame;
 	
 	/**
+	 * The list of registered change listeners
+	 */
+	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
+	
+	/**
 	 * Constructor. 
 	 * <p/>
 	 * Initialises the mandatory {@link #owner} and {@link #value} fields
@@ -41,6 +52,7 @@ public class BasicParameterValue implements ParameterValue
 		this.value = value;
 		this.frame = frame;
 		this.owner = owner;
+		addChangeListener(owner);
 	}
 	
 	/**
@@ -57,7 +69,14 @@ public class BasicParameterValue implements ParameterValue
 	@Override
 	public void setValue(double value)
 	{
+		boolean changed = this.value != value;
+		
 		this.value = value;
+		
+		if (changed)
+		{
+			notifyChange();
+		}
 	}
 
 	@Override
@@ -81,7 +100,14 @@ public class BasicParameterValue implements ParameterValue
 	@Override
 	public void setFrame(int frame)
 	{
+		boolean changed = this.frame != frame;
+		
 		this.frame = frame;
+		
+		if (changed)
+		{
+			notifyChange();
+		}
 	}
 	
 	@Override
@@ -95,6 +121,8 @@ public class BasicParameterValue implements ParameterValue
 	 */
 	protected void setOwner(Parameter p)
 	{
+		removeChangeListener(this.owner);
+		addChangeListener(p);
 		this.owner = p;
 	}
 	
@@ -142,5 +170,34 @@ public class BasicParameterValue implements ParameterValue
 		}
 	}
 	
+	@Override
+	public void addChangeListener(ChangeListener changeListener)
+	{
+		if (changeListener == null)
+		{
+			return;
+		}
+		this.changeListeners.add(changeListener);
+	}
+	
+	@Override
+	public void removeChangeListener(ChangeListener changeListener)
+	{
+		if (changeListener == null)
+		{
+			return;
+		}
+		this.changeListeners.remove(changeListener);
+	}
+	
+	@Override
+	public void notifyChange()
+	{
+		ChangeEvent event = new ChangeEvent(this);
+		for (ChangeListener listener : changeListeners)
+		{
+			listener.stateChanged(event);
+		}
+	}
 	
 }

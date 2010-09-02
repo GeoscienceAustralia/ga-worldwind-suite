@@ -123,10 +123,17 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	@Override
 	public void setInValue(double value)
 	{
+		boolean changed = this.in.getValue() != value;
+		
 		this.in.setValue(value);
 		if (isLocked() && in.hasValue()) 
 		{
 			lockOut();
+		}
+		
+		if (changed)
+		{
+			notifyChange();
 		}
 	}
 
@@ -139,7 +146,14 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	@Override
 	public void setInPercent(double percent)
 	{
+		boolean changed = this.in.getPercent() != percent;
+		
 		this.in.setPercent(percent);
+		
+		if (changed)
+		{
+			notifyChange();
+		}
 	}
 	
 	@Override
@@ -151,10 +165,17 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	@Override
 	public void setOutValue(double value)
 	{
+		boolean changed = this.out.getValue() != value;
+		
 		this.out.setValue(value);
 		if (isLocked() && out.hasValue())
 		{
 			lockIn();
+		}
+		
+		if (changed)
+		{
+			notifyChange();
 		}
 	}
 
@@ -167,7 +188,14 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	@Override
 	public void setOutPercent(double percent)
 	{
+		boolean changed = this.out.getPercent() != percent;
+		
 		this.out.setPercent(percent);
+		
+		if (changed)
+		{
+			notifyChange();
+		}
 	}
 	
 	@Override
