@@ -4,6 +4,7 @@ import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.geom.Angle;
@@ -34,6 +35,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import javax.media.opengl.GLCapabilities;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
@@ -45,6 +47,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
@@ -80,10 +83,20 @@ import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.FrameSlider;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
+import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.util.message.MessageSource;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.ResourceBundleMessageSource;
 
+/**
+ * The primary application class for the Animator application.
+ * <p/>
+ * Sets up the GUI and initialises animations.
+ * 
+ * @author Michael de Hoog (michael.deHoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
+ */
 public class Animator
 {
 	private static final GLCapabilities caps = new GLCapabilities();
@@ -130,114 +143,246 @@ public class Animator
 		new Animator();
 	}
 
+	/** The primary application window */
 	private JFrame frame;
 
+	/** The primary world wind canvas */
 	private WorldWindowGLCanvas wwd;
+	
+	/** The model backing the world wind display */
+	private Model model;
+	
+	/** The key frame slider component */
 	private FrameSlider slider;
+	
+	/** The current animation being viewed */
 	private Animation animation = null;
+	
+	/** The file the current animation is written to */
 	private File file = null;
+	
+	/** Used to update the animation outside of the EDT */
+	private Updater updater;
+	
+	// Status flags
 	private boolean autokey = false;
 	private boolean applying = false;
-	private Updater updater;
 	private boolean changed = false;
 	private boolean stop = false;
 	private boolean settingSlider = false;
+	
+	/** A listener that updates the 'changed' status when animation change is detected */
 	private ChangeListener animationChangeListener;
-	private Layer crosshair;
-	private JCheckBoxMenuItem useScaledZoomCheck;
 
+	// The layers used in the application
 	private DetailedElevationModel dem;
-	private Layer bmng, landsat;
+	private Layer blueMarble;
+	private Layer landsat;
+	private Layer crosshair;
+	private CameraPathLayer cameraPathLayer;
 	
 	/** The file chooser used for open and save. Instance variable so it will remember last used folders. */
 	private JFileChooser fileChooser = new JFileChooser();
 
+	/** The 'use scaled zoom' check box */
+	private JCheckBoxMenuItem useScaledZoomCheck;
+	
 	/** The message source for the application */
 	private MessageSource messageSource;
 
+	// Actions
+	private BasicAction newAnimationAction;
+	private BasicAction openAnimationAction;
+	private BasicAction saveAnimationAction;
+	private BasicAction saveAnimationAsAction;
+	private BasicAction exitAction;
+	
+	private BasicAction addKeyAction;
+	private BasicAction deleteKeyAction;
+	private SelectableAction autoKeyAction;
+	private BasicAction setFrameCountAction;
+	private BasicAction previousFrameAction;
+	private BasicAction nextFrameAction;
+	private BasicAction previous10FramesAction;
+	private BasicAction next10FramesAction;
+	private BasicAction firstFrameAction;
+	private BasicAction lastFrameAction;
+	
+	private SelectableAction useScaledZoomAction;
+	private BasicAction scaleAnimationAction;
+	private BasicAction smoothEyeSpeedAction;
+	private BasicAction previewAction;
+	private BasicAction previewX2Action;
+	private BasicAction previewX10Action;
+	private BasicAction renderHiResAction;
+	private BasicAction renderLowResAction;
+	
+	private BasicAction debugKeyFramesAction;
+	private BasicAction debugParameterValuesAction;
+	
+	/**
+	 * Constructor.
+	 * <p/>
+	 * Performs initialisation of GUI and animation.
+	 */
 	public Animator()
 	{
 		Logging.logger().setLevel(Level.FINER);
 
 		initialiseMessageSource();
 
-		// ImmediateMode.setImmediate(true);
+		initialiseConfiguration();
 
-		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
-		Configuration.setValue(AVKey.VIEW_CLASS_NAME, BasicOrbitView.class.getName());
-		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, AnimatorSceneController.class.getName());
-
-		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME, ImmediateTaskService.class.getName());
-		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ImmediateRetrievalService.class.getName());
-
-		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, ElevationTesselator.class.getName());
-
-		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE, 16777216L * 8); // 128 mb
-
-		animationChangeListener = new ChangeListener()
-		{
-			public void stateChanged(ChangeEvent e)
-			{
-				changed = true;
-				setTitleBar();
-			}
-		};
-
-		wwd = new WorldWindowGLCanvas(caps);
+		initialiseWorldWindow();
+		
+		initialiseApplicationWindow();
+		
 		animation = new WorldWindAnimationImpl(wwd);
-		resetChanged();
+		
 		updater = new Updater();
 
-		frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.addWindowListener(new WindowAdapter()
-		{
-			@Override
-			public void windowClosing(WindowEvent e)
-			{
-				quit();
-			}
-		});
-
-		frame.setLayout(new BorderLayout());
-		Model model = new BasicModel();
-		wwd.setModel(model);
 		setAnimationSize(animation.getRenderParameters().getImageDimension());
-		frame.add(wwd, BorderLayout.CENTER);
-		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
-		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(Angle.ZERO, Angle.POS180);
 
-		CompoundElevationModel cem = new CompoundElevationModel();
-		dem = new DetailedElevationModel(cem);
-		model.getGlobe().setElevationModel(dem);
+		initialiseElevationModels();
+		
+		initialiseLayers();
 
+		JPanel bottom = new JPanel(new BorderLayout());
+		frame.add(bottom, BorderLayout.SOUTH);
+
+		initialiseFrameSlider(bottom);
+
+		createStatusBar(bottom);
+
+		initialiseActions();
+		
+		createMenuBar();
+
+		setTitleBar();
+
+		initialiseAutoKeyListener();
+		
+		initialiseChangeListener();
+		
+		updateSlider();
+
+		resetChanged();
+		
+		showApplicationWindow();
+	}
+
+	/**
+	 * Initialises the layers to be used in the application
+	 */
+	private void initialiseLayers()
+	{
 		LayerList layers = model.getLayers();
 
 		Layer depth = new DepthLayer();
 		layers.add(depth);
 
-		bmng = new ImmediateBMNGWMSLayer();
-		layers.add(bmng);
+		blueMarble = new ImmediateBMNGWMSLayer();
+		layers.add(blueMarble);
 
 		landsat = new ImmediateLandsatI3WMSLayer();
 		layers.add(landsat);
 
-		ElevationModel earthem = (ElevationModel) new ExtendedBasicElevationModelFactory().createFromConfigSource("config/Earth/EarthElevationModelAsBil16.xml", null);
-		ExtendedElevationModel eem = getEBEM(earthem);
-		cem.addElevationModel(eem);
-
-		CameraPathLayer cameraPathLayer = new CameraPathLayer(animation);
+		cameraPathLayer = new CameraPathLayer(animation);
 		layers.add(cameraPathLayer);
 		
 		crosshair = new CrosshairLayer();
 		layers.add(crosshair);
+	}
 
-		JPanel bottom = new JPanel(new BorderLayout());
-		frame.add(bottom, BorderLayout.SOUTH);
+	/**
+	 * Initialise the elevation models used in the application
+	 */
+	private void initialiseElevationModels()
+	{
+		CompoundElevationModel cem = new CompoundElevationModel();
+		dem = new DetailedElevationModel(cem);
+		model.getGlobe().setElevationModel(dem);
 
+		ElevationModel earthem = (ElevationModel) new ExtendedBasicElevationModelFactory().createFromConfigSource("config/Earth/EarthElevationModelAsBil16.xml", null);
+		ExtendedElevationModel eem = getEBEM(earthem);
+		cem.addElevationModel(eem);
+	}
+
+	private void showApplicationWindow()
+	{
+		try
+		{
+			SwingUtilities.invokeAndWait(new Runnable(){
+
+				@Override
+				public void run()
+				{
+					frame.pack();
+					frame.setVisible(true);
+				}
+				
+			});
+		}
+		catch (Exception e)
+		{
+			ExceptionLogger.logException(e);
+		}
+	}
+
+	/**
+	 * Create a status bar and put it in the provided container panel.
+	 * 
+	 * @param container The container panel to add the status bar to
+	 */
+	private void createStatusBar(JPanel container)
+	{
+		StatusBar statusBar = new StatusBar();
+		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
+		container.add(statusBar, BorderLayout.SOUTH);
+		statusBar.setEventSource(wwd);
+	}
+
+	/**
+	 * Attach a property change listener to the World Wind view to automatically generate key frames
+	 * when a change is detected.
+	 */
+	private void initialiseAutoKeyListener()
+	{
+		getView().addPropertyChangeListener(AVKey.VIEW, new PropertyChangeListener()
+		{
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				if (autokey && !applying)
+				{
+					addFrame();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Initialise the World Wind {@link WorldWindow} used by the application
+	 */
+	private void initialiseWorldWindow()
+	{
+		wwd = new WorldWindowGLCanvas(caps);
+		model = new BasicModel();
+		wwd.setModel(model);
+		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
+		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(Angle.ZERO, Angle.POS180);
+	}
+
+	/**
+	 * Initialise the frame slider and add it to the provided container panel.
+	 * 
+	 * @param container The container panel to add the frame slider to
+	 */
+	private void initialiseFrameSlider(JPanel container)
+	{
 		slider = new FrameSlider(0, 0, animation.getFrameCount());
 		slider.setMinimumSize(new Dimension(0, 54));
-		bottom.add(slider, BorderLayout.CENTER);
+		container.add(slider, BorderLayout.CENTER);
+		
 		slider.addChangeListener(new ChangeListener()
 		{
 			public void stateChanged(ChangeEvent e)
@@ -253,6 +398,7 @@ public class Animator
 				}
 			}
 		});
+		
 		slider.addChangeFrameListener(new ChangeFrameListener()
 		{
 			public void frameChanged(int index, int oldFrame, int newFrame)
@@ -268,32 +414,62 @@ public class Animator
 				wwd.redraw();
 			}
 		});
+	}
 
-		getView().addPropertyChangeListener(AVKey.VIEW, new PropertyChangeListener()
+	/**
+	 * Initialise the primary application window 
+	 */
+	private void initialiseApplicationWindow()
+	{
+		frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter()
 		{
-			public void propertyChange(PropertyChangeEvent evt)
+			@Override
+			public void windowClosing(WindowEvent e)
 			{
-				if (autokey && !applying)
-				{
-					addFrame();
-				}
+				quit();
 			}
 		});
-
-		StatusBar statusBar = new StatusBar();
-		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
-		bottom.add(statusBar, BorderLayout.SOUTH);
-		statusBar.setEventSource(wwd);
-
+		frame.setLayout(new BorderLayout());
+		
+		frame.add(wwd, BorderLayout.CENTER);
+		
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-		createMenuBar();
+	}
 
-		setTitleBar();
-		updateSlider();
+	/**
+	 * Initialise the change listener that listens for changes to the animation state
+	 */
+	private void initialiseChangeListener()
+	{
+		animationChangeListener = new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				changed = true;
+				setTitleBar();
+			}
+		};
+	}
 
-		frame.pack();
-		frame.setVisible(true);
+	/**
+	 * Initialise the configuration settings for the application
+	 */
+	private void initialiseConfiguration()
+	{
+		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
+		Configuration.setValue(AVKey.VIEW_CLASS_NAME, BasicOrbitView.class.getName());
+		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, AnimatorSceneController.class.getName());
+
+		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME, ImmediateTaskService.class.getName());
+		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ImmediateRetrievalService.class.getName());
+
+		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, ElevationTesselator.class.getName());
+
+		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE, 16777216L * 8); // 128 mb
+		
 	}
 
 	/**
@@ -364,112 +540,87 @@ public class Animator
 	}
 
 	/**
-	 * Create the application menu bar
+	 * Initialise the actions used in the application
 	 */
-	private void createMenuBar()
+	private void initialiseActions()
 	{
-		JMenuBar menuBar = new JMenuBar();
-		frame.setJMenuBar(menuBar);
-
-		JMenu menu;
-		JMenuItem menuItem;
-
-		// File
-		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getFileMenuLabelKey()));
-		menu.setMnemonic('F');
-		menuBar.add(menu);
-
 		// New
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getNewMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke('N', ActionEvent.CTRL_MASK));
-		menuItem.setMnemonic('N');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		newAnimationAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getNewMenuLabelKey()), null);
+		newAnimationAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+		newAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
+		newAnimationAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				newFile();
 			}
 		});
-
+		
 		// Open
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getOpenMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke('O', ActionEvent.CTRL_MASK));
-		menuItem.setMnemonic('O');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		openAnimationAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getOpenMenuLabelKey()), null);
+		openAnimationAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+		openAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
+		openAnimationAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				open();
 			}
 		});
-
+		
 		// Save
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getSaveMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke('S', ActionEvent.CTRL_MASK));
-		menuItem.setMnemonic('S');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		saveAnimationAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getSaveMenuLabelKey()), null);
+		saveAnimationAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+		saveAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
+		saveAnimationAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				save();
 			}
 		});
-
+		
 		// Save as
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getSaveAsMenuLabelKey()));
-		menuItem.setMnemonic('A');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		saveAnimationAsAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getSaveAsMenuLabelKey()), null);
+		saveAnimationAsAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
+		saveAnimationAsAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
+		saveAnimationAsAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				saveAs();
 			}
 		});
-
-		menu.addSeparator();
-
+		
 		// Exit
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getExitMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
-		menuItem.setMnemonic('x');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		exitAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getExitMenuLabelKey()), null);
+		exitAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
+		exitAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
+		exitAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				quit();
 			}
 		});
-
-
-		// Frame
-		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getFrameMenuLabelKey()));
-		menu.setMnemonic('r');
-		menuBar.add(menu);
-
+		
 		// Add key
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getAddKeyMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0));
-		menuItem.setMnemonic('A');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		addKeyAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getAddKeyMenuLabelKey()), null);
+		addKeyAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0));
+		addKeyAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
+		addKeyAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				addFrame();
 			}
 		});
-
+		
 		// Delete key
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getDeleteKeyMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
-		menuItem.setMnemonic('D');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		deleteKeyAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getDeleteKeyMenuLabelKey()), null);
+		deleteKeyAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+		deleteKeyAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_D);
+		deleteKeyAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -481,26 +632,22 @@ public class Animator
 				updateSlider();
 			}
 		});
-
-		menu.addSeparator();
 		
 		// Auto key
-		final JCheckBoxMenuItem autoKeyItem = new JCheckBoxMenuItem(messageSource.getMessage(AnimationMessageConstants.getAutoKeyMenuLabelKey()), autokey);
-		menuItem.setMnemonic('k');
-		menu.add(autoKeyItem);
-		autoKeyItem.addActionListener(new ActionListener()
+		autoKeyAction = new SelectableAction(messageSource.getMessage(AnimationMessageConstants.getAutoKeyMenuLabelKey()), null, false);
+		autoKeyAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_K);
+		autoKeyAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				autokey = autoKeyItem.isSelected();
+				autokey = autoKeyAction.isSelected();
 			}
 		});
-
+		
 		// Set frame count
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getSetFrameCountMenuLabelKey()));
-		menuItem.setMnemonic('c');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		setFrameCountAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getSetFrameCountMenuLabelKey()), null);
+		setFrameCountAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
+		setFrameCountAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -524,87 +671,118 @@ public class Animator
 				updateSlider();
 			}
 		});
-
-		menu.addSeparator();
-
+		
 		// Previous frame
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getPreviousFrameMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, 0));
-		menuItem.setMnemonic('P');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		previousFrameAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getPreviousFrameMenuLabelKey()), null);
+		previousFrameAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, 0));
+		previousFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
+		previousFrameAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				slider.setValue(slider.getValue() - 1);
 			}
 		});
-
+		
 		// Next frame
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getNextFrameMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, 0));
-		menuItem.setMnemonic('N');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		nextFrameAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getNextFrameMenuLabelKey()), null);
+		nextFrameAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, 0));
+		nextFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
+		nextFrameAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				slider.setValue(slider.getValue() + 1);
 			}
 		});
-
-		// Previous 10 frames
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getPrevious10FrameMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, KeyEvent.SHIFT_DOWN_MASK));
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		
+		// Previous 10 frame
+		previous10FramesAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getPrevious10FrameMenuLabelKey()), null);
+		previous10FramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, KeyEvent.SHIFT_DOWN_MASK));
+		previous10FramesAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				slider.setValue(slider.getValue() - 10);
 			}
 		});
-
-		// Next 10 frames
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getNext10FrameMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, KeyEvent.SHIFT_DOWN_MASK));
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		
+		// Next 10 frame
+		next10FramesAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getNext10FrameMenuLabelKey()), null);
+		next10FramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, KeyEvent.SHIFT_DOWN_MASK));
+		next10FramesAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				slider.setValue(slider.getValue() + 10);
 			}
 		});
-
+		
 		// First frame
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getFirstFrameMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, ActionEvent.CTRL_MASK));
-		menuItem.setMnemonic('F');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		firstFrameAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getFirstFrameMenuLabelKey()), null);
+		firstFrameAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, ActionEvent.CTRL_MASK));
+		firstFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_F);
+		firstFrameAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				slider.setValue(animation.getFrameOfFirstKeyFrame());
 			}
 		});
-
+		
 		// Last frame
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getLastFrameMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, ActionEvent.CTRL_MASK));
-		menuItem.setMnemonic('L');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
+		lastFrameAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getLastFrameMenuLabelKey()), null);
+		lastFrameAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, ActionEvent.CTRL_MASK));
+		lastFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
+		lastFrameAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				slider.setValue(animation.getFrameOfLastKeyFrame());
 			}
 		});
+	}
+	
+	/**
+	 * Create the application menu bar
+	 */
+	private void createMenuBar()
+	{
+		JMenuBar menuBar = new JMenuBar();
+		frame.setJMenuBar(menuBar);
 
+		JMenu menu;
+		JMenuItem menuItem;
 
-		// Animation
+		// File menu
+		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getFileMenuLabelKey()));
+		menu.setMnemonic(KeyEvent.VK_F);
+		menuBar.add(menu);
+		menu.add(newAnimationAction);
+		menu.add(openAnimationAction);
+		menu.add(saveAnimationAction);
+		menu.add(saveAnimationAsAction);
+		menu.addSeparator();
+		menu.add(exitAction);
+
+		// Frame menu
+		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getFrameMenuLabelKey()));
+		menu.setMnemonic(KeyEvent.VK_R);
+		menuBar.add(menu);
+		menu.add(addKeyAction);
+		menu.add(deleteKeyAction);
+		menu.addSeparator();
+		autoKeyAction.addToMenu(menu);
+		menu.add(setFrameCountAction);
+		menu.addSeparator();
+		menu.add(previousFrameAction);
+		menu.add(nextFrameAction);
+		menu.add(previous10FramesAction);
+		menu.add(next10FramesAction);
+		menu.add(firstFrameAction);
+		menu.add(lastFrameAction);
+
+		// Animation menu
 		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getAnimationMenuLabelKey()));
 		menu.setMnemonic('A');
 		menuBar.add(menu);
@@ -838,6 +1016,7 @@ public class Animator
 			resetChanged();
 			setFile(null);
 			updateSlider();
+			slider.setValue(0);
 		}
 	}
 
