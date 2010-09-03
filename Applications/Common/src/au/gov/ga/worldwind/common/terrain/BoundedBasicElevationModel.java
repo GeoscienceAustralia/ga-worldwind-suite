@@ -8,6 +8,12 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.Bounded;
 
+/**
+ * Extension to {@link BasicElevationModel} that implements the {@link Bounded}
+ * interface.
+ * 
+ * @author Michael de Hoog
+ */
 public class BoundedBasicElevationModel extends BasicElevationModel implements Bounded
 {
 	public BoundedBasicElevationModel(Element domElement, AVList params)

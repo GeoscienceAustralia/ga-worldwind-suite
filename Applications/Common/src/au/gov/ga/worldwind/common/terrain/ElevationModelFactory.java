@@ -11,6 +11,14 @@ import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.Bounded;
+
+/**
+ * Extension to World Wind's {@link BasicElevationModelFactory} which creates
+ * {@link ElevationModel}'s that implement the {@link Bounded} interface.
+ * 
+ * @author Michael de Hoog
+ */
 public class ElevationModelFactory extends BasicElevationModelFactory
 {
 	//functions copied from superclass, replacing the model objects with our extensions 
@@ -50,11 +58,11 @@ public class ElevationModelFactory extends BasicElevationModelFactory
 
 		if ("Offline".equals(serviceName))
 		{
-			em = new ExtendedElevationModel(domElement, params);
+			em = new URLTransformerBasicElevationModel(domElement, params);
 		}
 		else if ("WWTileService".equals(serviceName))
 		{
-			em = new ExtendedElevationModel(domElement, params);
+			em = new URLTransformerBasicElevationModel(domElement, params);
 		}
 		else if ("FileTileService".equals(serviceName))
 		{

@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.common.terrain;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
+import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
@@ -13,9 +14,15 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.util.URLTransformer;
 
-public class ExtendedElevationModel extends BoundedBasicElevationModel
+/**
+ * {@link BasicElevationModel} that uses a custom {@link TileUrlBuilder} that
+ * uses the {@link URLTransformer} to transform elevation tile download URLs.
+ * 
+ * @author Michael de Hoog
+ */
+public class URLTransformerBasicElevationModel extends BoundedBasicElevationModel
 {
-	public ExtendedElevationModel(Element domElement, AVList params)
+	public URLTransformerBasicElevationModel(Element domElement, AVList params)
 	{
 		super(domElement, setupParams(params));
 	}
@@ -24,7 +31,10 @@ public class ExtendedElevationModel extends BoundedBasicElevationModel
 	{
 		if (params == null)
 			params = new AVListImpl();
-		params.setValue(AVKey.TILE_URL_BUILDER, createURLBuilder(params));
+
+		if (params.getValue(AVKey.TILE_URL_BUILDER) == null)
+			params.setValue(AVKey.TILE_URL_BUILDER, createURLBuilder(params));
+
 		return params;
 	}
 

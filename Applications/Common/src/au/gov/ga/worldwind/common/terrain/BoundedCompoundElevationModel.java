@@ -5,6 +5,12 @@ import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import au.gov.ga.worldwind.common.layers.Bounded;
 
+/**
+ * Extension to {@link CompoundElevationModel} that implements the
+ * {@link Bounded} interface.
+ * 
+ * @author Michael de Hoog
+ */
 public class BoundedCompoundElevationModel extends CompoundElevationModel implements Bounded
 {
 	@Override

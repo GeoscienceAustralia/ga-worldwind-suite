@@ -23,6 +23,12 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.Util;
 
+/**
+ * Elevation model that retrieves its elevation data from elevation tiles stored
+ * in a directory in the local file system.
+ * 
+ * @author Michael de Hoog
+ */
 public class FileElevationModel extends BoundedBasicElevationModel
 {
 	public FileElevationModel(Element domElement, AVList params)
@@ -41,6 +47,12 @@ public class FileElevationModel extends BoundedBasicElevationModel
 		return params;
 	}
 
+	/**
+	 * TileUrlBuilder implementation that creates file:// URLs pointing to
+	 * elevation tiles stored locally.
+	 * 
+	 * @author Michael de Hoog
+	 */
 	protected static class FileURLBuilder implements TileUrlBuilder
 	{
 		private URL context;
@@ -137,6 +149,11 @@ public class FileElevationModel extends BoundedBasicElevationModel
 		}
 	}
 
+	/**
+	 * URLRetriever that makes the readZipStream function accessible.
+	 * 
+	 * @author Michael de Hoog
+	 */
 	protected static class ZipRetriever extends URLRetriever
 	{
 		public ZipRetriever(URL url)
@@ -151,6 +168,14 @@ public class FileElevationModel extends BoundedBasicElevationModel
 		}
 	}
 
+	/**
+	 * This {@link RequestTask} creates elevation tile requests passing the
+	 * image format returned by the getImageFormat() function. It also skips
+	 * calling the downloadElevations() function, as the tiles are stored
+	 * locally and don't need to be downloaded.
+	 * 
+	 * @author Michael de Hoog
+	 */
 	protected static class RequestTask implements Runnable
 	{
 		protected final FileElevationModel elevationModel;
