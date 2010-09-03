@@ -33,6 +33,9 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 	/** The default colour to use for painting the camera path */
 	private static final Color DEFAULT_CAMERA_PATH_COLOUR = Color.WHITE;
 	
+	/** The number of frames currently held in the vertex buffers */
+	private int frameCount;
+	
 	/** The animation whose camera path is to be displayed on this layer */
 	private Animation animation;
 
@@ -60,6 +63,14 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 		Validate.notNull(animation, "An animation instance is required");
 		this.animation = animation;
 		
+		resetVertexBuffers();
+	}
+
+	/**
+	 * Re-create the vertex buffers to the current animation size
+	 */
+	private void resetVertexBuffers()
+	{
 		this.drawVertexBuffer = BufferUtil.newDoubleBuffer(animation.getFrameCount() * 3);
 		this.updateVertexBuffer = BufferUtil.newDoubleBuffer(animation.getFrameCount() * 3);
 	}
@@ -152,7 +163,15 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 	@Override
 	public void stateChanged(ChangeEvent e)
 	{
-		// TODO Auto-generated method stub
+		// If the frame count has changed, update the buffer size
+		if (e.getSource() instanceof Animation)
+		{
+			if (animation.getFrameCount() != frameCount)
+			{
+				frameCount = animation.getFrameCount();
+				resetVertexBuffers();
+			}
+		}
 		
 	}
 

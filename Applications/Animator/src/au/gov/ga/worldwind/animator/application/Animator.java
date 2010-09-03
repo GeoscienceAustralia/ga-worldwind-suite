@@ -37,7 +37,6 @@ import java.util.logging.Level;
 import javax.media.opengl.GLCapabilities;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -184,9 +183,6 @@ public class Animator
 	/** The file chooser used for open and save. Instance variable so it will remember last used folders. */
 	private JFileChooser fileChooser = new JFileChooser();
 
-	/** The 'use scaled zoom' check box */
-	private JCheckBoxMenuItem useScaledZoomCheck;
-	
 	/** The message source for the application */
 	private MessageSource messageSource;
 
@@ -741,6 +737,151 @@ public class Animator
 				slider.setValue(animation.getFrameOfLastKeyFrame());
 			}
 		});
+		
+		// Use scaled zoom
+		useScaledZoomAction = new SelectableAction(messageSource.getMessage(AnimationMessageConstants.getUseZoomScalingMenuLabelKey()), null, animation.isZoomScalingRequired());
+		useScaledZoomAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_Z);
+		useScaledZoomAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				animation.setZoomScalingRequired(useScaledZoomAction.isSelected());
+			}
+		});
+		
+		// Scale animation
+		scaleAnimationAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getScaleAnimationMenuLabelKey()), null);
+		scaleAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
+		scaleAnimationAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				double scale = -1.0;
+				Object value = JOptionPane.showInputDialog(frame, 
+														   messageSource.getMessage(AnimationMessageConstants.getScaleAnimationMessageKey()),
+														   messageSource.getMessage(AnimationMessageConstants.getScaleAnimationCaptionKey()),
+														   JOptionPane.QUESTION_MESSAGE,
+														   null,
+														   null,
+														   1.0);
+				try
+				{
+					scale = Double.parseDouble((String) value);
+				}
+				catch (Exception ex)
+				{
+					ExceptionLogger.logException(ex);
+				}
+				if (scale != 1.0 && scale > 0)
+				{
+					animation.scale(scale);
+				}
+				updateSlider();
+			}
+		});
+		
+		// Smooth eye speed
+		smoothEyeSpeedAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getSmoothEyeSpeedMenuLabelKey()), null);
+		smoothEyeSpeedAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_M);
+		smoothEyeSpeedAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if (JOptionPane.showConfirmDialog(frame,
+												  messageSource.getMessage(AnimationMessageConstants.getQuerySmoothEyeSpeedMessageKey()),
+												  messageSource.getMessage(AnimationMessageConstants.getQuerySmoothEyeSpeedCaptionKey()), 
+												  JOptionPane.YES_NO_OPTION, 
+												  JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+				{
+					animation.getCamera().smoothEyeSpeed(createAnimationContext());
+					updateSlider();
+				}
+			}
+		});
+		
+		// Preview
+		previewAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getPreviewMenuLabelKey()), null);
+		previewAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
+		previewAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
+		previewAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				preview(1);
+			}
+		});
+		
+		// Preview x2
+		previewX2Action = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getPreviewX2MenuLabelKey()), null);
+		previewX2Action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.SHIFT_MASK));
+		previewX2Action.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				preview(2);
+			}
+		});
+		
+		// Preview x10
+		previewX10Action = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getPreviewX10MenuLabelKey()), null);
+		previewX10Action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.CTRL_MASK));
+		previewX10Action.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				preview(10);
+			}
+		});
+		
+		// Render hi-res
+		renderHiResAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getRenderHighResMenuLabelKey()), null);
+		renderHiResAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK));
+		renderHiResAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_R);
+		renderHiResAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				renderAnimation(1);
+			}
+		});
+		
+		// Render low-res
+		renderLowResAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getRenderStandardResMenuLabelKey()), null);
+		renderLowResAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				renderAnimation(0);
+			}
+		});
+		
+		// Debug key frames
+		debugKeyFramesAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getKeyValuesMenuLabelKey()), null);
+		debugKeyFramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
+		debugKeyFramesAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_K);
+		debugKeyFramesAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				DebugWriter.dumpKeyFrameValues("keyFrames.txt", animation);
+			}
+		});
+		
+		// Debug parameter values
+		debugParameterValuesAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getParameterValuesMenuLabelKey()), null);
+		debugParameterValuesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.CTRL_MASK));
+		debugParameterValuesAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
+		debugParameterValuesAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				DebugWriter.dumpParameterValues("parameterValues.txt", 
+												animation.getAllParameters(), 
+												animation.getFrameOfFirstKeyFrame(), 
+												animation.getFrameOfLastKeyFrame(), 
+												new AnimationContextImpl(animation));
+			}
+		});
 	}
 	
 	/**
@@ -752,7 +893,6 @@ public class Animator
 		frame.setJMenuBar(menuBar);
 
 		JMenu menu;
-		JMenuItem menuItem;
 
 		// File menu
 		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getFileMenuLabelKey()));
@@ -784,164 +924,25 @@ public class Animator
 
 		// Animation menu
 		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getAnimationMenuLabelKey()));
-		menu.setMnemonic('A');
+		menu.setMnemonic(KeyEvent.VK_A);
 		menuBar.add(menu);
-
-		// Use scaled zoom
-		useScaledZoomCheck = new JCheckBoxMenuItem(messageSource.getMessage(AnimationMessageConstants.getUseZoomScalingMenuLabelKey()));
-		useScaledZoomCheck.setSelected(animation.isZoomScalingRequired());
-		menu.add(useScaledZoomCheck);
-		useScaledZoomCheck.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				animation.setZoomScalingRequired(useScaledZoomCheck.isSelected());
-			}
-		});
-
-		// Scale animation
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getScaleAnimationMenuLabelKey()));
-		menuItem.setMnemonic('S');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				double scale = -1.0;
-				Object value = JOptionPane.showInputDialog(frame, 
-														   messageSource.getMessage(AnimationMessageConstants.getScaleAnimationMessageKey()),
-														   messageSource.getMessage(AnimationMessageConstants.getScaleAnimationCaptionKey()),
-														   JOptionPane.QUESTION_MESSAGE,
-														   null,
-														   null,
-														   1.0);
-				try
-				{
-					scale = Double.parseDouble((String) value);
-				}
-				catch (Exception ex)
-				{
-					ExceptionLogger.logException(ex);
-				}
-				if (scale != 1.0 && scale > 0)
-				{
-					animation.scale(scale);
-				}
-				updateSlider();
-			}
-		});
-
-		// Smooth eye speed
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getSmoothEyeSpeedMenuLabelKey()));
-		menuItem.setMnemonic('m');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				if (JOptionPane.showConfirmDialog(frame,
-												  messageSource.getMessage(AnimationMessageConstants.getQuerySmoothEyeSpeedMessageKey()),
-												  messageSource.getMessage(AnimationMessageConstants.getQuerySmoothEyeSpeedCaptionKey()), 
-												  JOptionPane.YES_NO_OPTION, 
-												  JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
-				{
-					animation.getCamera().smoothEyeSpeed(createAnimationContext());
-					updateSlider();
-				}
-			}
-		});
-
+		useScaledZoomAction.addToMenu(menu);
+		menu.add(scaleAnimationAction);
+		menu.add(smoothEyeSpeedAction);
 		menu.addSeparator();
-
-		// Preview
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getPreviewMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
-		menuItem.setMnemonic('P');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				preview(1);
-			}
-		});
-
-		// Preview x2
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getPreviewX2MenuLabelKey()));
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				preview(2);
-			}
-		});
-
-		// Preview x10
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getPreviewX10MenuLabelKey()));
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				preview(10);
-			}
-		});
-
-		// Render hi-res
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getRenderHighResMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke('R', ActionEvent.CTRL_MASK));
-		menuItem.setMnemonic('R');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				renderAnimation(1);
-			}
-		});
-
-		// Render standard-res
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getRenderStandardResMenuLabelKey()));
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				renderAnimation(0);
-			}
-		});
+		menu.add(previewAction);
+		menu.add(previewX2Action);
+		menu.add(previewX10Action);
+		menu.addSeparator();
+		menu.add(renderHiResAction);
+		menu.add(renderLowResAction);
 		
 		// Debug
 		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getDebugMenuLabelKey()));
-		menu.setMnemonic('D');
+		menu.setMnemonic(KeyEvent.VK_D);
 		menuBar.add(menu);
-		
-		// Output key frame values
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getKeyValuesMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
-		menu.setMnemonic('k');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				DebugWriter.dumpKeyFrameValues("keyFrames.txt", animation);
-			}
-		});
-		
-		// Output parameter values
-		menuItem = new JMenuItem(messageSource.getMessage(AnimationMessageConstants.getParameterValuesMenuLabelKey()));
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.CTRL_MASK));
-		menu.setMnemonic('k');
-		menu.add(menuItem);
-		menuItem.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				DebugWriter.dumpParameterValues("parameterValues.txt", animation.getAllParameters(), animation.getFrameOfFirstKeyFrame(), animation.getFrameOfLastKeyFrame(), new AnimationContextImpl(animation));
-			}
-		});
+		menu.add(debugKeyFramesAction);
+		menu.add(debugParameterValuesAction);
 	}
 
 	/**
@@ -996,12 +997,17 @@ public class Animator
 		}
 	}
 
+	/**
+	 * Set the current animation on the application
+	 * 
+	 * @param animation The current animation
+	 */
 	private void setAnimation(Animation animation)
 	{
 		this.animation = animation;
-		if (useScaledZoomCheck != null)
+		if (useScaledZoomAction != null)
 		{
-			useScaledZoomCheck.setSelected(animation.isZoomScalingRequired());
+			useScaledZoomAction.setSelected(animation.isZoomScalingRequired());
 		}
 	}
 
