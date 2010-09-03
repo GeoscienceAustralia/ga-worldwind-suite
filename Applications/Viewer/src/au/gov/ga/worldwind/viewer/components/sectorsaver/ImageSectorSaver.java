@@ -312,7 +312,7 @@ public class ImageSectorSaver
 		JPanel buttonsPanel = new JPanel(new FlowLayout());
 		panel.add(buttonsPanel, BorderLayout.CENTER);
 
-		okButton = new JButton("OK");
+		okButton = new JButton("Save");
 		buttonsPanel.add(okButton);
 		okButton.addActionListener(new ActionListener()
 		{

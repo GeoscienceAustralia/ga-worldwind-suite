@@ -6,95 +6,55 @@ All Rights Reserved.
 */
 package nasa.worldwind.awt;
 
-import gov.nasa.worldwind.Configuration;
-import gov.nasa.worldwind.Model;
-import gov.nasa.worldwind.SceneController;
-import gov.nasa.worldwind.View;
-import gov.nasa.worldwind.WorldWind;
-import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.WorldWindowGLDrawable;
-import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.cache.BasicTextureCache;
-import gov.nasa.worldwind.cache.TextureCache;
-import gov.nasa.worldwind.event.InputHandler;
-import gov.nasa.worldwind.event.NoOpInputHandler;
-import gov.nasa.worldwind.event.PositionListener;
-import gov.nasa.worldwind.event.RenderingExceptionListener;
-import gov.nasa.worldwind.event.RenderingListener;
-import gov.nasa.worldwind.event.SelectListener;
+import gov.nasa.worldwind.*;
+import gov.nasa.worldwind.avlist.*;
+import gov.nasa.worldwind.cache.*;
+import gov.nasa.worldwind.event.*;
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.pick.PickedObjectList;
-import gov.nasa.worldwind.util.Logging;
-import gov.nasa.worldwind.util.PerformanceStatistic;
+import gov.nasa.worldwind.util.*;
 
-import java.awt.GraphicsDevice;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-
-import javax.media.opengl.GLCanvas;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLCapabilitiesChooser;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.*;
+import java.awt.*;
+import java.beans.*;
+import java.util.*;
 
 /**
  * <code>WorldWindowGLCanvas</code> is a heavyweight AWT component for displaying World Wind {@link Model}s (globe and
  * layers). It's a self-contained component intended to serve as an application's world window. rendering.
  *
  * @author Tom Gaskins
- * @version $Id: WorldWindowGLCanvas.java 9428 2009-03-17 07:05:09Z tgaskins $
+ * @version $Id: WorldWindowGLCanvas.java 11421 2009-06-03 13:23:25Z tgaskins $
  */
 public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, PropertyChangeListener
 {
-	public static final GLCapabilities defaultCaps = new GLCapabilities();
-	public static final GLCapabilities stereoCaps = new GLCapabilities();
+    public static final GLCapabilities defaultCaps = new GLCapabilities();
+    public static final GLCapabilities stereoCaps = new GLCapabilities();
 
-	static
-	{
-		defaultCaps.setAlphaBits(8);
-		defaultCaps.setRedBits(8);
-		defaultCaps.setGreenBits(8);
-		defaultCaps.setBlueBits(8);
-		defaultCaps.setDepthBits(24);
-		stereoCaps.setAlphaBits(8);
-		stereoCaps.setRedBits(8);
-		stereoCaps.setGreenBits(8);
-		stereoCaps.setBlueBits(8);
-		stereoCaps.setDepthBits(24);
-		stereoCaps.setStereo(true);
-	}
-	
-	public WorldWindowStereoGLCanvas(GLCapabilities caps)
+    static
     {
-        super(caps);
-        try
-        {
-            this.wwd = ((WorldWindowGLDrawable) WorldWind.createConfigurationComponent(AVKey.WORLD_WINDOW_CLASS_NAME));
-            this.wwd.initDrawable(this);
-            this.wwd.initTextureCache(createTextureCache());
-            this.createView();
-            this.createDefaultInputHandler();
-            WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
-            this.wwd.endInitalization();
-        }
-        catch (Exception e)
-        {
-            String message = Logging.getMessage("Awt.WorldWindowGLSurface.UnabletoCreateWindow");
-            Logging.logger().severe(message);
-            throw new WWRuntimeException(message, e);
-        }
+    	defaultCaps.setAlphaBits(8);
+    	defaultCaps.setRedBits(8);
+    	defaultCaps.setGreenBits(8);
+    	defaultCaps.setBlueBits(8);
+    	defaultCaps.setDepthBits(24);
+        stereoCaps.setAlphaBits(8);
+        stereoCaps.setRedBits(8);
+        stereoCaps.setGreenBits(8);
+        stereoCaps.setBlueBits(8);
+        stereoCaps.setDepthBits(24);
+        stereoCaps.setStereo(true);
     }
 
     private final WorldWindowGLDrawable wwd; // WorldWindow interface delegates to wwd
 
-    /** Constructs a new <code>WorldWindowGLCanvas</code> window on the default graphics device. */
-    public WorldWindowStereoGLCanvas()
+    /**
+     * Constructs a new <code>WorldWindowGLCanvas</code> window on the default graphics device.
+     */
+    public WorldWindowStereoGLCanvas(GLCapabilities caps)
     {
-        super(defaultCaps);
+        super(caps);
         try
         {
             this.wwd = ((WorldWindowGLDrawable) WorldWind.createConfigurationComponent(AVKey.WORLD_WINDOW_CLASS_NAME));
@@ -127,7 +87,6 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
      * be null
      *
      * @param shareWith a <code>WorldWindowGLCanvas</code> with which to share graphics resources.
-     *
      * @throws NullPointerException if shareWith is null.
      * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)
      */
@@ -159,7 +118,6 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
      *
      * @param shareWith a <code>WorldWindowGLCanvas</code> with which to share graphics resources.
      * @param device    the <code>GraphicsDevice</code> on which to create the window.
-     *
      * @throws NullPointerException     if <code>shareWith</code> is null.
      * @throws IllegalArgumentException if <code>deevice</code> is null.
      * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)

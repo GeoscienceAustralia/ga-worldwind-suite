@@ -5,9 +5,7 @@ import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingExceptionListener;
-import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
 import gov.nasa.worldwind.exception.WWAbsentRequirementException;
 import gov.nasa.worldwind.geom.Angle;
@@ -73,6 +71,7 @@ import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.HtmlViewer;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
+import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.common.util.URLTransformer;
@@ -120,7 +119,7 @@ public class Application
 		{
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
 			System.setProperty("com.apple.mrj.application.apple.menu.about.name",
-					"World Wind Application");
+					"World Wind Viewer");
 			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
 			System.setProperty("apple.awt.brushMetalLook", "true");
 		}
@@ -307,6 +306,8 @@ public class Application
 			wwd = new WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas.stereoCaps);
 		else
 			wwd = new WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas.defaultCaps);
+		splashScreen.addRenderingListener(wwd);
+		
 		Model model = new BasicModel();
 		model.setLayers(new ExtendedLayerList());
 		model.getGlobe().setElevationModel(new SectionListCompoundElevationModel());
@@ -330,20 +331,6 @@ public class Application
 					JOptionPane.showMessageDialog(frame, message, "Unable to Start Program",
 							JOptionPane.ERROR_MESSAGE);
 					System.exit(-1);
-				}
-			}
-		});
-
-		//hide splash screen when first frame is rendered
-		wwd.addRenderingListener(new RenderingListener()
-		{
-			@Override
-			public void stageChanged(RenderingEvent event)
-			{
-				if (event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)
-				{
-					splashScreen.dispose();
-					wwd.removeRenderingListener(this);
 				}
 			}
 		});
