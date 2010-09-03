@@ -19,6 +19,7 @@ import com.sun.opengl.util.texture.Texture;
 public class DelegatorTextureTile extends TextureTile
 {
 	protected final TileFactoryDelegate delegate;
+	protected TileKey transformedTileKey;
 
 	public DelegatorTextureTile(Sector sector, Level level, int row, int col,
 			TileFactoryDelegate delegate)
@@ -118,6 +119,28 @@ public class DelegatorTextureTile extends TextureTile
 		return subTiles;
 	}
 
+	protected TileKey getTransformedTileKey()
+	{
+		if (transformedTileKey == null)
+		{
+			transformedTileKey = delegate.transformTileKey(getTileKey());
+		}
+		return transformedTileKey;
+	}
+
+	@Override
+	public Texture getTexture(TextureCache tc)
+	{
+		if (tc == null)
+		{
+			String message = Logging.getMessage("nullValue.TextureCacheIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalStateException(message);
+		}
+
+		return tc.get(getTransformedTileKey());
+	}
+
 	@Override
 	public void setTexture(TextureCache tc, Texture texture)
 	{
@@ -128,7 +151,7 @@ public class DelegatorTextureTile extends TextureTile
 			throw new IllegalStateException(message);
 		}
 
-		tc.put(this.getTileKey(), texture);
+		tc.put(getTransformedTileKey(), texture);
 		this.updateTime = System.currentTimeMillis();
 
 		// No more need for texture data; allow garbage collector and memory cache to reclaim it.
@@ -146,9 +169,7 @@ public class DelegatorTextureTile extends TextureTile
 
 	private void updateMemoryCache()
 	{
-		TileKey tileKey = this.getTileKey();
-		tileKey = delegate.transformTileKey(tileKey);
-		if (getMemoryCache().getObject(tileKey) != null)
-			getMemoryCache().add(tileKey, this);
+		if (getMemoryCache().getObject(getTransformedTileKey()) != null)
+			getMemoryCache().add(getTransformedTileKey(), this);
 	}
 }
