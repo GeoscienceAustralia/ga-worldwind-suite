@@ -41,7 +41,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -84,6 +83,7 @@ import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
+import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.message.MessageSource;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.ResourceBundleMessageSource;
@@ -99,7 +99,6 @@ import au.gov.ga.worldwind.common.util.message.ResourceBundleMessageSource;
 public class Animator
 {
 	private static final GLCapabilities caps = new GLCapabilities();
-
 	static
 	{
 		caps.setAlphaBits(8);
@@ -110,10 +109,7 @@ public class Animator
 		caps.setSampleBuffers(true);
 		caps.setDoubleBuffered(true);
 		caps.setNumSamples(4);
-	}
-
-	static
-	{
+	
 		if (Configuration.isMacOS())
 		{
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
@@ -233,6 +229,8 @@ public class Animator
 		
 		initialiseApplicationWindow();
 		
+		showSplashScreen();
+		
 		animation = new WorldWindAnimationImpl(wwd);
 		
 		updater = new Updater();
@@ -265,6 +263,15 @@ public class Animator
 		resetChanged();
 		
 		showApplicationWindow();
+	}
+
+	/**
+	 * Show a splash screen on load
+	 */
+	private void showSplashScreen()
+	{
+		SplashScreen splashScreen = new SplashScreen(frame);
+		splashScreen.addRenderingListener(wwd);
 	}
 
 	/**
