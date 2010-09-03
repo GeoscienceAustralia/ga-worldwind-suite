@@ -28,6 +28,10 @@ public class DelegatorTextureTile extends TextureTile
 		this.delegate = delegate;
 	}
 
+	/**
+	 * Utility function to null the texture data, ignoring the thrown
+	 * {@link NullPointerException}.
+	 */
 	private void nullTextureData()
 	{
 		try
@@ -38,6 +42,21 @@ public class DelegatorTextureTile extends TextureTile
 		{
 			//ignore
 		}
+	}
+
+	/**
+	 * Get this tile's {@link TileKey}, transformed by the
+	 * {@link TileFactoryDelegate}.
+	 * 
+	 * @return {@link TileKey} transformed by {@link TileFactoryDelegate}
+	 */
+	protected TileKey getTransformedTileKey()
+	{
+		if (transformedTileKey == null)
+		{
+			transformedTileKey = delegate.transformTileKey(getTileKey());
+		}
+		return transformedTileKey;
 	}
 
 	/* ************************************************************************************
@@ -117,15 +136,6 @@ public class DelegatorTextureTile extends TextureTile
 		//subTiles[3] = new TextureTile(new Sector(p1, p2, t1, t2), nextLevel, 2 * row + 1, 2 * col + 1);
 
 		return subTiles;
-	}
-
-	protected TileKey getTransformedTileKey()
-	{
-		if (transformedTileKey == null)
-		{
-			transformedTileKey = delegate.transformTileKey(getTileKey());
-		}
-		return transformedTileKey;
 	}
 
 	@Override
