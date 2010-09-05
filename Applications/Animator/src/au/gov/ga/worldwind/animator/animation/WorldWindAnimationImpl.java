@@ -24,6 +24,7 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.util.ChangeableBase;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -34,7 +35,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class WorldWindAnimationImpl implements Animation
+public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 {
 	/** The default number of frames for an animation */
 	private static final int DEFAULT_FRAME_COUNT = 100;
@@ -62,11 +63,6 @@ public class WorldWindAnimationImpl implements Animation
 	
 	/** The worldwind window */
 	private WorldWindow worldWindow;
-	
-	/**
-	 * The list of registered change listeners
-	 */
-	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
 	
 	/**
 	 * Constructor. Initialises default values.
@@ -659,42 +655,13 @@ public class WorldWindAnimationImpl implements Animation
 	}
 	
 	@Override
-	public void addChangeListener(ChangeListener changeListener)
-	{
-		if (changeListener == null)
-		{
-			return;
-		}
-		this.changeListeners.add(changeListener);
-	}
-	
-	@Override
-	public void removeChangeListener(ChangeListener changeListener)
-	{
-		if (changeListener == null)
-		{
-			return;
-		}
-		this.changeListeners.remove(changeListener);
-	}
-	
-	@Override
-	public void notifyChange()
-	{
-		ChangeEvent event = new ChangeEvent(this);
-		for (ChangeListener listener : changeListeners)
-		{
-			listener.stateChanged(event);
-		}
-	}
-	
-	@Override
 	public void stateChanged(ChangeEvent e)
 	{
-		/// Propagate the change upwards
-		for (ChangeListener listener : changeListeners)
+		// Propagate the change upwards
+		List<ChangeListener> listeners = getChangeListeners();
+		for (int i = listeners.size() - 1; i >= 0; i--)
 		{
-			listener.stateChanged(e);
+			listeners.get(i).stateChanged(e);
 		}
 	}
 	

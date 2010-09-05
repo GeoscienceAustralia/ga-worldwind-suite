@@ -15,6 +15,7 @@ import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.util.ChangeableBase;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -24,7 +25,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class KeyFrameImpl implements KeyFrame
+public class KeyFrameImpl extends ChangeableBase implements KeyFrame
 {
 	private static final long serialVersionUID = 20100819L;
 
@@ -37,11 +38,6 @@ public class KeyFrameImpl implements KeyFrame
 	 * The frame of the animation this key frame corresponds to
 	 */
 	private int frame;
-	
-	/**
-	 * The list of registered change listeners
-	 */
-	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
 	
 	/**
 	 * Constructor.
@@ -176,42 +172,13 @@ public class KeyFrameImpl implements KeyFrame
 	}
 	
 	@Override
-	public void addChangeListener(ChangeListener changeListener)
-	{
-		if (changeListener == null)
-		{
-			return;
-		}
-		this.changeListeners.add(changeListener);
-	}
-	
-	@Override
-	public void removeChangeListener(ChangeListener changeListener)
-	{
-		if (changeListener == null)
-		{
-			return;
-		}
-		this.changeListeners.remove(changeListener);
-	}
-	
-	@Override
-	public void notifyChange()
-	{
-		ChangeEvent event = new ChangeEvent(this);
-		for (ChangeListener listener : changeListeners)
-		{
-			listener.stateChanged(event);
-		}
-	}
-	
-	@Override
 	public void stateChanged(ChangeEvent e)
 	{
-		/// Propagate the change upwards
-		for (ChangeListener listener : changeListeners)
+		// Propagate the change upwards
+		List<ChangeListener> listeners = getChangeListeners();
+		for (int i = listeners.size() - 1; i >= 0; i--)
 		{
-			listener.stateChanged(e);
+			listeners.get(i).stateChanged(e);
 		}
 	}
 	

@@ -3,12 +3,6 @@
  */
 package au.gov.ga.worldwind.animator.animation.parameter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -16,6 +10,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
+import au.gov.ga.worldwind.animator.util.ChangeableBase;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -23,7 +18,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public class BasicParameterValue implements ParameterValue
+public class BasicParameterValue extends ChangeableBase implements ParameterValue
 {
 	private static final long serialVersionUID = 20100823L;
 
@@ -35,11 +30,6 @@ public class BasicParameterValue implements ParameterValue
 	
 	/** The frame this {@link ParameterValue} is associated with */
 	private int frame;
-	
-	/**
-	 * The list of registered change listeners
-	 */
-	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
 	
 	/**
 	 * Constructor. 
@@ -167,36 +157,6 @@ public class BasicParameterValue implements ParameterValue
 			{
 				return null;
 			}
-		}
-	}
-	
-	@Override
-	public void addChangeListener(ChangeListener changeListener)
-	{
-		if (changeListener == null)
-		{
-			return;
-		}
-		this.changeListeners.add(changeListener);
-	}
-	
-	@Override
-	public void removeChangeListener(ChangeListener changeListener)
-	{
-		if (changeListener == null)
-		{
-			return;
-		}
-		this.changeListeners.remove(changeListener);
-	}
-	
-	@Override
-	public void notifyChange()
-	{
-		ChangeEvent event = new ChangeEvent(this);
-		for (ChangeListener listener : changeListeners)
-		{
-			listener.stateChanged(event);
 		}
 	}
 	

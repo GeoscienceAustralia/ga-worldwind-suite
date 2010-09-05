@@ -6,7 +6,6 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.WWXML;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.event.ChangeEvent;
@@ -22,6 +21,7 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
+import au.gov.ga.worldwind.animator.util.ChangeableBase;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -33,7 +33,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public abstract class ParameterBase implements Parameter
+public abstract class ParameterBase extends ChangeableBase implements Parameter
 {
 	private static final long serialVersionUID = 20100819L;
 
@@ -51,11 +51,6 @@ public abstract class ParameterBase implements Parameter
 
 	/** The name of this parameter (can be used for display purposes) */
 	private String name;
-	
-	/**
-	 * The list of registered change listeners
-	 */
-	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
 	
 	/**
 	 * Constructor. Initialises the mandatory {@link Animation} parameter.
@@ -257,42 +252,13 @@ public abstract class ParameterBase implements Parameter
 	protected abstract ParameterBase createParameter();
 	
 	@Override
-	public void addChangeListener(ChangeListener changeListener)
-	{
-		if (changeListener == null)
-		{
-			return;
-		}
-		this.changeListeners.add(changeListener);
-	}
-	
-	@Override
-	public void removeChangeListener(ChangeListener changeListener)
-	{
-		if (changeListener == null)
-		{
-			return;
-		}
-		this.changeListeners.remove(changeListener);
-	}
-	
-	@Override
-	public void notifyChange()
-	{
-		ChangeEvent event = new ChangeEvent(this);
-		for (ChangeListener listener : changeListeners)
-		{
-			listener.stateChanged(event);
-		}
-	}
-	
-	@Override
 	public void stateChanged(ChangeEvent e)
 	{
-		/// Propagate the change upwards
-		for (ChangeListener listener : changeListeners)
+		// Propagate the change upwards
+		List<ChangeListener> listeners = getChangeListeners();
+		for (int i = listeners.size() - 1; i >= 0; i--)
 		{
-			listener.stateChanged(e);
+			listeners.get(i).stateChanged(e);
 		}
 	}
 }
