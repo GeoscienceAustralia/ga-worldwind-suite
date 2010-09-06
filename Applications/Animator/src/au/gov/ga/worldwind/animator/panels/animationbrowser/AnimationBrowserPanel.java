@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.panels;
+package au.gov.ga.worldwind.animator.panels.animationbrowser;
 
 import java.awt.BorderLayout;
 
@@ -13,6 +13,7 @@ import javax.swing.tree.TreeSelectionModel;
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -23,7 +24,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class AnimatableObjectsPanel extends CollapsiblePanelBase
+public class AnimationBrowserPanel extends CollapsiblePanelBase
 {
 	private static final long serialVersionUID = 20100907L;
 
@@ -49,7 +50,7 @@ public class AnimatableObjectsPanel extends CollapsiblePanelBase
 	 * 
 	 * @param animation The animation this panel is viewing (Mandatory)
 	 */
-	public AnimatableObjectsPanel(Animation animation)
+	public AnimationBrowserPanel(Animation animation)
 	{
 		Validate.notNull(animation, "An animation is required");
 		this.animation = animation;

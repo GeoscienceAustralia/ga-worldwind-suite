@@ -79,9 +79,9 @@ import au.gov.ga.worldwind.animator.layers.immediate.ImmediateRetrievalService;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateTaskService;
 import au.gov.ga.worldwind.animator.layers.other.ImmediateBMNGWMSLayer;
 import au.gov.ga.worldwind.animator.layers.other.ImmediateLandsatI3WMSLayer;
-import au.gov.ga.worldwind.animator.panels.AnimatableObjectsPanel;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.animator.panels.SideBar;
+import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPanel;
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
@@ -271,7 +271,7 @@ public class Animator
 	private void initialiseSideBar()
 	{
 		List<CollapsiblePanel> collapsiblePanels = new ArrayList<CollapsiblePanel>();
-		collapsiblePanels.add(new AnimatableObjectsPanel(animation));
+		collapsiblePanels.add(new AnimationBrowserPanel(animation));
 		
 		sideBar = new SideBar(splitPane, collapsiblePanels);
 		splitPane.setLeftComponent(sideBar);
