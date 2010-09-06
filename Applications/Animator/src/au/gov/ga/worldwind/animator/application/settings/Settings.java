@@ -83,6 +83,10 @@ public class Settings
 				WWXML.setTextAttribute(recentFileElement, "path", recentFiles.get(i).getAbsolutePath());
 			}
 		
+			// Store split location
+			Element splitLocationElement = WWXML.appendElement(rootElement, "splitLocation");
+			WWXML.setIntegerAttribute(splitLocationElement, "value", instance.getSplitLocation());
+			
 			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(getUserDirectory(), SETTINGS_FILE_NAME)));
 		}
 		catch (Exception e)
@@ -126,6 +130,13 @@ public class Settings
 			}
 		}
 		
+		// Load the split location
+		Integer splitLocation = WWXML.getInteger(rootElement, "//splitLocation/@value", null);
+		if (splitLocation != null)
+		{
+			instance.setSplitLocation(splitLocation);
+		}
+		
 	}
 	
 	/**
@@ -155,6 +166,9 @@ public class Settings
 	
 	/** The list of recently used files */
 	private List<File> recentFiles = new ArrayList<File>(MAX_NUMBER_RECENT_FILES);
+	
+	/** The location of the split in the split pane */
+	private int splitLocation = 300;
 	
 	/**
 	 * Private constructor. Use the Singleton accessor {@link #get()}.
@@ -214,5 +228,21 @@ public class Settings
 		}
 		
 		recentFiles.add(0, recentFile);
+	}
+
+	/**
+	 * @return the splitLocation
+	 */
+	public int getSplitLocation()
+	{
+		return splitLocation;
+	}
+
+	/**
+	 * @param splitLocation the splitLocation to set
+	 */
+	public void setSplitLocation(int splitLocation)
+	{
+		this.splitLocation = splitLocation;
 	}
 }

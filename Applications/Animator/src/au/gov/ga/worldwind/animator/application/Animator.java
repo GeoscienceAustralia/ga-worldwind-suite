@@ -44,6 +44,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
@@ -86,6 +87,7 @@ import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
+import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
 import au.gov.ga.worldwind.common.util.message.MessageSource;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.ResourceBundleMessageSource;
@@ -143,6 +145,18 @@ public class Animator
 	/** The primary application window */
 	private JFrame frame;
 
+	/** The split pane that contains the actual components */
+	private JSplitPane splitPane;
+	
+	/** The main panel that contains the 3D view */
+	private JPanel mainPanel;
+	
+	/** The side bar panel */
+	private CollapsibleSplitPane sidePanel;
+	
+	/** The bottom panel. Holds the status bar. */
+	private JPanel bottomPanel;
+	
 	/** The primary world wind canvas */
 	private WorldWindowGLCanvas wwd;
 	
@@ -230,28 +244,23 @@ public class Animator
 
 		initialiseConfiguration();
 
-		initialiseWorldWindow();
-		
 		initialiseApplicationWindow();
+		
+		initialiseWorldWindow();
 		
 		showSplashScreen();
 		
-		animation = new WorldWindAnimationImpl(wwd);
-		
-		updater = new Updater();
-
-		setAnimationSize(animation.getRenderParameters().getImageDimension());
+		initialiseAnimation();
 
 		initialiseElevationModels();
 		
 		initialiseLayers();
 
-		JPanel bottom = new JPanel(new BorderLayout());
-		frame.add(bottom, BorderLayout.SOUTH);
+		initialiseSideBar();
+		
+		initialiseFrameSlider();
 
-		initialiseFrameSlider(bottom);
-
-		createStatusBar(bottom);
+		createStatusBar();
 
 		initialiseActions();
 		
@@ -268,6 +277,24 @@ public class Animator
 		resetChanged();
 		
 		showApplicationWindow();
+	}
+
+	/**
+	 * 
+	 */
+	private void initialiseSideBar()
+	{
+		// TODO Implement me!
+	}
+
+	/**
+	 * Initialise the animation
+	 */
+	private void initialiseAnimation()
+	{
+		animation = new WorldWindAnimationImpl(wwd);
+		updater = new Updater();
+		setAnimationSize(animation.getRenderParameters().getImageDimension());
 	}
 
 	/**
@@ -316,6 +343,11 @@ public class Animator
 		cem.addElevationModel(eem);
 	}
 
+	/**
+	 * Packs the main frame and makes it visible.
+	 * <p/>
+	 * Executes on the EDT.
+	 */
 	private void showApplicationWindow()
 	{
 		try
@@ -338,16 +370,15 @@ public class Animator
 	}
 
 	/**
-	 * Create a status bar and put it in the provided container panel.
-	 * 
-	 * @param container The container panel to add the status bar to
+	 * Create a status bar and put it in bottom panel
 	 */
-	private void createStatusBar(JPanel container)
+	private void createStatusBar()
 	{
 		StatusBar statusBar = new StatusBar();
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
-		container.add(statusBar, BorderLayout.SOUTH);
 		statusBar.setEventSource(wwd);
+		
+		bottomPanel.add(statusBar, BorderLayout.SOUTH);
 	}
 
 	/**
@@ -378,18 +409,19 @@ public class Animator
 		wwd.setModel(model);
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
 		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(Angle.ZERO, Angle.POS180);
+		wwd.setMinimumSize(new Dimension(1, 1));
+		
+		mainPanel.add(wwd, BorderLayout.CENTER);
 	}
 
 	/**
-	 * Initialise the frame slider and add it to the provided container panel.
-	 * 
-	 * @param container The container panel to add the frame slider to
+	 * Initialise the frame slider and add it to the content panel
 	 */
-	private void initialiseFrameSlider(JPanel container)
+	private void initialiseFrameSlider()
 	{
 		slider = new FrameSlider(0, 0, animation.getFrameCount());
-		slider.setMinimumSize(new Dimension(0, 54));
-		container.add(slider, BorderLayout.CENTER);
+		slider.setMinimumSize(new Dimension(0, 54)); //TODO: Is 54 special?
+		mainPanel.add(slider, BorderLayout.SOUTH);
 		
 		slider.addChangeListener(new ChangeListener()
 		{
@@ -429,6 +461,7 @@ public class Animator
 	 */
 	private void initialiseApplicationWindow()
 	{
+		// Setup the application frame
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter()
@@ -441,7 +474,26 @@ public class Animator
 		});
 		frame.setLayout(new BorderLayout());
 		
-		frame.add(wwd, BorderLayout.CENTER);
+		JPanel panel = new JPanel(new BorderLayout());
+		frame.setContentPane(panel);
+		
+		// Setup the split pane
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
+		splitPane.setOneTouchExpandable(true);
+		splitPane.setDividerLocation(Settings.get().getSplitLocation());
+		panel.add(splitPane, BorderLayout.CENTER);
+		
+		// Add the main panel for the 3D view and frame slider
+		mainPanel = new JPanel(new BorderLayout());
+		splitPane.setRightComponent(mainPanel);
+		
+		// Add the sidebar panel
+		sidePanel = new CollapsibleSplitPane();
+		splitPane.setLeftComponent(sidePanel);
+		
+		// Add the bottom panel for the status bar
+		bottomPanel = new JPanel(new BorderLayout());
+		frame.add(bottomPanel, BorderLayout.SOUTH);
 		
 		//ensure menu bar and popups appear over the heavyweight WW canvas
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
