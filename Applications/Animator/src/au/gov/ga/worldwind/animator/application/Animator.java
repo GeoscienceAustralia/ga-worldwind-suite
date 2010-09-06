@@ -79,6 +79,9 @@ import au.gov.ga.worldwind.animator.layers.immediate.ImmediateRetrievalService;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateTaskService;
 import au.gov.ga.worldwind.animator.layers.other.ImmediateBMNGWMSLayer;
 import au.gov.ga.worldwind.animator.layers.other.ImmediateLandsatI3WMSLayer;
+import au.gov.ga.worldwind.animator.panels.AnimatableObjectsPanel;
+import au.gov.ga.worldwind.animator.panels.CollapsiblePanel;
+import au.gov.ga.worldwind.animator.panels.SideBar;
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
@@ -154,7 +157,7 @@ public class Animator
 	private JPanel mainPanel;
 	
 	/** The side bar panel */
-	private CollapsibleSplitPane sidePanel;
+	private SideBar sideBar;
 	
 	/** The bottom panel. Holds the status bar. */
 	private JPanel bottomPanel;
@@ -267,9 +270,11 @@ public class Animator
 	 */
 	private void initialiseSideBar()
 	{
-		List<JPanel> collapsiblePanels = new ArrayList<JPanel>();
+		List<CollapsiblePanel> collapsiblePanels = new ArrayList<CollapsiblePanel>();
+		collapsiblePanels.add(new AnimatableObjectsPanel(animation));
 		
-		
+		sideBar = new SideBar(splitPane, collapsiblePanels);
+		splitPane.setLeftComponent(sideBar);
 	}
 
 	/**
@@ -471,10 +476,6 @@ public class Animator
 		// Add the main panel for the 3D view and frame slider
 		mainPanel = new JPanel(new BorderLayout());
 		splitPane.setRightComponent(mainPanel);
-		
-		// Add the sidebar panel
-		sidePanel = new CollapsibleSplitPane();
-		splitPane.setLeftComponent(sidePanel);
 		
 		// Add the bottom panel for the status bar
 		bottomPanel = new JPanel(new BorderLayout());

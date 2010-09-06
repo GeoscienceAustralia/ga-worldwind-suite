@@ -8,7 +8,6 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitConstraints;
-import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitLayout;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.l2fprod.CollapsibleGroup;
 
@@ -56,6 +55,17 @@ public class SideBar extends JPanel
 		containerPane = new CollapsibleSplitPane();
 		containerPane.getLayout().setVertical(true);
 
+		addPanels(panels);
+
+		add(containerPane, BorderLayout.CENTER);
+		refreshVisibility();
+	}
+
+	/**
+	 * Add the provided panels to the collapsible pane
+	 */
+	private void addPanels(List<CollapsiblePanel> panels)
+	{
 		for (CollapsiblePanel panel : panels)
 		{
 			CollapsibleGroup group = new CollapsibleGroup();
@@ -75,9 +85,6 @@ public class SideBar extends JPanel
 			containerPane.add(group, c);
 			groups.add(group);
 		}
-
-		add(containerPane, BorderLayout.CENTER);
-		refreshVisibility();
 	}
 
 	/**

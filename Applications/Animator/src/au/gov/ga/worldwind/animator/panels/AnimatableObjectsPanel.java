@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.animator.panels;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -53,7 +55,7 @@ public class AnimatableObjectsPanel extends CollapsiblePanelBase
 		this.animation = animation;
 		
 		initialiseObjectTree();
-		
+		updateTree();
 		packTreeIntoPanel();
 	}
 
@@ -65,7 +67,7 @@ public class AnimatableObjectsPanel extends CollapsiblePanelBase
 		scrollPane = new JScrollPane();
 		scrollPane.add(objectTree);
 		
-		add(scrollPane);
+		add(scrollPane, BorderLayout.CENTER);
 	}
 
 	/**
@@ -80,6 +82,16 @@ public class AnimatableObjectsPanel extends CollapsiblePanelBase
 		objectTree = new NameableTree(treeModel);
 		objectTree.setEditable(true);
 		objectTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+	}
+	
+	/**
+	 * Update the tree to display the {@link Animatable} objects and {@link Parameter}s of the
+	 * current animation.
+	 */
+	public void updateTree()
+	{
+		DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)treeModel.getRoot();
+		
 	}
 	
 	/**
