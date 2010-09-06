@@ -392,6 +392,12 @@ public class LayerEnabler
 		public void setLoaded(LoadedLayer loaded)
 		{
 			this.loaded = loaded;
+
+			//ensure the loaded layer/elevationModel has the same name as the tree node
+			if (hasLayer())
+				getLayer().setName(node.getName());
+			else if (hasElevationModel())
+				getElevationModel().setName(node.getName());
 		}
 
 		public void updateExpiryTime()

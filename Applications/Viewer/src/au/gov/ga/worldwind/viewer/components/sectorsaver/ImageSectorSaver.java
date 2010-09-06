@@ -446,20 +446,38 @@ public class ImageSectorSaver
 	{
 		//create a local copy of the list of layers, so that it doesn't change
 		final List<Layer> layers = new ArrayList<Layer>();
-		layers.addAll(wwd.getModel().getLayers());
+		for (Layer layer : wwd.getModel().getLayers())
+		{
+			if (layer.isEnabled() && layer instanceof TiledImageLayer)
+				layers.add(layer);
+		}
 
-		final JDialog dialog = new JDialog(frame, "Saving image...", false);
+		final JDialog dialog = new JDialog(frame, "Please wait...", false);
 		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		dialog.setLayout(new BorderLayout());
 
-		final JProgressBar progressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
+		JPanel panel = new JPanel(new GridBagLayout());
+		dialog.add(panel, BorderLayout.NORTH);
+
+		final JLabel label = new JLabel("Generating layer list");
+		GridBagConstraints c = new GridBagConstraints();
+		c.insets = new Insets(5, 0, 5, 0);
+		c.anchor = GridBagConstraints.CENTER;
+		c.weightx = 1;
+		panel.add(label, c);
+
+		final JProgressBar progressBar =
+				new JProgressBar(JProgressBar.HORIZONTAL, 0, layers.size());
 		dialog.add(progressBar, BorderLayout.CENTER);
 
 		dialog.pack();
+		Dimension dim = dialog.getSize();
+		dim.width = 300;
+		dialog.setSize(dim);
 		dialog.setLocationRelativeTo(frame);
 		dialog.setVisible(true);
 
-		Thread thread = new Thread(new Runnable()
+		/*Thread thread = new Thread(new Runnable()
 		{
 			@Override
 			public void run()
@@ -478,17 +496,17 @@ public class ImageSectorSaver
 			}
 		});
 		thread.setDaemon(true);
-		thread.start();
+		thread.start();*/
 
-		thread = new Thread(new Runnable()
+		Thread thread = new Thread(new Runnable()
 		{
-
 			@Override
 			public void run()
 			{
 				try
 				{
-					saveSector(frame, layers, sector, size, output.getAbsoluteFile());
+					saveSector(frame, layers, sector, size, output.getAbsoluteFile(), label,
+							progressBar);
 				}
 				catch (Exception e)
 				{
@@ -504,7 +522,7 @@ public class ImageSectorSaver
 	}
 
 	private void saveSector(Frame frame, List<Layer> layers, Sector sector, Dimension size,
-			File output) throws Exception
+			File output, JLabel label, JProgressBar progressBar) throws Exception
 	{
 		double texelSize = Math.abs(sector.getDeltaLonRadians()) / (double) size.width;
 
@@ -513,6 +531,8 @@ public class ImageSectorSaver
 
 		for (Layer l : layers)
 		{
+			label.setText("Saving layer: " + l.getName());
+
 			if (l.isEnabled() && l instanceof TiledImageLayer)
 			{
 				TiledImageLayer layer = (TiledImageLayer) l;
@@ -538,6 +558,8 @@ public class ImageSectorSaver
 									+ e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 				}
 			}
+
+			progressBar.setValue(progressBar.getValue() + 1);
 		}
 
 		AVList params = new AVListImpl();
