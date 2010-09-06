@@ -61,7 +61,7 @@ import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * @author tag
- * @version $Id: TiledImageLayer.java 13363 2010-05-03 19:36:53Z dcollins $
+ * @version $Id: TiledImageLayer.java 13693 2010-09-02 17:49:06Z dcollins $
  */
 public abstract class TiledImageLayer extends AbstractLayer
 {
@@ -74,10 +74,10 @@ public abstract class TiledImageLayer extends AbstractLayer
     private boolean retainLevelZeroTiles = false;
     private String tileCountName;
     private double splitScale = 0.9;
-    private boolean compressTextures = false;
     private boolean useMipMaps = true;
     private boolean useTransparentTextures = false;
     private ArrayList<String> supportedImageFormats = new ArrayList<String>();
+    private String textureFormat;
 
     // Diagnostic flags
     private boolean showImageTileOutlines = false;
@@ -246,28 +246,27 @@ public abstract class TiledImageLayer extends AbstractLayer
     }
 
     /**
-     * Returns true if image texture tiles are compressed before rendering, and false otherwise.
+     * Returns the format used to store images in texture memory, or null if images are stored in their native format.
      *
-     * @return true if this compresses texture tiles before rendering; false if this creates textures from the tile
-     *         source without compression.
+     * @return the texture image format; null if images are stored in their native format.
+     *
+     * @see {@link #setTextureFormat(String)}
      */
-    public boolean isCompressTextures()
+    public String getTextureFormat()
     {
-        return this.compressTextures;
+        return this.textureFormat;
     }
 
     /**
-     * Specifies if texture tiles should be compressed before rendering. If true, this compresses tile textures in a
-     * non-rendering thread, without modifying the original tile source. Otherwise, this creates textures from the tile
-     * sources without compression. This has no effect on tile sources which are alread in a compressed texture format,
-     * such as DDS.
+     * Specifies the format used to store images in texture memory, or null to store images in their native format.
+     * Suppported texture formats are as follows: <ul> <li><code>image/dds</code> - Stores images in the compressed DDS
+     * format. If the image is already in DDS format it's stored as-is.</li> </ul>
      *
-     * @param compressTextures true to compress texture tiles before rendering; false to create textures directly from
-     *                         the tile sources.
+     * @param textureFormat the texture image format; null to store images in their native format.
      */
-    public void setCompressTextures(boolean compressTextures)
+    public void setTextureFormat(String textureFormat)
     {
-        this.compressTextures = compressTextures;
+        this.textureFormat = textureFormat;
     }
 
     public boolean isUseMipMaps()
@@ -871,7 +870,7 @@ public abstract class TiledImageLayer extends AbstractLayer
      * AVKey#AVAILABLE_IMAGE_FORMATS}</td><td>AvailableImageFormats/ImageFormat</td><td>String array</td></tr>
      * <tr><td>{@link AVKey#FORCE_LEVEL_ZERO_LOADS}</td><td>ForceLevelZeroLoads</td><td>Boolean</td></tr> <tr><td>{@link
      * AVKey#RETAIN_LEVEL_ZERO_TILES}</td><td>RetainLevelZeroTiles</td><td>Boolean</td></tr> <tr><td>{@link
-     * AVKey#COMPRESS_TEXTURES}</td><td>CompressTextures</td><td>Boolean</td></tr> <tr><td>{@link
+     * AVKey#TEXTURE_FORMAT}</td><td>TextureFormat</td><td>String</td></tr> <tr><td>{@link
      * AVKey#USE_MIP_MAPS}</td><td>UseMipMaps</td><td>Boolean</td></tr> <tr><td>{@link
      * AVKey#USE_TRANSPARENT_TEXTURES}</td><td>UseTransparentTextures</td><td>Boolean</td></tr> <tr><td>{@link
      * AVKey#URL_CONNECT_TIMEOUT}</td><td>RetrievalTimeouts/ConnectTimeout/Time</td><td>Integer milliseconds</td></tr>
@@ -930,6 +929,7 @@ public abstract class TiledImageLayer extends AbstractLayer
 
         // Image format properties.
         WWXML.checkAndAppendTextElement(params, AVKey.IMAGE_FORMAT, context, "ImageFormat");
+        WWXML.checkAndAppendTextElement(params, AVKey.TEXTURE_FORMAT, context, "TextureFormat");
 
         Object o = params.getValue(AVKey.AVAILABLE_IMAGE_FORMATS);
         if (o != null && o instanceof String[])
@@ -949,7 +949,6 @@ public abstract class TiledImageLayer extends AbstractLayer
         // Optional behavior properties.
         WWXML.checkAndAppendBooleanElement(params, AVKey.FORCE_LEVEL_ZERO_LOADS, context, "ForceLevelZeroLoads");
         WWXML.checkAndAppendBooleanElement(params, AVKey.RETAIN_LEVEL_ZERO_TILES, context, "RetainLevelZeroTiles");
-        WWXML.checkAndAppendBooleanElement(params, AVKey.COMPRESS_TEXTURES, context, "CompressTextures");
         WWXML.checkAndAppendBooleanElement(params, AVKey.USE_MIP_MAPS, context, "UseMipMaps");
         WWXML.checkAndAppendBooleanElement(params, AVKey.USE_TRANSPARENT_TEXTURES, context, "UseTransparentTextures");
         WWXML.checkAndAppendDoubleElement(params, AVKey.SPLIT_SCALE, context, "SplitScale");
@@ -981,7 +980,7 @@ public abstract class TiledImageLayer extends AbstractLayer
      * AVKey#AVAILABLE_IMAGE_FORMATS}</td><td>AvailableImageFormats/ImageFormat</td><td>String array</td></tr>
      * <tr><td>{@link AVKey#FORCE_LEVEL_ZERO_LOADS}</td><td>ForceLevelZeroLoads</td><td>Boolean</td></tr> <tr><td>{@link
      * AVKey#RETAIN_LEVEL_ZERO_TILES}</td><td>RetainLevelZeroTiles</td><td>Boolean</td></tr> <tr><td>{@link
-     * AVKey#COMPRESS_TEXTURES}</td><td>CompressTextures</td><td>Boolean</td></tr> <tr><td>{@link
+     * AVKey#TEXTURE_FORMAT}</td><td>TextureFormat</td><td>Boolean</td></tr> <tr><td>{@link
      * AVKey#USE_MIP_MAPS}</td><td>UseMipMaps</td><td>Boolean</td></tr> <tr><td>{@link
      * AVKey#USE_TRANSPARENT_TEXTURES}</td><td>UseTransparentTextures</td><td>Boolean</td></tr> <tr><td>{@link
      * AVKey#URL_CONNECT_TIMEOUT}</td><td>RetrievalTimeouts/ConnectTimeout/Time</td><td>Integer milliseconds</td></tr>
@@ -1027,14 +1026,13 @@ public abstract class TiledImageLayer extends AbstractLayer
 
         // Image format properties.
         WWXML.checkAndSetStringParam(domElement, params, AVKey.IMAGE_FORMAT, "ImageFormat", xpath);
+        WWXML.checkAndSetStringParam(domElement, params, AVKey.TEXTURE_FORMAT, "TextureFormat", xpath);
         WWXML.checkAndSetUniqueStringsParam(domElement, params, AVKey.AVAILABLE_IMAGE_FORMATS,
             "AvailableImageFormats/ImageFormat", xpath);
 
         // Optional behavior properties.
         WWXML.checkAndSetBooleanParam(domElement, params, AVKey.FORCE_LEVEL_ZERO_LOADS, "ForceLevelZeroLoads", xpath);
         WWXML.checkAndSetBooleanParam(domElement, params, AVKey.RETAIN_LEVEL_ZERO_TILES, "RetainLevelZeroTiles", xpath);
-        WWXML.checkAndSetBooleanParam(domElement, params, AVKey.COMPRESS_TEXTURES, "CompressTextures",
-            xpath);
         WWXML.checkAndSetBooleanParam(domElement, params, AVKey.USE_MIP_MAPS, "UseMipMaps", xpath);
         WWXML.checkAndSetBooleanParam(domElement, params, AVKey.USE_TRANSPARENT_TEXTURES, "UseTransparentTextures",
             xpath);
@@ -1050,6 +1048,50 @@ public abstract class TiledImageLayer extends AbstractLayer
             "RetrievalTimeouts/ReadTimeout/Time", xpath);
         WWXML.checkAndSetTimeParamAsInteger(domElement, params, AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT,
             "RetrievalTimeouts/StaleRequestLimit/Time", xpath);
+
+        // Parse the legacy configuration parameters. This enables TiledImageLayer to recognize elements from previous
+        // versions of configuration documents.
+        getLegacyTiledImageLayerConfigParams(domElement, params);
+
+        return params;
+    }
+
+    /**
+     * Parses TiledImageLayer configuration parameters from previous versions of configuration documents. This writes
+     * output as key-value pairs to params. If a parameter from the XML document already exists in params, that
+     * parameter is ignored. Supported key and parameter names are: <table> <tr><th>Parameter</th><th>Element
+     * Path</th><th>Type</th></tr> <tr><td>{@link AVKey#TEXTURE_FORMAT}</td><td>CompressTextures</td><td>"image/dds" if
+     * CompressTextures is "true"; null otherwise</td></tr> </table>
+     *
+     * @param domElement the XML document root to parse for legacy TiledImageLayer configuration parameters.
+     * @param params     the output key-value pairs which recieve the TiledImageLayer configuration parameters. A null
+     *                   reference is permitted.
+     *
+     * @return a reference to params, or a new AVList if params is null.
+     *
+     * @throws IllegalArgumentException if the document is null.
+     */
+    protected static AVList getLegacyTiledImageLayerConfigParams(Element domElement, AVList params)
+    {
+        if (domElement == null)
+        {
+            String message = Logging.getMessage("nullValue.DocumentIsNull");
+            Logging.logger().severe(message);
+            throw new IllegalArgumentException(message);
+        }
+
+        if (params == null)
+            params = new AVListImpl();
+
+        XPath xpath = WWXML.makeXPath();
+
+        Object o = params.getValue(AVKey.TEXTURE_FORMAT);
+        if (o == null)
+        {
+            Boolean b = WWXML.getBoolean(domElement, "CompressTextures", xpath);
+            if (b != null && b)
+                params.setValue(AVKey.TEXTURE_FORMAT, "image/dds");
+        }
 
         return params;
     }

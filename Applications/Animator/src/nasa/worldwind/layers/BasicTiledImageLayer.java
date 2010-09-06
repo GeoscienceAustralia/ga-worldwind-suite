@@ -56,7 +56,7 @@ import com.sun.opengl.util.texture.TextureIO;
 
 /**
  * @author tag
- * @version $Id: BasicTiledImageLayer.java 13382 2010-05-10 17:45:11Z tgaskins $
+ * @version $Id: BasicTiledImageLayer.java 13695 2010-09-02 18:54:27Z tgaskins $
  */
 public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetrievable
 {
@@ -67,7 +67,7 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
     protected AbsentResourceList absentResources;
     protected static final int RESOURCE_ID_OGC_CAPABILITIES = 1;
     protected static final int DEFAULT_MAX_RESOURCE_ATTEMPTS = 3;
-    protected static final int DEFAULT_MIN_RESOURCE_CHECK_INTERVAL = 10000;
+    protected static final int DEFAULT_MIN_RESOURCE_CHECK_INTERVAL = (int) 6e5; // 10 minutes
 
     public BasicTiledImageLayer(LevelSet levelSet)
     {
@@ -85,6 +85,10 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
         String[] strings = (String[]) params.getValue(AVKey.AVAILABLE_IMAGE_FORMATS);
         if (strings != null && strings.length > 0)
             this.setAvailableImageFormats(strings);
+
+        s = params.getStringValue(AVKey.TEXTURE_FORMAT);
+        if (s != null)
+            this.setTextureFormat(s);
 
         Double d = (Double) params.getValue(AVKey.OPACITY);
         if (d != null)
@@ -117,10 +121,6 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
         b = (Boolean) params.getValue(AVKey.NETWORK_RETRIEVAL_ENABLED);
         if (b != null)
             this.setNetworkRetrievalEnabled(b);
-
-        b = (Boolean) params.getValue(AVKey.COMPRESS_TEXTURES);
-        if (b != null)
-            this.setCompressTextures(b);
 
         b = (Boolean) params.getValue(AVKey.USE_MIP_MAPS);
         if (b != null)
@@ -197,10 +197,7 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
 
         // Stop any scheduled non-tile resource retieval tasks. Resource retrievals are performed in a separate thread,
         // and are unnecessary once the Layer is disposed.
-        if (this.isRetrieveResources())
-        {
-            this.stopResourceRetrieval();
-        }
+        this.stopResourceRetrieval();
     }
 
     protected static AVList getParamsFromDocument(Element domElement, AVList params)
@@ -363,7 +360,7 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
 
         synchronized (this.fileLock)
         {
-            textureData = readTexture(textureURL, this.isCompressTextures(), this.isUseMipMaps());
+            textureData = readTexture(textureURL, this.getTextureFormat(), this.isUseMipMaps());
         }
 
         if (textureData == null)
@@ -377,27 +374,29 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
     }
 
     /**
-     * Reads and returns the texture data at the specified URL, optionally compressing it and generating mip-maps. If
-     * <code>compress</code> is true, this reads and converts the texture data to a compressed DDS format. If the
-     * texture data is already in the DDS format, the value of <code>compress</code> is ignored. If
-     * <code>useMipMaps</code> is true, this generates mip maps for any non-DDS texture data, and uses any mip-maps
-     * contained in DDS texture data.
+     * Reads and returns the texture data at the specified URL, optionally converting it to the specified format and
+     * generating mip-maps. If <code>textureFormat</code> is a recognized mime type, this returns the texture data in
+     * the specified format. Otherwise, this returns the texture data in its native format. If <code>useMipMaps</code>
+     * is true, this generates mip maps for any non-DDS texture data, and uses any mip-maps contained in DDS texture
+     * data.
+     * <p/>
+     * Suppported texture formats are as follows: <ul> <li><code>image/dds</code> - Returns DDS texture data, converting
+     * the data to DDS if necessary. If the data is already in DDS format it's returned as-is.</li> </ul>
      *
-     * @param url        the URL referencing the texture data to read.
-     * @param compress   true to convert the texture data to a compressed DDS format, and false to read the texture data
-     *                   without converting it.
-     * @param useMipMaps true to generate mip-maps for the texture data or use mip maps already in the texture data, and
-     *                   false to read the texture data without generating or using mip-maps.
+     * @param url           the URL referencing the texture data to read.
+     * @param textureFormat the texture data format to return.
+     * @param useMipMaps    true to generate mip-maps for the texture data or use mip maps already in the texture data,
+     *                      and false to read the texture data without generating or using mip-maps.
      *
-     * @return TextureData the texture data from the specified URL, optionally compressed and with mip-maps.
+     * @return TextureData the texture data from the specified URL, in the specified format and with mip-maps.
      */
-    private static TextureData readTexture(java.net.URL url, boolean compress, boolean useMipMaps)
+    private static TextureData readTexture(java.net.URL url, String textureFormat, boolean useMipMaps)
     {
         try
         {
             // If the caller has enabled texture compression, and the texture data is not a DDS file, then use read the
             // texture data and convert it to DDS.
-            if (compress && !url.toString().toLowerCase().endsWith("dds"))
+            if ("image/dds".equalsIgnoreCase(textureFormat) && !url.toString().toLowerCase().endsWith("dds"))
             {
                 // Configure a DDS compressor to generate mipmaps based according to the 'useMipMaps' parameter, and
                 // convert the image URL to a compressed DDS format.
@@ -724,8 +723,13 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
         // the cache invokes the methods Object.hashCode() and Object.equals() on the cache key. URL's implementations
         // of hashCode() and equals() perform blocking IO calls. World Wind does not perform blocking calls during
         // rendering, and this method is likely to be called from the rendering thread.
-        WMSCapabilities caps = SessionCacheUtils.getOrRetrieveSessionCapabilities(url, WorldWind.getSessionCache(),
-            url.toString(), this.absentResources, RESOURCE_ID_OGC_CAPABILITIES, null, null);
+        WMSCapabilities caps;
+        if (this.isNetworkRetrievalEnabled())
+            caps = SessionCacheUtils.getOrRetrieveSessionCapabilities(url, WorldWind.getSessionCache(),
+                url.toString(), this.absentResources, RESOURCE_ID_OGC_CAPABILITIES, null, null);
+        else
+            caps = SessionCacheUtils.getSessionCapabilities(WorldWind.getSessionCache(), url.toString(),
+                url.toString());
 
         // The OGC Capabilities resource retrieval is either currently running in another thread, or has failed. In
         // either case, return null indicating that that the retrieval was not successful, and we should try again
@@ -822,7 +826,7 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
         if (this.resourceRetrievalService != null)
             this.resourceRetrievalService.shutdown();
 
-        // Schedule a task to retrieve non-tile resources immediately, then every 10 seconds thereafter.
+        // Schedule a task to retrieve non-tile resources immediately, then at intervals thereafter.
         Runnable task = this.createResourceRetrievalTask();
         String taskName = Logging.getMessage("layers.TiledImageLayer.ResourceRetrieverThreadName", this.getName());
         this.resourceRetrievalService = DataConfigurationUtils.createResourceRetrievalService(taskName);
@@ -895,7 +899,8 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
         {
             try
             {
-                this.retrieveResources();
+                if (this.layer.isEnabled())
+                    this.retrieveResources();
             }
             catch (Throwable t)
             {

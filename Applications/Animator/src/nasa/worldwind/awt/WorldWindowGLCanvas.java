@@ -25,7 +25,7 @@ import java.util.*;
  * layers). It's a self-contained component intended to serve as an application's world window. rendering.
  *
  * @author Tom Gaskins
- * @version $Id: WorldWindowGLCanvas.java 11421 2009-06-03 13:23:25Z tgaskins $
+ * @version $Id: WorldWindowGLCanvas.java 13506 2010-06-30 01:29:07Z tgaskins $
  */
 public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, PropertyChangeListener
 {
@@ -45,27 +45,6 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
     /**
      * Constructs a new <code>WorldWindowGLCanvas</code> window on the default graphics device.
      */
-    public WorldWindowGLCanvas()
-    {
-        super(caps);
-        try
-        {
-            this.wwd = ((WorldWindowGLDrawable) WorldWind.createConfigurationComponent(AVKey.WORLD_WINDOW_CLASS_NAME));
-            this.wwd.initDrawable(this);
-            this.wwd.initTextureCache(createTextureCache());
-            this.createView();
-            this.createDefaultInputHandler();
-            WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
-            this.wwd.endInitalization();
-        }
-        catch (Exception e)
-        {
-            String message = Logging.getMessage("Awt.WorldWindowGLSurface.UnabletoCreateWindow");
-            Logging.logger().severe(message);
-            throw new WWRuntimeException(message, e);
-        }
-    }
-    
     public WorldWindowGLCanvas(GLCapabilities caps)
     {
         super(caps);
@@ -77,7 +56,7 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
-            this.wwd.endInitalization();
+            this.wwd.endInitialization();
         }
         catch (Exception e)
         {
@@ -115,7 +94,7 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
-            this.wwd.endInitalization();
+            this.wwd.endInitialization();
         }
         catch (Exception e)
         {
@@ -154,7 +133,7 @@ public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, Proper
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
-            this.wwd.endInitalization();
+            this.wwd.endInitialization();
         }
         catch (Exception e)
         {

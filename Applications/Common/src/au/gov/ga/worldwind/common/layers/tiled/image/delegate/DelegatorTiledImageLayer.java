@@ -236,7 +236,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 
 			BufferedImage image = readImage(url);
 
-			if (isCompressTextures())
+			if ("image/dds".equalsIgnoreCase(getTextureFormat()))
 			{
 				//if required to compress textures, then compress the image to a DDS image
 				DXTCompressionAttributes attributes =

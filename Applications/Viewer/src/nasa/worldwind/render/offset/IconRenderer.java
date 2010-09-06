@@ -7,8 +7,8 @@ All Rights Reserved.
 package nasa.worldwind.render.offset;
 
 import gov.nasa.worldwind.Locatable;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.exception.WWRuntimeException;
-import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.Layer;
@@ -20,30 +20,47 @@ import gov.nasa.worldwind.render.ToolTipRenderer;
 import gov.nasa.worldwind.render.WWIcon;
 import gov.nasa.worldwind.terrain.SectorGeometryList;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.image.BufferedImage;
+import java.awt.Rectangle;
 import java.util.Iterator;
 import java.util.logging.Level;
 
 import javax.media.opengl.GL;
 
-import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureCoords;
-import com.sun.opengl.util.texture.TextureIO;
 
 /**
+ * IconRenderer processes collections of {@link gov.nasa.worldwind.render.WWIcon} instances for picking and rendering.
+ * IconRenderer applies batch processing techniques to improve the runtime performance of picking and rendering large
+ * collections of icons.
+ * <p/>
+ * During the draw pass, IconRenderer records feedback information for each WWIcon which has the property key {@link
+ * gov.nasa.worldwind.avlist.AVKey#FEEDBACK_ENABLED} set to <code>true</code>. IconRenderer does not record any feedback
+ * information during the pick pass. When feedback is enabled, IconRenderer puts properties which describe how each
+ * WWIcon has been processed in key-value pairs attached to the WWIcon. Any of these properties may be null, indicating
+ * that processing of the WWIcon was terminated before this information became available. The feedback properties for
+ * WWIcon are as follows: <table> <tr><th>Key</th><th>Description</th></tr> <tr><td>{@link
+ * gov.nasa.worldwind.avlist.AVKey#FEEDBACK_REFERENCE_POINT}</td><td>The icon's reference point in model
+ * coordinates.</td></tr> <tr><td>{@link gov.nasa.worldwind.avlist.AVKey#FEEDBACK_SCREEN_BOUNDS}</td><td>The icon's
+ * bounding rectangle in screen coordinates.</td></tr> </table>
+ *
  * @author tag
- * @version $Id: IconRenderer.java 10925 2009-05-06 22:22:50Z dcollins $
+ * @version $Id: IconRenderer.java 13710 2010-09-03 21:51:00Z tgaskins $
  */
 public class IconRenderer
 {
-    private Pedestal pedestal;
-    private PickSupport pickSupport = new PickSupport();
-    private boolean horizonClippingEnabled = false;
-    private boolean viewClippingEnabled = false;
-    private boolean alwaysUseAbsoluteElevation = false;
+    protected Pedestal pedestal;
+    protected boolean horizonClippingEnabled = false;
+    protected boolean viewClippingEnabled = true;
+    protected boolean pickFrustumClippingEnabled = true;
+    protected boolean alwaysUseAbsoluteElevation = false;
+    protected OGLStackHandler oglStackHandler = new OGLStackHandler();
+    protected boolean allowBatchPicking = true;
+
+    protected PickSupport pickSupport = new PickSupport();
 
     public IconRenderer()
     {
@@ -112,9 +129,34 @@ public class IconRenderer
         this.viewClippingEnabled = viewClippingEnabled;
     }
 
-    private static boolean isIconValid(WWIcon icon, boolean checkPosition)
+    /**
+     * Indicates whether picking volume clipping is performed.
+     *
+     * @return <code>true</code> if picking volume clipping is performed, otherwise <code>false</code>.
+     *
+     * @see #setPickFrustumClippingEnabled(boolean)
+     */
+    public boolean isPickFrustumClippingEnabled()
     {
-        if (icon == null || icon.getImageSource() == null)
+        return pickFrustumClippingEnabled;
+    }
+
+    /**
+     * Indicates whether to render icons outside the picking volume when in pick mode. This increases performance by
+     * only drawing the icons within the picking volume when picking is enabled. Some important use cases demand that
+     * clipping not be performed. The default is <code>false</code>, picking volume clipping is not performed.
+     *
+     * @param pickFrustumClippingEnabled <code>true</code> if picking clipping should be performed, otherwise
+     *                                   <code>false</code>.
+     */
+    public void setPickFrustumClippingEnabled(boolean pickFrustumClippingEnabled)
+    {
+        this.pickFrustumClippingEnabled = pickFrustumClippingEnabled;
+    }
+
+    protected static boolean isIconValid(WWIcon icon, boolean checkPosition)
+    {
+        if (icon == null || icon.getImageTexture() == null)
             return false;
 
         //noinspection RedundantIfStatement
@@ -149,23 +191,36 @@ public class IconRenderer
         this.alwaysUseAbsoluteElevation = alwaysUseAbsoluteElevation;
     }
 
+    /**
+     * Indicates whether icons are picked as a batch and therefore a {@link gov.nasa.worldwind.event.SelectEvent} will
+     * contain only one icon from a given layer. Batch picking is much faster than individual picking, so this attribute
+     * should be used judiciously.
+     *
+     * @return true if batch picking is allowed, otherwise false.
+     *
+     * @see #setAllowBatchPicking(boolean)
+     */
+    public boolean isAllowBatchPicking()
+    {
+        return this.allowBatchPicking;
+    }
+
+    /**
+     * Specifies whether batch picking is allowed. If so, a {@link gov.nasa.worldwind.event.SelectEvent} from a layer
+     * will contain only one icon even if several overlapping icons are at the pick point. Batch picking is much faster
+     * than individual picking so the default value is true.
+     *
+     * @param allowBatchPicking true if batch picking is allowed, otherwise false.
+     */
+    public void setAllowBatchPicking(boolean allowBatchPicking)
+    {
+        this.allowBatchPicking = allowBatchPicking;
+    }
+
     @SuppressWarnings({"UnusedDeclaration"})
     public void pick(DrawContext dc, Iterable<WWIcon> icons, java.awt.Point pickPoint, Layer layer)
     {
         this.drawMany(dc, icons, layer);
-    }
-
-    @SuppressWarnings({"UnusedDeclaration"})
-    /**
-     * @deprecated
-     */
-    public void pick(DrawContext dc, WWIcon icon, Vec4 iconPoint, java.awt.Point pickPoint, Layer layer) // TODO: Remove
-    {
-        if (!isIconValid(icon, false))
-            return;
-
-        //noinspection deprecation
-        this.drawOne(dc, icon, iconPoint, layer);
     }
 
     public void render(DrawContext dc, Iterable<WWIcon> icons)
@@ -173,16 +228,7 @@ public class IconRenderer
         this.drawMany(dc, icons, null);
     }
 
-    public void render(DrawContext dc, WWIcon icon, Vec4 iconPoint)
-    {
-        if (!isIconValid(icon, false))
-            return;
-
-        //noinspection deprecation
-        this.drawOne(dc, icon, iconPoint, null);
-    }
-
-    private void drawMany(DrawContext dc, Iterable<WWIcon> icons, Layer layer)
+    protected void drawMany(DrawContext dc, Iterable<WWIcon> icons, Layer layer)
     {
         if (dc == null)
         {
@@ -211,16 +257,27 @@ public class IconRenderer
         if (!iterator.hasNext())
             return;
 
-        double horizon = dc.getView().computeHorizonDistance();
+        double horizon = dc.getView().getFarClipDistance();
 
         while (iterator.hasNext())
         {
             WWIcon icon = iterator.next();
             if (!isIconValid(icon, true))
+            {
+                // Record feedback data for this WWIcon if feedback is enabled.
+                if (icon != null)
+                    this.recordFeedback(dc, icon, null, null);
+
                 continue;
+            }
 
             if (!icon.isVisible())
+            {
+                // Record feedback data for this WWIcon if feedback is enabled.
+                this.recordFeedback(dc, icon, null, null);
+
                 continue;
+            }
 
             // Determine Cartesian position from the surface geometry if the icon is near the surface,
             // otherwise draw it from the globe.
@@ -234,12 +291,22 @@ public class IconRenderer
             double eyeDistance = icon.isAlwaysOnTop() ? 0 : dc.getView().getEyePoint().distanceTo3(iconPoint);
 
             if (this.isHorizonClippingEnabled() && eyeDistance > horizon)
+            {
+                // Record feedback data for this WWIcon if feedback is enabled.
+                this.recordFeedback(dc, icon, iconPoint, null);
+
                 continue; // don't render horizon-clipped icons
+            }
 
             // If enabled, eliminate icons outside the view volume. Primarily used to control icon visibility beyond
             // the view volume's far clipping plane.
             if (this.isViewClippingEnabled() && !dc.getView().getFrustumInModelCoordinates().contains(iconPoint))
-                continue;
+            {
+                // Record feedback data for this WWIcon if feedback is enabled.
+                this.recordFeedback(dc, icon, iconPoint, null);
+
+                continue; // don't render frustum-clipped icons
+            }
 
             // The icons aren't drawn here, but added to the ordered queue to be drawn back-to-front.
             dc.addOrderedRenderable(new OrderedIcon(icon, iconPoint, layer, eyeDistance, horizon));
@@ -249,84 +316,34 @@ public class IconRenderer
         }
     }
 
-    /** @deprecated  */
-    @SuppressWarnings({"JavaDoc"})
-    private void drawOne(DrawContext dc, WWIcon icon, Vec4 iconPoint, Layer layer) // TODO: Remove method
-    {
-        if (dc == null)
-        {
-            String msg = Logging.getMessage("nullValue.DrawContextIsNull");
-            Logging.logger().severe(msg);
-            throw new IllegalArgumentException(msg);
-        }
-
-        if (dc.getVisibleSector() == null)
-            return;
-
-        SectorGeometryList geos = dc.getSurfaceGeometry();
-        //noinspection RedundantIfStatement
-        if (geos == null)
-            return;
-
-        if (!icon.isVisible())
-            return;
-
-        if (iconPoint == null)
-        {
-            Angle lat = icon.getPosition().getLatitude();
-            Angle lon = icon.getPosition().getLongitude();
-
-            if (!dc.getVisibleSector().contains(lat, lon))
-                return;
-
-            iconPoint = dc.getSurfaceGeometry().getSurfacePoint(lat, lon, icon.getPosition().getElevation());
-            if (iconPoint == null)
-                return;
-        }
-
-        double horizon = dc.getView().computeHorizonDistance();
-        double eyeDistance = icon.isAlwaysOnTop() ? 0 : dc.getView().getEyePoint().distanceTo3(iconPoint);
-
-        if (this.isHorizonClippingEnabled() && eyeDistance > horizon)
-            return; // don't render horizon-clipped icons
-
-        // If enabled, eliminate icons outside the view volume. Primarily used to control icon visibility beyond
-        // the view volume's far clipping plane.
-        if (this.isViewClippingEnabled() && !dc.getView().getFrustumInModelCoordinates().contains(iconPoint))
-            return;
-
-        // The icon isn't drawn here, but added to the ordered queue to be drawn back-to-front.
-        dc.addOrderedRenderable(new OrderedIcon(icon, iconPoint, layer, eyeDistance, horizon));
-
-        if (icon.isShowToolTip())
-            this.addToolTip(dc, icon, iconPoint);
-    }
-
-    private void addToolTip(DrawContext dc, WWIcon icon, Vec4 iconPoint)
+    protected void addToolTip(DrawContext dc, WWIcon icon, Vec4 iconPoint)
     {
         if (icon.getToolTipFont() == null && icon.getToolTipText() == null)
             return;
 
-        final Vec4 screenPoint = dc.getView().project(iconPoint);
+        Vec4 screenPoint = dc.getView().project(iconPoint);
         if (screenPoint == null)
             return;
+
+        if (icon.getToolTipOffset() != null)
+            screenPoint = screenPoint.add3(icon.getToolTipOffset());
 
         OrderedText tip = new OrderedText(icon.getToolTipText(), icon.getToolTipFont(), screenPoint,
             icon.getToolTipTextColor(), 0d);
         dc.addOrderedRenderable(tip);
     }
 
-    private class OrderedText implements OrderedRenderable
+    protected class OrderedText implements OrderedRenderable
     {
-        Font font;
-        String text;
-        Vec4 point;
-        double eyeDistance;
-        java.awt.Point pickPoint;
-        Layer layer;
-        java.awt.Color color;
+        protected Font font;
+        protected String text;
+        protected Vec4 point;
+        protected double eyeDistance;
+        protected java.awt.Point pickPoint;
+        protected Layer layer;
+        protected java.awt.Color color;
 
-        OrderedText(String text, Font font, Vec4 point, java.awt.Color color, double eyeDistance)
+        public OrderedText(String text, Font font, Vec4 point, java.awt.Color color, double eyeDistance)
         {
             this.text = text;
             this.font = font;
@@ -335,7 +352,8 @@ public class IconRenderer
             this.color = color;
         }
 
-        OrderedText(String text, Font font, Vec4 point, java.awt.Point pickPoint, Layer layer, double eyeDistance)
+        public OrderedText(String text, Font font, Vec4 point, java.awt.Point pickPoint, Layer layer,
+            double eyeDistance)
         {
             this.text = text;
             this.font = font;
@@ -380,23 +398,15 @@ public class IconRenderer
         }
     }
 
-    private class OrderedIcon implements OrderedRenderable, Locatable
+    protected class OrderedIcon implements OrderedRenderable, Locatable
     {
-        WWIcon icon;
-        Vec4 point;
-        double eyeDistance;
-        double horizonDistance;
-        Layer layer;
+        protected WWIcon icon;
+        protected Vec4 point;
+        protected double eyeDistance;
+        protected double horizonDistance;
+        protected Layer layer;
 
-        OrderedIcon(WWIcon icon, Vec4 point, double eyeDistance, double horizonDistance)
-        {
-            this.icon = icon;
-            this.point = point;
-            this.eyeDistance = eyeDistance;
-            this.horizonDistance = horizonDistance;
-        }
-
-        OrderedIcon(WWIcon icon, Vec4 point, Layer layer, double eyeDistance, double horizonDistance)
+        public OrderedIcon(WWIcon icon, Vec4 point, Layer layer, double eyeDistance, double horizonDistance)
         {
             this.icon = icon;
             this.point = point;
@@ -415,9 +425,29 @@ public class IconRenderer
             return this.icon.getPosition();
         }
 
-        private IconRenderer getRenderer()
+        public IconRenderer getRenderer()
         {
             return IconRenderer.this;
+        }
+
+        public Vec4 getPoint()
+        {
+            return this.point;
+        }
+
+        public WWIcon getIcon()
+        {
+            return this.icon;
+        }
+
+        public double getHorizonDistance()
+        {
+            return horizonDistance;
+        }
+
+        public Layer getLayer()
+        {
+            return layer;
         }
 
         public void render(DrawContext dc)
@@ -426,21 +456,7 @@ public class IconRenderer
 
             try
             {
-                IconRenderer.this.drawIcon(dc, this);
-                
-                // Draw as many as we can in a batch to save ogl state switching.
-                Object nextItem = dc.getOrderedRenderables().peek();
-                while (nextItem != null && nextItem instanceof OrderedIcon)
-                {
-                    OrderedIcon oi = (OrderedIcon) nextItem;
-                    if (oi.getRenderer() != IconRenderer.this)
-                        return;
-
-                    dc.getOrderedRenderables().poll(); // take it off the queue
-                    IconRenderer.this.drawIcon(dc, oi);
-
-                    nextItem = dc.getOrderedRenderables().peek();
-                }
+                IconRenderer.this.drawIconsInBatch(dc, this);
             }
             catch (WWRuntimeException e)
             {
@@ -462,8 +478,10 @@ public class IconRenderer
             IconRenderer.this.beginDrawIcons(dc);
             try
             {
-                // TODO: implement batching as in render(), but make sure icons are still individually selectable
-                IconRenderer.this.drawIcon(dc, this);
+                if (IconRenderer.this.isAllowBatchPicking())
+                    IconRenderer.this.pickIconsInBatch(dc, this);
+                else
+                    IconRenderer.this.drawIcon(dc, this);
             }
             catch (WWRuntimeException e)
             {
@@ -482,9 +500,11 @@ public class IconRenderer
         }
     }
 
-    private void beginDrawIcons(DrawContext dc)
+    protected void beginDrawIcons(DrawContext dc)
     {
         GL gl = dc.getGL();
+
+        this.oglStackHandler.clear();
 
         int attributeMask =
             GL.GL_DEPTH_BUFFER_BIT // for depth test, depth mask and depth func
@@ -495,7 +515,7 @@ public class IconRenderer
                 | GL.GL_TEXTURE_BIT // for texture env
                 | GL.GL_DEPTH_BUFFER_BIT // for depth func
                 | GL.GL_ENABLE_BIT; // for enable/disable changes
-        gl.glPushAttrib(attributeMask);
+        this.oglStackHandler.pushAttrib(gl, attributeMask);
 
         // Apply the depth buffer but don't change it.
         gl.glEnable(GL.GL_DEPTH_TEST);
@@ -506,18 +526,11 @@ public class IconRenderer
         gl.glAlphaFunc(GL.GL_GREATER, 0.001f);
 
         // Load a parallel projection with dimensions (viewportWidth, viewportHeight)
-        int[] viewport = new int[4];
-        gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
-        gl.glMatrixMode(GL.GL_PROJECTION);
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
-        gl.glOrtho(0d, viewport[2], 0d, viewport[3], -1d, 1d);
+        this.oglStackHandler.pushProjectionIdentity(gl);
+        gl.glOrtho(0d, dc.getView().getViewport().width, 0d, dc.getView().getViewport().height, -1d, 1d);
 
-        gl.glMatrixMode(GL.GL_MODELVIEW);
-        gl.glPushMatrix();
-
-        gl.glMatrixMode(GL.GL_TEXTURE);
-        gl.glPushMatrix();
+        this.oglStackHandler.pushModelview(gl);
+        this.oglStackHandler.pushTexture(gl);
 
         if (dc.isPickingMode())
         {
@@ -537,56 +550,94 @@ public class IconRenderer
         }
     }
 
-    private void endDrawIcons(DrawContext dc)
+    protected void endDrawIcons(DrawContext dc)
     {
         if (dc.isPickingMode())
             this.pickSupport.endPicking(dc);
 
-        GL gl = dc.getGL();
-        gl.glMatrixMode(GL.GL_PROJECTION);
-        gl.glPopMatrix();
-
-        gl.glMatrixMode(GL.GL_MODELVIEW);
-        gl.glPopMatrix();
-
-        gl.glMatrixMode(GL.GL_TEXTURE);
-        gl.glPopMatrix();
-
-        gl.glPopAttrib();
+        this.oglStackHandler.pop(dc.getGL());
     }
 
-    private Vec4 drawIcon(DrawContext dc, OrderedIcon uIcon)
+    protected void drawIconsInBatch(DrawContext dc, OrderedIcon uIcon)
+    {
+        this.drawIcon(dc, uIcon);
+
+        // Draw as many as we can in a batch to save ogl state switching.
+        Object nextItem = dc.peekOrderedRenderables();
+        while (nextItem != null && nextItem instanceof OrderedIcon)
+        {
+            OrderedIcon oi = (OrderedIcon) nextItem;
+            if (oi.getRenderer() != this)
+                return;
+
+            dc.pollOrderedRenderables(); // take it off the queue
+            this.drawIcon(dc, oi);
+
+            nextItem = dc.peekOrderedRenderables();
+        }
+    }
+
+    protected void pickIconsInBatch(DrawContext dc, OrderedIcon uIcon)
+    {
+        this.drawIcon(dc, uIcon);
+
+        // Draw as many as we can in a batch to save ogl state switching.
+        // Note that there's a further qualification here than in render(): only items associated with the
+        // same layer can be batched because the pick resolution step at the end of batch rendering
+        // associates the item's layer with the resolved picked object.
+        Object nextItem = dc.peekOrderedRenderables();
+        while (nextItem != null && nextItem instanceof OrderedIcon
+            && ((OrderedIcon) nextItem).layer == uIcon.layer)
+        {
+            OrderedIcon oi = (OrderedIcon) nextItem;
+            if (oi.getRenderer() != this)
+                return;
+
+            dc.pollOrderedRenderables(); // take it off the queue
+            this.drawIcon(dc, oi);
+
+            nextItem = dc.peekOrderedRenderables();
+        }
+    }
+
+    protected Vec4 drawIcon(DrawContext dc, OrderedIcon uIcon)
     {
         if (uIcon.point == null)
         {
             String msg = Logging.getMessage("nullValue.PointIsNull");
             Logging.logger().severe(msg);
+
+            // Record feedback data for this WWIcon if feedback is enabled.
+            if (uIcon.icon != null)
+                this.recordFeedback(dc, uIcon.icon, null, null);
+
             return null;
         }
 
         WWIcon icon = uIcon.icon;
         if (dc.getView().getFrustumInModelCoordinates().getNear().distanceTo(uIcon.point) < 0)
+        {
+            // Record feedback data for this WWIcon if feedback is enabled.
+            this.recordFeedback(dc, icon, uIcon.point, null);
+
             return null;
+        }
 
         final Vec4 screenPoint = dc.getView().project(uIcon.point);
         if (screenPoint == null)
-            return null;
+        {
+            // Record feedback data for this WWIcon if feedback is enabled.
+            this.recordFeedback(dc, icon, uIcon.point, null);
 
-        Texture iconTexture = dc.getTextureCache().get(icon.getImageSource());
-        if (iconTexture == null)
-            iconTexture = this.initializeTexture(dc, icon.getImageSource());
+            return null;
+        }
 
         double pedestalScale;
         double pedestalSpacing;
-        Texture pedestalTexture = null;
-        if (pedestal != null)
+        if (this.pedestal != null)
         {
             pedestalScale = this.pedestal.getScale();
             pedestalSpacing = pedestal.getSpacingPixels();
-
-            pedestalTexture = dc.getTextureCache().get(pedestal.getPath()); // TODO: copy 'n paste bug?
-            if (pedestalTexture == null)
-                pedestalTexture = this.initializeTexture(dc, pedestal.getImageSource());
         }
         else
         {
@@ -602,8 +653,8 @@ public class IconRenderer
         gl.glLoadIdentity();
 
         Dimension size = icon.getSize();
-        double width = size != null ? size.getWidth() : iconTexture.getWidth();
-        double height = size != null ? size.getHeight() : iconTexture.getHeight();
+        double width = size != null ? size.getWidth() : icon.getImageTexture().getWidth(dc);
+        double height = size != null ? size.getHeight() : icon.getImageTexture().getHeight(dc);
         //gl.glTranslated(screenPoint.x - width / 2, screenPoint.y + (pedestalScale * height) + pedestalSpacing, 0d);
         gl.glTranslated(screenPoint.x, screenPoint.y - height + (pedestalScale * height) + pedestalSpacing, 0d);
 
@@ -615,75 +666,92 @@ public class IconRenderer
             gl.glTranslated(-width / 2, -heightDelta, 0);
         }
 
+        Rectangle rect = new Rectangle((int) (screenPoint.x - width / 2), (int) (screenPoint.y), (int) width,
+            (int) (height + (pedestalScale * height) + pedestalSpacing));
+
         if (dc.isPickingMode())
         {
-            java.awt.Color color = dc.getUniquePickColor();
-            int colorCode = color.getRGB();
-            this.pickSupport.addPickableObject(colorCode, icon, uIcon.getPosition(), false);
-            gl.glColor3ub((byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue());
+            //If in picking mode and pick clipping is enabled, check to see if the icon is within the pick volume.
+            if (this.isPickFrustumClippingEnabled() && !dc.getPickFrustums().intersectsAny(rect))
+            {
+                // Record feedback data for this WWIcon if feedback is enabled.
+                this.recordFeedback(dc, icon, uIcon.point, rect);
+
+                return screenPoint;
+            }
+            else
+            {
+                java.awt.Color color = dc.getUniquePickColor();
+                int colorCode = color.getRGB();
+                this.pickSupport.addPickableObject(colorCode, icon, uIcon.getPosition(), false);
+                gl.glColor3ub((byte) color.getRed(), (byte) color.getGreen(), (byte) color.getBlue());
+            }
         }
 
-        if (icon.getBackgroundImage() != null)
+        if (icon.getBackgroundTexture() != null)
             this.applyBackground(dc, icon, screenPoint, width, height, pedestalSpacing, pedestalScale);
 
-        iconTexture.bind();
-        TextureCoords texCoords = iconTexture.getImageTexCoords();
-        gl.glScaled(width, height, 1d);
-        dc.drawUnitQuad(texCoords);
+        if (icon.getImageTexture().bind(dc))
+        {
+            TextureCoords texCoords = icon.getImageTexture().getTexCoords();
+            gl.glScaled(width, height, 1d);
+            dc.drawUnitQuad(texCoords);
+        }
 
-        if (pedestalTexture != null)
+        if (this.pedestal != null && this.pedestal.getImageTexture() != null)
         {
             gl.glLoadIdentity();
             gl.glTranslated(screenPoint.x - (pedestalScale * (width / 2)), screenPoint.y, 0d);
             gl.glScaled(width * pedestalScale, height * pedestalScale, 1d);
 
-            pedestalTexture.bind();
-            texCoords = pedestalTexture.getImageTexCoords();
-            dc.drawUnitQuad(texCoords);
+            if (this.pedestal.getImageTexture().bind(dc))
+            {
+                TextureCoords texCoords = this.pedestal.getImageTexture().getTexCoords();
+                dc.drawUnitQuad(texCoords);
+            }
         }
+
+        // Record feedback data for this WWIcon if feedback is enabled.
+        this.recordFeedback(dc, icon, uIcon.point, rect);
 
         return screenPoint;
     }
 
-    private void applyBackground(DrawContext dc, WWIcon icon, Vec4 screenPoint, double width, double height,
+    protected void applyBackground(DrawContext dc, WWIcon icon, Vec4 screenPoint, double width, double height,
         double pedestalSpacing, double pedestalScale)
     {
         javax.media.opengl.GL gl = dc.getGL();
 
-        Object backgroundImage;
-        Texture backgroundTexture;
         double backgroundScale;
-        backgroundImage = icon.getBackgroundImage();
         backgroundScale = icon.getBackgroundScale();
-        backgroundTexture = dc.getTextureCache().get(backgroundImage);
-        if (backgroundTexture == null)
-            backgroundTexture = this.initializeTexture(dc, backgroundImage);
 
-        if (backgroundTexture != null)
+        if (icon.getBackgroundTexture() != null)
         {
-            backgroundTexture.bind();
-            TextureCoords texCoords = backgroundTexture.getImageTexCoords();
-            gl.glPushMatrix();
-            gl.glLoadIdentity();
-            double bgwidth = backgroundScale * width;
-            double bgheight = backgroundScale * height;
-            // Offset the background for the highlighted scale.
-            //if (icon.isHighlighted())
-            //{
-            //    gl.glTranslated(0d, height * (icon.getHighlightScale() - 1) / 2, 0d);
-            //}
-            // Offset the background for the pedestal height.
-            gl.glTranslated(0d, (pedestalScale * height) + pedestalSpacing, 0d);
-            // Place the background centered behind the icon.
-            gl.glTranslated(screenPoint.x - bgwidth / 2, screenPoint.y - (bgheight - height) / 2, 0d);
-            // Scale to the background image dimension.
-            gl.glScaled(bgwidth, bgheight, 1d);
-            dc.drawUnitQuad(texCoords);
-            gl.glPopMatrix();
+            if (icon.getBackgroundTexture().bind(dc))
+            {
+                TextureCoords texCoords = icon.getBackgroundTexture().getTexCoords();
+                gl.glPushMatrix();
+                gl.glLoadIdentity();
+                double bgwidth = backgroundScale * width;
+                double bgheight = backgroundScale * height;
+                // Offset the background for the highlighted scale.
+                //if (icon.isHighlighted())
+                //{
+                //    gl.glTranslated(0d, height * (icon.getHighlightScale() - 1) / 2, 0d);
+                //}
+                // Offset the background for the pedestal height.
+                gl.glTranslated(0d, (pedestalScale * height) + pedestalSpacing, 0d);
+                // Place the background centered behind the icon.
+                gl.glTranslated(screenPoint.x - bgwidth / 2, screenPoint.y - (bgheight - height) / 2, 0d);
+                // Scale to the background image dimension.
+                gl.glScaled(bgwidth, bgheight, 1d);
+                dc.drawUnitQuad(texCoords);
+                gl.glPopMatrix();
+            }
         }
     }
 
-    private void setDepthFunc(DrawContext dc, OrderedIcon uIcon, Vec4 screenPoint)
+    protected void setDepthFunc(DrawContext dc, OrderedIcon uIcon, Vec4 screenPoint)
     {
         GL gl = dc.getGL();
 
@@ -719,65 +787,62 @@ public class IconRenderer
         }
     }
 
-    private Texture initializeTexture(DrawContext dc, Object imageSource)
-    {
-        try
-        {
-            Texture iconTexture = null;
-
-            if (imageSource instanceof String)
-            {
-                String path = (String) imageSource;
-                java.io.InputStream iconStream = this.getClass().getResourceAsStream("/" + path);
-                if (iconStream == null)
-                {
-                    java.io.File iconFile = new java.io.File(path);
-                    if (iconFile.exists())
-                    {
-                        iconStream = new java.io.FileInputStream(iconFile);
-                    }
-                }
-                iconTexture = TextureIO.newTexture(iconStream, true, null);
-            }
-            else if (imageSource instanceof BufferedImage)
-            {
-                iconTexture = TextureIO.newTexture((BufferedImage) imageSource, true);
-            }
-            else
-            {
-                // TODO: Log case of unknown image-source type.
-            }
-
-            if (iconTexture == null)
-            {
-                // TODO: Log case.
-                return null;
-            }
-
-            // Icons with the same path are assumed to be identical textures, so key the texture id off the path.
-            dc.getTextureCache().put(imageSource, iconTexture);
-            iconTexture.bind();
-
-            GL gl = dc.getGL();
-            gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
-            gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR);
-            gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-            gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
-            gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
-
-            return iconTexture;
-        }
-        catch (java.io.IOException e)
-        {
-            String msg = Logging.getMessage("generic.IOExceptionDuringTextureInitialization");
-            Logging.logger().log(Level.SEVERE, msg, e);
-            throw new WWRuntimeException(msg, e);
-        }
-    }
-
     @Override
     public String toString()
     {
         return Logging.getMessage("layers.IconLayer.Name");
+    }
+
+    //**************************************************************//
+    //********************  Feedback  ******************************//
+    //**************************************************************//
+
+    /**
+     * Returns true if the IconRenderer should record feedback about how the specified WWIcon has been processed.
+     *
+     * @param dc   the current DrawContext.
+     * @param icon the WWIcon to record feedback information for.
+     *
+     * @return true to record feedback; false otherwise.
+     */
+    protected boolean isFeedbackEnabled(DrawContext dc, WWIcon icon)
+    {
+        if (dc.isPickingMode())
+            return false;
+
+        Boolean b = (Boolean) icon.getValue(AVKey.FEEDBACK_ENABLED);
+        return (b != null && b);
+    }
+
+    /**
+     * If feedback is enabled for the specified WWIcon, this method records feedback about how the specified WWIcon has
+     * been processed.
+     *
+     * @param dc         the current DrawContext.
+     * @param icon       the icon which the feedback information refers to.
+     * @param modelPoint the icon's reference point in model coordinates.
+     * @param screenRect the icon's bounding rectangle in screen coordinates.
+     */
+    protected void recordFeedback(DrawContext dc, WWIcon icon, Vec4 modelPoint, Rectangle screenRect)
+    {
+        if (!this.isFeedbackEnabled(dc, icon))
+            return;
+
+        this.doRecordFeedback(dc, icon, modelPoint, screenRect);
+    }
+
+    /**
+     * Records feedback about how the specified WWIcon has been processed.
+     *
+     * @param dc         the current DrawContext.
+     * @param icon       the icon which the feedback information refers to.
+     * @param modelPoint the icon's reference point in model coordinates.
+     * @param screenRect the icon's bounding rectangle in screen coordinates.
+     */
+    @SuppressWarnings({"UnusedDeclaration"})
+    protected void doRecordFeedback(DrawContext dc, WWIcon icon, Vec4 modelPoint, Rectangle screenRect)
+    {
+        icon.setValue(AVKey.FEEDBACK_REFERENCE_POINT, modelPoint);
+        icon.setValue(AVKey.FEEDBACK_SCREEN_BOUNDS, screenRect);
     }
 }

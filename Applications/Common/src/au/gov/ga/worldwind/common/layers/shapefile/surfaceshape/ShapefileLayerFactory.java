@@ -8,7 +8,7 @@ import gov.nasa.worldwind.formats.shapefile.Shapefile;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.SurfaceShapeLayer;
+import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.BasicShapeAttributes;
 import gov.nasa.worldwind.render.Material;
 import gov.nasa.worldwind.render.Renderable;
@@ -28,21 +28,21 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
- * Layer factory which creates a {@link SurfaceShapeLayer} from an AVList or XML
- * element. The parameters must contain a URL which points to a ESRI shapefile.
+ * Layer factory which creates a {@link Layer} from an AVList or XML element.
+ * The parameters must contain a URL which points to a ESRI shapefile.
  * 
  * @author Michael de Hoog
  */
-public class SurfaceShapeShapefileLayerFactory
+public class ShapefileLayerFactory
 {
 	/**
-	 * Create a new {@link SurfaceShapeLayer}.
+	 * Create a new {@link Layer}.
 	 * 
 	 * @param params
 	 *            Parameters describing the layer
-	 * @return A new {@link SurfaceShapeLayer}
+	 * @return A new {@link Layer}
 	 */
-	public static SurfaceShapeLayer createLayer(AVList params)
+	public static Layer createLayer(AVList params)
 	{
 		String s = params.getStringValue(AVKey.URL);
 
@@ -68,14 +68,7 @@ public class SurfaceShapeShapefileLayerFactory
 
 		//read the shapefile, and use the standard ShapefileLoader to create a layer
 		Shapefile shapefile = new Shapefile(url);
-		Layer layer = ShapefileLoader.makeLayerFromShapefile(shapefile);
-
-		if (!(layer instanceof SurfaceShapeLayer))
-		{
-			String message = "Expected layer to be instance of SurfaceShapeLayer";
-			Logging.logger().severe(message);
-			throw new IllegalArgumentException(message);
-		}
+		Layer layer = new ShapefileLoader().createLayerFromShapefile(shapefile);
 
 		//set the sector parameter so that the extents can be zoomed to
 		if (params.getValue(AVKey.SECTOR) == null)
@@ -83,43 +76,45 @@ public class SurfaceShapeShapefileLayerFactory
 			layer.setValue(AVKey.SECTOR, Sector.fromDegrees(shapefile.getBoundingRectangle()));
 		}
 
-		SurfaceShapeLayer ssl = (SurfaceShapeLayer) layer;
-
 		s = params.getStringValue(AVKey.DISPLAY_NAME);
 		if (s != null)
-			ssl.setName(s);
+			layer.setName(s);
 
 		Long l = (Long) params.getValue(AVKey.EXPIRY_TIME);
 		if (l != null)
-			ssl.setExpiryTime(l);
+			layer.setExpiryTime(l);
 
 		//set the shape drawing attributes
 		ShapeAttributes attributes = new BasicShapeAttributes();
 		setAttributesFromParams(attributes, params);
 
 		//also set the attributes on any renderables within the layer
-		for (Renderable renderable : ssl.getRenderables())
+		if (layer instanceof RenderableLayer)
 		{
-			if (renderable instanceof SurfaceShape)
-				((SurfaceShape) renderable).setAttributes(attributes);
+			RenderableLayer rl = (RenderableLayer) layer;
+			for (Renderable renderable : rl.getRenderables())
+			{
+				if (renderable instanceof SurfaceShape)
+					((SurfaceShape) renderable).setAttributes(attributes);
+			}
 		}
 
 		//disable picking by default
-		ssl.setPickEnabled(false);
+		layer.setPickEnabled(false);
 
-		return ssl;
+		return layer;
 	}
 
 	/**
-	 * Create a new {@link SurfaceShapeLayer} from an XML definition.
+	 * Create a new {@link Layer} from an XML definition.
 	 * 
 	 * @param domElement
 	 *            XML element
 	 * @param params
 	 *            Extra parameters describing the layer
-	 * @return A new {@link SurfaceShapeLayer}
+	 * @return A new {@link Layer}
 	 */
-	public static SurfaceShapeLayer createLayer(Element domElement, AVList params)
+	public static Layer createLayer(Element domElement, AVList params)
 	{
 		if (params == null)
 			params = new AVListImpl();

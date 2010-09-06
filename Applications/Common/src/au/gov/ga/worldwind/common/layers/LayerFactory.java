@@ -9,7 +9,7 @@ import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.SurfaceShapeShapefileLayerFactory;
+import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
@@ -29,7 +29,7 @@ public class LayerFactory extends BasicLayerFactory
 		String layerType = WWXML.getText(domElement, "@layerType");
 		if ("SurfaceShapeShapefileLayer".equals(layerType))
 		{
-			return SurfaceShapeShapefileLayerFactory.createLayer(domElement, params);
+			return ShapefileLayerFactory.createLayer(domElement, params);
 		}
 
 		return super.createFromLayerDocument(domElement, params);

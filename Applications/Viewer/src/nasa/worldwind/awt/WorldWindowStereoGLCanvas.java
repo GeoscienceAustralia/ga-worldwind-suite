@@ -25,7 +25,7 @@ import java.util.*;
  * layers). It's a self-contained component intended to serve as an application's world window. rendering.
  *
  * @author Tom Gaskins
- * @version $Id: WorldWindowGLCanvas.java 11421 2009-06-03 13:23:25Z tgaskins $
+ * @version $Id: WorldWindowGLCanvas.java 13506 2010-06-30 01:29:07Z tgaskins $
  */
 public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, PropertyChangeListener
 {
@@ -34,11 +34,12 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
 
     static
     {
-    	defaultCaps.setAlphaBits(8);
-    	defaultCaps.setRedBits(8);
-    	defaultCaps.setGreenBits(8);
-    	defaultCaps.setBlueBits(8);
-    	defaultCaps.setDepthBits(24);
+        defaultCaps.setAlphaBits(8);
+        defaultCaps.setRedBits(8);
+        defaultCaps.setGreenBits(8);
+        defaultCaps.setBlueBits(8);
+        defaultCaps.setDepthBits(24);
+        
         stereoCaps.setAlphaBits(8);
         stereoCaps.setRedBits(8);
         stereoCaps.setGreenBits(8);
@@ -63,7 +64,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
-            this.wwd.endInitalization();
+            this.wwd.endInitialization();
         }
         catch (Exception e)
         {
@@ -101,7 +102,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
-            this.wwd.endInitalization();
+            this.wwd.endInitialization();
         }
         catch (Exception e)
         {
@@ -140,7 +141,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
             this.createView();
             this.createDefaultInputHandler();
             WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
-            this.wwd.endInitalization();
+            this.wwd.endInitialization();
         }
         catch (Exception e)
         {

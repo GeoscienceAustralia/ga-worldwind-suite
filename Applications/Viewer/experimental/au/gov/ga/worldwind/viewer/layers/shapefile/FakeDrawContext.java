@@ -3,8 +3,10 @@ package au.gov.ga.worldwind.viewer.layers.shapefile;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.cache.MemoryCache;
 import gov.nasa.worldwind.cache.TextureCache;
 import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
@@ -18,8 +20,11 @@ import gov.nasa.worldwind.pick.PickedObjectList;
 import gov.nasa.worldwind.render.AnnotationRenderer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.GLRuntimeCapabilities;
+import gov.nasa.worldwind.render.LightingModel;
 import gov.nasa.worldwind.render.OrderedRenderable;
+import gov.nasa.worldwind.render.OutlinedShape;
 import gov.nasa.worldwind.render.ScreenCredit;
+import gov.nasa.worldwind.render.SurfaceObjectRenderer;
 import gov.nasa.worldwind.render.SurfaceTileRenderer;
 import gov.nasa.worldwind.render.TextRendererCache;
 import gov.nasa.worldwind.terrain.SectorGeometryList;
@@ -32,6 +37,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -224,14 +230,7 @@ public class FakeDrawContext implements DrawContext
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public Queue<OrderedRenderable> getOrderedRenderables()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	
 	@Override
 	public Collection<PerformanceStatistic> getPerFrameStatistics()
 	{
@@ -653,7 +652,6 @@ public class FakeDrawContext implements DrawContext
 
 	}
 
-
 	@Override
 	public void addRenderingException(Throwable t)
 	{
@@ -661,38 +659,19 @@ public class FakeDrawContext implements DrawContext
 		
 	}
 
-
-	@Override
-	public Layer getNextLayer()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
 	@Override
 	public Vec4 getPointOnTerrain(Angle latitude, Angle longitude)
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-
-	@Override
-	public Layer getPreviousLayer()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
+	
 	@Override
 	public Collection<Throwable> getRenderingExceptions()
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 	@Override
 	public boolean isOrderedRenderingMode()
@@ -701,14 +680,12 @@ public class FakeDrawContext implements DrawContext
 		return false;
 	}
 
-
 	@Override
 	public void setOrderedRenderingMode(boolean tf)
 	{
 		// TODO Auto-generated method stub
 		
 	}
-
 
 	@Override
 	public void setRenderingExceptions(Collection<Throwable> exceptions)
@@ -717,4 +694,123 @@ public class FakeDrawContext implements DrawContext
 		
 	}
 
+	@Override
+	public void addOrderedSurfaceRenderable(OrderedRenderable orderedRenderable)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Queue<OrderedRenderable> getOrderedSurfaceRenderables()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void drawUnitQuadOutline()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public MemoryCache getSurfaceObjectRendererCache()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setSurfaceObjectRendererCache(MemoryCache cache)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addSurfaceObjectRenderer(Object key, SurfaceObjectRenderer renderer)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public SurfaceObjectRenderer getSurfaceObjectRenderer(Object key)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void drawOutlinedShape(OutlinedShape renderer, Object shape)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void beginStandardLighting()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void endStandardLighting()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public LightingModel getStandardLightingModel()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setStandardLightingModel(LightingModel standardLighting)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Vec4 computeTerrainPoint(Angle lat, Angle lon, double offset,
+			boolean applyVerticalExaggeration)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isSmall(Extent extent, int numPixels)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void drawNormals(float length, FloatBuffer vBuf, FloatBuffer nBuf)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public OrderedRenderable peekOrderedRenderables()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public OrderedRenderable pollOrderedRenderables()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

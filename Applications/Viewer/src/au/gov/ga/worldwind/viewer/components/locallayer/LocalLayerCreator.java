@@ -935,7 +935,7 @@ public class LocalLayerCreator extends JDialog
 			params.setValue(AVKey.TILE_HEIGHT, tilesize);
 			params.setValue(AVKey.SECTOR, sector);
 			params.setValue(AVKey.USE_TRANSPARENT_TEXTURES, true);
-			params.setValue(AVKey.COMPRESS_TEXTURES, true);
+			params.setValue(AVKey.TEXTURE_FORMAT, "image/dds");
 			params.setValue(AVKey.USE_MIP_MAPS, true);
 			params.setValue(AVKey.RETAIN_LEVEL_ZERO_TILES, true);
 			params.setValue(AVKey.FORCE_LEVEL_ZERO_LOADS, true);

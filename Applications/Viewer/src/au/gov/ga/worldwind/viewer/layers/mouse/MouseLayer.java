@@ -13,42 +13,43 @@ import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import nasa.worldwind.render.offset.IconRenderer;
 
 public class MouseLayer extends AbstractLayer implements PositionListener
 {
-	private IconRenderer iconRenderer = new IconRenderer();
-	private Component wwd;
-	private WWIcon icon;
-	private Cursor blankCursor;
+	private final IconRenderer iconRenderer = new IconRenderer();
+	private final Component wwd;
+	private final WWIcon icon;
+	private final List<WWIcon> icons = new ArrayList<WWIcon>();
+	private final Cursor blankCursor;
 	private boolean mouseReplaced = false;
 
 	public MouseLayer(WorldWindow wwd, WWIcon icon)
 	{
 		if (!(wwd instanceof Component))
 		{
-			throw new IllegalArgumentException(
-					"WorldWindow must be a subclass of component");
+			throw new IllegalArgumentException("WorldWindow must be a subclass of component");
 		}
 		wwd.addPositionListener(this);
 		this.wwd = (Component) wwd;
 		this.iconRenderer.setPedestal(null);
 		this.icon = icon;
+		icons.add(icon);
 
 		setPickEnabled(false);
 
 		Toolkit tk = Toolkit.getDefaultToolkit();
-		BufferedImage image = new BufferedImage(1, 1,
-				BufferedImage.TYPE_INT_ARGB);
-		blankCursor = tk.createCustomCursor(image, new Point(0, 0),
-				"BlackCursor");
+		BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+		blankCursor = tk.createCustomCursor(image, new Point(0, 0), "BlackCursor");
 	}
 
 	@Override
 	protected void doRender(DrawContext dc)
 	{
-		this.iconRenderer.render(dc, icon, null);
+		this.iconRenderer.render(dc, icons);
 	}
 
 	@Override
@@ -76,13 +77,13 @@ public class MouseLayer extends AbstractLayer implements PositionListener
 			}
 		}
 	}
-	
+
 	private void replaceMouse()
 	{
 		wwd.setCursor(blankCursor);
 		mouseReplaced = true;
 	}
-	
+
 	private void restoreMouse()
 	{
 		wwd.setCursor(null);
@@ -93,7 +94,7 @@ public class MouseLayer extends AbstractLayer implements PositionListener
 	public void setEnabled(boolean enabled)
 	{
 		super.setEnabled(enabled);
-		if(!enabled && mouseReplaced)
+		if (!enabled && mouseReplaced)
 		{
 			restoreMouse();
 		}
