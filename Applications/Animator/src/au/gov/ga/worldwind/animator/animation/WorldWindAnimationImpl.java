@@ -25,7 +25,10 @@ import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.util.ChangeableBase;
+import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
+import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
  * An implementation of the {@link Animation} interface for animations using the
@@ -63,6 +66,9 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 	
 	/** The worldwind window */
 	private WorldWindow worldWindow;
+
+	/** The name of this animation (from {@link Nameable}) */
+	private String name;
 	
 	/**
 	 * Constructor. Initialises default values.
@@ -75,6 +81,7 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 		this.renderParameters = new RenderParameters();
 		this.renderCamera = new CameraImpl(this);
 		this.animatableObjects.add(renderCamera);
+		this.name = MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getAnimatorApplicationTitleKey());
 	}
 	
 	@Override
@@ -665,4 +672,15 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 		}
 	}
 	
+	@Override
+	public String getName()
+	{
+		return name;
+	}
+	
+	@Override
+	public void setName(String name)
+	{
+		this.name = name;
+	}
 }

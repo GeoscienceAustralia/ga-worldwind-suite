@@ -29,7 +29,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -239,52 +241,35 @@ public class Animator
 	public Animator()
 	{
 		Logging.logger().setLevel(Level.FINER);
-
 		initialiseMessageSource();
-
 		initialiseConfiguration();
-
 		initialiseApplicationWindow();
-		
 		initialiseWorldWindow();
-		
 		showSplashScreen();
-		
 		initialiseAnimation();
-
 		initialiseElevationModels();
-		
 		initialiseLayers();
-
 		initialiseSideBar();
-		
 		initialiseFrameSlider();
-
 		createStatusBar();
-
 		initialiseActions();
-		
 		createMenuBar();
-
 		setTitleBar();
-
 		initialiseAutoKeyListener();
-		
 		initialiseChangeListener();
-		
 		updateSlider();
-
 		resetChanged();
-		
 		showApplicationWindow();
 	}
 
 	/**
-	 * 
+	 * Initialise the side bar, which contains a group of collapsible panels
 	 */
 	private void initialiseSideBar()
 	{
-		// TODO Implement me!
+		List<JPanel> collapsiblePanels = new ArrayList<JPanel>();
+		
+		
 	}
 
 	/**
