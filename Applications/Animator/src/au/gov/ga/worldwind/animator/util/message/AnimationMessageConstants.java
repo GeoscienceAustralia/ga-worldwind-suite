@@ -456,5 +456,13 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	{
 		return "animator.message.renderoverwriteconfirm.caption";
 	}
+
+	/**
+	 * @return The key for the no recent file message
+	 */
+	public static String getNoRecentFileMessageKey()
+	{
+		return "animator.gui.menu.norecentfiles.label";
+	}
 	
 }

@@ -64,6 +64,8 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationWriter;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
+import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
+import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
 import au.gov.ga.worldwind.animator.layers.depth.DepthLayer;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
@@ -179,6 +181,9 @@ public class Animator
 	/** The file chooser used for open and save. Instance variable so it will remember last used folders. */
 	private JFileChooser fileChooser = new JFileChooser();
 
+	/** The menu list of recently used files */
+	private RecentlyUsedFilesMenuList mruFileMenu;
+	
 	/** The message source for the application */
 	private MessageSource messageSource;
 
@@ -438,8 +443,12 @@ public class Animator
 		
 		frame.add(wwd, BorderLayout.CENTER);
 		
+		//ensure menu bar and popups appear over the heavyweight WW canvas
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		
+		// Set the last used location
+		fileChooser.setCurrentDirectory(Settings.get().getLastUsedLocation());
 	}
 
 	/**
@@ -910,6 +919,9 @@ public class Animator
 		menu.add(saveAnimationAction);
 		menu.add(saveAnimationAsAction);
 		menu.addSeparator();
+		this.mruFileMenu = new RecentlyUsedFilesMenuList(this);
+		this.mruFileMenu.addToMenu(menu);
+		menu.addSeparator();
 		menu.add(exitAction);
 
 		// Frame menu
@@ -999,6 +1011,7 @@ public class Animator
 	{
 		if (querySave())
 		{
+			Settings.save();
 			frame.dispose();
 			System.exit(0);
 		}
@@ -1043,60 +1056,85 @@ public class Animator
 			setupFileChooser(messageSource.getMessage(AnimationMessageConstants.getOpenDialogTitleKey()), new XmlFilter());
 			if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
-				Animation oldAnimation = animation;
-				
 				File animationFile = fileChooser.getSelectedFile();
-				try
-				{
-					XmlAnimationReader animationReader = new XmlAnimationReader();
-					
-					// Check the file version and display appropriate messages
-					AnimationFileVersion version = animationReader.getFileVersion(animationFile);
-					if (version == null)
-					{
-						JOptionPane.showMessageDialog(frame, 
-													  messageSource.getMessage(AnimationMessageConstants.getOpenFailedMessageKey(), null, animationFile.getAbsolutePath()),
-													  messageSource.getMessage(AnimationMessageConstants.getOpenFailedCaptionKey()),
-													  JOptionPane.ERROR_MESSAGE);
-						return;
-					}
-					if (version == AnimationFileVersion.VERSION010)
-					{
-						int response = JOptionPane.showConfirmDialog(frame, 
-																	 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileMessageKey(), null, animationFile.getAbsolutePath(), XmlAnimationWriter.getCurrentFileVersion().getDisplayName()),
-																	 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileCaptionKey()), 
-																	 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-						if (response == JOptionPane.NO_OPTION)
-						{
-							return;
-						}
-					}
-					
-					// Load the file
-					Animation newAnimation = animationReader.readAnimation(animationFile, wwd);
-					setAnimation(newAnimation);
-					animation.applyFrame(0);
-					setSlider(0);
-					
-					resetChanged();
-					setFile(animationFile);
-					updateSlider();
-				}
-				catch (Exception e)
-				{
-					setAnimation(oldAnimation);
-					updateSlider();
-					
-					ExceptionLogger.logException(e);
-					JOptionPane.showMessageDialog(frame, 
-												  messageSource.getMessage(AnimationMessageConstants.getOpenFailedMessageKey(), null, animationFile.getAbsolutePath()),
-												  messageSource.getMessage(AnimationMessageConstants.getOpenFailedCaptionKey()),
-												  JOptionPane.ERROR_MESSAGE);
-				}
+				open(animationFile, false);
 			}
 		}
 	}
 
+	/**
+	 * Open the provided animation file
+	 * 
+	 * @param animationFile The file to open
+	 * @param promptForSave Whether or not to prompt the user to save their changes, if changes are detected
+	 */
+	public void open(File animationFile, boolean promptForSave)
+	{
+		if (!promptForSave || querySave())
+		{
+			Animation oldAnimation = animation;
+			try
+			{
+				XmlAnimationReader animationReader = new XmlAnimationReader();
+				
+				// Check the file version and display appropriate messages
+				AnimationFileVersion version = animationReader.getFileVersion(animationFile);
+				if (version == null)
+				{
+					JOptionPane.showMessageDialog(frame, 
+												  messageSource.getMessage(AnimationMessageConstants.getOpenFailedMessageKey(), null, animationFile.getAbsolutePath()),
+												  messageSource.getMessage(AnimationMessageConstants.getOpenFailedCaptionKey()),
+												  JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				if (version == AnimationFileVersion.VERSION010)
+				{
+					int response = JOptionPane.showConfirmDialog(frame, 
+																 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileMessageKey(), null, animationFile.getAbsolutePath(), XmlAnimationWriter.getCurrentFileVersion().getDisplayName()),
+																 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileCaptionKey()), 
+																 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+					if (response == JOptionPane.NO_OPTION)
+					{
+						return;
+					}
+				}
+				
+				// Load the file
+				Animation newAnimation = animationReader.readAnimation(animationFile, wwd);
+				setAnimation(newAnimation);
+				animation.applyFrame(0);
+				setSlider(0);
+				
+				resetChanged();
+				setFile(animationFile);
+				updateSlider();
+				
+				updateRecentFiles(animationFile);
+			}
+			catch (Exception e)
+			{
+				setAnimation(oldAnimation);
+				updateSlider();
+				
+				ExceptionLogger.logException(e);
+				JOptionPane.showMessageDialog(frame, 
+											  messageSource.getMessage(AnimationMessageConstants.getOpenFailedMessageKey(), null, animationFile.getAbsolutePath()),
+											  messageSource.getMessage(AnimationMessageConstants.getOpenFailedCaptionKey()),
+											  JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	/**
+	 * Update the recently used files list with the provided animation file
+	 */
+	private void updateRecentFiles(File animationFile)
+	{
+		Settings.get().addRecentFile(animationFile);
+		Settings.get().setLastUsedLocation(animationFile);
+		mruFileMenu.updateMenuItems();
+	}
+	
 	/**
 	 * Save the animation, prompting the user to choose a file if necessary.
 	 */
@@ -1185,6 +1223,8 @@ public class Animator
 											  JOptionPane.ERROR_MESSAGE);
 			}
 			setTitleBar();
+			
+			updateRecentFiles(file);
 		}
 	}
 
