@@ -5,9 +5,7 @@ import java.awt.BorderLayout;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
@@ -16,13 +14,14 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
+import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
- * A panel that allows the user to view and manipulate animatable objects
- * associated with the animation.
+ * A panel that allows the user to view and manipulate {@link Animatable} objects,
+ * and their {@link Parameter}s, associated with an animation.
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class AnimationBrowserPanel extends CollapsiblePanelBase
 {
@@ -43,7 +42,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 	/**
 	 * The model associated with the object tree
 	 */
-	private DefaultTreeModel treeModel;
+	private AnimationTreeModel treeModel;
 	
 	/**
 	 * Constructor. Initialises the tree from the provided (mandatory) {@link Animation} instance.
@@ -55,8 +54,9 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		Validate.notNull(animation, "An animation is required");
 		this.animation = animation;
 		
+		setName(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getAnimationBrowserPanelNameKey()));
+		
 		initialiseObjectTree();
-		updateTree();
 		packTreeIntoPanel();
 	}
 
@@ -65,9 +65,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 	 */
 	private void packTreeIntoPanel()
 	{
-		scrollPane = new JScrollPane();
-		scrollPane.add(objectTree);
-		
+		scrollPane = new JScrollPane(objectTree);
 		add(scrollPane, BorderLayout.CENTER);
 	}
 
@@ -76,23 +74,11 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 	 */
 	private void initialiseObjectTree()
 	{
-		TreeNode animationNode = new DefaultMutableTreeNode(animation.getName());
-		
-		treeModel = new DefaultTreeModel(animationNode);
+		treeModel = new AnimationTreeModel(animation);
 		
 		objectTree = new NameableTree(treeModel);
 		objectTree.setEditable(true);
 		objectTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-	}
-	
-	/**
-	 * Update the tree to display the {@link Animatable} objects and {@link Parameter}s of the
-	 * current animation.
-	 */
-	public void updateTree()
-	{
-		DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)treeModel.getRoot();
-		
 	}
 	
 	/**

@@ -464,5 +464,13 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	{
 		return "animator.gui.menu.norecentfiles.label";
 	}
+
+	/**
+	 * @return The key for the animation browser panel name
+	 */
+	public static String getAnimationBrowserPanelNameKey()
+	{
+		return "animator.gui.panel.animationbrowser.title";
+	}
 	
 }

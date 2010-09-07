@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.animator.panels;
 
+import java.awt.BorderLayout;
+
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
@@ -21,6 +23,11 @@ public abstract class CollapsiblePanelBase extends JPanel implements Collapsible
 	private boolean activated = true;
 	private float weight = 1.0f;
 
+	public CollapsiblePanelBase()
+	{
+		super(new BorderLayout());
+	}
+	
 	@Override
 	public JPanel getPanel()
 	{
