@@ -357,7 +357,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		}
 
 		@Override
-		protected ParameterBase createParameter()
+		protected ParameterBase createParameter(AVList context)
 		{
 			return new EyeLatParameter();
 		}
@@ -384,7 +384,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		}
 
 		@Override
-		protected ParameterBase createParameter()
+		protected ParameterBase createParameter(AVList context)
 		{
 			return new EyeLonParameter();
 		}
@@ -411,7 +411,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		}
 
 		@Override
-		protected ParameterBase createParameter()
+		protected ParameterBase createParameter(AVList context)
 		{
 			return new EyeElevationParameter();
 		}
@@ -438,7 +438,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		}
 
 		@Override
-		protected ParameterBase createParameter()
+		protected ParameterBase createParameter(AVList context)
 		{
 			return new LookatLatParameter();
 		}
@@ -465,7 +465,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		}
 
 		@Override
-		protected ParameterBase createParameter()
+		protected ParameterBase createParameter(AVList context)
 		{
 			return new LookatLonParameter();
 		}
@@ -492,7 +492,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		}
 
 		@Override
-		protected ParameterBase createParameter()
+		protected ParameterBase createParameter(AVList context)
 		{
 			return new LookatElevationParameter();
 		}

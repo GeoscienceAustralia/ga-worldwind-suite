@@ -219,7 +219,7 @@ public abstract class ParameterBase extends ChangeableBase implements Parameter
 			{
 				Validate.isTrue(context.hasKey(constants.getAnimationKey()), "An animation is required in context.");
 				
-				ParameterBase result = createParameter();
+				ParameterBase result = createParameter(context);
 				result.animation = (Animation)context.getValue(constants.getAnimationKey());
 				result.setDefaultValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeDefaultValue(), null));
 				result.setName(WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeName()));
@@ -249,7 +249,7 @@ public abstract class ParameterBase extends ChangeableBase implements Parameter
 	/**
 	 * @return A new instance of this parameter
 	 */
-	protected abstract ParameterBase createParameter();
+	protected abstract ParameterBase createParameter(AVList context);
 	
 	@Override
 	public void stateChanged(ChangeEvent e)

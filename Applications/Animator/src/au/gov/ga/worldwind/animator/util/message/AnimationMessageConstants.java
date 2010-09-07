@@ -472,5 +472,13 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	{
 		return "animator.gui.panel.animationbrowser.title";
 	}
+
+	/**
+	 * @return The key for the opacity parameter label
+	 */
+	public static String getOpacityParameterNameKey()
+	{
+		return "animator.layer.opacity.name";
+	}
 	
 }

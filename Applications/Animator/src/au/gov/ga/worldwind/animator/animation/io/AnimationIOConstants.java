@@ -1,7 +1,9 @@
 package au.gov.ga.worldwind.animator.animation.io;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.layers.AbstractLayer;
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
@@ -30,6 +32,11 @@ public interface AnimationIOConstants
 	 * @return The context key for the parameter value owner. Of type {@link Parameter}.
 	 */
 	String getParameterValueOwnerKey();
+	
+	/**
+	 * @return The context key for the layer associated with a {@link LayerParameter}. Of type {@link AbstractLayer}
+	 */
+	String getParameterLayerKey();
 	
 	/**
 	 * @return The context key for the world window in context. Of type {@link WorldWindow}.
@@ -208,6 +215,9 @@ public interface AnimationIOConstants
 		
 		@Override
 		public String getWorldWindowKey() {return "worldWindow";}
+		
+		@Override
+		public String getParameterLayerKey() {return "currentLayer";}
 		
 	}
 	
