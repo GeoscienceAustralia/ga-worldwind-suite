@@ -1,11 +1,11 @@
 package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
-import gov.nasa.worldwind.layers.AbstractLayer;
+import gov.nasa.worldwind.layers.Layer;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
- * An interface for parameters that control properties of an {@link AbstractLayer}.
+ * An interface for parameters that control properties of an {@link Layer}.
  * 
  * @author James Navin (james.navin@ga.gov.au)
  *
@@ -16,7 +16,7 @@ public interface LayerParameter extends Parameter
 	/**
 	 * @return The layer this parameter is associated with
 	 */
-	AbstractLayer getLayer();
+	Layer getLayer();
 	
 	/**
 	 * @return The type of this layer parameter

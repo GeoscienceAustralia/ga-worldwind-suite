@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
-import gov.nasa.worldwind.layers.AbstractLayer;
+import gov.nasa.worldwind.layers.Layer;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -16,14 +16,14 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 	private static final long serialVersionUID = 20100907L;
 	
 	/** The layer this parameter is associated with */
-	private AbstractLayer layer;
+	private Layer layer;
 	
 	/**
 	 * @param name The name of this parameter
 	 * @param animation The animation associated with this parameter
 	 * @param layer The layer associated with this parameter
 	 */
-	public LayerParameterBase(String name, Animation animation, AbstractLayer layer)
+	public LayerParameterBase(String name, Animation animation, Layer layer)
 	{
 		super(name, animation);
 		Validate.notNull(layer, "A layer is required");
@@ -33,7 +33,7 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 	/**
 	 * Constructor used for deserialization. Not for general consumption.
 	 */
-	protected LayerParameterBase(AbstractLayer layer)
+	protected LayerParameterBase(Layer layer)
 	{
 		super();
 		Validate.notNull(layer, "A layer is required");
@@ -41,7 +41,7 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 	}
 
 	@Override
-	public AbstractLayer getLayer()
+	public Layer getLayer()
 	{
 		return layer;
 	}

@@ -67,6 +67,9 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationWriter;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
+import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
+import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
+import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
@@ -92,7 +95,6 @@ import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
-import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
 import au.gov.ga.worldwind.common.util.message.MessageSource;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.ResourceBundleMessageSource;
@@ -317,6 +319,14 @@ public class Animator
 		
 		crosshair = new CrosshairLayer();
 		layers.add(crosshair);
+		
+		AnimatableLayer blueMarbleAL = new DefaultAnimatableLayer(blueMarble);
+		blueMarbleAL.addParameter(new LayerOpacityParameter(animation, blueMarble));
+		animation.addAnimatableObject(blueMarbleAL);
+		
+		AnimatableLayer landsatAL = new DefaultAnimatableLayer(landsat);
+		landsatAL.addParameter(new LayerOpacityParameter(animation, landsat));
+		animation.addAnimatableObject(landsatAL);
 	}
 
 	/**

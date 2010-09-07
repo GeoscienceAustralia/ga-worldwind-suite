@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.AbstractLayer;
+import gov.nasa.worldwind.layers.Layer;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
@@ -25,15 +26,16 @@ public class LayerOpacityParameter extends LayerParameterBase
 	/**
 	 * Constructor.
 	 */
-	public LayerOpacityParameter(Animation animation, AbstractLayer layer)
+	public LayerOpacityParameter(Animation animation, Layer layer)
 	{
 		super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getOpacityParameterNameKey()), animation, layer);
+		setDefaultValue(1.0);
 	}
 
 	/**
 	 * Constructor for de-serialisation.
 	 */
-	private LayerOpacityParameter(AbstractLayer layer)
+	private LayerOpacityParameter(Layer layer)
 	{
 		super(layer);
 	}

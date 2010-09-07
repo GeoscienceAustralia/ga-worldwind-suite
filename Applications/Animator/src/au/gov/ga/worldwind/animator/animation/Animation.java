@@ -147,6 +147,20 @@ public interface Animation extends XmlSerializable<Animation>, ChangeListener, C
 	Collection<Animatable> getAnimatableObjects();
 	
 	/**
+	 * Add the provided animatable object to this animation.
+	 * 
+	 * @param object The object to add.
+	 */
+	void addAnimatableObject(Animatable object);
+	
+	/**
+	 * Remove the provided animatable object from this animation.
+	 * 
+	 * @param object The object to remove.
+	 */
+	void removeAnimatableObject(Animatable object);
+	
+	/**
 	 * @return The number of frames in this animation
 	 */
 	int getFrameCount();

@@ -204,6 +204,23 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 	{
 		return this.animatableObjects;
 	}
+	
+	@Override
+	public void addAnimatableObject(Animatable object)
+	{
+		if (object == null || animatableObjects.contains(object))
+		{
+			return;
+		}
+		
+		animatableObjects.add(object);
+	}
+	
+	@Override
+	public void removeAnimatableObject(Animatable object)
+	{
+		animatableObjects.remove(object);
+	}
 
 	@Override
 	public int getFrameCount()
