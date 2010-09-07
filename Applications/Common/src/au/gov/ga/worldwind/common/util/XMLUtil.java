@@ -6,6 +6,7 @@ import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.Color;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -88,6 +89,14 @@ public class XMLUtil extends WWXML
 		return element;
 	}
 
+	/**
+	 * Saves the provided XML document to the provided file location in a pretty-printed, human readable, indented format.
+	 * <p/>
+	 * This method will overwrite any existing contents in the provided file location.
+	 * 
+	 * @param doc The xml document to save
+	 * @param filePath The location to save to. Will overwrite any existing file.
+	 */
 	public static void saveDocumentToFormattedFile(Document doc, String filePath)
 	{
 		if (doc == null)
@@ -119,10 +128,12 @@ public class XMLUtil extends WWXML
 	}
 
 	/**
-	 * @param document
-	 * @param fileOutputStream
+	 * Saves the provided XML document to the provided output stream in a pretty-printed, human readable, indented format.
+	 *  
+	 * @param doc The xml document to save
+	 * @param outputStream The output stream to write the output to
 	 */
-	public static void saveDocumentToFormattedStream(Document doc, FileOutputStream outputStream)
+	public static void saveDocumentToFormattedStream(Document doc, OutputStream outputStream)
 	{
 		if (doc == null)
 		{
