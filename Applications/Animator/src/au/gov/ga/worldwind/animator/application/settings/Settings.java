@@ -5,6 +5,7 @@ import gov.nasa.worldwind.util.WWXML;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
+import au.gov.ga.worldwind.animator.util.Util;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
@@ -66,32 +68,55 @@ public class Settings
 			Element rootElement = document.createElement("animationSettings");
 			document.appendChild(rootElement);
 			
-			// Store last used location
-			File lastUsedLocation = instance.getLastUsedLocation();
-			if (lastUsedLocation != null)
-			{
-				WWXML.appendText(rootElement, "lastUsedLocation", lastUsedLocation.getAbsolutePath());
-			}
-			
-			// Store recent files
-			Element recentFilesContainer = WWXML.appendElement(rootElement, "recentFiles");
-			List<File> recentFiles = instance.getRecentFiles();
-			for (int i = 0; i < recentFiles.size(); i++)
-			{
-				Element recentFileElement = WWXML.appendElement(recentFilesContainer, "file");
-				WWXML.setIntegerAttribute(recentFileElement, "index", i);
-				WWXML.setTextAttribute(recentFileElement, "path", recentFiles.get(i).getAbsolutePath());
-			}
-		
-			// Store split location
-			Element splitLocationElement = WWXML.appendElement(rootElement, "splitLocation");
-			WWXML.setIntegerAttribute(splitLocationElement, "value", instance.getSplitLocation());
+			saveLastUsedLocation(rootElement);
+			saveRecentFilesList(rootElement);
+			saveSplitLocation(rootElement);
+			saveDefaultAnimationLayerUrls(rootElement);
 			
 			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(getUserDirectory(), SETTINGS_FILE_NAME)));
 		}
 		catch (Exception e)
 		{
 			ExceptionLogger.logException(e);
+		}
+	}
+
+	private static void saveDefaultAnimationLayerUrls(Element rootElement)
+	{
+		Element animationLayersContainer = WWXML.appendElement(rootElement, "defaultLayers");
+		List<String> layersList = instance.getDefaultAnimationLayerUrls();
+		for (int i = 0; i < layersList.size(); i++)
+		{
+			Element layerElement = WWXML.appendElement(animationLayersContainer, "layer");
+			WWXML.setIntegerAttribute(layerElement, "index", i);
+			WWXML.setTextAttribute(animationLayersContainer, "url", layersList.get(i));
+		}
+	}
+
+	private static void saveSplitLocation(Element rootElement)
+	{
+		Element splitLocationElement = WWXML.appendElement(rootElement, "splitLocation");
+		WWXML.setIntegerAttribute(splitLocationElement, "value", instance.getSplitLocation());
+	}
+
+	private static void saveRecentFilesList(Element rootElement)
+	{
+		Element recentFilesContainer = WWXML.appendElement(rootElement, "recentFiles");
+		List<File> recentFiles = instance.getRecentFiles();
+		for (int i = 0; i < recentFiles.size(); i++)
+		{
+			Element recentFileElement = WWXML.appendElement(recentFilesContainer, "file");
+			WWXML.setIntegerAttribute(recentFileElement, "index", i);
+			WWXML.setTextAttribute(recentFileElement, "path", recentFiles.get(i).getAbsolutePath());
+		}
+	}
+
+	private static void saveLastUsedLocation(Element rootElement)
+	{
+		File lastUsedLocation = instance.getLastUsedLocation();
+		if (lastUsedLocation != null)
+		{
+			WWXML.appendText(rootElement, "lastUsedLocation", lastUsedLocation.getAbsolutePath());
 		}
 	}
 	
@@ -113,30 +138,54 @@ public class Settings
 		Document xmlDocument = WWXML.openDocument(settingsFile);
 		Element rootElement = xmlDocument.getDocumentElement();
 		
-		// Load the last used location
+		loadLastUsedLocation(rootElement);
+		loadRecentFilesList(rootElement);
+		loadSplitLocation(rootElement);
+		loadDefaultAnimationLayerUrls(rootElement);
+	}
+
+	private static void loadDefaultAnimationLayerUrls(Element rootElement)
+	{
+		instance.setDefaultAnimationLayerUrls(new ArrayList<String>());
+		Integer layerCount = WWXML.getInteger(rootElement, "count(//defaultLayers/layer)", null);
+		for (int i = layerCount - 1; i >= 0; i--)
+		{
+			String layerUrl = WWXML.getText(rootElement, "//defaultLayers/layer[@index='" + i + "']/@url");
+			if (!Util.isBlank(layerUrl))
+			{
+				instance.addDefaultAnimationLayerUrl(layerUrl);
+			}
+		}
+	}
+
+	private static void loadLastUsedLocation(Element rootElement)
+	{
 		String lastUsedLocationPath = WWXML.getText(rootElement, "//lastUsedLocation");
-		if (!(lastUsedLocationPath == null || lastUsedLocationPath.trim().isEmpty()))
+		if (!Util.isBlank(lastUsedLocationPath))
 		{
 			instance.setLastUsedLocation(new File(lastUsedLocationPath));
 		}
-		
-		// Load the recent files list
+	}
+
+	private static void loadRecentFilesList(Element rootElement)
+	{
 		for (int i = MAX_NUMBER_RECENT_FILES - 1; i >= 0; i--)
 		{
 			String recentFileName = WWXML.getText(rootElement, "//recentFiles/file[@index='" + i + "']/@path");
-			if (!(recentFileName == null || recentFileName.trim().isEmpty()))
+			if (!Util.isBlank(recentFileName))
 			{
 				instance.addRecentFile(new File(recentFileName));
 			}
 		}
-		
-		// Load the split location
+	}
+
+	private static void loadSplitLocation(Element rootElement)
+	{
 		Integer splitLocation = WWXML.getInteger(rootElement, "//splitLocation/@value", null);
 		if (splitLocation != null)
 		{
 			instance.setSplitLocation(splitLocation);
 		}
-		
 	}
 	
 	/**
@@ -169,6 +218,12 @@ public class Settings
 	
 	/** The location of the split in the split pane */
 	private int splitLocation = 300;
+	
+	/** The default set of animation layers to include in new animations */
+	private List<String> defaultAnimationLayerUrls = new ArrayList<String>(Arrays.asList(new String[]{
+			"file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/blue_marble.xml",
+			"file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/landsat.xml",
+	}));
 	
 	/**
 	 * Private constructor. Use the Singleton accessor {@link #get()}.
@@ -245,4 +300,34 @@ public class Settings
 	{
 		this.splitLocation = splitLocation;
 	}
+
+	/**
+	 * @return the defaultAnimationLayerUrls
+	 */
+	public List<String> getDefaultAnimationLayerUrls()
+	{
+		return defaultAnimationLayerUrls;
+	}
+
+	/**
+	 * @param defaultAnimationLayerUrls the defaultAnimationLayerUrls to set
+	 */
+	public void setDefaultAnimationLayerUrls(List<String> defaultAnimationLayerUrls)
+	{
+		this.defaultAnimationLayerUrls = defaultAnimationLayerUrls;
+	}
+	
+	/**
+	 * Add the provided URL to the list of default animation layer URLs.
+	 */
+	public void addDefaultAnimationLayerUrl(String url)
+	{
+		if (url == null || defaultAnimationLayerUrls.contains(url))
+		{
+			return;
+		}
+		defaultAnimationLayerUrls.add(url);
+	}
+	
+	
 }

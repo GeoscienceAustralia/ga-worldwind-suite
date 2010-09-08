@@ -29,12 +29,16 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
 import javax.media.opengl.GLCapabilities;
 import javax.swing.Action;
@@ -69,19 +73,16 @@ import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
-import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
+import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
-import au.gov.ga.worldwind.animator.layers.depth.DepthLayer;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedElevationModel;
 import au.gov.ga.worldwind.animator.layers.elevation.pervetex.ElevationTesselator;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateRetrievalService;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateTaskService;
-import au.gov.ga.worldwind.animator.layers.other.ImmediateBMNGWMSLayer;
-import au.gov.ga.worldwind.animator.layers.other.ImmediateLandsatI3WMSLayer;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.animator.panels.SideBar;
 import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPanel;
@@ -90,6 +91,7 @@ import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.FrameSlider;
+import au.gov.ga.worldwind.animator.util.Util;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 import au.gov.ga.worldwind.common.ui.BasicAction;
@@ -143,7 +145,7 @@ public class Animator
 		System.setProperty("http.nonProxyHosts", "localhost");
 
 	}
-
+	
 	public static void main(String[] args)
 	{
 		new Animator();
@@ -194,8 +196,6 @@ public class Animator
 
 	// The layers used in the application
 	private DetailedElevationModel dem;
-	private Layer blueMarble;
-	private Layer landsat;
 	private Layer crosshair;
 	private CameraPathLayer cameraPathLayer;
 	
@@ -248,22 +248,33 @@ public class Animator
 		Logging.logger().setLevel(Level.FINER);
 		initialiseMessageSource();
 		initialiseConfiguration();
+		
 		initialiseApplicationWindow();
 		initialiseWorldWindow();
+		
 		showSplashScreen();
+		
 		initialiseAnimation();
+		
 		initialiseElevationModels();
-		initialiseLayers();
+		initialiseUtilityLayers();
+		updateLayersInModel();
+		
 		initialiseSideBar();
 		initialiseFrameSlider();
-		createStatusBar();
+		initialiseStatusBar();
+		
 		initialiseActions();
-		createMenuBar();
+		initialiseMenuBar();
+		
 		setTitleBar();
+		
 		initialiseAutoKeyListener();
 		initialiseChangeListener();
+		
 		updateSlider();
 		resetChanged();
+		
 		showApplicationWindow();
 	}
 
@@ -285,6 +296,7 @@ public class Animator
 	private void initialiseAnimation()
 	{
 		animation = new WorldWindAnimationImpl(wwd);
+		addDefaultLayersToAnimation(animation);
 		updater = new Updater();
 		setAnimationSize(animation.getRenderParameters().getImageDimension());
 	}
@@ -299,36 +311,60 @@ public class Animator
 	}
 
 	/**
-	 * Initialises the layers to be used in the application
+	 * Initialise the utility layers used inside the animator application
 	 */
-	private void initialiseLayers()
+	private void initialiseUtilityLayers()
+	{
+		if (cameraPathLayer == null)
+		{
+			cameraPathLayer = new CameraPathLayer(animation);
+		}
+		
+		if (crosshair == null)
+		{
+			crosshair = new CrosshairLayer();
+		}
+	}
+	
+	/**
+	 * Updates the layers in the current world wind model.
+	 */
+	private void updateLayersInModel()
+	{
+		initialiseUtilityLayers();
+		
+		model.getLayers().clear();
+		
+		addAnimationLayersToModel();
+		addUtilityLayersToModel();
+	}
+	
+	/**
+	 * Add the layers associated with the current animation to the WorldWind model.
+	 * <p/>
+	 * Will append the animation layers to the current layers list. 
+	 */
+	private void addAnimationLayersToModel()
 	{
 		LayerList layers = model.getLayers();
-
-		Layer depth = new DepthLayer();
-		layers.add(depth);
-
-		blueMarble = new ImmediateBMNGWMSLayer();
-		layers.add(blueMarble);
-
-		landsat = new ImmediateLandsatI3WMSLayer();
-		layers.add(landsat);
-
-		cameraPathLayer = new CameraPathLayer(animation);
-		layers.add(cameraPathLayer);
-		
-		crosshair = new CrosshairLayer();
-		layers.add(crosshair);
-		
-		AnimatableLayer blueMarbleAL = new DefaultAnimatableLayer(blueMarble);
-		blueMarbleAL.addParameter(new LayerOpacityParameter(animation, blueMarble));
-		animation.addAnimatableObject(blueMarbleAL);
-		
-		AnimatableLayer landsatAL = new DefaultAnimatableLayer(landsat);
-		landsatAL.addParameter(new LayerOpacityParameter(animation, landsat));
-		animation.addAnimatableObject(landsatAL);
+		for (Layer layer : animation.getLayers())
+		{
+			layers.add(layer);
+		}
 	}
 
+	/**
+	 * Add the utility layers used in the animator application to the current world wind model.
+	 * <p/>
+	 * Will append the animation layers to the current layers list. 
+	 */
+	private void addUtilityLayersToModel()
+	{
+		LayerList layers = model.getLayers();
+		layers.add(cameraPathLayer);
+		layers.add(crosshair);
+	}
+	
 	/**
 	 * Initialise the elevation models used in the application
 	 */
@@ -372,7 +408,7 @@ public class Animator
 	/**
 	 * Create a status bar and put it in bottom panel
 	 */
-	private void createStatusBar()
+	private void initialiseStatusBar()
 	{
 		StatusBar statusBar = new StatusBar();
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -951,7 +987,7 @@ public class Animator
 	/**
 	 * Create the application menu bar
 	 */
-	private void createMenuBar()
+	private void initialiseMenuBar()
 	{
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
@@ -1077,6 +1113,7 @@ public class Animator
 		{
 			useScaledZoomAction.setSelected(animation.isZoomScalingRequired());
 		}
+		updateLayersInModel();
 	}
 
 	/**
@@ -1086,12 +1123,51 @@ public class Animator
 	{
 		if (querySave())
 		{
-			setAnimation(new WorldWindAnimationImpl(wwd));
+			WorldWindAnimationImpl newAnimation = new WorldWindAnimationImpl(wwd);
+			addDefaultLayersToAnimation(newAnimation);
+			setAnimation(newAnimation);
 			resetChanged();
 			setFile(null);
 			updateSlider();
 			slider.setValue(0);
 		}
+	}
+
+	/**
+	 * Add the default layers to the provided animation.
+	 * <p/>
+	 * Default layers are defined in {@link Settings#getDefaultAnimationLayerUrls()}.
+	 * <p/>
+	 * Layers will be added <em>without</em> any attached parameters.
+	 */
+	private void addDefaultLayersToAnimation(Animation newAnimation)
+	{
+		for (String layerUrlString : Settings.get().getDefaultAnimationLayerUrls())
+		{
+			if (Util.isBlank(layerUrlString))
+			{
+				continue;
+			}
+			
+			try
+			{
+				URL layerUrl = new URL(layerUrlString);
+				Layer loadedLayer = AnimationLayerLoader.loadLayer(layerUrl);
+				if (loadedLayer == null)
+				{
+					Logging.logger().log(Level.WARNING, "Animator::addDefaultLayersToAnimation - Unable to load layer at location '" + layerUrlString +"'. Layer loading failed.");
+					continue;
+				}
+				
+				AnimatableLayer animationLayer = new DefaultAnimatableLayer(loadedLayer);
+				animation.addAnimatableObject(animationLayer);
+			}
+			catch (MalformedURLException e)
+			{
+				Logging.logger().log(Level.WARNING, "Animator::addDefaultLayersToAnimation - Unable to load layer at location '" + layerUrlString +"'. Bad URL.");
+			}
+		}
+		
 	}
 
 	/**

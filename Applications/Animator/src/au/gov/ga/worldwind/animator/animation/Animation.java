@@ -3,6 +3,8 @@
  */
 package au.gov.ga.worldwind.animator.animation;
 
+import gov.nasa.worldwind.layers.Layer;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -311,4 +313,11 @@ public interface Animation extends XmlSerializable<Animation>, ChangeListener, C
 	 * @return The zoomed value, scaled appropriately.
 	 */
 	double unapplyZoomScaling(double zoomed);
+	
+	/**
+	 * Gets the list of layers (in order) associated with this animation.
+	 * 
+	 * @return The list of layers associated with this animation. If no layers are associated, will return the empty list.
+	 */
+	List<Layer> getLayers();
 }

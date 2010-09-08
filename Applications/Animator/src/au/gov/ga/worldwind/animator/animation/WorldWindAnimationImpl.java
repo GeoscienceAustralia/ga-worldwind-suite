@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.animator.animation;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -21,6 +22,7 @@ import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
+import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -57,6 +59,9 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 	
 	/** The list of animatable objects in this animation */
 	private List<Animatable> animatableObjects = new ArrayList<Animatable>();
+	
+	/** The list of animatable layers in this animation. A subset of the {@link #animatableObjects} list. */
+	private List<AnimatableLayer> animatableLayers = new ArrayList<AnimatableLayer>();
 	
 	/** Whether or not zoom scaling should be applied */
 	private boolean zoomRequired = true;
@@ -214,12 +219,22 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 		}
 		
 		animatableObjects.add(object);
+		
+		if (object instanceof AnimatableLayer)
+		{
+			animatableLayers.add((AnimatableLayer)object);
+		}
 	}
 	
 	@Override
 	public void removeAnimatableObject(Animatable object)
 	{
 		animatableObjects.remove(object);
+		if (object instanceof AnimatableLayer)
+		{
+			animatableLayers.remove((AnimatableLayer)object);
+		}
+		
 	}
 
 	@Override
@@ -699,5 +714,16 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+	
+	@Override
+	public List<Layer> getLayers()
+	{
+		List<Layer> result = new ArrayList<Layer>();
+		for (AnimatableLayer animatableLayer : animatableLayers)
+		{
+			result.add(animatableLayer.getLayer());
+		}
+		return result;
 	}
 }
