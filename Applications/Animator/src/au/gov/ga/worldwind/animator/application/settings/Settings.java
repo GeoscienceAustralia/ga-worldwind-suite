@@ -146,15 +146,19 @@ public class Settings
 
 	private static void loadDefaultAnimationLayerUrls(Element rootElement)
 	{
-		instance.setDefaultAnimationLayerUrls(new ArrayList<String>());
+		List<String> loadedUrls = new ArrayList<String>();
 		Integer layerCount = WWXML.getInteger(rootElement, "count(//defaultLayers/layer)", null);
 		for (int i = layerCount - 1; i >= 0; i--)
 		{
 			String layerUrl = WWXML.getText(rootElement, "//defaultLayers/layer[@index='" + i + "']/@url");
 			if (!Util.isBlank(layerUrl))
 			{
-				instance.addDefaultAnimationLayerUrl(layerUrl);
+				loadedUrls.add(layerUrl);
 			}
+		}
+		if (!loadedUrls.isEmpty())
+		{
+			instance.setDefaultAnimationLayerUrls(loadedUrls);
 		}
 	}
 
