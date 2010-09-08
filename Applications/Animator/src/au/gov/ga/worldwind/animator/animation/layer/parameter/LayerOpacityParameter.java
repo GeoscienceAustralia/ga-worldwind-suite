@@ -35,10 +35,7 @@ public class LayerOpacityParameter extends LayerParameterBase
 	/**
 	 * Constructor for de-serialisation.
 	 */
-	private LayerOpacityParameter(Layer layer)
-	{
-		super(layer);
-	}
+	private LayerOpacityParameter(){};
 
 	@Override
 	public Type getType()
@@ -64,10 +61,12 @@ public class LayerOpacityParameter extends LayerParameterBase
 	protected ParameterBase createParameter(AVList context)
 	{
 		AnimationIOConstants constants = XmlAnimationWriter.getCurrentFileVersion().getConstants();
-		AbstractLayer parameterLayer = (AbstractLayer)context.getValue(constants.getCurrentLayerKey());
+		Layer parameterLayer = (Layer)context.getValue(constants.getCurrentLayerKey());
 		Validate.notNull(parameterLayer, "No layer found in the context. Expected one under the key '" + constants.getCurrentLayerKey() + "'.");
 		
-		return new LayerOpacityParameter(parameterLayer);
+		LayerOpacityParameter result = new LayerOpacityParameter();
+		result.setLayer(parameterLayer);
+		return result;
 	}
 
 	

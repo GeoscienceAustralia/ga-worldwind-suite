@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.animator.layers;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
+import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
 
 import java.net.MalformedURLException;
@@ -24,6 +25,15 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
  */
 public class AnimationLayerLoader
 {
+	/** 
+	 * The layer factory instance to use.
+	 * <p/>
+	 * Defaults to an instance of the {@link LayerFactory}.
+	 * <p/>
+	 * Can be overriden with the {@link #setLayerFactory(BasicLayerFactory)} method.
+	 */
+	private static BasicLayerFactory layerFactory = new LayerFactory();
+	
 	static
 	{
 		DelegateFactory.registerDelegate(ImmediateRequesterDelegate.class);
@@ -70,10 +80,21 @@ public class AnimationLayerLoader
 		AVList params = new AVListImpl();
 		params.setValue(AVKeyMore.CONTEXT_URL, url);
 		
-		LayerFactory factory = new LayerFactory();
-		Layer result = (Layer)factory.createFromConfigSource(element, params);
+		Layer result = (Layer)layerFactory.createFromConfigSource(element, params);
 		
 		return (Layer)result;
+	}
+
+	/**
+	 * @param layerFactory The layer factory instance to use for creating 
+	 */
+	public static void setLayerFactory(BasicLayerFactory layerFactory)
+	{
+		if (layerFactory == null)
+		{
+			return;
+		}
+		AnimationLayerLoader.layerFactory = layerFactory;
 	}
 
 }

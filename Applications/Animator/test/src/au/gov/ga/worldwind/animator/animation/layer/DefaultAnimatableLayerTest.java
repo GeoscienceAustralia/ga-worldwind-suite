@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
+import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -12,7 +13,9 @@ import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -31,6 +34,7 @@ import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueType;
+import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -59,6 +63,8 @@ public class DefaultAnimatableLayerTest
 
 	private DefaultAnimatableLayer classToBeTested;
 	
+	private MockLayerFactory layerFactory;
+	
 	@Before
 	public void setup()
 	{
@@ -73,8 +79,16 @@ public class DefaultAnimatableLayerTest
 		initialiseParameters();
 		
 		classToBeTested = new DefaultAnimatableLayer("testLayer", layer, layerParameters);
+		
+		setupLayerFactory();
 	}
 	
+	private void setupLayerFactory()
+	{
+		layerFactory = new MockLayerFactory();
+		AnimationLayerLoader.setLayerFactory(layerFactory);
+	}
+
 	private void intialiseMessageSource()
 	{
 		messageSource = new StaticMessageSource();
@@ -96,7 +110,7 @@ public class DefaultAnimatableLayerTest
 	@Test
 	public void testToXml() throws Exception
 	{
-		setLayerUrl("file://somefile/somewhere.layer");
+		setLayerUrl("file://marl/sandpit/symbolic-links/world-wind/current/dataset/ga/gravity/edition3/gravity.xml");
 		addKeyFrame(0, 0.1, layerParameters.get(0));
 		addKeyFrame(10, 1.0, layerParameters.get(0));
 		
@@ -121,12 +135,37 @@ public class DefaultAnimatableLayerTest
 	public void testFromXml() throws Exception
 	{
 		AVList context = new AVListImpl();
+		context.setValue(AnimationFileVersion.VERSION020.getConstants().getAnimationKey(), animation);
+		
 		AnimationFileVersion versionId = AnimationFileVersion.VERSION020;
 		Element element = WWXML.openDocument(getClass().getResourceAsStream("animatableLayerXmlSnippet.xml")).getDocumentElement();
 		
-		DefaultAnimatableLayer result = (DefaultAnimatableLayer)classToBeTested.fromXml(element, versionId , context);
+		layerFactory.setResult(layer);
 		
+		DefaultAnimatableLayer result = (DefaultAnimatableLayer)classToBeTested.fromXml(element, versionId, context);
+		
+		// Check the layer was created
 		assertNotNull(result);
+		assertEquals(layer, result.getLayer());
+		assertEquals("testLayer", result.getName());
+		
+		// Check the opacity parameter was created
+		assertEquals(1, result.getParameters().size());
+		
+		LayerParameter opacityParameter = result.getParameterOfType(LayerParameter.Type.OPACITY);
+		assertNotNull(opacityParameter);
+		
+		// Check the key frames were correctly created
+		assertEquals(2, animation.getKeyFrameCount());
+		
+		ParameterValue v0 = animation.getKeyFrame(0).getValueForParameter(opacityParameter);
+		assertNotNull(v0);
+		assertEquals(0.1, v0.getValue(), 0.001);
+		
+		ParameterValue v10 = animation.getKeyFrame(10).getValueForParameter(opacityParameter);
+		assertNotNull(v10);
+		assertEquals(1.0, v10.getValue(), 0.001);
+		
 	}
 
 	private void addKeyFrame(int frame, double value, LayerParameter layerParameter)
@@ -148,4 +187,29 @@ public class DefaultAnimatableLayerTest
 		return target.trim().replace("\r\n", "\n");
 	}
 
+	/**
+	 * A mock layer factory that can have results set on it for testing purposes.
+	 */
+	private static class MockLayerFactory extends BasicLayerFactory
+	{
+		private Object result = null;
+		
+		@Override
+		public Object createFromConfigSource(Object configSource, AVList params)
+		{
+			return result;
+		}
+		
+		@Override
+		public Object createFromCapabilities(String capsFileName, AVList params)
+		{
+			return result;
+		}
+	
+		public void setResult(Object result)
+		{
+			this.result = result;
+		}
+		
+	}
 }

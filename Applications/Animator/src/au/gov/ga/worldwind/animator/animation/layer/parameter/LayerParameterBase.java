@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -7,6 +8,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -38,11 +40,9 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 	/**
 	 * Constructor used for deserialization. Not for general consumption.
 	 */
-	protected LayerParameterBase(Layer layer)
+	protected LayerParameterBase()
 	{
 		super();
-		Validate.notNull(layer, "A layer is required");
-		this.layer = layer;
 	}
 
 	@Override
@@ -51,6 +51,11 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 		return layer;
 	}
 
+	protected void setLayer(Layer layer)
+	{
+		this.layer = layer;
+	}
+	
 	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
@@ -59,6 +64,13 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 		result.appendChild(super.toXml(result, version));
 		
 		return result;
+	}
+	
+	@Override
+	public Parameter fromXml(Element element, AnimationFileVersion version, AVList context)
+	{
+		Element parameterElement = WWXML.getElement(element, "//" + element.getNodeName() + "/*", null);
+		return super.fromXml(parameterElement, version, context);
 	}
 	
 }

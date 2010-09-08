@@ -24,8 +24,8 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter.Type;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.util.Validate;
-import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
@@ -168,6 +168,7 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 			{
 				Validate.isTrue(context.hasKey(constants.getAnimationKey()), "An animation is required in context.");
 				
+				// Extract the layer properties from the XML
 				String layerName = WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableLayerAttributeName());
 				String layerUrlString = WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableLayerAttributeUrl());
 				if (layerUrlString == null)
@@ -175,18 +176,28 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 					Logging.logger().log(Level.WARNING, "No url found for layer " + layerName);
 					return null;
 				}
+				URL layerUrl = null;
+				try
+				{
+					layerUrl = new URL(layerUrlString);
+				}
+				catch (MalformedURLException e)
+				{
+					Logging.logger().log(Level.WARNING, "Unable to open layer  " + layerName + " from " + layerUrlString + ". Bad URL.");
+					return null;
+				}
 				
-				Layer loadedLayer = null; //TODO: Add call to layer factory to retrieve from URL
+				// Load the layer
+				Layer loadedLayer = AnimationLayerLoader.loadLayer(layerUrl);
 				
 				// Load the parameters for the layer
 				context.setValue(constants.getCurrentLayerKey(), loadedLayer);
 				List<LayerParameter> parameters = new ArrayList<LayerParameter>();
-				Element[] parameterElements = WWXML.getElements(element, constants.getAnimatableLayerName(), null);
+				Element[] parameterElements = WWXML.getElements(element, "//" + constants.getAnimatableLayerName() + "/*", null);
 				for (Element parameterElement : parameterElements)
 				{
 					parameters.add(LayerParameterFactory.fromXml(parameterElement, version, context));
 				}
-				
 				
 				return new DefaultAnimatableLayer(layerName, loadedLayer, parameters);
 			}
