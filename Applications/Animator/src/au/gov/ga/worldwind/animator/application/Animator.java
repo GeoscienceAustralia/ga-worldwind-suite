@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.StreamHandler;
 
 import javax.media.opengl.GLCapabilities;
 import javax.swing.Action;
@@ -73,6 +71,7 @@ import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
+import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
@@ -349,6 +348,7 @@ public class Animator
 		LayerList layers = model.getLayers();
 		for (Layer layer : animation.getLayers())
 		{
+			layer.setEnabled(true);
 			layers.add(layer);
 		}
 	}
@@ -1138,9 +1138,9 @@ public class Animator
 	 * <p/>
 	 * Default layers are defined in {@link Settings#getDefaultAnimationLayerUrls()}.
 	 * <p/>
-	 * Layers will be added <em>without</em> any attached parameters.
+	 * Layers will be added with opacity parameters.
 	 */
-	private void addDefaultLayersToAnimation(Animation newAnimation)
+	private void addDefaultLayersToAnimation(Animation animation)
 	{
 		for (String layerUrlString : Settings.get().getDefaultAnimationLayerUrls())
 		{
@@ -1160,6 +1160,8 @@ public class Animator
 				}
 				
 				AnimatableLayer animationLayer = new DefaultAnimatableLayer(loadedLayer);
+				animationLayer.addParameter(new LayerOpacityParameter(animation, loadedLayer));
+				
 				animation.addAnimatableObject(animationLayer);
 			}
 			catch (MalformedURLException e)
@@ -1205,18 +1207,12 @@ public class Animator
 				AnimationFileVersion version = animationReader.getFileVersion(animationFile);
 				if (version == null)
 				{
-					JOptionPane.showMessageDialog(frame, 
-												  messageSource.getMessage(AnimationMessageConstants.getOpenFailedMessageKey(), null, animationFile.getAbsolutePath()),
-												  messageSource.getMessage(AnimationMessageConstants.getOpenFailedCaptionKey()),
-												  JOptionPane.ERROR_MESSAGE);
+					promptUserOpenFailed(animationFile);
 					return;
 				}
 				if (version == AnimationFileVersion.VERSION010)
 				{
-					int response = JOptionPane.showConfirmDialog(frame, 
-																 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileMessageKey(), null, animationFile.getAbsolutePath(), XmlAnimationWriter.getCurrentFileVersion().getDisplayName()),
-																 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileCaptionKey()), 
-																 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+					int response = promptUserConfirmV1Load(animationFile);
 					if (response == JOptionPane.NO_OPTION)
 					{
 						return;
@@ -1225,12 +1221,18 @@ public class Animator
 				
 				// Load the file
 				Animation newAnimation = animationReader.readAnimation(animationFile, wwd);
+				if (version == AnimationFileVersion.VERSION010)
+				{
+					addDefaultLayersToAnimation(newAnimation);
+				}
+				
 				setAnimation(newAnimation);
+				setFile(animationFile);
+				
 				animation.applyFrame(0);
 				setSlider(0);
 				
 				resetChanged();
-				setFile(animationFile);
 				updateSlider();
 				
 				updateRecentFiles(animationFile);
@@ -1241,12 +1243,26 @@ public class Animator
 				updateSlider();
 				
 				ExceptionLogger.logException(e);
-				JOptionPane.showMessageDialog(frame, 
-											  messageSource.getMessage(AnimationMessageConstants.getOpenFailedMessageKey(), null, animationFile.getAbsolutePath()),
-											  messageSource.getMessage(AnimationMessageConstants.getOpenFailedCaptionKey()),
-											  JOptionPane.ERROR_MESSAGE);
+				promptUserOpenFailed(animationFile);
 			}
 		}
+	}
+
+	private int promptUserConfirmV1Load(File animationFile)
+	{
+		int response = JOptionPane.showConfirmDialog(frame, 
+													 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileMessageKey(), null, animationFile.getAbsolutePath(), XmlAnimationWriter.getCurrentFileVersion().getDisplayName()),
+													 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileCaptionKey()), 
+													 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		return response;
+	}
+
+	private void promptUserOpenFailed(File animationFile)
+	{
+		JOptionPane.showMessageDialog(frame, 
+									  messageSource.getMessage(AnimationMessageConstants.getOpenFailedMessageKey(), null, animationFile.getAbsolutePath()),
+									  messageSource.getMessage(AnimationMessageConstants.getOpenFailedCaptionKey()),
+									  JOptionPane.ERROR_MESSAGE);
 	}
 
 	/**

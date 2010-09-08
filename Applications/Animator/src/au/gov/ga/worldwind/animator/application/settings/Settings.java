@@ -225,6 +225,8 @@ public class Settings
 	
 	/** The default set of animation layers to include in new animations */
 	private List<String> defaultAnimationLayerUrls = new ArrayList<String>(Arrays.asList(new String[]{
+			"file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/stars.xml",
+			"file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/sky.xml",
 			"file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/blue_marble.xml",
 			"file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/landsat.xml",
 	}));
