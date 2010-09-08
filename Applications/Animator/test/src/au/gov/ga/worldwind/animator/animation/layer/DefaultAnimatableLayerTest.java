@@ -2,6 +2,8 @@ package au.gov.ga.worldwind.animator.animation.layer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.util.WWXML;
@@ -110,6 +112,21 @@ public class DefaultAnimatableLayerTest
 		String expected = normalise(TestUtils.readStreamToString(getClass().getResourceAsStream("animatableLayerXmlSnippet.xml")));
 		
 		assertEquals(expected, result);
+	}
+	
+	/**
+	 * Tests the {@link DefaultAnimatableLayer#fromXml()} method
+	 */
+	@Test
+	public void testFromXml() throws Exception
+	{
+		AVList context = new AVListImpl();
+		AnimationFileVersion versionId = AnimationFileVersion.VERSION020;
+		Element element = WWXML.openDocument(getClass().getResourceAsStream("animatableLayerXmlSnippet.xml")).getDocumentElement();
+		
+		DefaultAnimatableLayer result = (DefaultAnimatableLayer)classToBeTested.fromXml(element, versionId , context);
+		
+		assertNotNull(result);
 	}
 
 	private void addKeyFrame(int frame, double value, LayerParameter layerParameter)

@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.animation;
+package au.gov.ga.worldwind.animator.animation.layer;
 
 import gov.nasa.worldwind.avlist.AVList;
 
@@ -8,53 +8,53 @@ import java.util.Map;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
-import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
+import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter;
+import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
- * A factory class for de-serialising {@link Animatable} objects from XML
+ * A factory class for creating {@link LayerParameter}s from XML elements
  * 
  * @author James Navin (james.navin@ga.gov.au)
+ *
  */
-public class AnimatableFactory
+public class LayerParameterFactory
 {
-
-	/** A map of element name -> instance for use as factories in creating animatables */
-	private static Map<String, Animatable> factoryMap = new HashMap<String, Animatable>();
+	
+	/** A map of element name -> instance for use as factories in creating {@link LayerParameter}s */
+	private static Map<String, LayerParameter> factoryMap = new HashMap<String, LayerParameter>();
 	static
 	{
-		// Add additional Animatables here as they are created
-		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getCameraElementName(), instantiate(CameraImpl.class));
-		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getAnimatableLayerName(), instantiate(DefaultAnimatableLayer.class));
+		// Add additional LayerParameters here as they are created
+		factoryMap.put(LayerParameter.Type.OPACITY.name().toLowerCase(), instantiate(LayerOpacityParameter.class));
 	}
 	
 	/**
-	 * Create an instance of the {@link Animatable} that corresponds to the provided XML element in the 
+	 * Create an instance of the {@link LayerParameter} that corresponds to the provided XML element in the 
 	 * given file version.
 	 * 
 	 * @param element The element to de-serialise from
 	 * @param version The version the provided element is in
 	 * @param context The context needed to de-serialise the object.
 	 * 
-	 * @return an instance of the {@link Animatable} that corresponds to the provided XML element, or <code>null</code>
+	 * @return an instance of the {@link LayerParameter} that corresponds to the provided XML element, or <code>null</code>
 	 * if one cannot be found
 	 */
-	public static Animatable fromXml(Element element, AnimationFileVersion version, AVList context)
+	public static LayerParameter fromXml(Element element, AnimationFileVersion version, AVList context)
 	{
 		Validate.notNull(element, "An XML element is required");
 		Validate.notNull(version, "A version is required");
 		Validate.notNull(context, "A context is required");
 		
-		Animatable animatableFactory = factoryMap.get(element.getNodeName());
+		LayerParameter layerFactory = factoryMap.get(element.getNodeName());
 		
-		if (animatableFactory == null)
+		if (layerFactory == null)
 		{
 			return null;
 		}
 		
-		return animatableFactory.fromXml(element, version, context);
+		return (LayerParameter)layerFactory.fromXml(element, version, context);
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class AnimatableFactory
 	 * 
 	 * @return The instantiated object
 	 */
-	private static Animatable instantiate(Class<? extends Animatable> clazz)
+	private static LayerParameter instantiate(Class<? extends LayerParameter> clazz)
 	{
 		Validate.notNull(clazz, "A class must be provided");
 		
@@ -72,7 +72,7 @@ public class AnimatableFactory
 		{
 			Constructor<?> constructor = clazz.getDeclaredConstructor();
 			constructor.setAccessible(true);
-			return (Animatable)constructor.newInstance();
+			return (LayerParameter)constructor.newInstance();
 		} 
 		catch (NoSuchMethodException e)
 		{
@@ -83,4 +83,5 @@ public class AnimatableFactory
 			throw new IllegalStateException("Exception while instantiating class " + clazz.getSimpleName() + ".", e.getCause());
 		}
 	}
+
 }

@@ -64,8 +64,8 @@ public class LayerOpacityParameter extends LayerParameterBase
 	protected ParameterBase createParameter(AVList context)
 	{
 		AnimationIOConstants constants = XmlAnimationWriter.getCurrentFileVersion().getConstants();
-		AbstractLayer parameterLayer = (AbstractLayer)context.getValue(constants.getParameterLayerKey());
-		Validate.notNull(parameterLayer, "No layer found in the context. Expected one under the key '" + constants.getParameterLayerKey() + "'.");
+		AbstractLayer parameterLayer = (AbstractLayer)context.getValue(constants.getCurrentLayerKey());
+		Validate.notNull(parameterLayer, "No layer found in the context. Expected one under the key '" + constants.getCurrentLayerKey() + "'.");
 		
 		return new LayerOpacityParameter(parameterLayer);
 	}

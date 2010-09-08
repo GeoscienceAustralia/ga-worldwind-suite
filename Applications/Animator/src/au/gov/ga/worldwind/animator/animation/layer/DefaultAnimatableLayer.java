@@ -2,13 +2,17 @@ package au.gov.ga.worldwind.animator.animation.layer;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWXML;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.w3c.dom.Element;
 
@@ -21,6 +25,7 @@ import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter.Type;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
@@ -74,6 +79,11 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 		this(layer.getName(), layer, null);
 	}
 	
+	/**
+	 * No-arg constructor required for de-serialisation. Not for general use.
+	 */
+	@SuppressWarnings("unused")
+	private DefaultAnimatableLayer(){super();};
 
 	@Override
 	public void apply(AnimationContext animationContext, int frame)
@@ -144,9 +154,44 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	}
 
 	@Override
-	public Animatable fromXml(Element element, AnimationFileVersion versionId, AVList context)
+	public Animatable fromXml(Element element, AnimationFileVersion version, AVList context)
 	{
-		// TODO Implement me!
+		Validate.notNull(element, "An XML element is required");
+		Validate.notNull(version, "A version ID is required");
+		Validate.notNull(context, "A context is required");
+		
+		AnimationIOConstants constants = version.getConstants();
+		
+		switch (version)
+		{
+			case VERSION020:
+			{
+				Validate.isTrue(context.hasKey(constants.getAnimationKey()), "An animation is required in context.");
+				
+				String layerName = WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableLayerAttributeName());
+				String layerUrlString = WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableLayerAttributeUrl());
+				if (layerUrlString == null)
+				{
+					Logging.logger().log(Level.WARNING, "No url found for layer " + layerName);
+					return null;
+				}
+				
+				Layer loadedLayer = null; //TODO: Add call to layer factory to retrieve from URL
+				
+				// Load the parameters for the layer
+				context.setValue(constants.getCurrentLayerKey(), loadedLayer);
+				List<LayerParameter> parameters = new ArrayList<LayerParameter>();
+				Element[] parameterElements = WWXML.getElements(element, constants.getAnimatableLayerName(), null);
+				for (Element parameterElement : parameterElements)
+				{
+					parameters.add(LayerParameterFactory.fromXml(parameterElement, version, context));
+				}
+				
+				
+				return new DefaultAnimatableLayer(layerName, loadedLayer, parameters);
+			}
+		}
+		
 		return null;
 	}
 }
