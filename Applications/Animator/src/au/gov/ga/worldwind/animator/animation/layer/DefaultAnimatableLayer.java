@@ -2,7 +2,9 @@ package au.gov.ga.worldwind.animator.animation.layer;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.util.WWXML;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,10 +16,12 @@ import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter.Type;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
  * A default implementation of the {@link AnimatableLayer} interface.
@@ -99,7 +103,7 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 		{
 			return;
 		}
-		Validate.isTrue(parameter.getLayer().equals(getLayer()), "Parameter is not linked to the correct layer. Expected '" + getLayer().getName() + "'.");
+		Validate.isTrue(parameter.getLayer().equals(getLayer()), "Parameter is not linked to the correct layer. Expected '" + getLayer() + "'.");
 		layerParameters.put(parameter.getType(), parameter);
 	}
 
@@ -112,8 +116,31 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
-		// TODO Implement me!
-		return null;
+		AnimationIOConstants constants = version.getConstants();
+		
+		Element result = WWXML.appendElement(parent, constants.getAnimatableLayerName());
+		WWXML.setTextAttribute(result, constants.getAnimatableLayerAttributeName(), getName());
+		
+		URL layerUrl = getLayerUrl();
+		if (layerUrl != null)
+		{
+			WWXML.setTextAttribute(result, constants.getAnimatableLayerAttributeUrl(), getLayerUrl().toExternalForm());
+		}
+
+		for (LayerParameter parameter : layerParameters.values())
+		{
+			result.appendChild(parameter.toXml(result, version));
+		}
+		
+		return result;
+	}
+
+	/**
+	 * @return The URL of the layer associated with this instance, if available
+	 */
+	private URL getLayerUrl()
+	{
+		return (URL)layer.getValue(AVKeyMore.CONTEXT_URL);
 	}
 
 	@Override

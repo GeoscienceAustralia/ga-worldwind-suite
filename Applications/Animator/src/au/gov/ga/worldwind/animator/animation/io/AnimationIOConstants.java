@@ -203,6 +203,21 @@ public interface AnimationIOConstants
 	String getFrameRateElementName();
 	
 	/**
+	 * @return The name of the 'animatable layer' 
+	 */
+	String getAnimatableLayerName();
+	
+	/**
+	 * @return The name of the 'name' attribute on the layer element
+	 */
+	String getAnimatableLayerAttributeName();
+	
+	/**
+	 * @return The name of the 'url' attribute on the layer element
+	 */
+	String getAnimatableLayerAttributeUrl();
+	
+	/**
 	 * Common constants that don't change across versions
 	 */
 	public static abstract class BaseConstants implements AnimationIOConstants
@@ -321,6 +336,15 @@ public interface AnimationIOConstants
 		
 		@Override
 		public String getWorldWindAnimationAttributeVersion() {return "version";}
+		
+		@Override
+		public String getAnimatableLayerName() {return "layer";}
+		
+		@Override
+		public String getAnimatableLayerAttributeName() {return "name";}
+		
+		@Override
+		public String getAnimatableLayerAttributeUrl() {return "url";}
 	}
 	
 	/**
@@ -423,6 +447,16 @@ public interface AnimationIOConstants
 
 		@Override
 		public String getFrameRateElementName(){return null;}
+		
+		@Override
+		public String getAnimatableLayerName() {return null;}
+		
+		@Override
+		public String getAnimatableLayerAttributeName() {return null;}
+		
+		@Override
+		public String getAnimatableLayerAttributeUrl() {return null;}
 
 	}
+
 }

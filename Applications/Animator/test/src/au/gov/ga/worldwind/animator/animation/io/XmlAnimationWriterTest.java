@@ -4,11 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import gov.nasa.worldwind.WorldWindowImpl;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 
 import org.junit.Before;
@@ -21,6 +19,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValu
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.StaticMessageSource;
+import au.gov.ga.worldwind.test.util.TestUtils;
 
 /**
  * Tests for the {@link XmlAnimationWriter} class
@@ -81,23 +80,10 @@ public class XmlAnimationWriterTest
 		
 		
 		FileInputStream actualStream = new FileInputStream(outputFile);
-		assertEquals(readStream(expectedStream), readStream(actualStream));
+		assertEquals(TestUtils.readStreamToString(expectedStream), TestUtils.readStreamToString(actualStream));
 		actualStream.close();
 		outputFile.delete();
 	}
 	
-	private String readStream(InputStream stream) throws Exception
-	{
-		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-		StringBuffer result = new StringBuffer();
-		String readLine = null;
-		while((readLine = reader.readLine()) != null)
-		{
-			result.append(readLine);
-		}
-		reader.close();
-		return result.toString();
-	}
-
 	
 }
