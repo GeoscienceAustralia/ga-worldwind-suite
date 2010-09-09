@@ -10,16 +10,15 @@ import au.gov.ga.worldwind.animator.animation.Animatable;
  */
 public class AnimatableObjectEventImpl extends AnimationEventImpl implements AnimatableObjectEvent
 {
-
-	public AnimatableObjectEventImpl(Type eventType, Animatable source, AnimationEvent cause)
+	public AnimatableObjectEventImpl(Animatable owner, Type eventType, AnimationEvent cause, Object value)
 	{
-		super(eventType, source, cause);
+		super(owner, eventType, cause, value);
 	}
 
 	@Override
 	public Animatable getAnimatableObject()
 	{
-		return (Animatable)getSource();
+		return (Animatable)getOwner();
 	}
 
 }

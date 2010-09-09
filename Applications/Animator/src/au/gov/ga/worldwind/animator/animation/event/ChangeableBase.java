@@ -50,27 +50,27 @@ public abstract class ChangeableBase implements Changeable
 	}
 	
 	@Override
-	public void fireAddEvent()
+	public void fireAddEvent(Object value)
 	{
-		fireEvent(Type.ADD);
+		fireEvent(Type.ADD, value);
 	}
 	
 	@Override
-	public void fireRemoveEvent()
+	public void fireRemoveEvent(Object value)
 	{
-		fireEvent(Type.REMOVE);
+		fireEvent(Type.REMOVE, value);
 	}
 	
 	@Override
-	public void fireChangeEvent()
+	public void fireChangeEvent(Object value)
 	{
-		fireEvent(Type.CHANGE);
+		fireEvent(Type.CHANGE, value);
 	}
 
 	@Override
-	public void fireEvent(Type type)
+	public void fireEvent(Type type, Object value)
 	{
-		AnimationEvent event = createEvent(type, null);
+		AnimationEvent event = createEvent(type, null, null);
 		for (int i = changeListeners.size() - 1; i >= 0; i--)
 		{
 			changeListeners.get(i).receiveAnimationEvent(event);
@@ -84,8 +84,8 @@ public abstract class ChangeableBase implements Changeable
 	 * Subclasses should override this method and implement it to return richer subclasses 
 	 * of the {@link AnimationEvent} interface specific to their animation object class.
 	 */
-	protected AnimationEvent createEvent(Type type, AnimationEvent cause)
+	protected AnimationEvent createEvent(Type type, AnimationEvent cause, Object value)
 	{
-		return new AnimationEventImpl(type, this, cause);
+		return new AnimationEventImpl(this, type, cause, value);
 	}
 }

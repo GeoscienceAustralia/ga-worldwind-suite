@@ -10,15 +10,15 @@ import au.gov.ga.worldwind.animator.animation.KeyFrame;
  */
 public class KeyFrameEventImpl extends AnimationEventImpl implements KeyFrameEvent
 {
-	
-	public KeyFrameEventImpl(Type eventType, KeyFrame source, AnimationEvent cause)
+
+	public KeyFrameEventImpl(KeyFrame owner, Type eventType, AnimationEvent cause, Object value)
 	{
-		super(eventType, source, cause);
+		super(owner, eventType, cause, value);
 	}
 
 	@Override
 	public KeyFrame getKeyFrame()
 	{
-		return (KeyFrame)getSource();
+		return (KeyFrame)getOwner();
 	}
 }

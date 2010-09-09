@@ -34,24 +34,24 @@ public interface Changeable
 	 * <p/>
 	 * Should be invoked when this object is being added to some parent container (e.g. a {@link KeyFrame} is being added to an {@link Animation})
 	 */
-	void fireAddEvent();
+	void fireAddEvent(Object value);
 	
 	/**
 	 * Fire a event of type {@link AnimationEvent.Type#REMOVE}
 	 * <p/>
 	 * Should be invoked when this object is being removed from some parent container (e.g. a {@link KeyFrame} is being removed from an {@link Animation})
 	 */
-	void fireRemoveEvent();
+	void fireRemoveEvent(Object value);
 	
 	/**
 	 * Fire a event of type {@link AnimationEvent.Type#CHANGE}
 	 * <p/>
 	 * Should be invoked when some property of this object is being changed (e.g. the value of a {@link ParameterValue} is changed)
 	 */
-	void fireChangeEvent();
+	void fireChangeEvent(Object value);
 	
 	/**
 	 * Fire a event of the provided type
 	 */
-	void fireEvent(AnimationEvent.Type type);
+	void fireEvent(AnimationEvent.Type type, Object value);
 }

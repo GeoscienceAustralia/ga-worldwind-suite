@@ -9,16 +9,15 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
  */
 public class ParameterValueEventImpl extends AnimationEventImpl implements ParameterValueEvent
 {
-
-	public ParameterValueEventImpl(Type eventType, ParameterValue source, AnimationEvent cause)
+	public ParameterValueEventImpl(Object owner, Type eventType, AnimationEvent cause, Object value)
 	{
-		super(eventType, source, cause);
+		super(owner, eventType, cause, value);
 	}
 
 	@Override
 	public ParameterValue getParameterValue()
 	{
-		return (ParameterValue)getSource();
+		return (ParameterValue)getOwner();
 	}
 
 	

@@ -3,7 +3,16 @@ package au.gov.ga.worldwind.animator.animation.event;
 /**
  * A super-interface for events that can occur within an animation.
  * <p/>
- * Supports a causal chain that can be queried by listeners interested in particular event types.
+ * An event has:
+ * <ol>
+ *  <li>an owner (the object that signalled the event);
+ *  <li>a type (that signals the type of action that occurred to trigger the event);
+ *  <li>a value (the value that was acted on in the action that triggered the event); and
+ *  <li>a cause (the event that caused this event to be triggered)
+ * </ol>
+ * <p/>
+ * Animation events support a causal chain that can be queried by listeners interested in particular event types.
+ * For example, a key frame display might be interested in any event that involves key frames.
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
@@ -44,9 +53,15 @@ public interface AnimationEvent
 	Type getType();
 	
 	/**
-	 * @return The source of <em>this</em> event. May be <code>null</code>.
+	 * @return The owner of <em>this</em> event. This is the object that signalled the event.
 	 */
-	Object getSource();
+	Object getOwner();
+	
+	/**
+	 * @return The value associated with this event. This is the object that was added/changed/removed to trigger the event.
+	 * Will usually be <code>null</code> in all but the ultimate cause in the causal chain.
+	 */
+	Object getValue();
 	
 	/**
 	 * The valid types of events

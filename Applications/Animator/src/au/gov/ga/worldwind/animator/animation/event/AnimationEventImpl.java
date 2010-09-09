@@ -18,20 +18,24 @@ public class AnimationEventImpl implements AnimationEvent
 	
 	private Type type;
 	
-	private Object source;
+	private Object owner;
+	
+	private Object value;
 	
 	/**
+	 * @param owner Mandatory.
 	 * @param eventType Optional. If not provided, the <code>type</code> of the provided <code>cause</code> will be used.
-	 * @param source Optional.
 	 * @param cause Optional. If not provided, a <code>type</code> must be.
 	 */
-	public AnimationEventImpl(Type eventType, Object source, AnimationEvent cause)
+	public AnimationEventImpl(Object owner, Type eventType, AnimationEvent cause, Object value)
 	{
+		Validate.notNull(owner, "An owner must be provided");
 		Validate.isTrue(eventType != null || cause != null, "If no cause is provided, a type must be.");
 		
+		this.owner = owner;
 		this.type = eventType;
-		this.source = source;
 		this.cause = cause;
+		this.value = value;
 		
 		if (this.type == null && this.cause != null)
 		{
@@ -76,15 +80,21 @@ public class AnimationEventImpl implements AnimationEvent
 	}
 
 	@Override
-	public Object getSource()
+	public Object getOwner()
 	{
-		return source;
+		return owner;
+	}
+	
+	@Override
+	public Object getValue()
+	{
+		return value;
 	}
 	
 	@Override
 	public String toString()
 	{
-		return "Event: {" + getClass().getSimpleName() + ", " + type + ", " + source + ", " + cause + "}"; 
+		return "Event: {" + getClass().getSimpleName() + ", " + type + ", " + owner + ", " + cause + "}"; 
 	}
 
 }
