@@ -133,7 +133,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		
 		if (changed)
 		{
-			notifyChange();
+			fireChangeEvent();
 		}
 	}
 
@@ -152,7 +152,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		
 		if (changed)
 		{
-			notifyChange();
+			fireChangeEvent();
 		}
 	}
 	
@@ -175,7 +175,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		
 		if (changed)
 		{
-			notifyChange();
+			fireChangeEvent();
 		}
 	}
 
@@ -194,7 +194,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		
 		if (changed)
 		{
-			notifyChange();
+			fireChangeEvent();
 		}
 	}
 	

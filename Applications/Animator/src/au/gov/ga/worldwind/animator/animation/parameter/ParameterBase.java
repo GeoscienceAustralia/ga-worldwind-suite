@@ -8,20 +8,21 @@ import gov.nasa.worldwind.util.WWXML;
 
 import java.util.List;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
+import au.gov.ga.worldwind.animator.animation.event.ChangeableBase;
+import au.gov.ga.worldwind.animator.animation.event.ParameterEventImpl;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
-import au.gov.ga.worldwind.animator.util.ChangeableBase;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -252,13 +253,19 @@ public abstract class ParameterBase extends ChangeableBase implements Parameter
 	protected abstract ParameterBase createParameter(AVList context);
 	
 	@Override
-	public void stateChanged(ChangeEvent e)
+	public void receiveAnimationEvent(AnimationEvent event)
 	{
-		// Propagate the change upwards
-		List<ChangeListener> listeners = getChangeListeners();
+		AnimationEvent newEvent = createEvent(null, event);
+		List<AnimationEventListener> listeners = getChangeListeners();
 		for (int i = listeners.size() - 1; i >= 0; i--)
 		{
-			listeners.get(i).stateChanged(e);
+			listeners.get(i).receiveAnimationEvent(newEvent);
 		}
+	}
+	
+	@Override
+	protected AnimationEvent createEvent(Type type, AnimationEvent cause)
+	{
+		return new ParameterEventImpl(type, this, cause);
 	}
 }
