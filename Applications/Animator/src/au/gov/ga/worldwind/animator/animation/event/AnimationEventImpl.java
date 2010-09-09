@@ -3,13 +3,15 @@ package au.gov.ga.worldwind.animator.animation.event;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
- * A base implementation of the {@link AnimationEvent} interface that provides
- * default implementations of most methods.
+ * A base implementation of the {@link AnimationEvent} interface.
+ * <p/>
+ * In most cases you should use a sub-class to create specialised events for a given
+ * animation object class (e.g. key frames, parameter values etc.).
  * 
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public abstract class AnimationEventBase implements AnimationEvent
+public class AnimationEventImpl implements AnimationEvent
 {
 
 	private AnimationEvent cause;
@@ -23,7 +25,7 @@ public abstract class AnimationEventBase implements AnimationEvent
 	 * @param source Optional.
 	 * @param cause Optional. If not provided, a <code>type</code> must be.
 	 */
-	public AnimationEventBase(Type eventType, Object source, AnimationEvent cause)
+	public AnimationEventImpl(Type eventType, Object source, AnimationEvent cause)
 	{
 		Validate.isTrue(eventType != null || cause != null, "If no cause is provided, a type must be.");
 		

@@ -8,7 +8,7 @@ import au.gov.ga.worldwind.animator.animation.Animatable;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class AnimatableObjectEventImpl extends AnimationEventBase implements AnimatableObjectEvent
+public class AnimatableObjectEventImpl extends AnimationEventImpl implements AnimatableObjectEvent
 {
 
 	public AnimatableObjectEventImpl(Type eventType, Animatable source, AnimationEvent cause)

@@ -7,7 +7,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public class ParameterValueEventImpl extends AnimationEventBase implements ParameterValueEvent
+public class ParameterValueEventImpl extends AnimationEventImpl implements ParameterValueEvent
 {
 
 	public ParameterValueEventImpl(Type eventType, ParameterValue source, AnimationEvent cause)

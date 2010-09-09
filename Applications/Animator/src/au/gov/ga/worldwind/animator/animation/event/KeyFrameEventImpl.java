@@ -8,7 +8,7 @@ import au.gov.ga.worldwind.animator.animation.KeyFrame;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class KeyFrameEventImpl extends AnimationEventBase implements KeyFrameEvent
+public class KeyFrameEventImpl extends AnimationEventImpl implements KeyFrameEvent
 {
 	
 	public KeyFrameEventImpl(Type eventType, KeyFrame source, AnimationEvent cause)
