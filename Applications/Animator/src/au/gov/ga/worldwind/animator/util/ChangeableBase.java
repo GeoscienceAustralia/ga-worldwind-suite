@@ -3,8 +3,10 @@ package au.gov.ga.worldwind.animator.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventImpl;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 
 /**
  * A convenience base implementation of the {@link Changeable} interface.
@@ -19,10 +21,10 @@ public abstract class ChangeableBase implements Changeable
 	/**
 	 * The list of registered change listeners
 	 */
-	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
+	private List<AnimationEventListener> changeListeners = new ArrayList<AnimationEventListener>();
 
 	@Override
-	public void addChangeListener(ChangeListener changeListener)
+	public void addChangeListener(AnimationEventListener changeListener)
 	{
 		if (changeListener == null)
 		{
@@ -32,7 +34,7 @@ public abstract class ChangeableBase implements Changeable
 	}
 	
 	@Override
-	public void removeChangeListener(ChangeListener changeListener)
+	public void removeChangeListener(AnimationEventListener changeListener)
 	{
 		if (changeListener == null)
 		{
@@ -44,19 +46,48 @@ public abstract class ChangeableBase implements Changeable
 	/**
 	 * @return The (ordered) list of registered change listeners
 	 */
-	public List<ChangeListener> getChangeListeners()
+	public List<AnimationEventListener> getChangeListeners()
 	{
 		return changeListeners;
 	}
 	
 	@Override
-	public void notifyChange()
+	public void fireAddEvent()
 	{
-		ChangeEvent event = new ChangeEvent(this);
-		for (int i = changeListeners.size() - 1; i >= 0; i--)
-		{
-			changeListeners.get(i).stateChanged(event);
-		}
+		fireEvent(Type.ADD);
+	}
+	
+	@Override
+	public void fireRemoveEvent()
+	{
+		fireEvent(Type.REMOVE);
+	}
+	
+	@Override
+	public void fireChangeEvent()
+	{
+		fireEvent(Type.CHANGE);
 	}
 
+	@Override
+	public void fireEvent(Type type)
+	{
+		AnimationEvent event = createEvent(type, null);
+		for (int i = changeListeners.size() - 1; i >= 0; i--)
+		{
+			changeListeners.get(i).signalEvent(event);
+		}
+		
+	}
+
+	/**
+	 * Create an {@link AnimationEvent} for this instance of the given type.
+	 * <p/>
+	 * Subclasses should override this method and implement it to return richer subclasses 
+	 * of the {@link AnimationEvent} interface specific to their animation object class.
+	 */
+	protected AnimationEvent createEvent(Type type, AnimationEvent cause)
+	{
+		return new AnimationEventImpl(type, this, cause);
+	}
 }

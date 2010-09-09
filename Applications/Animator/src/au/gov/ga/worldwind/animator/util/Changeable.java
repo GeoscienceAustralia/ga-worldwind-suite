@@ -1,6 +1,10 @@
 package au.gov.ga.worldwind.animator.util;
 
-import javax.swing.event.ChangeListener;
+import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.KeyFrame;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 
 /**
  * An interface for objects that can change. Allows change listeners to be attatched
@@ -18,17 +22,38 @@ public interface Changeable
 	 * 
 	 * @param changeListener The listener to add
 	 */
-	void addChangeListener(ChangeListener changeListener);
+	void addChangeListener(AnimationEventListener changeListener);
 	
 	/**
 	 * Remove the provided listener to this class's list of change listeners.
 	 * 
 	 * @param changeListener The listener to remove
 	 */
-	void removeChangeListener(ChangeListener changeListener);
+	void removeChangeListener(AnimationEventListener changeListener);
 	
 	/**
-	 * Notify this object's registered change listeners of a change to this object's state
+	 * Fire a event of type {@link AnimationEvent.Type#ADD}
+	 * <p/>
+	 * Should be invoked when this object is being added to some parent container (e.g. a {@link KeyFrame} is being added to an {@link Animation})
 	 */
-	void notifyChange();
+	void fireAddEvent();
+	
+	/**
+	 * Fire a event of type {@link AnimationEvent.Type#REMOVE}
+	 * <p/>
+	 * Should be invoked when this object is being removed from some parent container (e.g. a {@link KeyFrame} is being removed from an {@link Animation})
+	 */
+	void fireRemoveEvent();
+	
+	/**
+	 * Fire a event of type {@link AnimationEvent.Type#CHANGE}
+	 * <p/>
+	 * Should be invoked when some property of this object is being changed (e.g. the value of a {@link ParameterValue} is changed)
+	 */
+	void fireChangeEvent();
+	
+	/**
+	 * Fire a event of the provided type
+	 */
+	void fireEvent(AnimationEvent.Type type);
 }
