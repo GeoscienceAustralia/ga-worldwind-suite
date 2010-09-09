@@ -8,13 +8,12 @@ import gov.nasa.worldwind.layers.Layer;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.event.ChangeListener;
-
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
+import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.util.Changeable;
 import au.gov.ga.worldwind.animator.util.Nameable;
 
 /**
@@ -30,7 +29,7 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Animation extends XmlSerializable<Animation>, ChangeListener, Changeable, Nameable
+public interface Animation extends XmlSerializable<Animation>, AnimationEventListener, Changeable, Nameable
 {
 
 	/**

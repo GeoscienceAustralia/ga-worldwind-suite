@@ -5,11 +5,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
+import au.gov.ga.worldwind.animator.animation.event.AnimatableObjectEventImpl;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
+import au.gov.ga.worldwind.animator.animation.event.ChangeableBase;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.animator.util.ChangeableBase;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -74,14 +75,20 @@ public abstract class AnimatableBase extends ChangeableBase implements Animatabl
 	}
 	
 	@Override
-	public void stateChanged(ChangeEvent e)
+	public void receiveAnimationEvent(AnimationEvent event)
 	{
-		// Propagate the change upwards
-		List<ChangeListener> listeners = getChangeListeners();
+		AnimationEvent newEvent = createEvent(null, event, null);
+		List<AnimationEventListener> listeners = getChangeListeners();
 		for (int i = listeners.size() - 1; i >= 0; i--)
 		{
-			listeners.get(i).stateChanged(e);
+			listeners.get(i).receiveAnimationEvent(newEvent);
 		}
+	}
+	
+	@Override
+	protected AnimationEvent createEvent(Type type, AnimationEvent cause, Object value)
+	{
+		return new AnimatableObjectEventImpl(this, type, cause, value);
 	}
 
 }

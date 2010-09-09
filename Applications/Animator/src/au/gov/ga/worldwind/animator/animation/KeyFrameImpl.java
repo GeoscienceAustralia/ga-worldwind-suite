@@ -10,12 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
+import au.gov.ga.worldwind.animator.animation.event.ChangeableBase;
+import au.gov.ga.worldwind.animator.animation.event.KeyFrameEventImpl;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.util.ChangeableBase;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -118,8 +119,10 @@ public class KeyFrameImpl extends ChangeableBase implements KeyFrame
 	{
 		if (parameterValueMap.containsKey(p))
 		{
-			parameterValueMap.get(p).removeChangeListener(this);
+			ParameterValue valueToBeRemoved = parameterValueMap.get(p);
+			valueToBeRemoved.removeChangeListener(this);
 			parameterValueMap.remove(p);
+			fireRemoveEvent(valueToBeRemoved);
 		}
 	}
 	
@@ -146,6 +149,8 @@ public class KeyFrameImpl extends ChangeableBase implements KeyFrame
 			
 			this.parameterValueMap.put(value.getOwner(), value);
 			value.addChangeListener(this);
+			
+			fireAddEvent(value);
 		}
 	}
 	
@@ -172,14 +177,20 @@ public class KeyFrameImpl extends ChangeableBase implements KeyFrame
 	}
 	
 	@Override
-	public void stateChanged(ChangeEvent e)
+	public void receiveAnimationEvent(AnimationEvent event)
 	{
-		// Propagate the change upwards
-		List<ChangeListener> listeners = getChangeListeners();
+		AnimationEvent newEvent = createEvent(null, event, null);
+		List<AnimationEventListener> listeners = getChangeListeners();
 		for (int i = listeners.size() - 1; i >= 0; i--)
 		{
-			listeners.get(i).stateChanged(e);
+			listeners.get(i).receiveAnimationEvent(newEvent);
 		}
+	}
+	
+	@Override
+	protected AnimationEvent createEvent(Type type, AnimationEvent cause, Object value)
+	{
+		return new KeyFrameEventImpl(this, type, cause, value);
 	}
 	
 }

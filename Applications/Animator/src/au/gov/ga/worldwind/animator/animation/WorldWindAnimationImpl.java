@@ -13,20 +13,19 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
+import au.gov.ga.worldwind.animator.animation.event.ChangeableBase;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.util.ChangeableBase;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
@@ -258,7 +257,7 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 		
 		if (changed)
 		{
-			notifyChange();
+			fireChangeEvent(newCount);
 		}
 	}
 
@@ -337,7 +336,7 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 			smoothKeyFrames(keyFrame);
 		}
 		
-		notifyChange();
+		fireAddEvent(keyFrame);
 	}
 	
 	/**
@@ -421,7 +420,7 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 				lookAtElevationFrame.getValueForParameter(renderCamera.getLookAtElevation()).smooth();
 			}
 			
-			notifyChange();
+			fireChangeEvent(null);
 		}
 	}
 
@@ -538,9 +537,10 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 	{
 		if (this.keyFrameMap.containsKey(frame))
 		{
-			this.keyFrameMap.get(frame).removeChangeListener(this);
+			KeyFrame frameToRemove = this.keyFrameMap.get(frame);
+			frameToRemove.removeChangeListener(this);
 			this.keyFrameMap.remove(frame);
-			notifyChange();
+			fireRemoveEvent(frameToRemove);
 		}
 	}
 	
@@ -556,7 +556,7 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 		{
 			keyFrame.removeChangeListener(this);
 			keyFrameMap.remove(keyFrame.getFrame());
-			notifyChange();
+			fireRemoveEvent(keyFrame);
 		}
 		
 	}
@@ -695,13 +695,13 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 	}
 	
 	@Override
-	public void stateChanged(ChangeEvent e)
+	public void receiveAnimationEvent(AnimationEvent event)
 	{
-		// Propagate the change upwards
-		List<ChangeListener> listeners = getChangeListeners();
+		AnimationEvent newEvent = createEvent(null, event, null);
+		List<AnimationEventListener> listeners = getChangeListeners();
 		for (int i = listeners.size() - 1; i >= 0; i--)
 		{
-			listeners.get(i).stateChanged(e);
+			listeners.get(i).receiveAnimationEvent(newEvent);
 		}
 	}
 	
