@@ -65,7 +65,7 @@ public class BasicParameterValue extends ChangeableBase implements ParameterValu
 		
 		if (changed)
 		{
-			fireChangeEvent();
+			fireChangeEvent(value);
 		}
 	}
 
@@ -96,7 +96,7 @@ public class BasicParameterValue extends ChangeableBase implements ParameterValu
 		
 		if (changed)
 		{
-			fireChangeEvent();
+			fireChangeEvent(frame);
 		}
 	}
 	

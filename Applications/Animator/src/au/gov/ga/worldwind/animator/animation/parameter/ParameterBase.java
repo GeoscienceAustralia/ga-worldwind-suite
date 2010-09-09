@@ -255,7 +255,7 @@ public abstract class ParameterBase extends ChangeableBase implements Parameter
 	@Override
 	public void receiveAnimationEvent(AnimationEvent event)
 	{
-		AnimationEvent newEvent = createEvent(null, event);
+		AnimationEvent newEvent = createEvent(null, event, null);
 		List<AnimationEventListener> listeners = getChangeListeners();
 		for (int i = listeners.size() - 1; i >= 0; i--)
 		{
@@ -264,8 +264,8 @@ public abstract class ParameterBase extends ChangeableBase implements Parameter
 	}
 	
 	@Override
-	protected AnimationEvent createEvent(Type type, AnimationEvent cause)
+	protected AnimationEvent createEvent(Type type, AnimationEvent cause, Object value)
 	{
-		return new ParameterEventImpl(type, this, cause);
+		return new ParameterEventImpl(this, type, cause, value);
 	}
 }
