@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.animator.animation.event;
 
+
 /**
  * A super-interface for events that can occur within an animation.
  * <p/>
@@ -45,7 +46,7 @@ public interface AnimationEvent
 	 * 
 	 * @return the ultimate cause in the causal chain.
 	 */
-	AnimationEvent getUltimateCause();
+	AnimationEvent getRootCause();
 	
 	/**
 	 * @return The type of event this instance represents
@@ -64,10 +65,17 @@ public interface AnimationEvent
 	Object getValue();
 	
 	/**
+	 * @return Whether this event is of the provided type
+	 */
+	boolean isOfType(Type type);
+	
+	/**
 	 * The valid types of events
 	 */
 	public static enum Type
 	{
 		ADD, REMOVE, CHANGE, OTHER;
 	}
+
+	
 }

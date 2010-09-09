@@ -64,13 +64,13 @@ public class AnimationEventImpl implements AnimationEvent
 	}
 
 	@Override
-	public AnimationEvent getUltimateCause()
+	public AnimationEvent getRootCause()
 	{
 		if (cause == null)
 		{
 			return this;
 		}
-		return cause.getUltimateCause();
+		return cause.getRootCause();
 	}
 
 	@Override
@@ -89,6 +89,12 @@ public class AnimationEventImpl implements AnimationEvent
 	public Object getValue()
 	{
 		return value;
+	}
+	
+	@Override
+	public boolean isOfType(Type type)
+	{
+		return this.type == type;
 	}
 	
 	@Override
