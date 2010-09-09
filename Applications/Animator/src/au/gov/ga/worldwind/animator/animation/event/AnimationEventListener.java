@@ -10,8 +10,8 @@ public interface AnimationEventListener
 {
 
 	/**
-	 * Signal for this listener to respond to the supplied event
+	 * Push the supplied event to this listener
 	 */
-	void signalEvent(AnimationEvent event);
+	void receiveAnimationEvent(AnimationEvent event);
 	
 }

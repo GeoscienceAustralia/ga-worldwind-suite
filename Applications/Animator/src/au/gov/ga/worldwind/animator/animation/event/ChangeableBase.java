@@ -73,7 +73,7 @@ public abstract class ChangeableBase implements Changeable
 		AnimationEvent event = createEvent(type, null);
 		for (int i = changeListeners.size() - 1; i >= 0; i--)
 		{
-			changeListeners.get(i).signalEvent(event);
+			changeListeners.get(i).receiveAnimationEvent(event);
 		}
 		
 	}
