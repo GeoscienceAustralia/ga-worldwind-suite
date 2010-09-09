@@ -3,6 +3,8 @@ package au.gov.ga.worldwind.animator.animation.event;
 import java.util.ArrayList;
 import java.util.List;
 
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
+
 
 /**
  * A convenience base implementation of the {@link Changeable} interface.
