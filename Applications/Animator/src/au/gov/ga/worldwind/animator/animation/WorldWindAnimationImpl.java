@@ -677,13 +677,14 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 					{
 						continue;
 					}
-					result.animatableObjects.add(animatable);
+					result.addAnimatableObject(animatable);
 					
 					// If this is the camera, set it as the render camera
 					if (animatable instanceof Camera)
 					{
 						result.renderCamera = (Camera)animatable;
 					}
+					
 				}
 				
 				return result;

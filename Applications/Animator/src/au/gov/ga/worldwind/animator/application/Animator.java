@@ -1114,6 +1114,15 @@ public class Animator
 			useScaledZoomAction.setSelected(animation.isZoomScalingRequired());
 		}
 		updateLayersInModel();
+		updateSideBar();
+	}
+
+	/**
+	 * Update the sidebar panels to reflect any changes in the animation structure.
+	 */
+	private void updateSideBar()
+	{
+		sideBar.refreshPanels(new ChangeEvent(animation));
 	}
 
 	/**

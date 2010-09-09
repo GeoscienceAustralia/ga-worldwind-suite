@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.event.ChangeEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
@@ -79,6 +80,18 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		objectTree = new NameableTree(treeModel);
 		objectTree.setEditable(true);
 		objectTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+	}
+	
+	@Override
+	public void refreshView(ChangeEvent e)
+	{
+		if (e != null && e.getSource() instanceof Animation)
+		{
+			this.animation = (Animation)e.getSource();
+			treeModel = new AnimationTreeModel(animation);
+			objectTree.setModel(treeModel);
+		}
+		objectTree.validate();
 	}
 	
 	/**

@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.event.ChangeEvent;
 
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitConstraints;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
@@ -30,6 +31,9 @@ public class SideBar extends JPanel
 	
 	/** The list groups attached to the collapsible pane */
 	private List<CollapsibleGroup> groups = new ArrayList<CollapsibleGroup>();
+	
+	/** The panels backing the collapsible pane */
+	private List<CollapsiblePanel> panels = new ArrayList<CollapsiblePanel>();
 	
 	/** 
 	 * The parent of the side bar. 
@@ -58,6 +62,7 @@ public class SideBar extends JPanel
 		addPanels(panels);
 
 		add(containerPane, BorderLayout.CENTER);
+		
 		refreshVisibility();
 	}
 
@@ -84,6 +89,8 @@ public class SideBar extends JPanel
 
 			containerPane.add(group, c);
 			groups.add(group);
+			
+			this.panels.add(panel);
 		}
 	}
 
@@ -119,6 +126,17 @@ public class SideBar extends JPanel
 			}
 		}
 		validate();
+	}
+
+	/**
+	 * Refresh the panels contained within the sidebar
+	 */
+	public void refreshPanels(ChangeEvent e)
+	{
+		for (CollapsiblePanel panel : panels)
+		{
+			panel.refreshView(e);
+		}
 	}
 
 }

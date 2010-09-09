@@ -81,6 +81,8 @@ public class AnimationLayerLoader
 		params.setValue(AVKeyMore.CONTEXT_URL, url);
 		
 		Layer result = (Layer)layerFactory.createFromConfigSource(element, params);
+		result.setValue(AVKeyMore.CONTEXT_URL, url);
+		result.setEnabled(true);
 		
 		return (Layer)result;
 	}
