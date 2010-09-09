@@ -1,9 +1,7 @@
-package au.gov.ga.worldwind.animator.util;
+package au.gov.ga.worldwind.animator.animation.event;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
-import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
-import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 
 /**

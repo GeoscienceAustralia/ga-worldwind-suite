@@ -1,12 +1,8 @@
-package au.gov.ga.worldwind.animator.util;
+package au.gov.ga.worldwind.animator.animation.event;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
-import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
-import au.gov.ga.worldwind.animator.animation.event.AnimationEventImpl;
-import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 
 /**
  * A convenience base implementation of the {@link Changeable} interface.
