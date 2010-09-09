@@ -17,9 +17,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
-import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
-import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
-import au.gov.ga.worldwind.animator.animation.event.ChangeableBase;
+import au.gov.ga.worldwind.animator.animation.event.PropagatingChangeableEventListener;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
@@ -39,7 +37,7 @@ import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class WorldWindAnimationImpl extends ChangeableBase implements Animation
+public class WorldWindAnimationImpl extends PropagatingChangeableEventListener implements Animation
 {
 	/** The default number of frames for an animation */
 	private static final int DEFAULT_FRAME_COUNT = 100;
@@ -692,17 +690,6 @@ public class WorldWindAnimationImpl extends ChangeableBase implements Animation
 		}
 		
 		return null;
-	}
-	
-	@Override
-	public void receiveAnimationEvent(AnimationEvent event)
-	{
-		AnimationEvent newEvent = createEvent(null, event, null);
-		List<AnimationEventListener> listeners = getChangeListeners();
-		for (int i = listeners.size() - 1; i >= 0; i--)
-		{
-			listeners.get(i).receiveAnimationEvent(newEvent);
-		}
 	}
 	
 	@Override

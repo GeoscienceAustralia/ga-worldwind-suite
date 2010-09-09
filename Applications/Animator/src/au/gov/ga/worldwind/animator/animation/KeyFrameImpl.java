@@ -7,14 +7,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
-import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
-import au.gov.ga.worldwind.animator.animation.event.ChangeableBase;
 import au.gov.ga.worldwind.animator.animation.event.KeyFrameEventImpl;
+import au.gov.ga.worldwind.animator.animation.event.PropagatingChangeableEventListener;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -26,7 +24,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class KeyFrameImpl extends ChangeableBase implements KeyFrame
+public class KeyFrameImpl extends PropagatingChangeableEventListener implements KeyFrame
 {
 	private static final long serialVersionUID = 20100819L;
 
@@ -174,17 +172,6 @@ public class KeyFrameImpl extends ChangeableBase implements KeyFrame
 	public boolean hasParameterValues()
 	{
 		return !parameterValueMap.isEmpty();
-	}
-	
-	@Override
-	public void receiveAnimationEvent(AnimationEvent event)
-	{
-		AnimationEvent newEvent = createEvent(null, event, null);
-		List<AnimationEventListener> listeners = getChangeListeners();
-		for (int i = listeners.size() - 1; i >= 0; i--)
-		{
-			listeners.get(i).receiveAnimationEvent(newEvent);
-		}
 	}
 	
 	@Override

@@ -16,9 +16,8 @@ import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
-import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
-import au.gov.ga.worldwind.animator.animation.event.ChangeableBase;
 import au.gov.ga.worldwind.animator.animation.event.ParameterEventImpl;
+import au.gov.ga.worldwind.animator.animation.event.PropagatingChangeableEventListener;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
@@ -34,7 +33,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public abstract class ParameterBase extends ChangeableBase implements Parameter
+public abstract class ParameterBase extends PropagatingChangeableEventListener implements Parameter
 {
 	private static final long serialVersionUID = 20100819L;
 
@@ -251,17 +250,6 @@ public abstract class ParameterBase extends ChangeableBase implements Parameter
 	 * @return A new instance of this parameter
 	 */
 	protected abstract ParameterBase createParameter(AVList context);
-	
-	@Override
-	public void receiveAnimationEvent(AnimationEvent event)
-	{
-		AnimationEvent newEvent = createEvent(null, event, null);
-		List<AnimationEventListener> listeners = getChangeListeners();
-		for (int i = listeners.size() - 1; i >= 0; i--)
-		{
-			listeners.get(i).receiveAnimationEvent(newEvent);
-		}
-	}
 	
 	@Override
 	protected AnimationEvent createEvent(Type type, AnimationEvent cause, Object value)

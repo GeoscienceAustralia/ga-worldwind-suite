@@ -3,13 +3,11 @@ package au.gov.ga.worldwind.animator.animation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import au.gov.ga.worldwind.animator.animation.event.AnimatableObjectEventImpl;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
-import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
-import au.gov.ga.worldwind.animator.animation.event.ChangeableBase;
+import au.gov.ga.worldwind.animator.animation.event.PropagatingChangeableEventListener;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -21,7 +19,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public abstract class AnimatableBase extends ChangeableBase implements Animatable
+public abstract class AnimatableBase extends PropagatingChangeableEventListener implements Animatable
 {
 	private static final long serialVersionUID = 20100823L;
 
@@ -72,17 +70,6 @@ public abstract class AnimatableBase extends ChangeableBase implements Animatabl
 			}
 		}
 		return result;
-	}
-	
-	@Override
-	public void receiveAnimationEvent(AnimationEvent event)
-	{
-		AnimationEvent newEvent = createEvent(null, event, null);
-		List<AnimationEventListener> listeners = getChangeListeners();
-		for (int i = listeners.size() - 1; i >= 0; i--)
-		{
-			listeners.get(i).receiveAnimationEvent(newEvent);
-		}
 	}
 	
 	@Override
