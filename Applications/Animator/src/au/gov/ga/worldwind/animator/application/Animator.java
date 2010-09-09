@@ -1209,55 +1209,61 @@ public class Animator
 	 */
 	public void open(File animationFile, boolean promptForSave)
 	{
-		if (!promptForSave || querySave())
+		if (promptForSave)
 		{
-			Animation oldAnimation = animation;
-			try
+			boolean continueWithOpen = querySave();
+			if (!continueWithOpen)
 			{
-				XmlAnimationReader animationReader = new XmlAnimationReader();
-				
-				// Check the file version and display appropriate messages
-				AnimationFileVersion version = animationReader.getFileVersion(animationFile);
-				if (version == null)
+				return;
+			}
+		}
+		
+		Animation oldAnimation = animation;
+		try
+		{
+			XmlAnimationReader animationReader = new XmlAnimationReader();
+			
+			// Check the file version and display appropriate messages
+			AnimationFileVersion version = animationReader.getFileVersion(animationFile);
+			if (version == null)
+			{
+				promptUserOpenFailed(animationFile);
+				return;
+			}
+			if (version == AnimationFileVersion.VERSION010)
+			{
+				int response = promptUserConfirmV1Load(animationFile);
+				if (response == JOptionPane.NO_OPTION)
 				{
-					promptUserOpenFailed(animationFile);
 					return;
 				}
-				if (version == AnimationFileVersion.VERSION010)
-				{
-					int response = promptUserConfirmV1Load(animationFile);
-					if (response == JOptionPane.NO_OPTION)
-					{
-						return;
-					}
-				}
-				
-				// Load the file
-				Animation newAnimation = animationReader.readAnimation(animationFile, wwd);
-				if (version == AnimationFileVersion.VERSION010)
-				{
-					addDefaultLayersToAnimation(newAnimation);
-				}
-				
-				setAnimation(newAnimation);
-				setFile(animationFile);
-				
-				animation.applyFrame(0);
-				setSlider(0);
-				
-				resetChanged();
-				updateSlider();
-				
-				updateRecentFiles(animationFile);
 			}
-			catch (Exception e)
+			
+			// Load the file
+			Animation newAnimation = animationReader.readAnimation(animationFile, wwd);
+			if (version == AnimationFileVersion.VERSION010)
 			{
-				setAnimation(oldAnimation);
-				updateSlider();
-				
-				ExceptionLogger.logException(e);
-				promptUserOpenFailed(animationFile);
+				addDefaultLayersToAnimation(newAnimation);
 			}
+			
+			setAnimation(newAnimation);
+			setFile(animationFile);
+			
+			animation.applyFrame(0);
+			setSlider(0);
+			
+			resetChanged();
+			updateSlider();
+			
+			updateRecentFiles(animationFile);
+		}
+		catch (Exception e)
+		{
+			setAnimation(oldAnimation);
+			updateSlider();
+			
+			ExceptionLogger.logException(e);
+			promptUserOpenFailed(animationFile);
 		}
 	}
 
@@ -1400,6 +1406,7 @@ public class Animator
 		animation.removeChangeListener(animationChangeListener);
 		animation.addChangeListener(animationChangeListener);
 		changed = false;
+		setTitleBar();
 	}
 
 	/**
@@ -1465,6 +1472,7 @@ public class Animator
 		}
 		slider.setMin(0);
 		slider.setMax(animation.getFrameCount());
+		slider.repaint();
 	}
 
 	private void setSlider(int frame)
