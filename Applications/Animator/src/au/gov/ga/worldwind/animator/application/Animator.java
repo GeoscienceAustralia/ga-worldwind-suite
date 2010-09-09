@@ -65,6 +65,8 @@ import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationWriter;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
@@ -191,7 +193,7 @@ public class Animator
 	private boolean settingSlider = false;
 	
 	/** A listener that updates the 'changed' status when animation change is detected */
-	private ChangeListener animationChangeListener;
+	private AnimationEventListener animationChangeListener;
 
 	// The layers used in the application
 	private DetailedElevationModel dem;
@@ -540,12 +542,14 @@ public class Animator
 	 */
 	private void initialiseChangeListener()
 	{
-		animationChangeListener = new ChangeListener()
+		animationChangeListener = new AnimationEventListener()
 		{
-			public void stateChanged(ChangeEvent e)
+			@Override
+			public void receiveAnimationEvent(AnimationEvent event)
 			{
 				changed = true;
 				setTitleBar();
+				
 			}
 		};
 	}
