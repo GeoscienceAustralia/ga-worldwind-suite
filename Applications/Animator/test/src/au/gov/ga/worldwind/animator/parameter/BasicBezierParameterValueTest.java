@@ -6,13 +6,12 @@ package au.gov.ga.worldwind.animator.parameter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import javax.swing.event.ChangeEvent;
-
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Before;
 import org.junit.Test;
 
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.BasicParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
@@ -40,7 +39,7 @@ public class BasicBezierParameterValueTest
 		
 		this.owner = context.mock(Parameter.class);
 		context.checking(new Expectations(){{
-			atLeast(1).of(owner).stateChanged(with(any(ChangeEvent.class)));
+			atLeast(1).of(owner).receiveAnimationEvent(with(any(AnimationEvent.class)));
 		}});
 	}
 	

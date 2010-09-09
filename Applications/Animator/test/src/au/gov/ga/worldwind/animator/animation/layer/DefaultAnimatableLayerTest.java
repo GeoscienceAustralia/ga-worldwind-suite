@@ -13,9 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -140,6 +138,8 @@ public class DefaultAnimatableLayerTest
 		AnimationFileVersion versionId = AnimationFileVersion.VERSION020;
 		Element element = WWXML.openDocument(getClass().getResourceAsStream("animatableLayerXmlSnippet.xml")).getDocumentElement();
 		
+		setLayerUrlExpectation(new URL("file://marl/sandpit/symbolic-links/world-wind/current/dataset/ga/gravity/edition3/gravity.xml"));
+		setLayerEnabledExpectation();
 		layerFactory.setResult(layer);
 		
 		DefaultAnimatableLayer result = (DefaultAnimatableLayer)classToBeTested.fromXml(element, versionId, context);
@@ -166,6 +166,21 @@ public class DefaultAnimatableLayerTest
 		assertNotNull(v10);
 		assertEquals(1.0, v10.getValue(), 0.001);
 		
+	}
+
+	private void setLayerEnabledExpectation()
+	{
+		mockContext.checking(new Expectations(){{
+			atLeast(1).of(layer).setEnabled(with(true));
+		}});
+		
+	}
+
+	private void setLayerUrlExpectation(final URL url) throws Exception
+	{
+		mockContext.checking(new Expectations(){{
+			atLeast(1).of(layer).setValue(with(AVKeyMore.CONTEXT_URL), with(url));
+		}});
 	}
 
 	private void addKeyFrame(int frame, double value, LayerParameter layerParameter)

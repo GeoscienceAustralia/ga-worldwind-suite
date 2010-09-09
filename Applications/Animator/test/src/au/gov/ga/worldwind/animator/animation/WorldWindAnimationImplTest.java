@@ -1,19 +1,19 @@
 package au.gov.ga.worldwind.animator.animation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import gov.nasa.worldwind.WorldWindow;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.event.ChangeEvent;
-
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Before;
 import org.junit.Test;
 
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.parameter.BasicParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -56,7 +56,7 @@ public class WorldWindAnimationImplTest
 		{
 			final Parameter parameter = mockContext.mock(Parameter.class, "Parameter" + i);
 			mockContext.checking(new Expectations(){{
-				oneOf(parameter).stateChanged(with(any(ChangeEvent.class)));
+				oneOf(parameter).receiveAnimationEvent(with(any(AnimationEvent.class)));
 			}});
 			testParameters.add(parameter);
 		}

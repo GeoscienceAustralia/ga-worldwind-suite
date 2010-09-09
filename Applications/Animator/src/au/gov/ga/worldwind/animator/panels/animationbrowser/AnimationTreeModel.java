@@ -3,8 +3,6 @@ package au.gov.ga.worldwind.animator.panels.animationbrowser;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
@@ -12,6 +10,11 @@ import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.event.AnimatableObjectEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
+import au.gov.ga.worldwind.animator.animation.event.ParameterEvent;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -19,7 +22,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class AnimationTreeModel implements TreeModel, ChangeListener
+public class AnimationTreeModel implements TreeModel, AnimationEventListener
 {
 	/** The animation backing this tree model */
 	private Animation animation;
@@ -123,17 +126,25 @@ public class AnimationTreeModel implements TreeModel, ChangeListener
 	}
 
 	@Override
-	public void stateChanged(ChangeEvent e)
+	public void receiveAnimationEvent(AnimationEvent event)
 	{
-		// If the change came from a parameter or animatable object,
-		// fire a potential tree change
-		if ((e.getSource() instanceof Animatable) || (e.getSource() instanceof Parameter) || (e.getSource() instanceof Animation))
+		if (isStructuralEvent(event))
 		{
-			notifyTreeChanged(e.getSource());
+			notifyTreeChanged(event.getRootCause().getValue());
 		}
-
 	}
 	
+	private boolean isStructuralEvent(AnimationEvent event)
+	{
+		if (event == null)
+		{
+			return false;
+		}
+		AnimationEvent rootCause = event.getRootCause();
+		return ((rootCause.isOfType(Type.ADD) || rootCause.isOfType(Type.REMOVE)) &&
+				(rootCause instanceof ParameterEvent || rootCause instanceof AnimatableObjectEvent));
+	}
+
 	protected void notifyTreeChanged(Object source)
 	{
 		TreeModelEvent e = new TreeModelEvent(source, new Object[]{animation});
