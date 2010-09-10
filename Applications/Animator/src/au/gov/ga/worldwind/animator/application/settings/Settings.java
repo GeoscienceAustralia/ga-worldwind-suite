@@ -168,7 +168,7 @@ public class Settings
 	{
 		List<LayerIdentifier> loadedIdentifiers = new ArrayList<LayerIdentifier>();
 		Integer layerCount = WWXML.getInteger(rootElement, "count(//knownLayers/layer)", null);
-		for (int i = layerCount - 1; i >= 0; i--)
+		for (int i = 0; i < layerCount ; i++)
 		{
 			String layerName = WWXML.getText(rootElement, "//knownLayers/layer[@index='" + i + "']/@name");
 			String layerUrl = WWXML.getText(rootElement, "//knownLayers/layer[@index='" + i + "']/@url");
@@ -188,7 +188,7 @@ public class Settings
 	{
 		List<LayerIdentifier> loadedIdentifiers = new ArrayList<LayerIdentifier>();
 		Integer layerCount = WWXML.getInteger(rootElement, "count(//defaultLayers/layer)", null);
-		for (int i = layerCount - 1; i >= 0; i--)
+		for (int i = 0; i < layerCount ; i++)
 		{
 			String layerName = WWXML.getText(rootElement, "//defaultLayers/layer[@index='" + i + "']/@name");
 			String layerUrl = WWXML.getText(rootElement, "//defaultLayers/layer[@index='" + i + "']/@url");
