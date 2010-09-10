@@ -6,9 +6,9 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.ViewControlsLayer;
 import gov.nasa.worldwind.layers.ViewControlsSelectListener;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemeHUD;
 import au.gov.ga.worldwind.viewer.theme.Theme;
-import au.gov.ga.worldwind.viewer.util.Icons;
 
 public class ControlsHUD extends AbstractThemeHUD
 {

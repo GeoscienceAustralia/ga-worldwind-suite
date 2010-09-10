@@ -39,8 +39,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import au.gov.ga.worldwind.common.ui.FlatJButton;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.Util;
-import au.gov.ga.worldwind.viewer.util.Icons;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public class GoToCoordinatePanel extends JPanel

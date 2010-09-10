@@ -2,9 +2,9 @@ package au.gov.ga.worldwind.viewer.panels.layers;
 
 import javax.swing.Icon;
 
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemeLayer;
-import au.gov.ga.worldwind.viewer.util.Icons;
 
 public class ThemeLayersPanel extends AbstractLayersPanel
 {

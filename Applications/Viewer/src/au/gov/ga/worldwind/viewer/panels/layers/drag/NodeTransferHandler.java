@@ -15,13 +15,13 @@ import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.dataset.LayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.layers.INode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTree;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTreeModel;
-import au.gov.ga.worldwind.viewer.util.Icons;
 
 public class NodeTransferHandler extends TransferHandler
 {

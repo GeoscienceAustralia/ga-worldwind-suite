@@ -2,8 +2,8 @@ package au.gov.ga.worldwind.viewer.theme.hud;
 
 import javax.swing.Icon;
 
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemeHUD;
-import au.gov.ga.worldwind.viewer.util.Icons;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 

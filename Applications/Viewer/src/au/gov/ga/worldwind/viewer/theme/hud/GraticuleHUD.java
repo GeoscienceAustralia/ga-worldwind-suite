@@ -4,8 +4,8 @@ import javax.swing.Icon;
 
 import gov.nasa.worldwind.layers.LatLonGraticuleLayer;
 import gov.nasa.worldwind.layers.Layer;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemeHUD;
-import au.gov.ga.worldwind.viewer.util.Icons;
 
 public class GraticuleHUD extends AbstractThemeHUD
 {

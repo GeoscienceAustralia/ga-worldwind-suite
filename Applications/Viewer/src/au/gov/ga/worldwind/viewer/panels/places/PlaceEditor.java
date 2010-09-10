@@ -34,8 +34,8 @@ import javax.swing.event.DocumentListener;
 
 import au.gov.ga.worldwind.common.ui.FlatJButton;
 import au.gov.ga.worldwind.common.ui.JDoubleField;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.Util;
-import au.gov.ga.worldwind.viewer.util.Icons;
 
 
 public class PlaceEditor extends JDialog

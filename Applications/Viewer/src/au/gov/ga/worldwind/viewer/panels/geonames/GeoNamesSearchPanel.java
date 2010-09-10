@@ -45,13 +45,13 @@ import javax.swing.event.DocumentListener;
 
 import au.gov.ga.worldwind.common.ui.FlatJButton;
 import au.gov.ga.worldwind.common.util.HSLColor;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.viewer.panels.geonames.GeoNamesSearch.Results;
 import au.gov.ga.worldwind.viewer.panels.geonames.GeoNamesSearch.SearchType;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
-import au.gov.ga.worldwind.viewer.util.Icons;
 
 public class GeoNamesSearchPanel extends AbstractThemePanel
 {

@@ -34,11 +34,11 @@ import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.resizabletoolbar.ResizableToolBar;
 import au.gov.ga.worldwind.common.util.FlyToSectorAnimator;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerEnabler.RefreshListener;
 import au.gov.ga.worldwind.viewer.retrieve.LayerTreeRetrievalListener;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
-import au.gov.ga.worldwind.viewer.util.Icons;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public abstract class AbstractLayersPanel extends AbstractThemePanel

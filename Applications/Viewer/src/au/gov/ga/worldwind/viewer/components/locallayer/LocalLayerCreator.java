@@ -52,12 +52,12 @@ import au.gov.ga.worldwind.common.layers.tiled.image.delegate.transparentcolor.T
 import au.gov.ga.worldwind.common.ui.JDoubleField;
 import au.gov.ga.worldwind.common.ui.JIntegerField;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.dataset.LayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel.LayerDefinitionFileFilter;
-import au.gov.ga.worldwind.viewer.util.Icons;
 
 public class LocalLayerCreator extends JDialog
 {

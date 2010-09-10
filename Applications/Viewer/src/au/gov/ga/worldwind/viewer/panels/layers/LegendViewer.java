@@ -17,7 +17,7 @@ import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 
 import au.gov.ga.worldwind.common.ui.ScrollableImage;
-import au.gov.ga.worldwind.viewer.util.Icons;
+import au.gov.ga.worldwind.common.util.Icons;
 
 public class LegendViewer
 {

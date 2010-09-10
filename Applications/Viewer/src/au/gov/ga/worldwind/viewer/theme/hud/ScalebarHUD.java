@@ -4,8 +4,8 @@ import javax.swing.Icon;
 
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.ScalebarLayer;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemeHUD;
-import au.gov.ga.worldwind.viewer.util.Icons;
 
 public class ScalebarHUD extends AbstractThemeHUD
 {

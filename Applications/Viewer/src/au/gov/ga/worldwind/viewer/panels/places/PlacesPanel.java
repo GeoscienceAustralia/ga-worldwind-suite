@@ -49,10 +49,10 @@ import javax.swing.filechooser.FileFilter;
 
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.util.HSLColor;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
-import au.gov.ga.worldwind.viewer.util.Icons;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public class PlacesPanel extends AbstractThemePanel

@@ -27,6 +27,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.components.lazytree.ILazyTreeObject;
 import au.gov.ga.worldwind.viewer.components.lazytree.LazyLoadListener;
 import au.gov.ga.worldwind.viewer.panels.dataset.DatasetPanel;
@@ -38,7 +39,6 @@ import au.gov.ga.worldwind.viewer.panels.dataset.LayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.layers.drag.NodeTransferHandler;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel;
-import au.gov.ga.worldwind.viewer.util.Icons;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public class LayersPanel extends AbstractLayersPanel

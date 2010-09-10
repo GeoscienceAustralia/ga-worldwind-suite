@@ -10,8 +10,8 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTreeModel;
-import au.gov.ga.worldwind.viewer.util.Icons;
 
 public class DatasetCellRenderer extends AbstractCellRenderer<IData, ILayerDefinition>
 {
