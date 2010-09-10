@@ -10,6 +10,7 @@ import java.net.URL;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegateFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.URLRequesterDelegate;
@@ -38,6 +39,29 @@ public class AnimationLayerLoader
 	{
 		DelegateFactory.registerDelegate(ImmediateRequesterDelegate.class);
 		DelegateFactory.registerReplacementClass(URLRequesterDelegate.class, ImmediateRequesterDelegate.class);
+	}
+	
+	/**
+	 * Load the layer identified by the provided identifier.
+	 * 
+	 * @param identifier The identifier that specifies the layer to open
+	 * 
+	 * @return The layer identified by the provided identifier.
+	 */
+	public static Layer loadLayer(LayerIdentifier identifier)
+	{
+		URL sourceUrl = null;
+		try
+		{
+			sourceUrl = new URL(identifier.getLocation());
+		}
+		catch (MalformedURLException e)
+		{
+			throw new IllegalArgumentException("Unable to locate Layer '"+ identifier.getName() +"' at provided location '" + identifier.getLocation() + "'", e);
+		}
+		Layer loadedLayer = loadLayer(sourceUrl);
+		loadedLayer.setName(identifier.getName());
+		return loadedLayer;
 	}
 	
 	/**

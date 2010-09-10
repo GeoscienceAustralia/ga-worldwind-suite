@@ -12,6 +12,8 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
+import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierImpl;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.Util;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -71,7 +73,8 @@ public class Settings
 			saveLastUsedLocation(rootElement);
 			saveRecentFilesList(rootElement);
 			saveSplitLocation(rootElement);
-			saveDefaultAnimationLayerUrls(rootElement);
+			saveDefaultAnimationLayers(rootElement);
+			saveKnownLayers(rootElement);
 			
 			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(getUserDirectory(), SETTINGS_FILE_NAME)));
 		}
@@ -81,15 +84,30 @@ public class Settings
 		}
 	}
 
-	private static void saveDefaultAnimationLayerUrls(Element rootElement)
+	private static void saveKnownLayers(Element rootElement)
 	{
-		Element animationLayersContainer = WWXML.appendElement(rootElement, "defaultLayers");
-		List<String> layersList = instance.getDefaultAnimationLayerUrls();
+		Element animationLayersContainer = WWXML.appendElement(rootElement, "knownLayers");
+		List<LayerIdentifier> layersList = instance.getKnownLayers();
 		for (int i = 0; i < layersList.size(); i++)
 		{
 			Element layerElement = WWXML.appendElement(animationLayersContainer, "layer");
 			WWXML.setIntegerAttribute(layerElement, "index", i);
-			WWXML.setTextAttribute(animationLayersContainer, "url", layersList.get(i));
+			WWXML.setTextAttribute(animationLayersContainer, "name", layersList.get(i).getName());
+			WWXML.setTextAttribute(animationLayersContainer, "url", layersList.get(i).getLocation());
+		}
+		
+	}
+
+	private static void saveDefaultAnimationLayers(Element rootElement)
+	{
+		Element animationLayersContainer = WWXML.appendElement(rootElement, "defaultLayers");
+		List<LayerIdentifier> layersList = instance.getDefaultAnimationLayers();
+		for (int i = 0; i < layersList.size(); i++)
+		{
+			Element layerElement = WWXML.appendElement(animationLayersContainer, "layer");
+			WWXML.setIntegerAttribute(layerElement, "index", i);
+			WWXML.setTextAttribute(animationLayersContainer, "name", layersList.get(i).getName());
+			WWXML.setTextAttribute(animationLayersContainer, "url", layersList.get(i).getLocation());
 		}
 	}
 
@@ -127,7 +145,7 @@ public class Settings
 	{
 		instance = new Settings();
 		
-		// If no file is detected, continue with the vanilla instance file
+		// If no file is detected, continue with the vanilla instance
 		File settingsFile = new File(getUserDirectory(), SETTINGS_FILE_NAME);
 		if (!settingsFile.exists())
 		{
@@ -141,24 +159,46 @@ public class Settings
 		loadLastUsedLocation(rootElement);
 		loadRecentFilesList(rootElement);
 		loadSplitLocation(rootElement);
-		loadDefaultAnimationLayerUrls(rootElement);
+		loadDefaultAnimationLayers(rootElement);
+		loadKnownLayers(rootElement);
 	}
 
-	private static void loadDefaultAnimationLayerUrls(Element rootElement)
+	private static void loadKnownLayers(Element rootElement)
 	{
-		List<String> loadedUrls = new ArrayList<String>();
+		List<LayerIdentifier> loadedIdentifiers = new ArrayList<LayerIdentifier>();
+		Integer layerCount = WWXML.getInteger(rootElement, "count(//knownLayers/layer)", null);
+		for (int i = layerCount - 1; i >= 0; i--)
+		{
+			String layerName = WWXML.getText(rootElement, "//knownLayers/layer[@index='" + i + "']/@name");
+			String layerUrl = WWXML.getText(rootElement, "//knownLayers/layer[@index='" + i + "']/@url");
+			if (!Util.isBlank(layerUrl) && !Util.isBlank(layerName))
+			{
+				loadedIdentifiers.add(new LayerIdentifierImpl(layerName, layerUrl));
+			}
+		}
+		if (!loadedIdentifiers.isEmpty())
+		{
+			instance.setKnownLayers(loadedIdentifiers);
+		}
+		
+	}
+
+	private static void loadDefaultAnimationLayers(Element rootElement)
+	{
+		List<LayerIdentifier> loadedIdentifiers = new ArrayList<LayerIdentifier>();
 		Integer layerCount = WWXML.getInteger(rootElement, "count(//defaultLayers/layer)", null);
 		for (int i = layerCount - 1; i >= 0; i--)
 		{
+			String layerName = WWXML.getText(rootElement, "//defaultLayers/layer[@index='" + i + "']/@name");
 			String layerUrl = WWXML.getText(rootElement, "//defaultLayers/layer[@index='" + i + "']/@url");
-			if (!Util.isBlank(layerUrl))
+			if (!Util.isBlank(layerUrl) && !Util.isBlank(layerName))
 			{
-				loadedUrls.add(layerUrl);
+				loadedIdentifiers.add(new LayerIdentifierImpl(layerName, layerUrl));
 			}
 		}
-		if (!loadedUrls.isEmpty())
+		if (!loadedIdentifiers.isEmpty())
 		{
-			instance.setDefaultAnimationLayerUrls(loadedUrls);
+			instance.setDefaultAnimationLayers(loadedIdentifiers);
 		}
 	}
 
@@ -224,12 +264,15 @@ public class Settings
 	private int splitLocation = 300;
 	
 	/** The default set of animation layers to include in new animations */
-	private List<String> defaultAnimationLayerUrls = new ArrayList<String>(Arrays.asList(new String[]{
-			"file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/stars.xml",
-			"file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/sky.xml",
-			"file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/blue_marble.xml",
-			"file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/landsat.xml",
+	private List<LayerIdentifier> defaultAnimationLayers = new ArrayList<LayerIdentifier>(Arrays.asList(new LayerIdentifier[]{
+			new LayerIdentifierImpl("Stars", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/stars.xml"),
+			new LayerIdentifierImpl("Sky", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/sky.xml"),
+			new LayerIdentifierImpl("Blue Marble", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/blue_marble.xml"),
+			new LayerIdentifierImpl("Landsat", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/landsat.xml"),
 	}));
+	
+	/** The list of known layer locations for populating the layer palette */
+	private List<LayerIdentifier> knownLayers = new ArrayList<LayerIdentifier>(defaultAnimationLayers);
 	
 	/**
 	 * Private constructor. Use the Singleton accessor {@link #get()}.
@@ -308,32 +351,59 @@ public class Settings
 	}
 
 	/**
-	 * @return the defaultAnimationLayerUrls
+	 * Set {@link #defaultAnimationLayers}
 	 */
-	public List<String> getDefaultAnimationLayerUrls()
+	public void setDefaultAnimationLayers(List<LayerIdentifier> defaultAnimationLayers)
 	{
-		return defaultAnimationLayerUrls;
-	}
-
-	/**
-	 * @param defaultAnimationLayerUrls the defaultAnimationLayerUrls to set
-	 */
-	public void setDefaultAnimationLayerUrls(List<String> defaultAnimationLayerUrls)
-	{
-		this.defaultAnimationLayerUrls = defaultAnimationLayerUrls;
+		this.defaultAnimationLayers = defaultAnimationLayers;
 	}
 	
 	/**
-	 * Add the provided URL to the list of default animation layer URLs.
+	 * @return {@link #defaultAnimationLayers}
 	 */
-	public void addDefaultAnimationLayerUrl(String url)
+	public List<LayerIdentifier> getDefaultAnimationLayers()
 	{
-		if (url == null || defaultAnimationLayerUrls.contains(url))
+		return defaultAnimationLayers;
+	}
+	
+	/**
+	 * Add the provided layer identifier to the list of default animation layers
+	 */
+	public void addDefaultAnimationLayer(LayerIdentifier layer)
+	{
+		if (defaultAnimationLayers.contains(layer))
 		{
 			return;
 		}
-		defaultAnimationLayerUrls.add(url);
+		defaultAnimationLayers.add(layer);
 	}
 	
+	/**
+	 * @return {@link #knownLayers}
+	 */
+	public List<LayerIdentifier> getKnownLayers()
+	{
+		return knownLayers;
+	}
+	
+	/**
+	 * Set {@link #knownLayers}
+	 */
+	public void setKnownLayers(List<LayerIdentifier> knownLayers)
+	{
+		this.knownLayers = knownLayers;
+	}
+	
+	/**
+	 * Add the provided layer identifier to the list of known layers
+	 */
+	public void addKnownLayer(LayerIdentifier layer)
+	{
+		if (knownLayers.contains(layer))
+		{
+			return;
+		}
+		knownLayers.add(layer);
+	}
 	
 }

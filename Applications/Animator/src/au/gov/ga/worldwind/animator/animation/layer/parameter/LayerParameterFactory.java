@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.animation.layer;
+package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
 import gov.nasa.worldwind.avlist.AVList;
 
@@ -9,8 +9,6 @@ import java.util.Map;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
-import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter;
-import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**

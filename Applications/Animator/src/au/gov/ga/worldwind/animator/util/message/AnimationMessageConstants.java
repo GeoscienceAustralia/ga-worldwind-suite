@@ -480,5 +480,12 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	{
 		return "animator.layer.opacity.name";
 	}
-	
+
+	/**
+	 * @return The key for the layer palette panel name
+	 */
+	public static String getLayerPalettePanelNameKey()
+	{
+		return "animator.gui.panel.layerpalette.title";
+	}
 }

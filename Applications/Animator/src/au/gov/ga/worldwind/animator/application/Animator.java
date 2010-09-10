@@ -73,6 +73,7 @@ import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
+import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
@@ -87,12 +88,12 @@ import au.gov.ga.worldwind.animator.layers.immediate.ImmediateTaskService;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.animator.panels.SideBar;
 import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPanel;
+import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.FrameSlider;
-import au.gov.ga.worldwind.animator.util.Util;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 import au.gov.ga.worldwind.common.ui.BasicAction;
@@ -285,7 +286,9 @@ public class Animator
 	private void initialiseSideBar()
 	{
 		List<CollapsiblePanel> collapsiblePanels = new ArrayList<CollapsiblePanel>();
+		
 		collapsiblePanels.add(new AnimationBrowserPanel(animation));
+		collapsiblePanels.add(new LayerPalettePanel());
 		
 		sideBar = new SideBar(splitPane, collapsiblePanels);
 		splitPane.setLeftComponent(sideBar);
@@ -1155,20 +1158,21 @@ public class Animator
 	 */
 	private void addDefaultLayersToAnimation(Animation animation)
 	{
-		for (String layerUrlString : Settings.get().getDefaultAnimationLayerUrls())
+		for (LayerIdentifier layerIdentifier : Settings.get().getDefaultAnimationLayers())
 		{
-			if (Util.isBlank(layerUrlString))
+			if (layerIdentifier == null)
 			{
 				continue;
 			}
 			
 			try
 			{
-				URL layerUrl = new URL(layerUrlString);
-				Layer loadedLayer = AnimationLayerLoader.loadLayer(layerUrl);
+				new URL(layerIdentifier.getLocation()); // Catch malformed URL exception early so we can report it accurately
+				
+				Layer loadedLayer = AnimationLayerLoader.loadLayer(layerIdentifier);
 				if (loadedLayer == null)
 				{
-					Logging.logger().log(Level.WARNING, "Animator::addDefaultLayersToAnimation - Unable to load layer at location '" + layerUrlString +"'. Layer loading failed.");
+					Logging.logger().log(Level.WARNING, "Animator::addDefaultLayersToAnimation - Unable to load layer '" + layerIdentifier.getName() + "' at location '" + layerIdentifier.getLocation() +"'. Layer loading failed.");
 					continue;
 				}
 				
@@ -1179,7 +1183,7 @@ public class Animator
 			}
 			catch (MalformedURLException e)
 			{
-				Logging.logger().log(Level.WARNING, "Animator::addDefaultLayersToAnimation - Unable to load layer at location '" + layerUrlString +"'. Bad URL.");
+				Logging.logger().log(Level.WARNING, "Animator::addDefaultLayersToAnimation - Unable to load layer '" + layerIdentifier.getName() + "' at location '" + layerIdentifier.getLocation() +"'. Bad URL.");
 			}
 		}
 		
