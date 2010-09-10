@@ -1,7 +1,10 @@
 package au.gov.ga.worldwind.animator.animation.layer;
 
+import static au.gov.ga.worldwind.animator.util.Util.isBlank;
+
 import gov.nasa.worldwind.layers.Layer;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -9,6 +12,7 @@ import java.util.ResourceBundle;
 import java.util.TreeMap;
 
 import au.gov.ga.worldwind.animator.util.Util;
+import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
  * A factory class for obtaining layer identifiers
@@ -79,8 +83,23 @@ public class LayerIdentifierFactory
 	 */
 	public static LayerIdentifier createFromLayer(Layer layer)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if (layer == null)
+		{
+			return null;
+		}
+		String layerName = layer.getName();
+		if (isBlank(layerName))
+		{
+			return null;
+		}
+		
+		URL layerUrl = (URL)layer.getValue(AVKeyMore.CONTEXT_URL);
+		if (layerUrl == null)
+		{
+			return null;
+		}
+		
+		return new LayerIdentifierImpl(layerName, layerUrl.toExternalForm());
 	}
 	
 }

@@ -1,5 +1,9 @@
 package au.gov.ga.worldwind.animator.panels.layerpalette;
 
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddLayerToAnimationLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getLayerPalettePanelNameKey;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -23,9 +27,7 @@ import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.animator.util.Validate;
-import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.common.ui.BasicAction;
-import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
  * A panel that allows the user to locate and select a layer for inclusion
@@ -60,7 +62,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		Validate.notNull(animation, "An animation is required");
 		this.animation = animation;
 		
-		setName(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getLayerPalettePanelNameKey()));
+		setName(getMessage(getLayerPalettePanelNameKey()));
 		
 		initialiseLayerList();
 		updateListModel();
@@ -71,7 +73,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	
 	private void initialiseActions()
 	{
-		addLayerToAnimationAction = new BasicAction(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getAddLayerToAnimationLabelKey()), Icons.add.getIcon());
+		addLayerToAnimationAction = new BasicAction(getMessage(getAddLayerToAnimationLabelKey()), Icons.add.getIcon());
 		addLayerToAnimationAction.addActionListener(new ActionListener(){
 
 			@Override

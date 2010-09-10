@@ -34,4 +34,17 @@ public class LayerIdentifierImpl implements LayerIdentifier
 		return location;
 	}
 
+	@Override
+	public boolean equals(Object obj)
+	{
+		return obj instanceof LayerIdentifier &&
+				location.equals(((LayerIdentifier)obj).getLocation());
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return location.hashCode();
+	}
+	
 }
