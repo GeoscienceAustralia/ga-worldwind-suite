@@ -9,6 +9,11 @@ package au.gov.ga.worldwind.common.util.message;
  */
 public class MessageSourceAccessor
 {
+	static
+	{
+		set(new ResourceBundleMessageSource());
+		addBundle("au.gov.ga.worldwind.common.data.messages.commonMessages");
+	}
 
 	private static MessageSource messageSource;
 
@@ -38,8 +43,20 @@ public class MessageSourceAccessor
 	}
 
 	/**
-	 * Helper function that calls getMessage on the {@link MessageSource} linked
-	 * to by this Accessor.
+	 * Helper function that calls addBundle() on the {@link MessageSource}
+	 * stored in this accessor.
+	 * 
+	 * @param name
+	 *            The base name of the collection of messages to add
+	 */
+	public static void addBundle(String baseName)
+	{
+		messageSource.addBundle(baseName);
+	}
+
+	/**
+	 * Helper function that calls getMessage() on the {@link MessageSource}
+	 * stored in this accessor.
 	 * 
 	 * @param key
 	 *            The key for the message to return

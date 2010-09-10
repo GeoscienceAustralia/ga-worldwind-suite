@@ -96,7 +96,6 @@ import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.message.MessageSource;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
-import au.gov.ga.worldwind.common.util.message.ResourceBundleMessageSource;
 
 /**
  * The primary application class for the Animator application.
@@ -576,9 +575,7 @@ public class Animator
 	private void initialiseMessageSource()
 	{
 		// Initialise the message source
-		messageSource = new ResourceBundleMessageSource("au.gov.ga.worldwind.animator.data.messages.animatorMessages",
-														"au.gov.ga.worldwind.common.data.messages.commonUIMessages");
-		MessageSourceAccessor.set(messageSource);
+		MessageSourceAccessor.addBundle("au.gov.ga.worldwind.animator.data.messages.animatorMessages");
 	}
 
 	private ExtendedElevationModel getEBEM(ElevationModel elevationModel)
