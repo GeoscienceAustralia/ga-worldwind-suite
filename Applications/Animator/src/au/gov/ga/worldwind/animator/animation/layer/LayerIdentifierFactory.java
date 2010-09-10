@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.animator.animation.layer;
 
+import gov.nasa.worldwind.layers.Layer;
+
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -66,6 +68,19 @@ public class LayerIdentifierFactory
 	private static boolean isLayerIdentifierKey(String key)
 	{
 		return !Util.isBlank(key) && key.startsWith(LAYER_IDENTIFIER_KEY_PREFIX);
+	}
+
+	/**
+	 * Creates a new {@link LayerIdentifier} that identifies the provided layer.
+	 * 
+	 * @param layer The layer to create the identifier from
+	 * 
+	 * @return A layer identifier created from the provided layer
+	 */
+	public static LayerIdentifier createFromLayer(Layer layer)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

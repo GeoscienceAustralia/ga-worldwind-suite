@@ -21,9 +21,13 @@ import au.gov.ga.worldwind.animator.animation.event.PropagatingChangeableEventLi
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
+import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
+import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
+import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
@@ -713,5 +717,37 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			result.add(animatableLayer.getLayer());
 		}
 		return result;
+	}
+	
+	@Override
+	public boolean hasLayer(LayerIdentifier layerIdentifier)
+	{
+		if (layerIdentifier == null)
+		{
+			return false;
+		}
+		for (AnimatableLayer animatableLayer : animatableLayers)
+		{
+			if (layerIdentifier.equals(animatableLayer.getLayerIdentifier()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public void addLayer(LayerIdentifier layerIdentifier)
+	{
+		Layer loadedLayer = AnimationLayerLoader.loadLayer(layerIdentifier);
+		if (loadedLayer == null)
+		{
+			throw new IllegalArgumentException("Unable to load layer " + layerIdentifier);
+		}
+		
+		DefaultAnimatableLayer animatableLayer = new DefaultAnimatableLayer(loadedLayer);
+		animatableLayer.addParameter(new LayerOpacityParameter(this, loadedLayer));
+		
+		addAnimatableObject(animatableLayer);
 	}
 }

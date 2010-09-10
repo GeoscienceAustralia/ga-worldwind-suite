@@ -125,6 +125,12 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	}
 	
 	@Override
+	public LayerIdentifier getLayerIdentifier()
+	{
+		return LayerIdentifierFactory.createFromLayer(layer);
+	}
+	
+	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
 		AnimationIOConstants constants = version.getConstants();

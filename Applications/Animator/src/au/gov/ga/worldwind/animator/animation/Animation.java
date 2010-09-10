@@ -12,6 +12,7 @@ import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
+import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.util.Nameable;
@@ -319,4 +320,14 @@ public interface Animation extends XmlSerializable<Animation>, AnimationEventLis
 	 * @return The list of layers associated with this animation. If no layers are associated, will return the empty list.
 	 */
 	List<Layer> getLayers();
+	
+	/**
+	 * @return Whether or not this animation contains the layer identified by the provided layer identifier
+	 */
+	boolean hasLayer(LayerIdentifier layerIdentifier);
+	
+	/**
+	 * Add the layer identified in the identifier to this animation, if it isn't already.
+	 */
+	void addLayer(LayerIdentifier layerIdentifier);
 }

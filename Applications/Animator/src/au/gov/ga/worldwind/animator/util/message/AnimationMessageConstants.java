@@ -488,4 +488,12 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	{
 		return "animator.gui.panel.layerpalette.title";
 	}
+
+	/**
+	 * @return The key for the layer palette 'add layer to animation' label
+	 */
+	public static String getAddLayerToAnimationLabelKey()
+	{
+		return "animator.gui.menu.addlayertoanimation.label";
+	}
 }

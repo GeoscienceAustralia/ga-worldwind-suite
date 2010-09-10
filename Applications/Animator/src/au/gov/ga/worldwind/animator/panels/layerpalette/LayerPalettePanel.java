@@ -3,6 +3,8 @@ package au.gov.ga.worldwind.animator.panels.layerpalette;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,13 +13,18 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
-import javax.swing.ListCellRenderer;
+import javax.swing.JToolBar;
+import javax.swing.ListModel;
 import javax.swing.event.ChangeEvent;
 
+import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
+import au.gov.ga.worldwind.animator.util.Icons;
+import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
+import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
@@ -30,6 +37,12 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 {
 	private static final long serialVersionUID = 20100910L;
 
+	/** The current animation */
+	private Animation animation;
+	
+	/** A toolbar holding operations to perform on the layers */
+	private JToolBar toolbar;
+	
 	/** A scrollable container for holding the tree */
 	private JScrollPane scrollPane;
 	
@@ -39,15 +52,44 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	/** The identities of known layers */
 	private ListBackedModel<LayerIdentifier> knownLayers = new ListBackedModel<LayerIdentifier>();
 	
-	public LayerPalettePanel()
+	// Actions
+	private BasicAction addLayerToAnimationAction;
+	
+	public LayerPalettePanel(Animation animation)
 	{
+		Validate.notNull(animation, "An animation is required");
+		this.animation = animation;
+		
 		setName(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getLayerPalettePanelNameKey()));
 		
 		initialiseLayerList();
 		updateListModel();
+		initialiseActions();
+		initialiseToolbar();
 		packComponents();
 	}
 	
+	private void initialiseActions()
+	{
+		addLayerToAnimationAction = new BasicAction(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getAddLayerToAnimationLabelKey()), Icons.add.getIcon());
+		addLayerToAnimationAction.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				animation.addLayer((LayerIdentifier)layerList.getSelectedValue());
+				
+			}
+		});
+	}
+	
+	private void initialiseToolbar()
+	{
+		toolbar = new JToolBar();
+		
+		toolbar.add(addLayerToAnimationAction);
+	}
+
 	private void updateListModel()
 	{
 		List<LayerIdentifier> knownLayerLocations = Settings.get().getKnownLayers();
@@ -64,7 +106,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	private void initialiseLayerList()
 	{
 		layerList = new JList(knownLayers);
-		layerList.setCellRenderer(new LayerListRenderer());
+		layerList.setCellRenderer(new LayerListRenderer(animation));
 	}
 
 	private void packComponents()
@@ -76,26 +118,57 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	@Override
 	public void refreshView(ChangeEvent e)
 	{
+		if (e != null && e.getSource() instanceof Animation)
+		{
+			this.animation = (Animation)e.getSource();
+			layerList.setCellRenderer(new LayerListRenderer(animation));
+		}
 		layerList.validate();
 	}
 	
+	/**
+	 * The renderer to use for the layer list. 
+	 */
 	private static class LayerListRenderer extends DefaultListCellRenderer
 	{
+		private static final long serialVersionUID = 20100910L;
+
+		private Animation animation;
+		
+		public LayerListRenderer(Animation animation)
+		{
+			this.animation = animation;
+		}
+
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
 		{
 			JLabel label = (JLabel)super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			
+			LayerIdentifier layerIdentifier = (LayerIdentifier)value;
+			
 			label.setText(((LayerIdentifier)value).getName());
 			
+			// Stripe the layer palette
 			if (index % 2 == 0 && !isSelected)
 			{
 				label.setBackground(new Color(230, 247, 252));
+			}
+			
+			if (animation.hasLayer(layerIdentifier))
+			{
+				label.setIcon(Icons.flag.getIcon());
 			}
 			
 			return label;
 		}
 	}
 	
+	/**
+	 * An implementation of the {@link ListModel} interface that is backed by a {@link List}.
+	 * <p/>
+	 * Add and remove events are fired when elements are added or removed from the backing list.
+	 */
 	private static class ListBackedModel<T> extends AbstractListModel
 	{
 		private static final long serialVersionUID = 20100910L;

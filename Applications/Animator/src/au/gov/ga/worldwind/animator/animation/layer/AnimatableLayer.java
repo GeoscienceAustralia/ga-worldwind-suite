@@ -38,4 +38,9 @@ public interface AnimatableLayer extends Animatable
 	 * if one does not exist.
 	 */
 	LayerParameter getParameterOfType(LayerParameter.Type type);
+	
+	/**
+	 * @return An identifier that identifies the layer associated with this animatable layer
+	 */
+	LayerIdentifier getLayerIdentifier();
 }

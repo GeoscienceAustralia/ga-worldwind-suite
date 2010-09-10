@@ -1,33 +1,23 @@
 package au.gov.ga.worldwind.animator.util;
 
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-
-public class Icons
+/**
+ * Extension of the common {@link au.gov.ga.worldwind.common.util.Icons} accessor class
+ * with additional icons specific to the Animator project.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
+ *
+ */
+public class Icons extends au.gov.ga.worldwind.common.util.Icons
 {
-	public static final ImageIcon remove;
-	public static final ImageIcon key;
-	public static final ImageIcon add;
-	static
+
+	public Icons(String directory, String filename)
 	{
-		String base = "/data/icons/";
-		remove = loadIcon(base + "remove.gif");
-		add = loadIcon(base + "add.gif");
-		key = loadIcon(base + "key.gif");
+		super(directory, filename);
 	}
 
-	private static ImageIcon loadIcon(String path)
+	public Icons(String filename)
 	{
-		try
-		{
-			return new ImageIcon(ImageIO.read(Icons.class
-					.getResourceAsStream(path)));
-		}
-		catch (IOException e)
-		{
-			return null;
-		}
+		super(filename);
 	}
+	
 }

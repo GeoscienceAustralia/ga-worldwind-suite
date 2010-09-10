@@ -29,8 +29,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,13 +69,9 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationWriter;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
-import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
-import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
-import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
-import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedElevationModel;
@@ -99,6 +93,7 @@ import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.message.MessageSource;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.ResourceBundleMessageSource;
@@ -288,7 +283,7 @@ public class Animator
 		List<CollapsiblePanel> collapsiblePanels = new ArrayList<CollapsiblePanel>();
 		
 		collapsiblePanels.add(new AnimationBrowserPanel(animation));
-		collapsiblePanels.add(new LayerPalettePanel());
+		collapsiblePanels.add(new LayerPalettePanel(animation));
 		
 		sideBar = new SideBar(splitPane, collapsiblePanels);
 		splitPane.setLeftComponent(sideBar);
@@ -651,6 +646,7 @@ public class Animator
 		newAnimationAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getNewMenuLabelKey()), null);
 		newAnimationAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
 		newAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
+		newAnimationAction.setIcon(Icons.newfile.getIcon());
 		newAnimationAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -675,6 +671,7 @@ public class Animator
 		saveAnimationAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getSaveMenuLabelKey()), null);
 		saveAnimationAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
 		saveAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
+		saveAnimationAction.setIcon(Icons.save.getIcon());
 		saveAnimationAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -1165,28 +1162,8 @@ public class Animator
 				continue;
 			}
 			
-			try
-			{
-				new URL(layerIdentifier.getLocation()); // Catch malformed URL exception early so we can report it accurately
-				
-				Layer loadedLayer = AnimationLayerLoader.loadLayer(layerIdentifier);
-				if (loadedLayer == null)
-				{
-					Logging.logger().log(Level.WARNING, "Animator::addDefaultLayersToAnimation - Unable to load layer '" + layerIdentifier.getName() + "' at location '" + layerIdentifier.getLocation() +"'. Layer loading failed.");
-					continue;
-				}
-				
-				AnimatableLayer animationLayer = new DefaultAnimatableLayer(loadedLayer);
-				animationLayer.addParameter(new LayerOpacityParameter(animation, loadedLayer));
-				
-				animation.addAnimatableObject(animationLayer);
-			}
-			catch (MalformedURLException e)
-			{
-				Logging.logger().log(Level.WARNING, "Animator::addDefaultLayersToAnimation - Unable to load layer '" + layerIdentifier.getName() + "' at location '" + layerIdentifier.getLocation() +"'. Bad URL.");
-			}
+			animation.addLayer(layerIdentifier);
 		}
-		
 	}
 
 	/**
