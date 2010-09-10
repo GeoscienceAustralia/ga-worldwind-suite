@@ -9,17 +9,23 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.ListModel;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
@@ -35,7 +41,7 @@ import au.gov.ga.worldwind.common.ui.BasicAction;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public class LayerPalettePanel extends CollapsiblePanelBase
+public class LayerPalettePanel extends CollapsiblePanelBase 
 {
 	private static final long serialVersionUID = 20100910L;
 
@@ -74,13 +80,14 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	private void initialiseActions()
 	{
 		addLayerToAnimationAction = new BasicAction(getMessage(getAddLayerToAnimationLabelKey()), Icons.add.getIcon());
+		addLayerToAnimationAction.setEnabled(false);
 		addLayerToAnimationAction.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				animation.addLayer((LayerIdentifier)layerList.getSelectedValue());
-				
+				layerList.repaint();
 			}
 		});
 	}
@@ -109,11 +116,21 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	{
 		layerList = new JList(knownLayers);
 		layerList.setCellRenderer(new LayerListRenderer(animation));
+		
+		layerList.addListSelectionListener(new ListSelectionListener(){
+			@Override
+			public void valueChanged(ListSelectionEvent e)
+			{
+				LayerIdentifier layerIdentifier = (LayerIdentifier)((JList)e.getSource()).getSelectedValue();
+				addLayerToAnimationAction.setEnabled(!animation.hasLayer(layerIdentifier));
+			}
+		});
 	}
 
 	private void packComponents()
 	{
 		scrollPane = new JScrollPane(layerList);
+		add(toolbar, BorderLayout.NORTH);
 		add(scrollPane, BorderLayout.CENTER);
 	}
 	
@@ -133,6 +150,8 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	 */
 	private static class LayerListRenderer extends DefaultListCellRenderer
 	{
+		private static final Color HIGHLIGHT_COLOR = new Color(230, 247, 252);
+
 		private static final long serialVersionUID = 20100910L;
 
 		private Animation animation;
@@ -145,24 +164,28 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
 		{
-			JLabel label = (JLabel)super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-			
 			LayerIdentifier layerIdentifier = (LayerIdentifier)value;
 			
+			JLabel label = (JLabel)super.getListCellRendererComponent(list, layerIdentifier, index, isSelected, cellHasFocus);
 			label.setText(((LayerIdentifier)value).getName());
+			
+			JComponent result = new JPanel(new BorderLayout());
+			result.add(label, BorderLayout.WEST);
 			
 			// Stripe the layer palette
 			if (index % 2 == 0 && !isSelected)
 			{
-				label.setBackground(new Color(230, 247, 252));
-			}
+				label.setBackground(HIGHLIGHT_COLOR);
+			} 
+			result.setBackground(label.getBackground());
 			
+			// Add the 'included in animation' indicator
 			if (animation.hasLayer(layerIdentifier))
 			{
-				label.setIcon(Icons.flag.getIcon());
+				result.add(new JLabel(Icons.flag.getIcon()), BorderLayout.EAST);
 			}
 			
-			return label;
+			return result;
 		}
 	}
 	
