@@ -49,6 +49,7 @@ public class ResourceBundleMessageSource extends MessageSourceBase implements Me
 	 * 
 	 * @return The message with the given key, or <code>null</code> if one cannot be found
 	 */
+	@Override
 	protected MessageFormat getMessageInternal(String key)
 	{
 		// Check the cache first
