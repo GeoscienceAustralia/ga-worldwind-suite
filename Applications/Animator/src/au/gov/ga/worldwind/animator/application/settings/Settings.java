@@ -13,6 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
+import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierFactory;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierImpl;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.Util;
@@ -92,8 +93,8 @@ public class Settings
 		{
 			Element layerElement = WWXML.appendElement(animationLayersContainer, "layer");
 			WWXML.setIntegerAttribute(layerElement, "index", i);
-			WWXML.setTextAttribute(animationLayersContainer, "name", layersList.get(i).getName());
-			WWXML.setTextAttribute(animationLayersContainer, "url", layersList.get(i).getLocation());
+			WWXML.setTextAttribute(layerElement, "name", layersList.get(i).getName());
+			WWXML.setTextAttribute(layerElement, "url", layersList.get(i).getLocation());
 		}
 		
 	}
@@ -106,8 +107,8 @@ public class Settings
 		{
 			Element layerElement = WWXML.appendElement(animationLayersContainer, "layer");
 			WWXML.setIntegerAttribute(layerElement, "index", i);
-			WWXML.setTextAttribute(animationLayersContainer, "name", layersList.get(i).getName());
-			WWXML.setTextAttribute(animationLayersContainer, "url", layersList.get(i).getLocation());
+			WWXML.setTextAttribute(layerElement, "name", layersList.get(i).getName());
+			WWXML.setTextAttribute(layerElement, "url", layersList.get(i).getLocation());
 		}
 	}
 
@@ -272,7 +273,7 @@ public class Settings
 	}));
 	
 	/** The list of known layer locations for populating the layer palette */
-	private List<LayerIdentifier> knownLayers = new ArrayList<LayerIdentifier>(defaultAnimationLayers);
+	private List<LayerIdentifier> knownLayers = LayerIdentifierFactory.readFromPropertiesFile("au.gov.ga.worldwind.animator.animation.layer.worldwindLayerIdentities");
 	
 	/**
 	 * Private constructor. Use the Singleton accessor {@link #get()}.
