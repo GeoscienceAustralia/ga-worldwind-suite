@@ -10,11 +10,9 @@ import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.event.AnimatableObjectEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
-import au.gov.ga.worldwind.animator.animation.event.ParameterEvent;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -141,8 +139,9 @@ public class AnimationTreeModel implements TreeModel, AnimationEventListener
 			return false;
 		}
 		AnimationEvent rootCause = event.getRootCause();
+		Object value = rootCause.getValue();
 		return ((rootCause.isOfType(Type.ADD) || rootCause.isOfType(Type.REMOVE)) &&
-				(rootCause instanceof ParameterEvent || rootCause instanceof AnimatableObjectEvent));
+				(value instanceof Parameter || value instanceof Animatable));
 	}
 
 	protected void notifyTreeChanged(Object source)

@@ -225,6 +225,8 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			animatableLayers.add((AnimatableLayer)object);
 		}
+		
+		fireAddEvent(object);
 	}
 	
 	@Override
@@ -235,6 +237,8 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			animatableLayers.remove((AnimatableLayer)object);
 		}
+		
+		fireRemoveEvent(object);
 		
 	}
 

@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.animator.application;
 
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
@@ -88,13 +90,11 @@ import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.FrameSlider;
-import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.common.util.message.MessageSource;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
@@ -201,9 +201,6 @@ public class Animator
 	/** The menu list of recently used files */
 	private RecentlyUsedFilesMenuList mruFileMenu;
 	
-	/** The message source for the application */
-	private MessageSource messageSource;
-
 	// Actions
 	private BasicAction newAnimationAction;
 	private BasicAction openAnimationAction;
@@ -627,8 +624,8 @@ public class Animator
 			if (wwdSize.width != animationSize.width || wwdSize.height != animationSize.height)
 			{
 				JOptionPane.showMessageDialog(frame, 
-											  messageSource.getMessage(AnimationMessageConstants.getSetDimensionFailedMessageKey(), animationSize.width, animationSize.height, wwdSize.width, wwdSize.height),
-											  messageSource.getMessage(AnimationMessageConstants.getSetDimensionFailedCaptionKey()),
+											  getMessage(getSetDimensionFailedMessageKey(), animationSize.width, animationSize.height, wwdSize.width, wwdSize.height),
+											  getMessage(getSetDimensionFailedCaptionKey()),
 											  JOptionPane.ERROR_MESSAGE);
 			}
 		}
@@ -640,7 +637,7 @@ public class Animator
 	private void initialiseActions()
 	{
 		// New
-		newAnimationAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getNewMenuLabelKey()), null);
+		newAnimationAction = new BasicAction(getMessage(getNewMenuLabelKey()), null);
 		newAnimationAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
 		newAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
 		newAnimationAction.setIcon(Icons.newfile.getIcon());
@@ -653,7 +650,7 @@ public class Animator
 		});
 		
 		// Open
-		openAnimationAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getOpenMenuLabelKey()), null);
+		openAnimationAction = new BasicAction(getMessage(getOpenMenuLabelKey()), null);
 		openAnimationAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
 		openAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		openAnimationAction.addActionListener(new ActionListener()
@@ -665,7 +662,7 @@ public class Animator
 		});
 		
 		// Save
-		saveAnimationAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getSaveMenuLabelKey()), null);
+		saveAnimationAction = new BasicAction(getMessage(getSaveMenuLabelKey()), null);
 		saveAnimationAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
 		saveAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
 		saveAnimationAction.setIcon(Icons.save.getIcon());
@@ -678,7 +675,7 @@ public class Animator
 		});
 		
 		// Save as
-		saveAnimationAsAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getSaveAsMenuLabelKey()), null);
+		saveAnimationAsAction = new BasicAction(getMessage(getSaveAsMenuLabelKey()), null);
 		saveAnimationAsAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
 		saveAnimationAsAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		saveAnimationAsAction.addActionListener(new ActionListener()
@@ -690,7 +687,7 @@ public class Animator
 		});
 		
 		// Exit
-		exitAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getExitMenuLabelKey()), null);
+		exitAction = new BasicAction(getMessage(getExitMenuLabelKey()), null);
 		exitAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
 		exitAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
 		exitAction.addActionListener(new ActionListener()
@@ -702,7 +699,7 @@ public class Animator
 		});
 		
 		// Add key
-		addKeyAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getAddKeyMenuLabelKey()), null);
+		addKeyAction = new BasicAction(getMessage(getAddKeyMenuLabelKey()), null);
 		addKeyAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0));
 		addKeyAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		addKeyAction.addActionListener(new ActionListener()
@@ -714,7 +711,7 @@ public class Animator
 		});
 		
 		// Delete key
-		deleteKeyAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getDeleteKeyMenuLabelKey()), null);
+		deleteKeyAction = new BasicAction(getMessage(getDeleteKeyMenuLabelKey()), null);
 		deleteKeyAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
 		deleteKeyAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_D);
 		deleteKeyAction.addActionListener(new ActionListener()
@@ -731,7 +728,7 @@ public class Animator
 		});
 		
 		// Auto key
-		autoKeyAction = new SelectableAction(messageSource.getMessage(AnimationMessageConstants.getAutoKeyMenuLabelKey()), null, false);
+		autoKeyAction = new SelectableAction(getMessage(getAutoKeyMenuLabelKey()), null, false);
 		autoKeyAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_K);
 		autoKeyAction.addActionListener(new ActionListener()
 		{
@@ -742,7 +739,7 @@ public class Animator
 		});
 		
 		// Set frame count
-		setFrameCountAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getSetFrameCountMenuLabelKey()), null);
+		setFrameCountAction = new BasicAction(getMessage(getSetFrameCountMenuLabelKey()), null);
 		setFrameCountAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
 		setFrameCountAction.addActionListener(new ActionListener()
 		{
@@ -750,8 +747,8 @@ public class Animator
 			{
 				int frames = slider.getLength() - 1;
 				Object value = JOptionPane.showInputDialog(frame, 
-														   messageSource.getMessage(AnimationMessageConstants.getSetFrameCountMessageKey()),
-														   messageSource.getMessage(AnimationMessageConstants.getSetFrameCountCaptionKey()),
+														   getMessage(getSetFrameCountMessageKey()),
+														   getMessage(getSetFrameCountCaptionKey()),
 														   JOptionPane.QUESTION_MESSAGE,
 														   null,
 														   null,
@@ -770,7 +767,7 @@ public class Animator
 		});
 		
 		// Previous frame
-		previousFrameAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getPreviousFrameMenuLabelKey()), null);
+		previousFrameAction = new BasicAction(getMessage(getPreviousFrameMenuLabelKey()), null);
 		previousFrameAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, 0));
 		previousFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
 		previousFrameAction.addActionListener(new ActionListener()
@@ -782,7 +779,7 @@ public class Animator
 		});
 		
 		// Next frame
-		nextFrameAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getNextFrameMenuLabelKey()), null);
+		nextFrameAction = new BasicAction(getMessage(getNextFrameMenuLabelKey()), null);
 		nextFrameAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, 0));
 		nextFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
 		nextFrameAction.addActionListener(new ActionListener()
@@ -794,7 +791,7 @@ public class Animator
 		});
 		
 		// Previous 10 frame
-		previous10FramesAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getPrevious10FrameMenuLabelKey()), null);
+		previous10FramesAction = new BasicAction(getMessage(getPrevious10FrameMenuLabelKey()), null);
 		previous10FramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, KeyEvent.SHIFT_DOWN_MASK));
 		previous10FramesAction.addActionListener(new ActionListener()
 		{
@@ -805,7 +802,7 @@ public class Animator
 		});
 		
 		// Next 10 frame
-		next10FramesAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getNext10FrameMenuLabelKey()), null);
+		next10FramesAction = new BasicAction(getMessage(getNext10FrameMenuLabelKey()), null);
 		next10FramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, KeyEvent.SHIFT_DOWN_MASK));
 		next10FramesAction.addActionListener(new ActionListener()
 		{
@@ -816,7 +813,7 @@ public class Animator
 		});
 		
 		// First frame
-		firstFrameAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getFirstFrameMenuLabelKey()), null);
+		firstFrameAction = new BasicAction(getMessage(getFirstFrameMenuLabelKey()), null);
 		firstFrameAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, ActionEvent.CTRL_MASK));
 		firstFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_F);
 		firstFrameAction.addActionListener(new ActionListener()
@@ -828,7 +825,7 @@ public class Animator
 		});
 		
 		// Last frame
-		lastFrameAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getLastFrameMenuLabelKey()), null);
+		lastFrameAction = new BasicAction(getMessage(getLastFrameMenuLabelKey()), null);
 		lastFrameAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, ActionEvent.CTRL_MASK));
 		lastFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
 		lastFrameAction.addActionListener(new ActionListener()
@@ -840,7 +837,7 @@ public class Animator
 		});
 		
 		// Use scaled zoom
-		useScaledZoomAction = new SelectableAction(messageSource.getMessage(AnimationMessageConstants.getUseZoomScalingMenuLabelKey()), null, animation.isZoomScalingRequired());
+		useScaledZoomAction = new SelectableAction(getMessage(getUseZoomScalingMenuLabelKey()), null, animation.isZoomScalingRequired());
 		useScaledZoomAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_Z);
 		useScaledZoomAction.addActionListener(new ActionListener()
 		{
@@ -851,7 +848,7 @@ public class Animator
 		});
 		
 		// Scale animation
-		scaleAnimationAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getScaleAnimationMenuLabelKey()), null);
+		scaleAnimationAction = new BasicAction(getMessage(getScaleAnimationMenuLabelKey()), null);
 		scaleAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
 		scaleAnimationAction.addActionListener(new ActionListener()
 		{
@@ -859,8 +856,8 @@ public class Animator
 			{
 				double scale = -1.0;
 				Object value = JOptionPane.showInputDialog(frame, 
-														   messageSource.getMessage(AnimationMessageConstants.getScaleAnimationMessageKey()),
-														   messageSource.getMessage(AnimationMessageConstants.getScaleAnimationCaptionKey()),
+														   getMessage(getScaleAnimationMessageKey()),
+														   getMessage(getScaleAnimationCaptionKey()),
 														   JOptionPane.QUESTION_MESSAGE,
 														   null,
 														   null,
@@ -882,15 +879,15 @@ public class Animator
 		});
 		
 		// Smooth eye speed
-		smoothEyeSpeedAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getSmoothEyeSpeedMenuLabelKey()), null);
+		smoothEyeSpeedAction = new BasicAction(getMessage(getSmoothEyeSpeedMenuLabelKey()), null);
 		smoothEyeSpeedAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_M);
 		smoothEyeSpeedAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				if (JOptionPane.showConfirmDialog(frame,
-												  messageSource.getMessage(AnimationMessageConstants.getQuerySmoothEyeSpeedMessageKey()),
-												  messageSource.getMessage(AnimationMessageConstants.getQuerySmoothEyeSpeedCaptionKey()), 
+												  getMessage(getQuerySmoothEyeSpeedMessageKey()),
+												  getMessage(getQuerySmoothEyeSpeedCaptionKey()), 
 												  JOptionPane.YES_NO_OPTION, 
 												  JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
 				{
@@ -901,7 +898,7 @@ public class Animator
 		});
 		
 		// Preview
-		previewAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getPreviewMenuLabelKey()), null);
+		previewAction = new BasicAction(getMessage(getPreviewMenuLabelKey()), null);
 		previewAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
 		previewAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
 		previewAction.addActionListener(new ActionListener()
@@ -913,7 +910,7 @@ public class Animator
 		});
 		
 		// Preview x2
-		previewX2Action = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getPreviewX2MenuLabelKey()), null);
+		previewX2Action = new BasicAction(getMessage(getPreviewX2MenuLabelKey()), null);
 		previewX2Action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.SHIFT_MASK));
 		previewX2Action.addActionListener(new ActionListener()
 		{
@@ -924,7 +921,7 @@ public class Animator
 		});
 		
 		// Preview x10
-		previewX10Action = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getPreviewX10MenuLabelKey()), null);
+		previewX10Action = new BasicAction(getMessage(getPreviewX10MenuLabelKey()), null);
 		previewX10Action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.CTRL_MASK));
 		previewX10Action.addActionListener(new ActionListener()
 		{
@@ -935,7 +932,7 @@ public class Animator
 		});
 		
 		// Render hi-res
-		renderHiResAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getRenderHighResMenuLabelKey()), null);
+		renderHiResAction = new BasicAction(getMessage(getRenderHighResMenuLabelKey()), null);
 		renderHiResAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK));
 		renderHiResAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_R);
 		renderHiResAction.addActionListener(new ActionListener()
@@ -947,7 +944,7 @@ public class Animator
 		});
 		
 		// Render low-res
-		renderLowResAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getRenderStandardResMenuLabelKey()), null);
+		renderLowResAction = new BasicAction(getMessage(getRenderStandardResMenuLabelKey()), null);
 		renderLowResAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -957,7 +954,7 @@ public class Animator
 		});
 		
 		// Debug key frames
-		debugKeyFramesAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getKeyValuesMenuLabelKey()), null);
+		debugKeyFramesAction = new BasicAction(getMessage(getKeyValuesMenuLabelKey()), null);
 		debugKeyFramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
 		debugKeyFramesAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_K);
 		debugKeyFramesAction.addActionListener(new ActionListener()
@@ -969,7 +966,7 @@ public class Animator
 		});
 		
 		// Debug parameter values
-		debugParameterValuesAction = new BasicAction(messageSource.getMessage(AnimationMessageConstants.getParameterValuesMenuLabelKey()), null);
+		debugParameterValuesAction = new BasicAction(getMessage(getParameterValuesMenuLabelKey()), null);
 		debugParameterValuesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.CTRL_MASK));
 		debugParameterValuesAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
 		debugParameterValuesAction.addActionListener(new ActionListener()
@@ -996,7 +993,7 @@ public class Animator
 		JMenu menu;
 
 		// File menu
-		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getFileMenuLabelKey()));
+		menu = new JMenu(getMessage(getFileMenuLabelKey()));
 		menu.setMnemonic(KeyEvent.VK_F);
 		menuBar.add(menu);
 		menu.add(newAnimationAction);
@@ -1010,7 +1007,7 @@ public class Animator
 		menu.add(exitAction);
 
 		// Frame menu
-		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getFrameMenuLabelKey()));
+		menu = new JMenu(getMessage(getFrameMenuLabelKey()));
 		menu.setMnemonic(KeyEvent.VK_R);
 		menuBar.add(menu);
 		menu.add(addKeyAction);
@@ -1027,7 +1024,7 @@ public class Animator
 		menu.add(lastFrameAction);
 
 		// Animation menu
-		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getAnimationMenuLabelKey()));
+		menu = new JMenu(getMessage(getAnimationMenuLabelKey()));
 		menu.setMnemonic(KeyEvent.VK_A);
 		menuBar.add(menu);
 		useScaledZoomAction.addToMenu(menu);
@@ -1042,7 +1039,7 @@ public class Animator
 		menu.add(renderLowResAction);
 		
 		// Debug
-		menu = new JMenu(messageSource.getMessage(AnimationMessageConstants.getDebugMenuLabelKey()));
+		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
 		menu.setMnemonic(KeyEvent.VK_D);
 		menuBar.add(menu);
 		menu.add(debugKeyFramesAction);
@@ -1170,7 +1167,7 @@ public class Animator
 	{
 		if (querySave())
 		{
-			setupFileChooser(messageSource.getMessage(AnimationMessageConstants.getOpenDialogTitleKey()), new XmlFilter());
+			setupFileChooser(getMessage(getOpenDialogTitleKey()), new XmlFilter());
 			if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 			{
 				File animationFile = fileChooser.getSelectedFile();
@@ -1248,8 +1245,8 @@ public class Animator
 	private int promptUserConfirmV1Load(File animationFile)
 	{
 		int response = JOptionPane.showConfirmDialog(frame, 
-													 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileMessageKey(), null, animationFile.getAbsolutePath(), XmlAnimationWriter.getCurrentFileVersion().getDisplayName()),
-													 messageSource.getMessage(AnimationMessageConstants.getOpenV1FileCaptionKey()), 
+													 getMessage(getOpenV1FileMessageKey(), animationFile.getAbsolutePath(), XmlAnimationWriter.getCurrentFileVersion().getDisplayName()),
+													 getMessage(getOpenV1FileCaptionKey()), 
 													 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		return response;
 	}
@@ -1257,8 +1254,8 @@ public class Animator
 	private void promptUserOpenFailed(File animationFile)
 	{
 		JOptionPane.showMessageDialog(frame, 
-									  messageSource.getMessage(AnimationMessageConstants.getOpenFailedMessageKey(), null, animationFile.getAbsolutePath()),
-									  messageSource.getMessage(AnimationMessageConstants.getOpenFailedCaptionKey()),
+									  getMessage(getOpenFailedMessageKey(), animationFile.getAbsolutePath()),
+									  getMessage(getOpenFailedCaptionKey()),
 									  JOptionPane.ERROR_MESSAGE);
 	}
 
@@ -1294,7 +1291,7 @@ public class Animator
 	 */
 	private void saveAs()
 	{
-		setupFileChooser(messageSource.getMessage(AnimationMessageConstants.getSaveAsDialogTitleKey()), new XmlFilter());
+		setupFileChooser(getMessage(getSaveAsDialogTitleKey()), new XmlFilter());
 		if (fileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
 			File newFile = fileChooser.getSelectedFile();
@@ -1306,8 +1303,8 @@ public class Animator
 			if (newFile.exists())
 			{
 				int response = JOptionPane.showConfirmDialog(frame, 
-														 	 messageSource.getMessage(AnimationMessageConstants.getConfirmOverwriteMessageKey(), null, newFile.getAbsolutePath()),
-														 	 messageSource.getMessage(AnimationMessageConstants.getConfirmOverwriteCaptionKey()),
+														 	 getMessage(getConfirmOverwriteMessageKey(), newFile.getAbsolutePath()),
+														 	 getMessage(getConfirmOverwriteCaptionKey()),
 														 	 JOptionPane.YES_NO_OPTION,
 														 	 JOptionPane.WARNING_MESSAGE);
 				override = response == JOptionPane.YES_OPTION;
@@ -1355,8 +1352,8 @@ public class Animator
 			{
 				ExceptionLogger.logException(e);
 				JOptionPane.showMessageDialog(frame, 
-											  messageSource.getMessage(AnimationMessageConstants.getSaveFailedMessageKey(), e),
-											  messageSource.getMessage(AnimationMessageConstants.getSaveFailedCaptionKey()),
+											  getMessage(getSaveFailedMessageKey(), e),
+											  getMessage(getSaveFailedCaptionKey()),
 											  JOptionPane.ERROR_MESSAGE);
 			}
 			setTitleBar();
@@ -1400,8 +1397,8 @@ public class Animator
 		}
 		String file = this.file == null ? "Animation" : "'" + this.file.getName() + "'";
 		int response = JOptionPane.showConfirmDialog(frame, 
-													 messageSource.getMessage(AnimationMessageConstants.getQuerySaveMessageKey(), null, file), 
-													 messageSource.getMessage(AnimationMessageConstants.getQuerySaveCaptionKey()),
+													 getMessage(getQuerySaveMessageKey(), file), 
+													 getMessage(getQuerySaveCaptionKey()),
 													 JOptionPane.YES_NO_CANCEL_OPTION,
 													 JOptionPane.QUESTION_MESSAGE);
 		
@@ -1424,14 +1421,14 @@ public class Animator
 	private void setTitleBar()
 	{
 		String file;
-		String title = messageSource.getMessage(AnimationMessageConstants.getAnimatorApplicationTitleKey());
+		String title = getMessage(getAnimatorApplicationTitleKey());
 		if (this.file != null)
 		{
 			file = this.file.getName();
 		}
 		else
 		{
-			file = messageSource.getMessage(AnimationMessageConstants.getNewAnimationNameKey());
+			file = getMessage(getNewAnimationNameKey());
 		}
 		if (changed)
 		{
@@ -1534,7 +1531,7 @@ public class Animator
 	private File promptForImageSequenceLocation()
 	{
 		// Prompt for a location to save the image sequence to
-		setupFileChooser(messageSource.getMessage(AnimationMessageConstants.getSaveRenderDialogTitleKey()), new FileNameExtensionFilter("TGA Image Sequence", "tga"));
+		setupFileChooser(getMessage(getSaveRenderDialogTitleKey()), new FileNameExtensionFilter("TGA Image Sequence", "tga"));
 		if (fileChooser.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION)
 		{
 			return null;
@@ -1570,8 +1567,8 @@ public class Animator
 		if (promptForOverwrite)
 		{
 			int response = JOptionPane.showConfirmDialog(frame, 
-					 									 messageSource.getMessage(AnimationMessageConstants.getConfirmRenderOverwriteMessageKey(), null, createImageSequenceName(fileName, firstFrame, filenameLength), createImageSequenceName(fileName, lastFrame, filenameLength)), 
-					 									 messageSource.getMessage(AnimationMessageConstants.getConfirmRenderOverwriteCaptionKey()),
+					 									 getMessage(getConfirmRenderOverwriteMessageKey(), createImageSequenceName(fileName, firstFrame, filenameLength), createImageSequenceName(fileName, lastFrame, filenameLength)), 
+					 									 getMessage(getConfirmRenderOverwriteCaptionKey()),
 					 									 JOptionPane.YES_NO_OPTION,
 					 									 JOptionPane.QUESTION_MESSAGE);
 			if (response == JOptionPane.NO_OPTION)
