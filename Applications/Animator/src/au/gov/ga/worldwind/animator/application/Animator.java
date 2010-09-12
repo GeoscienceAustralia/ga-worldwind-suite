@@ -66,11 +66,13 @@ import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationWriter;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
+import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
@@ -190,6 +192,9 @@ public class Animator
 	/** A listener that updates the 'changed' status when animation change is detected */
 	private AnimationEventListener animationChangeListener;
 
+	/** A listener that listens for layer addition/removals and updates the world wind model */
+	private AnimationEventListener layerUpdateListener;
+	
 	// The layers used in the application
 	private DetailedElevationModel dem;
 	private Layer crosshair;
@@ -262,8 +267,7 @@ public class Animator
 		
 		setTitleBar();
 		
-		initialiseAutoKeyListener();
-		initialiseChangeListener();
+		initialiseAnimationListeners();
 		
 		updateSlider();
 		resetChanged();
@@ -271,6 +275,82 @@ public class Animator
 		showApplicationWindow();
 	}
 
+	/**
+	 * Initialise the animation listeners
+	 */
+	private void initialiseAnimationListeners()
+	{
+		initialiseAutoKeyListener();
+		initialiseChangeListener();
+		initialiseLayerUpdateListener();
+		
+	}
+
+	/**
+	 * Initialise the layer update listener that listens for changes to the layers present in the animation
+	 */
+	private void initialiseLayerUpdateListener()
+	{
+		layerUpdateListener = new AnimationEventListener()
+		{
+			@Override
+			public void receiveAnimationEvent(AnimationEvent event)
+			{
+				if (isLayerChangeEvent(event))
+				{
+					updateLayersInModel();
+				}
+				
+			}
+
+			private boolean isLayerChangeEvent(AnimationEvent event)
+			{
+				if (event == null)
+				{
+					return false;
+				}
+				AnimationEvent rootCause = event.getRootCause();
+				return ((rootCause.isOfType(Type.ADD) || rootCause.isOfType(Type.REMOVE)) && rootCause.getValue() instanceof AnimatableLayer);
+			}
+		};
+		animation.addChangeListener(layerUpdateListener);
+	}
+
+	/**
+	 * Initialise the change listener that listens for changes to the animation state
+	 */
+	private void initialiseChangeListener()
+	{
+		animationChangeListener = new AnimationEventListener()
+		{
+			@Override
+			public void receiveAnimationEvent(AnimationEvent event)
+			{
+				changed = true;
+				setTitleBar();
+				
+			}
+		};
+	}
+	
+	/**
+	 * Attach a property change listener to the World Wind view to automatically generate key frames
+	 * when a change is detected.
+	 */
+	private void initialiseAutoKeyListener()
+	{
+		getView().addPropertyChangeListener(AVKey.VIEW, new PropertyChangeListener()
+		{
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				if (autokey && !applying)
+				{
+					addFrame();
+				}
+			}
+		});
+	}
+	
 	/**
 	 * Initialise the side bar, which contains a group of collapsible panels
 	 */
@@ -414,24 +494,6 @@ public class Animator
 	}
 
 	/**
-	 * Attach a property change listener to the World Wind view to automatically generate key frames
-	 * when a change is detected.
-	 */
-	private void initialiseAutoKeyListener()
-	{
-		getView().addPropertyChangeListener(AVKey.VIEW, new PropertyChangeListener()
-		{
-			public void propertyChange(PropertyChangeEvent evt)
-			{
-				if (autokey && !applying)
-				{
-					addFrame();
-				}
-			}
-		});
-	}
-
-	/**
 	 * Initialise the World Wind {@link WorldWindow} used by the application
 	 */
 	private void initialiseWorldWindow()
@@ -529,23 +591,6 @@ public class Animator
 		
 		// Set the last used location
 		fileChooser.setCurrentDirectory(Settings.get().getLastUsedLocation());
-	}
-
-	/**
-	 * Initialise the change listener that listens for changes to the animation state
-	 */
-	private void initialiseChangeListener()
-	{
-		animationChangeListener = new AnimationEventListener()
-		{
-			@Override
-			public void receiveAnimationEvent(AnimationEvent event)
-			{
-				changed = true;
-				setTitleBar();
-				
-			}
-		};
 	}
 
 	/**

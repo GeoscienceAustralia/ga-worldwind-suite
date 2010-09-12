@@ -100,7 +100,7 @@ public class AnimationEventImpl implements AnimationEvent
 	@Override
 	public String toString()
 	{
-		return "Event: {" + getClass().getSimpleName() + ", " + type + ", " + owner + ", " + cause + "}"; 
+		return "Event: {" + getClass().getSimpleName() + ", " + type + ", " + owner + ", " + value + ", Cause: " + cause + "}"; 
 	}
 
 }

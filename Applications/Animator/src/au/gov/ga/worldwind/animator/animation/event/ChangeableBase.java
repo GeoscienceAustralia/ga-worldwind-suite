@@ -70,7 +70,7 @@ public abstract class ChangeableBase implements Changeable
 	@Override
 	public void fireEvent(Type type, Object value)
 	{
-		AnimationEvent event = createEvent(type, null, null);
+		AnimationEvent event = createEvent(type, null, value);
 		for (int i = changeListeners.size() - 1; i >= 0; i--)
 		{
 			changeListeners.get(i).receiveAnimationEvent(event);
