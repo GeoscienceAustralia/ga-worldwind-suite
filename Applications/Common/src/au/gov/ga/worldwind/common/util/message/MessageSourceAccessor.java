@@ -68,4 +68,22 @@ public class MessageSourceAccessor
 	{
 		return get().getMessage(key);
 	}
+	
+	/**
+	 * Helper function that calls getMessage() on the {@link MessageSource}
+	 * stored in this accessor.
+	 * 
+	 * @param key
+	 *            The key for the message to return
+	 * @param params
+	 * 			  Parameters to use in message substitution
+	 * 
+	 * @return The message with the provided key, or <code>null</code> if a
+	 *         message with the provided key cannot be found
+	 */
+	public static String getMessage(String key, Object... params)
+	{
+		return get().getMessage(key, params);
+	}
+	
 }
