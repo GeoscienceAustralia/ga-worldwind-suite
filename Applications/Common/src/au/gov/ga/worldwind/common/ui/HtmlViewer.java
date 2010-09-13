@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.common.ui;
 
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Frame;
@@ -30,6 +32,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.plaf.basic.BasicHTML;
 
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
+import au.gov.ga.worldwind.common.util.message.CommonMessageConstants;
 
 public class HtmlViewer extends JDialog
 {
@@ -85,7 +88,7 @@ public class HtmlViewer extends JDialog
 
 		if (page != null)
 		{
-			setTitle(title + " - loading...");
+			setTitle(title + " - " + getMessage(CommonMessageConstants.getHtmlLoadingTitleKey()));
 			editorPane.addPropertyChangeListener(new PropertyChangeListener()
 			{
 				@Override
@@ -109,7 +112,7 @@ public class HtmlViewer extends JDialog
 		}
 		else
 		{
-			editorPane.setText("Could not find page");
+			editorPane.setText(getMessage(CommonMessageConstants.getHtmlNotFoundMessageKey()));
 		}
 
 		if (base != null)
@@ -169,7 +172,7 @@ public class HtmlViewer extends JDialog
 			c.fill = GridBagConstraints.HORIZONTAL;
 			panel.add(separator, c);
 
-			JButton ok = new JButton("OK");
+			JButton ok = new JButton(getMessage(CommonMessageConstants.getTermOkKey()));
 			c = new GridBagConstraints();
 			c.gridx = 0;
 			c.gridy = 1;

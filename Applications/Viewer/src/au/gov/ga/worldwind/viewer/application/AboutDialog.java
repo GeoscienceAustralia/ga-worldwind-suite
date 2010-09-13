@@ -25,13 +25,14 @@ import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.event.HyperlinkListener;
 
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
+import au.gov.ga.worldwind.viewer.util.Message;
 
 
 public class AboutDialog extends JDialog
 {
-	public AboutDialog(Frame parent)
+	public AboutDialog(Frame parent, String title)
 	{
-		super(parent, "About", true);
+		super(parent, title, true);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 		{
@@ -47,10 +48,9 @@ public class AboutDialog extends JDialog
 		BufferedImage image = null;
 		try
 		{
-			InputStream is = AboutDialog.class.getResourceAsStream(base
-					+ "about.jpg");
+			InputStream is = AboutDialog.class.getResourceAsStream(base + "about.jpg");
 			image = ImageIO.read(is);
-
+			is.close();
 		}
 		catch (IOException e)
 		{
@@ -82,7 +82,7 @@ public class AboutDialog extends JDialog
 		}
 		else
 		{
-			editorPane.setText("Could not find page");
+			editorPane.setText(Message.getMessage(Message.getHtmlNotFoundMessageKey()));
 		}
 		editorPane.addHyperlinkListener(new HyperlinkListener()
 		{
@@ -107,12 +107,11 @@ public class AboutDialog extends JDialog
 
 		JPanel panel = new JPanel(new BorderLayout());
 		int spacing = 10;
-		panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory
-				.createEtchedBorder(), BorderFactory.createEmptyBorder(spacing,
-				spacing, spacing, spacing)));
+		panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
+				BorderFactory.createEmptyBorder(spacing, spacing, spacing, spacing)));
 		add(panel, BorderLayout.PAGE_END);
 
-		JButton button = new JButton("OK");
+		JButton button = new JButton(Message.getMessage(Message.getTermOkKey()));
 		panel.add(button, BorderLayout.EAST);
 		button.addActionListener(new ActionListener()
 		{

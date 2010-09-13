@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.viewer.application;
 
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
@@ -111,7 +113,7 @@ import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public class Application
 {
-	private static final String HELP_URL = "http://www.ga.gov.au/apps/world-wind/help/index.jsp";
+	private static final String HELP_URL = getMessage(getHelpUrlKey());
 
 	static
 	{
@@ -164,14 +166,14 @@ public class Application
 			{
 				//check for a GA machine; if so, setup the default GA proxy
 				String hostname = InetAddress.getLocalHost().getCanonicalHostName();
-				if (hostname.matches("pc-\\d{5}.agso.gov.au"))
+				if (hostname.matches(getMessage(getGaMachinenameRegexKey())))
 				{
-					Settings.get().setProxyHost("proxy.agso.gov.au");
-					Settings.get().setProxyPort(8080);
+					Settings.get().setProxyHost(getMessage(getGaProxyHostKey()));
+					Settings.get().setProxyPort(Integer.parseInt(getMessage(getGaProxyPortKey())));
 					Settings.get().setProxyType(ProxyType.HTTP);
 					Settings.get().setProxyEnabled(true);
 
-					URL url = new URL("http://www.ga.gov.au/");
+					URL url = new URL(getMessage(getProxyTestUrlKey()));
 					try
 					{
 						Downloader.downloadImmediately(url, false);
@@ -290,11 +292,15 @@ public class Application
 		Settings.get().loadThemeProperties(theme);
 
 		//initialize frame
-		String title = "Geoscience Australia – World Wind";
+		String title = getMessage(getApplicationTitleKey());
 		if (theme.getName() != null && theme.getName().length() > 0)
 			title += " - " + theme.getName();
 		if (GASandpit.isSandpitMode())
-			title += " (SANDPIT)";
+		{
+			String sandpit = getMessage(getApplicationTitleSandpitSuffixKey());
+			if (sandpit != null && sandpit.length() > 0)
+				title += " " + sandpit;
+		}
 		frame = new JFrame(title);
 		frame.setIconImage(Icons.earth32.getIcon().getImage());
 
@@ -307,7 +313,7 @@ public class Application
 		else
 			wwd = new WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas.defaultCaps);
 		splashScreen.addRenderingListener(wwd);
-		
+
 		Model model = new BasicModel();
 		model.setLayers(new ExtendedLayerList());
 		model.getGlobe().setElevationModel(new SectionListCompoundElevationModel());
@@ -323,13 +329,9 @@ public class Application
 			{
 				if (t instanceof WWAbsentRequirementException)
 				{
-					String message = "Computer does not meet minimum graphics requirements.\n";
-					message += "Please install up-to-date graphics driver and try again.\n";
-					message += "Reason: " + t.getMessage() + "\n";
-					message += "This program will end when you press OK.";
-
-					JOptionPane.showMessageDialog(frame, message, "Unable to Start Program",
-							JOptionPane.ERROR_MESSAGE);
+					String title = getMessage(getVideocardFailureTitleKey());
+					String message = getMessage(getVideocardFailureMessageKey(), t.getMessage());
+					JOptionPane.showMessageDialog(frame, message, title, JOptionPane.ERROR_MESSAGE);
 					System.exit(-1);
 				}
 			}
@@ -438,7 +440,8 @@ public class Application
 
 	private void createActions()
 	{
-		openLayerAction = new BasicAction("Open layer", Icons.folder.getIcon());
+		openLayerAction =
+				new BasicAction(getMessage(getOpenLayerActionLabelKey()), Icons.folder.getIcon());
 		openLayerAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -449,7 +452,7 @@ public class Application
 		});
 
 		createLayerFromDirectoryAction =
-				new BasicAction("From tileset directory", "Create layer from tileset directory",
+				new BasicAction(getMessage(getCreateLayerFromDirectoryLabelKey()),
 						Icons.newfolder.getIcon());
 		createLayerFromDirectoryAction.addActionListener(new ActionListener()
 		{
@@ -461,7 +464,7 @@ public class Application
 		});
 
 		offlineAction =
-				new SelectableAction("Work offline", Icons.offline.getIcon(),
+				new SelectableAction(getMessage(getWorkOfflineLabelKey()), Icons.offline.getIcon(),
 						WorldWind.isOfflineMode());
 		offlineAction.addActionListener(new ActionListener()
 		{
@@ -472,7 +475,8 @@ public class Application
 			}
 		});
 
-		screenshotAction = new BasicAction("Save screenshot...", Icons.screenshot.getIcon());
+		screenshotAction =
+				new BasicAction(getMessage(getScreenshotLabelKey()), Icons.screenshot.getIcon());
 		screenshotAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -482,7 +486,7 @@ public class Application
 			}
 		});
 
-		exitAction = new BasicAction("Exit", Icons.escape.getIcon());
+		exitAction = new BasicAction(getMessage(getExitLabelKey()), Icons.escape.getIcon());
 		exitAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -492,7 +496,8 @@ public class Application
 			}
 		});
 
-		defaultViewAction = new BasicAction("Default view", Icons.home.getIcon());
+		defaultViewAction =
+				new BasicAction(getMessage(getDefaultViewLabelKey()), Icons.home.getIcon());
 		defaultViewAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -502,13 +507,14 @@ public class Application
 			}
 		});
 
-		gotoAction = new BasicAction("Go to coordinates...", Icons.crosshair45.getIcon());
+		gotoAction =
+				new BasicAction(getMessage(getGotoCoordsLabelKey()), Icons.crosshair45.getIcon());
 		gotoAction.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				GoToCoordinatePanel.showGotoDialog(frame, wwd, "Go to coordinates",
+				GoToCoordinatePanel.showGotoDialog(frame, wwd, getMessage(getGotoCoordsTitleKey()),
 						Icons.crosshair45.getIcon());
 			}
 		});
@@ -525,7 +531,7 @@ public class Application
 
 		final Tessellator tess = wwd.getModel().getGlobe().getTessellator();
 		skirtAction =
-				new SelectableAction("Render tile skirts", Icons.skirts.getIcon(),
+				new SelectableAction(getMessage(getRenderSkirtsLabelKey()), Icons.skirts.getIcon(),
 						tess.isMakeTileSkirts());
 		skirtAction.addActionListener(new ActionListener()
 		{
@@ -538,8 +544,8 @@ public class Application
 		});
 
 		wireframeAction =
-				new SelectableAction("Wireframe", Icons.wireframe.getIcon(), wwd.getModel()
-						.isShowWireframeInterior());
+				new SelectableAction(getMessage(getWireframeLabelKey()), Icons.wireframe.getIcon(),
+						wwd.getModel().isShowWireframeInterior());
 		wireframeAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -556,7 +562,8 @@ public class Application
 						? (WireframeRectangularTessellator) tess : null;
 		boolean depth = tessellator != null && tessellator.isWireframeDepthTesting();
 		wireframeDepthAction =
-				new SelectableAction("Wireframe depth testing", Icons.zwireframe.getIcon(), depth);
+				new SelectableAction(getMessage(getWireframeDepthLabelKey()),
+						Icons.zwireframe.getIcon(), depth);
 		wireframeDepthAction.setEnabled(wireframeAction.isSelected());
 		wireframeDepthAction.addActionListener(new ActionListener()
 		{
@@ -568,7 +575,8 @@ public class Application
 			}
 		});
 
-		fullscreenAction = new BasicAction("Fullscreen", Icons.monitor.getIcon());
+		fullscreenAction =
+				new BasicAction(getMessage(getFullscreenLabelKey()), Icons.monitor.getIcon());
 		fullscreenAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -578,7 +586,8 @@ public class Application
 			}
 		});
 
-		settingsAction = new BasicAction("Preferences...", Icons.settings.getIcon());
+		settingsAction =
+				new BasicAction(getMessage(getPreferencesLabelKey()), Icons.settings.getIcon());
 		settingsAction.addActionListener(new ActionListener()
 		{
 			private boolean visible = false;
@@ -590,7 +599,8 @@ public class Application
 				{
 					visible = true;
 					SettingsDialog settingsDialog =
-							new SettingsDialog(frame, "Preferences", Icons.settings.getIcon());
+							new SettingsDialog(frame, getMessage(getPreferencesTitleKey()),
+									Icons.settings.getIcon());
 					settingsDialog.setVisible(true);
 					visible = false;
 					afterSettingsChange();
@@ -598,7 +608,7 @@ public class Application
 			}
 		});
 
-		helpAction = new BasicAction("Help", Icons.help.getIcon());
+		helpAction = new BasicAction(getMessage(getHelpLabelKey()), Icons.help.getIcon());
 		helpAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -614,7 +624,8 @@ public class Application
 			}
 		});
 
-		controlsAction = new BasicAction("Controls...", Icons.keyboard.getIcon());
+		controlsAction =
+				new BasicAction(getMessage(getControlsLabelKey()), Icons.keyboard.getIcon());
 		controlsAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -624,17 +635,18 @@ public class Application
 			}
 		});
 
-		aboutAction = new BasicAction("About", Icons.about.getIcon());
+		aboutAction = new BasicAction(getMessage(getAboutLabelKey()), Icons.about.getIcon());
 		aboutAction.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				new AboutDialog(frame);
+				new AboutDialog(frame, getMessage(getAboutTitleKey()));
 			}
 		});
 
-		saveSectorAction = new BasicAction("Save sector as GeoTIFF...", Icons.save.getIcon());
+		saveSectorAction =
+				new BasicAction(getMessage(getSaveSectorLabelKey()), Icons.save.getIcon());
 		saveSectorAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -698,7 +710,7 @@ public class Application
 				@Override
 				public String getDescription()
 				{
-					return format.toUpperCase() + " image";
+					return format.toUpperCase() + " " + getMessage(getTermImageKey());
 				}
 
 				@Override
@@ -740,8 +752,11 @@ public class Application
 			if (file.exists())
 			{
 				int answer =
-						JOptionPane.showConfirmDialog(frame, file.getAbsolutePath()
-								+ " already exists.\nDo you want to replace it?", "Save image",
+						JOptionPane.showConfirmDialog(
+								frame,
+								getMessage(getSaveImageOverwriteMessageKey(),
+										file.getAbsolutePath()),
+								getMessage(getSaveImageOverwriteTitleKey()),
 								JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 				if (answer != JOptionPane.YES_OPTION)
 					file = null;
@@ -1001,14 +1016,14 @@ public class Application
 
 		JMenu menu, submenu;
 
-		menu = new JMenu("File");
+		menu = new JMenu(getMessage(getFileMenuLabelKey()));
 		menuBar.add(menu);
 
 		if (theme.hasLayersPanel())
 		{
 			menu.add(openLayerAction);
 
-			submenu = new JMenu("Create layer");
+			submenu = new JMenu(getMessage(getCreateLayerMenuLabelKey()));
 			submenu.setIcon(Icons.newfile.getIcon());
 			menu.add(submenu);
 
@@ -1026,7 +1041,7 @@ public class Application
 		menu.addSeparator();
 		menu.add(exitAction);
 
-		menu = new JMenu("View");
+		menu = new JMenu(getMessage(getViewMenuLabelKey()));
 		menuBar.add(menu);
 
 		menu.add(defaultViewAction);
@@ -1050,12 +1065,12 @@ public class Application
 			action.addToMenu(menu);
 		}
 
-		menu = new JMenu("Options");
+		menu = new JMenu(getMessage(getOptionsMenuLabelKey()));
 		menuBar.add(menu);
 
 		menu.add(settingsAction);
 
-		menu = new JMenu("Help");
+		menu = new JMenu(getMessage(getHelpMenuLabelKey()));
 		menuBar.add(menu);
 
 		menu.add(helpAction);
@@ -1091,7 +1106,7 @@ public class Application
 	private void showControls()
 	{
 		JDialog dialog =
-				new HtmlViewer(frame, "Controls", false,
+				new HtmlViewer(frame, getMessage(getControlsTitleKey()), false,
 						"/au/gov/ga/worldwind/data/help/controls.html", true);
 		dialog.setResizable(false);
 		dialog.setSize(640, 480);
@@ -1136,7 +1151,7 @@ public class Application
 							+ external.substring(index + placeholder.length());
 		}
 
-		System.out.println(external);
+		//System.out.println(external);
 		try
 		{
 			URL url = new URL(external);
@@ -1206,6 +1221,6 @@ public class Application
 
 	private void saveSector()
 	{
-		ImageSectorSaver.beginSelection(frame, "Save sector as GeoTIFF", wwd);
+		ImageSectorSaver.beginSelection(frame, getMessage(getSaveSectorTitleKey()), wwd);
 	}
 }
