@@ -76,6 +76,7 @@ import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.DoubleClickZoomListener;
+import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.URLTransformer;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
@@ -108,7 +109,6 @@ import au.gov.ga.worldwind.viewer.theme.ThemePanel;
 import au.gov.ga.worldwind.viewer.theme.ThemePiece;
 import au.gov.ga.worldwind.viewer.theme.ThemePiece.ThemePieceAdapter;
 import au.gov.ga.worldwind.viewer.theme.hud.WorldMapHUD;
-import au.gov.ga.worldwind.viewer.util.GASandpit;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public class Application

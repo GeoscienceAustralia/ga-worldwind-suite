@@ -4,6 +4,7 @@ import gov.nasa.worldwind.geom.LatLon;
 
 import java.io.File;
 
+import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 

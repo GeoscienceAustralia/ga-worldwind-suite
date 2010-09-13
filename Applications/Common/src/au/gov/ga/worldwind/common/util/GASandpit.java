@@ -1,6 +1,5 @@
-package au.gov.ga.worldwind.viewer.util;
+package au.gov.ga.worldwind.common.util;
 
-import au.gov.ga.worldwind.common.util.URLTransformer;
 import au.gov.ga.worldwind.common.util.URLTransformer.URLTransform;
 
 public class GASandpit
