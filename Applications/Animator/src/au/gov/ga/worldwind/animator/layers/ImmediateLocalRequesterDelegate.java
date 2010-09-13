@@ -27,7 +27,7 @@ public class ImmediateLocalRequesterDelegate extends LocalRequesterDelegate
 			return task;
 		}
 
-		//run immediately for load texture
+		//run immediately to load texture
 		task.run();
 		return null;
 	}
