@@ -406,5 +406,13 @@ public class Settings
 		}
 		knownLayers.add(layer);
 	}
+
+	/**
+	 * Remove the provided layer from the list of known layers
+	 */
+	public void removeKnownLayer(LayerIdentifier identifier)
+	{
+		knownLayers.remove(identifier);
+	}
 	
 }

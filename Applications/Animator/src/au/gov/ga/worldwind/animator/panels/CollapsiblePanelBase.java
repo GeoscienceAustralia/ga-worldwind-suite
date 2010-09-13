@@ -1,6 +1,8 @@
 package au.gov.ga.worldwind.animator.panels;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Window;
 
 import javax.swing.Icon;
 import javax.swing.JPanel;
@@ -86,5 +88,15 @@ public abstract class CollapsiblePanelBase extends JPanel implements Collapsible
 	public Icon getIcon()
 	{
 		return null;
+	}
+	
+	protected Window getParentWindow()
+	{
+		Component comp = this;
+        while (comp != null && !(comp instanceof Window)) {
+            comp = comp.getParent();
+        }
+
+        return (Window)comp;
 	}
 }

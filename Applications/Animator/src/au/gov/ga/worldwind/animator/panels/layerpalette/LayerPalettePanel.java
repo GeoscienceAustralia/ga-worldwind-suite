@@ -1,9 +1,7 @@
 package au.gov.ga.worldwind.animator.panels.layerpalette;
 
 import static au.gov.ga.worldwind.animator.util.ExceptionLogger.logException;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddLayerToAnimationLabelKey;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddLayerToListLabelKey;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getLayerPalettePanelNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.BorderLayout;
@@ -14,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
@@ -23,6 +22,7 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -72,6 +72,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	// Actions
 	private BasicAction addLayerToAnimationAction;
 	private BasicAction loadLayerDefinitionAction;
+	private BasicAction removeLayerDefinitionAction;
 	
 	public LayerPalettePanel(Animation animation)
 	{
@@ -137,6 +138,16 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			}
 
 		});
+		
+		removeLayerDefinitionAction = new BasicAction(getMessage(getRemoveLayerFromListLabelKey()), Icons.delete.getIcon());
+		removeLayerDefinitionAction.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				promptToRemoveLayersFromList();
+			}
+		});
 	}
 
 	private void initialiseToolbar()
@@ -144,6 +155,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		toolbar = new JToolBar();
 		
 		toolbar.add(loadLayerDefinitionAction);
+		toolbar.add(removeLayerDefinitionAction);
 		toolbar.add(Box.createHorizontalGlue());
 		toolbar.add(addLayerToAnimationAction);
 	}
@@ -190,10 +202,78 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		{
 			this.animation = (Animation)e.getSource();
 			layerList.setCellRenderer(new LayerListRenderer(animation));
+			addLayerToAnimationAction.setEnabled(!animation.hasLayer((LayerIdentifier)layerList.getSelectedValue()));
 		}
 		layerList.validate();
 	}
 	
+	private void promptToRemoveLayersFromList()
+	{
+		LayerIdentifier[] layerIdentifiers = getSelectedLayerIdentifiers();
+		if (layerIdentifiers == null || layerIdentifiers.length == 0)
+		{
+			return;
+		}
+		
+		boolean removalConfirmed = promptUserForConfirmationOfRemoval(layerIdentifiers);
+		if (removalConfirmed)
+		{
+			removeLayersFromList(layerIdentifiers);
+		}
+	}
+	
+	private LayerIdentifier[] getSelectedLayerIdentifiers()
+	{
+		List<LayerIdentifier> result = new ArrayList<LayerIdentifier>();
+		for (Object o : layerList.getSelectedValues())
+		{
+			result.add((LayerIdentifier)o);
+		}
+		return result.toArray(new LayerIdentifier[result.size()]);
+	}
+
+	/**
+	 * Remove the provided layers from the list of known layers
+	 */
+	private void removeLayersFromList(LayerIdentifier[] layerIdentifiers)
+	{
+		if (layerIdentifiers == null || layerIdentifiers.length == 0)
+		{
+			return;
+		}
+		for (LayerIdentifier identifier : layerIdentifiers)
+		{
+			knownLayers.remove(identifier);
+			Settings.get().removeKnownLayer(identifier);
+		}
+		layerList.setSelectedIndex(0);
+		layerList.validate();
+	}
+
+	/**
+	 * Prompt the user to remove the provided layers from the list of known layers
+	 */
+	private boolean promptUserForConfirmationOfRemoval(LayerIdentifier[] layerIdentifiers)
+	{
+		String selectionList = "";
+		for (LayerIdentifier identifier : layerIdentifiers)
+		{
+			if (identifier == null)
+			{
+				continue;
+			}
+			selectionList += "- " + identifier.getName() + "\n";
+			
+		}
+		int response = JOptionPane.showConfirmDialog(getParentWindow(),
+									  				 getMessage(getQueryRemoveLayersFromListMessageKey(), selectionList), 
+									  				 getMessage(getQueryRemoveLayersFromListCaptionKey()),
+									  				 JOptionPane.YES_NO_OPTION,
+									  				 JOptionPane.QUESTION_MESSAGE);
+		
+		return response == JOptionPane.YES_OPTION;
+	}
+
 	private void promptToAddLayersFromDefinitions()
 	{
 		File[] definitionFiles = promptUserForDefinitionFiles();
@@ -205,7 +285,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	 */
 	private File[] promptUserForDefinitionFiles()
 	{
-		int userAction = fileChooser.showOpenDialog(this);
+		int userAction = fileChooser.showOpenDialog(getParentWindow());
 		if (userAction == JFileChooser.APPROVE_OPTION)
 		{
 			return fileChooser.getSelectedFiles();
