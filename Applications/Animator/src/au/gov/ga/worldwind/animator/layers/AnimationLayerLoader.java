@@ -13,6 +13,7 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegateFactory;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.LocalRequesterDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.URLRequesterDelegate;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -39,6 +40,7 @@ public class AnimationLayerLoader
 	{
 		DelegateFactory.registerDelegate(ImmediateURLRequesterDelegate.class);
 		DelegateFactory.registerReplacementClass(URLRequesterDelegate.class, ImmediateURLRequesterDelegate.class);
+		DelegateFactory.registerReplacementClass(LocalRequesterDelegate.class, ImmediateLocalRequesterDelegate.class);
 	}
 	
 	/**
