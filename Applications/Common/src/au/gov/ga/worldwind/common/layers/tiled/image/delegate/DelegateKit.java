@@ -46,12 +46,27 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 	}
 
 	//default delegate implementations
-	private TileRequesterDelegate requesterDelegate = new URLRequesterDelegate();
-	private RetrieverFactoryDelegate retrieverDelegate = new HttpRetrieverFactoryDelegate();
-	private TileFactoryDelegate factoryDelegate = new TextureTileFactoryDelegate();
+	private TileRequesterDelegate requesterDelegate;
+	private RetrieverFactoryDelegate retrieverDelegate;
+	private TileFactoryDelegate factoryDelegate;
 	private final List<ImageReaderDelegate> readerDelegates = new ArrayList<ImageReaderDelegate>();
 	private final List<ImageTransformerDelegate> transformerDelegates =
 			new ArrayList<ImageTransformerDelegate>();
+
+	public DelegateKit()
+	{
+		//use the DelegateFactory to create the defaults, in case some replacements have been set
+
+		requesterDelegate =
+				(TileRequesterDelegate) DelegateFactory.createDelegate(new URLRequesterDelegate()
+						.toDefinition());
+		retrieverDelegate =
+				(RetrieverFactoryDelegate) DelegateFactory
+						.createDelegate(new HttpRetrieverFactoryDelegate().toDefinition());
+		factoryDelegate =
+				(TileFactoryDelegate) DelegateFactory
+						.createDelegate(new TextureTileFactoryDelegate().toDefinition());
+	}
 
 	/**
 	 * Set the {@link TileRequesterDelegate}.
