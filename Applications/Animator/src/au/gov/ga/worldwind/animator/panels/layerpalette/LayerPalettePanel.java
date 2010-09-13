@@ -1,6 +1,8 @@
 package au.gov.ga.worldwind.animator.panels.layerpalette;
 
+import static au.gov.ga.worldwind.animator.util.ExceptionLogger.logException;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddLayerToAnimationLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddLayerToListLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getLayerPalettePanelNameKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
@@ -9,12 +11,16 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
+import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -24,9 +30,11 @@ import javax.swing.ListModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
+import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierFactory;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.animator.util.Icons;
@@ -58,8 +66,12 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	/** The identities of known layers */
 	private ListBackedModel<LayerIdentifier> knownLayers = new ListBackedModel<LayerIdentifier>();
 	
+	/** Used for selecting layer definitions */
+	private JFileChooser fileChooser;
+	
 	// Actions
 	private BasicAction addLayerToAnimationAction;
+	private BasicAction loadLayerDefinitionAction;
 	
 	public LayerPalettePanel(Animation animation)
 	{
@@ -71,10 +83,35 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		initialiseLayerList();
 		updateListModel();
 		initialiseActions();
+		initialiseFileChooser();
 		initialiseToolbar();
 		packComponents();
 	}
 	
+	private void initialiseFileChooser()
+	{
+		fileChooser = new JFileChooser();
+		fileChooser.setMultiSelectionEnabled(true);
+		fileChooser.setFileFilter(new FileFilter(){
+			@Override
+			public boolean accept(File f)
+			{
+				if (f.isDirectory())
+				{
+					return true;
+				}
+				return f.getName().toLowerCase().endsWith(".xml");
+			}
+
+			@Override
+			public String getDescription()
+			{
+				return "Layer definition files (*.xml)";
+			}
+		});
+		
+	}
+
 	private void initialiseActions()
 	{
 		addLayerToAnimationAction = new BasicAction(getMessage(getAddLayerToAnimationLabelKey()), Icons.add.getIcon());
@@ -85,15 +122,29 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			public void actionPerformed(ActionEvent e)
 			{
 				animation.addLayer((LayerIdentifier)layerList.getSelectedValue());
+				addLayerToAnimationAction.setEnabled(false);
 				layerList.repaint();
 			}
 		});
+		
+		loadLayerDefinitionAction = new BasicAction(getMessage(getAddLayerToListLabelKey()), Icons.imporrt.getIcon());
+		loadLayerDefinitionAction.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				promptToAddLayersFromDefinitions();
+			}
+
+		});
 	}
-	
+
 	private void initialiseToolbar()
 	{
 		toolbar = new JToolBar();
 		
+		toolbar.add(loadLayerDefinitionAction);
+		toolbar.add(Box.createHorizontalGlue());
 		toolbar.add(addLayerToAnimationAction);
 	}
 
@@ -141,6 +192,62 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			layerList.setCellRenderer(new LayerListRenderer(animation));
 		}
 		layerList.validate();
+	}
+	
+	private void promptToAddLayersFromDefinitions()
+	{
+		File[] definitionFiles = promptUserForDefinitionFiles();
+		addLayersFromDefinitionFiles(definitionFiles);
+	}
+	
+	/**
+	 * Prompt the user to select one or more layer definition files to add to the known layers
+	 */
+	private File[] promptUserForDefinitionFiles()
+	{
+		int userAction = fileChooser.showOpenDialog(this);
+		if (userAction == JFileChooser.APPROVE_OPTION)
+		{
+			return fileChooser.getSelectedFiles();
+		}
+		return null;
+	}
+	
+	/**
+	 * Load layer identifiers from the provided definition files and add them to the list of known layers
+	 */
+	private void addLayersFromDefinitionFiles(File[] definitionFiles)
+	{
+		if (definitionFiles == null || definitionFiles.length == 0)
+		{
+			return;
+		}
+		for (File definitionFile : definitionFiles)
+		{
+			if (definitionFile == null || definitionFile.isDirectory())
+			{
+				continue;
+			}
+			try
+			{
+				addIdentifierToKnownLayers(LayerIdentifierFactory.createFromDefinition(definitionFile.toURI().toURL()));
+			}
+			catch (MalformedURLException e)
+			{
+				logException(e);
+			}
+		}
+		layerList.validate();
+	}
+	
+	private void addIdentifierToKnownLayers(LayerIdentifier identifier)
+	{
+		if (identifier == null)
+		{
+			return;
+		}
+		knownLayers.add(identifier);
+		Settings.get().addKnownLayer(identifier);
 	}
 	
 	/**

@@ -11,8 +11,12 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import au.gov.ga.worldwind.animator.util.Util;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
  * A factory class for obtaining layer identifiers
@@ -100,6 +104,56 @@ public class LayerIdentifierFactory
 		}
 		
 		return new LayerIdentifierImpl(layerName, layerUrl.toExternalForm());
+	}
+
+	/**
+	 * Creates a new {@link LayerIdentifier} that identifies the layer at the provided location.
+	 * <p/>
+	 * Attempts to extract the layer name from the definition file at the provided location. If one is not found, 
+	 * will use the file name as the layer name.
+	 * 
+	 * @param definitionLocation The location of the layer definition file to create the identifier for.
+	 */
+	public static LayerIdentifier createFromDefinition(URL definitionLocation)
+	{
+		if (definitionLocation == null)
+		{
+			return null;
+		}
+		
+		String layerName = getNameFromDefinition(definitionLocation);
+		if (isBlank(layerName))
+		{
+			layerName = getNameFromUrlLocation(definitionLocation);
+		}
+		
+		return new LayerIdentifierImpl(layerName, definitionLocation.toExternalForm());
+	}
+
+	private static String getNameFromUrlLocation(URL definitionLocation)
+	{
+		String locationName = definitionLocation.toExternalForm();
+		int startIndex = locationName.lastIndexOf("/");
+		int endIndex = locationName.lastIndexOf(".");
+		
+		return locationName.substring(startIndex + 1, endIndex);
+	}
+
+	private static String getNameFromDefinition(URL definitionLocation)
+	{
+		Document definitionDocument = XMLUtil.openDocument(definitionLocation);
+		if (definitionDocument == null)
+		{
+			return null;
+		}
+		
+		Element nameElement = XMLUtil.getElement(definitionDocument.getDocumentElement(), "/Layer/DisplayName", null);
+		if (nameElement == null)
+		{
+			return null;
+		}
+		
+		return nameElement.getFirstChild().getNodeValue();
 	}
 	
 }

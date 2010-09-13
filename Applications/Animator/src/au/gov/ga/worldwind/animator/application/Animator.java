@@ -96,7 +96,9 @@ import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
+import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.common.util.URLTransformer;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
@@ -284,6 +286,21 @@ public class Animator
 		initialiseChangeListener();
 		initialiseLayerUpdateListener();
 		
+	}
+
+	/**
+	 * Re-attach the animation listeners to the current animation. Used when the animation changes (open, new file etc.)
+	 */
+	private void updateAnimationListeners()
+	{
+		updateAnimationListener(layerUpdateListener);
+		// TODO: Add more listeners here as they are added
+		
+	}
+	private void updateAnimationListener(AnimationEventListener listener)
+	{
+		animation.removeChangeListener(listener);
+		animation.addChangeListener(listener);
 	}
 
 	/**
@@ -609,6 +626,7 @@ public class Animator
 
 		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE, 16777216L * 8); // 128 mb
 		
+		GASandpit.setSandpitMode(true);
 	}
 
 	/**
@@ -1273,6 +1291,7 @@ public class Animator
 			setSlider(0);
 			
 			resetChanged();
+			updateAnimationListeners();
 			updateSlider();
 			
 			updateRecentFiles(animationFile);
