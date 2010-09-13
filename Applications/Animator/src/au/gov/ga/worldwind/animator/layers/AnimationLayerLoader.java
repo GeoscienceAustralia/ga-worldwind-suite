@@ -37,8 +37,8 @@ public class AnimationLayerLoader
 	
 	static
 	{
-		DelegateFactory.registerDelegate(ImmediateRequesterDelegate.class);
-		DelegateFactory.registerReplacementClass(URLRequesterDelegate.class, ImmediateRequesterDelegate.class);
+		DelegateFactory.registerDelegate(ImmediateURLRequesterDelegate.class);
+		DelegateFactory.registerReplacementClass(URLRequesterDelegate.class, ImmediateURLRequesterDelegate.class);
 	}
 	
 	/**

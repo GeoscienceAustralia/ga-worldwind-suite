@@ -7,38 +7,40 @@ import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImag
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.URLRequesterDelegate;
 
 /**
- * A layer delegate that will immediately perform download and texture load from a remote location if
- * {@link ImmediateMode#isImmediate()} returns <code>true</code>.
+ * A URL requester delegate that will immediately perform download and texture
+ * load from a URL if {@link ImmediateMode#isImmediate()} returns
+ * <code>true</code>.
  * <p/>
- * Used to ensure hi-res versions of layers are available at render time for an animation. 
+ * Used to ensure hi-res versions of layers are available at render time for an
+ * animation.
  * 
  * @author James Navin (james.navin@ga.gov.au)
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  */
-public class ImmediateRequesterDelegate extends URLRequesterDelegate
+public class ImmediateURLRequesterDelegate extends URLRequesterDelegate
 {
 	@Override
 	public Runnable createRequestTask(TextureTile tile, DelegatorTiledImageLayer layer)
 	{
 		Runnable task = super.createRequestTask(tile, layer);
-		if(!ImmediateMode.isImmediate())
+		if (!ImmediateMode.isImmediate())
 		{
 			return task;
 		}
-		
+
 		//run twice: once for download, second time for load texture
 		task.run();
 		task.run();
 		return null;
 	}
-	
+
 	@Override
 	public Delegate fromDefinition(String definition)
 	{
 		Delegate superDelegate = super.fromDefinition(definition);
 		if (superDelegate != null)
 		{
-			return new ImmediateRequesterDelegate();
+			return new ImmediateURLRequesterDelegate();
 		}
 		return null;
 	}
