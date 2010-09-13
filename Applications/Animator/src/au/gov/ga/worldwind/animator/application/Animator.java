@@ -98,7 +98,6 @@ import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.common.util.URLTransformer;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
@@ -1174,6 +1173,7 @@ public class Animator
 		{
 			useScaledZoomAction.setSelected(animation.isZoomScalingRequired());
 		}
+		updateAnimationListeners();
 		updateLayersInModel();
 		updateSideBar();
 	}
@@ -1291,7 +1291,6 @@ public class Animator
 			setSlider(0);
 			
 			resetChanged();
-			updateAnimationListeners();
 			updateSlider();
 			
 			updateRecentFiles(animationFile);

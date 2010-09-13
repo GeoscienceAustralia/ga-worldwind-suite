@@ -1,7 +1,6 @@
 package au.gov.ga.worldwind.animator.animation.layer;
 
 import static au.gov.ga.worldwind.animator.util.Util.isBlank;
-
 import gov.nasa.worldwind.layers.Layer;
 
 import java.net.URL;
@@ -14,7 +13,6 @@ import java.util.TreeMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.util.Util;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
@@ -75,7 +73,7 @@ public class LayerIdentifierFactory
 
 	private static boolean isLayerIdentifierKey(String key)
 	{
-		return !Util.isBlank(key) && key.startsWith(LAYER_IDENTIFIER_KEY_PREFIX);
+		return !isBlank(key) && key.startsWith(LAYER_IDENTIFIER_KEY_PREFIX);
 	}
 
 	/**
