@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate;
 
+import gov.nasa.worldwind.globes.Globe;
+import gov.nasa.worldwind.layers.TextureTile;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
@@ -16,11 +19,15 @@ public interface ImageReaderDelegate extends Delegate
 	/**
 	 * Read an image from a url.
 	 * 
+	 * @param tile
+	 *            Tile for which to read the image
 	 * @param url
 	 *            URL to read the image from
+	 * @param globe
+	 *            Current globe; can be used for vertex calculations if required
 	 * @return Loaded image
 	 * @throws IOException
 	 *             If image reading fails
 	 */
-	BufferedImage readImage(URL url) throws IOException;
+	BufferedImage readImage(TextureTile tile, URL url, Globe globe) throws IOException;
 }

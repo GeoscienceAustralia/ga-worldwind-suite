@@ -1,7 +1,9 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate;
 
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.TextureTile;
+import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
 import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.util.Level;
@@ -28,7 +30,7 @@ import org.w3c.dom.Element;
  * @author Michael de Hoog
  */
 public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDelegate,
-		TileFactoryDelegate, ImageReaderDelegate, ImageTransformerDelegate
+		TileFactoryDelegate, ImageReaderDelegate, ImageTransformerDelegate, RenderDelegate
 {
 	/**
 	 * Stores the definitions of the default delegates. See
@@ -52,6 +54,7 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 	private final List<ImageReaderDelegate> readerDelegates = new ArrayList<ImageReaderDelegate>();
 	private final List<ImageTransformerDelegate> transformerDelegates =
 			new ArrayList<ImageTransformerDelegate>();
+	private final List<RenderDelegate> renderDelegates = new ArrayList<RenderDelegate>();
 
 	public DelegateKit()
 	{
@@ -116,6 +119,16 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 	public void addTransformerDelegate(ImageTransformerDelegate transformerDelegate)
 	{
 		transformerDelegates.add(transformerDelegate);
+	}
+
+	/**
+	 * Add a {@link RenderDelegate}.
+	 * 
+	 * @param renderDelegate
+	 */
+	public void addRenderDelegate(RenderDelegate renderDelegate)
+	{
+		renderDelegates.add(renderDelegate);
 	}
 
 	/**
@@ -208,6 +221,11 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 			addTransformerDelegate((ImageTransformerDelegate) delegate);
 			valid = true;
 		}
+		if (delegate instanceof RenderDelegate)
+		{
+			addRenderDelegate((RenderDelegate) delegate);
+			valid = true;
+		}
 		if (!valid)
 		{
 			throw new IllegalArgumentException("Unrecognized delegate: " + delegate);
@@ -225,6 +243,7 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 		delegates.add(factoryDelegate);
 		delegates.addAll(readerDelegates);
 		delegates.addAll(transformerDelegates);
+		delegates.addAll(renderDelegates);
 		return delegates;
 	}
 
@@ -243,11 +262,11 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 	}
 
 	@Override
-	public BufferedImage readImage(URL url) throws IOException
+	public BufferedImage readImage(TextureTile tile, URL url, Globe globe) throws IOException
 	{
 		for (ImageReaderDelegate reader : readerDelegates)
 		{
-			BufferedImage image = reader.readImage(url);
+			BufferedImage image = reader.readImage(tile, url, globe);
 			if (image != null)
 				return image;
 		}
@@ -289,6 +308,24 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 	public Runnable createRequestTask(TextureTile tile, DelegatorTiledImageLayer layer)
 	{
 		return requesterDelegate.createRequestTask(tile, layer);
+	}
+
+	@Override
+	public void preRender(DrawContext dc)
+	{
+		for (RenderDelegate renderDelegate : renderDelegates)
+		{
+			renderDelegate.preRender(dc);
+		}
+	}
+
+	@Override
+	public void postRender(DrawContext dc)
+	{
+		for (RenderDelegate renderDelegate : renderDelegates)
+		{
+			renderDelegate.postRender(dc);
+		}
 	}
 
 	@Override

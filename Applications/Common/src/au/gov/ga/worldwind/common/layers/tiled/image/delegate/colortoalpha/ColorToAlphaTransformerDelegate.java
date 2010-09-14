@@ -50,7 +50,7 @@ public class ColorToAlphaTransformerDelegate implements ImageTransformerDelegate
 	{
 		if (definition.toLowerCase().startsWith(DEFINITION_STRING.toLowerCase()))
 		{
-			Pattern pattern = Pattern.compile("(?:(\\d+),(\\d+),(\\d+))");
+			Pattern pattern = Pattern.compile("(?:\\((\\d+),(\\d+),(\\d+)\\))");
 			Matcher matcher = pattern.matcher(definition);
 			if (matcher.find())
 			{

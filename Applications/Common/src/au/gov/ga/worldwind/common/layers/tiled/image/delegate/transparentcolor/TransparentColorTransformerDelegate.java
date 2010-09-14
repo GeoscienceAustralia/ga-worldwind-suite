@@ -70,7 +70,7 @@ public class TransparentColorTransformerDelegate implements ImageTransformerDele
 	{
 		if (definition.toLowerCase().startsWith(DEFINITION_STRING.toLowerCase()))
 		{
-			Pattern pattern = Pattern.compile("(?:(\\d+),(\\d+),(\\d+),(\\d*\\.?\\d*))");
+			Pattern pattern = Pattern.compile("(?:\\((\\d+),(\\d+),(\\d+),(\\d*\\.?\\d*)\\))");
 			Matcher matcher = pattern.matcher(definition);
 			if (matcher.find())
 			{

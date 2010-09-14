@@ -12,8 +12,10 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.layers.TextureTile;
+import gov.nasa.worldwind.ogc.OGCConstants;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.util.DataConfigurationUtils;
@@ -24,6 +26,7 @@ import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileKey;
 import gov.nasa.worldwind.util.WWIO;
+import gov.nasa.worldwind.wms.WMSTiledImageLayer;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -42,6 +45,8 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.layers.tiled.image.URLTransformerBasicTiledImageLayer;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.DDSUncompressor;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
@@ -51,6 +56,11 @@ import com.sun.opengl.util.texture.TextureIO;
  * functions such as downloading, saving, loading, and image transforming. This
  * allows full customisation of different functions of the layer.
  * 
+ * It also uses the {@link FileLockSharer} to create/share the fileLock object.
+ * This is so that multiple layers can point and write to the same data cache
+ * name and synchronize with each other on the same fileLock object. (Note: this
+ * has not yet been added to Bulk Download facility).
+ * 
  * @author Michael de Hoog
  */
 public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer implements Bounded
@@ -58,6 +68,8 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	protected final Object fileLock;
 	protected final URL context;
 	protected final DelegateKit delegateKit;
+
+	protected Globe currentGlobe;
 
 	public DelegatorTiledImageLayer(AVList params)
 	{
@@ -87,13 +99,42 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 
 	protected static AVList getParamsFromDocument(Element domElement, AVList params)
 	{
-		params = BasicTiledImageLayer.getParamsFromDocument(domElement, params);
+		String serviceName = XMLUtil.getText(domElement, "Service/@serviceName");
+
+		if (OGCConstants.WMS_SERVICE_NAME.equals(serviceName))
+		{
+			//if serviceName defines a WMS sources, then use the WMSTiledImageLayer to initialise params
+			params = WMSTIL.wmsGetParamsFromDocument(domElement, params);
+		}
+		else
+		{
+			params = BasicTiledImageLayer.getParamsFromDocument(domElement, params);
+		}
 
 		//create the delegate kit from the XML element
 		DelegateKit delegateKit = DelegateKit.createFromXML(domElement);
 		params.setValue(AVKeyMore.DELEGATE_KIT, delegateKit);
 
 		return params;
+	}
+
+	/**
+	 * Extension of {@link WMSTiledImageLayer} that provides access to the
+	 * wmsGetParamsFromDocument function.
+	 * 
+	 * @author Michael de Hoog
+	 */
+	protected static class WMSTIL extends WMSTiledImageLayer
+	{
+		private WMSTIL()
+		{
+			super("");
+		}
+
+		public static AVList wmsGetParamsFromDocument(Element domElement, AVList params)
+		{
+			return WMSTiledImageLayer.wmsGetParamsFromDocument(domElement, params);
+		}
 	}
 
 	/**
@@ -132,6 +173,20 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	}
 
 	@Override
+	public void render(DrawContext dc)
+	{
+		if (!isEnabled())
+			return;
+
+		if (dc != null)
+			currentGlobe = dc.getGlobe();
+
+		delegateKit.preRender(dc);
+		super.render(dc);
+		delegateKit.postRender(dc);
+	}
+
+	@Override
 	public Sector getSector()
 	{
 		return getLevels().getSector();
@@ -163,7 +218,9 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	@Override
 	protected void requestTexture(DrawContext dc, TextureTile tile)
 	{
-		Vec4 centroid = tile.getCentroidPoint(dc.getGlobe());
+		currentGlobe = dc.getGlobe();
+
+		Vec4 centroid = tile.getCentroidPoint(currentGlobe);
 		Vec4 referencePoint = this.getReferencePoint(dc);
 		if (referencePoint != null)
 			tile.setPriority(centroid.distanceTo3(referencePoint));
@@ -192,7 +249,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 
 		synchronized (fileLock)
 		{
-			textureData = readTexture(textureURL);
+			textureData = readTexture(tile, textureURL);
 		}
 
 		if (textureData == null)
@@ -222,11 +279,13 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	 * Read image from a File URL and return it as TextureData. Called by
 	 * loadTexture().
 	 * 
+	 * @param tile
+	 *            Tile for which to read a texture
 	 * @param url
 	 *            File URL to read from
 	 * @return TextureData read from url
 	 */
-	protected TextureData readTexture(URL url)
+	protected TextureData readTexture(TextureTile tile, URL url)
 	{
 		try
 		{
@@ -234,7 +293,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 			if (url.toString().toLowerCase().endsWith("dds"))
 				return TextureIO.newTextureData(url, isUseMipMaps(), null);
 
-			BufferedImage image = readImage(url);
+			BufferedImage image = readImage(tile, url);
 
 			if ("image/dds".equalsIgnoreCase(getTextureFormat()))
 			{
@@ -274,20 +333,30 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	/**
 	 * Read image from a File URL and return it as a {@link BufferedImage}.
 	 * 
+	 * @param tile
+	 *            Tile for which to read an image
 	 * @param url
 	 *            File URL to read from
 	 * @return Image read from URL
 	 * @throws IOException
 	 *             If image could not be read
 	 */
-	protected BufferedImage readImage(URL url) throws IOException
+	protected BufferedImage readImage(TextureTile tile, URL url) throws IOException
 	{
 		//first try to read the image via the ImageReaderDelegates
-		BufferedImage image = delegateKit.readImage(url);
+		BufferedImage image = delegateKit.readImage(tile, url, currentGlobe);
 		if (image == null)
 		{
-			//if that doesn't work, just read it with ImageIO class
-			image = ImageIO.read(url);
+			if (url.toString().toLowerCase().endsWith(".dds"))
+			{
+				ByteBuffer buffer = WWIO.readURLContentToBuffer(url, false);
+				image = DDSUncompressor.readDxt3(buffer);
+			}
+			else
+			{
+				//if that doesn't work, just read it with ImageIO class
+				image = ImageIO.read(url);
+			}
 
 			if (image == null)
 			{
@@ -312,17 +381,20 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	 * 
 	 * @author Michael de Hoog
 	 */
-	public class DownloadPostProcessor extends BasicTiledImageLayer.DownloadPostProcessor
+	protected static class DownloadPostProcessor extends BasicTiledImageLayer.DownloadPostProcessor
 	{
-		public DownloadPostProcessor(TextureTile tile, BasicTiledImageLayer layer)
+		private final DelegatorTiledImageLayer layer;
+
+		public DownloadPostProcessor(TextureTile tile, DelegatorTiledImageLayer layer)
 		{
 			super(tile, layer);
+			this.layer = layer;
 		}
 
 		@Override
 		protected Object getFileLock()
 		{
-			return fileLock;
+			return layer.fileLock;
 		}
 	}
 
@@ -337,7 +409,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 		{
 			try
 			{
-				return readImage(url);
+				return readImage(tile, url);
 			}
 			catch (IOException e)
 			{

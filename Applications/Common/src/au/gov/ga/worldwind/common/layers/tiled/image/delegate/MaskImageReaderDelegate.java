@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate;
 
+import gov.nasa.worldwind.globes.Globe;
+import gov.nasa.worldwind.layers.TextureTile;
+
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -40,7 +43,7 @@ public class MaskImageReaderDelegate implements ImageReaderDelegate
 	}
 
 	@Override
-	public BufferedImage readImage(URL url) throws IOException
+	public BufferedImage readImage(TextureTile tile, URL url, Globe globe) throws IOException
 	{
 		boolean isZIP = url.toString().toLowerCase().endsWith("zip");
 		if (isZIP)
