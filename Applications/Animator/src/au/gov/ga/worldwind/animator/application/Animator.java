@@ -21,9 +21,12 @@ import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -53,10 +56,13 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.sun.java.swing.plaf.motif.MotifBorders.BevelBorder;
 
 import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.animation.Animation;
@@ -64,6 +70,7 @@ import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
+import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
@@ -521,7 +528,50 @@ public class Animator
 		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(Angle.ZERO, Angle.POS180);
 		wwd.setMinimumSize(new Dimension(1, 1));
 		
-		mainPanel.add(wwd, BorderLayout.CENTER);
+		// The buffer holds the world wind canvas and gives us a handle to resize it against
+		final JPanel wwdBufferPanel = new JPanel();
+		wwdBufferPanel.setLayout(null);
+		wwdBufferPanel.setPreferredSize(RenderParameters.DEFAULT_DIMENSIONS);
+		wwdBufferPanel.setBackground(LAFConstants.getHighlightColor());
+		wwdBufferPanel.add(wwd);
+		// On resize, adjust the world wind canvas to maintain the correct aspect ratio
+		wwdBufferPanel.addComponentListener(new ComponentAdapter(){
+
+			@Override
+			public void componentResized(ComponentEvent e)
+			{
+				Dimension bufferSize = wwdBufferPanel.getSize();
+				double newWidth = bufferSize.width;
+			    double newHeight = bufferSize.height;
+			    
+			    double targetRatio = animation.getRenderParameters().getImageAspectRatio();
+			    double currentRatio = (double)bufferSize.width / bufferSize.height;
+			    
+			    if (currentRatio > targetRatio) 
+			    {
+			        newWidth = newHeight * targetRatio;
+			    } 
+			    else if (currentRatio < targetRatio) 
+			    {
+			        newHeight = newWidth / targetRatio;
+			    }
+			    
+			    Dimension canvasSize = new Dimension((int)newWidth, (int)newHeight);
+				wwd.setSize(canvasSize);
+			    wwd.setPreferredSize(canvasSize);
+			    wwd.setMinimumSize(canvasSize);
+			    wwd.setMaximumSize(canvasSize);
+			    
+			    int newX = (int)(bufferSize.getWidth() - canvasSize.getWidth()) / 2;
+			    int newY = (int)(bufferSize.getHeight() - canvasSize.getHeight()) / 2;
+			    wwd.setLocation(newX, newY);
+			    
+			    wwdBufferPanel.revalidate();
+			    wwdBufferPanel.repaint(100);
+			}
+		});
+		
+		mainPanel.add(wwdBufferPanel, BorderLayout.CENTER);
 	}
 
 	/**
@@ -530,7 +580,6 @@ public class Animator
 	private void initialiseFrameSlider()
 	{
 		slider = new FrameSlider(0, 0, animation.getFrameCount());
-		slider.setMinimumSize(new Dimension(0, 54)); //TODO: Is 54 special?
 		mainPanel.add(slider, BorderLayout.SOUTH);
 		
 		slider.addChangeListener(new ChangeListener()

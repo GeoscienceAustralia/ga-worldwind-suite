@@ -20,7 +20,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 public class RenderParameters implements XmlSerializable<RenderParameters>
 {
-	private static final Dimension DEFAULT_DIMENSIONS = new Dimension(1024, 576);
+	public static final Dimension DEFAULT_DIMENSIONS = new Dimension(1024, 576);
 	
 	private static final int DEFAULT_FRAME_RATE = 25;
 	
@@ -71,6 +71,14 @@ public class RenderParameters implements XmlSerializable<RenderParameters>
 		this.frameRate = frameRate;
 	}
 
+	/**
+	 * @return The aspect ratio (<code>width:height</code>) of the image dimensions for the rendered output
+	 */
+	public double getImageAspectRatio()
+	{
+		return imageDimension.getWidth() / imageDimension.getHeight();
+	}
+	
 	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
@@ -114,5 +122,5 @@ public class RenderParameters implements XmlSerializable<RenderParameters>
 		
 		return null;
 	}
-	
+
 }

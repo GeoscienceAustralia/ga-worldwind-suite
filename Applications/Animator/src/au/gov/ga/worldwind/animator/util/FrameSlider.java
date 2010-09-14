@@ -23,6 +23,8 @@ import javax.swing.JComponent;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import au.gov.ga.worldwind.animator.application.LAFConstants;
+
 /**
  * A Swing component used to display a frame slider.
  * <p/>
@@ -527,7 +529,7 @@ public class FrameSlider extends JComponent
 			rect.height = MINOR_TICK_LENGTH;
 			g2.setColor(dark);
 			g2.drawRect(rect.x, rect.y, rect.width, rect.height);
-			g2.setColor(new Color(255, 0, 0, 128));
+			g2.setColor(LAFConstants.getUnselectedKeyColor());
 			g2.fillRect(rect.x + 1, rect.y + 1, rect.width - 1, rect.height - 1);
 		}
 

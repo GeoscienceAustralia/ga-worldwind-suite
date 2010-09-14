@@ -35,6 +35,7 @@ import javax.swing.filechooser.FileFilter;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierFactory;
+import au.gov.ga.worldwind.animator.application.LAFConstants;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.animator.util.Icons;
@@ -335,8 +336,6 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	 */
 	private static class LayerListRenderer extends DefaultListCellRenderer
 	{
-		private static final Color HIGHLIGHT_COLOR = new Color(230, 247, 252);
-
 		private static final long serialVersionUID = 20100910L;
 
 		private Animation animation;
@@ -360,7 +359,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			// Stripe the layer palette
 			if (index % 2 == 0 && !isSelected)
 			{
-				label.setBackground(HIGHLIGHT_COLOR);
+				label.setBackground(LAFConstants.getHighlightColor());
 			} 
 			result.setBackground(label.getBackground());
 			
