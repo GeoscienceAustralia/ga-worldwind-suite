@@ -79,19 +79,6 @@ public class StripingFilterTransformerDelegate implements ImageTransformerDelega
 		return arrayToImage(array, width, height);
 	}
 
-	protected static float[][] createOnesMatrix(int width, int height)
-	{
-		float[][] matrix = new float[width][height];
-		for (int x = 0; x < width; x++)
-		{
-			for (int y = 0; y < height; y++)
-			{
-				matrix[x][y] = 1;
-			}
-		}
-		return matrix;
-	}
-
 	protected static float[][][] imageToArray(BufferedImage image)
 	{
 		int width = image.getWidth();
@@ -245,41 +232,6 @@ public class StripingFilterTransformerDelegate implements ImageTransformerDelega
 		return value > max ? max : value < min ? min : value;
 	}
 
-	protected static float[][][] convolve(float[][][] image, float[][] matrix, float divisor)
-	{
-		int width = image.length;
-		int height = image[0].length;
-		int bands = image[0][0].length;
-		float[][][] array = new float[width][height][bands];
-
-		int cols = matrix.length;
-		int rows = matrix[0].length;
-
-		for (int b = 0; b < bands; b++)
-		{
-			for (int y = 0; y < height; y++)
-			{
-				for (int x = 0; x < width; x++)
-				{
-					float sum = 0f;
-					for (int my = 0; my < rows; my++)
-					{
-						int sy = Math.max(0, Math.min(height - 1, y + my - rows / 2));
-						for (int mx = 0; mx < cols; mx++)
-						{
-							int sx = Math.max(0, Math.min(width - 1, x + mx - cols / 2));
-							sum += image[sx][sy][b] * matrix[mx][my];
-						}
-					}
-					sum /= divisor;
-					array[x][y][b] = sum;
-				}
-			}
-		}
-
-		return array;
-	}
-
 	protected static void subtract(float[][][] image1, float[][][] image2, float[][][] store)
 	{
 		int width = image1.length;
@@ -313,25 +265,6 @@ public class StripingFilterTransformerDelegate implements ImageTransformerDelega
 				for (int x = 0; x < width; x++)
 				{
 					store[x][y][b] = clamp(image1[x][y][b] + image2[x][y][b], -1, 1);
-				}
-			}
-		}
-	}
-
-	protected static void average(float[][][] image1, float[][][] image2, float[][][] store)
-	{
-		int width = image1.length;
-		int height = image1[0].length;
-		int bands = image1[0][0].length;
-
-		//skip alpha?
-		for (int b = 1; b < bands; b++)
-		{
-			for (int y = 0; y < height; y++)
-			{
-				for (int x = 0; x < width; x++)
-				{
-					store[x][y][b] = clamp((image1[x][y][b] + image2[x][y][b]) / 2f, -1, 1);
 				}
 			}
 		}
