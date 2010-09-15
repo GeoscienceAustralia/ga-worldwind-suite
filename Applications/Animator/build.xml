@@ -59,6 +59,10 @@
 		<exclude name="META-INF/INDEX.LIST" />
 	</patternset>
 
+	<patternset id="test_exclude">
+			<exclude name="**/DefaultAnimatableLayerTest.*" />
+	</patternset>
+	
 	<target name="clean">
 		<delete dir="${build_dir}" />
 		<delete dir="${target_dir}" />

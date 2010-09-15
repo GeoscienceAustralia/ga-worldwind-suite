@@ -13,6 +13,7 @@ import javax.swing.tree.TreeCellRenderer;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Icons;
@@ -120,6 +121,10 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 		}
 		if (isAnimatableObjectRow(rowValue))
 		{
+			if (isAnimatableLayerRow(rowValue))
+			{
+				return Icons.animatableLayer.getIcon();
+			}
 			return Icons.animatableObject.getIcon();
 		}
 		if (isParameterRow(rowValue))
@@ -129,6 +134,11 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 		return null;
 	}
 	
+	private boolean isAnimatableLayerRow(Object rowValue)
+	{
+		return rowValue instanceof AnimatableLayer;
+	}
+
 	private boolean isAnimationRow(Object rowValue)
 	{
 		return rowValue instanceof Animation;
