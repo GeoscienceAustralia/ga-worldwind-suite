@@ -81,6 +81,12 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	}
 	
 	@Override
+	public boolean isAllChildrenEnabled()
+	{
+		return true;
+	}
+	
+	@Override
 	public final void setDefaultValue(double value)
 	{
 		this.defaultValue = value;

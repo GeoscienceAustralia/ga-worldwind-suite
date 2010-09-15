@@ -10,6 +10,13 @@ package au.gov.ga.worldwind.animator.util;
 public class Icons extends au.gov.ga.worldwind.common.util.Icons
 {
 
+	private static final String ANIMATOR_ICONS_DIRECTORY = "/au/gov/ga/worldwind/animator/data/icons/";
+	
+	public static final Icons animatableObject = new Icons(ANIMATOR_ICONS_DIRECTORY, "object.gif");
+	public static final Icons parameter = new Icons(ANIMATOR_ICONS_DIRECTORY, "parameter.gif");
+	public static final Icons partialCheck = new Icons(ANIMATOR_ICONS_DIRECTORY, "partialCheck.gif");
+	
+	
 	public Icons(String directory, String filename)
 	{
 		super(directory, filename);

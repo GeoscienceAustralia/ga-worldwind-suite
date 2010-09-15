@@ -10,6 +10,7 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Nameable;
 
 /**
@@ -17,7 +18,7 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  *
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Animatable extends Serializable, Nameable, XmlSerializable<Animatable>, AnimationEventListener, Changeable
+public interface Animatable extends Serializable, Nameable, XmlSerializable<Animatable>, AnimationEventListener, Changeable, Enableable
 {
 	/**
 	 * Apply this object's behaviour/changes to the 'world' for the given frame
@@ -36,4 +37,5 @@ public interface Animatable extends Serializable, Nameable, XmlSerializable<Anim
 	 * @return The collection of all <em>enabled</em> parameters associated with this animatable object
 	 */
 	Collection<Parameter> getEnabledParameters();
+	
 }

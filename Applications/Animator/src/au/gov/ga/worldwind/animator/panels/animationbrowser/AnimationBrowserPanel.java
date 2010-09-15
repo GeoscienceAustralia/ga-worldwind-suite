@@ -5,6 +5,9 @@ import java.awt.BorderLayout;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
+import javax.swing.plaf.TreeUI;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
@@ -16,6 +19,7 @@ import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
+import au.gov.ga.worldwind.common.ui.ClearableBasicTreeUI;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
@@ -78,8 +82,9 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		treeModel = new AnimationTreeModel(animation);
 		
 		objectTree = new NameableTree(treeModel);
-		objectTree.setEditable(true);
+		objectTree.setEditable(false);
 		objectTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		objectTree.setCellRenderer(new AnimationTreeRenderer());
 	}
 	
 	@Override
@@ -93,12 +98,12 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		}
 		objectTree.validate();
 	}
-	
+
 	/**
 	 * An extension of the {@link DefaultMutableTreeNode} that renders a {@link Nameable} object's name
-	 * as the text value of the tree nodes.
+	 * as the text value of the tree nodes. Used in conjunction with the {@link AnimationTreeRenderer}.
 	 */
-	private class NameableTree extends JTree
+	private static final class NameableTree extends JTree
 	{
 		private static final long serialVersionUID = 20100907L;
 		
@@ -118,5 +123,4 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 			return super.convertValueToText(value, selected, expanded, leaf, row, hasFocus);
 		}
 	}
-	
 }

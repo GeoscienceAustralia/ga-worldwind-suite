@@ -14,6 +14,7 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
+import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Nameable;
 
 /**
@@ -22,7 +23,7 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Parameter extends Serializable, Nameable, XmlSerializable<Parameter>, AnimationEventListener, Changeable
+public interface Parameter extends Serializable, Nameable, XmlSerializable<Parameter>, AnimationEventListener, Changeable, Enableable
 {
 	
 	/**

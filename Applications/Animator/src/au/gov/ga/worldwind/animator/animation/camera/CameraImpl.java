@@ -99,7 +99,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	}
 
 	@Override
-	public void apply(AnimationContext animationContext, int frame)
+	protected void doApply(AnimationContext animationContext, int frame)
 	{
 		Position eye = getEyePositionAtFrame(animationContext, frame);
 

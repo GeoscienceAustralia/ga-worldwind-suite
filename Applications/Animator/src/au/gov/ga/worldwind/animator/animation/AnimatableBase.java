@@ -26,6 +26,9 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	/** The name of this {@link Animatable} object */
 	private String name; 
 
+	/** Whether this animatable is enabled */
+	private boolean enabled = true;
+	
 	/**
 	 * Constructor. Initialises the name of the animatable object.
 	 * 
@@ -43,6 +46,21 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	protected AnimatableBase()
 	{
 	}
+
+	@Override
+	public final void apply(AnimationContext animationContext, int frame)
+	{
+		if (enabled)
+		{
+			doApply(animationContext, frame);
+		}
+	}
+
+	/**
+	 * @param animationContext
+	 * @param frame
+	 */
+	protected abstract void doApply(AnimationContext animationContext, int frame);
 
 	@Override
 	public String getName()
@@ -78,4 +96,26 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 		return new AnimatableObjectEventImpl(this, type, cause, value);
 	}
 
+	@Override
+	public void setEnabled(boolean enabled)
+	{
+		this.enabled = enabled;
+		for (Parameter parameter : getParameters())
+		{
+			parameter.setEnabled(enabled);
+		}
+	}
+	
+	@Override
+	public boolean isEnabled()
+	{
+		return enabled;
+	}
+	
+	@Override
+	public boolean isAllChildrenEnabled()
+	{
+		return getParameters().size() == getEnabledParameters().size();
+	}
+	
 }

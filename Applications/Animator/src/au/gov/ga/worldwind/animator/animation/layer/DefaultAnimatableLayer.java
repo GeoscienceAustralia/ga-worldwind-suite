@@ -87,7 +87,7 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	private DefaultAnimatableLayer(){super();};
 
 	@Override
-	public void apply(AnimationContext animationContext, int frame)
+	protected void doApply(AnimationContext animationContext, int frame)
 	{
 		for (LayerParameter lp : layerParameters.values())
 		{
