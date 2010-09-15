@@ -5,9 +5,6 @@ import java.awt.BorderLayout;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
-import javax.swing.plaf.TreeUI;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
@@ -19,7 +16,6 @@ import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
-import au.gov.ga.worldwind.common.ui.ClearableBasicTreeUI;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
