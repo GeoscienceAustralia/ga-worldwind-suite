@@ -33,7 +33,7 @@ public class TriStateCheckBox extends JLabel
 	private Icon partialCheckedIcon = DEFAULT_PARTIAL_CHECKED_ICON;
 	
 	/** The model that backs this component */
-	private TriStateCheckBoxModel model;
+	private DefaultTriStateCheckBoxModel model;
 	
 	/**
 	 * A representation of the three states a {@link TriStateCheckBox} can be in. 
@@ -70,7 +70,7 @@ public class TriStateCheckBox extends JLabel
 		actions.put("released", null);
 		SwingUtilities.replaceUIActionMap(this, actions);
 		
-		this.model = new TriStateCheckBoxModel(State.CHECKED);
+		this.model = new DefaultTriStateCheckBoxModel(State.CHECKED);
 		setIcon(checkedIcon);
 	}
 
@@ -86,12 +86,12 @@ public class TriStateCheckBox extends JLabel
 		return null;
 	}
 	
-	public TriStateCheckBoxModel getModel()
+	public DefaultTriStateCheckBoxModel getModel()
 	{
 		return model;
 	}
 	
-	public void setModel(TriStateCheckBoxModel model)
+	public void setModel(DefaultTriStateCheckBoxModel model)
 	{
 		if (model == null)
 		{

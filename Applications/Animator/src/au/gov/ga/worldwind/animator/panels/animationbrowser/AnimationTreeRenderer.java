@@ -66,6 +66,9 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 		return this;
 	}
 
+	/**
+	 * Updates the state of the enabled tristate checkbox for the given value and packs it into the parent container.
+	 */
 	private void updateEnabledTriCheck(Object value)
 	{
 		if (!(value instanceof Enableable))
@@ -149,4 +152,5 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 	{
 		return rowValue instanceof Parameter;
 	}
+	
 }

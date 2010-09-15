@@ -19,14 +19,14 @@ import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox.State;
 public class TriStateCheckBoxModelTest
 {
 
-	private TriStateCheckBoxModel classToBeTested;
+	private DefaultTriStateCheckBoxModel classToBeTested;
 	
 	private Mockery mockContext = new Mockery();
 	
 	@Before
 	public void setup()
 	{
-		classToBeTested = new TriStateCheckBoxModel();
+		classToBeTested = new DefaultTriStateCheckBoxModel();
 	}
 	
 	@Test
