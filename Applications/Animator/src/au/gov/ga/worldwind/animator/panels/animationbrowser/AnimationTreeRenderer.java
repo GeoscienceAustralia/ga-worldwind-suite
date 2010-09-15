@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.Icon;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -15,6 +14,8 @@ import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox;
+import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox.State;
 import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.common.util.HSLColor;
@@ -27,13 +28,9 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 {
 	private static final long serialVersionUID = 1433749823115631800L;
 	
-	private static final Icon CHECKED_ICON = Icons.check.getIcon();
-	private static final Icon UNCHECKED_ICON = Icons.uncheck.getIcon();
-	private static final Icon PARTIAL_CHECKED_ICON = Icons.partialCheck.getIcon();
-	
 	private JTree tree;
 	private DefaultTreeCellRenderer label;
-	private JLabel enabledTriCheck;
+	private TriStateCheckBox enabledTriCheck;
 	
 	public AnimationTreeRenderer()
 	{
@@ -42,7 +39,7 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 		
 		initialiseLabel();
 		
-		enabledTriCheck = new JLabel();
+		enabledTriCheck = new TriStateCheckBox();
 	}
 
 	private void initialiseLabel()
@@ -71,25 +68,24 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 
 	private void updateEnabledTriCheck(Object value)
 	{
-		if (value instanceof Enableable)
+		if (!(value instanceof Enableable))
 		{
-			Enableable enableableValue = (Enableable)value;
-			if (!enableableValue.isEnabled())
-			{
-				enabledTriCheck.setIcon(UNCHECKED_ICON);
-			}
-			else if (enableableValue.isAllChildrenEnabled())
-			{
-				enabledTriCheck.setIcon(CHECKED_ICON);
-			}
-			else
-			{
-				enabledTriCheck.setIcon(PARTIAL_CHECKED_ICON);
-			}
+			remove(enabledTriCheck);
+			return;
+		}
+		
+		Enableable enableableValue = (Enableable)value;
+		if (!enableableValue.isEnabled())
+		{
+			enabledTriCheck.setCurrentState(State.UNCHECKED);
+		}
+		else if (enableableValue.isAllChildrenEnabled())
+		{
+			enabledTriCheck.setCurrentState(State.CHECKED);
 		}
 		else
 		{
-			enabledTriCheck.setIcon(null);
+			enabledTriCheck.setCurrentState(State.PARTIAL);
 		}
 		add(enabledTriCheck, BorderLayout.WEST);
 	}
