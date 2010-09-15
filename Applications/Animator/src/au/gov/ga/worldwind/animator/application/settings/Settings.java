@@ -329,7 +329,7 @@ public class Settings
 		
 		if (recentFiles.size() == MAX_NUMBER_RECENT_FILES)
 		{
-			recentFiles.remove(recentFiles.size());
+			recentFiles.remove(recentFiles.size() - 1);
 		}
 		
 		recentFiles.add(0, recentFile);

@@ -96,14 +96,28 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 		return new AnimatableObjectEventImpl(this, type, cause, value);
 	}
 
-	@Override
-	public void setEnabled(boolean enabled)
+	/**
+	 * Used for de-serialisation to prevent parameter 'enabled' status' being overridden
+	 */
+	protected void setEnabled(boolean enabled, boolean propagate)
 	{
 		this.enabled = enabled;
+		
+		if (!propagate)
+		{
+			return;
+		}
+		
 		for (Parameter parameter : getParameters())
 		{
 			parameter.setEnabled(enabled);
 		}
+	}
+	
+	@Override
+	public void setEnabled(boolean enabled)
+	{
+		setEnabled(enabled, true);
 	}
 	
 	@Override

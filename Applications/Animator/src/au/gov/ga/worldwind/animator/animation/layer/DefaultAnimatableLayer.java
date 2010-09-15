@@ -28,6 +28,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
  * A default implementation of the {@link AnimatableLayer} interface.
@@ -137,6 +138,7 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 		
 		Element result = WWXML.appendElement(parent, constants.getAnimatableLayerName());
 		WWXML.setTextAttribute(result, constants.getAnimatableLayerAttributeName(), getName());
+		WWXML.setBooleanAttribute(result, constants.getAnimatableLayerAttributeEnabled(), isEnabled());
 		
 		URL layerUrl = getLayerUrl();
 		if (layerUrl != null)
@@ -206,10 +208,16 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 					parameters.add(LayerParameterFactory.fromXml(parameterElement, version, context));
 				}
 				
-				return new DefaultAnimatableLayer(layerName, loadedLayer, parameters);
+				DefaultAnimatableLayer result = new DefaultAnimatableLayer(layerName, loadedLayer, parameters);
+				
+				Boolean enabled = XMLUtil.getBoolean(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableLayerAttributeEnabled(), true);
+				result.setEnabled(enabled, false);
+				
+				return result;
 			}
 		}
 		
 		return null;
 	}
+	
 }

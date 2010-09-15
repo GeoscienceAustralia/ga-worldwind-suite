@@ -14,6 +14,7 @@ import javax.swing.tree.TreeCellRenderer;
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.common.util.HSLColor;
 
@@ -69,6 +70,26 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 
 	private void updateEnabledTriCheck(Object value)
 	{
+		if (value instanceof Enableable)
+		{
+			Enableable enableableValue = (Enableable)value;
+			if (!enableableValue.isEnabled())
+			{
+				enabledTriCheck.setIcon(UNCHECKED_ICON);
+			}
+			else if (enableableValue.isAllChildrenEnabled())
+			{
+				enabledTriCheck.setIcon(CHECKED_ICON);
+			}
+			else
+			{
+				enabledTriCheck.setIcon(PARTIAL_CHECKED_ICON);
+			}
+		}
+		else
+		{
+			enabledTriCheck.setIcon(null);
+		}
 		add(enabledTriCheck, BorderLayout.WEST);
 	}
 
