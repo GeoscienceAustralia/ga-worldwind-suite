@@ -88,6 +88,13 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	private DefaultAnimatableLayer(){super();};
 
 	@Override
+	public void setEnabled(boolean enabled)
+	{
+		super.setEnabled(enabled);
+		layer.setEnabled(enabled);
+	}
+	
+	@Override
 	protected void doApply(AnimationContext animationContext, int frame)
 	{
 		for (LayerParameter lp : layerParameters.values())
@@ -212,6 +219,7 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 				
 				Boolean enabled = XMLUtil.getBoolean(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableLayerAttributeEnabled(), true);
 				result.setEnabled(enabled, false);
+				loadedLayer.setEnabled(enabled);
 				
 				return result;
 			}
