@@ -14,7 +14,7 @@ public class MetersStatusBar extends gov.nasa.worldwind.util.StatusBar
 		else
 		{
 			if (metersAltitude < 1e4)
-				s = String.format(altitude + " %,7d meters", (int) Math
+				s = String.format(altitude + " %,7d m", (int) Math
 						.round(metersAltitude));
 			else
 				s = String.format(altitude + " %,7d km", (int) Math
