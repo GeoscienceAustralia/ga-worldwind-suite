@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.viewer.layers.mercator;
+package au.gov.ga.worldwind.common.layers.mercator;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
