@@ -226,6 +226,8 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			animatableLayers.add((AnimatableLayer)object);
 		}
 		
+		object.addChangeListener(this);
+		
 		fireAddEvent(object);
 	}
 	
@@ -237,6 +239,8 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			animatableLayers.remove((AnimatableLayer)object);
 		}
+		
+		object.removeChangeListener(this);
 		
 		fireRemoveEvent(object);
 		

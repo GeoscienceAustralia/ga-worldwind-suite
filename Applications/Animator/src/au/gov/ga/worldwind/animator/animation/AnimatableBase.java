@@ -101,6 +101,8 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	 */
 	protected void setEnabled(boolean enabled, boolean propagate)
 	{
+		boolean changed = this.enabled != enabled;
+		
 		this.enabled = enabled;
 		
 		if (!propagate)
@@ -111,6 +113,11 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 		for (Parameter parameter : getParameters())
 		{
 			parameter.setEnabled(enabled);
+		}
+		
+		if (changed)
+		{
+			fireChangeEvent(enabled);
 		}
 	}
 	

@@ -77,7 +77,13 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	@Override
 	public final void setEnabled(boolean enabled)
 	{
+		boolean changed = this.enabled != enabled;
 		this.enabled = enabled;
+		
+		if (changed)
+		{
+			fireChangeEvent(enabled);
+		}
 	}
 	
 	@Override

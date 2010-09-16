@@ -124,6 +124,8 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 		}
 		Validate.isTrue(parameter.getLayer().equals(getLayer()), "Parameter is not linked to the correct layer. Expected '" + getLayer() + "'.");
 		layerParameters.put(parameter.getType(), parameter);
+		
+		parameter.addChangeListener(this);
 	}
 
 	@Override
