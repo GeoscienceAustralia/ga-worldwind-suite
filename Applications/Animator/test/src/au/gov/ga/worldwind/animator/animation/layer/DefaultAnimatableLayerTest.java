@@ -107,7 +107,7 @@ public class DefaultAnimatableLayerTest
 	 * Tests the {@link DefaultAnimatableLayer#toXml()} method
 	 */
 	@Test
-	@Ignore
+	@Ignore("Does not work via ant script. JOGL libraries are not linked into the classpath in the ant script.")
 	public void testToXml() throws Exception
 	{
 		setLayerUrl("file://marl/sandpit/symbolic-links/world-wind/current/dataset/ga/gravity/edition3/gravity.xml");
@@ -132,7 +132,7 @@ public class DefaultAnimatableLayerTest
 	 * Tests the {@link DefaultAnimatableLayer#fromXml()} method
 	 */
 	@Test
-	@Ignore
+	@Ignore("Does not work via ant script. JOGL libraries are not linked into the classpath in the ant script.")
 	public void testFromXml() throws Exception
 	{
 		AVList context = new AVListImpl();
