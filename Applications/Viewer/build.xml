@@ -4,7 +4,7 @@
 
 	<property name="src_dir" value="${basedir}/src" />
 	<property name="common_src_dir" value="${basedir}/../Common/src" />
-	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-0.6.586.13714" />
+	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-0.6.595.13794" />
 	<property name="worldwind_jar" value="worldwind.jar" />
 	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
 

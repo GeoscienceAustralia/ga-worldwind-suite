@@ -779,14 +779,6 @@ public class FakeDrawContext implements DrawContext
 	}
 
 	@Override
-	public Vec4 computeTerrainPoint(Angle lat, Angle lon, double offset,
-			boolean applyVerticalExaggeration)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public boolean isSmall(Extent extent, int numPixels)
 	{
 		// TODO Auto-generated method stub
@@ -809,6 +801,14 @@ public class FakeDrawContext implements DrawContext
 
 	@Override
 	public OrderedRenderable pollOrderedRenderables()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Vec4 computeTerrainPoint(Angle lat, Angle lon, double offset)
 	{
 		// TODO Auto-generated method stub
 		return null;
