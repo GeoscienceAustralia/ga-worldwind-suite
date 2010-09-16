@@ -11,7 +11,7 @@ import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox.State;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class DefaultTriStateCheckBoxModel
+public class DefaultTriStateCheckBoxModel implements TriStateCheckBoxModel
 {
 
 	/** The current state of the checkbox */
@@ -36,34 +36,37 @@ public class DefaultTriStateCheckBoxModel
 		currentState = initialState;
 	}
 
+	@Override
 	public boolean isChecked()
 	{
 		return currentState == State.CHECKED;
 	}
 	
+	@Override
 	public boolean isUnchecked()
 	{
 		return currentState == State.UNCHECKED;
 	}
 	
+	@Override
 	public boolean isPartiallyChecked()
 	{
 		return currentState == State.PARTIAL;
 	}
 	
+	@Override
 	public void setCurrentState(State state)
 	{
 		currentState = state;
 	}
 	
+	@Override
 	public State getCurrentState()
 	{
 		return currentState;
 	}
 	
-	/**
-	 * Move from the current state into the next state
-	 */
+	@Override
 	public void iterateState()
 	{
 		State oldState = this.currentState;

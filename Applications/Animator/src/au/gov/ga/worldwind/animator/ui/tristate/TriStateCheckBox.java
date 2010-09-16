@@ -33,7 +33,7 @@ public class TriStateCheckBox extends JLabel
 	private Icon partialCheckedIcon = DEFAULT_PARTIAL_CHECKED_ICON;
 	
 	/** The model that backs this component */
-	private DefaultTriStateCheckBoxModel model;
+	private TriStateCheckBoxModel model;
 	
 	/**
 	 * A representation of the three states a {@link TriStateCheckBox} can be in. 
@@ -86,12 +86,12 @@ public class TriStateCheckBox extends JLabel
 		return null;
 	}
 	
-	public DefaultTriStateCheckBoxModel getModel()
+	public TriStateCheckBoxModel getModel()
 	{
 		return model;
 	}
 	
-	public void setModel(DefaultTriStateCheckBoxModel model)
+	public void setModel(TriStateCheckBoxModel model)
 	{
 		if (model == null)
 		{
