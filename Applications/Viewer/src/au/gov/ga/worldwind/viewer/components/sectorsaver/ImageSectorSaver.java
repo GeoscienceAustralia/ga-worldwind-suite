@@ -524,53 +524,61 @@ public class ImageSectorSaver
 	private void saveSector(Frame frame, List<Layer> layers, Sector sector, Dimension size,
 			File output, JLabel label, JProgressBar progressBar) throws Exception
 	{
-		double texelSize = Math.abs(sector.getDeltaLonRadians()) / (double) size.width;
-
-		BufferedImage image =
-				new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
-
-		for (Layer l : layers)
+		try
 		{
-			label.setText("Saving layer: " + l.getName());
+			double texelSize = Math.abs(sector.getDeltaLonRadians()) / (double) size.width;
 
-			if (l.isEnabled() && l instanceof TiledImageLayer)
+			BufferedImage image =
+					new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
+
+			for (Layer l : layers)
 			{
-				TiledImageLayer layer = (TiledImageLayer) l;
-				int level = layer.computeLevelForResolution(sector, texelSize);
+				label.setText("Saving layer: " + l.getName());
 
-				String mimeType = layer.getDefaultImageFormat();
-				if (layer.isImageFormatAvailable("image/png"))
-					mimeType = "image/png";
-				else if (layer.isImageFormatAvailable("image/jpg"))
-					mimeType = "image/jpg";
+				if (l.isEnabled() && l instanceof TiledImageLayer)
+				{
+					TiledImageLayer layer = (TiledImageLayer) l;
+					int level = layer.computeLevelForResolution(sector, texelSize);
 
-				try
-				{
-					image =
-							layer.composeImageForSector(sector, size.width, size.height, 1d, level,
-									mimeType, true, image, 30000);
+					String mimeType = layer.getDefaultImageFormat();
+					if (layer.isImageFormatAvailable("image/png"))
+						mimeType = "image/png";
+					else if (layer.isImageFormatAvailable("image/jpg"))
+						mimeType = "image/jpg";
+
+					try
+					{
+						image =
+								layer.composeImageForSector(sector, size.width, size.height, 1d,
+										level, mimeType, true, image, 30000);
+					}
+					catch (Exception e)
+					{
+						JOptionPane.showMessageDialog(frame, "Error composing image for layer "
+								+ layer.getName() + ":\n\n" + e.getMessage(), "Warning",
+								JOptionPane.WARNING_MESSAGE);
+					}
 				}
-				catch (Exception e)
-				{
-					JOptionPane.showMessageDialog(
-							frame,
-							"Error composing image for layer " + layer.getName() + ":\n\n"
-									+ e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
-				}
+
+				progressBar.setValue(progressBar.getValue() + 1);
 			}
 
-			progressBar.setValue(progressBar.getValue() + 1);
+			AVList params = new AVListImpl();
+
+			params.setValue(AVKey.SECTOR, sector);
+			params.setValue(AVKey.COORDINATE_SYSTEM, AVKey.COORDINATE_SYSTEM_GEOGRAPHIC);
+			params.setValue(AVKey.PIXEL_FORMAT, AVKey.IMAGE);
+			params.setValue(AVKey.BYTE_ORDER, AVKey.BIG_ENDIAN);
+
+			GeotiffWriter writer = new GeotiffWriter(output);
+			writer.write(BufferedImageRaster.wrapAsGeoreferencedRaster(image, params));
 		}
-
-		AVList params = new AVListImpl();
-
-		params.setValue(AVKey.SECTOR, sector);
-		params.setValue(AVKey.COORDINATE_SYSTEM, AVKey.COORDINATE_SYSTEM_GEOGRAPHIC);
-		params.setValue(AVKey.PIXEL_FORMAT, AVKey.IMAGE);
-		params.setValue(AVKey.BYTE_ORDER, AVKey.BIG_ENDIAN);
-
-		GeotiffWriter writer = new GeotiffWriter(output);
-		writer.write(BufferedImageRaster.wrapAsGeoreferencedRaster(image, params));
+		catch (OutOfMemoryError e)
+		{
+			JOptionPane.showMessageDialog(frame,
+					"Not enough memory. Try saving at a lower resolution.", "Error",
+					JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	private static Dimension adjustSize(Sector sector, int maxSize)

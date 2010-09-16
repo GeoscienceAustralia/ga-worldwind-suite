@@ -78,6 +78,7 @@ import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.common.util.MetersStatusBar;
 import au.gov.ga.worldwind.common.util.URLTransformer;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
 import au.gov.ga.worldwind.viewer.components.sectorsaver.ImageSectorSaver;
@@ -262,7 +263,7 @@ public class Application
 	private MouseLayer mouseLayer;
 
 	private SideBar sideBar;
-	private StatusBar statusBar;
+	private MetersStatusBar statusBar;
 	private JMenuBar menuBar;
 	private JToolBar toolBar;
 	private JSplitPane splitPane;
@@ -373,7 +374,7 @@ public class Application
 
 		if (theme.hasStatusBar())
 		{
-			statusBar = new StatusBar();
+			statusBar = new MetersStatusBar();
 			panel.add(statusBar, BorderLayout.PAGE_END);
 			statusBar.setEventSource(wwd);
 			statusBar.setBorder(BorderFactory.createLoweredBevelBorder());

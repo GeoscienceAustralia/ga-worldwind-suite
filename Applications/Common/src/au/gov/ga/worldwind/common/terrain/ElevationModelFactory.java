@@ -58,19 +58,19 @@ public class ElevationModelFactory extends BasicElevationModelFactory
 
 		if ("Offline".equals(serviceName))
 		{
-			em = new URLTransformerBasicElevationModel(domElement, params);
+			em = new SharedLockBasicElevationModel(domElement, params);
 		}
 		else if ("WWTileService".equals(serviceName))
 		{
-			em = new URLTransformerBasicElevationModel(domElement, params);
+			em = new SharedLockBasicElevationModel(domElement, params);
+		}
+		else if (OGCConstants.WMS_SERVICE_NAME.equals(serviceName))
+		{
+			em = new SharedLockWMSBasicElevationModel(domElement, params);
 		}
 		else if ("FileTileService".equals(serviceName))
 		{
 			em = new FileElevationModel(domElement, params);
-		}
-		else if (OGCConstants.WMS_SERVICE_NAME.equals(serviceName))
-		{
-			em = new BoundedWMSBasicElevationModel(domElement, params);
 		}
 		else
 		{

@@ -5,6 +5,7 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.ogc.OGCConstants;
 import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
@@ -46,7 +47,8 @@ public class LayerFactory extends BasicLayerFactory
 		Layer layer;
 		String serviceName = XMLUtil.getText(domElement, "Service/@serviceName");
 
-		if ("DelegatorTileService".equals(serviceName))
+		if ("DelegatorTileService".equals(serviceName)
+				|| OGCConstants.WMS_SERVICE_NAME.equals(serviceName))
 		{
 			layer = new DelegatorTiledImageLayer(domElement, params);
 		}
