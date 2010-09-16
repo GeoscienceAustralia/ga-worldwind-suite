@@ -20,12 +20,12 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 
-// This text will be stored with each diagram;  use it for notes.</help_text><zoom_level>10</zoom_level><element><type>com.umlet.element.base.Class</type><coordinates><x>0</x><y>350</y><w>180</w><h>50</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
-Animation</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Class</type><coordinates><x>0</x><y>190</y><w>180</w><h>50</h></coordinates><panel_attributes>WorldWindAnimationImpl</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>60</x><y>210</y><w>50</w><h>160</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>30;140;30;30</additional_attributes></element><element><type>com.umlet.element.base.Class</type><coordinates><x>300</x><y>350</y><w>180</w><h>50</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
+// This text will be stored with each diagram;  use it for notes.</help_text><zoom_level>10</zoom_level><element><type>com.umlet.element.base.Class</type><coordinates><x>300</x><y>200</y><w>180</w><h>50</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
+Animation</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Class</type><coordinates><x>300</x><y>70</y><w>180</w><h>50</h></coordinates><panel_attributes>WorldWindAnimationImpl</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>360</x><y>90</y><w>50</w><h>130</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>30;110;30;30</additional_attributes></element><element><type>com.umlet.element.base.Class</type><coordinates><x>300</x><y>350</y><w>180</w><h>50</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
 Animatable
-</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>150</x><y>340</y><w>170</w><h>50</h></coordinates><panel_attributes>lt=-&gt;
-m1=0..1
-m2=1..*</panel_attributes><additional_attributes>30;30;150;30</additional_attributes></element><element><type>com.umlet.element.base.Class</type><coordinates><x>300</x><y>450</y><w>180</w><h>50</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
+</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>360</x><y>220</y><w>50</w><h>150</h></coordinates><panel_attributes>lt=-&gt;
+m1= 
+m2=   *</panel_attributes><additional_attributes>30;30;30;130</additional_attributes></element><element><type>com.umlet.element.base.Class</type><coordinates><x>300</x><y>450</y><w>180</w><h>50</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
 Camera
 </panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>360</x><y>370</y><w>50</w><h>100</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>30;30;30;80</additional_attributes></element><element><type>com.umlet.element.base.Class</type><coordinates><x>590</x><y>350</y><w>180</w><h>50</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
 Parameter
@@ -38,16 +38,16 @@ m2=   *</panel_attributes><additional_attributes>30;30;30;80</additional_attribu
 BezierParameterValue
 </panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>650</x><y>470</y><w>50</w><h>150</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>30;30;30;130</additional_attributes></element><element><type>com.umlet.element.base.Class</type><coordinates><x>300</x><y>600</y><w>180</w><h>50</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
 KeyFrame
-</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>60</x><y>370</y><w>260</w><h>280</h></coordinates><panel_attributes>lt=-&gt;
+</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>220</x><y>190</y><w>100</w><h>460</h></coordinates><panel_attributes>lt=-&gt;
 m1=1
-m2=0..*</panel_attributes><additional_attributes>30;30;30;260;240;260</additional_attributes></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>450</x><y>450</y><w>160</w><h>200</h></coordinates><panel_attributes>lt=-&gt;
+m2=0..*</panel_attributes><additional_attributes>80;30;30;30;30;440;80;440</additional_attributes></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>450</x><y>450</y><w>160</w><h>200</h></coordinates><panel_attributes>lt=-&gt;
 m1=1
 m2=0..*</panel_attributes><additional_attributes>30;180;80;180;80;30;140;30</additional_attributes></element><element><type>com.umlet.element.base.Class</type><coordinates><x>850</x><y>450</y><w>180</w><h>50</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
 Interpolator
 </panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>740</x><y>450</y><w>130</w><h>50</h></coordinates><panel_attributes>lt=-&gt;
 m1=1
-m2=2</panel_attributes><additional_attributes>110;30;30;30</additional_attributes></element><element><type>com.umlet.element.base.Class</type><coordinates><x>990</x><y>340</y><w>180</w><h>50</h></coordinates><panel_attributes>
+m2=2</panel_attributes><additional_attributes>110;30;30;30</additional_attributes></element><element><type>com.umlet.element.base.Class</type><coordinates><x>630</x><y>200</y><w>180</w><h>50</h></coordinates><panel_attributes>
 LinearInterpolator
-</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Class</type><coordinates><x>1180</x><y>340</y><w>180</w><h>50</h></coordinates><panel_attributes>
+</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Class</type><coordinates><x>850</x><y>200</y><w>180</w><h>50</h></coordinates><panel_attributes>
 BezierInterpolator
-</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>1000</x><y>360</y><w>100</w><h>130</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>30;110;80;110;80;30</additional_attributes></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>1000</x><y>360</y><w>290</w><h>130</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>30;110;80;110;270;110;270;30</additional_attributes></element></umlet_diagram>
+</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>690</x><y>220</y><w>270</w><h>250</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>250;230;250;140;140;140;30;30</additional_attributes></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>910</x><y>220</y><w>50</w><h>250</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>30;230;30;30</additional_attributes></element></umlet_diagram>
