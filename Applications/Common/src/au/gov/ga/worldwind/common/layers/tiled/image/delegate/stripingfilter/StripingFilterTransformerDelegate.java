@@ -137,7 +137,8 @@ public class StripingFilterTransformerDelegate implements ImageTransformerDelega
 		float[][] windowHorizontalSum = new float[width][height];
 		float[] windowVerticalEdgeSum = new float[height];
 
-		for (int b = 0; b < bands; b++)
+		//skip alpha
+		for (int b = 1; b < bands; b++)
 		{
 			for (int y = 0; y < height; y++)
 			{
@@ -238,7 +239,7 @@ public class StripingFilterTransformerDelegate implements ImageTransformerDelega
 		int height = image1[0].length;
 		int bands = image1[0][0].length;
 
-		//skip alpha?
+		//skip alpha
 		for (int b = 1; b < bands; b++)
 		{
 			for (int y = 0; y < height; y++)
@@ -257,7 +258,7 @@ public class StripingFilterTransformerDelegate implements ImageTransformerDelega
 		int height = image1[0].length;
 		int bands = image1[0][0].length;
 
-		//skip alpha?
+		//skip alpha
 		for (int b = 1; b < bands; b++)
 		{
 			for (int y = 0; y < height; y++)
