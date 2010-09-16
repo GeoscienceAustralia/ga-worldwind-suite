@@ -4,6 +4,7 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.coords.MGRSCoord;
+import gov.nasa.worldwind.geom.coords.UTMCoordConverterPublic;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
 
@@ -17,7 +18,10 @@ public class Util
 {
 	public final static double METER_TO_FEET = 3.280839895;
 	public final static double METER_TO_MILE = 0.000621371192;
-	
+
+	public final static String UTM_COORDINATE_REGEX =
+			"(?:[a-zA-Z]*\\s*)(\\d+)(?:\\s*)([a-zA-Z])(?:\\s+)(\\d+)(?:[E|e]?)(?:\\s+)(\\d+)(?:[N|n]?)";
+
 	public static String paddedInt(int value, int charcount)
 	{
 		String str = String.valueOf(value);
@@ -27,7 +31,7 @@ public class Util
 		}
 		return str;
 	}
-	
+
 	public static File urlToFile(URL url)
 	{
 		if ("file".equalsIgnoreCase(url.getProtocol()))
@@ -49,7 +53,7 @@ public class Util
 		}
 		return null;
 	}
-	
+
 	public static File getPathWithinContext(String path, URL context)
 	{
 		//first attempt finding of the directory using a URL
@@ -259,10 +263,10 @@ public class Util
 		if (lat == null || lon == null)
 		{
 			regex =
-					"([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}['|\u2019|\\s])?(\\s*\\d{1,2}[\"|\u201d])?\\s*[N|n|S|s]?)";
+					"([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}[m|M|'|\u2019|\\s])?(\\s*\\d{1,2}[s|S|\"|\u201d])?\\s*[N|n|S|s]?)";
 			regex += separators;
 			regex +=
-					"([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}['|\u2019|\\s])?(\\s*\\d{1,2}[\"|\u201d])?\\s*[E|e|W|w]?)";
+					"([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}[m|M|'|\u2019|\\s])?(\\s*\\d{1,2}[s|S|\"|\u201d])?\\s*[E|e|W|w]?)";
 			pattern = Pattern.compile(regex);
 			matcher = pattern.matcher(coordString);
 			if (matcher.matches())
@@ -321,6 +325,52 @@ public class Util
 		if (m >= 0 && m <= 60 && s >= 0 && s <= 60)
 			return Angle.fromDegrees(d * sign + m / 60 * sign + s / 3600 * sign);
 
+		return null;
+	}
+
+	/**
+	 * Parse and convert a UTM string to a LatLon point.
+	 * 
+	 * @param coordString
+	 * @param globe
+	 * @param charRepresentsHemisphere
+	 *            Does the character after the UTM zone represent the hemisphere
+	 *            or the latitude band?
+	 * @return Point represented by UTM string
+	 */
+	public static LatLon computeLatLonFromUTMString(String coordString, Globe globe,
+			boolean charRepresentsHemisphere)
+	{
+		coordString = coordString.trim();
+		Pattern pattern = Pattern.compile(UTM_COORDINATE_REGEX);
+		Matcher matcher = pattern.matcher(coordString);
+		if (matcher.matches())
+		{
+			int zone = Integer.parseInt(matcher.group(1));
+			char latitudeBand = matcher.group(2).toUpperCase().charAt(0);
+			int easting = Integer.parseInt(matcher.group(3));
+			int northing = Integer.parseInt(matcher.group(4));
+			char hemisphere =
+					charRepresentsHemisphere ? latitudeBand : (latitudeBand >= 'N' ? 'N' : 'S');
+
+			try
+			{
+				final UTMCoordConverterPublic converter = new UTMCoordConverterPublic(globe);
+				long err = converter.convertUTMToGeodetic(zone, hemisphere, easting, northing);
+
+				if (err == UTMCoordConverterPublic.UTM_NO_ERROR)
+				{
+					LatLon latlon =
+							new LatLon(Angle.fromRadians(converter.getLatitude()),
+									Angle.fromRadians(converter.getLongitude()));
+					return latlon;
+				}
+			}
+			catch (Exception e)
+			{
+				//ignore
+			}
+		}
 		return null;
 	}
 

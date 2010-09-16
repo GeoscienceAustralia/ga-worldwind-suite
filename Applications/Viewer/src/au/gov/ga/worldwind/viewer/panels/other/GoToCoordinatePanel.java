@@ -9,6 +9,7 @@ package au.gov.ga.worldwind.viewer.panels.other;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
@@ -63,23 +64,76 @@ public class GoToCoordinatePanel extends JPanel
 		makePanel(inDialog);
 	}
 
+	/*public static void main(String[] args)
+	{
+		LatLon latlon = LatLon.fromDegrees(-27, 133.5);
+		String test1 = "-27.0 133.5";
+		String test2 = "27.0S 133.5E";
+		String test3 = "-27\u00B000'00\" 133\u00B030'00\"";
+		String test4 = "-27d00'00\" 133d30'00\"";
+		String test5 = "27d00'00\"S 133d30'00\"E";
+		String test6 = "53J 351167E 7012680N";
+		String test7 = "53JLL 51167 12680";
+
+		String[] tests = new String[] { test1, test2, test3, test4, test5, test6, test7 };
+		Globe globe = new Earth();
+
+		for (String test : tests)
+		{
+			LatLon ll = Util.computeLatLonFromString(test, globe);
+			if (ll == null)
+				ll = Util.computeLatLonFromUTMString(test, globe, false);
+
+			if (LatLon.greatCircleDistance(latlon, ll).degrees < 0.00001)
+			{
+				System.out.println(test);
+			}
+			else
+			{
+				System.out.println("ERROR!: " + test + " = " + ll);
+			}
+		}
+	}*/
+
 	private void makePanel(boolean inDialog)
 	{
 		GridBagConstraints c;
 
-		JLabel label = new JLabel();
-		label.setText("Enter lat/lon:");
+		int row = 0;
+
+		String prefix = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+		String supported = "<html>";
+		supported += "Supports Lat/Lon, DMS, UTM, and MGRS formats:<br>";
+		supported += prefix + "-27.0 133.5<br>";
+		supported += prefix + "27.0S 133.5E<br>";
+		supported += prefix + "-27\u00B00'0\" 133\u00B030'0\"<br>";
+		supported += prefix + "27d0'0\"S 133d30'0\"E<br>";
+		supported += prefix + "53J 351167E 7012680N<br>";
+		supported += prefix + "53JLL 51167 12680<br>";
+		supported += "</html>";
+
+		JLabel supportedLabel = new JLabel(supported);
 		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = row++;
+		c.anchor = GridBagConstraints.WEST;
+		add(supportedLabel, c);
+
+		JLabel space = new JLabel(" ");
+		c = new GridBagConstraints();
+		c.gridy = row++;
+		c.anchor = GridBagConstraints.WEST;
+		add(space, c);
+
+		JLabel label = new JLabel("Enter lat/lon:");
+		c = new GridBagConstraints();
+		c.gridy = row++;
 		c.anchor = GridBagConstraints.WEST;
 		add(label, c);
 
 		coordInput = new JTextField(30);
 		coordInput.setToolTipText("Type coordinates and press Enter");
 		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = row;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		add(coordInput, c);
@@ -90,7 +144,7 @@ public class GoToCoordinatePanel extends JPanel
 			go.restrictSize();
 			go.setToolTipText("Go");
 			c = new GridBagConstraints();
-			c.gridx = 1;
+			c.gridx = row;
 			c.gridy = 1;
 			add(go, c);
 
@@ -105,11 +159,11 @@ public class GoToCoordinatePanel extends JPanel
 			go.addActionListener(al);
 			coordInput.addActionListener(al);
 		}
+		row++;
 
 		resultLabel = new JLabel();
 		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = row++;
 		add(resultLabel, c);
 
 		coordInput.getDocument().addDocumentListener(new DocumentListener()
@@ -138,9 +192,17 @@ public class GoToCoordinatePanel extends JPanel
 
 	private void updateResult()
 	{
-		LatLon latLon =
-				Util.computeLatLonFromString(coordInput.getText(), wwd.getModel().getGlobe());
+		LatLon latLon = stringToLatLon(coordInput.getText());
 		updateResult(latLon, false);
+	}
+
+	private LatLon stringToLatLon(String s)
+	{
+		Globe globe = wwd.getModel().getGlobe();
+		LatLon ll = Util.computeLatLonFromString(s, globe);
+		if (ll == null)
+			ll = Util.computeLatLonFromUTMString(s, globe, false);
+		return ll;
 	}
 
 	private void updateResult(LatLon latlon, boolean showInvalid)
@@ -162,8 +224,7 @@ public class GoToCoordinatePanel extends JPanel
 
 	private void gotoCoords()
 	{
-		LatLon latLon =
-				Util.computeLatLonFromString(coordInput.getText(), wwd.getModel().getGlobe());
+		LatLon latLon = stringToLatLon(coordInput.getText());
 		updateResult(latLon, true);
 		if (latLon != null)
 		{
