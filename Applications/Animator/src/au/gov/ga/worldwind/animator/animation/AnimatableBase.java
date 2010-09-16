@@ -50,7 +50,7 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	@Override
 	public final void apply(AnimationContext animationContext, int frame)
 	{
-		if (enabled)
+		if (isEnabled())
 		{
 			doApply(animationContext, frame);
 		}

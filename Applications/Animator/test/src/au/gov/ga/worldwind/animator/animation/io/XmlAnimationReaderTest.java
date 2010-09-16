@@ -8,9 +8,14 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
+import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
+import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
+import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter.Type;
 import au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue;
+import au.gov.ga.worldwind.animator.animation.parameter.BasicParameterValue;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.StaticMessageSource;
@@ -42,7 +47,7 @@ public class XmlAnimationReaderTest
 	@Test
 	public void testReadAnimationV2() throws Exception
 	{
-		File inputFile = new File(getClass().getResource("expectedXmlOutput.xml").toURI());
+		File inputFile = new File(getClass().getResource("v2AnimationFile.xml").toURI());
 		
 		Animation result = classToBeTested.readAnimation(inputFile, new WorldWindowImpl());
 		
@@ -51,59 +56,104 @@ public class XmlAnimationReaderTest
 		assertNotNull(result.getCamera());
 		assertEquals("Render Camera", result.getCamera().getName());
 		
-		assertNotNull(result.getCamera().getEyeLat());
-		assertTrue(result.getCamera().getEyeLat().isEnabled());
-		assertEquals("Render Camera - Param", result.getCamera().getEyeLat().getName());
-		assertEquals(3, result.getCamera().getEyeLat().getKeyFramesWithThisParameter().size());
+		assertParameterCorrect(result.getCamera().getEyeLat(), "Render Camera - Eye Lat", 3, true);
+		assertParameterCorrect(result.getCamera().getEyeLon(), "Render Camera - Eye Lon", 2, true);
+		assertParameterCorrect(result.getCamera().getEyeElevation(), "Render Camera - Eye Elevation", 1, true);
 		
-		assertNotNull(result.getCamera().getEyeLon());
-		assertTrue(result.getCamera().getEyeLon().isEnabled());
-		assertEquals("Render Camera - Param", result.getCamera().getEyeLon().getName());
-		assertEquals(2, result.getCamera().getEyeLon().getKeyFramesWithThisParameter().size());
+		assertParameterCorrect(result.getCamera().getLookAtLat(), "Render Camera - Lookat Lat", 0, true);
+		assertParameterCorrect(result.getCamera().getLookAtLon(), "Render Camera - Lookat Lon", 0, true);
+		assertParameterCorrect(result.getCamera().getLookAtElevation(), "Render Camera - Lookat Elevation", 0, true);
 		
-		assertNotNull(result.getCamera().getEyeElevation());
-		assertTrue(result.getCamera().getEyeElevation().isEnabled());
-		assertEquals("Render Camera - Param", result.getCamera().getEyeElevation().getName());
-		assertEquals(1, result.getCamera().getEyeElevation().getKeyFramesWithThisParameter().size());
+		// Check the layers loaded correctly
+		assertEquals(3, result.getLayers().size());
+		assertContainsAnimatableLayer(result, "Layer1");
+		assertContainsAnimatableLayer(result, "Layer2");
+		assertContainsAnimatableLayer(result, "Layer3");
 		
-		assertNotNull(result.getCamera().getLookAtLat());
-		assertTrue(result.getCamera().getLookAtLat().isEnabled());
-		assertEquals("Render Camera - Param", result.getCamera().getLookAtLat().getName());
-		assertEquals(0, result.getCamera().getLookAtLat().getKeyFramesWithThisParameter().size());
+		AnimatableLayer layer2 = getAnimatableLayer(result, "Layer2");
+		assertAnimatableLayerCorrect(layer2);
 		
-		assertNotNull(result.getCamera().getLookAtLon());
-		assertTrue(result.getCamera().getLookAtLon().isEnabled());
-		assertEquals("Render Camera - Param", result.getCamera().getLookAtLon().getName());
-		assertEquals(0, result.getCamera().getLookAtLon().getKeyFramesWithThisParameter().size());
+		AnimatableLayer layer3 = getAnimatableLayer(result, "Layer3");
+		assertAnimatableLayerCorrect(layer3);
 		
-		assertNotNull(result.getCamera().getLookAtElevation());
-		assertTrue(result.getCamera().getLookAtElevation().isEnabled());
-		assertEquals("Render Camera - Param", result.getCamera().getLookAtElevation().getName());
-		assertEquals(0, result.getCamera().getLookAtElevation().getKeyFramesWithThisParameter().size());
-		
-		assertEquals(5, result.getKeyFrameCount());
+		// Check the key frames
+		assertEquals(10, result.getKeyFrameCount());
 		
 		// Test one key frame for correct values
 		KeyFrame frame = result.getFirstKeyFrame();
 		assertEquals(0, frame.getFrame());
-		assertEquals(2, frame.getParameterValues().size());
+		assertEquals(4, frame.getParameterValues().size());
 		
 		ParameterValue eyeLatValue = frame.getValueForParameter(result.getCamera().getEyeLat());
-		assertNotNull(eyeLatValue);
-		assertTrue(eyeLatValue instanceof BasicBezierParameterValue);
-		assertEquals(1.0, eyeLatValue.getValue(), ACCEPTABLE_ERROR);
-		assertEquals(1.1, ((BasicBezierParameterValue)eyeLatValue).getInValue(), ACCEPTABLE_ERROR);
-		assertEquals(1.2, ((BasicBezierParameterValue)eyeLatValue).getInPercent(), ACCEPTABLE_ERROR);
-		assertEquals(1.3, ((BasicBezierParameterValue)eyeLatValue).getOutValue(), ACCEPTABLE_ERROR);
-		assertEquals(1.4, ((BasicBezierParameterValue)eyeLatValue).getOutPercent(), ACCEPTABLE_ERROR);
-		assertFalse(((BasicBezierParameterValue)eyeLatValue).isLocked());
+		assertBezierParameterValueCorrect(eyeLatValue, 1.0, 1.1, 1.2, 1.3, 1.4, false);
 		
 		ParameterValue eyeLonValue = frame.getValueForParameter(result.getCamera().getEyeLon());
-		assertNotNull(eyeLonValue);
-		assertTrue(eyeLonValue instanceof BasicBezierParameterValue);
-		assertEquals(11.0, eyeLonValue.getValue(), ACCEPTABLE_ERROR);
+		assertBezierParameterValueCorrect(eyeLonValue, 11.0, 11.1, 11.2, 11.3, 11.4, true);
 		
+		ParameterValue layer2OpacityValue = frame.getValueForParameter(layer2.getParameterOfType(Type.OPACITY));
+		assertBezierParameterValueCorrect(layer2OpacityValue, 1.0, 1.0, 0.4, 1.0, 0.4, true);
 		
+		ParameterValue layer3OpacityValue = frame.getValueForParameter(layer3.getParameterOfType(Type.OPACITY));
+		assertLinearParameterValueCorrect(layer3OpacityValue, 0.5);
+	}
+
+	private void assertAnimatableLayerCorrect(AnimatableLayer layer)
+	{
+		assertNotNull(layer);
+		assertEquals(1, layer.getParameters().size());
+		assertNotNull(layer.getParameterOfType(Type.OPACITY));
+	}
+
+	private void assertContainsAnimatableLayer(Animation animation, String name)
+	{
+		for (Animatable animatableObject: animation.getAnimatableObjects())
+		{
+			if (animatableObject instanceof AnimatableLayer && animatableObject.getName().equals(name))
+			{
+				return;
+			}
+		}
+		fail();
+	}
+	
+	private AnimatableLayer getAnimatableLayer(Animation animation, String name)
+	{
+		for (Animatable animatableObject: animation.getAnimatableObjects())
+		{
+			if (animatableObject instanceof AnimatableLayer && animatableObject.getName().equals(name))
+			{
+				return (AnimatableLayer)animatableObject;
+			}
+		}
+		return null;
+	}
+	
+
+	private void assertParameterCorrect(Parameter parameter, String parameterName, int numberOfKeyFrames, boolean enabled)
+	{
+		assertNotNull(parameter);
+		assertEquals(enabled, parameter.isEnabled());
+		assertEquals(parameterName, parameter.getName());
+		assertEquals(numberOfKeyFrames, parameter.getKeyFramesWithThisParameter().size());
+	}
+	
+	private void assertBezierParameterValueCorrect(ParameterValue pv, double value, double inValue, double inPercent, double outValue, double outPercent, boolean locked)
+	{
+		assertNotNull(pv);
+		assertTrue(pv instanceof BasicBezierParameterValue);
+		assertEquals(value, pv.getValue(), ACCEPTABLE_ERROR);
+		assertEquals(inValue, ((BasicBezierParameterValue)pv).getInValue(), ACCEPTABLE_ERROR);
+		assertEquals(inPercent, ((BasicBezierParameterValue)pv).getInPercent(), ACCEPTABLE_ERROR);
+		assertEquals(outValue, ((BasicBezierParameterValue)pv).getOutValue(), ACCEPTABLE_ERROR);
+		assertEquals(outPercent, ((BasicBezierParameterValue)pv).getOutPercent(), ACCEPTABLE_ERROR);
+		assertEquals(locked, ((BasicBezierParameterValue)pv).isLocked());
+	}
+	
+	private void assertLinearParameterValueCorrect(ParameterValue pv, double value)
+	{
+		assertNotNull(pv);
+		assertTrue(pv instanceof BasicParameterValue);
+		assertEquals(value, pv.getValue(), ACCEPTABLE_ERROR);
 	}
 	
 }

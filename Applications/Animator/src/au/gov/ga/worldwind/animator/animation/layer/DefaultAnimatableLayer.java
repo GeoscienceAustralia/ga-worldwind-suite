@@ -99,7 +99,14 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	{
 		for (LayerParameter lp : layerParameters.values())
 		{
-			lp.apply(animationContext, frame);
+			if (lp.isEnabled())
+			{
+				lp.apply(animationContext, frame);
+			}
+			else
+			{
+				lp.applyDefaultValue(animationContext);
+			}
 		}
 	}
 
@@ -211,7 +218,7 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 				// Load the parameters for the layer
 				context.setValue(constants.getCurrentLayerKey(), loadedLayer);
 				List<LayerParameter> parameters = new ArrayList<LayerParameter>();
-				Element[] parameterElements = WWXML.getElements(element, "//" + constants.getAnimatableLayerName() + "/*", null);
+				Element[] parameterElements = WWXML.getElements(element, "./*", null);
 				for (Element parameterElement : parameterElements)
 				{
 					parameters.add(LayerParameterFactory.fromXml(parameterElement, version, context));

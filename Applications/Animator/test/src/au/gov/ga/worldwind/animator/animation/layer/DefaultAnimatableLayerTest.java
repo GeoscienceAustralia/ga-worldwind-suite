@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,6 +36,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueType;
 import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
+import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
@@ -82,6 +84,12 @@ public class DefaultAnimatableLayerTest
 		setupLayerFactory();
 	}
 	
+	@After
+	public void tearDown()
+	{
+		AnimationLayerLoader.setLayerFactory(new LayerFactory());
+	}
+	
 	private void setupLayerFactory()
 	{
 		layerFactory = new MockLayerFactory();
@@ -107,7 +115,7 @@ public class DefaultAnimatableLayerTest
 	 * Tests the {@link DefaultAnimatableLayer#toXml()} method
 	 */
 	@Test
-	@Ignore("Does not work via ant script. JOGL libraries are not linked into the classpath in the ant script.")
+	//@Ignore("Does not work via ant script. JOGL libraries are not linked into the classpath in the ant script.")
 	public void testToXml() throws Exception
 	{
 		setLayerUrl("file://marl/sandpit/symbolic-links/world-wind/current/dataset/ga/gravity/edition3/gravity.xml");
@@ -115,9 +123,11 @@ public class DefaultAnimatableLayerTest
 		addKeyFrame(10, 1.0, layerParameters.get(0));
 		
 		Document xmlDocument = WWXML.createDocumentBuilder(false).newDocument();
-		Element xmlElement = classToBeTested.toXml(xmlDocument.createElement("test"), AnimationFileVersion.VERSION020);
+		Element animatableObjectsElement = xmlDocument.createElement("animatableObjects");
+		Element xmlElement = classToBeTested.toXml(animatableObjectsElement, AnimationFileVersion.VERSION020);
 		assertNotNull(xmlElement);
-		xmlDocument.appendChild(xmlElement);
+		animatableObjectsElement.appendChild(xmlElement);
+		xmlDocument.appendChild(animatableObjectsElement);
 		
 		ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
 		XMLUtil.saveDocumentToFormattedStream(xmlDocument, resultStream );
@@ -132,20 +142,23 @@ public class DefaultAnimatableLayerTest
 	 * Tests the {@link DefaultAnimatableLayer#fromXml()} method
 	 */
 	@Test
-	@Ignore("Does not work via ant script. JOGL libraries are not linked into the classpath in the ant script.")
+	//@Ignore("Does not work via ant script. JOGL libraries are not linked into the classpath in the ant script.")
 	public void testFromXml() throws Exception
 	{
 		AVList context = new AVListImpl();
 		context.setValue(AnimationFileVersion.VERSION020.getConstants().getAnimationKey(), animation);
 		
 		AnimationFileVersion versionId = AnimationFileVersion.VERSION020;
-		Element element = WWXML.openDocument(getClass().getResourceAsStream("animatableLayerXmlSnippet.xml")).getDocumentElement();
+		
+		// Setup the elements correctly (add an 'AnimatableObjects' element
+		Document document = WWXML.openDocument(getClass().getResourceAsStream("animatableLayerXmlSnippet.xml"));
+		Element layerElement = WWXML.getElement(document.getDocumentElement(), "//" + versionId.getConstants().getAnimatableLayerName(), null);
 		
 		setLayerUrlExpectation(new URL("file://marl/sandpit/symbolic-links/world-wind/current/dataset/ga/gravity/edition3/gravity.xml"));
 		setLayerEnabledExpectation();
 		layerFactory.setResult(layer);
 		
-		DefaultAnimatableLayer result = (DefaultAnimatableLayer)classToBeTested.fromXml(element, versionId, context);
+		DefaultAnimatableLayer result = (DefaultAnimatableLayer)classToBeTested.fromXml(layerElement, versionId, context);
 		
 		// Check the layer was created
 		assertNotNull(result);

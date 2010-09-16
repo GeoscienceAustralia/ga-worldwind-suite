@@ -24,12 +24,19 @@ public interface LayerParameter extends Parameter
 	Type getType();
 
 	/**
-	 * Apply this parameters state to it's associated {@link Layer} for the given frame
+	 * Apply this parameter's state to it's associated {@link Layer} for the given frame
 	 * 
 	 * @param animationContext The context in which the animation is executing
 	 * @param frame The current frame of the animation
 	 */
 	void apply(AnimationContext animationContext, int frame);
+	
+	/**
+	 * Apply this parameter's default value to it's associated {@link Layer} for the current frame
+	 * 
+	 * @param animationContext The context in which the animation is executing
+	 */
+	void applyDefaultValue(AnimationContext animationContext);
 	
 	/**
 	 * An enumeration of the valid types of layer parameters.

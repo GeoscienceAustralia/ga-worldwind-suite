@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<layer enabled="true" name="testLayer" url="file://marl/sandpit/symbolic-links/world-wind/current/dataset/ga/gravity/edition3/gravity.xml">
-    <opacity>
-        <parameter defaultValue="1.0" enabled="true" name="opacity">
-            <parameterValue frame="0" type="LINEAR" value="0.1"/>
-            <parameterValue frame="10" type="LINEAR" value="1.0"/>
-        </parameter>
-    </opacity>
-</layer>
+<animatableObjects>
+    <layer enabled="true" name="testLayer" url="file://marl/sandpit/symbolic-links/world-wind/current/dataset/ga/gravity/edition3/gravity.xml">
+        <opacity>
+            <parameter defaultValue="1.0" enabled="true" name="opacity">
+                <parameterValue frame="0" type="LINEAR" value="0.1"/>
+                <parameterValue frame="10" type="LINEAR" value="1.0"/>
+            </parameter>
+        </opacity>
+    </layer>
+</animatableObjects>
 

@@ -86,6 +86,13 @@ public interface Parameter extends Serializable, Nameable, XmlSerializable<Param
 	void setDefaultValue(double value);
 	
 	/**
+	 * @return The default value of this {@link Parameter}.
+	 * 
+	 * @see #setDefaultValue(double)
+	 */
+	double getDefaultValue();
+	
+	/**
 	 * Gets the first recorded value of this parameter on a key frame before the provided frame.
 	 * <p/>
 	 * If one cannot be found, returns <code>null</code>.

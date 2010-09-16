@@ -105,6 +105,12 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	}
 	
 	@Override
+	public double getDefaultValue()
+	{
+		return this.defaultValue;
+	}
+	
+	@Override
 	public final ParameterValue getValueAtFrame(AnimationContext context, int frame)
 	{
 		// If the provided value is a keyframe for this parameter, return it's value from the key frame

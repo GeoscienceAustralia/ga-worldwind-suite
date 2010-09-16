@@ -69,7 +69,7 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 	@Override
 	public Parameter fromXml(Element element, AnimationFileVersion version, AVList context)
 	{
-		Element parameterElement = WWXML.getElement(element, "//" + element.getNodeName() + "/*", null);
+		Element parameterElement = WWXML.getElement(element, "./*", null);
 		return super.fromXml(parameterElement, version, context);
 	}
 	
