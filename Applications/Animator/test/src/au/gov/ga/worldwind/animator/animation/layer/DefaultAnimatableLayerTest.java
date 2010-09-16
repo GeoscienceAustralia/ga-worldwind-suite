@@ -2,9 +2,9 @@ package au.gov.ga.worldwind.animator.animation.layer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import gov.nasa.worldwind.WorldWindowImpl;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.util.WWXML;
@@ -19,7 +19,6 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -75,7 +74,7 @@ public class DefaultAnimatableLayerTest
 		
 		layer = mockContext.mock(Layer.class);
 		
-		animation = new WorldWindAnimationImpl(new WorldWindowGLCanvas());
+		animation = new WorldWindAnimationImpl(new WorldWindowImpl());
 		
 		initialiseParameters();
 		
@@ -115,7 +114,6 @@ public class DefaultAnimatableLayerTest
 	 * Tests the {@link DefaultAnimatableLayer#toXml()} method
 	 */
 	@Test
-	//@Ignore("Does not work via ant script. JOGL libraries are not linked into the classpath in the ant script.")
 	public void testToXml() throws Exception
 	{
 		setLayerUrl("file://marl/sandpit/symbolic-links/world-wind/current/dataset/ga/gravity/edition3/gravity.xml");
@@ -142,7 +140,6 @@ public class DefaultAnimatableLayerTest
 	 * Tests the {@link DefaultAnimatableLayer#fromXml()} method
 	 */
 	@Test
-	//@Ignore("Does not work via ant script. JOGL libraries are not linked into the classpath in the ant script.")
 	public void testFromXml() throws Exception
 	{
 		AVList context = new AVListImpl();
