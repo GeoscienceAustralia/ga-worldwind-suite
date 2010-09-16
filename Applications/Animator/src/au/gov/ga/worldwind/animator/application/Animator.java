@@ -17,7 +17,6 @@ import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.Logging;
-import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.BorderLayout;
@@ -101,6 +100,7 @@ import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.common.util.MetersStatusBar;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
@@ -504,7 +504,7 @@ public class Animator
 	 */
 	private void initialiseStatusBar()
 	{
-		StatusBar statusBar = new StatusBar();
+		MetersStatusBar statusBar = new MetersStatusBar();
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
 		statusBar.setEventSource(wwd);
 		
