@@ -43,7 +43,7 @@ public class AboutDialog extends JDialog
 			}
 		});
 
-		String base = "/au/gov/ga/worldwind/data/help/";
+		String base = "/au/gov/ga/worldwind/viewer/data/help/";
 
 		BufferedImage image = null;
 		try

@@ -1108,7 +1108,7 @@ public class Application
 	{
 		JDialog dialog =
 				new HtmlViewer(frame, getMessage(getControlsTitleKey()), false,
-						"/au/gov/ga/worldwind/data/help/controls.html", true);
+						"/au/gov/ga/worldwind/viewer/data/help/controls.html", true);
 		dialog.setResizable(false);
 		dialog.setSize(640, 480);
 		dialog.setLocationRelativeTo(frame);
