@@ -132,4 +132,9 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 		return getParameters().size() == getEnabledParameters().size();
 	}
 	
+	@Override
+	public boolean hasEnabledChildren()
+	{
+		return getEnabledParameters().size() > 0;
+	}
 }

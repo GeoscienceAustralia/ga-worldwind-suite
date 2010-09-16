@@ -81,6 +81,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		objectTree.setEditable(false);
 		objectTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		objectTree.setCellRenderer(new AnimationTreeRenderer());
+		objectTree.setToggleClickCount(-1);
 	}
 	
 	@Override

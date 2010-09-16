@@ -36,7 +36,7 @@ final class EnableableTriStateModel implements TriStateCheckBoxModel
 	@Override
 	public boolean isPartiallyChecked()
 	{
-		return value.isEnabled() && !value.isAllChildrenEnabled();
+		return (value.isEnabled() || value.hasEnabledChildren()) && !value.isAllChildrenEnabled();
 	}
 
 	@Override

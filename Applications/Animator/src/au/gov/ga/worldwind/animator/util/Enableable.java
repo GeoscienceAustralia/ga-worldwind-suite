@@ -26,6 +26,11 @@ public interface Enableable
 	boolean isAllChildrenEnabled();
 	
 	/**
+	 * @return Whether any of this objects {@link Enableable} children are 'enabled'. If this object has no {@link Enableable} children, should return <code>false</code>.
+	 */
+	boolean hasEnabledChildren();
+	
+	/**
 	 * Set whether this object is currently enabled for the current {@link Animation}.
 	 * <p/>
 	 * The 'enabled' status will be propagated to child objects (if applicable)
