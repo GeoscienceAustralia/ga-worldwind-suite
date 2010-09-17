@@ -223,6 +223,11 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 		
 	}
 	
+	protected Animation getAnimation()
+	{
+		return animation;
+	}
+	
 	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{

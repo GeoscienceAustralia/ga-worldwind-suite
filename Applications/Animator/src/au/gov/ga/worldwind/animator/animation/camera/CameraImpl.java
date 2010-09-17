@@ -361,6 +361,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		{
 			// TODO Implement me!
 			
+			
 		}
 		
 		@Override
