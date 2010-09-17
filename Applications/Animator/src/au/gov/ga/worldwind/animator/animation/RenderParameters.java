@@ -18,7 +18,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public class RenderParameters implements XmlSerializable<RenderParameters>
+public class RenderParameters implements AnimationObject, XmlSerializable<RenderParameters>
 {
 	public static final Dimension DEFAULT_DIMENSIONS = new Dimension(1024, 576);
 	

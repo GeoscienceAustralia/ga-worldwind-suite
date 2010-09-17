@@ -30,7 +30,7 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Animation extends XmlSerializable<Animation>, AnimationEventListener, Changeable, Nameable
+public interface Animation extends AnimationObject, XmlSerializable<Animation>, AnimationEventListener, Changeable, Nameable
 {
 
 	/**

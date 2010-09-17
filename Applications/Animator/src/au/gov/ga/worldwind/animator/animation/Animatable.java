@@ -18,7 +18,7 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  *
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Animatable extends Serializable, Nameable, XmlSerializable<Animatable>, AnimationEventListener, Changeable, Enableable
+public interface Animatable extends AnimationObject, Serializable, Nameable, XmlSerializable<Animatable>, AnimationEventListener, Changeable, Enableable
 {
 	/**
 	 * Apply this object's behaviour/changes to the 'world' for the given frame

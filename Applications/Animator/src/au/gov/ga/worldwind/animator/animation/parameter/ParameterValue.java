@@ -5,6 +5,7 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 
 import java.io.Serializable;
 
+import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 
@@ -18,7 +19,7 @@ import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface ParameterValue extends Serializable, XmlSerializable<ParameterValue>, Changeable
+public interface ParameterValue extends AnimationObject, Serializable, XmlSerializable<ParameterValue>, Changeable
 {
 	/**
 	 * @return The value of this parameter value
