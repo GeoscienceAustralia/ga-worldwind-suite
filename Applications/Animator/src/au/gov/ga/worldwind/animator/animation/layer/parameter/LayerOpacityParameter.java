@@ -56,6 +56,12 @@ public class LayerOpacityParameter extends LayerParameterBase
 	{
 		getLayer().setOpacity(getDefaultValue());
 	}
+	
+	@Override
+	public void doApplyValue(double value)
+	{
+		getLayer().setOpacity(value);
+	}
 
 	@Override
 	public ParameterValue getCurrentValue(AnimationContext context)

@@ -357,6 +357,13 @@ public class CameraImpl extends AnimatableBase implements Camera
 		}
 
 		@Override
+		protected void doApplyValue(double value)
+		{
+			// TODO Implement me!
+			
+		}
+		
+		@Override
 		protected ParameterBase createParameter(AVList context)
 		{
 			return new EyeLatParameter();
@@ -383,6 +390,13 @@ public class CameraImpl extends AnimatableBase implements Camera
 			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
 		}
 
+		@Override
+		protected void doApplyValue(double value)
+		{
+			// TODO Implement me!
+			
+		}
+		
 		@Override
 		protected ParameterBase createParameter(AVList context)
 		{
@@ -411,6 +425,13 @@ public class CameraImpl extends AnimatableBase implements Camera
 		}
 
 		@Override
+		protected void doApplyValue(double value)
+		{
+			// TODO Implement me!
+			
+		}
+		
+		@Override
 		protected ParameterBase createParameter(AVList context)
 		{
 			return new EyeElevationParameter();
@@ -437,6 +458,13 @@ public class CameraImpl extends AnimatableBase implements Camera
 			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
 		}
 
+		@Override
+		protected void doApplyValue(double value)
+		{
+			// TODO Implement me!
+			
+		}
+		
 		@Override
 		protected ParameterBase createParameter(AVList context)
 		{
@@ -465,6 +493,13 @@ public class CameraImpl extends AnimatableBase implements Camera
 		}
 
 		@Override
+		protected void doApplyValue(double value)
+		{
+			// TODO Implement me!
+			
+		}
+		
+		@Override
 		protected ParameterBase createParameter(AVList context)
 		{
 			return new LookatLonParameter();
@@ -491,6 +526,13 @@ public class CameraImpl extends AnimatableBase implements Camera
 			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
 		}
 
+		@Override
+		protected void doApplyValue(double value)
+		{
+			// TODO Implement me!
+			
+		}
+		
 		@Override
 		protected ParameterBase createParameter(AVList context)
 		{

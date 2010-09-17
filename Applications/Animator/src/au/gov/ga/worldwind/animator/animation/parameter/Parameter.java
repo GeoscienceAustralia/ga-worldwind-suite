@@ -94,6 +94,12 @@ public interface Parameter extends AnimationObject, Serializable, Nameable, XmlS
 	double getDefaultValue();
 	
 	/**
+	 * Apply the provided value to the property this parameter controls.
+	 * @param value
+	 */
+	void applyValue(double value);
+	
+	/**
 	 * Gets the first recorded value of this parameter on a key frame before the provided frame.
 	 * <p/>
 	 * If one cannot be found, returns <code>null</code>.

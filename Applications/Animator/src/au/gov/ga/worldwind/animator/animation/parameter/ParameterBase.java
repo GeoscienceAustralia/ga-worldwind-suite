@@ -111,6 +111,21 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	}
 	
 	@Override
+	public final void applyValue(double value)
+	{
+		if (enabled)
+		{
+			doApplyValue(value);
+		}
+		
+	}
+	
+	/**
+	 * Invoked when the {@link #applyValue(double)} method is called and the parameter is enabled.
+	 */
+	protected abstract void doApplyValue(double value);
+
+	@Override
 	public final ParameterValue getValueAtFrame(AnimationContext context, int frame)
 	{
 		// If the provided value is a keyframe for this parameter, return it's value from the key frame
