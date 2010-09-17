@@ -13,6 +13,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.CurrentlySelectedObject;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
@@ -90,7 +91,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 			@Override
 			public void valueChanged(TreeSelectionEvent e)
 			{
-				CurrentlySelectedObject.set(e.getSource());
+				CurrentlySelectedObject.set((AnimationObject)e.getSource());
 			}
 		});
 	}

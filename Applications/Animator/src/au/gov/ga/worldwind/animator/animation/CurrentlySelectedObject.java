@@ -15,7 +15,7 @@ import java.util.List;
 public class CurrentlySelectedObject
 {
 
-	private static Object currentObject;
+	private static AnimationObject currentObject;
 	
 	private static Object objectLock = new Object();
 	
@@ -24,7 +24,7 @@ public class CurrentlySelectedObject
 	/**
 	 * @return The currently selected animation object, or <code>null</code> if no object is currently selected
 	 */
-	public static Object get()
+	public static AnimationObject get()
 	{
 		synchronized (objectLock)
 		{
@@ -35,7 +35,7 @@ public class CurrentlySelectedObject
 	/**
 	 * Set the currently selected object and notify listeners of the change
 	 */
-	public static void set(Object o)
+	public static void set(AnimationObject o)
 	{
 		synchronized (objectLock)
 		{
@@ -82,7 +82,7 @@ public class CurrentlySelectedObject
 	 */
 	public interface ChangeListener
 	{
-		void selectedObjectChanged(Object currentlySelectedObject);
+		void selectedObjectChanged(AnimationObject currentlySelectedObject);
 	}
 	
 }
