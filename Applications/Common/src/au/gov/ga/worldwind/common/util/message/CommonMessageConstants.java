@@ -8,8 +8,10 @@ package au.gov.ga.worldwind.common.util.message;
  */
 public class CommonMessageConstants
 {
-	public static String getTermCurtainLevelWidthKey() { return "common.term.curtain.level.width"; }
-	public static String getTermCurtainLevelHeightKey() { return "common.term.curtain.level.height"; }
+	public static String getTermLevelWidthKey() { return "common.term.level.width"; }
+	public static String getTermLevelHeightKey() { return "common.term.level.height"; }
+	public static String getTermCurtainLengthKey() { return "common.term.curtain.length"; }
+	public static String getTermFullSizeKey() { return "common.term.full.size"; }
 	
 	public static String getGaMachinenameRegexKey() { return "common.ga.machinename.regex"; }
 	public static String getGaProxyHostKey() { return "common.ga.proxy.host"; }

@@ -383,23 +383,23 @@ public class Util
 		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
 
-	public static int limitRange(int value, int min, int max)
+	public static int clamp(int value, int min, int max)
 	{
 		return Math.max(min, Math.min(max, value));
 	}
 
-	public static double limitRange(double value, double min, double max)
+	public static double clamp(double value, double min, double max)
 	{
 		return Math.max(min, Math.min(max, value));
 	}
 
-	public static LatLon limitLatLon(LatLon latlon, Sector sector)
+	public static LatLon clampLatLon(LatLon latlon, Sector sector)
 	{
 		double lat =
-				limitRange(latlon.latitude.degrees, sector.getMinLatitude().degrees,
+				clamp(latlon.latitude.degrees, sector.getMinLatitude().degrees,
 						sector.getMaxLatitude().degrees);
 		double lon =
-				limitRange(latlon.longitude.degrees, sector.getMinLongitude().degrees,
+				clamp(latlon.longitude.degrees, sector.getMinLongitude().degrees,
 						sector.getMaxLongitude().degrees);
 
 		return LatLon.fromDegrees(lat, lon);
