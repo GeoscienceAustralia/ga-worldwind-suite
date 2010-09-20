@@ -374,7 +374,7 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 
 		return new Sector(minLatitude, minLatitude.add(dLat), minLongitude, minLongitude.add(dLon));
 	}*/
-
+	
 	public Segment computeSegmentForKey(TileKey key)
 	{
 		if (key == null)
@@ -383,11 +383,16 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 			Logging.logger().severe(msg);
 			throw new IllegalArgumentException(msg);
 		}
+		
+		return computeSegmentForRowColumn(key.getRow(), key.getColumn());
+	}
 
-		double startX = computeStartPercentForColumn(key.getColumn());
-		double endX = computeStartPercentForColumn(key.getColumn() + 1);
-		double startY = computeStartPercentForRow(key.getRow());
-		double endY = computeStartPercentForRow(key.getRow() + 1);
+	public Segment computeSegmentForRowColumn(int row, int column)
+	{
+		double startX = computeStartPercentForColumn(column);
+		double endX = computeStartPercentForColumn(column + 1);
+		double startY = computeStartPercentForRow(row);
+		double endY = computeStartPercentForRow(row + 1);
 
 		return new Segment(startX, endX, startY, endY);
 	}
@@ -402,12 +407,6 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 	{
 		double y = row * tileHeight;
 		return Util.clamp(y / levelHeight, 0, 1);
-	}
-
-	public CurtainTile createTile(TileKey key)
-	{
-		Segment segment = computeSegmentForKey(key);
-		return new CurtainTile(this, segment, key.getRow(), key.getColumn());
 	}
 
 	@Override

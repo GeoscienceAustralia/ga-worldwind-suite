@@ -329,7 +329,7 @@ public class CurtainLevelSet extends WWObjectImpl
 		tile.getLevel().unmarkResourceAbsent(this.getTileNumber(tile));
 	}
 
-	// Create the tile corresponding to a specified key.
+	// Create the Segment corresponding to a specified key.
 	public Segment computeSegmentForKey(TileKey key)
 	{
 		if (key == null)
@@ -341,20 +341,6 @@ public class CurtainLevelSet extends WWObjectImpl
 
 		CurtainLevel level = this.getLevel(key.getLevelNumber());
 		return level.computeSegmentForKey(key);
-	}
-
-	// Create the tile corresponding to a specified key.
-	public CurtainTile createTile(TileKey key)
-	{
-		if (key == null)
-		{
-			String msg = Logging.getMessage("nullValue.KeyIsNull");
-			Logging.logger().severe(msg);
-			throw new IllegalArgumentException(msg);
-		}
-
-		CurtainLevel level = this.getLevel(key.getLevelNumber());
-		return level.createTile(key);
 	}
 
 	public void setExpiryTime(long expiryTime)
