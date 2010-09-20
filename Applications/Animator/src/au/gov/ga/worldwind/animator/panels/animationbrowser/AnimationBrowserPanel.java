@@ -95,6 +95,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 				CurrentlySelectedObject.set((AnimationObject)e.getPath().getLastPathComponent());
 			}
 		});
+		objectTree.setActionMap(null); // Remove the default key bindings so our custom ones will work
 	}
 	
 	@Override
