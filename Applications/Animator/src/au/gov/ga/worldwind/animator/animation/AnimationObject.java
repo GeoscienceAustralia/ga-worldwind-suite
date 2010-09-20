@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.animator.animation;
 
+
 /**
  * A super-type for all objects in the animation model.
  * 
@@ -8,5 +9,4 @@ package au.gov.ga.worldwind.animator.animation;
  */
 public interface AnimationObject
 {
-
 }

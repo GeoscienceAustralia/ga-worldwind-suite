@@ -39,11 +39,14 @@ public class CurrentlySelectedObject
 	{
 		synchronized (objectLock)
 		{
+			AnimationObject previousObject = currentObject;
 			boolean changed = o != currentObject;
+			
 			currentObject = o;
+			
 			if (changed)
 			{
-				fireChangeEvent();
+				fireChangeEvent(previousObject);
 			}
 		}
 	}
@@ -68,11 +71,11 @@ public class CurrentlySelectedObject
 		listeners.remove(listener);
 	}
 	
-	private static void fireChangeEvent()
+	private static void fireChangeEvent(AnimationObject previouslySelectedObject)
 	{
 		for (int i = listeners.size() - 1; i >= 0; i--)
 		{
-			listeners.get(i).selectedObjectChanged(currentObject);
+			listeners.get(i).selectedObjectChanged(currentObject, previouslySelectedObject);
 		}
 	}
 	
@@ -82,7 +85,7 @@ public class CurrentlySelectedObject
 	 */
 	public interface ChangeListener
 	{
-		void selectedObjectChanged(AnimationObject currentlySelectedObject);
+		void selectedObjectChanged(AnimationObject currentlySelectedObject, AnimationObject previouslySelectedObject);
 	}
 	
 }

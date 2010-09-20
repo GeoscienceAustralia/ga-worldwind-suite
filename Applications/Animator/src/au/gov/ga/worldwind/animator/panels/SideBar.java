@@ -138,5 +138,4 @@ public class SideBar extends JPanel
 			panel.refreshView(e);
 		}
 	}
-
 }

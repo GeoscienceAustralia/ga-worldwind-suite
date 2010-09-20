@@ -18,4 +18,10 @@ public class LAFConstants
 	
 	private static final Color HIGHLIGHTED_KEY_SELECTOR_COLOR = new Color(0, 255, 0, 128);
 	public static Color getHighlightedKeySelectorColor() { return HIGHLIGHTED_KEY_SELECTOR_COLOR; }
+	
+	private static final Color VALID_FIELD_COLOR = Color.WHITE;
+	public static Color getValidFieldColor() { return VALID_FIELD_COLOR; }
+	
+	private static final Color INVALID_FIELD_COLOR = Color.PINK;
+	public static Color getInvalidFieldColor() { return INVALID_FIELD_COLOR; }
 }

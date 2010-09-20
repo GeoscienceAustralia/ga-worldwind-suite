@@ -5,6 +5,7 @@ import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.layers.Layer;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
+import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
@@ -19,6 +20,7 @@ import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
+@EditableParameter(bound=true, minValue=0.0, maxValue=1.0)
 public class LayerOpacityParameter extends LayerParameterBase
 {
 	private static final long serialVersionUID = 20100907L;

@@ -80,4 +80,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getRemoveLayerFromListLabelKey() { return "animator.gui.menu.removelayerfromlist.label"; }
 	public static String getQueryRemoveLayersFromListMessageKey() { return "animator.message.queryremovelayersfromlist.message"; }
 	public static String getQueryRemoveLayersFromListCaptionKey() { return "animator.message.queryremovelayersfromlist.caption"; }
+	public static String getObjectPropertiesPanelNameKey() { return "animator.gui.panel.objectproperties.title"; }
+	public static String getObjectPropertiesPanelNoSelectionMessageKey() { return "animator.message.objectproperties.noselected"; }
+	public static String getObjectPropertiesPanelSelectionTitleKey() { return "animator.message.objectproperties.selected"; }
 }

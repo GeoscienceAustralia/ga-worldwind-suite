@@ -14,8 +14,6 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
  */
 public interface AnimationContext
 {
-	// TODO: Give me some useful things!
-	
 	/**
 	 * Returns the first {@link KeyFrame} <em>before</em> the provided frame that 
 	 * contains a value for the provided {@link Parameter}.
@@ -79,4 +77,15 @@ public interface AnimationContext
 	 * @return The current frame of the animation
 	 */
 	int getCurrentFrame();
+	
+	/**
+	 * A factory class that can be used to create instances of the AnimationContext
+	 */
+	public static final class Factory
+	{
+		public static AnimationContext createForAnimation(Animation animation)
+		{
+			return new AnimationContextImpl(animation);
+		}
+	}
 }

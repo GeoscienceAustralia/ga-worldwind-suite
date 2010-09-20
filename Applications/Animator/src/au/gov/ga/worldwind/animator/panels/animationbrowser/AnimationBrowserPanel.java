@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.animator.panels.animationbrowser;
 
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAnimationBrowserPanelNameKey;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+
 import java.awt.BorderLayout;
 
 import javax.swing.JScrollPane;
@@ -19,8 +22,6 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
-import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
-import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
  * A panel that allows the user to view and manipulate {@link Animatable} objects,
@@ -59,7 +60,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		Validate.notNull(animation, "An animation is required");
 		this.animation = animation;
 		
-		setName(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getAnimationBrowserPanelNameKey()));
+		setName(getMessage(getAnimationBrowserPanelNameKey()));
 		
 		initialiseObjectTree();
 		packTreeIntoPanel();
@@ -91,7 +92,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 			@Override
 			public void valueChanged(TreeSelectionEvent e)
 			{
-				CurrentlySelectedObject.set((AnimationObject)e.getSource());
+				CurrentlySelectedObject.set((AnimationObject)e.getPath().getLastPathComponent());
 			}
 		});
 	}
