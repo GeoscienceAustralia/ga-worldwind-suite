@@ -5,14 +5,12 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
@@ -123,9 +121,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				animation.addLayer((LayerIdentifier)layerList.getSelectedValue());
-				addLayerToAnimationAction.setEnabled(false);
-				layerList.repaint();
+				addSelectedLayerToAnimation();
 			}
 		});
 		
@@ -137,7 +133,6 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			{
 				promptToAddLayersFromDefinitions();
 			}
-
 		});
 		
 		removeLayerDefinitionAction = new BasicAction(getMessage(getRemoveLayerFromListLabelKey()), Icons.delete.getIcon());
@@ -187,6 +182,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 				addLayerToAnimationAction.setEnabled(!animation.hasLayer(layerIdentifier));
 			}
 		});
+		layerList.setActionMap(null);
 	}
 
 	private void packComponents()
@@ -206,6 +202,13 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			addLayerToAnimationAction.setEnabled(!animation.hasLayer((LayerIdentifier)layerList.getSelectedValue()));
 		}
 		layerList.validate();
+	}
+	
+	private void addSelectedLayerToAnimation()
+	{
+		animation.addLayer((LayerIdentifier)layerList.getSelectedValue());
+		addLayerToAnimationAction.setEnabled(false);
+		layerList.repaint();
 	}
 	
 	private void promptToRemoveLayersFromList()
