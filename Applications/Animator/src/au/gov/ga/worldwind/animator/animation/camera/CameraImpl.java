@@ -22,6 +22,7 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
+import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
@@ -340,6 +341,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	 * Parameter for eye latitude
 	 */
 	@SuppressWarnings("serial")
+	@EditableParameter
 	private static class EyeLatParameter extends ParameterBase
 	{
 		public EyeLatParameter(Animation animation)
@@ -375,6 +377,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	 * Parameter for eye longitude
 	 */
 	@SuppressWarnings("serial")
+	@EditableParameter
 	private static class EyeLonParameter extends ParameterBase
 	{
 		public EyeLonParameter(Animation animation)
@@ -409,6 +412,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	 * Parameter for eye elevation
 	 */
 	@SuppressWarnings("serial")
+	@EditableParameter
 	private static class EyeElevationParameter extends ParameterBase
 	{
 		public EyeElevationParameter(Animation animation)
@@ -443,6 +447,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	 * Parameter for look-at latitude
 	 */
 	@SuppressWarnings("serial")
+	@EditableParameter
 	private static class LookatLatParameter extends ParameterBase
 	{
 		public LookatLatParameter(Animation animation)
@@ -477,6 +482,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	 * Parameter for look-at longitude
 	 */
 	@SuppressWarnings("serial")
+	@EditableParameter
 	private static class LookatLonParameter extends ParameterBase
 	{
 		public LookatLonParameter(Animation animation)
@@ -511,6 +517,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	 * Parameter for look-at elevation
 	 */
 	@SuppressWarnings("serial")
+	@EditableParameter
 	private static class LookatElevationParameter extends ParameterBase
 	{
 		public LookatElevationParameter(Animation animation)

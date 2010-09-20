@@ -58,6 +58,9 @@ public class EditableParameterInputVerifier extends InputVerifier
 		return true;
 	}
 	
+	/**
+	 * @return Whether the provided string can be converted via {@link Double#parseDouble(String)} to a {@link Double}
+	 */
 	private boolean isNumeric(String currentValue)
 	{
 		if (currentValue == null || currentValue.trim().isEmpty())

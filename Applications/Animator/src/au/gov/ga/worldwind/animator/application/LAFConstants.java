@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.animator.application;
 
 import java.awt.Color;
+import java.awt.Font;
 
 /**
  * Look and Feel (Color etc.) constants used throughout the application
@@ -24,4 +25,7 @@ public class LAFConstants
 	
 	private static final Color INVALID_FIELD_COLOR = Color.PINK;
 	public static Color getInvalidFieldColor() { return INVALID_FIELD_COLOR; }
+	
+	private static final Font SUB_HEADING_FONT = new Font(Font.MONOSPACED, Font.ITALIC, 12);
+	public static Font getSubHeadingFont() { return SUB_HEADING_FONT; }
 }

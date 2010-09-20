@@ -1,19 +1,19 @@
 package au.gov.ga.worldwind.animator.panels.objectproperties;
 
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getObjectPropertiesPanelNameKey;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getObjectPropertiesPanelNoSelectionMessageKey;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getObjectPropertiesPanelSelectionTitleKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
-import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
@@ -26,10 +26,11 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.application.LAFConstants;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
-import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationTreeModel;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.ui.JDoubleField;
 
 /**
  * A panel used to display and edit properties of the currently selected animation object
@@ -46,6 +47,7 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 	private JPanel propertiesPanel;
 	
 	private JLabel panelCaption;
+	private JLabel noEditableParameterMessage = new JLabel(getMessage(getObjectPropertiesPanelNoEditableMessageKey()));
 	
 	private Animation animation;
 	
@@ -60,10 +62,11 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 		panelCaption = new JLabel();
 		add(panelCaption, BorderLayout.NORTH);
 		
-		propertiesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		propertiesPanel.setBackground(Color.WHITE);
+		propertiesPanel = new JPanel(new GridLayout(0, 1, 2, 2));
+		propertiesPanel.setBorder(null);
 		
 		scrollPane = new JScrollPane(propertiesPanel);
+		scrollPane.setBorder(null);
 		
 		add(scrollPane, BorderLayout.CENTER);
 		
@@ -83,9 +86,11 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 		panelCaption.setText(getMessage(getObjectPropertiesPanelSelectionTitleKey(), getDisplayName(currentObject)));
 		
 		propertiesPanel.removeAll();
+		int parameterCounter = 0;
 		if (isEditableParameter(currentObject))
 		{
 			addParameterEditor((Parameter)currentObject);
+			parameterCounter++;
 		}
 		else if (isAnimatableObject(currentObject))
 		{
@@ -94,10 +99,15 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 				if (isEditableParameter(parameter))
 				{
 					addParameterEditor(parameter);
+					parameterCounter++;
 				}
 			}
 		}
 		
+		if (parameterCounter == 0)
+		{
+			propertiesPanel.add(noEditableParameterMessage);
+		}
 		
 		validate();
 		repaint();
@@ -105,7 +115,8 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 	
 	private void addParameterEditor(Parameter parameterToEdit)
 	{
-		propertiesPanel.add(new ParameterEditorPanel(parameterToEdit));
+		ParameterEditorPanel parameterEditor = new ParameterEditorPanel(parameterToEdit);
+		propertiesPanel.add(parameterEditor);
 	}
 
 	private boolean isAnimatableObject(AnimationObject currentObject)
@@ -193,23 +204,61 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 
 		private void populatePanel()
 		{
-			setLayout(new FlowLayout(FlowLayout.LEFT));
-			setBorder(BorderFactory.createEtchedBorder());
+			setLayout(new GridLayout(0, 1));
+			setBorder(new LineBorder(getBackground().darker(), 1, true));
 			
+			addParameterName();
 			addFieldEntry();
+		}
+
+		private void addParameterName()
+		{
+			JLabel label = new JLabel(getDisplayName(parameterToEdit));
+			label.setFont(LAFConstants.getSubHeadingFont());
+			add(label);
 		}
 
 		private void addFieldEntry()
 		{
-			JPanel fieldEntryPanel = new JPanel(new BorderLayout());
+			JPanel fieldEntryPanel = new JPanel(new BorderLayout(2, 2));
 			
-			fieldEntryPanel.add(new JLabel(getDisplayName(parameterToEdit) + ": "), BorderLayout.WEST);
-			
-			JTextField propertyField = new JTextField(Double.toString(parameterToEdit.getCurrentValue(AnimationContext.Factory.createForAnimation(animation)).getValue()));
+			final JDoubleField propertyField = new JDoubleField(parameterToEdit.getCurrentValue(AnimationContext.Factory.createForAnimation(animation)).getValue());
+			propertyField.setColumns(10);
+			propertyField.setMinValue(getParameterMinValue());
+			propertyField.setMaxValue(getParameterMaxValue());
 			propertyField.setInputVerifier(new EditableParameterInputVerifier(parameterToEdit));
-			fieldEntryPanel.add(propertyField, BorderLayout.CENTER);
+			propertyField.addFocusListener(new FocusAdapter()
+			{
+				@Override
+				public void focusLost(FocusEvent e)
+				{
+					parameterToEdit.applyValue(propertyField.getValue());
+				}
+			});
 			
+			JLabel valueLabel = new JLabel(getMessage(getObjectPropertiesPanelValueCaptionKey()));
+			valueLabel.setLabelFor(propertyField);
+			
+			fieldEntryPanel.add(valueLabel, BorderLayout.WEST);
+			fieldEntryPanel.add(propertyField, BorderLayout.CENTER);
+			fieldEntryPanel.add(Box.createRigidArea(new Dimension(10, 0)), BorderLayout.EAST); //TODO: Is this the best way to add space?
 			add(fieldEntryPanel);
+		}
+		
+		private boolean isBoundParameter()
+		{
+			return parameterToEdit.getClass().isAnnotationPresent(EditableParameter.class) && 
+					parameterToEdit.getClass().getAnnotation(EditableParameter.class).bound();
+		}
+		
+		private Double getParameterMaxValue()
+		{
+			return isBoundParameter() ? parameterToEdit.getClass().getAnnotation(EditableParameter.class).maxValue() : null;
+		}
+
+		private Double getParameterMinValue()
+		{
+			return isBoundParameter() ? parameterToEdit.getClass().getAnnotation(EditableParameter.class).minValue() : null;
 		}
 		
 	}
