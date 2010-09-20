@@ -20,7 +20,7 @@ import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-@EditableParameter(bound=true, minValue=0.0, maxValue=1.0)
+@EditableParameter(bound=true, minValue=0.0, maxValue=1.0, units="%")
 public class LayerOpacityParameter extends LayerParameterBase
 {
 	private static final long serialVersionUID = 20100907L;

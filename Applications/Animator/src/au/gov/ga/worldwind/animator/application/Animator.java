@@ -165,6 +165,9 @@ public class Animator
 	
 	/** The side bar panel */
 	private SideBar sideBar;
+	private AnimationBrowserPanel animationBrowserPanel;
+	private ObjectPropertiesPanel objectPropertiesPanel;
+	private LayerPalettePanel layerPalettePanel;
 	
 	/** The bottom panel. Holds the status bar. */
 	private JPanel bottomPanel;
@@ -240,7 +243,7 @@ public class Animator
 	
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
-	
+
 	/**
 	 * Constructor.
 	 * <p/>
@@ -263,8 +266,8 @@ public class Animator
 		initialiseUtilityLayers();
 		updateLayersInModel();
 		
-		initialiseSideBar();
 		initialiseFrameSlider();
+		initialiseSideBar();
 		initialiseStatusBar();
 		
 		initialiseActions();
@@ -376,14 +379,20 @@ public class Animator
 	 */
 	private void initialiseSideBar()
 	{
-		List<CollapsiblePanel> collapsiblePanels = new ArrayList<CollapsiblePanel>();
+		animationBrowserPanel = new AnimationBrowserPanel(animation);
+		objectPropertiesPanel = new ObjectPropertiesPanel(animation);
+		layerPalettePanel = new LayerPalettePanel(animation);
 		
-		collapsiblePanels.add(new AnimationBrowserPanel(animation));
-		collapsiblePanels.add(new ObjectPropertiesPanel(animation));
-		collapsiblePanels.add(new LayerPalettePanel(animation));
+		List<CollapsiblePanel> collapsiblePanels = new ArrayList<CollapsiblePanel>(3);
+		collapsiblePanels.add(animationBrowserPanel);
+		collapsiblePanels.add(objectPropertiesPanel);
+		collapsiblePanels.add(layerPalettePanel);
 		
 		sideBar = new SideBar(splitPane, collapsiblePanels);
 		splitPane.setLeftComponent(sideBar);
+		
+		slider.addChangeFrameListener(objectPropertiesPanel);
+		slider.addChangeListener(objectPropertiesPanel);
 	}
 
 	/**

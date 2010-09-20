@@ -1,24 +1,26 @@
 package au.gov.ga.worldwind.animator.panels.objectproperties;
 
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getObjectPropertiesPanelNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getObjectPropertiesPanelNoEditableMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getObjectPropertiesPanelNoSelectionMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getObjectPropertiesPanelSelectionTitleKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.CurrentlySelectedObject;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
@@ -26,11 +28,10 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.animator.application.LAFConstants;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
+import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
-import au.gov.ga.worldwind.common.ui.JDoubleField;
 
 /**
  * A panel used to display and edit properties of the currently selected animation object
@@ -38,7 +39,7 @@ import au.gov.ga.worldwind.common.ui.JDoubleField;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class ObjectPropertiesPanel extends CollapsiblePanelBase implements CurrentlySelectedObject.ChangeListener, AnimationEventListener
+public class ObjectPropertiesPanel extends CollapsiblePanelBase implements CurrentlySelectedObject.ChangeListener, AnimationEventListener, ChangeFrameListener, ChangeListener
 {
 	private static final long serialVersionUID = 20100917L;
 
@@ -49,7 +50,10 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 	private JLabel panelCaption;
 	private JLabel noEditableParameterMessage = new JLabel(getMessage(getObjectPropertiesPanelNoEditableMessageKey()));
 	
-	private Animation animation;
+	private Map<Parameter, ParameterEditorPanel> editorMap = new HashMap<Parameter, ParameterEditorPanel>();
+	private List<ParameterEditorPanel> visibleEditors = new ArrayList<ParameterEditorPanel>();
+	
+	Animation animation;
 	
 	public ObjectPropertiesPanel(Animation animation)
 	{
@@ -70,12 +74,12 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 		
 		add(scrollPane, BorderLayout.CENTER);
 		
-		updatePropertiesDisplay();
+		updatePanelDisplay();
 		
 		CurrentlySelectedObject.addChangeListener(this);
 	}
 	
-	private void updatePropertiesDisplay()
+	private void updatePanelDisplay()
 	{
 		AnimationObject currentObject = CurrentlySelectedObject.get();
 		if (currentObject == null)
@@ -86,6 +90,7 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 		panelCaption.setText(getMessage(getObjectPropertiesPanelSelectionTitleKey(), getDisplayName(currentObject)));
 		
 		propertiesPanel.removeAll();
+		visibleEditors.clear();
 		int parameterCounter = 0;
 		if (isEditableParameter(currentObject))
 		{
@@ -113,10 +118,26 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 		repaint();
 	}
 	
+	private void updateParameterEditorsDisplay()
+	{
+		for (ParameterEditorPanel parameterEditor : visibleEditors)
+		{
+			parameterEditor.updateDisplay();
+		}
+		
+	}
+	
 	private void addParameterEditor(Parameter parameterToEdit)
 	{
-		ParameterEditorPanel parameterEditor = new ParameterEditorPanel(parameterToEdit);
+		ParameterEditorPanel parameterEditor = editorMap.get(parameterToEdit);
+		if (parameterEditor == null)
+		{
+			parameterEditor = new ParameterEditorPanel(animation, parameterToEdit);
+			editorMap.put(parameterToEdit, parameterEditor);
+		}
+		
 		propertiesPanel.add(parameterEditor);
+		visibleEditors.add(parameterEditor);
 	}
 
 	private boolean isAnimatableObject(AnimationObject currentObject)
@@ -155,20 +176,23 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 		return object.toString();
 	}
 	
+	// Event listener methods
+	
 	@Override
 	public void refreshView(ChangeEvent e)
 	{
 		if (e != null && e.getSource() instanceof Animation)
 		{
 			this.animation = (Animation)e.getSource();
-			updatePropertiesDisplay();
+			this.editorMap.clear();
 		}
+		updatePanelDisplay();
 	}
 
 	@Override
 	public void selectedObjectChanged(AnimationObject currentlySelectedObject, AnimationObject previouslySelectedObject)
 	{
-		updatePropertiesDisplay();
+		updatePanelDisplay();
 		if (previouslySelectedObject instanceof Changeable)
 		{
 			((Changeable)previouslySelectedObject).removeChangeListener(this);
@@ -182,84 +206,18 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 	@Override
 	public void receiveAnimationEvent(AnimationEvent event)
 	{
-		updatePropertiesDisplay();
+		updateParameterEditorsDisplay();
 	}
-	
-	/**
-	 * A panel used to edit a single parameter. 
-	 */
-	private final class ParameterEditorPanel extends JPanel
+
+	@Override
+	public void frameChanged(int index, int oldFrame, int newFrame)
 	{
-		private static final long serialVersionUID = 20100920L;
+		updateParameterEditorsDisplay();
+	}
 
-		private Parameter parameterToEdit;
-
-		public ParameterEditorPanel(Parameter parameterToEdit)
-		{
-			Validate.notNull(parameterToEdit, "A parameter is required");
-			this.parameterToEdit = parameterToEdit;
-			
-			populatePanel();
-		}
-
-		private void populatePanel()
-		{
-			setLayout(new GridLayout(0, 1));
-			setBorder(new LineBorder(getBackground().darker(), 1, true));
-			
-			addParameterName();
-			addFieldEntry();
-		}
-
-		private void addParameterName()
-		{
-			JLabel label = new JLabel(getDisplayName(parameterToEdit));
-			label.setFont(LAFConstants.getSubHeadingFont());
-			add(label);
-		}
-
-		private void addFieldEntry()
-		{
-			JPanel fieldEntryPanel = new JPanel(new BorderLayout(2, 2));
-			
-			final JDoubleField propertyField = new JDoubleField(parameterToEdit.getCurrentValue(AnimationContext.Factory.createForAnimation(animation)).getValue());
-			propertyField.setColumns(10);
-			propertyField.setMinValue(getParameterMinValue());
-			propertyField.setMaxValue(getParameterMaxValue());
-			propertyField.setInputVerifier(new EditableParameterInputVerifier(parameterToEdit));
-			propertyField.addFocusListener(new FocusAdapter()
-			{
-				@Override
-				public void focusLost(FocusEvent e)
-				{
-					parameterToEdit.applyValue(propertyField.getValue());
-				}
-			});
-			
-			JLabel valueLabel = new JLabel(getMessage(getObjectPropertiesPanelValueCaptionKey()));
-			valueLabel.setLabelFor(propertyField);
-			
-			fieldEntryPanel.add(valueLabel, BorderLayout.WEST);
-			fieldEntryPanel.add(propertyField, BorderLayout.CENTER);
-			fieldEntryPanel.add(Box.createRigidArea(new Dimension(10, 0)), BorderLayout.EAST); //TODO: Is this the best way to add space?
-			add(fieldEntryPanel);
-		}
-		
-		private boolean isBoundParameter()
-		{
-			return parameterToEdit.getClass().isAnnotationPresent(EditableParameter.class) && 
-					parameterToEdit.getClass().getAnnotation(EditableParameter.class).bound();
-		}
-		
-		private Double getParameterMaxValue()
-		{
-			return isBoundParameter() ? parameterToEdit.getClass().getAnnotation(EditableParameter.class).maxValue() : null;
-		}
-
-		private Double getParameterMinValue()
-		{
-			return isBoundParameter() ? parameterToEdit.getClass().getAnnotation(EditableParameter.class).minValue() : null;
-		}
-		
+	@Override
+	public void stateChanged(ChangeEvent e)
+	{
+		updateParameterEditorsDisplay();		
 	}
 }

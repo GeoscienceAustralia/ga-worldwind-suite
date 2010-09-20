@@ -17,4 +17,5 @@ public @interface EditableParameter
 	boolean bound() default false;
 	double minValue() default 0.0;
 	double maxValue() default 1.0;
+	String units() default "";
 }
