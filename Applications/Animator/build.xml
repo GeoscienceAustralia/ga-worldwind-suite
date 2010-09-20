@@ -1,7 +1,9 @@
 <?xml version="1.0" ?>
 
-<project name="Animator" basedir="." default="executables">
+<project name="Animator" basedir="." default="deploy">
 
+	<property name="deploy_location" value="\\NAS\Corp\gav\GEOVIS\VIS\Projects\Animator 2.0\Builds\Current"/>
+	
 	<property name="application_version" value="2.0-SNAPSHOT"/>
 	<property name="application_class" value="au.gov.ga.worldwind.animator.application.Animator"/>
 	<property name="application_jar" value="ga-animator-${application_version}.jar" />
@@ -22,8 +24,6 @@
 	<property name="target_dir" value="${basedir}/target" />
 	<property name="lib_dir" value="${target_dir}/lib" />
 
-	
-	
 	<property name="test_src_dir" value="${basedir}/test/src"/>
 	<property name="test_lib_dir" value="${basedir}/test/lib"/>
 	<property name="test_build_dir" value="${basedir}/test/build"/>
@@ -59,10 +59,6 @@
 		<exclude name="META-INF/INDEX.LIST" />
 	</patternset>
 
-	<patternset id="test_exclude">
-			<exclude name="**/DefaultAnimatableLayerTest.*" />
-	</patternset>
-	
 	<target name="clean">
 		<delete dir="${build_dir}" />
 		<delete dir="${target_dir}" />
@@ -167,4 +163,10 @@
 		
 	</target>
 
+	<target name="deploy" depends="executables">
+		<copy todir="${deploy_location}" overwrite="yes">
+			<fileset dir="${target_dir}"/>
+		</copy>
+	</target>
+	
 </project>
