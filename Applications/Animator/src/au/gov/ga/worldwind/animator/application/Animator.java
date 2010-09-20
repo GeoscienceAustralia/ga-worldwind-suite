@@ -1596,8 +1596,8 @@ public class Animator
 
 					int firstFrame = Math.max(slider.getValue(), animation.getFrameOfFirstKeyFrame());
 					int lastFrame = animation.getFrameOfLastKeyFrame();
-
-					for (int frame = firstFrame; frame <= lastFrame; frame += frameSkip)
+					int frame;
+					for (frame = firstFrame; frame <= lastFrame; frame += frameSkip)
 					{
 						setSlider(frame);
 						applyAnimationState();
@@ -1607,6 +1607,12 @@ public class Animator
 						{
 							break;
 						}
+					}
+					if (frame != lastFrame && !stop)
+					{
+						setSlider(lastFrame);
+						applyAnimationState();
+						wwd.redrawNow();
 					}
 				}
 			});
