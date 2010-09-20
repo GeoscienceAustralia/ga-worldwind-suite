@@ -393,6 +393,7 @@ public class Animator
 		
 		slider.addChangeFrameListener(objectPropertiesPanel);
 		slider.addChangeListener(objectPropertiesPanel);
+		getView().addPropertyChangeListener(AVKey.VIEW, objectPropertiesPanel);
 	}
 
 	/**

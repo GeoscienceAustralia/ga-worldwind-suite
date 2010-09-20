@@ -42,7 +42,9 @@ final class ParameterEditorPanel extends JPanel
 
 	private SpinnerNumberModel spinnerModel;
 	private JSpinner parameterSpinner;
-
+	
+	private boolean updatingDisplay = false;
+	
 	public ParameterEditorPanel(Animation animation, Parameter parameterToEdit)
 	{
 		Validate.notNull(animation, "An animation is required");
@@ -85,7 +87,10 @@ final class ParameterEditorPanel extends JPanel
 			@Override
 			public void focusLost(FocusEvent e)
 			{
-				parameterToEdit.applyValue((Double)parameterSpinner.getValue());
+				if (!updatingDisplay)
+				{
+					parameterToEdit.applyValue((Double)parameterSpinner.getValue());
+				}
 			}
 		});
 		parameterSpinner.addChangeListener(new ChangeListener()
@@ -93,7 +98,10 @@ final class ParameterEditorPanel extends JPanel
 			@Override
 			public void stateChanged(ChangeEvent e)
 			{
-				parameterToEdit.applyValue((Double)parameterSpinner.getValue());
+				if (!updatingDisplay)
+				{
+					parameterToEdit.applyValue((Double)parameterSpinner.getValue());
+				}
 			}
 		});
 		parameterSpinner.setPreferredSize(new Dimension(80, 18));
@@ -114,7 +122,9 @@ final class ParameterEditorPanel extends JPanel
 
 	public void updateDisplay()
 	{
+		updatingDisplay = true;
 		parameterSpinner.setValue(getParameterCurrentValue());
+		updatingDisplay = false;
 	}
 	
 	private double getParameterCurrentValue()

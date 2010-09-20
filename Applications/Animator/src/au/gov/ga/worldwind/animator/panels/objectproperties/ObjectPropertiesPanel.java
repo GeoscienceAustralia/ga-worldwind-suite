@@ -8,6 +8,8 @@ import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getM
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +41,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class ObjectPropertiesPanel extends CollapsiblePanelBase implements CurrentlySelectedObject.ChangeListener, AnimationEventListener, ChangeFrameListener, ChangeListener
+public class ObjectPropertiesPanel extends CollapsiblePanelBase implements CurrentlySelectedObject.ChangeListener, AnimationEventListener, ChangeFrameListener, ChangeListener, PropertyChangeListener
 {
 	private static final long serialVersionUID = 20100917L;
 
@@ -53,7 +55,7 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 	private Map<Parameter, ParameterEditorPanel> editorMap = new HashMap<Parameter, ParameterEditorPanel>();
 	private List<ParameterEditorPanel> visibleEditors = new ArrayList<ParameterEditorPanel>();
 	
-	Animation animation;
+	private Animation animation;
 	
 	public ObjectPropertiesPanel(Animation animation)
 	{
@@ -219,5 +221,11 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 	public void stateChanged(ChangeEvent e)
 	{
 		updateParameterEditorsDisplay();		
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		updateParameterEditorsDisplay();
 	}
 }
