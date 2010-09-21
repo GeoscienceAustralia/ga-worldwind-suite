@@ -69,13 +69,9 @@ public class WorldWindAnimationImplTest
 	@Test
 	public void testGetFrameBeforeWithMultipleFrames()
 	{
-		KeyFrame kf1 = createKeyFrame(0, testParameters.get(0));
-		KeyFrame kf2 = createKeyFrame(50, testParameters.get(0), testParameters.get(1));
-		KeyFrame kf3 = createKeyFrame(100, testParameters.get(0), testParameters.get(1));
-		
-		classToBeTested.insertKeyFrame(kf1);
-		classToBeTested.insertKeyFrame(kf2);
-		classToBeTested.insertKeyFrame(kf3);
+		classToBeTested.insertKeyFrame(createKeyFrame(0, testParameters.get(0)));
+		classToBeTested.insertKeyFrame(createKeyFrame(50, testParameters.get(0), testParameters.get(1)));
+		classToBeTested.insertKeyFrame(createKeyFrame(100, testParameters.get(0), testParameters.get(1)));
 		
 		assertEquals(null, classToBeTested.getKeyFrameWithParameterBeforeFrame(testParameters.get(0), 0));
 		assertEquals(0, classToBeTested.getKeyFrameWithParameterBeforeFrame(testParameters.get(0), 25).getFrame());
@@ -106,13 +102,9 @@ public class WorldWindAnimationImplTest
 	@Test
 	public void testGetFrameAfterWithMultipleFrames()
 	{
-		KeyFrame kf1 = createKeyFrame(0, testParameters.get(0));
-		KeyFrame kf2 = createKeyFrame(50, testParameters.get(0), testParameters.get(1));
-		KeyFrame kf3 = createKeyFrame(100, testParameters.get(0), testParameters.get(1));
-		
-		classToBeTested.insertKeyFrame(kf1);
-		classToBeTested.insertKeyFrame(kf2);
-		classToBeTested.insertKeyFrame(kf3);
+		classToBeTested.insertKeyFrame(createKeyFrame(0, testParameters.get(0)));
+		classToBeTested.insertKeyFrame(createKeyFrame(50, testParameters.get(0), testParameters.get(1)));
+		classToBeTested.insertKeyFrame(createKeyFrame(100, testParameters.get(0), testParameters.get(1)));
 		
 		assertEquals(50, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(0), 0).getFrame());
 		assertEquals(50, classToBeTested.getKeyFrameWithParameterAfterFrame(testParameters.get(0), 25).getFrame());
@@ -142,15 +134,11 @@ public class WorldWindAnimationImplTest
 	@Test
 	public void testScaleWith0()
 	{
-		KeyFrame kf1 = createKeyFrame(0, testParameters.get(0));
-		KeyFrame kf2 = createKeyFrame(50, testParameters.get(1));
-		KeyFrame kf3 = createKeyFrame(100, testParameters.get(2));
-		
 		classToBeTested.setFrameCount(100);
 		
-		classToBeTested.insertKeyFrame(kf1);
-		classToBeTested.insertKeyFrame(kf2);
-		classToBeTested.insertKeyFrame(kf3);
+		classToBeTested.insertKeyFrame(createKeyFrame(0, testParameters.get(0)));
+		classToBeTested.insertKeyFrame(createKeyFrame(50, testParameters.get(1)));
+		classToBeTested.insertKeyFrame(createKeyFrame(100, testParameters.get(2)));
 		
 		try 
 		{
@@ -169,15 +157,11 @@ public class WorldWindAnimationImplTest
 	@Test
 	public void testScaleWithLT1()
 	{
-		KeyFrame kf1 = createKeyFrame(0, testParameters.get(0));
-		KeyFrame kf2 = createKeyFrame(50, testParameters.get(1));
-		KeyFrame kf3 = createKeyFrame(100, testParameters.get(2));
-		
 		classToBeTested.setFrameCount(100);
 		
-		classToBeTested.insertKeyFrame(kf1);
-		classToBeTested.insertKeyFrame(kf2);
-		classToBeTested.insertKeyFrame(kf3);
+		classToBeTested.insertKeyFrame(createKeyFrame(0, testParameters.get(0)));
+		classToBeTested.insertKeyFrame(createKeyFrame(50, testParameters.get(1)));
+		classToBeTested.insertKeyFrame(createKeyFrame(100, testParameters.get(2)));
 		
 		try 
 		{
@@ -217,15 +201,11 @@ public class WorldWindAnimationImplTest
 	@Test
 	public void testScaleWithEQ1()
 	{
-		KeyFrame kf1 = createKeyFrame(0, testParameters.get(0));
-		KeyFrame kf2 = createKeyFrame(50, testParameters.get(1));
-		KeyFrame kf3 = createKeyFrame(100, testParameters.get(2));
-		
 		classToBeTested.setFrameCount(100);
 		
-		classToBeTested.insertKeyFrame(kf1);
-		classToBeTested.insertKeyFrame(kf2);
-		classToBeTested.insertKeyFrame(kf3);
+		classToBeTested.insertKeyFrame(createKeyFrame(0, testParameters.get(0)));
+		classToBeTested.insertKeyFrame(createKeyFrame(50, testParameters.get(1)));
+		classToBeTested.insertKeyFrame(createKeyFrame(100, testParameters.get(2)));
 		
 		try 
 		{
@@ -265,15 +245,11 @@ public class WorldWindAnimationImplTest
 	@Test
 	public void testScaleWithGT1()
 	{
-		KeyFrame kf1 = createKeyFrame(0, testParameters.get(0));
-		KeyFrame kf2 = createKeyFrame(50, testParameters.get(1));
-		KeyFrame kf3 = createKeyFrame(100, testParameters.get(2));
-		
 		classToBeTested.setFrameCount(100);
 		
-		classToBeTested.insertKeyFrame(kf1);
-		classToBeTested.insertKeyFrame(kf2);
-		classToBeTested.insertKeyFrame(kf3);
+		classToBeTested.insertKeyFrame(createKeyFrame(0, testParameters.get(0)));
+		classToBeTested.insertKeyFrame(createKeyFrame(50, testParameters.get(1)));
+		classToBeTested.insertKeyFrame(createKeyFrame(100, testParameters.get(2)));
 		
 		try 
 		{
