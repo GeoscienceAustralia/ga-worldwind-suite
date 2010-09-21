@@ -38,6 +38,9 @@ public class KeyFrameImpl extends PropagatingChangeableEventListener implements 
 	 */
 	private int frame;
 	
+	/** The name of the keyframe. Defaults to <code>KeyFrameN</code>, but can be overridden via the {@link #setName(String)} method */
+	private String name = null;
+	
 	/**
 	 * Constructor.
 	 * <p/>
@@ -178,6 +181,22 @@ public class KeyFrameImpl extends PropagatingChangeableEventListener implements 
 	protected AnimationEvent createEvent(Type type, AnimationEvent cause, Object value)
 	{
 		return new KeyFrameEventImpl(this, type, cause, value);
+	}
+	
+	@Override
+	public String getName()
+	{
+		if (name == null)
+		{
+			return "KeyFrame" + getFrame();
+		}
+		return name;
+	}
+	
+	@Override
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 	
 }

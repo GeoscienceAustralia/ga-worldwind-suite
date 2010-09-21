@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getOpacityParameterNameKey;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.layers.Layer;
@@ -12,8 +14,6 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.util.Validate;
-import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
-import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
  * A {@link LayerParameter} that controls the opacity of an {@link AbstractLayer}.
@@ -30,7 +30,7 @@ public class LayerOpacityParameter extends LayerParameterBase
 	 */
 	public LayerOpacityParameter(Animation animation, Layer layer)
 	{
-		super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getOpacityParameterNameKey()), animation, layer);
+		super(getMessage(getOpacityParameterNameKey()), animation, layer);
 		setDefaultValue(1.0);
 	}
 

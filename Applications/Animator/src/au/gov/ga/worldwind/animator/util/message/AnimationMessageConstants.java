@@ -73,6 +73,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getConfirmRenderOverwriteCaptionKey() { return "animator.message.renderoverwriteconfirm.caption"; }
 	public static String getNoRecentFileMessageKey() { return "animator.gui.menu.norecentfiles.label"; }
 	public static String getAnimationBrowserPanelNameKey() { return "animator.gui.panel.animationbrowser.title"; }
+	public static String getAnimationBrowserRemoveObjectLabelKey() { return "animator.gui.menu.removeanimationobject.label"; }
 	public static String getOpacityParameterNameKey() { return "animator.layer.opacity.name"; }
 	public static String getLayerPalettePanelNameKey() { return "animator.gui.panel.layerpalette.title"; }
 	public static String getAddLayerToAnimationLabelKey() { return "animator.gui.menu.addlayertoanimation.label"; }
@@ -85,4 +86,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getObjectPropertiesPanelNoEditableMessageKey() { return "animator.message.objectproperties.noeditable"; }
 	public static String getObjectPropertiesPanelSelectionTitleKey() { return "animator.message.objectproperties.selected"; }
 	public static String getObjectPropertiesPanelValueCaptionKey() { return "animator.gui.panel.objectproperties.valuecaption.label"; }
+	public static String getQueryRemoveObjectFromAnimationMessageKey() {return "animator.message.queryremoveobjectfromanimation.message"; }
+	public static String getQueryRemoveObjectFromAnimationCaptionKey() { return "animator.message.queryremoveobjectfromanimation.caption"; }
+
 }

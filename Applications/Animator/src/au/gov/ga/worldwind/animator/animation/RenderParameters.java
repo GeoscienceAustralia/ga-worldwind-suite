@@ -38,6 +38,7 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 	 */
 	private int frameRate = DEFAULT_FRAME_RATE;
 	
+	private String name = "RenderParameters";
 	
 	/**
 	 * @return the {@link #imageDimension}
@@ -77,6 +78,18 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 	public double getImageAspectRatio()
 	{
 		return imageDimension.getWidth() / imageDimension.getHeight();
+	}
+	
+	@Override
+	public String getName()
+	{
+		return name;
+	}
+	
+	@Override
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 	
 	@Override

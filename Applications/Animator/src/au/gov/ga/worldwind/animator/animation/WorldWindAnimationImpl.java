@@ -242,8 +242,22 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		
 		object.removeChangeListener(this);
 		
+		removeValuesFromKeyFrames(object);
+		
 		fireRemoveEvent(object);
 		
+	}
+
+	private void removeValuesFromKeyFrames(Animatable object)
+	{
+		for (Parameter parameter : object.getParameters())
+		{
+			for (KeyFrame key : getKeyFrames(parameter))
+			{
+				key.removeValueForParameter(parameter);
+			}
+		}
+		removeEmptyKeyFrames();
 	}
 
 	@Override

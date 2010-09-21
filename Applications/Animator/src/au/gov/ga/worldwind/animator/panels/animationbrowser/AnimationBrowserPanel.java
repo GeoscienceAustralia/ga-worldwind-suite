@@ -1,11 +1,15 @@
 package au.gov.ga.worldwind.animator.panels.animationbrowser;
 
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAnimationBrowserPanelNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.TreeSelectionEvent;
@@ -18,10 +22,13 @@ import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.CurrentlySelectedObject;
+import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
+import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.ui.BasicAction;
 
 /**
  * A panel that allows the user to view and manipulate {@link Animatable} objects,
@@ -39,6 +46,8 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 	/** A scrollable container for holding the tree */
 	private JScrollPane scrollPane;
 	
+	private JToolBar toolbar;
+	
 	/** 
 	 * The tree that allows the user to browse through an animation's {@link Animatable} objects
 	 * and associated {@link Parameter}s.
@@ -49,6 +58,9 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 	 * The model associated with the object tree
 	 */
 	private AnimationTreeModel treeModel;
+	
+	// Actions
+	private BasicAction removeAnimationObjectAction;
 	
 	/**
 	 * Constructor. Initialises the tree from the provided (mandatory) {@link Animation} instance.
@@ -63,15 +75,72 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		setName(getMessage(getAnimationBrowserPanelNameKey()));
 		
 		initialiseObjectTree();
-		packTreeIntoPanel();
+		initialiseActions();
+		initialiseToolbar();
+		packComponents();
+	}
+	
+	private void initialiseActions()
+	{
+		removeAnimationObjectAction = new BasicAction(getMessage(getAnimationBrowserRemoveObjectLabelKey()), Icons.delete.getIcon());
+		removeAnimationObjectAction.setEnabled(false);
+		removeAnimationObjectAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				promptToRemoveSelectedObject();
+			}
+		});
+	}
+
+	private void promptToRemoveSelectedObject()
+	{
+		if (objectTree.isSelectionEmpty())
+		{
+			return;
+		}
+		
+		AnimationObject selectedObject = (AnimationObject)objectTree.getSelectionPath().getLastPathComponent();
+		if (!isRemovable(selectedObject))
+		{
+			return;
+		}
+		
+		boolean removalConfirmed = promptUserForConfirmationOfRemoval(selectedObject);
+		if (removalConfirmed)
+		{
+			animation.removeAnimatableObject((Animatable)selectedObject); // TODO Make this more general to allow extension in the future
+			removeAnimationObjectAction.setEnabled(false);
+		}
+		
+	}
+	
+	private boolean promptUserForConfirmationOfRemoval(AnimationObject selectedObject)
+	{
+		int response = JOptionPane.showConfirmDialog(getParentWindow(),
+ 				 									 getMessage(getQueryRemoveObjectFromAnimationMessageKey(), selectedObject.getName()), 
+ 				 									 getMessage(getQueryRemoveObjectFromAnimationCaptionKey()),
+ 				 									 JOptionPane.YES_NO_OPTION,
+ 				 									 JOptionPane.QUESTION_MESSAGE);
+
+		return response == JOptionPane.YES_OPTION;
+	}
+
+	private void initialiseToolbar()
+	{
+		toolbar = new JToolBar();
+		toolbar.setActionMap(null);
+		toolbar.add(removeAnimationObjectAction);
 	}
 
 	/**
-	 * Pack the object tree into the panel, ready for display
+	 * Pack the browser components into the parent panel, ready for display
 	 */
-	private void packTreeIntoPanel()
+	private void packComponents()
 	{
 		scrollPane = new JScrollPane(objectTree);
+		add(toolbar, BorderLayout.NORTH);
 		add(scrollPane, BorderLayout.CENTER);
 	}
 
@@ -92,10 +161,24 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 			@Override
 			public void valueChanged(TreeSelectionEvent e)
 			{
-				CurrentlySelectedObject.set((AnimationObject)e.getPath().getLastPathComponent());
+				AnimationObject selectedObject = (AnimationObject)e.getPath().getLastPathComponent();
+				CurrentlySelectedObject.set(selectedObject);
+				if (isRemovable(selectedObject))
+				{
+					removeAnimationObjectAction.setEnabled(true);
+				}
+				else
+				{
+					removeAnimationObjectAction.setEnabled(false);
+				}
 			}
 		});
 		objectTree.setActionMap(null); // Remove the default key bindings so our custom ones will work
+	}
+	
+	private boolean isRemovable(AnimationObject selectedObject)
+	{
+		return selectedObject instanceof Animatable && !(selectedObject instanceof Camera);
 	}
 	
 	@Override

@@ -20,11 +20,9 @@ import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
-import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.LAFConstants;
-import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -66,7 +64,7 @@ final class ParameterEditorPanel extends JPanel
 	
 	private void addParameterName()
 	{
-		JLabel label = new JLabel(getDisplayName(parameterToEdit));
+		JLabel label = new JLabel(parameterToEdit.getName());
 		label.setFont(LAFConstants.getSubHeadingFont());
 		label.setAlignmentX(Component.LEFT_ALIGNMENT);
 		add(label);
@@ -130,25 +128,6 @@ final class ParameterEditorPanel extends JPanel
 	private double getParameterCurrentValue()
 	{
 		return parameterToEdit.getCurrentValue(AnimationContext.Factory.createForAnimation(animation)).getValue();
-	}
-	
-	/**
-	 * @return A display name to use for the provided object. Uses the object's name if {@link Nameable}, 
-	 * otherwise uses {@link Object#toString()}.
-	 */
-	// TODO: This method is duplicated in ObjectPropertiesPanel. Need to refactor.
-	private String getDisplayName(AnimationObject object)
-	{
-		if (object == null)
-		{
-			return null;
-		}
-		
-		if (object instanceof Nameable)
-		{
-			return ((Nameable)object).getName();
-		}
-		return object.toString();
 	}
 	
 	private boolean isBoundParameter()

@@ -30,6 +30,8 @@ public class BasicParameterValue extends ChangeableBase implements ParameterValu
 	
 	/** The frame this {@link ParameterValue} is associated with */
 	private int frame;
+
+	private String name;
 	
 	/**
 	 * Constructor. 
@@ -106,6 +108,22 @@ public class BasicParameterValue extends ChangeableBase implements ParameterValu
 		// No smoothing applied to basic parameter values
 	}
 
+	@Override
+	public String getName()
+	{
+		if (name == null)
+		{
+			return getOwner().getName() + "Value" + getFrame();
+		}
+		return name;
+	}
+	
+	@Override
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	
 	/**
 	 * Set the owner of this value. Should only be invoked during de-serialisation.
 	 */

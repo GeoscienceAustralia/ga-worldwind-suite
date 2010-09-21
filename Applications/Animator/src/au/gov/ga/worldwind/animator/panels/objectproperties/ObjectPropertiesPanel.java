@@ -32,26 +32,39 @@ import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
-import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
- * A panel used to display and edit properties of the currently selected animation object
- * 
+ * A panel used to display and edit properties (parameters) of the currently selected animation object
+ * <p/>
+ * Can be attached as a listener to multiple event types within an animation to trigger an update on events like:
+ * <ul>
+ * 	<li>Change of frame
+ * 	<li>Movement of the camera
+ * 	<li>Selection of different animation object
+ * </ul>
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class ObjectPropertiesPanel extends CollapsiblePanelBase implements CurrentlySelectedObject.ChangeListener, AnimationEventListener, ChangeFrameListener, ChangeListener, PropertyChangeListener
+public class ObjectPropertiesPanel extends CollapsiblePanelBase implements CurrentlySelectedObject.ChangeListener, 
+																		   AnimationEventListener, 
+																		   ChangeFrameListener, 
+																		   ChangeListener, 
+																		   PropertyChangeListener
 {
 	private static final long serialVersionUID = 20100917L;
 
+	/** The message to display when no editable parameters are available */
+	private static final JLabel noEditableParameterMessage = new JLabel(getMessage(getObjectPropertiesPanelNoEditableMessageKey()));
+	
 	private JScrollPane scrollPane;
 	
+	/** The panel that holds the parameter editors */
 	private JPanel propertiesPanel;
 	
 	private JLabel panelCaption;
-	private JLabel noEditableParameterMessage = new JLabel(getMessage(getObjectPropertiesPanelNoEditableMessageKey()));
 	
+	// The cache of parameter editors
 	private Map<Parameter, ParameterEditorPanel> editorMap = new HashMap<Parameter, ParameterEditorPanel>();
 	private List<ParameterEditorPanel> visibleEditors = new ArrayList<ParameterEditorPanel>();
 	
@@ -89,14 +102,14 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 			panelCaption.setText(getMessage(getObjectPropertiesPanelNoSelectionMessageKey()));
 			return;
 		}
-		panelCaption.setText(getMessage(getObjectPropertiesPanelSelectionTitleKey(), getDisplayName(currentObject)));
+		panelCaption.setText(getMessage(getObjectPropertiesPanelSelectionTitleKey(), currentObject.getName()));
 		
 		propertiesPanel.removeAll();
 		visibleEditors.clear();
 		int parameterCounter = 0;
 		if (isEditableParameter(currentObject))
 		{
-			addParameterEditor((Parameter)currentObject);
+			addParameterEditorToPanel((Parameter)currentObject);
 			parameterCounter++;
 		}
 		else if (isAnimatableObject(currentObject))
@@ -105,7 +118,7 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 			{
 				if (isEditableParameter(parameter))
 				{
-					addParameterEditor(parameter);
+					addParameterEditorToPanel(parameter);
 					parameterCounter++;
 				}
 			}
@@ -120,16 +133,20 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 		repaint();
 	}
 	
+	/**
+	 * Update the displays of the visible parameter editors.
+	 * <p/>
+	 * Should be called to notify the editors of a change in the animation state
+	 */
 	private void updateParameterEditorsDisplay()
 	{
 		for (ParameterEditorPanel parameterEditor : visibleEditors)
 		{
 			parameterEditor.updateDisplay();
 		}
-		
 	}
 	
-	private void addParameterEditor(Parameter parameterToEdit)
+	private void addParameterEditorToPanel(Parameter parameterToEdit)
 	{
 		ParameterEditorPanel parameterEditor = editorMap.get(parameterToEdit);
 		if (parameterEditor == null)
@@ -160,24 +177,6 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 		return currentObject.getClass().isAnnotationPresent(EditableParameter.class);
 	}
 
-	/**
-	 * @return A display name to use for the provided object. Uses the object's name if {@link Nameable}, 
-	 * otherwise uses {@link Object#toString()}.
-	 */
-	private String getDisplayName(AnimationObject object)
-	{
-		if (object == null)
-		{
-			return null;
-		}
-		
-		if (object instanceof Nameable)
-		{
-			return ((Nameable)object).getName();
-		}
-		return object.toString();
-	}
-	
 	// Event listener methods
 	
 	@Override
