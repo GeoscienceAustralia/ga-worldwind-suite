@@ -11,7 +11,9 @@ public class CommonMessageConstants
 	public static String getTermLevelWidthKey() { return "common.term.level.width"; }
 	public static String getTermLevelHeightKey() { return "common.term.level.height"; }
 	public static String getTermCurtainLengthKey() { return "common.term.curtain.length"; }
-	public static String getTermFullSizeKey() { return "common.term.full.size"; }
+	public static String getTermFullWidthKey() { return "common.term.full.width"; }
+	public static String getTermFullHeightKey() { return "common.term.full.height"; }
+	public static String getTermPathKey() { return "common.term.path"; }
 	
 	public static String getGaMachinenameRegexKey() { return "common.ga.machinename.regex"; }
 	public static String getGaProxyHostKey() { return "common.ga.proxy.host"; }
