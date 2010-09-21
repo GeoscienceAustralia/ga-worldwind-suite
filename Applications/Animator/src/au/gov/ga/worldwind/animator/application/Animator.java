@@ -203,6 +203,9 @@ public class Animator
 	/** A listener that listens for layer addition/removals and updates the world wind model */
 	private AnimationEventListener layerUpdateListener;
 	
+	/** A listener that updates the frame slider when frames have been added or removed programmatically */
+	private AnimationEventListener framesChangedListener;
+	
 	// The layers used in the application
 	private DetailedElevationModel dem;
 	private Layer crosshair;
@@ -291,7 +294,7 @@ public class Animator
 		initialiseAutoKeyListener();
 		initialiseChangeListener();
 		initialiseLayerUpdateListener();
-		
+		initialiseFramesChangedListener();
 	}
 
 	/**
@@ -300,6 +303,7 @@ public class Animator
 	private void updateAnimationListeners()
 	{
 		updateAnimationListener(layerUpdateListener);
+		updateAnimationListener(framesChangedListener);
 		// TODO: Add more listeners here as they are added
 		
 	}
@@ -339,6 +343,35 @@ public class Animator
 		animation.addChangeListener(layerUpdateListener);
 	}
 
+	/**
+	 * 
+	 */
+	private void initialiseFramesChangedListener()
+	{
+		framesChangedListener = new AnimationEventListener()
+		{
+			@Override
+			public void receiveAnimationEvent(AnimationEvent event)
+			{
+				if (isFrameChangeEvent(event))
+				{
+					updateSlider();
+				}
+			}
+
+			private boolean isFrameChangeEvent(AnimationEvent event)
+			{
+				if (event == null)
+				{
+					return false;
+				}
+				AnimationEvent rootCause = event.getRootCause();
+				return (rootCause.isOfType(Type.ADD) || rootCause.isOfType(Type.REMOVE)) && rootCause.getValue() instanceof KeyFrame;
+			}
+		};
+		animation.addChangeListener(framesChangedListener);
+	}
+	
 	/**
 	 * Initialise the change listener that listens for changes to the animation state
 	 */

@@ -617,6 +617,8 @@ public class FrameSlider extends JComponent
 	private void notifyChangeFrameListeners(int index, int oldFrame, int newFrame)
 	{
 		for (ChangeFrameListener changeFrameListener : changeFrameListeners)
+		{
 			changeFrameListener.frameChanged(index, oldFrame, newFrame);
+		}
 	}
 }
