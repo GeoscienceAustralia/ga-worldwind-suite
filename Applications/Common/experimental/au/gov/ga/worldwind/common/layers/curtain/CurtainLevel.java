@@ -5,11 +5,9 @@ import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getM
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
-import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.util.AbsentResourceList;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.TileKey;
-import gov.nasa.worldwind.util.TileUrlBuilder;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.Util;
 
@@ -26,7 +24,7 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 	private final String service;
 	private final String dataset;
 	private final String formatSuffix;
-	private final double texelSize;
+//	private final double texelSize;
 	private final String path;
 	private final CurtainTileUrlBuilder urlBuilder;
 	private long expiryTime;
@@ -74,8 +72,8 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 		this.urlBuilder = (CurtainTileUrlBuilder) this.params.getValue(AVKey.TILE_URL_BUILDER);
 		this.expiryTime = AVListImpl.getLongValue(params, AVKey.EXPIRY_TIME, 0L);
 
-		Angle curtainLength = (Angle) this.params.getValue(AVKeyMore.CURTAIN_LENGTH);
-		this.texelSize = curtainLength.radians / this.levelWidth;
+//		Angle curtainLength = (Angle) this.params.getValue(AVKeyMore.CURTAIN_LENGTH);
+//		this.texelSize = curtainLength.radians / this.levelWidth;
 
 		//work out this level's tile width/height
 		int widthsPerTile = tileWidth / this.levelWidth;
@@ -140,16 +138,16 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 		if (o == null || !(o instanceof Integer) || ((Integer) o) < 0)
 			sb.append(Logging.getMessage("term.tileHeight")).append(" ");
 
-		o = params.getValue(AVKeyMore.CURTAIN_LENGTH);
-		if (o == null || !(o instanceof Angle) || ((Angle) o).radians <= 0)
-			sb.append(getMessage(getTermCurtainLengthKey())).append(" ");
+//		o = params.getValue(AVKeyMore.CURTAIN_LENGTH);
+//		if (o == null || !(o instanceof Angle) || ((Angle) o).radians <= 0)
+//			sb.append(getMessage(getTermCurtainLengthKey())).append(" ");
 
 		o = params.getValue(AVKey.DATA_CACHE_NAME);
 		if (o == null || !(o instanceof String) || ((String) o).length() < 1)
 			sb.append(Logging.getMessage("term.fileStoreFolder")).append(" ");
 
 		o = params.getValue(AVKey.TILE_URL_BUILDER);
-		if (o == null || !(o instanceof TileUrlBuilder))
+		if (o == null || !(o instanceof CurtainTileUrlBuilder))
 			sb.append(Logging.getMessage("term.tileURLBuilder")).append(" ");
 
 		o = params.getValue(AVKey.EXPIRY_TIME);
@@ -223,10 +221,10 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 		return this.cacheName;
 	}
 
-	public final double getTexelSize()
-	{
-		return this.texelSize;
-	}
+//	public final double getTexelSize()
+//	{
+//		return this.texelSize;
+//	}
 
 	public final boolean isEmpty()
 	{
@@ -454,8 +452,8 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 		if (service != null ? !service.equals(level.service) : level.service != null)
 			return false;
 		//noinspection RedundantIfStatement
-		if (texelSize != level.texelSize)
-			return false;
+//		if (texelSize != level.texelSize)
+//			return false;
 
 		return true;
 	}

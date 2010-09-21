@@ -65,14 +65,14 @@ public class Path
 		return LatLon.interpolateGreatCircle(p, lower.getValue(), higher.getValue());
 	}
 
-	public synchronized Vec4 getCenterPoint(DrawContext dc, double percent, double top,
+	public synchronized Vec4 getSegmentCenterPoint(DrawContext dc, Segment segment, double top,
 			double bottom)
 	{
 		top *= dc.getVerticalExaggeration();
 		bottom *= dc.getVerticalExaggeration();
 		double height = top - bottom;
-		double e = top - 0.5 * height;
-		LatLon ll = getPercentLatLon(percent);
+		double e = top - segment.getVerticalCenter() * height;
+		LatLon ll = getPercentLatLon(segment.getHorizontalCenter());
 		return dc.getGlobe().computePointFromPosition(ll, e);
 	}
 

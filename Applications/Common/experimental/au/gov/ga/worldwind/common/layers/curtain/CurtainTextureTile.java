@@ -121,6 +121,10 @@ public class CurtainTextureTile extends CurtainTile
 
 	public boolean isTextureInMemory(TextureCache tc)
 	{
+		//XXX TEMP TESTING
+		if(true)
+			return true;
+		
 		if (tc == null)
 		{
 			String message = Logging.getMessage("nullValue.TextureCacheIsNull");

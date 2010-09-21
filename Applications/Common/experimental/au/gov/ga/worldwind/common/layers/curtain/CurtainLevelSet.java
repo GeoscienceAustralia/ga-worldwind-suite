@@ -1,11 +1,10 @@
 package au.gov.ga.worldwind.common.layers.curtain;
 
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.*;
 import gov.nasa.worldwind.WWObjectImpl;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.TileKey;
 
@@ -19,7 +18,6 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 public class CurtainLevelSet extends WWObjectImpl
 {
-	private final Angle curtainLength;
 	private final List<CurtainLevel> levels = new ArrayList<CurtainLevel>();
 
 	public CurtainLevelSet(AVList params)
@@ -43,13 +41,13 @@ public class CurtainLevelSet extends WWObjectImpl
 		else if (o != null)
 			inactiveLevels = ((String) o).split(",");
 
-		o = params.getValue(AVKeyMore.CURTAIN_LENGTH);
-		if (o == null || !(o instanceof Angle) || ((Angle) o).radians <= 0)
-			sb.append(getMessage(getTermCurtainLengthKey())).append(" ");
+		o = params.getValue(AVKeyMore.FULL_WIDTH);
+		if (o == null || !(o instanceof Integer))
+			sb.append(getMessage(getTermFullWidthKey())).append(" ");
 
-		o = params.getValue(AVKeyMore.FULL_SIZE);
-		if (o == null || !(o instanceof Dimension))
-			sb.append(getMessage(getTermFullSizeKey())).append(" ");
+		o = params.getValue(AVKeyMore.FULL_HEIGHT);
+		if (o == null || !(o instanceof Integer))
+			sb.append(getMessage(getTermFullHeightKey())).append(" ");
 
 		if (sb.length() > 0)
 		{
@@ -60,8 +58,8 @@ public class CurtainLevelSet extends WWObjectImpl
 			throw new IllegalArgumentException(message);
 		}
 
-		this.curtainLength = (Angle) params.getValue(AVKeyMore.CURTAIN_LENGTH);
-		Dimension fullSize = (Dimension) params.getValue(AVKeyMore.FULL_SIZE);
+		int fullWidth = (Integer) params.getValue(AVKeyMore.FULL_WIDTH);
+		int fullHeight = (Integer) params.getValue(AVKeyMore.FULL_HEIGHT);
 
 		params = params.copy(); // copy so as not to modify the user's params
 
@@ -96,6 +94,7 @@ public class CurtainLevelSet extends WWObjectImpl
 			});
 		}
 
+		Dimension fullSize = new Dimension(fullWidth, fullHeight);
 		Dimension[] levelSizes = new Dimension[numLevels];
 		for (int i = numLevels - 1; i >= 0; i--)
 		{
@@ -134,8 +133,6 @@ public class CurtainLevelSet extends WWObjectImpl
 			throw new IllegalArgumentException(msg);
 		}
 
-		this.curtainLength = source.curtainLength;
-
 		for (CurtainLevel level : source.levels)
 		{
 			this.levels.add(level); // Levels are final, so it's safe to copy references.
@@ -170,11 +167,6 @@ public class CurtainLevelSet extends WWObjectImpl
 		}
 
 		return null;
-	}
-
-	public final Angle getCurtainLength()
-	{
-		return curtainLength;
 	}
 
 	public final List<CurtainLevel> getLevels()

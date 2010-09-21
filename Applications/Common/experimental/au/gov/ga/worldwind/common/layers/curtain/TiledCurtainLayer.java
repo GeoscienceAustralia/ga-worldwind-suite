@@ -2,10 +2,12 @@ package au.gov.ga.worldwind.common.layers.curtain;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
@@ -13,23 +15,20 @@ import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.OGLTextRenderer;
 import gov.nasa.worldwind.util.PerformanceStatistic;
-import gov.nasa.worldwind.util.WWIO;
+import gov.nasa.worldwind.util.WWXML;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
+import javax.xml.xpath.XPath;
+
+import org.w3c.dom.Element;
+
+import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 import com.sun.opengl.util.j2d.TextRenderer;
 
@@ -37,9 +36,10 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 {
 	//TODO initialise these!
 	private Path path;
-	private double top = 100;
-	private double bottom = -100000;
-	private boolean followTerrain = true;
+	private double curtainTop = 0;
+	private double curtainBottom = -10000;
+	private boolean followTerrain = false; //TODO how do we do this?
+	private int subsegments = 1;
 
 	// Infrastructure
 	private static final LevelComparer levelComparer = new LevelComparer();
@@ -56,10 +56,10 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 	private String textureFormat;
 
 	// Diagnostic flags
-	private boolean showImageTileOutlines = false;
-	private boolean drawTileBoundaries = false;
-	private boolean drawTileIDs = false;
-	private boolean drawBoundingVolumes = false;
+	private boolean showImageTileOutlines = true;
+	private boolean drawTileBoundaries = true;
+	private boolean drawTileIDs = true;
+	private boolean drawBoundingVolumes = true;
 
 	// Stuff computed each frame
 	private List<CurtainTextureTile> currentTiles = new ArrayList<CurtainTextureTile>();
@@ -111,6 +111,56 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 	{
 		super.setName(name);
 		this.tileCountName = this.getName() + " Tiles";
+	}
+
+	public Path getPath()
+	{
+		return path;
+	}
+
+	public void setPath(Path path)
+	{
+		this.path = path;
+	}
+
+	public double getCurtainTop()
+	{
+		return curtainTop;
+	}
+
+	public void setCurtainTop(double curtainTop)
+	{
+		this.curtainTop = curtainTop;
+	}
+
+	public double getCurtainBottom()
+	{
+		return curtainBottom;
+	}
+
+	public void setCurtainBottom(double curtainBottom)
+	{
+		this.curtainBottom = curtainBottom;
+	}
+
+	public boolean isFollowTerrain()
+	{
+		return followTerrain;
+	}
+
+	public void setFollowTerrain(boolean followTerrain)
+	{
+		this.followTerrain = followTerrain;
+	}
+
+	public int getSubsegments()
+	{
+		return subsegments;
+	}
+
+	public void setSubsegments(int subsegments)
+	{
+		this.subsegments = subsegments;
 	}
 
 	public boolean isForceLevelZeroLoads()
@@ -493,13 +543,13 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 	private boolean isTileVisible(DrawContext dc, CurtainTextureTile tile)
 	{
 		Segment segment = tile.getSegment();
-		LatLon start = path.getPercentLatLon(segment.getStart());
-		LatLon end = path.getPercentLatLon(segment.getEnd());
-		Extent extent = path.getSegmentExtent(dc, segment, top, bottom);
+		//LatLon start = path.getPercentLatLon(segment.getStart());
+		//LatLon end = path.getPercentLatLon(segment.getEnd());
+		Extent extent = path.getSegmentExtent(dc, segment, curtainTop, curtainBottom);
 
 		return extent.intersects(dc.getView().getFrustumInModelCoordinates())
-				&& (dc.getVisibleSector() == null || dc.getVisibleSector().intersectsSegment(start,
-						end));
+		/*&& (dc.getVisibleSector() == null || dc.getVisibleSector().intersectsSegment(start,
+				end))*/;
 	}
 
 	private boolean meetsRenderCriteria(DrawContext dc, CurtainTextureTile tile)
@@ -510,8 +560,8 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 
 	private boolean needToSplit(DrawContext dc, Segment segment)
 	{
-		Vec4[] points = path.getPointsInSegment(dc, segment, top, bottom);
-		Vec4 centerPoint = path.getCenterPoint(dc, segment.getCenter(), top, bottom);
+		Vec4[] points = path.getPointsInSegment(dc, segment, curtainTop, curtainBottom);
+		Vec4 centerPoint = path.getSegmentCenterPoint(dc, segment, curtainTop, curtainBottom);
 
 		View view = dc.getView();
 		double minDistance = view.getEyePoint().distanceTo3(centerPoint);
@@ -564,7 +614,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		if (dc.getSurfaceGeometry() == null || dc.getSurfaceGeometry().size() < 1)
 			return;
 
-		dc.getGeographicSurfaceTileRenderer().setShowImageTileOutlines(this.showImageTileOutlines);
+		//dc.getGeographicSurfaceTileRenderer().setShowImageTileOutlines(this.showImageTileOutlines);
 
 		draw(dc);
 	}
@@ -682,9 +732,12 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 			throw new IllegalStateException(message);
 		}
 
-		return dc.getVisibleSector() == null
+		Extent extent = path.getSegmentExtent(dc, Segment.FULL, curtainTop, curtainBottom);
+		return extent.intersects(dc.getView().getFrustumInModelCoordinates());
+
+		/*return dc.getVisibleSector() == null
 				|| dc.getVisibleSector().intersectsSegment(path.getPercentLatLon(0d),
-						path.getPercentLatLon(1d));
+						path.getPercentLatLon(1d));*/
 	}
 
 	private Vec4 computeReferencePoint(DrawContext dc)
@@ -748,7 +801,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 			if (tile.getFallbackTile() != null)
 				tileLabel += "/" + tile.getFallbackTile().getLabel();
 
-			Vec4 pt = path.getCenterPoint(dc, tile.getSegment().getCenter(), top, bottom);
+			Vec4 pt = path.getSegmentCenterPoint(dc, tile.getSegment(), curtainTop, curtainBottom);
 			pt = dc.getView().project(pt);
 			textRenderer.draw(tileLabel, (int) pt.x, (int) pt.y);
 		}
@@ -764,17 +817,17 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 
 		for (CurtainTextureTile tile : tiles)
 		{
-			Extent extent = path.getSegmentExtent(dc, tile.getSegment(), top, bottom);
+			Extent extent = path.getSegmentExtent(dc, tile.getSegment(), curtainTop, curtainBottom);
 			if (extent instanceof Renderable)
 				((Renderable) extent).render(dc);
-		}
 
-		Segment segment = new Segment(0, 1, 0, 1);
-		Extent extent = path.getSegmentExtent(dc, segment, top, bottom);
-		if (extent instanceof Renderable)
-		{
-			dc.getGL().glColor3d(1, 1, 0);
-			((Renderable) extent).render(dc);
+			/*dc.getGL().glBegin(GL.GL_POINTS);
+			Vec4[] points = path.getPointsInSegment(dc, tile.getSegment(), top, bottom);
+			for (Vec4 point : points)
+			{
+				dc.getGL().glVertex3d(point.x, point.y, point.z);
+			}
+			dc.getGL().glEnd();*/
 		}
 
 		dc.getGL().glColor4fv(previousColor, 0);
@@ -784,402 +837,142 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 	//********************  Configuration  *************************//
 	//**************************************************************//
 
-	//	/**
-	//	 * Creates a configuration document for a TiledImageLayer described by the
-	//	 * specified params. The returned document may be used as a construction
-	//	 * parameter to {@link gov.nasa.worldwind.layers.BasicTiledImageLayer}.
-	//	 * 
-	//	 * @param params
-	//	 *            parameters describing the TiledImageLayer.
-	//	 * 
-	//	 * @return a configuration document for the TiledImageLayer.
-	//	 */
-	//	public static Document createTiledImageLayerConfigDocument(AVList params)
-	//	{
-	//		Document doc = WWXML.createDocumentBuilder(true).newDocument();
-	//
-	//		Element root = WWXML.setDocumentElement(doc, "Layer");
-	//		WWXML.setIntegerAttribute(root, "version", 1);
-	//		WWXML.setTextAttribute(root, "layerType", "TiledImageLayer");
-	//
-	//		createTiledImageLayerConfigElements(params, root);
-	//
-	//		return doc;
-	//	}
-	//
-	//	/**
-	//	 * Appends TiledImageLayer configuration parameters as elements to the
-	//	 * specified context. This appends elements for the following parameters:
-	//	 * <table>
-	//	 * <tr>
-	//	 * <th>Parameter</th>
-	//	 * <th>Element Path</th>
-	//	 * <th>Type</th>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#SERVICE_NAME}</td>
-	//	 * <td>Service/@serviceName</td>
-	//	 * <td>String</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#IMAGE_FORMAT}</td>
-	//	 * <td>ImageFormat</td>
-	//	 * <td>String</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#AVAILABLE_IMAGE_FORMATS}</td>
-	//	 * <td>AvailableImageFormats/ImageFormat</td>
-	//	 * <td>String array</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#FORCE_LEVEL_ZERO_LOADS}</td>
-	//	 * <td>ForceLevelZeroLoads</td>
-	//	 * <td>Boolean</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#RETAIN_LEVEL_ZERO_TILES}</td>
-	//	 * <td>RetainLevelZeroTiles</td>
-	//	 * <td>Boolean</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#TEXTURE_FORMAT}</td>
-	//	 * <td>TextureFormat</td>
-	//	 * <td>String</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#USE_MIP_MAPS}</td>
-	//	 * <td>UseMipMaps</td>
-	//	 * <td>Boolean</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#USE_TRANSPARENT_TEXTURES}</td>
-	//	 * <td>UseTransparentTextures</td>
-	//	 * <td>Boolean</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#URL_CONNECT_TIMEOUT}</td>
-	//	 * <td>RetrievalTimeouts/ConnectTimeout/Time</td>
-	//	 * <td>Integer milliseconds</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#URL_READ_TIMEOUT}</td>
-	//	 * <td>RetrievalTimeouts/ReadTimeout/Time</td>
-	//	 * <td>Integer milliseconds</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT}</td>
-	//	 * <td>RetrievalTimeouts/StaleRequestLimit/Time</td>
-	//	 * <td>Integer milliseconds</td>
-	//	 * </tr>
-	//	 * </table>
-	//	 * This also writes common layer and LevelSet configuration parameters by
-	//	 * invoking
-	//	 * {@link gov.nasa.worldwind.layers.AbstractLayer#createLayerConfigElements(gov.nasa.worldwind.avlist.AVList, org.w3c.dom.Element)}
-	//	 * and
-	//	 * {@link DataConfigurationUtils#createLevelSetConfigElements(gov.nasa.worldwind.avlist.AVList, org.w3c.dom.Element)}
-	//	 * .
-	//	 * 
-	//	 * @param params
-	//	 *            the key-value pairs which define the TiledImageLayer
-	//	 *            configuration parameters.
-	//	 * @param context
-	//	 *            the XML document root on which to append TiledImageLayer
-	//	 *            configuration elements.
-	//	 * 
-	//	 * @return a reference to context.
-	//	 * 
-	//	 * @throws IllegalArgumentException
-	//	 *             if either the parameters or the context are null.
-	//	 */
-	//	public static Element createTiledImageLayerConfigElements(AVList params, Element context)
-	//	{
-	//		if (params == null)
-	//		{
-	//			String message = Logging.getMessage("nullValue.ParametersIsNull");
-	//			Logging.logger().severe(message);
-	//			throw new IllegalArgumentException(message);
-	//		}
-	//
-	//		if (context == null)
-	//		{
-	//			String message = Logging.getMessage("nullValue.ContextIsNull");
-	//			Logging.logger().severe(message);
-	//			throw new IllegalArgumentException(message);
-	//		}
-	//
-	//		XPath xpath = WWXML.makeXPath();
-	//
-	//		// Common layer properties.
-	//		AbstractLayer.createLayerConfigElements(params, context);
-	//
-	//		// LevelSet properties.
-	//		DataConfigurationUtils.createLevelSetConfigElements(params, context);
-	//
-	//		// Service properties.
-	//		// Try to get the SERVICE_NAME property, but default to "WWTileService".
-	//		String s = AVListImpl.getStringValue(params, AVKey.SERVICE_NAME, "WWTileService");
-	//		if (s != null && s.length() > 0)
-	//		{
-	//			// The service element may already exist, in which case we want to append to it.
-	//			Element el = WWXML.getElement(context, "Service", xpath);
-	//			if (el == null)
-	//				el = WWXML.appendElementPath(context, "Service");
-	//			WWXML.setTextAttribute(el, "serviceName", s);
-	//		}
-	//
-	//		WWXML.checkAndAppendBooleanElement(params, AVKey.RETRIEVE_PROPERTIES_FROM_SERVICE, context,
-	//				"RetrievePropertiesFromService");
-	//
-	//		// Image format properties.
-	//		WWXML.checkAndAppendTextElement(params, AVKey.IMAGE_FORMAT, context, "ImageFormat");
-	//		WWXML.checkAndAppendTextElement(params, AVKey.TEXTURE_FORMAT, context, "TextureFormat");
-	//
-	//		Object o = params.getValue(AVKey.AVAILABLE_IMAGE_FORMATS);
-	//		if (o != null && o instanceof String[])
-	//		{
-	//			String[] strings = (String[]) o;
-	//			if (strings.length > 0)
-	//			{
-	//				// The available image formats element may already exists, in which case we want to append to it, rather
-	//				// than create entirely separate paths.
-	//				Element el = WWXML.getElement(context, "AvailableImageFormats", xpath);
-	//				if (el == null)
-	//					el = WWXML.appendElementPath(context, "AvailableImageFormats");
-	//				WWXML.appendTextArray(el, "ImageFormat", strings);
-	//			}
-	//		}
-	//
-	//		// Optional behavior properties.
-	//		WWXML.checkAndAppendBooleanElement(params, AVKey.FORCE_LEVEL_ZERO_LOADS, context,
-	//				"ForceLevelZeroLoads");
-	//		WWXML.checkAndAppendBooleanElement(params, AVKey.RETAIN_LEVEL_ZERO_TILES, context,
-	//				"RetainLevelZeroTiles");
-	//		WWXML.checkAndAppendBooleanElement(params, AVKey.USE_MIP_MAPS, context, "UseMipMaps");
-	//		WWXML.checkAndAppendBooleanElement(params, AVKey.USE_TRANSPARENT_TEXTURES, context,
-	//				"UseTransparentTextures");
-	//		WWXML.checkAndAppendDoubleElement(params, AVKey.SPLIT_SCALE, context, "SplitScale");
-	//
-	//		// Retrieval properties.
-	//		if (params.getValue(AVKey.URL_CONNECT_TIMEOUT) != null
-	//				|| params.getValue(AVKey.URL_READ_TIMEOUT) != null
-	//				|| params.getValue(AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT) != null)
-	//		{
-	//			Element el = WWXML.getElement(context, "RetrievalTimeouts", xpath);
-	//			if (el == null)
-	//				el = WWXML.appendElementPath(context, "RetrievalTimeouts");
-	//
-	//			WWXML.checkAndAppendTimeElement(params, AVKey.URL_CONNECT_TIMEOUT, el,
-	//					"ConnectTimeout/Time");
-	//			WWXML.checkAndAppendTimeElement(params, AVKey.URL_READ_TIMEOUT, el, "ReadTimeout/Time");
-	//			WWXML.checkAndAppendTimeElement(params, AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT, el,
-	//					"StaleRequestLimit/Time");
-	//		}
-	//
-	//		return context;
-	//	}
-	//
-	//	/**
-	//	 * Parses TiledImageLayer configuration parameters from the specified DOM
-	//	 * document. This writes output as key-value pairs to params. If a parameter
-	//	 * from the XML document already exists in params, that parameter is
-	//	 * ignored. Supported key and parameter names are:
-	//	 * <table>
-	//	 * <tr>
-	//	 * <th>Parameter</th>
-	//	 * <th>Element Path</th>
-	//	 * <th>Type</th>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#SERVICE_NAME}</td>
-	//	 * <td>Service/@serviceName</td>
-	//	 * <td>String</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#IMAGE_FORMAT}</td>
-	//	 * <td>ImageFormat</td>
-	//	 * <td>String</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#AVAILABLE_IMAGE_FORMATS}</td>
-	//	 * <td>AvailableImageFormats/ImageFormat</td>
-	//	 * <td>String array</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#FORCE_LEVEL_ZERO_LOADS}</td>
-	//	 * <td>ForceLevelZeroLoads</td>
-	//	 * <td>Boolean</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#RETAIN_LEVEL_ZERO_TILES}</td>
-	//	 * <td>RetainLevelZeroTiles</td>
-	//	 * <td>Boolean</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#TEXTURE_FORMAT}</td>
-	//	 * <td>TextureFormat</td>
-	//	 * <td>Boolean</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#USE_MIP_MAPS}</td>
-	//	 * <td>UseMipMaps</td>
-	//	 * <td>Boolean</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#USE_TRANSPARENT_TEXTURES}</td>
-	//	 * <td>UseTransparentTextures</td>
-	//	 * <td>Boolean</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#URL_CONNECT_TIMEOUT}</td>
-	//	 * <td>RetrievalTimeouts/ConnectTimeout/Time</td>
-	//	 * <td>Integer milliseconds</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#URL_READ_TIMEOUT}</td>
-	//	 * <td>RetrievalTimeouts/ReadTimeout/Time</td>
-	//	 * <td>Integer milliseconds</td>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT}</td>
-	//	 * <td>RetrievalTimeouts/StaleRequestLimit/Time</td>
-	//	 * <td>Integer milliseconds</td>
-	//	 * </tr>
-	//	 * </table>
-	//	 * This also parses common layer and LevelSet configuration parameters by
-	//	 * invoking
-	//	 * {@link gov.nasa.worldwind.layers.AbstractLayer#getLayerConfigParams(org.w3c.dom.Element, gov.nasa.worldwind.avlist.AVList)}
-	//	 * and
-	//	 * {@link gov.nasa.worldwind.util.DataConfigurationUtils#getLevelSetConfigParams(org.w3c.dom.Element, gov.nasa.worldwind.avlist.AVList)}
-	//	 * .
-	//	 * 
-	//	 * @param domElement
-	//	 *            the XML document root to parse for TiledImageLayer
-	//	 *            configuration parameters.
-	//	 * @param params
-	//	 *            the output key-value pairs which recieve the TiledImageLayer
-	//	 *            configuration parameters. A null reference is permitted.
-	//	 * 
-	//	 * @return a reference to params, or a new AVList if params is null.
-	//	 * 
-	//	 * @throws IllegalArgumentException
-	//	 *             if the document is null.
-	//	 */
-	//	public static AVList getTiledImageLayerConfigParams(Element domElement, AVList params)
-	//	{
-	//		if (domElement == null)
-	//		{
-	//			String message = Logging.getMessage("nullValue.DocumentIsNull");
-	//			Logging.logger().severe(message);
-	//			throw new IllegalArgumentException(message);
-	//		}
-	//
-	//		if (params == null)
-	//			params = new AVListImpl();
-	//
-	//		XPath xpath = WWXML.makeXPath();
-	//
-	//		// Common layer properties.
-	//		AbstractLayer.getLayerConfigParams(domElement, params);
-	//
-	//		// LevelSet properties.
-	//		DataConfigurationUtils.getLevelSetConfigParams(domElement, params);
-	//
-	//		// Service properties.
-	//		WWXML.checkAndSetStringParam(domElement, params, AVKey.SERVICE_NAME,
-	//				"Service/@serviceName", xpath);
-	//		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.RETRIEVE_PROPERTIES_FROM_SERVICE,
-	//				"RetrievePropertiesFromService", xpath);
-	//
-	//		// Image format properties.
-	//		WWXML.checkAndSetStringParam(domElement, params, AVKey.IMAGE_FORMAT, "ImageFormat", xpath);
-	//		WWXML.checkAndSetStringParam(domElement, params, AVKey.TEXTURE_FORMAT, "TextureFormat",
-	//				xpath);
-	//		WWXML.checkAndSetUniqueStringsParam(domElement, params, AVKey.AVAILABLE_IMAGE_FORMATS,
-	//				"AvailableImageFormats/ImageFormat", xpath);
-	//
-	//		// Optional behavior properties.
-	//		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.FORCE_LEVEL_ZERO_LOADS,
-	//				"ForceLevelZeroLoads", xpath);
-	//		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.RETAIN_LEVEL_ZERO_TILES,
-	//				"RetainLevelZeroTiles", xpath);
-	//		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.USE_MIP_MAPS, "UseMipMaps", xpath);
-	//		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.USE_TRANSPARENT_TEXTURES,
-	//				"UseTransparentTextures", xpath);
-	//		WWXML.checkAndSetDoubleParam(domElement, params, AVKey.SPLIT_SCALE, "SplitScale", xpath);
-	//		WWXML.checkAndSetColorArrayParam(domElement, params, AVKey.TRANSPARENCY_COLORS,
-	//				"TransparencyColors/Color", xpath);
-	//
-	//		// Retrieval properties. Convert the Long time values to Integers, because BasicTiledImageLayer is expecting
-	//		// Integer values.
-	//		WWXML.checkAndSetTimeParamAsInteger(domElement, params, AVKey.URL_CONNECT_TIMEOUT,
-	//				"RetrievalTimeouts/ConnectTimeout/Time", xpath);
-	//		WWXML.checkAndSetTimeParamAsInteger(domElement, params, AVKey.URL_READ_TIMEOUT,
-	//				"RetrievalTimeouts/ReadTimeout/Time", xpath);
-	//		WWXML.checkAndSetTimeParamAsInteger(domElement, params,
-	//				AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT,
-	//				"RetrievalTimeouts/StaleRequestLimit/Time", xpath);
-	//
-	//		// Parse the legacy configuration parameters. This enables TiledImageLayer to recognize elements from previous
-	//		// versions of configuration documents.
-	//		getLegacyTiledImageLayerConfigParams(domElement, params);
-	//
-	//		return params;
-	//	}
-	//
-	//	/**
-	//	 * Parses TiledImageLayer configuration parameters from previous versions of
-	//	 * configuration documents. This writes output as key-value pairs to params.
-	//	 * If a parameter from the XML document already exists in params, that
-	//	 * parameter is ignored. Supported key and parameter names are:
-	//	 * <table>
-	//	 * <tr>
-	//	 * <th>Parameter</th>
-	//	 * <th>Element Path</th>
-	//	 * <th>Type</th>
-	//	 * </tr>
-	//	 * <tr>
-	//	 * <td>{@link AVKey#TEXTURE_FORMAT}</td>
-	//	 * <td>CompressTextures</td>
-	//	 * <td>"image/dds" if CompressTextures is "true"; null otherwise</td>
-	//	 * </tr>
-	//	 * </table>
-	//	 * 
-	//	 * @param domElement
-	//	 *            the XML document root to parse for legacy TiledImageLayer
-	//	 *            configuration parameters.
-	//	 * @param params
-	//	 *            the output key-value pairs which recieve the TiledImageLayer
-	//	 *            configuration parameters. A null reference is permitted.
-	//	 * 
-	//	 * @return a reference to params, or a new AVList if params is null.
-	//	 * 
-	//	 * @throws IllegalArgumentException
-	//	 *             if the document is null.
-	//	 */
-	//	protected static AVList getLegacyTiledImageLayerConfigParams(Element domElement, AVList params)
-	//	{
-	//		if (domElement == null)
-	//		{
-	//			String message = Logging.getMessage("nullValue.DocumentIsNull");
-	//			Logging.logger().severe(message);
-	//			throw new IllegalArgumentException(message);
-	//		}
-	//
-	//		if (params == null)
-	//			params = new AVListImpl();
-	//
-	//		XPath xpath = WWXML.makeXPath();
-	//
-	//		Object o = params.getValue(AVKey.TEXTURE_FORMAT);
-	//		if (o == null)
-	//		{
-	//			Boolean b = WWXML.getBoolean(domElement, "CompressTextures", xpath);
-	//			if (b != null && b)
-	//				params.setValue(AVKey.TEXTURE_FORMAT, "image/dds");
-	//		}
-	//
-	//		return params;
-	//	}
+	public static AVList getTiledCurtainLayerConfigParams(Element domElement, AVList params)
+	{
+		if (domElement == null)
+		{
+			String message = Logging.getMessage("nullValue.DocumentIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (params == null)
+			params = new AVListImpl();
+
+		XPath xpath = WWXML.makeXPath();
+
+		// Common layer properties.
+		AbstractLayer.getLayerConfigParams(domElement, params);
+
+		// LevelSet properties.
+		CurtainDataConfigurationUtils.getLevelSetConfigParams(domElement, params);
+
+		// Service properties.
+		WWXML.checkAndSetStringParam(domElement, params, AVKey.SERVICE_NAME,
+				"Service/@serviceName", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.RETRIEVE_PROPERTIES_FROM_SERVICE,
+				"RetrievePropertiesFromService", xpath);
+
+		// Image format properties.
+		WWXML.checkAndSetStringParam(domElement, params, AVKey.IMAGE_FORMAT, "ImageFormat", xpath);
+		WWXML.checkAndSetStringParam(domElement, params, AVKey.TEXTURE_FORMAT, "TextureFormat",
+				xpath);
+		WWXML.checkAndSetUniqueStringsParam(domElement, params, AVKey.AVAILABLE_IMAGE_FORMATS,
+				"AvailableImageFormats/ImageFormat", xpath);
+
+		// Optional behavior properties.
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.FORCE_LEVEL_ZERO_LOADS,
+				"ForceLevelZeroLoads", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.RETAIN_LEVEL_ZERO_TILES,
+				"RetainLevelZeroTiles", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.USE_MIP_MAPS, "UseMipMaps", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.USE_TRANSPARENT_TEXTURES,
+				"UseTransparentTextures", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKey.SPLIT_SCALE, "SplitScale", xpath);
+		WWXML.checkAndSetColorArrayParam(domElement, params, AVKey.TRANSPARENCY_COLORS,
+				"TransparencyColors/Color", xpath);
+
+		// Retrieval properties. Convert the Long time values to Integers, because BasicTiledImageLayer is expecting
+		// Integer values.
+		WWXML.checkAndSetTimeParamAsInteger(domElement, params, AVKey.URL_CONNECT_TIMEOUT,
+				"RetrievalTimeouts/ConnectTimeout/Time", xpath);
+		WWXML.checkAndSetTimeParamAsInteger(domElement, params, AVKey.URL_READ_TIMEOUT,
+				"RetrievalTimeouts/ReadTimeout/Time", xpath);
+		WWXML.checkAndSetTimeParamAsInteger(domElement, params,
+				AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT,
+				"RetrievalTimeouts/StaleRequestLimit/Time", xpath);
+
+		// Curtain specific properties.
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.CURTAIN_TOP, "CurtainTop", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.CURTAIN_BOTTOM, "CurtainBottom",
+				xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.FOLLOW_TERRAIN,
+				"FollowTerrain", xpath);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SUBSEGMENTS, "Subsegments",
+				xpath);
+
+		// Curtain path
+		List<LatLon> positions = new ArrayList<LatLon>();
+		Element[] latlons = WWXML.getElements(domElement, "Path/LatLon", xpath);
+		for (Element latlon : latlons)
+		{
+			LatLon ll = WWXML.getLatLon(latlon, null, xpath);
+			positions.add(ll);
+		}
+		Path path = new Path(positions);
+		params.setValue(AVKeyMore.PATH, path);
+
+		// Parse the legacy configuration parameters. This enables TiledImageLayer to recognize elements from previous
+		// versions of configuration documents.
+		getLegacyTiledImageLayerConfigParams(domElement, params);
+
+		return params;
+	}
+
+	/**
+	 * Parses TiledImageLayer configuration parameters from previous versions of
+	 * configuration documents. This writes output as key-value pairs to params.
+	 * If a parameter from the XML document already exists in params, that
+	 * parameter is ignored. Supported key and parameter names are:
+	 * <table>
+	 * <tr>
+	 * <th>Parameter</th>
+	 * <th>Element Path</th>
+	 * <th>Type</th>
+	 * </tr>
+	 * <tr>
+	 * <td>{@link AVKey#TEXTURE_FORMAT}</td>
+	 * <td>CompressTextures</td>
+	 * <td>"image/dds" if CompressTextures is "true"; null otherwise</td>
+	 * </tr>
+	 * </table>
+	 * 
+	 * @param domElement
+	 *            the XML document root to parse for legacy TiledImageLayer
+	 *            configuration parameters.
+	 * @param params
+	 *            the output key-value pairs which recieve the TiledImageLayer
+	 *            configuration parameters. A null reference is permitted.
+	 * 
+	 * @return a reference to params, or a new AVList if params is null.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the document is null.
+	 */
+	protected static AVList getLegacyTiledImageLayerConfigParams(Element domElement, AVList params)
+	{
+		if (domElement == null)
+		{
+			String message = Logging.getMessage("nullValue.DocumentIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (params == null)
+			params = new AVListImpl();
+
+		XPath xpath = WWXML.makeXPath();
+
+		Object o = params.getValue(AVKey.TEXTURE_FORMAT);
+		if (o == null)
+		{
+			Boolean b = WWXML.getBoolean(domElement, "CompressTextures", xpath);
+			if (b != null && b)
+				params.setValue(AVKey.TEXTURE_FORMAT, "image/dds");
+		}
+
+		return params;
+	}
 
 	// ============== Image Composition ======================= //
 	// ============== Image Composition ======================= //
@@ -1206,102 +999,5 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 
 		if (formats != null)
 			this.supportedImageFormats.addAll(Arrays.asList(formats));
-	}
-
-	protected BufferedImage requestImage(CurtainTextureTile tile, String mimeType)
-			throws URISyntaxException, InterruptedIOException, MalformedURLException
-	{
-		String pathBase = tile.getPathBase();
-		String suffix = WWIO.makeSuffixForMimeType(mimeType);
-		String path = pathBase + suffix;
-		File f = new File(path);
-		URL url;
-		if (f.isAbsolute() && f.exists())
-			url = f.toURI().toURL();
-		else
-			url = this.getDataFileStore().findFile(path, false);
-
-		if (url == null) // image is not local
-			return null;
-
-		if (WWIO.isFileOutOfDate(url, tile.getLevel().getExpiryTime()))
-		{
-			// The file has expired. Delete it.
-			this.getDataFileStore().removeFile(url);
-			String message = Logging.getMessage("generic.DataFileExpired", url);
-			Logging.logger().fine(message);
-		}
-		else
-		{
-			try
-			{
-				File imageFile = new File(url.toURI());
-				BufferedImage image = ImageIO.read(imageFile);
-				if (image == null)
-				{
-					String message = Logging.getMessage("generic.ImageReadFailed", imageFile);
-					throw new RuntimeException(message);
-				}
-
-				this.levels.unmarkResourceAbsent(tile);
-				return image;
-			}
-			catch (InterruptedIOException e)
-			{
-				throw e;
-			}
-			catch (IOException e)
-			{
-				// Assume that something's wrong with the file and delete it.
-				this.getDataFileStore().removeFile(url);
-				this.levels.markResourceAbsent(tile);
-				String message = Logging.getMessage("generic.DeletedCorruptDataFile", url);
-				Logging.logger().info(message);
-			}
-		}
-
-		return null;
-	}
-
-	public int computeLevelForResolution(Sector sector, double resolution)
-	{
-		if (sector == null)
-		{
-			String message = Logging.getMessage("nullValue.SectorIsNull");
-			Logging.logger().severe(message);
-			throw new IllegalStateException(message);
-		}
-
-		// Find the first level exceeding the desired resolution
-		double texelSize;
-		CurtainLevel targetLevel = this.levels.getLastLevel();
-		for (int i = 0; i < this.getLevels().getLastLevel().getLevelNumber(); i++)
-		{
-			if (this.levels.isLevelEmpty(i))
-				continue;
-
-			texelSize = this.levels.getLevel(i).getTexelSize();
-			if (texelSize > resolution)
-				continue;
-
-			targetLevel = this.levels.getLevel(i);
-			break;
-		}
-
-		// Choose the level closest to the resolution desired
-		if (targetLevel.getLevelNumber() != 0
-				&& !this.levels.isLevelEmpty(targetLevel.getLevelNumber() - 1))
-		{
-			CurtainLevel nextLowerLevel = this.levels.getLevel(targetLevel.getLevelNumber() - 1);
-			double dless = Math.abs(nextLowerLevel.getTexelSize() - resolution);
-			double dmore = Math.abs(targetLevel.getTexelSize() - resolution);
-			if (dless < dmore)
-				targetLevel = nextLowerLevel;
-		}
-
-		Logging.logger().fine(
-				Logging.getMessage("layers.TiledImageLayer.LevelSelection",
-						targetLevel.getLevelNumber(), Double.toString(targetLevel.getTexelSize())));
-		return targetLevel.getLevelNumber();
 	}
 }
