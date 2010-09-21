@@ -116,7 +116,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		
 	}
 	
-	private boolean promptUserForConfirmationOfRemoval(AnimationObject selectedObject)
+	protected boolean promptUserForConfirmationOfRemoval(AnimationObject selectedObject)
 	{
 		int response = JOptionPane.showConfirmDialog(getParentWindow(),
  				 									 getMessage(getQueryRemoveObjectFromAnimationMessageKey(), selectedObject.getName()), 

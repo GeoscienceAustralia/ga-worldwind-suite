@@ -39,19 +39,36 @@ public class TestUtils
 	{
 		try
 		{
-			Field targetField = target.getClass().getDeclaredField(name);
+			Field targetField = findField(target.getClass(), name);
+			if (targetField == null)
+			{
+				throw new IllegalArgumentException("Field '" + name + "' does not exist on '" + target.getClass().getSimpleName() + "'.");
+			}
 			
 			targetField.setAccessible(true);
 			Object result = targetField.get(target);
 			return type.cast(result);
 		}
-		catch (NoSuchFieldException e)
-		{
-			throw new IllegalArgumentException("Field '" + name + "' does not exist on '" + target.getClass().getSimpleName() + "'.", e);
-		}
 		catch (IllegalAccessException e)
 		{
 			throw new IllegalArgumentException("Cannot access field '" + name + "' on '" + target.getClass().getSimpleName() + "'.", e);
+		}
+	}
+	
+	private static Field findField(Class<?> clazz, String fieldName)
+	{
+		if (clazz == null)
+		{
+			return null;
+		}
+		try
+		{
+			Field result = clazz.getDeclaredField(fieldName);
+			return result;
+		}
+		catch (NoSuchFieldException e)
+		{
+			return findField(clazz.getSuperclass(), fieldName);
 		}
 	}
 }

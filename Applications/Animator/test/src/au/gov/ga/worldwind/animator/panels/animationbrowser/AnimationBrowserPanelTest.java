@@ -1,11 +1,10 @@
 package au.gov.ga.worldwind.animator.panels.animationbrowser;
 
+import static au.gov.ga.worldwind.test.util.TestUtils.getField;
 import static org.junit.Assert.assertEquals;
-import static au.gov.ga.worldwind.test.util.TestUtils.*;
-
 import gov.nasa.worldwind.layers.CrosshairLayer;
 
-import java.lang.reflect.Field;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,6 +47,10 @@ public class AnimationBrowserPanelTest
 	
 	private StaticMessageSource messageSource;
 	
+	// Flags used to inspect object removal
+	private boolean confirmationRequested;
+	private boolean confirmRemoveObject;
+	
 	@Before
 	public void setup()
 	{
@@ -57,6 +60,9 @@ public class AnimationBrowserPanelTest
 		mockContext = new Mockery();
 		
 		setupAnimation();
+		
+		confirmationRequested = false;
+		denyRemovalConfirmation();
 	}
 
 	@Test
@@ -67,8 +73,7 @@ public class AnimationBrowserPanelTest
 		
 		select(null);
 		
-		BasicAction removeAnimationObjectAction = getRemoveAnimationObjectAction();
-		assertEquals(false, removeAnimationObjectAction.isEnabled());
+		assertEquals(false, getRemoveAnimationObjectAction().isEnabled());
 	}
 
 	@Test
@@ -79,8 +84,7 @@ public class AnimationBrowserPanelTest
 		
 		select(getAnimationObjects().get(0));
 		
-		BasicAction removeAnimationObjectAction = getRemoveAnimationObjectAction();
-		assertEquals(false, removeAnimationObjectAction.isEnabled());
+		assertEquals(false, getRemoveAnimationObjectAction().isEnabled());
 	}
 	
 	@Test
@@ -91,8 +95,7 @@ public class AnimationBrowserPanelTest
 		
 		select(getAnimationObjects().get(1));
 		
-		BasicAction removeAnimationObjectAction = getRemoveAnimationObjectAction();
-		assertEquals(true, removeAnimationObjectAction.isEnabled());
+		assertEquals(true, getRemoveAnimationObjectAction().isEnabled());
 	}
 	
 	@Test
@@ -108,6 +111,76 @@ public class AnimationBrowserPanelTest
 		assertEquals(getAnimationObjects().get(1), CurrentlySelectedObject.get());
 	}
 	
+	@Test
+	public void testUserPromptedWhenRemoveIsFired()
+	{
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
+		createAnimationBrowserPanel();
+		
+		select(getAnimationObjects().get(1));
+		fireRemoveAnimationObjectAction();
+		
+		assertEquals(true, confirmationRequested);
+	}
+	
+	@Test
+	public void testNoRemovalWhenConfirmationDenied()
+	{
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
+		createAnimationBrowserPanel();
+		
+		select(getAnimationObjects().get(1));
+		denyRemovalConfirmation();
+		
+		expectNoObjectRemoval();
+		
+		fireRemoveAnimationObjectAction();
+	}
+	
+	@Test
+	public void testRemovalWhenConfirmationAccepted()
+	{
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
+		createAnimationBrowserPanel();
+		
+		select(getAnimationObjects().get(1));
+		acceptRemovalConfirmation();
+		
+		expectObjectRemoval(getAnimationObjects().get(1));
+		
+		fireRemoveAnimationObjectAction();
+	}
+
+	private void expectNoObjectRemoval()
+	{
+		mockContext.checking(new Expectations(){{
+			exactly(0).of(animation).removeAnimatableObject(with(any(Animatable.class)));
+		}});
+	}
+	
+	private void expectObjectRemoval(final Animatable objectExpectedToBeRemoved)
+	{
+		mockContext.checking(new Expectations(){{
+			exactly(1).of(animation).removeAnimatableObject(with(objectExpectedToBeRemoved));
+		}});
+	}
+
+	private void denyRemovalConfirmation()
+	{
+		confirmRemoveObject = false;
+	}
+	
+	private void acceptRemovalConfirmation()
+	{
+		confirmRemoveObject = true;
+	}
+	
+	private void fireRemoveAnimationObjectAction()
+	{
+		BasicAction removeAnimationObjectAction = getRemoveAnimationObjectAction();
+		removeAnimationObjectAction.actionPerformed(new ActionEvent(removeAnimationObjectAction, 0, null));
+	}
+
 	private void select(AnimationObject selectedObject)
 	{
 		JTree tree = getField(classToBeTested, "objectTree", JTree.class);
@@ -161,9 +234,18 @@ public class AnimationBrowserPanelTest
 		}});
 	}
 	
+	@SuppressWarnings("serial")
 	private void createAnimationBrowserPanel()
 	{
-		classToBeTested = new AnimationBrowserPanel(animation);
+		classToBeTested = new AnimationBrowserPanel(animation){
+			
+			// Overridden to allow control over the dialog
+			protected boolean promptUserForConfirmationOfRemoval(AnimationObject selectedObject) 
+			{
+				confirmationRequested = true;
+				return confirmRemoveObject;
+			};
+		};
 	}
 	
 	private BasicAction getRemoveAnimationObjectAction()
