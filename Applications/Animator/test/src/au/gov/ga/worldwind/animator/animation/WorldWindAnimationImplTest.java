@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 import gov.nasa.worldwind.WorldWindow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.parameter.BasicParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -46,7 +48,9 @@ public class WorldWindAnimationImplTest
 		initialiseTestParameters();
 		
 		worldWindow = mockContext.mock(WorldWindow.class);
+		
 		classToBeTested = new WorldWindAnimationImpl(worldWindow);
+		classToBeTested.setFrameCount(100);
 	}
 
 	private void initialiseTestParameters()
@@ -56,7 +60,7 @@ public class WorldWindAnimationImplTest
 		{
 			final Parameter parameter = mockContext.mock(Parameter.class, "Parameter" + i);
 			mockContext.checking(new Expectations(){{
-				oneOf(parameter).receiveAnimationEvent(with(any(AnimationEvent.class)));
+				allowing(parameter).receiveAnimationEvent(with(any(AnimationEvent.class)));
 			}});
 			testParameters.add(parameter);
 		}
@@ -283,7 +287,50 @@ public class WorldWindAnimationImplTest
 		assertEquals(200, keyFrames.get(2).getValueForParameter(testParameters.get(2)).getFrame());
 	}
 	
+	@Test
+	public void testRemoveAnimatableClearsValuesFromKeyFrames()
+	{
+		final Animatable animatable = createAnimatable("Object1", testParameters.get(0), testParameters.get(1));
+		
+		classToBeTested.addAnimatableObject(animatable);
+		
+		classToBeTested.insertKeyFrame(createKeyFrame(0, testParameters.get(0)));
+		classToBeTested.insertKeyFrame(createKeyFrame(1, testParameters.get(0), testParameters.get(1)));
+		classToBeTested.insertKeyFrame(createKeyFrame(2, testParameters.get(0), testParameters.get(1), testParameters.get(2)));
+		classToBeTested.insertKeyFrame(createKeyFrame(3, testParameters.get(1), testParameters.get(2)));
+		classToBeTested.insertKeyFrame(createKeyFrame(4, testParameters.get(2)));
+		
+		assertEquals(5, classToBeTested.getKeyFrameCount());
+		
+		mockContext.checking(new Expectations(){{
+			oneOf(animatable).removeChangeListener(with(classToBeTested));
+		}});
+		
+		classToBeTested.removeAnimatableObject(animatable);
+		
+		assertEquals(3, classToBeTested.getKeyFrameCount());
+		
+		List<KeyFrame> keyFrames = classToBeTested.getKeyFrames();
+		assertEquals(2, keyFrames.get(0).getFrame());
+		assertEquals(3, keyFrames.get(1).getFrame());
+		assertEquals(4, keyFrames.get(2).getFrame());
+		
+		assertEquals(0, classToBeTested.getKeyFrames(testParameters.get(0)).size());
+		assertEquals(0, classToBeTested.getKeyFrames(testParameters.get(1)).size());
+		assertEquals(3, classToBeTested.getKeyFrames(testParameters.get(2)).size());
+	}
 	
+	private Animatable createAnimatable(final String name, final Parameter... parameters)
+	{
+		final Animatable result = mockContext.mock(Animatable.class, "Animatable" + name);
+		mockContext.checking(new Expectations(){{
+			allowing(result).getName();will(returnValue(name));
+			allowing(result).getParameters();will(returnValue(Arrays.asList(parameters)));
+			allowing(result).addChangeListener(with(any(AnimationEventListener.class)));
+		}});
+		return result;
+	}
+
 	/**
 	 * @return A new key frame at the provided frame, containing a value for each provided parameter
 	 */
