@@ -7,7 +7,6 @@ import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.util.WWXML;
-import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,13 +21,16 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
-import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
+import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.EyeElevationParameter;
+import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.EyeLatParameter;
+import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.EyeLonParameter;
+import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatElevationParameter;
+import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatLatParameter;
+import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatLonParameter;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.math.vector.Vector3;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
@@ -45,7 +47,6 @@ public class CameraImpl extends AnimatableBase implements Camera
 	private static final long serialVersionUID = 20100819L;
 
 	private static final String DEFAULT_CAMERA_NAME = "Render Camera";
-	private static final String DEFAULT_PARAMETER_NAME = "Render Camera - Param";
 
 	private Parameter eyeLat;
 	private Parameter eyeLon;
@@ -337,215 +338,4 @@ public class CameraImpl extends AnimatableBase implements Camera
 		return null;
 	}
 
-	/**
-	 * Parameter for eye latitude
-	 */
-	@SuppressWarnings("serial")
-	@EditableParameter
-	private static class EyeLatParameter extends ParameterBase
-	{
-		public EyeLatParameter(Animation animation)
-		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLatNameKey(), DEFAULT_PARAMETER_NAME), animation);
-		}
-		
-		private EyeLatParameter(){super();}
-		
-		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
-		{
-			double value = context.getView().getEyePosition().getLatitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-		}
-
-		@Override
-		protected void doApplyValue(double value)
-		{
-			// TODO Implement me!
-			
-			
-		}
-		
-		@Override
-		protected ParameterBase createParameter(AVList context)
-		{
-			return new EyeLatParameter();
-		}
-	}
-	
-	/**
-	 * Parameter for eye longitude
-	 */
-	@SuppressWarnings("serial")
-	@EditableParameter
-	private static class EyeLonParameter extends ParameterBase
-	{
-		public EyeLonParameter(Animation animation)
-		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLonNameKey(), DEFAULT_PARAMETER_NAME), animation);
-		}
-		
-		private EyeLonParameter(){super();}
-		
-		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
-		{
-			double value = context.getView().getEyePosition().getLongitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-		}
-
-		@Override
-		protected void doApplyValue(double value)
-		{
-			// TODO Implement me!
-			
-		}
-		
-		@Override
-		protected ParameterBase createParameter(AVList context)
-		{
-			return new EyeLonParameter();
-		}
-	}
-	
-	/**
-	 * Parameter for eye elevation
-	 */
-	@SuppressWarnings("serial")
-	@EditableParameter
-	private static class EyeElevationParameter extends ParameterBase
-	{
-		public EyeElevationParameter(Animation animation)
-		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeZoomNameKey(), DEFAULT_PARAMETER_NAME), animation);
-		}
-		
-		private EyeElevationParameter(){super();}
-		
-		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
-		{
-			double value = context.applyZoomScaling(context.getView().getEyePosition().getElevation());
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-		}
-
-		@Override
-		protected void doApplyValue(double value)
-		{
-			// TODO Implement me!
-			
-		}
-		
-		@Override
-		protected ParameterBase createParameter(AVList context)
-		{
-			return new EyeElevationParameter();
-		}
-	}
-	
-	/**
-	 * Parameter for look-at latitude
-	 */
-	@SuppressWarnings("serial")
-	@EditableParameter
-	private static class LookatLatParameter extends ParameterBase
-	{
-		public LookatLatParameter(Animation animation)
-		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLatNameKey(), DEFAULT_PARAMETER_NAME), animation);
-		}
-		
-		private LookatLatParameter(){super();}
-		
-		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
-		{
-			double value = ((OrbitView) context.getView()).getCenterPosition().getLatitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-		}
-
-		@Override
-		protected void doApplyValue(double value)
-		{
-			// TODO Implement me!
-			
-		}
-		
-		@Override
-		protected ParameterBase createParameter(AVList context)
-		{
-			return new LookatLatParameter();
-		}
-	}
-	
-	/**
-	 * Parameter for look-at longitude
-	 */
-	@SuppressWarnings("serial")
-	@EditableParameter
-	private static class LookatLonParameter extends ParameterBase
-	{
-		public LookatLonParameter(Animation animation)
-		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLonNameKey(), DEFAULT_PARAMETER_NAME), animation);
-		}
-		
-		private LookatLonParameter(){super();}
-		
-		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
-		{
-			double value = ((OrbitView) context.getView()).getCenterPosition().getLongitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-		}
-
-		@Override
-		protected void doApplyValue(double value)
-		{
-			// TODO Implement me!
-			
-		}
-		
-		@Override
-		protected ParameterBase createParameter(AVList context)
-		{
-			return new LookatLonParameter();
-		}
-	}
-	
-	/**
-	 * Parameter for look-at elevation
-	 */
-	@SuppressWarnings("serial")
-	@EditableParameter
-	private static class LookatElevationParameter extends ParameterBase
-	{
-		public LookatElevationParameter(Animation animation)
-		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatZoomNameKey(), DEFAULT_PARAMETER_NAME), animation);
-		}
-		
-		private LookatElevationParameter(){super();}
-		
-		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
-		{
-			double value = context.applyZoomScaling(((OrbitView) context.getView()).getCenterPosition().getElevation());
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
-		}
-
-		@Override
-		protected void doApplyValue(double value)
-		{
-			// TODO Implement me!
-			
-		}
-		
-		@Override
-		protected ParameterBase createParameter(AVList context)
-		{
-			return new LookatElevationParameter();
-		}
-	}
-	
 }
