@@ -327,6 +327,13 @@ public class FrameSlider extends JComponent
 					int newFrame = calculateFrameFromPosition(e.getX() - dragPoint.x + keyRect.width / 2);
 					keys.remove(draggingKeyFrameIndex);
 					keys.add(draggingKeyFrameIndex, newFrame);
+					
+					if (isHighlightedKey(oldFrame))
+					{
+						highlightedKeys.remove((Integer)oldFrame);
+						highlightedKeys.add(newFrame);
+					}
+					
 					notifyChangeFrameListeners(draggingKeyFrameIndex, oldFrame, newFrame);
 				}
 				repaint();
