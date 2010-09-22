@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JComponent;
@@ -37,13 +38,21 @@ public class FrameSlider extends JComponent
 {
 	private static final long serialVersionUID = 20100824L;
 
+	private static final Font DEFAULT_FONT = Font.decode("");
+	private final static Color KEY_COLOR = LAFConstants.getKeyColor();
+	private final static Color HIGHLIGHTED_KEY_COLOR = LAFConstants.getHighlightedKeyColor();
+	private static final Color KEY_SELECTOR_COLOR = LAFConstants.getKeySelectorColor();
+	private static final Color HIGHLIGHTED_KEY_SELECTOR_COLOR = LAFConstants.getHighlightedKeySelectorColor();
+	
 	private final static int SLIDER_BORDER = 2;
 	private final static int PIXELS_PER_MAJOR_TICK = 48;
 	private final static int PIXELS_PER_MINOR_TICK = 8;
 	private final static int MAJOR_TICK_LENGTH = 16;
 	private final static int MINOR_TICK_LENGTH = 8;
 
-	private int min, max, value;
+	private int min;
+	private int max;
+	private int value;
 
 	private boolean leftDown = false;
 	private boolean rightDown = false;
@@ -56,12 +65,12 @@ public class FrameSlider extends JComponent
 	private Rectangle sliderRect;
 	private Rectangle leftRect;
 	private Rectangle rightRect;
-	private int moverWidth, moverHeight;
+	private Dimension moverDimension;
 	private float ascent;
 	private int position;
 
-	private int majorTicks;
-	private int minorTicks;
+	private int numberOfMajorTicks;
+	private int numberOfMinorTicks;
 	private int framesPerMajorTick;
 	private int framesPerMinorTick;
 	private int firstMajorTick;
@@ -74,6 +83,7 @@ public class FrameSlider extends JComponent
 	private List<ChangeFrameListener> changeFrameListeners = new ArrayList<ChangeFrameListener>();
 
 	private List<Integer> keys = new ArrayList<Integer>();
+	private List<Integer> highlightedKeys = new ArrayList<Integer>();
 	private List<Rectangle> keyRects = new ArrayList<Rectangle>();
 
 	public FrameSlider(int value, int min, int max)
@@ -106,7 +116,7 @@ public class FrameSlider extends JComponent
 
 	public void setMin(int min)
 	{
-		if (this.min != min)
+		if (getMin() != min)
 		{
 			this.min = min;
 			dirtySize();
@@ -121,7 +131,7 @@ public class FrameSlider extends JComponent
 
 	public void setMax(int max)
 	{
-		if (this.max != max)
+		if (getMax() != max)
 		{
 			this.max = max;
 			dirtySize();
@@ -148,7 +158,7 @@ public class FrameSlider extends JComponent
 
 	public int getLength()
 	{
-		return max - min + 1;
+		return getMax() - getMin() + 1;
 	}
 
 	public void addKey(int frame)
@@ -157,7 +167,7 @@ public class FrameSlider extends JComponent
 		keyRects.add(new Rectangle());
 		repaint();
 	}
-
+	
 	public void removeKey(int frame)
 	{
 		int index = keys.indexOf(frame);
@@ -171,6 +181,23 @@ public class FrameSlider extends JComponent
 		return keys.get(index);
 	}
 
+	public void highlightKeys(Collection<Integer> keysToHighlight)
+	{
+		if (keysToHighlight == null)
+		{
+			highlightedKeys.clear();
+			return;
+		}
+		highlightedKeys = new ArrayList<Integer>(keysToHighlight);
+		repaint();
+	}
+	
+	public void clearHighlightedKeys()
+	{
+		highlightedKeys.clear();
+		repaint();
+	}
+	
 	public int keyCount()
 	{
 		return keys.size();
@@ -318,14 +345,14 @@ public class FrameSlider extends JComponent
 	private int calculatePositionFromFrame(int frame)
 	{
 		frame = clamp(frame, getMin(), getMax());
-		int position = (getWidth() - moverWidth) * (frame - getMin()) / (getLength() - 1) + moverWidth / 2;
+		int position = (getWidth() - moverDimension.width) * (frame - getMin()) / (getLength() - 1) + moverDimension.width / 2;
 		return position;
 	}
 
 	private int calculateFrameFromPosition(int position)
 	{
-		int min = moverWidth / 2;
-		int max = getWidth() - moverWidth / 2;
+		int min = moverDimension.width / 2;
+		int max = getWidth() - moverDimension.width / 2;
 		position = clamp(position, min, max);
 		int frame = getMin() + getLength() * (position - min) / (max - min);
 		return frame;
@@ -342,7 +369,7 @@ public class FrameSlider extends JComponent
 		{
 			positionDirty = false;
 			position = calculatePositionFromFrame(getValue());
-			int left = position - moverWidth / 2;
+			int left = position - moverDimension.width / 2;
 			leftRect.x = left;
 			sliderRect.x = left + leftRect.width;
 			rightRect.x = left + leftRect.width + sliderRect.width;
@@ -372,7 +399,6 @@ public class FrameSlider extends JComponent
 
 	private void calculateControlSizes(Graphics2D g2)
 	{
-		int width = getWidth();
 		FontMetrics fm = g2.getFontMetrics();
 		String stringBoundsTest = "m " + getMax() + " / " + (getLength() - 1) + " m";
 		Rectangle2D stringBounds = fm.getStringBounds(stringBoundsTest, g2);
@@ -384,71 +410,72 @@ public class FrameSlider extends JComponent
 		int sliderWidth = fontWidth + SLIDER_BORDER * 2;
 		int height = fontHeight + SLIDER_BORDER * 2;
 
-		scrollRect = new Rectangle(0, 0, width, height + 3 + MAJOR_TICK_LENGTH);
+		scrollRect = new Rectangle(0, 0, getWidth(), height + 3 + MAJOR_TICK_LENGTH);
 		leftRect = new Rectangle(0, 0, buttonWidth, height);
 		sliderRect = new Rectangle(buttonWidth, 0, sliderWidth, height);
 		rightRect = new Rectangle(buttonWidth + sliderWidth, 0, buttonWidth, height);
-		this.moverWidth = buttonWidth * 2 + sliderWidth;
-		this.moverHeight = height;
+		moverDimension = new Dimension(buttonWidth * 2 + sliderWidth, height);
 	}
 
 	private void calculateTicks()
 	{
 		int width = getWidth();
-		int availableTickWidth = Math.max(1, width - moverWidth);
+		int availableTickWidth = Math.max(1, width - moverDimension.width);
 		int[] dividers = new int[] { 1, 2, 5 };
 		int multiple = 1;
-		minorTicks = getLength();
+		numberOfMinorTicks = getLength();
 		framesPerMinorTick = 1;
-		while (!(minorTicks == 0 || availableTickWidth / minorTicks >= PIXELS_PER_MINOR_TICK))
+		while (!(numberOfMinorTicks == 0 || availableTickWidth / numberOfMinorTicks >= PIXELS_PER_MINOR_TICK))
 		{
 			for (int i : dividers)
 			{
 				framesPerMinorTick = i * multiple;
-				minorTicks = (int) (getLength() / framesPerMinorTick);
-				if (minorTicks == 0 || availableTickWidth / minorTicks >= PIXELS_PER_MINOR_TICK)
+				numberOfMinorTicks = (int) (getLength() / framesPerMinorTick);
+				if (numberOfMinorTicks == 0 || availableTickWidth / numberOfMinorTicks >= PIXELS_PER_MINOR_TICK)
+				{
 					break;
+				}
 			}
 			multiple *= 10;
 		}
 
 		multiple = 1;
-		majorTicks = getLength();
+		numberOfMajorTicks = getLength();
 		framesPerMajorTick = 1;
-		while (!(majorTicks == 0 || availableTickWidth / majorTicks >= PIXELS_PER_MAJOR_TICK))
+		while (!(numberOfMajorTicks == 0 || availableTickWidth / numberOfMajorTicks >= PIXELS_PER_MAJOR_TICK))
 		{
 			for (int i : dividers)
 			{
 				framesPerMajorTick = i * multiple;
-				majorTicks = (int) (getLength() / framesPerMajorTick);
-				if (majorTicks == 0 || availableTickWidth / majorTicks >= PIXELS_PER_MAJOR_TICK)
+				numberOfMajorTicks = (int) (getLength() / framesPerMajorTick);
+				if (numberOfMajorTicks == 0 || availableTickWidth / numberOfMajorTicks >= PIXELS_PER_MAJOR_TICK)
+				{
 					break;
+				}
 			}
 			multiple *= 10;
 		}
 
-		int firstMinorTick = min - (min + framesPerMinorTick - 1) % framesPerMinorTick + framesPerMinorTick - 1;
-		int firstMajorTick = min - (min + framesPerMajorTick - 1) % framesPerMajorTick + framesPerMajorTick - 1;
+		int firstMinorTick = getMin() - (getMin() + framesPerMinorTick - 1) % framesPerMinorTick + framesPerMinorTick - 1;
+		int firstMajorTick = getMin() - (getMin() + framesPerMajorTick - 1) % framesPerMajorTick + framesPerMajorTick - 1;
 
 		//add one if last tick equals max
-		if (firstMinorTick + framesPerMinorTick * minorTicks <= max)
-			minorTicks++;
-		if (firstMajorTick + framesPerMajorTick * majorTicks <= max)
-			majorTicks++;
+		if (firstMinorTick + framesPerMinorTick * numberOfMinorTicks <= getMax())
+		{
+			numberOfMinorTicks++;
+		}
+		if (firstMajorTick + framesPerMajorTick * numberOfMajorTicks <= getMax())
+		{
+			numberOfMajorTicks++;
+		}
 	}
 
 	@Override
 	protected void paintComponent(Graphics g)
 	{
 		Graphics2D g2 = (Graphics2D) g;
-
-		//TODO remove
-		/*g2.setColor(new Color(225, 255, 255));
-		g2.fillRect(0, 0, getWidth(), getHeight());*/
-
-		Font font = Font.decode("");
-		g2.setFont(font);
-		FontMetrics fm = g2.getFontMetrics();
+		
+		g2.setFont(DEFAULT_FONT);
 
 		//recalculate anything that's dirty
 		calculateSizesIfDirty(g2);
@@ -460,118 +487,150 @@ public class FrameSlider extends JComponent
 		Color control = SystemColor.control;
 		Color text = SystemColor.controlText;
 
-		//slider and button background
-		g2.setColor(control);
-		g2.fillRect(leftRect.x, 0, moverWidth, moverHeight);
+		paintSlider(g2, control, light, dark);
+		paintSliderText(g2, text);
+		paintButtonArrows(g2, text);
+		paintSeparatorLine(g2, light, dark);
 
-		//slider and button borders
-		drawRaisedRect(sliderRect, g2, light, dark, false);
-		drawRaisedRect(leftRect, g2, light, dark, leftDown);
-		drawRaisedRect(rightRect, g2, light, dark, rightDown);
-
-		//slider text
-		g2.setColor(text);
-		String sliderText = value + " / " + (getLength() - 1);
-		Rectangle2D stringBounds = fm.getStringBounds(sliderText, g2);
-		int textY = (int) (moverHeight / 2 + ascent / 2 - 1);
-		g2.drawString(sliderText, (int) (sliderRect.x + sliderRect.width / 2 - stringBounds.getWidth() / 2), textY);
-
-		//button arrows
-		int arrowSize = 4;
-		int leftOffset = leftDown ? 0 : -1;
-		drawArrow(leftRect, arrowSize, g2, false, leftOffset);
-		int rightOffset = rightDown ? 1 : 0;
-		drawArrow(rightRect, arrowSize, g2, true, rightOffset);
-
-		//separator line
-		g2.setColor(light);
-		g2.drawLine(0, moverHeight + 1, getWidth(), moverHeight + 1);
-		g2.setColor(dark);
-		g2.drawLine(0, moverHeight + 2, getWidth(), moverHeight + 2);
-
-		//ticks
-		int availableTickWidth = getWidth() - moverWidth;
-		int tickY = moverHeight + 3;
-		int tickHeight = MAJOR_TICK_LENGTH;
-
-		g2.setColor(dark);
-		for (int i = 0; i < minorTicks; i++)
-		{
-			int x =
-					moverWidth / 2 + availableTickWidth * (firstMinorTick + (i * framesPerMinorTick) - min)
-							/ (getLength() - 1);
-			g2.drawLine(x, tickY, x, tickY + MINOR_TICK_LENGTH);
-		}
-
-		for (int i = 0; i < majorTicks; i++)
-		{
-			int frame = firstMajorTick + (i * framesPerMajorTick);
-			int x = moverWidth / 2 + availableTickWidth * (frame - min) / (getLength() - 1);
-			g2.setColor(dark);
-			g2.drawLine(x, tickY, x, tickY + MAJOR_TICK_LENGTH);
-
-			g2.setColor(text);
-			String frameString = String.valueOf(frame);
-			stringBounds = fm.getStringBounds(frameString, g2);
-			g2.drawString(frameString, (int) (x - stringBounds.getWidth() / 2), tickY + MAJOR_TICK_LENGTH + ascent);
-			tickHeight = Math.max(tickHeight, (int) (MAJOR_TICK_LENGTH + stringBounds.getHeight()));
-		}
+		int availableTickWidth = getWidth() - moverDimension.width;
+		int tickY = moverDimension.height + 3;
+		
+		paintMinorTicks(g2, dark, availableTickWidth, tickY);
+		int tickHeight = paintMajorTicks(g2, dark, text, availableTickWidth, tickY);
 
 		//keyframes
-		for (int i = 0; i < keys.size(); i++)
-		{
-			int key = keys.get(i);
-			Rectangle rect = keyRects.get(i);
-			int pos = calculatePositionFromFrame(key);
-			rect.x = pos - 3;
-			rect.y = tickY;
-			rect.width = 6;
-			rect.height = MINOR_TICK_LENGTH;
-			g2.setColor(dark);
-			g2.drawRect(rect.x, rect.y, rect.width, rect.height);
-			g2.setColor(LAFConstants.getUnselectedKeyColor());
-			g2.fillRect(rect.x + 1, rect.y + 1, rect.width - 1, rect.height - 1);
-		}
+		paintKeyFrames(g2, dark, tickY);
 
 		//selection box
-		g2.setColor(dark);
-		g2.drawRect(position - 3, tickY, 6, MAJOR_TICK_LENGTH);
-		if (keys.contains(getValue()))
-			g2.setColor(new Color(0, 255, 0, 128));
-		else
-			g2.setColor(new Color(0, 0, 255, 128));
-		g2.fillRect(position - 2, tickY + 1, 5, MAJOR_TICK_LENGTH - 1);
+		paintSelectionBox(g2, dark, tickY);
 
 		Dimension size = new Dimension(0, tickY + tickHeight);
 		setMinimumSize(size);
 		setPreferredSize(size);
 	}
 
-	/*public void setZoom(double scale)
+	private void paintSelectionBox(Graphics2D g2, Color borderColor, int top)
 	{
+		// Paint the border
+		g2.setColor(borderColor);
+		g2.drawRect(position - 3, top, 6, MAJOR_TICK_LENGTH);
 		
+		// Paint the filled area
+		g2.setColor(hasKeyAtValue() ? HIGHLIGHTED_KEY_SELECTOR_COLOR : KEY_SELECTOR_COLOR);
+		g2.fillRect(position - 2, top + 1, 5, MAJOR_TICK_LENGTH - 1);
 	}
 
-	@Override
-	public Dimension getPreferredSize()
+	private boolean hasKeyAtValue()
 	{
-		if (isPreferredSizeSet())
-			return super.getPreferredSize();
-		Dimension min = getMinimumSize();
-		min.width
-	}*/
+		return keys.contains(getValue());
+	}
 
-	private void drawArrow(Rectangle inside, int arrowSize, Graphics2D g2, boolean right, int offset)
+	private void paintKeyFrames(Graphics2D g2, Color border, int top)
+	{
+		for (int i = 0; i < keys.size(); i++)
+		{
+			int key = keys.get(i);
+			
+			Rectangle rect = keyRects.get(i);
+			int pos = calculatePositionFromFrame(key);
+			rect.x = pos - 3;
+			rect.y = top;
+			rect.width = 6;
+			rect.height = MINOR_TICK_LENGTH;
+			
+			g2.setColor(border);
+			g2.drawRect(rect.x, rect.y, rect.width, rect.height);
+			
+			g2.setColor(isHighlightedKey(key) ? HIGHLIGHTED_KEY_COLOR : KEY_COLOR);
+			g2.fillRect(rect.x + 1, rect.y + 1, rect.width - 1, rect.height - 1);
+		}
+	}
+
+	private boolean isHighlightedKey(int key)
+	{
+		return highlightedKeys.contains(key);
+	}
+
+	private int paintMajorTicks(Graphics2D g2, Color tick, Color text, int availableTickWidth, int tickY)
+	{
+		int tickHeight = MAJOR_TICK_LENGTH;
+		for (int i = 0; i < numberOfMajorTicks; i++)
+		{
+			int frame = firstMajorTick + (i * framesPerMajorTick);
+			int x = moverDimension.width / 2 + availableTickWidth * (frame - getMin()) / (getLength() - 1);
+			g2.setColor(tick);
+			g2.drawLine(x, tickY, x, tickY + MAJOR_TICK_LENGTH);
+
+			g2.setColor(text);
+			String frameString = String.valueOf(frame);
+			Rectangle2D stringBounds = g2.getFontMetrics().getStringBounds(frameString, g2);
+			g2.drawString(frameString, (int) (x - stringBounds.getWidth() / 2), tickY + MAJOR_TICK_LENGTH + ascent);
+			tickHeight = Math.max(tickHeight, (int) (MAJOR_TICK_LENGTH + stringBounds.getHeight()));
+		}
+		
+		return tickHeight;
+	}
+
+	private void paintMinorTicks(Graphics2D g2, Color dark, int availableTickWidth, int tickY)
+	{
+		g2.setColor(dark);
+		for (int i = 0; i < numberOfMinorTicks; i++)
+		{
+			int x = moverDimension.width / 2 + availableTickWidth * (firstMinorTick + (i * framesPerMinorTick) - getMin()) / (getLength() - 1);
+			g2.drawLine(x, tickY, x, tickY + MINOR_TICK_LENGTH);
+		}
+	}
+
+	private void paintSlider(Graphics2D g2, Color control, Color light, Color dark)
+	{
+		g2.setColor(control);
+		g2.fillRect(leftRect.x, 0, moverDimension.width, moverDimension.height);
+
+		//slider and button borders
+		drawRaisedRect(g2, sliderRect, light, dark, false);
+		drawRaisedRect(g2, leftRect, light, dark, leftDown);
+		drawRaisedRect(g2, rightRect, light, dark, rightDown);
+	}
+
+	private void paintSliderText(Graphics2D g2, Color text)
+	{
+		g2.setColor(text);
+		String sliderText = getValue() + " / " + (getLength() - 1);
+		Rectangle2D stringBounds = g2.getFontMetrics().getStringBounds(sliderText, g2);
+		int textY = (int) (moverDimension.height / 2 + ascent / 2 - 1);
+		g2.drawString(sliderText, (int) (sliderRect.x + sliderRect.width / 2 - stringBounds.getWidth() / 2), textY);
+	}
+
+	private void paintButtonArrows(Graphics2D g2, Color lineColor)
+	{
+		int arrowSize = 4;
+		int leftOffset = leftDown ? 0 : -1;
+		g2.setColor(lineColor);
+		drawArrow(g2, leftRect, arrowSize, leftOffset, false);
+		int rightOffset = rightDown ? 1 : 0;
+		drawArrow(g2, rightRect, arrowSize, rightOffset, true);
+	}
+
+	private void drawArrow(Graphics2D g2, Rectangle inside, int arrowSize, int offset, boolean right)
 	{
 		if (right)
+		{
 			arrowSize = -arrowSize;
-		g2.drawLine(inside.x + inside.width / 2 - arrowSize / 2 + offset, inside.height / 2, inside.x + inside.width
-				/ 2 + arrowSize / 2 + offset, inside.height / 2 - arrowSize);
-		g2.drawLine(inside.x + inside.width / 2 - arrowSize / 2 + offset, inside.height / 2, inside.x + inside.width
-				/ 2 + arrowSize / 2 + offset, inside.height / 2 + arrowSize);
+		}
+		
+		g2.drawLine(inside.x + inside.width / 2 - arrowSize / 2 + offset, inside.height / 2, inside.x + inside.width / 2 + arrowSize / 2 + offset, inside.height / 2 - arrowSize);
+		g2.drawLine(inside.x + inside.width / 2 - arrowSize / 2 + offset, inside.height / 2, inside.x + inside.width / 2 + arrowSize / 2 + offset, inside.height / 2 + arrowSize);
+	}
+	
+	private void paintSeparatorLine(Graphics2D g2, Color light, Color dark)
+	{
+		g2.setColor(light);
+		g2.drawLine(0, moverDimension.height + 1, getWidth(), moverDimension.height + 1);
+		g2.setColor(dark);
+		g2.drawLine(0, moverDimension.height + 2, getWidth(), moverDimension.height + 2);
 	}
 
-	private void drawRaisedRect(Rectangle rect, Graphics2D g2, Color c1, Color c2, boolean lowered)
+	private void drawRaisedRect(Graphics2D g2, Rectangle rect, Color c1, Color c2, boolean lowered)
 	{
 		if (lowered)
 		{
@@ -582,6 +641,7 @@ public class FrameSlider extends JComponent
 		g2.setColor(c1);
 		g2.drawLine(rect.x, rect.y, rect.x + rect.width - 2, rect.y);
 		g2.drawLine(rect.x, rect.y + 1, rect.x, rect.y + rect.height - 1);
+		
 		g2.setColor(c2);
 		g2.drawLine(rect.x + 1, rect.y + rect.height - 1, rect.x + rect.width - 2, rect.y + rect.height - 1);
 		g2.drawLine(rect.x + rect.width - 1, rect.y, rect.x + rect.width - 1, rect.y + rect.height - 1);
@@ -601,7 +661,9 @@ public class FrameSlider extends JComponent
 	{
 		ChangeEvent e = new ChangeEvent(this);
 		for (ChangeListener changeListener : changeListeners)
+		{
 			changeListener.stateChanged(e);
+		}
 	}
 
 	public void addChangeFrameListener(ChangeFrameListener changeFrameListener)

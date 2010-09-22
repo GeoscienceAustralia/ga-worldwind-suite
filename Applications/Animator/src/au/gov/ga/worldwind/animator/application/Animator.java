@@ -33,7 +33,9 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,9 +62,12 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import nasa.worldwind.awt.WorldWindowGLCanvas;
+import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
+import au.gov.ga.worldwind.animator.animation.AnimationObject;
+import au.gov.ga.worldwind.animator.animation.CurrentlySelectedObject;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.RenderParameters;
@@ -76,6 +81,7 @@ import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
@@ -206,6 +212,9 @@ public class Animator
 	/** A listener that updates the frame slider when frames have been added or removed programmatically */
 	private AnimationEventListener framesChangedListener;
 	
+	/** A listener that updates the highlighted frames when the currently selected object changes */
+	private CurrentlySelectedObject.ChangeListener highlightedFramesListener;
+	
 	// The layers used in the application
 	private DetailedElevationModel dem;
 	private Layer crosshair;
@@ -295,6 +304,7 @@ public class Animator
 		initialiseChangeListener();
 		initialiseLayerUpdateListener();
 		initialiseFramesChangedListener();
+		initialiseHighlightedFramesListener();
 	}
 
 	/**
@@ -313,6 +323,53 @@ public class Animator
 		animation.addChangeListener(listener);
 	}
 
+	private void initialiseHighlightedFramesListener()
+	{
+		highlightedFramesListener = new CurrentlySelectedObject.ChangeListener()
+		{
+			@Override
+			public void selectedObjectChanged(AnimationObject currentlySelectedObject, AnimationObject previouslySelectedObject)
+			{
+				if (currentlySelectedObject == null)
+				{
+					slider.clearHighlightedKeys();
+					return;
+				}
+				
+				Collection<Integer> keysToHighlight = getKeysToHighlight(currentlySelectedObject);
+				slider.highlightKeys(keysToHighlight);
+			}
+
+			private Collection<Integer> getKeysToHighlight(AnimationObject object)
+			{
+				Set<Integer> keysToHighlight = new HashSet<Integer>();
+				if (object instanceof Parameter)
+				{
+					keysToHighlight.addAll(getKeysFramesFromParameter((Parameter)object));
+				}
+				else if (object instanceof Animatable)
+				{
+					for (Parameter parameter : ((Animatable)object).getParameters())
+					{
+						keysToHighlight.addAll(getKeysFramesFromParameter(parameter));
+					}
+				}
+				return keysToHighlight;
+			}
+
+			private Collection<Integer> getKeysFramesFromParameter(Parameter parameter)
+			{
+				Set<Integer> result = new HashSet<Integer>();
+				for (KeyFrame keyFrame : animation.getKeyFrames(parameter))
+				{
+					result.add(keyFrame.getFrame());
+				}
+				return result;
+			}
+		};
+		CurrentlySelectedObject.addChangeListener(highlightedFramesListener);
+	}
+	
 	/**
 	 * Initialise the layer update listener that listens for changes to the layers present in the animation
 	 */
@@ -343,9 +400,6 @@ public class Animator
 		animation.addChangeListener(layerUpdateListener);
 	}
 
-	/**
-	 * 
-	 */
 	private void initialiseFramesChangedListener()
 	{
 		framesChangedListener = new AnimationEventListener()
