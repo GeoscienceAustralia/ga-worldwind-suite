@@ -394,7 +394,7 @@ public class Animator
 					return false;
 				}
 				AnimationEvent rootCause = event.getRootCause();
-				return ((rootCause.isOfType(Type.ADD) || rootCause.isOfType(Type.REMOVE)) && rootCause.getValue() instanceof AnimatableLayer);
+				return ((rootCause.isOfType(Type.ADD) || rootCause.isOfType(Type.REMOVE) || rootCause.isOfType(Type.CHANGE)) && rootCause.getValue() instanceof AnimatableLayer);
 			}
 		};
 		animation.addChangeListener(layerUpdateListener);
