@@ -106,6 +106,16 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 			}
 		});
 		
+		moveObjectDownAction = new BasicAction(getMessage(getAnimationBrowserMoveUpLabelKey()), Icons.down.getIcon());
+		moveObjectDownAction.setEnabled(false);
+		moveObjectDownAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				moveSelectedObjectDown();
+			}
+		});
+		
 	}
 
 	private void moveSelectedObjectUp()
@@ -121,6 +131,26 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 			treeModel.notifyTreeChanged(selectedObject);
 			objectTree.setSelectionPath(new TreePath(new Object[]{animation, selectedObject}));
 		}
+	}
+	
+	private void moveSelectedObjectDown()
+	{
+		AnimationObject selectedObject = getSelectedAnimationObject();
+		if (selectedObject == null)
+		{
+			return;
+		}
+		if (isMovable(selectedObject) && !isLastObject(selectedObject))
+		{
+			animation.changeOrderOfAnimatableObject((Animatable)selectedObject, indexOf(selectedObject) + 1);
+			treeModel.notifyTreeChanged(selectedObject);
+			objectTree.setSelectionPath(new TreePath(new Object[]{animation, selectedObject}));
+		}
+	}
+
+	private boolean isLastObject(AnimationObject selectedObject)
+	{
+		return indexOf(selectedObject) == animation.getAnimatableObjects().size() - 1;
 	}
 
 	private int indexOf(AnimationObject object)
@@ -173,6 +203,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		toolbar.add(removeAnimationObjectAction);
 		toolbar.addSeparator();
 		toolbar.add(moveObjectUpAction);
+		toolbar.add(moveObjectDownAction);
 	}
 
 	/**
@@ -207,7 +238,8 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 				CurrentlySelectedObject.set(selectedObject);
 				
 				removeAnimationObjectAction.setEnabled(selectedObject != null && isRemovable(selectedObject));
-				moveObjectUpAction.setEnabled(selectedObject != null && !isFirstObject(selectedObject));
+				moveObjectUpAction.setEnabled(selectedObject != null && isMovable(selectedObject) && !isFirstObject(selectedObject));
+				moveObjectDownAction.setEnabled(selectedObject != null && isMovable(selectedObject) && !isLastObject(selectedObject));
 			}
 		});
 		objectTree.setActionMap(null); // Remove the default key bindings so our custom ones will work

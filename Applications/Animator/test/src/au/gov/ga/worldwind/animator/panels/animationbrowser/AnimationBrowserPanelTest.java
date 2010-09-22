@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 
@@ -194,9 +195,55 @@ public class AnimationBrowserPanelTest
 		
 		expectMove(getAnimationObjects().get(1), 0);
 		
-		assertEquals(true, getMoveObjectUpAction().isEnabled());
+		fireMoveObjectUpAction();
+	}
+	
+	@Test
+	public void testMoveDownActionDisabledWhenNoSelection()
+	{
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
+		createAnimationBrowserPanel();
+		
+		select(null);
+		
+		assertEquals(false, getMoveObjectDownAction().isEnabled());
 	}
 
+	@Test
+	public void testMoveDownActionDisabledWhenLastSelected()
+	{
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
+		createAnimationBrowserPanel();
+		
+		select(getAnimationObjects().get(2));
+		
+		assertEquals(false, getMoveObjectDownAction().isEnabled());
+	}
+	
+	@Test
+	public void testMoveDownActionEnabledWhenSecondSelected()
+	{
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
+		createAnimationBrowserPanel();
+		
+		select(getAnimationObjects().get(1));
+		
+		assertEquals(true, getMoveObjectDownAction().isEnabled());
+	}
+	
+	@Test
+	public void testMoveWhenMoveDownActionFired()
+	{
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
+		createAnimationBrowserPanel();
+		
+		select(getAnimationObjects().get(1));
+		
+		expectMove(getAnimationObjects().get(1), 2);
+
+		fireMoveObjectDownAction();
+	}
+	
 	private void expectMove(final Animatable animatable, final int newIndex)
 	{
 		mockContext.checking(new Expectations(){{
@@ -226,6 +273,18 @@ public class AnimationBrowserPanelTest
 	private void acceptRemovalConfirmation()
 	{
 		confirmRemoveObject = true;
+	}
+	
+	private void fireMoveObjectDownAction()
+	{
+		BasicAction moveObjectDownAction = getMoveObjectDownAction();
+		moveObjectDownAction.actionPerformed(new ActionEvent(moveObjectDownAction, 0, null));
+	}
+	
+	private void fireMoveObjectUpAction()
+	{
+		BasicAction moveObjectUpAction = getMoveObjectUpAction();
+		moveObjectUpAction.actionPerformed(new ActionEvent(moveObjectUpAction, 0, null));
 	}
 	
 	private void fireRemoveAnimationObjectAction()
@@ -299,6 +358,11 @@ public class AnimationBrowserPanelTest
 				return confirmRemoveObject;
 			};
 		};
+	}
+	
+	private BasicAction getMoveObjectDownAction()
+	{
+		return getField(classToBeTested, "moveObjectDownAction", BasicAction.class);
 	}
 	
 	private BasicAction getMoveObjectUpAction()
