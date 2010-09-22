@@ -97,10 +97,10 @@ import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPane
 import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
 import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPanel;
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
-import au.gov.ga.worldwind.animator.util.ChangeFrameListener;
+import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
+import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
-import au.gov.ga.worldwind.animator.util.FrameSlider;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;

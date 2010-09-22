@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.util;
+package au.gov.ga.worldwind.animator.ui.frameslider;
 
 import java.awt.Color;
 import java.awt.Dimension;
