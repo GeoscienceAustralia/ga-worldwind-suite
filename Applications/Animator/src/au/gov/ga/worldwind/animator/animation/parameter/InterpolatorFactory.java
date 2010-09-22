@@ -108,6 +108,7 @@ public class InterpolatorFactory
 		
 		// Otherwise, set the appropriate control point to point at the other value (mimic a linear point)
 		BezierParameterValue result = new BasicBezierParameterValue(valueToConvert.getValue(), valueToConvert.getFrame(), valueToConvert.getOwner());
+		result.removeChangeListener(valueToConvert.getOwner());
 		
 		Vector2 thisPoint = new Vector2(valueToConvert.getFrame(), valueToConvert.getValue());
 		Vector2 otherPoint = new Vector2(otherValue.getFrame(), otherValue.getValue());

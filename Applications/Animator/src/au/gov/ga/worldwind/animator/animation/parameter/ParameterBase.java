@@ -158,6 +158,7 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 		}
 		
 		// Otherwise, use an interpolator to interpolate between the two values
+		
 		double percent = calculatePercentOfInterval(previousKeyFrame.getFrame(), nextKeyFrame.getFrame(), frame);
 		Interpolator<Vector2> interpolator = InterpolatorFactory.getInterpolator(previousKeyFrame.getValueForParameter(this), nextKeyFrame.getValueForParameter(this));
 		double interpolatedValue = interpolator.computeValue(percent).y;
