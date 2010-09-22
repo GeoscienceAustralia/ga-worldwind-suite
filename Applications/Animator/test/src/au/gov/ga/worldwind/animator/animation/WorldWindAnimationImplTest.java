@@ -320,6 +320,110 @@ public class WorldWindAnimationImplTest
 		assertEquals(3, classToBeTested.getKeyFrames(testParameters.get(2)).size());
 	}
 	
+	@Test
+	public void testChangeAnimatableOrderWithMoveUp()
+	{
+		final Animatable animatable1 = createAnimatable("Object1", testParameters.get(0), testParameters.get(1));
+		final Animatable animatable2 = createAnimatable("Object2", testParameters.get(1));
+		final Animatable animatable3 = createAnimatable("Object3", testParameters.get(2), testParameters.get(1));
+		final Animatable animatable4 = createAnimatable("Object4", testParameters.get(0));
+		final Animatable camera = classToBeTested.getCamera();
+		
+		classToBeTested.addAnimatableObject(animatable1);
+		classToBeTested.addAnimatableObject(animatable2);
+		classToBeTested.addAnimatableObject(animatable3);
+		classToBeTested.addAnimatableObject(animatable4);
+		
+		assertEquals(0, classToBeTested.getAnimatableObjects().indexOf(camera));
+		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(animatable1));
+		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable2));
+		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable3));
+		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable4));
+		
+		classToBeTested.changeOrderOfAnimatableObject(animatable3, 0);
+		
+		assertEquals(0, classToBeTested.getAnimatableObjects().indexOf(animatable3));
+		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(camera));
+		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable1));
+		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable2));
+		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable4));
+	}
+	
+	@Test
+	public void testChangeAnimatableOrderWithMoveDown()
+	{
+		final Animatable animatable1 = createAnimatable("Object1", testParameters.get(0), testParameters.get(1));
+		final Animatable animatable2 = createAnimatable("Object2", testParameters.get(1));
+		final Animatable animatable3 = createAnimatable("Object3", testParameters.get(2), testParameters.get(1));
+		final Animatable animatable4 = createAnimatable("Object4", testParameters.get(0));
+		final Animatable camera = classToBeTested.getCamera();
+		
+		classToBeTested.addAnimatableObject(animatable1);
+		classToBeTested.addAnimatableObject(animatable2);
+		classToBeTested.addAnimatableObject(animatable3);
+		classToBeTested.addAnimatableObject(animatable4);
+		
+		assertEquals(0, classToBeTested.getAnimatableObjects().indexOf(camera));
+		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(animatable1));
+		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable2));
+		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable3));
+		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable4));
+		
+		classToBeTested.changeOrderOfAnimatableObject(animatable1, 3);
+		
+		assertEquals(0, classToBeTested.getAnimatableObjects().indexOf(camera));
+		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(animatable2));
+		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable3));
+		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable1));
+		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable4));
+	}
+	
+	@Test
+	public void testChangeFiredWhenChangeAnimatableOrder()
+	{
+		final Animatable animatable1 = createAnimatable("Object1", testParameters.get(0), testParameters.get(1));
+		final Animatable animatable2 = createAnimatable("Object2", testParameters.get(1));
+		final Animatable animatable3 = createAnimatable("Object3", testParameters.get(2), testParameters.get(1));
+		final Animatable animatable4 = createAnimatable("Object4", testParameters.get(0));
+		
+		classToBeTested.addAnimatableObject(animatable1);
+		classToBeTested.addAnimatableObject(animatable2);
+		classToBeTested.addAnimatableObject(animatable3);
+		classToBeTested.addAnimatableObject(animatable4);
+
+		// Expect 1 call to the listener
+		final AnimationEventListener listener = mockContext.mock(AnimationEventListener.class);
+		mockContext.checking(new Expectations(){{
+			oneOf(listener).receiveAnimationEvent(with(any(AnimationEvent.class)));
+		}});
+		classToBeTested.addChangeListener(listener);
+		
+		classToBeTested.changeOrderOfAnimatableObject(animatable1, 2);
+	}
+	
+	@Test
+	public void testNoChangeFiredWhenChangeAnimatableOrderNotMoved()
+	{
+		final Animatable animatable1 = createAnimatable("Object1", testParameters.get(0), testParameters.get(1));
+		final Animatable animatable2 = createAnimatable("Object2", testParameters.get(1));
+		final Animatable animatable3 = createAnimatable("Object3", testParameters.get(2), testParameters.get(1));
+		final Animatable animatable4 = createAnimatable("Object4", testParameters.get(0));
+		
+		classToBeTested.addAnimatableObject(animatable1);
+		classToBeTested.addAnimatableObject(animatable2);
+		classToBeTested.addAnimatableObject(animatable3);
+		classToBeTested.addAnimatableObject(animatable4);
+
+		// Expect 0 calls to the listener
+		final AnimationEventListener listener = mockContext.mock(AnimationEventListener.class);
+		mockContext.checking(new Expectations(){{
+			never(listener).receiveAnimationEvent(with(any(AnimationEvent.class)));
+		}});
+		classToBeTested.addChangeListener(listener);
+		
+		classToBeTested.changeOrderOfAnimatableObject(animatable1, 1);
+	}
+	
 	private Animatable createAnimatable(final String name, final Parameter... parameters)
 	{
 		final Animatable result = mockContext.mock(Animatable.class, "Animatable" + name);

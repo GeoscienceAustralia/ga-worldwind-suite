@@ -144,9 +144,9 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	Camera getCamera();
 	
 	/**
-	 * @return A collection of all objects being animated in this animation
+	 * @return A list of all objects being animated in this animation. Ordering is in draw order (if applicable).
 	 */
-	Collection<Animatable> getAnimatableObjects();
+	List<Animatable> getAnimatableObjects();
 	
 	/**
 	 * Add the provided animatable object to this animation.
@@ -157,10 +157,19 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	
 	/**
 	 * Remove the provided animatable object from this animation.
+	 * <p/>
+	 * All associated key frame values will also be removed.
 	 * 
 	 * @param object The object to remove.
 	 */
 	void removeAnimatableObject(Animatable object);
+	
+	/**
+	 * Change the order of the provided animatable object, moving it from it's current index in the list of objects to the new index.
+	 * <p/>
+	 * If the provided object is not in this animation's list of objects, this method will have no effect.
+	 */
+	void changeOrderOfAnimatableObject(Animatable object, int newIndex);
 	
 	/**
 	 * @return The number of frames in this animation

@@ -16,6 +16,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
@@ -61,6 +62,8 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 	
 	// Actions
 	private BasicAction removeAnimationObjectAction;
+	private BasicAction moveObjectUpAction;
+	private BasicAction moveObjectDownAction;
 	
 	/**
 	 * Constructor. Initialises the tree from the provided (mandatory) {@link Animation} instance.
@@ -92,16 +95,52 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 				promptToRemoveSelectedObject();
 			}
 		});
+		
+		moveObjectUpAction = new BasicAction(getMessage(getAnimationBrowserMoveUpLabelKey()), Icons.up.getIcon());
+		moveObjectUpAction.setEnabled(false);
+		moveObjectUpAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				moveSelectedObjectUp();
+			}
+		});
+		
+	}
+
+	private void moveSelectedObjectUp()
+	{
+		AnimationObject selectedObject = getSelectedAnimationObject();
+		if (selectedObject == null)
+		{
+			return;
+		}
+		if (isMovable(selectedObject) && !isFirstObject(selectedObject))
+		{
+			animation.changeOrderOfAnimatableObject((Animatable)selectedObject, indexOf(selectedObject) - 1);
+			treeModel.notifyTreeChanged(selectedObject);
+			objectTree.setSelectionPath(new TreePath(new Object[]{animation, selectedObject}));
+		}
+	}
+
+	private int indexOf(AnimationObject object)
+	{
+		return animation.getAnimatableObjects().indexOf(object);
+	}
+
+	private boolean isFirstObject(AnimationObject object)
+	{
+		return animation.getAnimatableObjects().indexOf(object) == 0;
+	}
+
+	private boolean isMovable(AnimationObject object)
+	{
+		return object != null && object instanceof Animatable;
 	}
 
 	private void promptToRemoveSelectedObject()
 	{
-		if (objectTree.isSelectionEmpty())
-		{
-			return;
-		}
-		
-		AnimationObject selectedObject = (AnimationObject)objectTree.getSelectionPath().getLastPathComponent();
+		AnimationObject selectedObject = getSelectedAnimationObject();
 		if (!isRemovable(selectedObject))
 		{
 			return;
@@ -132,6 +171,8 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		toolbar = new JToolBar();
 		toolbar.setActionMap(null);
 		toolbar.add(removeAnimationObjectAction);
+		toolbar.addSeparator();
+		toolbar.add(moveObjectUpAction);
 	}
 
 	/**
@@ -161,16 +202,12 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 			@Override
 			public void valueChanged(TreeSelectionEvent e)
 			{
-				AnimationObject selectedObject = (AnimationObject)e.getPath().getLastPathComponent();
+				AnimationObject selectedObject = getSelectedAnimationObject();
+				
 				CurrentlySelectedObject.set(selectedObject);
-				if (isRemovable(selectedObject))
-				{
-					removeAnimationObjectAction.setEnabled(true);
-				}
-				else
-				{
-					removeAnimationObjectAction.setEnabled(false);
-				}
+				
+				removeAnimationObjectAction.setEnabled(selectedObject != null && isRemovable(selectedObject));
+				moveObjectUpAction.setEnabled(selectedObject != null && !isFirstObject(selectedObject));
 			}
 		});
 		objectTree.setActionMap(null); // Remove the default key bindings so our custom ones will work
@@ -178,7 +215,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 	
 	private boolean isRemovable(AnimationObject selectedObject)
 	{
-		return selectedObject instanceof Animatable && !(selectedObject instanceof Camera);
+		return selectedObject != null && selectedObject instanceof Animatable && !(selectedObject instanceof Camera);
 	}
 	
 	@Override
@@ -193,6 +230,15 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		objectTree.validate();
 	}
 
+	private AnimationObject getSelectedAnimationObject()
+	{
+		if (objectTree.isSelectionEmpty())
+		{
+			return null;
+		}
+		return (AnimationObject)objectTree.getSelectionPath().getLastPathComponent();
+	}
+	
 	/**
 	 * An extension of the {@link DefaultMutableTreeNode} that renders a {@link Nameable} object's name
 	 * as the text value of the tree nodes. Used in conjunction with the {@link AnimationTreeRenderer}.

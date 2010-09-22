@@ -150,6 +150,59 @@ public class AnimationBrowserPanelTest
 		
 		fireRemoveAnimationObjectAction();
 	}
+	
+	@Test
+	public void testMoveUpActionDisabledWhenNoSelection()
+	{
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
+		createAnimationBrowserPanel();
+		
+		select(null);
+		
+		assertEquals(false, getMoveObjectUpAction().isEnabled());
+	}
+
+	@Test
+	public void testMoveUpActionDisabledWhenFirstSelected()
+	{
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
+		createAnimationBrowserPanel();
+		
+		select(getAnimationObjects().get(0));
+		
+		assertEquals(false, getMoveObjectUpAction().isEnabled());
+	}
+	
+	@Test
+	public void testMoveUpActionEnabledWhenSecondSelected()
+	{
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
+		createAnimationBrowserPanel();
+		
+		select(getAnimationObjects().get(1));
+		
+		assertEquals(true, getMoveObjectUpAction().isEnabled());
+	}
+	
+	@Test
+	public void testMoveWhenMoveUpActionFired()
+	{
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
+		createAnimationBrowserPanel();
+		
+		select(getAnimationObjects().get(1));
+		
+		expectMove(getAnimationObjects().get(1), 0);
+		
+		assertEquals(true, getMoveObjectUpAction().isEnabled());
+	}
+
+	private void expectMove(final Animatable animatable, final int newIndex)
+	{
+		mockContext.checking(new Expectations(){{
+			exactly(1).of(animation).changeOrderOfAnimatableObject(with(animatable), with(newIndex));
+		}});
+	}
 
 	private void expectNoObjectRemoval()
 	{
@@ -246,6 +299,11 @@ public class AnimationBrowserPanelTest
 				return confirmRemoveObject;
 			};
 		};
+	}
+	
+	private BasicAction getMoveObjectUpAction()
+	{
+		return getField(classToBeTested, "moveObjectUpAction", BasicAction.class);
 	}
 	
 	private BasicAction getRemoveAnimationObjectAction()

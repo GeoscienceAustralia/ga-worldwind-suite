@@ -88,5 +88,6 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getObjectPropertiesPanelValueCaptionKey() { return "animator.gui.panel.objectproperties.valuecaption.label"; }
 	public static String getQueryRemoveObjectFromAnimationMessageKey() {return "animator.message.queryremoveobjectfromanimation.message"; }
 	public static String getQueryRemoveObjectFromAnimationCaptionKey() { return "animator.message.queryremoveobjectfromanimation.caption"; }
-
+	public static String getAnimationBrowserMoveUpLabelKey() { return "animator.gui.menu.moveobjectup.label"; }
+	public static String getAnimationBrowserMoveDownLabelKey() { return "animator.gui.menu.moveobjectdown.label"; }
 }

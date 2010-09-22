@@ -8,6 +8,7 @@ import gov.nasa.worldwind.util.WWXML;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -206,9 +207,9 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	}
 	
 	@Override
-	public Collection<Animatable> getAnimatableObjects()
+	public List<Animatable> getAnimatableObjects()
 	{
-		return this.animatableObjects;
+		return Collections.unmodifiableList(this.animatableObjects);
 	}
 	
 	@Override
@@ -258,6 +259,52 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			}
 		}
 		removeEmptyKeyFrames();
+	}
+
+	@Override
+	public void changeOrderOfAnimatableObject(Animatable object, int newIndex)
+	{
+		Validate.isTrue(newIndex >= 0 && newIndex < animatableObjects.size(), "newIndex outside of bounds. Must be in range [0, " + (animatableObjects.size() - 1) + "]");
+		if (!animatableObjects.contains(object))
+		{
+			return;
+		}
+		
+		int oldIndex = animatableObjects.indexOf(object);
+		if (oldIndex == newIndex)
+		{
+			return;
+		}
+		
+		if (oldIndex > newIndex)
+		{
+			animatableObjects.add(newIndex, object);
+			animatableObjects.remove(oldIndex + 1);
+		}
+		else
+		{
+			animatableObjects.add(newIndex + 1, object);
+			animatableObjects.remove(oldIndex);
+		}
+		
+		if (object instanceof AnimatableLayer)
+		{
+			refreshLayersList();
+		}
+		
+		fireChangeEvent(object);
+	}
+	
+	private void refreshLayersList()
+	{
+		animatableLayers.clear();
+		for (Animatable object : animatableObjects)
+		{
+			if (object instanceof AnimatableLayer)
+			{
+				animatableLayers.add((AnimatableLayer)object);
+			}
+		}
 	}
 
 	@Override
