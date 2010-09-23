@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.panels.animationbrowser;
+package au.gov.ga.worldwind.animator.panels;
 
 import static au.gov.ga.worldwind.animator.panels.DataTransferFlavors.getAnimationObjectFlavor;
 import static au.gov.ga.worldwind.animator.panels.DataTransferFlavors.getStringFlavor;

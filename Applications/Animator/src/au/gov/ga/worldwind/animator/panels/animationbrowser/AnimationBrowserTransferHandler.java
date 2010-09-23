@@ -10,6 +10,7 @@ import javax.swing.tree.TreePath;
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationObject;
+import au.gov.ga.worldwind.animator.panels.AnimationObjectTransferable;
 import au.gov.ga.worldwind.animator.panels.DataTransferFlavors;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.Validate;

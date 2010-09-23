@@ -88,30 +88,38 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		packComponents();
 	}
 	
-	private void initialiseFileChooser()
+	private void initialiseLayerList()
 	{
-		fileChooser = new JFileChooser();
-		fileChooser.setMultiSelectionEnabled(true);
-		fileChooser.setFileFilter(new FileFilter(){
+		layerList = new JList(knownLayers);
+		layerList.setCellRenderer(new LayerListRenderer(animation));
+		
+		layerList.addListSelectionListener(new ListSelectionListener(){
 			@Override
-			public boolean accept(File f)
+			public void valueChanged(ListSelectionEvent e)
 			{
-				if (f.isDirectory())
-				{
-					return true;
-				}
-				return f.getName().toLowerCase().endsWith(".xml");
-			}
-
-			@Override
-			public String getDescription()
-			{
-				return "Layer definition files (*.xml)";
+				LayerIdentifier layerIdentifier = (LayerIdentifier)((JList)e.getSource()).getSelectedValue();
+				addLayerToAnimationAction.setEnabled(!animation.hasLayer(layerIdentifier));
 			}
 		});
+		layerList.setActionMap(null);
 		
+		layerList.setDragEnabled(true);
+		layerList.setTransferHandler(new LayerPaletteTransferHandler(animation, layerList));
 	}
-
+	
+	private void updateListModel()
+	{
+		List<LayerIdentifier> knownLayerLocations = Settings.get().getKnownLayers();
+		for (LayerIdentifier layerIdentifier : knownLayerLocations)
+		{
+			if (knownLayers.contains(layerIdentifier))
+			{
+				continue;
+			}
+			knownLayers.add(layerIdentifier);
+		}
+	}
+	
 	private void initialiseActions()
 	{
 		addLayerToAnimationAction = new BasicAction(getMessage(getAddLayerToAnimationLabelKey()), Icons.add.getIcon());
@@ -145,6 +153,30 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			}
 		});
 	}
+	
+	private void initialiseFileChooser()
+	{
+		fileChooser = new JFileChooser();
+		fileChooser.setMultiSelectionEnabled(true);
+		fileChooser.setFileFilter(new FileFilter(){
+			@Override
+			public boolean accept(File f)
+			{
+				if (f.isDirectory())
+				{
+					return true;
+				}
+				return f.getName().toLowerCase().endsWith(".xml");
+			}
+
+			@Override
+			public String getDescription()
+			{
+				return "Layer definition files (*.xml)";
+			}
+		});
+		
+	}
 
 	private void initialiseToolbar()
 	{
@@ -154,35 +186,6 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		toolbar.add(removeLayerDefinitionAction);
 		toolbar.add(Box.createHorizontalGlue());
 		toolbar.add(addLayerToAnimationAction);
-	}
-
-	private void updateListModel()
-	{
-		List<LayerIdentifier> knownLayerLocations = Settings.get().getKnownLayers();
-		for (LayerIdentifier layerIdentifier : knownLayerLocations)
-		{
-			if (knownLayers.contains(layerIdentifier))
-			{
-				continue;
-			}
-			knownLayers.add(layerIdentifier);
-		}
-	}
-
-	private void initialiseLayerList()
-	{
-		layerList = new JList(knownLayers);
-		layerList.setCellRenderer(new LayerListRenderer(animation));
-		
-		layerList.addListSelectionListener(new ListSelectionListener(){
-			@Override
-			public void valueChanged(ListSelectionEvent e)
-			{
-				LayerIdentifier layerIdentifier = (LayerIdentifier)((JList)e.getSource()).getSelectedValue();
-				addLayerToAnimationAction.setEnabled(!animation.hasLayer(layerIdentifier));
-			}
-		});
-		layerList.setActionMap(null);
 	}
 
 	private void packComponents()
@@ -237,24 +240,6 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	}
 
 	/**
-	 * Remove the provided layers from the list of known layers
-	 */
-	private void removeLayersFromList(LayerIdentifier[] layerIdentifiers)
-	{
-		if (layerIdentifiers == null || layerIdentifiers.length == 0)
-		{
-			return;
-		}
-		for (LayerIdentifier identifier : layerIdentifiers)
-		{
-			knownLayers.remove(identifier);
-			Settings.get().removeKnownLayer(identifier);
-		}
-		layerList.setSelectedIndex(0);
-		layerList.validate();
-	}
-
-	/**
 	 * Prompt the user to remove the provided layers from the list of known layers
 	 */
 	private boolean promptUserForConfirmationOfRemoval(LayerIdentifier[] layerIdentifiers)
@@ -276,6 +261,24 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 									  				 JOptionPane.QUESTION_MESSAGE);
 		
 		return response == JOptionPane.YES_OPTION;
+	}
+	
+	/**
+	 * Remove the provided layers from the list of known layers
+	 */
+	private void removeLayersFromList(LayerIdentifier[] layerIdentifiers)
+	{
+		if (layerIdentifiers == null || layerIdentifiers.length == 0)
+		{
+			return;
+		}
+		for (LayerIdentifier identifier : layerIdentifiers)
+		{
+			knownLayers.remove(identifier);
+			Settings.get().removeKnownLayer(identifier);
+		}
+		layerList.setSelectedIndex(0);
+		layerList.validate();
 	}
 
 	private void promptToAddLayersFromDefinitions()
