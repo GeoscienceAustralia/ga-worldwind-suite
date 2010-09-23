@@ -30,6 +30,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
+import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierFactory;
 import au.gov.ga.worldwind.animator.application.LAFConstants;
@@ -67,6 +70,9 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	/** Used for selecting layer definitions */
 	private JFileChooser fileChooser;
 	
+	/** A listener used to update the palette when a layer is added or removed from the animation */
+	private AnimationEventListener animationListener;
+	
 	// Actions
 	private BasicAction addLayerToAnimationAction;
 	private BasicAction loadLayerDefinitionAction;
@@ -80,6 +86,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		setName(getMessage(getLayerPalettePanelNameKey()));
 		
 		initialiseLayerList();
+		initialiseAnimationListener();
 		updateListModel();
 		initialiseActions();
 		initialiseFileChooser();
@@ -105,6 +112,29 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		layerList.setDragEnabled(true);
 		layerList.setDropMode(DropMode.INSERT);
 		layerList.setTransferHandler(new LayerPaletteTransferHandler(layerList));
+	}
+	
+	private void initialiseAnimationListener()
+	{
+		animationListener = new AnimationEventListener()
+		{
+			@Override
+			public void receiveAnimationEvent(AnimationEvent event)
+			{
+				if (isLayerEvent(event))
+				{
+					addLayerToAnimationAction.setEnabled(!animation.hasLayer(getSelectedLayerIdentifier()));
+					layerList.repaint();
+				}
+			}
+
+			private boolean isLayerEvent(AnimationEvent event)
+			{
+				return event.getRootCause().getValue() instanceof AnimatableLayer;
+			}
+
+		};
+		animation.addChangeListener(animationListener);
 	}
 	
 	private void updateListModel()
@@ -203,6 +233,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			this.animation = (Animation)e.getSource();
 			layerList.setCellRenderer(new LayerListRenderer(animation));
 			addLayerToAnimationAction.setEnabled(!animation.hasLayer((LayerIdentifier)layerList.getSelectedValue()));
+			animation.addChangeListener(animationListener);
 		}
 		layerList.validate();
 	}
@@ -239,6 +270,11 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		return result.toArray(new LayerIdentifier[result.size()]);
 	}
 
+	private LayerIdentifier getSelectedLayerIdentifier()
+	{
+		return (LayerIdentifier)layerList.getSelectedValue();
+	}
+	
 	/**
 	 * Prompt the user to remove the provided layers from the list of known layers
 	 */

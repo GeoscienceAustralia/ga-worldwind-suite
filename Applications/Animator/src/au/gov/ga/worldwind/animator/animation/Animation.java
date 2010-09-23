@@ -156,6 +156,14 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	void addAnimatableObject(Animatable object);
 	
 	/**
+	 * Add the provided animatable object to this animation at the provided index
+	 * 
+	 * @param index The index to add the object at
+	 * @param object The object to add.
+	 */
+	void addAnimatableObject(int index, Animatable object);
+	
+	/**
 	 * Remove the provided animatable object from this animation.
 	 * <p/>
 	 * All associated key frame values will also be removed.

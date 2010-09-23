@@ -233,6 +233,23 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	}
 	
 	@Override
+	public void addAnimatableObject(int index, Animatable object)
+	{
+		if (object == null || animatableObjects.contains(object))
+		{
+			return;
+		}
+		
+		animatableObjects.add(index, object);
+		if (object instanceof AnimatableLayer)
+		{
+			refreshLayersList();
+		}
+		
+		fireAddEvent(object);
+	}
+	
+	@Override
 	public void removeAnimatableObject(Animatable object)
 	{
 		animatableObjects.remove(object);

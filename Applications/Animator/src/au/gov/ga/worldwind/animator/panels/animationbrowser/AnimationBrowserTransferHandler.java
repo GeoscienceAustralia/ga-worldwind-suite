@@ -1,5 +1,10 @@
 package au.gov.ga.worldwind.animator.panels.animationbrowser;
 
+import static au.gov.ga.worldwind.animator.panels.DataTransferFlavors.getAnimationObjectFlavor;
+import static au.gov.ga.worldwind.animator.panels.DataTransferFlavors.getLayerIdentifierFlavor;
+
+import gov.nasa.worldwind.layers.Layer;
+
 import java.awt.datatransfer.Transferable;
 
 import javax.swing.JComponent;
@@ -10,8 +15,12 @@ import javax.swing.tree.TreePath;
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationObject;
+import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
+import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
+import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
+import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter;
+import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.panels.AnimationObjectTransferable;
-import au.gov.ga.worldwind.animator.panels.DataTransferFlavors;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -80,10 +89,14 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 		try
 		{
 			// Try to import an animation object first...
-			if (support.isDataFlavorSupported(DataTransferFlavors.getAnimationObjectFlavor()))
+			if (support.isDataFlavorSupported(getAnimationObjectFlavor()))
 			{
-				object = (AnimationObject)support.getTransferable().getTransferData(DataTransferFlavors.getAnimationObjectFlavor());
-				animation.changeOrderOfAnimatableObject((Animatable)object, getNewIndexForAnimationObject(object, support));
+				object = moveAnimationObject(support);
+			}
+			
+			if (support.isDataFlavorSupported(getLayerIdentifierFlavor()))
+			{
+				object = addLayerFromIdentifier(support);
 			}
 		
 		}
@@ -93,9 +106,25 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 			return false;
 		}
 		
+		if (object == null)
+		{
+			return false;
+		}
+		
 		notifyAnimationTreeChanged(object, support);
 		return true;
 		
+	}
+
+	/**
+	 * Change the order within the current animation of the AnimationObject being transferred
+	 */
+	private AnimationObject moveAnimationObject(TransferSupport support) throws Exception
+	{
+		AnimationObject object = (AnimationObject)support.getTransferable().getTransferData(getAnimationObjectFlavor());
+		animation.changeOrderOfAnimatableObject((Animatable)object, getNewIndexForAnimationObject(object, support));
+		
+		return object;
 	}
 	
 	/**
@@ -103,7 +132,7 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 	 */
 	private int getNewIndexForAnimationObject(AnimationObject object, TransferSupport support)
 	{
-		int targetIndex = ((JTree.DropLocation)support.getDropLocation()).getChildIndex();
+		int targetIndex = getDropIndex(support);
 		int currentIndex = animation.getAnimatableObjects().indexOf(object);
 		
 		if (targetIndex <= currentIndex)
@@ -113,6 +142,29 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 		return targetIndex - 1;
 	}
 
+	/**
+	 * Add an animation layer from the layer identifier being transferred, if one does not already exist
+	 * <p/>
+	 * Wires in an opacity parameter by default.
+	 */
+	private AnimationObject addLayerFromIdentifier(TransferSupport support) throws Exception
+	{
+		LayerIdentifier identifier = (LayerIdentifier)support.getTransferable().getTransferData(getLayerIdentifierFlavor());
+		
+		if (animation.hasLayer(identifier))
+		{
+			return null;
+		}
+		
+		Layer loadedLayer = AnimationLayerLoader.loadLayer(identifier);
+		AnimatableLayer animatableLayer = new DefaultAnimatableLayer(loadedLayer);
+		animatableLayer.addParameter(new LayerOpacityParameter(animation, loadedLayer));
+		
+		animation.addAnimatableObject(getDropIndex(support), animatableLayer);
+		
+		return animatableLayer;
+	}
+	
 	private void notifyAnimationTreeChanged(AnimationObject object, TransferSupport support)
 	{
 		((AnimationTreeModel)animationObjectTree.getModel()).notifyTreeChanged(animation);
@@ -130,7 +182,8 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 	
 	private boolean isSupportedFlavor(TransferSupport support)
 	{
-		return support.isDataFlavorSupported(DataTransferFlavors.getAnimationObjectFlavor());// TODO: Add cases for layer identifiers and 
+		return support.isDataFlavorSupported(getAnimationObjectFlavor()) ||
+				support.isDataFlavorSupported(getLayerIdentifierFlavor()); 
 	}
 	
 	private boolean isTargetingAnimationObjectTree(TransferSupport support)
@@ -161,5 +214,10 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 			return null;
 		}
 		return (AnimationObject)animationObjectTree.getSelectionPath().getLastPathComponent();
+	}
+	
+	private int getDropIndex(TransferSupport support)
+	{
+		return ((JTree.DropLocation)support.getDropLocation()).getChildIndex();
 	}
 }
