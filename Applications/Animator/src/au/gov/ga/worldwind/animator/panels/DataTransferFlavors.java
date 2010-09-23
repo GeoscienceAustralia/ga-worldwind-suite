@@ -19,6 +19,8 @@ public class DataTransferFlavors
 	
 	public static DataFlavor getStringFlavor() { return DataFlavor.stringFlavor; }
 	
+	public static DataFlavor getFileListFlavor() { return DataFlavor.javaFileListFlavor; }
+	
 	private static final DataFlavor URL_FLAVOR = new DataFlavor(URL.class, "URL");
 	public static DataFlavor getURLFlavor() { return URL_FLAVOR; }
 	

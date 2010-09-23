@@ -13,9 +13,9 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.AbstractListModel;
 import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.DropMode;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -24,7 +24,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
-import javax.swing.ListModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -104,7 +103,8 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		layerList.setActionMap(null);
 		
 		layerList.setDragEnabled(true);
-		layerList.setTransferHandler(new LayerPaletteTransferHandler(animation, layerList));
+		layerList.setDropMode(DropMode.INSERT);
+		layerList.setTransferHandler(new LayerPaletteTransferHandler(layerList));
 	}
 	
 	private void updateListModel()
@@ -377,47 +377,5 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			
 			return result;
 		}
-	}
-	
-	/**
-	 * An implementation of the {@link ListModel} interface that is backed by a {@link List}.
-	 * <p/>
-	 * Add and remove events are fired when elements are added or removed from the backing list.
-	 */
-	private static class ListBackedModel<T> extends AbstractListModel
-	{
-		private static final long serialVersionUID = 20100910L;
-		
-		private List<T> backingList = new ArrayList<T>();
-
-		public boolean contains(T object)
-		{
-			return backingList.contains(object);
-		}
-		
-		public void add(T object)
-		{
-			backingList.add(object);
-			fireIntervalAdded(this, backingList.size() - 1, backingList.size());
-		}
-		
-		public void remove(T object)
-		{
-			backingList.remove(object);
-			fireIntervalRemoved(this,  backingList.size(),  backingList.size() - 1);
-		}
-		
-		@Override
-		public int getSize()
-		{
-			return backingList.size();
-		}
-
-		@Override
-		public Object getElementAt(int index)
-		{
-			return backingList.get(index);
-		}
-		
 	}
 }
