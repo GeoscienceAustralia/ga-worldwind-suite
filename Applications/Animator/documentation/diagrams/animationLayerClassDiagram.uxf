@@ -32,4 +32,5 @@ m2= 1</panel_attributes><additional_attributes>30;30;30;120</additional_attribut
 m1= 1
 m2= 1</panel_attributes><additional_attributes>30;30;30;80;240;80;240;120</additional_attributes></element><element><type>com.umlet.element.base.Class</type><coordinates><x>490</x><y>310</y><w>170</w><h>50</h></coordinates><panel_attributes>&lt;&lt;Enum&gt;&gt;
 Type</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>390</x><y>310</y><w>120</w><h>50</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
-m2=1</panel_attributes><additional_attributes>30;30;100;30</additional_attributes></element></umlet_diagram>
+m2=1</panel_attributes><additional_attributes>30;30;100;30</additional_attributes></element><element><type>com.umlet.element.base.Class</type><coordinates><x>0</x><y>460</y><w>170</w><h>50</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
+Animatable</panel_attributes><additional_attributes/></element><element><type>com.umlet.element.base.Relation</type><coordinates><x>50</x><y>330</y><w>50</w><h>150</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>30;130;30;30</additional_attributes></element></umlet_diagram>
