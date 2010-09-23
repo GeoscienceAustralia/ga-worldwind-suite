@@ -1,11 +1,14 @@
 package au.gov.ga.worldwind.animator.panels.animationbrowser;
 
 import static au.gov.ga.worldwind.animator.panels.DataTransferFlavors.getAnimationObjectFlavor;
+import static au.gov.ga.worldwind.animator.panels.DataTransferFlavors.getFileListFlavor;
 import static au.gov.ga.worldwind.animator.panels.DataTransferFlavors.getLayerIdentifierFlavor;
-
 import gov.nasa.worldwind.layers.Layer;
 
 import java.awt.datatransfer.Transferable;
+import java.io.File;
+import java.net.URL;
+import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
@@ -18,6 +21,7 @@ import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
+import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierFactory;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter;
 import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.panels.AnimationObjectTransferable;
@@ -30,8 +34,8 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * Can handle transfers of:
  * <ul>
  * 	<li>Animation objects from within the panel (i.e. changing the order of an animation object),
- * 	<li>TODO: A layer identifier from the layer palette panel (i.e. adding a new layer from the palette to the current animation); and
- * 	<li>TODO: A layer definition file from an external source (i.e. adding a layer from an external file, not via the palette)
+ * 	<li>A layer identifier from the layer palette panel (i.e. adding a new layer from the palette to the current animation); and
+ * 	<li>A layer definition file from an external source (i.e. adding a layer from an external file, not via the palette)
  * </ul>
  * 
  * @author James Navin (james.navin@ga.gov.au)
@@ -88,7 +92,6 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 		AnimationObject object = null;
 		try
 		{
-			// Try to import an animation object first...
 			if (support.isDataFlavorSupported(getAnimationObjectFlavor()))
 			{
 				object = moveAnimationObject(support);
@@ -97,6 +100,11 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 			if (support.isDataFlavorSupported(getLayerIdentifierFlavor()))
 			{
 				object = addLayerFromIdentifier(support);
+			}
+			
+			if (support.isDataFlavorSupported(getFileListFlavor()))
+			{
+				object = addLayerFromDefinitionFile(support);
 			}
 		
 		}
@@ -151,6 +159,39 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 	{
 		LayerIdentifier identifier = (LayerIdentifier)support.getTransferable().getTransferData(getLayerIdentifierFlavor());
 		
+		return addLayerFromIdentifier(identifier, getDropIndex(support));
+	}
+
+	/**
+	 * Add an animation layer from a layer definition files, if they don't already exist
+	 * <p/>
+	 * Wires in an opacity parameter by default
+	 */
+	private AnimationObject addLayerFromDefinitionFile(TransferSupport support) throws Exception
+	{
+		List<?> files = (List<?>)support.getTransferable().getTransferData(getFileListFlavor());
+		for (Object fileObject : files)
+		{
+			// Add the first file in the list
+			if (fileObject instanceof File)
+			{
+				URL layerUrl = ((File)fileObject).toURI().toURL();
+				LayerIdentifier identifier = LayerIdentifierFactory.createFromDefinition(layerUrl);
+				
+				return addLayerFromIdentifier(identifier, getDropIndex(support));
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Add an animation layer from the provided layer identifier if one does not already exist
+	 * <p/>
+	 * Wires in an opacity parameter by default.
+	 */
+	private AnimationObject addLayerFromIdentifier(LayerIdentifier identifier, int dropIndex)
+	{
 		if (animation.hasLayer(identifier))
 		{
 			return null;
@@ -160,7 +201,7 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 		AnimatableLayer animatableLayer = new DefaultAnimatableLayer(loadedLayer);
 		animatableLayer.addParameter(new LayerOpacityParameter(animation, loadedLayer));
 		
-		animation.addAnimatableObject(getDropIndex(support), animatableLayer);
+		animation.addAnimatableObject(dropIndex, animatableLayer);
 		
 		return animatableLayer;
 	}
@@ -183,7 +224,8 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 	private boolean isSupportedFlavor(TransferSupport support)
 	{
 		return support.isDataFlavorSupported(getAnimationObjectFlavor()) ||
-				support.isDataFlavorSupported(getLayerIdentifierFlavor()); 
+				support.isDataFlavorSupported(getLayerIdentifierFlavor()) ||
+				support.isDataFlavorSupported(getFileListFlavor()); 
 	}
 	
 	private boolean isTargetingAnimationObjectTree(TransferSupport support)
