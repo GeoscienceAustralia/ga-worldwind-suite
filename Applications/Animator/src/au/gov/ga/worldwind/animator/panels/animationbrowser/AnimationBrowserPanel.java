@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.DropMode;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -82,6 +83,39 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		initialiseToolbar();
 		packComponents();
 	}
+
+	/**
+	 * Initialises the object tree. 
+	 */
+	private void initialiseObjectTree()
+	{
+		treeModel = new AnimationTreeModel(animation);
+		
+		objectTree = new NameableTree(treeModel);
+		objectTree.setEditable(false);
+		objectTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		objectTree.setCellRenderer(new AnimationTreeRenderer());
+		objectTree.setToggleClickCount(-1);
+		objectTree.addTreeSelectionListener(new TreeSelectionListener()
+		{
+			@Override
+			public void valueChanged(TreeSelectionEvent e)
+			{
+				AnimationObject selectedObject = getSelectedAnimationObject();
+				
+				CurrentlySelectedObject.set(selectedObject);
+				
+				removeAnimationObjectAction.setEnabled(selectedObject != null && isRemovable(selectedObject));
+				moveObjectUpAction.setEnabled(selectedObject != null && isMovable(selectedObject) && !isFirstObject(selectedObject));
+				moveObjectDownAction.setEnabled(selectedObject != null && isMovable(selectedObject) && !isLastObject(selectedObject));
+			}
+		});
+		objectTree.setActionMap(null); // Remove the default key bindings so our custom ones will work
+		
+		objectTree.setTransferHandler(new AnimationBrowserTransferHandler(animation, objectTree));
+		objectTree.setDragEnabled(true);
+		objectTree.setDropMode(DropMode.INSERT);
+	}
 	
 	private void initialiseActions()
 	{
@@ -118,6 +152,34 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		
 	}
 
+	private void promptToRemoveSelectedObject()
+	{
+		AnimationObject selectedObject = getSelectedAnimationObject();
+		if (!isRemovable(selectedObject))
+		{
+			return;
+		}
+		
+		boolean removalConfirmed = promptUserForConfirmationOfRemoval(selectedObject);
+		if (removalConfirmed)
+		{
+			animation.removeAnimatableObject((Animatable)selectedObject); // TODO Make this more general to allow extension in the future
+			removeAnimationObjectAction.setEnabled(false);
+		}
+		
+	}
+	
+	protected boolean promptUserForConfirmationOfRemoval(AnimationObject selectedObject)
+	{
+		int response = JOptionPane.showConfirmDialog(getParentWindow(),
+ 				 									 getMessage(getQueryRemoveObjectFromAnimationMessageKey(), selectedObject.getName()), 
+ 				 									 getMessage(getQueryRemoveObjectFromAnimationCaptionKey()),
+ 				 									 JOptionPane.YES_NO_OPTION,
+ 				 									 JOptionPane.QUESTION_MESSAGE);
+
+		return response == JOptionPane.YES_OPTION;
+	}
+	
 	private void moveSelectedObjectUp()
 	{
 		AnimationObject selectedObject = getSelectedAnimationObject();
@@ -167,35 +229,21 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 	{
 		return object != null && object instanceof Animatable;
 	}
-
-	private void promptToRemoveSelectedObject()
+	
+	private boolean isRemovable(AnimationObject selectedObject)
 	{
-		AnimationObject selectedObject = getSelectedAnimationObject();
-		if (!isRemovable(selectedObject))
-		{
-			return;
-		}
-		
-		boolean removalConfirmed = promptUserForConfirmationOfRemoval(selectedObject);
-		if (removalConfirmed)
-		{
-			animation.removeAnimatableObject((Animatable)selectedObject); // TODO Make this more general to allow extension in the future
-			removeAnimationObjectAction.setEnabled(false);
-		}
-		
+		return selectedObject != null && selectedObject instanceof Animatable && !(selectedObject instanceof Camera);
 	}
 	
-	protected boolean promptUserForConfirmationOfRemoval(AnimationObject selectedObject)
+	private AnimationObject getSelectedAnimationObject()
 	{
-		int response = JOptionPane.showConfirmDialog(getParentWindow(),
- 				 									 getMessage(getQueryRemoveObjectFromAnimationMessageKey(), selectedObject.getName()), 
- 				 									 getMessage(getQueryRemoveObjectFromAnimationCaptionKey()),
- 				 									 JOptionPane.YES_NO_OPTION,
- 				 									 JOptionPane.QUESTION_MESSAGE);
-
-		return response == JOptionPane.YES_OPTION;
+		if (objectTree.isSelectionEmpty())
+		{
+			return null;
+		}
+		return (AnimationObject)objectTree.getSelectionPath().getLastPathComponent();
 	}
-
+	
 	private void initialiseToolbar()
 	{
 		toolbar = new JToolBar();
@@ -205,7 +253,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		toolbar.add(moveObjectUpAction);
 		toolbar.add(moveObjectDownAction);
 	}
-
+	
 	/**
 	 * Pack the browser components into the parent panel, ready for display
 	 */
@@ -214,40 +262,6 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		scrollPane = new JScrollPane(objectTree);
 		add(toolbar, BorderLayout.NORTH);
 		add(scrollPane, BorderLayout.CENTER);
-	}
-
-	/**
-	 * Initialises the object tree. 
-	 */
-	private void initialiseObjectTree()
-	{
-		treeModel = new AnimationTreeModel(animation);
-		
-		objectTree = new NameableTree(treeModel);
-		objectTree.setEditable(false);
-		objectTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		objectTree.setCellRenderer(new AnimationTreeRenderer());
-		objectTree.setToggleClickCount(-1);
-		objectTree.addTreeSelectionListener(new TreeSelectionListener()
-		{
-			@Override
-			public void valueChanged(TreeSelectionEvent e)
-			{
-				AnimationObject selectedObject = getSelectedAnimationObject();
-				
-				CurrentlySelectedObject.set(selectedObject);
-				
-				removeAnimationObjectAction.setEnabled(selectedObject != null && isRemovable(selectedObject));
-				moveObjectUpAction.setEnabled(selectedObject != null && isMovable(selectedObject) && !isFirstObject(selectedObject));
-				moveObjectDownAction.setEnabled(selectedObject != null && isMovable(selectedObject) && !isLastObject(selectedObject));
-			}
-		});
-		objectTree.setActionMap(null); // Remove the default key bindings so our custom ones will work
-	}
-	
-	private boolean isRemovable(AnimationObject selectedObject)
-	{
-		return selectedObject != null && selectedObject instanceof Animatable && !(selectedObject instanceof Camera);
 	}
 	
 	@Override
@@ -258,17 +272,9 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 			this.animation = (Animation)e.getSource();
 			treeModel = new AnimationTreeModel(animation);
 			objectTree.setModel(treeModel);
+			objectTree.setTransferHandler(new AnimationBrowserTransferHandler(animation, objectTree));
 		}
 		objectTree.validate();
-	}
-
-	private AnimationObject getSelectedAnimationObject()
-	{
-		if (objectTree.isSelectionEmpty())
-		{
-			return null;
-		}
-		return (AnimationObject)objectTree.getSelectionPath().getLastPathComponent();
 	}
 	
 	/**
