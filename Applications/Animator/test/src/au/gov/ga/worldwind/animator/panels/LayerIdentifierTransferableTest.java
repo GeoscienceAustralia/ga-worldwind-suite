@@ -46,6 +46,18 @@ public class LayerIdentifierTransferableTest
 	{
 		assertEquals(true, classToBeTested.isDataFlavorSupported(getLayerIdentifierFlavor()));
 	}
+	
+	@Test
+	public void testDoesNotSupportsOtherFlavors() throws Exception
+	{
+		assertEquals(false, classToBeTested.isDataFlavorSupported(getAnimationObjectFlavor()));
+	}
+	
+	@Test
+	public void testDoesNotSupportsNullFlavors() throws Exception
+	{
+		assertEquals(false, classToBeTested.isDataFlavorSupported(null));
+	}
 
 	@Test
 	public void testGetWithStringFlavorReturnsName() throws Exception
@@ -63,6 +75,18 @@ public class LayerIdentifierTransferableTest
 	public void testGetWithLayerIdentifierFlavorReturnsIdentifier() throws Exception
 	{
 		assertEquals(identifier, classToBeTested.getTransferData(getLayerIdentifierFlavor()));
+	}
+	
+	@Test
+	public void testGetWithLayerOtherFlavorReturnsNull() throws Exception
+	{
+		assertEquals(null, classToBeTested.getTransferData(getAnimationObjectFlavor()));
+	}
+	
+	@Test
+	public void testGetWithLayerNullFlavorReturnsNull() throws Exception
+	{
+		assertEquals(null, classToBeTested.getTransferData(null));
 	}
 	
 }
