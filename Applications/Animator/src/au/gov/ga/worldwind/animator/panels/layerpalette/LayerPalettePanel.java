@@ -103,8 +103,9 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			@Override
 			public void valueChanged(ListSelectionEvent e)
 			{
-				LayerIdentifier layerIdentifier = (LayerIdentifier)((JList)e.getSource()).getSelectedValue();
+				LayerIdentifier layerIdentifier = (LayerIdentifier)layerList.getSelectedValue();
 				addLayerToAnimationAction.setEnabled(!animation.hasLayer(layerIdentifier));
+				removeLayerDefinitionAction.setEnabled(true);
 			}
 		});
 		layerList.setActionMap(null);
@@ -174,6 +175,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		});
 		
 		removeLayerDefinitionAction = new BasicAction(getMessage(getRemoveLayerFromListLabelKey()), Icons.delete.getIcon());
+		removeLayerDefinitionAction.setEnabled(false);
 		removeLayerDefinitionAction.addActionListener(new ActionListener(){
 
 			@Override
@@ -290,12 +292,8 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 			selectionList += "- " + identifier.getName() + "\n";
 			
 		}
-		int response = JOptionPane.showConfirmDialog(getParentWindow(),
-									  				 getMessage(getQueryRemoveLayersFromListMessageKey(), selectionList), 
-									  				 getMessage(getQueryRemoveLayersFromListCaptionKey()),
-									  				 JOptionPane.YES_NO_OPTION,
-									  				 JOptionPane.QUESTION_MESSAGE);
-		
+		int response = issueConfirmationPrompt(getMessage(getQueryRemoveLayersFromListMessageKey(), selectionList), 
+											   getMessage(getQueryRemoveLayersFromListCaptionKey()));
 		return response == JOptionPane.YES_OPTION;
 	}
 	
@@ -326,7 +324,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	/**
 	 * Prompt the user to select one or more layer definition files to add to the known layers
 	 */
-	private File[] promptUserForDefinitionFiles()
+	protected File[] promptUserForDefinitionFiles()
 	{
 		int userAction = fileChooser.showOpenDialog(getParentWindow());
 		if (userAction == JFileChooser.APPROVE_OPTION)
@@ -371,6 +369,15 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 		}
 		knownLayers.add(identifier);
 		Settings.get().addKnownLayer(identifier);
+	}
+	
+	/**
+	 * Issue a confirmation prompt to the user with the provided message and caption.
+	 * @return the response from the user, one of {@link JOptionPane#YES_OPTION} or {@link JOptionPane#NO_OPTION}
+	 */
+	protected int issueConfirmationPrompt(String message, String caption)
+	{
+		return JOptionPane.showConfirmDialog(getParentWindow(), message, caption, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 	}
 	
 	/**

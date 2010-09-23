@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 
@@ -69,7 +68,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testRemoveActionDisabledWhenNoSelection()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(null);
@@ -80,7 +78,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testRemoveActionDisabledWhenCameraSelected()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(0));
@@ -91,7 +88,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testRemoveActionEnabledWhenLayerSelected()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(1));
@@ -104,7 +100,6 @@ public class AnimationBrowserPanelTest
 	{
 		CurrentlySelectedObject.set(createLayerWithSingleParameter("layer3"));
 		
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(1));
@@ -115,7 +110,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testUserPromptedWhenRemoveIsFired()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(1));
@@ -127,7 +121,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testNoRemovalWhenConfirmationDenied()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(1));
@@ -141,7 +134,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testRemovalWhenConfirmationAccepted()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(1));
@@ -155,7 +147,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testMoveUpActionDisabledWhenNoSelection()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(null);
@@ -166,7 +157,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testMoveUpActionDisabledWhenFirstSelected()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(0));
@@ -177,7 +167,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testMoveUpActionEnabledWhenSecondSelected()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(1));
@@ -188,7 +177,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testMoveWhenMoveUpActionFired()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(1));
@@ -201,7 +189,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testMoveDownActionDisabledWhenNoSelection()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(null);
@@ -212,7 +199,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testMoveDownActionDisabledWhenLastSelected()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(2));
@@ -223,7 +209,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testMoveDownActionEnabledWhenSecondSelected()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(1));
@@ -234,7 +219,6 @@ public class AnimationBrowserPanelTest
 	@Test
 	public void testMoveWhenMoveDownActionFired()
 	{
-		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 		createAnimationBrowserPanel();
 		
 		select(getAnimationObjects().get(1));
@@ -344,6 +328,8 @@ public class AnimationBrowserPanelTest
 			atLeast(1).of(animation).addChangeListener(with(any(AnimationTreeModel.class)));
 			atLeast(1).of(animation).getName();will(returnValue("Animation"));
 		}});
+		
+		addObjectsToAnimation(createCamera(), createLayerWithSingleParameter("layer1"), createLayerWithSingleParameter("layer2"));
 	}
 	
 	@SuppressWarnings("serial")
