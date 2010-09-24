@@ -129,7 +129,6 @@ public class Animator
 		caps.setGreenBits(8);
 		caps.setBlueBits(8);
 		caps.setDepthBits(24);
-		caps.setSampleBuffers(true);
 		caps.setDoubleBuffered(true);
 		caps.setNumSamples(4);
 	
