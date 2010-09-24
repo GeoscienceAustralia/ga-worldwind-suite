@@ -1853,12 +1853,14 @@ public class Animator
 	 */
 	private Thread renderAnimation(final double detailHint, final int firstFrame, final int lastFrame, final File outputDir, final String frameName, final boolean alpha)
 	{
+		
 		if (animation != null && animation.hasKeyFrames())
 		{
 			Thread thread = new Thread(new Runnable()
 			{
 				public void run()
 				{
+					
 					stop = false;
 
 					boolean wasImmediate = ImmediateMode.isImmediate();
@@ -1880,11 +1882,12 @@ public class Animator
 					int filenameLength = String.valueOf(lastFrame).length();
 
 					AnimatorSceneController asc = (AnimatorSceneController) wwd.getSceneController();
+					
 					for (int frame = firstFrame; frame <= lastFrame; frame ++)
 					{
 						setSlider(frame);
 						applyAnimationState();
-
+						
 						asc.takeScreenshot(new File(outputDir, createImageSequenceName(frameName, frame, filenameLength)), alpha);
 						wwd.redraw();
 						asc.waitForScreenshot();

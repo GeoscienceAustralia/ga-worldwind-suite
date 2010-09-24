@@ -19,7 +19,7 @@ public class AnimatorSceneController extends QualitySceneController
 		synchronized (semaphore2)
 		{
 			super.doRepaint(dc);
-
+			
 			if (screenshotFile != null)
 			{
 				if (!screenshotFile.getParentFile().exists())
@@ -32,15 +32,11 @@ public class AnimatorSceneController extends QualitySceneController
 					int height = dc.getGLDrawable().getHeight();
 					if (screenshotFile.getName().toLowerCase().endsWith(".tga"))
 					{
-						/*com.sun.opengl.util.Screenshot.writeToTargaFile(screenshotFile,
-								width, height, true);*/
-						TGAScreenshot.writeToTargaFile(screenshotFile, width,
-								height, alpha);
+						TGAScreenshot.writeToTargaFile(screenshotFile, width, height, alpha);
 					}
 					else
 					{
-						com.sun.opengl.util.Screenshot.writeToFile(
-								screenshotFile, width, height, alpha);
+						com.sun.opengl.util.Screenshot.writeToFile(screenshotFile, width, height, alpha);
 					}
 				}
 				catch (Exception e)
