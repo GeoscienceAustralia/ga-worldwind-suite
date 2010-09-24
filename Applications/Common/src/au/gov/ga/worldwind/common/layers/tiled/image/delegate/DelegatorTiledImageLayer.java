@@ -227,7 +227,13 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 
 		//pass request to delegate
 		Runnable task = delegateKit.createRequestTask(tile, this);
-		this.getRequestQ().add(task);
+
+		//if returned task is null, the task has already been run by
+		//the immediate delegates, so don't add to queue
+		if (task != null)
+		{
+			this.getRequestQ().add(task);
+		}
 	}
 
 	/**
