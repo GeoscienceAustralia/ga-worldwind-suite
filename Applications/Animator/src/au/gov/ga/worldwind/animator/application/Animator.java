@@ -102,6 +102,7 @@ import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
+import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
@@ -768,6 +769,8 @@ public class Animator
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, ElevationTesselator.class.getName());
 
 		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE, 16777216L * 8); // 128 mb
+		
+		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
 		
 		GASandpit.setSandpitMode(true);
 	}

@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.animator.layers;
 
+import gov.nasa.worldwind.Factory;
+import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.layers.BasicLayerFactory;
@@ -34,13 +37,33 @@ public class AnimationLayerLoader
 	 * <p/>
 	 * Can be overriden with the {@link #setLayerFactory(BasicLayerFactory)} method.
 	 */
-	private static BasicLayerFactory layerFactory = new LayerFactory();
+	private static Factory layerFactory;
 	
 	static
 	{
 		DelegateFactory.registerDelegate(ImmediateURLRequesterDelegate.class);
 		DelegateFactory.registerReplacementClass(URLRequesterDelegate.class, ImmediateURLRequesterDelegate.class);
 		DelegateFactory.registerReplacementClass(LocalRequesterDelegate.class, ImmediateLocalRequesterDelegate.class);
+	}
+	
+	/**
+	 * @return The layer factory instance to use for creating layers
+	 */
+	public static Factory getLayerFactory()
+	{
+		if (layerFactory == null)
+		{
+			layerFactory = (Factory) WorldWind.createConfigurationComponent(AVKey.LAYER_FACTORY);
+		}
+		return layerFactory;
+	}
+	
+	/**
+	 * @param layerFactory The layer factory instance to use for creating layers
+	 */
+	public static void setLayerFactory(BasicLayerFactory layerFactory)
+	{
+		AnimationLayerLoader.layerFactory = layerFactory;
 	}
 	
 	/**
@@ -106,23 +129,11 @@ public class AnimationLayerLoader
 		AVList params = new AVListImpl();
 		params.setValue(AVKeyMore.CONTEXT_URL, url);
 		
-		Layer result = (Layer)layerFactory.createFromConfigSource(element, params);
+		Layer result = (Layer)getLayerFactory().createFromConfigSource(element, params);
 		result.setValue(AVKeyMore.CONTEXT_URL, url);
 		result.setEnabled(true);
 		
 		return (Layer)result;
-	}
-
-	/**
-	 * @param layerFactory The layer factory instance to use for creating 
-	 */
-	public static void setLayerFactory(BasicLayerFactory layerFactory)
-	{
-		if (layerFactory == null)
-		{
-			return;
-		}
-		AnimationLayerLoader.layerFactory = layerFactory;
 	}
 
 }
