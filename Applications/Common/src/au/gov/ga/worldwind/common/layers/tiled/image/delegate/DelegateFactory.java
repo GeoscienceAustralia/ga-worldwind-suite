@@ -6,6 +6,7 @@ import java.util.Map;
 
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.colortoalpha.ColorToAlphaTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.nearestneighbor.NearestNeighborTextureTileFactoryDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.resize.ResizeTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.shadedelevationreader.ShadedElevationImageReaderDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.stripingfilter.StripingFilterTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.transparentcolor.TransparentColorTransformerDelegate;
@@ -43,6 +44,7 @@ public class DelegateFactory
 		registerDelegate(TransparentColorTransformerDelegate.class);
 		registerDelegate(StripingFilterTransformerDelegate.class);
 		registerDelegate(ShadedElevationImageReaderDelegate.class);
+		registerDelegate(ResizeTransformerDelegate.class);
 	}
 
 	/**
