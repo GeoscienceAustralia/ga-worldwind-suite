@@ -9,10 +9,13 @@ import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipFile;
 
 public class Util
 {
@@ -61,7 +64,7 @@ public class Util
 		{
 			URL url = context == null ? new URL(path) : new URL(context, path);
 			File file = Util.urlToFile(url);
-			if (file != null && file.isDirectory())
+			if (file != null && file.exists())
 				return file;
 		}
 		catch (Exception e)
@@ -87,7 +90,7 @@ public class Util
 			try
 			{
 				File dir = new File(parent, path);
-				if (dir.isDirectory())
+				if (dir.exists())
 					return dir;
 			}
 			catch (Exception e)
@@ -97,8 +100,57 @@ public class Util
 
 		//otherwise ignore the parent and just attempt the path
 		File dir = new File(path);
-		if (dir.isDirectory())
+		if (dir.exists())
 			return dir;
+		return null;
+	}
+
+	/**
+	 * Return a URL which points to an entry within a zip file (or
+	 * <code>null</code> if the entry doesn't exist).
+	 * 
+	 * @param zipFile
+	 * @param entry
+	 *            Filename within the zip file (must be relative with no leading
+	 *            slash)
+	 * @return URL pointing to entry within zipFile
+	 * @throws MalformedURLException
+	 */
+	public static URL zipEntryUrl(File zipFile, String entry) throws MalformedURLException
+	{
+		ZipFile zip = null;
+		entry = entry.replaceAll("\\\\", "/");
+		try
+		{
+			zip = new ZipFile(zipFile);
+			if (zip.getEntry(entry) != null)
+			{
+				URL zipFileUrl = zipFile.toURI().toURL();
+				return new URL("jar:" + zipFileUrl.toExternalForm() + "!/" + entry);
+			}
+		}
+		catch (MalformedURLException e)
+		{
+			throw e;
+		}
+		catch (IOException e)
+		{
+			//ignore
+		}
+		finally
+		{
+			if (zip != null)
+			{
+				try
+				{
+					zip.close();
+				}
+				catch (IOException e)
+				{
+					//ignore
+				}
+			}
+		}
 		return null;
 	}
 

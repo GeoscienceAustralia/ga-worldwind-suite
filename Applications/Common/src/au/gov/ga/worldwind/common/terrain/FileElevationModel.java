@@ -76,8 +76,8 @@ public class FileElevationModel extends BoundedBasicElevationModel
 			if (dataset == null)
 				dataset = "";
 
-			File directory = Util.getPathWithinContext(dataset, context);
-			if (directory == null)
+			File parent = Util.getPathWithinContext(dataset, context);
+			if (parent == null)
 				return null;
 
 			//default to BIL
@@ -89,12 +89,27 @@ public class FileElevationModel extends BoundedBasicElevationModel
 					ext = "zip";
 			}
 
-			File file =
-					new File(directory, tile.getLevelNumber() + File.separator
-							+ Util.paddedInt(tile.getRow(), 4) + File.separator
-							+ Util.paddedInt(tile.getRow(), 4) + "_"
-							+ Util.paddedInt(tile.getColumn(), 4) + "." + ext);
-			return file.toURI().toURL();
+			String filename =
+					tile.getLevelNumber() + File.separator + Util.paddedInt(tile.getRow(), 4)
+							+ File.separator + Util.paddedInt(tile.getRow(), 4) + "_"
+							+ Util.paddedInt(tile.getColumn(), 4) + "." + ext;
+			
+			if (parent.isFile() && parent.getName().toLowerCase().endsWith(".zip"))
+			{
+				//zip file; return URL using 'jar' protocol
+				return Util.zipEntryUrl(parent, filename);
+			}
+			else if (parent.isDirectory())
+			{
+				//return standard 'file' protocol URL
+				File file = new File(parent, filename);
+				if (file.exists())
+				{
+					return file.toURI().toURL();
+				}
+			}
+
+			return null;
 		}
 	}
 

@@ -38,20 +38,7 @@ public class LocalRequesterDelegate implements TileRequesterDelegate
 	public URL getLocalTileURL(TextureTile tile, DelegatorTiledImageLayer layer,
 			boolean searchClassPath)
 	{
-		File file = getTileFile(tile, layer);
-		if (file != null && file.exists())
-		{
-			try
-			{
-				return file.toURI().toURL();
-			}
-			catch (MalformedURLException e)
-			{
-				String msg = "Converting tile file to URL failed";
-				Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
-			}
-		}
-		return null;
+		return getTileURL(tile, layer);
 	}
 
 	/**
@@ -72,15 +59,15 @@ public class LocalRequesterDelegate implements TileRequesterDelegate
 	}
 
 	/**
-	 * Return a File object which points to the tile's texture.
+	 * Return a URL which points to the tile's texture.
 	 * 
 	 * @param tile
-	 *            Tile to get texture file for
+	 *            Tile to get texture URL for
 	 * @param layer
 	 *            Tile's layer
-	 * @return Tile's texture file
+	 * @return Tile's texture URL
 	 */
-	protected File getTileFile(Tile tile, DelegatorTiledImageLayer layer)
+	protected URL getTileURL(Tile tile, DelegatorTiledImageLayer layer)
 	{
 		String service = tile.getLevel().getService();
 		String dataset = tile.getLevel().getDataset();
@@ -93,9 +80,16 @@ public class LocalRequesterDelegate implements TileRequesterDelegate
 		if (dataset == null)
 			dataset = "";
 
-		File directory = Util.getPathWithinContext(dataset, layer.context);
+		boolean isZip = false;
+		File parent = Util.getPathWithinContext(dataset, layer.context);
+		if (parent == null)
+		{
+			//if the directory didn't exist, try a zip file
+			isZip = true;
+			parent = Util.getPathWithinContext(dataset + ".zip", layer.context);
+		}
 
-		if (directory == null)
+		if (parent == null)
 			return null;
 
 		//default to JPG
@@ -118,10 +112,34 @@ public class LocalRequesterDelegate implements TileRequesterDelegate
 				ext = "gif";
 		}
 
-		return new File(directory, tile.getLevelNumber() + File.separator
-				+ Util.paddedInt(tile.getRow(), 4) + File.separator
-				+ Util.paddedInt(tile.getRow(), 4) + "_" + Util.paddedInt(tile.getColumn(), 4)
-				+ "." + ext);
+		String filename =
+				tile.getLevelNumber() + File.separator + Util.paddedInt(tile.getRow(), 4)
+						+ File.separator + Util.paddedInt(tile.getRow(), 4) + "_"
+						+ Util.paddedInt(tile.getColumn(), 4) + "." + ext;
+
+		try
+		{
+			if (parent.isFile() && isZip)
+			{
+				//zip file; return URL using 'jar' protocol
+				return Util.zipEntryUrl(parent, filename);
+			}
+			else if (parent.isDirectory())
+			{
+				//return standard 'file' protocol URL
+				File file = new File(parent, filename);
+				if (file.exists())
+				{
+					return file.toURI().toURL();
+				}
+			}
+		}
+		catch (MalformedURLException e)
+		{
+			String msg = "Converting tile file to URL failed";
+			Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
+		}
+		return null;
 	}
 
 	/**
