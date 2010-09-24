@@ -1861,9 +1861,9 @@ public class Animator
 				{
 					stop = false;
 
-					boolean immediate = ImmediateMode.isImmediate();
+					boolean wasImmediate = ImmediateMode.isImmediate();
+					
 					ImmediateMode.setImmediate(true);
-					AnimatorSceneController asc = (AnimatorSceneController) wwd.getSceneController();
 
 					resizeWindowToAnimationSize(animation.getRenderParameters().getImageDimension());
 
@@ -1879,7 +1879,8 @@ public class Animator
 
 					int filenameLength = String.valueOf(lastFrame).length();
 
-					for (int frame = firstFrame; frame <= lastFrame; frame += 1)
+					AnimatorSceneController asc = (AnimatorSceneController) wwd.getSceneController();
+					for (int frame = firstFrame; frame <= lastFrame; frame ++)
 					{
 						setSlider(frame);
 						applyAnimationState();
@@ -1899,7 +1900,7 @@ public class Animator
 					orbitView.setDetectCollisions(detectCollisions);
 					frame.setAlwaysOnTop(false);
 
-					ImmediateMode.setImmediate(immediate);
+					ImmediateMode.setImmediate(wasImmediate);
 				}
 			});
 			thread.start();
