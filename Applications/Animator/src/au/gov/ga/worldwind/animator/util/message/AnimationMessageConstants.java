@@ -38,6 +38,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getPreviewX10MenuLabelKey() { return "animator.gui.menu.previewx10.label"; }
 	public static String getRenderHighResMenuLabelKey() { return "animator.gui.menu.renderhires.label"; }
 	public static String getRenderStandardResMenuLabelKey() { return "animator.gui.menu.renderstandardres.label"; }
+	public static String getResizeToRenderDimensionsLabelKey() { return "animator.gui.menu.resizetorenderdimensions.label"; }
 	public static String getDebugMenuLabelKey() { return "animator.gui.menu.debug.label"; }
 	public static String getKeyValuesMenuLabelKey() { return "animator.gui.menu.getkeyvalues.label"; }
 	public static String getParameterValuesMenuLabelKey() { return "animator.gui.menu.getparametervalues.label"; }

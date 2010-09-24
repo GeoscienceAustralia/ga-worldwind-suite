@@ -252,6 +252,7 @@ public class Animator
 	private BasicAction previewX10Action;
 	private BasicAction renderHiResAction;
 	private BasicAction renderLowResAction;
+	private BasicAction resizeToRenderDimensionsAction;
 	
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
@@ -491,7 +492,6 @@ public class Animator
 		animation = new WorldWindAnimationImpl(wwd);
 		addDefaultLayersToAnimation(animation);
 		updater = new Updater();
-		setAnimationSize(animation.getRenderParameters().getImageDimension());
 	}
 
 	/**
@@ -586,6 +586,7 @@ public class Animator
 				@Override
 				public void run()
 				{
+					resizeWindowToAnimationSize(animation.getRenderParameters().getImageDimension());
 					frame.pack();
 					frame.setVisible(true);
 				}
@@ -801,31 +802,30 @@ public class Animator
 		return null;
 	}
 
-	private void setAnimationSize(Dimension animationSize)
+	/**
+	 * Resize the animation window such that the render window is at the specified animation size.
+	 */
+	private void resizeWindowToAnimationSize(Dimension animationSize)
 	{
-		if (!frame.isVisible())
-		{
-			wwd.setMinimumSize(animationSize);
-			wwd.setMaximumSize(animationSize);
-			wwd.setPreferredSize(animationSize);
-			wwd.setSize(animationSize);
+			// Set the world window to the correct size
+			setWwdSize(animationSize);
+
+			if (!frame.isVisible())
+			{
+				frame.pack();
+			}
+			
+			// Set the frame to the correct size
+			int deltaWidth = calculateTotalWidthOfNonWWDElements();
+			int deltaHeight = calculateTotalHeightOfNonWWDElements();
+
+			Dimension frameSize = new Dimension(animationSize.width + deltaWidth, animationSize.height + deltaHeight);
+			setFrameSize(frameSize);
+			
 			frame.pack();
-		}
-		else
-		{
+
+			// Check the resize was successful
 			Dimension wwdSize = wwd.getSize();
-			Dimension frameSize = frame.getSize();
-			int deltaWidth = frameSize.width - wwdSize.width;
-			int deltaHeight = frameSize.height - wwdSize.height;
-
-			frameSize = new Dimension(animationSize.width + deltaWidth, animationSize.height + deltaHeight);
-			frame.setPreferredSize(frameSize);
-			frame.setMinimumSize(frameSize);
-			frame.setMaximumSize(frameSize);
-			frame.setSize(frameSize);
-			frame.pack();
-
-			wwdSize = wwd.getSize();
 			if (wwdSize.width != animationSize.width || wwdSize.height != animationSize.height)
 			{
 				JOptionPane.showMessageDialog(frame, 
@@ -833,7 +833,32 @@ public class Animator
 											  getMessage(getSetDimensionFailedCaptionKey()),
 											  JOptionPane.ERROR_MESSAGE);
 			}
-		}
+	}
+
+	private void setFrameSize(Dimension frameSize)
+	{
+		frame.setPreferredSize(frameSize);
+		frame.setMinimumSize(frameSize);
+		frame.setMaximumSize(frameSize);
+		frame.setSize(frameSize);
+	}
+
+	private void setWwdSize(Dimension animationSize)
+	{
+		wwd.setMinimumSize(animationSize);
+		wwd.setMaximumSize(animationSize);
+		wwd.setPreferredSize(animationSize);
+		wwd.setSize(animationSize);
+	}
+
+	private int calculateTotalHeightOfNonWWDElements()
+	{
+		return bottomPanel.getSize().height + slider.getSize().height + frame.getJMenuBar().getSize().height + frame.getInsets().top + frame.getInsets().bottom;
+	}
+
+	private int calculateTotalWidthOfNonWWDElements()
+	{
+		return sideBar.getSize().width + frame.getInsets().left + frame.getInsets().right;
 	}
 
 	/**
@@ -1158,6 +1183,17 @@ public class Animator
 			}
 		});
 		
+		// Resize to render dimensions
+		resizeToRenderDimensionsAction = new BasicAction(getMessage(getResizeToRenderDimensionsLabelKey()), null);
+		resizeToRenderDimensionsAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				resizeWindowToAnimationSize(animation.getRenderParameters().getImageDimension());
+			}
+		});
+		
 		// Debug key frames
 		debugKeyFramesAction = new BasicAction(getMessage(getKeyValuesMenuLabelKey()), null);
 		debugKeyFramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
@@ -1242,6 +1278,8 @@ public class Animator
 		menu.addSeparator();
 		menu.add(renderHiResAction);
 		menu.add(renderLowResAction);
+		menu.addSeparator();
+		menu.add(resizeToRenderDimensionsAction);
 		
 		// Debug
 		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
@@ -1827,7 +1865,7 @@ public class Animator
 					ImmediateMode.setImmediate(true);
 					AnimatorSceneController asc = (AnimatorSceneController) wwd.getSceneController();
 
-					setAnimationSize(animation.getRenderParameters().getImageDimension());
+					resizeWindowToAnimationSize(animation.getRenderParameters().getImageDimension());
 
 					crosshair.setEnabled(false);
 					double detailHintBackup = dem.getDetailHint();
