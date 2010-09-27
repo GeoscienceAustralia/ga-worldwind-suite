@@ -8,6 +8,16 @@ import gov.nasa.worldwind.terrain.AbstractElevationModel;
 
 import java.util.List;
 
+/**
+ * An {@link ElevationModel} that includes a global detail hint indicating how detailed the 
+ * elevation model should be resolved to.
+ * <p/>
+ * Actual elevation data is handled by a delegate {@link ElevationModel}. 
+ * <p/>
+ * The global detail hint replaces any sector-specific hints provided by the delegate's {@link #getDetailHint(Sector)} method. 
+ * <p/>
+ * This implementation also allows elevation values to be clamped between a specified min and max elevation.
+ */
 public class DetailedElevationModel extends AbstractElevationModel
 {
 	private ElevationModel sourceModel;
@@ -18,7 +28,7 @@ public class DetailedElevationModel extends AbstractElevationModel
 
 	public DetailedElevationModel(ElevationModel source)
 	{
-		this.sourceModel = source;
+		sourceModel = source;
 	}
 
 	public double getDetailHint()
@@ -39,7 +49,7 @@ public class DetailedElevationModel extends AbstractElevationModel
 
 	public ElevationModel getSourceModel()
 	{
-		return this.sourceModel;
+		return sourceModel;
 	}
 
 	public double getMin()
@@ -72,94 +82,114 @@ public class DetailedElevationModel extends AbstractElevationModel
 		this.offset = offset;
 	}
 
+	@Override
 	public double getMaxElevation()
 	{
-		return this.clampElevation(this.sourceModel.getMaxElevation());
+		return clampElevation(sourceModel.getMaxElevation());
 	}
 
+	@Override
 	public double getMinElevation()
 	{
-		return this.clampElevation(this.sourceModel.getMinElevation());
+		return clampElevation(sourceModel.getMinElevation());
 	}
 
+	@Override
 	public double[] getExtremeElevations(Angle latitude, Angle longitude)
 	{
-		double[] elevs = this.sourceModel.getExtremeElevations(latitude,
-				longitude);
-		if (elevs == null)
-			return elevs;
+		double[] sourceElevations = sourceModel.getExtremeElevations(latitude, longitude);
+		if (sourceElevations == null)
+		{
+			return sourceElevations;
+		}
 
-		return new double[]
-		{ this.clampElevation(elevs[0]), this.clampElevation(elevs[1]) };
+		return new double[] { clampElevation(sourceElevations[0]), clampElevation(sourceElevations[1]) };
 	}
 
+	@Override
 	public double[] getExtremeElevations(Sector sector)
 	{
-		double[] elevs = this.sourceModel.getExtremeElevations(sector);
+		double[] elevs = sourceModel.getExtremeElevations(sector);
 		if (elevs == null)
+		{
 			return elevs;
+		}
 
-		return new double[]
-		{ this.clampElevation(elevs[0]), this.clampElevation(elevs[1]) };
+		return new double[] { clampElevation(elevs[0]), clampElevation(elevs[1]) };
 	}
 
-	public double getElevations(Sector sector, List<? extends LatLon> latlons,
-			double targetResolution, double[] buffer)
+	@Override
+	public double getElevations(Sector sector, List<? extends LatLon> latlons, double targetResolution, double[] buffer)
 	{
-		double resolution = this.sourceModel.getElevations(sector, latlons,
-				targetResolution, buffer);
+		double resolution = sourceModel.getElevations(sector, latlons, targetResolution, buffer);
 
 		for (int i = 0; i < latlons.size(); i++)
 		{
 			LatLon ll = latlons.get(i);
-			if (this.sourceModel.contains(ll.getLatitude(), ll.getLongitude()))
+			if (sourceModel.contains(ll.getLatitude(), ll.getLongitude()))
+			{
 				buffer[i] = clampElevation(buffer[i]);
+			}
 		}
 
 		return resolution;
 	}
 
-	public double getUnmappedElevations(Sector sector,
-			List<? extends LatLon> latlons, double targetResolution,
-			double[] buffer)
+	@Override
+	public double getUnmappedElevations(Sector sector, List<? extends LatLon> latlons, double targetResolution, double[] buffer)
 	{
-		double resolution = this.sourceModel.getElevations(sector, latlons,
-				targetResolution, buffer);
+		double resolution = sourceModel.getElevations(sector, latlons, targetResolution, buffer);
 
 		for (int i = 0; i < latlons.size(); i++)
 		{
 			LatLon ll = latlons.get(i);
-			if (this.sourceModel.contains(ll.getLatitude(), ll.getLongitude())
-					&& buffer[i] != this.sourceModel.getMissingDataSignal())
+			if (sourceModel.contains(ll.getLatitude(), ll.getLongitude()) && !isMissingDataSignal(buffer[i]))
+			{
 				buffer[i] = clampElevation(buffer[i]);
+			}
 		}
 
 		return resolution;
 	}
 
+	@Override
 	public int intersects(Sector sector)
 	{
-		return this.sourceModel.intersects(sector);
+		return sourceModel.intersects(sector);
 	}
 
+	@Override
 	public boolean contains(Angle latitude, Angle longitude)
 	{
-		return this.sourceModel.contains(latitude, longitude);
+		return sourceModel.contains(latitude, longitude);
 	}
 
+	@Override
 	public double getBestResolution(Sector sector)
 	{
-		return this.sourceModel.getBestResolution(sector);
+		return sourceModel.getBestResolution(sector);
 	}
 
+	@Override
 	public double getUnmappedElevation(Angle latitude, Angle longitude)
 	{
-		double elev = this.sourceModel
-				.getUnmappedElevation(latitude, longitude);
-		return elev == this.sourceModel.getMissingDataSignal() ? elev
-				: clampElevation(elev);
+		double elevation = sourceModel.getUnmappedElevation(latitude, longitude);
+		return isMissingDataSignal(elevation) ? elevation : clampElevation(elevation);
 	}
 
+	private boolean isMissingDataSignal(double data)
+	{
+		return data == sourceModel.getMissingDataSignal();
+	}
+	
+	/**
+	 * Clamp the provided elevation value to be on the interval <code>[min, max]</code>
+	 * 
+	 * @see #getMin()
+	 * @see #setMin(double)
+	 * @see #getMax()
+	 * @see #setMax(double)
+	 */
 	protected double clampElevation(double elevation)
 	{
 		return elevation < min ? min : elevation > max ? max : elevation + offset;
