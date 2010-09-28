@@ -50,6 +50,19 @@ public class AnimationElevationLoader
 		}
 	}
 	
+	/**
+	 * Load an elevation model identified by the provided identifier.
+	 */
+	public static ElevationModel loadElevationModel(ElevationModelIdentifier identifier)
+	{
+		ElevationModel result = loadElevationModel(identifier.getLocation());
+		result.setName(identifier.getName());
+		return result;
+	}
+	
+	/**
+	 * Load an elevation model from a definition file at the provided URL location
+	 */
 	public static ElevationModel loadElevationModel(String url)
 	{
 		try
@@ -64,7 +77,7 @@ public class AnimationElevationLoader
 	}
 	
 	/**
-	 * Load an elevation model from a definition file at the provided location.
+	 * Load an elevation model from a definition file at the provided URL location.
 	 */
 	public static ElevationModel loadElevationModel(URL url)
 	{
@@ -81,7 +94,7 @@ public class AnimationElevationLoader
 		ElevationModel result = (ElevationModel)getElevationFactory().createFromConfigSource(element, params);
 		if (result == null)
 		{
-			throw new IllegalArgumentException("Unable to load elevation model from location " + url);
+			throw new IllegalArgumentException("Unable to load elevation model from location '" + url + "'");
 		}
 		
 		result.setValue(AVKeyMore.CONTEXT_URL, url);
