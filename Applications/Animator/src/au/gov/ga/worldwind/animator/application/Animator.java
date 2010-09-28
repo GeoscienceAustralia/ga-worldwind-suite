@@ -85,8 +85,6 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
-import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
-import au.gov.ga.worldwind.animator.layers.elevation.pervetex.ElevationTesselator;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateRetrievalService;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateTaskService;
@@ -96,6 +94,7 @@ import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPane
 import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
 import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPanel;
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
+import au.gov.ga.worldwind.animator.terrain.VerticalExaggerationTessellator;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
@@ -567,7 +566,7 @@ public class Animator
 		dem = new DetailedElevationModel(cem);
 		model.getGlobe().setElevationModel(dem);
 
-		ElevationModel earthem = (ElevationModel) new ExtendedBasicElevationModelFactory().createFromConfigSource("config/Earth/EarthElevationModelAsBil16.xml", null);
+		ElevationModel earthem = (ElevationModel) new ElevationModelFactory().createFromConfigSource("config/Earth/EarthElevationModelAsBil16.xml", null);
 		cem.addElevationModel(earthem);
 	}
 
@@ -764,7 +763,7 @@ public class Animator
 		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME, ImmediateTaskService.class.getName());
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ImmediateRetrievalService.class.getName());
 
-		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, ElevationTesselator.class.getName());
+		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, VerticalExaggerationTessellator.class.getName());
 
 		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE, 16777216L * 8); // 128 mb
 		
