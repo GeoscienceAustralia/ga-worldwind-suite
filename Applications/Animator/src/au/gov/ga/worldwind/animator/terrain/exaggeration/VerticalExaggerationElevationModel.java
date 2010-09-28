@@ -12,10 +12,10 @@ import java.util.TreeMap;
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 
 /**
- * An extension of the {@link DetailedElevationModel} that allows {@link ElevationExaggerator}s to be
+ * An extension of the {@link DetailedElevationModel} that allows {@link ElevationExaggeration}s to be
  * configured.
  * <p/>
- * Multiple {@link ElevationExaggerator}s can be configured, allowing exaggerations to be 'layered'. Elevations that lie between the thresholds of
+ * Multiple {@link ElevationExaggeration}s can be configured, allowing exaggerations to be 'layered'. Elevations that lie between the thresholds of
  * two exaggerators will be exaggerated according to the exaggeration amount of the 'bottom' exaggerator.
  * <p/>
  * In addition, an (optional) global elevation offset can be configured. This offset is applied <b>after</b> exaggeration.
@@ -27,7 +27,7 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 {
 
 	/** The registered exaggerators, keyed by elevation threshold */
-	private TreeMap<Double, ElevationExaggerator> exaggerators = new TreeMap<Double, ElevationExaggerator>();
+	private TreeMap<Double, ElevationExaggeration> exaggerators = new TreeMap<Double, ElevationExaggeration>();
 	
 	/** The global offset to apply after exaggeration */
 	private double globalOffset = 1.0;
@@ -37,7 +37,7 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 		super(source);
 	}
 	
-	public void addExaggerator(ElevationExaggerator exaggerator)
+	public void addExaggerator(ElevationExaggeration exaggerator)
 	{
 		if (exaggerator == null)
 		{
@@ -46,19 +46,19 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 		exaggerators.put(exaggerator.getElevationThreshold(), exaggerator);
 	}
 
-	public void addExaggerators(Collection<ElevationExaggerator> exaggerators)
+	public void addExaggerators(Collection<ElevationExaggeration> exaggerators)
 	{
 		if (exaggerators == null)
 		{
 			return;
 		}
-		for (ElevationExaggerator exaggerator : exaggerators)
+		for (ElevationExaggeration exaggerator : exaggerators)
 		{
 			addExaggerator(exaggerator);
 		}
 	}
 	
-	public void removeExaggerator(ElevationExaggerator exaggerator)
+	public void removeExaggerator(ElevationExaggeration exaggerator)
 	{
 		exaggerators.remove(exaggerator.getElevationThreshold());
 	}
@@ -68,7 +68,7 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 		exaggerators.remove(threshold);
 	}
 	
-	public ElevationExaggerator getExaggeratorForElevation(double elevation)
+	public ElevationExaggeration getExaggeratorForElevation(double elevation)
 	{
 		return exaggerators.floorEntry(elevation).getValue();
 	}
@@ -134,7 +134,7 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 	}
 	
 	/**
-	 * Exaggerate the elevations contained in the provided buffer using the configured {@link ElevationExaggerator}s.
+	 * Exaggerate the elevations contained in the provided buffer using the configured {@link ElevationExaggeration}s.
 	 * <p/>
 	 * <em>Note:</em> To keep consistent with elevation processing, the exaggeration is performed in-place in the provided buffer.
 	 */
@@ -152,10 +152,10 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 	}
 	
 	/**
-	 * Exaggerate the provided elevation using the configured {@link ElevationExaggerator}s.
+	 * Exaggerate the provided elevation using the configured {@link ElevationExaggeration}s.
 	 */
 	protected double exaggerateElevation(double elevation)
 	{
-		return 0; //TODO:
+		return elevation;
 	}
 }
