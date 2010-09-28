@@ -86,7 +86,6 @@ import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuLi
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
 import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedBasicElevationModelFactory;
-import au.gov.ga.worldwind.animator.layers.elevation.perpixel.ExtendedElevationModel;
 import au.gov.ga.worldwind.animator.layers.elevation.pervetex.ElevationTesselator;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateRetrievalService;
@@ -103,6 +102,7 @@ import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
+import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
@@ -568,8 +568,7 @@ public class Animator
 		model.getGlobe().setElevationModel(dem);
 
 		ElevationModel earthem = (ElevationModel) new ExtendedBasicElevationModelFactory().createFromConfigSource("config/Earth/EarthElevationModelAsBil16.xml", null);
-		ExtendedElevationModel eem = getEBEM(earthem);
-		cem.addElevationModel(eem);
+		cem.addElevationModel(earthem);
 	}
 
 	/**
@@ -771,6 +770,8 @@ public class Animator
 		
 		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
 		
+		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
+		
 		GASandpit.setSandpitMode(true);
 	}
 
@@ -781,27 +782,6 @@ public class Animator
 	{
 		// Initialise the message source
 		MessageSourceAccessor.addBundle("au.gov.ga.worldwind.animator.data.messages.animatorMessages");
-	}
-
-	private ExtendedElevationModel getEBEM(ElevationModel elevationModel)
-	{
-		if (elevationModel instanceof ExtendedElevationModel)
-		{
-			return (ExtendedElevationModel) elevationModel;
-		}
-		else if (elevationModel instanceof CompoundElevationModel)
-		{
-			CompoundElevationModel cem = (CompoundElevationModel) elevationModel;
-			for (ElevationModel model : cem.getElevationModels())
-			{
-				ExtendedElevationModel ebem = getEBEM(model);
-				if (ebem != null)
-				{
-					return ebem;
-				}
-			}
-		}
-		return null;
 	}
 
 	/**
