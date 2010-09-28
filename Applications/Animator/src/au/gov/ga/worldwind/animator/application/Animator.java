@@ -95,7 +95,7 @@ import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
 import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPanel;
 import au.gov.ga.worldwind.animator.terrain.AnimationElevationLoader;
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
-import au.gov.ga.worldwind.animator.terrain.VerticalExaggerationTessellator;
+import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationTessellator;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;

@@ -16,7 +16,7 @@ import javax.media.opengl.GL;
 
 import nasa.worldwind.terrain.RectangularTessellator;
 
-import au.gov.ga.worldwind.animator.terrain.VerticalExaggerationTessellator;
+import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationTessellator;
 
 import com.sun.opengl.util.BufferUtil;
 
