@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.animator.animation.layer;
 import gov.nasa.worldwind.layers.Layer;
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 
 /**
  * An interface for layers that can be animated in the Animator application.

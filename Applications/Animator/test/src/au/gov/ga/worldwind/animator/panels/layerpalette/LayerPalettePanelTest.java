@@ -17,8 +17,8 @@ import org.junit.Test;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
-import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
-import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierImpl;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifierImpl;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.StaticMessageSource;

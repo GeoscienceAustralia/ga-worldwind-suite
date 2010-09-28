@@ -13,7 +13,6 @@ import java.net.URL;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegateFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.LocalRequesterDelegate;

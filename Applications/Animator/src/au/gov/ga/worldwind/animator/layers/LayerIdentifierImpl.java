@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.animation.layer;
+package au.gov.ga.worldwind.animator.layers;
 
 import au.gov.ga.worldwind.animator.util.Validate;
 

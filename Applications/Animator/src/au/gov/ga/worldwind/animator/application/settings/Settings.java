@@ -12,9 +12,9 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
-import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierFactory;
-import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierImpl;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifierFactory;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifierImpl;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.Util;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -273,7 +273,7 @@ public class Settings
 	}));
 	
 	/** The list of known layer locations for populating the layer palette */
-	private List<LayerIdentifier> knownLayers = LayerIdentifierFactory.readFromPropertiesFile("au.gov.ga.worldwind.animator.animation.layer.worldwindLayerIdentities");
+	private List<LayerIdentifier> knownLayers = LayerIdentifierFactory.readFromPropertiesFile("au.gov.ga.worldwind.animator.layers.worldwindLayerIdentities");
 	
 	/**
 	 * Private constructor. Use the Singleton accessor {@link #get()}.

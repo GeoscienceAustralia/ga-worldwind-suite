@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.animation.layer;
+package au.gov.ga.worldwind.animator.layers;
 
 /**
  * Holds the identification details of a layer, including it's name

@@ -8,8 +8,8 @@ import java.net.URL;
 import org.junit.Before;
 import org.junit.Test;
 
-import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
-import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierImpl;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifierImpl;
 
 /**
  * Unit tests for the {@link LayerIdentifierTransferable} class

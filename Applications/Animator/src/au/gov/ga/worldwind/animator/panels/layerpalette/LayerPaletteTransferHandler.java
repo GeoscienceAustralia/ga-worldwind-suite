@@ -14,9 +14,9 @@ import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.TransferHandler;
 
-import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
-import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifierFactory;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifierFactory;
 import au.gov.ga.worldwind.animator.panels.LayerIdentifierTransferable;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.Validate;

@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.animation.layer;
+package au.gov.ga.worldwind.animator.layers;
 
 import static au.gov.ga.worldwind.animator.util.Util.isBlank;
 import gov.nasa.worldwind.layers.Layer;

@@ -4,7 +4,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.net.URL;
 
 import au.gov.ga.worldwind.animator.animation.AnimationObject;
-import au.gov.ga.worldwind.animator.animation.layer.LayerIdentifier;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 
 /**
  * A class containing supported data transfer flavors in the Animator application.
