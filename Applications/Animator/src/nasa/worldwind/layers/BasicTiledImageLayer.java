@@ -1167,7 +1167,6 @@ public class BasicTiledImageLayer extends TiledImageLayer implements BulkRetriev
         }
     }
 
-    @SuppressWarnings({"UnusedDeclaration"})
     protected void doRestoreStateForObject(RestorableSupport rs, RestorableSupport.StateObject so)
     {
         if (so == null)

@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.animator.math.vector;
 
+@SuppressWarnings("serial")
 public class Vector1 implements Vector<Vector1>
 {
 	public final static Vector1 ZERO = new Vector1(0);

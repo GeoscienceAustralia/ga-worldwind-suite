@@ -27,6 +27,7 @@ import java.util.*;
  * @author Tom Gaskins
  * @version $Id: WorldWindowGLCanvas.java 13506 2010-06-30 01:29:07Z tgaskins $
  */
+@SuppressWarnings("serial")
 public class WorldWindowGLCanvas extends GLCanvas implements WorldWindow, PropertyChangeListener
 {
     private static final GLCapabilities caps = new GLCapabilities();

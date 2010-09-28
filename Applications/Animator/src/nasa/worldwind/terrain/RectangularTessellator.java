@@ -32,8 +32,6 @@ import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.terrain.SectorGeometry;
-import gov.nasa.worldwind.terrain.SectorGeometry.ExtractedShapeDescription;
-import gov.nasa.worldwind.terrain.SectorGeometry.GeographicTextureCoordinateComputer;
 import gov.nasa.worldwind.terrain.SectorGeometryList;
 import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.util.Logging;
@@ -227,7 +225,6 @@ public class RectangularTessellator extends WWObjectImpl implements Tessellator
             this.globeStateKey = dc.getGlobe().getStateKey(dc);
         }
 
-        @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
         public boolean equals(Object o)
         {
             if (this == o)
