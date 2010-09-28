@@ -7,10 +7,12 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.globes.ElevationModel;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -45,6 +47,19 @@ public class AnimationElevationLoader
 		if (factory != null)
 		{
 			elevationFactory = factory;
+		}
+	}
+	
+	public static ElevationModel loadElevationModel(String url)
+	{
+		try
+		{
+			return loadElevationModel(new URL(url));
+		}
+		catch (MalformedURLException e)
+		{
+			ExceptionLogger.logException(e);
+			throw new IllegalArgumentException("Unable to locate elevation model at provided location '" + url + "'", e);
 		}
 	}
 	
