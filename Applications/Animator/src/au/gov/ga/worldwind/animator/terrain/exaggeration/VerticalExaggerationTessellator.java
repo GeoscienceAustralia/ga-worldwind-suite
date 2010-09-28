@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.terrain;
+package au.gov.ga.worldwind.animator.terrain.exaggeration;
 
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Vec4;
