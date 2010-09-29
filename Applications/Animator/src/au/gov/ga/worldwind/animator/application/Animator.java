@@ -94,7 +94,7 @@ import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPane
 import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
 import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPanel;
 import au.gov.ga.worldwind.animator.terrain.AnimationElevationLoader;
-import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
+import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationElevationModel;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationTessellator;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
@@ -216,7 +216,7 @@ public class Animator
 	private CurrentlySelectedObject.ChangeListener highlightedFramesListener;
 	
 	// The layers used in the application
-	private DetailedElevationModel dem;
+	private VerticalExaggerationElevationModel elevationModel;
 	private Layer crosshair;
 	private CameraPathLayer cameraPathLayer;
 	
@@ -564,8 +564,9 @@ public class Animator
 	private void initialiseElevationModels()
 	{
 		CompoundElevationModel cem = new CompoundElevationModel();
-		dem = new DetailedElevationModel(cem);
-		model.getGlobe().setElevationModel(dem);
+		
+		elevationModel = new VerticalExaggerationElevationModel(cem);
+		model.getGlobe().setElevationModel(elevationModel);
 
 		ElevationModel earthem = AnimationElevationLoader.loadElevationModel("file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml");
 		cem.addElevationModel(earthem);
@@ -1852,8 +1853,8 @@ public class Animator
 					resizeWindowToAnimationSize(animation.getRenderParameters().getImageDimension());
 
 					crosshair.setEnabled(false);
-					double detailHintBackup = dem.getDetailHint();
-					dem.setDetailHint(detailHint);
+					double detailHintBackup = elevationModel.getDetailHint();
+					elevationModel.setDetailHint(detailHint);
 					frame.setAlwaysOnTop(true);
 
 					View view = wwd.getView();
@@ -1880,7 +1881,7 @@ public class Animator
 						}
 					}
 
-					dem.setDetailHint(detailHintBackup);
+					elevationModel.setDetailHint(detailHintBackup);
 					crosshair.setEnabled(true);
 					orbitView.setDetectCollisions(detectCollisions);
 					frame.setAlwaysOnTop(false);
