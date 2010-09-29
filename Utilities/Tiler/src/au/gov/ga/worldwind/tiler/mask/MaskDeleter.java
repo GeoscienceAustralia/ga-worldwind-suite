@@ -71,7 +71,7 @@ public class MaskDeleter
 				new File("S:/resources/images/world-wind/tiles/radiometrics/edition2/ratio_uut_clip/mask"),
 				"png");*/
 		
-		deleteBlankImages(new File("S:/resources/images/world-wind/tiles/surface_uranium/calcrete_raster"), "png");
+		/*deleteBlankImages(new File("S:/resources/images/world-wind/tiles/surface_uranium/calcrete_raster"), "png");
 		
 		deleteImagesWithBlankMasks(new File[] {
 				new File("S:/resources/images/world-wind/tiles/surface_uranium/u2th/u2th") },
@@ -95,6 +95,14 @@ public class MaskDeleter
 				new File("S:/resources/images/world-wind/tiles/terrain/ozhill2/ozhill2") },
 				"jpg",
 				new File("S:/resources/images/world-wind/tiles/terrain/ozhill2/mask"),
+				"png");*/
+		
+		//deleteBlankImages(new File("G:/LandCover/DLCM_RGB/mask"), "png");
+		
+		deleteImagesWithBlankMasks(new File[] {
+				new File("D:/Magmap_images/1_tiles") },
+				"jpg",
+				new File("D:/Magmap_images/1_mask"),
 				"png");
 	}
 

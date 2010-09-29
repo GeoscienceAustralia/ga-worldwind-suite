@@ -14,9 +14,9 @@ public class MaskBaker
 {
 	public static void main(String[] args)
 	{
-		File imageDir = new File("F:/LandCover/min_trend_values1_nomask");
-		File maskDir = new File("F:/LandCover/DLCM_RGB/mask");
-		File outputDir = new File("F:/LandCover/min_trend_values1");
+		File imageDir = new File("G:/LandCover/Trends/mean_png_nomask");
+		File maskDir = new File("G:/LandCover/Trends/mask");
+		File outputDir = new File("G:/LandCover/Trends/mean_png");
 		String imageExt = "png";
 		String maskExt = "png";
 		String outputExt = "png";
