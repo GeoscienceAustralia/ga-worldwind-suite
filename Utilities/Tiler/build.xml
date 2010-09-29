@@ -80,6 +80,7 @@
 			<fileset dir="${basedir}">
 				<include name="gui.bat" />
 				<include name="console.bat" />
+				<include name="7za.exe" />
 			</fileset>
 		</copy>
 	</target>
