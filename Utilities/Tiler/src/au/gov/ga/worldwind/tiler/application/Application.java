@@ -88,6 +88,7 @@ import au.gov.ga.worldwind.tiler.util.DocumentLogger;
 import au.gov.ga.worldwind.tiler.util.JDoubleField;
 import au.gov.ga.worldwind.tiler.util.JIntegerField;
 import au.gov.ga.worldwind.tiler.util.JLongField;
+import au.gov.ga.worldwind.tiler.util.LatLon;
 import au.gov.ga.worldwind.tiler.util.MinMaxArray;
 import au.gov.ga.worldwind.tiler.util.NullableNumberArray;
 import au.gov.ga.worldwind.tiler.util.NumberArray;
@@ -147,10 +148,14 @@ public class Application implements UncaughtExceptionHandler
 	private JLabel tileTypeLabel;
 	private JRadioButton imageRadio;
 	private JRadioButton elevationRadio;
+	private JLabel qualityLabel;
+	private JDoubleField qualityField;
 	private JCheckBox reprojectCheck;
 	private JCheckBox bilinearCheck;
 	private JCheckBox bilinearOverviewsCheck;
 	private JDoubleField lztsField;
+	private JDoubleField latitudeOriginField;
+	private JDoubleField longitudeOriginField;
 	private JIntegerField tilesizeField;
 	private JCheckBox outsideCheck;
 	private JPanel outsidePanel;
@@ -799,6 +804,57 @@ public class Application implements UncaughtExceptionHandler
 		panel.add(label, c);
 		labels.add(label);
 
+		label = new JLabel("Tile origin (lat/lon):");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = ++row;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(label, c);
+		labels.add(label);
+
+		panel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = row;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(panel, c);
+
+		latitudeOriginField = new JDoubleField(-90d);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		size = latitudeOriginField.getPreferredSize();
+		size.width = 70;
+		latitudeOriginField.setMinimumSize(size);
+		latitudeOriginField.setMaximumSize(size);
+		latitudeOriginField.setPreferredSize(size);
+		panel.add(latitudeOriginField, c);
+
+		label = new JLabel("/");
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.insets = new Insets(0, SPACING / 2, 0, SPACING / 2);
+		panel.add(label, c);
+		labels.add(label);
+
+		longitudeOriginField = new JDoubleField(-180d);
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		size = longitudeOriginField.getPreferredSize();
+		size.width = 70;
+		longitudeOriginField.setMinimumSize(size);
+		longitudeOriginField.setMaximumSize(size);
+		longitudeOriginField.setPreferredSize(size);
+		panel.add(longitudeOriginField, c);
+
+		label = new JLabel("\u00B0");
+		c = new GridBagConstraints();
+		c.gridx = 3;
+		c.insets = new Insets(0, SPACING / 2, 0, 0);
+		panel.add(label, c);
+		labels.add(label);
+
 		levelsLabel = new JLabel("Level count:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -855,6 +911,22 @@ public class Application implements UncaughtExceptionHandler
 		bg = new ButtonGroup();
 		bg.add(jpegRadio);
 		bg.add(pngRadio);
+
+		qualityLabel = new JLabel("Compression quality: ");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = ++row;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(0, 0, SPACING, SPACING);
+		trPanel.add(qualityLabel, c);
+
+		qualityField = new JDoubleField(0.75, 2);
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = row;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(qualityField, c);
 
 		alphaCheck = new JCheckBox("Add alpha channel");
 		c = new GridBagConstraints();
@@ -1560,6 +1632,8 @@ public class Application implements UncaughtExceptionHandler
 		};
 
 		lztsField.getDocument().addDocumentListener(dl);
+		latitudeOriginField.getDocument().addDocumentListener(dl);
+		longitudeOriginField.getDocument().addDocumentListener(dl);
 		tilesizeField.getDocument().addDocumentListener(dl);
 		overviewsCheck.addActionListener(al);
 		outputDirectory.getDocument().addDocumentListener(dl);
@@ -2074,6 +2148,8 @@ public class Application implements UncaughtExceptionHandler
 		float32Radio.setEnabled(standard);
 		jpegRadio.setEnabled(standard);
 		lztsField.setEnabled(standard);
+		latitudeOriginField.setEnabled(standard);
+		longitudeOriginField.setEnabled(standard);
 		outsideCheck.setEnabled(standard && !mapnik);
 		overviewsCheck.setEnabled(standard);
 		reprojectCheck.setEnabled(standard && !mapnik);
@@ -2100,6 +2176,7 @@ public class Application implements UncaughtExceptionHandler
 
 		alphaCheck.setEnabled(pngRadio.isSelected() && standard && bandCount == 3 && !mapnik
 				&& !elevationRadio.isSelected());
+		qualityField.setEnabled(jpegRadio.isSelected() && standard && !mapnik);
 		bandCombo.setEnabled(bandCount > 1 && standard);
 		overrideLevelsSpinner.setEnabled(overrideLevelsCheck.isSelected() && standard);
 
@@ -2169,21 +2246,22 @@ public class Application implements UncaughtExceptionHandler
 	private void visibledFields()
 	{
 		boolean mapnik = mapnikRadio.isSelected();
+		boolean images = mapnik || imageRadio.isSelected();
+		boolean elevations = elevationRadio.isSelected() && !mapnik;
 
 		tileTypeLabel.setVisible(!mapnik);
 		imageRadio.setVisible(!mapnik);
 		elevationRadio.setVisible(!mapnik);
 
-		boolean images = mapnik || imageRadio.isSelected();
 		imageFormatLabel.setVisible(images);
 		jpegRadio.setVisible(images);
 		pngRadio.setVisible(images);
 		ignoreBlankCheck.setVisible(images);
 
-		alphaCheck.setVisible(pngRadio.isSelected() && bandCount == 3 && !mapnik
-				&& !elevationRadio.isSelected());
+		qualityLabel.setVisible(jpegRadio.isSelected() && !mapnik && !elevations);
+		qualityField.setVisible(jpegRadio.isSelected() && !mapnik && !elevations);
+		alphaCheck.setVisible(pngRadio.isSelected() && bandCount == 3 && !mapnik && !elevations);
 
-		boolean elevations = elevationRadio.isSelected() && !mapnik;
 		bandLabel.setVisible(elevations);
 		bandCombo.setVisible(elevations);
 		cellTypeLabel.setVisible(elevations);
@@ -2240,6 +2318,10 @@ public class Application implements UncaughtExceptionHandler
 		boolean overviews = overviewsCheck.isSelected();
 		Double lzts = lztsField.getValue();
 		Integer tilesize = tilesizeField.getValue();
+		Double latOrigin = latitudeOriginField.getValue();
+		Double lonOrigin = longitudeOriginField.getValue();
+		LatLon origin =
+				latOrigin == null || lonOrigin == null ? null : new LatLon(latOrigin, lonOrigin);
 		if (tilesize != null && tilesize <= 0)
 			tilesize = null;
 		if (lzts != null && lzts <= 0)
@@ -2247,7 +2329,7 @@ public class Application implements UncaughtExceptionHandler
 
 		if (validOptions)
 		{
-			validOptions = lzts != null && tilesize != null;
+			validOptions = lzts != null && tilesize != null && origin != null;
 			if (validOptions)
 			{
 				if (overrideLevelsCheck.isSelected())
@@ -2278,7 +2360,7 @@ public class Application implements UncaughtExceptionHandler
 			String outDirText = outputDirectory.getText();
 			File outDir = outDirText.length() == 0 ? null : new File(outDirText);
 
-			String info = GDALUtil.getTileText(dataset, sector, lzts, levels, overviews);
+			String info = GDALUtil.getTileText(dataset, sector, origin, lzts, levels, overviews);
 			if (outDir == null)
 			{
 				info += System.getProperty("line.separator") + "Please select an output directory";
@@ -2401,7 +2483,12 @@ public class Application implements UncaughtExceptionHandler
 				boolean reproject = reprojectCheck.isSelected();
 				boolean bilinear = bilinearCheck.isSelected();
 				boolean bilinearOverviews = bilinearOverviewsCheck.isSelected();
+				Double quality = qualityField.getValue();
+				float jpegQuality = (float) (quality == null ? 0.75 : quality.doubleValue());
 				boolean ignoreBlank = ignoreBlankCheck.isSelected();
+				Double latOrigin = latitudeOriginField.getValue();
+				Double lonOrigin = longitudeOriginField.getValue();
+				LatLon origin = new LatLon(latOrigin, lonOrigin);
 
 				LogWriter logWriter = null;
 				try
@@ -2412,18 +2499,18 @@ public class Application implements UncaughtExceptionHandler
 					String imageFormat = getImageFormat();
 					if (mapnikRadio.isSelected())
 					{
-						logWriter.startLog(TilingType.Mapnik, mapFile, outDir, sector, level,
-								tilesize, lzts, imageFormat, false, 0, 0, false, false,
+						logWriter.startLog(TilingType.Mapnik, mapFile, outDir, sector, origin,
+								level, tilesize, lzts, imageFormat, false, 0, 0, false, false,
 								infoText.getText(), tileText.getText(), null, null, null, null,
 								false);
 
-						Tiler.tileMapnik(mapFile, sector, level, tilesize, lzts, imageFormat,
-								ignoreBlank, outDir, reporter);
+						Tiler.tileMapnik(mapFile, sector, origin, level, tilesize, lzts,
+								imageFormat, ignoreBlank, outDir, reporter);
 						if (overviews && !reporter.isCancelled())
 						{
 							Overviewer.createImageOverviews(outDir, imageFormat, tilesize,
-									tilesize, null, sector, lzts, bilinearOverviews, ignoreBlank,
-									reporter);
+									tilesize, null, sector, origin, lzts, bilinearOverviews,
+									ignoreBlank, jpegQuality, reporter);
 						}
 					}
 					else
@@ -2492,19 +2579,20 @@ public class Application implements UncaughtExceptionHandler
 						{
 							boolean addAlpha = pngRadio.isSelected() && alphaCheck.isSelected();
 
-							logWriter.startLog(TilingType.Images, mapFile, outDir, sector, level,
-									tilesize, lzts, imageFormat, addAlpha, 0, 0, bilinear,
+							logWriter.startLog(TilingType.Images, mapFile, outDir, sector, origin,
+									level, tilesize, lzts, imageFormat, addAlpha, 0, 0, bilinear,
 									reproject, infoText.getText(), tileText.getText(),
 									outsideValues, minMaxReplaces, replace, otherwise, isFloat);
 
-							Tiler.tileImages(dataset, reproject, bilinear, sector, level, tilesize,
-									lzts, imageFormat, addAlpha, outsideValues, ignoreBlank,
-									minMaxReplaces, replace, otherwise, outDir, reporter);
+							Tiler.tileImages(dataset, reproject, bilinear, sector, origin, level,
+									tilesize, lzts, imageFormat, addAlpha, jpegQuality,
+									outsideValues, ignoreBlank, minMaxReplaces, replace, otherwise,
+									outDir, reporter);
 							if (overviews && !reporter.isCancelled())
 							{
 								Overviewer.createImageOverviews(outDir, imageFormat, tilesize,
-										tilesize, outsideValues, sector, lzts, bilinearOverviews,
-										ignoreBlank, reporter);
+										tilesize, outsideValues, sector, origin, lzts,
+										bilinearOverviews, ignoreBlank, jpegQuality, reporter);
 							}
 						}
 						else if (elevationRadio.isSelected())
@@ -2513,9 +2601,10 @@ public class Application implements UncaughtExceptionHandler
 							int band = bandCombo.getSelectedIndex();
 
 							logWriter.startLog(TilingType.Elevations, mapFile, outDir, sector,
-									level, tilesize, lzts, imageFormat, false, band, bufferType,
-									bilinear, reproject, infoText.getText(), tileText.getText(),
-									outsideValues, minMaxReplaces, replace, otherwise, isFloat);
+									origin, level, tilesize, lzts, imageFormat, false, band,
+									bufferType, bilinear, reproject, infoText.getText(),
+									tileText.getText(), outsideValues, minMaxReplaces, replace,
+									otherwise, isFloat);
 
 							NumberArray minmax = new NumberArray(2);
 							if (isFloat)
@@ -2529,15 +2618,15 @@ public class Application implements UncaughtExceptionHandler
 								minmax.setLong(1, Long.MIN_VALUE);
 							}
 
-							Tiler.tileElevations(dataset, reproject, bilinear, sector, level,
-									tilesize, lzts, bufferType, band, outsideValues,
+							Tiler.tileElevations(dataset, reproject, bilinear, sector, origin,
+									level, tilesize, lzts, bufferType, band, outsideValues,
 									minMaxReplaces, replace, otherwise, minmax, outDir, reporter);
 
 							if (overviews && !reporter.isCancelled())
 							{
 								Overviewer.createElevationOverviews(outDir, tilesize, tilesize,
 										bufferType, ByteOrder.LITTLE_ENDIAN, /*TODO remove hardcoded byteorder*/
-										outsideValues, sector, lzts, bilinearOverviews,
+										outsideValues, sector, origin, lzts, bilinearOverviews,
 										ignoreBlank, reporter);
 							}
 

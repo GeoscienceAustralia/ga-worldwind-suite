@@ -32,39 +32,44 @@ import javax.imageio.ImageIO;
 import org.gdal.gdal.gdal;
 
 import au.gov.ga.worldwind.tiler.gdal.GDALTile;
+import au.gov.ga.worldwind.tiler.util.FileFilters.DirectoryFileFilter;
+import au.gov.ga.worldwind.tiler.util.FileFilters.ExtensionFileFilter;
 import au.gov.ga.worldwind.tiler.util.FileUtil;
+import au.gov.ga.worldwind.tiler.util.LatLon;
 import au.gov.ga.worldwind.tiler.util.NullableNumberArray;
 import au.gov.ga.worldwind.tiler.util.ProgressReporter;
 import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.Util;
-import au.gov.ga.worldwind.tiler.util.FileFilters.DirectoryFileFilter;
-import au.gov.ga.worldwind.tiler.util.FileFilters.ExtensionFileFilter;
 
 
 public class Overviewer
 {
 	public static void createImageOverviews(File directory, String extension, int width,
-			int height, NullableNumberArray outsideValues, Sector sector, double lzts,
-			boolean bilinear, boolean ignoreBlank, ProgressReporter reporter)
+			int height, NullableNumberArray outsideValues, Sector sector, LatLon origin,
+			double lzts, boolean bilinear, boolean ignoreBlank, float jpegQuality,
+			ProgressReporter reporter)
 	{
 		OverviewCreator overviewCreator =
-				new ImageOverviewCreator(width, height, outsideValues, bilinear);
-		createOverviews(overviewCreator, directory, extension, sector, lzts, ignoreBlank, reporter);
+				new ImageOverviewCreator(width, height, outsideValues, bilinear, jpegQuality);
+		createOverviews(overviewCreator, directory, extension, sector, origin, lzts, ignoreBlank,
+				reporter);
 	}
 
 	public static void createElevationOverviews(File directory, int width, int height,
 			int bufferType, ByteOrder byteOrder, NullableNumberArray outsideValues, Sector sector,
-			double lzts, boolean bilinear, boolean ignoreBlank, ProgressReporter reporter)
+			LatLon origin, double lzts, boolean bilinear, boolean ignoreBlank,
+			ProgressReporter reporter)
 	{
 		int bands = 1;
 		OverviewCreator overviewCreator =
 				new ElevationOverviewCreator(width, height, bands, bufferType, byteOrder,
 						outsideValues, bilinear);
-		createOverviews(overviewCreator, directory, "bil", sector, lzts, ignoreBlank, reporter);
+		createOverviews(overviewCreator, directory, "bil", sector, origin, lzts, ignoreBlank,
+				reporter);
 	}
 
 	private static void createOverviews(OverviewCreator overviewCreator, File directory,
-			String extension, Sector sector, double lzts, boolean ignoreBlank,
+			String extension, Sector sector, LatLon origin, double lzts, boolean ignoreBlank,
 			ProgressReporter progress)
 	{
 		progress.getLogger().info("Generating overviews...");
@@ -98,7 +103,7 @@ public class Overviewer
 			int size = 0;
 			for (int i = 0; i < maxlevel; i++)
 			{
-				size += Util.tileCount(sector, i, lzts);
+				size += Util.tileCount(sector, origin, i, lzts);
 			}
 
 			for (int level = maxlevel; level > 0; level--)
@@ -191,13 +196,15 @@ public class Overviewer
 		private int width;
 		private int height;
 		private boolean bilinear;
+		private float jpegQuality;
 
 		public ImageOverviewCreator(int width, int height, NullableNumberArray outsideValues,
-				boolean bilinear)
+				boolean bilinear, float jpegQuality)
 		{
 			this.width = width;
 			this.height = height;
 			this.bilinear = bilinear;
+			this.jpegQuality = jpegQuality;
 
 			// create image for tiles outside extents (tiles that don't
 			// exist)
@@ -345,7 +352,7 @@ public class Overviewer
 			dst.getParentFile().mkdirs();
 			String imageformat =
 					dst.getName().substring(dst.getName().lastIndexOf('.') + 1).toLowerCase();
-			ImageIO.write(id, imageformat, dst);
+			Tiler.writeImage(id, imageformat, dst, jpegQuality);
 		}
 	}
 

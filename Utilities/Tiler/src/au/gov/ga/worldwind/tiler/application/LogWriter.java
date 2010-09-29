@@ -12,6 +12,7 @@ import org.gdal.gdal.gdal;
 import au.gov.ga.worldwind.tiler.application.Tiler.TilingType;
 import au.gov.ga.worldwind.tiler.mapnik.MapnikUtil;
 import au.gov.ga.worldwind.tiler.util.BufferedLineWriter;
+import au.gov.ga.worldwind.tiler.util.LatLon;
 import au.gov.ga.worldwind.tiler.util.MinMaxArray;
 import au.gov.ga.worldwind.tiler.util.NullableNumberArray;
 import au.gov.ga.worldwind.tiler.util.NumberArray;
@@ -30,8 +31,8 @@ public class LogWriter
 		writer = new BufferedLineWriter(logWriter);
 	}
 
-	public void startLog(TilingType type, File mapFile, File outDir, Sector sector, int level,
-			int tilesize, double lzts, String imageFormat, boolean addAlpha, int band,
+	public void startLog(TilingType type, File mapFile, File outDir, Sector sector, LatLon origin,
+			int level, int tilesize, double lzts, String imageFormat, boolean addAlpha, int band,
 			int bufferType, boolean bilinear, boolean reproject, String infoText, String tileText,
 			NullableNumberArray outsideValues, MinMaxArray[] minMaxReplaces,
 			NullableNumberArray replace, NullableNumberArray otherwise, boolean isFloat)
@@ -43,6 +44,7 @@ public class LogWriter
 			writer.writeLine("Python binary: " + MapnikUtil.getPythonBinary());
 			writer.writeLine("Mapnik script: " + MapnikUtil.getMapnikScript());
 			writer.writeLine("Sector: " + sector);
+			writer.writeLine("Tile origin: " + origin);
 			writer.writeLine("Output directory: " + outDir.getAbsolutePath());
 			writer.writeLine("Level count: " + (level + 1));
 			writer.writeLine("Tilesize: " + tilesize);
@@ -62,6 +64,7 @@ public class LogWriter
 
 			writer.writeLine("Output parameters:");
 			writer.writeLine("Sector: " + sector);
+			writer.writeLine("Tile origin: " + origin);
 			writer.writeLine("Output directory: " + outDir.getAbsolutePath());
 			writer.writeLine("Level count: " + (level + 1));
 			writer.writeLine("Tilesize: " + tilesize);

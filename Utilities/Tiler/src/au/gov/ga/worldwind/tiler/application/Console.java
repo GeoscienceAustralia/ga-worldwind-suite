@@ -21,6 +21,7 @@ import au.gov.ga.worldwind.tiler.application.CmdLineParser.Option;
 import au.gov.ga.worldwind.tiler.application.CmdLineParser.OptionException;
 import au.gov.ga.worldwind.tiler.application.Tiler.TilingType;
 import au.gov.ga.worldwind.tiler.gdal.GDALUtil;
+import au.gov.ga.worldwind.tiler.util.LatLon;
 import au.gov.ga.worldwind.tiler.util.MinMaxArray;
 import au.gov.ga.worldwind.tiler.util.NullableNumberArray;
 import au.gov.ga.worldwind.tiler.util.NumberArray;
@@ -41,7 +42,7 @@ public class Console
 						+ "       [{-d,--datatype} {BYTE|INT16|INT32|FLOAT32}] [{-a,--addalpha}]\n"
 						+ "       [{-b,--band} band] [{-n,--nooverviews}] [{-l,--levels} levels]\n"
 						+ "       [{-m,--nomagnification}] [{-g,--nominification}] [{-k,--includeblank}]\n"
-						+ "       [{-o,--setoutside} \"value[,value...]]\"\n"
+						+ "       [{-q,--quality} qual] [{-o,--setoutside} \"value[,value...]]\"\n"
 						+ "       [{-r,--replacevalues} \"min1[,min1...] max1[,max1...] min2[,min2...]\n"
 						+ "                              max2[,max2...] with[,with...] else[,else...]\"\n"
 						+ "       input_file output_directory\n"
@@ -54,6 +55,7 @@ public class Console
 						+ "             similar)\n"
 						+ "  -z lzts    Level zero tile size in degrees (default: 36.0 for images, 20.0\n"
 						+ "             for elevations)\n"
+						+ "  -s lat,lon Tile origin (default: -90,-180)\n"
 						+ "  -t size    Width and height of tiles (default: 512 for images, 150 for\n"
 						+ "             elevations)\n"
 						+ "  -n         Don't generate overviews\n"
@@ -61,7 +63,8 @@ public class Console
 						+ "  -m         Disable bilinear magnification (if the top level tiles generated\n"
 						+ "             have a higher resolution than the dataset)\n"
 						+ "  -g         Disable bilinear minification when generating overviews\n"
-						+ "  -k         Generate blank tiles"
+						+ "  -k         Generate blank tiles\n"
+						+ "  -q qual    JPEG compression quality (default: 0.75)\n"
 						+ "  -o \"...\"   Set values outside extends to (number of values must equal the\n"
 						+ "             number of output bands, blanks permitted)\n"
 						+ "  -r \"...\"   Replace values between (number of values in each group must\n"
@@ -99,14 +102,16 @@ public class Console
 		//-f --format JPG|PNG     (images)
 		//-d --datatype BYTE|INT16|INT32|FLOAT32     (elevations)
 		//-a --addalpha      (images)
+		//-q --quality 0.75
 		//-b --band 1      (elevations)
 		//-n --nooverviews
 		//-l --levels n
 		//-m --nomagnification
 		//-g --nominification
-		//-s --setoutside n,n,n
+		//-o --setoutside n,n,n
 		//-r --replacevalues "n,n,n n,n,n n,n,n n,n,n n,n,n n,n,n"
 		//-k --includeblank
+		//-s --origin n,n
 
 		CmdLineParser parser = new CmdLineParser();
 
@@ -125,6 +130,16 @@ public class Console
 		Option bilinearO = parser.addBooleanOption('m', "nomagnification");
 		Option bilinearOverviewsO = parser.addBooleanOption('g', "nominification");
 		Option includeBlankO = parser.addBooleanOption('k', "includeblank");
+		Option qualityO = parser.addDoubleOption('q', "quality");
+		Option originO = new Option('s', "origin", true)
+		{
+			@Override
+			protected Object parseValue(String arg, Locale locale)
+					throws IllegalOptionValueException
+			{
+				return parseOrigin(this, arg);
+			}
+		};
 		Option outsideO = new Option('o', "setoutside", true)
 		{
 			@Override
@@ -190,8 +205,10 @@ public class Console
 		boolean bilinear = !nobilinear;
 		boolean bilinearOverviews = !nobilinearOverviews;
 		Boolean includeBlank = (Boolean) parser.getOptionValue(includeBlankO, false);
+		Double quality = (Double) parser.getOptionValue(qualityO, 0.75);
 
 		Integer tilesize = (Integer) parser.getOptionValue(tilesizeO, elevations ? 150 : 512);
+		LatLon origin = (LatLon) parser.getOptionValue(originO, LatLon.DEFAULT_ORIGIN);
 		Double lzts = (Double) parser.getOptionValue(lztsO, elevations ? 20d : 36d);
 
 		String imageFormat = ((String) parser.getOptionValue(formatO, "jpg")).toLowerCase();
@@ -264,41 +281,44 @@ public class Console
 				output.mkdirs();
 				logWriter = new LogWriter(output);
 				String infoText = GDALUtil.getInfoText(dataset, sector);
-				String tileText = GDALUtil.getTileText(dataset, sector, lzts, levels, !nooverviews);
+				String tileText =
+						GDALUtil.getTileText(dataset, sector, origin, lzts, levels, !nooverviews);
 
 				if (elevations)
 				{
-					logWriter.startLog(TilingType.Elevations, input, output, sector, level,
+					logWriter.startLog(TilingType.Elevations, input, output, sector, origin, level,
 							tilesize, lzts, imageFormat, addAlpha, band, bufferType, bilinear,
 							reproject, infoText, tileText, outside, replaces.replaceMinMaxs,
 							replaces.replace, replaces.otherwise, isFloat);
 
 					NumberArray minMax = new NumberArray(2);
-					Tiler.tileElevations(dataset, reproject, bilinear, sector, level, tilesize,
-							lzts, bufferType, band, outside, replaces.replaceMinMaxs,
+					Tiler.tileElevations(dataset, reproject, bilinear, sector, origin, level,
+							tilesize, lzts, bufferType, band, outside, replaces.replaceMinMaxs,
 							replaces.replace, replaces.otherwise, minMax, output, reporter);
 					if (!nooverviews)
 					{
 						Overviewer.createElevationOverviews(output, tilesize, tilesize, bufferType,
-								ByteOrder.LITTLE_ENDIAN, outside, sector, lzts, bilinearOverviews,
-								!includeBlank, reporter);
+								ByteOrder.LITTLE_ENDIAN, outside, sector, origin, lzts,
+								bilinearOverviews, !includeBlank, reporter);
 					}
 					logWriter.logMinMax(minMax, isFloat);
 				}
 				else
 				{
-					logWriter.startLog(TilingType.Images, input, output, sector, level, tilesize,
-							lzts, imageFormat, addAlpha, band, bufferType, bilinear, reproject,
-							infoText, tileText, outside, replaces.replaceMinMaxs, replaces.replace,
-							replaces.otherwise, isFloat);
+					logWriter.startLog(TilingType.Images, input, output, sector, origin, level,
+							tilesize, lzts, imageFormat, addAlpha, band, bufferType, bilinear,
+							reproject, infoText, tileText, outside, replaces.replaceMinMaxs,
+							replaces.replace, replaces.otherwise, isFloat);
 
-					Tiler.tileImages(dataset, reproject, bilinear, sector, level, tilesize, lzts,
-							imageFormat, addAlpha, outside, !includeBlank, replaces.replaceMinMaxs,
-							replaces.replace, replaces.otherwise, output, reporter);
+					Tiler.tileImages(dataset, reproject, bilinear, sector, origin, level, tilesize,
+							lzts, imageFormat, addAlpha, quality.floatValue(), outside,
+							!includeBlank, replaces.replaceMinMaxs, replaces.replace,
+							replaces.otherwise, output, reporter);
 					if (!nooverviews)
 					{
 						Overviewer.createImageOverviews(output, imageFormat, tilesize, tilesize,
-								outside, sector, lzts, bilinearOverviews, !includeBlank, reporter);
+								outside, sector, origin, lzts, bilinearOverviews, !includeBlank,
+								quality.floatValue(), reporter);
 					}
 				}
 			}
@@ -324,6 +344,22 @@ public class Console
 	{
 		System.err.println(message);
 		System.exit(2);
+	}
+
+	private static LatLon parseOrigin(Option option, String arg) throws IllegalOptionValueException
+	{
+		try
+		{
+			String[] split = (arg + " ").split(","); //split doesn't work if there are no values
+			Double[] d = stringsToDoubles(split);
+			if (d.length == 2)
+				return new LatLon(d[0], d[1]);
+			throw new Exception();
+		}
+		catch (Exception e)
+		{
+			throw new IllegalOptionValueException(option, arg);
+		}
 	}
 
 	private static NullableNumberArray parseNumberArray(Option option, String arg)

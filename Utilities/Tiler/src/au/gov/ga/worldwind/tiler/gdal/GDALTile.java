@@ -51,8 +51,9 @@ public class GDALTile
 
 	public GDALTile(GDALTileParameters parameters) throws GDALException, TilerException
 	{
-		if (parameters.sector.getMinLatitude() >= parameters.sector.getMaxLatitude()
-				|| parameters.sector.getMinLongitude() >= parameters.sector.getMaxLongitude())
+		if (parameters.sector != null
+				&& (parameters.sector.getMinLatitude() >= parameters.sector.getMaxLatitude() || parameters.sector
+						.getMinLongitude() >= parameters.sector.getMaxLongitude()))
 			throw new IllegalArgumentException();
 
 		this.parameters = parameters;
@@ -124,12 +125,19 @@ public class GDALTile
 		double[] geoTransformArray = new double[6];
 		parameters.dataset.GetGeoTransform(geoTransformArray);
 
+		if (parameters.sourceRectangle != null)
+		{
+			readRectangle(parameters.dataset, parameters.sourceRectangle);
+			return;
+		}
+
+		double small = 0.001;
 		int srcX =
 				(int) ((parameters.sector.getMinLongitude() - geoTransformArray[0])
-						/ geoTransformArray[1] + 0.001);
+						/ geoTransformArray[1] + small);
 		int srcY =
 				(int) ((parameters.sector.getMaxLatitude() - geoTransformArray[3])
-						/ geoTransformArray[5] + 0.001);
+						/ geoTransformArray[5] + small);
 		int srcWidth = (int) (parameters.sector.getDeltaLongitude() / geoTransformArray[1] + 0.5);
 		int srcHeight = (int) (-parameters.sector.getDeltaLatitude() / geoTransformArray[5] + 0.5);
 
@@ -375,8 +383,7 @@ public class GDALTile
 
 		// set variables for indexed image
 		Band lastBand = bands[bands.length - 1];
-		boolean indexed =
-				lastBand.GetRasterColorInterpretation() == gdalconstConstants.GCI_PaletteIndex;
+		indexed = lastBand.GetRasterColorInterpretation() == gdalconstConstants.GCI_PaletteIndex;
 		indexColorModel =
 				indexed ? lastBand.GetRasterColorTable().getIndexColorModel(dataTypeSize) : null;
 	}

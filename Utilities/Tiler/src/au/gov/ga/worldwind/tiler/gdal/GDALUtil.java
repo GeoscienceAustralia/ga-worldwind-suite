@@ -9,6 +9,7 @@ import org.gdal.gdalconst.gdalconst;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 
+import au.gov.ga.worldwind.tiler.util.LatLon;
 import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.StringLineBuilder;
 import au.gov.ga.worldwind.tiler.util.TilerException;
@@ -50,8 +51,7 @@ public class GDALUtil
 
 	public static Dataset open(File file) throws GDALException
 	{
-		Dataset dataset = (Dataset) gdal.Open(file.getAbsolutePath(),
-				gdalconst.GA_ReadOnly);
+		Dataset dataset = (Dataset) gdal.Open(file.getAbsolutePath(), gdalconst.GA_ReadOnly);
 		if (dataset == null)
 		{
 			throw new GDALException();
@@ -64,9 +64,9 @@ public class GDALUtil
 		double[] geoTransformArray = new double[6];
 		dataset.GetGeoTransform(geoTransformArray);
 
-		if (geoTransformArray[0] == 0 && geoTransformArray[1] == 0
-				&& geoTransformArray[2] == 0 && geoTransformArray[3] == 0
-				&& geoTransformArray[4] == 0 && geoTransformArray[5] == 0)
+		if (geoTransformArray[0] == 0 && geoTransformArray[1] == 0 && geoTransformArray[2] == 0
+				&& geoTransformArray[3] == 0 && geoTransformArray[4] == 0
+				&& geoTransformArray[5] == 0)
 		{
 			throw new TilerException("Dataset contains zeroed geotransform");
 		}
@@ -77,10 +77,10 @@ public class GDALUtil
 		// gY = gt[3] + gt[4] * x + gt[5] * y;
 		double minlon = geoTransformArray[0];
 		double maxlat = geoTransformArray[3];
-		double maxlon = geoTransformArray[0] + geoTransformArray[1] * width
-				+ geoTransformArray[2] * height;
-		double minlat = geoTransformArray[3] + geoTransformArray[4] * width
-				+ geoTransformArray[5] * height;
+		double maxlon =
+				geoTransformArray[0] + geoTransformArray[1] * width + geoTransformArray[2] * height;
+		double minlat =
+				geoTransformArray[3] + geoTransformArray[4] * width + geoTransformArray[5] * height;
 
 		if (isProjectionsSupported())
 		{
@@ -93,17 +93,15 @@ public class GDALUtil
 					SpatialReference geog = proj.CloneGeogCS();
 					if (geog != null)
 					{
-						CoordinateTransformation transform = new CoordinateTransformation(
-								proj, geog);
+						CoordinateTransformation transform =
+								new CoordinateTransformation(proj, geog);
 						if (transform != null)
 						{
 							double[] transPoint = new double[3];
-							transform.TransformPoint(transPoint, minlon,
-									minlat, 0);
+							transform.TransformPoint(transPoint, minlon, minlat, 0);
 							minlon = transPoint[0];
 							minlat = transPoint[1];
-							transform.TransformPoint(transPoint, maxlon,
-									maxlat, 0);
+							transform.TransformPoint(transPoint, maxlon, maxlat, 0);
 							maxlon = transPoint[0];
 							maxlat = transPoint[1];
 							transform.delete();
@@ -137,10 +135,9 @@ public class GDALUtil
 		int height = dataset.getRasterYSize();
 		int bandCount = dataset.getRasterCount();
 		String projection = dataset.GetProjection();
-		SpatialReference spatialReference = (projection == null
-				|| projection.length() == 0 || !GDALUtil
-				.isProjectionsSupported()) ? null : new SpatialReference(
-				projection);
+		SpatialReference spatialReference =
+				(projection == null || projection.length() == 0 || !GDALUtil
+						.isProjectionsSupported()) ? null : new SpatialReference(projection);
 		String[] dataTypes = new String[bandCount];
 		int[] dataTypeSizes = new int[bandCount];
 		Double[] nodata = new Double[bandCount];
@@ -167,18 +164,17 @@ public class GDALUtil
 
 		info.appendLine("Dataset information:");
 		info.appendLine("Size = " + width + ", " + height);
-		info.appendLine("Cell size = " + (sector.getDeltaLongitude() / width)
-				+ ", " + (sector.getDeltaLatitude() / height));
-		info.appendLine("Bottom left corner = (" + sector.getMinLongitude()
-				+ ", " + sector.getMinLatitude() + ")");
-		info.appendLine("Top right corner = (" + sector.getMaxLongitude()
-				+ ", " + sector.getMaxLatitude() + ")");
+		info.appendLine("Cell size = " + (sector.getDeltaLongitude() / width) + ", "
+				+ (sector.getDeltaLatitude() / height));
+		info.appendLine("Bottom left corner = (" + sector.getMinLatitude() + ", "
+				+ sector.getMinLongitude() + ")");
+		info.appendLine("Top right corner = (" + sector.getMaxLatitude() + ", "
+				+ sector.getMaxLongitude() + ")");
 		info.appendLine("Raster band count = " + bandCount);
 		for (int i = 0; i < bandCount; i++)
 		{
 			info.appendLine("Band " + (i + 1) + ":");
-			info.appendLine("    Data type = " + dataTypes[i] + " ("
-					+ dataTypeSizes[i] + " bit)");
+			info.appendLine("    Data type = " + dataTypes[i] + " (" + dataTypeSizes[i] + " bit)");
 			info.appendLine("    No-data value = " + nodata[i]);
 			info.appendLine("    Approx minimum = " + min[i]);
 			info.appendLine("    Approx maximum = " + max[i]);
@@ -186,15 +182,14 @@ public class GDALUtil
 		if (spatialReference != null)
 		{
 			info.appendLine("Coordinate system =");
-			info.appendLine(Util.fixNewlines(spatialReference
-					.ExportToPrettyWkt()));
+			info.appendLine(Util.fixNewlines(spatialReference.ExportToPrettyWkt()));
 		}
 
 		return info.toString(true);
 	}
 
-	public static String getTileText(Dataset dataset, Sector sector,
-			double lzts, int levels, boolean overviews)
+	public static String getTileText(Dataset dataset, Sector sector, LatLon origin, double lzts,
+			int levels, boolean overviews)
 	{
 		StringLineBuilder info = new StringLineBuilder();
 
@@ -203,7 +198,7 @@ public class GDALUtil
 
 		for (int i = overviews ? 0 : levels - 1; i < levels; i++)
 		{
-			tileCount[i] = Util.tileCount(sector, i, lzts);
+			tileCount[i] = Util.tileCount(sector, origin, i, lzts);
 			totalCount += tileCount[i];
 		}
 
@@ -211,10 +206,8 @@ public class GDALUtil
 		info.appendLine("Level count = " + levels);
 		if (overviews)
 		{
-			info.appendLine("Tile count at highest level = "
-					+ tileCount[levels - 1]);
-			info.appendLine("Overview tile count = "
-					+ (totalCount - tileCount[levels - 1]));
+			info.appendLine("Tile count at highest level = " + tileCount[levels - 1]);
+			info.appendLine("Overview tile count = " + (totalCount - tileCount[levels - 1]));
 		}
 		info.appendLine("Total tile count = " + totalCount);
 

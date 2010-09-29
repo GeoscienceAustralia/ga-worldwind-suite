@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.tiler.gdal;
 
 import java.awt.Dimension;
+import java.awt.Rectangle;
 
 import org.gdal.gdal.Dataset;
 
@@ -16,11 +17,21 @@ public class GDALTileParameters
 		this.dataset = dataset;
 		this.size = size;
 		this.sector = sector;
+		this.sourceRectangle = null;
+	}
+	
+	public GDALTileParameters(Dataset dataset, Dimension size, Rectangle sourceRectangle)
+	{
+		this.dataset = dataset;
+		this.size = size;
+		this.sector = null;
+		this.sourceRectangle = sourceRectangle;
 	}
 	
 	public final Dataset dataset;
 	public final Dimension size;
 	public final Sector sector;
+	public final Rectangle sourceRectangle;
 	
 	public boolean addAlpha = false;
 	public int selectedBand = -1;
