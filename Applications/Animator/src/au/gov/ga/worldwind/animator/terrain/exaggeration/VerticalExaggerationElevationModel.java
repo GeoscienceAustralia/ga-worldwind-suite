@@ -5,8 +5,10 @@ import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.globes.ElevationModel;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
@@ -29,6 +31,9 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 	/** The registered exaggerators, keyed by elevation threshold */
 	private TreeMap<Double, ElevationExaggeration> exaggerators = new TreeMap<Double, ElevationExaggeration>();
 	
+	private List<ExaggerationWindow> positiveExaggerationWindows = new ArrayList<ExaggerationWindow>();
+	private List<ExaggerationWindow> negativeExaggerationWindows = new ArrayList<ExaggerationWindow>();
+	
 	/** The global offset to apply after exaggeration */
 	private double globalOffset = 1.0;
 	
@@ -43,7 +48,8 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 		{
 			return;
 		}
-		exaggerators.put(exaggerator.getElevationThreshold(), exaggerator);
+		exaggerators.put(exaggerator.getElevationBoundary(), exaggerator);
+		recalculateExaggerationWindows();
 	}
 
 	public void addExaggerators(Collection<ElevationExaggeration> exaggerators)
@@ -60,17 +66,24 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 	
 	public void removeExaggerator(ElevationExaggeration exaggerator)
 	{
-		exaggerators.remove(exaggerator.getElevationThreshold());
+		exaggerators.remove(exaggerator.getElevationBoundary());
+		recalculateExaggerationWindows();
 	}
 	
 	public void removeExaggerator(Double threshold)
 	{
 		exaggerators.remove(threshold);
+		recalculateExaggerationWindows();
 	}
 	
 	public ElevationExaggeration getExaggeratorForElevation(double elevation)
 	{
-		return exaggerators.floorEntry(elevation).getValue();
+		Entry<Double, ElevationExaggeration> floorEntry = exaggerators.floorEntry(elevation);
+		if (floorEntry == null)
+		{
+			return null;
+		}
+		return floorEntry.getValue();
 	}
 	
 	public double getGlobalOffset()
@@ -134,6 +147,58 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 	}
 	
 	/**
+	 * Recalculate all of the exaggeration windows from the current set of elevation exaggerators
+	 */
+	private void recalculateExaggerationWindows()
+	{
+		reCalculatePositiveExaggerationWindows();
+		reCalculateNegativeExaggerationWindows();
+	}
+
+	private void reCalculateNegativeExaggerationWindows()
+	{
+		negativeExaggerationWindows.clear();
+		ExaggerationWindow currentWindow = null;
+		ExaggerationWindow previousWindow = null;
+		
+		List<ElevationExaggeration> exaggerators = getNegativeExaggeratorsDescending();
+		for (int i = exaggerators.size() - 1; i >= 0; i--)
+		{
+			previousWindow = currentWindow;
+			
+			ElevationExaggeration elevationExaggeration = exaggerators.get(i);
+			currentWindow = new ExaggerationWindow(elevationExaggeration.getElevationBoundary(), elevationExaggeration.getExaggeration());
+			currentWindow.setLowerWindow(previousWindow);
+			
+			negativeExaggerationWindows.add(currentWindow);
+		}
+		
+		// Add a [-inf x1 n] window in the negative case
+		currentWindow = new ExaggerationWindow(Double.NEGATIVE_INFINITY, 1.0);
+		currentWindow.setUpperWindow(negativeExaggerationWindows.get(0));
+		negativeExaggerationWindows.add(0, currentWindow);
+	}
+
+	private void reCalculatePositiveExaggerationWindows()
+	{
+		positiveExaggerationWindows.clear();
+		ExaggerationWindow currentWindow = null;
+		ExaggerationWindow previousWindow = null;
+		
+		List<ElevationExaggeration> exaggerators = getPositiveExaggeratorsAscending();
+		for (int i = 0; i < exaggerators.size(); i++)
+		{
+			previousWindow = currentWindow;
+			
+			ElevationExaggeration elevationExaggeration = exaggerators.get(i);
+			currentWindow = new ExaggerationWindow(elevationExaggeration.getElevationBoundary(), elevationExaggeration.getExaggeration());
+			currentWindow.setLowerWindow(previousWindow);
+			
+			positiveExaggerationWindows.add(currentWindow);
+		}
+	}
+	
+	/**
 	 * Exaggerate the elevations contained in the provided buffer using the configured {@link ElevationExaggeration}s.
 	 * <p/>
 	 * <em>Note:</em> To keep consistent with elevation processing, the exaggeration is performed in-place in the provided buffer.
@@ -156,6 +221,75 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 	 */
 	protected double exaggerateElevation(double elevation)
 	{
-		return elevation;
+		ExaggerationWindow window = getWindowForElevation(elevation);
+		if (window == null)
+		{
+			return elevation;
+		}
+		return window.applyExaggeration(elevation);
+	}
+	
+	private ExaggerationWindow getWindowForElevation(double elevation)
+	{
+		if (isNegativeElevation(elevation))
+		{
+			return findWindowForElevation(negativeExaggerationWindows, elevation);
+		}
+		return findWindowForElevation(positiveExaggerationWindows, elevation);
+	}
+
+	private ExaggerationWindow findWindowForElevation(List<ExaggerationWindow> windowList, double elevation)
+	{
+		for (ExaggerationWindow window : windowList)
+		{
+			if (window.elevationIsInWindow(elevation))
+			{
+				return window;
+			}
+		}
+		return null;
+	}
+
+	private boolean isNegativeElevation(double elevation)
+	{
+		return elevation < 0.0;
+	}
+	
+	/**
+	 * @return The exaggerators with boundaries of positive elevations, ordered by ascending boundaries. 
+	 * Guaranteed to have an exaggerator at 0.0 as the first element in the list.
+	 */
+	private List<ElevationExaggeration> getPositiveExaggeratorsAscending()
+	{
+		List<ElevationExaggeration> result = new ArrayList<ElevationExaggeration>(exaggerators.tailMap(0.0, true).values());
+		if (result.isEmpty() || result.get(0).getElevationBoundary() > 0.0)
+		{
+			double zeroExaggeration = 1.0;
+			if (exaggerators.floorEntry(0.0) != null)
+			{
+				zeroExaggeration = exaggerators.floorEntry(0.0).getValue().getExaggeration();
+			}
+			result.add(0, new ElevationExaggerationImpl(zeroExaggeration, 0.0));
+		}
+		return result;
+	}
+	
+	/**
+	 * @return The exaggerators with boundaries of negative elevations, ordered by descending boundaries. 
+	 * Guaranteed to have an exaggerator at 0.0 as the first element in the list.
+	 */
+	private List<ElevationExaggeration> getNegativeExaggeratorsDescending()
+	{
+		List<ElevationExaggeration> result = new ArrayList<ElevationExaggeration>(exaggerators.headMap(0.0, false).descendingMap().values());
+		if (result.isEmpty() || result.get(0).getElevationBoundary() < 0.0)
+		{
+			double zeroExaggeration = 1.0;
+			if (exaggerators.lowerEntry(0.0) != null)
+			{
+				zeroExaggeration = exaggerators.lowerEntry(0.0).getValue().getExaggeration();
+			}
+			result.add(0, new ElevationExaggerationImpl(zeroExaggeration, 0.0));
+		}
+		return result;
 	}
 }
