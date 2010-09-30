@@ -35,6 +35,8 @@ import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationEle
 public class DefaultAnimatableElevation extends AnimatableBase implements AnimatableElevation
 {
 	private static final long serialVersionUID = 20100929L;
+
+	private static final String DEFAULT_NAME = "Elevation";
 	
 	private Map<Double, ElevationExaggerationParameter> exaggerationParameters = new HashMap<Double, ElevationExaggerationParameter>();
 
@@ -45,10 +47,10 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 	
 	public DefaultAnimatableElevation()
 	{
+		super(getMessage(getElevationNameKey()) == null ? DEFAULT_NAME : getMessage(getElevationNameKey()));
+		
 		containerModel = new CompoundElevationModel();
 		rootElevationModel = new VerticalExaggerationElevationModel(containerModel);
-		
-		setName(getMessage(getElevationNameKey()));
 	}
 	
 	/**

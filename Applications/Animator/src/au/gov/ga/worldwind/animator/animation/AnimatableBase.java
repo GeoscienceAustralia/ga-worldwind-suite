@@ -31,8 +31,6 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	
 	/**
 	 * Constructor. Initialises the name of the animatable object.
-	 * 
-	 * @param name
 	 */
 	public AnimatableBase(String name)
 	{
