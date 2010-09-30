@@ -12,6 +12,7 @@
 
 	private static final Map<String, String> extensions = new HashMap<String, String>();
 	private static final Map<String, String> contentTypes = new HashMap<String, String>();
+	private static final boolean useJavaZip;
 
 	static
 	{
@@ -21,6 +22,17 @@
 		//addFormat("dds", "image/x-dds");
 		//addFormat("gif", "image/gif");
 		addFormat("bil", "application/bil", "application/bil16", "application/bil32");
+
+		boolean useJavaZipLocal = true;
+		try
+		{
+			useJavaZipLocal =
+					Double.parseDouble(System.getProperty("java.specification.version")) > 1.5;
+		}
+		catch (Exception e)
+		{
+		}
+		useJavaZip = useJavaZipLocal;
 	}
 
 	/**
@@ -45,6 +57,72 @@
 				inputStream.close();
 			if (zipFile != null)
 				zipFile.close();
+		}
+	}
+
+	/**
+	 * Class which executes a command, waits for the process to complete, and
+	 * then allows access to the stdout and stderr produced by the command.
+	 */
+	private static class CommandExecutor
+	{
+		private byte[] input;
+		private byte[] error;
+
+		public CommandExecutor(String command) throws IOException
+		{
+			Process process = Runtime.getRuntime().exec(command);
+			InputStream inputStream = process.getInputStream();
+			InputStream errorStream = process.getErrorStream();
+			StreamReader inputReader = new StreamReader(inputStream);
+			StreamReader errorReader = new StreamReader(errorStream);
+			inputReader.start();
+			errorReader.start();
+
+			try
+			{
+				process.waitFor();
+				inputReader.join();
+				errorReader.join();
+			}
+			catch (InterruptedException e)
+			{
+			}
+
+			input = inputReader.data;
+			error = errorReader.data;
+		}
+
+		/**
+		 * Thread which reads from an InputStream, and stores the data read in a
+		 * byte[] array.
+		 */
+		private static class StreamReader extends Thread
+		{
+			private final InputStream stream;
+			private byte[] data;
+
+			public StreamReader(InputStream stream)
+			{
+				this.stream = stream;
+			}
+
+			@Override
+			public void run()
+			{
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				try
+				{
+					int read;
+					byte[] buffer = new byte[1024];
+					while ((read = stream.read(buffer)) >= 0)
+						baos.write(buffer, 0, read);
+				}
+				catch (Exception e)
+				{
+				}
+				data = baos.toByteArray();
+			}
 		}
 	}
 
@@ -134,7 +212,7 @@
 	 *            File extension (if null, searches all possible extensions)
 	 * @param mask
 	 *            Should we search in the 'mask' directory?
-	 * @return File if a file exists, else null
+	 * @return InputStream if a file exists, else null
 	 */
 	private static ExtensionInputStream findFile(String rowDirectory, String filename, String L,
 			String T, String extension, boolean mask) throws IOException
@@ -196,15 +274,45 @@
 
 				if (parent.isFile())
 				{
-					ZipFile zip = new ZipFile(parent);
-					ZipEntry entry = zip.getEntry(namePath);
-					if (entry != null)
-					{
-						//zip is closed later in handleRequest
-						return new ExtensionInputStream(zip.getInputStream(entry), extension, zip);
-					}
-					zip.close();
+					return getFileFromZip(parent, namePath, extension);
 				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Create an InputStream wrapping an entry within a zip file.
+	 * 
+	 * @param zipFile
+	 * @param entry
+	 * @param extension
+	 * @return InputStream if the entry exists, else null.
+	 * @throws IOException
+	 */
+	private static ExtensionInputStream getFileFromZip(File zipFile, String entry, String extension)
+			throws IOException
+	{
+		if (useJavaZip)
+		{
+			ZipFile zip = new ZipFile(zipFile);
+			ZipEntry zentry = zip.getEntry(entry);
+			if (zentry != null)
+			{
+				//zip is closed later in handleRequest
+				return new ExtensionInputStream(zip.getInputStream(zentry), extension, zip);
+			}
+			zip.close();
+		}
+		else
+		{
+			String command = "unzip -p " + zipFile.getAbsolutePath() + " " + entry;
+			CommandExecutor executor = new CommandExecutor(command);
+
+			if (executor.input.length > 0 && executor.error.length == 0)
+			{
+				ByteArrayInputStream bais = new ByteArrayInputStream(executor.input);
+				return new ExtensionInputStream(bais, extension, null);
 			}
 		}
 		return null;
@@ -219,7 +327,7 @@
 	 *            Tile dataset
 	 * @return true if the directory exists, else false
 	 */
-	private static boolean directoryExists(String L, String T)
+	private static boolean directoryExists(String L, String T) throws IOException
 	{
 		File parent = new File(path + "/" + T);
 		if (parent.isDirectory())
@@ -234,30 +342,53 @@
 
 			if (parent.isFile())
 			{
-				ZipFile zip = null;
-				try
+				return entryExistsInZip(parent, L + "/");
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Tests whether a zip file contains a particular entry.
+	 * 
+	 * @param zipFile
+	 * @param entry
+	 * @return True if entry exists in zipFile
+	 * @throws IOException
+	 */
+	private static boolean entryExistsInZip(File zipFile, String entry) throws IOException
+	{
+		if (useJavaZip)
+		{
+			ZipFile zip = null;
+			try
+			{
+				zip = new ZipFile(zipFile);
+				ZipEntry zentry = zip.getEntry(entry);
+				return zentry != null;
+			}
+			catch (Exception e)
+			{
+			}
+			finally
+			{
+				if (zip != null)
 				{
-					zip = new ZipFile(parent);
-					ZipEntry entry = zip.getEntry(L + "/");
-					return entry != null;
-				}
-				catch (Exception e)
-				{
-				}
-				finally
-				{
-					if (zip != null)
+					try
 					{
-						try
-						{
-							zip.close();
-						}
-						catch (IOException e)
-						{
-						}
+						zip.close();
+					}
+					catch (IOException e)
+					{
 					}
 				}
 			}
+		}
+		else
+		{
+			String command = "unzip -Z -1 " + zipFile.getAbsolutePath() + " " + entry;
+			CommandExecutor executor = new CommandExecutor(command);
+			return executor.input.length > 0 && executor.error.length == 0;
 		}
 		return false;
 	}
