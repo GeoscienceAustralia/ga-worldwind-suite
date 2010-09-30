@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<animatableObjects>
+    <elevation enabled="true" name="Elevation">
+        <models>
+            <model name="test1" url="file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml"/>
+        </models>
+        <exaggerator boundary="0.0">
+            <parameter defaultValue="1.0" enabled="true" name="Exaggeration"/>
+        </exaggerator>
+        <exaggerator boundary="100.0">
+            <parameter defaultValue="2.0" enabled="true" name="Exaggeration"/>
+        </exaggerator>
+        <exaggerator boundary="200.0">
+            <parameter defaultValue="3.0" enabled="true" name="Exaggeration"/>
+        </exaggerator>
+    </elevation>
+</animatableObjects>

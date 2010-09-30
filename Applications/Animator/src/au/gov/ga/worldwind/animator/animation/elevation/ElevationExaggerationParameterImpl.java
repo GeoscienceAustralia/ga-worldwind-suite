@@ -1,11 +1,17 @@
 package au.gov.ga.worldwind.animator.animation.elevation;
 
-import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.*;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
-
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getElevationExaggerationNameKey;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.util.WWXML;
+
+import org.w3c.dom.Element;
+
+import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
@@ -22,15 +28,28 @@ import au.gov.ga.worldwind.animator.util.Validate;
 public class ElevationExaggerationParameterImpl extends ParameterBase implements ElevationExaggerationParameter
 {
 	private static final long serialVersionUID = 2010L;
+
+	private static final String DEFAULT_NAME = "Exaggeration";
 	
 	private ElevationExaggeration exaggerator;
 	
-	public ElevationExaggerationParameterImpl(ElevationExaggeration exaggerator)
+	public ElevationExaggerationParameterImpl(Animation animation, ElevationExaggeration exaggerator)
 	{
+		super(getName(exaggerator), animation);
+		
 		Validate.notNull(exaggerator, "An exaggerator is required");
 		this.exaggerator = exaggerator;
 		
-		setName(getMessage(getElevationExaggerationNameKey(), exaggerator.getElevationBoundary()));
+		setDefaultValue(exaggerator.getExaggeration());
+	}
+	
+	private static String getName(ElevationExaggeration exaggerator)
+	{
+		if (getMessage(getElevationExaggerationNameKey()) == null)
+		{
+			return DEFAULT_NAME;
+		}
+		return getMessage(getElevationExaggerationNameKey(), exaggerator.getElevationBoundary());
 	}
 	
 	@Override
@@ -69,5 +88,17 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 		return null;
 	}
 
+	@Override
+	public Element toXml(Element parent, AnimationFileVersion version)
+	{
+		AnimationIOConstants constants = version.getConstants();
+		
+		Element result = WWXML.appendElement(parent, constants.getElevationExaggerationName());
+		WWXML.setDoubleAttribute(result, constants.getElevationExaggerationAttributeBoundary(), exaggerator.getElevationBoundary());
+		
+		result.appendChild(super.toXml(result, version));
+		
+		return result;
+	}
 	
 }

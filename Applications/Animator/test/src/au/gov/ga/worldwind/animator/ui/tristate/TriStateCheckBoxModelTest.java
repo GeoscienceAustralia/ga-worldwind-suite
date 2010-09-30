@@ -69,7 +69,8 @@ public class TriStateCheckBoxModelTest
 	public void testIterateStateFiresChange()
 	{
 		final TriStateEventListener listener = mockContext.mock(TriStateEventListener.class);
-		mockContext.checking(new Expectations(){{
+		mockContext.checking(new Expectations()
+		{{
 			oneOf(listener).stateChanged(with(classToBeTested), with(State.CHECKED), with(State.UNCHECKED));
 		}});
 		

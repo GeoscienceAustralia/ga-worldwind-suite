@@ -224,129 +224,104 @@ public interface AnimationIOConstants
 	String getAnimatableLayerAttributeEnabled();
 	
 	/**
+	 * @return The name of the 'animatable elevation' element
+	 */
+	String getAnimatableElevationName();
+	
+	/**
+	 * @return The name of the 'name' attribute on the layer element
+	 */
+	String getAnimatableElevationAttributeName();
+	
+	/**
+	 * @return The name of the 'enabled' attribute on the layer element
+	 */
+	String getAnimatableElevationAttributeEnabled();
+	
+	/**
+	 * @return The name of the 'elevation models' element
+	 */
+	String getAnimatableElevationModelContainerName();
+	
+	/**
+	 * @return The name of the 'elevation model' element
+	 */
+	String getAnimatableElevationModelIdentifierName();
+	
+	/**
+	 * @return The name of the 'name' attribute of the 'elevation model' element
+	 */
+	String getAnimatableElevationModelIdentifierAttributeName();
+	
+	/**
+	 * @return The name of the 'url' attribute of the 'elevation model' element
+	 */
+	String getAnimatableElevationModelIdentifierAttributeUrl();
+	
+	/**
+	 * @return The name of the 'elevation exaggeration' element
+	 */
+	String getElevationExaggerationName();
+	
+	/**
+	 * @return The name of the 'boundary' attribute of the 'elevation exaggeration' element
+	 */
+	String getElevationExaggerationAttributeBoundary();
+	
+	/**
 	 * Common constants that don't change across versions
 	 */
 	public static abstract class BaseConstants implements AnimationIOConstants
 	{
-		@Override
 		public String getParameterValueOwnerKey() {return "parameterValueOwner";}
-		
-		@Override
 		public String getAnimationKey() {return "currentAnimation";}
-		
-		@Override
 		public String getWorldWindowKey() {return "worldWindow";}
-		
-		@Override
 		public String getCurrentLayerKey() {return "currentLayer";}
-		
-		@Override
 		public String getRootElementName() {return "restorableState";}
-
-		@Override
 		public String getWorldWindAnimationElementName(){return null;}
-
-		@Override
 		public String getWorldWindAnimationAttributeVersion(){return null;}
-
-		@Override
 		public String getParameterValueElementName(){return null;}
-
-		@Override
 		public String getParameterValueAttributeValue(){return null;}
-
-		@Override
 		public String getParameterValueAttributeFrame(){return null;}
-
-		@Override
 		public String getParameterValueAttributeType(){return null;}
-
-		@Override
 		public String getBezierValueAttributeInValue(){return null;}
-
-		@Override
 		public String getBezierValueAttributeInPercent(){return null;}
-
-		@Override
 		public String getBezierValueAttributeOutValue(){return null;}
-
-		@Override
 		public String getBezierValueAttributeOutPercent(){return null;}
-
-		@Override
 		public String getBezierValueAttributeLocked(){return null;}
-
-		@Override
 		public String getParameterAttributeDefaultValue(){return null;}
-
-		@Override
 		public String getParameterAttributeName(){return null;}
-
-		@Override
 		public String getParameterAttributeEnabled(){return null;}
-
-		@Override
 		public String getParameterElementName(){return null;}
-
-		@Override
 		public String getCameraEyeLatElementName(){return null;}
-
-		@Override
 		public String getCameraEyeLonElementName(){return null;}
-
-		@Override
 		public String getCameraEyeElevationElementName(){return null;}
-
-		@Override
 		public String getCameraLookatLatElementName(){return null;}
-
-		@Override
 		public String getCameraLookatLonElementName(){return null;}
-
-		@Override
 		public String getCameraLookatElevationElementName(){return null;}
-
-		@Override
 		public String getCameraAttributeName(){return null;}
-
-		@Override
 		public String getCameraElementName(){return null;}
-
-		@Override
 		public String getAnimationAttributeFrameCount(){return null;}
-
-		@Override
 		public String getAnimationAttributeZoomRequired(){return null;}
-
-		@Override
 		public String getAnimatableObjectsElementName(){return null;}
-
-		@Override
 		public String getAnimationElementName(){return null;}
-		
-		@Override
 		public String getRenderParametersElementName(){return null;}
-
-		@Override
 		public String getHeightElementName(){return null;}
-
-		@Override
 		public String getWidthElementName(){return null;}
-
-		@Override
 		public String getFrameRateElementName(){return null;}
-		
-		@Override
 		public String getAnimatableLayerName() {return null;}
-		
-		@Override
 		public String getAnimatableLayerAttributeName() {return null;}
-		
-		@Override
 		public String getAnimatableLayerAttributeUrl() {return null;}
-		
-		@Override
 		public String getAnimatableLayerAttributeEnabled() {return null;}
+		public String getAnimatableElevationName() {return null;}
+		public String getAnimatableElevationAttributeName() {return null;}
+		public String getAnimatableElevationAttributeEnabled() {return null;}
+		public String getAnimatableElevationModelContainerName() {return null;}
+		public String getAnimatableElevationModelIdentifierName() {return null;}
+		public String getAnimatableElevationModelIdentifierAttributeName() {return null;}
+		public String getAnimatableElevationModelIdentifierAttributeUrl() {return null;}
+		public String getElevationExaggerationName() {return null;}
+		public String getElevationExaggerationAttributeBoundary() {return null;}
 	}
 	
 	/**
@@ -354,113 +329,51 @@ public interface AnimationIOConstants
 	 */
 	public static class V2 extends BaseConstants implements AnimationIOConstants
 	{
-		@Override
 		public String getRootElementName() {return getWorldWindAnimationElementName();}
-		
-		@Override
 		public String getParameterValueElementName() {return "parameterValue";}
-		
-		@Override
 		public String getParameterValueAttributeValue() {return "value";}
-		
-		@Override
 		public String getParameterValueAttributeFrame() {return "frame";}
-		
-		@Override
 		public String getParameterValueAttributeType() {return "type";}
-
-		@Override
 		public String getBezierValueAttributeInValue() {return "inValue";}
-
-		@Override
 		public String getBezierValueAttributeInPercent() {return "inPercent";}
-
-		@Override
 		public String getBezierValueAttributeOutValue() {return "outValue";}
-
-		@Override
 		public String getBezierValueAttributeOutPercent() {return "outPercent";}
-		
-		@Override
 		public String getBezierValueAttributeLocked() {return "locked";}
-		
-		@Override
 		public String getParameterAttributeDefaultValue() {return "defaultValue";}
-		
-		@Override
 		public String getParameterAttributeName() {return "name";}
-		
-		@Override
 		public String getParameterElementName() {return "parameter";}
-		
-		@Override
 		public String getParameterAttributeEnabled() {return "enabled";}
-		
-		@Override
 		public String getCameraEyeLatElementName() {return "eyeLat";}
-		
-		@Override
 		public String getCameraEyeLonElementName() {return "eyeLon";}
-		
-		@Override
 		public String getCameraEyeElevationElementName() {return "eyeElevation";}
-		
-		@Override
 		public String getCameraLookatLatElementName() {return "lookAtLat";}
-		
-		@Override
 		public String getCameraLookatLonElementName() {return "lookAtLon";}
-		
-		@Override
 		public String getCameraLookatElevationElementName() {return "lookAtElevation";}
-		
-		@Override
 		public String getCameraAttributeName() {return "name";}
-		
-		@Override
 		public String getCameraElementName() {return "camera";}
-		
-		@Override
 		public String getAnimationAttributeFrameCount() {return "frameCount";}
-		
-		@Override
 		public String getAnimationAttributeZoomRequired() {return "zoomRequired";}
-		
-		@Override
 		public String getAnimationElementName() {return "animation";}
-		
-		@Override
 		public String getAnimatableObjectsElementName() {return "animatableObjects";}
-		
-		@Override
 		public String getRenderParametersElementName() {return "renderParameters";}
-		
-		@Override
 		public String getFrameRateElementName() {return "frameRate";}
-		
-		@Override
 		public String getWidthElementName() {return "width";}
-		
-		@Override
 		public String getHeightElementName() {return "height";}
-		
-		@Override
 		public String getWorldWindAnimationElementName() {return "worldWindAnimation";}
-		
-		@Override
 		public String getWorldWindAnimationAttributeVersion() {return "version";}
-		
-		@Override
 		public String getAnimatableLayerName() {return "layer";}
-		
-		@Override
 		public String getAnimatableLayerAttributeName() {return "name";}
-		
-		@Override
 		public String getAnimatableLayerAttributeUrl() {return "url";}
-		
-		@Override
 		public String getAnimatableLayerAttributeEnabled() {return "enabled";}
+		public String getAnimatableElevationName() {return "elevation";}
+		public String getAnimatableElevationAttributeName() {return "name";}
+		public String getAnimatableElevationAttributeEnabled() {return "enabled";}
+		public String getAnimatableElevationModelContainerName() {return "models";}
+		public String getAnimatableElevationModelIdentifierName() {return "model";}
+		public String getAnimatableElevationModelIdentifierAttributeName() {return "name";}
+		public String getAnimatableElevationModelIdentifierAttributeUrl() {return "url";}
+		public String getElevationExaggerationName() {return "exaggerator";}
+		public String getElevationExaggerationAttributeBoundary() {return "boundary";}
 	}
 	
 	/**
@@ -468,9 +381,7 @@ public interface AnimationIOConstants
 	 */
 	public static class V1 extends BaseConstants implements AnimationIOConstants
 	{
-		@Override
 		public String getRootElementName() {return "restorableState";}
-
 	}
 
 }

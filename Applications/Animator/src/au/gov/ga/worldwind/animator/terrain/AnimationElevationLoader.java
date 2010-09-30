@@ -44,10 +44,7 @@ public class AnimationElevationLoader
 	
 	public static void setElevationFactory(Factory factory)
 	{
-		if (factory != null)
-		{
-			elevationFactory = factory;
-		}
+		elevationFactory = factory;
 	}
 	
 	/**

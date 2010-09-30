@@ -97,7 +97,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		this.renderCamera = new CameraImpl(this);
 		this.animatableObjects.add(renderCamera);
 		
-		this.animatableElevation = new DefaultAnimatableElevation();
+		this.animatableElevation = new DefaultAnimatableElevation(this);
 		this.animatableObjects.add(animatableElevation);
 		
 		this.name = MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getAnimatorApplicationTitleKey());
