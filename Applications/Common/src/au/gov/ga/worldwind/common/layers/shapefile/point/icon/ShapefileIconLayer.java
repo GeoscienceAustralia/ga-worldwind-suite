@@ -56,7 +56,7 @@ public class ShapefileIconLayer extends ShapefilePointLayer implements SelectLis
 		icon.setPosition(position);
 		icon.setToolTipText(text);
 		icon.setValue(AVKey.URL, link);
-		style.setPropertiesFromAttributes(context, icon, attrib);
+		style.setPropertiesFromAttributes(context, attrib, icon);
 		iconLayer.addIcon(icon);
 	}
 

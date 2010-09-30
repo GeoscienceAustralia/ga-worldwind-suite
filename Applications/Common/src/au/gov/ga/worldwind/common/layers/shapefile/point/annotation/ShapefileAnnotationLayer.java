@@ -54,7 +54,7 @@ public class ShapefileAnnotationLayer extends ShapefilePointLayer implements Sel
 		GlobeAnnotation annotation = new GlobeAnnotation(text, position);
 		annotation.setValue(AVKey.URL, link);
 		AnnotationAttributes attributes = new AnnotationAttributes();
-		style.setPropertiesFromAttributes(context, attributes, attrib);
+		style.setPropertiesFromAttributes(context, attrib, attributes, annotation);
 		annotation.setAttributes(attributes);
 		annotationLayer.addAnnotation(annotation);
 	}

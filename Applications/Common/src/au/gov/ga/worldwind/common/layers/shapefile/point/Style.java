@@ -61,11 +61,19 @@ public class Style
 		}
 	}
 
-	public void setPropertiesFromAttributes(URL context, Object object, AVList attributes)
+	public void setPropertiesFromAttributes(URL context, AVList attributes, Object... objects)
 	{
 		Map<String, Method> methods = new HashMap<String, Method>();
-		for (Method method : object.getClass().getMethods())
-			methods.put(method.getName(), method);
+		Map<Method, Object> methodToObject = new HashMap<Method, Object>();
+
+		for (Object object : objects)
+		{
+			for (Method method : object.getClass().getMethods())
+			{
+				methods.put(method.getName(), method);
+				methodToObject.put(method, object);
+			}
+		}
 
 		for (Entry<String, String> entry : properties.entrySet())
 		{
@@ -73,14 +81,17 @@ public class Style
 			String methodName = "set" + property;
 			if (!methods.containsKey(methodName))
 			{
-				String message =
-						"Could not find setter method '" + methodName + "' in class "
-								+ object.getClass();
+				String message = "Could not find setter method '" + methodName + "' in class: ";
+				for (Object object : objects)
+					message += object.getClass() + ", ";
+				message = message.substring(0, message.length() - 2);
+
 				Logging.logger().severe(message);
 				throw new IllegalArgumentException(message);
 			}
 
 			Method setter = methods.get(methodName);
+			Object object = methodToObject.get(setter);
 			Class<?>[] parameters = setter.getParameterTypes();
 			if (parameters.length != 1)
 			{
