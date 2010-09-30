@@ -23,6 +23,9 @@
 		//addFormat("gif", "image/gif");
 		addFormat("bil", "application/bil", "application/bil16", "application/bil32");
 
+		//There is a bug in Java 5.0 and earlier in which zip files are read into memory on load. This causes
+		//OutOfMemoryErrors, and makes reading from zip files much slower than Java 6.0. So if 5.0 or earlier
+		//is installed, use the 'unzip' system command instead.
 		boolean useJavaZipLocal = true;
 		try
 		{
