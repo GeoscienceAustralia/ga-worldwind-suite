@@ -12,7 +12,7 @@
 
 	private static final Map<String, String> extensions = new HashMap<String, String>();
 	private static final Map<String, String> contentTypes = new HashMap<String, String>();
-	private static final boolean useJavaZip;
+	private static boolean useJavaZip;
 
 	static
 	{
@@ -26,16 +26,13 @@
 		//There is a bug in Java 5.0 and earlier in which zip files are read into memory on load. This causes
 		//OutOfMemoryErrors, and makes reading from zip files much slower than Java 6.0. So if 5.0 or earlier
 		//is installed, use the 'unzip' system command instead.
-		boolean useJavaZipLocal = true;
 		try
 		{
-			useJavaZipLocal =
-					Double.parseDouble(System.getProperty("java.specification.version")) > 1.5;
+			useJavaZip = Double.parseDouble(System.getProperty("java.specification.version")) > 1.5;
 		}
 		catch (Exception e)
 		{
 		}
-		useJavaZip = useJavaZipLocal;
 	}
 
 	/**
@@ -412,13 +409,16 @@
 			boolean mask) throws IOException
 	{
 		String filename = "blank";
-		ExtensionInputStream result = findFile(null, filename, L, T, null, mask);
+		ExtensionInputStream result;
+		
+		//commented out searching inside layer folders for blanks, as currently no layers implement this
+		/*result = findFile(null, filename, L, T, null, mask);
 		if (result != null)
 			return result;
 
 		result = findFile(null, filename, null, T, null, mask);
 		if (result != null)
-			return result;
+			return result;*/
 
 		result = findFile(null, filename, null, null, extension, false);
 		if (result != null)
