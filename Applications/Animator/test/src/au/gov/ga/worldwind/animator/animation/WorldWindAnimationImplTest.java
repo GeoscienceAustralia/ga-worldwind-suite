@@ -328,6 +328,7 @@ public class WorldWindAnimationImplTest
 		final Animatable animatable3 = createAnimatable("Object3", testParameters.get(2), testParameters.get(1));
 		final Animatable animatable4 = createAnimatable("Object4", testParameters.get(0));
 		final Animatable camera = classToBeTested.getCamera();
+		final Animatable elevation = classToBeTested.getAnimatableElevation();
 		
 		classToBeTested.addAnimatableObject(animatable1);
 		classToBeTested.addAnimatableObject(animatable2);
@@ -335,18 +336,20 @@ public class WorldWindAnimationImplTest
 		classToBeTested.addAnimatableObject(animatable4);
 		
 		assertEquals(0, classToBeTested.getAnimatableObjects().indexOf(camera));
-		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(animatable1));
-		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable2));
-		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable3));
-		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable4));
+		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(elevation));
+		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable1));
+		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable2));
+		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable3));
+		assertEquals(5, classToBeTested.getAnimatableObjects().indexOf(animatable4));
 		
 		classToBeTested.changeOrderOfAnimatableObject(animatable3, 0);
 		
 		assertEquals(0, classToBeTested.getAnimatableObjects().indexOf(animatable3));
 		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(camera));
-		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable1));
-		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable2));
-		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable4));
+		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(elevation));
+		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable1));
+		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable2));
+		assertEquals(5, classToBeTested.getAnimatableObjects().indexOf(animatable4));
 	}
 	
 	@Test
@@ -357,6 +360,7 @@ public class WorldWindAnimationImplTest
 		final Animatable animatable3 = createAnimatable("Object3", testParameters.get(2), testParameters.get(1));
 		final Animatable animatable4 = createAnimatable("Object4", testParameters.get(0));
 		final Animatable camera = classToBeTested.getCamera();
+		final Animatable elevation = classToBeTested.getAnimatableElevation();
 		
 		classToBeTested.addAnimatableObject(animatable1);
 		classToBeTested.addAnimatableObject(animatable2);
@@ -364,18 +368,20 @@ public class WorldWindAnimationImplTest
 		classToBeTested.addAnimatableObject(animatable4);
 		
 		assertEquals(0, classToBeTested.getAnimatableObjects().indexOf(camera));
-		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(animatable1));
-		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable2));
-		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable3));
-		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable4));
+		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(elevation));
+		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable1));
+		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable2));
+		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable3));
+		assertEquals(5, classToBeTested.getAnimatableObjects().indexOf(animatable4));
 		
-		classToBeTested.changeOrderOfAnimatableObject(animatable1, 3);
+		classToBeTested.changeOrderOfAnimatableObject(animatable1, 4);
 		
 		assertEquals(0, classToBeTested.getAnimatableObjects().indexOf(camera));
-		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(animatable2));
-		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable3));
-		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable1));
-		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable4));
+		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(elevation));
+		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable2));
+		assertEquals(3, classToBeTested.getAnimatableObjects().indexOf(animatable3));
+		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable1));
+		assertEquals(5, classToBeTested.getAnimatableObjects().indexOf(animatable4));
 	}
 	
 	@Test
@@ -421,7 +427,8 @@ public class WorldWindAnimationImplTest
 		}});
 		classToBeTested.addChangeListener(listener);
 		
-		classToBeTested.changeOrderOfAnimatableObject(animatable1, 1);
+		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable1));
+		classToBeTested.changeOrderOfAnimatableObject(animatable1, 2);
 	}
 	
 	private Animatable createAnimatable(final String name, final Parameter... parameters)
