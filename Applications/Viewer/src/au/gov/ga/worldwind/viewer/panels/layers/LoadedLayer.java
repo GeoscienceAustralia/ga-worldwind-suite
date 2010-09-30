@@ -1,12 +1,15 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
+import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 
 import java.net.URL;
 
-public class LoadedLayer
+import au.gov.ga.worldwind.common.util.Setupable;
+
+public class LoadedLayer implements Setupable
 {
 	private Layer layer;
 	private ElevationModel elevationModel;
@@ -79,5 +82,18 @@ public class LoadedLayer
 	public AVList getParams()
 	{
 		return params;
+	}
+
+	@Override
+	public void setup(WorldWindow wwd)
+	{
+		if (isLayer() && getLayer() instanceof Setupable)
+		{
+			((Setupable) getLayer()).setup(wwd);
+		}
+		else if (isElevationModel() && getElevationModel() instanceof Setupable)
+		{
+			((Setupable) getElevationModel()).setup(wwd);
+		}
 	}
 }

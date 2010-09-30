@@ -1,15 +1,17 @@
-package au.gov.ga.worldwind.viewer.layers.point;
+package au.gov.ga.worldwind.common.layers.shapefile.point;
 
 import gov.nasa.worldwind.avlist.AVList;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 public class Attribute
 {
 	protected String name;
 	protected Map<String, String> switches = new HashMap<String, String>();
+	protected Map<String, String> regexes = new HashMap<String, String>();
 	protected Map<Range, String> ranges = new HashMap<Range, String>();
 	protected StringWithPlaceholder textString;
 	protected StringWithPlaceholder linkString;
@@ -32,6 +34,11 @@ public class Attribute
 	public void addCase(String value, String style)
 	{
 		switches.put(value, style);
+	}
+
+	public void addRegex(String regex, String style)
+	{
+		regexes.put(regex, style);
 	}
 
 	public void addRange(double min, double max, String style)
@@ -83,6 +90,12 @@ public class Attribute
 		String stringValue = attributes.getValue(name).toString();
 		if (switches.containsKey(stringValue))
 			return switches.get(stringValue);
+
+		for (Entry<String, String> regex : regexes.entrySet())
+		{
+			if (Pattern.matches(regex.getKey(), stringValue))
+				return regex.getValue();
+		}
 
 		Double doubleValue = null;
 		try

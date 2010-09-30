@@ -1,10 +1,14 @@
-package au.gov.ga.worldwind.viewer.layers.point.file;
+package au.gov.ga.worldwind.common.layers.shapefile.point;
 
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.formats.shapefile.DBaseRecord;
 import gov.nasa.worldwind.formats.shapefile.Shapefile;
 import gov.nasa.worldwind.formats.shapefile.ShapefileRecord;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.util.VecBuffer;
+
+import java.net.URL;
 
 import org.w3c.dom.Element;
 
@@ -29,9 +33,11 @@ public abstract class ShapefilePointLayer extends PointLayer
 	}
 
 	@Override
-	protected void load(String url)
+	protected void load(URL url)
 	{
 		Shapefile shapefile = new Shapefile(url);
+		//set the sector parameter so that the extents can be zoomed to
+
 		while (shapefile.hasNext())
 		{
 			ShapefileRecord record = shapefile.nextRecord();
@@ -48,6 +54,17 @@ public abstract class ShapefilePointLayer extends PointLayer
 			}
 		}
 
+		if (getValue(AVKey.SECTOR) == null)
+		{
+			setValue(AVKey.SECTOR, Sector.fromDegrees(shapefile.getBoundingRectangle()));
+		}
+
 		loaded = true;
+	}
+
+	@Override
+	public Sector getSector()
+	{
+		return (Sector) getValue(AVKey.SECTOR);
 	}
 }

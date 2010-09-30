@@ -11,11 +11,11 @@
 	<Delegates>
 		<!-- <Delegate>NormalMapReader(Int16,LittleEndian)</Delegate> -->
 		<!-- <Delegate>ShaderRender</Delegate> -->
-		<Delegate>ShadedElevationReader(Int16,LittleEndian)</Delegate>
-		<Delegate>StripingFilterTransformer(21,21,1,21)</Delegate>
+		<Delegate>ShadedElevationReader(Int16,LittleEndian,-32000,(-0.7,0.7,-1),10)</Delegate>
+		<!-- <Delegate>StripingFilterTransformer(21,21,1,21)</Delegate> -->
 		<Delegate>ResizeTransformer(128,128)</Delegate>
 		<!-- <Delegate>StripingFilterTransformer(21,21,21,1)</Delegate> -->
-		<!-- <Delegate>ColorToAlphaTransformer(200,200,200)</Delegate> -->
+		<Delegate>ColorToAlphaTransformer(180,180,180)</Delegate>
 	</Delegates>
 	<!-- day month year hours:minutes:seconds timezone -->
 	<LastUpdate>17 12 2009 01:01:01 GMT</LastUpdate>

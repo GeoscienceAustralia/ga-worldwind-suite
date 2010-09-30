@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.viewer.layers.point;
+package au.gov.ga.worldwind.common.layers.shapefile.point;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.Logging;
@@ -6,7 +6,11 @@ import gov.nasa.worldwind.util.Logging;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Point;
+import java.io.File;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +24,7 @@ public class Style
 	protected String name;
 	protected boolean defalt;
 	protected Map<String, String> properties = new HashMap<String, String>();
+	protected Map<String, String> typeOverrides = new HashMap<String, String>();
 
 	public Style(String name, boolean defalt)
 	{
@@ -47,12 +52,16 @@ public class Style
 		this.defalt = defalt;
 	}
 
-	public void addProperty(String property, String value)
+	public void addProperty(String property, String value, String typeOverride)
 	{
 		properties.put(property, value);
+		if (typeOverride != null && typeOverride.length() > 0)
+		{
+			typeOverrides.put(property, typeOverride);
+		}
 	}
 
-	public void setPropertiesFromAttributes(Object object, AVList attributes)
+	public void setPropertiesFromAttributes(URL context, Object object, AVList attributes)
 	{
 		Map<String, Method> methods = new HashMap<String, Method>();
 		for (Method method : object.getClass().getMethods())
@@ -85,11 +94,34 @@ public class Style
 			String stringValue = entry.getValue();
 			stringValue = replaceVariablesWithAttributeValues(stringValue, attributes);
 
-			Class<?> type = parameters[0];
+			Class<?> parameterType = parameters[0];
+			Class<?> type = parameterType;
+
+			String typeOverride = typeOverrides.get(property);
+			if (typeOverride != null)
+			{
+				type = convertTypeToClass(typeOverride);
+				if (type == null)
+				{
+					String message = "Could not find class for type " + type;
+					Logging.logger().severe(message);
+					throw new IllegalArgumentException(message);
+				}
+				else if (!parameterType.isAssignableFrom(type))
+				{
+					String message =
+							"Setter method '" + methodName + "' in class " + object.getClass()
+									+ " parameter type " + parameterType
+									+ " not assignable from type " + type;
+					Logging.logger().severe(message);
+					throw new IllegalArgumentException(message);
+				}
+			}
+
 			Object value = null;
 			try
 			{
-				value = convertStringToType(stringValue, type);
+				value = convertStringToType(context, stringValue, type);
 			}
 			catch (Exception e)
 			{
@@ -97,7 +129,7 @@ public class Style
 
 			if (value == null)
 			{
-				String message = "Error converting '" + stringValue + " to type " + type;
+				String message = "Error converting '" + stringValue + "' to type " + type;
 				Logging.logger().severe(message);
 				throw new IllegalArgumentException(message);
 			}
@@ -147,19 +179,80 @@ public class Style
 		return replacement.toString();
 	}
 
-	protected static Object convertStringToType(String string, Class<?> type)
+	protected static Class<?> convertTypeToClass(String type)
+	{
+		if ("String".equalsIgnoreCase(type))
+			return String.class;
+		if ("Integer".equalsIgnoreCase(type))
+			return Integer.class;
+		if ("Float".equalsIgnoreCase(type))
+			return Float.class;
+		if ("Long".equalsIgnoreCase(type))
+			return Long.class;
+		if ("Double".equalsIgnoreCase(type))
+			return Double.class;
+		if ("Character".equalsIgnoreCase(type))
+			return Character.class;
+		if ("Byte".equalsIgnoreCase(type))
+			return Byte.class;
+		if ("URL".equalsIgnoreCase(type))
+			return URL.class;
+		if ("File".equalsIgnoreCase(type))
+			return File.class;
+		if ("Color".equalsIgnoreCase(type))
+			return Color.class;
+		if ("Dimension".equalsIgnoreCase(type))
+			return Dimension.class;
+		if ("Point".equalsIgnoreCase(type))
+			return Point.class;
+		if ("Font".equalsIgnoreCase(type))
+			return Font.class;
+		return null;
+	}
+
+	protected static Object convertStringToType(URL context, String string, Class<?> type)
 	{
 		if (type.isAssignableFrom(String.class))
 		{
 			return string;
 		}
-		else if (type.isAssignableFrom(Double.class))
+		else if (type.isAssignableFrom(Double.class) || type.isAssignableFrom(double.class))
 		{
 			return Double.valueOf(string);
 		}
-		else if (type.isAssignableFrom(Integer.class))
+		else if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(int.class))
 		{
 			return Integer.valueOf(string);
+		}
+		else if (type.isAssignableFrom(Float.class) || type.isAssignableFrom(float.class))
+		{
+			return Float.valueOf(string);
+		}
+		else if (type.isAssignableFrom(Long.class) || type.isAssignableFrom(long.class))
+		{
+			return Long.valueOf(string);
+		}
+		else if (type.isAssignableFrom(Character.class) || type.isAssignableFrom(char.class))
+		{
+			return string.charAt(0);
+		}
+		else if (type.isAssignableFrom(Byte.class) || type.isAssignableFrom(byte.class))
+		{
+			return Byte.valueOf(string);
+		}
+		else if (type.isAssignableFrom(URL.class))
+		{
+			try
+			{
+				return new URL(context, string);
+			}
+			catch (MalformedURLException e)
+			{
+			}
+		}
+		else if (type.isAssignableFrom(File.class))
+		{
+			return new File(string);
 		}
 		else if (type.isAssignableFrom(Color.class))
 		{
@@ -178,6 +271,14 @@ public class Style
 				return new Dimension(ints[0], ints[0]);
 			else if (ints.length == 2)
 				return new Dimension(ints[0], ints[1]);
+		}
+		else if (type.isAssignableFrom(Point.class))
+		{
+			int[] ints = splitInts(string);
+			if (ints.length == 1)
+				return new Point(ints[0], ints[0]);
+			else if (ints.length == 2)
+				return new Point(ints[0], ints[1]);
 		}
 		else if (type.isAssignableFrom(Font.class))
 		{

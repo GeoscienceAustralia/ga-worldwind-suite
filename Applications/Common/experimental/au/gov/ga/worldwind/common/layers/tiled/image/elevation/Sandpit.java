@@ -12,6 +12,7 @@ import java.io.InputStream;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegateFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.resize.ResizeTransformerDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.shadedelevationreader.ShadedElevationImageReaderDelegate;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 
 public class Sandpit extends ApplicationTemplate

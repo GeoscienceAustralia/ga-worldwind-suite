@@ -152,10 +152,10 @@ public class SubTile
 	public LatLon limitLatLonWithinTile(LatLon latlon)
 	{
 		double lat =
-				Util.limitRange(latlon.latitude.degrees, minmin.latitude.degrees,
+				Util.clamp(latlon.latitude.degrees, minmin.latitude.degrees,
 						maxmax.latitude.degrees);
 		double lon =
-				Util.limitRange(latlon.longitude.degrees, minmin.longitude.degrees,
+				Util.clamp(latlon.longitude.degrees, minmin.longitude.degrees,
 						maxmax.longitude.degrees);
 
 		return LatLon.fromDegrees(lat, lon);

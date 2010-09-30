@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.viewer.layers.point.file;
+package au.gov.ga.worldwind.common.layers.shapefile.point;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -6,22 +6,27 @@ import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.util.Logging;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.viewer.layers.point.Attribute;
-import au.gov.ga.worldwind.viewer.layers.point.Style;
+import au.gov.ga.worldwind.common.layers.Bounded;
+import au.gov.ga.worldwind.common.util.AVKeyMore;
 
-public abstract class PointLayer extends AbstractLayer
+public abstract class PointLayer extends AbstractLayer implements Bounded
 {
 	public final static String POINT_STYLES = PointLayer.class.getName() + ".PointStyles";
 	public final static String POINT_ATTRIBUTES = PointLayer.class.getName() + ".PointAttributes";
 
 	protected String url;
 	protected String dataCacheName;
+	protected URL context;
 
 	protected Style[] styles;
 	protected Map<String, Style> styleMap = new HashMap<String, Style>();
@@ -53,6 +58,8 @@ public abstract class PointLayer extends AbstractLayer
 		o = params.getValue(POINT_ATTRIBUTES);
 		if (o != null)
 			setAttributes((Attribute[]) o);
+
+		context = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
 	}
 
 	public PointLayer(Element domElement, AVList params)
@@ -127,7 +134,15 @@ public abstract class PointLayer extends AbstractLayer
 		if (isEnabled() && !isLoaded())
 		{
 			//TODO move loading to new thread (ensure only single concurrent load() running)
-			load(getUrl());
+			try
+			{
+				URL url = new URL(context, getUrl());
+				load(url);
+			}
+			catch (MalformedURLException e)
+			{
+				Logging.logger().log(Level.SEVERE, "Error loading points", e);
+			}
 		}
 
 		super.render(dc);
@@ -152,7 +167,7 @@ public abstract class PointLayer extends AbstractLayer
 
 			String t = attribute.getText(attrib);
 			if (t != null)
-				text = text == null ? t : text + "/n" + t;
+				text = text == null ? t : text + t;
 
 			link = link != null ? link : attribute.getLink(attrib);
 		}
@@ -168,5 +183,5 @@ public abstract class PointLayer extends AbstractLayer
 
 	protected abstract boolean isLoaded();
 
-	protected abstract void load(String url);
+	protected abstract void load(URL url);
 }

@@ -10,6 +10,8 @@ import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.shapefile.point.annotation.ShapefileAnnotationLayer;
+import au.gov.ga.worldwind.common.layers.shapefile.point.icon.ShapefileIconLayer;
 import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -31,6 +33,14 @@ public class LayerFactory extends BasicLayerFactory
 		if ("SurfaceShapeShapefileLayer".equals(layerType))
 		{
 			return ShapefileLayerFactory.createLayer(domElement, params);
+		}
+		else if ("ShapefileIconLayer".equals(layerType))
+		{
+			return new ShapefileIconLayer(domElement, params);
+		}
+		else if ("ShapefileAnnotationLayer".equals(layerType))
+		{
+			return new ShapefileAnnotationLayer(domElement, params);
 		}
 
 		return super.createFromLayerDocument(domElement, params);

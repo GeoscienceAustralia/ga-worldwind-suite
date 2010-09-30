@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.viewer.layers.point.file;
+package au.gov.ga.worldwind.common.layers.shapefile.point;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -14,8 +14,6 @@ import javax.xml.xpath.XPath;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.util.XMLUtil;
-import au.gov.ga.worldwind.viewer.layers.point.Attribute;
-import au.gov.ga.worldwind.viewer.layers.point.Style;
 
 public class PointLayerUtils extends DataConfigurationUtils
 {
@@ -57,7 +55,8 @@ public class PointLayerUtils extends DataConfigurationUtils
 					{
 						String pname = WWXML.getText(p, "@name", xpath);
 						String value = WWXML.getText(p, "@value", xpath);
-						style.addProperty(pname, value);
+						String type = WWXML.getText(p, "@type", xpath);
+						style.addProperty(pname, value, type);
 					}
 				}
 
@@ -89,6 +88,17 @@ public class PointLayerUtils extends DataConfigurationUtils
 					String value = WWXML.getText(c, "@value", xpath);
 					String style = WWXML.getText(c, "@style", xpath);
 					attribute.addCase(value, style);
+				}
+			}
+
+			Element[] regexes = WWXML.getElements(a, "Regex", xpath);
+			if (regexes != null)
+			{
+				for (Element r : regexes)
+				{
+					String pattern = WWXML.getText(r, "@pattern", xpath);
+					String style = WWXML.getText(r, "@style", xpath);
+					attribute.addRegex(pattern, style);
 				}
 			}
 

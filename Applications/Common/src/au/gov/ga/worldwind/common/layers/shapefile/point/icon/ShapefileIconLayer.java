@@ -1,5 +1,6 @@
-package au.gov.ga.worldwind.viewer.layers.point.file.icon;
+package au.gov.ga.worldwind.common.layers.shapefile.point.icon;
 
+import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.event.SelectEvent;
@@ -17,11 +18,12 @@ import java.net.URL;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.shapefile.point.ShapefilePointLayer;
+import au.gov.ga.worldwind.common.layers.shapefile.point.Style;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
-import au.gov.ga.worldwind.viewer.layers.point.Style;
-import au.gov.ga.worldwind.viewer.layers.point.file.ShapefilePointLayer;
+import au.gov.ga.worldwind.common.util.Setupable;
 
-public class ShapefileIconLayer extends ShapefilePointLayer implements SelectListener
+public class ShapefileIconLayer extends ShapefilePointLayer implements SelectListener, Setupable
 {
 	//TODO think about adding downloading of icons to retrieval system, and caching them
 
@@ -54,7 +56,7 @@ public class ShapefileIconLayer extends ShapefilePointLayer implements SelectLis
 		icon.setPosition(position);
 		icon.setToolTipText(text);
 		icon.setValue(AVKey.URL, link);
-		style.setPropertiesFromAttributes(icon, attrib);
+		style.setPropertiesFromAttributes(context, icon, attrib);
 		iconLayer.addIcon(icon);
 	}
 
@@ -120,5 +122,11 @@ public class ShapefileIconLayer extends ShapefilePointLayer implements SelectLis
 	{
 		icon.setShowToolTip(highlight);
 		icon.setHighlighted(highlight);
+	}
+
+	@Override
+	public void setup(WorldWindow wwd)
+	{
+		wwd.addSelectListener(this);
 	}
 }

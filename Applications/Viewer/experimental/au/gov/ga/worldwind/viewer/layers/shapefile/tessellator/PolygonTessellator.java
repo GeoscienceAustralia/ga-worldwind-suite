@@ -70,8 +70,8 @@ public class PolygonTessellator
 							(int) ((latlon.longitude.degrees - sector.getMinLongitude().degrees) / deltaLon);
 					int y =
 							(int) ((latlon.latitude.degrees - sector.getMinLatitude().degrees) / deltaLat);
-					x = Util.limitRange(x, 0, subdivisions - 1);
-					y = Util.limitRange(y, 0, subdivisions - 1);
+					x = Util.clamp(x, 0, subdivisions - 1);
+					y = Util.clamp(y, 0, subdivisions - 1);
 
 					int tileIndex = y * subdivisions + x;
 					SubTile tile = tiles[tileIndex];
@@ -79,7 +79,7 @@ public class PolygonTessellator
 					{
 						String message = latlon + " outside bounds";
 						Logging.logger().warning(message);
-						latlon = Util.limitLatLon(latlon, tile.sector);
+						latlon = Util.clampLatLon(latlon, tile.sector);
 					}
 
 					if (tile != lastTile)
@@ -125,8 +125,8 @@ public class PolygonTessellator
 								for (int j = 1; j < line.size() - 1; j++)
 								{
 									java.awt.Point p = line.get(j);
-									p.x = Util.limitRange(p.x, 0, subdivisions - 1);
-									p.y = Util.limitRange(p.y, 0, subdivisions - 1);
+									p.x = Util.clamp(p.x, 0, subdivisions - 1);
+									p.y = Util.clamp(p.y, 0, subdivisions - 1);
 
 									int crossTileIndex = p.y * subdivisions + p.x;
 
