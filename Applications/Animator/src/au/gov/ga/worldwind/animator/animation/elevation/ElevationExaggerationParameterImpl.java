@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.animator.animation.elevation;
 
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.*;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+
 import gov.nasa.worldwind.avlist.AVList;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
@@ -15,7 +18,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-@EditableParameter(bound=true, minValue=0, maxValue=Double.MAX_VALUE)
+@EditableParameter(bound=true, minValue=0, maxValue=Double.MAX_VALUE, units="x")
 public class ElevationExaggerationParameterImpl extends ParameterBase implements ElevationExaggerationParameter
 {
 	private static final long serialVersionUID = 2010L;
@@ -26,6 +29,8 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 	{
 		Validate.notNull(exaggerator, "An exaggerator is required");
 		this.exaggerator = exaggerator;
+		
+		setName(getMessage(getElevationExaggerationNameKey(), exaggerator.getElevationBoundary()));
 	}
 	
 	@Override

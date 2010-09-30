@@ -11,11 +11,9 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
@@ -93,7 +91,8 @@ import au.gov.ga.worldwind.animator.panels.SideBar;
 import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPanel;
 import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
 import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPanel;
-import au.gov.ga.worldwind.animator.terrain.AnimationElevationLoader;
+import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
+import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierImpl;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationElevationModel;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationTessellator;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
@@ -275,9 +274,9 @@ public class Animator
 		
 		initialiseAnimation();
 		
-		initialiseElevationModels();
 		initialiseUtilityLayers();
 		updateLayersInModel();
+		updateElevationModelOnGlobe();
 		
 		initialiseFrameSlider();
 		initialiseSideBar();
@@ -491,6 +490,7 @@ public class Animator
 	{
 		animation = new WorldWindAnimationImpl(wwd);
 		addDefaultLayersToAnimation(animation);
+		addDefaultElevationModelsToAnimation(animation);
 		updater = new Updater();
 	}
 
@@ -559,19 +559,22 @@ public class Animator
 	}
 	
 	/**
-	 * Initialise the elevation models used in the application
+	 * Apply the elevation model associated with the current animation to the world wind glob.
 	 */
-	private void initialiseElevationModels()
+	private void updateElevationModelOnGlobe()
 	{
-		CompoundElevationModel cem = new CompoundElevationModel();
-		
-		elevationModel = new VerticalExaggerationElevationModel(cem);
-		model.getGlobe().setElevationModel(elevationModel);
-
-		ElevationModel earthem = AnimationElevationLoader.loadElevationModel("file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml");
-		cem.addElevationModel(earthem);
+		model.getGlobe().setElevationModel(animation.getRootElevationModel());
 	}
-
+	
+	/**
+	 * Add the default elevation models to the provided animation
+	 */
+	private void addDefaultElevationModelsToAnimation(Animation animation)
+	{
+		ElevationModelIdentifier earthElevationModelIdentifier = new ElevationModelIdentifierImpl("Earth", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml");
+		animation.addElevationModel(earthElevationModelIdentifier );
+	}
+	
 	/**
 	 * Packs the main frame and makes it visible.
 	 * <p/>
@@ -1339,6 +1342,7 @@ public class Animator
 		}
 		updateAnimationListeners();
 		updateLayersInModel();
+		updateElevationModelOnGlobe();
 		updateSideBar();
 	}
 
@@ -1359,6 +1363,7 @@ public class Animator
 		{
 			WorldWindAnimationImpl newAnimation = new WorldWindAnimationImpl(wwd);
 			addDefaultLayersToAnimation(newAnimation);
+			addDefaultElevationModelsToAnimation(newAnimation);
 			setAnimation(newAnimation);
 			resetChanged();
 			setFile(null);
@@ -1446,6 +1451,7 @@ public class Animator
 			if (version == AnimationFileVersion.VERSION010)
 			{
 				addDefaultLayersToAnimation(newAnimation);
+				addDefaultElevationModelsToAnimation(newAnimation);
 			}
 			
 			setAnimation(newAnimation);

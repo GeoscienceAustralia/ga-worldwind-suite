@@ -3,18 +3,21 @@
  */
 package au.gov.ga.worldwind.animator.animation;
 
+import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 
 import java.util.Collection;
 import java.util.List;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
+import au.gov.ga.worldwind.animator.animation.elevation.AnimatableElevation;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
+import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.util.Nameable;
 
 /**
@@ -347,4 +350,25 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	 * Add the layer identified in the identifier to this animation, if it isn't already.
 	 */
 	void addLayer(LayerIdentifier layerIdentifier);
+	
+	/**
+	 * @return The root elevation model associated with this {@link Animation}
+	 */
+	ElevationModel getRootElevationModel();
+	
+	/**
+	 * @return The {@link AnimatableElevation} associated with this Animation
+	 */
+	AnimatableElevation getAnimatableElevation();
+	
+	/**
+	 * Add the elevation model identified by the provided identifier to this model's {@link AnimatableElevation}, if it isn't already.
+	 */
+	void addElevationModel(ElevationModelIdentifier modelIdentifier);
+	
+	/**
+	 * @return Whether or not this animation contains the elevation model identified by the provided model identifier
+	 */
+	boolean hasElevationModel(ElevationModelIdentifier modelIdentifier);
+	
 }

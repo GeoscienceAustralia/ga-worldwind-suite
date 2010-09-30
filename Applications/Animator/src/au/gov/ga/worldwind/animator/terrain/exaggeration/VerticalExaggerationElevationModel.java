@@ -48,7 +48,7 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 		{
 			return;
 		}
-		exaggerators.put(exaggerator.getElevationBoundary(), exaggerator);
+		doAddExaggerator(exaggerator);
 		recalculateExaggerationWindows();
 	}
 
@@ -60,8 +60,18 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 		}
 		for (ElevationExaggeration exaggerator : exaggerators)
 		{
-			addExaggerator(exaggerator);
+			doAddExaggerator(exaggerator);
 		}
+		recalculateExaggerationWindows();
+	}
+	
+	private void doAddExaggerator(ElevationExaggeration exaggerator)
+	{
+		if (exaggerator == null)
+		{
+			return;
+		}
+		exaggerators.put(exaggerator.getElevationBoundary(), exaggerator);
 	}
 	
 	public void removeExaggerator(ElevationExaggeration exaggerator)
@@ -70,10 +80,15 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 		recalculateExaggerationWindows();
 	}
 	
-	public void removeExaggerator(Double threshold)
+	public void removeExaggerator(double boundary)
 	{
-		exaggerators.remove(threshold);
+		exaggerators.remove(boundary);
 		recalculateExaggerationWindows();
+	}
+	
+	public boolean containsExaggeratorAtBoundary(double boundary)
+	{
+		return exaggerators.containsKey(boundary);
 	}
 	
 	public ElevationExaggeration getExaggeratorForElevation(double elevation)

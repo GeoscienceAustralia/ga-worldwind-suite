@@ -91,4 +91,6 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getQueryRemoveObjectFromAnimationCaptionKey() { return "animator.message.queryremoveobjectfromanimation.caption"; }
 	public static String getAnimationBrowserMoveUpLabelKey() { return "animator.gui.menu.moveobjectup.label"; }
 	public static String getAnimationBrowserMoveDownLabelKey() { return "animator.gui.menu.moveobjectdown.label"; }
+	public static String getElevationNameKey() { return "animator.elevation.name"; }
+	public static String getElevationExaggerationNameKey() { return "animator.elevation.exaggeration.name"; }
 }

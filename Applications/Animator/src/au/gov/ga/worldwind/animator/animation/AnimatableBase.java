@@ -57,8 +57,7 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	}
 
 	/**
-	 * @param animationContext
-	 * @param frame
+	 * Perform the actions required to apply this {@link Animatable}s state to the 'world'
 	 */
 	protected abstract void doApply(AnimationContext animationContext, int frame);
 

@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.animator.animation;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWXML;
@@ -18,6 +19,8 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
+import au.gov.ga.worldwind.animator.animation.elevation.AnimatableElevation;
+import au.gov.ga.worldwind.animator.animation.elevation.DefaultAnimatableElevation;
 import au.gov.ga.worldwind.animator.animation.event.PropagatingChangeableEventListener;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
@@ -29,6 +32,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
+import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
@@ -65,6 +69,9 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	/** The list of animatable layers in this animation. A subset of the {@link #animatableObjects} list. */
 	private List<AnimatableLayer> animatableLayers = new ArrayList<AnimatableLayer>();
 	
+	/** The elevation model being used in this animation */
+	private AnimatableElevation animatableElevation;
+	
 	/** Whether or not zoom scaling should be applied */
 	private boolean zoomRequired = true;
 	
@@ -86,8 +93,13 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		this.worldWindow = worldWindow;
 		this.frameCount = DEFAULT_FRAME_COUNT;
 		this.renderParameters = new RenderParameters();
+		
 		this.renderCamera = new CameraImpl(this);
 		this.animatableObjects.add(renderCamera);
+		
+		this.animatableElevation = new DefaultAnimatableElevation();
+		this.animatableObjects.add(animatableElevation);
+		
 		this.name = MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getAnimatorApplicationTitleKey());
 	}
 	
@@ -835,5 +847,33 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		animatableLayer.addParameter(new LayerOpacityParameter(this, loadedLayer));
 		
 		addAnimatableObject(animatableLayer);
+	}
+	
+	@Override
+	public AnimatableElevation getAnimatableElevation()
+	{
+		return animatableElevation;
+	}
+	
+	@Override
+	public ElevationModel getRootElevationModel()
+	{
+		return animatableElevation.getRootElevationModel();
+	}
+	
+	@Override
+	public boolean hasElevationModel(ElevationModelIdentifier modelIdentifier)
+	{
+		if (modelIdentifier == null)
+		{
+			return false;
+		}
+		return animatableElevation.hasElevationModel(modelIdentifier);
+	}
+	
+	@Override
+	public void addElevationModel(ElevationModelIdentifier modelIdentifier)
+	{
+		animatableElevation.addElevationModel(modelIdentifier);
 	}
 }
