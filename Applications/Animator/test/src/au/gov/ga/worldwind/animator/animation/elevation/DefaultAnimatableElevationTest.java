@@ -9,6 +9,8 @@ import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -19,12 +21,17 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.KeyFrame;
+import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueType;
 import au.gov.ga.worldwind.animator.terrain.AnimationElevationLoader;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierImpl;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggerationImpl;
-import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.StaticMessageSource;
@@ -77,6 +84,11 @@ public class DefaultAnimatableElevationTest
 		addExaggerator(2.0, 100.0);
 		addExaggerator(3.0, 200.0);
 		
+		addKeyFrame(0, 1.2, getParameter(0));
+		addKeyFrame(10, 2.5, getParameter(0));
+		
+		addKeyFrame(20, 3.5, getParameter(2));
+		
 		Document xmlDocument = writeClassToBeTestedToXml();
 		
 		ByteArrayOutputStream resultStream = writeDocumentToStream(xmlDocument);
@@ -115,11 +127,22 @@ public class DefaultAnimatableElevationTest
 		return xmlDocument;
 	}
 	
+	private void addKeyFrame(int frame, double value, Parameter layerParameter)
+	{
+		ParameterValue paramValue = ParameterValueFactory.createParameterValue(ParameterValueType.LINEAR, layerParameter, value, frame);
+		KeyFrame keyFrame = new KeyFrameImpl(frame, Arrays.asList(new ParameterValue[]{paramValue}));
+		animation.insertKeyFrame(keyFrame);
+	}
+	
+	private Parameter getParameter(int i)
+	{
+		return new ArrayList<Parameter>(classToBeTested.getParameters()).get(i);
+	}
+	
 	private void intialiseMessageSource()
 	{
-		StaticMessageSource messageSource = new StaticMessageSource();
+		messageSource = new StaticMessageSource();
 		MessageSourceAccessor.set(messageSource);
-		
 	}
 	
 	private void setupElevationFactory()

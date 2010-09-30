@@ -5,13 +5,18 @@
             <model name="test1" url="file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml"/>
         </models>
         <exaggerator boundary="0.0">
-            <parameter defaultValue="1.0" enabled="true" name="Exaggeration"/>
+            <parameter defaultValue="1.0" enabled="true" name="Exaggeration">
+                <parameterValue frame="0" type="LINEAR" value="1.2"/>
+                <parameterValue frame="10" type="LINEAR" value="2.5"/>
+            </parameter>
         </exaggerator>
         <exaggerator boundary="100.0">
             <parameter defaultValue="2.0" enabled="true" name="Exaggeration"/>
         </exaggerator>
         <exaggerator boundary="200.0">
-            <parameter defaultValue="3.0" enabled="true" name="Exaggeration"/>
+            <parameter defaultValue="3.0" enabled="true" name="Exaggeration">
+                <parameterValue frame="20" type="LINEAR" value="3.5"/>
+            </parameter>
         </exaggerator>
     </elevation>
 </animatableObjects>
