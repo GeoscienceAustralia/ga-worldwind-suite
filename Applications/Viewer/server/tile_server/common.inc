@@ -12,7 +12,6 @@
 
 	private static final Map<String, String> extensions = new HashMap<String, String>();
 	private static final Map<String, String> contentTypes = new HashMap<String, String>();
-	private static boolean useJavaZip;
 
 	static
 	{
@@ -22,17 +21,6 @@
 		//addFormat("dds", "image/x-dds");
 		//addFormat("gif", "image/gif");
 		addFormat("bil", "application/bil", "application/bil16", "application/bil32");
-
-		//There is a bug in Java 5.0 and earlier in which zip files are read into memory on load. This causes
-		//OutOfMemoryErrors, and makes reading from zip files much slower than Java 6.0. So if 5.0 or earlier
-		//is installed, use the 'unzip' system command instead.
-		try
-		{
-			useJavaZip = Double.parseDouble(System.getProperty("java.specification.version")) > 1.5;
-		}
-		catch (Exception e)
-		{
-		}
 	}
 
 	/**
@@ -215,7 +203,7 @@
 	 * @return InputStream if a file exists, else null
 	 */
 	private static ExtensionInputStream findFile(String rowDirectory, String filename, String L,
-			String T, String extension, boolean mask) throws IOException
+			String T, String extension, boolean mask, boolean useJavaZip) throws IOException
 	{
 		//if searching for mask, replace last directory in T string with 'mask'
 		if (mask && T != null)
@@ -238,7 +226,7 @@
 				if (ext != null)
 				{
 					ExtensionInputStream result =
-							findFile(rowDirectory, filename, L, T, ext, false);
+							findFile(rowDirectory, filename, L, T, ext, false, useJavaZip);
 					if (result != null)
 						return result;
 				}
@@ -274,7 +262,7 @@
 
 				if (parent.isFile())
 				{
-					return getFileFromZip(parent, namePath, extension);
+					return getFileFromZip(parent, namePath, extension, useJavaZip);
 				}
 			}
 		}
@@ -290,8 +278,8 @@
 	 * @return InputStream if the entry exists, else null.
 	 * @throws IOException
 	 */
-	private static ExtensionInputStream getFileFromZip(File zipFile, String entry, String extension)
-			throws IOException
+	private static ExtensionInputStream getFileFromZip(File zipFile, String entry,
+			String extension, boolean useJavaZip) throws IOException
 	{
 		if (useJavaZip)
 		{
@@ -327,7 +315,8 @@
 	 *            Tile dataset
 	 * @return true if the directory exists, else false
 	 */
-	private static boolean directoryExists(String L, String T) throws IOException
+	private static boolean directoryExists(String L, String T, boolean useJavaZip)
+			throws IOException
 	{
 		File parent = new File(path + "/" + T);
 		if (parent.isDirectory())
@@ -342,7 +331,7 @@
 
 			if (parent.isFile())
 			{
-				return entryExistsInZip(parent, L + "/");
+				return entryExistsInZip(parent, L + "/", useJavaZip);
 			}
 		}
 		return false;
@@ -356,7 +345,8 @@
 	 * @return True if entry exists in zipFile
 	 * @throws IOException
 	 */
-	private static boolean entryExistsInZip(File zipFile, String entry) throws IOException
+	private static boolean entryExistsInZip(File zipFile, String entry, boolean useJavaZip)
+			throws IOException
 	{
 		if (useJavaZip)
 		{
@@ -406,11 +396,11 @@
 	 * @return File if a blank file exists, else null
 	 */
 	private static ExtensionInputStream findBlankFile(String L, String T, String extension,
-			boolean mask) throws IOException
+			boolean mask, boolean useJavaZip) throws IOException
 	{
 		String filename = "blank";
 		ExtensionInputStream result;
-		
+
 		//commented out searching inside layer folders for blanks, as currently no layers implement this
 		/*result = findFile(null, filename, L, T, null, mask);
 		if (result != null)
@@ -420,7 +410,7 @@
 		if (result != null)
 			return result;*/
 
-		result = findFile(null, filename, null, null, extension, false);
+		result = findFile(null, filename, null, null, extension, false, useJavaZip);
 		if (result != null)
 			return result;
 
@@ -441,6 +431,22 @@
 	 */
 	private static void handleRequest(HttpServletRequest request, HttpServletResponse response,
 			boolean blankOnError, boolean searchForMask) throws IOException
+	{
+		try
+		{
+			handleRequest(request, response, blankOnError, searchForMask, true);
+		}
+		catch (OutOfMemoryError e)
+		{
+			//There is a bug in Java 5.0 and earlier in which zip files are read into memory on
+			//load. This causes OutOfMemoryErrors, and makes reading from zip files much slower
+			//than Java 6.0. If this occurs, try the 'unzip' system command instead.
+			handleRequest(request, response, blankOnError, searchForMask, false);
+		}
+	}
+
+	private static void handleRequest(HttpServletRequest request, HttpServletResponse response,
+			boolean blankOnError, boolean searchForMask, boolean useJavaZip) throws IOException
 	{
 		/*
 		 * Implementation notes:
@@ -484,17 +490,17 @@
 		if (F == null)
 		{
 			//if no format has been specified, search for a file using any known extension
-			file = findFile(rowDirectory, filename, L, T, null, false);
+			file = findFile(rowDirectory, filename, L, T, null, false, useJavaZip);
 			if (file != null)
 			{
 				//if the file has been found, set the correct content type
 				contentType = getContentTypeForExtension(file.extension);
 			}
-			else if (blankOnError && directoryExists(L, T))
+			else if (blankOnError && directoryExists(L, T, useJavaZip))
 			{
 				//if no file has been found and a blank should be returned, return a blank file (default to jpg)
 				String extension = "jpg";
-				file = findBlankFile(L, T, extension, false);
+				file = findBlankFile(L, T, extension, false, useJavaZip);
 				contentType = getContentTypeForExtension(extension);
 			}
 		}
@@ -516,37 +522,37 @@
 			boolean isZip = extension.equals("zip");
 
 			//find a file matching the extension
-			file = findFile(rowDirectory, filename, L, T, extension, false);
+			file = findFile(rowDirectory, filename, L, T, extension, false, useJavaZip);
 
 			if (file == null && isZip)
 			{
 				//if no file has been found but a zip is requested
 				needsZip = true;
 				//search for a file using any known extension
-				file = findFile(rowDirectory, filename, L, T, null, false);
+				file = findFile(rowDirectory, filename, L, T, null, false, useJavaZip);
 				if (searchForMask)
 				{
 					//search for a file in the mask directory using any known extension
-					mask = findFile(rowDirectory, filename, L, T, null, true);
+					mask = findFile(rowDirectory, filename, L, T, null, true, useJavaZip);
 				}
 			}
 
-			if (file == null && blankOnError && directoryExists(L, T))
+			if (file == null && blankOnError && directoryExists(L, T, useJavaZip))
 			{
 				//if still no file has been found and a blank file should be returned
 				if (isZip)
 				{
 					//if a zip is requested, find blank files for the image and mask (default to jpg and png)
-					file = findBlankFile(L, T, "jpg", false);
+					file = findBlankFile(L, T, "jpg", false, useJavaZip);
 					if (searchForMask)
 					{
-						mask = findBlankFile(L, T, "png", true);
+						mask = findBlankFile(L, T, "png", true, useJavaZip);
 					}
 				}
 				else
 				{
 					//find a blank file for the requested extension
-					file = findBlankFile(L, T, extension, false);
+					file = findBlankFile(L, T, extension, false, useJavaZip);
 				}
 			}
 		}
