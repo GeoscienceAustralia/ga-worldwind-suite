@@ -122,7 +122,14 @@ public class LocalRequesterDelegate implements TileRequesterDelegate
 			if (parent.isFile() && isZip)
 			{
 				//zip file; return URL using 'jar' protocol
-				return Util.zipEntryUrl(parent, filename);
+				URL url = Util.zipEntryUrl(parent, filename);
+				if (url == null && !ext.equals("jpg"))
+				{
+					//if file was not found, attempt to find a jpg file in the zip anyway 
+					filename = filename.substring(0, filename.length() - ext.length()) + "jpg";
+					url = Util.zipEntryUrl(parent, filename);
+				}
+				return url;
 			}
 			else if (parent.isDirectory())
 			{

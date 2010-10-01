@@ -84,20 +84,57 @@ public class MaskImageReaderDelegate implements ImageReaderDelegate
 			return compose(image, mask);
 		}
 
-		File imageFile = Util.urlToFile(url);
-		if (imageFile == null || !imageFile.exists())
-			return null;
+		if (url.getProtocol().equalsIgnoreCase("zip") || url.getProtocol().equalsIgnoreCase("jar"))
+		{
+			//if the URL is pointing to an entry within a zip file, then create a
+			//new URL for the mask png file inside another zip file (mask.zip)
+			
+			String urlString = url.toString();
+			int indexOfBang = urlString.lastIndexOf('!');
 
-		//search for a mask file relative to the image file
-		File maskFile = getMaskFile(imageFile);
+			String zipFile = urlString.substring(0, indexOfBang);
+			int lastIndexOfSlash = zipFile.lastIndexOf('/');
+			String maskFile = zipFile.substring(0, lastIndexOfSlash + 1) + "mask.zip";
 
-		BufferedImage image = ImageIO.read(imageFile);
-		if (!maskFile.exists())
-			return image;
+			String entry = urlString.substring(indexOfBang);
+			int lastIndexOfPeriod = entry.lastIndexOf('.');
+			entry = entry.substring(0, lastIndexOfPeriod + 1) + "png";
 
-		//if the mask file exists, compose the image and mask together
-		BufferedImage mask = ImageIO.read(maskFile);
-		return compose(image, mask);
+			URL maskUrl = new URL(maskFile + entry);
+
+			BufferedImage image = null, mask = null;
+			try
+			{
+				image = ImageIO.read(url);
+				mask = ImageIO.read(maskUrl);
+			}
+			catch (Exception e)
+			{
+			}
+
+			if (image == null)
+				return null;
+			if (mask == null)
+				return image;
+			return compose(image, mask);
+		}
+		else
+		{
+			File imageFile = Util.urlToFile(url);
+			if (imageFile == null || !imageFile.exists())
+				return null;
+
+			//search for a mask file relative to the image file
+			File maskFile = getMaskFile(imageFile);
+
+			BufferedImage image = ImageIO.read(imageFile);
+			if (!maskFile.exists())
+				return image;
+
+			//if the mask file exists, compose the image and mask together
+			BufferedImage mask = ImageIO.read(maskFile);
+			return compose(image, mask);
+		}
 	}
 
 	/**
