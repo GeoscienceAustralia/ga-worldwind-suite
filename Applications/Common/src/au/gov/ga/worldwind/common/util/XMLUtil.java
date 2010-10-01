@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.common.util;
 
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWXML;
@@ -16,6 +17,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -89,13 +91,67 @@ public class XMLUtil extends WWXML
 		return element;
 	}
 
+	public static void checkAndSetURLParam(Element context, AVList params, String paramKey,
+			String paramName, XPath xpath)
+	{
+		if (context == null)
+		{
+			String message = Logging.getMessage("nullValue.ElementIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (params == null)
+		{
+			String message = Logging.getMessage("nullValue.ParametersIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (paramKey == null)
+		{
+			String message = Logging.getMessage("nullValue.ParameterKeyIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (paramName == null)
+		{
+			String message = Logging.getMessage("nullValue.ParameterNameIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		Object o = params.getValue(paramKey);
+		if (o == null)
+		{
+			String s = getText(context, paramName, xpath);
+			if (s != null && s.length() > 0)
+			{
+				try
+				{
+					URL url = new URL(s);
+					params.setValue(paramKey, url);
+				}
+				catch (MalformedURLException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 	/**
-	 * Saves the provided XML document to the provided file location in a pretty-printed, human readable, indented format.
+	 * Saves the provided XML document to the provided file location in a
+	 * pretty-printed, human readable, indented format.
 	 * <p/>
-	 * This method will overwrite any existing contents in the provided file location.
+	 * This method will overwrite any existing contents in the provided file
+	 * location.
 	 * 
-	 * @param doc The xml document to save
-	 * @param filePath The location to save to. Will overwrite any existing file.
+	 * @param doc
+	 *            The xml document to save
+	 * @param filePath
+	 *            The location to save to. Will overwrite any existing file.
 	 */
 	public static void saveDocumentToFormattedFile(Document doc, String filePath)
 	{
@@ -113,7 +169,7 @@ public class XMLUtil extends WWXML
 			throw new IllegalArgumentException(message);
 		}
 
-		
+
 		try
 		{
 			FileOutputStream outputStream = new FileOutputStream(filePath);
@@ -128,10 +184,13 @@ public class XMLUtil extends WWXML
 	}
 
 	/**
-	 * Saves the provided XML document to the provided output stream in a pretty-printed, human readable, indented format.
-	 *  
-	 * @param doc The xml document to save
-	 * @param outputStream The output stream to write the output to
+	 * Saves the provided XML document to the provided output stream in a
+	 * pretty-printed, human readable, indented format.
+	 * 
+	 * @param doc
+	 *            The xml document to save
+	 * @param outputStream
+	 *            The output stream to write the output to
 	 */
 	public static void saveDocumentToFormattedStream(Document doc, OutputStream outputStream)
 	{
@@ -142,14 +201,14 @@ public class XMLUtil extends WWXML
 			throw new IllegalArgumentException(message);
 		}
 
-		
+
 		if (outputStream == null)
 		{
 			String message = Logging.getMessage("nullValue.FilePathIsNull");
 			Logging.logger().severe(message);
 			throw new IllegalArgumentException(message);
 		}
-		
+
 		try
 		{
 			Source source = new DOMSource(doc);
@@ -166,6 +225,6 @@ public class XMLUtil extends WWXML
 			Logging.logger().severe(message);
 			throw new WWRuntimeException(e);
 		}
-		
+
 	}
 }

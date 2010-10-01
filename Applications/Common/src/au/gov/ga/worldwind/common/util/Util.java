@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.common.util;
 
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
@@ -398,12 +399,17 @@ public class Util
 		Matcher matcher = pattern.matcher(coordString);
 		if (matcher.matches())
 		{
-			int zone = Integer.parseInt(matcher.group(1));
+			long zone = Long.parseLong(matcher.group(1));
 			char latitudeBand = matcher.group(2).toUpperCase().charAt(0);
-			int easting = Integer.parseInt(matcher.group(3));
-			int northing = Integer.parseInt(matcher.group(4));
-			char hemisphere =
-					charRepresentsHemisphere ? latitudeBand : (latitudeBand >= 'N' ? 'N' : 'S');
+			double easting = Double.parseDouble(matcher.group(3));
+			double northing = Double.parseDouble(matcher.group(4));
+
+			//if charRepresentsHemisphere, then latitudeBand will be 'N' or 'S'
+			//otherwise, latitudeBand will be the actual latitudeBand
+			//convert back to hemisphere strings:
+			String hemisphere =
+					charRepresentsHemisphere ? (latitudeBand <= 'N' ? AVKey.NORTH : AVKey.SOUTH)
+							: (latitudeBand >= 'N' ? AVKey.NORTH : AVKey.SOUTH);
 
 			try
 			{

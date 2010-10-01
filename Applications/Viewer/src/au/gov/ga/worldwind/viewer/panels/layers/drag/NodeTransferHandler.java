@@ -120,7 +120,7 @@ public class NodeTransferHandler extends TransferHandler
 		{
 			try
 			{
-				LayerTreeModel model = layersTree.getModel();
+				LayerTreeModel model = layersTree.getLayerModel();
 
 				List<?> files =
 						(List<?>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
@@ -166,7 +166,7 @@ public class NodeTransferHandler extends TransferHandler
 			return;
 
 		TreeTransferable t = (TreeTransferable) data;
-		LayerTreeModel model = layersTree.getModel();
+		LayerTreeModel model = layersTree.getLayerModel();
 
 		Boolean moveIntoFolders = null;
 
@@ -197,7 +197,7 @@ public class NodeTransferHandler extends TransferHandler
 					ILayerDefinition definition = (ILayerDefinition) dmtn.getUserObject();
 					if (moveIntoFolders)
 					{
-						layersTree.getModel().addLayer(definition, path.getPath());
+						layersTree.getLayerModel().addLayer(definition, path.getPath());
 					}
 					else
 					{

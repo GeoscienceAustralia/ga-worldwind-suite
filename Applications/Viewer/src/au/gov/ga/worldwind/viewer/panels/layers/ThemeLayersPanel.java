@@ -29,9 +29,9 @@ public class ThemeLayersPanel extends AbstractLayersPanel
 		for (ThemeLayer layer : theme.getLayers())
 		{
 			if (layer.isVisible())
-				tree.getModel().addLayer(layer, (Object[]) null);
+				tree.getLayerModel().addLayer(layer, (Object[]) null);
 			else
-				tree.getModel().addInvisibleLayer(layer);
+				tree.getLayerModel().addInvisibleLayer(layer);
 		}
 
 		tree.getUI().relayout();

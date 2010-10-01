@@ -400,8 +400,7 @@ public class Application
 				nodes.add(LayerNode.createFromLayerDefinition(layer));
 			}
 
-			LayerEnabler enabler = new LayerEnabler();
-			enabler.setWwd(wwd);
+			LayerEnabler enabler = new LayerEnabler(wwd);
 			enabler.enable(nodes);
 		}
 

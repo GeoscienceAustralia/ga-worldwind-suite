@@ -498,7 +498,7 @@ public class LayersPanel extends AbstractLayersPanel
 
 	public LayerTreeModel getModel()
 	{
-		return tree.getModel();
+		return tree.getLayerModel();
 	}
 
 	@Override

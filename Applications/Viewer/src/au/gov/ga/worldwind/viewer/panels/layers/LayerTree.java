@@ -1,21 +1,28 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
+import gov.nasa.worldwind.WorldWindow;
+
 import java.util.EventObject;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellEditor;
 
+import au.gov.ga.worldwind.common.util.Loader.LoadingListener;
 import au.gov.ga.worldwind.viewer.components.lazytree.LoadingTree;
 
-public class LayerTree extends LoadingTree
+public class LayerTree extends LoadingTree implements LoadingListener
 {
-	public LayerTree(INode root, LayerEnabler enabler)
+	private final LayerEnabler enabler;
+
+	public LayerTree(WorldWindow wwd, INode root)
 	{
 		super();
+		setUI(new ClearableBasicTreeUI());
+
+		enabler = new LayerEnabler(this, wwd);
 		LayerTreeModel model = new LayerTreeModel(this, root, enabler);
 		setModel(model);
 
-		setUI(new ClearableBasicTreeUI());
 		setCellRenderer(new LayerCellRenderer());
 		setCellEditor(new LayerTreeCellEditor(this));
 		setEditable(true);
@@ -26,10 +33,14 @@ public class LayerTree extends LoadingTree
 		model.expandNodes();
 	}
 
-	@Override
-	public LayerTreeModel getModel()
+	public LayerEnabler getEnabler()
 	{
-		return (LayerTreeModel) super.getModel();
+		return enabler;
+	}
+
+	public LayerTreeModel getLayerModel()
+	{
+		return (LayerTreeModel) getModel();
 	}
 
 	@Override
@@ -56,5 +67,11 @@ public class LayerTree extends LoadingTree
 			//only allow editing with edit button, not with mouse click
 			return false;
 		}
+	}
+
+	@Override
+	public void loadingStateChanged(boolean isLoading)
+	{
+		repaint();
 	}
 }

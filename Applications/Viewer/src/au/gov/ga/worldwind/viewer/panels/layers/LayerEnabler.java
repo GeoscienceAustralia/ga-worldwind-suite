@@ -20,10 +20,11 @@ import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.layers.Bounded;
+import au.gov.ga.worldwind.common.util.Loader;
 
 public class LayerEnabler
 {
-	private LayerTree tree;
+	private final LayerTree tree;
 
 	private WorldWindow wwd;
 	private boolean layersSetup = false;
@@ -42,10 +43,17 @@ public class LayerEnabler
 			new HashMap<ElevationModel, ILayerNode>();
 
 	private List<RefreshListener> listeners = new ArrayList<RefreshListener>();
+	
+	public LayerEnabler(WorldWindow wwd)
+	{
+		this.tree = null;
+		setWwd(wwd);
+	}
 
-	public void setTree(LayerTree tree)
+	public LayerEnabler(LayerTree tree, WorldWindow wwd)
 	{
 		this.tree = tree;
+		setWwd(wwd);
 	}
 
 	public LayerTree getTree()
@@ -64,7 +72,7 @@ public class LayerEnabler
 	}
 
 	@SuppressWarnings("unchecked")
-	public synchronized void setWwd(WorldWindow wwd)
+	protected synchronized void setWwd(WorldWindow wwd)
 	{
 		this.wwd = wwd;
 
@@ -361,7 +369,7 @@ public class LayerEnabler
 		return elevationModelMap.get(elevationModel);
 	}
 
-	private static class Wrapper
+	private class Wrapper
 	{
 		public final ILayerNode node;
 		private LoadedLayer loaded;
@@ -410,6 +418,16 @@ public class LayerEnabler
 				getLayer().setName(node.getName());
 			else if (hasElevationModel())
 				getElevationModel().setName(node.getName());
+
+			if (getLoaded().getLoadedObject() instanceof Loader)
+			{
+				Loader loader = (Loader) getLoaded().getLoadedObject();
+				node.setLoader(loader);
+				if (tree != null)
+				{
+					loader.addLoadingListener(tree);
+				}
+			}
 		}
 
 		public void updateExpiryTime()

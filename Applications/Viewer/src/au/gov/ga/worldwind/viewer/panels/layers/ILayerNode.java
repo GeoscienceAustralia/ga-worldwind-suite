@@ -2,6 +2,8 @@ package au.gov.ga.worldwind.viewer.panels.layers;
 
 import java.net.URL;
 
+import au.gov.ga.worldwind.common.util.Loader;
+
 public interface ILayerNode extends INode
 {
 	public URL getLayerURL();
@@ -35,6 +37,8 @@ public interface ILayerNode extends INode
 	public boolean isLayerDataLoading();
 	
 	public void setLayerDataLoading(boolean layerDataLoading);
+	
+	public void setLoader(Loader loader);
 
 	public Long getExpiryTime();
 

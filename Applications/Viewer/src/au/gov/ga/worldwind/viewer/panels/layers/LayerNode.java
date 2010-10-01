@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.viewer.panels.layers;
 
 import java.net.URL;
 
+import au.gov.ga.worldwind.common.util.Loader;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 
 public class LayerNode extends AbstractNode implements ILayerNode
@@ -15,6 +16,7 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	private boolean layerLoading = false;
 	private boolean layerDataLoading = false;
 	private Long expiryTime;
+	private Loader loader;
 
 	public LayerNode(String name, URL infoURL, URL iconURL, boolean expanded, URL layerURL,
 			boolean enabled, double opacity, Long expiryTime)
@@ -93,7 +95,8 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	@Override
 	public boolean isLoading()
 	{
-		return super.isLoading() || isLayerLoading() || isLayerDataLoading();
+		return super.isLoading() || isLayerLoading() || isLayerDataLoading()
+				|| (loader != null && loader.isLoading());
 	}
 
 	@Override
@@ -118,6 +121,12 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	public void setLayerDataLoading(boolean layerDataLoading)
 	{
 		this.layerDataLoading = layerDataLoading;
+	}
+
+	@Override
+	public void setLoader(Loader loader)
+	{
+		this.loader = loader;
 	}
 
 	@Override

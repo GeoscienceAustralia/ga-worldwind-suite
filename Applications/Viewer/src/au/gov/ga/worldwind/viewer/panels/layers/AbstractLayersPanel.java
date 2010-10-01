@@ -64,9 +64,8 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 	public void setup(Theme theme)
 	{
 		root = createRootNode(theme);
-		layerEnabler = new LayerEnabler();
-		tree = new LayerTree(root, layerEnabler);
-		layerEnabler.setTree(tree);
+		tree = new LayerTree(theme.getWwd(), root);
+		layerEnabler = tree.getEnabler();
 
 		RetrievalService rs = WorldWind.getRetrievalService();
 		if (rs instanceof ExtendedRetrievalService)
@@ -183,7 +182,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		enableComponents();
 
 		wwd = theme.getWwd();
-		layerEnabler.setWwd(theme.getWwd());
+		//layerEnabler.setWwd(theme.getWwd());
 	}
 
 	protected abstract INode createRootNode(Theme theme);
@@ -263,9 +262,9 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 
 		for (ILayerNode node : nodes)
 		{
-			if (tree.getModel().isEnabled(node) != enabled)
+			if (tree.getLayerModel().isEnabled(node) != enabled)
 			{
-				tree.getModel().setEnabled(node, enabled);
+				tree.getLayerModel().setEnabled(node, enabled);
 				relayoutRepaint(node);
 			}
 		}
@@ -306,8 +305,8 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 
 			for (ILayerNode node : nodes)
 			{
-				tree.getModel().setEnabled(node, enabled);
-				tree.getModel().setOpacity(node, opacity);
+				tree.getLayerModel().setEnabled(node, enabled);
+				tree.getLayerModel().setOpacity(node, opacity);
 				relayoutRepaint(node);
 			}
 
@@ -318,7 +317,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 
 	private void relayoutRepaint(INode node)
 	{
-		TreePath path = new TreePath(tree.getModel().getPathToRoot(node));
+		TreePath path = new TreePath(tree.getLayerModel().getPathToRoot(node));
 		tree.getUI().relayout(path);
 
 		Rectangle bounds = tree.getPathBounds(path);
