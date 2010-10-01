@@ -33,11 +33,6 @@ public class ShapefileIconLayer extends ShapefilePointLayer implements SelectLis
 	public ShapefileIconLayer(Element domElement, AVList params)
 	{
 		super(domElement, params);
-		init();
-	}
-
-	protected void init()
-	{
 		iconLayer = new IconLayer();
 		setPickEnabled(true);
 	}

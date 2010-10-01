@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.common.layers.shapefile.point;
 
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.render.Material;
 import gov.nasa.worldwind.util.Logging;
 
 import java.awt.Color;
@@ -218,6 +219,8 @@ public class Style
 			return Point.class;
 		if ("Font".equalsIgnoreCase(type))
 			return Font.class;
+		if ("Material".equalsIgnoreCase(type))
+			return Material.class;
 		return null;
 	}
 
@@ -294,6 +297,20 @@ public class Style
 		else if (type.isAssignableFrom(Font.class))
 		{
 			return Font.decode(string);
+		}
+		else if (type.isAssignableFrom(Material.class))
+		{
+			Color color = null;
+			int[] ints = splitInts(string);
+			if (ints.length == 1)
+				color = new Color(ints[0]);
+			else if (ints.length == 3)
+				color = new Color(ints[0], ints[1], ints[2]);
+			else if (ints.length == 4)
+				color = new Color(ints[0], ints[1], ints[2], ints[3]);
+
+			if (color != null)
+				return new Material(color);
 		}
 		return null;
 	}

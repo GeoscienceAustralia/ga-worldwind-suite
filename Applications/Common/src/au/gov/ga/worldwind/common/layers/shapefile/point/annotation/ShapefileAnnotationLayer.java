@@ -32,11 +32,6 @@ public class ShapefileAnnotationLayer extends ShapefilePointLayer implements Sel
 	public ShapefileAnnotationLayer(Element domElement, AVList params)
 	{
 		super(domElement, params);
-		init();
-	}
-
-	protected void init()
-	{
 		annotationLayer = new AnnotationLayer();
 		setPickEnabled(true);
 	}
