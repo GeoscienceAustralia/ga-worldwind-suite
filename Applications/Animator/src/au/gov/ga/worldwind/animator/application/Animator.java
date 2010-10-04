@@ -92,7 +92,6 @@ import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPane
 import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
 import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPanel;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
-import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierImpl;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationElevationModel;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationTessellator;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
@@ -571,8 +570,15 @@ public class Animator
 	 */
 	private void addDefaultElevationModelsToAnimation(Animation animation)
 	{
-		ElevationModelIdentifier earthElevationModelIdentifier = new ElevationModelIdentifierImpl("Earth", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml");
-		animation.addElevationModel(earthElevationModelIdentifier );
+		for (ElevationModelIdentifier modelIdentifier : Settings.get().getDefaultElevationModels())
+		{
+			if (modelIdentifier == null)
+			{
+				continue;
+			}
+			
+			animation.addElevationModel(modelIdentifier);
+		}
 	}
 	
 	/**

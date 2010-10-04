@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.animator.application.settings;
 
+import static au.gov.ga.worldwind.animator.util.Util.isBlank;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.io.File;
@@ -15,8 +16,9 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifierFactory;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifierImpl;
+import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
+import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierImpl;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
-import au.gov.ga.worldwind.animator.util.Util;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
@@ -76,12 +78,26 @@ public class Settings
 			saveSplitLocation(rootElement);
 			saveDefaultAnimationLayers(rootElement);
 			saveKnownLayers(rootElement);
+			saveDefaultElevationModels(rootElement);
 			
 			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(getUserDirectory(), SETTINGS_FILE_NAME)));
 		}
 		catch (Exception e)
 		{
 			ExceptionLogger.logException(e);
+		}
+	}
+
+	private static void saveDefaultElevationModels(Element rootElement)
+	{
+		Element animationLayersContainer = WWXML.appendElement(rootElement, "defaultModels");
+		List<ElevationModelIdentifier> modelList = instance.getDefaultElevationModels();
+		for (int i = 0; i < modelList.size(); i++)
+		{
+			Element layerElement = WWXML.appendElement(animationLayersContainer, "model");
+			WWXML.setIntegerAttribute(layerElement, "index", i);
+			WWXML.setTextAttribute(layerElement, "name", modelList.get(i).getName());
+			WWXML.setTextAttribute(layerElement, "url", modelList.get(i).getLocation());
 		}
 	}
 
@@ -162,6 +178,26 @@ public class Settings
 		loadSplitLocation(rootElement);
 		loadDefaultAnimationLayers(rootElement);
 		loadKnownLayers(rootElement);
+		loadDefaultElevationModels(rootElement);
+	}
+
+	private static void loadDefaultElevationModels(Element rootElement)
+	{
+		List<ElevationModelIdentifier> loadedIdentifiers = new ArrayList<ElevationModelIdentifier>();
+		Integer layerCount = WWXML.getInteger(rootElement, "count(//defaultModels/model)", null);
+		for (int i = 0; i < layerCount ; i++)
+		{
+			String modelName = WWXML.getText(rootElement, "//defaultModels/model[@index='" + i + "']/@name");
+			String modelUrl = WWXML.getText(rootElement, "//defaultModels/model[@index='" + i + "']/@url");
+			if (!isBlank(modelUrl) && !isBlank(modelName))
+			{
+				loadedIdentifiers.add(new ElevationModelIdentifierImpl(modelName, modelUrl));
+			}
+		}
+		if (!loadedIdentifiers.isEmpty())
+		{
+			instance.setDefaultElevationModels(loadedIdentifiers);
+		}
 	}
 
 	private static void loadKnownLayers(Element rootElement)
@@ -172,7 +208,7 @@ public class Settings
 		{
 			String layerName = WWXML.getText(rootElement, "//knownLayers/layer[@index='" + i + "']/@name");
 			String layerUrl = WWXML.getText(rootElement, "//knownLayers/layer[@index='" + i + "']/@url");
-			if (!Util.isBlank(layerUrl) && !Util.isBlank(layerName))
+			if (!isBlank(layerUrl) && !isBlank(layerName))
 			{
 				loadedIdentifiers.add(new LayerIdentifierImpl(layerName, layerUrl));
 			}
@@ -192,7 +228,7 @@ public class Settings
 		{
 			String layerName = WWXML.getText(rootElement, "//defaultLayers/layer[@index='" + i + "']/@name");
 			String layerUrl = WWXML.getText(rootElement, "//defaultLayers/layer[@index='" + i + "']/@url");
-			if (!Util.isBlank(layerUrl) && !Util.isBlank(layerName))
+			if (!isBlank(layerUrl) && !isBlank(layerName))
 			{
 				loadedIdentifiers.add(new LayerIdentifierImpl(layerName, layerUrl));
 			}
@@ -206,7 +242,7 @@ public class Settings
 	private static void loadLastUsedLocation(Element rootElement)
 	{
 		String lastUsedLocationPath = WWXML.getText(rootElement, "//lastUsedLocation");
-		if (!Util.isBlank(lastUsedLocationPath))
+		if (!isBlank(lastUsedLocationPath))
 		{
 			instance.setLastUsedLocation(new File(lastUsedLocationPath));
 		}
@@ -217,7 +253,7 @@ public class Settings
 		for (int i = MAX_NUMBER_RECENT_FILES - 1; i >= 0; i--)
 		{
 			String recentFileName = WWXML.getText(rootElement, "//recentFiles/file[@index='" + i + "']/@path");
-			if (!Util.isBlank(recentFileName))
+			if (!isBlank(recentFileName))
 			{
 				instance.addRecentFile(new File(recentFileName));
 			}
@@ -274,6 +310,11 @@ public class Settings
 	
 	/** The list of known layer locations for populating the layer palette */
 	private List<LayerIdentifier> knownLayers = LayerIdentifierFactory.readFromPropertiesFile("au.gov.ga.worldwind.animator.layers.worldwindLayerIdentities");
+	
+	/** The default set of elevation models to include in new animations */
+	private List<ElevationModelIdentifier> defaultElevationModels = new ArrayList<ElevationModelIdentifier>(Arrays.asList(new ElevationModelIdentifier[]{
+			new ElevationModelIdentifierImpl("Earth", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml"),
+	}));
 	
 	/**
 	 * Private constructor. Use the Singleton accessor {@link #get()}.
@@ -415,4 +456,19 @@ public class Settings
 		knownLayers.remove(identifier);
 	}
 	
+	/**
+	 * @return {@link #defaultElevationModels}
+	 */
+	public List<ElevationModelIdentifier> getDefaultElevationModels()
+	{
+		return defaultElevationModels;
+	}
+	
+	/**
+	 * Set {@link #defaultElevationModels}
+	 */
+	public void setDefaultElevationModels(List<ElevationModelIdentifier> defaultElevationModels)
+	{
+		this.defaultElevationModels = defaultElevationModels;
+	}
 }
