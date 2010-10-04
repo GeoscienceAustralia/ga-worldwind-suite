@@ -283,14 +283,28 @@
 	{
 		if (useJavaZip)
 		{
-			ZipFile zip = new ZipFile(zipFile);
-			ZipEntry zentry = zip.getEntry(entry);
-			if (zentry != null)
+			boolean close = true;
+			ZipFile zip = null;
+			try
 			{
-				//zip is closed later in handleRequest
-				return new ExtensionInputStream(zip.getInputStream(zentry), extension, zip);
+				zip = new ZipFile(zipFile);
+				ZipEntry zentry = zip.getEntry(entry);
+				if (zentry != null)
+				{
+					ExtensionInputStream retval =
+							new ExtensionInputStream(zip.getInputStream(zentry), extension, zip);
+					//zip is closed later in handleRequest
+					close = false;
+					return retval;
+				}
 			}
-			zip.close();
+			finally
+			{
+				if (zip != null && close)
+				{
+					zip.close();
+				}
+			}
 		}
 		else
 		{
@@ -357,6 +371,11 @@
 				ZipEntry zentry = zip.getEntry(entry);
 				return zentry != null;
 			}
+			catch (OutOfMemoryError e)
+			{
+				//only throw OutOfMemoryErrors
+				throw e;
+			}
 			catch (Exception e)
 			{
 			}
@@ -364,13 +383,7 @@
 			{
 				if (zip != null)
 				{
-					try
-					{
-						zip.close();
-					}
-					catch (IOException e)
-					{
-					}
+					zip.close();
 				}
 			}
 		}
@@ -487,144 +500,173 @@
 		boolean needsZip = false;
 		String contentType = null;
 
-		if (F == null)
+		try
 		{
-			//if no format has been specified, search for a file using any known extension
-			file = findFile(rowDirectory, filename, L, T, null, false, useJavaZip);
-			if (file != null)
+			if (F == null)
 			{
-				//if the file has been found, set the correct content type
-				contentType = getContentTypeForExtension(file.extension);
-			}
-			else if (blankOnError && directoryExists(L, T, useJavaZip))
-			{
-				//if no file has been found and a blank should be returned, return a blank file (default to jpg)
-				String extension = "jpg";
-				file = findBlankFile(L, T, extension, false, useJavaZip);
-				contentType = getContentTypeForExtension(extension);
-			}
-		}
-		else
-		{
-			//format has been specified; get the extension for the requested format
-			F = F.toLowerCase();
-			String extension = getExtensionForFormat(F);
-
-			if (extension == null)
-			{
-				//if the format is unknown, return a 400 error
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				return;
-			}
-
-			//set the content type for the requested extension
-			contentType = getContentTypeForExtension(extension);
-			boolean isZip = extension.equals("zip");
-
-			//find a file matching the extension
-			file = findFile(rowDirectory, filename, L, T, extension, false, useJavaZip);
-
-			if (file == null && isZip)
-			{
-				//if no file has been found but a zip is requested
-				needsZip = true;
-				//search for a file using any known extension
+				//if no format has been specified, search for a file using any known extension
 				file = findFile(rowDirectory, filename, L, T, null, false, useJavaZip);
-				if (searchForMask)
+				if (file != null)
 				{
-					//search for a file in the mask directory using any known extension
-					mask = findFile(rowDirectory, filename, L, T, null, true, useJavaZip);
+					//if the file has been found, set the correct content type
+					contentType = getContentTypeForExtension(file.extension);
+				}
+				else if (blankOnError && directoryExists(L, T, useJavaZip))
+				{
+					//if no file has been found and a blank should be returned, return a blank file (default to jpg)
+					String extension = "jpg";
+					file = findBlankFile(L, T, extension, false, useJavaZip);
+					contentType = getContentTypeForExtension(extension);
+				}
+			}
+			else
+			{
+				//format has been specified; get the extension for the requested format
+				F = F.toLowerCase();
+				String extension = getExtensionForFormat(F);
+
+				if (extension == null)
+				{
+					//if the format is unknown, return a 400 error
+					response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+					return;
+				}
+
+				//set the content type for the requested extension
+				contentType = getContentTypeForExtension(extension);
+				boolean isZip = extension.equals("zip");
+
+				//find a file matching the extension
+				file = findFile(rowDirectory, filename, L, T, extension, false, useJavaZip);
+
+				if (file == null && isZip)
+				{
+					//if no file has been found but a zip is requested
+					needsZip = true;
+					//search for a file using any known extension
+					file = findFile(rowDirectory, filename, L, T, null, false, useJavaZip);
+					if (searchForMask)
+					{
+						//search for a file in the mask directory using any known extension
+						mask = findFile(rowDirectory, filename, L, T, null, true, useJavaZip);
+					}
+				}
+
+				if (file == null && blankOnError && directoryExists(L, T, useJavaZip))
+				{
+					//if still no file has been found and a blank file should be returned
+					if (isZip)
+					{
+						//if a zip is requested, find blank files for the image and mask (default to jpg and png)
+						file = findBlankFile(L, T, "jpg", false, useJavaZip);
+						if (searchForMask)
+						{
+							mask = findBlankFile(L, T, "png", true, useJavaZip);
+						}
+					}
+					else
+					{
+						//find a blank file for the requested extension
+						file = findBlankFile(L, T, extension, false, useJavaZip);
+					}
 				}
 			}
 
-			if (file == null && blankOnError && directoryExists(L, T, useJavaZip))
+			if (file == null)
 			{
-				//if still no file has been found and a blank file should be returned
-				if (isZip)
+				//if no file has been found to return, return a 404 error
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
+
+			int size;
+			byte[] buffer = new byte[1024];
+			InputStream is;
+
+			//set the content type and get the outputstream
+			response.setContentType(contentType);
+			OutputStream os = null;
+
+			try
+			{
+				os = response.getOutputStream();
+
+				if (needsZip)
 				{
-					//if a zip is requested, find blank files for the image and mask (default to jpg and png)
-					file = findBlankFile(L, T, "jpg", false, useJavaZip);
-					if (searchForMask)
+					//set the save-as filename in the http header
+					response.addHeader("Content-disposition", "inline; filename=" + filename
+							+ ".zip");
+
+					//create a zip outputstream wrapper around the response outputstream
+					ZipOutputStream zos = null;
+					try
 					{
-						mask = findBlankFile(L, T, "png", true, useJavaZip);
+						zos = new ZipOutputStream(os);
+						//zos.setLevel(ZipOutputStream.STORED);
+
+						//add the file to the zip file
+						is = file.inputStream;
+						zos.putNextEntry(new ZipEntry(filename + "." + file.extension));
+						while ((size = is.read(buffer)) >= 0)
+						{
+							zos.write(buffer, 0, size);
+						}
+						zos.closeEntry();
+
+						if (mask != null)
+						{
+							//if a mask exists, add the mask to the zip file
+							is = mask.inputStream;
+							zos.putNextEntry(new ZipEntry(filename + "_mask." + mask.extension));
+							while ((size = is.read(buffer)) >= 0)
+							{
+								zos.write(buffer, 0, size);
+							}
+							zos.closeEntry();
+						}
+					}
+					finally
+					{
+						//close the outputstream
+						if (zos != null)
+						{
+							zos.close();
+						}
 					}
 				}
 				else
 				{
-					//find a blank file for the requested extension
-					file = findBlankFile(L, T, extension, false, useJavaZip);
+					//set the save-as filename in the http header
+					response.addHeader("Content-disposition", "inline; filename=" + filename + "."
+							+ file.extension);
+
+					//write the file to the response outputstream
+					is = file.inputStream;
+					while ((size = is.read(buffer)) >= 0)
+					{
+						os.write(buffer, 0, size);
+					}
+				}
+			}
+			finally
+			{
+				if (os != null)
+				{
+					os.flush();
+					os.close();
 				}
 			}
 		}
-
-		if (file == null)
+		finally
 		{
-			//if no file has been found to return, return a 404 error
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
-
-		int size;
-		byte[] buffer = new byte[1024];
-		InputStream is;
-
-		//set the content type and get the outputstream
-		response.setContentType(contentType);
-		OutputStream os = response.getOutputStream();
-
-		if (needsZip)
-		{
-			//set the save-as filename in the http header
-			response.addHeader("Content-disposition", "inline; filename=" + filename + ".zip");
-
-			//create a zip outputstream wrapper around the response outputstream
-			ZipOutputStream zos = new ZipOutputStream(os);
-			//zos.setLevel(ZipOutputStream.STORED);
-
-			//add the file to the zip file
-			is = file.inputStream;
-			zos.putNextEntry(new ZipEntry(filename + "." + file.extension));
-			while ((size = is.read(buffer)) >= 0)
+			if (file != null)
 			{
-				zos.write(buffer, 0, size);
+				file.close();
 			}
-			zos.closeEntry();
-			file.close();
-
 			if (mask != null)
 			{
-				//if a mask exists, add the mask to the zip file
-				is = mask.inputStream;
-				zos.putNextEntry(new ZipEntry(filename + "_mask." + mask.extension));
-				while ((size = is.read(buffer)) >= 0)
-				{
-					zos.write(buffer, 0, size);
-				}
-				zos.closeEntry();
 				mask.close();
 			}
-
-			//close the outputstream
-			zos.close();
 		}
-		else
-		{
-			//set the save-as filename in the http header
-			response.addHeader("Content-disposition", "inline; filename=" + filename + "."
-					+ file.extension);
-
-			//write the file to the response outputstream
-			is = file.inputStream;
-			while ((size = is.read(buffer)) >= 0)
-			{
-				os.write(buffer, 0, size);
-			}
-
-			//close the stream
-			file.close();
-		}
-
-		os.flush();
-		os.close();
 	}
 %>
