@@ -779,10 +779,14 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 					}
 					result.addAnimatableObject(animatable);
 					
-					// If this is the camera, set it as the render camera
+					// If this is a 'special' object, set it to the correct field
 					if (animatable instanceof Camera)
 					{
 						result.renderCamera = (Camera)animatable;
+					}
+					if (animatable instanceof AnimatableElevation)
+					{
+						result.animatableElevation = (AnimatableElevation)animatable;
 					}
 					
 				}

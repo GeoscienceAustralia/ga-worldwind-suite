@@ -99,6 +99,9 @@
 		                    </parameter>
 		                </lookAtElevation>
             		</camera>
+            		<elevation enabled="true" name="Elevation">
+            			<models/>
+            		</elevation>
             	</animatableObjects>
 			</animation>
 		</worldWindAnimation>

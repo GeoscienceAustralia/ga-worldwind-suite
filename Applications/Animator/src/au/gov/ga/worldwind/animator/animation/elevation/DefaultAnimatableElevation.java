@@ -220,20 +220,26 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 				
 				// Load the models
 				Element[] modelIdentifierElements = WWXML.getElements(element, "./" + constants.getAnimatableElevationModelContainerName() + "/*", null);
-				for (Element modelIdentifierElement : modelIdentifierElements)
+				if (modelIdentifierElements != null)
 				{
-					String modelName = WWXML.getText(modelIdentifierElement, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableElevationModelIdentifierAttributeName());
-					String modelUrl = WWXML.getText(modelIdentifierElement, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableElevationModelIdentifierAttributeUrl());
-					result.addElevationModel(new ElevationModelIdentifierImpl(modelName, modelUrl));
+					for (Element modelIdentifierElement : modelIdentifierElements)
+					{
+						String modelName = WWXML.getText(modelIdentifierElement, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableElevationModelIdentifierAttributeName());
+						String modelUrl = WWXML.getText(modelIdentifierElement, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableElevationModelIdentifierAttributeUrl());
+						result.addElevationModel(new ElevationModelIdentifierImpl(modelName, modelUrl));
+					}
 				}
 				
 				// Load the exaggerators
 				ElevationExaggerationParameterImpl parameterFactory = new ElevationExaggerationParameterImpl();
 				Element[] exaggeratorElements = WWXML.getElements(element, "./" + constants.getElevationExaggerationName(), null);
-				for (Element exaggeratorElement : exaggeratorElements)
+				if (exaggeratorElements != null)
 				{
-					ElevationExaggerationParameter parameter = (ElevationExaggerationParameter)parameterFactory.fromXml(exaggeratorElement, version, context);
-					result.addElevationExaggerationParameter(parameter);
+					for (Element exaggeratorElement : exaggeratorElements)
+					{
+						ElevationExaggerationParameter parameter = (ElevationExaggerationParameter)parameterFactory.fromXml(exaggeratorElement, version, context);
+						result.addElevationExaggerationParameter(parameter);
+					}
 				}
 				
 				return result;
