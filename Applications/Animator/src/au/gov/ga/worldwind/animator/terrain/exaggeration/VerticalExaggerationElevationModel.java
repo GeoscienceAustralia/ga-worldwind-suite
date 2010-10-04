@@ -101,6 +101,11 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 		return floorEntry.getValue();
 	}
 	
+	public List<ElevationExaggeration> getExaggerators()
+	{
+		return new ArrayList<ElevationExaggeration>(exaggerators.values());
+	}
+	
 	public double getGlobalOffset()
 	{
 		return globalOffset;

@@ -147,7 +147,6 @@ public class DefaultAnimatableLayerTest
 		
 		AnimationFileVersion versionId = AnimationFileVersion.VERSION020;
 		
-		// Setup the elements correctly (add an 'AnimatableObjects' element
 		Document document = WWXML.openDocument(getClass().getResourceAsStream("animatableLayerXmlSnippet.xml"));
 		Element layerElement = WWXML.getElement(document.getDocumentElement(), "//" + versionId.getConstants().getAnimatableLayerName(), null);
 		

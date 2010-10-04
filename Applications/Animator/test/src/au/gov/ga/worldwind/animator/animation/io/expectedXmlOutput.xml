@@ -36,6 +36,9 @@
                     <parameter defaultValue="0.0" enabled="true" name="Render Camera - Param"/>
                 </lookAtElevation>
             </camera>
+            <elevation enabled="true" name="Elevation">
+                <models/>
+            </elevation>
         </animatableObjects>
     </animation>
 </worldWindAnimation>

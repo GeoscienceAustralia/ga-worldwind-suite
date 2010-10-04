@@ -5,12 +5,14 @@ import static org.junit.Assert.assertNotNull;
 import gov.nasa.worldwind.Factory;
 import gov.nasa.worldwind.WorldWindowImpl;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -31,6 +33,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueType;
 import au.gov.ga.worldwind.animator.terrain.AnimationElevationLoader;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierImpl;
+import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggerationImpl;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
@@ -45,6 +48,8 @@ import au.gov.ga.worldwind.test.util.TestUtils;
  */
 public class DefaultAnimatableElevationTest
 {
+	private static final double ALLOWABLE_ERROR = 0.001;
+	
 	private Mockery mockContext;
 	
 	private DefaultAnimatableElevation classToBeTested;
@@ -54,6 +59,8 @@ public class DefaultAnimatableElevationTest
 	private MockElevationFactory elevationFactory;
 
 	private Animation animation;
+	
+	private ElevationModel elevationModel;
 	
 	@Before
 	public void setup()
@@ -97,6 +104,83 @@ public class DefaultAnimatableElevationTest
 		String expected = normalise(TestUtils.readStreamToString(getClass().getResourceAsStream("animatableElevationXmlSnippet.xml")));
 		
 		assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testFromXml() throws Exception
+	{
+		AVList context = new AVListImpl();
+		context.setValue(AnimationFileVersion.VERSION020.getConstants().getAnimationKey(), animation);
+		AnimationFileVersion versionId = AnimationFileVersion.VERSION020;
+		
+		// Setup the elements correctly (add an 'AnimatableObjects' element
+		Document document = WWXML.openDocument(getClass().getResourceAsStream("animatableElevationXmlSnippet.xml"));
+		Element elevationElement = WWXML.getElement(document.getDocumentElement(), "//" + versionId.getConstants().getAnimatableElevationName(), null);
+		
+		DefaultAnimatableElevation result = (DefaultAnimatableElevation)classToBeTested.fromXml(elevationElement, versionId, context);
+		
+		assertNotNull(result);
+		assertNotNull(result.getRootElevationModel());
+		assertElevationModelCorrect(result);
+		assertElevationExaggeratorsCorrect(result);
+		assertElevationParametersCorrect(result);
+		assertKeyFramesCorrect(result);
+	}
+
+	private void assertKeyFramesCorrect(DefaultAnimatableElevation result)
+	{
+		assertEquals(3, animation.getKeyFrameCount());
+
+		ArrayList<Parameter> parameterList = new ArrayList<Parameter>(result.getParameters());
+		
+		List<KeyFrame> keyFrames = animation.getKeyFrames(parameterList.get(0));
+		assertEquals(2, keyFrames.size());
+		assertEquals(0, keyFrames.get(0).getFrame());
+		assertEquals(10, keyFrames.get(1).getFrame());
+		
+		keyFrames = animation.getKeyFrames(parameterList.get(1));
+		assertEquals(0, keyFrames.size());
+		
+		keyFrames = animation.getKeyFrames(parameterList.get(2));
+		assertEquals(1, keyFrames.size());
+		assertEquals(20, keyFrames.get(0).getFrame());
+	}
+
+	private void assertElevationParametersCorrect(DefaultAnimatableElevation result)
+	{
+		assertEquals(3, result.getEnabledParameters().size());
+		ArrayList<Parameter> parameterList = new ArrayList<Parameter>(result.getParameters());
+		assertElevationParameterCorrect(parameterList.get(0), "Exaggeration", true, 1.0);
+		assertElevationParameterCorrect(parameterList.get(1), "Exaggeration", true, 2.0);
+		assertElevationParameterCorrect(parameterList.get(2), "Exaggeration", true, 3.0);
+	}
+
+	private void assertElevationParameterCorrect(Parameter parameter, String name, boolean enabled, double defaultValue)
+	{
+		assertEquals(name, parameter.getName());
+		assertEquals(enabled, parameter.isEnabled());
+		assertEquals(defaultValue, parameter.getDefaultValue(), ALLOWABLE_ERROR);
+	}
+
+	private void assertElevationExaggeratorsCorrect(DefaultAnimatableElevation result)
+	{
+		assertEquals(3, result.getRootElevationModel().getExaggerators().size());
+		assertExaggeratorCorrect(result.getRootElevationModel().getExaggerators().get(0), 0.0, 1.0);
+		assertExaggeratorCorrect(result.getRootElevationModel().getExaggerators().get(1), 100.0, 2.0);
+		assertExaggeratorCorrect(result.getRootElevationModel().getExaggerators().get(2), 200.0, 3.0);
+	}
+
+	private void assertExaggeratorCorrect(ElevationExaggeration elevationExaggeration, double boundary, double exaggeration)
+	{
+		assertEquals(boundary, elevationExaggeration.getElevationBoundary(), ALLOWABLE_ERROR);
+		assertEquals(exaggeration, elevationExaggeration.getExaggeration(), ALLOWABLE_ERROR);
+	}
+
+	private void assertElevationModelCorrect(DefaultAnimatableElevation result)
+	{
+		assertEquals(1, result.getElevationModelIdentifiers().size());
+		assertEquals("test1", result.getElevationModelIdentifiers().get(0).getName());
+		assertEquals("file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml", result.getElevationModelIdentifiers().get(0).getLocation());
 	}
 
 	private void addElevationModel(String name, String location)
@@ -147,7 +231,7 @@ public class DefaultAnimatableElevationTest
 	
 	private void setupElevationFactory()
 	{
-		final ElevationModel elevationModel = mockContext.mock(ElevationModel.class);
+		elevationModel = mockContext.mock(ElevationModel.class);
 		mockContext.checking(new Expectations()
 		{{
 			allowing(elevationModel).setValue(with(any(String.class)), with(anything()));

@@ -9,6 +9,7 @@ import java.util.Map;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
+import au.gov.ga.worldwind.animator.animation.elevation.DefaultAnimatableElevation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -28,6 +29,7 @@ public class AnimatableFactory
 		// Add additional Animatables here as they are created
 		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getCameraElementName(), instantiate(CameraImpl.class));
 		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getAnimatableLayerName(), instantiate(DefaultAnimatableLayer.class));
+		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getAnimatableElevationName(), instantiate(DefaultAnimatableElevation.class));
 	}
 	
 	/**

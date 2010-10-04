@@ -9,14 +9,18 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
+import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
+import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggerationImpl;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
  * Default implementation of the {@link ElevationExaggerationParameter} interface
@@ -32,6 +36,11 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 	private static final String DEFAULT_NAME = "Exaggeration";
 	
 	private ElevationExaggeration exaggerator;
+	
+	/**
+	 * Constructor for de-serialisation.
+	 */
+	ElevationExaggerationParameterImpl(){};
 	
 	public ElevationExaggerationParameterImpl(Animation animation, ElevationExaggeration exaggerator)
 	{
@@ -84,7 +93,7 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 	@Override
 	protected ParameterBase createParameter(AVList context)
 	{
-		// TODO Auto-generated method stub
+		// Not needed in this parameter - the fromXml method has been overriden to perform the required processing
 		return null;
 	}
 
@@ -97,6 +106,40 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 		WWXML.setDoubleAttribute(result, constants.getElevationExaggerationAttributeBoundary(), exaggerator.getElevationBoundary());
 		
 		result.appendChild(super.toXml(result, version));
+		
+		return result;
+	}
+	
+	@Override
+	public Parameter fromXml(Element element, AnimationFileVersion version, AVList context)
+	{
+		AnimationIOConstants constants = version.getConstants();
+		Animation currentAnimation = (Animation)context.getValue(constants.getAnimationKey());
+		
+		double boundary = WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getElevationExaggerationAttributeBoundary(), null);
+		double exaggeration = WWXML.getDouble(element, "./" + constants.getParameterElementName() + "/" + ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeDefaultValue(), null);
+		boolean enabled = XMLUtil.getBoolean(element, "./" + constants.getParameterElementName() + "/" + ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeEnabled(), true);
+		String name = XMLUtil.getText(element, "./" + constants.getParameterElementName() + "/" + ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeName(), null);
+		
+		ElevationExaggeration exaggerator = new ElevationExaggerationImpl(exaggeration, boundary);
+		
+		ElevationExaggerationParameterImpl result = new ElevationExaggerationParameterImpl(currentAnimation, exaggerator);
+		result.setName(name);
+		result.setEnabled(enabled);
+		
+		// Load the parameter values
+		context.setValue(constants.getParameterValueOwnerKey(), result);
+		Element[] parameterValueElements = WWXML.getElements(element, "./" + constants.getParameterElementName() + "/" + constants.getParameterValueElementName(), null);
+		if (parameterValueElements == null)
+		{
+			return result;
+		}
+		
+		for (Element e : parameterValueElements)
+		{
+			ParameterValue v = ParameterValueFactory.fromXml(e, version, context);
+			currentAnimation.insertKeyFrame(new KeyFrameImpl(v.getFrame(), v), false);
+		}
 		
 		return result;
 	}
