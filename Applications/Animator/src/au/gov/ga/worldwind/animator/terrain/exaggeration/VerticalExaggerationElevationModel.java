@@ -25,7 +25,7 @@ import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class VerticalExaggerationElevationModel extends DetailedElevationModel
+public class VerticalExaggerationElevationModel extends DetailedElevationModel implements ElevationExaggeration.ChangeListener
 {
 
 	/** The registered exaggerators, keyed by elevation threshold */
@@ -72,16 +72,26 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 			return;
 		}
 		exaggerators.put(exaggerator.getElevationBoundary(), exaggerator);
+		exaggerator.addChangeListener(this);
 	}
 	
 	public void removeExaggerator(ElevationExaggeration exaggerator)
 	{
-		exaggerators.remove(exaggerator.getElevationBoundary());
-		recalculateExaggerationWindows();
+		if (exaggerator == null)
+		{
+			return;
+		}
+		removeExaggerator(exaggerator.getElevationBoundary());
 	}
 	
 	public void removeExaggerator(double boundary)
 	{
+		if (!exaggerators.containsKey(boundary))
+		{
+			return;
+		}
+		
+		exaggerators.get(boundary).removeChangeListener(this);
 		exaggerators.remove(boundary);
 		recalculateExaggerationWindows();
 	}
@@ -311,5 +321,11 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel
 			result.add(0, new ElevationExaggerationImpl(zeroExaggeration, 0.0));
 		}
 		return result;
+	}
+
+	@Override
+	public void exaggerationChanged(ElevationExaggeration exaggeration)
+	{
+		recalculateExaggerationWindows(); //TODO: Would be more efficient to recalculate only those windows effected by the change
 	}
 }

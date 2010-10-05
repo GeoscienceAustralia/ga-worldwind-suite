@@ -24,5 +24,22 @@ public interface ElevationExaggeration
 	 * @return the lower bound for the set of elevations that this exaggeration should be applied to.
 	 */
 	double getElevationBoundary();
+
+	/**
+	 * Add the provided change listener to this exaggeration's list of listeners
+	 */
+	void addChangeListener(ChangeListener listener);
+
+	/**
+	 * Remove the provided change listener from this exaggeration's list of listeners
+	 */
+	void removeChangeListener(ChangeListener listener);
 	
+	/**
+	 * An interface for objects that want to know when an elevation exaggeration has changed
+	 */
+	public interface ChangeListener
+	{
+		void exaggerationChanged(ElevationExaggeration exaggeration);
+	}
 }
