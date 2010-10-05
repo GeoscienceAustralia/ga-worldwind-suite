@@ -1,11 +1,15 @@
 package au.gov.ga.worldwind.animator.terrain;
 
-import static au.gov.ga.worldwind.animator.util.Util.*;
+import static au.gov.ga.worldwind.animator.util.Util.isBlank;
+import gov.nasa.worldwind.globes.ElevationModel;
 
 import java.net.URL;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import au.gov.ga.worldwind.common.util.AVKeyMore;
-import gov.nasa.worldwind.globes.ElevationModel;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
  * A factory class to create instances of {@link ElevationModelIdentifier}s
@@ -39,6 +43,65 @@ public class ElevationModelIdentifierFactory
 		}
 		
 		return new ElevationModelIdentifierImpl(modelName, modelUrl.toExternalForm());
+	}
+	
+	public static ElevationModelIdentifier createFromDefinition(URL definitionLocation)
+	{
+		if (definitionLocation == null || !isModelDefinition(definitionLocation))
+		{
+			return null;
+		}
+		
+		String name = getNameFromDefinition(definitionLocation);
+		if (isBlank(name))
+		{
+			name = getNameFromUrlLocation(definitionLocation);
+		}
+		
+		return new ElevationModelIdentifierImpl(name, definitionLocation.toExternalForm());
+	}
+
+	private static boolean isModelDefinition(URL definitionLocation)
+	{
+		Document definitionDocument = XMLUtil.openDocument(definitionLocation);
+		if (definitionDocument == null)
+		{
+			return false;
+		}
+		
+		Element elevationModelElement = XMLUtil.getElement(definitionDocument.getDocumentElement(), "/ElevationModel", null);
+		if (elevationModelElement == null)
+		{
+			return false;
+		}
+		
+		return true;
+	}
+
+	private static String getNameFromUrlLocation(URL definitionLocation)
+	{
+		String locationName = definitionLocation.toExternalForm();
+		int startIndex = locationName.lastIndexOf("/");
+		int endIndex = locationName.lastIndexOf(".");
+		
+		return locationName.substring(startIndex + 1, endIndex);
+	}
+
+	private static String getNameFromDefinition(URL definitionLocation)
+	{
+		Document definitionDocument = XMLUtil.openDocument(definitionLocation);
+		if (definitionDocument == null)
+		{
+			return null;
+		}
+		
+		Element nameElement = XMLUtil.getElement(definitionDocument.getDocumentElement(), "/ElevationModel/ElevationModel/DisplayName", null);
+		if (nameElement == null)
+		{
+			return null;
+		}
+		
+		return nameElement.getFirstChild().getNodeValue();
 	}
 	
 }

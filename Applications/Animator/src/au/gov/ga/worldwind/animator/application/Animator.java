@@ -30,6 +30,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -92,6 +94,7 @@ import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPane
 import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
 import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPanel;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
+import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierFactory;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationElevationModel;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationTessellator;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
@@ -119,6 +122,8 @@ import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
  */
 public class Animator
 {
+	private static final FileNameExtensionFilter TGA_FILE_FILTER = new FileNameExtensionFilter("TGA Image Sequence", "tga");
+
 	private static final GLCapabilities caps = new GLCapabilities();
 	static
 	{
@@ -251,6 +256,7 @@ public class Animator
 	private BasicAction renderHiResAction;
 	private BasicAction renderLowResAction;
 	private BasicAction resizeToRenderDimensionsAction;
+	private BasicAction addElevationModelAction;
 	
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
@@ -1186,6 +1192,18 @@ public class Animator
 			}
 		});
 		
+		addElevationModelAction = new BasicAction(getMessage(getAddElevationModelLabelKey()), Icons.exaggeration.getIcon());
+		addElevationModelAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_M, ActionEvent.CTRL_MASK));
+		addElevationModelAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_M);
+		addElevationModelAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				promptToAddElevationModel();
+			}
+		});
+		
 		// Debug key frames
 		debugKeyFramesAction = new BasicAction(getMessage(getKeyValuesMenuLabelKey()), null);
 		debugKeyFramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
@@ -1272,6 +1290,8 @@ public class Animator
 		menu.add(renderLowResAction);
 		menu.addSeparator();
 		menu.add(resizeToRenderDimensionsAction);
+		menu.addSeparator();
+		menu.add(addElevationModelAction);
 		
 		// Debug
 		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
@@ -1776,7 +1796,7 @@ public class Animator
 	private File promptForImageSequenceLocation()
 	{
 		// Prompt for a location to save the image sequence to
-		setupFileChooser(getMessage(getSaveRenderDialogTitleKey()), new FileNameExtensionFilter("TGA Image Sequence", "tga"));
+		setupFileChooser(getMessage(getSaveRenderDialogTitleKey()), TGA_FILE_FILTER);
 		if (fileChooser.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION)
 		{
 			return null;
@@ -1903,6 +1923,65 @@ public class Animator
 			});
 			thread.start();
 			return thread;
+		}
+		return null;
+	}
+
+	/**
+	 * Prompt the user to add an elevation model to the animation
+	 */
+	private void promptToAddElevationModel()
+	{
+		File selectedDefinitionFile = promptUserForElevationModelDefinition();
+		if (selectedDefinitionFile == null)
+		{
+			return;
+		}
+		
+		try
+		{
+			addElevationModelFromDefinitionFile(selectedDefinitionFile.toURI().toURL());
+		}
+		catch (MalformedURLException e)
+		{
+			// URL came from a file, should never be malformed
+		}
+	}
+	
+	private void addElevationModelFromDefinitionFile(URL fileUrl)
+	{
+		if (fileUrl == null)
+		{
+			return;
+		}
+		
+		ElevationModelIdentifier modelIdentifier = ElevationModelIdentifierFactory.createFromDefinition(fileUrl);
+		if (modelIdentifier == null)
+		{
+			promptUserInvalidModelIdentifier(fileUrl);
+			promptToAddElevationModel();
+		}
+		
+		animation.addElevationModel(modelIdentifier);
+	}
+
+	private void promptUserInvalidModelIdentifier(URL fileUrl)
+	{
+		JOptionPane.showMessageDialog(frame, 
+									  getMessage(getOpenElevationModelFailedMessageKey(), fileUrl.getFile()),
+									  getMessage(getOpenElevationModelFailedCaptionKey()),
+									  JOptionPane.ERROR_MESSAGE);
+		
+	}
+
+	private File promptUserForElevationModelDefinition()
+	{
+		setupFileChooser(getMessage(getSaveRenderDialogTitleKey()), new FileNameExtensionFilter("Elevation  model definition", "xml"));
+		fileChooser.setMultiSelectionEnabled(false);
+		int userAction = fileChooser.showOpenDialog(frame);
+		if (userAction == JFileChooser.APPROVE_OPTION)
+		{
+			return fileChooser.getSelectedFile();
 		}
 		return null;
 	}

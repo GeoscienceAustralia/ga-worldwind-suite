@@ -67,6 +67,7 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 		Validate.notNull(animation, "An animation is required");
 		
 		this.animation = animation;
+		this.addChangeListener(animation);
 	}
 	
 	/**

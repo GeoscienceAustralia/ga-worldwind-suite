@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.animator.panels.animationbrowser;
 
+import gov.nasa.worldwind.globes.ElevationModel;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -157,7 +159,7 @@ public class AnimationTreeModel implements TreeModel, AnimationEventListener
 		AnimationEvent rootCause = event.getRootCause();
 		Object value = rootCause.getValue();
 		return ((rootCause.isOfType(Type.ADD) || rootCause.isOfType(Type.REMOVE)) &&
-				(value instanceof Parameter || value instanceof Animatable));
+				(value instanceof Parameter || value instanceof Animatable || value instanceof ElevationModel));
 	}
 
 	protected void notifyTreeChanged(Object source)
