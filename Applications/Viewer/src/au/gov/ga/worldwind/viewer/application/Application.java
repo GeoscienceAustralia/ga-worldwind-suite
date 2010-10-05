@@ -197,6 +197,7 @@ public class Application
 		URL themeUrl = null;
 		if (argsLength > 0)
 		{
+			//first try the argument as a url
 			try
 			{
 				themeUrl = new URL(args[0]);
@@ -207,8 +208,21 @@ public class Application
 		}
 		if (themeUrl == null)
 		{
-			File file = new File("theme.xml");
-			if (file.exists())
+			File file = null;
+			if (argsLength > 0)
+			{
+				//next try the argument as a filename
+				file = new File(args[0]);
+			}
+			else
+			{
+				//finally search for theme.xml in the current directory
+				file = new File("theme.xml");
+				if (!file.exists())
+					file = null;
+			}
+
+			if (file != null)
 			{
 				try
 				{
@@ -219,6 +233,7 @@ public class Application
 				}
 			}
 		}
+
 		ThemeOpenDelegate delegate = new ThemeOpenDelegate()
 		{
 			@Override
