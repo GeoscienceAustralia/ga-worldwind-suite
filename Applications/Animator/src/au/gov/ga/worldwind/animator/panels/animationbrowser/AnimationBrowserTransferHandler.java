@@ -36,6 +36,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * 	<li>Animation objects from within the panel (i.e. changing the order of an animation object),
  * 	<li>A layer identifier from the layer palette panel (i.e. adding a new layer from the palette to the current animation); and
  * 	<li>A layer definition file from an external source (i.e. adding a layer from an external file, not via the palette)
+ *  <li>An elevation model definition file from an external source (i.e. adding a model definition from an external file)
  * </ul>
  * 
  * @author James Navin (james.navin@ga.gov.au)

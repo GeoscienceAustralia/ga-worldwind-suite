@@ -10,6 +10,7 @@ import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.elevation.AnimatableElevation;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
@@ -17,8 +18,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
- * @author James Navin (james.navin@ga.gov.au)
- *
+ * A Tree model that is backed by an animation
  */
 public class AnimationTreeModel implements TreeModel, AnimationEventListener
 {
@@ -53,6 +53,10 @@ public class AnimationTreeModel implements TreeModel, AnimationEventListener
 		{
 			return new ArrayList<Animatable>(((Animation)parent).getAnimatableObjects()).get(index);
 		}
+		else if (parent instanceof AnimatableElevation)
+		{
+			return getAnimatableElevationTreeChild(index);
+		}
 		else if (parent instanceof Animatable)
 		{
 			return new ArrayList<Parameter>(((Animatable)parent).getParameters()).get(index);
@@ -68,6 +72,10 @@ public class AnimationTreeModel implements TreeModel, AnimationEventListener
 		{
 			return ((Animation)parent).getAnimatableObjects().size();
 		}
+		else if (parent instanceof AnimatableElevation)
+		{
+			return getAnimatableElevationTreeChildCount();
+		}
 		else if (parent instanceof Animatable)
 		{
 			return ((Animatable)parent).getParameters().size();
@@ -81,6 +89,10 @@ public class AnimationTreeModel implements TreeModel, AnimationEventListener
 		if (node instanceof Animation)
 		{
 			return ((Animation)node).getAnimatableObjects().isEmpty();
+		}
+		else if (node instanceof AnimatableElevation)
+		{
+			return getAnimatableElevationTreeChildCount() == 0;
 		}
 		else if (node instanceof Animatable)
 		{
@@ -102,6 +114,10 @@ public class AnimationTreeModel implements TreeModel, AnimationEventListener
 		if (parent instanceof Animation)
 		{
 			return new ArrayList<Animatable>(((Animation)parent).getAnimatableObjects()).indexOf(child);
+		}
+		else if (parent instanceof AnimatableElevation)
+		{
+			return getAnimatableElevationTreeIndexOfChild(child);
 		}
 		else if (parent instanceof Animatable)
 		{
@@ -152,5 +168,34 @@ public class AnimationTreeModel implements TreeModel, AnimationEventListener
 			listener.treeStructureChanged(e);
 		}
 	}
+	
+	/**
+	 * Animatable elevation is a special case - list elevation models first
+	 */
+	private Object getAnimatableElevationTreeChild(int index)
+	{
+		AnimatableElevation animatableElevation = animation.getAnimatableElevation();
+		int elevationModelCount = animatableElevation.getElevationModelIdentifiers().size();
+		if (index < elevationModelCount)
+		{
+			return animatableElevation.getElevationModelIdentifiers().get(index);
+		}
+		return new ArrayList<Parameter>(animatableElevation.getParameters()).get(index - elevationModelCount);
+	}
 
+	private int getAnimatableElevationTreeChildCount()
+	{
+		return animation.getAnimatableElevation().getParameters().size() + animation.getAnimatableElevation().getElevationModelIdentifiers().size();
+	}
+	
+	private int getAnimatableElevationTreeIndexOfChild(Object child)
+	{
+		AnimatableElevation animatableElevation = animation.getAnimatableElevation();
+		int elevationModelCount = animatableElevation.getElevationModelIdentifiers().size();
+		if (animatableElevation.getElevationModelIdentifiers().contains(child))
+		{
+			return animatableElevation.getElevationModelIdentifiers().indexOf(child);
+		}
+		return new ArrayList<Parameter>(animatableElevation.getParameters()).indexOf(child) + elevationModelCount;
+	}
 }

@@ -241,7 +241,12 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		{
 			return null;
 		}
-		return (AnimationObject)objectTree.getSelectionPath().getLastPathComponent();
+		Object selectedObject = objectTree.getSelectionPath().getLastPathComponent();
+		if (!(selectedObject instanceof AnimationObject))
+		{
+			return null;
+		}
+		return (AnimationObject)selectedObject;
 	}
 	
 	private void initialiseToolbar()

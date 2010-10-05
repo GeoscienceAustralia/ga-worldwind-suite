@@ -29,6 +29,12 @@ public class ElevationModelIdentifierImpl implements ElevationModelIdentifier
 	}
 
 	@Override
+	public void setName(String name)
+	{
+		// Do nothing - required from Nameable
+	}
+	
+	@Override
 	public String getLocation()
 	{
 		return location;

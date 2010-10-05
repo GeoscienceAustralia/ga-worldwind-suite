@@ -21,6 +21,7 @@ import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox;
 import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBoxModel;
 import au.gov.ga.worldwind.animator.util.Enableable;
@@ -148,9 +149,18 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 		{
 			return Icons.parameter.getIcon();
 		}
+		if (isElevationModelRow(rowValue))
+		{
+			return Icons.exaggeration.getIcon();
+		}
 		return null;
 	}
 	
+	private boolean isElevationModelRow(Object rowValue)
+	{
+		return rowValue instanceof ElevationModelIdentifier;
+	}
+
 	private boolean isAnimatableLayerRow(Object rowValue)
 	{
 		return rowValue instanceof AnimatableLayer;
