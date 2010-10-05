@@ -84,7 +84,7 @@ public class MaskImageReaderDelegate implements ImageReaderDelegate
 			return compose(image, mask);
 		}
 
-		if (url.getProtocol().equalsIgnoreCase("zip") || url.getProtocol().equalsIgnoreCase("jar"))
+		if (url.getProtocol().equalsIgnoreCase("jar") || url.getProtocol().equalsIgnoreCase("zip"))
 		{
 			//if the URL is pointing to an entry within a zip file, then create a
 			//new URL for the mask png file inside another zip file (mask.zip)

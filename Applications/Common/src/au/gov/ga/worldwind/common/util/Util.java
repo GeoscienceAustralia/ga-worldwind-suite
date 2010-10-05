@@ -8,6 +8,7 @@ import gov.nasa.worldwind.geom.coords.MGRSCoord;
 import gov.nasa.worldwind.geom.coords.UTMCoordConverterPublic;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.Tile;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +59,117 @@ public class Util
 		return null;
 	}
 
-	public static File getPathWithinContext(String path, URL context)
+	/**
+	 * Create a URL pointing to a tile file on the local file system (or inside
+	 * a zip file). Returns null if no file for the tile was found.
+	 * 
+	 * @param tile
+	 *            Tile to search for a file for
+	 * @param context
+	 *            Tile's layer's context URL
+	 * @param format
+	 *            Tile's layer's default format
+	 * @param defaultExt
+	 *            If the format is not given, search using this file extension
+	 * @return URL pointing to tile's file, or null if not found
+	 */
+	public static URL getLocalTileURL(Tile tile, URL context, String format, String defaultExt)
+	{
+		String service = tile.getLevel().getService();
+		String dataset = tile.getLevel().getDataset();
+
+		if (dataset == null || dataset.length() <= 0)
+			dataset = service;
+		else if (service != null && service.length() > 0)
+			dataset = service + "/" + dataset;
+
+		if (dataset == null)
+			dataset = "";
+
+		boolean isZip = false;
+		File parent = Util.getPathWithinContext(dataset, context);
+		if (parent == null)
+		{
+			//if the directory didn't exist, try a zip file
+			isZip = true;
+			parent = Util.getPathWithinContext(dataset + ".zip", context);
+		}
+
+		if (parent == null)
+			return null;
+
+		//default to JPG
+		String ext = defaultExt;
+		if (format != null)
+		{
+			format = format.toLowerCase();
+			if (format.contains("jpg") || format.contains("jpeg"))
+				ext = "jpg";
+			else if (format.contains("png"))
+				ext = "png";
+			else if (format.contains("zip"))
+				ext = "zip";
+			else if (format.contains("dds"))
+				ext = "dds";
+			else if (format.contains("bmp"))
+				ext = "bmp";
+			else if (format.contains("gif"))
+				ext = "gif";
+			//for elevation models:
+			else if (format.contains("bil"))
+				ext = "bil";
+			else if (format.contains("zip"))
+				ext = "zip";
+		}
+
+		String filename =
+				tile.getLevelNumber() + File.separator + Util.paddedInt(tile.getRow(), 4)
+						+ File.separator + Util.paddedInt(tile.getRow(), 4) + "_"
+						+ Util.paddedInt(tile.getColumn(), 4) + "." + ext;
+
+		try
+		{
+			if (parent.isFile() && isZip)
+			{
+				//zip file; return URL using 'jar' protocol
+				String entry1 = filename;
+				//if file is not found, attempt to find a file with the defaultExt in the zip as well
+				String entry2 =
+						ext.equals(defaultExt) ? null : filename.substring(0, filename.length()
+								- ext.length())
+								+ defaultExt;
+
+				URL url =
+						entry2 != null ? Util.zipEntryUrl(parent, entry1, entry2) : Util
+								.zipEntryUrl(parent, entry1);
+				return url;
+			}
+			else if (parent.isDirectory())
+			{
+				//return standard 'file' protocol URL
+				File file = new File(parent, filename);
+				if (file.exists())
+				{
+					return file.toURI().toURL();
+				}
+			}
+		}
+		catch (MalformedURLException e)
+		{
+			String msg = "Converting tile file to URL failed";
+			Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
+		}
+		return null;
+	}
+
+	/**
+	 * Attempt to find a directory or file, relative to a given context URL
+	 * 
+	 * @param path
+	 * @param context
+	 * @return
+	 */
+	private static File getPathWithinContext(String path, URL context)
 	{
 		//first attempt finding of the directory using a URL
 		try
@@ -108,26 +219,29 @@ public class Util
 
 	/**
 	 * Return a URL which points to an entry within a zip file (or
-	 * <code>null</code> if the entry doesn't exist).
+	 * <code>null</code> if none of the entries exist).
 	 * 
 	 * @param zipFile
-	 * @param entry
-	 *            Filename within the zip file (must be relative with no leading
-	 *            slash)
+	 * @param entries
+	 *            Filenames within the zip file, returning the first entry found
+	 *            (must be relative with no leading slash)
 	 * @return URL pointing to entry within zipFile
 	 * @throws MalformedURLException
 	 */
-	public static URL zipEntryUrl(File zipFile, String entry) throws MalformedURLException
+	private static URL zipEntryUrl(File zipFile, String... entries) throws MalformedURLException
 	{
 		ZipFile zip = null;
-		entry = entry.replaceAll("\\\\", "/");
 		try
 		{
 			zip = new ZipFile(zipFile);
-			if (zip.getEntry(entry) != null)
+			for (String entry : entries)
 			{
-				URL zipFileUrl = zipFile.toURI().toURL();
-				return new URL("jar:" + zipFileUrl.toExternalForm() + "!/" + entry);
+				entry = entry.replaceAll("\\\\", "/");
+				if (zip.getEntry(entry) != null)
+				{
+					URL zipFileUrl = zipFile.toURI().toURL();
+					return new URL("jar:" + zipFileUrl.toExternalForm() + "!/" + entry);
+				}
 			}
 		}
 		catch (MalformedURLException e)

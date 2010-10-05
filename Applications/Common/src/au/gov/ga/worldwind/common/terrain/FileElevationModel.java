@@ -11,7 +11,6 @@ import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileKey;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -65,51 +64,7 @@ public class FileElevationModel extends BoundedBasicElevationModel
 		@Override
 		public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 		{
-			String service = tile.getLevel().getService();
-			String dataset = tile.getLevel().getDataset();
-
-			if (dataset == null || dataset.length() <= 0)
-				dataset = service;
-			else if (service != null && service.length() > 0)
-				dataset = service + "/" + dataset;
-
-			if (dataset == null)
-				dataset = "";
-
-			File parent = Util.getPathWithinContext(dataset, context);
-			if (parent == null)
-				return null;
-
-			//default to BIL
-			String ext = "bil";
-			if (imageFormat != null)
-			{
-				imageFormat = imageFormat.toLowerCase();
-				if (imageFormat.contains("zip"))
-					ext = "zip";
-			}
-
-			String filename =
-					tile.getLevelNumber() + File.separator + Util.paddedInt(tile.getRow(), 4)
-							+ File.separator + Util.paddedInt(tile.getRow(), 4) + "_"
-							+ Util.paddedInt(tile.getColumn(), 4) + "." + ext;
-			
-			if (parent.isFile() && parent.getName().toLowerCase().endsWith(".zip"))
-			{
-				//zip file; return URL using 'jar' protocol
-				return Util.zipEntryUrl(parent, filename);
-			}
-			else if (parent.isDirectory())
-			{
-				//return standard 'file' protocol URL
-				File file = new File(parent, filename);
-				if (file.exists())
-				{
-					return file.toURI().toURL();
-				}
-			}
-
-			return null;
+			return Util.getLocalTileURL(tile, context, imageFormat, "bil");
 		}
 	}
 

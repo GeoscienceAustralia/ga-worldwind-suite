@@ -5,8 +5,6 @@ import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.Tile;
 
-import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import au.gov.ga.worldwind.common.util.Util;
@@ -69,84 +67,7 @@ public class LocalRequesterDelegate implements TileRequesterDelegate
 	 */
 	protected URL getTileURL(Tile tile, DelegatorTiledImageLayer layer)
 	{
-		String service = tile.getLevel().getService();
-		String dataset = tile.getLevel().getDataset();
-
-		if (dataset == null || dataset.length() <= 0)
-			dataset = service;
-		else if (service != null && service.length() > 0)
-			dataset = service + "/" + dataset;
-
-		if (dataset == null)
-			dataset = "";
-
-		boolean isZip = false;
-		File parent = Util.getPathWithinContext(dataset, layer.context);
-		if (parent == null)
-		{
-			//if the directory didn't exist, try a zip file
-			isZip = true;
-			parent = Util.getPathWithinContext(dataset + ".zip", layer.context);
-		}
-
-		if (parent == null)
-			return null;
-
-		//default to JPG
-		String ext = "jpg";
-		String format = layer.getDefaultImageFormat();
-		if (format != null)
-		{
-			format = format.toLowerCase();
-			if (format.contains("jpg") || format.contains("jpeg"))
-				ext = "jpg";
-			else if (format.contains("png"))
-				ext = "png";
-			else if (format.contains("zip"))
-				ext = "zip";
-			else if (format.contains("dds"))
-				ext = "dds";
-			else if (format.contains("bmp"))
-				ext = "bmp";
-			else if (format.contains("gif"))
-				ext = "gif";
-		}
-
-		String filename =
-				tile.getLevelNumber() + File.separator + Util.paddedInt(tile.getRow(), 4)
-						+ File.separator + Util.paddedInt(tile.getRow(), 4) + "_"
-						+ Util.paddedInt(tile.getColumn(), 4) + "." + ext;
-
-		try
-		{
-			if (parent.isFile() && isZip)
-			{
-				//zip file; return URL using 'jar' protocol
-				URL url = Util.zipEntryUrl(parent, filename);
-				if (url == null && !ext.equals("jpg"))
-				{
-					//if file was not found, attempt to find a jpg file in the zip anyway 
-					filename = filename.substring(0, filename.length() - ext.length()) + "jpg";
-					url = Util.zipEntryUrl(parent, filename);
-				}
-				return url;
-			}
-			else if (parent.isDirectory())
-			{
-				//return standard 'file' protocol URL
-				File file = new File(parent, filename);
-				if (file.exists())
-				{
-					return file.toURI().toURL();
-				}
-			}
-		}
-		catch (MalformedURLException e)
-		{
-			String msg = "Converting tile file to URL failed";
-			Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
-		}
-		return null;
+		return Util.getLocalTileURL(tile, layer.context, layer.getDefaultImageFormat(), "jpg");
 	}
 
 	/**
