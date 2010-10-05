@@ -95,8 +95,10 @@ import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
 import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPanel;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierFactory;
+import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationElevationModel;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationTessellator;
+import au.gov.ga.worldwind.animator.ui.ExaggeratorDialog;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
@@ -257,6 +259,7 @@ public class Animator
 	private BasicAction renderLowResAction;
 	private BasicAction resizeToRenderDimensionsAction;
 	private BasicAction addElevationModelAction;
+	private BasicAction addExaggeratorAction;
 	
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
@@ -1192,6 +1195,7 @@ public class Animator
 			}
 		});
 		
+		// Add elevation model
 		addElevationModelAction = new BasicAction(getMessage(getAddElevationModelLabelKey()), Icons.exaggeration.getIcon());
 		addElevationModelAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_M, ActionEvent.CTRL_MASK));
 		addElevationModelAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_M);
@@ -1203,6 +1207,20 @@ public class Animator
 				promptToAddElevationModel();
 			}
 		});
+		
+		// Add exaggerator
+		addExaggeratorAction = new BasicAction(getMessage(getAddExaggeratorLabelKey()), null);
+		addExaggeratorAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
+		addExaggeratorAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
+		addExaggeratorAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				promptToAddElevationExaggerator();
+			}
+		});
+		
 		
 		// Debug key frames
 		debugKeyFramesAction = new BasicAction(getMessage(getKeyValuesMenuLabelKey()), null);
@@ -1292,6 +1310,7 @@ public class Animator
 		menu.add(resizeToRenderDimensionsAction);
 		menu.addSeparator();
 		menu.add(addElevationModelAction);
+		menu.add(addExaggeratorAction);
 		
 		// Debug
 		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
@@ -1941,6 +1960,7 @@ public class Animator
 		try
 		{
 			addElevationModelFromDefinitionFile(selectedDefinitionFile.toURI().toURL());
+			Settings.get().setLastUsedLocation(selectedDefinitionFile);
 		}
 		catch (MalformedURLException e)
 		{
@@ -1986,6 +2006,20 @@ public class Animator
 		return null;
 	}
 
+	/**
+	 * Prompt the user to add a new elevation exaggerator to the animation
+	 */
+	private void promptToAddElevationExaggerator()
+	{
+		ElevationExaggeration exaggerator = ExaggeratorDialog.collectExaggeration(frame);
+		if (exaggerator == null)
+		{
+			return;
+		}
+		
+		animation.getAnimatableElevation().addElevationExaggerator(exaggerator);
+	}
+	
 	private class Updater
 	{
 		private Map<Integer, ViewParameters> toApply = new HashMap<Integer, ViewParameters>();

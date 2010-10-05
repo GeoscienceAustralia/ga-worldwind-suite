@@ -96,4 +96,8 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getAddElevationModelLabelKey() { return "animator.gui.menu.addelevationmodel.label"; }
 	public static String getOpenElevationModelFailedCaptionKey() { return "animator.message.openelevationmodelfailed.caption";}
 	public static String getOpenElevationModelFailedMessageKey() { return "animator.message.openelevationmodelfailed.message";}
+	public static String getAddExaggeratorLabelKey() { return "animator.gui.menu.addexaggerator.label"; }
+	public static String getAddExaggeratorDialogTitleKey() { return "animator.gui.dialog.newexaggerator.title"; }
+	public static String getExaggeratorDialogExaggerationLabelKey() { return "animator.gui.dialog.newexaggerator.exaggeration.label"; }
+	public static String getExaggeratorDialogBoundaryLabelKey() { return "animator.gui.dialog.newexaggerator.boundary.label"; }
 }
