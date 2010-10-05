@@ -95,9 +95,9 @@ import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
 import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPanel;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierFactory;
+import au.gov.ga.worldwind.animator.terrain.ImmediateRectangularTesselator;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationElevationModel;
-import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationTessellator;
 import au.gov.ga.worldwind.animator.ui.ExaggeratorDialog;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
@@ -112,7 +112,6 @@ import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.common.util.MetersStatusBar;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
@@ -784,7 +783,7 @@ public class Animator
 		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME, ImmediateTaskService.class.getName());
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ImmediateRetrievalService.class.getName());
 
-		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, VerticalExaggerationTessellator.class.getName());
+		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, ImmediateRectangularTesselator.class.getName());
 
 		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE, 16777216L * 8); // 128 mb
 		

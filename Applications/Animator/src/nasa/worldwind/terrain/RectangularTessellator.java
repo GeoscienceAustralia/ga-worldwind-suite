@@ -96,7 +96,7 @@ public class RectangularTessellator extends WWObjectImpl implements Tessellator
             this.time = System.currentTimeMillis();
         }
 
-        private long getSizeInBytes()
+        public long getSizeInBytes()
         {
             // Texture coordinates are shared among all tiles of the same density, so do not count towards size.
             // 8 references, doubles in buffer.
@@ -212,7 +212,7 @@ public class RectangularTessellator extends WWObjectImpl implements Tessellator
         }
     }
 
-    private static class CacheKey
+    protected static class CacheKey
     {
         private final Sector sector;
         private final int density;
@@ -260,7 +260,7 @@ public class RectangularTessellator extends WWObjectImpl implements Tessellator
     private static final int DEFAULT_NUM_LON_SUBDIVISIONS = 10;
     private static final int DEFAULT_DENSITY = 20;
     private static final String CACHE_NAME = "Terrain";
-    private static final String CACHE_ID = RectangularTessellator.class.getName();
+    protected static final String CACHE_ID = RectangularTessellator.class.getName();
 
     // Tri-strip indices and texture coordinates. These depend only on density and can therefore be statically cached.
     private static final HashMap<Integer, DoubleBuffer> parameterizations = new HashMap<Integer, DoubleBuffer>();
@@ -491,12 +491,12 @@ public class RectangularTessellator extends WWObjectImpl implements Tessellator
         return subTiles;
     }
 
-    private RectangularTessellator.CacheKey createCacheKey(DrawContext dc, RectTile tile)
+    protected RectangularTessellator.CacheKey createCacheKey(DrawContext dc, RectTile tile)
     {
         return new CacheKey(dc, tile.sector, tile.density);
     }
 
-    private void makeVerts(DrawContext dc, RectTile tile)
+    protected void makeVerts(DrawContext dc, RectTile tile)
     {
         // First see if the vertices have been previously computed and are in the cache. Since the elevation model
         // can change between frames, regenerate and re-cache vertices every second.
