@@ -101,6 +101,7 @@ import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationTes
 import au.gov.ga.worldwind.animator.ui.ExaggeratorDialog;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
+import au.gov.ga.worldwind.animator.util.ExaggerationAwareStatusBar;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
@@ -622,7 +623,7 @@ public class Animator
 	 */
 	private void initialiseStatusBar()
 	{
-		MetersStatusBar statusBar = new MetersStatusBar();
+		ExaggerationAwareStatusBar statusBar = new ExaggerationAwareStatusBar();
 		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
 		statusBar.setEventSource(wwd);
 		

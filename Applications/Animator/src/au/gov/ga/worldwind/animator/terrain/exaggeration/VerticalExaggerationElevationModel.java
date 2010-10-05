@@ -176,6 +176,11 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel i
 		return exaggerateElevation(super.getUnmappedElevation(latitude, longitude));
 	}
 	
+	public double getUnexaggeratedElevation(Angle latitude, Angle longitude)
+	{
+		return super.getUnmappedElevation(latitude, longitude);
+	}
+	
 	/**
 	 * Recalculate all of the exaggeration windows from the current set of elevation exaggerators
 	 */
