@@ -8,14 +8,14 @@ import gov.nasa.worldwind.globes.Globe;
  * 
  * @author Michael de Hoog
  */
-public class UTMCoordConverterPublic extends UTMCoordConverter
+public class UTMCoordConverterAccessible extends UTMCoordConverter
 {
-	public UTMCoordConverterPublic(Globe globe)
+	public UTMCoordConverterAccessible(Globe globe)
 	{
 		super(globe);
 	}
 
-	public UTMCoordConverterPublic(double a, double f)
+	public UTMCoordConverterAccessible(double a, double f)
 	{
 		super(a, f);
 	}

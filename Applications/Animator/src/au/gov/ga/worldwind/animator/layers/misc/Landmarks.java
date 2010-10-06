@@ -1,10 +1,10 @@
 package au.gov.ga.worldwind.animator.layers.misc;
 
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.RenderableLayer;
-import gov.nasa.worldwind.render.Annotation;
 import gov.nasa.worldwind.render.AnnotationAttributes;
 import gov.nasa.worldwind.render.FrameFactory;
 import gov.nasa.worldwind.render.GlobeAnnotation;
@@ -94,7 +94,7 @@ public class Landmarks extends RenderableLayer
 
 			aa.setBorderWidth(0);
 			aa.setImageSource(image);
-			aa.setAdjustWidthToText(Annotation.SIZE_FIXED);
+			aa.setAdjustWidthToText(AVKey.SIZE_FIXED);
 			aa.setSize(new Dimension(image.getWidth(), image.getHeight()));
 			aa.setBackgroundColor(new Color(0, 0, 0, 0));
 			aa.setCornerRadius(0);

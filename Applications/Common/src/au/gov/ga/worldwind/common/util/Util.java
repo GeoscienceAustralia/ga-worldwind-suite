@@ -5,7 +5,7 @@ import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.coords.MGRSCoord;
-import gov.nasa.worldwind.geom.coords.UTMCoordConverterPublic;
+import gov.nasa.worldwind.geom.coords.UTMCoordConverterAccessible;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.Tile;
@@ -527,10 +527,10 @@ public class Util
 
 			try
 			{
-				final UTMCoordConverterPublic converter = new UTMCoordConverterPublic(globe);
+				final UTMCoordConverterAccessible converter = new UTMCoordConverterAccessible(globe);
 				long err = converter.convertUTMToGeodetic(zone, hemisphere, easting, northing);
 
-				if (err == UTMCoordConverterPublic.UTM_NO_ERROR)
+				if (err == UTMCoordConverterAccessible.UTM_NO_ERROR)
 				{
 					LatLon latlon =
 							new LatLon(Angle.fromRadians(converter.getLatitude()),

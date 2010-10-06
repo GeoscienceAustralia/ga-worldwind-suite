@@ -1,13 +1,16 @@
 package au.gov.ga.worldwind.viewer.terrain;
 
 import gov.nasa.worldwind.render.DrawContext;
-import nasa.worldwind.terrain.RectangularTessellator;
+import gov.nasa.worldwind.terrain.RectangularTessellatorAccessible;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
+
 import javax.media.opengl.GL;
 
-public class WireframeRectangularTessellator extends RectangularTessellator
+public class WireframeRectangularTessellator extends RectangularTessellatorAccessible
 {
 	private boolean wireframeDepthTesting = true;
 
@@ -32,14 +35,16 @@ public class WireframeRectangularTessellator extends RectangularTessellator
 			throw new IllegalArgumentException(msg);
 		}
 
-		if (tile.ri == null)
+		RenderInfo ri = getRenderInfo(tile);
+
+		if (ri == null)
 		{
 			String msg = Logging.getMessage("nullValue.RenderInfoIsNull");
 			Logging.logger().severe(msg);
 			throw new IllegalStateException(msg);
 		}
 
-		dc.getView().pushReferenceCenter(dc, tile.ri.referenceCenter);
+		dc.getView().pushReferenceCenter(dc, getReferenceCenter(ri));
 
 		javax.media.opengl.GL gl = dc.getGL();
 		gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | GL.GL_POLYGON_BIT | GL.GL_TEXTURE_BIT
@@ -73,9 +78,11 @@ public class WireframeRectangularTessellator extends RectangularTessellator
 
 				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
 
-				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, tile.ri.vertices.rewind());
-				gl.glDrawElements(javax.media.opengl.GL.GL_TRIANGLE_STRIP, tile.ri.indices.limit(),
-						javax.media.opengl.GL.GL_UNSIGNED_INT, tile.ri.indices.rewind());
+				DoubleBuffer vertices = getVertices(ri);
+				IntBuffer indices = getIndices(ri);
+				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vertices.rewind());
+				gl.glDrawElements(javax.media.opengl.GL.GL_TRIANGLE_STRIP, indices.limit(),
+						javax.media.opengl.GL.GL_UNSIGNED_INT, indices.rewind());
 			}
 			finally
 			{
