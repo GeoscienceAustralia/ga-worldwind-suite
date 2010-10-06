@@ -27,7 +27,7 @@ import java.util.logging.Level;
  * Performs threaded retrieval of data.
  *
  * @author Tom Gaskins
- * @version $Id: BasicRetrievalService.java 6362 2008-09-03 17:45:47Z tgaskins $
+ * @version $Id: BasicRetrievalService.java 11710 2009-06-17 22:48:37Z tgaskins $
  */
 public class BasicRetrievalService extends WWObjectImpl
     implements RetrievalService, Thread.UncaughtExceptionHandler
@@ -63,8 +63,7 @@ public class BasicRetrievalService extends WWObjectImpl
             this.priority = priority;
         }
 
-        @SuppressWarnings("unused")
-		public double getPriority()
+        public double getPriority()
         {
             return priority;
         }
