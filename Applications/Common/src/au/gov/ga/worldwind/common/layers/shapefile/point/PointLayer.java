@@ -116,6 +116,11 @@ public abstract class PointLayer extends AbstractLayer implements Bounded
 				defaultStyle = style;
 			styleMap.put(style.getName(), style);
 		}
+		
+		if(defaultStyle == null)
+		{
+			defaultStyle = new Style(null, true);
+		}
 	}
 
 	public Attribute[] getAttributes()
