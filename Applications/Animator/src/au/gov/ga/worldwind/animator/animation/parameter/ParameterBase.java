@@ -40,6 +40,9 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	/** Whether this parameter is currently enabled */
 	private boolean enabled = true;
 
+	/** Whether this parameter is currently armed */
+	private boolean armed = true;
+	
 	/** 
 	 * The default value to use in the case that no {@link KeyFrame}s can be found
 	 * with a value for this {@link Parameter}
@@ -83,6 +86,24 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 		if (changed)
 		{
 			fireChangeEvent(enabled);
+		}
+	}
+	
+	@Override
+	public boolean isArmed()
+	{
+		return armed;
+	}
+	
+	@Override
+	public void setArmed(boolean armed)
+	{
+		boolean changed = this.armed != armed;
+		this.armed = armed;
+		
+		if (changed)
+		{
+			fireChangeEvent(armed);
 		}
 	}
 	

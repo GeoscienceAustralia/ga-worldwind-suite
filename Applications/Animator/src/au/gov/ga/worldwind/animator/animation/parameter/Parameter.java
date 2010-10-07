@@ -46,6 +46,20 @@ public interface Parameter extends AnimationObject, Serializable, Nameable, XmlS
 	void setEnabled(boolean enabled);
 	
 	/**
+	 * Returns whether this parameter is 'armed' (i.e. whether it should be included in the creation of key frames or not).
+	 * <p/>
+	 * Different from 'enabled' in that a 'disarmed' parameter is still included in the animation, just not in the creation of key frames.
+	 */
+	boolean isArmed();
+	
+	/**
+	 * Set whether or not this parameter is 'armed'.
+	 * 
+	 * @see #isArmed()
+	 */
+	void setArmed(boolean armed);
+	
+	/**
 	 * Get the current value of this {@link Parameter} in the current {@link AnimationContext}.
 	 * 
 	 * @param context The context of the current animation

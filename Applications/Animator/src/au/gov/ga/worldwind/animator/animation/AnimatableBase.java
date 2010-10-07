@@ -88,6 +88,21 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	}
 	
 	@Override
+	public Collection<Parameter> getArmedParameters()
+	{
+		Collection<Parameter> result = new ArrayList<Parameter>();
+		for (Iterator<Parameter> parameterIterator = getParameters().iterator(); parameterIterator.hasNext();)
+		{
+			Parameter parameter = (Parameter) parameterIterator.next();
+			if (parameter.isEnabled() && parameter.isArmed())
+			{
+				result.add(parameter);
+			}
+		}
+		return result;
+	}
+	
+	@Override
 	protected AnimationEvent createEvent(Type type, AnimationEvent cause, Object value)
 	{
 		return new AnimatableObjectEventImpl(this, type, cause, value);

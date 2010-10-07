@@ -38,4 +38,8 @@ public interface Animatable extends AnimationObject, Serializable, Nameable, Xml
 	 */
 	Collection<Parameter> getEnabledParameters();
 	
+	/**
+	 * @return The collection of all parameters associated with this animatable that are both <em>enabled</em> and <em>armed</em>
+	 */
+	Collection<Parameter> getArmedParameters();
 }

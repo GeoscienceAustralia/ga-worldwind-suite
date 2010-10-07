@@ -142,6 +142,11 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	Collection<Parameter> getEnabledParameters();
 	
 	/**
+	 * @return A collection of all parameters associated with this animation that are currently armed
+	 */
+	Collection<Parameter> getArmedParameters();
+	
+	/**
 	 * @return The camera used in this animation
 	 */
 	Camera getCamera();
