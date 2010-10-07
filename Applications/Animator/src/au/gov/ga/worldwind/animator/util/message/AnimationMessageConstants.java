@@ -100,4 +100,8 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getAddExaggeratorDialogTitleKey() { return "animator.gui.dialog.newexaggerator.title"; }
 	public static String getExaggeratorDialogExaggerationLabelKey() { return "animator.gui.dialog.newexaggerator.exaggeration.label"; }
 	public static String getExaggeratorDialogBoundaryLabelKey() { return "animator.gui.dialog.newexaggerator.boundary.label"; }
+	public static String getAnimationBrowserEnableAllLabelKey() { return "animator.gui.menu.enableall.label"; }
+	public static String getAnimationBrowserDisableAllLabelKey() { return "animator.gui.menu.disableall.label"; }
+	public static String getAnimationBrowserArmAllLabelKey() { return "animator.gui.menu.armall.label"; }
+	public static String getAnimationBrowserDisarmAllLabelKey() { return "animator.gui.menu.disarmall.label"; }
 }

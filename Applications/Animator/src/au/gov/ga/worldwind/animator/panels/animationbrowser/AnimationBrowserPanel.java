@@ -65,6 +65,10 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 	private BasicAction removeAnimationObjectAction;
 	private BasicAction moveObjectUpAction;
 	private BasicAction moveObjectDownAction;
+	private BasicAction enableAllAction;
+	private BasicAction disableAllAction;
+	private BasicAction armAllAction;
+	private BasicAction disarmAllAction;
 	
 	/**
 	 * Constructor. Initialises the tree from the provided (mandatory) {@link Animation} instance.
@@ -150,6 +154,47 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 			}
 		});
 		
+		enableAllAction = new BasicAction(getMessage(getAnimationBrowserEnableAllLabelKey()), Icons.checkall.getIcon());
+		enableAllAction.setEnabled(true);
+		enableAllAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				setAllEnabled(true);
+			}
+		});
+		
+		disableAllAction = new BasicAction(getMessage(getAnimationBrowserDisableAllLabelKey()), Icons.uncheckall.getIcon());
+		disableAllAction.setEnabled(true);
+		disableAllAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				setAllEnabled(false);
+			}
+		});
+		
+		armAllAction = new BasicAction(getMessage(getAnimationBrowserArmAllLabelKey()), Icons.armed.getIcon());
+		armAllAction.setEnabled(true);
+		armAllAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				setAllArmed(true);
+			}
+		});
+		
+		disarmAllAction = new BasicAction(getMessage(getAnimationBrowserDisarmAllLabelKey()), Icons.disarmed.getIcon());
+		disarmAllAction.setEnabled(true);
+		disarmAllAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				setAllArmed(false);
+			}
+		});
+		
+		
 	}
 
 	private void promptToRemoveSelectedObject()
@@ -209,6 +254,24 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 			objectTree.setSelectionPath(new TreePath(new Object[]{animation, selectedObject}));
 		}
 	}
+	
+	private void setAllEnabled(boolean enabled)
+	{
+		for (Animatable animatable : animation.getAnimatableObjects())
+		{
+			animatable.setEnabled(enabled);
+		}
+		objectTree.repaint();
+	}
+	
+	private void setAllArmed(boolean armed)
+	{
+		for (Animatable animatable : animation.getAnimatableObjects())
+		{
+			animatable.setArmed(armed);
+		}
+		objectTree.repaint();
+	}
 
 	private boolean isLastObject(AnimationObject selectedObject)
 	{
@@ -257,6 +320,12 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		toolbar.addSeparator();
 		toolbar.add(moveObjectUpAction);
 		toolbar.add(moveObjectDownAction);
+		toolbar.addSeparator();
+		toolbar.add(enableAllAction);
+		toolbar.add(disableAllAction);
+		toolbar.addSeparator();
+		toolbar.add(armAllAction);
+		toolbar.add(disarmAllAction);
 	}
 	
 	/**
