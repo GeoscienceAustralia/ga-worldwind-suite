@@ -96,7 +96,7 @@ import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPane
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierFactory;
-import au.gov.ga.worldwind.animator.terrain.ImmediateRectangularTesselator;
+import au.gov.ga.worldwind.animator.terrain.ImmediateRectangularTessellator;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationElevationModel;
 import au.gov.ga.worldwind.animator.ui.ExaggeratorDialog;
@@ -783,7 +783,7 @@ public class Animator
 		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME, ImmediateTaskService.class.getName());
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ImmediateRetrievalService.class.getName());
 
-		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, ImmediateRectangularTesselator.class.getName());
+		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, ImmediateRectangularTessellator.class.getName());
 
 		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE, 16777216L * 8); // 128 mb
 		
