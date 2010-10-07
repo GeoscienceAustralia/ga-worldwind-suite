@@ -74,6 +74,16 @@ public class TriStateCheckBox extends JLabel
 		setIcon(checkedIcon);
 	}
 
+	
+	
+	public TriStateCheckBox(Icon checkedIcon, Icon uncheckedIcon, Icon partialCheckedIcon)
+	{
+		this();
+		this.checkedIcon = checkedIcon;
+		this.uncheckedIcon = uncheckedIcon;
+		this.partialCheckedIcon = partialCheckedIcon;
+	}
+
 	@Override
 	public Icon getIcon()
 	{

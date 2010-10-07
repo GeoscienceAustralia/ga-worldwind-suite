@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.animator.panels.animationbrowser;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -10,6 +11,8 @@ import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JTree;
@@ -24,6 +27,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox;
 import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBoxModel;
+import au.gov.ga.worldwind.animator.util.Armable;
 import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.common.util.HSLColor;
@@ -38,9 +42,13 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 	
 	private JTree tree;
 	private DefaultTreeCellRenderer label;
+	
+	private JPanel buttonPanel;
 	private TriStateCheckBox enabledTriCheck;
+	private TriStateCheckBox armedTriCheck;
 	
 	private Map<Integer, TriStateModelLocation> enabledTriCheckMap = new HashMap<Integer, TriStateModelLocation>();
+	private Map<Integer, TriStateModelLocation> armedTriCheckMap = new HashMap<Integer, TriStateModelLocation>();
 
 	private TreeCellInteractionListener interactionListener;
 	
@@ -48,10 +56,14 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 	{
 		setOpaque(false);
 		setLayout(new BorderLayout(3,3));
+		setBorder(BorderFactory.createEmptyBorder());
 		
 		initialiseLabel();
 		
+		buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
 		enabledTriCheck = new TriStateCheckBox();
+
+		armedTriCheck = new TriStateCheckBox(Icons.armed.getIcon(), Icons.disarmed.getIcon(), Icons.partialArmed.getIcon());
 		
 		interactionListener = new TreeCellInteractionListener();
 	}
@@ -72,16 +84,63 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 	{
 		updateTree(tree);
 		
-		updateEnabledTriCheck(value);
+		updateButtonPanel(value);
 		updateLabel(tree, value, sel, expanded, leaf, row, hasFocus);
 		
 		validate();
 		
 		updateEnabledTriCheckMap(value, row);
+		updateArmedTriCheckMap(value, row);
 		
 		return this;
 	}
 
+	/**
+	 * @param value
+	 */
+	private void updateButtonPanel(Object value)
+	{
+		buttonPanel.setOpaque(false);
+		
+		updateEnabledTriCheck(value);
+		updateArmedTriCheck(value);
+		
+		add(buttonPanel, BorderLayout.WEST);
+	}
+
+	/**
+	 * Updates the state of the enabled tristate checkbox for the given value and packs it into the parent container.
+	 */
+	private void updateEnabledTriCheck(Object value)
+	{
+		if (!(value instanceof Enableable))
+		{
+			buttonPanel.remove(enabledTriCheck);
+			return;
+		}
+		
+		EnableableTriStateModel model = new EnableableTriStateModel((Enableable)value);
+		enabledTriCheck.setModel(model);
+		buttonPanel.add(enabledTriCheck);
+	}
+	
+	/**
+	 * Updates the state of the armed tristate checkbox for the given value and packs it into the parent container.
+	 */
+	private void updateArmedTriCheck(Object value)
+	{
+		if (!(value instanceof Armable))
+		{
+			buttonPanel.remove(armedTriCheck);
+			return;
+		}
+		
+		ArmableTriStateModel model = new ArmableTriStateModel((Armable)value);
+		armedTriCheck.setModel(model);
+		buttonPanel.add(armedTriCheck);
+	}
+	
+	
 	private void updateEnabledTriCheckMap(Object value, int row)
 	{
 		if (!(value instanceof Enableable))
@@ -95,20 +154,17 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 		enabledTriCheckMap.put(row, new TriStateModelLocation(triCheckBounds, enabledTriCheck.getModel()));
 	}
 
-	/**
-	 * Updates the state of the enabled tristate checkbox for the given value and packs it into the parent container.
-	 */
-	private void updateEnabledTriCheck(Object value)
+	private void updateArmedTriCheckMap(Object value, int row)
 	{
-		if (!(value instanceof Enableable))
+		if (!(value instanceof Armable))
 		{
-			remove(enabledTriCheck);
-			return;
+			armedTriCheckMap.remove(row);
 		}
 		
-		EnableableTriStateModel model = new EnableableTriStateModel((Enableable)value);
-		enabledTriCheck.setModel(model);
-		add(enabledTriCheck, BorderLayout.WEST);
+		Rectangle triCheckBounds = new Rectangle(armedTriCheck.getPreferredSize());
+		triCheckBounds.x += armedTriCheck.getLocation().x;
+		
+		armedTriCheckMap.put(row, new TriStateModelLocation(triCheckBounds, armedTriCheck.getModel()));
 	}
 
 	private void updateLabel(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus)
@@ -223,22 +279,44 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 			}
 			
 			int mouseRow = tree.getRowForLocation(e.getX(), e.getY());
-			if (!enabledTriCheckMap.containsKey(mouseRow))
+			if (isEnabledTriCheckClick(mouseRow, e.getPoint()))
 			{
-				return;
+				enabledTriCheckMap.get(mouseRow).getModel().iterateState();
 			}
-			
-			Point relativeMouseCoords = calculateRelativeMouseCoords(e.getPoint(), mouseRow);
-			
-			TriStateModelLocation modelLocation = enabledTriCheckMap.get(mouseRow);
-			if (modelLocation.containsPoint(relativeMouseCoords))
+			else if (isArmedTriCheckClick(mouseRow, e.getPoint()))
 			{
-				modelLocation.getModel().iterateState();
+				armedTriCheckMap.get(mouseRow).getModel().iterateState();
 			}
 			
 			tree.repaint();
 		}
 
+		private boolean isEnabledTriCheckClick(int mouseRow, Point clickPoint)
+		{
+			if (!enabledTriCheckMap.containsKey(mouseRow))
+			{
+				return false;
+			}
+			
+			Point relativeMouseCoords = calculateRelativeMouseCoords(clickPoint, mouseRow);
+			
+			TriStateModelLocation modelLocation = enabledTriCheckMap.get(mouseRow);
+			return modelLocation.containsPoint(relativeMouseCoords);
+		}
+		
+		private boolean isArmedTriCheckClick(int mouseRow, Point clickPoint)
+		{
+			if (!armedTriCheckMap.containsKey(mouseRow))
+			{
+				return false;
+			}
+			
+			Point relativeMouseCoords = calculateRelativeMouseCoords(clickPoint, mouseRow);
+			
+			TriStateModelLocation modelLocation = armedTriCheckMap.get(mouseRow);
+			return modelLocation.containsPoint(relativeMouseCoords);
+		}
+		
 		/**
 		 * Adjust the provided mouse coordinates to coordinates relative to the current row in the tree
 		 */
