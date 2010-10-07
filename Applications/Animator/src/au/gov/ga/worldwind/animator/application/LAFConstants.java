@@ -14,7 +14,7 @@ public class LAFConstants
 	private static final Color KEY_COLOR = new Color(255, 0, 0, 128);
 	public static Color getKeyColor() { return KEY_COLOR; }
 	
-	private static final Color HIGHLIGHTED_KEY_COLOR = new Color(64, 0, 255, 128);
+	private static final Color HIGHLIGHTED_KEY_COLOR = new Color(0, 255, 255, 128);
 	public static Color getHighlightedKeyColor() { return HIGHLIGHTED_KEY_COLOR; }
 	
 	private static final Color KEY_SELECTOR_COLOR = new Color(0, 0, 255, 128);
