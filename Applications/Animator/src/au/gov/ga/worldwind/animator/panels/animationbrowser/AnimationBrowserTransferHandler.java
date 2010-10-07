@@ -97,13 +97,11 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 			{
 				object = moveAnimationObject(support);
 			}
-			
-			if (support.isDataFlavorSupported(getLayerIdentifierFlavor()))
+			else if (support.isDataFlavorSupported(getLayerIdentifierFlavor()))
 			{
 				object = addLayerFromIdentifier(support);
 			}
-			
-			if (support.isDataFlavorSupported(getFileListFlavor()))
+			else if (support.isDataFlavorSupported(getFileListFlavor()))
 			{
 				object = addLayerFromDefinitionFile(support);
 			}
