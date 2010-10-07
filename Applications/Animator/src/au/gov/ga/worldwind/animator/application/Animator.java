@@ -13,7 +13,6 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.BorderLayout;
@@ -38,7 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -102,7 +100,6 @@ import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
  * The primary application class for the Animator application.
@@ -226,9 +223,6 @@ public class Animator
 	 */
 	public Animator()
 	{
-		Logging.logger().setLevel(Level.FINER);
-		initialiseMessageSource();
-		
 		initialiseApplicationWindow();
 		initialiseWorldWindow();
 		
@@ -723,15 +717,6 @@ public class Animator
 		
 		// Set the last used location
 		fileChooser.setCurrentDirectory(Settings.get().getLastUsedLocation());
-	}
-
-	/**
-	 * Initialise the message source used in the application
-	 */
-	private void initialiseMessageSource()
-	{
-		// Initialise the message source
-		MessageSourceAccessor.addBundle("au.gov.ga.worldwind.animator.data.messages.animatorMessages");
 	}
 
 	/**
