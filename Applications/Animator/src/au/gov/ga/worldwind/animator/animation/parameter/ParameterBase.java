@@ -113,11 +113,14 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	@Override
 	public final void applyValue(double value)
 	{
-		if (enabled)
+		if (isEnabled())
 		{
 			doApplyValue(value);
 		}
-		
+		else
+		{
+			doApplyValue(getDefaultValue());
+		}
 	}
 	
 	/**
