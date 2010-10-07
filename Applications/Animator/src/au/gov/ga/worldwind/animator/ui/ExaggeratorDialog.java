@@ -31,7 +31,8 @@ import au.gov.ga.worldwind.common.ui.JDoubleField;
  */
 public class ExaggeratorDialog extends JDialog
 {
-	
+	private static final long serialVersionUID = 20101007L;
+
 	/**
 	 * Prompt the user for the information needed to create a new exaggerator.
 	 * <p/>
