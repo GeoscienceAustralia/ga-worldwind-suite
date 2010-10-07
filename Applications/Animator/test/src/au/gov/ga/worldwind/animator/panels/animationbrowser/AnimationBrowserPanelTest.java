@@ -311,7 +311,9 @@ public class AnimationBrowserPanelTest
 			atLeast(1).of(result).getName();will(returnValue(name));
 			atLeast(1).of(result).getParameters();will(returnValue(parameters));
 			atLeast(1).of(result).isEnabled();will(returnValue(true));
+			atLeast(1).of(result).isArmed();will(returnValue(true));
 			atLeast(1).of(result).isAllChildrenEnabled();will(returnValue(true));
+			atLeast(1).of(result).isAllChildrenArmed();will(returnValue(true));
 		}});
 		return result;
 	}
