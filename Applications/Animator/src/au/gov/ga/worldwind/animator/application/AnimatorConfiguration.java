@@ -20,13 +20,13 @@ import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
- * Class that holds the configuration details for the Animator application
+ * Class that holds and initialises the configuration details for the Animator application
  */
 public class AnimatorConfiguration
 {
 	private static final GLCapabilities caps = new GLCapabilities();
 	
-	static
+	public static final void initialiseConfiguration()
 	{
 		initialiseLogging();
 		initialiseGLCapabilities();
@@ -43,11 +43,47 @@ public class AnimatorConfiguration
 		Logging.logger().setLevel(Level.FINER);
 	}
 	
-	private static void initialiseSandpitMode()
+	private static void initialiseGLCapabilities()
 	{
-		GASandpit.setSandpitMode(true);
+		caps.setAlphaBits(8);
+		caps.setRedBits(8);
+		caps.setGreenBits(8);
+		caps.setBlueBits(8);
+		caps.setDepthBits(24);
+		caps.setDoubleBuffered(true);
+		caps.setNumSamples(4);
 	}
-
+	
+	private static void initialisePlatformDependentConfiguration()
+	{
+		if (Configuration.isMacOS())
+		{
+			System.setProperty("apple.laf.useScreenMenuBar", "true");
+			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "World Wind Application");
+			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
+			System.setProperty("apple.awt.brushMetalLook", "true");
+		}
+	}
+	
+	private static void initialiseLAF()
+	{
+		try
+		{
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (Exception e)
+		{
+			ExceptionLogger.logException(e);
+		}
+	}
+	
+	private static void initialiseProxySettings()
+	{
+		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
+		System.setProperty("http.proxyPort", "8080");
+		System.setProperty("http.nonProxyHosts", "localhost");
+	}
+	
 	private static void initialiseWorldWindConfiguration()
 	{
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
@@ -60,46 +96,10 @@ public class AnimatorConfiguration
 		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
 		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
 	}
-
-	private static void initialiseProxySettings()
+	
+	private static void initialiseSandpitMode()
 	{
-		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
-		System.setProperty("http.proxyPort", "8080");
-		System.setProperty("http.nonProxyHosts", "localhost");
-	}
-
-	private static void initialiseLAF()
-	{
-		try
-		{
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (Exception e)
-		{
-			ExceptionLogger.logException(e);
-		}
-	}
-
-	private static void initialisePlatformDependentConfiguration()
-	{
-		if (Configuration.isMacOS())
-		{
-			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "World Wind Application");
-			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
-			System.setProperty("apple.awt.brushMetalLook", "true");
-		}
-	}
-
-	private static void initialiseGLCapabilities()
-	{
-		caps.setAlphaBits(8);
-		caps.setRedBits(8);
-		caps.setGreenBits(8);
-		caps.setBlueBits(8);
-		caps.setDepthBits(24);
-		caps.setDoubleBuffered(true);
-		caps.setNumSamples(4);
+		GASandpit.setSandpitMode(true);
 	}
 	
 	private static void initialiseMessageSource()
