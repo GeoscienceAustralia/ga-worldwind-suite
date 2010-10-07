@@ -147,6 +147,11 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	Collection<Parameter> getArmedParameters();
 	
 	/**
+	 * @return A collection of all parameters associated with this animation that are currently both enabled and armed
+	 */
+	Collection<Parameter> getEnabledArmedParameters();
+	
+	/**
 	 * @return The camera used in this animation
 	 */
 	Camera getCamera();
@@ -375,5 +380,5 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	 * @return Whether or not this animation contains the elevation model identified by the provided model identifier
 	 */
 	boolean hasElevationModel(ElevationModelIdentifier modelIdentifier);
-	
+
 }

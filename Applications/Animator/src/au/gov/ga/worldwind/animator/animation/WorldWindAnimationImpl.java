@@ -222,6 +222,17 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		return result;
 	}
+	
+	@Override
+	public Collection<Parameter> getEnabledArmedParameters()
+	{
+		List<Parameter> result = new ArrayList<Parameter>();
+		for (Animatable a : this.animatableObjects)
+		{
+			result.addAll(a.getEnabledArmedParameters());
+		}
+		return result;
+	}
 
 	@Override
 	public Camera getCamera()
@@ -386,7 +397,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	@Override
 	public void recordKeyFrame(int frame)
 	{
-		recordKeyFrame(frame, getArmedParameters());
+		recordKeyFrame(frame, getEnabledArmedParameters());
 		
 	}
 
