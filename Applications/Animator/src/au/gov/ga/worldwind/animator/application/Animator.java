@@ -106,13 +106,16 @@ import au.gov.ga.worldwind.common.ui.SplashScreen;
  */
 public class Animator
 {
-	private static final FileNameExtensionFilter TGA_FILE_FILTER = new FileNameExtensionFilter("TGA Image Sequence", "tga");
-
 	public static void main(String[] args)
 	{
-		new Animator();
+		launchAnimatorApplication();
 	}
 
+	static
+	{
+		AnimatorConfiguration.initialiseConfiguration();
+	}
+	
 	/** The primary application window */
 	private JFrame frame;
 
@@ -178,17 +181,19 @@ public class Animator
 	/** The menu list of recently used files */
 	private RecentlyUsedFilesMenuList mruFileMenu;
 
+	/** The action factory used to obtain application actions */
 	private AnimatorActionFactory actionFactory;
 
 	/**
-	 * Constructor.
-	 * <p/>
-	 * Performs initialisation of GUI and animation.
+	 * Launch an instance of the Animator Application
 	 */
+	public static final void launchAnimatorApplication()
+	{
+		new Animator();
+	}
+	
 	public Animator()
 	{
-		AnimatorConfiguration.initialiseConfiguration();
-		
 		initialiseApplicationWindow();
 		initialiseWorldWindow();
 		
@@ -203,10 +208,7 @@ public class Animator
 		initialiseFrameSlider();
 		initialiseSideBar();
 		initialiseStatusBar();
-		
 		initialiseMenuBar();
-		
-		updateTitleBar();
 		
 		initialiseAnimationListeners();
 		
@@ -217,192 +219,116 @@ public class Animator
 	}
 
 	/**
-	 * Initialise the animation listeners
+	 * Initialise the primary application window 
 	 */
-	private void initialiseAnimationListeners()
+	private void initialiseApplicationWindow()
 	{
-		initialiseAutoKeyListener();
-		initialiseChangeListener();
-		initialiseLayerUpdateListener();
-		initialiseFramesChangedListener();
-		initialiseHighlightedFramesListener();
-	}
-
-	/**
-	 * Re-attach the animation listeners to the current animation. Used when the animation changes (open, new file etc.)
-	 */
-	private void updateAnimationListeners()
-	{
-		updateAnimationListener(layerUpdateListener);
-		updateAnimationListener(framesChangedListener);
-		// TODO: Add more listeners here as they are added
-		
-	}
-	private void updateAnimationListener(AnimationEventListener listener)
-	{
-		getCurrentAnimation().removeChangeListener(listener);
-		getCurrentAnimation().addChangeListener(listener);
-	}
-
-	private void initialiseHighlightedFramesListener()
-	{
-		highlightedFramesListener = new CurrentlySelectedObject.ChangeListener()
+		// Setup the application frame
+		frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter()
 		{
 			@Override
-			public void selectedObjectChanged(AnimationObject currentlySelectedObject, AnimationObject previouslySelectedObject)
+			public void windowClosing(WindowEvent e)
 			{
-				if (currentlySelectedObject == null)
-				{
-					slider.clearHighlightedKeys();
-					return;
-				}
-				
-				Collection<Integer> keysToHighlight = getKeysToHighlight(currentlySelectedObject);
-				slider.highlightKeys(keysToHighlight);
-			}
-
-			private Collection<Integer> getKeysToHighlight(AnimationObject object)
-			{
-				Set<Integer> keysToHighlight = new HashSet<Integer>();
-				if (object instanceof Parameter)
-				{
-					keysToHighlight.addAll(getKeysFramesFromParameter((Parameter)object));
-				}
-				else if (object instanceof Animatable)
-				{
-					for (Parameter parameter : ((Animatable)object).getParameters())
-					{
-						keysToHighlight.addAll(getKeysFramesFromParameter(parameter));
-					}
-				}
-				return keysToHighlight;
-			}
-
-			private Collection<Integer> getKeysFramesFromParameter(Parameter parameter)
-			{
-				Set<Integer> result = new HashSet<Integer>();
-				for (KeyFrame keyFrame : getCurrentAnimation().getKeyFrames(parameter))
-				{
-					result.add(keyFrame.getFrame());
-				}
-				return result;
-			}
-		};
-		CurrentlySelectedObject.addChangeListener(highlightedFramesListener);
-	}
-	
-	/**
-	 * Initialise the layer update listener that listens for changes to the layers present in the animation
-	 */
-	private void initialiseLayerUpdateListener()
-	{
-		layerUpdateListener = new AnimationEventListener()
-		{
-			@Override
-			public void receiveAnimationEvent(AnimationEvent event)
-			{
-				if (isLayerChangeEvent(event))
-				{
-					updateLayersInModel();
-				}
-				
-			}
-
-			private boolean isLayerChangeEvent(AnimationEvent event)
-			{
-				if (event == null)
-				{
-					return false;
-				}
-				AnimationEvent rootCause = event.getRootCause();
-				return ((rootCause.isOfType(Type.ADD) || rootCause.isOfType(Type.REMOVE) || rootCause.isOfType(Type.CHANGE)) && rootCause.getValue() instanceof AnimatableLayer);
-			}
-		};
-		getCurrentAnimation().addChangeListener(layerUpdateListener);
-	}
-
-	private void initialiseFramesChangedListener()
-	{
-		framesChangedListener = new AnimationEventListener()
-		{
-			@Override
-			public void receiveAnimationEvent(AnimationEvent event)
-			{
-				if (isFrameChangeEvent(event))
-				{
-					updateSlider();
-				}
-			}
-
-			private boolean isFrameChangeEvent(AnimationEvent event)
-			{
-				if (event == null)
-				{
-					return false;
-				}
-				AnimationEvent rootCause = event.getRootCause();
-				return (rootCause.isOfType(Type.ADD) || rootCause.isOfType(Type.REMOVE)) && rootCause.getValue() instanceof KeyFrame;
-			}
-		};
-		getCurrentAnimation().addChangeListener(framesChangedListener);
-	}
-	
-	/**
-	 * Initialise the change listener that listens for changes to the animation state
-	 */
-	private void initialiseChangeListener()
-	{
-		animationChangeListener = new AnimationEventListener()
-		{
-			@Override
-			public void receiveAnimationEvent(AnimationEvent event)
-			{
-				changed = true;
-				updateTitleBar();
-			}
-		};
-	}
-	
-	/**
-	 * Attach a property change listener to the World Wind view to automatically generate key frames
-	 * when a change is detected.
-	 */
-	private void initialiseAutoKeyListener()
-	{
-		getView().addPropertyChangeListener(AVKey.VIEW, new PropertyChangeListener()
-		{
-			public void propertyChange(PropertyChangeEvent evt)
-			{
-				if (autokey && !applying)
-				{
-					addFrame();
-				}
+				quit();
 			}
 		});
+		frame.setLayout(new BorderLayout());
+		
+		JPanel panel = new JPanel(new BorderLayout());
+		frame.setContentPane(panel);
+		
+		// Setup the split pane
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
+		splitPane.setOneTouchExpandable(true);
+		splitPane.setDividerLocation(Settings.get().getSplitLocation());
+		panel.add(splitPane, BorderLayout.CENTER);
+		
+		// Add the main panel for the 3D view and frame slider
+		mainPanel = new JPanel(new BorderLayout());
+		splitPane.setRightComponent(mainPanel);
+		
+		// Add the bottom panel for the status bar
+		bottomPanel = new JPanel(new BorderLayout());
+		frame.add(bottomPanel, BorderLayout.SOUTH);
+		
+		//ensure menu bar and popups appear over the heavyweight WW canvas
+		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		
+		// Set the last used location
+		fileChooser = new JFileChooser();
+		fileChooser.setCurrentDirectory(Settings.get().getLastUsedLocation());
+	}
+
+	/**
+	 * Initialise the World Wind {@link WorldWindow} used by the application
+	 */
+	private void initialiseWorldWindow()
+	{
+		wwd = new WorldWindowGLCanvas(AnimatorConfiguration.getGLCapabilities());
+		model = new BasicModel();
+		wwd.setModel(model);
+		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
+		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(Angle.ZERO, Angle.POS180);
+		wwd.setMinimumSize(new Dimension(1, 1));
+		
+		// The buffer holds the world wind canvas and gives us a handle to resize it against
+		final JPanel wwdBufferPanel = new JPanel();
+		wwdBufferPanel.setLayout(null);
+		wwdBufferPanel.setPreferredSize(RenderParameters.DEFAULT_DIMENSIONS);
+		wwdBufferPanel.setBackground(LAFConstants.getHighlightColor());
+		wwdBufferPanel.add(wwd);
+		// On resize, adjust the world wind canvas to maintain the correct aspect ratio
+		wwdBufferPanel.addComponentListener(new ComponentAdapter(){
+
+			@Override
+			public void componentResized(ComponentEvent e)
+			{
+				Dimension bufferSize = wwdBufferPanel.getSize();
+				double newWidth = bufferSize.width;
+			    double newHeight = bufferSize.height;
+			    
+			    double targetRatio = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
+			    double currentRatio = (double)bufferSize.width / bufferSize.height;
+			    
+			    if (currentRatio > targetRatio) 
+			    {
+			        newWidth = newHeight * targetRatio;
+			    } 
+			    else if (currentRatio < targetRatio) 
+			    {
+			        newHeight = newWidth / targetRatio;
+			    }
+			    
+			    Dimension canvasSize = new Dimension((int)newWidth, (int)newHeight);
+				wwd.setSize(canvasSize);
+			    wwd.setPreferredSize(canvasSize);
+			    wwd.setMinimumSize(canvasSize);
+			    wwd.setMaximumSize(canvasSize);
+			    
+			    int newX = (int)(bufferSize.getWidth() - canvasSize.getWidth()) / 2;
+			    int newY = (int)(bufferSize.getHeight() - canvasSize.getHeight()) / 2;
+			    wwd.setLocation(newX, newY);
+			    
+			    wwdBufferPanel.revalidate();
+			    wwdBufferPanel.repaint(100);
+			}
+		});
+		
+		mainPanel.add(wwdBufferPanel, BorderLayout.CENTER);
 	}
 	
 	/**
-	 * Initialise the side bar, which contains a group of collapsible panels
+	 * Show a splash screen on load
 	 */
-	private void initialiseSideBar()
+	private void showSplashScreen()
 	{
-		animationBrowserPanel = new AnimationBrowserPanel(getCurrentAnimation());
-		objectPropertiesPanel = new ObjectPropertiesPanel(getCurrentAnimation());
-		layerPalettePanel = new LayerPalettePanel(getCurrentAnimation());
-		
-		List<CollapsiblePanel> collapsiblePanels = new ArrayList<CollapsiblePanel>(3);
-		collapsiblePanels.add(animationBrowserPanel);
-		collapsiblePanels.add(objectPropertiesPanel);
-		collapsiblePanels.add(layerPalettePanel);
-		
-		sideBar = new SideBar(splitPane, collapsiblePanels);
-		splitPane.setLeftComponent(sideBar);
-		
-		slider.addChangeFrameListener(objectPropertiesPanel);
-		slider.addChangeListener(objectPropertiesPanel);
-		getView().addPropertyChangeListener(AVKey.VIEW, objectPropertiesPanel);
+		SplashScreen splashScreen = new SplashScreen(frame);
+		splashScreen.addRenderingListener(wwd);
 	}
-
+	
 	/**
 	 * Initialise the animation
 	 */
@@ -412,17 +338,71 @@ public class Animator
 		addDefaultLayersToAnimation(getCurrentAnimation());
 		addDefaultElevationModelsToAnimation(getCurrentAnimation());
 		updater = new Updater();
+		
+		updateTitleBar();
 	}
-
+	
 	/**
-	 * Show a splash screen on load
+	 * Add the default layers to the provided animation.
+	 * <p/>
+	 * Default layers are defined in {@link Settings#getDefaultAnimationLayerUrls()}.
+	 * <p/>
+	 * Layers will be added with opacity parameters.
 	 */
-	private void showSplashScreen()
+	private void addDefaultLayersToAnimation(Animation animation)
 	{
-		SplashScreen splashScreen = new SplashScreen(frame);
-		splashScreen.addRenderingListener(wwd);
+		for (LayerIdentifier layerIdentifier : Settings.get().getDefaultAnimationLayers())
+		{
+			if (layerIdentifier == null)
+			{
+				continue;
+			}
+			
+			animation.addLayer(layerIdentifier);
+		}
 	}
-
+	
+	/**
+	 * Add the default elevation models to the provided animation
+	 */
+	private void addDefaultElevationModelsToAnimation(Animation animation)
+	{
+		for (ElevationModelIdentifier modelIdentifier : Settings.get().getDefaultElevationModels())
+		{
+			if (modelIdentifier == null)
+			{
+				continue;
+			}
+			
+			animation.addElevationModel(modelIdentifier);
+		}
+	}
+	
+	/**
+	 * Set the title bar of the application window. 
+	 * <p/>
+	 * The application title will include the file name of the current animation, and an 'isChanged' indicator. 
+	 */
+	private void updateTitleBar()
+	{
+		String file;
+		String title = getMessage(getAnimatorApplicationTitleKey());
+		if (this.file != null)
+		{
+			file = this.file.getName();
+		}
+		else
+		{
+			file = getMessage(getNewAnimationNameKey());
+		}
+		if (changed)
+		{
+			file += " *";
+		}
+		title = file + " - " + title;
+		frame.setTitle(title);
+	}
+	
 	/**
 	 * Initialise the utility layers used inside the animator application
 	 */
@@ -487,119 +467,6 @@ public class Animator
 	}
 	
 	/**
-	 * Add the default elevation models to the provided animation
-	 */
-	private void addDefaultElevationModelsToAnimation(Animation animation)
-	{
-		for (ElevationModelIdentifier modelIdentifier : Settings.get().getDefaultElevationModels())
-		{
-			if (modelIdentifier == null)
-			{
-				continue;
-			}
-			
-			animation.addElevationModel(modelIdentifier);
-		}
-	}
-	
-	/**
-	 * Packs the main frame and makes it visible.
-	 * <p/>
-	 * Executes on the EDT.
-	 */
-	private void showApplicationWindow()
-	{
-		try
-		{
-			SwingUtilities.invokeAndWait(new Runnable(){
-
-				@Override
-				public void run()
-				{
-					resizeWindowToRenderDimensions();
-					frame.pack();
-					frame.setVisible(true);
-				}
-				
-			});
-		}
-		catch (Exception e)
-		{
-			ExceptionLogger.logException(e);
-		}
-	}
-
-	/**
-	 * Create a status bar and put it in bottom panel
-	 */
-	private void initialiseStatusBar()
-	{
-		ExaggerationAwareStatusBar statusBar = new ExaggerationAwareStatusBar();
-		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
-		statusBar.setEventSource(wwd);
-		
-		bottomPanel.add(statusBar, BorderLayout.SOUTH);
-	}
-
-	/**
-	 * Initialise the World Wind {@link WorldWindow} used by the application
-	 */
-	private void initialiseWorldWindow()
-	{
-		wwd = new WorldWindowGLCanvas(AnimatorConfiguration.getGLCapabilities());
-		model = new BasicModel();
-		wwd.setModel(model);
-		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
-		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(Angle.ZERO, Angle.POS180);
-		wwd.setMinimumSize(new Dimension(1, 1));
-		
-		// The buffer holds the world wind canvas and gives us a handle to resize it against
-		final JPanel wwdBufferPanel = new JPanel();
-		wwdBufferPanel.setLayout(null);
-		wwdBufferPanel.setPreferredSize(RenderParameters.DEFAULT_DIMENSIONS);
-		wwdBufferPanel.setBackground(LAFConstants.getHighlightColor());
-		wwdBufferPanel.add(wwd);
-		// On resize, adjust the world wind canvas to maintain the correct aspect ratio
-		wwdBufferPanel.addComponentListener(new ComponentAdapter(){
-
-			@Override
-			public void componentResized(ComponentEvent e)
-			{
-				Dimension bufferSize = wwdBufferPanel.getSize();
-				double newWidth = bufferSize.width;
-			    double newHeight = bufferSize.height;
-			    
-			    double targetRatio = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
-			    double currentRatio = (double)bufferSize.width / bufferSize.height;
-			    
-			    if (currentRatio > targetRatio) 
-			    {
-			        newWidth = newHeight * targetRatio;
-			    } 
-			    else if (currentRatio < targetRatio) 
-			    {
-			        newHeight = newWidth / targetRatio;
-			    }
-			    
-			    Dimension canvasSize = new Dimension((int)newWidth, (int)newHeight);
-				wwd.setSize(canvasSize);
-			    wwd.setPreferredSize(canvasSize);
-			    wwd.setMinimumSize(canvasSize);
-			    wwd.setMaximumSize(canvasSize);
-			    
-			    int newX = (int)(bufferSize.getWidth() - canvasSize.getWidth()) / 2;
-			    int newY = (int)(bufferSize.getHeight() - canvasSize.getHeight()) / 2;
-			    wwd.setLocation(newX, newY);
-			    
-			    wwdBufferPanel.revalidate();
-			    wwdBufferPanel.repaint(100);
-			}
-		});
-		
-		mainPanel.add(wwdBufferPanel, BorderLayout.CENTER);
-	}
-
-	/**
 	 * Initialise the frame slider and add it to the content panel
 	 */
 	private void initialiseFrameSlider()
@@ -639,110 +506,41 @@ public class Animator
 			}
 		});
 	}
-
+	
 	/**
-	 * Initialise the primary application window 
+	 * Initialise the side bar, which contains a group of collapsible panels
 	 */
-	private void initialiseApplicationWindow()
+	private void initialiseSideBar()
 	{
-		// Setup the application frame
-		frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.addWindowListener(new WindowAdapter()
-		{
-			@Override
-			public void windowClosing(WindowEvent e)
-			{
-				quit();
-			}
-		});
-		frame.setLayout(new BorderLayout());
+		animationBrowserPanel = new AnimationBrowserPanel(getCurrentAnimation());
+		objectPropertiesPanel = new ObjectPropertiesPanel(getCurrentAnimation());
+		layerPalettePanel = new LayerPalettePanel(getCurrentAnimation());
 		
-		JPanel panel = new JPanel(new BorderLayout());
-		frame.setContentPane(panel);
+		List<CollapsiblePanel> collapsiblePanels = new ArrayList<CollapsiblePanel>(3);
+		collapsiblePanels.add(animationBrowserPanel);
+		collapsiblePanels.add(objectPropertiesPanel);
+		collapsiblePanels.add(layerPalettePanel);
 		
-		// Setup the split pane
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
-		splitPane.setOneTouchExpandable(true);
-		splitPane.setDividerLocation(Settings.get().getSplitLocation());
-		panel.add(splitPane, BorderLayout.CENTER);
+		sideBar = new SideBar(splitPane, collapsiblePanels);
+		splitPane.setLeftComponent(sideBar);
 		
-		// Add the main panel for the 3D view and frame slider
-		mainPanel = new JPanel(new BorderLayout());
-		splitPane.setRightComponent(mainPanel);
-		
-		// Add the bottom panel for the status bar
-		bottomPanel = new JPanel(new BorderLayout());
-		frame.add(bottomPanel, BorderLayout.SOUTH);
-		
-		//ensure menu bar and popups appear over the heavyweight WW canvas
-		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
-		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-		
-		// Set the last used location
-		fileChooser = new JFileChooser();
-		fileChooser.setCurrentDirectory(Settings.get().getLastUsedLocation());
+		slider.addChangeFrameListener(objectPropertiesPanel);
+		slider.addChangeListener(objectPropertiesPanel);
+		getView().addPropertyChangeListener(AVKey.VIEW, objectPropertiesPanel);
 	}
-
+	
 	/**
-	 * Resize the animation window such that the render window is at the specified animation size.
+	 * Create a status bar and put it in bottom panel
 	 */
-	private void resizeWindowToAnimationSize(Dimension animationSize)
+	private void initialiseStatusBar()
 	{
-			// Set the world window to the correct size
-			setWwdSize(animationSize);
-
-			if (!frame.isVisible())
-			{
-				frame.pack();
-			}
-			
-			// Set the frame to the correct size
-			int deltaWidth = calculateTotalWidthOfNonWWDElements();
-			int deltaHeight = calculateTotalHeightOfNonWWDElements();
-
-			Dimension frameSize = new Dimension(animationSize.width + deltaWidth, animationSize.height + deltaHeight);
-			setFrameSize(frameSize);
-			
-			frame.pack();
-
-			// Check the resize was successful
-			Dimension wwdSize = wwd.getSize();
-			if (wwdSize.width != animationSize.width || wwdSize.height != animationSize.height)
-			{
-				JOptionPane.showMessageDialog(frame, 
-											  getMessage(getSetDimensionFailedMessageKey(), animationSize.width, animationSize.height, wwdSize.width, wwdSize.height),
-											  getMessage(getSetDimensionFailedCaptionKey()),
-											  JOptionPane.ERROR_MESSAGE);
-			}
+		ExaggerationAwareStatusBar statusBar = new ExaggerationAwareStatusBar();
+		statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
+		statusBar.setEventSource(wwd);
+		
+		bottomPanel.add(statusBar, BorderLayout.SOUTH);
 	}
-
-	private void setFrameSize(Dimension frameSize)
-	{
-		frame.setPreferredSize(frameSize);
-		frame.setMinimumSize(frameSize);
-		frame.setMaximumSize(frameSize);
-		frame.setSize(frameSize);
-	}
-
-	private void setWwdSize(Dimension animationSize)
-	{
-		wwd.setMinimumSize(animationSize);
-		wwd.setMaximumSize(animationSize);
-		wwd.setPreferredSize(animationSize);
-		wwd.setSize(animationSize);
-	}
-
-	private int calculateTotalHeightOfNonWWDElements()
-	{
-		return bottomPanel.getSize().height + slider.getSize().height + frame.getJMenuBar().getSize().height + frame.getInsets().top + frame.getInsets().bottom;
-	}
-
-	private int calculateTotalWidthOfNonWWDElements()
-	{
-		return sideBar.getSize().width + frame.getInsets().left + frame.getInsets().right;
-	}
-
+	
 	/**
 	 * Create the application menu bar
 	 */
@@ -812,6 +610,281 @@ public class Animator
 		menuBar.add(menu);
 		menu.add(actionFactory.getDebugKeyFramesAction());
 		menu.add(actionFactory.getDebugParameterValuesAction());
+	}
+	
+	/**
+	 * Initialise the animation listeners
+	 */
+	private void initialiseAnimationListeners()
+	{
+		initialiseAutoKeyListener();
+		initialiseAnimationChangeListener();
+		initialiseLayerUpdateListener();
+		initialiseFramesChangedListener();
+		initialiseHighlightedFramesListener();
+	}
+
+	/**
+	 * Attach a property change listener to the World Wind view to automatically generate key frames
+	 * when a change is detected.
+	 */
+	private void initialiseAutoKeyListener()
+	{
+		getView().addPropertyChangeListener(AVKey.VIEW, new PropertyChangeListener()
+		{
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				if (autokey && !applying)
+				{
+					addFrame();
+				}
+			}
+		});
+	}
+	
+	/**
+	 * Initialise the change listener that listens for changes to the animation state
+	 */
+	private void initialiseAnimationChangeListener()
+	{
+		animationChangeListener = new AnimationEventListener()
+		{
+			@Override
+			public void receiveAnimationEvent(AnimationEvent event)
+			{
+				changed = true;
+				updateTitleBar();
+			}
+		};
+	}
+	
+	/**
+	 * Initialise the layer update listener that listens for changes to the layers present in the animation
+	 */
+	private void initialiseLayerUpdateListener()
+	{
+		layerUpdateListener = new AnimationEventListener()
+		{
+			@Override
+			public void receiveAnimationEvent(AnimationEvent event)
+			{
+				if (isLayerChangeEvent(event))
+				{
+					updateLayersInModel();
+				}
+				
+			}
+
+			private boolean isLayerChangeEvent(AnimationEvent event)
+			{
+				if (event == null)
+				{
+					return false;
+				}
+				AnimationEvent rootCause = event.getRootCause();
+				return ((rootCause.isOfType(Type.ADD) || rootCause.isOfType(Type.REMOVE) || rootCause.isOfType(Type.CHANGE)) && rootCause.getValue() instanceof AnimatableLayer);
+			}
+		};
+		getCurrentAnimation().addChangeListener(layerUpdateListener);
+	}
+	
+	private void initialiseFramesChangedListener()
+	{
+		framesChangedListener = new AnimationEventListener()
+		{
+			@Override
+			public void receiveAnimationEvent(AnimationEvent event)
+			{
+				if (isFrameChangeEvent(event))
+				{
+					updateSlider();
+				}
+			}
+
+			private boolean isFrameChangeEvent(AnimationEvent event)
+			{
+				if (event == null)
+				{
+					return false;
+				}
+				AnimationEvent rootCause = event.getRootCause();
+				return (rootCause.isOfType(Type.ADD) || rootCause.isOfType(Type.REMOVE)) && rootCause.getValue() instanceof KeyFrame;
+			}
+		};
+		getCurrentAnimation().addChangeListener(framesChangedListener);
+	}
+	
+	private void initialiseHighlightedFramesListener()
+	{
+		highlightedFramesListener = new CurrentlySelectedObject.ChangeListener()
+		{
+			@Override
+			public void selectedObjectChanged(AnimationObject currentlySelectedObject, AnimationObject previouslySelectedObject)
+			{
+				if (currentlySelectedObject == null)
+				{
+					slider.clearHighlightedKeys();
+					return;
+				}
+				
+				Collection<Integer> keysToHighlight = getKeysToHighlight(currentlySelectedObject);
+				slider.highlightKeys(keysToHighlight);
+			}
+
+			private Collection<Integer> getKeysToHighlight(AnimationObject object)
+			{
+				Set<Integer> keysToHighlight = new HashSet<Integer>();
+				if (object instanceof Parameter)
+				{
+					keysToHighlight.addAll(getKeysFramesFromParameter((Parameter)object));
+				}
+				else if (object instanceof Animatable)
+				{
+					for (Parameter parameter : ((Animatable)object).getParameters())
+					{
+						keysToHighlight.addAll(getKeysFramesFromParameter(parameter));
+					}
+				}
+				return keysToHighlight;
+			}
+
+			private Collection<Integer> getKeysFramesFromParameter(Parameter parameter)
+			{
+				Set<Integer> result = new HashSet<Integer>();
+				for (KeyFrame keyFrame : getCurrentAnimation().getKeyFrames(parameter))
+				{
+					result.add(keyFrame.getFrame());
+				}
+				return result;
+			}
+		};
+		CurrentlySelectedObject.addChangeListener(highlightedFramesListener);
+	}
+	
+	/**
+	 * Re-attach the animation listeners to the current animation. Used when the animation changes (open, new file etc.)
+	 */
+	private void updateAnimationListeners()
+	{
+		updateAnimationListener(layerUpdateListener);
+		updateAnimationListener(framesChangedListener);
+		// TODO: Add more listeners here as they are added
+		
+	}
+	
+	private void updateAnimationListener(AnimationEventListener listener)
+	{
+		getCurrentAnimation().removeChangeListener(listener);
+		getCurrentAnimation().addChangeListener(listener);
+	}
+	
+	private void updateSlider()
+	{
+		slider.clearKeys();
+		for (KeyFrame keyFrame : getCurrentAnimation().getKeyFrames())
+		{
+			slider.addKey(keyFrame.getFrame());
+		}
+		slider.setMin(0);
+		slider.setMax(getCurrentAnimation().getFrameCount());
+		slider.repaint();
+	}
+	
+	/**
+	 * Reset the changed flag for the application
+	 */
+	private void resetChanged()
+	{
+		getCurrentAnimation().removeChangeListener(animationChangeListener);
+		getCurrentAnimation().addChangeListener(animationChangeListener);
+		changed = false;
+		updateTitleBar();
+	}
+	
+	/**
+	 * Packs the main frame and makes it visible.
+	 * <p/>
+	 * Executes on the EDT.
+	 */
+	private void showApplicationWindow()
+	{
+		try
+		{
+			SwingUtilities.invokeAndWait(new Runnable(){
+
+				@Override
+				public void run()
+				{
+					resizeWindowToRenderDimensions();
+					frame.pack();
+					frame.setVisible(true);
+				}
+				
+			});
+		}
+		catch (Exception e)
+		{
+			ExceptionLogger.logException(e);
+		}
+	}
+
+	/**
+	 * Resize the animation window such that the render window is at the specified animation size.
+	 */
+	private void resizeWindowToAnimationSize(Dimension animationSize)
+	{
+			// Set the world window to the correct size
+			setWwdSize(animationSize);
+
+			if (!frame.isVisible())
+			{
+				frame.pack();
+			}
+			
+			// Set the frame to the correct size
+			int deltaWidth = calculateTotalWidthOfNonWWDElements();
+			int deltaHeight = calculateTotalHeightOfNonWWDElements();
+
+			Dimension frameSize = new Dimension(animationSize.width + deltaWidth, animationSize.height + deltaHeight);
+			setFrameSize(frameSize);
+			
+			frame.pack();
+
+			// Check the resize was successful
+			Dimension wwdSize = wwd.getSize();
+			if (wwdSize.width != animationSize.width || wwdSize.height != animationSize.height)
+			{
+				JOptionPane.showMessageDialog(frame, 
+											  getMessage(getSetDimensionFailedMessageKey(), animationSize.width, animationSize.height, wwdSize.width, wwdSize.height),
+											  getMessage(getSetDimensionFailedCaptionKey()),
+											  JOptionPane.ERROR_MESSAGE);
+			}
+	}
+
+	private void setFrameSize(Dimension frameSize)
+	{
+		frame.setPreferredSize(frameSize);
+		frame.setMinimumSize(frameSize);
+		frame.setMaximumSize(frameSize);
+		frame.setSize(frameSize);
+	}
+
+	private void setWwdSize(Dimension animationSize)
+	{
+		wwd.setMinimumSize(animationSize);
+		wwd.setMaximumSize(animationSize);
+		wwd.setPreferredSize(animationSize);
+		wwd.setSize(animationSize);
+	}
+
+	private int calculateTotalHeightOfNonWWDElements()
+	{
+		return bottomPanel.getSize().height + slider.getSize().height + frame.getJMenuBar().getSize().height + frame.getInsets().top + frame.getInsets().bottom;
+	}
+
+	private int calculateTotalWidthOfNonWWDElements()
+	{
+		return sideBar.getSize().width + frame.getInsets().left + frame.getInsets().right;
 	}
 
 	/**
@@ -888,26 +961,6 @@ public class Animator
 			setFile(null);
 			updateSlider();
 			slider.setValue(0);
-		}
-	}
-
-	/**
-	 * Add the default layers to the provided animation.
-	 * <p/>
-	 * Default layers are defined in {@link Settings#getDefaultAnimationLayerUrls()}.
-	 * <p/>
-	 * Layers will be added with opacity parameters.
-	 */
-	private void addDefaultLayersToAnimation(Animation animation)
-	{
-		for (LayerIdentifier layerIdentifier : Settings.get().getDefaultAnimationLayers())
-		{
-			if (layerIdentifier == null)
-			{
-				continue;
-			}
-			
-			animation.addLayer(layerIdentifier);
 		}
 	}
 
@@ -1125,17 +1178,6 @@ public class Animator
 	}
 
 	/**
-	 * Reset the changed flag for the application
-	 */
-	private void resetChanged()
-	{
-		getCurrentAnimation().removeChangeListener(animationChangeListener);
-		getCurrentAnimation().addChangeListener(animationChangeListener);
-		changed = false;
-		updateTitleBar();
-	}
-
-	/**
 	 * Prompt the user to save their changes if any exist.
 	 * 
 	 * @return <code>false</code> if the user cancelled the operation. <code>true</code> otherwise.
@@ -1162,43 +1204,6 @@ public class Animator
 			save();
 		}
 		return true;
-	}
-
-	/**
-	 * Set the title bar of the application window. 
-	 * <p/>
-	 * The application title will include the file name of the current animation, and an 'isChanged' indicator. 
-	 */
-	private void updateTitleBar()
-	{
-		String file;
-		String title = getMessage(getAnimatorApplicationTitleKey());
-		if (this.file != null)
-		{
-			file = this.file.getName();
-		}
-		else
-		{
-			file = getMessage(getNewAnimationNameKey());
-		}
-		if (changed)
-		{
-			file += " *";
-		}
-		title = file + " - " + title;
-		frame.setTitle(title);
-	}
-
-	private void updateSlider()
-	{
-		slider.clearKeys();
-		for (KeyFrame keyFrame : getCurrentAnimation().getKeyFrames())
-		{
-			slider.addKey(keyFrame.getFrame());
-		}
-		slider.setMin(0);
-		slider.setMax(getCurrentAnimation().getFrameCount());
-		slider.repaint();
 	}
 
 	private void setSlider(int frame)
@@ -1288,7 +1293,7 @@ public class Animator
 	private File promptForImageSequenceLocation()
 	{
 		// Prompt for a location to save the image sequence to
-		setupFileChooser(getMessage(getSaveRenderDialogTitleKey()), TGA_FILE_FILTER);
+		setupFileChooser(getMessage(getSaveRenderDialogTitleKey()), FileFilters.getTgaFilter());
 		if (fileChooser.showSaveDialog(frame) != JFileChooser.APPROVE_OPTION)
 		{
 			return null;

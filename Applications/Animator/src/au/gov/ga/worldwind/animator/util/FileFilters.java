@@ -3,17 +3,23 @@ package au.gov.ga.worldwind.animator.util;
 import java.io.File;
 
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * Holds commonly used file filters
  */
 public class FileFilters
 {
-	
 	private static final XmlFilter XML_FILTER_INSTANCE = new XmlFilter();
 	public static final XmlFilter getXmlFilter()
 	{
 		return XML_FILTER_INSTANCE;
+	}
+	
+	private static final FileNameExtensionFilter TGA_FILE_FILTER_INSTANCE = new FileNameExtensionFilter("TGA Image Sequence", "tga");
+	public static final FileNameExtensionFilter getTgaFilter()
+	{
+		return TGA_FILE_FILTER_INSTANCE;
 	}
 	
 	/**
