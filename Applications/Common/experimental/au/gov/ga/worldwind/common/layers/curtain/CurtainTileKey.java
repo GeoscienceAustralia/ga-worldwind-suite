@@ -14,4 +14,5 @@ public class CurtainTileKey extends TileKey
 		this(tile.getLevel().getLevelNumber(), tile.getRow(), tile.getColumn(), tile.getLevel()
 				.getCacheName());
 	}
+
 }

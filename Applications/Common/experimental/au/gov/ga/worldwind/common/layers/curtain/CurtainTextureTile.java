@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.common.layers.curtain;
 
 import gov.nasa.worldwind.cache.MemoryCache;
 import gov.nasa.worldwind.cache.TextureCache;
-import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.TileKey;
@@ -24,7 +23,7 @@ public class CurtainTextureTile extends CurtainTile
 	public static synchronized MemoryCache getMemoryCache()
 	{
 		//share TextureTile memory cache for now
-		return TextureTile.getMemoryCache();
+		return gov.nasa.worldwind.layers.TextureTile.getMemoryCache();
 	}
 
 	public CurtainTextureTile(CurtainLevel level, Segment segment, int row, int column)
@@ -42,17 +41,6 @@ public class CurtainTextureTile extends CurtainTile
 
 		return size;
 	}
-
-	//	public List<? extends LatLon> getCorners()
-	//	{
-	//		ArrayList<LatLon> list = new ArrayList<LatLon>(4);
-	//		for (LatLon ll : this.getSector())
-	//		{
-	//			list.add(ll);
-	//		}
-	//
-	//		return list;
-	//	}
 
 	public CurtainTextureTile getFallbackTile()
 	{
@@ -121,10 +109,6 @@ public class CurtainTextureTile extends CurtainTile
 
 	public boolean isTextureInMemory(TextureCache tc)
 	{
-		//XXX TEMP TESTING
-		if(true)
-			return true;
-		
 		if (tc == null)
 		{
 			String message = Logging.getMessage("nullValue.TextureCacheIsNull");
@@ -222,7 +206,7 @@ public class CurtainTextureTile extends CurtainTile
 		{
 			int row = this.getRow() * rowMultiplier + rows[i];
 			int column = this.getColumn() * columnMultiplier + columns[i];
-			TileKey key = new TileKey(nextLevelNum, row, column, nextLevelCacheName);
+			CurtainTileKey key = new CurtainTileKey(nextLevelNum, row, column, nextLevelCacheName);
 			CurtainTextureTile subTile = this.getTileFromMemoryCache(key);
 
 			if (subTile == null)
@@ -457,16 +441,20 @@ public class CurtainTextureTile extends CurtainTile
 		if (levelDelta <= 0)
 			return;
 
-		//TODO THESE CALCULATIONS ARE INCORRECT FOR CURTAIN TILES; FIX THEM
+		Segment segment = getSegment();
+		Segment fallbackSegment = this.getFallbackTile().getSegment();
+		double fhd = fallbackSegment.getHorizontalDelta();
+		double fvd = fallbackSegment.getVerticalDelta();
+		double shd = segment.getHorizontalDelta();
+		double svd = segment.getVerticalDelta();
 
-		double twoToTheN = Math.pow(2, levelDelta);
-		double oneOverTwoToTheN = 1 / twoToTheN;
+		double xScale = shd / fhd;
+		double yScale = svd / fvd;
+		double xShift = (segment.getStart() - fallbackSegment.getStart()) / fhd;
+		double yShift = (segment.getBottom() - fallbackSegment.getBottom()) / fvd;
 
-		double sShift = oneOverTwoToTheN * (this.getColumn() % twoToTheN);
-		double tShift = oneOverTwoToTheN * (this.getRow() % twoToTheN);
-
-		dc.getGL().glTranslated(sShift, tShift, 0);
-		dc.getGL().glScaled(oneOverTwoToTheN, oneOverTwoToTheN, 1);
+		dc.getGL().glTranslated(xShift, yShift, 0);
+		dc.getGL().glScaled(xScale, yScale, 1);
 	}
 
 	@Override
@@ -477,7 +465,7 @@ public class CurtainTextureTile extends CurtainTile
 		if (o == null || getClass() != o.getClass())
 			return false;
 
-		final TextureTile tile = (TextureTile) o;
+		final CurtainTextureTile tile = (CurtainTextureTile) o;
 
 		return !(this.getTileKey() != null ? !this.getTileKey().equals(tile.getTileKey()) : tile
 				.getTileKey() != null);

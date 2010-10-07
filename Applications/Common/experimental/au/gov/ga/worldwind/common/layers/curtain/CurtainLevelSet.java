@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.URLTransformer;
 
 public class CurtainLevelSet extends WWObjectImpl
 {
@@ -75,8 +76,10 @@ public class CurtainLevelSet extends WWObjectImpl
 					String service = tile.getLevel().getService();
 					if (service == null || service.length() < 1)
 						return null;
+					
+					service = URLTransformer.transform(service);
 
-					StringBuffer sb = new StringBuffer(tile.getLevel().getService());
+					StringBuffer sb = new StringBuffer(service);
 					if (sb.lastIndexOf("?") != sb.length() - 1)
 						sb.append("?");
 					sb.append("T=");
@@ -88,7 +91,6 @@ public class CurtainLevelSet extends WWObjectImpl
 					sb.append("&Y=");
 					sb.append(tile.getRow());
 
-					// Convention for NASA WWN tiles is to request them with common dataset name but without dds.
 					return new URL(sb.toString());
 				}
 			});

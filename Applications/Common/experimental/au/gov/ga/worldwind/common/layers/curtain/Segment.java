@@ -43,9 +43,19 @@ public class Segment implements Cacheable
 		return 0.5 * (start + end);
 	}
 	
+	public double getHorizontalDelta()
+	{
+		return end - start;
+	}
+	
 	public double getVerticalCenter()
 	{
 		return 0.5 * (top + bottom);
+	}
+	
+	public double getVerticalDelta()
+	{
+		return top - bottom;
 	}
 
 	@Override

@@ -8,12 +8,14 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.render.DrawContext;
 
-import java.util.ArrayList;
+import java.nio.DoubleBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+
+import com.sun.opengl.util.BufferUtil;
 
 public class Path
 {
@@ -76,52 +78,106 @@ public class Path
 		return dc.getGlobe().computePointFromPosition(ll, e);
 	}
 
-	public synchronized Vec4[] getPointsInSegment(DrawContext dc, Segment segment, double top,
-			double bottom)
+	public synchronized SegmentGeometry getGeometry(DrawContext dc, Segment segment, double top,
+			double bottom, int subsegments)
 	{
-		//TODO ?? cache value returned from this method, and if called twice with same input parameters, return cached value ??
+		NavigableMap<Double, LatLon> betweenMap = segmentMap(segment, subsegments);
+		int numVertices = betweenMap.size() * 2;
 
+		Globe globe = dc.getGlobe();
+
+		DoubleBuffer verts = BufferUtil.newDoubleBuffer(numVertices * 3);
+		DoubleBuffer texCoords = BufferUtil.newDoubleBuffer(numVertices * 2);
+		Vec4 refCenter = getSegmentCenterPoint(dc, segment, top, bottom);
+
+		//calculate exaggerated segment top/bottom elevations
 		top *= dc.getVerticalExaggeration();
 		bottom *= dc.getVerticalExaggeration();
 		double height = top - bottom;
 		double t = top - segment.getTop() * height;
 		double b = top - segment.getBottom() * height;
 
-		LatLon start = getPercentLatLon(segment.getStart());
-		LatLon end = getPercentLatLon(segment.getEnd());
+		double percentDistance = segment.getHorizontalDelta();
+		for (Entry<Double, LatLon> entry : betweenMap.entrySet())
+		{
+			Vec4 point1 = globe.computePointFromPosition(entry.getValue(), t);
+			Vec4 point2 = globe.computePointFromPosition(entry.getValue(), b);
+			double percent = (entry.getKey() - segment.getStart()) / percentDistance;
 
-		//get a sublist of all the points between start and end
-		List<LatLon> between =
-				new ArrayList<LatLon>(positions.subMap(segment.getStart(), false, segment.getEnd(),
-						false).values());
+			verts.put(point1.x - refCenter.x).put(point1.y - refCenter.y)
+					.put(point1.z - refCenter.z);
+			verts.put(point2.x - refCenter.x).put(point2.y - refCenter.y)
+					.put(point2.z - refCenter.z);
+			texCoords.put(percent).put(1);
+			texCoords.put(percent).put(0);
+		}
+
+		return new SegmentGeometry(verts, texCoords, refCenter);
+	}
+
+	public synchronized Vec4[] getPointsInSegment(DrawContext dc, Segment segment, double top,
+			double bottom, int subsegments)
+	{
+		//TODO ?? cache value returned from this method, and if called twice with same input parameters, return cached value ??
+		//TODO create a new function to return some object with a vertex buffer and texture buffer instead of just a Vec4[] array
+
+		NavigableMap<Double, LatLon> betweenMap = segmentMap(segment, subsegments);
 
 		Globe globe = dc.getGlobe();
-		Vec4[] points = new Vec4[4 + between.size() * 2];
+		Vec4[] points = new Vec4[betweenMap.size() * 2];
+
+		//calculate exaggerated segment top/bottom elevations
+		top *= dc.getVerticalExaggeration();
+		bottom *= dc.getVerticalExaggeration();
+		double height = top - bottom;
+		double t = top - segment.getTop() * height;
+		double b = top - segment.getBottom() * height;
 
 		//add top points
 		int j = 0;
-		points[j++] = globe.computePointFromPosition(start, t);
-		for (int i = 0; i < between.size(); i++)
+		for (LatLon position : betweenMap.values())
 		{
-			points[j++] = globe.computePointFromPosition(between.get(i), t);
+			points[j++] = globe.computePointFromPosition(position, t);
 		}
-		points[j++] = globe.computePointFromPosition(end, t);
 
-		//add bottom points
-		points[j++] = globe.computePointFromPosition(end, b);
-		for (int i = between.size() - 1; i >= 0; i--)
+		//add bottom points (add them backwards, so it's a loop)
+		j = betweenMap.size() * 2;
+		for (LatLon position : betweenMap.values())
 		{
-			points[j++] = globe.computePointFromPosition(between.get(i), b);
+			points[--j] = globe.computePointFromPosition(position, b);
 		}
-		points[j++] = globe.computePointFromPosition(start, b);
 
 		return points;
 	}
 
-	public synchronized Extent getSegmentExtent(DrawContext dc, Segment segment, double top,
-			double bottom)
+	protected NavigableMap<Double, LatLon> segmentMap(Segment segment, int subsegments)
 	{
-		Vec4[] points = getPointsInSegment(dc, segment, top, bottom);
+		LatLon start = getPercentLatLon(segment.getStart());
+		LatLon end = getPercentLatLon(segment.getEnd());
+
+		NavigableMap<Double, LatLon> betweenMap = new TreeMap<Double, LatLon>();
+		//get a sublist of all the points between start and end (non-inclusive)
+		betweenMap.putAll(positions.subMap(segment.getStart(), false, segment.getEnd(), false));
+		//add the start and end points
+		betweenMap.put(segment.getStart(), start);
+		betweenMap.put(segment.getEnd(), end);
+
+		//insert any subsegment points
+		for (int i = 0; i < subsegments - 1; i++)
+		{
+			double subsegment = (i + 1) / (double) subsegments;
+			double percent = segment.getStart() + subsegment * segment.getHorizontalDelta();
+			LatLon pos = getPercentLatLon(percent);
+			betweenMap.put(percent, pos);
+		}
+
+		return betweenMap;
+	}
+
+	public synchronized Extent getSegmentExtent(DrawContext dc, Segment segment, double top,
+			double bottom, int subsegments)
+	{
+		Vec4[] points = getPointsInSegment(dc, segment, top, bottom, subsegments);
 		return Box.computeBoundingBox(Arrays.asList(points));
 	}
 
@@ -132,7 +188,7 @@ public class Path
 
 	public synchronized double getSegmentLengthInRadians(Segment segment)
 	{
-		return (segment.getEnd() - segment.getStart()) * length.radians;
+		return segment.getHorizontalDelta() * length.radians;
 	}
 
 	/*public synchronized Angle getPercentLength(double percent)

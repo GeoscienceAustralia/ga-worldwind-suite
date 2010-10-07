@@ -34,7 +34,9 @@ import com.sun.opengl.util.j2d.TextRenderer;
 
 public abstract class TiledCurtainLayer extends AbstractLayer
 {
-	//TODO initialise these!
+	//TODO where should this live
+	private CurtainTileRenderer renderer = new CurtainTileRenderer();
+
 	private Path path;
 	private double curtainTop = 0;
 	private double curtainBottom = -10000;
@@ -56,10 +58,10 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 	private String textureFormat;
 
 	// Diagnostic flags
-	private boolean showImageTileOutlines = true;
-	private boolean drawTileBoundaries = true;
+	private boolean showImageTileOutlines = false;
+	private boolean drawTileBoundaries = false;
 	private boolean drawTileIDs = true;
-	private boolean drawBoundingVolumes = true;
+	private boolean drawBoundingVolumes = false;
 
 	// Stuff computed each frame
 	private List<CurtainTextureTile> currentTiles = new ArrayList<CurtainTextureTile>();
@@ -67,9 +69,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 	private boolean atMaxResolution = false;
 	private PriorityBlockingQueue<Runnable> requestQ = new PriorityBlockingQueue<Runnable>(200);
 
-	abstract protected void requestTexture(DrawContext dc, CurtainTile tile);
+	abstract protected void requestTexture(DrawContext dc, CurtainTextureTile tile);
 
-	abstract protected void forceTextureLoad(CurtainTile tile);
+	abstract protected void forceTextureLoad(CurtainTextureTile tile);
 
 	public TiledCurtainLayer(CurtainLevelSet levelSet)
 	{
@@ -545,7 +547,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		Segment segment = tile.getSegment();
 		//LatLon start = path.getPercentLatLon(segment.getStart());
 		//LatLon end = path.getPercentLatLon(segment.getEnd());
-		Extent extent = path.getSegmentExtent(dc, segment, curtainTop, curtainBottom);
+		Extent extent = path.getSegmentExtent(dc, segment, curtainTop, curtainBottom, subsegments);
 
 		return extent.intersects(dc.getView().getFrustumInModelCoordinates())
 		/*&& (dc.getVisibleSector() == null || dc.getVisibleSector().intersectsSegment(start,
@@ -560,7 +562,8 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 
 	private boolean needToSplit(DrawContext dc, Segment segment)
 	{
-		Vec4[] points = path.getPointsInSegment(dc, segment, curtainTop, curtainBottom);
+		Vec4[] points =
+				path.getPointsInSegment(dc, segment, curtainTop, curtainBottom, subsegments);
 		Vec4 centerPoint = path.getSegmentCenterPoint(dc, segment, curtainTop, curtainBottom);
 
 		View view = dc.getView();
@@ -652,8 +655,8 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 
 			dc.setPerFrameStatistic(PerformanceStatistic.IMAGE_TILE_COUNT, this.tileCountName,
 					this.currentTiles.size());
-			//dc.getGeographicSurfaceTileRenderer().renderTiles(dc, this.currentTiles);
-			//TODO
+			renderer.renderTiles(dc, this.currentTiles, getPath(), getCurtainTop(),
+					getCurtainBottom(), getSubsegments());
 
 			gl.glPopAttrib();
 
@@ -732,7 +735,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 			throw new IllegalStateException(message);
 		}
 
-		Extent extent = path.getSegmentExtent(dc, Segment.FULL, curtainTop, curtainBottom);
+		Extent extent = path.getSegmentExtent(dc, Segment.FULL, curtainTop, curtainBottom, 1);
 		return extent.intersects(dc.getView().getFrustumInModelCoordinates());
 
 		/*return dc.getVisibleSector() == null
@@ -817,7 +820,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 
 		for (CurtainTextureTile tile : tiles)
 		{
-			Extent extent = path.getSegmentExtent(dc, tile.getSegment(), curtainTop, curtainBottom);
+			Extent extent =
+					path.getSegmentExtent(dc, tile.getSegment(), curtainTop, curtainBottom,
+							subsegments);
 			if (extent instanceof Renderable)
 				((Renderable) extent).render(dc);
 

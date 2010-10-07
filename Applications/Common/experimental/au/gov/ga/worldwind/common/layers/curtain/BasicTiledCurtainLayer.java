@@ -1,24 +1,45 @@
 package au.gov.ga.worldwind.common.layers.curtain;
 
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
+import gov.nasa.worldwind.cache.FileStore;
+import gov.nasa.worldwind.formats.dds.DDSCompressor;
+import gov.nasa.worldwind.formats.dds.DXTCompressionAttributes;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.ScreenCredit;
+import gov.nasa.worldwind.retrieve.AbstractRetrievalPostProcessor;
+import gov.nasa.worldwind.retrieve.HTTPRetriever;
+import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.WWIO;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.ByteBuffer;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.FileLockSharer;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+
+import com.sun.opengl.util.texture.TextureData;
+import com.sun.opengl.util.texture.TextureIO;
 
 public class BasicTiledCurtainLayer extends TiledCurtainLayer
 {
+	private final Object fileLock;
+
 	public BasicTiledCurtainLayer(CurtainLevelSet levelSet)
 	{
 		super(levelSet);
+		fileLock = FileLockSharer.getLock(getLevels().getFirstLevel().getCacheName());
 	}
 
 	public BasicTiledCurtainLayer(AVList params)
@@ -127,68 +148,383 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 		//            this.startResourceRetrieval();
 		//        }
 	}
-	
+
 	public BasicTiledCurtainLayer(Document dom, AVList params)
-    {
-        this(dom.getDocumentElement(), params);
-    }
-	
-	public BasicTiledCurtainLayer(Element domElement, AVList params)
-    {
-        this(getParamsFromDocument(domElement, params));
-    }
-	
-	protected static AVList getParamsFromDocument(Element domElement, AVList params)
-    {
-        if (domElement == null)
-        {
-            String message = Logging.getMessage("nullValue.DocumentIsNull");
-            Logging.logger().severe(message);
-            throw new IllegalArgumentException(message);
-        }
-
-        if (params == null)
-            params = new AVListImpl();
-
-        getTiledCurtainLayerConfigParams(domElement, params);
-        setFallbacks(params);
-
-        return params;
-    }
-
-    protected static void setFallbacks(AVList params)
-    {
-        if (params.getValue(AVKey.LEVEL_ZERO_TILE_DELTA) == null)
-        {
-            Angle delta = Angle.fromDegrees(36);
-            params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(delta, delta));
-        }
-
-        if (params.getValue(AVKey.TILE_WIDTH) == null)
-            params.setValue(AVKey.TILE_WIDTH, 512);
-
-        if (params.getValue(AVKey.TILE_HEIGHT) == null)
-            params.setValue(AVKey.TILE_HEIGHT, 512);
-
-        if (params.getValue(AVKey.FORMAT_SUFFIX) == null)
-            params.setValue(AVKey.FORMAT_SUFFIX, ".dds");
-
-        if (params.getValue(AVKey.NUM_LEVELS) == null)
-            params.setValue(AVKey.NUM_LEVELS, 19); // approximately 0.1 meters per pixel
-
-        if (params.getValue(AVKey.NUM_EMPTY_LEVELS) == null)
-            params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
-    }
-
-	@Override
-	protected void forceTextureLoad(CurtainTile tile)
 	{
-		System.out.println(tile + " FORCED");
+		this(dom.getDocumentElement(), params);
+	}
+
+	public BasicTiledCurtainLayer(Element domElement, AVList params)
+	{
+		this(getParamsFromDocument(domElement, params));
+	}
+
+	protected static AVList getParamsFromDocument(Element domElement, AVList params)
+	{
+		if (domElement == null)
+		{
+			String message = Logging.getMessage("nullValue.DocumentIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (params == null)
+			params = new AVListImpl();
+
+		getTiledCurtainLayerConfigParams(domElement, params);
+		setFallbacks(params);
+
+		return params;
+	}
+
+	protected static void setFallbacks(AVList params)
+	{
+		if (params.getValue(AVKey.LEVEL_ZERO_TILE_DELTA) == null)
+		{
+			Angle delta = Angle.fromDegrees(36);
+			params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(delta, delta));
+		}
+
+		if (params.getValue(AVKey.TILE_WIDTH) == null)
+			params.setValue(AVKey.TILE_WIDTH, 512);
+
+		if (params.getValue(AVKey.TILE_HEIGHT) == null)
+			params.setValue(AVKey.TILE_HEIGHT, 512);
+
+		if (params.getValue(AVKey.FORMAT_SUFFIX) == null)
+			params.setValue(AVKey.FORMAT_SUFFIX, ".dds");
+
+		if (params.getValue(AVKey.NUM_LEVELS) == null)
+			params.setValue(AVKey.NUM_LEVELS, 19); // approximately 0.1 meters per pixel
+
+		if (params.getValue(AVKey.NUM_EMPTY_LEVELS) == null)
+			params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
 	}
 
 	@Override
-	protected void requestTexture(DrawContext dc, CurtainTile tile)
+	protected void forceTextureLoad(CurtainTextureTile tile)
 	{
-		System.out.println(tile + " REQUESTED");
+		final URL textureURL = this.getDataFileStore().findFile(tile.getPath(), true);
+
+		if (textureURL != null
+				&& !this.isTextureFileExpired(tile, textureURL, this.getDataFileStore()))
+		{
+			this.loadTexture(tile, textureURL);
+		}
+	}
+
+	@Override
+	protected void requestTexture(DrawContext dc, CurtainTextureTile tile)
+	{
+		Vec4 centroid =
+				getPath().getSegmentCenterPoint(dc, tile.getSegment(), getCurtainTop(),
+						getCurtainBottom());
+		Vec4 referencePoint = this.getReferencePoint(dc);
+		if (referencePoint != null)
+			tile.setPriority(centroid.distanceTo3(referencePoint));
+
+		RequestTask task = new RequestTask(tile, this);
+		this.getRequestQ().add(task);
+	}
+
+	protected boolean isTextureFileExpired(CurtainTextureTile tile, URL textureURL,
+			FileStore fileStore)
+	{
+		if (!WWIO.isFileOutOfDate(textureURL, tile.getLevel().getExpiryTime()))
+			return false;
+
+		// The file has expired. Delete it.
+		fileStore.removeFile(textureURL);
+		String message = Logging.getMessage("generic.DataFileExpired", textureURL);
+		Logging.logger().fine(message);
+		return true;
+	}
+
+	private boolean loadTexture(CurtainTextureTile tile, java.net.URL textureURL)
+	{
+		TextureData textureData;
+
+		synchronized (this.fileLock)
+		{
+			textureData = readTexture(textureURL, this.getTextureFormat(), this.isUseMipMaps());
+		}
+
+		if (textureData == null)
+			return false;
+
+		tile.setTextureData(textureData);
+		if (tile.getLevelNumber() != 0 || !this.isRetainLevelZeroTiles())
+			this.addTileToCache(tile);
+
+		return true;
+	}
+
+	private void addTileToCache(CurtainTextureTile tile)
+	{
+		CurtainTextureTile.getMemoryCache().add(tile.getTileKey(), tile);
+	}
+
+	private static TextureData readTexture(java.net.URL url, String textureFormat,
+			boolean useMipMaps)
+	{
+		try
+		{
+			// If the caller has enabled texture compression, and the texture data is not a DDS file, then use read the
+			// texture data and convert it to DDS.
+			if ("image/dds".equalsIgnoreCase(textureFormat)
+					&& !url.toString().toLowerCase().endsWith("dds"))
+			{
+				// Configure a DDS compressor to generate mipmaps based according to the 'useMipMaps' parameter, and
+				// convert the image URL to a compressed DDS format.
+				DXTCompressionAttributes attributes =
+						DDSCompressor.getDefaultCompressionAttributes();
+				attributes.setBuildMipmaps(useMipMaps);
+				ByteBuffer buffer = DDSCompressor.compressImageURL(url, attributes);
+
+				return TextureIO.newTextureData(WWIO.getInputStreamFromByteBuffer(buffer),
+						useMipMaps, null);
+			}
+			// If the caller has disabled texture compression, or if the texture data is already a DDS file, then read
+			// the texture data without converting it.
+			else
+			{
+				return TextureIO.newTextureData(url, useMipMaps, null);
+			}
+		}
+		catch (Exception e)
+		{
+			String msg =
+					Logging.getMessage("layers.TextureLayer.ExceptionAttemptingToReadTextureFile",
+							url);
+			Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
+			return null;
+		}
+	}
+
+	private static class RequestTask implements Runnable, Comparable<RequestTask>
+	{
+		private final BasicTiledCurtainLayer layer;
+		private final CurtainTextureTile tile;
+
+		private RequestTask(CurtainTextureTile tile, BasicTiledCurtainLayer layer)
+		{
+			this.layer = layer;
+			this.tile = tile;
+		}
+
+		@Override
+		public void run()
+		{
+			// TODO: check to ensure load is still needed
+
+			final java.net.URL textureURL =
+					this.layer.getDataFileStore().findFile(tile.getPath(), false);
+			if (textureURL != null
+					&& !this.layer.isTextureFileExpired(tile, textureURL,
+							this.layer.getDataFileStore()))
+			{
+				if (this.layer.loadTexture(tile, textureURL))
+				{
+					layer.getLevels().unmarkResourceAbsent(this.tile);
+					this.layer.firePropertyChange(AVKey.LAYER, null, this);
+					return;
+				}
+				else
+				{
+					// Assume that something's wrong with the file and delete it.
+					this.layer.getDataFileStore().removeFile(textureURL);
+					String message =
+							Logging.getMessage("generic.DeletedCorruptDataFile", textureURL);
+					Logging.logger().info(message);
+				}
+			}
+
+			this.layer.downloadTexture(this.tile, null);
+		}
+
+		/**
+		 * @param that
+		 *            the task to compare
+		 * 
+		 * @return -1 if <code>this</code> less than <code>that</code>, 1 if
+		 *         greater than, 0 if equal
+		 * 
+		 * @throws IllegalArgumentException
+		 *             if <code>that</code> is null
+		 */
+		@Override
+		public int compareTo(RequestTask that)
+		{
+			if (that == null)
+			{
+				String msg = Logging.getMessage("nullValue.RequestTaskIsNull");
+				Logging.logger().severe(msg);
+				throw new IllegalArgumentException(msg);
+			}
+			return this.tile.getPriority() == that.tile.getPriority() ? 0
+					: this.tile.getPriority() < that.tile.getPriority() ? -1 : 1;
+		}
+
+		@Override
+		public boolean equals(Object o)
+		{
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+
+			final RequestTask that = (RequestTask) o;
+
+			// Don't include layer in comparison so that requests are shared among layers
+			return !(tile != null ? !tile.equals(that.tile) : that.tile != null);
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return (tile != null ? tile.hashCode() : 0);
+		}
+
+		@Override
+		public String toString()
+		{
+			return this.tile.toString();
+		}
+	}
+
+	protected void downloadTexture(final CurtainTextureTile tile,
+			DownloadPostProcessor postProcessor)
+	{
+		if (!this.isNetworkRetrievalEnabled())
+		{
+			this.getLevels().markResourceAbsent(tile);
+			return;
+		}
+
+		if (!WorldWind.getRetrievalService().isAvailable())
+			return;
+
+		java.net.URL url;
+		try
+		{
+			url = tile.getResourceURL();
+
+			if (url == null)
+				return;
+
+			if (WorldWind.getNetworkStatus().isHostUnavailable(url))
+			{
+				this.getLevels().markResourceAbsent(tile);
+				return;
+			}
+		}
+		catch (java.net.MalformedURLException e)
+		{
+			Logging.logger().log(java.util.logging.Level.SEVERE,
+					Logging.getMessage("layers.TextureLayer.ExceptionCreatingTextureUrl", tile), e);
+			return;
+		}
+
+		Retriever retriever;
+
+		if ("http".equalsIgnoreCase(url.getProtocol())
+				|| "https".equalsIgnoreCase(url.getProtocol()))
+		{
+			if (postProcessor == null)
+				postProcessor = new DownloadPostProcessor(tile, this);
+			retriever = new HTTPRetriever(url, postProcessor);
+		}
+		else
+		{
+			Logging.logger().severe(
+					Logging.getMessage("layers.TextureLayer.UnknownRetrievalProtocol",
+							url.toString()));
+			return;
+		}
+
+		// Apply any overridden timeouts.
+		Integer cto = AVListImpl.getIntegerValue(this, AVKey.URL_CONNECT_TIMEOUT);
+		if (cto != null && cto > 0)
+			retriever.setConnectTimeout(cto);
+		Integer cro = AVListImpl.getIntegerValue(this, AVKey.URL_READ_TIMEOUT);
+		if (cro != null && cro > 0)
+			retriever.setReadTimeout(cro);
+		Integer srl = AVListImpl.getIntegerValue(this, AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT);
+		if (srl != null && srl > 0)
+			retriever.setStaleRequestLimit(srl);
+
+		WorldWind.getRetrievalService().runRetriever(retriever, tile.getPriority());
+	}
+
+	protected static class DownloadPostProcessor extends AbstractRetrievalPostProcessor
+	{
+		protected final CurtainTextureTile tile;
+		protected final BasicTiledCurtainLayer layer;
+		protected final FileStore fileStore;
+
+		public DownloadPostProcessor(CurtainTextureTile tile, BasicTiledCurtainLayer layer)
+		{
+			this(tile, layer, null);
+		}
+
+		public DownloadPostProcessor(CurtainTextureTile tile, BasicTiledCurtainLayer layer,
+				FileStore fileStore)
+		{
+			//noinspection RedundantCast
+			super((AVList) layer);
+
+			this.tile = tile;
+			this.layer = layer;
+			this.fileStore = fileStore;
+		}
+
+		protected FileStore getFileStore()
+		{
+			return this.fileStore != null ? this.fileStore : this.layer.getDataFileStore();
+		}
+
+		@Override
+		protected void markResourceAbsent()
+		{
+			this.layer.getLevels().markResourceAbsent(this.tile);
+		}
+
+		@Override
+		protected Object getFileLock()
+		{
+			return this.layer.fileLock;
+		}
+
+		@Override
+		protected File doGetOutputFile()
+		{
+			return this.getFileStore().newFile(this.tile.getPath());
+		}
+
+		@Override
+		protected ByteBuffer handleSuccessfulRetrieval()
+		{
+			ByteBuffer buffer = super.handleSuccessfulRetrieval();
+
+			if (buffer != null)
+			{
+				// We've successfully cached data. Check if there's a configuration file for this layer, create one
+				// if there's not.
+				//this.layer.writeConfigurationFile(this.getFileStore()); //TODO implement
+
+				// Fire a property change to denote that the layer's backing data has changed.
+				this.layer.firePropertyChange(AVKey.LAYER, null, this);
+			}
+
+			return buffer;
+		}
+
+		@Override
+		protected ByteBuffer handleTextContent() throws IOException
+		{
+			this.markResourceAbsent();
+
+			return super.handleTextContent();
+		}
 	}
 }
