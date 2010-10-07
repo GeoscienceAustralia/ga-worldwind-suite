@@ -9,7 +9,6 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
@@ -30,10 +29,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -337,7 +334,7 @@ public class Animator
 		animation = new WorldWindAnimationImpl(wwd);
 		addDefaultLayersToAnimation(getCurrentAnimation());
 		addDefaultElevationModelsToAnimation(getCurrentAnimation());
-		updater = new Updater();
+		updater = new Updater(this);
 		
 		updateTitleBar();
 	}
@@ -778,7 +775,7 @@ public class Animator
 		getCurrentAnimation().addChangeListener(listener);
 	}
 	
-	private void updateSlider()
+	void updateSlider()
 	{
 		slider.clearKeys();
 		for (KeyFrame keyFrame : getCurrentAnimation().getKeyFrames())
@@ -908,7 +905,7 @@ public class Animator
 			view.setPitch(Angle.fromDegrees(0.1));
 			wwd.redrawNow();
 		}
-		updater.addFrame(slider.getValue(), view);
+		updater.addFrame(slider.getValue());
 	}
 
 	/**
@@ -1639,87 +1636,5 @@ public class Animator
 	public Animation getCurrentAnimation()
 	{
 		return animation;
-	}
-
-	private class Updater
-	{
-		private Map<Integer, ViewParameters> toApply = new HashMap<Integer, ViewParameters>();
-		private Object waiter = new Object();
-
-		public Updater()
-		{
-			Thread thread = new Thread()
-			{
-				@Override
-				public void run()
-				{
-					while (true)
-					{
-						Integer key = getNextKey();
-						if (key != null)
-						{
-							getCurrentAnimation().recordKeyFrame(key);
-							updateSlider();
-							removeValue(key);
-						}
-						else
-						{
-							synchronized (waiter)
-							{
-								try
-								{
-									waiter.wait();
-								}
-								catch (InterruptedException e)
-								{
-									ExceptionLogger.logException(e);
-								}
-							}
-						}
-					}
-				}
-			};
-			thread.setDaemon(true);
-			thread.start();
-		}
-
-		private synchronized Integer getNextKey()
-		{
-			Set<Integer> keyset = toApply.keySet();
-			if (keyset.isEmpty())
-			{
-				return null;
-			}
-			return keyset.iterator().next();
-		}
-
-		private synchronized ViewParameters removeValue(Integer key)
-		{
-			return toApply.remove(key);
-		}
-
-		public synchronized void addFrame(int frame, OrbitView view)
-		{
-			toApply.put(frame, ViewParameters.fromView(view));
-			synchronized (waiter)
-			{
-				waiter.notify();
-			}
-		}
-
-	}
-
-	private static class ViewParameters
-	{
-		public Position eye;
-		public Position center;
-
-		public static ViewParameters fromView(OrbitView view)
-		{
-			ViewParameters vp = new ViewParameters();
-			vp.eye = view.getEyePosition();
-			vp.center = view.getCenterPosition();
-			return vp;
-		}
 	}
 }
