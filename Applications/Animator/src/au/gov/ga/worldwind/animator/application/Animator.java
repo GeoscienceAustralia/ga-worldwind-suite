@@ -206,7 +206,7 @@ public class Animator
 		
 		initialiseMenuBar();
 		
-		setTitleBar();
+		updateTitleBar();
 		
 		initialiseAnimationListeners();
 		
@@ -358,8 +358,7 @@ public class Animator
 			public void receiveAnimationEvent(AnimationEvent event)
 			{
 				changed = true;
-				setTitleBar();
-				
+				updateTitleBar();
 			}
 		};
 	}
@@ -823,7 +822,6 @@ public class Animator
 		return new AnimationContextImpl(getCurrentAnimation());
 	}
 
-
 	private OrbitView getView()
 	{
 		return (OrbitView) wwd.getView();
@@ -838,7 +836,6 @@ public class Animator
 			wwd.redrawNow();
 		}
 		updater.addFrame(slider.getValue(), view);
-		
 	}
 
 	/**
@@ -869,24 +866,6 @@ public class Animator
 	}
 
 	/**
-	 * Set the current animation on the application
-	 * 
-	 * @param animation The current animation
-	 */
-	private void setAnimation(Animation animation)
-	{
-		this.animation = animation;
-		if (actionFactory != null)
-		{
-			actionFactory.getUseScaledZoomAction().setSelected(animation.isZoomScalingRequired());
-		}
-		updateAnimationListeners();
-		updateLayersInModel();
-		updateElevationModelOnGlobe();
-		updateSideBar();
-	}
-
-	/**
 	 * Update the sidebar panels to reflect any changes in the animation structure.
 	 */
 	private void updateSideBar()
@@ -904,7 +883,7 @@ public class Animator
 			WorldWindAnimationImpl newAnimation = new WorldWindAnimationImpl(wwd);
 			addDefaultLayersToAnimation(newAnimation);
 			addDefaultElevationModelsToAnimation(newAnimation);
-			setAnimation(newAnimation);
+			setCurrentAnimation(newAnimation);
 			resetChanged();
 			setFile(null);
 			updateSlider();
@@ -994,7 +973,7 @@ public class Animator
 				addDefaultElevationModelsToAnimation(newAnimation);
 			}
 			
-			setAnimation(newAnimation);
+			setCurrentAnimation(newAnimation);
 			setFile(animationFile);
 			
 			getCurrentAnimation().applyFrame(0);
@@ -1007,7 +986,7 @@ public class Animator
 		}
 		catch (Exception e)
 		{
-			setAnimation(oldAnimation);
+			setCurrentAnimation(oldAnimation);
 			updateSlider();
 			
 			ExceptionLogger.logException(e);
@@ -1129,8 +1108,7 @@ public class Animator
 											  getMessage(getSaveFailedCaptionKey()),
 											  JOptionPane.ERROR_MESSAGE);
 			}
-			setTitleBar();
-			
+			updateTitleBar();
 			updateRecentFiles(file);
 		}
 	}
@@ -1143,7 +1121,7 @@ public class Animator
 	private void setFile(File file)
 	{
 		this.file = file;
-		setTitleBar();
+		updateTitleBar();
 	}
 
 	/**
@@ -1154,7 +1132,7 @@ public class Animator
 		getCurrentAnimation().removeChangeListener(animationChangeListener);
 		getCurrentAnimation().addChangeListener(animationChangeListener);
 		changed = false;
-		setTitleBar();
+		updateTitleBar();
 	}
 
 	/**
@@ -1191,7 +1169,7 @@ public class Animator
 	 * <p/>
 	 * The application title will include the file name of the current animation, and an 'isChanged' indicator. 
 	 */
-	private void setTitleBar()
+	private void updateTitleBar()
 	{
 		String file;
 		String title = getMessage(getAnimatorApplicationTitleKey());
@@ -1633,6 +1611,24 @@ public class Animator
 	void setZoomScalingRequired(boolean zoomScalingRequired)
 	{
 		getCurrentAnimation().setZoomScalingRequired(zoomScalingRequired);
+	}
+	
+	/**
+	 * Set the current animation on the application
+	 * 
+	 * @param animation The current animation
+	 */
+	private void setCurrentAnimation(Animation animation)
+	{
+		this.animation = animation;
+		if (actionFactory != null)
+		{
+			actionFactory.getUseScaledZoomAction().setSelected(animation.isZoomScalingRequired());
+		}
+		updateAnimationListeners();
+		updateLayersInModel();
+		updateElevationModelOnGlobe();
+		updateSideBar();
 	}
 	
 	public Animation getCurrentAnimation()
