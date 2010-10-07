@@ -93,6 +93,7 @@ import au.gov.ga.worldwind.animator.panels.SideBar;
 import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPanel;
 import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
 import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPanel;
+import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierFactory;
 import au.gov.ga.worldwind.animator.terrain.ImmediateRectangularTesselator;
@@ -221,7 +222,6 @@ public class Animator
 	private CurrentlySelectedObject.ChangeListener highlightedFramesListener;
 	
 	// The layers used in the application
-	private VerticalExaggerationElevationModel elevationModel;
 	private Layer crosshair;
 	private CameraPathLayer cameraPathLayer;
 	
@@ -1904,8 +1904,8 @@ public class Animator
 					resizeWindowToAnimationSize(animation.getRenderParameters().getImageDimension());
 
 					crosshair.setEnabled(false);
-					double detailHintBackup = elevationModel.getDetailHint();
-					elevationModel.setDetailHint(detailHint);
+					double detailHintBackup = getDetailedElevationModel().getDetailHint();
+					getDetailedElevationModel().setDetailHint(detailHint);
 					frame.setAlwaysOnTop(true);
 
 					View view = wwd.getView();
@@ -1932,7 +1932,7 @@ public class Animator
 						}
 					}
 
-					elevationModel.setDetailHint(detailHintBackup);
+					getDetailedElevationModel().setDetailHint(detailHintBackup);
 					crosshair.setEnabled(true);
 					orbitView.setDetectCollisions(detectCollisions);
 					frame.setAlwaysOnTop(false);
@@ -1946,6 +1946,11 @@ public class Animator
 		return null;
 	}
 
+	private DetailedElevationModel getDetailedElevationModel()
+	{
+		return animation.getAnimatableElevation().getRootElevationModel();
+	}
+	
 	/**
 	 * Prompt the user to add an elevation model to the animation
 	 */
