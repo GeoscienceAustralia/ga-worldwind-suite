@@ -89,6 +89,19 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 		}
 	}
 	
+	
+	@Override
+	public boolean isAllChildrenEnabled()
+	{
+		return true;
+	}
+	
+	@Override
+	public boolean hasEnabledChildren()
+	{
+		return false;
+	}
+	
 	@Override
 	public boolean isArmed()
 	{
@@ -108,13 +121,13 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	}
 	
 	@Override
-	public boolean isAllChildrenEnabled()
+	public boolean isAllChildrenArmed()
 	{
 		return true;
 	}
 	
 	@Override
-	public boolean hasEnabledChildren()
+	public boolean hasArmedChildren()
 	{
 		return false;
 	}

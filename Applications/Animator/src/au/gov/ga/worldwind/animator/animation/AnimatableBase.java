@@ -29,6 +29,9 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	/** Whether this animatable is enabled */
 	private boolean enabled = true;
 	
+	/** Whether or not this animatable is 'armed' */
+	private boolean armed = true;
+	
 	/**
 	 * Constructor. Initialises the name of the animatable object.
 	 */
@@ -89,6 +92,21 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	
 	@Override
 	public Collection<Parameter> getArmedParameters()
+	{
+		Collection<Parameter> result = new ArrayList<Parameter>();
+		for (Iterator<Parameter> parameterIterator = getParameters().iterator(); parameterIterator.hasNext();)
+		{
+			Parameter parameter = (Parameter) parameterIterator.next();
+			if (parameter.isArmed())
+			{
+				result.add(parameter);
+			}
+		}
+		return result;
+	}
+	
+	@Override
+	public Collection<Parameter> getEnabledArmedParameters()
 	{
 		Collection<Parameter> result = new ArrayList<Parameter>();
 		for (Iterator<Parameter> parameterIterator = getParameters().iterator(); parameterIterator.hasNext();)
@@ -155,5 +173,41 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	public boolean hasEnabledChildren()
 	{
 		return getEnabledParameters().size() > 0;
+	}
+	
+	@Override
+	public void setArmed(boolean armed)
+	{
+		boolean changed = this.armed != armed;
+		
+		this.armed = armed;
+		
+		for (Parameter parameter : getParameters())
+		{
+			parameter.setArmed(armed);
+		}
+		
+		if (changed)
+		{
+			fireChangeEvent(armed);
+		}
+	}
+	
+	@Override
+	public boolean isArmed()
+	{
+		return armed;
+	}
+	
+	@Override
+	public boolean isAllChildrenArmed()
+	{
+		return getParameters().size() == getArmedParameters().size();
+	}
+	
+	@Override
+	public boolean hasArmedChildren()
+	{
+		return getArmedParameters().size() > 0;
 	}
 }

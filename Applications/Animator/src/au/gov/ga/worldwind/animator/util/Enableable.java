@@ -14,8 +14,7 @@ public interface Enableable
 
 	/**
 	 * Return whether this object is currently enabled for the current {@link Animation}.
-	 * <p/>
-	 * An 
+
 	 * @return whether this object is currently enabled
 	 */
 	boolean isEnabled();

@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
-import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
@@ -15,6 +14,7 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
+import au.gov.ga.worldwind.animator.util.Armable;
 import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Nameable;
 
@@ -24,41 +24,8 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Parameter extends AnimationObject, Serializable, Nameable, XmlSerializable<Parameter>, AnimationEventListener, Changeable, Enableable
+public interface Parameter extends AnimationObject, Serializable, Nameable, XmlSerializable<Parameter>, AnimationEventListener, Changeable, Enableable, Armable
 {
-	
-	/**
-	 * Return whether this parameter is currently enabled for the current {@link Animation}.
-	 * <p/>
-	 * Only enabled parameters will be recorded when creating new key frames.
-	 * 
-	 * @return whether this parameter is currently enabled
-	 */
-	boolean isEnabled();
-	
-	/**
-	 * Set whether this parameter is currently enabled for the current {@link Animation}.
-	 * <p/>
-	 * Only enabled parameters will be recorded when creating new key frames.
-	 * 
-	 * @param enabled Whether this parameter is currently enabled
-	 */
-	void setEnabled(boolean enabled);
-	
-	/**
-	 * Returns whether this parameter is 'armed' (i.e. whether it should be included in the creation of key frames or not).
-	 * <p/>
-	 * Different from 'enabled' in that a 'disarmed' parameter is still included in the animation, just not in the creation of key frames.
-	 */
-	boolean isArmed();
-	
-	/**
-	 * Set whether or not this parameter is 'armed'.
-	 * 
-	 * @see #isArmed()
-	 */
-	void setArmed(boolean armed);
-	
 	/**
 	 * Get the current value of this {@link Parameter} in the current {@link AnimationContext}.
 	 * 
