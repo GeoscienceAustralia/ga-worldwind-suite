@@ -302,10 +302,10 @@ public class Settings
 	
 	/** The default set of animation layers to include in new animations */
 	private List<LayerIdentifier> defaultAnimationLayers = new ArrayList<LayerIdentifier>(Arrays.asList(new LayerIdentifier[]{
-			new LayerIdentifierImpl("Stars", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/stars.xml"),
-			new LayerIdentifierImpl("Sky", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/sky.xml"),
-			new LayerIdentifierImpl("Blue Marble", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/blue_marble.xml"),
-			new LayerIdentifierImpl("Landsat", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/landsat.xml"),
+			new LayerIdentifierImpl("Stars", "http://www.ga.gov.au/apps/world-wind/dataset/standard/layers/stars.xml"),
+			new LayerIdentifierImpl("Sky", "http://www.ga.gov.au/apps/world-wind/dataset/standard/layers/sky.xml"),
+			new LayerIdentifierImpl("Blue Marble", "http://www.ga.gov.au/apps/world-wind/dataset/standard/layers/blue_marble.xml"),
+			new LayerIdentifierImpl("Landsat", "http://www.ga.gov.au/apps/world-wind/dataset/standard/layers/landsat.xml"),
 	}));
 	
 	/** The list of known layer locations for populating the layer palette */
@@ -313,7 +313,7 @@ public class Settings
 	
 	/** The default set of elevation models to include in new animations */
 	private List<ElevationModelIdentifier> defaultElevationModels = new ArrayList<ElevationModelIdentifier>(Arrays.asList(new ElevationModelIdentifier[]{
-			new ElevationModelIdentifierImpl("Earth", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml"),
+			new ElevationModelIdentifierImpl("Earth", "http://www.ga.gov.au/apps/world-wind/dataset/standard/layers/earth_elevation_model.xml"),
 	}));
 	
 	/**

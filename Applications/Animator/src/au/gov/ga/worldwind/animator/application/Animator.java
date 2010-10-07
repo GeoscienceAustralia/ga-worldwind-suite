@@ -3,7 +3,6 @@ package au.gov.ga.worldwind.animator.application;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.BasicModel;
-import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
@@ -41,7 +40,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
-import javax.media.opengl.GLCapabilities;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
@@ -55,7 +53,6 @@ import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
-import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
@@ -86,8 +83,6 @@ import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
-import au.gov.ga.worldwind.animator.layers.immediate.ImmediateRetrievalService;
-import au.gov.ga.worldwind.animator.layers.immediate.ImmediateTaskService;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.animator.panels.SideBar;
 import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPanel;
@@ -96,22 +91,16 @@ import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPane
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierFactory;
-import au.gov.ga.worldwind.animator.terrain.ImmediateRectangularTessellator;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
-import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationElevationModel;
 import au.gov.ga.worldwind.animator.ui.ExaggeratorDialog;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
 import au.gov.ga.worldwind.animator.util.ExaggerationAwareStatusBar;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
-import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
-import au.gov.ga.worldwind.common.layers.LayerFactory;
-import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
-import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
@@ -127,40 +116,6 @@ public class Animator
 {
 	private static final FileNameExtensionFilter TGA_FILE_FILTER = new FileNameExtensionFilter("TGA Image Sequence", "tga");
 
-	private static final GLCapabilities caps = new GLCapabilities();
-	static
-	{
-		caps.setAlphaBits(8);
-		caps.setRedBits(8);
-		caps.setGreenBits(8);
-		caps.setBlueBits(8);
-		caps.setDepthBits(24);
-		caps.setDoubleBuffered(true);
-		caps.setNumSamples(4);
-	
-		if (Configuration.isMacOS())
-		{
-			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "World Wind Application");
-			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
-			System.setProperty("apple.awt.brushMetalLook", "true");
-		}
-
-		try
-		{
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (Exception e)
-		{
-			ExceptionLogger.logException(e);
-		}
-
-		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
-		System.setProperty("http.proxyPort", "8080");
-		System.setProperty("http.nonProxyHosts", "localhost");
-
-	}
-	
 	public static void main(String[] args)
 	{
 		new Animator();
@@ -273,7 +228,6 @@ public class Animator
 	{
 		Logging.logger().setLevel(Level.FINER);
 		initialiseMessageSource();
-		initialiseConfiguration();
 		
 		initialiseApplicationWindow();
 		initialiseWorldWindow();
@@ -634,7 +588,7 @@ public class Animator
 	 */
 	private void initialiseWorldWindow()
 	{
-		wwd = new WorldWindowGLCanvas(caps);
+		wwd = new WorldWindowGLCanvas(AnimatorConfiguration.getGLCapabilities());
 		model = new BasicModel();
 		wwd.setModel(model);
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
@@ -769,29 +723,6 @@ public class Animator
 		
 		// Set the last used location
 		fileChooser.setCurrentDirectory(Settings.get().getLastUsedLocation());
-	}
-
-	/**
-	 * Initialise the configuration settings for the application
-	 */
-	private void initialiseConfiguration()
-	{
-		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
-		Configuration.setValue(AVKey.VIEW_CLASS_NAME, BasicOrbitView.class.getName());
-		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, AnimatorSceneController.class.getName());
-
-		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME, ImmediateTaskService.class.getName());
-		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ImmediateRetrievalService.class.getName());
-
-		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, ImmediateRectangularTessellator.class.getName());
-
-		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE, 16777216L * 8); // 128 mb
-		
-		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
-		
-		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
-		
-		GASandpit.setSandpitMode(true);
 	}
 
 	/**

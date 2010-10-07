@@ -91,7 +91,15 @@ public class FrameSlider extends JComponent
 		setMin(min);
 		setMax(max);
 		setValue(value);
+		
 		setupMouseListeners();
+		setResizeListener();
+
+		initialiseSize();
+	}
+
+	private void setResizeListener()
+	{
 		addComponentListener(new ComponentAdapter()
 		{
 			@Override
@@ -101,7 +109,10 @@ public class FrameSlider extends JComponent
 				repaint();
 			}
 		});
+	}
 
+	private void initialiseSize()
+	{
 		Dimension size = new Dimension(0, 54);
 		setMinimumSize(size);
 		setPreferredSize(size);
