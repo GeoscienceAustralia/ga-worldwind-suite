@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.animator.panels.animationbrowser;
 
 import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBoxModel;
 import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox.State;
+import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBoxModelBase;
 import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -10,7 +11,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-final class EnableableTriStateModel implements TriStateCheckBoxModel
+final class EnableableTriStateModel extends TriStateCheckBoxModelBase implements TriStateCheckBoxModel
 {
 
 	private Enableable value; 
@@ -47,26 +48,6 @@ final class EnableableTriStateModel implements TriStateCheckBoxModel
 			case CHECKED: value.setEnabled(true); break;
 			case UNCHECKED: value.setEnabled(false); break;
 		}
-	}
-
-	@Override
-	public State getCurrentState()
-	{
-		if (isChecked())
-		{
-			return State.CHECKED;
-		}
-		if (isUnchecked())
-		{
-			return State.UNCHECKED;
-		}
-		return State.PARTIAL;
-	}
-
-	@Override
-	public void iterateState()
-	{
-		setCurrentState(getCurrentState().nextState());
 	}
 	
 }
