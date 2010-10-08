@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="CurtainImageLayer">
+	
+	<DisplayName>Curtain</DisplayName>
+	<Service serviceName="CurtainTileService">
+		<URL>http://www.ga.gov.au/apps/world-wind/tiles.jsp</URL>
+	</Service>
+	
+	<!-- day month year hours:minutes:seconds timezone -->
+	<LastUpdate>19 09 2009 04:10:00 GMT</LastUpdate>
+	
+	<DatasetName>curtain_test</DatasetName>
+	<DataCacheName>GA/Curtain Test</DataCacheName>
+	
+	<ImageFormat>application/jpg</ImageFormat>
+	<AvailableImageFormats>
+		<ImageFormat>application/jpg</ImageFormat>
+	</AvailableImageFormats>
+	<FormatSuffix>.jpg</FormatSuffix>
+	
+	<NumLevels count="7" numEmpty="0" />
+	<TileSize>
+		<Dimension width="512" height="512" />
+	</TileSize>
+	<FullSize>
+		<Dimension width="36610" height="13968" />
+	</FullSize>
+	<Path>
+		<LatLon units="degrees" latitude="-32.74399255357542" longitude="114.05318859543719" />
+		<LatLon units="degrees" latitude="-34.136011379672276" longitude="114.26382145380674" />
+	</Path>
+	<CurtainTop>0</CurtainTop>
+	<CurtainBottom>-20000</CurtainBottom>
+	<FollowTerrain>true</FollowTerrain>
+	<Subsegments>10</Subsegments>
+	
+	<UseTransparentTextures>true</UseTransparentTextures>
+	<ForceLevelZeroLoads>true</ForceLevelZeroLoads>
+	<RetainLevelZeroTiles>true</RetainLevelZeroTiles>
+	<!-- <TextureFormat>image/dds</TextureFormat> -->
+	<UseMipMaps>true</UseMipMaps>
+	<SplitScale>0.9</SplitScale>
+	
+</Layer>

@@ -25,7 +25,7 @@ public class Util
 	public final static double METER_TO_MILE = 0.000621371192;
 
 	public final static String UTM_COORDINATE_REGEX =
-			"(?:[a-zA-Z]*\\s*)(\\d+)(?:\\s*)([a-zA-Z])(?:\\s+)(\\d+)(?:[E|e]?)(?:\\s+)(\\d+)(?:[N|n]?)";
+			"(?:[a-zA-Z]*\\s*)(\\d+)(?:\\s*)([a-zA-Z])(?:\\s+)((?:\\d*\\.?\\d+)|(?:\\d+))(?:[E|e]?)(?:\\s+)((?:\\d*\\.?\\d+)|(?:\\d+))(?:[N|n]?)";
 
 	public static String paddedInt(int value, int charcount)
 	{
