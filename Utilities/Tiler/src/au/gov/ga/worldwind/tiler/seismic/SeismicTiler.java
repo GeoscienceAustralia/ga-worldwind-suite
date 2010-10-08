@@ -200,51 +200,6 @@ public class SeismicTiler
 				}
 			}
 		}
-
-		//separate strips
-		/*for (int level = levels - 1; level >= 0; level--)
-		{
-			levelDir = new File(output, String.valueOf(level));
-
-			File[] files = levelDir.listFiles();
-			for (File file : files)
-			{
-				if (!file.getName().toLowerCase().endsWith(format))
-					continue;
-
-				BufferedImage image = ImageIO.read(file);
-				if (image.getWidth() <= tilesize && image.getHeight() <= tilesize)
-				{
-					continue;
-				}
-				else if (image.getWidth() * image.getHeight() > tilesize * tilesize)
-				{
-					throw new IllegalStateException("Too many pixels!");
-				}
-
-				BufferedImage tile =
-						new BufferedImage(tilesize, tilesize, BufferedImage.TYPE_INT_RGB);
-				Graphics2D g = tile.createGraphics();
-
-				int splitWidth = (image.getWidth() - 1) / tilesize + 1;
-				int splitHeight = (image.getHeight() - 1) / tilesize + 1;
-
-				if (splitWidth > 1)
-				{
-					int h = tilesize / image.getHeight();
-					h = tilesize / h;
-					for (int s = 0, sx = 0, dy = 0; s < splitWidth; s++, sx += tilesize, dy += h)
-					{
-						int w = Math.min(tilesize, image.getWidth() - sx);
-						g.drawImage(image, 0, dy, w, dy + image.getHeight(), sx, 0, sx + w,
-								image.getHeight(), null);
-					}
-				}
-
-				g.dispose();
-				ImageIO.write(tile, format, file);
-			}
-		}*/
 	}
 
 	private static int levelCount(int width, int height, int tilesize)
