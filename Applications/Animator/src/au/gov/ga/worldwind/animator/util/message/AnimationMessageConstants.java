@@ -104,4 +104,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getAnimationBrowserDisableAllLabelKey() { return "animator.gui.menu.disableall.label"; }
 	public static String getAnimationBrowserArmAllLabelKey() { return "animator.gui.menu.armall.label"; }
 	public static String getAnimationBrowserDisarmAllLabelKey() { return "animator.gui.menu.disarmall.label"; }
+	public static String getCopyKeyFrameLabelKey() { return "animator.gui.menu.copykey.label"; }
+	public static String getCutKeyFrameLabelKey() { return "animator.gui.menu.cutkey.label"; }
+	public static String getPasteKeyFrameLabelKey() { return "animator.gui.menu.pastekey.label"; }
 }

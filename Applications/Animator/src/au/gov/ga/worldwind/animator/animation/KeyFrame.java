@@ -21,7 +21,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public interface KeyFrame extends AnimationObject, Serializable, AnimationEventListener, Changeable
+public interface KeyFrame extends AnimationObject, Serializable, AnimationEventListener, Changeable, Cloneable
 {
 	
 	/**
@@ -108,4 +108,9 @@ public interface KeyFrame extends AnimationObject, Serializable, AnimationEventL
 	 * @return Whether this key frame has any recorded {@link ParameterValue}s
 	 */
 	boolean hasParameterValues();
+	
+	/**
+	 * @return A deep-copy clone of this key frame
+	 */
+	KeyFrame clone();
 }

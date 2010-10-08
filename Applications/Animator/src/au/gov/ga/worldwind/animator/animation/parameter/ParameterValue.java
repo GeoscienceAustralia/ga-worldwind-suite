@@ -19,7 +19,7 @@ import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface ParameterValue extends AnimationObject, Serializable, XmlSerializable<ParameterValue>, Changeable
+public interface ParameterValue extends AnimationObject, Serializable, XmlSerializable<ParameterValue>, Changeable, Cloneable
 {
 	/**
 	 * @return The value of this parameter value
@@ -62,4 +62,9 @@ public interface ParameterValue extends AnimationObject, Serializable, XmlSerial
 	 * The algorithm used to achieve smoothing is up to the implementing class. 
 	 */
 	void smooth();
+	
+	/**
+	 * @return A deep-copy clone of this parameter value
+	 */
+	ParameterValue clone();
 }

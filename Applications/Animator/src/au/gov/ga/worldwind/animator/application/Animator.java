@@ -45,7 +45,6 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -85,6 +84,7 @@ import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierFactory;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
 import au.gov.ga.worldwind.animator.ui.ExaggeratorDialog;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
+import au.gov.ga.worldwind.animator.ui.frameslider.CurrentFrameChangeListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
 import au.gov.ga.worldwind.animator.util.ExaggerationAwareStatusBar;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
@@ -181,6 +181,9 @@ public class Animator
 	/** The action factory used to obtain application actions */
 	private AnimatorActionFactory actionFactory;
 
+	/** A clipboard used to perform cut-copy-paste operations on key frames */
+	private KeyFrameClipboard keyFrameClipboard;
+	
 	/**
 	 * Launch an instance of the Animator Application
 	 */
@@ -203,6 +206,7 @@ public class Animator
 		updateElevationModelOnGlobe();
 		
 		initialiseFrameSlider();
+		initialiseKeyFrameClipboard();
 		initialiseSideBar();
 		initialiseStatusBar();
 		initialiseMenuBar();
@@ -471,12 +475,14 @@ public class Animator
 		slider = new FrameSlider(0, 0, getCurrentAnimation().getFrameCount());
 		mainPanel.add(slider, BorderLayout.SOUTH);
 		
-		slider.addChangeListener(new ChangeListener()
+		slider.addChangeListener(new CurrentFrameChangeListener()
 		{
-			public void stateChanged(ChangeEvent e)
+			@Override
+			public void currentFrameChanged(int newCurrentFrame)
 			{
 				if (!settingSlider)
 				{
+					getCurrentAnimation().setCurrentFrame(newCurrentFrame);
 					if (getCurrentAnimation().getKeyFrameCount() > 0)
 					{
 						applyAnimationState();
@@ -484,6 +490,7 @@ public class Animator
 					}
 					stop = true;
 				}
+				
 			}
 		});
 		
@@ -502,6 +509,14 @@ public class Animator
 				wwd.redraw();
 			}
 		});
+	}
+	
+	private void initialiseKeyFrameClipboard()
+	{
+		keyFrameClipboard = new KeyFrameClipboard(this);
+		slider.addChangeListener(keyFrameClipboard);
+		slider.addChangeFrameListener(keyFrameClipboard);
+		animation.addChangeListener(keyFrameClipboard);
 	}
 	
 	/**
@@ -570,6 +585,10 @@ public class Animator
 		menuBar.add(menu);
 		menu.add(actionFactory.getAddKeyAction());
 		menu.add(actionFactory.getDeleteKeyAction());
+		menu.addSeparator();
+		menu.add(keyFrameClipboard.getCutAction());
+		menu.add(keyFrameClipboard.getCopyAction());
+		menu.add(keyFrameClipboard.getPasteAction());
 		menu.addSeparator();
 		actionFactory.getAutoKeyAction().addToMenu(menu);
 		menu.add(actionFactory.getSetFrameCountAction());
@@ -765,6 +784,7 @@ public class Animator
 	{
 		updateAnimationListener(layerUpdateListener);
 		updateAnimationListener(framesChangedListener);
+		updateAnimationListener(keyFrameClipboard);
 		// TODO: Add more listeners here as they are added
 		
 	}
@@ -914,12 +934,10 @@ public class Animator
 	private void applyAnimationState()
 	{
 		int frame = slider.getValue();
-		if (getCurrentAnimation().getFrameOfFirstKeyFrame() <= frame && frame <= getCurrentAnimation().getFrameOfLastKeyFrame())
-		{
-			applying = true;
-			getCurrentAnimation().applyFrame(frame);
-			applying = false;
-		}
+		
+		applying = true;
+		getCurrentAnimation().applyFrame(frame);
+		applying = false;
 	}
 
 	/**
@@ -1229,7 +1247,7 @@ public class Animator
 				{
 					stop = false;
 
-					int firstFrame = Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
+					int firstFrame = Math.max(slider.getValue(), 0);
 					int lastFrame = getCurrentAnimation().getFrameOfLastKeyFrame();
 					int frame;
 					for (frame = firstFrame; frame <= lastFrame; frame += frameSkip)
@@ -1627,6 +1645,7 @@ public class Animator
 		{
 			actionFactory.getUseScaledZoomAction().setSelected(animation.isZoomScalingRequired());
 		}
+		keyFrameClipboard.clearClipboard();
 		updateAnimationListeners();
 		updateLayersInModel();
 		updateElevationModelOnGlobe();

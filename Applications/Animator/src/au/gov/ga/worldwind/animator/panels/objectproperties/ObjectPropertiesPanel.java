@@ -32,6 +32,7 @@ import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
+import au.gov.ga.worldwind.animator.ui.frameslider.CurrentFrameChangeListener;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -48,8 +49,9 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 public class ObjectPropertiesPanel extends CollapsiblePanelBase implements CurrentlySelectedObject.ChangeListener, 
 																		   AnimationEventListener, 
-																		   ChangeFrameListener, 
-																		   ChangeListener, 
+																		   ChangeFrameListener,
+																		   CurrentFrameChangeListener,
+																		   ChangeListener,
 																		   PropertyChangeListener
 {
 	private static final long serialVersionUID = 20100917L;
@@ -216,6 +218,12 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 		updateParameterEditorsDisplay();
 	}
 
+	@Override
+	public void currentFrameChanged(int newCurrentFrame)
+	{
+		updateParameterEditorsDisplay();
+	}
+	
 	@Override
 	public void stateChanged(ChangeEvent e)
 	{

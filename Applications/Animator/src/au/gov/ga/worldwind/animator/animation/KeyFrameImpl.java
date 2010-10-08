@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
@@ -28,14 +29,10 @@ public class KeyFrameImpl extends PropagatingChangeableEventListener implements 
 {
 	private static final long serialVersionUID = 20100819L;
 
-	/**
-	 * The map of Parameter->ParameterValue of values recorded in this key frame 
-	 */
+	/** The map of Parameter->ParameterValue of values recorded in this key frame */
 	private Map<Parameter, ParameterValue> parameterValueMap = new HashMap<Parameter, ParameterValue>();
 	
-	/**
-	 * The frame of the animation this key frame corresponds to
-	 */
+	/** The frame of the animation this key frame corresponds to */
 	private int frame;
 	
 	/** The name of the keyframe. Defaults to <code>KeyFrameN</code>, but can be overridden via the {@link #setName(String)} method */
@@ -199,4 +196,16 @@ public class KeyFrameImpl extends PropagatingChangeableEventListener implements 
 		this.name = name;
 	}
 	
+	@Override
+	public KeyFrame clone()
+	{
+		List<ParameterValue> parameterValues = new ArrayList<ParameterValue>();
+		for (ParameterValue value : getParameterValues())
+		{
+			parameterValues.add(value.clone());
+		}
+		KeyFrameImpl result = new KeyFrameImpl(frame, parameterValues);
+		
+		return result;
+	}
 }

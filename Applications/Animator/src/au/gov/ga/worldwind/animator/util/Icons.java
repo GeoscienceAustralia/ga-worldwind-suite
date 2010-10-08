@@ -19,6 +19,10 @@ public class Icons extends au.gov.ga.worldwind.common.util.Icons
 	public static final Icons armed = new Icons(ANIMATOR_ICONS_DIRECTORY, "armed.gif");
 	public static final Icons disarmed = new Icons(ANIMATOR_ICONS_DIRECTORY, "disarmed.gif");
 	public static final Icons partialArmed = new Icons(ANIMATOR_ICONS_DIRECTORY, "partial_armed.gif");
+	public static final Icons copy = new Icons(ANIMATOR_ICONS_DIRECTORY, "copy.gif");
+	public static final Icons paste = new Icons(ANIMATOR_ICONS_DIRECTORY, "paste.gif");
+	public static final Icons cut = new Icons(ANIMATOR_ICONS_DIRECTORY, "cut.gif");
+	
 	
 	public Icons(String directory, String filename)
 	{

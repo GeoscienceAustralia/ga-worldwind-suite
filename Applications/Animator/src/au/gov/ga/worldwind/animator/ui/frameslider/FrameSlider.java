@@ -21,8 +21,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JComponent;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.animator.application.LAFConstants;
 
@@ -79,7 +77,7 @@ public class FrameSlider extends JComponent
 	private boolean sizeDirty = true;
 	private boolean positionDirty = true;
 
-	private List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
+	private List<CurrentFrameChangeListener> changeListeners = new ArrayList<CurrentFrameChangeListener>();
 	private List<ChangeFrameListener> changeFrameListeners = new ArrayList<ChangeFrameListener>();
 
 	private List<Integer> keys = new ArrayList<Integer>();
@@ -665,22 +663,21 @@ public class FrameSlider extends JComponent
 		g2.drawLine(rect.x + rect.width - 1, rect.y, rect.x + rect.width - 1, rect.y + rect.height - 1);
 	}
 
-	public void addChangeListener(ChangeListener changeListener)
+	public void addChangeListener(CurrentFrameChangeListener changeListener)
 	{
 		changeListeners.add(changeListener);
 	}
 
-	public void removeChangeListener(ChangeListener changeListener)
+	public void removeChangeListener(CurrentFrameChangeListener changeListener)
 	{
 		changeListeners.remove(changeListener);
 	}
 
 	private void notifyChangeListeners()
 	{
-		ChangeEvent e = new ChangeEvent(this);
-		for (ChangeListener changeListener : changeListeners)
+		for (CurrentFrameChangeListener changeListener : changeListeners)
 		{
-			changeListener.stateChanged(e);
+			changeListener.currentFrameChanged(value);
 		}
 	}
 

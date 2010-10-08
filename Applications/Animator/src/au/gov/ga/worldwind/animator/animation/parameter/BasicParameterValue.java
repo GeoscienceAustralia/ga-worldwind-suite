@@ -135,6 +135,14 @@ public class BasicParameterValue extends ChangeableBase implements ParameterValu
 	}
 	
 	@Override
+	public ParameterValue clone()
+	{
+		BasicParameterValue result = new BasicParameterValue(value, frame, owner);
+		result.setName(name);
+		return result;
+	}
+	
+	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
 		AnimationIOConstants constants = version.getConstants();

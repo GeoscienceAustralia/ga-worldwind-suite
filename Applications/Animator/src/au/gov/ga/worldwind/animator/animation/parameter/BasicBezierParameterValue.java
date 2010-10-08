@@ -300,6 +300,15 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	}
 	
 	@Override
+	public ParameterValue clone()
+	{
+		BasicBezierParameterValue result = new BasicBezierParameterValue(getValue(), getFrame(), getOwner(), getInValue(), getInPercent(), getOutValue(), getOutPercent());
+		result.setName(getName());
+		result.setLocked(isLocked());
+		return result;
+	}
+	
+	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
 		AnimationIOConstants constants = version.getConstants();
