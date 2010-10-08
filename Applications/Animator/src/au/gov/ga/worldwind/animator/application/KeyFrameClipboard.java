@@ -84,6 +84,11 @@ public class KeyFrameClipboard implements CurrentFrameChangeListener, ChangeFram
 		return clipboardKeyFrame != null;
 	}
 	
+	public KeyFrame getKeyFrameInClipboard()
+	{
+		return clipboardKeyFrame;
+	}
+	
 	public void copySelectedKeyFrame()
 	{
 		KeyFrame selectedKeyFrame = getSelectedKeyFrame();

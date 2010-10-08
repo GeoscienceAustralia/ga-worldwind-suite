@@ -205,7 +205,7 @@ public class KeyFrameImpl extends PropagatingChangeableEventListener implements 
 			parameterValues.add(value.clone());
 		}
 		KeyFrameImpl result = new KeyFrameImpl(frame, parameterValues);
-		
+		result.setName(getName());
 		return result;
 	}
 }
