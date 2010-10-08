@@ -513,7 +513,7 @@ public class Animator
 	
 	private void initialiseKeyFrameClipboard()
 	{
-		keyFrameClipboard = new KeyFrameClipboard(this);
+		keyFrameClipboard = new KeyFrameClipboard(getCurrentAnimation());
 		slider.addChangeListener(keyFrameClipboard);
 		slider.addChangeFrameListener(keyFrameClipboard);
 		animation.addChangeListener(keyFrameClipboard);
@@ -1645,7 +1645,7 @@ public class Animator
 		{
 			actionFactory.getUseScaledZoomAction().setSelected(animation.isZoomScalingRequired());
 		}
-		keyFrameClipboard.clearClipboard();
+		keyFrameClipboard.updateAnimation(animation);
 		updateAnimationListeners();
 		updateLayersInModel();
 		updateElevationModelOnGlobe();

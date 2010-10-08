@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
+import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
@@ -30,16 +31,16 @@ public class KeyFrameClipboard implements CurrentFrameChangeListener, ChangeFram
 	/** The  key frame currently in the clipboard */
 	private KeyFrame clipboardKeyFrame;
 	
-	private Animator animator;
+	private Animation animation;
 	
 	private BasicAction copyAction;
 	private BasicAction cutAction;
 	private BasicAction pasteAction;
 	
-	public KeyFrameClipboard(Animator animator)
+	public KeyFrameClipboard(Animation animation)
 	{
-		Validate.notNull(animator, "An animator is required");
-		this.animator = animator;
+		Validate.notNull(animation, "An animation is required");
+		this.animation = animation;
 		
 		initialiseActions();
 		updateActionEnabledStatus();
@@ -99,7 +100,7 @@ public class KeyFrameClipboard implements CurrentFrameChangeListener, ChangeFram
 		if (selectedKeyFrame != null)
 		{
 			clipboardKeyFrame = selectedKeyFrame.clone();
-			animator.getCurrentAnimation().removeKeyFrame(selectedKeyFrame);
+			animation.removeKeyFrame(selectedKeyFrame);
 			updateActionEnabledStatus();
 		}
 	}
@@ -110,8 +111,7 @@ public class KeyFrameClipboard implements CurrentFrameChangeListener, ChangeFram
 		{
 			return;
 		}
-		animator.getCurrentAnimation().insertKeyFrame(createKeyFrameForCurrentFrame(), true);
-		animator.updateSlider();
+		animation.insertKeyFrame(createKeyFrameForCurrentFrame(), true);
 		updateActionEnabledStatus();
 	}
 	
@@ -121,6 +121,13 @@ public class KeyFrameClipboard implements CurrentFrameChangeListener, ChangeFram
 		pasteAction.setEnabled(false);
 	}
 	
+	public void updateAnimation(Animation newAnimation)
+	{
+		Validate.notNull(newAnimation, "An animation is required");
+		this.animation = newAnimation;
+		clearClipboard();
+	}
+	
 	private KeyFrame createKeyFrameForCurrentFrame()
 	{
 		return new KeyFrameImpl(getCurrentFrame(), clipboardKeyFrame.getParameterValues());
@@ -128,12 +135,12 @@ public class KeyFrameClipboard implements CurrentFrameChangeListener, ChangeFram
 	
 	private KeyFrame getSelectedKeyFrame()
 	{
-		return animator.getCurrentAnimation().getKeyFrame(getCurrentFrame());
+		return animation.getKeyFrame(getCurrentFrame());
 	}
 
 	private int getCurrentFrame()
 	{
-		return animator.getCurrentAnimation().getCurrentFrame();
+		return animation.getCurrentFrame();
 	}
 
 	public BasicAction getCopyAction()
