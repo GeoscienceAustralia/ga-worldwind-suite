@@ -409,11 +409,6 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 
 		for (CurtainTextureTile tile : this.getTopLevels())
 		{
-			//TODO to tell if a certain CurtainTile is visible, it must first be mapped onto it's
-			//piece of geometry. Perhaps there should be a geometry piece cache, and geometry pieces
-			//are created/cached for each CurtainTile. Then all view geometry calculations can be made
-			//on the geometry piece instead of the CurtainTile.
-
 			if (this.isTileVisible(dc, tile))
 			{
 				this.currentResourceTile = null;

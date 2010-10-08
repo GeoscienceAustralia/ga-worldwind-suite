@@ -290,14 +290,8 @@ public class CurtainTextureTile extends CurtainTile
 		// b. The texture is setup to have GL automatically generate mipmaps. This is typically true when a texture is
 		//    loaded from a standard image type, such as PNG or JPEG, and the caller instructed JOGL to generate
 		//     mipmaps.
-		// Additionally, the texture must be in the latitude range (-80, 80). We do this to prevent seams that appear
-		// between textures near the poles.
-		//
-		// TODO: remove the latitude range restriction if a better tessellator fixes the problem.
 
-		boolean useMipmapFilter = (this.hasMipmapData || t.isUsingAutoMipmapGeneration())
-		/*&& this.getSector().getMaxLatitude().degrees < 80d
-		&& this.getSector().getMinLatitude().degrees > -80*/;
+		boolean useMipmapFilter = (this.hasMipmapData || t.isUsingAutoMipmapGeneration());
 
 		// Set the texture minification filter. If the texture qualifies for mipmaps, apply a minification filter that
 		// will access the mipmap data using the highest quality algorithm. If the anisotropic texture filter is
