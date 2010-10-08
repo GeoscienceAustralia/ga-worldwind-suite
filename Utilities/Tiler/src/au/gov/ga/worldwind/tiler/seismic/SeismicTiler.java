@@ -20,10 +20,10 @@ public class SeismicTiler
 {
 	public static void main(String[] args) throws Exception
 	{
-		File input = new File("D:/Seismic/S310_SWM13_final_mig_unscal.bmp");
-		File output = new File("D:/Seismic/tiles4");
+		File input = new File("D:/Seismic/S310_SWM13_final_mig_unscal_bigger.bmp");
+		File output = new File("D:/Seismic/tiles_bigger");
 		Dataset dataset = GDALUtil.open(input);
-		Insets insets = new Insets(0, 0, 0, 0);
+		Insets insets = new Insets(408, 833, 14385 - 14376, 38159 - 37443);
 		int tilesize = 512;
 		String format = "jpg";
 
@@ -56,6 +56,12 @@ public class SeismicTiler
 
 			for (int x = 0, col = 0; x < width; x += tilesize * yStrips, col++)
 			{
+				File imageFile = tileFile(levelDir, row, col, format);
+				if (imageFile.exists())
+				{
+					continue;
+				}
+
 				int w = Math.min(tilesize * yStrips / xStrips, width - x);
 				int h = Math.min(tilesize * xStrips / yStrips, height - y);
 
@@ -65,7 +71,6 @@ public class SeismicTiler
 				GDALTile tile = new GDALTile(parameters);
 				BufferedImage image = tile.getAsImage();
 
-				File imageFile = tileFile(levelDir, row, col, format);
 				ImageIO.write(image, format, imageFile);
 			}
 		}
@@ -126,6 +131,12 @@ public class SeismicTiler
 					//if lastRows == 1: 0,1,2,3 / 4,5,6,7
 					//            else: 0,1,0,1 / 2,3,2,3
 
+					File imageFile = tileFile(levelDir, row, col, format);
+					if (imageFile.exists())
+					{
+						continue;
+					}
+
 					int firstCol = col * (lastRows == 1 ? 4 : 2);
 					int c0 = colMultiplier * (firstCol);
 					int c1 = colMultiplier * (firstCol + 1);
@@ -136,8 +147,6 @@ public class SeismicTiler
 					File src1 = tileFile(lastLevelDir, r1, c1, format);
 					File src2 = tileFile(lastLevelDir, r2, c2, format);
 					File src3 = tileFile(lastLevelDir, r3, c3, format);
-
-					File imageFile = tileFile(levelDir, row, col, format);
 
 					BufferedImage img0 = src0.exists() ? ImageIO.read(src0) : null;
 					BufferedImage img1 = src1.exists() ? ImageIO.read(src1) : null;
@@ -161,27 +170,28 @@ public class SeismicTiler
 					g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
 							RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
-					int x = 0, y = 0;
+					int x = 0;
+					int y = 0;
 					if (img0 != null)
 					{
 						g.drawImage(img0, x, y, w0, h0, null);
 					}
+					x += lastCols == 1 ? 0 : w0;
+					y += lastCols == 1 ? h0 : 0;
 					if (img1 != null)
 					{
-						x += lastCols == 1 ? 0 : w0;
-						y += lastCols == 1 ? h0 : 0;
 						g.drawImage(img1, x, y, w1, h1, null);
 					}
+					x += lastCols == 1 ? 0 : lastRows == 1 ? w1 : -w0;
+					y += lastCols == 1 ? h1 : lastRows == 1 ? 0 : h0;
 					if (img2 != null)
 					{
-						x += lastCols == 1 ? 0 : lastRows == 1 ? w1 : -w0;
-						y += lastCols == 1 ? h1 : lastRows == 1 ? 0 : h0;
 						g.drawImage(img2, x, y, w2, h2, null);
 					}
+					x += lastCols == 1 ? 0 : w2;
+					y += lastCols == 1 ? h2 : 0;
 					if (img3 != null)
 					{
-						x += lastCols == 1 ? 0 : w2;
-						y += lastCols == 1 ? h2 : 0;
 						g.drawImage(img3, x, y, w3, h3, null);
 					}
 
