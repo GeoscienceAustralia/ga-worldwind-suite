@@ -63,7 +63,8 @@ public class BasicRetrievalService extends WWObjectImpl
             this.priority = priority;
         }
 
-        public double getPriority()
+        @SuppressWarnings("unused")
+		public double getPriority()
         {
             return priority;
         }
