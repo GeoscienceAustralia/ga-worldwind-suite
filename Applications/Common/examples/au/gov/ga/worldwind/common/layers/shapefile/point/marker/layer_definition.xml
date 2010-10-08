@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="ShapefileAnnotationLayer">
+
+	<DisplayName></DisplayName>
+	<Legend></Legend>
+	<URL>file:///C:/WINNT/Profiles/u97852/Desktop/shapefiles/point_test.shp</URL>
+	<LastUpdate></LastUpdate>
+	<DataCacheName>point_test</DataCacheName>
+
+	<!-- <Styles>
+		<Style name="icon1" default="true">
+			<Property name="Material" value="255,255,0" />
+		</Style>
+		<Style name="icon2">
+		</Style>
+		<Style name="icon3">
+		</Style>
+	</Styles> -->
+
+	<Attributes>
+		<Attribute name="Name">
+			<Case value="cool" style="icon1" />
+			<Case value="else" style="icon2" />
+			<Case value="clean" style="icon3" />
+
+			<!-- <Range min="" max="" style="" /> -->
+			<Text value="&lt;b&gt;Name:&lt;/b&gt; %value%" placeholder="%value%" />
+			<Link url="http://www.google.com/search?q=%value%" placeholder="%value%" />
+		</Attribute>
+	</Attributes>
+
+</Layer>
