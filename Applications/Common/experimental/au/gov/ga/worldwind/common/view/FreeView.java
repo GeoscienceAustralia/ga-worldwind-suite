@@ -15,6 +15,9 @@ import javax.media.opengl.GL;
 
 public class FreeView extends BasicView
 {
+	private double minimumFarDistance = MINIMUM_FAR_DISTANCE;
+	private double minimumNearDistance = 0.1;
+
 	public FreeView()
 	{
 		this.viewInputHandler = new BasicFreeViewInputHandler();
@@ -47,6 +50,8 @@ public class FreeView extends BasicView
 		// Update DrawContext and Globe references.
 		this.dc = dc;
 		this.globe = this.dc.getGlobe();
+
+		minimumFarDistance = globe.getDiameter() / 2;
 
 		//========== modelview matrix state ==========//
 		// Compute the current modelview matrix.
@@ -138,5 +143,30 @@ public class FreeView extends BasicView
 		setHeading(ViewUtil.computeHeading(transform));
 		setPitch(ViewUtil.computePitch(transform));
 		setRoll(ViewUtil.computeRoll(transform));
+	}
+
+	@Override
+	protected double computeNearDistance(Position eyePosition)
+	{
+		double near = 0;
+		if (eyePosition != null && this.dc != null)
+		{
+			double elevation = ViewUtil.computeElevationAboveSurface(this.dc, eyePosition);
+			double tanHalfFov = this.fieldOfView.tanHalfAngle();
+			near = elevation / (2 * Math.sqrt(2 * tanHalfFov * tanHalfFov + 1));
+		}
+		return near < minimumNearDistance ? minimumNearDistance : near;
+	}
+
+	@Override
+	protected double computeFarDistance(Position eyePosition)
+	{
+		double far = 0;
+		if (eyePosition != null)
+		{
+			far = computeHorizonDistance(eyePosition);
+		}
+
+		return far < minimumFarDistance ? minimumFarDistance : far;
 	}
 }

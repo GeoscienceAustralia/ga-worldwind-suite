@@ -52,7 +52,7 @@ public class BasicFreeViewInputHandler extends AbstractInputFreeViewInputHandler
 
 	protected double getScaleValueElevation()
 	{
-		double[] range = new double[] { 1, 100000 }; //TODO
+		double[] range = new double[] { 10, 100000 }; //TODO
 
 		View view = getView();
 		Position eyePos = view.getEyePosition();
