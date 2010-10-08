@@ -68,18 +68,26 @@ public class Path
 	}
 
 	public synchronized Vec4 getSegmentCenterPoint(DrawContext dc, Segment segment, double top,
-			double bottom)
+			double bottom, boolean followTerrain)
 	{
 		top *= dc.getVerticalExaggeration();
 		bottom *= dc.getVerticalExaggeration();
 		double height = top - bottom;
 		double e = top - segment.getVerticalCenter() * height;
 		LatLon ll = getPercentLatLon(segment.getHorizontalCenter());
+
+		if (followTerrain)
+		{
+			e +=
+					dc.getGlobe().getElevation(ll.latitude, ll.longitude)
+							* dc.getVerticalExaggeration();
+		}
+
 		return dc.getGlobe().computePointFromPosition(ll, e);
 	}
 
 	public synchronized SegmentGeometry getGeometry(DrawContext dc, Segment segment, double top,
-			double bottom, int subsegments)
+			double bottom, int subsegments, boolean followTerrain)
 	{
 		NavigableMap<Double, LatLon> betweenMap = segmentMap(segment, subsegments);
 		int numVertices = betweenMap.size() * 2;
@@ -88,7 +96,7 @@ public class Path
 
 		DoubleBuffer verts = BufferUtil.newDoubleBuffer(numVertices * 3);
 		DoubleBuffer texCoords = BufferUtil.newDoubleBuffer(numVertices * 2);
-		Vec4 refCenter = getSegmentCenterPoint(dc, segment, top, bottom);
+		Vec4 refCenter = getSegmentCenterPoint(dc, segment, top, bottom, followTerrain);
 
 		//calculate exaggerated segment top/bottom elevations
 		top *= dc.getVerticalExaggeration();
@@ -100,8 +108,16 @@ public class Path
 		double percentDistance = segment.getHorizontalDelta();
 		for (Entry<Double, LatLon> entry : betweenMap.entrySet())
 		{
-			Vec4 point1 = globe.computePointFromPosition(entry.getValue(), t);
-			Vec4 point2 = globe.computePointFromPosition(entry.getValue(), b);
+			LatLon ll = entry.getValue();
+
+			double e = 0;
+			if (followTerrain)
+			{
+				e = globe.getElevation(ll.latitude, ll.longitude) * dc.getVerticalExaggeration();
+			}
+
+			Vec4 point1 = globe.computePointFromPosition(ll, t + e);
+			Vec4 point2 = globe.computePointFromPosition(ll, b + e);
 			double percent = (entry.getKey() - segment.getStart()) / percentDistance;
 
 			verts.put(point1.x - refCenter.x).put(point1.y - refCenter.y)
@@ -116,7 +132,7 @@ public class Path
 	}
 
 	public synchronized Vec4[] getPointsInSegment(DrawContext dc, Segment segment, double top,
-			double bottom, int subsegments)
+			double bottom, int subsegments, boolean followTerrain)
 	{
 		//TODO ?? cache value returned from this method, and if called twice with same input parameters, return cached value ??
 		//TODO create a new function to return some object with a vertex buffer and texture buffer instead of just a Vec4[] array
@@ -133,18 +149,18 @@ public class Path
 		double t = top - segment.getTop() * height;
 		double b = top - segment.getBottom() * height;
 
-		//add top points
-		int j = 0;
-		for (LatLon position : betweenMap.values())
+		//add top points, and add bottom points (add them backwards, so it's a loop)
+		int j = 0, k = betweenMap.size() * 2;
+		for (LatLon ll : betweenMap.values())
 		{
-			points[j++] = globe.computePointFromPosition(position, t);
-		}
+			double e = 0;
+			if (followTerrain)
+			{
+				e = globe.getElevation(ll.latitude, ll.longitude) * dc.getVerticalExaggeration();
+			}
 
-		//add bottom points (add them backwards, so it's a loop)
-		j = betweenMap.size() * 2;
-		for (LatLon position : betweenMap.values())
-		{
-			points[--j] = globe.computePointFromPosition(position, b);
+			points[j++] = globe.computePointFromPosition(ll, t + e);
+			points[--k] = globe.computePointFromPosition(ll, b + e);
 		}
 
 		return points;
@@ -175,9 +191,9 @@ public class Path
 	}
 
 	public synchronized Extent getSegmentExtent(DrawContext dc, Segment segment, double top,
-			double bottom, int subsegments)
+			double bottom, int subsegments, boolean followTerrain)
 	{
-		Vec4[] points = getPointsInSegment(dc, segment, top, bottom, subsegments);
+		Vec4[] points = getPointsInSegment(dc, segment, top, bottom, subsegments, followTerrain);
 		return Box.computeBoundingBox(Arrays.asList(points));
 	}
 

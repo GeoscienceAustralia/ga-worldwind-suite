@@ -218,7 +218,7 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 	{
 		Vec4 centroid =
 				getPath().getSegmentCenterPoint(dc, tile.getSegment(), getCurtainTop(),
-						getCurtainBottom());
+						getCurtainBottom(), isFollowTerrain());
 		Vec4 referencePoint = this.getReferencePoint(dc);
 		if (referencePoint != null)
 			tile.setPriority(centroid.distanceTo3(referencePoint));

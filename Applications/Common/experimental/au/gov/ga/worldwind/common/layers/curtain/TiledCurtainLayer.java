@@ -547,7 +547,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		Segment segment = tile.getSegment();
 		//LatLon start = path.getPercentLatLon(segment.getStart());
 		//LatLon end = path.getPercentLatLon(segment.getEnd());
-		Extent extent = path.getSegmentExtent(dc, segment, curtainTop, curtainBottom, subsegments);
+		Extent extent =
+				path.getSegmentExtent(dc, segment, curtainTop, curtainBottom, subsegments,
+						followTerrain);
 
 		return extent.intersects(dc.getView().getFrustumInModelCoordinates())
 		/*&& (dc.getVisibleSector() == null || dc.getVisibleSector().intersectsSegment(start,
@@ -563,8 +565,10 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 	private boolean needToSplit(DrawContext dc, Segment segment)
 	{
 		Vec4[] points =
-				path.getPointsInSegment(dc, segment, curtainTop, curtainBottom, subsegments);
-		Vec4 centerPoint = path.getSegmentCenterPoint(dc, segment, curtainTop, curtainBottom);
+				path.getPointsInSegment(dc, segment, curtainTop, curtainBottom, subsegments,
+						followTerrain);
+		Vec4 centerPoint =
+				path.getSegmentCenterPoint(dc, segment, curtainTop, curtainBottom, followTerrain);
 
 		View view = dc.getView();
 		double minDistance = view.getEyePoint().distanceTo3(centerPoint);
@@ -656,7 +660,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 			dc.setPerFrameStatistic(PerformanceStatistic.IMAGE_TILE_COUNT, this.tileCountName,
 					this.currentTiles.size());
 			renderer.renderTiles(dc, this.currentTiles, getPath(), getCurtainTop(),
-					getCurtainBottom(), getSubsegments());
+					getCurtainBottom(), getSubsegments(), isFollowTerrain());
 
 			gl.glPopAttrib();
 
@@ -735,7 +739,8 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 			throw new IllegalStateException(message);
 		}
 
-		Extent extent = path.getSegmentExtent(dc, Segment.FULL, curtainTop, curtainBottom, 1);
+		Extent extent =
+				path.getSegmentExtent(dc, Segment.FULL, curtainTop, curtainBottom, 1, followTerrain);
 		return extent.intersects(dc.getView().getFrustumInModelCoordinates());
 
 		/*return dc.getVisibleSector() == null
@@ -804,7 +809,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 			if (tile.getFallbackTile() != null)
 				tileLabel += "/" + tile.getFallbackTile().getLabel();
 
-			Vec4 pt = path.getSegmentCenterPoint(dc, tile.getSegment(), curtainTop, curtainBottom);
+			Vec4 pt =
+					path.getSegmentCenterPoint(dc, tile.getSegment(), curtainTop, curtainBottom,
+							followTerrain);
 			pt = dc.getView().project(pt);
 			textRenderer.draw(tileLabel, (int) pt.x, (int) pt.y);
 		}
@@ -822,7 +829,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		{
 			Extent extent =
 					path.getSegmentExtent(dc, tile.getSegment(), curtainTop, curtainBottom,
-							subsegments);
+							subsegments, followTerrain);
 			if (extent instanceof Renderable)
 				((Renderable) extent).render(dc);
 

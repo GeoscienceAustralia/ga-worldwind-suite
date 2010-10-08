@@ -11,7 +11,7 @@ import javax.media.opengl.GL;
 public class CurtainTileRenderer
 {
 	public void renderTile(DrawContext dc, CurtainTextureTile tile, Path path, double top,
-			double bottom, int subsegments)
+			double bottom, int subsegments, boolean followTerrain)
 	{
 		if (tile == null)
 		{
@@ -22,12 +22,12 @@ public class CurtainTileRenderer
 
 		ArrayList<CurtainTextureTile> al = new ArrayList<CurtainTextureTile>(1);
 		al.add(tile);
-		this.renderTiles(dc, al, path, top, bottom, subsegments);
+		this.renderTiles(dc, al, path, top, bottom, subsegments, followTerrain);
 		al.clear();
 	}
 
 	public void renderTiles(DrawContext dc, Iterable<? extends CurtainTextureTile> tiles,
-			Path path, double top, double bottom, int subsegments)
+			Path path, double top, double bottom, int subsegments, boolean followTerrain)
 	{
 		if (tiles == null)
 		{
@@ -80,11 +80,12 @@ public class CurtainTileRenderer
 				if (tile.bind(dc))
 				{
 					gl.glMatrixMode(GL.GL_TEXTURE);
-		            gl.glLoadIdentity();
+					gl.glLoadIdentity();
 					tile.applyInternalTransform(dc);
-					
+
 					SegmentGeometry geometry =
-							path.getGeometry(dc, tile.getSegment(), top, bottom, subsegments);
+							path.getGeometry(dc, tile.getSegment(), top, bottom, subsegments,
+									followTerrain);
 					geometry.render(dc, 1);
 				}
 			}
