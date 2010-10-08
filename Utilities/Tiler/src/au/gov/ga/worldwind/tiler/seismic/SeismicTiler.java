@@ -14,13 +14,14 @@ import org.gdal.gdal.Dataset;
 import au.gov.ga.worldwind.tiler.gdal.GDALTile;
 import au.gov.ga.worldwind.tiler.gdal.GDALTileParameters;
 import au.gov.ga.worldwind.tiler.gdal.GDALUtil;
+import au.gov.ga.worldwind.tiler.util.Util;
 
 public class SeismicTiler
 {
 	public static void main(String[] args) throws Exception
 	{
 		File input = new File("D:/Seismic/S310_SWM13_final_mig_unscal.bmp");
-		File output = new File("D:/Seismic/tiles3");
+		File output = new File("D:/Seismic/tiles4");
 		Dataset dataset = GDALUtil.open(input);
 		Insets insets = new Insets(0, 0, 0, 0);
 		int tilesize = 512;
@@ -41,7 +42,6 @@ public class SeismicTiler
 		}
 
 		File levelDir = new File(output, String.valueOf(levels - 1));
-		levelDir.mkdirs();
 
 		int xStrips = Math.max(1, tilesize / width);
 		int yStrips = Math.max(1, tilesize / height);
@@ -50,6 +50,10 @@ public class SeismicTiler
 
 		for (int y = 0, row = 0; y < height; y += tilesize * xStrips, row++)
 		{
+			String rowPadded = Util.paddedInt(row, 4);
+			File rowDir = new File(levelDir, rowPadded);
+			rowDir.mkdirs();
+
 			for (int x = 0, col = 0; x < width; x += tilesize * yStrips, col++)
 			{
 				int w = Math.min(tilesize * yStrips / xStrips, width - x);
@@ -61,7 +65,7 @@ public class SeismicTiler
 				GDALTile tile = new GDALTile(parameters);
 				BufferedImage image = tile.getAsImage();
 
-				File imageFile = new File(levelDir, row + "_" + col + "." + format);
+				File imageFile = tileFile(levelDir, row, col, format);
 				ImageIO.write(image, format, imageFile);
 			}
 		}
@@ -106,6 +110,10 @@ public class SeismicTiler
 				//if lastCols == 1: 0,1,2,3 / 4,5,6,7
 				//            else: 0,0,1,1 / 2,2,3,3
 
+				String rowPadded = Util.paddedInt(row, 4);
+				File rowDir = new File(levelDir, rowPadded);
+				rowDir.mkdirs();
+
 				int firstRow = row * 4;
 				int r0 = rowMultiplier * (firstRow + 0) / rowDivisor;
 				int r1 = rowMultiplier * (firstRow + 1) / rowDivisor;
@@ -124,12 +132,12 @@ public class SeismicTiler
 					int c2 = colMultiplier * (firstCol + colDelta);
 					int c3 = colMultiplier * (firstCol + colDelta + 1);
 
-					File src0 = new File(lastLevelDir, r0 + "_" + c0 + "." + format);
-					File src1 = new File(lastLevelDir, r1 + "_" + c1 + "." + format);
-					File src2 = new File(lastLevelDir, r2 + "_" + c2 + "." + format);
-					File src3 = new File(lastLevelDir, r3 + "_" + c3 + "." + format);
+					File src0 = tileFile(lastLevelDir, r0, c0, format);
+					File src1 = tileFile(lastLevelDir, r1, c1, format);
+					File src2 = tileFile(lastLevelDir, r2, c2, format);
+					File src3 = tileFile(lastLevelDir, r3, c3, format);
 
-					File imageFile = new File(levelDir, row + "_" + col + "." + format);
+					File imageFile = tileFile(levelDir, row, col, format);
 
 					BufferedImage img0 = src0.exists() ? ImageIO.read(src0) : null;
 					BufferedImage img1 = src1.exists() ? ImageIO.read(src1) : null;
@@ -242,5 +250,13 @@ public class SeismicTiler
 			yCount /= 2f;
 		}
 		return levels;
+	}
+
+	private static File tileFile(File levelDir, int row, int col, String ext)
+	{
+		String paddedRow = Util.paddedInt(row, 4);
+		String paddedCol = Util.paddedInt(col, 4);
+		File rowDir = new File(levelDir, paddedRow);
+		return new File(rowDir, paddedRow + "_" + paddedCol + "." + ext);
 	}
 }
