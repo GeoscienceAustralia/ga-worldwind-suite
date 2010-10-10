@@ -14,8 +14,6 @@ import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWXML;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -118,16 +116,9 @@ public class Skysphere extends AbstractLayer
 	{
 		try
 		{
-			InputStream stream = this.getClass().getResourceAsStream("/" + textureLocation);
-			if (stream == null)
-			{
-				File file = new File(textureLocation);
-				if (file.exists())
-				{
-					stream = new FileInputStream(file);
-				}
-			}
-
+			URL textureUrl = new URL(context, textureLocation);
+			InputStream stream = textureUrl.openStream();
+			
 			texture = TextureIO.newTexture(stream, true, null);
 			texture.bind();
 		}

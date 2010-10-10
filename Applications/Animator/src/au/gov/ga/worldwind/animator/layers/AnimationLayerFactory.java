@@ -25,7 +25,7 @@ public class AnimationLayerFactory extends LayerFactory
 		String layerType = WWXML.getText(domElement, "@layerType");
 		if (Skysphere.LAYER_TYPE.equals(layerType))
 		{
-			
+			return new Skysphere(domElement, params);
 		}
 		
 		return super.createFromLayerDocument(domElement, params);
