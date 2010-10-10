@@ -1,20 +1,20 @@
 package au.gov.ga.worldwind.animator.application;
 
-import java.util.logging.Level;
-
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.util.Logging;
 
+import java.util.logging.Level;
+
 import javax.media.opengl.GLCapabilities;
 import javax.swing.UIManager;
 
+import au.gov.ga.worldwind.animator.layers.AnimationLayerFactory;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateRetrievalService;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateTaskService;
 import au.gov.ga.worldwind.animator.terrain.ImmediateRectangularTessellator;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
-import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
@@ -93,7 +93,7 @@ public class AnimatorConfiguration
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ImmediateRetrievalService.class.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, ImmediateRectangularTessellator.class.getName());
 		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE, 16777216L * 8); // 128 mb
-		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
+		Configuration.setValue(AVKey.LAYER_FACTORY, AnimationLayerFactory.class.getName());
 		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
 	}
 	

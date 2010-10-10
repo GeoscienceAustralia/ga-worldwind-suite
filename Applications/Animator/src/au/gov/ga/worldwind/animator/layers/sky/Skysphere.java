@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.animator.layers.sky;
 
+import static au.gov.ga.worldwind.animator.util.Util.isBlank;
+import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Matrix;
@@ -13,11 +16,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 
 import javax.media.opengl.GL;
 
+import org.w3c.dom.Element;
+
+import au.gov.ga.worldwind.animator.util.AVKeyMore;
+import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.animator.view.roll.RollOrbitView;
 
 import com.sun.opengl.util.BufferUtil;
@@ -26,29 +34,73 @@ import com.sun.opengl.util.texture.TextureIO;
 
 public class Skysphere extends AbstractLayer
 {
+	public static final String LAYER_TYPE = "SkySphereLayer";
+
 	private int vertexCount, triCount;
 	private DoubleBuffer vb, nb, tb;
 	private IntBuffer ib;
 	private Texture texture;
 	private boolean inited = false;
-	private String texturePath = "data/skysphere/sky10.png";
+
+	private URL context;
+	private String textureLocation;
 	private int slices = 20;
 	private int segments = 20;
-	private Angle rotation = Angle.fromDegrees(83d);
+	private Angle rotation = Angle.fromDegrees(0);
 
-	public Skysphere()
+	/**
+	 * Create a new {@link Skysphere} from the provided parameters
+	 */
+	public Skysphere(AVList params)
 	{
+		String s = params.getStringValue(AVKey.DISPLAY_NAME);
+		if (!isBlank(s))
+		{
+			setName(s);
+		}
+		
+		s = params.getStringValue(AVKey.URL);
+		Validate.notBlank(s, "A texture location must be provided");
+		textureLocation = s;
+		
+		Integer i = (Integer)params.getValue(AVKeyMore.SKYSPHERE_SLICES);
+		if (i != null)
+		{
+			slices = i;
+		}
+		
+		i = (Integer)params.getValue(AVKeyMore.SKYSPHERE_SEGMENTS);
+		if (i != null)
+		{
+			segments = i;
+		}
+		
+		Double d = (Double)params.getValue(AVKeyMore.SKYSPHERE_ANGLE);
+		if (d != null)
+		{
+			rotation = Angle.fromDegrees(d);
+		}
+		
+		context = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
+		Validate.notNull(context, "A context URL must be provided");
+	}
+
+	/**
+	 * Create a new {@link Skysphere} from the provided XML definition
+	 */
+	public Skysphere(Element domElement, AVList params)
+	{
+
 	}
 
 	private void initializeTextures(DrawContext dc)
 	{
 		try
 		{
-			InputStream stream = this.getClass().getResourceAsStream(
-					"/" + texturePath);
+			InputStream stream = this.getClass().getResourceAsStream("/" + textureLocation);
 			if (stream == null)
 			{
-				File file = new File(texturePath);
+				File file = new File(textureLocation);
 				if (file.exists())
 				{
 					stream = new FileInputStream(file);
@@ -60,22 +112,17 @@ public class Skysphere extends AbstractLayer
 		}
 		catch (IOException e)
 		{
-			String msg = Logging
-					.getMessage("layers.IOExceptionDuringInitialization");
+			String msg = Logging.getMessage("layers.IOExceptionDuringInitialization");
 			Logging.logger().severe(msg);
 			throw new WWRuntimeException(msg, e);
 		}
 
 		GL gl = dc.getGL();
 		gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER,
-				GL.GL_LINEAR_MIPMAP_LINEAR);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER,
-				GL.GL_LINEAR);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S,
-				GL.GL_CLAMP_TO_EDGE);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T,
-				GL.GL_CLAMP_TO_EDGE);
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR);
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
 		// Enable texture anisotropy, improves "tilted" world map quality.
 		/*int[] maxAnisotropy = new int[1];
 		gl
@@ -102,10 +149,10 @@ public class Skysphere extends AbstractLayer
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
 
-		dc.getGLU().gluPerspective(
-				dc.getView().getFieldOfView().degrees,
-				dc.getView().getViewport().getWidth()
-						/ dc.getView().getViewport().getHeight(), 0.1, 10.0);
+		dc.getGLU().gluPerspective(dc.getView().getFieldOfView().degrees,
+								   dc.getView().getViewport().getWidth() / dc.getView().getViewport().getHeight(), 
+								   0.1, 
+								   10.0);
 
 		//set up modelview matrix
 		gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -127,10 +174,8 @@ public class Skysphere extends AbstractLayer
 
 		Matrix transform = Matrix.IDENTITY;
 		transform = transform.multiply(Matrix.fromRotationZ(roll));
-		transform = transform.multiply(Matrix.fromRotationX(pitch
-				.addDegrees(90).multiply(-1.0)));
-		transform = transform.multiply(Matrix.fromRotationY(heading.multiply(
-				-1.0).add(rotation)));
+		transform = transform.multiply(Matrix.fromRotationX(pitch.addDegrees(90).multiply(-1.0)));
+		transform = transform.multiply(Matrix.fromRotationY(heading.multiply(-1.0).add(rotation)));
 
 		double[] matrixArray = new double[16];
 		transform.toArray(matrixArray, 0, false);
@@ -181,16 +226,14 @@ public class Skysphere extends AbstractLayer
 		gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vb);
 		gl.glNormalPointer(GL.GL_DOUBLE, 0, nb);
 		gl.glTexCoordPointer(2, GL.GL_DOUBLE, 0, tb);
-		gl.glDrawElements(GL.GL_TRIANGLES, ib.limit() / 2, GL.GL_UNSIGNED_INT,
-				ib);
+		gl.glDrawElements(GL.GL_TRIANGLES, ib.limit() / 2, GL.GL_UNSIGNED_INT, ib);
 
 		gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
 		gl.glDisableClientState(GL.GL_NORMAL_ARRAY);
 		gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
 	}
 
-	private void setupGeometryBuffers(int slices, int segments, double radius,
-			boolean projected, boolean interior)
+	private void setupGeometryBuffers(int slices, int segments, double radius, boolean projected, boolean interior)
 	{
 		// allocate vertices
 		vertexCount = (slices - 2) * (segments + 1) + 2;
@@ -252,19 +295,25 @@ public class Skysphere extends AbstractLayer
 				Vec4 v = radial.multiply3(sliceRadius).add3(sliceCenter);
 				vb.put(v.x).put(v.y).put(v.z);
 
-				Vec4 normal = new Vec4(vb.get(i * 3), vb.get(i * 3 + 1), vb
-						.get(i * 3 + 2));
+				Vec4 normal = new Vec4(vb.get(i * 3), vb.get(i * 3 + 1), vb.get(i * 3 + 2));
 				normal = normal.subtract3(center).normalize3();
 				if (!interior) // later we may allow interior texture vs. exterior
+				{
 					nb.put(normal.x).put(normal.y).put(normal.z);
+				}
 				else
+				{
 					nb.put(-normal.x).put(-normal.y).put(-normal.z);
+				}
 
 				if (!projected)
+				{
 					tb.put(radialFraction).put(0.5f * (yFraction + 1.0f));
+				}
 				else
-					tb.put(radialFraction).put(
-							invpi * (halfpi + Math.asin(yFraction)));
+				{
+					tb.put(radialFraction).put(invpi * (halfpi + Math.asin(yFraction)));
+				}
 
 				i++;
 			}
@@ -280,9 +329,13 @@ public class Skysphere extends AbstractLayer
 			nb.put(d3);
 
 			if (!projected)
+			{
 				tb.put(1.0f).put(0.5f * (yFraction + 1.0f));
+			}
 			else
+			{
 				tb.put(1.0f).put(invpi * (halfpi + Math.asin(yFraction)));
+			}
 
 			i++;
 		}
@@ -293,9 +346,13 @@ public class Skysphere extends AbstractLayer
 
 		nb.position(i * 3);
 		if (!interior) // allow for inner texture orientation later.
+		{
 			nb.put(0).put(-1).put(0);
+		}
 		else
+		{
 			nb.put(0).put(1).put(0);
+		}
 
 		tb.position(i * 2);
 		tb.put(0.5f).put(0.0f);
@@ -306,10 +363,14 @@ public class Skysphere extends AbstractLayer
 		vb.put(center.x).put(center.y + radius).put(center.z);
 
 		if (!interior)
+		{
 			nb.put(0).put(1).put(0);
+		}
 		else
+		{
 			nb.put(0).put(-1).put(0);
-
+		}
+		
 		tb.put(0.5f).put(1.0f);
 
 
