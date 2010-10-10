@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	A minimum Skysphere definition. Mandatory fields included.
+ -->
+<Layer version="1" layerType="SkysphereLayer">
+	<!-- The location of the texture to use. Can be relative or an absolute URL. Mandatory. -->
+	<TextureLocation>testTexture.png</TextureLocation>
+</Layer>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	A complete Skysphere definition. All fields included.
+ -->
+<Layer version="1" layerType="SkysphereLayer">
+	<!-- The display name. Optional, but recommended. -->
+	<DisplayName>testName</DisplayName>
+	
+	<!-- The location of the texture to use. Can be relative or an absolute URL. Mandatory. -->
+	<TextureLocation>testTexture.png</TextureLocation>
+	
+	<!-- The number of slices to use for the skysphere. Optional -->
+	<Slices>23</Slices>
+	
+	<!-- The number of segments to use for the skysphere. Optional -->
+	<Segments>32</Segments>
+	
+	<!-- Angle (in degrees) with which to rotate the skysphere. Optional -->
+	<Rotation>14</Rotation>
+</Layer>

@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.animator.layers.sky;
 import static au.gov.ga.worldwind.animator.util.Util.isBlank;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Matrix;
@@ -10,6 +11,7 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.WWXML;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.io.File;
@@ -34,7 +36,7 @@ import com.sun.opengl.util.texture.TextureIO;
 
 public class Skysphere extends AbstractLayer
 {
-	public static final String LAYER_TYPE = "SkySphereLayer";
+	public static final String LAYER_TYPE = "SkysphereLayer";
 
 	private int vertexCount, triCount;
 	private DoubleBuffer vb, nb, tb;
@@ -52,6 +54,33 @@ public class Skysphere extends AbstractLayer
 	 * Create a new {@link Skysphere} from the provided parameters
 	 */
 	public Skysphere(AVList params)
+	{
+		Validate.notNull(params, "Parameters are required");
+		
+		initialiseFromParams(params);
+	}
+
+	/**
+	 * Create a new {@link Skysphere} from the provided XML definition
+	 */
+	public Skysphere(Element domElement, AVList params)
+	{
+		if (params == null)
+		{
+			params = new AVListImpl();
+		}
+		
+		AbstractLayer.getLayerConfigParams(domElement, params);
+		
+		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.URL, "TextureLocation", null);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SKYSPHERE_SLICES, "Slices", null);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SKYSPHERE_SEGMENTS, "Segments", null);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.SKYSPHERE_ANGLE, "Rotation", null);
+		
+		initialiseFromParams(params);
+	}
+	
+	private void initialiseFromParams(AVList params)
 	{
 		String s = params.getStringValue(AVKey.DISPLAY_NAME);
 		if (!isBlank(s))
@@ -83,14 +112,6 @@ public class Skysphere extends AbstractLayer
 		
 		context = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
 		Validate.notNull(context, "A context URL must be provided");
-	}
-
-	/**
-	 * Create a new {@link Skysphere} from the provided XML definition
-	 */
-	public Skysphere(Element domElement, AVList params)
-	{
-
 	}
 
 	private void initializeTextures(DrawContext dc)

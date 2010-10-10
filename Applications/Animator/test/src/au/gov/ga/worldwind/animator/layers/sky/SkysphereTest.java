@@ -1,17 +1,20 @@
 package au.gov.ga.worldwind.animator.layers.sky;
 
-import static org.junit.Assert.*;
-
-import java.net.URL;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.util.WWXML;
+
+import java.net.URL;
 
 import org.junit.Test;
+import org.w3c.dom.Document;
 
 import au.gov.ga.worldwind.animator.util.AVKeyMore;
 import au.gov.ga.worldwind.test.util.TestUtils;
+
 
 /**
  * Unit tests for the {@link Skysphere} class
@@ -107,6 +110,43 @@ public class SkysphereTest
 		{
 			// Pass
 		}
+	}
+	
+	@Test
+	public void testXMLCtorWithCompleteDefinition() throws Exception
+	{
+		Document document = WWXML.openDocument(getClass().getResource("skysphereDefinitionComplete.xml"));
+		
+		AVList params = new AVListImpl();
+		params.setValue(AVKeyMore.CONTEXT_URL, new URL("http://test/url"));
+		
+		classToBeTested = new Skysphere(document.getDocumentElement(), params);
+		
+		assertEquals("testName", classToBeTested.getName());
+		assertEquals("testTexture.png", TestUtils.getField(classToBeTested, "textureLocation", String.class));
+		assertEquals(new URL("http://test/url"), TestUtils.getField(classToBeTested, "context", URL.class));
+		
+		assertEquals(23, (int)TestUtils.getField(classToBeTested, "slices", Integer.class));
+		assertEquals(32, (int)TestUtils.getField(classToBeTested, "segments", Integer.class));
+		assertEquals(Angle.fromDegrees(14), (Angle)TestUtils.getField(classToBeTested, "rotation", Angle.class));
+	}
+	
+	@Test
+	public void testXMLCtorWithMinimumDefinition() throws Exception
+	{
+		Document document = WWXML.openDocument(getClass().getResource("skysphereDefinitionMinimum.xml"));
+		
+		AVList params = new AVListImpl();
+		params.setValue(AVKeyMore.CONTEXT_URL, new URL("http://test/url"));
+		
+		classToBeTested = new Skysphere(document.getDocumentElement(), params);
+		
+		assertEquals("testTexture.png", TestUtils.getField(classToBeTested, "textureLocation", String.class));
+		assertEquals(new URL("http://test/url"), TestUtils.getField(classToBeTested, "context", URL.class));
+		
+		assertEquals(20, (int)TestUtils.getField(classToBeTested, "slices", Integer.class));
+		assertEquals(20, (int)TestUtils.getField(classToBeTested, "segments", Integer.class));
+		assertEquals(Angle.fromDegrees(0), (Angle)TestUtils.getField(classToBeTested, "rotation", Angle.class));
 	}
 	
 }
