@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.common.layers.shapefile.point.marker;
+package au.gov.ga.worldwind.common.layers.point.marker;
 
 import gov.nasa.worldwind.examples.ApplicationTemplate;
 import gov.nasa.worldwind.render.WWIcon;
@@ -9,6 +9,8 @@ import nasa.worldwind.layers.FogLayer;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.point.PointLayer;
+import au.gov.ga.worldwind.common.layers.point.PointLayerUtils;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 public class Sandpit extends ApplicationTemplate
@@ -35,10 +37,10 @@ public class Sandpit extends ApplicationTemplate
 			InputStream is = Sandpit.class.getResourceAsStream("layer_definition.xml");
 			Element domElement = XMLUtil.getElementFromSource(is);
 
-			ShapefileMarkerLayer layer = new ShapefileMarkerLayer(domElement, null);
+			PointLayer layer = PointLayerUtils.createPointLayer(domElement, null);
 			layer.setName("Markers");
 			insertAfterPlacenames(getWwd(), layer);
-			getWwd().addSelectListener(layer);
+			layer.setup(getWwd());
 			
 			FogLayer fog = new FogLayer();
 			insertBeforeLayerName(getWwd(), fog, "NASA Blue Marble Image");

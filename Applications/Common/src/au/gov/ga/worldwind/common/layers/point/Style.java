@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.common.layers.shapefile.point;
+package au.gov.ga.worldwind.common.layers.point;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.render.Material;
@@ -20,13 +20,28 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Generalised selectable style. Defines a bunch of properties that are set on
+ * an object using reflection. A style is selected using the
+ * {@link StyleProvider} for a particular set of attribute values, and then the
+ * Style is used to set an object's properties.
+ * 
+ * @author Michael de Hoog
+ */
 public class Style
 {
 	protected String name;
 	protected boolean defalt;
-	protected Map<String, String> properties = new HashMap<String, String>();
-	protected Map<String, String> typeOverrides = new HashMap<String, String>();
+	protected final Map<String, String> properties = new HashMap<String, String>();
+	protected final Map<String, String> typeOverrides = new HashMap<String, String>();
 
+	/**
+	 * Create a new style.
+	 * 
+	 * @param name
+	 * @param defalt
+	 *            Is this style the default style?
+	 */
 	public Style(String name, boolean defalt)
 	{
 		setName(name);
@@ -53,6 +68,17 @@ public class Style
 		this.defalt = defalt;
 	}
 
+	/**
+	 * Add a property that this style will set.
+	 * 
+	 * @param property
+	 *            Property name
+	 * @param value
+	 *            Value to set the property to (can replace with attribute
+	 *            values by using a %attributeName% placeholder)
+	 * @param typeOverride
+	 *            Type to use when setting the property
+	 */
 	public void addProperty(String property, String value, String typeOverride)
 	{
 		properties.put(property, value);
@@ -62,11 +88,27 @@ public class Style
 		}
 	}
 
-	public void setPropertiesFromAttributes(URL context, AVList attributes, Object... objects)
+	/**
+	 * Set the objects properties to the values in this style. Iterates through
+	 * each of the properties in this style, searches for a matching setter
+	 * method for the property, and if found, calls the setter with this style's
+	 * property value. Can also insert values from the attributes themselves, by
+	 * using the %attributeName% placeholder in the value string.
+	 * 
+	 * @param context
+	 *            Layer's context url
+	 * @param attributeValues
+	 *            Attribute values
+	 * @param objects
+	 *            Objects to search for matching setter properties, using
+	 *            reflection
+	 */
+	public void setPropertiesFromAttributes(URL context, AVList attributeValues, Object... objects)
 	{
 		Map<String, Method> methods = new HashMap<String, Method>();
 		Map<Method, Object> methodToObject = new HashMap<Method, Object>();
 
+		//create a list of the methods in the objects
 		for (Object object : objects)
 		{
 			for (Method method : object.getClass().getMethods())
@@ -76,8 +118,10 @@ public class Style
 			}
 		}
 
+		//for each of the properties in this style
 		for (Entry<String, String> entry : properties.entrySet())
 		{
+			//search for the setter method for this property
 			String property = entry.getKey();
 			String methodName = "set" + property;
 			if (!methods.containsKey(methodName))
@@ -91,6 +135,7 @@ public class Style
 				throw new IllegalArgumentException(message);
 			}
 
+			//find out the method's parameters
 			Method setter = methods.get(methodName);
 			Object object = methodToObject.get(setter);
 			Class<?>[] parameters = setter.getParameterTypes();
@@ -103,12 +148,15 @@ public class Style
 				throw new IllegalArgumentException(message);
 			}
 
+			//get the string value to pass to the method
 			String stringValue = entry.getValue();
-			stringValue = replaceVariablesWithAttributeValues(stringValue, attributes);
+			stringValue = replaceVariablesWithAttributeValues(stringValue, attributeValues);
 
+			//find out the type to pass to the method
 			Class<?> parameterType = parameters[0];
 			Class<?> type = parameterType;
 
+			//check if the type has been overridden (useful if the type above is just 'Object')
 			String typeOverride = typeOverrides.get(property);
 			if (typeOverride != null)
 			{
@@ -130,6 +178,7 @@ public class Style
 				}
 			}
 
+			//convert the string value to a valid type
 			Object value = null;
 			try
 			{
@@ -138,7 +187,6 @@ public class Style
 			catch (Exception e)
 			{
 			}
-
 			if (value == null)
 			{
 				String message = "Error converting '" + stringValue + "' to type " + type;
@@ -146,6 +194,7 @@ public class Style
 				throw new IllegalArgumentException(message);
 			}
 
+			//invoke the setter with the value
 			try
 			{
 				setter.invoke(object, value);
@@ -161,7 +210,17 @@ public class Style
 		}
 	}
 
-	protected static String replaceVariablesWithAttributeValues(String string, AVList attributes)
+	/**
+	 * Replaces attribute placeholders in a string with the attribute value
+	 * 
+	 * @param string
+	 *            String to replace placeholders in
+	 * @param attributesValues
+	 *            Attribute values
+	 * @return Replaced string
+	 */
+	protected static String replaceVariablesWithAttributeValues(String string,
+			AVList attributesValues)
 	{
 		Pattern pattern = Pattern.compile("%[^%]+%");
 		Matcher matcher = pattern.matcher(string);
@@ -174,14 +233,14 @@ public class Style
 			String attribute = matcher.group();
 			attribute = attribute.substring(1, attribute.length() - 1);
 
-			if (!attributes.hasKey(attribute))
+			if (!attributesValues.hasKey(attribute))
 			{
 				String message = "Could not find attribute '" + attribute + "'";
 				Logging.logger().severe(message);
 				throw new IllegalArgumentException(message);
 			}
 
-			String value = attributes.getValue(attribute).toString();
+			String value = attributesValues.getValue(attribute).toString();
 			replacement.append(value);
 
 			start = matcher.end();
@@ -191,6 +250,12 @@ public class Style
 		return replacement.toString();
 	}
 
+	/**
+	 * Convert a type string to a class
+	 * 
+	 * @param type
+	 * @return Class represented by the type string
+	 */
 	protected static Class<?> convertTypeToClass(String type)
 	{
 		if ("String".equalsIgnoreCase(type))
@@ -224,6 +289,17 @@ public class Style
 		return null;
 	}
 
+	/**
+	 * Convert a string to a certain type, parsing the string if required
+	 * 
+	 * @param context
+	 *            If creating a URL, use this as the URL's context
+	 * @param string
+	 *            String to convert
+	 * @param type
+	 *            Type to convert to
+	 * @return Converted string, or null if failed
+	 */
 	protected static Object convertStringToType(URL context, String string, Class<?> type)
 	{
 		if (type.isAssignableFrom(String.class))
@@ -315,6 +391,12 @@ public class Style
 		return null;
 	}
 
+	/**
+	 * Split a string into an array of integers
+	 * 
+	 * @param string
+	 * @return Array of ints
+	 */
 	protected static int[] splitInts(String string)
 	{
 		String[] split = string.trim().split(",");

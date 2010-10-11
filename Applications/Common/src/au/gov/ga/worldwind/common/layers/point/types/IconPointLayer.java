@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.common.layers.shapefile.point.icon;
+package au.gov.ga.worldwind.common.layers.point.types;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -6,71 +6,75 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.IconLayer;
 import gov.nasa.worldwind.pick.PickedObject;
-import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.render.WWIcon;
 
-import java.awt.Point;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.w3c.dom.Element;
-
-import au.gov.ga.worldwind.common.layers.shapefile.point.ShapefilePointLayer;
-import au.gov.ga.worldwind.common.layers.shapefile.point.Style;
+import au.gov.ga.worldwind.common.layers.point.PointLayer;
+import au.gov.ga.worldwind.common.layers.point.PointLayerHelper;
+import au.gov.ga.worldwind.common.layers.point.PointProperties;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
-import au.gov.ga.worldwind.common.util.Setupable;
 
-public class ShapefileIconLayer extends ShapefilePointLayer implements SelectListener, Setupable
+/**
+ * {@link PointLayer} implementation which extends {@link IconLayer} and uses
+ * Icons to represent points.
+ * 
+ * @author Michael de Hoog
+ */
+public class IconPointLayer extends IconLayer implements PointLayer, SelectListener
 {
-	//TODO think about adding downloading of icons to retrieval system, and caching them
+	private final PointLayerHelper helper;
+	private WWIcon pickedIcon;
 
-	protected IconLayer iconLayer;
-	protected WWIcon pickedIcon;
-
-	public ShapefileIconLayer(Element domElement, AVList params)
+	public IconPointLayer(PointLayerHelper helper)
 	{
-		super(domElement, params);
-		iconLayer = new IconLayer();
-		setPickEnabled(true);
+		this.helper = helper;
 	}
 
 	@Override
-	public void setPickEnabled(boolean pickable)
+	public void setup(WorldWindow wwd)
 	{
-		super.setPickEnabled(pickable);
-		iconLayer.setPickEnabled(pickable);
+		wwd.addSelectListener(this);
 	}
 
 	@Override
-	protected void addPoint(Position position, AVList attrib, Style style, String text, String link)
+	public Sector getSector()
 	{
+		return helper.getSector();
+	}
+
+	@Override
+	public void addPoint(Position position, AVList attributeValues)
+	{
+		PointProperties properties = helper.getStyle(attributeValues);
 		UserFacingIcon icon = new UserFacingIcon();
 		icon.setPosition(position);
-		icon.setToolTipText(text);
-		icon.setValue(AVKey.URL, link);
-		style.setPropertiesFromAttributes(context, attrib, icon);
-		iconLayer.addIcon(icon);
+		icon.setToolTipText(properties.text);
+		icon.setValue(AVKey.URL, properties.link);
+		properties.style.setPropertiesFromAttributes(helper.getContext(), attributeValues, icon);
+		this.addIcon(icon);
 	}
 
 	@Override
-	protected void doPick(DrawContext dc, Point point)
+	public void loadComplete()
 	{
-		iconLayer.pick(dc, point);
 	}
 
 	@Override
-	protected void doPreRender(DrawContext dc)
+	public URL getUrl() throws MalformedURLException
 	{
-		iconLayer.preRender(dc);
+		return helper.getUrl();
 	}
 
 	@Override
-	protected void doRender(DrawContext dc)
+	public String getDataCacheName()
 	{
-		iconLayer.render(dc);
+		return helper.getDataCacheName();
 	}
 
 	@Override
@@ -117,11 +121,5 @@ public class ShapefileIconLayer extends ShapefilePointLayer implements SelectLis
 	{
 		icon.setShowToolTip(highlight);
 		icon.setHighlighted(highlight);
-	}
-
-	@Override
-	public void setup(WorldWindow wwd)
-	{
-		wwd.addSelectListener(this);
 	}
 }

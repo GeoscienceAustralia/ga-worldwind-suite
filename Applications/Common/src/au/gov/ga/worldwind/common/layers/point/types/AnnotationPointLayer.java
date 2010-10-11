@@ -1,4 +1,7 @@
-package au.gov.ga.worldwind.common.layers.shapefile.point.annotation;
+package au.gov.ga.worldwind.common.layers.point.types;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -6,70 +9,83 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.AnnotationLayer;
 import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.render.AnnotationAttributes;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.GlobeAnnotation;
-
-import java.awt.Point;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import org.w3c.dom.Element;
-
-import au.gov.ga.worldwind.common.layers.shapefile.point.ShapefilePointLayer;
-import au.gov.ga.worldwind.common.layers.shapefile.point.Style;
+import au.gov.ga.worldwind.common.layers.point.PointLayer;
+import au.gov.ga.worldwind.common.layers.point.PointLayerHelper;
+import au.gov.ga.worldwind.common.layers.point.PointProperties;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
-import au.gov.ga.worldwind.common.util.Setupable;
 
-public class ShapefileAnnotationLayer extends ShapefilePointLayer implements SelectListener,
-		Setupable
+/**
+ * {@link PointLayer} implementation which extends {@link AnnotationLayer} and
+ * uses Annotations to represent points.
+ * 
+ * @author Michael de Hoog
+ */
+public class AnnotationPointLayer extends AnnotationLayer implements PointLayer, SelectListener
 {
-	protected AnnotationLayer annotationLayer;
-	protected GlobeAnnotation pickedAnnotation;
+	private final PointLayerHelper helper;
+	private GlobeAnnotation pickedAnnotation;
 
-	public ShapefileAnnotationLayer(Element domElement, AVList params)
+	public AnnotationPointLayer(PointLayerHelper helper)
 	{
-		super(domElement, params);
-		annotationLayer = new AnnotationLayer();
-		setPickEnabled(true);
+		this.helper = helper;
 	}
 
 	@Override
-	public void setPickEnabled(boolean pickable)
+	public void render(DrawContext dc)
 	{
-		super.setPickEnabled(pickable);
-		annotationLayer.setPickEnabled(pickable);
+		if (isEnabled())
+		{
+			helper.requestPoints(this);
+		}
+		super.render(dc);
 	}
 
 	@Override
-	protected void addPoint(Position position, AVList attrib, Style style, String text, String link)
+	public void setup(WorldWindow wwd)
 	{
-		GlobeAnnotation annotation = new GlobeAnnotation(text, position);
-		annotation.setValue(AVKey.URL, link);
+		wwd.addSelectListener(this);
+	}
+
+	@Override
+	public Sector getSector()
+	{
+		return helper.getSector();
+	}
+
+	@Override
+	public void addPoint(Position position, AVList attributeValues)
+	{
+		PointProperties properties = helper.getStyle(attributeValues);
+		GlobeAnnotation annotation = new GlobeAnnotation(properties.text, position);
+		annotation.setValue(AVKey.URL, properties.link);
 		AnnotationAttributes attributes = new AnnotationAttributes();
-		style.setPropertiesFromAttributes(context, attrib, attributes, annotation);
+		properties.style.setPropertiesFromAttributes(helper.getContext(), attributeValues,
+				attributes, annotation);
 		annotation.setAttributes(attributes);
-		annotationLayer.addAnnotation(annotation);
+		this.addAnnotation(annotation);
 	}
 
 	@Override
-	protected void doPick(DrawContext dc, Point point)
+	public void loadComplete()
 	{
-		annotationLayer.pick(dc, point);
 	}
 
 	@Override
-	protected void doPreRender(DrawContext dc)
+	public URL getUrl() throws MalformedURLException
 	{
-		annotationLayer.preRender(dc);
+		return helper.getUrl();
 	}
 
 	@Override
-	protected void doRender(DrawContext dc)
+	public String getDataCacheName()
 	{
-		annotationLayer.render(dc);
+		return helper.getDataCacheName();
 	}
 
 	@Override
@@ -115,11 +131,5 @@ public class ShapefileAnnotationLayer extends ShapefilePointLayer implements Sel
 	protected void highlight(GlobeAnnotation annotation, boolean highlight)
 	{
 		annotation.getAttributes().setHighlighted(highlight);
-	}
-
-	@Override
-	public void setup(WorldWindow wwd)
-	{
-		wwd.addSelectListener(this);
 	}
 }

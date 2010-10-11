@@ -22,4 +22,10 @@ public interface AVKeyMore extends AVKey
 	final static String FOLLOW_TERRAIN = "au.gov.ga.worldwind.AVKeyMore.FollowTerrain";
 	final static String SUBSEGMENTS = "au.gov.ga.worldwind.AVKeyMore.Subsegments";
 	final static String PATH = "au.gov.ga.worldwind.AVKeyMore.Path";
+	
+	//point layer
+	final static String POINT_STYLES = "au.gov.ga.worldwind.AVKeyMore.PointStyles";
+	final static String POINT_ATTRIBUTES = "au.gov.ga.worldwind.AVKeyMore.PointAttributes";
+	final static String POINT_PROVIDER = "au.gov.ga.worldwind.AVKeyMore.PointProvider";
+	final static String POINT_TYPE = "au.gov.ga.worldwind.AVKeyMore.PointType";
 }

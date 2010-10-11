@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Layer version="1" layerType="ShapefileAnnotationLayer">
+<Layer version="1" layerType="PointLayer">
 
 	<DisplayName></DisplayName>
 	<Legend></Legend>
-	<URL>file:///C:/WINNT/Profiles/u97852/Desktop/shapefiles/point_test.shp</URL>
-	<LastUpdate></LastUpdate>
-	<DataCacheName>point_test</DataCacheName>
 
-	<!-- <Styles>
+	<PointType>Marker</PointType>
+	<URL>file:///C:/WINNT/Profiles/u97852/Desktop/shapefiles/point_test.zip</URL>
+	<DataFormat>Shapefile</DataFormat>
+
+	<LastUpdate></LastUpdate>
+	<DataCacheName>GA/Points/point_test.zip</DataCacheName>
+
+	<Styles>
 		<Style name="icon1" default="true">
 			<Property name="Material" value="255,255,0" />
 		</Style>
@@ -15,7 +19,7 @@
 		</Style>
 		<Style name="icon3">
 		</Style>
-	</Styles> -->
+	</Styles>
 
 	<Attributes>
 		<Attribute name="Name">

@@ -1,10 +1,11 @@
-package au.gov.ga.worldwind.common.layers.shapefile.point.marker;
+package au.gov.ga.worldwind.common.layers.point.types;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.MarkerLayer;
 import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.render.DrawContext;
@@ -14,82 +15,86 @@ import gov.nasa.worldwind.render.markers.Marker;
 import gov.nasa.worldwind.render.markers.MarkerAttributes;
 
 import java.awt.Color;
-import java.awt.Point;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.Element;
-
-import au.gov.ga.worldwind.common.layers.shapefile.point.ShapefilePointLayer;
-import au.gov.ga.worldwind.common.layers.shapefile.point.Style;
+import au.gov.ga.worldwind.common.layers.point.PointLayer;
+import au.gov.ga.worldwind.common.layers.point.PointLayerHelper;
+import au.gov.ga.worldwind.common.layers.point.PointProperties;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
-import au.gov.ga.worldwind.common.util.Setupable;
 
-public class ShapefileMarkerLayer extends ShapefilePointLayer implements SelectListener, Setupable
+/**
+ * {@link PointLayer} implementation which extends {@link MarkerLayer} and uses
+ * Markers to represent points.
+ * 
+ * @author Michael de Hoog
+ */
+public class MarkerPointLayer extends MarkerLayer implements PointLayer, SelectListener
 {
-	private MarkerLayer markerLayer;
+	private final PointLayerHelper helper;
+
 	private List<Marker> markers = new ArrayList<Marker>();
 	private UrlMarker pickedMarker;
 	private Material backupMaterial;
-	private Material highlightMaterial;
+	private Material highlightMaterial = new Material(Color.white);
 
-	public ShapefileMarkerLayer(Element domElement, AVList params)
+	public MarkerPointLayer(PointLayerHelper helper)
 	{
-		super(domElement, params);
-		markerLayer = new MarkerLayer();
-		highlightMaterial = new Material(Color.white);
-		setPickEnabled(true);
+		this.helper = helper;
 	}
 
 	@Override
-	protected void load(URL url)
+	public void render(DrawContext dc)
 	{
-		markers.clear();
-		super.load(url);
-		markerLayer.setMarkers(markers);
-	}
-	
-	@Override
-	public void setPickEnabled(boolean pickable)
-	{
-		super.setPickEnabled(pickable);
-		markerLayer.setPickEnabled(pickable);
-	}
-
-	@Override
-	protected void addPoint(Position position, AVList attrib, Style style, String text, String link)
-	{
-		MarkerAttributes attributes = new BasicMarkerAttributes();
-		style.setPropertiesFromAttributes(context, attrib, attributes);
-		UrlMarker marker = new UrlMarker(position, attributes);
-		marker.setUrl(link);
-		markers.add(marker);
-	}
-
-	@Override
-	protected void doPick(DrawContext dc, Point point)
-	{
-		markerLayer.pick(dc, point);
-	}
-
-	@Override
-	protected void doPreRender(DrawContext dc)
-	{
-		markerLayer.preRender(dc);
-	}
-
-	@Override
-	protected void doRender(DrawContext dc)
-	{
-		markerLayer.render(dc);
+		if (isEnabled())
+		{
+			helper.requestPoints(this);
+		}
+		super.render(dc);
 	}
 
 	@Override
 	public void setup(WorldWindow wwd)
 	{
 		wwd.addSelectListener(this);
+	}
+
+	@Override
+	public Sector getSector()
+	{
+		return helper.getSector();
+	}
+
+	@Override
+	public void addPoint(Position position, AVList attributeValues)
+	{
+		MarkerAttributes attributes = new BasicMarkerAttributes();
+		PointProperties properties = helper.getStyle(attributeValues);
+		properties.style.setPropertiesFromAttributes(helper.getContext(), attributeValues,
+				attributes);
+		UrlMarker marker = new UrlMarker(position, attributes);
+		marker.setUrl(properties.link);
+		markers.add(marker);
+	}
+
+	@Override
+	public void loadComplete()
+	{
+		setMarkers(markers);
+	}
+
+	@Override
+	public URL getUrl() throws MalformedURLException
+	{
+		return helper.getUrl();
+	}
+
+	@Override
+	public String getDataCacheName()
+	{
+		return helper.getDataCacheName();
 	}
 
 	@Override
@@ -144,5 +149,4 @@ public class ShapefileMarkerLayer extends ShapefilePointLayer implements SelectL
 			marker.getAttributes().setMaterial(backupMaterial);
 		}
 	}
-
 }

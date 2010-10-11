@@ -1,13 +1,19 @@
-package au.gov.ga.worldwind.common.layers.shapefile.point.marker;
+package au.gov.ga.worldwind.common.layers.point.types;
 
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.render.markers.BasicMarker;
 import gov.nasa.worldwind.render.markers.MarkerAttributes;
 
+/**
+ * Extension to the {@link BasicMarker} class which adds a 'url' property, so
+ * that markers can have associated urls.
+ * 
+ * @author Michael de Hoog
+ */
 public class UrlMarker extends BasicMarker
 {
 	private String url;
-	
+
 	public UrlMarker(Position position, MarkerAttributes attrs)
 	{
 		super(position, attrs);
