@@ -35,6 +35,7 @@ public class LayerParameterFactory
 		// Add additional LayerParameters here as they are created
 		factoryMap.put(LayerParameter.Type.OPACITY.name().toLowerCase(), instantiate(LayerOpacityParameter.class));
 		factoryMap.put(LayerParameter.Type.NEAR.name().toLowerCase(), instantiate(FogNearFactorParameter.class));
+		factoryMap.put(LayerParameter.Type.FAR.name().toLowerCase(), instantiate(FogFarFactorParameter.class));
 	}
 	
 	/** A map of parameter type -> support layer types used to determine which parameters can be applied to which layers */
@@ -44,6 +45,7 @@ public class LayerParameterFactory
 		// Add additional parameter types here as they are created
 		parameterTypeMap.put(LayerOpacityParameter.class, new Class[]{TiledImageLayer.class});
 		parameterTypeMap.put(FogNearFactorParameter.class, new Class[]{FogLayer.class});
+		parameterTypeMap.put(FogFarFactorParameter.class, new Class[]{FogLayer.class});
 	}
 	
 	/**
@@ -92,6 +94,10 @@ public class LayerParameterFactory
 		{
 			result.add(createFogNearFactorParameter(animation, targetLayer));
 		}
+		if (supportsFogFarFactorParameters(targetLayer))
+		{
+			result.add(createFogFarFactorParameter(animation, targetLayer));
+		}
 		
 		return result.toArray(new LayerParameter[0]);
 	}
@@ -104,6 +110,11 @@ public class LayerParameterFactory
 	private static boolean supportsFogNearFactorParameters(Layer targetLayer)
 	{
 		return layerTypeInList(targetLayer, parameterTypeMap.get(FogNearFactorParameter.class));
+	}
+	
+	private static boolean supportsFogFarFactorParameters(Layer targetLayer)
+	{
+		return layerTypeInList(targetLayer, parameterTypeMap.get(FogFarFactorParameter.class));
 	}
 	
 	private static boolean layerTypeInList(Layer targetLayer, Class<Layer>[] layerTypes)
@@ -126,6 +137,11 @@ public class LayerParameterFactory
 	private static LayerParameter createFogNearFactorParameter(Animation animation, Layer targetLayer)
 	{
 		return new FogNearFactorParameter(animation, (FogLayer)targetLayer);
+	}
+	
+	private static LayerParameter createFogFarFactorParameter(Animation animation, Layer targetLayer)
+	{
+		return new FogFarFactorParameter(animation, (FogLayer)targetLayer);
 	}
 	
 	/**
