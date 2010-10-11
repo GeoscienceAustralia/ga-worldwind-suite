@@ -2,8 +2,6 @@ package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.SkyGradientLayer;
-import gov.nasa.worldwind.layers.StarsLayer;
 import gov.nasa.worldwind.layers.TiledImageLayer;
 
 import java.lang.reflect.Constructor;
@@ -36,11 +34,12 @@ public class LayerParameterFactory
 		factoryMap.put(LayerParameter.Type.OPACITY.name().toLowerCase(), instantiate(LayerOpacityParameter.class));
 	}
 	
+	/** A map of parameter type -> support layer types used to determine which parameters can be applied to which layers */
 	private static Map<Class<? extends LayerParameter>, Class<Layer>[]> parameterTypeMap = new HashMap<Class<? extends LayerParameter>, Class<Layer>[]>();
 	static
 	{
 		// Add additional parameter types here as they are created
-		parameterTypeMap.put(LayerOpacityParameter.class, new Class[]{TiledImageLayer.class, SkyGradientLayer.class, StarsLayer.class});
+		parameterTypeMap.put(LayerOpacityParameter.class, new Class[]{TiledImageLayer.class});
 	}
 	
 	/**
