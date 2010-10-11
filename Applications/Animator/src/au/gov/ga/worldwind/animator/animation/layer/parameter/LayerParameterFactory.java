@@ -1,13 +1,20 @@
 package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.SkyGradientLayer;
+import gov.nasa.worldwind.layers.StarsLayer;
+import gov.nasa.worldwind.layers.TiledImageLayer;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -17,6 +24,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
+@SuppressWarnings("unchecked")
 public class LayerParameterFactory
 {
 	
@@ -26,6 +34,13 @@ public class LayerParameterFactory
 	{
 		// Add additional LayerParameters here as they are created
 		factoryMap.put(LayerParameter.Type.OPACITY.name().toLowerCase(), instantiate(LayerOpacityParameter.class));
+	}
+	
+	private static Map<Class<? extends LayerParameter>, Class<Layer>[]> parameterTypeMap = new HashMap<Class<? extends LayerParameter>, Class<Layer>[]>();
+	static
+	{
+		// Add additional parameter types here as they are created
+		parameterTypeMap.put(LayerOpacityParameter.class, new Class[]{TiledImageLayer.class, SkyGradientLayer.class, StarsLayer.class});
 	}
 	
 	/**
@@ -55,6 +70,47 @@ public class LayerParameterFactory
 		return (LayerParameter)layerFactory.fromXml(element, version, context);
 	}
 
+	/**
+	 * @return The list of {@link LayerParameter}s that can be applied to the provided layer in the provided animation
+	 */
+	public static LayerParameter[] createDefaultParametersForLayer(Animation animation, Layer targetLayer)
+	{
+		if (animation == null || targetLayer == null)
+		{
+			return new LayerParameter[0];
+		}
+		
+		List<LayerParameter> result = new ArrayList<LayerParameter>();
+		if (supportsOpacityParameter(targetLayer))
+		{
+			result.add(createOpacityParameter(animation, targetLayer));
+		}
+		
+		return result.toArray(new LayerParameter[0]);
+	}
+	
+	private static boolean supportsOpacityParameter(Layer targetLayer)
+	{
+		return layerTypeInList(targetLayer, parameterTypeMap.get(LayerOpacityParameter.class));
+	}
+
+	private static boolean layerTypeInList(Layer targetLayer, Class<Layer>[] layerTypes)
+	{
+		for (Class<Layer> layerType : layerTypes)
+		{
+			if (layerType.isAssignableFrom(targetLayer.getClass()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static LayerOpacityParameter createOpacityParameter(Animation animation, Layer targetLayer)
+	{
+		return new LayerOpacityParameter(animation, targetLayer);
+	}
+	
 	/**
 	 * Instantiate the provided class using the default constructor.
 	 * 

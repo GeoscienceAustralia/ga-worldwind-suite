@@ -26,7 +26,8 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
-import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter;
+import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
+import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameterFactory;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -870,11 +871,14 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		
 		DefaultAnimatableLayer animatableLayer = new DefaultAnimatableLayer(loadedLayer);
-		animatableLayer.addParameter(new LayerOpacityParameter(this, loadedLayer));
+		for (LayerParameter parameter : LayerParameterFactory.createDefaultParametersForLayer(this, loadedLayer))
+		{
+			animatableLayer.addParameter(parameter);
+		}
 		
 		addAnimatableObject(animatableLayer);
 	}
-	
+
 	@Override
 	public AnimatableElevation getAnimatableElevation()
 	{

@@ -72,5 +72,4 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 		Element parameterElement = WWXML.getElement(element, "./*", null);
 		return super.fromXml(parameterElement, version, context);
 	}
-	
 }
