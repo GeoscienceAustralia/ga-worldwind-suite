@@ -76,6 +76,7 @@ public class Icons
 	public static final Icons uncheckall = new Icons("uncheckall.gif");
 	public static final Icons up = new Icons("up.gif");
 	public static final Icons updown = new Icons("updown.gif");
+	public static final Icons view = new Icons("view.gif");
 	public static final Icons wireframe = new Icons("wireframe.png");
 	public static final Icons world = new Icons("world.gif");
 	public static final Icons zwireframe = new Icons("zwireframe.png");
