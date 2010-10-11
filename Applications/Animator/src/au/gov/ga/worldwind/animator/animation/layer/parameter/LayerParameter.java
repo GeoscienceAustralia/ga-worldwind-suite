@@ -47,7 +47,9 @@ public interface LayerParameter extends Parameter
 	 */
 	public static enum Type
 	{
-		OPACITY;
+		OPACITY,
+		NEAR,
+		FAR;
 	}
 	
 }

@@ -221,11 +221,13 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 				context.setValue(constants.getCurrentLayerKey(), loadedLayer);
 				List<LayerParameter> parameters = new ArrayList<LayerParameter>();
 				Element[] parameterElements = WWXML.getElements(element, "./*", null);
-				for (Element parameterElement : parameterElements)
+				if (parameterElements != null)
 				{
-					parameters.add(LayerParameterFactory.fromXml(parameterElement, version, context));
+					for (Element parameterElement : parameterElements)
+					{
+						parameters.add(LayerParameterFactory.fromXml(parameterElement, version, context));
+					}
 				}
-				
 				DefaultAnimatableLayer result = new DefaultAnimatableLayer(layerName, loadedLayer, parameters);
 				
 				Boolean enabled = XMLUtil.getBoolean(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableLayerAttributeEnabled(), true);

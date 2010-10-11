@@ -6,6 +6,7 @@ import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.animator.layers.misc.FogLayerFactory;
 import au.gov.ga.worldwind.animator.layers.sky.Skysphere;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
 
@@ -26,6 +27,10 @@ public class AnimationLayerFactory extends LayerFactory
 		if (Skysphere.LAYER_TYPE.equals(layerType))
 		{
 			return new Skysphere(domElement, params);
+		}
+		if (FogLayerFactory.LAYER_TYPE.equals(layerType))
+		{
+			return FogLayerFactory.createFromDefinition(domElement, params);
 		}
 		
 		return super.createFromLayerDocument(domElement, params);

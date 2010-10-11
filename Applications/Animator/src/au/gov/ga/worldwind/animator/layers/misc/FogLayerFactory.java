@@ -27,6 +27,8 @@ import au.gov.ga.worldwind.animator.util.AVKeyMore;
 public class FogLayerFactory
 {
 
+	public static final String LAYER_TYPE = "FogLayer";
+	
 	/**
 	 * Create a new {@link FogLayer} from the provided parameters.
 	 * <p/>

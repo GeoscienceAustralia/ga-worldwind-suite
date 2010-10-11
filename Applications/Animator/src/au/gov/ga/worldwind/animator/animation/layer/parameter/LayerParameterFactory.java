@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import nasa.worldwind.layers.FogLayer;
+
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
@@ -32,6 +34,7 @@ public class LayerParameterFactory
 	{
 		// Add additional LayerParameters here as they are created
 		factoryMap.put(LayerParameter.Type.OPACITY.name().toLowerCase(), instantiate(LayerOpacityParameter.class));
+		factoryMap.put(LayerParameter.Type.NEAR.name().toLowerCase(), instantiate(FogNearFactorParameter.class));
 	}
 	
 	/** A map of parameter type -> support layer types used to determine which parameters can be applied to which layers */
@@ -40,6 +43,7 @@ public class LayerParameterFactory
 	{
 		// Add additional parameter types here as they are created
 		parameterTypeMap.put(LayerOpacityParameter.class, new Class[]{TiledImageLayer.class});
+		parameterTypeMap.put(FogNearFactorParameter.class, new Class[]{FogLayer.class});
 	}
 	
 	/**
@@ -84,6 +88,10 @@ public class LayerParameterFactory
 		{
 			result.add(createOpacityParameter(animation, targetLayer));
 		}
+		if (supportsFogNearFactorParameters(targetLayer))
+		{
+			result.add(createFogNearFactorParameter(animation, targetLayer));
+		}
 		
 		return result.toArray(new LayerParameter[0]);
 	}
@@ -93,6 +101,11 @@ public class LayerParameterFactory
 		return layerTypeInList(targetLayer, parameterTypeMap.get(LayerOpacityParameter.class));
 	}
 
+	private static boolean supportsFogNearFactorParameters(Layer targetLayer)
+	{
+		return layerTypeInList(targetLayer, parameterTypeMap.get(FogNearFactorParameter.class));
+	}
+	
 	private static boolean layerTypeInList(Layer targetLayer, Class<Layer>[] layerTypes)
 	{
 		for (Class<Layer> layerType : layerTypes)
@@ -108,6 +121,11 @@ public class LayerParameterFactory
 	private static LayerOpacityParameter createOpacityParameter(Animation animation, Layer targetLayer)
 	{
 		return new LayerOpacityParameter(animation, targetLayer);
+	}
+	
+	private static LayerParameter createFogNearFactorParameter(Animation animation, Layer targetLayer)
+	{
+		return new FogNearFactorParameter(animation, (FogLayer)targetLayer);
 	}
 	
 	/**
