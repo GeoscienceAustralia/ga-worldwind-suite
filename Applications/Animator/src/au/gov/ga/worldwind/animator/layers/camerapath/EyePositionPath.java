@@ -270,7 +270,7 @@ class EyePositionPath implements Renderable
 	private void setupMarkerAttributes()
 	{
 		keyFrameMarkerAttributes.setMaterial(new Material(keyFrameNodeColour));
-		keyFrameMarkerAttributes.setMaxMarkerSize(200d);
+		keyFrameMarkerAttributes.setMaxMarkerSize(2000d);
 	}
 	
 	private void populateKeyFrameMarkers()
