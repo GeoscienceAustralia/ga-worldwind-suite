@@ -46,12 +46,9 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	public CameraPathLayer(Animation animation)
 	{
 		Validate.notNull(animation, "An animation instance is required");
-		this.animation = animation;
+		eyePositionPath = new EyePositionPath(animation);
 		
-		this.eyePositionPath = new EyePositionPath(animation);
-		
-		reset();
-		update();
+		updateAnimation(animation);
 	}
 
 	@Override
@@ -76,7 +73,10 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	
 	public void updateAnimation(Animation animation)
 	{
-		this.animation.removeChangeListener(this);
+		if (this.animation != null)
+		{
+			this.animation.removeChangeListener(this);
+		}
 		this.animation = animation;
 		this.animation.addChangeListener(this);
 		

@@ -78,7 +78,7 @@ class EyePositionPath implements Renderable
 	
 	public void resetPath()
 	{
-		frameCount = animation.getFrameOfLastKeyFrame() - animation.getFrameOfFirstKeyFrame();
+		frameCount = animation.getFrameCount();
 		this.pathVertexFrontBuffer = BufferUtil.newDoubleBuffer(frameCount * 3);
 		this.pathVertexBackBuffer = BufferUtil.newDoubleBuffer(frameCount * 3);
 		this.pathColourFrontBuffer = BufferUtil.newDoubleBuffer(frameCount * 3);
@@ -127,6 +127,7 @@ class EyePositionPath implements Renderable
 			gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
 			gl.glLineWidth(2.0f);
 			gl.glPointSize(2.0f);
+			int numberOfPointsInPath = animation.getFrameOfLastKeyFrame() - animation.getFrameOfFirstKeyFrame();
 			synchronized (pathBufferLock)
 			{
 				gl.glColorPointer(3, GL.GL_DOUBLE, 0, pathColourFrontBuffer);
@@ -134,12 +135,12 @@ class EyePositionPath implements Renderable
 
 				// Draw a smooth line without depth testing, filling gaps with points
 				gl.glDepthMask(false);
-				gl.glDrawArrays(GL.GL_LINE_STRIP, 0, frameCount);
-				gl.glDrawArrays(GL.GL_POINTS, 0, frameCount);
+				gl.glDrawArrays(GL.GL_LINE_STRIP, 0, numberOfPointsInPath);
+				gl.glDrawArrays(GL.GL_POINTS, 0, numberOfPointsInPath);
 				gl.glDepthMask(true);
 				
 				// Now redraw the line with depth testing to ensure line looks correct with markers
-				gl.glDrawArrays(GL.GL_LINE_STRIP, 0, frameCount);
+				gl.glDrawArrays(GL.GL_LINE_STRIP, 0, numberOfPointsInPath);
 			}
 		}
 		finally
@@ -251,7 +252,8 @@ class EyePositionPath implements Renderable
 			deltaWindow = 1;
 		}
 		
-		HSLColor hslColor = new HSLColor(0, 80, 50);
+		// Use the HSL colour ramp to indicate magnitude of deltas
+		HSLColor hslColor = new HSLColor(0, 50, 50);
 		Color pathColor = null;
 		
 		pathColourBackBuffer.rewind();
@@ -285,6 +287,9 @@ class EyePositionPath implements Renderable
 		}
 	}
 	
+	/**
+	 * Swap the front and back buffers, giving access to the newly updated data for drawing
+	 */
 	private void swapBuffers()
 	{
 		synchronized (pathBufferLock)
