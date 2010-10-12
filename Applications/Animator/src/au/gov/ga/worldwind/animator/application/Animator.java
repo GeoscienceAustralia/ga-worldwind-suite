@@ -1646,6 +1646,7 @@ public class Animator
 			actionFactory.getUseScaledZoomAction().setSelected(animation.isZoomScalingRequired());
 		}
 		keyFrameClipboard.updateAnimation(animation);
+		cameraPathLayer.updateAnimation(animation);
 		updateAnimationListeners();
 		updateLayersInModel();
 		updateElevationModelOnGlobe();

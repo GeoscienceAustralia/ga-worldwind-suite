@@ -42,6 +42,12 @@ public interface AnimationEvent
 	AnimationEvent getCauseOfClass(Class<? extends AnimationEvent> clazz);
 	
 	/**
+	 * Returns whether an owner in the causal chain of this event is of the provided type. Useful for determining if an 
+	 * event has effected a particular level of the animation (for example, if an event may have effected the Camera). 
+	 */
+	boolean hasOwnerInChainOfType(Class<?> clazz);
+	
+	/**
 	 * Gets the last event in the causal chain.
 	 * 
 	 * @return the ultimate cause in the causal chain.

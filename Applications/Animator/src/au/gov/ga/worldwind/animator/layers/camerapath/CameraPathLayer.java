@@ -7,16 +7,20 @@ import gov.nasa.worldwind.render.DrawContext;
 
 import java.awt.Color;
 import java.nio.DoubleBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.media.opengl.GL;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
+import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
+import au.gov.ga.worldwind.animator.animation.event.KeyFrameEvent;
+import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 import com.sun.opengl.util.BufferUtil;
@@ -28,7 +32,7 @@ import com.sun.opengl.util.BufferUtil;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class CameraPathLayer extends AbstractLayer implements ChangeListener
+public class CameraPathLayer extends AbstractLayer implements AnimationEventListener
 {
 	/** The default colour to use for painting the camera path */
 	private static final Color DEFAULT_CAMERA_PATH_COLOUR = Color.WHITE;
@@ -48,6 +52,9 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 	/** A lock used to synchronise access to the vertex buffers */
 	private Object vertexBufferLock = new Object();
 	
+	/** A thread used to update the vertex buffers outside of the render thread */
+	private ExecutorService updater = Executors.newFixedThreadPool(1, new DaemonThreadFactory());
+	
 	/** The colour to use to draw the camera path */
 	private Color cameraPathColour = DEFAULT_CAMERA_PATH_COLOUR;
 	
@@ -64,15 +71,7 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 		this.animation = animation;
 		
 		resetVertexBuffers();
-	}
-
-	/**
-	 * Re-create the vertex buffers to the current animation size
-	 */
-	private void resetVertexBuffers()
-	{
-		this.drawVertexBuffer = BufferUtil.newDoubleBuffer(animation.getFrameCount() * 3);
-		this.updateVertexBuffer = BufferUtil.newDoubleBuffer(animation.getFrameCount() * 3);
+		updateVertexBuffers();
 	}
 
 	@Override
@@ -82,24 +81,28 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 		drawEyePositionNodes(dc);
 	}
 
-	/**
-	 * Draw the camera eye position nodes
-	 */
-	private void drawEyePositionNodes(DrawContext dc)
+	@Override
+	public void receiveAnimationEvent(AnimationEvent event)
 	{
-		AnimationContext context = new AnimationContextImpl(animation);
-		for (KeyFrame keyFrame : animation.getKeyFrames())
+		if (frameCountHasChanged())
 		{
-			if (keyFrame.hasValueForParameter(animation.getCamera().getEyeLat()) || 
-					keyFrame.hasValueForParameter(animation.getCamera().getEyeLon()) || 
-					keyFrame.hasValueForParameter(animation.getCamera().getEyeElevation()))
-			{
-				Vec4 eyeVector = dc.getGlobe().computePointFromPosition(animation.getCamera().getEyePositionAtFrame(context, keyFrame.getFrame()));
-				Sphere marker = new Sphere(eyeVector, 50);
-				marker.render(dc);
-			}
+			resetVertexBuffers();
+			updateVertexBuffers();
 		}
+		else if (cameraPathHasChanged(event))
+		{
+			updateVertexBuffers();
+		}
+	}
+	
+	public void updateAnimation(Animation animation)
+	{
+		this.animation.removeChangeListener(this);
+		this.animation = animation;
+		this.animation.addChangeListener(this);
 		
+		resetVertexBuffers();
+		updateVertexBuffers();
 	}
 
 	/**
@@ -107,9 +110,6 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 	 */
 	private void drawPath(DrawContext dc)
 	{
-		populateVertexBuffer(dc);
-		swapBuffers();
-		
 		GL gl = dc.getGL();
 		gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 		try
@@ -127,18 +127,53 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 			gl.glPopClientAttrib();
 		}
 	}
-
+	
 	/**
-	 * Swap the two buffers 
+	 * Draw the camera eye position nodes
 	 */
-	private synchronized void swapBuffers()
+	private void drawEyePositionNodes(DrawContext dc)
 	{
-		DoubleBuffer tmp = drawVertexBuffer;
-		drawVertexBuffer = updateVertexBuffer;
-		updateVertexBuffer = tmp;
-		drawVertexBuffer.rewind();
+		AnimationContext context = new AnimationContextImpl(animation);
+		for (KeyFrame keyFrame : animation.getKeyFrames())
+		{
+			if (isEyePositionFrame(keyFrame))
+			{
+				Vec4 eyeVector = dc.getGlobe().computePointFromPosition(animation.getCamera().getEyePositionAtFrame(context, keyFrame.getFrame()));
+				Sphere marker = new Sphere(eyeVector, 100);
+				marker.render(dc);
+			}
+		}
+		
 	}
 
+	/**
+	 * Re-create the vertex buffers to the current animation size
+	 */
+	private void resetVertexBuffers()
+	{
+		frameCount = animation.getFrameCount();
+		this.drawVertexBuffer = BufferUtil.newDoubleBuffer(frameCount * 3);
+		this.updateVertexBuffer = BufferUtil.newDoubleBuffer(frameCount * 3);
+	}
+	
+	private void recalulateVertexBuffers()
+	{
+		populateVertexBuffer();
+		swapBuffers();
+	}
+	
+	private void updateVertexBuffers()
+	{
+		updater.execute(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				recalulateVertexBuffers();
+			}
+		});
+	}
+	
 	/**
 	 * Populate the update vertex buffer with the coordinates of the 
 	 * eye location at each frame in the animation.
@@ -146,33 +181,60 @@ public class CameraPathLayer extends AbstractLayer implements ChangeListener
 	 * Vertex buffer has size <code>3*animation.getlastFrame()</code>, with <code>[x,y,z]</code> stored at 
 	 * <code>[3*frame, 3*frame+1, 3*frame+2]</code>
 	 */
-	private synchronized void populateVertexBuffer(DrawContext dc)
+	private void populateVertexBuffer()
 	{
 		Camera renderCamera = animation.getCamera();
 		AnimationContext context = new AnimationContextImpl(animation);
 		for (int frame = animation.getFrameOfFirstKeyFrame(); frame < animation.getFrameOfLastKeyFrame(); frame ++)
 		{
-			Vec4 eyeVector = dc.getGlobe().computePointFromPosition(renderCamera.getEyePositionAtFrame(context, frame));
+			Vec4 eyeVector = context.getView().getGlobe().computePointFromPosition(renderCamera.getEyePositionAtFrame(context, frame));
 			updateVertexBuffer.put(eyeVector.x);
 			updateVertexBuffer.put(eyeVector.y);
 			updateVertexBuffer.put(eyeVector.z);
 		}
 		updateVertexBuffer.rewind();
 	}
-
-	@Override
-	public void stateChanged(ChangeEvent e)
+	
+	/**
+	 * Swap the two buffers 
+	 */
+	private void swapBuffers()
 	{
-		// If the frame count has changed, update the buffer size
-		if (e.getSource() instanceof Animation)
+		synchronized (vertexBufferLock)
 		{
-			if (animation.getFrameCount() != frameCount)
-			{
-				frameCount = animation.getFrameCount();
-				resetVertexBuffers();
-			}
+			DoubleBuffer tmp = drawVertexBuffer;
+			drawVertexBuffer = updateVertexBuffer;
+			updateVertexBuffer = tmp;
+			drawVertexBuffer.rewind();
 		}
-		
+	}
+	
+	private boolean isEyePositionFrame(KeyFrame keyFrame)
+	{
+		return keyFrame.hasValueForParameter(animation.getCamera().getEyeLat()) || 
+				keyFrame.hasValueForParameter(animation.getCamera().getEyeLon()) || 
+				keyFrame.hasValueForParameter(animation.getCamera().getEyeElevation());
 	}
 
+	private boolean cameraPathHasChanged(AnimationEvent event)
+	{
+		// Any event attached to the Camera counts
+		if (event.hasOwnerInChainOfType(Camera.class))
+		{
+			return true;
+		}
+		
+		// Otherwise, any key frame event that includes a camera parameter
+		KeyFrameEvent keyFrameEvent = (KeyFrameEvent)event.getCauseOfClass(KeyFrameEvent.class);
+		if (keyFrameEvent == null)
+		{
+			return false;
+		}
+		return isEyePositionFrame(keyFrameEvent.getKeyFrame());
+	}
+
+	private boolean frameCountHasChanged()
+	{
+		return animation.getFrameCount() != frameCount;
+	}
 }

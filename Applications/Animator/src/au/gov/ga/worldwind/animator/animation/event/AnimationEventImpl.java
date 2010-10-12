@@ -52,7 +52,7 @@ public class AnimationEventImpl implements AnimationEvent
 	@Override
 	public AnimationEvent getCauseOfClass(Class<? extends AnimationEvent> clazz)
 	{
-		if (getClass().isAssignableFrom(clazz))
+		if (clazz.isAssignableFrom(getClass()))
 		{
 			return this;
 		}
@@ -63,6 +63,20 @@ public class AnimationEventImpl implements AnimationEvent
 		return cause.getCauseOfClass(clazz);
 	}
 
+	@Override
+	public boolean hasOwnerInChainOfType(Class<?> clazz)
+	{
+		if (owner.getClass().isAssignableFrom(clazz))
+		{
+			return true;
+		}
+		if (cause == null)
+		{
+			return false;
+		}
+		return cause.hasOwnerInChainOfType(clazz);
+	}
+	
 	@Override
 	public AnimationEvent getRootCause()
 	{
