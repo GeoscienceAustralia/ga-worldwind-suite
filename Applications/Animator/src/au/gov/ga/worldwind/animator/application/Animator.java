@@ -619,6 +619,8 @@ public class Animator
 		menu.addSeparator();
 		menu.add(actionFactory.getAddElevationModelAction());
 		menu.add(actionFactory.getAddExaggeratorAction());
+		menu.addSeparator();
+		actionFactory.getShowCameraPathAction().addToMenu(menu);
 		
 		// Debug
 		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
@@ -1558,6 +1560,11 @@ public class Animator
 		slider.setValue(getCurrentAnimation().getFrameOfLastKeyFrame());
 	}
 
+	void setCameraPathVisible(boolean visible)
+	{
+		cameraPathLayer.setEnabled(visible);
+	}
+	
 	void scaleAnimation()
 	{
 		double scale = -1.0;

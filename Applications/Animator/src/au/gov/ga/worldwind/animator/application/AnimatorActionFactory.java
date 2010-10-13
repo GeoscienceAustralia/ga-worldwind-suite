@@ -49,6 +49,7 @@ public class AnimatorActionFactory
 	private BasicAction resizeToRenderDimensionsAction;
 	private BasicAction addElevationModelAction;
 	private BasicAction addExaggeratorAction;
+	private SelectableAction showCameraPathAction;
 	
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
@@ -372,6 +373,15 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		showCameraPathAction = new SelectableAction(getMessage(getShowCameraPathLabelKey()), null, true);
+		showCameraPathAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.setCameraPathVisible(showCameraPathAction.isSelected());
+			}
+		});
 		
 		// Debug key frames
 		debugKeyFramesAction = new BasicAction(getMessage(getKeyValuesMenuLabelKey()), null);
@@ -542,4 +552,8 @@ public class AnimatorActionFactory
 		return debugParameterValuesAction;
 	}
 
+	public SelectableAction getShowCameraPathAction()
+	{
+		return showCameraPathAction;
+	}
 }

@@ -109,5 +109,6 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getPasteKeyFrameLabelKey() { return "animator.gui.menu.pastekey.label"; }
 	public static String getFogNearParameterNameKey() { return "animator.layer.fognear.name"; }
 	public static String getFogFarParameterNameKey() { return "animator.layer.fogfar.name"; }
+	public static String getShowCameraPathLabelKey() { return "animator.gui.menu.showcamerapath.label"; }
 
 }
