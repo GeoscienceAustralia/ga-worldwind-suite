@@ -13,7 +13,6 @@ import gov.nasa.worldwind.render.markers.Marker;
 import gov.nasa.worldwind.render.markers.MarkerRenderer;
 
 import java.awt.Color;
-import java.awt.event.MouseEvent;
 import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +51,11 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	
 	private Animation animation;
 	
-	private boolean dragging;
+	private Click lastClick = null;
+	private enum Click
+	{
+		LEFT, MIDDLE, RIGHT;
+	}
 	
 	public KeyFrameMarkers(Animation animation)
 	{
@@ -81,13 +84,21 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		}
 		
 		Marker pickedMarker = (Marker)topPickedObject.getObject();
-		
-		if (event.getMouseEvent() != null && event.getMouseEvent().getID() == MouseEvent.MOUSE_PRESSED)
+		if (event.isLeftPress())
+		{
+			lastClick = Click.LEFT;
+		}
+		else if (event.isRightPress())
+		{
+			lastClick = Click.RIGHT;
+		}
+		else if (event.isDrag())
 		{
 			highlight(pickedMarker);
-		}
-		else if (event.getMouseEvent() != null && event.getMouseEvent().getID() == MouseEvent.MOUSE_RELEASED)
+		} 
+		else if (event.isDragEnd())
 		{
+			lastClick = null;
 			unhighlight(pickedMarker);
 		}
 	}
@@ -180,7 +191,9 @@ class KeyFrameMarkers implements Renderable, SelectListener
 			gl.glEnable(GL.GL_BLEND);
 			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 			gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
+			gl.glEnable(GL.GL_LINE_STIPPLE);
 			gl.glLineWidth(2.0f);
+			gl.glLineStipple(3, (short)0xAAAA);
 			
 			gl.glColor3fv(Color.WHITE.getColorComponents(null), 0);
 			gl.glVertexPointer(3, GL.GL_DOUBLE, 0, joinersFrontBuffer);

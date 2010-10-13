@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import javax.media.opengl.GLCapabilities;
 import javax.swing.UIManager;
 
+import au.gov.ga.worldwind.animator.application.input.AnimatorInputHandler;
 import au.gov.ga.worldwind.animator.layers.AnimationLayerFactory;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateRetrievalService;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateTaskService;
@@ -95,6 +96,7 @@ public class AnimatorConfiguration
 		Configuration.setValue(AVKey.AIRSPACE_GEOMETRY_CACHE_SIZE, 16777216L * 8); // 128 mb
 		Configuration.setValue(AVKey.LAYER_FACTORY, AnimationLayerFactory.class.getName());
 		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
+		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME, AnimatorInputHandler.class.getName());
 	}
 	
 	private static void initialiseSandpitMode()

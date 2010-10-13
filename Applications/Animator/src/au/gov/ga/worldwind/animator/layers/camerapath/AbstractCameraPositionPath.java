@@ -36,6 +36,8 @@ public abstract class AbstractCameraPositionPath implements Renderable
 	/** The animation whose camera path is to be displayed on this layer */
 	private Animation animation;
 	
+	boolean enableDepthTesting = true;
+	
 	public AbstractCameraPositionPath(Animation animation)
 	{
 		this.animation = animation;
@@ -105,6 +107,15 @@ public abstract class AbstractCameraPositionPath implements Renderable
 			int numberOfPointsInPath = animation.getFrameOfLastKeyFrame() - animation.getFrameOfFirstKeyFrame();
 			synchronized (pathBufferLock)
 			{
+				if (enableDepthTesting)
+				{
+					gl.glEnable(GL.GL_DEPTH_TEST);
+				}
+				else
+				{
+					gl.glDisable(GL.GL_DEPTH_TEST);
+				}
+				
 				gl.glColorPointer(3, GL.GL_DOUBLE, 0, pathColourFrontBuffer);
 				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, pathVertexFrontBuffer);
 
@@ -256,5 +267,10 @@ public abstract class AbstractCameraPositionPath implements Renderable
 	public Animation getAnimation()
 	{
 		return animation;
+	}
+	
+	public void setEnableDepthTesting(boolean enableDepthTesting)
+	{
+		this.enableDepthTesting = enableDepthTesting;
 	}
 }

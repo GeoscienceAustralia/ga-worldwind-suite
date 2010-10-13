@@ -51,6 +51,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		
 		eyePositionPath = new EyePositionPath(animation);
 		lookatPositionPath = new LookatPositionPath(animation);
+		lookatPositionPath.setEnableDepthTesting(false);
 		keyFrameMarkers = new KeyFrameMarkers(animation);
 		
 		updateAnimation(animation);
