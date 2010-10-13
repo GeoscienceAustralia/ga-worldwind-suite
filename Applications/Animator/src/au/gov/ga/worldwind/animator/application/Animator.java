@@ -412,6 +412,7 @@ public class Animator
 		if (cameraPathLayer == null)
 		{
 			cameraPathLayer = new CameraPathLayer(getCurrentAnimation());
+			wwd.addSelectListener(cameraPathLayer);
 		}
 		
 		if (crosshair == null)
@@ -457,6 +458,8 @@ public class Animator
 		LayerList layers = model.getLayers();
 		layers.add(cameraPathLayer);
 		layers.add(crosshair);
+		
+		wwd.addSelectListener(cameraPathLayer);
 	}
 	
 	/**

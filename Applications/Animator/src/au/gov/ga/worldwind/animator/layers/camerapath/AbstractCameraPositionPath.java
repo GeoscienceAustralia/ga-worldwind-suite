@@ -3,18 +3,10 @@ package au.gov.ga.worldwind.animator.layers.camerapath;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.Material;
 import gov.nasa.worldwind.render.Renderable;
-import gov.nasa.worldwind.render.markers.BasicMarker;
-import gov.nasa.worldwind.render.markers.BasicMarkerAttributes;
-import gov.nasa.worldwind.render.markers.Marker;
-import gov.nasa.worldwind.render.markers.MarkerAttributes;
-import gov.nasa.worldwind.render.markers.MarkerRenderer;
 
 import java.awt.Color;
 import java.nio.DoubleBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.media.opengl.GL;
 
@@ -31,9 +23,6 @@ import com.sun.opengl.util.BufferUtil;
  */
 public abstract class AbstractCameraPositionPath implements Renderable
 {
-
-private static final Color DEFAULT_KEYFRAME_NODE_COLOUR = Color.BLUE;
-	
 	private int frameCount;
 	
 	// Buffers used to draw the eye path
@@ -44,24 +33,12 @@ private static final Color DEFAULT_KEYFRAME_NODE_COLOUR = Color.BLUE;
 	private Object pathBufferLock = new Object();
 	private Vec4 pathReferenceCenter;
 	
-	// Buffers used to draw the key frame markers
-	private List<Marker> keyFrameMarkersFrontBuffer = new ArrayList<Marker>();
-	private List<Marker> keyFrameMarkersBackBuffer = new ArrayList<Marker>();
-	private Object keyFrameBufferLock = new Object();
-	
-	private MarkerRenderer keyFramemarkerRenderer = new MarkerRenderer();
-	private MarkerAttributes keyFrameMarkerAttributes = new BasicMarkerAttributes();
-	
-	private Color keyFrameNodeColour = DEFAULT_KEYFRAME_NODE_COLOUR;
-	
 	/** The animation whose camera path is to be displayed on this layer */
 	private Animation animation;
 	
 	public AbstractCameraPositionPath(Animation animation)
 	{
 		this.animation = animation;
-		
-		setupMarkerAttributes();
 	}
 
 	public void updateAnimation(Animation animation)
@@ -72,7 +49,6 @@ private static final Color DEFAULT_KEYFRAME_NODE_COLOUR = Color.BLUE;
 	public void recalulatePath()
 	{
 		populatePathBuffers();
-		populateKeyFrameMarkers();
 		swapBuffers();
 	}
 	
@@ -88,7 +64,6 @@ private static final Color DEFAULT_KEYFRAME_NODE_COLOUR = Color.BLUE;
 	@Override
 	public final void render(DrawContext dc)
 	{
-		drawKeyFrameMarkers(dc);
 		drawPath(dc);
 	}
 
@@ -97,7 +72,7 @@ private static final Color DEFAULT_KEYFRAME_NODE_COLOUR = Color.BLUE;
 	 */
 	private void drawPath(DrawContext dc)
 	{
-		if (frameCount <= 0)
+		if (frameCount <= 0 || dc.isPickingMode())
 		{
 			return;
 		}
@@ -151,28 +126,6 @@ private static final Color DEFAULT_KEYFRAME_NODE_COLOUR = Color.BLUE;
 			}
 			gl.glPopAttrib();
 			gl.glPopClientAttrib();
-		}
-	}
-	
-	/**
-	 * Draw the camera eye position key frame markers
-	 */
-	private void drawKeyFrameMarkers(DrawContext dc)
-	{
-		synchronized (keyFrameBufferLock)
-		{
-			GL gl = dc.getGL();
-			gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
-			try
-			{
-				gl.glShadeModel(GL.GL_SMOOTH);
-				gl.glColor3fv(keyFrameNodeColour.getColorComponents(null), 0);
-				keyFramemarkerRenderer.render(dc, keyFrameMarkersFrontBuffer);
-			}
-			finally
-			{
-				gl.glPopAttrib();
-			}
 		}
 	}
 	
@@ -276,26 +229,6 @@ private static final Color DEFAULT_KEYFRAME_NODE_COLOUR = Color.BLUE;
 		pathColourBackBuffer.rewind();
 	}
 	
-	private void setupMarkerAttributes()
-	{
-		keyFrameMarkerAttributes.setMaterial(new Material(keyFrameNodeColour));
-		keyFrameMarkerAttributes.setMaxMarkerSize(2000d);
-	}
-	
-	private void populateKeyFrameMarkers()
-	{
-		keyFrameMarkersBackBuffer.clear();
-		AnimationContext context = new AnimationContextImpl(animation);
-		for (KeyFrame keyFrame : animation.getKeyFrames())
-		{
-			if (isPathFrame(keyFrame))
-			{
-				Marker marker = new BasicMarker(getPathPositionAtFrame(context, keyFrame.getFrame()), keyFrameMarkerAttributes);
-				keyFrameMarkersBackBuffer.add(marker);
-			}
-		}
-	}
-
 	/**
 	 * @return Whether the provided key frame is one that should be included in this camera path
 	 */
@@ -317,13 +250,6 @@ private static final Color DEFAULT_KEYFRAME_NODE_COLOUR = Color.BLUE;
 			pathColourFrontBuffer = pathColourBackBuffer;
 			pathColourBackBuffer = tmp;
 			pathColourFrontBuffer.rewind();
-		}
-		
-		synchronized (keyFrameBufferLock)
-		{
-			List<Marker> tmp = keyFrameMarkersFrontBuffer;
-			keyFrameMarkersFrontBuffer = keyFrameMarkersBackBuffer;
-			keyFrameMarkersBackBuffer = tmp;
 		}
 	}
 	

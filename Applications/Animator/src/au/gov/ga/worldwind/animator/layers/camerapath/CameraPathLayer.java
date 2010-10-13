@@ -1,8 +1,11 @@
 package au.gov.ga.worldwind.animator.layers.camerapath;
 
+import gov.nasa.worldwind.event.SelectEvent;
+import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
 
+import java.awt.Point;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -18,14 +21,12 @@ import au.gov.ga.worldwind.animator.util.Validate;
 /**
  * A WorldWind Layer that displays the camera path of a given {@link Animation}
  * in the 3D world.
- * 
- * @author James Navin (james.navin@ga.gov.au)
- *
  */
-public class CameraPathLayer extends AbstractLayer implements AnimationEventListener
+public class CameraPathLayer extends AbstractLayer implements AnimationEventListener, SelectListener
 {
 	private EyePositionPath eyePositionPath;
 	private LookatPositionPath lookatPositionPath;
+	private KeyFrameMarkers keyFrameMarkers;
 	
 	/** The number of frames currently held in the vertex buffers */
 	private int frameCount;
@@ -46,8 +47,11 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	public CameraPathLayer(Animation animation)
 	{
 		Validate.notNull(animation, "An animation instance is required");
+		setPickEnabled(true);
+		
 		eyePositionPath = new EyePositionPath(animation);
 		lookatPositionPath = new LookatPositionPath(animation);
+		keyFrameMarkers = new KeyFrameMarkers(animation);
 		
 		updateAnimation(animation);
 	}
@@ -57,6 +61,13 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	{
 		eyePositionPath.render(dc);
 		lookatPositionPath.render(dc);
+		keyFrameMarkers.render(dc);
+	}
+	
+	@Override
+	protected void doPick(DrawContext dc, Point point)
+	{
+		keyFrameMarkers.render(dc);
 	}
 
 	@Override
@@ -84,9 +95,17 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		
 		eyePositionPath.updateAnimation(animation);
 		lookatPositionPath.updateAnimation(animation);
+		keyFrameMarkers.updateAnimation(animation);
 		
 		reset();
 		update();
+	}
+	
+	@Override
+	public void selected(SelectEvent event)
+	{
+		// Propagate the event to the key frame markers
+		keyFrameMarkers.selected(event);
 	}
 
 	private void reset()
@@ -94,6 +113,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		this.frameCount = animation.getFrameCount();
 		eyePositionPath.resetPath();
 		lookatPositionPath.resetPath();
+		keyFrameMarkers.resetKeyFrameMarkers();
 	}
 	
 	private void update()
@@ -105,10 +125,10 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 			{
 				eyePositionPath.recalulatePath();
 				lookatPositionPath.recalulatePath();
+				keyFrameMarkers.recalulateKeyFrameMarkers();
 			}
 		});
 	}
-	
 	
 	private boolean cameraPathHasChanged(AnimationEvent event)
 	{
