@@ -24,8 +24,8 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 public class CameraPathLayer extends AbstractLayer implements AnimationEventListener
 {
-	/** The path of the camera eye position */
 	private EyePositionPath eyePositionPath;
+	private LookatPositionPath lookatPositionPath;
 	
 	/** The number of frames currently held in the vertex buffers */
 	private int frameCount;
@@ -47,6 +47,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	{
 		Validate.notNull(animation, "An animation instance is required");
 		eyePositionPath = new EyePositionPath(animation);
+		lookatPositionPath = new LookatPositionPath(animation);
 		
 		updateAnimation(animation);
 	}
@@ -55,6 +56,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	protected void doRender(DrawContext dc)
 	{
 		eyePositionPath.render(dc);
+		lookatPositionPath.render(dc);
 	}
 
 	@Override
@@ -81,6 +83,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		this.animation.addChangeListener(this);
 		
 		eyePositionPath.updateAnimation(animation);
+		lookatPositionPath.updateAnimation(animation);
 		
 		reset();
 		update();
@@ -90,6 +93,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	{
 		this.frameCount = animation.getFrameCount();
 		eyePositionPath.resetPath();
+		lookatPositionPath.resetPath();
 	}
 	
 	private void update()
@@ -100,6 +104,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 			public void run()
 			{
 				eyePositionPath.recalulatePath();
+				lookatPositionPath.recalulatePath();
 			}
 		});
 	}
