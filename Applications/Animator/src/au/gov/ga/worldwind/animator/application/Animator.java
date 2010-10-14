@@ -411,7 +411,7 @@ public class Animator
 	{
 		if (cameraPathLayer == null)
 		{
-			cameraPathLayer = new CameraPathLayer(getCurrentAnimation());
+			cameraPathLayer = new CameraPathLayer(wwd, getCurrentAnimation());
 			wwd.addSelectListener(cameraPathLayer);
 		}
 		

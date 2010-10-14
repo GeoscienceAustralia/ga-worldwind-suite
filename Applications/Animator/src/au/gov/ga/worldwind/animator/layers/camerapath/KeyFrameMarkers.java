@@ -1,18 +1,22 @@
 package au.gov.ga.worldwind.animator.layers.camerapath;
 
+import static au.gov.ga.worldwind.animator.util.GeometryUtil.nearestIntersectionPoint;
+import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.event.DragSelectEvent;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
+import gov.nasa.worldwind.geom.Intersection;
+import gov.nasa.worldwind.geom.Line;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.Material;
 import gov.nasa.worldwind.render.Renderable;
-import gov.nasa.worldwind.render.markers.BasicMarker;
-import gov.nasa.worldwind.render.markers.BasicMarkerAttributes;
 import gov.nasa.worldwind.render.markers.Marker;
 import gov.nasa.worldwind.render.markers.MarkerRenderer;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +35,6 @@ import com.sun.opengl.util.BufferUtil;
  */
 class KeyFrameMarkers implements Renderable, SelectListener
 {
-	private static final Color DEFAULT_EYE_NODE_COLOUR = Color.BLUE;
-	private static final Color DEFAULT_LOOKAT_NODE_COLOUR = Color.MAGENTA;
-	private static final Color DEFAULT_HIGHLIGHTED_NODE_COLOUR = Color.YELLOW;
-	
 	// Buffers used to draw the key frame markers
 	private List<Marker> eyeMarkersFrontBuffer = new ArrayList<Marker>();
 	private List<Marker> eyeMarkersBackBuffer = new ArrayList<Marker>();
@@ -45,9 +45,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	private Object markerBufferLock = new Object();
 	
 	private MarkerRenderer markerRenderer = new MarkerRenderer();
-	private BasicMarkerAttributes eyeMarkerAttributes = new BasicMarkerAttributes();
-	private BasicMarkerAttributes lookatMarkerAttributes = new BasicMarkerAttributes();
-	private BasicMarkerAttributes highlighedMarkerAttributes = new BasicMarkerAttributes();
+	private WorldWindow worldWindow;
 	
 	private Animation animation;
 	
@@ -57,10 +55,10 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		LEFT, MIDDLE, RIGHT;
 	}
 	
-	public KeyFrameMarkers(Animation animation)
+	public KeyFrameMarkers(WorldWindow wwd, Animation animation)
 	{
+		this.worldWindow = wwd;
 		this.animation = animation;
-		setupMarkerAttributes();
 	}
 
 	@Override
@@ -83,7 +81,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 			return;
 		}
 		
-		Marker pickedMarker = (Marker)topPickedObject.getObject();
+		KeyFrameMarker pickedMarker = (KeyFrameMarker)topPickedObject.getObject();
 		if (event.isLeftPress())
 		{
 			lastClick = Click.LEFT;
@@ -94,12 +92,11 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		}
 		else if (event.isDrag())
 		{
-			highlight(pickedMarker);
+			doDragMarker(pickedMarker, lastClick, event.getPickPoint(), ((DragSelectEvent)event).getPreviousPickPoint());
 		} 
 		else if (event.isDragEnd())
 		{
-			lastClick = null;
-			unhighlight(pickedMarker);
+			doEndDrag(pickedMarker);
 		}
 	}
 
@@ -110,23 +107,42 @@ class KeyFrameMarkers implements Renderable, SelectListener
 			    eyeMarkersFrontBuffer.contains(pickedObject.getObject()));
 	}
 
-	private void highlight(Marker pickedMarker)
+	private void doDragMarker(KeyFrameMarker pickedMarker, Click clickType, Point pickPoint, Point previousPickPoint)
 	{
-		pickedMarker.setAttributes(highlighedMarkerAttributes);
+		pickedMarker.highlight();
+		if (clickType == Click.LEFT)
+		{
+			doDragLatLon(pickedMarker, pickPoint);
+		}
 	}
 	
-	private void unhighlight(Marker pickedMarker)
+	private void doDragLatLon(KeyFrameMarker pickedMarker, Point pickPoint)
 	{
-		if (lookatMarkersFrontBuffer.contains(pickedMarker))
+		// Compute the ray from the screen point
+		Line ray = worldWindow.getView().computeRayFromScreenPoint(pickPoint.x, pickPoint.y);
+		Intersection[] intersections = worldWindow.getModel().getGlobe().intersect(ray, pickedMarker.getPosition().elevation);
+		if (intersections == null || intersections.length == 0)
 		{
-			pickedMarker.setAttributes(lookatMarkerAttributes);
+			return;
 		}
-		else
+		Vec4 intersection = nearestIntersectionPoint(ray, intersections);
+		if (intersection == null)
 		{
-			pickedMarker.setAttributes(eyeMarkerAttributes);
+			return;
 		}
+		
+		Position newPosition = worldWindow.getModel().getGlobe().computePositionFromPoint(intersection);
+		pickedMarker.setPosition(newPosition);
+		
 	}
 
+	private void doEndDrag(KeyFrameMarker pickedMarker)
+	{
+		lastClick = null;
+		pickedMarker.applyPositionChangeToAnimation();
+		pickedMarker.unhighlight();
+	}
+	
 	public void updateAnimation(Animation animation)
 	{
 		this.animation = animation;
@@ -146,18 +162,6 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		lookatMarkersBackBuffer.clear();
 		joinersFrontBuffer = BufferUtil.newDoubleBuffer(animation.getKeyFrameCount() * 3 * 2);
 		joinersBackBuffer = BufferUtil.newDoubleBuffer(animation.getKeyFrameCount() * 3 * 2);
-	}
-	
-	private void setupMarkerAttributes()
-	{
-		eyeMarkerAttributes.setMaterial(new Material(DEFAULT_EYE_NODE_COLOUR));
-		eyeMarkerAttributes.setMaxMarkerSize(2000d);
-		
-		lookatMarkerAttributes = new BasicMarkerAttributes(eyeMarkerAttributes);
-		lookatMarkerAttributes.setMaterial(new Material(DEFAULT_LOOKAT_NODE_COLOUR));
-		
-		highlighedMarkerAttributes = new BasicMarkerAttributes(eyeMarkerAttributes);
-		highlighedMarkerAttributes.setMaterial(new Material(DEFAULT_HIGHLIGHTED_NODE_COLOUR));
 	}
 	
 	/**
@@ -223,7 +227,8 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		{
 			if (isCameraFrame(keyFrame))
 			{
-				Marker marker = new BasicMarker(animation.getCamera().getEyePositionAtFrame(context, keyFrame.getFrame()), eyeMarkerAttributes);
+				int frame = keyFrame.getFrame();
+				KeyFrameMarker marker = new EyeKeyFrameMarker(animation, frame);
 				eyeMarkersBackBuffer.add(marker);
 				
 				markerCoords = context.getView().getGlobe().computePointFromPosition(marker.getPosition());
@@ -231,7 +236,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 				joinersBackBuffer.put(markerCoords.y);
 				joinersBackBuffer.put(markerCoords.z);
 				
-				marker = new BasicMarker(animation.getCamera().getLookatPositionAtFrame(context, keyFrame.getFrame()), lookatMarkerAttributes);
+				marker = new LookatKeyFrameMarker(animation, frame);
 				lookatMarkersBackBuffer.add(marker);
 				
 				markerCoords = context.getView().getGlobe().computePointFromPosition(marker.getPosition());

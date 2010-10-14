@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.animator.layers.camerapath;
 
+import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.layers.AbstractLayer;
@@ -42,17 +43,19 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	 * <p/>
 	 * Initialises the mandatory animation instance.
 	 * 
+	 * @param wwd The current WorldWindow
 	 * @param animation The animation instance whose camera path will be displayed by this layer
 	 */
-	public CameraPathLayer(Animation animation)
+	public CameraPathLayer(WorldWindow wwd, Animation animation)
 	{
 		Validate.notNull(animation, "An animation instance is required");
+		Validate.notNull(wwd, "A world window is required");
 		setPickEnabled(true);
 		
 		eyePositionPath = new EyePositionPath(animation);
 		lookatPositionPath = new LookatPositionPath(animation);
 		lookatPositionPath.setEnableDepthTesting(false);
-		keyFrameMarkers = new KeyFrameMarkers(animation);
+		keyFrameMarkers = new KeyFrameMarkers(wwd, animation);
 		
 		updateAnimation(animation);
 	}
