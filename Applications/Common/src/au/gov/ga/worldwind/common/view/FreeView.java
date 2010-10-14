@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.common.view;
 
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Frustum;
 import gov.nasa.worldwind.geom.Matrix;
@@ -168,5 +169,18 @@ public class FreeView extends BasicView
 		}
 
 		return far < minimumFarDistance ? minimumFarDistance : far;
+	}
+	
+	@Override
+	public void copyViewState(View view)
+	{
+		this.globe = view.getGlobe();
+		
+		Matrix transform = view.getModelviewMatrix();
+		setHeading(ViewUtil.computeHeading(transform));
+		setPitch(ViewUtil.computePitch(transform));
+		setRoll(ViewUtil.computeRoll(transform));
+		
+		setEyePosition(view.getCurrentEyePosition());
 	}
 }
