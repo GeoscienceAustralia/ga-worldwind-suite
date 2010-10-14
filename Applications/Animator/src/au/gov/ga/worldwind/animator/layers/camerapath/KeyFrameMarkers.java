@@ -221,6 +221,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	private void populateKeyFrameMarkers()
 	{
 		eyeMarkersBackBuffer.clear();
+		lookatMarkersBackBuffer.clear();
 		AnimationContext context = new AnimationContextImpl(animation);
 		Vec4 markerCoords;
 		for (KeyFrame keyFrame : animation.getKeyFrames())

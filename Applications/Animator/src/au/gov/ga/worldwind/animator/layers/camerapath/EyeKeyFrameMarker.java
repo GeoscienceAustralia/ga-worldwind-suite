@@ -7,8 +7,7 @@ import java.awt.Color;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
-import au.gov.ga.worldwind.animator.animation.KeyFrame;
-import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
  * A key frame marker used to mark the position of the camera eye at a specific key frame.
@@ -29,30 +28,27 @@ public class EyeKeyFrameMarker extends KeyFrameMarker
 	}
 
 	@Override
-	public void applyPositionChangeToAnimation()
-	{
-		KeyFrame currentKeyFrame = getAnimation().getKeyFrame(getFrame());
-		
-		ParameterValue eyeLatValue = currentKeyFrame.getValueForParameter(getAnimation().getCamera().getEyeLat());
-		ParameterValue eyeLonValue = currentKeyFrame.getValueForParameter(getAnimation().getCamera().getEyeLon());
-		ParameterValue eyeElevationValue = currentKeyFrame.getValueForParameter(getAnimation().getCamera().getEyeElevation());
-		
-		eyeLatValue.setValue(getPosition().latitude.degrees);
-		eyeLonValue.setValue(getPosition().longitude.degrees);
-		eyeElevationValue.setValue(getAnimation().applyZoomScaling(getPosition().elevation));
-		
-		// Smooth this key frame, and the ones either side of it
-		eyeLatValue.smooth();
-		eyeLonValue.smooth();
-		eyeElevationValue.smooth();
-		
-		
-	}
-	
-	@Override
 	public BasicMarkerAttributes getUnhighlightedAttributes()
 	{
 		return DEFAULT_UNHIGHLIGHTED_ATTRIBUTES;
+	}
+
+	@Override
+	protected Parameter getLatParameter()
+	{
+		return getAnimation().getCamera().getEyeLat();
+	}
+
+	@Override
+	protected Parameter getLonParameter()
+	{
+		return getAnimation().getCamera().getEyeLon();
+	}
+
+	@Override
+	protected Parameter getElevationParameter()
+	{
+		return getAnimation().getCamera().getEyeElevation();
 	}
 
 }

@@ -8,6 +8,9 @@ import gov.nasa.worldwind.render.markers.BasicMarkerAttributes;
 import java.awt.Color;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.KeyFrame;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -68,7 +71,26 @@ public abstract class KeyFrameMarker extends BasicMarker
 		return highlightedAttributes;
 	}
 	
-	public abstract void applyPositionChangeToAnimation();
+	public void applyPositionChangeToAnimation()
+	{
+		ParameterValue[] positionValues = getPositionValuesAtKeyFrame(getAnimation().getKeyFrame(getFrame()));
+		positionValues[0].setValue(getPosition().latitude.degrees);
+		positionValues[1].setValue(getPosition().longitude.degrees);
+		positionValues[2].setValue(getAnimation().applyZoomScaling(getPosition().elevation));
+		
+		// Smooth this key frame, and the ones either side of it
+		smoothParameterValues(positionValues);
+		
+		positionValues = getPositionValuesAtKeyFrame(getAnimation().getKeyFrameWithParameterBeforeFrame(getLatParameter(), getFrame()));
+		smoothParameterValues(positionValues);
+
+		positionValues = getPositionValuesAtKeyFrame(getAnimation().getKeyFrameWithParameterAfterFrame(getLatParameter(), getFrame()));
+		smoothParameterValues(positionValues);
+	}
+	
+	protected abstract Parameter getLatParameter();
+	protected abstract Parameter getLonParameter();
+	protected abstract Parameter getElevationParameter();
 	
 	public int getFrame()
 	{
@@ -78,5 +100,37 @@ public abstract class KeyFrameMarker extends BasicMarker
 	public Animation getAnimation()
 	{
 		return animation;
+	}
+	
+	protected void smoothParameterValues(ParameterValue[] values)
+	{
+		if (values == null)
+		{
+			return;
+		}
+		for (ParameterValue parameterValue : values)
+		{
+			parameterValue.smooth();
+		}
+	}
+
+	protected ParameterValue[] getPositionValuesAtKeyFrame(KeyFrame keyFrame)
+	{
+		return getValuesAtKeyFrame(keyFrame, getLatParameter(), getLonParameter(), getElevationParameter());
+	}
+	
+	protected ParameterValue[] getValuesAtKeyFrame(KeyFrame keyFrame, Parameter... parameters)
+	{
+		if (keyFrame == null)
+		{
+			return null;
+		}
+		
+		ParameterValue[] result = new ParameterValue[parameters.length];
+		for (int i = 0; i < parameters.length; i++)
+		{
+			result[i] = keyFrame.getValueForParameter(parameters[i]);
+		}
+		return result;
 	}
 }
