@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import au.gov.ga.worldwind.common.layers.point.AbstractPointProvider;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 import au.gov.ga.worldwind.viewer.layers.geonames.GeoNamesLayer;
 
@@ -35,7 +36,7 @@ public class RetrievalListenerHelper
 						BasicElevationModel.class, BasicTiledImageLayer.class,
 						PlaceNameLayer.class, RPFTiledImageLayer.class, SurfaceImage.class,
 						MercatorTiledImageLayer.class, BasicMercatorTiledImageLayer.class,
-						GeoNamesLayer.class };
+						GeoNamesLayer.class, AbstractPointProvider.class };
 
 		// Search classes above for declared classes that implement
 		// RetrivalPostProcess AND contain a Field which is a subclass of Tile,
