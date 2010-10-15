@@ -1,49 +1,47 @@
 package au.gov.ga.worldwind.animator.util;
 
-import gov.nasa.worldwind.geom.Intersection;
 import gov.nasa.worldwind.geom.Line;
+import gov.nasa.worldwind.geom.Plane;
 import gov.nasa.worldwind.geom.Vec4;
 
 /**
- * Utility methods for dealing with geometry (lines, polygons etc.)
- *
+ * Utility methods for working with geometry
  */
 public class GeometryUtil
 {
 
 	/**
-	 * Calculate the {@link Intersection} point nearest to the provided {@link Line}'s origin
+	 * Compute the 3D Plane that contains the two provided lines
 	 */
-	public static Vec4 nearestIntersectionPoint(Line line, Intersection[] intersections)
-    {
-        Vec4 intersectionPoint = null;
+	public static Plane createPlaneContainingLines(Line line1, Line line2)
+	{
+		Validate.isTrue(line1 != null && line2 != null, "Two lines are required to create a plane in 3D space");
+		
+		// Choose three arbitrary points that lie on the two lines
+		Vec4 point1 = line1.getPointAt(0);
+		Vec4 point2 = line1.getPointAt(1000);
+		Vec4 point3 = line2.getPointAt(500);
+		
+		return createPlaneFromThreePoints(point1, point2, point3);
+	}
 
-        // Find the nearest intersection that's in front of the ray origin.
-        double nearestDistance = Double.MAX_VALUE;
-        for (Intersection intersection : intersections)
-        {
-            // Ignore any intersections behind the line origin.
-            if (!isPointBehindLineOrigin(line, intersection.getIntersectionPoint()))
-            {
-                double d = intersection.getIntersectionPoint().distanceTo3(line.getOrigin());
-                if (d < nearestDistance)
-                {
-                    intersectionPoint = intersection.getIntersectionPoint();
-                    nearestDistance = d;
-                }
-            }
-        }
-
-        return intersectionPoint;
-    }
-	
 	/**
-	 * @return Whether the provided point lies behind the line origin
+	 * Compute the 3D Plane that contains the three provided points
 	 */
-	public static boolean isPointBehindLineOrigin(Line line, Vec4 point)
-    {
-        double dot = point.subtract3(line.getOrigin()).dot3(line.getDirection());
-        return dot < 0.0;
-    }
+	public static Plane createPlaneFromThreePoints(Vec4 point1, Vec4 point2, Vec4 point3)
+	{
+		Validate.isTrue(point1 != null && point2 != null && point3 != null, "Three points are required to define a plane in 3D space");
+		
+		// Using the Plane equation ax+by+cz+d = 0
+		double a = (point1.y * (point2.z - point3.z)) + (point2.y * (point3.z - point1.z)) + (point3.y * (point1.z - point2.z));
+		double b = (point1.z * (point2.x - point3.x)) + (point2.z * (point3.x - point1.x)) + (point3.z * (point1.x - point2.x));
+		double c = (point1.x * (point2.y - point3.y)) + (point2.x * (point3.y - point1.y)) + (point3.x * (point1.y - point2.y));
+		double d = -((point1.x * ((point2.y * point3.z) - (point3.y * point2.z))) + (point2.x * ((point3.y * point1.z) - (point1.y * point3.z))) + (point3.x * ((point1.y * point2.z) - (point2.y * point1.z))));
+		
+		Vec4 normal = new Vec4(a, b, c).normalize3();
+		double distance = d / (Math.sqrt(a*a + b*b + c*c));
+		
+		return new Plane(normal.x, normal.y, normal.z, distance);
+	}
 	
 }
