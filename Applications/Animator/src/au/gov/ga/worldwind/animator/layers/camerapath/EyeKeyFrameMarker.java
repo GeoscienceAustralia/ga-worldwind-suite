@@ -18,7 +18,6 @@ public class EyeKeyFrameMarker extends KeyFrameMarker
 	static
 	{
 		DEFAULT_UNHIGHLIGHTED_ATTRIBUTES = new BasicMarkerAttributes();
-		DEFAULT_UNHIGHLIGHTED_ATTRIBUTES.setMaxMarkerSize(2000d);
 		DEFAULT_UNHIGHLIGHTED_ATTRIBUTES.setMaterial(new Material(Color.BLUE));
 	}
 	

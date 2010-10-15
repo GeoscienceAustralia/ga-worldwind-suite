@@ -18,6 +18,7 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.KeyFrameEvent;
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.animator.view.orbit.BasicOrbitView;
 
 /**
  * A WorldWind Layer that displays the camera path of a given {@link Animation}
@@ -63,11 +64,30 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	@Override
 	protected void doRender(DrawContext dc)
 	{
+		double nearClipDistance = setNearClipDistance(dc, 1.0);
+		
 		eyePositionPath.render(dc);
 		lookatPositionPath.render(dc);
 		keyFrameMarkers.render(dc);
+		
+		setNearClipDistance(dc, nearClipDistance);
 	}
 	
+	/**
+	 * Set the near clip distance if it is settable, returning the original clip distance before the set operation.
+	 */
+	private double setNearClipDistance(DrawContext dc, double nearClipDistance)
+	{
+		double currentClipDistance = dc.getView().getNearClipDistance();
+		
+		if (dc.getView() instanceof BasicOrbitView)
+		{
+			((BasicOrbitView)dc.getView()).setNearClipDistance(nearClipDistance);
+		}
+		
+		return currentClipDistance;
+	}
+
 	@Override
 	protected void doPick(DrawContext dc, Point point)
 	{

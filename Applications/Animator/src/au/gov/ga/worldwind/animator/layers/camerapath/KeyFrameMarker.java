@@ -24,7 +24,6 @@ public abstract class KeyFrameMarker extends BasicMarker
 	{
 		DEFAULT_HIGHLIGHTED_ATTRIBUTES = new BasicMarkerAttributes();
 		DEFAULT_HIGHLIGHTED_ATTRIBUTES.setMaterial(new Material(Color.YELLOW));
-		DEFAULT_HIGHLIGHTED_ATTRIBUTES.setMaxMarkerSize(2000d);
 		
 		DEFAULT_UNHIGHLIGHTED_ATTRIBUTES = new BasicMarkerAttributes(DEFAULT_HIGHLIGHTED_ATTRIBUTES);
 		DEFAULT_UNHIGHLIGHTED_ATTRIBUTES.setMaterial(new Material(Color.MAGENTA));

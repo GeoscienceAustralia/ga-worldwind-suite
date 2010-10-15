@@ -196,8 +196,6 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		// Set the elevation of the marker to the elevation at the point of intersection
 		Position intersectionPosition = worldWindow.getModel().getGlobe().computePositionFromPoint(intersection);
 		
-		System.out.println(intersectionPosition.latitude.degrees + ", " + intersectionPosition.longitude.degrees + ", " + intersectionPosition.elevation);
-		
 		Position newMarkerPosition = new Position(pickedMarker.getPosition().latitude, 
 												  pickedMarker.getPosition().longitude, 
 												  intersectionPosition.elevation);
@@ -231,8 +229,6 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		eyeMarkersBackBuffer.clear();
 		lookatMarkersFrontBuffer.clear();
 		lookatMarkersBackBuffer.clear();
-		joinersFrontBuffer = BufferUtil.newDoubleBuffer(animation.getKeyFrameCount() * 3 * 2);
-		joinersBackBuffer = BufferUtil.newDoubleBuffer(animation.getKeyFrameCount() * 3 * 2);
 	}
 	
 	/**
@@ -334,6 +330,8 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	{
 		eyeMarkersBackBuffer.clear();
 		lookatMarkersBackBuffer.clear();
+		joinersBackBuffer = BufferUtil.newDoubleBuffer(animation.getKeyFrameCount() * 3 * 2);
+		
 		AnimationContext context = new AnimationContextImpl(animation);
 		Vec4 markerCoords;
 		for (KeyFrame keyFrame : animation.getKeyFrames())
