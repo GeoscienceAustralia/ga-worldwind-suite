@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.common.layers.point;
 
-import gov.nasa.worldwind.applications.gio.gidb.Layer;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
