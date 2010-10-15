@@ -33,12 +33,15 @@ public class GeometryUtil
 		Validate.isTrue(point1 != null && point2 != null && point3 != null, "Three points are required to define a plane in 3D space");
 		
 		// Using the Plane equation ax+by+cz+d = 0
+		// Expansion taken from http://local.wasp.uwa.edu.au/~pbourke/geometry/planeeq/
 		double a = (point1.y * (point2.z - point3.z)) + (point2.y * (point3.z - point1.z)) + (point3.y * (point1.z - point2.z));
 		double b = (point1.z * (point2.x - point3.x)) + (point2.z * (point3.x - point1.x)) + (point3.z * (point1.x - point2.x));
 		double c = (point1.x * (point2.y - point3.y)) + (point2.x * (point3.y - point1.y)) + (point3.x * (point1.y - point2.y));
 		double d = -((point1.x * ((point2.y * point3.z) - (point3.y * point2.z))) + (point2.x * ((point3.y * point1.z) - (point1.y * point3.z))) + (point3.x * ((point1.y * point2.z) - (point2.y * point1.z))));
 		
 		Vec4 normal = new Vec4(a, b, c).normalize3();
+		
+		// Distance calculation from http://mathworld.wolfram.com/Plane.html
 		double distance = d / (Math.sqrt(a*a + b*b + c*c));
 		
 		return new Plane(normal.x, normal.y, normal.z, distance);
