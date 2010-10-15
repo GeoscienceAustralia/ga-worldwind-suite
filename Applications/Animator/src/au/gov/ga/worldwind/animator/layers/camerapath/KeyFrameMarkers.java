@@ -246,7 +246,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 
 	private void drawJoiners(DrawContext dc)
 	{
-		if (animation.getKeyFrameCount() <= 0 || dc.isPickingMode())
+		if (animation.getKeyFrameCount() <= 0 || dc.isPickingMode() || joinersFrontBuffer.limit() <= 0)
 		{
 			return;
 		}

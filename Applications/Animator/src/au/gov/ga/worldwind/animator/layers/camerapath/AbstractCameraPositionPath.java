@@ -226,13 +226,14 @@ public abstract class AbstractCameraPositionPath implements Renderable
 		}
 		
 		// Use the HSL colour ramp to indicate magnitude of deltas
-		HSLColor hslColor = new HSLColor(0, 50, 50);
+		HSLColor hslColor = new HSLColor(0, 80, 50);
 		Color pathColor = null;
 		
 		pathColourBackBuffer.rewind();
 		for (int i = 0; i < deltas.length; i++)
 		{
-			pathColor = hslColor.adjustHue((float)((deltas[i] - minDelta) / deltaWindow) * 360f);
+			float normalizedDelta = (float)((deltas[i] - minDelta) / deltaWindow);
+			pathColor = hslColor.adjustHue((1f - normalizedDelta) * 240f);
 			pathColourBackBuffer.put((double)pathColor.getRed() / 255d);
 			pathColourBackBuffer.put((double)pathColor.getGreen() / 255d);
 			pathColourBackBuffer.put((double)pathColor.getBlue() / 255d);
