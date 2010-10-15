@@ -12,6 +12,7 @@ import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWXML;
+import gov.nasa.worldwind.view.BasicView;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.io.IOException;
@@ -26,7 +27,6 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.util.AVKeyMore;
 import au.gov.ga.worldwind.animator.util.Validate;
-import au.gov.ga.worldwind.animator.view.roll.RollOrbitView;
 
 import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.texture.Texture;
@@ -179,9 +179,9 @@ public class Skysphere extends AbstractLayer
 			heading = ((OrbitView) dc.getView()).getHeading();
 			pitch = ((OrbitView) dc.getView()).getPitch();
 		}
-		if (dc.getView() instanceof RollOrbitView)
+		if (dc.getView() instanceof BasicView)
 		{
-			roll = ((RollOrbitView) dc.getView()).getRoll();
+			roll = ((BasicView) dc.getView()).getRoll();
 		}
 
 		Matrix transform = Matrix.IDENTITY;

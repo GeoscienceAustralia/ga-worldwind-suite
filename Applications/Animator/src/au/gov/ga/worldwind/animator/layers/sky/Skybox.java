@@ -7,6 +7,7 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.view.BasicView;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.io.File;
@@ -15,8 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.media.opengl.GL;
-
-import au.gov.ga.worldwind.animator.view.roll.RollOrbitView;
 
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
@@ -130,9 +129,9 @@ public class Skybox extends RenderableLayer
 			heading = ((OrbitView) dc.getView()).getHeading();
 			pitch = ((OrbitView) dc.getView()).getPitch();
 		}
-		if (dc.getView() instanceof RollOrbitView)
+		if (dc.getView() instanceof BasicView)
 		{
-			roll = ((RollOrbitView) dc.getView()).getRoll();
+			roll = ((BasicView) dc.getView()).getRoll();
 		}
 
 		Matrix transform = Matrix.IDENTITY;
