@@ -719,6 +719,9 @@ public class Animator
 				if (isFrameChangeEvent(event))
 				{
 					updateSlider();
+					
+					// Trigger a repaint of the highlighted frames on key frame changes
+					highlightedFramesListener.selectedObjectChanged(CurrentlySelectedObject.get(), CurrentlySelectedObject.get());
 				}
 			}
 
