@@ -79,6 +79,7 @@ public class Settings
 			saveDefaultAnimationLayers(rootElement);
 			saveKnownLayers(rootElement);
 			saveDefaultElevationModels(rootElement);
+			saveUtilityLayerFlags(rootElement);
 			
 			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(getUserDirectory(), SETTINGS_FILE_NAME)));
 		}
@@ -86,6 +87,13 @@ public class Settings
 		{
 			ExceptionLogger.logException(e);
 		}
+	}
+
+	private static void saveUtilityLayerFlags(Element rootElement)
+	{
+		WWXML.appendBoolean(rootElement, "showCameraPath", instance.isCameraPathShown());
+		WWXML.appendBoolean(rootElement, "showGrid", instance.isGridShown());
+		WWXML.appendBoolean(rootElement, "showRuleOfThirds", instance.isRuleOfThirdsShown());
 	}
 
 	private static void saveDefaultElevationModels(Element rootElement)
@@ -179,6 +187,14 @@ public class Settings
 		loadDefaultAnimationLayers(rootElement);
 		loadKnownLayers(rootElement);
 		loadDefaultElevationModels(rootElement);
+		loadUtilityLayerFlags(rootElement);
+	}
+
+	private static void loadUtilityLayerFlags(Element rootElement)
+	{
+		instance.setCameraPathShown(XMLUtil.getBoolean(rootElement, "//showCameraPath", true));
+		instance.setGridShown(XMLUtil.getBoolean(rootElement, "//showGrid", true));
+		instance.setRuleOfThirdsShown(XMLUtil.getBoolean(rootElement, "//showRuleOfThirds", true));
 	}
 
 	private static void loadDefaultElevationModels(Element rootElement)
@@ -315,6 +331,10 @@ public class Settings
 	private List<ElevationModelIdentifier> defaultElevationModels = new ArrayList<ElevationModelIdentifier>(Arrays.asList(new ElevationModelIdentifier[]{
 			new ElevationModelIdentifierImpl("Earth", "http://www.ga.gov.au/apps/world-wind/dataset/standard/layers/earth_elevation_model.xml"),
 	}));
+	
+	private boolean gridShown = true;
+	private boolean cameraPathShown = true;
+	private boolean ruleOfThirdsShown = true;
 	
 	/**
 	 * Private constructor. Use the Singleton accessor {@link #get()}.
@@ -470,5 +490,53 @@ public class Settings
 	public void setDefaultElevationModels(List<ElevationModelIdentifier> defaultElevationModels)
 	{
 		this.defaultElevationModels = defaultElevationModels;
+	}
+	
+	/**
+	 * @return {@link #gridShown}
+	 */
+	public boolean isGridShown()
+	{
+		return gridShown;
+	}
+	
+	/**
+	 * Set {@link #gridShown}
+	 */
+	public void setGridShown(boolean gridShown)
+	{
+		this.gridShown = gridShown;
+	}
+	
+	/**
+	 * @return {@link #ruleOfThirdsShown}
+	 */
+	public boolean isRuleOfThirdsShown()
+	{
+		return ruleOfThirdsShown;
+	}
+	
+	/**
+	 * Set {@link #ruleOfThirdsShown}
+	 */
+	public void setRuleOfThirdsShown(boolean ruleOfThirdsShown)
+	{
+		this.ruleOfThirdsShown = ruleOfThirdsShown;
+	}
+	
+	/**
+	 * @return {@link #cameraPathShown}
+	 */
+	public boolean isCameraPathShown()
+	{
+		return cameraPathShown;
+	}
+	
+	/**
+	 * Set {@link #cameraPathShown}
+	 */
+	public void setCameraPathShown(boolean cameraPathShown)
+	{
+		this.cameraPathShown = cameraPathShown;
 	}
 }

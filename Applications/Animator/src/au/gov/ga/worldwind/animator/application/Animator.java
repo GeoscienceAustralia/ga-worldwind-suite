@@ -417,6 +417,7 @@ public class Animator
 		{
 			cameraPathLayer = new CameraPathLayer(wwd, getCurrentAnimation());
 			wwd.addSelectListener(cameraPathLayer);
+			cameraPathLayer.setEnabled(Settings.get().isCameraPathShown());
 		}
 		
 		if (crosshair == null)
@@ -427,12 +428,14 @@ public class Animator
 		if (gridOverlay == null)
 		{
 			gridOverlay = new GridOverlayLayer();
+			gridOverlay.setEnabled(Settings.get().isGridShown());
 		}
 		
 		if (ruleOfThirdsOverlay == null)
 		{
 			ruleOfThirdsOverlay = new GridOverlayLayer(false, 0.3333, 0.3333);
 			ruleOfThirdsOverlay.setGridColor(Color.GREEN);
+			ruleOfThirdsOverlay.setEnabled(Settings.get().isRuleOfThirdsShown());
 		}
 	}
 	
@@ -1588,16 +1591,19 @@ public class Animator
 	void setCameraPathVisible(boolean visible)
 	{
 		cameraPathLayer.setEnabled(visible);
+		Settings.get().setCameraPathShown(visible);
 	}
 	
 	void setGridVisible(boolean visible)
 	{
 		gridOverlay.setEnabled(visible);
+		Settings.get().setGridShown(visible);
 	}
 	
 	void setRuleOfThirdsVisible(boolean visible)
 	{
 		ruleOfThirdsOverlay.setEnabled(visible);
+		Settings.get().setRuleOfThirdsShown(visible);
 	}
 	
 	void scaleAnimation()

@@ -11,6 +11,7 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
+import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
@@ -376,7 +377,7 @@ public class AnimatorActionFactory
 		});
 		
 		// Show camera path
-		showCameraPathAction = new SelectableAction(getMessage(getShowCameraPathLabelKey()), null, true);
+		showCameraPathAction = new SelectableAction(getMessage(getShowCameraPathLabelKey()), null, Settings.get().isCameraPathShown());
 		showCameraPathAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -387,7 +388,7 @@ public class AnimatorActionFactory
 		});
 		
 		// Show grid
-		showGridAction = new SelectableAction(getMessage(getShowGridLabelKey()), null, true);
+		showGridAction = new SelectableAction(getMessage(getShowGridLabelKey()), null, Settings.get().isGridShown());
 		showGridAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -398,7 +399,7 @@ public class AnimatorActionFactory
 		});
 		
 		// Show rule of thirds
-		showRuleOfThirdsAction = new SelectableAction(getMessage(getShowRuleOfThirdsLabelKey()), null, true);
+		showRuleOfThirdsAction = new SelectableAction(getMessage(getShowRuleOfThirdsLabelKey()), null, Settings.get().isRuleOfThirdsShown());
 		showRuleOfThirdsAction.addActionListener(new ActionListener()
 		{
 			@Override
