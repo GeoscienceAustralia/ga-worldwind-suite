@@ -151,6 +151,12 @@ public class LayerIdentifierFactory
 			return null;
 		}
 		
+		// If name element is included, but is empty...
+		if (nameElement.getFirstChild() == null)
+		{
+			return null;
+		}
+		
 		return nameElement.getFirstChild().getNodeValue();
 	}
 	
