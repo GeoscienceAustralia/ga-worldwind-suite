@@ -37,7 +37,9 @@ public class JDoubleField extends JTextField
 	public Double getValue()
 	{
 		if (getText().length() == 0)
+		{
 			return null;
+		}
 		return value;
 	}
 
@@ -45,7 +47,9 @@ public class JDoubleField extends JTextField
 	{
 		this.value = value;
 		if (!updating)
+		{
 			updateText();
+		}
 	}
 
 	public boolean isPositive()
@@ -75,12 +79,17 @@ public class JDoubleField extends JTextField
 		{
 			setting = true;
 			if (value == null)
+			{
 				setText("");
+			}
 			else if (precision != null)
-				setText(String.format("%1." + precision + "f", value
-						* getScale()));
+			{
+				setText(String.format("%1." + precision + "f", value * getScale()));
+			}
 			else
+			{
 				setText(String.valueOf(value * getScale()));
+			}
 			setting = false;
 		}
 	}
@@ -88,28 +97,36 @@ public class JDoubleField extends JTextField
 	private class DoubleDocument extends PlainDocument
 	{
 		@Override
-		public void insertString(int offs, String str, AttributeSet a)
-				throws BadLocationException
+		public void insertString(int offs, String str, AttributeSet a) throws BadLocationException
 		{
-			String result = getText(0, offs) + str
-					+ getText(offs, getLength() - offs);
-			if (checkAndSet(result))
+			String result = getText(0, offs) + str + getText(offs, getLength() - offs);
+			if (isValidNegativeSign(result) || checkAndSet(result))
+			{
 				super.insertString(offs, str, a);
+			}
+		}
+
+		private boolean isValidNegativeSign(String result)
+		{
+			return result.trim().equals("-") && !isPositive();
 		}
 
 		@Override
 		public void remove(int offs, int len) throws BadLocationException
 		{
-			String result = getText(0, offs)
-					+ getText(offs + len, getLength() - offs - len);
-			if (checkAndSet(result))
+			String result = getText(0, offs) + getText(offs + len, getLength() - offs - len);
+			if (isValidNegativeSign(result) || checkAndSet(result))
+			{
 				super.remove(offs, len);
+			}
 		}
 
 		private boolean checkAndSet(String result)
 		{
 			if (result.length() == 0)
+			{
 				return true;
+			}
 
 			boolean doit = true;
 			Double value = null;
