@@ -641,6 +641,8 @@ public class Animator
 		menu.add(actionFactory.getAddExaggeratorAction());
 		menu.addSeparator();
 		actionFactory.getShowCameraPathAction().addToMenu(menu);
+		actionFactory.getShowGridAction().addToMenu(menu);
+		actionFactory.getShowRuleOfThirdsAction().addToMenu(menu);
 		
 		// Debug
 		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
@@ -1586,6 +1588,16 @@ public class Animator
 	void setCameraPathVisible(boolean visible)
 	{
 		cameraPathLayer.setEnabled(visible);
+	}
+	
+	void setGridVisible(boolean visible)
+	{
+		gridOverlay.setEnabled(visible);
+	}
+	
+	void setRuleOfThirdsVisible(boolean visible)
+	{
+		ruleOfThirdsOverlay.setEnabled(visible);
 	}
 	
 	void scaleAnimation()

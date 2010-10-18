@@ -50,6 +50,8 @@ public class AnimatorActionFactory
 	private BasicAction addElevationModelAction;
 	private BasicAction addExaggeratorAction;
 	private SelectableAction showCameraPathAction;
+	private SelectableAction showGridAction;
+	private SelectableAction showRuleOfThirdsAction;
 	
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
@@ -373,6 +375,7 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		// Show camera path
 		showCameraPathAction = new SelectableAction(getMessage(getShowCameraPathLabelKey()), null, true);
 		showCameraPathAction.addActionListener(new ActionListener()
 		{
@@ -380,6 +383,28 @@ public class AnimatorActionFactory
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.setCameraPathVisible(showCameraPathAction.isSelected());
+			}
+		});
+		
+		// Show grid
+		showGridAction = new SelectableAction(getMessage(getShowGridLabelKey()), null, true);
+		showGridAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.setGridVisible(showGridAction.isSelected());
+			}
+		});
+		
+		// Show rule of thirds
+		showRuleOfThirdsAction = new SelectableAction(getMessage(getShowRuleOfThirdsLabelKey()), null, true);
+		showRuleOfThirdsAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.setRuleOfThirdsVisible(showRuleOfThirdsAction.isSelected());
 			}
 		});
 		
@@ -555,5 +580,15 @@ public class AnimatorActionFactory
 	public SelectableAction getShowCameraPathAction()
 	{
 		return showCameraPathAction;
+	}
+
+	public SelectableAction getShowGridAction()
+	{
+		return showGridAction;
+	}
+
+	public SelectableAction getShowRuleOfThirdsAction()
+	{
+		return showRuleOfThirdsAction;
 	}
 }
