@@ -34,11 +34,11 @@ public class LayerFactory extends BasicLayerFactory
 		{
 			return ShapefileLayerFactory.createLayer(domElement, params);
 		}
-		else if("PointLayer".equals(layerType))
+		else if ("PointLayer".equals(layerType))
 		{
 			return PointLayerUtils.createPointLayer(domElement, params);
 		}
-		else if("KMLLayer".equals(layerType))
+		else if ("KMLLayer".equals(layerType))
 		{
 			return new KMLLayer(domElement, params);
 		}
