@@ -15,6 +15,7 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -73,6 +74,7 @@ import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
+import au.gov.ga.worldwind.animator.layers.misc.GridOverlayLayer;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.animator.panels.SideBar;
 import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPanel;
@@ -171,6 +173,8 @@ public class Animator
 	// The layers used in the application
 	private Layer crosshair;
 	private CameraPathLayer cameraPathLayer;
+	private GridOverlayLayer gridOverlay;
+	private GridOverlayLayer ruleOfThirdsOverlay;
 	
 	/** The file chooser used for open and save. Instance variable so it will remember last used folders. */
 	private JFileChooser fileChooser;
@@ -419,6 +423,17 @@ public class Animator
 		{
 			crosshair = new CrosshairLayer();
 		}
+		
+		if (gridOverlay == null)
+		{
+			gridOverlay = new GridOverlayLayer();
+		}
+		
+		if (ruleOfThirdsOverlay == null)
+		{
+			ruleOfThirdsOverlay = new GridOverlayLayer(false, 0.3333, 0.3333);
+			ruleOfThirdsOverlay.setGridColor(Color.GREEN);
+		}
 	}
 	
 	/**
@@ -457,13 +472,15 @@ public class Animator
 	{
 		LayerList layers = model.getLayers();
 		layers.add(cameraPathLayer);
+		layers.add(gridOverlay);
+		layers.add(ruleOfThirdsOverlay);
 		layers.add(crosshair);
 		
 		wwd.addSelectListener(cameraPathLayer);
 	}
 	
 	/**
-	 * Apply the elevation model associated with the current animation to the world wind glob.
+	 * Apply the elevation model associated with the current animation to the world wind globe.
 	 */
 	private void updateElevationModelOnGlobe()
 	{
