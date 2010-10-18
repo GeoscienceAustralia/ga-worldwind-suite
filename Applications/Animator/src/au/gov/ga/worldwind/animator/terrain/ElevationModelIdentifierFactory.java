@@ -96,7 +96,7 @@ public class ElevationModelIdentifierFactory
 		}
 		
 		Element nameElement = XMLUtil.getElement(definitionDocument.getDocumentElement(), "/ElevationModel/ElevationModel/DisplayName", null);
-		if (nameElement == null)
+		if (nameElement == null || nameElement.getFirstChild() == null)
 		{
 			return null;
 		}

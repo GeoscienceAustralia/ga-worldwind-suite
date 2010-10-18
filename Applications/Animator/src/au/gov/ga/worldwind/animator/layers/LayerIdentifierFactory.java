@@ -146,17 +146,10 @@ public class LayerIdentifierFactory
 		}
 		
 		Element nameElement = XMLUtil.getElement(definitionDocument.getDocumentElement(), "/Layer/DisplayName", null);
-		if (nameElement == null)
+		if (nameElement == null || nameElement.getFirstChild() == null)
 		{
 			return null;
 		}
-		
-		// If name element is included, but is empty...
-		if (nameElement.getFirstChild() == null)
-		{
-			return null;
-		}
-		
 		return nameElement.getFirstChild().getNodeValue();
 	}
 	
