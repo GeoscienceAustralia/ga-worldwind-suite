@@ -7,6 +7,7 @@ import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
+import gov.nasa.worldwind.util.Logging;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
@@ -43,7 +45,7 @@ public class LayerEnabler
 			new HashMap<ElevationModel, ILayerNode>();
 
 	private List<RefreshListener> listeners = new ArrayList<RefreshListener>();
-	
+
 	public LayerEnabler(WorldWindow wwd)
 	{
 		this.tree = null;
@@ -229,6 +231,7 @@ public class LayerEnabler
 		}
 		catch (Exception e)
 		{
+			Logging.logger().log(Level.SEVERE, "Error loading layer", e);
 			setError(node, e);
 			return;
 		}
