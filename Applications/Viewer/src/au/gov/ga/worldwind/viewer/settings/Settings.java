@@ -89,7 +89,6 @@ public class Settings
 	private boolean stereoSwap = false;
 	private String displayId = null;
 	private double eyeSeparation = 1.0;
-	private double focalLength = 100.0;
 	private double verticalExaggeration = 1.0;
 	private Rectangle windowBounds = null;
 	private boolean spanDisplays = false;
@@ -226,16 +225,6 @@ public class Settings
 	public void setEyeSeparation(double eyeSeparation)
 	{
 		this.eyeSeparation = eyeSeparation;
-	}
-
-	public double getFocalLength()
-	{
-		return focalLength;
-	}
-
-	public void setFocalLength(double focalLength)
-	{
-		this.focalLength = focalLength;
 	}
 
 	public boolean isStereoCursor()

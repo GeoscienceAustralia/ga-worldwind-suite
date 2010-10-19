@@ -79,8 +79,6 @@ public class SettingsDialog extends JDialog
 	private JComboBox stereoModeCombo;
 	private JLabel eyeSeparationLabel;
 	private JSpinner eyeSeparationSpinner;
-	private JLabel focalLengthLabel;
-	private JSpinner focalLengthSpinner;
 	private JCheckBox stereoCursorCheck;
 
 	private JCheckBox proxyEnabledCheck;
@@ -196,7 +194,6 @@ public class SettingsDialog extends JDialog
 		boolean stereoSwap = stereoSwapCheck.isSelected();
 		StereoMode stereoMode = (StereoMode) stereoModeCombo.getSelectedItem();
 		double eyeSeparation = (Double) eyeSeparationSpinner.getValue();
-		double focalLength = (Double) focalLengthSpinner.getValue();
 		boolean stereoCursor = stereoCursorCheck.isSelected();
 
 		double fieldOfView = fovSlider.getValue();
@@ -230,7 +227,6 @@ public class SettingsDialog extends JDialog
 			settings.setStereoSwap(stereoSwap);
 			settings.setStereoMode(stereoMode);
 			settings.setEyeSeparation(eyeSeparation);
-			settings.setFocalLength(focalLength);
 			settings.setStereoCursor(stereoCursor);
 
 			settings.setFieldOfView(fieldOfView);
@@ -501,25 +497,6 @@ public class SettingsDialog extends JDialog
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(eyeSeparationSpinner, c);
-
-		focalLengthLabel = new JLabel("Focal length:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = ++i;
-		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(SPACING, SPACING, 0, 0);
-		panel.add(focalLengthLabel, c);
-
-		SpinnerModel focalLengthModel =
-				new SpinnerNumberModel(settings.getFocalLength(), 0, 10000000, 1);
-		focalLengthSpinner = new JSpinner(focalLengthModel);
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = i;
-		c.gridwidth = 3;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
-		panel.add(focalLengthSpinner, c);
 
 		stereoCursorCheck = new JCheckBox("Stereo mouse cursor");
 		stereoCursorCheck.setSelected(settings.isStereoCursor());
@@ -846,8 +823,6 @@ public class SettingsDialog extends JDialog
 		eyeSeparationLabel.setEnabled(enabled);
 		eyeSeparationSpinner.setEnabled(enabled);
 		stereoCursorCheck.setEnabled(enabled);
-		focalLengthLabel.setEnabled(enabled);
-		focalLengthSpinner.setEnabled(enabled);
 	}
 
 	private int exaggerationToSlider(double exaggeration)
