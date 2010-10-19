@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.common.view;
+package au.gov.ga.worldwind.common.view.free;
 
 import java.awt.AWTException;
 import java.awt.Cursor;

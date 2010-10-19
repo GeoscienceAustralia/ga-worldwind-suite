@@ -303,13 +303,22 @@ public class Util
 		return (long) mixDouble(scaleFactor, minLengthMillis, maxLengthMillis);
 	}
 
-	private static double mixDouble(double amount, double value1, double value2)
+	public static double mixDouble(double amount, double value1, double value2)
 	{
 		if (amount < 0)
 			return value1;
 		else if (amount > 1)
 			return value2;
 		return value1 * (1.0 - amount) + value2 * amount;
+	}
+	
+	public static double percentDouble(double value, double min, double max)
+	{
+		if(value < min)
+			return 0;
+		if(value > max)
+			return 1;
+		return (value - min) / (max - min);
 	}
 
 	private static double angularRatio(Angle x, Angle y)

@@ -80,6 +80,7 @@ import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.MetersStatusBar;
 import au.gov.ga.worldwind.common.util.URLTransformer;
+import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
 import au.gov.ga.worldwind.viewer.components.sectorsaver.ImageSectorSaver;
 import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
@@ -97,7 +98,6 @@ import au.gov.ga.worldwind.viewer.retrieve.PolylineLayerRetrievalListener;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.settings.Settings.ProxyType;
 import au.gov.ga.worldwind.viewer.settings.SettingsDialog;
-import au.gov.ga.worldwind.viewer.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
 import au.gov.ga.worldwind.viewer.terrain.SectionListCompoundElevationModel;
 import au.gov.ga.worldwind.viewer.terrain.WireframeRectangularTessellator;
@@ -870,7 +870,7 @@ public class Application
 	private void create3DMouse()
 	{
 		final UserFacingIcon icon =
-				new UserFacingIcon("au/gov/ga/worldwind/data/images/cursor.png", new Position(
+				new UserFacingIcon("au/gov/ga/worldwind/viewer/data/images/cursor.png", new Position(
 						Angle.ZERO, Angle.ZERO, 0));
 		icon.setSize(new Dimension(16, 32));
 		icon.setAlwaysOnTop(true);

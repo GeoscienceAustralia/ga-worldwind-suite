@@ -2,8 +2,6 @@ package au.gov.ga.worldwind.viewer.panels.view;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.event.RenderingEvent;
-import gov.nasa.worldwind.event.RenderingListener;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -16,7 +14,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.common.view.FreeView;
+import au.gov.ga.worldwind.common.view.free.FreeView;
+import au.gov.ga.worldwind.common.view.stereo.StereoFlyView;
+import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 
@@ -85,18 +85,7 @@ public class ViewPanel extends AbstractThemePanel
 	public void setup(Theme theme)
 	{
 		wwd = theme.getWwd();
-		wwd.setView(new ViewStateBasicOrbitView());
-
-		wwd.addRenderingListener(new RenderingListener()
-		{
-			@Override
-			public void stageChanged(RenderingEvent event)
-			{
-				System.out.println(wwd.getView().getEyePoint() + ", "
-						+ wwd.getView().getCenterPoint() + ", " + wwd.getView().getHeading() + ", "
-						+ wwd.getView().getPitch());
-			}
-		});
+		wwd.setView(new StereoOrbitView());
 	}
 
 	@Override
@@ -112,13 +101,13 @@ public class ViewPanel extends AbstractThemePanel
 		View oldView = wwd.getView();
 		View view = null;
 
-		if (orbitRadio.isSelected() && !(oldView instanceof ViewStateBasicOrbitView))
+		if (orbitRadio.isSelected() && !(oldView instanceof StereoOrbitView))
 		{
-			view = new ViewStateBasicOrbitView();
+			view = new StereoOrbitView();
 		}
-		else if (flyRadio.isSelected() && !(oldView instanceof ViewStateBasicFlyView))
+		else if (flyRadio.isSelected() && !(oldView instanceof StereoFlyView))
 		{
-			view = new ViewStateBasicFlyView();
+			view = new StereoFlyView();
 		}
 		else if (freeRadio.isSelected() && !(oldView instanceof FreeView))
 		{

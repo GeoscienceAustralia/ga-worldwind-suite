@@ -45,7 +45,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.common.ui.JIntegerField;
-import au.gov.ga.worldwind.viewer.settings.Settings.ProjectionMode;
 import au.gov.ga.worldwind.viewer.settings.Settings.ProxyType;
 import au.gov.ga.worldwind.viewer.settings.Settings.StereoMode;
 
@@ -78,8 +77,6 @@ public class SettingsDialog extends JDialog
 	private JCheckBox stereoSwapCheck;
 	private JLabel stereoModeLabel;
 	private JComboBox stereoModeCombo;
-	private JLabel projectionModeLabel;
-	private JComboBox projectionModeCombo;
 	private JLabel eyeSeparationLabel;
 	private JSpinner eyeSeparationSpinner;
 	private JLabel focalLengthLabel;
@@ -198,7 +195,6 @@ public class SettingsDialog extends JDialog
 		boolean hardwareStereoEnabled = hardwareStereoEnabledCheck.isSelected();
 		boolean stereoSwap = stereoSwapCheck.isSelected();
 		StereoMode stereoMode = (StereoMode) stereoModeCombo.getSelectedItem();
-		ProjectionMode projectionMode = (ProjectionMode) projectionModeCombo.getSelectedItem();
 		double eyeSeparation = (Double) eyeSeparationSpinner.getValue();
 		double focalLength = (Double) focalLengthSpinner.getValue();
 		boolean stereoCursor = stereoCursorCheck.isSelected();
@@ -233,7 +229,6 @@ public class SettingsDialog extends JDialog
 			settings.setHardwareStereoEnabled(hardwareStereoEnabled);
 			settings.setStereoSwap(stereoSwap);
 			settings.setStereoMode(stereoMode);
-			settings.setProjectionMode(projectionMode);
 			settings.setEyeSeparation(eyeSeparation);
 			settings.setFocalLength(focalLength);
 			settings.setStereoCursor(stereoCursor);
@@ -437,11 +432,12 @@ public class SettingsDialog extends JDialog
 	{
 		GridBagConstraints c;
 		JPanel panel = new JPanel(new GridBagLayout());
+		int i = 0;
 
 		JPanel checks = new JPanel(new GridLayout(0, 2));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = i;
 		c.gridwidth = 4;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
@@ -466,7 +462,7 @@ public class SettingsDialog extends JDialog
 		stereoModeLabel = new JLabel("Stereo mode:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = ++i;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel.add(stereoModeLabel, c);
@@ -475,7 +471,7 @@ public class SettingsDialog extends JDialog
 		stereoModeCombo.setSelectedItem(settings.getStereoMode());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 1;
+		c.gridy = i;
 		c.weightx = 1;
 		c.gridwidth = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -487,47 +483,20 @@ public class SettingsDialog extends JDialog
 			stereoModeCombo.removeItem(StereoMode.STEREO_BUFFER);
 		}
 
-		projectionModeLabel = new JLabel("Projection mode:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 2;
-		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(SPACING, SPACING, 0, 0);
-		panel.add(projectionModeLabel, c);
-
-		projectionModeCombo = new JComboBox(ProjectionMode.values());
-		projectionModeCombo.setSelectedItem(settings.getProjectionMode());
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 2;
-		c.weightx = 1;
-		c.gridwidth = 3;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
-		panel.add(projectionModeCombo, c);
-		projectionModeCombo.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				enableStereoSettings();
-			}
-		});
-
 		eyeSeparationLabel = new JLabel("Eye separation:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy = ++i;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel.add(eyeSeparationLabel, c);
 
 		SpinnerModel eyeSeparationModel =
-				new SpinnerNumberModel(settings.getEyeSeparation(), 0, 10, 0.1);
+				new SpinnerNumberModel(settings.getEyeSeparation(), 0, 1000000, 0.1);
 		eyeSeparationSpinner = new JSpinner(eyeSeparationModel);
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 3;
+		c.gridy = i;
 		c.gridwidth = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
@@ -536,17 +505,17 @@ public class SettingsDialog extends JDialog
 		focalLengthLabel = new JLabel("Focal length:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = ++i;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel.add(focalLengthLabel, c);
 
 		SpinnerModel focalLengthModel =
-				new SpinnerNumberModel(settings.getFocalLength(), 0, 10000, 1);
+				new SpinnerNumberModel(settings.getFocalLength(), 0, 10000000, 1);
 		focalLengthSpinner = new JSpinner(focalLengthModel);
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 4;
+		c.gridy = i;
 		c.gridwidth = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
@@ -556,7 +525,7 @@ public class SettingsDialog extends JDialog
 		stereoCursorCheck.setSelected(settings.isStereoCursor());
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 5;
+		c.gridy = ++i;
 		c.gridwidth = 4;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
@@ -567,7 +536,7 @@ public class SettingsDialog extends JDialog
 		hardwareStereoEnabledCheck.setSelected(settings.isHardwareStereoEnabled());
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 6;
+		c.gridy = ++i;
 		c.gridwidth = 4;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
@@ -613,13 +582,13 @@ public class SettingsDialog extends JDialog
 				double exaggeration = sliderToExaggeration(verticalExaggerationSlider.getValue());
 				if (e != null)
 					verticalExaggeration = exaggeration;
-				
+
 				String format =
 						"%1." + (exaggeration < 10 ? "2" : exaggeration < 100 ? "1" : "0") + "f";
 				String value = String.format(format, exaggeration);
 				if (value.indexOf('.') < 0)
 					value += ".";
-				
+
 				verticalExaggerationLabel.setText(value + " x");
 			}
 		};
@@ -874,16 +843,11 @@ public class SettingsDialog extends JDialog
 		stereoModeLabel.setEnabled(enabled);
 		stereoModeCombo.setEnabled(enabled);
 		stereoSwapCheck.setEnabled(enabled);
-		projectionModeLabel.setEnabled(enabled);
-		projectionModeCombo.setEnabled(enabled);
 		eyeSeparationLabel.setEnabled(enabled);
 		eyeSeparationSpinner.setEnabled(enabled);
 		stereoCursorCheck.setEnabled(enabled);
-		boolean focalLengthEnabled =
-				enabled
-						&& projectionModeCombo.getSelectedItem() == ProjectionMode.ASYMMETRIC_FRUSTUM;
-		focalLengthLabel.setEnabled(focalLengthEnabled);
-		focalLengthSpinner.setEnabled(focalLengthEnabled);
+		focalLengthLabel.setEnabled(enabled);
+		focalLengthSpinner.setEnabled(enabled);
 	}
 
 	private int exaggerationToSlider(double exaggeration)

@@ -14,6 +14,8 @@ public interface StereoView extends View
 	Eye getEye();
 	void setEye(Eye eye);
 	boolean isDrawingStereo();
-	void setDrawingStereo(boolean drawing);
-	Matrix calculateProjectionMatrix(double near, double far);
+	void setDrawingStereo(boolean drawingStereo);
+	double getSeparationExaggeration();
+	void setSeparationExaggeration(double separationExaggeration);
+	Matrix calculateProjectionMatrix(double nearDistance, double farDistance);
 }

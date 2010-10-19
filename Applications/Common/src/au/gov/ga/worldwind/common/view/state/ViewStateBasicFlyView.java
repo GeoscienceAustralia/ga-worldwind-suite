@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.viewer.panels.view;
+package au.gov.ga.worldwind.common.view.state;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Matrix;

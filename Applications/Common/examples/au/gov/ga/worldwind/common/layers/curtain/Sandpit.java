@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.XMLUtil;
-import au.gov.ga.worldwind.common.view.FreeView;
+import au.gov.ga.worldwind.common.view.free.FreeView;
 
 public class Sandpit extends ApplicationTemplate
 {

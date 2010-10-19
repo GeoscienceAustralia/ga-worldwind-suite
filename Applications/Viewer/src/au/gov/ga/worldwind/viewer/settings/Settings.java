@@ -90,7 +90,6 @@ public class Settings
 	private String displayId = null;
 	private double eyeSeparation = 1.0;
 	private double focalLength = 100.0;
-	private ProjectionMode projectionMode = ProjectionMode.SIMPLE_OFFSET;
 	private double verticalExaggeration = 1.0;
 	private Rectangle windowBounds = null;
 	private boolean spanDisplays = false;
@@ -217,18 +216,6 @@ public class Settings
 	public void setHardwareStereoEnabled(boolean hardwareStereoEnabled)
 	{
 		this.hardwareStereoEnabled = hardwareStereoEnabled;
-	}
-
-	public ProjectionMode getProjectionMode()
-	{
-		return projectionMode;
-	}
-
-	public void setProjectionMode(ProjectionMode projectionMode)
-	{
-		if (projectionMode == null)
-			projectionMode = ProjectionMode.ASYMMETRIC_FRUSTUM;
-		this.projectionMode = projectionMode;
 	}
 
 	public double getEyeSeparation()
@@ -557,29 +544,6 @@ public class Settings
 			prop.setClassName(hud.getClass().getName());
 			if (theme.hasMenuBar())
 				prop.setEnabled(hud.isOn());
-		}
-	}
-
-	public enum ProjectionMode implements Serializable
-	{
-		SIMPLE_OFFSET("Simple offset"), ASYMMETRIC_FRUSTUM("Asymmetric frustum");
-
-		private String pretty;
-
-		ProjectionMode(String pretty)
-		{
-			this.pretty = pretty;
-		}
-
-		@Override
-		public String toString()
-		{
-			return pretty;
-		}
-
-		static
-		{
-			EnumPersistenceDelegate.installFor(values());
 		}
 	}
 

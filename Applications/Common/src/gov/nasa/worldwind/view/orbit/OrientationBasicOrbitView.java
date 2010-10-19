@@ -3,16 +3,16 @@ package gov.nasa.worldwind.view.orbit;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.orbit.OrbitViewInputSupport.OrbitViewState;
 
-public class OrientationBasicOrbitView extends BasicOrbitView
+public class OrientationBasicOrbitView extends LenientBasicOrbitView
 {
 	private boolean validModelCoordinates;
-	private boolean settingOrientationInCopyViewState;
+	private boolean attemptingSetOrientation;
 
 	protected boolean trySetOrientation(Position eyePosition, Position centerPosition)
 	{
-		settingOrientationInCopyViewState = true;
+		attemptingSetOrientation = true;
 		setOrientation(eyePosition, centerPosition);
-		settingOrientationInCopyViewState = false;
+		attemptingSetOrientation = false;
 		return validModelCoordinates;
 	}
 
@@ -22,7 +22,7 @@ public class OrientationBasicOrbitView extends BasicOrbitView
 		validModelCoordinates = super.validateModelCoordinates(modelCoords);
 
 		//if we are copying the view state, always return true, so an error is not thrown
-		if (settingOrientationInCopyViewState)
+		if (attemptingSetOrientation)
 			return true;
 
 		return validModelCoordinates;

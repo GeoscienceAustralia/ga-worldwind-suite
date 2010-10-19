@@ -9,9 +9,10 @@ import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
 
+import au.gov.ga.worldwind.common.view.stereo.StereoView;
+import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.settings.Settings.StereoMode;
-import au.gov.ga.worldwind.viewer.stereo.StereoOrbitView.Eye;
 
 import com.sun.opengl.util.BufferUtil;
 
@@ -60,10 +61,10 @@ public class StereoSceneController extends AbstractSceneController
 			this.clearFrame(dc);
 
 			View view = dc.getView();
-			StereoOrbitView stereo = null;
-			if (view instanceof StereoOrbitView)
+			StereoView stereo = null;
+			if (view instanceof StereoView)
 			{
-				stereo = (StereoOrbitView) view;
+				stereo = (StereoView) view;
 			}
 			if (stereo == null || !settings.isStereoEnabled())
 			{
@@ -74,6 +75,7 @@ public class StereoSceneController extends AbstractSceneController
 				StereoMode mode = settings.getStereoMode();
 				boolean swap = settings.isStereoSwap();
 
+				stereo.setSeparationExaggeration(Settings.get().getEyeSeparation());
 				stereo.setDrawingStereo(true);
 				stereo.setEye(swap ? Eye.RIGHT : Eye.LEFT);
 				setupBuffer(gl, mode, Eye.LEFT);

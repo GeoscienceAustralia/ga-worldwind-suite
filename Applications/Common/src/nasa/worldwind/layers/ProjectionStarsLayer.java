@@ -9,14 +9,16 @@ public class ProjectionStarsLayer extends StarsLayer
 {
 	protected void applyDrawProjection(DrawContext dc)
 	{
+		//copied from super's doRender() function
+		
 		GL gl = dc.getGL();
 		gl.glMatrixMode(GL.GL_PROJECTION);
         gl.glPushMatrix();
         gl.glLoadIdentity();
-        double ditanceFromOrigin = dc.getView().getEyePoint().getLength3();
+        double distanceFromOrigin = dc.getView().getEyePoint().getLength3();
         //noinspection UnnecessaryLocalVariable
-        double near = ditanceFromOrigin;
-        double far = this.radius + ditanceFromOrigin;
+        double near = distanceFromOrigin;
+        double far = this.radius + distanceFromOrigin;
         dc.getGLU().gluPerspective(dc.getView().getFieldOfView().degrees,
             dc.getView().getViewport().getWidth() / dc.getView().getViewport().getHeight(),
             near, far);

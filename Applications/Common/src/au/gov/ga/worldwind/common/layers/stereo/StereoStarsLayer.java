@@ -17,7 +17,6 @@ public class StereoStarsLayer extends ProjectionStarsLayer
 		if (dc.getView() instanceof StereoView)
 		{
 			StereoView stereo = (StereoView) dc.getView();
-
 			//near is the distance from the origin
 			double near = stereo.getEyePoint().getLength3();
 			double far = this.radius + near;
@@ -41,5 +40,18 @@ public class StereoStarsLayer extends ProjectionStarsLayer
 		{
 			super.applyDrawProjection(dc);
 		}
+	}
+
+	@Override
+	public void doRender(DrawContext dc)
+	{
+		float pointSize = 1f;
+		if (dc.getView() instanceof StereoView && ((StereoView) dc.getView()).isDrawingStereo())
+		{
+			pointSize *= 2f;
+		}
+		dc.getGL().glPointSize(pointSize);
+		
+		super.doRender(dc);
 	}
 }

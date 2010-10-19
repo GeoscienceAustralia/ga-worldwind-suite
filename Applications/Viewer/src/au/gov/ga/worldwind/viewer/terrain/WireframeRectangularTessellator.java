@@ -13,6 +13,7 @@ import javax.media.opengl.GL;
 public class WireframeRectangularTessellator extends RectangularTessellatorAccessible
 {
 	private boolean wireframeDepthTesting = true;
+	private boolean backfaceCulling = false;
 
 	public boolean isWireframeDepthTesting()
 	{
@@ -22,6 +23,16 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 	public void setWireframeDepthTesting(boolean wireframeDepthTesting)
 	{
 		this.wireframeDepthTesting = wireframeDepthTesting;
+	}
+
+	public boolean isBackfaceCulling()
+	{
+		return backfaceCulling;
+	}
+
+	public void setBackfaceCulling(boolean backfaceCulling)
+	{
+		this.backfaceCulling = backfaceCulling;
 	}
 
 	@Override
@@ -96,5 +107,15 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 
 		if (showTileBoundary)
 			this.renderPatchBoundary(dc, tile);
+	}
+
+	@Override
+	protected long render(DrawContext dc, RectTile tile, int numTextureUnits)
+	{
+		if (!backfaceCulling)
+		{
+			dc.getGL().glDisable(GL.GL_CULL_FACE);
+		}
+		return super.render(dc, tile, numTextureUnits);
 	}
 }
