@@ -131,10 +131,8 @@ public class PointLayerUtils extends DataConfigurationUtils
 
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.URL, "URL", xpath);
 		WWXML.checkAndSetLongParam(domElement, params, AVKey.EXPIRY_TIME, "ExpiryTime", xpath);
-		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate",
-				DATE_TIME_PATTERN, xpath);
-		WWXML.checkAndSetStringParam(domElement, params, AVKey.DATA_CACHE_NAME, "DataCacheName",
-				xpath);
+		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate", DATE_TIME_PATTERN, xpath);
+		WWXML.checkAndSetStringParam(domElement, params, AVKey.DATA_CACHE_NAME, "DataCacheName", xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.POINT_TYPE, "PointType", xpath);
 
 		setupPointProvider(domElement, xpath, params);

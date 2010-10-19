@@ -1,8 +1,5 @@
 package au.gov.ga.worldwind.common.layers.point.types;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -12,12 +9,17 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.AnnotationLayer;
 import gov.nasa.worldwind.pick.PickedObject;
-import gov.nasa.worldwind.render.AnnotationAttributes;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.GlobeAnnotation;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import au.gov.ga.worldwind.common.layers.point.PointLayer;
 import au.gov.ga.worldwind.common.layers.point.PointLayerHelper;
 import au.gov.ga.worldwind.common.layers.point.PointProperties;
+import au.gov.ga.worldwind.common.layers.point.annotation.EnhancedAnnotation;
+import au.gov.ga.worldwind.common.layers.point.annotation.EnhancedAnnotationAttributes;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 
 /**
@@ -62,12 +64,12 @@ public class AnnotationPointLayer extends AnnotationLayer implements PointLayer,
 	public void addPoint(Position position, AVList attributeValues)
 	{
 		PointProperties properties = helper.getStyle(attributeValues);
-		GlobeAnnotation annotation = new GlobeAnnotation(properties.text, position);
+		EnhancedAnnotation annotation = new EnhancedAnnotation(properties.text, position);
 		annotation.setValue(AVKey.URL, properties.link);
-		AnnotationAttributes attributes = new AnnotationAttributes();
-		properties.style.setPropertiesFromAttributes(helper.getContext(), attributeValues,
-				attributes, annotation);
+		EnhancedAnnotationAttributes attributes = new EnhancedAnnotationAttributes();
+		properties.style.setPropertiesFromAttributes(helper.getContext(), attributeValues, attributes, annotation);
 		annotation.setAttributes(attributes);
+		
 		this.addAnnotation(annotation);
 	}
 
