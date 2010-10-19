@@ -644,6 +644,7 @@ public class Animator
 		menu.add(actionFactory.getAddExaggeratorAction());
 		menu.addSeparator();
 		actionFactory.getShowCameraPathAction().addToMenu(menu);
+		actionFactory.getShowCrosshairsAction().addToMenu(menu);
 		actionFactory.getShowGridAction().addToMenu(menu);
 		actionFactory.getShowRuleOfThirdsAction().addToMenu(menu);
 		
@@ -1426,7 +1427,8 @@ public class Animator
 
 					resizeWindowToRenderDimensions();
 
-					crosshair.setEnabled(false);
+					disableUtilityLayers();
+					
 					double detailHintBackup = getDetailedElevationModel().getDetailHint();
 					getDetailedElevationModel().setDetailHint(detailHint);
 					frame.setAlwaysOnTop(true);
@@ -1456,7 +1458,7 @@ public class Animator
 					}
 
 					getDetailedElevationModel().setDetailHint(detailHintBackup);
-					crosshair.setEnabled(true);
+					reenableUtilityLayers();
 					orbitView.setDetectCollisions(detectCollisions);
 					frame.setAlwaysOnTop(false);
 
@@ -1469,6 +1471,22 @@ public class Animator
 		return null;
 	}
 
+	private void disableUtilityLayers()
+	{
+		crosshair.setEnabled(false);
+		cameraPathLayer.setEnabled(false);
+		gridOverlay.setEnabled(false);
+		ruleOfThirdsOverlay.setEnabled(false);
+	}
+	
+	private void reenableUtilityLayers()
+	{
+		crosshair.setEnabled(Settings.get().isCrosshairsShown());
+		cameraPathLayer.setEnabled(Settings.get().isCameraPathShown());
+		gridOverlay.setEnabled(Settings.get().isGridShown());
+		ruleOfThirdsOverlay.setEnabled(Settings.get().isRuleOfThirdsShown());
+	}
+	
 	private DetailedElevationModel getDetailedElevationModel()
 	{
 		return getCurrentAnimation().getAnimatableElevation().getRootElevationModel();
@@ -1606,6 +1624,12 @@ public class Animator
 		Settings.get().setRuleOfThirdsShown(visible);
 	}
 	
+	void setCrosshairsVisible(boolean visible)
+	{
+		crosshair.setEnabled(visible);
+		Settings.get().setCrosshairsShown(visible);
+	}
+	
 	void scaleAnimation()
 	{
 		double scale = -1.0;
@@ -1705,4 +1729,5 @@ public class Animator
 	{
 		return animation;
 	}
+
 }

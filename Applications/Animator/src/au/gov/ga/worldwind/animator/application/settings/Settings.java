@@ -94,6 +94,7 @@ public class Settings
 		WWXML.appendBoolean(rootElement, "showCameraPath", instance.isCameraPathShown());
 		WWXML.appendBoolean(rootElement, "showGrid", instance.isGridShown());
 		WWXML.appendBoolean(rootElement, "showRuleOfThirds", instance.isRuleOfThirdsShown());
+		WWXML.appendBoolean(rootElement, "showCrosshairs", instance.isCrosshairsShown());
 	}
 
 	private static void saveDefaultElevationModels(Element rootElement)
@@ -195,6 +196,7 @@ public class Settings
 		instance.setCameraPathShown(XMLUtil.getBoolean(rootElement, "//showCameraPath", true));
 		instance.setGridShown(XMLUtil.getBoolean(rootElement, "//showGrid", true));
 		instance.setRuleOfThirdsShown(XMLUtil.getBoolean(rootElement, "//showRuleOfThirds", true));
+		instance.setCrosshairsShown(XMLUtil.getBoolean(rootElement, "//showCrosshairs", true));
 	}
 
 	private static void loadDefaultElevationModels(Element rootElement)
@@ -332,6 +334,7 @@ public class Settings
 			new ElevationModelIdentifierImpl("Earth", "http://www.ga.gov.au/apps/world-wind/dataset/standard/layers/earth_elevation_model.xml"),
 	}));
 	
+	private boolean crosshairsShown = true;
 	private boolean gridShown = true;
 	private boolean cameraPathShown = true;
 	private boolean ruleOfThirdsShown = true;
@@ -538,5 +541,21 @@ public class Settings
 	public void setCameraPathShown(boolean cameraPathShown)
 	{
 		this.cameraPathShown = cameraPathShown;
+	}
+	
+	/**
+	 * @return {@link #crosshairsShown}
+	 */
+	public boolean isCrosshairsShown()
+	{
+		return crosshairsShown;
+	}
+	
+	/**
+	 * Set {@link #crosshairsShown}
+	 */
+	public void setCrosshairsShown(boolean crosshairsShown)
+	{
+		this.crosshairsShown = crosshairsShown;
 	}
 }

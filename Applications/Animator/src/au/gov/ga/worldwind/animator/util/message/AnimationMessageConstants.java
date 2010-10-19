@@ -112,5 +112,6 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getShowCameraPathLabelKey() { return "animator.gui.menu.showcamerapath.label"; }
 	public static String getShowGridLabelKey() { return "animator.gui.menu.showgrid.label"; }
 	public static String getShowRuleOfThirdsLabelKey() { return "animator.gui.menu.showruleofthirds.label"; }
+	public static String getShowCrosshairsLabelKey() { return "animator.gui.menu.showcrosshairs.label"; }
 
 }

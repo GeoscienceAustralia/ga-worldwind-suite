@@ -53,6 +53,7 @@ public class AnimatorActionFactory
 	private SelectableAction showCameraPathAction;
 	private SelectableAction showGridAction;
 	private SelectableAction showRuleOfThirdsAction;
+	private SelectableAction showCrosshairsAction;
 	
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
@@ -409,6 +410,17 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		// Show crosshairs
+		showCrosshairsAction = new SelectableAction(getMessage(getShowCrosshairsLabelKey()), null, Settings.get().isCrosshairsShown());
+		showCrosshairsAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.setCrosshairsVisible(showCrosshairsAction.isSelected());
+			}
+		});
+		
 		// Debug key frames
 		debugKeyFramesAction = new BasicAction(getMessage(getKeyValuesMenuLabelKey()), null);
 		debugKeyFramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
@@ -591,5 +603,10 @@ public class AnimatorActionFactory
 	public SelectableAction getShowRuleOfThirdsAction()
 	{
 		return showRuleOfThirdsAction;
+	}
+	
+	public SelectableAction getShowCrosshairsAction()
+	{
+		return showCrosshairsAction;
 	}
 }
