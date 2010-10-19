@@ -9,6 +9,7 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.IconLayer;
 import gov.nasa.worldwind.pick.PickedObject;
+import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.render.WWIcon;
 
@@ -34,6 +35,16 @@ public class IconPointLayer extends IconLayer implements PointLayer, SelectListe
 	public IconPointLayer(PointLayerHelper helper)
 	{
 		this.helper = helper;
+	}
+	
+	@Override
+	public void render(DrawContext dc)
+	{
+		if (isEnabled())
+		{
+			helper.requestPoints(this);
+		}
+		super.render(dc);
 	}
 
 	@Override
