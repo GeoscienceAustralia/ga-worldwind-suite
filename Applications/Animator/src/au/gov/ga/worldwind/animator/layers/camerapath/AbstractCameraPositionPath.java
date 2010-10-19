@@ -7,6 +7,8 @@ import gov.nasa.worldwind.render.Renderable;
 
 import java.awt.Color;
 import java.nio.DoubleBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.media.opengl.GL;
 
@@ -158,10 +160,9 @@ public abstract class AbstractCameraPositionPath implements Renderable
 		Position previousPathPosition = null;
 		Position currentPathPosition = null;
 		
-		double[] deltas = new double[animation.getFrameOfLastKeyFrame() - animation.getFrameOfFirstKeyFrame()];
+		List<Double> deltas = new ArrayList<Double>(animation.getFrameCount());
 		double minDelta = Double.MAX_VALUE;
 		double maxDelta = 0d;
-		int i = 0;
 
 		pathVertexBackBuffer.rewind();
 		for (int frame = animation.getFrameOfFirstKeyFrame(); frame < animation.getFrameOfLastKeyFrame(); frame ++)
@@ -182,7 +183,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 			if (previousPathPosition != null)
 			{
 				double positionDelta = calculateDelta(currentPathPosition, previousPathPosition);
-				deltas[i] = positionDelta;
+				deltas.add(positionDelta);
 				if (positionDelta > maxDelta)
 				{
 					maxDelta = positionDelta;
@@ -193,7 +194,6 @@ public abstract class AbstractCameraPositionPath implements Renderable
 				}
 			}
 			previousPathPosition = currentPathPosition;
-			i++;
 		}
 		
 		populatePathColourBufferFromDeltas(deltas, minDelta, maxDelta);
@@ -217,7 +217,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 		return Math.abs(current.distanceTo3(previous));
 	}
 
-	private void populatePathColourBufferFromDeltas(double[] deltas, double minDelta, double maxDelta)
+	private void populatePathColourBufferFromDeltas(List<Double> deltas, double minDelta, double maxDelta)
 	{
 		double deltaWindow = maxDelta - minDelta;
 		if (deltaWindow < 1)
@@ -230,9 +230,9 @@ public abstract class AbstractCameraPositionPath implements Renderable
 		Color pathColor = null;
 		
 		pathColourBackBuffer.rewind();
-		for (int i = 0; i < deltas.length; i++)
+		for (Double delta : deltas)	
 		{
-			float normalizedDelta = (float)((deltas[i] - minDelta) / deltaWindow);
+			float normalizedDelta = (float)((delta - minDelta) / deltaWindow);
 			pathColor = hslColor.adjustHue((1f - normalizedDelta) * 240f);
 			pathColourBackBuffer.put((double)pathColor.getRed() / 255d);
 			pathColourBackBuffer.put((double)pathColor.getGreen() / 255d);

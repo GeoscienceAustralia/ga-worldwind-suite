@@ -136,13 +136,16 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	
 	private boolean cameraPathHasChanged(AnimationEvent event)
 	{
-		// Any event attached to the Camera counts
-		if (event.hasOwnerInChainOfType(Camera.class))
+		return eventIsRelatedToCamera(event) || isKeyFrameEventContainingCameraParameter(event);
+	}
+
+	private boolean isKeyFrameEventContainingCameraParameter(AnimationEvent event)
+	{
+		if (eventValueIsKeyFrameContainingCameraParameter(event))
 		{
 			return true;
 		}
 		
-		// Otherwise, any key frame event that includes a camera parameter
 		KeyFrameEvent keyFrameEvent = (KeyFrameEvent)event.getCauseOfClass(KeyFrameEvent.class);
 		if (keyFrameEvent == null)
 		{
@@ -151,8 +154,28 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		return isCameraFrame(keyFrameEvent.getKeyFrame());
 	}
 
+	private boolean eventValueIsKeyFrameContainingCameraParameter(AnimationEvent event)
+	{
+		Object rootValue = event.getRootCause().getValue();
+		if (rootValue instanceof KeyFrame)
+		{
+			return isCameraFrame((KeyFrame)rootValue);
+		}
+		return false;
+	}
+
+	private boolean eventIsRelatedToCamera(AnimationEvent event)
+	{
+		return event.hasOwnerInChainOfType(Camera.class);
+	}
+
 	private boolean isCameraFrame(KeyFrame keyFrame)
 	{
+		if (keyFrame == null)
+		{
+			return false;
+		}
+		
 		return keyFrame.hasValueForParameter(animation.getCamera().getEyeLat()) || 
 				keyFrame.hasValueForParameter(animation.getCamera().getEyeLon()) || 
 				keyFrame.hasValueForParameter(animation.getCamera().getEyeElevation()) ||
