@@ -1122,16 +1122,19 @@ public class Animator
 	
 	/**
 	 * Save the animation, prompting the user to choose a file if necessary.
+	 * 
+	 * @return <code>true</code> if the user proceeded with the save, <code>false</code> if they cancelled the save
 	 */
-	void save()
+	boolean save()
 	{
 		if (file == null)
 		{
-			saveAs();
+			return saveAs();
 		}
 		else
 		{
 			save(file);
+			return true;
 		}
 	}
 
@@ -1140,9 +1143,10 @@ public class Animator
 	 * <p/>
 	 * If the user selects an existing file, prompt to overwrite it.
 	 */
-	void saveAs()
+	boolean saveAs()
 	{
 		setupFileChooser(getMessage(getSaveAsDialogTitleKey()), FileFilters.getXmlFilter());
+		
 		if (fileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
 			File newFile = fileChooser.getSelectedFile();
@@ -1150,7 +1154,6 @@ public class Animator
 			{
 				newFile = new File(newFile.getParent(), newFile.getName() + XmlFilter.getFileExtension());
 			}
-			boolean override = true;
 			if (newFile.exists())
 			{
 				int response = JOptionPane.showConfirmDialog(frame, 
@@ -1158,17 +1161,21 @@ public class Animator
 														 	 getMessage(getConfirmOverwriteCaptionKey()),
 														 	 JOptionPane.YES_NO_OPTION,
 														 	 JOptionPane.WARNING_MESSAGE);
-				override = response == JOptionPane.YES_OPTION;
-			}
-			if (override)
-			{
-				setFile(newFile);
-				if (file != null)
+				if (response != JOptionPane.YES_OPTION)
 				{
-					save(file);
+					return false;
 				}
 			}
+			
+			setFile(newFile);
+			if (file != null)
+			{
+				save(file);
+			}
+			return true;
 		}
+		
+		return false;
 	}
 
 	/**
@@ -1241,13 +1248,13 @@ public class Animator
 													 JOptionPane.YES_NO_CANCEL_OPTION,
 													 JOptionPane.QUESTION_MESSAGE);
 		
-		if (response == JOptionPane.CANCEL_OPTION)
+		if (response == JOptionPane.CANCEL_OPTION || response == JOptionPane.CLOSED_OPTION)
 		{
 			return false;
 		}
 		if (response == JOptionPane.YES_OPTION)
 		{
-			save();
+			return save();
 		}
 		return true;
 	}
