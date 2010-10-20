@@ -4,9 +4,9 @@ import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.ViewUtil;
-import gov.nasa.worldwind.view.firstperson.BasicFlyView;
+import au.gov.ga.worldwind.common.view.transform.TransformBasicFlyView;
 
-public class ViewStateBasicFlyView extends BasicFlyView
+public class ViewStateBasicFlyView extends TransformBasicFlyView
 {
 	@Override
 	public void copyViewState(View view)

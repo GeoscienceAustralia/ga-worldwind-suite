@@ -46,12 +46,12 @@ public class StereoStarsLayer extends ProjectionStarsLayer
 	public void doRender(DrawContext dc)
 	{
 		float pointSize = 1f;
-		if (dc.getView() instanceof StereoView && ((StereoView) dc.getView()).isDrawingStereo())
+		if (dc.getView() instanceof StereoView && ((StereoView) dc.getView()).isStereo())
 		{
 			pointSize *= 2f;
 		}
 		dc.getGL().glPointSize(pointSize);
-		
+
 		super.doRender(dc);
 	}
 }

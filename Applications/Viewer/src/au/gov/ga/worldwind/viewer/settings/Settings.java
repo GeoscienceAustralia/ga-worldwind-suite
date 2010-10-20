@@ -13,13 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.gov.ga.worldwind.common.util.EnumPersistenceDelegate;
+import au.gov.ga.worldwind.common.view.stereo.StereoViewParameters;
 import au.gov.ga.worldwind.viewer.panels.places.Place;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
-public class Settings
+public class Settings implements StereoViewParameters
 {
 	private static Settings instance;
 	private static boolean stereoSupported = false;
@@ -89,6 +90,9 @@ public class Settings
 	private boolean stereoSwap = false;
 	private String displayId = null;
 	private double eyeSeparation = 1.0;
+	private double eyeSeparationMultiplier = 1.0;
+	private double focalLength = 100.0;
+	private boolean dynamicStereo = true;
 	private double verticalExaggeration = 1.0;
 	private Rectangle windowBounds = null;
 	private boolean spanDisplays = false;
@@ -217,14 +221,52 @@ public class Settings
 		this.hardwareStereoEnabled = hardwareStereoEnabled;
 	}
 
+	@Override
 	public double getEyeSeparation()
 	{
 		return eyeSeparation;
 	}
 
+	@Override
 	public void setEyeSeparation(double eyeSeparation)
 	{
 		this.eyeSeparation = eyeSeparation;
+	}
+
+	@Override
+	public double getEyeSeparationMultiplier()
+	{
+		return eyeSeparationMultiplier;
+	}
+
+	@Override
+	public void setEyeSeparationMultiplier(double eyeSeparationMultiplier)
+	{
+		this.eyeSeparationMultiplier = eyeSeparationMultiplier;
+	}
+
+	@Override
+	public double getFocalLength()
+	{
+		return focalLength;
+	}
+
+	@Override
+	public void setFocalLength(double focalLength)
+	{
+		this.focalLength = focalLength;
+	}
+
+	@Override
+	public boolean isDynamicStereo()
+	{
+		return dynamicStereo;
+	}
+
+	@Override
+	public void setDynamicStereo(boolean dynamicStereo)
+	{
+		this.dynamicStereo = dynamicStereo;
 	}
 
 	public boolean isStereoCursor()
@@ -538,8 +580,10 @@ public class Settings
 
 	public enum StereoMode implements Serializable
 	{
-		STEREO_BUFFER("Hardware stereo buffer"), RC_ANAGLYPH("Red/cyan anaglyph"), GM_ANAGLYPH(
-				"Green/magenta anaglyph"), BY_ANAGLYPH("Blue/yellow anaglyph");
+		STEREO_BUFFER("Hardware stereo buffer"),
+		RC_ANAGLYPH("Red/cyan anaglyph"),
+		GM_ANAGLYPH("Green/magenta anaglyph"),
+		BY_ANAGLYPH("Blue/yellow anaglyph");
 
 		private String pretty;
 
@@ -562,7 +606,8 @@ public class Settings
 
 	public enum ProxyType implements Serializable
 	{
-		HTTP("HTTP", "Proxy.Type.Http"), SOCKS("SOCKS", "Proxy.Type.SOCKS");
+		HTTP("HTTP", "Proxy.Type.Http"),
+		SOCKS("SOCKS", "Proxy.Type.SOCKS");
 
 		private String pretty;
 		private String type;

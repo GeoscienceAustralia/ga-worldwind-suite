@@ -14,8 +14,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.common.view.free.FreeView;
 import au.gov.ga.worldwind.common.view.stereo.StereoFlyView;
+import au.gov.ga.worldwind.common.view.stereo.StereoFreeView;
 import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
@@ -109,9 +109,9 @@ public class ViewPanel extends AbstractThemePanel
 		{
 			view = new StereoFlyView();
 		}
-		else if (freeRadio.isSelected() && !(oldView instanceof FreeView))
+		else if (freeRadio.isSelected() && !(oldView instanceof StereoFreeView))
 		{
-			view = new FreeView();
+			view = new StereoFreeView();
 		}
 
 		if (view == null)

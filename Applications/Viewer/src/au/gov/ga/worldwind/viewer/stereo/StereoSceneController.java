@@ -49,6 +49,14 @@ public class StereoSceneController extends AbstractSceneController
 			stereoTested = true;
 		}
 
+		View view = dc.getView();
+		StereoView stereo = null;
+		if (view instanceof StereoView)
+		{
+			stereo = (StereoView) view;
+			stereo.setParameters(settings);
+		}
+
 		this.initializeFrame(dc);
 		try
 		{
@@ -60,12 +68,6 @@ public class StereoSceneController extends AbstractSceneController
 			this.pick(dc);
 			this.clearFrame(dc);
 
-			View view = dc.getView();
-			StereoView stereo = null;
-			if (view instanceof StereoView)
-			{
-				stereo = (StereoView) view;
-			}
 			if (stereo == null || !settings.isStereoEnabled())
 			{
 				this.draw(dc);
@@ -75,9 +77,7 @@ public class StereoSceneController extends AbstractSceneController
 				StereoMode mode = settings.getStereoMode();
 				boolean swap = settings.isStereoSwap();
 
-				stereo.setSeparationExaggeration(Settings.get().getEyeSeparation());
-				stereo.setDrawingStereo(true);
-				stereo.setEye(swap ? Eye.RIGHT : Eye.LEFT);
+				stereo.setup(true, swap ? Eye.RIGHT : Eye.LEFT);
 				setupBuffer(gl, mode, Eye.LEFT);
 				this.applyView(dc);
 				this.draw(dc);
@@ -85,12 +85,12 @@ public class StereoSceneController extends AbstractSceneController
 				gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
 				gl.glDisable(GL.GL_FOG);
 
-				stereo.setEye(swap ? Eye.LEFT : Eye.RIGHT);
+				stereo.setup(true, swap ? Eye.LEFT : Eye.RIGHT);
 				setupBuffer(gl, mode, Eye.RIGHT);
 				this.applyView(dc);
 				this.draw(dc);
 
-				stereo.setDrawingStereo(false);
+				stereo.setup(false, Eye.LEFT);
 				restoreBuffer(gl, mode);
 				view.apply(dc);
 			}

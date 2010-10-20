@@ -14,14 +14,43 @@ import gov.nasa.worldwind.view.ViewUtil;
 
 import javax.media.opengl.GL;
 
-public class FreeView extends BasicView
+import au.gov.ga.worldwind.common.view.transform.TransformView;
+
+public class FreeView extends BasicView implements TransformView
 {
-	private double minimumFarDistance = MINIMUM_FAR_DISTANCE;
-	private double minimumNearDistance = 0.1;
+	protected double minimumFarDistance = MINIMUM_FAR_DISTANCE;
+	protected double minimumNearDistance = 0.1;
 
 	public FreeView()
 	{
 		this.viewInputHandler = new BasicFreeViewInputHandler();
+	}
+
+	@Override
+	public void beforeComputeMatrices()
+	{
+		minimumFarDistance = globe.getDiameter() / 2;
+	}
+
+	@Override
+	public Matrix computeModelView()
+	{
+		//default:
+		//return ViewUtil.computeTransformMatrix(this.globe, this.eyePosition, this.heading, this.pitch, this.roll);
+
+		Matrix transform = computeRotationTransform(heading, pitch, roll);
+		transform = transform.multiply(computePositionTransform(globe, eyePosition));
+		return transform;
+	}
+
+	@Override
+	public Matrix computeProjection()
+	{
+		double viewportWidth = this.viewport.getWidth() <= 0.0 ? 1.0 : this.viewport.getWidth();
+		double viewportHeight = this.viewport.getHeight() <= 0.0 ? 1.0 : this.viewport.getHeight();
+
+		return Matrix.fromPerspective(this.fieldOfView, viewportWidth, viewportHeight,
+				this.nearClipDistance, this.farClipDistance);
 	}
 
 	@Override
@@ -52,11 +81,11 @@ public class FreeView extends BasicView
 		this.dc = dc;
 		this.globe = this.dc.getGlobe();
 
-		minimumFarDistance = globe.getDiameter() / 2;
+		beforeComputeMatrices();
 
 		//========== modelview matrix state ==========//
 		// Compute the current modelview matrix.
-		this.modelview = computeModelViewMatrix();
+		this.modelview = computeModelView();
 		if (this.modelview == null)
 			this.modelview = Matrix.IDENTITY;
 
@@ -77,19 +106,10 @@ public class FreeView extends BasicView
 		this.nearClipDistance = this.computeNearClipDistance();
 		this.farClipDistance = this.computeFarClipDistance();
 
-		// Compute the current viewport dimensions.
-		double viewportWidth = this.viewport.getWidth() <= 0.0 ? 1.0 : this.viewport.getWidth();
-		double viewportHeight = this.viewport.getHeight() <= 0.0 ? 1.0 : this.viewport.getHeight();
-
 		// Compute the current projection matrix.
-		this.projection =
-				Matrix.fromPerspective(this.fieldOfView, viewportWidth, viewportHeight,
-						this.nearClipDistance, this.farClipDistance);
-
+		this.projection = computeProjection();
 		// Compute the current frustum.
-		this.frustum =
-				Frustum.fromPerspective(this.fieldOfView, (int) viewportWidth,
-						(int) viewportHeight, this.nearClipDistance, this.farClipDistance);
+		this.frustum = Frustum.fromProjectionMatrix(this.projection);
 
 		//========== load GL matrix state ==========//
 		loadGLViewState(dc, this.modelview, this.projection);
@@ -106,16 +126,6 @@ public class FreeView extends BasicView
 		this.lastUpVector = null;
 		this.lastForwardVector = null;
 		this.lastFrustumInModelCoords = null;
-	}
-
-	protected Matrix computeModelViewMatrix()
-	{
-		//default:
-		//return ViewUtil.computeTransformMatrix(this.globe, this.eyePosition, this.heading, this.pitch, this.roll);
-
-		Matrix transform = computeRotationTransform(heading, pitch, roll);
-		transform = transform.multiply(computePositionTransform(globe, eyePosition));
-		return transform;
 	}
 
 	protected Matrix computeRotationTransform(Angle heading, Angle pitch, Angle roll)
@@ -170,17 +180,17 @@ public class FreeView extends BasicView
 
 		return far < minimumFarDistance ? minimumFarDistance : far;
 	}
-	
+
 	@Override
 	public void copyViewState(View view)
 	{
 		this.globe = view.getGlobe();
-		
+
 		Matrix transform = view.getModelviewMatrix();
 		setHeading(ViewUtil.computeHeading(transform));
 		setPitch(ViewUtil.computePitch(transform));
 		setRoll(ViewUtil.computeRoll(transform));
-		
+
 		setEyePosition(view.getCurrentEyePosition());
 	}
 }

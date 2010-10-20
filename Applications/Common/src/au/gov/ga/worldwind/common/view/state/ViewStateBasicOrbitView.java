@@ -3,9 +3,9 @@ package au.gov.ga.worldwind.common.view.state;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
-import gov.nasa.worldwind.view.orbit.OrientationBasicOrbitView;
+import au.gov.ga.worldwind.common.view.transform.TransformBasicOrbitView;
 
-public class ViewStateBasicOrbitView extends OrientationBasicOrbitView
+public class ViewStateBasicOrbitView extends TransformBasicOrbitView
 {
 	@Override
 	public void copyViewState(View view)

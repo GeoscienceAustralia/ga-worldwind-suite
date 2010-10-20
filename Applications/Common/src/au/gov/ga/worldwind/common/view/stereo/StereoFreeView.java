@@ -1,9 +1,9 @@
 package au.gov.ga.worldwind.common.view.stereo;
 
 import gov.nasa.worldwind.geom.Matrix;
-import au.gov.ga.worldwind.common.view.state.ViewStateBasicFlyView;
+import au.gov.ga.worldwind.common.view.free.FreeView;
 
-public class StereoFlyView extends ViewStateBasicFlyView implements StereoView
+public class StereoFreeView extends FreeView implements StereoView
 {
 	private StereoViewHelper helper = new StereoViewHelper();
 
@@ -24,7 +24,7 @@ public class StereoFlyView extends ViewStateBasicFlyView implements StereoView
 	{
 		return helper.getEye();
 	}
-
+	
 	@Override
 	public StereoViewParameters getParameters()
 	{
