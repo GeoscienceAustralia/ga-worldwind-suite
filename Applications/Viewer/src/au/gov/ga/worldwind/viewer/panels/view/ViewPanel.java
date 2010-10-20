@@ -31,6 +31,7 @@ public class ViewPanel extends AbstractThemePanel
 	public ViewPanel()
 	{
 		super(new GridBagLayout());
+		setResizable(false);
 		GridBagConstraints c;
 		JPanel panel;
 
