@@ -49,10 +49,26 @@ public class BasicStyleProviderImpl implements StyleProvider
 		
 		if (style == null)
 		{
-			style = defaultStyle;
+			style = getDefaultStyle();
 		}
 		
 		return style;
+	}
+
+	private Style getDefaultStyle()
+	{
+		if (defaultStyle == null)
+		{
+			for (Style style : styles)
+			{
+				if (style.isDefault())
+				{
+					defaultStyle = style;
+					break;
+				}
+			}
+		}
+		return defaultStyle;
 	}
 
 	@Override

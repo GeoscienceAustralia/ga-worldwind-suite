@@ -4,18 +4,21 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Renderable;
+import gov.nasa.worldwind.render.airspaces.AbstractAirspace;
 import gov.nasa.worldwind.render.airspaces.Airspace;
 import gov.nasa.worldwind.render.airspaces.Curtain;
 import gov.nasa.worldwind.render.airspaces.Polygon;
 
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.layers.geometry.GeometryLayer;
 import au.gov.ga.worldwind.common.layers.geometry.Shape;
+import au.gov.ga.worldwind.common.layers.point.Style;
+import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
  * An implementation of the {@link GeometryLayer} interface that renders each
@@ -23,7 +26,7 @@ import au.gov.ga.worldwind.common.layers.geometry.Shape;
  */
 public class AirspaceGeometryLayer extends GeometryLayerBase implements GeometryLayer
 {
-	private List<AirspaceShape> airspaceShapes = Collections.synchronizedList(new ArrayList<AirspaceShape>());
+	private List<AirspaceShape> airspaceShapes = new ArrayList<AirspaceShape>();
 	
 	public AirspaceGeometryLayer(AVList params)
 	{
@@ -39,29 +42,35 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 	@Override
 	public void addShape(Shape shape)
 	{
-		if (shape == null)
+		synchronized (airspaceShapes)
 		{
-			return;
+			if (shape == null)
+			{
+				return;
+			}
+			airspaceShapes.add(new AirspaceShape(shape));
 		}
-		airspaceShapes.add(new AirspaceShape(shape));
 	}
 
 	@Override
 	public void renderGeometry(DrawContext dc)
 	{
-		for (AirspaceShape airspaceShape :  airspaceShapes)
+		synchronized (airspaceShapes)
 		{
-			airspaceShape.render(dc);
+			for (AirspaceShape airspaceShape :  airspaceShapes)
+			{
+				airspaceShape.render(dc);
+			}
 		}
 	}
 
 	/**
 	 * A container class that associates a {@link Shape} with a renderable {@link Airspace}.
 	 */
-	private static class AirspaceShape implements Shape, Renderable
+	private class AirspaceShape implements Shape, Renderable
 	{
 		private AtomicBoolean dirty = new AtomicBoolean(true);
-		private Airspace airspace;
+		private AbstractAirspace airspace;
 		private Shape shapeDelegate;
 		
 		public AirspaceShape(Shape shape)
@@ -112,8 +121,6 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 				case LINE:
 				{
 					airspace = new Curtain(getPoints());
-					airspace.setTerrainConforming(true, false);
-					airspace.setAltitudes(0d, 1000000d);
 					break;
 				}
 				case POLYGON:
@@ -122,9 +129,41 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 					break;
 				}
 			}
+			
+			applyStyleToAirspace();
+			
 			dirty.set(false);
 		}
 		
+		private void applyStyleToAirspace()
+		{
+			Style style = getStyleProvider().getStyle(AirspaceGeometryLayer.this);
+			if (style == null)
+			{
+				applyDefaultStyleToAirspace();
+			}
+			else
+			{
+				style.setPropertiesFromAttributes((URL)getValue(AVKeyMore.CONTEXT_URL),
+											   	  AirspaceGeometryLayer.this, 
+											   	  airspace,
+											   	  airspace.getAttributes(),
+											   	  airspace.getRenderer());
+			}
+		}
+
+		/**
+		 * Apply some sensible defaults to the airspace in case no style was found
+		 */
+		private void applyDefaultStyleToAirspace()
+		{
+			airspace.setTerrainConforming(true, false);
+			airspace.setAltitudes(0, 100000);
+			airspace.getAttributes().setOpacity(0.5);
+			airspace.getAttributes().setOutlineWidth(2.0d);
+			airspace.getRenderer().setEnableAntialiasing(true);
+		}
+
 		@Override
 		public void render(DrawContext dc)
 		{
