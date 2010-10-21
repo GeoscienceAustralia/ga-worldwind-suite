@@ -35,6 +35,6 @@ public interface Shape
 	 */
 	enum Type
 	{
-		LINE, POLYGON
+		POINT, LINE, POLYGON
 	}
 }

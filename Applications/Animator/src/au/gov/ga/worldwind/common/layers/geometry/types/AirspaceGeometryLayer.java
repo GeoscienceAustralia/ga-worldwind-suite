@@ -21,9 +21,13 @@ import au.gov.ga.worldwind.common.layers.geometry.Shape;
  */
 public class AirspaceGeometryLayer extends GeometryLayerBase implements GeometryLayer
 {
-
 	private List<AirspaceShape> airspaceShapes = new ArrayList<AirspaceShape>();
 	
+	public AirspaceGeometryLayer(AVList params)
+	{
+		super(params);
+	}
+
 	@Override
 	public Iterable<? extends Shape> getShapes()
 	{

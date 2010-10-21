@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.common.layers.geometry;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
@@ -23,4 +26,14 @@ public interface GeometryLayer extends AVList, Setupable, Bounded, Layer
 	 * Add the provided shape to this layer
 	 */
 	void addShape(Shape shape);
+	
+	/**
+	 * @return The download url for this layer's shape data
+	 */
+	URL getShapeSourceUrl() throws MalformedURLException;
+
+	/**
+	 * @return The filename under which to store the downloaded data in the cache
+	 */
+	String getDataCacheName();
 }

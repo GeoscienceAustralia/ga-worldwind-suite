@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.common.layers.geometry.types;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Position;
@@ -9,6 +10,8 @@ import gov.nasa.worldwind.layers.AbstractLayer;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,6 +20,7 @@ import java.util.Set;
 
 import au.gov.ga.worldwind.common.layers.geometry.GeometryLayer;
 import au.gov.ga.worldwind.common.layers.geometry.Shape;
+import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
  * @author James Navin (james.navin@ga.gov.au)
@@ -24,9 +28,26 @@ import au.gov.ga.worldwind.common.layers.geometry.Shape;
  */
 public abstract class GeometryLayerBase extends AbstractLayer implements GeometryLayer
 {
-
 	private AVList avList = new AVListImpl();
-
+	private final URL shapeSourceUrl;
+	private final String dataCacheName;
+	
+	public GeometryLayerBase(AVList params)
+	{
+		try
+		{
+			URL shapeSourceContext = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
+			String url = params.getStringValue(AVKey.URL);
+			shapeSourceUrl = new URL(shapeSourceContext, url);
+		}
+		catch (MalformedURLException e)
+		{
+			throw new IllegalArgumentException("Unable to parse shape source URL", e);
+		}
+		
+		dataCacheName = params.getStringValue(AVKey.DATA_CACHE_NAME);
+	}
+	
 	@Override
 	public Object setValue(String key, Object value)
 	{
@@ -138,5 +159,18 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 	@Override
 	public void setup(WorldWindow wwd)
 	{
+		// Subclasses may override to perform required setup
 	} 
+	
+	@Override
+	public URL getShapeSourceUrl() throws MalformedURLException
+	{
+		return shapeSourceUrl;
+	}
+	
+	@Override
+	public String getDataCacheName()
+	{
+		return dataCacheName;
+	}
 }
