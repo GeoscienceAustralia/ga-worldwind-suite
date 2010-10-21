@@ -9,6 +9,7 @@ import gov.nasa.worldwind.render.airspaces.Curtain;
 import gov.nasa.worldwind.render.airspaces.Polygon;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -22,7 +23,7 @@ import au.gov.ga.worldwind.common.layers.geometry.Shape;
  */
 public class AirspaceGeometryLayer extends GeometryLayerBase implements GeometryLayer
 {
-	private List<AirspaceShape> airspaceShapes = new ArrayList<AirspaceShape>();
+	private List<AirspaceShape> airspaceShapes = Collections.synchronizedList(new ArrayList<AirspaceShape>());
 	
 	public AirspaceGeometryLayer(AVList params)
 	{
@@ -46,7 +47,7 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 	}
 
 	@Override
-	protected void doRender(DrawContext dc)
+	public void renderGeometry(DrawContext dc)
 	{
 		for (AirspaceShape airspaceShape :  airspaceShapes)
 		{
@@ -111,6 +112,8 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 				case LINE:
 				{
 					airspace = new Curtain(getPoints());
+					airspace.setTerrainConforming(true, false);
+					airspace.setAltitudes(0d, 1000000d);
 					break;
 				}
 				case POLYGON:

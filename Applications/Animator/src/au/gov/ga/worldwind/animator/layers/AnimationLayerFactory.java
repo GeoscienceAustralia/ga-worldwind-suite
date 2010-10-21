@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.animator.layers.misc.FogLayerFactory;
 import au.gov.ga.worldwind.animator.layers.sky.Skysphere;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
+import au.gov.ga.worldwind.common.layers.geometry.GeometryLayerFactory;
 
 /**
  * An extension of the {@link LayerFactory} that adds support for
@@ -31,6 +32,10 @@ public class AnimationLayerFactory extends LayerFactory
 		if (FogLayerFactory.LAYER_TYPE.equals(layerType))
 		{
 			return FogLayerFactory.createFromDefinition(domElement, params);
+		}
+		if ("GeometryLayer".equalsIgnoreCase(layerType))
+		{
+			return GeometryLayerFactory.createGeometryLayer(domElement, params);
 		}
 		
 		return super.createFromLayerDocument(domElement, params);

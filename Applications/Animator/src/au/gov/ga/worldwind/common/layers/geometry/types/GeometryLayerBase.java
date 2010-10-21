@@ -7,6 +7,7 @@ import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.AbstractLayer;
+import gov.nasa.worldwind.render.DrawContext;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -18,8 +19,13 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import au.gov.ga.worldwind.common.layers.geometry.BasicStyleProviderImpl;
 import au.gov.ga.worldwind.common.layers.geometry.GeometryLayer;
 import au.gov.ga.worldwind.common.layers.geometry.Shape;
+import au.gov.ga.worldwind.common.layers.geometry.ShapeProvider;
+import au.gov.ga.worldwind.common.layers.geometry.StyleProvider;
+import au.gov.ga.worldwind.common.layers.point.Attribute;
+import au.gov.ga.worldwind.common.layers.point.Style;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
@@ -32,7 +38,10 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 	private AVList avList = new AVListImpl();
 	private final URL shapeSourceUrl;
 	private final String dataCacheName;
+	private final ShapeProvider shapeProvider;
+	private final StyleProvider styleProvider;
 	
+	@SuppressWarnings("unchecked")
 	public GeometryLayerBase(AVList params)
 	{
 		try
@@ -47,6 +56,13 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 		}
 		
 		dataCacheName = params.getStringValue(AVKey.DATA_CACHE_NAME);
+		
+		shapeProvider = (ShapeProvider)params.getValue(AVKeyMore.SHAPE_PROVIDER);
+		
+		styleProvider = new BasicStyleProviderImpl((Collection<? extends Attribute>)params.getValue(AVKeyMore.SHAPE_ATTRIBUTES), 
+												   (Collection<? extends Style>)params.getValue(AVKeyMore.SHAPE_STYLES)); 
+		
+		setValues(params);
 	}
 	
 	@Override
@@ -179,5 +195,25 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 	public String getDataCacheName()
 	{
 		return dataCacheName;
+	}
+	
+	@Override
+	protected final void doRender(DrawContext dc)
+	{
+		if (isEnabled())
+		{
+			getShapeProvider().requestShapes(this);
+		}
+		renderGeometry(dc);
+	}
+	
+	protected ShapeProvider getShapeProvider()
+	{
+		return shapeProvider;
+	}
+	
+	protected StyleProvider getStyleProvider()
+	{
+		return styleProvider;
 	}
 }

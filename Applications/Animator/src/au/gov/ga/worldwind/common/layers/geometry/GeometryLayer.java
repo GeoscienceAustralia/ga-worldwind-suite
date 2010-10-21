@@ -1,11 +1,13 @@
 package au.gov.ga.worldwind.common.layers.geometry;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.render.DrawContext;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.util.Setupable;
 
@@ -43,4 +45,9 @@ public interface GeometryLayer extends AVList, Setupable, Bounded, Layer
 	 * Provides a hook for implementing classes to perform post-load processing.
 	 */
 	void loadComplete();
+	
+	/**
+	 * Render the geometry in this layer
+	 */
+	void renderGeometry(DrawContext dc);
 }
