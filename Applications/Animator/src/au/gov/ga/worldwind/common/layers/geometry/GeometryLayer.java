@@ -36,4 +36,11 @@ public interface GeometryLayer extends AVList, Setupable, Bounded, Layer
 	 * @return The filename under which to store the downloaded data in the cache
 	 */
 	String getDataCacheName();
+	
+	/**
+	 * Invoked when this layer's shape source has been loaded.
+	 * <p/>
+	 * Provides a hook for implementing classes to perform post-load processing.
+	 */
+	void loadComplete();
 }

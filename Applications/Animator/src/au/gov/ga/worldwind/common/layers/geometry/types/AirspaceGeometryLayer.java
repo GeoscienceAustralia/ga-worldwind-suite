@@ -10,6 +10,7 @@ import gov.nasa.worldwind.render.airspaces.Polygon;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.layers.geometry.GeometryLayer;
@@ -58,6 +59,7 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 	 */
 	private static class AirspaceShape implements Shape, Renderable
 	{
+		private AtomicBoolean dirty = new AtomicBoolean(true);
 		private Airspace airspace;
 		private Shape shapeDelegate;
 		
@@ -74,7 +76,7 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 		}
 
 		@Override
-		public List<? extends Position> getPoints()
+		public List<? extends ShapePoint> getPoints()
 		{
 			return shapeDelegate.getPoints();
 		}
@@ -83,7 +85,14 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 		public void addPoint(Position p, AVList attributeValues)
 		{
 			shapeDelegate.addPoint(p, attributeValues);
-			generateAirspace();
+			dirty.set(true);
+		}
+		
+		@Override
+		public void addPoint(ShapePoint p)
+		{
+			shapeDelegate.addPoint(p);
+			dirty.set(true);
 		}
 		
 		@Override
@@ -107,13 +116,19 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 				case POLYGON:
 				{
 					airspace = new Polygon(getPoints());
+					break;
 				}
 			}
+			dirty.set(false);
 		}
 		
 		@Override
 		public void render(DrawContext dc)
 		{
+			if (dirty.get())
+			{
+				generateAirspace();
+			}
 			airspace.render(dc);
 		}
 	}
