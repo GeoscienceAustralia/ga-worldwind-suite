@@ -30,21 +30,21 @@ public class StyleTest
 	@Test
 	public void testSetPropertiesFromAttributesWithSimpleAttributes()
 	{
-		classToTest.addProperty("littleIInteger", "1", null);
-		classToTest.addProperty("bigIInteger", "2", null);
-		classToTest.addProperty("littleLLong", "3", null);
-		classToTest.addProperty("bigLLong", "0xFF", null);
-		classToTest.addProperty("littleDDouble", "5.5", null);
-		classToTest.addProperty("bigDDouble", "6E6", null);
-		classToTest.addProperty("littleFFloat", "7.7f", null);
-		classToTest.addProperty("bigFFloat", "8E-1", null);
-		classToTest.addProperty("littleBBoolean", "true", null);
-		classToTest.addProperty("bigBBoolean", "TRUE", null);
-		classToTest.addProperty("string", "This is a String!", null);
-		classToTest.addProperty("littleCCharacter", "y", null);
-		classToTest.addProperty("bigCCharacter", "&", null);
-		classToTest.addProperty("littleBByte", "0xF", null);
-		classToTest.addProperty("bigBByte", "8", null);
+		classToTest.addProperty("littleIInteger", "1");
+		classToTest.addProperty("bigIInteger", "2");
+		classToTest.addProperty("littleLLong", "3");
+		classToTest.addProperty("bigLLong", "0xFF");
+		classToTest.addProperty("littleDDouble", "5.5");
+		classToTest.addProperty("bigDDouble", "6E6");
+		classToTest.addProperty("littleFFloat", "7.7f");
+		classToTest.addProperty("bigFFloat", "8E-1");
+		classToTest.addProperty("littleBBoolean", "true");
+		classToTest.addProperty("bigBBoolean", "TRUE");
+		classToTest.addProperty("string", "This is a String!");
+		classToTest.addProperty("littleCCharacter", "y");
+		classToTest.addProperty("bigCCharacter", "&");
+		classToTest.addProperty("littleBByte", "0xF");
+		classToTest.addProperty("bigBByte", "8");
 		
 		SimpleDummyBean dummyBean = new SimpleDummyBean();
 		classToTest.setPropertiesFromAttributes(null, null, dummyBean);
@@ -69,11 +69,11 @@ public class StyleTest
 	@Test
 	public void testSetPropertiesFromAttributesWithComplexAttributes()
 	{
-		classToTest.addProperty("material", "255,0,0", null);
-		classToTest.addProperty("color", "0,255,0", null);
-		classToTest.addProperty("dimension", "100,200", null);
-		classToTest.addProperty("point", "300,400", null);
-		classToTest.addProperty("font", "Arial-BOLD-18", null);
+		classToTest.addProperty("material", "255,0,0");
+		classToTest.addProperty("color", "0,255,0");
+		classToTest.addProperty("dimension", "100,200");
+		classToTest.addProperty("point", "300,400");
+		classToTest.addProperty("font", "Arial-BOLD-18");
 		
 		ComplexDummyBean dummyBean = new ComplexDummyBean();
 		classToTest.setPropertiesFromAttributes(null, null, dummyBean);
@@ -88,7 +88,7 @@ public class StyleTest
 	@Test
 	public void testSetPropertiesFromAttributesWithFailedConversion()
 	{
-		classToTest.addProperty("material", "255s,0,0", null);
+		classToTest.addProperty("material", "255s,0,0");
 		
 		ComplexDummyBean dummyBean = new ComplexDummyBean();
 		
@@ -107,10 +107,10 @@ public class StyleTest
 	@Test
 	public void testSetPropertiesFromAttributesWithAttributeSubstitution()
 	{
-		classToTest.addProperty("littleIInteger", "%int%", null);
-		classToTest.addProperty("material", "%material%", null);
-		classToTest.addProperty("string", "%string%", null);
-		classToTest.addProperty("point", "%point%", null);
+		classToTest.addProperty("littleIInteger", "%int%");
+		classToTest.addProperty("material", "%material%");
+		classToTest.addProperty("string", "%string%");
+		classToTest.addProperty("point", "%point%");
 		
 		AVList attributeValues = new AVListImpl();
 		attributeValues.setValue("int", "1");
@@ -133,7 +133,7 @@ public class StyleTest
 	@Test
 	public void testSetPropertiesFromAttributesWithMultiParameterMethods()
 	{
-		classToTest.addProperty("params", "255,255,0|true|-45", null);
+		classToTest.addProperty("params", "255,255,0|true|-45");
 		
 		MultiParamSetterBean multiParamBean = new MultiParamSetterBean();
 		classToTest.setPropertiesFromAttributes(null, null, multiParamBean);
@@ -141,6 +141,52 @@ public class StyleTest
 		assertEquals(new Color(255,255,0), multiParamBean.getColor());
 		assertEquals(true, multiParamBean.getBool());
 		assertEquals((Integer)(-45), multiParamBean.getInteger());
+	}
+	
+	@Test
+	public void testSetPropertiesFromAttributesWithTypeOverrides()
+	{
+		classToTest.addProperty("object0", "255,0,0", "Color");
+		classToTest.addProperty("object1", "255,0,0", "Material");
+		classToTest.addProperty("object234", "100,200|true|300,400", "Point", "Boolean", "Dimension");
+		
+		TypeOverrideBean bean = new TypeOverrideBean();
+		classToTest.setPropertiesFromAttributes(null, null, bean);
+		
+		assertEquals(new Color(255,0,0), bean.getObject(0));
+		assertEquals(new Material(new Color(255,0,0)), bean.getObject(1));
+		assertEquals(new Point(100,200), bean.getObject(2));
+		assertEquals(true, bean.getObject(3));
+		assertEquals(new Dimension(300,400), bean.getObject(4));
+	}
+	
+	/**
+	 * A dummy bean used to test type override setters
+	 */
+	@SuppressWarnings("unused")
+	private class TypeOverrideBean
+	{
+		Object[] objects = new Object[5];
+		
+		public void setObject0(Object o)
+		{
+			objects[0] = o;
+		}
+		public void setObject1(Object o)
+		{
+			objects[1] = o;
+		}
+		public void setObject234(Object o2, Object o3, Object o4)
+		{
+			objects[2] = o2;
+			objects[3] = o3;
+			objects[4] = o4;
+		}
+		
+		public Object getObject(int index)
+		{
+			return objects[index];
+		}
 	}
 	
 	/**

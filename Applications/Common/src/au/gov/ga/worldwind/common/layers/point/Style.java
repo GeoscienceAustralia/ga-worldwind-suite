@@ -33,7 +33,7 @@ public class Style
 	protected String name;
 	protected boolean defalt;
 	protected final Map<String, String> properties = new HashMap<String, String>();
-	protected final Map<String, String> typeOverrides = new HashMap<String, String>();
+	protected final Map<String, String[]> typeOverrides = new HashMap<String, String[]>();
 
 	/**
 	 * Create a new style.
@@ -79,12 +79,12 @@ public class Style
 	 * @param typeOverride
 	 *            Type to use when setting the property
 	 */
-	public void addProperty(String property, String value, String typeOverride)
+	public void addProperty(String property, String value, String... typeOverrides)
 	{
 		properties.put(property, value);
-		if (typeOverride != null && typeOverride.length() > 0)
+		if (typeOverrides != null && typeOverrides.length > 0)
 		{
-			typeOverrides.put(property, typeOverride);
+			this.typeOverrides.put(property, typeOverrides);
 		}
 	}
 
@@ -156,7 +156,8 @@ public class Style
 				continue;
 			}
 
-			Object[] parameverValues = new Object[paramValueStrings.length];
+			Object[] parameterValues = new Object[paramValueStrings.length];
+			String[] typeOverrides = getTypeOverridesForProperty(property, parameterValues.length);
 			
 			// Convert each parameter value string into a parameter
 			for (int i = 0; i < paramValueStrings.length; i++)
@@ -166,7 +167,7 @@ public class Style
 				Class<?> type = parameterType;
 	
 				//check if the type has been overridden (useful if the type above is just 'Object')
-				String typeOverride = typeOverrides.get(property);
+				String typeOverride = typeOverrides[i];
 				if (typeOverride != null)
 				{
 					type = convertTypeToClass(typeOverride);
@@ -195,13 +196,13 @@ public class Style
 					throw new IllegalArgumentException(message);
 				}
 				
-				parameverValues[i] = value;
+				parameterValues[i] = value;
 			}
 
 			//invoke the setter with the value
 			try
 			{
-				setter.invoke(object, parameverValues);
+				setter.invoke(object, parameterValues);
 			}
 			catch (Exception e)
 			{
@@ -210,6 +211,38 @@ public class Style
 				throw new IllegalArgumentException(message, e);
 			}
 		}
+	}
+
+	/**
+	 * @return the type overrides for the provided property, populated to ensure there are the correct
+	 * number of overrides for the parameters of the property.
+	 */
+	private String[] getTypeOverridesForProperty(String property, int numberOfParameters)
+	{
+		String[] result = typeOverrides.get(property);
+		if (result == null)
+		{
+			return new String[numberOfParameters];
+		}
+		if (result.length == numberOfParameters)
+		{
+			return result;
+		}
+		
+		String[] propertyOverrides = typeOverrides.get(property); 
+		result = new String[numberOfParameters];
+		for (int i = 0; i < result.length; i++)
+		{
+			if (i < propertyOverrides.length)
+			{
+				result[i] = propertyOverrides[i];
+			}
+			else
+			{
+				result[i] = null;
+			}
+		}
+		return result;
 	}
 
 	private static String[] splitParamValues(String stringValue)
@@ -299,6 +332,8 @@ public class Style
 			return Font.class;
 		if ("Material".equalsIgnoreCase(type))
 			return Material.class;
+		if ("Boolean".equalsIgnoreCase(type))
+			return Boolean.class;
 		return null;
 	}
 
