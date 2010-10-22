@@ -78,7 +78,7 @@ public class Style
 	 *            Value to set the property to (can replace with attribute
 	 *            values by using a %attributeName% placeholder)
 	 * @param typeOverride
-	 *            Type to use when setting the property
+	 *            Type overrides to use when setting the property
 	 */
 	public void addProperty(String property, String value, String... typeOverrides)
 	{
@@ -87,6 +87,22 @@ public class Style
 		{
 			this.typeOverrides.put(property, typeOverrides);
 		}
+	}
+	
+	/**
+	 * Add a property that this style will set.
+	 * 
+	 * @param property
+	 *            Property name
+	 * @param value
+	 *            Value to set the property to (can replace with attribute
+	 *            values by using a %attributeName% placeholder)
+	 * @param typeOverride
+	 *            Type to use when setting the property. Pipe separated lists supported.
+	 */
+	public void addProperty(String property, String value, String typeOverrides)
+	{
+		addProperty(property, value, splitPipeSeparatedString(typeOverrides));
 	}
 
 	/**
@@ -147,7 +163,7 @@ public class Style
 			String stringValue = entry.getValue();
 			stringValue = replaceVariablesWithAttributeValues(stringValue, attributeValues);
 			
-			String[] paramValueStrings = splitParamValues(stringValue);
+			String[] paramValueStrings = splitPipeSeparatedString(stringValue);
 			
 			if (parameters.length != paramValueStrings.length)
 			{
@@ -246,7 +262,7 @@ public class Style
 		return result;
 	}
 
-	private static String[] splitParamValues(String stringValue)
+	private static String[] splitPipeSeparatedString(String stringValue)
 	{
 		// Split on '|' and trim whitespace at the same time
 		return stringValue.trim().split("[ \t]*[|][ \t]*");
