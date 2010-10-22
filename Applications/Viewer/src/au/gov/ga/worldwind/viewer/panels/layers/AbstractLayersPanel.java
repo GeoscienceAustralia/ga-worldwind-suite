@@ -5,6 +5,7 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.retrieve.RetrievalService;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
@@ -412,5 +413,10 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 	public void removeQueryClickListener(QueryClickListener listener)
 	{
 		tree.getLayerCellRenderer().removeQueryClickListener(listener);
+	}
+
+	public boolean containsLayer(Layer layer)
+	{
+		return layerEnabler.hasLayer(layer);
 	}
 }

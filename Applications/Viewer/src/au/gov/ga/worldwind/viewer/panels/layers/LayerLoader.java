@@ -37,55 +37,63 @@ public class LayerLoader
 		else
 		{
 			Element element = XMLUtil.getElementFromSource(stream);
-
-			URL legend = XMLUtil.getURL(element, "Legend", sourceUrl);
-			URL query = XMLUtil.getURL(element, "Query", sourceUrl);
-
-			Object o = null;
-			Exception exception = null;
-
-			//if (o == null)
-			{
-				try
-				{
-					Factory factory =
-							(Factory) WorldWind.createConfigurationComponent(AVKey.LAYER_FACTORY);
-					o = factory.createFromConfigSource(element, params);
-				}
-				catch (Exception e)
-				{
-					//if (exception == null)
-					exception = e;
-				}
-			}
-
-			if (o == null)
-			{
-				try
-				{
-					Factory factory =
-							(Factory) WorldWind
-									.createConfigurationComponent(AVKey.ELEVATION_MODEL_FACTORY);
-					o = factory.createFromConfigSource(element, params);
-				}
-				catch (Exception e)
-				{
-					if (exception == null)
-						exception = e;
-				}
-			}
-
-			if (o == null)
-			{
-				if (exception != null)
-					throw exception;
-				throw new Exception("Error reading file");
-			}
-
-			LoadedLayer loaded = new LoadedLayer(o, params);
-			loaded.setLegendURL(legend);
-			loaded.setQueryURL(query);
-			return loaded;
+			return loadFromElement(element, sourceUrl, params);
 		}
+	}
+
+	public static LoadedLayer loadFromElement(Element element, URL sourceUrl, AVList params)
+			throws Exception
+	{
+		URL legend = XMLUtil.getURL(element, "Legend", sourceUrl);
+		URL query = XMLUtil.getURL(element, "Query", sourceUrl);
+
+		if (params == null)
+			params = new AVListImpl();
+
+		Object o = null;
+		Exception exception = null;
+
+		//if (o == null)
+		{
+			try
+			{
+				Factory factory =
+						(Factory) WorldWind.createConfigurationComponent(AVKey.LAYER_FACTORY);
+				o = factory.createFromConfigSource(element, params);
+			}
+			catch (Exception e)
+			{
+				//if (exception == null)
+				exception = e;
+			}
+		}
+
+		if (o == null)
+		{
+			try
+			{
+				Factory factory =
+						(Factory) WorldWind
+								.createConfigurationComponent(AVKey.ELEVATION_MODEL_FACTORY);
+				o = factory.createFromConfigSource(element, params);
+			}
+			catch (Exception e)
+			{
+				if (exception == null)
+					exception = e;
+			}
+		}
+
+		if (o == null)
+		{
+			if (exception != null)
+				throw exception;
+			throw new Exception("Error reading file");
+		}
+
+		LoadedLayer loaded = new LoadedLayer(o, params);
+		loaded.setLegendURL(legend);
+		loaded.setQueryURL(query);
+		return loaded;
 	}
 }

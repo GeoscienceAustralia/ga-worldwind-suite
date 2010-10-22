@@ -142,12 +142,9 @@ public class ThemeFactory
 					String name = XMLUtil.getText(element, "@name");
 					URL url = XMLUtil.getURL(element, "@url", urlContext);
 					URL info = XMLUtil.getURL(element, "@info", urlContext);
-					String icon = XMLUtil.getText(element, "@icon");
-					URL iconURL = null;
-					if (icon == null)
+					URL iconURL = XMLUtil.getURL(element, "@icon", urlContext);
+					if (iconURL == null)
 						iconURL = Icons.earth.getURL();
-					else
-						iconURL = XMLUtil.getURL(icon, urlContext);
 
 					IDataset dataset = new LazyDataset(name, url, info, iconURL, true);
 					datasets.add(dataset);

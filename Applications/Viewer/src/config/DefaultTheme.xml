@@ -24,23 +24,16 @@
 	<Dataset name="Datasets" url="http://www.ga.gov.au/apps/world-wind/dataset/dataset.xml" />
 
 	<!-- Layers are shown in the Theme Layers panel (non editable list) -->
-	<!--
-		<Layer name="Potassium"
-		url="http://www.ga.gov.au/apps/world-wind/dataset/ga/radiometrics/edition1/potassium.xml" icon=""
-		info="" enabled="false" /> <Layer name="Atmosphere"
-		url="http://www.ga.gov.au/apps/world-wind/dataset/nasa/sky.xml" icon="" info="" visible="false" />
-	-->
+	<!-- <Layer name="Potassium" url="http://www.ga.gov.au/apps/world-wind/dataset/ga/radiometrics/edition1/potassium.xml" icon="" info="" enabled="false" /> -->
+	<!-- <Layer name="Atmosphere" url="http://www.ga.gov.au/apps/world-wind/dataset/nasa/sky.xml" icon="" info="" visible="false" /> -->
 
 	<!-- Sidebar panels -->
-	<Panel name="Search" className="au.gov.ga.worldwind.viewer.panels.geonames.GeoNamesSearchPanel"
-		enabled="false" />
+	<Panel name="Search" className="au.gov.ga.worldwind.viewer.panels.geonames.GeoNamesSearchPanel" enabled="false" />
 	<Panel name="Places" className="au.gov.ga.worldwind.viewer.panels.places.PlacesPanel" enabled="false" />
 	<Panel name="Layers" className="au.gov.ga.worldwind.viewer.panels.layers.LayersPanel" />
 	<Panel name="Datasets" className="au.gov.ga.worldwind.viewer.panels.dataset.DatasetPanel" />
-	<!--
-		<Panel name="Theme Layers" className="au.gov.ga.worldwind.viewer.panels.layers.ThemeLayersPanel" />
-	-->
-	<Panel name="Vertical Exaggeration" className="au.gov.ga.worldwind.viewer.panels.other.ExaggerationPanel"
-		enabled="false" />
+	<!-- <Panel name="Theme Layers" className="au.gov.ga.worldwind.viewer.panels.layers.ThemeLayersPanel" /> -->
+	<Panel name="Vertical Exaggeration" className="au.gov.ga.worldwind.viewer.panels.other.ExaggerationPanel" enabled="false" />
+	<Panel name="View" className="au.gov.ga.worldwind.viewer.panels.view.ViewPanel" enabled="false" />
 
 </Theme>

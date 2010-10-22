@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Sector;
@@ -9,6 +10,7 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.Logging;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +25,8 @@ import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.util.Loader;
+import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.viewer.panels.layers.FileLoader.FileLoadListener;
 
 public class LayerEnabler
 {
@@ -159,9 +163,73 @@ public class LayerEnabler
 		loadLayer(node, false);
 	}
 
-	private void loadLayer(final ILayerNode node, boolean onlyIfModified)
+	private void loadLayer(ILayerNode node, boolean onlyIfModified)
 	{
 		URL url = node.getLayerURL();
+		File file = Util.urlToFile(url);
+		boolean isFile = file != null && file.isFile();
+		boolean isXml = url.toString().toLowerCase().endsWith(".xml");
+
+		setLayerLoading(node, true, true);
+
+		if (isFile && !isXml)
+		{
+			loadFile(node, file);
+		}
+		else
+		{
+			downloadLayer(node, url, onlyIfModified);
+		}
+	}
+
+	private void loadFile(final ILayerNode node, File file)
+	{
+		FileLoadListener listener = new FileLoadListener()
+		{
+			@Override
+			public void loaded(LoadedLayer loaded)
+			{
+				handleLoad(node, loaded);
+			}
+
+			@Override
+			public void error(Exception e)
+			{
+				setLayerLoading(node, false, false);
+				setError(node, e);
+			}
+
+			@Override
+			public void cancelled()
+			{
+				setLayerLoading(node, false, false);
+				setError(node, new Exception("Cancelled"));
+			}
+		};
+		
+		//clear any errors before attempting to load
+		setError(node, null);
+		
+		//load the file using the FileLoader
+		FileLoader.loadFile(file, listener, tree, WorldWind.getDataFileStore());
+	}
+
+	private synchronized void handleLoad(ILayerNode node, LoadedLayer loaded)
+	{
+		setLayerLoading(node, false, true);
+
+		int index = nodes.indexOf(node);
+		if (index < 0) //layer must have been removed during loading
+			return;
+
+		Wrapper wrapper = wrappers.get(index);
+		wrapper.setLoaded(loaded);
+		
+		refreshLists();
+	}
+
+	private void downloadLayer(final ILayerNode node, URL url, boolean onlyIfModified)
+	{
 		RetrievalHandler handler = new RetrievalHandler()
 		{
 			@Override
@@ -170,7 +238,6 @@ public class LayerEnabler
 				handleResult(node, result);
 			}
 		};
-		setLayerLoading(node, true, true);
 		if (onlyIfModified)
 			Downloader.downloadIfModified(url, handler, handler);
 		else
@@ -338,6 +405,11 @@ public class LayerEnabler
 		if (nodeMap.containsKey(node))
 			return nodeMap.get(node).hasLayer();
 		return false;
+	}
+
+	public synchronized boolean hasLayer(Layer layer)
+	{
+		return layerMap.containsKey(layer);
 	}
 
 	public synchronized Sector getLayerExtents(ILayerNode node)
