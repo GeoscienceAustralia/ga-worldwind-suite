@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.common.view.state;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.view.transform.TransformBasicOrbitView;
 
 public class ViewStateBasicOrbitView extends TransformBasicOrbitView
@@ -12,40 +13,28 @@ public class ViewStateBasicOrbitView extends TransformBasicOrbitView
 	{
 		this.globe = view.getGlobe();
 
-		Vec4 centerPoint = view.getCenterPoint();
 		Vec4 eyePoint = view.getCurrentEyePoint();
 		Position eyePosition = globe.computePositionFromPoint(eyePoint);
 
-		if (centerPoint != null)
+		Vec4 centerPoint = view.getCenterPoint();
+		//if the view is not looking at the globe, create a centerPoint just in front of the eye
+		if (centerPoint == null)
 		{
-			Position centerPosition = globe.computePositionFromPoint(centerPoint);
-			if (trySetOrientation(eyePosition, centerPosition))
-				return;
+			Vec4 forward = view.getForwardVector();
+			centerPoint = eyePoint.add3(forward);
 		}
+		Position centerPosition = globe.computePositionFromPoint(centerPoint);
 
-		//center point is not on the globe, so compute the closest point on the horizon
-		double horizonDistance = view.computeHorizonDistance();
-		Vec4 forward = view.getForwardVector().normalize3();
-		Vec4 normal = globe.computeSurfaceNormalAtPoint(eyePoint);
-		Vec4 left = normal.cross3(forward);
-		forward = left.cross3(normal);
+		if (trySetOrientation(eyePosition, centerPosition))
+			return;
 
-		//keep moving the horizon distance closer until modelCoords are valid
-		while (horizonDistance > 1)
-		{
-			centerPoint = eyePoint.add3(forward.multiply3(horizonDistance));
-			Position pos = globe.computePositionFromPoint(centerPoint);
-			double elevation =
-					Math.min(eyePosition.elevation, globe.getElevation(pos.latitude, pos.longitude));
-			Position centerPosition = new Position(pos, elevation);
+		//if a center position just in front of the eye doesn't work, then try the closest position
+		centerPosition = Util.computeViewClosestCenterPosition(view, eyePoint);
 
-			if (trySetOrientation(eyePosition, centerPosition))
-				return;
+		if (trySetOrientation(eyePosition, centerPosition))
+			return;
 
-			horizonDistance /= 2d;
-		}
-
-		//if nothing worked, just set the view using the heading/pitch
+		//if everything failed, just set the view using the heading/pitch
 		setEyePosition(eyePosition);
 		setHeading(view.getHeading());
 		setPitch(view.getPitch());

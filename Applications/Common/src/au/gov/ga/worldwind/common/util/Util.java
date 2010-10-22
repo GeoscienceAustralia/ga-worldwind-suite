@@ -1,9 +1,12 @@
 package au.gov.ga.worldwind.common.util;
 
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.geom.coords.MGRSCoord;
 import gov.nasa.worldwind.geom.coords.UTMCoordConverterAccessible;
 import gov.nasa.worldwind.globes.Globe;
@@ -311,12 +314,12 @@ public class Util
 			return value2;
 		return value1 * (1.0 - amount) + value2 * amount;
 	}
-	
+
 	public static double percentDouble(double value, double min, double max)
 	{
-		if(value < min)
+		if (value < min)
 			return 0;
-		if(value > max)
+		if (value > max)
 			return 1;
 		return (value - min) / (max - min);
 	}
@@ -337,6 +340,36 @@ public class Util
 	private static double clampDouble(double value, double min, double max)
 	{
 		return value < min ? min : (value > max ? max : value);
+	}
+	
+	public static Position computePositionFromString(String positionString)
+	{
+		return computePositionFromString(positionString, null);
+	}
+
+	public static Position computePositionFromString(String positionString, Globe globe)
+	{
+		int lastIndexOfSpace = positionString.trim().lastIndexOf(' ');
+		if (lastIndexOfSpace < 0)
+			return null;
+		String latlonString = positionString.substring(0, lastIndexOfSpace);
+		String elevationString = positionString.substring(lastIndexOfSpace + 1);
+		
+		double elevation;
+		try
+		{
+			elevation = Double.parseDouble(elevationString);
+		}
+		catch(Exception e)
+		{
+			return null;
+		}
+		
+		LatLon ll = computeLatLonFromString(latlonString, globe);
+		if(ll == null)
+			return null;
+		
+		return new Position(ll, elevation);
 	}
 
 	public static LatLon computeLatLonFromString(String coordString)
@@ -536,7 +569,8 @@ public class Util
 
 			try
 			{
-				final UTMCoordConverterAccessible converter = new UTMCoordConverterAccessible(globe);
+				final UTMCoordConverterAccessible converter =
+						new UTMCoordConverterAccessible(globe);
 				long err = converter.convertUTMToGeodetic(zone, hemisphere, easting, northing);
 
 				if (err == UTMCoordConverterAccessible.UTM_NO_ERROR)
@@ -584,5 +618,46 @@ public class Util
 						sector.getMaxLongitude().degrees);
 
 		return LatLon.fromDegrees(lat, lon);
+	}
+
+	/**
+	 * Calculate the position on the globe in the center of the view. If the
+	 * view is not looking at a point on the globe, the closest position is
+	 * found by calculating the horizon distance.
+	 * 
+	 * @param view
+	 *            View to find center position for
+	 * @param eyePoint
+	 *            Eye point in model coordinates (if null, requested from view)
+	 * @return View's closest center position on the globe
+	 */
+	public static Position computeViewClosestCenterPosition(View view, Vec4 eyePoint)
+	{
+		Globe globe = view.getGlobe();
+
+		Vec4 centerPoint = view.getCenterPoint();
+		if (centerPoint != null)
+		{
+			return globe.computePositionFromPoint(centerPoint);
+		}
+
+		//center point is not on the globe, so compute the closest point on the horizon
+
+		if (eyePoint == null)
+		{
+			eyePoint = view.getEyePoint();
+		}
+
+		Vec4 forward = view.getForwardVector().normalize3();
+		Vec4 normal = globe.computeSurfaceNormalAtPoint(eyePoint);
+		Vec4 left = normal.cross3(forward);
+		forward = left.cross3(normal);
+
+		double horizonDistance = view.computeHorizonDistance();
+		centerPoint = eyePoint.add3(forward.multiply3(horizonDistance));
+		Position pos = globe.computePositionFromPoint(centerPoint);
+		double elevation = globe.getElevation(pos.latitude, pos.longitude);
+
+		return new Position(pos, elevation);
 	}
 }

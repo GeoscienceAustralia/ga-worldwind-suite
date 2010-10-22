@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.common.view.stereo;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.globes.Globe;
 
 import java.awt.Rectangle;
 
@@ -148,24 +149,26 @@ public class StereoViewHelper
 		Vec4 eyePoint = view.getCurrentEyePoint();
 		double distanceFromOrigin = eyePoint.getLength3();
 
-		//calculate center point
-		double radius = view.getGlobe().getEquatorialRadius();
+		Globe globe = view.getGlobe();
+		double radius = globe.getRadiusAt(globe.computePositionFromPoint(eyePoint));
 		double amount = Util.percentDouble(distanceFromOrigin, radius, radius * 5d);
 
 		Vec4 centerPoint = view.getCenterPoint();
-		double distanceToCenter = distanceFromOrigin; //default to a valid value
-
+		double distanceToCenter;
 		if (centerPoint != null)
 		{
 			distanceToCenter = eyePoint.distanceTo3(centerPoint);
 		}
-		else if (distanceFromOrigin > radius)
+		else
 		{
-			//pythagoras, distanceFromOrigin is hypotenuse
-			distanceToCenter = Math.sqrt(distanceFromOrigin * distanceFromOrigin - radius * radius);
+			distanceToCenter = view.computeHorizonDistance();
 		}
 
-		//calculate distance from eye to center
+		//limit the distance to center relative to the eye distance from the ellipsoid surface
+		double maxDistanceToCenter = (distanceFromOrigin - radius) * 10;
+		distanceToCenter = Math.min(maxDistanceToCenter, distanceToCenter);
+
+		//calculate focal length as distance to center when zoomed in, and distance from origin when zoomed out
 		double focalLength = Util.mixDouble(amount, distanceToCenter, distanceFromOrigin);
 
 		//exaggerate separation more when zoomed out
@@ -176,6 +179,7 @@ public class StereoViewHelper
 		amount = Util.percentDouble(view.getPitch().degrees, 0d, 90d);
 		focalLength = Util.mixDouble(amount, focalLength, focalLength / 3d);
 
+		//calculate eye separation linearly relative to focal length
 		double eyeSeparation = separationExaggeration * focalLength / 100d;
 
 		return new AsymmetricFrutumParameters(focalLength, eyeSeparation);

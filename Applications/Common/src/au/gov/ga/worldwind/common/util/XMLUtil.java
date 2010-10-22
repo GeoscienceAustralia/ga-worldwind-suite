@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.common.util;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.exception.WWRuntimeException;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -44,7 +45,12 @@ public class XMLUtil extends WWXML
 
 	public static boolean getBoolean(Element context, String path, boolean def)
 	{
-		Boolean b = getBoolean(context, path, null);
+		return getBoolean(context, path, def, null);
+	}
+	
+	public static boolean getBoolean(Element context, String path, boolean def, XPath xpath)
+	{
+		Boolean b = getBoolean(context, path, xpath);
 		if (b == null)
 			return def;
 		return b;
@@ -52,7 +58,12 @@ public class XMLUtil extends WWXML
 
 	public static double getDouble(Element context, String path, double def)
 	{
-		Double d = getDouble(context, path, null);
+		return getDouble(context, path, def, null);
+	}
+	
+	public static double getDouble(Element context, String path, double def, XPath xpath)
+	{
+		Double d = getDouble(context, path, xpath);
 		if (d == null)
 			return def;
 		return d;
@@ -65,14 +76,20 @@ public class XMLUtil extends WWXML
 		return getURL(text, context);
 	}
 
-	public static URL getURL(String text, URL context) throws MalformedURLException
+	public static URL getURL(Element element, String path, URL context, XPath xpath)
+			throws MalformedURLException
 	{
-		URL url = getURL2(text, context);
-		url = URLTransformer.transform(url);
-		return url;
+		String text = getText(element, path, xpath);
+		return getURL(text, context);
 	}
 
-	protected static URL getURL2(String text, URL context) throws MalformedURLException
+	protected static URL getURL(String text, URL context) throws MalformedURLException
+	{
+		URL url = textToURL(text, context);
+		return URLTransformer.transform(url);
+	}
+
+	protected static URL textToURL(String text, URL context) throws MalformedURLException
 	{
 		if (text == null || text.length() == 0)
 			return null;
@@ -90,6 +107,49 @@ public class XMLUtil extends WWXML
 		WWXML.setIntegerAttribute(element, "alpha", color.getAlpha());
 		return element;
 	}
+	
+	public static Position getPosition(Element context, String path, XPath xpath)
+    {
+        if (context == null)
+        {
+            String message = Logging.getMessage("nullValue.ContextIsNull");
+            Logging.logger().severe(message);
+            throw new IllegalArgumentException(message);
+        }
+
+        try
+        {
+            Element el = path == null ? context : getElement(context, path, xpath);
+            if (el == null)
+                return null;
+
+            String units = getText(el, "@units", xpath);
+            Double lat = getDouble(el, "@latitude", xpath);
+            Double lon = getDouble(el, "@longitude", xpath);
+            Double elev = getDouble(el, "@elevation", xpath);
+
+            if (lat == null || lon == null || elev == null)
+                return null;
+
+            if (units == null || units.equals("degrees"))
+                return Position.fromDegrees(lat, lon, elev);
+
+            if (units.equals("radians"))
+                return Position.fromRadians(lat, lon, elev);
+
+            // Warn that units are not recognized
+            String message = Logging.getMessage("XML.UnitsUnrecognized", units);
+            Logging.logger().warning(message);
+
+            return null;
+        }
+        catch (NumberFormatException e)
+        {
+            String message = Logging.getMessage("generic.ConversionError", path);
+            Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
+            return null;
+        }
+    }
 
 	public static void checkAndSetURLParam(Element context, AVList params, String paramKey,
 			String paramName, XPath xpath)
