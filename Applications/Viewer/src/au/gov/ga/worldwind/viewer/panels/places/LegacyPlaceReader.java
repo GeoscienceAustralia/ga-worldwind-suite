@@ -60,7 +60,7 @@ public class LegacyPlaceReader
 		place.setMinZoom(XMLUtil.getDouble(context, "void[@property=\"minZoom\"]/double",
 				place.getMinZoom(), xpath));
 		place.setMaxZoom(XMLUtil.getDouble(context, "void[@property=\"maxZoom\"]/double",
-				place.getMinZoom(), xpath));
+				place.getMaxZoom(), xpath));
 		place.setSaveCamera(XMLUtil.getBoolean(context, "void[@property=\"saveCamera\"]/boolean",
 				place.isSaveCamera(), xpath));
 		place.setVisible(XMLUtil.getBoolean(context, "void[@property=\"visible\"]/boolean",
@@ -86,17 +86,15 @@ public class LegacyPlaceReader
 					OrbitViewInputSupport.computeTransformMatrix(globe, center,
 							Angle.fromDegrees(heading), Angle.fromDegrees(pitch), zoom);
 
-			Position eyePosition = null;
 			Matrix modelviewInv = transform.getInverse();
 			if (modelviewInv != null)
 			{
 				Vec4 eyePoint = Vec4.UNIT_W.transformBy4(modelviewInv);
-				eyePosition = globe.computePositionFromPoint(eyePoint);
+				Vec4 upVector = Vec4.UNIT_Y.transformBy4(modelviewInv);
+				Position eyePosition = globe.computePositionFromPoint(eyePoint);
+				place.setEyePosition(eyePosition);
+				place.setUpVector(upVector);
 			}
-			Vec4 upVector = Vec4.UNIT_Y.transformBy4(transform);
-
-			place.setEyePosition(eyePosition);
-			place.setUpVector(upVector);
 		}
 	}
 }

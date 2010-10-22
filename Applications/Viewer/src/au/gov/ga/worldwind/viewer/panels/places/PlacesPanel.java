@@ -97,7 +97,7 @@ public class PlacesPanel extends AbstractThemePanel
 		List<Place> places = PlacePersistance.readFromXML(file);
 
 		//if the read failed, attempt to read from the old format
-		if (places == null)
+		if (places == null && wwd != null)
 		{
 			places = LegacyPlaceReader.readPlacesFromLegacyXML(file, wwd.getModel().getGlobe());
 		}
