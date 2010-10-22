@@ -14,7 +14,6 @@ import java.util.List;
 
 import au.gov.ga.worldwind.common.util.EnumPersistenceDelegate;
 import au.gov.ga.worldwind.common.view.stereo.StereoViewParameters;
-import au.gov.ga.worldwind.viewer.panels.places.Place;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel;
@@ -46,7 +45,7 @@ public class Settings implements StereoViewParameters
 		return instance;
 	}
 
-	private static File getSettingsFile()
+	public static File getSettingsFile()
 	{
 		return SettingsUtil.getSettingsFile("settings.xml");
 	}
@@ -100,7 +99,6 @@ public class Settings implements StereoViewParameters
 	private boolean stereoEnabled = false;
 	private boolean hardwareStereoEnabled = false;
 	private boolean windowMaximized = false;
-	private List<Place> places = new ArrayList<Place>();
 	private double viewIteratorSpeed = 1.0;
 	private boolean showDownloads = true;
 	private int placesPause = 1000;
@@ -382,18 +380,6 @@ public class Settings implements StereoViewParameters
 	public void setDisplayId(String displayId)
 	{
 		this.displayId = displayId;
-	}
-
-	public List<Place> getPlaces()
-	{
-		return places;
-	}
-
-	public void setPlaces(List<Place> places)
-	{
-		if (places == null)
-			places = new ArrayList<Place>();
-		this.places = places;
 	}
 
 	public double getViewIteratorSpeed()

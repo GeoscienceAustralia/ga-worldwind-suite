@@ -4,7 +4,7 @@ import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.view.orbit.OrbitView;
+import gov.nasa.worldwind.geom.Vec4;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -56,25 +56,19 @@ public class PlaceEditor extends JDialog
 	private JCheckBox cameraInformation;
 	private JButton copyCamera;
 	private JCheckBox excludeFromPlaylist;
-	private JLabel zoomLabel;
-	private JLabel headingLabel;
-	private JLabel pitchLabel;
-	private JLabel elevationLabel;
-	private JDoubleField zoom;
-	private JDoubleField heading;
-	private JDoubleField pitch;
-	private JDoubleField elevation;
-	private JComboBox elevationUnits;
-	private JComboBox zoomUnits;
+	private JTextField eyePosition;
+	private JTextField upVector;
+	private JLabel eyePositionLabel;
 	private WorldWindow wwd;
 	private int returnValue = JOptionPane.CANCEL_OPTION;
 	private JButton okButton;
 
 	private enum Units
 	{
-		Kilometres("km", 1d / 1000d), Metres("m", 1d), Miles("mi", Util.METER_TO_MILE), Feet(
-				"ft",
-				Util.METER_TO_FEET);
+		Kilometres("km", 1d / 1000d),
+		Metres("m", 1d),
+		Miles("mi", Util.METER_TO_MILE),
+		Feet("ft", Util.METER_TO_FEET);
 
 		private final String label;
 		private final double scale;
@@ -187,7 +181,7 @@ public class PlaceEditor extends JDialog
 		c.insets.bottom = 0;
 		panel2.add(label, c);
 
-		latlon = new JTextField(textFormatedLatLon(place.getLatitude(), place.getLongitude()));
+		latlon = new JTextField(textFormattedLatLon(place.getLatLon()));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 1;
@@ -400,188 +394,79 @@ public class PlaceEditor extends JDialog
 			public void actionPerformed(ActionEvent e)
 			{
 				View view = wwd.getView();
-				if (view instanceof OrbitView)
+				Vec4 eyePoint = view.getCurrentEyePoint();
+				Vec4 up = view.getUpVector();
+				Position eyePos = view.getGlobe().computePositionFromPoint(eyePoint);
+				Position centerPosition = Util.computeViewClosestCenterPosition(view, eyePoint);
+
+				eyePosition.setText(textFormattedPosition(eyePos));
+				upVector.setText(textFormattedVec4(up));
+
+				if (LatLon.greatCircleDistance(centerPosition, place.getLatLon()).degrees > 0.1)
 				{
-					OrbitView orbitView = (OrbitView) view;
-					heading.setValue(orbitView.getHeading().degrees);
-					pitch.setValue(orbitView.getPitch().degrees);
-					zoom.setValue(orbitView.getZoom());
-					Position pos = orbitView.getCenterPosition();
-					elevation.setValue(pos.getElevation());
-					double lat = pos.getLatitude().degrees;
-					double lon = pos.getLongitude().degrees;
-					if (Math.abs(lat - place.getLatitude()) > 0.1
-							|| Math.abs(lon - place.getLongitude()) > 0.1)
+					int value =
+							JOptionPane
+									.showConfirmDialog(
+											PlaceEditor.this,
+											"Do you want to change the Lat/Lon to match the current camera center?",
+											"Move place", JOptionPane.YES_NO_OPTION,
+											JOptionPane.QUESTION_MESSAGE);
+					if (value == JOptionPane.YES_OPTION)
 					{
-						int value =
-								JOptionPane
-										.showConfirmDialog(
-												PlaceEditor.this,
-												"Do you want to change the Lat/Lon to match the current camera center?",
-												"Move place", JOptionPane.YES_NO_OPTION,
-												JOptionPane.QUESTION_MESSAGE);
-						if (value == JOptionPane.YES_OPTION)
-						{
-							latlon.setText(textFormatedLatLon(lat, lon));
-						}
+						latlon.setText(textFormattedLatLon(centerPosition));
 					}
-					checkValidity();
 				}
+				checkValidity();
 			}
 		});
 
-		headingLabel = new JLabel("Heading:");
+		label = new JLabel("Eye position:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 1;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
-		panel2.add(headingLabel, c);
+		c.insets.bottom = 0;
+		panel2.add(label, c);
 
-		panel3 = new JPanel(new GridBagLayout());
+		eyePosition = new JTextField(textFormattedPosition(place.getEyePosition()));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 1;
-		c.weightx = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = (Insets) insets.clone();
-		panel2.add(panel3, c);
-
-		heading = new JDoubleField(place.getHeading(), 2);
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
-		panel3.add(heading, c);
-
-		label = new JLabel("\u00B0");
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.insets = new Insets(0, insets.left + insets.right, 0, 0);
-		panel3.add(label, c);
-
-		pitchLabel = new JLabel("Pitch:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 2;
-		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
-		panel2.add(pitchLabel, c);
+		c.insets.bottom = 0;
+		panel2.add(eyePosition, c);
 
-		panel3 = new JPanel(new GridBagLayout());
+		eyePositionLabel = new JLabel(" ");
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 2;
-		c.fill = GridBagConstraints.HORIZONTAL;
+		c.anchor = GridBagConstraints.CENTER;
 		c.insets = (Insets) insets.clone();
-		panel2.add(panel3, c);
+		c.insets.top = 0;
+		panel2.add(eyePositionLabel, c);
 
-		pitch = new JDoubleField(place.getPitch(), 2);
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1;
-		panel3.add(pitch, c);
 
-		label = new JLabel("\u00B0");
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.insets = new Insets(0, insets.left + insets.right, 0, 0);
-		panel3.add(label, c);
-
-		zoomLabel = new JLabel("Zoom:");
+		label = new JLabel("Up vector:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 3;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
-		panel2.add(zoomLabel, c);
+		c.insets.bottom = 0;
+		panel2.add(label, c);
 
-		panel3 = new JPanel(new GridBagLayout());
+		upVector = new JTextField(textFormattedVec4(place.getUpVector()));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel2.add(panel3, c);
-
-		zoom = new JDoubleField(place.getZoom(), 2);
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = (Insets) insets.clone();
 		c.weightx = 1;
-		panel3.add(zoom, c);
-
-		zoomUnits = new JComboBox(Units.values());
-		if (UNITS == IMPERIAL)
-			zoomUnits.setSelectedItem(Units.Miles);
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
 		c.insets = (Insets) insets.clone();
-		panel3.add(zoomUnits, c);
-
-		mzal = new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				zoom.setScale(((Units) zoomUnits.getSelectedItem()).getScale());
-			}
-		};
-		zoomUnits.addActionListener(mzal);
-		mzal.actionPerformed(null);
-
-		elevationLabel = new JLabel("Elevation:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 4;
-		c.anchor = GridBagConstraints.EAST;
-		c.insets = (Insets) insets.clone();
-		panel2.add(elevationLabel, c);
-
-		panel3 = new JPanel(new GridBagLayout());
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 4;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		panel2.add(panel3, c);
-
-		elevation = new JDoubleField(place.getElevation(), 2);
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = (Insets) insets.clone();
-		c.weightx = 1;
-		panel3.add(elevation, c);
-
-		elevationUnits = new JComboBox(Units.values());
-		if (UNITS == IMPERIAL)
-			elevationUnits.setSelectedItem(Units.Miles);
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.WEST;
-		c.insets = (Insets) insets.clone();
-		panel3.add(elevationUnits, c);
-
-		mzal = new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				elevation.setScale(((Units) elevationUnits.getSelectedItem()).getScale());
-			}
-		};
-		elevationUnits.addActionListener(mzal);
-		mzal.actionPerformed(null);
+		c.insets.bottom = 0;
+		panel2.add(upVector, c);
 
 
 		panel = new JPanel(new BorderLayout());
@@ -627,10 +512,8 @@ public class PlaceEditor extends JDialog
 		latlon.getDocument().addDocumentListener(dl);
 		minZoom.getDocument().addDocumentListener(dl);
 		maxZoom.getDocument().addDocumentListener(dl);
-		zoom.getDocument().addDocumentListener(dl);
-		heading.getDocument().addDocumentListener(dl);
-		pitch.getDocument().addDocumentListener(dl);
-		elevation.getDocument().addDocumentListener(dl);
+		eyePosition.getDocument().addDocumentListener(dl);
+		upVector.getDocument().addDocumentListener(dl);
 	}
 
 	private boolean checkValidity()
@@ -653,14 +536,12 @@ public class PlaceEditor extends JDialog
 		}
 		else
 		{
-			place.setLatitude(ll.getLatitude().degrees);
-			place.setLongitude(ll.getLongitude().degrees);
-			latlonLabel.setText(labelFormatedLatLon(place));
+			place.setLatLon(ll);
+			latlonLabel.setText(labelFormattedLatLon(ll));
 		}
 
 		Double minz = minZoom.getValue();
 		Double maxz = maxZoom.getValue();
-		Double z = zoom.getValue();
 		if (minz != null && maxz != null && maxz > minz)
 		{
 			Double temp = maxz;
@@ -671,27 +552,26 @@ public class PlaceEditor extends JDialog
 			minz = -1d;
 		if (maxz == null)
 			maxz = -1d;
-		if (z == null || z <= 0)
-			z = wwd.getView().getEyePosition().getElevation();
 
 		place.setMinZoom(minz);
 		place.setMaxZoom(maxz);
-		place.setZoom(z);
 
-		Double p = pitch.getValue();
-		Double h = heading.getValue();
-		Double e = elevation.getValue();
-		if (p == null)
-			p = 0d;
-		if (h == null)
-			h = 0d;
-		if (e == null)
-			e = 0d;
+		Position pos = parsePosition(eyePosition.getText());
+		if (pos == null)
+		{
+			valid = false;
+			eyePositionLabel.setText("Invalid position");
+		}
+		else
+		{
+			place.setEyePosition(pos);
+			eyePositionLabel.setText(labelFormattedPosition(pos));
+		}
+
+		Vec4 v = parseVec4(upVector.getText());
+		place.setUpVector(v);
 
 		place.setSaveCamera(cameraInformation.isSelected());
-		place.setHeading(h);
-		place.setPitch(p);
-		place.setElevation(e);
 		place.setExcludeFromPlaylist(excludeFromPlaylist.isSelected());
 
 		okButton.setEnabled(valid);
@@ -711,32 +591,72 @@ public class PlaceEditor extends JDialog
 	{
 		boolean enabled = cameraInformation.isSelected();
 		copyCamera.setEnabled(enabled);
-		headingLabel.setEnabled(enabled);
-		zoomLabel.setEnabled(enabled);
-		pitchLabel.setEnabled(enabled);
-		elevationLabel.setEnabled(enabled);
-		heading.setEnabled(enabled);
-		zoom.setEnabled(enabled);
-		pitch.setEnabled(enabled);
-		elevation.setEnabled(enabled);
-		zoomUnits.setEnabled(enabled);
-		elevationUnits.setEnabled(enabled);
+		eyePositionLabel.setEnabled(enabled);
+		eyePosition.setEnabled(enabled);
+		upVector.setEnabled(enabled);
 	}
 
-	private String textFormatedLatLon(double latitude, double longitude)
+	private String textFormattedLatLon(LatLon latlon)
 	{
-		return String.format("%7.4f %7.4f", latitude, longitude);
+		if(latlon == null)
+			return "";
+		
+		return String.format("%7.4f %7.4f", latlon.latitude.degrees, latlon.longitude.degrees);
 	}
 
-	private String labelFormatedLatLon(Place place)
+	private String labelFormattedLatLon(LatLon latlon)
 	{
-		return String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", place.getLatitude(),
-				place.getLongitude());
+		if(latlon == null)
+			return "";
+		
+		return String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", latlon.latitude.degrees,
+				latlon.longitude.degrees);
 	}
 
 	private LatLon parseLatLon(String text)
 	{
 		return Util.computeLatLonFromString(text, wwd.getModel().getGlobe());
+	}
+
+	private String textFormattedPosition(Position position)
+	{
+		if(position == null)
+			return "";
+		
+		return String.format("%7.4f %7.4f %7.0f", position.latitude.degrees,
+				position.longitude.degrees, position.elevation);
+	}
+
+	private String labelFormattedPosition(Position position)
+	{
+		if(position == null)
+			return "";
+		
+		return String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0 Elev %7.0fm",
+				position.latitude.degrees, position.longitude.degrees, position.elevation);
+	}
+
+	private Position parsePosition(String text)
+	{
+		return Util.computePositionFromString(text, wwd.getModel().getGlobe());
+	}
+
+	private String textFormattedVec4(Vec4 v)
+	{
+		if(v == null)
+			return "";
+		
+		String text = String.format("%7.4f %7.4f %7.4f", v.x, v.y, v.z);
+		if (v.w != 1)
+		{
+			text += String.format(" %7.4f", v.w);
+		}
+		return text;
+	}
+
+	private Vec4 parseVec4(String text)
+	{
+		return Util.computeVec4FromString(text);
 	}
 
 	public static void setUnits(String units)

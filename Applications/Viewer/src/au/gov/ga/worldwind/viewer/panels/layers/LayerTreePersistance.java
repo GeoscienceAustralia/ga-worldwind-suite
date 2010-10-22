@@ -9,6 +9,7 @@ import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
@@ -21,9 +22,18 @@ public class LayerTreePersistance
 		if (elem != null)
 		{
 			INode root = new FolderNode(null, null, null, true);
-			Element[] elements = XMLUtil.getElements(elem, "//LayerList", xpath);
-			if (elements != null)
+
+			String nodeName = "LayerList";
+			if (elem.getNodeName().equals(nodeName))
 			{
+				addRelevant(elem, root, xpath);
+			}
+			else
+			{
+				Element[] elements = XMLUtil.getElements(elem, nodeName, xpath);
+				if (elements == null)
+					return null;
+
 				for (Element element : elements)
 				{
 					addRelevant(element, root, xpath);
@@ -34,7 +44,7 @@ public class LayerTreePersistance
 		return null;
 	}
 
-	private static void addRelevant(Element element, INode parent, XPath xpath)
+	protected static void addRelevant(Element element, INode parent, XPath xpath)
 			throws MalformedURLException
 	{
 		Element[] elements = XMLUtil.getElements(element, "Folder|Layer", xpath);
@@ -54,7 +64,7 @@ public class LayerTreePersistance
 		}
 	}
 
-	private static void addFolder(Element element, INode parent, XPath xpath)
+	protected static void addFolder(Element element, INode parent, XPath xpath)
 			throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name", xpath);
@@ -66,7 +76,7 @@ public class LayerTreePersistance
 		addRelevant(element, node, xpath);
 	}
 
-	private static void addLayer(Element element, INode parent, XPath xpath)
+	protected static void addLayer(Element element, INode parent, XPath xpath)
 			throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name", xpath);
@@ -87,17 +97,22 @@ public class LayerTreePersistance
 	{
 		DocumentBuilder db = XMLUtil.createDocumentBuilder(false);
 		Document document = db.newDocument();
-		Element element = document.createElement("LayerList");
-		document.appendChild(element);
-		for (int i = 0; i < root.getChildCount(); i++)
-		{
-			INode child = root.getChild(i);
-			saveNodeToElement(document, element, child);
-		}
+		saveToNode(root, document, document);
 		XMLUtil.saveDocumentToFormattedFile(document, output.getAbsolutePath());
 	}
 
-	private static void saveNodeToElement(Document document, Element element, INode node)
+	public static void saveToNode(INode root, Document document, Node parent)
+	{
+		Element element = document.createElement("LayerList");
+		parent.appendChild(element);
+		for (int i = 0; i < root.getChildCount(); i++)
+		{
+			INode child = root.getChild(i);
+			saveNodeToElement(child, document, element);
+		}
+	}
+
+	protected static void saveNodeToElement(INode node, Document document, Element element)
 	{
 		Element current = null;
 		if (node instanceof FolderNode)
@@ -130,7 +145,7 @@ public class LayerTreePersistance
 			for (int i = 0; i < node.getChildCount(); i++)
 			{
 				INode child = node.getChild(i);
-				saveNodeToElement(document, current, child);
+				saveNodeToElement(child, document, current);
 			}
 		}
 	}

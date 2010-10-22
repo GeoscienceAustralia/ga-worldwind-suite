@@ -18,7 +18,7 @@ public class RenderablePlace extends GlobeAnnotation
 
 	public RenderablePlace(Place place)
 	{
-		super(place.getLabel(), Position.fromDegrees(place.getLatitude(), place.getLongitude(), 0));
+		super(place.getLabel(), new Position(place.getLatLon(), 0));
 		this.place = place;
 		setAttributes(new MyAnnotationAttributes(place));
 		getAttributes().setTextAlign(AVKey.CENTER);
@@ -50,8 +50,8 @@ public class RenderablePlace extends GlobeAnnotation
 		double eyeDistance = dc.getView().getEyePoint().distanceTo3(point);
 		double distanceFactor = Math.sqrt(lookAtDistance / eyeDistance);
 		double scale =
-				WWMath.clamp(distanceFactor, this.attributes.getDistanceMinScale(), this.attributes
-						.getDistanceMaxScale());
+				WWMath.clamp(distanceFactor, this.attributes.getDistanceMinScale(),
+						this.attributes.getDistanceMaxScale());
 		double opacity = WWMath.clamp(distanceFactor, this.attributes.getDistanceMinOpacity(), 1);
 
 
@@ -104,7 +104,7 @@ public class RenderablePlace extends GlobeAnnotation
 	public Position getPosition()
 	{
 		if (position == null)
-			position = Position.fromDegrees(place.getLatitude(), place.getLongitude(), 0);
+			position = new Position(place.getLatLon(), 0);
 		return position;
 	}
 
@@ -118,16 +118,14 @@ public class RenderablePlace extends GlobeAnnotation
 	public void move(Position position)
 	{
 		Position newPosition = getPosition().add(position);
-		place.setLatitude(newPosition.getLatitude().degrees);
-		place.setLongitude(newPosition.getLongitude().degrees);
+		place.setLatLon(newPosition);
 		this.position = null;
 	}
 
 	@Override
 	public void moveTo(Position position)
 	{
-		place.setLatitude(position.getLatitude().degrees);
-		place.setLongitude(position.getLongitude().degrees);
+		place.setLatLon(position);
 		this.position = null;
 	}
 

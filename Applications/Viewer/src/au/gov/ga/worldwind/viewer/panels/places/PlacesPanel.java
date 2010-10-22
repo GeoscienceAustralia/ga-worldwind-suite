@@ -2,10 +2,8 @@ package au.gov.ga.worldwind.viewer.panels.places;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
-import gov.nasa.worldwind.view.orbit.OrbitView;
+import gov.nasa.worldwind.geom.Vec4;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -21,11 +19,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -50,13 +45,21 @@ import javax.swing.filechooser.FileFilter;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
+import au.gov.ga.worldwind.viewer.theme.ThemePanel;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public class PlacesPanel extends AbstractThemePanel
 {
+	private static final String DEFAULT_PLACES_PERSISTANCE_FILENAME = "places.xml";
+	private String placesPersistanceFilename = DEFAULT_PLACES_PERSISTANCE_FILENAME;
+
+	private List<Place> places = new ArrayList<Place>();
+
 	private WorldWindow wwd;
 	private JList list;
 	private DefaultListModel model;
@@ -67,6 +70,7 @@ public class PlacesPanel extends AbstractThemePanel
 	private BasicAction addAction, editAction, deleteAction, playAction, importAction,
 			exportAction;
 	private JFileChooser exportImportChooser;
+	private LayersPanel layerPanels;
 
 	private class ListItem
 	{
@@ -80,18 +84,54 @@ public class PlacesPanel extends AbstractThemePanel
 		}
 	}
 
-	@Override
-	public ImageIcon getIcon()
-	{
-		return Icons.bookmark.getIcon();
-	}
-
 	public PlacesPanel()
 	{
 		super(new BorderLayout());
 
 		createPanel();
+		loadPlaces(getPlacesFile(), false);
+	}
+
+	protected void loadPlaces(File file, boolean append)
+	{
+		List<Place> places = PlacePersistance.readFromXML(file);
+
+		//if the read failed, attempt to read from the old format
+		if (places == null)
+		{
+			places = LegacyPlaceReader.readPlacesFromLegacyXML(file, wwd.getModel().getGlobe());
+		}
+
+		if (places == null)
+			places = new ArrayList<Place>();
+
+		if (append)
+			this.places.addAll(places);
+		else
+			this.places = places;
+
 		populateList();
+	}
+
+	protected void savePlaces(File file)
+	{
+		PlacePersistance.saveToXML(places, file);
+	}
+
+	protected File getPlacesFile()
+	{
+		return new File(SettingsUtil.getUserDirectory(), placesPersistanceFilename);
+	}
+
+	public List<Place> getPlaces()
+	{
+		return places;
+	}
+
+	@Override
+	public ImageIcon getIcon()
+	{
+		return Icons.bookmark.getIcon();
 	}
 
 	private void createPanel()
@@ -345,7 +385,7 @@ public class PlacesPanel extends AbstractThemePanel
 	private void populateList()
 	{
 		model.removeAllElements();
-		for (Place place : Settings.get().getPlaces())
+		for (Place place : places)
 		{
 			addPlace(place);
 		}
@@ -362,27 +402,27 @@ public class PlacesPanel extends AbstractThemePanel
 	private void addNew()
 	{
 		View view = wwd.getView();
-		if (view instanceof OrbitView)
+
+		Vec4 eyePoint = view.getCurrentEyePoint();
+		Position eyePosition = view.getGlobe().computePositionFromPoint(eyePoint);
+		Position centerPosition = Util.computeViewClosestCenterPosition(view, eyePoint);
+		Vec4 upVector = view.getUpVector();
+		double zoom =
+				eyePoint.distanceTo3(view.getGlobe().computePointFromPosition(centerPosition));
+		double minZoom = zoom * 5;
+
+		Place place = new Place("", centerPosition, minZoom);
+		place.setEyePosition(eyePosition);
+		place.setUpVector(upVector);
+		place.setSaveCamera(false);
+		PlaceEditor editor = new PlaceEditor(wwd, window, "New place", place, getIcon());
+		int value = editor.getOkCancel();
+		if (value == JOptionPane.OK_OPTION)
 		{
-			OrbitView orbitView = (OrbitView) view;
-			Position pos = orbitView.getCenterPosition();
-			double minZoom = orbitView.getZoom() * 5;
-			Place place =
-					new Place("", pos.getLatitude().degrees, pos.getLongitude().degrees, minZoom);
-			place.setZoom(orbitView.getZoom());
-			place.setHeading(orbitView.getHeading().degrees);
-			place.setPitch(orbitView.getPitch().degrees);
-			place.setElevation(pos.getElevation());
-			place.setSaveCamera(false);
-			PlaceEditor editor = new PlaceEditor(wwd, window, "New place", place, getIcon());
-			int value = editor.getOkCancel();
-			if (value == JOptionPane.OK_OPTION)
-			{
-				Settings.get().getPlaces().add(place);
-				addPlace(place);
-				list.repaint();
-				refreshLayer();
-			}
+			places.add(place);
+			addPlace(place);
+			list.repaint();
+			refreshLayer();
 		}
 	}
 
@@ -433,7 +473,7 @@ public class PlacesPanel extends AbstractThemePanel
 			if (value == JOptionPane.YES_OPTION)
 			{
 				model.removeElement(item);
-				Settings.get().getPlaces().remove(item.place);
+				places.remove(item.place);
 				list.repaint();
 				if (index >= model.getSize())
 					index = model.getSize() - 1;
@@ -458,7 +498,7 @@ public class PlacesPanel extends AbstractThemePanel
 
 	private void deleteAllPlaces()
 	{
-		Settings.get().getPlaces().clear();
+		places.clear();
 		populateList();
 		refreshLayer();
 	}
@@ -470,8 +510,8 @@ public class PlacesPanel extends AbstractThemePanel
 		{
 			model.remove(srcIndex);
 			model.add(index, item);
-			Settings.get().getPlaces().remove(item.place);
-			Settings.get().getPlaces().add(index, item.place);
+			places.remove(item.place);
+			places.add(index, item.place);
 			list.setSelectedIndex(index);
 			list.repaint();
 		}
@@ -522,7 +562,7 @@ public class PlacesPanel extends AbstractThemePanel
 				public void run()
 				{
 					ListItem item = (ListItem) list.getSelectedValue();
-					List<Place> places = Settings.get().getPlaces();
+					//List<Place> places = Settings.get().getPlaces();
 					int index = -1;
 					if (item != null)
 					{
@@ -599,47 +639,53 @@ public class PlacesPanel extends AbstractThemePanel
 	private long flyToPlace(Place place)
 	{
 		View view = wwd.getView();
-		if (view instanceof OrbitView)
+
+		double centerElevation =
+				view.getGlobe().getElevation(place.getLatLon().latitude,
+						place.getLatLon().longitude);
+		Position centerPosition = new Position(place.getLatLon(), centerElevation);
+		Position eyePosition = place.getEyePosition();
+		if (!place.isSaveCamera() || eyePosition == null)
 		{
-			OrbitView orbitView = (OrbitView) view;
+			Position currentEyePosition = view.getCurrentEyePosition();
+			double elevation = currentEyePosition.elevation;
 
-			Angle heading = orbitView.getHeading();
-			Angle pitch = orbitView.getPitch();
-			double zoom = orbitView.getZoom();
-			double elevation = 0d;
-			boolean endCenterOnSurface = true;
-			if (place.isSaveCamera())
-			{
-				zoom = place.getZoom();
-				heading = Angle.fromDegrees(place.getHeading());
-				pitch = Angle.fromDegrees(place.getPitch());
-				elevation = place.getElevation();
-				endCenterOnSurface = false;
-			}
-			else
-			{
-				double minZoom = place.getMinZoom();
-				double maxZoom = place.getMaxZoom();
-				if (minZoom >= 0 && zoom > minZoom)
-					zoom = Math.max(minZoom, 1000);
-				else if (maxZoom >= 0 && zoom < maxZoom)
-					zoom = maxZoom;
-			}
+			double minZoom = place.getMinZoom();
+			double maxZoom = place.getMaxZoom();
+			if (minZoom >= 0 && elevation > minZoom)
+				elevation = Math.max(minZoom, 1000);
+			else if (maxZoom >= 0 && elevation < maxZoom)
+				elevation = maxZoom;
 
-			Position center = orbitView.getCenterPosition();
-			Position newCenter =
-					Position.fromDegrees(place.getLatitude(), place.getLongitude(), elevation);
-			long lengthMillis = SettingsUtil.getScaledLengthMillis(center, newCenter);
-
-			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView, center,
-					newCenter, orbitView.getHeading(), heading, orbitView.getPitch(), pitch,
-					orbitView.getZoom(), zoom, lengthMillis, endCenterOnSurface));
-
-			wwd.redraw();
-
-			return lengthMillis;
+			eyePosition = new Position(centerPosition, elevation);
 		}
-		return -1;
+
+		long lengthMillis =
+				AnimatorHelper.addAnimator(view, centerPosition, eyePosition, place.getUpVector());
+		wwd.redraw();
+
+		return lengthMillis;
+	}
+
+	private void animateLayers(Place place)
+	{
+		// - find a list of currently enabled layers (enabled && opacity > 0): OLD
+		// - find the list of enabled layers in the place: NEW
+		// - move backwards through the NEW list, finding any that are in a different order
+		//       outOfOrder means: (any that are in a greater position relative to any other
+		//       layers in the NEW list compared to the OLD list, and are in both lists)
+		// - add those out of order to a third list: OOO
+
+		// - fade (NEW - OLD - OOO) layers from 0 to new between 0.0 and 1.0 percent
+		// - fade (OLD - NEW - OOO) layers from current to 0 between 0.0 and 1.0 percent
+		// - fade OOO layers from current to 0 between 0.0 and 0.5 percent
+		// - move layers to correct positions at 0.5 percent
+		// - fade OOO layers from 0 to new between 0.5 and 1.0 percent
+
+		//TODO Have to modify the implementation of saving the places.
+		//No longer save to the settings file, but save instead to a places file.
+		//Use proper XML handling instead of the XMLEncoder.
+		//Save the full layer tree (perhaps use the LayerPersistance class) to an element in the place.
 	}
 
 	private JFileChooser getChooser()
@@ -698,32 +744,7 @@ public class PlacesPanel extends AbstractThemePanel
 	{
 		if (file.exists())
 		{
-			XMLDecoder xmldec = null;
-			try
-			{
-				FileInputStream fis = new FileInputStream(file);
-				xmldec = new XMLDecoder(fis);
-				List<Place> places = Settings.get().getPlaces();
-				List<?> newPlaces = (List<?>) xmldec.readObject();
-				if (newPlaces != null)
-				{
-					for (Object object : newPlaces)
-					{
-						if (object instanceof Place)
-							places.add((Place) object);
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				throw e;
-			}
-			finally
-			{
-				if (xmldec != null)
-					xmldec.close();
-			}
-			populateList();
+			loadPlaces(file, true);
 			refreshLayer();
 		}
 	}
@@ -764,22 +785,7 @@ public class PlacesPanel extends AbstractThemePanel
 
 	private void exportPlaces(File file) throws Exception
 	{
-		XMLEncoder xmlenc = null;
-		try
-		{
-			FileOutputStream fos = new FileOutputStream(file);
-			xmlenc = new XMLEncoder(fos);
-			xmlenc.writeObject(Settings.get().getPlaces());
-		}
-		catch (Exception e)
-		{
-			throw e;
-		}
-		finally
-		{
-			if (xmlenc != null)
-				xmlenc.close();
-		}
+		savePlaces(file);
 	}
 
 	private class CheckboxListCellRenderer extends JPanel implements ListCellRenderer
@@ -837,10 +843,22 @@ public class PlacesPanel extends AbstractThemePanel
 		wwd.getModel().getLayers().add(layer);
 
 		window = SwingUtilities.getWindowAncestor(this);
+
+		for (ThemePanel panel : theme.getPanels())
+		{
+			if (panel instanceof LayersPanel)
+			{
+				this.layerPanels = (LayersPanel) panel;
+			}
+		}
+
+		//load legacy places
+		loadPlaces(Settings.getSettingsFile(), true);
 	}
 
 	@Override
 	public void dispose()
 	{
+		savePlaces(getPlacesFile());
 	}
 }

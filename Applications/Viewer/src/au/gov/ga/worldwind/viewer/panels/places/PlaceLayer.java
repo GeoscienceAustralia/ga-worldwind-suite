@@ -16,8 +16,6 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.viewer.settings.Settings;
-
 public class PlaceLayer extends AbstractLayer
 {
 	private AnnotationRenderer renderer = new BasicAnnotationRenderer();
@@ -27,12 +25,12 @@ public class PlaceLayer extends AbstractLayer
 
 	private Color savedBorderColor;
 	private WorldWindow wwd;
-	private PlacesPanel annotationsPanel;
+	private PlacesPanel placesPanel;
 
-	public PlaceLayer(WorldWindow wwd, PlacesPanel annotationsPanel)
+	public PlaceLayer(WorldWindow wwd, PlacesPanel placesPanel)
 	{
 		this.wwd = wwd;
-		this.annotationsPanel = annotationsPanel;
+		this.placesPanel = placesPanel;
 		addSelectListener();
 		refresh();
 	}
@@ -57,7 +55,7 @@ public class PlaceLayer extends AbstractLayer
 							// Left click on an annotation - select
 							selectAnnotation(a, true);
 							if (isSelected(a))
-								annotationsPanel.selectPlace(a.getPlace());
+								placesPanel.selectPlace(a.getPlace());
 						}
 					}
 				}
@@ -123,7 +121,7 @@ public class PlaceLayer extends AbstractLayer
 	public void refresh()
 	{
 		annotations.clear();
-		for (Place place : Settings.get().getPlaces())
+		for (Place place : placesPanel.getPlaces())
 		{
 			RenderablePlace a = new RenderablePlace(place);
 			annotations.add(a);

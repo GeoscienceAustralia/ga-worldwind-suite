@@ -1,39 +1,40 @@
 package au.gov.ga.worldwind.viewer.panels.places;
 
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Vec4;
+
 import java.io.Serializable;
+
+import au.gov.ga.worldwind.viewer.panels.layers.INode;
 
 public class Place implements Serializable
 {
 	private String label = "";
-	private double latitude = 0;
-	private double longitude = 0;
+	private LatLon latlon = LatLon.ZERO;
 	private boolean visible = true;
 	private double minZoom = -1;
 	private double maxZoom = -1;
 	private boolean saveCamera = false;
-	private double zoom = 0;
-	private double heading = 0;
-	private double pitch = 0;
-	private double elevation = 0;
+	private Position eyePosition = null;
+	private Vec4 upVector = null;
 	private boolean excludeFromPlaylist = false;
+	private INode layers = null;
 
 	public Place()
 	{
 	}
 
-	public Place(String label, double latitude, double longitude)
+	public Place(String label, LatLon latlon)
 	{
-		this(label, latitude, longitude, -1);
+		this(label, latlon, -1);
 	}
 
-	public Place(String label, double latitude, double longitude,
-			double minZoom)
+	public Place(String label, LatLon latlon, double minZoom)
 	{
 		this.label = label;
-		this.latitude = latitude;
-		this.longitude = longitude;
+		this.latlon = latlon;
 		this.minZoom = minZoom;
-		this.visible = true;
 	}
 
 	public Place(Place place)
@@ -44,17 +45,15 @@ public class Place implements Serializable
 	public void setValuesFrom(Place place)
 	{
 		this.label = place.label;
-		this.latitude = place.latitude;
-		this.longitude = place.longitude;
+		this.latlon = place.latlon;
+		this.visible = place.visible;
 		this.minZoom = place.minZoom;
 		this.maxZoom = place.maxZoom;
-		this.visible = place.visible;
 		this.saveCamera = place.saveCamera;
-		this.zoom = place.zoom;
-		this.heading = place.heading;
-		this.pitch = place.pitch;
-		this.elevation = place.elevation;
+		this.eyePosition = place.eyePosition;
+		this.upVector = place.upVector;
 		this.excludeFromPlaylist = place.excludeFromPlaylist;
+		this.layers = place.layers;
 	}
 
 	public String getLabel()
@@ -64,27 +63,21 @@ public class Place implements Serializable
 
 	public void setLabel(String label)
 	{
+		if (label == null)
+			label = "";
 		this.label = label;
 	}
 
-	public double getLatitude()
+	public LatLon getLatLon()
 	{
-		return latitude;
+		return latlon;
 	}
 
-	public void setLatitude(double latitude)
+	public void setLatLon(LatLon latlon)
 	{
-		this.latitude = latitude;
-	}
-
-	public double getLongitude()
-	{
-		return longitude;
-	}
-
-	public void setLongitude(double longitude)
-	{
-		this.longitude = longitude;
+		if (latlon == null)
+			latlon = LatLon.ZERO;
+		this.latlon = latlon;
 	}
 
 	public boolean isVisible()
@@ -127,34 +120,24 @@ public class Place implements Serializable
 		this.saveCamera = saveCamera;
 	}
 
-	public double getZoom()
+	public Position getEyePosition()
 	{
-		return zoom;
+		return eyePosition;
 	}
 
-	public void setZoom(double zoom)
+	public void setEyePosition(Position eyePosition)
 	{
-		this.zoom = zoom;
+		this.eyePosition = eyePosition;
 	}
 
-	public double getHeading()
+	public Vec4 getUpVector()
 	{
-		return heading;
+		return upVector;
 	}
 
-	public void setHeading(double heading)
+	public void setUpVector(Vec4 upVector)
 	{
-		this.heading = heading;
-	}
-
-	public double getPitch()
-	{
-		return pitch;
-	}
-
-	public void setPitch(double pitch)
-	{
-		this.pitch = pitch;
+		this.upVector = upVector;
 	}
 
 	public boolean isExcludeFromPlaylist()
@@ -167,13 +150,13 @@ public class Place implements Serializable
 		this.excludeFromPlaylist = excludeFromPlaylist;
 	}
 
-	public double getElevation()
+	public INode getLayers()
 	{
-		return elevation;
+		return layers;
 	}
 
-	public void setElevation(double elevation)
+	public void setLayers(INode layers)
 	{
-		this.elevation = elevation;
+		this.layers = layers;
 	}
 }
