@@ -123,12 +123,14 @@ public class Style
 		{
 			//search for the setter method for this property
 			String property = entry.getKey();
-			String methodName = "set" + property;
+			String methodName = constructSetterName(property);
 			if (!methods.containsKey(methodName))
 			{
 				String message = "Could not find setter method '" + methodName + "' in class: ";
 				for (Object object : objects)
+				{
 					message += object.getClass() + ", ";
+				}
 				message = message.substring(0, message.length() - 2);
 
 				Logging.logger().severe(message);
@@ -141,11 +143,10 @@ public class Style
 			Class<?>[] parameters = setter.getParameterTypes();
 			if (parameters.length != 1)
 			{
-				String message =
-						"Setter method '" + methodName + "' in class " + object.getClass()
-								+ " doesn't take 1 parameter";
+				String message = "Setter method '" + methodName + "' in class " + object.getClass() + " doesn't take 1 parameter";
 				Logging.logger().severe(message);
-				throw new IllegalArgumentException(message);
+				// Continue on incase this is an overloaded method
+				continue;
 			}
 
 			//get the string value to pass to the method
@@ -201,13 +202,16 @@ public class Style
 			}
 			catch (Exception e)
 			{
-				String message =
-						"Error invoking '" + methodName + "' in class " + object.getClass() + ": "
-								+ e;
+				String message = "Error invoking '" + methodName + "' in class " + object.getClass() + ": " + e;
 				Logging.logger().severe(message);
 				throw new IllegalArgumentException(message, e);
 			}
 		}
+	}
+
+	private static String constructSetterName(String property)
+	{
+		return "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
 	}
 
 	/**
@@ -312,7 +316,7 @@ public class Style
 		}
 		else if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(int.class))
 		{
-			return Integer.valueOf(string);
+			return Integer.decode(string);
 		}
 		else if (type.isAssignableFrom(Float.class) || type.isAssignableFrom(float.class))
 		{
@@ -320,7 +324,7 @@ public class Style
 		}
 		else if (type.isAssignableFrom(Long.class) || type.isAssignableFrom(long.class))
 		{
-			return Long.valueOf(string);
+			return Long.decode(string);
 		}
 		else if (type.isAssignableFrom(Character.class) || type.isAssignableFrom(char.class))
 		{
@@ -328,7 +332,11 @@ public class Style
 		}
 		else if (type.isAssignableFrom(Byte.class) || type.isAssignableFrom(byte.class))
 		{
-			return Byte.valueOf(string);
+			return Byte.decode(string);
+		}
+		else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class))
+		{
+			return Boolean.valueOf(string);
 		}
 		else if (type.isAssignableFrom(URL.class))
 		{
@@ -405,7 +413,7 @@ public class Style
 		{
 			try
 			{
-				ints.add(Integer.valueOf(s));
+				ints.add(Integer.valueOf(s.trim()));
 			}
 			catch (Exception e)
 			{
@@ -414,7 +422,9 @@ public class Style
 
 		int[] is = new int[ints.size()];
 		for (int i = 0; i < is.length; i++)
+		{
 			is[i] = ints.get(i);
+		}
 		return is;
 	}
 }

@@ -28,4 +28,10 @@ public interface AVKeyMore extends AVKey
 	final static String POINT_ATTRIBUTES = "au.gov.ga.worldwind.AVKeyMore.PointAttributes";
 	final static String POINT_PROVIDER = "au.gov.ga.worldwind.AVKeyMore.PointProvider";
 	final static String POINT_TYPE = "au.gov.ga.worldwind.AVKeyMore.PointType";
+	
+	//geometry layer
+	final static String SHAPE_PROVIDER = "au.gov.ga.worldwind.AVKeyMore.ShapeProvider";
+	final static String RENDER_TYPE = "au.gov.ga.worldwind.AVKeyMore.RenderType";
+	final static String SHAPE_STYLES = "au.gov.ga.worldwind.AVKeyMore.ShapeStyles";
+	final static String SHAPE_ATTRIBUTES = "au.gov.ga.worldwind.AVKeyMore.ShapeAttributes";
 }
