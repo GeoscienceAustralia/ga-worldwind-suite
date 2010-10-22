@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.common.layers.point;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.render.Material;
@@ -86,6 +86,25 @@ public class StyleTest
 	}
 	
 	@Test
+	public void testSetPropertiesFromAttributesWithFailedConversion()
+	{
+		classToTest.addProperty("material", "255s,0,0", null);
+		
+		ComplexDummyBean dummyBean = new ComplexDummyBean();
+		
+		try
+		{
+			classToTest.setPropertiesFromAttributes(null, null, dummyBean);
+			fail("Expected exception but got none");
+		}
+		catch (Exception e)
+		{
+			assertTrue(e instanceof IllegalArgumentException);
+			assertEquals("Error converting '255s,0,0' to type class gov.nasa.worldwind.render.Material", e.getMessage());
+		}
+	}
+	
+	@Test
 	public void testSetPropertiesFromAttributesWithAttributeSubstitution()
 	{
 		classToTest.addProperty("littleIInteger", "%int%", null);
@@ -111,6 +130,47 @@ public class StyleTest
 		assertEquals(new Point(500,600), complexBean.getPoint());
 	}
 	
+	@Test
+	public void testSetPropertiesFromAttributesWithMultiParameterMethods()
+	{
+		classToTest.addProperty("params", "255,255,0|true|-45", null);
+		
+		MultiParamSetterBean multiParamBean = new MultiParamSetterBean();
+		classToTest.setPropertiesFromAttributes(null, null, multiParamBean);
+		
+		assertEquals(new Color(255,255,0), multiParamBean.getColor());
+		assertEquals(true, multiParamBean.getBool());
+		assertEquals((Integer)(-45), multiParamBean.getInteger());
+	}
+	
+	/**
+	 * A dummy bean used to test multi-param setters
+	 */
+	@SuppressWarnings("unused")
+	private class MultiParamSetterBean
+	{
+		Color color = null;
+		boolean bool = false;
+		Integer integer = null;
+		public void setParams(Color c, boolean b, Integer i)
+		{
+			this.color = c;
+			this.bool = b;
+			this.integer = i;
+		}
+		public Color getColor()
+		{
+			return color;
+		}
+		public boolean getBool()
+		{
+			return bool;
+		}
+		public Integer getInteger()
+		{
+			return integer;
+		}
+	}
 	
 	/**
 	 * A dummy bean used to test the setting of complex attribute values

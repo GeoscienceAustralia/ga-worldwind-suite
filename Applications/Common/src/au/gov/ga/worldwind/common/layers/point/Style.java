@@ -141,64 +141,67 @@ public class Style
 			Method setter = methods.get(methodName);
 			Object object = methodToObject.get(setter);
 			Class<?>[] parameters = setter.getParameterTypes();
-			if (parameters.length != 1)
+			
+			//get the string value to pass to the method
+			String stringValue = entry.getValue();
+			stringValue = replaceVariablesWithAttributeValues(stringValue, attributeValues);
+			
+			String[] paramValueStrings = splitParamValues(stringValue);
+			
+			if (parameters.length != paramValueStrings.length)
 			{
-				String message = "Setter method '" + methodName + "' in class " + object.getClass() + " doesn't take 1 parameter";
+				String message = "Setter method '" + methodName + "' in class " + object.getClass() + " doesn't take " + paramValueStrings.length + " parameter(s)";
 				Logging.logger().severe(message);
 				// Continue on incase this is an overloaded method
 				continue;
 			}
 
-			//get the string value to pass to the method
-			String stringValue = entry.getValue();
-			stringValue = replaceVariablesWithAttributeValues(stringValue, attributeValues);
-
-			//find out the type to pass to the method
-			Class<?> parameterType = parameters[0];
-			Class<?> type = parameterType;
-
-			//check if the type has been overridden (useful if the type above is just 'Object')
-			String typeOverride = typeOverrides.get(property);
-			if (typeOverride != null)
+			Object[] parameverValues = new Object[paramValueStrings.length];
+			
+			// Convert each parameter value string into a parameter
+			for (int i = 0; i < paramValueStrings.length; i++)
 			{
-				type = convertTypeToClass(typeOverride);
-				if (type == null)
+				//find out the type to pass to the method
+				Class<?> parameterType = parameters[i];
+				Class<?> type = parameterType;
+	
+				//check if the type has been overridden (useful if the type above is just 'Object')
+				String typeOverride = typeOverrides.get(property);
+				if (typeOverride != null)
 				{
-					String message = "Could not find class for type " + type;
+					type = convertTypeToClass(typeOverride);
+					if (type == null)
+					{
+						String message = "Could not find class for type " + type;
+						Logging.logger().severe(message);
+						throw new IllegalArgumentException(message);
+					}
+					else if (!parameterType.isAssignableFrom(type))
+					{
+						String message = "Setter method '" + methodName + "' in class " + object.getClass()
+										+ " parameter type " + parameterType
+										+ " not assignable from type " + type;
+						Logging.logger().severe(message);
+						throw new IllegalArgumentException(message);
+					}
+				}
+	
+				//convert the string value to a valid type
+				Object value = convertStringToType(context, paramValueStrings[i], type);
+				if (value == null)
+				{
+					String message = "Error converting '" + paramValueStrings[i] + "' to type " + type;
 					Logging.logger().severe(message);
 					throw new IllegalArgumentException(message);
 				}
-				else if (!parameterType.isAssignableFrom(type))
-				{
-					String message =
-							"Setter method '" + methodName + "' in class " + object.getClass()
-									+ " parameter type " + parameterType
-									+ " not assignable from type " + type;
-					Logging.logger().severe(message);
-					throw new IllegalArgumentException(message);
-				}
-			}
-
-			//convert the string value to a valid type
-			Object value = null;
-			try
-			{
-				value = convertStringToType(context, stringValue, type);
-			}
-			catch (Exception e)
-			{
-			}
-			if (value == null)
-			{
-				String message = "Error converting '" + stringValue + "' to type " + type;
-				Logging.logger().severe(message);
-				throw new IllegalArgumentException(message);
+				
+				parameverValues[i] = value;
 			}
 
 			//invoke the setter with the value
 			try
 			{
-				setter.invoke(object, value);
+				setter.invoke(object, parameverValues);
 			}
 			catch (Exception e)
 			{
@@ -207,6 +210,12 @@ public class Style
 				throw new IllegalArgumentException(message, e);
 			}
 		}
+	}
+
+	private static String[] splitParamValues(String stringValue)
+	{
+		// Split on '|' and trim whitespace at the same time
+		return stringValue.trim().split("[ \t]*[|][ \t]*");
 	}
 
 	private static String constructSetterName(String property)
@@ -306,95 +315,102 @@ public class Style
 	 */
 	protected static Object convertStringToType(URL context, String string, Class<?> type)
 	{
-		if (type.isAssignableFrom(String.class))
+		try
 		{
-			return string;
-		}
-		else if (type.isAssignableFrom(Double.class) || type.isAssignableFrom(double.class))
-		{
-			return Double.valueOf(string);
-		}
-		else if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(int.class))
-		{
-			return Integer.decode(string);
-		}
-		else if (type.isAssignableFrom(Float.class) || type.isAssignableFrom(float.class))
-		{
-			return Float.valueOf(string);
-		}
-		else if (type.isAssignableFrom(Long.class) || type.isAssignableFrom(long.class))
-		{
-			return Long.decode(string);
-		}
-		else if (type.isAssignableFrom(Character.class) || type.isAssignableFrom(char.class))
-		{
-			return string.charAt(0);
-		}
-		else if (type.isAssignableFrom(Byte.class) || type.isAssignableFrom(byte.class))
-		{
-			return Byte.decode(string);
-		}
-		else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class))
-		{
-			return Boolean.valueOf(string);
-		}
-		else if (type.isAssignableFrom(URL.class))
-		{
-			try
+			if (type.isAssignableFrom(String.class))
 			{
-				return new URL(context, string);
+				return string;
 			}
-			catch (MalformedURLException e)
+			else if (type.isAssignableFrom(Double.class) || type.isAssignableFrom(double.class))
 			{
+				return Double.valueOf(string);
+			}
+			else if (type.isAssignableFrom(Integer.class) || type.isAssignableFrom(int.class))
+			{
+				return Integer.decode(string);
+			}
+			else if (type.isAssignableFrom(Float.class) || type.isAssignableFrom(float.class))
+			{
+				return Float.valueOf(string);
+			}
+			else if (type.isAssignableFrom(Long.class) || type.isAssignableFrom(long.class))
+			{
+				return Long.decode(string);
+			}
+			else if (type.isAssignableFrom(Character.class) || type.isAssignableFrom(char.class))
+			{
+				return string.charAt(0);
+			}
+			else if (type.isAssignableFrom(Byte.class) || type.isAssignableFrom(byte.class))
+			{
+				return Byte.decode(string);
+			}
+			else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class))
+			{
+				return Boolean.valueOf(string);
+			}
+			else if (type.isAssignableFrom(URL.class))
+			{
+				try
+				{
+					return new URL(context, string);
+				}
+				catch (MalformedURLException e)
+				{
+				}
+			}
+			else if (type.isAssignableFrom(File.class))
+			{
+				return new File(string);
+			}
+			else if (type.isAssignableFrom(Color.class))
+			{
+				int[] ints = splitInts(string);
+				if (ints.length == 1)
+					return new Color(ints[0]);
+				else if (ints.length == 3)
+					return new Color(ints[0], ints[1], ints[2]);
+				else if (ints.length == 4)
+					return new Color(ints[0], ints[1], ints[2], ints[3]);
+			}
+			else if (type.isAssignableFrom(Dimension.class))
+			{
+				int[] ints = splitInts(string);
+				if (ints.length == 1)
+					return new Dimension(ints[0], ints[0]);
+				else if (ints.length == 2)
+					return new Dimension(ints[0], ints[1]);
+			}
+			else if (type.isAssignableFrom(Point.class))
+			{
+				int[] ints = splitInts(string);
+				if (ints.length == 1)
+					return new Point(ints[0], ints[0]);
+				else if (ints.length == 2)
+					return new Point(ints[0], ints[1]);
+			}
+			else if (type.isAssignableFrom(Font.class))
+			{
+				return Font.decode(string);
+			}
+			else if (type.isAssignableFrom(Material.class))
+			{
+				Color color = null;
+				int[] ints = splitInts(string);
+				if (ints.length == 1)
+					color = new Color(ints[0]);
+				else if (ints.length == 3)
+					color = new Color(ints[0], ints[1], ints[2]);
+				else if (ints.length == 4)
+					color = new Color(ints[0], ints[1], ints[2], ints[3]);
+	
+				if (color != null)
+					return new Material(color);
 			}
 		}
-		else if (type.isAssignableFrom(File.class))
+		catch (Exception e)
 		{
-			return new File(string);
-		}
-		else if (type.isAssignableFrom(Color.class))
-		{
-			int[] ints = splitInts(string);
-			if (ints.length == 1)
-				return new Color(ints[0]);
-			else if (ints.length == 3)
-				return new Color(ints[0], ints[1], ints[2]);
-			else if (ints.length == 4)
-				return new Color(ints[0], ints[1], ints[2], ints[3]);
-		}
-		else if (type.isAssignableFrom(Dimension.class))
-		{
-			int[] ints = splitInts(string);
-			if (ints.length == 1)
-				return new Dimension(ints[0], ints[0]);
-			else if (ints.length == 2)
-				return new Dimension(ints[0], ints[1]);
-		}
-		else if (type.isAssignableFrom(Point.class))
-		{
-			int[] ints = splitInts(string);
-			if (ints.length == 1)
-				return new Point(ints[0], ints[0]);
-			else if (ints.length == 2)
-				return new Point(ints[0], ints[1]);
-		}
-		else if (type.isAssignableFrom(Font.class))
-		{
-			return Font.decode(string);
-		}
-		else if (type.isAssignableFrom(Material.class))
-		{
-			Color color = null;
-			int[] ints = splitInts(string);
-			if (ints.length == 1)
-				color = new Color(ints[0]);
-			else if (ints.length == 3)
-				color = new Color(ints[0], ints[1], ints[2]);
-			else if (ints.length == 4)
-				color = new Color(ints[0], ints[1], ints[2], ints[3]);
-
-			if (color != null)
-				return new Material(color);
+			
 		}
 		return null;
 	}
