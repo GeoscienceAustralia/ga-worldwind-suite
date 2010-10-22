@@ -598,6 +598,14 @@ public class Util
 		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
 
+	/**
+	 * @return Whether the provided string is blank (<code>null</code>, empty string, or contains only whitespace)
+	 */
+	public static boolean isBlank(String string)
+	{
+		return string == null || string.trim().isEmpty();
+	}
+	
 	public static int clamp(int value, int min, int max)
 	{
 		return Math.max(min, Math.min(max, value));

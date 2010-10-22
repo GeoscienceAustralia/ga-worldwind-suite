@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.common.layers.point;
 
+import static au.gov.ga.worldwind.common.util.Util.*;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.render.Material;
 import gov.nasa.worldwind.util.Logging;
@@ -168,7 +169,7 @@ public class Style
 	
 				//check if the type has been overridden (useful if the type above is just 'Object')
 				String typeOverride = typeOverrides[i];
-				if (typeOverride != null)
+				if (!isBlank(typeOverride))
 				{
 					type = convertTypeToClass(typeOverride);
 					if (type == null)
@@ -253,7 +254,7 @@ public class Style
 
 	private static String constructSetterName(String property)
 	{
-		return "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
+		return "set" + capitalizeFirstLetter(property);
 	}
 
 	/**
