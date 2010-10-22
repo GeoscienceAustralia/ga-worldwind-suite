@@ -668,4 +668,29 @@ public class Util
 
 		return new Position(pos, elevation);
 	}
+
+	public static Vec4 computeVec4FromString(String text)
+	{
+		String separators = "(\\s+|,|,\\s+)";
+		String[] split = text.trim().split(separators);
+		if (split.length == 3 || split.length == 4)
+		{
+			try
+			{
+				double x = Double.valueOf(split[0]);
+				double y = Double.valueOf(split[1]);
+				double z = Double.valueOf(split[2]);
+				double w = 1d;
+				if (split.length == 4)
+				{
+					w = Double.valueOf(split[3]);
+				}
+				return new Vec4(x, y, z, w);
+			}
+			catch (NumberFormatException e)
+			{
+			}
+		}
+		return null;
+	}
 }

@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.common.util;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -47,7 +48,7 @@ public class XMLUtil extends WWXML
 	{
 		return getBoolean(context, path, def, null);
 	}
-	
+
 	public static boolean getBoolean(Element context, String path, boolean def, XPath xpath)
 	{
 		Boolean b = getBoolean(context, path, xpath);
@@ -60,7 +61,7 @@ public class XMLUtil extends WWXML
 	{
 		return getDouble(context, path, def, null);
 	}
-	
+
 	public static double getDouble(Element context, String path, double def, XPath xpath)
 	{
 		Double d = getDouble(context, path, xpath);
@@ -107,49 +108,136 @@ public class XMLUtil extends WWXML
 		WWXML.setIntegerAttribute(element, "alpha", color.getAlpha());
 		return element;
 	}
-	
+
 	public static Position getPosition(Element context, String path, XPath xpath)
-    {
-        if (context == null)
-        {
-            String message = Logging.getMessage("nullValue.ContextIsNull");
-            Logging.logger().severe(message);
-            throw new IllegalArgumentException(message);
-        }
+	{
+		if (context == null)
+		{
+			String message = Logging.getMessage("nullValue.ContextIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
 
-        try
-        {
-            Element el = path == null ? context : getElement(context, path, xpath);
-            if (el == null)
-                return null;
+		try
+		{
+			Element el = path == null ? context : getElement(context, path, xpath);
+			if (el == null)
+				return null;
 
-            String units = getText(el, "@units", xpath);
-            Double lat = getDouble(el, "@latitude", xpath);
-            Double lon = getDouble(el, "@longitude", xpath);
-            Double elev = getDouble(el, "@elevation", xpath);
+			String units = getText(el, "@units", xpath);
+			Double lat = getDouble(el, "@latitude", xpath);
+			Double lon = getDouble(el, "@longitude", xpath);
+			Double elev = getDouble(el, "@elevation", xpath);
 
-            if (lat == null || lon == null || elev == null)
-                return null;
+			if (lat == null || lon == null || elev == null)
+				return null;
 
-            if (units == null || units.equals("degrees"))
-                return Position.fromDegrees(lat, lon, elev);
+			if (units == null || units.equals("degrees"))
+				return Position.fromDegrees(lat, lon, elev);
 
-            if (units.equals("radians"))
-                return Position.fromRadians(lat, lon, elev);
+			if (units.equals("radians"))
+				return Position.fromRadians(lat, lon, elev);
 
-            // Warn that units are not recognized
-            String message = Logging.getMessage("XML.UnitsUnrecognized", units);
-            Logging.logger().warning(message);
+			// Warn that units are not recognized
+			String message = Logging.getMessage("XML.UnitsUnrecognized", units);
+			Logging.logger().warning(message);
 
-            return null;
-        }
-        catch (NumberFormatException e)
-        {
-            String message = Logging.getMessage("generic.ConversionError", path);
-            Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
-            return null;
-        }
-    }
+			return null;
+		}
+		catch (NumberFormatException e)
+		{
+			String message = Logging.getMessage("generic.ConversionError", path);
+			Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
+			return null;
+		}
+	}
+
+	public static Element appendPosition(Element context, String path, Position pos)
+	{
+		if (context == null)
+		{
+			String message = Logging.getMessage("nullValue.ContextIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (pos == null)
+		{
+			String message = Logging.getMessage("nullValue.PositionIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		Element el = appendElementPath(context, path);
+		setTextAttribute(el, "units", "degrees");
+		setDoubleAttribute(el, "latitude", pos.getLatitude().degrees);
+		setDoubleAttribute(el, "longitude", pos.getLongitude().degrees);
+		setDoubleAttribute(el, "elevation", pos.getElevation());
+
+		return el;
+	}
+
+	public static Vec4 getVec4(Element context, String path, XPath xpath)
+	{
+		if (context == null)
+		{
+			String message = Logging.getMessage("nullValue.ContextIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		try
+		{
+			Element el = path == null ? context : getElement(context, path, xpath);
+			if (el == null)
+				return null;
+
+			Double x = getDouble(el, "@x", xpath);
+			Double y = getDouble(el, "@y", xpath);
+			Double z = getDouble(el, "@z", xpath);
+			Double w = getDouble(el, "@w", xpath);
+
+			if (x == null || y == null || z == null)
+				return null;
+
+			if (w == null)
+				w = 1d;
+
+			return new Vec4(x, y, z, w);
+		}
+		catch (NumberFormatException e)
+		{
+			String message = Logging.getMessage("generic.ConversionError", path);
+			Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
+			return null;
+		}
+	}
+
+	public static Element appendVec4(Element context, String path, Vec4 v)
+	{
+		if (context == null)
+		{
+			String message = Logging.getMessage("nullValue.ContextIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (v == null)
+		{
+			String message = Logging.getMessage("nullValue.Vec4IsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		Element el = appendElementPath(context, path);
+		setDoubleAttribute(el, "x", v.x);
+		setDoubleAttribute(el, "y", v.y);
+		setDoubleAttribute(el, "z", v.z);
+		if (v.w != 1)
+			setDoubleAttribute(el, "w", v.w);
+
+		return el;
+	}
 
 	public static void checkAndSetURLParam(Element context, AVList params, String paramKey,
 			String paramName, XPath xpath)
