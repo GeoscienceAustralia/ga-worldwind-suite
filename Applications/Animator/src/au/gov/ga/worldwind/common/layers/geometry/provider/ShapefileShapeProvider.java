@@ -1,5 +1,5 @@
 package au.gov.ga.worldwind.common.layers.geometry.provider;
-
+import static au.gov.ga.worldwind.common.util.Util.*;
 import gov.nasa.worldwind.formats.shapefile.DBaseRecord;
 import gov.nasa.worldwind.formats.shapefile.Shapefile;
 import gov.nasa.worldwind.formats.shapefile.ShapefileRecord;
@@ -18,6 +18,7 @@ import au.gov.ga.worldwind.common.layers.geometry.GeometryLayer;
 import au.gov.ga.worldwind.common.layers.geometry.Shape;
 import au.gov.ga.worldwind.common.layers.geometry.Shape.Type;
 import au.gov.ga.worldwind.common.layers.geometry.ShapeProvider;
+import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.Util;
 
 /**
@@ -56,7 +57,7 @@ public class ShapefileShapeProvider extends ShapeProviderBase implements ShapePr
 				ShapefileRecord record = shapefile.nextRecord();
 				DBaseRecord values = record.getAttributes();
 
-				Shape loadedShape = new BasicShapeImpl(url.getPath() + record.getRecordNumber(), getShapeTypeFromRecord(record)); 
+				Shape loadedShape = new BasicShapeImpl(url.getPath() + record.getRecordNumber(), getShapeTypeForRecord(layer, record)); 
 				for (int part = 0; part < record.getNumberOfParts(); part++)
 				{
 					VecBuffer buffer = record.getPointBuffer(part);
@@ -80,6 +81,18 @@ public class ShapefileShapeProvider extends ShapeProviderBase implements ShapePr
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * @return The shape type to use for the provided record. Checks for an override in the layer before inspecting the shapefile record.
+	 */
+	private Type getShapeTypeForRecord(GeometryLayer layer, ShapefileRecord record)
+	{
+		if (!isBlank(layer.getStringValue(AVKeyMore.SHAPE_TYPE)))
+		{
+			return Type.valueOf(layer.getStringValue(AVKeyMore.SHAPE_TYPE).toUpperCase());
+		}
+		return getShapeTypeFromRecord(record);
 	}
 
 	@Override

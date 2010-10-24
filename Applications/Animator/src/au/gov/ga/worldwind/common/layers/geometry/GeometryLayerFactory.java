@@ -125,6 +125,7 @@ public class GeometryLayerFactory
 		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate", DATE_TIME_PATTERN, xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.DATA_CACHE_NAME, "DataCacheName", xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.RENDER_TYPE, "RenderType", xpath);
+		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.SHAPE_TYPE, "ShapeType", xpath);
 
 		setupShapeProvider(domElement, xpath, params);
 

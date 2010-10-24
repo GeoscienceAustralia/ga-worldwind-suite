@@ -74,7 +74,7 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 	@Override
 	public AVList setValues(AVList avList)
 	{
-		return avList.setValues(avList);
+		return this.avList.setValues(avList);
 	}
 
 	@Override
