@@ -34,4 +34,5 @@ public interface AVKeyMore extends AVKey
 	final static String RENDER_TYPE = "au.gov.ga.worldwind.AVKeyMore.RenderType";
 	final static String SHAPE_STYLES = "au.gov.ga.worldwind.AVKeyMore.ShapeStyles";
 	final static String SHAPE_ATTRIBUTES = "au.gov.ga.worldwind.AVKeyMore.ShapeAttributes";
+	static final String SHAPE_TYPE = "au.gov.ga.worldwind.AVKeyMore.ShapeType";
 }
