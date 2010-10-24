@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.common.layers.geometry.types;
+package au.gov.ga.worldwind.common.layers.geometry.types.airspace;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.layers.geometry.GeometryLayer;
 import au.gov.ga.worldwind.common.layers.geometry.Shape;
+import au.gov.ga.worldwind.common.layers.geometry.types.GeometryLayerBase;
 import au.gov.ga.worldwind.common.layers.point.Style;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 

@@ -15,7 +15,7 @@ import javax.xml.xpath.XPath;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.geometry.provider.ShapefileShapeProvider;
-import au.gov.ga.worldwind.common.layers.geometry.types.AirspaceGeometryLayer;
+import au.gov.ga.worldwind.common.layers.geometry.types.airspace.AirspaceGeometryLayer;
 import au.gov.ga.worldwind.common.layers.point.Attribute;
 import au.gov.ga.worldwind.common.layers.point.Style;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
