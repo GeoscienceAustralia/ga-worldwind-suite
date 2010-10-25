@@ -6,7 +6,6 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.render.airspaces.AbstractAirspace;
 import gov.nasa.worldwind.render.airspaces.Airspace;
-import gov.nasa.worldwind.render.airspaces.Curtain;
 import gov.nasa.worldwind.render.airspaces.Polygon;
 
 import java.net.URL;
@@ -121,7 +120,7 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 			{
 				case LINE:
 				{
-					airspace = new Curtain(getPoints());
+					airspace = new ShapeOutlineCurtain(getPoints());
 					break;
 				}
 				case POLYGON:
