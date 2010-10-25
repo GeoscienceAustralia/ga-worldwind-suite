@@ -77,8 +77,23 @@ public class ShapeOutlineCurtain extends Curtain
 
 	private void renderLowerShapeOutline(DrawContext dc)
 	{
-		// TODO Auto-generated method stub
+		Vec4 refCenter = computeReferenceCenter(dc);
+		Geometry vertexGeometry = getCurtainGeometry(dc, refCenter).getVertexGeometry();
 		
+		int count = vertexGeometry.getCount(GEOMETRY_TYPE_VERTEX) - 2;
+		int[] shapeIndices = new int[count];
+		int i = 0;
+		while (i < count)
+		{
+			shapeIndices[i] = i;
+			shapeIndices[i+1] = i+2;
+			i+=2;
+		}
+		
+		Geometry shapeOutlineElementGeometry = new Geometry();
+		shapeOutlineElementGeometry.setElementData(GL.GL_LINES, count, shapeIndices);
+		
+		drawShapeOutline(dc, refCenter, vertexGeometry, shapeOutlineElementGeometry);
 	}
 	
 	private void drawShapeOutline(DrawContext dc, Vec4 refCenter, Geometry vertexGeometry,
