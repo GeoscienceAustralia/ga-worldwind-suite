@@ -9,8 +9,6 @@ import gov.nasa.worldwind.render.airspaces.Geometry;
 
 import javax.media.opengl.GL;
 
-import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
-
 /**
  * An extension of the {@link Curtain} airspace that can render the 
  * generating shape as a line at the upper and lower elevations.
@@ -42,10 +40,7 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 	@Override
 	protected void doRenderGeometry(DrawContext dc, String drawStyle)
 	{
-//		if (ImmediateMode.isImmediate())
-//		{
-			setExpiryTime(0);
-//		}
+		setExpiryTime(0);
 		if (drawCurtain)
 		{
 			super.doRenderGeometry(dc, drawStyle);
