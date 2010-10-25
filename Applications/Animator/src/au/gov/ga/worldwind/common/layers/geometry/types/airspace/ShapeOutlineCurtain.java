@@ -42,10 +42,10 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 	@Override
 	protected void doRenderGeometry(DrawContext dc, String drawStyle)
 	{
-		if (ImmediateMode.isImmediate())
-		{
-			setExpiryTime(1);
-		}
+//		if (ImmediateMode.isImmediate())
+//		{
+			setExpiryTime(0);
+//		}
 		if (drawCurtain)
 		{
 			super.doRenderGeometry(dc, drawStyle);
