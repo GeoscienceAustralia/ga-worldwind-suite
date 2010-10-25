@@ -150,8 +150,8 @@ public class Style
 				}
 				message = message.substring(0, message.length() - 2);
 
-				Logging.logger().severe(message);
-				throw new IllegalArgumentException(message);
+				Logging.logger().warning(message);
+				continue;
 			}
 
 			//find out the method's parameters
