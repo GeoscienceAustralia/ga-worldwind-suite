@@ -15,9 +15,12 @@ import javax.media.opengl.GL;
  */
 public class ShapeOutlineCurtain extends Curtain
 {
-	boolean renderCurtain = true;
-	boolean renderUpperShapeOutline = true;
-	boolean renderLowerShapeOutline = false;
+	private static final int GEOMETRY_TYPE_ELEMENT = 1;
+	private static final int GEOMETRY_TYPE_VERTEX = 2;
+
+	boolean drawCurtain = true;
+	boolean drawUpperShapeOutline = false;
+	boolean drawLowerShapeOutline = false;
 	
 	public ShapeOutlineCurtain()
 	{
@@ -37,15 +40,15 @@ public class ShapeOutlineCurtain extends Curtain
 	@Override
 	protected void doRenderGeometry(DrawContext dc, String drawStyle)
 	{
-		if (renderCurtain)
+		if (drawCurtain)
 		{
 			super.doRenderGeometry(dc, drawStyle);
 		}
-		if (renderUpperShapeOutline)
+		if (drawUpperShapeOutline)
 		{
 			renderUpperShapeOutline(dc);
 		}
-		if (renderLowerShapeOutline)
+		if (drawLowerShapeOutline)
 		{
 			renderLowerShapeOutline(dc);
 		}
@@ -54,11 +57,9 @@ public class ShapeOutlineCurtain extends Curtain
 	private void renderUpperShapeOutline(DrawContext dc)
 	{
 		Vec4 refCenter = computeReferenceCenter(dc);
-		CurtainGeometry curtain = getCurtainGeometry(dc, locations.size(), locations.toArray(new LatLon[locations.size()]), 
-													 pathType, splitThreshold, getAltitudes(), isTerrainConforming(), 
-													 refCenter);
+		Geometry vertexGeometry = getCurtainGeometry(dc, refCenter).getVertexGeometry();
 		
-		int count = curtain.getVertexGeometry().getCount(2) - 2;
+		int count = vertexGeometry.getCount(GEOMETRY_TYPE_VERTEX) - 2;
 		int[] shapeIndices = new int[count];
 		int i = 0;
 		while (i < count)
@@ -69,17 +70,93 @@ public class ShapeOutlineCurtain extends Curtain
 		}
 		
 		Geometry shapeOutlineElementGeometry = new Geometry();
-		shapeOutlineElementGeometry.setElementData(GL.GL_LINES, shapeIndices.length, shapeIndices);
+		shapeOutlineElementGeometry.setElementData(GL.GL_LINES, count, shapeIndices);
 		
-		dc.getView().pushReferenceCenter(dc, refCenter);
-		getAttributes().applyOutline(dc, false);
-		getRenderer().drawGeometry(dc, shapeOutlineElementGeometry, curtain.getVertexGeometry());
-		dc.getView().popReferenceCenter(dc);
+		drawShapeOutline(dc, refCenter, vertexGeometry, shapeOutlineElementGeometry);
 	}
-	
+
 	private void renderLowerShapeOutline(DrawContext dc)
 	{
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private void drawShapeOutline(DrawContext dc, Vec4 refCenter, Geometry vertexGeometry,
+			Geometry shapeOutlineElementGeometry)
+	{
+		
+		dc.getView().pushReferenceCenter(dc, refCenter);
+		GL gl = dc.getGL();
+		gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+		gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+		try
+		{
+			// Points are drawn over the line to prevent gaps forming when 
+			// antialiasing and smoothing is applied to the line
+			setupDrawParams(dc, gl);
+			
+			gl.glDepthMask(false);
+			drawShapeOutlineAsLines(dc, shapeOutlineElementGeometry, vertexGeometry);
+			drawShapeOutlineAsPoints(dc, shapeOutlineElementGeometry, vertexGeometry);
+			
+			gl.glDepthMask(true);
+			drawShapeOutlineAsLines(dc, shapeOutlineElementGeometry, vertexGeometry);			
+			
+		}
+		finally
+		{
+			dc.getView().popReferenceCenter(dc);
+			gl.glPopAttrib();
+			gl.glPopClientAttrib();
+		}
+	}
+
+	private void setupDrawParams(DrawContext dc, GL gl)
+	{
+		gl.glShadeModel(GL.GL_SMOOTH);
+		gl.glEnable(GL.GL_LINE_SMOOTH);
+		gl.glEnable(GL.GL_POINT_SMOOTH);
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
+		gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
+		getAttributes().applyOutline(dc, false);
+		gl.glPointSize((float)getAttributes().getOutlineWidth());
+	}
+
+	private void drawShapeOutlineAsLines(DrawContext dc, Geometry shapeOutlineElementGeometry, Geometry vertexGeometry)
+	{
+		getRenderer().drawGeometry(dc, shapeOutlineElementGeometry, vertexGeometry);
+	}
+	
+	private void drawShapeOutlineAsPoints(DrawContext dc, Geometry shapeOutlineElementGeometry, Geometry vertexGeometry)
+	{
+		getRenderer().drawGeometry(dc, 
+								   GL.GL_POINTS, 
+								   shapeOutlineElementGeometry.getCount(GEOMETRY_TYPE_ELEMENT), 
+								   shapeOutlineElementGeometry.getGLType(GEOMETRY_TYPE_ELEMENT), 
+								   shapeOutlineElementGeometry.getBuffer(GEOMETRY_TYPE_ELEMENT), 
+								   vertexGeometry);
+	}
+	
+	private CurtainGeometry getCurtainGeometry(DrawContext dc, Vec4 refCenter)
+	{
+		return getCurtainGeometry(dc, locations.size(), locations.toArray(new LatLon[locations.size()]), pathType,
+								  splitThreshold, getAltitudes(), isTerrainConforming(), refCenter);
+	}
+
+	public void setDrawCurtain(boolean drawCurtain)
+	{
+		this.drawCurtain = drawCurtain;
+	}
+
+	public void setDrawUpperShapeOutline(boolean drawUpperShapeOutline)
+	{
+		this.drawUpperShapeOutline = drawUpperShapeOutline;
+	}
+
+	public void setDrawLowerShapeOutline(boolean drawLowerShapeOutline)
+	{
+		this.drawLowerShapeOutline = drawLowerShapeOutline;
 	}
 }
