@@ -11,6 +11,7 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
+import au.gov.ga.worldwind.animator.application.debug.DebugWriter;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.BasicAction;

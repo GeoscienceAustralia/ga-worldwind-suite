@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.application;
+package au.gov.ga.worldwind.animator.application.debug;
 
 import java.io.FileWriter;
 import java.util.Collection;
