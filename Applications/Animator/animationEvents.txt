@@ -1,0 +1,1062 @@
+>> Event occurred at Wed Oct 27 08:26:47 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@174f02c}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:24 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@172c47b}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@172c47b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 30}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@172c47b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 30}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 30}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@172c47b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 30}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@172c47b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 30}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@172c47b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 30}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@172c47b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 30}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@172c47b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 30}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 30}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@172c47b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 30}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@172c47b}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@14f1726}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@14f1726, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 31}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@14f1726, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 31}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 31}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@14f1726, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 31}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@14f1726, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 31}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@14f1726, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 31}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@14f1726, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 31}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@14f1726, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 31}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 31}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@14f1726, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 31}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@14f1726}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@329572}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@329572, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 33}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@329572, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 33}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 33}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@329572, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 33}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@329572, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 33}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@329572, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 33}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@329572, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 33}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@329572, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 33}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 33}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@329572, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 33}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@329572}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@18a3a1d}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@18a3a1d, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 34}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@18a3a1d, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 34}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 34}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@18a3a1d, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 34}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@18a3a1d, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 34}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@18a3a1d, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 34}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@18a3a1d, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 34}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@18a3a1d, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 34}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 34}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@18a3a1d, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 34}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@18a3a1d}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1ed688f}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1ed688f, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 35}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1ed688f, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 35}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 35}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1ed688f, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 35}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1ed688f, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 35}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1ed688f, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 35}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1ed688f, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 35}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1ed688f, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 35}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 35}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1ed688f, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 35}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1ed688f}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@fb6763}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@fb6763, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@fb6763, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@fb6763, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@fb6763, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@fb6763, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@fb6763, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@fb6763, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@fb6763, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@fb6763}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1a4eb56}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1a4eb56, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 37}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1a4eb56, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 37}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 37}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1a4eb56, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 37}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1a4eb56, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 37}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1a4eb56, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 37}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1a4eb56, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 37}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1a4eb56, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 37}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 37}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1a4eb56, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 37}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1a4eb56}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1be0369}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1be0369, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 42}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1be0369, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 42}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 42}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1be0369, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 42}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1be0369, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 42}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1be0369, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 42}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1be0369, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 42}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1be0369, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 42}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 42}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1be0369, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 42}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1be0369}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@162f030}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@162f030, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 47}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@162f030, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 47}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 47}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@162f030, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 47}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@162f030, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 47}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@162f030, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 47}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@162f030, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 47}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@162f030, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 47}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 47}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@162f030, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 47}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@162f030}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19b2faf}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19b2faf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19b2faf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19b2faf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19b2faf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19b2faf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19b2faf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19b2faf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19b2faf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19b2faf}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1f1e39b}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1f1e39b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 52}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1f1e39b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 52}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 52}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1f1e39b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 52}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1f1e39b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 52}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1f1e39b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 52}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1f1e39b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 52}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1f1e39b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 52}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 52}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1f1e39b, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 52}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1f1e39b}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ae1393}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ae1393, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ae1393, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ae1393, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ae1393, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ae1393, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ae1393, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ae1393, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ae1393, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ae1393}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:43 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@5f1c48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@5f1c48, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 59}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@5f1c48, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 59}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 59}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@5f1c48, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 59}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@5f1c48, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 59}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@5f1c48, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 59}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@5f1c48, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 59}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@5f1c48, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 59}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 59}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@5f1c48, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 59}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@5f1c48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@e33af5}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@e33af5, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 63}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@e33af5, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 63}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 63}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@e33af5, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 63}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@e33af5, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 63}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@e33af5, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 63}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@e33af5, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 63}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@e33af5, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 63}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 63}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@e33af5, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 63}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@e33af5}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:27:44 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1b044df}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19ee8a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19ee8a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19ee8a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19ee8a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19ee8a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19ee8a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19ee8a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19ee8a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 36}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@19ee8a}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:25 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bbfb8}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bbfb8, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 41}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bbfb8, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 41}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 41}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bbfb8, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 41}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bbfb8, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 41}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bbfb8, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 41}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bbfb8, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 41}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bbfb8, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 41}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 41}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bbfb8, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 41}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bbfb8}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1cb048e}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1cb048e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 44}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1cb048e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 44}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 44}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1cb048e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 44}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1cb048e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 44}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1cb048e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 44}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1cb048e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 44}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1cb048e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 44}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 44}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1cb048e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 44}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1cb048e}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@92997e}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@92997e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 46}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@92997e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 46}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 46}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@92997e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 46}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@92997e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 46}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@92997e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 46}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@92997e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 46}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@92997e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 46}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 46}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@92997e, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 46}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@92997e}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1e80f3a}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1e80f3a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1e80f3a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1e80f3a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1e80f3a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1e80f3a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1e80f3a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1e80f3a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1e80f3a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 48}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1e80f3a}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@3fc47c}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@3fc47c, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@3fc47c, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@3fc47c, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@3fc47c, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@3fc47c, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@3fc47c, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@3fc47c, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@3fc47c, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 51}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@3fc47c}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1849daf}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1849daf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 53}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1849daf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 53}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 53}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1849daf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 53}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1849daf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 53}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1849daf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 53}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1849daf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 53}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1849daf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 53}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 53}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1849daf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 53}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@1849daf}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:26 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ea3cdf}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ea3cdf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 54}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ea3cdf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 54}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 54}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ea3cdf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 54}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ea3cdf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 54}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ea3cdf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 54}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ea3cdf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 54}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ea3cdf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 54}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 54}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ea3cdf, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 54}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@ea3cdf}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bd46a}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bd46a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1de7497, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bd46a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@114a947, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@2153fe, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@25ef73, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bd46a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@8b6c39, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bd46a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@16e334a, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bd46a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1e94001, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bd46a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d9e5ad, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bd46a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{AnimatableObjectEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer@ec6bb1, null}
+	 Caused by: Event{ParameterEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.layer.parameter.LayerOpacityParameter@c9f997, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1d144a4, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, null}
+	 Caused by: Event{KeyFrameEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bd46a, null}
+	 Caused by: Event{AnimationEventImpl, CHANGE, au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue@1f18cbe, 55}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, REMOVE, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@7bd46a}
+	 Caused by: null
+>> Event occurred at Wed Oct 27 08:29:27 EST 2010: Event{AnimationEventImpl, ADD, au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl@c38157, au.gov.ga.worldwind.animator.animation.KeyFrameImpl@392814}
+	 Caused by: null

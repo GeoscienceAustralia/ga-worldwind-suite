@@ -58,6 +58,7 @@ public class AnimatorActionFactory
 	
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
+	private SelectableAction logAnimationEventsAction;
 
 	private Animator targetApplication;
 
@@ -449,7 +450,18 @@ public class AnimatorActionFactory
 												new AnimationContextImpl(targetApplication.getCurrentAnimation()));
 			}
 		});
+		
+		logAnimationEventsAction = new SelectableAction(getMessage(getLogEventsLabelKey()), null, Settings.get().isAnimationEventsLogged());
+		logAnimationEventsAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.setEnableAnimationEventLogging(logAnimationEventsAction.isSelected());
+			}
+		});
 	}
+
 
 	public BasicAction getNewAnimationAction()
 	{
@@ -609,5 +621,10 @@ public class AnimatorActionFactory
 	public SelectableAction getShowCrosshairsAction()
 	{
 		return showCrosshairsAction;
+	}
+	
+	public SelectableAction getLogAnimationEventsAction()
+	{
+		return logAnimationEventsAction;
 	}
 }

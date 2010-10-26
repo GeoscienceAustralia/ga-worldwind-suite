@@ -80,6 +80,7 @@ public class Settings
 			saveKnownLayers(rootElement);
 			saveDefaultElevationModels(rootElement);
 			saveUtilityLayerFlags(rootElement);
+			saveDebugFlags(rootElement);
 			
 			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(getUserDirectory(), SETTINGS_FILE_NAME)));
 		}
@@ -87,6 +88,11 @@ public class Settings
 		{
 			ExceptionLogger.logException(e);
 		}
+	}
+
+	private static void saveDebugFlags(Element rootElement)
+	{
+		WWXML.appendBoolean(rootElement, "logAnimationEvents", instance.isAnimationEventsLogged());
 	}
 
 	private static void saveUtilityLayerFlags(Element rootElement)
@@ -189,6 +195,12 @@ public class Settings
 		loadKnownLayers(rootElement);
 		loadDefaultElevationModels(rootElement);
 		loadUtilityLayerFlags(rootElement);
+		loadDebugFlags(rootElement);
+	}
+
+	private static void loadDebugFlags(Element rootElement)
+	{
+		instance.setAnimationEventsLogged(XMLUtil.getBoolean(rootElement, "//logAnimationEvents", false));
 	}
 
 	private static void loadUtilityLayerFlags(Element rootElement)
@@ -338,6 +350,7 @@ public class Settings
 	private boolean gridShown = true;
 	private boolean cameraPathShown = true;
 	private boolean ruleOfThirdsShown = true;
+	private boolean animationEventsLogged = false;
 	
 	/**
 	 * Private constructor. Use the Singleton accessor {@link #get()}.
@@ -558,4 +571,15 @@ public class Settings
 	{
 		this.crosshairsShown = crosshairsShown;
 	}
+
+	public boolean isAnimationEventsLogged()
+	{
+		return animationEventsLogged;
+	}
+
+	public void setAnimationEventsLogged(boolean animationEventsLogged)
+	{
+		this.animationEventsLogged = animationEventsLogged;
+	}
+
 }

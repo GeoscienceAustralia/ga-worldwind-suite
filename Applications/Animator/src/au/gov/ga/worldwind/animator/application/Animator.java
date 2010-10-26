@@ -69,6 +69,7 @@ import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.application.debug.AnimationEventLogger;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
@@ -166,6 +167,9 @@ public class Animator
 	
 	/** A listener that updates the frame slider when frames have been added or removed programmatically */
 	private AnimationEventListener framesChangedListener;
+	
+	/** A listener that logs animation events received by the animator */
+	private AnimationEventLogger eventLogger;
 	
 	/** A listener that updates the highlighted frames when the currently selected object changes */
 	private CurrentlySelectedObject.ChangeListener highlightedFramesListener;
@@ -652,6 +656,8 @@ public class Animator
 		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
 		menu.setMnemonic(KeyEvent.VK_D);
 		menuBar.add(menu);
+		actionFactory.getLogAnimationEventsAction().addToMenu(menu);
+		menu.addSeparator();
 		menu.add(actionFactory.getDebugKeyFramesAction());
 		menu.add(actionFactory.getDebugParameterValuesAction());
 	}
@@ -666,6 +672,7 @@ public class Animator
 		initialiseLayerUpdateListener();
 		initialiseFramesChangedListener();
 		initialiseHighlightedFramesListener();
+		initialiseAnimationEventLogger();
 	}
 
 	/**
@@ -808,6 +815,12 @@ public class Animator
 		CurrentlySelectedObject.addChangeListener(highlightedFramesListener);
 	}
 	
+	private void initialiseAnimationEventLogger()
+	{
+		eventLogger = new AnimationEventLogger("animationEvents.txt");
+		getCurrentAnimation().addChangeListener(eventLogger);
+	}
+	
 	/**
 	 * Re-attach the animation listeners to the current animation. Used when the animation changes (open, new file etc.)
 	 */
@@ -816,8 +829,7 @@ public class Animator
 		updateAnimationListener(layerUpdateListener);
 		updateAnimationListener(framesChangedListener);
 		updateAnimationListener(keyFrameClipboard);
-		// TODO: Add more listeners here as they are added
-		
+		updateAnimationListener(eventLogger);
 	}
 	
 	private void updateAnimationListener(AnimationEventListener listener)
@@ -1635,6 +1647,12 @@ public class Animator
 	{
 		crosshair.setEnabled(visible);
 		Settings.get().setCrosshairsShown(visible);
+	}
+	
+	void setEnableAnimationEventLogging(boolean enabled)
+	{
+		eventLogger.setEnabled(enabled);
+		Settings.get().setAnimationEventsLogged(enabled);
 	}
 	
 	void scaleAnimation()
