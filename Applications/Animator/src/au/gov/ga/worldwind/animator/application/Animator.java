@@ -69,6 +69,7 @@ import au.gov.ga.worldwind.animator.animation.io.XmlAnimationReader;
 import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.application.debug.AnimationEventLogger;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
@@ -526,7 +527,15 @@ public class Animator
 			public void frameChanged(int index, int oldFrame, int newFrame)
 			{
 				KeyFrame oldKey = getCurrentAnimation().getKeyFrame(oldFrame);
-				KeyFrame newKey = new KeyFrameImpl(newFrame, oldKey.getParameterValues());
+				
+				// Remove the old key frame as a listener so we don't get swamped by change events
+				Collection<ParameterValue> parameterValues = oldKey.getParameterValues();
+				for (ParameterValue value : parameterValues)
+				{
+					value.removeChangeListener(oldKey);
+				}
+				
+				KeyFrame newKey = new KeyFrameImpl(newFrame, parameterValues);
 
 				getCurrentAnimation().removeKeyFrame(oldKey);
 				getCurrentAnimation().insertKeyFrame(newKey);
