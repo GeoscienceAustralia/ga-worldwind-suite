@@ -33,4 +33,26 @@ public class LookatKeyFrameMarker extends KeyFrameMarker
 		return getAnimation().getCamera().getLookAtElevation();
 	}
 
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == this)
+		{
+			return true;
+		}
+		
+		if (!(obj instanceof LookatKeyFrameMarker))
+		{
+			return false;
+		}
+		
+		return ((LookatKeyFrameMarker)obj).getFrame() == this.getFrame();
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return this.getFrame();
+	}
+	
 }

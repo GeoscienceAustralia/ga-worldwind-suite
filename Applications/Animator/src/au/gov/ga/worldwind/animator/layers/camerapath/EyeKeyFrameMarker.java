@@ -50,4 +50,26 @@ public class EyeKeyFrameMarker extends KeyFrameMarker
 		return getAnimation().getCamera().getEyeElevation();
 	}
 
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == this)
+		{
+			return true;
+		}
+		
+		if (!(obj instanceof EyeKeyFrameMarker))
+		{
+			return false;
+		}
+		
+		return ((EyeKeyFrameMarker)obj).getFrame() == this.getFrame();
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return this.getFrame();
+	}
+	
 }

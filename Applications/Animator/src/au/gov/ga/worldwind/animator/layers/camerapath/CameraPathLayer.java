@@ -9,6 +9,7 @@ import gov.nasa.worldwind.render.DrawContext;
 import java.awt.Point;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
@@ -36,7 +37,9 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	private Animation animation;
 
 	/** A thread used to update the vertex buffers outside of the render thread */
-	private ExecutorService updater = Executors.newFixedThreadPool(1, new DaemonThreadFactory());
+	private ExecutorService updater = Executors.newFixedThreadPool(1, new DaemonThreadFactory("Camera Path Updater"));
+	private Future<UpdateTask> currentTask;
+	private Future<UpdateTask> nextTask;
 	
 	/**
 	 * Constructor.
@@ -120,18 +123,21 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		keyFrameMarkers.resetKeyFrameMarkers();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void update()
 	{
-		updater.execute(new Runnable()
+		if (currentTask == null || currentTask.isDone())
 		{
-			@Override
-			public void run()
+			currentTask = (Future<UpdateTask>)updater.submit(new UpdateTask());
+		}
+		else
+		{
+			if (nextTask != null)
 			{
-				eyePositionPath.recalulatePath();
-				lookatPositionPath.recalulatePath();
-				keyFrameMarkers.recalulateKeyFrameMarkers();
+				nextTask.cancel(true);
 			}
-		});
+			nextTask = (Future<UpdateTask>)updater.submit(new UpdateTask());
+		}
 	}
 	
 	private boolean cameraPathHasChanged(AnimationEvent event)
@@ -187,5 +193,16 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	private boolean frameCountHasChanged()
 	{
 		return animation.getFrameCount() != frameCount;
+	}
+	
+	private class UpdateTask implements Runnable
+	{
+		@Override
+		public void run()
+		{
+			eyePositionPath.recalulatePath();
+			lookatPositionPath.recalulatePath();
+			keyFrameMarkers.recalulateKeyFrameMarkers();
+		}
 	}
 }

@@ -88,13 +88,12 @@ class KeyFrameMarkers implements Renderable, SelectListener
 			return;
 		}
 		
-		PickedObject topPickedObject = event.getTopPickedObject();
-		if (!isKeyFrameMarker(topPickedObject))
+		KeyFrameMarker pickedMarker = getPickedMarker(event);
+		if (pickedMarker == null)
 		{
 			return;
 		}
 		
-		KeyFrameMarker pickedMarker = (KeyFrameMarker)topPickedObject.getObject();
 		if (event.isLeftPress())
 		{
 			lastClick = Click.LEFT;
@@ -113,11 +112,37 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		}
 	}
 
+	/**
+	 * @return The actual picked object, corrected for buffer swaps
+	 */
+	private KeyFrameMarker getPickedMarker(SelectEvent event)
+	{
+		synchronized (markerBufferLock)
+		{
+			PickedObject pickedObject = event.getTopPickedObject();
+			if (!isKeyFrameMarker(pickedObject))
+			{
+				return null;
+			}
+			
+			// In case the buffers have been swapped, we need to find the actual picked object so 
+			// that highlighting etc. will work correctly
+			if (lookatMarkersFrontBuffer.contains(pickedObject.getObject()))
+			{
+				return (KeyFrameMarker)lookatMarkersFrontBuffer.get(lookatMarkersFrontBuffer.indexOf(pickedObject.getObject()));
+			}
+			else
+			{
+				return (KeyFrameMarker)eyeMarkersFrontBuffer.get(eyeMarkersFrontBuffer.indexOf(pickedObject.getObject()));
+			}
+		}
+	}
+
 	private boolean isKeyFrameMarker(PickedObject pickedObject)
 	{
 		return pickedObject != null && 
-			   (lookatMarkersFrontBuffer.contains(pickedObject.getObject()) || 
-			    eyeMarkersFrontBuffer.contains(pickedObject.getObject()));
+		   (lookatMarkersFrontBuffer.contains(pickedObject.getObject()) || 
+		    eyeMarkersFrontBuffer.contains(pickedObject.getObject()));
 	}
 
 	private void doDragMarker(KeyFrameMarker pickedMarker, Click clickType, Point pickPoint, Point previousPickPoint)

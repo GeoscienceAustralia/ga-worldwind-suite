@@ -165,6 +165,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 		double maxDelta = 0d;
 
 		pathVertexBackBuffer.rewind();
+		
 		for (int frame = animation.getFrameOfFirstKeyFrame(); frame < animation.getFrameOfLastKeyFrame(); frame ++)
 		{
 			currentPathPosition = getPathPositionAtFrame(context, frame);

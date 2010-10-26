@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 
 import org.w3c.dom.Element;
@@ -54,6 +55,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	
 	/** Map of <code>frame -> key frame</code>, ordered by frame, for quick lookup of key frames */
 	private SortedMap<Integer, KeyFrame> keyFrameMap = new TreeMap<Integer, KeyFrame>();
+	private ReentrantReadWriteLock keyFrameMapLock = new ReentrantReadWriteLock(true);
 	
 	/** The number of frames in this animation */
 	private int frameCount;
@@ -107,25 +109,38 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	@Override
 	public int getKeyFrameCount()
 	{
-		return keyFrameMap.size();
+		keyFrameMapLock.readLock().lock();
+		int result = keyFrameMap.size();
+		keyFrameMapLock.readLock().unlock();
+		
+		return result;
 	}
 	
 	@Override
 	public boolean hasKeyFrames()
 	{
-		return !keyFrameMap.isEmpty();
+		keyFrameMapLock.readLock().lock();
+		boolean result = !keyFrameMap.isEmpty();
+		keyFrameMapLock.readLock().unlock();
+		
+		return result;
 	}
 	
 	@Override
 	public List<KeyFrame> getKeyFrames()
 	{
-		return new ArrayList<KeyFrame>(keyFrameMap.values());
+		keyFrameMapLock.readLock().lock();
+		ArrayList<KeyFrame> result = new ArrayList<KeyFrame>(keyFrameMap.values());
+		keyFrameMapLock.readLock().unlock();
+		
+		return result;
 	}
 	
 	@Override
 	public List<KeyFrame> getKeyFrames(Parameter p)
 	{
 		List<KeyFrame> result = new ArrayList<KeyFrame>();
+		keyFrameMapLock.readLock().lock();
 		for (KeyFrame keyFrame : getKeyFrames())
 		{
 			if (keyFrame.hasValueForParameter(p))
@@ -133,6 +148,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 				result.add(keyFrame);
 			}
 		}
+		keyFrameMapLock.readLock().unlock();
 		return result;
 	}
 	
@@ -141,54 +157,76 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	{
 		// Note: The ArrayList is used to achieve good random access performance so we can iterate backwards.
 		// This is not required for the forward-looking version of this method
+		keyFrameMapLock.readLock().lock();
 		List<KeyFrame> candidateKeys = new ArrayList<KeyFrame>(keyFrameMap.headMap(frame).values());
 		for (int i = candidateKeys.size()-1; i >= 0; i--)
 		{
 			KeyFrame candidateKey = candidateKeys.get(i);
 			if (candidateKey.hasValueForParameter(p))
 			{
+				keyFrameMapLock.readLock().unlock();
 				return candidateKey;
 			}
 		}
+		keyFrameMapLock.readLock().unlock();
 		return null;
 	}
 
 	@Override
 	public KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame)
 	{
+		keyFrameMapLock.readLock().lock();
 		Collection<KeyFrame> candidateKeys = keyFrameMap.tailMap(frame + 1).values();
 		for (KeyFrame candidateKey : candidateKeys)
 		{
 			if (candidateKey.hasValueForParameter(p))
 			{
+				keyFrameMapLock.readLock().unlock();
 				return candidateKey;
 			}
 		}
+		keyFrameMapLock.readLock().unlock();
 		return null;
 	}
 
 	@Override
 	public KeyFrame getFirstKeyFrame()
 	{
-		return keyFrameMap.isEmpty() ? null : keyFrameMap.get(keyFrameMap.firstKey());
+		keyFrameMapLock.readLock().lock();
+		KeyFrame result = keyFrameMap.isEmpty() ? null : keyFrameMap.get(keyFrameMap.firstKey());
+		keyFrameMapLock.readLock().unlock();
+		
+		return result;
 	}
 	
 	@Override
 	public int getFrameOfFirstKeyFrame()
 	{
-		return keyFrameMap.isEmpty() ? 0 : keyFrameMap.firstKey();
+		keyFrameMapLock.readLock().lock();
+		int result = keyFrameMap.isEmpty() ? 0 : keyFrameMap.firstKey();
+		keyFrameMapLock.readLock().unlock();
+		
+		return result;
 	}
 	
 	@Override
 	public KeyFrame getLastKeyFrame()
 	{
-		return keyFrameMap.isEmpty() ? null : keyFrameMap.get(keyFrameMap.lastKey());
+		keyFrameMapLock.readLock().lock();
+		KeyFrame result = keyFrameMap.isEmpty() ? null : keyFrameMap.get(keyFrameMap.lastKey());
+		keyFrameMapLock.readLock().unlock();
+		
+		return result;
 	}
 	
 	@Override
 	public int getFrameOfLastKeyFrame()
 	{
-		return keyFrameMap.isEmpty() ? 0 : keyFrameMap.lastKey();
+		keyFrameMapLock.readLock().lock();
+		int result = keyFrameMap.isEmpty() ? 0 : keyFrameMap.lastKey();
+		keyFrameMapLock.readLock().unlock();
+		
+		return result;
 	}
 	
 	@Override
@@ -373,7 +411,9 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		// If we are decreasing the frame count, remove any keyframes after the new frame count
 		if (newCount < frameCount)
 		{
+			keyFrameMapLock.writeLock().lock();
 			this.keyFrameMap = this.keyFrameMap.headMap(newCount);
+			keyFrameMapLock.writeLock().unlock();
 		}
 		
 		this.frameCount = newCount;
@@ -421,7 +461,9 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		
 		insertKeyFrame(new KeyFrameImpl(frame, parameterValues));
 		
+		keyFrameMapLock.readLock().lock();
 		Logging.logger().log(Level.FINER, "WorldWindAnimationImpl::recordKeyFrame - Recorded frame " + frame + ": " + this.keyFrameMap.get(frame));
+		keyFrameMapLock.readLock().unlock();
 	}
 	
 	@Override
@@ -442,15 +484,20 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		
 		// If a key frame already exists at this frame, merge the parameter values
 		// Otherwise, create a new key frame
+		keyFrameMapLock.readLock().lock();
 		if (this.keyFrameMap.containsKey(keyFrame.getFrame()))
 		{
 			KeyFrame existingFrame = this.keyFrameMap.get(keyFrame.getFrame());
 			existingFrame.addParameterValues(keyFrame.getParameterValues());
+			keyFrameMapLock.readLock().unlock();
 		} 
 		else
 		{
 			keyFrame.addChangeListener(this);
+			keyFrameMapLock.readLock().unlock();
+			keyFrameMapLock.writeLock().lock();
 			this.keyFrameMap.put(keyFrame.getFrame(), keyFrame);
+			keyFrameMapLock.writeLock().unlock();
 		}
 		
 		if (applySmoothing)
@@ -633,38 +680,55 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	@Override
 	public boolean hasKeyFrame(int frame)
 	{
-		return this.keyFrameMap.containsKey(frame);
+		keyFrameMapLock.readLock().lock();
+		boolean result = this.keyFrameMap.containsKey(frame);
+		keyFrameMapLock.readLock().unlock();
+		
+		return result;
 	}
 
 	@Override
 	public boolean hasKeyFrame(Parameter p)
 	{
+		keyFrameMapLock.readLock().lock();
 		for (KeyFrame keyFrame : getKeyFrames())
 		{
 			if (keyFrame.hasValueForParameter(p))
 			{
+				keyFrameMapLock.readLock().unlock();
 				return true;
 			}
 		}
+		keyFrameMapLock.readLock().unlock();
 		return false;
 	}
 
 	@Override
 	public KeyFrame getKeyFrame(int frame)
 	{
-		return this.keyFrameMap.get(frame);
+		keyFrameMapLock.readLock().lock();
+		KeyFrame result = this.keyFrameMap.get(frame);
+		keyFrameMapLock.readLock().unlock();
+		
+		return result;
 	}
 	
 	@Override
 	public void removeKeyFrame(int frame)
 	{
+		keyFrameMapLock.readLock().lock();
 		if (this.keyFrameMap.containsKey(frame))
 		{
 			KeyFrame frameToRemove = this.keyFrameMap.get(frame);
 			frameToRemove.removeChangeListener(this);
+			keyFrameMapLock.readLock().unlock();
+			keyFrameMapLock.writeLock().lock();
 			this.keyFrameMap.remove(frame);
+			keyFrameMapLock.writeLock().unlock();
 			fireRemoveEvent(frameToRemove);
+			return;
 		}
+		keyFrameMapLock.readLock().unlock();
 	}
 	
 	@Override
@@ -675,18 +739,24 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			return;
 		}
 		
+		keyFrameMapLock.readLock().lock();
 		if (keyFrameMap.containsValue(keyFrame))
 		{
 			keyFrame.removeChangeListener(this);
+			keyFrameMapLock.readLock().unlock();
+			keyFrameMapLock.writeLock().lock();
 			keyFrameMap.remove(keyFrame.getFrame());
+			keyFrameMapLock.writeLock().unlock();
 			fireRemoveEvent(keyFrame);
+			return;
 		}
-		
+		keyFrameMapLock.readLock().unlock();
 	}
 	
 	@Override
 	public void removeEmptyKeyFrames()
 	{
+		keyFrameMapLock.writeLock().lock();
 		for (KeyFrame keyFrame : getKeyFrames())
 		{
 			if (!keyFrame.hasParameterValues())
@@ -694,6 +764,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 				removeKeyFrame(keyFrame.getFrame());
 			}
 		}
+		keyFrameMapLock.writeLock().unlock();
 	}
 	
 	@Override
@@ -714,6 +785,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			setFrameCount(newFrameCount);
 		}
 
+		keyFrameMapLock.readLock().lock();
 		List<KeyFrame> oldKeyFrames = getKeyFrames();
 		
 		// Scale each key frame, and add it to the list
@@ -729,13 +801,16 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 				newFrames[i] = newFrames[i-1] + 1;
 			}
 		}
+		keyFrameMapLock.readLock().unlock();
 
 		// Create the new key frames
+		keyFrameMapLock.writeLock().lock();
 		this.keyFrameMap.clear();
 		for (int i = 0; i < oldKeyFrames.size(); i++)
 		{
 			insertKeyFrame(new KeyFrameImpl(newFrames[i], oldKeyFrames.get(i).getParameterValues()));
 		}
+		keyFrameMapLock.writeLock().unlock();
 		
 	}
 
