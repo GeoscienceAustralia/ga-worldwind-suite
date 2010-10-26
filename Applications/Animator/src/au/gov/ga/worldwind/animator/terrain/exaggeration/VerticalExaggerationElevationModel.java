@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 
@@ -33,6 +34,7 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel i
 	
 	private List<ExaggerationWindow> positiveExaggerationWindows = new ArrayList<ExaggerationWindow>();
 	private List<ExaggerationWindow> negativeExaggerationWindows = new ArrayList<ExaggerationWindow>();
+	private ReentrantReadWriteLock exaggerationWindowLock = new ReentrantReadWriteLock(true);
 	
 	/** The global offset to apply after exaggeration */
 	private double globalOffset = 1.0;
@@ -186,8 +188,10 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel i
 	 */
 	private void recalculateExaggerationWindows()
 	{
+		exaggerationWindowLock.writeLock().lock();
 		reCalculatePositiveExaggerationWindows();
 		reCalculateNegativeExaggerationWindows();
+		exaggerationWindowLock.writeLock().unlock();
 	}
 
 	private void reCalculateNegativeExaggerationWindows()
@@ -266,11 +270,19 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel i
 	
 	private ExaggerationWindow getWindowForElevation(double elevation)
 	{
-		if (isNegativeElevation(elevation))
+		exaggerationWindowLock.readLock().lock();
+		try
 		{
-			return findWindowForElevation(negativeExaggerationWindows, elevation);
+			if (isNegativeElevation(elevation))
+			{
+				return findWindowForElevation(negativeExaggerationWindows, elevation);
+			}
+			return findWindowForElevation(positiveExaggerationWindows, elevation);
 		}
-		return findWindowForElevation(positiveExaggerationWindows, elevation);
+		finally
+		{
+			exaggerationWindowLock.readLock().unlock();
+		}
 	}
 
 	private ExaggerationWindow findWindowForElevation(List<ExaggerationWindow> windowList, double elevation)
