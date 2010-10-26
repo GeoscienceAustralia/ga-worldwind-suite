@@ -334,6 +334,10 @@ public class FrameSlider extends JComponent
 					Rectangle keyRect = keyRects.get(draggingKeyFrameIndex);
 					int oldFrame = keys.get(draggingKeyFrameIndex);
 					int newFrame = calculateFrameFromPosition(e.getX() - dragPoint.x + keyRect.width / 2);
+					if (oldFrame == newFrame || newFrame > getMax() || newFrame < getMin())
+					{
+						return;
+					}
 					
 					keys.remove(draggingKeyFrameIndex);
 					keys.add(draggingKeyFrameIndex, newFrame);
