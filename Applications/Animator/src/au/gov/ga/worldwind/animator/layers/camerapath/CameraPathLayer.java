@@ -40,6 +40,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	private ExecutorService updater = Executors.newFixedThreadPool(1, new DaemonThreadFactory("Camera Path Updater"));
 	private Future<UpdateTask> currentTask;
 	private Future<UpdateTask> nextTask;
+	private WorldWindow worldWindow;
 	
 	/**
 	 * Constructor.
@@ -59,6 +60,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		lookatPositionPath = new LookatPositionPath(animation);
 		lookatPositionPath.setEnableDepthTesting(false);
 		keyFrameMarkers = new KeyFrameMarkers(wwd, animation);
+		worldWindow = wwd;
 		
 		updateAnimation(animation);
 	}
@@ -203,6 +205,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 			eyePositionPath.recalulatePath();
 			lookatPositionPath.recalulatePath();
 			keyFrameMarkers.recalulateKeyFrameMarkers();
+			worldWindow.redraw();
 		}
 	}
 }
