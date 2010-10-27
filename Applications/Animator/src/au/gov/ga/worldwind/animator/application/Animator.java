@@ -4,7 +4,6 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Model;
-import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
@@ -71,11 +70,13 @@ import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.application.debug.AnimationEventLogger;
+import au.gov.ga.worldwind.animator.application.render.AnimationRenderer;
+import au.gov.ga.worldwind.animator.application.render.AnimationRenderer.RenderEventListener;
+import au.gov.ga.worldwind.animator.application.render.ViewportScreenshotRenderer;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
-import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
 import au.gov.ga.worldwind.animator.layers.misc.GridOverlayLayer;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.animator.panels.SideBar;
@@ -156,6 +157,7 @@ public class Animator
 	// Status flags
 	private boolean autokey = false;
 	private boolean applying = false;
+	private boolean rendering = false;
 	private boolean changed = false;
 	private boolean stop = false;
 	private boolean settingSlider = false;
@@ -192,6 +194,9 @@ public class Animator
 
 	/** A clipboard used to perform cut-copy-paste operations on key frames */
 	private KeyFrameClipboard keyFrameClipboard;
+ 
+	/** The renderer to use for rendering animations */
+	private AnimationRenderer renderer;
 	
 	/**
 	 * Launch an instance of the Animator Application
@@ -207,6 +212,8 @@ public class Animator
 		initialiseWorldWindow();
 		
 		showSplashScreen();
+		
+		initialiseRenderer();
 		
 		initialiseAnimation();
 		
@@ -328,6 +335,39 @@ public class Animator
 		});
 		
 		mainPanel.add(wwdBufferPanel, BorderLayout.CENTER);
+	}
+	
+	/**
+	 * Initialise the animation renderer
+	 */
+	private void initialiseRenderer()
+	{
+		renderer = new ViewportScreenshotRenderer(wwd, this);
+		renderer.addListener(new RenderEventListener()
+		{
+			@Override
+			public void stopped(int frame)
+			{
+				rendering = false;
+				stop = false;
+			}
+			
+			@Override
+			public void startingFrame(int frame)
+			{
+			}
+			
+			@Override
+			public void finishedFrame(int frame)
+			{
+			}
+			
+			@Override
+			public void completed()
+			{
+				rendering = false;
+			}
+		});
 	}
 	
 	/**
@@ -516,7 +556,7 @@ public class Animator
 						applyAnimationState();
 						wwd.redraw();
 					}
-					stop = true;
+					stopActiveTasks();
 				}
 				
 			}
@@ -694,7 +734,7 @@ public class Animator
 		{
 			public void propertyChange(PropertyChangeEvent evt)
 			{
-				if (autokey && !applying)
+				if (autokey && !applying && !rendering)
 				{
 					addFrame();
 				}
@@ -1280,7 +1320,7 @@ public class Animator
 		return true;
 	}
 
-	private void setSlider(int frame)
+	public void setSlider(int frame)
 	{
 		settingSlider = true;
 		slider.setValue(frame);
@@ -1343,7 +1383,7 @@ public class Animator
 	 * 
 	 * @return The thread performing the animation
 	 */
-	Thread renderAnimation(final double detailHint)
+	void renderAnimation(final double detailHint)
 	{
 		int firstFrame = Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
 		int lastFrame = getCurrentAnimation().getFrameOfLastKeyFrame();
@@ -1351,10 +1391,10 @@ public class Animator
 		File destination = promptForImageSequenceLocation();
 		if (destination == null)
 		{
-			return null;
+			return;
 		}
 		
-		return renderAnimation(detailHint, firstFrame, lastFrame, destination.getParentFile(), destination.getName(), true);
+		renderer.render(animation, firstFrame, lastFrame, destination.getParentFile(), destination.getName(), detailHint, true);
 	}
 
 	/**
@@ -1423,83 +1463,8 @@ public class Animator
 	{
 		return prefix + FileUtil.paddedInt(sequenceNumber, padTo) + ".tga";
 	}
-	
-	/**
-	 * Render the current animation, between the provided first and last frames, storing the resulting frame images in the provided
-	 * output directory.
-	 * 
-	 * @param detailHint The level of detail to use when rendering, on the interval <code>[0,1]</code>
-	 * @param firstFrame The frame to start the animation at
-	 * @param lastFrame The frame to finish the animation at
-	 * @param outputDir The directory to output the animation files to
-	 * @param frameName The name to use as the prefix for the image sequence files (e.g. "myAnimation" results in "myAnimation001.tga", "myAnimation002.tga"...)
-	 * @param alpha Whether to include an alpha channel in the rendered image sequence
-	 * 
-	 * @return The thread performing the rendering
-	 */
-	private Thread renderAnimation(final double detailHint, final int firstFrame, final int lastFrame, final File outputDir, final String frameName, final boolean alpha)
-	{
-		
-		if (getCurrentAnimation() != null && getCurrentAnimation().hasKeyFrames())
-		{
-			Thread thread = new Thread(new Runnable()
-			{
-				public void run()
-				{
-					
-					stop = false;
 
-					boolean wasImmediate = ImmediateMode.isImmediate();
-					
-					ImmediateMode.setImmediate(true);
-
-					resizeWindowToRenderDimensions();
-
-					disableUtilityLayers();
-					
-					double detailHintBackup = getDetailedElevationModel().getDetailHint();
-					getDetailedElevationModel().setDetailHint(detailHint);
-					frame.setAlwaysOnTop(true);
-
-					View view = wwd.getView();
-					OrbitView orbitView = (OrbitView) view;
-					boolean detectCollisions = orbitView.isDetectCollisions();
-					orbitView.setDetectCollisions(false);
-
-					int filenameLength = String.valueOf(lastFrame).length();
-
-					AnimatorSceneController asc = (AnimatorSceneController) wwd.getSceneController();
-					
-					for (int frame = firstFrame; frame <= lastFrame; frame ++)
-					{
-						setSlider(frame);
-						applyAnimationState();
-						
-						asc.takeScreenshot(new File(outputDir, createImageSequenceName(frameName, frame, filenameLength)), alpha);
-						wwd.redraw();
-						asc.waitForScreenshot();
-
-						if (stop)
-						{
-							break;
-						}
-					}
-
-					getDetailedElevationModel().setDetailHint(detailHintBackup);
-					reenableUtilityLayers();
-					orbitView.setDetectCollisions(detectCollisions);
-					frame.setAlwaysOnTop(false);
-
-					ImmediateMode.setImmediate(wasImmediate);
-				}
-			});
-			thread.start();
-			return thread;
-		}
-		return null;
-	}
-
-	private void disableUtilityLayers()
+	public void disableUtilityLayers()
 	{
 		crosshair.setEnabled(false);
 		cameraPathLayer.setEnabled(false);
@@ -1507,7 +1472,7 @@ public class Animator
 		ruleOfThirdsOverlay.setEnabled(false);
 	}
 	
-	private void reenableUtilityLayers()
+	public void reenableUtilityLayers()
 	{
 		crosshair.setEnabled(Settings.get().isCrosshairsShown());
 		cameraPathLayer.setEnabled(Settings.get().isCameraPathShown());
@@ -1515,7 +1480,7 @@ public class Animator
 		ruleOfThirdsOverlay.setEnabled(Settings.get().isRuleOfThirdsShown());
 	}
 	
-	private DetailedElevationModel getDetailedElevationModel()
+	public DetailedElevationModel getDetailedElevationModel()
 	{
 		return getCurrentAnimation().getAnimatableElevation().getRootElevationModel();
 	}
@@ -1702,7 +1667,7 @@ public class Animator
 		}
 	}
 
-	void resizeWindowToRenderDimensions()
+	public void resizeWindowToRenderDimensions()
 	{
 		resizeWindowToAnimationSize(getCurrentAnimation().getRenderParameters().getImageDimension());
 	}
@@ -1764,4 +1729,14 @@ public class Animator
 		return animation;
 	}
 
+	public JFrame getFrame()
+	{
+		return frame;
+	}
+
+	private void stopActiveTasks()
+	{
+		stop = true;
+		renderer.stop();
+	}
 }
