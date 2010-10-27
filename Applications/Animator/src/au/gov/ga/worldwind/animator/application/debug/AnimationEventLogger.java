@@ -1,7 +1,9 @@
 package au.gov.ga.worldwind.animator.application.debug;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -20,11 +22,13 @@ import au.gov.ga.worldwind.animator.util.Validate;
 public class AnimationEventLogger implements AnimationEventListener
 {
 	private final FileWriter logWriter;
+	private final File logFile;
 	
 	private boolean enabled = true;
 	
 	private BlockingQueue<EventOccurance> queuedEvents = new LinkedBlockingQueue<EventOccurance>();
 
+	private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd hh:mm:ss:SS");
 	private Thread loggingThread = new Thread()
 	{
 		@Override
@@ -35,7 +39,7 @@ public class AnimationEventLogger implements AnimationEventListener
 				{
 					// Poll the queue for an event to log
 					EventOccurance occurance = queuedEvents.take();
-					logWriter.write(">> Event occurred at " + occurance.timestamp + ": " + occurance.event + "\n");
+					logWriter.write(">> Event occurred at " + DATE_FORMATTER.format(occurance.timestamp) + ": " + occurance.event + "\n");
 					logWriter.flush();
 				}
 				catch (InterruptedException e)
@@ -55,7 +59,8 @@ public class AnimationEventLogger implements AnimationEventListener
 		Validate.notBlank(fileName, "A filename is required");
 		try
 		{
-			logWriter = new FileWriter(fileName, true);
+			logFile = new File(fileName);
+			logWriter = new FileWriter(logFile, true);
 		}
 		catch (IOException e)
 		{
