@@ -26,8 +26,10 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 	@Override
 	public void stop()
 	{
-		stop.set(true);
-		notifyStopped(currentFrame);
+		if (!stop.getAndSet(true))
+		{
+			notifyStopped(currentFrame);
+		}
 	}
 
 	@Override
@@ -44,6 +46,8 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 			@Override
 			public void run()
 			{
+				notifyStarted();
+				
 				doPreRender(animation, firstFrame, lastFrame, outputDir, frameName, detailHint, alpha);
 				
 				int numeralPadLength = String.valueOf(lastFrame).length();
@@ -177,6 +181,14 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 		for (int i = listeners.size()-1; i >= 0; i--)
 		{
 			listeners.get(i).stopped(frame);
+		}
+	}
+	
+	public void notifyStarted()
+	{
+		for (int i = listeners.size()-1; i >= 0; i--)
+		{
+			listeners.get(i).started();
 		}
 	}
 	

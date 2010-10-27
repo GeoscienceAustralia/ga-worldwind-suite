@@ -55,6 +55,9 @@ public interface AnimationRenderer
 	 */
 	public static interface RenderEventListener
 	{
+		/** Notified when rendering begins */
+		void started();
+		
 		/** Notified when a frame is begun rendering */
 		void startingFrame(int frame);
 		
