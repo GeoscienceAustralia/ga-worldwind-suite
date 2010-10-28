@@ -8,6 +8,7 @@ import java.io.File;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.animator.application.AnimatorSceneController;
+import au.gov.ga.worldwind.animator.application.ScreenshotPaintTask;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -64,9 +65,10 @@ public class ViewportScreenshotRenderer extends AnimationRendererBase
 		targetApplication.setSlider(frame);
 		animation.applyFrame(frame);
 
-		animatorSceneController.takeScreenshot(targetFile, alpha);
+		ScreenshotPaintTask screenshotTask = new ScreenshotPaintTask(targetFile, alpha);
+		animatorSceneController.addPostPaintTask(screenshotTask);
 		worldWindow.redraw();
-		animatorSceneController.waitForScreenshot();
+		screenshotTask.waitForScreenshot();
 	}
 	
 	@Override
