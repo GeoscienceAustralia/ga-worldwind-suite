@@ -73,6 +73,7 @@ import au.gov.ga.worldwind.animator.application.debug.AnimationEventLogger;
 import au.gov.ga.worldwind.animator.application.render.AnimationRenderer;
 import au.gov.ga.worldwind.animator.application.render.AnimationRenderer.RenderEventListener;
 import au.gov.ga.worldwind.animator.application.render.OffscreenRenderer;
+import au.gov.ga.worldwind.animator.application.render.RenderProgressDialog;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
@@ -365,7 +366,6 @@ public class Animator
 			@Override
 			public void started()
 			{
-				System.out.println("Rendering started...");
 			}
 
 			@Override
@@ -373,13 +373,11 @@ public class Animator
 			{
 				rendering = false;
 				stop = false;
-				System.out.println("Rendering stopped.");
 			}
 
 			@Override
 			public void startingFrame(int frame)
 			{
-				System.out.println("Rendering frame: " + frame);
 			}
 
 			@Override
@@ -391,9 +389,9 @@ public class Animator
 			public void completed()
 			{
 				rendering = false;
-				System.out.println("Rendering completed.");
 			}
 		});
+		RenderProgressDialog.attachToRenderer(getFrame(), renderer);
 	}
 
 	/**
