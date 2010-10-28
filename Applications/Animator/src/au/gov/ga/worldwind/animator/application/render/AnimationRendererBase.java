@@ -20,7 +20,7 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 	private double completedPercentage = 0.0;
 	
 	private AtomicBoolean started = new AtomicBoolean(false);
-	private AtomicBoolean stop = new AtomicBoolean(false);
+	private AtomicBoolean stop = new AtomicBoolean(true);
 	private AtomicBoolean done = new AtomicBoolean(false);
 
 	@Override
