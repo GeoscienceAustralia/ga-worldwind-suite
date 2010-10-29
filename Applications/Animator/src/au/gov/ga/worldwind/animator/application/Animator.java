@@ -504,7 +504,7 @@ public class Animator
 
 		if (ruleOfThirdsOverlay == null)
 		{
-			ruleOfThirdsOverlay = new GridOverlayLayer(false, 0.3333, 0.3333);
+			ruleOfThirdsOverlay = new GridOverlayLayer(false, 1 / 3d, 1 / 3d);
 			ruleOfThirdsOverlay.setGridColor(Color.GREEN);
 			ruleOfThirdsOverlay.setEnabled(Settings.get().isRuleOfThirdsShown());
 		}

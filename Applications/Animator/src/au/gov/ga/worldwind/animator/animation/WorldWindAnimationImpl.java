@@ -16,6 +16,8 @@ import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 
+import javax.xml.xpath.XPath;
+
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
@@ -38,6 +40,7 @@ import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
@@ -46,47 +49,53 @@ import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
  * 
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
- *
+ * 
  */
 public class WorldWindAnimationImpl extends PropagatingChangeableEventListener implements Animation
 {
 	/** The default number of frames for an animation */
 	private static final int DEFAULT_FRAME_COUNT = 100;
-	
-	/** Map of <code>frame -> key frame</code>, ordered by frame, for quick lookup of key frames */
+
+	/**
+	 * Map of <code>frame -> key frame</code>, ordered by frame, for quick
+	 * lookup of key frames
+	 */
 	private SortedMap<Integer, KeyFrame> keyFrameMap = new TreeMap<Integer, KeyFrame>();
 	private ReentrantReadWriteLock keyFrameMapLock = new ReentrantReadWriteLock(true);
-	
+
 	/** The number of frames in this animation */
 	private int frameCount;
-	
+
 	/** The render parameters for this animation */
 	private RenderParameters renderParameters;
-	
+
 	/** The camera to use for rendering the animation */
 	private Camera renderCamera;
-	
+
 	/** The list of animatable objects in this animation */
 	private List<Animatable> animatableObjects = new ArrayList<Animatable>();
-	
-	/** The list of animatable layers in this animation. A subset of the {@link #animatableObjects} list. */
+
+	/**
+	 * The list of animatable layers in this animation. A subset of the
+	 * {@link #animatableObjects} list.
+	 */
 	private List<AnimatableLayer> animatableLayers = new ArrayList<AnimatableLayer>();
-	
+
 	/** The elevation model being used in this animation */
 	private AnimatableElevation animatableElevation;
-	
+
 	/** Whether or not zoom scaling should be applied */
 	private boolean zoomRequired = true;
-	
+
 	/** The current frame of the animation */
 	private int currentFrame = 0;
-	
+
 	/** The worldwind window */
 	private WorldWindow worldWindow;
 
 	/** The name of this animation (from {@link Nameable}) */
 	private String name;
-	
+
 	/**
 	 * Constructor. Initialises default values.
 	 */
@@ -96,139 +105,186 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		this.worldWindow = worldWindow;
 		this.frameCount = DEFAULT_FRAME_COUNT;
 		this.renderParameters = new RenderParameters();
-		
+
 		this.renderCamera = new CameraImpl(this);
 		this.animatableObjects.add(renderCamera);
-		
+
 		this.animatableElevation = new DefaultAnimatableElevation(this);
 		this.animatableObjects.add(animatableElevation);
-		
-		this.name = MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getAnimatorApplicationTitleKey());
+
+		this.name =
+				MessageSourceAccessor.get().getMessage(
+						AnimationMessageConstants.getAnimatorApplicationTitleKey());
 	}
-	
+
 	@Override
 	public int getKeyFrameCount()
 	{
-		keyFrameMapLock.readLock().lock();
-		int result = keyFrameMap.size();
-		keyFrameMapLock.readLock().unlock();
-		
-		return result;
+		try
+		{
+			keyFrameMapLock.readLock().lock();
+			return keyFrameMap.size();
+		}
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
-	
+
 	@Override
 	public boolean hasKeyFrames()
 	{
-		keyFrameMapLock.readLock().lock();
-		boolean result = !keyFrameMap.isEmpty();
-		keyFrameMapLock.readLock().unlock();
-		
-		return result;
+		try
+		{
+			keyFrameMapLock.readLock().lock();
+			return !keyFrameMap.isEmpty();
+		}
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
-	
+
 	@Override
 	public List<KeyFrame> getKeyFrames()
 	{
-		keyFrameMapLock.readLock().lock();
-		ArrayList<KeyFrame> result = new ArrayList<KeyFrame>(keyFrameMap.values());
-		keyFrameMapLock.readLock().unlock();
-		
-		return result;
+		try
+		{
+			keyFrameMapLock.readLock().lock();
+			return new ArrayList<KeyFrame>(keyFrameMap.values());
+		}
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
-	
+
 	@Override
 	public List<KeyFrame> getKeyFrames(Parameter p)
 	{
-		List<KeyFrame> result = new ArrayList<KeyFrame>();
-		keyFrameMapLock.readLock().lock();
-		for (KeyFrame keyFrame : getKeyFrames())
+		try
 		{
-			if (keyFrame.hasValueForParameter(p))
+			keyFrameMapLock.readLock().lock();
+			List<KeyFrame> result = new ArrayList<KeyFrame>();
+			for (KeyFrame keyFrame : getKeyFrames())
 			{
-				result.add(keyFrame);
+				if (keyFrame.hasValueForParameter(p))
+				{
+					result.add(keyFrame);
+				}
 			}
+			return result;
 		}
-		keyFrameMapLock.readLock().unlock();
-		return result;
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
-	
+
 	@Override
 	public KeyFrame getKeyFrameWithParameterBeforeFrame(Parameter p, int frame)
 	{
 		// Note: The ArrayList is used to achieve good random access performance so we can iterate backwards.
 		// This is not required for the forward-looking version of this method
-		keyFrameMapLock.readLock().lock();
-		List<KeyFrame> candidateKeys = new ArrayList<KeyFrame>(keyFrameMap.headMap(frame).values());
-		for (int i = candidateKeys.size()-1; i >= 0; i--)
+		try
 		{
-			KeyFrame candidateKey = candidateKeys.get(i);
-			if (candidateKey.hasValueForParameter(p))
+			keyFrameMapLock.readLock().lock();
+			List<KeyFrame> candidateKeys =
+					new ArrayList<KeyFrame>(keyFrameMap.headMap(frame).values());
+			for (int i = candidateKeys.size() - 1; i >= 0; i--)
 			{
-				keyFrameMapLock.readLock().unlock();
-				return candidateKey;
+				KeyFrame candidateKey = candidateKeys.get(i);
+				if (candidateKey.hasValueForParameter(p))
+				{
+					return candidateKey;
+				}
 			}
+			return null;
 		}
-		keyFrameMapLock.readLock().unlock();
-		return null;
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
 
 	@Override
 	public KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame)
 	{
-		keyFrameMapLock.readLock().lock();
-		Collection<KeyFrame> candidateKeys = keyFrameMap.tailMap(frame + 1).values();
-		for (KeyFrame candidateKey : candidateKeys)
+		try
 		{
-			if (candidateKey.hasValueForParameter(p))
+			keyFrameMapLock.readLock().lock();
+			Collection<KeyFrame> candidateKeys = keyFrameMap.tailMap(frame + 1).values();
+			for (KeyFrame candidateKey : candidateKeys)
 			{
-				keyFrameMapLock.readLock().unlock();
-				return candidateKey;
+				if (candidateKey.hasValueForParameter(p))
+				{
+					return candidateKey;
+				}
 			}
+			return null;
 		}
-		keyFrameMapLock.readLock().unlock();
-		return null;
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
 
 	@Override
 	public KeyFrame getFirstKeyFrame()
 	{
-		keyFrameMapLock.readLock().lock();
-		KeyFrame result = keyFrameMap.isEmpty() ? null : keyFrameMap.get(keyFrameMap.firstKey());
-		keyFrameMapLock.readLock().unlock();
-		
-		return result;
+		try
+		{
+			keyFrameMapLock.readLock().lock();
+			return keyFrameMap.isEmpty() ? null : keyFrameMap.get(keyFrameMap.firstKey());
+		}
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
-	
+
 	@Override
 	public int getFrameOfFirstKeyFrame()
 	{
-		keyFrameMapLock.readLock().lock();
-		int result = keyFrameMap.isEmpty() ? 0 : keyFrameMap.firstKey();
-		keyFrameMapLock.readLock().unlock();
-		
-		return result;
+		try
+		{
+			keyFrameMapLock.readLock().lock();
+			return keyFrameMap.isEmpty() ? 0 : keyFrameMap.firstKey();
+		}
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
-	
+
 	@Override
 	public KeyFrame getLastKeyFrame()
 	{
-		keyFrameMapLock.readLock().lock();
-		KeyFrame result = keyFrameMap.isEmpty() ? null : keyFrameMap.get(keyFrameMap.lastKey());
-		keyFrameMapLock.readLock().unlock();
-		
-		return result;
+		try
+		{
+			keyFrameMapLock.readLock().lock();
+			return keyFrameMap.isEmpty() ? null : keyFrameMap.get(keyFrameMap.lastKey());
+		}
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
-	
+
 	@Override
 	public int getFrameOfLastKeyFrame()
 	{
-		keyFrameMapLock.readLock().lock();
-		int result = keyFrameMap.isEmpty() ? 0 : keyFrameMap.lastKey();
-		keyFrameMapLock.readLock().unlock();
-		
-		return result;
+		try
+		{
+			keyFrameMapLock.readLock().lock();
+			return keyFrameMap.isEmpty() ? 0 : keyFrameMap.lastKey();
+		}
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
-	
+
 	@Override
 	public Collection<Parameter> getAllParameters()
 	{
@@ -250,7 +306,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		return result;
 	}
-	
+
 	@Override
 	public Collection<Parameter> getArmedParameters()
 	{
@@ -261,7 +317,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		return result;
 	}
-	
+
 	@Override
 	public Collection<Parameter> getEnabledArmedParameters()
 	{
@@ -278,13 +334,13 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	{
 		return this.renderCamera;
 	}
-	
+
 	@Override
 	public List<Animatable> getAnimatableObjects()
 	{
 		return Collections.unmodifiableList(this.animatableObjects);
 	}
-	
+
 	@Override
 	public void addAnimatableObject(Animatable object)
 	{
@@ -292,19 +348,19 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			return;
 		}
-		
+
 		animatableObjects.add(object);
-		
+
 		if (object instanceof AnimatableLayer)
 		{
-			animatableLayers.add((AnimatableLayer)object);
+			animatableLayers.add((AnimatableLayer) object);
 		}
-		
+
 		object.addChangeListener(this);
-		
+
 		fireAddEvent(object);
 	}
-	
+
 	@Override
 	public void addAnimatableObject(int index, Animatable object)
 	{
@@ -312,31 +368,30 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			return;
 		}
-		
+
 		animatableObjects.add(index, object);
 		if (object instanceof AnimatableLayer)
 		{
 			refreshLayersList();
 		}
-		
+
 		fireAddEvent(object);
 	}
-	
+
 	@Override
 	public void removeAnimatableObject(Animatable object)
 	{
 		animatableObjects.remove(object);
 		if (object instanceof AnimatableLayer)
 		{
-			animatableLayers.remove((AnimatableLayer)object);
+			animatableLayers.remove((AnimatableLayer) object);
 		}
-		
+
 		object.removeChangeListener(this);
-		
+
 		removeValuesFromKeyFrames(object);
-		
+
 		fireRemoveEvent(object);
-		
 	}
 
 	private void removeValuesFromKeyFrames(Animatable object)
@@ -354,18 +409,20 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	@Override
 	public void changeOrderOfAnimatableObject(Animatable object, int newIndex)
 	{
-		Validate.isTrue(newIndex >= 0 && newIndex < animatableObjects.size(), "newIndex outside of bounds. Must be in range [0, " + (animatableObjects.size() - 1) + "]");
+		Validate.isTrue(newIndex >= 0 && newIndex < animatableObjects.size(),
+				"newIndex outside of bounds. Must be in range [0, "
+						+ (animatableObjects.size() - 1) + "]");
 		if (!animatableObjects.contains(object))
 		{
 			return;
 		}
-		
+
 		int oldIndex = animatableObjects.indexOf(object);
 		if (oldIndex == newIndex)
 		{
 			return;
 		}
-		
+
 		if (oldIndex > newIndex)
 		{
 			animatableObjects.add(newIndex, object);
@@ -376,15 +433,15 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			animatableObjects.add(newIndex + 1, object);
 			animatableObjects.remove(oldIndex);
 		}
-		
+
 		if (object instanceof AnimatableLayer)
 		{
 			refreshLayersList();
 		}
-		
+
 		fireChangeEvent(object);
 	}
-	
+
 	private void refreshLayersList()
 	{
 		animatableLayers.clear();
@@ -392,7 +449,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			if (object instanceof AnimatableLayer)
 			{
-				animatableLayers.add((AnimatableLayer)object);
+				animatableLayers.add((AnimatableLayer) object);
 			}
 		}
 	}
@@ -407,7 +464,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	public void setFrameCount(int newCount)
 	{
 		boolean changed = newCount != frameCount;
-		
+
 		// If we are decreasing the frame count, remove any keyframes after the new frame count
 		if (newCount < frameCount)
 		{
@@ -415,9 +472,9 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			this.keyFrameMap = this.keyFrameMap.headMap(newCount);
 			keyFrameMapLock.writeLock().unlock();
 		}
-		
+
 		this.frameCount = newCount;
-		
+
 		if (changed)
 		{
 			fireChangeEvent(newCount);
@@ -439,7 +496,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	public void recordKeyFrame(int frame)
 	{
 		recordKeyFrame(frame, getEnabledArmedParameters());
-		
+
 	}
 
 	@Override
@@ -452,26 +509,29 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			parameterValues.add(parameter.getCurrentValue(animationContext));
 		}
-		
+
 		// If there are no parameter values to record, do nothing
 		if (parameterValues.isEmpty())
 		{
 			return;
 		}
-		
+
 		insertKeyFrame(new KeyFrameImpl(frame, parameterValues));
-		
+
 		keyFrameMapLock.readLock().lock();
-		Logging.logger().log(Level.FINER, "WorldWindAnimationImpl::recordKeyFrame - Recorded frame " + frame + ": " + this.keyFrameMap.get(frame));
+		Logging.logger().log(
+				Level.FINER,
+				"WorldWindAnimationImpl::recordKeyFrame - Recorded frame " + frame + ": "
+						+ this.keyFrameMap.get(frame));
 		keyFrameMapLock.readLock().unlock();
 	}
-	
+
 	@Override
 	public void insertKeyFrame(KeyFrame keyFrame)
 	{
 		insertKeyFrame(keyFrame, true);
 	}
-	
+
 	@Override
 	public void insertKeyFrame(KeyFrame keyFrame, boolean applySmoothing)
 	{
@@ -479,41 +539,44 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			return;
 		}
-		
+
 		setCurrentFrame(keyFrame.getFrame());
-		
+
 		// If a key frame already exists at this frame, merge the parameter values
 		// Otherwise, create a new key frame
-		keyFrameMapLock.readLock().lock();
-		if (this.keyFrameMap.containsKey(keyFrame.getFrame()))
+		KeyFrame existingFrame = getKeyFrame(keyFrame.getFrame());
+		if (existingFrame != null)
 		{
-			KeyFrame existingFrame = this.keyFrameMap.get(keyFrame.getFrame());
 			existingFrame.addParameterValues(keyFrame.getParameterValues());
-			keyFrameMapLock.readLock().unlock();
-		} 
+		}
 		else
 		{
 			keyFrame.addChangeListener(this);
-			keyFrameMapLock.readLock().unlock();
-			keyFrameMapLock.writeLock().lock();
-			this.keyFrameMap.put(keyFrame.getFrame(), keyFrame);
-			keyFrameMapLock.writeLock().unlock();
+			try
+			{
+				keyFrameMapLock.writeLock().lock();
+				this.keyFrameMap.put(keyFrame.getFrame(), keyFrame);
+			}
+			finally
+			{
+				keyFrameMapLock.writeLock().unlock();
+			}
 		}
-		
+
 		if (applySmoothing)
 		{
 			// Smooth the key frames around this one
 			smoothKeyFrames(keyFrame);
 		}
-		
+
 		fireAddEvent(keyFrame);
 	}
-	
+
 	/**
 	 * Smooth the transition into- and out-of the provided key frame
 	 * <p/>
-	 * Applies value smoothing to the values of the provided key frames, 
-	 * as well as those in key frames on either side of the frame.
+	 * Applies value smoothing to the values of the provided key frames, as well
+	 * as those in key frames on either side of the frame.
 	 * 
 	 * @param keyFrame
 	 */
@@ -522,28 +585,35 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		for (ParameterValue parameterValue : keyFrame.getParameterValues())
 		{
 			parameterValue.smooth();
-			
+
 			// Smooth the previous value for this parameter
-			KeyFrame previousFrame = getKeyFrameWithParameterBeforeFrame(parameterValue.getOwner(), keyFrame.getFrame());
+			KeyFrame previousFrame =
+					getKeyFrameWithParameterBeforeFrame(parameterValue.getOwner(),
+							keyFrame.getFrame());
 			if (previousFrame != null)
 			{
-				ParameterValue previousValue = previousFrame.getValueForParameter(parameterValue.getOwner());
+				ParameterValue previousValue =
+						previousFrame.getValueForParameter(parameterValue.getOwner());
 				previousValue.smooth();
 			}
-			
+
 			// Smooth the next value for this parameter
-			KeyFrame nextFrame = getKeyFrameWithParameterAfterFrame(parameterValue.getOwner(), keyFrame.getFrame());
+			KeyFrame nextFrame =
+					getKeyFrameWithParameterAfterFrame(parameterValue.getOwner(),
+							keyFrame.getFrame());
 			if (nextFrame != null)
 			{
-				ParameterValue nextValue = nextFrame.getValueForParameter(parameterValue.getOwner());
+				ParameterValue nextValue =
+						nextFrame.getValueForParameter(parameterValue.getOwner());
 				nextValue.smooth();
 			}
-			
+
 		}
 	}
-	
+
 	/**
-	 * @return An animation context that reflects the current state of the animation
+	 * @return An animation context that reflects the current state of the
+	 *         animation
 	 */
 	private AnimationContext createAnimationContext()
 	{
@@ -569,17 +639,20 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		if (this.zoomRequired != zoomScalingRequired)
 		{
 			this.zoomRequired = zoomScalingRequired;
-			
+
 			// Apply / Un-apply the zoom scaling to the camera's elevation parameters 
 			for (KeyFrame eyeElevationFrame : getKeyFrames(renderCamera.getEyeElevation()))
 			{
-				applyScalingChangeToValue(eyeElevationFrame.getValueForParameter(renderCamera.getEyeElevation()), zoomScalingRequired);
+				applyScalingChangeToValue(
+						eyeElevationFrame.getValueForParameter(renderCamera.getEyeElevation()),
+						zoomScalingRequired);
 			}
 			for (KeyFrame lookAtElevationFrame : getKeyFrames(renderCamera.getLookAtElevation()))
 			{
-				applyScalingChangeToValue(lookAtElevationFrame.getValueForParameter(renderCamera.getLookAtElevation()), zoomScalingRequired);
+				applyScalingChangeToValue(lookAtElevationFrame.getValueForParameter(renderCamera
+						.getLookAtElevation()), zoomScalingRequired);
 			}
-			
+
 			// Smooth the frames we just changed
 			for (KeyFrame eyeElevationFrame : getKeyFrames(renderCamera.getEyeElevation()))
 			{
@@ -587,9 +660,10 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			}
 			for (KeyFrame lookAtElevationFrame : getKeyFrames(renderCamera.getLookAtElevation()))
 			{
-				lookAtElevationFrame.getValueForParameter(renderCamera.getLookAtElevation()).smooth();
+				lookAtElevationFrame.getValueForParameter(renderCamera.getLookAtElevation())
+						.smooth();
 			}
-			
+
 			fireChangeEvent(null);
 		}
 	}
@@ -597,34 +671,42 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	/**
 	 * Apply the zoom scaling change to the provided parameter value
 	 * 
-	 * @param value The parameter value to apply the change to
-	 * @param scale Whether scaling should be applied or unapplied
+	 * @param value
+	 *            The parameter value to apply the change to
+	 * @param scale
+	 *            Whether scaling should be applied or unapplied
 	 */
 	private void applyScalingChangeToValue(ParameterValue value, boolean scale)
 	{
-		value.setValue(scale ? applyZoomScaling(value.getValue()) : unapplyZoomScaling(value.getValue()));
+		value.setValue(scale ? applyZoomScaling(value.getValue()) : unapplyZoomScaling(value
+				.getValue()));
 		if (value instanceof BezierParameterValue)
 		{
-			BezierParameterValue bezierValue = (BezierParameterValue)value;
+			BezierParameterValue bezierValue = (BezierParameterValue) value;
 			boolean wasLocked = bezierValue.isLocked();
 			bezierValue.setLocked(false);
-			bezierValue.setInValue(scale ? doApplyZoomScaling(bezierValue.getInValue(), true) : doUnapplyZoomScaling(bezierValue.getInValue(), true));
-			bezierValue.setOutValue(scale ? doApplyZoomScaling(bezierValue.getOutValue(), true) : doUnapplyZoomScaling(bezierValue.getOutValue(), true));
+			bezierValue.setInValue(scale ? doApplyZoomScaling(bezierValue.getInValue(), true)
+					: doUnapplyZoomScaling(bezierValue.getInValue(), true));
+			bezierValue.setOutValue(scale ? doApplyZoomScaling(bezierValue.getOutValue(), true)
+					: doUnapplyZoomScaling(bezierValue.getOutValue(), true));
 			bezierValue.setLocked(wasLocked);
 		}
 	}
-	
+
 	@Override
 	public double applyZoomScaling(double unzoomed)
 	{
 		return doApplyZoomScaling(unzoomed, false);
 	}
-	
+
 	/**
 	 * Perform zoom scaling.
 	 * 
-	 * @param unzoomed The value to scale
-	 * @param force Whether to override the current 'zoom scaling required' setting
+	 * @param unzoomed
+	 *            The value to scale
+	 * @param force
+	 *            Whether to override the current 'zoom scaling required'
+	 *            setting
 	 */
 	private double doApplyZoomScaling(double unzoomed, boolean force)
 	{
@@ -634,18 +716,21 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		return unzoomed;
 	}
-	
+
 	@Override
 	public double unapplyZoomScaling(double zoomed)
 	{
 		return doUnapplyZoomScaling(zoomed, false);
 	}
-	
+
 	/**
 	 * Perform zoom un-scaling.
 	 * 
-	 * @param zoomed The value to scale
-	 * @param force Whether to override the current 'zoom scaling required' setting
+	 * @param zoomed
+	 *            The value to scale
+	 * @param force
+	 *            Whether to override the current 'zoom scaling required'
+	 *            setting
 	 */
 	private double doUnapplyZoomScaling(double zoomed, boolean force)
 	{
@@ -655,8 +740,8 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		return zoomed;
 	}
-	
-	
+
+
 	@Override
 	public int getCurrentFrame()
 	{
@@ -670,7 +755,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	}
 
 	/**
-	 * @return The WorldWindow used in this animation 
+	 * @return The WorldWindow used in this animation
 	 */
 	public WorldWindow getWorldWindow()
 	{
@@ -680,57 +765,85 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	@Override
 	public boolean hasKeyFrame(int frame)
 	{
-		keyFrameMapLock.readLock().lock();
-		boolean result = this.keyFrameMap.containsKey(frame);
-		keyFrameMapLock.readLock().unlock();
-		
-		return result;
+		try
+		{
+			keyFrameMapLock.readLock().lock();
+			return this.keyFrameMap.containsKey(frame);
+		}
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
 
 	@Override
 	public boolean hasKeyFrame(Parameter p)
 	{
-		keyFrameMapLock.readLock().lock();
-		for (KeyFrame keyFrame : getKeyFrames())
+		try
 		{
-			if (keyFrame.hasValueForParameter(p))
+			keyFrameMapLock.readLock().lock();
+			for (KeyFrame keyFrame : getKeyFrames())
 			{
-				keyFrameMapLock.readLock().unlock();
-				return true;
+				if (keyFrame.hasValueForParameter(p))
+				{
+					return true;
+				}
 			}
+			return false;
 		}
-		keyFrameMapLock.readLock().unlock();
-		return false;
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
 
 	@Override
 	public KeyFrame getKeyFrame(int frame)
 	{
-		keyFrameMapLock.readLock().lock();
-		KeyFrame result = this.keyFrameMap.get(frame);
-		keyFrameMapLock.readLock().unlock();
-		
-		return result;
+		try
+		{
+			keyFrameMapLock.readLock().lock();
+			return this.keyFrameMap.get(frame);
+		}
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
 	}
-	
+
+	public boolean containsKeyFrame(KeyFrame keyFrame)
+	{
+		try
+		{
+			keyFrameMapLock.readLock().lock();
+			return !keyFrameMap.containsValue(keyFrame);
+		}
+		finally
+		{
+			keyFrameMapLock.readLock().unlock();
+		}
+	}
+
 	@Override
 	public void removeKeyFrame(int frame)
 	{
-		keyFrameMapLock.readLock().lock();
-		if (this.keyFrameMap.containsKey(frame))
+		KeyFrame frameToRemove = getKeyFrame(frame);
+		if (frameToRemove != null)
 		{
-			KeyFrame frameToRemove = this.keyFrameMap.get(frame);
 			frameToRemove.removeChangeListener(this);
-			keyFrameMapLock.readLock().unlock();
-			keyFrameMapLock.writeLock().lock();
-			this.keyFrameMap.remove(frame);
-			keyFrameMapLock.writeLock().unlock();
+			try
+			{
+				keyFrameMapLock.writeLock().lock();
+				this.keyFrameMap.remove(frame);
+			}
+			finally
+			{
+				keyFrameMapLock.writeLock().unlock();
+			}
 			fireRemoveEvent(frameToRemove);
-			return;
 		}
-		keyFrameMapLock.readLock().unlock();
 	}
-	
+
 	@Override
 	public void removeKeyFrame(KeyFrame keyFrame)
 	{
@@ -738,46 +851,54 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			return;
 		}
-		
-		keyFrameMapLock.readLock().lock();
-		if (keyFrameMap.containsValue(keyFrame))
+
+		if (containsKeyFrame(keyFrame))
 		{
 			keyFrame.removeChangeListener(this);
-			keyFrameMapLock.readLock().unlock();
-			keyFrameMapLock.writeLock().lock();
-			keyFrameMap.remove(keyFrame.getFrame());
-			keyFrameMapLock.writeLock().unlock();
+			try
+			{
+				keyFrameMapLock.writeLock().lock();
+				keyFrameMap.remove(keyFrame.getFrame());
+			}
+			finally
+			{
+				keyFrameMapLock.writeLock().unlock();
+			}
 			fireRemoveEvent(keyFrame);
-			return;
 		}
-		keyFrameMapLock.readLock().unlock();
 	}
-	
+
 	@Override
 	public void removeEmptyKeyFrames()
 	{
-		keyFrameMapLock.writeLock().lock();
-		for (KeyFrame keyFrame : getKeyFrames())
+		try
 		{
-			if (!keyFrame.hasParameterValues())
+			keyFrameMapLock.writeLock().lock();
+			for (KeyFrame keyFrame : getKeyFrames())
 			{
-				removeKeyFrame(keyFrame.getFrame());
+				if (!keyFrame.hasParameterValues())
+				{
+					removeKeyFrame(keyFrame.getFrame());
+				}
 			}
 		}
-		keyFrameMapLock.writeLock().unlock();
+		finally
+		{
+			keyFrameMapLock.writeLock().unlock();
+		}
 	}
-	
+
 	@Override
 	public void scale(double scaleFactor)
 	{
 		Validate.isTrue(scaleFactor > 0.0, "Scale factor must be greater than 0");
-		
+
 		// Don't bother scaling if the scale factor is 1
 		if (scaleFactor == 1.0)
 		{
 			return;
 		}
-		
+
 		// Expand the frame count if required
 		int newFrameCount = (int) Math.ceil(scaleFactor * getFrameOfLastKeyFrame());
 		if (getFrameCount() < newFrameCount)
@@ -785,33 +906,37 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			setFrameCount(newFrameCount);
 		}
 
-		keyFrameMapLock.readLock().lock();
 		List<KeyFrame> oldKeyFrames = getKeyFrames();
-		
+
 		// Scale each key frame, and add it to the list
 		int[] newFrames = new int[oldKeyFrames.size()];
 		for (int i = 0; i < oldKeyFrames.size(); i++)
 		{
 			// Apply the scale factor
 			newFrames[i] = (int) Math.round(oldKeyFrames.get(i).getFrame() * scaleFactor);
-			
+
 			// Adjust any key frames that now lie on top of each other
-			if (i > 0 && newFrames[i] <= newFrames[i-1])
+			if (i > 0 && newFrames[i] <= newFrames[i - 1])
 			{
-				newFrames[i] = newFrames[i-1] + 1;
+				newFrames[i] = newFrames[i - 1] + 1;
 			}
 		}
-		keyFrameMapLock.readLock().unlock();
 
 		// Create the new key frames
-		keyFrameMapLock.writeLock().lock();
-		this.keyFrameMap.clear();
-		for (int i = 0; i < oldKeyFrames.size(); i++)
+		try
 		{
-			insertKeyFrame(new KeyFrameImpl(newFrames[i], oldKeyFrames.get(i).getParameterValues()));
+			keyFrameMapLock.writeLock().lock();
+			this.keyFrameMap.clear();
+			for (int i = 0; i < oldKeyFrames.size(); i++)
+			{
+				insertKeyFrame(new KeyFrameImpl(newFrames[i], oldKeyFrames.get(i)
+						.getParameterValues()));
+			}
 		}
-		keyFrameMapLock.writeLock().unlock();
-		
+		finally
+		{
+			keyFrameMapLock.writeLock().unlock();
+		}
 	}
 
 	@Override
@@ -819,17 +944,19 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	{
 		Validate.notNull(parent, "An XML element is required");
 		Validate.notNull(version, "A version ID is required");
-		
+
 		AnimationIOConstants constants = version.getConstants();
-		
+
 		Element result = WWXML.appendElement(parent, constants.getAnimationElementName());
-		
+
 		WWXML.setIntegerAttribute(result, constants.getAnimationAttributeFrameCount(), frameCount);
-		WWXML.setBooleanAttribute(result, constants.getAnimationAttributeZoomRequired(), isZoomScalingRequired());
-		
+		WWXML.setBooleanAttribute(result, constants.getAnimationAttributeZoomRequired(),
+				isZoomScalingRequired());
+
 		renderParameters.toXml(result, version);
-		
-		Element animatableContainer = WWXML.appendElement(result, constants.getAnimatableObjectsElementName());
+
+		Element animatableContainer =
+				WWXML.appendElement(result, constants.getAnimatableObjectsElementName());
 		for (Animatable animatable : animatableObjects)
 		{
 			animatableContainer.appendChild(animatable.toXml(animatableContainer, version));
@@ -843,71 +970,95 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		Validate.notNull(element, "An XML element is required");
 		Validate.notNull(version, "A version ID is required");
 		Validate.notNull(context, "A context is required");
-		
+
 		AnimationIOConstants constants = version.getConstants();
-		
+
 		switch (version)
 		{
-			case VERSION020:
+		case VERSION020:
+		{
+			WorldWindAnimationImpl result =
+					new WorldWindAnimationImpl((WorldWindow) context.getValue(constants
+							.getWorldWindowKey()));
+
+			context.setValue(constants.getAnimationKey(), result);
+
+			XPath xpath = WWXML.makeXPath();
+
+			result.setCurrentFrame(0);
+			Integer frameCount = WWXML.getInteger(element, ATTRIBUTE_PATH_PREFIX
+					+ constants.getAnimationAttributeFrameCount(), xpath);
+			result.setZoomScalingRequired(XMLUtil.getBoolean(element, ATTRIBUTE_PATH_PREFIX
+					+ constants.getAnimationAttributeZoomRequired(), true, xpath));
+
+			// Add the render parameters
+			result.renderParameters =
+					new RenderParameters().fromXml(WWXML.getElement(element,
+							constants.getRenderParametersElementName(), xpath), version, context);
+
+			// Add each animatable object
+			Element[] animatableObjectElements =
+					WWXML.getElements(element, constants.getAnimatableObjectsElementName() + "/*",
+							xpath);
+			if (animatableObjectElements == null)
 			{
-				WorldWindAnimationImpl result = new WorldWindAnimationImpl((WorldWindow)context.getValue(constants.getWorldWindowKey()));
-				
-				context.setValue(constants.getAnimationKey(), result);
-				
-				result.setCurrentFrame(0);
-				result.setFrameCount(WWXML.getInteger(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimationAttributeFrameCount(), null));
-				result.setZoomScalingRequired(WWXML.getBoolean(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimationAttributeZoomRequired(), null));
-				
-				// Add the render parameters
-				result.renderParameters = new RenderParameters().fromXml(WWXML.getElement(element, constants.getRenderParametersElementName(), null), version, context);
-				
-				// Add each animatable object
-				Element[] animatableObjectElements = WWXML.getElements(element, constants.getAnimatableObjectsElementName() + "/*", null);
-				if (animatableObjectElements == null)
-				{
-					return null;
-				}
-				result.animatableObjects = new ArrayList<Animatable>();
-				for (Element animatableObjectElement : animatableObjectElements)
-				{
-					Animatable animatable = AnimatableFactory.fromXml(animatableObjectElement, version, context);
-					if (animatable == null)
-					{
-						continue;
-					}
-					result.addAnimatableObject(animatable);
-					
-					// If this is a 'special' object, set it to the correct field
-					if (animatable instanceof Camera)
-					{
-						result.renderCamera = (Camera)animatable;
-					}
-					if (animatable instanceof AnimatableElevation)
-					{
-						result.animatableElevation = (AnimatableElevation)animatable;
-					}
-					
-				}
-				
-				return result;
+				return null;
 			}
+			result.animatableObjects = new ArrayList<Animatable>();
+			for (Element animatableObjectElement : animatableObjectElements)
+			{
+				Animatable animatable =
+						AnimatableFactory.fromXml(animatableObjectElement, version, context);
+				if (animatable == null)
+				{
+					continue;
+				}
+				result.addAnimatableObject(animatable);
+
+				// If this is a 'special' object, set it to the correct field
+				if (animatable instanceof Camera)
+				{
+					result.renderCamera = (Camera) animatable;
+				}
+				if (animatable instanceof AnimatableElevation)
+				{
+					result.animatableElevation = (AnimatableElevation) animatable;
+				}
+			}
+
+			//if the frame count didn't exist in the XML, calculate a smart default value
+			if (frameCount == null)
+			{
+				if (hasKeyFrames())
+				{
+					frameCount = getLastKeyFrame().getFrame();
+				}
+				else
+				{
+					frameCount = DEFAULT_FRAME_COUNT;
+				}
+			}
+			result.setFrameCount(frameCount);
+
+			return result;
 		}
-		
+		}
+
 		return null;
 	}
-	
+
 	@Override
 	public String getName()
 	{
 		return name;
 	}
-	
+
 	@Override
 	public void setName(String name)
 	{
 		this.name = name;
 	}
-	
+
 	@Override
 	public List<Layer> getLayers()
 	{
@@ -918,7 +1069,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		return result;
 	}
-	
+
 	@Override
 	public boolean hasLayer(LayerIdentifier layerIdentifier)
 	{
@@ -935,7 +1086,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		return false;
 	}
-	
+
 	@Override
 	public void addLayer(LayerIdentifier layerIdentifier)
 	{
@@ -944,13 +1095,14 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			throw new IllegalArgumentException("Unable to load layer " + layerIdentifier);
 		}
-		
+
 		DefaultAnimatableLayer animatableLayer = new DefaultAnimatableLayer(loadedLayer);
-		for (LayerParameter parameter : LayerParameterFactory.createDefaultParametersForLayer(this, loadedLayer))
+		for (LayerParameter parameter : LayerParameterFactory.createDefaultParametersForLayer(this,
+				loadedLayer))
 		{
 			animatableLayer.addParameter(parameter);
 		}
-		
+
 		addAnimatableObject(animatableLayer);
 	}
 
@@ -959,13 +1111,13 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	{
 		return animatableElevation;
 	}
-	
+
 	@Override
 	public ElevationModel getRootElevationModel()
 	{
 		return animatableElevation.getRootElevationModel();
 	}
-	
+
 	@Override
 	public boolean hasElevationModel(ElevationModelIdentifier modelIdentifier)
 	{
@@ -975,7 +1127,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		return animatableElevation.hasElevationModel(modelIdentifier);
 	}
-	
+
 	@Override
 	public void addElevationModel(ElevationModelIdentifier modelIdentifier)
 	{

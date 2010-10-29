@@ -5,7 +5,7 @@
 	<xsl:template match="/">
 		<worldWindAnimation version="2.0">
 			<xsl:param name="frameCount" select='//stateObject[@name="frameCount"]'/>
-			<xsl:param name="zoomRequired" select='boolean(//stateObject[@name="scaledZoom"])'/>
+			<xsl:param name="zoomRequired" select='//stateObject[@name="scaledZoom"]'/>
 			<animation frameCount="{$frameCount}" zoomRequired="{$zoomRequired}">
 				<renderParameters>
 					<frameRate>25</frameRate>
