@@ -50,7 +50,7 @@ public class WorldWindAnimationImplTest
 		worldWindow = mockContext.mock(WorldWindow.class);
 		
 		classToBeTested = new WorldWindAnimationImpl(worldWindow);
-		classToBeTested.setFrameCount(100);
+		classToBeTested.setFrameCount(101);
 	}
 
 	private void initialiseTestParameters()
@@ -138,7 +138,7 @@ public class WorldWindAnimationImplTest
 	@Test
 	public void testScaleWith0()
 	{
-		classToBeTested.setFrameCount(100);
+		classToBeTested.setFrameCount(101);
 		
 		classToBeTested.insertKeyFrame(createKeyFrame(0, testParameters.get(0)));
 		classToBeTested.insertKeyFrame(createKeyFrame(50, testParameters.get(1)));
@@ -161,7 +161,7 @@ public class WorldWindAnimationImplTest
 	@Test
 	public void testScaleWithLT1()
 	{
-		classToBeTested.setFrameCount(100);
+		classToBeTested.setFrameCount(101);
 		
 		classToBeTested.insertKeyFrame(createKeyFrame(0, testParameters.get(0)));
 		classToBeTested.insertKeyFrame(createKeyFrame(50, testParameters.get(1)));
@@ -177,7 +177,7 @@ public class WorldWindAnimationImplTest
 			fail("Got an exception when one was not expected");
 		}
 		
-		assertEquals(100, classToBeTested.getFrameCount());
+		assertEquals(101, classToBeTested.getFrameCount());
 		
 		List<KeyFrame> keyFrames = classToBeTested.getKeyFrames();
 		assertEquals(3, keyFrames.size());
@@ -205,7 +205,7 @@ public class WorldWindAnimationImplTest
 	@Test
 	public void testScaleWithEQ1()
 	{
-		classToBeTested.setFrameCount(100);
+		classToBeTested.setFrameCount(101);
 		
 		classToBeTested.insertKeyFrame(createKeyFrame(0, testParameters.get(0)));
 		classToBeTested.insertKeyFrame(createKeyFrame(50, testParameters.get(1)));
@@ -221,7 +221,7 @@ public class WorldWindAnimationImplTest
 			fail("Got an exception when one was not expected");
 		}
 		
-		assertEquals(100, classToBeTested.getFrameCount());
+		assertEquals(101, classToBeTested.getFrameCount());
 		
 		List<KeyFrame> keyFrames = classToBeTested.getKeyFrames();
 		assertEquals(3, keyFrames.size());
@@ -249,7 +249,7 @@ public class WorldWindAnimationImplTest
 	@Test
 	public void testScaleWithGT1()
 	{
-		classToBeTested.setFrameCount(100);
+		classToBeTested.setFrameCount(101);
 		
 		classToBeTested.insertKeyFrame(createKeyFrame(0, testParameters.get(0)));
 		classToBeTested.insertKeyFrame(createKeyFrame(50, testParameters.get(1)));

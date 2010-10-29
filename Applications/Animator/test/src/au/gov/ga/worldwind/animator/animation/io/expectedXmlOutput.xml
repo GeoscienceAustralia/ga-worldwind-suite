@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <worldWindAnimation version="2.0">
-    <animation frameCount="100" zoomRequired="true">
+    <animation frameCount="101" zoomRequired="true">
         <renderParameters>
             <frameRate>25</frameRate>
             <width>1024</width>
