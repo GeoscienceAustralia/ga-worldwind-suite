@@ -192,9 +192,9 @@ public class Animator
 
 	// The layers used in the application
 	private Layer crosshair;
-	private CameraPathLayer cameraPathLayer;
 	private GridOverlayLayer gridOverlay;
 	private GridOverlayLayer ruleOfThirdsOverlay;
+	private CameraPathLayer cameraPathLayer;
 
 	/**
 	 * The file chooser used for open and save. Instance variable so it will
@@ -324,7 +324,8 @@ public class Animator
 				double newWidth = bufferSize.width;
 				double newHeight = bufferSize.height;
 
-				double targetRatio = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
+				double targetRatio =
+						getCurrentAnimation().getRenderParameters().getImageAspectRatio();
 				double currentRatio = (double) bufferSize.width / bufferSize.height;
 
 				if (currentRatio > targetRatio)
@@ -931,7 +932,7 @@ public class Animator
 			slider.addKey(keyFrame.getFrame());
 		}
 		slider.setMin(0);
-		slider.setMax(getCurrentAnimation().getFrameCount());
+		slider.setMax(getCurrentAnimation().getFrameCount() - 1);
 		slider.repaint();
 	}
 
@@ -992,7 +993,8 @@ public class Animator
 		int deltaWidth = calculateTotalWidthOfNonWWDElements();
 		int deltaHeight = calculateTotalHeightOfNonWWDElements();
 
-		Dimension frameSize = new Dimension(animationSize.width + deltaWidth, animationSize.height + deltaHeight);
+		Dimension frameSize =
+				new Dimension(animationSize.width + deltaWidth, animationSize.height + deltaHeight);
 		setFrameSize(frameSize);
 
 		frame.pack();
@@ -1003,9 +1005,9 @@ public class Animator
 		{
 			JOptionPane.showMessageDialog(
 					frame,
-					getMessage(getSetDimensionFailedMessageKey(), animationSize.width, animationSize.height,
-							wwdSize.width, wwdSize.height), getMessage(getSetDimensionFailedCaptionKey()),
-					JOptionPane.ERROR_MESSAGE);
+					getMessage(getSetDimensionFailedMessageKey(), animationSize.width,
+							animationSize.height, wwdSize.width, wwdSize.height),
+					getMessage(getSetDimensionFailedCaptionKey()), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -1027,8 +1029,9 @@ public class Animator
 
 	private int calculateTotalHeightOfNonWWDElements()
 	{
-		return bottomPanel.getSize().height + slider.getSize().height + frame.getJMenuBar().getSize().height
-				+ frame.getInsets().top + frame.getInsets().bottom;
+		return bottomPanel.getSize().height + slider.getSize().height
+				+ frame.getJMenuBar().getSize().height + frame.getInsets().top
+				+ frame.getInsets().bottom;
 	}
 
 	private int calculateTotalWidthOfNonWWDElements()
@@ -1204,15 +1207,17 @@ public class Animator
 		int response =
 				JOptionPane.showConfirmDialog(
 						frame,
-						getMessage(getOpenV1FileMessageKey(), animationFile.getAbsolutePath(), XmlAnimationWriter
-								.getCurrentFileVersion().getDisplayName()), getMessage(getOpenV1FileCaptionKey()),
-						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						getMessage(getOpenV1FileMessageKey(), animationFile.getAbsolutePath(),
+								XmlAnimationWriter.getCurrentFileVersion().getDisplayName()),
+						getMessage(getOpenV1FileCaptionKey()), JOptionPane.YES_NO_OPTION,
+						JOptionPane.QUESTION_MESSAGE);
 		return response;
 	}
 
 	private void promptUserOpenFailed(File animationFile)
 	{
-		JOptionPane.showMessageDialog(frame, getMessage(getOpenFailedMessageKey(), animationFile.getAbsolutePath()),
+		JOptionPane.showMessageDialog(frame,
+				getMessage(getOpenFailedMessageKey(), animationFile.getAbsolutePath()),
 				getMessage(getOpenFailedCaptionKey()), JOptionPane.ERROR_MESSAGE);
 	}
 
@@ -1259,15 +1264,19 @@ public class Animator
 			File newFile = fileChooser.getSelectedFile();
 			if (!newFile.getName().toLowerCase().endsWith(XmlFilter.getFileExtension()))
 			{
-				newFile = new File(newFile.getParent(), newFile.getName() + XmlFilter.getFileExtension());
+				newFile =
+						new File(newFile.getParent(), newFile.getName()
+								+ XmlFilter.getFileExtension());
 			}
 			if (newFile.exists())
 			{
 				int response =
-						JOptionPane.showConfirmDialog(frame,
-								getMessage(getConfirmOverwriteMessageKey(), newFile.getAbsolutePath()),
-								getMessage(getConfirmOverwriteCaptionKey()), JOptionPane.YES_NO_OPTION,
-								JOptionPane.WARNING_MESSAGE);
+						JOptionPane.showConfirmDialog(
+								frame,
+								getMessage(getConfirmOverwriteMessageKey(),
+										newFile.getAbsolutePath()),
+								getMessage(getConfirmOverwriteCaptionKey()),
+								JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 				if (response != JOptionPane.YES_OPTION)
 				{
 					return false;
@@ -1440,7 +1449,8 @@ public class Animator
 	 */
 	void renderAnimation(final double detailHint)
 	{
-		int firstFrame = Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
+		int firstFrame =
+				Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
 		int lastFrame = getCurrentAnimation().getFrameOfLastKeyFrame();
 
 		File destination = promptForImageSequenceLocation();
@@ -1449,8 +1459,8 @@ public class Animator
 			return;
 		}
 
-		renderer.render(animation, firstFrame, lastFrame, destination.getParentFile(), destination.getName(),
-				detailHint, true);
+		renderer.render(animation, firstFrame, lastFrame, destination.getParentFile(),
+				destination.getName(), detailHint, true);
 	}
 
 	/**
@@ -1487,13 +1497,15 @@ public class Animator
 		}
 
 		// Check for existing files and prompt for confirmation if they exist
-		int firstFrame = Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
+		int firstFrame =
+				Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
 		int lastFrame = getCurrentAnimation().getFrameOfLastKeyFrame();
 		int filenameLength = String.valueOf(lastFrame).length();
 		boolean promptForOverwrite = false;
 		for (int i = firstFrame; i <= lastFrame; i++)
 		{
-			if (new File(destinationFile, createImageSequenceName(fileName, i, filenameLength)).exists())
+			if (new File(destinationFile, createImageSequenceName(fileName, i, filenameLength))
+					.exists())
 			{
 				promptForOverwrite = true;
 				break;
@@ -1507,8 +1519,8 @@ public class Animator
 							getMessage(getConfirmRenderOverwriteMessageKey(),
 									createImageSequenceName(fileName, firstFrame, filenameLength),
 									createImageSequenceName(fileName, lastFrame, filenameLength)),
-							getMessage(getConfirmRenderOverwriteCaptionKey()), JOptionPane.YES_NO_OPTION,
-							JOptionPane.QUESTION_MESSAGE);
+							getMessage(getConfirmRenderOverwriteCaptionKey()),
+							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			if (response == JOptionPane.NO_OPTION)
 			{
 				return null;
@@ -1577,7 +1589,8 @@ public class Animator
 			return;
 		}
 
-		ElevationModelIdentifier modelIdentifier = ElevationModelIdentifierFactory.createFromDefinition(fileUrl);
+		ElevationModelIdentifier modelIdentifier =
+				ElevationModelIdentifierFactory.createFromDefinition(fileUrl);
 		if (modelIdentifier == null)
 		{
 			promptUserInvalidModelIdentifier(fileUrl);
@@ -1589,7 +1602,8 @@ public class Animator
 
 	private void promptUserInvalidModelIdentifier(URL fileUrl)
 	{
-		JOptionPane.showMessageDialog(frame, getMessage(getOpenElevationModelFailedMessageKey(), fileUrl.getFile()),
+		JOptionPane.showMessageDialog(frame,
+				getMessage(getOpenElevationModelFailedMessageKey(), fileUrl.getFile()),
 				getMessage(getOpenElevationModelFailedCaptionKey()), JOptionPane.ERROR_MESSAGE);
 
 	}
@@ -1696,7 +1710,8 @@ public class Animator
 		double scale = -1.0;
 		Object value =
 				JOptionPane.showInputDialog(frame, getMessage(getScaleAnimationMessageKey()),
-						getMessage(getScaleAnimationCaptionKey()), JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
+						getMessage(getScaleAnimationCaptionKey()), JOptionPane.QUESTION_MESSAGE,
+						null, null, 1.0);
 		try
 		{
 			scale = Double.parseDouble((String) value);
@@ -1714,10 +1729,9 @@ public class Animator
 
 	void smoothEyeSpeed()
 	{
-		if (JOptionPane
-				.showConfirmDialog(frame, getMessage(getQuerySmoothEyeSpeedMessageKey()),
-						getMessage(getQuerySmoothEyeSpeedCaptionKey()), JOptionPane.YES_NO_OPTION,
-						JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+		if (JOptionPane.showConfirmDialog(frame, getMessage(getQuerySmoothEyeSpeedMessageKey()),
+				getMessage(getQuerySmoothEyeSpeedCaptionKey()), JOptionPane.YES_NO_OPTION,
+				JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
 		{
 			getCurrentAnimation().getCamera().smoothEyeSpeed(createAnimationContext());
 			updateSlider();
@@ -1734,7 +1748,8 @@ public class Animator
 		int frames = slider.getLength() - 1;
 		Object value =
 				JOptionPane.showInputDialog(frame, getMessage(getSetFrameCountMessageKey()),
-						getMessage(getSetFrameCountCaptionKey()), JOptionPane.QUESTION_MESSAGE, null, null, frames);
+						getMessage(getSetFrameCountCaptionKey()), JOptionPane.QUESTION_MESSAGE,
+						null, null, frames);
 		try
 		{
 			frames = Integer.parseInt((String) value);
@@ -1771,7 +1786,7 @@ public class Animator
 			actionFactory.getUseScaledZoomAction().setSelected(animation.isZoomScalingRequired());
 		}
 		keyFrameClipboard.updateAnimation(animation);
-		cameraPathLayer.updateAnimation(animation);
+		cameraPathLayer.setAnimation(animation);
 		updateAnimationListeners();
 		updateLayersInModel();
 		updateElevationModelOnGlobe();

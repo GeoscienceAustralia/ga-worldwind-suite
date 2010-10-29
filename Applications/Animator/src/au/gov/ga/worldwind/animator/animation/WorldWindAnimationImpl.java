@@ -54,7 +54,7 @@ import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 public class WorldWindAnimationImpl extends PropagatingChangeableEventListener implements Animation
 {
 	/** The default number of frames for an animation */
-	private static final int DEFAULT_FRAME_COUNT = 100;
+	private static final int DEFAULT_FRAME_COUNT = 101;
 
 	/**
 	 * Map of <code>frame -> key frame</code>, ordered by frame, for quick
@@ -755,7 +755,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		try
 		{
 			keyFrameMapLock.readLock().lock();
-			return !keyFrameMap.containsValue(keyFrame);
+			return keyFrameMap.containsValue(keyFrame);
 		}
 		finally
 		{
@@ -990,12 +990,13 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 				}
 			}
 
-			//if the frame count didn't exist in the XML, calculate a smart default value
-			if (frameCount == null)
+			//if the frame count didn't exist in the XML, or is too small, calculate a smart default value
+			int lastFrame = result.getFrameOfLastKeyFrame();
+			if (frameCount == null || lastFrame >= frameCount)
 			{
-				if (hasKeyFrames())
+				if (lastFrame > 0)
 				{
-					frameCount = getLastKeyFrame().getFrame();
+					frameCount = lastFrame + 1;
 				}
 				else
 				{

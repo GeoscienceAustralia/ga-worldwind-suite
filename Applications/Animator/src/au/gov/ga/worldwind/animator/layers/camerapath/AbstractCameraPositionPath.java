@@ -7,8 +7,6 @@ import gov.nasa.worldwind.render.Renderable;
 
 import java.awt.Color;
 import java.nio.DoubleBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.media.opengl.GL;
 
@@ -26,7 +24,7 @@ import com.sun.opengl.util.BufferUtil;
 public abstract class AbstractCameraPositionPath implements Renderable
 {
 	private int frameCount;
-	
+
 	// Buffers used to draw the eye path
 	private DoubleBuffer pathVertexFrontBuffer;
 	private DoubleBuffer pathVertexBackBuffer;
@@ -34,28 +32,28 @@ public abstract class AbstractCameraPositionPath implements Renderable
 	private DoubleBuffer pathColourBackBuffer;
 	private Object pathBufferLock = new Object();
 	private Vec4 pathReferenceCenter;
-	
+
 	/** The animation whose camera path is to be displayed on this layer */
 	private Animation animation;
-	
+
 	boolean enableDepthTesting = true;
-	
+
 	public AbstractCameraPositionPath(Animation animation)
+	{
+		setAnimation(animation);
+	}
+
+	public void setAnimation(Animation animation)
 	{
 		this.animation = animation;
 	}
 
-	public void updateAnimation(Animation animation)
-	{
-		this.animation = animation;
-	}
-	
 	public void recalulatePath()
 	{
 		populatePathBuffers();
 		swapBuffers();
 	}
-	
+
 	public void resetPath()
 	{
 		frameCount = animation.getFrameCount();
@@ -64,7 +62,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 		this.pathColourFrontBuffer = BufferUtil.newDoubleBuffer(frameCount * 3);
 		this.pathColourBackBuffer = BufferUtil.newDoubleBuffer(frameCount * 3);
 	}
-	
+
 	@Override
 	public final void render(DrawContext dc)
 	{
@@ -80,11 +78,11 @@ public abstract class AbstractCameraPositionPath implements Renderable
 		{
 			return;
 		}
-		
+
 		GL gl = dc.getGL();
 		gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 		gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
-		
+
 		boolean popRefCenter = false;
 		if (pathReferenceCenter != null)
 		{
@@ -106,7 +104,13 @@ public abstract class AbstractCameraPositionPath implements Renderable
 			gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
 			gl.glLineWidth(2.0f);
 			gl.glPointSize(2.0f);
-			int numberOfPointsInPath = animation.getFrameOfLastKeyFrame() - animation.getFrameOfFirstKeyFrame();
+			int numberOfPointsInPath =
+					animation.getFrameOfLastKeyFrame() - animation.getFrameOfFirstKeyFrame() + 1;
+
+			//don't draw lines with less than 2 points
+			if (numberOfPointsInPath <= 1)
+				return;
+
 			synchronized (pathBufferLock)
 			{
 				if (enableDepthTesting)
@@ -117,17 +121,21 @@ public abstract class AbstractCameraPositionPath implements Renderable
 				{
 					gl.glDisable(GL.GL_DEPTH_TEST);
 				}
-				
+
+				//use flat shading, so that each segment is colored with the previous first vertex's color
+				//instead of interpolating between the two vertices colors
+				gl.glShadeModel(GL.GL_FLAT);
+
 				gl.glColorPointer(3, GL.GL_DOUBLE, 0, pathColourFrontBuffer);
 				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, pathVertexFrontBuffer);
 
-				// Draw a smooth line without depth testing, filling gaps with points
+				// Draw a smooth line without modifying the depth buffer, filling gaps with points
 				gl.glDepthMask(false);
 				gl.glDrawArrays(GL.GL_LINE_STRIP, 0, numberOfPointsInPath);
 				gl.glDrawArrays(GL.GL_POINTS, 0, numberOfPointsInPath);
 				gl.glDepthMask(true);
-				
-				// Now redraw the line with depth testing to ensure line looks correct with markers
+
+				// Now redraw the line, writing to the depth buffer, to ensure line looks correct with markers
 				gl.glDrawArrays(GL.GL_LINE_STRIP, 0, numberOfPointsInPath);
 			}
 		}
@@ -141,64 +149,67 @@ public abstract class AbstractCameraPositionPath implements Renderable
 			gl.glPopClientAttrib();
 		}
 	}
-	
+
 	/**
-	 * Populate the update vertex buffers with the coordinates of the 
-	 * eye location at each frame in the animation.
+	 * Populate the update vertex buffers with the coordinates of the eye
+	 * location at each frame in the animation.
 	 * <p/>
-	 * Vertex buffer has size <code>3*animation.getlastFrame()</code>, with <code>[x,y,z]</code> stored at 
+	 * Vertex buffer has size <code>3*animation.getlastFrame()</code>, with
+	 * <code>[x,y,z]</code> stored at
 	 * <code>[3*frame, 3*frame+1, 3*frame+2]</code>
 	 * <p/>
-	 * Colour buffer has size <code>3*animation.getLastFrame()</code> with colours ramping through the HSV colour space
-	 * based on the rate of change of the camera eye position. Colours <code>[r,g,b]</code> are stored at <code>[3*frame, 3*frame+1, 3*frame+2]</code>.
+	 * Colour buffer has size <code>3*animation.getLastFrame()</code> with
+	 * colours ramping through the HSV colour space based on the rate of change
+	 * of the camera eye position. Colours <code>[r,g,b]</code> are stored at
+	 * <code>[3*frame, 3*frame+1, 3*frame+2]</code>.
 	 */
 	private void populatePathBuffers()
 	{
 		AnimationContext context = new AnimationContextImpl(animation);
 		pathReferenceCenter = null;
-		
-		Position previousPathPosition = null;
-		Position currentPathPosition = null;
-		
-		List<Double> deltas = new ArrayList<Double>(animation.getFrameCount());
+
+		int firstFrame = animation.getFrameOfFirstKeyFrame();
+		int lastFrame = animation.getFrameOfLastKeyFrame();
+		double[] deltas = new double[lastFrame - firstFrame + 1];
 		double minDelta = Double.MAX_VALUE;
 		double maxDelta = 0d;
 
 		pathVertexBackBuffer.rewind();
-		
-		for (int frame = animation.getFrameOfFirstKeyFrame(); frame < animation.getFrameOfLastKeyFrame(); frame ++)
+
+		Position previousPathPosition = null;
+		for (int frame = firstFrame; frame <= lastFrame; frame++)
 		{
-			currentPathPosition = getPathPositionAtFrame(context, frame);
-			
+			Position currentPathPosition = getPathPositionAtFrame(context, frame);
+
 			// Populate the vertex buffer
-			Vec4 eyeVector = context.getView().getGlobe().computePointFromPosition(currentPathPosition);
+			Vec4 eyeVector =
+					context.getView().getGlobe().computePointFromPosition(currentPathPosition);
 			if (pathReferenceCenter == null)
 			{
-				pathReferenceCenter  = eyeVector; // Choose the first point in the path to be the reference point
+				pathReferenceCenter = eyeVector; // Choose the first point in the path to be the reference point
 			}
 			pathVertexBackBuffer.put(eyeVector.x - pathReferenceCenter.x);
 			pathVertexBackBuffer.put(eyeVector.y - pathReferenceCenter.y);
 			pathVertexBackBuffer.put(eyeVector.z - pathReferenceCenter.z);
-			
+
 			// Populate the delta array
 			if (previousPathPosition != null)
 			{
-				double positionDelta = calculateDelta(currentPathPosition, previousPathPosition);
-				deltas.add(positionDelta);
-				if (positionDelta > maxDelta)
-				{
-					maxDelta = positionDelta;
-				}
-				if (positionDelta < minDelta)
-				{
-					minDelta = positionDelta;
-				}
+				double positionDelta =
+						calculateDelta(context, currentPathPosition, previousPathPosition);
+				deltas[frame - firstFrame] = positionDelta;
+				maxDelta = Math.max(maxDelta, positionDelta);
+				minDelta = Math.min(minDelta, positionDelta);
 			}
 			previousPathPosition = currentPathPosition;
 		}
-		
+
+		//first wasn't set in loop above, so just copy from second:
+		if (deltas.length > 1)
+			deltas[0] = deltas[1];
+
 		populatePathColourBufferFromDeltas(deltas, minDelta, maxDelta);
-		
+
 		pathVertexBackBuffer.rewind();
 	}
 
@@ -210,45 +221,48 @@ public abstract class AbstractCameraPositionPath implements Renderable
 	/**
 	 * @return The delta of the current and previous position
 	 */
-	private double calculateDelta(Position currentPosition, Position previousPosition)
+	private double calculateDelta(AnimationContext context, Position currentPosition,
+			Position previousPosition)
 	{
-		AnimationContext context = new AnimationContextImpl(animation);
 		Vec4 current = context.getView().getGlobe().computePointFromPosition(currentPosition);
 		Vec4 previous = context.getView().getGlobe().computePointFromPosition(previousPosition);
 		return Math.abs(current.distanceTo3(previous));
 	}
 
-	private void populatePathColourBufferFromDeltas(List<Double> deltas, double minDelta, double maxDelta)
+	private void populatePathColourBufferFromDeltas(double[] deltas, double minDelta,
+			double maxDelta)
 	{
 		double deltaWindow = maxDelta - minDelta;
 		if (deltaWindow < 1)
 		{
 			deltaWindow = 1;
 		}
-		
+
 		// Use the HSL colour ramp to indicate magnitude of deltas
 		HSLColor hslColor = new HSLColor(0, 80, 50);
 		Color pathColor = null;
-		
+
 		pathColourBackBuffer.rewind();
-		for (Double delta : deltas)	
+		for (double delta : deltas)
 		{
-			float normalizedDelta = (float)((delta - minDelta) / deltaWindow);
+			float normalizedDelta = (float) ((delta - minDelta) / deltaWindow);
 			pathColor = hslColor.adjustHue((1f - normalizedDelta) * 240f);
-			pathColourBackBuffer.put((double)pathColor.getRed() / 255d);
-			pathColourBackBuffer.put((double)pathColor.getGreen() / 255d);
-			pathColourBackBuffer.put((double)pathColor.getBlue() / 255d);
+			pathColourBackBuffer.put((double) pathColor.getRed() / 255d);
+			pathColourBackBuffer.put((double) pathColor.getGreen() / 255d);
+			pathColourBackBuffer.put((double) pathColor.getBlue() / 255d);
 		}
 		pathColourBackBuffer.rewind();
 	}
-	
+
 	/**
-	 * @return Whether the provided key frame is one that should be included in this camera path
+	 * @return Whether the provided key frame is one that should be included in
+	 *         this camera path
 	 */
 	protected abstract boolean isPathFrame(KeyFrame keyFrame);
-	
+
 	/**
-	 * Swap the front and back buffers, giving access to the newly updated data for drawing
+	 * Swap the front and back buffers, giving access to the newly updated data
+	 * for drawing
 	 */
 	private void swapBuffers()
 	{
@@ -258,19 +272,19 @@ public abstract class AbstractCameraPositionPath implements Renderable
 			pathVertexFrontBuffer = pathVertexBackBuffer;
 			pathVertexBackBuffer = tmp;
 			pathVertexFrontBuffer.rewind();
-			
+
 			tmp = pathColourFrontBuffer;
 			pathColourFrontBuffer = pathColourBackBuffer;
 			pathColourBackBuffer = tmp;
 			pathColourFrontBuffer.rewind();
 		}
 	}
-	
+
 	public Animation getAnimation()
 	{
 		return animation;
 	}
-	
+
 	public void setEnableDepthTesting(boolean enableDepthTesting)
 	{
 		this.enableDepthTesting = enableDepthTesting;

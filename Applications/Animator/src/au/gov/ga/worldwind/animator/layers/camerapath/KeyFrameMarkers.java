@@ -67,6 +67,11 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	public KeyFrameMarkers(WorldWindow wwd, Animation animation)
 	{
 		this.worldWindow = wwd;
+		setAnimation(animation);
+	}
+	
+	public void setAnimation(Animation animation)
+	{
 		this.animation = animation;
 	}
 
@@ -235,11 +240,6 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		pickedMarker.applyPositionChangeToAnimation();
 		pickedMarker.unhighlight();
 		worldWindow.redrawNow();
-	}
-	
-	public void updateAnimation(Animation animation)
-	{
-		this.animation = animation;
 	}
 	
 	public void recalulateKeyFrameMarkers()

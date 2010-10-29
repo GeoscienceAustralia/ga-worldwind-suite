@@ -24,50 +24,63 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * A WorldWind Layer that displays the camera path of a given {@link Animation}
  * in the 3D world.
  */
-public class CameraPathLayer extends AbstractLayer implements AnimationEventListener, SelectListener
+public class CameraPathLayer extends AbstractLayer implements AnimationEventListener,
+		SelectListener
 {
 	private EyePositionPath eyePositionPath;
 	private LookatPositionPath lookatPositionPath;
 	private KeyFrameMarkers keyFrameMarkers;
-	
+
 	/** The number of frames currently held in the vertex buffers */
 	private int frameCount;
-	
+
 	/** The animation whose camera path is to be displayed on this layer */
 	private Animation animation;
+	private boolean animationChanged = true;
 
 	/** A thread used to update the vertex buffers outside of the render thread */
-	private ExecutorService updater = Executors.newFixedThreadPool(1, new DaemonThreadFactory("Camera Path Updater"));
+	private ExecutorService updater = Executors.newFixedThreadPool(1, new DaemonThreadFactory(
+			"Camera Path Updater"));
 	private Future<UpdateTask> currentTask;
 	private Future<UpdateTask> nextTask;
 	private WorldWindow worldWindow;
-	
+
 	/**
 	 * Constructor.
 	 * <p/>
 	 * Initialises the mandatory animation instance.
 	 * 
-	 * @param wwd The current WorldWindow
-	 * @param animation The animation instance whose camera path will be displayed by this layer
+	 * @param wwd
+	 *            The current WorldWindow
+	 * @param animation
+	 *            The animation instance whose camera path will be displayed by
+	 *            this layer
 	 */
 	public CameraPathLayer(WorldWindow wwd, Animation animation)
 	{
 		Validate.notNull(animation, "An animation instance is required");
 		Validate.notNull(wwd, "A world window is required");
 		setPickEnabled(true);
-		
+
 		eyePositionPath = new EyePositionPath(animation);
 		lookatPositionPath = new LookatPositionPath(animation);
 		lookatPositionPath.setEnableDepthTesting(false);
 		keyFrameMarkers = new KeyFrameMarkers(wwd, animation);
 		worldWindow = wwd;
-		
-		updateAnimation(animation);
+
+		setAnimation(animation);
 	}
 
 	@Override
 	protected void doRender(DrawContext dc)
 	{
+		if (animationChanged)
+		{
+			reset();
+			update();
+			animationChanged = false;
+		}
+
 		eyePositionPath.render(dc);
 		lookatPositionPath.render(dc);
 		keyFrameMarkers.render(dc);
@@ -92,8 +105,8 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 			update();
 		}
 	}
-	
-	public void updateAnimation(Animation animation)
+
+	public void setAnimation(Animation animation)
 	{
 		if (this.animation != null)
 		{
@@ -101,15 +114,14 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		}
 		this.animation = animation;
 		this.animation.addChangeListener(this);
-		
-		eyePositionPath.updateAnimation(animation);
-		lookatPositionPath.updateAnimation(animation);
-		keyFrameMarkers.updateAnimation(animation);
-		
-		reset();
-		update();
+
+		eyePositionPath.setAnimation(animation);
+		lookatPositionPath.setAnimation(animation);
+		keyFrameMarkers.setAnimation(animation);
+
+		animationChanged = true;
 	}
-	
+
 	@Override
 	public void selected(SelectEvent event)
 	{
@@ -124,13 +136,13 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		lookatPositionPath.resetPath();
 		keyFrameMarkers.resetKeyFrameMarkers();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void update()
 	{
 		if (currentTask == null || currentTask.isDone())
 		{
-			currentTask = (Future<UpdateTask>)updater.submit(new UpdateTask());
+			currentTask = (Future<UpdateTask>) updater.submit(new UpdateTask());
 		}
 		else
 		{
@@ -138,10 +150,10 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 			{
 				nextTask.cancel(true);
 			}
-			nextTask = (Future<UpdateTask>)updater.submit(new UpdateTask());
+			nextTask = (Future<UpdateTask>) updater.submit(new UpdateTask());
 		}
 	}
-	
+
 	private boolean cameraPathHasChanged(AnimationEvent event)
 	{
 		return eventIsRelatedToCamera(event) || isKeyFrameEventContainingCameraParameter(event);
@@ -153,8 +165,8 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		{
 			return true;
 		}
-		
-		KeyFrameEvent keyFrameEvent = (KeyFrameEvent)event.getCauseOfClass(KeyFrameEvent.class);
+
+		KeyFrameEvent keyFrameEvent = (KeyFrameEvent) event.getCauseOfClass(KeyFrameEvent.class);
 		if (keyFrameEvent == null)
 		{
 			return false;
@@ -167,7 +179,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		Object rootValue = event.getRootCause().getValue();
 		if (rootValue instanceof KeyFrame)
 		{
-			return isCameraFrame((KeyFrame)rootValue);
+			return isCameraFrame((KeyFrame) rootValue);
 		}
 		return false;
 	}
@@ -183,29 +195,36 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		{
 			return false;
 		}
-		
-		return keyFrame.hasValueForParameter(animation.getCamera().getEyeLat()) || 
-				keyFrame.hasValueForParameter(animation.getCamera().getEyeLon()) || 
-				keyFrame.hasValueForParameter(animation.getCamera().getEyeElevation()) ||
-				keyFrame.hasValueForParameter(animation.getCamera().getLookAtLat()) ||
-				keyFrame.hasValueForParameter(animation.getCamera().getLookAtLon()) ||
-				keyFrame.hasValueForParameter(animation.getCamera().getLookAtElevation());
+
+		return keyFrame.hasValueForParameter(animation.getCamera().getEyeLat())
+				|| keyFrame.hasValueForParameter(animation.getCamera().getEyeLon())
+				|| keyFrame.hasValueForParameter(animation.getCamera().getEyeElevation())
+				|| keyFrame.hasValueForParameter(animation.getCamera().getLookAtLat())
+				|| keyFrame.hasValueForParameter(animation.getCamera().getLookAtLon())
+				|| keyFrame.hasValueForParameter(animation.getCamera().getLookAtElevation());
 	}
-	
+
 	private boolean frameCountHasChanged()
 	{
 		return animation.getFrameCount() != frameCount;
 	}
-	
+
 	private class UpdateTask implements Runnable
 	{
 		@Override
 		public void run()
 		{
-			eyePositionPath.recalulatePath();
-			lookatPositionPath.recalulatePath();
-			keyFrameMarkers.recalulateKeyFrameMarkers();
-			worldWindow.redraw();
+			try
+			{
+				eyePositionPath.recalulatePath();
+				lookatPositionPath.recalulatePath();
+				keyFrameMarkers.recalulateKeyFrameMarkers();
+				worldWindow.redraw();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 }
