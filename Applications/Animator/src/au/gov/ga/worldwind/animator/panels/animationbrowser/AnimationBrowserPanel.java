@@ -15,8 +15,6 @@ import javax.swing.JTree;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -27,8 +25,8 @@ import au.gov.ga.worldwind.animator.animation.CurrentlySelectedObject;
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
+import au.gov.ga.worldwind.animator.ui.NameableTree;
 import au.gov.ga.worldwind.animator.util.Icons;
-import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 
@@ -349,30 +347,5 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 			objectTree.setTransferHandler(new AnimationBrowserTransferHandler(animation, objectTree));
 		}
 		objectTree.validate();
-	}
-	
-	/**
-	 * An extension of the {@link DefaultMutableTreeNode} that renders a {@link Nameable} object's name
-	 * as the text value of the tree nodes. Used in conjunction with the {@link AnimationTreeRenderer}.
-	 */
-	private static final class NameableTree extends JTree
-	{
-		private static final long serialVersionUID = 20100907L;
-		
-		public NameableTree(TreeModel model)
-		{
-			super(model);
-		}
-
-		@Override
-		public String convertValueToText(Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus)
-		{
-			if (value instanceof Nameable)
-			{
-				return ((Nameable)value).getName();
-			}
-			
-			return super.convertValueToText(value, selected, expanded, leaf, row, hasFocus);
-		}
 	}
 }

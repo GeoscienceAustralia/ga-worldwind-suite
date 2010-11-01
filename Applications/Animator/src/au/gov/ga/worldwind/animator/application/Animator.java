@@ -92,6 +92,7 @@ import au.gov.ga.worldwind.animator.ui.ExaggeratorDialog;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.CurrentFrameChangeListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
+import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterEditor;
 import au.gov.ga.worldwind.animator.util.ExaggerationAwareStatusBar;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileFilters;
@@ -137,6 +138,9 @@ public class Animator
 	/** The bottom panel. Holds the status bar. */
 	private JPanel bottomPanel;
 
+	/** A window used to edit parameters in 2D space */
+	private ParameterEditor parameterEditor;
+	
 	/** The primary world wind canvas */
 	private WorldWindowGLCanvas wwd;
 
@@ -242,6 +246,7 @@ public class Animator
 		initialiseSideBar();
 		initialiseStatusBar();
 		initialiseMenuBar();
+		initialiseParameterEditor();
 
 		initialiseAnimationListeners();
 
@@ -731,6 +736,12 @@ public class Animator
 		actionFactory.getShowGridAction().addToMenu(menu);
 		actionFactory.getShowRuleOfThirdsAction().addToMenu(menu);
 
+		// Window menu
+		menu = new JMenu(getMessage(getWindowMenuLabelKey()));
+		menu.setMnemonic(KeyEvent.VK_W);
+		menuBar.add(menu);
+		actionFactory.getShowParameterEditorAction().addToMenu(menu);
+		
 		// Debug
 		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
 		menu.setMnemonic(KeyEvent.VK_D);
@@ -741,6 +752,11 @@ public class Animator
 		menu.add(actionFactory.getDebugParameterValuesAction());
 	}
 
+	private void initialiseParameterEditor()
+	{
+		this.parameterEditor = new ParameterEditor(this);
+	}
+	
 	/**
 	 * Initialise the animation listeners
 	 */
@@ -1705,6 +1721,12 @@ public class Animator
 		Settings.get().setAnimationEventsLogged(enabled);
 	}
 
+	public void setParameterEditorVisible(boolean visible)
+	{
+		parameterEditor.setVisible(visible);
+		actionFactory.getShowParameterEditorAction().setSelected(visible);
+	}
+	
 	void scaleAnimation()
 	{
 		double scale = -1.0;
@@ -1808,4 +1830,5 @@ public class Animator
 		stop = true;
 		renderer.stop();
 	}
+
 }

@@ -56,6 +56,8 @@ public class AnimatorActionFactory
 	private SelectableAction showRuleOfThirdsAction;
 	private SelectableAction showCrosshairsAction;
 	
+	private SelectableAction showParameterEditorAction;
+	
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
 	private SelectableAction logAnimationEventsAction;
@@ -423,6 +425,17 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		// Show parameter editor
+		showParameterEditorAction = new SelectableAction(getMessage(getShowParameterEditorMenuLabelKey()), null, false);
+		showParameterEditorAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.setParameterEditorVisible(showParameterEditorAction.isSelected());
+			}
+		});
+		
 		// Debug key frames
 		debugKeyFramesAction = new BasicAction(getMessage(getKeyValuesMenuLabelKey()), null);
 		debugKeyFramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
@@ -626,5 +639,10 @@ public class AnimatorActionFactory
 	public SelectableAction getLogAnimationEventsAction()
 	{
 		return logAnimationEventsAction;
+	}
+	
+	public SelectableAction getShowParameterEditorAction()
+	{
+		return showParameterEditorAction;
 	}
 }
