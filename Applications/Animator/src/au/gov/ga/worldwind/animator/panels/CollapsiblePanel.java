@@ -3,7 +3,7 @@ package au.gov.ga.worldwind.animator.panels;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
-import au.gov.ga.worldwind.animator.application.AnimationChangeListener;
+import au.gov.ga.worldwind.animator.application.ChangeOfAnimationListener;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitLayout;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
@@ -13,7 +13,7 @@ import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface CollapsiblePanel extends Nameable, AnimationChangeListener
+public interface CollapsiblePanel extends Nameable, ChangeOfAnimationListener
 {
 	/**
 	 * @return The {@link JPanel} backing this {@link CollapsiblePanel}

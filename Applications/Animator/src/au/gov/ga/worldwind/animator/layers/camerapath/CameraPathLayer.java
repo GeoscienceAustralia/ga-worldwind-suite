@@ -17,7 +17,7 @@ import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.KeyFrameEvent;
-import au.gov.ga.worldwind.animator.application.AnimationChangeListener;
+import au.gov.ga.worldwind.animator.application.ChangeOfAnimationListener;
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -25,7 +25,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * A WorldWind Layer that displays the camera path of a given {@link Animation}
  * in the 3D world.
  */
-public class CameraPathLayer extends AbstractLayer implements AnimationEventListener, SelectListener, AnimationChangeListener
+public class CameraPathLayer extends AbstractLayer implements AnimationEventListener, SelectListener, ChangeOfAnimationListener
 {
 	private EyePositionPath eyePositionPath;
 	private LookatPositionPath lookatPositionPath;

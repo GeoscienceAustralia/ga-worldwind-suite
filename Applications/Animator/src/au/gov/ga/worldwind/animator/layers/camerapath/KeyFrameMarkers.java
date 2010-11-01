@@ -75,6 +75,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	{
 		this.worldWindow = wwd;
 		setAnimation(animation);
+		markerRenderer.setKeepSeparated(false);
 	}
 
 	public void setAnimation(Animation animation)
@@ -298,8 +299,14 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		try
 		{
 			frontLock.readLock().lock();
-			markerRenderer.render(dc, eyeMarkersFrontBuffer);
-			markerRenderer.render(dc, lookatMarkersFrontBuffer);
+			
+			// The marker renderer caches marker points - if two calls are used the second buffer may not be drawn correctly
+			// To fix, we combine the two buffers and execute a single call
+			ArrayList<Marker> combinedBuffer = new ArrayList<Marker>();
+			combinedBuffer.addAll(eyeMarkersFrontBuffer);
+			combinedBuffer.addAll(lookatMarkersFrontBuffer);
+			markerRenderer.render(dc, combinedBuffer);
+
 			drawJoiners(dc);
 		}
 		finally

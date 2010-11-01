@@ -7,10 +7,10 @@ import au.gov.ga.worldwind.animator.animation.Animation;
  * when the current animation of the Animator application
  * changes.
  */
-public interface AnimationChangeListener
+public interface ChangeOfAnimationListener
 {
 	/**
-	 * Notified when the current animation is changed 
+	 * Notified when the current animation object is changed 
 	 */
 	void updateAnimation(Animation newAnimation);
 	

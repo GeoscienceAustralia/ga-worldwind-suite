@@ -27,6 +27,7 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.Animator;
+import au.gov.ga.worldwind.animator.application.ChangeOfAnimationListener;
 import au.gov.ga.worldwind.animator.ui.NameableTree;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -34,7 +35,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * The parameter editor panel used to edit individual animation {@link Parameter}
  * curves on a 2D x-y time-value axis.
  */
-public class ParameterEditor extends JFrame
+public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 {
 	private static final long serialVersionUID = 20101101L;
 
@@ -45,6 +46,8 @@ public class ParameterEditor extends JFrame
 	private JScrollPane rightScrollPane;
 	
 	private JTree parameterTree;
+
+	private TreeModel treeModel;
 	
 	public ParameterEditor(Animator targetApplication)
 	{
@@ -67,8 +70,8 @@ public class ParameterEditor extends JFrame
 
 	private void setupSplitPane()
 	{
-		TreeModel model = new ParameterTreeModel(targetApplication.getCurrentAnimation());
-		parameterTree = new NameableTree(model);
+		treeModel = new ParameterTreeModel(targetApplication.getCurrentAnimation());
+		parameterTree = new NameableTree(treeModel);
 		parameterTree.setEditable(false);
 		parameterTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		parameterTree.setToggleClickCount(-1);
@@ -84,6 +87,14 @@ public class ParameterEditor extends JFrame
 		containerPane.setRightComponent(rightScrollPane);
 		
 		add(containerPane);
+	}
+	
+	@Override
+	public void updateAnimation(Animation newAnimation)
+	{
+		treeModel = new ParameterTreeModel(newAnimation);
+		parameterTree.setModel(treeModel);
+		parameterTree.validate();
 	}
 	
 	/**

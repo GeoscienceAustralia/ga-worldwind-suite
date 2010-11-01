@@ -217,7 +217,7 @@ public class Animator
 	/** The renderer to use for rendering animations */
 	private AnimationRenderer renderer;
 
-	private List<AnimationChangeListener> animationChangeListeners = new ArrayList<AnimationChangeListener>();
+	private List<ChangeOfAnimationListener> changeOfAnimationListeners = new ArrayList<ChangeOfAnimationListener>();
 	
 	/**
 	 * Launch an instance of the Animator Application
@@ -496,7 +496,7 @@ public class Animator
 			cameraPathLayer = new CameraPathLayer(wwd, getCurrentAnimation());
 			wwd.addSelectListener(cameraPathLayer);
 			cameraPathLayer.setEnabled(Settings.get().isCameraPathShown());
-			animationChangeListeners.add(cameraPathLayer);
+			changeOfAnimationListeners.add(cameraPathLayer);
 		}
 
 		if (crosshair == null)
@@ -630,7 +630,7 @@ public class Animator
 		slider.addChangeListener(keyFrameClipboard);
 		slider.addChangeFrameListener(keyFrameClipboard);
 		animation.addChangeListener(keyFrameClipboard);
-		animationChangeListeners.add(keyFrameClipboard);
+		changeOfAnimationListeners.add(keyFrameClipboard);
 	}
 
 	/**
@@ -654,7 +654,7 @@ public class Animator
 		slider.addChangeListener(objectPropertiesPanel);
 		getView().addPropertyChangeListener(AVKey.VIEW, objectPropertiesPanel);
 		
-		animationChangeListeners.add(sideBar);
+		changeOfAnimationListeners.add(sideBar);
 	}
 
 	/**
@@ -760,6 +760,7 @@ public class Animator
 	private void initialiseParameterEditor()
 	{
 		this.parameterEditor = new ParameterEditor(this);
+		changeOfAnimationListeners.add(parameterEditor);
 	}
 	
 	/**
@@ -1811,9 +1812,9 @@ public class Animator
 	
 	private void notifyAnimationChanged(Animation newAnimation)
 	{
-		for (int i = animationChangeListeners.size() - 1; i >= 0; i--)
+		for (int i = changeOfAnimationListeners.size() - 1; i >= 0; i--)
 		{
-			animationChangeListeners.get(i).updateAnimation(newAnimation);
+			changeOfAnimationListeners.get(i).updateAnimation(newAnimation);
 		}
 	}
 
