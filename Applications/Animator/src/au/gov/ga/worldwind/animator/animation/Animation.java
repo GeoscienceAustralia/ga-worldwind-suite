@@ -157,6 +157,13 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	Camera getCamera();
 	
 	/**
+	 * Set this animation's camera.
+	 * 
+	 * @param camera Camera to use in this animation
+	 */
+	void setCamera(Camera camera);
+	
+	/**
 	 * @return A list of all objects being animated in this animation. Ordering is in draw order (if applicable).
 	 */
 	List<Animatable> getAnimatableObjects();

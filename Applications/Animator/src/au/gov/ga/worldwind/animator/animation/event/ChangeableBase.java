@@ -41,6 +41,21 @@ public abstract class ChangeableBase implements Changeable
 		this.changeListeners.remove(changeListener);
 	}
 	
+	@Override
+	public void copyChangeListenersTo(Changeable changeable)
+	{
+		for(AnimationEventListener listener : this.changeListeners)
+		{
+			changeable.addChangeListener(listener);
+		}
+	}
+	
+	@Override
+	public void clearChangeListeners()
+	{
+		this.changeListeners.clear();
+	}
+	
 	/**
 	 * @return The (ordered) list of registered change listeners
 	 */

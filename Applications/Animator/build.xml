@@ -6,6 +6,7 @@
 	
 	<property name="application_version" value="2.0-SNAPSHOT"/>
 	<property name="application_class" value="au.gov.ga.worldwind.animator.application.Animator"/>
+	<property name="executable_class" value="au.gov.ga.worldwind.animator.application.Executable"/>
 	<property name="application_jar" value="ga-animator-${application_version}.jar" />
 	<property name="application_uber_jar" value="ga-animator-full-${application_version}.jar" />
 	
@@ -13,9 +14,7 @@
 	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-${worldwind_version}" />
 	<property name="worldwind_jar" value="worldwind.jar" />
 	
-	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
-	<property name="jogl_windows_location" value="./lib/native/windows-i586" />
-	
+	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />	
 	<property name="common_src_dir" value="${basedir}/../Common/src" />
 	
 	<property name="src_dir" value="${basedir}/src" />
@@ -144,22 +143,19 @@
 
 		<jar destfile="${target_dir}/${application_uber_jar}">
 			<fileset dir="${build_dir}" excludes="**/*.jar,**/*.zip"/>
+			<fileset dir="${jogl_dir}" includes="native/**" />
 			<zipfileset src="${target_dir}/temp.zip">
 				<patternset refid="manifest_exclude" />
 			</zipfileset>
 
 			<manifest>
-				<attribute name="Main-Class" value="${application_class}" />
+				<attribute name="Main-Class" value="${executable_class}" />
 			</manifest>
 		</jar>
 
 		<delete file="${target_dir}/temp.zip" />
 		
-		<copy todir="${lib_dir}">
-			<fileset dir="${jogl_dir}" includes="native/**" />
-		</copy>
-		
-		<echo file="${target_dir}/${run_file}">java -Djava.library.path=${jogl_windows_location} -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${application_uber_jar}</echo>
+		<echo file="${target_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${application_uber_jar} &gt;&gt; animator.log 2&gt;&amp;1</echo>
 		
 	</target>
 

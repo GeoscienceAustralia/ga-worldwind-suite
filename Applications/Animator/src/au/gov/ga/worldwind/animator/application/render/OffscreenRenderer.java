@@ -24,9 +24,9 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 public class OffscreenRenderer extends AnimationRendererBase
 {
-	private WorldWindow worldWindow;
-	private Animator targetApplication;
-	private AnimatorSceneController animatorSceneController;
+	protected WorldWindow wwd;
+	protected Animator targetApplication;
+	protected AnimatorSceneController animatorSceneController;
 
 	private int frameBufferId;
 	private int textureId;
@@ -44,7 +44,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 		Validate.notNull(wwd, "A world window is required");
 		Validate.notNull(targetApplication, "An Animator application is required");
 
-		this.worldWindow = wwd;
+		this.wwd = wwd;
 		this.targetApplication = targetApplication;
 		this.animatorSceneController = (AnimatorSceneController) wwd.getSceneController();
 	}
@@ -92,7 +92,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			}
 		};
 
-		worldWindow.redrawNow();
+		wwd.redrawNow();
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 		animatorSceneController.addPostPaintTask(postRenderTask);
 
 		//redraw, and then wait for the screenshot to complete 
-		worldWindow.redraw();
+		wwd.redraw();
 		screenshotTask.waitForScreenshot();
 	}
 
@@ -166,7 +166,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			}
 		});
 
-		worldWindow.redrawNow();
+		wwd.redrawNow();
 		resetViewingParameters();
 	}
 
@@ -180,7 +180,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 		detailHintBackup = targetApplication.getDetailedElevationModel().getDetailHint();
 		targetApplication.getDetailedElevationModel().setDetailHint(detailHint);
 
-		OrbitView orbitView = (OrbitView) worldWindow.getView();
+		OrbitView orbitView = (OrbitView) wwd.getView();
 		detectCollisions = orbitView.isDetectCollisions();
 		orbitView.setDetectCollisions(false);
 	}
@@ -282,7 +282,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 		targetApplication.reenableUtilityLayers();
 
 		targetApplication.getDetailedElevationModel().setDetailHint(detailHintBackup);
-		((OrbitView) worldWindow.getView()).setDetectCollisions(detectCollisions);
+		((OrbitView) wwd.getView()).setDetectCollisions(detectCollisions);
 		ImmediateMode.setImmediate(wasImmediate);
 	}
 }

@@ -88,6 +88,7 @@ public class AnimatorConfiguration
 	private static void initialiseWorldWindConfiguration()
 	{
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
+		//Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class.getName());
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, LenientBasicOrbitView.class.getName());
 		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, AnimatorSceneController.class.getName());
 		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME, ImmediateTaskService.class.getName());

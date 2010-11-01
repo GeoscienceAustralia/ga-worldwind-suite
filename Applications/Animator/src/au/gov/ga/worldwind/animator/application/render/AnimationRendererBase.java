@@ -46,40 +46,45 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 			@Override
 			public void run()
 			{
-				notifyStarted();
-				
-				doPreRender(animation, firstFrame, lastFrame, outputDir, frameName, detailHint, alpha);
-				
-				int numeralPadLength = String.valueOf(lastFrame).length();
-				
-				for (int frame = firstFrame; frame <= lastFrame; frame ++)
-				{
-					currentFrame = frame;
-					notifyStartingFrame(frame);
-					
-					File targetFile = createFileForFrame(frame, outputDir, frameName, numeralPadLength);
-					
-					doRender(animation, frame, targetFile, detailHint, alpha);
-					
-					notifyFinishedFrame(frame);
-					
-					completedPercentage = (double)(frame - firstFrame) / (double)(lastFrame - firstFrame);
-					
-					if (isStopped())
-					{
-						break;
-					}
-				}
-				
-				doPostRender(animation, firstFrame, lastFrame, outputDir, frameName, detailHint, alpha);
-				
-				notifyCompleted(lastFrame);
+				renderOnThread(animation, firstFrame, lastFrame, outputDir, frameName, detailHint, alpha);
 			}
-
 		};
 
 		Thread renderThread = DaemonThreadFactory.newThread(renderTask, "Animator render thread");
 		renderThread.start();
+	}
+	
+	protected void renderOnThread(Animation animation, int firstFrame, int lastFrame, File outputDir, String frameName, double detailHint, boolean alpha)
+	{
+		notifyStarted();
+		doPreRender(animation, firstFrame, lastFrame, outputDir, frameName, detailHint, alpha);
+		
+		int numeralPadLength = String.valueOf(lastFrame).length();
+		
+		for (int frame = firstFrame; frame <= lastFrame; frame ++)
+		{
+			currentFrame = frame;
+			notifyStartingFrame(frame);
+			
+			renderFrame(frame, animation, outputDir, frameName, numeralPadLength, detailHint, alpha);
+			
+			notifyFinishedFrame(frame);
+			completedPercentage = (double)(frame - firstFrame) / (double)(lastFrame - firstFrame);
+			
+			if (isStopped())
+			{
+				break;
+			}
+		}
+		
+		doPostRender(animation, firstFrame, lastFrame, outputDir, frameName, detailHint, alpha);
+		notifyCompleted(lastFrame);
+	}
+	
+	protected void renderFrame(int frame, Animation animation, File outputDir, String frameName, int numeralPadLength, double detailHint, boolean alpha)
+	{
+		File targetFile = createFileForFrame(frame, outputDir, frameName, numeralPadLength);
+		doRender(animation, frame, targetFile, detailHint, alpha);
 	}
 
 	private void resetRenderFlags()
@@ -89,7 +94,7 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 		started.set(false);
 	}
 	
-	private File createFileForFrame(int frame, File outputDir, String frameName, int numeralPadLength)
+	protected File createFileForFrame(int frame, File outputDir, String frameName, int numeralPadLength)
 	{
 		return new File(outputDir, createImageSequenceName(frameName, frame, numeralPadLength));
 	}
@@ -97,7 +102,7 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 	/**
 	 * @return The name of a file in an image sequence, of the form <code>{prefix}{padded sequence number}.tga</code>
 	 */
-	private String createImageSequenceName(String prefix, int sequenceNumber, int padTo)
+	protected String createImageSequenceName(String prefix, int sequenceNumber, int padTo)
 	{
 		return prefix + FileUtil.paddedInt(sequenceNumber, padTo) + ".tga";
 	}

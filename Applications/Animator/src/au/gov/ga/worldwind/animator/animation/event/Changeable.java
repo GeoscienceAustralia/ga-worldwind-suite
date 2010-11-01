@@ -30,6 +30,18 @@ public interface Changeable
 	void removeChangeListener(AnimationEventListener changeListener);
 	
 	/**
+	 * Copy all change listeners from this to another Changeable.
+	 * 
+	 * @param changeable Changeable to copy change listeners to
+	 */
+	void copyChangeListenersTo(Changeable changeable);
+	
+	/**
+	 * Remove all change listeners.
+	 */
+	void clearChangeListeners();
+	
+	/**
 	 * Fire a event of type {@link AnimationEvent.Type#ADD}
 	 * <p/>
 	 * Should be invoked when this object is being added to some parent container (e.g. a {@link KeyFrame} is being added to an {@link Animation})

@@ -312,6 +312,22 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	{
 		return this.renderCamera;
 	}
+	
+	@Override
+	public void setCamera(Camera camera)
+	{
+		if(this.renderCamera != camera)
+		{
+			//if a camera already existed, swap the change listeners
+			if(this.renderCamera != null)
+			{
+				this.renderCamera.copyChangeListenersTo(camera);
+				this.renderCamera.clearChangeListeners();
+			}
+			
+			this.renderCamera = camera;
+		}
+	}
 
 	@Override
 	public List<Animatable> getAnimatableObjects()
