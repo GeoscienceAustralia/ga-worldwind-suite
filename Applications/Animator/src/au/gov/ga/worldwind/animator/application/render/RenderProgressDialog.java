@@ -42,8 +42,9 @@ public class RenderProgressDialog implements RenderEventListener
 	public void started()
 	{
 		progressMonitor = new ProgressMonitor(owner, getMessage(getRenderProgressDialogTitleKey()), "", 0, 100);
-		progressMonitor.setMillisToDecideToPopup(1);
-		progressMonitor.setMillisToPopup(1);
+		progressMonitor.setMillisToPopup(0);
+		progressMonitor.setMillisToDecideToPopup(0);
+		progressMonitor.setProgress(0);
 	}
 
 	@Override
