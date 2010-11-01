@@ -12,7 +12,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -337,15 +336,17 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 	}
 	
 	@Override
-	public void refreshView(ChangeEvent e)
+	public void updateAnimation(Animation newAnimation)
 	{
-		if (e != null && e.getSource() instanceof Animation)
+		if (newAnimation == null)
 		{
-			this.animation = (Animation)e.getSource();
-			treeModel = new AnimationTreeModel(animation);
-			objectTree.setModel(treeModel);
-			objectTree.setTransferHandler(new AnimationBrowserTransferHandler(animation, objectTree));
+			return;
 		}
+		
+		this.animation = newAnimation;
+		treeModel = new AnimationTreeModel(animation);
+		objectTree.setModel(treeModel);
+		objectTree.setTransferHandler(new AnimationBrowserTransferHandler(animation, objectTree));
 		objectTree.validate();
 	}
 }

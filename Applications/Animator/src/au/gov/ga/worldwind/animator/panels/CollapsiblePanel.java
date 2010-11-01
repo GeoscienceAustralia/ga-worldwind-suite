@@ -2,8 +2,8 @@ package au.gov.ga.worldwind.animator.panels;
 
 import javax.swing.Icon;
 import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
 
+import au.gov.ga.worldwind.animator.application.AnimationChangeListener;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitLayout;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
@@ -13,7 +13,7 @@ import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface CollapsiblePanel extends Nameable
+public interface CollapsiblePanel extends Nameable, AnimationChangeListener
 {
 	/**
 	 * @return The {@link JPanel} backing this {@link CollapsiblePanel}
@@ -88,13 +88,4 @@ public interface CollapsiblePanel extends Nameable
 	 * @return The icon associated with this panel, or <code>null</code> if one has not been specified.
 	 */
 	public Icon getIcon();
-	
-	/**
-	 * Prompt this panel to refresh it's view of it's model.
-	 * <p/>
-	 * Should be triggered when a major application event occurs that
-	 * is out of the scope of individual listeners etc.
-	 */
-	public void refreshView(ChangeEvent e);
-	
 }

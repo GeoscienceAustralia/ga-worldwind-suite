@@ -17,6 +17,7 @@ import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.KeyFrameEvent;
+import au.gov.ga.worldwind.animator.application.AnimationChangeListener;
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -24,8 +25,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * A WorldWind Layer that displays the camera path of a given {@link Animation}
  * in the 3D world.
  */
-public class CameraPathLayer extends AbstractLayer implements AnimationEventListener,
-		SelectListener
+public class CameraPathLayer extends AbstractLayer implements AnimationEventListener, SelectListener, AnimationChangeListener
 {
 	private EyePositionPath eyePositionPath;
 	private LookatPositionPath lookatPositionPath;
@@ -39,8 +39,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 	private boolean animationChanged = true;
 
 	/** A thread used to update the vertex buffers outside of the render thread */
-	private ExecutorService updater = Executors.newFixedThreadPool(1, new DaemonThreadFactory(
-			"Camera Path Updater"));
+	private ExecutorService updater = Executors.newFixedThreadPool(1, new DaemonThreadFactory("Camera Path Updater"));
 	private Future<UpdateTask> currentTask;
 	private Future<UpdateTask> nextTask;
 	private WorldWindow worldWindow;
@@ -68,7 +67,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		keyFrameMarkers = new KeyFrameMarkers(wwd, animation);
 		worldWindow = wwd;
 
-		setAnimation(animation);
+		updateAnimation(animation);
 	}
 
 	@Override
@@ -106,7 +105,7 @@ public class CameraPathLayer extends AbstractLayer implements AnimationEventList
 		}
 	}
 
-	public void setAnimation(Animation animation)
+	public void updateAnimation(Animation animation)
 	{
 		if (this.animation != null)
 		{

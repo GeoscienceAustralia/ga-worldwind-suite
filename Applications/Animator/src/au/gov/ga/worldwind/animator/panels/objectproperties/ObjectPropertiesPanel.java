@@ -182,13 +182,15 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 	// Event listener methods
 	
 	@Override
-	public void refreshView(ChangeEvent e)
+	public void updateAnimation(Animation newAnimation)
 	{
-		if (e != null && e.getSource() instanceof Animation)
+		if (newAnimation == null)
 		{
-			this.animation = (Animation)e.getSource();
-			this.editorMap.clear();
+			return;
 		}
+		
+		this.animation = newAnimation;
+		this.editorMap.clear();
 		updatePanelDisplay();
 	}
 

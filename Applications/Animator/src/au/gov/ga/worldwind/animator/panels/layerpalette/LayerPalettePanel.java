@@ -24,7 +24,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -228,15 +227,17 @@ public class LayerPalettePanel extends CollapsiblePanelBase
 	}
 	
 	@Override
-	public void refreshView(ChangeEvent e)
+	public void updateAnimation(Animation newAnimation)
 	{
-		if (e != null && e.getSource() instanceof Animation)
+		if (newAnimation == null)
 		{
-			this.animation = (Animation)e.getSource();
-			layerList.setCellRenderer(new LayerListRenderer(animation));
-			addLayerToAnimationAction.setEnabled(!animation.hasLayer((LayerIdentifier)layerList.getSelectedValue()));
-			animation.addChangeListener(animationListener);
+			return;
 		}
+		
+		this.animation = newAnimation;
+		layerList.setCellRenderer(new LayerListRenderer(animation));
+		addLayerToAnimationAction.setEnabled(!animation.hasLayer((LayerIdentifier)layerList.getSelectedValue()));
+		animation.addChangeListener(animationListener);
 		layerList.validate();
 	}
 	

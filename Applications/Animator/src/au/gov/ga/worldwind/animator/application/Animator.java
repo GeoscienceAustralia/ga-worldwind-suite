@@ -44,7 +44,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
-import javax.swing.event.ChangeEvent;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -218,6 +217,8 @@ public class Animator
 	/** The renderer to use for rendering animations */
 	private AnimationRenderer renderer;
 
+	private List<AnimationChangeListener> animationChangeListeners = new ArrayList<AnimationChangeListener>();
+	
 	/**
 	 * Launch an instance of the Animator Application
 	 */
@@ -495,6 +496,7 @@ public class Animator
 			cameraPathLayer = new CameraPathLayer(wwd, getCurrentAnimation());
 			wwd.addSelectListener(cameraPathLayer);
 			cameraPathLayer.setEnabled(Settings.get().isCameraPathShown());
+			animationChangeListeners.add(cameraPathLayer);
 		}
 
 		if (crosshair == null)
@@ -628,6 +630,7 @@ public class Animator
 		slider.addChangeListener(keyFrameClipboard);
 		slider.addChangeFrameListener(keyFrameClipboard);
 		animation.addChangeListener(keyFrameClipboard);
+		animationChangeListeners.add(keyFrameClipboard);
 	}
 
 	/**
@@ -650,6 +653,8 @@ public class Animator
 		slider.addChangeFrameListener(objectPropertiesPanel);
 		slider.addChangeListener(objectPropertiesPanel);
 		getView().addPropertyChangeListener(AVKey.VIEW, objectPropertiesPanel);
+		
+		animationChangeListeners.add(sideBar);
 	}
 
 	/**
@@ -1102,15 +1107,6 @@ public class Animator
 			frame.dispose();
 			System.exit(0);
 		}
-	}
-
-	/**
-	 * Update the sidebar panels to reflect any changes in the animation
-	 * structure.
-	 */
-	private void updateSideBar()
-	{
-		sideBar.refreshPanels(new ChangeEvent(getCurrentAnimation()));
 	}
 
 	/**
@@ -1807,12 +1803,18 @@ public class Animator
 		{
 			actionFactory.getUseScaledZoomAction().setSelected(animation.isZoomScalingRequired());
 		}
-		keyFrameClipboard.updateAnimation(animation);
-		cameraPathLayer.setAnimation(animation);
+		notifyAnimationChanged(animation);
 		updateAnimationListeners();
 		updateLayersInModel();
 		updateElevationModelOnGlobe();
-		updateSideBar();
+	}
+	
+	private void notifyAnimationChanged(Animation newAnimation)
+	{
+		for (int i = animationChangeListeners.size() - 1; i >= 0; i--)
+		{
+			animationChangeListeners.get(i).updateAnimation(newAnimation);
+		}
 	}
 
 	public Animation getCurrentAnimation()

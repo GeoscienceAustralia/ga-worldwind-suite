@@ -6,8 +6,9 @@ import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.event.ChangeEvent;
 
+import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.application.AnimationChangeListener;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitConstraints;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.l2fprod.CollapsibleGroup;
@@ -22,7 +23,7 @@ import au.gov.ga.worldwind.common.ui.collapsiblesplit.l2fprod.CollapsibleGroup;
  * @author James Navin (james.navin@ga.gov.au)
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  */
-public class SideBar extends JPanel
+public class SideBar extends JPanel implements AnimationChangeListener
 {
 	private static final long serialVersionUID = 20100906;
 
@@ -128,14 +129,12 @@ public class SideBar extends JPanel
 		validate();
 	}
 
-	/**
-	 * Refresh the panels contained within the sidebar
-	 */
-	public void refreshPanels(ChangeEvent e)
+	@Override
+	public void updateAnimation(Animation newAnimation)
 	{
 		for (CollapsiblePanel panel : panels)
 		{
-			panel.refreshView(e);
+			panel.updateAnimation(newAnimation);
 		}
 	}
 }

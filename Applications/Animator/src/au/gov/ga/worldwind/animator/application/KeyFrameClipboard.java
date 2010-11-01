@@ -26,7 +26,7 @@ import au.gov.ga.worldwind.common.ui.BasicAction;
 /**
  * A clipboard that holds a keyframe and can perform cut-copy-paste operations 
  */
-public class KeyFrameClipboard implements CurrentFrameChangeListener, ChangeFrameListener, AnimationEventListener
+public class KeyFrameClipboard implements CurrentFrameChangeListener, ChangeFrameListener, AnimationEventListener, AnimationChangeListener
 {
 	/** The  key frame currently in the clipboard */
 	private KeyFrame clipboardKeyFrame;
