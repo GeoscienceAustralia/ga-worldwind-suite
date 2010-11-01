@@ -82,37 +82,39 @@ public abstract class AbstractCameraPositionPath implements Renderable
 		GL gl = dc.getGL();
 		gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 		gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
-
 		boolean popRefCenter = false;
-		if (pathReferenceCenter != null)
-		{
-			dc.getView().pushReferenceCenter(dc, pathReferenceCenter);
-			popRefCenter = true;
-		}
 		try
 		{
-			// Points are drawn over the line to prevent gaps forming when 
-			// antialiasing and smoothing is applied to the line
-			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-			gl.glEnableClientState(GL.GL_COLOR_ARRAY);
-			gl.glShadeModel(GL.GL_SMOOTH);
-			gl.glEnable(GL.GL_LINE_SMOOTH);
-			gl.glEnable(GL.GL_POINT_SMOOTH);
-			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-			gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
-			gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
-			gl.glLineWidth(2.0f);
-			gl.glPointSize(2.0f);
-			int numberOfPointsInPath =
-					animation.getFrameOfLastKeyFrame() - animation.getFrameOfFirstKeyFrame() + 1;
-
-			//don't draw lines with less than 2 points
-			if (numberOfPointsInPath <= 1)
-				return;
-
 			synchronized (pathBufferLock)
 			{
+				if (pathReferenceCenter != null)
+				{
+					dc.getView().pushReferenceCenter(dc, pathReferenceCenter);
+					popRefCenter = true;
+				}
+				
+				// Points are drawn over the line to prevent gaps forming when 
+				// antialiasing and smoothing is applied to the line
+				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+				gl.glEnableClientState(GL.GL_COLOR_ARRAY);
+				gl.glShadeModel(GL.GL_SMOOTH);
+				gl.glEnable(GL.GL_LINE_SMOOTH);
+				gl.glEnable(GL.GL_POINT_SMOOTH);
+				gl.glEnable(GL.GL_BLEND);
+				gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+				gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
+				gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
+				gl.glLineWidth(2.0f);
+				gl.glPointSize(2.0f);
+				int numberOfPointsInPath = animation.getFrameOfLastKeyFrame() - animation.getFrameOfFirstKeyFrame() + 1;
+	
+				//don't draw lines with less than 2 points
+				if (numberOfPointsInPath <= 1)
+				{
+					return;
+				}
+
+			
 				if (enableDepthTesting)
 				{
 					gl.glEnable(GL.GL_DEPTH_TEST);
