@@ -35,7 +35,7 @@ import au.gov.ga.worldwind.common.util.HSLColor;
  * An extension of the {@link DefaultTreeCellRenderer} that decorates the standard tree components
  * with additional elements specific to the animation browser (check boxes, buttons etc.)
  */
-class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
+class AnimationBrowserTreeRenderer extends JPanel implements TreeCellRenderer
 {
 	private static final long serialVersionUID = 1433749823115631800L;
 	
@@ -51,7 +51,7 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 
 	private TreeCellInteractionListener interactionListener;
 	
-	public AnimationTreeRenderer()
+	public AnimationBrowserTreeRenderer()
 	{
 		setOpaque(false);
 		setLayout(new BorderLayout(3,3));

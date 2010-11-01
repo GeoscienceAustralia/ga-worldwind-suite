@@ -95,7 +95,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		objectTree = new NameableTree(treeModel);
 		objectTree.setEditable(false);
 		objectTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		objectTree.setCellRenderer(new AnimationTreeRenderer());
+		objectTree.setCellRenderer(new AnimationBrowserTreeRenderer());
 		objectTree.setToggleClickCount(-1);
 		objectTree.addTreeSelectionListener(new TreeSelectionListener()
 		{
