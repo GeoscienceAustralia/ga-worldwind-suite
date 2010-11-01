@@ -427,6 +427,7 @@ public class AnimatorActionFactory
 		
 		// Show parameter editor
 		showParameterEditorAction = new SelectableAction(getMessage(getShowParameterEditorMenuLabelKey()), null, false);
+		showParameterEditorAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK));
 		showParameterEditorAction.addActionListener(new ActionListener()
 		{
 			@Override

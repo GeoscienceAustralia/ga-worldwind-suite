@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.animator.ui.parametereditor;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getParameterEditorWindowLabelKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
+import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -45,7 +46,7 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 		this.targetApplication = targetApplication;
 		
 		this.setTitle(getMessage(getParameterEditorWindowLabelKey()));
-		
+		this.setSize(new Dimension(640, 480));
 		this.addWindowListener(new WindowAdapter()
 		{
 			@Override
@@ -62,6 +63,7 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 	{
 		treeModel = new ParameterTreeModel(targetApplication.getCurrentAnimation());
 		parameterTree = new NameableTree(treeModel);
+		parameterTree.setCellRenderer(new ParameterTreeRenderer());
 		parameterTree.setEditable(false);
 		parameterTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		parameterTree.setToggleClickCount(-1);

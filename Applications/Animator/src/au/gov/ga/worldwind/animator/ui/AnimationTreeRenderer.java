@@ -8,8 +8,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -24,20 +22,15 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
-import au.gov.ga.worldwind.animator.ui.tristate.ArmableTriStateModel;
-import au.gov.ga.worldwind.animator.ui.tristate.EnableableTriStateModel;
-import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox;
 import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBoxModel;
-import au.gov.ga.worldwind.animator.util.Armable;
-import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.common.util.HSLColor;
 
 /**
- * An extension of the {@link DefaultTreeCellRenderer} that decorates the standard tree components
- * with additional elements specific to the animation browser (check boxes, buttons etc.)
+ * An extension of the {@link DefaultTreeCellRenderer} that allows the standard tree components
+ * to be decorated with additional elements (check boxes, buttons etc.) that can be tailored to specific uses.
  */
-class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
+public abstract class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 {
 	private static final long serialVersionUID = 1433749823115631800L;
 	
@@ -45,12 +38,7 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 	private DefaultTreeCellRenderer label;
 	
 	private JPanel buttonPanel;
-	private TriStateCheckBox enabledTriCheck;
-	private TriStateCheckBox armedTriCheck;
 	
-	private Map<Integer, TriStateModelLocation> enabledTriCheckMap = new HashMap<Integer, TriStateModelLocation>();
-	private Map<Integer, TriStateModelLocation> armedTriCheckMap = new HashMap<Integer, TriStateModelLocation>();
-
 	private TreeCellInteractionListener interactionListener;
 	
 	public AnimationTreeRenderer()
@@ -62,9 +50,6 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 		initialiseLabel();
 		
 		buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
-		enabledTriCheck = new TriStateCheckBox();
-
-		armedTriCheck = new TriStateCheckBox(Icons.armed.getIcon(), Icons.disarmed.getIcon(), Icons.partialArmed.getIcon());
 		
 		interactionListener = new TreeCellInteractionListener();
 	}
@@ -90,91 +75,9 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 		
 		validate();
 		
-		updateEnabledTriCheckMap(value, row);
-		updateArmedTriCheckMap(value, row);
+		updateButtonPanelLocationMaps(value, row);
 		
 		return this;
-	}
-
-	/**
-	 * @param value
-	 */
-	private void updateButtonPanel(Object value)
-	{
-		buttonPanel.setOpaque(false);
-		
-		updateEnabledTriCheck(value);
-		updateArmedTriCheck(value);
-		
-		add(buttonPanel, BorderLayout.WEST);
-	}
-
-	/**
-	 * Updates the state of the enabled tristate checkbox for the given value and packs it into the parent container.
-	 */
-	private void updateEnabledTriCheck(Object value)
-	{
-		if (!(value instanceof Enableable))
-		{
-			buttonPanel.remove(enabledTriCheck);
-			return;
-		}
-		
-		EnableableTriStateModel model = new EnableableTriStateModel((Enableable)value);
-		enabledTriCheck.setModel(model);
-		buttonPanel.add(enabledTriCheck);
-	}
-	
-	/**
-	 * Updates the state of the armed tristate checkbox for the given value and packs it into the parent container.
-	 */
-	private void updateArmedTriCheck(Object value)
-	{
-		if (!(value instanceof Armable))
-		{
-			buttonPanel.remove(armedTriCheck);
-			return;
-		}
-		
-		ArmableTriStateModel model = new ArmableTriStateModel((Armable)value);
-		armedTriCheck.setModel(model);
-		buttonPanel.add(armedTriCheck);
-	}
-	
-	
-	private void updateEnabledTriCheckMap(Object value, int row)
-	{
-		if (!(value instanceof Enableable))
-		{
-			enabledTriCheckMap.remove(row);
-		}
-		
-		Rectangle triCheckBounds = new Rectangle(enabledTriCheck.getPreferredSize());
-		triCheckBounds.x += enabledTriCheck.getLocation().x;
-		
-		enabledTriCheckMap.put(row, new TriStateModelLocation(triCheckBounds, enabledTriCheck.getModel()));
-	}
-
-	private void updateArmedTriCheckMap(Object value, int row)
-	{
-		if (!(value instanceof Armable))
-		{
-			armedTriCheckMap.remove(row);
-		}
-		
-		Rectangle triCheckBounds = new Rectangle(armedTriCheck.getPreferredSize());
-		triCheckBounds.x += armedTriCheck.getLocation().x;
-		
-		armedTriCheckMap.put(row, new TriStateModelLocation(triCheckBounds, armedTriCheck.getModel()));
-	}
-
-	private void updateLabel(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus)
-	{
-		label.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-		label.setIcon(getIconForRowValue(value));
-		
-		// We MUST re-add the label to our container after calling getTreeCellRendererComponent or the tree row sizes become wrong
-		add(label, BorderLayout.CENTER);
 	}
 
 	private void updateTree(JTree newTree)
@@ -187,8 +90,45 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 		tree = newTree;
 		tree.addMouseListener(interactionListener);
 	}
+	
+	private void updateButtonPanel(Object value)
+	{
+		buttonPanel.setOpaque(false);
+		
+		updateButtonPanelContents(value);
+		
+		add(buttonPanel, BorderLayout.WEST);
+	}
 
-	private Icon getIconForRowValue(Object rowValue)
+	/**
+	 * Update any items to be added to this row's button panel
+	 * 
+	 * @param value The value at the current row in the tree
+	 */
+	protected abstract void updateButtonPanelContents(Object value);
+	
+	private void updateLabel(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus)
+	{
+		label.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+		label.setIcon(getIconForRowValue(value));
+		
+		// We MUST re-add the label to our container after calling getTreeCellRendererComponent or the tree row sizes become wrong
+		add(label, BorderLayout.CENTER);
+	}
+
+	/**
+	 * Update the location maps for items to be included in the button panel
+	 * 
+	 * @param value The value at the current row in the tree
+	 * @param row The current row in the tree
+	 */
+	protected abstract void updateButtonPanelLocationMaps(Object value, int row);
+
+	
+	/**
+	 * @return The icon to use for the object at the current row in the tree
+	 */
+	protected Icon getIconForRowValue(Object rowValue)
 	{
 		if (isAnimationRow(rowValue))
 		{
@@ -213,27 +153,27 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 		return null;
 	}
 	
-	private boolean isElevationModelRow(Object rowValue)
+	protected boolean isElevationModelRow(Object rowValue)
 	{
 		return rowValue instanceof ElevationModelIdentifier;
 	}
 
-	private boolean isAnimatableLayerRow(Object rowValue)
+	protected boolean isAnimatableLayerRow(Object rowValue)
 	{
 		return rowValue instanceof AnimatableLayer;
 	}
 
-	private boolean isAnimationRow(Object rowValue)
+	protected boolean isAnimationRow(Object rowValue)
 	{
 		return rowValue instanceof Animation;
 	}
 	
-	private boolean isAnimatableObjectRow(Object rowValue)
+	protected boolean isAnimatableObjectRow(Object rowValue)
 	{
 		return rowValue instanceof Animatable;
 	}
 	
-	private boolean isParameterRow(Object rowValue)
+	protected boolean isParameterRow(Object rowValue)
 	{
 		return rowValue instanceof Parameter;
 	}
@@ -243,7 +183,7 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 	 * <p/>
 	 * Used to locate the correct model to fire on a mouse event.
 	 */
-	private static final class TriStateModelLocation
+	protected static final class TriStateModelLocation
 	{
 		private Rectangle bounds;
 		private TriStateCheckBoxModel model;
@@ -280,52 +220,29 @@ class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 			}
 			
 			int mouseRow = tree.getRowForLocation(e.getX(), e.getY());
-			if (isEnabledTriCheckClick(mouseRow, e.getPoint()))
-			{
-				enabledTriCheckMap.get(mouseRow).getModel().iterateState();
-			}
-			else if (isArmedTriCheckClick(mouseRow, e.getPoint()))
-			{
-				armedTriCheckMap.get(mouseRow).getModel().iterateState();
-			}
+			handleMousePressed(mouseRow, e.getPoint());
 			
 			tree.repaint();
 		}
-
-		private boolean isEnabledTriCheckClick(int mouseRow, Point clickPoint)
-		{
-			if (!enabledTriCheckMap.containsKey(mouseRow))
-			{
-				return false;
-			}
-			
-			Point relativeMouseCoords = calculateRelativeMouseCoords(clickPoint, mouseRow);
-			
-			TriStateModelLocation modelLocation = enabledTriCheckMap.get(mouseRow);
-			return modelLocation.containsPoint(relativeMouseCoords);
-		}
 		
-		private boolean isArmedTriCheckClick(int mouseRow, Point clickPoint)
-		{
-			if (!armedTriCheckMap.containsKey(mouseRow))
-			{
-				return false;
-			}
-			
-			Point relativeMouseCoords = calculateRelativeMouseCoords(clickPoint, mouseRow);
-			
-			TriStateModelLocation modelLocation = armedTriCheckMap.get(mouseRow);
-			return modelLocation.containsPoint(relativeMouseCoords);
-		}
-		
-		/**
-		 * Adjust the provided mouse coordinates to coordinates relative to the current row in the tree
-		 */
-		private Point calculateRelativeMouseCoords(Point absoluteCoords, int mouseRow)
-		{
-			Rectangle rowBounds = tree.getRowBounds(mouseRow);
-			return new Point(absoluteCoords.x - rowBounds.x, absoluteCoords.y - rowBounds.y);
-		}
-		
+	}
+	
+	/**
+	 * Handle a mouse pressed event at the provided row in the tree
+	 */
+	protected abstract void handleMousePressed(int mouseRow, Point clickPoint);
+	
+	/**
+	 * Adjust the provided mouse coordinates to coordinates relative to the current row in the tree
+	 */
+	protected Point calculateRelativeMouseCoords(Point absoluteCoords, int mouseRow)
+	{
+		Rectangle rowBounds = tree.getRowBounds(mouseRow);
+		return new Point(absoluteCoords.x - rowBounds.x, absoluteCoords.y - rowBounds.y);
+	}
+	
+	public JPanel getButtonPanel()
+	{
+		return buttonPanel;
 	}
 }
