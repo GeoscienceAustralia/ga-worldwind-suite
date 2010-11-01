@@ -682,7 +682,7 @@ public class FrameSlider extends JComponent
 	{
 		for (CurrentFrameChangeListener changeListener : changeListeners)
 		{
-			changeListener.currentFrameChanged(value);
+			changeListener.currentFrameChanged(getValue());
 		}
 	}
 
