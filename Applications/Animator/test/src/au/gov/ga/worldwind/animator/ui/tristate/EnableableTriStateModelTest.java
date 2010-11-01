@@ -1,10 +1,11 @@
-package au.gov.ga.worldwind.animator.panels.animationbrowser;
+package au.gov.ga.worldwind.animator.ui.tristate;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import au.gov.ga.worldwind.animator.ui.tristate.EnableableTriStateModel;
 import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox.State;
 import au.gov.ga.worldwind.animator.util.Enableable;
 

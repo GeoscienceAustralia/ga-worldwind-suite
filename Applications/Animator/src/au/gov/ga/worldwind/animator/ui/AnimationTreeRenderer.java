@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.panels.animationbrowser;
+package au.gov.ga.worldwind.animator.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,7 +37,7 @@ import au.gov.ga.worldwind.common.util.HSLColor;
  * An extension of the {@link DefaultTreeCellRenderer} that decorates the standard tree components
  * with additional elements specific to the animation browser (check boxes, buttons etc.)
  */
-class AnimationBrowserTreeRenderer extends JPanel implements TreeCellRenderer
+class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 {
 	private static final long serialVersionUID = 1433749823115631800L;
 	
@@ -53,7 +53,7 @@ class AnimationBrowserTreeRenderer extends JPanel implements TreeCellRenderer
 
 	private TreeCellInteractionListener interactionListener;
 	
-	public AnimationBrowserTreeRenderer()
+	public AnimationTreeRenderer()
 	{
 		setOpaque(false);
 		setLayout(new BorderLayout(3,3));

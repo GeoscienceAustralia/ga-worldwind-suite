@@ -1,7 +1,5 @@
-package au.gov.ga.worldwind.animator.panels.animationbrowser;
+package au.gov.ga.worldwind.animator.ui.tristate;
 
-import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBoxModel;
-import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBoxModelBase;
 import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox.State;
 import au.gov.ga.worldwind.animator.util.Armable;
 import au.gov.ga.worldwind.animator.util.Validate;

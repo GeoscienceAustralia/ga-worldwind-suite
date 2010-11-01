@@ -1,8 +1,6 @@
-package au.gov.ga.worldwind.animator.panels.animationbrowser;
+package au.gov.ga.worldwind.animator.ui.tristate;
 
-import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBoxModel;
 import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox.State;
-import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBoxModelBase;
 import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -11,7 +9,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-final class EnableableTriStateModel extends TriStateCheckBoxModelBase implements TriStateCheckBoxModel
+public class EnableableTriStateModel extends TriStateCheckBoxModelBase implements TriStateCheckBoxModel
 {
 
 	private Enableable value; 
