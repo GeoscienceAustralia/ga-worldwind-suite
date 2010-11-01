@@ -299,13 +299,17 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		try
 		{
 			frontLock.readLock().lock();
-			
+
 			// The marker renderer caches marker points - if two calls are used the second buffer may not be drawn correctly
 			// To fix, we combine the two buffers and execute a single call
-			ArrayList<Marker> combinedBuffer = new ArrayList<Marker>();
-			combinedBuffer.addAll(eyeMarkersFrontBuffer);
-			combinedBuffer.addAll(lookatMarkersFrontBuffer);
-			markerRenderer.render(dc, combinedBuffer);
+			int totalSize = eyeMarkersFrontBuffer.size() + lookatMarkersFrontBuffer.size();
+			if (totalSize > 0)
+			{
+				ArrayList<Marker> combinedBuffer = new ArrayList<Marker>(totalSize);
+				combinedBuffer.addAll(eyeMarkersFrontBuffer);
+				combinedBuffer.addAll(lookatMarkersFrontBuffer);
+				markerRenderer.render(dc, combinedBuffer);
+			}
 
 			drawJoiners(dc);
 		}
