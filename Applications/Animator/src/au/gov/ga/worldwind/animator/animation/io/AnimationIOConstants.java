@@ -154,6 +154,21 @@ public interface AnimationIOConstants
 	String getCameraLookatElevationElementName();
 	
 	/**
+	 * @return The name of the 'Focal length' element of the stereo camera
+	 */
+	String getCameraFocalLengthElementName();
+	
+	/**
+	 * @return The name of the 'Eye separation' element of the stereo camera
+	 */
+	String getCameraEyeSeparationElementName();
+	
+	/**
+	 * @return The name of the 'Dynamic stereo' element of the stereo camera
+	 */
+	String getCameraDynamicStereoElementName();
+	
+	/**
 	 * @return The name of the 'name' attribute of the camera
 	 */
 	String getCameraAttributeName();
@@ -162,6 +177,11 @@ public interface AnimationIOConstants
 	 * @return The name of the 'camera' element
 	 */
 	String getCameraElementName();
+	
+	/**
+	 * @return The name of the 'stereo camera' element
+	 */
+	String getStereoCameraElementName();
 	
 	/**
 	 * @return The name of the 'frame count' attribute of the animation element
@@ -299,8 +319,12 @@ public interface AnimationIOConstants
 		public String getCameraLookatLatElementName(){return null;}
 		public String getCameraLookatLonElementName(){return null;}
 		public String getCameraLookatElevationElementName(){return null;}
+		public String getCameraFocalLengthElementName() {return null;}
+		public String getCameraEyeSeparationElementName() {return null;}
+		public String getCameraDynamicStereoElementName() {return null;}
 		public String getCameraAttributeName(){return null;}
 		public String getCameraElementName(){return null;}
+		public String getStereoCameraElementName(){return null;}
 		public String getAnimationAttributeFrameCount(){return null;}
 		public String getAnimationAttributeZoomRequired(){return null;}
 		public String getAnimatableObjectsElementName(){return null;}
@@ -349,8 +373,12 @@ public interface AnimationIOConstants
 		public String getCameraLookatLatElementName() {return "lookAtLat";}
 		public String getCameraLookatLonElementName() {return "lookAtLon";}
 		public String getCameraLookatElevationElementName() {return "lookAtElevation";}
+		public String getCameraFocalLengthElementName() {return "focalLength";}
+		public String getCameraEyeSeparationElementName() {return "eyeSeparation";}
+		public String getCameraDynamicStereoElementName() {return "dynamicStereo";}
 		public String getCameraAttributeName() {return "name";}
 		public String getCameraElementName() {return "camera";}
+		public String getStereoCameraElementName(){return "stereoCamera";}
 		public String getAnimationAttributeFrameCount() {return "frameCount";}
 		public String getAnimationAttributeZoomRequired() {return "zoomRequired";}
 		public String getAnimationElementName() {return "animation";}

@@ -342,7 +342,7 @@ public class WorldWindAnimationImplTest
 		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable3));
 		assertEquals(5, classToBeTested.getAnimatableObjects().indexOf(animatable4));
 		
-		classToBeTested.changeOrderOfAnimatableObject(animatable3, 0);
+		classToBeTested.moveAnimatableObject(animatable3, 0);
 		
 		assertEquals(0, classToBeTested.getAnimatableObjects().indexOf(animatable3));
 		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(camera));
@@ -374,7 +374,7 @@ public class WorldWindAnimationImplTest
 		assertEquals(4, classToBeTested.getAnimatableObjects().indexOf(animatable3));
 		assertEquals(5, classToBeTested.getAnimatableObjects().indexOf(animatable4));
 		
-		classToBeTested.changeOrderOfAnimatableObject(animatable1, 4);
+		classToBeTested.moveAnimatableObject(animatable1, 4);
 		
 		assertEquals(0, classToBeTested.getAnimatableObjects().indexOf(camera));
 		assertEquals(1, classToBeTested.getAnimatableObjects().indexOf(elevation));
@@ -404,7 +404,7 @@ public class WorldWindAnimationImplTest
 		}});
 		classToBeTested.addChangeListener(listener);
 		
-		classToBeTested.changeOrderOfAnimatableObject(animatable1, 2);
+		classToBeTested.moveAnimatableObject(animatable1, 2);
 	}
 	
 	@Test
@@ -428,7 +428,7 @@ public class WorldWindAnimationImplTest
 		classToBeTested.addChangeListener(listener);
 		
 		assertEquals(2, classToBeTested.getAnimatableObjects().indexOf(animatable1));
-		classToBeTested.changeOrderOfAnimatableObject(animatable1, 2);
+		classToBeTested.moveAnimatableObject(animatable1, 2);
 	}
 	
 	private Animatable createAnimatable(final String name, final Parameter... parameters)

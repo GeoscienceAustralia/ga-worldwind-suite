@@ -231,7 +231,7 @@ public class AnimationBrowserPanelTest
 	private void expectMove(final Animatable animatable, final int newIndex)
 	{
 		mockContext.checking(new Expectations(){{
-			exactly(1).of(animation).changeOrderOfAnimatableObject(with(animatable), with(newIndex));
+			exactly(1).of(animation).moveAnimatableObject(with(animatable), with(newIndex));
 		}});
 	}
 

@@ -312,20 +312,26 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	{
 		return this.renderCamera;
 	}
-	
+
 	@Override
 	public void setCamera(Camera camera)
 	{
-		if(this.renderCamera != camera)
+		if (this.renderCamera != camera)
 		{
-			//if a camera already existed, swap the change listeners
-			if(this.renderCamera != null)
+			int index = 0;
+
+			//if a camera already existed, copy the data to the new camera
+			if (this.renderCamera != null)
 			{
-				this.renderCamera.copyChangeListenersTo(camera);
+				camera.copyStateFrom(this.renderCamera);
 				this.renderCamera.clearChangeListeners();
+
+				//remove the object, but don't remove the KeyFrames
+				index = Math.max(index, removeAnimatableObject(this.renderCamera, false));
 			}
-			
+
 			this.renderCamera = camera;
+			addAnimatableObject(index, this.renderCamera);
 		}
 	}
 
@@ -338,21 +344,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	@Override
 	public void addAnimatableObject(Animatable object)
 	{
-		if (object == null || animatableObjects.contains(object))
-		{
-			return;
-		}
-
-		animatableObjects.add(object);
-
-		if (object instanceof AnimatableLayer)
-		{
-			animatableLayers.add((AnimatableLayer) object);
-		}
-
-		object.addChangeListener(this);
-
-		fireAddEvent(object);
+		addAnimatableObject(animatableObjects.size(), object);
 	}
 
 	@Override
@@ -366,26 +358,50 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		animatableObjects.add(index, object);
 		if (object instanceof AnimatableLayer)
 		{
-			refreshLayersList();
+			if (index >= animatableObjects.size())
+			{
+				//if we are adding at the end, then simply add the layer to the list
+				animatableLayers.add((AnimatableLayer) object);
+			}
+			else
+			{
+				//otherwise we don't know where in the list we added the layer, so just refresh it
+				refreshLayersList();
+			}
 		}
+
+		object.addChangeListener(this);
 
 		fireAddEvent(object);
 	}
 
 	@Override
-	public void removeAnimatableObject(Animatable object)
+	public int removeAnimatableObject(Animatable object)
 	{
-		animatableObjects.remove(object);
-		if (object instanceof AnimatableLayer)
+		return removeAnimatableObject(object, true);
+	}
+
+	protected int removeAnimatableObject(Animatable object, boolean removeValuesFromKeyFrames)
+	{
+		int index = animatableObjects.indexOf(object);
+		if (index >= 0)
 		{
-			animatableLayers.remove((AnimatableLayer) object);
+			animatableObjects.remove(index);
+			if (object instanceof AnimatableLayer)
+			{
+				animatableLayers.remove((AnimatableLayer) object);
+			}
+
+			object.removeChangeListener(this);
+
+			if (removeValuesFromKeyFrames)
+			{
+				removeValuesFromKeyFrames(object);
+			}
+
+			fireRemoveEvent(object);
 		}
-
-		object.removeChangeListener(this);
-
-		removeValuesFromKeyFrames(object);
-
-		fireRemoveEvent(object);
+		return index;
 	}
 
 	private void removeValuesFromKeyFrames(Animatable object)
@@ -401,18 +417,14 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	}
 
 	@Override
-	public void changeOrderOfAnimatableObject(Animatable object, int newIndex)
+	public void moveAnimatableObject(Animatable object, int newIndex)
 	{
 		Validate.isTrue(newIndex >= 0 && newIndex < animatableObjects.size(),
 				"newIndex outside of bounds. Must be in range [0, "
 						+ (animatableObjects.size() - 1) + "]");
-		if (!animatableObjects.contains(object))
-		{
-			return;
-		}
 
 		int oldIndex = animatableObjects.indexOf(object);
-		if (oldIndex == newIndex)
+		if (oldIndex < 0 || oldIndex == newIndex)
 		{
 			return;
 		}

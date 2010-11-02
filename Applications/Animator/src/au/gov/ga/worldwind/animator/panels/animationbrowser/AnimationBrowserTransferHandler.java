@@ -130,7 +130,7 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 	private AnimationObject moveAnimationObject(TransferSupport support) throws Exception
 	{
 		AnimationObject object = (AnimationObject)support.getTransferable().getTransferData(getAnimationObjectFlavor());
-		animation.changeOrderOfAnimatableObject((Animatable)object, getNewIndexForAnimationObject(object, support));
+		animation.moveAnimatableObject((Animatable)object, getNewIndexForAnimationObject(object, support));
 		
 		return object;
 	}

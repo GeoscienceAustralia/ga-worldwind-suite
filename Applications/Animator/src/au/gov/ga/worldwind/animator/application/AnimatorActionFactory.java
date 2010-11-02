@@ -60,6 +60,9 @@ public class AnimatorActionFactory
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
 	private SelectableAction logAnimationEventsAction;
+	
+	private SelectableAction stereoCameraAction;
+	private SelectableAction dynamicStereoAction;
 
 	private Animator targetApplication;
 
@@ -472,6 +475,28 @@ public class AnimatorActionFactory
 				targetApplication.setEnableAnimationEventLogging(logAnimationEventsAction.isSelected());
 			}
 		});
+		
+		stereoCameraAction = new SelectableAction(getMessage(getStereoCameraMenuLabelKey()), null, false);
+		stereoCameraAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.setUseStereoCamera(stereoCameraAction.isSelected());
+			}
+		});
+		
+		dynamicStereoAction = new SelectableAction(getMessage(getDynamicStereoMenuLabelKey()), null, true);
+		dynamicStereoAction.setEnabled(false);
+		dynamicStereoAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.setUseDynamicStereo(dynamicStereoAction.isSelected());
+				dynamicStereoAction.setEnabled(stereoCameraAction.isSelected());
+			}
+		});
 	}
 
 
@@ -643,5 +668,15 @@ public class AnimatorActionFactory
 	public SelectableAction getShowParameterEditorAction()
 	{
 		return showParameterEditorAction;
+	}
+
+	public SelectableAction getStereoCameraAction()
+	{
+		return stereoCameraAction;
+	}
+
+	public SelectableAction getDynamicStereoAction()
+	{
+		return dynamicStereoAction;
 	}
 }

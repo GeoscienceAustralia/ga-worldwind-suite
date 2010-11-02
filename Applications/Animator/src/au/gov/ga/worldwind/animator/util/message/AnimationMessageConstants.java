@@ -43,12 +43,15 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getKeyValuesMenuLabelKey() { return "animator.gui.menu.getkeyvalues.label"; }
 	public static String getParameterValuesMenuLabelKey() { return "animator.gui.menu.getparametervalues.label"; }
 	public static String getCameraNameKey() { return "animator.animation.camera.name"; }
+	public static String getStereoCameraNameKey() { return "animator.animation.stereo.camera.name"; }
 	public static String getCameraEyeLatNameKey() { return "animator.animation.camera.eye.lat.name"; }
 	public static String getCameraEyeLonNameKey() { return "animator.animation.camera.eye.lon.name"; }
 	public static String getCameraEyeZoomNameKey() { return "animator.animation.camera.eye.zoom.name"; }
 	public static String getCameraLookatLatNameKey() { return "animator.animation.camera.lookat.lat.name"; }
 	public static String getCameraLookatLonNameKey() { return "animator.animation.camera.lookat.lon.name"; }
 	public static String getCameraLookatZoomNameKey() { return "animator.animation.camera.lookat.zoom.name"; }
+	public static String getCameraFocalLengthNameKey() { return "animator.animation.camera.focal.length.name"; }
+	public static String getCameraEyeSeparationNameKey() { return "animator.animation.camera.eye.separation.name"; }
 	public static String getOpenFailedMessageKey() { return "animator.message.openfailed.message"; }
 	public static String getOpenFailedCaptionKey() { return "animator.message.openfailed.caption"; }
 	public static String getSaveFailedMessageKey() { return "animator.message.savefailed.message"; }
@@ -119,5 +122,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getParameterEditorWindowLabelKey() { return "animator.gui.parametereditor.window.title"; }
 	public static String getWindowMenuLabelKey() { return "animator.gui.menu.window.label"; }
 	public static String getShowParameterEditorMenuLabelKey() { return "animator.gui.menu.showparametereditor.label"; }
+	public static String getStereoCameraMenuLabelKey() { return "animator.gui.menu.stereo.camera.label"; }
+	public static String getDynamicStereoMenuLabelKey() { return "animator.gui.menu.dynamic.stereo.label"; }
 	
 }

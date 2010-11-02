@@ -231,7 +231,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		}
 		if (isMovable(selectedObject) && !isFirstObject(selectedObject))
 		{
-			animation.changeOrderOfAnimatableObject((Animatable)selectedObject, indexOf(selectedObject) - 1);
+			animation.moveAnimatableObject((Animatable)selectedObject, indexOf(selectedObject) - 1);
 			treeModel.notifyTreeChanged(selectedObject);
 			objectTree.setSelectionPath(new TreePath(new Object[]{animation, selectedObject}));
 		}
@@ -246,7 +246,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase
 		}
 		if (isMovable(selectedObject) && !isLastObject(selectedObject))
 		{
-			animation.changeOrderOfAnimatableObject((Animatable)selectedObject, indexOf(selectedObject) + 1);
+			animation.moveAnimatableObject((Animatable)selectedObject, indexOf(selectedObject) + 1);
 			treeModel.notifyTreeChanged(selectedObject);
 			objectTree.setSelectionPath(new TreePath(new Object[]{animation, selectedObject}));
 		}

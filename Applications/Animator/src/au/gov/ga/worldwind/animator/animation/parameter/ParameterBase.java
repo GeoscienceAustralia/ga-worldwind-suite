@@ -21,6 +21,9 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
+import au.gov.ga.worldwind.animator.util.Armable;
+import au.gov.ga.worldwind.animator.util.CodependantHelper;
+import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -54,6 +57,8 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	/** The name of this parameter (can be used for display purposes) */
 	private String name;
 	
+	private final CodependantHelper codependantHelper;
+	
 	/**
 	 * Constructor. Initialises the mandatory {@link Animation} parameter.
 	 */
@@ -63,12 +68,16 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 		Validate.notNull(animation, "An animation is required");
 		this.name = name;
 		this.animation = animation;
+		codependantHelper = new CodependantHelper(this, this);
 	}
 	
 	/**
 	 * Constructor. For use during de-serialisation.
 	 */
-	protected ParameterBase(){}
+	protected ParameterBase()
+	{
+		codependantHelper = new CodependantHelper(this, this);
+	}
 	
 	@Override
 	public final boolean isEnabled()
@@ -81,6 +90,8 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	{
 		boolean changed = this.enabled != enabled;
 		this.enabled = enabled;
+		
+		codependantHelper.setCodependantEnabled(enabled);
 		
 		if (changed)
 		{
@@ -102,6 +113,12 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	}
 	
 	@Override
+	public void connectCodependantEnableable(Enableable enableable)
+	{
+		codependantHelper.addCodependantEnableable(enableable);
+	}
+	
+	@Override
 	public boolean isArmed()
 	{
 		return armed;
@@ -112,6 +129,8 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	{
 		boolean changed = this.armed != armed;
 		this.armed = armed;
+		
+		codependantHelper.setCodependantArmed(armed);
 		
 		if (changed)
 		{
@@ -129,6 +148,12 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	public boolean hasArmedChildren()
 	{
 		return false;
+	}
+	
+	@Override
+	public void connectCodependantArmable(Armable armable)
+	{
+		codependantHelper.addCodependantArmable(armable);
 	}
 	
 	@Override
@@ -263,6 +288,13 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	protected Animation getAnimation()
 	{
 		return animation;
+	}
+	
+	@Override
+	public void connectCodependantParameter(Parameter parameter)
+	{
+		connectCodependantArmable(parameter);
+		connectCodependantEnableable(parameter);
 	}
 	
 	@Override

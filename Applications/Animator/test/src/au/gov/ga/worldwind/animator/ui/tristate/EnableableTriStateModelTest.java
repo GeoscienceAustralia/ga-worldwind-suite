@@ -136,6 +136,10 @@ public class EnableableTriStateModelTest
 			this.enabled = enabled;
 		}
 		
+		@Override
+		public void connectCodependantEnableable(Enableable enableable)
+		{
+		}
 	}
 	
 }

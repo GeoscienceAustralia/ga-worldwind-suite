@@ -9,6 +9,9 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
 import au.gov.ga.worldwind.animator.animation.event.PropagatingChangeableEventListener;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.util.Armable;
+import au.gov.ga.worldwind.animator.util.CodependantHelper;
+import au.gov.ga.worldwind.animator.util.Enableable;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -32,6 +35,8 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	/** Whether or not this animatable is 'armed' */
 	private boolean armed = true;
 	
+	private final CodependantHelper codependantHelper;
+	
 	/**
 	 * Constructor. Initialises the name of the animatable object.
 	 */
@@ -39,6 +44,7 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	{
 		Validate.notNull(name, "A name must be provided");
 		this.name = name;
+		codependantHelper = new CodependantHelper(this, this);
 	}
 
 	/**
@@ -46,6 +52,7 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	 */
 	protected AnimatableBase()
 	{
+		codependantHelper = new CodependantHelper(this, this);
 	}
 
 	@Override
@@ -140,6 +147,8 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 			return;
 		}
 		
+		codependantHelper.setCodependantEnabled(enabled);
+		
 		for (Parameter parameter : getParameters())
 		{
 			parameter.setEnabled(enabled);
@@ -176,11 +185,19 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	}
 	
 	@Override
+	public void connectCodependantEnableable(Enableable enableable)
+	{
+		codependantHelper.addCodependantEnableable(enableable);
+	}
+	
+	@Override
 	public void setArmed(boolean armed)
 	{
 		boolean changed = this.armed != armed;
 		
 		this.armed = armed;
+		
+		codependantHelper.setCodependantArmed(armed);
 		
 		for (Parameter parameter : getParameters())
 		{
@@ -209,5 +226,18 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	public boolean hasArmedChildren()
 	{
 		return getArmedParameters().size() > 0;
+	}
+	
+	@Override
+	public void connectCodependantArmable(Armable armable)
+	{
+		codependantHelper.addCodependantArmable(armable);
+	}
+	
+	@Override
+	public void connectCodependantAnimatable(Animatable animatable)
+	{
+		connectCodependantArmable(animatable);
+		connectCodependantEnableable(animatable);
 	}
 }

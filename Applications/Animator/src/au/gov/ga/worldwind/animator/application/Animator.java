@@ -89,6 +89,10 @@ import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
+import au.gov.ga.worldwind.animator.animation.camera.Camera;
+import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
+import au.gov.ga.worldwind.animator.animation.camera.StereoCamera;
+import au.gov.ga.worldwind.animator.animation.camera.StereoCameraImpl;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
@@ -170,7 +174,7 @@ public class Animator
 
 	/** A window used to edit parameters in 2D space */
 	private ParameterEditor parameterEditor;
-	
+
 	/** The primary world wind canvas */
 	private WorldWindowGLCanvas wwd;
 
@@ -248,8 +252,9 @@ public class Animator
 	/** The renderer to use for rendering animations */
 	private AnimationRenderer renderer;
 
-	private List<ChangeOfAnimationListener> changeOfAnimationListeners = new ArrayList<ChangeOfAnimationListener>();
-	
+	private List<ChangeOfAnimationListener> changeOfAnimationListeners =
+			new ArrayList<ChangeOfAnimationListener>();
+
 	/**
 	 * Launch an instance of the Animator Application
 	 */
@@ -685,7 +690,7 @@ public class Animator
 		slider.addChangeFrameListener(objectPropertiesPanel);
 		slider.addChangeListener(objectPropertiesPanel);
 		getView().addPropertyChangeListener(AVKey.VIEW, objectPropertiesPanel);
-		
+
 		changeOfAnimationListeners.add(sideBar);
 	}
 
@@ -772,13 +777,16 @@ public class Animator
 		actionFactory.getShowCrosshairsAction().addToMenu(menu);
 		actionFactory.getShowGridAction().addToMenu(menu);
 		actionFactory.getShowRuleOfThirdsAction().addToMenu(menu);
+		menu.addSeparator();
+		actionFactory.getStereoCameraAction().addToMenu(menu);
+		actionFactory.getDynamicStereoAction().addToMenu(menu);
 
 		// Window menu
 		menu = new JMenu(getMessage(getWindowMenuLabelKey()));
 		menu.setMnemonic(KeyEvent.VK_W);
 		menuBar.add(menu);
 		actionFactory.getShowParameterEditorAction().addToMenu(menu);
-		
+
 		// Debug
 		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
 		menu.setMnemonic(KeyEvent.VK_D);
@@ -794,7 +802,7 @@ public class Animator
 		this.parameterEditor = new ParameterEditor(this);
 		changeOfAnimationListeners.add(parameterEditor);
 	}
-	
+
 	/**
 	 * Initialise the animation listeners
 	 */
@@ -1755,7 +1763,7 @@ public class Animator
 		parameterEditor.setVisible(visible);
 		actionFactory.getShowParameterEditorAction().setSelected(visible);
 	}
-	
+
 	void scaleAnimation()
 	{
 		double scale = -1.0;
@@ -1835,13 +1843,19 @@ public class Animator
 		if (actionFactory != null)
 		{
 			actionFactory.getUseScaledZoomAction().setSelected(animation.isZoomScalingRequired());
+			
+			boolean stereo = animation.getCamera() instanceof StereoCamera;
+			boolean dynamic = !stereo || ((StereoCamera)animation.getCamera()).isDynamicStereo(); 
+			actionFactory.getStereoCameraAction().setSelected(stereo);
+			actionFactory.getDynamicStereoAction().setEnabled(stereo);
+			actionFactory.getDynamicStereoAction().setSelected(dynamic);
 		}
 		notifyAnimationChanged(animation);
 		updateAnimationListeners();
 		updateLayersInModel();
 		updateElevationModelOnGlobe();
 	}
-	
+
 	private void notifyAnimationChanged(Animation newAnimation)
 	{
 		for (int i = changeOfAnimationListeners.size() - 1; i >= 0; i--)
@@ -1866,4 +1880,23 @@ public class Animator
 		renderer.stop();
 	}
 
+	void setUseStereoCamera(boolean stereo)
+	{
+		Animation animation = getCurrentAnimation();
+		boolean hasStereo = animation.getCamera() instanceof StereoCamera;
+		if (stereo != hasStereo)
+		{
+			Camera newCamera = stereo ? new StereoCameraImpl(animation) : new CameraImpl(animation);
+			animation.setCamera(newCamera);
+		}
+	}
+
+	void setUseDynamicStereo(boolean dynamic)
+	{
+		Camera camera = getCurrentAnimation().getCamera();
+		if(camera instanceof StereoCamera)
+		{
+			((StereoCamera) camera).setDynamicStereo(dynamic);
+		}
+	}
 }
