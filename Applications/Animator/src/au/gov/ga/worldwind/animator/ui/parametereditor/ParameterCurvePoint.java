@@ -5,10 +5,10 @@ package au.gov.ga.worldwind.animator.ui.parametereditor;
  */
 class ParameterCurvePoint
 {
-	int frame;
+	double frame;
 	double value;
 	
-	ParameterCurvePoint(int frame, double value)
+	ParameterCurvePoint(double frame, double value)
 	{
 		this.frame = frame;
 		this.value = value;

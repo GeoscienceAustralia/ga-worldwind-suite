@@ -5,13 +5,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.LAFConstants;
@@ -22,7 +23,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
 /**
  * A class that draws the curve for a single parameter
  */
-public class ParameterCurve extends JComponent implements ParameterCurveModelListener
+public class ParameterCurve extends JPanel implements ParameterCurveModelListener
 {
 	private static final long serialVersionUID = 20101102L;
 
@@ -61,6 +62,9 @@ public class ParameterCurve extends JComponent implements ParameterCurveModelLis
 		model.addListener(this);
 		
 		this.curveBounds = curveBounds;
+		
+		setOpaque(true);
+		setBackground(LAFConstants.getCurveEditorBackgroundColor());
 	}
 
 	/**
@@ -172,7 +176,7 @@ public class ParameterCurve extends JComponent implements ParameterCurveModelLis
 	private void paintParameterCurve(Graphics2D g2)
 	{
 		g2.setColor(Color.GREEN); // TODO: Make dynamic
-		for (int frame = curveBounds.getMinFrame(); frame < curveBounds.getMaxFrame(); frame++)
+		for (int frame = (int)curveBounds.getMinFrame(); frame < curveBounds.getMaxFrame(); frame++)
 		{
 			double x1 = getX(frame);
 			double x2 = getX(frame + 1);
@@ -185,26 +189,51 @@ public class ParameterCurve extends JComponent implements ParameterCurveModelLis
 
 	private void paintKeyFrameNodes(Graphics2D g2)
 	{
-		g2.setColor(LAFConstants.getCurveKeyHandleColor()); // TODO: Make dynamic
 		for (ParameterCurveKeyNode keyFrameNode : model.getKeyFrameNodes())
 		{
-			Rectangle2D.Double nodeShape = createNodeShape(getX(keyFrameNode.getValuePoint().frame), getY(keyFrameNode.getValuePoint().value));
-			g2.draw(nodeShape);
+			g2.setColor(LAFConstants.getCurveKeyHandleColor());
+			g2.draw(createNodeShape(keyFrameNode.getValuePoint()));
+			
+			if (keyFrameNode.isBezier())
+			{
+				if (keyFrameNode.getInPoint() != null)
+				{
+					g2.setColor(LAFConstants.getCurveKeyHandleColor());
+					g2.draw(createNodeShape(keyFrameNode.getInPoint()));
+					g2.setColor(LAFConstants.getCurveHandleJoinerColor());
+					g2.draw(new Line2D.Double(getScreenPoint(keyFrameNode.getInPoint()), getScreenPoint(keyFrameNode.getValuePoint())));
+				}
+				
+				if (keyFrameNode.getOutPoint() != null)
+				{
+					g2.setColor(LAFConstants.getCurveKeyHandleColor());
+					g2.draw(createNodeShape(keyFrameNode.getOutPoint()));
+					g2.setColor(LAFConstants.getCurveHandleJoinerColor());
+					g2.draw(new Line2D.Double(getScreenPoint(keyFrameNode.getOutPoint()), getScreenPoint(keyFrameNode.getValuePoint())));
+				}
+			}
 		}
 	}
 
 	/**
-	 * Create a node shape around the centroid [x,y]
+	 * Create a node shape around the provided curve point
 	 */
-	private Rectangle2D.Double createNodeShape(double x, double y)
+	private Rectangle2D.Double createNodeShape(ParameterCurvePoint p)
 	{
+		double x = getX(p.frame);
+		double y = getY(p.value);
 		return new Rectangle2D.Double(x - 2d, y - 2d, 4, 4);
 	}
 
+	private Point2D.Double getScreenPoint(ParameterCurvePoint p)
+	{
+		return new Point2D.Double(getX(p.frame), getY(p.value));
+	}
+	
 	/**
 	 * Maps the provided frame number to a screen x-coordinate
 	 */
-	private double getX(int frame)
+	private double getX(double frame)
 	{
 		return (double)getWidth() * (double)(frame - curveBounds.getMinFrame()) / (double)(curveBounds.getMaxFrame() - curveBounds.getMinFrame());
 	}

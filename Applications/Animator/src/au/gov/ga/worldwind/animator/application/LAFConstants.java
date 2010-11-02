@@ -32,6 +32,12 @@ public class LAFConstants
 	private static final Font SUB_HEADING_FONT = new Font(Font.MONOSPACED, Font.ITALIC, 12);
 	public static Font getSubHeadingFont() { return SUB_HEADING_FONT; }
 	
+	private static final Color CURVE_EDITOR_BACKGROUND_COLOR = Color.WHITE;
+	public static Color getCurveEditorBackgroundColor() { return CURVE_EDITOR_BACKGROUND_COLOR; }
+	
 	private static final Color CURVE_KEY_HANDLE_COLOR = Color.ORANGE.darker().darker();
 	public static Color getCurveKeyHandleColor() { return CURVE_KEY_HANDLE_COLOR; }
+	
+	private static final Color CURVE_HANDLE_JOINER_COLOR = Color.PINK;
+	public static Color getCurveHandleJoinerColor() { return CURVE_HANDLE_JOINER_COLOR; }
 }

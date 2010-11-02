@@ -10,13 +10,13 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 class ParameterCurveKeyNode
 {
-	ParameterCurvePoint valuePoint;
-	ParameterCurvePoint inPoint;
-	ParameterCurvePoint outPoint;
+	private ParameterCurvePoint valuePoint;
+	private ParameterCurvePoint inPoint;
+	private ParameterCurvePoint outPoint;
 	
-	ParameterValueType type;
+	private ParameterValueType type;
 	
-	boolean locked = true;
+	private boolean locked = true;
 	
 	ParameterCurveKeyNode(ParameterValue parameterValue)
 	{

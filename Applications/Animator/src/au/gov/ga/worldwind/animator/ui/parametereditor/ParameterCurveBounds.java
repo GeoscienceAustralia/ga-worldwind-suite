@@ -15,18 +15,18 @@ class ParameterCurveBounds
 		this.topRight = topRight;
 	}
 	
-	ParameterCurveBounds(int minFrame, int maxFrame, double minValue, double maxValue)
+	ParameterCurveBounds(double minFrame, double maxFrame, double minValue, double maxValue)
 	{
 		this.bottomLeft = new ParameterCurvePoint(minFrame, minValue);
 		this.topRight = new ParameterCurvePoint(maxFrame, maxValue);
 	}
 	
-	int getMinFrame()
+	double getMinFrame()
 	{
 		return bottomLeft.frame;
 	}
 	
-	int getMaxFrame()
+	double getMaxFrame()
 	{
 		return topRight.frame;
 	}
