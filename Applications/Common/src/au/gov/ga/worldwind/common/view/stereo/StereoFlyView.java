@@ -36,6 +36,18 @@ public class StereoFlyView extends ViewStateBasicFlyView implements StereoView
 	{
 		helper.setParameters(parameters);
 	}
+	
+	@Override
+	public double getCurrentFocalLength()
+	{
+		return helper.getCurrentFocalLength();
+	}
+	
+	@Override
+	public double getCurrentEyeSeparation()
+	{
+		return helper.getCurrentEyeSeparation();
+	}
 
 	@Override
 	public Matrix calculateProjectionMatrix(double nearDistance, double farDistance)

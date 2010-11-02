@@ -50,6 +50,16 @@ public interface StereoView extends View
 	 * @param parameters
 	 */
 	void setParameters(StereoViewParameters parameters);
+	
+	/**
+	 * @return Focal length used in the last call to doApply()
+	 */
+	double getCurrentFocalLength();
+	
+	/**
+	 * @return Eye separation used in the last call to doApply()
+	 */
+	double getCurrentEyeSeparation();
 
 	/**
 	 * Calculate a projection matrix for the current state of this view.

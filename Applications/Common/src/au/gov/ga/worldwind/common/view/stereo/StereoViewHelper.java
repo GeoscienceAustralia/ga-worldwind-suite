@@ -49,6 +49,20 @@ public class StereoViewHelper
 	{
 		this.parameters = parameters;
 	}
+	
+	public double getCurrentFocalLength()
+	{
+		if(parameters.isDynamicStereo())
+			return lastFocalLength;
+		return parameters.getFocalLength();
+	}
+	
+	public double getCurrentEyeSeparation()
+	{
+		if(parameters.isDynamicStereo())
+			return lastEyeSeparation;
+		return parameters.getEyeSeparation();
+	}
 
 	public Matrix calculateProjectionMatrix(View view, double nearDistance, double farDistance)
 	{

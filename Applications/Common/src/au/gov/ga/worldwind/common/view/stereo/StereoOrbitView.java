@@ -36,6 +36,18 @@ public class StereoOrbitView extends ViewStateBasicOrbitView implements StereoVi
 	{
 		helper.setParameters(parameters);
 	}
+	
+	@Override
+	public double getCurrentFocalLength()
+	{
+		return helper.getCurrentFocalLength();
+	}
+	
+	@Override
+	public double getCurrentEyeSeparation()
+	{
+		return helper.getCurrentEyeSeparation();
+	}
 
 	@Override
 	public Matrix calculateProjectionMatrix(double nearDistance, double farDistance)
