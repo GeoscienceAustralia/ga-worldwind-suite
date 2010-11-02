@@ -155,7 +155,7 @@
 
 		<delete file="${target_dir}/temp.zip" />
 		
-		<echo file="${target_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${application_uber_jar} &gt;&gt; animator.log 2&gt;&amp;1</echo>
+		<echo file="${target_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${application_uber_jar}</echo>
 		
 	</target>
 
