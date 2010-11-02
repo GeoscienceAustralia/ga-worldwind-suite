@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -39,6 +40,8 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 	private JTree parameterTree;
 
 	private TreeModel treeModel;
+
+	private JPanel curvePanel;
 	
 	public ParameterEditor(Animator targetApplication)
 	{
@@ -71,7 +74,10 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 
 		leftScrollPane = new JScrollPane(parameterTree);
 		
-		rightScrollPane = new JScrollPane(new JPanel());
+		curvePanel = new JPanel();
+		curvePanel.setLayout(new BoxLayout(curvePanel, BoxLayout.Y_AXIS));
+		
+		rightScrollPane = new JScrollPane(curvePanel);
 		
 		containerPane = new JSplitPane();
 		containerPane.setDividerLocation(300);
@@ -87,6 +93,11 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 		treeModel = new ParameterTreeModel(newAnimation);
 		parameterTree.setModel(treeModel);
 		parameterTree.validate();
+		
+		curvePanel.removeAll();
+		curvePanel.add(new ParameterCurve(newAnimation.getCamera().getEyeLat()));
+		curvePanel.add(new ParameterCurve(newAnimation.getCamera().getEyeLon()));
+		curvePanel.add(new ParameterCurve(newAnimation.getCamera().getEyeElevation()));
 	}
 	
 }
