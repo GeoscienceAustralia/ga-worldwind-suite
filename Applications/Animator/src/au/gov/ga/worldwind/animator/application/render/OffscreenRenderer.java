@@ -43,6 +43,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 	{
 		Validate.notNull(wwd, "A world window is required");
 		Validate.notNull(targetApplication, "An Animator application is required");
+		Validate.isTrue(wwd.getSceneController() instanceof AnimatorSceneController, "SceneController must be an AnimatorSceneController");
 
 		this.wwd = wwd;
 		this.targetApplication = targetApplication;
