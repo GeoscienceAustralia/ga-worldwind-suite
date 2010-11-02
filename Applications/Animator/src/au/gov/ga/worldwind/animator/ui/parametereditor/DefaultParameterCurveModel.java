@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.animator.ui.parametereditor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
@@ -21,7 +22,6 @@ import au.gov.ga.worldwind.animator.util.Validate;
  */
 public class DefaultParameterCurveModel implements ParameterCurveModel, AnimationEventListener
 {
-
 	/** The parameter being drawn */
 	private Parameter parameter;
 	
@@ -39,6 +39,8 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 	private Lock frontBufferLock = new ReentrantLock();
 	private double maxValue;
 	private double minValue;
+	
+	private List<ParameterCurveModelListener> listeners = new ArrayList<ParameterCurveModelListener>();
 	
 	public DefaultParameterCurveModel(Parameter parameter, ExecutorService updater)
 	{
@@ -155,6 +157,41 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 		frontBufferLock.unlock();
 	}
 	
+	private void notifyCurveChanged()
+	{
+		for (int i = listeners.size() - 1; i <= 0; i--)
+		{
+			listeners.get(i).curveChanged();
+		}
+	}
+	
+	@Override
+	public void addListener(ParameterCurveModelListener listener)
+	{
+		if (listener == null || listeners.contains(listener))
+		{
+			return;
+		}
+		listeners.add(listener);
+	}
+	
+	@Override
+	public void removeListener(ParameterCurveModelListener listener)
+	{
+		listeners.remove(listener);
+	}
+	
+	@Override
+	public List<ParameterCurveKeyNode> getKeyFrameNodes()
+	{
+		List<ParameterCurveKeyNode> result = new ArrayList<ParameterCurveKeyNode>();
+		for (KeyFrame keyFrame : parameter.getKeyFramesWithThisParameter())
+		{
+			result.add(new ParameterCurveKeyNode(keyFrame.getValueForParameter(parameter)));
+		}
+		return result;
+	}
+	
 	/**
 	 * A runnable task that recalculates the curves points
 	 */
@@ -175,7 +212,7 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 				frontBufferLock.unlock();
 				backBufferLock.unlock();
 			}
-			
+			notifyCurveChanged();
 		}
 
 		private void recalculatePoints()
@@ -221,5 +258,4 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 		}
 		
 	}
-	
 }

@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
@@ -13,13 +14,15 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.JComponent;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.application.LAFConstants;
+import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterCurveModel.ParameterCurveModelListener;
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
  * A class that draws the curve for a single parameter
  */
-public class ParameterCurve extends JComponent
+public class ParameterCurve extends JComponent implements ParameterCurveModelListener
 {
 	private static final long serialVersionUID = 20101102L;
 
@@ -55,6 +58,7 @@ public class ParameterCurve extends JComponent
 		Validate.notNull(parameter, "A parameter is required");
 		
 		model = new DefaultParameterCurveModel(parameter, THREAD_POOL);
+		model.addListener(this);
 		
 		this.curveBounds = curveBounds;
 	}
@@ -150,6 +154,7 @@ public class ParameterCurve extends JComponent
 			}
 			
 			paintParameterCurve(g2);
+			paintKeyFrameNodes(g2);
 		}
 		finally
 		{
@@ -178,6 +183,24 @@ public class ParameterCurve extends JComponent
 		}
 	}
 
+	private void paintKeyFrameNodes(Graphics2D g2)
+	{
+		g2.setColor(LAFConstants.getCurveKeyHandleColor()); // TODO: Make dynamic
+		for (ParameterCurveKeyNode keyFrameNode : model.getKeyFrameNodes())
+		{
+			Rectangle2D.Double nodeShape = createNodeShape(getX(keyFrameNode.getValuePoint().frame), getY(keyFrameNode.getValuePoint().value));
+			g2.draw(nodeShape);
+		}
+	}
+
+	/**
+	 * Create a node shape around the centroid [x,y]
+	 */
+	private Rectangle2D.Double createNodeShape(double x, double y)
+	{
+		return new Rectangle2D.Double(x - 2d, y - 2d, 4, 4);
+	}
+
 	/**
 	 * Maps the provided frame number to a screen x-coordinate
 	 */
@@ -203,5 +226,11 @@ public class ParameterCurve extends JComponent
 	public void setModel(ParameterCurveModel model)
 	{
 		this.model = model;
+	}
+
+	@Override
+	public void curveChanged()
+	{
+		repaint();
 	}
 }

@@ -31,4 +31,7 @@ public class LAFConstants
 	
 	private static final Font SUB_HEADING_FONT = new Font(Font.MONOSPACED, Font.ITALIC, 12);
 	public static Font getSubHeadingFont() { return SUB_HEADING_FONT; }
+	
+	private static final Color CURVE_KEY_HANDLE_COLOR = Color.ORANGE.darker().darker();
+	public static Color getCurveKeyHandleColor() { return CURVE_KEY_HANDLE_COLOR; }
 }

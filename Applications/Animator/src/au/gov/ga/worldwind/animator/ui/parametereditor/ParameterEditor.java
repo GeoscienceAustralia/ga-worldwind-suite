@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.animator.ui.parametereditor;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getParameterEditorWindowLabelKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -12,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
@@ -34,11 +36,11 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 	private Animator targetApplication;
 	
 	private JSplitPane containerPane;
+	private JToolBar toolbar;
 	private JScrollPane leftScrollPane;
 	private JScrollPane rightScrollPane;
 	
 	private JTree parameterTree;
-
 	private TreeModel treeModel;
 
 	private JPanel curvePanel;
@@ -64,6 +66,8 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 
 	private void setupSplitPane()
 	{
+		setLayout(new BorderLayout());
+		
 		treeModel = new ParameterTreeModel(targetApplication.getCurrentAnimation());
 		parameterTree = new NameableTree(treeModel);
 		parameterTree.setCellRenderer(new ParameterTreeRenderer());
@@ -84,7 +88,10 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 		containerPane.setLeftComponent(leftScrollPane);
 		containerPane.setRightComponent(rightScrollPane);
 		
-		add(containerPane);
+		toolbar = new JToolBar();
+		
+		add(toolbar, BorderLayout.NORTH);
+		add(containerPane, BorderLayout.CENTER);
 	}
 	
 	@Override
