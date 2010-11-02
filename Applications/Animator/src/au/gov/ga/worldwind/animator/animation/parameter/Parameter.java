@@ -56,7 +56,7 @@ public interface Parameter extends AnimationObject, Serializable, Nameable, XmlS
 	 * 
 	 * @return The value of this {@link Parameter} at the provided frame.
 	 */
-	ParameterValue getValueAtFrame(AnimationContext context, int frame);
+	ParameterValue getValueAtFrame(int frame);
 	
 	/**
 	 * Set the default value of this {@link Parameter}. This is the value this {@link Parameter} will use if no recorded {@link KeyFrame}s

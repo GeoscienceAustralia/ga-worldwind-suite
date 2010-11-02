@@ -80,7 +80,7 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 		{
 			return;
 		}
-		ParameterValue value = getValueAtFrame(animationContext, frame);
+		ParameterValue value = getValueAtFrame(frame);
 		applyValue(value.getValue());
 	}
 	

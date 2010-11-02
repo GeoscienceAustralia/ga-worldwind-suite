@@ -4,7 +4,6 @@ import java.io.FileWriter;
 import java.util.Collection;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
@@ -67,7 +66,7 @@ public class DebugWriter
 	 * @param end The end frame
 	 * @param context The current animation context
 	 */
-	public static void dumpParameterValues(String fileName, Collection<Parameter> parameters, int start, int end, AnimationContext context)
+	public static void dumpParameterValues(String fileName, Collection<Parameter> parameters, int start, int end)
 	{
 		try
 		{
@@ -81,7 +80,7 @@ public class DebugWriter
 				
 				for (int i = start; i < end; i++)
 				{
-					writer.append("" + i).append(", ").append("" + p.getValueAtFrame(context, i).getValue()).append('\n');
+					writer.append("" + i).append(", ").append("" + p.getValueAtFrame(i).getValue()).append('\n');
 				}
 				
 				writer.append("\n\n");

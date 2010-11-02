@@ -44,7 +44,7 @@ public class FogNearFactorParameter extends LayerParameterBase
 	@Override
 	public void apply(AnimationContext animationContext, int frame)
 	{
-		ParameterValue nearFactorValue = getValueAtFrame(animationContext, frame);
+		ParameterValue nearFactorValue = getValueAtFrame(frame);
 		
 		applyValue(nearFactorValue.getValue());
 	}

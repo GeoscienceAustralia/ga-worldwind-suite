@@ -10,7 +10,6 @@ import java.awt.event.KeyEvent;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
-import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.application.debug.DebugWriter;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.util.Validate;
@@ -460,8 +459,7 @@ public class AnimatorActionFactory
 				DebugWriter.dumpParameterValues("parameterValues.txt", 
 												targetApplication.getCurrentAnimation().getAllParameters(), 
 												targetApplication.getCurrentAnimation().getFrameOfFirstKeyFrame(), 
-												targetApplication.getCurrentAnimation().getFrameOfLastKeyFrame(), 
-												new AnimationContextImpl(targetApplication.getCurrentAnimation()));
+												targetApplication.getCurrentAnimation().getFrameOfLastKeyFrame());
 			}
 		});
 		

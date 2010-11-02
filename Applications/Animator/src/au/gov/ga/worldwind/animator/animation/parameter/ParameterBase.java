@@ -11,7 +11,6 @@ import java.util.List;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
@@ -163,7 +162,7 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	protected abstract void doApplyValue(double value);
 
 	@Override
-	public final ParameterValue getValueAtFrame(AnimationContext context, int frame)
+	public final ParameterValue getValueAtFrame(int frame)
 	{
 		// If the provided value is a keyframe for this parameter, return it's value from the key frame
 		KeyFrame keyAtFrame = animation.getKeyFrame(frame);
@@ -173,8 +172,8 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 		}
 		
 		// Otherwise, interpolate between the two surrounding frames
-		KeyFrame previousKeyFrame = context.getKeyFrameWithParameterBeforeFrame(this, frame);
-		KeyFrame nextKeyFrame = context.getKeyFrameWithParameterAfterFrame(this, frame);
+		KeyFrame previousKeyFrame = animation.getKeyFrameWithParameterBeforeFrame(this, frame);
+		KeyFrame nextKeyFrame = animation.getKeyFrameWithParameterAfterFrame(this, frame);
 		
 		// If no key values exist, return the default value
 		if (previousKeyFrame == null && nextKeyFrame == null)

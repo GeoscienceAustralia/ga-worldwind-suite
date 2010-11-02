@@ -115,17 +115,17 @@ public class CameraImpl extends AnimatableBase implements Camera
 	@Override
 	public Position getEyePositionAtFrame(AnimationContext animationContext, int frame)
 	{
-		return Position.fromDegrees(eyeLat.getValueAtFrame(animationContext, frame).getValue(),
-									eyeLon.getValueAtFrame(animationContext, frame).getValue(),
-									animationContext.unapplyZoomScaling(eyeElevation.getValueAtFrame(animationContext, frame).getValue()));
+		return Position.fromDegrees(eyeLat.getValueAtFrame(frame).getValue(),
+									eyeLon.getValueAtFrame(frame).getValue(),
+									animationContext.unapplyZoomScaling(eyeElevation.getValueAtFrame(frame).getValue()));
 	}
 
 	@Override
 	public Position getLookatPositionAtFrame(AnimationContext animationContext, int frame)
 	{
-		return Position.fromDegrees(lookAtLat.getValueAtFrame(animationContext, frame).getValue(), 
-									lookAtLon.getValueAtFrame(animationContext, frame).getValue(), 
-									animationContext.unapplyZoomScaling(lookAtElevation.getValueAtFrame(animationContext, frame).getValue()));
+		return Position.fromDegrees(lookAtLat.getValueAtFrame(frame).getValue(), 
+									lookAtLon.getValueAtFrame(frame).getValue(), 
+									animationContext.unapplyZoomScaling(lookAtElevation.getValueAtFrame(frame).getValue()));
 	}
 
 	@Override
@@ -205,9 +205,9 @@ public class CameraImpl extends AnimatableBase implements Camera
 			Vector3 vStart = null;
 			for (int frame = firstFrame; frame <= lastFrame; frame++)
 			{
-				double x = eyeLat.getValueAtFrame(context, frame).getValue();
-				double y = eyeLon.getValueAtFrame(context, frame).getValue();
-				double z = eyeElevation.getValueAtFrame(context, frame).getValue();
+				double x = eyeLat.getValueAtFrame(frame).getValue();
+				double y = eyeLon.getValueAtFrame(frame).getValue();
+				double z = eyeElevation.getValueAtFrame(frame).getValue();
 				
 				Vector3 vEnd = new Vector3(x, y, z);
 				if (vStart != null)
