@@ -129,10 +129,13 @@ public class XMLUtil extends WWXML
 			Double lon = getDouble(el, "@longitude", xpath);
 			Double elev = getDouble(el, "@elevation", xpath);
 
-			if (lat == null || lon == null || elev == null)
+			if (lat == null || lon == null)
 				return null;
+			
+			if(elev == null)
+				elev = 0d;
 
-			if (units == null || units.equals("degrees"))
+			if (units == null || units.length() == 0 || units.equals("degrees"))
 				return Position.fromDegrees(lat, lon, elev);
 
 			if (units.equals("radians"))

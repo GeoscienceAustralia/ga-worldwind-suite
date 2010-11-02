@@ -15,6 +15,7 @@ import javax.xml.xpath.XPath;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.point.providers.ShapefilePointProvider;
+import au.gov.ga.worldwind.common.layers.point.providers.XMLPointProvider;
 import au.gov.ga.worldwind.common.layers.point.types.AnnotationPointLayer;
 import au.gov.ga.worldwind.common.layers.point.types.IconPointLayer;
 import au.gov.ga.worldwind.common.layers.point.types.MarkerPointLayer;
@@ -158,6 +159,10 @@ public class PointLayerUtils extends DataConfigurationUtils
 		if ("Shapefile".equalsIgnoreCase(format))
 		{
 			params.setValue(AVKeyMore.POINT_PROVIDER, new ShapefilePointProvider());
+		}
+		else if("XML".equalsIgnoreCase(format))
+		{
+			params.setValue(AVKeyMore.POINT_PROVIDER, new XMLPointProvider(domElement));
 		}
 		else
 		{

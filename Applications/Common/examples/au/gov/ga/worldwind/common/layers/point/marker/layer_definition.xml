@@ -5,8 +5,8 @@
 	<Legend></Legend>
 
 	<PointType>Marker</PointType>
-	<URL>file:///C:/WINNT/Profiles/u97852/Desktop/shapefiles/point_test.zip</URL>
-	<DataFormat>Shapefile</DataFormat>
+	<!-- <URL>file:///C:/WINNT/Profiles/u97852/Desktop/shapefiles/point_test.zip</URL> -->
+	<DataFormat>XML</DataFormat>
 
 	<LastUpdate></LastUpdate>
 	<DataCacheName>GA/Points/point_test.zip</DataCacheName>
@@ -32,5 +32,11 @@
 			<Link url="http://www.google.com/search?q=%value%" placeholder="%value%" />
 		</Attribute>
 	</Attributes>
+	
+	<Points>
+		<Point latitude="10" longitude="10" Name="Test1" />
+		<Point latitude="20" longitude="20" Name="Test2" />
+		<Point latitude="30" longitude="30" Name="Test3" />
+	</Points>
 
 </Layer>
