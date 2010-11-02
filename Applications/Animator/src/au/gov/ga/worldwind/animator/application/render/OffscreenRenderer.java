@@ -103,6 +103,9 @@ public class OffscreenRenderer extends AnimationRendererBase
 
 		//add the pre render task
 		animatorSceneController.addPrePaintTask(preRenderTask);
+		
+		//also add it post render, just before the screenshot, to ensure the viewport is always correct
+		animatorSceneController.addPostPaintTask(preRenderTask);
 
 		//add the screenshot task
 		ScreenshotPaintTask screenshotTask = new ScreenshotPaintTask(targetFile, alpha);
