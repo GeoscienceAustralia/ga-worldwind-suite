@@ -73,6 +73,8 @@ public class CameraImpl extends AnimatableBase implements Camera
 		this.animation = animation;
 		
 		initialiseParameters(animation);
+		connectCodependants();
+		connectAsListener();
 	}
 
 	/**
@@ -94,14 +96,6 @@ public class CameraImpl extends AnimatableBase implements Camera
 		lookAtLat = new LookatLatParameter(animation);
 		lookAtLon = new LookatLonParameter(animation);
 		lookAtElevation = new LookatElevationParameter(animation);
-		
-		connectCodependants();
-		
-		// Add this camera as a change listener to the camera parameters
-		for (Parameter p : getParameters())
-		{
-			p.addChangeListener(this);
-		}
 	}
 	
 	protected void connectCodependants()
@@ -111,6 +105,14 @@ public class CameraImpl extends AnimatableBase implements Camera
 		eyeLat.connectCodependantParameter(lookAtLat);
 		eyeLat.connectCodependantParameter(lookAtLon);
 		eyeLat.connectCodependantParameter(lookAtElevation);
+	}
+	
+	protected void connectAsListener()
+	{
+		for (Parameter p : getParameters())
+		{
+			p.addChangeListener(this);
+		}
 	}
 
 	@Override
@@ -291,9 +293,9 @@ public class CameraImpl extends AnimatableBase implements Camera
 	{
 		AnimationIOConstants constants = version.getConstants();
 		
-		Element result = WWXML.appendElement(parent, constants.getCameraElementName());
+		Element result = WWXML.appendElement(parent, getCameraElementName(constants));
 		
-		WWXML.setTextAttribute(result, getCameraAttributeName(constants), getName());
+		WWXML.setTextAttribute(result, constants.getCameraAttributeName(), getName());
 
 		Element eyeLatElement = WWXML.appendElement(result, constants.getCameraEyeLatElementName());
 		eyeLatElement.appendChild(eyeLat.toXml(eyeLatElement, version));
@@ -315,7 +317,11 @@ public class CameraImpl extends AnimatableBase implements Camera
 		
 		return result;
 	}
-
+	
+	protected String getCameraElementName(AnimationIOConstants constants)
+	{
+		return constants.getCameraElementName();
+	}
 
 	@Override
 	public Animatable fromXml(Element element, AnimationFileVersion version, AVList context)
@@ -333,18 +339,10 @@ public class CameraImpl extends AnimatableBase implements Camera
 				Validate.isTrue(context.hasKey(constants.getAnimationKey()), "An animation is required in context.");
 				
 				CameraImpl result = createAnimatable();
-				result.animation = (Animation)context.getValue(constants.getAnimationKey());
-				result.setName(WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + getCameraAttributeName(constants)));
-				
-				result.eyeLat = new EyeLatParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLatElementName()+ "/" + constants.getParameterElementName(), null), version, context);
-				result.eyeLon = new EyeLonParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLonElementName()+ "/" + constants.getParameterElementName(), null), version, context);
-				result.eyeElevation = new EyeElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeElevationElementName()+ "/" + constants.getParameterElementName(), null), version, context);
-				
-				result.lookAtLat = new LookatLatParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLatElementName()+ "/" + constants.getParameterElementName(), null), version, context);
-				result.lookAtLon = new LookatLonParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLonElementName()+ "/" + constants.getParameterElementName(), null), version, context);
-				result.lookAtElevation = new LookatElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatElevationElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+				setupFromXml(result, element, version, context);
 				
 				result.connectCodependants();
+				result.connectAsListener();
 				
 				return result;
 			}
@@ -353,9 +351,20 @@ public class CameraImpl extends AnimatableBase implements Camera
 		return null;
 	}
 	
-	protected String getCameraAttributeName(AnimationIOConstants constants)
+	protected void setupFromXml(CameraImpl camera, Element element, AnimationFileVersion version, AVList context)
 	{
-		return constants.getCameraAttributeName();
+		AnimationIOConstants constants = version.getConstants();
+		
+		camera.animation = (Animation)context.getValue(constants.getAnimationKey());
+		camera.setName(WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getCameraAttributeName()));
+		
+		camera.eyeLat = new EyeLatParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLatElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+		camera.eyeLon = new EyeLonParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLonElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+		camera.eyeElevation = new EyeElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeElevationElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+		
+		camera.lookAtLat = new LookatLatParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLatElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+		camera.lookAtLon = new LookatLonParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLonElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+		camera.lookAtElevation = new LookatElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatElevationElementName()+ "/" + constants.getParameterElementName(), null), version, context);
 	}
 
 	protected CameraImpl createAnimatable()
