@@ -102,8 +102,6 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 		parameterTree.validate();
 		
 		curvePanel.removeAll();
-		curvePanel.add(new ParameterCurve(newAnimation.getCamera().getEyeLat()));
-		curvePanel.add(new ParameterCurve(newAnimation.getCamera().getEyeLon()));
 		curvePanel.add(new ParameterCurve(newAnimation.getCamera().getEyeElevation()));
 	}
 	

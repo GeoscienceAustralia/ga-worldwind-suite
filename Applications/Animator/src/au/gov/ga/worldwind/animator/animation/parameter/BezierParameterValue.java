@@ -98,4 +98,5 @@ public interface BezierParameterValue extends ParameterValue
 	 * @see #isLocked()
 	 */
 	void setLocked(boolean locked);
+	
 }

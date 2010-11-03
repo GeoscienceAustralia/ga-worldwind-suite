@@ -61,16 +61,35 @@ public class BasicParameterValue extends ChangeableBase implements ParameterValu
 	@Override
 	public void setValue(double value)
 	{
+		setValue(value, false);
+	}
+	
+	protected boolean setValue(double value, boolean inhibitEvent)
+	{
 		boolean changed = this.value != value;
 		
 		this.value = value;
 		
-		if (changed)
+		if (changed && !inhibitEvent)
 		{
 			fireChangeEvent(value);
 		}
+		
+		return changed;
 	}
 
+	@Override
+	public void translate(double delta)
+	{
+		if (delta == 0.0)
+		{
+			return;
+		}
+		
+		value += delta;
+		fireChangeEvent(value);
+	}
+	
 	@Override
 	public Parameter getOwner()
 	{

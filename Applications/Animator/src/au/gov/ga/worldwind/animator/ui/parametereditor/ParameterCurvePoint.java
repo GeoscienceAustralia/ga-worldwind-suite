@@ -13,4 +13,9 @@ class ParameterCurvePoint
 		this.frame = frame;
 		this.value = value;
 	}
+
+	public ParameterCurvePoint subtract(ParameterCurvePoint other)
+	{
+		return new ParameterCurvePoint(frame - other.frame, value - other.value);
+	}
 }

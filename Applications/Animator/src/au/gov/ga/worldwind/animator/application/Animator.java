@@ -355,6 +355,7 @@ public class Animator
 		wwdBufferPanel.setPreferredSize(RenderParameters.DEFAULT_DIMENSIONS);
 		wwdBufferPanel.setBackground(LAFConstants.getHighlightColor());
 		wwdBufferPanel.add(wwd);
+		
 		// On resize, adjust the world wind canvas to maintain the correct aspect ratio
 		wwdBufferPanel.addComponentListener(new ComponentAdapter()
 		{
@@ -1027,6 +1028,7 @@ public class Animator
 					resizeWindowToRenderDimensions();
 					frame.pack();
 					frame.setVisible(true);
+					wwd.createBufferStrategy(2);
 				}
 
 			});

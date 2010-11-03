@@ -3,14 +3,25 @@ package au.gov.ga.worldwind.animator.ui.parametereditor;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.JPanel;
 
@@ -28,10 +39,9 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	private static final long serialVersionUID = 20101102L;
 
 	private static final RenderingHints RENDER_HINT = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-	
 	private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new DaemonThreadFactory("Parameter Curve Updater"));
-	
 	private static final int Y_PADDING = 10;
+	private static final int NODE_SHAPE_SIZE = 8;
 	
 	/** The model backing this component */
 	private ParameterCurveModel model;
@@ -47,7 +57,13 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	/** Whether to show the axis for this curve */
 	private boolean showAxis = false;
 	
+	/** Whether this curve has been destroyed */
 	private boolean isDestroyed = false;
+	
+	private List<KeyNodeMarker> keyNodeMarkers = new ArrayList<KeyNodeMarker>();
+	private ReadWriteLock keyNodeMarkersLock = new ReentrantReadWriteLock(true);
+	
+	private NodeMouseListener nodeMouseListener = new NodeMouseListener();
 	
 	public ParameterCurve(Parameter parameter)
 	{
@@ -65,6 +81,9 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		
 		setOpaque(true);
 		setBackground(LAFConstants.getCurveEditorBackgroundColor());
+		addMouseListener(nodeMouseListener);
+		addMouseMotionListener(nodeMouseListener);
+		addComponentListener(new ComponentListener());
 	}
 
 	/**
@@ -178,10 +197,10 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		g2.setColor(Color.GREEN); // TODO: Make dynamic
 		for (int frame = (int)curveBounds.getMinFrame(); frame < curveBounds.getMaxFrame(); frame++)
 		{
-			double x1 = getX(frame);
-			double x2 = getX(frame + 1);
-			double y1 = getY(model.getValueAtFrame(frame));
-			double y2 = getY(model.getValueAtFrame(frame + 1));
+			double x1 = getScreenX(frame);
+			double x2 = getScreenX(frame + 1);
+			double y1 = getScreenY(model.getValueAtFrame(frame));
+			double y2 = getScreenY(model.getValueAtFrame(frame + 1));
 			
 			g2.draw(new Line2D.Double(x1, y1, x2, y2));
 		}
@@ -189,51 +208,33 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 
 	private void paintKeyFrameNodes(Graphics2D g2)
 	{
-		for (ParameterCurveKeyNode keyFrameNode : model.getKeyFrameNodes())
+		try
 		{
-			g2.setColor(LAFConstants.getCurveKeyHandleColor());
-			g2.draw(createNodeShape(keyFrameNode.getValuePoint()));
-			
-			if (keyFrameNode.isBezier())
+			updateKeyNodeMarkers();
+			keyNodeMarkersLock.readLock().lock();
+			for (KeyNodeMarker marker : keyNodeMarkers)
 			{
-				if (keyFrameNode.getInPoint() != null)
-				{
-					g2.setColor(LAFConstants.getCurveKeyHandleColor());
-					g2.draw(createNodeShape(keyFrameNode.getInPoint()));
-					g2.setColor(LAFConstants.getCurveHandleJoinerColor());
-					g2.draw(new Line2D.Double(getScreenPoint(keyFrameNode.getInPoint()), getScreenPoint(keyFrameNode.getValuePoint())));
-				}
-				
-				if (keyFrameNode.getOutPoint() != null)
-				{
-					g2.setColor(LAFConstants.getCurveKeyHandleColor());
-					g2.draw(createNodeShape(keyFrameNode.getOutPoint()));
-					g2.setColor(LAFConstants.getCurveHandleJoinerColor());
-					g2.draw(new Line2D.Double(getScreenPoint(keyFrameNode.getOutPoint()), getScreenPoint(keyFrameNode.getValuePoint())));
-				}
+				marker.paint(g2);
 			}
+		}
+		finally
+		{
+			keyNodeMarkersLock.readLock().unlock();
 		}
 	}
 
 	/**
-	 * Create a node shape around the provided curve point
+	 * Maps the provided curve point to a screen point
 	 */
-	private Rectangle2D.Double createNodeShape(ParameterCurvePoint p)
-	{
-		double x = getX(p.frame);
-		double y = getY(p.value);
-		return new Rectangle2D.Double(x - 2d, y - 2d, 4, 4);
-	}
-
 	private Point2D.Double getScreenPoint(ParameterCurvePoint p)
 	{
-		return new Point2D.Double(getX(p.frame), getY(p.value));
+		return new Point2D.Double(getScreenX(p.frame), getScreenY(p.value));
 	}
 	
 	/**
 	 * Maps the provided frame number to a screen x-coordinate
 	 */
-	private double getX(double frame)
+	private double getScreenX(double frame)
 	{
 		return (double)getWidth() * (double)(frame - curveBounds.getMinFrame()) / (double)(curveBounds.getMaxFrame() - curveBounds.getMinFrame());
 	}
@@ -241,12 +242,37 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	/**
 	 * Maps the provided parameter value to a screen y-coordinate
 	 */
-	private double getY(double parameterValue)
+	private double getScreenY(double parameterValue)
 	{
 		double h = (double)getHeight() - Y_PADDING;
 		return h - (h * (parameterValue - curveBounds.getMinValue()) / (curveBounds.getMaxValue() - curveBounds.getMinValue())) + ((double)Y_PADDING / 2);
 	}
 
+	/**
+	 * Maps the provided screen point to a curve point
+	 */
+	private ParameterCurvePoint getCurvePoint(Point2D.Double screenPoint)
+	{
+		return new ParameterCurvePoint(getCurveX(screenPoint.x), getCurveY(screenPoint.y));
+	}
+	
+	/**
+	 * Maps the provided screen x-coordinate to a curve frame coordinate
+	 */
+	private double getCurveX(double x)
+	{
+		return curveBounds.getMinFrame() + ((x / getWidth()) * (curveBounds.getMaxFrame() - curveBounds.getMinFrame()));
+	}
+	
+	/**
+	 * Maps the provided screen y-coordinate to a curve value coordinate
+	 */
+	private double getCurveY(double y)
+	{
+		double h = (double)getHeight() - Y_PADDING;
+		return curveBounds.getMinValue() + (h - (y - ((double)Y_PADDING / 2)) / h) * (curveBounds.getMaxValue() - curveBounds.getMinValue());
+	}
+	
 	public void setShowAxis(boolean showAxis)
 	{
 		this.showAxis = showAxis;
@@ -260,6 +286,194 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	@Override
 	public void curveChanged()
 	{
+		updateKeyNodeMarkers();
 		repaint();
+	}
+	
+	private void updateKeyNodeMarkers()
+	{
+		try
+		{
+			keyNodeMarkersLock.writeLock().lock();
+			keyNodeMarkers.clear();
+			for (ParameterCurveKeyNode node : model.getKeyFrameNodes())
+			{
+				keyNodeMarkers.add(new KeyNodeMarker(node));
+			}
+		}
+		finally
+		{
+			keyNodeMarkersLock.writeLock().unlock();
+		}
+	}
+	
+	private KeyNodeMarker getKeyNodeMarker(Point p)
+	{
+		if (p == null)
+		{
+			return null;
+		}
+		try
+		{
+			keyNodeMarkersLock.readLock().lock();
+			for (KeyNodeMarker keyNodeMarker : keyNodeMarkers)
+			{
+				if (keyNodeMarker.isInMarker(p))
+				{
+					return keyNodeMarker;
+				}
+			}
+			return null;
+		}
+		finally
+		{
+			keyNodeMarkersLock.readLock().unlock();
+		}
+	}
+	
+	/**
+	 * A mouse listener used to detect and process keyframe node selections and drags
+	 */
+	private class NodeMouseListener extends MouseAdapter
+	{
+		private Point lastPoint;
+		
+		@Override
+		public void mouseClicked(MouseEvent e)
+		{
+			updateLastPoint(e);
+			KeyNodeMarker marker = getKeyNodeMarker(e.getPoint());
+			
+			if (marker != null)
+			{
+				System.out.println("Clicked!");
+			}
+		}
+		
+		@Override
+		public void mouseDragged(MouseEvent e)
+		{
+			try
+			{
+				KeyNodeMarker marker = getKeyNodeMarker(lastPoint);
+				if (marker == null)
+				{
+					return;
+				}
+				marker.applyHandleMove(lastPoint, e.getPoint());
+			}
+			finally
+			{
+				updateLastPoint(e);
+			}
+		}
+		
+		private void updateLastPoint(MouseEvent e)
+		{
+			lastPoint = e.getPoint();
+		}
+	}
+	
+	private class ComponentListener extends ComponentAdapter
+	{
+		@Override
+		public void componentResized(ComponentEvent e)
+		{
+		}
+	}
+	
+	/**
+	 * A marker used to draw key frame nodes, and to respond to mouse events etc.
+	 */
+	private class KeyNodeMarker 
+	{
+		private ParameterCurveKeyNode curveNode;
+		
+		private Shape inHandle;
+		private Shape valueHandle;
+		private Shape outHandle;
+
+		private Line2D.Double inValueJoiner;
+		private Line2D.Double valueOutJoiner;
+		
+		KeyNodeMarker(ParameterCurveKeyNode curveNode)
+		{
+			Validate.notNull(curveNode, "A node is required");
+			this.curveNode = curveNode;
+			
+			updateMarker();
+		}
+		
+		void updateMarker()
+		{
+			valueHandle = createNodeShape(curveNode.getValuePoint());
+			if (curveNode.isBezier() && curveNode.getInPoint() != null)
+			{
+				inHandle = createNodeShape(curveNode.getInPoint());
+				inValueJoiner = new Line2D.Double(getScreenPoint(curveNode.getInPoint()), getScreenPoint(curveNode.getValuePoint()));
+			}
+			if (curveNode.isBezier() && curveNode.getOutPoint() != null)
+			{
+				outHandle = createNodeShape(curveNode.getOutPoint());
+				valueOutJoiner = new Line2D.Double(getScreenPoint(curveNode.getOutPoint()), getScreenPoint(curveNode.getValuePoint()));
+			}
+		}
+		
+		void paint(Graphics2D g2)
+		{
+			g2.setColor(LAFConstants.getCurveKeyHandleColor());
+			g2.draw(valueHandle);
+			
+			if (inHandle != null)
+			{
+				g2.setColor(LAFConstants.getCurveKeyHandleColor());
+				g2.draw(inHandle);
+				g2.setColor(LAFConstants.getCurveHandleJoinerColor());
+				g2.draw(inValueJoiner);
+			}
+			
+			if (outHandle != null)
+			{
+				g2.setColor(LAFConstants.getCurveKeyHandleColor());
+				g2.draw(outHandle);
+				g2.setColor(LAFConstants.getCurveHandleJoinerColor());
+				g2.draw(valueOutJoiner);
+			}
+		}
+		
+		/**
+		 * Create a node shape around the provided curve point
+		 */
+		private Rectangle2D.Double createNodeShape(ParameterCurvePoint p)
+		{
+			double x = getScreenX(p.frame);
+			double y = getScreenY(p.value);
+			double offset = NODE_SHAPE_SIZE / 2d;
+			return new Rectangle2D.Double(x - offset, y - offset, NODE_SHAPE_SIZE, NODE_SHAPE_SIZE);
+		}
+		
+		/**
+		 * Applies a handle move, taking the handle located at lastPoint and shifting it to the new point
+		 */
+		public void applyHandleMove(Point lastPoint, Point point)
+		{
+			// TODO: Apply delta X
+			int deltaY = point.y - lastPoint.y;
+			
+			if (valueHandle.contains(lastPoint))
+			{
+				Double screenPoint = getScreenPoint(curveNode.getValuePoint());
+				curveNode.applyValueChange(getCurvePoint(new Point2D.Double(screenPoint.x, screenPoint.y + deltaY)));
+			}
+			
+		}
+		
+		/**
+		 * @return Whether the provided point lies within one of the handles of this marker
+		 */
+		boolean isInMarker(Point point)
+		{
+			return valueHandle.contains(point) || (inHandle != null && inHandle.contains(point)) || (outHandle != null && outHandle.contains(point));
+		}
 	}
 }

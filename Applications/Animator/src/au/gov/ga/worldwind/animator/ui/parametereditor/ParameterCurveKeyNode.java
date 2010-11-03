@@ -18,10 +18,12 @@ class ParameterCurveKeyNode
 	
 	private boolean locked = true;
 	
+	private ParameterValue parameterValue;
+	
 	ParameterCurveKeyNode(ParameterValue parameterValue)
 	{
 		Validate.notNull(parameterValue, "A parameterValue is required");
-		
+		this.parameterValue = parameterValue;
 		this.valuePoint = new ParameterCurvePoint(parameterValue.getFrame(), parameterValue.getValue());
 		this.type = parameterValue.getType();
 		
@@ -93,4 +95,58 @@ class ParameterCurveKeyNode
 	{
 		return locked;
 	}
+	
+	public ParameterValue getParameterValue()
+	{
+		return parameterValue;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == this)
+		{
+			return true;
+		}
+		
+		if (!(obj instanceof ParameterCurveKeyNode))
+		{
+			return false;
+		}
+		
+		return ((ParameterCurveKeyNode)obj).getParameterValue().getFrame() == this.getParameterValue().getFrame();
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return this.getParameterValue().getFrame();
+	}
+
+	/**
+	 * Apply the provided value point to the parameter value this node reflects
+	 */
+	public void applyValueChange(ParameterCurvePoint newValue)
+	{
+		ParameterCurvePoint delta = valuePoint.subtract(newValue);
+		parameterValue.translate(delta.value);
+	}
+	
+	/**
+	 * Apply the provided value point to the parameter value this node reflects
+	 */
+	public void applyInChange(ParameterCurvePoint newIn)
+	{
+		
+	}
+	
+	/**
+	 * Apply the provided value point to the parameter value this node reflects
+	 */
+	public void applyOutChange(ParameterCurvePoint newOut)
+	{
+		
+	}
+	
+	
 }

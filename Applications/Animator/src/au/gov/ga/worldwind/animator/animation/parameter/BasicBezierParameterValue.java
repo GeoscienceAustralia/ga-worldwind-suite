@@ -309,6 +309,27 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	}
 	
 	@Override
+	public void translate(double delta)
+	{
+		if (delta == 0.0)
+		{
+			return;
+		}
+		
+		setValue(getValue() + delta, true);
+		if (in.hasValue())
+		{
+			in.setValue(in.value + delta);
+		}
+		if (out.hasValue())
+		{
+			out.setValue(out.value + delta);
+		}
+		
+		fireChangeEvent(getValue());
+	}
+	
+	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
 		AnimationIOConstants constants = version.getConstants();

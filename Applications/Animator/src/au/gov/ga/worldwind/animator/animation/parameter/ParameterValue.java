@@ -67,4 +67,9 @@ public interface ParameterValue extends AnimationObject, Serializable, XmlSerial
 	 * @return A deep-copy clone of this parameter value
 	 */
 	ParameterValue clone();
+	
+	/**
+	 * Translate all values (in, value and out) of this parameter by the provided delta amount
+	 */
+	void translate(double delta);
 }
