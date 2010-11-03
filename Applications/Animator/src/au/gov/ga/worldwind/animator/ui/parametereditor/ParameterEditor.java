@@ -64,6 +64,18 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 		setupSplitPane();
 	}
 
+	@Override
+	public void setVisible(boolean b)
+	{
+		super.setVisible(b);
+		
+		if (isVisible())
+		{
+			curvePanel.removeAll();
+			curvePanel.add(new ParameterCurve(targetApplication.getCurrentAnimation().getCamera().getEyeElevation()));
+		}
+	}
+	
 	private void setupSplitPane()
 	{
 		setLayout(new BorderLayout());
@@ -100,9 +112,6 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 		treeModel = new ParameterTreeModel(newAnimation);
 		parameterTree.setModel(treeModel);
 		parameterTree.validate();
-		
-		curvePanel.removeAll();
-		curvePanel.add(new ParameterCurve(newAnimation.getCamera().getEyeElevation()));
 	}
 	
 }

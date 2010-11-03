@@ -148,5 +148,9 @@ class ParameterCurveKeyNode
 		
 	}
 	
-	
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + "[In:" + inPoint + ", Value:" + valuePoint + ", Out:" + outPoint + "]";
+	}
 }

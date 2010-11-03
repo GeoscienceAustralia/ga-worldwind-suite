@@ -18,4 +18,10 @@ class ParameterCurvePoint
 	{
 		return new ParameterCurvePoint(frame - other.frame, value - other.value);
 	}
+	
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + "[" + frame + ", " + value + "]";
+	}
 }

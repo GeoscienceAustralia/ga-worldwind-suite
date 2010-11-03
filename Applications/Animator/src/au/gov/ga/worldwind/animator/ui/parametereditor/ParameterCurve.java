@@ -228,7 +228,18 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	 */
 	private Point2D.Double getScreenPoint(ParameterCurvePoint p)
 	{
-		return new Point2D.Double(getScreenX(p.frame), getScreenY(p.value));
+		System.out.println("Point: " + p);
+		System.out.println("Canvas dimensions: " + getSize());
+		System.out.println("Curve bounds: " + curveBounds);
+		
+		double screenX = getScreenX(p.frame);
+		double screenY = getScreenY(p.value);
+
+		System.out.println("Computed screen X: " + screenX);
+		System.out.println("Computed screen Y: " + screenY);
+		System.out.println();
+		
+		return new Point2D.Double(screenX, screenY);
 	}
 	
 	/**
@@ -270,7 +281,9 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	private double getCurveY(double y)
 	{
 		double h = (double)getHeight() - Y_PADDING;
-		return curveBounds.getMinValue() + (h - (y - ((double)Y_PADDING / 2)) / h) * (curveBounds.getMaxValue() - curveBounds.getMinValue());
+		double r = (y - (Y_PADDING/2d)) / h;
+		double curveValuewindow = (curveBounds.getMaxValue() - curveBounds.getMinValue());
+		return curveBounds.getMinValue() + (r * curveValuewindow);
 	}
 	
 	public void setShowAxis(boolean showAxis)
@@ -286,7 +299,6 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	@Override
 	public void curveChanged()
 	{
-		updateKeyNodeMarkers();
 		repaint();
 	}
 	
@@ -300,6 +312,10 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			{
 				keyNodeMarkers.add(new KeyNodeMarker(node));
 			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 		finally
 		{
@@ -339,15 +355,9 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		private Point lastPoint;
 		
 		@Override
-		public void mouseClicked(MouseEvent e)
+		public void mousePressed(MouseEvent e)
 		{
 			updateLastPoint(e);
-			KeyNodeMarker marker = getKeyNodeMarker(e.getPoint());
-			
-			if (marker != null)
-			{
-				System.out.println("Clicked!");
-			}
 		}
 		
 		@Override
@@ -368,9 +378,20 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			}
 		}
 		
+		@Override
+		public void mouseReleased(MouseEvent e)
+		{
+			clearLastPoint();
+		}
+		
 		private void updateLastPoint(MouseEvent e)
 		{
 			lastPoint = e.getPoint();
+		}
+		
+		private void clearLastPoint()
+		{
+			lastPoint = null;
 		}
 	}
 	
@@ -463,7 +484,8 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			if (valueHandle.contains(lastPoint))
 			{
 				Double screenPoint = getScreenPoint(curveNode.getValuePoint());
-				curveNode.applyValueChange(getCurvePoint(new Point2D.Double(screenPoint.x, screenPoint.y + deltaY)));
+				ParameterCurvePoint curvePoint = getCurvePoint(new Point2D.Double(screenPoint.x, screenPoint.y + deltaY));
+				curveNode.applyValueChange(curvePoint);
 			}
 			
 		}
