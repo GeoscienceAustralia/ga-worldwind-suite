@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -39,6 +40,7 @@ public class Executable
 			//log at INFO level
 			handler.setLevel(Level.INFO);
 			Logging.logger().addHandler(handler);
+			Logging.logger().addHandler(new ConsoleHandler());
 		}
 		catch (IOException e)
 		{
