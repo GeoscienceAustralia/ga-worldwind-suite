@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.animator.application.render;
 
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getRenderProgressDialogTitleKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getRenderProgressFrameMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getRenderProgressStartingMessageKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.Component;
@@ -41,7 +42,7 @@ public class RenderProgressDialog implements RenderEventListener
 	@Override
 	public void started()
 	{
-		progressMonitor = new ProgressMonitor(owner, getMessage(getRenderProgressDialogTitleKey()), "", 0, 100);
+		progressMonitor = new ProgressMonitor(owner, getMessage(getRenderProgressDialogTitleKey()), getMessage(getRenderProgressStartingMessageKey()), 0, 100);
 		progressMonitor.setMillisToPopup(0);
 		progressMonitor.setMillisToDecideToPopup(0);
 		progressMonitor.setProgress(0);

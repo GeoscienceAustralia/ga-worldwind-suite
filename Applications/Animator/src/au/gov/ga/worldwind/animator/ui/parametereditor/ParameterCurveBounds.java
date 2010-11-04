@@ -40,4 +40,10 @@ class ParameterCurveBounds
 	{
 		return topRight.value;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + "[X:" + getMinFrame() + "-" + getMaxFrame() + ", Y:" + getMinValue() + "-" + getMaxValue() + "]"; 
+	}
 }

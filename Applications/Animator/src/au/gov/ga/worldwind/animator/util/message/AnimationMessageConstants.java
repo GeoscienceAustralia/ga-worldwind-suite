@@ -119,6 +119,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getLogEventsLabelKey() { return "animator.gui.menu.logevents.label"; }
 	public static String getRenderProgressDialogTitleKey() { return "animator.gui.dialog.renderprogress.title"; }
 	public static String getRenderProgressFrameMessageKey() { return "animator.gui.dialog.renderprogress.framemessage.label"; }
+	public static String getRenderProgressStartingMessageKey() { return "animator.gui.dialog.renderprogress.startingmessage.label"; }
 	public static String getParameterEditorWindowLabelKey() { return "animator.gui.parametereditor.window.title"; }
 	public static String getWindowMenuLabelKey() { return "animator.gui.menu.window.label"; }
 	public static String getShowParameterEditorMenuLabelKey() { return "animator.gui.menu.showparametereditor.label"; }
