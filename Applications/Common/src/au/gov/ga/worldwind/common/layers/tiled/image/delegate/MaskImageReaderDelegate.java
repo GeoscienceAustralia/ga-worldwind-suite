@@ -199,7 +199,7 @@ public class MaskImageReaderDelegate implements ImageReaderDelegate
 	}
 
 	@Override
-	public String toDefinition()
+	public String toDefinition(Element layerElement)
 	{
 		return DEFINITION_STRING;
 	}

@@ -62,7 +62,7 @@ public class ResizeTransformerDelegate implements ImageTransformerDelegate
 	}
 
 	@Override
-	public String toDefinition()
+	public String toDefinition(Element layerElement)
 	{
 		return DEFINITION_STRING + "(" + width + "," + height + ")";
 	}

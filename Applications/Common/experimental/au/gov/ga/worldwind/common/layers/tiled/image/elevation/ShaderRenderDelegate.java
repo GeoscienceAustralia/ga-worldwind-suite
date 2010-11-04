@@ -217,7 +217,7 @@ public class ShaderRenderDelegate implements RenderDelegate
 	}
 
 	@Override
-	public String toDefinition()
+	public String toDefinition(Element layerElement)
 	{
 		return DEFINITION_STRING;
 	}

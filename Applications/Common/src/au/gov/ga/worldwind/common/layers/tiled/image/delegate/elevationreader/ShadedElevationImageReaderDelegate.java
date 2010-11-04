@@ -69,7 +69,7 @@ public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDele
 	}
 
 	@Override
-	public String toDefinition()
+	public String toDefinition(Element layerElement)
 	{
 		return DEFINITION_STRING + "(" + WWXML.dataTypeAsText(pixelType) + ","
 				+ WWXML.byteOrderAsText(byteOrder) + "," + missingDataSignal + ",(" + sunPosition.x

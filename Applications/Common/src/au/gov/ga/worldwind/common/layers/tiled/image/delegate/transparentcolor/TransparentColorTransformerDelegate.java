@@ -90,7 +90,7 @@ public class TransparentColorTransformerDelegate implements ImageTransformerDele
 	}
 
 	@Override
-	public String toDefinition()
+	public String toDefinition(Element layerElement)
 	{
 		return DEFINITION_STRING + "(" + color.getRed() + "," + color.getGreen() + ","
 				+ color.getBlue() + "," + fuzz + ")";

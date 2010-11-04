@@ -43,7 +43,7 @@ public class ColorToAlphaTransformerDelegate implements ImageTransformerDelegate
 	}
 
 	@Override
-	public String toDefinition()
+	public String toDefinition(Element layerElement)
 	{
 		return DEFINITION_STRING + "(" + color.getRed() + "," + color.getGreen() + ","
 				+ color.getBlue() + ")";

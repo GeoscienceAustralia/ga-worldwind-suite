@@ -58,7 +58,7 @@ public class NormalMapImageReaderDelegate extends ElevationImageReaderDelegate
 	}
 
 	@Override
-	public String toDefinition()
+	public String toDefinition(Element layerElement)
 	{
 		return DEFINITION_STRING + "(" + WWXML.dataTypeAsText(pixelType) + ","
 				+ WWXML.byteOrderAsText(byteOrder) + "," + missingDataSignal + ")";

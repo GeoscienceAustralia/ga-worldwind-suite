@@ -35,5 +35,5 @@ public interface Delegate
 	 * 
 	 * @return
 	 */
-	String toDefinition();
+	String toDefinition(Element layerElement);
 }

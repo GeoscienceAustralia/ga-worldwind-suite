@@ -44,7 +44,7 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 		Collection<Delegate> defaultDelegates = new DelegateKit().getDelegates();
 		for (Delegate delegate : defaultDelegates)
 		{
-			defaultDelegateDefinitions.add(delegate.toDefinition());
+			defaultDelegateDefinitions.add(delegate.toDefinition(null));
 		}
 	}
 
@@ -63,13 +63,13 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 
 		requesterDelegate =
 				(TileRequesterDelegate) DelegateFactory.createDelegate(
-						new URLRequesterDelegate().toDefinition(), null, null);
+						new URLRequesterDelegate().toDefinition(null), null, null);
 		retrieverDelegate =
 				(RetrieverFactoryDelegate) DelegateFactory.createDelegate(
-						new HttpRetrieverFactoryDelegate().toDefinition(), null, null);
+						new HttpRetrieverFactoryDelegate().toDefinition(null), null, null);
 		factoryDelegate =
 				(TileFactoryDelegate) DelegateFactory.createDelegate(
-						new TextureTileFactoryDelegate().toDefinition(), null, null);
+						new TextureTileFactoryDelegate().toDefinition(null), null, null);
 	}
 
 	/**
@@ -180,7 +180,7 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 		Element delegatesElement = WWXML.appendElement(context, "Delegates");
 		for (Delegate delegate : delegates)
 		{
-			String definition = delegate.toDefinition();
+			String definition = delegate.toDefinition(context);
 			//only append the XML element if the delegate is not one of the defaults
 			if (!defaultDelegateDefinitions.contains(definition))
 			{
@@ -337,7 +337,7 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 	}
 
 	@Override
-	public String toDefinition()
+	public String toDefinition(Element layerElement)
 	{
 		return null;
 	}

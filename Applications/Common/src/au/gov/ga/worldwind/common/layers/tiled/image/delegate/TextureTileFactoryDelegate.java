@@ -50,7 +50,7 @@ public class TextureTileFactoryDelegate implements TileFactoryDelegate
 	}
 
 	@Override
-	public String toDefinition()
+	public String toDefinition(Element layerElement)
 	{
 		return DEFINITION_STRING;
 	}

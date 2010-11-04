@@ -59,7 +59,7 @@ public class URLRequesterDelegate implements TileRequesterDelegate
 	}
 
 	@Override
-	public String toDefinition()
+	public String toDefinition(Element layerElement)
 	{
 		return DEFINITION_STRING;
 	}

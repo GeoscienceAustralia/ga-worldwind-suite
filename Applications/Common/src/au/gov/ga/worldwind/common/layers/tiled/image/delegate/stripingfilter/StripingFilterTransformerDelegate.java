@@ -62,7 +62,7 @@ public class StripingFilterTransformerDelegate implements ImageTransformerDelega
 	}
 
 	@Override
-	public String toDefinition()
+	public String toDefinition(Element layerElement)
 	{
 		return DEFINITION_STRING + "(" + lowPassCols + "," + lowPassRows + "," + highPassCols + ","
 				+ highPassRows + ")";
