@@ -4,6 +4,7 @@ import java.io.File;
 
 import gov.nasa.worldwind.WorldWindow;
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.camera.StereoCamera;
 import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
@@ -20,7 +21,8 @@ public class StereoOffscreenRenderer extends OffscreenRenderer
 			int numeralPadLength, double detailHint, boolean alpha)
 	{
 		//if the view is not a stereo view, then just render with the super method
-		if (!(wwd.getView() instanceof StereoView))
+		boolean stereo = wwd.getView() instanceof StereoView && animation.getCamera() instanceof StereoCamera;
+		if (!stereo)
 		{
 			super.renderFrame(frame, animation, outputDir, frameName, numeralPadLength, detailHint,
 					alpha);
