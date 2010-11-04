@@ -156,7 +156,7 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Curre
 			parameterEditor = new ParameterEditorPanel(animation, parameterToEdit);
 			editorMap.put(parameterToEdit, parameterEditor);
 		}
-		
+		parameterEditor.updateDisplay();
 		propertiesPanel.add(parameterEditor);
 		visibleEditors.add(parameterEditor);
 	}

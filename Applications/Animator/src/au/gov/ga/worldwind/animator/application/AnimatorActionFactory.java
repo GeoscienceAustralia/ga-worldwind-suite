@@ -483,6 +483,7 @@ public class AnimatorActionFactory
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.setUseStereoCamera(stereoCameraAction.isSelected());
+				dynamicStereoAction.setEnabled(stereoCameraAction.isSelected());
 			}
 		});
 		
@@ -494,7 +495,6 @@ public class AnimatorActionFactory
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.setUseDynamicStereo(dynamicStereoAction.isSelected());
-				dynamicStereoAction.setEnabled(stereoCameraAction.isSelected());
 			}
 		});
 	}

@@ -56,6 +56,7 @@ public abstract class StereoCameraParameter extends CameraParameter
 		protected void doApplyValue(double value)
 		{
 			getView().getParameters().setFocalLength(value);
+			redraw();
 		}
 
 		@Override
@@ -92,6 +93,7 @@ public abstract class StereoCameraParameter extends CameraParameter
 		protected void doApplyValue(double value)
 		{
 			getView().getParameters().setEyeSeparation(value);
+			redraw();
 		}
 
 		@Override

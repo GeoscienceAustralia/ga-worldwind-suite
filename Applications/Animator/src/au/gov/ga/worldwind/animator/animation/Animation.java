@@ -3,6 +3,7 @@
  */
 package au.gov.ga.worldwind.animator.animation;
 
+import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 
@@ -389,4 +390,8 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	 */
 	boolean hasElevationModel(ElevationModelIdentifier modelIdentifier);
 
+	/**
+	 * @return The WorldWindow used in this animation
+	 */
+	WorldWindow getWorldWindow();
 }

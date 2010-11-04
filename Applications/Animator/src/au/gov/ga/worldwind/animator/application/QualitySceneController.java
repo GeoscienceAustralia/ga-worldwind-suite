@@ -1,11 +1,12 @@
 package au.gov.ga.worldwind.animator.application;
 
-import gov.nasa.worldwind.BasicSceneController;
 import gov.nasa.worldwind.render.DrawContext;
 
 import javax.media.opengl.GL;
 
-public class QualitySceneController extends BasicSceneController
+import au.gov.ga.worldwind.animator.application.stereo.StereoSceneController;
+
+public class QualitySceneController extends StereoSceneController
 {
 	@Override
 	public void doRepaint(DrawContext dc)

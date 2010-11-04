@@ -764,9 +764,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		this.currentFrame = frame;
 	}
 
-	/**
-	 * @return The WorldWindow used in this animation
-	 */
+	@Override
 	public WorldWindow getWorldWindow()
 	{
 		return this.worldWindow;

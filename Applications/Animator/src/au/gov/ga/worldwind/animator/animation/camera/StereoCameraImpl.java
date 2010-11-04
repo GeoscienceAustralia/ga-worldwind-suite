@@ -69,10 +69,9 @@ public class StereoCameraImpl extends CameraImpl implements StereoCamera
 	@Override
 	protected void initialiseParameters(Animation animation)
 	{
+		super.initialiseParameters(animation);
 		focalLength = new FocalLengthParameter(animation);
 		eyeSeparation = new EyeSeparationParameter(animation);
-
-		super.initialiseParameters(animation);
 	}
 
 	@Override

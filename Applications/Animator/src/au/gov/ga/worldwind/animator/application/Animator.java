@@ -848,6 +848,7 @@ public class Animator
 			{
 				changed = true;
 				updateTitleBar();
+				wwd.redraw();
 			}
 		};
 	}
@@ -1890,6 +1891,7 @@ public class Animator
 		{
 			Camera newCamera = stereo ? new StereoCameraImpl(animation) : new CameraImpl(animation);
 			animation.setCamera(newCamera);
+			actionFactory.getDynamicStereoAction().setSelected(true);
 		}
 	}
 

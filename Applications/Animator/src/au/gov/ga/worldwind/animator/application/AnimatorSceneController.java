@@ -1,11 +1,14 @@
 package au.gov.ga.worldwind.animator.application;
 
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.SurfaceObjectRenderer;
 
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import au.gov.ga.worldwind.animator.application.render.OffscreenSurfaceObjectRenderer;
 
 public class AnimatorSceneController extends QualitySceneController
 {
@@ -73,5 +76,11 @@ public class AnimatorSceneController extends QualitySceneController
 		{
 			postPaintTasksLock.unlock();
 		}
+	}
+
+	@Override
+	protected SurfaceObjectRenderer createSurfaceObjectRenderer()
+	{
+		return new OffscreenSurfaceObjectRenderer();
 	}
 }

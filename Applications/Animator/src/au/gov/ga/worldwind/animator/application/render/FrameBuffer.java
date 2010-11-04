@@ -40,7 +40,7 @@ public class FrameBuffer
 		frameBufferId = generateFrameBuffer(gl);
 
 		//bind the frame buffer
-		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, frameBufferId);
+		bind(gl);
 		//bind the color and depth attachments to the frame buffer
 		gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_COLOR_ATTACHMENT0_EXT,
 				GL.GL_TEXTURE_2D, textureId, 0);
@@ -59,7 +59,7 @@ public class FrameBuffer
 		checkFrameBuffer(gl);
 
 		//unbind the frame buffer (bound later in the prerender task)
-		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
+		unbind(gl);
 
 		currentDimensions = dimensions;
 	}
@@ -94,7 +94,7 @@ public class FrameBuffer
 	 */
 	public void bind(GL gl)
 	{
-		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, frameBufferId);
+		FrameBufferStack.push(gl, frameBufferId);
 	}
 
 	/**
@@ -102,7 +102,7 @@ public class FrameBuffer
 	 */
 	public void unbind(GL gl)
 	{
-		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
+		FrameBufferStack.pop(gl);
 	}
 
 	/**

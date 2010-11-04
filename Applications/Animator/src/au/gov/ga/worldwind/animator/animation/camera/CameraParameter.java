@@ -7,7 +7,6 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
-import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -33,7 +32,12 @@ abstract class CameraParameter extends ParameterBase
 
 	protected View getView()
 	{
-		return ((WorldWindAnimationImpl) getAnimation()).getWorldWindow().getView();
+		return getAnimation().getWorldWindow().getView();
+	}
+	
+	protected void redraw()
+	{
+		getAnimation().getWorldWindow().redraw();
 	}
 
 	protected Position getCurrentEyePosition()
@@ -55,6 +59,7 @@ abstract class CameraParameter extends ParameterBase
 		View view = getView();
 		view.stopMovement();
 		view.setOrientation(eyePosition, lookAtPosition);
+		redraw();
 	}
 
 	/**
