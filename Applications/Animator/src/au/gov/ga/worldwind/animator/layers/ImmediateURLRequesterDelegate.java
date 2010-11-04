@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.animator.layers;
 
+import org.w3c.dom.Element;
+
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.TextureTile;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
@@ -35,9 +38,9 @@ public class ImmediateURLRequesterDelegate extends URLRequesterDelegate
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition)
+	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
-		Delegate superDelegate = super.fromDefinition(definition);
+		Delegate superDelegate = super.fromDefinition(definition, layerElement, params);
 		if (superDelegate != null)
 		{
 			return new ImmediateURLRequesterDelegate();
