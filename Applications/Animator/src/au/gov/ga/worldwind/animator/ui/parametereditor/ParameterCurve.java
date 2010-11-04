@@ -238,17 +238,8 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	 */
 	Point2D.Double getScreenPoint(ParameterCurvePoint p)
 	{
-		System.out.println("Point: " + p);
-		System.out.println("Canvas dimensions: " + getSize());
-		System.out.println("Curve bounds: " + curveBounds);
-		
 		double screenX = getScreenX(p.frame);
 		double screenY = getScreenY(p.value);
-
-		System.out.println("Computed screen X: " + screenX);
-		System.out.println("Computed screen Y: " + screenY);
-		System.out.println();
-		
 		return new Point2D.Double(screenX, screenY);
 	}
 	
@@ -282,7 +273,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	 */
 	double getCurveX(double x)
 	{
-		return curveBounds.getMinFrame() + ((x / getWidth()) * (curveBounds.getMaxFrame() - curveBounds.getMinFrame()));
+		return curveBounds.getMinFrame() + ((x / (double)getWidth()) * (curveBounds.getMaxFrame() - curveBounds.getMinFrame()));
 	}
 	
 	/**
@@ -290,10 +281,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	 */
 	double getCurveY(double y)
 	{
-		double h = (double)getHeight();
-		double r = y / h;
-		double curveValuewindow = (curveBounds.getMaxValue() - curveBounds.getMinValue());
-		return curveBounds.getMinValue() + (r * curveValuewindow);
+		return curveBounds.getMinValue() + (((getHeight() - y) / (double)getHeight()) * (curveBounds.getMaxValue() - curveBounds.getMinValue()));
 	}
 	
 	public void setShowAxis(boolean showAxis)
@@ -489,7 +477,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		public void applyHandleMove(Point lastPoint, Point point)
 		{
 			// TODO: Apply delta X
-			int deltaY = point.y - lastPoint.y;
+			int deltaY = lastPoint.y - point.y;
 			
 			if (valueHandle.contains(lastPoint))
 			{

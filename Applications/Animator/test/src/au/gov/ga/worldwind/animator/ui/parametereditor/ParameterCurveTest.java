@@ -37,6 +37,7 @@ public class ParameterCurveTest
 		
 		classToBeTested = new ParameterCurve(curveModel);
 	}
+	// Note: Screen coordinates [0,0] is top-left, while curve coordinates are bottom-left
 	
 	@Test
 	public void testConvertScreenPointToCurvePoint1To1()
@@ -68,21 +69,21 @@ public class ParameterCurveTest
 		assertEquals(100, curvePoint.frame, ALLOWABLE_ERROR);
 		assertEquals(50, curvePoint.value, ALLOWABLE_ERROR);
 		
-		// [50,0] -> [50,0]
+		// [50,0] -> [50,100]
 		screenPoint = new Point2D.Double(50, 0);
 		curvePoint = classToBeTested.getCurvePoint(screenPoint);
 
 		assertNotNull(curvePoint);
 		assertEquals(50, curvePoint.frame, ALLOWABLE_ERROR);
-		assertEquals(0, curvePoint.value, ALLOWABLE_ERROR);
+		assertEquals(100, curvePoint.value, ALLOWABLE_ERROR);
 		
-		// [50,100] -> [50,100]
+		// [50,100] -> [50,0]
 		screenPoint = new Point2D.Double(50, 100);
 		curvePoint = classToBeTested.getCurvePoint(screenPoint);
 
 		assertNotNull(curvePoint);
 		assertEquals(50, curvePoint.frame, ALLOWABLE_ERROR);
-		assertEquals(100, curvePoint.value, ALLOWABLE_ERROR);
+		assertEquals(0, curvePoint.value, ALLOWABLE_ERROR);
 	}
 	
 	@Test
@@ -115,21 +116,21 @@ public class ParameterCurveTest
 		assertEquals(100, curvePoint.frame, ALLOWABLE_ERROR);
 		assertEquals(50, curvePoint.value, ALLOWABLE_ERROR);
 		
-		// [100,0] -> [50,0]
+		// [100,0] -> [50,100]
 		screenPoint = new Point2D.Double(100, 0);
 		curvePoint = classToBeTested.getCurvePoint(screenPoint);
 
 		assertNotNull(curvePoint);
 		assertEquals(50, curvePoint.frame, ALLOWABLE_ERROR);
-		assertEquals(0, curvePoint.value, ALLOWABLE_ERROR);
+		assertEquals(100, curvePoint.value, ALLOWABLE_ERROR);
 		
-		// [100,200] -> [50,100]
+		// [100,200] -> [50,0]
 		screenPoint = new Point2D.Double(100, 200);
 		curvePoint = classToBeTested.getCurvePoint(screenPoint);
 
 		assertNotNull(curvePoint);
 		assertEquals(50, curvePoint.frame, ALLOWABLE_ERROR);
-		assertEquals(100, curvePoint.value, ALLOWABLE_ERROR);
+		assertEquals(0, curvePoint.value, ALLOWABLE_ERROR);
 	}
 	
 	
@@ -163,21 +164,21 @@ public class ParameterCurveTest
 		assertEquals(200, curvePoint.frame, ALLOWABLE_ERROR);
 		assertEquals(100, curvePoint.value, ALLOWABLE_ERROR);
 		
-		// [50,0] -> [100,0]
+		// [50,0] -> [100,200]
 		screenPoint = new Point2D.Double(50, 0);
 		curvePoint = classToBeTested.getCurvePoint(screenPoint);
 
 		assertNotNull(curvePoint);
 		assertEquals(100, curvePoint.frame, ALLOWABLE_ERROR);
-		assertEquals(0, curvePoint.value, ALLOWABLE_ERROR);
+		assertEquals(200, curvePoint.value, ALLOWABLE_ERROR);
 		
-		// [50,100] -> [100,200]
+		// [50,100] -> [100,0]
 		screenPoint = new Point2D.Double(50, 100);
 		curvePoint = classToBeTested.getCurvePoint(screenPoint);
 
 		assertNotNull(curvePoint);
 		assertEquals(100, curvePoint.frame, ALLOWABLE_ERROR);
-		assertEquals(200, curvePoint.value, ALLOWABLE_ERROR);
+		assertEquals(0, curvePoint.value, ALLOWABLE_ERROR);
 	}
 	
 	@Test
@@ -210,20 +211,20 @@ public class ParameterCurveTest
 		assertEquals(150, curvePoint.frame, ALLOWABLE_ERROR);
 		assertEquals(100, curvePoint.value, ALLOWABLE_ERROR);
 		
-		// [50,0] -> [100,50]
+		// [50,0] -> [100,150]
 		screenPoint = new Point2D.Double(50, 0);
 		curvePoint = classToBeTested.getCurvePoint(screenPoint);
 
 		assertNotNull(curvePoint);
 		assertEquals(100, curvePoint.frame, ALLOWABLE_ERROR);
-		assertEquals(50, curvePoint.value, ALLOWABLE_ERROR);
+		assertEquals(150, curvePoint.value, ALLOWABLE_ERROR);
 		
-		// [50,100] -> [100,150]
+		// [50,100] -> [100,50]
 		screenPoint = new Point2D.Double(50, 100);
 		curvePoint = classToBeTested.getCurvePoint(screenPoint);
 
 		assertNotNull(curvePoint);
 		assertEquals(100, curvePoint.frame, ALLOWABLE_ERROR);
-		assertEquals(150, curvePoint.value, ALLOWABLE_ERROR);
+		assertEquals(50, curvePoint.value, ALLOWABLE_ERROR);
 	}
 }
