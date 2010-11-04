@@ -8,10 +8,15 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.MessageFormat;
+import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
@@ -30,7 +35,7 @@ public class Executable
 		try
 		{
 			Handler handler = new FileHandler("animator%u.log", true);
-			handler.setFormatter(new SimpleFormatter());
+			handler.setFormatter(new OneLineFormatter());
 			//log at INFO level
 			handler.setLevel(Level.INFO);
 			Logging.logger().addHandler(handler);
@@ -41,12 +46,10 @@ public class Executable
 		}
 
 		//redirect standard out and standard error to the logger
-		Logger logger = Logger.getLogger("stdout");
-		LoggingOutputStream los = new LoggingOutputStream(logger, StdOutErrLevel.STDOUT);
+		LoggingOutputStream los = new LoggingOutputStream(Logging.logger(), StdOutErrLevel.STDOUT);
 		System.setOut(new PrintStream(los, true));
 
-		logger = Logger.getLogger("stderr");
-		los = new LoggingOutputStream(logger, StdOutErrLevel.STDERR);
+		los = new LoggingOutputStream(Logging.logger(), StdOutErrLevel.STDERR);
 		System.setErr(new PrintStream(los, true));
 
 
@@ -58,7 +61,7 @@ public class Executable
 		NativeJOGLLibs.init();
 
 		//start the animator
-		Logging.logger().info("Starting Animator");
+		System.out.println("Starting Animator");
 		Animator.main(args);
 	}
 
@@ -92,6 +95,58 @@ public class Executable
 
 				logger.logp(level, "", "", record);
 			}
+		}
+	}
+
+	private static class OneLineFormatter extends SimpleFormatter
+	{
+		private Date date = new Date();
+		private final static String format = "{0,date} {0,time}";
+		private MessageFormat formatter;
+		private String lineSeparator = System.getProperty("line.separator");
+		private Object args[] = new Object[1];
+
+		@Override
+		public String format(LogRecord record)
+		{
+			if (record.getLevel() != StdOutErrLevel.STDOUT
+					&& record.getLevel() != StdOutErrLevel.STDERR)
+			{
+				return super.format(record);
+			}
+
+			StringBuffer sb = new StringBuffer();
+			// Minimize memory allocations here.
+			date.setTime(record.getMillis());
+			args[0] = date;
+			StringBuffer text = new StringBuffer();
+			if (formatter == null)
+			{
+				formatter = new MessageFormat(format);
+			}
+			formatter.format(args, text, null);
+			sb.append(text);
+			sb.append(" ");
+			String message = formatMessage(record);
+			sb.append(record.getLevel().getLocalizedName());
+			sb.append(": ");
+			sb.append(message);
+			sb.append(lineSeparator);
+			if (record.getThrown() != null)
+			{
+				try
+				{
+					StringWriter sw = new StringWriter();
+					PrintWriter pw = new PrintWriter(sw);
+					record.getThrown().printStackTrace(pw);
+					pw.close();
+					sb.append(sw.toString());
+				}
+				catch (Exception ex)
+				{
+				}
+			}
+			return sb.toString();
 		}
 	}
 
