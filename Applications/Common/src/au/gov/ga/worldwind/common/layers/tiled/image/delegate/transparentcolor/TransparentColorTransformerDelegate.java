@@ -1,9 +1,13 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate.transparentcolor;
 
+import gov.nasa.worldwind.avlist.AVList;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageTransformerDelegate;
@@ -66,7 +70,7 @@ public class TransparentColorTransformerDelegate implements ImageTransformerDele
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition)
+	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.toLowerCase().startsWith(DEFINITION_STRING.toLowerCase()))
 		{

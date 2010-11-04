@@ -1,13 +1,17 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate;
 
+import gov.nasa.worldwind.avlist.AVList;
+
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.w3c.dom.Element;
+
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.colortoalpha.ColorToAlphaTransformerDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader.ShadedElevationImageReaderDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.nearestneighbor.NearestNeighborTextureTileFactoryDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.resize.ResizeTransformerDelegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.shadedelevationreader.ShadedElevationImageReaderDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.stripingfilter.StripingFilterTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.transparentcolor.TransparentColorTransformerDelegate;
 
@@ -92,11 +96,11 @@ public class DelegateFactory
 	 * @param definition
 	 * @return New delegate corresponding to {@code definition}
 	 */
-	public static Delegate createDelegate(String definition)
+	public static Delegate createDelegate(String definition, Element layerElement, AVList params)
 	{
 		for (Delegate delegate : classToInstanceMap.values())
 		{
-			Delegate d = delegate.fromDefinition(definition);
+			Delegate d = delegate.fromDefinition(definition, layerElement, params);
 			if (d != null)
 			{
 				if (replacementClasses.containsKey(d.getClass()))
@@ -104,7 +108,7 @@ public class DelegateFactory
 					Class<? extends Delegate> replacementClass =
 							replacementClasses.get(d.getClass());
 					Delegate instance = classToInstanceMap.get(replacementClass);
-					Delegate newInstance = instance.fromDefinition(definition);
+					Delegate newInstance = instance.fromDefinition(definition, layerElement, params);
 					if (newInstance != null)
 					{
 						return newInstance;

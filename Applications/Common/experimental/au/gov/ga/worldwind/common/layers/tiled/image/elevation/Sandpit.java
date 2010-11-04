@@ -11,8 +11,8 @@ import java.io.InputStream;
 
 import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegateFactory;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader.ShadedElevationImageReaderDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.resize.ResizeTransformerDelegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.shadedelevationreader.ShadedElevationImageReaderDelegate;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 
 public class Sandpit extends ApplicationTemplate
@@ -46,7 +46,6 @@ public class Sandpit extends ApplicationTemplate
 
 			DelegateFactory.registerDelegate(NormalMapImageReaderDelegate.class);
 			DelegateFactory.registerDelegate(ShaderRenderDelegate.class);
-			DelegateFactory.registerDelegate(ShadedElevationImageReaderDelegate.class);
 			DelegateFactory.registerDelegate(ResizeTransformerDelegate.class);
 
 			LayerFactory factory = new LayerFactory();
@@ -57,9 +56,9 @@ public class Sandpit extends ApplicationTemplate
 			//layer.setOpacity(0.2);
 			insertAfterPlacenames(getWwd(), layer);
 
-			is = this.getClass().getResourceAsStream("EarthElevationModelAsBil16Shaded.xml");
+			/*is = this.getClass().getResourceAsStream("EarthElevationModelAsBil16Shaded.xml");
 			layer = (Layer) factory.createFromConfigSource(is, null);
-			insertAfterPlacenames(getWwd(), layer);
+			insertAfterPlacenames(getWwd(), layer);*/
 
 			TerrainProfileLayer profile = new TerrainProfileLayer();
 			profile.setEventSource(getWwd());

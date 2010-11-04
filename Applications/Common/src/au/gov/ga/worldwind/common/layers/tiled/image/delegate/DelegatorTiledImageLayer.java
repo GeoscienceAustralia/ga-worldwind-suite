@@ -112,7 +112,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 		}
 
 		//create the delegate kit from the XML element
-		DelegateKit delegateKit = DelegateKit.createFromXML(domElement);
+		DelegateKit delegateKit = DelegateKit.createFromXML(domElement, params);
 		params.setValue(AVKeyMore.DELEGATE_KIT, delegateKit);
 
 		return params;

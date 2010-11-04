@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate.nearestneighbor;
 
+import org.w3c.dom.Element;
+
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.util.Level;
@@ -24,7 +27,7 @@ public class NearestNeighborTextureTileFactoryDelegate extends TextureTileFactor
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition)
+	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
 		{

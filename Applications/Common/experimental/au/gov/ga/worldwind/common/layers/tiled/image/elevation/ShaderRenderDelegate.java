@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.elevation;
 
 import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.examples.sunlight.SunCalculator;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Matrix;
@@ -18,6 +19,8 @@ import javax.swing.JFrame;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.RenderDelegate;
@@ -206,7 +209,7 @@ public class ShaderRenderDelegate implements RenderDelegate
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition)
+	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
 			return new ShaderRenderDelegate();

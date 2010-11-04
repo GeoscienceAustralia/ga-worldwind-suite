@@ -1,34 +1,26 @@
-package au.gov.ga.worldwind.common.layers.tiled.image.delegate.shadedelevationreader;
+package au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
-import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.util.BufferWrapper;
-import gov.nasa.worldwind.util.WWIO;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageReaderDelegate;
+import org.w3c.dom.Element;
 
-public class ShadedElevationImageReaderDelegate implements ImageReaderDelegate
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
+
+public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDelegate
 {
 	private final static String DEFINITION_STRING = "ShadedElevationReader";
 
-	protected final String pixelType;
-	protected final String byteOrder;
-	protected final Double missingDataSignal;
 	protected final double exaggeration;
 	protected final Vec4 sunPosition;
 
@@ -42,19 +34,16 @@ public class ShadedElevationImageReaderDelegate implements ImageReaderDelegate
 	public ShadedElevationImageReaderDelegate(String pixelType, String byteOrder,
 			double missingDataSignal, double exaggeration, Vec4 sunPosition)
 	{
-		this.pixelType = pixelType;
-		this.byteOrder = byteOrder;
-		this.missingDataSignal = missingDataSignal;
+		super(pixelType, byteOrder, missingDataSignal);
 		this.exaggeration = exaggeration;
 		this.sunPosition = sunPosition;
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition)
+	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.toLowerCase().startsWith(DEFINITION_STRING.toLowerCase()))
 		{
-			String doublePattern = "((?:-?\\d*\\.\\d*)|(?:-?\\d+))";
 			Pattern pattern =
 					Pattern.compile("(?:\\((\\w+),(\\w+)," + doublePattern + ",\\(" + doublePattern
 							+ "," + doublePattern + "," + doublePattern + "\\)," + doublePattern
@@ -83,28 +72,13 @@ public class ShadedElevationImageReaderDelegate implements ImageReaderDelegate
 	public String toDefinition()
 	{
 		return DEFINITION_STRING + "(" + WWXML.dataTypeAsText(pixelType) + ","
-				+ WWXML.byteOrderAsText(byteOrder) + ")";
+				+ WWXML.byteOrderAsText(byteOrder) + "," + missingDataSignal + ",(" + sunPosition.x
+				+ "," + sunPosition.y + "," + sunPosition.z + ")," + exaggeration + ")";
 	}
 
 	@Override
-	public BufferedImage readImage(TextureTile tile, URL url, Globe globe) throws IOException
-	{
-		ByteBuffer byteBuffer = WWIO.readURLContentToBuffer(url);
-
-		int width = tile.getWidth();
-		int height = tile.getHeight();
-
-		// Setup parameters to instruct BufferWrapper on how to interpret the ByteBuffer.
-		AVList bufferParams = new AVListImpl();
-		bufferParams.setValue(AVKey.DATA_TYPE, pixelType);
-		bufferParams.setValue(AVKey.BYTE_ORDER, byteOrder);
-		BufferWrapper elevations = BufferWrapper.wrap(byteBuffer, bufferParams);
-
-		return calculateShaded(elevations, width, height, tile.getSector());
-	}
-
-	protected BufferedImage calculateShaded(BufferWrapper elevations, int width, int height,
-			Sector sector)
+	protected BufferedImage generateImage(BufferWrapper elevations, int width, int height,
+			Globe globe, Sector sector)
 	{
 		//image array has one less in width and height than verts array:
 		//this is because edge verts are shared between adjacent tiles

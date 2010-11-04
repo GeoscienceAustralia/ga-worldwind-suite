@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate;
 
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.TextureTile;
@@ -61,14 +62,14 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 		//use the DelegateFactory to create the defaults, in case some replacements have been set
 
 		requesterDelegate =
-				(TileRequesterDelegate) DelegateFactory.createDelegate(new URLRequesterDelegate()
-						.toDefinition());
+				(TileRequesterDelegate) DelegateFactory.createDelegate(
+						new URLRequesterDelegate().toDefinition(), null, null);
 		retrieverDelegate =
-				(RetrieverFactoryDelegate) DelegateFactory
-						.createDelegate(new HttpRetrieverFactoryDelegate().toDefinition());
+				(RetrieverFactoryDelegate) DelegateFactory.createDelegate(
+						new HttpRetrieverFactoryDelegate().toDefinition(), null, null);
 		factoryDelegate =
-				(TileFactoryDelegate) DelegateFactory
-						.createDelegate(new TextureTileFactoryDelegate().toDefinition());
+				(TileFactoryDelegate) DelegateFactory.createDelegate(
+						new TextureTileFactoryDelegate().toDefinition(), null, null);
 	}
 
 	/**
@@ -138,7 +139,7 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 	 *            XML element
 	 * @return New {@link DelegateKit}
 	 */
-	public static DelegateKit createFromXML(Element domElement)
+	public static DelegateKit createFromXML(Element domElement, AVList params)
 	{
 		DelegateKit kit = new DelegateKit();
 
@@ -154,7 +155,8 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 					String definition = element.getTextContent();
 					if (definition != null && definition.length() > 0)
 					{
-						Delegate delegate = DelegateFactory.createDelegate(definition);
+						Delegate delegate =
+								DelegateFactory.createDelegate(definition, domElement, params);
 						kit.setOrAddDelegate(delegate);
 					}
 				}
@@ -329,7 +331,7 @@ public class DelegateKit implements TileRequesterDelegate, RetrieverFactoryDeleg
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition)
+	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		return null;
 	}

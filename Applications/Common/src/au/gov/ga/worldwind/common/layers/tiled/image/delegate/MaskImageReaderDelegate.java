@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate;
 
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.TextureTile;
 
@@ -13,6 +14,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.imageio.ImageIO;
+
+import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.util.Util;
 
@@ -188,7 +191,7 @@ public class MaskImageReaderDelegate implements ImageReaderDelegate
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition)
+	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
 			return new MaskImageReaderDelegate();

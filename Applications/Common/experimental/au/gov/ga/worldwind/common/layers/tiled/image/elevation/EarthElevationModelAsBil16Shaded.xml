@@ -9,7 +9,7 @@
 		<LayerNames>mergedAsterElevations</LayerNames>
 	</Service>
 	<Delegates>
-		<!-- <Delegate>NormalMapReader(Int16,LittleEndian)</Delegate> -->
+		<!-- <Delegate>NormalMapReader(Int16,LittleEndian,-32000)</Delegate> -->
 		<!-- <Delegate>ShaderRender</Delegate> -->
 		<Delegate>ShadedElevationReader(Int16,LittleEndian,-32000,(-0.7,0.7,-1),10)</Delegate>
 		<!-- <Delegate>StripingFilterTransformer(21,21,1,21)</Delegate> -->

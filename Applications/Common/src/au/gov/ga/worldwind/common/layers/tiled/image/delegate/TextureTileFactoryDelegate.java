@@ -1,6 +1,9 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate;
 
+import org.w3c.dom.Element;
+
 import au.gov.ga.worldwind.common.util.Util;
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.util.Level;
@@ -39,7 +42,7 @@ public class TextureTileFactoryDelegate implements TileFactoryDelegate
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition)
+	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
 			return new TextureTileFactoryDelegate();

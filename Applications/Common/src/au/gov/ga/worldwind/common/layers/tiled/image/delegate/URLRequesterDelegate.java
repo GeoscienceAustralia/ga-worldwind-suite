@@ -1,11 +1,14 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate;
 
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.util.Logging;
 
 import java.net.URL;
+
+import org.w3c.dom.Element;
 
 /**
  * Implementation of {@link TileRequesterDelegate} which performs the same
@@ -48,7 +51,7 @@ public class URLRequesterDelegate implements TileRequesterDelegate
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition)
+	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
 			return new URLRequesterDelegate();

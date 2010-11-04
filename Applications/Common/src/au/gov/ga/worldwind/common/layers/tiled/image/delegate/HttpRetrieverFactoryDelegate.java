@@ -1,10 +1,13 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate;
 
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.retrieve.HTTPRetriever;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
 import gov.nasa.worldwind.retrieve.Retriever;
 
 import java.net.URL;
+
+import org.w3c.dom.Element;
 
 /**
  * Implementation of {@link RetrieverFactoryDelegate} which creates
@@ -23,7 +26,7 @@ public class HttpRetrieverFactoryDelegate implements RetrieverFactoryDelegate
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition)
+	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
 			return new HttpRetrieverFactoryDelegate();

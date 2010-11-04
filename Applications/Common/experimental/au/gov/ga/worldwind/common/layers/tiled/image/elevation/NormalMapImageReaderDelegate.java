@@ -2,35 +2,27 @@ package au.gov.ga.worldwind.common.layers.tiled.image.elevation;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
-import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.util.BufferWrapper;
-import gov.nasa.worldwind.util.WWIO;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageReaderDelegate;
+import org.w3c.dom.Element;
 
-public class NormalMapImageReaderDelegate implements ImageReaderDelegate
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader.ElevationImageReaderDelegate;
+
+public class NormalMapImageReaderDelegate extends ElevationImageReaderDelegate
 {
 	private final static String DEFINITION_STRING = "NormalMapReader";
 
-	protected final String pixelType;
-	protected final String byteOrder;
-
 	//TODO get from constructor or layer
-	protected final Double missingDataSignal = -Double.MAX_VALUE;
 	protected final double bakedExaggeration = 100.0;
 	protected final double minElevationClamp = -Double.MAX_VALUE;
 	protected final double maxElevationClamp = Double.MAX_VALUE;
@@ -38,28 +30,28 @@ public class NormalMapImageReaderDelegate implements ImageReaderDelegate
 	@SuppressWarnings("unused")
 	private NormalMapImageReaderDelegate()
 	{
-		this(AVKey.INT16, AVKey.LITTLE_ENDIAN);
+		this(AVKey.INT16, AVKey.LITTLE_ENDIAN, -Double.MAX_VALUE);
 	}
 
-	public NormalMapImageReaderDelegate(String pixelType, String byteOrder)
+	public NormalMapImageReaderDelegate(String pixelType, String byteOrder, Double missingDataSignal)
 	{
-		this.pixelType = pixelType;
-		this.byteOrder = byteOrder;
+		super(pixelType, byteOrder, missingDataSignal);
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition)
+	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.toLowerCase().startsWith(DEFINITION_STRING.toLowerCase()))
 		{
-			Pattern pattern = Pattern.compile("(?:\\((\\w+),(\\w+)\\))");
+			Pattern pattern = Pattern.compile("(?:\\((\\w+),(\\w+)," + doublePattern + "\\))");
 			Matcher matcher = pattern.matcher(definition);
 			if (matcher.find())
 			{
 				String pixelType = matcher.group(1);
 				String byteOrder = matcher.group(2);
+				double missingDataSignal = Double.parseDouble(matcher.group(3));
 				return new NormalMapImageReaderDelegate(WWXML.parseDataType(pixelType),
-						WWXML.parseByteOrder(byteOrder));
+						WWXML.parseByteOrder(byteOrder), missingDataSignal);
 			}
 		}
 		return null;
@@ -69,27 +61,11 @@ public class NormalMapImageReaderDelegate implements ImageReaderDelegate
 	public String toDefinition()
 	{
 		return DEFINITION_STRING + "(" + WWXML.dataTypeAsText(pixelType) + ","
-				+ WWXML.byteOrderAsText(byteOrder) + ")";
+				+ WWXML.byteOrderAsText(byteOrder) + "," + missingDataSignal + ")";
 	}
 
 	@Override
-	public BufferedImage readImage(TextureTile tile, URL url, Globe globe) throws IOException
-	{
-		ByteBuffer byteBuffer = WWIO.readURLContentToBuffer(url);
-
-		int width = tile.getWidth();
-		int height = tile.getHeight();
-
-		// Setup parameters to instruct BufferWrapper on how to interpret the ByteBuffer.
-		AVList bufferParams = new AVListImpl();
-		bufferParams.setValue(AVKey.DATA_TYPE, pixelType);
-		bufferParams.setValue(AVKey.BYTE_ORDER, byteOrder);
-		BufferWrapper elevations = BufferWrapper.wrap(byteBuffer, bufferParams);
-
-		return calculateNormalMap(elevations, width, height, globe, tile.getSector());
-	}
-
-	protected BufferedImage calculateNormalMap(BufferWrapper elevations, int width, int height,
+	protected BufferedImage generateImage(BufferWrapper elevations, int width, int height,
 			Globe globe, Sector sector)
 	{
 		//normals array has one less in width and height than verts array:
