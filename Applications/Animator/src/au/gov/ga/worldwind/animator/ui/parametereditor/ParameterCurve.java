@@ -40,7 +40,6 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 
 	private static final RenderingHints RENDER_HINT = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 	private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new DaemonThreadFactory("Parameter Curve Updater"));
-	private static final int Y_PADDING = 10;
 	private static final int NODE_SHAPE_SIZE = 8;
 	
 	/** The model backing this component */
@@ -72,12 +71,15 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	
 	public ParameterCurve(Parameter parameter, ParameterCurveBounds curveBounds)
 	{
-		Validate.notNull(parameter, "A parameter is required");
-		
-		model = new DefaultParameterCurveModel(parameter, THREAD_POOL);
-		model.addListener(this);
-		
+		this(new DefaultParameterCurveModel(parameter, THREAD_POOL));
 		this.curveBounds = curveBounds;
+	}
+
+	public ParameterCurve(ParameterCurveModel curveModel)
+	{
+		Validate.notNull(curveModel, "A model is required");
+		this.model = curveModel;
+		model.addListener(this);
 		
 		setOpaque(true);
 		setBackground(LAFConstants.getCurveEditorBackgroundColor());
@@ -85,7 +87,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		addMouseMotionListener(nodeMouseListener);
 		addComponentListener(new ComponentListener());
 	}
-
+	
 	/**
 	 * Destroy's this curve. Once called, no further updates will take place for the curve.
 	 */
@@ -108,9 +110,17 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	}
 
 	/**
+	 * Set the curve drawing bounds for this parameter curve
+	 */
+	public void setCurveBounds(double minFrame, double maxFrame, double minValue, double maxValue)
+	{
+		setCurveBounds(new ParameterCurveBounds(minFrame, maxFrame, minValue, maxValue));
+	}
+	
+	/**
 	 * Set the frame bounds for this parameter curve. The value bounds will be left untouched.
 	 */
-	public void setCurveFrameBounds(int minFrame, int maxFrame)
+	public void setCurveFrameBounds(double minFrame, double maxFrame)
 	{
 		if (curveBounds == null)
 		{
@@ -226,7 +236,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	/**
 	 * Maps the provided curve point to a screen point
 	 */
-	private Point2D.Double getScreenPoint(ParameterCurvePoint p)
+	Point2D.Double getScreenPoint(ParameterCurvePoint p)
 	{
 		System.out.println("Point: " + p);
 		System.out.println("Canvas dimensions: " + getSize());
@@ -245,7 +255,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	/**
 	 * Maps the provided frame number to a screen x-coordinate
 	 */
-	private double getScreenX(double frame)
+	double getScreenX(double frame)
 	{
 		return (double)getWidth() * (double)(frame - curveBounds.getMinFrame()) / (double)(curveBounds.getMaxFrame() - curveBounds.getMinFrame());
 	}
@@ -253,16 +263,16 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	/**
 	 * Maps the provided parameter value to a screen y-coordinate
 	 */
-	private double getScreenY(double parameterValue)
+	double getScreenY(double parameterValue)
 	{
-		double h = (double)getHeight() - Y_PADDING;
-		return h - (h * (parameterValue - curveBounds.getMinValue()) / (curveBounds.getMaxValue() - curveBounds.getMinValue())) + ((double)Y_PADDING / 2);
+		double h = (double)getHeight();
+		return h - (h * (parameterValue - curveBounds.getMinValue()) / (curveBounds.getMaxValue() - curveBounds.getMinValue()));
 	}
 
 	/**
 	 * Maps the provided screen point to a curve point
 	 */
-	private ParameterCurvePoint getCurvePoint(Point2D.Double screenPoint)
+	ParameterCurvePoint getCurvePoint(Point2D.Double screenPoint)
 	{
 		return new ParameterCurvePoint(getCurveX(screenPoint.x), getCurveY(screenPoint.y));
 	}
@@ -270,7 +280,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	/**
 	 * Maps the provided screen x-coordinate to a curve frame coordinate
 	 */
-	private double getCurveX(double x)
+	double getCurveX(double x)
 	{
 		return curveBounds.getMinFrame() + ((x / getWidth()) * (curveBounds.getMaxFrame() - curveBounds.getMinFrame()));
 	}
@@ -278,10 +288,10 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	/**
 	 * Maps the provided screen y-coordinate to a curve value coordinate
 	 */
-	private double getCurveY(double y)
+	double getCurveY(double y)
 	{
-		double h = (double)getHeight() - Y_PADDING;
-		double r = (y - (Y_PADDING/2d)) / h;
+		double h = (double)getHeight();
+		double r = y / h;
 		double curveValuewindow = (curveBounds.getMaxValue() - curveBounds.getMinValue());
 		return curveBounds.getMinValue() + (r * curveValuewindow);
 	}
