@@ -22,9 +22,10 @@ public interface Delegate
 	 *            Definition string
 	 * @param layerElement
 	 *            DOM element of the layer definition from which this definition
-	 *            is being created
+	 *            is being created (could be null)
 	 * @param params
-	 *            AVList passed to the {@link DelegatorTiledImageLayer}
+	 *            AVList passed to the {@link DelegatorTiledImageLayer} (could
+	 *            be null)
 	 * @return New delegate if the definition is valid for this delegate
 	 */
 	Delegate fromDefinition(String definition, Element layerElement, AVList params);
@@ -33,6 +34,9 @@ public interface Delegate
 	 * Generate a definition string for this delegate. Must be a string accepted
 	 * by the {@code fromDefinition()} function.
 	 * 
+	 * @param layerElement
+	 *            DOM element of the layer; can add elements to this element if
+	 *            this delegate requires (could be null)
 	 * @return
 	 */
 	String toDefinition(Element layerElement);
