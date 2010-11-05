@@ -83,7 +83,6 @@ public class StereoSceneController extends AbstractSceneController
 				this.draw(dc);
 
 				gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
-				gl.glDisable(GL.GL_FOG);
 
 				stereo.setup(true, swap ? Eye.LEFT : Eye.RIGHT);
 				setupBuffer(gl, mode, Eye.RIGHT);
@@ -92,7 +91,7 @@ public class StereoSceneController extends AbstractSceneController
 
 				stereo.setup(false, Eye.LEFT);
 				restoreBuffer(gl, mode);
-				view.apply(dc);
+				this.applyView(dc);
 			}
 		}
 		finally
