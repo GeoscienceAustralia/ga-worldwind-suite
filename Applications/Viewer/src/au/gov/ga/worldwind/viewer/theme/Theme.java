@@ -5,13 +5,16 @@ import gov.nasa.worldwind.WorldWindow;
 
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import au.gov.ga.worldwind.viewer.panels.dataset.IDataset;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
 
 public interface Theme extends Disposable
 {
-	public void setup(WorldWindow wwd);
+	public void setup(JFrame frame, WorldWindow wwd);
 	public WorldWindow getWwd();
+	public JFrame getFrame();
 	
 	public String getName();
 	public boolean hasMenuBar();

@@ -4,12 +4,15 @@ import gov.nasa.worldwind.WorldWindow;
 
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import au.gov.ga.worldwind.viewer.panels.dataset.IDataset;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.viewer.panels.layers.ThemeLayersPanel;
 
 public class BasicTheme implements Theme
 {
+	private JFrame frame;
 	private WorldWindow wwd;
 
 	private String name;
@@ -40,9 +43,10 @@ public class BasicTheme implements Theme
 	}
 
 	@Override
-	public void setup(WorldWindow wwd)
+	public void setup(JFrame frame, WorldWindow wwd)
 	{
 		setWwd(wwd);
+		setFrame(frame);
 
 		for (ThemePanel panel : getPanels())
 		{
@@ -76,6 +80,17 @@ public class BasicTheme implements Theme
 	public void setWwd(WorldWindow wwd)
 	{
 		this.wwd = wwd;
+	}
+
+	@Override
+	public JFrame getFrame()
+	{
+		return frame;
+	}
+
+	public void setFrame(JFrame frame)
+	{
+		this.frame = frame;
 	}
 
 	@Override
