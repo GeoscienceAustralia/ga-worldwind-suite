@@ -7,7 +7,10 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -45,6 +48,8 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 
 	private JPanel curvePanel;
 	
+	private List<ParameterCurve> curves = new ArrayList<ParameterCurve>();
+	
 	public ParameterEditor(Animator targetApplication)
 	{
 		Validate.notNull(targetApplication, "A Animator instance must be provided");
@@ -65,15 +70,45 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 	}
 
 	@Override
-	public void setVisible(boolean b)
+	public void setVisible(boolean visible)
 	{
-		super.setVisible(b);
+		super.setVisible(visible);
 		
-		if (isVisible())
+		if (!visible)
 		{
-			curvePanel.removeAll();
-			curvePanel.add(new ParameterCurve(targetApplication.getCurrentAnimation().getCamera().getEyeElevation()));
+			removeAndDestroyAllCurves();
 		}
+		else
+		{
+			addSelectedCurves();
+		}
+	}
+
+	private void removeAndDestroyAllCurves()
+	{
+		for (ParameterCurve curve : curves)
+		{
+			curvePanel.remove(curve);
+			curve.destroy();
+		}
+		curvePanel.removeAll();
+		curves.clear();
+		curvePanel.validate();
+	}
+	
+	private void addSelectedCurves()
+	{
+		curves.add(new ParameterCurve(targetApplication.getCurrentAnimation().getCamera().getEyeElevation()));
+		
+		curvePanel.add(Box.createVerticalStrut(10));
+		for (ParameterCurve curve : curves)
+		{
+			curvePanel.add(curve);
+			curvePanel.add(Box.createVerticalStrut(10));
+		}
+		
+		curvePanel.validate();
+		curvePanel.repaint();
 	}
 	
 	private void setupSplitPane()
@@ -112,6 +147,11 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 		treeModel = new ParameterTreeModel(newAnimation);
 		parameterTree.setModel(treeModel);
 		parameterTree.validate();
+		removeAndDestroyAllCurves();
+		if (isVisible())
+		{
+			addSelectedCurves();
+		}
 	}
 	
 }

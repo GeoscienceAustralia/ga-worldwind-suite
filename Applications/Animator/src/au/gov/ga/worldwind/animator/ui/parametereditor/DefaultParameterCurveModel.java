@@ -54,7 +54,9 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 		
 		this.updater = updater;
 		
-		updateCurve();
+		// Update the curve on this thread the first time around to ensure 
+		// the model begins life in a valid state
+		new CurveUpdateTask().run();
 	}
 
 	/**
@@ -64,6 +66,15 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 	{
 		parameter.removeChangeListener(this);
 
+		if (currentTask != null)
+		{
+			currentTask.cancel(true);
+		}
+		if (nextTask != null)
+		{
+			nextTask.cancel(true);
+		}
+		
 		backBufferLock.lock();
 		frontBufferLock.lock();
 		curvePointsBackBuffer.clear();
@@ -159,6 +170,10 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 	
 	private void notifyCurveChanged()
 	{
+		if (listeners.isEmpty())
+		{
+			return;
+		}
 		for (int i = listeners.size() - 1; i <= 0; i--)
 		{
 			listeners.get(i).curveChanged();
