@@ -48,6 +48,20 @@ public interface AnimationEvent
 	boolean hasOwnerInChainOfType(Class<?> clazz);
 	
 	/**
+	 * Returns the first object in the chain of the given type.
+	 * <p/>
+	 * Inspects (in order):
+	 * <ol>
+	 * 	<li>The event itself
+	 *  <li>The event owner
+	 *  <li>The event value
+	 *  <li>The event cause
+	 * </ol>
+	 * Inspects from this event down to the root cause in order.
+	 */
+	<T> T getObjectInChainOfType(Class<T> clazz);
+	
+	/**
 	 * Gets the last event in the causal chain.
 	 * 
 	 * @return the ultimate cause in the causal chain.

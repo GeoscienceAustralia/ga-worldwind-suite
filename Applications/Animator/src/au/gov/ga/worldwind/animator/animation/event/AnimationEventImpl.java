@@ -63,6 +63,29 @@ public class AnimationEventImpl implements AnimationEvent
 		return cause.getCauseOfClass(clazz);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getObjectInChainOfType(Class<T> clazz)
+	{
+		if (clazz.isAssignableFrom(getClass()))
+		{
+			return (T)this;
+		}
+		if (owner != null && clazz.isAssignableFrom(owner.getClass()))
+		{
+			return (T)owner;
+		}
+		if (value != null && clazz.isAssignableFrom(value.getClass()))
+		{
+			return (T)value;
+		}
+		if (cause != null)
+		{
+			return cause.getObjectInChainOfType(clazz);
+		}
+		return null;
+	}
+	
 	@Override
 	public boolean hasOwnerInChainOfType(Class<?> clazz)
 	{

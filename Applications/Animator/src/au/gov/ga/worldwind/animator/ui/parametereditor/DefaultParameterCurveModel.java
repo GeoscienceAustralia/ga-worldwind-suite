@@ -12,6 +12,7 @@ import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
@@ -133,18 +134,38 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 		return curvePointsFrontBuffer.lastKey();
 	}
 	
+	
 	@Override
 	public void receiveAnimationEvent(AnimationEvent event)
 	{
-		updateCurve();
+		if (!isEventForThisParameter(event))
+		{
+			return;
+		}
+		
+		// Calculate a 'dirty window' from the event to minimise the amount of curve that needs to be recalculated
+		ParameterValue changedValue = getParameterValueFromEvent(event);
+		Integer startFrame = null;
+		Integer endFrame = null;
+		
+		if (changedValue != null)
+		{
+			ParameterValue previousKeyValue = parameter.getValueAtKeyFrameBeforeFrame(changedValue.getFrame());
+			startFrame = previousKeyValue == null ? null : previousKeyValue.getFrame();
+			
+			ParameterValue nextKeyValue = parameter.getValueAtKeyFrameAfterFrame(changedValue.getFrame());
+			endFrame = nextKeyValue == null ? null : nextKeyValue.getFrame();
+		}
+		
+		submitUpdateTask(new CurveUpdateTask(startFrame, endFrame));
 	}
 
 	@SuppressWarnings("unchecked")
-	private void updateCurve()
+	private void submitUpdateTask(CurveUpdateTask updateTask)
 	{
 		if (currentTask == null || currentTask.isDone())
 		{
-			currentTask = (Future<CurveUpdateTask>) updater.submit(new CurveUpdateTask());
+			currentTask = (Future<CurveUpdateTask>) updater.submit(updateTask);
 		}
 		else
 		{
@@ -152,10 +173,26 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 			{
 				nextTask.cancel(true);
 			}
-			nextTask = (Future<CurveUpdateTask>) updater.submit(new CurveUpdateTask());
+			nextTask = (Future<CurveUpdateTask>) updater.submit(updateTask);
 		}
 	}
+
+	private boolean isEventForThisParameter(AnimationEvent event)
+	{
+		Parameter p = event.getObjectInChainOfType(Parameter.class);
+		return p != null && p.equals(parameter);
+	}
 	
+	private ParameterValue getParameterValueFromEvent(AnimationEvent event)
+	{
+		ParameterValue p = event.getObjectInChainOfType(ParameterValue.class);
+		if (p != null && p.getOwner().equals(parameter))
+		{
+			return p;
+		}
+		return null;
+	}
+
 	@Override
 	public void lock()
 	{
@@ -212,13 +249,32 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 	 */
 	private class CurveUpdateTask implements Runnable
 	{
+		private Integer startFrame;
+		private Integer endFrame;
+
+		/**
+		 * Create a new update task that updates the entire curve
+		 */
+		public CurveUpdateTask()
+		{
+		}
+		
+		/**
+		 * Create a new update task that updates the curve between the start and end frames
+		 */
+		public CurveUpdateTask(Integer startFrame, Integer endFrame)
+		{
+			this.startFrame = startFrame;
+			this.endFrame = endFrame;
+		}
+		
 		@Override
 		public void run()
 		{
 			try
 			{
 				backBufferLock.lock();
-				recalculatePoints();
+				recalculatePoints(startFrame, endFrame);
 				frontBufferLock.lock();
 				swapBuffers();
 			}
@@ -230,13 +286,17 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 			notifyCurveChanged();
 		}
 
-		private void recalculatePoints()
+		/**
+		 * Recalculates the curve points between the provided (optional) start and end frames.
+		 */
+		private void recalculatePoints(Integer dirtyWindowStart, Integer dirtyWindowEnd)
 		{
-			curvePointsBackBuffer.clear();
-
+			TreeMap<Integer, ParameterCurvePoint> tmpBuffer = new TreeMap<Integer, ParameterCurvePoint>();
+			
 			List<KeyFrame> keyFrames = parameter.getKeyFramesWithThisParameter();
 			if (keyFrames.isEmpty())
 			{
+				curvePointsBackBuffer.clear();
 				return;
 			}
 			
@@ -247,8 +307,16 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 			int lastFrame = keyFrames.get(keyFrames.size() - 1).getFrame();
 			for (int frame = firstFrame; frame <= lastFrame; frame++)
 			{
-				ParameterCurvePoint curvePoint = new ParameterCurvePoint(frame, parameter.getValueAtFrame(frame).getValue());
-				curvePointsBackBuffer.put(frame, curvePoint);
+				ParameterCurvePoint curvePoint = null;
+				
+				if (inWindow(frame, dirtyWindowStart, dirtyWindowEnd) || !curvePointsBackBuffer.containsKey(frame))
+				{
+					curvePoint = new ParameterCurvePoint(frame, parameter.getValueAtFrame(frame).getValue());
+				}
+				else
+				{
+					curvePoint = curvePointsBackBuffer.get(frame);
+				}
 				
 				if (curvePoint.value > maxValue)
 				{
@@ -259,12 +327,23 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 				{
 					minValue = curvePoint.value;
 				}
+				
+				tmpBuffer.put(frame, curvePoint);
 			}
 			
+			curvePointsBackBuffer = tmpBuffer;
 			DefaultParameterCurveModel.this.maxValue = maxValue;
 			DefaultParameterCurveModel.this.minValue = minValue;
 		}
 		
+		private boolean inWindow(int frame, Integer dirtyWindowStart, Integer dirtyWindowEnd)
+		{
+			int start = dirtyWindowStart == null ? Integer.MIN_VALUE : dirtyWindowStart;
+			int end = dirtyWindowEnd == null ? Integer.MAX_VALUE : dirtyWindowEnd;
+			
+			return frame >= start && frame <= end;
+		}
+
 		private void swapBuffers()
 		{
 			TreeMap<Integer, ParameterCurvePoint> tmpBuffer = curvePointsBackBuffer;
