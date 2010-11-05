@@ -37,6 +37,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 	private boolean wasImmediate;
 
 	private PaintTask preRenderTask;
+	private PaintTask prePostRenderTask;
 	private PaintTask postRenderTask;
 
 	public OffscreenRenderer(WorldWindow wwd, Animator targetApplication)
@@ -78,6 +79,16 @@ public class OffscreenRenderer extends AnimationRendererBase
 				gl.glViewport(0, 0, renderDimensions.width, renderDimensions.height);
 			}
 		};
+		
+		prePostRenderTask = new PaintTask()
+		{
+			@Override
+			public void run(DrawContext dc)
+			{
+				GL gl = dc.getGL();
+				gl.glViewport(0, 0, renderDimensions.width, renderDimensions.height);
+			}
+		};
 
 		//create a post PaintTask which will reset the viewport, unbind the FBO, and draw the
 		//offscreen texture to a quad in screen coordinates
@@ -105,8 +116,8 @@ public class OffscreenRenderer extends AnimationRendererBase
 		//add the pre render task
 		animatorSceneController.addPrePaintTask(preRenderTask);
 		
-		//also add it post render, just before the screenshot, to ensure the viewport is always correct
-		animatorSceneController.addPostPaintTask(preRenderTask);
+		//also add a viewport set just before the screenshot, to ensure the viewport is always correct
+		animatorSceneController.addPostPaintTask(prePostRenderTask);
 
 		//add the screenshot task
 		ScreenshotPaintTask screenshotTask = new ScreenshotPaintTask(targetFile, alpha);
