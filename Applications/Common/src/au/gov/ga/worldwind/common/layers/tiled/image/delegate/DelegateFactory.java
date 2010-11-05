@@ -8,7 +8,9 @@ import java.util.Map;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.colortoalpha.ColorLimitTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.colortoalpha.ColorToAlphaTransformerDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader.ColorMapElevationImageReaderDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader.ShadedElevationImageReaderDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.nearestneighbor.NearestNeighborTextureTileFactoryDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.resize.ResizeTransformerDelegate;
@@ -49,6 +51,8 @@ public class DelegateFactory
 		registerDelegate(StripingFilterTransformerDelegate.class);
 		registerDelegate(ShadedElevationImageReaderDelegate.class);
 		registerDelegate(ResizeTransformerDelegate.class);
+		registerDelegate(ColorMapElevationImageReaderDelegate.class);
+		registerDelegate(ColorLimitTransformerDelegate.class);
 	}
 
 	/**

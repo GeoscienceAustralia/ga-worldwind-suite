@@ -69,6 +69,19 @@ public class XMLUtil extends WWXML
 			return def;
 		return d;
 	}
+	
+	public static int getInteger(Element context, String path, int def)
+	{
+		return getInteger(context, path, def, null);
+	}
+
+	public static int getInteger(Element context, String path, int def, XPath xpath)
+	{
+		Integer i = getInteger(context, path, xpath);
+		if (i == null)
+			return def;
+		return i;
+	}
 
 	public static URL getURL(Element element, String path, URL context)
 			throws MalformedURLException
