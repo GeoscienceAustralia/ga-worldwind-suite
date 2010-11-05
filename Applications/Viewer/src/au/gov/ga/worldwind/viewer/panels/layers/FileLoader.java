@@ -46,8 +46,13 @@ public class FileLoader
 
 				try
 				{
-					// Import the file into a form usable by World Wind components.
-					dataConfig = importDataFromFile(parentComponent, file, fileStore);
+					//first attempt loading the file from the WorldWindInstalled cache
+					dataConfig = loadCachedData(file, fileStore);
+					if (dataConfig == null)
+					{
+						// Import the file into a form usable by World Wind components.
+						dataConfig = importDataFromFile(parentComponent, file, fileStore);
+					}
 
 					if (dataConfig == null)
 					{
@@ -71,6 +76,12 @@ public class FileLoader
 		thread.setDaemon(true);
 		thread.setName("File loader");
 		thread.start();
+	}
+
+	protected static Document loadCachedData(File file, FileStore fileStore)
+	{
+		//TODO
+		return null;
 	}
 
 	//FROM ImportingImagesAndElevationsDemo.java

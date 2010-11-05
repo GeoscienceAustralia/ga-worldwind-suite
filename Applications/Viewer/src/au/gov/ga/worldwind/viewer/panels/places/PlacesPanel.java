@@ -2,6 +2,8 @@ package au.gov.ga.worldwind.viewer.panels.places;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.event.RenderingEvent;
+import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 
@@ -11,7 +13,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -20,14 +21,20 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -37,15 +44,20 @@ import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
+
+import org.w3c.dom.Document;
 
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.viewer.panels.layers.ILayerNode;
+import au.gov.ga.worldwind.viewer.panels.layers.INode;
+import au.gov.ga.worldwind.viewer.panels.layers.LayerTreeModel;
+import au.gov.ga.worldwind.viewer.panels.layers.LayerTreePersistance;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
@@ -60,17 +72,18 @@ public class PlacesPanel extends AbstractThemePanel
 
 	private List<Place> places = new ArrayList<Place>();
 
+	private JFrame frame;
 	private WorldWindow wwd;
 	private JList list;
 	private DefaultListModel model;
 	private ListItem dragging;
 	private PlaceLayer layer;
-	private Window window;
 	private boolean playing = false;
 	private BasicAction addAction, editAction, deleteAction, playAction, importAction,
 			exportAction;
 	private JFileChooser exportImportChooser;
-	private LayersPanel layerPanels;
+	private LayersPanel layersPanel;
+	private RenderingListener opacityChanger;
 
 	private class ListItem
 	{
@@ -90,6 +103,16 @@ public class PlacesPanel extends AbstractThemePanel
 
 		createPanel();
 		loadPlaces(getPlacesFile(), false);
+	}
+
+	public JFrame getFrame()
+	{
+		return frame;
+	}
+
+	public WorldWindow getWwd()
+	{
+		return wwd;
 	}
 
 	protected void loadPlaces(File file, boolean append)
@@ -415,8 +438,7 @@ public class PlacesPanel extends AbstractThemePanel
 		place.setEyePosition(eyePosition);
 		place.setUpVector(upVector);
 		place.setSaveCamera(false);
-		PlaceEditor editor = new PlaceEditor(wwd, window, "New place", place, getIcon());
-		int value = editor.getOkCancel();
+		int value = PlaceEditor.edit(place, this, "New place");
 		if (value == JOptionPane.OK_OPTION)
 		{
 			places.add(place);
@@ -448,8 +470,7 @@ public class PlacesPanel extends AbstractThemePanel
 		if (item != null)
 		{
 			Place editing = new Place(item.place);
-			PlaceEditor editor = new PlaceEditor(wwd, window, "Edit place", editing, getIcon());
-			int value = editor.getOkCancel();
+			int value = PlaceEditor.edit(editing, this, "Edit place");
 			if (value == JOptionPane.OK_OPTION)
 			{
 				item.place.setValuesFrom(editing);
@@ -487,7 +508,7 @@ public class PlacesPanel extends AbstractThemePanel
 	{
 		int value =
 				JOptionPane
-						.showConfirmDialog(window, "All places will be deleted!\nAre you sure?",
+						.showConfirmDialog(frame, "All places will be deleted!\nAre you sure?",
 								"Delete all places", JOptionPane.YES_NO_OPTION,
 								JOptionPane.WARNING_MESSAGE);
 		if (value == JOptionPane.YES_OPTION)
@@ -660,14 +681,19 @@ public class PlacesPanel extends AbstractThemePanel
 			eyePosition = new Position(centerPosition, elevation);
 		}
 
+		wwd.getView().stopAnimations();
+		wwd.getView().stopMovement();
+		wwd.removeRenderingListener(opacityChanger);
+
 		long lengthMillis =
 				AnimatorHelper.addAnimator(view, centerPosition, eyePosition, place.getUpVector());
+		animateLayers(place, lengthMillis);
 		wwd.redraw();
 
 		return lengthMillis;
 	}
 
-	private void animateLayers(Place place)
+	private void animateLayers(Place place, final long lengthMillis)
 	{
 		// - find a list of currently enabled layers (enabled && opacity > 0): OLD
 		// - find the list of enabled layers in the place: NEW
@@ -682,10 +708,287 @@ public class PlacesPanel extends AbstractThemePanel
 		// - move layers to correct positions at 0.5 percent
 		// - fade OOO layers from 0 to new between 0.5 and 1.0 percent
 
-		//TODO Have to modify the implementation of saving the places.
-		//No longer save to the settings file, but save instead to a places file.
-		//Use proper XML handling instead of the XMLEncoder.
-		//Save the full layer tree (perhaps use the LayerPersistance class) to an element in the place.
+		if (layersPanel == null)
+			return;
+
+		INode placeNode = place.getLayers();
+		if (placeNode == null)
+			return;
+
+		INode currentNode = layersPanel.getRoot();
+		if (currentNode == null)
+			return;
+
+		List<ILayerNode> placeLayers = flattenLayerHierarchy(placeNode);
+		List<ILayerNode> currentLayers = flattenLayerHierarchy(currentNode);
+
+		//get the layer tree model from the panel
+		final LayerTreeModel model = layersPanel.getModel();
+
+		//generate a map of URL to lists of indices, mapping each layer URL to one or multiple
+		//indices in the list (if there are multiple instances of the URL in the list)
+		Map<URL, List<Integer>> currentUrlIndexMap = new HashMap<URL, List<Integer>>();
+		for (int i = 0; i < currentLayers.size(); i++)
+		{
+			URL url = currentLayers.get(i).getLayerURL();
+			List<Integer> list = currentUrlIndexMap.get(url);
+			if (list == null)
+			{
+				list = new ArrayList<Integer>();
+				currentUrlIndexMap.put(url, list);
+			}
+			list.add(i);
+		}
+
+		//find out the index in the current layer list of each layer in the place
+		//also generate a list of the layers required for enabling/opacity changing
+		List<Integer> indexOfPlaceInCurrent = new ArrayList<Integer>();
+		final List<ILayerNode> toModify = new ArrayList<ILayerNode>();
+		for (int i = 0; i < placeLayers.size(); i++)
+		{
+			ILayerNode placeLayer = placeLayers.get(i);
+			URL url = placeLayer.getLayerURL();
+			if (!currentUrlIndexMap.containsKey(url))
+			{
+				placeLayers.remove(i--);
+				continue;
+			}
+
+			List<Integer> indices = currentUrlIndexMap.get(url);
+			Integer index = indices.remove(0);
+			if (indices.isEmpty())
+			{
+				currentUrlIndexMap.remove(url);
+			}
+			indexOfPlaceInCurrent.add(index);
+
+			ILayerNode currentLayer = currentLayers.get(index);
+			if (!currentLayer.isEnabled() || currentLayer.getOpacity() != placeLayer.getOpacity())
+			{
+				toModify.add(currentLayer);
+			}
+		}
+
+		//urlIndexMap now contains all the indices of the layers that don't exist in the place's layers 
+		final List<ILayerNode> toDisable = new ArrayList<ILayerNode>();
+		for (Entry<URL, List<Integer>> entry : currentUrlIndexMap.entrySet())
+		{
+			for (Integer index : entry.getValue())
+			{
+				ILayerNode currentLayer = currentLayers.get(index);
+				if (currentLayer.isEnabled())
+				{
+					toDisable.add(currentLayer);
+				}
+			}
+		}
+
+		//find out the index in the place of each layer in the current layer list
+		final int[] indexOfCurrentInPlace = new int[currentLayers.size()];
+		//initialise array to -1
+		for (int i = 0; i < indexOfCurrentInPlace.length; i++)
+		{
+			indexOfCurrentInPlace[i] = -1;
+		}
+		//init array to indices of current layers in the places array
+		for (int i = 0; i < indexOfPlaceInCurrent.size(); i++)
+		{
+			indexOfCurrentInPlace[indexOfPlaceInCurrent.get(i)] = i;
+		}
+
+		/*System.out.println("current = " + Arrays.toString(currentLayers.toArray()));
+		System.out.println("place = " + Arrays.toString(placeLayers.toArray()));
+		System.out.println("indexOfCurrentInPlace = " + Arrays.toString(indexOfCurrentInPlace));
+		System.out.println("indexOfPlaceInCurrent = "
+				+ Arrays.toString(indexOfPlaceInCurrent.toArray()));*/
+
+		//find a list of layers needed to reorder
+		final List<ILayerNode> reorder = new ArrayList<ILayerNode>();
+		final List<ILayerNode> putBefore = new ArrayList<ILayerNode>();
+		for (int i = indexOfPlaceInCurrent.size() - 2; i >= 0; i--)
+		{
+			int placeIndex = indexOfPlaceInCurrent.get(i);
+			//go backwards to find any layers that are earlier that should be later in the list
+			for (int j = placeIndex - 1; j >= 0; j--)
+			{
+				int currentIndex = indexOfCurrentInPlace[j];
+				if (currentIndex < 0)
+					continue;
+
+				if (currentIndex > i)
+				{
+					reorder.add(currentLayers.get(placeIndex));
+					putBefore.add(currentLayers.get(indexOfPlaceInCurrent.get(i + 1)));
+					break;
+				}
+			}
+		}
+		toModify.removeAll(reorder);
+
+		/*System.out.println(Arrays.toString(reorder.toArray()));
+		System.out.println(Arrays.toString(putBefore.toArray()));*/
+
+		/*
+		 * current:
+		 * 5: blue marble
+		 * 6: landsat
+		 * 7: place names
+		 * 8: ternary
+		 * 
+		 * place:
+		 * 5: blue marble
+		 * 6: ternary
+		 * 7: landsat
+		 * 
+		indexOfCurrentInPlace = [0, 1, 2, 3, 4, 7, 5, -1, 6]
+		indexOfPlaceInCurrent = [0, 1, 2, 3, 4, 6, 8, 5]
+		[Ternary (K-Th-U), Blue Marble]
+		[Landsat, Landsat]
+		 */
+
+
+		//find an array of start/end opacities for the layers to enable/change opacity
+		final double[] modifyStartOpacities = new double[toModify.size()];
+		final double[] modifyEndOpacities = new double[toModify.size()];
+		for (int i = 0; i < toModify.size(); i++)
+		{
+			ILayerNode layer = toModify.get(i);
+			if (!layer.isEnabled())
+			{
+				modifyStartOpacities[i] = 0d;
+				model.setEnabled(layer, true);
+				model.setOpacity(layer, 0d);
+			}
+			else
+			{
+				modifyStartOpacities[i] = layer.getOpacity();
+			}
+			int currentIndex = currentLayers.indexOf(layer);
+			modifyEndOpacities[i] =
+					placeLayers.get(indexOfCurrentInPlace[currentIndex]).getOpacity();
+		}
+
+		final double[] reorderStartOpacities = new double[reorder.size()];
+		final double[] reorderEndOpacities = new double[reorder.size()];
+		for (int i = 0; i < reorder.size(); i++)
+		{
+			ILayerNode layer = reorder.get(i);
+			if (!layer.isEnabled())
+			{
+				reorderStartOpacities[i] = 0d;
+				model.setEnabled(layer, true);
+				model.setOpacity(layer, 0d);
+			}
+			else
+			{
+				reorderStartOpacities[i] = layer.getOpacity();
+			}
+			int currentIndex = currentLayers.indexOf(layer);
+			reorderEndOpacities[i] =
+					placeLayers.get(indexOfCurrentInPlace[currentIndex]).getOpacity();
+		}
+
+		//find an array of start opacities for the layers to disable
+		final double[] disableStartOpacities = new double[toDisable.size()];
+		for (int i = 0; i < toDisable.size(); i++)
+		{
+			ILayerNode layer = toDisable.get(i);
+			disableStartOpacities[i] = layer.getOpacity();
+		}
+
+
+		final long startTime = System.currentTimeMillis();
+		opacityChanger = new RenderingListener()
+		{
+			private boolean swapped = false;
+
+			@Override
+			public void stageChanged(RenderingEvent event)
+			{
+				if (event.getStage() == RenderingEvent.BEFORE_RENDERING)
+				{
+					long currentTime = System.currentTimeMillis();
+					double percent = (currentTime - startTime) / (double) lengthMillis;
+					percent = Math.max(0d, Math.min(1d, percent));
+					boolean complete = percent >= 1d;
+
+					for (int i = 0; i < toDisable.size(); i++)
+					{
+						ILayerNode layer = toDisable.get(i);
+						double opacity = Util.mixDouble(percent, disableStartOpacities[i], 0d);
+						model.setOpacity(layer, opacity);
+
+						if (complete)
+						{
+							model.setEnabled(layer, false);
+						}
+					}
+
+					for (int i = 0; i < toModify.size(); i++)
+					{
+						ILayerNode layer = toModify.get(i);
+						double opacity =
+								Util.mixDouble(percent, modifyStartOpacities[i],
+										modifyEndOpacities[i]);
+						model.setOpacity(layer, opacity);
+					}
+
+					if (!swapped && percent >= 0.5)
+					{
+						for (int i = 0; i < reorder.size(); i++)
+						{
+							model.moveNodeBefore(reorder.get(i), putBefore.get(i));
+						}
+
+						swapped = true;
+					}
+
+					double reorderPercent = percent * 2d - 1d;
+					for (int i = 0; i < reorder.size(); i++)
+					{
+						ILayerNode layer = reorder.get(i);
+						double start = 0d;
+						double end = swapped ? reorderEndOpacities[i] : reorderStartOpacities[i];
+						double opacity = Util.mixDouble(Math.abs(reorderPercent), start, end);
+						model.setOpacity(layer, opacity);
+					}
+
+					if (complete)
+					{
+						wwd.removeRenderingListener(this);
+					}
+				}
+			}
+		};
+		wwd.addRenderingListener(opacityChanger);
+
+		wwd.getInputHandler().addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				wwd.removeRenderingListener(opacityChanger);
+			}
+		});
+	}
+
+	private List<ILayerNode> flattenLayerHierarchy(INode root)
+	{
+		List<ILayerNode> layers = new ArrayList<ILayerNode>();
+		addLayersToList(root, layers);
+		return layers;
+	}
+
+	private void addLayersToList(INode parent, List<ILayerNode> layers)
+	{
+		if (parent instanceof ILayerNode)
+		{
+			layers.add((ILayerNode) parent);
+		}
+		for (int i = 0; i < parent.getChildCount(); i++)
+		{
+			addLayersToList(parent.getChild(i), layers);
+		}
 	}
 
 	private JFileChooser getChooser()
@@ -722,7 +1025,7 @@ public class PlacesPanel extends AbstractThemePanel
 	{
 		final JFileChooser chooser = getChooser();
 		chooser.setMultiSelectionEnabled(true);
-		if (chooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION)
+		if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
 			for (File file : chooser.getSelectedFiles())
 			{
@@ -732,7 +1035,7 @@ public class PlacesPanel extends AbstractThemePanel
 				}
 				catch (Exception e)
 				{
-					JOptionPane.showMessageDialog(window, "Could not import " + file.getName(),
+					JOptionPane.showMessageDialog(frame, "Could not import " + file.getName(),
 							"Import error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
@@ -752,7 +1055,7 @@ public class PlacesPanel extends AbstractThemePanel
 	private void exportPlaces()
 	{
 		final JFileChooser chooser = getChooser();
-		if (chooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION)
+		if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
 			File file = chooser.getSelectedFile();
 			if (!file.getName().toLowerCase().endsWith(".xml"))
@@ -762,7 +1065,7 @@ public class PlacesPanel extends AbstractThemePanel
 			if (file.exists())
 			{
 				int answer =
-						JOptionPane.showConfirmDialog(window, file.getAbsolutePath()
+						JOptionPane.showConfirmDialog(frame, file.getAbsolutePath()
 								+ " already exists.\nDo you want to replace it?", "Export",
 								JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 				if (answer != JOptionPane.YES_OPTION)
@@ -776,7 +1079,7 @@ public class PlacesPanel extends AbstractThemePanel
 				}
 				catch (Exception e)
 				{
-					JOptionPane.showMessageDialog(window, "Error: " + e, "Export error",
+					JOptionPane.showMessageDialog(frame, "Error: " + e, "Export error",
 							JOptionPane.ERROR_MESSAGE);
 				}
 			}
@@ -839,16 +1142,15 @@ public class PlacesPanel extends AbstractThemePanel
 	public void setup(Theme theme)
 	{
 		wwd = theme.getWwd();
+		frame = theme.getFrame();
 		layer = new PlaceLayer(wwd, this);
 		wwd.getModel().getLayers().add(layer);
-
-		window = SwingUtilities.getWindowAncestor(this);
 
 		for (ThemePanel panel : theme.getPanels())
 		{
 			if (panel instanceof LayersPanel)
 			{
-				this.layerPanels = (LayersPanel) panel;
+				this.layersPanel = (LayersPanel) panel;
 			}
 		}
 
@@ -860,5 +1162,83 @@ public class PlacesPanel extends AbstractThemePanel
 	public void dispose()
 	{
 		savePlaces(getPlacesFile());
+	}
+
+	public void setLayersFromLayersPanel(Place place)
+	{
+		if (layersPanel != null)
+		{
+			INode node = layersPanel.getRoot();
+			//deep copy the layer hierarchy using it's own persistance mechanism
+			try
+			{
+				Document document = LayerTreePersistance.saveToDocument(node);
+				INode copy = LayerTreePersistance.readFromXML(document);
+				removeAnyDisabled(copy);
+				removeAnyUnneededProperties(copy);
+				place.setLayers(copy);
+			}
+			catch (MalformedURLException e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void removeAnyUnneededProperties(INode node)
+	{
+		if (node instanceof ILayerNode)
+		{
+			ILayerNode layer = (ILayerNode) node;
+			layer.setExpiryTime(null);
+			layer.setLegendURL(null);
+			layer.setQueryURL(null);
+			layer.setEnabled(false);
+		}
+
+		node.setExpanded(false);
+		node.setIconURL(null);
+		node.setName(null);
+		node.setInfoURL(null);
+
+		for (int i = 0; i < node.getChildCount(); i++)
+		{
+			removeAnyUnneededProperties(node.getChild(i));
+		}
+	}
+
+	private void removeAnyDisabled(INode node)
+	{
+		for (int i = 0; i < node.getChildCount(); i++)
+		{
+			INode child = node.getChild(i);
+			if (!anyEnabled(child))
+			{
+				node.removeChild(child);
+				i--;
+			}
+			else
+			{
+				//recurse into children
+				removeAnyDisabled(child);
+			}
+		}
+	}
+
+	private boolean anyEnabled(INode node)
+	{
+		if (node instanceof ILayerNode)
+		{
+			if (((ILayerNode) node).isEnabled())
+				return true;
+		}
+
+		for (int i = 0; i < node.getChildCount(); i++)
+		{
+			if (anyEnabled(node.getChild(i)))
+				return true;
+		}
+
+		return false;
 	}
 }

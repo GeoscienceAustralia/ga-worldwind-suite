@@ -12,7 +12,7 @@ public interface INode extends IIconItem
 
 	public URL getInfoURL();
 
-	//public void setInfoURL(URL infoURL);
+	public void setInfoURL(URL infoURL);
 
 	public boolean isExpanded();
 

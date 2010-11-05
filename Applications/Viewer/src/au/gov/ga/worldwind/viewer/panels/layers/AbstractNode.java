@@ -43,6 +43,7 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 		return infoURL;
 	}
 
+	@Override
 	public void setInfoURL(URL infoURL)
 	{
 		this.infoURL = infoURL;

@@ -419,4 +419,9 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 	{
 		return layerEnabler.hasLayer(layer);
 	}
+	
+	public INode getRoot()
+	{
+		return root;
+	}
 }

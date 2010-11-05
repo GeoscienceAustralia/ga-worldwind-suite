@@ -505,7 +505,9 @@ public class LayersPanel extends AbstractLayersPanel
 	public void dispose()
 	{
 		if (persistLayers)
+		{
 			LayerTreePersistance.saveToXML(root, getLayersFile());
+		}
 	}
 
 	protected File getLayersFile()

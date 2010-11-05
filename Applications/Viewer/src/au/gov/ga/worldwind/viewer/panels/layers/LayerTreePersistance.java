@@ -15,6 +15,8 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
 
 public class LayerTreePersistance
 {
+	public final static String LAYERS_ROOT_ELEMENT_NAME = "LayerList";
+
 	public static INode readFromXML(Object source) throws MalformedURLException
 	{
 		XPath xpath = XMLUtil.makeXPath();
@@ -23,14 +25,13 @@ public class LayerTreePersistance
 		{
 			INode root = new FolderNode(null, null, null, true);
 
-			String nodeName = "LayerList";
-			if (elem.getNodeName().equals(nodeName))
+			if (elem.getNodeName().equals(LAYERS_ROOT_ELEMENT_NAME))
 			{
 				addRelevant(elem, root, xpath);
 			}
 			else
 			{
-				Element[] elements = XMLUtil.getElements(elem, nodeName, xpath);
+				Element[] elements = XMLUtil.getElements(elem, LAYERS_ROOT_ELEMENT_NAME, xpath);
 				if (elements == null)
 					return null;
 
@@ -95,15 +96,21 @@ public class LayerTreePersistance
 
 	public static void saveToXML(INode root, File output)
 	{
+		Document document = saveToDocument(root);
+		XMLUtil.saveDocumentToFormattedFile(document, output.getAbsolutePath());
+	}
+
+	public static Document saveToDocument(INode root)
+	{
 		DocumentBuilder db = XMLUtil.createDocumentBuilder(false);
 		Document document = db.newDocument();
 		saveToNode(root, document, document);
-		XMLUtil.saveDocumentToFormattedFile(document, output.getAbsolutePath());
+		return document;
 	}
 
 	public static void saveToNode(INode root, Document document, Node parent)
 	{
-		Element element = document.createElement("LayerList");
+		Element element = document.createElement(LAYERS_ROOT_ELEMENT_NAME);
 		parent.appendChild(element);
 		for (int i = 0; i < root.getChildCount(); i++)
 		{
@@ -126,8 +133,10 @@ public class LayerTreePersistance
 			LayerNode layer = (LayerNode) node;
 			if (layer.getLayerURL() != null)
 				current.setAttribute("layer", layer.getLayerURL().toExternalForm());
-			XMLUtil.setBooleanAttribute(current, "enabled", layer.isEnabled());
-			XMLUtil.setDoubleAttribute(current, "opacity", layer.getOpacity());
+			if (layer.isEnabled())
+				XMLUtil.setBooleanAttribute(current, "enabled", layer.isEnabled());
+			if (layer.getOpacity() != 1.0)
+				XMLUtil.setDoubleAttribute(current, "opacity", layer.getOpacity());
 			if (layer.getExpiryTime() != null)
 				XMLUtil.setLongAttribute(current, "expiry", layer.getExpiryTime());
 		}
@@ -135,12 +144,14 @@ public class LayerTreePersistance
 		if (current != null)
 		{
 			element.appendChild(current);
-			current.setAttribute("name", node.getName());
+			if (node.getName() != null && node.getName().length() > 0)
+				current.setAttribute("name", node.getName());
 			if (node.getInfoURL() != null)
 				current.setAttribute("info", node.getInfoURL().toExternalForm());
 			if (node.getIconURL() != null)
 				current.setAttribute("icon", node.getIconURL().toExternalForm());
-			XMLUtil.setBooleanAttribute(current, "expanded", node.isExpanded());
+			if (node.isExpanded())
+				XMLUtil.setBooleanAttribute(current, "expanded", node.isExpanded());
 
 			for (int i = 0; i < node.getChildCount(); i++)
 			{

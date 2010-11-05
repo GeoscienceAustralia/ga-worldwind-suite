@@ -428,6 +428,101 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		listeners.remove(l);
 	}
 
+	public void moveNodeBefore(INode node, INode beforeNode)
+	{
+		INode[] nodePath = getPathToRoot(node);
+		INode[] beforePath = getPathToRoot(beforeNode);
+
+		int differenceLevel = -1;
+		for (int i = 0; i < nodePath.length && i < beforePath.length; i++)
+		{
+			if (nodePath[i] != beforePath[i])
+			{
+				differenceLevel = i;
+				break;
+			}
+		}
+
+		if (differenceLevel <= 0)
+			return;
+
+		//parent is the lowest node in the hierarchy that both paths share in common
+		INode parent = nodePath[differenceLevel - 1];
+		//find the index of both paths in the parent
+		int indexOfNode = parent.getChildIndex(nodePath[differenceLevel]);
+		int indexOfBefore = parent.getChildIndex(beforePath[differenceLevel]);
+
+		//node is already before beforeNode
+		if (indexOfNode < indexOfBefore)
+			return;
+
+		//remove the node (and any empty parents) from the tree
+		int removedLevel = -1;
+		for (int i = nodePath.length - 1; i >= differenceLevel; i--)
+		{
+			INode n = nodePath[i];
+			if (n.getChildCount() > 1)
+			{
+				break;
+			}
+			removedLevel = i;
+		}
+		if (removedLevel >= 0)
+		{
+			INode remove = nodePath[removedLevel];
+			removeNodeFromParent(remove, false);
+		}
+
+		//TODO if beforeNode is not the first node in the hierarchy all the way down to differenceLevel,
+		//need to split the hierarchy at beforeNode and create two separate trees down to differenceLevel,
+		//then insert the node in between the two trees
+		//probably implement in the splitNodesAtLevel function below
+
+		int insertionIndex = indexOfBefore;
+		for (int i = differenceLevel; i < nodePath.length; i++)
+		{
+			if (i == removedLevel)
+			{
+				INode n = nodePath[i];
+				insertNodeInto(n, parent, insertionIndex, false);
+				break;
+			}
+			else
+			{
+				INode n = nodePath[i];
+				INode nextParent;
+
+				INode currentBeforeNode =
+						insertionIndex > 0 ? parent.getChild(insertionIndex - 1) : null;
+				if (currentBeforeNode != null
+						&& currentBeforeNode.getName().equalsIgnoreCase(n.getName()))
+				{
+					nextParent = currentBeforeNode;
+				}
+				else
+				{
+					nextParent = new FolderNode(n);
+					insertNodeInto(nextParent, parent, insertionIndex, false);
+				}
+
+				parent = nextParent;
+				insertionIndex = 0;
+			}
+		}
+
+		rebuildLayersList();
+	}
+
+	/*public void splitNodesAtLevel(INode[] path, int level, int index)
+	{
+		if (level >= path.length || level < 0)
+		{
+			throw new IllegalArgumentException("Level is outside of path bounds");
+		}
+		
+		
+	}*/
+
 	public void insertNodeInto(INode newNode, INode parentNode, int index, boolean rebuildLayersList)
 	{
 		parentNode.insertChild(index, newNode);

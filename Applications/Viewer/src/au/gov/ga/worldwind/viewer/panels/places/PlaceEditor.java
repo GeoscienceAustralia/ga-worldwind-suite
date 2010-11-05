@@ -13,16 +13,15 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -37,28 +36,34 @@ import au.gov.ga.worldwind.common.ui.JDoubleField;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.Util;
 
-
-public class PlaceEditor extends JDialog
+public class PlaceEditor
 {
 	public static String IMPERIAL = "Imperial";
 	public static String METRIC = "Metric";
 	private static String UNITS = METRIC;
 
+	private JDialog dialog;
+	private PlacesPanel placesPanel;
+
 	private Place place;
-	private JCheckBox visible;
-	private JTextArea text;
-	private JTextField latlon;
+	private JCheckBox visibleCheck;
+	private JTextArea labelText;
+	private JTextField latlonField;
 	private JLabel latlonLabel;
-	private JDoubleField minZoom;
-	private JDoubleField maxZoom;
-	private JComboBox minZoomUnits;
-	private JComboBox maxZoomUnits;
-	private JCheckBox cameraInformation;
-	private JButton copyCamera;
-	private JCheckBox excludeFromPlaylist;
-	private JTextField eyePosition;
-	private JTextField upVector;
+	private JDoubleField minZoomField;
+	private JDoubleField maxZoomField;
+	private JComboBox minZoomUnitsCombo;
+	private JComboBox maxZoomUnitsCombo;
+	private JCheckBox cameraInformationCheck;
+	private JButton copyCameraButton;
+	private JCheckBox excludeFromPlaylistCheck;
+	private JTextField eyePositionField;
 	private JLabel eyePositionLabel;
+	private JTextField upVectorField;
+	private JLabel layersLabel;
+	private JButton saveLayersButton;
+	private JButton clearLayersButton;
+
 	private WorldWindow wwd;
 	private int returnValue = JOptionPane.CANCEL_OPTION;
 	private JButton okButton;
@@ -91,14 +96,33 @@ public class PlaceEditor extends JDialog
 		}
 	}
 
-	public PlaceEditor(final WorldWindow wwd, Window owner, String title, final Place place,
-			ImageIcon icon)
+	public static int edit(Place place, PlacesPanel panel, String title)
 	{
-		super(owner, title, ModalityType.APPLICATION_MODAL);
-		this.wwd = wwd;
+		PlaceEditor pe = new PlaceEditor(place, panel, title);
+		return pe.getOkCancel();
+	}
+
+	private int getOkCancel()
+	{
+		labelText.requestFocusInWindow();
+		dialog.setVisible(true);
+		checkValidity();
+		dialog.dispose();
+		return returnValue;
+	}
+
+	private PlaceEditor(final Place place, PlacesPanel placesPanel, String title)
+	{
+		this.placesPanel = placesPanel;
+		this.wwd = placesPanel.getWwd();
 		this.place = place;
-		setLayout(new BorderLayout());
-		setIconImage(icon.getImage());
+		final JFrame frame = placesPanel.getFrame();
+
+		//needs to be modal, so that getOkCancel blocks until disposed
+		dialog = new JDialog(frame, title, true);
+		dialog.setLayout(new BorderLayout());
+		dialog.setIconImage(placesPanel.getIcon().getImage());
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
 		Insets insets = new Insets(3, 1, 3, 1);
 		GridBagConstraints c;
@@ -107,9 +131,7 @@ public class PlaceEditor extends JDialog
 
 		panel = new JPanel(new GridBagLayout());
 		panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		add(panel, BorderLayout.CENTER);
-
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		dialog.add(panel, BorderLayout.CENTER);
 
 		DocumentListener dl = new DocumentListener()
 		{
@@ -158,8 +180,8 @@ public class PlaceEditor extends JDialog
 		c.insets = (Insets) insets.clone();
 		panel2.add(label, c);
 
-		text = new JTextArea(place.getLabel(), 3, 30);
-		text.setFont(Font.decode(""));
+		labelText = new JTextArea(place.getLabel(), 3, 30);
+		labelText.setFont(Font.decode(""));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
@@ -168,7 +190,7 @@ public class PlaceEditor extends JDialog
 		c.fill = GridBagConstraints.BOTH;
 		c.insets = (Insets) insets.clone();
 		JScrollPane scrollPane =
-				new JScrollPane(text, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				new JScrollPane(labelText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		panel2.add(scrollPane, c);
 
@@ -181,14 +203,14 @@ public class PlaceEditor extends JDialog
 		c.insets.bottom = 0;
 		panel2.add(label, c);
 
-		latlon = new JTextField(textFormattedLatLon(place.getLatLon()));
+		latlonField = new JTextField(textFormattedLatLon(place.getLatLon()));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
 		c.insets.bottom = 0;
-		panel2.add(latlon, c);
+		panel2.add(latlonField, c);
 
 		latlonLabel = new JLabel(" ");
 		c = new GridBagConstraints();
@@ -208,13 +230,14 @@ public class PlaceEditor extends JDialog
 		c.insets = (Insets) insets.clone();
 		panel2.add(panel3, c);
 
-		visible = new JCheckBox("Show on globe", place.isVisible());
-		panel3.add(visible);
-		visible.addActionListener(al);
+		visibleCheck = new JCheckBox("Show on globe", place.isVisible());
+		panel3.add(visibleCheck);
+		visibleCheck.addActionListener(al);
 
-		excludeFromPlaylist = new JCheckBox("Exclude from playlist", place.isExcludeFromPlaylist());
-		panel3.add(excludeFromPlaylist);
-		excludeFromPlaylist.addActionListener(al);
+		excludeFromPlaylistCheck =
+				new JCheckBox("Exclude from playlist", place.isExcludeFromPlaylist());
+		panel3.add(excludeFromPlaylistCheck);
+		excludeFromPlaylistCheck.addActionListener(al);
 
 		panel2 = new JPanel(new GridBagLayout());
 		panel2.setBorder(BorderFactory.createTitledBorder("Fade"));
@@ -243,35 +266,35 @@ public class PlaceEditor extends JDialog
 		Double minz = Double.valueOf(place.getMinZoom());
 		if (minz < 0)
 			minz = null;
-		minZoom = new JDoubleField(minz, 2);
-		minZoom.setPositive(true);
+		minZoomField = new JDoubleField(minz, 2);
+		minZoomField.setPositive(true);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
-		panel3.add(minZoom, c);
+		panel3.add(minZoomField, c);
 
-		minZoomUnits = new JComboBox(Units.values());
+		minZoomUnitsCombo = new JComboBox(Units.values());
 		if (UNITS == IMPERIAL)
-			minZoomUnits.setSelectedItem(Units.Miles);
+			minZoomUnitsCombo.setSelectedItem(Units.Miles);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = (Insets) insets.clone();
-		panel3.add(minZoomUnits, c);
+		panel3.add(minZoomUnitsCombo, c);
 
 		ActionListener mzal = new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				minZoom.setScale(((Units) minZoomUnits.getSelectedItem()).getScale());
+				minZoomField.setScale(((Units) minZoomUnitsCombo.getSelectedItem()).getScale());
 			}
 		};
-		minZoomUnits.addActionListener(mzal);
+		minZoomUnitsCombo.addActionListener(mzal);
 		mzal.actionPerformed(null);
 
 		FlatJButton flat = new FlatJButton(Icons.remove.getIcon());
@@ -287,7 +310,7 @@ public class PlaceEditor extends JDialog
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				minZoom.setValue(null);
+				minZoomField.setValue(null);
 			}
 		});
 
@@ -309,35 +332,35 @@ public class PlaceEditor extends JDialog
 		Double maxz = Double.valueOf(place.getMaxZoom());
 		if (maxz < 0)
 			maxz = null;
-		maxZoom = new JDoubleField(maxz, 2);
-		maxZoom.setPositive(true);
+		maxZoomField = new JDoubleField(maxz, 2);
+		maxZoomField.setPositive(true);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = (Insets) insets.clone();
-		panel3.add(maxZoom, c);
+		panel3.add(maxZoomField, c);
 
-		maxZoomUnits = new JComboBox(Units.values());
+		maxZoomUnitsCombo = new JComboBox(Units.values());
 		if (UNITS == IMPERIAL)
-			maxZoomUnits.setSelectedItem(Units.Miles);
+			maxZoomUnitsCombo.setSelectedItem(Units.Miles);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = (Insets) insets.clone();
-		panel3.add(maxZoomUnits, c);
+		panel3.add(maxZoomUnitsCombo, c);
 
 		mzal = new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				maxZoom.setScale(((Units) maxZoomUnits.getSelectedItem()).getScale());
+				maxZoomField.setScale(((Units) maxZoomUnitsCombo.getSelectedItem()).getScale());
 			}
 		};
-		maxZoomUnits.addActionListener(mzal);
+		maxZoomUnitsCombo.addActionListener(mzal);
 		mzal.actionPerformed(null);
 
 		flat = new FlatJButton(Icons.remove.getIcon());
@@ -353,7 +376,7 @@ public class PlaceEditor extends JDialog
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				maxZoom.setValue(null);
+				maxZoomField.setValue(null);
 			}
 		});
 
@@ -365,7 +388,7 @@ public class PlaceEditor extends JDialog
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel.add(panel2, c);
 
-		panel3 = new JPanel(new GridLayout(0, 2));
+		panel3 = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
@@ -374,9 +397,13 @@ public class PlaceEditor extends JDialog
 		c.gridwidth = 2;
 		panel2.add(panel3, c);
 
-		cameraInformation = new JCheckBox("Save camera information", place.isSaveCamera());
-		panel3.add(cameraInformation);
-		cameraInformation.addActionListener(new ActionListener()
+		cameraInformationCheck = new JCheckBox("Save camera information", place.isSaveCamera());
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.anchor = GridBagConstraints.WEST;
+		c.weightx = 0.5;
+		panel3.add(cameraInformationCheck, c);
+		cameraInformationCheck.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
@@ -386,9 +413,12 @@ public class PlaceEditor extends JDialog
 			}
 		});
 
-		copyCamera = new JButton("Fill from current view");
-		panel3.add(copyCamera);
-		copyCamera.addActionListener(new ActionListener()
+		copyCameraButton = new JButton("Fill from current view");
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.anchor = GridBagConstraints.EAST;
+		panel3.add(copyCameraButton, c);
+		copyCameraButton.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
@@ -399,21 +429,21 @@ public class PlaceEditor extends JDialog
 				Position eyePos = view.getGlobe().computePositionFromPoint(eyePoint);
 				Position centerPosition = Util.computeViewClosestCenterPosition(view, eyePoint);
 
-				eyePosition.setText(textFormattedPosition(eyePos));
-				upVector.setText(textFormattedVec4(up));
+				eyePositionField.setText(textFormattedPosition(eyePos));
+				upVectorField.setText(textFormattedVec4(up));
 
 				if (LatLon.greatCircleDistance(centerPosition, place.getLatLon()).degrees > 0.1)
 				{
 					int value =
 							JOptionPane
 									.showConfirmDialog(
-											PlaceEditor.this,
+											dialog,
 											"Do you want to change the Lat/Lon to match the current camera center?",
 											"Move place", JOptionPane.YES_NO_OPTION,
 											JOptionPane.QUESTION_MESSAGE);
 					if (value == JOptionPane.YES_OPTION)
 					{
-						latlon.setText(textFormattedLatLon(centerPosition));
+						latlonField.setText(textFormattedLatLon(centerPosition));
 					}
 				}
 				checkValidity();
@@ -429,7 +459,7 @@ public class PlaceEditor extends JDialog
 		c.insets.bottom = 0;
 		panel2.add(label, c);
 
-		eyePosition = new JTextField(textFormattedPosition(place.getEyePosition()));
+		eyePositionField = new JTextField(textFormattedPosition(place.getEyePosition()));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 1;
@@ -437,7 +467,7 @@ public class PlaceEditor extends JDialog
 		c.weightx = 1;
 		c.insets = (Insets) insets.clone();
 		c.insets.bottom = 0;
-		panel2.add(eyePosition, c);
+		panel2.add(eyePositionField, c);
 
 		eyePositionLabel = new JLabel(" ");
 		c = new GridBagConstraints();
@@ -455,25 +485,71 @@ public class PlaceEditor extends JDialog
 		c.gridy = 3;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
-		c.insets.bottom = 0;
 		panel2.add(label, c);
 
-		upVector = new JTextField(textFormattedVec4(place.getUpVector()));
+		upVectorField = new JTextField(textFormattedVec4(place.getUpVector()));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 3;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		c.insets = (Insets) insets.clone();
+		panel2.add(upVectorField, c);
+
+		panel2 = new JPanel(new GridBagLayout());
+		panel2.setBorder(BorderFactory.createTitledBorder("Layers"));
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 3;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(panel2, c);
+
+		layersLabel = new JLabel(" ");
+		c = new GridBagConstraints();
+		c.gridy = 0;
+		c.weightx = 1;
+		c.anchor = GridBagConstraints.CENTER;
+		c.insets = (Insets) insets.clone();
 		c.insets.bottom = 0;
-		panel2.add(upVector, c);
+		panel2.add(layersLabel, c);
+
+		saveLayersButton = new JButton("Save current layers state");
+		c = new GridBagConstraints();
+		c.gridy = 1;
+		//c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = (Insets) insets.clone();
+		c.insets.bottom = 0;
+		panel2.add(saveLayersButton, c);
+		saveLayersButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				saveLayers();
+			}
+		});
+
+		clearLayersButton = new JButton("Clear saved layers state");
+		c = new GridBagConstraints();
+		c.gridy = 2;
+		//c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = (Insets) insets.clone();
+		panel2.add(clearLayersButton, c);
+		clearLayersButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				clearLayers();
+			}
+		});
 
 
 		panel = new JPanel(new BorderLayout());
 		int spacing = 5;
 		panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
 				BorderFactory.createEmptyBorder(spacing, spacing, spacing, spacing)));
-		add(panel, BorderLayout.SOUTH);
+		dialog.add(panel, BorderLayout.SOUTH);
 
 		JPanel buttonsPanel = new JPanel(new FlowLayout());
 		panel.add(buttonsPanel, BorderLayout.CENTER);
@@ -486,11 +562,11 @@ public class PlaceEditor extends JDialog
 			public void actionPerformed(ActionEvent e)
 			{
 				returnValue = JOptionPane.OK_OPTION;
-				dispose();
+				dialog.dispose();
 			}
 		});
 		okButton.setDefaultCapable(true);
-		getRootPane().setDefaultButton(okButton);
+		dialog.getRootPane().setDefaultButton(okButton);
 
 		JButton button = new JButton("Cancel");
 		buttonsPanel.add(button);
@@ -499,36 +575,37 @@ public class PlaceEditor extends JDialog
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				dispose();
+				dialog.dispose();
 			}
 		});
 
-		pack();
-		setLocationRelativeTo(owner);
+		dialog.pack();
+		dialog.setLocationRelativeTo(frame);
 		checkValidity();
 		enableCameraInformation();
+		enableLayersComponents();
 
-		text.getDocument().addDocumentListener(dl);
-		latlon.getDocument().addDocumentListener(dl);
-		minZoom.getDocument().addDocumentListener(dl);
-		maxZoom.getDocument().addDocumentListener(dl);
-		eyePosition.getDocument().addDocumentListener(dl);
-		upVector.getDocument().addDocumentListener(dl);
+		labelText.getDocument().addDocumentListener(dl);
+		latlonField.getDocument().addDocumentListener(dl);
+		minZoomField.getDocument().addDocumentListener(dl);
+		maxZoomField.getDocument().addDocumentListener(dl);
+		eyePositionField.getDocument().addDocumentListener(dl);
+		upVectorField.getDocument().addDocumentListener(dl);
 	}
 
 	private boolean checkValidity()
 	{
 		boolean valid = true;
 
-		place.setVisible(visible.isSelected());
+		place.setVisible(visibleCheck.isSelected());
 
-		String label = text.getText();
+		String label = labelText.getText();
 		if (label.length() == 0)
 			valid = false;
 		else
 			place.setLabel(label);
 
-		LatLon ll = parseLatLon(latlon.getText());
+		LatLon ll = parseLatLon(latlonField.getText());
 		if (ll == null)
 		{
 			valid = false;
@@ -540,8 +617,8 @@ public class PlaceEditor extends JDialog
 			latlonLabel.setText(labelFormattedLatLon(ll));
 		}
 
-		Double minz = minZoom.getValue();
-		Double maxz = maxZoom.getValue();
+		Double minz = minZoomField.getValue();
+		Double maxz = maxZoomField.getValue();
 		if (minz != null && maxz != null && maxz > minz)
 		{
 			Double temp = maxz;
@@ -556,7 +633,7 @@ public class PlaceEditor extends JDialog
 		place.setMinZoom(minz);
 		place.setMaxZoom(maxz);
 
-		Position pos = parsePosition(eyePosition.getText());
+		Position pos = parsePosition(eyePositionField.getText());
 		if (pos == null)
 		{
 			valid = false;
@@ -568,48 +645,39 @@ public class PlaceEditor extends JDialog
 			eyePositionLabel.setText(labelFormattedPosition(pos));
 		}
 
-		Vec4 v = parseVec4(upVector.getText());
+		Vec4 v = parseVec4(upVectorField.getText());
 		place.setUpVector(v);
 
-		place.setSaveCamera(cameraInformation.isSelected());
-		place.setExcludeFromPlaylist(excludeFromPlaylist.isSelected());
+		place.setSaveCamera(cameraInformationCheck.isSelected());
+		place.setExcludeFromPlaylist(excludeFromPlaylistCheck.isSelected());
 
 		okButton.setEnabled(valid);
 		return valid;
 	}
 
-	public int getOkCancel()
-	{
-		text.requestFocusInWindow();
-		setVisible(true);
-		checkValidity();
-		dispose();
-		return returnValue;
-	}
-
 	private void enableCameraInformation()
 	{
-		boolean enabled = cameraInformation.isSelected();
-		copyCamera.setEnabled(enabled);
+		boolean enabled = cameraInformationCheck.isSelected();
+		copyCameraButton.setEnabled(enabled);
 		eyePositionLabel.setEnabled(enabled);
-		eyePosition.setEnabled(enabled);
-		upVector.setEnabled(enabled);
+		eyePositionField.setEnabled(enabled);
+		upVectorField.setEnabled(enabled);
 	}
 
 	private String textFormattedLatLon(LatLon latlon)
 	{
-		if(latlon == null)
+		if (latlon == null)
 			return "";
-		
-		return String.format("%7.4f %7.4f", latlon.latitude.degrees, latlon.longitude.degrees);
+
+		return String.format("%1.4f %1.4f", latlon.latitude.degrees, latlon.longitude.degrees);
 	}
 
 	private String labelFormattedLatLon(LatLon latlon)
 	{
-		if(latlon == null)
+		if (latlon == null)
 			return "";
-		
-		return String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", latlon.latitude.degrees,
+
+		return String.format("Lat %1.4f\u00B0 Lon %1.4f\u00B0", latlon.latitude.degrees,
 				latlon.longitude.degrees);
 	}
 
@@ -620,19 +688,19 @@ public class PlaceEditor extends JDialog
 
 	private String textFormattedPosition(Position position)
 	{
-		if(position == null)
+		if (position == null)
 			return "";
-		
-		return String.format("%7.4f %7.4f %7.0f", position.latitude.degrees,
+
+		return String.format("%1.4f %1.4f %1.0f", position.latitude.degrees,
 				position.longitude.degrees, position.elevation);
 	}
 
 	private String labelFormattedPosition(Position position)
 	{
-		if(position == null)
+		if (position == null)
 			return "";
-		
-		return String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0 Elev %7.0fm",
+
+		return String.format("Lat %1.4f\u00B0 Lon %1.4f\u00B0 Elev %1.0fm",
 				position.latitude.degrees, position.longitude.degrees, position.elevation);
 	}
 
@@ -643,13 +711,13 @@ public class PlaceEditor extends JDialog
 
 	private String textFormattedVec4(Vec4 v)
 	{
-		if(v == null)
+		if (v == null)
 			return "";
-		
-		String text = String.format("%7.4f %7.4f %7.4f", v.x, v.y, v.z);
+
+		String text = String.format("%1.4f %1.4f %1.4f", v.x, v.y, v.z);
 		if (v.w != 1)
 		{
-			text += String.format(" %7.4f", v.w);
+			text += String.format(" %1.4f", v.w);
 		}
 		return text;
 	}
@@ -657,6 +725,26 @@ public class PlaceEditor extends JDialog
 	private Vec4 parseVec4(String text)
 	{
 		return Util.computeVec4FromString(text);
+	}
+
+	private void enableLayersComponents()
+	{
+		boolean layersSaved = place.getLayers() != null;
+		String label = layersSaved ? "Layers state saved" : "No layers state saved";
+		layersLabel.setText(label);
+		clearLayersButton.setEnabled(layersSaved);
+	}
+
+	private void saveLayers()
+	{
+		placesPanel.setLayersFromLayersPanel(place);
+		enableLayersComponents();
+	}
+
+	private void clearLayers()
+	{
+		place.setLayers(null);
+		enableLayersComponents();
 	}
 
 	public static void setUnits(String units)
