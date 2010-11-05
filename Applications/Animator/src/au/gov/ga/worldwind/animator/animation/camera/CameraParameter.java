@@ -71,9 +71,8 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public EyeLatParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(
-					AnimationMessageConstants.getCameraEyeLatNameKey(), DEFAULT_PARAMETER_NAME),
-					animation);
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLatNameKey(),
+					DEFAULT_PARAMETER_NAME), animation);
 		}
 
 		EyeLatParameter()
@@ -85,17 +84,16 @@ abstract class CameraParameter extends ParameterBase
 		public ParameterValue getCurrentValue(AnimationContext context)
 		{
 			double value = getCurrentEyePosition().getLatitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value,
-					context.getCurrentFrame());
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentEyePosition = getCurrentEyePosition();
-			Position newEyePosition =
-					Position.fromDegrees(value, currentEyePosition.longitude.degrees,
-							currentEyePosition.elevation);
+			Position newEyePosition = Position.fromDegrees(value,
+					currentEyePosition.longitude.degrees,
+					currentEyePosition.elevation);
 			applyCameraPositions(newEyePosition, getCurrentLookatPosition());
 		}
 
@@ -115,9 +113,8 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public EyeLonParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(
-					AnimationMessageConstants.getCameraEyeLonNameKey(), DEFAULT_PARAMETER_NAME),
-					animation);
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLonNameKey(),
+					DEFAULT_PARAMETER_NAME), animation);
 		}
 
 		EyeLonParameter()
@@ -129,17 +126,16 @@ abstract class CameraParameter extends ParameterBase
 		public ParameterValue getCurrentValue(AnimationContext context)
 		{
 			double value = getCurrentEyePosition().getLongitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value,
-					context.getCurrentFrame());
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentEyePosition = getCurrentEyePosition();
-			Position newEyePosition =
-					Position.fromDegrees(currentEyePosition.latitude.degrees, value,
-							currentEyePosition.elevation);
+			Position newEyePosition = Position.fromDegrees(currentEyePosition.latitude.degrees,
+					value,
+					currentEyePosition.elevation);
 			applyCameraPositions(newEyePosition, getCurrentLookatPosition());
 
 		}
@@ -160,9 +156,8 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public EyeElevationParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(
-					AnimationMessageConstants.getCameraEyeZoomNameKey(), DEFAULT_PARAMETER_NAME),
-					animation);
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeZoomNameKey(),
+					DEFAULT_PARAMETER_NAME), animation);
 		}
 
 		EyeElevationParameter()
@@ -173,20 +168,17 @@ abstract class CameraParameter extends ParameterBase
 		@Override
 		public ParameterValue getCurrentValue(AnimationContext context)
 		{
-			double value =
-					context.applyZoomScaling(getCurrentEyePosition().getElevation());
-			return ParameterValueFactory.createParameterValue(this, value,
-					context.getCurrentFrame());
+			double value = context.applyZoomScaling(getCurrentEyePosition().getElevation());
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentEyePosition = getCurrentEyePosition();
-			Position newEyePosition =
-					Position.fromDegrees(currentEyePosition.latitude.degrees,
-							currentEyePosition.longitude.degrees, getAnimation()
-									.unapplyZoomScaling(value));
+			Position newEyePosition = Position.fromDegrees(currentEyePosition.latitude.degrees,
+					currentEyePosition.longitude.degrees,
+					getAnimation().unapplyZoomScaling(value));
 			applyCameraPositions(newEyePosition, getCurrentLookatPosition());
 		}
 
@@ -206,9 +198,8 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public LookatLatParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(
-					AnimationMessageConstants.getCameraLookatLatNameKey(), DEFAULT_PARAMETER_NAME),
-					animation);
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLatNameKey(),
+					DEFAULT_PARAMETER_NAME), animation);
 		}
 
 		LookatLatParameter()
@@ -220,17 +211,16 @@ abstract class CameraParameter extends ParameterBase
 		public ParameterValue getCurrentValue(AnimationContext context)
 		{
 			double value = getCurrentLookatPosition().getLatitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value,
-					context.getCurrentFrame());
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentLookatPosition = getCurrentLookatPosition();
-			Position newLookatPosition =
-					Position.fromDegrees(value, currentLookatPosition.longitude.degrees,
-							currentLookatPosition.elevation);
+			Position newLookatPosition = Position.fromDegrees(value,
+					currentLookatPosition.longitude.degrees,
+					currentLookatPosition.elevation);
 			applyCameraPositions(getCurrentEyePosition(), newLookatPosition);
 
 		}
@@ -251,9 +241,8 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public LookatLonParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(
-					AnimationMessageConstants.getCameraLookatLonNameKey(), DEFAULT_PARAMETER_NAME),
-					animation);
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLonNameKey(),
+					DEFAULT_PARAMETER_NAME), animation);
 		}
 
 		LookatLonParameter()
@@ -265,17 +254,16 @@ abstract class CameraParameter extends ParameterBase
 		public ParameterValue getCurrentValue(AnimationContext context)
 		{
 			double value = getCurrentLookatPosition().getLongitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value,
-					context.getCurrentFrame());
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentLookatPosition = getCurrentLookatPosition();
-			Position newLookatPosition =
-					Position.fromDegrees(currentLookatPosition.latitude.degrees, value,
-							currentLookatPosition.elevation);
+			Position newLookatPosition = Position.fromDegrees(currentLookatPosition.latitude.degrees,
+					value,
+					currentLookatPosition.elevation);
 			applyCameraPositions(getCurrentEyePosition(), newLookatPosition);
 		}
 
@@ -295,10 +283,8 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public LookatElevationParameter(Animation animation)
 		{
-			super(
-					MessageSourceAccessor.get().getMessage(
-							AnimationMessageConstants.getCameraLookatZoomNameKey(),
-							DEFAULT_PARAMETER_NAME), animation);
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatZoomNameKey(),
+					DEFAULT_PARAMETER_NAME), animation);
 		}
 
 		LookatElevationParameter()
@@ -309,19 +295,17 @@ abstract class CameraParameter extends ParameterBase
 		@Override
 		public ParameterValue getCurrentValue(AnimationContext context)
 		{
-			double value = getCurrentLookatPosition().getElevation();
-			return ParameterValueFactory.createParameterValue(this, value,
-					context.getCurrentFrame());
+			double value = context.applyZoomScaling(getCurrentLookatPosition().getElevation());
+			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentLookatPosition = getCurrentLookatPosition();
-			Position newLookatPosition =
-					Position.fromDegrees(currentLookatPosition.latitude.degrees,
-							currentLookatPosition.longitude.degrees, getAnimation()
-									.unapplyZoomScaling(value));
+			Position newLookatPosition = Position.fromDegrees(currentLookatPosition.latitude.degrees,
+															  currentLookatPosition.longitude.degrees,
+															  getAnimation().unapplyZoomScaling(value));
 			applyCameraPositions(getCurrentEyePosition(), newLookatPosition);
 		}
 

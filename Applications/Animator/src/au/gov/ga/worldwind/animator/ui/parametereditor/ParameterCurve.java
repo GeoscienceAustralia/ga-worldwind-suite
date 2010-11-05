@@ -363,6 +363,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		{
 			try
 			{
+				System.out.println("Last point: " + lastPoint);
 				KeyNodeMarker marker = getKeyNodeMarker(lastPoint);
 				if (marker == null)
 				{
