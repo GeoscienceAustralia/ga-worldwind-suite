@@ -707,6 +707,9 @@ public class PlacesPanel extends AbstractThemePanel
 		// - fade OOO layers from current to 0 between 0.0 and 0.5 percent
 		// - move layers to correct positions at 0.5 percent
 		// - fade OOO layers from 0 to new between 0.5 and 1.0 percent
+		
+		//TODO most of the above is implemented, apart from reordering
+		//see revision 1331 for a almost-working reordering implementation
 
 		if (layersPanel == null)
 			return;
@@ -796,57 +799,6 @@ public class PlacesPanel extends AbstractThemePanel
 			indexOfCurrentInPlace[indexOfPlaceInCurrent.get(i)] = i;
 		}
 
-		/*System.out.println("current = " + Arrays.toString(currentLayers.toArray()));
-		System.out.println("place = " + Arrays.toString(placeLayers.toArray()));
-		System.out.println("indexOfCurrentInPlace = " + Arrays.toString(indexOfCurrentInPlace));
-		System.out.println("indexOfPlaceInCurrent = "
-				+ Arrays.toString(indexOfPlaceInCurrent.toArray()));*/
-
-		//find a list of layers needed to reorder
-		final List<ILayerNode> reorder = new ArrayList<ILayerNode>();
-		final List<ILayerNode> putBefore = new ArrayList<ILayerNode>();
-		for (int i = indexOfPlaceInCurrent.size() - 2; i >= 0; i--)
-		{
-			int placeIndex = indexOfPlaceInCurrent.get(i);
-			//go backwards to find any layers that are earlier that should be later in the list
-			for (int j = placeIndex - 1; j >= 0; j--)
-			{
-				int currentIndex = indexOfCurrentInPlace[j];
-				if (currentIndex < 0)
-					continue;
-
-				if (currentIndex > i)
-				{
-					reorder.add(currentLayers.get(placeIndex));
-					putBefore.add(currentLayers.get(indexOfPlaceInCurrent.get(i + 1)));
-					break;
-				}
-			}
-		}
-		toModify.removeAll(reorder);
-
-		/*System.out.println(Arrays.toString(reorder.toArray()));
-		System.out.println(Arrays.toString(putBefore.toArray()));*/
-
-		/*
-		 * current:
-		 * 5: blue marble
-		 * 6: landsat
-		 * 7: place names
-		 * 8: ternary
-		 * 
-		 * place:
-		 * 5: blue marble
-		 * 6: ternary
-		 * 7: landsat
-		 * 
-		indexOfCurrentInPlace = [0, 1, 2, 3, 4, 7, 5, -1, 6]
-		indexOfPlaceInCurrent = [0, 1, 2, 3, 4, 6, 8, 5]
-		[Ternary (K-Th-U), Blue Marble]
-		[Landsat, Landsat]
-		 */
-
-
 		//find an array of start/end opacities for the layers to enable/change opacity
 		final double[] modifyStartOpacities = new double[toModify.size()];
 		final double[] modifyEndOpacities = new double[toModify.size()];
@@ -868,26 +820,6 @@ public class PlacesPanel extends AbstractThemePanel
 					placeLayers.get(indexOfCurrentInPlace[currentIndex]).getOpacity();
 		}
 
-		final double[] reorderStartOpacities = new double[reorder.size()];
-		final double[] reorderEndOpacities = new double[reorder.size()];
-		for (int i = 0; i < reorder.size(); i++)
-		{
-			ILayerNode layer = reorder.get(i);
-			if (!layer.isEnabled())
-			{
-				reorderStartOpacities[i] = 0d;
-				model.setEnabled(layer, true);
-				model.setOpacity(layer, 0d);
-			}
-			else
-			{
-				reorderStartOpacities[i] = layer.getOpacity();
-			}
-			int currentIndex = currentLayers.indexOf(layer);
-			reorderEndOpacities[i] =
-					placeLayers.get(indexOfCurrentInPlace[currentIndex]).getOpacity();
-		}
-
 		//find an array of start opacities for the layers to disable
 		final double[] disableStartOpacities = new double[toDisable.size()];
 		for (int i = 0; i < toDisable.size(); i++)
@@ -900,8 +832,6 @@ public class PlacesPanel extends AbstractThemePanel
 		final long startTime = System.currentTimeMillis();
 		opacityChanger = new RenderingListener()
 		{
-			private boolean swapped = false;
-
 			@Override
 			public void stageChanged(RenderingEvent event)
 			{
@@ -930,26 +860,6 @@ public class PlacesPanel extends AbstractThemePanel
 						double opacity =
 								Util.mixDouble(percent, modifyStartOpacities[i],
 										modifyEndOpacities[i]);
-						model.setOpacity(layer, opacity);
-					}
-
-					if (!swapped && percent >= 0.5)
-					{
-						for (int i = 0; i < reorder.size(); i++)
-						{
-							model.moveNodeBefore(reorder.get(i), putBefore.get(i));
-						}
-
-						swapped = true;
-					}
-
-					double reorderPercent = percent * 2d - 1d;
-					for (int i = 0; i < reorder.size(); i++)
-					{
-						ILayerNode layer = reorder.get(i);
-						double start = 0d;
-						double end = swapped ? reorderEndOpacities[i] : reorderStartOpacities[i];
-						double opacity = Util.mixDouble(Math.abs(reorderPercent), start, end);
 						model.setOpacity(layer, opacity);
 					}
 
