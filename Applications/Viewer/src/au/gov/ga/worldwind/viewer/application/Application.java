@@ -363,7 +363,7 @@ public class Application
 		}
 
 		//link theme to WorldWindow
-		theme.setup(wwd);
+		theme.setup(frame, wwd);
 
 		//ensure menu bar and popups appear over the heavyweight WW canvas
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
@@ -385,6 +385,7 @@ public class Application
 		splitPane.setRightComponent(wwd);
 		splitPane.setOneTouchExpandable(true);
 		wwd.setMinimumSize(new Dimension(1, 1));
+		wwd.createBufferStrategy(2);
 		loadSplitLocation();
 
 		if (theme.hasStatusBar())
