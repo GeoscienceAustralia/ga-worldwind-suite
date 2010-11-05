@@ -59,6 +59,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	/** Whether this curve has been destroyed */
 	private boolean isDestroyed = false;
 	
+	// Holds the calculated key node markers for the curve
 	private List<KeyNodeMarker> keyNodeMarkers = new ArrayList<KeyNodeMarker>();
 	private ReadWriteLock keyNodeMarkersLock = new ReentrantReadWriteLock(true);
 	
@@ -220,7 +221,10 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	{
 		try
 		{
-			updateKeyNodeMarkers();
+			if (keyNodeMarkers.isEmpty())
+			{
+				updateKeyNodeMarkers();
+			}
 			keyNodeMarkersLock.readLock().lock();
 			for (KeyNodeMarker marker : keyNodeMarkers)
 			{
@@ -297,19 +301,38 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	@Override
 	public void curveChanged()
 	{
+		updateKeyNodeMarkers();
 		repaint();
 	}
 	
+	/**
+	 * Updates the positions of the key node markers. This can occur due to a mouse drag,
+	 * or because of a detected change in the curve.
+	 */
 	private void updateKeyNodeMarkers()
 	{
 		try
 		{
 			keyNodeMarkersLock.writeLock().lock();
-			keyNodeMarkers.clear();
+			
+			// Update into a new list, adding nodes for any inserted key frames as we go 
+			List<KeyNodeMarker> tmpMarkers = new ArrayList<KeyNodeMarker>();
 			for (ParameterCurveKeyNode node : model.getKeyFrameNodes())
 			{
-				keyNodeMarkers.add(new KeyNodeMarker(node));
+				KeyNodeMarker markerNode = new KeyNodeMarker(node);
+				if (keyNodeMarkers.contains(markerNode))
+				{
+					KeyNodeMarker existingNode = keyNodeMarkers.get(keyNodeMarkers.indexOf(markerNode));
+					existingNode.updateMarker(node);
+					tmpMarkers.add(existingNode);
+				}
+				else
+				{
+					tmpMarkers.add(markerNode);
+				}
 			}
+			keyNodeMarkers.clear();
+			keyNodeMarkers.addAll(tmpMarkers);
 		}
 		catch (Exception e)
 		{
@@ -321,6 +344,10 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		}
 	}
 	
+	/**
+	 * @return The key node marker corresponding to the screen point P (if any). Will use the {@link KeyNodeMarker#isInMarker(Point)} method
+	 * to check for the value, in and out handle areas.
+	 */
 	private KeyNodeMarker getKeyNodeMarker(Point p)
 	{
 		if (p == null)
@@ -352,10 +379,13 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	{
 		private Point lastPoint;
 		
+		private KeyNodeMarker lastSelected;
+		
 		@Override
 		public void mousePressed(MouseEvent e)
 		{
 			updateLastPoint(e);
+			updateLastSelected(e);
 		}
 		
 		@Override
@@ -363,8 +393,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		{
 			try
 			{
-				System.out.println("Last point: " + lastPoint);
-				KeyNodeMarker marker = getKeyNodeMarker(lastPoint);
+				KeyNodeMarker marker = lastSelected;
 				if (marker == null)
 				{
 					return;
@@ -381,6 +410,8 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		public void mouseReleased(MouseEvent e)
 		{
 			clearLastPoint();
+			clearLastSelected();
+			repaint();
 		}
 		
 		private void updateLastPoint(MouseEvent e)
@@ -392,13 +423,40 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		{
 			lastPoint = null;
 		}
+		
+		private void updateLastSelected(MouseEvent e)
+		{
+			KeyNodeMarker newLastSelected = getKeyNodeMarker(lastPoint);
+			if (newLastSelected != lastSelected && lastSelected != null)
+			{
+				lastSelected.setSelected(false);
+			}
+			if (newLastSelected != null)
+			{
+				newLastSelected.setSelected(true);
+			}
+			lastSelected = newLastSelected;
+		}
+		
+		private void clearLastSelected()
+		{
+			if (lastSelected != null)
+			{
+				lastSelected.setSelected(false);
+			}
+			lastSelected = null;
+		}
 	}
 	
+	/**
+	 * A component listener used to add behaviour to resize events etc.
+	 */
 	private class ComponentListener extends ComponentAdapter
 	{
 		@Override
 		public void componentResized(ComponentEvent e)
 		{
+			updateKeyNodeMarkers();
 		}
 	}
 	
@@ -416,16 +474,18 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		private Line2D.Double inValueJoiner;
 		private Line2D.Double valueOutJoiner;
 		
+		private boolean selected = false;
+		
 		KeyNodeMarker(ParameterCurveKeyNode curveNode)
+		{
+			updateMarker(curveNode);
+		}
+		
+		void updateMarker(ParameterCurveKeyNode curveNode)
 		{
 			Validate.notNull(curveNode, "A node is required");
 			this.curveNode = curveNode;
 			
-			updateMarker();
-		}
-		
-		void updateMarker()
-		{
 			valueHandle = createNodeShape(curveNode.getValuePoint());
 			if (curveNode.isBezier() && curveNode.getInPoint() != null)
 			{
@@ -441,7 +501,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		
 		void paint(Graphics2D g2)
 		{
-			g2.setColor(LAFConstants.getCurveKeyHandleColor());
+			g2.setColor(selected ? LAFConstants.getCurveKeyHandleColor().brighter().brighter() : LAFConstants.getCurveKeyHandleColor());
 			g2.draw(valueHandle);
 			
 			if (inHandle != null)
@@ -487,6 +547,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 				curveNode.applyValueChange(curvePoint);
 			}
 			
+			
 		}
 		
 		/**
@@ -495,6 +556,33 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		boolean isInMarker(Point point)
 		{
 			return valueHandle.contains(point) || (inHandle != null && inHandle.contains(point)) || (outHandle != null && outHandle.contains(point));
+		}
+		
+		void setSelected(boolean selected)
+		{
+			this.selected = selected;
+		}
+		
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (obj == this)
+			{
+				return true;
+			}
+			
+			if (!(obj instanceof KeyNodeMarker))
+			{
+				return false;
+			}
+			
+			return ((KeyNodeMarker)obj).curveNode.equals(this.curveNode);
+		}
+		
+		@Override
+		public int hashCode()
+		{
+			return curveNode.hashCode();
 		}
 	}
 }
