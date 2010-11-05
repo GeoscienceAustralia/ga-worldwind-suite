@@ -33,13 +33,11 @@ public class ColorMapElevationImageReaderDelegate extends ElevationImageReaderDe
 	@SuppressWarnings("unused")
 	private ColorMapElevationImageReaderDelegate()
 	{
-		this(AVKey.INT16, AVKey.LITTLE_ENDIAN, -Double.MAX_VALUE, true,
-				new TreeMap<Double, Color>());
+		this(AVKey.INT16, AVKey.LITTLE_ENDIAN, -Double.MAX_VALUE, true, new TreeMap<Double, Color>());
 	}
 
-	public ColorMapElevationImageReaderDelegate(String pixelType, String byteOrder,
-			Double missingDataSignal, boolean useUseInterpolation,
-			NavigableMap<Double, Color> colorMap)
+	public ColorMapElevationImageReaderDelegate(String pixelType, String byteOrder, Double missingDataSignal,
+			boolean useUseInterpolation, NavigableMap<Double, Color> colorMap)
 	{
 		super(pixelType, byteOrder, missingDataSignal);
 		this.useHueInterpolation = useUseInterpolation;
@@ -64,22 +62,18 @@ public class ColorMapElevationImageReaderDelegate extends ElevationImageReaderDe
 				if (layerElement != null)
 				{
 					XPath xpath = WWXML.makeXPath();
-					useHueInterpolation =
-							XMLUtil.getBoolean(layerElement, "ColorMap/@interpolateHue", true,
-									xpath);
+					useHueInterpolation = XMLUtil.getBoolean(layerElement, "ColorMap/@interpolateHue", true, xpath);
 					parseColorMapXml(layerElement, colorMap, xpath);
 				}
 
 				return new ColorMapElevationImageReaderDelegate(WWXML.parseDataType(pixelType),
-						WWXML.parseByteOrder(byteOrder), missingDataSignal, useHueInterpolation,
-						colorMap);
+						WWXML.parseByteOrder(byteOrder), missingDataSignal, useHueInterpolation, colorMap);
 			}
 		}
 		return null;
 	}
 
-	protected void parseColorMapXml(Element element, NavigableMap<Double, Color> colorMap,
-			XPath xpath)
+	protected void parseColorMapXml(Element element, NavigableMap<Double, Color> colorMap, XPath xpath)
 	{
 		Element[] mapEntries = WWXML.getElements(element, "ColorMap/Entry", xpath);
 		if (mapEntries != null)
@@ -89,11 +83,11 @@ public class ColorMapElevationImageReaderDelegate extends ElevationImageReaderDe
 				Double elevation = WWXML.getDouble(entry, "@elevation", xpath);
 				if (elevation == null)
 					continue;
-				
+
 				//don't allow a duplicate key
-				while(colorMap.containsKey(elevation))
+				while (colorMap.containsKey(elevation))
 					elevation += EPSILON;
-				
+
 				int red = XMLUtil.getInteger(entry, "@red", 0, xpath);
 				int green = XMLUtil.getInteger(entry, "@green", 0, xpath);
 				int blue = XMLUtil.getInteger(entry, "@blue", 0, xpath);
@@ -107,13 +101,12 @@ public class ColorMapElevationImageReaderDelegate extends ElevationImageReaderDe
 	@Override
 	public String toDefinition(Element layerElement)
 	{
-		return DEFINITION_STRING + "(" + WWXML.dataTypeAsText(pixelType) + ","
-				+ WWXML.byteOrderAsText(byteOrder) + "," + missingDataSignal + ")";
+		return DEFINITION_STRING + "(" + WWXML.dataTypeAsText(pixelType) + "," + WWXML.byteOrderAsText(byteOrder) + ","
+				+ missingDataSignal + ")";
 	}
 
 	@Override
-	protected BufferedImage generateImage(BufferWrapper elevations, int width, int height,
-			Globe globe, Sector sector)
+	protected BufferedImage generateImage(BufferWrapper elevations, int width, int height, Globe globe, Sector sector)
 	{
 		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
@@ -122,21 +115,28 @@ public class ColorMapElevationImageReaderDelegate extends ElevationImageReaderDe
 			for (int x = 0; x < width; x++, i++)
 			{
 				double elevation = elevations.getDouble(i);
-				Entry<Double, Color> lessEntry = colorMap.floorEntry(elevation);
-				Entry<Double, Color> greaterEntry = colorMap.ceilingEntry(elevation);
-				double mixer = 0;
-				if (lessEntry != null && greaterEntry != null)
+				if (elevation == missingDataSignal)
 				{
-					double window = greaterEntry.getKey() - lessEntry.getKey();
-					if (window > 0)
-					{
-						mixer = (elevation - lessEntry.getKey()) / window;
-					}
+					image.setRGB(x, y, 0);
 				}
-				Color color0 = lessEntry == null ? null : lessEntry.getValue();
-				Color color1 = greaterEntry == null ? null : greaterEntry.getValue();
-				int rgba = interpolateColor(color0, color1, mixer, useHueInterpolation);
-				image.setRGB(x, y, rgba);
+				else
+				{
+					Entry<Double, Color> lessEntry = colorMap.floorEntry(elevation);
+					Entry<Double, Color> greaterEntry = colorMap.ceilingEntry(elevation);
+					double mixer = 0;
+					if (lessEntry != null && greaterEntry != null)
+					{
+						double window = greaterEntry.getKey() - lessEntry.getKey();
+						if (window > 0)
+						{
+							mixer = (elevation - lessEntry.getKey()) / window;
+						}
+					}
+					Color color0 = lessEntry == null ? null : lessEntry.getValue();
+					Color color1 = greaterEntry == null ? null : greaterEntry.getValue();
+					int rgba = interpolateColor(color0, color1, mixer, useHueInterpolation);
+					image.setRGB(x, y, rgba);
+				}
 			}
 		}
 
@@ -158,10 +158,8 @@ public class ColorMapElevationImageReaderDelegate extends ElevationImageReaderDe
 
 		if (useHue)
 		{
-			float[] hsb0 =
-					Color.RGBtoHSB(color0.getRed(), color0.getGreen(), color0.getBlue(), null);
-			float[] hsb1 =
-					Color.RGBtoHSB(color1.getRed(), color1.getGreen(), color1.getBlue(), null);
+			float[] hsb0 = Color.RGBtoHSB(color0.getRed(), color0.getGreen(), color0.getBlue(), null);
+			float[] hsb1 = Color.RGBtoHSB(color1.getRed(), color1.getGreen(), color1.getBlue(), null);
 			float h0 = hsb0[0];
 			float h1 = hsb1[0];
 
