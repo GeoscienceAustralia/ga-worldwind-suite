@@ -8,6 +8,7 @@ import gov.nasa.worldwind.util.Logging;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.Point;
 import java.io.File;
 import java.lang.reflect.Method;
@@ -88,7 +89,7 @@ public class Style
 			this.typeOverrides.put(property, typeOverrides);
 		}
 	}
-	
+
 	/**
 	 * Add a property that this style will set.
 	 * 
@@ -98,7 +99,8 @@ public class Style
 	 *            Value to set the property to (can replace with attribute
 	 *            values by using a %attributeName% placeholder)
 	 * @param typeOverride
-	 *            Type to use when setting the property. Pipe separated lists supported.
+	 *            Type to use when setting the property. Pipe separated lists
+	 *            supported.
 	 */
 	public void addProperty(String property, String value, String typeOverrides)
 	{
@@ -158,16 +160,18 @@ public class Style
 			Method setter = methods.get(methodName);
 			Object object = methodToObject.get(setter);
 			Class<?>[] parameters = setter.getParameterTypes();
-			
+
 			//get the string value to pass to the method
 			String stringValue = entry.getValue();
 			stringValue = replaceVariablesWithAttributeValues(stringValue, attributeValues);
-			
+
 			String[] paramValueStrings = splitPipeSeparatedString(stringValue);
-			
+
 			if (parameters.length != paramValueStrings.length)
 			{
-				String message = "Setter method '" + methodName + "' in class " + object.getClass() + " doesn't take " + paramValueStrings.length + " parameter(s)";
+				String message =
+						"Setter method '" + methodName + "' in class " + object.getClass() + " doesn't take "
+								+ paramValueStrings.length + " parameter(s)";
 				Logging.logger().severe(message);
 				// Continue on incase this is an overloaded method
 				continue;
@@ -175,14 +179,14 @@ public class Style
 
 			Object[] parameterValues = new Object[paramValueStrings.length];
 			String[] typeOverrides = getTypeOverridesForProperty(property, parameterValues.length);
-			
+
 			// Convert each parameter value string into a parameter
 			for (int i = 0; i < paramValueStrings.length; i++)
 			{
 				//find out the type to pass to the method
 				Class<?> parameterType = parameters[i];
 				Class<?> type = parameterType;
-	
+
 				//check if the type has been overridden (useful if the type above is just 'Object')
 				String typeOverride = typeOverrides[i];
 				if (!isBlank(typeOverride))
@@ -196,14 +200,14 @@ public class Style
 					}
 					else if (!parameterType.isAssignableFrom(type))
 					{
-						String message = "Setter method '" + methodName + "' in class " + object.getClass()
-										+ " parameter type " + parameterType
-										+ " not assignable from type " + type;
+						String message =
+								"Setter method '" + methodName + "' in class " + object.getClass() + " parameter type "
+										+ parameterType + " not assignable from type " + type;
 						Logging.logger().severe(message);
 						throw new IllegalArgumentException(message);
 					}
 				}
-	
+
 				//convert the string value to a valid type
 				Object value = convertStringToType(context, paramValueStrings[i], type);
 				if (value == null)
@@ -212,7 +216,7 @@ public class Style
 					Logging.logger().severe(message);
 					throw new IllegalArgumentException(message);
 				}
-				
+
 				parameterValues[i] = value;
 			}
 
@@ -231,8 +235,9 @@ public class Style
 	}
 
 	/**
-	 * @return the type overrides for the provided property, populated to ensure there are the correct
-	 * number of overrides for the parameters of the property.
+	 * @return the type overrides for the provided property, populated to ensure
+	 *         there are the correct number of overrides for the parameters of
+	 *         the property.
 	 */
 	private String[] getTypeOverridesForProperty(String property, int numberOfParameters)
 	{
@@ -245,8 +250,8 @@ public class Style
 		{
 			return result;
 		}
-		
-		String[] propertyOverrides = typeOverrides.get(property); 
+
+		String[] propertyOverrides = typeOverrides.get(property);
 		result = new String[numberOfParameters];
 		for (int i = 0; i < result.length; i++)
 		{
@@ -282,8 +287,7 @@ public class Style
 	 *            Attribute values
 	 * @return Replaced string
 	 */
-	protected static String replaceVariablesWithAttributeValues(String string,
-			AVList attributesValues)
+	protected static String replaceVariablesWithAttributeValues(String string, AVList attributesValues)
 	{
 		Pattern pattern = Pattern.compile("%[^%]+%");
 		Matcher matcher = pattern.matcher(string);
@@ -341,6 +345,8 @@ public class Style
 			return File.class;
 		if ("Color".equalsIgnoreCase(type))
 			return Color.class;
+		if ("Insets".equalsIgnoreCase(type))
+			return Insets.class;
 		if ("Dimension".equalsIgnoreCase(type))
 			return Dimension.class;
 		if ("Point".equalsIgnoreCase(type))
@@ -455,14 +461,20 @@ public class Style
 					color = new Color(ints[0], ints[1], ints[2]);
 				else if (ints.length == 4)
 					color = new Color(ints[0], ints[1], ints[2], ints[3]);
-	
+
 				if (color != null)
 					return new Material(color);
+			}
+			else if (type.isAssignableFrom(Insets.class))
+			{
+				int[] ints = splitInts(string);
+				if (ints.length == 4)
+					return new Insets(ints[0], ints[1], ints[2], ints[3]);
 			}
 		}
 		catch (Exception e)
 		{
-			
+
 		}
 		return null;
 	}
