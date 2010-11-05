@@ -10,14 +10,13 @@
 	</Service>
 	<Delegates>
 		<!-- <Delegate>NormalMapReader(Int16,LittleEndian,-32000)</Delegate> -->
-		<!-- <Delegate>ColorMapReader(Int16,LittleEndian,-32000)</Delegate> -->
+		<Delegate>ColorMapReader(Int16,LittleEndian,-32000)</Delegate>
 		<!-- <Delegate>ShaderRender</Delegate> -->
-		<Delegate>ShadedElevationReader(Int16,LittleEndian,-32000,(-0.7,-0.7,-1),20)</Delegate>
+		<!-- <Delegate>ShadedElevationReader(Int16,LittleEndian,-32000,(-0.7,0.7,-1),10)</Delegate> -->
 		<!-- <Delegate>StripingFilterTransformer(21,21,1,21)</Delegate> -->
 		<Delegate>ResizeTransformer(128,128)</Delegate>
 		<!-- <Delegate>StripingFilterTransformer(21,21,21,1)</Delegate> -->
-		<Delegate>ColorLimitTransformer(180,180,180)</Delegate>
-		<Delegate>ColorToAlphaTransformer(180,180,180)</Delegate>
+		<!-- <Delegate>ColorToAlphaTransformer(180,180,180)</Delegate> -->
 	</Delegates>
 	<ColorMap interpolateHue="true">
 		<Entry elevation="-7000" red="128" green="0" blue="128" />
