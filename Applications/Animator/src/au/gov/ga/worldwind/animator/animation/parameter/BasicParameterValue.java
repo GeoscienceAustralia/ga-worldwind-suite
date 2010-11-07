@@ -67,15 +67,19 @@ public class BasicParameterValue extends ChangeableBase implements ParameterValu
 	protected boolean setValue(double value, boolean inhibitEvent)
 	{
 		boolean changed = this.value != value;
+		if (!changed)
+		{
+			return false;
+		}
 		
 		this.value = value;
 		
-		if (changed && !inhibitEvent)
+		if (!inhibitEvent)
 		{
 			fireChangeEvent(value);
 		}
 		
-		return changed;
+		return true;
 	}
 
 	@Override
@@ -112,13 +116,13 @@ public class BasicParameterValue extends ChangeableBase implements ParameterValu
 	public void setFrame(int frame)
 	{
 		boolean changed = this.frame != frame;
+		if (!changed)
+		{
+			return;
+		}
 		
 		this.frame = frame;
-		
-		if (changed)
-		{
-			fireChangeEvent(frame);
-		}
+		fireChangeEvent(frame);
 	}
 	
 	@Override

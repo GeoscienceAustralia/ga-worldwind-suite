@@ -124,17 +124,17 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	public void setInValue(double value)
 	{
 		boolean changed = !this.in.hasValue() || this.in.getValue() != value;
+		if (!changed)
+		{
+			return;
+		}
 		
 		this.in.setValue(value);
 		if (isLocked() && in.hasValue()) 
 		{
 			lockOut();
 		}
-		
-		if (changed)
-		{
-			fireChangeEvent(value);
-		}
+		fireChangeEvent(value);
 	}
 
 	@Override
@@ -147,13 +147,13 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	public void setInPercent(double percent)
 	{
 		boolean changed = this.in.getPercent() != percent;
+		if (!changed)
+		{
+			return;
+		}
 		
 		this.in.setPercent(percent);
-		
-		if (changed)
-		{
-			fireChangeEvent(percent);
-		}
+		fireChangeEvent(percent);
 	}
 	
 	@Override
@@ -166,17 +166,17 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	public void setOutValue(double value)
 	{
 		boolean changed = !this.out.hasValue() || this.out.getValue() != value;
+		if (!changed)
+		{
+			return;
+		}
 		
 		this.out.setValue(value);
 		if (isLocked() && out.hasValue())
 		{
 			lockIn();
 		}
-		
-		if (changed)
-		{
-			fireChangeEvent(value);
-		}
+		fireChangeEvent(value);
 	}
 
 	@Override
@@ -189,13 +189,13 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	public void setOutPercent(double percent)
 	{
 		boolean changed = this.out.getPercent() != percent;
+		if (!changed)
+		{
+			return;
+		}
 		
 		this.out.setPercent(percent);
-		
-		if (changed)
-		{
-			fireChangeEvent(percent);
-		}
+		fireChangeEvent(percent);
 	}
 	
 	@Override
