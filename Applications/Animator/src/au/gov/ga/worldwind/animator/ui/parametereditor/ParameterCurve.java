@@ -377,63 +377,43 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	 */
 	private class NodeMouseListener extends MouseAdapter
 	{
-		private Point lastPoint;
-		
 		private KeyNodeMarker lastSelected;
 		
 		@Override
 		public void mousePressed(MouseEvent e)
 		{
-			updateLastPoint(e);
 			updateLastSelected(e);
+			repaint();
 		}
 		
 		@Override
 		public void mouseDragged(MouseEvent e)
 		{
-			try
+			KeyNodeMarker marker = lastSelected;
+			if (marker == null)
 			{
-				KeyNodeMarker marker = lastSelected;
-				if (marker == null)
-				{
-					return;
-				}
-				marker.applyHandleMove(lastPoint, e.getPoint());
+				return;
 			}
-			finally
-			{
-				updateLastPoint(e);
-			}
+			marker.applyHandleMove(e.getPoint());
 		}
 		
 		@Override
 		public void mouseReleased(MouseEvent e)
 		{
-			clearLastPoint();
 			clearLastSelected();
 			repaint();
 		}
 		
-		private void updateLastPoint(MouseEvent e)
-		{
-			lastPoint = e.getPoint();
-		}
-		
-		private void clearLastPoint()
-		{
-			lastPoint = null;
-		}
-		
 		private void updateLastSelected(MouseEvent e)
 		{
-			KeyNodeMarker newLastSelected = getKeyNodeMarker(lastPoint);
+			KeyNodeMarker newLastSelected = getKeyNodeMarker(e.getPoint());
 			if (newLastSelected != lastSelected && lastSelected != null)
 			{
-				lastSelected.setSelected(false);
+				lastSelected.deselect();
 			}
 			if (newLastSelected != null)
 			{
-				newLastSelected.setSelected(true);
+				newLastSelected.setSelectedHandle(e.getPoint());
 			}
 			lastSelected = newLastSelected;
 		}
@@ -442,7 +422,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		{
 			if (lastSelected != null)
 			{
-				lastSelected.setSelected(false);
+				lastSelected.deselect();
 			}
 			lastSelected = null;
 		}
@@ -460,6 +440,12 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		}
 	}
 	
+	/** An enumeration of key node handles */
+	private static enum KeyNodeHandleSelection
+	{
+		IN, VALUE, OUT, NONE;
+	}
+	
 	/**
 	 * A marker used to draw key frame nodes, and to respond to mouse events etc.
 	 */
@@ -471,10 +457,10 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		private Shape valueHandle;
 		private Shape outHandle;
 
+		private KeyNodeHandleSelection selection = KeyNodeHandleSelection.NONE;
+		
 		private Line2D.Double inValueJoiner;
 		private Line2D.Double valueOutJoiner;
-		
-		private boolean selected = false;
 		
 		KeyNodeMarker(ParameterCurveKeyNode curveNode)
 		{
@@ -501,12 +487,12 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		
 		void paint(Graphics2D g2)
 		{
-			g2.setColor(selected ? LAFConstants.getCurveKeyHandleColor().brighter().brighter() : LAFConstants.getCurveKeyHandleColor());
+			g2.setColor(getHandleColor(valueHandleSelected()));
 			g2.draw(valueHandle);
 			
 			if (inHandle != null)
 			{
-				g2.setColor(LAFConstants.getCurveKeyHandleColor());
+				g2.setColor(getHandleColor(inHandleSelected()));
 				g2.draw(inHandle);
 				g2.setColor(LAFConstants.getCurveHandleJoinerColor());
 				g2.draw(inValueJoiner);
@@ -514,11 +500,16 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			
 			if (outHandle != null)
 			{
-				g2.setColor(LAFConstants.getCurveKeyHandleColor());
+				g2.setColor(getHandleColor(outHandleSelected()));
 				g2.draw(outHandle);
 				g2.setColor(LAFConstants.getCurveHandleJoinerColor());
 				g2.draw(valueOutJoiner);
 			}
+		}
+		
+		private Color getHandleColor(boolean selected)
+		{
+			return selected ? LAFConstants.getCurveKeyHandleColor().brighter().brighter() : LAFConstants.getCurveKeyHandleColor();
 		}
 		
 		/**
@@ -535,21 +526,40 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		/**
 		 * Applies a handle move, taking the handle located at lastPoint and shifting it to the new point
 		 */
-		public void applyHandleMove(Point lastPoint, Point point)
+		public void applyHandleMove(Point point)
 		{
 			// TODO: Apply delta X
-			int deltaY = lastPoint.y - point.y;
-			
-			if (valueHandle.contains(lastPoint))
+			Double lastPoint = getScreenPoint(getSelectedHandleCurvePoint());
+			if (lastPoint == null)
 			{
-				Double screenPoint = getScreenPoint(curveNode.getValuePoint());
-				ParameterCurvePoint curvePoint = getCurvePoint(new Point2D.Double(screenPoint.x, screenPoint.y + deltaY));
-				curveNode.applyValueChange(curvePoint);
+				return;
 			}
 			
+			int deltaY = (int)(lastPoint.y - point.y);
 			
+			ParameterCurvePoint curvePoint = getCurvePoint(new Point2D.Double(lastPoint.x, lastPoint.y + deltaY));
+			if (valueHandleSelected())
+			{
+				curveNode.applyValueChange(curvePoint);
+			}
+			updateMarker(curveNode);
 		}
 		
+		private ParameterCurvePoint getSelectedHandleCurvePoint()
+		{
+			switch (selection)
+			{
+				case VALUE:
+					return curveNode.getValuePoint();
+				case IN:
+					return curveNode.getInPoint();
+				case OUT:
+					return curveNode.getOutPoint();
+				default:
+					return null;
+			}
+		}
+
 		/**
 		 * @return Whether the provided point lies within one of the handles of this marker
 		 */
@@ -558,9 +568,44 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			return valueHandle.contains(point) || (inHandle != null && inHandle.contains(point)) || (outHandle != null && outHandle.contains(point));
 		}
 		
-		void setSelected(boolean selected)
+		public void setSelectedHandle(Point point)
 		{
-			this.selected = selected;
+			if (valueHandle.contains(point))
+			{
+				selection = KeyNodeHandleSelection.VALUE;
+			}
+			else if (inHandle.contains(point))
+			{
+				selection = KeyNodeHandleSelection.IN;
+			}
+			else if (outHandle.contains(point))
+			{
+				selection = KeyNodeHandleSelection.OUT;
+			}
+			else
+			{
+				selection = KeyNodeHandleSelection.NONE;
+			}
+		}
+		
+		public void deselect()
+		{
+			selection = KeyNodeHandleSelection.NONE;
+		}
+		
+		private boolean valueHandleSelected()
+		{
+			return selection == KeyNodeHandleSelection.VALUE;
+		}
+		
+		private boolean inHandleSelected()
+		{
+			return selection == KeyNodeHandleSelection.IN;
+		}
+		
+		private boolean outHandleSelected()
+		{
+			return selection == KeyNodeHandleSelection.OUT;
 		}
 		
 		@Override
