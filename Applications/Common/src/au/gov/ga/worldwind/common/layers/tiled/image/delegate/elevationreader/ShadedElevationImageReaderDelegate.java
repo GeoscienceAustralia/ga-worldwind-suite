@@ -64,12 +64,10 @@ public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDele
 				double sunPositionZ = Double.parseDouble(matcher.group(6));
 				double exaggeration = Double.parseDouble(matcher.group(7));
 				Vec4 sunPosition = new Vec4(sunPositionX, sunPositionY, sunPositionZ).normalize3();
-				
-				System.out.println(matcher.groupCount());
 
 				double minElevation = -Double.MAX_VALUE;
 				double maxElevation = Double.MAX_VALUE;
-				if (matcher.groupCount() >= 9)
+				if (matcher.groupCount() >= 9 && matcher.group(8) != null && matcher.group(9) != null)
 				{
 					minElevation = Double.parseDouble(matcher.group(8));
 					maxElevation = Double.parseDouble(matcher.group(9));
