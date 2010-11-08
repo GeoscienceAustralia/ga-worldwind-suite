@@ -395,6 +395,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 				return;
 			}
 			marker.applyHandleMove(e.getPoint());
+			repaint();
 		}
 		
 		@Override
@@ -529,18 +530,26 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		public void applyHandleMove(Point point)
 		{
 			// TODO: Apply delta X
-			Double lastPoint = getScreenPoint(getSelectedHandleCurvePoint());
-			if (lastPoint == null)
+			Double lastScreenPoint = getScreenPoint(getSelectedHandleCurvePoint());
+			if (lastScreenPoint == null)
 			{
 				return;
 			}
 			
-			int deltaY = (int)(lastPoint.y - point.y);
+			int deltaY = (int)(lastScreenPoint.y - point.y);
 			
-			ParameterCurvePoint curvePoint = getCurvePoint(new Point2D.Double(lastPoint.x, lastPoint.y + deltaY));
+			ParameterCurvePoint newCurvePoint = getCurvePoint(new Point2D.Double(lastScreenPoint.x, lastScreenPoint.y + deltaY));
 			if (valueHandleSelected())
 			{
-				curveNode.applyValueChange(curvePoint);
+				curveNode.applyValueChange(newCurvePoint);
+			}
+			else if (inHandleSelected())
+			{
+				curveNode.applyInChange(newCurvePoint);
+			}
+			else if (outHandleSelected())
+			{
+				curveNode.applyOutChange(newCurvePoint);
 			}
 			updateMarker(curveNode);
 		}
@@ -574,11 +583,11 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			{
 				selection = KeyNodeHandleSelection.VALUE;
 			}
-			else if (inHandle.contains(point))
+			else if (inHandle != null && inHandle.contains(point))
 			{
 				selection = KeyNodeHandleSelection.IN;
 			}
-			else if (outHandle.contains(point))
+			else if (outHandle != null && outHandle.contains(point))
 			{
 				selection = KeyNodeHandleSelection.OUT;
 			}

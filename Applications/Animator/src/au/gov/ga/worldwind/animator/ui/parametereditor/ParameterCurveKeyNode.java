@@ -24,6 +24,11 @@ class ParameterCurveKeyNode
 	{
 		Validate.notNull(parameterValue, "A parameterValue is required");
 		this.parameterValue = parameterValue;
+		updateNode();
+	}
+
+	private void updateNode()
+	{
 		this.valuePoint = new ParameterCurvePoint(parameterValue.getFrame(), parameterValue.getValue());
 		this.type = parameterValue.getType();
 		
@@ -130,6 +135,7 @@ class ParameterCurveKeyNode
 	{
 		ParameterCurvePoint delta = valuePoint.subtract(newValue);
 		parameterValue.translate(delta.value);
+		updateNode();
 	}
 	
 	/**
@@ -137,7 +143,13 @@ class ParameterCurveKeyNode
 	 */
 	public void applyInChange(ParameterCurvePoint newIn)
 	{
-		
+		if (!(parameterValue instanceof BezierParameterValue))
+		{
+			return;
+		}
+		System.out.println("New in:" + newIn);
+		((BezierParameterValue)parameterValue).setInValue(newIn.value);
+		updateNode();
 	}
 	
 	/**
@@ -145,7 +157,13 @@ class ParameterCurveKeyNode
 	 */
 	public void applyOutChange(ParameterCurvePoint newOut)
 	{
-		
+		if (!(parameterValue instanceof BezierParameterValue))
+		{
+			return;
+		}
+		System.out.println("New out:" + newOut);
+		((BezierParameterValue)parameterValue).setOutValue(newOut.value);
+		updateNode();
 	}
 	
 	@Override
