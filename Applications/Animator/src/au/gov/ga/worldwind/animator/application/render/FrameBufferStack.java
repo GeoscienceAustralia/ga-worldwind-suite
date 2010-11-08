@@ -7,20 +7,23 @@ import javax.media.opengl.GL;
 public class FrameBufferStack
 {
 	private static Stack<Integer> stack = new Stack<Integer>();
-	
-	public static void push(GL gl, int frameBufferId)
+	private static int currentFrameBufferId = 0;
+
+	public static synchronized void push(GL gl, int frameBufferId)
 	{
+		stack.push(currentFrameBufferId);
 		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, frameBufferId);
-		stack.push(frameBufferId);
+		currentFrameBufferId = frameBufferId;
 	}
-	
-	public static void pop(GL gl)
+
+	public static synchronized void pop(GL gl)
 	{
 		int frameBufferId = 0;
-		if(!stack.isEmpty())
+		if (!stack.isEmpty())
 		{
 			frameBufferId = stack.pop();
 		}
 		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, frameBufferId);
+		currentFrameBufferId = frameBufferId;
 	}
 }
