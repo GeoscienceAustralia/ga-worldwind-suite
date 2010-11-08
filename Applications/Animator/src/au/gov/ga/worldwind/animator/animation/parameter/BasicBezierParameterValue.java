@@ -110,6 +110,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		this.locked = true;
 		this.in.setValue(inValue);
 		this.in.setPercent(inPercent);
+		this.out.setPercent(inPercent);
 		lockOut();
 	}
 	
@@ -219,11 +220,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	/**
 	 * Lock the '<code>in</code>' value to the '<code>out</code>' value.
 	 * <p/>
-	 * This will:
-	 * <ul>
-	 * 	<li>Adjust <code>in</code> so that <code>in</code>, <code>value</code> and <code>out</code> are colinear
-	 *  <li>Lock the <code>in</code> percentage to the same as the <code>out</code> percentage
-	 * </ul>
+	 * This will adjust <code>in</code> so that <code>in</code>, <code>value</code> and <code>out</code> are colinear
 	 */
 	private void lockIn()
 	{
@@ -232,19 +229,25 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 			return;
 		}
 		
-		double outValueDelta = out.getValue() - getValue();
-		in.setValue(getValue() - outValueDelta);
-		in.setPercent(out.getPercent());
+		ParameterValue previousValue = getOwner().getValueAtKeyFrameBeforeFrame(getFrame());
+		ParameterValue nextValue = getOwner().getValueAtKeyFrameAfterFrame(getFrame());
+		if (previousValue == null || nextValue == null)
+		{
+			return;
+		}
+		
+		int deltaNextFrame = nextValue.getFrame() - getFrame();
+		int deltaPreviousFrame = getFrame() - previousValue.getFrame();
+		
+		double y = getValue() + (deltaPreviousFrame * getInPercent()) / (deltaNextFrame * getOutPercent()) * (getValue() - out.getValue());
+		
+		in.setValue(y);
 	}
 	
 	/**
 	 * Lock the '<code>out</code>' value to the '<code>in</code>' value.
 	 * <p/>
-	 * This will:
-	 * <ul>
-	 * 	<li>Adjust <code>out</code> so that <code>in</code>, <code>value</code> and <code>out</code> are colinear
-	 *  <li>Lock the <code>out</code> percentage to the same as the <code>in</code> percentage
-	 * </ul>
+	 * This will adjust <code>out</code> so that <code>in</code>, <code>value</code> and <code>out</code> are colinear
 	 */
 	private void lockOut()
 	{
@@ -252,9 +255,20 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		{
 			return;
 		}
-		double inValueDelta = in.getValue() - getValue();
-		out.setValue(getValue() - inValueDelta);
-		out.setPercent(in.getPercent());
+		
+		ParameterValue previousValue = getOwner().getValueAtKeyFrameBeforeFrame(getFrame());
+		ParameterValue nextValue = getOwner().getValueAtKeyFrameAfterFrame(getFrame());
+		if (previousValue == null || nextValue == null)
+		{
+			return;
+		}
+		
+		int deltaNextFrame = nextValue.getFrame() - getFrame();
+		int deltaPreviousFrame = getFrame() - previousValue.getFrame();
+		
+		double y = getValue() + (deltaNextFrame * getOutPercent()) / (deltaPreviousFrame * getInPercent()) * (getValue() - in.getValue());
+		
+		out.setValue(y);
 	}
 	
 	/**
