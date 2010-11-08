@@ -537,8 +537,12 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			}
 			
 			int deltaY = (int)(lastScreenPoint.y - point.y);
+			if (deltaY == 0)
+			{
+				return;
+			}
 			
-			ParameterCurvePoint newCurvePoint = getCurvePoint(new Point2D.Double(lastScreenPoint.x, lastScreenPoint.y + deltaY));
+			ParameterCurvePoint newCurvePoint = getCurvePoint(new Point2D.Double(lastScreenPoint.x, lastScreenPoint.y - deltaY));
 			if (valueHandleSelected())
 			{
 				curveNode.applyValueChange(newCurvePoint);

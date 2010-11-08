@@ -133,7 +133,7 @@ class ParameterCurveKeyNode
 	 */
 	public void applyValueChange(ParameterCurvePoint newValue)
 	{
-		ParameterCurvePoint delta = valuePoint.subtract(newValue);
+		ParameterCurvePoint delta = newValue.subtract(valuePoint);
 		parameterValue.translate(delta.value);
 		updateNode();
 	}
@@ -147,7 +147,6 @@ class ParameterCurveKeyNode
 		{
 			return;
 		}
-		System.out.println("New in:" + newIn);
 		((BezierParameterValue)parameterValue).setInValue(newIn.value);
 		updateNode();
 	}
@@ -161,7 +160,6 @@ class ParameterCurveKeyNode
 		{
 			return;
 		}
-		System.out.println("New out:" + newOut);
 		((BezierParameterValue)parameterValue).setOutValue(newOut.value);
 		updateNode();
 	}

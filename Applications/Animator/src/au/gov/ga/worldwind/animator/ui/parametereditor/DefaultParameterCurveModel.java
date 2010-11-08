@@ -305,13 +305,28 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 			
 			int firstFrame = keyFrames.get(0).getFrame();
 			int lastFrame = keyFrames.get(keyFrames.size() - 1).getFrame();
+			
+			// Retrieve all values inside the dirty window
+			if (dirtyWindowStart == null)
+			{
+				dirtyWindowStart = firstFrame;
+			}
+			if (dirtyWindowEnd == null)
+			{
+				dirtyWindowEnd = lastFrame;
+			}
+			ParameterValue[] windowValues = parameter.getValuesBetweenFrames(dirtyWindowStart, dirtyWindowEnd, null);
+			
+			// Repopulate the buffer from the recalculated values
 			for (int frame = firstFrame; frame <= lastFrame; frame++)
 			{
 				ParameterCurvePoint curvePoint = null;
 				
-				if (inWindow(frame, dirtyWindowStart, dirtyWindowEnd) || !curvePointsBackBuffer.containsKey(frame))
+				boolean inWindow = inWindow(frame, dirtyWindowStart, dirtyWindowEnd);
+				if (inWindow || !curvePointsBackBuffer.containsKey(frame))
 				{
-					curvePoint = new ParameterCurvePoint(frame, parameter.getValueAtFrame(frame).getValue());
+					double curveValue = inWindow ? windowValues[frame - dirtyWindowStart].getValue() : parameter.getValueAtFrame(frame).getValue();
+					curvePoint = new ParameterCurvePoint(frame, curveValue);
 				}
 				else
 				{

@@ -24,4 +24,14 @@ class ParameterCurvePoint
 	{
 		return getClass().getSimpleName() + "[" + frame + ", " + value + "]";
 	}
+
+	/**
+	 * @param newValue
+	 * @return
+	 */
+	public ParameterCurvePoint add(ParameterCurvePoint newValue)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
