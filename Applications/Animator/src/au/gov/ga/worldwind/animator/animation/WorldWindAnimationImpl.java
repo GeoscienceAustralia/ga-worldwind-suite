@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.SortedMap;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
@@ -60,7 +60,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	 * Map of <code>frame -> key frame</code>, ordered by frame, for quick
 	 * lookup of key frames
 	 */
-	private SortedMap<Integer, KeyFrame> keyFrameMap = new TreeMap<Integer, KeyFrame>();
+	private NavigableMap<Integer, KeyFrame> keyFrameMap = new TreeMap<Integer, KeyFrame>();
 	private ReentrantReadWriteLock keyFrameMapLock = new ReentrantReadWriteLock(true);
 
 	/** The number of frames in this animation */
@@ -112,9 +112,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		this.animatableElevation = new DefaultAnimatableElevation(this);
 		this.animatableObjects.add(animatableElevation);
 
-		this.name =
-				MessageSourceAccessor.get().getMessage(
-						AnimationMessageConstants.getAnimatorApplicationTitleKey());
+		this.name = MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getAnimatorApplicationTitleKey());
 	}
 
 	@Override
@@ -172,20 +170,22 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			keyFrameMapLock.readLock().unlock();
 		}
 	}
-
+	
 	@Override
 	public KeyFrame getKeyFrameWithParameterBeforeFrame(Parameter p, int frame)
 	{
-		// Note: The ArrayList is used to achieve good random access performance so we can iterate backwards.
-		// This is not required for the forward-looking version of this method
+		return getKeyFrameWithParameterBeforeFrame(p, frame, false);
+	}
+
+	@Override
+	public KeyFrame getKeyFrameWithParameterBeforeFrame(Parameter p, int frame, boolean inclusive)
+	{
 		try
 		{
 			keyFrameMapLock.readLock().lock();
-			List<KeyFrame> candidateKeys =
-					new ArrayList<KeyFrame>(keyFrameMap.headMap(frame).values());
-			for (int i = candidateKeys.size() - 1; i >= 0; i--)
+			Collection<KeyFrame> candidateKeys = keyFrameMap.headMap(frame, inclusive).descendingMap().values();
+			for (KeyFrame candidateKey : candidateKeys)
 			{
-				KeyFrame candidateKey = candidateKeys.get(i);
 				if (candidateKey.hasValueForParameter(p))
 				{
 					return candidateKey;
@@ -202,10 +202,16 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	@Override
 	public KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame)
 	{
+		return getKeyFrameWithParameterAfterFrame(p, frame, false);
+	}
+	
+	@Override
+	public KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame, boolean inclusive)
+	{
 		try
 		{
 			keyFrameMapLock.readLock().lock();
-			Collection<KeyFrame> candidateKeys = keyFrameMap.tailMap(frame + 1).values();
+			Collection<KeyFrame> candidateKeys = keyFrameMap.tailMap(frame, inclusive).values();
 			for (KeyFrame candidateKey : candidateKeys)
 			{
 				if (candidateKey.hasValueForParameter(p))
@@ -420,8 +426,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	public void moveAnimatableObject(Animatable object, int newIndex)
 	{
 		Validate.isTrue(newIndex >= 0 && newIndex < animatableObjects.size(),
-				"newIndex outside of bounds. Must be in range [0, "
-						+ (animatableObjects.size() - 1) + "]");
+				"newIndex outside of bounds. Must be in range [0, " + (animatableObjects.size() - 1) + "]");
 
 		int oldIndex = animatableObjects.indexOf(object);
 		if (oldIndex < 0 || oldIndex == newIndex)
@@ -477,7 +482,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			try
 			{
 				keyFrameMapLock.writeLock().lock();
-				this.keyFrameMap = this.keyFrameMap.headMap(newCount);
+				this.keyFrameMap = this.keyFrameMap.headMap(newCount, false);
 			}
 			finally
 			{
@@ -530,10 +535,8 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 
 		insertKeyFrame(new KeyFrameImpl(frame, parameterValues));
 
-		Logging.logger().log(
-				Level.FINER,
-				"WorldWindAnimationImpl::recordKeyFrame - Recorded frame " + frame + ": "
-						+ getKeyFrame(frame));
+		Logging.logger().log(Level.FINER,
+				"WorldWindAnimationImpl::recordKeyFrame - Recorded frame " + frame + ": " + getKeyFrame(frame));
 	}
 
 	@Override
@@ -598,23 +601,18 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 
 			// Smooth the previous value for this parameter
 			KeyFrame previousFrame =
-					getKeyFrameWithParameterBeforeFrame(parameterValue.getOwner(),
-							keyFrame.getFrame());
+					getKeyFrameWithParameterBeforeFrame(parameterValue.getOwner(), keyFrame.getFrame());
 			if (previousFrame != null)
 			{
-				ParameterValue previousValue =
-						previousFrame.getValueForParameter(parameterValue.getOwner());
+				ParameterValue previousValue = previousFrame.getValueForParameter(parameterValue.getOwner());
 				previousValue.smooth();
 			}
 
 			// Smooth the next value for this parameter
-			KeyFrame nextFrame =
-					getKeyFrameWithParameterAfterFrame(parameterValue.getOwner(),
-							keyFrame.getFrame());
+			KeyFrame nextFrame = getKeyFrameWithParameterAfterFrame(parameterValue.getOwner(), keyFrame.getFrame());
 			if (nextFrame != null)
 			{
-				ParameterValue nextValue =
-						nextFrame.getValueForParameter(parameterValue.getOwner());
+				ParameterValue nextValue = nextFrame.getValueForParameter(parameterValue.getOwner());
 				nextValue.smooth();
 			}
 
@@ -653,14 +651,13 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			// Apply / Un-apply the zoom scaling to the camera's elevation parameters 
 			for (KeyFrame eyeElevationFrame : getKeyFrames(renderCamera.getEyeElevation()))
 			{
-				applyScalingChangeToValue(
-						eyeElevationFrame.getValueForParameter(renderCamera.getEyeElevation()),
+				applyScalingChangeToValue(eyeElevationFrame.getValueForParameter(renderCamera.getEyeElevation()),
 						zoomScalingRequired);
 			}
 			for (KeyFrame lookAtElevationFrame : getKeyFrames(renderCamera.getLookAtElevation()))
 			{
-				applyScalingChangeToValue(lookAtElevationFrame.getValueForParameter(renderCamera
-						.getLookAtElevation()), zoomScalingRequired);
+				applyScalingChangeToValue(lookAtElevationFrame.getValueForParameter(renderCamera.getLookAtElevation()),
+						zoomScalingRequired);
 			}
 
 			// Smooth the frames we just changed
@@ -670,8 +667,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			}
 			for (KeyFrame lookAtElevationFrame : getKeyFrames(renderCamera.getLookAtElevation()))
 			{
-				lookAtElevationFrame.getValueForParameter(renderCamera.getLookAtElevation())
-						.smooth();
+				lookAtElevationFrame.getValueForParameter(renderCamera.getLookAtElevation()).smooth();
 			}
 
 			fireChangeEvent(null);
@@ -688,17 +684,16 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	 */
 	private void applyScalingChangeToValue(ParameterValue value, boolean scale)
 	{
-		value.setValue(scale ? applyZoomScaling(value.getValue()) : unapplyZoomScaling(value
-				.getValue()));
+		value.setValue(scale ? applyZoomScaling(value.getValue()) : unapplyZoomScaling(value.getValue()));
 		if (value instanceof BezierParameterValue)
 		{
 			BezierParameterValue bezierValue = (BezierParameterValue) value;
 			boolean wasLocked = bezierValue.isLocked();
 			bezierValue.setLocked(false);
-			bezierValue.setInValue(scale ? doApplyZoomScaling(bezierValue.getInValue(), true)
-					: doUnapplyZoomScaling(bezierValue.getInValue(), true));
-			bezierValue.setOutValue(scale ? doApplyZoomScaling(bezierValue.getOutValue(), true)
-					: doUnapplyZoomScaling(bezierValue.getOutValue(), true));
+			bezierValue.setInValue(scale ? doApplyZoomScaling(bezierValue.getInValue(), true) : doUnapplyZoomScaling(
+					bezierValue.getInValue(), true));
+			bezierValue.setOutValue(scale ? doApplyZoomScaling(bezierValue.getOutValue(), true) : doUnapplyZoomScaling(
+					bezierValue.getOutValue(), true));
 			bezierValue.setLocked(wasLocked);
 		}
 	}
@@ -917,8 +912,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			this.keyFrameMap.clear();
 			for (int i = 0; i < oldKeyFrames.size(); i++)
 			{
-				insertKeyFrame(new KeyFrameImpl(newFrames[i], oldKeyFrames.get(i)
-						.getParameterValues()));
+				insertKeyFrame(new KeyFrameImpl(newFrames[i], oldKeyFrames.get(i).getParameterValues()));
 			}
 		}
 		finally
@@ -938,13 +932,11 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		Element result = WWXML.appendElement(parent, constants.getAnimationElementName());
 
 		WWXML.setIntegerAttribute(result, constants.getAnimationAttributeFrameCount(), frameCount);
-		WWXML.setBooleanAttribute(result, constants.getAnimationAttributeZoomRequired(),
-				isZoomScalingRequired());
+		WWXML.setBooleanAttribute(result, constants.getAnimationAttributeZoomRequired(), isZoomScalingRequired());
 
 		renderParameters.toXml(result, version);
 
-		Element animatableContainer =
-				WWXML.appendElement(result, constants.getAnimatableObjectsElementName());
+		Element animatableContainer = WWXML.appendElement(result, constants.getAnimatableObjectsElementName());
 		for (Animatable animatable : animatableObjects)
 		{
 			animatableContainer.appendChild(animatable.toXml(animatableContainer, version));
@@ -966,8 +958,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		case VERSION020:
 		{
 			WorldWindAnimationImpl result =
-					new WorldWindAnimationImpl((WorldWindow) context.getValue(constants
-							.getWorldWindowKey()));
+					new WorldWindAnimationImpl((WorldWindow) context.getValue(constants.getWorldWindowKey()));
 
 			context.setValue(constants.getAnimationKey(), result);
 
@@ -975,21 +966,20 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 
 			result.setCurrentFrame(0);
 			Integer frameCount =
-					WWXML.getInteger(element,
-							ATTRIBUTE_PATH_PREFIX + constants.getAnimationAttributeFrameCount(),
+					WWXML.getInteger(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimationAttributeFrameCount(),
 							xpath);
-			result.setZoomScalingRequired(XMLUtil.getBoolean(element, ATTRIBUTE_PATH_PREFIX
-					+ constants.getAnimationAttributeZoomRequired(), true, xpath));
+			result.setZoomScalingRequired(XMLUtil.getBoolean(element,
+					ATTRIBUTE_PATH_PREFIX + constants.getAnimationAttributeZoomRequired(), true, xpath));
 
 			// Add the render parameters
 			result.renderParameters =
-					new RenderParameters().fromXml(WWXML.getElement(element,
-							constants.getRenderParametersElementName(), xpath), version, context);
+					new RenderParameters().fromXml(
+							WWXML.getElement(element, constants.getRenderParametersElementName(), xpath), version,
+							context);
 
 			// Add each animatable object
 			Element[] animatableObjectElements =
-					WWXML.getElements(element, constants.getAnimatableObjectsElementName() + "/*",
-							xpath);
+					WWXML.getElements(element, constants.getAnimatableObjectsElementName() + "/*", xpath);
 			if (animatableObjectElements == null)
 			{
 				return null;
@@ -997,8 +987,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			result.animatableObjects = new ArrayList<Animatable>();
 			for (Element animatableObjectElement : animatableObjectElements)
 			{
-				Animatable animatable =
-						AnimatableFactory.fromXml(animatableObjectElement, version, context);
+				Animatable animatable = AnimatableFactory.fromXml(animatableObjectElement, version, context);
 				if (animatable == null)
 				{
 					continue;
@@ -1088,8 +1077,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 
 		DefaultAnimatableLayer animatableLayer = new DefaultAnimatableLayer(loadedLayer);
-		for (LayerParameter parameter : LayerParameterFactory.createDefaultParametersForLayer(this,
-				loadedLayer))
+		for (LayerParameter parameter : LayerParameterFactory.createDefaultParametersForLayer(this, loadedLayer))
 		{
 			animatableLayer.addParameter(parameter);
 		}

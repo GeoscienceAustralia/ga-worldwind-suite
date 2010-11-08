@@ -81,32 +81,46 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	KeyFrame getKeyFrame(int frame);
 	
 	/**
-	 * Returns the first {@link KeyFrame} <em>before</em> the provided frame that 
-	 * contains a value for the provided {@link Parameter}.
-	 * <p/>
-	 * If (a) there are no {@link KeyFrame}s before the provided frame, 
-	 * or (b) there are no {@link KeyFrame}s with a value recorded for the
-	 * provided parameter before the provided frame, returns <code>null</code>.
-	 * 
-	 * @return the first {@link KeyFrame} <em>before</em> the provided frame that 
-	 * contains a value for the provided {@link Parameter}, or <code>null</code> if
-	 * one cannot be found
+	 * Same as
+	 * {@link Animation#getKeyFrameWithParameterBeforeFrame(Parameter, int, boolean)}
+	 * with <code>inclusive=false</code>.
 	 */
 	KeyFrame getKeyFrameWithParameterBeforeFrame(Parameter p, int frame);
+
+	/**
+	 * Returns the last {@link KeyFrame} <em>before</em> (or, if inclusive,
+	 * <em>at</em>) the provided frame that contains a value for the provided
+	 * {@link Parameter}.
+	 * <p/>
+	 * If there are no {@link KeyFrame}s with a value recorded for the provided
+	 * parameter before the provided frame, returns <code>null</code>.
+	 * 
+	 * @return the first {@link KeyFrame} <em>before</em> or <em>at</em> the
+	 *         provided frame that contains a value for the provided
+	 *         {@link Parameter}, or <code>null</code> if one cannot be found
+	 */
+	KeyFrame getKeyFrameWithParameterBeforeFrame(Parameter p, int frame, boolean inclusive);
 	
 	/**
-	 * Returns the first {@link KeyFrame} <em>after</em> the provided frame that 
-	 * contains a value for the provided {@link Parameter}.
-	 * <p/>
-	 * If (a) there are no {@link KeyFrame}s after the provided frame, 
-	 * or (b) there are no {@link KeyFrame}s with a value recorded for the
-	 * provided parameter after the provided frame, returns <code>null</code>.
-	 * 
-	 * @return the first {@link KeyFrame} <em>after</em> the provided frame that 
-	 * contains a value for the provided {@link Parameter}, or <code>null</code> if
-	 * one cannot be found
+	 * Same as
+	 * {@link Animation#getKeyFrameWithParameterAfterFrame(Parameter, int, boolean)}
+	 * with <code>inclusive=false</code>.
 	 */
 	KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame);
+	
+	/**
+	 * Returns the first {@link KeyFrame} <em>after</em> (or, if inclusive,
+	 * <em>at</em>) the provided frame that contains a value for the provided
+	 * {@link Parameter}.
+	 * <p/>
+	 * If there are no {@link KeyFrame}s with a value recorded for the provided
+	 * parameter after the provided frame, returns <code>null</code>.
+	 * 
+	 * @return the first {@link KeyFrame} <em>after</em> or <em>at</em> the
+	 *         provided frame that contains a value for the provided
+	 *         {@link Parameter}, or <code>null</code> if one cannot be found
+	 */
+	KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame, boolean inclusive);
 	
 	/**
 	 * @return The first key frame in the animation, or <code>null</code> if no key frames are recorded

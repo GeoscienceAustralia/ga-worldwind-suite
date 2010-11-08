@@ -25,8 +25,8 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Parameter extends AnimationObject, Serializable, Nameable,
-		XmlSerializable<Parameter>, AnimationEventListener, Changeable, Enableable, Armable
+public interface Parameter extends AnimationObject, Serializable, Nameable, XmlSerializable<Parameter>,
+		AnimationEventListener, Changeable, Enableable, Armable
 {
 	/**
 	 * Get the current value of this {@link Parameter} in the current
@@ -68,6 +68,22 @@ public interface Parameter extends AnimationObject, Serializable, Nameable,
 	 * @return The value of this {@link Parameter} at the provided frame.
 	 */
 	ParameterValue getValueAtFrame(int frame);
+
+	/**
+	 * Get the values of this {@link Parameter} between the provided frames,
+	 * inclusive. See {@link Parameter#getValueAtFrame(int)}.
+	 * 
+	 * @param startFrame
+	 *            Start frame (inclusive)
+	 * @param endFrame
+	 *            End frame (inclusive)
+	 * @param array
+	 *            {@link ParameterValue} array to put values in (if null or
+	 *            doesn't contain enough space, a new array is returned)
+	 * 
+	 * @return {@link ParameterValue}s for the frames provided.
+	 */
+	ParameterValue[] getValuesBetweenFrames(int startFrame, int endFrame, ParameterValue[] array);
 
 	/**
 	 * Set the default value of this {@link Parameter}. This is the value this
@@ -136,8 +152,8 @@ public interface Parameter extends AnimationObject, Serializable, Nameable,
 
 	/**
 	 * Calls {@link Armable#connectCodependantArmable(Armable)} and
-	 * {@link Enableable#connectCodependantEnableable(Enableable)} on this, passing
-	 * parameter.
+	 * {@link Enableable#connectCodependantEnableable(Enableable)} on this,
+	 * passing parameter.
 	 */
 	void connectCodependantParameter(Parameter parameter);
 }

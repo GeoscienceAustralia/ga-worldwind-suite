@@ -189,17 +189,45 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	@Override
 	public final ParameterValue getValueAtFrame(int frame)
 	{
-		// If the provided value is a keyframe for this parameter, return it's value from the key frame
-		KeyFrame keyAtFrame = animation.getKeyFrame(frame);
-		if (keyAtFrame != null && keyAtFrame.hasValueForParameter(this))
+		// Interpolate between the two surrounding frames
+		KeyFrame previousKeyFrame = animation.getKeyFrameWithParameterBeforeFrame(this, frame, true);
+		KeyFrame nextKeyFrame = animation.getKeyFrameWithParameterAfterFrame(this, frame, false);
+		return calculateInterpolatedParameterValue(frame, previousKeyFrame, nextKeyFrame);
+	}
+	
+	@Override
+	public ParameterValue[] getValuesBetweenFrames(int startFrame, int endFrame, ParameterValue[] array)
+	{
+		Validate.isTrue(startFrame <= endFrame, "End frame must not be less than start frame");
+		
+		if(array == null || array.length < (endFrame - startFrame + 1))
 		{
-			return keyAtFrame.getValueForParameter(this);
+			array = new ParameterValue[endFrame - startFrame + 1];
 		}
 		
-		// Otherwise, interpolate between the two surrounding frames
-		KeyFrame previousKeyFrame = animation.getKeyFrameWithParameterBeforeFrame(this, frame);
-		KeyFrame nextKeyFrame = animation.getKeyFrameWithParameterAfterFrame(this, frame);
+		KeyFrame previousKeyFrame = null;
+		KeyFrame nextKeyFrame = null;
+		for(int frame = startFrame; frame <= endFrame; frame++)
+		{
+			//if the frame is outside of the bounds of previous and next, then recalculate
+			if(frame == startFrame || (nextKeyFrame != null && frame >= nextKeyFrame.getFrame()))
+			{
+				previousKeyFrame = animation.getKeyFrameWithParameterBeforeFrame(this, frame, true);
+				nextKeyFrame = animation.getKeyFrameWithParameterAfterFrame(this, frame, false);
+			}
+			array[frame - startFrame] = calculateInterpolatedParameterValue(frame, previousKeyFrame, nextKeyFrame);
+		}
 		
+		return array;
+	}
+	
+	/**
+	 * Invoked by the {@link ParameterBase#getValueAtFrame(int)} and
+	 * {@link ParameterBase#getValuesBetweenFrames(int, int, ParameterValue[])}
+	 * functions.
+	 */
+	protected ParameterValue calculateInterpolatedParameterValue(int frame, KeyFrame previousKeyFrame, KeyFrame nextKeyFrame)
+	{
 		// If no key values exist, return the default value
 		if (previousKeyFrame == null && nextKeyFrame == null)
 		{
@@ -221,6 +249,17 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 		// Otherwise, use an interpolator to interpolate between the two values
 		
 		double percent = calculatePercentOfInterval(previousKeyFrame.getFrame(), nextKeyFrame.getFrame(), frame);
+		
+		//don't need to interpolate if at either end
+		if(percent <= 0)
+		{
+			return previousKeyFrame.getValueForParameter(this);
+		}
+		if(percent >= 1)
+		{
+			return nextKeyFrame.getValueForParameter(this);
+		}
+		
 		Interpolator<Vector2> interpolator = InterpolatorFactory.getInterpolator(previousKeyFrame.getValueForParameter(this), nextKeyFrame.getValueForParameter(this));
 		double interpolatedValue = interpolator.computeValue(percent).y;
 		
