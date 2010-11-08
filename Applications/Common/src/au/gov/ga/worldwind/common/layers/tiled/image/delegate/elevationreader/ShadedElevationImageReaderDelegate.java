@@ -23,19 +23,24 @@ public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDele
 
 	protected final double exaggeration;
 	protected final Vec4 sunPosition;
+	protected final double minElevation;
+	protected final double maxElevation;
 
 	@SuppressWarnings("unused")
 	private ShadedElevationImageReaderDelegate()
 	{
-		this(AVKey.INT16, AVKey.LITTLE_ENDIAN, -Double.MAX_VALUE, 10, new Vec4(-1, 1, -1).normalize3());
+		this(AVKey.INT16, AVKey.LITTLE_ENDIAN, -Double.MAX_VALUE, 10, new Vec4(-0.7, 0.7, -1).normalize3(),
+				-Double.MAX_VALUE, Double.MAX_VALUE);
 	}
 
 	public ShadedElevationImageReaderDelegate(String pixelType, String byteOrder, double missingDataSignal,
-			double exaggeration, Vec4 sunPosition)
+			double exaggeration, Vec4 sunPosition, double minElevation, double maxElevation)
 	{
 		super(pixelType, byteOrder, missingDataSignal);
 		this.exaggeration = exaggeration;
 		this.sunPosition = sunPosition;
+		this.minElevation = minElevation;
+		this.maxElevation = maxElevation;
 	}
 
 	@Override
@@ -43,9 +48,11 @@ public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDele
 	{
 		if (definition.toLowerCase().startsWith(DEFINITION_STRING.toLowerCase()))
 		{
+			String optionalMinMaxGroup = "(?:,\\(" + doublePattern + "," + doublePattern + "\\))?";
 			Pattern pattern =
 					Pattern.compile("(?:\\((\\w+),(\\w+)," + doublePattern + ",\\(" + doublePattern + ","
-							+ doublePattern + "," + doublePattern + "\\)," + doublePattern + "\\))");
+							+ doublePattern + "," + doublePattern + "\\)," + doublePattern + optionalMinMaxGroup
+							+ "\\))");
 			Matcher matcher = pattern.matcher(definition);
 			if (matcher.find())
 			{
@@ -57,9 +64,20 @@ public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDele
 				double sunPositionZ = Double.parseDouble(matcher.group(6));
 				double exaggeration = Double.parseDouble(matcher.group(7));
 				Vec4 sunPosition = new Vec4(sunPositionX, sunPositionY, sunPositionZ).normalize3();
+				
+				System.out.println(matcher.groupCount());
+
+				double minElevation = -Double.MAX_VALUE;
+				double maxElevation = Double.MAX_VALUE;
+				if (matcher.groupCount() >= 9)
+				{
+					minElevation = Double.parseDouble(matcher.group(8));
+					maxElevation = Double.parseDouble(matcher.group(9));
+				}
 
 				return new ShadedElevationImageReaderDelegate(WWXML.parseDataType(pixelType),
-						WWXML.parseByteOrder(byteOrder), missingDataSignal, exaggeration, sunPosition);
+						WWXML.parseByteOrder(byteOrder), missingDataSignal, exaggeration, sunPosition, minElevation,
+						maxElevation);
 			}
 		}
 		return null;
@@ -125,7 +143,7 @@ public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDele
 				//if (this.getLevels().getSector().contains(lat, lon))
 				{
 					double elevation = elevations.getDouble(i);
-					if (elevation != missingDataSignal)
+					if (elevation != missingDataSignal && minElevation <= elevation && elevation <= maxElevation)
 					{
 						verts[i] = new Vec4(lat.degrees, lon.degrees, elevation * exaggeration);
 					}
