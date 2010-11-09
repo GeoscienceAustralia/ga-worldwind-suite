@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.animator.ui.parametereditor;
 
+import au.gov.ga.worldwind.common.util.Range;
+
 
 /**
  * A container that defines a bounding box for a drawn parameter curve. 
@@ -31,6 +33,16 @@ class ParameterCurveBounds
 		return topRight.frame;
 	}
 	
+	double getFrameWindow()
+	{
+		return getMaxFrame() - getMinFrame();
+	}
+	
+	Range<Double> getFrameRange()
+	{
+		return new Range<Double>(getMinFrame(), getMaxFrame());
+	}
+	
 	double getMinValue()
 	{
 		return bottomLeft.value;
@@ -39,6 +51,16 @@ class ParameterCurveBounds
 	double getMaxValue()
 	{
 		return topRight.value;
+	}
+	
+	double getValueWindow()
+	{
+		return getMaxValue() - getMinValue();
+	}
+	
+	Range<Double> getValueRange()
+	{
+		return new Range<Double>(getMinValue(), getMaxValue());
 	}
 	
 	@Override

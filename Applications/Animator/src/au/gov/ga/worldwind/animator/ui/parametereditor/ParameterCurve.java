@@ -30,6 +30,9 @@ import au.gov.ga.worldwind.animator.application.LAFConstants;
 import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterCurveModel.ParameterCurveModelListener;
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.GridHelper;
+import au.gov.ga.worldwind.common.util.Range;
+import au.gov.ga.worldwind.common.util.GridHelper.GridProperties;
 
 /**
  * A class that draws the curve for a single parameter
@@ -40,7 +43,9 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 
 	private static final RenderingHints RENDER_HINT = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 	private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new DaemonThreadFactory("Parameter Curve Updater"));
-	private static final int NODE_SHAPE_SIZE = 8;
+	
+	private static final int NODE_SHAPE_SIZE = 8; // Pixels
+	private static final Range<Integer> GRID_SIZE = new Range<Integer>(20, 40); // Pixels
 	
 	/** The model backing this component */
 	private ParameterCurveModel model;
@@ -54,7 +59,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	private Lock boundsLock = new ReentrantLock();
 	
 	/** Whether to show the axis for this curve */
-	private boolean showAxis = false;
+	private boolean showAxis = true;
 	
 	/** Whether this curve has been destroyed */
 	private boolean isDestroyed = false;
@@ -199,8 +204,16 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	
 	private void paintAxisLines(Graphics2D g2)
 	{
-		// TODO Auto-generated method stub
+		GridProperties gridProperties = GridHelper.createGrid().ofSize(GRID_SIZE).toFitIn(getHeight()).forValueRange(curveBounds.getValueRange()).build();
 		
+		int gridY = getHeight() - gridProperties.getFirstGridLine();
+		
+		g2.setColor(LAFConstants.getCurveEditorGridColor());
+		while (gridY > 0)
+		{
+			g2.draw(new Line2D.Double(0, gridY, getWidth(), gridY));
+			gridY -= gridProperties.getGridSpacing();
+		}
 	}
 	
 	private void paintParameterCurve(Graphics2D g2)
@@ -252,7 +265,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	 */
 	double getScreenX(double frame)
 	{
-		return (double)getWidth() * (double)(frame - curveBounds.getMinFrame()) / (double)(curveBounds.getMaxFrame() - curveBounds.getMinFrame());
+		return (double)getWidth() * (double)(frame - curveBounds.getMinFrame()) / curveBounds.getFrameWindow();
 	}
 	
 	/**
@@ -261,7 +274,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	double getScreenY(double parameterValue)
 	{
 		double h = (double)getHeight();
-		return h - (h * (parameterValue - curveBounds.getMinValue()) / (curveBounds.getMaxValue() - curveBounds.getMinValue()));
+		return h - (h * (parameterValue - curveBounds.getMinValue()) / curveBounds.getValueWindow());
 	}
 
 	/**
@@ -277,7 +290,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	 */
 	double getCurveX(double x)
 	{
-		return curveBounds.getMinFrame() + ((x / (double)getWidth()) * (curveBounds.getMaxFrame() - curveBounds.getMinFrame()));
+		return curveBounds.getMinFrame() + ((x / (double)getWidth()) * curveBounds.getFrameWindow());
 	}
 	
 	/**
@@ -285,7 +298,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	 */
 	double getCurveY(double y)
 	{
-		return curveBounds.getMinValue() + (((getHeight() - y) / (double)getHeight()) * (curveBounds.getMaxValue() - curveBounds.getMinValue()));
+		return curveBounds.getMinValue() + (((getHeight() - y) / (double)getHeight()) * curveBounds.getValueWindow());
 	}
 	
 	public void setShowAxis(boolean showAxis)
@@ -438,6 +451,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		public void componentResized(ComponentEvent e)
 		{
 			updateKeyNodeMarkers();
+			repaint();
 		}
 	}
 	
@@ -537,23 +551,32 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			}
 			
 			int deltaY = (int)(lastScreenPoint.y - point.y);
-			if (deltaY == 0)
-			{
-				return;
-			}
+			int deltaX = (int)(lastScreenPoint.x - point.x);
 			
-			ParameterCurvePoint newCurvePoint = getCurvePoint(new Point2D.Double(lastScreenPoint.x, lastScreenPoint.y - deltaY));
 			if (valueHandleSelected())
 			{
-				curveNode.applyValueChange(newCurvePoint);
+				// Only deltaY applied to the value handle
+				if (deltaY == 0)
+				{
+					return;
+				}
+				curveNode.applyValueChange(getCurvePoint(new Point2D.Double(lastScreenPoint.x, lastScreenPoint.y - deltaY)));
 			}
-			else if (inHandleSelected())
+			else if (inHandleSelected() || outHandleSelected())
 			{
-				curveNode.applyInChange(newCurvePoint);
-			}
-			else if (outHandleSelected())
-			{
-				curveNode.applyOutChange(newCurvePoint);
+				if (deltaY == 0 && deltaX == 0)
+				{
+					return;
+				}
+				ParameterCurvePoint curvePoint = getCurvePoint(new Point2D.Double(lastScreenPoint.x - deltaX, lastScreenPoint.y - deltaY));
+				if (inHandleSelected())
+				{
+					curveNode.applyInChange(curvePoint);
+				}
+				else
+				{
+					curveNode.applyOutChange(curvePoint);
+				}
 			}
 			updateMarker(curveNode);
 		}

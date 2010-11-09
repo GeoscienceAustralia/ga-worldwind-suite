@@ -147,8 +147,20 @@ class ParameterCurveKeyNode
 		{
 			return;
 		}
+		((BezierParameterValue)parameterValue).setInPercent(calculateInPercent((BezierParameterValue)parameterValue, newIn.frame));
 		((BezierParameterValue)parameterValue).setInValue(newIn.value);
 		updateNode();
+	}
+	
+	/** Calculate the percent value for the in handle, given the new frame position of the in handle */
+	private static Double calculateInPercent(BezierParameterValue bezierValue, double inFrame)
+	{
+		ParameterValue previousValue = bezierValue.getOwner().getValueAtKeyFrameBeforeFrame(bezierValue.getFrame());
+		if (previousValue == null)
+		{
+			return null;
+		}
+		return 1 - (double)(inFrame - previousValue.getFrame()) / (double)(bezierValue.getFrame() - previousValue.getFrame());
 	}
 	
 	/**
@@ -160,10 +172,22 @@ class ParameterCurveKeyNode
 		{
 			return;
 		}
+		((BezierParameterValue)parameterValue).setOutPercent(calculateOutPercent((BezierParameterValue)parameterValue, newOut.frame));
 		((BezierParameterValue)parameterValue).setOutValue(newOut.value);
 		updateNode();
 	}
 	
+	/** Calculate the percent value for the out handle, given the new frame position of the out handle */
+	private static Double calculateOutPercent(BezierParameterValue bezierValue, double outFrame)
+	{
+		ParameterValue nextValue = bezierValue.getOwner().getValueAtKeyFrameAfterFrame(bezierValue.getFrame());
+		if (nextValue == null)
+		{
+			return null;
+		}
+		return (double)(outFrame - bezierValue.getFrame()) / (double)(nextValue.getFrame() - bezierValue.getFrame());
+	}
+
 	@Override
 	public String toString()
 	{
