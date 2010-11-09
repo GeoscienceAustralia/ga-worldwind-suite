@@ -14,6 +14,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.awt.geom.Rectangle2D;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -31,8 +32,8 @@ import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterCurveModel.Param
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.util.GridHelper;
-import au.gov.ga.worldwind.common.util.Range;
 import au.gov.ga.worldwind.common.util.GridHelper.GridProperties;
+import au.gov.ga.worldwind.common.util.Range;
 
 /**
  * A class that draws the curve for a single parameter
@@ -69,6 +70,8 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	private ReadWriteLock keyNodeMarkersLock = new ReentrantReadWriteLock(true);
 	
 	private NodeMouseListener nodeMouseListener = new NodeMouseListener();
+
+	private GridProperties axisProperties;
 	
 	public ParameterCurve(Parameter parameter)
 	{
@@ -113,6 +116,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		{
 			calculateDefaultBounds();
 		}
+		axisProperties = null;
 	}
 
 	/**
@@ -204,16 +208,58 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	
 	private void paintAxisLines(Graphics2D g2)
 	{
-		GridProperties gridProperties = GridHelper.createGrid().ofSize(GRID_SIZE).toFitIn(getHeight()).forValueRange(curveBounds.getValueRange()).build();
+		if (axisProperties == null)
+		{
+			recalculateAxisGrid();
+		}
 		
-		int gridY = getHeight() - gridProperties.getFirstGridLine();
-		
-		g2.setColor(LAFConstants.getCurveEditorGridColor());
+		int gridY = getHeight() - axisProperties.getFirstGridLineLocation();
+		int numDecimalPlaces = calculateNumDecimalPlacesForGridLabel();
+		double labelValue = axisProperties.getFirstGridLineValue();
 		while (gridY > 0)
 		{
+			g2.setColor(LAFConstants.getCurveEditorGridColor().darker());
+			g2.drawString(getGridLabel(labelValue, numDecimalPlaces), 5, gridY);
+			
+			g2.setColor(LAFConstants.getCurveEditorGridColor());
 			g2.draw(new Line2D.Double(0, gridY, getWidth(), gridY));
-			gridY -= gridProperties.getGridSpacing();
+			
+			gridY -= axisProperties.getGridSpacing();
+			labelValue += axisProperties.getValueChangePerGridLine();
 		}
+	}
+
+	private int calculateNumDecimalPlacesForGridLabel()
+	{
+		int numDecimalPlaces = 0;
+		
+		String strideString = String.valueOf(axisProperties.getValueChangePerGridLine());
+		if (strideString.indexOf('.') > -1)
+		{
+			numDecimalPlaces = strideString.substring(strideString.indexOf('.')+1).length();
+		}
+		
+		return numDecimalPlaces;
+	}
+	
+	private String getGridLabel(double labelValue, int numDecimalPlaces)
+	{
+		String formatString = "0";
+		if (numDecimalPlaces > 0)
+		{
+			formatString += ".";
+			for (int i = 0; i < numDecimalPlaces; i++)
+			{
+				formatString += "0";
+			}
+		}
+		return new DecimalFormat(formatString).format(labelValue);
+	}
+
+	private void recalculateAxisGrid()
+	{
+		axisProperties = GridHelper.createGrid().ofSize(GRID_SIZE).toFitIn(getHeight()).forValueRange(curveBounds.getValueRange()).build();
+		System.out.println("Axis properties: " + axisProperties);
 	}
 	
 	private void paintParameterCurve(Graphics2D g2)
@@ -451,6 +497,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		public void componentResized(ComponentEvent e)
 		{
 			updateKeyNodeMarkers();
+			axisProperties = null;
 			repaint();
 		}
 	}

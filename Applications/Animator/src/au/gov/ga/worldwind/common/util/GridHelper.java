@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.common.util;
 
 
+
 /**
  * A helper class used to calculate grid spacings etc.
  */
@@ -14,6 +15,9 @@ public class GridHelper
 	{
 		/** The location of the first grid line to draw, in pixels */
 		private int firstGridLine;
+
+		/** The value of the first grid line */
+		private double firstGridLineValue;
 		
 		/** The grid spacing to use, in pixels */
 		private int gridSpacing;
@@ -21,18 +25,24 @@ public class GridHelper
 		/** The value change per grid line */
 		private double valueChangePerGridLine;
 
-		public GridProperties(int firstGridLine, int gridSpacing, double valueChangePerGridLine)
+		public GridProperties(int firstGridLine, int gridSpacing, double firstGridLineValue, double valueChangePerGridLine)
 		{
 			this.firstGridLine = firstGridLine;
+			this.firstGridLineValue = firstGridLineValue;
 			this.gridSpacing = gridSpacing;
 			this.valueChangePerGridLine = valueChangePerGridLine;
 		}
 
-		public int getFirstGridLine()
+		public int getFirstGridLineLocation()
 		{
 			return firstGridLine;
 		}
 
+		public double getFirstGridLineValue()
+		{
+			return firstGridLineValue;
+		}
+		
 		public int getGridSpacing()
 		{
 			return gridSpacing;
@@ -118,23 +128,23 @@ public class GridHelper
 				valueChangePerGridLine *= 0.1;
 			}
 			
-			// Choose the best place to put the first grid line
-			// Find the grid line that is as close to the order of magnitude of the step as possible
+			// Find the first multiple of the grid step size
+			double valuePerPixel = valueDelta / numPixels;
+			double minRemainder = Double.MAX_VALUE;
 			int firstGridLine = 0;
-			int minMagnitudeDifference = Integer.MAX_VALUE;
-			int gridStepMagnitude = (int)Math.log10(valueChangePerGridLine);
+			double firstGridLineValue = 0;
 			for (int i = 0; i < pixelsPerGridLine; i++)
 			{
-				double valueAtPixel = (valueChangePerGridLine * i) + valueRange.getMinValue();
-				int exponentDifference = Math.abs((int)Math.log10(valueAtPixel) - gridStepMagnitude);
-				if (exponentDifference < minMagnitudeDifference)
+				double valueAtPixel = (valuePerPixel * i) + valueRange.getMinValue();
+				double remainder = valueAtPixel % valueChangePerGridLine;
+				if (remainder < minRemainder)
 				{
-					minMagnitudeDifference = exponentDifference;
 					firstGridLine = i;
+					firstGridLineValue = valueAtPixel;
+					minRemainder = remainder;
 				}
 			}
-			
-			return new GridProperties(firstGridLine, pixelsPerGridLine, valueChangePerGridLine);
+			return new GridProperties(firstGridLine, pixelsPerGridLine, firstGridLineValue, valueChangePerGridLine);
 		}
 		
 	}
