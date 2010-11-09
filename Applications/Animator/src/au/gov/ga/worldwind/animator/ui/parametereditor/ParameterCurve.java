@@ -340,6 +340,14 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	}
 	
 	/**
+	 * Maps the provided screen point to a curve point
+	 */
+	ParameterCurvePoint getCurvePoint(Point screenPoint)
+	{
+		return new ParameterCurvePoint(getCurveX(screenPoint.x), getCurveY(screenPoint.y));
+	}
+	
+	/**
 	 * Maps the provided screen x-coordinate to a curve frame coordinate
 	 */
 	double getCurveX(double x)
@@ -454,8 +462,17 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			double deltaY = zoomValueAxis(e) ? ((curveBounds.getValueWindow() * zoomAmount) - curveBounds.getValueWindow()) / 2 : 0;
 			double deltaX = zoomFrameAxis(e) ? ((curveBounds.getFrameWindow() * zoomAmount) - curveBounds.getFrameWindow()) / 2 : 0;
 			
-			// Adjust the curve bounds
+			ParameterCurvePoint originalMousePosition = getCurvePoint(e.getPoint());
+			
+			// Resize the curve bounds to the new zoomed bounds
 			resizeCurveBounds(deltaX, deltaY);
+			
+			ParameterCurvePoint newMousePosition = getCurvePoint(e.getPoint());
+			
+			ParameterCurvePoint curveTranslation = originalMousePosition.subtract(newMousePosition);
+			
+			// Reposition the curve bounds so the mouse remains in the same place in curve space 
+			translateCurveBounds(curveTranslation.frame, curveTranslation.value);
 			
 			// Repaint
 			updateKeyNodeMarkers();
@@ -474,16 +491,22 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			return e.isShiftDown() || !(e.isAltDown() || e.isAltGraphDown() || e.isControlDown() || e.isMetaDown() || e.isShiftDown());
 		}
 
+		private boolean isZoomIn(MouseWheelEvent e)
+		{
+			// Zoom in for positive direction, out for negative
+			return e.getWheelRotation() > 0;
+		}
+		
 		private void resizeCurveBounds(double deltaX, double deltaY)
 		{
 			setCurveBounds(curveBounds.getMinFrame() - deltaX, curveBounds.getMaxFrame() + deltaX, 
 						   curveBounds.getMinValue() - deltaY, curveBounds.getMaxValue() + deltaY);
 		}
 		
-		private boolean isZoomIn(MouseWheelEvent e)
+		private void translateCurveBounds(double deltaX, double deltaY)
 		{
-			// Zoom in for positive direction, out for negative
-			return e.getWheelRotation() > 0;
+			setCurveBounds(curveBounds.getMinFrame() + deltaX, curveBounds.getMaxFrame() + deltaX, 
+						   curveBounds.getMinValue() + deltaY, curveBounds.getMaxValue() + deltaY);
 		}
 	}
 	
