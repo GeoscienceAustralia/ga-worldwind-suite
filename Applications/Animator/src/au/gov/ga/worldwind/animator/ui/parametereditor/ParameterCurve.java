@@ -10,6 +10,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
@@ -47,6 +48,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	
 	private static final int NODE_SHAPE_SIZE = 8; // Pixels
 	private static final Range<Integer> GRID_SIZE = new Range<Integer>(20, 40); // Pixels
+	private static final double ZOOM_PERCENT_PER_WHEEL_CLICK = 0.1; // 10% zoom per wheel click
 	
 	/** The model backing this component */
 	private ParameterCurveModel model;
@@ -69,7 +71,8 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	private List<KeyNodeMarker> keyNodeMarkers = new ArrayList<KeyNodeMarker>();
 	private ReadWriteLock keyNodeMarkersLock = new ReentrantReadWriteLock(true);
 	
-	private NodeMouseListener nodeMouseListener = new NodeMouseListener();
+	private NodeDragListener nodeMouseListener = new NodeDragListener();
+	private PanZoomListener panZoomListener = new PanZoomListener();
 
 	private GridProperties axisProperties;
 	
@@ -92,8 +95,14 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		
 		setOpaque(true);
 		setBackground(LAFConstants.getCurveEditorBackgroundColor());
+		
 		addMouseListener(nodeMouseListener);
 		addMouseMotionListener(nodeMouseListener);
+		
+		addMouseListener(panZoomListener);
+		addMouseMotionListener(panZoomListener);
+		addMouseWheelListener(panZoomListener);
+		
 		addComponentListener(new ComponentListener());
 	}
 	
@@ -114,7 +123,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		this.curveBounds = curveBounds;
 		if (this.curveBounds == null)
 		{
-			calculateDefaultBounds();
+			calculateFittingBounds();
 		}
 		axisProperties = null;
 	}
@@ -134,7 +143,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	{
 		if (curveBounds == null)
 		{
-			calculateDefaultBounds();
+			calculateFittingBounds();
 		}
 		setCurveBounds(new ParameterCurveBounds(minFrame, maxFrame, curveBounds.getMinValue(), curveBounds.getMaxValue()));
 	}
@@ -146,17 +155,17 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	{
 		if (curveBounds == null)
 		{
-			calculateDefaultBounds();
+			calculateFittingBounds();
 		}
 		setCurveBounds(new ParameterCurveBounds(curveBounds.getMinFrame(), curveBounds.getMaxFrame(), minValue, maxValue));
 	}
 	
 	/**
-	 * Calculates the default bounds to use for the parameter.
+	 * Calculates the bounds to use for the parameter that will fit the entirety of the parameter curve.
 	 * <p/>
-	 * The default bounds [0, maxValue] - [lastFrame, minValue] 
+	 * The bounds will be [0, maxValue] - [lastFrame, minValue] 
 	 */
-	private void calculateDefaultBounds()
+	private void calculateFittingBounds()
 	{
 		try
 		{
@@ -188,7 +197,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			model.lock();
 			if (curveBounds == null)
 			{
-				calculateDefaultBounds();
+				calculateFittingBounds();
 			}
 			
 			if (showAxis)
@@ -259,7 +268,6 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	private void recalculateAxisGrid()
 	{
 		axisProperties = GridHelper.createGrid().ofSize(GRID_SIZE).toFitIn(getHeight()).forValueRange(curveBounds.getValueRange()).build();
-		System.out.println("Axis properties: " + axisProperties);
 	}
 	
 	private void paintParameterCurve(Graphics2D g2)
@@ -432,17 +440,70 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	}
 	
 	/**
+	 * A mouse listener used to control panning and zooming via the middle mouse button
+	 */
+	private class PanZoomListener extends MouseAdapter
+	{
+		@Override
+		public void mouseWheelMoved(MouseWheelEvent e)
+		{
+			double zoomer = isZoomIn(e) ? 1 + ZOOM_PERCENT_PER_WHEEL_CLICK : 1 - ZOOM_PERCENT_PER_WHEEL_CLICK;
+			double zoomAmount = Math.pow(zoomer, Math.abs(e.getWheelRotation()));
+			
+			// Contract/expand the bounds based on the zoom amount
+			double deltaY = zoomValueAxis(e) ? ((curveBounds.getValueWindow() * zoomAmount) - curveBounds.getValueWindow()) / 2 : 0;
+			double deltaX = zoomFrameAxis(e) ? ((curveBounds.getFrameWindow() * zoomAmount) - curveBounds.getFrameWindow()) / 2 : 0;
+			
+			// Adjust the curve bounds
+			resizeCurveBounds(deltaX, deltaY);
+			
+			// Repaint
+			updateKeyNodeMarkers();
+			repaint();
+		}
+
+		/** The frame axis is zoomed if CTRL or no action key is pressed */
+		private boolean zoomFrameAxis(MouseWheelEvent e)
+		{
+			return e.isControlDown() || !(e.isAltDown() || e.isAltGraphDown() || e.isControlDown() || e.isMetaDown() || e.isShiftDown());
+		}
+		
+		/** The value axis is zoomed if SHIFT or no action key is pressed */
+		private boolean zoomValueAxis(MouseWheelEvent e)
+		{
+			return e.isShiftDown() || !(e.isAltDown() || e.isAltGraphDown() || e.isControlDown() || e.isMetaDown() || e.isShiftDown());
+		}
+
+		private void resizeCurveBounds(double deltaX, double deltaY)
+		{
+			setCurveBounds(curveBounds.getMinFrame() - deltaX, curveBounds.getMaxFrame() + deltaX, 
+						   curveBounds.getMinValue() - deltaY, curveBounds.getMaxValue() + deltaY);
+		}
+		
+		private boolean isZoomIn(MouseWheelEvent e)
+		{
+			// Zoom in for positive direction, out for negative
+			return e.getWheelRotation() > 0;
+		}
+	}
+	
+	/**
 	 * A mouse listener used to detect and process keyframe node selections and drags
 	 */
-	private class NodeMouseListener extends MouseAdapter
+	private class NodeDragListener extends MouseAdapter
 	{
 		private KeyNodeMarker lastSelected;
 		
 		@Override
 		public void mousePressed(MouseEvent e)
 		{
+			if (!isLeftClick(e))
+			{
+				return;
+			}
 			updateLastSelected(e);
 			repaint();
+			e.consume();
 		}
 		
 		@Override
@@ -455,13 +516,19 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			}
 			marker.applyHandleMove(e.getPoint());
 			repaint();
+			e.consume();
 		}
 		
 		@Override
 		public void mouseReleased(MouseEvent e)
 		{
+			if (!isLeftClick(e))
+			{
+				return;
+			}
 			clearLastSelected();
 			repaint();
+			e.consume();
 		}
 		
 		private void updateLastSelected(MouseEvent e)
@@ -485,6 +552,11 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 				lastSelected.deselect();
 			}
 			lastSelected = null;
+		}
+		
+		private boolean isLeftClick(MouseEvent e)
+		{
+			return e.getButton() == MouseEvent.BUTTON1;
 		}
 	}
 	
