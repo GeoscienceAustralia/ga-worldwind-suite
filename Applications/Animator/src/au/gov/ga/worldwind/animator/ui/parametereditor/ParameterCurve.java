@@ -217,6 +217,12 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	
 	private void paintAxisLines(Graphics2D g2)
 	{
+		// Don't generate axis lines if there is nothing to plot
+		if (curveBounds.getFrameWindow() == 0 || curveBounds.getValueWindow() == 0)
+		{
+			return;
+		}
+		
 		if (axisProperties == null)
 		{
 			recalculateAxisGrid();
@@ -267,6 +273,10 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 
 	private void recalculateAxisGrid()
 	{
+		if (curveBounds.getValueWindow() == 0)
+		{
+			return;
+		}
 		axisProperties = GridHelper.createGrid().ofSize(GRID_SIZE).toFitIn(getHeight()).forValueRange(curveBounds.getValueRange()).build();
 	}
 	
@@ -452,6 +462,8 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	 */
 	private class PanZoomListener extends MouseAdapter
 	{
+		private ParameterCurvePoint lastMousePoint = null;
+		
 		@Override
 		public void mouseWheelMoved(MouseWheelEvent e)
 		{
@@ -474,9 +486,43 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			// Reposition the curve bounds so the mouse remains in the same place in curve space 
 			translateCurveBounds(curveTranslation.frame, curveTranslation.value);
 			
-			// Repaint
-			updateKeyNodeMarkers();
-			repaint();
+			repaintCurve();
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e)
+		{
+			if (!isPanClick(e))
+			{
+				return;
+			}
+			updateLastMousePoint(getCurvePoint(e.getPoint()));
+		}
+		
+		@Override
+		public void mouseDragged(MouseEvent e)
+		{
+			if (lastMousePoint == null)
+			{
+				return;
+			}
+
+			ParameterCurvePoint translation = lastMousePoint.subtract(getCurvePoint(e.getPoint()));
+			translateCurveBounds(translation.frame, translation.value);
+			
+			updateLastMousePoint(getCurvePoint(e.getPoint()));
+			
+			repaintCurve();
+		}
+		
+		@Override
+		public void mouseReleased(MouseEvent e)
+		{
+			if (!isPanClick(e))
+			{
+				return;
+			}
+			updateLastMousePoint(null);
 		}
 
 		/** The frame axis is zoomed if CTRL or no action key is pressed */
@@ -508,6 +554,22 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			setCurveBounds(curveBounds.getMinFrame() + deltaX, curveBounds.getMaxFrame() + deltaX, 
 						   curveBounds.getMinValue() + deltaY, curveBounds.getMaxValue() + deltaY);
 		}
+		
+		private boolean isPanClick(MouseEvent e)
+		{
+			return e.getButton() == MouseEvent.BUTTON2;
+		}
+		
+		private void updateLastMousePoint(ParameterCurvePoint curvePoint)
+		{
+			lastMousePoint = curvePoint;
+		}
+		
+		private void repaintCurve()
+		{
+			updateKeyNodeMarkers();
+			repaint();
+		}
 	}
 	
 	/**
@@ -520,7 +582,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		@Override
 		public void mousePressed(MouseEvent e)
 		{
-			if (!isLeftClick(e))
+			if (!isNodeDragClick(e))
 			{
 				return;
 			}
@@ -545,7 +607,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		@Override
 		public void mouseReleased(MouseEvent e)
 		{
-			if (!isLeftClick(e))
+			if (!isNodeDragClick(e))
 			{
 				return;
 			}
@@ -577,7 +639,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			lastSelected = null;
 		}
 		
-		private boolean isLeftClick(MouseEvent e)
+		private boolean isNodeDragClick(MouseEvent e)
 		{
 			return e.getButton() == MouseEvent.BUTTON1;
 		}
