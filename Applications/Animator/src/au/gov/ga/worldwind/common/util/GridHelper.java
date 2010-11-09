@@ -9,43 +9,24 @@ public class GridHelper
 {
 	private static final Range<Integer> DEFAULT_GRID_SIZE = new Range<Integer>(5, 20);
 	
-	
 	/** A container class that holds calculated grid properties */
 	public static class GridProperties
 	{
-		/** The location of the first grid line to draw, in pixels */
-		private int firstGridLine;
-
 		/** The value of the first grid line */
 		private double firstGridLineValue;
-		
-		/** The grid spacing to use, in pixels */
-		private int gridSpacing;
 		
 		/** The value change per grid line */
 		private double valueChangePerGridLine;
 
-		public GridProperties(int firstGridLine, int gridSpacing, double firstGridLineValue, double valueChangePerGridLine)
+		public GridProperties(double firstGridLineValue, double valueChangePerGridLine)
 		{
-			this.firstGridLine = firstGridLine;
 			this.firstGridLineValue = firstGridLineValue;
-			this.gridSpacing = gridSpacing;
 			this.valueChangePerGridLine = valueChangePerGridLine;
-		}
-
-		public int getFirstGridLineLocation()
-		{
-			return firstGridLine;
 		}
 
 		public double getFirstGridLineValue()
 		{
 			return firstGridLineValue;
-		}
-		
-		public int getGridSpacing()
-		{
-			return gridSpacing;
 		}
 
 		public double getValueChangePerGridLine()
@@ -56,7 +37,7 @@ public class GridHelper
 		@Override
 		public String toString()
 		{
-			return "Grid[Start: " + firstGridLine + ", Spacing: " + gridSpacing + ", Value change: " + valueChangePerGridLine + "]"; 
+			return "Grid[Start: " + firstGridLineValue + ", Value change: " + valueChangePerGridLine + "]"; 
 		}
 	}
 	
@@ -128,23 +109,11 @@ public class GridHelper
 				valueChangePerGridLine *= 0.1;
 			}
 			
-			// Find the first multiple of the grid step size
-			double valuePerPixel = valueDelta / numPixels;
-			double minRemainder = Double.MAX_VALUE;
-			int firstGridLine = 0;
-			double firstGridLineValue = 0;
-			for (int i = 0; i < pixelsPerGridLine; i++)
-			{
-				double valueAtPixel = (valuePerPixel * i) + valueRange.getMinValue();
-				double remainder = valueAtPixel % valueChangePerGridLine;
-				if (remainder < minRemainder)
-				{
-					firstGridLine = i;
-					firstGridLineValue = valueAtPixel;
-					minRemainder = remainder;
-				}
-			}
-			return new GridProperties(firstGridLine, pixelsPerGridLine, firstGridLineValue, valueChangePerGridLine);
+			double start = valueRange.getMinValue();
+			double floor = Math.floor(start / valueChangePerGridLine);
+			double firstGridLineValue = valueChangePerGridLine * floor;
+			
+			return new GridProperties(firstGridLineValue, valueChangePerGridLine);
 		}
 		
 	}

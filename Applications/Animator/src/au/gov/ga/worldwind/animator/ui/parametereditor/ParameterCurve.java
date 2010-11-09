@@ -228,18 +228,17 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			recalculateAxisGrid();
 		}
 		
-		int gridY = getHeight() - axisProperties.getFirstGridLineLocation();
-		int numDecimalPlaces = calculateNumDecimalPlacesForGridLabel();
 		double labelValue = axisProperties.getFirstGridLineValue();
-		while (gridY > 0)
+		int numDecimalPlaces = calculateNumDecimalPlacesForGridLabel();
+		while (labelValue <= curveBounds.getMaxValue())
 		{
+			int gridY = (int)getScreenY(labelValue);
 			g2.setColor(LAFConstants.getCurveEditorGridColor().darker());
 			g2.drawString(getGridLabel(labelValue, numDecimalPlaces), 5, gridY);
 			
 			g2.setColor(LAFConstants.getCurveEditorGridColor());
 			g2.draw(new Line2D.Double(0, gridY, getWidth(), gridY));
 			
-			gridY -= axisProperties.getGridSpacing();
 			labelValue += axisProperties.getValueChangePerGridLine();
 		}
 	}

@@ -23,8 +23,6 @@ public class GridHelperTest
 													 .build();
 		
 		assertNotNull(grid);
-		assertEquals(0, grid.getFirstGridLineLocation());
-		assertEquals(10, grid.getGridSpacing());
 		assertEquals(10, grid.getValueChangePerGridLine(), ALLOWABLE_ERROR);
 	}
 	
@@ -37,8 +35,6 @@ public class GridHelperTest
 													 .build();
 		
 		assertNotNull(grid);
-		assertEquals(0, grid.getFirstGridLineLocation());
-		assertEquals(8, grid.getGridSpacing());
 		assertEquals(0.1, grid.getValueChangePerGridLine(), ALLOWABLE_ERROR);
 	}
 	
@@ -51,8 +47,6 @@ public class GridHelperTest
 													 .build();
 		
 		assertNotNull(grid);
-		assertEquals(5, grid.getFirstGridLineLocation());
-		assertEquals(8, grid.getGridSpacing());
 		assertEquals(0.1, grid.getValueChangePerGridLine(), ALLOWABLE_ERROR);
 	}
 	
@@ -65,8 +59,6 @@ public class GridHelperTest
 													 .build();
 		
 		assertNotNull(grid);
-		assertEquals(0, grid.getFirstGridLineLocation());
-		assertEquals(21, grid.getGridSpacing());
 		assertEquals(2500, grid.getValueChangePerGridLine(), ALLOWABLE_ERROR);
 	}
 	
