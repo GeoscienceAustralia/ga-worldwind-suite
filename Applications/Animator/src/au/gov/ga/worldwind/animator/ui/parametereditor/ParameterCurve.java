@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -41,6 +42,11 @@ import au.gov.ga.worldwind.common.util.GridHelper.GridProperties;
  */
 public class ParameterCurve extends JPanel implements ParameterCurveModelListener
 {
+	public static interface ParameterCurveListener
+	{
+		void curveBoundsChanged(ParameterCurve source, ParameterCurveBounds newBounds);
+	}
+	
 	private static final long serialVersionUID = 20101102L;
 
 	private static final RenderingHints RENDER_HINT = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -70,11 +76,14 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	// Holds the calculated key node markers for the curve
 	private List<KeyNodeMarker> keyNodeMarkers = new ArrayList<KeyNodeMarker>();
 	private ReadWriteLock keyNodeMarkersLock = new ReentrantReadWriteLock(true);
+	private AtomicBoolean markersDirty = new AtomicBoolean(true);
 	
 	private NodeDragListener nodeMouseListener = new NodeDragListener();
 	private PanZoomListener panZoomListener = new PanZoomListener();
 
 	private GridProperties axisProperties;
+	
+	private List<ParameterCurveListener> curveListeners = new ArrayList<ParameterCurveListener>(); 
 	
 	public ParameterCurve(Parameter parameter)
 	{
@@ -112,7 +121,16 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	public void destroy()
 	{
 		model.destroy();
+		this.curveListeners.clear();
 		this.isDestroyed = true;
+	}
+	
+	public void addCurveListener(ParameterCurveListener curveListener)
+	{
+		if (!curveListeners.contains(curveListener))
+		{
+			curveListeners.add(curveListener);
+		}
 	}
 	
 	/**
@@ -126,6 +144,8 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			calculateFittingBounds();
 		}
 		axisProperties = null;
+		markersDirty.set(true);
+		notifyCurveBoundsChanged();
 	}
 
 	/**
@@ -176,6 +196,19 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		{
 			boundsLock.unlock();
 		}
+	}
+	
+	private void notifyCurveBoundsChanged()
+	{
+		for (int i = curveListeners.size() - 1; i>= 0; i--)
+		{
+			curveListeners.get(i).curveBoundsChanged(this, curveBounds);
+		}
+	}
+	
+	public ParameterCurveBounds getCurveBounds()
+	{
+		return curveBounds;
 	}
 	
 	@Override
@@ -309,7 +342,12 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	private void paintParameterCurve(Graphics2D g2)
 	{
 		g2.setColor(Color.GREEN); // TODO: Make dynamic
-		for (int frame = (int)curveBounds.getMinFrame(); frame < curveBounds.getMaxFrame(); frame++)
+		
+		// Draw the curve within [0, framecount], cropped by the curve bounds
+		int startFrame = curveBounds.getMinFrame() < 0 ? 0 : (int)curveBounds.getMinFrame();
+		int lastFrame = curveBounds.getMaxFrame() > model.getAnimationFrameCount() ? model.getAnimationFrameCount() : (int)curveBounds.getMaxFrame();
+		
+		for (int frame = startFrame; frame <= lastFrame; frame++)
 		{
 			double x1 = getScreenX(frame);
 			double x2 = getScreenX(frame + 1);
@@ -317,6 +355,22 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			double y2 = getScreenY(model.getValueAtFrame(frame + 1));
 			
 			g2.draw(new Line2D.Double(x1, y1, x2, y2));
+		}
+		
+		// Draw the parts of the curve outside [0, framecount] (if any) as a single line
+		if (curveBounds.getMinFrame() < 0)
+		{
+			double x1 = 0;
+			double x2 = getScreenX(0);
+			double y = getScreenY(model.getValueAtFrame(0));
+			g2.draw(new Line2D.Double(x1, y, x2, y));
+		}
+		if (curveBounds.getMaxFrame() > model.getAnimationFrameCount())
+		{
+			double x1 = getScreenX(model.getAnimationFrameCount());
+			double x2 = getWidth();
+			double y = getScreenY(model.getValueAtFrame(model.getAnimationFrameCount()));
+			g2.draw(new Line2D.Double(x1, y, x2, y));
 		}
 	}
 
@@ -327,7 +381,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	{
 		try
 		{
-			if (keyNodeMarkers.isEmpty())
+			if (keyNodeMarkers.isEmpty() || markersDirty.get())
 			{
 				updateKeyNodeMarkers();
 			}
@@ -447,6 +501,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			}
 			keyNodeMarkers.clear();
 			keyNodeMarkers.addAll(tmpMarkers);
+			markersDirty.set(false);
 		}
 		catch (Exception e)
 		{
@@ -899,4 +954,5 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			return curveNode.hashCode();
 		}
 	}
+
 }

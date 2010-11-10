@@ -88,7 +88,7 @@ public class GridHelper
 		private GridProperties calculateGridProperties()
 		{
 			int pixelsPerGridLine = Integer.MAX_VALUE;
-			double valueChangePerGridLine = Math.pow(10, (int)Math.log10(valueRange.getMaxValue()));
+			double valueChangePerGridLine = Math.pow(10, (int)Math.log10(valueRange.getMaxValue())+1);
 			
 			double valueDelta = valueRange.getMaxValue() - valueRange.getMinValue();
 			

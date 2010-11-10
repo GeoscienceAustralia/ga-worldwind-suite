@@ -119,4 +119,47 @@ public class Range<C extends Comparable<C>>
 		}
 		return compareValue < 0;
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == this)
+		{
+			return true;
+		}
+		
+		Range<C> other = null;
+		try
+		{
+			other = (Range<C>)obj;
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+		
+		return this.includeMax == other.includeMax && this.includeMin == other.includeMin && nullSafeEquals(minValue, other.minValue) && nullSafeEquals(maxValue, other.maxValue);
+	}
+	
+	private boolean nullSafeEquals(Object o1, Object o2)
+	{
+		if (o1 == null && o2 == null)
+		{
+			return true;
+		}
+		
+		if (o1 != null && o2 != null)
+		{
+			return o1.equals(o2);
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return (minValue == null ? minValue.hashCode() : 31) + (maxValue == null ? maxValue.hashCode() : 131);
+	}
 }
