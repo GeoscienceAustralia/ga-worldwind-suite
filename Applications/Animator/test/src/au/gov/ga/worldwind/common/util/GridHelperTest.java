@@ -59,7 +59,7 @@ public class GridHelperTest
 													 .build();
 		
 		assertNotNull(grid);
-		assertEquals(2500, grid.getValueChangePerGridLine(), ALLOWABLE_ERROR);
+		assertEquals(2000, grid.getValueChangePerGridLine(), ALLOWABLE_ERROR);
 	}
 	
 }
