@@ -34,7 +34,6 @@ import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.util.GridHelper;
 import au.gov.ga.worldwind.common.util.GridHelper.GridProperties;
-import au.gov.ga.worldwind.common.util.Range;
 
 /**
  * A class that draws the curve for a single parameter
@@ -47,7 +46,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new DaemonThreadFactory("Parameter Curve Updater"));
 	
 	private static final int NODE_SHAPE_SIZE = 8; // Pixels
-	private static final Range<Integer> GRID_SIZE = new Range<Integer>(20, 40); // Pixels
+	private static final int GRID_SIZE = 40; // Pixels
 	private static final double ZOOM_PERCENT_PER_WHEEL_CLICK = 0.1; // 10% zoom per wheel click
 	
 	/** The model backing this component */
@@ -94,7 +93,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		model.addListener(this);
 		
 		setOpaque(true);
-		setBackground(LAFConstants.getCurveEditorBackgroundColor());
+		setBackground(LAFConstants.getCurveEditorInactiveBackgroundColor());
 		
 		addMouseListener(nodeMouseListener);
 		addMouseMotionListener(nodeMouseListener);
@@ -205,6 +204,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 				paintAxisLines(g2);
 			}
 			
+			paintActiveArea(g2);
 			paintParameterCurve(g2);
 			paintKeyFrameNodes(g2);
 		}
@@ -215,6 +215,9 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		}
 	}
 	
+	/**
+	 * Paint the axis grid lines for the 'value' axis
+	 */
 	private void paintAxisLines(Graphics2D g2)
 	{
 		// Don't generate axis lines if there is nothing to plot
@@ -229,12 +232,11 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		}
 		
 		double labelValue = axisProperties.getFirstGridLineValue();
-		int numDecimalPlaces = calculateNumDecimalPlacesForGridLabel();
 		while (labelValue <= curveBounds.getMaxValue())
 		{
 			int gridY = (int)getScreenY(labelValue);
 			g2.setColor(LAFConstants.getCurveEditorGridColor().darker());
-			g2.drawString(getGridLabel(labelValue, numDecimalPlaces), 5, gridY);
+			g2.drawString(getGridLabel(labelValue, axisProperties.getNumberDecimalPlaces()), 5, gridY);
 			
 			g2.setColor(LAFConstants.getCurveEditorGridColor());
 			g2.draw(new Line2D.Double(0, gridY, getWidth(), gridY));
@@ -243,19 +245,6 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		}
 	}
 
-	private int calculateNumDecimalPlacesForGridLabel()
-	{
-		int numDecimalPlaces = 0;
-		
-		String strideString = String.valueOf(axisProperties.getValueChangePerGridLine());
-		if (strideString.indexOf('.') > -1)
-		{
-			numDecimalPlaces = strideString.substring(strideString.indexOf('.')+1).length();
-		}
-		
-		return numDecimalPlaces;
-	}
-	
 	private String getGridLabel(double labelValue, int numDecimalPlaces)
 	{
 		String formatString = "0";
@@ -279,6 +268,25 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		axisProperties = GridHelper.createGrid().ofSize(GRID_SIZE).toFitIn(getHeight()).forValueRange(curveBounds.getValueRange()).build();
 	}
 	
+	/**
+	 * Paint the active area in a different colour to distinguish what is 'in' the animation.
+	 */
+	private void paintActiveArea(Graphics2D g2)
+	{
+		g2.setColor(LAFConstants.getCurveEditorActiveBackgroundColor());
+		
+		double x = getScreenX(curveBounds.getMinFrame());
+		double y = 0;
+		double h = getHeight();
+		double w = getScreenX(curveBounds.getMaxFrame()) - x;
+		
+		g2.draw(new Rectangle2D.Double(x, y, w, h));
+		
+	}
+
+	/**
+	 * Paint the curve itself using the backing model
+	 */
 	private void paintParameterCurve(Graphics2D g2)
 	{
 		g2.setColor(Color.GREEN); // TODO: Make dynamic
@@ -293,6 +301,9 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		}
 	}
 
+	/**
+	 * Paint the key frame node markers using the local list of markers
+	 */
 	private void paintKeyFrameNodes(Graphics2D g2)
 	{
 		try

@@ -17,7 +17,7 @@ public class GridHelperTest
 	@Test
 	public void testSimpleCase()
 	{
-		GridProperties grid = GridHelper.createGrid().ofSize(new Range<Integer>(5, 10))
+		GridProperties grid = GridHelper.createGrid().ofSize(10)
 													 .toFitIn(100)
 													 .forValueRange(new Range<Double>(0d, 100d))
 													 .build();
@@ -29,7 +29,7 @@ public class GridHelperTest
 	@Test
 	public void testSmallRange()
 	{
-		GridProperties grid = GridHelper.createGrid().ofSize(new Range<Integer>(5, 10))
+		GridProperties grid = GridHelper.createGrid().ofSize(10)
 													 .toFitIn(100)
 													 .forValueRange(new Range<Double>(0d, 1.2d))
 													 .build();
@@ -41,7 +41,7 @@ public class GridHelperTest
 	@Test
 	public void testSmallRangeWithOffset()
 	{
-		GridProperties grid = GridHelper.createGrid().ofSize(new Range<Integer>(5, 10))
+		GridProperties grid = GridHelper.createGrid().ofSize(10)
 													 .toFitIn(100)
 													 .forValueRange(new Range<Double>(0.05d, 1.2d))
 													 .build();
@@ -53,7 +53,7 @@ public class GridHelperTest
 	@Test
 	public void testLargeRange()
 	{
-		GridProperties grid = GridHelper.createGrid().ofSize(new Range<Integer>(20, 40))
+		GridProperties grid = GridHelper.createGrid().ofSize(40)
 													 .toFitIn(100)
 													 .forValueRange(new Range<Double>(100d, 12000d))
 													 .build();

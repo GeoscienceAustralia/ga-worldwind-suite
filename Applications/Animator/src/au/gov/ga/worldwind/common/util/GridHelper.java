@@ -7,7 +7,7 @@ package au.gov.ga.worldwind.common.util;
  */
 public class GridHelper
 {
-	private static final Range<Integer> DEFAULT_GRID_SIZE = new Range<Integer>(5, 20);
+	private static final int DEFAULT_GRID_SIZE = 20;
 	
 	/** A container class that holds calculated grid properties */
 	public static class GridProperties
@@ -17,11 +17,15 @@ public class GridHelper
 		
 		/** The value change per grid line */
 		private double valueChangePerGridLine;
+		
+		/** The number of decimal places the value change is accurate to */
+		private int numberDecimalPlaces;
 
-		public GridProperties(double firstGridLineValue, double valueChangePerGridLine)
+		public GridProperties(double firstGridLineValue, double valueChangePerGridLine, int numberOfDecimalPlaces)
 		{
 			this.firstGridLineValue = firstGridLineValue;
 			this.valueChangePerGridLine = valueChangePerGridLine;
+			this.numberDecimalPlaces = numberOfDecimalPlaces;
 		}
 
 		public double getFirstGridLineValue()
@@ -34,23 +38,28 @@ public class GridHelper
 			return valueChangePerGridLine;
 		}
 		
+		public int getNumberDecimalPlaces()
+		{
+			return numberDecimalPlaces;
+		}
+		
 		@Override
 		public String toString()
 		{
-			return "Grid[Start: " + firstGridLineValue + ", Value change: " + valueChangePerGridLine + "]"; 
+			return "Grid[Start: " + firstGridLineValue + ", Value change: " + valueChangePerGridLine + ", Number decimal places: " + numberDecimalPlaces + "]"; 
 		}
 	}
 	
 	/** A builder class to use for building grids */
 	public static class GridBuilder
 	{
-		private Range<Integer> gridSize = DEFAULT_GRID_SIZE;
+		private int gridSize = DEFAULT_GRID_SIZE;
 		private Integer numPixels;
 		private Range<Double> valueRange;
 		
-		public GridBuilder ofSize(Range<Integer> gridSize)
+		public GridBuilder ofSize(int maxGridSize)
 		{
-			this.gridSize = gridSize;
+			this.gridSize = maxGridSize;
 			return this;
 		}
 		
@@ -68,7 +77,7 @@ public class GridHelper
 		
 		public GridProperties build()
 		{
-			if (gridSize == null || numPixels == null || valueRange == null)
+			if (numPixels == null || valueRange == null)
 			{
 				throw new IllegalStateException("Not enough information provided to build a grid. Please use the builder methods to provide required information");
 			}
@@ -78,42 +87,58 @@ public class GridHelper
 
 		private GridProperties calculateGridProperties()
 		{
-			int pixelsPerGridLine = -1;
+			int pixelsPerGridLine = Integer.MAX_VALUE;
 			double valueChangePerGridLine = Math.pow(10, (int)Math.log10(valueRange.getMaxValue()));
 			
 			double valueDelta = valueRange.getMaxValue() - valueRange.getMinValue();
 			
-			// Prefer 1/2s, then 1/4s, then 1/5s
-			double[] dividers = new double[]{1, 0.5, 0.75, 0.25, 0.8, 0.6, 0.4, 0.2};
+			double[] dividers = new double[]{1, 0.5, 0.2};
+			
+			int numDecimalPlaces = 0;
 			
 			// Incrementally decrease the value change until it falls within the grid size
-			while (!gridSize.contains(pixelsPerGridLine))
+			while (pixelsPerGridLine > gridSize)
 			{
 				for (double d : dividers)
 				{
 					double candidateValueChange = valueChangePerGridLine * d;
 					
+					// Adjust for the <1 dividers
+					if (d < 1 && candidateValueChange < 1)
+					{
+						numDecimalPlaces++;
+					}
+					
 					pixelsPerGridLine = (int)((numPixels / valueDelta) * candidateValueChange);
 					
-					if (gridSize.contains(pixelsPerGridLine))
+					if (pixelsPerGridLine <= gridSize)
 					{
 						valueChangePerGridLine = candidateValueChange;
 						break;
 					}
+					
+					if (d < 1 && candidateValueChange < 1)
+					{
+						numDecimalPlaces--;
+					}
 				}
-				if (gridSize.contains(pixelsPerGridLine))
+				if (pixelsPerGridLine <= gridSize)
 				{
 					break;
 				}
 				
 				valueChangePerGridLine *= 0.1;
+				if (valueChangePerGridLine < 1)
+				{
+					numDecimalPlaces++;
+				}
 			}
 			
 			double start = valueRange.getMinValue();
 			double floor = Math.floor(start / valueChangePerGridLine);
 			double firstGridLineValue = valueChangePerGridLine * floor;
 			
-			return new GridProperties(firstGridLineValue, valueChangePerGridLine);
+			return new GridProperties(firstGridLineValue, valueChangePerGridLine, numDecimalPlaces);
 		}
 		
 	}
