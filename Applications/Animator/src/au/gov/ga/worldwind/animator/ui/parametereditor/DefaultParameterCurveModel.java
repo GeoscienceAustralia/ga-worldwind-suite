@@ -60,6 +60,12 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 		new CurveUpdateTask().run();
 	}
 
+	@Override
+	public String getParameterLabel()
+	{
+		return parameter.getName();
+	}
+	
 	/**
 	 * Destroy's this curve. Once called, no further updates will take place for the curve.
 	 */

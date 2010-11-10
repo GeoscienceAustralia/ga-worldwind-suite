@@ -55,6 +55,11 @@ public interface ParameterCurveModel
 	int getAnimationFrameCount();
 	
 	/**
+	 * @return The label to use for the parameter this model is reflecting
+	 */
+	String getParameterLabel();
+	
+	/**
 	 * Add a model listener to this model
 	 */
 	void addListener(ParameterCurveModelListener listener);

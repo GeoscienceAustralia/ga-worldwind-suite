@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.animator.ui.parametereditor;
 
 import java.awt.Color;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -204,6 +205,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			if (showAxis)
 			{
 				paintAxisLines(g2);
+				paintParameterLabel(g2);
 			}
 			
 			paintParameterCurve(g2);
@@ -267,6 +269,20 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 			return;
 		}
 		axisProperties = GridHelper.createGrid().ofSize(GRID_SIZE).toFitIn(getHeight()).forValueRange(curveBounds.getValueRange()).build();
+	}
+	
+	/**
+	 * Paint the parameter name in the top-right corner
+	 */
+	private void paintParameterLabel(Graphics2D g2)
+	{
+		String parameterLabel = model.getParameterLabel();
+		
+		FontMetrics fm = g2.getFontMetrics();
+		Rectangle2D stringBounds = fm.getStringBounds(parameterLabel, g2);
+		
+		g2.setColor(LAFConstants.getCurveEditorGridColor().darker());
+		g2.drawString(parameterLabel, (int)(getWidth() - stringBounds.getWidth()) - 10, (int)(stringBounds.getHeight() + 1));
 	}
 	
 	/**
