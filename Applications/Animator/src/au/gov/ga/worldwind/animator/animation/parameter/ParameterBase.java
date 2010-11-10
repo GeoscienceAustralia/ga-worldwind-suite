@@ -324,7 +324,8 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 		
 	}
 	
-	protected Animation getAnimation()
+	@Override
+	public Animation getAnimation()
 	{
 		return animation;
 	}

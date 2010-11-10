@@ -35,7 +35,7 @@ public class LAFConstants
 	private static final Color CURVE_EDITOR_ACTIVE_BACKGROUND_COLOR = Color.WHITE;
 	public static Color getCurveEditorActiveBackgroundColor() { return CURVE_EDITOR_ACTIVE_BACKGROUND_COLOR; }
 	
-	private static final Color CURVE_EDITOR_INACTIVE_BACKGROUND_COLOR = new Color(250, 250, 250);
+	private static final Color CURVE_EDITOR_INACTIVE_BACKGROUND_COLOR = new Color(250, 250, 255);
 	public static Color getCurveEditorInactiveBackgroundColor() { return CURVE_EDITOR_INACTIVE_BACKGROUND_COLOR; }
 	
 	private static final Color CURVE_EDITOR_GRID_COLOR = new Color(240, 240, 240);

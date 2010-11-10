@@ -50,6 +50,11 @@ public interface ParameterCurveModel
 	int getMaxFrame();
 	
 	/**
+	 * @return The framecount of the animation the parameter this model is reflecting
+	 */
+	int getAnimationFrameCount();
+	
+	/**
 	 * Add a model listener to this model
 	 */
 	void addListener(ParameterCurveModelListener listener);

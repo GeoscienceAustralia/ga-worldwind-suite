@@ -199,12 +199,13 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 				calculateFittingBounds();
 			}
 			
+			paintActiveArea(g2);
+			
 			if (showAxis)
 			{
 				paintAxisLines(g2);
 			}
 			
-			paintActiveArea(g2);
 			paintParameterCurve(g2);
 			paintKeyFrameNodes(g2);
 		}
@@ -273,14 +274,16 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	 */
 	private void paintActiveArea(Graphics2D g2)
 	{
-		g2.setColor(LAFConstants.getCurveEditorActiveBackgroundColor());
-		
-		double x = getScreenX(curveBounds.getMinFrame());
+		double x = getScreenX(0);
 		double y = 0;
 		double h = getHeight();
-		double w = getScreenX(curveBounds.getMaxFrame()) - x;
+		double w = getScreenX(model.getAnimationFrameCount()) - x;
 		
-		g2.draw(new Rectangle2D.Double(x, y, w, h));
+		Rectangle2D.Double activeAreaRectangle = new Rectangle2D.Double(x, y, w, h);
+		
+		g2.setColor(LAFConstants.getCurveEditorActiveBackgroundColor());
+		g2.draw(activeAreaRectangle);
+		g2.fill(activeAreaRectangle);
 		
 	}
 

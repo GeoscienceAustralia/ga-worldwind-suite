@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
+import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
@@ -28,6 +29,12 @@ import au.gov.ga.worldwind.animator.util.Nameable;
 public interface Parameter extends AnimationObject, Serializable, Nameable, XmlSerializable<Parameter>,
 		AnimationEventListener, Changeable, Enableable, Armable
 {
+	
+	/**
+	 * @return The animation this parameter is associated with
+	 */
+	Animation getAnimation();
+	
 	/**
 	 * Get the current value of this {@link Parameter} in the current
 	 * {@link AnimationContext}.

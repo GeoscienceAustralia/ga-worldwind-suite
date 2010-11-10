@@ -134,6 +134,11 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 		return curvePointsFrontBuffer.lastKey();
 	}
 	
+	@Override
+	public int getAnimationFrameCount()
+	{
+		return parameter.getAnimation().getFrameCount();
+	}
 	
 	@Override
 	public void receiveAnimationEvent(AnimationEvent event)
