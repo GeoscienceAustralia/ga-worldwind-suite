@@ -561,6 +561,10 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		if (existingFrame != null)
 		{
 			existingFrame.addParameterValues(keyFrame.getParameterValues());
+			for (ParameterValue pv : keyFrame.getParameterValues())
+			{
+				pv.removeChangeListener(keyFrame);
+			}
 		}
 		else
 		{

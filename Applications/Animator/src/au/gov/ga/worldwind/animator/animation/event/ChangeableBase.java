@@ -32,6 +32,10 @@ public abstract class ChangeableBase implements Changeable
 		listenersLock.writeLock().lock();
 		try
 		{
+			if (changeListeners.contains(changeListener))
+			{
+				return;
+			}
 			this.changeListeners.add(changeListener);
 		}
 		finally
