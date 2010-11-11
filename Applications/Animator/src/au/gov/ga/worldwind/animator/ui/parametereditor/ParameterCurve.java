@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.animator.ui.parametereditor;
 
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.*;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -7,6 +10,8 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -28,12 +33,14 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.LAFConstants;
 import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterCurveModel.ParameterCurveModelListener;
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.util.GridHelper;
 import au.gov.ga.worldwind.common.util.GridHelper.GridProperties;
 
@@ -79,13 +86,17 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	private ReadWriteLock keyNodeMarkersLock = new ReentrantReadWriteLock(true);
 	private AtomicBoolean markersDirty = new AtomicBoolean(true);
 	
+	// Listeners used to interact with the curve
 	private NodeDragListener nodeMouseListener = new NodeDragListener();
 	private PanZoomListener panZoomListener = new PanZoomListener();
 	private MouseMoveListener mouseMoveListener = new MouseMoveListener();
+	private PopupMenuListener popupListener = new PopupMenuListener();
 	
 	private GridProperties axisProperties;
 	
 	private List<ParameterCurveListener> curveListeners = new ArrayList<ParameterCurveListener>(); 
+	
+	private JPopupMenu popup;
 	
 	public ParameterCurve(Parameter parameter)
 	{
@@ -117,6 +128,13 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		addMouseMotionListener(mouseMoveListener);
 		
 		addComponentListener(new ComponentListener());
+		
+		addMouseListener(popupListener);
+		
+		popup = new JPopupMenu();
+		popupListener.getConvertLockedBezierAction().addToPopupMenu(popup);
+		popupListener.getConvertUnlockedBezierAction().addToPopupMenu(popup);
+		popupListener.getConvertLinearAction().addToPopupMenu(popup);
 	}
 	
 	/**
@@ -770,6 +788,10 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		}
 	}
 	
+	/**
+	 * A mouse listener that triggers a repaint on mouse move/drag 
+	 * (ensures the current mouse / current frame lines are redrawn appropriately)
+	 */
 	private class MouseMoveListener extends MouseAdapter
 	{
 		@Override
@@ -782,6 +804,110 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		public void mouseDragged(MouseEvent e)
 		{
 			getParent().repaint();
+		}
+	}
+	
+	/**
+	 * A mouse listener that triggers the popup menu on a selected node 
+	 */
+	private class PopupMenuListener extends MouseAdapter
+	{
+		private SelectableAction convertLockedBezierAction;
+		private SelectableAction convertUnlockedBezierAction;
+		private SelectableAction convertLinearAction;
+		
+		private KeyNodeMarker selectedMarker;
+		
+		public PopupMenuListener()
+		{
+			convertLockedBezierAction = new SelectableAction(getMessage(getParameterEditorLockedBezierMenuLabelKey()), null, true);
+			convertLockedBezierAction.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					selectedMarker.makeLockedBezier();
+				}
+			});
+			
+			convertUnlockedBezierAction = new SelectableAction(getMessage(getParameterEditorUnlockedBezierMenuLabelKey()), null, true);
+			convertUnlockedBezierAction.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					selectedMarker.makeUnlockedBezier();
+				}
+			});
+			
+			convertLinearAction = new SelectableAction(getMessage(getParameterEditorLinearMenuLabelKey()), null, true);
+			convertLinearAction.addActionListener(new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					selectedMarker.makeLinear();
+				}
+			});
+		}
+		
+		@Override
+		public void mousePressed(MouseEvent e)
+		{
+			maybeShowPopup(e);
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e)
+		{
+			maybeShowPopup(e);
+		}
+
+		private void maybeShowPopup(MouseEvent e)
+		{
+			if (!e.isPopupTrigger())
+			{
+				return;
+			}
+			
+			selectedMarker = getKeyNodeMarker(e.getPoint());
+			if (selectedMarker == null)
+			{
+				return;
+			}
+			
+			updatePopupActions();
+			
+			showPopupMenu(e.getX(), e.getY());
+		}
+
+		private void updatePopupActions()
+		{
+			convertLockedBezierAction.setSelected(selectedMarker.curveNode.isBezier() && selectedMarker.curveNode.isLocked());
+			convertLockedBezierAction.setEnabled(!convertLockedBezierAction.isSelected());
+			
+			convertUnlockedBezierAction.setSelected(selectedMarker.curveNode.isBezier() && !selectedMarker.curveNode.isLocked());
+			convertUnlockedBezierAction.setEnabled(!convertUnlockedBezierAction.isSelected());
+			
+			convertLinearAction.setSelected(selectedMarker.curveNode.isLinear());
+			convertLinearAction.setEnabled(!convertLinearAction.isSelected());
+		}
+
+		private void showPopupMenu(int x, int y)
+		{
+			popup.show(ParameterCurve.this, x, y);
+		}
+		
+		public SelectableAction getConvertLockedBezierAction()
+		{
+			return convertLockedBezierAction;
+		}
+		
+		public SelectableAction getConvertUnlockedBezierAction()
+		{
+			return convertUnlockedBezierAction;
+		}
+		
+		public SelectableAction getConvertLinearAction()
+		{
+			return convertLinearAction;
 		}
 	}
 	
@@ -985,6 +1111,21 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		private boolean outHandleSelected()
 		{
 			return selection == KeyNodeHandleSelection.OUT;
+		}
+		
+		public void makeLinear()
+		{
+			curveNode.convertToLinear();
+		}
+		
+		public void makeLockedBezier()
+		{
+			curveNode.convertToLockedBezier();
+		}
+		
+		public void makeUnlockedBezier()
+		{
+			curveNode.convertToUnlockedBezier();
 		}
 		
 		@Override

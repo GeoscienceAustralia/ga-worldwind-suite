@@ -3,6 +3,8 @@ package au.gov.ga.worldwind.animator.animation.parameter;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.WWXML;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
@@ -35,6 +37,9 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	
 	/** The '<code>out</code>' control point value */
 	private BezierContolPoint out = new BezierContolPoint();
+	
+	/** Whether smoothing is being applied - inhibits locking behaviour etc. during smoothing */
+	private AtomicBoolean applyingSmoothing = new AtomicBoolean(false);
 	
 	/**
 	 * Constructor. Required for de-serialisation. Not for general use.
@@ -214,7 +219,18 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	@Override
 	public void setLocked(boolean locked)
 	{
+		if (this.locked == locked)
+		{
+			return;
+		}
+		
 		this.locked = locked;
+		if (locked)
+		{
+			lockOut();
+		}
+		
+		fireChangeEvent(locked);
 	}
 
 	/**
@@ -224,7 +240,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	 */
 	private void lockIn()
 	{
-		if (!out.hasValue()) 
+		if (!out.hasValue() || getOwner() == null || applyingSmoothing.get()) 
 		{
 			return;
 		}
@@ -251,7 +267,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	 */
 	private void lockOut()
 	{
-		if (!in.hasValue()) 
+		if (!in.hasValue() || getOwner() == null || applyingSmoothing.get()) 
 		{
 			return;
 		}
@@ -303,14 +319,10 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 			outValue = getValue() + m * xOut;
 		}
 		
-		// Set the values (bypass the locking as we have calculated what we need here)
-		boolean wasLocked = isLocked();
-		setLocked(false);
-		
+		applyingSmoothing.set(true);
 		setInValue(inValue);
 		setOutValue(outValue);
-		
-		setLocked(wasLocked);
+		applyingSmoothing.set(false);
 	}
 	
 	@Override

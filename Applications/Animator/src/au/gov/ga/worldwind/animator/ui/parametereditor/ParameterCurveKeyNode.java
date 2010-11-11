@@ -188,6 +188,30 @@ class ParameterCurveKeyNode
 		return (double)(outFrame - bezierValue.getFrame()) / (double)(nextValue.getFrame() - bezierValue.getFrame());
 	}
 
+	public void convertToLinear()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void convertToLockedBezier()
+	{
+		if (isBezier())
+		{
+			((BezierParameterValue)parameterValue).setLocked(true);
+		}
+		updateNode();
+	}
+
+	public void convertToUnlockedBezier()
+	{
+		if (isBezier())
+		{
+			((BezierParameterValue)parameterValue).setLocked(false);
+		}
+		updateNode();
+	}
+	
 	@Override
 	public String toString()
 	{

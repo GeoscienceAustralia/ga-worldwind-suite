@@ -125,5 +125,8 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getShowParameterEditorMenuLabelKey() { return "animator.gui.menu.showparametereditor.label"; }
 	public static String getStereoCameraMenuLabelKey() { return "animator.gui.menu.stereo.camera.label"; }
 	public static String getDynamicStereoMenuLabelKey() { return "animator.gui.menu.dynamic.stereo.label"; }
+	public static String getParameterEditorLockedBezierMenuLabelKey() { return "animator.gui.parametereditor.lockedbezier.label"; }
+	public static String getParameterEditorUnlockedBezierMenuLabelKey() { return "animator.gui.parametereditor.unlockedbezier.label"; }
+	public static String getParameterEditorLinearMenuLabelKey() { return "animator.gui.parametereditor.linear.label"; }
 	
 }
