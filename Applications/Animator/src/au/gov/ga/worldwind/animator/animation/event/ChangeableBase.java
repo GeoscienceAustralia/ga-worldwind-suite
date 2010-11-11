@@ -1,7 +1,10 @@
 package au.gov.ga.worldwind.animator.animation.event;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
 
@@ -16,10 +19,8 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
  */
 public abstract class ChangeableBase implements Changeable
 {
-	/**
-	 * The list of registered change listeners
-	 */
 	private List<AnimationEventListener> changeListeners = new ArrayList<AnimationEventListener>();
+	private ReadWriteLock listenersLock = new ReentrantReadWriteLock(true);
 
 	@Override
 	public void addChangeListener(AnimationEventListener changeListener)
@@ -28,7 +29,15 @@ public abstract class ChangeableBase implements Changeable
 		{
 			return;
 		}
-		this.changeListeners.add(changeListener);
+		listenersLock.writeLock().lock();
+		try
+		{
+			this.changeListeners.add(changeListener);
+		}
+		finally
+		{
+			listenersLock.writeLock().unlock();
+		}
 	}
 	
 	@Override
@@ -38,12 +47,25 @@ public abstract class ChangeableBase implements Changeable
 		{
 			return;
 		}
-		this.changeListeners.remove(changeListener);
+		listenersLock.writeLock().lock();
+		try
+		{
+			this.changeListeners.remove(changeListener);
+		}
+		finally
+		{
+			listenersLock.writeLock().unlock();
+		}
 	}
 	
 	@Override
 	public void copyChangeListenersTo(Changeable changeable)
 	{
+		if (changeable == null || changeable == this)
+		{
+			return;
+		}
+		
 		for(AnimationEventListener listener : this.changeListeners)
 		{
 			changeable.addChangeListener(listener);
@@ -53,7 +75,15 @@ public abstract class ChangeableBase implements Changeable
 	@Override
 	public void clearChangeListeners()
 	{
-		this.changeListeners.clear();
+		listenersLock.writeLock().lock();
+		try
+		{
+			this.changeListeners.clear();
+		}
+		finally
+		{
+			listenersLock.writeLock().unlock();
+		}
 	}
 	
 	/**
@@ -61,7 +91,15 @@ public abstract class ChangeableBase implements Changeable
 	 */
 	public List<AnimationEventListener> getChangeListeners()
 	{
-		return changeListeners;
+		listenersLock.readLock().lock();
+		try
+		{
+			return Collections.unmodifiableList(changeListeners);
+		}
+		finally
+		{
+			listenersLock.readLock().unlock();
+		}
 	}
 	
 	@Override
@@ -86,9 +124,17 @@ public abstract class ChangeableBase implements Changeable
 	public void fireEvent(Type type, Object value)
 	{
 		AnimationEvent event = createEvent(type, null, value);
-		for (int i = changeListeners.size() - 1; i >= 0; i--)
+		listenersLock.readLock().lock();
+		try
 		{
-			changeListeners.get(i).receiveAnimationEvent(event);
+			for (int i = changeListeners.size() - 1; i >= 0; i--)
+			{
+				changeListeners.get(i).receiveAnimationEvent(event);
+			}
+		}
+		finally
+		{
+			listenersLock.readLock().unlock();
 		}
 		
 	}

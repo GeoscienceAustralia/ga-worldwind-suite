@@ -85,7 +85,7 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 	 * @param outPercent The relative time percentage to use for the <code>out</code> control point
 	 * 
 	 */
-	public BasicBezierParameterValue(double value, int frame, Parameter owner, double inValue, double inPercent, double outValue, double outPercent)
+	public BasicBezierParameterValue(double value, int frame, Parameter owner, Double inValue, double inPercent, Double outValue, double outPercent)
 	{
 		super(value, frame, owner);
 		this.locked = false;
@@ -93,6 +93,19 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		this.in.setPercent(inPercent);
 		this.out.setValue(outValue);
 		this.out.setPercent(outPercent);
+	}
+	
+	/**
+	 * Construct a new bezier parameter value.
+	 * <p/>
+	 * Allows <code>in</code> and <code>out</code> values to be specified. Default percentages will be used.
+	 */
+	public BasicBezierParameterValue(double value, int frame, Parameter owner, Double inValue, Double outValue)
+	{
+		super(value, frame, owner);
+		this.locked = false;
+		this.in.setValue(inValue);
+		this.out.setValue(outValue);
 	}
 	
 	/**

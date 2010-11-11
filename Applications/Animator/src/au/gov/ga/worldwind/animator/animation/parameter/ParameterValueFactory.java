@@ -10,6 +10,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
+import au.gov.ga.worldwind.animator.math.vector.Vector2;
 
 
 /**
@@ -27,6 +28,10 @@ public class ParameterValueFactory
 	
 	/** An instance of the {@link BasicBezierParameterValue} class to act as a factory for that class when de-serialising */
 	private static BasicBezierParameterValue BEZIER_VALUE_FACTORY = new BasicBezierParameterValue();
+
+	/** The default scaling to apply to generated bezier control points when generating from linear values */
+	private static final double DEFAULT_BEZIER_CONTROL_SCALE = 0.4;
+	
 	
 	/** Static factory class. No need to instantiate. */
 	private ParameterValueFactory(){};
@@ -85,6 +90,79 @@ public class ParameterValueFactory
 		}
 	}
 	
+	/**
+	 * Convert the provided parameter value to the given type, using sensible defaults if more information is required
+	 */
+	public static ParameterValue convertParameterValue(ParameterValue valueToConvert, ParameterValueType type)
+	{
+		if (valueToConvert == null || valueToConvert.getType() == type)
+		{
+			return valueToConvert;
+		}
+		
+		ParameterValue result = null;
+		
+		if (valueToConvert.getType() == ParameterValueType.BEZIER && type == ParameterValueType.LINEAR)
+		{
+			// Bezier -> Linear is easy, just ignore the bezier in/out values
+			result = new BasicParameterValue(valueToConvert.getValue(), valueToConvert.getFrame(), valueToConvert.getOwner());
+		}
+		else if (valueToConvert.getType() == ParameterValueType.LINEAR && type == ParameterValueType.BEZIER)
+		{
+			// Linear -> Bezier is a bit more tricky - use an unlocked bezier with handles pointing at adjacent values, as if it were linear
+			result = toBezierValue(valueToConvert);
+		}
+		
+		// Attach all of the listeners to the new value
+		result.clearChangeListeners();
+		valueToConvert.copyChangeListenersTo(result);
+		
+		// Don't know how to do any other conversion....
+		return result == null ? valueToConvert : result;
+	}
+	
+	/**
+	 * Convert the provided parameter value to a Bezier value.
+	 * <p/>
+	 * If is already a bezier value, won't change anything. Otherwise, will create an unlocked 'linear' bezier value
+	 * (i.e. a bezier value whose control points are setup to point to adjacent key frame values to mimic a linear point).
+	 */
+	private static ParameterValue toBezierValue(ParameterValue valueToConvert)
+	{
+		// If it already is a bezier value, don't need to do anything
+		if (valueToConvert.getType() == ParameterValueType.BEZIER)
+		{
+			return (BezierParameterValue)valueToConvert;
+		}
+		
+		// Otherwise, set the appropriate control point to point at the other value (mimic a linear point)
+		Vector2 thisPoint = new Vector2(valueToConvert.getFrame(), valueToConvert.getValue());
+		Double inValue = null;
+		Double outValue = null;
+		
+		// Set the 'in' handle appropriately, if there is a previous value
+		ParameterValue previousValue = valueToConvert.getOwner().getValueAtKeyFrameBeforeFrame(valueToConvert.getFrame());
+		if (previousValue != null)
+		{
+			Vector2 previousPoint = new Vector2(previousValue.getFrame(), previousValue.getValue());
+			Vector2 controlPoint = thisPoint.add((previousPoint.subtract(thisPoint)).mult(DEFAULT_BEZIER_CONTROL_SCALE));
+			
+			inValue = controlPoint.y;
+		}
+
+		// Set the 'out' handle appropriately, if there is a next value
+		ParameterValue nextValue = valueToConvert.getOwner().getValueAtKeyFrameAfterFrame(valueToConvert.getFrame());
+		if (nextValue != null)
+		{
+			Vector2 nextPoint = new Vector2(nextValue.getFrame(), nextValue.getValue());
+			Vector2 controlPoint = thisPoint.add((nextPoint.subtract(thisPoint)).mult(DEFAULT_BEZIER_CONTROL_SCALE));
+			
+			outValue = controlPoint.y;
+		}
+		
+		return new BasicBezierParameterValue(valueToConvert.getValue(), valueToConvert.getFrame(), valueToConvert.getOwner(), inValue, outValue);
+	}
+
 	/**
 	 * Create a parameter value from the provided XML element.
 	 * 

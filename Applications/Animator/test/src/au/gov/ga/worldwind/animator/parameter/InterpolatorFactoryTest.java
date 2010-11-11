@@ -45,8 +45,8 @@ public class InterpolatorFactoryTest
 	@Test
 	public void testGetInterpolatorTwoBezierValues()
 	{
-		ParameterValue startValue = new BasicBezierParameterValue(10.0, 0, owner, 8, 0.4, 12, 0.4);
-		ParameterValue endValue = new BasicBezierParameterValue(20.0, 10, owner, 22, 0.4, 18, 0.4);
+		ParameterValue startValue = new BasicBezierParameterValue(10.0, 0, owner, 8d, 0.4, 12d, 0.4);
+		ParameterValue endValue = new BasicBezierParameterValue(20.0, 10, owner, 22d, 0.4, 18d, 0.4);
 		
 		Interpolator<Vector2> result = InterpolatorFactory.getInterpolator(startValue, endValue);
 		

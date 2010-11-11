@@ -963,10 +963,21 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 				inHandle = createNodeShape(curveNode.getInPoint());
 				inValueJoiner = new Line2D.Double(getScreenPoint(curveNode.getInPoint()), getScreenPoint(curveNode.getValuePoint()));
 			}
+			else
+			{
+				inHandle = null;
+				inValueJoiner = null;
+			}
+			
 			if (curveNode.isBezier() && curveNode.getOutPoint() != null)
 			{
 				outHandle = createNodeShape(curveNode.getOutPoint());
 				valueOutJoiner = new Line2D.Double(getScreenPoint(curveNode.getOutPoint()), getScreenPoint(curveNode.getValuePoint()));
+			}
+			else
+			{
+				outHandle = null;
+				valueOutJoiner = null;
 			}
 		}
 		
@@ -1116,16 +1127,19 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		public void makeLinear()
 		{
 			curveNode.convertToLinear();
+			updateMarker(curveNode);
 		}
 		
 		public void makeLockedBezier()
 		{
 			curveNode.convertToLockedBezier();
+			updateMarker(curveNode);
 		}
 		
 		public void makeUnlockedBezier()
 		{
 			curveNode.convertToUnlockedBezier();
+			updateMarker(curveNode);
 		}
 		
 		@Override

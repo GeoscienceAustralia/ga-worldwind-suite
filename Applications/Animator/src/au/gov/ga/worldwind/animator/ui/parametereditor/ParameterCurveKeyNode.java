@@ -1,7 +1,9 @@
 package au.gov.ga.worldwind.animator.ui.parametereditor;
 
+import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueType;
 import au.gov.ga.worldwind.animator.util.Validate;
 
@@ -190,26 +192,43 @@ class ParameterCurveKeyNode
 
 	public void convertToLinear()
 	{
-		// TODO Auto-generated method stub
+		if (isLinear())
+		{
+			return;
+		}
 		
+		replaceParameterValue(ParameterValueFactory.convertParameterValue(parameterValue, ParameterValueType.LINEAR));
+		updateNode();
 	}
 
 	public void convertToLockedBezier()
 	{
-		if (isBezier())
+		if (!isBezier())
 		{
-			((BezierParameterValue)parameterValue).setLocked(true);
+			replaceParameterValue(ParameterValueFactory.convertParameterValue(parameterValue, ParameterValueType.BEZIER));
 		}
+		
+		((BezierParameterValue)parameterValue).setLocked(true);
 		updateNode();
 	}
 
 	public void convertToUnlockedBezier()
 	{
-		if (isBezier())
+		if (!isBezier())
 		{
-			((BezierParameterValue)parameterValue).setLocked(false);
+			replaceParameterValue(ParameterValueFactory.convertParameterValue(parameterValue, ParameterValueType.BEZIER));
 		}
+		
+		((BezierParameterValue)parameterValue).setLocked(false);
 		updateNode();
+	}
+	
+
+	private void replaceParameterValue(ParameterValue replacementValue)
+	{
+		KeyFrame keyFrame = replacementValue.getOwner().getAnimation().getKeyFrame(replacementValue.getFrame());
+		keyFrame.addParameterValue(replacementValue);
+		parameterValue = replacementValue;
 	}
 	
 	@Override

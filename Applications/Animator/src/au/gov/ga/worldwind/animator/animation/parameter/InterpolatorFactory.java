@@ -96,7 +96,6 @@ public class InterpolatorFactory
 	 * @param valueToConvert The value to convert
 	 * @param isStart Whether or not the value to convert is the start or end point on the interval. Used to determine whether to set 'in' or 'out' values.
 	 * @param otherValue The other value in the interval
-	 * @return
 	 */
 	private static BezierParameterValue asBezierValue(ParameterValue valueToConvert, boolean isStart, ParameterValue otherValue)
 	{
