@@ -13,6 +13,8 @@ import au.gov.ga.worldwind.common.view.stereo.StereoView;
 
 public abstract class StereoCameraParameter extends CameraParameter
 {
+	private static final long serialVersionUID = 20101111L;
+
 	protected StereoCameraParameter()
 	{
 		super();
@@ -29,6 +31,7 @@ public abstract class StereoCameraParameter extends CameraParameter
 		return (StereoView) super.getView();
 	}
 
+	@SuppressWarnings("serial")
 	@EditableParameter
 	public static class FocalLengthParameter extends StereoCameraParameter
 	{
@@ -66,6 +69,7 @@ public abstract class StereoCameraParameter extends CameraParameter
 		}
 	}
 
+	@SuppressWarnings("serial")
 	@EditableParameter
 	public static class EyeSeparationParameter extends StereoCameraParameter
 	{

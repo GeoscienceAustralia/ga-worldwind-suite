@@ -23,6 +23,8 @@ import au.gov.ga.worldwind.common.view.stereo.StereoView;
 
 public class StereoCameraImpl extends CameraImpl implements StereoCamera
 {
+	private static final long serialVersionUID = 20101111L;
+
 	protected Parameter focalLength;
 	protected Parameter eyeSeparation;
 
