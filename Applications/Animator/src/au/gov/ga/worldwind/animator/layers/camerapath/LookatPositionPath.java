@@ -17,11 +17,9 @@ public class LookatPositionPath extends AbstractCameraPositionPath
 	}
 
 	@Override
-	protected Position getPathPositionAtFrame(AnimationContext context, int frame)
+	protected Position[] getPathPositions(AnimationContext context, int startFrame, int endFrame)
 	{
-		Position lookatPositionAtFrame = getAnimation().getCamera().getLookatPositionAtFrame(context, frame);
-		
-		return lookatPositionAtFrame;
+		return getAnimation().getCamera().getLookatPositionsBetweenFrames(context, startFrame, endFrame);
 	}
 
 	@Override

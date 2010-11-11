@@ -17,11 +17,11 @@ class EyePositionPath extends AbstractCameraPositionPath
 	}
 
 	@Override
-	protected Position getPathPositionAtFrame(AnimationContext context, int frame)
+	protected Position[] getPathPositions(AnimationContext context, int startFrame, int endFrame)
 	{
-		return getAnimation().getCamera().getEyePositionAtFrame(context, frame);
+		return getAnimation().getCamera().getEyePositionsBetweenFrames(context, startFrame, endFrame);
 	}
-
+	
 	@Override
 	protected boolean isPathFrame(KeyFrame keyFrame)
 	{

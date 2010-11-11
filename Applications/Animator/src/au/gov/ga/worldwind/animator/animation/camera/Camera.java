@@ -54,6 +54,16 @@ public interface Camera extends Animatable
 	Parameter getLookAtElevation();
 
 	/**
+	 * @return The eye position of the camera in the provided frame range (inclusive)
+	 */
+	Position[] getEyePositionsBetweenFrames(AnimationContext animationContext, int startFrame, int endFrame);
+
+	/**
+	 * @return The lookat position of the camera in the provided frame range (inclusive)
+	 */
+	Position[] getLookatPositionsBetweenFrames(AnimationContext animationContext, int startFrame, int endFrame);
+	
+	/**
 	 * Return the eye position of the camera at the provided frame
 	 * 
 	 * @param context

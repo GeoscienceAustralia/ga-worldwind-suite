@@ -172,20 +172,22 @@ public abstract class AbstractCameraPositionPath implements Renderable
 
 		int firstFrame = animation.getFrameOfFirstKeyFrame();
 		int lastFrame = animation.getFrameOfLastKeyFrame();
+		
 		double[] deltas = new double[lastFrame - firstFrame + 1];
 		double minDelta = Double.MAX_VALUE;
 		double maxDelta = 0d;
 
 		pathVertexBackBuffer.rewind();
 
+		Position[] pathPositions = getPathPositions(context, firstFrame, lastFrame);
+		
 		Position previousPathPosition = null;
-		for (int frame = firstFrame; frame <= lastFrame; frame++)
+		for (int i = 0; i < pathPositions.length; i++)
 		{
-			Position currentPathPosition = getPathPositionAtFrame(context, frame);
+			Position currentPathPosition = pathPositions[i];
 
 			// Populate the vertex buffer
-			Vec4 eyeVector =
-					context.getView().getGlobe().computePointFromPosition(currentPathPosition);
+			Vec4 eyeVector = context.getView().getGlobe().computePointFromPosition(currentPathPosition);
 			if (pathReferenceCenter == null)
 			{
 				pathReferenceCenter = eyeVector; // Choose the first point in the path to be the reference point
@@ -197,9 +199,8 @@ public abstract class AbstractCameraPositionPath implements Renderable
 			// Populate the delta array
 			if (previousPathPosition != null)
 			{
-				double positionDelta =
-						calculateDelta(context, currentPathPosition, previousPathPosition);
-				deltas[frame - firstFrame] = positionDelta;
+				double positionDelta = calculateDelta(context, currentPathPosition, previousPathPosition);
+				deltas[i] = positionDelta;
 				maxDelta = Math.max(maxDelta, positionDelta);
 				minDelta = Math.min(minDelta, positionDelta);
 			}
@@ -208,7 +209,9 @@ public abstract class AbstractCameraPositionPath implements Renderable
 
 		//first wasn't set in loop above, so just copy from second:
 		if (deltas.length > 1)
+		{
 			deltas[0] = deltas[1];
+		}
 
 		populatePathColourBufferFromDeltas(deltas, minDelta, maxDelta);
 
@@ -216,10 +219,10 @@ public abstract class AbstractCameraPositionPath implements Renderable
 	}
 
 	/**
-	 * @return The position of the camera path at the given frame
+	 * @return the path positions for this path between the start and end frames
 	 */
-	protected abstract Position getPathPositionAtFrame(AnimationContext context, int frame);
-
+	protected abstract Position[] getPathPositions(AnimationContext context, int startFrame, int endFrame);
+	
 	/**
 	 * @return The delta of the current and previous position
 	 */

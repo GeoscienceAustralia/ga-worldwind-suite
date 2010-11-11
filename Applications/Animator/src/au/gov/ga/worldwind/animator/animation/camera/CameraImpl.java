@@ -128,6 +128,38 @@ public class CameraImpl extends AnimatableBase implements Camera
 	}
 
 	@Override
+	public Position[] getEyePositionsBetweenFrames(AnimationContext animationContext, int startFrame, int endFrame)
+	{
+		return getPositionsBetweenFrames(animationContext, startFrame, endFrame, eyeLat, eyeLon, eyeElevation);
+	}
+	
+	@Override
+	public Position[] getLookatPositionsBetweenFrames(AnimationContext animationContext, int startFrame, int endFrame)
+	{
+		return getPositionsBetweenFrames(animationContext, startFrame, endFrame, lookAtLat, lookAtLon, lookAtElevation);
+	}
+	
+	private Position[] getPositionsBetweenFrames(AnimationContext animationContext, int startFrame, int endFrame, Parameter lat, Parameter lon, Parameter elevation)
+	{
+		Validate.isTrue(startFrame <= endFrame, "End frame must not be less than start frame");
+		
+		ParameterValue[] latValues = lat.getValuesBetweenFrames(startFrame, endFrame, null);
+		ParameterValue[] lonValues = lon.getValuesBetweenFrames(startFrame, endFrame, null);
+		ParameterValue[] elevationValues = elevation.getValuesBetweenFrames(startFrame, endFrame, null);
+		
+		Position[] result = new Position[latValues.length];
+		for (int i = 0; i < result.length; i++)
+		{
+			result[i] = Position.fromDegrees(latValues[i].getValue(),
+											 lonValues[i].getValue(),
+											 animationContext.unapplyZoomScaling(elevationValues[i].getValue()));
+		}
+		
+		return result;
+	}
+	
+	
+	@Override
 	public Position getEyePositionAtFrame(AnimationContext animationContext, int frame)
 	{
 		return Position.fromDegrees(eyeLat.getValueAtFrame(frame).getValue(),

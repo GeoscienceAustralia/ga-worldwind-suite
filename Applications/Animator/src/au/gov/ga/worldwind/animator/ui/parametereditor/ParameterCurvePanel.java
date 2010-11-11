@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.animator.ui.parametereditor;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
@@ -175,14 +176,20 @@ public class ParameterCurvePanel implements ParameterCurveListener, CurrentFrame
 		/** Paint a line at the current mouse x position */
 		private void paintCurrentMousePositionLine(Graphics2D g2)
 		{
-			if (curves.isEmpty() || getMousePosition(true) == null)
+			if (curves.isEmpty())
 			{
 				return;
 			}
-
-			g2.setColor(LAFConstants.getCurveEditorCurrentMousePositionColor());
 			
-			double mouseX = getMousePosition(true).getX();
+			Point mousePosition = getMousePosition(true);
+			if (mousePosition == null)
+			{
+				return;
+			}
+			
+			double mouseX = mousePosition.getX();
+			
+			g2.setColor(LAFConstants.getCurveEditorCurrentMousePositionColor());
 			g2.draw(new Line2D.Double(mouseX, 0, mouseX, getHeight()));
 			
 		}
