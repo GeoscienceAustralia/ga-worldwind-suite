@@ -226,9 +226,15 @@ class ParameterCurveKeyNode
 
 	private void replaceParameterValue(ParameterValue replacementValue)
 	{
+		if (parameterValue == replacementValue)
+		{
+			return;
+		}
+		
 		KeyFrame keyFrame = replacementValue.getOwner().getAnimation().getKeyFrame(replacementValue.getFrame());
 		keyFrame.addParameterValue(replacementValue);
 		parameterValue = replacementValue;
+		parameterValue.fireChangeEvent(parameterValue);
 	}
 	
 	@Override

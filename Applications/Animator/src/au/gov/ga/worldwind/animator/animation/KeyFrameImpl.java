@@ -208,4 +208,10 @@ public class KeyFrameImpl extends PropagatingChangeableEventListener implements 
 		result.setName(getName());
 		return result;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + "[Frame: " + getFrame() + ", ParameterValues: " + getParameterValues() + "]";
+	}
 }

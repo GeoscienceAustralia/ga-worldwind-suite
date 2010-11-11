@@ -209,4 +209,9 @@ public class BasicParameterValue extends ChangeableBase implements ParameterValu
 		}
 	}
 	
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + "[Owner: " + getOwner().getName() + ", Frame: " + getFrame() + ", Value: " + getValue() + "]";
+	}
 }

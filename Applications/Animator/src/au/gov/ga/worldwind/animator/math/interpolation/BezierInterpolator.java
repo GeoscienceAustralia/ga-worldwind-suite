@@ -64,11 +64,13 @@ public class BezierInterpolator<V extends Vector<V>> implements Interpolator<V>
 	private Bezier<V> getBezier()
 	{
 		String cacheKey = createCacheKey();
-		if (BEZIER_CACHE.contains(cacheKey))
+		Bezier<V> result = (Bezier<V>)BEZIER_CACHE.getObject(cacheKey);
+		if (result != null)
 		{
-			return (Bezier<V>)BEZIER_CACHE.getObject(cacheKey);
+			return result;
 		}
-		Bezier<V> result = new Bezier<V>(begin, out, in, end);
+		 
+		result = new Bezier<V>(begin, out, in, end);
 		BEZIER_CACHE.add(cacheKey, result, result.getNumSubdivisions() * (Double.SIZE / 8));
 		return result;
 	}

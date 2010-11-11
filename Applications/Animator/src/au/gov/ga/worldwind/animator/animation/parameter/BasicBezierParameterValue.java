@@ -454,6 +454,19 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 		{
 			return percent;
 		}
+		
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + "[Value: " + value + ", Percent: " + percent + "]";
+		}
+		
+	}
+	
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + "[Owner: " + getOwner().getName() + ", Frame: " + getFrame() + ", Value: " + getValue() + ", In: " + in + ", Out: " + out + ", Locked: " + locked + "]";
 	}
 
 }
