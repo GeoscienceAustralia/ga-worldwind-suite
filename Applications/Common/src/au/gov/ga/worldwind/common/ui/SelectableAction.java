@@ -13,6 +13,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
+import javax.swing.JPopupMenu;
 import javax.swing.JToolBar;
 
 public class SelectableAction extends BasicAction
@@ -79,6 +80,13 @@ public class SelectableAction extends BasicAction
 	}
 
 	public void addToMenu(JMenu menu)
+	{
+		JCheckBoxMenuItem item = new JCheckBoxMenuItem(this);
+		registerButton(item, false);
+		menu.add(item);
+	}
+	
+	public void addToPopupMenu(JPopupMenu menu)
 	{
 		JCheckBoxMenuItem item = new JCheckBoxMenuItem(this);
 		registerButton(item, false);
