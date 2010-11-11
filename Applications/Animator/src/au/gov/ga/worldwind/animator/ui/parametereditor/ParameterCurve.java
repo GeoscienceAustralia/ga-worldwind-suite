@@ -55,6 +55,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	private static final int NODE_SHAPE_SIZE = 8; // Pixels
 	private static final int GRID_SIZE = 40; // Pixels
 	private static final double ZOOM_PERCENT_PER_WHEEL_CLICK = 0.1; // 10% zoom per wheel click
+	private static final DecimalFormat VALUE_LABEL_FORMAT = new DecimalFormat("0.00000");
 	
 	/** The model backing this component */
 	private ParameterCurveModel model;
@@ -80,7 +81,8 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	
 	private NodeDragListener nodeMouseListener = new NodeDragListener();
 	private PanZoomListener panZoomListener = new PanZoomListener();
-
+	private MouseMoveListener mouseMoveListener = new MouseMoveListener();
+	
 	private GridProperties axisProperties;
 	
 	private List<ParameterCurveListener> curveListeners = new ArrayList<ParameterCurveListener>(); 
@@ -111,6 +113,8 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		addMouseListener(panZoomListener);
 		addMouseMotionListener(panZoomListener);
 		addMouseWheelListener(panZoomListener);
+		
+		addMouseMotionListener(mouseMoveListener);
 		
 		addComponentListener(new ComponentListener());
 	}
@@ -233,12 +237,19 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 				calculateFittingBounds();
 			}
 			
+			if (curveBounds.getFrameWindow() == 0)
+			{
+				return;
+			}
+			
 			paintActiveArea(g2);
 			
 			if (showAxis)
 			{
 				paintAxisLines(g2);
 				paintParameterLabel(g2);
+				paintCurrentFrameValueLabel(g2);
+				paintCurrentMousePositionValueLabel(g2);
 			}
 			
 			paintParameterCurve(g2);
@@ -319,6 +330,40 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	}
 	
 	/**
+	 * Paint the value at the current frame on the bottom right
+	 */
+	private void paintCurrentFrameValueLabel(Graphics2D g2)
+	{
+		String valueString = VALUE_LABEL_FORMAT.format(model.getValueAtFrame(model.getCurrentFrame()));
+		
+		FontMetrics fm = g2.getFontMetrics();
+		Rectangle2D stringBounds = fm.getStringBounds(valueString, g2);
+		
+		g2.setColor(LAFConstants.getCurveEditorCurrentFrameColor());
+		g2.drawString(valueString, (int)(getWidth() - stringBounds.getWidth()) - 10, getHeight() - (int)(stringBounds.getHeight() + 1));
+	}
+	
+	/**
+	 * Paint the value at the current mouse position on the bottom right
+	 */
+	private void paintCurrentMousePositionValueLabel(Graphics2D g2)
+	{
+		Point mousePoint = getParent().getMousePosition(true);
+		if (mousePoint == null)
+		{
+			return;
+		}
+		
+		String valueString = VALUE_LABEL_FORMAT.format(model.getValueAtFrame((int)getCurveX(mousePoint.getX())));
+		
+		FontMetrics fm = g2.getFontMetrics();
+		Rectangle2D stringBounds = fm.getStringBounds(valueString, g2);
+		
+		g2.setColor(LAFConstants.getCurveEditorCurrentMousePositionColor());
+		g2.drawString(valueString, (int)(getWidth() - stringBounds.getWidth()) - 10, getHeight() - 2 * (int)(stringBounds.getHeight() + 1));
+	}
+	
+	/**
 	 * Paint the active area in a different colour to distinguish what is 'in' the animation.
 	 */
 	private void paintActiveArea(Graphics2D g2)
@@ -333,7 +378,6 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		g2.setColor(LAFConstants.getCurveEditorActiveBackgroundColor());
 		g2.draw(activeAreaRectangle);
 		g2.fill(activeAreaRectangle);
-		
 	}
 
 	/**
@@ -470,7 +514,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	public void curveChanged()
 	{
 		updateKeyNodeMarkers();
-		repaint();
+		getParent().repaint();
 	}
 	
 	/**
@@ -652,7 +696,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		private void repaintCurve()
 		{
 			updateKeyNodeMarkers();
-			repaint();
+			getParent().repaint();
 		}
 	}
 	
@@ -671,8 +715,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 				return;
 			}
 			updateLastSelected(e);
-			repaint();
-			e.consume();
+			getParent().repaint();
 		}
 		
 		@Override
@@ -684,8 +727,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 				return;
 			}
 			marker.applyHandleMove(e.getPoint());
-			repaint();
-			e.consume();
+			getParent().repaint();
 		}
 		
 		@Override
@@ -696,8 +738,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 				return;
 			}
 			clearLastSelected();
-			repaint();
-			e.consume();
+			getParent().repaint();
 		}
 		
 		private void updateLastSelected(MouseEvent e)
@@ -726,6 +767,21 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		private boolean isNodeDragClick(MouseEvent e)
 		{
 			return e.getButton() == MouseEvent.BUTTON1;
+		}
+	}
+	
+	private class MouseMoveListener extends MouseAdapter
+	{
+		@Override
+		public void mouseMoved(MouseEvent e)
+		{
+			getParent().repaint();
+		}
+		
+		@Override
+		public void mouseDragged(MouseEvent e)
+		{
+			getParent().repaint();
 		}
 	}
 	
@@ -791,7 +847,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		void paint(Graphics2D g2)
 		{
 			g2.setColor(getHandleColor(valueHandleSelected()));
-			g2.draw(valueHandle);
+			g2.fill(valueHandle);
 			
 			if (inHandle != null)
 			{
@@ -831,7 +887,6 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		 */
 		public void applyHandleMove(Point point)
 		{
-			// TODO: Apply delta X
 			Double lastScreenPoint = getScreenPoint(getSelectedHandleCurvePoint());
 			if (lastScreenPoint == null)
 			{

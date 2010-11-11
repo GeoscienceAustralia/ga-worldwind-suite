@@ -55,6 +55,11 @@ public interface ParameterCurveModel
 	int getAnimationFrameCount();
 	
 	/**
+	 * @return The current animation frame
+	 */
+	int getCurrentFrame();
+	
+	/**
 	 * @return The label to use for the parameter this model is reflecting
 	 */
 	String getParameterLabel();

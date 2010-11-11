@@ -41,6 +41,12 @@ public class LAFConstants
 	private static final Color CURVE_EDITOR_GRID_COLOR = new Color(240, 240, 240);
 	public static Color getCurveEditorGridColor() { return CURVE_EDITOR_GRID_COLOR; }
 	
+	private static final Color CURVE_EDITOR_CURRENT_FRAME_COLOR = new Color(255, 0, 0, 128);
+	public static Color getCurveEditorCurrentFrameColor() { return CURVE_EDITOR_CURRENT_FRAME_COLOR; }
+	
+	private static final Color CURVE_EDITOR_CURRENT_MOUSE_POSITION_COLOR = new Color(0, 0, 255, 128);
+	public static Color getCurveEditorCurrentMousePositionColor() { return CURVE_EDITOR_CURRENT_MOUSE_POSITION_COLOR; }
+	
 	private static final Color CURVE_KEY_HANDLE_COLOR = Color.ORANGE.darker().darker();
 	public static Color getCurveKeyHandleColor() { return CURVE_KEY_HANDLE_COLOR; }
 	

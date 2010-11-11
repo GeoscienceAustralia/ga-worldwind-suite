@@ -1844,6 +1844,11 @@ public class Animator
 		return frame;
 	}
 
+	public FrameSlider getFrameSlider()
+	{
+		return slider;
+	}
+	
 	private void stopActiveTasks()
 	{
 		stop = true;

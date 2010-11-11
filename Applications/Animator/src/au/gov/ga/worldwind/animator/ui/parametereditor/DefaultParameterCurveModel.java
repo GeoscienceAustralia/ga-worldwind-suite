@@ -147,6 +147,12 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 	}
 	
 	@Override
+	public int getCurrentFrame()
+	{
+		return parameter.getAnimation().getCurrentFrame();
+	}
+	
+	@Override
 	public void receiveAnimationEvent(AnimationEvent event)
 	{
 		if (!isEventForThisParameter(event))
