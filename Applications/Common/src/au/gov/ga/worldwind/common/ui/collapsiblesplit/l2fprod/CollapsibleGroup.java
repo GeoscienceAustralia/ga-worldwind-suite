@@ -529,6 +529,6 @@ public class CollapsibleGroup extends AbstractCollapsiblePanel implements
 		return super.paramString() + ",title=" + getTitle() + ",icon="
 				+ getIcon() + ",collapsed=" + String.valueOf(isCollapsed())
 				+ ",scrollOnExpand=" + String.valueOf(isScrollOnExpand())
-				+ ",ui=" + getUI();
+				+ ",ui=" + ui;
 	}
 }
