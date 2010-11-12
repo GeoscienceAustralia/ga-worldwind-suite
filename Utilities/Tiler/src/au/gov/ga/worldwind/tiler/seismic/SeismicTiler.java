@@ -5,7 +5,12 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
@@ -20,12 +25,13 @@ public class SeismicTiler
 {
 	public static void main(String[] args) throws Exception
 	{
-		File input = new File("D:/Seismic/S310_SWM13_final_mig_unscal_bigger.bmp");
-		File output = new File("D:/Seismic/tiles_bigger");
+		boolean mask = true;
+		File input = new File("D:/Seismic/from gabe/s310_31_blured_wb_convert.tif");
+		File output = new File("D:/Seismic/from gabe/s310_31_blured_wb_convert_mask");
 		Dataset dataset = GDALUtil.open(input);
-		Insets insets = new Insets(408, 833, 14385 - 14376, 38159 - 37443);
+		Insets insets = new Insets(0, 0, 0, 0);
 		int tilesize = 512;
-		String format = "jpg";
+		String format = mask ? "png" : "jpg";
 
 		int width = dataset.GetRasterXSize() - insets.left - insets.right;
 		int height = dataset.GetRasterYSize() - insets.top - insets.bottom;
@@ -36,40 +42,114 @@ public class SeismicTiler
 		int printWidth = width, printHeight = height;
 		for (int level = levels - 1; level >= 0; level--)
 		{
-			System.out.println("Level " + level + ": " + printWidth + "x" + printHeight);
+			System.out.println("Level " + level + ": " + printWidth + "" + "x" + printHeight);
 			printWidth = (printWidth + 1) / 2;
 			printHeight = (printHeight + 1) / 2;
 		}
 
-		File levelDir = new File(output, String.valueOf(levels - 1));
+		//calculate blank rows per column (columns of constant color)
+		System.out.println("Calculating columns to remove from the top and bottom of the image...");
+		File topFile = new File(input.getParentFile(), input.getName() + ".top.dat");
+		File bottomFile = new File(input.getParentFile(), input.getName() + ".bottom.dat");
 
+		int[] constantPixelsFromTop = loadIntArrayFromFile(topFile);
+		int[] constantPixelsFromBottom = loadIntArrayFromFile(bottomFile);
+		if (!(constantPixelsFromTop == null || constantPixelsFromBottom == null || constantPixelsFromTop.length != width
+				|| constantPixelsFromBottom.length != width))
+		{
+			System.out.println("Loaded from previous calculations");
+		}
+		else
+		{
+			constantPixelsFromTop = new int[width];
+			constantPixelsFromBottom = new int[width];
+
+			int constantWidth = 10 * tilesize * tilesize / height;
+			for (int startX = 0; startX < width; startX += constantWidth)
+			{
+				int w = Math.min(constantWidth, width - startX);
+
+				//get an image of the full height, 1 pixel wide at column x
+				Rectangle src = new Rectangle(insets.left + startX, insets.top, w, height);
+				GDALTileParameters parameters = new GDALTileParameters(dataset, src.getSize(), src);
+				GDALTile tile = new GDALTile(parameters);
+				BufferedImage image = tile.getAsImage();
+
+				System.out.println((100 * (startX + 1) / width) + "% done");
+
+				for (int x = 0; x < w; x++)
+				{
+					int fromTop = 0;
+					int fromBottom = 0;
+					int lastColor = 0;
+					for (int y = 0; y < height; y++)
+					{
+						int thisColor = image.getRGB(x, y);
+						if (y > 0 && lastColor != thisColor)
+						{
+							break;
+						}
+						lastColor = thisColor;
+						fromTop++;
+					}
+
+					if (fromTop < height)
+					{
+						for (int y = height - 1; y >= 0; y--)
+						{
+							int thisColor = image.getRGB(x, y);
+							if (y < height - 1 && lastColor != thisColor)
+							{
+								break;
+							}
+							lastColor = thisColor;
+							fromBottom++;
+						}
+					}
+
+					constantPixelsFromTop[startX + x] = fromTop;
+					constantPixelsFromBottom[startX + x] = fromBottom;
+				}
+			}
+
+			saveIntArrayToFile(constantPixelsFromTop, topFile);
+			saveIntArrayToFile(constantPixelsFromBottom, bottomFile);
+		}
+
+		//calculate tiling parameters
 		int xStrips = Math.max(1, tilesize / width);
 		int yStrips = Math.max(1, tilesize / height);
 		int rows = (height - 1) / (tilesize * xStrips) + 1;
 		int cols = (width - 1) / (tilesize * yStrips) + 1;
+		File levelDir = new File(output, String.valueOf(levels - 1));
 
+		//create top level tiles
+		System.out.println("Creating top level tiles...");
 		for (int y = 0, row = 0; y < height; y += tilesize * xStrips, row++)
 		{
+			//create row directory
 			String rowPadded = Util.paddedInt(row, 4);
 			File rowDir = new File(levelDir, rowPadded);
 			rowDir.mkdirs();
+
+			int h = Math.min(tilesize * xStrips / yStrips, height - y);
 
 			for (int x = 0, col = 0; x < width; x += tilesize * yStrips, col++)
 			{
 				File imageFile = tileFile(levelDir, row, col, format);
 				if (imageFile.exists())
-				{
 					continue;
-				}
 
 				int w = Math.min(tilesize * yStrips / xStrips, width - x);
-				int h = Math.min(tilesize * xStrips / yStrips, height - y);
 
 				Rectangle src = new Rectangle(x + insets.left, y + insets.top, w, h);
-
 				GDALTileParameters parameters = new GDALTileParameters(dataset, src.getSize(), src);
 				GDALTile tile = new GDALTile(parameters);
 				BufferedImage image = tile.getAsImage();
+
+				image =
+						removeConstantColumns(image, constantPixelsFromTop, constantPixelsFromBottom, x, y, width,
+								height, mask);
 
 				ImageIO.write(image, format, imageFile);
 			}
@@ -165,10 +245,10 @@ public class SeismicTiler
 					int w = w0 + (lastCols == 1 ? 0 : w1) + (lastRows == 1 ? w2 + w3 : 0);
 					int h = h0 + (lastRows == 1 ? 0 : h2) + (lastCols == 1 ? h1 + h3 : 0);
 
-					BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+					int type = mask ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
+					BufferedImage image = new BufferedImage(w, h, type);
 					Graphics2D g = image.createGraphics();
-					g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-							RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+					g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
 					int x = 0;
 					int y = 0;
@@ -223,5 +303,79 @@ public class SeismicTiler
 		String paddedCol = Util.paddedInt(col, 4);
 		File rowDir = new File(levelDir, paddedRow);
 		return new File(rowDir, paddedRow + "_" + paddedCol + "." + ext);
+	}
+
+	private static BufferedImage removeConstantColumns(BufferedImage image, int[] constantPixelsFromTop,
+			int[] constantPixelsFromBottom, int startX, int startY, int totalWidth, int totalHeight, boolean mask)
+	{
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int type = mask ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
+		BufferedImage newImage = new BufferedImage(width, height, type);
+
+		for (int x = 0; x < width; x++)
+		{
+			int fromTop = constantPixelsFromTop[startX + x];
+			int fromBottom = constantPixelsFromBottom[startX + x];
+
+			for (int y = 0; y < height; y++)
+			{
+				boolean withinTop = y + startY < fromTop;
+				boolean withinBottom = y + startY > totalHeight - 1 - fromBottom;
+				if (withinTop || withinBottom)
+				{
+					newImage.setRGB(x, y, mask ? 0 : 0xffffffff);
+				}
+				else
+				{
+					newImage.setRGB(x, y, mask ? 0xffffffff : image.getRGB(x, y));
+				}
+			}
+		}
+
+		return newImage;
+	}
+
+	private static void saveIntArrayToFile(int[] array, File file)
+	{
+		try
+		{
+			FileOutputStream fos = new FileOutputStream(file);
+			DataOutputStream dos = new DataOutputStream(fos);
+			for (int i : array)
+			{
+				dos.writeInt(i);
+			}
+			dos.close();
+			fos.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private static int[] loadIntArrayFromFile(File file)
+	{
+		if (!file.exists())
+			return null;
+
+		int size = (int) (file.length() / 4l);
+		try
+		{
+			FileInputStream fis = new FileInputStream(file);
+			DataInputStream dis = new DataInputStream(fis);
+			int[] array = new int[size];
+			for (int i = 0; i < size; i++)
+			{
+				array[i] = dis.readInt();
+			}
+			return array;
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
