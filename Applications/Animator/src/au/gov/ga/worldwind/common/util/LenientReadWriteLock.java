@@ -52,7 +52,10 @@ public class LenientReadWriteLock implements ReadWriteLock
 		@Override
 		public void unlock()
 		{
-			lockDelegate.readLock().unlock();
+			if (lockDelegate.getReadHoldCount() > 0)
+			{
+				lockDelegate.readLock().unlock();
+			}
 		}
 
 		@Override
