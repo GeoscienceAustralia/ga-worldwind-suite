@@ -6,11 +6,9 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.requester.AbstractLocalRequesterDelegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTextureTile;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.IImageTileRequesterDelegate;
 
-public class CurtainLocalRequesterDelegate extends AbstractLocalRequesterDelegate<DelegatorTextureTile> implements
-		IImageTileRequesterDelegate
+public class CurtainLocalRequesterDelegate extends AbstractLocalRequesterDelegate<DelegatorCurtainTextureTile> implements
+		ICurtainTileRequesterDelegate
 {
 	private final static String DEFINITION_STRING = "LocalRequester";
 
