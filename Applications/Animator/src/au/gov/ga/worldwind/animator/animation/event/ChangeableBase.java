@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
+import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 
 
 /**
@@ -20,7 +20,7 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
 public abstract class ChangeableBase implements Changeable
 {
 	private List<AnimationEventListener> changeListeners = new ArrayList<AnimationEventListener>();
-	private ReadWriteLock listenersLock = new ReentrantReadWriteLock(true);
+	private ReadWriteLock listenersLock = new LenientReadWriteLock();
 
 	@Override
 	public void addChangeListener(AnimationEventListener changeListener)

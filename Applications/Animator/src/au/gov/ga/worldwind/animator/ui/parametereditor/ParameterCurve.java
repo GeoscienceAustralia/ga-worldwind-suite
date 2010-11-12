@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -44,6 +43,7 @@ import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.util.GridHelper;
 import au.gov.ga.worldwind.common.util.GridHelper.GridProperties;
+import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 
 /**
  * A class that draws the curve for a single parameter
@@ -83,7 +83,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	
 	// Holds the calculated key node markers for the curve
 	private List<KeyNodeMarker> keyNodeMarkers = new ArrayList<KeyNodeMarker>();
-	private ReadWriteLock keyNodeMarkersLock = new ReentrantReadWriteLock(true);
+	private ReadWriteLock keyNodeMarkersLock = new LenientReadWriteLock();
 	private AtomicBoolean markersDirty = new AtomicBoolean(true);
 	
 	// Listeners used to interact with the curve

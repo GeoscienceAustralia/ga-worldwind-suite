@@ -20,7 +20,7 @@ import java.awt.Point;
 import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import javax.media.opengl.GL;
 
@@ -29,6 +29,7 @@ import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.util.GeometryUtil;
+import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 
 import com.sun.opengl.util.BufferUtil;
 
@@ -51,7 +52,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	private DoubleBuffer joinersFrontBuffer;
 	private DoubleBuffer joinersBackBuffer;
 
-	private ReentrantReadWriteLock frontLock = new ReentrantReadWriteLock(false);
+	private ReadWriteLock frontLock = new LenientReadWriteLock();
 	private Object backLock = new Object();
 
 	private MarkerRenderer markerRenderer = new MarkerRenderer();

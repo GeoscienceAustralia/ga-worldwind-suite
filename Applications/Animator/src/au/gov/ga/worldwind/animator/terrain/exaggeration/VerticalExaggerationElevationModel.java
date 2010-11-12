@@ -10,9 +10,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
+import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 
 /**
  * An extension of the {@link DetailedElevationModel} that allows {@link ElevationExaggeration}s to be
@@ -34,7 +35,7 @@ public class VerticalExaggerationElevationModel extends DetailedElevationModel i
 	
 	private List<ExaggerationWindow> positiveExaggerationWindows = new ArrayList<ExaggerationWindow>();
 	private List<ExaggerationWindow> negativeExaggerationWindows = new ArrayList<ExaggerationWindow>();
-	private ReentrantReadWriteLock exaggerationWindowLock = new ReentrantReadWriteLock(true);
+	private ReadWriteLock exaggerationWindowLock = new LenientReadWriteLock();
 	
 	/** The global offset to apply after exaggeration */
 	private double globalOffset = 1.0;

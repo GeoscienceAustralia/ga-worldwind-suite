@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.logging.Level;
 
 import javax.xml.xpath.XPath;
@@ -40,6 +40,7 @@ import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
+import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
@@ -61,7 +62,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	 * lookup of key frames
 	 */
 	private NavigableMap<Integer, KeyFrame> keyFrameMap = new TreeMap<Integer, KeyFrame>();
-	private ReentrantReadWriteLock keyFrameMapLock = new ReentrantReadWriteLock(true);
+	private ReadWriteLock keyFrameMapLock = new LenientReadWriteLock();
 
 	/** The number of frames in this animation */
 	private int frameCount;
