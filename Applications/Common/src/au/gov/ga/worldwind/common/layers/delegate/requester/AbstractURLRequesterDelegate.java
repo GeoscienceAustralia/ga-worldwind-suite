@@ -32,7 +32,7 @@ public abstract class AbstractURLRequesterDelegate<TILE extends IDelegatorTile> 
 	@Override
 	public Runnable createRequestTask(TILE tile, IDelegatorLayer<TILE> layer)
 	{
-		return new RequestTask(tile, layer);
+		return new RequestTask<TILE>(tile, layer, this);
 	}
 
 	@Override
@@ -50,15 +50,17 @@ public abstract class AbstractURLRequesterDelegate<TILE extends IDelegatorTile> 
 	 * Below here is copied from BasicTiledImageLayer, with some modifications to use the delegates *
 	 ********************************************************************************************** */
 
-	private class RequestTask implements Runnable, Comparable<RequestTask>
+	private static class RequestTask<TILE extends IDelegatorTile> implements Runnable, Comparable<RequestTask<TILE>>
 	{
 		private final TILE tile;
 		private final IDelegatorLayer<TILE> layer;
+		private final AbstractURLRequesterDelegate<TILE> delegate;
 
-		private RequestTask(TILE tile, IDelegatorLayer<TILE> layer)
+		private RequestTask(TILE tile, IDelegatorLayer<TILE> layer, AbstractURLRequesterDelegate<TILE> delegate)
 		{
 			this.layer = layer;
 			this.tile = tile;
+			this.delegate = delegate;
 		}
 
 		@Override
@@ -66,10 +68,10 @@ public abstract class AbstractURLRequesterDelegate<TILE extends IDelegatorTile> 
 		{
 			// TODO: check to ensure load is still needed
 
-			final java.net.URL textureURL = getLocalTileURL(tile, layer, false);
+			final java.net.URL textureURL = delegate.getLocalTileURL(tile, layer, false);
 			if (textureURL != null && !this.layer.isTextureFileExpired(tile, textureURL, this.layer.getDataFileStore()))
 			{
-				if (loadTexture(tile, textureURL, layer))
+				if (delegate.loadTexture(tile, textureURL, layer))
 				{
 					layer.unmarkResourceAbsent(this.tile);
 					this.layer.firePropertyChange(AVKey.LAYER, null, this);
@@ -98,7 +100,7 @@ public abstract class AbstractURLRequesterDelegate<TILE extends IDelegatorTile> 
 		 *             if <code>that</code> is null
 		 */
 		@Override
-		public int compareTo(RequestTask that)
+		public int compareTo(RequestTask<TILE> that)
 		{
 			if (that == null)
 			{
@@ -118,7 +120,7 @@ public abstract class AbstractURLRequesterDelegate<TILE extends IDelegatorTile> 
 			if (o == null || getClass() != o.getClass())
 				return false;
 
-			final AbstractURLRequesterDelegate<?>.RequestTask that = (AbstractURLRequesterDelegate<?>.RequestTask) o;
+			final RequestTask<?> that = (RequestTask<?>) o;
 
 			// Don't include layer in comparison so that requests are shared among layers
 			return !(tile != null ? !tile.equals(that.tile) : that.tile != null);

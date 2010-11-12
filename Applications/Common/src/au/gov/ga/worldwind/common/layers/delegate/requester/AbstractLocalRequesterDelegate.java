@@ -17,7 +17,8 @@ import au.gov.ga.worldwind.common.util.Util;
  * 
  * @author Michael de Hoog
  */
-public abstract class AbstractLocalRequesterDelegate<TILE extends IDelegatorTile> implements ITileRequesterDelegate<TILE>
+public abstract class AbstractLocalRequesterDelegate<TILE extends IDelegatorTile> implements
+		ITileRequesterDelegate<TILE>
 {
 	@Override
 	public void forceTextureLoad(TILE tile, IDelegatorLayer<TILE> layer)
@@ -28,7 +29,7 @@ public abstract class AbstractLocalRequesterDelegate<TILE extends IDelegatorTile
 	@Override
 	public Runnable createRequestTask(TILE tile, IDelegatorLayer<TILE> layer)
 	{
-		return new RequestTask(tile, layer);
+		return new RequestTask<TILE>(tile, layer, this);
 	}
 
 	@Override
@@ -76,21 +77,23 @@ public abstract class AbstractLocalRequesterDelegate<TILE extends IDelegatorTile
 	 * 
 	 * @author Michael de Hoog
 	 */
-	protected class RequestTask implements Runnable, Comparable<RequestTask>
+	protected static class RequestTask<TILE extends IDelegatorTile> implements Runnable, Comparable<RequestTask<TILE>>
 	{
 		private final IDelegatorLayer<TILE> layer;
 		private final TILE tile;
+		private final AbstractLocalRequesterDelegate<TILE> delegate;
 
-		private RequestTask(TILE tile, IDelegatorLayer<TILE> layer)
+		private RequestTask(TILE tile, IDelegatorLayer<TILE> layer, AbstractLocalRequesterDelegate<TILE> delegate)
 		{
 			this.layer = layer;
 			this.tile = tile;
+			this.delegate = delegate;
 		}
 
 		@Override
 		public void run()
 		{
-			if (loadTexture(tile, layer))
+			if (delegate.loadTexture(tile, layer))
 			{
 				layer.unmarkResourceAbsent(tile);
 				layer.firePropertyChange(AVKey.LAYER, null, this);
@@ -102,7 +105,7 @@ public abstract class AbstractLocalRequesterDelegate<TILE extends IDelegatorTile
 		}
 
 		@Override
-		public int compareTo(RequestTask that)
+		public int compareTo(RequestTask<TILE> that)
 		{
 			if (that == null)
 			{
@@ -122,8 +125,7 @@ public abstract class AbstractLocalRequesterDelegate<TILE extends IDelegatorTile
 			if (o == null || getClass() != o.getClass())
 				return false;
 
-			final AbstractLocalRequesterDelegate<?>.RequestTask that =
-					(AbstractLocalRequesterDelegate<?>.RequestTask) o;
+			final RequestTask<?> that = (RequestTask<?>) o;
 
 			// Don't include layer in comparison so that requests are shared among layers
 			return !(tile != null ? !tile.equals(that.tile) : that.tile != null);
