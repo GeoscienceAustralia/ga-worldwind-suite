@@ -88,6 +88,8 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 		curvePointsFrontBuffer.clear();
 		backBufferLock.unlock();
 		frontBufferLock.unlock();
+		
+		updater.shutdownNow();
 	}
 	
 	@Override

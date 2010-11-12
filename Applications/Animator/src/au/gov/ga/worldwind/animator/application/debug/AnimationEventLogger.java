@@ -66,6 +66,7 @@ public class AnimationEventLogger implements AnimationEventListener
 		{
 			throw new IllegalArgumentException("Filename not valid", e);
 		}
+		loggingThread.setName("Animation Event Logger");
 		loggingThread.setDaemon(true);
 		loggingThread.start();
 	}

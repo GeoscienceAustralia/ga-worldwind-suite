@@ -54,6 +54,7 @@ public class Updater
 				}
 			}
 		};
+		thread.setName("Animator Updator Thread");
 		thread.setDaemon(true);
 		thread.start();
 	}

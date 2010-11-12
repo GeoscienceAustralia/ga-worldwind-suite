@@ -1,7 +1,9 @@
 package au.gov.ga.worldwind.animator.ui.parametereditor;
 
-import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.*;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getParameterEditorLinearMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getParameterEditorLockedBezierMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getParameterEditorUnlockedBezierMenuLabelKey;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -24,7 +26,6 @@ import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -57,7 +58,6 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	private static final long serialVersionUID = 20101102L;
 
 	private static final RenderingHints RENDER_HINT = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-	private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new DaemonThreadFactory("Parameter Curve Updater"));
 	
 	private static final int NODE_SHAPE_SIZE = 8; // Pixels
 	private static final int GRID_SIZE = 40; // Pixels
@@ -105,7 +105,7 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	
 	public ParameterCurve(Parameter parameter, ParameterCurveBounds curveBounds)
 	{
-		this(new DefaultParameterCurveModel(parameter, THREAD_POOL));
+		this(new DefaultParameterCurveModel(parameter, Executors.newSingleThreadExecutor(new DaemonThreadFactory("Parameter Curve Updater"))));
 		this.curveBounds = curveBounds;
 	}
 
