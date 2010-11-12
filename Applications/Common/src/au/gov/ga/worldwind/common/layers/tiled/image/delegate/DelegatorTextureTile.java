@@ -8,24 +8,39 @@ import gov.nasa.worldwind.util.Level;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.TileKey;
 
+import au.gov.ga.worldwind.common.layers.delegate.IDelegatorTile;
+import au.gov.ga.worldwind.common.layers.delegate.ITileFactoryDelegate;
+
 import com.sun.opengl.util.texture.Texture;
 
 /**
  * Extension of the {@link TextureTile} class which uses a
- * {@link TileFactoryDelegate} when creating sub tiles.
+ * {@link ITileFactoryDelegate} when creating sub tiles.
  * 
  * @author Michael de Hoog
  */
-public class DelegatorTextureTile extends TextureTile
+public class DelegatorTextureTile extends TextureTile implements IDelegatorTile
 {
-	protected final TileFactoryDelegate delegate;
+	protected final ITileFactoryDelegate<DelegatorTextureTile, Sector, Level> delegate;
 	protected TileKey transformedTileKey;
 
 	public DelegatorTextureTile(Sector sector, Level level, int row, int col,
-			TileFactoryDelegate delegate)
+			ITileFactoryDelegate<DelegatorTextureTile, Sector, Level> delegate)
 	{
 		super(sector, level, row, col);
 		this.delegate = delegate;
+	}
+
+	@Override
+	public String getService()
+	{
+		return getLevel().getService();
+	}
+
+	@Override
+	public String getDataset()
+	{
+		return getLevel().getDataset();
 	}
 
 	/**
@@ -46,11 +61,12 @@ public class DelegatorTextureTile extends TextureTile
 
 	/**
 	 * Get this tile's {@link TileKey}, transformed by the
-	 * {@link TileFactoryDelegate}.
+	 * {@link ITileFactoryDelegate}.
 	 * 
-	 * @return {@link TileKey} transformed by {@link TileFactoryDelegate}
+	 * @return {@link TileKey} transformed by {@link ITileFactoryDelegate}
 	 */
-	protected TileKey getTransformedTileKey()
+	@Override
+	public TileKey getTransformedTileKey()
 	{
 		if (transformedTileKey == null)
 		{
@@ -100,9 +116,7 @@ public class DelegatorTextureTile extends TextureTile
 		if (subTile != null)
 			subTiles[0] = subTile;
 		else
-			subTiles[0] =
-					delegate.createTextureTile(new Sector(p0, p1, t0, t1), nextLevel, 2 * row,
-							2 * col);
+			subTiles[0] = delegate.createTextureTile(new Sector(p0, p1, t0, t1), nextLevel, 2 * row, 2 * col);
 		//subTiles[0] = new TextureTile(new Sector(p0, p1, t0, t1), nextLevel, 2 * row, 2 * col);
 
 		key = new TileKey(nextLevelNum, 2 * row, 2 * col + 1, nextLevelCacheName);
@@ -110,9 +124,7 @@ public class DelegatorTextureTile extends TextureTile
 		if (subTile != null)
 			subTiles[1] = subTile;
 		else
-			subTiles[1] =
-					delegate.createTextureTile(new Sector(p0, p1, t1, t2), nextLevel, 2 * row,
-							2 * col + 1);
+			subTiles[1] = delegate.createTextureTile(new Sector(p0, p1, t1, t2), nextLevel, 2 * row, 2 * col + 1);
 		//subTiles[1] = new TextureTile(new Sector(p0, p1, t1, t2), nextLevel, 2 * row, 2 * col + 1);
 
 		key = new TileKey(nextLevelNum, 2 * row + 1, 2 * col, nextLevelCacheName);
@@ -120,9 +132,7 @@ public class DelegatorTextureTile extends TextureTile
 		if (subTile != null)
 			subTiles[2] = subTile;
 		else
-			subTiles[2] =
-					delegate.createTextureTile(new Sector(p1, p2, t0, t1), nextLevel, 2 * row + 1,
-							2 * col);
+			subTiles[2] = delegate.createTextureTile(new Sector(p1, p2, t0, t1), nextLevel, 2 * row + 1, 2 * col);
 		//subTiles[2] = new TextureTile(new Sector(p1, p2, t0, t1), nextLevel, 2 * row + 1, 2 * col);
 
 		key = new TileKey(nextLevelNum, 2 * row + 1, 2 * col + 1, nextLevelCacheName);
@@ -130,9 +140,7 @@ public class DelegatorTextureTile extends TextureTile
 		if (subTile != null)
 			subTiles[3] = subTile;
 		else
-			subTiles[3] =
-					delegate.createTextureTile(new Sector(p1, p2, t1, t2), nextLevel, 2 * row + 1,
-							2 * col + 1);
+			subTiles[3] = delegate.createTextureTile(new Sector(p1, p2, t1, t2), nextLevel, 2 * row + 1, 2 * col + 1);
 		//subTiles[3] = new TextureTile(new Sector(p1, p2, t1, t2), nextLevel, 2 * row + 1, 2 * col + 1);
 
 		return subTiles;

@@ -67,6 +67,8 @@ public class CurtainLevelSet extends WWObjectImpl
 		CurtainTileUrlBuilder tub = (CurtainTileUrlBuilder) params.getValue(AVKey.TILE_URL_BUILDER);
 		if (tub == null)
 		{
+			final String paramsImageFormat = (String) params.getValue(AVKey.IMAGE_FORMAT);
+			
 			params.setValue(AVKey.TILE_URL_BUILDER, new CurtainTileUrlBuilder()
 			{
 				@Override
@@ -76,12 +78,15 @@ public class CurtainLevelSet extends WWObjectImpl
 					String service = tile.getLevel().getService();
 					if (service == null || service.length() < 1)
 						return null;
-					
+
 					service = URLTransformer.transform(service);
 
 					StringBuffer sb = new StringBuffer(service);
-					if (sb.lastIndexOf("?") != sb.length() - 1)
+					if (sb.lastIndexOf("?") < 0)
 						sb.append("?");
+					else
+						sb.append("&");
+
 					sb.append("T=");
 					sb.append(tile.getLevel().getDataset());
 					sb.append("&L=");
@@ -90,6 +95,10 @@ public class CurtainLevelSet extends WWObjectImpl
 					sb.append(tile.getColumn());
 					sb.append("&Y=");
 					sb.append(tile.getRow());
+
+					String format = imageFormat != null ? imageFormat : paramsImageFormat;
+					if (format != null)
+						sb.append("&F=" + format);
 
 					return new URL(sb.toString());
 				}

@@ -14,9 +14,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageReaderDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.IDelegatorTile;
+import au.gov.ga.worldwind.common.layers.delegate.ITileReaderDelegate;
 
-public abstract class ElevationImageReaderDelegate implements ImageReaderDelegate
+public abstract class ElevationImageReaderDelegate implements ITileReaderDelegate
 {
 	protected final static String doublePattern = "((?:-?\\d*\\.\\d*)|(?:-?\\d+))";
 
@@ -32,12 +33,18 @@ public abstract class ElevationImageReaderDelegate implements ImageReaderDelegat
 	}
 
 	@Override
+	public BufferedImage readImage(IDelegatorTile tile, URL url, Globe globe) throws IOException
+	{
+		if (!(tile instanceof TextureTile))
+		{
+			throw new IllegalArgumentException("Tile must be a " + TextureTile.class.getName());
+		}
+		return readImage((TextureTile) tile, url, globe);
+	}
+
 	public BufferedImage readImage(TextureTile tile, URL url, Globe globe) throws IOException
 	{
 		ByteBuffer byteBuffer = WWIO.readURLContentToBuffer(url);
-
-		int width = tile.getWidth();
-		int height = tile.getHeight();
 
 		// Setup parameters to instruct BufferWrapper on how to interpret the ByteBuffer.
 		AVList bufferParams = new AVListImpl();
@@ -45,7 +52,7 @@ public abstract class ElevationImageReaderDelegate implements ImageReaderDelegat
 		bufferParams.setValue(AVKey.BYTE_ORDER, byteOrder);
 		BufferWrapper elevations = BufferWrapper.wrap(byteBuffer, bufferParams);
 
-		return generateImage(elevations, width, height, globe, tile.getSector());
+		return generateImage(elevations, tile.getWidth(), tile.getHeight(), globe, tile.getSector());
 	}
 
 	protected abstract BufferedImage generateImage(BufferWrapper elevations, int width, int height, Globe globe,

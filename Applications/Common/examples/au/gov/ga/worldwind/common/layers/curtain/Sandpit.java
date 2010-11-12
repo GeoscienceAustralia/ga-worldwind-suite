@@ -9,6 +9,7 @@ import java.io.InputStream;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.curtain.delegate.DelegatorTiledCurtainLayer;
 import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.common.view.free.FreeView;
@@ -31,6 +32,7 @@ public class Sandpit extends ApplicationTemplate
 		Configuration.setValue(AVKey.INITIAL_LONGITUDE, 133.5);
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, FreeView.class.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, BMNGWMSLayer.class.getName());
+		Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 10);
 
 		ApplicationTemplate.start("Sandpit", AppFrame.class);
 	}
@@ -46,8 +48,9 @@ public class Sandpit extends ApplicationTemplate
 			
 			getWwd().getModel().getLayers().get(1).setOpacity(0.5);
 			getWwd().getModel().getGlobe().getTessellator().setMakeTileSkirts(false);
+			
 
-			BasicTiledCurtainLayer layer = new BasicTiledCurtainLayer(element, null);
+			DelegatorTiledCurtainLayer layer = new DelegatorTiledCurtainLayer(element, null);
 			insertAfterPlacenames(getWwd(), layer);
 
 			// Update layer panel

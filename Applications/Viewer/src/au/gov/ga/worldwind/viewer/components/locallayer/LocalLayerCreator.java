@@ -44,11 +44,11 @@ import javax.swing.event.DocumentListener;
 
 import org.w3c.dom.Document;
 
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegateKit;
+import au.gov.ga.worldwind.common.layers.delegate.reader.MaskImageReaderDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.transformer.TransparentColorTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.LocalRequesterDelegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.MaskImageReaderDelegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.transparentcolor.TransparentColorTransformerDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageDelegateKit;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageLocalRequesterDelegate;
 import au.gov.ga.worldwind.common.ui.JDoubleField;
 import au.gov.ga.worldwind.common.ui.JIntegerField;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
@@ -444,31 +444,28 @@ public class LocalLayerCreator extends JDialog
 				Double lztsd = lztsdField.getValue();
 				if (!directory.exists() || !directory.isDirectory())
 				{
-					JOptionPane.showMessageDialog(calculateExtents,
-							"Selected directory is invalid", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(calculateExtents, "Selected directory is invalid", "Error",
+							JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				else if (lztsd == null || lztsd <= 0)
 				{
-					JOptionPane.showMessageDialog(calculateExtents,
-							"Level zero tile size is invalid", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(calculateExtents, "Level zero tile size is invalid", "Error",
+							JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				int levels = levelCount(directory);
 				if (levels <= 0)
 				{
-					JOptionPane.showMessageDialog(calculateExtents, "Found " + levels
-							+ " tiles in selected directory", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(calculateExtents, "Found " + levels + " tiles in selected directory",
+							"Error", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				Sector sector =
-						sector(directory, (String) extensionCombo.getSelectedItem(), levels,
-								lztsdField.getValue());
+						sector(directory, (String) extensionCombo.getSelectedItem(), levels, lztsdField.getValue());
 				levelcountField.setValue(levels);
-				bottomleftField.setText(formatLatLon(sector.getMinLatitude().degrees,
-						sector.getMinLongitude().degrees));
-				toprightField.setText(formatLatLon(sector.getMaxLatitude().degrees,
-						sector.getMaxLongitude().degrees));
+				bottomleftField.setText(formatLatLon(sector.getMinLatitude().degrees, sector.getMinLongitude().degrees));
+				toprightField.setText(formatLatLon(sector.getMaxLatitude().degrees, sector.getMaxLongitude().degrees));
 			}
 		});
 
@@ -675,8 +672,7 @@ public class LocalLayerCreator extends JDialog
 			if (nameField.getText().length() > 0 && dirField.getText().length() > 0)
 			{
 				ignoreOutputFieldChange = true;
-				String filename =
-						dirField.getText() + File.separator + nameField.getText() + ".xml";
+				String filename = dirField.getText() + File.separator + nameField.getText() + ".xml";
 				outputField.setText(filename);
 				ignoreOutputFieldChange = false;
 			}
@@ -797,10 +793,8 @@ public class LocalLayerCreator extends JDialog
 		File lastLevelDirectory = new File(directory, String.valueOf(level));
 		MinMax rowMinMax = getMinMaxRow(lastLevelDirectory);
 		MinMax colMinMax = getMinMaxCol(lastLevelDirectory, extension);
-		return Sector.fromDegrees(getTileLat(rowMinMax.min, level, lztsd),
-				getTileLat(rowMinMax.max + 1, level, lztsd),
-				getTileLon(colMinMax.min, level, lztsd),
-				getTileLon(colMinMax.max + 1, level, lztsd));
+		return Sector.fromDegrees(getTileLat(rowMinMax.min, level, lztsd), getTileLat(rowMinMax.max + 1, level, lztsd),
+				getTileLon(colMinMax.min, level, lztsd), getTileLon(colMinMax.max + 1, level, lztsd));
 	}
 
 	private static class MinMax
@@ -839,8 +833,7 @@ public class LocalLayerCreator extends JDialog
 				String[] list = level.list();
 				for (String file : list)
 				{
-					if (file.toLowerCase().matches(
-							"\\d+\\_\\d+\\Q." + extension.toLowerCase() + "\\E"))
+					if (file.toLowerCase().matches("\\d+\\_\\d+\\Q." + extension.toLowerCase() + "\\E"))
 					{
 						Pattern pattern = Pattern.compile("\\d+");
 						Matcher matcher = pattern.matcher(file);
@@ -906,8 +899,7 @@ public class LocalLayerCreator extends JDialog
 			LatLon topleft = Util.computeLatLonFromString(bottomleftField.getText());
 			LatLon bottomright = Util.computeLatLonFromString(toprightField.getText());
 			Sector sector =
-					new Sector(topleft.latitude, bottomright.latitude, topleft.longitude,
-							bottomright.longitude);
+					new Sector(topleft.latitude, bottomright.latitude, topleft.longitude, bottomright.longitude);
 
 			Integer fuzzI = fuzzField.getValue();
 			Double fuzz = null;
@@ -940,36 +932,33 @@ public class LocalLayerCreator extends JDialog
 			params.setValue(AVKey.RETAIN_LEVEL_ZERO_TILES, true);
 			params.setValue(AVKey.FORCE_LEVEL_ZERO_LOADS, true);
 
-			DelegateKit kit = new DelegateKit();
+			ImageDelegateKit kit = new ImageDelegateKit();
 			params.setValue(AVKeyMore.DELEGATE_KIT, kit);
 
-			kit.setRequesterDelegate(new LocalRequesterDelegate());
+			kit.setTileRequesterDelegate(new ImageLocalRequesterDelegate());
 
 			if (transparentCheck.isSelected())
 			{
-				kit.addTransformerDelegate(new TransparentColorTransformerDelegate(transparentColor
-						.getColor(), fuzz));
+				kit.addImageTransformerDelegate(new TransparentColorTransformerDelegate(transparentColor.getColor(),
+						fuzz));
 			}
 			if (maskedCheck.isSelected())
 			{
-				kit.addReaderDelegate(new MaskImageReaderDelegate());
+				kit.addTileReaderDelegate(new MaskImageReaderDelegate());
 			}
 
-			Document document =
-					DelegatorTiledImageLayer.createDelegatorTiledImageLayerConfigDocument(params);
+			Document document = DelegatorTiledImageLayer.createDelegatorTiledImageLayerConfigDocument(params);
 			XMLUtil.saveDocumentToFormattedFile(document, file.getAbsolutePath());
 
 			try
 			{
 				URL url = file.toURI().toURL();
-				layer =
-						new LayerDefinition(nameField.getText(), url, null, Icons.file.getURL(),
-								true, false);
+				layer = new LayerDefinition(nameField.getText(), url, null, Icons.file.getURL(), true, false);
 			}
 			catch (MalformedURLException e)
 			{
-				JOptionPane.showMessageDialog(this, "Error adding layer file: " + e, "Error",
-						JOptionPane.ERROR_MESSAGE);
+				JOptionPane
+						.showMessageDialog(this, "Error adding layer file: " + e, "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}

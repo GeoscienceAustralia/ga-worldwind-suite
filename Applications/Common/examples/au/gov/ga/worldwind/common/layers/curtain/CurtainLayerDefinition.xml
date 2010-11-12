@@ -2,36 +2,40 @@
 <Layer version="1" layerType="CurtainImageLayer">
 	
 	<DisplayName>Curtain</DisplayName>
-	<Service serviceName="CurtainTileService">
+	<Service serviceName="DelegatorTileService">
 		<URL>http://www.ga.gov.au/apps/world-wind/tiles.jsp</URL>
 	</Service>
+	<Delegates>
+		<Delegate>MaskReader</Delegate>
+		<Delegate>PassThroughZipRetriever</Delegate>
+	</Delegates>
 	
 	<!-- day month year hours:minutes:seconds timezone -->
 	<LastUpdate>19 09 2009 04:10:00 GMT</LastUpdate>
 	
-	<DatasetName>curtain_test</DatasetName>
-	<DataCacheName>GA/Curtain Test</DataCacheName>
+	<DatasetName>s310_23_blured_wb_convert</DatasetName>
+	<DataCacheName>GA/Seismic Lines/s310_23_blured_wb_convert</DataCacheName>
 	
-	<ImageFormat>application/jpg</ImageFormat>
+	<ImageFormat>application/zip</ImageFormat>
 	<AvailableImageFormats>
-		<ImageFormat>application/jpg</ImageFormat>
+		<ImageFormat>application/zip</ImageFormat>
 	</AvailableImageFormats>
-	<FormatSuffix>.jpg</FormatSuffix>
+	<FormatSuffix>.zip</FormatSuffix>
 	
-	<NumLevels count="7" numEmpty="0" />
+	<NumLevels count="8" numEmpty="0" />
 	<TileSize>
 		<Dimension width="512" height="512" />
 	</TileSize>
 	<FullSize>
-		<Dimension width="36610" height="13968" />
+		<Dimension width="52798" height="21423" />
 	</FullSize>
 	<Path>
-		<LatLon units="degrees" latitude="-32.74399255357542" longitude="114.05318859543719" />
-		<LatLon units="degrees" latitude="-34.136011379672276" longitude="114.26382145380674" />
+		<LatLon units="degrees" latitude="-28.88778" longitude="112.51076" />
+		<LatLon units="degrees" latitude="-29.8456" longitude="113.55251" />
 	</Path>
 	<CurtainTop>0</CurtainTop>
-	<CurtainBottom>-20000</CurtainBottom>
-	<FollowTerrain>true</FollowTerrain>
+	<CurtainBottom>-10000</CurtainBottom>
+	<FollowTerrain>false</FollowTerrain>
 	<Subsegments>10</Subsegments>
 	
 	<UseTransparentTextures>true</UseTransparentTextures>

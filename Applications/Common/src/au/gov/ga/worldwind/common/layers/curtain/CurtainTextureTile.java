@@ -26,9 +26,9 @@ public class CurtainTextureTile extends CurtainTile
 		return gov.nasa.worldwind.layers.TextureTile.getMemoryCache();
 	}
 
-	public CurtainTextureTile(CurtainLevel level, Segment segment, int row, int column)
+	public CurtainTextureTile(Segment segment, CurtainLevel level, int row, int column)
 	{
-		super(level, segment, row, column);
+		super(segment, level, row, column);
 	}
 
 	@Override
@@ -212,7 +212,7 @@ public class CurtainTextureTile extends CurtainTile
 			if (subTile == null)
 			{
 				Segment segment = nextLevel.computeSegmentForKey(key);
-				subTile = new CurtainTextureTile(nextLevel, segment, key.getRow(), key.getColumn());
+				subTile = createTextureTile(segment, nextLevel, key.getRow(), key.getColumn());
 			}
 
 			subTiles[i] = subTile;
@@ -220,13 +220,18 @@ public class CurtainTextureTile extends CurtainTile
 
 		return subTiles;
 	}
+	
+	protected CurtainTextureTile createTextureTile(Segment segment, CurtainLevel level, int row, int column)
+	{
+		return new CurtainTextureTile(segment, level, row, column);
+	}
 
-	private CurtainTextureTile getTileFromMemoryCache(TileKey tileKey)
+	protected CurtainTextureTile getTileFromMemoryCache(TileKey tileKey)
 	{
 		return (CurtainTextureTile) getMemoryCache().getObject(tileKey);
 	}
 
-	private void updateMemoryCache()
+	protected void updateMemoryCache()
 	{
 		if (this.getTileFromMemoryCache(this.getTileKey()) != null)
 			getMemoryCache().add(this.getTileKey(), this);

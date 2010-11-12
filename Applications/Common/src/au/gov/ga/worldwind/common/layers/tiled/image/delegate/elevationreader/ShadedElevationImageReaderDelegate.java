@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
+import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 
 public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDelegate
 {
@@ -44,7 +44,7 @@ public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDele
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
+	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.toLowerCase().startsWith(DEFINITION_STRING.toLowerCase()))
 		{
@@ -92,8 +92,8 @@ public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDele
 	@Override
 	protected BufferedImage generateImage(BufferWrapper elevations, int width, int height, Globe globe, Sector sector)
 	{
-		//image array has one less in width and height than verts array:
-		//this is because edge verts are shared between adjacent tiles
+		//image has one less in width and height than verts array, because normals are calculated using neighbors
+		//it would be optimal to read the neighboring tiles for normals on tile edges; this would fix visible tile edges
 
 		BufferedImage image = new BufferedImage(width - 1, height - 1, BufferedImage.TYPE_INT_ARGB);
 

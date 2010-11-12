@@ -382,10 +382,15 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 			for (int col = 0; col < colCount; col++)
 			{
 				Segment segment = level.computeSegmentForRowColumn(row, col);
-				CurtainTextureTile tile = new CurtainTextureTile(level, segment, row, col);
+				CurtainTextureTile tile = createCurtainTextureTile(segment, level, row, col);
 				this.topLevels.add(tile);
 			}
 		}
+	}
+	
+	protected CurtainTextureTile createCurtainTextureTile(Segment segment, CurtainLevel level, int row, int col)
+	{
+		return new CurtainTextureTile(segment, level, row, col);
 	}
 
 	private void loadAllTopLevelTextures(DrawContext dc)

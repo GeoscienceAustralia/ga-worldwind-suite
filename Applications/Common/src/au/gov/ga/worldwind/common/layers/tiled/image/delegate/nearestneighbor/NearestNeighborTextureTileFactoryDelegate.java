@@ -1,17 +1,18 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate.nearestneighbor;
 
-import org.w3c.dom.Element;
-
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.util.Level;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
+
+import org.w3c.dom.Element;
+
+import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.ITileFactoryDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTextureTile;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.TextureTileFactoryDelegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.TileFactoryDelegate;
 
 /**
- * Implementation of {@link TileFactoryDelegate} which creates
+ * Implementation of {@link ITileFactoryDelegate} which creates
  * {@link NearestNeighborTextureTile}s.
  * 
  * @author Michael de Hoog
@@ -21,13 +22,13 @@ public class NearestNeighborTextureTileFactoryDelegate extends TextureTileFactor
 	private final static String DEFINITION_STRING = "NearestNeighborTile";
 
 	@Override
-	public TextureTile createTextureTile(Sector sector, Level level, int row, int col)
+	public DelegatorTextureTile createTextureTile(Sector sector, Level level, int row, int col)
 	{
 		return new NearestNeighborTextureTile(sector, level, row, col, this);
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
+	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
 		{

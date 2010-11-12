@@ -10,6 +10,8 @@ import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.curtain.BasicTiledCurtainLayer;
+import au.gov.ga.worldwind.common.layers.curtain.delegate.DelegatorTiledCurtainLayer;
 import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
 import au.gov.ga.worldwind.common.layers.point.PointLayerUtils;
 import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
@@ -42,8 +44,35 @@ public class LayerFactory extends BasicLayerFactory
 		{
 			return new KMLLayer(domElement, params);
 		}
+		else if("CurtainImageLayer".equals(layerType))
+		{
+			return createTiledCurtainLayer(domElement, params);
+		}
 
 		return super.createFromLayerDocument(domElement, params);
+	}
+	
+	protected Layer createTiledCurtainLayer(Element domElement, AVList params)
+	{
+		if (params == null)
+			params = new AVListImpl();
+
+		Layer layer;
+		String serviceName = XMLUtil.getText(domElement, "Service/@serviceName");
+
+		if ("DelegatorTileService".equals(serviceName))
+		{
+			layer = new DelegatorTiledCurtainLayer(domElement, params);
+		}
+		else
+		{
+			layer = new BasicTiledCurtainLayer(domElement, params);
+		}
+
+		params = TimedExpirationHandler.getExpirationParams(domElement, params);
+		TimedExpirationHandler.registerLayer(layer, params);
+
+		return layer;
 	}
 
 	@Override

@@ -9,8 +9,8 @@ import gov.nasa.worldwind.util.Level;
 
 import javax.media.opengl.GL;
 
+import au.gov.ga.worldwind.common.layers.delegate.ITileFactoryDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTextureTile;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.TileFactoryDelegate;
 
 import com.sun.opengl.util.texture.Texture;
 
@@ -25,7 +25,7 @@ public class NearestNeighborTextureTile extends DelegatorTextureTile
 	private int numLevels = 0;
 
 	public NearestNeighborTextureTile(Sector sector, Level level, int row, int col,
-			TileFactoryDelegate delegate)
+			ITileFactoryDelegate<DelegatorTextureTile, Sector, Level> delegate)
 	{
 		super(sector, level, row, col, delegate);
 
@@ -41,8 +41,7 @@ public class NearestNeighborTextureTile extends DelegatorTextureTile
 		super.setTextureParameters(dc, t);
 
 		//set the magnification filter to nearest neighbor if this tile's level is the layer's last level
-		if ((numLevels > 0 && getLevelNumber() >= numLevels - 1)
-				|| dc.getCurrentLayer().isAtMaxResolution())
+		if ((numLevels > 0 && getLevelNumber() >= numLevels - 1) || dc.getCurrentLayer().isAtMaxResolution())
 		{
 			dc.getGL().glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
 		}

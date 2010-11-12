@@ -1,13 +1,14 @@
 package au.gov.ga.worldwind.animator.layers;
 
+import gov.nasa.worldwind.avlist.AVList;
+
 import org.w3c.dom.Element;
 
-import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.layers.TextureTile;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.LocalRequesterDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.IDelegatorLayer;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTextureTile;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageLocalRequesterDelegate;
 
 /**
  * A local requester delegate that will immediately perform texture load from a
@@ -19,10 +20,10 @@ import au.gov.ga.worldwind.common.layers.tiled.image.delegate.LocalRequesterDele
  * 
  * @author Michael de Hoog
  */
-public class ImmediateLocalRequesterDelegate extends LocalRequesterDelegate
+public class ImmediateLocalRequesterDelegate extends ImageLocalRequesterDelegate
 {
 	@Override
-	public Runnable createRequestTask(TextureTile tile, DelegatorTiledImageLayer layer)
+	public Runnable createRequestTask(DelegatorTextureTile tile, IDelegatorLayer<DelegatorTextureTile> layer)
 	{
 		Runnable task = super.createRequestTask(tile, layer);
 		if (!ImmediateMode.isImmediate())
@@ -36,9 +37,9 @@ public class ImmediateLocalRequesterDelegate extends LocalRequesterDelegate
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
+	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
-		Delegate superDelegate = super.fromDefinition(definition, layerElement, params);
+		IDelegate superDelegate = super.fromDefinition(definition, layerElement, params);
 		if (superDelegate != null)
 		{
 			return new ImmediateLocalRequesterDelegate();

@@ -14,9 +14,9 @@ import java.net.URL;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.LayerFactory;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegateFactory;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.LocalRequesterDelegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.URLRequesterDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageDelegateFactory;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageLocalRequesterDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageURLRequesterDelegate;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
@@ -40,9 +40,10 @@ public class AnimationLayerLoader
 	
 	static
 	{
-		DelegateFactory.registerDelegate(ImmediateURLRequesterDelegate.class);
-		DelegateFactory.registerReplacementClass(URLRequesterDelegate.class, ImmediateURLRequesterDelegate.class);
-		DelegateFactory.registerReplacementClass(LocalRequesterDelegate.class, ImmediateLocalRequesterDelegate.class);
+		ImageDelegateFactory.get().registerDelegate(ImmediateURLRequesterDelegate.class);
+		ImageDelegateFactory.get().registerDelegate(ImmediateLocalRequesterDelegate.class);
+		ImageDelegateFactory.get().registerReplacementClass(ImageURLRequesterDelegate.class, ImmediateURLRequesterDelegate.class);
+		ImageDelegateFactory.get().registerReplacementClass(ImageLocalRequesterDelegate.class, ImmediateLocalRequesterDelegate.class);
 	}
 	
 	/**

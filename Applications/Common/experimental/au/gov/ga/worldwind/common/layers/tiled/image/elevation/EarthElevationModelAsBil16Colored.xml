@@ -113,7 +113,7 @@
 	</SectorResolutionLimit>
 
 	<UseTransparentTextures>true</UseTransparentTextures>
-	<ForceLevelZeroLoads>true</ForceLevelZeroLoads>
+	<ForceLevelZeroLoads>false</ForceLevelZeroLoads>
 	<RetainLevelZeroTiles>true</RetainLevelZeroTiles>
 	<TextureFormat>image/dds</TextureFormat>
 	<UseMipMaps>true</UseMipMaps>

@@ -22,10 +22,10 @@ import javax.swing.event.ChangeListener;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.RenderDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.IRenderDelegate;
 
-public class ShaderRenderDelegate implements RenderDelegate
+public class ShaderRenderDelegate implements IRenderDelegate
 {
 	private final static String DEFINITION_STRING = "ShaderRender";
 
@@ -209,7 +209,7 @@ public class ShaderRenderDelegate implements RenderDelegate
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
+	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
 			return new ShaderRenderDelegate();

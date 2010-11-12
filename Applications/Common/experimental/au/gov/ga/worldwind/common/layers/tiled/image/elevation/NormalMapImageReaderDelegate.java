@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.Delegate;
+import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader.ElevationImageReaderDelegate;
 
 public class NormalMapImageReaderDelegate extends ElevationImageReaderDelegate
@@ -39,7 +39,7 @@ public class NormalMapImageReaderDelegate extends ElevationImageReaderDelegate
 	}
 
 	@Override
-	public Delegate fromDefinition(String definition, Element layerElement, AVList params)
+	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.toLowerCase().startsWith(DEFINITION_STRING.toLowerCase()))
 		{

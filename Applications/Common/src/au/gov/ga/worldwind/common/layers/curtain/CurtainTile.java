@@ -16,7 +16,7 @@ public class CurtainTile implements Cacheable
 	// The following is late bound because it's only selectively needed and costly to create
 	private String path;
 
-	public CurtainTile(CurtainLevel level, Segment segment, int row, int column)
+	public CurtainTile(Segment segment, CurtainLevel level, int row, int column)
 	{
 		this.segment = segment;
 		this.level = level;
@@ -62,7 +62,7 @@ public class CurtainTile implements Cacheable
 		return column;
 	}
 
-	public final TileKey getTileKey()
+	public TileKey getTileKey()
 	{
 		return tileKey;
 	}

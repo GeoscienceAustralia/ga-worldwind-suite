@@ -64,7 +64,8 @@ public class FileElevationModel extends BoundedBasicElevationModel
 		@Override
 		public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 		{
-			return Util.getLocalTileURL(tile, context, imageFormat, "bil");
+			return Util.getLocalTileURL(tile.getLevel().getService(), tile.getLevel().getDataset(),
+					tile.getLevelNumber(), tile.getRow(), tile.getColumn(), context, imageFormat, "bil");
 		}
 	}
 
@@ -113,8 +114,8 @@ public class FileElevationModel extends BoundedBasicElevationModel
 		}
 		catch (java.io.IOException e)
 		{
-			Logging.logger().log(java.util.logging.Level.SEVERE,
-					"ElevationModel.ExceptionReadingElevationFile", url.toString());
+			Logging.logger().log(java.util.logging.Level.SEVERE, "ElevationModel.ExceptionReadingElevationFile",
+					url.toString());
 			throw e;
 		}
 	}
@@ -184,9 +185,7 @@ public class FileElevationModel extends BoundedBasicElevationModel
 			}
 			catch (IOException e)
 			{
-				String msg =
-						Logging.getMessage("ElevationModel.ExceptionRequestingElevations",
-								tileKey.toString());
+				String msg = Logging.getMessage("ElevationModel.ExceptionRequestingElevations", tileKey.toString());
 				Logging.logger().log(java.util.logging.Level.FINE, msg, e);
 			}
 		}

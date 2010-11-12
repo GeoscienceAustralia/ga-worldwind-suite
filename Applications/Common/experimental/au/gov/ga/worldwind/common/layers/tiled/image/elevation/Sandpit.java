@@ -10,11 +10,11 @@ import gov.nasa.worldwind.render.WWIcon;
 import java.io.InputStream;
 
 import au.gov.ga.worldwind.common.layers.LayerFactory;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegateFactory;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.colortoalpha.ColorLimitTransformerDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.transformer.ColorLimitTransformerDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.transformer.ResizeTransformerDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageDelegateFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader.ColorMapElevationImageReaderDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader.ShadedElevationImageReaderDelegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.resize.ResizeTransformerDelegate;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 
 public class Sandpit extends ApplicationTemplate
@@ -46,11 +46,8 @@ public class Sandpit extends ApplicationTemplate
 			ElevationModel elevationModel = (ElevationModel) emf.createFromConfigSource(eis, null);
 			getWwd().getModel().getGlobe().setElevationModel(elevationModel);
 
-			DelegateFactory.registerDelegate(NormalMapImageReaderDelegate.class);
-			DelegateFactory.registerDelegate(ShaderRenderDelegate.class);
-			DelegateFactory.registerDelegate(ResizeTransformerDelegate.class);
-			DelegateFactory.registerDelegate(ColorMapElevationImageReaderDelegate.class);
-			DelegateFactory.registerDelegate(ColorLimitTransformerDelegate.class);
+			ImageDelegateFactory.get().registerDelegate(NormalMapImageReaderDelegate.class);
+			ImageDelegateFactory.get().registerDelegate(ShaderRenderDelegate.class);
 
 			LayerFactory factory = new LayerFactory();
 

@@ -11,7 +11,6 @@ import gov.nasa.worldwind.geom.coords.MGRSCoord;
 import gov.nasa.worldwind.geom.coords.UTMCoordConverterAccessible;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
-import gov.nasa.worldwind.util.Tile;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,11 +75,9 @@ public class Util
 	 *            If the format is not given, search using this file extension
 	 * @return URL pointing to tile's file, or null if not found
 	 */
-	public static URL getLocalTileURL(Tile tile, URL context, String format, String defaultExt)
+	public static URL getLocalTileURL(String service, String dataset, int level, int row, int col, URL context,
+			String format, String defaultExt)
 	{
-		String service = tile.getLevel().getService();
-		String dataset = tile.getLevel().getDataset();
-
 		if (dataset == null || dataset.length() <= 0)
 			dataset = service;
 		else if (service != null && service.length() > 0)
@@ -126,9 +123,8 @@ public class Util
 		}
 
 		String filename =
-				tile.getLevelNumber() + File.separator + Util.paddedInt(tile.getRow(), 4)
-						+ File.separator + Util.paddedInt(tile.getRow(), 4) + "_"
-						+ Util.paddedInt(tile.getColumn(), 4) + "." + ext;
+				level + File.separator + Util.paddedInt(row, 4) + File.separator + Util.paddedInt(row, 4) + "_"
+						+ Util.paddedInt(col, 4) + "." + ext;
 
 		try
 		{
@@ -138,13 +134,10 @@ public class Util
 				String entry1 = filename;
 				//if file is not found, attempt to find a file with the defaultExt in the zip as well
 				String entry2 =
-						ext.equals(defaultExt) ? null : filename.substring(0, filename.length()
-								- ext.length())
+						ext.equals(defaultExt) ? null : filename.substring(0, filename.length() - ext.length())
 								+ defaultExt;
 
-				URL url =
-						entry2 != null ? Util.zipEntryUrl(parent, entry1, entry2) : Util
-								.zipEntryUrl(parent, entry1);
+				URL url = entry2 != null ? Util.zipEntryUrl(parent, entry1, entry2) : Util.zipEntryUrl(parent, entry1);
 				return url;
 			}
 			else if (parent.isDirectory())
@@ -286,20 +279,19 @@ public class Util
 
 	public static long getScaledLengthMillis(double scale, LatLon beginLatLon, LatLon endLatLon)
 	{
-		return getScaledLengthMillis(beginLatLon, endLatLon, (long) (4000 / scale),
-				(long) (20000 / scale));
+		return getScaledLengthMillis(beginLatLon, endLatLon, (long) (4000 / scale), (long) (20000 / scale));
 	}
 
-	public static long getScaledLengthMillis(LatLon beginLatLon, LatLon endLatLon,
-			long minLengthMillis, long maxLengthMillis)
+	public static long getScaledLengthMillis(LatLon beginLatLon, LatLon endLatLon, long minLengthMillis,
+			long maxLengthMillis)
 	{
 		Angle sphericalDistance = LatLon.greatCircleDistance(beginLatLon, endLatLon);
 		double scaleFactor = angularRatio(sphericalDistance, Angle.POS180);
 		return (long) mixDouble(scaleFactor, minLengthMillis, maxLengthMillis);
 	}
 
-	public static long getScaledLengthMillis(double beginZoom, double endZoom,
-			long minLengthMillis, long maxLengthMillis)
+	public static long getScaledLengthMillis(double beginZoom, double endZoom, long minLengthMillis,
+			long maxLengthMillis)
 	{
 		double scaleFactor = Math.abs(endZoom - beginZoom) / Math.max(endZoom, beginZoom);
 		scaleFactor = clampDouble(scaleFactor, 0.0, 1.0);
@@ -341,7 +333,7 @@ public class Util
 	{
 		return value < min ? min : (value > max ? max : value);
 	}
-	
+
 	public static Position computePositionFromString(String positionString)
 	{
 		return computePositionFromString(positionString, null);
@@ -354,21 +346,21 @@ public class Util
 			return null;
 		String latlonString = positionString.substring(0, lastIndexOfSpace);
 		String elevationString = positionString.substring(lastIndexOfSpace + 1);
-		
+
 		double elevation;
 		try
 		{
 			elevation = Double.parseDouble(elevationString);
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			return null;
 		}
-		
+
 		LatLon ll = computeLatLonFromString(latlonString, globe);
-		if(ll == null)
+		if (ll == null)
 			return null;
-		
+
 		return new Position(ll, elevation);
 	}
 
@@ -547,8 +539,7 @@ public class Util
 	 *            or the latitude band?
 	 * @return Point represented by UTM string
 	 */
-	public static LatLon computeLatLonFromUTMString(String coordString, Globe globe,
-			boolean charRepresentsHemisphere)
+	public static LatLon computeLatLonFromUTMString(String coordString, Globe globe, boolean charRepresentsHemisphere)
 	{
 		coordString = coordString.trim();
 		Pattern pattern = Pattern.compile(UTM_COORDINATE_REGEX);
@@ -564,20 +555,19 @@ public class Util
 			//otherwise, latitudeBand will be the actual latitudeBand
 			//convert back to hemisphere strings:
 			String hemisphere =
-					charRepresentsHemisphere ? (latitudeBand <= 'N' ? AVKey.NORTH : AVKey.SOUTH)
-							: (latitudeBand >= 'N' ? AVKey.NORTH : AVKey.SOUTH);
+					charRepresentsHemisphere ? (latitudeBand <= 'N' ? AVKey.NORTH : AVKey.SOUTH) : (latitudeBand >= 'N'
+							? AVKey.NORTH : AVKey.SOUTH);
 
 			try
 			{
-				final UTMCoordConverterAccessible converter =
-						new UTMCoordConverterAccessible(globe);
+				final UTMCoordConverterAccessible converter = new UTMCoordConverterAccessible(globe);
 				long err = converter.convertUTMToGeodetic(zone, hemisphere, easting, northing);
 
 				if (err == UTMCoordConverterAccessible.UTM_NO_ERROR)
 				{
 					LatLon latlon =
-							new LatLon(Angle.fromRadians(converter.getLatitude()),
-									Angle.fromRadians(converter.getLongitude()));
+							new LatLon(Angle.fromRadians(converter.getLatitude()), Angle.fromRadians(converter
+									.getLongitude()));
 					return latlon;
 				}
 			}
@@ -599,13 +589,14 @@ public class Util
 	}
 
 	/**
-	 * @return Whether the provided string is blank (<code>null</code>, empty string, or contains only whitespace)
+	 * @return Whether the provided string is blank (<code>null</code>, empty
+	 *         string, or contains only whitespace)
 	 */
 	public static boolean isBlank(String string)
 	{
 		return string == null || string.trim().isEmpty();
 	}
-	
+
 	public static int clamp(int value, int min, int max)
 	{
 		return Math.max(min, Math.min(max, value));
@@ -618,12 +609,9 @@ public class Util
 
 	public static LatLon clampLatLon(LatLon latlon, Sector sector)
 	{
-		double lat =
-				clamp(latlon.latitude.degrees, sector.getMinLatitude().degrees,
-						sector.getMaxLatitude().degrees);
+		double lat = clamp(latlon.latitude.degrees, sector.getMinLatitude().degrees, sector.getMaxLatitude().degrees);
 		double lon =
-				clamp(latlon.longitude.degrees, sector.getMinLongitude().degrees,
-						sector.getMaxLongitude().degrees);
+				clamp(latlon.longitude.degrees, sector.getMinLongitude().degrees, sector.getMaxLongitude().degrees);
 
 		return LatLon.fromDegrees(lat, lon);
 	}
