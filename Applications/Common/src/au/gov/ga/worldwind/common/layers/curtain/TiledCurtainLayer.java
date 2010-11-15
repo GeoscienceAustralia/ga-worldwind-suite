@@ -60,7 +60,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 	// Diagnostic flags
 	private boolean showImageTileOutlines = false;
 	private boolean drawTileBoundaries = false;
-	private boolean drawTileIDs = true;
+	private boolean drawTileIDs = false;
 	private boolean drawBoundingVolumes = false;
 
 	// Stuff computed each frame
