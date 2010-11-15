@@ -207,13 +207,13 @@ public class Path
 		return segment.getHorizontalDelta() * length.radians;
 	}
 
-	/*public synchronized Angle getPercentLength(double percent)
+	public synchronized Angle getPercentLength(double percent)
 	{
-		return Angle.fromRadians(length.radians * percent);
+		return Angle.fromRadians(getPercentLengthInRadians(percent));
 	}
 
 	public synchronized double getPercentLengthInRadians(double percent)
 	{
 		return length.radians * percent;
-	}*/
+	}
 }

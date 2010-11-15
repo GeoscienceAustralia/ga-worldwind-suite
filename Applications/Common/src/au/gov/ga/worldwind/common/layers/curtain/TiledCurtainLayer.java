@@ -559,25 +559,25 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 	private boolean meetsRenderCriteria(DrawContext dc, CurtainTextureTile tile)
 	{
 		return this.levels.isFinalLevel(tile.getLevelNumber())
-				|| !needToSplit(dc, tile.getSegment());
+				|| !needToSplit(dc, tile);
 	}
 
-	private boolean needToSplit(DrawContext dc, Segment segment)
+	private boolean needToSplit(DrawContext dc, CurtainTextureTile tile)
 	{
-		Vec4[] points =
-				path.getPointsInSegment(dc, segment, curtainTop, curtainBottom, subsegments,
-						followTerrain);
-		Vec4 centerPoint =
-				path.getSegmentCenterPoint(dc, segment, curtainTop, curtainBottom, followTerrain);
+		Vec4[] points = path.getPointsInSegment(dc, tile.getSegment(), curtainTop, curtainBottom, subsegments, followTerrain);
+		Vec4 centerPoint = path.getSegmentCenterPoint(dc, tile.getSegment(), curtainTop, curtainBottom, followTerrain);
 
 		View view = dc.getView();
-		double minDistance = view.getEyePoint().distanceTo3(centerPoint);
+		Vec4 eyePoint = view.getEyePoint();
+		double minDistance = eyePoint.distanceTo3(centerPoint);
 		for (Vec4 point : points)
 		{
-			minDistance = Math.min(minDistance, view.getEyePoint().distanceTo3(point));
+			minDistance = Math.min(minDistance, eyePoint.distanceTo3(point));
 		}
 
-		double segmentLength = path.getSegmentLengthInRadians(segment);
+		double percent = 1d / (double) tile.getLevel().getColumnCount();
+		double segmentLength = path.getPercentLengthInRadians(percent);
+		//double segmentLength = path.getSegmentLengthInRadians(segment);
 		double cellSize = (Math.PI * segmentLength * dc.getGlobe().getRadius()) / 20; // TODO
 
 		return !(Math.log10(cellSize) <= (Math.log10(minDistance) - this.getSplitScale()));
