@@ -39,11 +39,8 @@ public class ImmediateLocalRequesterDelegate extends ImageLocalRequesterDelegate
 	@Override
 	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
-		IDelegate superDelegate = super.fromDefinition(definition, layerElement, params);
-		if (superDelegate != null)
-		{
+		if (definition.equalsIgnoreCase(DEFINITION_STRING))
 			return new ImmediateLocalRequesterDelegate();
-		}
 		return null;
 	}
 }

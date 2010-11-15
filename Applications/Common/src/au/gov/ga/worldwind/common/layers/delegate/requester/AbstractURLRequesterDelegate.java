@@ -6,6 +6,8 @@ import gov.nasa.worldwind.util.Logging;
 
 import java.net.URL;
 
+import org.w3c.dom.Element;
+
 import au.gov.ga.worldwind.common.layers.delegate.IDelegatorLayer;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegatorTile;
 import au.gov.ga.worldwind.common.layers.delegate.ITileRequesterDelegate;
@@ -18,6 +20,14 @@ import au.gov.ga.worldwind.common.layers.delegate.ITileRequesterDelegate;
  */
 public abstract class AbstractURLRequesterDelegate<TILE extends IDelegatorTile> implements ITileRequesterDelegate<TILE>
 {
+	protected final static String DEFINITION_STRING = "URLRequester";
+	
+	@Override
+	public String toDefinition(Element layerElement)
+	{
+		return DEFINITION_STRING;
+	}
+	
 	@Override
 	public void forceTextureLoad(TILE tile, IDelegatorLayer<TILE> layer)
 	{

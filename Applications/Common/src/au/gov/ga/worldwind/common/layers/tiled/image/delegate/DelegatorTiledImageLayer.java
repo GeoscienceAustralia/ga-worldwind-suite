@@ -213,6 +213,14 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	@Override
 	protected void requestTexture(DrawContext dc, TextureTile tile)
 	{
+		//Only request textures for tiles that intersect the layer's sector.
+		//This makes perfect sense, and am unsure why the TiledImageLayer doesn't do this. 
+		if(!tile.getSector().intersects(getSector()))
+		{
+			markResourceAbsent(tile);
+			return;
+		}
+		
 		validateTileClass(tile);
 
 		currentGlobe = dc.getGlobe();
@@ -667,6 +675,11 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 
 	@Override
 	public void markResourceAbsent(DelegatorTextureTile tile)
+	{
+		getLevels().markResourceAbsent(tile);
+	}
+	
+	public void markResourceAbsent(TextureTile tile)
 	{
 		getLevels().markResourceAbsent(tile);
 	}

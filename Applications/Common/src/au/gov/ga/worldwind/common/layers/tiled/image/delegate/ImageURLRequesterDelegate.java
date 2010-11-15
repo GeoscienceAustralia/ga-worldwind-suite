@@ -10,19 +10,11 @@ import au.gov.ga.worldwind.common.layers.delegate.requester.AbstractURLRequester
 public class ImageURLRequesterDelegate extends AbstractURLRequesterDelegate<DelegatorTextureTile> implements
 		IImageTileRequesterDelegate
 {
-	private final static String DEFINITION_STRING = "URLRequester";
-
 	@Override
 	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
 			return new ImageURLRequesterDelegate();
 		return null;
-	}
-
-	@Override
-	public String toDefinition(Element layerElement)
-	{
-		return DEFINITION_STRING;
 	}
 }
