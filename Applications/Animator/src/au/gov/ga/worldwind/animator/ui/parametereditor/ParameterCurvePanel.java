@@ -14,6 +14,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.animator.application.LAFConstants;
 import au.gov.ga.worldwind.animator.ui.frameslider.CurrentFrameChangeListener;
@@ -56,12 +57,22 @@ public class ParameterCurvePanel implements ParameterCurveListener, CurrentFrame
 		return backingPanel;
 	}
 	
+	public void addCurveForParameter(Parameter p)
+	{
+		if (p == null)
+		{
+			return;
+		}
+		
+		addCurve(new ParameterCurve(p));
+	}
+	
 	/**
 	 * Add the provided curve to this panel
 	 */
 	public void addCurve(ParameterCurve curve)
 	{
-		if (curves.contains(curve))
+		if (curve == null || curves.contains(curve))
 		{
 			return;
 		}
@@ -80,6 +91,55 @@ public class ParameterCurvePanel implements ParameterCurveListener, CurrentFrame
 		
 		backingPanel.validate();
 		backingPanel.repaint();
+		
+		if (!curves.isEmpty())
+		{
+			updateCurveBounds(curves.get(0));
+		}
+	}
+	
+	/**
+	 * Remove the curve for the provided
+	 */
+	public void removeCurveForParameter(Parameter parameter)
+	{
+		if (parameter == null)
+		{
+			return;
+		}
+		
+		// Copy over the curves to be kept
+		List<ParameterCurve> tmpCurves = new ArrayList<ParameterCurve>(curves.size());
+		for (ParameterCurve curve : curves)
+		{
+			if (!curve.getParameter().equals(parameter))
+			{
+				tmpCurves.add(curve);
+			}
+			else
+			{
+				curve.destroy();
+			}
+		}
+		
+		backingPanel.removeAll();
+		curves.clear();
+		
+		// Add them back into the panel
+		for (ParameterCurve curve : tmpCurves)
+		{
+			addCurve(curve);
+		}
+		
+		if (!curves.isEmpty())
+		{
+			updateCurveBounds(curves.get(0));
+		}
+		
+		if (curves.isEmpty())
+		{
+			backingPanel.repaint();
+		}
 	}
 	
 	public void destroy()
@@ -97,6 +157,21 @@ public class ParameterCurvePanel implements ParameterCurveListener, CurrentFrame
 	@Override
 	public void curveBoundsChanged(ParameterCurve source, ParameterCurveBounds newBounds)
 	{
+		updateCurveBounds(source);
+	}
+	
+	/**
+	 * Update the curve bounds of all parameter curves in this panel to
+	 * match those provided.
+	 */
+	public void updateCurveBounds(ParameterCurve source)
+	{
+		ParameterCurveBounds newBounds = source.getCurveBounds();
+		if (newBounds == null)
+		{
+			return;
+		}
+		
 		if (settingBounds.get())
 		{
 			return;
@@ -109,8 +184,7 @@ public class ParameterCurvePanel implements ParameterCurveListener, CurrentFrame
 				continue;
 			}
 			
-			if (newBounds.getMinFrame() == curve.getCurveBounds().getMinFrame() && 
-					newBounds.getMaxFrame() == curve.getCurveBounds().getMaxFrame())
+			if (curve.getCurveBounds() != null && newBounds.getMinFrame() == curve.getCurveBounds().getMinFrame() && newBounds.getMaxFrame() == curve.getCurveBounds().getMaxFrame())
 			{
 				continue;
 			}

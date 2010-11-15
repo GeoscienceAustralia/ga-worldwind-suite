@@ -213,6 +213,12 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		{
 			boundsLock.lock();
 			curveBounds = new ParameterCurveBounds(0, model.getMaxFrame(), model.getMinValue(), model.getMaxValue());
+			
+			// If the value is contstant, adjust the curve bounds so we don't end up with minValue == maxValue
+			if (curveBounds.getValueWindow() == 0)
+			{
+				curveBounds = new ParameterCurveBounds(curveBounds.getMinFrame(), curveBounds.getMaxFrame(), curveBounds.getMinValue() - 1, curveBounds.getMaxValue() + 1);
+			}
 		}
 		finally
 		{
@@ -541,6 +547,10 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 	 */
 	private void updateKeyNodeMarkers()
 	{
+		if (isDestroyed)
+		{
+			return;
+		}
 		try
 		{
 			keyNodeMarkersLock.writeLock().lock();
@@ -601,6 +611,14 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		{
 			keyNodeMarkersLock.readLock().unlock();
 		}
+	}
+	
+	/**
+	 * @return The parameter this curve is representing
+	 */
+	public Parameter getParameter()
+	{
+		return model.getParameter();
 	}
 	
 	/**
@@ -919,6 +937,10 @@ public class ParameterCurve extends JPanel implements ParameterCurveModelListene
 		@Override
 		public void componentResized(ComponentEvent e)
 		{
+			if (!isVisible())
+			{
+				return;
+			}
 			updateKeyNodeMarkers();
 			axisProperties = null;
 			repaint();

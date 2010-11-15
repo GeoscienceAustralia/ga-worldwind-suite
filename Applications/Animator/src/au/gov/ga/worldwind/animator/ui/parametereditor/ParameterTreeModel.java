@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.animator.ui.parametereditor;
 import gov.nasa.worldwind.globes.ElevationModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.event.TreeModelEvent;
@@ -26,7 +27,10 @@ class ParameterTreeModel implements TreeModel, AnimationEventListener
 {
 	private Animation animation;
 	
-	private List<TreeModelListener> listeners = new ArrayList<TreeModelListener>(); 
+	private List<TreeModelListener> treeListeners = new ArrayList<TreeModelListener>(); 
+	private List<ParameterSelectionListener> selectionListeners = new ArrayList<ParameterSelectionListener>();
+	
+	private List<Parameter> selectedParameters = new ArrayList<Parameter>();
 	
 	public ParameterTreeModel(Animation animation)
 	{
@@ -49,7 +53,7 @@ class ParameterTreeModel implements TreeModel, AnimationEventListener
 		}
 		if (parent instanceof Animatable)
 		{
-			return new ArrayList<Parameter>(((Animatable)parent).getParameters()).get(index);
+			return getEditableParameters((Animatable)parent).get(index);
 		}
 		return null;
 	}
@@ -96,7 +100,7 @@ class ParameterTreeModel implements TreeModel, AnimationEventListener
 		}
 		else if (parent instanceof Animatable)
 		{
-			return new ArrayList<Parameter>(((Animatable)parent).getParameters()).indexOf(child);
+			return getEditableParameters((Animatable)parent).indexOf(child);
 		}
 		return -1;
 	}
@@ -104,14 +108,32 @@ class ParameterTreeModel implements TreeModel, AnimationEventListener
 	@Override
 	public void addTreeModelListener(TreeModelListener l)
 	{
-		this.listeners.add(l);
+		if (treeListeners.contains(l))
+		{
+			return;
+		}
+		this.treeListeners.add(l);
 
 	}
 
 	@Override
 	public void removeTreeModelListener(TreeModelListener l)
 	{
-		this.listeners.remove(l);
+		this.treeListeners.remove(l);
+	}
+	
+	public void addParameterSelectionListener(ParameterSelectionListener l)
+	{
+		if (selectionListeners.contains(l))
+		{
+			return;
+		}
+		selectionListeners.add(l);
+	}
+	
+	public void removeParameterSelectionListener(ParameterSelectionListener l)
+	{
+		selectionListeners.remove(l);
 	}
 	
 	@Override
@@ -138,7 +160,7 @@ class ParameterTreeModel implements TreeModel, AnimationEventListener
 	protected void notifyTreeChanged(Object source)
 	{
 		TreeModelEvent e = new TreeModelEvent(source, new Object[]{animation});
-		for (TreeModelListener listener : listeners)
+		for (TreeModelListener listener : treeListeners)
 		{
 			listener.treeStructureChanged(e);
 		}
@@ -149,11 +171,66 @@ class ParameterTreeModel implements TreeModel, AnimationEventListener
 		List<Animatable> result = new ArrayList<Animatable>();
 		for (Animatable animatable : animation.getAnimatableObjects())
 		{
-			if (!animatable.getParameters().isEmpty())
+			if (!getEditableParameters(animatable).isEmpty())
 			{
 				result.add(animatable);
 			}
 		}
 		return result;
+	}
+	
+	private ArrayList<Parameter> getEditableParameters(Animatable parent)
+	{
+		return new ArrayList<Parameter>(((Animatable)parent).getParameters());
+	}
+	
+	public boolean isSelected(Parameter p)
+	{
+		return selectedParameters.contains(p);
+	}
+	
+	public void selectParameter(Parameter p)
+	{
+		selectedParameters.add(p);
+		notifySelectedStatusChanged(p);
+	}
+	
+	public void unselectParameter(Parameter p)
+	{
+		selectedParameters.remove(p);
+		notifySelectedStatusChanged(p);
+	}
+
+	public List<Parameter> getSelectedParameters()
+	{
+		return Collections.unmodifiableList(selectedParameters);
+	}
+
+	public void toggleParameterSelection(Parameter p)
+	{
+		if (isSelected(p))
+		{
+			unselectParameter(p);
+		}
+		else
+		{
+			selectParameter(p);
+		}
+	}
+	
+	private void notifySelectedStatusChanged(Parameter p)
+	{
+		for (int i = selectionListeners.size() - 1; i >= 0; i--)
+		{
+			selectionListeners.get(i).selectedStatusChanged(p);
+		}
+	}
+	
+	/**
+	 * An interface for classes that want to be notified of changes to a parameter's 'selection' status
+	 */
+	public static interface ParameterSelectionListener
+	{
+		void selectedStatusChanged(Parameter p);
 	}
 }

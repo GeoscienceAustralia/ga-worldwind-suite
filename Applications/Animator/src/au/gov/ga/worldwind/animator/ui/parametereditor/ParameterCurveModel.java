@@ -2,6 +2,8 @@ package au.gov.ga.worldwind.animator.ui.parametereditor;
 
 import java.util.List;
 
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+
 
 /**
  * An interface for a model that backs the {@link ParameterCurve} component
@@ -86,4 +88,6 @@ public interface ParameterCurveModel
 	{
 		void curveChanged();
 	}
+
+	Parameter getParameter();
 }

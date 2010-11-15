@@ -98,6 +98,12 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 		try
 		{
 			frontBufferLock.lock();
+			
+			if (curvePointsFrontBuffer.isEmpty())
+			{
+				return parameter.getDefaultValue();
+			}
+			
 			if (frame <= curvePointsFrontBuffer.firstKey())
 			{
 				return curvePointsFrontBuffer.ceilingEntry(frame).getValue().value;
@@ -152,6 +158,12 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 	public int getCurrentFrame()
 	{
 		return parameter.getAnimation().getCurrentFrame();
+	}
+	
+	@Override
+	public Parameter getParameter()
+	{
+		return parameter;
 	}
 	
 	@Override

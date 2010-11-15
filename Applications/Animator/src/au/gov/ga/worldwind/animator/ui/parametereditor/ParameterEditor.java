@@ -13,7 +13,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
@@ -24,10 +23,13 @@ import au.gov.ga.worldwind.animator.ui.NameableTree;
 import au.gov.ga.worldwind.animator.util.Validate;
 
 /**
- * The parameter editor panel used to edit individual animation {@link Parameter}
+ * The parameter editor panel used to edit animation {@link Parameter}
  * curves on a 2D x-y time-value axis.
+ * <p/>
+ * Contains an animation tree for selecting parameters, and a {@link ParameterCurvePanel} used
+ * to contain multiple {@link ParameterCurve}s.
  */
-public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
+public class ParameterEditor extends JFrame implements ChangeOfAnimationListener, ParameterTreeModel.ParameterSelectionListener
 {
 	private static final long serialVersionUID = 20101101L;
 
@@ -39,7 +41,7 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 	private JScrollPane rightScrollPane;
 	
 	private JTree parameterTree;
-	private TreeModel treeModel;
+	private ParameterTreeModel treeModel;
 
 	private ParameterCurvePanel curvePanel;
 	
@@ -85,9 +87,10 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 
 	private void addSelectedCurves()
 	{
-		curvePanel.addCurve(new ParameterCurve(targetApplication.getCurrentAnimation().getCamera().getEyeLat()));
-		curvePanel.addCurve(new ParameterCurve(targetApplication.getCurrentAnimation().getCamera().getEyeLon()));
-		curvePanel.addCurve(new ParameterCurve(targetApplication.getCurrentAnimation().getCamera().getEyeElevation()));
+		for (Parameter p : treeModel.getSelectedParameters())
+		{
+			curvePanel.addCurveForParameter(p);
+		}
 	}
 	
 	private void setupSplitPane()
@@ -95,8 +98,9 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 		setLayout(new BorderLayout());
 		
 		treeModel = new ParameterTreeModel(targetApplication.getCurrentAnimation());
+		treeModel.addParameterSelectionListener(this);
 		parameterTree = new NameableTree(treeModel);
-		parameterTree.setCellRenderer(new ParameterTreeRenderer());
+		parameterTree.setCellRenderer(new ParameterTreeRenderer(treeModel));
 		parameterTree.setEditable(false);
 		parameterTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		parameterTree.setToggleClickCount(-1);
@@ -123,13 +127,37 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 	public void updateAnimation(Animation newAnimation)
 	{
 		treeModel = new ParameterTreeModel(newAnimation);
+		treeModel.addParameterSelectionListener(this);
 		parameterTree.setModel(treeModel);
+		parameterTree.setCellRenderer(new ParameterTreeRenderer(treeModel));
 		parameterTree.validate();
+		
 		removeAndDestroyAllCurves();
+		
+		treeModel.selectParameter(targetApplication.getCurrentAnimation().getCamera().getEyeLat());
+		treeModel.selectParameter(targetApplication.getCurrentAnimation().getCamera().getEyeLon());
+		treeModel.selectParameter(targetApplication.getCurrentAnimation().getCamera().getEyeElevation());
+		
 		if (isVisible())
 		{
-			addSelectedCurves();
 			repaint();
+		}
+	}
+
+	@Override
+	public void selectedStatusChanged(Parameter p)
+	{
+		if (!isVisible())
+		{
+			return;
+		}
+		if (treeModel.isSelected(p))
+		{
+			curvePanel.addCurveForParameter(p);
+		}
+		else
+		{
+			curvePanel.removeCurveForParameter(p);
 		}
 	}
 }
