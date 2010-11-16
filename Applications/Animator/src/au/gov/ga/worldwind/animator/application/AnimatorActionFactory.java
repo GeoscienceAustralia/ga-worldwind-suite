@@ -56,6 +56,7 @@ public class AnimatorActionFactory
 	private SelectableAction showCrosshairsAction;
 	
 	private SelectableAction showParameterEditorAction;
+	private SelectableAction showWmsBrowserAction;
 	
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
@@ -439,6 +440,18 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		// Show wms editor
+		showWmsBrowserAction = new SelectableAction(getMessage(getShowWmsBrowserMenuLabelKey()), null, false);
+		showWmsBrowserAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
+		showWmsBrowserAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.setWmsBrowserVisible(showWmsBrowserAction.isSelected());
+			}
+		});
+		
 		// Debug key frames
 		debugKeyFramesAction = new BasicAction(getMessage(getKeyValuesMenuLabelKey()), null);
 		debugKeyFramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
@@ -678,5 +691,10 @@ public class AnimatorActionFactory
 	public SelectableAction getDynamicStereoAction()
 	{
 		return dynamicStereoAction;
+	}
+	
+	public SelectableAction getShowWmsBrowserAction()
+	{
+		return showWmsBrowserAction;
 	}
 }

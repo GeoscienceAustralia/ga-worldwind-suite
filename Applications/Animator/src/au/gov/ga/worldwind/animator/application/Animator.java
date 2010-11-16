@@ -102,6 +102,7 @@ import au.gov.ga.worldwind.animator.util.FileFilters;
 import au.gov.ga.worldwind.animator.util.FileFilters.XmlFilter;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
+import au.gov.ga.worldwind.wmsbrowser.WmsBrowser;
 
 /**
  * The primary application class for the Animator application.
@@ -144,6 +145,9 @@ public class Animator
 	/** A window used to edit parameters in 2D space */
 	private ParameterEditor parameterEditor;
 
+	/** A tool used to browse for and add WMS layers to the current animation */
+	private WmsBrowser wmsBrowser;
+	
 	/** The primary world wind canvas */
 	private WorldWindowGLCanvas wwd;
 
@@ -253,6 +257,7 @@ public class Animator
 		initialiseStatusBar();
 		initialiseMenuBar();
 		initialiseParameterEditor();
+		initialiseWmsBrowser();
 
 		initialiseAnimationListeners();
 
@@ -754,6 +759,7 @@ public class Animator
 		menu.setMnemonic(KeyEvent.VK_W);
 		menuBar.add(menu);
 		actionFactory.getShowParameterEditorAction().addToMenu(menu);
+		actionFactory.getShowWmsBrowserAction().addToMenu(menu);
 
 		// Debug
 		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
@@ -769,6 +775,11 @@ public class Animator
 	{
 		this.parameterEditor = new ParameterEditor(this);
 		changeOfAnimationListeners.add(parameterEditor);
+	}
+	
+	private void initialiseWmsBrowser()
+	{
+		this.wmsBrowser = new WmsBrowser(getMessage(getAnimatorApplicationTitleKey()));
 	}
 
 	/**
@@ -1732,6 +1743,18 @@ public class Animator
 	{
 		parameterEditor.setVisible(visible);
 		actionFactory.getShowParameterEditorAction().setSelected(visible);
+	}
+	
+	public void setWmsBrowserVisible(boolean visible)
+	{
+		if (visible)
+		{
+			wmsBrowser.show();
+		}
+		else
+		{
+			wmsBrowser.hide();
+		}
 	}
 
 	void scaleAnimation()

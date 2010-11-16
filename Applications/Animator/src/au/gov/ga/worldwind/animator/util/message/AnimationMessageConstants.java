@@ -132,5 +132,6 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getZoomAllMenuLabelKey() { return "animator.gui.parametereditor.zoomall.label"; }
 	public static String getZoomFrameMenuLabelKey() { return "animator.gui.parametereditor.zoomframe.label"; }
 	public static String getZoomValueMenuLabelKey() { return "animator.gui.parametereditor.zoomvalue.label"; }
+	public static String getShowWmsBrowserMenuLabelKey() { return "animator.gui.menu.showwmsbrowser.label"; }
 	
 }
