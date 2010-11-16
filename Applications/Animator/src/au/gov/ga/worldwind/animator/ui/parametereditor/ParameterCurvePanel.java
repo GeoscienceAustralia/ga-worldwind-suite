@@ -20,6 +20,7 @@ import au.gov.ga.worldwind.animator.application.LAFConstants;
 import au.gov.ga.worldwind.animator.ui.frameslider.CurrentFrameChangeListener;
 import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterCurve.ParameterCurveListener;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Range;
 
 /**
  * A panel that holds multiple {@link ParameterCurve}s, and draws various annotations over them
@@ -157,6 +158,10 @@ public class ParameterCurvePanel implements ParameterCurveListener, CurrentFrame
 	@Override
 	public void curveBoundsChanged(ParameterCurve source, ParameterCurveBounds newBounds)
 	{
+		if (settingBounds.get())
+		{
+			return;
+		}
 		updateCurveBounds(source);
 	}
 	
@@ -172,10 +177,6 @@ public class ParameterCurvePanel implements ParameterCurveListener, CurrentFrame
 			return;
 		}
 		
-		if (settingBounds.get())
-		{
-			return;
-		}
 		settingBounds.set(true);
 		for (ParameterCurve curve : curves)
 		{
@@ -184,12 +185,96 @@ public class ParameterCurvePanel implements ParameterCurveListener, CurrentFrame
 				continue;
 			}
 			
-			if (curve.getCurveBounds() != null && newBounds.getMinFrame() == curve.getCurveBounds().getMinFrame() && newBounds.getMaxFrame() == curve.getCurveBounds().getMaxFrame())
+			if (curve.getCurveBounds() != null && 
+					newBounds.getMinFrame() == curve.getCurveBounds().getMinFrame() && 
+					newBounds.getMaxFrame() == curve.getCurveBounds().getMaxFrame())
 			{
 				continue;
 			}
 			
 			curve.setCurveFrameBounds(newBounds.getMinFrame(), newBounds.getMaxFrame());
+		}
+		settingBounds.set(false);
+		backingPanel.repaint();
+	}
+	
+	/**
+	 * Update the curve bounds of all parameter curves in this panel to
+	 * match the frame range provided.
+	 */
+	public void updateCurveBoundsFrameRange(Range<Double> frameRange)
+	{
+		if (frameRange == null)
+		{
+			return;
+		}
+		
+		settingBounds.set(true);
+		for (ParameterCurve curve : curves)
+		{
+			if (curve.getCurveBounds() != null && 
+					frameRange.getMinValue() == curve.getCurveBounds().getMinFrame() && 
+					frameRange.getMaxValue() == curve.getCurveBounds().getMaxFrame())
+			{
+				continue;
+			}
+			
+			curve.setCurveFrameBounds(frameRange.getMinValue(), frameRange.getMaxValue());
+		}
+		settingBounds.set(false);
+		backingPanel.repaint();
+	}
+	
+	/**
+	 * Zoom all curves to fit their bounds in both the x (frame) and y (value) directions
+	 */
+	public void zoomToFit()
+	{
+		// Calculate the fitting bounds for each curve, and keep track of the frame range that encompasses all included curves
+		settingBounds.set(true);
+		Range<Double> frameRange = new Range<Double>(0d, 0d); 
+		for (ParameterCurve curve : curves)
+		{
+			curve.setCurveBounds(null);
+			frameRange = frameRange.union(curve.getCurveBounds().getFrameRange());
+		}
+		settingBounds.set(false);
+
+		// Update each curve to use the calculated maximum frame range
+		updateCurveBoundsFrameRange(frameRange);
+	}
+
+	/**
+	 * Zoom all curves to fit their bounds in the x (frame) direction
+	 */
+	public void zoomToFitFrame()
+	{
+		settingBounds.set(true);
+		Range<Double> frameRange = new Range<Double>(0d, 0d); 
+		for (ParameterCurve curve : curves)
+		{
+			ParameterCurveBounds oldBounds = curve.getCurveBounds();
+			curve.setCurveBounds(null);
+			curve.setCurveValueBounds(oldBounds.getMinValue(), oldBounds.getMaxValue());
+			frameRange = frameRange.union(curve.getCurveBounds().getFrameRange());
+		}
+		settingBounds.set(false);
+
+		// Update each curve to use the calculated maximum frame range
+		updateCurveBoundsFrameRange(frameRange);
+	}
+
+	/**
+	 * Zoom all curves to fit their bounds in the y (value) direction
+	 */
+	public void zoomToFitValue()
+	{
+		settingBounds.set(true);
+		for (ParameterCurve curve : curves)
+		{
+			ParameterCurveBounds oldBounds = curve.getCurveBounds();
+			curve.setCurveBounds(null);
+			curve.setCurveFrameBounds(oldBounds.getMinFrame(), oldBounds.getMaxFrame());
 		}
 		settingBounds.set(false);
 		backingPanel.repaint();
@@ -268,4 +353,5 @@ public class ParameterCurvePanel implements ParameterCurveListener, CurrentFrame
 			
 		}
 	}
+
 }

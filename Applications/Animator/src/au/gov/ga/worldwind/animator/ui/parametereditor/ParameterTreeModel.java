@@ -201,6 +201,12 @@ class ParameterTreeModel implements TreeModel, AnimationEventListener
 		notifySelectedStatusChanged(p);
 	}
 
+	public void unselectAllParameters()
+	{
+		selectedParameters.clear();
+		notifySelectedStatusesChanged();
+	}
+	
 	public List<Parameter> getSelectedParameters()
 	{
 		return Collections.unmodifiableList(selectedParameters);
@@ -226,11 +232,21 @@ class ParameterTreeModel implements TreeModel, AnimationEventListener
 		}
 	}
 	
+	private void notifySelectedStatusesChanged()
+	{
+		for (int i = selectionListeners.size() - 1; i >= 0; i--)
+		{
+			selectionListeners.get(i).selectedStatusesChanged();
+		}
+	}
+	
 	/**
 	 * An interface for classes that want to be notified of changes to a parameter's 'selection' status
 	 */
 	public static interface ParameterSelectionListener
 	{
 		void selectedStatusChanged(Parameter p);
+		void selectedStatusesChanged();
 	}
+
 }

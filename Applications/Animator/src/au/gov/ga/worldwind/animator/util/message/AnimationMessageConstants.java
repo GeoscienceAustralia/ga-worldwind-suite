@@ -128,5 +128,9 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getParameterEditorLockedBezierMenuLabelKey() { return "animator.gui.parametereditor.lockedbezier.label"; }
 	public static String getParameterEditorUnlockedBezierMenuLabelKey() { return "animator.gui.parametereditor.unlockedbezier.label"; }
 	public static String getParameterEditorLinearMenuLabelKey() { return "animator.gui.parametereditor.linear.label"; }
+	public static String getUnselectAllMenuLabelKey() { return "animator.gui.parametereditor.unselectall.label"; }
+	public static String getZoomAllMenuLabelKey() { return "animator.gui.parametereditor.zoomall.label"; }
+	public static String getZoomFrameMenuLabelKey() { return "animator.gui.parametereditor.zoomframe.label"; }
+	public static String getZoomValueMenuLabelKey() { return "animator.gui.parametereditor.zoomvalue.label"; }
 	
 }

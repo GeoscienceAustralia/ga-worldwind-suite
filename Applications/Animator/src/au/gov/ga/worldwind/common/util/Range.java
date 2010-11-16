@@ -17,8 +17,42 @@ public class Range<C extends Comparable<C>>
 	 */
 	public Range(C minValue, C maxValue)
 	{
-		this.minValue = minValue;
-		this.maxValue = maxValue;
+		this.minValue = minValue == null ? null : min(minValue, maxValue);
+		this.maxValue = maxValue == null ? null : max(minValue, maxValue);
+	}
+	
+	private C min(C value1, C value2)
+	{
+		if (value1 == null)
+		{
+			return value2;
+		}
+		if (value2 == null)
+		{
+			return value1;
+		}
+		if (value1.compareTo(value2) <= 0)
+		{
+			return value1;
+		}
+		return value2;
+	}
+	
+	private C max(C value1, C value2)
+	{
+		if (value1 == null)
+		{
+			return value2;
+		}
+		if (value2 == null)
+		{
+			return value1;
+		}
+		if (value1.compareTo(value2) > 0)
+		{
+			return value1;
+		}
+		return value2;
 	}
 	
 	/**
@@ -26,10 +60,8 @@ public class Range<C extends Comparable<C>>
 	 */
 	public Range(C minValue, boolean includeMin,  C maxValue, boolean includeMax)
 	{
-		this.minValue = minValue;
+		this(minValue, maxValue);
 		this.includeMin = includeMin;
-		
-		this.maxValue = maxValue;
 		this.includeMax = includeMax;
 	}
 
@@ -161,5 +193,19 @@ public class Range<C extends Comparable<C>>
 	public int hashCode()
 	{
 		return (minValue == null ? minValue.hashCode() : 31) + (maxValue == null ? maxValue.hashCode() : 131);
+	}
+	
+	/**
+	 * @return A new range that is the union of this range and the provided other
+	 */
+	public Range<C> union(Range<C> other)
+	{
+		C min = this.minValue == null || other.minValue == null ? null : min(this.minValue, other.minValue);
+		boolean includeMin = min != null && ((min == this.minValue && this.includeMin) || (min == other.minValue && other.includeMin));
+		
+		C max = this.maxValue == null || other.maxValue == null ? null : max(this.maxValue, other.maxValue);
+		boolean includeMax = max != null && ((max == this.maxValue && this.includeMax) || (max == other.maxValue && other.includeMax));
+		
+		return new Range<C>(min, includeMin, max, includeMax);
 	}
 }

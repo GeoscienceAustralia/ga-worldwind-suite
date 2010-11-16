@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Utility methods to help when unit testing.
@@ -69,6 +71,19 @@ public class TestUtils
 		catch (NoSuchFieldException e)
 		{
 			return findField(clazz.getSuperclass(), fieldName);
+		}
+	}
+	
+	public static Date createDate(String dateString)
+	{
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		try
+		{
+			return dateFormat.parse(dateString);
+		}
+		catch (Exception e)
+		{
+			return null;
 		}
 	}
 }

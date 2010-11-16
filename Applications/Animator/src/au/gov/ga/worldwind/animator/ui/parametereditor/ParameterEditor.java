@@ -1,10 +1,12 @@
 package au.gov.ga.worldwind.animator.ui.parametereditor;
 
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getParameterEditorWindowLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -20,7 +22,9 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.animator.application.ChangeOfAnimationListener;
 import au.gov.ga.worldwind.animator.ui.NameableTree;
+import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.ui.BasicAction;
 
 /**
  * The parameter editor panel used to edit animation {@link Parameter}
@@ -45,6 +49,12 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 
 	private ParameterCurvePanel curvePanel;
 	
+	// Actions used in the parameter editor
+	private BasicAction unselectAllAction;
+	private BasicAction zoomAllToFitAction;
+	private BasicAction zoomFrameToFitAction;
+	private BasicAction zoomValueToFitAction;
+	
 	public ParameterEditor(Animator targetApplication)
 	{
 		Validate.notNull(targetApplication, "A Animator instance must be provided");
@@ -60,7 +70,8 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 				ParameterEditor.this.targetApplication.setParameterEditorVisible(false);
 			}
 		});
-		
+	
+		setupActions();
 		setupSplitPane();
 	}
 
@@ -93,6 +104,48 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 		}
 	}
 	
+	private void setupActions()
+	{
+		unselectAllAction = new BasicAction(getMessage(getUnselectAllMenuLabelKey()), Icons.uncheckall.getIcon());
+		unselectAllAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				treeModel.unselectAllParameters();
+			}
+		});
+		
+		zoomAllToFitAction = new BasicAction(getMessage(getZoomAllMenuLabelKey()), Icons.zoomxy.getIcon());
+		zoomAllToFitAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				curvePanel.zoomToFit();
+			}
+		});
+		
+		zoomFrameToFitAction = new BasicAction(getMessage(getZoomFrameMenuLabelKey()), Icons.zoomx.getIcon());
+		zoomFrameToFitAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				curvePanel.zoomToFitFrame();
+			}
+		});
+		
+		zoomValueToFitAction = new BasicAction(getMessage(getZoomValueMenuLabelKey()), Icons.zoomy.getIcon());
+		zoomValueToFitAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				curvePanel.zoomToFitValue();
+			}
+		});
+	}
+	
 	private void setupSplitPane()
 	{
 		setLayout(new BorderLayout());
@@ -118,6 +171,11 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 		containerPane.setRightComponent(rightScrollPane);
 		
 		toolbar = new JToolBar();
+		toolbar.add(unselectAllAction);
+		toolbar.addSeparator();
+		toolbar.add(zoomAllToFitAction);
+		toolbar.add(zoomFrameToFitAction);
+		toolbar.add(zoomValueToFitAction);
 		
 		add(toolbar, BorderLayout.NORTH);
 		add(containerPane, BorderLayout.CENTER);
@@ -159,5 +217,13 @@ public class ParameterEditor extends JFrame implements ChangeOfAnimationListener
 		{
 			curvePanel.removeCurveForParameter(p);
 		}
+	}
+	
+	@Override
+	public void selectedStatusesChanged()
+	{
+		removeAndDestroyAllCurves();
+		addSelectedCurves();
+		repaint();
 	}
 }
