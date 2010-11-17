@@ -23,11 +23,12 @@ import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.CurrentlySelectedObject;
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
+import au.gov.ga.worldwind.animator.panels.AnimatorCollapsiblePanel;
 import au.gov.ga.worldwind.animator.ui.NameableTree;
 import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
 
 /**
  * A panel that allows the user to view and manipulate {@link Animatable} objects,
@@ -35,7 +36,7 @@ import au.gov.ga.worldwind.common.ui.BasicAction;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public class AnimationBrowserPanel extends CollapsiblePanelBase
+public class AnimationBrowserPanel extends CollapsiblePanelBase implements AnimatorCollapsiblePanel
 {
 	private static final long serialVersionUID = 20100907L;
 

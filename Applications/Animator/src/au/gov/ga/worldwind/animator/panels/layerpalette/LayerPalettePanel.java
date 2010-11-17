@@ -36,10 +36,11 @@ import au.gov.ga.worldwind.animator.application.LAFConstants;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifierFactory;
-import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
+import au.gov.ga.worldwind.animator.panels.AnimatorCollapsiblePanel;
 import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
 
 /**
  * A panel that allows the user to locate and select a layer for inclusion
@@ -47,7 +48,7 @@ import au.gov.ga.worldwind.common.ui.BasicAction;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public class LayerPalettePanel extends CollapsiblePanelBase 
+public class LayerPalettePanel extends CollapsiblePanelBase implements AnimatorCollapsiblePanel
 {
 	private static final long serialVersionUID = 20100910L;
 

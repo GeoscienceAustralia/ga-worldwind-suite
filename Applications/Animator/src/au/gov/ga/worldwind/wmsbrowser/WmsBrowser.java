@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 
+import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
@@ -29,6 +30,9 @@ public class WmsBrowser
 {
 	private JFrame frame;
 	private JSplitPane splitPane;
+	
+	private CollapsibleSplitPane sidebar;
+	
 	
 	public WmsBrowser(String parentApplicationTitle)
 	{

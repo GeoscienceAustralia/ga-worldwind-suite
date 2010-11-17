@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.panels;
+package au.gov.ga.worldwind.common.ui.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -7,7 +7,6 @@ import java.awt.Window;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
-import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
 
 /**
  * A base implementation of the {@link CollapsiblePanel} interface that extends

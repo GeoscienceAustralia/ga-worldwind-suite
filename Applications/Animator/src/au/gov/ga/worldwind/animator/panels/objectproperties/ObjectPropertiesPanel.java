@@ -30,10 +30,11 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.animator.panels.CollapsiblePanelBase;
+import au.gov.ga.worldwind.animator.panels.AnimatorCollapsiblePanel;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.CurrentFrameChangeListener;
 import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
 
 /**
  * A panel used to display and edit properties (parameters) of the currently selected animation object
@@ -47,7 +48,8 @@ import au.gov.ga.worldwind.animator.util.Validate;
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public class ObjectPropertiesPanel extends CollapsiblePanelBase implements CurrentlySelectedObject.ChangeListener, 
+public class ObjectPropertiesPanel extends CollapsiblePanelBase implements AnimatorCollapsiblePanel,
+																		   CurrentlySelectedObject.ChangeListener, 
 																		   AnimationEventListener, 
 																		   ChangeFrameListener,
 																		   CurrentFrameChangeListener,
