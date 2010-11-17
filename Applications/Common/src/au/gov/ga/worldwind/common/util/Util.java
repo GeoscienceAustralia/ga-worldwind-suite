@@ -23,6 +23,9 @@ import java.util.zip.ZipFile;
 
 public class Util
 {
+	/** The settings folder name to use for GA world wind settings */
+	public static final String SETTINGS_FOLDER_NAME = ".gaww";
+	
 	public final static double METER_TO_FEET = 3.280839895;
 	public final static double METER_TO_MILE = 0.000621371192;
 
@@ -680,5 +683,20 @@ public class Util
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * @return The user's home directory
+	 */
+	public static File getUserGAWorldWindDirectory()
+	{
+		String home = System.getProperty("user.home");
+		File homeDir = new File(home);
+		File dir = new File(homeDir, SETTINGS_FOLDER_NAME);
+		if (!dir.exists())
+		{
+			dir.mkdirs();
+		}
+		return dir;
 	}
 }
