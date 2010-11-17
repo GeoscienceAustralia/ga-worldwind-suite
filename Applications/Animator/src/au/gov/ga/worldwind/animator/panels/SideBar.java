@@ -34,7 +34,7 @@ public class SideBar extends JPanel implements ChangeOfAnimationListener
 	private List<CollapsibleGroup> groups = new ArrayList<CollapsibleGroup>();
 	
 	/** The panels backing the collapsible pane */
-	private List<CollapsiblePanel> panels = new ArrayList<CollapsiblePanel>();
+	private List<AnimatorCollapsiblePanel> panels = new ArrayList<AnimatorCollapsiblePanel>();
 	
 	/** 
 	 * The parent of the side bar. 
@@ -49,7 +49,7 @@ public class SideBar extends JPanel implements ChangeOfAnimationListener
 	/** The saved location of the parent divider bar. Used to re-inflate the parent split plane if needed. */
 	private int savedDividerSize;
 	
-	public SideBar(JSplitPane parent, List<CollapsiblePanel> panels) 
+	public SideBar(JSplitPane parent, List<AnimatorCollapsiblePanel> panels) 
 	{
 		super(new BorderLayout());
 		
@@ -70,9 +70,9 @@ public class SideBar extends JPanel implements ChangeOfAnimationListener
 	/**
 	 * Add the provided panels to the collapsible pane
 	 */
-	private void addPanels(List<CollapsiblePanel> panels)
+	private void addPanels(List<AnimatorCollapsiblePanel> panels)
 	{
-		for (CollapsiblePanel panel : panels)
+		for (AnimatorCollapsiblePanel panel : panels)
 		{
 			CollapsibleGroup group = new CollapsibleGroup();
 			group.setIcon(panel.getIcon());
@@ -132,7 +132,7 @@ public class SideBar extends JPanel implements ChangeOfAnimationListener
 	@Override
 	public void updateAnimation(Animation newAnimation)
 	{
-		for (CollapsiblePanel panel : panels)
+		for (AnimatorCollapsiblePanel panel : panels)
 		{
 			panel.updateAnimation(newAnimation);
 		}

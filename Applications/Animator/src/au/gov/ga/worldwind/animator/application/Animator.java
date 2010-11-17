@@ -82,7 +82,7 @@ import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.camerapath.CameraPathLayer;
 import au.gov.ga.worldwind.animator.layers.misc.GridOverlayLayer;
-import au.gov.ga.worldwind.animator.panels.CollapsiblePanel;
+import au.gov.ga.worldwind.animator.panels.AnimatorCollapsiblePanel;
 import au.gov.ga.worldwind.animator.panels.SideBar;
 import au.gov.ga.worldwind.animator.panels.animationbrowser.AnimationBrowserPanel;
 import au.gov.ga.worldwind.animator.panels.layerpalette.LayerPalettePanel;
@@ -652,7 +652,7 @@ public class Animator
 		objectPropertiesPanel = new ObjectPropertiesPanel(getCurrentAnimation());
 		layerPalettePanel = new LayerPalettePanel(getCurrentAnimation());
 
-		List<CollapsiblePanel> collapsiblePanels = new ArrayList<CollapsiblePanel>(3);
+		List<AnimatorCollapsiblePanel> collapsiblePanels = new ArrayList<AnimatorCollapsiblePanel>(3);
 		collapsiblePanels.add(animationBrowserPanel);
 		collapsiblePanels.add(objectPropertiesPanel);
 		collapsiblePanels.add(layerPalettePanel);

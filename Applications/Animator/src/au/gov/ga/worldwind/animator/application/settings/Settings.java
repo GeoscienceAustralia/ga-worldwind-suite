@@ -19,6 +19,7 @@ import au.gov.ga.worldwind.animator.layers.LayerIdentifierImpl;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierImpl;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
@@ -30,10 +31,6 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
  */
 public class Settings
 {
-
-	/** The settings folder name to use */
-	private static final String SETTINGS_FOLDER_NAME = ".gaww";
-	
 	/** The settings file name to use */
 	private static final String SETTINGS_FILE_NAME = "animatorSettings.xml";
 	
@@ -82,7 +79,7 @@ public class Settings
 			saveUtilityLayerFlags(rootElement);
 			saveDebugFlags(rootElement);
 			
-			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(getUserDirectory(), SETTINGS_FILE_NAME)));
+			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(Util.getUserGAWorldWindDirectory(), SETTINGS_FILE_NAME)));
 		}
 		catch (Exception e)
 		{
@@ -178,7 +175,7 @@ public class Settings
 		instance = new Settings();
 		
 		// If no file is detected, continue with the vanilla instance
-		File settingsFile = new File(getUserDirectory(), SETTINGS_FILE_NAME);
+		File settingsFile = new File(Util.getUserGAWorldWindDirectory(), SETTINGS_FILE_NAME);
 		if (!settingsFile.exists())
 		{
 			return;
@@ -298,22 +295,7 @@ public class Settings
 			instance.setSplitLocation(splitLocation);
 		}
 	}
-	
-	/**
-	 * @return The user's home directory
-	 */
-	private static File getUserDirectory()
-	{
-		String home = System.getProperty("user.home");
-		File homeDir = new File(home);
-		File dir = new File(homeDir, SETTINGS_FOLDER_NAME);
-		if (!dir.exists())
-		{
-			dir.mkdirs();
-		}
-		return dir;
-	}
-	
+
 	// ----------------------------------
 	// Instance members
 	// ----------------------------------

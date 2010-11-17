@@ -8,15 +8,15 @@ import javax.swing.Icon;
 import javax.swing.JPanel;
 
 /**
- * A base implementation of the {@link CollapsiblePanel} interface that extends
+ * A base implementation of the {@link AnimatorCollapsiblePanel} interface that extends
  * {@link JPanel}.
  * <p/>
- * Provides convenience implementations of the {@link CollapsiblePanel} methods.
+ * Provides convenience implementations of the {@link AnimatorCollapsiblePanel} methods.
  * 
  * @author James Navin (james.navin@ga.gov.au)
  *
  */
-public abstract class CollapsiblePanelBase extends JPanel implements CollapsiblePanel
+public abstract class CollapsiblePanelBase extends JPanel implements AnimatorCollapsiblePanel
 {
 	private static final long serialVersionUID = 20100906L;
 	

@@ -1,19 +1,15 @@
-package au.gov.ga.worldwind.animator.panels;
+package au.gov.ga.worldwind.common.ui.panels;
 
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
-import au.gov.ga.worldwind.animator.application.ChangeOfAnimationListener;
-import au.gov.ga.worldwind.animator.util.Nameable;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitLayout;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
 
 /**
  * An interface for panels that can be collapsed using a {@link CollapsibleSplitPane}.
- * 
- * @author James Navin (james.navin@ga.gov.au)
  */
-public interface CollapsiblePanel extends Nameable, ChangeOfAnimationListener
+public interface CollapsiblePanel
 {
 	/**
 	 * @return The {@link JPanel} backing this {@link CollapsiblePanel}
