@@ -12,7 +12,10 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 
+import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitConstraints;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
+import au.gov.ga.worldwind.common.ui.collapsiblesplit.l2fprod.CollapsibleGroup;
+import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
@@ -32,7 +35,9 @@ public class WmsBrowser
 	private JSplitPane splitPane;
 	
 	private CollapsibleSplitPane sidebar;
+	private JPanel informationPanel;
 	
+	private WmsServerBrowserPanel serverBrowserPanel;
 	
 	public WmsBrowser(String parentApplicationTitle)
 	{
@@ -40,6 +45,7 @@ public class WmsBrowser
 		
 		initialiseWindow(parentApplicationTitle);
 		initialiseWindowContents();
+		initialiseBrowserPanel();
 	}
 
 	private void initialiseWindow(String parentApplicationTitle)
@@ -66,6 +72,19 @@ public class WmsBrowser
 		splitPane.setOneTouchExpandable(true);
 		splitPane.setDividerLocation(WmsBrowserSettings.get().getSplitLocation());
 		panel.add(splitPane, BorderLayout.CENTER);
+		
+		sidebar = new CollapsibleSplitPane();
+		splitPane.setLeftComponent(sidebar);
+		
+		informationPanel = new JPanel();
+		splitPane.setRightComponent(informationPanel);
+	}
+	
+	private void initialiseBrowserPanel()
+	{
+		serverBrowserPanel = new WmsServerBrowserPanel();
+		
+		addPanelToSidebar(serverBrowserPanel);
 	}
 	
 	/** Show the WMS Browser tool */
@@ -115,5 +134,27 @@ public class WmsBrowser
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Add the provided panel to the sidebar
+	 */
+	private void addPanelToSidebar(CollapsiblePanel panel)
+	{
+		CollapsibleGroup group = new CollapsibleGroup();
+		group.setIcon(panel.getIcon());
+		group.setVisible(panel.isOn());
+		group.setCollapsed(!panel.isExpanded());
+		group.setScrollOnExpand(true);
+		group.setLayout(new BorderLayout());
+		group.setTitle(panel.getName());
+		group.add(panel.getPanel(), BorderLayout.CENTER);
+
+		CollapsibleSplitConstraints c = new CollapsibleSplitConstraints();
+		c.expanded = panel.isExpanded();
+		c.resizable = panel.isResizable();
+		c.weight = panel.getWeight();
+
+		sidebar.add(group, c);
 	}
 }

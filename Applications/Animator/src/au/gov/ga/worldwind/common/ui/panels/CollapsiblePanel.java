@@ -84,4 +84,9 @@ public interface CollapsiblePanel
 	 * @return The icon associated with this panel, or <code>null</code> if one has not been specified.
 	 */
 	public Icon getIcon();
+	
+	/**
+	 * @return The display name of this panel
+	 */
+	public String getName();
 }
