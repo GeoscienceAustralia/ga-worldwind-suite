@@ -7,16 +7,16 @@ import java.awt.Window;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
+import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
+
 /**
- * A base implementation of the {@link AnimatorCollapsiblePanel} interface that extends
+ * A base implementation of the {@link CollapsiblePanel} interface that extends
  * {@link JPanel}.
  * <p/>
- * Provides convenience implementations of the {@link AnimatorCollapsiblePanel} methods.
- * 
- * @author James Navin (james.navin@ga.gov.au)
+ * Provides convenience implementations of the {@link CollapsiblePanel} methods.
  *
  */
-public abstract class CollapsiblePanelBase extends JPanel implements AnimatorCollapsiblePanel
+public abstract class CollapsiblePanelBase extends JPanel implements CollapsiblePanel
 {
 	private static final long serialVersionUID = 20100906L;
 	
