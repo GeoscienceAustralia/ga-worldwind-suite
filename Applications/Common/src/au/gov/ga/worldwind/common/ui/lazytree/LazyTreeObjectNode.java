@@ -1,12 +1,11 @@
 package au.gov.ga.worldwind.common.ui.lazytree;
 
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
 
 public class LazyTreeObjectNode extends LazyTreeNode
 {
-	public LazyTreeObjectNode(ITreeObject userObject, DefaultTreeModel model)
+	public LazyTreeObjectNode(ITreeObject userObject, LazyTreeModel model)
 	{
 		super(userObject, model);
 		if (userObject instanceof ILazyTreeObject)
@@ -20,7 +19,7 @@ public class LazyTreeObjectNode extends LazyTreeNode
 	}
 
 	@Override
-	public MutableTreeNode[] loadChildren(DefaultTreeModel model) throws Exception
+	public MutableTreeNode[] loadChildren(LazyTreeModel model) throws Exception
 	{
 		if (getUserObject() instanceof ILazyTreeObject)
 		{
@@ -33,7 +32,7 @@ public class LazyTreeObjectNode extends LazyTreeNode
 		return null;
 	}
 
-	public void refreshChildren(DefaultTreeModel model)
+	public void refreshChildren(LazyTreeModel model)
 	{
 		if (getUserObject() instanceof ITreeObject)
 		{

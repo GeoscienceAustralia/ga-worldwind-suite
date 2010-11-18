@@ -3,7 +3,6 @@ package au.gov.ga.worldwind.common.ui.lazytree;
 import javax.swing.SwingWorker;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -14,9 +13,9 @@ public class LazyTreeController implements TreeWillExpandListener
 {
 	private SwingWorkerFactory<MutableTreeNode[], ?> workerFactory = new DefaultWorkerFactory();
 	private LazyTree tree;
-	private DefaultTreeModel model;
+	private LazyTreeModel model;
 
-	public LazyTreeController(LazyTree tree, DefaultTreeModel model)
+	public LazyTreeController(LazyTree tree, LazyTreeModel model)
 	{
 		this.tree = tree;
 		this.model = model;

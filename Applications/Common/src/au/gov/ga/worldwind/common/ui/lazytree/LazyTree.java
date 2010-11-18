@@ -1,10 +1,9 @@
 package au.gov.ga.worldwind.common.ui.lazytree;
 
-import javax.swing.tree.DefaultTreeModel;
 
 public class LazyTree extends LoadingTree
 {
-	public LazyTree(DefaultTreeModel model)
+	public LazyTree(LazyTreeModel model)
 	{
 		super(model);
 		LazyTreeController controller = new LazyTreeController(this, model);
