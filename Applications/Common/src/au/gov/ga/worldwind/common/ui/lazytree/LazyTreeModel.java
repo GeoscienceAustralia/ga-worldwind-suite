@@ -11,6 +11,6 @@ public interface LazyTreeModel extends TreeModel
 
 	void removeNodeFromParent(MutableTreeNode childAt);
 
-	void insertNodeInto(MutableTreeNode mutableTreeNode, MutableTreeNode lazyTreeNode, int i);
+	void insertNodeInto(MutableTreeNode newChild, MutableTreeNode parent, int index);
 
 }
