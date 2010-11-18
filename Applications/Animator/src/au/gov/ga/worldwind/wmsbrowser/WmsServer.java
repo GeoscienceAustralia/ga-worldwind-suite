@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.wmsbrowser;
 
+import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;
@@ -42,6 +43,13 @@ public interface WmsServer
 	void removeLoadListener(LoadListener listener);
 	
 	/**
+	 * Inject a {@link WmsCapabilitiesService} to use for retrieving capabilities
+	 * <p/>
+	 * Useful for testing etc. when a working WMS server is not available.
+	 */
+	void setCapabilitiesService(WmsCapabilitiesService service);
+	
+	/**
 	 * An interface for listeners that want to be notified of loading events
 	 * for a {@link WmsServer}
 	 */
@@ -52,5 +60,14 @@ public interface WmsServer
 		
 		/** Notified when a server has finished loading it's layers list */
 		void loaded(WmsServer server);
+		
+		/** Notified when loading has failed. Includes the exception that caused the failure */
+		void loadFailed(WmsServer server, Exception e);
+	}
+	
+	interface WmsCapabilitiesService
+	{
+		/** Retrieve the WMS Capabilites for the provided url */
+		WMSCapabilities retrieveCapabilities(URL url) throws Exception;
 	}
 }

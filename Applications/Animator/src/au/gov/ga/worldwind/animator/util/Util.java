@@ -7,7 +7,7 @@ import java.util.Random;
  * <p/>
  * Some are based on the Apache Commons util classes (StringUtil etc.)
  */
-public class Util
+public class Util extends au.gov.ga.worldwind.common.util.Util
 {
 	/**
 	 * Generate a random string of alpha characters (mixed case), of the given length.
@@ -24,13 +24,5 @@ public class Util
 			sb.append(chars.charAt(random.nextInt(chars.length())));
 		}
 		return sb.toString();
-	}
-	
-	/**
-	 * @return Whether the provided string is blank (<code>null</code>, empty string, or contains only whitespace)
-	 */
-	public static boolean isBlank(String string)
-	{
-		return string == null || string.trim().isEmpty();
 	}
 }
