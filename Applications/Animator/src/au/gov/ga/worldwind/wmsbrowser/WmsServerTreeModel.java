@@ -5,21 +5,23 @@ import java.util.List;
 
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
-import javax.swing.tree.TreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
+
+import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 
 /**
  * A tree model backed by a list of {@link WmsServer}s.
  * <p/>
- * Supports lazy-loading of the servers
+ * Supports lazy-loading of the servers layer lists
  */
-public class WmsServerTreeModel implements TreeModel
+public class WmsServerTreeModel implements LazyTreeModel
 {
 	/** The servers list backing this tree */
 	private List<WmsServer> servers = new ArrayList<WmsServer>();
-	
+
 	private List<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
-	
+
 	public void addServer(WmsServer server)
 	{
 		if (servers.contains(server))
@@ -27,10 +29,10 @@ public class WmsServerTreeModel implements TreeModel
 			return;
 		}
 		servers.add(server);
-		
-		notifyServerAdded(server);
+
+		notifyTreeChanged(server);
 	}
-	
+
 	@Override
 	public Object getRoot()
 	{
@@ -46,7 +48,7 @@ public class WmsServerTreeModel implements TreeModel
 		}
 		else if (parent instanceof WmsServer)
 		{
-			return ((WmsServer)parent).getLayers().get(index);
+			return ((WmsServer) parent).getLayers().get(index);
 		}
 		return null;
 	}
@@ -60,11 +62,11 @@ public class WmsServerTreeModel implements TreeModel
 		}
 		else if (parent instanceof WmsServer)
 		{
-			if (!((WmsServer)parent).isLayersLoaded())
+			if (!((WmsServer) parent).isLayersLoaded())
 			{
-				return 0;
+				return 1;
 			}
-			return ((WmsServer)parent).getLayers().size();
+			return ((WmsServer) parent).getLayers().size();
 		}
 		return 0;
 	}
@@ -72,11 +74,6 @@ public class WmsServerTreeModel implements TreeModel
 	@Override
 	public boolean isLeaf(Object node)
 	{
-		// Make server nodes appear to have children if we don't know any better 
-		if (node instanceof WmsServer && !((WmsServer)node).isLayersLoaded())
-		{
-			return true;
-		}
 		return getChildCount(node) == 0;
 	}
 
@@ -95,7 +92,7 @@ public class WmsServerTreeModel implements TreeModel
 		}
 		else if (parent instanceof WmsServer)
 		{
-			return ((WmsServer)parent).getLayers().indexOf(child);
+			return ((WmsServer) parent).getLayers().indexOf(child);
 		}
 		return -1;
 	}
@@ -116,13 +113,34 @@ public class WmsServerTreeModel implements TreeModel
 		listeners.remove(l);
 	}
 
-	public void notifyServerAdded(WmsServer server)
+	@Override
+	public void removeNodeFromParent(MutableTreeNode node)
 	{
-		TreeModelEvent e = new TreeModelEvent(server, new Object[]{servers});
+		MutableTreeNode parent = (MutableTreeNode) node.getParent();
+		if (parent == null)
+		{
+			throw new IllegalArgumentException("node does not have a parent.");
+		}
+
+		parent.remove(node);
+		notifyTreeChanged(parent);
+	}
+
+	@Override
+	public void insertNodeInto(MutableTreeNode newChild, MutableTreeNode parent, int index)
+	{
+		parent.insert(newChild, index);
+		
+		notifyTreeChanged(parent);
+	}
+
+	public void notifyTreeChanged(Object source)
+	{
+		TreeModelEvent e = new TreeModelEvent(source, new Object[] { servers });
 		for (int i = listeners.size() - 1; i >= 0; i--)
 		{
 			listeners.get(i).treeStructureChanged(e);
 		}
 	}
-	
+
 }

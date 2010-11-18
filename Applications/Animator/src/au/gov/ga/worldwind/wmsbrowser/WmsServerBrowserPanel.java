@@ -8,9 +8,9 @@ import java.awt.BorderLayout;
 import java.net.URL;
 
 import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.tree.TreeModel;
 
+import au.gov.ga.worldwind.common.ui.lazytree.LazyTree;
+import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
 
@@ -23,7 +23,7 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 	private static final long serialVersionUID = 20101116L;
 
 	private WmsServerTreeModel treeModel;
-	private JTree serverTree;
+	private LazyTree serverTree;
 	
 	public WmsServerBrowserPanel()
 	{
@@ -69,11 +69,11 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		add(scrollPane, BorderLayout.CENTER);
 	}
 	
-	private static class WmsServerTree extends JTree
+	private static class WmsServerTree extends LazyTree
 	{
 		private static final long serialVersionUID = 20101118L;
 
-		public WmsServerTree(TreeModel newModel)
+		public WmsServerTree(LazyTreeModel newModel)
 		{
 			super(newModel);
 		}
