@@ -4,9 +4,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
+import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeObjectNode;
 
 public class Dataset extends AbstractData implements IDataset
@@ -34,7 +34,7 @@ public class Dataset extends AbstractData implements IDataset
 	}
 
 	@Override
-	public MutableTreeNode[] getChildren(DefaultTreeModel model)
+	public MutableTreeNode[] getChildren(LazyTreeModel model)
 	{
 		synchronized (children)
 		{
@@ -49,7 +49,7 @@ public class Dataset extends AbstractData implements IDataset
 	}
 
 	@Override
-	public MutableTreeNode createMutableTreeNode(DefaultTreeModel model)
+	public MutableTreeNode createMutableTreeNode(LazyTreeModel model)
 	{
 		return new LazyTreeObjectNode(this, model);
 	}

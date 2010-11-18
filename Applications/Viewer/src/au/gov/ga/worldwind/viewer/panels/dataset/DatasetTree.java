@@ -1,13 +1,12 @@
 package au.gov.ga.worldwind.viewer.panels.dataset;
 
-import javax.swing.tree.DefaultTreeModel;
-
 import au.gov.ga.worldwind.common.ui.ClearableBasicTreeUI;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTree;
+import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 
 public class DatasetTree extends LazyTree
 {
-	public DatasetTree(DefaultTreeModel treeModel)
+	public DatasetTree(LazyTreeModel treeModel)
 	{
 		super(treeModel);
 
@@ -20,9 +19,9 @@ public class DatasetTree extends LazyTree
 	}
 
 	@Override
-	public DefaultTreeModel getModel()
+	public LazyTreeModel getModel()
 	{
-		return (DefaultTreeModel) super.getModel();
+		return (LazyTreeModel) super.getModel();
 	}
 
 	@Override

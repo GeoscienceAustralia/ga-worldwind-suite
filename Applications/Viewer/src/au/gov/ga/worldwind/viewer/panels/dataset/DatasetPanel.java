@@ -5,9 +5,9 @@ import java.awt.Dimension;
 
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.common.ui.lazytree.DefaultLazyTreeModel;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeObjectNode;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTreeModel;
@@ -26,7 +26,7 @@ public class DatasetPanel extends AbstractThemePanel
 		setDisplayName("Datasets");
 
 		root = new Dataset("root", null, null, true);
-		DefaultTreeModel model = new DefaultTreeModel(null);
+		DefaultLazyTreeModel model = new DefaultLazyTreeModel(null);
 		rootNode = new LazyTreeObjectNode(root, model);
 		model.setRoot(rootNode);
 

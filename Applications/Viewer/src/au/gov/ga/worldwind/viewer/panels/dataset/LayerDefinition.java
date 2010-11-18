@@ -3,8 +3,9 @@ package au.gov.ga.worldwind.viewer.panels.dataset;
 import java.net.URL;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
+
+import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 
 public class LayerDefinition extends AbstractData implements ILayerDefinition
 {
@@ -46,7 +47,7 @@ public class LayerDefinition extends AbstractData implements ILayerDefinition
 	}
 
 	@Override
-	public MutableTreeNode createMutableTreeNode(DefaultTreeModel model)
+	public MutableTreeNode createMutableTreeNode(LazyTreeModel model)
 	{
 		return new DefaultMutableTreeNode(this, false);
 	}
