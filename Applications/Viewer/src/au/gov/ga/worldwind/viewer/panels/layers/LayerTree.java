@@ -7,6 +7,7 @@ import java.util.EventObject;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellEditor;
 
+import au.gov.ga.worldwind.common.ui.ClearableBasicTreeUI;
 import au.gov.ga.worldwind.common.ui.lazytree.LoadingTree;
 import au.gov.ga.worldwind.common.util.Loader.LoadingListener;
 
