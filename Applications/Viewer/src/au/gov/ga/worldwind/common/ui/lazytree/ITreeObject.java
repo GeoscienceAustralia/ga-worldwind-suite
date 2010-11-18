@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.viewer.components.lazytree;
+package au.gov.ga.worldwind.common.ui.lazytree;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;

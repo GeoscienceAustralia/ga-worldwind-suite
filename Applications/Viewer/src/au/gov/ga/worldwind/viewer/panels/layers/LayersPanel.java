@@ -27,9 +27,9 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.lazytree.ILazyTreeObject;
+import au.gov.ga.worldwind.common.ui.lazytree.LazyLoadListener;
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.viewer.components.lazytree.ILazyTreeObject;
-import au.gov.ga.worldwind.viewer.components.lazytree.LazyLoadListener;
 import au.gov.ga.worldwind.viewer.panels.dataset.DatasetPanel;
 import au.gov.ga.worldwind.viewer.panels.dataset.IData;
 import au.gov.ga.worldwind.viewer.panels.dataset.IDataset;

@@ -7,7 +7,7 @@ import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 
-import au.gov.ga.worldwind.viewer.components.lazytree.LazyTreeObjectNode;
+import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeObjectNode;
 
 public class Dataset extends AbstractData implements IDataset
 {

@@ -8,8 +8,8 @@ import javax.swing.JScrollPane;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeObjectNode;
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.viewer.components.lazytree.LazyTreeObjectNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTreeModel;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;

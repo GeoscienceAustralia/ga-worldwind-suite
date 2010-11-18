@@ -6,7 +6,7 @@ import java.util.List;
 
 import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
-import au.gov.ga.worldwind.viewer.components.lazytree.LazyLoadListener;
+import au.gov.ga.worldwind.common.ui.lazytree.LazyLoadListener;
 
 public class LazyDataset extends Dataset implements ILazyDataset
 {

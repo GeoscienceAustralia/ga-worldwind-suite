@@ -4,7 +4,7 @@ import java.net.URL;
 
 import javax.swing.ImageIcon;
 
-import au.gov.ga.worldwind.viewer.components.lazytree.ILoadingNode;
+import au.gov.ga.worldwind.common.ui.lazytree.ILoadingNode;
 
 public interface IIconItem extends ILoadingNode
 {
