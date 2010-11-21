@@ -3,25 +3,49 @@ package au.gov.ga.worldwind.wmsbrowser;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
 import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.common.ui.lazytree.DefaultLazyTreeModel;
+import au.gov.ga.worldwind.common.ui.lazytree.ITreeObject;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
+import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeObjectNode;
 
 /**
  * A tree model backed by a list of {@link WmsServer}s.
  * <p/>
  * Supports lazy-loading of the servers layer lists
  */
-public class WmsServerTreeModel implements LazyTreeModel
+public class WmsServerTreeModel extends DefaultLazyTreeModel implements LazyTreeModel
 {
+	private static final long serialVersionUID = 20101119L;
+
 	/** The servers list backing this tree */
 	private List<WmsServer> servers = new ArrayList<WmsServer>();
 
-	private List<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
-
+	/** The root node in the tree */
+	private LazyTreeObjectNode rootNode;
+	
+	public WmsServerTreeModel()
+	{
+		super(null);
+		
+		rootNode = new LazyTreeObjectNode(new ITreeObject(){
+			@Override
+			public MutableTreeNode[] getChildren(LazyTreeModel model)
+			{
+				MutableTreeNode[] result = new MutableTreeNode[servers.size()];
+				int i = 0;
+				for (WmsServer server : servers)
+				{
+					result[i] = new LazyTreeObjectNode(new WmsServerTreeObject(server), WmsServerTreeModel.this);
+					i++;
+				}
+				return result;
+			}
+		}, this);
+		setRoot(rootNode);
+	}
+	
 	public void addServer(WmsServer server)
 	{
 		if (servers.contains(server))
@@ -30,117 +54,21 @@ public class WmsServerTreeModel implements LazyTreeModel
 		}
 		servers.add(server);
 
+		rootNode.refreshChildren(this);
+		
 		notifyTreeChanged(server);
 	}
-
-	@Override
-	public Object getRoot()
+	
+	public void addServers(List<WmsServer> servers)
 	{
-		return servers;
-	}
-
-	@Override
-	public Object getChild(Object parent, int index)
-	{
-		if (parent == servers)
-		{
-			return servers.get(index);
-		}
-		else if (parent instanceof WmsServer)
-		{
-			return ((WmsServer) parent).getLayers().get(index);
-		}
-		return null;
-	}
-
-	@Override
-	public int getChildCount(Object parent)
-	{
-		if (parent == servers)
-		{
-			return servers.size();
-		}
-		else if (parent instanceof WmsServer)
-		{
-			if (!((WmsServer) parent).isLayersLoaded())
-			{
-				return 1;
-			}
-			return ((WmsServer) parent).getLayers().size();
-		}
-		return 0;
-	}
-
-	@Override
-	public boolean isLeaf(Object node)
-	{
-		return getChildCount(node) == 0;
-	}
-
-	@Override
-	public void valueForPathChanged(TreePath path, Object newValue)
-	{
-		// Do nothing
-	}
-
-	@Override
-	public int getIndexOfChild(Object parent, Object child)
-	{
-		if (parent == servers)
-		{
-			return servers.indexOf(child);
-		}
-		else if (parent instanceof WmsServer)
-		{
-			return ((WmsServer) parent).getLayers().indexOf(child);
-		}
-		return -1;
-	}
-
-	@Override
-	public void addTreeModelListener(TreeModelListener l)
-	{
-		if (listeners.contains(l))
-		{
-			return;
-		}
-		listeners.add(l);
-	}
-
-	@Override
-	public void removeTreeModelListener(TreeModelListener l)
-	{
-		listeners.remove(l);
-	}
-
-	@Override
-	public void removeNodeFromParent(MutableTreeNode node)
-	{
-		MutableTreeNode parent = (MutableTreeNode) node.getParent();
-		if (parent == null)
-		{
-			throw new IllegalArgumentException("node does not have a parent.");
-		}
-
-		parent.remove(node);
-		notifyTreeChanged(parent);
-	}
-
-	@Override
-	public void insertNodeInto(MutableTreeNode newChild, MutableTreeNode parent, int index)
-	{
-		parent.insert(newChild, index);
+		this.servers.addAll(servers);
 		
-		notifyTreeChanged(parent);
+		rootNode.refreshChildren(this);
+		notifyTreeChanged(servers);
 	}
-
+	
 	public void notifyTreeChanged(Object source)
 	{
-		TreeModelEvent e = new TreeModelEvent(source, new Object[] { servers });
-		for (int i = listeners.size() - 1; i >= 0; i--)
-		{
-			listeners.get(i).treeStructureChanged(e);
-		}
+		fireTreeStructureChanged(source, new Object[] { servers }, null, null);
 	}
-
 }

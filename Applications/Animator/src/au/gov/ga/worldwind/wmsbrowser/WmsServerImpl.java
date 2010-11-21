@@ -88,6 +88,28 @@ public class WmsServerImpl implements WmsServer
 		});
 	}
 	
+	@Override
+	public void loadLayersImmediately() throws Exception
+	{
+		if (isLayersLoaded())
+		{
+			return;
+		}
+		
+		try
+		{
+			notifyLoadStarting();
+			doLoad();
+			notifyLoadComplete();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			notifyLoadFailed(e);
+			throw e;
+		}
+	}
+	
 	private void doLoad() throws Exception
 	{
 		// Load the capabilities

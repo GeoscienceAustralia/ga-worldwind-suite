@@ -23,10 +23,18 @@ public interface WmsServer
 	List<WMSLayerInfo> getLayers();
 	
 	/**
-	 * Load the layer information for this server
+	 * Load the layer information for this server asynchronously. This method will not block.
+	 * The listener mechanism to be used to receive notifications of the load completion etc.
+	 * <p/>
+	 * Any exception that occurs will be notified via the listener mechanism.
 	 */
 	void loadLayers();
 
+	/**
+	 * Block the current thread until loading completes. Exceptions will be propagated directly.
+	 */
+	void loadLayersImmediately() throws Exception;
+	
 	/**
 	 * @return Whether or not the layers for this server have been loaded yet
 	 */
