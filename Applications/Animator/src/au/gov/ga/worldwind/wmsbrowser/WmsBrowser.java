@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.wmsbrowser;
 
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getWindowTitleKey;
+import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
@@ -17,6 +18,7 @@ import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.l2fprod.CollapsibleGroup;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
+import au.gov.ga.worldwind.wmsbrowser.WmsServerBrowserPanel.LayerInfoSelectionListener;
 
 /**
  * A browser tool used to locate layers residing in WMS browsers
@@ -35,8 +37,8 @@ public class WmsBrowser
 	private JSplitPane splitPane;
 	
 	private CollapsibleSplitPane sidebar;
-	private JPanel informationPanel;
 	
+	private WmsLayerInfoPanel layerInfoPanel;
 	private WmsServerBrowserPanel serverBrowserPanel;
 	
 	public WmsBrowser(String parentApplicationTitle)
@@ -50,7 +52,7 @@ public class WmsBrowser
 
 	private void initialiseWindow(String parentApplicationTitle)
 	{
-		frame = new JFrame(parentApplicationTitle + " - " + getMessage(getWindowTitleKey()));
+		frame = new JFrame(getMessage(getWindowTitleKey()) + " - " + parentApplicationTitle);
 		
 		frame.addWindowListener(new WindowAdapter()
 		{
@@ -58,6 +60,7 @@ public class WmsBrowser
 			public void windowClosing(WindowEvent e)
 			{
 				WmsBrowserSettings.get().setSplitLocation(splitPane.getDividerLocation());
+				WmsBrowserSettings.get().setWindowDimension(frame.getSize());
 				WmsBrowserSettings.save();
 			}
 		});
@@ -67,6 +70,8 @@ public class WmsBrowser
 	{
 		JPanel panel = new JPanel(new BorderLayout());
 		frame.setContentPane(panel);
+		frame.setSize(WmsBrowserSettings.get().getWindowDimension());
+		frame.setPreferredSize(WmsBrowserSettings.get().getWindowDimension());
 		
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
 		splitPane.setOneTouchExpandable(true);
@@ -76,13 +81,24 @@ public class WmsBrowser
 		sidebar = new CollapsibleSplitPane();
 		splitPane.setLeftComponent(sidebar);
 		
-		informationPanel = new JPanel();
-		splitPane.setRightComponent(informationPanel);
+		layerInfoPanel = new WmsLayerInfoPanel();
+		splitPane.setRightComponent(layerInfoPanel);
 	}
 	
 	private void initialiseBrowserPanel()
 	{
 		serverBrowserPanel = new WmsServerBrowserPanel();
+		serverBrowserPanel.addLayerInfoSelectionListener(new LayerInfoSelectionListener()
+		{
+			@Override
+			public void layerSelectionChanged(WMSLayerInfo selectedLayer)
+			{
+				if (layerInfoPanel != null)
+				{
+					layerInfoPanel.setLayerInfo(selectedLayer);
+				}
+			}
+		});
 		
 		addPanelToSidebar(serverBrowserPanel);
 	}
@@ -95,6 +111,8 @@ public class WmsBrowser
 			public void run()
 			{
 				frame.pack();
+				frame.setSize(WmsBrowserSettings.get().getWindowDimension());
+				frame.setPreferredSize(WmsBrowserSettings.get().getWindowDimension());
 				frame.setVisible(true);
 			}
 		});

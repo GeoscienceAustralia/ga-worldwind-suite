@@ -1,8 +1,9 @@
 package au.gov.ga.worldwind.wmsbrowser;
 
-import static au.gov.ga.worldwind.common.util.Util.*;
+import static au.gov.ga.worldwind.common.util.Util.isBlank;
 import gov.nasa.worldwind.util.WWXML;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import javax.xml.xpath.XPath;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
@@ -55,6 +55,7 @@ public class WmsBrowserSettings
 			document.appendChild(rootElement);
 			
 			saveSplitLocation(rootElement);
+			saveWindowSize(rootElement);
 			saveWmsServerLocations(rootElement);
 			
 			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(Util.getUserGAWorldWindDirectory(), SETTINGS_FILE_NAME)));
@@ -71,6 +72,13 @@ public class WmsBrowserSettings
 		WWXML.setIntegerAttribute(splitLocationElement, "value", instance.getSplitLocation());
 	}
 
+	private static void saveWindowSize(Element rootElement)
+	{
+		Element windowSizeElement = WWXML.appendElement(rootElement, "windowSize");
+		WWXML.setIntegerAttribute(windowSizeElement, "width", instance.getWindowDimension().width);
+		WWXML.setIntegerAttribute(windowSizeElement, "height", instance.getWindowDimension().height);
+	}
+	
 	private static void saveWmsServerLocations(Element rootElement)
 	{
 		Element serverLocationsContainer = WWXML.appendElement(rootElement, "serverLocations");
@@ -100,16 +108,26 @@ public class WmsBrowserSettings
 		XPath xpath = WWXML.makeXPath();
 		
 		loadSplitLocation(rootElement, xpath);
+		loadWindowSize(rootElement, xpath);
 		loadWmsServerLocations(rootElement, xpath);
 	}
 	
-
 	private static void loadSplitLocation(Element rootElement, XPath xpath)
 	{
 		Integer splitLocation = WWXML.getInteger(rootElement, "//splitLocation/@value", xpath);
 		if (splitLocation != null)
 		{
 			instance.setSplitLocation(splitLocation);
+		}
+	}
+	
+	private static void loadWindowSize(Element rootElement, XPath xpath)
+	{
+		Integer width = WWXML.getInteger(rootElement, "//windowSize/@width", xpath);
+		Integer height = WWXML.getInteger(rootElement, "//windowSize/@height", xpath);
+		if (width != null && height != null)
+		{
+			instance.setWindowDimension(new Dimension(width, height));
 		}
 	}
 	
@@ -137,6 +155,8 @@ public class WmsBrowserSettings
 
 	/** The location of the split pane split bar */
 	private int splitLocation = 300;
+	
+	private Dimension windowDimension = new Dimension(768, 640);
 	
 	private List<String> wmsServerUrls = new ArrayList<String>(Arrays.asList(new String[]{
 			"http://neowms.sci.gsfc.nasa.gov/wms/wms",
@@ -176,4 +196,15 @@ public class WmsBrowserSettings
 	{
 		this.wmsServerUrls = wmsServerUrls;
 	}
+	
+	public Dimension getWindowDimension()
+	{
+		return windowDimension;
+	}
+
+	public void setWindowDimension(Dimension windowDimension)
+	{
+		this.windowDimension = windowDimension;
+	}
+	
 }

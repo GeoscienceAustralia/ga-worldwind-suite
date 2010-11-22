@@ -10,11 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JScrollPane;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTree;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
-import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeObjectNode;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
 
@@ -29,6 +30,8 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 	private WmsServerTreeModel treeModel;
 	private WmsServerTree serverTree;
 	
+	private List<LayerInfoSelectionListener> layerSelectionListeners = new ArrayList<LayerInfoSelectionListener>();
+	
 	public WmsServerBrowserPanel()
 	{
 		setName(getMessage(getServerBrowserPanelTitleKey()));
@@ -39,16 +42,19 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 
 	private void initialiseServerTree()
 	{
-		
 		treeModel = new WmsServerTreeModel();
 		
 		serverTree = new WmsServerTree(treeModel);
+		serverTree.addTreeSelectionListener(new LayerSelectionListener());
 		
 		addKnownServersToTree();
 		
 		serverTree.validate();
 	}
 
+	/**
+	 * Add the known WMS servers from the settings file into the browser tree
+	 */
 	private void addKnownServersToTree()
 	{
 		try
@@ -66,11 +72,64 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 			e.printStackTrace();
 		}
 	}
-
+	
 	private void packComponents()
 	{
 		JScrollPane scrollPane = new JScrollPane(serverTree);
 		add(scrollPane, BorderLayout.CENTER);
+	}
+	
+	private class LayerSelectionListener implements TreeSelectionListener
+	{
+		@Override
+		public void valueChanged(TreeSelectionEvent e)
+		{
+			notifyLayerSelectionChanged(getSelectedLayerInfo());
+		}
+	}
+	
+	private WMSLayerInfo getSelectedLayerInfo()
+	{
+		if (serverTree.isSelectionEmpty())
+		{
+			return null;
+		}
+		Object selectedObject = serverTree.getSelectionPath().getLastPathComponent();
+		if (selectedObject == null || !(selectedObject instanceof DefaultMutableTreeNode))
+		{
+			return null;
+		}
+		
+		Object nodeObject = ((DefaultMutableTreeNode)selectedObject).getUserObject();
+		if (nodeObject == null || !(nodeObject instanceof WMSLayerInfo))
+		{
+			return null;
+		}
+		
+		return (WMSLayerInfo)nodeObject;
+	}
+	
+	private void notifyLayerSelectionChanged(WMSLayerInfo selectedLayerInfo)
+	{
+		for (int i = layerSelectionListeners.size() - 1; i >= 0; i--)
+		{
+			layerSelectionListeners.get(i).layerSelectionChanged(selectedLayerInfo);
+		}
+	}
+	
+	public void addLayerInfoSelectionListener(LayerInfoSelectionListener l)
+	{
+		if (layerSelectionListeners.contains(l))
+		{
+			return;
+		}
+		
+		layerSelectionListeners.add(l);
+	}
+	
+	public void removeLayerInfoSelectionListener(LayerInfoSelectionListener l)
+	{
+		layerSelectionListeners.remove(l);
 	}
 	
 	/**
@@ -109,5 +168,14 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 			
 			return super.convertValueToText(value, selected, expanded, leaf, row, hasFocus);
 		}
+	}
+	
+	/**
+	 * An interface for classes what wish to be notified of changes to the selected
+	 * WMS layer
+	 */
+	public static interface LayerInfoSelectionListener
+	{
+		void layerSelectionChanged(WMSLayerInfo selectedLayer);
 	}
 }

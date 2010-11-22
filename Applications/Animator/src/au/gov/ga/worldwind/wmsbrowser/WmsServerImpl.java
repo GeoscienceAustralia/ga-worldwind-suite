@@ -2,13 +2,11 @@ package au.gov.ga.worldwind.wmsbrowser;
 
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
-import gov.nasa.worldwind.ogc.wms.WMSLayerStyle;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -118,29 +116,16 @@ public class WmsServerImpl implements WmsServer
 
 		layers = new ArrayList<WMSLayerInfo>();
 		
-        // Gather up all the named layers and make a world wind layer for each.
+        // Gather up all the named layers
         final List<WMSLayerCapabilities> namedLayerCaps = capabilities.getNamedLayers();
         if (namedLayerCaps == null)
         {
             return;
         }
-
+        
         for (WMSLayerCapabilities lc : namedLayerCaps)
         {
-        	Set<WMSLayerStyle> styles = lc.getStyles();
-        	if (styles == null || styles.size() == 0)
-        	{
-        		WMSLayerInfo layerInfo = new WMSLayerInfo(capabilities, lc, null);
-        		layers.add(layerInfo);
-        	}
-        	else
-        	{
-        		for (WMSLayerStyle style : styles)
-        		{
-        			WMSLayerInfo layerInfo = new WMSLayerInfo(capabilities, lc, style);
-        			layers.add(layerInfo);
-        		}
-        	}
+        	layers.addAll(WMSLayerInfo.createLayerInfos(capabilities, lc));
         }
 	}
 
