@@ -29,7 +29,7 @@ import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierFactory;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierImpl;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationElevationModel;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * The default implementation of the {@link AnimatableElevation} interface

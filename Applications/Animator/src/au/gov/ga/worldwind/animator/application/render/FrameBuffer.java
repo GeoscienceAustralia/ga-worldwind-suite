@@ -4,7 +4,7 @@ import java.awt.Dimension;
 
 import javax.media.opengl.GL;
 
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * Helper class for the creation and binding of an OpenGL Frame Buffer Object.

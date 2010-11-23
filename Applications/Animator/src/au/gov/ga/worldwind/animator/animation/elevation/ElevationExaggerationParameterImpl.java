@@ -19,7 +19,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggerationImpl;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**

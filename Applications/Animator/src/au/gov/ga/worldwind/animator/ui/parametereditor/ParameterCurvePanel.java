@@ -19,8 +19,8 @@ import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.animator.application.LAFConstants;
 import au.gov.ga.worldwind.animator.ui.frameslider.CurrentFrameChangeListener;
 import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterCurve.ParameterCurveListener;
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.util.Range;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A panel that holds multiple {@link ParameterCurve}s, and draws various annotations over them

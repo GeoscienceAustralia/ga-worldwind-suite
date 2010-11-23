@@ -10,7 +10,7 @@ import java.awt.Component;
 import javax.swing.ProgressMonitor;
 
 import au.gov.ga.worldwind.animator.application.render.AnimationRenderer.RenderEventListener;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A dialog box used to show the progress of a render task

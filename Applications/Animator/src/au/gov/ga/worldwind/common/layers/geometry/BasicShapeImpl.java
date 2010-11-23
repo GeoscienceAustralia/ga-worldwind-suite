@@ -6,7 +6,7 @@ import gov.nasa.worldwind.geom.Position;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A default implementation of the {@link Shape} interface.

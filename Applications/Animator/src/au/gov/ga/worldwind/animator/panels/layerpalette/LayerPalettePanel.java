@@ -38,9 +38,9 @@ import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifierFactory;
 import au.gov.ga.worldwind.animator.panels.AnimatorCollapsiblePanel;
 import au.gov.ga.worldwind.animator.util.Icons;
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A panel that allows the user to locate and select a layer for inclusion

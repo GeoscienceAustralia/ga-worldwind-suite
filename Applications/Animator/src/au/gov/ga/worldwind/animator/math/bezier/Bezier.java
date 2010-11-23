@@ -3,7 +3,7 @@ package au.gov.ga.worldwind.animator.math.bezier;
 import java.io.Serializable;
 
 import au.gov.ga.worldwind.animator.math.vector.Vector;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * An implementation of a Cubic Bezier curve.

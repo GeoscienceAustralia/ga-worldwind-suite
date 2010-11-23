@@ -14,7 +14,7 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 import com.sun.opengl.util.BufferUtil;
 

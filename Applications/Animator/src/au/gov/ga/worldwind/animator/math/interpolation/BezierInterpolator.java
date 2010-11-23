@@ -6,7 +6,7 @@ package au.gov.ga.worldwind.animator.math.interpolation;
 import gov.nasa.worldwind.cache.BasicMemoryCache;
 import au.gov.ga.worldwind.animator.math.bezier.Bezier;
 import au.gov.ga.worldwind.animator.math.vector.Vector;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 
 /**

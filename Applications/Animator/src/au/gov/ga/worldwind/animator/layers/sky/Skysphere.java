@@ -26,7 +26,7 @@ import javax.media.opengl.GL;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.util.AVKeyMore;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.texture.Texture;

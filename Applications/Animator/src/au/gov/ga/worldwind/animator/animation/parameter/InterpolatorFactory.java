@@ -8,7 +8,7 @@ import au.gov.ga.worldwind.animator.math.interpolation.Interpolator;
 import au.gov.ga.worldwind.animator.math.interpolation.LinearInterpolator;
 import au.gov.ga.worldwind.animator.math.vector.TimeVector;
 import au.gov.ga.worldwind.animator.math.vector.Vector2;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A factory class for creating instances of {@link Interpolator}s suitable for a

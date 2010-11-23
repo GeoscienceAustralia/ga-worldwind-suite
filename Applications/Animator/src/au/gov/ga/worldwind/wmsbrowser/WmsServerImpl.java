@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * Default implementation of the {@link WmsServer} interface
@@ -32,24 +32,49 @@ public class WmsServerImpl implements WmsServer
 	};
 	
 	private static ExecutorService loaderService = Executors.newSingleThreadExecutor(new DaemonThreadFactory("WMS Server layer loader"));
+
+	private WmsServerIdentifier identifier;
 	
 	private List<WMSLayerInfo> layers = null;
 	private List<LoadListener> loadListeners = new ArrayList<LoadListener>();
 
 	private WmsCapabilitiesService capabilitiesService = DEFAULT_CAPABILITIES_SERVICE;
 	private WMSCapabilities capabilities;
-	private URL serverUrl;
 	
 	public WmsServerImpl(URL serverUrl)
 	{
 		Validate.notNull(serverUrl, "A server url is required");
-		this.serverUrl = serverUrl;
+		this.identifier = new WmsServerIdentifierImpl(serverUrl);
+	}
+	
+	public WmsServerImpl(String name, URL serverUrl)
+	{
+		Validate.notNull(serverUrl, "A server url is required");
+		this.identifier = new WmsServerIdentifierImpl(name, serverUrl);
+	}
+	
+	public WmsServerImpl(WmsServerIdentifier identifier)
+	{
+		Validate.notNull(identifier, "A server identifier is required");
+		this.identifier = identifier;
+	}
+	
+	@Override
+	public WmsServerIdentifier getIdentifier()
+	{
+		return identifier;
+	}
+	
+	@Override
+	public String getName()
+	{
+		return identifier.getName();
 	}
 	
 	@Override
 	public URL getCapabilitiesUrl()
 	{
-		return serverUrl;
+		return identifier.getCapabilitiesUrl();
 	}
 
 	@Override
@@ -111,7 +136,7 @@ public class WmsServerImpl implements WmsServer
 	private void doLoad() throws Exception
 	{
 		// Load the capabilities
-		capabilities = capabilitiesService.retrieveCapabilities(serverUrl);
+		capabilities = capabilitiesService.retrieveCapabilities(getCapabilitiesUrl());
 		capabilities.parse();
 
 		layers = new ArrayList<WMSLayerInfo>();
@@ -194,19 +219,19 @@ public class WmsServerImpl implements WmsServer
 			return false;
 		}
 		
-		return ((WmsServer)obj).getCapabilitiesUrl().equals(this.getCapabilitiesUrl());
+		return ((WmsServer)obj).getIdentifier().equals(this.getIdentifier());
 	}
 	
 	@Override
 	public int hashCode()
 	{
-		return serverUrl.hashCode();
+		return getIdentifier().hashCode();
 	}
 	
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + "[" + serverUrl.toExternalForm() + "]";
+		return getClass().getSimpleName() + "[" + getCapabilitiesUrl().toExternalForm() + "]";
 	}
 	
 }

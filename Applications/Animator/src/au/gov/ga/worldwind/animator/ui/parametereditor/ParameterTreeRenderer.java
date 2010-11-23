@@ -10,8 +10,8 @@ import javax.swing.JCheckBox;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.ui.AnimationTreeRenderer;
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * An extension of the {@link AnimationTreeRenderer} that adds a tristate checkbox

@@ -26,9 +26,9 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.panels.AnimatorCollapsiblePanel;
 import au.gov.ga.worldwind.animator.ui.NameableTree;
 import au.gov.ga.worldwind.animator.util.Icons;
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A panel that allows the user to view and manipulate {@link Animatable} objects,

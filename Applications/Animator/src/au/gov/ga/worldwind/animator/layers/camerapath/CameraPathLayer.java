@@ -19,7 +19,7 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.KeyFrameEvent;
 import au.gov.ga.worldwind.animator.application.ChangeOfAnimationListener;
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A WorldWind Layer that displays the camera path of a given {@link Animation}

@@ -8,10 +8,10 @@ import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.lazytree.ILazyTreeObject;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyLoadListener;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A lazy tree object backed by a single {@link WmsServer} instance

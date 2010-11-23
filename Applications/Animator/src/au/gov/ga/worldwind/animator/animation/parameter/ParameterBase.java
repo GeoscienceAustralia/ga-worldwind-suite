@@ -24,7 +24,7 @@ import au.gov.ga.worldwind.animator.math.vector.Vector2;
 import au.gov.ga.worldwind.animator.util.Armable;
 import au.gov.ga.worldwind.animator.util.CodependantHelper;
 import au.gov.ga.worldwind.animator.util.Enableable;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * Base implementation of the {@link Parameter} interface.

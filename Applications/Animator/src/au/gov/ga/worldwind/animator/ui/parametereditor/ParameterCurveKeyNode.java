@@ -5,7 +5,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueType;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * Holds information about a keyframe node on a parameter curve

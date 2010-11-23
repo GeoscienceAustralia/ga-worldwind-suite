@@ -10,7 +10,7 @@ import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.animator.application.AnimatorSceneController;
 import au.gov.ga.worldwind.animator.application.ScreenshotPaintTask;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * An {@link AnimationRenderer} that works by applying the animation state, 

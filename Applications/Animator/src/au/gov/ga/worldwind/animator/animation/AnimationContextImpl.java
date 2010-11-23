@@ -5,7 +5,7 @@ package au.gov.ga.worldwind.animator.animation;
 
 import gov.nasa.worldwind.View;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * The default implementation of the {@link AnimationContext} interface

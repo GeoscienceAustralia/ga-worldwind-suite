@@ -22,7 +22,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**

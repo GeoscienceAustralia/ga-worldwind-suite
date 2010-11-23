@@ -28,8 +28,8 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifierFactory;
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**

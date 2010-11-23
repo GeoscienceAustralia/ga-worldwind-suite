@@ -9,7 +9,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 
 /**

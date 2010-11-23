@@ -20,8 +20,8 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.CurrentFrameChangeListener;
 import au.gov.ga.worldwind.animator.util.Icons;
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A clipboard that holds a keyframe and can perform cut-copy-paste operations 

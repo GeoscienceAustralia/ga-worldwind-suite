@@ -5,7 +5,6 @@ import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConst
 import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.awt.BorderLayout;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,9 +59,9 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		try
 		{
 			List<WmsServer> servers = new ArrayList<WmsServer>();
-			for (String serverUrl : WmsBrowserSettings.get().getWmsServerUrls())
+			for (WmsServerIdentifier serverIdentifier : WmsBrowserSettings.get().getWmsServers())
 			{
-				WmsServerImpl server = new WmsServerImpl(new URL(serverUrl));
+				WmsServerImpl server = new WmsServerImpl(serverIdentifier);
 				servers.add(server);
 			}
 			treeModel.addServers(servers);
@@ -158,7 +157,7 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 				
 				if (nodeObject instanceof WmsServerTreeObject)
 				{
-					return ((WmsServerTreeObject)nodeObject).getWmsServer().getCapabilitiesUrl().toExternalForm();
+					return ((WmsServerTreeObject)nodeObject).getWmsServer().getName();
 				}
 				if (nodeObject instanceof WMSLayerInfo)
 				{

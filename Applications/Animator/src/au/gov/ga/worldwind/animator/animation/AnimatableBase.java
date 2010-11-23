@@ -12,7 +12,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.util.Armable;
 import au.gov.ga.worldwind.animator.util.CodependantHelper;
 import au.gov.ga.worldwind.animator.util.Enableable;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * An abstract base class implementation of the {@link Animatable} interface.

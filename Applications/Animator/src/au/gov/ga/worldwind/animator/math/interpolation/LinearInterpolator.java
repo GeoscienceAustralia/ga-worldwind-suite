@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.animator.math.interpolation;
 
 import au.gov.ga.worldwind.animator.math.vector.Vector;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A simple linear interpolator that interpolates linearly between

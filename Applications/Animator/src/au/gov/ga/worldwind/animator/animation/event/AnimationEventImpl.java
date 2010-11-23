@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.animator.animation.event;
 
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A base implementation of the {@link AnimationEvent} interface.

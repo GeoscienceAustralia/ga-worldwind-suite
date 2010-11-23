@@ -10,7 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * An {@link AnimationEventListener} that logs animation events asynchronously

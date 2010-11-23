@@ -3,7 +3,7 @@ package au.gov.ga.worldwind.animator.animation.io;
 import java.util.HashMap;
 import java.util.Map;
 
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * The set of supported animation file format versions

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * Used to update the animation outside of the render thread.

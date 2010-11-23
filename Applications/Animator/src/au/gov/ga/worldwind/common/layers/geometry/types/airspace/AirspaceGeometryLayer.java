@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.layers.geometry.GeometryLayer;
 import au.gov.ga.worldwind.common.layers.geometry.Shape;
 import au.gov.ga.worldwind.common.layers.geometry.types.GeometryLayerBase;
 import au.gov.ga.worldwind.common.layers.point.Style;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * An implementation of the {@link GeometryLayer} interface that renders each

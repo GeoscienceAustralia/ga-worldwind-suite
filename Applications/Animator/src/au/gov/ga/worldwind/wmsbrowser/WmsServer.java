@@ -12,9 +12,19 @@ import java.util.List;
 public interface WmsServer
 {
 	/**
+	 * @return The (human-friendly) name of this server
+	 */
+	String getName();
+	
+	/**
 	 * @return The URL to use for retrieving this server's capabilities descriptor
 	 */
 	URL getCapabilitiesUrl();
+	
+	/**
+	 * @return The identifier for this server
+	 */
+	WmsServerIdentifier getIdentifier();
 	
 	/**
 	 * @return The list of layers available on this WMS server. May be empty. Will be <code>null</code>

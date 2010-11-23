@@ -8,9 +8,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.layers.point.Attribute;
 import au.gov.ga.worldwind.common.layers.point.Style;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * The default implementation of the {@link StyleProvider} interface

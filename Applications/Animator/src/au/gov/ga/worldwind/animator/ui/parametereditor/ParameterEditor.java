@@ -23,8 +23,8 @@ import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.animator.application.ChangeOfAnimationListener;
 import au.gov.ga.worldwind.animator.ui.NameableTree;
 import au.gov.ga.worldwind.animator.util.Icons;
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * The parameter editor panel used to edit animation {@link Parameter}

@@ -23,7 +23,7 @@ import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.LAFConstants;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A panel used to edit a single parameter. 

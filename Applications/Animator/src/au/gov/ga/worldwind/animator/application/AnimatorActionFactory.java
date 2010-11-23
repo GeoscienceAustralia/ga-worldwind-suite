@@ -12,10 +12,10 @@ import javax.swing.KeyStroke;
 
 import au.gov.ga.worldwind.animator.application.debug.DebugWriter;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A factory used for creating and accessing action objects used in the Animator application

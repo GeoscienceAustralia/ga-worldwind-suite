@@ -6,6 +6,7 @@ import gov.nasa.worldwind.util.WWXML;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -82,12 +83,13 @@ public class WmsBrowserSettings
 	private static void saveWmsServerLocations(Element rootElement)
 	{
 		Element serverLocationsContainer = WWXML.appendElement(rootElement, "serverLocations");
-		List<String> serverLocations = instance.getWmsServerUrls();
-		for (int i = 0; i < serverLocations.size(); i++)
+		List<WmsServerIdentifier> servers = instance.getWmsServers();
+		for (int i = 0; i < servers.size(); i++)
 		{
 			Element layerElement = WWXML.appendElement(serverLocationsContainer, "server");
 			WWXML.setIntegerAttribute(layerElement, "index", i);
-			WWXML.setTextAttribute(layerElement, "name", serverLocations.get(i));
+			WWXML.setTextAttribute(layerElement, "name", servers.get(i).getName());
+			WWXML.setTextAttribute(layerElement, "url", servers.get(i).getCapabilitiesUrl().toExternalForm());
 		}
 	}
 	
@@ -133,19 +135,36 @@ public class WmsBrowserSettings
 	
 	private static void loadWmsServerLocations(Element rootElement, XPath xpath)
 	{
-		List<String> serverLocations = new ArrayList<String>();
+		List<WmsServerIdentifier> servers = new ArrayList<WmsServerIdentifier>();
 		Integer serverCount = WWXML.getInteger(rootElement, "count(//serverLocations/server)", null);
 		for (int i = 0; i < serverCount; i++)
 		{
-			String serverLocation = WWXML.getText(rootElement, "//knownLayers/layer[@index='" + i + "']/@location");
+			String serverName = WWXML.getText(rootElement, "//serverLocations/server[@index='" + i + "']/@name");
+			String serverLocation = WWXML.getText(rootElement, "//serverLocations/server[@index='" + i + "']/@url");
 			if (!isBlank(serverLocation))
 			{
-				serverLocations.add(serverLocation);
+				URL url = toUrl(serverLocation);
+				if (url != null)
+				{
+					servers.add(new WmsServerIdentifierImpl(serverName, url));
+				}
 			}
 		}
-		if (!serverLocations.isEmpty())
+		if (!servers.isEmpty())
 		{
-			instance.setWmsServerUrls(serverLocations);
+			instance.setWmsServers(servers);
+		}
+	}
+
+	private static URL toUrl(String serverLocation)
+	{
+		try
+		{
+			return new URL(serverLocation);
+		}
+		catch (Exception e)
+		{
+			return null;
 		}
 	}
 
@@ -158,14 +177,25 @@ public class WmsBrowserSettings
 	
 	private Dimension windowDimension = new Dimension(768, 640);
 	
-	private List<String> wmsServerUrls = new ArrayList<String>(Arrays.asList(new String[]{
-			"http://neowms.sci.gsfc.nasa.gov/wms/wms",
-	}));
+	private List<WmsServerIdentifier> wmsServers;
 	
 	/**
 	 * Private constructor. Obtain a {@link WmsBrowserSettings} instance using the static {@link #get()} method.
 	 */
-	private WmsBrowserSettings(){}
+	private WmsBrowserSettings()
+	{
+		try
+		{
+			wmsServers = new ArrayList<WmsServerIdentifier>(Arrays.asList(new WmsServerIdentifier[]{
+					new WmsServerIdentifierImpl("Geoscience Australia", new URL("http://www.ga.gov.au/wms/getmap?dataset=geows_outcrops&service=wms&request=getcapabilities")),
+					new WmsServerIdentifierImpl("NASA Earth Observations", new URL("http://neowms.sci.gsfc.nasa.gov/wms/wms")),
+			}));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 	
 	
 	public int getSplitLocation()
@@ -178,23 +208,23 @@ public class WmsBrowserSettings
 		this.splitLocation = splitLocation;
 	}
 
-	public List<String> getWmsServerUrls()
+	public List<WmsServerIdentifier> getWmsServers()
 	{
-		return wmsServerUrls;
+		return wmsServers;
 	}
 	
-	public void addWmsServerUrl(String url)
+	public void addWmsServer(WmsServerIdentifier identifier)
 	{
-		if (url == null || wmsServerUrls.contains(url))
+		if (identifier == null || wmsServers.contains(identifier))
 		{
 			return;
 		}
-		wmsServerUrls.add(url);
+		wmsServers.add(identifier);
 	}
 	
-	public void setWmsServerUrls(List<String> wmsServerUrls)
+	public void setWmsServers(List<WmsServerIdentifier> identifiers)
 	{
-		this.wmsServerUrls = wmsServerUrls;
+		this.wmsServers = identifiers;
 	}
 	
 	public Dimension getWindowDimension()

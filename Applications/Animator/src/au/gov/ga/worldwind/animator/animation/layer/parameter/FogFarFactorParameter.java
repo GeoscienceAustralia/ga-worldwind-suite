@@ -13,7 +13,7 @@ import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A layer parameter controlling the far factor of a {@link FogLayer}

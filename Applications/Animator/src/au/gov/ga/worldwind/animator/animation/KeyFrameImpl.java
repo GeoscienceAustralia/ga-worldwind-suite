@@ -16,7 +16,7 @@ import au.gov.ga.worldwind.animator.animation.event.KeyFrameEventImpl;
 import au.gov.ga.worldwind.animator.animation.event.PropagatingChangeableEventListener;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * The default implementation of the {@link KeyFrame} interface

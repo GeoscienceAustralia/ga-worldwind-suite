@@ -19,7 +19,7 @@ import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifierFactory;
 import au.gov.ga.worldwind.animator.panels.LayerIdentifierTransferable;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A transfer handler for the {@link LayerPalettePanel}

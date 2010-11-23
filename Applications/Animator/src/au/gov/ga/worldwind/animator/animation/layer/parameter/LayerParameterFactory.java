@@ -16,7 +16,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A factory class for creating {@link LayerParameter}s from XML elements

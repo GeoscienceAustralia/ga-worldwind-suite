@@ -2,7 +2,7 @@ package au.gov.ga.worldwind.animator.ui.tristate;
 
 import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox.State;
 import au.gov.ga.worldwind.animator.util.Enableable;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A {@link TriStateCheckBoxModel} backed by an {@link Enableable} object

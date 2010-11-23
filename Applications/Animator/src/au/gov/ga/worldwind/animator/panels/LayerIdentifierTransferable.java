@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A transferable object used to transfer {@link LayerIdentifier}s.

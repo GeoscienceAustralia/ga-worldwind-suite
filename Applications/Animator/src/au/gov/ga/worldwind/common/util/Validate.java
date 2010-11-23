@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.util;
+package au.gov.ga.worldwind.common.util;
 
 /**
  * Util class that provides some commonly used validation methods.

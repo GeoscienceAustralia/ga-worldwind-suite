@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.animator.layers;
 
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * Default (immutable) implementation of the {@link LayerIdentifier} interface.

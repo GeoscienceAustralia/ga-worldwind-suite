@@ -39,9 +39,9 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.LAFConstants;
 import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterCurveModel.ParameterCurveModelListener;
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.util.GridHelper;
+import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.util.GridHelper.GridProperties;
 import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 

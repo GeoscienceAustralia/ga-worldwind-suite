@@ -13,7 +13,7 @@ import au.gov.ga.worldwind.animator.animation.camera.StereoCameraImpl;
 import au.gov.ga.worldwind.animator.animation.elevation.DefaultAnimatableElevation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A factory class for de-serialising {@link Animatable} objects from XML

@@ -38,9 +38,9 @@ import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.util.Nameable;
-import au.gov.ga.worldwind.animator.util.Validate;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
+import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 

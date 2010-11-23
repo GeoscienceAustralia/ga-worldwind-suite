@@ -7,7 +7,7 @@ import javax.swing.JTextField;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.LAFConstants;
-import au.gov.ga.worldwind.animator.util.Validate;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * An input verifier for text fields linked to {@link Parameter}s marked as 'editable' via the {@link EditableParameter} annotation.
