@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.wmsbrowser.wmsserver;
 
+import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;
@@ -24,6 +25,16 @@ public interface WmsServer
 	 * @return The identifier for this server
 	 */
 	WmsServerIdentifier getIdentifier();
+	
+	/**
+	 * @return The capabilities for this service if loaded; <code>null</code> otherwise.
+	 */
+	WMSCapabilities getCapabilities();
+	
+	/**
+	 * @return Whether or not the capabilities for this server have been loaded
+	 */
+	boolean isCapabilitiesLoaded();
 	
 	/**
 	 * @return The list of layers available on this WMS server. May be empty. Will be <code>null</code>

@@ -2,10 +2,12 @@ package au.gov.ga.worldwind.wmsbrowser;
 
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.*;
+import gov.nasa.worldwind.util.Logging;
 
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -19,7 +21,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -28,10 +33,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.HintTextField;
+import au.gov.ga.worldwind.common.ui.SelectableLabel;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 import au.gov.ga.worldwind.common.util.Util;
@@ -45,9 +52,14 @@ import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerIdentifier;
  */
 public class SearchWmsServerDialog extends JDialog
 {
+	private static final Color STRIPE_EVEN = Color.WHITE;
+	private static final Color STRIPE_ODD = Color.LIGHT_GRAY;
+	
 	private static final Dimension PREFERRED_SIZE = new Dimension(800, 600);
 	private static final long serialVersionUID = 20101124L;
-
+	
+	private static Logger logger = Logging.logger();
+	
 	private WmsServerSearchService searchService;
 	
 	private JPanel contentPane;
@@ -210,13 +222,30 @@ public class SearchWmsServerDialog extends JDialog
 			// Otherwise, add each result in order
 			resultsPanel.removeAll();
 
+			GridBagConstraints constraints = new GridBagConstraints();
+			constraints.anchor = GridBagConstraints.LINE_START;
+			constraints.gridx = 0;
+			constraints.gridy = 0;
+			constraints.ipady = 10;
+			constraints.fill = GridBagConstraints.HORIZONTAL;
 			for (WmsServer server : searchResults)
 			{
-				resultsPanel.add(new SearchResult(server));
+				SearchResult searchResult = new SearchResult(server);
+				searchResult.setBackground(constraints.gridy % 2 == 0 ? STRIPE_EVEN : STRIPE_ODD);
+				resultsPanel.add(searchResult, constraints);
+				constraints.gridy++;
 			}
+			
+			constraints.weighty = 1;
+			constraints.fill = GridBagConstraints.BOTH;
+			resultsPanel.add(Box.createVerticalGlue(), constraints);
 			
 			validate();
 			repaint();
+		}
+		catch (Throwable e)
+		{
+			logger.log(Level.FINE, "Exception occurred during updateSearchResultsPanel", e);
 		}
 		finally
 		{
@@ -234,7 +263,6 @@ public class SearchWmsServerDialog extends JDialog
 	
 	private void showSearchingMessage()
 	{
-		// TODO: Make display icon
 		resultsPanel.removeAll();
 		resultsPanel.add(searchingIndicator);
 		validate();
@@ -323,6 +351,10 @@ public class SearchWmsServerDialog extends JDialog
 			}
 			catch (Exception e)
 			{
+				if (!(e instanceof InterruptedException))
+				{
+					logger.log(Level.FINE, e.getMessage());
+				}
 				// Nothing - task has been cancelled and original results will be restored
 			}
 			
@@ -340,7 +372,7 @@ public class SearchWmsServerDialog extends JDialog
 		
 		public boolean isDone()
 		{
-			return searchFuture.isDone();
+			return searchFuture == null || searchFuture.isDone();
 		}
 	}
 	
@@ -351,9 +383,71 @@ public class SearchWmsServerDialog extends JDialog
 	{
 		private static final long serialVersionUID = 20101124L;
 
+		private static final Font HEADING_FONT = UIManager.getFont("Label.font").deriveFont(Font.BOLD, UIManager.getFont("Label.font").getSize2D() * 1.4f);
+		private static final Font URL_FONT = UIManager.getFont("Label.font").deriveFont(Font.ITALIC);
+		
+		private WmsServer server;
+		
 		public SearchResult(WmsServer server)
 		{
-			add(new JLabel(server.getName()));
+			Validate.notNull(server, "A server is required");
+			this.server = server;
+			
+			setLayout(new GridBagLayout());
+			
+			addHeading();
+			addUrl();
+			addAbstract();
+			addPublisher();
+		}
+
+		private void addHeading()
+		{
+			SelectableLabel headingLabel = new SelectableLabel(server.getName());
+			headingLabel.setFont(HEADING_FONT);
+			
+			GridBagConstraints constraints = new GridBagConstraints();
+			constraints.gridx = 0;
+			constraints.gridy = 0;
+			constraints.anchor = GridBagConstraints.FIRST_LINE_START;
+			constraints.fill = GridBagConstraints.HORIZONTAL;
+			constraints.weightx = 1;
+			add(headingLabel, constraints);
+		}
+
+		private void addUrl()
+		{
+			SelectableLabel urlLabel = new SelectableLabel(server.getCapabilitiesUrl().toExternalForm());
+			urlLabel.setFont(URL_FONT);
+			
+			GridBagConstraints constraints = new GridBagConstraints();
+			constraints.gridx = 0;
+			constraints.gridy = 1;
+			constraints.anchor = GridBagConstraints.FIRST_LINE_START;
+			constraints.fill = GridBagConstraints.HORIZONTAL;
+			constraints.weightx = 1;
+			add(urlLabel, constraints);
+		}
+
+		private void addAbstract()
+		{
+			SelectableLabel abstractLabel = new SelectableLabel(server.getCapabilities().getServiceInformation().getServiceAbstract());
+			
+			GridBagConstraints constraints = new GridBagConstraints();
+			constraints.gridx = 0;
+			constraints.gridy = 2;
+			constraints.anchor = GridBagConstraints.FIRST_LINE_START;
+			constraints.fill = GridBagConstraints.BOTH;
+			constraints.weightx = 1;
+			constraints.weighty = 1;
+			add(abstractLabel, constraints);
+			
+		}
+
+		private void addPublisher()
+		{
+			// TODO Auto-generated method stub
+			
 		}
 	}
 }

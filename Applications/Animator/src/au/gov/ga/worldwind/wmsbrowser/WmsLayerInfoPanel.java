@@ -37,13 +37,12 @@ import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
 import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.application.AnimatorConfiguration;
+import au.gov.ga.worldwind.common.ui.SelectableLabel;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.wmsbrowser.layer.MetacartaCoastlineLayer;
 import au.gov.ga.worldwind.wmsbrowser.layer.MetacartaCountryBoundariesLayer;
@@ -322,25 +321,5 @@ public class WmsLayerInfoPanel extends JComponent
 		constraints.weighty = 1;
 		constraints.fill = GridBagConstraints.BOTH;
 		return constraints;
-	}
-	
-	/**
-	 * A simple extension of the {@link JTextField} to make it appear like a label,
-	 * but allow text selection via the mouse
-	 */
-	private static class SelectableLabel extends JTextField
-	{
-		private static final long serialVersionUID = 20101123L;
-
-		public SelectableLabel(String value)
-		{
-			super(value);
-			setEditable(false);
-			setBorder(null);
-			setForeground(UIManager.getColor("Label.foreground"));
-			setFont(UIManager.getFont("Label.font"));
-			setOpaque(false);
-			setColumns(value.length() + 5);
-		}
 	}
 }

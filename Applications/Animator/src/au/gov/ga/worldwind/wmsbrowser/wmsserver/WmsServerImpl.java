@@ -82,6 +82,18 @@ public class WmsServerImpl implements WmsServer
 	}
 
 	@Override
+	public WMSCapabilities getCapabilities()
+	{
+		return capabilities;
+	}
+	
+	@Override
+	public boolean isCapabilitiesLoaded()
+	{
+		return capabilities != null;
+	}
+	
+	@Override
 	public List<WMSLayerInfo> getLayers()
 	{
 		return layers;
