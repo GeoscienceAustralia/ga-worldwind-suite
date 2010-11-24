@@ -25,11 +25,26 @@ public class FreeView extends BasicView implements TransformView
 	{
 		this.viewInputHandler = new BasicFreeViewInputHandler();
 	}
+	
+	protected static Matrix computeRotationTransform(Angle heading, Angle pitch, Angle roll)
+	{
+		Matrix transform = Matrix.IDENTITY;
+		transform = transform.multiply(Matrix.fromAxisAngle(pitch, -1, 0, 0));
+		transform = transform.multiply(Matrix.fromAxisAngle(roll, 0, 1, 0));
+		transform = transform.multiply(Matrix.fromAxisAngle(heading, 0, 0, 1));
+		return transform;
+	}
+
+	protected static Matrix computePositionTransform(Globe globe, Position eyePosition)
+	{
+		Vec4 point = globe.computePointFromPosition(eyePosition);
+		return Matrix.fromTranslation(point.getNegative3());
+	}
 
 	@Override
 	public void beforeComputeMatrices()
 	{
-		minimumFarDistance = globe.getDiameter() / 2;
+		minimumFarDistance = globe.getDiameter() / 2d;
 	}
 
 	@Override
@@ -128,56 +143,17 @@ public class FreeView extends BasicView implements TransformView
 		this.lastFrustumInModelCoords = null;
 	}
 
-	protected Matrix computeRotationTransform(Angle heading, Angle pitch, Angle roll)
-	{
-		Matrix transform = Matrix.IDENTITY;
-		transform = transform.multiply(Matrix.fromAxisAngle(pitch, -1, 0, 0));
-		transform = transform.multiply(Matrix.fromAxisAngle(roll, 0, 1, 0));
-		transform = transform.multiply(Matrix.fromAxisAngle(heading, 0, 0, 1));
-		return transform;
-	}
-
-	protected Matrix computePositionTransform(Globe globe, Position eyePosition)
-	{
-		Vec4 point = globe.computePointFromPosition(eyePosition);
-		return Matrix.fromTranslation(point.getNegative3());
-	}
-
-	public void rotate(double deltaX, double deltaY, double deltaZ)
-	{
-		Matrix transform = computeRotationTransform(heading, pitch, roll);
-
-		transform = Matrix.fromAxisAngle(Angle.fromDegrees(deltaX), 1, 0, 0).multiply(transform);
-		transform = Matrix.fromAxisAngle(Angle.fromDegrees(deltaY), 0, 1, 0).multiply(transform);
-		transform = Matrix.fromAxisAngle(Angle.fromDegrees(deltaZ), 0, 0, 1).multiply(transform);
-
-		setHeading(ViewUtil.computeHeading(transform));
-		setPitch(ViewUtil.computePitch(transform));
-		setRoll(ViewUtil.computeRoll(transform));
-	}
-
 	@Override
 	protected double computeNearDistance(Position eyePosition)
 	{
-		double near = 0;
-		if (eyePosition != null && this.dc != null)
-		{
-			double elevation = ViewUtil.computeElevationAboveSurface(this.dc, eyePosition);
-			double tanHalfFov = this.fieldOfView.tanHalfAngle();
-			near = elevation / (2 * Math.sqrt(2 * tanHalfFov * tanHalfFov + 1));
-		}
+		double near = super.computeNearDistance(eyePosition);
 		return near < minimumNearDistance ? minimumNearDistance : near;
 	}
 
 	@Override
 	protected double computeFarDistance(Position eyePosition)
 	{
-		double far = 0;
-		if (eyePosition != null)
-		{
-			far = computeHorizonDistance(eyePosition);
-		}
-
+		double far = super.computeFarDistance(eyePosition);
 		return far < minimumFarDistance ? minimumFarDistance : far;
 	}
 
