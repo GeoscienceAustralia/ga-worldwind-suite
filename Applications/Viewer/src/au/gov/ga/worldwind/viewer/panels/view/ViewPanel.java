@@ -17,6 +17,7 @@ import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.view.stereo.StereoFlyView;
 import au.gov.ga.worldwind.common.view.stereo.StereoFreeView;
 import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
+import au.gov.ga.worldwind.common.view.stereo.StereoSubSurfaceOrbitView;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 
@@ -25,6 +26,7 @@ public class ViewPanel extends AbstractThemePanel
 	private WorldWindow wwd;
 
 	private JRadioButton orbitRadio;
+	private JRadioButton subSurfaceRadio;
 	private JRadioButton flyRadio;
 	private JRadioButton freeRadio;
 
@@ -56,24 +58,32 @@ public class ViewPanel extends AbstractThemePanel
 		orbitRadio.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.weightx = 1d / 3d;
+		c.weightx = 1d / 4d;
 		panel.add(orbitRadio, c);
 
-		freeRadio = new JRadioButton("Free");
-		bg.add(freeRadio);
-		freeRadio.addActionListener(al);
+		subSurfaceRadio = new JRadioButton("Sub-surface");
+		bg.add(subSurfaceRadio);
+		subSurfaceRadio.addActionListener(al);
 		c = new GridBagConstraints();
-		c.gridx = 2;
-		c.weightx = 1d / 3d;
-		panel.add(freeRadio, c);
+		c.gridx = 1;
+		c.weightx = 1d / 4d;
+		panel.add(subSurfaceRadio, c);
 
 		flyRadio = new JRadioButton("Fly");
 		bg.add(flyRadio);
 		flyRadio.addActionListener(al);
 		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.weightx = 1d / 3d;
+		c.gridx = 2;
+		c.weightx = 1d / 4d;
 		panel.add(flyRadio, c);
+
+		freeRadio = new JRadioButton("Free");
+		bg.add(freeRadio);
+		freeRadio.addActionListener(al);
+		c = new GridBagConstraints();
+		c.gridx = 3;
+		c.weightx = 1d / 4d;
+		panel.add(freeRadio, c);
 	}
 
 	@Override
@@ -105,6 +115,10 @@ public class ViewPanel extends AbstractThemePanel
 		if (orbitRadio.isSelected() && !(oldView instanceof StereoOrbitView))
 		{
 			view = new StereoOrbitView();
+		}
+		else if (subSurfaceRadio.isSelected() && !(oldView instanceof StereoSubSurfaceOrbitView))
+		{
+			view = new StereoSubSurfaceOrbitView();
 		}
 		else if (flyRadio.isSelected() && !(oldView instanceof StereoFlyView))
 		{
