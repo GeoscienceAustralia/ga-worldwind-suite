@@ -9,6 +9,7 @@ import au.gov.ga.worldwind.common.ui.lazytree.DefaultLazyTreeModel;
 import au.gov.ga.worldwind.common.ui.lazytree.ITreeObject;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeObjectNode;
+import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 
 /**
  * A tree model backed by a list of {@link WmsServer}s.

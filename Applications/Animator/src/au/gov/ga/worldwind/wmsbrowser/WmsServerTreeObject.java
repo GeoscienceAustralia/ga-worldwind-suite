@@ -12,6 +12,7 @@ import au.gov.ga.worldwind.common.ui.lazytree.ILazyTreeObject;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyLoadListener;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.util.Validate;
+import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 
 /**
  * A lazy tree object backed by a single {@link WmsServer} instance

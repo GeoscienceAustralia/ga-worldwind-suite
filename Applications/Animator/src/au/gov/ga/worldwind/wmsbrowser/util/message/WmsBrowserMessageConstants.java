@@ -16,4 +16,8 @@ public class WmsBrowserMessageConstants
 	public static String getLayerInfoKeywordsKey() { return "wmsbrowser.layerinfo.property.keywords"; }
 	public static String getLayerInfoNoCapabilitiesMsgKey() { return "wmsbrowser.layerinfo.message.nocapabilities"; }
 	public static String getLayerInfoDefaultStringValueKey() { return "wmsbrowser.layerinfo.value.default"; }
+	public static String getAddServerMenuLabelKey() { return "wmsbrowser.gui.menu.addserver.label"; }
+	public static String getSearchWmsTitleKey() { return "wmsbrowser.searchwms.title"; }
+	public static String getSearchWmsSearchBoxMsgKey() { return "wmsbrowser.searchwms.searchbox.message"; }
+	public static String getSearchWmsSearchButtonLabelKey() { return "wmsbrowser.searchwms.searchbutton.label"; }
 }

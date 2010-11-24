@@ -1,22 +1,31 @@
 package au.gov.ga.worldwind.wmsbrowser;
 
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getAddServerMenuLabelKey;
 import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getServerBrowserPanelTitleKey;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTree;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
+import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
+import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerIdentifier;
+import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerImpl;
 
 /**
  * A {@link CollapsiblePanel} that allows the user to browse through known
@@ -29,6 +38,11 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 	private WmsServerTreeModel treeModel;
 	private WmsServerTree serverTree;
 	
+	private SearchWmsServerDialog searchServerDialog;
+	
+	private JToolBar toolbar;
+	private BasicAction addServerAction;
+	
 	private List<LayerInfoSelectionListener> layerSelectionListeners = new ArrayList<LayerInfoSelectionListener>();
 	
 	public WmsServerBrowserPanel()
@@ -36,6 +50,8 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		setName(getMessage(getServerBrowserPanelTitleKey()));
 		
 		initialiseServerTree();
+		initialiseToolbar();
+		initialiseSearchDialog();
 		packComponents();
 	}
 
@@ -72,10 +88,37 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		}
 	}
 	
+	private void initialiseToolbar()
+	{
+		initialiseActions();
+		
+		toolbar = new JToolBar();
+		toolbar.add(addServerAction);
+	}
+
+	
+	private void initialiseActions()
+	{
+		addServerAction = new BasicAction(getMessage(getAddServerMenuLabelKey()), Icons.add.getIcon());
+		addServerAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				searchServerDialog.setVisible(true);
+			}
+		});
+	}
+
+	private void initialiseSearchDialog()
+	{
+		searchServerDialog = new SearchWmsServerDialog();
+	}
+	
 	private void packComponents()
 	{
 		JScrollPane scrollPane = new JScrollPane(serverTree);
 		add(scrollPane, BorderLayout.CENTER);
+		add(toolbar, BorderLayout.NORTH);
 	}
 	
 	private class LayerSelectionListener implements TreeSelectionListener

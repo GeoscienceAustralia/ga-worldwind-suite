@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.wmsbrowser;
+package au.gov.ga.worldwind.wmsbrowser.wmsserver;
 
 import java.net.URL;
 

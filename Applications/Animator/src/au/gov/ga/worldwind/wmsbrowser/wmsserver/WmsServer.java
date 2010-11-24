@@ -1,6 +1,5 @@
-package au.gov.ga.worldwind.wmsbrowser;
+package au.gov.ga.worldwind.wmsbrowser.wmsserver;
 
-import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;
@@ -81,11 +80,5 @@ public interface WmsServer
 		
 		/** Notified when loading has failed. Includes the exception that caused the failure */
 		void loadFailed(WmsServer server, Exception e);
-	}
-	
-	interface WmsCapabilitiesService
-	{
-		/** Retrieve the WMS Capabilites for the provided url */
-		WMSCapabilities retrieveCapabilities(URL url) throws Exception;
 	}
 }

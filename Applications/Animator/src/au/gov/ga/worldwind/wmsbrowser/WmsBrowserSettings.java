@@ -18,6 +18,8 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.XMLUtil;
+import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerIdentifier;
+import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerIdentifierImpl;
 
 
 /**

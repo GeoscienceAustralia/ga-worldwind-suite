@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.wmsbrowser;
+package au.gov.ga.worldwind.wmsbrowser.wmsserver;
 
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
@@ -22,14 +22,7 @@ import au.gov.ga.worldwind.common.util.Validate;
 public class WmsServerImpl implements WmsServer
 {
 	/** The default capabilities service. Can be overridden through injection using the {@link #setCapabilitiesService()} method */
-	private static final WmsCapabilitiesService DEFAULT_CAPABILITIES_SERVICE = new WmsCapabilitiesService()
-	{
-		@Override
-		public WMSCapabilities retrieveCapabilities(URL url) throws Exception
-		{
-			return WMSCapabilities.retrieve(url.toURI());
-		}
-	};
+	private static final WmsCapabilitiesService DEFAULT_CAPABILITIES_SERVICE = new DefaultCapabilitiesService();
 	
 	private static ExecutorService loaderService = Executors.newSingleThreadExecutor(new DaemonThreadFactory("WMS Server layer loader"));
 
@@ -58,6 +51,17 @@ public class WmsServerImpl implements WmsServer
 		Validate.notNull(identifier, "A server identifier is required");
 		this.identifier = identifier;
 	}
+	
+	/**
+	 * Constructor to use if the capabilities for this server have already been retrieved.
+	 */
+	public WmsServerImpl(WmsServerIdentifier identifier, WMSCapabilities capabilities)
+	{
+		Validate.notNull(identifier, "A server identifier is required");
+		this.identifier = identifier;
+		this.capabilities = capabilities;
+	}
+	
 	
 	@Override
 	public WmsServerIdentifier getIdentifier()
@@ -136,7 +140,10 @@ public class WmsServerImpl implements WmsServer
 	private void doLoad() throws Exception
 	{
 		// Load the capabilities
-		capabilities = capabilitiesService.retrieveCapabilities(getCapabilitiesUrl());
+		if (capabilities == null)
+		{
+			capabilities = capabilitiesService.retrieveCapabilities(getCapabilitiesUrl());
+		}
 		capabilities.parse();
 
 		layers = new ArrayList<WMSLayerInfo>();
