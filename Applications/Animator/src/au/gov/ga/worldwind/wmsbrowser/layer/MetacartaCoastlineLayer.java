@@ -1,40 +1,19 @@
 package au.gov.ga.worldwind.wmsbrowser.layer;
 
-import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.util.WWXML;
+import gov.nasa.worldwind.wms.WMSTiledImageLayer;
 
-import javax.media.opengl.GL;
+import org.w3c.dom.Document;
 
-import au.gov.ga.worldwind.animator.layers.immediate.ImmediateBasicTiledImageLayer;
-
-public class MetacartaCoastlineLayer extends ImmediateBasicTiledImageLayer
+public class MetacartaCoastlineLayer extends WMSTiledImageLayer
 {
-	public MetacartaCoastlineLayer()
-	{
-		super(MetacartaLayerUtil.makeLevels("Earth/Metacarta Coastline",
-				"coastline_02"));
-		setUseTransparentTextures(true);
-		setUseMipMaps(true);
-	}
+    public MetacartaCoastlineLayer()
+    {
+        super(getConfigurationDocument(), null);
+    }
 
-	@Override
-	public String toString()
-	{
-		return "Metacarta coastline";
-	}
-	
-	@Override
-	public void setSplitScale(double splitScale)
-	{
-		super.setSplitScale(splitScale);
-	}
-	
-	@Override
-	protected void setBlendingFunction(DrawContext dc)
-	{
-		GL gl = dc.getGL();
-		double alpha = this.getOpacity();
-		gl.glColor4d(alpha, alpha, alpha, alpha);
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-	}
+    protected static Document getConfigurationDocument()
+    {
+        return WWXML.openDocumentFile("au/gov/ga/worldwind/wmsbrowser/layer/metacarta_coastline.xml", null);
+    }
 }
