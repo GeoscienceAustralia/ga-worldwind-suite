@@ -23,6 +23,8 @@ import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.wmsbrowser.search.ChainingSearchService;
+import au.gov.ga.worldwind.wmsbrowser.search.DirectUrlSearchService;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerIdentifier;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerImpl;
@@ -111,7 +113,11 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 
 	private void initialiseSearchDialog()
 	{
-		searchServerDialog = new SearchWmsServerDialog();
+		// Setup the search service TODO: Is this the best place for it?
+		ChainingSearchService searchService = new ChainingSearchService();
+		searchService.addService(new DirectUrlSearchService());
+		
+		searchServerDialog = new SearchWmsServerDialog(searchService);
 	}
 	
 	private void packComponents()

@@ -20,4 +20,7 @@ public class WmsBrowserMessageConstants
 	public static String getSearchWmsTitleKey() { return "wmsbrowser.searchwms.title"; }
 	public static String getSearchWmsSearchBoxMsgKey() { return "wmsbrowser.searchwms.searchbox.message"; }
 	public static String getSearchWmsSearchButtonLabelKey() { return "wmsbrowser.searchwms.searchbutton.label"; }
+	public static String getSearchWmsCancelSearchButtonLabelKey() { return "wmsbrowser.searchwms.cancelsearchbutton.label"; }
+	public static String getSearchWmsNoResultsMsgKey() { return "wmsbrowser.searchwms.noresults.message"; }
+	public static String getSearchWmsSearchingMsgKey() { return "wmsbrowser.searchwms.searching.message"; }
 }
