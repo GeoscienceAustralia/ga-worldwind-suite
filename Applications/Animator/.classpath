@@ -8,6 +8,5 @@
 	<classpathentry kind="lib" path="test/lib/hamcrest-core-1.1.jar"/>
 	<classpathentry kind="lib" path="test/lib/hamcrest-library-1.1.jar"/>
 	<classpathentry kind="lib" path="test/lib/jmock-2.5.1.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/SwingDebug"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
