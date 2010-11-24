@@ -46,7 +46,8 @@ public class RenderablePlace extends GlobeAnnotation
 		Position pos = dc.getGlobe().computePositionFromPoint(point);
 
 		// Determine scale and opacity factors based on distance from eye vs the distance to the look at point.
-		double lookAtDistance = this.computeLookAtDistance(dc);
+		Double lookAtDistanceD = this.computeLookAtDistance(dc);
+		double lookAtDistance = lookAtDistanceD != null ? lookAtDistanceD : 0;
 		double eyeDistance = dc.getView().getEyePoint().distanceTo3(point);
 		double distanceFactor = Math.sqrt(lookAtDistance / eyeDistance);
 		double scale =

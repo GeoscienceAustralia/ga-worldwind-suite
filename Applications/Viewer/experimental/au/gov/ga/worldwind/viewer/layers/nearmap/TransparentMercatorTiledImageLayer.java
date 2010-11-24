@@ -114,6 +114,7 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 			this.tile = tile;
 		}
 
+		@Override
 		public void run()
 		{
 			// TODO: check to ensure load is still needed
@@ -154,6 +155,7 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 		 * @throws IllegalArgumentException
 		 *             if <code>that</code> is null
 		 */
+		@Override
 		public int compareTo(RequestTask that)
 		{
 			if (that == null)
@@ -333,6 +335,7 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 			this.layer = layer;
 		}
 
+		@Override
 		public ByteBuffer run(Retriever retriever)
 		{
 			if (retriever == null)

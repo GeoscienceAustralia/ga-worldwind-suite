@@ -18,7 +18,6 @@ public class NearMapOSM extends TransparentMercatorTiledImageLayer
 	public NearMapOSM()
 	{
 		super(makeLevels());
-		setSplitScale(1.3);
 		this.setForceLevelZeroLoads(true);
 		this.setUseTransparentTextures(true);
 		this.setRetainLevelZeroTiles(true);
@@ -47,6 +46,7 @@ public class NearMapOSM extends TransparentMercatorTiledImageLayer
 
 	private static class URLBuilder implements TileUrlBuilder
 	{
+		@Override
 		public URL getURL(Tile tile, String imageFormat)
 				throws MalformedURLException
 		{

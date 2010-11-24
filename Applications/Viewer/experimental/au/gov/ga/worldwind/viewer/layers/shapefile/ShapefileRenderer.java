@@ -470,25 +470,30 @@ public class ShapefileRenderer
 	
 	private class DepthTile implements SurfaceTile
 	{
+		@Override
 		public void applyInternalTransform(DrawContext dc)
 		{
 		}
 
+		@Override
 		public boolean bind(DrawContext dc)
 		{
 			return true;
 		}
 
+		@Override
 		public Extent getExtent(DrawContext dc)
 		{
 			return null;
 		}
 
+		@Override
 		public Sector getSector()
 		{
 			return Sector.FULL_SPHERE;
 		}
 
+		@Override
 		public List<? extends LatLon> getCorners()
 		{
 			return null;

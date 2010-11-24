@@ -59,6 +59,7 @@ public class FastShape implements Renderable, Cacheable
 		setMode(mode);
 	}
 
+	@Override
 	public void render(DrawContext dc)
 	{
 		boolean recalculate =
@@ -136,6 +137,7 @@ public class FastShape implements Renderable, Cacheable
 	{
 		Runnable runnable = new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				ensureBuffersExist();
@@ -404,6 +406,7 @@ public class FastShape implements Renderable, Cacheable
 			{
 				Thread thread = new Thread(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						while (true)

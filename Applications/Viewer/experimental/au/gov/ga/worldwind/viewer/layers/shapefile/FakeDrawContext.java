@@ -813,4 +813,19 @@ public class FakeDrawContext implements DrawContext
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
+	@Override
+	public void setDeepPickingEnabled(boolean tf)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isDeepPickingEnabled()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

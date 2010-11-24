@@ -12,10 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import au.gov.ga.worldwind.viewer.layers.shapefile.indextessellator.IndexedLatLon;
-import au.gov.ga.worldwind.viewer.layers.shapefile.indextessellator.SubTile;
-import au.gov.ga.worldwind.viewer.util.SettingsUtil;
-
 public class ShapefileLimiter
 {
 	public static List<Shape> limit(Shapefile shapefile, Sector sector)

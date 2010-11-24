@@ -19,7 +19,6 @@ public class NearMap extends BasicMercatorTiledImageLayer
 	public NearMap()
 	{
 		super(makeLevels());
-		setSplitScale(1.3);
 		this.setForceLevelZeroLoads(true);
 		this.setRetainLevelZeroTiles(true);
 	}
@@ -47,6 +46,7 @@ public class NearMap extends BasicMercatorTiledImageLayer
 
 	private static class URLBuilder implements TileUrlBuilder
 	{
+		@Override
 		public URL getURL(Tile tile, String imageFormat)
 				throws MalformedURLException
 		{

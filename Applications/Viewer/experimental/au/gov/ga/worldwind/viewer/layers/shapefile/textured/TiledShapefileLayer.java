@@ -17,8 +17,6 @@ import java.util.ArrayList;
 
 public abstract class TiledShapefileLayer extends TiledImageLayer
 {
-	private int shapefileLevels;
-	
 	public TiledShapefileLayer(LevelSet levelSet)
 	{
 		super(levelSet);
@@ -33,19 +31,9 @@ public abstract class TiledShapefileLayer extends TiledImageLayer
 	//*********************************************************************
 	//Below here is copied (with slight modifications) from TiledImageLayer
 	//*********************************************************************
-	
-	private ArrayList<TextureTile> topLevels;
-	
+
 	@Override
-	public ArrayList<TextureTile> getTopLevels()
-	{
-		if (this.topLevels == null)
-			this.createTopLevelTiles();
-
-		return topLevels;
-	}
-
-	private void createTopLevelTiles()
+	protected void createTopLevelTiles()
 	{
 		LevelSet levels = getLevels();
 		Sector sector = levels.getSector();

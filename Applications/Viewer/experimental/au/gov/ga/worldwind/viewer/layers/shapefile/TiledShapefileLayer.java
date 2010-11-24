@@ -649,6 +649,7 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 
 	private static class LevelComparer implements Comparator<ShapefileTile>
 	{
+		@Override
 		public int compare(ShapefileTile ta, ShapefileTile tb)
 		{
 			int la =
