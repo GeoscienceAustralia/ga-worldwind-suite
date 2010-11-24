@@ -21,7 +21,7 @@ public interface IDelegatorLayer<TILE extends IDelegatorTile> extends AVList
 	/**
 	 * Download data for tile, using the provided postProcessor.
 	 */
-	void downloadTexture(TILE tile, RetrievalPostProcessor postProcessor); //BasicTiledImageLayer
+	void retrieveRemoteTexture(TILE tile, RetrievalPostProcessor postProcessor); //BasicTiledImageLayer
 
 	/**
 	 * @return The {@link FileStore} for this layer.

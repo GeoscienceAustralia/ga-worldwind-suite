@@ -50,6 +50,11 @@ public class Path
 			sum += distances[i];
 		}
 	}
+	
+	public synchronized Angle getLength()
+	{
+		return length;
+	}
 
 	public synchronized LatLon getPercentLatLon(double percent)
 	{

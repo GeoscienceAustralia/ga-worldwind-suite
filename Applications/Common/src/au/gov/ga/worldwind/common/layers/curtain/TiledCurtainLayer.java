@@ -35,39 +35,39 @@ import com.sun.opengl.util.j2d.TextRenderer;
 public abstract class TiledCurtainLayer extends AbstractLayer
 {
 	//TODO where should this live
-	private CurtainTileRenderer renderer = new CurtainTileRenderer();
+	protected CurtainTileRenderer renderer = new CurtainTileRenderer();
 
-	private Path path;
-	private double curtainTop = 0;
-	private double curtainBottom = -10000;
-	private boolean followTerrain = false; //TODO how do we do this?
-	private int subsegments = 1;
+	protected Path path;
+	protected double curtainTop = 0;
+	protected double curtainBottom = -10000;
+	protected boolean followTerrain = false; //TODO how do we do this?
+	protected int subsegments = 1;
 
 	// Infrastructure
-	private static final LevelComparer levelComparer = new LevelComparer();
-	private final CurtainLevelSet levels;
-	private List<CurtainTextureTile> topLevels;
-	private boolean forceLevelZeroLoads = false;
-	private boolean levelZeroLoaded = false;
-	private boolean retainLevelZeroTiles = false;
-	private String tileCountName;
-	private double splitScale = 0.9;
-	private boolean useMipMaps = true;
-	private boolean useTransparentTextures = false;
-	private List<String> supportedImageFormats = new ArrayList<String>();
-	private String textureFormat;
+	protected static final LevelComparer levelComparer = new LevelComparer();
+	protected final CurtainLevelSet levels;
+	protected List<CurtainTextureTile> topLevels;
+	protected boolean forceLevelZeroLoads = false;
+	protected boolean levelZeroLoaded = false;
+	protected boolean retainLevelZeroTiles = false;
+	protected String tileCountName;
+	protected double detailHintOrigin = 2.8;
+	protected double detailHint = 0;
+	protected boolean useMipMaps = true;
+	protected boolean useTransparentTextures = false;
+	protected List<String> supportedImageFormats = new ArrayList<String>();
+	protected String textureFormat;
 
 	// Diagnostic flags
-	private boolean showImageTileOutlines = false;
-	private boolean drawTileBoundaries = false;
-	private boolean drawTileIDs = false;
-	private boolean drawBoundingVolumes = false;
+	protected boolean drawTileBoundaries = false;
+	protected boolean drawTileIDs = false;
+	protected boolean drawBoundingVolumes = false;
 
 	// Stuff computed each frame
-	private List<CurtainTextureTile> currentTiles = new ArrayList<CurtainTextureTile>();
-	private CurtainTextureTile currentResourceTile;
-	private boolean atMaxResolution = false;
-	private PriorityBlockingQueue<Runnable> requestQ = new PriorityBlockingQueue<Runnable>(200);
+	protected List<CurtainTextureTile> currentTiles = new ArrayList<CurtainTextureTile>();
+	protected CurtainTextureTile currentResourceTile;
+	protected boolean atMaxResolution = false;
+	protected PriorityBlockingQueue<Runnable> requestQ = new PriorityBlockingQueue<Runnable>(200);
 
 	abstract protected void requestTexture(DrawContext dc, CurtainTextureTile tile);
 
@@ -83,8 +83,6 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		}
 
 		this.levels = new CurtainLevelSet(levelSet); // the caller's levelSet may change internally, so we copy it.
-
-		//        this.createTopLevelTiles();
 
 		this.setPickEnabled(false); // textures are assumed to be terrain unless specifically indicated otherwise.
 		this.tileCountName = this.getName() + " Tiles";
@@ -205,16 +203,6 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		this.drawTileBoundaries = drawTileBoundaries;
 	}
 
-	public boolean isShowImageTileOutlines()
-	{
-		return showImageTileOutlines;
-	}
-
-	public void setShowImageTileOutlines(boolean showImageTileOutlines)
-	{
-		this.showImageTileOutlines = showImageTileOutlines;
-	}
-
 	public boolean isDrawBoundingVolumes()
 	{
 		return drawBoundingVolumes;
@@ -225,38 +213,40 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		this.drawBoundingVolumes = drawBoundingVolumes;
 	}
 
-	/**
-	 * Sets the parameter controlling a layer's displayed resolution as distance
-	 * changes between the globe's surface and the eye point. Higher resolution
-	 * is displayed as the split scale increases from 1.0. Lower resolution is
-	 * displayed as the split scale decreases from 1.0. The default value is
-	 * specified in the layer's configuration, or is 0.9 if not specified there.
-	 * 
-	 * @param splitScale
-	 *            a value near 1.0 that controls the image resolution as the
-	 *            distance between the globe's surface and the eye point change.
-	 *            Increasing values select higher resolution, decreasing values
-	 *            select lower resolution. Typical values range between 0.8 and
-	 *            1.2.
-	 */
-	public void setSplitScale(double splitScale)
-	{
-		this.splitScale = splitScale;
-	}
+    /**
+     * Indicates the layer's detail hint, which is described in {@link #setDetailHint(double)}.
+     *
+     * @return the detail hint
+     *
+     * @see #setDetailHint(double)
+     */
+    public double getDetailHint()
+    {
+        return this.detailHint;
+    }
 
-	/**
-	 * Returns the split scale value controlling image resolution relative to
-	 * the distance between the globe's surface at the image position and the
-	 * eye point.
-	 * 
-	 * @return the current split scale.
-	 * 
-	 * @see #setSplitScale(double)
-	 */
-	public double getSplitScale()
-	{
-		return this.splitScale;
-	}
+    /**
+     * Modifies the default relationship of image resolution to screen resolution as the viewing altitude changes.
+     * Values greater than 0 cause imagery to appear at higher resolution at greater altitudes than normal, but at an
+     * increased performance cost. Values less than 0 decrease the default resolution at any given altitude. The default
+     * value is 0. Values typically range between -0.5 and 0.5.
+     * <p/>
+     * Note: The resolution-to-height relationship is defined by a scale factor that specifies the approximate size of
+     * discernable lengths in the image relative to eye distance. The scale is specified as a power of 10. A value of 3,
+     * for example, specifies that 1 meter on the surface should be distinguishable from an altitude of 10^3 meters
+     * (1000 meters). The default scale is 1/10^2.8, (1 over 10 raised to the power 2.8). The detail hint specifies
+     * deviations from that default. A detail hint of 0.2 specifies a scale of 1/1000, i.e., 1/10^(2.8 + .2) = 1/10^3.
+     * Scales much larger than 3 typically cause the applied resolution to be higher than discernable for the altitude.
+     * Such scales significantly decrease performance.
+     *
+     * @param detailHint the degree to modify the default relationship of image resolution to screen resolution with
+     *                   changing view altitudes. Values greater than 1 increase the resolution. Values less than zero
+     *                   decrease the resolution. The default value is 0.
+     */
+    public void setDetailHint(double detailHint)
+    {
+        this.detailHint = detailHint;
+    }
 
 	protected CurtainLevelSet getLevels()
 	{
@@ -369,7 +359,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		return topLevels;
 	}
 
-	private void createTopLevelTiles()
+	protected void createTopLevelTiles()
 	{
 		CurtainLevel level = levels.getFirstLevel();
 		int rowCount = level.getRowCount();
@@ -393,7 +383,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		return new CurtainTextureTile(segment, level, row, col);
 	}
 
-	private void loadAllTopLevelTextures(DrawContext dc)
+	protected void loadAllTopLevelTextures(DrawContext dc)
 	{
 		for (CurtainTextureTile tile : this.getTopLevels())
 		{
@@ -408,7 +398,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 	// ============== Tile Assembly ======================= //
 	// ============== Tile Assembly ======================= //
 
-	private void assembleTiles(DrawContext dc)
+	protected void assembleTiles(DrawContext dc)
 	{
 		this.currentTiles.clear();
 
@@ -422,7 +412,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		}
 	}
 
-	private void addTileOrDescendants(DrawContext dc, CurtainTextureTile tile)
+	protected void addTileOrDescendants(DrawContext dc, CurtainTextureTile tile)
 	{
 		if (this.meetsRenderCriteria(dc, tile))
 		{
@@ -491,7 +481,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		}
 	}
 
-	private void addTile(DrawContext dc, CurtainTextureTile tile)
+	protected void addTile(DrawContext dc, CurtainTextureTile tile)
 	{
 		tile.setFallbackTile(null);
 
@@ -537,12 +527,12 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		}
 	}
 
-	private void addTileToCurrent(CurtainTextureTile tile)
+	protected void addTileToCurrent(CurtainTextureTile tile)
 	{
 		this.currentTiles.add(tile);
 	}
 
-	private boolean isTileVisible(DrawContext dc, CurtainTextureTile tile)
+	protected boolean isTileVisible(DrawContext dc, CurtainTextureTile tile)
 	{
 		Segment segment = tile.getSegment();
 		//LatLon start = path.getPercentLatLon(segment.getStart());
@@ -556,31 +546,47 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 				end))*/;
 	}
 
-	private boolean meetsRenderCriteria(DrawContext dc, CurtainTextureTile tile)
+	protected boolean meetsRenderCriteria(DrawContext dc, CurtainTextureTile tile)
 	{
 		return this.levels.isFinalLevel(tile.getLevelNumber())
 				|| !needToSplit(dc, tile);
 	}
+	
+    protected double getDetailFactor()
+    {
+        return this.detailHintOrigin + this.getDetailHint();
+    }
 
-	private boolean needToSplit(DrawContext dc, CurtainTextureTile tile)
+	protected boolean needToSplit(DrawContext dc, CurtainTextureTile tile)
 	{
 		Vec4[] points = path.getPointsInSegment(dc, tile.getSegment(), curtainTop, curtainBottom, subsegments, followTerrain);
 		Vec4 centerPoint = path.getSegmentCenterPoint(dc, tile.getSegment(), curtainTop, curtainBottom, followTerrain);
 
 		View view = dc.getView();
 		Vec4 eyePoint = view.getEyePoint();
+		
+		double texelSize = tile.getLevel().getTexelSize();
 		double minDistance = eyePoint.distanceTo3(centerPoint);
+		double cellHeight = centerPoint.getLength3() * texelSize;
+		
 		for (Vec4 point : points)
 		{
-			minDistance = Math.min(minDistance, eyePoint.distanceTo3(point));
+			double distance = eyePoint.distanceTo3(point);
+			if(distance < minDistance)
+			{
+				minDistance = distance;
+				cellHeight = point.getLength3() * texelSize;
+			}
 		}
 
-		double percent = 1d / (double) tile.getLevel().getColumnCount();
-		double segmentLength = path.getPercentLengthInRadians(percent);
-		//double segmentLength = path.getSegmentLengthInRadians(segment);
-		double cellSize = (Math.PI * segmentLength * dc.getGlobe().getRadius()) / 20; // TODO
-
-		return !(Math.log10(cellSize) <= (Math.log10(minDistance) - this.getSplitScale()));
+		// Split when the cell height (length of a texel) becomes greater than the specified fraction of the eye
+        // distance. The fraction is specified as a power of 10. For example, a detail factor of 3 means split when the
+        // cell height becomes more than one thousandth of the eye distance. Another way to say it is, use the current
+        // tile if its cell height is less than the specified fraction of the eye distance.
+        //
+        // NOTE: It's tempting to instead compare a screen pixel size to the texel size, but that calculation is
+        // window-size dependent and results in selecting an excessive number of tiles when the window is large.
+        return cellHeight > minDistance * Math.pow(10, -this.getDetailFactor());
 	}
 
 	//	private boolean atMaxLevel(DrawContext dc)
@@ -621,12 +627,13 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		if (dc.getSurfaceGeometry() == null || dc.getSurfaceGeometry().size() < 1)
 			return;
 
+		//TODO add tile boundary rendering to the curtain tile renderer
 		//dc.getGeographicSurfaceTileRenderer().setShowImageTileOutlines(this.showImageTileOutlines);
 
 		draw(dc);
 	}
 
-	private void draw(DrawContext dc)
+	protected void draw(DrawContext dc)
 	{
 		this.assembleTiles(dc); // Determine the tiles to draw.
 
@@ -684,7 +691,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		this.requestQ.clear();
 	}
 
-	private void checkTextureExpiration(DrawContext dc, List<CurtainTextureTile> tiles)
+	protected void checkTextureExpiration(DrawContext dc, List<CurtainTextureTile> tiles)
 	{
 		for (CurtainTextureTile tile : tiles)
 		{
@@ -708,7 +715,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	private void sendRequests()
+	protected void sendRequests()
 	{
 		Runnable task = this.requestQ.poll();
 		while (task != null)
@@ -748,7 +755,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 						path.getPercentLatLon(1d));*/
 	}
 
-	private Vec4 computeReferencePoint(DrawContext dc)
+	protected Vec4 computeReferencePoint(DrawContext dc)
 	{
 		if (dc.getViewportCenterPosition() != null)
 			return dc.getGlobe().computePointFromPosition(dc.getViewportCenterPosition());
@@ -773,7 +780,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		return this.computeReferencePoint(dc);
 	}
 
-	private static class LevelComparer implements Comparator<CurtainTextureTile>
+	protected static class LevelComparer implements Comparator<CurtainTextureTile>
 	{
 		@Override
 		public int compare(CurtainTextureTile ta, CurtainTextureTile tb)
@@ -789,7 +796,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		}
 	}
 
-	private void drawTileIDs(DrawContext dc, List<CurtainTextureTile> tiles)
+	protected void drawTileIDs(DrawContext dc, List<CurtainTextureTile> tiles)
 	{
 		java.awt.Rectangle viewport = dc.getView().getViewport();
 		TextRenderer textRenderer =
@@ -819,7 +826,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		textRenderer.endRendering();
 	}
 
-	private void drawBoundingVolumes(DrawContext dc, List<CurtainTextureTile> tiles)
+	protected void drawBoundingVolumes(DrawContext dc, List<CurtainTextureTile> tiles)
 	{
 		float[] previousColor = new float[4];
 		dc.getGL().glGetFloatv(GL.GL_CURRENT_COLOR, previousColor, 0);
@@ -890,7 +897,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.USE_MIP_MAPS, "UseMipMaps", xpath);
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.USE_TRANSPARENT_TEXTURES,
 				"UseTransparentTextures", xpath);
-		WWXML.checkAndSetDoubleParam(domElement, params, AVKey.SPLIT_SCALE, "SplitScale", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKey.DETAIL_HINT, "DetailHint", xpath);
 		WWXML.checkAndSetColorArrayParam(domElement, params, AVKey.TRANSPARENCY_COLORS,
 				"TransparencyColors/Color", xpath);
 

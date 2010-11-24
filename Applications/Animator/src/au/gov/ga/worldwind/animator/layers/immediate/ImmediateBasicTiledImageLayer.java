@@ -9,9 +9,9 @@ import gov.nasa.worldwind.util.Logging;
 
 import java.net.URL;
 
-import nasa.worldwind.layers.BasicTiledImageLayer;
+import au.gov.ga.worldwind.animator.layers.accessible.AccessibleBasicTiledImageLayer;
 
-public class ImmediateBasicTiledImageLayer extends BasicTiledImageLayer
+public class ImmediateBasicTiledImageLayer extends AccessibleBasicTiledImageLayer
 {
 	public ImmediateBasicTiledImageLayer(LevelSet levelSet)
 	{
@@ -38,7 +38,7 @@ public class ImmediateBasicTiledImageLayer extends BasicTiledImageLayer
 		}
 
 		if (!loadTextureFromStore(tile))
-			downloadTexture(tile, null);
+			retrieveTexture(tile, null);
 		loadTextureFromStore(tile);
 
 		// Add to list of tiles to be drawn. Usually this is done by addTile(),
@@ -51,10 +51,8 @@ public class ImmediateBasicTiledImageLayer extends BasicTiledImageLayer
 	{
 		// from BasicTiledImageLayer.requestTask.run()
 
-		final URL textureURL = getDataFileStore().findFile(tile.getPath(),
-				false);
-		if (textureURL != null
-				&& !isTextureFileExpired(tile, textureURL, getDataFileStore()))
+		final URL textureURL = getDataFileStore().findFile(tile.getPath(), false);
+		if (textureURL != null && !isTextureFileExpired(tile, textureURL, getDataFileStore()))
 		{
 			if (loadTexture(tile, textureURL))
 			{
@@ -66,11 +64,12 @@ public class ImmediateBasicTiledImageLayer extends BasicTiledImageLayer
 			{
 				// Assume that something's wrong with the file and delete it.
 				getDataFileStore().removeFile(textureURL);
-				String message = Logging.getMessage(
-						"generic.DeletedCorruptDataFile", textureURL);
+				String message = Logging.getMessage("generic.DeletedCorruptDataFile", textureURL);
 				Logging.logger().info(message);
 			}
 		}
 		return false;
 	}
+
+
 }

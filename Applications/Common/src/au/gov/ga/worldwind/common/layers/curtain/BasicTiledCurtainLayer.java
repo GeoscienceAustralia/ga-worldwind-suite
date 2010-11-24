@@ -13,8 +13,8 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.ScreenCredit;
 import gov.nasa.worldwind.retrieve.AbstractRetrievalPostProcessor;
-import gov.nasa.worldwind.retrieve.HTTPRetriever;
 import gov.nasa.worldwind.retrieve.Retriever;
+import gov.nasa.worldwind.retrieve.URLRetriever;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWIO;
 
@@ -74,9 +74,9 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 		if (d != null)
 			this.setValue(AVKey.MAP_SCALE, d);
 
-		d = (Double) params.getValue(AVKey.SPLIT_SCALE);
+		d = (Double) params.getValue(AVKey.DETAIL_HINT);
 		if (d != null)
-			this.setSplitScale(d);
+			this.setDetailHint(d);
 
 		Boolean b = (Boolean) params.getValue(AVKey.FORCE_LEVEL_ZERO_LOADS);
 		if (b != null)
@@ -206,8 +206,7 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 	{
 		final URL textureURL = this.getDataFileStore().findFile(tile.getPath(), true);
 
-		if (textureURL != null
-				&& !this.isTextureFileExpired(tile, textureURL, this.getDataFileStore()))
+		if (textureURL != null && !this.isTextureFileExpired(tile, textureURL, this.getDataFileStore()))
 		{
 			this.loadTexture(tile, textureURL);
 		}
@@ -217,8 +216,8 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 	protected void requestTexture(DrawContext dc, CurtainTextureTile tile)
 	{
 		Vec4 centroid =
-				getPath().getSegmentCenterPoint(dc, tile.getSegment(), getCurtainTop(),
-						getCurtainBottom(), isFollowTerrain());
+				getPath().getSegmentCenterPoint(dc, tile.getSegment(), getCurtainTop(), getCurtainBottom(),
+						isFollowTerrain());
 		Vec4 referencePoint = this.getReferencePoint(dc);
 		if (referencePoint != null)
 			tile.setPriority(centroid.distanceTo3(referencePoint));
@@ -227,8 +226,7 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 		this.getRequestQ().add(task);
 	}
 
-	protected boolean isTextureFileExpired(CurtainTextureTile tile, URL textureURL,
-			FileStore fileStore)
+	protected boolean isTextureFileExpired(CurtainTextureTile tile, URL textureURL, FileStore fileStore)
 	{
 		if (!WWIO.isFileOutOfDate(textureURL, tile.getLevel().getExpiryTime()))
 			return false;
@@ -264,25 +262,21 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 		CurtainTextureTile.getMemoryCache().add(tile.getTileKey(), tile);
 	}
 
-	private static TextureData readTexture(java.net.URL url, String textureFormat,
-			boolean useMipMaps)
+	private static TextureData readTexture(java.net.URL url, String textureFormat, boolean useMipMaps)
 	{
 		try
 		{
 			// If the caller has enabled texture compression, and the texture data is not a DDS file, then use read the
 			// texture data and convert it to DDS.
-			if ("image/dds".equalsIgnoreCase(textureFormat)
-					&& !url.toString().toLowerCase().endsWith("dds"))
+			if ("image/dds".equalsIgnoreCase(textureFormat) && !url.toString().toLowerCase().endsWith("dds"))
 			{
 				// Configure a DDS compressor to generate mipmaps based according to the 'useMipMaps' parameter, and
 				// convert the image URL to a compressed DDS format.
-				DXTCompressionAttributes attributes =
-						DDSCompressor.getDefaultCompressionAttributes();
+				DXTCompressionAttributes attributes = DDSCompressor.getDefaultCompressionAttributes();
 				attributes.setBuildMipmaps(useMipMaps);
 				ByteBuffer buffer = DDSCompressor.compressImageURL(url, attributes);
 
-				return TextureIO.newTextureData(WWIO.getInputStreamFromByteBuffer(buffer),
-						useMipMaps, null);
+				return TextureIO.newTextureData(WWIO.getInputStreamFromByteBuffer(buffer), useMipMaps, null);
 			}
 			// If the caller has disabled texture compression, or if the texture data is already a DDS file, then read
 			// the texture data without converting it.
@@ -293,9 +287,7 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 		}
 		catch (Exception e)
 		{
-			String msg =
-					Logging.getMessage("layers.TextureLayer.ExceptionAttemptingToReadTextureFile",
-							url);
+			String msg = Logging.getMessage("layers.TextureLayer.ExceptionAttemptingToReadTextureFile", url);
 			Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
 			return null;
 		}
@@ -317,11 +309,8 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 		{
 			// TODO: check to ensure load is still needed
 
-			final java.net.URL textureURL =
-					this.layer.getDataFileStore().findFile(tile.getPath(), false);
-			if (textureURL != null
-					&& !this.layer.isTextureFileExpired(tile, textureURL,
-							this.layer.getDataFileStore()))
+			final java.net.URL textureURL = this.layer.getDataFileStore().findFile(tile.getPath(), false);
+			if (textureURL != null && !this.layer.isTextureFileExpired(tile, textureURL, this.layer.getDataFileStore()))
 			{
 				if (this.layer.loadTexture(tile, textureURL))
 				{
@@ -333,13 +322,12 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 				{
 					// Assume that something's wrong with the file and delete it.
 					this.layer.getDataFileStore().removeFile(textureURL);
-					String message =
-							Logging.getMessage("generic.DeletedCorruptDataFile", textureURL);
+					String message = Logging.getMessage("generic.DeletedCorruptDataFile", textureURL);
 					Logging.logger().info(message);
 				}
 			}
 
-			this.layer.downloadTexture(this.tile, null);
+			this.layer.retrieveTexture(this.tile, new DownloadPostProcessor(this.tile, this.layer));
 		}
 
 		/**
@@ -361,8 +349,8 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 				Logging.logger().severe(msg);
 				throw new IllegalArgumentException(msg);
 			}
-			return this.tile.getPriority() == that.tile.getPriority() ? 0
-					: this.tile.getPriority() < that.tile.getPriority() ? -1 : 1;
+			return this.tile.getPriority() == that.tile.getPriority() ? 0 : this.tile.getPriority() < that.tile
+					.getPriority() ? -1 : 1;
 		}
 
 		@Override
@@ -392,8 +380,38 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 		}
 	}
 
-	protected void downloadTexture(final CurtainTextureTile tile,
-			DownloadPostProcessor postProcessor)
+	protected void retrieveTexture(CurtainTextureTile tile, DownloadPostProcessor postProcessor)
+	{
+		//TODO add support for a Local Curtain RetrieverFactory
+
+		/*if (this.getValue(AVKey.RETRIEVER_FACTORY_LOCAL) != null)
+		    this.retrieveLocalTexture(tile, postProcessor);
+		else*/
+		// Assume it's remote, which handles the legacy cases.
+		this.retrieveRemoteTexture(tile, postProcessor);
+	}
+
+	/*protected void retrieveLocalTexture(CurtainTextureTile tile, DownloadPostProcessor postProcessor)
+	{
+	    if (!WorldWind.getLocalRetrievalService().isAvailable())
+	        return;
+
+	    RetrieverFactory retrieverFactory = (RetrieverFactory) this.getValue(AVKey.RETRIEVER_FACTORY_LOCAL);
+	    if (retrieverFactory == null)
+	        return;
+
+	    AVListImpl avList = new AVListImpl();
+	    avList.setValue(AVKey.SECTOR, tile.getSector());
+	    avList.setValue(AVKey.WIDTH, tile.getWidth());
+	    avList.setValue(AVKey.HEIGHT, tile.getHeight());
+	    avList.setValue(AVKey.FILE_NAME, tile.getPath());
+
+	    Retriever retriever = retrieverFactory.createRetriever(avList, postProcessor);
+
+	    WorldWind.getLocalRetrievalService().runRetriever(retriever, tile.getPriority());
+	}*/
+
+	protected void retrieveRemoteTexture(final CurtainTextureTile tile, DownloadPostProcessor postProcessor)
 	{
 		if (!this.isNetworkRetrievalEnabled())
 		{
@@ -427,18 +445,13 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 
 		Retriever retriever;
 
-		if ("http".equalsIgnoreCase(url.getProtocol())
-				|| "https".equalsIgnoreCase(url.getProtocol()))
+		if (postProcessor == null)
+			postProcessor = new DownloadPostProcessor(tile, this);
+		retriever = URLRetriever.createRetriever(url, postProcessor);
+
+		if (retriever == null)
 		{
-			if (postProcessor == null)
-				postProcessor = new DownloadPostProcessor(tile, this);
-			retriever = new HTTPRetriever(url, postProcessor);
-		}
-		else
-		{
-			Logging.logger().severe(
-					Logging.getMessage("layers.TextureLayer.UnknownRetrievalProtocol",
-							url.toString()));
+			Logging.logger().severe(Logging.getMessage("layers.TextureLayer.UnknownRetrievalProtocol", url.toString()));
 			return;
 		}
 
@@ -467,8 +480,7 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 			this(tile, layer, null);
 		}
 
-		public DownloadPostProcessor(CurtainTextureTile tile, BasicTiledCurtainLayer layer,
-				FileStore fileStore)
+		public DownloadPostProcessor(CurtainTextureTile tile, BasicTiledCurtainLayer layer, FileStore fileStore)
 		{
 			//noinspection RedundantCast
 			super((AVList) layer);

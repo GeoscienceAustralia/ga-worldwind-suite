@@ -8,9 +8,9 @@ import gov.nasa.worldwind.util.Logging;
 
 import java.net.URL;
 
-import nasa.worldwind.wms.WMSTiledImageLayer;
+import au.gov.ga.worldwind.animator.layers.accessible.AccessibleWMSTiledImageLayer;
 
-public class ImmediateWMSTiledImageLayer extends WMSTiledImageLayer
+public class ImmediateWMSTiledImageLayer extends AccessibleWMSTiledImageLayer
 {
 	public ImmediateWMSTiledImageLayer(String stateInXml)
 	{
@@ -37,7 +37,7 @@ public class ImmediateWMSTiledImageLayer extends WMSTiledImageLayer
 		}
 
 		if (!loadTextureFromStore(tile))
-			downloadTexture(tile, null);
+			retrieveTexture(tile, null);
 		loadTextureFromStore(tile);
 
 		// Add to list of tiles to be drawn. Usually this is done by addTile(),

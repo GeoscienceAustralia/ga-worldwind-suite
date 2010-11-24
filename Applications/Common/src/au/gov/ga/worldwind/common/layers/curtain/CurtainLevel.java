@@ -5,6 +5,7 @@ import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getM
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.util.AbsentResourceList;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.TileKey;
@@ -24,7 +25,7 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 	private final String service;
 	private final String dataset;
 	private final String formatSuffix;
-//	private final double texelSize;
+	private final double texelSize;
 	private final String path;
 	private final CurtainTileUrlBuilder urlBuilder;
 	private long expiryTime;
@@ -72,8 +73,9 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 		this.urlBuilder = (CurtainTileUrlBuilder) this.params.getValue(AVKey.TILE_URL_BUILDER);
 		this.expiryTime = AVListImpl.getLongValue(params, AVKey.EXPIRY_TIME, 0L);
 
-//		Angle curtainLength = (Angle) this.params.getValue(AVKeyMore.CURTAIN_LENGTH);
-//		this.texelSize = curtainLength.radians / this.levelWidth;
+		Angle curtainLength = ((Path) this.params.getValue(AVKeyMore.PATH)).getLength();
+		//Angle curtainLength = (Angle) this.params.getValue(AVKeyMore.CURTAIN_LENGTH);
+		this.texelSize = curtainLength.radians / this.levelWidth;
 
 		//work out this level's tile width/height
 		int widthsPerTile = tileWidth / this.levelWidth;
@@ -96,18 +98,15 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 
 		this.path = this.cacheName + "/" + this.levelName;
 
-		Integer maxAbsentTileAttempts =
-				(Integer) this.params.getValue(AVKey.MAX_ABSENT_TILE_ATTEMPTS);
+		Integer maxAbsentTileAttempts = (Integer) this.params.getValue(AVKey.MAX_ABSENT_TILE_ATTEMPTS);
 		if (maxAbsentTileAttempts == null)
 			maxAbsentTileAttempts = DEFAULT_MAX_ABSENT_TILE_ATTEMPTS;
 
-		Integer minAbsentTileCheckInterval =
-				(Integer) this.params.getValue(AVKey.MIN_ABSENT_TILE_CHECK_INTERVAL);
+		Integer minAbsentTileCheckInterval = (Integer) this.params.getValue(AVKey.MIN_ABSENT_TILE_CHECK_INTERVAL);
 		if (minAbsentTileCheckInterval == null)
 			minAbsentTileCheckInterval = DEFAULT_MIN_ABSENT_TILE_CHECK_INTERVAL;
 
-		this.absentTiles =
-				new AbsentResourceList(maxAbsentTileAttempts, minAbsentTileCheckInterval);
+		this.absentTiles = new AbsentResourceList(maxAbsentTileAttempts, minAbsentTileCheckInterval);
 	}
 
 	private String validate(AVList params)
@@ -138,9 +137,9 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 		if (o == null || !(o instanceof Integer) || ((Integer) o) < 0)
 			sb.append(Logging.getMessage("term.tileHeight")).append(" ");
 
-//		o = params.getValue(AVKeyMore.CURTAIN_LENGTH);
-//		if (o == null || !(o instanceof Angle) || ((Angle) o).radians <= 0)
-//			sb.append(getMessage(getTermCurtainLengthKey())).append(" ");
+		o = params.getValue(AVKeyMore.PATH);
+		if (o == null || !(o instanceof Path) || ((Path) o).getLength().radians <= 0)
+			sb.append(getMessage(getTermPathKey())).append(" ");
 
 		o = params.getValue(AVKey.DATA_CACHE_NAME);
 		if (o == null || !(o instanceof String) || ((String) o).length() < 1)
@@ -221,10 +220,10 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 		return this.cacheName;
 	}
 
-//	public final double getTexelSize()
-//	{
-//		return this.texelSize;
-//	}
+	public final double getTexelSize()
+	{
+		return this.texelSize;
+	}
 
 	public final boolean isEmpty()
 	{
@@ -298,8 +297,7 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 	{
 		if (key != null && key.equals(AVKey.MAX_ABSENT_TILE_ATTEMPTS) && value instanceof Integer)
 			this.absentTiles.setMaxTries((Integer) value);
-		else if (key != null && key.equals(AVKey.MIN_ABSENT_TILE_CHECK_INTERVAL)
-				&& value instanceof Integer)
+		else if (key != null && key.equals(AVKey.MIN_ABSENT_TILE_CHECK_INTERVAL) && value instanceof Integer)
 			this.absentTiles.setMinCheckInterval((Integer) value);
 
 		return super.setValue(key, value);
@@ -331,8 +329,7 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 	 * @throws IllegalArgumentException
 	 *             if <code>tile</code> is null.
 	 */
-	public java.net.URL getTileResourceURL(CurtainTile tile, String imageFormat)
-			throws java.net.MalformedURLException
+	public java.net.URL getTileResourceURL(CurtainTile tile, String imageFormat) throws java.net.MalformedURLException
 	{
 		if (tile == null)
 		{
@@ -372,7 +369,7 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 
 		return new Sector(minLatitude, minLatitude.add(dLat), minLongitude, minLongitude.add(dLon));
 	}*/
-	
+
 	public Segment computeSegmentForKey(TileKey key)
 	{
 		if (key == null)
@@ -381,7 +378,7 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 			Logging.logger().severe(msg);
 			throw new IllegalArgumentException(msg);
 		}
-		
+
 		return computeSegmentForRowColumn(key.getRow(), key.getColumn());
 	}
 
@@ -416,8 +413,7 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 			Logging.logger().severe(msg);
 			throw new IllegalArgumentException(msg);
 		}
-		return this.levelNumber < that.levelNumber ? -1 : this.levelNumber == that.levelNumber ? 0
-				: 1;
+		return this.levelNumber < that.levelNumber ? -1 : this.levelNumber == that.levelNumber ? 0 : 1;
 	}
 
 	@Override
@@ -444,16 +440,15 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 			return false;
 		if (dataset != null ? !dataset.equals(level.dataset) : level.dataset != null)
 			return false;
-		if (formatSuffix != null ? !formatSuffix.equals(level.formatSuffix)
-				: level.formatSuffix != null)
+		if (formatSuffix != null ? !formatSuffix.equals(level.formatSuffix) : level.formatSuffix != null)
 			return false;
 		if (levelName != null ? !levelName.equals(level.levelName) : level.levelName != null)
 			return false;
 		if (service != null ? !service.equals(level.service) : level.service != null)
 			return false;
 		//noinspection RedundantIfStatement
-//		if (texelSize != level.texelSize)
-//			return false;
+		//		if (texelSize != level.texelSize)
+		//			return false;
 
 		return true;
 	}

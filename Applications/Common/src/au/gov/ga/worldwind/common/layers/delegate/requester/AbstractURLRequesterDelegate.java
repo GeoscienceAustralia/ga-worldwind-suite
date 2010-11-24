@@ -96,7 +96,7 @@ public abstract class AbstractURLRequesterDelegate<TILE extends IDelegatorTile> 
 				}
 			}
 
-			this.layer.downloadTexture(this.tile, null);
+			this.layer.retrieveRemoteTexture(this.tile, null);
 		}
 
 		/**

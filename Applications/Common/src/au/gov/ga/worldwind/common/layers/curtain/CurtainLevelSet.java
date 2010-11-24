@@ -49,6 +49,10 @@ public class CurtainLevelSet extends WWObjectImpl
 		o = params.getValue(AVKeyMore.FULL_HEIGHT);
 		if (o == null || !(o instanceof Integer))
 			sb.append(getMessage(getTermFullHeightKey())).append(" ");
+		
+		o = params.getValue(AVKeyMore.PATH);
+		if(o == null || !(o instanceof Path))
+			sb.append(getMessage(getTermPathKey())).append(" ");
 
 		if (sb.length() > 0)
 		{

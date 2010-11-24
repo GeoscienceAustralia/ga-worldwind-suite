@@ -336,13 +336,13 @@ public class DelegatorTiledCurtainLayer extends BasicTiledCurtainLayer implement
 	 ********************************************************************************************** */
 
 	@Override
-	public void downloadTexture(CurtainTextureTile tile, BasicTiledCurtainLayer.DownloadPostProcessor postProcessor)
+	public void retrieveRemoteTexture(CurtainTextureTile tile, BasicTiledCurtainLayer.DownloadPostProcessor postProcessor)
 	{
 		createAndRunRetriever(tile, postProcessor);
 	}
 
 	@Override
-	public void downloadTexture(DelegatorCurtainTextureTile tile, RetrievalPostProcessor postProcessor)
+	public void retrieveRemoteTexture(DelegatorCurtainTextureTile tile, RetrievalPostProcessor postProcessor)
 	{
 		createAndRunRetriever(tile, postProcessor);
 	}

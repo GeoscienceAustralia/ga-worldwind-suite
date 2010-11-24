@@ -20,7 +20,6 @@ public class OpenStreetMapTransparentLayer extends BasicMercatorTiledImageLayer
 	public OpenStreetMapTransparentLayer()
 	{
 		super(makeLevels());
-		setSplitScale(1.3);
 		this.setUseTransparentTextures(true);
 	}
 

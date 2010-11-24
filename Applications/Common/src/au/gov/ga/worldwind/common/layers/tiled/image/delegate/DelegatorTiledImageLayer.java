@@ -443,18 +443,8 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	 * Below here is copied from BasicTiledImageLayer, with some modifications to use the delegates *
 	 ********************************************************************************************** */
 
-	private ArrayList<TextureTile> topLevels;
-
 	@Override
-	public ArrayList<TextureTile> getTopLevels()
-	{
-		if (this.topLevels == null)
-			this.createTopLevelTiles();
-
-		return topLevels;
-	}
-
-	private void createTopLevelTiles()
+	protected void createTopLevelTiles()
 	{
 		Sector sector = this.getLevels().getSector();
 
@@ -548,13 +538,13 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	}
 
 	@Override
-	public void downloadTexture(TextureTile tile, BasicTiledImageLayer.DownloadPostProcessor postProcessor)
+	public void retrieveRemoteTexture(TextureTile tile, BasicTiledImageLayer.DownloadPostProcessor postProcessor)
 	{
 		createAndRunRetriever(tile, postProcessor);
 	}
 
 	@Override
-	public void downloadTexture(DelegatorTextureTile tile, RetrievalPostProcessor postProcessor)
+	public void retrieveRemoteTexture(DelegatorTextureTile tile, RetrievalPostProcessor postProcessor)
 	{
 		createAndRunRetriever(tile, postProcessor);
 	}
