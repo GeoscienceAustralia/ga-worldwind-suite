@@ -1,9 +1,11 @@
 package au.gov.ga.worldwind.wmsbrowser.util.message;
 
+import au.gov.ga.worldwind.common.util.message.CommonMessageConstants;
+
 /**
  * Message key constants for the WMS Browser tool
  */
-public class WmsBrowserMessageConstants
+public class WmsBrowserMessageConstants extends CommonMessageConstants
 {
 	public static String getWindowTitleKey() { return "wmsbrowser.application.title"; }
 	public static String getServerBrowserPanelTitleKey() { return "wmsbrowser.gui.panel.serverbrowser.title"; }

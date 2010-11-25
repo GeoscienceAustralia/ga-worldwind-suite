@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.event.TreeSelectionEvent;
@@ -107,6 +108,11 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 			public void actionPerformed(ActionEvent e)
 			{
 				searchServerDialog.setVisible(true);
+				if (searchServerDialog.getResponse() == JOptionPane.OK_OPTION)
+				{
+					treeModel.addServers(searchServerDialog.getSelectedServers());
+					serverTree.validate();
+				}
 			}
 		});
 	}

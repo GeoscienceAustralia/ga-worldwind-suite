@@ -226,6 +226,27 @@ public class WmsServerImpl implements WmsServer
 	}
 	
 	@Override
+	public void copyLoadedDataFrom(WmsServer otherServer)
+	{
+		if (otherServer == null || !(otherServer.getIdentifier().equals(this.getIdentifier())))
+		{
+			return;
+		}
+		
+		// Copy loaded capabilities if not already loaded
+		if (!this.isCapabilitiesLoaded() && otherServer.isCapabilitiesLoaded())
+		{
+			this.capabilities = otherServer.getCapabilities();
+		}
+		
+		// Copy loaded layers, if not already loaded
+		if (!this.isLayersLoaded() && otherServer.isLayersLoaded())
+		{
+			this.layers = otherServer.getLayers();
+		}
+	}
+	
+	@Override
 	public boolean equals(Object obj)
 	{
 		if (obj == this)

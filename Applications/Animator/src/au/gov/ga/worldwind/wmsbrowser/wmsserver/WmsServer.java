@@ -78,6 +78,12 @@ public interface WmsServer
 	void setCapabilitiesService(WmsCapabilitiesService service);
 	
 	/**
+	 * Utility method. Copies loaded layers/capabilities from the provided other server, if the identifier matches this one
+	 * and this server has not yet loaded its data.
+	 */
+	void copyLoadedDataFrom(WmsServer otherServer);
+	
+	/**
 	 * An interface for listeners that want to be notified of loading events
 	 * for a {@link WmsServer}
 	 */

@@ -27,6 +27,7 @@ import java.awt.GridLayout;
 import java.awt.ScrollPane;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Collection;
 import java.util.Iterator;
 
 import javax.swing.JComponent;
@@ -34,10 +35,14 @@ import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkEvent.EventType;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 
 import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.application.AnimatorConfiguration;
+import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.wmsbrowser.layer.MetacartaCoastlineLayer;
@@ -117,6 +122,17 @@ public class WmsLayerInfoPanel extends JComponent
 		infoTextPane = new JTextPane();
 		infoTextPane.setEditorKit(new HTMLEditorKit());
 		infoTextPane.setEditable(false);
+		infoTextPane.addHyperlinkListener(new HyperlinkListener()
+		{
+			@Override
+			public void hyperlinkUpdate(HyperlinkEvent e)
+			{
+				if (e.getEventType() == EventType.ACTIVATED)
+				{
+					DefaultLauncher.openURL(e.getURL());
+				}
+			}
+		});
 		
 		panel.add(infoTextPane, constraints);
 	}
@@ -249,20 +265,36 @@ public class WmsLayerInfoPanel extends JComponent
 
 		private static String getMetaDataUrlAsString(WMSLayerCapabilities capabilities)
 		{
-			return asString(capabilities.getMetadataURLs().iterator());
+			return asUnorderedListOfLinks(capabilities.getMetadataURLs());
 		}
 		
 		private static String getDataUrlAsString(WMSLayerCapabilities capabilities)
 		{
-			return asString(capabilities.getDataURLs().iterator());
+			return asUnorderedListOfLinks(capabilities.getDataURLs());
 		}
 		
-		private static String asString(Iterator<WMSLayerInfoURL> iterator)
+		private static String asUnorderedListOfLinks(Collection<WMSLayerInfoURL> urls)
 		{
-			String result = "";
-			while (iterator.hasNext())
+			if (urls.isEmpty())
 			{
-				result += iterator.next().getOnlineResource().getHref() + "\n";
+				return "";
+			}
+			
+			String result = "";
+			Iterator<WMSLayerInfoURL> iterator = urls.iterator();
+			while (iterator .hasNext())
+			{
+				String href = iterator.next().getOnlineResource().getHref();
+				String urlLink = "<a href=" + href + ">" + href + "</a>";
+				if (urls.size() > 1)
+				{
+					urlLink = "<li>" + urlLink + "</li>";
+				}
+				result += urlLink;
+			}
+			if (urls.size() > 1)
+			{
+				result = "<ul>" + result + "</ul>";
 			}
 			return result;
 		}
@@ -300,7 +332,7 @@ public class WmsLayerInfoPanel extends JComponent
 		
 		private static String substitute(String template, String variable, String value)
 		{
-			return template.replace("@" + variable + "@", Util.isBlank(value) ? "N/A" : value);
+			return template.replace("@" + variable + "@", Util.isBlank(value) ? getMessage(getLayerInfoDefaultStringValueKey()) : value);
 		}
 		
 		private static String substituteNameValue(String template, String variable, String heading, String value)

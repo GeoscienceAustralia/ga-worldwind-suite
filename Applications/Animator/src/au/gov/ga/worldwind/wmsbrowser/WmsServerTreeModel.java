@@ -47,26 +47,51 @@ public class WmsServerTreeModel extends DefaultLazyTreeModel implements LazyTree
 		setRoot(rootNode);
 	}
 	
+	/**
+	 * Add the provided server to this tree model
+	 */
 	public void addServer(WmsServer server)
 	{
-		if (servers.contains(server))
-		{
-			return;
-		}
-		servers.add(server);
-
-		rootNode.refreshChildren(this);
+		boolean treeChanged = doAddServer(server);
 		
-		notifyTreeChanged(server);
+		if (treeChanged)
+		{
+			rootNode.refreshChildren(this);
+			notifyTreeChanged(server);
+		}
 	}
 	
+	/**
+	 * Add each provided server to this tree model
+	 */
 	public void addServers(List<WmsServer> servers)
 	{
-		this.servers.addAll(servers);
+		boolean treeChanged = false;
+		for (WmsServer server : servers)
+		{
+			treeChanged = doAddServer(server) || treeChanged; // Order important - other way around will short-circuit and prevent adding of server
+		}
 		
-		rootNode.refreshChildren(this);
-		notifyTreeChanged(servers);
+		if (treeChanged)
+		{
+			rootNode.refreshChildren(this);
+			notifyTreeChanged(servers);
+		}
 	}
+
+	private boolean doAddServer(WmsServer newServer)
+	{
+		if (servers.contains(newServer))
+		{
+			// Update the layers/capabilities if the provided server has them loaded and the existing one doesn't
+			WmsServer existingServer = servers.get(servers.indexOf(newServer));
+			existingServer.copyLoadedDataFrom(newServer);
+			return false;
+		}
+		servers.add(newServer);
+		return true;
+	}
+	
 	
 	public void notifyTreeChanged(Object source)
 	{
