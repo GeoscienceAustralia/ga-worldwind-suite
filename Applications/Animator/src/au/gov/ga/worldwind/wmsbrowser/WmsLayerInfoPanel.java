@@ -20,30 +20,26 @@ import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.ScrollPane;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.Iterator;
 
-import javax.swing.Box;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextPane;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.html.HTMLEditorKit;
 
 import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.application.AnimatorConfiguration;
-import au.gov.ga.worldwind.common.ui.SelectableLabel;
 import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.wmsbrowser.layer.MetacartaCoastlineLayer;
 import au.gov.ga.worldwind.wmsbrowser.layer.MetacartaCountryBoundariesLayer;
 
@@ -65,13 +61,13 @@ public class WmsLayerInfoPanel extends JComponent
 	private JPanel splitPanel;
 	
 	private JPanel panel;
-	
-	private int currentRow = 0;
+	private JTextPane infoTextPane;
 	
 	private WorldWindowGLCanvas wwd;
 	private WorldMapLayer worldMapLayer;
 	private MetacartaCountryBoundariesLayer countryBoundariesLayer;
 	private MetacartaCoastlineLayer coastlinesLayer;
+	
 	
 	public WmsLayerInfoPanel()
 	{
@@ -110,6 +106,19 @@ public class WmsLayerInfoPanel extends JComponent
 		ScrollPane scrollPane = new ScrollPane();
 		scrollPane.add(panel);
 		splitPanel.add(scrollPane);
+		
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.weightx = 1;
+		constraints.weighty = 1;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.anchor = GridBagConstraints.FIRST_LINE_START;
+		infoTextPane = new JTextPane();
+		infoTextPane.setEditorKit(new HTMLEditorKit());
+		infoTextPane.setEditable(false);
+		
+		panel.add(infoTextPane, constraints);
 	}
 	
 	private void initialiseWorldWindow()
@@ -145,30 +154,17 @@ public class WmsLayerInfoPanel extends JComponent
 	{
 		try
 		{
-			panel.removeAll();
 			if (layerInfo == null)
 			{
 				wwd.setVisible(false);
+				infoTextPane.setText("");
 				return;
 			}
 			
-			currentRow = 0;
-			
-			addHeading(layerInfo.getTitle());
-			
 			layerCapabilities = ((WMSCapabilities)layerInfo.getCaps()).getLayerByName(layerInfo.getParams().getStringValue(AVKey.LAYER_NAMES));
-			if (layerCapabilities == null)
-			{
-				addSubHeading(getMessage(getLayerInfoNoCapabilitiesMsgKey()));
-			}
 			
-			addNameValuePair(getMessage(getLayerInfoDataUrlKey()), getDataUrlAsString(layerCapabilities));
-			addNameValuePair(getMessage(getLayerInfoMetaDataUrlKey()), getMetaDataUrlAsString(layerCapabilities));
-			addNameValuePair(getMessage(getLayerInfoLastUpdateKey()), layerCapabilities.getLastUpdate());
-			addNameValuePair(getMessage(getLayerInfoAbstractKey()), layerCapabilities.getLayerAbstract());
-			addNameValuePair(getMessage(getLayerInfoBoundingBoxKey()), getBoundingBoxAsString(layerCapabilities));
-			addNameValuePair(getMessage(getLayerInfoKeywordsKey()), getKeyWordsAsString(layerCapabilities));
-			addEndingSpace();
+			String infoText = new LayerInfoBuilder(layerCapabilities).getFormattedString();
+			infoTextPane.setText(infoText);
 			
 			updateFlatGlobeViewer();
 		}
@@ -181,91 +177,6 @@ public class WmsLayerInfoPanel extends JComponent
 		}
 	}
 
-	private static String getKeyWordsAsString(WMSLayerCapabilities capabilities)
-	{
-		String result = "";
-		Iterator<String> keywords = capabilities.getKeywords().iterator();
-		while (keywords.hasNext())
-		{
-			result += keywords.next();
-			if (keywords.hasNext())
-			{
-				result += ", ";
-			}
-		}
-		return result;
-	}
-
-	private static String getBoundingBoxAsString(WMSLayerCapabilities capabilities)
-	{
-		return capabilities.getGeographicBoundingBox().toString();
-	}
-
-	private static String getMetaDataUrlAsString(WMSLayerCapabilities capabilities)
-	{
-		return asString(capabilities.getMetadataURLs().iterator());
-	}
-	
-	private static String getDataUrlAsString(WMSLayerCapabilities capabilities)
-	{
-		return asString(capabilities.getDataURLs().iterator());
-	}
-	
-	private static String asString(Iterator<WMSLayerInfoURL> iterator)
-	{
-		String result = "";
-		while (iterator.hasNext())
-		{
-			result += iterator.next().getOnlineResource().getHref() + "\n";
-		}
-		return result;
-	}
-	
-	/**
-	 * Add an entry to the info panel of the form 'Name: value'
-	 */
-	private void addNameValuePair(String name, String value)
-	{
-		Container container = new Container();
-		container.setLayout(new FlowLayout(FlowLayout.LEFT, PADDING, 0));
-		
-		JLabel nameLabel = new JLabel(name + ":");
-		nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD));
-		container.add(nameLabel, Box.LEFT_ALIGNMENT);
-		
-		SelectableLabel valueLabel = new SelectableLabel(getStringValue(value));
-		container.add(valueLabel);
-
-		panel.add(container, createElementConstraints());
-		currentRow++;
-	}
-
-	private void addHeading(String heading)
-	{
-		JLabel headingLabel = new JLabel(heading);
-		headingLabel.setFont(headingLabel.getFont().deriveFont(Font.BOLD, headingLabel.getFont().getSize() * 1.5f));
-		
-		panel.add(headingLabel, createElementConstraints());
-		currentRow++;
-	}
-	
-	private void addSubHeading(String heading)
-	{
-		Container container = new Container();
-		container.setLayout(new FlowLayout(FlowLayout.LEFT, PADDING, 0));
-		
-		JLabel headingLabel = new JLabel(heading);
-		headingLabel.setFont(headingLabel.getFont().deriveFont(Font.BOLD, headingLabel.getFont().getSize() * 1.3f));
-		container.add(headingLabel);
-		
-		panel.add(container, createElementConstraints());
-		currentRow++;
-	}
-	
-	private void addEndingSpace()
-	{
-		panel.add(Box.createVerticalGlue(), createEndConstraints());
-	}
 	
 	private void updateFlatGlobeViewer()
 	{
@@ -298,28 +209,105 @@ public class WmsLayerInfoPanel extends JComponent
 		wwd.getView().setEyePosition(pos);
 	}
 
-	private static String getStringValue(String value)
+	/**
+	 * A builder that uses an external template to create a HTML-formatted string suitable for display in a text area or similar.
+	 */
+	public static class LayerInfoBuilder 
 	{
-		return Util.isBlank(value) ? getMessage(getLayerInfoDefaultStringValueKey()) : value;
-	}
-	
-	private GridBagConstraints createElementConstraints()
-	{
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.weightx = 1;
-		constraints.gridx = 0;
-		constraints.gridy = currentRow;
-		constraints.fill = GridBagConstraints.HORIZONTAL;
-		constraints.insets = new Insets(0, 0, PADDING, 0);
-		constraints.anchor = GridBagConstraints.FIRST_LINE_START;
-		return constraints;
-	}
-	
-	private GridBagConstraints createEndConstraints()
-	{
-		GridBagConstraints constraints = createElementConstraints();
-		constraints.weighty = 1;
-		constraints.fill = GridBagConstraints.BOTH;
-		return constraints;
+		private static String INFO_TEMPLATE;
+		static
+		{
+			try
+			{
+				INFO_TEMPLATE = Util.readStreamToString(WmsLayerInfoPanel.class.getResourceAsStream("layerInfoTemplate.txt"));
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		private static String getKeyWordsAsString(WMSLayerCapabilities capabilities)
+		{
+			String result = "";
+			Iterator<String> keywords = capabilities.getKeywords().iterator();
+			while (keywords.hasNext())
+			{
+				result += keywords.next();
+				if (keywords.hasNext())
+				{
+					result += ", ";
+				}
+			}
+			return result;
+		}
+
+		private static String getBoundingBoxAsString(WMSLayerCapabilities capabilities)
+		{
+			return capabilities.getGeographicBoundingBox().toString();
+		}
+
+		private static String getMetaDataUrlAsString(WMSLayerCapabilities capabilities)
+		{
+			return asString(capabilities.getMetadataURLs().iterator());
+		}
+		
+		private static String getDataUrlAsString(WMSLayerCapabilities capabilities)
+		{
+			return asString(capabilities.getDataURLs().iterator());
+		}
+		
+		private static String asString(Iterator<WMSLayerInfoURL> iterator)
+		{
+			String result = "";
+			while (iterator.hasNext())
+			{
+				result += iterator.next().getOnlineResource().getHref() + "\n";
+			}
+			return result;
+		}
+		
+		private WMSLayerCapabilities layerCapabilities;
+		private String formattedString = null;
+		
+		public LayerInfoBuilder(WMSLayerCapabilities layerCapabilities)
+		{
+			Validate.notNull(layerCapabilities, "Layer capabilities are required");
+			this.layerCapabilities = layerCapabilities;
+		}
+		
+		public String getFormattedString()
+		{
+			if (formattedString == null)
+			{
+				formattedString = buildFormattedString();
+			}
+			return formattedString;
+		}
+
+		private String buildFormattedString()
+		{
+			String result = INFO_TEMPLATE;
+			result = substitute(result, "LAYER_NAME", layerCapabilities.getTitle());
+			result = substituteNameValue(result, "DATA_URL", getMessage(getLayerInfoDataUrlKey()), getDataUrlAsString(layerCapabilities));
+			result = substituteNameValue(result, "METADATA_URL", getMessage(getLayerInfoMetaDataUrlKey()), getMetaDataUrlAsString(layerCapabilities));
+			result = substituteNameValue(result, "LAST_UPDATE", getMessage(getLayerInfoLastUpdateKey()), layerCapabilities.getLastUpdate());
+			result = substituteNameValue(result, "ABSTRACT", getMessage(getLayerInfoAbstractKey()), layerCapabilities.getLayerAbstract());
+			result = substituteNameValue(result, "BOUNDING_BOX", getMessage(getLayerInfoBoundingBoxKey()), getBoundingBoxAsString(layerCapabilities));
+			result = substituteNameValue(result, "KEYWORDS", getMessage(getLayerInfoKeywordsKey()), getKeyWordsAsString(layerCapabilities));
+			return result;
+		}
+		
+		private static String substitute(String template, String variable, String value)
+		{
+			return template.replace("@" + variable + "@", Util.isBlank(value) ? "N/A" : value);
+		}
+		
+		private static String substituteNameValue(String template, String variable, String heading, String value)
+		{
+			String result = substitute(template, variable + "_HEADING", heading);
+			result = substitute(result, variable + "_VALUE", value);
+			return result;
+		}
 	}
 }

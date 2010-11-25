@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.common.ui;
 
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 
@@ -7,7 +8,7 @@ import javax.swing.UIManager;
  * A simple extension of the {@link JTextField} to make it appear like a label,
  * but allow text selection via the mouse
  */
-public class SelectableLabel extends JTextField
+public class SelectableLabel extends JTextArea
 {
 	private static final long serialVersionUID = 20101123L;
 
@@ -15,7 +16,7 @@ public class SelectableLabel extends JTextField
 	{
 		super(value);
 		setEditable(false);
-		setBorder(null);
+		//setBorder(null);
 		setForeground(UIManager.getColor("Label.foreground"));
 		setFont(UIManager.getFont("Label.font"));
 		setOpaque(false);
