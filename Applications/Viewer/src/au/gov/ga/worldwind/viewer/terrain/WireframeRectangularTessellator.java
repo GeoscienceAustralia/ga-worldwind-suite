@@ -145,7 +145,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 	{
 		SectorGeometryList currentTiles = super.tessellate(dc);
 
-		if (smartSkirts)
+		if (isMakeTileSkirts() && smartSkirts)
 		{
 			Map<RectTileKey, RowColRectTile> tileMap = new HashMap<RectTileKey, RowColRectTile>();
 			for (SectorGeometry t : currentTiles)
