@@ -12,8 +12,11 @@ import gov.nasa.worldwind.geom.coords.UTMCoordConverterAccessible;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Random;
@@ -698,5 +701,25 @@ public class Util
 			dir.mkdirs();
 		}
 		return dir;
+	}
+	
+	/**
+	 * Read the provided stream into a String
+	 */
+	public static String readStreamToString(InputStream stream) throws Exception
+	{
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+		StringBuffer result = new StringBuffer();
+		String readLine = null;
+		while((readLine = reader.readLine()) != null)
+		{
+			if (result.length() > 0)
+			{
+				result.append('\n');
+			}
+			result.append(readLine);
+		}
+		reader.close();
+		return result.toString();
 	}
 }
