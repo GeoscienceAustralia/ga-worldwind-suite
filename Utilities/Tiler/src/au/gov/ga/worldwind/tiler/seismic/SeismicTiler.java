@@ -25,9 +25,9 @@ public class SeismicTiler
 {
 	public static void main(String[] args) throws Exception
 	{
-		boolean mask = true;
-		File input = new File("D:/Seismic/from gabe/s310_31_blured_wb_convert.tif");
-		File output = new File("D:/Seismic/from gabe/s310_31_blured_wb_convert_mask");
+		boolean mask = false;
+		File input = new File("D:/Seismic/from gabe/s280_03_depth_interp.tif");
+		File output = new File("D:/Seismic/from gabe/s280_03_depth_interp_tiles");
 		Dataset dataset = GDALUtil.open(input);
 		Insets insets = new Insets(0, 0, 0, 0);
 		int tilesize = 512;
@@ -64,7 +64,7 @@ public class SeismicTiler
 			constantPixelsFromTop = new int[width];
 			constantPixelsFromBottom = new int[width];
 
-			int constantWidth = 10 * tilesize * tilesize / height;
+			int constantWidth = Math.max(1, 10 * tilesize * tilesize / height);
 			for (int startX = 0; startX < width; startX += constantWidth)
 			{
 				int w = Math.min(constantWidth, width - startX);
