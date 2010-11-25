@@ -8,6 +8,7 @@ package nasa.worldwind.awt;
 
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.avlist.*;
+import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.cache.*;
 import gov.nasa.worldwind.event.*;
 import gov.nasa.worldwind.exception.WWRuntimeException;
@@ -25,7 +26,7 @@ import java.util.*;
  * layers). It's a self-contained component intended to serve as an application's world window. rendering.
  *
  * @author Tom Gaskins
- * @version $Id: WorldWindowGLCanvas.java 13506 2010-06-30 01:29:07Z tgaskins $
+ * @version $Id: WorldWindowGLCanvas.java 14141 2010-11-21 22:14:56Z tgaskins $
  */
 public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, PropertyChangeListener
 {
@@ -88,10 +89,11 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
      * be null
      *
      * @param shareWith a <code>WorldWindowGLCanvas</code> with which to share graphics resources.
+     *
      * @throws NullPointerException if shareWith is null.
      * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)
      */
-    public WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas shareWith)
+    public WorldWindowStereoGLCanvas(WorldWindowGLCanvas shareWith)
     {
         super(defaultCaps, null, shareWith.getContext(), null);
         try
@@ -119,13 +121,60 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
      *
      * @param shareWith a <code>WorldWindowGLCanvas</code> with which to share graphics resources.
      * @param device    the <code>GraphicsDevice</code> on which to create the window.
+     *
      * @throws NullPointerException     if <code>shareWith</code> is null.
-     * @throws IllegalArgumentException if <code>deevice</code> is null.
+     * @throws IllegalArgumentException if <code>device</code> is null.
      * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)
      */
-    public WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas shareWith, java.awt.GraphicsDevice device)
+    public WorldWindowStereoGLCanvas(WorldWindowGLCanvas shareWith, java.awt.GraphicsDevice device)
     {
         super(defaultCaps, null, shareWith.getContext(), device);
+
+        if (device == null)
+        {
+            String msg = Logging.getMessage("nullValue.DeviceIsNull");
+            Logging.logger().severe(msg);
+            throw new IllegalArgumentException(msg);
+        }
+        try
+        {
+            this.wwd = ((WorldWindowGLDrawable) WorldWind.createConfigurationComponent(AVKey.WORLD_WINDOW_CLASS_NAME));
+            this.wwd.initDrawable(this);
+            this.wwd.initTextureCache(shareWith.getTextureCache());
+            this.createView();
+            this.createDefaultInputHandler();
+            WorldWind.addPropertyChangeListener(WorldWind.SHUTDOWN_EVENT, this);
+            this.wwd.endInitialization();
+        }
+        catch (Exception e)
+        {
+            String message = Logging.getMessage("Awt.WorldWindowGLSurface.UnabletoCreateWindow");
+            Logging.logger().severe(message);
+            throw new WWRuntimeException(message, e);
+        }
+    }
+
+    /**
+     * Constructs a new <code>WorldWindowGLCanvas</code> window that will share graphics resources with another
+     * <code>WorldWindowGLCanvas</code> window and whose capabilities are chosen via a specified {@link GLCapabilities}
+     * object and a {@link javax.media.opengl.GLCapabilitiesChooser}. The new window is created on the specified
+     * graphics device. Neither <code> shareWith</code> or <code>device</code> may be null.
+     *
+     * @param shareWith    a <code>WorldWindowGLCanvas</code> with which to share graphics resources. May not be null.
+     * @param device       the <code>GraphicsDevice</code> on which to create the window.
+     * @param capabilities a capabilities object indicating the OpenGL rendering context's capabilities. May be null, in
+     *                     which case a default set of capabilities is used.
+     * @param chooser      a chooser object that customizes the specified capabilities. May be null, in which case a
+     *                     default chooser is used.
+     *
+     * @throws NullPointerException     if <code>shareWith</code> is null.
+     * @throws IllegalArgumentException if <code>device</code> is null.
+     * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)
+     */
+    public WorldWindowStereoGLCanvas(WorldWindowGLCanvas shareWith, java.awt.GraphicsDevice device,
+        GLCapabilities capabilities, GLCapabilitiesChooser chooser)
+    {
+        super(capabilities, chooser, shareWith.getContext(), device);
 
         if (device == null)
         {
