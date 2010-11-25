@@ -1,9 +1,12 @@
 package au.gov.ga.worldwind.common.view.subsurface;
 
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.animation.AnimationController;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.ViewInputAttributes.ActionAttributes;
+import gov.nasa.worldwind.awt.ViewInputAttributes.DeviceAttributes;
 import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.view.BasicView;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitViewInputHandler;
 import gov.nasa.worldwind.view.orbit.OrbitViewLimits;
@@ -41,5 +44,24 @@ public class SubSurfaceOrbitViewInputHandler extends OrbitViewInputHandler
 		double newAltitude = computeNewZoom(altitude, change, limits);
 		double delta = newAltitude - altitude;
 		return curZoom + delta;
+	}
+
+	@Override
+	protected double getScaleValueHorizTransRel(DeviceAttributes deviceAttributes, ActionAttributes actionAttributes)
+	{
+		View view = this.getView();
+		if (view != null && view instanceof BasicView)
+		{
+			//change move speed according to eye altitude
+			double[] range = actionAttributes.getValues();
+			Vec4 eyePoint = view.getCurrentEyePoint();
+			double altitude =
+					SubSurfaceOrbitView.computeEyeAltitude(((BasicView) view).getDC(), view.getGlobe(), eyePoint);
+			double radius = view.getGlobe().getRadius();
+
+			//multiply minimum speed by 10, because default min speed is too slow for sub-surface movement
+			return getScaleValue(range[0] * 10, range[1], Math.abs(altitude), 3.0 * radius, true);
+		}
+		return super.getScaleValueHorizTransRel(deviceAttributes, actionAttributes);
 	}
 }
