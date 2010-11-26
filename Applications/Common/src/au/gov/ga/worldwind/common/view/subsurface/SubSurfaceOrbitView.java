@@ -87,10 +87,14 @@ public class SubSurfaceOrbitView extends ViewStateBasicOrbitView
 	public static double computeEyeAltitude(DrawContext dc, Globe globe, Vec4 eyePoint)
 	{
 		Position eyePosition = globe.computePositionFromPoint(eyePoint);
-		double elevation =
-				globe.getElevation(eyePosition.latitude, eyePosition.longitude) * dc.getVerticalExaggeration();
-		Position surfacePosition = new Position(eyePosition, elevation);
-		Vec4 surfacePoint = globe.computePointFromPosition(surfacePosition);
+		Vec4 surfacePoint = dc.getSurfaceGeometry().getSurfacePoint(eyePosition.latitude, eyePosition.longitude, 0);
+		if (surfacePoint == null)
+		{
+			double elevation =
+					globe.getElevation(eyePosition.latitude, eyePosition.longitude) * dc.getVerticalExaggeration();
+			Position surfacePosition = new Position(eyePosition, elevation);
+			surfacePoint = globe.computePointFromPosition(surfacePosition);
+		}
 		return eyePoint.getLength3() - surfacePoint.getLength3();
 	}
 
