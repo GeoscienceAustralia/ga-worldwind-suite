@@ -34,6 +34,7 @@ public class Downloader
 {
 	private static final String DIRECTORY = "GA/Download Cache"; //TODO should this be in configuration?
 	private static final Object cacheLock = new Object();
+	private static final Object duplicateLock = new Object();
 
 	//use the standard World Wind BasicRetrievalService for handling downloading
 	private static final RetrievalService service = new BasicRetrievalService();
@@ -51,8 +52,7 @@ public class Downloader
 	 * @throws Exception
 	 *             If the download fails
 	 */
-	public static synchronized RetrievalResult downloadImmediately(final URL url,
-			final boolean cache) throws Exception
+	public static RetrievalResult downloadImmediately(final URL url, final boolean cache) throws Exception
 	{
 		if (isJarProtocol(url))
 		{
@@ -76,14 +76,17 @@ public class Downloader
 		URLRetriever retriever = createRetriever(url, null, postProcessor);
 
 		//check if the request is a duplicate
-		HandlerPostProcessor activeHandler = retrieverCache.getActiveRetriever(retriever);
-		if (activeHandler != null)
+		synchronized (duplicateLock)
 		{
-			activeHandler.addHandler(immediateHandler);
-		}
-		else
-		{
-			runRetriever(retriever, postProcessor);
+			HandlerPostProcessor activeHandler = retrieverCache.getActiveRetriever(retriever);
+			if (activeHandler != null)
+			{
+				activeHandler.addHandler(immediateHandler);
+			}
+			else
+			{
+				runRetriever(retriever, postProcessor);
+			}
 		}
 
 		//get the result immediately
@@ -112,8 +115,7 @@ public class Downloader
 	 * @throws Exception
 	 *             If the download fails
 	 */
-	public static synchronized RetrievalResult downloadImmediatelyIfModified(final URL url)
-			throws Exception
+	public static RetrievalResult downloadImmediatelyIfModified(final URL url) throws Exception
 	{
 		if (isJarProtocol(url))
 		{
@@ -134,14 +136,17 @@ public class Downloader
 		URLRetriever retriever = createRetriever(url, lastModified, postProcessor);
 
 		//check if the request is a duplicate
-		HandlerPostProcessor activeHandler = retrieverCache.getActiveRetriever(retriever);
-		if (activeHandler != null)
+		synchronized (duplicateLock)
 		{
-			activeHandler.addHandler(immediateHandler);
-		}
-		else
-		{
-			runRetriever(retriever, postProcessor);
+			HandlerPostProcessor activeHandler = retrieverCache.getActiveRetriever(retriever);
+			if (activeHandler != null)
+			{
+				activeHandler.addHandler(immediateHandler);
+			}
+			else
+			{
+				runRetriever(retriever, postProcessor);
+			}
 		}
 
 		//get the result immediately
@@ -175,8 +180,7 @@ public class Downloader
 	 * @param cache
 	 *            Cache the result?
 	 */
-	public static synchronized void download(final URL url, final RetrievalHandler downloadHandler,
-			final boolean cache)
+	public static void download(final URL url, final RetrievalHandler downloadHandler, final boolean cache)
 	{
 		if (isJarProtocol(url))
 		{
@@ -211,14 +215,17 @@ public class Downloader
 		HandlerPostProcessor postProcessor = new HandlerPostProcessor(url, cacherHandler);
 		URLRetriever retriever = createRetriever(url, null, postProcessor);
 
-		HandlerPostProcessor activeHandler = retrieverCache.getActiveRetriever(retriever);
-		if (activeHandler != null)
+		synchronized (duplicateLock)
 		{
-			activeHandler.addHandler(cacherHandler);
-		}
-		else
-		{
-			runRetriever(retriever, postProcessor);
+			HandlerPostProcessor activeHandler = retrieverCache.getActiveRetriever(retriever);
+			if (activeHandler != null)
+			{
+				activeHandler.addHandler(cacherHandler);
+			}
+			else
+			{
+				runRetriever(retriever, postProcessor);
+			}
 		}
 	}
 
@@ -239,8 +246,7 @@ public class Downloader
 	 *            (result.hasData() will be false if the URL has not been
 	 *            modified)
 	 */
-	public static void downloadIfModified(URL url, RetrievalHandler cacheHandler,
-			RetrievalHandler downloadHandler)
+	public static void downloadIfModified(URL url, RetrievalHandler cacheHandler, RetrievalHandler downloadHandler)
 	{
 		download(url, cacheHandler, downloadHandler, true);
 	}
@@ -258,13 +264,12 @@ public class Downloader
 	 * @param downloadHandler
 	 *            Handler to call after the download is complete
 	 */
-	public static void downloadAnyway(URL url, RetrievalHandler cacheHandler,
-			RetrievalHandler downloadHandler)
+	public static void downloadAnyway(URL url, RetrievalHandler cacheHandler, RetrievalHandler downloadHandler)
 	{
 		download(url, cacheHandler, downloadHandler, false);
 	}
 
-	private static synchronized void download(final URL url, final RetrievalHandler cacheHandler,
+	private static void download(final URL url, final RetrievalHandler cacheHandler,
 			final RetrievalHandler downloadHandler, final boolean checkIfModified)
 	{
 		if (isJarProtocol(url))
@@ -299,14 +304,17 @@ public class Downloader
 		HandlerPostProcessor postProcessor = new HandlerPostProcessor(url, cacherHandler);
 		URLRetriever retriever = createRetriever(url, lastModified, postProcessor);
 
-		HandlerPostProcessor currentHandler = retrieverCache.getActiveRetriever(retriever);
-		if (currentHandler != null)
+		synchronized (duplicateLock)
 		{
-			currentHandler.addHandler(cacherHandler);
-		}
-		else
-		{
-			runRetriever(retriever, postProcessor);
+			HandlerPostProcessor currentHandler = retrieverCache.getActiveRetriever(retriever);
+			if (currentHandler != null)
+			{
+				currentHandler.addHandler(cacherHandler);
+			}
+			else
+			{
+				runRetriever(retriever, postProcessor);
+			}
 		}
 	}
 
@@ -372,23 +380,19 @@ public class Downloader
 		return DIRECTORY + File.separator + external;
 	}
 
-	private static URLRetriever createRetriever(URL url, Long ifModifiedSince,
-			RetrievalPostProcessor postProcessor)
+	private static URLRetriever createRetriever(URL url, Long ifModifiedSince, RetrievalPostProcessor postProcessor)
 	{
 		URLRetriever retriever = doCreateRetriever(url, ifModifiedSince, postProcessor);
-		int connectTimeout =
-				Configuration.getIntegerValue(AVKeyMore.DOWNLOADER_CONNECT_TIMEOUT, 30000);
+		int connectTimeout = Configuration.getIntegerValue(AVKeyMore.DOWNLOADER_CONNECT_TIMEOUT, 30000);
 		int readTimeout = Configuration.getIntegerValue(AVKeyMore.DOWNLOADER_READ_TIMEOUT, 30000);
 		retriever.setConnectTimeout(connectTimeout);
 		retriever.setReadTimeout(readTimeout);
 		return retriever;
 	}
 
-	private static URLRetriever doCreateRetriever(URL url, Long ifModifiedSince,
-			RetrievalPostProcessor postProcessor)
+	private static URLRetriever doCreateRetriever(URL url, Long ifModifiedSince, RetrievalPostProcessor postProcessor)
 	{
-		if ("http".equalsIgnoreCase(url.getProtocol())
-				|| "https".equalsIgnoreCase(url.getProtocol()))
+		if ("http".equalsIgnoreCase(url.getProtocol()) || "https".equalsIgnoreCase(url.getProtocol()))
 			return new ExtendedHTTPRetriever(url, ifModifiedSince, postProcessor);
 		return new ExtendedFileRetriever(url, ifModifiedSince, postProcessor);
 	}
@@ -552,7 +556,7 @@ public class Downloader
 			thread.start();
 		}
 
-		private synchronized void removeNonActiveRetrievers()
+		private void removeNonActiveRetrievers()
 		{
 			synchronized (lock)
 			{
