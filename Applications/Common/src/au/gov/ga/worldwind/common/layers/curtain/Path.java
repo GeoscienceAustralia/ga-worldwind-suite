@@ -50,7 +50,7 @@ public class Path
 			sum += distances[i];
 		}
 	}
-	
+
 	public synchronized Angle getLength()
 	{
 		return length;
@@ -72,8 +72,8 @@ public class Path
 		return LatLon.interpolateGreatCircle(p, lower.getValue(), higher.getValue());
 	}
 
-	public synchronized Vec4 getSegmentCenterPoint(DrawContext dc, Segment segment, double top,
-			double bottom, boolean followTerrain)
+	public synchronized Vec4 getSegmentCenterPoint(DrawContext dc, Segment segment, double top, double bottom,
+			boolean followTerrain)
 	{
 		top *= dc.getVerticalExaggeration();
 		bottom *= dc.getVerticalExaggeration();
@@ -83,16 +83,14 @@ public class Path
 
 		if (followTerrain)
 		{
-			e +=
-					dc.getGlobe().getElevation(ll.latitude, ll.longitude)
-							* dc.getVerticalExaggeration();
+			e += dc.getGlobe().getElevation(ll.latitude, ll.longitude) * dc.getVerticalExaggeration();
 		}
 
 		return dc.getGlobe().computePointFromPosition(ll, e);
 	}
 
-	public synchronized SegmentGeometry getGeometry(DrawContext dc, Segment segment, double top,
-			double bottom, int subsegments, boolean followTerrain)
+	public synchronized SegmentGeometry getGeometry(DrawContext dc, Segment segment, double top, double bottom,
+			int subsegments, boolean followTerrain)
 	{
 		NavigableMap<Double, LatLon> betweenMap = segmentMap(segment, subsegments);
 		int numVertices = betweenMap.size() * 2;
@@ -110,6 +108,12 @@ public class Path
 		double t = top - segment.getTop() * height;
 		double b = top - segment.getBottom() * height;
 
+		//ensure t is greater than b (this can occur if exaggeration is 0)
+		if (t <= b)
+		{
+			t = b + 1;
+		}
+
 		double percentDistance = segment.getHorizontalDelta();
 		for (Entry<Double, LatLon> entry : betweenMap.entrySet())
 		{
@@ -125,10 +129,8 @@ public class Path
 			Vec4 point2 = globe.computePointFromPosition(ll, b + e);
 			double percent = (entry.getKey() - segment.getStart()) / percentDistance;
 
-			verts.put(point1.x - refCenter.x).put(point1.y - refCenter.y)
-					.put(point1.z - refCenter.z);
-			verts.put(point2.x - refCenter.x).put(point2.y - refCenter.y)
-					.put(point2.z - refCenter.z);
+			verts.put(point1.x - refCenter.x).put(point1.y - refCenter.y).put(point1.z - refCenter.z);
+			verts.put(point2.x - refCenter.x).put(point2.y - refCenter.y).put(point2.z - refCenter.z);
 			texCoords.put(percent).put(1);
 			texCoords.put(percent).put(0);
 		}
@@ -136,8 +138,8 @@ public class Path
 		return new SegmentGeometry(verts, texCoords, refCenter);
 	}
 
-	public synchronized Vec4[] getPointsInSegment(DrawContext dc, Segment segment, double top,
-			double bottom, int subsegments, boolean followTerrain)
+	public synchronized Vec4[] getPointsInSegment(DrawContext dc, Segment segment, double top, double bottom,
+			int subsegments, boolean followTerrain)
 	{
 		//TODO ?? cache value returned from this method, and if called twice with same input parameters, return cached value ??
 		//TODO create a new function to return some object with a vertex buffer and texture buffer instead of just a Vec4[] array
@@ -195,8 +197,8 @@ public class Path
 		return betweenMap;
 	}
 
-	public synchronized Extent getSegmentExtent(DrawContext dc, Segment segment, double top,
-			double bottom, int subsegments, boolean followTerrain)
+	public synchronized Extent getSegmentExtent(DrawContext dc, Segment segment, double top, double bottom,
+			int subsegments, boolean followTerrain)
 	{
 		Vec4[] points = getPointsInSegment(dc, segment, top, bottom, subsegments, followTerrain);
 		return Box.computeBoundingBox(Arrays.asList(points));
