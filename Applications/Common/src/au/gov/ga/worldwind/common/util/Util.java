@@ -722,4 +722,24 @@ public class Util
 		reader.close();
 		return result.toString();
 	}
+	
+	/**
+	 * @return A new URL with the same protocol and path, but devoid of the query string
+	 */
+	public static URL stripQuery(URL url)
+	{
+		if (url.getQuery() == null)
+		{
+			return url;
+		}
+		try
+		{
+			String urlString = url.toExternalForm();
+			return new URL(urlString.substring(0, urlString.indexOf('?')));
+		}
+		catch (MalformedURLException e)
+		{
+			return null;
+		}
+	}
 }
