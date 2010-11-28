@@ -8,6 +8,7 @@ import gov.nasa.worldwindow.core.WMSLayerInfo;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.wmsbrowser.search.CSWSearchService;
 import au.gov.ga.worldwind.wmsbrowser.search.ChainingSearchService;
 import au.gov.ga.worldwind.wmsbrowser.search.DirectUrlSearchService;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
@@ -119,9 +121,16 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 
 	private void initialiseSearchDialog()
 	{
-		// Setup the search service TODO: Is this the best place for it?
 		ChainingSearchService searchService = new ChainingSearchService();
 		searchService.addService(new DirectUrlSearchService());
+		try
+		{
+			searchService.addService(new CSWSearchService(new URL("http://catalog.geodata.gov/geoportal/csw/discovery?")));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		
 		searchServerDialog = new SearchWmsServerDialog(searchService);
 	}

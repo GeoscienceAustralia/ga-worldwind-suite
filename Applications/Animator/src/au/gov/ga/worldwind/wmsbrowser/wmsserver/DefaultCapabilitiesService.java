@@ -1,7 +1,10 @@
 package au.gov.ga.worldwind.wmsbrowser.wmsserver;
 
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
+import gov.nasa.worldwind.wms.CapabilitiesRequest;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
@@ -20,12 +23,31 @@ public final class DefaultCapabilitiesService implements WmsCapabilitiesService
 			return null;
 		}
 		
-		WMSCapabilities result = WMSCapabilities.retrieve(url.toURI());
-		if (result != null)
+		// TODO: Implement own capabilities loading mechanism to avoid hard-coding the version
+		WMSCapabilities result = null;
+		try
 		{
-			// Ensure the result has been parsed
-			result.parse();
+			CapabilitiesRequest request = new CapabilitiesRequest(url.toURI());
+			
+			// Try v1.3.0 first, then v1.1.1
+			request.setVersion("1.3.0");
+			result = new WMSCapabilities(request).parse();
+			
+			if (result == null)
+			{
+				request.setVersion("1.1.1");
+				result = new WMSCapabilities(request).parse();
+			}
 		}
+		catch (URISyntaxException e)
+		{
+			e.printStackTrace();
+		}
+		catch (MalformedURLException e)
+		{
+			e.printStackTrace();
+		}
+
 		return result;
 	}
 }

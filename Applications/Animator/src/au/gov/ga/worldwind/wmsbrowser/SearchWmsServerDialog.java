@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.wmsbrowser;
 
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermCancelKey;
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermOkKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.*;
 import gov.nasa.worldwind.util.Logging;
@@ -42,10 +44,12 @@ import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.HintTextField;
 import au.gov.ga.worldwind.common.ui.SelectableLabel;
+import au.gov.ga.worldwind.common.ui.SwingUtil;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
+import au.gov.ga.worldwind.wmsbrowser.search.WmsServerSearchResult;
 import au.gov.ga.worldwind.wmsbrowser.search.WmsServerSearchService;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 
@@ -77,7 +81,7 @@ public class SearchWmsServerDialog extends JDialog
 	
 	// The results panel
 	private JLabel noResultsMessage = new JLabel(getMessage(getSearchWmsNoResultsMsgKey()));
-	private List<WmsServer> searchResults = new ArrayList<WmsServer>();
+	private List<WmsServerSearchResult> searchResults = new ArrayList<WmsServerSearchResult>();
 	private List<WmsServer> selectedResults = new ArrayList<WmsServer>();
 	private ReadWriteLock searchResultsLock = new LenientReadWriteLock();
 	private JPanel resultsPanel;
@@ -86,6 +90,7 @@ public class SearchWmsServerDialog extends JDialog
 	private BasicAction okAction;
 	private BasicAction cancelAction;
 	private int response = JOptionPane.CANCEL_OPTION;
+	private JScrollPane resultScroller;
 	
 	public SearchWmsServerDialog(WmsServerSearchService searchService)
 	{
@@ -222,8 +227,8 @@ public class SearchWmsServerDialog extends JDialog
 		resultsPanel.setLayout(new GridBagLayout());
 		resultsPanel.setBackground(Color.WHITE);
 		
-		JScrollPane container = new JScrollPane(resultsPanel);
-		container.setOpaque(false);
+		resultScroller = new JScrollPane(resultsPanel);
+		resultScroller.setOpaque(false);
 		
 		GridBagConstraints containerConstraints = new GridBagConstraints();
 		containerConstraints.gridy = 1;
@@ -233,7 +238,7 @@ public class SearchWmsServerDialog extends JDialog
 		containerConstraints.ipady = 10;
 		containerConstraints.anchor = GridBagConstraints.NORTH;
 		containerConstraints.fill = GridBagConstraints.BOTH;
-		contentPane.add(container, containerConstraints);
+		contentPane.add(resultScroller, containerConstraints);
 		
 		updateSearchResultsPanel();
 	}
@@ -261,65 +266,84 @@ public class SearchWmsServerDialog extends JDialog
 	
 	private void updateSearchResultsPanel()
 	{
-		try
-		{
-			searchResultsLock.readLock().lock();
-			
-			// If no results, show the appropriate message
-			if (searchResults.isEmpty())
+		SwingUtil.invokeTaskOnEDT(new Runnable(){
+			@Override
+			public void run()
 			{
-				showNoResultsMessage();
-				return;
-			}
+				try
+				{
+					searchResultsLock.readLock().lock();
+					
+					// If no results, show the appropriate message
+					if (searchResults.isEmpty())
+					{
+						showNoResultsMessage();
+						return;
+					}
 
-			// Otherwise, add each result in order
-			resultsPanel.removeAll();
+					// Otherwise, add each result in order
+					resultsPanel.removeAll();
 
-			GridBagConstraints constraints = new GridBagConstraints();
-			constraints.anchor = GridBagConstraints.LINE_START;
-			constraints.gridx = 0;
-			constraints.gridy = 0;
-			constraints.ipady = 10;
-			constraints.fill = GridBagConstraints.HORIZONTAL;
-			for (WmsServer server : searchResults)
-			{
-				SearchResult searchResult = new SearchResult(server);
-				searchResult.setBackground(constraints.gridy % 2 == 0 ? STRIPE_EVEN : STRIPE_ODD);
-				resultsPanel.add(searchResult, constraints);
-				constraints.gridy++;
+					GridBagConstraints constraints = new GridBagConstraints();
+					constraints.anchor = GridBagConstraints.LINE_START;
+					constraints.gridx = 0;
+					constraints.gridy = 0;
+					constraints.ipady = 10;
+					constraints.fill = GridBagConstraints.HORIZONTAL;
+					for (WmsServerSearchResult searchResult : searchResults)
+					{
+						SearchResultPanel searchResultPanel = new SearchResultPanel(searchResult);
+						searchResultPanel.setBackground(constraints.gridy % 2 == 0 ? STRIPE_EVEN : STRIPE_ODD);
+						resultsPanel.add(searchResultPanel, constraints);
+						constraints.gridy++;
+					}
+					
+					constraints.weighty = 1;
+					constraints.fill = GridBagConstraints.BOTH;
+					resultsPanel.add(Box.createVerticalGlue(), constraints);
+					resultScroller.getVerticalScrollBar().setValue(0);
+					
+					validate();
+					repaint();
+				}
+				catch (Throwable e)
+				{
+					logger.log(Level.FINE, "Exception occurred during updateSearchResultsPanel", e);
+				}
+				finally
+				{
+					searchResultsLock.readLock().unlock();
+				}
 			}
-			
-			constraints.weighty = 1;
-			constraints.fill = GridBagConstraints.BOTH;
-			resultsPanel.add(Box.createVerticalGlue(), constraints);
-			
-			validate();
-			repaint();
-		}
-		catch (Throwable e)
-		{
-			logger.log(Level.FINE, "Exception occurred during updateSearchResultsPanel", e);
-		}
-		finally
-		{
-			searchResultsLock.readLock().unlock();
-		}
+		});
 	}
 	
 	private void showNoResultsMessage()
 	{
-		resultsPanel.removeAll();
-		resultsPanel.add(noResultsMessage);
-		validate();
-		repaint();
+		SwingUtil.invokeTaskOnEDT(new Runnable(){
+			@Override
+			public void run()
+			{
+				resultsPanel.removeAll();
+				resultsPanel.add(noResultsMessage);
+				validate();
+				repaint();
+			}
+		});
 	}
 	
 	private void showSearchingMessage()
 	{
-		resultsPanel.removeAll();
-		resultsPanel.add(searchingIndicator);
-		validate();
-		repaint();
+		SwingUtil.invokeTaskOnEDT(new Runnable(){
+			@Override
+			public void run()
+			{
+				resultsPanel.removeAll();
+				resultsPanel.add(searchingIndicator);
+				validate();
+				repaint();
+			}
+		});
 	}
 	
 	/**
@@ -335,7 +359,7 @@ public class SearchWmsServerDialog extends JDialog
 		searcher.submit(currentSearch);
 	}
 	
-	private void setSearchResults(List<WmsServer> results)
+	private void setSearchResults(List<WmsServerSearchResult> results)
 	{
 		try
 		{
@@ -345,11 +369,11 @@ public class SearchWmsServerDialog extends JDialog
 			
 			// Update the selected results list to include only those present in the new results
 			List<WmsServer> tmpSelectedResults = new ArrayList<WmsServer>();
-			for (WmsServer searchResult : searchResults)
+			for (WmsServerSearchResult searchResult : searchResults)
 			{
-				if (selectedResults.contains(searchResult))
+				if (selectedResults.contains(searchResult.getWmsServer()))
 				{
-					tmpSelectedResults.add(searchResult);
+					tmpSelectedResults.add(searchResult.getWmsServer());
 				}
 			}
 			selectedResults = tmpSelectedResults;
@@ -435,7 +459,7 @@ public class SearchWmsServerDialog extends JDialog
 		private ExecutorService executor;
 		private String searchString;
 
-		private Future<List<WmsServer>> searchFuture; 
+		private Future<List<WmsServerSearchResult>> searchFuture; 
 		
 		public SearchTask(String searchString)
 		{
@@ -453,21 +477,21 @@ public class SearchWmsServerDialog extends JDialog
 			}
 			
 			// Cache the old results so we can restore them if the task is cancelled
-			List<WmsServer> oldResults = new ArrayList<WmsServer>(searchResults);
+			List<WmsServerSearchResult> oldResults = new ArrayList<WmsServerSearchResult>(searchResults);
 			
 			showSearchingMessage();
 			
 			// Perform the search on a separate thread
-			searchFuture = executor.submit(new Callable<List<WmsServer>>(){
+			searchFuture = executor.submit(new Callable<List<WmsServerSearchResult>>(){
 				@Override
-				public List<WmsServer> call() throws Exception
+				public List<WmsServerSearchResult> call() throws Exception
 				{
-					List<WmsServer> searchResults = searchService.searchForServers(searchString);
+					List<WmsServerSearchResult> searchResults = searchService.searchForServers(searchString);
 					return searchResults;
 				}
 			});
 			
-			List<WmsServer> searchResults = oldResults;
+			List<WmsServerSearchResult> searchResults = oldResults;
 			try
 			{
 				searchResults = searchFuture.get();
@@ -504,7 +528,7 @@ public class SearchWmsServerDialog extends JDialog
 	 * <p/>
 	 * Presents some metadata, along with a checkbox to select a result for 
 	 */
-	private class SearchResult extends JPanel
+	private class SearchResultPanel extends JPanel
 	{
 		private static final long serialVersionUID = 20101124L;
 
@@ -512,25 +536,26 @@ public class SearchWmsServerDialog extends JDialog
 		private final Font PUBLISHER_FONT = UIManager.getFont("Label.font").deriveFont(Font.BOLD);
 		private final Font URL_FONT = UIManager.getFont("Label.font").deriveFont(Font.ITALIC);
 		
-		private WmsServer server;
+		private WmsServerSearchResult searchResult;
 
-		public SearchResult(WmsServer server)
+		public SearchResultPanel(WmsServerSearchResult searchResult)
 		{
-			Validate.notNull(server, "A server is required");
-			this.server = server;
+			Validate.notNull(searchResult, "A server is required");
+			this.searchResult = searchResult;
 			
 			setLayout(new GridBagLayout());
 			
+			addAbstract();
 			addHeading();
 			addUrl();
-			addAbstract();
+			
 			addPublisher();
 			addSelector();
 		}
 
 		private void addHeading()
 		{
-			SelectableLabel headingLabel = new SelectableLabel(server.getName());
+			SelectableLabel headingLabel = new SelectableLabel(searchResult.getTitle());
 			headingLabel.setFont(HEADING_FONT);
 			
 			GridBagConstraints constraints = new GridBagConstraints();
@@ -544,7 +569,7 @@ public class SearchWmsServerDialog extends JDialog
 
 		private void addUrl()
 		{
-			SelectableLabel urlLabel = new SelectableLabel(server.getCapabilitiesUrl().toExternalForm());
+			SelectableLabel urlLabel = new SelectableLabel(searchResult.getCapabilitiesUrl().toExternalForm());
 			urlLabel.setFont(URL_FONT);
 			
 			GridBagConstraints constraints = new GridBagConstraints();
@@ -558,7 +583,7 @@ public class SearchWmsServerDialog extends JDialog
 
 		private void addAbstract()
 		{
-			SelectableLabel abstractLabel = new SelectableLabel(server.getCapabilities().getServiceInformation().getServiceAbstract());
+			SelectableLabel abstractLabel = new SelectableLabel(searchResult.getAbstract());
 			abstractLabel.setLineWrap(true);
 			abstractLabel.setWrapStyleWord(true);
 			
@@ -575,7 +600,12 @@ public class SearchWmsServerDialog extends JDialog
 
 		private void addPublisher()
 		{
-			SelectableLabel publisherLabel = new SelectableLabel(server.getCapabilities().getServiceInformation().getContactInformation().getOrganization());
+			if (Util.isBlank(searchResult.getPublisher()))
+			{
+				return;
+			}
+			
+			SelectableLabel publisherLabel = new SelectableLabel(searchResult.getPublisher());
 			publisherLabel.setFont(PUBLISHER_FONT);
 			
 			GridBagConstraints constraints = new GridBagConstraints();
@@ -592,12 +622,12 @@ public class SearchWmsServerDialog extends JDialog
 		{
 			JCheckBox selector = new JCheckBox();
 			selector.setOpaque(false);
-			selector.setSelected(isSelected(server));
+			selector.setSelected(isSelected(searchResult.getWmsServer()));
 			selector.addActionListener(new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent e)
 				{
-					toggleSelection(server);
+					toggleSelection(searchResult.getWmsServer());
 				}
 			});
 			

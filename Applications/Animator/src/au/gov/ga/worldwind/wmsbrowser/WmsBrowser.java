@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.wmsbrowser;
 
+import static au.gov.ga.worldwind.common.ui.SwingUtil.*;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getWindowTitleKey;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
@@ -11,7 +12,6 @@ import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
 
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitConstraints;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
@@ -129,29 +129,6 @@ public class WmsBrowser
 				frame.setVisible(false);
 			}
 		});
-	}
-	
-	/**
-	 * Invokes the provided runnable task on the EDT. Use to ensure 
-	 * GUI updates are performed on the EDT, where they should be.
-	 */
-	private void invokeTaskOnEDT(Runnable task)
-	{
-		try
-		{
-			if (SwingUtilities.isEventDispatchThread())
-			{
-				task.run();
-			}
-			else
-			{
-				SwingUtilities.invokeAndWait(task);
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
 	}
 	
 	/**

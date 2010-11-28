@@ -37,7 +37,7 @@ public class DirectUrlSearchService implements WmsServerSearchService
 	}
 	
 	@Override
-	public List<WmsServer> searchForServers(String searchString)
+	public List<WmsServerSearchResult> searchForServers(String searchString)
 	{
 		if (Util.isBlank(searchString))
 		{
@@ -76,8 +76,8 @@ public class DirectUrlSearchService implements WmsServerSearchService
 		WmsServerIdentifier identifier = new WmsServerIdentifierImpl(serverCaps.getServiceInformation().getServiceTitle(), searchUrl);
 		WmsServer server = new WmsServerImpl(identifier, serverCaps);
 		
-		List<WmsServer> result = new ArrayList<WmsServer>(1);
-		result.add(server);
+		List<WmsServerSearchResult> result = new ArrayList<WmsServerSearchResult>(1);
+		result.add(new WmsServerSearchResultImpl(server));
 		return result;
 	}
 

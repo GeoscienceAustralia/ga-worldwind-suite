@@ -3,8 +3,6 @@ package au.gov.ga.worldwind.wmsbrowser.search;
 import java.util.Collections;
 import java.util.List;
 
-import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
-
 /**
  * An implementation of the {@link WmsServerSearchService} that queries
  * delegate search services in order until one returns a result, at which point
@@ -13,7 +11,7 @@ import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 public class ChainingSearchService extends DelegatingSearchService implements WmsServerSearchService
 {
 	@Override
-	public List<WmsServer> searchForServers(String searchString)
+	public List<WmsServerSearchResult> searchForServers(String searchString)
 	{
 		try
 		{
@@ -21,7 +19,7 @@ public class ChainingSearchService extends DelegatingSearchService implements Wm
 			
 			for (WmsServerSearchService service : getServices())
 			{
-				List<WmsServer> servers = service.searchForServers(searchString);
+				List<WmsServerSearchResult> servers = service.searchForServers(searchString);
 				if (!servers.isEmpty())
 				{
 					return servers;
