@@ -4,6 +4,7 @@ import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.common.view.subsurface.SubSurfaceOrbitView;
 import au.gov.ga.worldwind.common.view.transform.TransformBasicOrbitView;
 
 public class ViewStateBasicOrbitView extends TransformBasicOrbitView
@@ -21,7 +22,15 @@ public class ViewStateBasicOrbitView extends TransformBasicOrbitView
 	protected double computeFarClipDistance()
 	{
 		double far = super.computeFarClipDistance();
-		return Math.max(far, minimumFarDistance);
+
+		double altitude = SubSurfaceOrbitView.computeEyeAltitude(getDC(), getGlobe(), getCurrentEyePoint());
+		if (altitude < 0)
+		{
+			//if subsurface, use a larger far clip distance, so we don't fall into the black hole
+			return Math.max(far, minimumFarDistance);
+		}
+
+		return far;
 	}
 
 	@Override

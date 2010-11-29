@@ -21,6 +21,13 @@ public class SubSurfaceOrbitView extends ViewStateBasicOrbitView
 	}
 
 	@Override
+	protected double computeFarClipDistance()
+	{
+		double far = super.computeFarClipDistance();
+		return Math.max(far, minimumFarDistance);
+	}
+
+	@Override
 	public void focusOnViewportCenter()
 	{
 		if (this.dc == null)
@@ -87,7 +94,11 @@ public class SubSurfaceOrbitView extends ViewStateBasicOrbitView
 	public static double computeEyeAltitude(DrawContext dc, Globe globe, Vec4 eyePoint)
 	{
 		Position eyePosition = globe.computePositionFromPoint(eyePoint);
-		Vec4 surfacePoint = dc.getSurfaceGeometry().getSurfacePoint(eyePosition.latitude, eyePosition.longitude, 0);
+		Vec4 surfacePoint = null;
+		if (dc.getSurfaceGeometry() != null)
+		{
+			surfacePoint = dc.getSurfaceGeometry().getSurfacePoint(eyePosition.latitude, eyePosition.longitude, 0);
+		}
 		if (surfacePoint == null)
 		{
 			double elevation =
