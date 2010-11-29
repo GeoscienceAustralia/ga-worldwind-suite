@@ -4,7 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -76,12 +78,31 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 
 		add(button, BorderLayout.WEST);
 		add(label, BorderLayout.CENTER);
-		buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 2, 0));
+		buttonPanel = new JPanel(new GridBagLayout());
 		buttonPanel.setOpaque(false);
 		add(buttonPanel, BorderLayout.EAST);
-		buttonPanel.add(infoLabel);
-		buttonPanel.add(legendLabel);
-		buttonPanel.add(queryLabel);
+		
+		GridBagConstraints c;
+		Insets insets = new Insets(0, 0, 0, 2);
+		int i = 0;
+		
+		c = new GridBagConstraints();
+		c.gridx = i++;
+		c.anchor = GridBagConstraints.CENTER;
+		c.insets = (Insets) insets.clone();
+		buttonPanel.add(infoLabel, c);
+		
+		c = new GridBagConstraints();
+		c.gridx = i++;
+		c.anchor = GridBagConstraints.CENTER;
+		c.insets = (Insets) insets.clone();
+		buttonPanel.add(legendLabel, c);
+		
+		c = new GridBagConstraints();
+		c.gridx = i++;
+		c.anchor = GridBagConstraints.CENTER;
+		c.insets = (Insets) insets.clone();
+		buttonPanel.add(queryLabel, c);
 
 		loadingIcon = Icons.newLoadingIcon();
 	}
