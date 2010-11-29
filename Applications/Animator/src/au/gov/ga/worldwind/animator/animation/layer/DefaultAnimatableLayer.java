@@ -36,9 +36,6 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
  * A default implementation of the {@link AnimatableLayer} interface.
  * <p/>
  * Can be used to wrap around any {@link Layer} implementation.
- * 
- * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class DefaultAnimatableLayer extends AnimatableBase implements AnimatableLayer
 {
@@ -147,6 +144,12 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	public LayerIdentifier getLayerIdentifier()
 	{
 		return LayerIdentifierFactory.createFromLayer(layer);
+	}
+	
+	@Override
+	public boolean hasError()
+	{
+		return false;
 	}
 	
 	@Override

@@ -13,6 +13,7 @@ import java.net.URL;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageDelegateFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageLocalRequesterDelegate;
@@ -71,22 +72,34 @@ public class AnimationLayerLoader
 	 * 
 	 * @param identifier The identifier that specifies the layer to open
 	 * 
-	 * @return The layer identified by the provided identifier.
+	 * @return The layer identified by the provided identifier, or <code>null</code> if an error occurred during layer load
 	 */
 	public static Layer loadLayer(LayerIdentifier identifier)
 	{
-		URL sourceUrl = null;
 		try
 		{
-			sourceUrl = new URL(identifier.getLocation());
+			URL sourceUrl = null;
+			try
+			{
+				sourceUrl = new URL(identifier.getLocation());
+			}
+			catch (MalformedURLException e)
+			{
+				throw new IllegalArgumentException("Unable to locate Layer '"+ identifier.getName() +"' at provided location '" + identifier.getLocation() + "'", e);
+			}
+			Layer loadedLayer = loadLayer(sourceUrl);
+			if (loadedLayer == null)
+			{
+				return loadedLayer;
+			}
+			loadedLayer.setName(identifier.getName());
+			return loadedLayer;
 		}
-		catch (MalformedURLException e)
+		catch (Throwable t)
 		{
-			throw new IllegalArgumentException("Unable to locate Layer '"+ identifier.getName() +"' at provided location '" + identifier.getLocation() + "'", e);
+			ExceptionLogger.logException(t);
+			return null;
 		}
-		Layer loadedLayer = loadLayer(sourceUrl);
-		loadedLayer.setName(identifier.getName());
-		return loadedLayer;
 	}
 	
 	/**
@@ -115,7 +128,7 @@ public class AnimationLayerLoader
 	 * 
 	 * @param url The URL that identifies the layer to open
 	 * 
-	 * @return The layer identified by the provided URL.
+	 * @return The layer identified by the provided URL, or <code>null</code> if an error occurred during layer loading.
 	 */
 	public static Layer loadLayer(URL url)
 	{
@@ -124,16 +137,24 @@ public class AnimationLayerLoader
 			return null;
 		}
 		
-		Element element = XMLUtil.getElementFromSource(url);
-		
-		AVList params = new AVListImpl();
-		params.setValue(AVKeyMore.CONTEXT_URL, url);
-		
-		Layer result = (Layer)getLayerFactory().createFromConfigSource(element, params);
-		result.setValue(AVKeyMore.CONTEXT_URL, url);
-		result.setEnabled(true);
-		
-		return (Layer)result;
+		try
+		{
+			Element element = XMLUtil.getElementFromSource(url);
+			
+			AVList params = new AVListImpl();
+			params.setValue(AVKeyMore.CONTEXT_URL, url);
+			
+			Layer result = (Layer)getLayerFactory().createFromConfigSource(element, params);
+			result.setValue(AVKeyMore.CONTEXT_URL, url);
+			result.setEnabled(true);
+			
+			return (Layer)result;
+		}
+		catch (Throwable e)
+		{
+			ExceptionLogger.logException(e);
+			return null;
+		}
 	}
 
 }

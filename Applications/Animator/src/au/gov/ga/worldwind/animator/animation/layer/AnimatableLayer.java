@@ -44,4 +44,9 @@ public interface AnimatableLayer extends Animatable
 	 * @return An identifier that identifies the layer associated with this animatable layer
 	 */
 	LayerIdentifier getLayerIdentifier();
+
+	/**
+	 * @return Whether this layer has encountered an error (e.g. cannot load layer definition file etc.)
+	 */
+	boolean hasError();
 }
