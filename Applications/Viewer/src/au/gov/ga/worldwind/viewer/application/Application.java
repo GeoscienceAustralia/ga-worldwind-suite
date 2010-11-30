@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.viewer.application;
 
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
 import gov.nasa.worldwind.BasicModel;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+import javax.media.opengl.GLCapabilities;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -53,6 +55,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
@@ -67,6 +70,9 @@ import javax.swing.filechooser.FileFilter;
 
 import nasa.worldwind.awt.WorldWindowStereoGLCanvas;
 import nasa.worldwind.retrieve.ExtendedRetrievalService;
+
+import org.w3c.dom.Element;
+
 import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
@@ -74,6 +80,7 @@ import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.HtmlViewer;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
+import au.gov.ga.worldwind.common.ui.SwingUtil;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.common.util.GASandpit;
@@ -102,6 +109,7 @@ import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
 import au.gov.ga.worldwind.viewer.terrain.SectionListCompoundElevationModel;
 import au.gov.ga.worldwind.viewer.terrain.WireframeRectangularTessellator;
 import au.gov.ga.worldwind.viewer.theme.Theme;
+import au.gov.ga.worldwind.viewer.theme.ThemeFactory;
 import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
 import au.gov.ga.worldwind.viewer.theme.ThemeLayer;
 import au.gov.ga.worldwind.viewer.theme.ThemeOpener;
@@ -116,13 +124,15 @@ public class Application
 {
 	private static final String HELP_URL = getMessage(getHelpUrlKey());
 
+	private static URL themeUrl;
+	private static Element themeElement;
+
 	static
 	{
 		if (Configuration.isMacOS())
 		{
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			System.setProperty("com.apple.mrj.application.apple.menu.about.name",
-					"World Wind Viewer");
+			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "World Wind Viewer");
 			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
 			System.setProperty("apple.awt.brushMetalLook", "true");
 		}
@@ -136,16 +146,12 @@ public class Application
 		}
 
 		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
-		Configuration
-				.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
-		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME,
-				StereoSceneController.class.getName());
+		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
+		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, StereoSceneController.class.getName());
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
-		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME,
-				ExtendedRetrievalService.class.getName());
-		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME,
-				WireframeRectangularTessellator.class.getName());
+		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class.getName());
+		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, WireframeRectangularTessellator.class.getName());
 	}
 
 	public static void main(String[] args)
@@ -237,9 +243,11 @@ public class Application
 		ThemeOpenDelegate delegate = new ThemeOpenDelegate()
 		{
 			@Override
-			public void opened(Theme theme)
+			public void opened(Theme theme, Element themeElement, URL themeUrl)
 			{
-				start(theme);
+				Application.themeElement = themeElement;
+				Application.themeUrl = themeUrl;
+				start(theme, false, true);
 			}
 		};
 		if (themeUrl == null)
@@ -248,7 +256,13 @@ public class Application
 			ThemeOpener.openTheme(themeUrl, delegate);
 	}
 
-	private static Application start(Theme theme)
+	private static Application restart(boolean fullscreen)
+	{
+		Theme theme = ThemeFactory.createFromXML(themeElement, themeUrl);
+		return start(theme, fullscreen, false);
+	}
+
+	private static Application start(Theme theme, boolean fullscreen, boolean showSplashScreen)
 	{
 		if (theme.getInitialLatitude() != null)
 			Configuration.setValue(AVKey.INITIAL_LATITUDE, theme.getInitialLatitude());
@@ -267,12 +281,12 @@ public class Application
 				WorldWind.getDataFileStore().addLocation(location, false);
 		}
 
-		return new Application(theme);
+		return new Application(theme, fullscreen, showSplashScreen);
 	}
 
+	private final boolean fullscreen;
 	private Theme theme;
 	private JFrame frame;
-	private JFrame fullscreenFrame;
 
 	private WorldWindowStereoGLCanvas wwd;
 	private MouseLayer mouseLayer;
@@ -302,9 +316,10 @@ public class Application
 	private BasicAction aboutAction;
 	private BasicAction saveSectorAction;
 
-	private Application(Theme theme)
+	private Application(Theme theme, boolean fullscreen, boolean showSplashScreen)
 	{
 		this.theme = theme;
+		this.fullscreen = fullscreen;
 		Settings.get().loadThemeProperties(theme);
 
 		//initialize frame
@@ -319,16 +334,20 @@ public class Application
 		}
 		frame = new JFrame(title);
 		frame.setIconImage(Icons.earth32.getIcon().getImage());
+		frame.setUndecorated(fullscreen);
 
 		// show splashscreen
-		final SplashScreen splashScreen = new SplashScreen(frame);
+		final SplashScreen splashScreen = showSplashScreen ? new SplashScreen(frame) : null;
 
 		// create worldwind stuff
-		if (Settings.get().isHardwareStereoEnabled())
-			wwd = new WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas.stereoCaps);
-		else
-			wwd = new WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas.defaultCaps);
-		splashScreen.addRenderingListener(wwd);
+		GLCapabilities caps =
+				Settings.get().isHardwareStereoEnabled() ? WorldWindowStereoGLCanvas.stereoCaps
+						: WorldWindowStereoGLCanvas.defaultCaps;
+		wwd = new WorldWindowStereoGLCanvas(caps);
+		if (splashScreen != null)
+		{
+			splashScreen.addRenderingListener(wwd);
+		}
 
 		Model model = new BasicModel();
 		model.setLayers(new ExtendedLayerList());
@@ -362,49 +381,99 @@ public class Application
 			((ExtendedRetrievalService) rs).addRetrievalListener(layer);
 		}
 
-		//link theme to WorldWindow
-		theme.setup(frame, wwd);
-
 		//ensure menu bar and popups appear over the heavyweight WW canvas
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
-		frame.setLayout(new BorderLayout());
-		frame.setBounds(Settings.get().getWindowBounds());
-		if (Settings.get().isWindowMaximized())
-		{
-			frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		}
-
 		JPanel panel = new JPanel(new BorderLayout());
 		frame.setContentPane(panel);
-		// panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
-		panel.add(splitPane, BorderLayout.CENTER);
-		splitPane.setRightComponent(wwd);
-		splitPane.setOneTouchExpandable(true);
-		wwd.setMinimumSize(new Dimension(1, 1));
-		wwd.createBufferStrategy(2);
-		loadSplitLocation();
-
-		if (theme.hasStatusBar())
+		if (fullscreen)
 		{
-			statusBar = new MetersStatusBar();
-			panel.add(statusBar, BorderLayout.PAGE_END);
-			statusBar.setEventSource(wwd);
-			statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
-		}
+			panel.add(wwd, BorderLayout.CENTER);
+			frame.setAlwaysOnTop(true);
 
-		if (!theme.getPanels().isEmpty())
-		{
-			sideBar = new SideBar(theme, splitPane);
-			splitPane.setLeftComponent(sideBar);
+			frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+			frame.addWindowListener(new WindowAdapter()
+			{
+				@Override
+				public void windowClosing(WindowEvent e)
+				{
+					setFullscreen(false);
+				}
+			});
+
+			Action action = new AbstractAction()
+			{
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					setFullscreen(false);
+				}
+			};
+			panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+					action);
+			panel.getActionMap().put(action, action);
+
+
+			boolean span = Settings.get().isSpanDisplays();
+			String id = Settings.get().getDisplayId();
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			Rectangle bounds;
+
+			if (span)
+			{
+				Rectangle fullBounds = new Rectangle();
+				GraphicsDevice[] gds = ge.getScreenDevices();
+				for (GraphicsDevice g : gds)
+				{
+					GraphicsConfiguration gc = g.getDefaultConfiguration();
+					fullBounds = fullBounds.union(gc.getBounds());
+				}
+				bounds = fullBounds;
+			}
+			else
+			{
+				bounds = getGraphicsDeviceBounds(id, ge);
+			}
+			frame.setBounds(bounds);
 		}
 		else
 		{
-			splitPane.setDividerSize(0);
+			frame.setBounds(Settings.get().getWindowBounds());
+			if (Settings.get().isWindowMaximized())
+			{
+				frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+			}
+
+			splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
+			panel.add(splitPane, BorderLayout.CENTER);
+			splitPane.setRightComponent(wwd);
+			splitPane.setOneTouchExpandable(true);
+			wwd.setMinimumSize(new Dimension(1, 1));
+			loadSplitLocation();
+
+			if (theme.hasStatusBar())
+			{
+				statusBar = new MetersStatusBar();
+				panel.add(statusBar, BorderLayout.PAGE_END);
+				statusBar.setEventSource(wwd);
+				statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
+			}
+
+			if (!theme.getPanels().isEmpty())
+			{
+				sideBar = new SideBar(theme, splitPane);
+				splitPane.setLeftComponent(sideBar);
+			}
+			else
+			{
+				splitPane.setDividerSize(0);
+			}
 		}
+
+		//link theme to WorldWindow
+		theme.setup(frame, wwd);
 
 		//if the theme has some theme layers defined, and the ThemeLayersPanel has not been
 		//added, then we need to create a local LayerEnabler and enable the layers manually
@@ -424,28 +493,32 @@ public class Application
 		createActions();
 		createThemeListeners();
 
-		if (theme.hasMenuBar())
+		if (!fullscreen)
 		{
-			menuBar = createMenuBar();
-			frame.setJMenuBar(menuBar);
-		}
+			if (theme.hasMenuBar())
+			{
+				menuBar = createMenuBar();
+				frame.setJMenuBar(menuBar);
+			}
 
-		if (theme.hasToolBar())
-		{
-			toolBar = createToolBar();
-			panel.add(toolBar, BorderLayout.PAGE_START);
-		}
+			if (theme.hasToolBar())
+			{
+				toolBar = createToolBar();
+				panel.add(toolBar, BorderLayout.PAGE_START);
+			}
 
-		addWindowListeners();
+			addWindowListeners();
+		}
 
 		try
 		{
-			java.awt.EventQueue.invokeAndWait(new Runnable()
+			SwingUtil.invokeTaskOnEDT(new Runnable()
 			{
 				@Override
 				public void run()
 				{
 					frame.setVisible(true);
+					wwd.createBufferStrategy(2);
 				}
 			});
 		}
@@ -456,8 +529,7 @@ public class Application
 
 	private void createActions()
 	{
-		openLayerAction =
-				new BasicAction(getMessage(getOpenLayerActionLabelKey()), Icons.folder.getIcon());
+		openLayerAction = new BasicAction(getMessage(getOpenLayerActionLabelKey()), Icons.folder.getIcon());
 		openLayerAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -468,8 +540,7 @@ public class Application
 		});
 
 		createLayerFromDirectoryAction =
-				new BasicAction(getMessage(getCreateLayerFromDirectoryLabelKey()),
-						Icons.newfolder.getIcon());
+				new BasicAction(getMessage(getCreateLayerFromDirectoryLabelKey()), Icons.newfolder.getIcon());
 		createLayerFromDirectoryAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -491,8 +562,7 @@ public class Application
 			}
 		});
 
-		screenshotAction =
-				new BasicAction(getMessage(getScreenshotLabelKey()), Icons.screenshot.getIcon());
+		screenshotAction = new BasicAction(getMessage(getScreenshotLabelKey()), Icons.screenshot.getIcon());
 		screenshotAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -512,8 +582,7 @@ public class Application
 			}
 		});
 
-		defaultViewAction =
-				new BasicAction(getMessage(getDefaultViewLabelKey()), Icons.home.getIcon());
+		defaultViewAction = new BasicAction(getMessage(getDefaultViewLabelKey()), Icons.home.getIcon());
 		defaultViewAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -523,8 +592,7 @@ public class Application
 			}
 		});
 
-		gotoAction =
-				new BasicAction(getMessage(getGotoCoordsLabelKey()), Icons.crosshair45.getIcon());
+		gotoAction = new BasicAction(getMessage(getGotoCoordsLabelKey()), Icons.crosshair45.getIcon());
 		gotoAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -560,8 +628,8 @@ public class Application
 		});
 
 		wireframeAction =
-				new SelectableAction(getMessage(getWireframeLabelKey()), Icons.wireframe.getIcon(),
-						wwd.getModel().isShowWireframeInterior());
+				new SelectableAction(getMessage(getWireframeLabelKey()), Icons.wireframe.getIcon(), wwd.getModel()
+						.isShowWireframeInterior());
 		wireframeAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -574,12 +642,10 @@ public class Application
 		});
 
 		final WireframeRectangularTessellator tessellator =
-				tess instanceof WireframeRectangularTessellator
-						? (WireframeRectangularTessellator) tess : null;
+				tess instanceof WireframeRectangularTessellator ? (WireframeRectangularTessellator) tess : null;
 		boolean depth = tessellator != null && tessellator.isWireframeDepthTesting();
 		wireframeDepthAction =
-				new SelectableAction(getMessage(getWireframeDepthLabelKey()),
-						Icons.zwireframe.getIcon(), depth);
+				new SelectableAction(getMessage(getWireframeDepthLabelKey()), Icons.zwireframe.getIcon(), depth);
 		wireframeDepthAction.setEnabled(wireframeAction.isSelected());
 		wireframeDepthAction.addActionListener(new ActionListener()
 		{
@@ -591,8 +657,7 @@ public class Application
 			}
 		});
 
-		fullscreenAction =
-				new BasicAction(getMessage(getFullscreenLabelKey()), Icons.monitor.getIcon());
+		fullscreenAction = new BasicAction(getMessage(getFullscreenLabelKey()), Icons.monitor.getIcon());
 		fullscreenAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -602,8 +667,7 @@ public class Application
 			}
 		});
 
-		settingsAction =
-				new BasicAction(getMessage(getPreferencesLabelKey()), Icons.settings.getIcon());
+		settingsAction = new BasicAction(getMessage(getPreferencesLabelKey()), Icons.settings.getIcon());
 		settingsAction.addActionListener(new ActionListener()
 		{
 			private boolean visible = false;
@@ -615,8 +679,7 @@ public class Application
 				{
 					visible = true;
 					SettingsDialog settingsDialog =
-							new SettingsDialog(frame, getMessage(getPreferencesTitleKey()),
-									Icons.settings.getIcon());
+							new SettingsDialog(frame, getMessage(getPreferencesTitleKey()), Icons.settings.getIcon());
 					settingsDialog.setVisible(true);
 					visible = false;
 					afterSettingsChange();
@@ -640,8 +703,7 @@ public class Application
 			}
 		});
 
-		controlsAction =
-				new BasicAction(getMessage(getControlsLabelKey()), Icons.keyboard.getIcon());
+		controlsAction = new BasicAction(getMessage(getControlsLabelKey()), Icons.keyboard.getIcon());
 		controlsAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -661,8 +723,7 @@ public class Application
 			}
 		});
 
-		saveSectorAction =
-				new BasicAction(getMessage(getSaveSectorLabelKey()), Icons.save.getIcon());
+		saveSectorAction = new BasicAction(getMessage(getSaveSectorLabelKey()), Icons.save.getIcon());
 		saveSectorAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -686,8 +747,8 @@ public class Application
 		if (panel != null)
 		{
 			ILayerDefinition layer =
-					LocalLayerCreator.createDefinition(frame,
-							createLayerFromDirectoryAction.getToolTipText(), panel.getIcon());
+					LocalLayerCreator.createDefinition(frame, createLayerFromDirectoryAction.getToolTipText(),
+							panel.getIcon());
 			if (layer != null)
 			{
 				panel.addLayer(layer);
@@ -768,12 +829,10 @@ public class Application
 			if (file.exists())
 			{
 				int answer =
-						JOptionPane.showConfirmDialog(
-								frame,
-								getMessage(getSaveImageOverwriteMessageKey(),
-										file.getAbsolutePath()),
-								getMessage(getSaveImageOverwriteTitleKey()),
-								JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+						JOptionPane.showConfirmDialog(frame,
+								getMessage(getSaveImageOverwriteMessageKey(), file.getAbsolutePath()),
+								getMessage(getSaveImageOverwriteTitleKey()), JOptionPane.YES_NO_OPTION,
+								JOptionPane.WARNING_MESSAGE);
 				if (answer != JOptionPane.YES_OPTION)
 					file = null;
 			}
@@ -799,7 +858,14 @@ public class Application
 			@Override
 			public void windowClosing(WindowEvent e)
 			{
-				quit();
+				if (isFullscreen())
+				{
+					setFullscreen(false);
+				}
+				else
+				{
+					quit();
+				}
 			}
 		});
 
@@ -808,7 +874,10 @@ public class Application
 			@Override
 			public void windowStateChanged(WindowEvent e)
 			{
-				Settings.get().setWindowMaximized(isMaximized());
+				if (!isFullscreen())
+				{
+					Settings.get().setWindowMaximized(isMaximized());
+				}
 			}
 		});
 
@@ -862,17 +931,17 @@ public class Application
 		Position endCenter = Position.fromDegrees(initLat, initLon, beginCenter.getElevation());
 		long lengthMillis = SettingsUtil.getScaledLengthMillis(beginCenter, endCenter);
 
-		view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter,
-				endCenter, view.getHeading(), Angle.fromDegrees(initHeading), view.getPitch(),
-				Angle.fromDegrees(initPitch), view.getZoom(), initAltitude, lengthMillis, true));
+		view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter, endCenter,
+				view.getHeading(), Angle.fromDegrees(initHeading), view.getPitch(), Angle.fromDegrees(initPitch),
+				view.getZoom(), initAltitude, lengthMillis, true));
 		wwd.redraw();
 	}
 
 	private void create3DMouse()
 	{
 		final UserFacingIcon icon =
-				new UserFacingIcon("au/gov/ga/worldwind/viewer/data/images/cursor.png", new Position(
-						Angle.ZERO, Angle.ZERO, 0));
+				new UserFacingIcon("au/gov/ga/worldwind/viewer/data/images/cursor.png", new Position(Angle.ZERO,
+						Angle.ZERO, 0));
 		icon.setSize(new Dimension(16, 32));
 		icon.setAlwaysOnTop(true);
 
@@ -900,79 +969,36 @@ public class Application
 
 	public boolean isFullscreen()
 	{
-		return fullscreenFrame != null;
+		return fullscreen;
 	}
 
-	public void setFullscreen(boolean fullscreen)
+	public void setFullscreen(final boolean fullscreen)
 	{
 		if (fullscreen != isFullscreen())
 		{
-			if (fullscreen)
+			final JDialog dialog = new JDialog();
+			dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+			dialog.setLayout(new BorderLayout());
+			String mode = fullscreen ? "fullscreen" : "windowed";
+			JLabel label = new JLabel("Switching to " + mode + " mode, please wait...");
+			label.setIcon(Icons.newLoadingIcon());
+			label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+			dialog.add(label, BorderLayout.CENTER);
+			dialog.pack();
+			dialog.setLocationRelativeTo(null);
+			dialog.setVisible(true);
+
+			Thread thread = new Thread(new Runnable()
 			{
-				boolean span = Settings.get().isSpanDisplays();
-				String id = Settings.get().getDisplayId();
-
-				saveSplitLocation();
-				fullscreenFrame = new JFrame(frame.getTitle());
-				JPanel panel = new JPanel(new BorderLayout());
-				fullscreenFrame.setContentPane(panel);
-				fullscreenFrame.setUndecorated(true);
-				fullscreenFrame.add(wwd);
-				fullscreenFrame.setAlwaysOnTop(true);
-
-				fullscreenFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-				fullscreenFrame.addWindowListener(new WindowAdapter()
+				@Override
+				public void run()
 				{
-					@Override
-					public void windowClosing(WindowEvent e)
-					{
-						setFullscreen(false);
-					}
-				});
-
-				Action action = new AbstractAction()
-				{
-					@Override
-					public void actionPerformed(ActionEvent e)
-					{
-						setFullscreen(false);
-					}
-				};
-				panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-						KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), action);
-				panel.getActionMap().put(action, action);
-
-				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-				if (span)
-				{
-					Rectangle fullBounds = new Rectangle();
-					GraphicsDevice[] gds = ge.getScreenDevices();
-					for (GraphicsDevice g : gds)
-					{
-						GraphicsConfiguration gc = g.getDefaultConfiguration();
-						fullBounds = fullBounds.union(gc.getBounds());
-					}
-					fullscreenFrame.setBounds(fullBounds);
+					quit(false);
+					restart(fullscreen);
+					dialog.dispose();
 				}
-				else
-				{
-					Rectangle bounds = getGraphicsDeviceBounds(id, ge);
-					fullscreenFrame.setBounds(bounds);
-				}
-				fullscreenFrame.setVisible(true);
-				frame.setVisible(false);
-			}
-			else
-			{
-				if (fullscreenFrame != null)
-				{
-					splitPane.setRightComponent(wwd);
-					fullscreenFrame.dispose();
-					fullscreenFrame = null;
-					loadSplitLocation();
-					frame.setVisible(true);
-				}
-			}
+			});
+			thread.start();
 		}
 	}
 
@@ -1098,8 +1124,7 @@ public class Application
 
 	private SelectableAction createThemePieceAction(final ThemePiece piece)
 	{
-		final SelectableAction action =
-				new SelectableAction(piece.getDisplayName(), piece.getIcon(), piece.isOn());
+		final SelectableAction action = new SelectableAction(piece.getDisplayName(), piece.getIcon(), piece.isOn());
 		action.addActionListener(new ActionListener()
 		{
 			@Override
@@ -1154,17 +1179,14 @@ public class Application
 		Position pos = ((OrbitView) wwd.getView()).getCenterPosition();
 		double small = 1e-5;
 		String bbox =
-				(pos.getLongitude().degrees - small) + "," + (pos.getLatitude().degrees - small)
-						+ "," + (pos.getLongitude().degrees + small) + ","
-						+ (pos.getLatitude().degrees + small);
+				(pos.getLongitude().degrees - small) + "," + (pos.getLatitude().degrees - small) + ","
+						+ (pos.getLongitude().degrees + small) + "," + (pos.getLatitude().degrees + small);
 		String external = queryURL.toExternalForm();
 		String placeholder = "#bbox#";
 		int index = external.indexOf(placeholder);
 		if (index >= 0)
 		{
-			external =
-					external.substring(0, index) + bbox
-							+ external.substring(index + placeholder.length());
+			external = external.substring(0, index) + bbox + external.substring(index + placeholder.length());
 		}
 
 		//System.out.println(external);
@@ -1202,8 +1224,8 @@ public class Application
 		{
 			if (hud instanceof WorldMapHUD)
 			{
-				((WorldMapHUD) hud).setPickEnabled(!(Settings.get().isStereoEnabled() && Settings
-						.get().isStereoCursor()));
+				((WorldMapHUD) hud).setPickEnabled(!(Settings.get().isStereoEnabled() && Settings.get()
+						.isStereoCursor()));
 			}
 		}
 		enableMouseLayer();
@@ -1211,12 +1233,21 @@ public class Application
 
 	public void quit()
 	{
+		quit(true);
+	}
+
+	protected void quit(boolean systemExit)
+	{
 		saveSplitLocation();
 		Settings.get().saveThemeProperties(theme);
 		Settings.get().save();
 		theme.dispose();
 		frame.dispose();
-		System.exit(0);
+
+		if (systemExit)
+		{
+			System.exit(0);
+		}
 	}
 
 	private void saveSplitLocation()

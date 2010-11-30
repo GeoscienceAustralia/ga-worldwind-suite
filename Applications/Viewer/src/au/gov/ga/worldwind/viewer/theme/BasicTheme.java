@@ -294,19 +294,13 @@ public class BasicTheme implements Theme
 	@Override
 	public boolean hasLayersPanel()
 	{
-		for (ThemePanel panel : getPanels())
-			if (panel instanceof LayersPanel)
-				return true;
-		return false;
+		return getLayersPanel() != null;
 	}
 
 	@Override
 	public boolean hasThemeLayersPanel()
 	{
-		for (ThemePanel panel : getPanels())
-			if (panel instanceof ThemeLayersPanel)
-				return true;
-		return false;
+		return getThemeLayersPanel() != null;
 	}
 
 	@Override
@@ -315,6 +309,14 @@ public class BasicTheme implements Theme
 		for (ThemePanel panel : getPanels())
 			if (panel instanceof LayersPanel)
 				return (LayersPanel) panel;
+		return null;
+	}
+	
+	public ThemeLayersPanel getThemeLayersPanel()
+	{
+		for (ThemePanel panel : getPanels())
+			if (panel instanceof ThemeLayersPanel)
+				return (ThemeLayersPanel) panel;
 		return null;
 	}
 }

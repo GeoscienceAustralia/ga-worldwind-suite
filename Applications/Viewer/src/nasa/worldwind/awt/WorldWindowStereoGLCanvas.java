@@ -8,7 +8,6 @@ package nasa.worldwind.awt;
 
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.avlist.*;
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.cache.*;
 import gov.nasa.worldwind.event.*;
 import gov.nasa.worldwind.exception.WWRuntimeException;
@@ -93,7 +92,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
      * @throws NullPointerException if shareWith is null.
      * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)
      */
-    public WorldWindowStereoGLCanvas(WorldWindowGLCanvas shareWith)
+    public WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas shareWith)
     {
         super(defaultCaps, null, shareWith.getContext(), null);
         try
@@ -126,7 +125,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
      * @throws IllegalArgumentException if <code>device</code> is null.
      * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)
      */
-    public WorldWindowStereoGLCanvas(WorldWindowGLCanvas shareWith, java.awt.GraphicsDevice device)
+    public WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas shareWith, java.awt.GraphicsDevice device)
     {
         super(defaultCaps, null, shareWith.getContext(), device);
 
@@ -171,7 +170,7 @@ public class WorldWindowStereoGLCanvas extends GLCanvas implements WorldWindow, 
      * @throws IllegalArgumentException if <code>device</code> is null.
      * @see GLCanvas#GLCanvas(GLCapabilities,GLCapabilitiesChooser,GLContext,GraphicsDevice)
      */
-    public WorldWindowStereoGLCanvas(WorldWindowGLCanvas shareWith, java.awt.GraphicsDevice device,
+    public WorldWindowStereoGLCanvas(WorldWindowStereoGLCanvas shareWith, java.awt.GraphicsDevice device,
         GLCapabilities capabilities, GLCapabilitiesChooser chooser)
     {
         super(capabilities, chooser, shareWith.getContext(), device);

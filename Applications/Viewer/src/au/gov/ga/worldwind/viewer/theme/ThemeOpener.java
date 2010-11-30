@@ -7,9 +7,12 @@ import java.net.URL;
 import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
 
+import org.w3c.dom.Element;
+
 import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.HttpException;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 
 public class ThemeOpener
 {
@@ -25,9 +28,9 @@ public class ThemeOpener
 		final ThemeOpenDelegate innerDelegate = new ThemeOpenDelegate()
 		{
 			@Override
-			public void opened(Theme theme)
+			public void opened(Theme theme, Element themeElement, URL themeUrl)
 			{
-				delegate.opened(theme);
+				delegate.opened(theme, themeElement, themeUrl);
 			}
 		};
 
@@ -40,21 +43,22 @@ public class ThemeOpener
 				{
 					//RetrievalResult result = Downloader.downloadImmediatelyIfModified(url);
 					RetrievalResult result = Downloader.downloadImmediately(url, false);
-					if(progress.isCanceled())
+					if (progress.isCanceled())
 						return;
-					
+
 					InputStream is = result.getAsInputStream();
-					Theme theme = ThemeFactory.createFromXML(is, url);
+					Element element = XMLUtil.getElementFromSource(is);
+					Theme theme = ThemeFactory.createFromXML(element, url);
 					if (theme == null)
 						throw new Exception("Could not create theme from XML document");
-					
+
 					progress.close();
-					innerDelegate.opened(theme);
+					innerDelegate.opened(theme, element, url);
 				}
 				catch (Exception e)
 				{
 					progress.close();
-					
+
 					//TODO if response is 403 (forbidden) or 407 (authentication required), allow setting of proxy?
 					//for now, just display a message
 
@@ -84,10 +88,11 @@ public class ThemeOpener
 		try
 		{
 			InputStream is = url.openStream();
-			Theme theme = ThemeFactory.createFromXML(is, url);
+			Element element = XMLUtil.getElementFromSource(is);
+			Theme theme = ThemeFactory.createFromXML(element, url);
 			if (theme == null)
 				throw new Exception("Could not create theme from XML document");
-			delegate.opened(theme);
+			delegate.opened(theme, element, url);
 		}
 		catch (Exception e)
 		{
@@ -99,7 +104,7 @@ public class ThemeOpener
 
 	public static interface ThemeOpenDelegate
 	{
-		public void opened(Theme theme);
+		public void opened(Theme theme, Element themeElement, URL themeUrl);
 	}
 
 	public static class IndeterminateProgressMonitor extends ProgressMonitor
