@@ -6,7 +6,6 @@ import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
-import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.RenderingExceptionListener;
@@ -288,6 +287,7 @@ public class Application
 	private final boolean fullscreen;
 	private Theme theme;
 	private JFrame frame;
+	private JFrame fullscreenFrame;
 
 	private WorldWindowStereoGLCanvas wwd;
 	private MouseLayer mouseLayer;
@@ -317,7 +317,7 @@ public class Application
 	private BasicAction aboutAction;
 	private BasicAction saveSectorAction;
 
-	private Application(Theme theme, boolean fullscreen, boolean showSplashScreen)
+	private Application(Theme theme, final boolean fullscreen, boolean showSplashScreen)
 	{
 		this.theme = theme;
 		this.fullscreen = fullscreen;
@@ -335,7 +335,6 @@ public class Application
 		}
 		frame = new JFrame(title);
 		frame.setIconImage(Icons.earth32.getIcon().getImage());
-		frame.setUndecorated(fullscreen);
 
 		// show splashscreen
 		final SplashScreen splashScreen = showSplashScreen ? new SplashScreen(frame) : null;
@@ -345,6 +344,7 @@ public class Application
 				Settings.get().isHardwareStereoEnabled() ? WorldWindowStereoGLCanvas.stereoCaps
 						: WorldWindowStereoGLCanvas.defaultCaps;
 		wwd = new WorldWindowStereoGLCanvas(caps);
+		wwd.setMinimumSize(new Dimension(1, 1));
 		if (splashScreen != null)
 		{
 			splashScreen.addRenderingListener(wwd);
@@ -389,13 +389,25 @@ public class Application
 		JPanel panel = new JPanel(new BorderLayout());
 		frame.setContentPane(panel);
 
+		frame.setBounds(Settings.get().getWindowBounds());
+		if (!fullscreen && Settings.get().isWindowMaximized())
+		{
+			frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		}
+
 		if (fullscreen)
 		{
-			panel.add(wwd, BorderLayout.CENTER);
-			frame.setAlwaysOnTop(true);
+			fullscreenFrame = new JFrame(frame.getTitle());
+			fullscreenFrame.setIconImage(frame.getIconImage());
+			fullscreenFrame.setUndecorated(true);
+			fullscreenFrame.setAlwaysOnTop(true);
 
-			frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-			frame.addWindowListener(new WindowAdapter()
+			JPanel fullscreenPanel = new JPanel(new BorderLayout());
+			fullscreenFrame.setContentPane(fullscreenPanel);
+			fullscreenPanel.add(wwd, BorderLayout.CENTER);
+
+			fullscreenFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+			fullscreenFrame.addWindowListener(new WindowAdapter()
 			{
 				@Override
 				public void windowClosing(WindowEvent e)
@@ -412,15 +424,20 @@ public class Application
 					setFullscreen(false);
 				}
 			};
-			panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-					action);
-			panel.getActionMap().put(action, action);
+			fullscreenPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+					KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), action);
+			fullscreenPanel.getActionMap().put(action, action);
 
 
 			boolean span = Settings.get().isSpanDisplays();
 			String id = Settings.get().getDisplayId();
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-			Rectangle bounds;
+			Rectangle fullscreenBounds;
+			Rectangle frameBounds = frame.getBounds();
+
+			//the wwd is not in the frame, so shrink it to the width of the sidebar
+			int splitLocation = Settings.get().getSplitLocation();
+			frameBounds.width = splitLocation + 10;
 
 			if (span)
 			{
@@ -431,46 +448,58 @@ public class Application
 					GraphicsConfiguration gc = g.getDefaultConfiguration();
 					fullBounds = fullBounds.union(gc.getBounds());
 				}
-				bounds = fullBounds;
+				fullscreenBounds = fullBounds;
 			}
 			else
 			{
-				bounds = getGraphicsDeviceBounds(id, ge);
+				GraphicsDevice fullscreenDevice = getGraphicsDeviceForId(id, ge);
+				fullscreenBounds = fullscreenDevice.getDefaultConfiguration().getBounds();
+
+				//check if the frame bounds are within the fullscreen device
+				//we want to show the frame on a different monitor to the fullscreen frame if possible
+				GraphicsDevice frameDevice = getGraphicsDeviceContainingBounds(frameBounds, ge);
+				if (frameDevice == fullscreenDevice)
+				{
+					GraphicsDevice otherDevice = getOtherGraphicsDevice(fullscreenDevice, ge);
+					if (otherDevice != null)
+					{
+						Rectangle otherDeviceBounds = otherDevice.getDefaultConfiguration().getBounds();
+						frameBounds.setLocation(otherDeviceBounds.getLocation());
+					}
+				}
 			}
-			frame.setBounds(bounds);
+
+			frame.setBounds(frameBounds);
+			fullscreenFrame.setBounds(fullscreenBounds);
 		}
-		else
+
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
+		panel.add(splitPane, BorderLayout.CENTER);
+		if (!fullscreen)
 		{
-			frame.setBounds(Settings.get().getWindowBounds());
-			if (Settings.get().isWindowMaximized())
-			{
-				frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-			}
-
-			splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
-			panel.add(splitPane, BorderLayout.CENTER);
 			splitPane.setRightComponent(wwd);
-			splitPane.setOneTouchExpandable(true);
-			wwd.setMinimumSize(new Dimension(1, 1));
-			loadSplitLocation();
+		}
+		splitPane.setOneTouchExpandable(true);
+		loadSplitLocation();
 
-			if (theme.hasStatusBar())
-			{
-				statusBar = new MetersStatusBar();
-				panel.add(statusBar, BorderLayout.PAGE_END);
-				statusBar.setEventSource(wwd);
-				statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
-			}
+		boolean anyPanels = !theme.getPanels().isEmpty();
+		if (anyPanels)
+		{
+			sideBar = new SideBar(theme, splitPane);
+			splitPane.setLeftComponent(sideBar);
+		}
 
-			if (!theme.getPanels().isEmpty())
-			{
-				sideBar = new SideBar(theme, splitPane);
-				splitPane.setLeftComponent(sideBar);
-			}
-			else
-			{
-				splitPane.setDividerSize(0);
-			}
+		if (!anyPanels || fullscreen)
+		{
+			splitPane.setDividerSize(0);
+		}
+
+		if (theme.hasStatusBar())
+		{
+			statusBar = new MetersStatusBar();
+			panel.add(statusBar, BorderLayout.PAGE_END);
+			statusBar.setEventSource(wwd);
+			statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
 		}
 
 		//link theme to WorldWindow
@@ -494,22 +523,20 @@ public class Application
 		createActions();
 		createThemeListeners();
 
-		if (!fullscreen)
+
+		if (theme.hasMenuBar())
 		{
-			if (theme.hasMenuBar())
-			{
-				menuBar = createMenuBar();
-				frame.setJMenuBar(menuBar);
-			}
-
-			if (theme.hasToolBar())
-			{
-				toolBar = createToolBar();
-				panel.add(toolBar, BorderLayout.PAGE_START);
-			}
-
-			addWindowListeners();
+			menuBar = createMenuBar();
+			frame.setJMenuBar(menuBar);
 		}
+
+		if (theme.hasToolBar())
+		{
+			toolBar = createToolBar();
+			panel.add(toolBar, BorderLayout.PAGE_START);
+		}
+
+		addWindowListeners();
 
 		try
 		{
@@ -519,6 +546,10 @@ public class Application
 				public void run()
 				{
 					frame.setVisible(true);
+					if (fullscreen)
+					{
+						fullscreenFrame.setVisible(true);
+					}
 					wwd.createBufferStrategy(2);
 				}
 			});
@@ -994,10 +1025,9 @@ public class Application
 				@Override
 				public void run()
 				{
-					View view = wwd.getView();
 					quit(false);
 					Application application = restart(fullscreen);
-					application.wwd.setView(view);
+					copyStateBetweenWorldWindows(wwd, application.wwd);
 					dialog.dispose();
 				}
 			});
@@ -1005,7 +1035,16 @@ public class Application
 		}
 	}
 
-	private Rectangle getGraphicsDeviceBounds(String deviceId, GraphicsEnvironment environment)
+	protected void copyStateBetweenWorldWindows(WorldWindowStereoGLCanvas src, WorldWindowStereoGLCanvas dst)
+	{
+		dst.setView(src.getView());
+	}
+
+	/**
+	 * @return The graphics device corresponding to deviceId, or the default if
+	 *         deviceId is null or a matching device could not be found.
+	 */
+	private GraphicsDevice getGraphicsDeviceForId(String deviceId, GraphicsEnvironment environment)
 	{
 		if (deviceId != null)
 		{
@@ -1014,14 +1053,33 @@ public class Application
 			{
 				if (deviceId.equals(g.getIDstring()))
 				{
-					GraphicsConfiguration gc = g.getDefaultConfiguration();
-					return gc.getBounds();
+					return g;
 				}
 			}
 		}
+		return environment.getDefaultScreenDevice();
+	}
 
-		GraphicsConfiguration gc = environment.getDefaultScreenDevice().getDefaultConfiguration();
-		return gc.getBounds();
+	private GraphicsDevice getOtherGraphicsDevice(GraphicsDevice device, GraphicsEnvironment environment)
+	{
+		GraphicsDevice[] gds = environment.getScreenDevices();
+		for (GraphicsDevice g : gds)
+		{
+			if (g != device)
+				return g;
+		}
+		return null;
+	}
+
+	private GraphicsDevice getGraphicsDeviceContainingBounds(Rectangle bounds, GraphicsEnvironment environment)
+	{
+		GraphicsDevice[] gds = environment.getScreenDevices();
+		for (GraphicsDevice g : gds)
+		{
+			if (g.getDefaultConfiguration().getBounds().intersects(bounds))
+				return g;
+		}
+		return null;
 	}
 
 	private JToolBar createToolBar()
@@ -1192,7 +1250,6 @@ public class Application
 			external = external.substring(0, index) + bbox + external.substring(index + placeholder.length());
 		}
 
-		//System.out.println(external);
 		try
 		{
 			URL url = new URL(external);
@@ -1218,11 +1275,6 @@ public class Application
 
 	private void afterSettingsChange()
 	{
-		/*if (Settings.get().isStereoEnabled()
-				&& Settings.get().getProjectionMode() == ProjectionMode.ASYMMETRIC_FRUSTUM)
-		{
-			layersPanel.turnOffAtmosphere();
-		}*/
 		for (ThemeHUD hud : theme.getHUDs())
 		{
 			if (hud instanceof WorldMapHUD)
@@ -1246,6 +1298,10 @@ public class Application
 		Settings.get().save();
 		theme.dispose();
 		frame.dispose();
+		if (fullscreenFrame != null)
+		{
+			fullscreenFrame.dispose();
+		}
 
 		if (systemExit)
 		{
@@ -1255,7 +1311,7 @@ public class Application
 
 	private void saveSplitLocation()
 	{
-		if (sideBar != null)
+		if (sideBar != null && !isFullscreen())
 		{
 			if (sideBar.isVisible())
 				Settings.get().setSplitLocation(splitPane.getDividerLocation());
