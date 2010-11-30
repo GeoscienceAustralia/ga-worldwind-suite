@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -37,6 +38,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
@@ -195,6 +197,8 @@ public class SearchWmsServerDialog extends JDialog
 		
 		searchField = new HintTextField(getMessage(getSearchWmsSearchBoxMsgKey()));
 		searchField.setColumns(50);
+		searchField.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "doSearch");
+		searchField.getActionMap().put("doSearch", searchAction);
 		
 		GridBagConstraints searchFieldConstraints = new GridBagConstraints();
 		searchFieldConstraints.gridy = 0;

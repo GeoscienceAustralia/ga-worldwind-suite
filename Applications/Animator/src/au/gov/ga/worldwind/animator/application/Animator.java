@@ -98,10 +98,10 @@ import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
 import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterEditor;
 import au.gov.ga.worldwind.animator.util.ExaggerationAwareStatusBar;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
-import au.gov.ga.worldwind.animator.util.FileFilters;
-import au.gov.ga.worldwind.animator.util.FileFilters.XmlFilter;
 import au.gov.ga.worldwind.animator.util.FileUtil;
+import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
+import au.gov.ga.worldwind.common.ui.FileFilters.XmlFilter;
 import au.gov.ga.worldwind.wmsbrowser.WmsBrowser;
 
 /**

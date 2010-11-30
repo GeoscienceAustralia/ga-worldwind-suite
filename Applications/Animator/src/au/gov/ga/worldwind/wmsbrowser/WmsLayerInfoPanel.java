@@ -14,6 +14,7 @@ import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerInfoURL;
+import gov.nasa.worldwind.terrain.ZeroElevationModel;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 import gov.nasa.worldwind.wms.WMSTiledImageLayer;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
@@ -21,16 +22,23 @@ import gov.nasa.worldwindow.core.WMSLayerInfo;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.ScrollPane;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.border.CompoundBorder;
@@ -42,11 +50,16 @@ import javax.swing.text.html.HTMLEditorKit;
 
 import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.application.AnimatorConfiguration;
+import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.wmsbrowser.layer.MetacartaCoastlineLayer;
 import au.gov.ga.worldwind.wmsbrowser.layer.MetacartaCountryBoundariesLayer;
+import au.gov.ga.worldwind.wmsbrowser.layer.WmsLayerExporter;
+import au.gov.ga.worldwind.wmsbrowser.layer.WmsLayerExporterImpl;
 
 /**
  * A panel used to display WMS Layer information
@@ -59,6 +72,8 @@ public class WmsLayerInfoPanel extends JComponent
 	private static final long serialVersionUID = 20101122L;
 	private static int PADDING = 10;
 	
+	private static final WmsLayerExporter exporter = new WmsLayerExporterImpl();
+	
 	/** The layer this panel is backed by */
 	private WMSLayerInfo layerInfo;
 	private WMSLayerCapabilities layerCapabilities;
@@ -68,18 +83,25 @@ public class WmsLayerInfoPanel extends JComponent
 	private JPanel panel;
 	private JTextPane infoTextPane;
 	
+	private JPanel buttonPanel;
+	private BasicAction exportLayerAction;
+	private JFileChooser fileChooser;
+	
 	private WorldWindowGLCanvas wwd;
 	private WorldMapLayer worldMapLayer;
 	private MetacartaCountryBoundariesLayer countryBoundariesLayer;
 	private MetacartaCoastlineLayer coastlinesLayer;
 	
-	
 	public WmsLayerInfoPanel()
 	{
 		setLayout(new BorderLayout());
 		
+		initialiseActions();
+		initialiseFileChooser();
 		initialiseSplitPanel();
-		initialisePanel();
+		initialiseContainerPanel();
+		initialiseInfoPanel();
+		initialiseButtonPanel();
 		initialiseWorldWindow();
 		
 		addComponentListener(new ComponentAdapter()
@@ -92,6 +114,25 @@ public class WmsLayerInfoPanel extends JComponent
 		});
 	}
 
+	private void initialiseActions()
+	{
+		exportLayerAction = new BasicAction(getMessage(getWmsExportLayerLabelKey()), Icons.export.getIcon());
+		exportLayerAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				promptUserToSaveLayer();
+			}
+		});
+	}
+	
+	private void initialiseFileChooser()
+	{
+		fileChooser = new JFileChooser();
+		fileChooser.setAcceptAllFileFilterUsed(false);
+		fileChooser.setFileFilter(FileFilters.getXmlFilter());
+	}
+	
 	private void initialiseSplitPanel()
 	{
 		splitPanel = new JPanel();
@@ -100,7 +141,7 @@ public class WmsLayerInfoPanel extends JComponent
 		add(splitPanel, BorderLayout.CENTER);
 	}
 
-	private void initialisePanel()
+	private void initialiseContainerPanel()
 	{
 		panel = new JPanel();
 		panel.setLayout(new GridBagLayout());
@@ -111,14 +152,10 @@ public class WmsLayerInfoPanel extends JComponent
 		ScrollPane scrollPane = new ScrollPane();
 		scrollPane.add(panel);
 		splitPanel.add(scrollPane);
-		
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.weightx = 1;
-		constraints.weighty = 1;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.fill = GridBagConstraints.BOTH;
-		constraints.anchor = GridBagConstraints.FIRST_LINE_START;
+	}
+
+	private void initialiseInfoPanel()
+	{
 		infoTextPane = new JTextPane();
 		infoTextPane.setEditorKit(new HTMLEditorKit());
 		infoTextPane.setEditable(false);
@@ -134,7 +171,31 @@ public class WmsLayerInfoPanel extends JComponent
 			}
 		});
 		
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.weightx = 1;
+		constraints.weighty = 1;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.anchor = GridBagConstraints.FIRST_LINE_START;
 		panel.add(infoTextPane, constraints);
+	}
+	
+	private void initialiseButtonPanel()
+	{
+		buttonPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
+		buttonPanel.add(new JButton(exportLayerAction));
+		buttonPanel.setOpaque(false);
+		buttonPanel.setVisible(false);
+		
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.weightx = 1;
+		constraints.weighty = 0;
+		constraints.gridx = 0;
+		constraints.gridy = 1;
+		constraints.fill = GridBagConstraints.HORIZONTAL;
+		constraints.anchor = GridBagConstraints.FIRST_LINE_END;
+		panel.add(buttonPanel, constraints);
 	}
 	
 	private void initialiseWorldWindow()
@@ -146,6 +207,8 @@ public class WmsLayerInfoPanel extends JComponent
 		((OrbitView) wwd.getView()).getOrbitViewLimits().setPitchLimits(Angle.ZERO, Angle.ZERO);
 		((OrbitView) wwd.getView()).getOrbitViewLimits().setHeadingLimits(Angle.ZERO, Angle.ZERO);
 		wwd.getModel().setGlobe(new EarthFlat());
+		wwd.getModel().getGlobe().getTessellator().setMakeTileSkirts(false);
+		wwd.getModel().getGlobe().setElevationModel(new ZeroElevationModel());
 		wwd.setVisible(false);
 		
 		splitPanel.add(wwd);
@@ -174,6 +237,7 @@ public class WmsLayerInfoPanel extends JComponent
 			{
 				wwd.setVisible(false);
 				infoTextPane.setText("");
+				buttonPanel.setVisible(false);
 				return;
 			}
 			
@@ -183,6 +247,8 @@ public class WmsLayerInfoPanel extends JComponent
 			infoTextPane.setText(infoText);
 			
 			updateFlatGlobeViewer();
+			
+			buttonPanel.setVisible(true);
 		}
 		finally
 		{
@@ -225,6 +291,36 @@ public class WmsLayerInfoPanel extends JComponent
 		wwd.getView().setEyePosition(pos);
 	}
 
+	private void promptUserToSaveLayer()
+	{
+		int response = fileChooser.showSaveDialog(getParent());
+		if (response == JFileChooser.CANCEL_OPTION)
+		{
+			return;
+		}
+		
+		File targetFile = fileChooser.getSelectedFile();
+		if (targetFile == null)
+		{
+			return;
+		}
+		
+		if (targetFile.exists())
+		{
+			response = JOptionPane.showConfirmDialog(getParent(), getMessage(getLayerDefinitionAlreadyExistsMessageKey(), targetFile.getName()), getMessage(getLayerDefinitionAlreadyExistsTitleKey()), JOptionPane.YES_NO_CANCEL_OPTION);
+			if (response == JOptionPane.NO_OPTION)
+			{
+				return;
+			}
+			if (response == JOptionPane.CANCEL_OPTION || response == JOptionPane.CLOSED_OPTION)
+			{
+				promptUserToSaveLayer();
+			}
+		}
+		
+		exporter.exportLayer(targetFile, layerInfo);
+	}
+	
 	/**
 	 * A builder that uses an external template to create a HTML-formatted string suitable for display in a text area or similar.
 	 */
