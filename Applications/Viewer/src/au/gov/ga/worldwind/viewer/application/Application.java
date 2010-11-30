@@ -6,6 +6,7 @@ import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.RenderingExceptionListener;
@@ -993,8 +994,10 @@ public class Application
 				@Override
 				public void run()
 				{
+					View view = wwd.getView();
 					quit(false);
-					restart(fullscreen);
+					Application application = restart(fullscreen);
+					application.wwd.setView(view);
 					dialog.dispose();
 				}
 			});
