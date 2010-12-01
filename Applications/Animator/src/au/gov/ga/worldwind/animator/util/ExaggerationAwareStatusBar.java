@@ -6,7 +6,7 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.util.Logging;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.VerticalExaggerationElevationModel;
-import au.gov.ga.worldwind.common.util.MetersStatusBar;
+import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
 
 /**
  * A status bar that corrects for vertical exaggeration applied via a
@@ -14,7 +14,7 @@ import au.gov.ga.worldwind.common.util.MetersStatusBar;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public class ExaggerationAwareStatusBar extends MetersStatusBar
+public class ExaggerationAwareStatusBar extends DownloaderStatusBar
 {
 	private static final long serialVersionUID = 20101006L;
 	

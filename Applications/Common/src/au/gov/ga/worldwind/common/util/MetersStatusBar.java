@@ -2,7 +2,7 @@ package au.gov.ga.worldwind.common.util;
 
 import gov.nasa.worldwind.util.Logging;
 
-public class MetersStatusBar extends gov.nasa.worldwind.util.StatusBar
+public class MetersStatusBar extends nasa.worldwind.util.StatusBar
 {
 	@Override
 	protected String makeEyeAltitudeDescription(double metersAltitude)

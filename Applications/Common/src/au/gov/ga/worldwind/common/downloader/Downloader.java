@@ -269,6 +269,15 @@ public class Downloader
 		download(url, cacheHandler, downloadHandler, false);
 	}
 
+	/**
+	 * @return The {@link RetrievalService} used to for downloading by this
+	 *         Downloader.
+	 */
+	public static RetrievalService getRetrievalService()
+	{
+		return service;
+	}
+
 	private static void download(final URL url, final RetrievalHandler cacheHandler,
 			final RetrievalHandler downloadHandler, final boolean checkIfModified)
 	{

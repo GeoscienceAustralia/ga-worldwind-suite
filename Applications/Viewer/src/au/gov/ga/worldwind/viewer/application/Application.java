@@ -74,6 +74,7 @@ import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.downloader.Downloader;
+import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.ui.BasicAction;
@@ -85,7 +86,6 @@ import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.common.util.MetersStatusBar;
 import au.gov.ga.worldwind.common.util.URLTransformer;
 import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
@@ -294,7 +294,7 @@ public class Application
 	private MouseLayer mouseLayer;
 
 	private SideBar sideBar;
-	private MetersStatusBar statusBar;
+	private DownloaderStatusBar statusBar;
 	private JMenuBar menuBar;
 	private JToolBar toolBar;
 	private JSplitPane splitPane;
@@ -499,7 +499,7 @@ public class Application
 
 		if (theme.hasStatusBar())
 		{
-			statusBar = new MetersStatusBar();
+			statusBar = new DownloaderStatusBar();
 			panel.add(statusBar, BorderLayout.PAGE_END);
 			statusBar.setEventSource(wwd);
 			statusBar.setBorder(BorderFactory.createLoweredBevelBorder());
