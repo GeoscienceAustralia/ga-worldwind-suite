@@ -67,7 +67,7 @@ public class ShapefileLayerFactory
 		}
 
 		//read the shapefile, and use the standard ShapefileLoader to create a layer
-		Shapefile shapefile = new Shapefile(url);
+		Shapefile shapefile = new UrlShapefile(url);
 		Layer layer = new ShapefileLoader().createLayerFromShapefile(shapefile);
 
 		//set the sector parameter so that the extents can be zoomed to
