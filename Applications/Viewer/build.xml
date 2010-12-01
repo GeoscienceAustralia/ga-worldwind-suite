@@ -6,6 +6,7 @@
 	<property name="common_src_dir" value="${basedir}/../Common/src" />
 	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-0.6.663.14141" />
 	<property name="worldwind_jar" value="worldwind.jar" />
+	<property name="gdal_jar" value="gdal.jar" />
 	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
 
 	<property name="build_dir" value="${basedir}/build" />
@@ -77,6 +78,9 @@
 			<zipfileset src="${worldwind_dir}/${worldwind_jar}">
 				<patternset refid="manifest_exclude" />
 			</zipfileset>
+			<zipfileset src="${worldwind_dir}/${gdal_jar}">
+				<patternset refid="manifest_exclude" />
+			</zipfileset>
 		</jar>
 	</target>
 
@@ -94,6 +98,9 @@
 			</zipgroupfileset>
 			<zipgroupfileset dir="${worldwind_dir}">
 				<include name="${worldwind_jar}" />
+			</zipgroupfileset>
+			<zipgroupfileset dir="${worldwind_dir}">
+				<include name="${gdal_jar}" />
 			</zipgroupfileset>
 		</zip>
 
