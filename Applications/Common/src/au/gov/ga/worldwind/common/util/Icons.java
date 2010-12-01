@@ -24,6 +24,7 @@ public class Icons
 	public static final Icons crosshair45 = new Icons("crosshair45.gif");
 	public static final Icons crosshair = new Icons("crosshair.gif");
 	public static final Icons crosshairwhite = new Icons("crosshairwhite.gif");
+	public static final Icons cut = new Icons("cut.gif");
 	public static final Icons datasets = new Icons("datasets.gif");
 	public static final Icons delete = new Icons("delete.gif");
 	public static final Icons deletevalue = new Icons("deletevalue.gif");
