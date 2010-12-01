@@ -114,4 +114,12 @@
 	</target>
 
 	<target name="run" depends="sign, executable" />
+
+	<target name="deploy" depends="clean, run">
+		<copy file="${executable_dir}/${executable_jar}" todir="\\marl\sandpit\symbolic-links\world-wind\current\executable" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${app_unsigned_jar}" todir="\\marl\sandpit\symbolic-links\world-wind\current" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${app_signed_jar}" todir="\\marl\sandpit\symbolic-links\world-wind\current" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_unsigned_jar}" todir="\\marl\sandpit\symbolic-links\world-wind\current" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_signed_jar}" todir="\\marl\sandpit\symbolic-links\world-wind\current" preservelastmodified="true" />
+	</target>
 </project>
