@@ -70,6 +70,7 @@ public class FileLoader
 				catch (Exception e)
 				{
 					listener.error(e);
+					e.printStackTrace();
 				}
 			}
 		});
@@ -184,7 +185,7 @@ public class FileLoader
 		producer.setStoreParameters(params);
 
 		// Use the specified file as the the production data source.
-		producer.offerDataSource(file, null);
+		producer.offerDataSource(file, params);
 
 		try
 		{
