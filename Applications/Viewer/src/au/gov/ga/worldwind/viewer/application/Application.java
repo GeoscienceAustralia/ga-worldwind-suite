@@ -89,6 +89,7 @@ import au.gov.ga.worldwind.common.util.MetersStatusBar;
 import au.gov.ga.worldwind.common.util.URLTransformer;
 import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
+import au.gov.ga.worldwind.viewer.components.sectorclipper.SectorClipper;
 import au.gov.ga.worldwind.viewer.components.sectorsaver.ImageSectorSaver;
 import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.viewer.panels.SideBar;
@@ -316,6 +317,8 @@ public class Application
 	private BasicAction controlsAction;
 	private BasicAction aboutAction;
 	private BasicAction saveSectorAction;
+	private BasicAction clipSectorAction;
+	private BasicAction clearClipAction;
 
 	private Application(Theme theme, final boolean fullscreen, boolean showSplashScreen)
 	{
@@ -764,6 +767,27 @@ public class Application
 				saveSector();
 			}
 		});
+
+		clipSectorAction = new BasicAction(getMessage(getClipSectorLabelKey()), Icons.cut.getIcon());
+		clipSectorAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				clipSector();
+			}
+		});
+
+		clearClipAction = new BasicAction(getMessage(getClearClipLabelKey()), Icons.cutdelete.getIcon());
+		clearClipAction.setEnabled(false);
+		clearClipAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				clearClipping();
+			}
+		});
 	}
 
 	private void openLayer()
@@ -1152,6 +1176,10 @@ public class Application
 		menu.add(fullscreenAction);
 
 		menu.addSeparator();
+		menu.add(clipSectorAction);
+		menu.add(clearClipAction);
+
+		menu.addSeparator();
 		skirtAction.addToMenu(menu);
 		wireframeAction.addToMenu(menu);
 		wireframeDepthAction.addToMenu(menu);
@@ -1328,5 +1356,20 @@ public class Application
 	private void saveSector()
 	{
 		ImageSectorSaver.beginSelection(frame, getMessage(getSaveSectorTitleKey()), wwd);
+	}
+
+	private void clipSector()
+	{
+		SectorClipper
+				.beginSelection(frame, getMessage(getClipSectorTitleKey()), wwd, clipSectorAction, clearClipAction);
+	}
+
+	private void clearClipping()
+	{
+		StereoSceneController sceneController = (StereoSceneController) wwd.getSceneController();
+		sceneController.clearClipping();
+		wwd.redraw();
+		clipSectorAction.setEnabled(true);
+		clearClipAction.setEnabled(false);
 	}
 }

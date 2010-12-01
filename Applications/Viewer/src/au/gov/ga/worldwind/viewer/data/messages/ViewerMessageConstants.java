@@ -19,6 +19,7 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getPreferencesTitleKey() { return "viewer.dialog.preferences.title"; }
 	public static String getControlsTitleKey() { return "viewer.dialog.controls.title"; }
 	public static String getSaveSectorTitleKey() { return "viewer.dialog.savesector.title"; }
+	public static String getClipSectorTitleKey() { return "viewer.dialog.clipsector.title"; }
 
 	public static String getSaveImageOverwriteTitleKey() { return "viewer.saveimage.overwrite.title"; }
 	public static String getSaveImageOverwriteMessageKey() { return "viewer.saveimage.overwrite.message"; }
@@ -45,6 +46,8 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getControlsLabelKey() { return "viewer.action.controls.label"; }
 	public static String getAboutLabelKey() { return "viewer.action.about.label"; }
 	public static String getSaveSectorLabelKey() { return "viewer.action.savesector.label"; }
+	public static String getClipSectorLabelKey() { return "viewer.action.clipsector.label"; }
+	public static String getClearClipLabelKey() { return "viewer.action.clearclip.label"; }
 
 	public static String getTermImageKey() { return "viewer.term.image"; }
 

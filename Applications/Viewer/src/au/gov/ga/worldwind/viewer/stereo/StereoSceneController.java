@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.viewer.stereo;
 import gov.nasa.worldwind.AbstractSceneController;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.render.DrawContext;
 
 import java.nio.ByteBuffer;
@@ -21,6 +22,17 @@ public class StereoSceneController extends AbstractSceneController
 	private double lastVerticalExaggeration = -1;
 	private double lastFieldOfView = -1;
 	private boolean stereoTested = false;
+	private SectorClipPlanes sectorClipping = new SectorClipPlanes();
+	
+	public void clipSector(Sector sector)
+	{
+		sectorClipping.clipSector(sector);
+	}
+	
+	public void clearClipping()
+	{
+		sectorClipping.clear();
+	}
 
 	@Override
 	protected void doRepaint(DrawContext dc)
@@ -68,30 +80,39 @@ public class StereoSceneController extends AbstractSceneController
 			this.pick(dc);
 			this.clearFrame(dc);
 
-			if (stereo == null || !settings.isStereoEnabled())
+			try
 			{
-				this.draw(dc);
+				sectorClipping.enableClipping(dc);
+
+				if (stereo == null || !settings.isStereoEnabled())
+				{
+					this.draw(dc);
+				}
+				else
+				{
+					StereoMode mode = settings.getStereoMode();
+					boolean swap = settings.isStereoSwap();
+
+					stereo.setup(true, swap ? Eye.RIGHT : Eye.LEFT);
+					setupBuffer(gl, mode, Eye.LEFT);
+					this.applyView(dc);
+					this.draw(dc);
+
+					gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+
+					stereo.setup(true, swap ? Eye.LEFT : Eye.RIGHT);
+					setupBuffer(gl, mode, Eye.RIGHT);
+					this.applyView(dc);
+					this.draw(dc);
+
+					stereo.setup(false, Eye.LEFT);
+					restoreBuffer(gl, mode);
+					this.applyView(dc);
+				}
 			}
-			else
+			finally
 			{
-				StereoMode mode = settings.getStereoMode();
-				boolean swap = settings.isStereoSwap();
-
-				stereo.setup(true, swap ? Eye.RIGHT : Eye.LEFT);
-				setupBuffer(gl, mode, Eye.LEFT);
-				this.applyView(dc);
-				this.draw(dc);
-
-				gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
-
-				stereo.setup(true, swap ? Eye.LEFT : Eye.RIGHT);
-				setupBuffer(gl, mode, Eye.RIGHT);
-				this.applyView(dc);
-				this.draw(dc);
-
-				stereo.setup(false, Eye.LEFT);
-				restoreBuffer(gl, mode);
-				this.applyView(dc);
+				sectorClipping.disableClipping(dc);
 			}
 		}
 		finally
