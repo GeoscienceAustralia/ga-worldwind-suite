@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.common.layers.earthquakes;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.geom.LatLon;
@@ -52,9 +53,10 @@ import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.HSLColor;
+import au.gov.ga.worldwind.common.util.Loader;
 import au.gov.ga.worldwind.common.util.Setupable;
 
-public class RSSEarthquakesLayer extends RenderableLayer implements Setupable
+public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, Loader
 {
 	private static final String RSS_URL = "http://www.ga.gov.au/rss/quakesfeed.rss";
 
@@ -66,6 +68,8 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable
 	private Timer updateTimer;
 	private SurfaceEarthquakeAnnotation mouseEq, latestEq;
 	private GlobeAnnotation tooltipAnnotation;
+	private List<LoadingListener> loadingListeners = new ArrayList<LoadingListener>();
+	private boolean loading;
 
 	public RSSEarthquakesLayer()
 	{
@@ -108,6 +112,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable
 
 	protected void downloadEarthquakes()
 	{
+		setLoading(true);
 		try
 		{
 			RetrievalHandler handler = new RetrievalHandler()
@@ -148,6 +153,8 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable
 						{
 							e.printStackTrace();
 						}
+						setLoading(false);
+						firePropertyChange(AVKey.LAYER, null, this);
 					}
 				}
 			};
@@ -478,5 +485,38 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable
 				}
 			}
 		}
+	}
+	
+	protected void fireLoadingStateChanged()
+	{
+		for(int i = loadingListeners.size() - 1; i >= 0; i--)
+		{
+			LoadingListener listener = loadingListeners.get(i);
+			listener.loadingStateChanged(isLoading());
+		}
+	}
+	
+	protected void setLoading(boolean loading)
+	{
+		this.loading = loading;
+		fireLoadingStateChanged();
+	}
+
+	@Override
+	public boolean isLoading()
+	{
+		return loading;
+	}
+
+	@Override
+	public void addLoadingListener(LoadingListener listener)
+	{
+		loadingListeners.add(listener);
+	}
+
+	@Override
+	public void removeLoadingListener(LoadingListener listener)
+	{
+		loadingListeners.remove(listener);
 	}
 }
