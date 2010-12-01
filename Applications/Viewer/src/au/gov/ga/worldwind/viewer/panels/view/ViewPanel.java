@@ -2,11 +2,14 @@ package au.gov.ga.worldwind.viewer.panels.view;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.avlist.AVKey;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
@@ -53,7 +56,7 @@ public class ViewPanel extends AbstractThemePanel
 			}
 		};
 
-		orbitRadio = new JRadioButton("Orbit", true);
+		orbitRadio = new JRadioButton("Orbit");
 		bg.add(orbitRadio);
 		orbitRadio.addActionListener(al);
 		c = new GridBagConstraints();
@@ -96,12 +99,41 @@ public class ViewPanel extends AbstractThemePanel
 	public void setup(Theme theme)
 	{
 		wwd = theme.getWwd();
-		wwd.setView(new StereoOrbitView());
+		wwd.getSceneController().addPropertyChangeListener(AVKey.VIEW, new PropertyChangeListener()
+		{
+			@Override
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				updateRadioButtons();
+			}
+		});
+		updateRadioButtons();
 	}
 
 	@Override
 	public void dispose()
 	{
+	}
+	
+	protected void updateRadioButtons()
+	{
+		View view = wwd.getView();
+		if(view instanceof StereoSubSurfaceOrbitView)
+		{
+			subSurfaceRadio.setSelected(true);
+		}
+		else if(view instanceof StereoOrbitView)
+		{
+			orbitRadio.setSelected(true);
+		}
+		else if(view instanceof StereoFlyView)
+		{
+			flyRadio.setSelected(true);
+		}
+		else if(view instanceof StereoFreeView)
+		{
+			freeRadio.setSelected(true);
+		}
 	}
 
 	protected void setupView()
