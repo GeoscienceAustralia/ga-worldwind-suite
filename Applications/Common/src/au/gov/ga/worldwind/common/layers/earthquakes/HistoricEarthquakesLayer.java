@@ -6,6 +6,7 @@ import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.OGLStackHandler;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -42,6 +43,8 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 	public final static String MAGNITUDE_COLORING = "Magnitude";
 	public final static String DEPTH_COLORING = "Depth";
 
+	private final static int MAX_DOWNLOAD_ATTEMPTS = 3;
+
 	private final URL url;
 	private final String coloring;
 	private Long coloringMinDate;
@@ -49,9 +52,11 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 
 	private double pointSize;
 
+	private boolean loaded = false;
+	private int loadAttempts = 0;
+
 	private boolean loading = false;
 	private final List<LoadingListener> loadingListeners = new ArrayList<LoadingListener>();
-	private boolean loaded = false;
 
 	private FastShape shape;
 	private final Object shapeLock = new Object();
@@ -126,6 +131,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 		if (!loaded)
 		{
 			loaded = true;
+			loadAttempts++;
 			downloadData();
 		}
 
@@ -135,7 +141,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 		{
 			stack.pushAttrib(gl, GL.GL_POINT_BIT);
 			gl.glPointSize((float) pointSize);
-			
+
 			synchronized (shapeLock)
 			{
 				if (shape != null)
@@ -176,7 +182,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 					}
 				};
 
-				Downloader.downloadIfModified(url, handler, handler);
+				Downloader.downloadIfModified(url, handler, handler, true);
 			}
 		});
 		thread.setDaemon(true);
@@ -207,7 +213,16 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			if (loadAttempts < MAX_DOWNLOAD_ATTEMPTS)
+			{
+				loaded = false;
+				Downloader.removeCache(url);
+				Logging.logger().warning("Deleted corrupt cached data file for " + url);
+			}
+			else
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 

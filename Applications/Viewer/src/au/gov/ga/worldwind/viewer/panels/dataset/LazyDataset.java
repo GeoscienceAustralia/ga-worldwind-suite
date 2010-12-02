@@ -23,7 +23,7 @@ public class LazyDataset extends Dataset implements ILazyDataset
 	public void load() throws Exception
 	{
 		//download immediately, checking for modifications
-		RetrievalResult result = Downloader.downloadImmediatelyIfModified(url);
+		RetrievalResult result = Downloader.downloadImmediatelyIfModified(url, true);
 		if (result.getError() != null)
 			throw result.getError();
 

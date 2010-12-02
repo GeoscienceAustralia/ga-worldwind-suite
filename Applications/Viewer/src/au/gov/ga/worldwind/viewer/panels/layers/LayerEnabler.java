@@ -45,8 +45,7 @@ public class LayerEnabler
 	private List<Layer> layers = new ArrayList<Layer>();
 	private List<ElevationModel> elevationModels = new ArrayList<ElevationModel>();
 	private Map<Layer, ILayerNode> layerMap = new HashMap<Layer, ILayerNode>();
-	private Map<ElevationModel, ILayerNode> elevationModelMap =
-			new HashMap<ElevationModel, ILayerNode>();
+	private Map<ElevationModel, ILayerNode> elevationModelMap = new HashMap<ElevationModel, ILayerNode>();
 
 	private List<RefreshListener> listeners = new ArrayList<RefreshListener>();
 
@@ -99,8 +98,7 @@ public class LayerEnabler
 		}
 		else
 		{
-			throw new IllegalStateException(
-					"Globe's elevation model must implement SectionList<ElevationModel>");
+			throw new IllegalStateException("Globe's elevation model must implement SectionList<ElevationModel>");
 		}
 
 		layerList.registerSectionObject(this);
@@ -206,10 +204,10 @@ public class LayerEnabler
 				setError(node, new Exception("Cancelled"));
 			}
 		};
-		
+
 		//clear any errors before attempting to load
 		setError(node, null);
-		
+
 		//load the file using the FileLoader
 		FileLoader.loadFile(file, listener, tree, WorldWind.getDataFileStore());
 	}
@@ -224,7 +222,7 @@ public class LayerEnabler
 
 		Wrapper wrapper = wrappers.get(index);
 		wrapper.setLoaded(loaded);
-		
+
 		refreshLists();
 	}
 
@@ -239,9 +237,9 @@ public class LayerEnabler
 			}
 		};
 		if (onlyIfModified)
-			Downloader.downloadIfModified(url, handler, handler);
+			Downloader.downloadIfModified(url, handler, handler, true);
 		else
-			Downloader.downloadIgnoreCache(url, handler);
+			Downloader.downloadIgnoreCache(url, handler, true);
 	}
 
 	private void setError(ILayerNode node, Exception error)
@@ -264,7 +262,7 @@ public class LayerEnabler
 	}
 
 	private synchronized void handleResult(ILayerNode node, RetrievalResult result)
-	{		
+	{
 		if (result.getError() != null)
 		{
 			setLayerLoading(node, false, false);
@@ -419,8 +417,8 @@ public class LayerEnabler
 
 		Wrapper wrapper = nodeMap.get(node);
 		Object wrapped =
-				wrapper.hasLayer() ? wrapper.getLayer() : wrapper.hasElevationModel() ? wrapper
-						.getElevationModel() : null;
+				wrapper.hasLayer() ? wrapper.getLayer() : wrapper.hasElevationModel() ? wrapper.getElevationModel()
+						: null;
 
 		return Bounded.Reader.getSector(wrapped);
 	}

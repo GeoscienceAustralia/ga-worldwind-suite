@@ -18,15 +18,17 @@ public class ByteBufferRetrievalResult implements RetrievalResult
 	private final ByteBuffer buffer;
 	private final boolean fromCache;
 	private final boolean notModified;
+	private final String contentType;
 
 	public ByteBufferRetrievalResult(URL sourceURL, ByteBuffer buffer, boolean fromCache,
-			boolean notModified, Exception error)
+			boolean notModified, Exception error, String contentType)
 	{
 		this.sourceURL = sourceURL;
 		this.buffer = buffer;
 		this.fromCache = fromCache;
 		this.notModified = notModified;
 		this.error = error;
+		this.contentType = contentType;
 	}
 
 	@Override
@@ -87,6 +89,12 @@ public class ByteBufferRetrievalResult implements RetrievalResult
 	public boolean isNotModified()
 	{
 		return notModified;
+	}
+	
+	@Override
+	public String getContentType()
+	{
+		return contentType;
 	}
 
 	@Override

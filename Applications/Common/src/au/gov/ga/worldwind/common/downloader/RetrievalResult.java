@@ -63,6 +63,14 @@ public interface RetrievalResult
 	public boolean isNotModified();
 
 	/**
+	 * Get the content type of the downloaded data.
+	 * 
+	 * @return The content type of the downloaded data returned by the server,
+	 *         or null if the file was not retrieved from a http url.
+	 */
+	public String getContentType();
+
+	/**
 	 * Gets the exception if the attempted download resulted in an error.
 	 * Returns null if the download was successful.
 	 * 

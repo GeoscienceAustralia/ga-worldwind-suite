@@ -85,34 +85,37 @@ public class FastShape implements Renderable, Cacheable
 			verticesDirty = false;
 		}
 
-		GL gl = dc.getGL();
-		OGLStackHandler stack = new OGLStackHandler();
-
-		try
+		synchronized (vertexLock)
 		{
-			stack.pushAttrib(gl, GL.GL_CURRENT_BIT);
-			stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+			if (vertexBuffer == null || vertexBuffer.limit() <= 0)
+				return;
 
-			if (colorBuffer != null)
-			{
-				gl.glEnableClientState(GL.GL_COLOR_ARRAY);
-				gl.glColorPointer(colorBufferElementSize, GL.GL_DOUBLE, 0, colorBuffer.rewind());
-			}
+			GL gl = dc.getGL();
+			OGLStackHandler stack = new OGLStackHandler();
 
-			double alpha = getOpacity();
-			if (dc.getCurrentLayer() != null)
+			try
 			{
-				alpha *= dc.getCurrentLayer().getOpacity();
-			}
-			gl.glColor4d(color.getRed() / 255d, color.getGreen() / 255d, color.getBlue() / 255d, alpha);
-			if (alpha < 1.0)
-			{
-				gl.glEnable(GL.GL_BLEND);
-				gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-			}
+				stack.pushAttrib(gl, GL.GL_CURRENT_BIT);
+				stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 
-			synchronized (vertexLock)
-			{
+				if (colorBuffer != null)
+				{
+					gl.glEnableClientState(GL.GL_COLOR_ARRAY);
+					gl.glColorPointer(colorBufferElementSize, GL.GL_DOUBLE, 0, colorBuffer.rewind());
+				}
+
+				double alpha = getOpacity();
+				if (dc.getCurrentLayer() != null)
+				{
+					alpha *= dc.getCurrentLayer().getOpacity();
+				}
+				gl.glColor4d(color.getRed() / 255d, color.getGreen() / 255d, color.getBlue() / 255d, alpha);
+				if (alpha < 1.0)
+				{
+					gl.glEnable(GL.GL_BLEND);
+					gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+				}
+
 				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
 				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vertexBuffer.rewind());
 
@@ -134,10 +137,10 @@ public class FastShape implements Renderable, Cacheable
 					}
 				}
 			}
-		}
-		finally
-		{
-			stack.pop(gl);
+			finally
+			{
+				stack.pop(gl);
+			}
 		}
 	}
 
@@ -300,7 +303,7 @@ public class FastShape implements Renderable, Cacheable
 	{
 		this.color = color;
 	}
-	
+
 	public DoubleBuffer getColorBuffer()
 	{
 		return colorBuffer;

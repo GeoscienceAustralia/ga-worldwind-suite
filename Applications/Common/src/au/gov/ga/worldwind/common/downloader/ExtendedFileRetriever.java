@@ -3,6 +3,8 @@ package au.gov.ga.worldwind.common.downloader;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
@@ -19,18 +21,25 @@ public class ExtendedFileRetriever extends FileRetriever implements ExtendedRetr
 	private Long ifModifiedSince;
 	private Exception error;
 	private boolean notModified = false;
+	private boolean unzip;
 
 	public ExtendedFileRetriever(URL url, Long ifModifiedSince, RetrievalPostProcessor postProcessor)
 	{
+		this(url, ifModifiedSince, postProcessor, true);
+	}
+
+	public ExtendedFileRetriever(URL url, Long ifModifiedSince, RetrievalPostProcessor postProcessor, boolean unzip)
+	{
 		super(url, postProcessor);
 		this.ifModifiedSince = ifModifiedSince;
+		this.unzip = unzip;
 	}
 
 	@Override
 	protected ByteBuffer doRead(URLConnection connection) throws Exception
 	{
 		//overridden to catch exceptions and set the notModified flag
-		
+
 		try
 		{
 			if (ifModifiedSince != null)
@@ -49,7 +58,7 @@ public class ExtendedFileRetriever extends FileRetriever implements ExtendedRetr
 		}
 	}
 
-	private boolean checkIfModified(URL url, long ifModifiedSince)
+	protected boolean checkIfModified(URL url, long ifModifiedSince)
 	{
 		File file = Util.urlToFile(url);
 		return file != null && file.exists() && file.lastModified() <= ifModifiedSince;
@@ -65,5 +74,15 @@ public class ExtendedFileRetriever extends FileRetriever implements ExtendedRetr
 	public boolean isNotModified()
 	{
 		return notModified;
+	}
+
+	@Override
+	protected ByteBuffer readZipStream(InputStream inputStream, URL url) throws IOException
+	{
+		if (unzip)
+		{
+			return super.readZipStream(inputStream, url);
+		}
+		return readNonSpecificStream(inputStream, getConnection());
 	}
 }

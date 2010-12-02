@@ -72,7 +72,9 @@ public class HandlerPostProcessor implements RetrievalPostProcessor
 		synchronized (lock)
 		{
 			//synchronized with the addHandler method to ensure thread safety
-			result = new ByteBufferRetrievalResult(sourceURL, buffer, false, notModified, error);
+			result =
+					new ByteBufferRetrievalResult(sourceURL, buffer, false, notModified, error,
+							retriever.getContentType());
 			size = handlers.size();
 		}
 		//iterate through handlers, ending at size (which was calculated in the synchronzied

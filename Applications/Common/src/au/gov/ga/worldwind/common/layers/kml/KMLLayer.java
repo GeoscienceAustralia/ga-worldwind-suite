@@ -81,7 +81,7 @@ public class KMLLayer extends RenderableLayer implements Loader
 				loadKml(url, result.getAsInputStream());
 			}
 		};
-		Downloader.downloadIfModified(url, handler, handler);
+		Downloader.downloadIfModified(url, handler, handler, false);
 	}
 
 	public KMLLayer(URL sourceUrl, InputStream stream, AVList params)
@@ -107,10 +107,8 @@ public class KMLLayer extends RenderableLayer implements Loader
 					try
 					{
 						boolean isKmz = url != null && url.toString().toLowerCase().contains("kmz");
-						InputStream stream =
-								inputStream != null ? inputStream : WWIO.openStream(url);
-						KMLDoc doc =
-								isKmz ? new KMZInputStream(stream) : new KMLInputStream(stream);
+						InputStream stream = inputStream != null ? inputStream : WWIO.openStream(url);
+						KMLDoc doc = isKmz ? new KMZInputStream(stream) : new KMLInputStream(stream);
 						KMLRoot root = new KMLRoot(doc);
 						root.parse();
 						KMLController controller = new KMLController(root);

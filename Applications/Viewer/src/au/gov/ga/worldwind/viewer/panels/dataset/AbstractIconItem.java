@@ -62,7 +62,7 @@ public abstract class AbstractIconItem implements IIconItem
 						afterLoad.run();
 					}
 				};
-				Downloader.downloadIfModified(iconURL, setIconHandler, setIconHandler);
+				Downloader.downloadIfModified(iconURL, setIconHandler, setIconHandler, true);
 			}
 		}
 	}

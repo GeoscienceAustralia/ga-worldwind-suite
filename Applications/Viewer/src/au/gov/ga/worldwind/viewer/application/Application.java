@@ -184,7 +184,7 @@ public class Application
 					URL url = new URL(getMessage(getProxyTestUrlKey()));
 					try
 					{
-						Downloader.downloadImmediately(url, false);
+						Downloader.downloadImmediately(url, false, true);
 					}
 					catch (UnknownHostException e)
 					{

@@ -17,7 +17,7 @@ public class FileRetrievalResult extends ByteBufferRetrievalResult
 
 	public FileRetrievalResult(URL sourceURL, File file, boolean fromCache)
 	{
-		super(sourceURL, readFile(file), fromCache, false, null);
+		super(sourceURL, readFile(file), fromCache, false, null, null);
 		this.file = file;
 	}
 

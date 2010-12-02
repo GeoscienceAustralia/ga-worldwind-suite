@@ -3,14 +3,15 @@ package au.gov.ga.worldwind.common.downloader;
 import gov.nasa.worldwind.retrieve.HTTPRetriever;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
 
 /**
- * Extension of {@link HTTPRetriever} which implements {@link ExtendedRetriever}
- * .
+ * Extension of {@link HTTPRetriever} which implements {@link ExtendedRetriever}.
  * 
  * @author Michael de Hoog
  */
@@ -18,11 +19,18 @@ public class ExtendedHTTPRetriever extends HTTPRetriever implements ExtendedRetr
 {
 	private Long ifModifiedSince;
 	private Exception error;
+	private boolean unzip;
 
 	public ExtendedHTTPRetriever(URL url, Long ifModifiedSince, RetrievalPostProcessor postProcessor)
 	{
+		this(url, ifModifiedSince, postProcessor, true);
+	}
+
+	public ExtendedHTTPRetriever(URL url, Long ifModifiedSince, RetrievalPostProcessor postProcessor, boolean unzip)
+	{
 		super(url, postProcessor);
 		this.ifModifiedSince = ifModifiedSince;
+		this.unzip = unzip;
 	}
 
 	@Override
@@ -37,8 +45,7 @@ public class ExtendedHTTPRetriever extends HTTPRetriever implements ExtendedRetr
 			ByteBuffer buffer = super.doRead(connection);
 			if (buffer == null && !isOk() && !isNotModified())
 			{
-				throw new HttpException(getResponseCode() + ": " + getResponseMessage(),
-						getResponseCode());
+				throw new HttpException(getResponseCode() + ": " + getResponseMessage(), getResponseCode());
 			}
 			return buffer;
 		}
@@ -69,5 +76,15 @@ public class ExtendedHTTPRetriever extends HTTPRetriever implements ExtendedRetr
 	public Exception getError()
 	{
 		return error;
+	}
+
+	@Override
+	protected ByteBuffer readZipStream(InputStream inputStream, URL url) throws IOException
+	{
+		if (unzip)
+		{
+			return super.readZipStream(inputStream, url);
+		}
+		return readNonSpecificStream(inputStream, getConnection());
 	}
 }

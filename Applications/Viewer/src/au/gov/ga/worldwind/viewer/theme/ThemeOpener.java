@@ -41,8 +41,7 @@ public class ThemeOpener
 			{
 				try
 				{
-					//RetrievalResult result = Downloader.downloadImmediatelyIfModified(url);
-					RetrievalResult result = Downloader.downloadImmediately(url, false);
+					RetrievalResult result = Downloader.downloadImmediatelyIfModified(url, true);
 					if (progress.isCanceled())
 						return;
 

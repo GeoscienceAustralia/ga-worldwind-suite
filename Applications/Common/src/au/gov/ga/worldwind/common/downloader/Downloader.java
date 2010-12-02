@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.Util;
 
 /**
  * Utility class which performs downloading from URLs. Supports the file, http
@@ -47,11 +48,14 @@ public class Downloader
 	 *            URL to download
 	 * @param cache
 	 *            Cache the result?
+	 * @param unzip
+	 *            Should the result be pre-unzipped?
 	 * @return Download result
 	 * @throws Exception
 	 *             If the download fails
 	 */
-	public static RetrievalResult downloadImmediately(final URL url, final boolean cache) throws Exception
+	public static RetrievalResult downloadImmediately(final URL url, final boolean cache, final boolean unzip)
+			throws Exception
 	{
 		if (isJarProtocol(url))
 		{
@@ -72,7 +76,7 @@ public class Downloader
 
 		ImmediateRetrievalHandler immediateHandler = new ImmediateRetrievalHandler();
 		HandlerPostProcessor postProcessor = new HandlerPostProcessor(url, immediateHandler);
-		URLRetriever retriever = createRetriever(url, null, postProcessor);
+		URLRetriever retriever = createRetriever(url, null, postProcessor, unzip);
 
 		//check if the request is a duplicate
 		synchronized (duplicateLock)
@@ -110,11 +114,13 @@ public class Downloader
 	 * 
 	 * @param url
 	 *            URL to download
+	 * @param unzip
+	 *            Should the result be pre-unzipped?
 	 * @return Download result
 	 * @throws Exception
 	 *             If the download fails
 	 */
-	public static RetrievalResult downloadImmediatelyIfModified(final URL url) throws Exception
+	public static RetrievalResult downloadImmediatelyIfModified(final URL url, final boolean unzip) throws Exception
 	{
 		if (isJarProtocol(url))
 		{
@@ -132,7 +138,7 @@ public class Downloader
 		ImmediateRetrievalHandler immediateHandler = new ImmediateRetrievalHandler();
 		HandlerPostProcessor postProcessor = new HandlerPostProcessor(url, immediateHandler);
 		//download if lastModified is null or server's modification date is greater than lastModified
-		URLRetriever retriever = createRetriever(url, lastModified, postProcessor);
+		URLRetriever retriever = createRetriever(url, lastModified, postProcessor, unzip);
 
 		//check if the request is a duplicate
 		synchronized (duplicateLock)
@@ -176,10 +182,13 @@ public class Downloader
 	 *            URL to download
 	 * @param downloadHandler
 	 *            Handler to call when download is complete
+	 * @param unzip
+	 *            Should the result be pre-unzipped?
 	 * @param cache
 	 *            Cache the result?
 	 */
-	public static void download(final URL url, final RetrievalHandler downloadHandler, final boolean cache)
+	public static void download(final URL url, final RetrievalHandler downloadHandler, final boolean cache,
+			final boolean unzip)
 	{
 		if (isJarProtocol(url))
 		{
@@ -212,7 +221,7 @@ public class Downloader
 		};
 
 		HandlerPostProcessor postProcessor = new HandlerPostProcessor(url, cacherHandler);
-		URLRetriever retriever = createRetriever(url, null, postProcessor);
+		URLRetriever retriever = createRetriever(url, null, postProcessor, unzip);
 
 		synchronized (duplicateLock)
 		{
@@ -244,10 +253,13 @@ public class Downloader
 	 *            Handler to call after the download is complete
 	 *            (result.hasData() will be false if the URL has not been
 	 *            modified)
+	 * @param unzip
+	 *            Should the result be pre-unzipped?
 	 */
-	public static void downloadIfModified(URL url, RetrievalHandler cacheHandler, RetrievalHandler downloadHandler)
+	public static void downloadIfModified(URL url, RetrievalHandler cacheHandler, RetrievalHandler downloadHandler,
+			boolean unzip)
 	{
-		download(url, cacheHandler, downloadHandler, true);
+		download(url, cacheHandler, downloadHandler, true, unzip);
 	}
 
 	/**
@@ -262,10 +274,13 @@ public class Downloader
 	 *            Handler to call with the result if the URL is cached
 	 * @param downloadHandler
 	 *            Handler to call after the download is complete
+	 * @param unzip
+	 *            Should the result be pre-unzipped?
 	 */
-	public static void downloadAnyway(URL url, RetrievalHandler cacheHandler, RetrievalHandler downloadHandler)
+	public static void downloadAnyway(URL url, RetrievalHandler cacheHandler, RetrievalHandler downloadHandler,
+			boolean unzip)
 	{
-		download(url, cacheHandler, downloadHandler, false);
+		download(url, cacheHandler, downloadHandler, false, unzip);
 	}
 
 	/**
@@ -277,10 +292,12 @@ public class Downloader
 	 *            URL to download
 	 * @param downloadHandler
 	 *            Handler to call after the download is complete
+	 * @param unzip
+	 *            Should the result be pre-unzipped?
 	 */
-	public static void downloadIgnoreCache(URL url, RetrievalHandler downloadHandler)
+	public static void downloadIgnoreCache(URL url, RetrievalHandler downloadHandler, boolean unzip)
 	{
-		download(url, null, downloadHandler, false);
+		download(url, null, downloadHandler, false, unzip);
 	}
 
 	/**
@@ -293,7 +310,7 @@ public class Downloader
 	}
 
 	private static void download(final URL url, final RetrievalHandler cacheHandler,
-			final RetrievalHandler downloadHandler, final boolean checkIfModified)
+			final RetrievalHandler downloadHandler, final boolean checkIfModified, final boolean unzip)
 	{
 		if (isJarProtocol(url))
 		{
@@ -329,7 +346,7 @@ public class Downloader
 		};
 
 		HandlerPostProcessor postProcessor = new HandlerPostProcessor(url, cacherHandler);
-		URLRetriever retriever = createRetriever(url, lastModified, postProcessor);
+		URLRetriever retriever = createRetriever(url, lastModified, postProcessor, unzip);
 
 		synchronized (duplicateLock)
 		{
@@ -384,6 +401,22 @@ public class Downloader
 		}
 	}
 
+	/**
+	 * Remove the local cached file of this url, if it exists.
+	 * 
+	 * @param url
+	 *            Cached url file to remove.
+	 */
+	public static void removeCache(URL url)
+	{
+		URL fileUrl = getCacheURL(url);
+		File file = Util.urlToFile(fileUrl);
+		if (file != null && file.isFile())
+		{
+			file.delete();
+		}
+	}
+
 	private static URL getCacheURL(URL url)
 	{
 		String filename = filenameForURL(url);
@@ -407,9 +440,10 @@ public class Downloader
 		return DIRECTORY + File.separator + external;
 	}
 
-	private static URLRetriever createRetriever(URL url, Long ifModifiedSince, RetrievalPostProcessor postProcessor)
+	private static URLRetriever createRetriever(URL url, Long ifModifiedSince, RetrievalPostProcessor postProcessor,
+			boolean unzip)
 	{
-		URLRetriever retriever = doCreateRetriever(url, ifModifiedSince, postProcessor);
+		URLRetriever retriever = doCreateRetriever(url, ifModifiedSince, postProcessor, unzip);
 		int connectTimeout = Configuration.getIntegerValue(AVKeyMore.DOWNLOADER_CONNECT_TIMEOUT, 30000);
 		int readTimeout = Configuration.getIntegerValue(AVKeyMore.DOWNLOADER_READ_TIMEOUT, 30000);
 		retriever.setConnectTimeout(connectTimeout);
@@ -417,11 +451,12 @@ public class Downloader
 		return retriever;
 	}
 
-	private static URLRetriever doCreateRetriever(URL url, Long ifModifiedSince, RetrievalPostProcessor postProcessor)
+	private static URLRetriever doCreateRetriever(URL url, Long ifModifiedSince, RetrievalPostProcessor postProcessor,
+			boolean unzip)
 	{
 		if ("http".equalsIgnoreCase(url.getProtocol()) || "https".equalsIgnoreCase(url.getProtocol()))
-			return new ExtendedHTTPRetriever(url, ifModifiedSince, postProcessor);
-		return new ExtendedFileRetriever(url, ifModifiedSince, postProcessor);
+			return new ExtendedHTTPRetriever(url, ifModifiedSince, postProcessor, unzip);
+		return new ExtendedFileRetriever(url, ifModifiedSince, postProcessor, unzip);
 	}
 
 	private static void runRetriever(Retriever retriever, HandlerPostProcessor postProcessor)
@@ -486,7 +521,7 @@ public class Downloader
 		{
 			e = ex;
 		}
-		return new ByteBufferRetrievalResult(url, bb, false, false, e);
+		return new ByteBufferRetrievalResult(url, bb, false, false, e, null);
 	}
 
 	/**

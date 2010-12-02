@@ -160,7 +160,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 			};
 
 			URL url = new URL(RSS_URL);
-			Downloader.downloadAnyway(url, handler, handler);
+			Downloader.downloadAnyway(url, handler, handler, true);
 		}
 		catch (Exception e)
 		{
@@ -486,16 +486,16 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 			}
 		}
 	}
-	
+
 	protected void fireLoadingStateChanged()
 	{
-		for(int i = loadingListeners.size() - 1; i >= 0; i--)
+		for (int i = loadingListeners.size() - 1; i >= 0; i--)
 		{
 			LoadingListener listener = loadingListeners.get(i);
 			listener.loadingStateChanged(isLoading());
 		}
 	}
-	
+
 	protected void setLoading(boolean loading)
 	{
 		this.loading = loading;
