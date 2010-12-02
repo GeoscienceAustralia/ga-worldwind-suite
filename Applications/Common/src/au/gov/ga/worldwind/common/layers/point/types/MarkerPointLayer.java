@@ -96,36 +96,36 @@ public class MarkerPointLayer extends MarkerLayer implements PointLayer, SelectL
 		marker.setTooltipText(properties.text);
 		markers.add(marker);
 	}
-	
+
 	protected void fixShapeType(MarkerAttributes attributes)
 	{
 		//someone decided to use string equality instead of the equals function when testing the
 		//shape type; so fix it here instead (see BasicMarkerShape.createShapeInstance()).
-		
+
 		String shapetype = attributes.getShapeType();
-		if(shapetype != null)
+		if (shapetype != null)
 		{
-			if(BasicMarkerShape.SPHERE.equalsIgnoreCase(shapetype))
+			if (BasicMarkerShape.SPHERE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.SPHERE);
-			else if(BasicMarkerShape.CONE.equalsIgnoreCase(shapetype))
+			else if (BasicMarkerShape.CONE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.CONE);
-			else if(BasicMarkerShape.CYLINDER.equalsIgnoreCase(shapetype))
+			else if (BasicMarkerShape.CYLINDER.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.CYLINDER);
-			else if(BasicMarkerShape.HEADING_ARROW.equalsIgnoreCase(shapetype))
+			else if (BasicMarkerShape.HEADING_ARROW.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.HEADING_ARROW);
-			else if(BasicMarkerShape.HEADING_LINE.equalsIgnoreCase(shapetype))
+			else if (BasicMarkerShape.HEADING_LINE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.HEADING_LINE);
-			else if(BasicMarkerShape.ORIENTED_SPHERE.equalsIgnoreCase(shapetype))
+			else if (BasicMarkerShape.ORIENTED_SPHERE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.ORIENTED_SPHERE);
-			else if(BasicMarkerShape.ORIENTED_CONE.equalsIgnoreCase(shapetype))
+			else if (BasicMarkerShape.ORIENTED_CONE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.ORIENTED_CONE);
-			else if(BasicMarkerShape.ORIENTED_CYLINDER.equalsIgnoreCase(shapetype))
+			else if (BasicMarkerShape.ORIENTED_CYLINDER.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.ORIENTED_CYLINDER);
-			else if(BasicMarkerShape.ORIENTED_SPHERE_LINE.equalsIgnoreCase(shapetype))
+			else if (BasicMarkerShape.ORIENTED_SPHERE_LINE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.ORIENTED_SPHERE_LINE);
-			else if(BasicMarkerShape.ORIENTED_CONE_LINE.equalsIgnoreCase(shapetype))
+			else if (BasicMarkerShape.ORIENTED_CONE_LINE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.ORIENTED_CONE_LINE);
-			else if(BasicMarkerShape.ORIENTED_CYLINDER_LINE.equalsIgnoreCase(shapetype))
+			else if (BasicMarkerShape.ORIENTED_CYLINDER_LINE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.ORIENTED_CYLINDER_LINE);
 		}
 	}
