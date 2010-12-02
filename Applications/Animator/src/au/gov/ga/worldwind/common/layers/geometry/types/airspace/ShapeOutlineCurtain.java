@@ -6,12 +6,13 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.airspaces.AirspaceAttributes;
 import gov.nasa.worldwind.render.airspaces.Curtain;
 import gov.nasa.worldwind.render.airspaces.Geometry;
+import gov.nasa.worldwind.util.OGLStackHandler;
 
 import javax.media.opengl.GL;
 
 /**
- * An extension of the {@link Curtain} airspace that can render the 
- * generating shape as a line at the upper and lower elevations.
+ * An extension of the {@link Curtain} airspace that can render the generating
+ * shape as a line at the upper and lower elevations.
  */
 public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 {
@@ -21,7 +22,7 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 	boolean drawCurtain = true;
 	boolean drawUpperShapeOutline = false;
 	boolean drawLowerShapeOutline = false;
-	
+
 	public ShapeOutlineCurtain()
 	{
 		super();
@@ -59,20 +60,20 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 	{
 		Vec4 refCenter = computeReferenceCenter(dc);
 		Geometry vertexGeometry = getCurtainGeometry(dc, refCenter).getVertexGeometry();
-		
+
 		int count = vertexGeometry.getCount(GEOMETRY_TYPE_VERTEX) - 2;
 		int[] shapeIndices = new int[count];
 		int i = 0;
 		while (i < count)
 		{
-			shapeIndices[i] = i+1;
-			shapeIndices[i+1] = i+3;
-			i+=2;
+			shapeIndices[i] = i + 1;
+			shapeIndices[i + 1] = i + 3;
+			i += 2;
 		}
-		
+
 		Geometry shapeOutlineElementGeometry = new Geometry();
 		shapeOutlineElementGeometry.setElementData(GL.GL_LINES, count, shapeIndices);
-		
+
 		drawShapeOutline(dc, refCenter, vertexGeometry, shapeOutlineElementGeometry);
 	}
 
@@ -80,50 +81,51 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 	{
 		Vec4 refCenter = computeReferenceCenter(dc);
 		Geometry vertexGeometry = getCurtainGeometry(dc, refCenter).getVertexGeometry();
-		
+
 		int count = vertexGeometry.getCount(GEOMETRY_TYPE_VERTEX) - 2;
 		int[] shapeIndices = new int[count];
 		int i = 0;
 		while (i < count)
 		{
 			shapeIndices[i] = i;
-			shapeIndices[i+1] = i+2;
-			i+=2;
+			shapeIndices[i + 1] = i + 2;
+			i += 2;
 		}
-		
+
 		Geometry shapeOutlineElementGeometry = new Geometry();
 		shapeOutlineElementGeometry.setElementData(GL.GL_LINES, count, shapeIndices);
-		
+
 		drawShapeOutline(dc, refCenter, vertexGeometry, shapeOutlineElementGeometry);
 	}
-	
+
 	private void drawShapeOutline(DrawContext dc, Vec4 refCenter, Geometry vertexGeometry,
 			Geometry shapeOutlineElementGeometry)
 	{
-		
+
 		dc.getView().pushReferenceCenter(dc, refCenter);
 		GL gl = dc.getGL();
-		gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-		gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+		OGLStackHandler stack = new OGLStackHandler();
+		stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_HINT_BIT | GL.GL_ENABLE_BIT | GL.GL_DEPTH_BUFFER_BIT
+				| GL.GL_POINT_BIT | GL.GL_COLOR_BUFFER_BIT | GL.GL_LIGHTING_BIT | GL.GL_POINT_BIT);
+		stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 		try
 		{
 			// Points are drawn over the line to prevent gaps forming when 
 			// antialiasing and smoothing is applied to the line
 			setupDrawParams(dc, gl);
-			
+
 			gl.glDepthMask(false);
 			drawShapeOutlineAsLines(dc, shapeOutlineElementGeometry, vertexGeometry);
 			drawShapeOutlineAsPoints(dc, shapeOutlineElementGeometry, vertexGeometry);
-			
+
 			gl.glDepthMask(true);
-			drawShapeOutlineAsLines(dc, shapeOutlineElementGeometry, vertexGeometry);			
-			
+			drawShapeOutlineAsLines(dc, shapeOutlineElementGeometry, vertexGeometry);
+
 		}
 		finally
 		{
 			dc.getView().popReferenceCenter(dc);
-			gl.glPopAttrib();
-			gl.glPopClientAttrib();
+			stack.pop(gl);
 		}
 	}
 
@@ -137,28 +139,25 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
 		gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
 		getAttributes().applyOutline(dc, false);
-		gl.glPointSize((float)getAttributes().getOutlineWidth());
+		gl.glPointSize((float) getAttributes().getOutlineWidth());
 	}
 
 	private void drawShapeOutlineAsLines(DrawContext dc, Geometry shapeOutlineElementGeometry, Geometry vertexGeometry)
 	{
 		getRenderer().drawGeometry(dc, shapeOutlineElementGeometry, vertexGeometry);
 	}
-	
+
 	private void drawShapeOutlineAsPoints(DrawContext dc, Geometry shapeOutlineElementGeometry, Geometry vertexGeometry)
 	{
-		getRenderer().drawGeometry(dc, 
-								   GL.GL_POINTS, 
-								   shapeOutlineElementGeometry.getCount(GEOMETRY_TYPE_ELEMENT), 
-								   shapeOutlineElementGeometry.getGLType(GEOMETRY_TYPE_ELEMENT), 
-								   shapeOutlineElementGeometry.getBuffer(GEOMETRY_TYPE_ELEMENT), 
-								   vertexGeometry);
+		getRenderer().drawGeometry(dc, GL.GL_POINTS, shapeOutlineElementGeometry.getCount(GEOMETRY_TYPE_ELEMENT),
+				shapeOutlineElementGeometry.getGLType(GEOMETRY_TYPE_ELEMENT),
+				shapeOutlineElementGeometry.getBuffer(GEOMETRY_TYPE_ELEMENT), vertexGeometry);
 	}
-	
+
 	private CurtainGeometry getCurtainGeometry(DrawContext dc, Vec4 refCenter)
 	{
 		return getCurtainGeometry(dc, locations.size(), locations.toArray(new LatLon[locations.size()]), pathType,
-								  splitThreshold, getAltitudes(), isTerrainConforming(), refCenter);
+				splitThreshold, getAltitudes(), isTerrainConforming(), refCenter);
 	}
 
 	public void setDrawCurtain(boolean drawCurtain)

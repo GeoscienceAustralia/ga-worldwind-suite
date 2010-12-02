@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.animator.layers.misc;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.OrderedRenderable;
+import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -94,10 +95,8 @@ public class GridOverlayLayer extends AbstractLayer
 	public GridOverlayLayer(boolean centred, double verticalSpacing, double horizontalSpacing)
 	{
 		this();
-		Validate.isTrue(verticalSpacing > 0 && verticalSpacing < 1,
-				"Vertical spacing must be in the range (0,1)");
-		Validate.isTrue(horizontalSpacing > 0 && horizontalSpacing < 1,
-				"Horizontal spacing must be in the range (0,1)");
+		Validate.isTrue(verticalSpacing > 0 && verticalSpacing < 1, "Vertical spacing must be in the range (0,1)");
+		Validate.isTrue(horizontalSpacing > 0 && horizontalSpacing < 1, "Horizontal spacing must be in the range (0,1)");
 
 		centreGrid = centred;
 		this.verticalSpacing = verticalSpacing;
@@ -118,32 +117,21 @@ public class GridOverlayLayer extends AbstractLayer
 		GL gl = dc.getGL();
 		GLU glu = dc.getGLU();
 
-		boolean clientAttribsPushed = false;
-		boolean attribsPushed = false;
-		boolean projectionPushed = false;
-		boolean modelviewPushed = false;
-
+		OGLStackHandler stack = new OGLStackHandler();
 		Rectangle viewport = dc.getView().getViewport();
 
 		try
 		{
 			recalculateGrid(viewport);
 
-			gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-			clientAttribsPushed = true;
+			stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT | GL.GL_LINE_BIT);
+			stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 
-			gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
-			attribsPushed = true;
-
-			gl.glMatrixMode(GL.GL_PROJECTION);
-			gl.glPushMatrix();
+			stack.pushProjection(gl);
 			gl.glLoadIdentity();
 			glu.gluOrtho2D(0, viewport.getWidth(), 0, viewport.getHeight());
-			projectionPushed = true;
 
-			gl.glMatrixMode(GL.GL_MODELVIEW);
-			gl.glPushMatrix();
-			modelviewPushed = true;
+			stack.pushModelview(gl);
 			gl.glLoadIdentity();
 
 			gl.glColor4d(gridColor[0], gridColor[1], gridColor[2], getOpacity());
@@ -158,24 +146,7 @@ public class GridOverlayLayer extends AbstractLayer
 		}
 		finally
 		{
-			if (modelviewPushed)
-			{
-				gl.glMatrixMode(GL.GL_MODELVIEW);
-				gl.glPopMatrix();
-			}
-			if (projectionPushed)
-			{
-				gl.glMatrixMode(GL.GL_PROJECTION);
-				gl.glPopMatrix();
-			}
-			if (attribsPushed)
-			{
-				gl.glPopAttrib();
-			}
-			if (clientAttribsPushed)
-			{
-				gl.glPopClientAttrib();
-			}
+			stack.pop(gl);
 		}
 	}
 

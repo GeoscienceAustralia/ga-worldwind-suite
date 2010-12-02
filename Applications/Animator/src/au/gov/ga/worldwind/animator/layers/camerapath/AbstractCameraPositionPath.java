@@ -4,6 +4,7 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Renderable;
+import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.awt.Color;
 import java.nio.DoubleBuffer;
@@ -80,8 +81,10 @@ public abstract class AbstractCameraPositionPath implements Renderable
 		}
 
 		GL gl = dc.getGL();
-		gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-		gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+		OGLStackHandler stack = new OGLStackHandler();
+		stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_POINT_BIT | GL.GL_LINE_BIT | GL.GL_HINT_BIT | GL.GL_LIGHTING_BIT
+				| GL.GL_DEPTH_BUFFER_BIT);
+		stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 		boolean popRefCenter = false;
 		try
 		{
@@ -92,7 +95,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 					dc.getView().pushReferenceCenter(dc, pathReferenceCenter);
 					popRefCenter = true;
 				}
-				
+
 				// Points are drawn over the line to prevent gaps forming when 
 				// antialiasing and smoothing is applied to the line
 				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
@@ -107,14 +110,14 @@ public abstract class AbstractCameraPositionPath implements Renderable
 				gl.glLineWidth(2.0f);
 				gl.glPointSize(2.0f);
 				int numberOfPointsInPath = animation.getFrameOfLastKeyFrame() - animation.getFrameOfFirstKeyFrame() + 1;
-	
+
 				//don't draw lines with less than 2 points
 				if (numberOfPointsInPath <= 1)
 				{
 					return;
 				}
 
-			
+
 				if (enableDepthTesting)
 				{
 					gl.glEnable(GL.GL_DEPTH_TEST);
@@ -147,8 +150,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 			{
 				dc.getView().popReferenceCenter(dc);
 			}
-			gl.glPopAttrib();
-			gl.glPopClientAttrib();
+			stack.pop(gl);
 		}
 	}
 
@@ -172,7 +174,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 
 		int firstFrame = animation.getFrameOfFirstKeyFrame();
 		int lastFrame = animation.getFrameOfLastKeyFrame();
-		
+
 		double[] deltas = new double[lastFrame - firstFrame + 1];
 		double minDelta = Double.MAX_VALUE;
 		double maxDelta = 0d;
@@ -180,7 +182,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 		pathVertexBackBuffer.rewind();
 
 		Position[] pathPositions = getPathPositions(context, firstFrame, lastFrame);
-		
+
 		Position previousPathPosition = null;
 		for (int i = 0; i < pathPositions.length; i++)
 		{
@@ -222,20 +224,18 @@ public abstract class AbstractCameraPositionPath implements Renderable
 	 * @return the path positions for this path between the start and end frames
 	 */
 	protected abstract Position[] getPathPositions(AnimationContext context, int startFrame, int endFrame);
-	
+
 	/**
 	 * @return The delta of the current and previous position
 	 */
-	private double calculateDelta(AnimationContext context, Position currentPosition,
-			Position previousPosition)
+	private double calculateDelta(AnimationContext context, Position currentPosition, Position previousPosition)
 	{
 		Vec4 current = context.getView().getGlobe().computePointFromPosition(currentPosition);
 		Vec4 previous = context.getView().getGlobe().computePointFromPosition(previousPosition);
 		return Math.abs(current.distanceTo3(previous));
 	}
 
-	private void populatePathColourBufferFromDeltas(double[] deltas, double minDelta,
-			double maxDelta)
+	private void populatePathColourBufferFromDeltas(double[] deltas, double minDelta, double maxDelta)
 	{
 		double deltaWindow = maxDelta - minDelta;
 		if (deltaWindow < 1)

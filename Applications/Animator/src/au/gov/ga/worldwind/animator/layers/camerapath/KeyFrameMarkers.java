@@ -14,6 +14,7 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.render.markers.Marker;
 import gov.nasa.worldwind.render.markers.MarkerRenderer;
+import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -160,8 +161,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		}
 	}
 
-	private void doDragMarker(KeyFrameMarker pickedMarker, Click clickType, Point pickPoint,
-			Point previousPickPoint)
+	private void doDragMarker(KeyFrameMarker pickedMarker, Click clickType, Point pickPoint, Point previousPickPoint)
 	{
 		lastPickedMarker = pickedMarker;
 		pickedMarker.highlight();
@@ -186,8 +186,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		// Compute the ray from the screen point
 		Line ray = worldWindow.getView().computeRayFromScreenPoint(pickPoint.x, pickPoint.y);
 		Intersection[] intersections =
-				worldWindow.getModel().getGlobe()
-						.intersect(ray, pickedMarker.getPosition().elevation);
+				worldWindow.getModel().getGlobe().intersect(ray, pickedMarker.getPosition().elevation);
 		if (intersections == null || intersections.length == 0)
 		{
 			return;
@@ -198,8 +197,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 			return;
 		}
 
-		Position newPosition =
-				worldWindow.getModel().getGlobe().computePositionFromPoint(intersection);
+		Position newPosition = worldWindow.getModel().getGlobe().computePositionFromPoint(intersection);
 		pickedMarker.setPosition(newPosition);
 
 	}
@@ -213,18 +211,14 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	 * screen <code>y = pickPoint.y</code> intersected with the origin-marker
 	 * ray.
 	 */
-	private void doDragElevation(KeyFrameMarker pickedMarker, Point pickPoint,
-			Point previousPickPoint)
+	private void doDragElevation(KeyFrameMarker pickedMarker, Point pickPoint, Point previousPickPoint)
 	{
 		// Calculate the plane projected from screen y=pickPoint.y
-		Line screenLeftRay =
-				worldWindow.getView().computeRayFromScreenPoint(pickPoint.x - 100, pickPoint.y);
-		Line screenRightRay =
-				worldWindow.getView().computeRayFromScreenPoint(pickPoint.x + 100, pickPoint.y);
+		Line screenLeftRay = worldWindow.getView().computeRayFromScreenPoint(pickPoint.x - 100, pickPoint.y);
+		Line screenRightRay = worldWindow.getView().computeRayFromScreenPoint(pickPoint.x + 100, pickPoint.y);
 
 		// As the two lines are very close to parallel, use an arbitrary line joining them rather than the two lines to avoid precision problems
-		Line joiner =
-				Line.fromSegment(screenLeftRay.getPointAt(500), screenRightRay.getPointAt(500));
+		Line joiner = Line.fromSegment(screenLeftRay.getPointAt(500), screenRightRay.getPointAt(500));
 
 		Plane screenPlane = GeometryUtil.createPlaneContainingLines(screenLeftRay, joiner);
 		if (screenPlane == null)
@@ -234,8 +228,8 @@ class KeyFrameMarkers implements Renderable, SelectListener
 
 		// Calculate the origin-marker ray
 		Line markerEarhCentreRay =
-				Line.fromSegment(worldWindow.getModel().getGlobe().getCenter(), worldWindow
-						.getModel().getGlobe().computePointFromPosition(pickedMarker.getPosition()));
+				Line.fromSegment(worldWindow.getModel().getGlobe().getCenter(), worldWindow.getModel().getGlobe()
+						.computePointFromPosition(pickedMarker.getPosition()));
 
 		Vec4 intersection = screenPlane.intersect(markerEarhCentreRay);
 		if (intersection == null)
@@ -244,12 +238,11 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		}
 
 		// Set the elevation of the marker to the elevation at the point of intersection
-		Position intersectionPosition =
-				worldWindow.getModel().getGlobe().computePositionFromPoint(intersection);
+		Position intersectionPosition = worldWindow.getModel().getGlobe().computePositionFromPoint(intersection);
 
 		Position newMarkerPosition =
-				new Position(pickedMarker.getPosition().latitude,
-						pickedMarker.getPosition().longitude, intersectionPosition.elevation);
+				new Position(pickedMarker.getPosition().latitude, pickedMarker.getPosition().longitude,
+						intersectionPosition.elevation);
 
 		pickedMarker.setPosition(newMarkerPosition);
 	}
@@ -322,19 +315,18 @@ class KeyFrameMarkers implements Renderable, SelectListener
 
 	private void drawJoiners(DrawContext dc)
 	{
-		if (animation.getKeyFrameCount() <= 0 || dc.isPickingMode()
-				|| joinersFrontBuffer.limit() <= 0)
+		if (animation.getKeyFrameCount() <= 0 || dc.isPickingMode() || joinersFrontBuffer.limit() <= 0)
 		{
 			return;
 		}
 
 		GL gl = dc.getGL();
-		gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-		gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+		OGLStackHandler stack = new OGLStackHandler();
+		stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_LINE_BIT | GL.GL_COLOR_BUFFER_BIT | GL.GL_HINT_BIT);
+		stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 		try
 		{
 			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-			gl.glShadeModel(GL.GL_SMOOTH);
 			gl.glEnable(GL.GL_LINE_SMOOTH);
 			gl.glEnable(GL.GL_BLEND);
 			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
@@ -350,8 +342,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		}
 		finally
 		{
-			gl.glPopAttrib();
-			gl.glPopClientAttrib();
+			stack.pop(gl);
 		}
 	}
 
@@ -365,12 +356,12 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	private void drawMarkerElevationRay(DrawContext dc)
 	{
 		GL gl = dc.getGL();
-		gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-		gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+		OGLStackHandler stack = new OGLStackHandler();
+		stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_LINE_BIT | GL.GL_COLOR_BUFFER_BIT | GL.GL_HINT_BIT);
+		stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 		try
 		{
 			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-			gl.glShadeModel(GL.GL_SMOOTH);
 			gl.glEnable(GL.GL_LINE_SMOOTH);
 			gl.glEnable(GL.GL_BLEND);
 			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
@@ -380,10 +371,8 @@ class KeyFrameMarkers implements Renderable, SelectListener
 			gl.glColor3fv(Color.GREEN.getColorComponents(null), 0);
 
 			Line markerEarhCentreRay =
-					Line.fromSegment(
-							worldWindow.getModel().getGlobe().getCenter(),
-							worldWindow.getModel().getGlobe()
-									.computePointFromPosition(lastPickedMarker.getPosition()));
+					Line.fromSegment(worldWindow.getModel().getGlobe().getCenter(), worldWindow.getModel().getGlobe()
+							.computePointFromPosition(lastPickedMarker.getPosition()));
 			gl.glBegin(GL.GL_LINE_STRIP);
 
 			Vec4 linePoint = markerEarhCentreRay.getPointAt(0);
@@ -396,8 +385,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		}
 		finally
 		{
-			gl.glPopAttrib();
-			gl.glPopClientAttrib();
+			stack.pop(gl);
 		}
 	}
 
@@ -427,8 +415,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 				KeyFrameMarker marker = new EyeKeyFrameMarker(animation, frame);
 				eyeMarkersBackBuffer.add(marker);
 
-				markerCoords =
-						context.getView().getGlobe().computePointFromPosition(marker.getPosition());
+				markerCoords = context.getView().getGlobe().computePointFromPosition(marker.getPosition());
 				joinersBackBuffer.put(markerCoords.x);
 				joinersBackBuffer.put(markerCoords.y);
 				joinersBackBuffer.put(markerCoords.z);
@@ -436,8 +423,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 				marker = new LookatKeyFrameMarker(animation, frame);
 				lookatMarkersBackBuffer.add(marker);
 
-				markerCoords =
-						context.getView().getGlobe().computePointFromPosition(marker.getPosition());
+				markerCoords = context.getView().getGlobe().computePointFromPosition(marker.getPosition());
 				joinersBackBuffer.put(markerCoords.x);
 				joinersBackBuffer.put(markerCoords.y);
 				joinersBackBuffer.put(markerCoords.z);
