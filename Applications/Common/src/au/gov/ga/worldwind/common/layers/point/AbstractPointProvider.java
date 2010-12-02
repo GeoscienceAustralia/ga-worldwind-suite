@@ -5,7 +5,6 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.cache.FileStore;
 import gov.nasa.worldwind.retrieve.AbstractRetrievalPostProcessor;
-import gov.nasa.worldwind.retrieve.HTTPRetriever;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
 import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.util.Logging;
@@ -14,6 +13,8 @@ import gov.nasa.worldwind.util.WWIO;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import au.gov.ga.worldwind.common.layers.delegate.retriever.PassThroughZipRetriever;
 
 /**
  * Basic implementation of the {@link PointProvider} interface. Handles
@@ -119,7 +120,7 @@ public abstract class AbstractPointProvider implements PointProvider
 		{
 			if (postProcessor == null)
 				postProcessor = new DownloadPostProcessor(this, layer);
-			retriever = new HTTPRetriever(url, postProcessor);
+			retriever = new PassThroughZipRetriever(url, postProcessor);
 		}
 		else
 		{
