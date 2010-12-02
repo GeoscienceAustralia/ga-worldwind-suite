@@ -16,8 +16,8 @@ import java.util.Map;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
 
+import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.Util;
-import au.gov.ga.worldwind.viewer.layers.shapefile.FastShape;
 
 public class PolygonTessellator
 {

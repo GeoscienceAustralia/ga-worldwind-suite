@@ -10,7 +10,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 
-import au.gov.ga.worldwind.viewer.layers.shapefile.FastShape;
+import au.gov.ga.worldwind.common.util.FastShape;
 
 public class TessellatorCallback extends GLUtessellatorCallbackAdapter
 {

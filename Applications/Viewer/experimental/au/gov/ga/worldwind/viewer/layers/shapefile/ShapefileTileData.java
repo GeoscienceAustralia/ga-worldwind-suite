@@ -22,6 +22,7 @@ import java.util.Random;
 
 import javax.media.opengl.GL;
 
+import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.viewer.layers.shapefile.indextessellator.PolygonTessellator;
 
