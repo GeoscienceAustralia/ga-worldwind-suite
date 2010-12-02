@@ -12,6 +12,10 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -69,7 +73,7 @@ public class XMLUtil extends WWXML
 			return def;
 		return d;
 	}
-	
+
 	public static int getInteger(Element context, String path, int def)
 	{
 		return getInteger(context, path, def, null);
@@ -83,15 +87,13 @@ public class XMLUtil extends WWXML
 		return i;
 	}
 
-	public static URL getURL(Element element, String path, URL context)
-			throws MalformedURLException
+	public static URL getURL(Element element, String path, URL context) throws MalformedURLException
 	{
 		String text = getText(element, path);
 		return getURL(text, context);
 	}
 
-	public static URL getURL(Element element, String path, URL context, XPath xpath)
-			throws MalformedURLException
+	public static URL getURL(Element element, String path, URL context, XPath xpath) throws MalformedURLException
 	{
 		String text = getText(element, path, xpath);
 		return getURL(text, context);
@@ -144,8 +146,8 @@ public class XMLUtil extends WWXML
 
 			if (lat == null || lon == null)
 				return null;
-			
-			if(elev == null)
+
+			if (elev == null)
 				elev = 0d;
 
 			if (units == null || units.length() == 0 || units.equals("degrees"))
@@ -255,8 +257,77 @@ public class XMLUtil extends WWXML
 		return el;
 	}
 
-	public static void checkAndSetURLParam(Element context, AVList params, String paramKey,
-			String paramName, XPath xpath)
+	public static Long getFormattedDate(Element context, String path, XPath xpath)
+	{
+		if (context == null)
+		{
+			String message = Logging.getMessage("nullValue.ContextIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		try
+		{
+			Element el = path == null ? context : getElement(context, path, xpath);
+			if (el == null)
+				return null;
+
+			String value = getText(el, "@value", xpath);
+			String format = getText(el, "@format", xpath);
+
+			DateFormat dateFormat = new SimpleDateFormat(format);
+			Date date = dateFormat.parse(value);
+
+			return date.getTime();
+		}
+		catch (ParseException e)
+		{
+			String message = Logging.getMessage("generic.ConversionError", path);
+			Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
+			return null;
+		}
+	}
+
+	public static void checkAndSetFormattedDateParam(Element context, AVList params, String paramKey, String paramName,
+			XPath xpath)
+	{
+		if (context == null)
+		{
+			String message = Logging.getMessage("nullValue.ElementIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (params == null)
+		{
+			String message = Logging.getMessage("nullValue.ParametersIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (paramKey == null)
+		{
+			String message = Logging.getMessage("nullValue.ParameterKeyIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (paramName == null)
+		{
+			String message = Logging.getMessage("nullValue.ParameterNameIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+		
+		Long l = getFormattedDate(context, paramName, xpath);
+		if(l != null)
+		{
+			params.setValue(paramKey, l);
+		}
+	}
+
+	public static void checkAndSetURLParam(Element context, AVList params, String paramKey, String paramName,
+			XPath xpath)
 	{
 		if (context == null)
 		{

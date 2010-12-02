@@ -12,6 +12,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.curtain.BasicTiledCurtainLayer;
 import au.gov.ga.worldwind.common.layers.curtain.delegate.DelegatorTiledCurtainLayer;
+import au.gov.ga.worldwind.common.layers.earthquakes.HistoricEarthquakesLayer;
 import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
 import au.gov.ga.worldwind.common.layers.point.PointLayerUtils;
 import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
@@ -47,6 +48,10 @@ public class LayerFactory extends BasicLayerFactory
 		else if("CurtainImageLayer".equals(layerType))
 		{
 			return createTiledCurtainLayer(domElement, params);
+		}
+		else if("HistoricEarthquakesLayer".equals(layerType))
+		{
+			return new HistoricEarthquakesLayer(domElement, params);
 		}
 
 		return super.createFromLayerDocument(domElement, params);

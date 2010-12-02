@@ -10,7 +10,7 @@ public interface AVKeyMore extends AVKey
 	final static String DOWNLOADER_READ_TIMEOUT = "au.gov.ga.worldwind.AVKeyMore.DownloaderReadTimeout";
 	final static String EXPIRY_TIMESPAN = "au.gov.ga.worldwind.AVKeyMore.ExpiryTimespan";
 	final static String EXPIRY_START_TIME = "au.gov.ga.worldwind.AVKeyMore.ExpiryStartTime";
-	
+
 	//curtain layer
 	final static String FULL_WIDTH = "au.gov.ga.worldwind.AVKeyMore.FullWidth";
 	final static String FULL_HEIGHT = "au.gov.ga.worldwind.AVKeyMore.FullHeight";
@@ -22,17 +22,23 @@ public interface AVKeyMore extends AVKey
 	final static String FOLLOW_TERRAIN = "au.gov.ga.worldwind.AVKeyMore.FollowTerrain";
 	final static String SUBSEGMENTS = "au.gov.ga.worldwind.AVKeyMore.Subsegments";
 	final static String PATH = "au.gov.ga.worldwind.AVKeyMore.Path";
-	
+
 	//point layer
 	final static String POINT_STYLES = "au.gov.ga.worldwind.AVKeyMore.PointStyles";
 	final static String POINT_ATTRIBUTES = "au.gov.ga.worldwind.AVKeyMore.PointAttributes";
 	final static String POINT_PROVIDER = "au.gov.ga.worldwind.AVKeyMore.PointProvider";
 	final static String POINT_TYPE = "au.gov.ga.worldwind.AVKeyMore.PointType";
-	
+
 	//geometry layer
 	final static String SHAPE_PROVIDER = "au.gov.ga.worldwind.AVKeyMore.ShapeProvider";
 	final static String RENDER_TYPE = "au.gov.ga.worldwind.AVKeyMore.RenderType";
 	final static String SHAPE_STYLES = "au.gov.ga.worldwind.AVKeyMore.ShapeStyles";
 	final static String SHAPE_ATTRIBUTES = "au.gov.ga.worldwind.AVKeyMore.ShapeAttributes";
-	static final String SHAPE_TYPE = "au.gov.ga.worldwind.AVKeyMore.ShapeType";
+	final static String SHAPE_TYPE = "au.gov.ga.worldwind.AVKeyMore.ShapeType";
+
+	//historic earthquakes layer
+	final static String COLORING = "au.gov.ga.worldwind.AVKeyMore.Coloring";
+	final static String COLORING_MIN_DATE = "au.gov.ga.worldwind.AVKeyMore.ColoringMinDate";
+	final static String COLORING_MAX_DATE = "au.gov.ga.worldwind.AVKeyMore.ColoringMaxDate";
+	final static String POINT_SIZE = "au.gov.ga.worldwind.AVKeyMore.PointSize";
 }
