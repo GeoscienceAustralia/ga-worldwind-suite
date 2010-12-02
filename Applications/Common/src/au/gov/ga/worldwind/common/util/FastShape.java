@@ -90,17 +90,8 @@ public class FastShape implements Renderable, Cacheable
 
 		try
 		{
-			int push = GL.GL_CLIENT_VERTEX_ARRAY_BIT;
-			if (colorBuffer != null)
-			{
-				push |= GL.GL_COLOR_BUFFER_BIT;
-			}
-			if (getOpacity() < 1.0)
-			{
-				push |= GL.GL_CURRENT_BIT;
-			}
-			stack.pushAttrib(gl, push);
-			stack.pushClientAttrib(gl, push);
+			stack.pushAttrib(gl, GL.GL_CURRENT_BIT);
+			stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 
 			if (colorBuffer != null)
 			{

@@ -220,6 +220,8 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 		{
 			this.shape = shape;
 		}
+		
+		firePropertyChange(AVKey.LAYER, null, this);
 	}
 
 	private void generateColorBuffer(DoubleBuffer colorBuffer, List<Earthquake> earthquakes)
