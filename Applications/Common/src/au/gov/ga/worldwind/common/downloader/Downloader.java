@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.common.downloader;
 
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.WorldWind;
-import gov.nasa.worldwind.retrieve.BasicRetrievalService;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
 import gov.nasa.worldwind.retrieve.RetrievalService;
 import gov.nasa.worldwind.retrieve.Retriever;
@@ -37,7 +36,7 @@ public class Downloader
 	private static final Object duplicateLock = new Object();
 
 	//use the standard World Wind BasicRetrievalService for handling downloading
-	private static final RetrievalService service = new BasicRetrievalService();
+	private static final RetrievalService service = new DownloaderRetrievalService();
 	private static final ActiveRetrieverCache retrieverCache = new ActiveRetrieverCache();
 
 	/**
@@ -270,6 +269,21 @@ public class Downloader
 	}
 
 	/**
+	 * Performs a download asynchronously. If there is a cached version of the
+	 * URL, it is ignored, and the newly downloaded version is cached instead.
+	 * The downloadHandler is called with the download result.
+	 * 
+	 * @param url
+	 *            URL to download
+	 * @param downloadHandler
+	 *            Handler to call after the download is complete
+	 */
+	public static void downloadIgnoreCache(URL url, RetrievalHandler downloadHandler)
+	{
+		download(url, null, downloadHandler, false);
+	}
+
+	/**
 	 * @return The {@link RetrievalService} used to for downloading by this
 	 *         Downloader.
 	 */
@@ -288,13 +302,17 @@ public class Downloader
 			return;
 		}
 
-		FileRetrievalResult result = getFromCache(url);
 		Long lastModified = null;
-		if (result != null && result.hasData())
+		if (cacheHandler != null || checkIfModified)
 		{
-			cacheHandler.handle(result);
-			if (checkIfModified)
-				lastModified = result.lastModified();
+			FileRetrievalResult result = getFromCache(url);
+			if (result != null && result.hasData())
+			{
+				if (cacheHandler != null)
+					cacheHandler.handle(result);
+				if (checkIfModified)
+					lastModified = result.lastModified();
+			}
 		}
 
 		RetrievalHandler cacherHandler = new RetrievalHandler()
