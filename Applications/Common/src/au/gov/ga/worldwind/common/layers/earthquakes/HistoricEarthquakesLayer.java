@@ -6,6 +6,7 @@ import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.util.OGLStackHandler;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.Color;
@@ -129,15 +130,24 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 		}
 
 		GL gl = dc.getGL();
-		gl.glPointSize((float) pointSize);
-		synchronized (shapeLock)
+		OGLStackHandler stack = new OGLStackHandler();
+		try
 		{
-			if (shape != null)
+			stack.pushAttrib(gl, GL.GL_POINT_BIT);
+			gl.glPointSize((float) pointSize);
+			
+			synchronized (shapeLock)
 			{
-				shape.render(dc);
+				if (shape != null)
+				{
+					shape.render(dc);
+				}
 			}
 		}
-		gl.glPointSize(1f);
+		finally
+		{
+			stack.pop(gl);
+		}
 	}
 
 	protected void downloadData()
@@ -220,7 +230,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 		{
 			this.shape = shape;
 		}
-		
+
 		firePropertyChange(AVKey.LAYER, null, this);
 	}
 
@@ -281,10 +291,10 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 			for (Earthquake earthquake : earthquakes)
 			{
 				double percent = (earthquake.magnitude - minMagnitude) / (maxMagnitude - minMagnitude);
-				
+
 				//scale the magnitude (VERY crude equalisation)
 				percent = Math.pow(percent, 0.2);
-				
+
 				Color color = new HSLColor((float) (240d * percent), 100f, 50f).getRGB();
 				colorBuffer.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d);
 			}
