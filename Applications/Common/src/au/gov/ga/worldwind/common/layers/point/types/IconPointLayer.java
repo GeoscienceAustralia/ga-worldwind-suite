@@ -105,7 +105,7 @@ public class IconPointLayer extends IconLayer implements PointLayer, SelectListe
 			pickedIcon = (WWIcon) topPickedObject.getObject();
 			highlight(pickedIcon, true);
 
-			if (e.getEventAction() == SelectEvent.LEFT_PRESS)
+			if (e.getEventAction() == SelectEvent.LEFT_CLICK)
 			{
 				String link = pickedIcon.getStringValue(AVKey.URL);
 				if (link != null)

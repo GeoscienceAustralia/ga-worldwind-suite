@@ -107,7 +107,7 @@ public class AnnotationPointLayer extends AnnotationLayer implements PointLayer,
 			pickedAnnotation = (GlobeAnnotation) topPickedObject.getObject();
 			highlight(pickedAnnotation, true);
 
-			if (e.getEventAction() == SelectEvent.LEFT_PRESS)
+			if (e.getEventAction() == SelectEvent.LEFT_CLICK)
 			{
 				String link = pickedAnnotation.getStringValue(AVKey.URL);
 				if (link != null)
