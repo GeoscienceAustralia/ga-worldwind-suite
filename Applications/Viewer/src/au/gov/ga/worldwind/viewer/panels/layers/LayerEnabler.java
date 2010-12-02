@@ -241,7 +241,7 @@ public class LayerEnabler
 		if (onlyIfModified)
 			Downloader.downloadIfModified(url, handler, handler);
 		else
-			Downloader.download(url, handler, false);
+			Downloader.downloadIgnoreCache(url, handler);
 	}
 
 	private void setError(ILayerNode node, Exception error)
@@ -264,7 +264,7 @@ public class LayerEnabler
 	}
 
 	private synchronized void handleResult(ILayerNode node, RetrievalResult result)
-	{
+	{		
 		if (result.getError() != null)
 		{
 			setLayerLoading(node, false, false);
