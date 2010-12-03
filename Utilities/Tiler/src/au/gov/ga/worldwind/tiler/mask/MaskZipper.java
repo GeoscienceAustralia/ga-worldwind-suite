@@ -13,9 +13,9 @@ public class MaskZipper
 {
 	public static void main(String[] args)
 	{
-		File imageDir = new File("D:/Magmap_images/1_tiles");
-		File maskDir = new File("D:/Magmap_images/1_mask");
-		File outputDir = new File("D:/Magmap_images/2_zipped");
+		File imageDir = new File("D:/Seismic/from gabe/s280_03_depth_interp_tiles");
+		File maskDir = new File("D:/Seismic/from gabe/s280_03_depth_interp_mask");
+		File outputDir = new File("D:/Seismic/from gabe/s280_03_depth_interp");
 		String imageExt = "jpg";
 		String maskExt = "png";
 		String outputExt = "zip";

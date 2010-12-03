@@ -8,7 +8,7 @@ public class Zipper
 {
 	public static void main(String[] args)
 	{
-		File dir = new File("G:/ASEG/Layers/CapelFaust/FaustCapelBasins_geodetic_00025_elevation");
+		File dir = new File("D:/Bathymetry/ausbath09_r3");
 		String ext = "bil";
 		zipAndDelete(dir, ext);
 		//unzipAndDelete(dir);
