@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatasetList>
+
+	<Layer name="Recent Earthquakes (RSS)" url="layers/rss_earthquakes.xml" icon="../../points.png" info="http://www.ga.gov.au/earthquakes/" />
+	<Layer name="Historic Earthquakes (Depth)" url="layers/historic_earthquakes_depth.xml" icon="../../points.png" />
+	<Layer name="Historic Earthquakes (Magnitude)" url="layers/historic_earthquakes_magnitude.xml" icon="../../points.png" />
+	<Layer name="Historic Earthquakes (Date)" url="layers/historic_earthquakes_date.xml" icon="../../points.png" />
+
+</DatasetList>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatasetList>
+
+	<Layer name="MRVBF - topographic gradient" url="layers/MRVBF.xml" icon="../../imagery.png" />
+	<Layer name="MRVBF - topographic gradient (low flat)" url="layers/MRVBF_clipped.xml" icon="../../imagery.png" />
+	<Layer name="Australia hill shading" url="layers/ozhill2.xml" icon="../../imagery.png" />
+	<Layer name="Hill shading (northwest)" url="layers/1sec_sunshade_nw.xml" icon="../../imagery.png" />
+	<Layer name="Hill shading (zenith)" url="layers/1sec_sunshade_zenith.xml" icon="../../imagery.png" />
+	<Layer name="Bathymetry shading (northwest)" url="layers/ausbath09_nw.xml" icon="../../imagery.png" />
+	<!-- <Layer name="Bathymetry shading (zenith)" url="layers/ausbath09_zenith.xml" icon="../../imagery.png" /> -->
+
+</DatasetList>

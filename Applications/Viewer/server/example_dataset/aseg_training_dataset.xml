@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DatasetList>
+
+	<Dataset name="Standard" icon="standard/earth.png" base="true">
+		<Layer name="Earth Digital Elevation Model" url="standard/layers/earth_elevation_model.xml" icon="elevation.png" default="true" />
+		<Layer name="Stars" url="standard/layers/stars.xml" icon="stars.png" default="true" />
+		<Layer name="Sky" url="standard/layers/sky.xml" icon="sky.png" default="true" />
+		<Layer name="Earth Image" url="standard/layers/earth_image.xml" icon="imagery.png" default="true" />
+		<Layer name="Blue Marble" url="standard/layers/blue_marble.xml" icon="imagery.png" default="true" />
+		<Layer name="Landsat" url="standard/layers/landsat.xml" icon="imagery.png" default="true" />
+		<Layer name="Country Boundaries" url="standard/layers/country_boundaries.xml" icon="lines.png" />
+		<Layer name="Metacarta Coastline" url="standard/layers/metacarta_coastline.xml" icon="lines.png" />
+		<Layer name="Metacarta Country Boundaries" url="standard/layers/metacarta_country_boundaries.xml" icon="lines.png" />
+		<Layer name="Metacarta State Boundaries" url="standard/layers/metacarta_state_boundaries.xml" icon="lines.png" />
+		<Layer name="Place Names" url="standard/layers/place_names.xml" icon="text.png" default="true" />
+		<Layer name="Virtual Earth - Aerial" url="standard/layers/virtual_earth_aerial.xml" icon="imagery.png" />
+		<Layer name="Virtual Earth - Roads" url="standard/layers/virtual_earth_roads.xml" icon="imagery.png" />
+		<Layer name="Virtual Earth - Hybrid" url="standard/layers/virtual_earth_hybrid.xml" icon="imagery.png" />
+		<Layer name="Open Street Map - Transparent Mercator" url="standard/layers/osm_mercator_transparent.xml" icon="imagery.png" />
+	</Dataset>
+
+	<Link name="Geoscience Australia" url="ga/dataset.xml" icon="ga/ga.png" info="http://www.ga.gov.au/" base="true" />
+	
+	<Dataset name="ASEG Conference" base="true">
+		<Dataset name="SW Margins">
+			<Layer name="Bathymetry" url="../experimental_dataset/ga/aseg/sw_margins/s2476_swath_002c_elevation.xml" icon="elevation.png" />
+			<Layer name="Bathymetry image" url="../experimental_dataset/ga/aseg/sw_margins/s2476_swath_002c_images.xml" icon="imagery.png" />
+			<Layer name="Gravity" url="../experimental_dataset/ga/aseg/sw_margins/Boug_180_Merge_PreferenceSonne_uc25kmres_geo.xml" icon="imagery.png" />
+			<Layer name="Magnetics" url="../experimental_dataset/ga/aseg/sw_margins/TMI_merge_vrtp_geo.xml" icon="imagery.png" />
+			<Layer name="Seismic line locations" url="../experimental_dataset/ga/aseg/seismic_lines/sw_survey_edit.xml" icon="lines.png" />
+		</Dataset>
+		<Dataset name="Capel Faust">
+			<Layer name="Bathymetry" url="../experimental_dataset/ga/aseg/capel_faust/FaustCapelBasins_geodetic_00025_elevation.xml" icon="elevation.png" />
+			<Layer name="Bathymetry image" url="../experimental_dataset/ga/aseg/capel_faust/FaustCapelBasins_geodetic_00025_images.xml" icon="imagery.png" />
+			<Layer name="Gravity" url="../experimental_dataset/ga/aseg/capel_faust/grv_CAP_levBA2000_20100304.xml" icon="imagery.png" />
+			<Layer name="Magnetics" url="../experimental_dataset/ga/aseg/capel_faust/mag_CAP_Lev_RTP2007_LP15_20100301.xml" icon="imagery.png" />
+			<Layer name="Seismic line locations" url="../experimental_dataset/ga/aseg/seismic_lines/s302_lines.xml" icon="lines.png" />
+		</Dataset>
+		<Dataset name="Marine Boundaries">
+			<Layer name="EEZ" url="../experimental_dataset/ga/aseg/marine_boundaries/eez_limit.xml" icon="lines.png" />
+			<Layer name="ECS" url="../experimental_dataset/ga/aseg/marine_boundaries/ecs.xml" icon="lines.png" />
+		</Dataset>
+	</Dataset>
+
+</DatasetList>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="PointLayer">
+
+	<DisplayName>Volcanoes of the World (Smithsonian)</DisplayName>
+	<Legend></Legend>
+
+	<PointType>Marker</PointType>
+	<URL>smithsonian_volcanoes.zip</URL>
+	<DataFormat>Shapefile</DataFormat>
+
+	<LastUpdate></LastUpdate>
+	<DataCacheName>GA/Volcanoes/smithsonian_volcanoes.zip</DataCacheName>
+
+	<Styles>
+		<Style name="color1" default="true">
+			<Property name="Material" value="128,128,128" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Cone" />
+		</Style>
+		<Style name="color2">
+			<Property name="Material" value="0,0,255" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Cone" />
+		</Style>
+		<Style name="color3">
+			<Property name="Material" value="0,85,255" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Cone" />
+		</Style>
+		<Style name="color4">
+			<Property name="Material" value="0,170,255" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Cone" />
+		</Style>
+		<Style name="color5">
+			<Property name="Material" value="0,255,255" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Cone" />
+		</Style>
+		<Style name="color6">
+			<Property name="Material" value="0,255,128" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Cone" />
+		</Style>
+		<Style name="color7">
+			<Property name="Material" value="0,255,0" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Cone" />
+		</Style>
+		<Style name="color8">
+			<Property name="Material" value="128,255,0" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Cone" />
+		</Style>
+		<Style name="color9">
+			<Property name="Material" value="255,255,0" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Cone" />
+		</Style>
+		<Style name="color10">
+			<Property name="Material" value="255,128,0" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Cone" />
+		</Style>
+		<Style name="color11">
+			<Property name="Material" value="255,0,0" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Cone" />
+		</Style>
+	</Styles>
+
+	<Attributes>
+		<Attribute name="NAME">
+			<Text value="&lt;p&gt; &lt;b&gt;%value%&lt;/b&gt; &lt;/p&gt;" placeholder="%value%" />
+		</Attribute>
+		
+		<Attribute name="STATUS">
+			<Text value="Status: &lt;b&gt;%value%&lt;/b&gt; &lt;br/&gt;" placeholder="%value%" />
+		</Attribute>
+		
+		<Attribute name="TYPE">
+			<Text value="Type: &lt;b&gt;%value%&lt;/b&gt; &lt;br/&gt;" placeholder="%value%" />
+		</Attribute>
+	
+		<Attribute name="TIMEFRAME">
+			<Case value="?" style="color1" />
+			<Case value="U" style="color2" />
+			<Case value="Q" style="color3" />
+			<Case value="D" style="color4" />
+			<Case value="D7" style="color5" />
+			<Case value="D6" style="color6" />
+			<Case value="D5" style="color7" />
+			<Case value="D4" style="color8" />
+			<Case value="D3" style="color9" />
+			<Case value="D2" style="color10" />
+			<Case value="D1" style="color11" />
+
+			<Text value="Timeframe: &lt;b&gt;%value%&lt;/b&gt; &lt;br/&gt;" placeholder="%value%" />
+		</Attribute>
+		
+		<Attribute name="NUMBER">
+			<Link url="http://www.volcano.si.edu/world/volcano.cfm?vnum=%value%" placeholder="%value%" />
+		</Attribute>
+	</Attributes>
+
+</Layer>

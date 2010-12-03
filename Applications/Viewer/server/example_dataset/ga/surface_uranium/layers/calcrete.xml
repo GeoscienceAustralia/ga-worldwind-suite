@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="TiledImageLayer">
+	<DisplayName>Calcrete</DisplayName>
+	<Service serviceName="DelegatorTileService">
+		<URL>http://www.ga.gov.au/apps/world-wind/tiles.jsp</URL>
+	</Service>
+	<!-- day month year hours:minutes:seconds timezone -->
+	<LastUpdate>25 06 2010 00:00:00 GMT</LastUpdate>
+	<DatasetName>surface_uranium/calcrete_raster</DatasetName>
+	<DataCacheName>GA/Surface Uranium/Calcrete Raster</DataCacheName>
+	<ImageFormat>image/png</ImageFormat>
+	<AvailableImageFormats>
+		<ImageFormat>image/png</ImageFormat>
+	</AvailableImageFormats>
+	<FormatSuffix>.png</FormatSuffix>
+	<NumLevels count="9" numEmpty="0" />
+	<TileOrigin>
+		<LatLon units="degrees" latitude="-90" longitude="-180" />
+	</TileOrigin>
+	<LevelZeroTileDelta>
+		<LatLon units="degrees" latitude="36" longitude="36" />
+	</LevelZeroTileDelta>
+	<TileSize>
+		<Dimension width="512" height="512" />
+	</TileSize>
+	<Sector>
+		<SouthWest>
+			<LatLon units="degrees" latitude="-35.5000752778" longitude="111.873001345" />
+		</SouthWest>
+		<NorthEast>
+			<LatLon units="degrees" latitude="-15.0736087372" longitude="142.512701156" />
+		</NorthEast>
+	</Sector>
+	<UseTransparentTextures>true</UseTransparentTextures>
+	<ForceLevelZeroLoads>true</ForceLevelZeroLoads>
+	<RetainLevelZeroTiles>true</RetainLevelZeroTiles>
+	<TextureFormat>image/dds</TextureFormat>
+	<UseMipMaps>true</UseMipMaps>
+	<SplitScale>0.9</SplitScale>
+</Layer>

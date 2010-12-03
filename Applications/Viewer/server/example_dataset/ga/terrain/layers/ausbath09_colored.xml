@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="TiledImageLayer">
+	<DisplayName>ausbath09_r3</DisplayName>
+	<Service serviceName="DelegatorTileService">
+		<URL>http://www.ga.gov.au/apps/world-wind/elev.jsp</URL>
+	</Service>
+	<Delegates>
+		<Delegate>ColorMapReader(Int16,LittleEndian,-32768)</Delegate>
+		<Delegate>ResizeTransformer(128,128)</Delegate>
+	</Delegates>
+	<ColorMap interpolateHue="true">
+		<Entry elevation="-7000" red="128" green="0" blue="128" />
+		<Entry elevation="-4200" red="0" green="128" blue="0" />
+		<Entry elevation="-2500" red="255" green="255" blue="0" />
+		<Entry elevation="0" red="255" green="128" blue="0" />
+		<Entry elevation="6000" red="255" green="0" blue="0" />
+	</ColorMap>
+	<!-- day month year hours:minutes:seconds timezone -->
+	<LastUpdate>23 07 2010 00:00:00 GMT</LastUpdate>
+	<DatasetName>elevation/ausbath09_r3</DatasetName>
+	<DataCacheName>GA/Elevation/ausbath09_r3</DataCacheName>
+	<ImageFormat>application/zip</ImageFormat>
+	<FormatSuffix>.bil</FormatSuffix>
+	<NumLevels count="7" numEmpty="0"/>
+	<TileOrigin>
+		<LatLon units="degrees" latitude="-90" longitude="-180"/>
+	</TileOrigin>
+	<LevelZeroTileDelta>
+		<LatLon units="degrees" latitude="20" longitude="20"/>
+	</LevelZeroTileDelta>
+	<TileSize>
+		<Dimension width="150" height="150"/>
+	</TileSize>
+	<Sector>
+		<SouthWest>
+			<LatLon units="degrees" latitude="-60" longitude="92"/>
+		</SouthWest>
+		<NorthEast>
+			<LatLon units="degrees" latitude="-8" longitude="172"/>
+		</NorthEast>
+	</Sector>
+	
+	<UseTransparentTextures>true</UseTransparentTextures>
+	<ForceLevelZeroLoads>false</ForceLevelZeroLoads>
+	<RetainLevelZeroTiles>true</RetainLevelZeroTiles>
+	<TextureFormat>image/dds</TextureFormat>
+	<UseMipMaps>true</UseMipMaps>
+	<SplitScale>1.4</SplitScale>
+</Layer>

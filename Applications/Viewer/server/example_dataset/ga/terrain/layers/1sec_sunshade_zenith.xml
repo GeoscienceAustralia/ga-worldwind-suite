@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="TiledImageLayer">
+	<DisplayName>1 second Sun Shading (Zenith)</DisplayName>
+	<Service serviceName="DelegatorTileService">
+		<URL>http://www.ga.gov.au/apps/world-wind/tiles.jsp</URL>
+	</Service>
+	<Delegates>
+		<Delegate>MaskReader</Delegate>
+		<Delegate>PassThroughZipRetriever</Delegate>
+		<Delegate>ColorToAlphaTransformer(255,255,255)</Delegate>
+	</Delegates>
+	<!-- day month year hours:minutes:seconds timezone -->
+	<LastUpdate>28 05 2010 00:00:00 GMT</LastUpdate>
+	<DatasetName>terrain/1sec_sunshade_zenith</DatasetName>
+	<DataCacheName>GA/Terrain/1sec_sunshade_zenith</DataCacheName>
+	<ImageFormat>application/zip</ImageFormat>
+	<AvailableImageFormats>
+		<ImageFormat>application/zip</ImageFormat>
+	</AvailableImageFormats>
+	<FormatSuffix>.zip</FormatSuffix>
+	<NumLevels count="9" numEmpty="0" />
+	<TileOrigin>
+		<LatLon units="degrees" latitude="-90" longitude="-180" />
+	</TileOrigin>
+	<LevelZeroTileDelta>
+		<LatLon units="degrees" latitude="36" longitude="36" />
+	</LevelZeroTileDelta>
+	<TileSize>
+		<Dimension width="512" height="512" />
+	</TileSize>
+	<Sector>
+		<SouthWest>
+			<LatLon units="degrees" latitude="-44" longitude="113" />
+		</SouthWest>
+		<NorthEast>
+			<LatLon units="degrees" latitude="-10" longitude="154" />
+		</NorthEast>
+	</Sector>
+	<UseTransparentTextures>true</UseTransparentTextures>
+	<ForceLevelZeroLoads>true</ForceLevelZeroLoads>
+	<RetainLevelZeroTiles>true</RetainLevelZeroTiles>
+	<TextureFormat>image/dds</TextureFormat>
+	<UseMipMaps>true</UseMipMaps>
+	<SplitScale>0.9</SplitScale>
+</Layer>

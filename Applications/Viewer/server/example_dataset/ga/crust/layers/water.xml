@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="CrustLayer">
+
+	<DisplayName></DisplayName>
+	<Legend></Legend>
+	<URL>map2.t1.zip</URL>
+	<Size width="180" height="90" />
+	<Scale>1000</Scale>
+	<Sector>
+		<SouthWest>
+			<LatLon units="degrees" latitude="-89" longitude="1" />
+		</SouthWest>
+		<NorthEast>
+			<LatLon units="degrees" latitude="89" longitude="359" />
+		</NorthEast>
+	</Sector>
+	<Wrap>true</Wrap>
+	
+</Layer>

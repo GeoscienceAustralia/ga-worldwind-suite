@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatasetList>
+
+	<Layer name="Sea Level" url="layers/sea_level.xml" icon="../../model.png" />
+	<Layer name="Water" url="layers/water.xml" icon="../../model.png" />
+	<Layer name="Ice" url="layers/ice.xml" icon="../../model.png" />
+	<Layer name="Soft Sediments" url="layers/soft_sediments.xml" icon="../../model.png" />
+	<Layer name="Hard Sediments" url="layers/hard_sediments.xml" icon="../../model.png" />
+	<Layer name="Upper Crust" url="layers/upper_crust.xml" icon="../../model.png" />
+	<Layer name="Middle Crust" url="layers/middle_crust.xml" icon="../../model.png" />
+	<Layer name="Lower Crust (MOHO)" url="layers/lower_crust.xml" icon="../../model.png" />
+
+</DatasetList>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatasetList>
+
+	<Dataset name="National Datasets" icon="australia.png">
+		<Link name="Radiometric Map" url="radiometric/dataset.xml" icon="radiometric/icon.png" />
+		<Link name="Gravity Anomaly Map" url="gravity/dataset.xml" icon="gravity/icon.png" />
+		<Link name="Magnetic Anomaly Map" url="magnetic/dataset.xml" icon="magnetic/icon.png" />
+		<Link name="Surface-related Uranium" url="surface_uranium/dataset.xml" icon="surface_uranium/icon.png" info="surface_uranium/layers/metadata/info.html" />
+		<!--<Link name="Landcover" url="landcover/dataset.xml" icon="landcover/icon.png" />-->
+		<Link name="Terrain" url="terrain/dataset.xml" icon="terrain/icon.png" />
+		<Link name="Earthquakes" url="earthquakes/dataset.xml" icon="rss.png" />
+		<Dataset name="Volcanoes" icon="volcano.png">
+			<Layer name="Volcanoes of the World (Smithsonian)" url="volcanoes/smithsonian_volcanoes.xml" icon="../points.png" info="http://www.volcano.si.edu/world/" />
+		</Dataset>
+		<Link name="Crustal" url="crust/dataset.xml" icon="crust.png" />
+	</Dataset>
+
+</DatasetList>

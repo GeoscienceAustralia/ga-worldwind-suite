@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="TiledImageLayer">
+	<DisplayName>Radiometrics - Ratio Th-K</DisplayName>
+	<Legend>legends/ratio.jpg</Legend>
+	<Service serviceName="DelegatorTileService">
+		<URL>http://www.ga.gov.au/apps/world-wind/tiles.jsp</URL>
+	</Service>
+	<Delegates>
+		<Delegate>MaskReader</Delegate>
+		<Delegate>PassThroughZipRetriever</Delegate>
+	</Delegates>
+	<!-- day month year hours:minutes:seconds timezone -->
+	<LastUpdate>19 09 2009 04:10:00 GMT</LastUpdate>
+	<DatasetName>radiometrics/edition1/full/ratio_tk</DatasetName>
+	<DataCacheName>GA/Radiometrics/Edition1/Ratio_TK</DataCacheName>
+	<ImageFormat>application/zip</ImageFormat>
+	<AvailableImageFormats>
+		<ImageFormat>application/zip</ImageFormat>
+	</AvailableImageFormats>
+	<FormatSuffix>.zip</FormatSuffix>
+	<NumLevels count="7" numEmpty="0" />
+	<TileOrigin>
+		<LatLon units="degrees" latitude="-90" longitude="-180" />
+	</TileOrigin>
+	<LevelZeroTileDelta>
+		<LatLon units="degrees" latitude="36" longitude="36" />
+	</LevelZeroTileDelta>
+	<TileSize>
+		<Dimension width="512" height="512" />
+	</TileSize>
+	<Sector>
+		<SouthWest>
+			<LatLon units="degrees" latitude="-43.7605" longitude="112.8995" />
+		</SouthWest>
+		<NorthEast>
+			<LatLon units="degrees" latitude="-8.9995" longitude="153.6705" />
+		</NorthEast>
+	</Sector>
+	<UseTransparentTextures>true</UseTransparentTextures>
+	<ForceLevelZeroLoads>true</ForceLevelZeroLoads>
+	<RetainLevelZeroTiles>true</RetainLevelZeroTiles>
+	<TextureFormat>image/dds</TextureFormat>
+	<UseMipMaps>true</UseMipMaps>
+	<SplitScale>0.9</SplitScale>
+</Layer>

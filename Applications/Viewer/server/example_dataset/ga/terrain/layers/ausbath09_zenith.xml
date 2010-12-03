@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="TiledImageLayer">
+	<DisplayName>Bathymetry shading (Zenith)</DisplayName>
+	<Service serviceName="DelegatorTileService">
+		<URL>http://www.ga.gov.au/apps/world-wind/tiles.jsp</URL>
+	</Service>
+	<Delegates>
+		<Delegate>MaskReader</Delegate>
+		<Delegate>PassThroughZipRetriever</Delegate>
+		<Delegate>ColorToAlphaTransformer(255,255,255)</Delegate>
+	</Delegates>
+	<!-- day month year hours:minutes:seconds timezone -->
+	<LastUpdate>28 05 2010 00:00:00 GMT</LastUpdate>
+	<DatasetName>terrain/ausbath09_zenith</DatasetName>
+	<DataCacheName>GA/Terrain/ausbath09_zenith</DataCacheName>
+	<ImageFormat>image/jpg</ImageFormat>
+	<AvailableImageFormats>
+		<ImageFormat>image/jpg</ImageFormat>
+	</AvailableImageFormats>
+	<FormatSuffix>.jpg</FormatSuffix>
+	<NumLevels count="6" numEmpty="0" />
+	<TileOrigin>
+		<LatLon units="degrees" latitude="-90" longitude="-180" />
+	</TileOrigin>
+	<LevelZeroTileDelta>
+		<LatLon units="degrees" latitude="40" longitude="40" />
+	</LevelZeroTileDelta>
+	<TileSize>
+		<Dimension width="512" height="512" />
+	</TileSize>
+	<Sector>
+		<SouthWest>
+			<LatLon units="degrees" latitude="-60" longitude="92" />
+		</SouthWest>
+		<NorthEast>
+			<LatLon units="degrees" latitude="-7.9" longitude="171.9" />
+		</NorthEast>
+	</Sector>
+	<UseTransparentTextures>true</UseTransparentTextures>
+	<ForceLevelZeroLoads>true</ForceLevelZeroLoads>
+	<RetainLevelZeroTiles>true</RetainLevelZeroTiles>
+	<TextureFormat>image/dds</TextureFormat>
+	<UseMipMaps>true</UseMipMaps>
+	<SplitScale>0.9</SplitScale>
+</Layer>

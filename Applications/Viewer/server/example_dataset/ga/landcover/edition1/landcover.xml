@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="TiledImageLayer">
+	<DisplayName>Landcover</DisplayName>
+	<Legend>legend/legend.png</Legend>
+	<Service serviceName="DelegatorTileService">
+		<URL>http://www.ga.gov.au/apps/world-wind/tiles.jsp</URL>
+	</Service>
+	<Delegates>
+		<Delegate>MaskReader</Delegate>
+		<Delegate>PassThroughZipRetriever</Delegate>
+		<Delegate>NearestNeighborTile</Delegate>
+	</Delegates>
+	<!-- day month year hours:minutes:seconds timezone -->
+	<LastUpdate>20 07 2010 00:00:00 GMT</LastUpdate>
+	<DatasetName>landcover/edition1/image/DLCM_RGB</DatasetName>
+	<DataCacheName>GA/Landcover/Edition1/Image/DLCM_RGB</DataCacheName>
+	<ImageFormat>application/zip</ImageFormat>
+	<AvailableImageFormats>
+		<ImageFormat>application/zip</ImageFormat>
+	</AvailableImageFormats>
+	<FormatSuffix>.zip</FormatSuffix>
+	<NumLevels count="6" numEmpty="0" />
+	<TileOrigin>
+		<LatLon units="degrees" latitude="-90" longitude="-180" />
+	</TileOrigin>
+	<LevelZeroTileDelta>
+		<LatLon units="degrees" latitude="38.486016" longitude="38.486016" />
+	</LevelZeroTileDelta>
+	<TileSize>
+		<Dimension width="512" height="512" />
+	</TileSize>
+	<Sector>
+		<SouthWest>
+			<LatLon units="degrees" latitude="-45.0047975" longitude="110" />
+		</SouthWest>
+		<NorthEast>
+			<LatLon units="degrees" latitude="-10" longitude="155.00919" />
+		</NorthEast>
+	</Sector>
+	<UseTransparentTextures>true</UseTransparentTextures>
+	<ForceLevelZeroLoads>true</ForceLevelZeroLoads>
+	<RetainLevelZeroTiles>true</RetainLevelZeroTiles>
+	<UseMipMaps>true</UseMipMaps>
+</Layer>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatasetList>
+
+	<Dataset name="Edition 1" icon="icon.png">
+		<Layer name="Landcover" url="edition1/landcover.xml" icon="../../imagery.png" info="edition1/metadata/info.html" />
+		<Dataset name="Trends" icon="trend.png">
+			<Layer name="Trend in the maximum EVI values" url="edition1/max_trend.xml" icon="../../imagery.png" />
+			<Layer name="Trend in the mean EVI values" url="edition1/mean_trend.xml" icon="../../imagery.png" />
+			<Layer name="Trend in the minimum EVI values" url="edition1/min_trend.xml" icon="../../imagery.png" />
+		</Dataset>
+		<Dataset name="Masks" icon="mask.png">
+			<Layer name="Agricultural Systems mask" url="edition1/agricultural_systems_mask.xml" icon="../../imagery.png" />
+			<Layer name="Forest and Woodland mask" url="edition1/forest_and_woodland_mask.xml" icon="../../imagery.png" />
+			<Layer name="Grassland mask" url="edition1/grassland_mask.xml" icon="../../imagery.png" />
+			<Layer name="Pastures mask" url="edition1/pastures_mask.xml" icon="../../imagery.png" />
+			<Layer name="Shrubland mask" url="edition1/shrubland_mask.xml" icon="../../imagery.png" />
+		</Dataset>
+	</Dataset>
+
+</DatasetList>

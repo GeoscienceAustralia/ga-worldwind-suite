@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DatasetList>
+
+	<Dataset name="Standard" icon="standard/earth.png" base="true">
+		<Layer name="Earth Digital Elevation Model" url="standard/layers/earth_elevation_model.xml" icon="elevation.png" default="true" />
+		<Layer name="Stars" url="standard/layers/stars.xml" icon="stars.png" default="true" />
+		<Layer name="Sky" url="standard/layers/sky.xml" icon="sky.png" default="true" />
+		<Layer name="Fog" url="standard/layers/fog.xml" icon="sky.png" default="true" />
+		<Layer name="Earth Image" url="standard/layers/earth_image.xml" icon="imagery.png" default="true" />
+		<Layer name="Blue Marble" url="standard/layers/blue_marble.xml" icon="imagery.png" default="true" />
+		<Layer name="Landsat" url="standard/layers/landsat.xml" icon="imagery.png" default="true" />
+		<!-- Country boundaries server seems to be down; remove for now -->
+		<!-- <Layer name="Country Boundaries" url="standard/layers/country_boundaries.xml" icon="lines.png" /> -->
+		<Layer name="Metacarta Coastline" url="standard/layers/metacarta_coastline.xml" icon="lines.png" />
+		<Layer name="Metacarta Country Boundaries" url="standard/layers/metacarta_country_boundaries.xml" icon="lines.png" />
+		<Layer name="Metacarta State Boundaries" url="standard/layers/metacarta_state_boundaries.xml" icon="lines.png" />
+		<Layer name="Place Names" url="standard/layers/place_names.xml" icon="text.png" default="true" />
+		<Layer name="Virtual Earth - Aerial" url="standard/layers/virtual_earth_aerial.xml" icon="imagery.png" />
+		<Layer name="Virtual Earth - Roads" url="standard/layers/virtual_earth_roads.xml" icon="imagery.png" />
+		<Layer name="Virtual Earth - Hybrid" url="standard/layers/virtual_earth_hybrid.xml" icon="imagery.png" />
+		<Layer name="Open Street Map - Transparent Mercator" url="standard/layers/osm_mercator_transparent.xml" icon="imagery.png" />
+		<Layer name="Global Elevation Shading (northwest)" url="standard/layers/ShadedEarthElevationModelAsBil16.xml" icon="imagery.png" />
+	</Dataset>
+
+	<Link name="Geoscience Australia" url="ga/dataset.xml" icon="ga/ga.png" info="http://www.ga.gov.au/" base="true" />
+
+</DatasetList>

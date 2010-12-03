@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="HistoricEarthquakesLayer">
+
+	<DisplayName></DisplayName>
+	<Legend></Legend>
+
+	<URL>historic_earthquakes.zip</URL>
+	<Coloring>Depth</Coloring> <!-- Date, Magnitude, Depth -->
+	<!--<ColoringMinDate value="1950-01-01" format="yyyy-MM-dd" />
+	<ColoringMaxDate value="2007-01-01" format="yyyy-MM-dd" />-->
+	<PointSize>2</PointSize>
+
+</Layer>

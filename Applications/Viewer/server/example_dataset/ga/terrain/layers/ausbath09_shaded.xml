@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="TiledImageLayer">
+	<DisplayName>ausbath09_r3 Hill Shaded</DisplayName>
+	<Service serviceName="DelegatorTileService">
+		<URL>http://www.ga.gov.au/apps/world-wind/elev.jsp</URL>
+	</Service>
+	<Delegates>
+		<Delegate>ShadedElevationReader(Int16,LittleEndian,-32768,(-0.7,0.7,-1),10,(-40000,0))</Delegate>
+		<Delegate>ResizeTransformer(128,128)</Delegate>
+		<!-- <Delegate>ColorLimitTransformer(180,180,180)</Delegate> -->
+		<Delegate>ColorToAlphaTransformer(180,180,180)</Delegate>
+	</Delegates>
+	<!-- day month year hours:minutes:seconds timezone -->
+	<LastUpdate>23 07 2010 00:00:00 GMT</LastUpdate>
+	<DatasetName>elevation/ausbath09_r3</DatasetName>
+	<DataCacheName>GA/Elevation/ausbath09_r3</DataCacheName>
+	<ImageFormat>application/zip</ImageFormat>
+	<FormatSuffix>.zip</FormatSuffix>
+	<NumLevels count="7" numEmpty="0"/>
+	<TileOrigin>
+		<LatLon units="degrees" latitude="-90" longitude="-180"/>
+	</TileOrigin>
+	<LevelZeroTileDelta>
+		<LatLon units="degrees" latitude="20" longitude="20"/>
+	</LevelZeroTileDelta>
+	<TileSize>
+		<Dimension width="150" height="150"/>
+	</TileSize>
+	<Sector>
+		<SouthWest>
+			<LatLon units="degrees" latitude="-60" longitude="92"/>
+		</SouthWest>
+		<NorthEast>
+			<LatLon units="degrees" latitude="-8" longitude="172"/>
+		</NorthEast>
+	</Sector>
+	
+	<UseTransparentTextures>true</UseTransparentTextures>
+	<ForceLevelZeroLoads>false</ForceLevelZeroLoads>
+	<RetainLevelZeroTiles>true</RetainLevelZeroTiles>
+	<TextureFormat>image/dds</TextureFormat>
+	<UseMipMaps>true</UseMipMaps>
+	<SplitScale>1.4</SplitScale>
+</Layer>
