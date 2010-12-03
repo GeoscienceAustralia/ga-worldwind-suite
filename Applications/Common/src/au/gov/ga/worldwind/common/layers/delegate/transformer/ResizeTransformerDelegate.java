@@ -35,6 +35,9 @@ public class ResizeTransformerDelegate implements IImageTransformerDelegate
 	@Override
 	public BufferedImage transformImage(BufferedImage image)
 	{
+		if(image.getWidth() == width && image.getHeight() == height)
+			return image;
+		
 		BufferedImage resized = new BufferedImage(width, height, image.getType());
 		Graphics2D g = resized.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
