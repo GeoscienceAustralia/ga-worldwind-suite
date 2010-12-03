@@ -10,6 +10,7 @@ import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.crust.CrustLayer;
 import au.gov.ga.worldwind.common.layers.curtain.BasicTiledCurtainLayer;
 import au.gov.ga.worldwind.common.layers.curtain.delegate.DelegatorTiledCurtainLayer;
 import au.gov.ga.worldwind.common.layers.earthquakes.HistoricEarthquakesLayer;
@@ -52,6 +53,10 @@ public class LayerFactory extends BasicLayerFactory
 		else if("HistoricEarthquakesLayer".equals(layerType))
 		{
 			return new HistoricEarthquakesLayer(domElement, params);
+		}
+		else if("CrustLayer".equals(layerType))
+		{
+			return new CrustLayer(domElement, params);
 		}
 
 		return super.createFromLayerDocument(domElement, params);

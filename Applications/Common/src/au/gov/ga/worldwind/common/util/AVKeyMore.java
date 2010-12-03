@@ -41,4 +41,8 @@ public interface AVKeyMore extends AVKey
 	final static String COLORING_MIN_DATE = "au.gov.ga.worldwind.AVKeyMore.ColoringMinDate";
 	final static String COLORING_MAX_DATE = "au.gov.ga.worldwind.AVKeyMore.ColoringMaxDate";
 	final static String POINT_SIZE = "au.gov.ga.worldwind.AVKeyMore.PointSize";
+	
+	//crust layer
+	final static String SCALE = "au.gov.ga.worldwind.AVKeyMore.Scale";
+	final static String WRAP = "au.gov.ga.worldwind.AVKeyMore.WRAP";
 }
