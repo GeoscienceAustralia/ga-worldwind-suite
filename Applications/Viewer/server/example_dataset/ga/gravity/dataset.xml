@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<DatasetList>
-
-	<Layer name="Gravity - 3rd Edition" url="edition3/gravity.xml" icon="../../imagery.png" info="edition3/metadata/info.html" />
-
-</DatasetList>

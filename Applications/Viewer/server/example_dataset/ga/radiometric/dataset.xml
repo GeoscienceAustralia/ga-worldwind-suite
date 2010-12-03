@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<DatasetList>
-
-	<Link name="2nd Edition" url="edition2/dataset.xml" icon="icon.png" info="edition2/layers/metadata/info.html" />
-
-</DatasetList>

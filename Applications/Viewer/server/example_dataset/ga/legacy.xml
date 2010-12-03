@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<DatasetList>
-
-	<Dataset name="National Datasets" icon="australia.png">
-		<Link name="Radiometric Map" url="radiometric/legacy.xml" icon="radiometric/icon.png" />
-		<Link name="Magnetic Anomaly Map" url="magnetic/legacy.xml" icon="magnetic/icon.png" />
-	</Dataset>
-
-</DatasetList>
