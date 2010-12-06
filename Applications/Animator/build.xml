@@ -64,6 +64,7 @@
 		<delete dir="${test_build_dir}" />
 		<delete dir="${test_results_dir}" />
 		<delete dir="${test_reports_dir}" />
+		<delete dir="${working_src_dir}" />
 	</target>
 
 	<target name="build">

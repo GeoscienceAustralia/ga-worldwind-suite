@@ -29,4 +29,6 @@ public class WmsBrowserMessageConstants extends CommonMessageConstants
 	public static String getLayerDefinitionAlreadyExistsMessageKey() { return "wmsbrowser.layerinfo.overwritelayer.message"; }
 	public static String getLayerDefinitionAlreadyExistsTitleKey() { return "wmsbrowser.layerinfo.overwritelayer.title"; }
 	public static String getWmsExportedLayerCreationCommentKey() { return "wmsbrowser.exportedlayer.generationcomment"; }
+	public static String getSelectAllLabelKey() { return "wmsbrowser.searchwms.selectall.label"; }
+	public static String getDeselectAllLabelKey() { return "wmsbrowser.searchwms.deselectall.label"; }
 }
