@@ -16,6 +16,7 @@
 	
 	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />	
 	<property name="common_src_dir" value="${basedir}/../Common/src" />
+	<property name="common_test_src_dir" value="${basedir}/../Common/test/src" />
 	
 	<property name="src_dir" value="${basedir}/src" />
 	<property name="working_src_dir" value="${basedir}/tmp_src" />
@@ -88,13 +89,23 @@
 	</target>
 
 	<target name="build-test" depends="build">
+		<mkdir dir="${working_src_dir}" />
+		<copy todir="${working_src_dir}">
+			<fileset dir="${common_test_src_dir}"/>
+		</copy>
+		<copy todir="${working_src_dir}" overwrite="true">
+			<fileset dir="${test_src_dir}"/>
+		</copy>
+		
 		<mkdir dir="${test_build_dir}"/>
 		<copy todir="${test_build_dir}">
-			<fileset dir="${test_src_dir}">
+			<fileset dir="${working_src_dir}">
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javac source="1.6" target="1.6" srcdir="${test_src_dir}" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}" />
+		<javac source="1.6" target="1.6" srcdir="${working_src_dir}" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}" />
+		
+		<delete dir="${working_src_dir}" />
 	</target>
 	
 	<target name="test" description="Execute unit tests on the project" depends="build-test">
