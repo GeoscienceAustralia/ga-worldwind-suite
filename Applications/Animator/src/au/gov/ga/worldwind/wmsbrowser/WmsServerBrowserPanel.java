@@ -27,6 +27,7 @@ import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.wmsbrowser.search.CSWSearchService;
 import au.gov.ga.worldwind.wmsbrowser.search.ChainingSearchService;
+import au.gov.ga.worldwind.wmsbrowser.search.CompoundSearchService;
 import au.gov.ga.worldwind.wmsbrowser.search.DirectUrlSearchService;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerIdentifier;
@@ -123,15 +124,14 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 	{
 		ChainingSearchService searchService = new ChainingSearchService();
 		searchService.addService(new DirectUrlSearchService());
-		try
+		
+		CompoundSearchService cswCatalogueSearchService = new CompoundSearchService();
+		for (URL cswCatalogueUrl : WmsBrowserSettings.get().getCswCatalogueServers())
 		{
-			searchService.addService(new CSWSearchService(new URL("http://catalog.geodata.gov/geoportal/csw/discovery?")));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
+			cswCatalogueSearchService.addService(new CSWSearchService(cswCatalogueUrl));
 		}
 		
+		searchService.addService(cswCatalogueSearchService);
 		searchServerDialog = new SearchWmsServerDialog(searchService);
 	}
 	

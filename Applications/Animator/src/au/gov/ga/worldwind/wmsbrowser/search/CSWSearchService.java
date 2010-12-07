@@ -81,6 +81,10 @@ public class CSWSearchService implements WmsServerSearchService
 	private List<WmsServerSearchResult> createWmsServerList(RecordList recordList)
 	{
 		List<WmsServerSearchResult> result = new ArrayList<WmsServerSearchResult>();
+		if (recordList == null || recordList.getRecords() == null)
+		{
+			return result;
+		}
 		for (Record cswRecord : recordList.getRecords())
 		{
 			// If there is no capabilities URL, move on

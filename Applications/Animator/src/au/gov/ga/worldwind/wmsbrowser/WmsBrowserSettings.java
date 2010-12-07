@@ -60,6 +60,7 @@ public class WmsBrowserSettings
 			saveSplitLocation(rootElement);
 			saveWindowSize(rootElement);
 			saveWmsServerLocations(rootElement);
+			saveCswCatalogueServers(rootElement);
 			
 			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(Util.getUserGAWorldWindDirectory(), SETTINGS_FILE_NAME)));
 		}
@@ -95,6 +96,19 @@ public class WmsBrowserSettings
 		}
 	}
 	
+	private static void saveCswCatalogueServers(Element rootElement)
+	{
+		Element cswCataloguesContainer = WWXML.appendElement(rootElement, "cswCatalogues");
+		List<URL> servers = instance.getCswCatalogueServers();
+		for (int i = 0; i < servers.size(); i++)
+		{
+			Element layerElement = WWXML.appendElement(cswCataloguesContainer, "server");
+			WWXML.setIntegerAttribute(layerElement, "index", i);
+			WWXML.setTextAttribute(layerElement, "url", servers.get(i).toExternalForm());
+		}
+	}
+	
+	
 	private static void loadSettings()
 	{
 		instance = new WmsBrowserSettings();
@@ -114,6 +128,7 @@ public class WmsBrowserSettings
 		loadSplitLocation(rootElement, xpath);
 		loadWindowSize(rootElement, xpath);
 		loadWmsServerLocations(rootElement, xpath);
+		loadCswCatalogueServers(rootElement, xpath);
 	}
 	
 	private static void loadSplitLocation(Element rootElement, XPath xpath)
@@ -158,6 +173,28 @@ public class WmsBrowserSettings
 		}
 	}
 
+	private static void loadCswCatalogueServers(Element rootElement, XPath xpath)
+	{
+		List<URL> servers = new ArrayList<URL>();
+		Integer serverCount = WWXML.getInteger(rootElement, "count(//cswCatalogues/server)", null);
+		for (int i = 0; i < serverCount; i++)
+		{
+			String serverLocation = WWXML.getText(rootElement, "//cswCatalogues/server[@index='" + i + "']/@url");
+			if (!isBlank(serverLocation))
+			{
+				URL url = toUrl(serverLocation);
+				if (url != null)
+				{
+					servers.add(url);
+				}
+			}
+		}
+		if (!servers.isEmpty())
+		{
+			instance.setCswCatalogueServers(servers);
+		}
+	}
+	
 	private static URL toUrl(String serverLocation)
 	{
 		try
@@ -181,6 +218,8 @@ public class WmsBrowserSettings
 	
 	private List<WmsServerIdentifier> wmsServers;
 	
+	private List<URL> cswCatalogueServers;
+	
 	/**
 	 * Private constructor. Obtain a {@link WmsBrowserSettings} instance using the static {@link #get()} method.
 	 */
@@ -193,13 +232,16 @@ public class WmsBrowserSettings
 					new WmsServerIdentifierImpl("Geoscience Australia Map Connect (1:250k)", new URL("http://mapconnect.ga.gov.au/wmsconnector/com.esri.wms.Esrimap?Version=1.1.1&Request=getcapabilities&Service=WMS&Servicename=GDA94_MapConnect_SDE_250kmap_WMS&")),
 					new WmsServerIdentifierImpl("NASA Earth Observations", new URL("http://neowms.sci.gsfc.nasa.gov/wms/wms")),
 			}));
+			
+			cswCatalogueServers = new ArrayList<URL>(Arrays.asList(new URL[]{
+				new URL("http://catalog.geodata.gov/geoportal/csw/discovery?"),	
+			}));
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 	}
-	
 	
 	public int getSplitLocation()
 	{
@@ -228,6 +270,25 @@ public class WmsBrowserSettings
 	public void setWmsServers(List<WmsServerIdentifier> identifiers)
 	{
 		this.wmsServers = identifiers;
+	}
+	
+	public List<URL> getCswCatalogueServers()
+	{
+		return cswCatalogueServers;
+	}
+	
+	public void addCswCatalogueServer(URL serverUrl)
+	{
+		if (serverUrl == null || cswCatalogueServers.contains(serverUrl))
+		{
+			return;
+		}
+		cswCatalogueServers.add(serverUrl);
+	}
+	
+	public void setCswCatalogueServers(List<URL> cswCatalogueServers)
+	{
+		this.cswCatalogueServers = cswCatalogueServers;
 	}
 	
 	public Dimension getWindowDimension()

@@ -42,6 +42,7 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.common.ui.BasicAction;
@@ -78,7 +79,6 @@ public class SearchWmsServerDialog extends JDialog
 	private JButton searchButton;
 	private BasicAction searchAction;
 	private BasicAction cancelSearchAction;
-	private BasicAction clearResultsAction;
 	private SearchTask currentSearch;
 	private ExecutorService searcher = Executors.newSingleThreadExecutor(new DaemonThreadFactory("Master WMS search thread"));
 	private JComponent searchingIndicator;
@@ -96,6 +96,7 @@ public class SearchWmsServerDialog extends JDialog
 	private BasicAction cancelAction;
 	private BasicAction selectAllAction;
 	private BasicAction deselectAllAction;
+	private BasicAction editCatalogueListAction;
 	private int response = JOptionPane.CANCEL_OPTION;
 	private JScrollPane resultScroller;
 	
@@ -107,9 +108,10 @@ public class SearchWmsServerDialog extends JDialog
 		initialiseDialog();
 		initialiseActions();
 		initialiseSearchingIndicator();
-		addSearchBar();
-		addResultsPanel();
-		addButtonPanel();
+		addBlurb(0);
+		addSearchBar(1);
+		addResultsPanel(2);
+		addButtonPanel(3);
 		
 		addComponentListener(new ComponentAdapter()
 		{
@@ -138,6 +140,7 @@ public class SearchWmsServerDialog extends JDialog
 	private void initialiseActions()
 	{
 		searchAction = new BasicAction(getMessage(getSearchWmsSearchButtonLabelKey()), Icons.search.getIcon());
+		searchAction.setToolTipText(getMessage(getSearchWmsSearchButtonTooltipKey()));
 		searchAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -148,6 +151,7 @@ public class SearchWmsServerDialog extends JDialog
 		});
 		
 		cancelSearchAction = new BasicAction(getMessage(getSearchWmsCancelSearchButtonLabelKey()), Icons.remove.getIcon());
+		cancelSearchAction.setToolTipText(getMessage(getSearchWmsCancelSearchButtonTooltipKey()));
 		cancelSearchAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -182,7 +186,8 @@ public class SearchWmsServerDialog extends JDialog
 			}
 		});
 		
-		selectAllAction = new BasicAction(getMessage(getSelectAllLabelKey()), Icons.checkall.getIcon());
+		selectAllAction = new BasicAction(getMessage(getSearchWmsSelectAllLabelKey()), Icons.checkall.getIcon());
+		selectAllAction.setToolTipText(getMessage(getSearchWmsSelectAllTooltipKey()));
 		selectAllAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -196,17 +201,52 @@ public class SearchWmsServerDialog extends JDialog
 					{
 						result.select();
 					}
-					validate();
-					repaint();
 				}
 				finally
 				{
 					searchResultsLock.writeLock().unlock();
 				}
+				validate();
+				repaint();
 			}
 		});
 		
-		deselectAllAction = new BasicAction(getMessage(getDeselectAllLabelKey()), Icons.uncheckall.getIcon());
+		deselectAllAction = new BasicAction(getMessage(getSearchWmsDeselectAllLabelKey()), Icons.uncheckall.getIcon());
+		deselectAllAction.setToolTipText(getMessage(getSearchWmsDeselectAllTooltipKey()));
+		deselectAllAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				searchResultsLock.writeLock().lock();
+				try
+				{
+					selectedResults.clear();
+					for (SearchResultPanel result : searchResultPanels)
+					{
+						result.deselect();
+					}
+				}
+				finally
+				{
+					searchResultsLock.writeLock().unlock();
+				}
+				validate();
+				repaint();
+			}
+		});
+		
+		editCatalogueListAction = new BasicAction(getMessage(getSearchWmsEditCswListLabelKey()), null);
+		editCatalogueListAction.setToolTipText(getMessage(getSearchWmsEditCswListTooltipKey()));
+		editCatalogueListAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 	
 	private void initialiseSearchingIndicator()
@@ -220,8 +260,24 @@ public class SearchWmsServerDialog extends JDialog
 		searchingIndicator.add(new JLabel(getMessage(getSearchWmsSearchingMsgKey()), Icons.newLoadingIcon(), SwingConstants.CENTER));
 		searchingIndicator.add(cancelSearchButton);
 	}
+
+	private void addBlurb(int verticalOrder)
+	{
+		JLabel blurb = new JLabel(getMessage(getSearchWmsBlurbKey()));
+		blurb.setBorder(new EmptyBorder(10, 30, 10, 0));
+		
+		GridBagConstraints containerConstraints = new GridBagConstraints();
+		containerConstraints.gridy = verticalOrder;
+		containerConstraints.gridx = 0;
+		containerConstraints.weighty = 0;
+		containerConstraints.anchor = GridBagConstraints.NORTH;
+		containerConstraints.fill = GridBagConstraints.HORIZONTAL;
+		containerConstraints.ipady = 10;
+		containerConstraints.ipadx = 20;
+		contentPane.add(blurb, containerConstraints);
+	}
 	
-	private void addSearchBar()
+	private void addSearchBar(int verticalOrder)
 	{
 		Container container = new JPanel();
 		container.setLayout(new GridBagLayout());
@@ -247,7 +303,7 @@ public class SearchWmsServerDialog extends JDialog
 		container.add(searchButton, searchButtonConstraints);
 		
 		GridBagConstraints containerConstraints = new GridBagConstraints();
-		containerConstraints.gridy = 0;
+		containerConstraints.gridy = verticalOrder;
 		containerConstraints.gridx = 0;
 		containerConstraints.weighty = 0;
 		containerConstraints.anchor = GridBagConstraints.NORTH;
@@ -256,7 +312,7 @@ public class SearchWmsServerDialog extends JDialog
 		contentPane.add(container, containerConstraints);
 	}
 
-	private void addResultsPanel()
+	private void addResultsPanel(int verticalOrder)
 	{
 		resultsPanel = new JPanel();
 		resultsPanel.setLayout(new GridBagLayout());
@@ -266,7 +322,7 @@ public class SearchWmsServerDialog extends JDialog
 		resultScroller.setOpaque(false);
 		
 		GridBagConstraints containerConstraints = new GridBagConstraints();
-		containerConstraints.gridy = 1;
+		containerConstraints.gridy = verticalOrder;
 		containerConstraints.gridx = 0;
 		containerConstraints.weighty = 1;
 		containerConstraints.weightx = 1;
@@ -278,7 +334,7 @@ public class SearchWmsServerDialog extends JDialog
 		updateSearchResultsPanel();
 	}
 	
-	private void addButtonPanel()
+	private void addButtonPanel(int verticalOrder)
 	{
 		JToolBar utilityPanel = new JToolBar();
 
@@ -286,6 +342,9 @@ public class SearchWmsServerDialog extends JDialog
 		utilityPanel.setRollover(true);
 		utilityPanel.add(selectAllAction);
 		utilityPanel.add(deselectAllAction);
+		
+		JButton catalogueButton = utilityPanel.add(editCatalogueListAction);
+		catalogueButton.setContentAreaFilled(false);
 		
 		utilityPanel.add(Box.createHorizontalGlue());
 		
@@ -299,7 +358,7 @@ public class SearchWmsServerDialog extends JDialog
 		utilityPanel.add(okCancelPanel);
 		
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.gridy = 2;
+		constraints.gridy = verticalOrder;
 		constraints.gridx = 0;
 		constraints.weighty = 0;
 		constraints.weightx = 0;
@@ -335,8 +394,10 @@ public class SearchWmsServerDialog extends JDialog
 					constraints.gridy = 0;
 					constraints.ipady = 10;
 					constraints.fill = GridBagConstraints.HORIZONTAL;
+					constraints.weightx = 1;
 					for (WmsServerSearchResult searchResult : searchResults)
 					{
+						constraints.gridx = 0;
 						SearchResultPanel searchResultPanel = new SearchResultPanel(searchResult);
 						searchResultPanel.setBackground(constraints.gridy % 2 == 0 ? STRIPE_EVEN : STRIPE_ODD);
 						resultsPanel.add(searchResultPanel, constraints);
@@ -347,7 +408,6 @@ public class SearchWmsServerDialog extends JDialog
 					constraints.weighty = 1;
 					constraints.fill = GridBagConstraints.BOTH;
 					resultsPanel.add(Box.createVerticalGlue(), constraints);
-					resultScroller.getVerticalScrollBar().setValue(0);
 					
 					validate();
 					repaint();
@@ -586,18 +646,6 @@ public class SearchWmsServerDialog extends JDialog
 
 		private JCheckBox selector;
 
-		public void select()
-		{
-			selector.setSelected(true);
-			SearchWmsServerDialog.this.select(searchResult.getWmsServer());
-		}
-		
-		public void deselect()
-		{
-			selector.setSelected(false);
-			SearchWmsServerDialog.this.deselect(searchResult.getWmsServer());
-		}
-		
 		public SearchResultPanel(WmsServerSearchResult searchResult)
 		{
 			Validate.notNull(searchResult, "A server is required");
@@ -613,6 +661,18 @@ public class SearchWmsServerDialog extends JDialog
 			addSelector();
 		}
 
+		public void select()
+		{
+			selector.setSelected(true);
+			SearchWmsServerDialog.this.select(searchResult.getWmsServer());
+		}
+		
+		public void deselect()
+		{
+			selector.setSelected(false);
+			SearchWmsServerDialog.this.deselect(searchResult.getWmsServer());
+		}
+		
 		private void addHeading()
 		{
 			SelectableLabel headingLabel = new SelectableLabel(searchResult.getTitle());
@@ -655,7 +715,6 @@ public class SearchWmsServerDialog extends JDialog
 			constraints.weightx = 1;
 			constraints.weighty = 1;
 			add(abstractLabel, constraints);
-			
 		}
 
 		private void addPublisher()
