@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.panels.layerpalette;
+package au.gov.ga.worldwind.common.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +48,7 @@ public class ListBackedModel<T> extends AbstractListModel implements List<T>
 		boolean elementRemoved = backingList.remove(object);
 		if (elementRemoved)
 		{
-			fireIntervalRemoved(this,  backingList.size(),  backingList.size() - 1);
+			fireIntervalRemoved(this,  backingList.size(),  Math.max(0, backingList.size() - 1));
 		}
 		
 		return elementRemoved;

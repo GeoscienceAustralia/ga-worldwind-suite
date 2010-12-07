@@ -8,7 +8,6 @@ import gov.nasa.worldwindow.core.WMSLayerInfo;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +24,6 @@ import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.wmsbrowser.search.CSWSearchService;
-import au.gov.ga.worldwind.wmsbrowser.search.ChainingSearchService;
-import au.gov.ga.worldwind.wmsbrowser.search.CompoundSearchService;
-import au.gov.ga.worldwind.wmsbrowser.search.DirectUrlSearchService;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerIdentifier;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerImpl;
@@ -122,17 +117,7 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 
 	private void initialiseSearchDialog()
 	{
-		ChainingSearchService searchService = new ChainingSearchService();
-		searchService.addService(new DirectUrlSearchService());
-		
-		CompoundSearchService cswCatalogueSearchService = new CompoundSearchService();
-		for (URL cswCatalogueUrl : WmsBrowserSettings.get().getCswCatalogueServers())
-		{
-			cswCatalogueSearchService.addService(new CSWSearchService(cswCatalogueUrl));
-		}
-		
-		searchService.addService(cswCatalogueSearchService);
-		searchServerDialog = new SearchWmsServerDialog(searchService);
+		searchServerDialog = new SearchWmsServerDialog();
 	}
 	
 	private void packComponents()

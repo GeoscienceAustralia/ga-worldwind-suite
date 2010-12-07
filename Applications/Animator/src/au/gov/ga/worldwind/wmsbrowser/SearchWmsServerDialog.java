@@ -18,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -42,7 +43,9 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.common.ui.BasicAction;
@@ -53,6 +56,10 @@ import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
+import au.gov.ga.worldwind.wmsbrowser.search.CSWSearchService;
+import au.gov.ga.worldwind.wmsbrowser.search.ChainingSearchService;
+import au.gov.ga.worldwind.wmsbrowser.search.CompoundSearchService;
+import au.gov.ga.worldwind.wmsbrowser.search.DirectUrlSearchService;
 import au.gov.ga.worldwind.wmsbrowser.search.WmsServerSearchResult;
 import au.gov.ga.worldwind.wmsbrowser.search.WmsServerSearchService;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
@@ -62,13 +69,13 @@ import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
  */
 public class SearchWmsServerDialog extends JDialog
 {
-	private static final Color STRIPE_EVEN = Color.WHITE;
-	private static final Color STRIPE_ODD = Color.LIGHT_GRAY;
-	
-	private static final Dimension PREFERRED_SIZE = new Dimension(800, 600);
 	private static final long serialVersionUID = 20101124L;
 	
-	private static Logger logger = Logging.logger();
+	private static final Color STRIPE_EVEN = Color.WHITE;
+	private static final Color STRIPE_ODD = Color.LIGHT_GRAY;
+	private static final Dimension PREFERRED_SIZE = new Dimension(800, 600);
+
+	private static final Logger logger = Logging.logger();
 	
 	private WmsServerSearchService searchService;
 	
@@ -96,6 +103,7 @@ public class SearchWmsServerDialog extends JDialog
 	private BasicAction cancelAction;
 	private BasicAction selectAllAction;
 	private BasicAction deselectAllAction;
+	private boolean catalogueEditAllowed = true; // Catalogue edit only permitted when using the default search service
 	private BasicAction editCatalogueListAction;
 	private int response = JOptionPane.CANCEL_OPTION;
 	private JScrollPane resultScroller;
@@ -104,7 +112,22 @@ public class SearchWmsServerDialog extends JDialog
 	{
 		Validate.notNull(searchService, "A search service is required");
 		this.searchService = searchService;
-		
+		catalogueEditAllowed = false;
+		init();
+	}
+
+	public SearchWmsServerDialog()
+	{
+		this.searchService = createDefaultSearchService();
+		catalogueEditAllowed = true;
+		init();
+	}
+	
+	/**
+	 * Perform common initialisation
+	 */
+	private void init()
+	{
 		initialiseDialog();
 		initialiseActions();
 		initialiseSearchingIndicator();
@@ -123,7 +146,7 @@ public class SearchWmsServerDialog extends JDialog
 			}
 		});
 	}
-
+	
 	private void initialiseDialog()
 	{
 		setModal(true);
@@ -243,8 +266,24 @@ public class SearchWmsServerDialog extends JDialog
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				// TODO Auto-generated method stub
+				// Cancel any current search
+				if (currentSearch != null)
+				{
+					currentSearch.cancel();
+				}
 				
+				// Show the CSW dialog
+				CswCatalogueListDialog catalogueDialog = new CswCatalogueListDialog();
+				catalogueDialog.setVisible(true);
+				
+				int response = catalogueDialog.getResponse();
+				if (response == JOptionPane.CANCEL_OPTION)
+				{
+					return;
+				}
+				
+				// Update the search service
+				searchService = createDefaultSearchService();
 			}
 		});
 	}
@@ -263,8 +302,8 @@ public class SearchWmsServerDialog extends JDialog
 
 	private void addBlurb(int verticalOrder)
 	{
-		JLabel blurb = new JLabel(getMessage(getSearchWmsBlurbKey()));
-		blurb.setBorder(new EmptyBorder(10, 30, 10, 0));
+		JLabel blurb = new JLabel(getMessage(getSearchWmsBlurbKey(), getMessage(getSearchWmsTitleKey()), getMessage(getSearchWmsEditCswListLabelKey())));
+		blurb.setBorder(new CompoundBorder(LineBorder.createGrayLineBorder(), new EmptyBorder(10, 30, 10, 0)));
 		
 		GridBagConstraints containerConstraints = new GridBagConstraints();
 		containerConstraints.gridy = verticalOrder;
@@ -343,8 +382,11 @@ public class SearchWmsServerDialog extends JDialog
 		utilityPanel.add(selectAllAction);
 		utilityPanel.add(deselectAllAction);
 		
-		JButton catalogueButton = utilityPanel.add(editCatalogueListAction);
-		catalogueButton.setContentAreaFilled(false);
+		if (catalogueEditAllowed)
+		{
+			JButton catalogueButton = utilityPanel.add(editCatalogueListAction);
+			catalogueButton.setContentAreaFilled(false);
+		}
 		
 		utilityPanel.add(Box.createHorizontalGlue());
 		
@@ -365,6 +407,24 @@ public class SearchWmsServerDialog extends JDialog
 		constraints.anchor = GridBagConstraints.BASELINE_TRAILING;
 		constraints.fill = GridBagConstraints.BOTH;
 		contentPane.add(utilityPanel, constraints);
+	}
+	
+	/**
+	 * @return A default search service that first attempts direct URL lookup, then CSW catalogue searching
+	 */
+	private WmsServerSearchService createDefaultSearchService()
+	{
+		ChainingSearchService searchService = new ChainingSearchService();
+		searchService.addService(new DirectUrlSearchService());
+		
+		CompoundSearchService cswCatalogueSearchService = new CompoundSearchService();
+		for (URL cswCatalogueUrl : WmsBrowserSettings.get().getCswCatalogueServers())
+		{
+			cswCatalogueSearchService.addService(new CSWSearchService(cswCatalogueUrl));
+		}
+		searchService.addService(cswCatalogueSearchService);
+		
+		return searchService;
 	}
 	
 	private void updateSearchResultsPanel()

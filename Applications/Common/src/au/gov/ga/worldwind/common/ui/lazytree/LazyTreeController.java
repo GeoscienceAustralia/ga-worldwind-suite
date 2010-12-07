@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.common.ui.lazytree;
 
+import java.util.concurrent.ExecutionException;
+
 import javax.swing.SwingWorker;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
@@ -72,6 +74,10 @@ public class LazyTreeController implements TreeWillExpandListener
 		if (e instanceof LazyLoadException)
 		{
 			text = e.getMessage();
+		}
+		else if (e instanceof ExecutionException && e.getCause() instanceof LazyLoadException)
+		{
+			text = e.getCause().getMessage();
 		}
 		else
 		{

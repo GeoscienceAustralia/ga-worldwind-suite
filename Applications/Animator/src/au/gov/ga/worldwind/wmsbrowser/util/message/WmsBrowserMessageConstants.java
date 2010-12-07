@@ -38,4 +38,20 @@ public class WmsBrowserMessageConstants extends CommonMessageConstants
 	public static String getSearchWmsBlurbKey() { return "wmsbrowser.searchwms.blurb"; }
 	public static String getSearchWmsEditCswListLabelKey() { return "wmsbrowser.searchwms.editcswlist.label"; }
 	public static String getSearchWmsEditCswListTooltipKey() { return "wmsbrowser.searchwms.editcswlist.tooltip"; }
+	public static String getEditCswTitleKey() { return "wmsbrowser.editcsw.title"; }
+	public static String getEditCswBlurbKey() { return "wmsbrowser.editcsw.blurb"; }
+	public static String getEditCswAddCatalogueLabelKey() { return "wmsbrowser.editcsw.addcatalogue.label"; }
+	public static String getEditCswAddCatalogueTooltipKey() { return "wmsbrowser.editcsw.addcatalogue.tooltip"; }
+	public static String getEditCswRemoveCatalogueLabelKey() { return "wmsbrowser.editcsw.removecatalogue.label"; }
+	public static String getEditCswRemoveCatalogueTooltipKey() { return "wmsbrowser.editcsw.removecatalogue.label"; }
+	public static String getEditCswCatalogueEntryBoxMsgKey() { return "wmsbrowser.editcsw.catalogueentry.message"; }
+	public static String getEditCswInvalidUrlMsgKey() { return "wmsbrowser.editcsw.invalidurl.message"; }
+	public static String getEditCswInvalidUrlTitleKey() { return "wmsbrowser.editcsw.invalidurl.title"; }
+	public static String getEditCswDuplicateUrlMsgKey() { return "wmsbrowser.editcsw.duplicateurl.message"; }
+	public static String getEditCswDuplicateUrlTitleKey() { return "wmsbrowser.editcsw.duplicateurl.title"; }
+	
+	public static String getServerNotReachableErrorMsgKey() { return "wmsbrowser.error.servernotreachable.message"; }
+	public static String getServerReturnedInvalidErrorMsgKey() { return "wmsbrowser.error.invalidcapabilities.message"; }
+	public static String getDefaultWmsLoadingErrorMsgKey() { return "wmsbrowser.error.default.message"; }
+	public static String getDefaultWmsLoadingErrorPrefixKey() { return "wmsbrowser.error.default.prefix"; }
 }
