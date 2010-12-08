@@ -1,13 +1,14 @@
 package au.gov.ga.worldwind.wmsbrowser;
 
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
-import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getAddServerMenuLabelKey;
-import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getServerBrowserPanelTitleKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.*;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.SwingUtil;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTree;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
@@ -43,6 +45,7 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 	
 	private JToolBar toolbar;
 	private BasicAction addServerAction;
+	private BasicAction removeServerAction;
 	
 	private List<LayerInfoSelectionListener> layerSelectionListeners = new ArrayList<LayerInfoSelectionListener>();
 	
@@ -54,6 +57,16 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		initialiseToolbar();
 		initialiseSearchDialog();
 		packComponents();
+		
+		updateActionsEnabledStatus();
+		addComponentListener(new ComponentAdapter()
+		{
+			@Override
+			public void componentShown(ComponentEvent e)
+			{
+				updateActionsEnabledStatus();
+			}
+		});
 	}
 
 	private void initialiseServerTree()
@@ -62,6 +75,14 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		
 		serverTree = new WmsServerTree(treeModel);
 		serverTree.addTreeSelectionListener(new LayerSelectionListener());
+		serverTree.addTreeSelectionListener(new TreeSelectionListener()
+		{
+			@Override
+			public void valueChanged(TreeSelectionEvent e)
+			{
+				updateActionsEnabledStatus();
+			}
+		});
 		
 		addKnownServersToTree();
 		
@@ -94,13 +115,15 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		initialiseActions();
 		
 		toolbar = new JToolBar();
+		toolbar.setFloatable(false);
 		toolbar.add(addServerAction);
+		toolbar.add(removeServerAction);
 	}
-
 	
 	private void initialiseActions()
 	{
 		addServerAction = new BasicAction(getMessage(getAddServerMenuLabelKey()), Icons.add.getIcon());
+		addServerAction.setToolTipText(getMessage(getAddServerMenuTooltipKey()));
 		addServerAction.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e)
@@ -110,7 +133,51 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 				{
 					treeModel.addServers(searchServerDialog.getSelectedServers());
 					serverTree.validate();
+					updateKnownServersInSettings();
 				}
+			}
+		});
+		
+		removeServerAction = new BasicAction(getMessage(getDeleteServerMenuLabelKey()), Icons.delete.getIcon());
+		removeServerAction.setToolTipText(getMessage(getDeleteServerMenuTooltipKey()));
+		removeServerAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				Object selectedObject = getSelectedUserObject();
+				if (!(selectedObject instanceof WmsServer))
+				{
+					return;
+				}
+				
+				treeModel.removeServer((WmsServer)selectedObject);
+				serverTree.revalidate();
+				updateKnownServersInSettings();
+			}
+		});
+		
+	}
+	
+	private void updateKnownServersInSettings()
+	{
+		List<WmsServerIdentifier> serverIdentifiers = new ArrayList<WmsServerIdentifier>(treeModel.getNumberOfServers());
+		for (WmsServer server : treeModel.getServers())
+		{
+			serverIdentifiers.add(server.getIdentifier());
+		}
+		WmsBrowserSettings.get().setWmsServers(serverIdentifiers);
+	}
+	
+	/**
+	 * Update the enabled status of the actions. Invoke when something interesting happens in the GUI.
+	 */
+	private void updateActionsEnabledStatus()
+	{
+		SwingUtil.invokeTaskOnEDT(new Runnable(){
+			@Override
+			public void run()
+			{
+				removeServerAction.setEnabled(getSelectedUserObject() instanceof WmsServer);
 			}
 		});
 	}
@@ -142,13 +209,8 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		{
 			return null;
 		}
-		Object selectedObject = serverTree.getSelectionPath().getLastPathComponent();
-		if (selectedObject == null || !(selectedObject instanceof DefaultMutableTreeNode))
-		{
-			return null;
-		}
 		
-		Object nodeObject = ((DefaultMutableTreeNode)selectedObject).getUserObject();
+		Object nodeObject = getSelectedUserObject();
 		if (nodeObject == null || !(nodeObject instanceof WMSLayerInfo))
 		{
 			return null;
@@ -180,6 +242,30 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		layerSelectionListeners.remove(l);
 	}
 	
+	private Object getSelectedTreeObject()
+	{
+		if (serverTree.getSelectionPath() == null)
+		{
+			return null;
+		}
+		return serverTree.getSelectionPath().getLastPathComponent();
+	}
+	
+	private Object getSelectedUserObject()
+	{
+		Object treeObject = getSelectedTreeObject();
+		if (!(treeObject instanceof DefaultMutableTreeNode))
+		{
+			return null;
+		}
+		Object userObject = ((DefaultMutableTreeNode)treeObject).getUserObject();
+		if (!(userObject instanceof WmsServerTreeObject))
+		{
+			return userObject;
+		}
+		return ((WmsServerTreeObject)userObject).getWmsServer();
+	}
+
 	/**
 	 * An extension of the {@link LazyTree} class customised for
 	 * use in the WMS browser panel

@@ -47,6 +47,16 @@ public class WmsServerTreeModel extends DefaultLazyTreeModel implements LazyTree
 		setRoot(rootNode);
 	}
 	
+	public int getNumberOfServers()
+	{
+		return servers.size();
+	}
+	
+	public List<WmsServer> getServers()
+	{
+		return servers;
+	}
+	
 	/**
 	 * Add the provided server to this tree model
 	 */
@@ -92,9 +102,24 @@ public class WmsServerTreeModel extends DefaultLazyTreeModel implements LazyTree
 		return true;
 	}
 	
+	/**
+	 * Remove the provided server from the model, and signal a tree changed event.
+	 */
+	public void removeServer(WmsServer server)
+	{
+		if (server == null || !servers.contains(server))
+		{
+			return;
+		}
+		
+		servers.remove(server);
+		rootNode.refreshChildren(this);
+		notifyTreeChanged(server);
+	}
 	
 	public void notifyTreeChanged(Object source)
 	{
 		fireTreeStructureChanged(source, new Object[] { servers }, null, null);
 	}
+
 }
