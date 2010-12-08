@@ -10,6 +10,7 @@ import gov.nasa.worldwind.util.WWXML;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -46,7 +47,7 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 	
 	private Map<Double, ElevationExaggerationParameter> exaggerationParameters = new TreeMap<Double, ElevationExaggerationParameter>();
 
-	private List<ElevationModelIdentifier> elevationModelIdentifiers = new ArrayList<ElevationModelIdentifier>();
+	private Map<ElevationModelIdentifier, ElevationModel> elevationModelIdentification = new LinkedHashMap<ElevationModelIdentifier, ElevationModel>();
 	
 	private CompoundElevationModel containerModel = new CompoundElevationModel();
 	private VerticalExaggerationElevationModel rootElevationModel = new VerticalExaggerationElevationModel(containerModel);
@@ -80,7 +81,7 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 		for (ElevationModel model : elevationModels)
 		{
 			containerModel.addElevationModel(model);
-			elevationModelIdentifiers.add(ElevationModelIdentifierFactory.createFromElevationModel(model));
+			elevationModelIdentification.put(ElevationModelIdentifierFactory.createFromElevationModel(model), model);
 		}
 		
 		rootElevationModel.addExaggerators(exaggerators);
@@ -117,13 +118,13 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 	@Override
 	public List<ElevationModelIdentifier> getElevationModelIdentifiers()
 	{
-		return Collections.unmodifiableList(elevationModelIdentifiers);
+		return Collections.unmodifiableList(new ArrayList<ElevationModelIdentifier>(elevationModelIdentification.keySet()));
 	}
 
 	@Override
 	public boolean hasElevationModel(ElevationModelIdentifier modelIdentifier)
 	{
-		return elevationModelIdentifiers.contains(modelIdentifier);
+		return elevationModelIdentification.containsKey(modelIdentifier);
 	}
 	
 	@Override
@@ -140,9 +141,24 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 		}
 		
 		containerModel.addElevationModel(loadedModel);
-		elevationModelIdentifiers.add(modelIdentifier);
+		elevationModelIdentification.put(modelIdentifier, loadedModel);
 
 		fireChangeEvent(loadedModel);
+	}
+	
+	@Override
+	public void removeElevationModel(ElevationModelIdentifier modelIdentifier)
+	{
+		if (modelIdentifier == null || !hasElevationModel(modelIdentifier))
+		{
+			return;
+		}
+		
+		ElevationModel model = elevationModelIdentification.get(modelIdentifier);
+		containerModel.removeElevationModel(model);
+		elevationModelIdentification.remove(modelIdentifier);
+		
+		fireRemoveEvent(model);
 	}
 	
 	@Override
@@ -173,6 +189,13 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 		
 		rootElevationModel.addExaggerator(parameter.getElevationExaggeration());
 		exaggerationParameters.put(parameter.getElevationExaggeration().getElevationBoundary(), parameter);
+	}
+	
+	@Override
+	public void removeElevationExaggerator(ElevationExaggeration exaggerator)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 	
 	@Override

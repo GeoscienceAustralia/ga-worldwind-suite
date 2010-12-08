@@ -12,11 +12,13 @@ import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.elevation.AnimatableElevation;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEvent.Type;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**
@@ -178,7 +180,7 @@ public class AnimationTreeModel implements TreeModel, AnimationEventListener
 		int elevationModelCount = animatableElevation.getElevationModelIdentifiers().size();
 		if (index < elevationModelCount)
 		{
-			return animatableElevation.getElevationModelIdentifiers().get(index);
+			return new AnimationElevationModelIdentifier(animatableElevation.getElevationModelIdentifiers().get(index));
 		}
 		return new ArrayList<Parameter>(animatableElevation.getParameters()).get(index - elevationModelCount);
 	}
@@ -192,10 +194,60 @@ public class AnimationTreeModel implements TreeModel, AnimationEventListener
 	{
 		AnimatableElevation animatableElevation = animation.getAnimatableElevation();
 		int elevationModelCount = animatableElevation.getElevationModelIdentifiers().size();
-		if (animatableElevation.getElevationModelIdentifiers().contains(child))
+		if (child instanceof AnimationElevationModelIdentifier)
 		{
-			return animatableElevation.getElevationModelIdentifiers().indexOf(child);
+			return animatableElevation.getElevationModelIdentifiers().indexOf(((AnimationElevationModelIdentifier)child).getIdentifier());
 		}
 		return new ArrayList<Parameter>(animatableElevation.getParameters()).indexOf(child) + elevationModelCount;
+	}
+	
+	/**
+	 * A wrapper class that makes an {@link ElevationModelIdentifier} appear as an {@link AnimationObject}
+	 */
+	private static class AnimationElevationModelIdentifier implements ElevationModelIdentifier, AnimationObject
+	{
+		private ElevationModelIdentifier identifier;
+		
+		public AnimationElevationModelIdentifier(ElevationModelIdentifier identifier)
+		{
+			Validate.notNull(identifier, "An identifier is required");
+			this.identifier = identifier;
+		}
+		
+		@Override
+		public String getName()
+		{
+			return identifier.getName();
+		}
+
+		@Override
+		public void setName(String name)
+		{
+			// Do nothing
+		}
+		
+		public ElevationModelIdentifier getIdentifier()
+		{
+			return identifier;
+		}
+
+		@Override
+		public String getLocation()
+		{
+			return identifier.getLocation();
+		}
+		
+		@Override
+		public boolean equals(Object obj)
+		{
+			return identifier.equals(obj);
+		}
+		
+		@Override
+		public int hashCode()
+		{
+			return identifier.hashCode();
+		}
+		
 	}
 }

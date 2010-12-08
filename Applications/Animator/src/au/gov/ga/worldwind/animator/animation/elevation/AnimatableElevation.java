@@ -37,7 +37,17 @@ public interface AnimatableElevation extends Animatable
 	void addElevationModel(ElevationModelIdentifier modelIdentifier);
 	
 	/**
+	 * Remove the elevation model identified by the provided from this {@link AnimatableElevation}
+	 */
+	void removeElevationModel(ElevationModelIdentifier modelIdentifier);
+	
+	/**
 	 * Add the provided elevation exaggerator to this {@link AnimatableElevation}
 	 */
 	void addElevationExaggerator(ElevationExaggeration exaggerator);
+	
+	/**
+	 * Remove the provided elevation exaggerator from this {@link AnimatableElevation}
+	 */
+	void removeElevationExaggerator(ElevationExaggeration exaggerator);
 }

@@ -24,6 +24,7 @@ import au.gov.ga.worldwind.animator.animation.CurrentlySelectedObject;
 import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.panels.AnimatorCollapsiblePanel;
+import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.ui.NameableTree;
 import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.common.ui.BasicAction;
@@ -206,7 +207,14 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase implements Anima
 		boolean removalConfirmed = promptUserForConfirmationOfRemoval(selectedObject);
 		if (removalConfirmed)
 		{
-			animation.removeAnimatableObject((Animatable)selectedObject); // TODO Make this more general to allow extension in the future
+			if (selectedObject instanceof ElevationModelIdentifier)
+			{
+				animation.getAnimatableElevation().removeElevationModel((ElevationModelIdentifier)selectedObject);
+			}
+			else
+			{
+				animation.removeAnimatableObject((Animatable)selectedObject); // TODO Make this more general to allow extension in the future
+			}
 			removeAnimationObjectAction.setEnabled(false);
 		}
 		
@@ -293,7 +301,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase implements Anima
 	
 	private boolean isRemovable(AnimationObject selectedObject)
 	{
-		return selectedObject != null && selectedObject instanceof Animatable && !(selectedObject instanceof Camera);
+		return selectedObject != null && ((selectedObject instanceof Animatable && !(selectedObject instanceof Camera)) || (selectedObject instanceof ElevationModelIdentifier));
 	}
 	
 	private AnimationObject getSelectedAnimationObject()
