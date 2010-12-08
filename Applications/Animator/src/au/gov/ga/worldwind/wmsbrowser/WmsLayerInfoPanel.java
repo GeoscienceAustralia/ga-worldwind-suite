@@ -15,6 +15,8 @@ import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerInfoURL;
+import gov.nasa.worldwind.ogc.wms.WMSLayerStyle;
+import gov.nasa.worldwind.ogc.wms.WMSLogoURL;
 import gov.nasa.worldwind.terrain.ZeroElevationModel;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 import gov.nasa.worldwind.wms.WMSTiledImageLayer;
@@ -35,6 +37,7 @@ import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -171,6 +174,7 @@ public class WmsLayerInfoPanel extends JComponent
 				}
 			}
 		});
+		infoTextPane.setText(getMessage(getNoLayerSelectedMsgKey()));
 		
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.weightx = 1;
@@ -237,7 +241,7 @@ public class WmsLayerInfoPanel extends JComponent
 			if (layerInfo == null)
 			{
 				wwd.setVisible(false);
-				infoTextPane.setText("");
+				infoTextPane.setText(getMessage(getNoLayerSelectedMsgKey()));
 				buttonPanel.setVisible(false);
 				return;
 			}
@@ -413,6 +417,37 @@ public class WmsLayerInfoPanel extends JComponent
 			return result;
 		}
 		
+		private static String getLegendFragment(WMSLayerCapabilities capabilities)
+		{
+			Collection<WMSLayerStyle> layerStyles = capabilities.getStyles();
+			if (layerStyles == null || layerStyles.isEmpty())
+			{
+				return getMessage(getLayerInfoNoLegendMsgKey());
+			}
+			
+			// First legend with a URL wins...
+			for (WMSLayerStyle style : layerStyles)
+			{
+				Set<WMSLogoURL> legendURLs = style.getLegendURLs();
+				if (legendURLs == null || legendURLs.isEmpty())
+				{
+					continue;
+				}
+				for (WMSLogoURL legendURL : legendURLs)
+				{
+					String legendHref = legendURL.getOnlineResource().getHref();
+					if (Util.isBlank(legendHref))
+					{
+						continue;
+					}
+					
+					return "<a href='" + legendHref + "'><img border='0' src='" + legendHref + "' alt='" + getMessage(getLayerInfoLegendAltKey()) + "'/></a>";
+				}
+			}
+			
+			return getMessage(getLayerInfoNoLegendMsgKey());
+		}
+		
 		private WMSLayerCapabilities layerCapabilities;
 		private String formattedString = null;
 		
@@ -441,6 +476,7 @@ public class WmsLayerInfoPanel extends JComponent
 			result = substituteNameValue(result, "ABSTRACT", getMessage(getLayerInfoAbstractKey()), layerCapabilities.getLayerAbstract());
 			result = substituteNameValue(result, "BOUNDING_BOX", getMessage(getLayerInfoBoundingBoxKey()), getBoundingBoxAsString(layerCapabilities));
 			result = substituteNameValue(result, "KEYWORDS", getMessage(getLayerInfoKeywordsKey()), getKeyWordsAsString(layerCapabilities));
+			result = substitute(result, "LEGEND", getLegendFragment(layerCapabilities));
 			return result;
 		}
 		

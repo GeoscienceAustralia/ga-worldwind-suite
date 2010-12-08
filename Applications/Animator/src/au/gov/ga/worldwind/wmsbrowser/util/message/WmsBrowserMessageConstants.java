@@ -18,10 +18,13 @@ public class WmsBrowserMessageConstants extends CommonMessageConstants
 	public static String getLayerInfoKeywordsKey() { return "wmsbrowser.layerinfo.property.keywords"; }
 	public static String getLayerInfoNoCapabilitiesMsgKey() { return "wmsbrowser.layerinfo.message.nocapabilities"; }
 	public static String getLayerInfoDefaultStringValueKey() { return "wmsbrowser.layerinfo.value.default"; }
+	public static String getLayerInfoNoLegendMsgKey() { return "wmsbrowser.layerinfo.message.nolegend"; }
+	public static String getLayerInfoLegendAltKey() { return "wmsbrowser.layerinfo.value.legendalt"; }
 	public static String getAddServerMenuLabelKey() { return "wmsbrowser.gui.menu.addserver.label"; }
 	public static String getAddServerMenuTooltipKey() { return "wmsbrowser.gui.menu.addserver.tooltip"; }
 	public static String getDeleteServerMenuLabelKey() { return "wmsbrowser.gui.menu.deleteserver.label"; }
 	public static String getDeleteServerMenuTooltipKey() { return "wmsbrowser.gui.menu.deleteserver.tooltip"; }
+	public static String getNoLayerSelectedMsgKey() { return "wmsbrowser.layerinfo.message.nolayerselected"; }
 	public static String getSearchWmsTitleKey() { return "wmsbrowser.searchwms.title"; }
 	public static String getSearchWmsSearchBoxMsgKey() { return "wmsbrowser.searchwms.searchbox.message"; }
 	public static String getSearchWmsSearchButtonLabelKey() { return "wmsbrowser.searchwms.searchbutton.label"; }
