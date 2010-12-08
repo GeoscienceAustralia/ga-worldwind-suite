@@ -4,6 +4,7 @@ import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getM
 import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.*;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
@@ -258,18 +259,35 @@ public class WmsLayerInfoPanel extends JComponent
 			repaint();
 		}
 	}
-
 	
 	private void updateFlatGlobeViewer()
 	{
 		wwd.setVisible(true);
-		wwd.getModel().getLayers().clear();		
-		wwd.getModel().getLayers().add(new WMSTiledImageLayer((WMSCapabilities)layerInfo.getCaps(), layerInfo.getParams()));
+		wwd.getModel().getLayers().clear();
+		
+		// Need to perform some cleanup
+		AVList layerParams = WMSTiledImageLayer.wmsGetParamsFromCapsDoc((WMSCapabilities)layerInfo.getCaps(), layerInfo.getParams());
+		sanitiseLayerParams(layerParams);
+		
+		wwd.getModel().getLayers().add(new WMSTiledImageLayer(layerParams));
 		wwd.getModel().getLayers().add(countryBoundariesLayer);
 		wwd.getModel().getLayers().add(coastlinesLayer);
 		wwd.getModel().getLayers().add(worldMapLayer);
 		zoomViewToSector(layerCapabilities.getGeographicBoundingBox() == null ? DEFAULT_VIEW_EXTENTS : layerCapabilities.getGeographicBoundingBox());
 		wwd.redraw();
+	}
+
+	/**
+	 * Performs some sanitisation on the provided layer parameters (clamps sectors to [-180, 180] etc.)
+	 */
+	private void sanitiseLayerParams(AVList layerParams)
+	{
+		LatLon levelZeroDelta = (LatLon)layerParams.getValue(AVKey.LEVEL_ZERO_TILE_DELTA);
+		levelZeroDelta = Util.clampLatLon(levelZeroDelta, new Sector(Angle.NEG90, Angle.POS90, Angle.NEG180, Angle.POS180));
+		layerParams.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, levelZeroDelta);
+		Sector sector = (Sector)layerParams.getValue(AVKey.SECTOR);
+		sector = Util.clampSector(sector, new Sector(Angle.NEG90, Angle.POS90, Angle.NEG180, Angle.POS180));
+		layerParams.setValue(AVKey.SECTOR, sector);
 	}
 	
 	private void zoomViewToSector(Sector geographicBoundingBox)

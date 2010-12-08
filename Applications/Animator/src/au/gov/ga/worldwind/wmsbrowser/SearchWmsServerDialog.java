@@ -97,6 +97,7 @@ public class SearchWmsServerDialog extends JDialog
 	private List<WmsServer> selectedResults = new ArrayList<WmsServer>();
 	private ReadWriteLock searchResultsLock = new LenientReadWriteLock();
 	private JPanel resultsPanel;
+	private JLabel resultCountLabel;
 	
 	// The button panel
 	private BasicAction okAction;
@@ -131,10 +132,22 @@ public class SearchWmsServerDialog extends JDialog
 		initialiseDialog();
 		initialiseActions();
 		initialiseSearchingIndicator();
-		addBlurb(0);
-		addSearchBar(1);
-		addResultsPanel(2);
-		addButtonPanel(3);
+		
+		GridBagConstraints containerConstraints = new GridBagConstraints();
+		containerConstraints.gridy = -1;
+		containerConstraints.gridx = 0;
+		containerConstraints.weighty = 0;
+		containerConstraints.anchor = GridBagConstraints.NORTH;
+		containerConstraints.fill = GridBagConstraints.HORIZONTAL;
+		containerConstraints.ipady = 10;
+		containerConstraints.ipadx = 20;
+		
+		addBlurb(containerConstraints);
+		addSearchBar(containerConstraints);
+		addResultsPanel(containerConstraints);
+		addButtonPanel(containerConstraints);
+		
+		updateSearchResultsPanel();
 		
 		addComponentListener(new ComponentAdapter()
 		{
@@ -300,13 +313,12 @@ public class SearchWmsServerDialog extends JDialog
 		searchingIndicator.add(cancelSearchButton);
 	}
 
-	private void addBlurb(int verticalOrder)
+	private void addBlurb(GridBagConstraints containerConstraints)
 	{
 		JLabel blurb = new JLabel(getMessage(getSearchWmsBlurbKey(), getMessage(getSearchWmsTitleKey()), getMessage(getSearchWmsEditCswListLabelKey())));
 		blurb.setBorder(new CompoundBorder(LineBorder.createGrayLineBorder(), new EmptyBorder(10, 30, 10, 0)));
 		
-		GridBagConstraints containerConstraints = new GridBagConstraints();
-		containerConstraints.gridy = verticalOrder;
+		containerConstraints.gridy++;
 		containerConstraints.gridx = 0;
 		containerConstraints.weighty = 0;
 		containerConstraints.anchor = GridBagConstraints.NORTH;
@@ -316,7 +328,7 @@ public class SearchWmsServerDialog extends JDialog
 		contentPane.add(blurb, containerConstraints);
 	}
 	
-	private void addSearchBar(int verticalOrder)
+	private void addSearchBar(GridBagConstraints containerConstraints)
 	{
 		Container container = new JPanel();
 		container.setLayout(new GridBagLayout());
@@ -341,8 +353,7 @@ public class SearchWmsServerDialog extends JDialog
 		searchButtonConstraints.fill = GridBagConstraints.NONE;
 		container.add(searchButton, searchButtonConstraints);
 		
-		GridBagConstraints containerConstraints = new GridBagConstraints();
-		containerConstraints.gridy = verticalOrder;
+		containerConstraints.gridy++;
 		containerConstraints.gridx = 0;
 		containerConstraints.weighty = 0;
 		containerConstraints.anchor = GridBagConstraints.NORTH;
@@ -351,7 +362,7 @@ public class SearchWmsServerDialog extends JDialog
 		contentPane.add(container, containerConstraints);
 	}
 
-	private void addResultsPanel(int verticalOrder)
+	private void addResultsPanel(GridBagConstraints containerConstraints)
 	{
 		resultsPanel = new JPanel();
 		resultsPanel.setLayout(new GridBagLayout());
@@ -360,8 +371,7 @@ public class SearchWmsServerDialog extends JDialog
 		resultScroller = new JScrollPane(resultsPanel);
 		resultScroller.setOpaque(false);
 		
-		GridBagConstraints containerConstraints = new GridBagConstraints();
-		containerConstraints.gridy = verticalOrder;
+		containerConstraints.gridy++;
 		containerConstraints.gridx = 0;
 		containerConstraints.weighty = 1;
 		containerConstraints.weightx = 1;
@@ -369,11 +379,9 @@ public class SearchWmsServerDialog extends JDialog
 		containerConstraints.anchor = GridBagConstraints.NORTH;
 		containerConstraints.fill = GridBagConstraints.BOTH;
 		contentPane.add(resultScroller, containerConstraints);
-		
-		updateSearchResultsPanel();
 	}
 	
-	private void addButtonPanel(int verticalOrder)
+	private void addButtonPanel(GridBagConstraints containerConstraints)
 	{
 		JToolBar utilityPanel = new JToolBar();
 
@@ -390,6 +398,11 @@ public class SearchWmsServerDialog extends JDialog
 		
 		utilityPanel.add(Box.createHorizontalGlue());
 		
+		resultCountLabel = new JLabel();
+		resultCountLabel.setFont(resultCountLabel.getFont().deriveFont(Font.ITALIC).deriveFont(10f));
+		resultCountLabel.setOpaque(false);
+		utilityPanel.add(resultCountLabel);
+		
 		JPanel okCancelPanel = new JPanel();
 		okCancelPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
 		JButton okButton = new JButton(okAction);
@@ -399,14 +412,13 @@ public class SearchWmsServerDialog extends JDialog
 		
 		utilityPanel.add(okCancelPanel);
 		
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.gridy = verticalOrder;
-		constraints.gridx = 0;
-		constraints.weighty = 0;
-		constraints.weightx = 0;
-		constraints.anchor = GridBagConstraints.BASELINE_TRAILING;
-		constraints.fill = GridBagConstraints.BOTH;
-		contentPane.add(utilityPanel, constraints);
+		containerConstraints.gridy++;
+		containerConstraints.gridx = 0;
+		containerConstraints.weighty = 0;
+		containerConstraints.weightx = 0;
+		containerConstraints.anchor = GridBagConstraints.BASELINE_TRAILING;
+		containerConstraints.fill = GridBagConstraints.BOTH;
+		contentPane.add(utilityPanel, containerConstraints);
 	}
 	
 	/**
@@ -469,6 +481,8 @@ public class SearchWmsServerDialog extends JDialog
 					constraints.fill = GridBagConstraints.BOTH;
 					resultsPanel.add(Box.createVerticalGlue(), constraints);
 					
+					resultCountLabel.setText(getMessage(getSearchWmsResultCountMsgKey(), searchResults.size()));
+					
 					validate();
 					repaint();
 				}
@@ -492,6 +506,7 @@ public class SearchWmsServerDialog extends JDialog
 			{
 				resultsPanel.removeAll();
 				resultsPanel.add(noResultsMessage);
+				resultCountLabel.setText(getMessage(getSearchWmsResultCountMsgKey(), 0));
 				validate();
 				repaint();
 			}

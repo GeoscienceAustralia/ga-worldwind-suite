@@ -38,6 +38,7 @@ public class WmsBrowserMessageConstants extends CommonMessageConstants
 	public static String getSearchWmsBlurbKey() { return "wmsbrowser.searchwms.blurb"; }
 	public static String getSearchWmsEditCswListLabelKey() { return "wmsbrowser.searchwms.editcswlist.label"; }
 	public static String getSearchWmsEditCswListTooltipKey() { return "wmsbrowser.searchwms.editcswlist.tooltip"; }
+	public static String getSearchWmsResultCountMsgKey() { return "wmsbrowser.searchwms.resultcount.message"; }
 	public static String getEditCswTitleKey() { return "wmsbrowser.editcsw.title"; }
 	public static String getEditCswBlurbKey() { return "wmsbrowser.editcsw.blurb"; }
 	public static String getEditCswAddCatalogueLabelKey() { return "wmsbrowser.editcsw.addcatalogue.label"; }

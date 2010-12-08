@@ -621,6 +621,16 @@ public class Util
 
 		return LatLon.fromDegrees(lat, lon);
 	}
+	
+	public static Sector clampSector(Sector source, Sector extents)
+	{
+		double minLat = clamp(source.getMinLatitude().degrees, extents.getMinLatitude().degrees, extents.getMaxLatitude().degrees);
+		double maxLat = clamp(source.getMaxLatitude().degrees, extents.getMinLatitude().degrees, extents.getMaxLatitude().degrees);
+		double minLon = clamp(source.getMinLongitude().degrees, extents.getMinLongitude().degrees, extents.getMaxLongitude().degrees);
+		double maxLon = clamp(source.getMaxLongitude().degrees, extents.getMinLongitude().degrees, extents.getMaxLongitude().degrees);
+		
+		return Sector.fromDegrees(minLat, maxLat, minLon, maxLon);
+	}
 
 	/**
 	 * Calculate the position on the globe in the center of the view. If the

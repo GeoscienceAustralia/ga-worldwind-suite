@@ -61,6 +61,7 @@ public class WmsBrowserSettings
 			saveWindowSize(rootElement);
 			saveWmsServerLocations(rootElement);
 			saveCswCatalogueServers(rootElement);
+			saveMaxNumberCswSearchResultsPerService(rootElement);
 			
 			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(Util.getUserGAWorldWindDirectory(), SETTINGS_FILE_NAME)));
 		}
@@ -108,6 +109,11 @@ public class WmsBrowserSettings
 		}
 	}
 	
+	private static void saveMaxNumberCswSearchResultsPerService(Element rootElement)
+	{
+		Element splitLocationElement = WWXML.appendElement(rootElement, "maxNumberWmsSearchResultsPerService");
+		WWXML.setIntegerAttribute(splitLocationElement, "value", instance.getMaxNumberWmsSearchResultsPerService());
+	}
 	
 	private static void loadSettings()
 	{
@@ -129,6 +135,7 @@ public class WmsBrowserSettings
 		loadWindowSize(rootElement, xpath);
 		loadWmsServerLocations(rootElement, xpath);
 		loadCswCatalogueServers(rootElement, xpath);
+		loadMaxNumberCswSearchResultsPerService(rootElement, xpath);
 	}
 	
 	private static void loadSplitLocation(Element rootElement, XPath xpath)
@@ -195,6 +202,15 @@ public class WmsBrowserSettings
 		}
 	}
 	
+	private static void loadMaxNumberCswSearchResultsPerService(Element rootElement, XPath xpath)
+	{
+		Integer maxNumberSearchResults = WWXML.getInteger(rootElement, "//maxNumberWmsSearchResultsPerService/@value", xpath);
+		if (maxNumberSearchResults != null)
+		{
+			instance.setMaxNumberWmsSearchResultsPerService(maxNumberSearchResults);
+		}
+	}
+	
 	private static URL toUrl(String serverLocation)
 	{
 		try
@@ -219,6 +235,8 @@ public class WmsBrowserSettings
 	private List<WmsServerIdentifier> wmsServers;
 	
 	private List<URL> cswCatalogueServers;
+	
+	private int maxNumberWmsSearchResultsPerService = 50;
 	
 	/**
 	 * Private constructor. Obtain a {@link WmsBrowserSettings} instance using the static {@link #get()} method.
@@ -299,6 +317,16 @@ public class WmsBrowserSettings
 	public void setWindowDimension(Dimension windowDimension)
 	{
 		this.windowDimension = windowDimension;
+	}
+	
+	public int getMaxNumberWmsSearchResultsPerService()
+	{
+		return maxNumberWmsSearchResultsPerService;
+	}
+	
+	public void setMaxNumberWmsSearchResultsPerService(int maxNumberCswSearchResultsPerService)
+	{
+		this.maxNumberWmsSearchResultsPerService = maxNumberCswSearchResultsPerService;
 	}
 	
 }

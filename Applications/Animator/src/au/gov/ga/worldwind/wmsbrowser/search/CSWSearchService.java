@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
+import au.gov.ga.worldwind.wmsbrowser.WmsBrowserSettings;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerImpl;
 
 /**
@@ -31,7 +32,7 @@ public class CSWSearchService implements WmsServerSearchService
 	private static final Logger logger = Logging.logger();
 	
 	private static final int RECORD_START_INDEX = 0;
-	private static final int MAX_RECORDS = 50;
+	private static final int MAX_RECORDS = WmsBrowserSettings.get().getMaxNumberWmsSearchResultsPerService();
 	private static final String RECORD_FORMAT = "wms";
 	
 	private URL catalogueUrl;
