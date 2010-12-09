@@ -435,6 +435,10 @@ public class WmsLayerInfoPanel extends JComponent
 			}
 			
 			// Bit of a hack - some services provide the abstract in a parent layer...
+			if (capabilities.getEnclosingCapabilityInformation() == null)
+			{
+				return null;
+			}
 			for (WMSLayerCapabilities rootLayer : capabilities.getEnclosingCapabilityInformation().getLayerCapabilities())
 			{
 				WMSLayerCapabilities parentLayer = findLayerParent(rootLayer, capabilities);
