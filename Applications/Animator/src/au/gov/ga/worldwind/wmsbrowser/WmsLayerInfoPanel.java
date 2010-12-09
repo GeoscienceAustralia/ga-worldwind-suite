@@ -448,8 +448,6 @@ public class WmsLayerInfoPanel extends JComponent
 					break;
 				}
 			}
-			
-			System.out.println(layerAbstract);
 			return layerAbstract;
 		}
 		
