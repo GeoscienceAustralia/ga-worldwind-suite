@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -603,6 +604,11 @@ public class Util
 		return string == null || string.trim().isEmpty();
 	}
 
+	public static boolean isEmpty(Collection<?> collection)
+	{
+		return collection == null || collection.isEmpty();
+	}
+	
 	public static int clamp(int value, int min, int max)
 	{
 		return Math.max(min, Math.min(max, value));
