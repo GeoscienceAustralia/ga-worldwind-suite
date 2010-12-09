@@ -29,7 +29,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -44,6 +43,7 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -145,16 +145,25 @@ public class WmsLayerInfoPanel extends JComponent
 		add(splitPanel, BorderLayout.CENTER);
 	}
 
+	@SuppressWarnings("serial")
 	private void initialiseContainerPanel()
 	{
-		panel = new JPanel();
+		panel = new JPanel(){
+			// Overridden to force line wrapping within a scrollpane, but still provide vertical scrolling
+			public Dimension getPreferredSize() 
+			{ 
+				Dimension parentSize = getParent().getSize();
+				Dimension superSize = super.getPreferredSize();
+				Dimension minSize = getMinimumSize();
+				return new Dimension(Math.max(parentSize.width, minSize.width), superSize.height);
+			}
+		};
 		panel.setLayout(new GridBagLayout());
 		panel.setBorder(new CompoundBorder(panel.getBorder(), new EmptyBorder(PADDING, PADDING, PADDING, PADDING)));
 		panel.setBackground(Color.WHITE);
 		panel.setOpaque(true);
 		
-		ScrollPane scrollPane = new ScrollPane();
-		scrollPane.add(panel);
+		JScrollPane scrollPane = new JScrollPane(panel);
 		splitPanel.add(scrollPane);
 	}
 
@@ -177,7 +186,7 @@ public class WmsLayerInfoPanel extends JComponent
 		infoTextPane.setText(getMessage(getNoLayerSelectedMsgKey()));
 		
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.weightx = 1;
+		constraints.weightx = 0;
 		constraints.weighty = 1;
 		constraints.gridx = 0;
 		constraints.gridy = 0;
@@ -417,6 +426,54 @@ public class WmsLayerInfoPanel extends JComponent
 			return result;
 		}
 		
+		private static String getLayerAbstract(WMSLayerCapabilities capabilities)
+		{
+			String layerAbstract = capabilities.getLayerAbstract();
+			if (!Util.isBlank(layerAbstract))
+			{
+				return layerAbstract;
+			}
+			
+			// Bit of a hack - some services provide the abstract in a parent layer...
+			for (WMSLayerCapabilities rootLayer : capabilities.getEnclosingCapabilityInformation().getLayerCapabilities())
+			{
+				WMSLayerCapabilities parentLayer = findLayerParent(rootLayer, capabilities);
+				if (parentLayer != null)
+				{
+					layerAbstract = parentLayer.getLayerAbstract();
+					break;
+				}
+			}
+			
+			System.out.println(layerAbstract);
+			return layerAbstract;
+		}
+		
+		//TODO: This is an ugly hack. Better solution would be to modify the class structure to maintain an upwards link from a layer to it's parent...
+		private static WMSLayerCapabilities findLayerParent(WMSLayerCapabilities root, WMSLayerCapabilities target)
+		{
+			if (Util.isEmpty(root.getLayers()) || Util.isBlank(target.getName()))
+			{
+				return null;
+			}
+			
+			if (root.getLayerByName(target.getName()) != null)
+			{
+				return root;
+			}
+			
+			for (WMSLayerCapabilities subLayer : root.getLayers())
+			{
+				WMSLayerCapabilities result = findLayerParent(subLayer, target);
+				if (result != null)
+				{
+					return result;
+				}
+			}
+			
+			return null;
+		}
+		
 		private static String getLegendFragment(WMSLayerCapabilities capabilities)
 		{
 			Collection<WMSLayerStyle> layerStyles = capabilities.getStyles();
@@ -473,7 +530,7 @@ public class WmsLayerInfoPanel extends JComponent
 			result = substituteNameValue(result, "DATA_URL", getMessage(getLayerInfoDataUrlKey()), getDataUrlAsString(layerCapabilities));
 			result = substituteNameValue(result, "METADATA_URL", getMessage(getLayerInfoMetaDataUrlKey()), getMetaDataUrlAsString(layerCapabilities));
 			result = substituteNameValue(result, "LAST_UPDATE", getMessage(getLayerInfoLastUpdateKey()), layerCapabilities.getLastUpdate());
-			result = substituteNameValue(result, "ABSTRACT", getMessage(getLayerInfoAbstractKey()), layerCapabilities.getLayerAbstract());
+			result = substituteNameValue(result, "ABSTRACT", getMessage(getLayerInfoAbstractKey()), getLayerAbstract(layerCapabilities));
 			result = substituteNameValue(result, "BOUNDING_BOX", getMessage(getLayerInfoBoundingBoxKey()), getBoundingBoxAsString(layerCapabilities));
 			result = substituteNameValue(result, "KEYWORDS", getMessage(getLayerInfoKeywordsKey()), getKeyWordsAsString(layerCapabilities));
 			result = substitute(result, "LEGEND", getLegendFragment(layerCapabilities));
