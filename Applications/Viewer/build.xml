@@ -37,6 +37,14 @@
 	<property name="keystore_password" value="password" />
 	<property name="javac_debug" value="false" />
 
+	<property name="working_src_dir" value="${basedir}/tmp_src" />
+	<property name="test_src_dir" value="${basedir}/test/src"/>
+	<property name="common_test_src_dir" value="${basedir}/../Common/test/src" />
+	<property name="test_lib_dir" value="${basedir}/test/lib"/>
+	<property name="test_build_dir" value="${basedir}/test/build"/>
+	<property name="test_results_dir" value="${basedir}/test/results"/>
+	<property name="test_reports_dir" value="${basedir}/test/reports"/>
+	
 	<path id="classpath">
 		<fileset dir="${worldwind_dir}">
 			<include name="${worldwind_jar}" />
@@ -46,6 +54,14 @@
 		</fileset>
 	</path>
 
+	<path id="test_classpath">
+		<path refid="classpath"/>
+		<fileset dir="${test_lib_dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<path path="${build_dir}"/>
+	</path>
+	
 	<patternset id="manifest_exclude">
 		<exclude name="META-INF/*.DSA" />
 		<exclude name="META-INF/*.RSA" />
@@ -58,6 +74,10 @@
 		<delete dir="${build_dir}" />
 		<delete dir="${webstart_dir}" />
 		<delete dir="${executable_dir}" />
+		<delete dir="${test_build_dir}" />
+		<delete dir="${test_results_dir}" />
+		<delete dir="${test_reports_dir}" />
+		<delete dir="${working_src_dir}" />
 	</target>
 
 	<target name="build">
@@ -76,7 +96,47 @@
 		</javac>
 	</target>
 
-	<target name="package" depends="build">
+	<target name="build-test" depends="build">
+			<mkdir dir="${working_src_dir}" />
+			<copy todir="${working_src_dir}">
+				<fileset dir="${common_test_src_dir}"/>
+			</copy>
+			<copy todir="${working_src_dir}" overwrite="true">
+				<fileset dir="${test_src_dir}"/>
+			</copy>
+			
+			<mkdir dir="${test_build_dir}"/>
+			<copy todir="${test_build_dir}">
+				<fileset dir="${working_src_dir}">
+					<exclude name="**/*.java" />
+				</fileset>
+			</copy>
+			<javac source="1.6" target="1.6" srcdir="${working_src_dir}" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}" />
+			
+			<delete dir="${working_src_dir}" />
+		</target>
+		
+		<target name="test" description="Execute unit tests on the project" depends="build-test">
+			<mkdir dir="${test_results_dir}"/>
+			<mkdir dir="${test_reports_dir}"/>
+			<junit printsummary="withOutAndErr" failureproperty="junit.failure">
+				<classpath refid="test_classpath"/>
+				<classpath path="classes:${test_build_dir}"/>
+				<batchtest todir="${test_results_dir}">
+					<fileset dir="${test_build_dir}">
+						<include name="**/*Test.class"/>
+					</fileset>
+					<formatter type="xml"/>
+				</batchtest>
+			</junit>
+			<junitreport todir="${test_reports_dir}">
+				<fileset dir="${test_results_dir}"/>
+				<report todir="${test_reports_dir}"/>
+			</junitreport>
+			<fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
+		</target>
+	
+	<target name="package" depends="test">
 		<mkdir dir="${webstart_dir}" />
 		<jar destfile="${webstart_dir}/${app_unsigned_jar}" basedir="${build_dir}">
 			<manifest>

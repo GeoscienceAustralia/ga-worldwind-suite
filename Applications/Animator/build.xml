@@ -16,7 +16,6 @@
 	
 	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />	
 	<property name="common_src_dir" value="${basedir}/../Common/src" />
-	<property name="common_test_src_dir" value="${basedir}/../Common/test/src" />
 	
 	<property name="src_dir" value="${basedir}/src" />
 	<property name="working_src_dir" value="${basedir}/tmp_src" />
@@ -25,6 +24,7 @@
 	<property name="lib_dir" value="${target_dir}/lib" />
 
 	<property name="test_src_dir" value="${basedir}/test/src"/>
+	<property name="common_test_src_dir" value="${basedir}/../Common/test/src" />
 	<property name="test_lib_dir" value="${basedir}/test/lib"/>
 	<property name="test_build_dir" value="${basedir}/test/build"/>
 	<property name="test_results_dir" value="${basedir}/test/results"/>
