@@ -2,7 +2,7 @@
 
 <project name="Animator" basedir="." default="deploy">
 
-	<property name="deploy_location" value="\\NAS\Corp\gav\GEOVIS\VIS\Projects\Animator 2.0\Builds\Current"/>
+	<property name="archive_location" value="\\NAS\Corp\gav\GEOVIS\VIS\Projects\World Wind Suite\Animator\Builds\Current"/>
 	
 	<property name="application_version" value="2.0-SNAPSHOT"/>
 	<property name="application_class" value="au.gov.ga.worldwind.animator.application.Animator"/>
@@ -171,10 +171,13 @@
 		
 	</target>
 
-	<target name="deploy" depends="executables">
-		<copy todir="${deploy_location}" overwrite="true" failonerror="false">
+	<target name="archive" depends="executables">
+		<copy todir="${archive_location}" overwrite="true" failonerror="false">
 			<fileset dir="${target_dir}"/>
 		</copy>
+	</target>
+	
+	<target name="deploy" depends="clean, archive">
 	</target>
 	
 </project>
