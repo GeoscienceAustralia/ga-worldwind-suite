@@ -2,6 +2,11 @@
 
 <project name="Viewer" basedir="." default="run">
 
+	<property name="archive_location" value="\\NAS\Corp\gav\GEOVIS\VIS\Projects\World Wind Suite\Viewer\Builds\Current"/>
+	<property name="deploy_location" value="\\marl\sandpit\symbolic-links\world-wind\current"/>
+	
+	<property name="application_version" value="2.0-SNAPSHOT"/>
+	
 	<property name="src_dir" value="${basedir}/src" />
 	<property name="common_src_dir" value="${basedir}/../Common/src" />
 	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-0.6.663.14141" />
@@ -13,13 +18,20 @@
 	<property name="webstart_dir" value="${basedir}/webstart" />
 	<property name="executable_dir" value="${basedir}/executable" />
 
+	<property name="executable_jar" value="executable.jar" />
+	<property name="executable_versioned_jar" value="executable-${application_version}.jar" />
+	
 	<property name="app_unsigned_jar" value="application-unsigned.jar" />
+	<property name="app_unsigned_versioned_jar" value="application-unsigned-${application_version}.jar" />
+	
 	<property name="app_signed_jar" value="application.jar" />
+	<property name="app_signed_versioned_jar" value="application-${application_version}.jar" />
+
 	<property name="ww_unsigned_jar" value="worldwind-unsigned.jar" />
 	<property name="ww_signed_jar" value="worldwind.jar" />
 
-	<property name="executable_jar" value="executable.jar" />
-
+	<property name="run_file" value="run.bat"/>
+	
 	<property name="keystore_file" value="${basedir}/keystore" />
 	<property name="keystore_alias" value="selfsigned" />
 	<property name="keystore_password" value="password" />
@@ -44,11 +56,8 @@
 
 	<target name="clean">
 		<delete dir="${build_dir}" />
-		<delete file="${webstart_dir}/${app_unsigned_jar}" />
-		<delete file="${webstart_dir}/${app_signed_jar}" />
-		<delete file="${webstart_dir}/${ww_unsigned_jar}" />
-		<delete file="${webstart_dir}/${ww_signed_jar}" />
-		<delete file="${executable_dir}/${executable_jar}" />
+		<delete dir="${webstart_dir}" />
+		<delete dir="${executable_dir}" />
 	</target>
 
 	<target name="build">
@@ -118,15 +127,26 @@
 		</jar>
 
 		<delete file="${executable_dir}/temp.zip" />
+		
+		<echo file="${executable_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${executable_versioned_jar}</echo>
 	</target>
 
 	<target name="run" depends="sign, executable" />
 
-	<target name="deploy" depends="clean, run">
-		<copy file="${executable_dir}/${executable_jar}" todir="\\marl\sandpit\symbolic-links\world-wind\current\executable" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${app_unsigned_jar}" todir="\\marl\sandpit\symbolic-links\world-wind\current" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${app_signed_jar}" todir="\\marl\sandpit\symbolic-links\world-wind\current" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_unsigned_jar}" todir="\\marl\sandpit\symbolic-links\world-wind\current" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_signed_jar}" todir="\\marl\sandpit\symbolic-links\world-wind\current" preservelastmodified="true" />
+	<target name="archive" depends="clean, run">
+		<copy file="${executable_dir}/${executable_jar}" tofile="${archive_location}/${executable_versioned_jar}" preservelastmodified="true" />
+		<copy file="${executable_dir}/${run_file}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${app_unsigned_jar}" tofile="${archive_location}/${app_unsigned_versioned_jar}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${app_signed_jar}" tofile="${archive_location}/${app_signed_versioned_jar}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_unsigned_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_signed_jar}" todir="${archive_location}" preservelastmodified="true" />
+	</target>
+	
+	<target name="deploy" depends="archive">
+		<copy file="${executable_dir}/${executable_jar}" todir="${deploy_location}\executable" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${app_unsigned_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${app_signed_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_unsigned_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_signed_jar}" todir="${deploy_location}" preservelastmodified="true" />
 	</target>
 </project>
