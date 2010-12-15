@@ -9,7 +9,11 @@ import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 
+import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.junit.Test;
 
@@ -351,6 +355,246 @@ public class UtilTest
 		Sector expected = new Sector(Angle.fromDegrees(90), Angle.fromDegrees(90), Angle.fromDegrees(90), Angle.fromDegrees(90));
 		
 		assertEquals(expected, result);
+	}
+	
+	// capitalizeFirstLetter()
+	@Test
+	public void testCapitalizeFirstLetterWithNull()
+	{
+		assertEquals(null, Util.capitalizeFirstLetter(null));
+	}
+	
+	@Test
+	public void testCapitalizeFirstLetterWithEmpty()
+	{
+		assertEquals("", Util.capitalizeFirstLetter(""));
+	}
+	
+	@Test
+	public void testCapitalizeFirstLetterWithBlank()
+	{
+		assertEquals("   ", Util.capitalizeFirstLetter("   "));
+	}
+	
+	@Test
+	public void testCapitalizeFirstLetterWithAlpha()
+	{
+		assertEquals("The Wonderful STRING", Util.capitalizeFirstLetter("the Wonderful STRING"));
+	}
+	
+	@Test
+	public void testCapitalizeFirstLetterWithNumeric()
+	{
+		assertEquals("123 456", Util.capitalizeFirstLetter("123 456"));
+	}
+	
+	// isBlank()
+	@Test
+	public void testIsBlankWithNull()
+	{
+		assertEquals(true, Util.isBlank(null));
+	}
+	
+	@Test
+	public void testIsBlankWithEmpty()
+	{
+		assertEquals(true, Util.isBlank(""));
+	}
+	
+	@Test
+	public void testIsBlankWithWhitespaceOnly()
+	{
+		assertEquals(true, Util.isBlank(" \t\r"));
+	}
+	
+	@Test
+	public void testIsBlankWithMixed()
+	{
+		assertEquals(false, Util.isBlank(" \t\r  t"));
+	}
+	
+	// isEmpty()
+	@Test
+	public void testIsEmptyWithNull()
+	{
+		Collection<Object> collection = null;
+		
+		assertEquals(true, Util.isEmpty(collection));
+	}
+	
+	@Test
+	public void testIsEmptyWithEmpty()
+	{
+		Collection<Object> collection = Collections.emptyList();
+		
+		assertEquals(true, Util.isEmpty(collection));
+	}
+	
+	@Test
+	public void testIsEmptyWithSingleElement()
+	{
+		Collection<Object> collection = Arrays.asList(new Object[]{"item"});
+		
+		assertEquals(false, Util.isEmpty(collection));
+	}
+	
+	// paddedInt()
+	
+	@Test
+	public void testPaddedIntWithIntLengthLessThanCharCount()
+	{
+		assertEquals("0012", Util.paddedInt(12, 4));
+	}
+	
+	@Test
+	public void testPaddedIntWithIntLengthEqualToCharCount()
+	{
+		assertEquals("1223", Util.paddedInt(1223, 4));
+	}
+	
+	@Test
+	public void testPaddedIntWithIntLengthGreaterThanCharCount()
+	{
+		assertEquals("12235", Util.paddedInt(12235, 4));
+	}
+	
+	// urlToFile()
+	@Test
+	public void testUrlToFileWithNull()
+	{
+		File result = Util.urlToFile(null);
+		
+		assertEquals(null, result);
+	}
+	
+	@Test
+	public void testUrlToFileWithFileUrl() throws Exception
+	{
+		File result = Util.urlToFile(new URL("file://c:/this/is/a/file.extension"));
+		
+		assertEquals("C:\\this\\is\\a\\file.extension", result.getAbsolutePath());
+	}
+	
+	@Test
+	public void testUrlToFileWithHttpUrl() throws Exception
+	{
+		File result = Util.urlToFile(new URL("http://this/is/not/a/file.html"));
+		
+		assertEquals(null, result);
+	}
+	
+	//randomString()
+	@Test
+	public void testRandomStringWithZeroLength()
+	{
+		String result = Util.randomString(0);
+		
+		assertEquals(0, result.length());
+		assertEquals(0, result.replaceAll("[a-zA-Z]", "").length());
+	}
+	
+	@Test
+	public void testRandomStringWithNonZeroLength()
+	{
+		String result = Util.randomString(10);
+		
+		assertEquals(10, result.length());
+		assertEquals(0, result.replaceAll("[a-zA-Z]", "").length());
+	}
+	
+	//mixDouble()
+	@Test
+	public void testMixDouble5050()
+	{
+		assertEquals(30 , Util.mixDouble(0.5, 10, 50), ALLOWABLE_DOUBLE_ERROR);
+	}
+	
+	@Test
+	public void testMixDouble2575()
+	{
+		assertEquals(20 , Util.mixDouble(0.25, 10, 50), ALLOWABLE_DOUBLE_ERROR);
+	}
+	
+	@Test
+	public void testMixDouble7525()
+	{
+		assertEquals(40 , Util.mixDouble(0.75, 10, 50), ALLOWABLE_DOUBLE_ERROR);
+	}
+	
+	@Test
+	public void testMixDoubleAmountLessThanZero()
+	{
+		assertEquals(10 , Util.mixDouble(-1, 10, 50), ALLOWABLE_DOUBLE_ERROR);
+	}
+	
+	@Test
+	public void testMixDoubleAmountGreaterThanOne()
+	{
+		assertEquals(50 , Util.mixDouble(2, 10, 50), ALLOWABLE_DOUBLE_ERROR);
+	}
+	
+	// percentDouble()
+	@Test
+	public void testPercentDoubleLessThanMin()
+	{
+		assertEquals(0, Util.percentDouble(-1, 0.0, 100.0), ALLOWABLE_DOUBLE_ERROR);
+	}
+	
+	@Test
+	public void testPercentDoubleGreaterThanMax()
+	{
+		assertEquals(1.0, Util.percentDouble(101, 0.0, 100.0), ALLOWABLE_DOUBLE_ERROR);
+	}
+	
+	@Test
+	public void testPercentDoubleInRange()
+	{
+		assertEquals(0.55, Util.percentDouble(55, 0.0, 100.0), ALLOWABLE_DOUBLE_ERROR);
+	}
+	
+	// computeLatLonFromString()
+	@Test
+	public void testComputeLatLonFromStringWithNull()
+	{
+		assertEquals(null, Util.computeLatLonFromString(null));
+	}
+	
+	@Test
+	public void testComputeLatLonFromStringWithBlank()
+	{
+		assertEquals(null, Util.computeLatLonFromString(""));
+	}
+	
+	@Test
+	public void testComputeLatLonFromStringWithInvalid()
+	{
+		assertEquals(null, Util.computeLatLonFromString("abc"));
+	}
+	
+	@Test
+	public void testComputeLatLonFromStringWithValidSignedDecimalDegrees()
+	{
+		LatLon result = Util.computeLatLonFromString("-87.345, 123.45");
+		LatLon expected = new LatLon(Angle.fromDegrees(-87.345), Angle.fromDegrees(123.45));
+		assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testComputeLatLonFromStringWithValidEWNSDecimalDegrees()
+	{
+		LatLon result = Util.computeLatLonFromString("87.345S, 123.45E");
+		LatLon expected = new LatLon(Angle.fromDegrees(-87.345), Angle.fromDegrees(123.45));
+		assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testComputeLatLonFromStringWithValidEWNSDegMinSec()
+	{
+		LatLon result = Util.computeLatLonFromString("87° 23' 33\"S, 123° 45' 56\"E");
+		LatLon expected = new LatLon(Angle.fromDegrees(-87.3925), Angle.fromDegrees(123.7656));
+		
+		assertEquals(expected.latitude.degrees, result.latitude.degrees, ALLOWABLE_DOUBLE_ERROR);
+		assertEquals(expected.longitude.degrees, result.longitude.degrees, ALLOWABLE_DOUBLE_ERROR);
 	}
 	
 }
