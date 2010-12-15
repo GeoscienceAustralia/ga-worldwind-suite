@@ -1,5 +1,5 @@
 package au.gov.ga.worldwind.common.layers.geometry.provider;
-import static au.gov.ga.worldwind.common.util.Util.*;
+import static au.gov.ga.worldwind.common.util.Util.isBlank;
 import gov.nasa.worldwind.formats.shapefile.DBaseRecord;
 import gov.nasa.worldwind.formats.shapefile.Shapefile;
 import gov.nasa.worldwind.formats.shapefile.ShapefileRecord;
@@ -19,7 +19,7 @@ import au.gov.ga.worldwind.common.layers.geometry.Shape;
 import au.gov.ga.worldwind.common.layers.geometry.Shape.Type;
 import au.gov.ga.worldwind.common.layers.geometry.ShapeProvider;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
-import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.common.util.URLUtil;
 
 /**
  * A {@link ShapeProvider} that loads shapes from a zipped Shapefile.
@@ -51,7 +51,7 @@ public class ShapefileShapeProvider extends ShapeProviderBase implements ShapePr
 	{
 		try
 		{
-			Shapefile shapefile = ShapefileUtils.openZippedShapefile(Util.urlToFile(url));
+			Shapefile shapefile = ShapefileUtils.openZippedShapefile(URLUtil.urlToFile(url));
 			while (shapefile.hasNext())
 			{
 				ShapefileRecord record = shapefile.nextRecord();

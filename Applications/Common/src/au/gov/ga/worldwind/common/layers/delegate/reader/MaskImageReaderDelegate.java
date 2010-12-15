@@ -19,7 +19,7 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegatorTile;
 import au.gov.ga.worldwind.common.layers.delegate.ITileReaderDelegate;
-import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.common.util.URLUtil;
 
 /**
  * Implementation of {@link ITileReaderDelegate} which supports reading an image
@@ -125,7 +125,7 @@ public class MaskImageReaderDelegate implements ITileReaderDelegate
 		}
 		else
 		{
-			File imageFile = Util.urlToFile(url);
+			File imageFile = URLUtil.urlToFile(url);
 			if (imageFile == null || !imageFile.exists())
 				return null;
 

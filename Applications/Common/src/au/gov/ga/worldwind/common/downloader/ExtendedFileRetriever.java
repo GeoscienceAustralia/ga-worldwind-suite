@@ -9,7 +9,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
 
-import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.common.util.URLUtil;
 
 /**
  * Extension of {@link FileRetriever} which implements {@link ExtendedRetriever}.
@@ -60,7 +60,7 @@ public class ExtendedFileRetriever extends FileRetriever implements ExtendedRetr
 
 	protected boolean checkIfModified(URL url, long ifModifiedSince)
 	{
-		File file = Util.urlToFile(url);
+		File file = URLUtil.urlToFile(url);
 		return file != null && file.exists() && file.lastModified() <= ifModifiedSince;
 	}
 

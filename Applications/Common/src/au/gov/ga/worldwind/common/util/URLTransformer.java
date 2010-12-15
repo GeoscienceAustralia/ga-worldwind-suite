@@ -5,6 +5,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Maintains a static list of {@link URLTransform}'s that can be applied in order using
+ * the {@link #transform} methods.
+ * <p/>
+ * Examples of {@link URLTransform}s might be to change the port number based on the current environment,
+ * or append request parameters to URLs matching a given pattern.
+ */
 public class URLTransformer
 {
 	public interface URLTransform

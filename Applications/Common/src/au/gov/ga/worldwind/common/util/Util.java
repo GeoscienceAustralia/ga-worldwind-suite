@@ -52,44 +52,6 @@ public class Util
 	}
 
 	/**
-	 * Obtain a {@link File} instance that points to the provided file:// URL.
-	 * <p/>
-	 * If the provided URL is not a file, will return <code>null</code>.
-	 */
-	public static File urlToFile(URL url)
-	{
-		if (!isFileUrl(url))
-		{
-			return null;
-		}
-		
-		try
-		{
-			return new File(url.toURI());
-		}
-		catch (Exception e1)
-		{
-			try
-			{
-				return new File(url.getPath());
-			}
-			catch (Exception e2)
-			{
-			}
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * @return <code>true</code> if the provided URL uses the file:// protocol
-	 */
-	public static boolean isFileUrl(URL url)
-	{
-		return url != null && "file".equalsIgnoreCase(url.getProtocol());
-	}
-
-	/**
 	 * Create a URL pointing to a tile file on the local file system (or inside
 	 * a zip file). Returns null if no file for the tile was found.
 	 * 
@@ -188,10 +150,6 @@ public class Util
 
 	/**
 	 * Attempt to find a directory or file, relative to a given context URL
-	 * 
-	 * @param path
-	 * @param context
-	 * @return
 	 */
 	private static File getPathWithinContext(String path, URL context)
 	{
@@ -199,7 +157,7 @@ public class Util
 		try
 		{
 			URL url = context == null ? new URL(path) : new URL(context, path);
-			File file = Util.urlToFile(url);
+			File file = URLUtil.urlToFile(url);
 			if (file != null && file.exists())
 				return file;
 		}
@@ -211,7 +169,7 @@ public class Util
 		File parent = null;
 		if (context != null)
 		{
-			File file = Util.urlToFile(context);
+			File file = URLUtil.urlToFile(context);
 			if (file != null && file.isFile())
 			{
 				parent = file.getParentFile();
@@ -813,25 +771,5 @@ public class Util
 		}
 		reader.close();
 		return result.toString();
-	}
-	
-	/**
-	 * @return A new URL with the same protocol and path, but devoid of the query string
-	 */
-	public static URL stripQuery(URL url)
-	{
-		if (url == null || url.getQuery() == null)
-		{
-			return url;
-		}
-		try
-		{
-			String urlString = url.toExternalForm();
-			return new URL(urlString.substring(0, urlString.indexOf('?')));
-		}
-		catch (MalformedURLException e)
-		{
-			return null;
-		}
 	}
 }

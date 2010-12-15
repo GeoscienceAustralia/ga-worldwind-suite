@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.wmsbrowser.WmsBrowserSettings;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerImpl;
@@ -95,7 +95,7 @@ public class CSWSearchService implements WmsServerSearchService
 				continue;
 			}
 			
-			URL url = Util.stripQuery(capabilitiesResource.getURL());
+			URL url = URLUtil.stripQuery(capabilitiesResource.getURL());
 			String name = cswRecord.getTitle();
 			
 			result.add(new WmsServerSearchResultImpl(new WmsServerImpl(name, url), cswRecord));

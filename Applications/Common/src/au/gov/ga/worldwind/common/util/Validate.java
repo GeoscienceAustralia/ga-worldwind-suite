@@ -4,9 +4,6 @@ package au.gov.ga.worldwind.common.util;
  * Util class that provides some commonly used validation methods.
  * <p/>
  * Based on the Apache Commons Validate class
- * 
- * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class Validate
 {

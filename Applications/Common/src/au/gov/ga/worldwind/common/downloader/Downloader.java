@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import au.gov.ga.worldwind.common.util.AVKeyMore;
-import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.common.util.URLUtil;
 
 /**
  * Utility class which performs downloading from URLs. Supports the file, http
@@ -410,7 +410,7 @@ public class Downloader
 	public static void removeCache(URL url)
 	{
 		URL fileUrl = getCacheURL(url);
-		File file = Util.urlToFile(fileUrl);
+		File file = URLUtil.urlToFile(fileUrl);
 		if (file != null && file.isFile())
 		{
 			file.delete();

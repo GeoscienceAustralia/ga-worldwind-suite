@@ -28,6 +28,10 @@ import javax.xml.xpath.XPath;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * An extension of the World-Wind provided {@link WWXML} utilities,
+ * provides additional helper methods for dealing with XML documents.
+ */
 public class XMLUtil extends WWXML
 {
 	public static Element getElementFromSource(Object source)

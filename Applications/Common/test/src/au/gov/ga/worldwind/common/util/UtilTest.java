@@ -24,40 +24,6 @@ public class UtilTest
 {
 	private static final double ALLOWABLE_DOUBLE_ERROR = 0.0001;
 
-	// stripQuery()
-	
-	@Test
-	public void testStripQueryWithNull()
-	{
-		URL url = null;
-		
-		URL result = Util.stripQuery(url);
-		
-		assertNull(result);
-	}
-	
-	@Test
-	public void testStripQueryWithNoQuery() throws Exception
-	{
-		URL url = new URL("http://www.some.url.com/without/query.html");
-		
-		URL result = Util.stripQuery(url);
-		
-		assertNotNull(result);
-		assertEquals("http://www.some.url.com/without/query.html", result.toExternalForm());
-	}
-	
-	@Test
-	public void testStripQueryWithQuery() throws Exception
-	{
-		URL url = new URL("http://www.some.url.com/with/query.html?param1=value1&param2=value2");
-		
-		URL result = Util.stripQuery(url);
-		
-		assertNotNull(result);
-		assertEquals("http://www.some.url.com/with/query.html", result.toExternalForm());
-	}
-	
 	// computeVec4FromString()
 	
 	@Test
@@ -456,31 +422,6 @@ public class UtilTest
 	public void testPaddedIntWithIntLengthGreaterThanCharCount()
 	{
 		assertEquals("12235", Util.paddedInt(12235, 4));
-	}
-	
-	// urlToFile()
-	@Test
-	public void testUrlToFileWithNull()
-	{
-		File result = Util.urlToFile(null);
-		
-		assertEquals(null, result);
-	}
-	
-	@Test
-	public void testUrlToFileWithFileUrl() throws Exception
-	{
-		File result = Util.urlToFile(new URL("file://c:/this/is/a/file.extension"));
-		
-		assertEquals("C:\\this\\is\\a\\file.extension", result.getAbsolutePath());
-	}
-	
-	@Test
-	public void testUrlToFileWithHttpUrl() throws Exception
-	{
-		File result = Util.urlToFile(new URL("http://this/is/not/a/file.html"));
-		
-		assertEquals(null, result);
 	}
 	
 	//randomString()

@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import au.gov.ga.worldwind.common.layers.point.AbstractPointProvider;
 import au.gov.ga.worldwind.common.layers.point.PointLayer;
 import au.gov.ga.worldwind.common.layers.point.PointProvider;
-import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.common.util.URLUtil;
 
 /**
  * {@link PointProvider} implementation which loads points from a zipped
@@ -31,7 +31,7 @@ public class ShapefilePointProvider extends AbstractPointProvider
 	{
 		try
 		{
-			Shapefile shapefile = ShapefileUtils.openZippedShapefile(Util.urlToFile(url));
+			Shapefile shapefile = ShapefileUtils.openZippedShapefile(URLUtil.urlToFile(url));
 			while (shapefile.hasNext())
 			{
 				ShapefileRecord record = shapefile.nextRecord();
