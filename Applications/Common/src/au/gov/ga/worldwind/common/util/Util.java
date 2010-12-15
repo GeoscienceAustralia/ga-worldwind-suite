@@ -604,32 +604,58 @@ public class Util
 		return string == null || string.trim().isEmpty();
 	}
 
+	/**
+	 * @return Whether the provided collection is <code>null</code> or empty
+	 */
 	public static boolean isEmpty(Collection<?> collection)
 	{
 		return collection == null || collection.isEmpty();
 	}
 	
+	/**
+	 * Clamp the provided value to the range specified by <code>[min, max]</code>
+	 */
 	public static int clamp(int value, int min, int max)
 	{
+		Validate.isTrue(min <= max, "Min must be less than or equal to max");
 		return Math.max(min, Math.min(max, value));
 	}
 
+	/**
+	 * Clamp the provided value to the range specified by <code>[min, max]</code>
+	 */
 	public static double clamp(double value, double min, double max)
 	{
+		Validate.isTrue(min <= max, "Min must be less than or equal to max");
 		return Math.max(min, Math.min(max, value));
 	}
 
+	/**
+	 * Clamp the provided {@link LatLon} pair to be within the provided {@link Sector} extents.
+	 */
 	public static LatLon clampLatLon(LatLon latlon, Sector sector)
 	{
+		if (latlon ==  null || sector == null)
+		{
+			return latlon;
+		}
+		
 		double lat = clamp(latlon.latitude.degrees, sector.getMinLatitude().degrees, sector.getMaxLatitude().degrees);
-		double lon =
-				clamp(latlon.longitude.degrees, sector.getMinLongitude().degrees, sector.getMaxLongitude().degrees);
+		double lon = clamp(latlon.longitude.degrees, sector.getMinLongitude().degrees, sector.getMaxLongitude().degrees);
 
 		return LatLon.fromDegrees(lat, lon);
 	}
 	
+	/**
+	 * Clamp the provided {@link Sector} to be within the provided {@link Sector} extents.
+	 */
 	public static Sector clampSector(Sector source, Sector extents)
 	{
+		if (source == null || extents == null)
+		{
+			return source;
+		}
+		
 		double minLat = clamp(source.getMinLatitude().degrees, extents.getMinLatitude().degrees, extents.getMaxLatitude().degrees);
 		double maxLat = clamp(source.getMaxLatitude().degrees, extents.getMinLatitude().degrees, extents.getMaxLatitude().degrees);
 		double minLon = clamp(source.getMinLongitude().degrees, extents.getMinLongitude().degrees, extents.getMaxLongitude().degrees);
@@ -679,10 +705,18 @@ public class Util
 		return new Position(pos, elevation);
 	}
 
+	/**
+	 * Parse a Vec4 from a String representation of the form <code>[(]x,[ ]y,[ ]z[,w][)]</code>
+	 */
 	public static Vec4 computeVec4FromString(String text)
 	{
-		String separators = "(\\s+|,|,\\s+)";
-		String[] split = text.trim().split(separators);
+		if (isBlank(text))
+		{
+			return null;
+		}
+		
+		String separators = "(\\s+|,|,\\s+)"; // Separate on commas (with or without whitespace)
+		String[] split = text.replaceAll("\\s", "").replaceAll("\\(|\\)", "").split(separators); // Clean up whitespace and braces before splitting
 		if (split.length == 3 || split.length == 4)
 		{
 			try
@@ -744,7 +778,7 @@ public class Util
 	 */
 	public static URL stripQuery(URL url)
 	{
-		if (url.getQuery() == null)
+		if (url == null || url.getQuery() == null)
 		{
 			return url;
 		}
