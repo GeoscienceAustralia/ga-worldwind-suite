@@ -36,6 +36,11 @@ public class Util
 	public final static String UTM_COORDINATE_REGEX =
 			"(?:[a-zA-Z]*\\s*)(\\d+)(?:\\s*)([a-zA-Z])(?:\\s+)((?:\\d*\\.?\\d+)|(?:\\d+))(?:[E|e]?)(?:\\s+)((?:\\d*\\.?\\d+)|(?:\\d+))(?:[N|n]?)";
 
+	/**
+	 * @return A string representation of the provided integer value, padded with 0's to a total
+	 * length of <code>charcount</code>. Note: If length(value) > charcount, the input value
+	 * will be returned as a string.
+	 */
 	public static String paddedInt(int value, int charcount)
 	{
 		String str = String.valueOf(value);
@@ -46,26 +51,42 @@ public class Util
 		return str;
 	}
 
+	/**
+	 * Obtain a {@link File} instance that points to the provided file:// URL.
+	 * <p/>
+	 * If the provided URL is not a file, will return <code>null</code>.
+	 */
 	public static File urlToFile(URL url)
 	{
-		if ("file".equalsIgnoreCase(url.getProtocol()))
+		if (!isFileUrl(url))
+		{
+			return null;
+		}
+		
+		try
+		{
+			return new File(url.toURI());
+		}
+		catch (Exception e1)
 		{
 			try
 			{
-				return new File(url.toURI());
+				return new File(url.getPath());
 			}
-			catch (Exception e1)
+			catch (Exception e2)
 			{
-				try
-				{
-					return new File(url.getPath());
-				}
-				catch (Exception e2)
-				{
-				}
 			}
 		}
+		
 		return null;
+	}
+	
+	/**
+	 * @return <code>true</code> if the provided URL uses the file:// protocol
+	 */
+	public static boolean isFileUrl(URL url)
+	{
+		return url != null && "file".equalsIgnoreCase(url.getProtocol());
 	}
 
 	/**
@@ -272,6 +293,9 @@ public class Util
 		return null;
 	}
 
+	/**
+	 * @return A string containing random characters <code>[a-zA-z]</code> of length <code>length</code>
+	 */
 	public static String randomString(int length)
 	{
 		String chars = new String("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -297,14 +321,17 @@ public class Util
 		return (long) mixDouble(scaleFactor, minLengthMillis, maxLengthMillis);
 	}
 
-	public static long getScaledLengthMillis(double beginZoom, double endZoom, long minLengthMillis,
-			long maxLengthMillis)
+	public static long getScaledLengthMillis(double beginZoom, double endZoom, long minLengthMillis, long maxLengthMillis)
 	{
 		double scaleFactor = Math.abs(endZoom - beginZoom) / Math.max(endZoom, beginZoom);
-		scaleFactor = clampDouble(scaleFactor, 0.0, 1.0);
+		scaleFactor = clamp(scaleFactor, 0.0, 1.0);
 		return (long) mixDouble(scaleFactor, minLengthMillis, maxLengthMillis);
 	}
 
+	/**
+	 * Returns a 'mixing' of the values <code>value1</code> and <code>value2</code> using <code>1-amount<code> of <code>value1</code> linearly combined
+	 * with <code>amount</code> of <code>value2</code>. <code>amount</code> should be expressed as a percentage in the range <code>[0,1]</code>
+	 */
 	public static double mixDouble(double amount, double value1, double value2)
 	{
 		if (amount < 0)
@@ -314,6 +341,9 @@ public class Util
 		return value1 * (1.0 - amount) + value2 * amount;
 	}
 
+	/**
+	 * @return The provided value as a percentage of the interval <code>[min, max]</code>, clamped to the interval <code>[0,1]</code>
+	 */
 	public static double percentDouble(double value, double min, double max)
 	{
 		if (value < min)
@@ -333,12 +363,7 @@ public class Util
 		}
 
 		double unclampedRatio = x.divide(y);
-		return clampDouble(unclampedRatio, 0, 1);
-	}
-
-	private static double clampDouble(double value, double min, double max)
-	{
-		return value < min ? min : (value > max ? max : value);
+		return clamp(unclampedRatio, 0, 1);
 	}
 
 	public static Position computePositionFromString(String positionString)
@@ -371,6 +396,9 @@ public class Util
 		return new Position(ll, elevation);
 	}
 
+	/**
+	 * @see #computeLatLonFromString(String, Globe)
+	 */
 	public static LatLon computeLatLonFromString(String coordString)
 	{
 		return computeLatLonFromString(coordString, null);
@@ -378,20 +406,26 @@ public class Util
 
 	/**
 	 * Tries to extract a latitude and a longitude from the given text string.
+	 * <p/>
+	 * Supported formats are:
+	 * <ol>
+	 * 	<li>Comma- or space-separated signed decimal degrees, with optional E/W/N/S suffixes (eg. <code>-97.345, 123.45</code> or <code>97.345S 123.345W</code>)</li>
+	 * 	<li>Comma- or space-separated degree-minute-second blocks, with optional E/W/N/S suffixes (eg. <code>-123° 34' 42", +45° 12' 30"</code> or <code>123° 34' 42"S 45° 12' 30"W</code>)</li>
+	 * </ol>
+	 * <p/>
+	 * If the parsed Lat-Lons are outside of the valid range of <code>Lat=[-90,90]</code> and <code>Lon=[-180,180]</code>, or parsing fails, will return <code>null</code>.
+	 * @param coordString the input string 
+	 * @param globe the current <code>Globe</code> (Optional).
 	 * 
-	 * @param coordString
-	 *            the input string.
-	 * @param globe
-	 *            the current <code>Globe</code>.
 	 * @return the corresponding <code>LatLon</code> or <code>null</code>.
 	 */
 	public static LatLon computeLatLonFromString(String coordString, Globe globe)
 	{
-		if (coordString == null)
+		if (isBlank(coordString))
 		{
 			String msg = Logging.getMessage("nullValue.StringIsNull");
 			Logging.logger().severe(msg);
-			throw new IllegalArgumentException(msg);
+			return null;
 		}
 
 		Angle lat = null;
@@ -411,7 +445,7 @@ public class Util
 				try
 				{
 					MGRSCoord MGRS = MGRSCoord.fromString(coordString, globe);
-					// NOTE: the MGRSCoord does not always report errors with invalide strings,
+					// NOTE: the MGRSCoord does not always report errors with invalid strings,
 					// but will have lat and lon set to zero
 					if (MGRS.getLatitude().degrees != 0 || MGRS.getLatitude().degrees != 0)
 					{
@@ -419,7 +453,9 @@ public class Util
 						lon = MGRS.getLongitude();
 					}
 					else
+					{
 						return null;
+					}
 				}
 				catch (IllegalArgumentException e)
 				{
@@ -429,7 +465,7 @@ public class Util
 		}
 
 		// Try to extract a pair of signed decimal values separated by a space, ',' or ', '
-		// Allow E, W, S, N sufixes
+		// Allow E, W, S, N suffixes
 		if (lat == null || lon == null)
 		{
 			regex = "([-|\\+]?\\d+?(\\.\\d+?)??\\s*[N|n|S|s]??)";
@@ -470,11 +506,9 @@ public class Util
 		// eg: 123° 34' 42"S 45° 12' 30"W
 		if (lat == null || lon == null)
 		{
-			regex =
-					"([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}[m|M|'|\u2019|\\s])?(\\s*\\d{1,2}[s|S|\"|\u201d])?\\s*[N|n|S|s]?)";
+			regex = "([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}[m|M|'|\u2019|\\s])?(\\s*\\d{1,2}[s|S|\"|\u201d])?\\s*[N|n|S|s]?)";
 			regex += separators;
-			regex +=
-					"([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}[m|M|'|\u2019|\\s])?(\\s*\\d{1,2}[s|S|\"|\u201d])?\\s*[E|e|W|w]?)";
+			regex += "([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}[m|M|'|\u2019|\\s])?(\\s*\\d{1,2}[s|S|\"|\u201d])?\\s*[E|e|W|w]?)";
 			pattern = Pattern.compile(regex);
 			matcher = pattern.matcher(coordString);
 			if (matcher.matches())
@@ -485,10 +519,14 @@ public class Util
 		}
 
 		if (lat == null || lon == null)
+		{
 			return null;
+		}
 
 		if (lat.degrees >= -90 && lat.degrees <= 90 && lon.degrees >= -180 && lon.degrees <= 180)
+		{
 			return new LatLon(lat, lon);
+		}
 
 		return null;
 	}
@@ -586,12 +624,16 @@ public class Util
 		return null;
 	}
 
+	/**
+	 * @return The capitalised version of the provided string
+	 */
 	public static String capitalizeFirstLetter(String s)
 	{
-		if (s == null)
-			return null;
-		if (s.isEmpty())
+		if (isBlank(s))
+		{
 			return s;
+		}
+		
 		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
 

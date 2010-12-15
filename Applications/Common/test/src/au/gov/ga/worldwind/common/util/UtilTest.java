@@ -588,6 +588,24 @@ public class UtilTest
 	}
 	
 	@Test
+	public void testComputeLatLonFromStringWithInvalidDecimalDegrees()
+	{
+		LatLon result = Util.computeLatLonFromString("-90.345, 123.45");
+		LatLon expected = null;
+		assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testComputeLatLonFromStringWithValidSignedDegMinSec()
+	{
+		LatLon result = Util.computeLatLonFromString("-87° 23' 33\", 123° 45' 56\"");
+		LatLon expected = new LatLon(Angle.fromDegrees(-87.3925), Angle.fromDegrees(123.7656));
+		
+		assertEquals(expected.latitude.degrees, result.latitude.degrees, ALLOWABLE_DOUBLE_ERROR);
+		assertEquals(expected.longitude.degrees, result.longitude.degrees, ALLOWABLE_DOUBLE_ERROR);
+	}
+	
+	@Test
 	public void testComputeLatLonFromStringWithValidEWNSDegMinSec()
 	{
 		LatLon result = Util.computeLatLonFromString("87° 23' 33\"S, 123° 45' 56\"E");
@@ -595,6 +613,14 @@ public class UtilTest
 		
 		assertEquals(expected.latitude.degrees, result.latitude.degrees, ALLOWABLE_DOUBLE_ERROR);
 		assertEquals(expected.longitude.degrees, result.longitude.degrees, ALLOWABLE_DOUBLE_ERROR);
+	}
+	
+	@Test
+	public void testComputeLatLonFromStringWithInvalidDegMinSec()
+	{
+		LatLon result = Util.computeLatLonFromString("-90° 23' 33\", 123° 45' 56\"");
+
+		assertNull(result);
 	}
 	
 }
