@@ -64,37 +64,6 @@ public class GoToCoordinatePanel extends JPanel
 		makePanel(inDialog);
 	}
 
-	/*public static void main(String[] args)
-	{
-		LatLon latlon = LatLon.fromDegrees(-27, 133.5);
-		String test1 = "-27.0 133.5";
-		String test2 = "27.0S 133.5E";
-		String test3 = "-27\u00B000'00\" 133\u00B030'00\"";
-		String test4 = "-27d00'00\" 133d30'00\"";
-		String test5 = "27d00'00\"S 133d30'00\"E";
-		String test6 = "53J 351167E 7012680N";
-		String test7 = "53JLL 51167 12680";
-
-		String[] tests = new String[] { test1, test2, test3, test4, test5, test6, test7 };
-		Globe globe = new Earth();
-
-		for (String test : tests)
-		{
-			LatLon ll = Util.computeLatLonFromString(test, globe);
-			if (ll == null)
-				ll = Util.computeLatLonFromUTMString(test, globe, false);
-
-			if (LatLon.greatCircleDistance(latlon, ll).degrees < 0.00001)
-			{
-				System.out.println(test);
-			}
-			else
-			{
-				System.out.println("ERROR!: " + test + " = " + ll);
-			}
-		}
-	}*/
-
 	private void makePanel(boolean inDialog)
 	{
 		GridBagConstraints c;

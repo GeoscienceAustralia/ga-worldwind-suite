@@ -164,15 +164,11 @@ public class ExaggerationPanel extends AbstractThemePanel
 	private void set(double exaggeration, boolean valueFromSlider, boolean valueFromField)
 	{
 		if (ignoreExaggerationChange)
+		{
 			return;
+		}
 
 		ignoreExaggerationChange = true;
-
-		//String format = "%1." + (exaggeration < 10 ? "2" : exaggeration < 100 ? "1" : "0") + "f";
-		//String text = String.format(format, exaggeration);
-		//if (text.indexOf('.') < 0)
-		//	text += ".";
-		//exaggerationLabel.setText(text + " x");
 
 		if (!valueFromField)
 		{
@@ -186,7 +182,9 @@ public class ExaggerationPanel extends AbstractThemePanel
 			//only change slider if current value doesn't resolve to current exaggeration
 			double currentSliderExaggeration = sliderToExaggeration(exaggerationSlider.getValue());
 			if (currentSliderExaggeration != exaggeration)
+			{
 				exaggerationSlider.setValue(exaggerationToSlider(exaggeration));
+			}
 		}
 
 		if (valueFromSlider || valueFromField)
