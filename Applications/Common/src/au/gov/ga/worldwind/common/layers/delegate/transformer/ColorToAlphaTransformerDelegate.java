@@ -14,8 +14,21 @@ import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
 
 /**
  * Implementation of {@link IImageTransformerDelegate} which applies a
- * color-to-alpha transformation on the incoming images. The color-to-alpha
- * implementation is similar to GIMPs.
+ * color-to-alpha transformation on the incoming images. 
+ * <p/>
+ * The color-to-alpha implementation is similar to GIMP's: The alpha level of each processed pixel
+ * is proportional to how close that pixel is to the target colour.
+ * 
+ * <p/>
+ * 
+ * <code>&lt;Delegate&gt;ColorToAlphaTransformer(r,g,b)&lt;/Delegate&gt;</code>
+ * <ul>
+ * 	<li>r = target colour red channel (integer in range [0, 255])
+ *  <li>g = target colour green channel (integer in range [0, 255])
+ *  <li>b = target colour blue channel (integer in range [0, 255])
+ * </ul>
+ * 
+ * @see http://manual.gimp.org/en/plug-in-colortoalpha.html
  * 
  * @author Michael de Hoog
  */

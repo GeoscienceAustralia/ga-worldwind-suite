@@ -13,8 +13,22 @@ import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
 
 /**
- * Implementation of {@link IImageTransformerDelegate} which converts a certain
- * color to transparency with fuzziness.
+ * Implementation of {@link IImageTransformerDelegate} which converts a targeted
+ * colour to transparency with fuzziness.
+ * <p/>
+ * Similar to the {@link ColorToAlphaTransformerDelegate}, but sets any colour within <code>fuzz</code> percent
+ * of the target colour to fully transparent.
+ * <p/>
+ * Useful for masking images that do not have an alpha channel but provide a 'mask' colour.
+ * <p/>
+ * <code>&lt;Delegate&gt;TransparentColorTransformer(r,g,b,fuzz)&lt;/Delegate&gt;</code>
+ * <ul>
+ * 	<li>r = target colour red channel (integer in range [0, 255])
+ *  <li>g = target colour green channel (integer in range [0, 255])
+ *  <li>b = target colour blue channel (integer in range [0, 255])
+ *  <li>fuzz = controls how close to the target colour a pixel must be to be made transparent 
+ *  (double in range [0, 1], 0 = only the target colour, 1 = all colours)
+ * </ul>
  * 
  * @author Michael de Hoog
  */

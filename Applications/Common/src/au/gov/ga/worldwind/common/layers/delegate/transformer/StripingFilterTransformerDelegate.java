@@ -11,6 +11,27 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
 
+/**
+ * Applies a filter to the retrieved image tiles to remove striping noise using a 
+ * combination of lowpass and highpass filtering.
+ * <p/>
+ * Based on the technique described at http://isis.astrogeology.usgs.gov/IsisWorkshop/index.php/Removing_Striping_Noise_from_Image_Data
+ * <p/>
+ * As described in the article, a good rule of thumb for the size of filter to apply is:
+ * <ol>
+ * 	<li>Make the size of the lowpass filter large enough to encompass the striping (e.g. twice the size of the striping)
+ *  <li>Make the size of the highpass filter small enough to fit within the striping (e.g. half the size of the striping)
+ * </ol>
+ * <p/>
+ * <code>&lt;Delegate&gt;StripingFilterTransformer(lowPassCols,lowPassRows,highPassCols,highPassRows)&lt;/Delegate&gt;</code>
+ * <ul>
+ * 	<li>lowPassCols = the filter size for the low pass filter applied to the columns of the image (integer number of pixels)
+ *  <li>lowPassRows = the filter size for the low pass filter applied to the rows of the image (integer number of pixels)
+ *  <li>highPassCols = the filter size for the high pass filter applied to the columns of the image (integer number of pixels)
+ *  <li>highPassRows = the filter size for the high pass filter applied to the rows of the image (integer number of pixels)
+ * </ul>
+ * <b>Note:</b> If the lowPass and highPass filters are the same size for columns or rows, no effect will be seen in that direction of the image
+ */
 public class StripingFilterTransformerDelegate implements IImageTransformerDelegate
 {
 	private final static String DEFINITION_STRING = "StripingFilterTransformer";

@@ -13,6 +13,19 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
 
+/**
+ * Applies a resize transformation to each retrieved tile such that the resulting image dimensions match
+ * those specified in the delegate definition. Where the target dimensions do not match those of the 
+ * retrieved image tile, bilinear interpolation is used for resizing the tile.
+ * <p/>
+ * Useful for resizing tiles on-the-fly to the standard 512x512 size.
+ * <p/>
+ * <code>&lt;Delegate&gt;ResizeTransformer(w,h)&lt;/Delegate&gt;</code>
+ * <ul>
+ * 	<li>w = target image width (integer)
+ *  <li>h = target image height (integer)
+ * </ul> 
+ */
 public class ResizeTransformerDelegate implements IImageTransformerDelegate
 {
 	private final static String DEFINITION_STRING = "ResizeTransformer";

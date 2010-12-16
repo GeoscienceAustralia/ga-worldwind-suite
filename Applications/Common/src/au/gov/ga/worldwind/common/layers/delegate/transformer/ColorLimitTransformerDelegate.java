@@ -12,6 +12,17 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
 
+/**
+ * A delegate that limits each colour channel of the target image to be less than a 
+ * provided limiting colour.
+ * <p/>
+ * <code>&lt;Delegate&gt;ColorLimitTransformer(r,g,b)&lt;/Delegate&gt;</code>
+ * <ul>
+ * 	<li>r = limit for the red channel (integer in range [0, 255])
+ *  <li>g = limit for the green channel (integer in range [0, 255])
+ *  <li>b = limit for the blue channel (integer in range [0, 255])
+ * </ul>
+ */
 public class ColorLimitTransformerDelegate implements IImageTransformerDelegate
 {
 	private final static String DEFINITION_STRING = "ColorLimitTransformer";
