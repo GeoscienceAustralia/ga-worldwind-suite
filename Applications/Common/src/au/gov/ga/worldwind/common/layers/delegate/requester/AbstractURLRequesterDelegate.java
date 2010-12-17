@@ -126,9 +126,13 @@ public abstract class AbstractURLRequesterDelegate<TILE extends IDelegatorTile> 
 		public boolean equals(Object o)
 		{
 			if (this == o)
+			{
 				return true;
+			}
 			if (o == null || getClass() != o.getClass())
+			{
 				return false;
+			}
 
 			final RequestTask<?> that = (RequestTask<?>) o;
 

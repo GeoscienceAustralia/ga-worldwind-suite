@@ -18,6 +18,18 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader.ElevationImageReaderDelegate;
 
+/**
+ * Treats retrieved image tiles as elevation data and calculates and displays the normal map
+ * for the elevation model mesh that would be generated from the elevation data.
+ * <p/>
+ * <code>&lt;Delegate&gt;NormalMapReader(pixelType,byteOrder,missingData)&lt;/Delegate&gt;</code>
+ * Where:
+ * <ul>
+ * 	<li>pixelType = the pixel format of the elevation tiles (one of "<code>Float32</code>", "<code>Int32</code>", "<code>Int16</code>" or "<code>Int8</code>")
+ * 	<li>byteOrder = the byte order of the elevation tiles (one of "<code>little</code>" or "<code>big</code>")
+ * 	<li>missingData = the value used in the elevation tiles to represent missing data (float)
+ * </ul>
+ */
 public class NormalMapImageReaderDelegate extends ElevationImageReaderDelegate
 {
 	private final static String DEFINITION_STRING = "NormalMapReader";
@@ -60,24 +72,26 @@ public class NormalMapImageReaderDelegate extends ElevationImageReaderDelegate
 	@Override
 	public String toDefinition(Element layerElement)
 	{
-		return DEFINITION_STRING + "(" + WWXML.dataTypeAsText(pixelType) + ","
-				+ WWXML.byteOrderAsText(byteOrder) + "," + missingDataSignal + ")";
+		return DEFINITION_STRING + "(" + WWXML.dataTypeAsText(pixelType) + "," + WWXML.byteOrderAsText(byteOrder) + ","
+				+ missingDataSignal + ")";
 	}
 
 	@Override
-	protected BufferedImage generateImage(BufferWrapper elevations, int width, int height,
-			Globe globe, Sector sector)
+	protected BufferedImage generateImage(BufferWrapper elevations, int width, int height, Globe globe, Sector sector)
 	{
 		//normals array has one less in width and height than verts array:
 		//this is because edge verts are shared between adjacent tiles
 
 		BufferedImage image = new BufferedImage(width - 1, height - 1, BufferedImage.TYPE_INT_RGB);
 
-		Vec4[] verts =
-				calculateTileVerts(width, height, globe, sector, elevations, missingDataSignal,
-						bakedExaggeration);
+		Vec4[] verts = calculateTileVerts(width,
+				height,
+				globe,
+				sector,
+				elevations,
+				missingDataSignal,
+				bakedExaggeration);
 		Vec4[] normals = calculateNormals(width, height, verts);
-		//double[] minmax = getMinMax(wrapper, missingDataSignal);
 
 		for (int y = 0, i = 0; y < height - 1; y++)
 		{
@@ -85,16 +99,13 @@ public class NormalMapImageReaderDelegate extends ElevationImageReaderDelegate
 			{
 				Vec4 normal = normals[i];
 				if (normal == null)
+				{
 					normal = Vec4.ZERO;
+				}
 
 				int r = (int) (255.0 * (normal.x + 1) / 2);
 				int g = (int) (255.0 * (normal.y + 1) / 2);
 				int b = (int) (255.0 * (normal.z + 1) / 2);
-
-				/*int index = width * y + x;
-				double elevation = elevations.getDouble(index);
-				elevation = clamp(elevation, minmax[0], minmax[1]);
-				int a = (int) (255.0 * (elevation - minmax[0]) / (minmax[1] - minmax[0]));*/
 
 				int argb = (0xff) << 24 | (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
 				image.setRGB(x, y, argb);
@@ -104,16 +115,12 @@ public class NormalMapImageReaderDelegate extends ElevationImageReaderDelegate
 		return image;
 	}
 
-	protected Vec4[] calculateTileVerts(int width, int height, Globe globe, Sector sector,
-			BufferWrapper elevations, double missingDataSignal, double bakedExaggeration)
+	protected Vec4[] calculateTileVerts(int width, int height, Globe globe, Sector sector, BufferWrapper elevations,
+			double missingDataSignal, double bakedExaggeration)
 	{
 		Vec4[] verts = new Vec4[width * height];
 		double dlon = sector.getDeltaLonDegrees() / width;
 		double dlat = sector.getDeltaLatDegrees() / height;
-
-		/*globe =
-				new FlatGlobe(Earth.WGS84_EQUATORIAL_RADIUS, Earth.WGS84_POLAR_RADIUS,
-						Earth.WGS84_ES, null);*/
 
 		for (int y = 0, i = 0; y < height; y++)
 		{
@@ -121,18 +128,10 @@ public class NormalMapImageReaderDelegate extends ElevationImageReaderDelegate
 			for (int x = 0; x < width; x++, i++)
 			{
 				Angle lon = sector.getMinLongitude().addDegrees(dlon * x);
-				//only add if lat/lon is inside level's sector
-				//if (this.getLevels().getSector().contains(lat, lon))
+				double elevation = elevations.getDouble(i);
+				if (elevation != missingDataSignal && elevation >= minElevationClamp && elevation <= maxElevationClamp)
 				{
-					double elevation = elevations.getDouble(i);
-					if (elevation != missingDataSignal && elevation >= minElevationClamp
-							&& elevation <= maxElevationClamp)
-					{
-						verts[i] =
-								globe.computePointFromPosition(lat, lon, elevation
-										* bakedExaggeration);
-						//verts[i] = new Vec4(lat.degrees, lon.degrees, elevation * bakedExaggeration);
-					}
+					verts[i] = globe.computePointFromPosition(lat, lon, elevation * bakedExaggeration);
 				}
 			}
 		}
@@ -147,10 +146,6 @@ public class NormalMapImageReaderDelegate extends ElevationImageReaderDelegate
 		{
 			for (int x = 0; x < width - 1; x++, i++)
 			{
-				//v0-v1
-				//|
-				//v2
-
 				int vertIndex = width * y + x;
 				Vec4 v0 = verts[vertIndex];
 				if (v0 != null)
@@ -158,33 +153,10 @@ public class NormalMapImageReaderDelegate extends ElevationImageReaderDelegate
 					Vec4 v1 = verts[vertIndex + 1];
 					Vec4 v2 = verts[vertIndex + width];
 
-					norms[i] =
-							v1 != null && v2 != null ? v1.subtract3(v0).cross3(v0.subtract3(v2))
-									.normalize3() : null;
+					norms[i] = v1 != null && v2 != null ? v1.subtract3(v0).cross3(v0.subtract3(v2)).normalize3() : null;
 				}
 			}
 		}
 		return norms;
 	}
-
-	/*protected double[] getMinMax(BufferWrapper elevations, double missingDataSignal)
-	{
-		double min = Double.MAX_VALUE;
-		double max = -Double.MAX_VALUE;
-		for (int i = 0; i < elevations.length(); i++)
-		{
-			double value = elevations.getDouble(i);
-			if (value != missingDataSignal)
-			{
-				min = Math.min(min, value);
-				max = Math.max(max, value);
-			}
-		}
-		if (min < minElevationClamp)
-			min = minElevationClamp;
-		if (max > maxElevationClamp)
-			max = maxElevationClamp;
-
-		return new double[] { min, max };
-	}*/
 }

@@ -17,6 +17,28 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 
+/**
+ * Treats retrieved image tiles as elevation data, and generates a shading based on the elevation data
+ * combined with a provided virtual sun position.
+ * <p/>
+ * <pre>
+ * &lt;Delegate&gt;
+ *   ShadedElevationReader(pixelType,byteOrder,missingData,sunX,sunY,sunZ,exaggeration[,(min,max)])
+ * &lt;/Delegate&gt;
+ * </pre>
+ * Where:
+ * <ul>
+ * 	<li>pixelType = the pixel format of the elevation tiles (one of "<code>Float32</code>", "<code>Int32</code>", "<code>Int16</code>" or "<code>Int8</code>")
+ * 	<li>byteOrder = the byte order of the elevation tiles (one of "<code>little</code>" or "<code>big</code>")
+ * 	<li>missingData = the value used in the elevation tiles to represent missing data (float)
+ * 	<li>sunX = The X location of the virtual sun position (double)
+ * 	<li>sunY = The Y location of the virtual sun position (double)
+ *  <li>sunZ = The Z location of the virtual sun position (double)
+ *  <li>exaggeration = The vertical exaggeration to bake into the shading (double)
+ *  <li>(min,max) = (Optional) The minimum and maximum elevation values to use when calculating shading (in metres as doubles)
+ * </ul>
+ * Shading is calculated as a simple dot product between the calculated normals of the elevation model and the sun vector.
+ */
 public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDelegate
 {
 	private final static String DEFINITION_STRING = "ShadedElevationReader";
@@ -49,10 +71,9 @@ public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDele
 		if (definition.toLowerCase().startsWith(DEFINITION_STRING.toLowerCase()))
 		{
 			String optionalMinMaxGroup = "(?:,\\(" + doublePattern + "," + doublePattern + "\\))?";
-			Pattern pattern =
-					Pattern.compile("(?:\\((\\w+),(\\w+)," + doublePattern + ",\\(" + doublePattern + ","
-							+ doublePattern + "," + doublePattern + "\\)," + doublePattern + optionalMinMaxGroup
-							+ "\\))");
+			Pattern pattern = Pattern.compile("(?:\\((\\w+),(\\w+)," + doublePattern + ",\\(" + doublePattern + ","
+								+ doublePattern + "," + doublePattern + "\\)," + doublePattern + optionalMinMaxGroup
+								+ "\\))");
 			Matcher matcher = pattern.matcher(definition);
 			if (matcher.find())
 			{
@@ -97,8 +118,7 @@ public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDele
 
 		BufferedImage image = new BufferedImage(width - 1, height - 1, BufferedImage.TYPE_INT_ARGB);
 
-		Vec4[] verts =
-				calculateTileVerts(width, height, sector, elevations, missingDataSignal, exaggeration * 0.000005);
+		Vec4[] verts = calculateTileVerts(width, height, sector, elevations, missingDataSignal, exaggeration * 0.000005);
 		Vec4[] normals = calculateNormals(width, height, verts);
 
 		for (int y = 0, i = 0; y < height - 1; y++)
@@ -137,14 +157,10 @@ public class ShadedElevationImageReaderDelegate extends ElevationImageReaderDele
 			for (int x = 0; x < width; x++, i++)
 			{
 				Angle lon = sector.getMinLongitude().addDegrees(dlon * x);
-				//only add if lat/lon is inside level's sector
-				//if (this.getLevels().getSector().contains(lat, lon))
+				double elevation = elevations.getDouble(i);
+				if (elevation != missingDataSignal && minElevation <= elevation && elevation <= maxElevation)
 				{
-					double elevation = elevations.getDouble(i);
-					if (elevation != missingDataSignal && minElevation <= elevation && elevation <= maxElevation)
-					{
-						verts[i] = new Vec4(lat.degrees, lon.degrees, elevation * exaggeration);
-					}
+					verts[i] = new Vec4(lat.degrees, lon.degrees, elevation * exaggeration);
 				}
 			}
 		}

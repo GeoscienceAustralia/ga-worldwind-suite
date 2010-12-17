@@ -22,6 +22,36 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
+/**
+ * Treats the retrieved image tiles as an elevation model, and applies a colour map based on the elevations
+ * recorded in the retrieved tiles.
+ * <p/>
+ * <code>&lt;Delegate&gt;ColorMapReader(pixelType,byteOrder,missingData)&lt;/Delegate&gt;</code>
+ * Where:
+ * <ul>
+ * 	<li>pixelType = the pixel format of the elevation tiles (one of "<code>Float32</code>", "<code>Int32</code>", "<code>Int16</code>" or "<code>Int8</code>")
+ * 	<li>byteOrder = the byte order of the elevation tiles (one of "<code>little</code>" or "<code>big</code>")
+ * 	<li>missingData = the value used in the elevation tiles to represent missing data (float)
+ * </ul>
+ * <p/>
+ * When parsing from a layer definition file, the colour map must be provided in the layer xml, as follows:
+ * <pre>
+ * &lt;ColorMap interpolateHue="true"&gt;
+ *   &lt;Entry elevation="e" red="r" green="g" blue="b" alpha="a"/&gt;
+ *   ...
+ * &lt;/ColorMap&gt;
+ * </pre>
+ * Where:
+ * <ul>
+ * 	<li>interpolateHue = if true, will use the HSB colour space and interpolate between elevations using hue. If false, will
+ *      use the RGB colour space and interpolate each channel.
+ *  <li>elevation = the elevation at which this colour map entry applies (float in metres)
+ *  <li>red = the red channel of the colour entry (integer in range [0, 255])
+ *  <li>green = the green channel of the colour entry (integer in range [0, 255])
+ *  <li>blue = the blue channel of the colour entry (integer in range [0, 255])
+ *  <li>alpha = the alpha channel of the colour entry (integer in range [0, 255])
+ * </ul>
+ */
 public class ColorMapElevationImageReaderDelegate extends ElevationImageReaderDelegate
 {
 	private final static String DEFINITION_STRING = "ColorMapReader";
