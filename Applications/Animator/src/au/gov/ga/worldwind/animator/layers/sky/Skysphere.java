@@ -32,6 +32,16 @@ import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
 
+/**
+ * A layer that renders a hemisphere skysphere mapped with the specified image.
+ * <p/>
+ * Texture images should be provided in a dome projection to ensure correct display of 
+ * the image within the world window.
+ * <p/>
+ * The rotation of the image can be controlled using the <code>&lt;Rotation&gt;</code> elements within the 
+ * layer definition file.
+ *
+ */
 public class Skysphere extends AbstractLayer
 {
 	public static final String LAYER_TYPE = "SkysphereLayer";

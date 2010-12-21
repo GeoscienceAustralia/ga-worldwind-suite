@@ -37,6 +37,28 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
 
 import com.sun.opengl.util.BufferUtil;
 
+/**
+ * A specialised sub-surface layer that reads and displays earthquake data 
+ * from a reference data file.
+ * <p/>
+ * Each datapoint in the earthquake file is plotted as a point plotted at 
+ * the recorded earthquake depth.
+ * <p/>
+ * Colouring is configurable, and can be based on Date, Magnitude or Depth.
+ * <p/>
+ * This implementation makes use of the {@link FastShape} class to load earthquake data
+ * outside the rendering thread to ensure the interface remains responsive.
+ * <p/>
+ * Each record in the data file should have the following format (without line breaks):
+ * <pre>
+ * double latitude (in degrees)
+ * double longitude (in degrees)
+ * double elevation (in metres - negative indicates subsurface)
+ * double magnitude
+ * long timestamp (in milliseconds since epoc 01 01 1970 00:00:00 UTC)
+ * </pre>
+ * To save on bandwidth, it is recommended that the data file be compressed into a .zip file.
+ */
 public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 {
 	public final static String DATE_COLORING = "Date";

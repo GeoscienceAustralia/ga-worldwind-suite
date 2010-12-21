@@ -101,14 +101,6 @@ public class FogLayer extends RenderableLayer
 		this.farFactor = factor;
 	}
 
-	// Rendering
-
-	/**
-	 * Setup fog
-	 * 
-	 * @param dc
-	 *            the current DrawContext
-	 */
 	@Override
 	public void doRender(DrawContext dc)
 	{
