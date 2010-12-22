@@ -34,6 +34,17 @@ import au.gov.ga.worldwind.common.util.Loader;
 
 import com.sun.opengl.util.BufferUtil;
 
+/**
+ * A specialised sub-surface layer that displays crustal elevation data
+ * read from a simple comma- or whitespace-separated data file.
+ * <p/>
+ * The data file (referenced via the {@link #url} field) should contain elevations
+ * expressed as doubles (in metres) in a row-major ordering of dimensions {@link #width} x {@link #height}.
+ * The datafile can be contaied within a zip file to minimise bandwidth requirements.
+ * <p/>
+ * The crust layer will be rendered as a surface deformed by the elevation data and
+ * coloured using a colour map based on min and max elevation values.
+ */
 public class CrustLayer extends AbstractLayer implements Loader
 {
 	private static final String WHITESPACE_COMMA_REGEX = "(\\s*,\\s*)|\\s+";
@@ -82,7 +93,9 @@ public class CrustLayer extends AbstractLayer implements Loader
 		this.sector = (Sector) params.getValue(AVKey.SECTOR);
 		
 		if (width <= 1 || height <= 1)
+		{
 			throw new IllegalArgumentException("Illegal width or height");
+		}
 
 		double scale = 1;
 		if (params.getValue(AVKeyMore.SCALE) != null)
@@ -115,7 +128,9 @@ public class CrustLayer extends AbstractLayer implements Loader
 	protected static AVList getParamsFromDocument(Element domElement, AVList params)
 	{
 		if (params == null)
+		{
 			params = new AVListImpl();
+		}
 
 		XPath xpath = WWXML.makeXPath();
 
@@ -169,8 +184,7 @@ public class CrustLayer extends AbstractLayer implements Loader
 				colors.rewind();
 				for (int i = 0; i < width * height; i++)
 				{
-					double[] color =
-							chroma((elevations.get() - minElevation) / (maxElevation - minElevation), getOpacity());
+					double[] color = chroma((elevations.get() - minElevation) / (maxElevation - minElevation), getOpacity());
 					colors.put(color);
 				}
 			}
@@ -188,7 +202,9 @@ public class CrustLayer extends AbstractLayer implements Loader
 	{
 		int w = width - 1;
 		if (!wrapWidth)
+		{
 			width--;
+		}
 		height--;
 		int indexCount = 2 * width * height + 4 * width - 2;
 		IntBuffer buffer = BufferUtil.newIntBuffer(indexCount);
