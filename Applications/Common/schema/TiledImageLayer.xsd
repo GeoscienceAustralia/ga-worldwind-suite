@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   targetNamespace="http://www.ga.gov.au/worldwind/TiledImageLayer"
+		   xmlns="http://www.ga.gov.au/worldwind/TiledImageLayer">
+
+  <!-- Elements -->
+  <xs:element name="Layer">
+  	<xs:annotation>
+  		<xs:documentation>
+  			The root element of all layer definitions.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="DisplayName"/>
+        <xs:element minOccurs="0" ref="Legend"/>
+        <xs:element minOccurs="1" ref="Service"/>
+        <xs:element minOccurs="0" ref="Delegates"/>
+        <xs:element minOccurs="0" ref="LastUpdate"/>
+        <xs:element minOccurs="0" ref="DatasetName"/>
+        <xs:element minOccurs="1" ref="DataCacheName"/>
+        <xs:element minOccurs="1" ref="ImageFormat"/>
+        <xs:element minOccurs="0" ref="AvailableImageFormats"/>
+        <xs:element minOccurs="1" ref="FormatSuffix"/>
+        <xs:element minOccurs="1" ref="NumLevels"/>
+        <xs:element minOccurs="1" ref="TileOrigin"/>
+        <xs:element minOccurs="1" ref="LevelZeroTileDelta"/>
+        <xs:element minOccurs="1" ref="TileSize"/>
+        <xs:element minOccurs="1" ref="Sector"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="SectorResolutionLimit"/>
+        <xs:element minOccurs="0" ref="UseTransparentTextures"/>
+        <xs:element minOccurs="0" ref="ForceLevelZeroLoads"/>
+        <xs:element minOccurs="0" ref="RetainLevelZeroTiles"/>
+        <xs:element minOccurs="0" ref="TextureFormat"/>
+        <xs:element minOccurs="0" ref="UseMipMaps"/>
+        <xs:element minOccurs="0" ref="SplitScale"/>
+        <xs:element minOccurs="0" ref="DetailHint"/>
+        <xs:element minOccurs="0" ref="TransparencyColors"/>
+        <xs:element minOccurs="0" ref="TimedExpiry"/>
+        <xs:element minOccurs="0" ref="ColorMap"/>
+      </xs:sequence>
+      <xs:attribute name="layerType" use="required" type="xs:NCName"/>
+      <xs:attribute name="version" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="DisplayName" type="xs:string">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Used to define a human-readable name for the layer. This name is used within the GA World Wind Suite to allow users to identify layers.
+			
+			The display name should be concise and meaningful. All layer definition files should define a display name.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="Legend" type="xs:anyURI">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Defines the URL of the legend image to use for the layer.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="Service">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Defines the service type to use for retrieving image tiles, along with the URL to connect to to retrieve the tiles.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="URL">
+        	<xs:annotation>
+        		<xs:documentation>
+        			Defines the URL to be used by the tile service to retrieve image tiles for the layer.
+        		</xs:documentation>
+        	</xs:annotation>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="serviceName" use="required" type="ServiceType">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The name of the tile service to use when retrieving image tiles for the layer.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="URL" type="xs:anyURI"/>
+  
+  <xs:element name="Delegates">
+  	<xs:annotation>
+  		<xs:documentation>
+	  		Specifies a list of delegates element that are to be applied to the tile retrieval process. 
+	  		
+	  		These delegates may control tile retrieval, or perform pre-processing on tile images.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="Delegate"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Delegate">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies a single delegate for use with the DelegatorTileService. 
+  			
+  			Delegates may have parameters passed to them as a comma-separated list of parameter values surrounded by braces.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:string">
+  			<xs:pattern value="[a-zA-Z]*(\(.*\))?"></xs:pattern>
+  		</xs:restriction>
+  	</xs:simpleType>
+  </xs:element>
+  
+  <xs:element name="LastUpdate">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Records the timestamp of the last time the layer data was updated.
+  			
+  			This is compared to the timestamps of image tiles residing in the cache and used to trigger re-downloading of the tiles.
+			
+			This field should be updated whenever the tileset for a layer is re-generated.
+			
+			Expects timestamps in the format "dd MM yyyy HH:mm:ss Z"
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:string">
+  			<xs:pattern value="[0-9][0-9] [0-9][0-9] [0-9][0-9][0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] .*"/>
+  		</xs:restriction>
+  	</xs:simpleType>
+  </xs:element>
+  
+  <xs:element name="DatasetName" type="xs:string">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Identifies the layer dataset on the tile server identified by the service URL.
+			
+			In the case of a remote retrieval, this field gets passed to the tile server as query parameter 'T'.
+			
+			In the case of tiles retrieved using the LocalRequester delegate, the DatasetName is used in conjunction 
+			with the service URL to locate the tileset on the local filesystem. The choice of what part of the path to 
+			include in the URL and what to include in the DatasetName is somewhat arbitrary, but often local tilesets 
+			are stored in a common location so it makes sense to set the URL element to this common path and use the 
+			DatasetName to uniquely identify the target layer tileset inside that common location.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="DataCacheName" type="xs:string">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Identifies the location to store cached layer information within the user's WorldWindData folder.
+
+			Layers for GA data should be stored within the 'GA/' subdirectory.  			
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="ImageFormat">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the default (preferred) image format to use for retrieving image tiles.
+
+			In the case of a remote retrieval, this field gets passed to the tile server as query parameter 'F'.
+			
+			If the image tiles are not available in the specified format, the retriever may fall back to 
+			those listed in the AvailableImageFormats element.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:string">
+  			<xs:enumeration value="application/zip"/>
+  			<xs:enumeration value="image/dds"/>
+  			<xs:enumeration value="image/gif"/>
+  			<xs:enumeration value="image/jpg"/>
+  			<xs:enumeration value="image/png"/>
+  			<xs:enumeration value="image/tif"/>
+  		</xs:restriction>
+  	</xs:simpleType>
+  </xs:element>
+  
+  <xs:element name="AvailableImageFormats">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Lists the available image formats for this layer.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ImageFormat"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="FormatSuffix">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the extension to add to downloaded image tiles when storing them in the tile cache. 
+  			This should correspond to the image format specified in the ImageFormat element.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:NMTOKEN">
+  			<xs:pattern value="\.[a-zA-Z0-9]+"/>
+  		</xs:restriction>
+  	</xs:simpleType>
+  </xs:element>
+  
+  <xs:element name="NumLevels">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the number of levels available in the dataset, along with the number of 'empty' levels (i.e. levels that contain no data).
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="count" use="required" type="xs:integer">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The number of tile levels in the dataset.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="numEmpty" use="required" type="xs:integer">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The number of top-level levels that contain no data.
+
+				For example, if the Level Zero Tile Size (LZTS) is 36º and numEmpty=2, the first level of data will have tiles 
+				of size 9º (LZTS / 2^numEmpty) and will 'turn on' at level 2.
+
+				Most often numEmpty should be set to 0.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="TileOrigin" type="LatLon">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the Lat/Lon location of the tileset's South-West corner.
+
+			For most layers this will be (-90, -180).
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="LevelZeroTileDelta" type="LatLon">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the size (in latitude/longitude) of the level zero tiles, and is commonly called the Level Zero Tile Size (LZTS). 
+
+			This size is used to calculate the geographical extent of each tile in the layer at all levels.
+
+			In general, the geographical extent of a tile from level N can be calculated as (LZTS / 2^N).
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="TileSize">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the dimensions (in pixels) of each tile in the layer.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Dimension"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Dimension">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies a rectangular dimension of width x height.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="height" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="width" use="required" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Sector" type="Sector">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the geographical extents of the layer. Extents are specified using a South-West and North-East corner point (bottom-left and top-right).
+
+			This element essentially controls where on the globe the layer is mapped to.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="SectorResolutionLimit">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Used to specify the highest level of detail available for specific sub-sectors of the data. 
+  			This is useful when the data contains varying levels of detail where the generation of high-resolution images 
+  			for low-resolution sections of the data doesn't make sense.
+
+			A layer definition file may contain 0-n SectorResolutionLimit elements for 0 or more sub-sectors. 
+			
+			If multiple SectorResolutionLimit elements are defined and sub-sectors overlap, the highest resolution limit will be used.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:complexType>
+  		<xs:sequence>
+  			<xs:element ref="Sector">
+  				<xs:annotation>
+  					<xs:documentation>
+  						Specifies the sub-sector to which the resolution limit applies.
+  					</xs:documentation>
+  				</xs:annotation>
+  			</xs:element>
+  		</xs:sequence>
+  		<xs:attribute name="maxLevelNum" type="xs:nonNegativeInteger">
+  			<xs:annotation>
+  				<xs:documentation>
+  					The  highest level to use for the provided sub-sector.
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  	</xs:complexType>
+  </xs:element>
+  
+  <xs:element name="SouthWest" type="LatLon">
+  	<xs:annotation>
+  		<xs:documentation>
+  			The south-west (bottom-left) corner of the sector, expressed as a Lat/Lon.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="NorthEast" type="LatLon">
+  	<xs:annotation>
+  		<xs:documentation>
+  			The north-east (top-right) corner of the sector, expressed as a Lat/Lon.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="UseTransparentTextures" type="xs:boolean">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Whether or not to enable transparency for this layer.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="ForceLevelZeroLoads" type="xs:boolean">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Whether or not to load level 0 tiles from the cache on the render thread so that they are immediately visible. 
+  			
+  			Setting this to true will slow down the render thread on the first drawing of the layer, but ensures that at least 
+  			a low-resolution version of the layer is available immediately.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="RetainLevelZeroTiles" type="xs:boolean">
+  	<xs:annotation>
+  		<xs:documentation>
+  			If true, will keep the layer’s level 0 tiles in memory and prevent them from being cleared out of the cache when it gets full. 
+  			This, again, is used to ensure that at least a low-resolution version of the layer is available immediately.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="TextureFormat">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the texture format to use when loading image tiles into memory. If not specified, the image tiles will be loaded 
+  			in their native format. If specified, images will be converted to the specified format on load.
+
+			Currently only supports the DDS (Direct Draw Surface) format. This is a format designed for use in realtime graphics, and is 
+			the recommended format to use where possible.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:string">
+  			<xs:enumeration id="blank" value=""/>
+  			<xs:enumeration id="dds" value="image/dds"/>
+  		</xs:restriction>
+  	</xs:simpleType>
+  </xs:element>
+  
+  <xs:element name="UseMipMaps" type="xs:boolean">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Enable automatic texture mipmapping. This is an optimisation technique that may increase rendering speed of the layer.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="SplitScale">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Deprecated. Use DetailHint instead.
+
+			This is the old way of controlling at what point tiles are split and the next level is loaded. The split scale is related to 
+			the resolution of the tile as viewed in the world window compared to the resolution of the image tile.
+
+			A SplitScale of 0.9 is equivalent to a DetailHint of 0.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:decimal">
+  			<xs:minInclusive value="0.0"/>
+  		</xs:restriction>
+  	</xs:simpleType>
+  </xs:element>
+  
+  <xs:element name="DetailHint" type="xs:decimal">
+  	<xs:annotation>
+  		<xs:documentation>
+  			This is the new (and preferred) way of controlling at what point tiles are split and the next level is loaded. 
+  			
+  			The hint value is somewhat abstract, but 0 is default detail, &lt;0 is more detailed and &gt;0 is less detailed.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="TimedExpiry" type="xs:string"/>
+  
+  <xs:element name="TransparencyColors">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="Color"/>
+		</xs:sequence>
+	</xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Color" type="Color">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Defines a colour in the RGBA colour space.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="ColorMap">
+  	<xs:annotation>
+  		<xs:documentation>
+  		Used in conjunction with the ColorMapReader delegate to define an elevation-to-colour mapping. 
+  		
+  		If defined when the ColorMapReader is not used, this element will be ignored
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:complexType>
+  		<xs:sequence>
+  			<xs:element ref="Entry" minOccurs="1"  maxOccurs="unbounded"/>
+  		</xs:sequence>
+  		<xs:attribute name="interpolateHue" use="required" type="xs:boolean">
+  			<xs:annotation>
+  				<xs:documentation>
+  					Whether interpolation should be based on the Hue channel of the HSB colour space. 
+
+					If true, interpolation will alter only the hue. Saturation and Brightness will remain 
+					constant over the map. If false, interpolation will occur on each channel in RGBA space.
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  	</xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Entry">
+  	<xs:complexType>
+  		<xs:complexContent>
+  			<xs:extension base="Color">
+  				<xs:attribute name="elevation" use="required" type="xs:decimal">
+		  			<xs:annotation>
+						<xs:documentation>
+							The elevation this entry is for. Float value in metres (m).
+						</xs:documentation>  				
+		  			</xs:annotation>
+		  		</xs:attribute>
+  			</xs:extension>
+  		</xs:complexContent>
+  	</xs:complexType>
+  </xs:element>
+  
+  <!-- Common elements -->
+  
+  <xs:element name="LatLon">
+    <xs:complexType>
+      <xs:attribute name="latitude" use="required" type="xs:decimal"/>
+      <xs:attribute name="longitude" use="required" type="xs:decimal"/>
+      <xs:attribute name="units" use="optional" default="degrees" type="AngleUnits"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <!-- Types -->
+  
+  <xs:complexType name="LatLon">
+    <xs:sequence>
+      <xs:element ref="LatLon"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:simpleType name="AngleUnits">
+  	<xs:restriction base="xs:string">
+  		<xs:enumeration value="degrees"/>
+  		<xs:enumeration value="radians"/>
+  	</xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="ServiceType">
+  	<xs:restriction base="xs:string">
+  		<xs:enumeration value="Offline"/>
+  		<xs:enumeration value="WWTileService"/>
+  		<xs:enumeration value="OGC:WMS"/>
+  		<xs:enumeration value="DelegatorTileService"/>
+  	</xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="Sector">
+    <xs:sequence>
+      <xs:element ref="SouthWest"/>
+      <xs:element ref="NorthEast"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:simpleType name="ColorChannel">
+  	<xs:restriction base="xs:integer">
+  		<xs:minInclusive value="0"/>
+  		<xs:maxInclusive value="255"/>
+  	</xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="Color">
+ 		<xs:attribute name="red" use="optional" type="ColorChannel" default="0">
+ 			<xs:annotation>
+ 				<xs:documentation>
+ 					The red channel of the colour.
+ 				</xs:documentation>
+ 			</xs:annotation>
+ 		</xs:attribute>
+ 		<xs:attribute name="green" use="optional" type="ColorChannel" default="0">
+ 			<xs:annotation>
+ 				<xs:documentation>
+ 					The green channel of the colour.
+ 				</xs:documentation>
+ 			</xs:annotation>
+ 		</xs:attribute>
+ 		<xs:attribute name="blue" use="optional" type="ColorChannel" default="0">
+ 			<xs:annotation>
+ 				<xs:documentation>
+ 					The blue channel of the colour.
+ 				</xs:documentation>
+ 			</xs:annotation>
+ 		</xs:attribute>
+ 		<xs:attribute name="alpha" use="optional" type="ColorChannel" default="255">
+ 			<xs:annotation>
+ 				<xs:documentation>
+ 					The alpha channel of the colour.
+ 				</xs:documentation>
+ 			</xs:annotation>
+ 		</xs:attribute>
+ 	</xs:complexType>
+  
+</xs:schema>
