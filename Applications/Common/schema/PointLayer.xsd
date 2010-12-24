@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="Layer">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="DisplayName"/>
+        <xs:element ref="Legend"/>
+        <xs:element ref="PointType"/>
+        <xs:element ref="URL"/>
+        <xs:element ref="DataFormat"/>
+        <xs:element ref="LastUpdate"/>
+        <xs:element ref="DataCacheName"/>
+        <xs:element ref="Styles"/>
+        <xs:element ref="Attributes"/>
+      </xs:sequence>
+      <xs:attribute name="layerType" use="required" type="xs:NCName"/>
+      <xs:attribute name="version" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DisplayName" type="xs:string"/>
+  <xs:element name="Legend">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="PointType" type="xs:NCName"/>
+  <xs:element name="URL" type="xs:NCName"/>
+  <xs:element name="DataFormat" type="xs:NCName"/>
+  <xs:element name="LastUpdate">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="DataCacheName" type="xs:string"/>
+  <xs:element name="Styles">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="Style"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Style">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="Property"/>
+      </xs:sequence>
+      <xs:attribute name="default" type="xs:boolean"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Property">
+    <xs:complexType>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Attributes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="Attribute"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Attribute">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="Case"/>
+        <xs:choice>
+          <xs:element ref="Link"/>
+          <xs:element ref="Text"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Case">
+    <xs:complexType>
+      <xs:attribute name="style" use="required" type="xs:NCName"/>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Link">
+    <xs:complexType>
+      <xs:attribute name="placeholder" use="required"/>
+      <xs:attribute name="url" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Text">
+    <xs:complexType>
+      <xs:attribute name="placeholder" use="required"/>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
