@@ -722,7 +722,11 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	{
 		if (isZoomScalingRequired() || force)
 		{
-			return Math.log(Math.max(0, unzoomed) + 1);
+			if (unzoomed < 0.0)
+			{
+				return unzoomed;
+			}
+			return Math.log(unzoomed + 1);
 		}
 		return unzoomed;
 	}
@@ -746,6 +750,10 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	{
 		if (isZoomScalingRequired() || force)
 		{
+			if (zoomed < 0.0)
+			{
+				return zoomed;
+			}
 			return Math.pow(Math.E, zoomed) - 1;
 		}
 		return zoomed;
