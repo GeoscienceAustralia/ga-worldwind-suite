@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   targetNamespace="http://www.ga.gov.au/worldwind/HistoricEarthquakeLayer"
+		   xmlns="http://www.ga.gov.au/worldwind/HistoricEarthquakeLayer">
+
+  <xs:annotation>
+  	<xs:documentation>
+  		The historic earthquakes layer is a specialised sub-surface layer type that reads earthquake data from a (optionally compressed) .dat file. 
+  		
+  		Each data point is rendered as a point plotted at the recorded earthquake depth and coloured based on date of occurrence, magnitude or depth.
+  	</xs:documentation>
+  </xs:annotation>
+
+  <xs:element name="Layer">
+  	<xs:annotation>
+  		<xs:documentation>
+  			The root element of all layer definitions.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:all>
+        <xs:element minOccurs="0" ref="DisplayName"/>
+        <xs:element minOccurs="0" ref="URL"/>
+        <xs:element minOccurs="0" ref="Coloring"/>
+        <xs:element minOccurs="1" ref="ColoringMinDate"/>
+        <xs:element minOccurs="1" ref="ColoringMaxDate"/>
+        <xs:element minOccurs="1" ref="PointSize"/>
+      </xs:all>
+      <xs:attribute name="layerType" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:string">
+      			<xs:enumeration value="HistoricEarthquakeLayer"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="version" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:integer">
+      			<xs:enumeration value="1"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="DisplayName" type="xs:string">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Used to define a human-readable name for the layer. This name is used within the GA World Wind Suite to allow users to identify layers.
+			
+			The display name should be concise and meaningful. All layer definition files should define a display name.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="URL" type="xs:anyURI">
+  	<xs:annotation>
+  		<xs:documentation>
+  			References the data file (compressed or uncompressed) that contains the earthquake data. 
+
+			Each record in the data file should contain the following fields without any additional characters:
+			1.	[Double] Latitude (in degrees) 
+			2.	[Double] Longitude (in degrees)
+			3.	[Double] Elevation (in metres – negative indicates subsurface)
+			4.	[Double] Magnitude
+			5.	[Long] Timestamp (in milliseconds since epoc 01/01/1970 00:00:00 UTC)
+			
+			The URL can be an absolute path, or can specify a path relative to the layer definition file.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="Coloring">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the colouring to apply to the data points.
+  			
+  			Default is 'Magnitude'
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:string">
+  			<xs:enumeration value="Date"/>
+  			<xs:enumeration value="Magnitude"/>
+  			<xs:enumeration value="Depth"/>
+  		</xs:restriction>
+  	</xs:simpleType>
+  </xs:element>
+  
+  <xs:element name="ColoringMinDate">
+  	<xs:annotation>
+  		<xs:documentation>
+			Only used when Coloring is "Date". Specifies the start date to use when colouring the data points. 
+  		
+	  		Useful for restricting the colour map to a specific date range to enhance visualisation of data.
+	
+			Optional. If not provided, will use the earliest occurrence date in the dataset.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:complexType>
+  		<xs:attribute name="value" use="required" type="xs:string">
+  			<xs:annotation>
+  				<xs:documentation>
+  					The date value, specified in the format described with the format attribute.
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  		<xs:attribute name="format" use="required" type="xs:string">
+  			<xs:annotation>
+  				<xs:documentation>
+  					Specifies what format the date value is provided in. 
+
+					See the Standard Unicode Date Elements for more details on date format symbols (http://unicode.org/reports/tr35/tr35-6.html#Date_Format_Patterns).
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  	</xs:complexType>
+  </xs:element>
+  
+  <xs:element name="ColoringMaxDate">
+  	<xs:annotation>
+  		<xs:documentation>
+			Only used when Coloring is "Date". Specifies the end date to use when colouring the data points. 
+  		
+	  		Useful for restricting the colour map to a specific date range to enhance visualisation of data.
+	
+			Optional. If not provided, will use the latest occurrence date in the dataset.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:complexType>
+  		<xs:attribute name="value" use="required" type="xs:string">
+  			<xs:annotation>
+  				<xs:documentation>
+  					The date value, specified in the format described with the format attribute.
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  		<xs:attribute name="format" use="required" type="xs:string">
+  			<xs:annotation>
+  				<xs:documentation>
+  					Specifies what format the date value is provided in. 
+
+					See the Standard Unicode Date Elements for more details on date format symbols (http://unicode.org/reports/tr35/tr35-6.html#Date_Format_Patterns).
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  	</xs:complexType>
+  </xs:element>
+  
+  <xs:element name="PointSize" type="NonNegativeDecimal">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the size (in pixels) of the points used to render earthquake occurrences on the globe.
+  			
+  			Default value is 1.
+  		</xs:documentation>
+  	</xs:annotation>	
+  </xs:element>
+  
+  <xs:simpleType name="NonNegativeDecimal">
+  	<xs:restriction base="xs:decimal">
+  		<xs:minInclusive value="0"/>
+  	</xs:restriction>
+  </xs:simpleType>
+  
+</xs:schema>
