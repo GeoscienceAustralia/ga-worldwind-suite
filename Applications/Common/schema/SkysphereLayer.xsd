@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   targetNamespace="http://www.ga.gov.au/worldwind/SkysphereLayer"
+		   xmlns="http://www.ga.gov.au/worldwind/SkysphereLayer">
+		   
+	<xs:element name="Layer">
+  	<xs:annotation>
+  		<xs:documentation>
+  			The root element of all layer definitions.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:all>
+        <xs:element minOccurs="0" ref="DisplayName"/>
+        <xs:element minOccurs="1" ref="TextureLocation"/>
+        <xs:element minOccurs="0" ref="Rotation"/>
+        <xs:element minOccurs="0" ref="Segments"/>
+        <xs:element minOccurs="0" ref="Slices"/>
+      </xs:all>
+      <xs:attribute name="layerType" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:string">
+      			<xs:enumeration value="SkysphereLayer"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="version" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:integer">
+      			<xs:enumeration value="1"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>		   
+	
+  <xs:element name="DisplayName" type="xs:string">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Used to define a human-readable name for the layer. This name is used within the GA World Wind Suite to allow users to identify layers.
+			
+			The display name should be concise and meaningful. All layer definition files should define a display name.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="TextureLocation" type="xs:anyURI">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the URL of the image to use as the skysphere. This image should be provided in a dome projection to ensure correct display of the image within the world window.
+
+			Any valid image format may be used. Currently, supported formats are:
+			- image/dds
+			- image/gif
+			- image/jpg
+			- image/png
+			- image/tga
+			- image/tif
+			
+			The provided URL may be an absolute path, or may specify a path relative to the layer definition file.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="Rotation" type="xs:decimal">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the rotation (in degrees) of the image texture as it is applied to the skysphere dome. 
+  			
+  			This rotation can be used to fine-tune what part of the sky is visible in what direction on the globe (for example, to position a sunset sky image such that the sun is in the west).
+
+			Default value is 0. Rotation will be applied modulo 360º.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="Segments" type="xs:positiveInteger">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the number of segments the skysphere should be rendered with. Segments are the divisions along the circle profiles used to generate the hemisphere.
+
+			A higher number will result in a smoother sphere, but may affect render times.
+				
+			Default value is 20.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="Slices" type="xs:positiveInteger">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the number of slices the skysphere should be rendered with. Slices are the number of circle profiles used to generate the hemisphere.
+
+			A higher number will result in a smoother sphere, but may affect render times.
+				
+			Default value is 20.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+</xs:schema>

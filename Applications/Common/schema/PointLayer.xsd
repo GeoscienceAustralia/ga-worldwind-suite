@@ -491,7 +491,7 @@
   				</xs:documentation>
   			</xs:annotation>
   			<xs:simpleType>
-  				<xs:restriction>
+  				<xs:restriction base="xs:string">
   					<xs:enumeration value="degrees"/>
   					<xs:enumeration value="radians"/>
   				</xs:restriction>
