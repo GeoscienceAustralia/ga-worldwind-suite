@@ -20,11 +20,11 @@
     <xs:complexType>
       <xs:all>
         <xs:element minOccurs="0" ref="DisplayName"/>
-        <xs:element minOccurs="0" ref="URL"/>
+        <xs:element minOccurs="1" ref="URL"/>
         <xs:element minOccurs="0" ref="Coloring"/>
-        <xs:element minOccurs="1" ref="ColoringMinDate"/>
-        <xs:element minOccurs="1" ref="ColoringMaxDate"/>
-        <xs:element minOccurs="1" ref="PointSize"/>
+        <xs:element minOccurs="0" ref="ColoringMinDate"/>
+        <xs:element minOccurs="0" ref="ColoringMaxDate"/>
+        <xs:element minOccurs="0" ref="PointSize"/>
       </xs:all>
       <xs:attribute name="layerType" use="required">
       	<xs:simpleType>
