@@ -39,8 +39,20 @@
         <xs:element minOccurs="0" ref="TimedExpiry"/>
         <xs:element minOccurs="0" ref="ColorMap"/>
       </xs:sequence>
-      <xs:attribute name="layerType" use="required" type="xs:NCName"/>
-      <xs:attribute name="version" use="required" type="xs:integer"/>
+      <xs:attribute name="layerType" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:string">
+      			<xs:enumeration value="TiledImageLayer"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="version" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:integer">
+      			<xs:enumeration value="1"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
   
@@ -134,7 +146,7 @@
   	</xs:annotation>
   	<xs:simpleType>
   		<xs:restriction base="xs:string">
-  			<xs:pattern value="[0-9][0-9] [0-9][0-9] [0-9][0-9][0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] .*"/>
+  			<xs:pattern value="()|([0-9][0-9] [0-9][0-9] [0-9][0-9][0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] .*)"/>
   		</xs:restriction>
   	</xs:simpleType>
   </xs:element>

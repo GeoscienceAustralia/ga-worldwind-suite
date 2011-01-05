@@ -1,90 +1,530 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   targetNamespace="http://www.ga.gov.au/worldwind/PointLayer"
+		   xmlns="http://www.ga.gov.au/worldwind/PointLayer">
+
   <xs:element name="Layer">
+  	<xs:annotation>
+  		<xs:documentation>
+  			The root element of all layer definitions.
+  		</xs:documentation>
+  	</xs:annotation>
     <xs:complexType>
-      <xs:sequence>
-        <xs:element ref="DisplayName"/>
-        <xs:element ref="Legend"/>
-        <xs:element ref="PointType"/>
-        <xs:element ref="URL"/>
-        <xs:element ref="DataFormat"/>
-        <xs:element ref="LastUpdate"/>
-        <xs:element ref="DataCacheName"/>
-        <xs:element ref="Styles"/>
-        <xs:element ref="Attributes"/>
-      </xs:sequence>
-      <xs:attribute name="layerType" use="required" type="xs:NCName"/>
-      <xs:attribute name="version" use="required" type="xs:integer"/>
+      <xs:all>
+        <xs:element minOccurs="0" ref="DisplayName"/>
+        <xs:element minOccurs="0" ref="Legend"/>
+        <xs:element minOccurs="1" ref="PointType"/>
+        <xs:element minOccurs="0" ref="URL"/>
+        <xs:element minOccurs="1" ref="DataFormat"/>
+        <xs:element minOccurs="0" ref="LastUpdate"/>
+        <xs:element minOccurs="1" ref="DataCacheName"/>
+        <xs:element minOccurs="0" ref="Styles"/>
+        <xs:element minOccurs="0" ref="Attributes"/>
+      </xs:all>
+      <xs:attribute name="layerType" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:string">
+      			<xs:enumeration value="PointLayer"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="version" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:integer">
+      			<xs:enumeration value="1"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
-  <xs:element name="DisplayName" type="xs:string"/>
-  <xs:element name="Legend">
-    <xs:complexType/>
+
+  <xs:element name="DisplayName" type="xs:string">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Used to define a human-readable name for the layer. This name is used within the GA World Wind Suite to allow users to identify layers.
+			
+			The display name should be concise and meaningful. All layer definition files should define a display name.
+  		</xs:documentation>
+  	</xs:annotation>
   </xs:element>
-  <xs:element name="PointType" type="xs:NCName"/>
-  <xs:element name="URL" type="xs:NCName"/>
-  <xs:element name="DataFormat" type="xs:NCName"/>
+
+  <xs:element name="Legend" type="xs:anyURI">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Defines the URL of the legend image to use for the layer.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+
+  <xs:element name="PointType">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies what to display at each point in the dataset.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:string">
+  			<xs:enumeration value="Marker">
+  				<xs:annotation>
+  					<xs:documentation>
+  						Renders points as markers that can be specified in the ShapeType property of the Style element.
+  						
+  						Supports mouse-over display of additional information.
+  					</xs:documentation>
+  				</xs:annotation>
+  			</xs:enumeration>
+  			<xs:enumeration value="Annotation">
+  				<xs:annotation>
+  					<xs:documentation>
+  						Renders points as annotation boxes that contain textual additional information. 
+  						
+  						Annotations can be styled to appear as pop-up boxes or text labels etc.
+  					</xs:documentation>
+  				</xs:annotation>
+  			</xs:enumeration>
+  			<xs:enumeration value="Icon">
+  				<xs:annotation>
+  					<xs:documentation>
+  						Renders points as user-facing icons. 
+  						
+  						Supports mouse-over display of additional information.
+  					</xs:documentation>
+  				</xs:annotation>
+  			</xs:enumeration>
+  		</xs:restriction>
+  	</xs:simpleType>
+  </xs:element>
+
+  <xs:element name="URL" type="xs:anyURI">
+  	<xs:annotation>
+  		<xs:documentation>
+  			When DataFormat is Shapefile, this element provides the location of the shapefile to use. The URL can be provided in absolute or relative format, 
+  			and can refer to an uncompressed .shp file, or a compressed .zip archive containing the shapefile (recommended in most cases).
+
+			When the XML data format is used, this element will be ignored.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+
+  <xs:element name="DataFormat">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Defines the format the point data is to be supplied in.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:string">
+  			<xs:enumeration value="Shapefile">
+  				<xs:annotation>
+  					<xs:documentation>
+  						Point data is supplied in a shapefile referenced in the URL element. This shapefile may be zipped. 
+  						
+  						This is the recommended data format in most cases.
+  					</xs:documentation>
+  				</xs:annotation>
+  			</xs:enumeration>
+  			<xs:enumeration value="XML">
+  				<xs:annotation>
+  					<xs:documentation>
+  						Point data is supplied within the layer definition file in a Points element. 
+  						
+  						This can be useful when defining a limited, unchanging dataset (such as capital cities etc.)
+  					</xs:documentation>
+  				</xs:annotation>
+  			</xs:enumeration>
+  		</xs:restriction>
+  	</xs:simpleType>
+  </xs:element>
+
   <xs:element name="LastUpdate">
-    <xs:complexType/>
+  	<xs:annotation>
+  		<xs:documentation>
+  			Records the timestamp of the last time the layer data was updated.
+  			
+  			This is compared to the timestamps of image tiles residing in the cache and used to trigger re-downloading of the tiles.
+			
+			This field should be updated whenever the tileset for a layer is re-generated.
+			
+			Expects timestamps in the format "dd MM yyyy HH:mm:ss Z"
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:string">
+  			<xs:pattern value="()|([0-9][0-9] [0-9][0-9] [0-9][0-9][0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] .*)"/>
+  		</xs:restriction>
+  	</xs:simpleType>
   </xs:element>
-  <xs:element name="DataCacheName" type="xs:string"/>
+
+  <xs:element name="DataCacheName" type="xs:string">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Identifies the location to store cached layer information within the user's WorldWindData folder.
+
+			Layers for GA data should be stored within the 'GA/' subdirectory.  			
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+
   <xs:element name="Styles">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Styles are used to control the look-and-feel of points as they are displayed on the globe.
+
+			The Styles element may contain 0-many Style elements. Styles may be selected by selector elements 
+			listed in an Attributes section, or based on the 'default' property of child Style elements.
+  		</xs:documentation>
+  	</xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element maxOccurs="unbounded" ref="Style"/>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="Style"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+
   <xs:element name="Style">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Defines a single style. A style contains multiple Property elements that can be used to control particular properties of the point's look-and-feel.
+  		</xs:documentation>
+  	</xs:annotation>
     <xs:complexType>
       <xs:sequence>
         <xs:element maxOccurs="unbounded" ref="Property"/>
       </xs:sequence>
-      <xs:attribute name="default" type="xs:boolean"/>
-      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="default" use="optional" type="xs:boolean">
+      	<xs:annotation>
+      		<xs:documentation>
+      			Whether or not this is the default style to use for this layer.
+
+				Optional. Defaults to false.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="name" use="required" type="xs:string">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The name used to identify this style.
+
+				Style names can be any string value, but must be unique within a layer definition.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
+
   <xs:element name="Property">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Sets a value for a particular property for the parent style. The properties are applied to a target object(s), controlled by the PointType element 
+  			(e.g. applied to the attributes of a Marker, Icon or Annotation).
+
+			For example, if a Property element is specified with name="Opacity", the style mechanism will look for a method setOpacity(opacity) 
+			on the target object(s), and will set it to the value provided in the value attribute.
+  		</xs:documentation>
+  	</xs:annotation>
     <xs:complexType>
-      <xs:attribute name="name" use="required" type="xs:NCName"/>
-      <xs:attribute name="value" use="required"/>
+      <xs:attribute name="name" use="required" type="xs:NCName">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The name of the property this element is controlling.
+
+				The property name should match a JavaBean property name on the target object.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="value" use="required" type="xs:string">
+      	<xs:annotation>
+      		<xs:documentation>
+      			A pipe-separated list of values that correspond to arguments of the setter method for the names property.
+
+				Each value may be a compound type with components separated by commas. For example, colour values are 
+				expressed as 1,3 or 4 comma-separated integers (e.g. "255,0,45").
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="type" use="optional" type="xs:string">
+      	<xs:annotation>
+      		<xs:documentation>
+      			A pipe-separated list of types that correspond to the types of the arguments provided in the value attribute.
+
+				Optional. If not provided, the style mechanism will attempt to derive the correct type and coerce the value into that type. 
+
+				If provided, there must be a type provided for each element specified in value.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
+
   <xs:element name="Attributes">
+	<xs:annotation>
+      	<xs:documentation>
+      		Defines style selectors and text generators based on the attributes of points in the dataset. 
+      		
+      		Attributes are defined in Shapefiles as attribute columns, and in XML as named attributes.
+    	</xs:documentation>
+    </xs:annotation>
     <xs:complexType>
       <xs:sequence>
         <xs:element maxOccurs="unbounded" ref="Attribute"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+
   <xs:element name="Attribute">
+  	<xs:annotation>
+     	<xs:documentation>
+     		Defines style selectors and text generators for a single named attribute of a point.
+
+			If a point does not contain a value for the named attribute, this element will be ignored for that point.
+     	</xs:documentation>
+    </xs:annotation>
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="Case"/>
-        <xs:choice>
-          <xs:element ref="Link"/>
-          <xs:element ref="Text"/>
-        </xs:choice>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="Regex"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="Text"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="Link"/>
       </xs:sequence>
-      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="name" use="required" type="xs:string">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The name of the attribute this element refers to.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
-  <xs:element name="Case">
-    <xs:complexType>
-      <xs:attribute name="style" use="required" type="xs:NCName"/>
-      <xs:attribute name="value" use="required"/>
-    </xs:complexType>
-  </xs:element>
+
   <xs:element name="Link">
+  	<xs:annotation>
+      <xs:documentation>
+      	Specifies the link to use for points that have a value for the attribute. Links are triggered when the user clicks on the point in the globe. If multiple Link elements are found, the last link element is used.
+
+		Hyperlinks can be embedded into the text of a point by using (escaped) HTML encoded 'a' tags. See the Text element description for more details.
+      </xs:documentation>
+    </xs:annotation>
     <xs:complexType>
-      <xs:attribute name="placeholder" use="required"/>
-      <xs:attribute name="url" use="required"/>
+      <xs:attribute name="placeholder" use="optional" type="xs:string">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The placeholder string to replace with the actual value of the parameter.
+
+				This can be any string value, but by convention the placeholder string is usually surrounded with '%' characters.
+
+				e.g. "%value%", "%v%", "%theName%"
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="url" use="required" type="xs:string">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The URL to render for the link.
+
+				The actual value of the attribute can be substituted using the placeholder value defined in the placeholder attribute.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
+
   <xs:element name="Text">
+	<xs:annotation>
+    	<xs:documentation>
+     		Text elements specify a piece of text that is to be added to the rendered point based on an attribute of the dataset. 
+     		All text elements from all enabled attributes will be concatenated together in order and rendered according to the selected style in a manner appropriate for the point type specified.
+
+			Text is rendered as follows:
+			- Marker: As a popup that occurs on mouse rollover
+			- Icon: As a tooltip that occurs on mouse rollover
+			- Annotation: As the annotation text itself.
+     	</xs:documentation>
+     </xs:annotation>
     <xs:complexType>
-      <xs:attribute name="placeholder" use="required"/>
-      <xs:attribute name="value" use="required"/>
+      <xs:attribute name="placeholder" use="optional">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The placeholder string to replace with the actual value of the parameter.
+
+				This can be any string value, but by convention the placeholder string is usually surrounded with '%' characters.
+
+				e.g. "%value%", "%v%", "%theName%"
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="value" use="required">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The escaped html-encoded text to render for points that have a value for the attribute.
+
+				The actual value of the attribute can be substituted using the placeholder value defined in the placeholder attribute.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
     </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Case">
+  	<xs:annotation>
+      	<xs:documentation>
+      		A style-selecting element used to describe one branch of a switch that selects a style based on the value of an attribute.
+
+			If multiple style-selecting elements from different Attribute elements match a style, the last match wins.
+			
+			Case elements are useful for discrete-valued attributes (such as a key or classification ID).
+      	</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="style" use="required" type="xs:string">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The name of the style to select on a match.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="value" use="required">
+      	<xs:annotation>
+      		<xs:documentation>
+      			The attribute value that will trigger a match on this case element.
+      		</xs:documentation>
+      	</xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Regex">
+  	<xs:annotation>
+  		<xs:documentation>
+			A style-selecting element used to match an attribute value based on a regular expression.
+
+			If multiple style-selecting elements from different Attribute elements match a style, the last match wins.
+
+			Regex elements are useful for textual attributes (such as names or descriptions).
+		</xs:documentation>
+	</xs:annotation>
+  	<xs:complexType>
+  		<xs:attribute name="pattern" use="required" type="xs:string">
+			<xs:annotation>
+				<xs:documentation>
+					The regular expression to apply to the attribute value to test for a match.
+				</xs:documentation>
+			</xs:annotation>
+  		</xs:attribute>
+  		<xs:attribute name="style" use="required" type="xs:string">
+  			<xs:annotation>
+  				<xs:documentation>
+  					The name of the style to select on a match.
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  	</xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Range">
+  	<xs:annotation>
+  		<xs:documentation>
+  			A style-selecting element that matches an attribute value that falls within a specified closed range.
+
+			If multiple style-selecting elements from different Attribute elements match a style, the last match wins.
+
+			Range elements can only be used for numeric attributes (such as temperature, population etc.).
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:complexType>
+		<xs:attribute name="min" use="required" type="xs:decimal">
+			<xs:annotation>
+				<xs:documentation>
+					The bottom of the closed range
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="max" use="required" type="xs:decimal">
+			<xs:annotation>
+				<xs:documentation>
+					The top of the closed range
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="style" use="required" type="xs:string">
+  			<xs:annotation>
+  				<xs:documentation>
+  					The name of the style to select on a match.
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  	</xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Points">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Used to define the point data for the layer when an external shapefile is not used.
+
+			This is designed primarily for small datasets that do not change often (for example capital cities). 
+			If the layer is to contain a large number of points, shapefiles are more appropriate as they can be compressed to reduce bandwidth requirements, and will not affect parsing performance of the layer definition file.
+
+			The Points element can contain multiple Point elements.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:complexType>
+  		<xs:sequence>
+  			<xs:element minOccurs="1" maxOccurs="unbounded" ref="Point"/>
+  		</xs:sequence>
+  	</xs:complexType>
+  </xs:element>
+  
+  <xs:element name="Point">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies a single point in a point layer. Each Point element must provide a lat/lon location, and can specify any number of additional, arbitrary attributes of the form attributeName="value".
+
+			Additional attributes are used by the Style and Attribute mechanisms to control the appearance of the point on the globe.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:complexType>
+  		<xs:attribute name="units" use="optional">
+  			<xs:annotation>
+  				<xs:documentation>
+  					The units that the latitude and longitude are expressed in.
+
+					Optional. Defaults to "degrees".
+  				</xs:documentation>
+  			</xs:annotation>
+  			<xs:simpleType>
+  				<xs:restriction>
+  					<xs:enumeration value="degrees"/>
+  					<xs:enumeration value="radians"/>
+  				</xs:restriction>
+  			</xs:simpleType>
+  		</xs:attribute>
+  		<xs:attribute name="latitude" use="required" type="xs:decimal">
+  			<xs:annotation>
+  				<xs:documentation>
+  					The latitude, expressed in the specified units
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  		<xs:attribute name="longitude" use="required" type="xs:decimal">
+  			<xs:annotation>
+  				<xs:documentation>
+  					The longitude, expressed in the specified units
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  		<xs:anyAttribute>
+  			<xs:annotation>
+  				<xs:documentation>
+  					Arbitrary attributes can be specified on a per-point basis. These should take form attributeName="value".
+
+					Example attributes:
+					- Name="Canberra"
+					- Population="330000"
+					- Abbreviation="CBR"
+					
+					Values can be any datatype that can be handled by the Style mechanism. If they cannot be coerced into any other type, values will be stored as Strings.
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:anyAttribute>
+  	</xs:complexType>
   </xs:element>
 </xs:schema>
