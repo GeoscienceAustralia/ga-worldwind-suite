@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   targetNamespace="http://www.ga.gov.au/worldwind/FogLayer"
+		   xmlns="http://www.ga.gov.au/worldwind/FogLayer">
+
+  <xs:element name="Layer">
+  	<xs:annotation>
+  		<xs:documentation>
+  			The root element of all layer definitions.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:all>
+        <xs:element minOccurs="0" ref="DisplayName"/>
+        <xs:element minOccurs="0" ref="NearFactor"/>
+        <xs:element minOccurs="0" ref="FarFactor"/>
+        <xs:element minOccurs="1" ref="FogColor"/>
+      </xs:all>
+      <xs:attribute name="layerType" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:string">
+      			<xs:enumeration value="FogLayer"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="version" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:integer">
+      			<xs:enumeration value="1"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="DisplayName" type="xs:string">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Used to define a human-readable name for the layer. This name is used within the GA World Wind Suite to allow users to identify layers.
+			
+			The display name should be concise and meaningful. All layer definition files should define a display name.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="NearFactor" type="NonNegativeDecimal">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Adjusts the starting point of the fog as a multiplier of the camera altitude. 
+
+			The inclusion of camera altitude in the calculation of fog density ensures that fog density decreases as the camera elevation is increased.
+			
+			Default value is 1.1
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="FarFactor" type="NonNegativeDecimal">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Adjusts the ending point of the fog as a multiplier of the camera-horizon distance.
+			
+			Default value is 1.1
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="FogColor">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the colour of the fog.
+  			
+  			Note that the FogColor element is very similar to the common Color element, but does not include an attribute for an alpha channel.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:complexType>
+  		<xs:attribute name="red" type="ColorChannel" use="optional">
+  			<xs:annotation>
+  				<xs:documentation>
+  					The red channel.
+  					
+  					Defaults to 0.
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  		<xs:attribute name="green" type="ColorChannel" use="optional">
+  			<xs:annotation>
+  				<xs:documentation>
+  					The green channel.
+  					
+  					Defaults to 0.
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  		<xs:attribute name="blue" type="ColorChannel" use="optional">
+  			<xs:annotation>
+  				<xs:documentation>
+  					The blue channel.
+  					
+  					Defaults to 0.
+  				</xs:documentation>
+  			</xs:annotation>
+  		</xs:attribute>
+  	</xs:complexType>
+  </xs:element>
+  
+  <xs:simpleType name="NonNegativeDecimal">
+  	<xs:restriction base="xs:decimal">
+  		<xs:minInclusive value="0"/>
+  	</xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="ColorChannel">
+  	<xs:restriction base="xs:integer">
+  		<xs:minInclusive value="0"/>
+  		<xs:maxInclusive value="255"/>
+  	</xs:restriction>
+  </xs:simpleType>
+  
+</xs:schema>
