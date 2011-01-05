@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   targetNamespace="http://www.ga.gov.au/worldwind/KMLLayer"
+		   xmlns="http://www.ga.gov.au/worldwind/KMLLayer">
+
+  <xs:annotation>
+ 	<xs:documentation>
+ 		KML layers provide a thin wrapper that allows Keyhole Markup Language (KML) data layers to be viewed inside the GA World Wind suite. 
+ 		
+ 		It does nothing more than reference a KML or KMZ (compressed KML) file. All metadata (display name etc.) is extracted from the referenced KML file.
+ 	</xs:documentation>
+  </xs:annotation>
+  	
+  <xs:element name="Layer">
+  	<xs:annotation>
+  		<xs:documentation>
+  			The root element of all layer definitions.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:all>
+        <xs:element minOccurs="1" ref="URL"/>
+      </xs:all>
+      <xs:attribute name="layerType" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:string">
+      			<xs:enumeration value="KMLLayer"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="version" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:integer">
+      			<xs:enumeration value="1"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="URL" type="xs:anyURI">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the URL of the KML or KMZ file to reference.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+</xs:schema>
