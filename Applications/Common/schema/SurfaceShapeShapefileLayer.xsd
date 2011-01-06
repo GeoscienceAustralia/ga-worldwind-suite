@@ -1,0 +1,232 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+		   targetNamespace="http://www.ga.gov.au/worldwind/SurfaceShapeShapefileLayer"
+		   xmlns="http://www.ga.gov.au/worldwind/SurfaceShapeShapefileLayer">
+		   
+		   
+	<xs:annotation>
+		<xs:documentation>
+			Surface shapefile layers are able to read a single shapefile[11] containing point, line or polygon data, and display that data as points/lines drawn onto the globe.
+
+			This layer type differs from the more general point and geometry layers in that the data is rendered as a texture onto the globe, and does not exist as polygons.
+		</xs:documentation>
+	</xs:annotation>
+	
+	<xs:element name="Layer">
+  	<xs:annotation>
+  		<xs:documentation>
+  			The root element of all layer definitions.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:all>
+        <xs:element minOccurs="0" ref="DisplayName"/>
+        <xs:element minOccurs="1" ref="URL"/>
+        <xs:element minOccurs="0" ref="DrawInterior"/>
+        <xs:element minOccurs="0" ref="DrawOutline"/>
+        <xs:element minOccurs="0" ref="OutlineWidth"/>
+        <xs:element minOccurs="0" ref="Antialiasing"/>
+        <xs:element minOccurs="0" ref="InteriorColor"/>
+        <xs:element minOccurs="0" ref="OutlineColor"/>
+        <xs:element minOccurs="0" ref="InteriorOpacity"/>
+        <xs:element minOccurs="0" ref="OutlineOpacity"/>
+        <xs:element minOccurs="0" ref="StippleFactor"/>
+        <xs:element minOccurs="0" ref="StipplePattern"/>
+      </xs:all>
+      <xs:attribute name="layerType" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:string">
+      			<xs:enumeration value="SkysphereLayer"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="version" use="required">
+      	<xs:simpleType>
+      		<xs:restriction base="xs:integer">
+      			<xs:enumeration value="1"/>
+      		</xs:restriction>
+      	</xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="DisplayName" type="xs:string">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Used to define a human-readable name for the layer. This name is used within the GA World Wind Suite to allow users to identify layers.
+			
+			The display name should be concise and meaningful. All layer definition files should define a display name.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="URL" type="xs:anyURI">
+  	<xs:annotation>
+  		<xs:documentation>
+  			The URL of the shapefile to load data from.
+  			
+  			May be an absolute path, or relative to the layer definition file location.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="DrawInterior" type="xs:boolean">
+  	<xs:annotation>
+  		<xs:documentation>
+  			For polygonal shapefiles, specifies whether or not to draw the interior of the shape.
+
+			For point and line data, this element is ignored.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="DrawOutline" type="xs:boolean">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies whether or not to draw the outline of the shapefile data.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="OutlineWidth" type="NonNegativeDecimal">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the width (in pixels) of the outline to draw for the shapefile.
+
+			If DrawOutline is false, this element is ignored.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="Antialiasing" type="xs:boolean">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies whether antialiasing should be applied to the drawing of the shape.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="InteriorColor" type="Color">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the colour to use when drawing the interior of the shape.
+
+			If DrawInterior is false, this element is ignored.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="OutlineColor" type="Color">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the colour to use when drawing the outline of the shape.
+
+			If DrawOutline is false, this element is ignored.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="InteriorOpacity" type="OpacityChannel">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the opacity to use when drawing the interior of the shape.
+
+			If DrawInterior is false, this element is ignored.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="OutlineOpacity" type="OpacityChannel">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the opacity to use when drawing the outline of the shape.
+
+			If DrawOutline is false, this element is ignored.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+   <xs:element name="StippleFactor" default="1">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the stipple factor to use to draw the shape outline. The stipple factor is a repeater multiplier for each bit in the stipple pattern, and is used in the same way as it is defined in the OpenGL specification[12].
+
+			If no stipple pattern is defined, or DrawOutline is false, this element is ignored.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:integer">
+  			<xs:minInclusive value="1"/>
+  			<xs:maxInclusive value="256"/>
+  		</xs:restriction>
+  	</xs:simpleType>
+  </xs:element>
+  
+  <xs:element name="StipplePattern">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the stipple pattern to use to draw the shape outline (if applicable). The stipple pattern is a 16-bit pattern that defines how the shape outline will be rendered. It is combined with the StippleFactor to control how outlines are drawn.
+			
+			If DrawOutline is false, this element is ignored.
+			
+			Example patterns:
+			- 0xFFFF = Normal solid line (default)
+			- 0xF0F0 = Dashed line
+			- 0xFF00 = Long dashes
+			- 0x0101 = Dotted line
+			
+			Valid values are expressions that resolve to an integer. Defaults to 0xFFFF.
+  		</xs:documentation>
+  	</xs:annotation>
+  	<xs:simpleType>
+  		<xs:restriction base="xs:string">
+  			<!-- Matches encoded strings as per Java's Integer.decodeString() method -->
+  			<xs:pattern value="[-]?(((0[xX])|[#])[0-9a-fA-F]+)|([1-9][0-9]*)|(0[0-7]+)"/>
+  		</xs:restriction>
+  	</xs:simpleType>
+  </xs:element>
+  
+  <xs:simpleType name="NonNegativeDecimal">
+  	<xs:restriction base="xs:decimal">
+  		<xs:minInclusive value="0"/>
+  	</xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="Color">
+	<xs:attribute name="red" use="optional" type="ColorChannel" default="0">
+		<xs:annotation>
+			<xs:documentation>
+				The red channel of the colour.
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:attribute name="green" use="optional" type="ColorChannel" default="0">
+		<xs:annotation>
+			<xs:documentation>
+				The green channel of the colour.
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:attribute name="blue" use="optional" type="ColorChannel" default="0">
+		<xs:annotation>
+			<xs:documentation>
+				The blue channel of the colour.
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+  </xs:complexType>
+ 	
+  <xs:simpleType name="ColorChannel">
+  	<xs:restriction base="xs:integer">
+  		<xs:minInclusive value="0"/>
+  		<xs:maxInclusive value="255"/>
+  	</xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="OpacityChannel">
+  	<xs:restriction base="xs:decimal">
+  		<xs:minInclusive value="0.0"/>
+  		<xs:maxInclusive value="1.0"/>
+  	</xs:restriction>
+  </xs:simpleType>
+  
+</xs:schema>
