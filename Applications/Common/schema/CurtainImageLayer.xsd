@@ -1,9 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-		   targetNamespace="http://www.ga.gov.au/worldwind/TiledImageLayer"
-		   xmlns="http://www.ga.gov.au/worldwind/TiledImageLayer">
+		   targetNamespace="http://www.ga.gov.au/worldwind/CurtainImageLayer"
+		   xmlns="http://www.ga.gov.au/worldwind/CurtainImageLayer">
 
-  <!-- Elements -->
+  <xs:annotation>
+  	<xs:documentation>
+  		Curtain image layers are used to display high-resolution image data on vertical ribbon curtains that can be positioned above or below the surface of the earth. 
+  		
+  		These layers support tiling, and can make more efficient use of textures than Tiled Image Layers for long, thin images.
+
+		Curtain image layers are useful for displaying seismic and radar datasets etc
+  	</xs:documentation>
+  </xs:annotation>
+
   <xs:element name="Layer">
   	<xs:annotation>
   		<xs:documentation>
@@ -11,9 +19,8 @@
   		</xs:documentation>
   	</xs:annotation>
     <xs:complexType>
-      <xs:sequence>
+      <xs:all>
         <xs:element minOccurs="0" ref="DisplayName"/>
-        <xs:element minOccurs="0" ref="Legend"/>
         <xs:element minOccurs="1" ref="Service"/>
         <xs:element minOccurs="0" ref="Delegates"/>
         <xs:element minOccurs="0" ref="LastUpdate"/>
@@ -23,26 +30,23 @@
         <xs:element minOccurs="0" ref="AvailableImageFormats"/>
         <xs:element minOccurs="1" ref="FormatSuffix"/>
         <xs:element minOccurs="1" ref="NumLevels"/>
-        <xs:element minOccurs="1" ref="TileOrigin"/>
-        <xs:element minOccurs="1" ref="LevelZeroTileDelta"/>
         <xs:element minOccurs="1" ref="TileSize"/>
-        <xs:element minOccurs="1" ref="Sector"/>
-        <xs:element minOccurs="0" maxOccurs="unbounded" ref="SectorResolutionLimit"/>
+        <xs:element minOccurs="1" ref="FullSize"/>
+        <xs:element minOccurs="1" ref="Path"/>
+        <xs:element minOccurs="1" ref="CurtainTop"/>
+        <xs:element minOccurs="1" ref="CurtainBottom"/>
+        <xs:element minOccurs="1" ref="FollowTerrain"/>
+        <xs:element minOccurs="0" ref="Subsegments"/>
         <xs:element minOccurs="0" ref="UseTransparentTextures"/>
         <xs:element minOccurs="0" ref="ForceLevelZeroLoads"/>
-        <xs:element minOccurs="0" ref="RetainLevelZeroTiles"/>
         <xs:element minOccurs="0" ref="TextureFormat"/>
         <xs:element minOccurs="0" ref="UseMipMaps"/>
         <xs:element minOccurs="0" ref="SplitScale"/>
-        <xs:element minOccurs="0" ref="DetailHint"/>
-        <xs:element minOccurs="0" ref="TransparencyColors"/>
-        <xs:element minOccurs="0" ref="TimedExpiry"/>
-        <xs:element minOccurs="0" ref="ColorMap"/>
-      </xs:sequence>
+      </xs:all>
       <xs:attribute name="layerType" use="required">
       	<xs:simpleType>
       		<xs:restriction base="xs:string">
-      			<xs:enumeration value="TiledImageLayer"/>
+      			<xs:enumeration value="CurtainImageLayer"/>
       		</xs:restriction>
       	</xs:simpleType>
       </xs:attribute>
@@ -66,14 +70,6 @@
   	</xs:annotation>
   </xs:element>
   
-  <xs:element name="Legend" type="xs:anyURI">
-  	<xs:annotation>
-  		<xs:documentation>
-  			Defines the URL of the legend image to use for the layer.
-  		</xs:documentation>
-  	</xs:annotation>
-  </xs:element>
-  
   <xs:element name="Service">
   	<xs:annotation>
   		<xs:documentation>
@@ -82,7 +78,7 @@
   	</xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="URL">
+        <xs:element name="URL" type="xs:anyURI">
         	<xs:annotation>
         		<xs:documentation>
         			Defines the URL to be used by the tile service to retrieve image tiles for the layer.
@@ -99,8 +95,6 @@
       </xs:attribute>
     </xs:complexType>
   </xs:element>
-  
-  <xs:element name="URL" type="xs:anyURI"/>
   
   <xs:element name="Delegates">
   	<xs:annotation>
@@ -256,32 +250,23 @@
     </xs:complexType>
   </xs:element>
   
-  <xs:element name="TileOrigin" type="LatLon">
-  	<xs:annotation>
-  		<xs:documentation>
-  			Specifies the Lat/Lon location of the tileset's South-West corner.
-
-			For most layers this will be (-90, -180).
-  		</xs:documentation>
-  	</xs:annotation>
-  </xs:element>
-  
-  <xs:element name="LevelZeroTileDelta" type="LatLon">
-  	<xs:annotation>
-  		<xs:documentation>
-  			Specifies the size (in latitude/longitude) of the level zero tiles, and is commonly called the Level Zero Tile Size (LZTS). 
-
-			This size is used to calculate the geographical extent of each tile in the layer at all levels.
-
-			In general, the geographical extent of a tile from level N can be calculated as (LZTS / 2^N).
-  		</xs:documentation>
-  	</xs:annotation>
-  </xs:element>
-  
   <xs:element name="TileSize">
   	<xs:annotation>
   		<xs:documentation>
   			Specifies the dimensions (in pixels) of each tile in the layer.
+  		</xs:documentation>
+  	</xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Dimension"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="FullSize">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the total resolution (in pixels) of the curtain image. Often this will be a dimension with the 'width' significantly larger than the 'height'.
   		</xs:documentation>
   	</xs:annotation>
     <xs:complexType>
@@ -303,60 +288,65 @@
     </xs:complexType>
   </xs:element>
   
-  <xs:element name="Sector" type="Sector">
+  <xs:element name="Path">
   	<xs:annotation>
   		<xs:documentation>
-  			Specifies the geographical extents of the layer. Extents are specified using a South-West and North-East corner point (bottom-left and top-right).
+  			Specifies the path that the curtain is to follow. 
 
-			This element essentially controls where on the globe the layer is mapped to.
-  		</xs:documentation>
-  	</xs:annotation>
-  </xs:element>
-  
-  <xs:element name="SectorResolutionLimit">
-  	<xs:annotation>
-  		<xs:documentation>
-  			Used to specify the highest level of detail available for specific sub-sectors of the data. 
-  			This is useful when the data contains varying levels of detail where the generation of high-resolution images 
-  			for low-resolution sections of the data doesn't make sense.
-
-			A layer definition file may contain 0-n SectorResolutionLimit elements for 0 or more sub-sectors. 
+			A path is defined by 2 or more ordered LatLon elements. The curtain will be rendered as a vertical strip that passes through the points specified on the path. 
 			
-			If multiple SectorResolutionLimit elements are defined and sub-sectors overlap, the highest resolution limit will be used.
+			Between any two points on the path, the curtain section will follow a straight line.
   		</xs:documentation>
   	</xs:annotation>
-  	<xs:complexType>
-  		<xs:sequence>
-  			<xs:element ref="Sector">
-  				<xs:annotation>
-  					<xs:documentation>
-  						Specifies the sub-sector to which the resolution limit applies.
-  					</xs:documentation>
-  				</xs:annotation>
-  			</xs:element>
-  		</xs:sequence>
-  		<xs:attribute name="maxLevelNum" type="xs:nonNegativeInteger">
-  			<xs:annotation>
-  				<xs:documentation>
-  					The  highest level to use for the provided sub-sector.
-  				</xs:documentation>
-  			</xs:annotation>
-  		</xs:attribute>
-  	</xs:complexType>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="2" maxOccurs="unbounded" ref="LatLon"/>
+      </xs:sequence>
+    </xs:complexType>
   </xs:element>
   
-  <xs:element name="SouthWest" type="LatLon">
+  <xs:element name="CurtainTop" type="NonNegativeDecimal">
   	<xs:annotation>
   		<xs:documentation>
-  			The south-west (bottom-left) corner of the sector, expressed as a Lat/Lon.
+  			Specifies the elevation (in metres) of the top of the curtain.
+
+			If FollowTerrain is true, this value will be used as an offset from sea level (0m).
+			
+			Values must be greater (higher) than the value for CurtainBottom.
   		</xs:documentation>
   	</xs:annotation>
   </xs:element>
   
-  <xs:element name="NorthEast" type="LatLon">
+  <xs:element name="CurtainBottom" type="NonNegativeDecimal">
   	<xs:annotation>
   		<xs:documentation>
-  			The north-east (top-right) corner of the sector, expressed as a Lat/Lon.
+  			Specifies the elevation (in metres) of the bottom of the curtain.
+
+			If FollowTerrain is true, this value will be used as an offset from sea level (0m).
+			
+			Values must be lower than the value for CurtainTop.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="FollowTerrain" type="xs:boolean">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Whether or not the curtain should be deformed to follow the terrain of the elevation model.
+
+			If false, the curtain will be rendered at a constant elevation defined with CurtainTop and CurtainBottom. This will follow the underlying globe shape (e.g. spherical, ellipsoidal or flat depending on the globe used).
+			
+			If true, the curtain will be deformed such that it follows the terrain of any elevation model present.
+  		</xs:documentation>
+  	</xs:annotation>
+  </xs:element>
+  
+  <xs:element name="Subsegments" type="xs:nonNegativeInteger">
+  	<xs:annotation>
+  		<xs:documentation>
+  			Specifies the number of subsegments to divide the curtain into between points on the path.
+
+			A higher value will increase the terrain- and curvature-following resolution of the curtain, but may affect performance.
   		</xs:documentation>
   	</xs:annotation>
   </xs:element>
@@ -376,15 +366,6 @@
   			
   			Setting this to true will slow down the render thread on the first drawing of the layer, but ensures that at least 
   			a low-resolution version of the layer is available immediately.
-  		</xs:documentation>
-  	</xs:annotation>
-  </xs:element>
-  
-  <xs:element name="RetainLevelZeroTiles" type="xs:boolean">
-  	<xs:annotation>
-  		<xs:documentation>
-  			If true, will keep the layer’s level 0 tiles in memory and prevent them from being cleared out of the cache when it gets full. 
-  			This, again, is used to ensure that at least a low-resolution version of the layer is available immediately.
   		</xs:documentation>
   	</xs:annotation>
   </xs:element>
@@ -433,77 +414,6 @@
   	</xs:simpleType>
   </xs:element>
   
-  <xs:element name="DetailHint" type="xs:decimal">
-  	<xs:annotation>
-  		<xs:documentation>
-  			This is the new (and preferred) way of controlling at what point tiles are split and the next level is loaded. 
-  			
-  			The hint value is somewhat abstract, but 0 is default detail, &lt;0 is more detailed and &gt;0 is less detailed.
-  		</xs:documentation>
-  	</xs:annotation>
-  </xs:element>
-  
-  <xs:element name="TimedExpiry" type="xs:string"/>
-  
-  <xs:element name="TransparencyColors">
-	<xs:complexType>
-		<xs:sequence>
-			<xs:element ref="Color"/>
-		</xs:sequence>
-	</xs:complexType>
-  </xs:element>
-  
-  <xs:element name="Color" type="Color">
-  	<xs:annotation>
-  		<xs:documentation>
-  			Defines a colour in the RGBA colour space.
-  		</xs:documentation>
-  	</xs:annotation>
-  </xs:element>
-  
-  <xs:element name="ColorMap">
-  	<xs:annotation>
-  		<xs:documentation>
-  		Used in conjunction with the ColorMapReader delegate to define an elevation-to-colour mapping. 
-  		
-  		If defined when the ColorMapReader is not used, this element will be ignored
-  		</xs:documentation>
-  	</xs:annotation>
-  	<xs:complexType>
-  		<xs:sequence>
-  			<xs:element ref="Entry" minOccurs="1"  maxOccurs="unbounded"/>
-  		</xs:sequence>
-  		<xs:attribute name="interpolateHue" use="required" type="xs:boolean">
-  			<xs:annotation>
-  				<xs:documentation>
-  					Whether interpolation should be based on the Hue channel of the HSB colour space. 
-
-					If true, interpolation will alter only the hue. Saturation and Brightness will remain 
-					constant over the map. If false, interpolation will occur on each channel in RGBA space.
-  				</xs:documentation>
-  			</xs:annotation>
-  		</xs:attribute>
-  	</xs:complexType>
-  </xs:element>
-  
-  <xs:element name="Entry">
-  	<xs:complexType>
-  		<xs:complexContent>
-  			<xs:extension base="Color">
-  				<xs:attribute name="elevation" use="required" type="xs:decimal">
-		  			<xs:annotation>
-						<xs:documentation>
-							The elevation this entry is for. Float value in metres (m).
-						</xs:documentation>  				
-		  			</xs:annotation>
-		  		</xs:attribute>
-  			</xs:extension>
-  		</xs:complexContent>
-  	</xs:complexType>
-  </xs:element>
-  
-  <!-- Common elements -->
-  
   <xs:element name="LatLon">
     <xs:complexType>
       <xs:attribute name="latitude" use="required" type="xs:decimal"/>
@@ -511,21 +421,6 @@
       <xs:attribute name="units" use="optional" default="degrees" type="AngleUnits"/>
     </xs:complexType>
   </xs:element>
-  
-  <!-- Types -->
-  
-  <xs:complexType name="LatLon">
-    <xs:sequence>
-      <xs:element ref="LatLon"/>
-    </xs:sequence>
-  </xs:complexType>
-  
-  <xs:simpleType name="AngleUnits">
-  	<xs:restriction base="xs:string">
-  		<xs:enumeration value="degrees"/>
-  		<xs:enumeration value="radians"/>
-  	</xs:restriction>
-  </xs:simpleType>
   
   <xs:simpleType name="ServiceType">
   	<xs:restriction base="xs:string">
@@ -536,49 +431,17 @@
   	</xs:restriction>
   </xs:simpleType>
   
-  <xs:complexType name="Sector">
-    <xs:sequence>
-      <xs:element ref="SouthWest"/>
-      <xs:element ref="NorthEast"/>
-    </xs:sequence>
-  </xs:complexType>
-  
-  <xs:simpleType name="ColorChannel">
-  	<xs:restriction base="xs:integer">
-  		<xs:minInclusive value="0"/>
-  		<xs:maxInclusive value="255"/>
+  <xs:simpleType name="AngleUnits">
+  	<xs:restriction base="xs:string">
+  		<xs:enumeration value="degrees"/>
+  		<xs:enumeration value="radians"/>
   	</xs:restriction>
   </xs:simpleType>
   
-  <xs:complexType name="Color">
- 		<xs:attribute name="red" use="optional" type="ColorChannel" default="0">
- 			<xs:annotation>
- 				<xs:documentation>
- 					The red channel of the colour.
- 				</xs:documentation>
- 			</xs:annotation>
- 		</xs:attribute>
- 		<xs:attribute name="green" use="optional" type="ColorChannel" default="0">
- 			<xs:annotation>
- 				<xs:documentation>
- 					The green channel of the colour.
- 				</xs:documentation>
- 			</xs:annotation>
- 		</xs:attribute>
- 		<xs:attribute name="blue" use="optional" type="ColorChannel" default="0">
- 			<xs:annotation>
- 				<xs:documentation>
- 					The blue channel of the colour.
- 				</xs:documentation>
- 			</xs:annotation>
- 		</xs:attribute>
- 		<xs:attribute name="alpha" use="optional" type="ColorChannel" default="255">
- 			<xs:annotation>
- 				<xs:documentation>
- 					The alpha channel of the colour.
- 				</xs:documentation>
- 			</xs:annotation>
- 		</xs:attribute>
- 	</xs:complexType>
+  <xs:simpleType name="NonNegativeDecimal">
+  	<xs:restriction base="xs:decimal">
+  		<xs:minInclusive value="0"/>
+  	</xs:restriction>
+  </xs:simpleType>
   
 </xs:schema>
