@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
+import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**

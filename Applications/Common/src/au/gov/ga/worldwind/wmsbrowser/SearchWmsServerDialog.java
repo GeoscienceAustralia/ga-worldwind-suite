@@ -47,11 +47,11 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
-import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.HintTextField;
 import au.gov.ga.worldwind.common.ui.SelectableLabel;
 import au.gov.ga.worldwind.common.ui.SwingUtil;
+import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 import au.gov.ga.worldwind.common.util.Util;

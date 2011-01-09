@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.util;
+package au.gov.ga.worldwind.common.util;
 
 import java.util.concurrent.ThreadFactory;
 
@@ -18,6 +18,7 @@ public class DaemonThreadFactory implements ThreadFactory
 		this.threadName = threadName;
 	}
 
+	@Override
 	public Thread newThread(Runnable r)
 	{
 		return newThread(r, threadName);

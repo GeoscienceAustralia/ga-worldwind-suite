@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.animator.util.FileUtil;
+import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
 
 /**
  * A base class for animation renderers

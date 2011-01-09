@@ -18,7 +18,7 @@ import au.gov.ga.worldwind.animator.animation.event.AnimationEvent;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
 import au.gov.ga.worldwind.animator.animation.event.KeyFrameEvent;
 import au.gov.ga.worldwind.animator.application.ChangeOfAnimationListener;
-import au.gov.ga.worldwind.animator.util.DaemonThreadFactory;
+import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**

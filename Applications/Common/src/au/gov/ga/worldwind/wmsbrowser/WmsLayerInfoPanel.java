@@ -6,6 +6,7 @@ import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.awt.AWTInputHandler;
+import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -52,8 +53,6 @@ import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 
-import nasa.worldwind.awt.WorldWindowGLCanvas;
-import au.gov.ga.worldwind.animator.application.AnimatorConfiguration;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
@@ -150,6 +149,7 @@ public class WmsLayerInfoPanel extends JComponent
 	{
 		panel = new JPanel(){
 			// Overridden to force line wrapping within a scrollpane, but still provide vertical scrolling
+			@Override
 			public Dimension getPreferredSize() 
 			{ 
 				Dimension parentSize = getParent().getSize();
@@ -214,7 +214,16 @@ public class WmsLayerInfoPanel extends JComponent
 	
 	private void initialiseWorldWindow()
 	{
-		wwd = new WorldWindowGLCanvas(AnimatorConfiguration.getGLCapabilities());
+//		GLCapabilities caps = new GLCapabilities();
+//		caps.setAlphaBits(8);
+//		caps.setRedBits(8);
+//		caps.setGreenBits(8);
+//		caps.setBlueBits(8);
+//		caps.setDepthBits(24);
+//		caps.setDoubleBuffered(true);
+//		caps.setNumSamples(4);
+		
+		wwd = new WorldWindowGLCanvas();
 		wwd.setModel(new BasicModel());
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
 		wwd.setMinimumSize(new Dimension(1, 1));
