@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.common.util;
+package au.gov.ga.worldwind.animator.util;
 
 import static org.junit.Assert.*;
 import gov.nasa.worldwind.geom.Line;
