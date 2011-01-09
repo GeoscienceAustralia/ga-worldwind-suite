@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.common.wmsbrowser;
+package au.gov.ga.worldwind.wmsbrowser;
 
 import static org.junit.Assert.*;
 
