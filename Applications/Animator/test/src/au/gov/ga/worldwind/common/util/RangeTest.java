@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.common.util;
 
 import static au.gov.ga.worldwind.test.util.TestUtils.createDate;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
