@@ -16,11 +16,14 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Earth;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.WorldMapLayer;
+import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.retrieve.RetrievalService;
 import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
+import gov.nasa.worldwind.wms.WMSTiledImageLayer;
+import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -121,6 +124,7 @@ import au.gov.ga.worldwind.viewer.theme.ThemePiece.ThemePieceAdapter;
 import au.gov.ga.worldwind.viewer.theme.hud.WorldMapHUD;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 import au.gov.ga.worldwind.wmsbrowser.WmsBrowser;
+import au.gov.ga.worldwind.wmsbrowser.WmsLayerReceiver;
 
 public class Application
 {
@@ -565,7 +569,15 @@ public class Application
 		{
 		}
 		
-		this.wmsBrowser = new WmsBrowser(getMessage(getApplicationTitleKey()));
+		wmsBrowser = new WmsBrowser(getMessage(getApplicationTitleKey()));
+		wmsBrowser.registerLayerReceiver(new WmsLayerReceiver()
+		{
+			@Override
+			public void receive(WMSLayerInfo layerInfo)
+			{
+				WMSTiledImageLayer layer = new WMSTiledImageLayer((WMSCapabilities)layerInfo.getCaps(), layerInfo.getParams());
+			}
+		});
 	}
 
 	private void createActions()
@@ -795,7 +807,7 @@ public class Application
 			}
 		});
 		
-		wmsBrowserAction = new BasicAction(getMessage(getLaunchWmsBrowserLabelKey()), Icons.wmsbrowser.getIcon()); // TODO: Change icon
+		wmsBrowserAction = new BasicAction(getMessage(getLaunchWmsBrowserLabelKey()), Icons.wmsbrowser.getIcon());
 		wmsBrowserAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -810,7 +822,9 @@ public class Application
 	{
 		LayersPanel panel = theme.getLayersPanel();
 		if (panel != null)
+		{
 			panel.openLayerFile();
+		}
 	}
 
 	private void createLayerFromDirectory()
@@ -818,9 +832,7 @@ public class Application
 		LayersPanel panel = theme.getLayersPanel();
 		if (panel != null)
 		{
-			ILayerDefinition layer =
-					LocalLayerCreator.createDefinition(frame, createLayerFromDirectoryAction.getToolTipText(),
-							panel.getIcon());
+			ILayerDefinition layer = LocalLayerCreator.createDefinition(frame, createLayerFromDirectoryAction.getToolTipText(), panel.getIcon());
 			if (layer != null)
 			{
 				panel.addLayer(layer);
@@ -848,10 +860,14 @@ public class Application
 				public boolean accept(File f)
 				{
 					if (f.isDirectory())
+					{
 						return true;
+					}
 					int index = f.getName().lastIndexOf('.');
 					if (index < 0)
+					{
 						return false;
+					}
 					String ext = f.getName().substring(index + 1);
 					return format.equals(ext.toLowerCase());
 				}
@@ -871,10 +887,14 @@ public class Application
 			filters.add(filter);
 			chooser.addChoosableFileFilter(filter);
 			if (format.equals("jpg"))
+			{
 				jpgFilter = filter;
+			}
 		}
 		if (jpgFilter != null)
+		{
 			chooser.setFileFilter(jpgFilter);
+		}
 
 		if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
@@ -883,14 +903,21 @@ public class Application
 			String newExt;
 			FileFilter filter = chooser.getFileFilter();
 			if (filters.contains(filter))
+			{
 				newExt = filter.toString();
+			}
 			else
+			{
 				newExt = "jpg";
+			}
 			// find file extension
 			int index = file.getName().lastIndexOf('.');
 			String ext = null;
 			if (index > 0)
+			{
 				ext = file.getName().substring(index + 1);
+			}
+			
 			// fix/add file extension
 			if (ext == null || !newExt.equals(ext.toLowerCase()))
 			{
@@ -900,13 +927,15 @@ public class Application
 			// ask user if they want to overwrite
 			if (file.exists())
 			{
-				int answer =
-						JOptionPane.showConfirmDialog(frame,
+				int answer = JOptionPane.showConfirmDialog(frame,
 								getMessage(getSaveImageOverwriteMessageKey(), file.getAbsolutePath()),
 								getMessage(getSaveImageOverwriteTitleKey()), JOptionPane.YES_NO_OPTION,
 								JOptionPane.WARNING_MESSAGE);
+				
 				if (answer != JOptionPane.YES_OPTION)
+				{
 					file = null;
+				}
 			}
 			if (file != null)
 			{

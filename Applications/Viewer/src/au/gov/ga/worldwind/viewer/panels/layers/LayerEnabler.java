@@ -147,7 +147,9 @@ public class LayerEnabler
 
 				//load the layer if it has been added in this refresh
 				if (added.contains(node))
+				{
 					loadLayer(node, true);
+				}
 			}
 		}
 
@@ -218,7 +220,9 @@ public class LayerEnabler
 
 		int index = nodes.indexOf(node);
 		if (index < 0) //layer must have been removed during loading
+		{
 			return;
+		}
 
 		Wrapper wrapper = wrappers.get(index);
 		wrapper.setLoaded(loaded);
@@ -237,9 +241,13 @@ public class LayerEnabler
 			}
 		};
 		if (onlyIfModified)
+		{
 			Downloader.downloadIfModified(url, handler, handler, true);
+		}
 		else
+		{
 			Downloader.downloadIgnoreCache(url, handler, true);
+		}
 	}
 
 	private void setError(ILayerNode node, Exception error)
@@ -271,11 +279,15 @@ public class LayerEnabler
 		}
 
 		if (!result.isFromCache())
+		{
 			setLayerLoading(node, false, true);
+		}
 
 		//data was not modified (already created layer from cache)
 		if (result.isNotModified())
+		{
 			return;
+		}
 
 		if (!result.hasData())
 		{
@@ -301,11 +313,15 @@ public class LayerEnabler
 			return;
 		}
 		if (loaded == null)
+		{
 			return;
+		}
 
 		int index = nodes.indexOf(node);
 		if (index < 0) //layer must have been removed during loading
+		{
 			return;
+		}
 
 		Wrapper wrapper = wrappers.get(index);
 		wrapper.setLoaded(loaded);
@@ -323,11 +339,13 @@ public class LayerEnabler
 
 	private void refreshLists()
 	{
-		//TODO instead of clearing layers and readding, only remove those that need to be removed,
+		//TODO instead of clearing layers and reading, only remove those that need to be removed,
 		//and only add those that need to be added, and move those that need to be moved
 
 		if (wwd == null)
+		{
 			return;
+		}
 
 		//remove all that we added last time
 		layerList.removeAllFromSection(this, layers);
@@ -378,7 +396,9 @@ public class LayerEnabler
 
 		//tell the listeners that the list has been refreshed
 		for (RefreshListener listener : listeners)
+		{
 			listener.refreshed();
+		}
 
 		//relayout and repaint the tree, as the labels may have changed (maybe legend button added)
 		tree.getUI().relayout();
@@ -401,7 +421,9 @@ public class LayerEnabler
 	public synchronized boolean hasLayer(ILayerNode node)
 	{
 		if (nodeMap.containsKey(node))
+		{
 			return nodeMap.get(node).hasLayer();
+		}
 		return false;
 	}
 
@@ -413,12 +435,12 @@ public class LayerEnabler
 	public synchronized Sector getLayerExtents(ILayerNode node)
 	{
 		if (!nodeMap.containsKey(node))
+		{
 			return null;
+		}
 
 		Wrapper wrapper = nodeMap.get(node);
-		Object wrapped =
-				wrapper.hasLayer() ? wrapper.getLayer() : wrapper.hasElevationModel() ? wrapper.getElevationModel()
-						: null;
+		Object wrapped = wrapper.hasLayer() ? wrapper.getLayer() : wrapper.hasElevationModel() ? wrapper.getElevationModel() : null;
 
 		return Bounded.Reader.getSector(wrapped);
 	}
@@ -426,7 +448,9 @@ public class LayerEnabler
 	public synchronized Layer getLayer(ILayerNode node)
 	{
 		if (!nodeMap.containsKey(node))
+		{
 			return null;
+		}
 
 		Wrapper wrapper = nodeMap.get(node);
 		return wrapper.hasLayer() ? wrapper.getLayer() : null;
@@ -488,9 +512,13 @@ public class LayerEnabler
 
 			//ensure the loaded layer/elevationModel has the same name as the tree node
 			if (hasLayer())
+			{
 				getLayer().setName(node.getName());
+			}
 			else if (hasElevationModel())
+			{
 				getElevationModel().setName(node.getName());
+			}
 
 			if (getLoaded().getLoadedObject() instanceof Loader)
 			{
@@ -510,9 +538,13 @@ public class LayerEnabler
 				if (useNodesExpiryTime())
 				{
 					if (hasLayer())
+					{
 						getLayer().setExpiryTime(node.getExpiryTime());
+					}
 					else if (hasElevationModel())
+					{
 						getElevationModel().setExpiryTime(node.getExpiryTime());
+					}
 				}
 				else
 				{
@@ -524,18 +556,26 @@ public class LayerEnabler
 		private boolean useNodesExpiryTime()
 		{
 			if (node.getExpiryTime() == null)
+			{
 				return false;
+			}
 
 			if (loaded.getParams() == null)
+			{
 				return true;
+			}
 
 			Object o = loaded.getParams().getValue(AVKey.EXPIRY_TIME);
 			if (o == null || !(o instanceof Long))
+			{
 				return true;
+			}
 
 			Long l = (Long) o;
 			if (l < node.getExpiryTime())
+			{
 				return true;
+			}
 
 			return false;
 		}

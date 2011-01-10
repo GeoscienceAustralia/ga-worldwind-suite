@@ -23,7 +23,8 @@ public class ViewerMessageConstants extends CommonMessageConstants
 
 	public static String getSaveImageOverwriteTitleKey() { return "viewer.saveimage.overwrite.title"; }
 	public static String getSaveImageOverwriteMessageKey() { return "viewer.saveimage.overwrite.message"; }
-
+	public static String getRefreshLayerConfirmationMessageKey() { return "viewer.refreshlayer.message"; }
+	
 	public static String getFileMenuLabelKey() { return "viewer.menu.file.label"; }
 	public static String getCreateLayerMenuLabelKey() { return "viewer.menu.createlayer.label"; }
 	public static String getViewMenuLabelKey() { return "viewer.menu.view.label"; }

@@ -1,5 +1,9 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
+import static au.gov.ga.worldwind.common.util.Util.isBlank;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.getRefreshLayerConfirmationMessageKey;
+
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,10 +27,10 @@ import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.ui.lazytree.ILazyTreeObject;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyLoadListener;
 import au.gov.ga.worldwind.common.util.Icons;
@@ -51,8 +55,16 @@ public class LayersPanel extends AbstractLayersPanel
 
 	private Window window;
 
-	private BasicAction newLayerAction, openLayerAction, renameAction, editAction, deleteAction,
-			newFolderAction, expandAllAction, collapseAllAction, refreshAction, reloadAction;
+	private BasicAction newLayerAction;
+	private BasicAction openLayerAction;
+	private BasicAction renameAction;
+	private BasicAction editAction;
+	private BasicAction deleteAction;
+	private BasicAction newFolderAction;
+	private BasicAction expandAllAction;
+	private BasicAction collapseAllAction;
+	private BasicAction refreshAction;
+	private BasicAction reloadAction;
 
 	private DatasetPanel datasetPanel;
 
@@ -87,8 +99,12 @@ public class LayersPanel extends AbstractLayersPanel
 		setupDrag();
 
 		if (!layersFileExisted)
+		{
 			for (IDataset dataset : theme.getDatasets())
+			{
 				addDefaultLayersFromDataset(dataset);
+			}
+		}
 
 		window = SwingUtilities.getWindowAncestor(this);
 	}
@@ -103,8 +119,7 @@ public class LayersPanel extends AbstractLayersPanel
 	protected INode createRootNode(Theme theme)
 	{
 		persistLayers = theme.isPersistLayers();
-		if (theme.getLayerPersistanceFilename() != null
-				&& theme.getLayerPersistanceFilename().length() > 0)
+		if (!isBlank(theme.getLayerPersistanceFilename()))
 		{
 			layersPersistanceFilename = theme.getLayerPersistanceFilename();
 		}
@@ -134,8 +149,7 @@ public class LayersPanel extends AbstractLayersPanel
 	{
 		super.createActions();
 
-		newFolderAction =
-				new BasicAction("New folder", "Create new folder", Icons.newfolder.getIcon());
+		newFolderAction = new BasicAction("New folder", "Create new folder", Icons.newfolder.getIcon());
 		newFolderAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -247,9 +261,6 @@ public class LayersPanel extends AbstractLayersPanel
 		toolBar.add(editAction);
 		toolBar.add(deleteAction);
 		toolBar.addSeparator();
-		/*toolBar.add(expandAllAction);
-		toolBar.add(collapseAllAction);
-		toolBar.addSeparator();*/
 	}
 
 	private void createPopupMenus()
@@ -395,9 +406,8 @@ public class LayersPanel extends AbstractLayersPanel
 						break;
 					}
 				}
-				text =
-						"Are you sure you want to delete these " + paths.length + " items"
-								+ (anyChildren ? " and their children" : "") + "?";
+				text = "Are you sure you want to delete these " + paths.length + " items"
+						+ (anyChildren ? " and their children" : "") + "?";
 			}
 			else
 			{
@@ -405,18 +415,19 @@ public class LayersPanel extends AbstractLayersPanel
 				INode node = (INode) p.getLastPathComponent();
 				String type;
 				if (node instanceof ILayerNode)
+				{
 					type = "layer";
+				}
 				else
+				{
 					type = "folder";
+				}
 				boolean anyChildren = node.getChildCount() > 0;
-				text =
-						"Are you sure you want to delete the " + type + " '" + node.getName() + "'"
-								+ (anyChildren ? " and its children" : "") + "?";
+				text = "Are you sure you want to delete the " + type + " '" + node.getName() + "'"
+						+ (anyChildren ? " and its children" : "") + "?";
 			}
 
-			int choice =
-					JOptionPane.showConfirmDialog(this, text, "Confirm deletion",
-							JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			int choice = JOptionPane.showConfirmDialog(this, text, "Confirm deletion", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 			if (choice == JOptionPane.YES_OPTION)
 			{
 				for (TreePath p : paths)
@@ -424,7 +435,9 @@ public class LayersPanel extends AbstractLayersPanel
 					INode node = (INode) p.getLastPathComponent();
 					getModel().removeNodeFromParent(node, true);
 					if (datasetPanel != null)
+					{
 						datasetPanel.getTree().repaint();
+					}
 				}
 
 				tree.getUI().relayout();
@@ -440,7 +453,9 @@ public class LayersPanel extends AbstractLayersPanel
 		{
 			Object o = p.getLastPathComponent();
 			if (o instanceof ILayerNode)
+			{
 				node = (ILayerNode) o;
+			}
 		}
 
 		refreshAction.setEnabled(node != null);
@@ -456,13 +471,11 @@ public class LayersPanel extends AbstractLayersPanel
 			if (o instanceof ILayerNode)
 			{
 				ILayerNode layer = (ILayerNode) o;
-				int choice =
-						JOptionPane
-								.showConfirmDialog(
-										this,
-										"This will refresh all previously downloaded data for this layer. Are you sure?",
-										refreshAction.getName(), JOptionPane.YES_NO_OPTION,
-										JOptionPane.WARNING_MESSAGE);
+				int choice = JOptionPane.showConfirmDialog(this,
+															getMessage(getRefreshLayerConfirmationMessageKey()),
+															refreshAction.getName(),
+															JOptionPane.YES_NO_OPTION,
+															JOptionPane.WARNING_MESSAGE);
 				if (choice == JOptionPane.YES_OPTION)
 				{
 					getModel().setExpiryTime(layer, System.currentTimeMillis());
@@ -564,7 +577,9 @@ public class LayersPanel extends AbstractLayersPanel
 			{
 				ILayerDefinition layer = (ILayerDefinition) child;
 				if (layer.isDefault())
+				{
 					getModel().addLayer(layer, parents);
+				}
 			}
 		}
 
@@ -630,8 +645,7 @@ public class LayersPanel extends AbstractLayersPanel
 
 	protected void collapseAll()
 	{
-		while (collapseLast())
-			;
+		while (collapseLast()){/* Do nothing...*/}
 	}
 
 	private boolean collapseLast()
@@ -662,7 +676,7 @@ public class LayersPanel extends AbstractLayersPanel
 			chooser = new JFileChooser();
 			chooser.setMultiSelectionEnabled(true);
 			chooser.setDialogTitle("Open layer");
-			chooser.setFileFilter(new LayerDefinitionFileFilter());
+			chooser.setFileFilter(FileFilters.getLayerDefinitionFilter());
 		}
 	}
 
@@ -679,61 +693,23 @@ public class LayersPanel extends AbstractLayersPanel
 				for (File file : files)
 				{
 					URL url = file.toURI().toURL();
-					ILayerDefinition definition =
-							new LayerDefinition(file.getName(), url, null, Icons.file.getURL(),
-									true, false);
+					ILayerDefinition definition = new LayerDefinition(file.getName(), url, null, Icons.file.getURL(), true, false);
 					addLayer(definition);
 				}
 			}
 			catch (Exception e)
 			{
-				JOptionPane.showMessageDialog(this, "Error adding layer file: " + e, "Error",
-						JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, "Error adding layer file: " + e, "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
 
 	public void addLayer(ILayerDefinition definition)
 	{
-		/*INode parent = null;
-		int index = -1;
-		TreePath p = tree.getSelectionPath();
-		if (p != null && isOn())
-		{
-			Object o = p.getLastPathComponent();
-			if (o instanceof INode)
-			{
-				parent = (INode) o;
-				index = parent.getChildCount();
-			}
-		}
-
-		INode node = LayerNode.createFromLayerDefinition(definition);
-		if (parent == null)
-			getModel().addToRoot(node, true);
-		else
-			getModel().insertNodeInto(node, parent, index, true);*/
-
 		INode node = LayerNode.createFromLayerDefinition(definition);
 		getModel().addToRoot(node, true);
 
 		tree.getUI().relayout();
 	}
 
-	public static class LayerDefinitionFileFilter extends FileFilter
-	{
-		@Override
-		public String getDescription()
-		{
-			return "Layer definition file (*.xml)";
-		}
-
-		@Override
-		public boolean accept(File f)
-		{
-			if (f.isDirectory())
-				return true;
-			return f.getName().toLowerCase().endsWith(".xml");
-		}
-	}
 }

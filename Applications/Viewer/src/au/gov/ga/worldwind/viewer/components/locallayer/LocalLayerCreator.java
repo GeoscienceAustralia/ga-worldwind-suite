@@ -49,6 +49,7 @@ import au.gov.ga.worldwind.common.layers.delegate.transformer.TransparentColorTr
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageDelegateKit;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageLocalRequesterDelegate;
+import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.ui.JDoubleField;
 import au.gov.ga.worldwind.common.ui.JIntegerField;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
@@ -57,7 +58,6 @@ import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.dataset.LayerDefinition;
-import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel.LayerDefinitionFileFilter;
 
 public class LocalLayerCreator extends JDialog
 {
@@ -298,7 +298,7 @@ public class LocalLayerCreator extends JDialog
 				chooser.setDialogTitle("Select output layer file");
 				chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				chooser.setAcceptAllFileFilterUsed(false);
-				chooser.setFileFilter(new LayerDefinitionFileFilter());
+				chooser.setFileFilter(FileFilters.getLayerDefinitionFilter());
 				if (chooser.showSaveDialog(LocalLayerCreator.this) == JFileChooser.APPROVE_OPTION)
 				{
 					outputField.setText(chooser.getSelectedFile().getAbsolutePath());
