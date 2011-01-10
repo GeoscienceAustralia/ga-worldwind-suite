@@ -35,6 +35,8 @@ public class WmsBrowserMessageConstants extends CommonMessageConstants
 	public static String getSearchWmsSearchingMsgKey() { return "wmsbrowser.searchwms.searching.message"; }
 	public static String getWmsExportLayerLabelKey() { return "wmsbrowser.layerinfo.exportlayer.label"; }
 	public static String getWmsExportLayerTooltipKey() { return "wmsbrowser.layerinfo.exportlayer.tooltip"; }
+	public static String getUseLayerLabelKey() { return "wmsbrowser.layerinfo.uselayer.label"; }
+	public static String getUseLayerTooltipKey() { return "wmsbrowser.layerinfo.uselayer.tooltip"; }
 	public static String getLayerDefinitionAlreadyExistsMessageKey() { return "wmsbrowser.layerinfo.overwritelayer.message"; }
 	public static String getLayerDefinitionAlreadyExistsTitleKey() { return "wmsbrowser.layerinfo.overwritelayer.title"; }
 	public static String getWmsExportedLayerCreationCommentKey() { return "wmsbrowser.exportedlayer.generationcomment"; }

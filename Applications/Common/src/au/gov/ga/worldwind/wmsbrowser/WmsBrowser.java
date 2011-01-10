@@ -152,4 +152,12 @@ public class WmsBrowser
 
 		sidebar.add(group, c);
 	}
+	
+	/**
+	 * Register a class to receive WMS layers selected by the user
+	 */
+	public void registerLayerReceiver(WmsLayerReceiver receiver)
+	{
+		serverBrowserPanel.registerLayerReceiver(receiver);
+	}
 }

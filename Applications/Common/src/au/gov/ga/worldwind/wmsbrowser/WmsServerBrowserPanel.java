@@ -11,9 +11,12 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -51,15 +54,19 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 	private SearchWmsServerDialog searchServerDialog;
 	
 	private JToolBar toolbar;
+	private JButton useLayerButton;
 	private BasicAction addServerAction;
 	private BasicAction removeServerAction;
 	private BasicAction exportLayerAction;
+	private BasicAction useLayerAction;
 	
 	private JFileChooser fileChooser;
 	
 	private static final WmsLayerExporter exporter = new WmsLayerExporterImpl();
 	
 	private List<LayerInfoSelectionListener> layerSelectionListeners = new ArrayList<LayerInfoSelectionListener>();
+	
+	private Set<WmsLayerReceiver> layerReceivers = new LinkedHashSet<WmsLayerReceiver>();
 	
 	public WmsServerBrowserPanel()
 	{
@@ -185,6 +192,17 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 				promptUserToSaveLayer();
 			}
 		});
+		
+		useLayerAction = new BasicAction(getMessage(getUseLayerLabelKey()), Icons.imporrt.getIcon());
+		useLayerAction.setToolTipText(getMessage(getUseLayerTooltipKey()));
+		useLayerAction.setEnabled(false);
+		useLayerAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				giveLayerToReceivers(getSelectedLayerInfo());
+			}
+		});
 	}
 	
 	private void initialiseToolbar()
@@ -196,7 +214,10 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		toolbar.add(addServerAction);
 		toolbar.add(removeServerAction);
 		toolbar.add(Box.createHorizontalGlue());
+		useLayerButton = toolbar.add(useLayerAction);
 		toolbar.add(exportLayerAction);
+		
+		useLayerButton.setVisible(false);
 	}
 	
 	private void updateKnownServersInSettings()
@@ -394,5 +415,36 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		}
 		
 		exporter.exportLayer(targetFile, selectedLayerInfo);
+	}
+	
+	public void registerLayerReceiver(WmsLayerReceiver receiver)
+	{
+		if (receiver == null)
+		{
+			return;
+		}
+		layerReceivers.add(receiver);
+		useLayerButton.setVisible(true);
+	}
+	
+	public void removeLayerReceiver(WmsLayerReceiver receiver)
+	{
+		if (receiver == null)
+		{
+			return;
+		}
+		layerReceivers.remove(receiver);
+		if (layerReceivers.isEmpty())
+		{
+			useLayerButton.setVisible(false);
+		}
+	}
+	
+	private void giveLayerToReceivers(WMSLayerInfo layer)
+	{
+		for (WmsLayerReceiver receiver : layerReceivers)
+		{
+			receiver.receive(layer);
+		}
 	}
 }
