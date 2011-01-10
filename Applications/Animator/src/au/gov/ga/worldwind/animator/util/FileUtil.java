@@ -6,7 +6,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class FileUtil
+/**
+ * Utilities for working with files
+ */
+public class FileUtil extends au.gov.ga.worldwind.common.util.FileUtil
 {
 	public static String readFileAsString(File file) throws IOException
 	{
@@ -41,29 +44,5 @@ public class FileUtil
 			str = "0" + str;
 		}
 		return str;
-	}
-	
-	/**
-	 * Strip file extensions from the provided filename.
-	 * <p/>
-	 * A file extension if defined as anything after the last period '.'
-	 * 
-	 * @param filename The name to strip extensions from
-	 * 
-	 * @return The provided file name, stripped of any file extensions
-	 */
-	public static String stripExtension(String filename)
-	{
-		if (filename == null || filename.isEmpty())
-		{
-			return null;
-		}
-		
-		if (filename.lastIndexOf('.') == -1)
-		{
-			return filename;
-		}
-		
-		return filename.substring(0, filename.lastIndexOf('.'));
 	}
 }

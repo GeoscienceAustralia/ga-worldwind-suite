@@ -9,9 +9,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.Box;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -20,12 +23,16 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.ui.SwingUtil;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTree;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
+import au.gov.ga.worldwind.common.util.FileUtil;
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.wmsbrowser.layer.WmsLayerExporter;
+import au.gov.ga.worldwind.wmsbrowser.layer.WmsLayerExporterImpl;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerIdentifier;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerImpl;
@@ -46,6 +53,11 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 	private JToolBar toolbar;
 	private BasicAction addServerAction;
 	private BasicAction removeServerAction;
+	private BasicAction exportLayerAction;
+	
+	private JFileChooser fileChooser;
+	
+	private static final WmsLayerExporter exporter = new WmsLayerExporterImpl();
 	
 	private List<LayerInfoSelectionListener> layerSelectionListeners = new ArrayList<LayerInfoSelectionListener>();
 	
@@ -53,6 +65,7 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 	{
 		setName(getMessage(getServerBrowserPanelTitleKey()));
 		
+		initialiseFileChooser();
 		initialiseServerTree();
 		initialiseToolbar();
 		initialiseSearchDialog();
@@ -67,8 +80,24 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 				updateActionsEnabledStatus();
 			}
 		});
+		
+		addLayerInfoSelectionListener(new LayerInfoSelectionListener()
+		{
+			@Override
+			public void layerSelectionChanged(WMSLayerInfo selectedLayer)
+			{
+				exportLayerAction.setEnabled(selectedLayer != null);
+			}
+		});
 	}
 
+	private void initialiseFileChooser()
+	{
+		fileChooser = new JFileChooser();
+		fileChooser.setAcceptAllFileFilterUsed(false);
+		fileChooser.setFileFilter(FileFilters.getXmlFilter());
+	}
+	
 	private void initialiseServerTree()
 	{
 		treeModel = new WmsServerTreeModel();
@@ -110,16 +139,6 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		}
 	}
 	
-	private void initialiseToolbar()
-	{
-		initialiseActions();
-		
-		toolbar = new JToolBar();
-		toolbar.setFloatable(false);
-		toolbar.add(addServerAction);
-		toolbar.add(removeServerAction);
-	}
-	
 	private void initialiseActions()
 	{
 		addServerAction = new BasicAction(getMessage(getAddServerMenuLabelKey()), Icons.add.getIcon());
@@ -156,6 +175,28 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 			}
 		});
 		
+		exportLayerAction = new BasicAction(getMessage(getWmsExportLayerLabelKey()), Icons.save.getIcon());
+		exportLayerAction.setToolTipText(getMessage(getWmsExportLayerTooltipKey()));
+		exportLayerAction.setEnabled(false);
+		exportLayerAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				promptUserToSaveLayer();
+			}
+		});
+	}
+	
+	private void initialiseToolbar()
+	{
+		initialiseActions();
+		
+		toolbar = new JToolBar();
+		toolbar.setFloatable(false);
+		toolbar.add(addServerAction);
+		toolbar.add(removeServerAction);
+		toolbar.add(Box.createHorizontalGlue());
+		toolbar.add(exportLayerAction);
 	}
 	
 	private void updateKnownServersInSettings()
@@ -311,5 +352,47 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 	public static interface LayerInfoSelectionListener
 	{
 		void layerSelectionChanged(WMSLayerInfo selectedLayer);
+	}
+	
+	private void promptUserToSaveLayer()
+	{
+		WMSLayerInfo selectedLayerInfo = getSelectedLayerInfo();
+		if (selectedLayerInfo == null)
+		{
+			return;
+		}
+		
+		int response = fileChooser.showSaveDialog(getParent());
+		if (response == JFileChooser.CANCEL_OPTION)
+		{
+			return;
+		}
+		
+		File targetFile = fileChooser.getSelectedFile();
+		if (targetFile == null)
+		{
+			return;
+		}
+		
+		// Add the extension if the user didn't
+		if (!FileUtil.hasExtension(targetFile.getAbsolutePath(), FileFilters.XmlFilter.getFileExtension()))
+		{
+			targetFile = new File(targetFile.getAbsolutePath() + FileFilters.XmlFilter.getFileExtension());
+		}
+		
+		if (targetFile.exists())
+		{
+			response = JOptionPane.showConfirmDialog(getParent(), getMessage(getLayerDefinitionAlreadyExistsMessageKey(), targetFile.getName()), getMessage(getLayerDefinitionAlreadyExistsTitleKey()), JOptionPane.YES_NO_CANCEL_OPTION);
+			if (response == JOptionPane.NO_OPTION)
+			{
+				return;
+			}
+			if (response == JOptionPane.CANCEL_OPTION || response == JOptionPane.CLOSED_OPTION)
+			{
+				promptUserToSaveLayer();
+			}
+		}
+		
+		exporter.exportLayer(targetFile, selectedLayerInfo);
 	}
 }
