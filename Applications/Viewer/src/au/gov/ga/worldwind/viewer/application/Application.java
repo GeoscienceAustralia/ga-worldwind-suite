@@ -120,6 +120,7 @@ import au.gov.ga.worldwind.viewer.theme.ThemePiece;
 import au.gov.ga.worldwind.viewer.theme.ThemePiece.ThemePieceAdapter;
 import au.gov.ga.worldwind.viewer.theme.hud.WorldMapHUD;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
+import au.gov.ga.worldwind.wmsbrowser.WmsBrowser;
 
 public class Application
 {
@@ -319,7 +320,10 @@ public class Application
 	private BasicAction saveSectorAction;
 	private BasicAction clipSectorAction;
 	private BasicAction clearClipAction;
+	private BasicAction wmsBrowserAction;
 
+	private WmsBrowser wmsBrowser;
+	
 	private Application(Theme theme, final boolean fullscreen, boolean showSplashScreen)
 	{
 		this.theme = theme;
@@ -560,6 +564,8 @@ public class Application
 		catch (Exception e)
 		{
 		}
+		
+		this.wmsBrowser = new WmsBrowser(getMessage(getApplicationTitleKey()));
 	}
 
 	private void createActions()
@@ -786,6 +792,16 @@ public class Application
 			public void actionPerformed(ActionEvent e)
 			{
 				clearClipping();
+			}
+		});
+		
+		wmsBrowserAction = new BasicAction(getMessage(getLaunchWmsBrowserLabelKey()), Icons.wmsbrowser.getIcon()); // TODO: Change icon
+		wmsBrowserAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				showWmsBrowser();
 			}
 		});
 	}
@@ -1132,6 +1148,7 @@ public class Application
 			action.addToToolBar(toolBar);
 
 		toolBar.addSeparator();
+		toolBar.add(wmsBrowserAction);
 		toolBar.add(settingsAction);
 
 		return toolBar;
@@ -1371,5 +1388,10 @@ public class Application
 		wwd.redraw();
 		clipSectorAction.setEnabled(true);
 		clearClipAction.setEnabled(false);
+	}
+	
+	private void showWmsBrowser()
+	{
+		wmsBrowser.show();
 	}
 }

@@ -48,9 +48,12 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getSaveSectorLabelKey() { return "viewer.action.savesector.label"; }
 	public static String getClipSectorLabelKey() { return "viewer.action.clipsector.label"; }
 	public static String getClearClipLabelKey() { return "viewer.action.clearclip.label"; }
-
+	public static String getLaunchWmsBrowserLabelKey() { return "viewer.action.wmsbrowser.label"; }
+	
 	public static String getTermImageKey() { return "viewer.term.image"; }
 
 	public static String getTreeLoadingNodeLabelKey() { return "viewer.tree.loadingnode.label"; }
 	public static String getTreeErrorNodeLabelKey() { return "viewer.tree.errornode.label"; }
+	
+	
 }

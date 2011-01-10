@@ -82,7 +82,8 @@ public class Icons
 	public static final Icons wireframe = new Icons("wireframe.png");
 	public static final Icons world = new Icons("world.gif");
 	public static final Icons zwireframe = new Icons("zwireframe.png");
-
+	public static final Icons wmsbrowser = new Icons("wms-browser.gif");
+	
 	/**
 	 * @return A new loading icon instance
 	 */
