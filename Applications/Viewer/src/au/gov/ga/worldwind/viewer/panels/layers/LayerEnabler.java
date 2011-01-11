@@ -22,12 +22,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.layers.Bounded;
+import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.common.util.FileUtil;
 import au.gov.ga.worldwind.common.util.Loader;
 import au.gov.ga.worldwind.common.util.URLUtil;
@@ -55,6 +58,8 @@ public class LayerEnabler
 
 	private List<RefreshListener> listeners = new ArrayList<RefreshListener>();
 
+	private static ExecutorService loaderService = Executors.newSingleThreadExecutor(new DaemonThreadFactory("WMS layer loader"));
+	
 	public LayerEnabler(WorldWindow wwd)
 	{
 		this.tree = null;
@@ -193,42 +198,50 @@ public class LayerEnabler
 		}
 	}
 	
-	private void loadWmsLayer(WmsLayerNode node)
+	private void loadWmsLayer(final WmsLayerNode node)
 	{
-		int index = nodes.indexOf(node);
+		final int index = nodes.indexOf(node);
 		if (index < 0) //layer must have been removed during loading
 		{
 			return;
 		}
 
-		LoadedLayer loadedLayer;
-		if (!node.isLayerInfoLoaded())
-		{
-			try
+		loaderService.submit(new Runnable(){
+			@Override
+			public void run()
 			{
-				// TODO: Do this on a thread...
-				WMSCapabilities capabilities = WmsCapabilitiesServiceAccessor.getService().retrieveCapabilities(node.getLayerURL());
-				capabilities.parse();
-				WMSLayerCapabilities layerCapabilities = capabilities.getLayerByName(node.getLayerId());
-				List<WMSLayerInfo> layerInfos = WMSLayerInfo.createLayerInfos(capabilities, layerCapabilities);
-				node.setLayerInfo(layerInfos.get(0));
+				LoadedLayer loadedLayer;
+				if (!node.isLayerInfoLoaded())
+				{
+	
+					try
+					{
+						WMSCapabilities capabilities = WmsCapabilitiesServiceAccessor.getService().retrieveCapabilities(node.getLayerURL());
+						capabilities.parse();
+						WMSLayerCapabilities layerCapabilities = capabilities.getLayerByName(node.getLayerId());
+						List<WMSLayerInfo> layerInfos = WMSLayerInfo.createLayerInfos(capabilities, layerCapabilities);
+						node.setLayerInfo(layerInfos.get(0));
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+						setLayerLoading(node, false, false);
+						setError(node, e);
+						return;
+					}
+				}
+				
+				loadedLayer = new LoadedLayer(new WMSTiledImageLayer(node.getWmsCapabilities(), node.getWmsParams()), node.getWmsParams());
+				loadedLayer.setLegendURL(node.getLegendURL());
+				
+				Wrapper wrapper = wrappers.get(index);
+				wrapper.setLoaded(loadedLayer);
+				
+				setLayerLoading(node, false, true);
+				
+				refreshLists();
 			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				setLayerLoading(node, false, false);
-				setError(node, e);
-				return;
-			}
-		}
-		
-		loadedLayer = new LoadedLayer(new WMSTiledImageLayer(node.getWmsCapabilities(), node.getWmsParams()), node.getWmsParams());
-		loadedLayer.setLegendURL(node.getLegendURL());
-		
-		Wrapper wrapper = wrappers.get(index);
-		wrapper.setLoaded(loadedLayer);
-		
-		setLayerLoading(node, false, true);
+		});
 	}
 
 	private void loadFile(final ILayerNode node, File file)
