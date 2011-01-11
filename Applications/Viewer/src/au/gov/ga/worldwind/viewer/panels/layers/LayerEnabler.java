@@ -9,6 +9,7 @@ import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.wms.WMSTiledImageLayer;
 
 import java.io.File;
 import java.net.URL;
@@ -170,10 +171,15 @@ public class LayerEnabler
 		File file = URLUtil.urlToFile(url);
 		boolean isFile = file != null && file.isFile();
 		boolean isXml = FileUtil.hasExtension(url.toString(), "xml");
-
+		boolean isWmsLayer = node instanceof WmsLayerNode;
+		
 		setLayerLoading(node, true, true);
 
-		if (isFile && !isXml)
+		if (isWmsLayer)
+		{
+			loadWmsLayer((WmsLayerNode)node);
+		}
+		else if (isFile && !isXml)
 		{
 			loadFile(node, file);
 		}
@@ -181,6 +187,22 @@ public class LayerEnabler
 		{
 			downloadLayer(node, url, onlyIfModified);
 		}
+	}
+	
+	private void loadWmsLayer(WmsLayerNode node)
+	{
+		setLayerLoading(node, false, true);
+		int index = nodes.indexOf(node);
+		if (index < 0) //layer must have been removed during loading
+		{
+			return;
+		}
+
+		LoadedLayer loadedLayer = new LoadedLayer(new WMSTiledImageLayer(node.getWmsCapabilities(), node.getWmsParams()), node.getWmsParams());
+		loadedLayer.setLegendURL(node.getLegendURL());
+		
+		Wrapper wrapper = wrappers.get(index);
+		wrapper.setLoaded(loadedLayer);
 	}
 
 	private void loadFile(final ILayerNode node, File file)

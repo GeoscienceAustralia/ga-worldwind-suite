@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.viewer.panels.layers;
 import static au.gov.ga.worldwind.common.util.Util.isBlank;
 import static au.gov.ga.worldwind.common.util.Util.isEmpty;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerInfoURL;
@@ -121,5 +122,15 @@ public class WmsLayerNode extends LayerNode
 	public WMSLayerInfo getLayerInfo()
 	{
 		return layerInfo;
+	}
+	
+	public WMSCapabilities getWmsCapabilities()
+	{
+		return (WMSCapabilities)layerInfo.getCaps();
+	}
+	
+	public AVList getWmsParams()
+	{
+		return layerInfo.getParams();
 	}
 }
