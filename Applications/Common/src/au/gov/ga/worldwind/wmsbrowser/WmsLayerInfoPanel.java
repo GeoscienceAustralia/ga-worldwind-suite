@@ -178,15 +178,6 @@ public class WmsLayerInfoPanel extends JComponent
 	
 	private void initialiseWorldWindow()
 	{
-//		GLCapabilities caps = new GLCapabilities();
-//		caps.setAlphaBits(8);
-//		caps.setRedBits(8);
-//		caps.setGreenBits(8);
-//		caps.setBlueBits(8);
-//		caps.setDepthBits(24);
-//		caps.setDoubleBuffered(true);
-//		caps.setNumSamples(4);
-		
 		wwd = new WorldWindowGLCanvas();
 		wwd.setModel(new BasicModel());
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);

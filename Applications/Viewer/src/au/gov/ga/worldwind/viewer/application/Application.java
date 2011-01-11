@@ -16,13 +16,11 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Earth;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.WorldMapLayer;
-import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.retrieve.RetrievalService;
 import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
-import gov.nasa.worldwind.wms.WMSTiledImageLayer;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.awt.BorderLayout;
@@ -168,7 +166,9 @@ public class Application
 		boolean sandpit = "-sandpit".equals(lastArg) || "--sandpit".equals(lastArg);
 		GASandpit.setSandpitMode(sandpit);
 		if (sandpit)
+		{
 			argsLength--; //ensure the sandpit argument is not used for the theme URL
+		}
 
 		//Settings need to be initialised before Theme is opened, so that proxy values are set
 		Settings.init();
@@ -231,7 +231,9 @@ public class Application
 				//finally search for theme.xml in the current directory
 				file = new File("theme.xml");
 				if (!file.exists())
+				{
 					file = null;
+				}
 			}
 
 			if (file != null)
@@ -257,9 +259,13 @@ public class Application
 			}
 		};
 		if (themeUrl == null)
+		{
 			ThemeOpener.openDefault(delegate);
+		}
 		else
+		{
 			ThemeOpener.openTheme(themeUrl, delegate);
+		}
 	}
 
 	private static Application restart(boolean fullscreen)
@@ -271,20 +277,32 @@ public class Application
 	private static Application start(Theme theme, boolean fullscreen, boolean showSplashScreen)
 	{
 		if (theme.getInitialLatitude() != null)
+		{
 			Configuration.setValue(AVKey.INITIAL_LATITUDE, theme.getInitialLatitude());
+		}
 		if (theme.getInitialLongitude() != null)
+		{
 			Configuration.setValue(AVKey.INITIAL_LONGITUDE, theme.getInitialLongitude());
+		}
 		if (theme.getInitialAltitude() != null)
+		{
 			Configuration.setValue(AVKey.INITIAL_ALTITUDE, theme.getInitialAltitude());
+		}
 		if (theme.getInitialHeading() != null)
+		{
 			Configuration.setValue(AVKey.INITIAL_HEADING, theme.getInitialHeading());
+		}
 		if (theme.getInitialPitch() != null)
+		{
 			Configuration.setValue(AVKey.INITIAL_PITCH, theme.getInitialPitch());
+		}
 
 		if (theme.getCacheLocations() != null)
 		{
 			for (String location : theme.getCacheLocations())
+			{
 				WorldWind.getDataFileStore().addLocation(location, false);
+			}
 		}
 
 		return new Application(theme, fullscreen, showSplashScreen);
@@ -327,6 +345,8 @@ public class Application
 	private BasicAction wmsBrowserAction;
 
 	private WmsBrowser wmsBrowser;
+
+	private LayersPanel layersPanel;
 	
 	private Application(Theme theme, final boolean fullscreen, boolean showSplashScreen)
 	{
@@ -337,12 +357,16 @@ public class Application
 		//initialize frame
 		String title = getMessage(getApplicationTitleKey());
 		if (theme.getName() != null && theme.getName().length() > 0)
+		{
 			title += " - " + theme.getName();
+		}
 		if (GASandpit.isSandpitMode())
 		{
 			String sandpit = getMessage(getApplicationTitleSandpitSuffixKey());
 			if (sandpit != null && sandpit.length() > 0)
+			{
 				title += " " + sandpit;
+			}
 		}
 		frame = new JFrame(title);
 		frame.setIconImage(Icons.earth32.getIcon().getImage());
@@ -351,9 +375,7 @@ public class Application
 		final SplashScreen splashScreen = showSplashScreen ? new SplashScreen(frame) : null;
 
 		// create worldwind stuff
-		GLCapabilities caps =
-				Settings.get().isHardwareStereoEnabled() ? WorldWindowStereoGLCanvas.stereoCaps
-						: WorldWindowStereoGLCanvas.defaultCaps;
+		GLCapabilities caps = Settings.get().isHardwareStereoEnabled() ? WorldWindowStereoGLCanvas.stereoCaps : WorldWindowStereoGLCanvas.defaultCaps;
 		wwd = new WorldWindowStereoGLCanvas(caps);
 		wwd.setMinimumSize(new Dimension(1, 1));
 		if (splashScreen != null)
@@ -575,7 +597,7 @@ public class Application
 			@Override
 			public void receive(WMSLayerInfo layerInfo)
 			{
-				WMSTiledImageLayer layer = new WMSTiledImageLayer((WMSCapabilities)layerInfo.getCaps(), layerInfo.getParams());
+				addWmsLayer(layerInfo);
 			}
 		});
 	}
@@ -592,8 +614,7 @@ public class Application
 			}
 		});
 
-		createLayerFromDirectoryAction =
-				new BasicAction(getMessage(getCreateLayerFromDirectoryLabelKey()), Icons.newfolder.getIcon());
+		createLayerFromDirectoryAction = new BasicAction(getMessage(getCreateLayerFromDirectoryLabelKey()), Icons.newfolder.getIcon());
 		createLayerFromDirectoryAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -603,9 +624,7 @@ public class Application
 			}
 		});
 
-		offlineAction =
-				new SelectableAction(getMessage(getWorkOfflineLabelKey()), Icons.offline.getIcon(),
-						WorldWind.isOfflineMode());
+		offlineAction = new SelectableAction(getMessage(getWorkOfflineLabelKey()), Icons.offline.getIcon(), WorldWind.isOfflineMode());
 		offlineAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -694,11 +713,9 @@ public class Application
 			}
 		});
 
-		final WireframeRectangularTessellator tessellator =
-				tess instanceof WireframeRectangularTessellator ? (WireframeRectangularTessellator) tess : null;
+		final WireframeRectangularTessellator tessellator = tess instanceof WireframeRectangularTessellator ? (WireframeRectangularTessellator) tess : null;
 		boolean depth = tessellator != null && tessellator.isWireframeDepthTesting();
-		wireframeDepthAction =
-				new SelectableAction(getMessage(getWireframeDepthLabelKey()), Icons.zwireframe.getIcon(), depth);
+		wireframeDepthAction = new SelectableAction(getMessage(getWireframeDepthLabelKey()), Icons.zwireframe.getIcon(), depth);
 		wireframeDepthAction.setEnabled(wireframeAction.isSelected());
 		wireframeDepthAction.addActionListener(new ActionListener()
 		{
@@ -731,8 +748,7 @@ public class Application
 				if (!visible)
 				{
 					visible = true;
-					SettingsDialog settingsDialog =
-							new SettingsDialog(frame, getMessage(getPreferencesTitleKey()), Icons.settings.getIcon());
+					SettingsDialog settingsDialog = new SettingsDialog(frame, getMessage(getPreferencesTitleKey()), Icons.settings.getIcon());
 					settingsDialog.setVisible(true);
 					visible = false;
 					afterSettingsChange();
@@ -1007,7 +1023,9 @@ public class Application
 	private void resetView()
 	{
 		if (!(wwd.getView() instanceof OrbitView))
+		{
 			return;
+		}
 
 		OrbitView view = (OrbitView) wwd.getView();
 		Position beginCenter = view.getCenterPosition();
@@ -1019,15 +1037,25 @@ public class Application
 		Double initPitch = Configuration.getDoubleValue(AVKey.INITIAL_PITCH);
 
 		if (initLat == null)
+		{
 			initLat = 0d;
+		}
 		if (initLon == null)
+		{
 			initLon = 0d;
+		}
 		if (initAltitude == null)
+		{
 			initAltitude = 3d * Earth.WGS84_EQUATORIAL_RADIUS;
+		}
 		if (initHeading == null)
+		{
 			initHeading = 0d;
+		}
 		if (initPitch == null)
+		{
 			initPitch = 0d;
+		}
 
 		Position endCenter = Position.fromDegrees(initLat, initLon, beginCenter.getElevation());
 		long lengthMillis = SettingsUtil.getScaledLengthMillis(beginCenter, endCenter);
@@ -1040,9 +1068,7 @@ public class Application
 
 	private void create3DMouse()
 	{
-		final UserFacingIcon icon =
-				new UserFacingIcon("au/gov/ga/worldwind/viewer/data/images/cursor.png", new Position(Angle.ZERO,
-						Angle.ZERO, 0));
+		final UserFacingIcon icon = new UserFacingIcon("au/gov/ga/worldwind/viewer/data/images/cursor.png", new Position(Angle.ZERO, Angle.ZERO, 0));
 		icon.setSize(new Dimension(16, 32));
 		icon.setAlwaysOnTop(true);
 
@@ -1388,9 +1414,13 @@ public class Application
 		if (sideBar != null && !isFullscreen())
 		{
 			if (sideBar.isVisible())
+			{
 				Settings.get().setSplitLocation(splitPane.getDividerLocation());
+			}
 			else
+			{
 				Settings.get().setSplitLocation(sideBar.getSavedDividerLocation());
+			}
 		}
 	}
 
@@ -1406,8 +1436,7 @@ public class Application
 
 	private void clipSector()
 	{
-		SectorClipper
-				.beginSelection(frame, getMessage(getClipSectorTitleKey()), wwd, clipSectorAction, clearClipAction);
+		SectorClipper.beginSelection(frame, getMessage(getClipSectorTitleKey()), wwd, clipSectorAction, clearClipAction);
 	}
 
 	private void clearClipping()
@@ -1422,5 +1451,14 @@ public class Application
 	private void showWmsBrowser()
 	{
 		wmsBrowser.show();
+	}
+	
+	private void addWmsLayer(WMSLayerInfo layerInfo)
+	{
+		LayersPanel panel = theme.getLayersPanel();
+		if (panel != null)
+		{
+			panel.addWmsLayer(layerInfo);
+		}
 	}
 }

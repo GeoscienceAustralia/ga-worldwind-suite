@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.viewer.panels.layers;
 import static au.gov.ga.worldwind.common.util.Util.isBlank;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.getRefreshLayerConfirmationMessageKey;
+import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -712,4 +713,16 @@ public class LayersPanel extends AbstractLayersPanel
 		tree.getUI().relayout();
 	}
 
+	public void addWmsLayer(WMSLayerInfo layerInfo)
+	{
+		if (layerInfo == null)
+		{
+			return;
+		}
+		
+		WmsLayerNode layerNode = new WmsLayerNode(layerInfo, true, 1.0);
+		getModel().addToRoot(layerNode, true);
+		tree.getUI().relayout();
+	}
+	
 }

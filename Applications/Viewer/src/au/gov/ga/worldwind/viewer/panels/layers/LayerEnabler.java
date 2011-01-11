@@ -24,6 +24,7 @@ import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.layers.Bounded;
+import au.gov.ga.worldwind.common.util.FileUtil;
 import au.gov.ga.worldwind.common.util.Loader;
 import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.viewer.panels.layers.FileLoader.FileLoadListener;
@@ -168,7 +169,7 @@ public class LayerEnabler
 		URL url = node.getLayerURL();
 		File file = URLUtil.urlToFile(url);
 		boolean isFile = file != null && file.isFile();
-		boolean isXml = url.toString().toLowerCase().endsWith(".xml");
+		boolean isXml = FileUtil.hasExtension(url.toString(), "xml");
 
 		setLayerLoading(node, true, true);
 

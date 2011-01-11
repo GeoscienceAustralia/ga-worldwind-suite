@@ -74,4 +74,19 @@ public class URLUtil
 		
 		return null;
 	}
+	
+	/**
+	 * Create a URL from the provided string. If the url is malformed, will return <code>null</code>.
+	 */
+	public static URL fromString(String urlString)
+	{
+		try
+		{
+			return new URL(urlString);
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
 }

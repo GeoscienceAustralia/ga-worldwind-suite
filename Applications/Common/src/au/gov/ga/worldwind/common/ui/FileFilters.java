@@ -22,6 +22,12 @@ public class FileFilters
 		return TGA_FILE_FILTER_INSTANCE;
 	}
 	
+	private static final LayerDefinitionFileFilter LAYER_DEFINITION_FILTER_INSTANCE = new LayerDefinitionFileFilter();
+	public static final LayerDefinitionFileFilter getLayerDefinitionFilter()
+	{
+		return LAYER_DEFINITION_FILTER_INSTANCE;
+	}
+	
 	/**
 	 * A simple file filter that matches XML files with extension <code>.xml</code> 
 	 */
@@ -46,6 +52,28 @@ public class FileFilters
 		public String getDescription()
 		{
 			return "XML files (*.xml)";
+		}
+	}
+	
+	/**
+	 * Matches layer definition files with the extension <code>.xml</code>
+	 */
+	public static class LayerDefinitionFileFilter extends FileFilter
+	{
+		@Override
+		public String getDescription()
+		{
+			return "Layer definition file (*.xml)";
+		}
+
+		@Override
+		public boolean accept(File f)
+		{
+			if (f.isDirectory())
+			{
+				return true;
+			}
+			return f.getName().toLowerCase().endsWith(".xml");
 		}
 	}
 }

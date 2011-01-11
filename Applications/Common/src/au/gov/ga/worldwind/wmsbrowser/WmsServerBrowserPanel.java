@@ -94,6 +94,7 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 			public void layerSelectionChanged(WMSLayerInfo selectedLayer)
 			{
 				exportLayerAction.setEnabled(selectedLayer != null);
+				useLayerAction.setEnabled(selectedLayer != null);
 			}
 		});
 	}
