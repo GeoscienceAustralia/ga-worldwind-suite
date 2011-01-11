@@ -109,24 +109,32 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			for (Object o : pathToRoot)
 			{
 				if (o == null)
+				{
 					break;
+				}
 
 				IData data = null;
 				if (o instanceof DefaultMutableTreeNode)
 				{
 					Object uo = ((DefaultMutableTreeNode) o).getUserObject();
 					if (uo != null && uo instanceof IData)
+					{
 						data = (IData) uo;
+					}
 				}
 				else if (o instanceof IData)
 				{
 					data = (IData) o;
 				}
 				if (data == null)
+				{
 					break;
+				}
 
 				if (data != layer)
+				{
 					parents.add(data);
+				}
 			}
 		}
 		addLayer(layer, parents);
@@ -143,7 +151,9 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		if (parents != null)
 		{
 			if (!parents.isEmpty())
+			{
 				directParent = parents.get(parents.size() - 1);
+			}
 
 			//if the list contains any 'base' IData's, then start from that index
 			int startIndex = 0;
@@ -171,9 +181,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				}
 				if (node == null)
 				{
-					node =
-							new FolderNode(data.getName(), data.getInfoURL(), data.getIconURL(),
-									true);
+					node = new FolderNode(data.getName(), data.getInfoURL(), data.getIconURL(), true);
 					insertNodeInto(node, currentParent, currentParent.getChildCount(), false);
 				}
 				expandPath.add(currentParent);
@@ -190,7 +198,9 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			IDataset dataset = (IDataset) directParent;
 			int insertionIndex = findInsertionIndex(layer, dataset, currentParent);
 			if (insertionIndex >= 0)
+			{
 				index = insertionIndex;
+			}
 		}
 
 		//add the layer
@@ -202,15 +212,16 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		tree.scrollPathToVisible(expand);
 	}
 
-	protected int findInsertionIndex(ILayerDefinition layer, IDataset directParent,
-			INode currentParent)
+	protected int findInsertionIndex(ILayerDefinition layer, IDataset directParent, INode currentParent)
 	{
 		List<ILayerDefinition> layers = new ArrayList<ILayerDefinition>();
 		List<IData> children = directParent.getChildren();
 		for (IData child : children)
 		{
 			if (child instanceof ILayerDefinition)
+			{
 				layers.add((ILayerDefinition) child);
+			}
 		}
 
 		int indexOfChild = layers.indexOf(layer);
@@ -221,14 +232,18 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				ILayerDefinition l = layers.get(i);
 				int j = indexOfLayerName(l.getName(), currentParent);
 				if (j >= 0)
+				{
 					return j;
+				}
 			}
 			for (int i = indexOfChild - 1; i >= 0; i--)
 			{
 				ILayerDefinition l = layers.get(i);
 				int j = indexOfLayerName(l.getName(), currentParent);
 				if (j >= 0)
+				{
 					return j + 1;
+				}
 			}
 		}
 		return -1;
@@ -237,8 +252,12 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	protected int indexOfLayerName(String layerName, INode parent)
 	{
 		for (int i = 0; i < parent.getChildCount(); i++)
+		{
 			if (layerName.equalsIgnoreCase(parent.getChild(i).getName()))
+			{
 				return i;
+			}
+		}
 		return -1;
 	}
 
@@ -261,9 +280,10 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				INode remove = layerNode;
 
 				//go up the list of parents if the parents have this layer as their only child
-				while (remove.getParent() != null && remove.getParent() != root
-						&& remove.getParent().getChildCount() == 1)
+				while (remove.getParent() != null && remove.getParent() != root && remove.getParent().getChildCount() == 1)
+				{
 					remove = remove.getParent();
+				}
 
 				//the following will call removedLayer() which will remove the node from the set
 				//(therefore this is not an infinite loop)
@@ -283,14 +303,18 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	{
 		boolean changed = addAnyLayersBelow(node);
 		if (changed && rebuildLayersList)
+		{
 			rebuildLayersList();
+		}
 	}
 
 	private void removeAnyLayers(INode node, boolean rebuildLayersList)
 	{
 		boolean changed = removeAnyLayersBelow(node);
 		if (changed && rebuildLayersList)
+		{
 			rebuildLayersList();
+		}
 	}
 
 	private boolean addAnyLayersBelow(INode node)
@@ -340,7 +364,9 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		}
 		//call recursively for all node's children
 		for (int i = 0; i < node.getChildCount(); i++)
+		{
 			changed |= removeAnyLayersBelow(node.getChild(i));
+		}
 
 		return changed;
 	}
@@ -363,7 +389,9 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			layerNodes.add(layer);
 		}
 		for (int i = 0; i < node.getChildCount(); i++)
+		{
 			addLayersToLayerList(node.getChild(i), layerNodes);
+		}
 	}
 
 	@Override
@@ -371,7 +399,9 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	{
 		INode node = (INode) parent;
 		if (index < 0 || index >= node.getChildCount())
+		{
 			return null;
+		}
 		return node.getChild(index);
 	}
 
@@ -545,7 +575,9 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 					Object[] cChildren = new Object[cCount];
 
 					for (int counter = 0; counter < cCount; counter++)
+					{
 						cChildren[counter] = getChild(node, childIndices[counter]);
+					}
 					fireTreeNodesChanged(this, getPathToRoot(node), childIndices, cChildren);
 				}
 			}
@@ -564,7 +596,9 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			Object[] newChildren = new Object[cCount];
 
 			for (int counter = 0; counter < cCount; counter++)
+			{
 				newChildren[counter] = getChild(node, childIndices[counter]);
+			}
 			fireTreeNodesInserted(this, getPathToRoot(node), childIndices, newChildren);
 		}
 	}
@@ -594,43 +628,54 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		if (aNode == null)
 		{
 			if (depth == 0)
+			{
 				return null;
+			}
 			else
+			{
 				nodes = new INode[depth];
+			}
 		}
 		else
 		{
 			depth++;
 			if (aNode == root)
+			{
 				nodes = new INode[depth];
+			}
 			else
+			{
 				nodes = getPathToRoot(aNode.getParent(), depth);
+			}
 			nodes[nodes.length - depth] = aNode;
 		}
 		return nodes;
 	}
 
-	protected void fireTreeNodesChanged(Object source, Object[] path, int[] childIndices,
-			Object[] children)
+	protected void fireTreeNodesChanged(Object source, Object[] path, int[] childIndices, Object[] children)
 	{
 		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
 		for (int i = listeners.size() - 1; i >= 0; i--)
+		{
 			listeners.get(i).treeNodesChanged(e);
+		}
 	}
 
-	private void fireTreeNodesInserted(Object source, Object[] path, int[] childIndices,
-			Object[] children)
+	private void fireTreeNodesInserted(Object source, Object[] path, int[] childIndices, Object[] children)
 	{
 		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
 		for (int i = listeners.size() - 1; i >= 0; i--)
+		{
 			listeners.get(i).treeNodesInserted(e);
+		}
 	}
 
-	private void fireTreeNodesRemoved(Object source, Object[] path, int[] childIndices,
-			Object[] children)
+	private void fireTreeNodesRemoved(Object source, Object[] path, int[] childIndices, Object[] children)
 	{
 		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
 		for (int i = listeners.size() - 1; i >= 0; i--)
+		{
 			listeners.get(i).treeNodesRemoved(e);
+		}
 	}
 }

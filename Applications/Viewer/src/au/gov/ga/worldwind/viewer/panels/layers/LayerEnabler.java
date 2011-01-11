@@ -7,9 +7,12 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
+import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.wms.WMSTiledImageLayer;
+import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.io.File;
 import java.net.URL;
@@ -29,6 +32,7 @@ import au.gov.ga.worldwind.common.util.FileUtil;
 import au.gov.ga.worldwind.common.util.Loader;
 import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.viewer.panels.layers.FileLoader.FileLoadListener;
+import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsCapabilitiesServiceAccessor;
 
 public class LayerEnabler
 {
@@ -191,18 +195,40 @@ public class LayerEnabler
 	
 	private void loadWmsLayer(WmsLayerNode node)
 	{
-		setLayerLoading(node, false, true);
 		int index = nodes.indexOf(node);
 		if (index < 0) //layer must have been removed during loading
 		{
 			return;
 		}
 
-		LoadedLayer loadedLayer = new LoadedLayer(new WMSTiledImageLayer(node.getWmsCapabilities(), node.getWmsParams()), node.getWmsParams());
+		LoadedLayer loadedLayer;
+		if (!node.isLayerInfoLoaded())
+		{
+			try
+			{
+				// TODO: Do this on a thread...
+				WMSCapabilities capabilities = WmsCapabilitiesServiceAccessor.getService().retrieveCapabilities(node.getLayerURL());
+				capabilities.parse();
+				WMSLayerCapabilities layerCapabilities = capabilities.getLayerByName(node.getLayerId());
+				List<WMSLayerInfo> layerInfos = WMSLayerInfo.createLayerInfos(capabilities, layerCapabilities);
+				node.setLayerInfo(layerInfos.get(0));
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				setLayerLoading(node, false, false);
+				setError(node, e);
+				return;
+			}
+		}
+		
+		loadedLayer = new LoadedLayer(new WMSTiledImageLayer(node.getWmsCapabilities(), node.getWmsParams()), node.getWmsParams());
 		loadedLayer.setLegendURL(node.getLegendURL());
 		
 		Wrapper wrapper = wrappers.get(index);
 		wrapper.setLoaded(loadedLayer);
+		
+		setLayerLoading(node, false, true);
 	}
 
 	private void loadFile(final ILayerNode node, File file)

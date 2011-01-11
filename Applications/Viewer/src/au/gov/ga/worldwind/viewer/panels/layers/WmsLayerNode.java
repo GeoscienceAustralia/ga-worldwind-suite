@@ -4,6 +4,7 @@ import static au.gov.ga.worldwind.common.util.Util.isBlank;
 import static au.gov.ga.worldwind.common.util.Util.isEmpty;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.ogc.OGCRequestDescription;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerInfoURL;
@@ -34,15 +35,26 @@ public class WmsLayerNode extends LayerNode
 			return null;
 		}
 		
-		WMSCapabilities caps = (WMSCapabilities)layerInfo.getCaps();
-		if (caps.getServiceInformation() == null || 
-				caps.getServiceInformation().getOnlineResource() == null || 
-				isBlank(caps.getServiceInformation().getOnlineResource().getHref()))
+		WMSLayerCapabilities caps = ((WMSCapabilities)layerInfo.getCaps()).getLayerByName(layerInfo.getParams().getStringValue(AVKey.LAYER_NAMES));
+		if (caps == null || isEmpty(caps.getDataURLs()))
 		{
 			return null;
 		}
 		
-		return URLUtil.fromString(caps.getServiceInformation().getOnlineResource().getHref());
+		// Use the first URL...
+		for (WMSLayerInfoURL dataUrl : caps.getDataURLs())
+		{
+			if (dataUrl == null || dataUrl.getOnlineResource() == null || isBlank(dataUrl.getOnlineResource().getHref()))
+			{
+				continue;
+			}
+			URL result = URLUtil.fromString(dataUrl.getOnlineResource().getHref());
+			if (result != null)
+			{
+				return result;
+			}
+		}
+		return null;
 	}
 	
 	private static URL getLegendUrlForLayer(WMSLayerInfo layerInfo)
@@ -88,35 +100,41 @@ public class WmsLayerNode extends LayerNode
 		{
 			return null;
 		}
-		WMSLayerCapabilities caps = ((WMSCapabilities)layerInfo.getCaps()).getLayerByName(layerInfo.getParams().getStringValue(AVKey.LAYER_NAMES));
-		if (caps == null || isEmpty(caps.getDataURLs()))
-		{
-			return null;
-		}
+		WMSCapabilities caps = (WMSCapabilities)layerInfo.getCaps();
 		
-		// Use the first URL...
-		for (WMSLayerInfoURL dataUrl : caps.getDataURLs())
-		{
-			if (dataUrl == null || dataUrl.getOnlineResource() == null || isBlank(dataUrl.getOnlineResource().getHref()))
-			{
-				continue;
-			}
-			URL result = URLUtil.fromString(dataUrl.getOnlineResource().getHref());
-			if (result != null)
-			{
-				return result;
-			}
-		}
+		Set<OGCRequestDescription> requestDescriptions = caps.getCapabilityInformation().getRequestDescriptions();
+        for (OGCRequestDescription rd : requestDescriptions)
+        {
+            if (rd.getRequestName().equals("GetCapabilities"))
+            {
+                return URLUtil.fromString(rd.getOnlineResouce("HTTP", "Get").getHref());
+            }
+        }
 		return null;
 	}
 	
 	private WMSLayerInfo layerInfo;
+	private String layerId;
 	
+	/**
+	 * Construct from a provided {@link WMSLayerInfo} instance.
+	 */
 	public WmsLayerNode(WMSLayerInfo layerInfo, boolean enabled, double opacity)
 	{
 		super(layerInfo.getTitle(), getInfoUrlForLayer(layerInfo), DEFAULT_ICON_URL, false, getLayerUrl(layerInfo), enabled, opacity, DEFAULT_EXPIRY_TIME);
 		setLegendURL(getLegendUrlForLayer(layerInfo));
+		this.layerId = layerInfo.getParams().getStringValue(AVKey.LAYER_NAMES);
 		this.layerInfo = layerInfo;
+	}
+	
+	/**
+	 * Construct using component information.
+	 */
+	public WmsLayerNode(String name, URL infoURL, URL iconURL, boolean expanded, URL layerURL, boolean enabled, double opacity, Long expiryTime, URL legendURL, String layerId)
+	{
+		super(name, infoURL, iconURL, expanded, layerURL, enabled, opacity, expiryTime);
+		setLegendURL(legendURL);
+		this.layerId = layerId;
 	}
 	
 	public WMSLayerInfo getLayerInfo()
@@ -124,13 +142,28 @@ public class WmsLayerNode extends LayerNode
 		return layerInfo;
 	}
 	
+	public void setLayerInfo(WMSLayerInfo layerInfo)
+	{
+		this.layerInfo = layerInfo;
+	}
+	
+	public String getLayerId()
+	{
+		return layerId;
+	}
+	
+	public boolean isLayerInfoLoaded()
+	{
+		return layerInfo != null;
+	}
+	
 	public WMSCapabilities getWmsCapabilities()
 	{
-		return (WMSCapabilities)layerInfo.getCaps();
+		return layerInfo == null ? null : (WMSCapabilities)layerInfo.getCaps();
 	}
 	
 	public AVList getWmsParams()
 	{
-		return layerInfo.getParams();
+		return layerInfo == null ? null : layerInfo.getParams();
 	}
 }

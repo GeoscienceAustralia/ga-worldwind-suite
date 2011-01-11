@@ -77,8 +77,7 @@ public class LayerTreePersistance
 		addRelevant(element, node, xpath);
 	}
 
-	protected static void addLayer(Element element, INode parent, XPath xpath)
-			throws MalformedURLException
+	protected static void addLayer(Element element, INode parent, XPath xpath) throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name", xpath);
 		URL icon = XMLUtil.getURL(element, "@icon", null, xpath);
@@ -88,8 +87,21 @@ public class LayerTreePersistance
 		boolean enabled = XMLUtil.getBoolean(element, "@enabled", false, xpath);
 		double opacity = XMLUtil.getDouble(element, "@opacity", 1.0, xpath);
 		Long expiryTime = XMLUtil.getLong(element, "@expiry", xpath);
-		LayerNode node =
-				new LayerNode(name, info, icon, expanded, layer, enabled, opacity, expiryTime);
+		
+		String type = XMLUtil.getText(element, "@type", xpath);
+		
+		LayerNode node;
+		if ("wms".equals(type))
+		{
+			URL legend = XMLUtil.getURL(element, "@legend", null, xpath);
+			String id = XMLUtil.getText(element, "@layerId", xpath);
+			node = new WmsLayerNode(name, info, icon, expanded, layer, enabled, opacity, expiryTime, legend, id);
+		}
+		else
+		{
+			node = new LayerNode(name, info, icon, expanded, layer, enabled, opacity, expiryTime);
+		}
+		
 		parent.addChild(node);
 		addRelevant(element, node, xpath);
 	}
@@ -132,26 +144,52 @@ public class LayerTreePersistance
 
 			LayerNode layer = (LayerNode) node;
 			if (layer.getLayerURL() != null)
+			{
 				current.setAttribute("layer", layer.getLayerURL().toExternalForm());
+			}
 			if (layer.isEnabled())
+			{
 				XMLUtil.setBooleanAttribute(current, "enabled", layer.isEnabled());
+			}
 			if (layer.getOpacity() != 1.0)
+			{
 				XMLUtil.setDoubleAttribute(current, "opacity", layer.getOpacity());
+			}
 			if (layer.getExpiryTime() != null)
+			{
 				XMLUtil.setLongAttribute(current, "expiry", layer.getExpiryTime());
+			}
 		}
 
+		if (current != null && node instanceof WmsLayerNode)
+		{
+			current.setAttribute("type", "wms");
+			if (((WmsLayerNode)node).getLegendURL() != null)
+			{
+				current.setAttribute("legend", ((WmsLayerNode)node).getLegendURL().toExternalForm());
+			}
+			current.setAttribute("layerId", ((WmsLayerNode)node).getLayerId());
+		}
+		
 		if (current != null)
 		{
 			element.appendChild(current);
 			if (node.getName() != null && node.getName().length() > 0)
+			{
 				current.setAttribute("name", node.getName());
+			}
 			if (node.getInfoURL() != null)
+			{
 				current.setAttribute("info", node.getInfoURL().toExternalForm());
+			}
 			if (node.getIconURL() != null)
+			{
 				current.setAttribute("icon", node.getIconURL().toExternalForm());
+			}
 			if (node.isExpanded())
+			{
 				XMLUtil.setBooleanAttribute(current, "expanded", node.isExpanded());
+			}
 
 			for (int i = 0; i < node.getChildCount(); i++)
 			{
