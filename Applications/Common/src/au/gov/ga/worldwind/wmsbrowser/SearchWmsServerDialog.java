@@ -42,6 +42,7 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -494,6 +495,18 @@ public class SearchWmsServerDialog extends JDialog
 				{
 					searchResultsLock.readLock().unlock();
 				}
+			}
+		});
+		
+		// This is required so that the event is invoked after everything has been loaded and rendered properly
+		SwingUtilities.invokeLater(new Runnable(){
+			@Override
+			public void run()
+			{
+				resultScroller.getVerticalScrollBar().setValue(0);
+				
+				validate();
+				repaint();
 			}
 		});
 	}
