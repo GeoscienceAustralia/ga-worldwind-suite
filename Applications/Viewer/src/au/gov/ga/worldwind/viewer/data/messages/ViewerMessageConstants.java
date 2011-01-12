@@ -14,23 +14,35 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getApplicationTitleSandpitSuffixKey() { return "viewer.application.title.sandpitsuffix"; }
 	public static String getHelpUrlKey() { return "viewer.help.url"; }
 
+	// Dialogs
 	public static String getGotoCoordsTitleKey() { return "viewer.dialog.gotocoords.title"; }
 	public static String getAboutTitleKey() { return "viewer.dialog.about.title"; }
 	public static String getPreferencesTitleKey() { return "viewer.dialog.preferences.title"; }
 	public static String getControlsTitleKey() { return "viewer.dialog.controls.title"; }
 	public static String getSaveSectorTitleKey() { return "viewer.dialog.savesector.title"; }
 	public static String getClipSectorTitleKey() { return "viewer.dialog.clipsector.title"; }
+	public static String getNewLayerDialogTitleKey() { return "viewer.dialog.newlayer.title"; }
+	public static String getEditLayerDialogTitleKey() { return "viewer.dialog.editlayer.title"; }
+	public static String getOpenLayerDialogTitleKey() { return "viewer.dialog.openlayer.title"; }
 
+	// Messages
 	public static String getSaveImageOverwriteTitleKey() { return "viewer.saveimage.overwrite.title"; }
 	public static String getSaveImageOverwriteMessageKey() { return "viewer.saveimage.overwrite.message"; }
 	public static String getRefreshLayerConfirmationMessageKey() { return "viewer.refreshlayer.message"; }
+	public static String getOpenLayerErrorMessageKey() { return "viewer.openlayer.error.message"; }
+	public static String getOpenLayerErrorTitleKey() { return "viewer.openlayer.error.title"; }
 	
+	// Panels
+	public static String getLayersPanelTitleKey() { return "viewer.panel.layers.title"; }
+	
+	// Menu items
 	public static String getFileMenuLabelKey() { return "viewer.menu.file.label"; }
 	public static String getCreateLayerMenuLabelKey() { return "viewer.menu.createlayer.label"; }
 	public static String getViewMenuLabelKey() { return "viewer.menu.view.label"; }
 	public static String getOptionsMenuLabelKey() { return "viewer.menu.options.label"; }
 	public static String getHelpMenuLabelKey() { return "viewer.menu.help.label"; }
 
+	// Actions
 	public static String getOpenLayerActionLabelKey() { return "viewer.action.openlayer.label"; }
 	public static String getCreateLayerFromDirectoryLabelKey() { return "viewer.action.createlayerfromdirectory.label"; }
 	public static String getWorkOfflineLabelKey() { return "viewer.action.workoffline.label"; }
@@ -50,6 +62,27 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getClipSectorLabelKey() { return "viewer.action.clipsector.label"; }
 	public static String getClearClipLabelKey() { return "viewer.action.clearclip.label"; }
 	public static String getLaunchWmsBrowserLabelKey() { return "viewer.action.wmsbrowser.label"; }
+	
+	public static String getLayersNewFolderLabelKey() { return "viewer.action.layers.newfolder.label"; }
+	public static String getLayersNewFolderTooltipKey() { return "viewer.action.layers.newfolder.tooltip"; }
+	public static String getLayersNewLayerLabelKey() { return "viewer.action.layers.newlayer.label"; }
+	public static String getLayersNewLayerTooltipKey() { return "viewer.action.layers.newlayer.tooltip"; }
+	public static String getLayersOpenLayerLabelKey() { return "viewer.action.layers.openlayer.label"; }
+	public static String getLayersOpenLayerTooltipKey() { return "viewer.action.layers.openlayer.tooltip"; }
+	public static String getLayersRenameLabelKey() { return "viewer.action.layers.rename.label"; }
+	public static String getLayersRenameTooltipKey() { return "viewer.action.layers.rename.tooltip"; }
+	public static String getLayersEditLabelKey() { return "viewer.action.layers.edit.label"; }
+	public static String getLayersEditTooltipKey() { return "viewer.action.layers.edit.tooltip"; }
+	public static String getLayersDeleteLabelKey() { return "viewer.action.layers.delete.label"; }
+	public static String getLayersDeleteTooltipKey() { return "viewer.action.layers.delete.tooltip"; }
+	public static String getLayersExpandAllLabelKey() { return "viewer.action.layers.expandall.label"; }
+	public static String getLayersExpandAllTooltipKey() { return "viewer.action.layers.expandall.tooltip"; }
+	public static String getLayersCollapseAllLabelKey() { return "viewer.action.layers.collapseall.label"; }
+	public static String getLayersCollapseAllTooltipKey() { return "viewer.action.layers.collapseall.tooltip"; }
+	public static String getLayersRefreshLayerLabelKey() { return "viewer.action.layers.refresh.label"; }
+	public static String getLayersRefreshLayerTooltipKey() { return "viewer.action.layers.refresh.tooltip"; }
+	public static String getLayersReloadLayerLabelKey() { return "viewer.action.layers.reload.label"; }
+	public static String getLayersReloadLayerTooltipKey() { return "viewer.action.layers.reload.tooltip"; }
 	
 	public static String getTermImageKey() { return "viewer.term.image"; }
 
