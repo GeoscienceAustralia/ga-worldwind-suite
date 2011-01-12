@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<LayerList>
+    <Folder expanded="true" icon="http://folder1/icon" info="http://folder1/info" name="folder1">
+        <Layer enabled="true" expanded="true" icon="file://folder1/layer1/icon" info="file://folder1/layer1/info" layer="file://folder1/layer1/layer" name="layer1"/>
+        <Layer icon="file://folder1/layer2/icon" info="file://folder1/layer2/info" layer="file://folder1/layer2/layer" name="layer2" opacity="0.5"/>
+    </Folder>
+    <Layer enabled="true" expanded="true" expiry="1000" icon="http://folder1/wmslayer/icon" info="http://folder1/wmslayer/info" layer="http://folder1/wmslayer/layer" layerId="theWmsLayer" legend="http://folder1/wmslayer/legend" name="wmsLayer" opacity="0.3" type="wms"/>
+</LayerList>

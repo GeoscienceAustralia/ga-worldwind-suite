@@ -11,12 +11,33 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
+/**
+ * Allows the application layer tree to be persisted to-and-from an XML file.
+ * <p/>
+ * This is used primarily to persist the user's layer tree between invocations of the application.
+ */
 public class LayerTreePersistance
 {
 	public final static String LAYERS_ROOT_ELEMENT_NAME = "LayerList";
 
+	/**
+	 * Read a layer tree structure from the provided source.
+	 * <p/>
+	 * The source object may be one of:
+	 * <ul>
+	 * 	<li>DOM Element
+	 * 	<li>DOM Document
+	 * 	<li>URL
+	 *  <li>File
+	 *  <li>InputStream
+	 *  <li>String representation of a URL
+	 * </ul>
+	 * 
+	 * @return The root node of the layer tree
+	 */
 	public static INode readFromXML(Object source) throws MalformedURLException
 	{
 		XPath xpath = XMLUtil.makeXPath();
@@ -33,7 +54,9 @@ public class LayerTreePersistance
 			{
 				Element[] elements = XMLUtil.getElements(elem, LAYERS_ROOT_ELEMENT_NAME, xpath);
 				if (elements == null)
+				{
 					return null;
+				}
 
 				for (Element element : elements)
 				{
@@ -45,8 +68,7 @@ public class LayerTreePersistance
 		return null;
 	}
 
-	protected static void addRelevant(Element element, INode parent, XPath xpath)
-			throws MalformedURLException
+	protected static void addRelevant(Element element, INode parent, XPath xpath) throws MalformedURLException
 	{
 		Element[] elements = XMLUtil.getElements(element, "Folder|Layer", xpath);
 		if (elements != null)
@@ -65,8 +87,7 @@ public class LayerTreePersistance
 		}
 	}
 
-	protected static void addFolder(Element element, INode parent, XPath xpath)
-			throws MalformedURLException
+	protected static void addFolder(Element element, INode parent, XPath xpath) throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name", xpath);
 		URL info = XMLUtil.getURL(element, "@info", null, xpath);
@@ -106,14 +127,33 @@ public class LayerTreePersistance
 		addRelevant(element, node, xpath);
 	}
 
+	/**
+	 * Save the provided layer tree node and it's sub-tree to an XML file at the location provided.
+	 */
 	public static void saveToXML(INode root, File output)
 	{
+		if (root == null)
+		{
+			return;
+		}
+		Validate.notNull(output, "An output file is required");
+		
 		Document document = saveToDocument(root);
 		XMLUtil.saveDocumentToFormattedFile(document, output.getAbsolutePath());
 	}
 
+	/**
+	 * Save the provided node and it's sub-tree to a generated XML Document object.
+	 * 
+	 * @return An XML Document object with the layer tree persisted as XML
+	 */
 	public static Document saveToDocument(INode root)
 	{
+		if (root == null)
+		{
+			return null;
+		}
+		
 		DocumentBuilder db = XMLUtil.createDocumentBuilder(false);
 		Document document = db.newDocument();
 		saveToNode(root, document, document);
