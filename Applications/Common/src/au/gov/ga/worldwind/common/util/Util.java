@@ -613,6 +613,14 @@ public class Util
 	}
 	
 	/**
+	 * @return Whether the provided array is <code>null</code> or empty
+	 */
+	public static boolean isEmpty(Object[] array)
+	{
+		return array == null || array.length == 0;
+	}
+	
+	/**
 	 * Clamp the provided value to the range specified by <code>[min, max]</code>
 	 */
 	public static int clamp(int value, int min, int max)

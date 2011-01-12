@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
 import static au.gov.ga.worldwind.common.util.Util.isBlank;
+import static au.gov.ga.worldwind.common.util.Util.isEmpty;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
@@ -392,56 +393,54 @@ public class LayersPanel extends AbstractLayersPanel
 	private void deleteSelected()
 	{
 		TreePath[] paths = tree.getSelectionPaths();
-		if (paths != null && paths.length > 0)
+		if (isEmpty(paths))
 		{
-			String text;
-			if (paths.length > 1)
-			{
-				boolean anyChildren = false;
-				for (TreePath p : paths)
-				{
-					INode node = (INode) p.getLastPathComponent();
-					if (node.getChildCount() > 0)
-					{
-						anyChildren = true;
-						break;
-					}
-				}
-				text = "Are you sure you want to delete these " + paths.length + " items" + (anyChildren ? " and their children" : "") + "?";
-			}
-			else
-			{
-				TreePath p = paths[0];
-				INode node = (INode) p.getLastPathComponent();
-				String type;
-				if (node instanceof ILayerNode)
-				{
-					type = "layer";
-				}
-				else
-				{
-					type = "folder";
-				}
-				boolean anyChildren = node.getChildCount() > 0;
-				text = "Are you sure you want to delete the " + type + " '" + node.getName() + "'" + (anyChildren ? " and its children" : "") + "?";
-			}
-
-			int choice = JOptionPane.showConfirmDialog(this, text, "Confirm deletion", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-			if (choice == JOptionPane.YES_OPTION)
-			{
-				for (TreePath p : paths)
-				{
-					INode node = (INode) p.getLastPathComponent();
-					getModel().removeNodeFromParent(node, true);
-					if (datasetPanel != null)
-					{
-						datasetPanel.getTree().repaint();
-					}
-				}
-
-				tree.getUI().relayout();
-			}
+			return;
 		}
+		
+		int choice = JOptionPane.showConfirmDialog(this, createDeleteConfirmationMessage(paths), getMessage(getDeleteLayerDialogTitleKey()), 
+													JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+		if (choice == JOptionPane.YES_OPTION)
+		{
+			for (TreePath p : paths)
+			{
+				INode node = (INode) p.getLastPathComponent();
+				getModel().removeNodeFromParent(node, true);
+				if (datasetPanel != null)
+				{
+					datasetPanel.getTree().repaint();
+				}
+			}
+
+			tree.getUI().relayout();
+		}
+	}
+
+	private String createDeleteConfirmationMessage(TreePath[] paths)
+	{
+		String message;
+		if (paths.length > 1)
+		{
+			boolean anyChildren = false;
+			for (TreePath p : paths)
+			{
+				INode node = (INode) p.getLastPathComponent();
+				if (node.getChildCount() > 0)
+				{
+					anyChildren = true;
+					break;
+				}
+			}
+			message = getMessage(getConfirmDeleteLayerMultipleMessageKey(), paths.length, anyChildren ? 1 : 0);
+		}
+		else
+		{
+			INode node = (INode) paths[0].getLastPathComponent();
+			
+			String typeKey = (node instanceof ILayerNode) ? getTermLayerKey() : getTermFolderKey();
+			message = getMessage(getConfirmDeleteLayerSingleMessageKey(), getMessage(typeKey), node.getName(), node.getChildCount());
+		}
+		return message;
 	}
 
 	private void treeSelectionChanged()
@@ -464,21 +463,23 @@ public class LayersPanel extends AbstractLayersPanel
 	private void refreshSelected()
 	{
 		TreePath p = tree.getSelectionPath();
-		if (p != null)
+		if (p == null)
 		{
-			Object o = p.getLastPathComponent();
-			if (o instanceof ILayerNode)
+			return;
+		}
+		
+		Object o = p.getLastPathComponent();
+		if (o instanceof ILayerNode)
+		{
+			ILayerNode layer = (ILayerNode) o;
+			int choice = JOptionPane.showConfirmDialog(this,
+														getMessage(getRefreshLayerConfirmationMessageKey()),
+														refreshAction.getName(),
+														JOptionPane.YES_NO_OPTION,
+														JOptionPane.WARNING_MESSAGE);
+			if (choice == JOptionPane.YES_OPTION)
 			{
-				ILayerNode layer = (ILayerNode) o;
-				int choice = JOptionPane.showConfirmDialog(this,
-															getMessage(getRefreshLayerConfirmationMessageKey()),
-															refreshAction.getName(),
-															JOptionPane.YES_NO_OPTION,
-															JOptionPane.WARNING_MESSAGE);
-				if (choice == JOptionPane.YES_OPTION)
-				{
-					getModel().setExpiryTime(layer, System.currentTimeMillis());
-				}
+				getModel().setExpiryTime(layer, System.currentTimeMillis());
 			}
 		}
 	}
@@ -486,17 +487,19 @@ public class LayersPanel extends AbstractLayersPanel
 	private void reloadSelected()
 	{
 		TreePath p = tree.getSelectionPath();
-		if (p != null)
+		if (p == null)
 		{
-			Object o = p.getLastPathComponent();
-			if (o instanceof ILayerNode)
-			{
-				ILayerNode layer = (ILayerNode) o;
-				layerEnabler.reloadLayer(layer);
+			return;
+		}
+		
+		Object o = p.getLastPathComponent();
+		if (o instanceof ILayerNode)
+		{
+			ILayerNode layer = (ILayerNode) o;
+			layerEnabler.reloadLayer(layer);
 
-				tree.scrollPathToVisible(p);
-				tree.getUI().relayout();
-			}
+			tree.scrollPathToVisible(p);
+			tree.getUI().relayout();
 		}
 	}
 

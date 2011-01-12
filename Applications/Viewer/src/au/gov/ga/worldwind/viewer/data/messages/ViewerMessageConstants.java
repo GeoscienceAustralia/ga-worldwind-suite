@@ -24,6 +24,7 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getNewLayerDialogTitleKey() { return "viewer.dialog.newlayer.title"; }
 	public static String getEditLayerDialogTitleKey() { return "viewer.dialog.editlayer.title"; }
 	public static String getOpenLayerDialogTitleKey() { return "viewer.dialog.openlayer.title"; }
+	public static String getDeleteLayerDialogTitleKey() { return "viewer.dialog.deletelayer.title"; }
 
 	// Messages
 	public static String getSaveImageOverwriteTitleKey() { return "viewer.saveimage.overwrite.title"; }
@@ -31,6 +32,8 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getRefreshLayerConfirmationMessageKey() { return "viewer.refreshlayer.message"; }
 	public static String getOpenLayerErrorMessageKey() { return "viewer.openlayer.error.message"; }
 	public static String getOpenLayerErrorTitleKey() { return "viewer.openlayer.error.title"; }
+	public static String getConfirmDeleteLayerMultipleMessageKey() { return "viewer.deletelayer.confirm.multiple.message"; }
+	public static String getConfirmDeleteLayerSingleMessageKey() { return "viewer.deletelayer.confirm.single.message"; }
 	
 	// Panels
 	public static String getLayersPanelTitleKey() { return "viewer.panel.layers.title"; }
@@ -84,7 +87,10 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getLayersReloadLayerLabelKey() { return "viewer.action.layers.reload.label"; }
 	public static String getLayersReloadLayerTooltipKey() { return "viewer.action.layers.reload.tooltip"; }
 	
+	// Terms
 	public static String getTermImageKey() { return "viewer.term.image"; }
+	public static String getTermLayerKey() { return "viewer.term.layer"; }
+	public static String getTermFolderKey() { return "viewer.term.folder"; }
 
 	public static String getTreeLoadingNodeLabelKey() { return "viewer.tree.loadingnode.label"; }
 	public static String getTreeErrorNodeLabelKey() { return "viewer.tree.errornode.label"; }
