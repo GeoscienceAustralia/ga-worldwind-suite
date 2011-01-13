@@ -57,19 +57,33 @@ public class Path
 		}
 	}
 
+	/**
+	 * @return The length of the path, expressed as an angle.
+	 */
 	public synchronized Angle getLength()
 	{
 		return length;
 	}
 
+	/**
+	 * @param percent The percentage expressed as a decimal (e.g. 50% == 0.5)
+	 * 
+	 * @return The {@link LatLon} location that lies <code>percent</code>% of the way along the path
+	 */
 	public synchronized LatLon getPercentLatLon(double percent)
 	{
 		if (percent <= 0)
+		{
 			return positions.firstEntry().getValue();
+		}
 		if (percent >= 1)
+		{
 			return positions.lastEntry().getValue();
+		}
 		if (positions.containsKey(percent))
+		{
 			return positions.get(percent);
+		}
 
 		Entry<Double, LatLon> lower = positions.lowerEntry(percent);
 		Entry<Double, LatLon> higher = positions.higherEntry(percent);
@@ -226,6 +240,9 @@ public class Path
 		return length.radians * percent;
 	}
 	
+	/**
+	 * @return The sector that bounds the path
+	 */
 	public synchronized Sector getBoundingSector()
 	{
 		if (isEmpty(positions))
