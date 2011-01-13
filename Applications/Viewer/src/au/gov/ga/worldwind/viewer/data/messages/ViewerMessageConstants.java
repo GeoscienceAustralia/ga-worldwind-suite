@@ -86,6 +86,11 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getLayersRefreshLayerTooltipKey() { return "viewer.action.layers.refresh.tooltip"; }
 	public static String getLayersReloadLayerLabelKey() { return "viewer.action.layers.reload.label"; }
 	public static String getLayersReloadLayerTooltipKey() { return "viewer.action.layers.reload.tooltip"; }
+	public static String getLayersEnableLayerLabelKey() { return "viewer.action.layers.enable.label"; }
+	public static String getLayersEnableLayerTooltipKey() { return "viewer.action.layers.enable.tooltip"; }
+	public static String getLayersDisableLayerLabelKey() { return "viewer.action.layers.disable.label"; }
+	public static String getLayersDisableLayerTooltipKey() { return "viewer.action.layers.disable.tooltip"; }
+	public static String getLayersOpacityTooltipKey() { return "viewer.action.layers.opacity.tooltip"; }
 	
 	// Terms
 	public static String getTermImageKey() { return "viewer.term.image"; }

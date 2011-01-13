@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
+
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
@@ -213,7 +216,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 
 	protected void createActions()
 	{
-		enableAction = new BasicAction("Enable selected", Icons.check.getIcon());
+		enableAction = new BasicAction(getMessage(getLayersEnableLayerLabelKey()), getMessage(getLayersEnableLayerTooltipKey()), Icons.check.getIcon());
 		enableAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -223,7 +226,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			}
 		});
 
-		disableAction = new BasicAction("Disable selected", Icons.uncheck.getIcon());
+		disableAction = new BasicAction(getMessage(getLayersDisableLayerLabelKey()), getMessage(getLayersDisableLayerTooltipKey()), Icons.uncheck.getIcon());
 		disableAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -252,7 +255,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 	private void createOpacitySlider()
 	{
 		opacitySlider = new JSlider(0, 100, 100);
-		opacitySlider.setToolTipText("Layer opacity");
+		opacitySlider.setToolTipText(getMessage(getLayersOpacityTooltipKey()));
 		Dimension size = opacitySlider.getPreferredSize();
 		size.width = 60;
 		opacitySlider.setPreferredSize(size);
@@ -296,47 +299,50 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 
 	private void setOpacitySlider()
 	{
-		if (!ignoreOpacityChange)
+		if (ignoreOpacityChange)
 		{
-			TreePath[] selected = tree.getSelectionPaths();
-			ILayerNode layer = firstChildLayer(selected, true);
-			if (layer != null)
-			{
-				double opacity = layer.isEnabled() ? layer.getOpacity() * 100d : 0;
-				ignoreOpacityChange = true;
-				opacitySlider.setValue((int) Math.round(opacity));
-				ignoreOpacityChange = false;
-				opacitySlider.setEnabled(true);
-			}
-			else
-			{
-				opacitySlider.setEnabled(false);
-			}
+			return;
+		}
+		
+		TreePath[] selected = tree.getSelectionPaths();
+		ILayerNode layer = firstChildLayer(selected, true);
+		if (layer != null)
+		{
+			double opacity = layer.isEnabled() ? layer.getOpacity() * 100d : 0;
+			ignoreOpacityChange = true;
+			opacitySlider.setValue((int) Math.round(opacity));
+			ignoreOpacityChange = false;
+			opacitySlider.setEnabled(true);
+		}
+		else
+		{
+			opacitySlider.setEnabled(false);
 		}
 	}
 
 	private void setSelectedOpacity()
 	{
-		if (!ignoreOpacityChange)
+		if (ignoreOpacityChange)
 		{
-			ignoreOpacityChange = true;
-
-			TreePath[] selected = tree.getSelectionPaths();
-			Set<ILayerNode> nodes = getChildLayers(selected, true);
-
-			double opacity = opacitySlider.getValue() / 100d;
-			boolean enabled = opacity > 0;
-
-			for (ILayerNode node : nodes)
-			{
-				tree.getLayerModel().setEnabled(node, enabled);
-				tree.getLayerModel().setOpacity(node, opacity);
-				relayoutRepaint(node);
-			}
-
-			ignoreOpacityChange = false;
-			setOpacitySlider();
+			return;
 		}
+		ignoreOpacityChange = true;
+
+		TreePath[] selected = tree.getSelectionPaths();
+		Set<ILayerNode> nodes = getChildLayers(selected, true);
+
+		double opacity = opacitySlider.getValue() / 100d;
+		boolean enabled = opacity > 0;
+
+		for (ILayerNode node : nodes)
+		{
+			tree.getLayerModel().setEnabled(node, enabled);
+			tree.getLayerModel().setOpacity(node, opacity);
+			relayoutRepaint(node);
+		}
+
+		ignoreOpacityChange = false;
+		setOpacitySlider();
 	}
 
 	private void relayoutRepaint(INode node)
@@ -346,7 +352,9 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 
 		Rectangle bounds = tree.getPathBounds(path);
 		if (bounds != null)
+		{
 			tree.repaint(bounds);
+		}
 	}
 
 	protected ILayerNode firstChildLayer(TreePath[] selected, boolean hasLayer)
@@ -361,7 +369,9 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			{
 				ILayerNode layer = firstChildLayer((INode) o, hasLayer);
 				if (layer != null)
+				{
 					return layer;
+				}
 			}
 		}
 		return null;
@@ -373,13 +383,17 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		{
 			ILayerNode layer = (ILayerNode) node;
 			if (!hasLayer || layerEnabler.hasLayer(layer))
+			{
 				return layer;
+			}
 		}
 		for (int i = 0; i < node.getChildCount(); i++)
 		{
 			ILayerNode layer = firstChildLayer(node.getChild(i), hasLayer);
 			if (layer != null)
+			{
 				return layer;
+			}
 		}
 		return null;
 	}
@@ -393,7 +407,9 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			{
 				Object o = path.getLastPathComponent();
 				if (o instanceof INode)
+				{
 					addChildLayers((INode) o, layers, hasLayer);
+				}
 			}
 		}
 		return layers;
@@ -412,7 +428,9 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		{
 			ILayerNode layer = (ILayerNode) node;
 			if (!hasLayer || layerEnabler.hasLayer(layer))
+			{
 				list.add(layer);
+			}
 		}
 		for (int i = 0; i < node.getChildCount(); i++)
 		{
