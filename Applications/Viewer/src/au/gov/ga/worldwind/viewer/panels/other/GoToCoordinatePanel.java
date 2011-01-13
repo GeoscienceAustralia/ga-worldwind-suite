@@ -6,6 +6,9 @@ All Rights Reserved.
  */
 package au.gov.ga.worldwind.viewer.panels.other;
 
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
+
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -72,7 +75,7 @@ public class GoToCoordinatePanel extends JPanel
 
 		String prefix = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 		String supported = "<html>";
-		supported += "Supports Lat/Lon, DMS, UTM, and MGRS formats:<br>";
+		supported += getMessage(getGotoLocationSupportsMessageKey()) + ":<br>";
 		supported += prefix + "-27.0 133.5<br>";
 		supported += prefix + "27.0S 133.5E<br>";
 		supported += prefix + "-27\u00B00'0\" 133\u00B030'0\"<br>";
@@ -93,14 +96,14 @@ public class GoToCoordinatePanel extends JPanel
 		c.anchor = GridBagConstraints.WEST;
 		add(space, c);
 
-		JLabel label = new JLabel("Enter lat/lon:");
+		JLabel label = new JLabel(getMessage(getGotoLocationPromptLabelKey()));
 		c = new GridBagConstraints();
 		c.gridy = row++;
 		c.anchor = GridBagConstraints.WEST;
 		add(label, c);
 
 		coordInput = new JTextField(30);
-		coordInput.setToolTipText("Type coordinates and press Enter");
+		coordInput.setToolTipText(getMessage(getGotoLocationPromptTooltipKey()));
 		c = new GridBagConstraints();
 		c.gridy = row;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -111,7 +114,7 @@ public class GoToCoordinatePanel extends JPanel
 		{
 			FlatJButton go = new FlatJButton(Icons.run.getIcon());
 			go.restrictSize();
-			go.setToolTipText("Go");
+			go.setToolTipText(getMessage(getGotoLocationGotoTooltipKey()));
 			c = new GridBagConstraints();
 			c.gridx = row;
 			c.gridy = 1;
@@ -170,7 +173,9 @@ public class GoToCoordinatePanel extends JPanel
 		Globe globe = wwd.getModel().getGlobe();
 		LatLon ll = Util.computeLatLonFromString(s, globe);
 		if (ll == null)
+		{
 			ll = Util.computeLatLonFromUTMString(s, globe, false);
+		}
 		return ll;
 	}
 
@@ -179,14 +184,16 @@ public class GoToCoordinatePanel extends JPanel
 		inputValid = latlon != null;
 		if (latlon != null)
 		{
-			// coordInput.setText(coordInput.getText().toUpperCase());
-			resultLabel.setText(String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0",
-					latlon.getLatitude().degrees, latlon.getLongitude().degrees));
+			resultLabel.setText(String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", latlon.getLatitude().degrees, latlon.getLongitude().degrees));
 		}
 		else if (showInvalid)
-			resultLabel.setText("Invalid coordinates");
+		{
+			resultLabel.setText(getMessage(getGotoLocationInvalidMessageKey()));
+		}
 		else
+		{
 			resultLabel.setText(" ");
+		}
 
 		notifyChangeListeners();
 	}
@@ -243,7 +250,7 @@ public class GoToCoordinatePanel extends JPanel
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
 		panel.add(gtp, c);
 
-		final JButton ok = new JButton("OK");
+		final JButton ok = new JButton(getMessage(getTermOkKey()));
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 1;
@@ -264,7 +271,7 @@ public class GoToCoordinatePanel extends JPanel
 			}
 		});
 
-		JButton cancel = new JButton("Cancel");
+		JButton cancel = new JButton(getMessage(getTermCancelKey()));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 1;

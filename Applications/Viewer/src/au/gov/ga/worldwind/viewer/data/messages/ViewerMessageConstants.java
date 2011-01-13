@@ -34,9 +34,17 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getOpenLayerErrorTitleKey() { return "viewer.openlayer.error.title"; }
 	public static String getConfirmDeleteLayerMultipleMessageKey() { return "viewer.deletelayer.confirm.multiple.message"; }
 	public static String getConfirmDeleteLayerSingleMessageKey() { return "viewer.deletelayer.confirm.single.message"; }
+	public static String getGotoLocationSupportsMessageKey() { return "viewer.gotolocation.supports.message"; }
+	public static String getGotoLocationInvalidMessageKey() { return "viewer.gotolocation.invalid.message"; }
+	
+	// Field labels
+	public static String getGotoLocationPromptLabelKey() { return "viewer.gotolocation.prompt.label"; }
+	public static String getGotoLocationPromptTooltipKey() { return "viewer.gotolocation.prompt.tooltip"; }
+	public static String getGotoLocationGotoTooltipKey() { return "viewer.gotolocation.go.tooltip"; }
 	
 	// Panels
 	public static String getLayersPanelTitleKey() { return "viewer.panel.layers.title"; }
+	public static String getDatasetsPanelTitleKey() { return "viewer.panel.datasets.title"; }
 	
 	// Menu items
 	public static String getFileMenuLabelKey() { return "viewer.menu.file.label"; }

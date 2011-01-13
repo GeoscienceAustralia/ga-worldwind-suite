@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.viewer.panels.dataset;
 
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.getDatasetsPanelTitleKey;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
@@ -23,7 +26,7 @@ public class DatasetPanel extends AbstractThemePanel
 	public DatasetPanel()
 	{
 		super(new BorderLayout());
-		setDisplayName("Datasets");
+		setDisplayName(getMessage(getDatasetsPanelTitleKey()));
 
 		root = new Dataset("root", null, null, true);
 		DefaultLazyTreeModel model = new DefaultLazyTreeModel(null);
