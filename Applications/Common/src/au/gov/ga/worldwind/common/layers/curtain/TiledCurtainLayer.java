@@ -8,6 +8,7 @@ import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
@@ -28,15 +29,17 @@ import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 import com.sun.opengl.util.j2d.TextRenderer;
 
-public abstract class TiledCurtainLayer extends AbstractLayer
+public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 {
 	//TODO where should this live
 	protected CurtainTileRenderer renderer = new CurtainTileRenderer();
 
+	protected Sector boundingSector;
 	protected Path path;
 	protected double curtainTop = 0;
 	protected double curtainBottom = -10000;
@@ -388,12 +391,25 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		for (CurtainTextureTile tile : this.getTopLevels())
 		{
 			if (!tile.isTextureInMemory(dc.getTextureCache()))
+			{
 				this.forceTextureLoad(tile);
+			}
 		}
 
 		this.levelZeroLoaded = true;
 	}
 
+	@Override
+	public Sector getSector()
+	{
+		if (boundingSector == null)
+		{
+			boundingSector = path == null ? null : path.getBoundingSector();
+		}
+		System.out.println("Bounding sector: " + boundingSector);
+		return boundingSector;
+	}
+	
 	// ============== Tile Assembly ======================= //
 	// ============== Tile Assembly ======================= //
 	// ============== Tile Assembly ======================= //
@@ -471,13 +487,17 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 			for (CurtainTextureTile child : subTiles)
 			{
 				if (this.isTileVisible(dc, child))
+				{
 					this.addTileOrDescendants(dc, child);
+				}
 			}
 		}
 		finally
 		{
 			if (ancestorResource != null) // Pop this tile as the currentResource ancestor
+			{
 				this.currentResourceTile = ancestorResource;
+			}
 		}
 	}
 
@@ -492,8 +512,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 		}
 
 		// Level 0 loads may be forced
-		if (tile.getLevelNumber() == 0 && this.forceLevelZeroLoads
-				&& !tile.isTextureInMemory(dc.getTextureCache()))
+		if (tile.getLevelNumber() == 0 && this.forceLevelZeroLoads && !tile.isTextureInMemory(dc.getTextureCache()))
 		{
 			this.forceTextureLoad(tile);
 			if (tile.isTextureInMemory(dc.getTextureCache()))
@@ -535,21 +554,14 @@ public abstract class TiledCurtainLayer extends AbstractLayer
 	protected boolean isTileVisible(DrawContext dc, CurtainTextureTile tile)
 	{
 		Segment segment = tile.getSegment();
-		//LatLon start = path.getPercentLatLon(segment.getStart());
-		//LatLon end = path.getPercentLatLon(segment.getEnd());
-		Extent extent =
-				path.getSegmentExtent(dc, segment, curtainTop, curtainBottom, subsegments,
-						followTerrain);
+		Extent extent = path.getSegmentExtent(dc, segment, curtainTop, curtainBottom, subsegments, followTerrain);
 
-		return extent.intersects(dc.getView().getFrustumInModelCoordinates())
-		/*&& (dc.getVisibleSector() == null || dc.getVisibleSector().intersectsSegment(start,
-				end))*/;
+		return extent.intersects(dc.getView().getFrustumInModelCoordinates());
 	}
 
 	protected boolean meetsRenderCriteria(DrawContext dc, CurtainTextureTile tile)
 	{
-		return this.levels.isFinalLevel(tile.getLevelNumber())
-				|| !needToSplit(dc, tile);
+		return this.levels.isFinalLevel(tile.getLevelNumber()) || !needToSplit(dc, tile);
 	}
 	
     protected double getDetailFactor()
@@ -588,25 +600,6 @@ public abstract class TiledCurtainLayer extends AbstractLayer
         // window-size dependent and results in selecting an excessive number of tiles when the window is large.
         return cellHeight > minDistance * Math.pow(10, -this.getDetailFactor());
 	}
-
-	//	private boolean atMaxLevel(DrawContext dc)
-	//	{
-	//		Position vpc = dc.getViewportCenterPosition();
-	//		if (dc.getView() == null || this.getLevels() == null || vpc == null)
-	//			return false;
-	//
-	//		if (!this.getLevels().getSector().contains(vpc.getLatitude(), vpc.getLongitude()))
-	//			return true;
-	//
-	//		CurtainLevel nextToLast = this.getLevels().getNextToLastLevel();
-	//		if (nextToLast == null)
-	//			return true;
-	//
-	//		Sector centerSector =
-	//				nextToLast.computeSectorForPosition(vpc.getLatitude(), vpc.getLongitude(),
-	//						this.levels.getTileOrigin());
-	//		return this.needToSplit(dc, centerSector);
-	//	}
 
 	// ============== Rendering ======================= //
 	// ============== Rendering ======================= //

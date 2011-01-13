@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -610,6 +611,14 @@ public class Util
 	public static boolean isEmpty(Collection<?> collection)
 	{
 		return collection == null || collection.isEmpty();
+	}
+	
+	/**
+	 * @return Whether the provided map is <code>null</code> or empty
+	 */
+	public static boolean isEmpty(Map<?,?> map)
+	{
+		return map == null || map.isEmpty();
 	}
 	
 	/**

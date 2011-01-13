@@ -61,9 +61,7 @@ public class LoadedLayer implements Setupable
 
 	public Object getLoadedObject()
 	{
-		if (isLayer())
-			return layer;
-		return elevationModel;
+		return isLayer() ? layer : elevationModel;
 	}
 
 	public URL getLegendURL()

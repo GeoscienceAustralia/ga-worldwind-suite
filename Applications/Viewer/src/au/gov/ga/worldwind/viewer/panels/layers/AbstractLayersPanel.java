@@ -42,6 +42,9 @@ import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
+/**
+ * Superclass for panels that display layer information.
+ */
 public abstract class AbstractLayersPanel extends AbstractThemePanel
 {
 	protected WorldWindow wwd;
@@ -85,6 +88,17 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		createActions();
 		createToolBar();
 
+		addEnableComponentListeners();
+		addFlyToLayerListener();
+		addResizedListener();
+
+		enableComponents();
+
+		wwd = theme.getWwd();
+	}
+
+	private void addEnableComponentListeners()
+	{
 		layerEnabler.addRefreshListener(new RefreshListener()
 		{
 			@Override
@@ -101,74 +115,10 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 				enableComponents();
 			}
 		});
-
-		tree.addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mouseClicked(MouseEvent e)
-			{
-				if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1)
-				{
-					int row = tree.getRowForLocation(e.getX(), e.getY());
-					Rectangle bounds = tree.getRowBounds(row);
-
-					//remove height from left edge to ignore space taken by the checkbox
-					bounds.width -= bounds.height;
-					bounds.x += bounds.height;
-
-					if (bounds.contains(e.getX(), e.getY()))
-					{
-						TreePath path = tree.getPathForRow(row);
-						if (path != null)
-						{
-							Object o = path.getLastPathComponent();
-							if (o != null && o instanceof ILayerNode)
-							{
-								ILayerNode layer = (ILayerNode) o;
-								Sector sector = layerEnabler.getLayerExtents(layer);
-								if (sector != null)
-								{
-									if (wwd.getView() instanceof OrbitView)
-									{
-										OrbitView orbitView = (OrbitView) wwd.getView();
-										Position center = orbitView.getCenterPosition();
-										Position newCenter;
-										if (sector.contains(center)
-												&& sector.getDeltaLatDegrees() > 90
-												&& sector.getDeltaLonDegrees() > 90)
-										{
-											newCenter = center;
-										}
-										else
-										{
-											newCenter = new Position(sector.getCentroid(), 0);
-										}
-
-										LatLon endVisibleDelta =
-												new LatLon(sector.getDeltaLat(), sector
-														.getDeltaLon());
-										long lengthMillis =
-												SettingsUtil.getScaledLengthMillis(center,
-														newCenter);
-
-										FlyToOrbitViewAnimator animator =
-												FlyToSectorAnimator.createFlyToSectorAnimator(
-														orbitView, center, newCenter,
-														orbitView.getHeading(),
-														orbitView.getPitch(), orbitView.getZoom(),
-														endVisibleDelta, lengthMillis);
-										orbitView.addAnimator(animator);
-
-										wwd.redraw();
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		});
-
+	}
+	
+	private void addResizedListener()
+	{
 		addComponentListener(new ComponentAdapter()
 		{
 			@Override
@@ -179,13 +129,86 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 				setPreferredSize(size);
 			}
 		});
-
-		enableComponents();
-
-		wwd = theme.getWwd();
-		//layerEnabler.setWwd(theme.getWwd());
 	}
 
+	/**
+	 * Adds a mouse listener that will fly to a layer extents on double-click
+	 */
+	private void addFlyToLayerListener()
+	{
+		tree.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1)
+				{
+					int row = tree.getRowForLocation(e.getX(), e.getY());
+					Rectangle bounds = tree.getRowBounds(row);
+					if (bounds == null)
+					{
+						return;
+					}
+					
+					//remove height from left edge to ignore space taken by the checkbox
+					bounds.width -= bounds.height;
+					bounds.x += bounds.height;
+					if (!bounds.contains(e.getPoint()))
+					{
+						return;
+					}
+					TreePath path = tree.getPathForRow(row);
+					if (path == null)
+					{
+						return;
+					}
+					
+					Object o = path.getLastPathComponent();
+					if (o == null || !(o instanceof ILayerNode))
+					{
+						return;
+					}
+					
+					ILayerNode layer = (ILayerNode) o;
+					Sector sector = layerEnabler.getLayerExtents(layer);
+					if (sector == null || !(wwd.getView() instanceof OrbitView))
+					{
+						return;
+					}
+					
+					OrbitView orbitView = (OrbitView) wwd.getView();
+					Position center = orbitView.getCenterPosition();
+					Position newCenter;
+					if (sector.contains(center) && sector.getDeltaLatDegrees() > 90 && sector.getDeltaLonDegrees() > 90)
+					{
+						newCenter = center;
+					}
+					else
+					{
+						newCenter = new Position(sector.getCentroid(), 0);
+					}
+
+					LatLon endVisibleDelta = new LatLon(sector.getDeltaLat(), sector.getDeltaLon());
+					long lengthMillis = SettingsUtil.getScaledLengthMillis(center, newCenter);
+
+					FlyToOrbitViewAnimator animator = FlyToSectorAnimator.createFlyToSectorAnimator(orbitView,
+																									center,
+																									newCenter,
+																									orbitView.getHeading(),
+																									orbitView.getPitch(),
+																									orbitView.getZoom(),
+																									endVisibleDelta,
+																									lengthMillis);
+					orbitView.stopAnimations();
+					orbitView.stopMovement();
+					orbitView.addAnimator(animator);
+
+					wwd.redraw();
+				}
+			}
+		});
+	}
+	
 	protected abstract INode createRootNode(Theme theme);
 
 	protected void createActions()

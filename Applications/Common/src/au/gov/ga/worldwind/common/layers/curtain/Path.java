@@ -1,9 +1,12 @@
 package au.gov.ga.worldwind.common.layers.curtain;
 
+import static au.gov.ga.worldwind.common.util.Util.isEmpty;
+
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Box;
 import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.render.DrawContext;
@@ -17,6 +20,9 @@ import java.util.TreeMap;
 
 import com.sun.opengl.util.BufferUtil;
 
+/**
+ * Defines a path consisting of lat/lon coordinates.
+ */
 public class Path
 {
 	protected final NavigableMap<Double, LatLon> positions = new TreeMap<Double, LatLon>();
@@ -72,8 +78,7 @@ public class Path
 		return LatLon.interpolateGreatCircle(p, lower.getValue(), higher.getValue());
 	}
 
-	public synchronized Vec4 getSegmentCenterPoint(DrawContext dc, Segment segment, double top, double bottom,
-			boolean followTerrain)
+	public synchronized Vec4 getSegmentCenterPoint(DrawContext dc, Segment segment, double top, double bottom, boolean followTerrain)
 	{
 		top *= dc.getVerticalExaggeration();
 		bottom *= dc.getVerticalExaggeration();
@@ -89,8 +94,7 @@ public class Path
 		return dc.getGlobe().computePointFromPosition(ll, e);
 	}
 
-	public synchronized SegmentGeometry getGeometry(DrawContext dc, Segment segment, double top, double bottom,
-			int subsegments, boolean followTerrain)
+	public synchronized SegmentGeometry getGeometry(DrawContext dc, Segment segment, double top, double bottom, int subsegments, boolean followTerrain)
 	{
 		NavigableMap<Double, LatLon> betweenMap = segmentMap(segment, subsegments);
 		int numVertices = betweenMap.size() * 2;
@@ -138,8 +142,7 @@ public class Path
 		return new SegmentGeometry(verts, texCoords, refCenter);
 	}
 
-	public synchronized Vec4[] getPointsInSegment(DrawContext dc, Segment segment, double top, double bottom,
-			int subsegments, boolean followTerrain)
+	public synchronized Vec4[] getPointsInSegment(DrawContext dc, Segment segment, double top, double bottom, int subsegments, boolean followTerrain)
 	{
 		//TODO ?? cache value returned from this method, and if called twice with same input parameters, return cached value ??
 		//TODO create a new function to return some object with a vertex buffer and texture buffer instead of just a Vec4[] array
@@ -197,8 +200,7 @@ public class Path
 		return betweenMap;
 	}
 
-	public synchronized Extent getSegmentExtent(DrawContext dc, Segment segment, double top, double bottom,
-			int subsegments, boolean followTerrain)
+	public synchronized Extent getSegmentExtent(DrawContext dc, Segment segment, double top, double bottom, int subsegments, boolean followTerrain)
 	{
 		Vec4[] points = getPointsInSegment(dc, segment, top, bottom, subsegments, followTerrain);
 		return Box.computeBoundingBox(Arrays.asList(points));
@@ -222,5 +224,40 @@ public class Path
 	public synchronized double getPercentLengthInRadians(double percent)
 	{
 		return length.radians * percent;
+	}
+	
+	public synchronized Sector getBoundingSector()
+	{
+		if (isEmpty(positions))
+		{
+			return null;
+		}
+		
+		Angle minLat = Angle.fromDegrees(360);
+		Angle minLon = Angle.fromDegrees(360);
+		Angle maxLat = Angle.fromDegrees(-360);
+		Angle maxLon = Angle.fromDegrees(-360);
+		
+		for (LatLon pathPosition : positions.values())
+		{
+			if (pathPosition.getLatitude().compareTo(minLat) < 0)
+			{
+				minLat = pathPosition.getLatitude();
+			}
+			if (pathPosition.getLatitude().compareTo(maxLat) > 0)
+			{
+				maxLat = pathPosition.getLatitude();
+			}
+			if (pathPosition.getLongitude().compareTo(minLon) < 0)
+			{
+				minLon = pathPosition.getLongitude();
+			}
+			if (pathPosition.getLongitude().compareTo(maxLon) > 0)
+			{
+				maxLon = pathPosition.getLongitude();
+			}
+		}
+		
+		return new Sector(minLat, maxLat, minLon, maxLon);
 	}
 }

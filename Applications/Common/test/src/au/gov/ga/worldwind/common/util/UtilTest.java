@@ -12,6 +12,8 @@ import gov.nasa.worldwind.geom.Vec4;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -400,6 +402,14 @@ public class UtilTest
 		Collection<Object> collection = Arrays.asList(new Object[]{"item"});
 		
 		assertEquals(false, Util.isEmpty(collection));
+	}
+	
+	@Test
+	public void testIsEmptyWithMap()
+	{
+		Map<Double, Integer> collection = new HashMap<Double, Integer>();
+		
+		assertEquals(true, Util.isEmpty(collection));
 	}
 	
 	// paddedInt()

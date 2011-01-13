@@ -346,8 +346,6 @@ public class Application
 
 	private WmsBrowser wmsBrowser;
 
-	private LayersPanel layersPanel;
-	
 	private Application(Theme theme, final boolean fullscreen, boolean showSplashScreen)
 	{
 		this.theme = theme;
@@ -1363,24 +1361,13 @@ public class Application
 		}
 	}
 
-	/*private void showDataSources()
-	{
-		JDialog dialog =
-				new HtmlViewer(frame, "Data sources", false,
-						"/au/gov/ga/worldwind/data/help/datasources.html", false);
-		dialog.setSize(640, 480);
-		dialog.setLocationRelativeTo(frame);
-		dialog.setVisible(true);
-	}*/
-
 	private void afterSettingsChange()
 	{
 		for (ThemeHUD hud : theme.getHUDs())
 		{
 			if (hud instanceof WorldMapHUD)
 			{
-				((WorldMapHUD) hud).setPickEnabled(!(Settings.get().isStereoEnabled() && Settings.get()
-						.isStereoCursor()));
+				((WorldMapHUD) hud).setPickEnabled(!(Settings.get().isStereoEnabled() && Settings.get().isStereoCursor()));
 			}
 		}
 		enableMouseLayer();
