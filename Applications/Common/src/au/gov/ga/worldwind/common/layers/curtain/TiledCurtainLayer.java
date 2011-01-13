@@ -406,7 +406,6 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		{
 			boundingSector = path == null ? null : path.getBoundingSector();
 		}
-		System.out.println("Bounding sector: " + boundingSector);
 		return boundingSector;
 	}
 	
