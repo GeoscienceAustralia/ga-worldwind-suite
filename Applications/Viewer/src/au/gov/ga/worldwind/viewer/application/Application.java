@@ -1182,9 +1182,10 @@ public class Application
 		if (theme.hasLayersPanel())
 		{
 			toolBar.add(openLayerAction);
-			toolBar.addSeparator();
 		}
-
+		toolBar.add(wmsBrowserAction);
+		toolBar.addSeparator();
+		
 		toolBar.add(screenshotAction);
 
 		toolBar.addSeparator();
@@ -1194,14 +1195,17 @@ public class Application
 
 		toolBar.addSeparator();
 		for (SelectableAction action : panelActions)
+		{
 			action.addToToolBar(toolBar);
+		}
 
 		toolBar.addSeparator();
 		for (SelectableAction action : hudActions)
+		{
 			action.addToToolBar(toolBar);
+		}
 
 		toolBar.addSeparator();
-		toolBar.add(wmsBrowserAction);
 		toolBar.add(settingsAction);
 
 		return toolBar;
@@ -1229,6 +1233,9 @@ public class Application
 			menu.addSeparator();
 		}
 
+		menu.add(wmsBrowserAction);
+		menu.addSeparator();
+		
 		offlineAction.addToMenu(menu);
 
 		menu.addSeparator();
