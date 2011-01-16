@@ -17,6 +17,7 @@ import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitConstraint
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.CollapsibleSplitPane;
 import au.gov.ga.worldwind.common.ui.collapsiblesplit.l2fprod.CollapsibleGroup;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanel;
+import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.wmsbrowser.WmsServerBrowserPanel.LayerInfoSelectionListener;
 
@@ -53,7 +54,7 @@ public class WmsBrowser
 	private void initialiseWindow(String parentApplicationTitle)
 	{
 		frame = new JFrame(getMessage(getWindowTitleKey()) + " - " + parentApplicationTitle);
-		
+		frame.setIconImage(Icons.wmsbrowser.getIcon().getImage());
 		frame.addWindowListener(new WindowAdapter()
 		{
 			@Override

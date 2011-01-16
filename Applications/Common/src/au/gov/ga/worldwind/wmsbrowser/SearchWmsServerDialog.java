@@ -167,6 +167,7 @@ public class SearchWmsServerDialog extends JDialog
 		setTitle(getMessage(getSearchWmsTitleKey()));
 		setPreferredSize(PREFERRED_SIZE);
 		setSize(PREFERRED_SIZE);
+		setIconImage(Icons.wmsbrowser.getIcon().getImage());
 		
 		contentPane = new JPanel();
 		contentPane.setLayout(new GridBagLayout());

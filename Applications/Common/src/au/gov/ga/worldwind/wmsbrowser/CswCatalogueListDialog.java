@@ -115,6 +115,7 @@ public class CswCatalogueListDialog extends JDialog
 		setTitle(getMessage(getEditCswTitleKey()));
 		setPreferredSize(PREFERRED_SIZE);
 		setSize(PREFERRED_SIZE);
+		setIconImage(Icons.wmsbrowser.getIcon().getImage());
 		
 		contentPane = new JPanel();
 		contentPane.setLayout(new GridBagLayout());
