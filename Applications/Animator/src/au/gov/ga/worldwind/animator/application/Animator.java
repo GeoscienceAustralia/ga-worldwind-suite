@@ -428,6 +428,7 @@ public class Animator
 		animation = new WorldWindAnimationImpl(wwd);
 		addDefaultLayersToAnimation(getCurrentAnimation());
 		addDefaultElevationModelsToAnimation(getCurrentAnimation());
+		setDefaultInitialArmedStatus(animation);
 		updater = new Updater(this);
 
 		updateTitleBar();
@@ -1142,6 +1143,7 @@ public class Animator
 			WorldWindAnimationImpl newAnimation = new WorldWindAnimationImpl(wwd);
 			addDefaultLayersToAnimation(newAnimation);
 			addDefaultElevationModelsToAnimation(newAnimation);
+			setDefaultInitialArmedStatus(newAnimation);
 			setCurrentAnimation(newAnimation);
 			resetChanged();
 			setFile(null);
@@ -1215,6 +1217,7 @@ public class Animator
 				addDefaultElevationModelsToAnimation(newAnimation);
 			}
 
+			setDefaultInitialArmedStatus(newAnimation);
 			setCurrentAnimation(newAnimation);
 			setFile(animationFile);
 
@@ -1824,6 +1827,14 @@ public class Animator
 		getCurrentAnimation().setZoomScalingRequired(zoomScalingRequired);
 	}
 
+	private void setDefaultInitialArmedStatus(Animation animation)
+	{
+		for (Animatable object : animation.getAnimatableObjects())
+		{
+			object.setArmed(object instanceof Camera);
+		}
+	}
+	
 	/**
 	 * Set the current animation on the application
 	 * 
