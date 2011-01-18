@@ -31,6 +31,7 @@
 	<property name="ww_signed_jar" value="worldwind.jar" />
 
 	<property name="run_file" value="run.bat"/>
+	<property name="experimental_run_file" value="run-experimental.bat"/>
 	
 	<property name="keystore_file" value="${basedir}/keystore" />
 	<property name="keystore_alias" value="selfsigned" />
@@ -189,6 +190,7 @@
 		<delete file="${executable_dir}/temp.zip" />
 		
 		<echo file="${executable_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${executable_versioned_jar}</echo>
+		<echo file="${executable_dir}/${experimental_run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${executable_versioned_jar} http://www.ga.gov.au:8500/symbolic-links/world-wind/current/themes/ExperimentalTheme.xml --sandpit</echo>
 	</target>
 
 	<target name="run" depends="sign, executable" />
@@ -196,6 +198,7 @@
 	<target name="archive" depends="clean, run">
 		<copy file="${executable_dir}/${executable_jar}" tofile="${archive_location}/${executable_versioned_jar}" preservelastmodified="true" />
 		<copy file="${executable_dir}/${run_file}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${executable_dir}/${experimental_run_file}" todir="${archive_location}" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${app_unsigned_jar}" tofile="${archive_location}/${app_unsigned_versioned_jar}" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${app_signed_jar}" tofile="${archive_location}/${app_signed_versioned_jar}" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${ww_unsigned_jar}" todir="${archive_location}" preservelastmodified="true" />
