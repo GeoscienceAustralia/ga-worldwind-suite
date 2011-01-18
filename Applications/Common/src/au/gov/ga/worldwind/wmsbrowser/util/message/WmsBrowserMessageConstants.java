@@ -59,6 +59,8 @@ public class WmsBrowserMessageConstants extends CommonMessageConstants
 	public static String getEditCswInvalidUrlTitleKey() { return "wmsbrowser.editcsw.invalidurl.title"; }
 	public static String getEditCswDuplicateUrlMsgKey() { return "wmsbrowser.editcsw.duplicateurl.message"; }
 	public static String getEditCswDuplicateUrlTitleKey() { return "wmsbrowser.editcsw.duplicateurl.title"; }
+	public static String getEditServerLabelKey() { return "wmsbrowser.gui.menu.editserver.label"; }
+	public static String getEditServerTooltipKey() { return "wmsbrowser.gui.menu.editserver.tooltip"; }
 	
 	public static String getServerNotReachableErrorMsgKey() { return "wmsbrowser.error.servernotreachable.message"; }
 	public static String getServerReturnedInvalidErrorMsgKey() { return "wmsbrowser.error.invalidcapabilities.message"; }
