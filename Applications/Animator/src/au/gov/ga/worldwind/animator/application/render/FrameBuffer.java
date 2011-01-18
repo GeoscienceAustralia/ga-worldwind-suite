@@ -42,17 +42,14 @@ public class FrameBuffer
 		//bind the frame buffer
 		bind(gl);
 		//bind the color and depth attachments to the frame buffer
-		gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_COLOR_ATTACHMENT0_EXT,
-				GL.GL_TEXTURE_2D, textureId, 0);
+		gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_TEXTURE_2D, textureId, 0);
 		if (depthAsTexture)
 		{
-			gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT,
-					GL.GL_TEXTURE_2D, depthId, 0);
+			gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_TEXTURE_2D, depthId, 0);
 		}
 		else
 		{
-			gl.glFramebufferRenderbufferEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT,
-					GL.GL_RENDERBUFFER_EXT, depthId);
+			gl.glFramebufferRenderbufferEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, depthId);
 		}
 
 		//check to see if the frame buffer is supported and complete
@@ -83,7 +80,9 @@ public class FrameBuffer
 		Validate.notNull(dimensions, "Dimensions cannot be null");
 
 		if (isCreated() && dimensions.equals(currentDimensions))
+		{
 			return; //already the correct dimensions
+		}
 
 		delete(gl);
 		create(gl, dimensions, depthAsTexture);

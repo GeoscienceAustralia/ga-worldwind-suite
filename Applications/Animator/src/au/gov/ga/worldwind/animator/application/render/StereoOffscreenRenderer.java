@@ -9,6 +9,10 @@ import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
 
+/**
+ * An extension of the basic {@link OffscreenRenderer} that supports a stereo view,
+ * rendering two file sequences when stereo is enabled, one for the left and right eye.
+ */
 public class StereoOffscreenRenderer extends OffscreenRenderer
 {
 	public StereoOffscreenRenderer(WorldWindow wwd, Animator targetApplication)
@@ -24,16 +28,14 @@ public class StereoOffscreenRenderer extends OffscreenRenderer
 		boolean stereo = wwd.getView() instanceof StereoView && animation.getCamera() instanceof StereoCamera;
 		if (!stereo)
 		{
-			super.renderFrame(frame, animation, outputDir, frameName, numeralPadLength, detailHint,
-					alpha);
+			super.renderFrame(frame, animation, outputDir, frameName, numeralPadLength, detailHint, alpha);
 			return;
 		}
 
 		StereoView view = (StereoView) wwd.getView();
 		view.setup(true, Eye.LEFT);
 
-		File targetFile =
-				createFileForFrame(frame, outputDir, frameName, numeralPadLength, Eye.LEFT);
+		File targetFile = createFileForFrame(frame, outputDir, frameName, numeralPadLength, Eye.LEFT);
 		doRender(animation, frame, targetFile, detailHint, alpha);
 
 		view.setup(true, Eye.RIGHT);
@@ -44,8 +46,7 @@ public class StereoOffscreenRenderer extends OffscreenRenderer
 		view.setup(false, Eye.LEFT);
 	}
 
-	protected File createFileForFrame(int frame, File outputDir, String frameName,
-			int numeralPadLength, Eye eye)
+	protected File createFileForFrame(int frame, File outputDir, String frameName, int numeralPadLength, Eye eye)
 	{
 		String eyeString = eye == Eye.LEFT ? "left" : "right";
 		File dir = new File(outputDir, frameName + "_" + eyeString);

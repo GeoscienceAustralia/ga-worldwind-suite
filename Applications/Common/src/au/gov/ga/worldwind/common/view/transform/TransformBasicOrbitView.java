@@ -19,8 +19,11 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 	@Override
 	public Matrix computeModelView()
 	{
-		return OrbitViewInputSupport.computeTransformMatrix(this.globe, this.center, this.heading,
-				this.pitch, this.zoom);
+		return OrbitViewInputSupport.computeTransformMatrix(this.globe,
+															this.center,
+															this.heading,
+															this.pitch,
+															this.zoom);
 	}
 
 	@Override
@@ -29,8 +32,11 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 		double viewportWidth = this.viewport.getWidth() <= 0.0 ? 1.0 : this.viewport.getWidth();
 		double viewportHeight = this.viewport.getHeight() <= 0.0 ? 1.0 : this.viewport.getHeight();
 
-		return Matrix.fromPerspective(this.fieldOfView, viewportWidth, viewportHeight,
-				this.nearClipDistance, this.farClipDistance);
+		return Matrix.fromPerspective(this.fieldOfView,
+										viewportWidth,
+										viewportHeight,
+										this.nearClipDistance,
+										this.farClipDistance);
 	}
 
 	@Override
@@ -65,25 +71,29 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 		// Compute the current modelview matrix.
 		this.modelview = computeModelView();
 		if (this.modelview == null)
+		{
 			this.modelview = Matrix.IDENTITY;
+		}
 		// Compute the current inverse-modelview matrix.
 		this.modelviewInv = this.modelview.getInverse();
 		if (this.modelviewInv == null)
+		{
 			this.modelviewInv = Matrix.IDENTITY;
+		}
 
 		//========== projection matrix state ==========//
 		// Get the current OpenGL viewport state.
 		int[] viewportArray = new int[4];
 		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
-		this.viewport =
-				new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2],
-						viewportArray[3]);
-		// Compute the current clip plane distances.
+		this.viewport = new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
 
+		// Compute the current clip plane distances.
 		this.nearClipDistance = computeNearClipDistance();
 		this.farClipDistance = computeFarClipDistance();
+		
 		// Compute the current projection matrix.
 		this.projection = computeProjection();
+		
 		// Compute the current frustum.
 		this.frustum = Frustum.fromProjectionMatrix(this.projection);
 
