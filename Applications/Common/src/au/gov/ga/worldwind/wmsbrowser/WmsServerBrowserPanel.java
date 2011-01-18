@@ -17,7 +17,9 @@ import java.util.Set;
 
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -59,6 +61,7 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 	private BasicAction removeServerAction;
 	private BasicAction exportLayerAction;
 	private BasicAction useLayerAction;
+	private BasicAction editServerAction;
 	
 	private JFileChooser fileChooser;
 	
@@ -85,16 +88,6 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 			public void componentShown(ComponentEvent e)
 			{
 				updateActionsEnabledStatus();
-			}
-		});
-		
-		addLayerInfoSelectionListener(new LayerInfoSelectionListener()
-		{
-			@Override
-			public void layerSelectionChanged(WMSLayerInfo selectedLayer)
-			{
-				exportLayerAction.setEnabled(selectedLayer != null);
-				useLayerAction.setEnabled(selectedLayer != null);
 			}
 		});
 	}
@@ -204,6 +197,17 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 				giveLayerToReceivers(getSelectedLayerInfo());
 			}
 		});
+		
+		editServerAction = new BasicAction(getMessage(getEditServerLabelKey()), Icons.edit.getIcon());
+		editServerAction.setToolTipText(getMessage(getEditServerTooltipKey()));
+		editServerAction.setEnabled(false);
+		editServerAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				promptUserToEditServer();
+			}
+		});
 	}
 	
 	private void initialiseToolbar()
@@ -214,6 +218,7 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		toolbar.setFloatable(false);
 		toolbar.add(addServerAction);
 		toolbar.add(removeServerAction);
+		toolbar.add(editServerAction);
 		toolbar.add(Box.createHorizontalGlue());
 		useLayerButton = toolbar.add(useLayerAction);
 		toolbar.add(exportLayerAction);
@@ -240,7 +245,13 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 			@Override
 			public void run()
 			{
-				removeServerAction.setEnabled(getSelectedUserObject() instanceof WmsServer);
+				WmsServer selectedServer = getSelectedWmsServer();
+				removeServerAction.setEnabled(selectedServer != null);
+				editServerAction.setEnabled(selectedServer != null);
+				
+				WMSLayerInfo selectedLayer = getSelectedLayerInfo();
+				exportLayerAction.setEnabled(selectedLayer != null);
+				useLayerAction.setEnabled(selectedLayer != null);
 			}
 		});
 	}
@@ -329,6 +340,16 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		return ((WmsServerTreeObject)userObject).getWmsServer();
 	}
 
+	private WmsServer getSelectedWmsServer()
+	{
+		Object userObject = getSelectedUserObject();
+		if (userObject instanceof WmsServer)
+		{
+			return (WmsServer)userObject;
+		}
+		return null;
+	}
+	
 	/**
 	 * An extension of the {@link LazyTree} class customised for
 	 * use in the WMS browser panel
@@ -418,6 +439,17 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		exporter.exportLayer(targetFile, selectedLayerInfo);
 	}
 	
+	private void promptUserToEditServer()
+	{
+		WmsServer selectedServer = getSelectedWmsServer();
+		if (selectedServer == null)
+		{
+			return;
+		}
+		
+		
+	}
+	
 	public void registerLayerReceiver(WmsLayerReceiver receiver)
 	{
 		if (receiver == null)
@@ -446,6 +478,19 @@ public class WmsServerBrowserPanel extends CollapsiblePanelBase
 		for (WmsLayerReceiver receiver : layerReceivers)
 		{
 			receiver.receive(layer);
+		}
+	}
+	
+	private class EditWmsServerDialog extends JDialog
+	{
+		private JFrame contentFrame; 
+		
+		public EditWmsServerDialog()
+		{
+			contentFrame = new JFrame();
+			
+			setContentPane(contentFrame);
+			setModal(true);
 		}
 	}
 }
