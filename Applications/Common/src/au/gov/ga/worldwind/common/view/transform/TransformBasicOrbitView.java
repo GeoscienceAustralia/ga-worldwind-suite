@@ -87,9 +87,9 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
 		this.viewport = new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
 
-		// Compute the current clip plane distances.
-		this.nearClipDistance = computeNearClipDistance();
-		this.farClipDistance = computeFarClipDistance();
+		// Compute the current clip plane distances (Use utils methods to better handle underlying elevation data)
+		this.nearClipDistance = TransformViewUtils.computeNearClippingDistance(dc);
+		this.farClipDistance = TransformViewUtils.computeFarClippingDistance(dc);
 		
 		// Compute the current projection matrix.
 		this.projection = computeProjection();
