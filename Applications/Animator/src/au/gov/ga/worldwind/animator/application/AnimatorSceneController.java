@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.animator.application;
 
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.SurfaceObjectRenderer;
+import gov.nasa.worldwind.render.SurfaceObjectTileBuilder;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -79,7 +79,7 @@ public class AnimatorSceneController extends QualitySceneController
 	}
 
 	@Override
-	protected SurfaceObjectRenderer createSurfaceObjectRenderer()
+	protected SurfaceObjectTileBuilder createSurfaceObjectTileBuilder()
 	{
 		return new OffscreenSurfaceObjectRenderer();
 	}

@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.common.util;
 
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -68,7 +69,7 @@ public class DoubleClickZoomListener extends MouseAdapter
 
 				view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view,
 						beginCenter, endCenter, view.getHeading(), view.getHeading(),
-						view.getPitch(), view.getPitch(), view.getZoom(), zoom, 1000, true));
+						view.getPitch(), view.getPitch(), view.getZoom(), zoom, 1000, WorldWind.ABSOLUTE));
 				e.consume();
 				wwd.redraw();
 				latlon = null;

@@ -10,7 +10,7 @@
 	<property name="application_jar" value="ga-animator-${application_version}.jar" />
 	<property name="application_uber_jar" value="ga-animator-full-${application_version}.jar" />
 	
-	<property name="worldwind_version" value="0.6.663.14141"/>
+	<property name="worldwind_version" value="0.6.724.14486"/>
 	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-${worldwind_version}" />
 	<property name="worldwind_jar" value="worldwind.jar" />
 	

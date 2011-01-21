@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.common.util;
 
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -35,6 +36,6 @@ public class FlyToSectorAnimator
 
 		return FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView, beginCenterPos,
 				endCenterPos, beginHeading, Angle.ZERO, beginPitch, Angle.ZERO, beginZoom, endZoom,
-				timeToMove, true);
+				timeToMove, WorldWind.ABSOLUTE);
 	}
 }

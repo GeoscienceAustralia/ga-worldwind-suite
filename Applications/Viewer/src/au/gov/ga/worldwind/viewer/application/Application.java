@@ -1060,7 +1060,7 @@ public class Application
 
 		view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter, endCenter,
 				view.getHeading(), Angle.fromDegrees(initHeading), view.getPitch(), Angle.fromDegrees(initPitch),
-				view.getZoom(), initAltitude, lengthMillis, true));
+				view.getZoom(), initAltitude, lengthMillis, WorldWind.ABSOLUTE));
 		wwd.redraw();
 	}
 

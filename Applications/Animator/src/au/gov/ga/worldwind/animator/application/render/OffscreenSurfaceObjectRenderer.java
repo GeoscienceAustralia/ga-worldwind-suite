@@ -1,12 +1,12 @@
 package au.gov.ga.worldwind.animator.application.render;
 
-import javax.media.opengl.GL;
-
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.SurfaceObjectRenderer;
+import gov.nasa.worldwind.render.SurfaceObjectTileBuilder;
 import gov.nasa.worldwind.util.OGLRenderToTextureSupport;
 
-public class OffscreenSurfaceObjectRenderer extends SurfaceObjectRenderer
+import javax.media.opengl.GL;
+
+public class OffscreenSurfaceObjectRenderer extends SurfaceObjectTileBuilder
 {
 	public OffscreenSurfaceObjectRenderer()
 	{

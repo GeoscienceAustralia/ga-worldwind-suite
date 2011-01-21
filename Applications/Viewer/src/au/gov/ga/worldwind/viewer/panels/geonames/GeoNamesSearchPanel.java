@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.viewer.panels.geonames;
 
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
@@ -331,7 +332,7 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 					view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView,
 							center, newCenter, orbitView.getHeading(), Angle.ZERO,
 							orbitView.getPitch(), Angle.ZERO, orbitView.getZoom(), zoom,
-							lengthMillis, true));
+							lengthMillis, WorldWind.ABSOLUTE));
 					wwd.redraw();
 				}
 			}

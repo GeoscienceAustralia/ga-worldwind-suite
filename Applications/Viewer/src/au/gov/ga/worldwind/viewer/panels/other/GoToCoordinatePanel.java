@@ -9,6 +9,7 @@ package au.gov.ga.worldwind.viewer.panels.other;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
 
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -212,7 +213,7 @@ public class GoToCoordinatePanel extends JPanel
 
 			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter,
 					center, view.getHeading(), view.getHeading(), view.getPitch(), view.getPitch(),
-					view.getZoom(), view.getZoom(), lengthMillis, true));
+					view.getZoom(), view.getZoom(), lengthMillis, WorldWind.ABSOLUTE));
 			wwd.redraw();
 		}
 	}

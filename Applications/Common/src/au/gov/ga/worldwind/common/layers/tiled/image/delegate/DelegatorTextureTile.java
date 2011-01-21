@@ -179,13 +179,15 @@ public class DelegatorTextureTile extends TextureTile implements IDelegatorTile
 		this.updateMemoryCache();
 	}
 
-	private TextureTile getTileFromMemoryCache(TileKey tileKey)
+	@Override
+	protected TextureTile getTileFromMemoryCache(TileKey tileKey)
 	{
 		tileKey = delegate.transformTileKey(tileKey);
 		return (TextureTile) getMemoryCache().getObject(tileKey);
 	}
 
-	private void updateMemoryCache()
+	@Override
+	protected void updateMemoryCache()
 	{
 		if (getMemoryCache().getObject(getTransformedTileKey()) != null)
 			getMemoryCache().add(getTransformedTileKey(), this);

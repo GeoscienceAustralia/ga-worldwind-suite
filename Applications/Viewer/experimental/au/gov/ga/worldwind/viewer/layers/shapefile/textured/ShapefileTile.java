@@ -138,7 +138,8 @@ public class ShapefileTile extends TextureTile
 		return subTiles;
 	}
 
-	private TextureTile getTileFromMemoryCache(TileKey tileKey)
+	@Override
+	protected TextureTile getTileFromMemoryCache(TileKey tileKey)
 	{
 		return (TextureTile) getMemoryCache().getObject(tileKey);
 	}

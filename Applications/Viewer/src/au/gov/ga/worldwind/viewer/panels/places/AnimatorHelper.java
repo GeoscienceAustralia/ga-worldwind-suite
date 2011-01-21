@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.viewer.panels.places;
 
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Position;
@@ -70,7 +71,7 @@ public class AnimatorHelper
 			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView,
 					currentCenter, centerPosition, view.getHeading(), ovs.getHeading(),
 					view.getPitch(), ovs.getPitch(), orbitView.getZoom(), ovs.getZoom(),
-					lengthMillis, false));
+					lengthMillis, WorldWind.ABSOLUTE));
 
 			return lengthMillis;
 		}
@@ -98,7 +99,7 @@ public class AnimatorHelper
 
 			FlyToFlyViewAnimator.createFlyToFlyViewAnimator(flyView, currentCenter, centerPosition,
 					view.getHeading(), vs.getHeading(), view.getPitch(), vs.getPitch(),
-					currentEye.elevation, eyePosition.elevation, lengthMillis, false);
+					currentEye.elevation, eyePosition.elevation, lengthMillis, WorldWind.ABSOLUTE);
 
 			return lengthMillis;
 		}
