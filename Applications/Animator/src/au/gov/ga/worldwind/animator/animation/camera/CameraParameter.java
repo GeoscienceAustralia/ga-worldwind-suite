@@ -13,6 +13,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
+import au.gov.ga.worldwind.common.view.transform.ClipConfigurableView;
 
 abstract class CameraParameter extends ParameterBase
 {
@@ -50,7 +51,9 @@ abstract class CameraParameter extends ParameterBase
 		Vec4 center = getView().getCenterPoint();
 		Globe globe = getView().getGlobe();
 		if (center == null || globe == null)
+		{
 			return null;
+		}
 		return globe.computePositionFromPoint(center);
 	}
 
@@ -283,8 +286,7 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public LookatElevationParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatZoomNameKey(),
-					DEFAULT_PARAMETER_NAME), animation);
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatZoomNameKey(), DEFAULT_PARAMETER_NAME), animation);
 		}
 
 		LookatElevationParameter()
@@ -313,6 +315,98 @@ abstract class CameraParameter extends ParameterBase
 		protected ParameterBase createParameter(AVList context)
 		{
 			return new LookatElevationParameter();
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	@EditableParameter(units = "m")
+	static class NearClipParameter extends CameraParameter
+	{
+		public NearClipParameter(Animation animation)
+		{
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraNearClipNameKey(), DEFAULT_PARAMETER_NAME), animation);
+		}
+
+		NearClipParameter()
+		{
+			super();
+		}
+
+		
+		@Override
+		public ParameterValue getCurrentValue(AnimationContext context)
+		{
+			return ParameterValueFactory.createParameterValue(this, getView().getNearClipDistance(), context.getCurrentFrame());
+		}
+
+		@Override
+		protected void doApplyValue(double value)
+		{
+			if (!(getView() instanceof ClipConfigurableView))
+			{
+				return;
+			}
+			ClipConfigurableView view = (ClipConfigurableView)getView();
+			
+			// Only apply if key frames have been stored. Otherwise, let the view auto-calculate them.
+			if (getKeyFramesWithThisParameter().isEmpty() || !(isEnabled()))
+			{
+				view.setAutoCalculateNearClipDistance(true);
+				return;
+			}
+			view.setNearClipDistance(value);
+		}
+
+		@Override
+		protected ParameterBase createParameter(AVList context)
+		{
+			return new NearClipParameter();
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	@EditableParameter(units = "m")
+	static class FarClipParameter extends CameraParameter
+	{
+		public FarClipParameter(Animation animation)
+		{
+			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraFarClipNameKey(), DEFAULT_PARAMETER_NAME), animation);
+		}
+
+		FarClipParameter()
+		{
+			super();
+		}
+
+		
+		@Override
+		public ParameterValue getCurrentValue(AnimationContext context)
+		{
+			return ParameterValueFactory.createParameterValue(this, getView().getFarClipDistance(), context.getCurrentFrame());
+		}
+
+		@Override
+		protected void doApplyValue(double value)
+		{
+			if (!(getView() instanceof ClipConfigurableView))
+			{
+				return;
+			}
+			ClipConfigurableView view = (ClipConfigurableView)getView();
+			
+			// Only apply if key frames have been stored. Otherwise, let the view auto-calculate them.
+			if (getKeyFramesWithThisParameter().isEmpty() || !(isEnabled()))
+			{
+				view.setAutoCalculateFarClipDistance(true);
+				return;
+			}
+			view.setFarClipDistance(value);
+		}
+
+		@Override
+		protected ParameterBase createParameter(AVList context)
+		{
+			return new FarClipParameter();
 		}
 	}
 }

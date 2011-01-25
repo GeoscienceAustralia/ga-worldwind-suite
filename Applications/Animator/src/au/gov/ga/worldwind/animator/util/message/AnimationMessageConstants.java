@@ -52,6 +52,8 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getCameraLookatZoomNameKey() { return "animator.animation.camera.lookat.zoom.name"; }
 	public static String getCameraFocalLengthNameKey() { return "animator.animation.camera.focal.length.name"; }
 	public static String getCameraEyeSeparationNameKey() { return "animator.animation.camera.eye.separation.name"; }
+	public static String getCameraNearClipNameKey() { return "animator.animation.camera.nearclip.name"; }
+	public static String getCameraFarClipNameKey() { return "animator.animation.camera.farclip.name"; }
 	public static String getOpenFailedMessageKey() { return "animator.message.openfailed.message"; }
 	public static String getOpenFailedCaptionKey() { return "animator.message.openfailed.caption"; }
 	public static String getSaveFailedMessageKey() { return "animator.message.savefailed.message"; }

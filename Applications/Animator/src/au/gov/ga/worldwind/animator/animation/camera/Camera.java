@@ -54,6 +54,16 @@ public interface Camera extends Animatable
 	Parameter getLookAtElevation();
 
 	/**
+	 * @return The parameter that represents the near clipping distance of the camera
+	 */
+	Parameter getNearClip();
+	
+	/**
+	 * @return The parameter that represents the near clipping distance of the camera
+	 */
+	Parameter getFarClip();
+	
+	/**
 	 * @return The eye position of the camera in the provided frame range (inclusive)
 	 */
 	Position[] getEyePositionsBetweenFrames(AnimationContext animationContext, int startFrame, int endFrame);

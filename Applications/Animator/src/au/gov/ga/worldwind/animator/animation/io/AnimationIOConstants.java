@@ -1,11 +1,5 @@
 package au.gov.ga.worldwind.animator.animation.io;
 
-import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.layers.AbstractLayer;
-import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
-import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
-import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
  * An interface defining accessors for constants used during animation IO.
@@ -15,279 +9,72 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 public interface AnimationIOConstants
 {
 	
-	/**
-	 * @return The name of the root element in the file
-	 */
 	String getRootElementName();
 	
 	// -------------------------------------
 	// Context keys
 	// -------------------------------------
 	
-	/**
-	 * @return The context key for the animation in context. Of type {@link Animation}.
-	 */
 	String getAnimationKey();
-
-	/**
-	 * @return The context key for the parameter value owner. Of type {@link Parameter}.
-	 */
 	String getParameterValueOwnerKey();
-	
-	/**
-	 * @return The context key for the layer associated with a {@link LayerParameter} and {@link AnimatableLayer}. Of type {@link AbstractLayer}
-	 */
 	String getCurrentLayerKey();
-	
-	/**
-	 * @return The context key for the world window in context. Of type {@link WorldWindow}.
-	 */
 	String getWorldWindowKey();
 	
 	// -------------------------------------
 	// XML elements and attributes
 	// -------------------------------------
 	
-	/**
-	 * @return The root world wind animation element name
-	 */
 	String getWorldWindAnimationElementName();
-	
-	/**
-	 * @return The world wind animation version attribute name
-	 */
 	String getWorldWindAnimationAttributeVersion();
-	
-	/**
-	 * @return The name of the 'parameter value' element
-	 */
 	String getParameterValueElementName();
-	
-	/**
-	 * @return The name of the 'value' attribute on the parameter value element
-	 */
 	String getParameterValueAttributeValue();
-	
-	/**
-	 * @return The name of the 'frame' attribute on the parameter value element
-	 */
 	String getParameterValueAttributeFrame();
-	
-	/**
-	 * @return The name of the 'type' attribute on the parameter value element
-	 */
 	String getParameterValueAttributeType();
-	
-	/**
-	 * @return The name of the 'in value' attribute on the bezier parameter value element
-	 */
 	String getBezierValueAttributeInValue();
-
-	/**
-	 * @return The name of the 'in percent' attribute on the bezier parameter value element
-	 */
 	String getBezierValueAttributeInPercent();
-
-	/**
-	 * @return The name of the 'out value' attribute on the bezier parameter value element
-	 */
 	String getBezierValueAttributeOutValue();
-
-	/**
-	 * @return The name of the 'out percent' attribute on the bezier parameter value element
-	 */
 	String getBezierValueAttributeOutPercent();
-
-	/**
-	 * @return The name of the 'locked' attribute on the bezier parameter value element
-	 */
 	String getBezierValueAttributeLocked();
-
-	/**
-	 * @return The name of the 'default value' attribute on the parameter element
-	 */
 	String getParameterAttributeDefaultValue();
-	
-	/**
-	 * @return The name of the 'name' attribute on the parameter element
-	 */
 	String getParameterAttributeName();
-	
-	/**
-	 * @return The name of the 'enabled' attribute on the parameter element
-	 */
 	String getParameterAttributeEnabled();
-	
-	/**
-	 * @return The name of the 'parameter' element
-	 */
 	String getParameterElementName();
-	
-	/**
-	 * @return The name of the 'eye lat' element of the camera
-	 */
 	String getCameraEyeLatElementName();
-	
-	/**
-	 * @return The name of the 'eye lon' element of the camera
-	 */
 	String getCameraEyeLonElementName();
-	
-	/**
-	 * @return The name of the 'eye elevation' element of the camera
-	 */
 	String getCameraEyeElevationElementName();
-	
-	/**
-	 * @return The name of the 'Lookat lat' element of the camera
-	 */
 	String getCameraLookatLatElementName();
-	
-	/**
-	 * @return The name of the 'Lookat lon' element of the camera
-	 */
 	String getCameraLookatLonElementName();
-	
-	/**
-	 * @return The name of the 'Lookat elevation' element of the camera
-	 */
 	String getCameraLookatElevationElementName();
-	
-	/**
-	 * @return The name of the 'Focal length' element of the stereo camera
-	 */
 	String getCameraFocalLengthElementName();
-	
-	/**
-	 * @return The name of the 'Eye separation' element of the stereo camera
-	 */
 	String getCameraEyeSeparationElementName();
-	
-	/**
-	 * @return The name of the 'Dynamic stereo' element of the stereo camera
-	 */
 	String getCameraDynamicStereoElementName();
-	
-	/**
-	 * @return The name of the 'name' attribute of the camera
-	 */
+	String getCameraNearClipElementName();
+	String getCameraFarClipElementName();
 	String getCameraAttributeName();
-	
-	/**
-	 * @return The name of the 'camera' element
-	 */
 	String getCameraElementName();
-	
-	/**
-	 * @return The name of the 'stereo camera' element
-	 */
 	String getStereoCameraElementName();
-	
-	/**
-	 * @return The name of the 'frame count' attribute of the animation element
-	 */
 	String getAnimationAttributeFrameCount();
-	
-	/**
-	 * @return The name of the 'zoom required' attribute of the animation element 
-	 */
 	String getAnimationAttributeZoomRequired();
-	
-	/**
-	 * @return The name of the 'animatable objects' element
-	 */
 	String getAnimatableObjectsElementName();
-
-	/**
-	 * @return The name of the 'animation' element
-	 */
 	String getAnimationElementName();
-	
-	/**
-	 * @return The name of the 'render parameters' element
-	 */
 	String getRenderParametersElementName();
-	
-	/**
-	 * @return The name of the 'height' element
-	 */
 	String getHeightElementName();
-
-	/**
-	 * @return The name of the 'width' element
-	 */
 	String getWidthElementName();
-
-	/**
-	 * @return The name of the 'frame rate' element
-	 */
 	String getFrameRateElementName();
-	
-	/**
-	 * @return The name of the 'animatable layer' 
-	 */
 	String getAnimatableLayerName();
-	
-	/**
-	 * @return The name of the 'name' attribute on the layer element
-	 */
 	String getAnimatableLayerAttributeName();
-	
-	/**
-	 * @return The name of the 'url' attribute on the layer element
-	 */
 	String getAnimatableLayerAttributeUrl();
-	
-	/**
-	 * @return The name of the 'enabled' attribute on the layer element
-	 */
 	String getAnimatableLayerAttributeEnabled();
-	
-	/**
-	 * @return The name of the 'animatable elevation' element
-	 */
 	String getAnimatableElevationName();
-	
-	/**
-	 * @return The name of the 'name' attribute on the layer element
-	 */
 	String getAnimatableElevationAttributeName();
-	
-	/**
-	 * @return The name of the 'enabled' attribute on the layer element
-	 */
 	String getAnimatableElevationAttributeEnabled();
-	
-	/**
-	 * @return The name of the 'elevation models' element
-	 */
 	String getAnimatableElevationModelContainerName();
-	
-	/**
-	 * @return The name of the 'elevation model' element
-	 */
 	String getAnimatableElevationModelIdentifierName();
-	
-	/**
-	 * @return The name of the 'name' attribute of the 'elevation model' element
-	 */
 	String getAnimatableElevationModelIdentifierAttributeName();
-	
-	/**
-	 * @return The name of the 'url' attribute of the 'elevation model' element
-	 */
 	String getAnimatableElevationModelIdentifierAttributeUrl();
-	
-	/**
-	 * @return The name of the 'elevation exaggeration' element
-	 */
 	String getElevationExaggerationName();
-	
-	/**
-	 * @return The name of the 'boundary' attribute of the 'elevation exaggeration' element
-	 */
 	String getElevationExaggerationAttributeBoundary();
-	
+
 	/**
 	 * Common constants that don't change across versions
 	 */
@@ -322,6 +109,8 @@ public interface AnimationIOConstants
 		public String getCameraFocalLengthElementName() {return null;}
 		public String getCameraEyeSeparationElementName() {return null;}
 		public String getCameraDynamicStereoElementName() {return null;}
+		public String getCameraNearClipElementName() {return null;}
+		public String getCameraFarClipElementName() {return null;}
 		public String getCameraAttributeName(){return null;}
 		public String getCameraElementName(){return null;}
 		public String getStereoCameraElementName(){return null;}
@@ -376,6 +165,8 @@ public interface AnimationIOConstants
 		public String getCameraFocalLengthElementName() {return "focalLength";}
 		public String getCameraEyeSeparationElementName() {return "eyeSeparation";}
 		public String getCameraDynamicStereoElementName() {return "dynamicStereo";}
+		public String getCameraNearClipElementName() {return "nearClip";}
+		public String getCameraFarClipElementName() {return "farClip";}
 		public String getCameraAttributeName() {return "name";}
 		public String getCameraElementName() {return "camera";}
 		public String getStereoCameraElementName(){return "stereoCamera";}

@@ -10,6 +10,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
+
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
@@ -21,9 +24,11 @@ import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.EyeElevationParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.EyeLatParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.EyeLonParameter;
+import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.FarClipParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatElevationParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatLatParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatLonParameter;
+import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.NearClipParameter;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
@@ -53,6 +58,9 @@ public class CameraImpl extends AnimatableBase implements Camera
 	private Parameter lookAtLon;
 	private Parameter lookAtElevation;
 
+	private Parameter nearClip;
+	private Parameter farClip;
+	
 	protected Collection<Parameter> parameters;
 	
 	private Animation animation;
@@ -96,6 +104,9 @@ public class CameraImpl extends AnimatableBase implements Camera
 		lookAtLat = new LookatLatParameter(animation);
 		lookAtLon = new LookatLonParameter(animation);
 		lookAtElevation = new LookatElevationParameter(animation);
+		
+		nearClip = new NearClipParameter(animation);
+		farClip = new FarClipParameter(animation);
 	}
 	
 	protected void connectCodependants()
@@ -125,6 +136,9 @@ public class CameraImpl extends AnimatableBase implements Camera
 		View view = animationContext.getView();
 		view.stopMovement();
 		view.setOrientation(eye, center);
+		
+		nearClip.applyValue(nearClip.getValueAtFrame(frame).getValue());
+		farClip.applyValue(farClip.getValueAtFrame(frame).getValue());
 	}
 
 	@Override
@@ -212,6 +226,18 @@ public class CameraImpl extends AnimatableBase implements Camera
 	}
 
 	@Override
+	public Parameter getNearClip()
+	{
+		return nearClip;
+	}
+	
+	@Override
+	public Parameter getFarClip()
+	{
+		return farClip;
+	}
+	
+	@Override
 	public Collection<Parameter> getParameters()
 	{
 		if (parameters == null || parameters.isEmpty())
@@ -223,6 +249,8 @@ public class CameraImpl extends AnimatableBase implements Camera
 			parameters.add(lookAtLat);
 			parameters.add(lookAtLon);
 			parameters.add(lookAtElevation);
+			parameters.add(nearClip);
+			parameters.add(farClip);
 		}
 		return Collections.unmodifiableCollection(parameters);
 	}
@@ -347,6 +375,12 @@ public class CameraImpl extends AnimatableBase implements Camera
 		Element lookAtElevationElement = WWXML.appendElement(result, constants.getCameraLookatElevationElementName());
 		lookAtElevationElement.appendChild(lookAtElevation.toXml(lookAtElevationElement, version));
 		
+		Element nearClipElement = WWXML.appendElement(result, constants.getCameraNearClipElementName());
+		nearClipElement.appendChild(nearClip.toXml(nearClipElement, version));
+		
+		Element farClipElement = WWXML.appendElement(result, constants.getCameraFarClipElementName());
+		farClipElement.appendChild(farClip.toXml(farClipElement, version));
+		
 		return result;
 	}
 	
@@ -386,17 +420,32 @@ public class CameraImpl extends AnimatableBase implements Camera
 	protected void setupFromXml(CameraImpl camera, Element element, AnimationFileVersion version, AVList context)
 	{
 		AnimationIOConstants constants = version.getConstants();
+		XPath xpath = XPathFactory.newInstance().newXPath();
 		
 		camera.animation = (Animation)context.getValue(constants.getAnimationKey());
 		camera.setName(WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getCameraAttributeName()));
 		
-		camera.eyeLat = new EyeLatParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLatElementName()+ "/" + constants.getParameterElementName(), null), version, context);
-		camera.eyeLon = new EyeLonParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLonElementName()+ "/" + constants.getParameterElementName(), null), version, context);
-		camera.eyeElevation = new EyeElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeElevationElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+		camera.eyeLat = new EyeLatParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLatElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
+		camera.eyeLon = new EyeLonParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLonElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
+		camera.eyeElevation = new EyeElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeElevationElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
 		
-		camera.lookAtLat = new LookatLatParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLatElementName()+ "/" + constants.getParameterElementName(), null), version, context);
-		camera.lookAtLon = new LookatLonParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLonElementName()+ "/" + constants.getParameterElementName(), null), version, context);
-		camera.lookAtElevation = new LookatElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatElevationElementName()+ "/" + constants.getParameterElementName(), null), version, context);
+		camera.lookAtLat = new LookatLatParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLatElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
+		camera.lookAtLon = new LookatLonParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLonElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
+		camera.lookAtElevation = new LookatElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatElevationElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
+		
+		// Near and far clipping are optional.
+		camera.nearClip = new NearClipParameter(camera.animation);
+		camera.farClip = new FarClipParameter(camera.animation);
+		Element nearClipElement = WWXML.getElement(element, constants.getCameraNearClipElementName() + "/" + constants.getParameterElementName(), xpath);
+		Element farClipElement = WWXML.getElement(element, constants.getCameraFarClipElementName() + "/" + constants.getParameterElementName(), xpath);
+		if (nearClipElement != null)
+		{
+			camera.nearClip = new NearClipParameter().fromXml(nearClipElement, version, context);
+		}
+		if (farClipElement != null)
+		{
+			camera.farClip = new FarClipParameter().fromXml(farClipElement, version, context);
+		}
 	}
 
 	protected CameraImpl createAnimatable()
@@ -414,6 +463,8 @@ public class CameraImpl extends AnimatableBase implements Camera
 		this.lookAtLat = camera.getLookAtLat();
 		this.lookAtLon = camera.getLookAtLon();
 		this.lookAtElevation = camera.getLookAtElevation();
+		this.nearClip = camera.getNearClip();
+		this.farClip = camera.getFarClip();
 		this.parameters = null;
 		this.setEnabled(camera.isEnabled(), false);
 		this.setArmed(camera.isArmed());

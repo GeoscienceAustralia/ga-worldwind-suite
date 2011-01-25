@@ -9,8 +9,11 @@ import gov.nasa.worldwind.view.orbit.OrientationBasicOrbitView;
 
 import javax.media.opengl.GL;
 
-public class TransformBasicOrbitView extends OrientationBasicOrbitView implements TransformView
+public class TransformBasicOrbitView extends OrientationBasicOrbitView implements TransformView, ClipConfigurableView
 {
+	private boolean autoNearClip = true;
+	private boolean autoFarClip = true;
+	
 	@Override
 	public void beforeComputeMatrices()
 	{
@@ -88,8 +91,14 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 		this.viewport = new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
 
 		// Compute the current clip plane distances (Use utils methods to better handle underlying elevation data)
-		this.nearClipDistance = TransformViewUtils.computeNearClippingDistance(dc);
-		this.farClipDistance = TransformViewUtils.computeFarClippingDistance(dc);
+		if (autoNearClip)
+		{
+			this.nearClipDistance = TransformViewUtils.computeNearClippingDistance(dc);
+		}
+		if (autoFarClip)
+		{
+			this.farClipDistance = TransformViewUtils.computeFarClippingDistance(dc);
+		}
 		
 		// Compute the current projection matrix.
 		this.projection = computeProjection();
@@ -102,5 +111,31 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 
 		//========== after apply (GL matrix state) ==========//
 		afterDoApply();
+	}
+	
+	@Override
+	public void setNearClipDistance(double clipDistance)
+	{
+		autoNearClip = false;
+		super.setNearClipDistance(Math.min(clipDistance, this.farClipDistance - 1));
+	}
+	
+	@Override
+	public void setFarClipDistance(double clipDistance)
+	{
+		autoFarClip = false;
+		super.setFarClipDistance(Math.max(clipDistance, this.nearClipDistance + 1));
+	}
+
+	@Override
+	public void setAutoCalculateNearClipDistance(boolean autoCalculate)
+	{
+		autoNearClip = autoCalculate;
+	}
+
+	@Override
+	public void setAutoCalculateFarClipDistance(boolean autoCalculate)
+	{
+		autoFarClip = autoCalculate;
 	}
 }
