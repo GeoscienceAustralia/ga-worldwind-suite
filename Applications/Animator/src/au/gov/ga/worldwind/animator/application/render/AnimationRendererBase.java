@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
 
@@ -33,10 +34,16 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 	}
 
 	@Override
-	public final void render(final Animation animation, final int firstFrame, final int lastFrame, final File outputDir, final String frameName, final double detailHint, final boolean alpha)
+	public final void render(Animation animation)
+	{
+		render(animation, animation.getRenderParameters());
+	}
+	
+	@Override
+	public final void render(final Animation animation, final RenderParameters renderParams)
 	{
 		resetRenderFlags();
-		if (animation == null || !animation.hasKeyFrames() || lastFrame < firstFrame)
+		if (animation == null || !animation.hasKeyFrames() || !renderParams.isFrameRangeSet() || renderParams.getEndFrame() < renderParams.getStartFrame())
 		{
 			return;
 		}
@@ -46,37 +53,31 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 			@Override
 			public void run()
 			{
-				renderOnThread(animation, firstFrame, lastFrame, outputDir, frameName, detailHint, alpha);
+				renderOnThread(animation, renderParams);
 			}
 		};
 
 		Thread renderThread = DaemonThreadFactory.newThread(renderTask, "Animator render thread");
 		renderThread.start();
-	}
-	
-	@Override
-	public void render(Animation animation)
-	{
-		// TODO Auto-generated method stub
 		
 	}
 	
-	protected void renderOnThread(Animation animation, int firstFrame, int lastFrame, File outputDir, String frameName, double detailHint, boolean alpha)
+	protected void renderOnThread(Animation animation, RenderParameters renderParams)
 	{
 		notifyStarted();
-		doPreRender(animation, firstFrame, lastFrame, outputDir, frameName, detailHint, alpha);
+		doPreRender(animation, renderParams);
 		
-		int numeralPadLength = String.valueOf(lastFrame).length();
+		int numeralPadLength = String.valueOf(renderParams.getEndFrame()).length();
 		
-		for (int frame = firstFrame; frame <= lastFrame; frame ++)
+		for (int frame = renderParams.getStartFrame(); frame <= renderParams.getEndFrame(); frame ++)
 		{
 			currentFrame = frame;
 			notifyStartingFrame(frame);
 			
-			renderFrame(frame, animation, outputDir, frameName, numeralPadLength, detailHint, alpha);
+			renderFrame(frame, animation, renderParams, numeralPadLength);
 			
 			notifyFinishedFrame(frame);
-			completedPercentage = (double)(frame - firstFrame) / (double)(lastFrame - firstFrame);
+			completedPercentage = (double)(frame - renderParams.getStartFrame()) / (double)(renderParams.getEndFrame() - renderParams.getStartFrame());
 			
 			if (isStopped())
 			{
@@ -84,14 +85,14 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 			}
 		}
 		
-		doPostRender(animation, firstFrame, lastFrame, outputDir, frameName, detailHint, alpha);
-		notifyCompleted(lastFrame);
+		doPostRender(animation, renderParams);
+		notifyCompleted(renderParams.getEndFrame());
 	}
 	
-	protected void renderFrame(int frame, Animation animation, File outputDir, String frameName, int numeralPadLength, double detailHint, boolean alpha)
+	protected void renderFrame(int frame, Animation animation, RenderParameters renderParams, int numeralPadLength)
 	{
-		File targetFile = createFileForFrame(frame, outputDir, frameName, numeralPadLength);
-		doRender(animation, frame, targetFile, detailHint, alpha);
+		File targetFile = createFileForFrame(frame, renderParams.getRenderDirectory(), renderParams.getFrameName(), numeralPadLength);
+		doRender(frame, targetFile, animation, renderParams);
 	}
 
 	private void resetRenderFlags()
@@ -117,18 +118,18 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 	/**
 	 * Perform any required pre-render setup
 	 */
-	protected abstract void doPreRender(Animation animation, int firstFrame, int lastFrame, File outputDir, String frameName, double detailHint, boolean alpha);
+	protected abstract void doPreRender(Animation animation, RenderParameters renderParams);
 
 	
 	/**
 	 * Render the given frame of the given animation into the given file
 	 */
-	protected abstract void doRender(Animation animation, int frame, File targetFile, double detailHint, boolean alpha);
+	protected abstract void doRender(int frame, File targetFile, Animation animation, RenderParameters renderParams);
 	
 	/**
 	 * Perform any required post-render cleanup
 	 */
-	protected abstract void doPostRender(Animation animation, int firstFrame, int lastFrame, File outputDir, String frameName, double detailHint, boolean alpha);
+	protected abstract void doPostRender(Animation animation, RenderParameters renderParams);
 	
 	@Override
 	public boolean isDone()

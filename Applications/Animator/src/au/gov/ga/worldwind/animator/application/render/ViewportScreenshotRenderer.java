@@ -6,6 +6,7 @@ import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.io.File;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.animator.application.AnimatorSceneController;
 import au.gov.ga.worldwind.animator.application.ScreenshotPaintTask;
@@ -41,7 +42,7 @@ public class ViewportScreenshotRenderer extends AnimationRendererBase
 	}
 	
 	@Override
-	protected void doPreRender(Animation animation, int firstFrame, int lastFrame, File outputDir, String frameName, double detailHint, boolean alpha)
+	protected void doPreRender(Animation animation, RenderParameters renderParams)
 	{
 		wasImmediate = ImmediateMode.isImmediate();
 		ImmediateMode.setImmediate(true);
@@ -50,7 +51,7 @@ public class ViewportScreenshotRenderer extends AnimationRendererBase
 		targetApplication.disableUtilityLayers();
 
 		detailHintBackup = targetApplication.getDetailedElevationModel().getDetailHint();
-		targetApplication.getDetailedElevationModel().setDetailHint(detailHint);
+		targetApplication.getDetailedElevationModel().setDetailHint(renderParams.getDetailLevel());
 
 		OrbitView orbitView = (OrbitView) worldWindow.getView();
 		detectCollisions = orbitView.isDetectCollisions();
@@ -60,19 +61,19 @@ public class ViewportScreenshotRenderer extends AnimationRendererBase
 	}
 	
 	@Override
-	protected void doRender(Animation animation, int frame, File targetFile, double detailHint, boolean alpha)
+	protected void doRender(int frame, File targetFile, Animation animation, RenderParameters renderParams)
 	{
 		targetApplication.setSlider(frame);
 		animation.applyFrame(frame);
 
-		ScreenshotPaintTask screenshotTask = new ScreenshotPaintTask(targetFile, alpha);
+		ScreenshotPaintTask screenshotTask = new ScreenshotPaintTask(targetFile, renderParams.isRenderAlpha());
 		animatorSceneController.addPostPaintTask(screenshotTask);
 		worldWindow.redraw();
 		screenshotTask.waitForScreenshot();
 	}
 	
 	@Override
-	protected void doPostRender(Animation animation, int firstFrame, int lastFrame, File outputDir, String frameName, double detailHint, boolean alpha)
+	protected void doPostRender(Animation animation, RenderParameters renderParams)
 	{
 		targetApplication.reenableUtilityLayers();
 		

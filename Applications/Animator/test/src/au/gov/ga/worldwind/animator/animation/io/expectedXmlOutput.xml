@@ -6,6 +6,8 @@
             <width>1024</width>
             <height>576</height>
             <locked>true</locked>
+            <detailLevel>1.0</detailLevel>
+            <renderAlpha>true</renderAlpha>
         </renderParameters>
         <animatableObjects>
             <camera name="Render Camera">

@@ -10,6 +10,7 @@ import java.io.File;
 import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.animator.application.AnimatorSceneController;
 import au.gov.ga.worldwind.animator.application.PaintTask;
@@ -52,12 +53,11 @@ public class OffscreenRenderer extends AnimationRendererBase
 	}
 
 	@Override
-	protected void doPreRender(final Animation animation, int firstFrame, int lastFrame, File outputDir,
-			String frameName, double detailHint, boolean alpha)
+	protected void doPreRender(final Animation animation, final RenderParameters renderParams)
 	{
-		setupForRendering(detailHint);
+		setupForRendering(renderParams.getDetailLevel());
 
-		final Dimension renderDimensions = animation.getRenderParameters().getImageDimension();
+		final Dimension renderDimensions = renderParams.getImageDimension();
 
 		animatorSceneController.addPrePaintTask(new PaintTask()
 		{
@@ -108,7 +108,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 	}
 
 	@Override
-	protected void doRender(Animation animation, int frame, final File targetFile, double detailHint, boolean alpha)
+	protected void doRender(int frame, File targetFile, Animation animation, RenderParameters renderParams)
 	{
 		targetApplication.setSlider(frame);
 		animation.applyFrame(frame);
@@ -120,7 +120,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 		animatorSceneController.addPostPaintTask(prePostRenderTask);
 
 		//add the screenshot task
-		ScreenshotPaintTask screenshotTask = new ScreenshotPaintTask(targetFile, alpha);
+		ScreenshotPaintTask screenshotTask = new ScreenshotPaintTask(targetFile, renderParams.isRenderAlpha());
 		animatorSceneController.addPostPaintTask(screenshotTask);
 
 		//add the post render task AFTER the screenshot task, so that the screenshot is taken from the FBO
@@ -132,8 +132,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 	}
 
 	@Override
-	protected void doPostRender(Animation animation, int firstFrame, int lastFrame, File outputDir, String frameName,
-			double detailHint, boolean alpha)
+	protected void doPostRender(Animation animation, RenderParameters renderParams)
 	{
 		animatorSceneController.addPostPaintTask(new PaintTask()
 		{

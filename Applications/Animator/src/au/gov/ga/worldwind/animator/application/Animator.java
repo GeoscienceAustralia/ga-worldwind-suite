@@ -1508,18 +1508,23 @@ public class Animator
 		int firstFrame = Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
 		int lastFrame = getCurrentAnimation().getFrameOfLastKeyFrame();
 
-		File destination = animation.getRenderParameters().getRenderDestination();
+		File destination = getCurrentAnimation().getRenderParameters().getRenderDestination();
 		if (destination == null)
 		{
 			destination = promptForImageSequenceLocation();
-			animation.getRenderParameters().setRenderDestination(destination);
+			getCurrentAnimation().getRenderParameters().setRenderDestination(destination);
 			if (destination == null)
 			{
 				return;
 			}
 		}
 
-		renderer.render(animation, firstFrame, lastFrame, destination.getParentFile(), destination.getName(), detailHint, true);
+		RenderParameters renderParams = getCurrentAnimation().getRenderParameters().clone();
+		renderParams.setFrameRange(firstFrame, lastFrame);
+		renderParams.setRenderDestination(destination);
+		renderParams.setDetailLevel(detailHint);
+		
+		renderer.render(animation, renderParams);
 	}
 
 	/**

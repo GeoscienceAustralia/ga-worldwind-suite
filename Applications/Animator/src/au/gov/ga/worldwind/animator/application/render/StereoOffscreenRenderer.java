@@ -4,6 +4,7 @@ import java.io.File;
 
 import gov.nasa.worldwind.WorldWindow;
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.animator.animation.camera.StereoCamera;
 import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
@@ -21,27 +22,26 @@ public class StereoOffscreenRenderer extends OffscreenRenderer
 	}
 
 	@Override
-	protected void renderFrame(int frame, Animation animation, File outputDir, String frameName,
-			int numeralPadLength, double detailHint, boolean alpha)
+	protected void renderFrame(int frame, Animation animation, RenderParameters renderParams, int numeralPadLength)
 	{
 		//if the view is not a stereo view, then just render with the super method
 		boolean stereo = wwd.getView() instanceof StereoView && animation.getCamera() instanceof StereoCamera;
 		if (!stereo)
 		{
-			super.renderFrame(frame, animation, outputDir, frameName, numeralPadLength, detailHint, alpha);
+			super.renderFrame(frame, animation, renderParams, numeralPadLength);
 			return;
 		}
 
 		StereoView view = (StereoView) wwd.getView();
 		view.setup(true, Eye.LEFT);
 
-		File targetFile = createFileForFrame(frame, outputDir, frameName, numeralPadLength, Eye.LEFT);
-		doRender(animation, frame, targetFile, detailHint, alpha);
+		File targetFile = createFileForFrame(frame, renderParams.getRenderDirectory(), renderParams.getFrameName(), numeralPadLength, Eye.LEFT);
+		doRender(frame, targetFile, animation, renderParams);
 
 		view.setup(true, Eye.RIGHT);
 
-		targetFile = createFileForFrame(frame, outputDir, frameName, numeralPadLength, Eye.RIGHT);
-		doRender(animation, frame, targetFile, detailHint, alpha);
+		targetFile = createFileForFrame(frame, renderParams.getRenderDirectory(), renderParams.getFrameName(), numeralPadLength, Eye.RIGHT);
+		doRender(frame, targetFile, animation, renderParams);
 
 		view.setup(false, Eye.LEFT);
 	}

@@ -76,6 +76,10 @@ public interface AnimationIOConstants
 	String getElevationExaggerationAttributeBoundary();
 	String getLockedDimensionsElementName();
 	String getRenderDestinationElementName();
+	String getFrameStartElementName();
+	String getFrameEndElementName();
+	String getDetailLevelElementName();
+	String getRenderAlphaElementName();
 
 	/**
 	 * Common constants that don't change across versions
@@ -137,8 +141,12 @@ public interface AnimationIOConstants
 		public String getAnimatableElevationModelIdentifierAttributeUrl() {return null;}
 		public String getElevationExaggerationName() {return null;}
 		public String getElevationExaggerationAttributeBoundary() {return null;}
-		public String getLockedDimensionsElementName() { return null; }
-		public String getRenderDestinationElementName() { return null; }
+		public String getLockedDimensionsElementName() {return null;}
+		public String getRenderDestinationElementName() {return null;}
+		public String getFrameStartElementName() {return null;}
+		public String getFrameEndElementName() {return null;}
+		public String getDetailLevelElementName() {return null;}
+		public String getRenderAlphaElementName() {return null;}
 	}
 	
 	/**
@@ -199,6 +207,10 @@ public interface AnimationIOConstants
 		public String getElevationExaggerationAttributeBoundary() {return "boundary";}
 		public String getLockedDimensionsElementName() { return "locked";}
 		public String getRenderDestinationElementName() { return "renderDestination"; }
+		public String getFrameStartElementName() {return "startFrame";}
+		public String getFrameEndElementName() {return "endFrame";}
+		public String getDetailLevelElementName() {return "detailLevel";}
+		public String getRenderAlphaElementName() {return "renderAlpha";}
 	}
 	
 	/**
