@@ -54,6 +54,13 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 		renderThread.start();
 	}
 	
+	@Override
+	public void render(Animation animation)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+	
 	protected void renderOnThread(Animation animation, int firstFrame, int lastFrame, File outputDir, String frameName, double detailHint, boolean alpha)
 	{
 		notifyStarted();

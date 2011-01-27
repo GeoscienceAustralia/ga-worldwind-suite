@@ -74,6 +74,8 @@ public interface AnimationIOConstants
 	String getAnimatableElevationModelIdentifierAttributeUrl();
 	String getElevationExaggerationName();
 	String getElevationExaggerationAttributeBoundary();
+	String getLockedDimensionsElementName();
+	String getRenderDestinationElementName();
 
 	/**
 	 * Common constants that don't change across versions
@@ -135,6 +137,8 @@ public interface AnimationIOConstants
 		public String getAnimatableElevationModelIdentifierAttributeUrl() {return null;}
 		public String getElevationExaggerationName() {return null;}
 		public String getElevationExaggerationAttributeBoundary() {return null;}
+		public String getLockedDimensionsElementName() { return null; }
+		public String getRenderDestinationElementName() { return null; }
 	}
 	
 	/**
@@ -193,6 +197,8 @@ public interface AnimationIOConstants
 		public String getAnimatableElevationModelIdentifierAttributeUrl() {return "url";}
 		public String getElevationExaggerationName() {return "exaggerator";}
 		public String getElevationExaggerationAttributeBoundary() {return "boundary";}
+		public String getLockedDimensionsElementName() { return "locked";}
+		public String getRenderDestinationElementName() { return "renderDestination"; }
 	}
 	
 	/**

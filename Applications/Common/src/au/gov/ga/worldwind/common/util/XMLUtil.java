@@ -8,6 +8,7 @@ import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.Color;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
@@ -118,6 +119,23 @@ public class XMLUtil extends WWXML
 		return new URL(context, text);
 	}
 
+	public static File getFile(Element element, String path)
+	{
+		try
+		{
+			URL url = getURL(element, path, null);
+			if (url == null)
+			{
+				return null;
+			}
+			return new File(url.toURI());
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+	
 	public static Element appendColor(Element context, String path, Color color)
 	{
 		Element element = WWXML.appendElement(context, path);

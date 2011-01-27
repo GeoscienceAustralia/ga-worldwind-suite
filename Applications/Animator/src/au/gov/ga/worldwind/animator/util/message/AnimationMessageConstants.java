@@ -36,6 +36,8 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getPreviewMenuLabelKey() { return "animator.gui.menu.preview.label"; }
 	public static String getPreviewX2MenuLabelKey() { return "animator.gui.menu.previewx2.label"; }
 	public static String getPreviewX10MenuLabelKey() { return "animator.gui.menu.previewx10.label"; }
+	public static String getRenderMenuLabelKey() { return "animator.gui.menu.render.label"; }
+	public static String getRenderMenuTooltipKey() { return "animator.gui.menu.render.tooltip"; }
 	public static String getRenderHighResMenuLabelKey() { return "animator.gui.menu.renderhires.label"; }
 	public static String getRenderStandardResMenuLabelKey() { return "animator.gui.menu.renderstandardres.label"; }
 	public static String getResizeToRenderDimensionsLabelKey() { return "animator.gui.menu.resizetorenderdimensions.label"; }
@@ -135,5 +137,13 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getZoomFrameMenuLabelKey() { return "animator.gui.parametereditor.zoomframe.label"; }
 	public static String getZoomValueMenuLabelKey() { return "animator.gui.parametereditor.zoomvalue.label"; }
 	public static String getShowWmsBrowserMenuLabelKey() { return "animator.gui.menu.showwmsbrowser.label"; }
+	public static String getRenderDialogTitleKey() { return "animator.gui.dialog.render.title"; }
+	public static String getRenderDialogRenderLabelKey() { return "animator.gui.dialog.render.renderbutton.label"; }
+	public static String getRenderDialogRenderTooltipKey() { return "animator.gui.dialog.render.renderbutton.tooltip"; }
+	public static String getRenderDialogWidthLabelKey() { return "animator.gui.dialog.render.widthfield.label"; }
+	public static String getRenderDialogWidthTooltipKey() { return "animator.gui.dialog.render.widthfield.tooltip"; }
+	public static String getRenderDialogHeightLabelKey() { return "animator.gui.dialog.render.heightfield.label"; }
+	public static String getRenderDialogHeightTooltipKey() { return "animator.gui.dialog.render.heightfield.tooltip"; }
+	public static String getRenderDialogDimensionsLabelKey() { return "animator.gui.dialog.render.dimensions.label"; }
 	
 }

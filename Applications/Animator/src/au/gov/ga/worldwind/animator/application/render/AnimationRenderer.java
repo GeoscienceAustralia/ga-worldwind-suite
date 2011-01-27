@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.animator.application.render;
 import java.io.File;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.RenderParameters;
 
 /**
  * An interface for animation renderers
@@ -29,6 +30,11 @@ public interface AnimationRenderer
 	 * @param alpha Whether or not to render an alpha channel
 	 */
 	void render(Animation animation, int firstFrame, int lastFrame, File outputDir, String frameName, double detailHint, boolean alpha);
+	
+	/**
+	 * Render the provided animation using the settings stored in the animation {@link RenderParameters}.
+	 */
+	void render(Animation animation);
 	
 	/**
 	 * @return Whether the rendering is complete yet

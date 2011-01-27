@@ -75,6 +75,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.application.debug.AnimationEventLogger;
 import au.gov.ga.worldwind.animator.application.render.AnimationRenderer;
 import au.gov.ga.worldwind.animator.application.render.AnimationRenderer.RenderEventListener;
+import au.gov.ga.worldwind.animator.application.render.RenderDialog;
 import au.gov.ga.worldwind.animator.application.render.RenderProgressDialog;
 import au.gov.ga.worldwind.animator.application.render.StereoOffscreenRenderer;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
@@ -100,8 +101,8 @@ import au.gov.ga.worldwind.animator.util.ExaggerationAwareStatusBar;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.common.ui.FileFilters;
-import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.ui.FileFilters.XmlFilter;
+import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.wmsbrowser.WmsBrowser;
 
 /**
@@ -166,6 +167,9 @@ public class Animator
 	/** Used to update the animation outside of the EDT */
 	private Updater updater;
 
+	/** The render dialog to use */
+	private RenderDialog renderDialog;
+	
 	// Status flags
 	private boolean autokey = false;
 	private boolean applying = false;
@@ -225,8 +229,7 @@ public class Animator
 	/** The renderer to use for rendering animations */
 	private AnimationRenderer renderer;
 
-	private List<ChangeOfAnimationListener> changeOfAnimationListeners =
-			new ArrayList<ChangeOfAnimationListener>();
+	private List<ChangeOfAnimationListener> changeOfAnimationListeners = new ArrayList<ChangeOfAnimationListener>();
 
 	/**
 	 * Launch an instance of the Animator Application
@@ -243,9 +246,8 @@ public class Animator
 
 		showSplashScreen();
 
-		initialiseRenderer();
-
 		initialiseAnimation();
+		initialiseRenderer();
 
 		initialiseUtilityLayers();
 		updateLayersInModel();
@@ -409,6 +411,10 @@ public class Animator
 			}
 		});
 		RenderProgressDialog.attachToRenderer(getFrame(), renderer);
+		
+		renderDialog = new RenderDialog(frame);
+		renderDialog.setCurrentAnimation(getCurrentAnimation());
+		changeOfAnimationListeners.add(renderDialog);
 	}
 
 	/**
@@ -739,6 +745,7 @@ public class Animator
 		menu.add(actionFactory.getPreviewX2Action());
 		menu.add(actionFactory.getPreviewX10Action());
 		menu.addSeparator();
+		menu.add(actionFactory.getRenderAction());
 		menu.add(actionFactory.getRenderHiResAction());
 		menu.add(actionFactory.getRenderLowResAction());
 		menu.addSeparator();
@@ -1472,32 +1479,47 @@ public class Animator
 	}
 
 	/**
+	 * Prompt the user to render using the render dialog
+	 */
+	void promptForRender()
+	{
+		renderDialog.setVisible(true);
+		int response = renderDialog.getResponse();
+		if (response != JOptionPane.OK_OPTION)
+		{
+			return;
+		}
+		renderer.render(animation);
+	}
+	
+	/**
 	 * Render the current animation, from frame 0 through to
 	 * <code>frameCount</code>
 	 * <p/>
 	 * Prompts the user to choose a location to save the rendered image sequence
-	 * to.
+	 * to (if one has not already been specified).
 	 * 
 	 * @param detailHint
 	 *            The level of detail to use when rendering, on the interval
 	 *            <code>[0,1]</code>
-	 * 
-	 * @return The thread performing the animation
 	 */
 	void renderAnimation(final double detailHint)
 	{
-		int firstFrame =
-				Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
+		int firstFrame = Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
 		int lastFrame = getCurrentAnimation().getFrameOfLastKeyFrame();
 
-		File destination = promptForImageSequenceLocation();
+		File destination = animation.getRenderParameters().getRenderDestination();
 		if (destination == null)
 		{
-			return;
+			destination = promptForImageSequenceLocation();
+			animation.getRenderParameters().setRenderDestination(destination);
+			if (destination == null)
+			{
+				return;
+			}
 		}
 
-		renderer.render(animation, firstFrame, lastFrame, destination.getParentFile(),
-				destination.getName(), detailHint, true);
+		renderer.render(animation, firstFrame, lastFrame, destination.getParentFile(), destination.getName(), detailHint, true);
 	}
 
 	/**

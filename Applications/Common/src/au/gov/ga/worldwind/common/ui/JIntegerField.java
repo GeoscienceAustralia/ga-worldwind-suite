@@ -17,6 +17,12 @@ public class JIntegerField extends JTextField
 		super();
 		setValue(value);
 	}
+	
+	public JIntegerField(boolean isPositive, Integer initialValue)
+	{
+		setValue(initialValue);
+		setPositive(isPositive);
+	}
 
 	@Override
 	protected Document createDefaultModel()

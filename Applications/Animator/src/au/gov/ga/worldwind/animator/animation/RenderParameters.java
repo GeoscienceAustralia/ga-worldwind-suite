@@ -4,6 +4,7 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.Dimension;
+import java.io.File;
 
 import org.w3c.dom.Element;
 
@@ -11,6 +12,7 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 import au.gov.ga.worldwind.common.util.Validate;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
  * A class that holds the render parameters associated with an animation 
@@ -39,45 +41,43 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 	private int frameRate = DEFAULT_FRAME_RATE;
 	
 	private String name = "RenderParameters";
+	private boolean lockedDimensions = true;
+	private File renderDestination = null;
 	
-	/**
-	 * @return the {@link #imageDimension}
-	 */
+	
 	public Dimension getImageDimension()
 	{
 		return imageDimension;
 	}
 	
-	/**
-	 * @param imageDimension the {@link #imageDimension} to set
-	 */
 	public void setImageDimension(Dimension imageDimension)
 	{
 		this.imageDimension = imageDimension;
 	}
 	
-	/**
-	 * @return the {@link #frameRate}
-	 */
 	public int getFrameRate()
 	{
 		return frameRate;
 	}
 	
-	/**
-	 * @param frameRate the {@link #frameRate} to set
-	 */
 	public void setFrameRate(int frameRate)
 	{
 		this.frameRate = frameRate;
 	}
 
-	/**
-	 * @return The aspect ratio (<code>width:height</code>) of the image dimensions for the rendered output
-	 */
 	public double getImageAspectRatio()
 	{
 		return imageDimension.getWidth() / imageDimension.getHeight();
+	}
+	
+	public boolean isDimensionsLocked()
+	{
+		return lockedDimensions;
+	}
+	
+	public void setDimensionsLocked(boolean locked)
+	{
+		this.lockedDimensions = locked;
 	}
 	
 	@Override
@@ -90,6 +90,16 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+	
+	public File getRenderDestination()
+	{
+		return renderDestination;
+	}
+	
+	public void setRenderDestination(File destination)
+	{
+		this.renderDestination = destination;
 	}
 	
 	@Override
@@ -105,7 +115,12 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 		WWXML.appendInteger(result, constants.getFrameRateElementName(), getFrameRate());
 		WWXML.appendLong(result, constants.getWidthElementName(), Math.round(imageDimension.getWidth()));
 		WWXML.appendLong(result, constants.getHeightElementName(), Math.round(imageDimension.getHeight()));
+		WWXML.appendBoolean(result, constants.getLockedDimensionsElementName(), lockedDimensions);
 		
+		if (renderDestination != null)
+		{
+			XMLUtil.appendText(result, constants.getRenderDestinationElementName(), renderDestination.toURI().toString());
+		}
 		return result;
 	}
 
@@ -128,6 +143,10 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 				int width = WWXML.getInteger(element, constants.getWidthElementName(), null);
 				int height = WWXML.getInteger(element, constants.getHeightElementName(), null);
 				result.setImageDimension(new Dimension(width, height));
+				
+				result.setDimensionsLocked(XMLUtil.getBoolean(element, constants.getLockedDimensionsElementName(), true));
+				
+				result.setRenderDestination(XMLUtil.getFile(element, constants.getRenderDestinationElementName()));
 				
 				return result;
 			}

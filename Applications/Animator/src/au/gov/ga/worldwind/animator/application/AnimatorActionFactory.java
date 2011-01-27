@@ -14,7 +14,7 @@ import au.gov.ga.worldwind.animator.application.debug.DebugWriter;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
-import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**
@@ -45,6 +45,7 @@ public class AnimatorActionFactory
 	private BasicAction previewAction;
 	private BasicAction previewX2Action;
 	private BasicAction previewX10Action;
+	private BasicAction renderAction;
 	private BasicAction renderHiResAction;
 	private BasicAction renderLowResAction;
 	private BasicAction resizeToRenderDimensionsAction;
@@ -325,10 +326,21 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		// Render
+		renderAction = new BasicAction(getMessage(getRenderMenuLabelKey()), getMessage(getRenderMenuTooltipKey()), Icons.render.getIcon());
+		renderAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK));
+		renderAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_R);
+		renderAction.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.promptForRender();
+			}
+		});
+		
 		// Render hi-res
 		renderHiResAction = new BasicAction(getMessage(getRenderHighResMenuLabelKey()), null);
-		renderHiResAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK));
-		renderHiResAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_R);
+		renderHiResAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.SHIFT_MASK|ActionEvent.CTRL_MASK));
 		renderHiResAction.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -618,6 +630,11 @@ public class AnimatorActionFactory
 		return previewX10Action;
 	}
 
+	public BasicAction getRenderAction()
+	{
+		return renderAction;
+	}
+	
 	public BasicAction getRenderHiResAction()
 	{
 		return renderHiResAction;

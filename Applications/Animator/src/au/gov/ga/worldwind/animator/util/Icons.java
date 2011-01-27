@@ -25,6 +25,9 @@ public class Icons extends au.gov.ga.worldwind.common.util.Icons
 	public static final Icons zoomxy = new Icons(ANIMATOR_ICONS_DIRECTORY, "zoomxy.gif");
 	public static final Icons zoomx = new Icons(ANIMATOR_ICONS_DIRECTORY, "zoomx.gif");
 	public static final Icons zoomy = new Icons(ANIMATOR_ICONS_DIRECTORY, "zoomy.gif");
+	public static final Icons render = new Icons(ANIMATOR_ICONS_DIRECTORY, "render.gif");
+	public static final Icons lock = new Icons(ANIMATOR_ICONS_DIRECTORY, "lock.gif");
+	public static final Icons unlock = new Icons(ANIMATOR_ICONS_DIRECTORY, "unlock.gif");
 	
 	
 	public Icons(String directory, String filename)

@@ -5,6 +5,7 @@
             <frameRate>25</frameRate>
             <width>1024</width>
             <height>576</height>
+            <locked>true</locked>
         </renderParameters>
         <animatableObjects>
             <camera name="Render Camera">
