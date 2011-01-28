@@ -1893,6 +1893,7 @@ public class Animator
 		updateAnimationListeners();
 		updateLayersInModel();
 		updateElevationModelOnGlobe();
+		resizeWindowToRenderDimensions();
 	}
 
 	private void notifyAnimationChanged(Animation newAnimation)
