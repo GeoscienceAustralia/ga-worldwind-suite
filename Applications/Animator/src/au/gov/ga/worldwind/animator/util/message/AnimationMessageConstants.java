@@ -145,5 +145,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getRenderDialogHeightLabelKey() { return "animator.gui.dialog.render.heightfield.label"; }
 	public static String getRenderDialogHeightTooltipKey() { return "animator.gui.dialog.render.heightfield.tooltip"; }
 	public static String getRenderDialogDimensionsLabelKey() { return "animator.gui.dialog.render.dimensions.label"; }
-	
+	public static String getRenderDialogScaleLabelKey() { return "animator.gui.dialog.render.scalefield.label";}
+	public static String getRenderDialogScaleTooltipKey() { return "animator.gui.dialog.render.scalefield.tooltip";}
+	public static String getRenderDialogRenderSizeLabelKey() { return "animator.gui.dialog.render.rendersize.label"; }
 }

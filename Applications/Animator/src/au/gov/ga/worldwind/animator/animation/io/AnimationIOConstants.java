@@ -80,6 +80,7 @@ public interface AnimationIOConstants
 	String getFrameEndElementName();
 	String getDetailLevelElementName();
 	String getRenderAlphaElementName();
+	String getImageScalePercentElementName();
 
 	/**
 	 * Common constants that don't change across versions
@@ -147,6 +148,7 @@ public interface AnimationIOConstants
 		public String getFrameEndElementName() {return null;}
 		public String getDetailLevelElementName() {return null;}
 		public String getRenderAlphaElementName() {return null;}
+		public String getImageScalePercentElementName() {return null;}
 	}
 	
 	/**
@@ -211,6 +213,7 @@ public interface AnimationIOConstants
 		public String getFrameEndElementName() {return "endFrame";}
 		public String getDetailLevelElementName() {return "detailLevel";}
 		public String getRenderAlphaElementName() {return "renderAlpha";}
+		public String getImageScalePercentElementName() {return "imageScalePercent";}
 	}
 	
 	/**

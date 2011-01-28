@@ -1483,12 +1483,19 @@ public class Animator
 	 */
 	void promptForRender()
 	{
+		double oldAspect = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
 		renderDialog.setVisible(true);
 		int response = renderDialog.getResponse();
 		if (response != JOptionPane.OK_OPTION)
 		{
 			return;
 		}
+		double newAspect = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
+		if (newAspect != oldAspect)
+		{
+			resizeWindowToAnimationSize(getCurrentAnimation().getRenderParameters().getImageDimension());
+		}
+		wwd.redraw();
 		renderer.render(animation);
 	}
 	
@@ -1523,6 +1530,7 @@ public class Animator
 		renderParams.setFrameRange(firstFrame, lastFrame);
 		renderParams.setRenderDestination(destination);
 		renderParams.setDetailLevel(detailHint);
+		renderParams.setImageScalePercent(100);
 		
 		renderer.render(animation, renderParams);
 	}

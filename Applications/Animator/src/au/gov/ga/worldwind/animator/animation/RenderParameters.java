@@ -23,7 +23,7 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
 public class RenderParameters implements AnimationObject, XmlSerializable<RenderParameters>, Cloneable
 {
 	public static final Dimension DEFAULT_DIMENSIONS = new Dimension(1024, 576);
-	
+	private static final int DEFAULT_IMAGE_SCALE_PERCENT = 100; 
 	private static final int DEFAULT_FRAME_RATE = 25;
 	private static final double DEFAULT_DETAIL_LEVEL = 1.0d;
 	private static final boolean DEFAULT_LOCKED_DIMENSIONS = true;
@@ -36,6 +36,9 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 	 */
 	private Dimension imageDimension = DEFAULT_DIMENSIONS;
 	
+	/** A percentage scaler applied to the base image dimensions to obtain the render dimensions */
+	private int imageScalePercent = DEFAULT_IMAGE_SCALE_PERCENT;
+	
 	/** 
 	 * The frame rate of the output animation (in frames per second)
 	 * <p/>
@@ -43,14 +46,37 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 	 */
 	private int frameRate = DEFAULT_FRAME_RATE;
 	
-	private String name = "RenderParameters";
+	/** Whether or not to lock the aspect ratio of the image dimensions */
 	private boolean lockedDimensions = DEFAULT_LOCKED_DIMENSIONS;
+	
+	/** The base target file for rendered frames */
 	private File renderDestination = null;
+	
+	/** The frame to begin rendering from */
 	private Integer startFrame = null;
+	
+	/** The frame to finish rendering on */
 	private Integer endFrame = null;
+	
+	/** 
+	 * The detail level to use when rendering.
+	 * <p/>
+	 * May be used to control things like the terrain mesh density etc.
+	 */
 	private double detailLevel = DEFAULT_DETAIL_LEVEL;
+	
+	/**
+	 * Whether or not to support alpha channels when rendering.
+	 * <p/>
+	 * Defaults to <code>true</code>.
+	 */
 	private boolean renderAlpha = DEFAULT_RENDER_ALPHA;
 	
+	private String name = "RenderParameters";
+	
+	/**
+	 * @return The base {@link #imageDimension}, before scaling.
+	 */
 	public Dimension getImageDimension()
 	{
 		return imageDimension;
@@ -59,6 +85,15 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 	public void setImageDimension(Dimension imageDimension)
 	{
 		this.imageDimension = imageDimension;
+	}
+	
+	/**
+	 * @return The dimensions of the output render (after {@link #imageScalePercent} is applied to the base {@link #imageDimension})
+	 */
+	public Dimension getRenderDimension()
+	{
+		double scaler = imageScalePercent / 100d;
+		return new Dimension((int)(imageDimension.width * scaler), (int)(imageDimension.height * scaler));
 	}
 	
 	public int getFrameRate()
@@ -177,6 +212,16 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 		this.renderAlpha = renderAlpha;
 	}
 
+	public int getImageScalePercent()
+	{
+		return imageScalePercent;
+	}
+
+	public void setImageScalePercent(int imageScalePercent)
+	{
+		this.imageScalePercent = imageScalePercent;
+	}
+
 	@Override
 	public Element toXml(Element parent, AnimationFileVersion version)
 	{
@@ -205,6 +250,7 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 		}
 		WWXML.appendDouble(result, constants.getDetailLevelElementName(), detailLevel);
 		WWXML.appendBoolean(result, constants.getRenderAlphaElementName(), renderAlpha);
+		WWXML.appendInteger(result, constants.getImageScalePercentElementName(), imageScalePercent);
 		return result;
 	}
 
@@ -238,6 +284,8 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 				result.setDetailLevel(XMLUtil.getDouble(element, constants.getDetailLevelElementName(), DEFAULT_DETAIL_LEVEL));
 				
 				result.setRenderAlpha(XMLUtil.getBoolean(element, constants.getRenderAlphaElementName(), DEFAULT_RENDER_ALPHA));
+				
+				result.setImageScalePercent(XMLUtil.getInteger(element, constants.getImageScalePercentElementName(), DEFAULT_IMAGE_SCALE_PERCENT));
 				
 				return result;
 			}
