@@ -3,14 +3,18 @@ package au.gov.ga.worldwind.animator.application.render;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermCancelKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.animator.util.Util.*;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -19,15 +23,19 @@ import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.animator.application.ChangeOfAnimationListener;
+import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.JDoubleField;
 import au.gov.ga.worldwind.common.ui.JIntegerField;
 import au.gov.ga.worldwind.common.ui.SwingUtil;
 
@@ -59,10 +67,13 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 	private JLabel renderDimensionsLabel;
 	
 	private JPanel detailPane;
+	private JDoubleField detailField;
+	private JFileChooser fileChooser = new JFileChooser();
 	
 	private JPanel frameRangePane;
 	
 	private JPanel destinationPane;
+	private JTextField destinationField;
 
 	private int response = JOptionPane.CANCEL_OPTION;
 	
@@ -201,6 +212,8 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
 
+		Component hGlue = Box.createHorizontalGlue();
+		
 		layout.setHorizontalGroup(
 				layout.createSequentialGroup()
 				.addGroup(
@@ -229,6 +242,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 						.addComponent(renderDimensionsLabel)
 					)
 				)
+				.addComponent(hGlue)
 				
 		);
 		layout.setVerticalGroup(
@@ -240,6 +254,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 					.addComponent(heightLabel)
 					.addComponent(heightField)
 					.addComponent(lockedCheck)
+					.addComponent(hGlue)
 				).addGroup(
 					layout.createParallelGroup()
 					.addComponent(scaleLabel)
@@ -249,9 +264,6 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 					.addComponent(renderDimensionsLabel)
 				)
 		);
-		
-		dimensionsPane.add(widthField);
-		dimensionsPane.add(heightField);
 		
 		contentPane.add(dimensionsPane);
 	}
@@ -300,8 +312,35 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 	
 	private void addDetailPanel()
 	{
-		// TODO Auto-generated method stub
+		detailPane = new DialogPane(getMessage(getRenderDialogDetailLabelKey()));
 		
+		GroupLayout layout = new GroupLayout(detailPane);
+		detailPane.setLayout(layout);
+		
+		JLabel detailLabel = new JLabel(getMessage(getRenderDialogDetailLevelLabelKey()));
+		detailField = new JDoubleField(null);
+		detailField.setPositive(true);
+		detailField.setToolTipText(getMessage(getRenderDialogDetailLevelTooltipKey()));
+		detailField.setMaximumSize(new Dimension(50, 10));
+		
+		Component hGlue = Box.createHorizontalGlue();
+		
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		layout.setHorizontalGroup(
+				layout.createSequentialGroup()
+				.addComponent(detailLabel)
+				.addComponent(detailField)
+				.addComponent(hGlue)
+		);
+		layout.setVerticalGroup(
+				layout.createParallelGroup()
+				.addComponent(detailLabel)
+				.addComponent(detailField)
+				.addComponent(hGlue)
+		);
+		
+		contentPane.add(detailPane);
 	}
 
 	private void addFrameRangePane()
@@ -312,7 +351,59 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 	
 	private void addDestinationPane()
 	{
-		// TODO
+		destinationPane = new DialogPane(getMessage(getRenderDialogDestinationLabelKey()));
+		
+		GroupLayout layout = new GroupLayout(destinationPane);
+		destinationPane.setLayout(layout);
+		
+		JLabel destinationLabel = new JLabel(getMessage(getRenderDialogOutputFieldLabelKey()));
+		JButton browseButton = new JButton(Icons.folder.getIcon());
+		browseButton.setMargin(new Insets(0,0,0,0));
+		browseButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				if (!isBlank(destinationField.getText()))
+				{
+					fileChooser.setCurrentDirectory(new File(destinationField.getText()));
+				}
+				else
+				{
+					fileChooser.setCurrentDirectory(Settings.get().getLastUsedLocation());
+				}
+				fileChooser.showOpenDialog(RenderDialog.this);
+				if (fileChooser.getSelectedFile() == null)
+				{
+					return;
+				}
+				destinationField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+			}
+		});
+		
+		destinationField = new JTextField();
+		destinationField.setToolTipText(getMessage(getRenderDialogOutputFieldTooltipKey()));
+		destinationField.setMinimumSize(new Dimension(200, 10));
+		
+		Component hGlue = Box.createHorizontalGlue();
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		layout.setHorizontalGroup(
+				layout.createSequentialGroup()
+				.addComponent(destinationLabel)
+				.addComponent(destinationField)
+				.addComponent(browseButton)
+				.addComponent(hGlue)
+		);
+		layout.setVerticalGroup(
+				layout.createParallelGroup()
+				.addComponent(destinationLabel)
+				.addComponent(destinationField)
+				.addComponent(browseButton)
+				.addComponent(hGlue)
+		);
+		
+		contentPane.add(destinationPane);
 	}
 	
 	private void addButtonPanel()
@@ -374,6 +465,11 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 				lockedCheck.setSelected(renderParameters.isDimensionsLocked());
 				scaleField.setValue(renderParameters.getImageScalePercent());
 				aspectRatio = renderParameters.getImageAspectRatio();
+				detailField.setValue(renderParameters.getDetailLevel());
+				if (renderParameters.getRenderDestination() != null)
+				{
+					destinationField.setText(renderParameters.getRenderDestination().getAbsolutePath());
+				}
 				updateRenderDimensions();
 			}
 		});
@@ -390,6 +486,10 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		renderParameters.setImageDimension(new Dimension(widthField.getValue(), heightField.getValue()));
 		renderParameters.setDimensionsLocked(lockedCheck.isSelected());
 		renderParameters.setImageScalePercent(scaleField.getValue());
+		
+		renderParameters.setDetailLevel(detailField.getValue());
+		
+		renderParameters.setRenderDestination(new File(destinationField.getText()));
 		
 		// TODO: REMOVE!!!
 		renderParameters.setStartFrame(0);
@@ -412,6 +512,22 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		public DialogPane(String title)
 		{
 			setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), title));
+		}
+		
+		@Override
+		public Dimension getPreferredSize()
+		{
+			Dimension result = super.getPreferredSize();
+			result.width = getParent().getWidth();
+			return result;
+		}
+		
+		@Override
+		public Dimension getMinimumSize()
+		{
+			Dimension result = super.getPreferredSize();
+			result.width = getParent().getWidth();
+			return result;
 		}
 	}
 }
