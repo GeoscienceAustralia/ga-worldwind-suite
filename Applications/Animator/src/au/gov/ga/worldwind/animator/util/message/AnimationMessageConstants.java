@@ -154,4 +154,5 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getRenderDialogDestinationLabelKey() { return "animator.gui.dialog.render.destination.label"; }
 	public static String getRenderDialogOutputFieldLabelKey() { return "animator.gui.dialog.render.output.label"; }
 	public static String getRenderDialogOutputFieldTooltipKey() { return "animator.gui.dialog.render.output.tooltip"; }
+	public static String getRenderDialogOutputExampleLabelKey() {  return "animator.gui.dialog.render.outputexample.label"; }
 }

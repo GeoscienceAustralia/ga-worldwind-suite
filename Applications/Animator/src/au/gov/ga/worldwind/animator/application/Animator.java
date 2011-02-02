@@ -1,6 +1,9 @@
 package au.gov.ga.worldwind.animator.application;
 
+import static au.gov.ga.worldwind.animator.util.FileUtil.createSequenceFileName;
+import static au.gov.ga.worldwind.animator.util.FileUtil.stripSequenceNumber;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+import static au.gov.ga.worldwind.common.util.FileUtil.stripExtension;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Model;
@@ -99,7 +102,6 @@ import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
 import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterEditor;
 import au.gov.ga.worldwind.animator.util.ExaggerationAwareStatusBar;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
-import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.ui.FileFilters.XmlFilter;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
@@ -1564,20 +1566,18 @@ public class Animator
 		String fileName = "frame";
 		if (!destinationFile.isDirectory())
 		{
-			fileName = FileUtil.stripExtension(destinationFile.getName());
+			fileName = stripSequenceNumber(stripExtension(destinationFile.getName()));
 			destinationFile = destinationFile.getParentFile();
 		}
 
 		// Check for existing files and prompt for confirmation if they exist
-		int firstFrame =
-				Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
+		int firstFrame = Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
 		int lastFrame = getCurrentAnimation().getFrameOfLastKeyFrame();
 		int filenameLength = String.valueOf(lastFrame).length();
 		boolean promptForOverwrite = false;
 		for (int i = firstFrame; i <= lastFrame; i++)
 		{
-			if (new File(destinationFile, createImageSequenceName(fileName, i, filenameLength))
-					.exists())
+			if (new File(destinationFile, createImageSequenceName(fileName, i, filenameLength)).exists())
 			{
 				promptForOverwrite = true;
 				break;
@@ -1585,14 +1585,13 @@ public class Animator
 		}
 		if (promptForOverwrite)
 		{
-			int response =
-					JOptionPane.showConfirmDialog(
-							frame,
-							getMessage(getConfirmRenderOverwriteMessageKey(),
-									createImageSequenceName(fileName, firstFrame, filenameLength),
-									createImageSequenceName(fileName, lastFrame, filenameLength)),
-							getMessage(getConfirmRenderOverwriteCaptionKey()),
-							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			int response = JOptionPane.showConfirmDialog(frame,
+								getMessage(getConfirmRenderOverwriteMessageKey(),
+										createImageSequenceName(fileName, firstFrame, filenameLength),
+										createImageSequenceName(fileName, lastFrame, filenameLength)),
+								getMessage(getConfirmRenderOverwriteCaptionKey()),
+								JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE);
 			if (response == JOptionPane.NO_OPTION)
 			{
 				return null;
@@ -1602,13 +1601,9 @@ public class Animator
 		return new File(destinationFile, fileName);
 	}
 
-	/**
-	 * @return The name of a file in an image sequence, of the form
-	 *         <code>{prefix}{padded sequence number}.tga</code>
-	 */
 	private String createImageSequenceName(String prefix, int sequenceNumber, int padTo)
 	{
-		return prefix + FileUtil.paddedInt(sequenceNumber, padTo) + ".tga";
+		return createSequenceFileName(prefix, sequenceNumber, padTo, ".tga");
 	}
 
 	public void disableUtilityLayers()

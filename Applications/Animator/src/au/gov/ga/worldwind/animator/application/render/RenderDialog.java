@@ -1,9 +1,12 @@
 package au.gov.ga.worldwind.animator.application.render;
 
+import static au.gov.ga.worldwind.animator.util.FileUtil.createSequenceFileName;
+import static au.gov.ga.worldwind.animator.util.FileUtil.stripSequenceNumber;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+import static au.gov.ga.worldwind.common.util.FileUtil.stripExtension;
+import static au.gov.ga.worldwind.common.util.Util.isBlank;
 import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermCancelKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
-import static au.gov.ga.worldwind.animator.util.Util.*;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -14,6 +17,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 
 import javax.swing.BorderFactory;
@@ -69,6 +74,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 	private JPanel detailPane;
 	private JDoubleField detailField;
 	private JFileChooser fileChooser = new JFileChooser();
+	private JLabel outputExampleLabel;
 	
 	private JPanel frameRangePane;
 	
@@ -104,7 +110,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		contentPane = new JPanel();
 		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
 		setContentPane(contentPane);
-		setMinimumSize(new Dimension(300, 300));
+		setMinimumSize(new Dimension(300, 500));
 		setResizable(false);
 	}
 	
@@ -384,26 +390,77 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		destinationField = new JTextField();
 		destinationField.setToolTipText(getMessage(getRenderDialogOutputFieldTooltipKey()));
 		destinationField.setMinimumSize(new Dimension(200, 10));
+		destinationField.setMaximumSize(new Dimension(200, 10));
+		destinationField.addPropertyChangeListener("text", new PropertyChangeListener()
+		{
+			@Override
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				updateOutputExampleLabel();
+			}
+		});
+		destinationField.addFocusListener(new FocusAdapter()
+		{
+			@Override
+			public void focusLost(FocusEvent e)
+			{
+				updateOutputExampleLabel();
+			}
+		});
+		
+		outputExampleLabel = new JLabel();
 		
 		Component hGlue = Box.createHorizontalGlue();
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
 		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
-				.addComponent(destinationLabel)
-				.addComponent(destinationField)
-				.addComponent(browseButton)
-				.addComponent(hGlue)
+				layout.createParallelGroup()
+				.addGroup(
+					layout.createSequentialGroup()
+					.addComponent(destinationLabel)
+					.addComponent(destinationField)
+					.addComponent(browseButton)
+					.addComponent(hGlue)
+				)
+				.addComponent(outputExampleLabel)
 		);
 		layout.setVerticalGroup(
-				layout.createParallelGroup()
-				.addComponent(destinationLabel)
-				.addComponent(destinationField)
-				.addComponent(browseButton)
-				.addComponent(hGlue)
+				layout.createSequentialGroup()
+				.addGroup(
+					layout.createParallelGroup()
+					.addComponent(destinationLabel)
+					.addComponent(destinationField)
+					.addComponent(browseButton)
+					.addComponent(hGlue)
+				)
+				.addComponent(outputExampleLabel)
 		);
 		
 		contentPane.add(destinationPane);
+	}
+	
+	private void updateOutputExampleLabel()
+	{
+		if (isBlank(destinationField.getText()))
+		{
+			outputExampleLabel.setText(getMessage(getRenderDialogOutputExampleLabelKey()));
+		}
+		File destinationFile = new File(destinationField.getText());
+		String name = stripSequenceNumber(stripExtension(destinationFile.getName()));
+		
+		int firstFrame = getCurrentAnimation().getFrameOfFirstKeyFrame();
+		int lastFrame = getCurrentAnimation().getFrameOfLastKeyFrame();
+		int filenameLength = String.valueOf(lastFrame).length();
+		
+		final String example = createSequenceFileName(name, firstFrame, filenameLength, "") + ",...," + createSequenceFileName(name, lastFrame, filenameLength, "");
+		
+		SwingUtil.invokeTaskOnEDT(new Runnable(){
+			@Override
+			public void run()
+			{
+				outputExampleLabel.setText(getMessage(getRenderDialogOutputExampleLabelKey(), example));
+			}
+		});
 	}
 	
 	private void addButtonPanel()

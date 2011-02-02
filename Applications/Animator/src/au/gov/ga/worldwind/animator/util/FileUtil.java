@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.animator.util;
 
+import static au.gov.ga.worldwind.animator.util.Util.*;
+
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -25,8 +28,7 @@ public class FileUtil extends au.gov.ga.worldwind.common.util.FileUtil
 		return sb.toString();
 	}
 
-	public static void writeStringToFile(String string, File file)
-			throws IOException
+	public static void writeStringToFile(String string, File file) throws IOException
 	{
 		FileWriter fw = new FileWriter(file);
 		fw.append(string);
@@ -44,5 +46,25 @@ public class FileUtil extends au.gov.ga.worldwind.common.util.FileUtil
 			str = "0" + str;
 		}
 		return str;
+	}
+	
+	/**
+	 * @return A sequence file name of the form <code>prefix000Nsuffix</code>
+	 */
+	public static String createSequenceFileName(String prefix, int sequenceNumber, int padTo, String suffix)
+	{
+		return prefix + paddedInt(sequenceNumber, padTo) + suffix;
+	}
+	
+	/**
+	 * @return The input string, stripped of trailing sequence numbers (e.g. "file0056" -> "file")
+	 */
+	public static String stripSequenceNumber(String name)
+	{
+		if (isBlank(name) || !Character.isDigit(name.charAt(name.length()-1)))
+		{
+			return name;
+		}
+		return stripSequenceNumber(name.substring(0, name.length()-1));
 	}
 }
