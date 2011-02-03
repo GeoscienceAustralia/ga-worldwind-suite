@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 
 import org.gdal.gdal.Dataset;
 
+import au.gov.ga.worldwind.tiler.application.Executable;
 import au.gov.ga.worldwind.tiler.gdal.GDALTile;
 import au.gov.ga.worldwind.tiler.gdal.GDALTileParameters;
 import au.gov.ga.worldwind.tiler.gdal.GDALUtil;
@@ -25,9 +26,11 @@ public class SeismicTiler
 {
 	public static void main(String[] args) throws Exception
 	{
+		Executable.setGDALEnvironmentVariables();
+		
 		boolean mask = false;
-		File input = new File("D:/Seismic/from gabe/s280_03_depth_interp.tif");
-		File output = new File("D:/Seismic/from gabe/s280_03_depth_interp_tiles");
+		File input = new File("c:/data/projects/AEM flight lines/10300.jpg");
+		File output = new File("c:/data/projects/AEM flight lines/tiles");
 		Dataset dataset = GDALUtil.open(input);
 		Insets insets = new Insets(0, 0, 0, 0);
 		int tilesize = 512;
