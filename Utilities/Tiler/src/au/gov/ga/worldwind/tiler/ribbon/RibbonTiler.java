@@ -1,16 +1,12 @@
 package au.gov.ga.worldwind.tiler.ribbon;
 
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 
 import javax.imageio.ImageIO;
 
@@ -22,63 +18,76 @@ import au.gov.ga.worldwind.tiler.gdal.GDALTileParameters;
 import au.gov.ga.worldwind.tiler.gdal.GDALUtil;
 import au.gov.ga.worldwind.tiler.util.Util;
 
+/**
+ * A tiler that is used to process long, thin images for use in <code>CurtainImageTiles</code>
+ * (e.g. seismic, AEM, MT etc.)
+ */
 public class RibbonTiler
 {
 	public static void main(String[] args) throws Exception
 	{
 		Executable.setGDALEnvironmentVariables();
 		
-		boolean mask = false;
-		File input = new File("c:/data/projects/AEM flight lines/10300.jpg");
-		File output = new File("c:/data/projects/AEM flight lines/tiles");
-		Dataset dataset = GDALUtil.open(input);
-		Insets insets = new Insets(0, 0, 0, 0);
-		int tilesize = 512;
-		String format = mask ? "png" : "jpg";
-
-		int width = dataset.GetRasterXSize() - insets.left - insets.right;
-		int height = dataset.GetRasterYSize() - insets.top - insets.bottom;
-
-		int levels = levelCount(width, height, tilesize);
-		System.out.println("Level count = " + levels);
-
-		int printWidth = width, printHeight = height;
-		for (int level = levels - 1; level >= 0; level--)
+		RibbonTilingContext context = new RibbonTilingContext();
+		context.setSourceFile(new File("c:/data/projects/AEM flight lines/10300.jpg"));
+		context.setOutputLocation(new File("c:/data/projects/AEM flight lines"));
+		context.setHideStdOut(true);
+		
+		new RibbonTiler().tileRibbon(context);
+	}
+	
+	public void tileRibbon(RibbonTilingContext context) throws Exception
+	{
+		if (context == null)
 		{
-			System.out.println("Level " + level + ": " + printWidth + "" + "x" + printHeight);
-			printWidth = (printWidth + 1) / 2;
-			printHeight = (printHeight + 1) / 2;
+			throw new IllegalArgumentException("A contex is required");
 		}
+		
+		log(context, "Tiled on: " + new Date(), true);
+		log(context, "Source: " + context.getSourceFile().getAbsolutePath(), true);
+		log(context, "", true);
+		
+		Dataset dataset = GDALUtil.open(context.getSourceFile());
+
+		int width = dataset.GetRasterXSize() - context.getInsets().left - context.getInsets().right;
+		int height = dataset.GetRasterYSize() - context.getInsets().top - context.getInsets().bottom;
+
+		int levels = levelCount(width, height, context.getTilesize());
+		log(context, "Level count = " + levels, true);
+
+		printLevelsSummary(context, width, height, levels);
 
 		//calculate blank rows per column (columns of constant color)
-		System.out.println("Calculating columns to remove from the top and bottom of the image...");
-		File topFile = new File(input.getParentFile(), input.getName() + ".top.dat");
-		File bottomFile = new File(input.getParentFile(), input.getName() + ".bottom.dat");
+		log(context, "Calculating columns to remove from the top and bottom of the image...", false);
+		File topFile = new File(context.getSourceLocation(), context.getTilesetName() + ".top.dat");
+		File bottomFile = new File(context.getSourceLocation(), context.getTilesetName() + ".bottom.dat");
 
-		int[] constantPixelsFromTop = loadIntArrayFromFile(topFile);
-		int[] constantPixelsFromBottom = loadIntArrayFromFile(bottomFile);
-		if (!(constantPixelsFromTop == null || constantPixelsFromBottom == null || constantPixelsFromTop.length != width
-				|| constantPixelsFromBottom.length != width))
+		int[] constantPixelsFromTop = RibbonTilerUtils.loadIntArrayFromFile(topFile);
+		int[] constantPixelsFromBottom = RibbonTilerUtils.loadIntArrayFromFile(bottomFile);
+		if (!(constantPixelsFromTop == null || 
+				constantPixelsFromBottom == null || 
+				constantPixelsFromTop.length != width || 
+				constantPixelsFromBottom.length != width))
 		{
-			System.out.println("Loaded from previous calculations");
+			log(context, "Loaded removal columns from previous calculations", false);
 		}
 		else
 		{
 			constantPixelsFromTop = new int[width];
 			constantPixelsFromBottom = new int[width];
 
-			int constantWidth = Math.max(1, 10 * tilesize * tilesize / height);
+			int constantWidth = Math.max(1, 10 * context.getTilesize() * context.getTilesize() / height);
 			for (int startX = 0; startX < width; startX += constantWidth)
 			{
 				int w = Math.min(constantWidth, width - startX);
 
 				//get an image of the full height, 1 pixel wide at column x
-				Rectangle src = new Rectangle(insets.left + startX, insets.top, w, height);
+				Rectangle src = new Rectangle(context.getInsets().left + startX, context.getInsets().top, w, height);
 				GDALTileParameters parameters = new GDALTileParameters(dataset, src.getSize(), src);
 				GDALTile tile = new GDALTile(parameters);
 				BufferedImage image = tile.getAsImage();
 
-				System.out.println((100 * (startX + 1) / width) + "% done");
+				log(context, (100 * (startX + 1) / width) + "% done", false);
 
 				for (int x = 0; x < w; x++)
 				{
@@ -115,46 +124,46 @@ public class RibbonTiler
 				}
 			}
 
-			saveIntArrayToFile(constantPixelsFromTop, topFile);
-			saveIntArrayToFile(constantPixelsFromBottom, bottomFile);
+			RibbonTilerUtils.saveIntArrayToFile(constantPixelsFromTop, topFile);
+			RibbonTilerUtils.saveIntArrayToFile(constantPixelsFromBottom, bottomFile);
 		}
 
 		//calculate tiling parameters
-		int xStrips = Math.max(1, tilesize / width);
-		int yStrips = Math.max(1, tilesize / height);
-		int rows = (height - 1) / (tilesize * xStrips) + 1;
-		int cols = (width - 1) / (tilesize * yStrips) + 1;
-		File levelDir = new File(output, String.valueOf(levels - 1));
+		int xStrips = Math.max(1, context.getTilesize() / width);
+		int yStrips = Math.max(1, context.getTilesize() / height);
+		int rows = (height - 1) / (context.getTilesize() * xStrips) + 1;
+		int cols = (width - 1) / (context.getTilesize() * yStrips) + 1;
+		File levelDir = new File(context.getDestination(), String.valueOf(levels - 1));
 
 		//create top level tiles
-		System.out.println("Creating top level tiles...");
-		for (int y = 0, row = 0; y < height; y += tilesize * xStrips, row++)
+		log(context, "Creating top level tiles...", false);
+		for (int y = 0, row = 0; y < height; y += context.getTilesize() * xStrips, row++)
 		{
 			//create row directory
 			String rowPadded = Util.paddedInt(row, 4);
 			File rowDir = new File(levelDir, rowPadded);
 			rowDir.mkdirs();
 
-			int h = Math.min(tilesize * xStrips / yStrips, height - y);
+			int h = Math.min(context.getTilesize() * xStrips / yStrips, height - y);
 
-			for (int x = 0, col = 0; x < width; x += tilesize * yStrips, col++)
+			for (int x = 0, col = 0; x < width; x += context.getTilesize() * yStrips, col++)
 			{
-				File imageFile = tileFile(levelDir, row, col, format);
+				File imageFile = tileFile(levelDir, row, col, context.getFormat());
 				if (imageFile.exists())
+				{
 					continue;
+				}
 
-				int w = Math.min(tilesize * yStrips / xStrips, width - x);
+				int w = Math.min(context.getTilesize() * yStrips / xStrips, width - x);
 
-				Rectangle src = new Rectangle(x + insets.left, y + insets.top, w, h);
+				Rectangle src = new Rectangle(x + context.getInsets().left, y + context.getInsets().top, w, h);
 				GDALTileParameters parameters = new GDALTileParameters(dataset, src.getSize(), src);
 				GDALTile tile = new GDALTile(parameters);
 				BufferedImage image = tile.getAsImage();
 
-				image =
-						removeConstantColumns(image, constantPixelsFromTop, constantPixelsFromBottom, x, y, width,
-								height, mask);
+				image = removeConstantColumns(image, constantPixelsFromTop, constantPixelsFromBottom, x, y, width, height, context.isMasked());
 
-				ImageIO.write(image, format, imageFile);
+				ImageIO.write(image, context.getFormat(), imageFile);
 			}
 		}
 
@@ -178,13 +187,15 @@ public class RibbonTiler
 			rows = (rows + 1) / 2;
 			cols = (cols + 1) / 2;
 
-			System.out.println("Level " + level);
-			System.out.println("lastRows x lastCols = " + lastRows + " x " + lastCols);
-			System.out.println("Rows x Cols = " + rows + " x " + cols);
-			System.out.println("xStrips,yStrips = " + xStrips + "," + yStrips);
-
+			log(context, "", true);
+			log(context, "Level " + level, true);
+			log(context, "lastRows x lastCols = " + lastRows + " x " + lastCols, true);
+			log(context, "Rows x Cols = " + rows + " x " + cols, true);
+			log(context, "xStrips,yStrips = " + xStrips + "," + yStrips, true);
+			log(context, "", true);
+			
 			File lastLevelDir = levelDir;
-			levelDir = new File(output, String.valueOf(level));
+			levelDir = new File(context.getDestination(), String.valueOf(level));
 			levelDir.mkdirs();
 
 			int rowMultiplier = lastRows == 1 ? 0 : 1;
@@ -214,7 +225,7 @@ public class RibbonTiler
 					//if lastRows == 1: 0,1,2,3 / 4,5,6,7
 					//            else: 0,1,0,1 / 2,3,2,3
 
-					File imageFile = tileFile(levelDir, row, col, format);
+					File imageFile = tileFile(levelDir, row, col, context.getFormat());
 					if (imageFile.exists())
 					{
 						continue;
@@ -226,10 +237,10 @@ public class RibbonTiler
 					int c2 = colMultiplier * (firstCol + colDelta);
 					int c3 = colMultiplier * (firstCol + colDelta + 1);
 
-					File src0 = tileFile(lastLevelDir, r0, c0, format);
-					File src1 = tileFile(lastLevelDir, r1, c1, format);
-					File src2 = tileFile(lastLevelDir, r2, c2, format);
-					File src3 = tileFile(lastLevelDir, r3, c3, format);
+					File src0 = tileFile(lastLevelDir, r0, c0, context.getFormat());
+					File src1 = tileFile(lastLevelDir, r1, c1, context.getFormat());
+					File src2 = tileFile(lastLevelDir, r2, c2, context.getFormat());
+					File src3 = tileFile(lastLevelDir, r3, c3, context.getFormat());
 
 					BufferedImage img0 = src0.exists() ? ImageIO.read(src0) : null;
 					BufferedImage img1 = src1.exists() ? ImageIO.read(src1) : null;
@@ -248,7 +259,7 @@ public class RibbonTiler
 					int w = w0 + (lastCols == 1 ? 0 : w1) + (lastRows == 1 ? w2 + w3 : 0);
 					int h = h0 + (lastRows == 1 ? 0 : h2) + (lastCols == 1 ? h1 + h3 : 0);
 
-					int type = mask ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
+					int type = context.isMasked() ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
 					BufferedImage image = new BufferedImage(w, h, type);
 					Graphics2D g = image.createGraphics();
 					g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -279,9 +290,32 @@ public class RibbonTiler
 					}
 
 					g.dispose();
-					ImageIO.write(image, format, imageFile);
+					ImageIO.write(image, context.getFormat(), imageFile);
 				}
 			}
+		}
+		
+		if (context.isCopySource())
+		{
+			try
+			{
+				Util.copyFileToDirectory(context.getSourceFile(), context.getDestination(), true);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void printLevelsSummary(RibbonTilingContext context, int width,
+			int height, int levels) {
+		int printWidth = width, printHeight = height;
+		for (int level = levels - 1; level >= 0; level--)
+		{
+			log(context, "Level " + level + ": " + printWidth + "" + "x" + printHeight, true);
+			printWidth = (printWidth + 1) / 2;
+			printHeight = (printHeight + 1) / 2;
 		}
 	}
 
@@ -338,47 +372,22 @@ public class RibbonTiler
 
 		return newImage;
 	}
-
-	private static void saveIntArrayToFile(int[] array, File file)
+	
+	private static void log(RibbonTilingContext context, String msg, boolean addToTilingLog)
 	{
 		try
 		{
-			FileOutputStream fos = new FileOutputStream(file);
-			DataOutputStream dos = new DataOutputStream(fos);
-			for (int i : array)
+			context.getStdWriter().write(msg + '\n');
+			if (addToTilingLog)
 			{
-				dos.writeInt(i);
+				context.getLogWriter().write(msg + '\n'); 
 			}
-			dos.close();
-			fos.close();
+			context.getStdWriter().flush();
+			context.getLogWriter().flush();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-	}
-
-	private static int[] loadIntArrayFromFile(File file)
-	{
-		if (!file.exists())
-			return null;
-
-		int size = (int) (file.length() / 4l);
-		try
-		{
-			FileInputStream fis = new FileInputStream(file);
-			DataInputStream dis = new DataInputStream(fis);
-			int[] array = new int[size];
-			for (int i = 0; i < size; i++)
-			{
-				array[i] = dis.readInt();
-			}
-			return array;
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		return null;
 	}
 }

@@ -1,11 +1,19 @@
 package au.gov.ga.worldwind.tiler.util;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 
 import org.gdal.gdal.Dataset;
 
 public class Util
 {
+	private static final long FIFTY_MB = 1024 * 1024 * 50; 
+	
 	public static String fixNewlines(String s)
 	{
 		String newLine = System.getProperty("line.separator");
@@ -103,4 +111,107 @@ public class Util
 		}
 		return Math.max(0f, Math.min(1f, diff));
 	}
+	
+	public static String stripExtension(String filename)
+	{
+		if (filename == null || filename.trim().isEmpty())
+		{
+			return null;
+		}
+		
+		if (filename.lastIndexOf('.') == -1)
+		{
+			return filename;
+		}
+		
+		return filename.substring(0, filename.lastIndexOf('.'));
+	}
+	
+	/**
+	 * From Apache Commons FileUtils
+	 * @see http://svn.apache.org/viewvc/commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileUtils.java?view=markup
+	 */
+	public static void copyFileToDirectory(File srcFile, File destDir, boolean preserveFileDate) throws IOException
+	{
+		if (srcFile == null || destDir == null || !destDir.isDirectory())
+		{
+			throw new IllegalArgumentException();
+		}
+		File destFile = new File(destDir, srcFile.getName());
+		copyFile(srcFile, destFile, preserveFileDate);
+	}
+	
+	/**
+	 * From Apache Commons FileUtils
+	 * 
+	 * @see http://svn.apache.org/viewvc/commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileUtils.java?view=markup
+	 */
+	public static void copyFile(File srcFile, File destFile, boolean preserveFileDate) throws IOException {
+		if (srcFile == null) {
+			throw new NullPointerException("Source must not be null");
+		}
+		if (destFile == null) {
+			throw new NullPointerException("Destination must not be null");
+		}
+		if (srcFile.exists() == false) {
+			throw new FileNotFoundException("Source '" + srcFile + "' does not exist");
+		}
+		if (srcFile.isDirectory()) {
+			throw new IOException("Source '" + srcFile + "' exists but is a directory");
+		}
+		if (srcFile.getCanonicalPath().equals(destFile.getCanonicalPath())) {
+			throw new IOException("Source '" + srcFile + "' and destination '" + destFile + "' are the same");
+		}
+		if (destFile.getParentFile() != null && destFile.getParentFile().exists() == false) {
+			if (destFile.getParentFile().mkdirs() == false) {
+				throw new IOException("Destination '" + destFile + "' directory cannot be created");
+			}
+		}
+		if (destFile.exists() && destFile.canWrite() == false) {
+			throw new IOException("Destination '" + destFile + "' exists but is read-only");
+		}
+		doCopyFile(srcFile, destFile, preserveFileDate);
+	}
+
+	/**
+	 * From Apache Commons FileUtils
+	 * 
+	 * @see http://svn.apache.org/viewvc/commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileUtils.java?view=markup
+	 */
+	private static void doCopyFile(File srcFile, File destFile, boolean preserveFileDate) throws IOException {
+		if (destFile.exists() && destFile.isDirectory()) {
+			throw new IOException("Destination '" + destFile + "' exists but is a directory");
+		}
+
+		FileInputStream fis = null;
+		FileOutputStream fos = null;
+		FileChannel input = null;
+		FileChannel output = null;
+		try {
+			fis = new FileInputStream(srcFile);
+			fos = new FileOutputStream(destFile);
+			input = fis.getChannel();
+			output = fos.getChannel();
+			long size = input.size();
+			long pos = 0;
+			long count = 0;
+			while (pos < size) {
+				count = (size - pos) > FIFTY_MB ? FIFTY_MB : (size - pos);
+				pos += output.transferFrom(input, pos, count);
+			}
+		} finally {
+			output.close();
+			fos.close();
+			input.close();
+			fis.close();
+		}
+
+		if (srcFile.length() != destFile.length()) {
+			throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'");
+		}
+		if (preserveFileDate) {
+			destFile.setLastModified(srcFile.lastModified());
+		}
+	}
+	
 }

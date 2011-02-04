@@ -630,7 +630,7 @@ public class GDALTile
 			imageType = BufferedImage.TYPE_CUSTOM;
 		}
 		//TEMP
-		/*else if (bufferType == gdalconstConstants.GDT_Float32 && bandCount == 1)
+		else if (bufferType == gdalconstConstants.GDT_Float32 && bandCount == 1)
 		{
 			GDALTile byteTile = this.convertToType(gdalconstConstants.GDT_Byte);
 			bandCount = 4;
@@ -643,7 +643,7 @@ public class GDALTile
 			}
 			imgBuffer = new DataBufferByte(bytes, bytes.length);
 			dataType = DataBuffer.TYPE_BYTE;
-		}*/
+		}
 		//TEMP
 		else
 		{

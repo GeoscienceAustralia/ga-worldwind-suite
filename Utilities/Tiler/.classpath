@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="**/.svn/*" kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/jna.jar"/>
 	<classpathentry kind="lib" path="gdal/gdal.jar">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Tiler/gdal"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry excluding="**/.svn/*" kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/jna.jar"/>
 	<classpathentry kind="lib" path="lib/jts-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/jump-core-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
