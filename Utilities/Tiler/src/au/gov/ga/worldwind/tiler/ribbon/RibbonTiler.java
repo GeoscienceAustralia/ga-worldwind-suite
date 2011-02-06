@@ -16,6 +16,7 @@ import au.gov.ga.worldwind.tiler.application.Executable;
 import au.gov.ga.worldwind.tiler.gdal.GDALTile;
 import au.gov.ga.worldwind.tiler.gdal.GDALTileParameters;
 import au.gov.ga.worldwind.tiler.gdal.GDALUtil;
+import au.gov.ga.worldwind.tiler.ribbon.definition.LayerDefinitionCreator;
 import au.gov.ga.worldwind.tiler.util.Util;
 
 /**
@@ -59,8 +60,8 @@ public class RibbonTiler
 
 		//calculate blank rows per column (columns of constant color)
 		log(context, "Calculating columns to remove from the top and bottom of the image...", false);
-		File topFile = new File(context.getSourceLocation(), context.getTilesetName() + ".top.dat");
-		File bottomFile = new File(context.getSourceLocation(), context.getTilesetName() + ".bottom.dat");
+		File topFile = new File(context.getTilesetRoot(), context.getTilesetName() + ".top.dat");
+		File bottomFile = new File(context.getTilesetRoot(), context.getTilesetName() + ".bottom.dat");
 
 		int[] constantPixelsFromTop = RibbonTilerUtils.loadIntArrayFromFile(topFile);
 		int[] constantPixelsFromBottom = RibbonTilerUtils.loadIntArrayFromFile(bottomFile);
@@ -133,7 +134,7 @@ public class RibbonTiler
 		int yStrips = Math.max(1, context.getTilesize() / height);
 		int rows = (height - 1) / (context.getTilesize() * xStrips) + 1;
 		int cols = (width - 1) / (context.getTilesize() * yStrips) + 1;
-		File levelDir = new File(context.getDestination(), String.valueOf(levels - 1));
+		File levelDir = new File(context.getTilesetRoot(), String.valueOf(levels - 1));
 
 		//create top level tiles
 		log(context, "Creating top level tiles...", false);
@@ -161,7 +162,7 @@ public class RibbonTiler
 				GDALTile tile = new GDALTile(parameters);
 				BufferedImage image = tile.getAsImage();
 
-				image = removeConstantColumns(image, constantPixelsFromTop, constantPixelsFromBottom, x, y, width, height, context.isMasked());
+				image = removeConstantColumns(image, constantPixelsFromTop, constantPixelsFromBottom, x, y, width, height, context.isMask());
 
 				ImageIO.write(image, context.getFormat(), imageFile);
 			}
@@ -195,7 +196,7 @@ public class RibbonTiler
 			log(context, "", true);
 			
 			File lastLevelDir = levelDir;
-			levelDir = new File(context.getDestination(), String.valueOf(level));
+			levelDir = new File(context.getTilesetRoot(), String.valueOf(level));
 			levelDir.mkdirs();
 
 			int rowMultiplier = lastRows == 1 ? 0 : 1;
@@ -259,7 +260,7 @@ public class RibbonTiler
 					int w = w0 + (lastCols == 1 ? 0 : w1) + (lastRows == 1 ? w2 + w3 : 0);
 					int h = h0 + (lastRows == 1 ? 0 : h2) + (lastCols == 1 ? h1 + h3 : 0);
 
-					int type = context.isMasked() ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
+					int type = context.isMask() ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
 					BufferedImage image = new BufferedImage(w, h, type);
 					Graphics2D g = image.createGraphics();
 					g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -299,12 +300,20 @@ public class RibbonTiler
 		{
 			try
 			{
-				Util.copyFileToDirectory(context.getSourceFile(), context.getDestination(), true);
+				Util.copyFileToDirectory(context.getSourceFile(), context.getTilesetRoot(), true);
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
 			}
+		}
+		
+		if (context.isGenerateLayerDefinition())
+		{
+			LayerDefinitionCreator creator = new LayerDefinitionCreator();
+			creator.createDefinition(context);
+			log(context, "", true);
+			log(context, "Layer definition file generated at " + context.getLayerDefinitionFile().getAbsolutePath(), true);
 		}
 	}
 
