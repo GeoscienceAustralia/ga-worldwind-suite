@@ -36,6 +36,13 @@ public class LayerDefinitionCreator
 		registerElementCreator(new DefaultCurtainTopElementCreator());
 		registerElementCreator(new DefaultCurtainBottomElementCreator());
 		registerElementCreator(new DefaultFollowTerrainElementCreator());
+		registerElementCreator(new DefaultSubsegmentsElementCreator());
+		registerElementCreator(new DefaultUseTransparentElementCreator());
+		registerElementCreator(new DefaultForceLevelZeroLoadsElementCreator());
+		registerElementCreator(new DefaultRetainLevelZeroElementCreator());
+		registerElementCreator(new DefaultTextureFormatElementCreator());
+		registerElementCreator(new DefaultUseMipMapsElementCreator());
+		registerElementCreator(new DefaultDetailHintElementCreator());
 	}
 	
 	public void createDefinition(RibbonTilingContext context) throws Exception
@@ -68,6 +75,13 @@ public class LayerDefinitionCreator
 		writeElement("CurtainTop", context);
 		writeElement("CurtainBottom", context);
 		writeElement("FollowTerrain", context);
+		writeElement("Subsegments", context);
+		writeElement("UseTransparentTextures", context);
+		writeElement("ForceLevelZeroLoads", context);
+		writeElement("RetainLevelZeroTiles", context);
+		writeElement("TextureFormat", context);
+		writeElement("UseMipMaps", context);
+		writeElement("DetailHint", context);
 		stream.println("</Layer>");
 	}
 	

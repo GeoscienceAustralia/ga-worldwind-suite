@@ -44,6 +44,13 @@ public class RibbonTilingContext {
 	private Double curtainTop = 0d;
 	private Double curtainBottom = -100d;
 	private boolean followTerrain = false;
+	private int subsegments = 10;
+	private boolean useTransparentTextures = true;
+	private boolean forceLevelZeroLoads = true;
+	private boolean retainLevelZeroTiles = true;
+	private boolean useMipMaps = true;
+	private double detailHint = 0.5;
+	private String textureFormat = "image/dds";
 	
 	// Writing streams
 	private static OutputStream NULL_STREAM = new OutputStream()
@@ -296,5 +303,75 @@ public class RibbonTilingContext {
 	public void setFollowTerrain(boolean followTerrain)
 	{
 		this.followTerrain = followTerrain;
+	}
+	
+	public int getSubsegments()
+	{
+		return subsegments;
+	}
+
+	public void setSubsegments(int subsegments)
+	{
+		this.subsegments = subsegments;
+	}
+
+	public boolean isUseTransparentTextures()
+	{
+		return useTransparentTextures;
+	}
+
+	public void setUseTransparentTextures(boolean useTransparentTextures)
+	{
+		this.useTransparentTextures = useTransparentTextures;
+	}
+
+	public boolean isForceLevelZeroLoads()
+	{
+		return forceLevelZeroLoads;
+	}
+
+	public void setForceLevelZeroLoads(boolean forceLevelZeroLoads)
+	{
+		this.forceLevelZeroLoads = forceLevelZeroLoads;
+	}
+
+	public boolean isRetainLevelZeroTiles()
+	{
+		return retainLevelZeroTiles;
+	}
+
+	public void setRetainLevelZeroTiles(boolean retainLevelZeroTiles)
+	{
+		this.retainLevelZeroTiles = retainLevelZeroTiles;
+	}
+
+	public boolean isUseMipMaps()
+	{
+		return useMipMaps;
+	}
+
+	public void setUseMipMaps(boolean useMipMaps)
+	{
+		this.useMipMaps = useMipMaps;
+	}
+
+	public double getDetailHint()
+	{
+		return detailHint;
+	}
+
+	public void setDetailHint(double detailHint)
+	{
+		this.detailHint = detailHint;
+	}
+	
+	public String getTextureFormat()
+	{
+		return textureFormat;
+	}
+	
+	public void setTextureFormat(String textureFormat)
+	{
+		this.textureFormat = textureFormat;
 	}
 }
