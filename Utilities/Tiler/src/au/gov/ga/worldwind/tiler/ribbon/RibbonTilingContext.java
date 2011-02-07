@@ -227,6 +227,15 @@ public class RibbonTilingContext {
 		return delegateStrings;
 	}
 	
+	public void addDelegateString(String delegateString)
+	{
+		if (Util.isBlank(delegateString))
+		{
+			return;
+		}
+		delegateStrings.add(delegateString);
+	}
+	
 	public void setDelegateStrings(List<String> delegateStrings)
 	{
 		this.delegateStrings = delegateStrings;

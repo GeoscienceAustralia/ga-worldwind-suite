@@ -35,7 +35,10 @@ public class RibbonTiler
 		context.setOutputLocation(new File("c:/data/projects/11-5171 - AEM flight lines"));
 		context.setHideStdOut(true);
 		
+		context.addDelegateString("TransparentColorTransformer(255,255,255,0.2)");
 		context.addElementCreatorClass("au.gov.ga.worldwind.tiler.ribbon.definition.aem.AemPathElementCreator");
+		context.addElementCreatorClass("au.gov.ga.worldwind.tiler.ribbon.definition.aem.AemCurtainTopElementCreator");
+		context.addElementCreatorClass("au.gov.ga.worldwind.tiler.ribbon.definition.aem.AemCurtainBottomElementCreator");
 		
 		new RibbonTiler().tileRibbon(context);
 	}

@@ -1,20 +1,16 @@
 package au.gov.ga.worldwind.tiler.ribbon.definition.aem;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.gov.ga.worldwind.tiler.ribbon.RibbonTilingContext;
-import au.gov.ga.worldwind.tiler.ribbon.definition.LayerDefinitionElementCreatorBase;
-import au.gov.ga.worldwind.tiler.util.Util;
 
 /**
  * A Path element creator that looks for a file called <code>source_file_name.txt</code> containing
  * whitespace-separated lines of [longitude latitude elevation_top elevation_bottom]
  */
-public class AemPathElementCreator extends LayerDefinitionElementCreatorBase
+public class AemPathElementCreator extends AemElementCreatorBase
 {
 
 	@Override
@@ -54,19 +50,6 @@ public class AemPathElementCreator extends LayerDefinitionElementCreatorBase
 		{
 			e.printStackTrace();
 			return;
-		}
-	}
-	
-	private FileReader getDataFileReader(RibbonTilingContext context)
-	{
-		try
-		{
-			return new FileReader(new File(context.getSourceLocation(), Util.stripExtension(context.getSourceFile().getName()) + ".txt"));
-		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-			return null;
 		}
 	}
 
