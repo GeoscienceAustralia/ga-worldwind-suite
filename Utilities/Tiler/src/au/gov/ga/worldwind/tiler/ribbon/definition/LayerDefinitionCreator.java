@@ -48,9 +48,19 @@ public class LayerDefinitionCreator
 	public void createDefinition(RibbonTilingContext context) throws Exception
 	{
 		stream = new PrintStream(context.getLayerDefinitionFile());
+	
+		replaceElementCreatorsFromContext(context);
 		
 		writePreamble();
 		writeLayerElement(context);
+	}
+
+	private void replaceElementCreatorsFromContext(RibbonTilingContext context)
+	{
+		for (String creatorClass : context.getElementCreatorClasses())
+		{
+			registerElementCreator(creatorClass);
+		}
 	}
 
 	private void writePreamble() {

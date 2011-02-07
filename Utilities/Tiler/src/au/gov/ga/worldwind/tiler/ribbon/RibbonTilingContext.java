@@ -37,6 +37,7 @@ public class RibbonTilingContext {
 	private boolean generateLayerDefinition = true;
 	
 	// Layer definition parameters
+	private List<String> elementCreatorClasses = new ArrayList<String>();
 	private File layerDefinitionFile;
 	private List<String> delegateStrings = new ArrayList<String>();
 	private String dataCache;
@@ -373,5 +374,15 @@ public class RibbonTilingContext {
 	public void setTextureFormat(String textureFormat)
 	{
 		this.textureFormat = textureFormat;
+	}
+
+	public void setElementCreatorClasses(List<String> elementCreatorClasses)
+	{
+		this.elementCreatorClasses = elementCreatorClasses;
+	}
+
+	public List<String> getElementCreatorClasses()
+	{
+		return elementCreatorClasses;
 	}
 }
