@@ -23,6 +23,11 @@ public class LayerDefinitionCreator
 		registerElementCreator(new DefaultDisplayNameElementCreator());
 		registerElementCreator(new DefaultServiceElementCreator());
 		registerElementCreator(new DefaultDelegateElementCreator());
+		registerElementCreator(new DefaultLastUpdateElementCreator());
+		registerElementCreator(new DefaultDatasetNameElementCreator());
+		registerElementCreator(new DefaultDataCacheElementCreator());
+		registerElementCreator(new DefaultImageFormatElementCreator());
+		registerElementCreator(new DefaultAvailableFormatsElementCreator());
 	}
 	
 	public void createDefinition(RibbonTilingContext context) throws Exception
@@ -42,6 +47,11 @@ public class LayerDefinitionCreator
 		writeElement("DisplayName", context);
 		writeElement("Service", context);
 		writeElement("Delegates", context);
+		writeElement("LastUpdate", context);
+		writeElement("DatasetName", context);
+		writeElement("DataCacheName", context);
+		writeElement("ImageFormat", context);
+		writeElement("AvailableImageFormats", context);
 		stream.println("</Layer>");
 	}
 	

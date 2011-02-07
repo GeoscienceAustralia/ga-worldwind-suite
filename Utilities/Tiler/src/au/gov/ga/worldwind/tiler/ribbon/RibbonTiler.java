@@ -30,8 +30,8 @@ public class RibbonTiler
 		Executable.setGDALEnvironmentVariables();
 		
 		RibbonTilingContext context = new RibbonTilingContext();
-		context.setSourceFile(new File("c:/data/projects/AEM flight lines/10300.jpg"));
-		context.setOutputLocation(new File("c:/data/projects/AEM flight lines"));
+		context.setSourceFile(new File("c:/data/projects/11-5171 - AEM flight lines/10300.jpg"));
+		context.setOutputLocation(new File("c:/data/projects/11-5171 - AEM flight lines"));
 		context.setHideStdOut(true);
 		
 		new RibbonTiler().tileRibbon(context);

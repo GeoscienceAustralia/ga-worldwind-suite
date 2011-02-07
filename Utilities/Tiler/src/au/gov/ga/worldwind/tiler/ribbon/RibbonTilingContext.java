@@ -36,6 +36,7 @@ public class RibbonTilingContext {
 	// Layer definition parameters
 	private File layerDefinitionFile;
 	private List<String> delegateStrings = new ArrayList<String>();
+	private String dataCache;
 	
 	
 	// Writing streams
@@ -190,7 +191,7 @@ public class RibbonTilingContext {
 	public File getLayerDefinitionFile() {
 		if (layerDefinitionFile == null)
 		{
-			layerDefinitionFile = new File(getTilesetRoot(), getTilesetName() + ".xml");
+			layerDefinitionFile = new File(getOutputLocation(), getTilesetName() + ".xml");
 			try
 			{
 				layerDefinitionFile.createNewFile();
@@ -215,5 +216,19 @@ public class RibbonTilingContext {
 	public void setDelegateStrings(List<String> delegateStrings)
 	{
 		this.delegateStrings = delegateStrings;
+	}
+	
+	public String getDataCacheName()
+	{
+		if (dataCache == null)
+		{
+			return "GA/Curtain Tiles/" + getTilesetName();
+		}
+		return dataCache;
+	}
+	
+	public void setDataCache(String dataCache)
+	{
+		this.dataCache = dataCache;
 	}
 }
