@@ -381,6 +381,15 @@ public class RibbonTilingContext {
 		this.elementCreatorClasses = elementCreatorClasses;
 	}
 
+	public void addElementCreatorClass(String className)
+	{
+		if (Util.isBlank(className))
+		{
+			return;
+		}
+		elementCreatorClasses.add(className);
+	}
+	
 	public List<String> getElementCreatorClasses()
 	{
 		return elementCreatorClasses;
