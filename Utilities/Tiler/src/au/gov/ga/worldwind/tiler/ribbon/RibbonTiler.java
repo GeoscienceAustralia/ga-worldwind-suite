@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.tiler.ribbon;
 
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -52,8 +53,10 @@ public class RibbonTiler
 
 		int width = dataset.GetRasterXSize() - context.getInsets().left - context.getInsets().right;
 		int height = dataset.GetRasterYSize() - context.getInsets().top - context.getInsets().bottom;
-
+		context.setSourceImageSize(new Dimension(width, height));
+		
 		int levels = levelCount(width, height, context.getTilesize());
+		context.setNumLevels(levels);
 		log(context, "Level count = " + levels, true);
 
 		printLevelsSummary(context, width, height, levels);

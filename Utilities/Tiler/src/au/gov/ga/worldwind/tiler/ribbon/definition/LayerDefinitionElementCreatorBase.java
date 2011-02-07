@@ -12,13 +12,13 @@ public abstract class LayerDefinitionElementCreatorBase implements LayerDefiniti
 		buffer.append(line).append('\n');
 	}
 	
-	protected String addIndent(int tabIndents, String line)
+	protected String formatLine(int tabIndents, String line)
 	{
 		for (int i = 0; i < tabIndents; i++)
 		{
 			line = '\t' + line;
 		}
-		return line;
+		return line + '\n';
 	}
 	
 }

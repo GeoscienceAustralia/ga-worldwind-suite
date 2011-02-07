@@ -2,19 +2,19 @@ package au.gov.ga.worldwind.tiler.ribbon.definition;
 
 import au.gov.ga.worldwind.tiler.ribbon.RibbonTilingContext;
 
-public class DefaultDataCacheElementCreator extends LayerDefinitionElementCreatorBase
+public class DefaultFormatSuffixElementCreator extends LayerDefinitionElementCreatorBase
 {
 
 	@Override
 	public String getElementName()
 	{
-		return "DataCacheName";
+		return "FormatSuffix";
 	}
 
 	@Override
 	public String getElementString(int level, RibbonTilingContext context)
 	{
-		return formatLine(level, "<DataCacheName>" + context.getDataCacheName() + "</DataCacheName>");
+		return formatLine(level, "<FormatSuffix>." + context.getFormat().toLowerCase() + "</FormatSuffix>");
 	}
 
 }

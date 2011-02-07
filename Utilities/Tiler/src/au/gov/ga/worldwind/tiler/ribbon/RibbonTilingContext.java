@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.tiler.ribbon;
 
+import java.awt.Dimension;
 import java.awt.Insets;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,11 +21,13 @@ public class RibbonTilingContext {
 
 	// Tiling parameters
 	private int tilesize = 512;
+	private Dimension sourceImageSize;
 	private File sourceFile;
 	private File outputLocation;
 	private File tilesetRoot;
 	private Insets insets = new Insets(0,0,0,0);
 	private String format = null;
+	private int numLevels;
 	
 	// Flags
 	private boolean copySource = true; 
@@ -37,7 +40,10 @@ public class RibbonTilingContext {
 	private File layerDefinitionFile;
 	private List<String> delegateStrings = new ArrayList<String>();
 	private String dataCache;
-	
+	private List<String> pathLatLons = new ArrayList<String>();
+	private Double curtainTop = 0d;
+	private Double curtainBottom = -100d;
+	private boolean followTerrain = false;
 	
 	// Writing streams
 	private static OutputStream NULL_STREAM = new OutputStream()
@@ -230,5 +236,65 @@ public class RibbonTilingContext {
 	public void setDataCache(String dataCache)
 	{
 		this.dataCache = dataCache;
+	}
+	
+	public int getNumLevels()
+	{
+		return numLevels;
+	}
+	
+	public void setNumLevels(int numLevels)
+	{
+		this.numLevels = numLevels;
+	}
+
+	public void setSourceImageSize(Dimension sourceImageSize)
+	{
+		this.sourceImageSize = sourceImageSize;
+	}
+
+	public Dimension getSourceImageSize()
+	{
+		return sourceImageSize;
+	}
+
+	public void setPathLatLons(List<String> pathLatLons)
+	{
+		this.pathLatLons = pathLatLons;
+	}
+
+	public List<String> getPathLatLons()
+	{
+		return pathLatLons;
+	}
+
+	public void setCurtainTop(Double curtainTop)
+	{
+		this.curtainTop = curtainTop;
+	}
+
+	public Double getCurtainTop()
+	{
+		return curtainTop;
+	}
+
+	public void setCurtainBottom(Double curtainBottom)
+	{
+		this.curtainBottom = curtainBottom;
+	}
+
+	public Double getCurtainBottom()
+	{
+		return curtainBottom;
+	}
+	
+	public boolean isFollowTerrain()
+	{
+		return followTerrain;
+	}
+	
+	public void setFollowTerrain(boolean followTerrain)
+	{
+		this.followTerrain = followTerrain;
 	}
 }

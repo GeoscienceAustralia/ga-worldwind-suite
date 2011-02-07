@@ -17,7 +17,7 @@ public class DefaultLastUpdateElementCreator extends LayerDefinitionElementCreat
 	@Override
 	public String getElementString(int level, RibbonTilingContext context)
 	{
-		return addIndent(level, "<LastUpdate>" + getFormattedDate() + "</LastUpdate>\n");
+		return formatLine(level, "<LastUpdate>" + getFormattedDate() + "</LastUpdate>");
 	}
 
 	private String getFormattedDate()

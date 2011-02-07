@@ -14,7 +14,7 @@ public class DefaultImageFormatElementCreator extends LayerDefinitionElementCrea
 	@Override
 	public String getElementString(int level, RibbonTilingContext context)
 	{
-		return addIndent(level, "<ImageFormat>image/" + context.getFormat() + "</ImageFormat>\n");
+		return formatLine(level, "<ImageFormat>image/" + context.getFormat() + "</ImageFormat>");
 	}
 
 }

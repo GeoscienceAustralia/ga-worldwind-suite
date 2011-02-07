@@ -2,19 +2,19 @@ package au.gov.ga.worldwind.tiler.ribbon.definition;
 
 import au.gov.ga.worldwind.tiler.ribbon.RibbonTilingContext;
 
-public class DefaultDataCacheElementCreator extends LayerDefinitionElementCreatorBase
+public class DefaultFollowTerrainElementCreator extends LayerDefinitionElementCreatorBase
 {
 
 	@Override
 	public String getElementName()
 	{
-		return "DataCacheName";
+		return "FollowTerrain";
 	}
 
 	@Override
 	public String getElementString(int level, RibbonTilingContext context)
 	{
-		return formatLine(level, "<DataCacheName>" + context.getDataCacheName() + "</DataCacheName>");
+		return formatLine(level, "<FollowTerrain>" + context.isFollowTerrain() + "</FollowTerrain>");
 	}
 
 }

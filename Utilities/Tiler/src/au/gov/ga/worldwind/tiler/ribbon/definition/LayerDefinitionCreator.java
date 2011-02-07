@@ -28,6 +28,14 @@ public class LayerDefinitionCreator
 		registerElementCreator(new DefaultDataCacheElementCreator());
 		registerElementCreator(new DefaultImageFormatElementCreator());
 		registerElementCreator(new DefaultAvailableFormatsElementCreator());
+		registerElementCreator(new DefaultFormatSuffixElementCreator());
+		registerElementCreator(new DefaultNumLevelsElementCreator());
+		registerElementCreator(new DefaultTileSizeElementCreator());
+		registerElementCreator(new DefaultFullSizeElementCreator());
+		registerElementCreator(new DefaultPathElementCreator());
+		registerElementCreator(new DefaultCurtainTopElementCreator());
+		registerElementCreator(new DefaultCurtainBottomElementCreator());
+		registerElementCreator(new DefaultFollowTerrainElementCreator());
 	}
 	
 	public void createDefinition(RibbonTilingContext context) throws Exception
@@ -52,6 +60,14 @@ public class LayerDefinitionCreator
 		writeElement("DataCacheName", context);
 		writeElement("ImageFormat", context);
 		writeElement("AvailableImageFormats", context);
+		writeElement("FormatSuffix", context);
+		writeElement("NumLevels", context);
+		writeElement("TileSize", context);
+		writeElement("FullSize", context);
+		writeElement("Path", context);
+		writeElement("CurtainTop", context);
+		writeElement("CurtainBottom", context);
+		writeElement("FollowTerrain", context);
 		stream.println("</Layer>");
 	}
 	

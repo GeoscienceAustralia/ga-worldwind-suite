@@ -14,7 +14,7 @@ public class DefaultDatasetNameElementCreator extends LayerDefinitionElementCrea
 	@Override
 	public String getElementString(int level, RibbonTilingContext context)
 	{
-		return addIndent(level, "<DatasetName>" + context.getTilesetName() + "</DatasetName>\n");
+		return formatLine(level, "<DatasetName>" + context.getTilesetName() + "</DatasetName>");
 	}
 
 }
