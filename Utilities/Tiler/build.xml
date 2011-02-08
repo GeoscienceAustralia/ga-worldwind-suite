@@ -10,6 +10,7 @@
 	<property name="build.dir" value="${basedir}/build" />
 	<property name="executable.dir" value="${basedir}/executable" />
 	<property name="executable.jar" value="tiler.jar" />
+	<property name="ribbon.jar" value="ribbonTiler.jar" />
 
 	<property name="javac.debug" value="false" />
 
@@ -84,5 +85,46 @@
 			</fileset>
 		</copy>
 	</target>
+	
+	<target name="ribbonExecutable" depends="compile">
+		<mkdir dir="${executable.dir}" />
+		<zip destfile="${executable.dir}/temp.zip">
+			<zipgroupfileset dir="${lib.dir}">
+				<include name="**/*.jar" />
+			</zipgroupfileset>
+			<zipgroupfileset dir="${gdal.dir}">
+				<include name="**/*.jar" />
+			</zipgroupfileset>
+		</zip>
+		<jar destfile="${executable.dir}/${ribbon.jar}">
+			<fileset dir="${build.dir}" />
+			<zipfileset src="${executable.dir}/temp.zip">
+				<patternset refid="manifest.exclude" />
+			</zipfileset>
+			<manifest>
+				<attribute name="Main-Class" value="au.gov.ga.worldwind.tiler.ribbon.RibbonTiler" />
+
+			</manifest>
+		</jar>
+		<delete file="${executable.dir}/temp.zip" />
+		<copy todir="${executable.dir}/gdal">
+			<fileset dir="${gdal.dir}">
+				<include name="**/*.dll" />
+			</fileset>
+		</copy>
+		<copy todir="${executable.dir}/gdal/data">
+			<fileset dir="${data.dir}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+		<copy todir="${executable.dir}">
+			<fileset dir="${basedir}">
+				<include name="gui.bat" />
+				<include name="console.bat" />
+				<include name="7za.exe" />
+			</fileset>
+		</copy>
+	</target>
+	
 	<target name="run" depends="executable" />
 </project>

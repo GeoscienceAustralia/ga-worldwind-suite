@@ -278,7 +278,7 @@ public class RibbonTilingContext {
 		{
 			return "GA/Curtain Tiles/" + getTilesetName();
 		}
-		return dataCache.replaceAll("%TILESET%", getTilesetName());
+		return dataCache.replaceAll("&TILESET&", getTilesetName());
 	}
 	
 	public void setDataCache(String dataCache)

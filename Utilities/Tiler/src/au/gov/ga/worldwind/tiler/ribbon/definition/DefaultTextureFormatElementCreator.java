@@ -14,7 +14,7 @@ public class DefaultTextureFormatElementCreator extends LayerDefinitionElementCr
 	@Override
 	public String getElementString(int level, RibbonTilingContext context)
 	{
-		return formatLine(level, "<TextureFormat>" + context.getDetailHint() + "</TextureFormat>");
+		return formatLine(level, "<TextureFormat>" + context.getTextureFormat() + "</TextureFormat>");
 	}
 
 }
