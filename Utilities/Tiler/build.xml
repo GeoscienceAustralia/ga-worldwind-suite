@@ -84,6 +84,5 @@
 			</fileset>
 		</copy>
 	</target>
-
 	<target name="run" depends="executable" />
 </project>

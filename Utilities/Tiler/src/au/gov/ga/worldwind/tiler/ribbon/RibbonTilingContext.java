@@ -27,7 +27,7 @@ public class RibbonTilingContext {
 	@Parameter(names="-tilesize", description="The output dimensions of the tiles (in pixels)")
 	private int tilesize = 512;
 	private Dimension sourceImageSize;
-	@Parameter(names="-source", description="The source image", required=true, converter=FileConverter.class)
+	@Parameter(names="-source", description="The source image", converter=FileConverter.class)
 	private File sourceFile;
 	@Parameter(names="-output", description="The output location", required=true, converter=FileConverter.class)
 	private File outputLocation;
@@ -39,6 +39,8 @@ public class RibbonTilingContext {
 	private int numLevels;
 	
 	// Flags
+	@Parameter(names="-removeConstantColumns", description="Remove constant colour from the top and bottom of the image")
+	private boolean removeConstantColumns = false;
 	@Parameter(names="-copySource", description="Copy the source image to the tileset folder?")
 	private boolean copySource = true; 
 	@Parameter(names="-mask", description="Generate a mask tileset?")
@@ -276,7 +278,7 @@ public class RibbonTilingContext {
 		{
 			return "GA/Curtain Tiles/" + getTilesetName();
 		}
-		return dataCache;
+		return dataCache.replaceAll("%TILESET%", getTilesetName());
 	}
 	
 	public void setDataCache(String dataCache)
@@ -431,5 +433,15 @@ public class RibbonTilingContext {
 	public List<String> getElementCreatorClasses()
 	{
 		return elementCreatorClasses;
+	}
+
+	public boolean isRemoveConstantColumns()
+	{
+		return removeConstantColumns;
+	}
+
+	public void setRemoveConstantColumns(boolean removeConstantColumns)
+	{
+		this.removeConstantColumns = removeConstantColumns;
 	}
 }

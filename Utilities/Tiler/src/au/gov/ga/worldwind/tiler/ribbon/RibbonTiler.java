@@ -74,75 +74,79 @@ public class RibbonTiler
 
 		printLevelsSummary(context, width, height, levels);
 
-		//calculate blank rows per column (columns of constant color)
-		log(context, "Calculating columns to remove from the top and bottom of the image...", false);
-		File topFile = new File(context.getTilesetRoot(), context.getTilesetName() + ".top.dat");
-		File bottomFile = new File(context.getTilesetRoot(), context.getTilesetName() + ".bottom.dat");
-
-		int[] constantPixelsFromTop = RibbonTilerUtils.loadIntArrayFromFile(topFile);
-		int[] constantPixelsFromBottom = RibbonTilerUtils.loadIntArrayFromFile(bottomFile);
-		if (!(constantPixelsFromTop == null || 
-				constantPixelsFromBottom == null || 
-				constantPixelsFromTop.length != width || 
-				constantPixelsFromBottom.length != width))
+		int[] constantPixelsFromTop = null;
+		int[] constantPixelsFromBottom = null;
+		if (context.isRemoveConstantColumns())
 		{
-			log(context, "Loaded removal columns from previous calculations", false);
-		}
-		else
-		{
-			constantPixelsFromTop = new int[width];
-			constantPixelsFromBottom = new int[width];
-
-			int constantWidth = Math.max(1, 10 * context.getTilesize() * context.getTilesize() / height);
-			for (int startX = 0; startX < width; startX += constantWidth)
+			//calculate blank rows per column (columns of constant color)
+			log(context, "Calculating columns to remove from the top and bottom of the image...", false);
+			File topFile = new File(context.getTilesetRoot(), context.getTilesetName() + ".top.dat");
+			File bottomFile = new File(context.getTilesetRoot(), context.getTilesetName() + ".bottom.dat");
+			constantPixelsFromTop = RibbonTilerUtils.loadIntArrayFromFile(topFile);
+			constantPixelsFromBottom = RibbonTilerUtils.loadIntArrayFromFile(bottomFile);
+			if (!(constantPixelsFromTop == null || 
+					constantPixelsFromBottom == null || 
+					constantPixelsFromTop.length != width || 
+					constantPixelsFromBottom.length != width))
 			{
-				int w = Math.min(constantWidth, width - startX);
-
-				//get an image of the full height, 1 pixel wide at column x
-				Rectangle src = new Rectangle(context.getInsets().left + startX, context.getInsets().top, w, height);
-				GDALTileParameters parameters = new GDALTileParameters(dataset, src.getSize(), src);
-				GDALTile tile = new GDALTile(parameters);
-				BufferedImage image = tile.getAsImage();
-
-				log(context, (100 * (startX + 1) / width) + "% done", false);
-
-				for (int x = 0; x < w; x++)
+				log(context, "Loaded removal columns from previous calculations", false);
+			}
+			else
+			{
+				constantPixelsFromTop = new int[width];
+				constantPixelsFromBottom = new int[width];
+	
+				int constantWidth = Math.max(1, 10 * context.getTilesize() * context.getTilesize() / height);
+				for (int startX = 0; startX < width; startX += constantWidth)
 				{
-					int fromTop = 0;
-					int fromBottom = 0;
-					int lastColor = 0;
-					for (int y = 0; y < height; y++)
+					int w = Math.min(constantWidth, width - startX);
+	
+					//get an image of the full height, 1 pixel wide at column x
+					Rectangle src = new Rectangle(context.getInsets().left + startX, context.getInsets().top, w, height);
+					GDALTileParameters parameters = new GDALTileParameters(dataset, src.getSize(), src);
+					GDALTile tile = new GDALTile(parameters);
+					BufferedImage image = tile.getAsImage();
+	
+					log(context, (100 * (startX + 1) / width) + "% done", false);
+	
+					for (int x = 0; x < w; x++)
 					{
-						int thisColor = image.getRGB(x, y);
-						if (y > 0 && lastColor != thisColor)
-						{
-							break;
-						}
-						lastColor = thisColor;
-						fromTop++;
-					}
-
-					if (fromTop < height)
-					{
-						for (int y = height - 1; y >= 0; y--)
+						int fromTop = 0;
+						int fromBottom = 0;
+						int lastColor = 0;
+						for (int y = 0; y < height; y++)
 						{
 							int thisColor = image.getRGB(x, y);
-							if (y < height - 1 && lastColor != thisColor)
+							if (y > 0 && lastColor != thisColor)
 							{
 								break;
 							}
 							lastColor = thisColor;
-							fromBottom++;
+							fromTop++;
 						}
+	
+						if (fromTop < height)
+						{
+							for (int y = height - 1; y >= 0; y--)
+							{
+								int thisColor = image.getRGB(x, y);
+								if (y < height - 1 && lastColor != thisColor)
+								{
+									break;
+								}
+								lastColor = thisColor;
+								fromBottom++;
+							}
+						}
+	
+						constantPixelsFromTop[startX + x] = fromTop;
+						constantPixelsFromBottom[startX + x] = fromBottom;
 					}
-
-					constantPixelsFromTop[startX + x] = fromTop;
-					constantPixelsFromBottom[startX + x] = fromBottom;
 				}
+	
+				RibbonTilerUtils.saveIntArrayToFile(constantPixelsFromTop, topFile);
+				RibbonTilerUtils.saveIntArrayToFile(constantPixelsFromBottom, bottomFile);
 			}
-
-			RibbonTilerUtils.saveIntArrayToFile(constantPixelsFromTop, topFile);
-			RibbonTilerUtils.saveIntArrayToFile(constantPixelsFromBottom, bottomFile);
 		}
 
 		//calculate tiling parameters
@@ -178,7 +182,10 @@ public class RibbonTiler
 				GDALTile tile = new GDALTile(parameters);
 				BufferedImage image = tile.getAsImage();
 
-				image = removeConstantColumns(image, constantPixelsFromTop, constantPixelsFromBottom, x, y, width, height, context.isMask());
+				if (context.isRemoveConstantColumns())
+				{
+					image = removeConstantColumns(image, constantPixelsFromTop, constantPixelsFromBottom, x, y, width, height, context.isMask());
+				}
 
 				ImageIO.write(image, context.getFormat(), imageFile);
 			}
