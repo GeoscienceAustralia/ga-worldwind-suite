@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="lib/jts-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/jump-core-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/opencsv-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/jcommander-1.13.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

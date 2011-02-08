@@ -20,6 +20,9 @@ import au.gov.ga.worldwind.tiler.gdal.GDALUtil;
 import au.gov.ga.worldwind.tiler.ribbon.definition.LayerDefinitionCreator;
 import au.gov.ga.worldwind.tiler.util.Util;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
+
 /**
  * A tiler that is used to process long, thin images for use in <code>CurtainImageTiles</code>
  * (e.g. seismic, AEM, MT etc.)
@@ -31,14 +34,19 @@ public class RibbonTiler
 		Executable.setGDALEnvironmentVariables();
 		
 		RibbonTilingContext context = new RibbonTilingContext();
-		context.setSourceFile(new File("c:/data/projects/11-5171 - AEM flight lines/10300.jpg"));
-		context.setOutputLocation(new File("c:/data/projects/11-5171 - AEM flight lines"));
-		context.setHideStdOut(true);
-		
-		context.addDelegateString("TransparentColorTransformer(255,255,255,0.2)");
-		context.addElementCreatorClass("au.gov.ga.worldwind.tiler.ribbon.definition.aem.AemPathElementCreator");
-		context.addElementCreatorClass("au.gov.ga.worldwind.tiler.ribbon.definition.aem.AemCurtainTopElementCreator");
-		context.addElementCreatorClass("au.gov.ga.worldwind.tiler.ribbon.definition.aem.AemCurtainBottomElementCreator");
+		JCommander jCommander = null;
+		try
+		{
+			jCommander = new JCommander();
+			jCommander.addObject(context);
+			jCommander.parse(args);
+		}
+		catch (ParameterException e)
+		{
+			System.out.println(e.getLocalizedMessage());
+			jCommander.usage();
+			return;
+		}
 		
 		new RibbonTiler().tileRibbon(context);
 	}

@@ -14,43 +14,72 @@ import java.util.List;
 
 import au.gov.ga.worldwind.tiler.util.Util;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.converters.CommaSeparatedConverter;
+import com.beust.jcommander.converters.FileConverter;
+
 /**
  * Contains the contextual information for a ribbon tiling job
  */
 public class RibbonTilingContext {
 
 	// Tiling parameters
+	@Parameter(names="-tilesize", description="The output dimensions of the tiles (in pixels)")
 	private int tilesize = 512;
 	private Dimension sourceImageSize;
+	@Parameter(names="-source", description="The source image", required=true, converter=FileConverter.class)
 	private File sourceFile;
+	@Parameter(names="-output", description="The output location", required=true, converter=FileConverter.class)
 	private File outputLocation;
+	@Parameter(names="-tileset", description="The name to use for the tileset folder", converter=FileConverter.class)
 	private File tilesetRoot;
 	private Insets insets = new Insets(0,0,0,0);
+	@Parameter(names="-format", description="Override the output format")
 	private String format = null;
 	private int numLevels;
 	
 	// Flags
+	@Parameter(names="-copySource", description="Copy the source image to the tileset folder?")
 	private boolean copySource = true; 
+	@Parameter(names="-mask", description="Generate a mask tileset?")
 	private boolean mask = false;
+	@Parameter(names="-generateLog", description="Generate a tiling log?")
 	private boolean generateTilingLog = true;
+	@Parameter(names="-hideStdOut", description="Hide the standard console output?")
 	private boolean hideStdOut = false;
+	@Parameter(names="-generateLayerDef", description="Generate a layer definition file?")
 	private boolean generateLayerDefinition = true;
 	
 	// Layer definition parameters
+	@Parameter(names="-elementCreators", description="The fully qualified classname of element creators to use", converter=CommaSeparatedConverter.class)
 	private List<String> elementCreatorClasses = new ArrayList<String>();
+	@Parameter(names="-layerDefinition", description="Override the default location for the layer definition file", converter=FileConverter.class)
 	private File layerDefinitionFile;
+	@Parameter(names="-delegate", description="Add delegate strings to the layer definition")
 	private List<String> delegateStrings = new ArrayList<String>();
+	@Parameter(names="-dataCache", description="Override the default cache location")
 	private String dataCache;
+	@Parameter(names="-path", description="Provide pipe-separated lat-lon pairs to specify the path", converter=CommaSeparatedConverter.class)
 	private List<String> pathLatLons = new ArrayList<String>();
+	@Parameter(names="-top", description="The curtain top elevation")
 	private Double curtainTop = 0d;
+	@Parameter(names="-bottom", description="The curtain bottom elevation")
 	private Double curtainBottom = -100d;
+	@Parameter(names="-followTerrain", description="Follow the terrain?")
 	private boolean followTerrain = false;
+	@Parameter(names="-subsegments", description="The number of subsegments to use")
 	private int subsegments = 10;
+	@Parameter(names="-useTransparent")
 	private boolean useTransparentTextures = true;
+	@Parameter(names="-forceLevelZeroLoads")
 	private boolean forceLevelZeroLoads = true;
+	@Parameter(names="-retainLevelZeroTiles")
 	private boolean retainLevelZeroTiles = true;
+	@Parameter(names="-useMipMaps")
 	private boolean useMipMaps = true;
+	@Parameter(names="-detailHint", description="The detail hint to use for the layer")
 	private double detailHint = 0.5;
+	@Parameter(names="-textureFormat")
 	private String textureFormat = "image/dds";
 	
 	// Writing streams
