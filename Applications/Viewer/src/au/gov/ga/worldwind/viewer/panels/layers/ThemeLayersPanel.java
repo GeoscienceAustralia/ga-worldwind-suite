@@ -12,7 +12,10 @@ public class ThemeLayersPanel extends AbstractLayersPanel
 	{
 		super();
 		setDisplayName("Theme Layers");
-		tree.setShowsRootHandles(false);
+		if (tree != null)
+		{
+			tree.setShowsRootHandles(false);
+		}
 	}
 
 	@Override
@@ -26,6 +29,10 @@ public class ThemeLayersPanel extends AbstractLayersPanel
 	{
 		super.setup(theme);
 
+		if (tree != null)
+		{
+			tree.setShowsRootHandles(false);
+		}
 		for (ThemeLayer layer : theme.getLayers())
 		{
 			if (layer.isVisible())

@@ -465,4 +465,9 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 	{
 		return root;
 	}
+	
+	public LayerTree getTree()
+	{
+		return tree;
+	}
 }

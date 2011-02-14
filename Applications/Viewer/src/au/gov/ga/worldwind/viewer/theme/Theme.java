@@ -20,6 +20,7 @@ public interface Theme extends Disposable
 	public boolean hasMenuBar();
 	public boolean hasToolBar();
 	public boolean hasStatusBar();
+	public boolean hasWms();
 	
 	public boolean isPersistLayers();
 	public String getLayerPersistanceFilename();

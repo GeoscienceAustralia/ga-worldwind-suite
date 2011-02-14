@@ -546,7 +546,7 @@ public class Application
 				nodes.add(LayerNode.createFromLayerDefinition(layer));
 			}
 
-			LayerEnabler enabler = new LayerEnabler(wwd);
+			LayerEnabler enabler = new LayerEnabler(theme.getLayersPanel().getTree(), wwd);
 			enabler.enable(nodes);
 		}
 
@@ -1183,8 +1183,14 @@ public class Application
 		{
 			toolBar.add(openLayerAction);
 		}
-		toolBar.add(wmsBrowserAction);
-		toolBar.addSeparator();
+		if (theme.hasWms())
+		{
+			toolBar.add(wmsBrowserAction);
+		}
+		if (theme.hasLayersPanel() || theme.hasWms())
+		{
+			toolBar.addSeparator();
+		}
 		
 		toolBar.add(screenshotAction);
 
@@ -1233,8 +1239,11 @@ public class Application
 			menu.addSeparator();
 		}
 
-		menu.add(wmsBrowserAction);
-		menu.addSeparator();
+		if (theme.hasWms())
+		{
+			menu.add(wmsBrowserAction);
+			menu.addSeparator();
+		}
 		
 		offlineAction.addToMenu(menu);
 

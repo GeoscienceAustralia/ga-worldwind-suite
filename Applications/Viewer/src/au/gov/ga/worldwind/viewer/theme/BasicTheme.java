@@ -19,6 +19,7 @@ public class BasicTheme implements Theme
 	private boolean menuBar;
 	private boolean toolBar;
 	private boolean statusBar;
+	private boolean allowWms = true;
 	
 	private boolean persistLayers;
 	private String layerPersistanceFilename;
@@ -82,6 +83,17 @@ public class BasicTheme implements Theme
 		this.wwd = wwd;
 	}
 
+	@Override
+	public boolean hasWms()
+	{
+		return allowWms;
+	}
+	
+	public void setHasWms(boolean allowWms)
+	{
+		this.allowWms = allowWms;
+	}
+	
 	@Override
 	public JFrame getFrame()
 	{
