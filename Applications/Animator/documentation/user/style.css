@@ -1,0 +1,11 @@
+/*
+ * style.css
+ * Stylesheet for the World Wind Animator Documentation.
+ *
+ * Created By: Neil Caldwell
+ * Created On: 22/02/2011
+ */
+
+ol.appendix {
+	list-style-type: upper-alpha;
+}
