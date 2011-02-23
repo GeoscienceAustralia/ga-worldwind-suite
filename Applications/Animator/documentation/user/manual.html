@@ -7,11 +7,11 @@
 <h1>World Wind Animator Documentation</h1>
 <p><strong>Please note that this is document is a work in progress, in a pre 1st draft stage. Text in italics (not using the emph tag) are author's notes. Any feedback would be appreciated.</strong></p>
 <!-- ### TOC ### -->
-<a name="TOC"<h2>Table of Contents</h2></a>
+<a name="TOC"><h2>Table of Contents</h2></a>
 <ol>
 <li><a href="#intro">Introduction</a></li>
 <li><A href="#UI">Interface</a></li>
-<li><A href="#layers">Layers</a></li>
+<li><A href="#layers">Layers and Objects</a></li>
 <ol>
 <li><A href="#addingDatasets">Adding Datasets</a></li>
 </ol>
@@ -38,18 +38,18 @@
 
 <p>The Camera is also animatable, allowing the animator to create moving footage showing different views of the data.</p>
 
-<p>Data sets are rather large; Each can take up several Terabytes of space. As such the default data sets are stored on servers, located at Geoscience and NASA, and the World Wind Animator only acceses the data as it needs to, pulling the required data down over the network as the camera brings it into view.</p>
+<p>Data sets are rather large; Each can take up several Terabytes of space. As such the default data sets are stored on servers, located at Geoscience and NASA, and the World Wind Animator only access the data as it needs to, pulling the required data down over the network as the camera brings it into view.</p>
 
 <p><a href="#TOC">Top</a><p>
 
 <!-- ### Interface ### -->
 <a name="UI"><h2>Interface</h2></a>
 
-<p>The dominate feature of the Animator is the viewport. On opening it should display a view of the earth from space. The viewport shows the camera's current view. To the left of the viewport is a panel containing three roleouts. The Animation Browser, Properties and Layer Palette. These are used to interact with layers and datasets. Below the viewport is the time slider; A drag bar marking a position on a number line. This is used to mark the time a property changes, while animating.</p>
+<p>The dominate feature of the Animator is the viewport. On opening it should display a view of the earth from space. The viewport shows the camera's current view. To the left of the viewport is a panel containing three rollout. The Animation Browser, Properties and Layer Palette. These are used to interact with layers and datasets. Below the viewport is the time slider; A drag bar marking a position on a number line. This is used to mark the time a property changes, while animating.</p>
 
-<p>The viewport has crosshairs in the center. These mark the target location on the ground, where the camera is looking. In order to move that location, drag the mouse around the viewport while holding the left mouse button down. This can also be achieved with the arrow buttons on the keyboard. This is called Paning the camera. It is important to note that the camera does not pan relative to it's own position, as one might expect. It instead pans the position relevent to the ground, effectivly keeping the camera target on the ground.</p>
+<p>The viewport has crosshairs in the center. These mark the target location on the ground, where the camera is looking. In order to move that location, drag the mouse around the viewport while holding the left mouse button down. This can also be achieved with the arrow buttons on the keyboard. This is called Panning the camera. It is important to note that the camera does not pan relative to it's own position, as one might expect. It instead pans the position relevant to the ground, effectively keeping the camera target on the ground.</p>
 
-<p>Zooming can be achieved in two ways. First, the mouse will can be spun, moving the camera towards or away from the earth in increments. This is not a smooth process; the camera jumps up and down as the wheel moves. In order to zoom smoothly the mouse wheel can be used as a middle mouse button. Holding it down while moving the mouse up and down will zoom the camera smoothly, forwards and backwards.</p>
+<p>Zooming can be achieved in two ways. First, the mouse wheel can be spun, moving the camera toward or away from the earth in increments. This is not a smooth process; the camera jumps up and down as the wheel moves. In order to zoom smoothly the mouse wheel can be used as a middle mouse button. Holding it down while moving the mouse up and down will zoom the camera smoothly, forward and backwood.</p>
 
 <p>To change the angle of the camera, hold the right mouse button down and drag the mouse around the viewport. Doing this will rotate the camera around the target, marked by the crosshairs in middle of the viewport.</p>
 
@@ -57,10 +57,22 @@
 
 <p><a href="#TOC">Top</a><p>
 
-<!-- ### Layers ### -->
-<a name="layers"><h2>Layers</h2></a>
+<!-- ### Layers and Objects ### -->
+<a name="layers"><h2>Layers and Objects</h2></a>
 
-Talk about layers: What they are; Interacting with them; Parameters?
+<p>The earth, in the World Wind Animator, is made up of different data sets. The top rollout in the side panel, labeled the 'Animation Browser', contains a list of the different objects within the scene that make up the animation. Each list item, displayed under the World Wind Animator, has three buttons, an icon and a name: An expand button, like the one in windows explorer, which either expands or collapses the list with properties that belong to that list item; A checkbox, marking whether or not the object is currently active; A coloured letter 'a' in a circle, marking whether or not the item is armed; the icon marking what kind of object the list item is; and the name.</p>
+
+<p>When an object is armed, new key frames can be created for the object. This is discussed further in the animation chapter.</p>
+
+<p>The object's icon shows what the object is. If the icon is made up of three balls, the one in front being blue and the others being faded, then the it is an animatable object. If that icon has a red L in the forground, then it an animatable layer. If the letter is an E, then it is an elevation layer. If the icon has a single blue ball with the number 001 underneath it, then it is an animatable property.</p>
+
+<p>Expanding an object displays any properties the object has in the list, with the same set of items. This can be useful for enabling/disabling different properties in an object, such as the camera's clipping properties.</p>
+
+<p>The animation browser has it's own toolbar, at the top of the rollout. It allows the removal of an object from the list; Repositioning of an object in the list; The mass enabling/disable and arming/disarming of objects.</p>
+
+<p>The order the layers affects how they are displayed. If the layer <em>Landsat</em> is below the layer <em>Blue Marble</em> in the list, and it's opacity is set to .5, then the world image is blended 50/50 between the Blue Marble Layer and the Landsat layer. If however, The Blue Marble layer is below the Landsat layer, then there will be no visible difference, as each item on the list is overlaid on the previous layer.</p>
+
+<p>Layers can have multiple properties. At the time of writing the camera has eight different properties. When an object is selected in the animation browser, any properties it has are displayed in the properties rollout. If the object is itself a property, then it is displayed in the properties rollout. Changes to the properties values can be animated.</p>
 
 <a name="addingDatasets"><h3>Adding Datasets</h3></a>
 
