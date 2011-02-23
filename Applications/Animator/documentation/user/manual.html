@@ -1,10 +1,11 @@
-<html>
+﻿<html>
 <head>
-	<title>Documentation Outline</title>
+	<title>World Wind Animator - Manual</title>
 	<link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 <body>
 <h1>World Wind Animator Documentation</h1>
+<p><strong>Please note that this is document is a work in progress, in a pre 1st draft stage. Text in italics (not using the emph tag) are author's notes. Any feedback would be appreciated.</strong></p>
 <!-- ### TOC ### -->
 <a name="TOC"<h2>Table of Contents</h2></a>
 <ol>
@@ -29,26 +30,30 @@
 <!-- ### Introduction ### -->
 <a name="intro"><h2>Introduction</h2></a>
 
-<p>In order to display and compare different datasets, the World Wind
-Animator was written (adapted from the viewer?) so that people could 
-create footage for use (as a visual aid in presentations?). The animator
-was originally developed (as a viewer) using NASA's World Wind Java SDK,
-allowing it to be used on a wider range of platforms.</p>
+<i>This is currently a little disjointed.</i>
 
-The animator works by setting key frames for the parameters of the 
-different layers. Each layer has a set of properties that can be changed 
-on different frames, causing the program to interpret the differences 
-between the two frames as animation.
+<p>In order to display and compare different datasets, the World Wind Animator was written <i>(adapted from the viewer?)</i> so that people could create footage for use <i>(as a visual aid in presentations?)</i>. The animator was originally developed <i>(as a viewer?)</i> using NASA's World Wind Java SDK, allowing it to be used on a wider range of platforms.</p>
+
+<p>The animator works by setting key frames for the parameters of the  different layers. Each layer has a set of properties that can be changed  on different frames, causing the program to interpret the differences  between the two frames as animation.</p>
+
+<p>The Camera is also animatable, allowing the animator to create moving footage showing different views of the data.</p>
+
+<p>Data sets are rather large; Each can take up several Terabytes of space. As such the default data sets are stored on servers, located at Geoscience and NASA, and the World Wind Animator only acceses the data as it needs to, pulling the required data down over the network as the camera brings it into view.</p>
 
 <p><a href="#TOC">Top</a><p>
 
 <!-- ### Interface ### -->
 <a name="UI"><h2>Interface</h2></a>
 
+<p>The dominate feature of the Animator is the viewport. On opening it should display a view of the earth from space. The viewport shows the camera's current view. To the left of the viewport is a panel containing three roleouts. The Animation Browser, Properties and Layer Palette. These are used to interact with layers and datasets. Below the viewport is the time slider; A drag bar marking a position on a number line. This is used to mark the time a property changes, while animating.</p>
 
+<p>The viewport has crosshairs in the center. These mark the target location on the ground, where the camera is looking. In order to move that location, drag the mouse around the viewport while holding the left mouse button down. This can also be achieved with the arrow buttons on the keyboard. This is called Paning the camera. It is important to note that the camera does not pan relative to it's own position, as one might expect. It instead pans the position relevent to the ground, effectivly keeping the camera target on the ground.</p>
 
-Go over the general interface. Don't go into to much detail, as that
-should go in the other sections.
+<p>Zooming can be achieved in two ways. First, the mouse will can be spun, moving the camera towards or away from the earth in increments. This is not a smooth process; the camera jumps up and down as the wheel moves. In order to zoom smoothly the mouse wheel can be used as a middle mouse button. Holding it down while moving the mouse up and down will zoom the camera smoothly, forwards and backwards.</p>
+
+<p>To change the angle of the camera, hold the right mouse button down and drag the mouse around the viewport. Doing this will rotate the camera around the target, marked by the crosshairs in middle of the viewport.</p>
+
+<p>In the current version of the Animator the most of the functions must be accessed via either the menus or keyboard shortcuts. <i>Is this likely to change?</i></p>
 
 <p><a href="#TOC">Top</a><p>
 
