@@ -120,6 +120,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getShowGridLabelKey() { return "animator.gui.menu.showgrid.label"; }
 	public static String getShowRuleOfThirdsLabelKey() { return "animator.gui.menu.showruleofthirds.label"; }
 	public static String getShowCrosshairsLabelKey() { return "animator.gui.menu.showcrosshairs.label"; }
+	public static String getAnimateClippingLabelKey() { return "animator.gui.menu.animateClipping.label"; }
 	public static String getLogEventsLabelKey() { return "animator.gui.menu.logevents.label"; }
 	public static String getRenderProgressDialogTitleKey() { return "animator.gui.dialog.renderprogress.title"; }
 	public static String getRenderProgressFrameMessageKey() { return "animator.gui.dialog.renderprogress.framemessage.label"; }

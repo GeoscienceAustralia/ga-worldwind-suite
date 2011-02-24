@@ -209,6 +209,13 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	int removeAnimatableObject(Animatable object);
 	
 	/**
+	 * Remove the provided animation parameters from this animation
+	 * <p/>
+	 * If any key frames exists that only have this parameter, they will be removed
+	 */
+	void removeAnimationParameters(Parameter... parameters);
+	
+	/**
 	 * Change the order of the provided animatable object, moving it from it's current index in the list of objects to the new index.
 	 * <p/>
 	 * If the provided object is not in this animation's list of objects, this method will have no effect.

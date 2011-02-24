@@ -56,6 +56,10 @@ public class AnimatorActionFactory
 	private SelectableAction showRuleOfThirdsAction;
 	private SelectableAction showCrosshairsAction;
 	
+	private SelectableAction animateClippingAction;
+	private SelectableAction stereoCameraAction;
+	private SelectableAction dynamicStereoAction;
+	
 	private SelectableAction showParameterEditorAction;
 	private SelectableAction showWmsBrowserAction;
 	
@@ -63,9 +67,6 @@ public class AnimatorActionFactory
 	private BasicAction debugParameterValuesAction;
 	private SelectableAction logAnimationEventsAction;
 	
-	private SelectableAction stereoCameraAction;
-	private SelectableAction dynamicStereoAction;
-
 	private Animator targetApplication;
 
 	public AnimatorActionFactory(Animator targetApplication)
@@ -440,6 +441,16 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		animateClippingAction = new SelectableAction(getMessage(getAnimateClippingLabelKey()), null, false);
+		animateClippingAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.setCameraClippingAnimatable(animateClippingAction.isSelected());
+			}
+		});
+		
 		// Show parameter editor
 		showParameterEditorAction = new SelectableAction(getMessage(getShowParameterEditorMenuLabelKey()), null, false);
 		showParameterEditorAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK));
@@ -713,5 +724,10 @@ public class AnimatorActionFactory
 	public SelectableAction getShowWmsBrowserAction()
 	{
 		return showWmsBrowserAction;
+	}
+	
+	public SelectableAction getAnimateClippingAction()
+	{
+		return animateClippingAction;
 	}
 }

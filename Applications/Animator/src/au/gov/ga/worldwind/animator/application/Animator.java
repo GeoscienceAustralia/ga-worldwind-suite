@@ -761,6 +761,7 @@ public class Animator
 		actionFactory.getShowGridAction().addToMenu(menu);
 		actionFactory.getShowRuleOfThirdsAction().addToMenu(menu);
 		menu.addSeparator();
+		actionFactory.getAnimateClippingAction().addToMenu(menu);
 		actionFactory.getStereoCameraAction().addToMenu(menu);
 		actionFactory.getDynamicStereoAction().addToMenu(menu);
 
@@ -955,6 +956,7 @@ public class Animator
 	private void initialiseAnimationEventLogger()
 	{
 		eventLogger = new AnimationEventLogger("animationEvents.txt");
+		eventLogger.setEnabled(false);
 		getCurrentAnimation().addChangeListener(eventLogger);
 	}
 
@@ -1775,6 +1777,11 @@ public class Animator
 		Settings.get().setCrosshairsShown(visible);
 	}
 
+	void setCameraClippingAnimatable(boolean active)
+	{
+		getCurrentAnimation().getCamera().setClippingParametersActive(active);
+	}
+	
 	void setEnableAnimationEventLogging(boolean enabled)
 	{
 		eventLogger.setEnabled(enabled);
@@ -1892,6 +1899,7 @@ public class Animator
 			actionFactory.getStereoCameraAction().setSelected(stereo);
 			actionFactory.getDynamicStereoAction().setEnabled(stereo);
 			actionFactory.getDynamicStereoAction().setSelected(dynamic);
+			actionFactory.getAnimateClippingAction().setSelected(animation.getCamera().isClippingParametersActive());
 		}
 		notifyAnimationChanged(animation);
 		updateAnimationListeners();
@@ -1938,6 +1946,7 @@ public class Animator
 			Camera newCamera = stereo ? new StereoCameraImpl(animation) : new CameraImpl(animation);
 			animation.setCamera(newCamera);
 			actionFactory.getDynamicStereoAction().setSelected(true);
+			
 		}
 	}
 

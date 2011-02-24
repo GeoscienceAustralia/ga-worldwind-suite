@@ -424,6 +424,19 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	}
 
 	@Override
+	public void removeAnimationParameters(Parameter... parameters)
+	{
+		for (Parameter parameter : parameters)
+		{
+			for (KeyFrame key : getKeyFrames(parameter))
+			{
+				key.removeValueForParameter(parameter);
+			}
+		}
+		removeEmptyKeyFrames();
+	}
+	
+	@Override
 	public void moveAnimatableObject(Animatable object, int newIndex)
 	{
 		Validate.isTrue(newIndex >= 0 && newIndex < animatableObjects.size(),

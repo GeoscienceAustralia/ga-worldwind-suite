@@ -54,6 +54,19 @@ public interface Camera extends Animatable
 	Parameter getLookAtElevation();
 
 	/**
+	 * @return Whether the camera clipping parameters are active or not
+	 */
+	boolean isClippingParametersActive();
+	
+	/**
+	 * Sets the clipping parameters to be active or not.
+	 * <p/>
+	 * If the status changes, this can result in key frame parameters being removed
+	 * entirely from the animation.
+	 */
+	void setClippingParametersActive(boolean active);
+	
+	/**
 	 * @return The parameter that represents the near clipping distance of the camera
 	 */
 	Parameter getNearClip();

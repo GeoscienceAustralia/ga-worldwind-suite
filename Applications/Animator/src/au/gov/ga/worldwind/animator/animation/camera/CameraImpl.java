@@ -37,6 +37,7 @@ import au.gov.ga.worldwind.animator.math.vector.Vector3;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
+import au.gov.ga.worldwind.common.view.transform.ClipConfigurableView;
 
 /**
  * A default implementation of the {@link Camera} interface
@@ -58,6 +59,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	private Parameter lookAtLon;
 	private Parameter lookAtElevation;
 
+	private boolean clippingParametersActivated = false;
 	private Parameter nearClip;
 	private Parameter farClip;
 	
@@ -105,8 +107,11 @@ public class CameraImpl extends AnimatableBase implements Camera
 		lookAtLon = new LookatLonParameter(animation);
 		lookAtElevation = new LookatElevationParameter(animation);
 		
-		nearClip = new NearClipParameter(animation);
-		farClip = new FarClipParameter(animation);
+		if (clippingParametersActivated)
+		{
+			nearClip = new NearClipParameter(animation);
+			farClip = new FarClipParameter(animation);
+		}
 	}
 	
 	protected void connectCodependants()
@@ -137,8 +142,11 @@ public class CameraImpl extends AnimatableBase implements Camera
 		view.stopMovement();
 		view.setOrientation(eye, center);
 		
-		nearClip.applyValue(nearClip.getValueAtFrame(frame).getValue());
-		farClip.applyValue(farClip.getValueAtFrame(frame).getValue());
+		if (clippingParametersActivated)
+		{
+			nearClip.applyValue(nearClip.getValueAtFrame(frame).getValue());
+			farClip.applyValue(farClip.getValueAtFrame(frame).getValue());
+		}
 	}
 
 	@Override
@@ -226,6 +234,60 @@ public class CameraImpl extends AnimatableBase implements Camera
 	}
 
 	@Override
+	public boolean isClippingParametersActive()
+	{
+		return clippingParametersActivated;
+	}
+	
+	@Override
+	public void setClippingParametersActive(boolean active)
+	{
+		if (active == clippingParametersActivated)
+		{
+			return;
+		}
+		this.parameters = null;
+		if (!active)
+		{
+			deactivateClippingParameters();
+		}
+		else
+		{
+			activateClippingParameters();
+		}
+	}
+	
+	private void deactivateClippingParameters()
+	{
+		this.clippingParametersActivated = false;
+		
+		// Remove any key frames with the parameters
+		this.animation.removeAnimationParameters(nearClip, farClip);
+		
+		((ClipConfigurableView)this.animation.getWorldWindow().getView()).setAutoCalculateNearClipDistance(true);
+		((ClipConfigurableView)this.animation.getWorldWindow().getView()).setAutoCalculateFarClipDistance(true);
+
+		Parameter oldNearClip = nearClip;
+		Parameter oldFarClip = farClip;
+		
+		this.nearClip = null;
+		this.farClip = null;
+		
+		fireRemoveEvent(oldNearClip);
+		fireRemoveEvent(oldFarClip);
+	}
+
+	private void activateClippingParameters()
+	{
+		this.clippingParametersActivated = true;
+		this.nearClip = new NearClipParameter(animation);
+		this.farClip = new FarClipParameter(animation);
+		
+		fireAddEvent(nearClip);
+		fireAddEvent(farClip);
+	}
+
+	@Override
 	public Parameter getNearClip()
 	{
 		return nearClip;
@@ -242,15 +304,18 @@ public class CameraImpl extends AnimatableBase implements Camera
 	{
 		if (parameters == null || parameters.isEmpty())
 		{
-			parameters = new ArrayList<Parameter>(6);
+			parameters = new ArrayList<Parameter>(8);
 			parameters.add(eyeLat);
 			parameters.add(eyeLon);
 			parameters.add(eyeElevation);
 			parameters.add(lookAtLat);
 			parameters.add(lookAtLon);
 			parameters.add(lookAtElevation);
-			parameters.add(nearClip);
-			parameters.add(farClip);
+			if (clippingParametersActivated)
+			{
+				parameters.add(nearClip);
+				parameters.add(farClip);
+			}
 		}
 		return Collections.unmodifiableCollection(parameters);
 	}
@@ -258,7 +323,6 @@ public class CameraImpl extends AnimatableBase implements Camera
 	@Override
 	public void smoothEyeSpeed(AnimationContext context)
 	{
-		// TODO: This assumes that eye parameters are always set together. Is this a safe assumption?
 		List<KeyFrame> eyeKeyFrames = eyeLat.getKeyFramesWithThisParameter();
 		
 		// There needs to be at least two key frames for smoothing to apply
@@ -375,11 +439,14 @@ public class CameraImpl extends AnimatableBase implements Camera
 		Element lookAtElevationElement = WWXML.appendElement(result, constants.getCameraLookatElevationElementName());
 		lookAtElevationElement.appendChild(lookAtElevation.toXml(lookAtElevationElement, version));
 		
-		Element nearClipElement = WWXML.appendElement(result, constants.getCameraNearClipElementName());
-		nearClipElement.appendChild(nearClip.toXml(nearClipElement, version));
-		
-		Element farClipElement = WWXML.appendElement(result, constants.getCameraFarClipElementName());
-		farClipElement.appendChild(farClip.toXml(farClipElement, version));
+		if (clippingParametersActivated)
+		{
+			Element nearClipElement = WWXML.appendElement(result, constants.getCameraNearClipElementName());
+			nearClipElement.appendChild(nearClip.toXml(nearClipElement, version));
+			
+			Element farClipElement = WWXML.appendElement(result, constants.getCameraFarClipElementName());
+			farClipElement.appendChild(farClip.toXml(farClipElement, version));
+		}
 		
 		return result;
 	}
@@ -434,17 +501,13 @@ public class CameraImpl extends AnimatableBase implements Camera
 		camera.lookAtElevation = new LookatElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatElevationElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
 		
 		// Near and far clipping are optional.
-		camera.nearClip = new NearClipParameter(camera.animation);
-		camera.farClip = new FarClipParameter(camera.animation);
 		Element nearClipElement = WWXML.getElement(element, constants.getCameraNearClipElementName() + "/" + constants.getParameterElementName(), xpath);
 		Element farClipElement = WWXML.getElement(element, constants.getCameraFarClipElementName() + "/" + constants.getParameterElementName(), xpath);
-		if (nearClipElement != null)
+		if (nearClipElement != null || farClipElement != null)
 		{
-			camera.nearClip = new NearClipParameter().fromXml(nearClipElement, version, context);
-		}
-		if (farClipElement != null)
-		{
-			camera.farClip = new FarClipParameter().fromXml(farClipElement, version, context);
+			camera.nearClip = nearClipElement != null ? new NearClipParameter().fromXml(nearClipElement, version, context) : new NearClipParameter(animation);
+			camera.farClip = farClipElement != null ? new FarClipParameter().fromXml(farClipElement, version, context) : new FarClipParameter(animation);
+			this.clippingParametersActivated = true;
 		}
 	}
 
@@ -463,6 +526,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		this.lookAtLat = camera.getLookAtLat();
 		this.lookAtLon = camera.getLookAtLon();
 		this.lookAtElevation = camera.getLookAtElevation();
+		this.clippingParametersActivated = camera.isClippingParametersActive();
 		this.nearClip = camera.getNearClip();
 		this.farClip = camera.getFarClip();
 		this.parameters = null;
