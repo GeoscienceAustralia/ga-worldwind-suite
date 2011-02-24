@@ -64,7 +64,7 @@
 
 <p>When an object is armed, new keyframes can be created for the object. This is discussed further in the animation chapter.</p>
 
-<p>The object's icon shows what the object is. If the icon is made up of three balls, the one in front being blue and the others being faded, then the it is an animatable object. If that icon has a red L in the forground, then it an animatable layer. If the letter is an E, then it is an elevation layer. If the icon has a single blue ball with the number 001 underneath it, then it is an animatable property.</p>
+<p>The object's icon shows what the object is. If the icon is made up of three balls, the one in front being blue and the others being faded, then the it is an animatable object. If that icon has a red L in the foreground, then it an animatable layer. If the letter is an E, then it is an elevation layer. If the icon has a single blue ball with the number 001 underneath it, then it is an animatable property.</p>
 
 <p>Expanding an object displays any properties the object has in the list, with the same set of items. This can be useful for enabling/disabling different properties in an object, such as the camera's clipping properties.</p>
 
@@ -76,22 +76,22 @@
 
 <a name="addingDatasets"><h3>Adding Datasets</h3></a>
 
-<p>The layer palette, bellow the Properties rollout contains a list of known layers that can be added to the animation. The layers currently in the scene are marked with a yellow flag. In order to add a layer to the animation, there is a green plus button to the right of the rollouts toolbar, directly above the scroller. The red x in the layer palette toolbar removes layers from the pallet, not from the scene. The box with the arrow pointing into it is the add layer button. If you have an xml file specifing a layer.</p>
+<p>The layer palette, bellow the Properties rollout contains a list of known layers that can be added to the animation. The layers currently in the scene are marked with a yellow flag. In order to add a layer to the animation, there is a green plus button to the right of the rollouts toolbar, directly above the scroller. The red x in the layer palette toolbar removes layers from the pallet, not from the scene. The box with the arrow pointing into it is the add layer button. If you have an XML file specifying a layer.</p>
 
-<i>Is there something to read about the xml files? Where are they getting them from? I'll add the drag drop thing in after I've had a look at them.</i>
+<i>Is there something to read about the XML files? Where are they getting them from? I'll add the drag drop thing in after I've had a look at them.</i>
 
 <p><a href="#TOC">Top</a><p>
 
 <!-- ### Animation ### -->
 <a name="animation"><h2>Animation</h2></a>
 
-<p>Animation is done with by keyframing changes to parameters. Moving the camera changes it's positoinal parameters. The timeline at the bottom of the camera viewport displays the keyframes that make up the animation.</p>
+<p>Animation is done with by keyframing changes to parameters. Moving the camera changes it's positional parameters. The timeline at the bottom of the camera viewport displays the keyframes that make up the animation.</p>
 
 <a name="keyframes"><h3>Keyframes</h3></a>
 
-<p>The World Wind Animator supports keyframes; Specific frames which determine the overall animation. By default the timeslider only has one hundred frames. The number can be changed by with the set frame count diaglog, found in the frame menu.</p>
+<p>The World Wind Animator supports keyframes; Specific frames which determine the overall animation. By default the timeslider only has one hundred frames. The number can be changed by with the set frame count dialog, found in the frame menu.</p>
 
-<p>The insert button on the keyboard, or the Frame -> Add key menu item, inserts a new keyframe for all armed objects. If an object is armed, any keyframe that can be applied to it will be. Unarmed objects do not recieve keyframes.</p>
+<p>The insert button on the keyboard, or the <em>Frame &rarr; Add key</em> menu item, inserts a new keyframe for all armed objects. If an object is armed, any keyframe that can be applied to it will be. Unarmed objects do not recieve keyframes.</p>
 
 <p>Most of the animation within the animator will revolve around layer parameters. Most layers have an opacity layer, which is a value between 0 and 1 that represents how transparant or visible the layer is. In order to add a keyframe modifing a parameter, change the parameter and then add the new keyframe. The view may not update with the changes to the parameter until the the keyframe has been added.</p>
 
@@ -101,22 +101,29 @@
 
 <p>The camera is an animatable object within the scene. It is made up of an Eye, the camera itself, and a look at target. The look at target is always aligned to the ground, and the camera rotates around it. Each have latitude, longitude and zoom parameters. It also has near and far clip parameters. It can be moved as described in the Interface chapter, or the parameters can be changed.</p>
 
-<p>When a keyframe has been added to the camera, the camera's position becomes visible in the viewport. Emediantly after a keyframe has been inserted, a pink dot will appear in the center of the crosshairs. If the viewport is moved away from the camera's position, two dots, a blue and a pink one, should be visible. They will be joined by a dotted line. The blue dot represents the camera's eye, while the pink dot represents the targe.</p>
+<p>When a keyframe has been added to the camera, the camera's position becomes visible in the viewport. Immediately after a keyframe has been inserted, a pink dot will appear in the center of the crosshairs. If the viewport is moved away from the camera's position, two dots, a blue and a pink one, should be visible. They will be joined by a dotted line. The blue dot represents the camera's eye, while the pink dot represents the target.</p>
 
-<p>When the camera has multipul keyframes, they will all be visible within the viewport, joined together by lines showing the their trajectories. The lines colour will vary between blue, where the movement is slow, and red, where the movement is quick.</p>
+<p>When the camera has multiple keyframes, they will all be visible within the viewport, joined together by lines showing the their trajectories. The lines colour will vary between blue, where the movement is slow, and red, where the movement is quick.</p>
 
-<p>To edit keyframes, the position of the camera can be changed by either moving the camera and pressing the insert button, or by grabbing and moving the visual representation. You can grab both the camera and the target using the left moust button and change their latitude and longitude, or with the right moust button and change their zoom.</p>
+<p>To edit keyframes, the position of the camera can be changed by either moving the camera and pressing the insert button, or by grabbing and moving the visual representation. You can grab both the camera and the target using the left mouse button and change their latitude and longitude, or with the right mouse button and change their zoom.</p>
 
 <a name="parameterEditor"><h3>The Parameter Editor</h3></a>
 
-Editing Curves;
+<p>The parameter editor, found in the Window menu or by clicking <em>Ctrl+P</em>, shows the changes made to parameters between different keyframes as a graph. On the left is a list of all the parameters in the scene that can be displayed. The gray area to the right displays a graph, once a parameter is selected.</p>
 
+<p>The line represents the value of the parameter, and each point along it is a keyframe. Each keyframe that has one or two lines coming off it, each with its own handle. These lines are bezier handles. Moving them affects the curve of the line between the keys. By default each bezier handle controls both the input and the output direction of the key. This can be changed by right clicking on the key and choosing <em>bezier (unlocked)</em>. There is also a linear option, which takes the input and sends the output directly toward the previous/next key.</p>
+
+<p>Navigating a graph can be done by holding down the mouse wheel (middle mouse button) and dragging the mouse around a graph. Rolling the wheel zooms. In order to stay in line, all the graphs will zoom and pan together.</p>
+
+<i>How is rotation handled?</i>
 <p><a href="#TOC">Top</a><p>
 
 <!-- ### Rendering ### -->
 <a name="rendering"><h2>Rendering</h2></a>
 
-Rendering; Image sequence; Parameters;
+Rendering is the process of creating a final film. In the animation menu, there are three options: <em>Render</em>, <em>Quick Render (detailed)</em> and <em>Quick Render (preview)</em>. The Quick Render functions ask for a filename and then renders an image set from the current frame to the end of the range. If they already have a destination filename then the quick render will just overwrite existing files. The render button opens a dialog which asks for Dimensions, Level of Detail, Frame Range and destination.
+
+Image sequence; Parameters;
 
 <a name="stero"><h3>Rendering in Stereo</h3></a>
 
