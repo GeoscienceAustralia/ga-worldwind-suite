@@ -105,6 +105,7 @@ import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.ui.FileFilters.XmlFilter;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
+import au.gov.ga.worldwind.common.view.transform.ClipConfigurableView;
 import au.gov.ga.worldwind.wmsbrowser.WmsBrowser;
 
 /**
@@ -1152,6 +1153,8 @@ public class Animator
 		if (querySave())
 		{
 			WorldWindAnimationImpl newAnimation = new WorldWindAnimationImpl(wwd);
+			((ClipConfigurableView)getView()).setAutoCalculateNearClipDistance(true);
+			((ClipConfigurableView)getView()).setAutoCalculateFarClipDistance(true);
 			addDefaultLayersToAnimation(newAnimation);
 			addDefaultElevationModelsToAnimation(newAnimation);
 			setDefaultInitialArmedStatus(newAnimation);
