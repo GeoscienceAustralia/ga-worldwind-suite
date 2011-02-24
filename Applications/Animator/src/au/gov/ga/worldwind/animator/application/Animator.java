@@ -1492,6 +1492,15 @@ public class Animator
 		{
 			return;
 		}
+		if (!getCurrentAnimation().getRenderParameters().isRenderDestinationSet())
+		{
+			File destination = promptForImageSequenceLocation();
+			if (destination == null)
+			{
+				return;
+			}
+			getCurrentAnimation().getRenderParameters().setRenderDestination(destination);
+		}
 		double newAspect = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
 		if (newAspect != oldAspect)
 		{

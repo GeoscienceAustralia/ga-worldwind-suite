@@ -483,7 +483,12 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			try
 			{
 				keyFrameMapLock.writeLock().lock();
-				this.keyFrameMap = this.keyFrameMap.headMap(newCount, false);
+				
+				// the headMap() operation returns a map that has a restriced range - copy into a new map.
+				NavigableMap<Integer, KeyFrame> headMap = this.keyFrameMap.headMap(newCount, false);
+				
+				this.keyFrameMap = new TreeMap<Integer, KeyFrame>();
+				this.keyFrameMap.putAll(headMap);
 			}
 			finally
 			{

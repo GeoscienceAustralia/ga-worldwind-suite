@@ -96,6 +96,11 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 		return new Dimension((int)(imageDimension.width * scaler), (int)(imageDimension.height * scaler));
 	}
 	
+	public boolean isRenderDestinationSet()
+	{
+		return getRenderDestination() != null;
+	}
+	
 	public int getFrameRate()
 	{
 		return frameRate;
@@ -307,5 +312,4 @@ public class RenderParameters implements AnimationObject, XmlSerializable<Render
 		result.setRenderDestination(renderDestination);
 		return result;
 	}
-	
 }
