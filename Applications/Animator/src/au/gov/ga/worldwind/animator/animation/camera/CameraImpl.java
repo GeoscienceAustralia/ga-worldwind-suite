@@ -507,7 +507,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		{
 			camera.nearClip = nearClipElement != null ? new NearClipParameter().fromXml(nearClipElement, version, context) : new NearClipParameter(animation);
 			camera.farClip = farClipElement != null ? new FarClipParameter().fromXml(farClipElement, version, context) : new FarClipParameter(animation);
-			this.clippingParametersActivated = true;
+			camera.clippingParametersActivated = true;
 		}
 	}
 

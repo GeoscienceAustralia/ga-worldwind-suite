@@ -39,12 +39,6 @@
                 <lookAtElevation>
                     <parameter defaultValue="0.0" enabled="true" name="Render Camera - Param"/>
                 </lookAtElevation>
-                <nearClip>
-                    <parameter defaultValue="0.0" enabled="true" name="Render Camera - Param"/>
-                </nearClip>
-                <farClip>
-                    <parameter defaultValue="0.0" enabled="true" name="Render Camera - Param"/>
-                </farClip>
             </camera>
             <elevation enabled="true" name="Elevation">
                 <models/>
