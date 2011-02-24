@@ -134,6 +134,11 @@ public class CameraImpl extends AnimatableBase implements Camera
 	@Override
 	protected void doApply(AnimationContext animationContext, int frame)
 	{
+		if (!animation.hasKeyFrame(this))
+		{
+			return;
+		}
+		
 		Position eye = getEyePositionAtFrame(animationContext, frame);
 
 		Position center = getLookatPositionAtFrame(animationContext, frame);

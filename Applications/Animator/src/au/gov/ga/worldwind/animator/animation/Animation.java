@@ -71,6 +71,11 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	boolean hasKeyFrame(Parameter p);
 	
 	/**
+	 * @return <code>true</code> if there is a key frame with a value for a parameter of the given animatable object, <code>false</code> otherwise
+	 */
+	boolean hasKeyFrame(Animatable o);
+	
+	/**
 	 * @return The number of key frames associated with this animation
 	 */
 	int getKeyFrameCount();

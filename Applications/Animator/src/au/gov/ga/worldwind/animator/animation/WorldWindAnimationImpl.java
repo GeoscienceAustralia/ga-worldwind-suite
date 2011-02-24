@@ -836,6 +836,23 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			keyFrameMapLock.readLock().unlock();
 		}
 	}
+	
+	@Override
+	public boolean hasKeyFrame(Animatable o)
+	{
+		if (o == null || !animatableObjects.contains(o))
+		{
+			return false;
+		}
+		for (Parameter p : o.getParameters())
+		{
+			if (hasKeyFrame(p))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public KeyFrame getKeyFrame(int frame)
