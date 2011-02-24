@@ -17,7 +17,7 @@
 </ol>
 <li><A href="#animation">Animation</a></li>
 <ol>
-<li><A href="#keyframes">Key Frames</a></li>
+<li><A href="#keyframes">Keyframes</a></li>
 <li><A href="#camera">The Camera</a></li>
 <li><A href="#parameterEditor">The Parameter Editor</a></li>
 </ol>
@@ -34,7 +34,7 @@
 
 <p>In order to display and compare different datasets, the World Wind Animator was written <i>(adapted from the viewer?)</i> so that people could create footage for use <i>(as a visual aid in presentations?)</i>. The animator was originally developed <i>(as a viewer?)</i> using NASA's World Wind Java SDK, allowing it to be used on a wider range of platforms.</p>
 
-<p>The animator works by setting key frames for the parameters of the  different layers. Each layer has a set of properties that can be changed  on different frames, causing the program to interpret the differences  between the two frames as animation.</p>
+<p>The animator works by setting keyframes for the parameters of the  different layers. Each layer has a set of properties that can be changed  on different frames, causing the program to interpret the differences  between the two frames as animation.</p>
 
 <p>The Camera is also animatable, allowing the animator to create moving footage showing different views of the data.</p>
 
@@ -62,7 +62,7 @@
 
 <p>The earth, in the World Wind Animator, is made up of different data sets. The top rollout in the side panel, labeled the 'Animation Browser', contains a list of the different objects within the scene that make up the animation. Each list item, displayed under the World Wind Animator, has three buttons, an icon and a name: An expand button, like the one in windows explorer, which either expands or collapses the list with properties that belong to that list item; A checkbox, marking whether or not the object is currently active; A coloured letter 'a' in a circle, marking whether or not the item is armed; the icon marking what kind of object the list item is; and the name.</p>
 
-<p>When an object is armed, new key frames can be created for the object. This is discussed further in the animation chapter.</p>
+<p>When an object is armed, new keyframes can be created for the object. This is discussed further in the animation chapter.</p>
 
 <p>The object's icon shows what the object is. If the icon is made up of three balls, the one in front being blue and the others being faded, then the it is an animatable object. If that icon has a red L in the forground, then it an animatable layer. If the letter is an E, then it is an elevation layer. If the icon has a single blue ball with the number 001 underneath it, then it is an animatable property.</p>
 
@@ -76,22 +76,36 @@
 
 <a name="addingDatasets"><h3>Adding Datasets</h3></a>
 
-Talk about adding new datasets into the application. Will possibly need to look at specifications.
+<p>The layer palette, bellow the Properties rollout contains a list of known layers that can be added to the animation. The layers currently in the scene are marked with a yellow flag. In order to add a layer to the animation, there is a green plus button to the right of the rollouts toolbar, directly above the scroller. The red x in the layer palette toolbar removes layers from the pallet, not from the scene. The box with the arrow pointing into it is the add layer button. If you have an xml file specifing a layer.</p>
+
+<i>Is there something to read about the xml files? Where are they getting them from? I'll add the drag drop thing in after I've had a look at them.</i>
 
 <p><a href="#TOC">Top</a><p>
 
 <!-- ### Animation ### -->
 <a name="animation"><h2>Animation</h2></a>
 
-Talk about animation.
+<p>Animation is done with by keyframing changes to parameters. Moving the camera changes it's positoinal parameters. The timeline at the bottom of the camera viewport displays the keyframes that make up the animation.</p>
 
-<a name="keyframes"><h3>Key Frames</h3></a>
+<a name="keyframes"><h3>Keyframes</h3></a>
 
-Key frames; Arming layers and parameters;
+<p>The World Wind Animator supports keyframes; Specific frames which determine the overall animation. By default the timeslider only has one hundred frames. The number can be changed by with the set frame count diaglog, found in the frame menu.</p>
+
+<p>The insert button on the keyboard, or the Frame -> Add key menu item, inserts a new keyframe for all armed objects. If an object is armed, any keyframe that can be applied to it will be. Unarmed objects do not recieve keyframes.</p>
+
+<p>Most of the animation within the animator will revolve around layer parameters. Most layers have an opacity layer, which is a value between 0 and 1 that represents how transparant or visible the layer is. In order to add a keyframe modifing a parameter, change the parameter and then add the new keyframe. The view may not update with the changes to the parameter until the the keyframe has been added.</p>
+
+<i>James was talking about having text components. I'm going to need to read about the layer specifications.</i>
 
 <a name="camera"><h3>The Camera</h3></a>
 
-Eye; Look at; Zoom; 
+<p>The camera is an animatable object within the scene. It is made up of an Eye, the camera itself, and a look at target. The look at target is always aligned to the ground, and the camera rotates around it. Each have latitude, longitude and zoom parameters. It also has near and far clip parameters. It can be moved as described in the Interface chapter, or the parameters can be changed.</p>
+
+<p>When a keyframe has been added to the camera, the camera's position becomes visible in the viewport. Emediantly after a keyframe has been inserted, a pink dot will appear in the center of the crosshairs. If the viewport is moved away from the camera's position, two dots, a blue and a pink one, should be visible. They will be joined by a dotted line. The blue dot represents the camera's eye, while the pink dot represents the targe.</p>
+
+<p>When the camera has multipul keyframes, they will all be visible within the viewport, joined together by lines showing the their trajectories. The lines colour will vary between blue, where the movement is slow, and red, where the movement is quick.</p>
+
+<p>To edit keyframes, the position of the camera can be changed by either moving the camera and pressing the insert button, or by grabbing and moving the visual representation. You can grab both the camera and the target using the left moust button and change their latitude and longitude, or with the right moust button and change their zoom.</p>
 
 <a name="parameterEditor"><h3>The Parameter Editor</h3></a>
 
