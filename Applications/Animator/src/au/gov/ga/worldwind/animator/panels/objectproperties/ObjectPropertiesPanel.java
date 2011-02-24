@@ -104,6 +104,8 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Anima
 		if (currentObject == null)
 		{
 			panelCaption.setText(getMessage(getObjectPropertiesPanelNoSelectionMessageKey()));
+			propertiesPanel.removeAll();
+			visibleEditors.clear();
 			return;
 		}
 		panelCaption.setText(getMessage(getObjectPropertiesPanelSelectionTitleKey(), currentObject.getName()));
@@ -213,7 +215,7 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Anima
 	@Override
 	public void receiveAnimationEvent(AnimationEvent event)
 	{
-		updateParameterEditorsDisplay();
+		updatePanelDisplay();
 	}
 
 	@Override

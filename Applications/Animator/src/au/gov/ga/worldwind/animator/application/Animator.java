@@ -1779,6 +1779,7 @@ public class Animator
 
 	void setCameraClippingAnimatable(boolean active)
 	{
+		CurrentlySelectedObject.set(null);
 		getCurrentAnimation().getCamera().setClippingParametersActive(active);
 	}
 	

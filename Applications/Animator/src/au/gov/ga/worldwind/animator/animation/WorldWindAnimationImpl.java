@@ -108,6 +108,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		this.renderParameters = new RenderParameters();
 
 		this.renderCamera = new CameraImpl(this);
+		this.renderCamera.addChangeListener(this);
 		this.animatableObjects.add(renderCamera);
 
 		this.animatableElevation = new DefaultAnimatableElevation(this);
