@@ -1,4 +1,4 @@
-/*
+﻿/*
  * style.css
  * Stylesheet for the World Wind Animator Documentation.
  *
@@ -8,4 +8,18 @@
 
 ol.appendix {
 	list-style-type: upper-alpha;
+}
+
+p {
+	text-indent: 1em;
+	text-align: justify;
+}
+
+font.code {
+	font-family: monospace;
+	font-size: 10pt;
+}
+
+font.em{
+	font-family: monospace;
 }
