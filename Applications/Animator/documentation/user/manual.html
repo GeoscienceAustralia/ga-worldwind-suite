@@ -14,6 +14,7 @@
 <li><A href="#layers">Layers and Objects</a></li>
 <ol>
 <li><A href="#addingDatasets">Adding Datasets</a></li>
+<li><a href="#WMSB">WMS Browser</a></li>
 </ol>
 <li><A href="#animation">Animation</a></li>
 <ol>
@@ -82,6 +83,18 @@ The animator works by setting keyframes for the parameters of the  different lay
 <p>The layer palette, bellow the Properties rollout, contains a list of known layers that can be added to the animation. The layers currently in the scene are marked with a yellow flag. In order to add a layer to the animation, there is a green plus button to the right of the rollouts toolbar, directly above the scroller. The red <font class="em">x</font> in the layer palette toolbar removes layers from the pallet, not from the scene. The box with the arrow pointing into it is the add layer button, from an XML file.</p>
 
 <p>Layers are specified in XML files. They contain information about the layer's type, where to get any data and how to interpret any data referenced. Because datasets can be rather large, and one is unlikely to work with the whole dataset, they are often stored on a remote server, and are retrieved in segments when needed. An XML layer file may also be dragged directly into the animation browser list, to be added to the animation.</p>
+
+<a name="WMSB"><h3>WMS Browser</h3></a>
+
+<a href="images/WMSBrowser.png"><img src="images/WMSBrowser.png" width="465" height="299"></a>
+
+<p>The Web Map Service (WMS) is an open standard for georeferenced maps. The WMS Browser can be used to find new layers, and get the data from an external server. The browser contains three windows: A list of known servers; a description and a preview window. When you expand a server in the list, it will display all the layers that are available on that server. Selecting one of them will load a description and information about that layer, and an image preview in the preview window.</p>
+
+<p>In order to find a new server, there is a green plus sign on the WMS Server list toolbar. Clicking on it brings up a search window; Along with some instructions it has a search bar and a results window. A query can either be made of different terms or of a direct URL to a server. Any results have a name, URL and description of the service provided by the server. To add the servers to the list, check them with the checkbox on the left, and press Ok. There are <em>check all</em> and <em>check none</em> buttons in the bottom left corner. </p>
+
+<a href="images/SearchWMS.png"><img src="images/SearchWMS.png" height="348" width="465"></a>
+
+<p>The datasets provided by a server can not be imported directly into an animation. First, they must be saved as layers. Selecting a layer will activate the save button on the list panel. Once the layer has been saved as an XML file, it can be added into the the scene as described in the previous sections.</p>
 
 <p><a href="#TOC">Top</a><p>
 
