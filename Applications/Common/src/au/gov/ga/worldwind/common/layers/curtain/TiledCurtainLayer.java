@@ -552,9 +552,13 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 
 	protected boolean isTileVisible(DrawContext dc, CurtainTextureTile tile)
 	{
-		Segment segment = tile.getSegment();
-		Extent extent = path.getSegmentExtent(dc, segment, curtainTop, curtainBottom, subsegments, followTerrain);
-
+//		Segment segment = tile.getSegment();
+//		Extent extent = path.getSegmentExtent(dc, segment, curtainTop, curtainBottom, subsegments, followTerrain);
+		
+		// TODO: Fix this - see CWW-129
+		Sector pathBoundingSector = getSector();
+		Extent extent = Sector.computeBoundingBox(dc.getGlobe(), dc.getVerticalExaggeration(), pathBoundingSector);
+		
 		return extent.intersects(dc.getView().getFrustumInModelCoordinates());
 	}
 
