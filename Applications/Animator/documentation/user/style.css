@@ -23,3 +23,7 @@ font.code {
 font.em{
 	font-family: monospace;
 }
+
+img {
+	border-style: none;
+}

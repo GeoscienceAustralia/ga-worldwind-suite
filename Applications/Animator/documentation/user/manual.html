@@ -5,7 +5,7 @@
 </head>
 <body>
 <h1>World Wind Animator Documentation</h1>
-<p><strong>Please note that this is document is a work in progress, in a pre 1st draft stage. Text in italics (not using the emph tag) are author's notes. Any feedback would be appreciated.</strong></p>
+<p><strong>Please note that this is document is the 1st draft. Text in italics (not using the em tag) are author's notes. Any and all feedback would be appreciated.</strong></p>
 <!-- ### TOC ### -->
 <a name="TOC"><h2>Table of Contents</h2></a>
 <ol>
@@ -46,6 +46,8 @@ The animator works by setting keyframes for the parameters of the  different lay
 
 <p>Visually, The dominate feature of the Animator is the viewport. On opening it should display a view of the earth from space. The viewport shows the camera's current view. To the left of the viewport is a panel containing three rollouts. The Animation Browser, Properties and Layer Palette. These are used to interact with layers and datasets. Below the viewport is the time slider; A drag bar marking a position on a number line. This is used to mark the time a property changes, while animating.</p>
 
+<a href="images/AnimatorFirstOpen.png"><img src="images/AnimatorFirstOpen.png" width="465.85" height="246.05"></a>
+
 <p>The viewport has crosshairs in the center. These mark the target location on the ground, where the camera is looking. In order to move that location, drag the mouse around the viewport while holding the left mouse button down. This can also be achieved with the arrow buttons on the keyboard. This is called Panning the camera. It is important to note that the camera does not pan relative to it's own position, as one might expect. It instead pans the position relevant to the ground, effectively keeping the camera target on the ground.</p>
 
 <p>Zooming can be achieved in two ways. First, the mouse wheel can be spun, moving the camera toward or away from the earth in increments. This is not a smooth process; the camera jumps up and down as the wheel moves. In order to zoom smoothly the mouse wheel can be used as a middle mouse button. Holding it down while moving the mouse up and down will zoom the camera smoothly, forward and backward.</p>
@@ -57,9 +59,13 @@ The animator works by setting keyframes for the parameters of the  different lay
 <!-- ### Layers and Objects ### -->
 <a name="layers"><h2>Layers and Objects</h2></a>
 
+<a href="images/AnimationPanel.png"><img src="images/AnimationPanel.png" align="left" height="535.5" width="259.25"></a>
+
 <p>The earth, in the World Wind Animator, is made up of different data sets. The top rollout in the side panel, labeled <em>Animation Browser</em>, contains a list of the different objects within the scene that make up the animation. Each list item, displayed under the World Wind Animator, has three buttons, an icon and a name: An expand button, like the one in windows explorer, which either expands or collapses properties belonging to the object in the list item; A checkbox, marking whether or not the object is currently active; A coloured letter <font class="em">a</font> in a circle, marking whether or not the item is armed; the icon marking what kind of object the list item is; and the name.</p>
 
 <p>When an object is armed, new keyframes can be created for the object. This is discussed further in the animation chapter.</p>
+
+<img src="images/ObjectIcons.png" align="center">
 
 <p>The object's icon shows what the object is. If the icon is made up of three balls, the one in front being blue and the others being faded, then it is an animatable object. If that icon has a red <font class="em">L</font> in the foreground, then it an animatable layer. If the letter is an <font class="em">E</font>, then it is an elevation layer. If the icon has a single blue ball with the number <font class="code">001</font> underneath it, then it is an animatable property.</p>
 
@@ -98,6 +104,8 @@ The animator works by setting keyframes for the parameters of the  different lay
 
 <p>The camera is an animatable object within the scene. It is made up of an Eye, the camera itself, and a look at target. The look at target is always aligned to the ground, and the camera rotates around it. Each have latitude, longitude and zoom parameters. It also has additional parameters controlling stereo cameras and clipping which can be added to it from the animation menu. It can be moved as described in the Interface chapter, or the parameters can be manually changed.</p>
 
+<a href="images/CameraPaths.png"><img src="images/CameraPaths.png" height="290" width="465"></a>
+
 <p>When a keyframe has been added to the camera, the camera's position becomes visible in the viewport. Immediately after a keyframe has been inserted, a pink dot will appear in the center of the crosshairs. If the viewport is moved away from the camera's position, two dots, a blue and a pink one, should be visible. They will be joined by a dotted line. The blue dot represents the camera's eye, while the pink dot represents the target.</p>
 
 <p>When the camera has multiple keyframes, they will all be visible within the viewport, joined together by lines showing the their trajectories. The lines colour will vary between blue, where the movement is slow, and red, where the movement is quick.</p>
@@ -111,11 +119,15 @@ The camera can have extra parameters added to it, including Stereoscopic cameras
 
 <a name="parameterEditor"><h3>The Parameter Editor</h3></a>
 
+<a href="images/ParameterEditor.png"><img src="images/ParameterEditor.png" height="249" width="465"></a>
+
 <p>The parameter editor, found in the Window menu or by clicking <em>Ctrl+P</em>, shows the changes made to parameters between different keyframes as a graph. On the left is a list of all the parameters in the scene that can be displayed. The gray area to the right displays a graph, once a parameter is selected.</p>
 
 <p>The line represents the value of the parameter, and each point along it is a keyframe. Each keyframe that has one or two lines coming off it, each with its own handle. These lines are bezier handles. Moving them affects the curve of the line between the keys. By default each bezier handle controls both the input and the output direction of the key. This can be changed by right clicking on the key and choosing <em>bezier (unlocked)</em>. There is also a linear option, which takes the input and sends the output directly toward the previous/next key.</p>
 
-<p>Navigating a graph can be done by holding down the mouse wheel (middle mouse button) and dragging the mouse around a graph. Rolling the wheel zooms. In order to stay in line, all the graphs will zoom and pan together.</p>
+<p>There are two lines that go vertical across all open graphs. The red line is positioned at the current frame and the blue line is the closest frame to the current mouse position. The parameters values at those points are shown at the bottom right of the graph.</p>
+
+<p>Navigating a graph can be done by holding down the mouse wheel (middle mouse button) and dragging the mouse around a graph. Rolling the wheel zooms, or by using the buttons on the toolbar at the top of the window. In order to stay in line, all the graphs will zoom and pan together.</p>
 
 <p><a href="#TOC">Top</a><p>
 
@@ -123,6 +135,8 @@ The camera can have extra parameters added to it, including Stereoscopic cameras
 <a name="rendering"><h2>Rendering</h2></a>
 
 <p>Rendering is the process of creating a final film. In the animation menu, there are three options: <em>Render</em>, <em>Quick Render (detailed)</em> and <em>Quick Render (preview)</em>. The Quick Render functions ask for a filename and then render an image set from the current frame to the end of the range. If they already have a destination filename then the quick render will just overwrite existing files. The render button opens a dialog which asks for Dimensions, Level of Detail, Frame Range and destination.</p>
+
+<a href="images/RenderDialog.png"><img src="images/RenderDialog.png" align="left"></a>
 
 <p>The dimensions of the image to render are in pixels, and also correspond to the size of the animator viewport. If set to 640 by 480, then the viewport will shrink to that size when the render button is pressed. By default, the aspect ratio is locked, so that when either the width or height is changed, the other will change as well. The scale changes the output size. The render size is displayed next to the scale box.</p>
 
