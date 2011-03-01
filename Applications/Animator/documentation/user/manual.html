@@ -15,6 +15,7 @@
 <ol>
 <li><A href="#addingLayers">Adding Layers</a></li>
 <li><a href="#WMSB">WMS Browser</a></li>
+<li><a href="#elevation">Elevation Models</a></li>
 </ol>
 <li><A href="#animation">Animation</a></li>
 <ol>
@@ -72,7 +73,7 @@
 <img src="images/ObjectIcons.png" align="center">
 
 <p>
-There are several types of object in the animator. Animatable objects (such as the camera), Elevation objects, data Layers and animatable properties. The object's icon shows what the object is. If the icon is made up of three balls, the one in front being blue and the others being faded, then it is an animatable object. If that icon has a red <font class="em">L</font> in the foreground, then it an animatable layer. If the letter is an <font class="em">E</font>, then it is an elevation layer. If the icon has a single blue ball with the number <font class="code">001</font> underneath it, then it is an animatable property.</p>
+There are several types of object in the animator. Animatable objects (such as the camera), Elevation objects and models, data Layers and animatable properties. The object's icon shows what the object is. If the icon is made up of three balls, the one in front being blue and the others being faded, then it is an animatable object. If that icon has a red <font class="em">L</font> in the foreground, then it an animatable layer. If the letter is an <font class="em">E</font>, then it is an elevation layer. If the icon has a single blue ball with the number <font class="code">001</font> underneath it, then it is an animatable property. If the Icon is a light gray circle with a jagged line, then it is an elevation model.</p>
 
 <p>Expanding an object displays any properties the object has in the list. This can be useful for enabling/disabling different properties in an object, such as the camera's clipping properties.</p>
 
@@ -99,6 +100,18 @@ There are several types of object in the animator. Animatable objects (such as t
 <a href="images/SearchWMS.png"><img src="images/SearchWMS.png" height="348" width="465"></a>
 
 <p>The layers provided by a server can not be imported directly into an animation. First, they must be saved as layers. Selecting a layer will activate the save button on the list panel. Once the layer has been saved as an XML file, it can be added into the the scene as described in the previous sections.</p>
+
+<a name="elevation"<h3>Elevation Models</h3>
+
+<A href="images/ElevationExaggeration.png"<img src="images/ElevationExaggeration.png" width="465" height="246"></a>
+
+<p>The World Wind Animator also supports Digital Elevation Models (DEM). These are used to deform the the terrain model, causing mountain ranges to appear according to the data. In the Animation Browser, these can be seen as children of the <em>Elevation</em> object. By default, there is only one DEM applied to the scene's elevation: <em>Earth</em>, a DEM provided by NASA that covers all the terrain on the planet.</p>
+
+<p>The DEM files that are recognised by the animator are part of the XML layer file specification. In the animation menu there is an <em>Add elevation model...</em> option. Once a file has been given to the animator, the model will be listed in the Animation Browser and the terrain will be updated.</p>
+
+<p>In order to exaggerate the elevation, an exaggeration properties may be added to the elevation object. They can be added with the <em>Animation &rarr; Add elevation exaggerator...</em> A new dialog will pop up and ask for a Boundary and an Exaggeration; A Boundary is the height at which the Exaggeration property will be applied, and the exaggeration is the amount of exaggeration to apply, where 1.0 is normal, 0.0 is flat and 2.0 is double.</p>
+
+<p>The Exaggerator property will be applied to all the DEMs and multiple Exaggerators can be used. If an exaggerator states that from 100.00m, the terrain will be exaggerated by 2.0, all the terrain points that are above 100.00m above sea level will have their position doubled. If there is then another exaggerator that states that from 200.00m, all the terrain will be exaggerated by 1.0, all terrain points above 200.00m will be set back to their regular scale. This allows exaggeration ranges to be set.</p>
 
 <p><a href="#TOC">Top</a><p>
 
