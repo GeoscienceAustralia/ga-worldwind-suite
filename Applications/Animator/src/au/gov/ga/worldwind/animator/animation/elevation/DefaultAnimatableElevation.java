@@ -143,7 +143,7 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 		containerModel.addElevationModel(loadedModel);
 		elevationModelIdentification.put(modelIdentifier, loadedModel);
 
-		fireChangeEvent(loadedModel);
+		fireAddEvent(loadedModel);
 	}
 	
 	@Override
