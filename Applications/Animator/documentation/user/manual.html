@@ -11,9 +11,9 @@
 <ol>
 <li><a href="#intro">Introduction</a></li>
 <li><A href="#UI">Interface</a></li>
-<li><A href="#layers">Layers and Objects</a></li>
+<li><A href="#layers">Objects and Layers</a></li>
 <ol>
-<li><A href="#addingDatasets">Adding Layers</a></li>
+<li><A href="#addingLayers">Adding Layers</a></li>
 <li><a href="#WMSB">WMS Browser</a></li>
 </ol>
 <li><A href="#animation">Animation</a></li>
@@ -35,7 +35,7 @@
 <!-- ### Introduction ### -->
 <a name="intro"><h2>Introduction</h2></a>
 
-<p>The World Wind Animator was written so that <a href="http://www.ga.gov.au/">Geoscience Australia</a> could create fly-through footage showing geological information for use as a visual communication tool. The animator was developed using <a href="http://worldwind.arc.nasa.gov/java/">NASA's World Wind Java SDK</a>, as an adition to the 3D Data Viewer developed by GA to display Australia's continental data sets.</p>
+<p>The World Wind Animator was written so that <a href="http://www.ga.gov.au/">Geoscience Australia</a> could create fly-through footage showing geological information for use as a visual communication tool. The animator was developed using <a href="http://worldwind.arc.nasa.gov/java/">NASA's World Wind Java SDK</a>, as an addition to the 3D Data Viewer developed by GA to display Australia's continental data sets.</p>
 
 <p>The Data sets used by the Animator are rather large; Each can take up several Terabytes of space. As such the default data sets are stored on remote servers, located at Geoscience and NASA. The World Wind Animator only accesses the data as it needs to, pulling the required data down over the network and caching it as the camera brings it into view.</p>
 
@@ -46,7 +46,7 @@
 <!-- ### Interface ### -->
 <a name="UI"><h2>Interface</h2></a>
 
-<p>Visually, The dominate feature of the Animator is the viewport. On opening it should display a view of the earth from space. The viewport shows the camera's current view. To the left of the viewport is a panel containing three rollouts. The Animation Browser, Properties and Layer Palette. These are used to interact with layers and datasets. Below the viewport is the time slider; A drag bar marking a position on a number line. This is used to mark the time a property changes, while animating.</p>
+<p>Visually, The dominate feature of the Animator is the viewport. On opening it should display a view of the earth from space. The viewport shows the camera's current view. To the left of the viewport is a panel containing three rollouts. The Animation Browser, a list of all objects in the animation; Properties, a rollout that displays all of the selected objects properties; and Layer Palette, a list of all of the standard layers that can be added into the scene. These are used to interact with layers. Below the viewport is the time slider; A drag bar marking a position on a number line. This is used to mark the time a property changes, while animating.</p>
 
 <a href="images/AnimatorFirstOpen.png"><img src="images/AnimatorFirstOpen.png" width="465.85" height="246.05"></a>
 
@@ -59,7 +59,7 @@
 <p><a href="#TOC">Top</a><p>
 
 <!-- ### Layers and Objects ### -->
-<a name="layers"><h2>Layers and Objects</h2></a>
+<a name="layers"><h2>Objects and Layers</h2></a>
 
 <a href="images/AnimationPanel.png"><img src="images/AnimationPanel.png" align="left" height="535.5" width="259.25"></a>
 
@@ -72,7 +72,7 @@
 <img src="images/ObjectIcons.png" align="center">
 
 <p>
-There are several types of object in the animator. Animatable objects (such as the camera), Eleveation objects, data Layers and animatable properties. The object's icon shows what the object is. If the icon is made up of three balls, the one in front being blue and the others being faded, then it is an animatable object. If that icon has a red <font class="em">L</font> in the foreground, then it an animatable layer. If the letter is an <font class="em">E</font>, then it is an elevation layer. If the icon has a single blue ball with the number <font class="code">001</font> underneath it, then it is an animatable property.</p>
+There are several types of object in the animator. Animatable objects (such as the camera), Elevation objects, data Layers and animatable properties. The object's icon shows what the object is. If the icon is made up of three balls, the one in front being blue and the others being faded, then it is an animatable object. If that icon has a red <font class="em">L</font> in the foreground, then it an animatable layer. If the letter is an <font class="em">E</font>, then it is an elevation layer. If the icon has a single blue ball with the number <font class="code">001</font> underneath it, then it is an animatable property.</p>
 
 <p>Expanding an object displays any properties the object has in the list. This can be useful for enabling/disabling different properties in an object, such as the camera's clipping properties.</p>
 
@@ -82,11 +82,11 @@ There are several types of object in the animator. Animatable objects (such as t
 
 <p>Layers can have multiple properties. At the time of writing the camera has eight different properties. When an object is selected in the animation browser, any properties it has are displayed in the properties rollout. If the object is itself a property, then it is displayed in the properties rollout. Changes to the properties values can be animated.</p>
 
-<a name="addingDatasets"><h3>Adding Layers</h3></a>
+<a name="addingLayers"><h3>Adding Layers</h3></a>
+
+<p>Layers are specified in XML files. They contain information about the layer's type, where to get any data and how to interpret any data referenced. New layers can either be added to the scene by dragging a layer file into the Animation Browser, or through the Layer Palette.</p>
 
 <p>The layer palette, bellow the Properties rollout, contains a list of known layers that can be added to the animation. The layers currently in the scene are marked with a yellow flag. In order to add a layer to the animation, there is a green plus button to the right of the rollouts toolbar, directly above the scrollbar on the right. The red <font class="em">x</font> in the layer palette toolbar removes layers from the pallet, not from the scene. The box with the arrow pointing into it is the add layer button, from an XML file.</p>
-
-<p>Layers are specified in XML files. They contain information about the layer's type, where to get any data and how to interpret any data referenced. Because datasets can be rather large, and one is unlikely to work with the whole dataset, they are often stored on a remote server, and are retrieved in segments when needed. An XML layer file may also be dragged directly into the animation browser list, to be added to the animation.</p>
 
 <a name="WMSB"><h3>WMS Browser</h3></a>
 
@@ -98,7 +98,7 @@ There are several types of object in the animator. Animatable objects (such as t
 
 <a href="images/SearchWMS.png"><img src="images/SearchWMS.png" height="348" width="465"></a>
 
-<p>The datasets provided by a server can not be imported directly into an animation. First, they must be saved as layers. Selecting a layer will activate the save button on the list panel. Once the layer has been saved as an XML file, it can be added into the the scene as described in the previous sections.</p>
+<p>The layers provided by a server can not be imported directly into an animation. First, they must be saved as layers. Selecting a layer will activate the save button on the list panel. Once the layer has been saved as an XML file, it can be added into the the scene as described in the previous sections.</p>
 
 <p><a href="#TOC">Top</a><p>
 
