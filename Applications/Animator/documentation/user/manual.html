@@ -13,7 +13,7 @@
 <li><A href="#UI">Interface</a></li>
 <li><A href="#layers">Layers and Objects</a></li>
 <ol>
-<li><A href="#addingDatasets">Adding Datasets</a></li>
+<li><A href="#addingDatasets">Adding Layers</a></li>
 <li><a href="#WMSB">WMS Browser</a></li>
 </ol>
 <li><A href="#animation">Animation</a></li>
@@ -35,10 +35,11 @@
 <!-- ### Introduction ### -->
 <a name="intro"><h2>Introduction</h2></a>
 
-<p>The World Wind Animator was written so that Geoscience Australia could create fly-through footage showing geological information for use as a visual communication tool. The animator was originally developed using NASA's World Wind Java SDK, allowing it to be used on a wider range of platforms.
-The animator works by setting keyframes for the parameters of the  different layers.</p>
+<p>The World Wind Animator was written so that <a href="http://www.ga.gov.au/">Geoscience Australia</a> could create fly-through footage showing geological information for use as a visual communication tool. The animator was developed using <a href="http://worldwind.arc.nasa.gov/java/">NASA's World Wind Java SDK</a>, as an adition to the 3D Data Viewer developed by GA to display Australia's continental data sets.</p>
 
-<p>Data sets are rather large; Each can take up several Terabytes of space. As such the default data sets are stored on servers, located at Geoscience and NASA, and the World Wind Animator only access the data as it needs to, pulling the required data down over the network as the camera brings it into view.</p>
+<p>The Data sets used by the Animator are rather large; Each can take up several Terabytes of space. As such the default data sets are stored on remote servers, located at Geoscience and NASA. The World Wind Animator only accesses the data as it needs to, pulling the required data down over the network and caching it as the camera brings it into view.</p>
+
+<p>Objects within a scene have parameters that can be animated, using the concept of a keyframe to change the parameters values over time. Parameters differ from object to object, but examples include a camera's positional parameters and a layers opacity.</p>
 
 <p><a href="#TOC">Top</a><p>
 
@@ -49,11 +50,11 @@ The animator works by setting keyframes for the parameters of the  different lay
 
 <a href="images/AnimatorFirstOpen.png"><img src="images/AnimatorFirstOpen.png" width="465.85" height="246.05"></a>
 
-<p>The viewport has crosshairs in the center. These mark the target location on the ground, where the camera is looking. In order to move that location, drag the mouse around the viewport while holding the left mouse button down. This can also be achieved with the arrow buttons on the keyboard. This is called Panning the camera. It is important to note that the camera does not pan relative to it's own position, as one might expect. It instead pans the position relevant to the ground, effectively keeping the camera target on the ground.</p>
+<p>The viewport has crosshairs in the centre. These mark the target location on the ground, where the camera is looking. In order to move that location, drag the mouse around the viewport while holding the left mouse button down. This can also be achieved with the arrow buttons on the keyboard. This is called Panning the camera. It is important to note that the camera does not pan relative to it's own position, as one might expect. It instead pans the position relevant to the ground, effectively keeping the camera target on the ground.</p>
 
 <p>Zooming can be achieved in two ways. First, the mouse wheel can be spun, moving the camera toward or away from the earth in increments. This is not a smooth process; the camera jumps up and down as the wheel moves. In order to zoom smoothly the mouse wheel can be used as a middle mouse button. Holding it down while moving the mouse up and down will zoom the camera smoothly, forward and backward.</p>
 
-<p>To change the angle of the camera, hold the right mouse button down and drag the mouse around the viewport. Doing this will rotate the camera around the target, marked by the crosshairs in middle of the viewport.</p>
+<p>To change the angle of the camera, hold the right mouse button down and drag the mouse around the viewport. Doing this will rotate the camera around the target, which is marked by the crosshairs in middle of the viewport.</p>
 
 <p><a href="#TOC">Top</a><p>
 
@@ -62,25 +63,28 @@ The animator works by setting keyframes for the parameters of the  different lay
 
 <a href="images/AnimationPanel.png"><img src="images/AnimationPanel.png" align="left" height="535.5" width="259.25"></a>
 
-<p>The earth, in the World Wind Animator, is made up of different data sets. The top rollout in the side panel, labeled <em>Animation Browser</em>, contains a list of the different objects within the scene that make up the animation. Each list item, displayed under the World Wind Animator, has three buttons, an icon and a name: An expand button, like the one in windows explorer, which either expands or collapses properties belonging to the object in the list item; A checkbox, marking whether or not the object is currently active; A coloured letter <font class="em">a</font> in a circle, marking whether or not the item is armed; the icon marking what kind of object the list item is; and the name.</p>
+<p>In the World Wind Animator the earth is made up of different data sets. The top rollout in the side panel, labelled <em>Animation Browser</em>, contains a list of the different objects within the scene that make up the animation.</p>
+
+<p>Each list item, listed under the World Wind Animator, has two or three buttons, an icon and a name: An expand button, like the one in windows explorer, which either expands or collapses properties belonging to the object in the list item; A checkbox, marking whether or not the object is currently active; A coloured letter <font class="em">a</font> in a circle, marking whether or not the item is armed; An icon that indicates what kind of object the list item is; and the name.</p>
 
 <p>When an object is armed, new keyframes can be created for the object. This is discussed further in the animation chapter.</p>
 
 <img src="images/ObjectIcons.png" align="center">
 
-<p>The object's icon shows what the object is. If the icon is made up of three balls, the one in front being blue and the others being faded, then it is an animatable object. If that icon has a red <font class="em">L</font> in the foreground, then it an animatable layer. If the letter is an <font class="em">E</font>, then it is an elevation layer. If the icon has a single blue ball with the number <font class="code">001</font> underneath it, then it is an animatable property.</p>
+<p>
+There are several types of object in the animator. Animatable objects (such as the camera), Eleveation objects, data Layers and animatable properties. The object's icon shows what the object is. If the icon is made up of three balls, the one in front being blue and the others being faded, then it is an animatable object. If that icon has a red <font class="em">L</font> in the foreground, then it an animatable layer. If the letter is an <font class="em">E</font>, then it is an elevation layer. If the icon has a single blue ball with the number <font class="code">001</font> underneath it, then it is an animatable property.</p>
 
 <p>Expanding an object displays any properties the object has in the list. This can be useful for enabling/disabling different properties in an object, such as the camera's clipping properties.</p>
 
 <p>The animation browser has it's own toolbar, at the top of the rollout. It allows the removal of an object from the list; Repositioning of an object in the list; The mass enabling/disabling and arming/disarming of objects.</p>
 
-<p>The order the layers affects how they are displayed. If the layer <em>Landsat</em> is below the layer <em>Blue Marble</em> in the list, and it's opacity is set to .5, then the world image is blended 50/50 between the Blue Marble Layer and the Landsat layer. If however, The Blue Marble layer is below the Landsat layer, then there will be no visible difference, as each item on the list is overlaid onto the previous layer.</p>
+<p>The order the layers affects how they are displayed. If the layer <em>Landsat</em> is below the layer <em>Blue Marble</em> in the list, and it's opacity is set to .5, then the world image is blended 50/50 between the Blue Marble Layer and the Landsat layer. If however, The Blue Marble layer is below the Landsat layer, then there will be no visible difference, as each item on the list is overlaid onto the previous layer. Note that the Landsat layer is not visible from space.</p>
 
 <p>Layers can have multiple properties. At the time of writing the camera has eight different properties. When an object is selected in the animation browser, any properties it has are displayed in the properties rollout. If the object is itself a property, then it is displayed in the properties rollout. Changes to the properties values can be animated.</p>
 
-<a name="addingDatasets"><h3>Adding Datasets</h3></a>
+<a name="addingDatasets"><h3>Adding Layers</h3></a>
 
-<p>The layer palette, bellow the Properties rollout, contains a list of known layers that can be added to the animation. The layers currently in the scene are marked with a yellow flag. In order to add a layer to the animation, there is a green plus button to the right of the rollouts toolbar, directly above the scroller. The red <font class="em">x</font> in the layer palette toolbar removes layers from the pallet, not from the scene. The box with the arrow pointing into it is the add layer button, from an XML file.</p>
+<p>The layer palette, bellow the Properties rollout, contains a list of known layers that can be added to the animation. The layers currently in the scene are marked with a yellow flag. In order to add a layer to the animation, there is a green plus button to the right of the rollouts toolbar, directly above the scrollbar on the right. The red <font class="em">x</font> in the layer palette toolbar removes layers from the pallet, not from the scene. The box with the arrow pointing into it is the add layer button, from an XML file.</p>
 
 <p>Layers are specified in XML files. They contain information about the layer's type, where to get any data and how to interpret any data referenced. Because datasets can be rather large, and one is unlikely to work with the whole dataset, they are often stored on a remote server, and are retrieved in segments when needed. An XML layer file may also be dragged directly into the animation browser list, to be added to the animation.</p>
 
@@ -121,13 +125,13 @@ The animator works by setting keyframes for the parameters of the  different lay
 
 <p>When a keyframe has been added to the camera, the camera's position becomes visible in the viewport. Immediately after a keyframe has been inserted, a pink dot will appear in the center of the crosshairs. If the viewport is moved away from the camera's position, two dots, a blue and a pink one, should be visible. They will be joined by a dotted line. The blue dot represents the camera's eye, while the pink dot represents the target.</p>
 
-<p>When the camera has multiple keyframes, they will all be visible within the viewport, joined together by lines showing the their trajectories. The lines colour will vary between blue, where the movement is slow, and red, where the movement is quick.</p>
+<p>When the camera has multiple keyframes, they will all be visible within the viewport, joined together by lines showing their trajectories. The lines colour will vary between blue, where the movement is slow, and red, where the movement is quick.</p>
 
-<p>To edit keyframes, the position of the camera can be changed by either moving the camera and pressing the insert button, or by grabbing and moving the visual representation. You can grab both the camera and the target using the left mouse button and change their latitude and longitude, or with the right mouse button and change their zoom.</p>
+<p>To edit keyframes, the position of the camera can be changed by either moving the camera and pressing the insert button, or by grabbing and moving the visual representation. You can grab both the camera and the target using the left mouse button and change their latitude and longitude, or with the right mouse button and change their height (the zoom parameter).</p>
 
 <h4>Camera Clipping</h4>
 
-The camera can have extra parameters added to it, including Stereoscopic cameras and clipping. These can be found in the animation menu. To turn on clipping select the <em>Animate camera clipping</em> option. Two new animatable parameters will be added to the camera, can can be animated as normal parameters.
+The camera can have extra parameters added to it, including Stereoscopic cameras and clipping. These can be found in the animation menu. To turn on clipping select the <em>Animate camera clipping</em> option. Two new animatable parameters will be added to the camera, and can be animated like the other parameters.
 
 
 <a name="parameterEditor"><h3>The Parameter Editor</h3></a>
@@ -136,7 +140,7 @@ The camera can have extra parameters added to it, including Stereoscopic cameras
 
 <p>The parameter editor, found in the Window menu or by clicking <em>Ctrl+P</em>, shows the changes made to parameters between different keyframes as a graph. On the left is a list of all the parameters in the scene that can be displayed. The gray area to the right displays a graph, once a parameter is selected.</p>
 
-<p>The line represents the value of the parameter, and each point along it is a keyframe. Each keyframe that has one or two lines coming off it, each with its own handle. These lines are bezier handles. Moving them affects the curve of the line between the keys. By default each bezier handle controls both the input and the output direction of the key. This can be changed by right clicking on the key and choosing <em>bezier (unlocked)</em>. There is also a linear option, which takes the input and sends the output directly toward the previous/next key.</p>
+<p>The line represents the value of the parameter, and each point along it is a keyframe. Each keyframe has one or two lines coming off it, each with its own handle. These lines are bezier handles. Moving them affects the curve of the line between the keys. By default each bezier handle controls both the input and the output direction of the key. This can be changed by right clicking on the key and choosing <em>bezier (unlocked)</em>. There is also a linear option, which takes the input and sends the output directly toward the previous/next key.</p>
 
 <p>There are two lines that go vertical across all open graphs. The red line is positioned at the current frame and the blue line is the closest frame to the current mouse position. The parameters values at those points are shown at the bottom right of the graph.</p>
 
@@ -153,13 +157,13 @@ The camera can have extra parameters added to it, including Stereoscopic cameras
 
 <p>The dimensions of the image to render are in pixels, and also correspond to the size of the animator viewport. If set to 640 by 480, then the viewport will shrink to that size when the render button is pressed. By default, the aspect ratio is locked, so that when either the width or height is changed, the other will change as well. The scale changes the output size. The render size is displayed next to the scale box.</p>
 
-<p>The level of detail (LOD) determines at what distance which LOD will be displayed. The terrain is generated by applying a hightmap to a mesh. There are several hightmaps, some more detailed that others. The camera distance is used to determine which is used, as well as the density of the mesh.</p>
+<p>The level of detail (LOD) setting determines at what distance which LOD will be displayed. The terrain is generated by applying a hightmap to a mesh. There are several hightmaps, some more detailed that others. The camera distance is used to determine which is used, as well as the density of the mesh.</p>
 
 <p>The World Wind Animator currently only renders out image sets. The output field in the destination panel points to the common prefix of each image. If the output reads <font class="code">c:\temp\camera\frame_</font> and you are rendering a hundred frames, then each frame will be rendered in <font class="code">c:\temp\camera\</font> as <font class="code">frame_001.tga</font>, <font class="code">frame_002.tga...</font> Any non-existing directories listed in the output will be created. If a full path is not specified, it will attempt to save the files in the directory that the animator is run from.</p>
 
 <a name="stero"><h3>Rendering in Stereo</h3></a>
 
-<p>The illusion of a 3D image is commonly created in film with stereoscopic footage: Two separate images or film channels that are slightly off sync, in order to simulate a human eye. The World Wind Animator allows rendering of stereoscopic footage, rendering from two extra cameras on either side of the one used for the viewport. To use the stereoscopic cameras, select the <em>Use stereo camera</em> option from the animation menu. This will add two new parameters to the camera: <em>Focal Length</em> and <em>Eye Separation</em>.</p>
+<p>The illusion of a 3D image is commonly created in film with stereoscopic footage: Two separate images or film channels that are created from two slightly different eye positions, in order to the separation between the human eyes in binocular vision. The World Wind Animator allows rendering of stereoscopic footage, rendering from two extra cameras on either side of the one used for the viewport. To use the stereoscopic cameras, select the <em>Use stereo camera</em> option from the animation menu. This will add two new parameters to the camera: <em>Focal Length</em> and <em>Eye Separation</em>.</p>
 
 <p>The Focal Length is the point in front of the camera that the two camera's lines of sight converge, and then Eye Separation is the distance between the two eyes. These two parameters can be edited as per other parameters, but there is also a <em>Dynamic Stereo parameters</em> option in the Animation menu, which is checked by default. It attempts to animate the parameters dynamically according to the position of terrain in order to keep the focus sane.</p>
 
