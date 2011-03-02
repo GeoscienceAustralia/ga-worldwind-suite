@@ -122,13 +122,17 @@ There are several types of object in the animator. Animatable objects (such as t
 
 <a name="keyframes"><h3>Keyframes</h3></a>
 
-<p>The World Wind Animator supports keyframes; Specific frames which determine the overall animation. By default the timeslider only has one hundred frames. The number can be changed with the set frame count dialog, found in the frame menu.</p>
+<p>The World Wind Animator supports keyframes; Specific frames which determine the overall animation. By default the timeslider only has one hundred frames. The number can be changed with the <em>Set frame count...</em> dialog, found in the Frame menu.</p>
 
-<p>The insert button on the keyboard, or the <em>Frame &rarr; Add key</em> menu item, inserts a new keyframe for all armed objects. If an object is armed, any keyframe that can be applied to it will be. Unarmed objects do not recieve keyframes.</p>
+<p>The <em>insert</em> button on the keyboard, or the <em>Frame &rarr; Add key</em> menu item, inserts a new keyframe for all armed objects. If an object is armed, the arm button will be green, any keyframe that can be applied to it will be. Unarmed objects, that have a red arm button, do not recieve keyframes. There is also an <em>Auto key</em> option in the Frame menu. While this is active, all changes made will to any armed parameters will automatically be keyed to the current frame.</p>
 
 <p>Most of the animation within the animator will revolve around layer parameters. Most layers have an opacity layer, which is a value between 0 and 1 that represents how transparant or visible the layer is. In order to add a keyframe modifing a parameter, change the parameter and then add the new keyframe. The view may not update with the changes to the parameter until the the keyframe has been added.</p>
 
-<p>Each keyframe will visibly appear on the timeslider, marking which frames are keyed. These frames can be dragged along the slider.</p>
+<p>Each keyframe will visibly appear on the timeslider as a red rectangle, marking which frames are keyed. These frames can be dragged along the time line, underneath the timeslider. Frames can also be copied. When the time slider is on a frame, the frame is highlighted blue. If the slider is on a keyframe, then the frame is highlighted green. While the timeslider is on a keyframe, it can be copied with the <em>Frame &rarr; Copy</em> menu option or the by pressing <em>Ctrl+C</em>. The <em>Frame &rarr; Copy</em> option or the <em>Ctrl+V</em> keyboard shortcut will then paste the copied frame to the current frame.</p>
+
+<p>The number of frames an animation takes up can be changed. The <em>Scale animation...</em> option opens a dialog box that requests a scale factor. The default number, 1.0, is equivalent to 100%. If a larger number is given the animation is stretched out over a larger number of frames. If the number is smaller, then the animation is shrunk. 0.5 is equivalent to half, or 50%, and 2.0 is double, or 200% of the current number of frames. This does not change the number of frames in the animation, however.</p>
+
+<p>Animation can be played back by pressing the spacebar or using the <em>Preview</em> option in the animation menu will play back the animation in the viewport, from the current position to the end. There are also <em>preview x2</em> and <em>preview x10</em> option. In addition to moving the timeslider to different frames, there are also <em>Previous</em>, <em>Next</em>, <em>First</em> and <em>Last</em> options, in the frame menu. First and Last are mapped to Period (.), Comma (,). Using shift as well gives First and Last keybindings. The Ctrl key causes them to jump by ten frames.</p>
 
 <a name="camera"><h3>The Camera</h3></a>
 
