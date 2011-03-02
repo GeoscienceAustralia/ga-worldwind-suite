@@ -2,6 +2,8 @@
 
 <project name="Tiler" basedir="." default="run">
 
+	<property name="deploy_location" value="\\NAS\Corp\gav\GEOVIS\VIS\Projects\World Wind Suite\Tiler\Builds\Current"/>
+	
 	<property name="src.dir" value="${basedir}/src" />
 	<property name="lib.dir" value="${basedir}/lib" />
 	<property name="gdal.dir" value="${basedir}/gdal" />
@@ -9,8 +11,12 @@
 
 	<property name="build.dir" value="${basedir}/build" />
 	<property name="executable.dir" value="${basedir}/executable" />
-	<property name="executable.jar" value="tiler.jar" />
-	<property name="ribbon.jar" value="ribbonTiler.jar" />
+	
+	<property name="tiler.version" value="1.0"/>
+	<property name="executable.jar" value="tiler-${tiler.version}.jar" />
+	
+	<property name="ribbon.version" value="1.0-SNAPSHOT"/>
+	<property name="ribbon.jar" value="ribbonTiler-${ribbon.version}.jar" />
 
 	<property name="javac.debug" value="false" />
 
@@ -63,7 +69,6 @@
 			</zipfileset>
 			<manifest>
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.tiler.application.Executable" />
-
 			</manifest>
 		</jar>
 		<delete file="${executable.dir}/temp.zip" />
@@ -77,10 +82,14 @@
 				<include name="**/*" />
 			</fileset>
 		</copy>
+		<echo file="${executable.dir}/gui.bat">@echo off
+java -jar ./${executable.jar}
+		</echo>
+		<echo file="${executable.dir}/console.bat">@echo off
+java -cp ${executable.jar} au.gov.ga.worldwind.tiler.application.Console %*
+		</echo>
 		<copy todir="${executable.dir}">
 			<fileset dir="${basedir}">
-				<include name="gui.bat" />
-				<include name="console.bat" />
 				<include name="7za.exe" />
 			</fileset>
 		</copy>
@@ -119,12 +128,16 @@
 		</copy>
 		<copy todir="${executable.dir}">
 			<fileset dir="${basedir}">
-				<include name="gui.bat" />
-				<include name="console.bat" />
 				<include name="7za.exe" />
 			</fileset>
 		</copy>
 	</target>
 	
 	<target name="run" depends="executable" />
+	
+	<target name="deploy" depends="clean,executable">
+		<copy todir="${deploy_location}" overwrite="true" failonerror="false">
+			<fileset dir="${executable.dir}"/>
+		</copy>
+	</target>
 </project>
