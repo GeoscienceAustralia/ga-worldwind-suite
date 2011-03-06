@@ -14,6 +14,7 @@
 <ol>
 <li><a href="#camera">Controlling the Camera</A></li>
 <li><a href="#keyframes">Animating the Camera</a></li>
+<li><a href="#layeranim">Animating Layers</a></li>
 </ol>
 </ol>
 <!-- ### END TOC ### -->
@@ -30,9 +31,11 @@
 
 <p>In this tutorial we are going to create a short animation in which the camera will zoom into a place, all the way from orbit. Whilst creating this animation we will cover the camera controls; how to set keyframes and create animation; and how to animate an object's and layer's parameters.</p>
 
+<a href="#TOC">Top</a>
+
 <a name="camera"><h3>Controlling the Camera</h3></a>
 
-<a href="images/AnimatorFirstOpen.png"><img src="images/AnimatorFirstOpen.png" width="465.85" height="246.05"></a>
+<a href="images/AnimatorFirstOpen.png"><img src="images/AnimatorFirstOpen.png" width="465" height="246"></a>
 
 <p>When you first open the animator, the first thing you should see is the earth. By default, the camera will be pointing into the ocean west of Japan, east of the international date line. In the center of the screen there will be a crosshair. They show what the camera is currently pointing at.</p>
 
@@ -48,15 +51,23 @@
 
 <i>That sentence about deformation is horrible.</i>
 
+<a href="images/SnowyMountains.png"><img src="images/SnowyMountains.png" width="465" height="245"></a>
+
 <p>Practice using these tools and find a place that looks interesting.</p>
+
+<a href="#TOC">Top</a>
 
 <a name="keyframes"><h3>Animating the Camera</h3></a>
 
 <p>A segment of film footage is not actually made up of moving pictures. Instead it is made up of a number of still images that are displayed in quick succession, creating the illusion of a moving image. These still images are called frames. Usually there are between twenty-five to thirty frames in a second, so animating each step of the animation frame by frame would be a rather large job. In order to avoid this, animation applications commonly support keyframes; The animator can determine which two points main points within the animation on two specific frames, called keyframes.</p>
 
+<a href="images/timeSlider.png"><img src="images/timeSlider.png" width="560" height="31"></a>
+
 <p>Once you have found a place, look at the bottom of the the viewport. Underneath it there is a number line with a series of numbers, by default between 0 and 100. Each number represents one frame. On top of it is a slide bar marking the first frame, frame zero. The time slider always marks the current frame, allowing us to see the scene along the a timeline.</p>
 
 <p>The animator doesn't have a concept of time past frames; It doesn't know how many frames there are in a second. The number of frames in a second is generally set by the standards in your locale. The two main standards are NTSC and PAL, which run at 30 and 25 frames a second respectively. NTSC is used in America and Japan, while PAL is used practically everywhere else.</p>
+
+<a href="images/firstFrame.png"><img src="images/firstFrame.png" width="465" height="245"></a>
 
 <p>Keeping this in mind, Zoom out until you can see the entire country. Center the country, keeping track of where you want to zoom back into. With the time slider on frame 0, press the <em>Insert</em> on the keyboard. This creates a keyframe for all armed parameters and, by default, the camera is armed. The first visible change will be the pink dot in the center of the screen, under the target. That is the camera target. The second is that on the timeslider, on the current frame a little red square will have appeared, to mark that frame as a keyframe.</p>
 
@@ -64,13 +75,23 @@
 
 <p>Creating an animation is never as easy as that though. After watching the animation, you should have an idea of what could be improved. Perhaps it is too quick, or too slow, but what ever it is, it usually needs some refinement. With this kind of animation, the animator tends to generate too smooth a path between the two points, which is usually not particularly nice on the eyes. If your camera's target is in two different points, some of the footage towards the end of the animation is probably just footage of the ground flying underneath the camera, as if you were looking down from a low flying plane. This isn't particularly easy on the eye, and doesn't really work with a transitional shot. It is generally a better idea to keep the place you are zooming into in the shot at all times.</p>
 
+<a href="images/frameSeventyFive.png"><img src="images/frameSeventyFive.png" width="465" height="245"></a>
+
 <p>The easiest way to fix this is to go half way between the two points, which is frame fifty, and attempt to rectify the camera position. This can probably be done by just zooming out, though you may want to pan the camera into a slightly different position. When you are happy with the new position of the camera at the halfway point, press Insert to create a new keyframe. Go back to frame 0 and watch the animation. The first part of the animation probably seems slower, and to flow better.</p>
 
 <p>Keep refining the camera path until you are happy with it. Depending on the scale of your shot, you may want to lengthen the animation. If so, you can do so using the <em>Set frame count</em> option in the <em>Frame</em> menu. You can drag keyframes along the timeslider, or copy/cut and paste them from/to the selected frame, using the familiar <em>Ctrl+X/C/V</em> keyboard shortcuts.</p>
 
+<a href="#TOC">Top</a>
+
+<a name="layeranim"><h3>Animating Layers</h3></a>
+
+<a href="images/landsatJump.png"><img src="images/landsatJump.png" width="465" height="262"></a>
+
 <p>While watching your animation you have likely noticed that when the Landsat layer becomes visible, it snaps in and the transition is quite noticeable; In some places the terrain is a slightly different colour, relating to the different seasons and conditions to each set of imagery, and Landsat is noticeably more detailed than blue marble. In order to make this transition smoother and less noticeable, we will animate the opacity parameter of the Landsat layer.</p>
 
 <p>There are, by default, only two layers that provide information on the earth in an animation: Blue Marble and Landsat. These are shown in the <em>Animation Browser</em> on the left of the window. Having used another graphics application with layers, one may see the Animation Browser and think that a layer is overlaid onto any layers below it. It is, in fact, the other way around. A layer is overlaid onto any previous layers in the list, so it is overlaid on any layers that are above it. When looking at the Animation Browser, we can see that the Landsat layer is after the Blue Marble layer. This is because the Blue Marble layer is always visible, while the more detailed Landsat layer is only visible up close.</p>
+
+<a href="images/landsatOpacity01.png"><img src="images/landsatOpacity01.png" align="left"></a>
 
 <p>In order to blend the two layers, we can change the opacity parameter of the Landsat layer. Click on the Landsat layer in the Animation Browser and look at the Properties rollout, beneath it. There will be a single slider, labeled <em>Opacity</em>. This value is a number between 0 and 1. It can be thought of as a percentage, where 1 is 100%, 0.5 is 50% and 0 is 0%. What we will do is set the opacity to 0, so it is not visible, on the first frame that it would show up otherwise, and then set the opacity to 1 at around a second latter (25-30) frames.</p>
 
@@ -78,9 +99,15 @@
 
 <p>To find the first frame Landsat is visible on, slide the timeslider until it is visible and find the exact frame it appears on. Change the Opacity to 0, press enter and then press Insert. Move forward a second, and then change the opacity to 1, press enter and then insert. If you do not insert the keyframe, the parameter will revert to 0 the next time the frame is changes. This should cause Landsat to blend into Blue Marble, and then completely overlay it in a second. If you have lengthened your animation to slow it down, perhaps you want the transition to happen over a longer period of time.</p>
 
+<a href="images/landsatOpacity02.png"><img src="images/landsatOpacity02.png" width="465" height="246"></a>
+
+<p>If you disarm your camera prior to creating the keyframes, then the keys that appear on the timeline will be light blue in colour, instead of red.</p>
+
 <p>Once this is done, go back to the first frame and make sure you are happy with the changes. When you are, find the <em>Quick render (detailed)</em> option in the <em>Animation</em> menu. The quick render function renders an image sequence starting with the current frame. A dialog box will ask you to chose a file name, and then append the frame number to the filename as it renders each frame. It is possible that the animator will hang for a while as it makes sure all the necessary data for the render has been downloaded. When it has finished, you will be able to use the image sequence with your favorite compositing suite to create a video.</p>
 
 <i>I guess I should wrap this up somehow.</i>
+
+<a href="#TOC">Top</a>
 
 </body>
 </html>
