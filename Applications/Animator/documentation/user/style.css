@@ -34,3 +34,21 @@ table {
 td.def {
 	text-align: right;
 }
+
+.comment {
+	color: darkseagreen;
+	font-style: italic;
+	font-weight: bold;
+}
+
+.add {
+	color: red;
+	font-style: italic;
+	font-weight: bold;
+}
+
+.remove {
+	color: orange;
+	text-decoration: line-through;
+	font-weight: bold;
+}
