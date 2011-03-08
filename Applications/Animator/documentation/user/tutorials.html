@@ -22,14 +22,14 @@
 <!-- ### Introduction ### -->
 <a name="introduction"><h2>Introduction</h2></a>
 
-<p>Welcome to the World Wind Animator Tutorials. This document is a series of tutorials that have been written in order to help you, the user, get failure with using the animator.</p>
+<p>Welcome to the World Wind Animator Tutorials. This document is a series of tutorials that have been written in order to help you, the user, get familiar with using the animator.</p>
 
 <i>Talk about how much is knowledge assumed in the tutorials, and give a brief overview of the animator's use.</i>
 
 <!-- ### Earth to Place Zoom Animation ### -->
-<a name="earthtoplace"><h2>Earth to Place Zoom Animation</h2></a>
+<a name="earthtoplace"><h2>Space to Place Zoom Animation</h2></a>
 
-<p>In this tutorial we are going to create a short animation in which the camera will zoom into a place, all the way from orbit. Whilst creating this animation we will cover the camera controls; how to set keyframes and create animation; and how to animate an object's and layer's parameters.</p>
+<p>In this tutorial we are going to create a short animation in which the camera will zoom from orbit into a specific place on the globe, all the way from orbit. Whilst creating this animation we will cover the camera controls; how to set keyframes and create animation; and how to animate an object's and layer's parameters.</p>
 
 <a href="#TOC">Top</a>
 
@@ -37,19 +37,17 @@
 
 <a href="images/AnimatorFirstOpen.png"><img src="images/AnimatorFirstOpen.png" width="465" height="246"></a>
 
-<p>When you first open the animator, the first thing you should see is the earth. By default, the camera will be pointing into the ocean west of Japan, east of the international date line. In the center of the screen there will be a crosshair. They show what the camera is currently pointing at.</p>
+<p>When you first open the animator, the first thing you should see is the earth. By default, the camera will be pointing into the ocean west of Japan, east of the international date line. In the centre of the screen there will be a crosshair. They show what the camera is currently pointing at.</p>
 
-<p>Left click close to it and, holding the button down, move the mouse to the right. You will notice the globe spinning with the mouse. This is called panning the camera. What is actually happening is you are moving the camera target along the ground, rotating the camera around the earth. Moving the camera up and down will pan down and up. Pan the camera until you can see a familiar country.</p>
+<p>Left click close to the crosshair, somewhere on the earth, and, holding the button down, move the mouse to the right. You will notice the globe spinning with the mouse. This is called panning the camera. What is actually happening is you are moving the camera target along the ground, rotating the camera around the earth. Moving the camera up and down will pan down and up. Pan the camera until you can see a familiar country.</p>
 
-<p>When you have found a place that you know, rotate the mouse wheel. Spinning it up zooms the camera in by increments, and spinning it down zooms out. Notice that it jerks forward and backward. Try holding down the mouse wheel, using it as a button, and dragging the mouse up and down. Doing this zooms in smoothly. Using it with the pan tool, try to find somewhere you know; A city or town, perhaps, or something interesting like a tall mountain, or mountain range.</p>
+<p>When you have found a place that you know, rotate the mouse wheel. Spinning it up zooms the camera in by increments, and spinning it down zooms out. Notice that it steps forward and backward. Try holding down the mouse wheel, using it as a button, and dragging the mouse up and down. Doing this zooms in smoothly. Using it with the pan tool, try to find somewhere you know; A city or town, perhaps, or something interesting like a tall mountain, or mountain range.</p>
 
 <p>As you zoom into places you will notice that as you get closer, the land scape will get more detailed. Because both the image of the earth and the size of the data is so large it has been broken up into smaller tiles at different levels of detail. The animator downloads the tiles from the Internet as it needs them, so that it doesn't get unneeded and unused data.</p>
 
 <p>You will also notice that the image texturing the earth will change when you get close enough. By default, the animator uses two layers to texture the earth: <em>Blue Marble</em> and <em>Landsat</em>. Blue Marble is a layer NASA generated in order to present the earth as it would look to the human eye from space. Landsat is a layer of satellite images, which have more detail than the blue marble layer. As Landsat is more detailed than blue marble at close distances, by default it is rendered on top of the blue marble layer.</p>
 
-<p>When you have found somewhere interesting, such as a mountain range, push and hold the right mouse button while dragging the mouse down wards along the viewport; The camera will rotate around the target, changing the angle at which you are viewing the landscape. If you have found a mountain or other interesting features, you will be able to see those features deformed into the terrain; Mountains will protrude out of the ground as if you were actually flying over them.</p>
-
-<i>That sentence about deformation is horrible.</i>
+<p>When you have found somewhere interesting, such as a mountain range, click and hold the right mouse button while dragging the mouse downwards within the viewport; The camera will rotate around the target, changing the angle at which you are viewing the landscape. If you are looking at a feature that has some height or depth, you will be able to see that the surface of the globe is three dimensional; Mountains will protrude out of the ground as if you were actually flying over them.</p>
 
 <a href="images/SnowyMountains.png"><img src="images/SnowyMountains.png" width="465" height="245"></a>
 
@@ -59,11 +57,9 @@
 
 <a name="keyframes"><h3>Animating the Camera</h3></a>
 
-<p>A segment of film footage is not actually made up of moving pictures. Instead it is made up of a number of still images that are displayed in quick succession, creating the illusion of a moving image. These still images are called frames. Usually there are between twenty-five to thirty frames in a second, so animating each step of the animation frame by frame would be a rather large job. In order to avoid this, animation applications commonly support keyframes; The animator can determine which two points main points within the animation on two specific frames, called keyframes.</p>
+<p>Once you have found a place, look at the bottom of the the viewport. Underneath it there is a number line with a series of numbers, by default between 0 and 100. Each number represents one frame. On top of it is a slide bar marking the first frame, frame zero. The time slider always marks the current frame, allowing us to see the scene along the timeline.</p>
 
 <a href="images/timeSlider.png"><img src="images/timeSlider.png" width="560" height="31"></a>
-
-<p>Once you have found a place, look at the bottom of the the viewport. Underneath it there is a number line with a series of numbers, by default between 0 and 100. Each number represents one frame. On top of it is a slide bar marking the first frame, frame zero. The time slider always marks the current frame, allowing us to see the scene along the a timeline.</p>
 
 <p>The animator doesn't have a concept of time past frames; It doesn't know how many frames there are in a second. The number of frames in a second is generally set by the standards in your locale. The two main standards are NTSC and PAL, which run at 30 and 25 frames a second respectively. NTSC is used in America and Japan, while PAL is used practically everywhere else.</p>
 
@@ -103,7 +99,7 @@
 
 <p>Once this is done, go back to the first frame and make sure you are happy with the changes. When you are, find the <em>Quick render (detailed)</em> option in the <em>Animation</em> menu. The quick render function renders an image sequence starting with the current frame. A dialog box will ask you to chose a file name, and then append the frame number to the filename as it renders each frame. It is possible that the animator will hang for a while as it makes sure all the necessary data for the render has been downloaded. When it has finished, you will be able to use the image sequence with your favorite compositing suite to create a video.</p>
 
-<i>I guess I should wrap this up somehow.</i>
+<p>You should now have an understanding of the World Wind Animator and how to move and animate the camera, manipulate the appearance of the earth by animating layers. You should also have your first space to place animation as a image sequence, which you can now combine into a movie with a video editing program.</p>
 
 <a href="#TOC">Top</a>
 
