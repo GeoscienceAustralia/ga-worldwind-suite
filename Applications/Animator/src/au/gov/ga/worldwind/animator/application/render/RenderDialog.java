@@ -5,7 +5,6 @@ import static au.gov.ga.worldwind.animator.util.FileUtil.stripSequenceNumber;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.FileUtil.stripExtension;
 import static au.gov.ga.worldwind.common.util.Util.isBlank;
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermCancelKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.Component;
@@ -398,6 +397,8 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 			@Override
 			public void focusLost(FocusEvent e)
 			{
+				frameStartField.setValue(Math.min(Math.max(0, frameStartField.getValue()), getCurrentAnimation().getLastFrame()));
+				forceFrameEndAfterFrameStart();
 				updateOutputExampleLabel();
 			}
 		});
@@ -410,8 +411,11 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 			@Override
 			public void focusLost(FocusEvent e)
 			{
+				frameEndField.setValue(Math.max(Math.min(getCurrentAnimation().getLastFrame(), frameEndField.getValue()), 0));
+				forceFrameStartBeforeFrameEnd();
 				updateOutputExampleLabel();
 			}
+
 		});
 		
 		Component hGlue = Box.createHorizontalGlue();
@@ -436,6 +440,22 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		);
 
 		contentPane.add(frameRangePane);
+	}
+	
+	private void forceFrameEndAfterFrameStart()
+	{
+		if (frameEndField.getValue() < frameStartField.getValue())
+		{
+			frameEndField.setValue(frameStartField.getValue());
+		}
+	}
+	
+	private void forceFrameStartBeforeFrameEnd()
+	{
+		if (frameStartField.getValue() > frameEndField.getValue())
+		{
+			frameStartField.setValue(frameEndField.getValue());
+		}
 	}
 	
 	private void addDestinationPane()
