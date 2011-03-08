@@ -59,6 +59,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 
 	private BasicAction renderAction;
 	private BasicAction cancelAction;
+	private BasicAction resetAction;
 	
 	private JPanel presetsPane;
 	
@@ -83,6 +84,9 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 	private JTextField destinationField;
 
 	private int response = JOptionPane.CANCEL_OPTION;
+	
+	private static final int DIALOG_WIDTH = 300;
+	private static final int DIALOG_HEIGHT = 390;
 	
 	public RenderDialog(Frame owner)
 	{
@@ -111,7 +115,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		contentPane = new JPanel();
 		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
 		setContentPane(contentPane);
-		setMinimumSize(new Dimension(300, 370));
+		setMinimumSize(new Dimension(DIALOG_WIDTH, DIALOG_HEIGHT));
 		setResizable(false);
 	}
 	
@@ -133,6 +137,15 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 			public void actionPerformed(ActionEvent e)
 			{
 				hideDialog(JOptionPane.CANCEL_OPTION);
+			}
+		});
+		
+		resetAction = new BasicAction(getMessage(getRenderDialogResetLabelKey()), getMessage(getRenderDialogResetTooltipKey()), null);
+		resetAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				updateFieldsFromAnimation();
 			}
 		});
 	}
@@ -361,10 +374,26 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		JLabel frameStartLabel = new JLabel(getMessage(getRenderDialogFrameStartLabelKey()));
 		frameStartField = new JIntegerField(true, null);
 		frameStartField.setToolTipText(getMessage(getRenderDialogFrameStartTooltipKey()));
+		frameStartField.addFocusListener(new FocusAdapter()
+		{
+			@Override
+			public void focusLost(FocusEvent e)
+			{
+				updateOutputExampleLabel();
+			}
+		});
 		
 		JLabel frameEndLabel = new JLabel(getMessage(getRenderDialogFrameEndLabelKey()));
 		frameEndField = new JIntegerField(true, null);
 		frameEndField.setToolTipText(getMessage(getRenderDialogFrameEndTooltipKey()));
+		frameEndField.addFocusListener(new FocusAdapter()
+		{
+			@Override
+			public void focusLost(FocusEvent e)
+			{
+				updateOutputExampleLabel();
+			}
+		});
 		
 		Component hGlue = Box.createHorizontalGlue();
 		
@@ -407,7 +436,16 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 			{
 				if (!isBlank(destinationField.getText()))
 				{
-					fileChooser.setCurrentDirectory(new File(destinationField.getText()));
+					File currentDir = new File(destinationField.getText());
+					while (!currentDir.exists() && !currentDir.isDirectory())
+					{
+						if (currentDir.getParentFile() == null)
+						{
+							break;
+						}
+						currentDir = currentDir.getParentFile();
+					}
+					fileChooser.setCurrentDirectory(currentDir);
 				}
 				else
 				{
@@ -419,6 +457,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 					return;
 				}
 				destinationField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+				updateOutputExampleLabel();
 			}
 		});
 		
@@ -478,13 +517,14 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 	{
 		if (isBlank(destinationField.getText()))
 		{
-			outputExampleLabel.setText(getMessage(getRenderDialogOutputExampleLabelKey()));
+			outputExampleLabel.setText(getMessage(getRenderDialogOutputExampleLabelKey(), ""));
+			return;
 		}
 		File destinationFile = new File(destinationField.getText());
 		String name = stripSequenceNumber(stripExtension(destinationFile.getName()));
 		
-		int firstFrame = getCurrentAnimation().getFrameOfFirstKeyFrame();
-		int lastFrame = getCurrentAnimation().getFrameOfLastKeyFrame();
+		int firstFrame = Math.max(0, frameStartField.getValue());
+		int lastFrame = Math.min(frameEndField.getValue(), getCurrentAnimation().getFrameCount());
 		int filenameLength = String.valueOf(lastFrame).length();
 		
 		final String example = createSequenceFileName(name, firstFrame, filenameLength, "") + ",...," + createSequenceFileName(name, lastFrame, filenameLength, "");
@@ -504,6 +544,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		buttonPanel.add(new JButton(renderAction));
 		buttonPanel.add(new JButton(cancelAction));
+		buttonPanel.add(new JButton(resetAction));
 		buttonPanel.setAlignmentY(JPanel.BOTTOM_ALIGNMENT);
 		buttonPanel.setMaximumSize(new Dimension(400, 30));
 		contentPane.add(buttonPanel);
@@ -536,6 +577,8 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		if (visible)
 		{
 			updateFieldsFromAnimation();
+			updateOutputExampleLabel();
+			response = JOptionPane.CANCEL_OPTION;
 		}
 		super.setVisible(visible);
 	}
@@ -563,7 +606,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 					destinationField.setText(renderParameters.getRenderDestination().getAbsolutePath());
 				}
 				frameStartField.setValue(renderParameters.getStartFrame() == null ? 0 : renderParameters.getStartFrame());
-				frameEndField.setValue(renderParameters.getEndFrame() == null ? currentAnimation.getFrameCount() : renderParameters.getStartFrame());
+				frameEndField.setValue(renderParameters.getEndFrame() == null ? currentAnimation.getFrameCount() : renderParameters.getEndFrame());
 				updateRenderDimensions();
 			}
 		});
@@ -583,7 +626,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		renderParameters.setDetailLevel(detailField.getValue());
 		renderParameters.setRenderDestination(isBlank(destinationField.getText()) ? null : new File(destinationField.getText()));
 		renderParameters.setStartFrame(Math.max(frameStartField.getValue(), 0));
-		renderParameters.setEndFrame(Math.min(frameStartField.getValue(), currentAnimation.getFrameCount()));
+		renderParameters.setEndFrame(Math.min(frameEndField.getValue(), currentAnimation.getFrameCount()));
 	}
 
 	private void hideDialog(int response)

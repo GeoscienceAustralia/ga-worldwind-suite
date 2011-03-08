@@ -161,5 +161,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getRenderDialogFrameStartTooltipKey() { return "animator.gui.dialog.render.framestart.tooltip"; }
 	public static String getRenderDialogFrameEndLabelKey() { return "animator.gui.dialog.render.frameend.label"; }
 	public static String getRenderDialogFrameEndTooltipKey() { return "animator.gui.dialog.render.frameend.tooltip"; }
+	public static String getRenderDialogResetLabelKey() { return "animator.gui.dialog.render.reset.label"; }
+	public static String getRenderDialogResetTooltipKey() { return "animator.gui.dialog.render.reset.tooltip"; }
 	
 }
