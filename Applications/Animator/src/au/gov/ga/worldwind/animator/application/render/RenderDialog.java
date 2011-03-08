@@ -5,6 +5,7 @@ import static au.gov.ga.worldwind.animator.util.FileUtil.stripSequenceNumber;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.FileUtil.stripExtension;
 import static au.gov.ga.worldwind.common.util.Util.isBlank;
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermCancelKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.Component;
@@ -35,8 +36,10 @@ import javax.swing.JTextField;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.RenderParameters;
+import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.animator.application.ChangeOfAnimationListener;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
+import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.JDoubleField;
@@ -53,15 +56,19 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 {
 	private static final long serialVersionUID = 20110125L;
 
+	private Animator targetApplication;
+	
 	private Animation currentAnimation;
 	
 	private JPanel contentPane;
 
 	private BasicAction renderAction;
 	private BasicAction cancelAction;
+	private BasicAction applyAction;
 	private BasicAction resetAction;
 	
-	private JPanel presetsPane;
+	// TODO: Add presets
+	//private JPanel presetsPane;
 	
 	private JPanel dimensionsPane;
 	private double aspectRatio;
@@ -88,9 +95,11 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 	private static final int DIALOG_WIDTH = 300;
 	private static final int DIALOG_HEIGHT = 390;
 	
-	public RenderDialog(Frame owner)
+	public RenderDialog(Animator targetApplication, Frame owner)
 	{
 		super(owner, true);
+		
+		this.targetApplication = targetApplication;
 		
 		initialiseDialog();
 		initialiseActions();
@@ -137,6 +146,16 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 			public void actionPerformed(ActionEvent e)
 			{
 				hideDialog(JOptionPane.CANCEL_OPTION);
+			}
+		});
+		
+		applyAction = new BasicAction(getMessage(getRenderDialogApplyLabelKey()), getMessage(getRenderDialogApplyTooltipKey()), null);
+		applyAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				bindToAnimation();
+				targetApplication.resizeWindowToRenderDimensions();
 			}
 		});
 		
@@ -456,7 +475,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 				{
 					return;
 				}
-				destinationField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+				destinationField.setText(FileUtil.stripSequenceNumber(FileUtil.stripExtension(fileChooser.getSelectedFile().getAbsolutePath())));
 				updateOutputExampleLabel();
 			}
 		});
@@ -524,7 +543,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		String name = stripSequenceNumber(stripExtension(destinationFile.getName()));
 		
 		int firstFrame = Math.max(0, frameStartField.getValue());
-		int lastFrame = Math.min(frameEndField.getValue(), getCurrentAnimation().getFrameCount());
+		int lastFrame = Math.min(frameEndField.getValue(), getCurrentAnimation().getLastFrame());
 		int filenameLength = String.valueOf(lastFrame).length();
 		
 		final String example = createSequenceFileName(name, firstFrame, filenameLength, "") + ",...," + createSequenceFileName(name, lastFrame, filenameLength, "");
@@ -544,6 +563,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		buttonPanel.add(new JButton(renderAction));
 		buttonPanel.add(new JButton(cancelAction));
+		buttonPanel.add(new JButton(applyAction));
 		buttonPanel.add(new JButton(resetAction));
 		buttonPanel.setAlignmentY(JPanel.BOTTOM_ALIGNMENT);
 		buttonPanel.setMaximumSize(new Dimension(400, 30));
@@ -606,7 +626,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 					destinationField.setText(renderParameters.getRenderDestination().getAbsolutePath());
 				}
 				frameStartField.setValue(renderParameters.getStartFrame() == null ? 0 : renderParameters.getStartFrame());
-				frameEndField.setValue(renderParameters.getEndFrame() == null ? currentAnimation.getFrameCount() : renderParameters.getEndFrame());
+				frameEndField.setValue(renderParameters.getEndFrame() == null ? currentAnimation.getLastFrame() : renderParameters.getEndFrame());
 				updateRenderDimensions();
 			}
 		});
@@ -624,9 +644,19 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		renderParameters.setDimensionsLocked(lockedCheck.isSelected());
 		renderParameters.setImageScalePercent(scaleField.getValue());
 		renderParameters.setDetailLevel(detailField.getValue());
-		renderParameters.setRenderDestination(isBlank(destinationField.getText()) ? null : new File(destinationField.getText()));
+		
+		if (isBlank(destinationField.getText()))
+		{
+			renderParameters.setRenderDestination(null);
+		}
+		else
+		{
+			String filename = FileUtil.stripSequenceNumber(FileUtil.stripExtension(destinationField.getText()));
+			renderParameters.setRenderDestination(new File(filename));
+		}
+		
 		renderParameters.setStartFrame(Math.max(frameStartField.getValue(), 0));
-		renderParameters.setEndFrame(Math.min(frameEndField.getValue(), currentAnimation.getFrameCount()));
+		renderParameters.setEndFrame(Math.min(frameEndField.getValue(), currentAnimation.getLastFrame()));
 	}
 
 	private void hideDialog(int response)

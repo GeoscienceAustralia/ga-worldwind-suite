@@ -233,6 +233,11 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	int getFrameCount();
 	
 	/**
+	 * @return The 0-based index of the last frame in this animation (equivalent to frameCount - 1)
+	 */
+	int getLastFrame();
+	
+	/**
 	 * Set the frame count of this animation.
 	 * <p/>
 	 * If this will result in a decrease in the frame count of the animation, any key frames at a 

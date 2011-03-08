@@ -415,7 +415,7 @@ public class Animator
 		});
 		RenderProgressDialog.attachToRenderer(getFrame(), renderer);
 		
-		renderDialog = new RenderDialog(frame);
+		renderDialog = new RenderDialog(this, frame);
 		renderDialog.setCurrentAnimation(getCurrentAnimation());
 		changeOfAnimationListeners.add(renderDialog);
 	}
@@ -1492,11 +1492,19 @@ public class Animator
 	{
 		double oldAspect = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
 		renderDialog.setVisible(true);
+		
+		double newAspect = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
+		if (newAspect != oldAspect)
+		{
+			resizeWindowToAnimationSize(getCurrentAnimation().getRenderParameters().getImageDimension());
+		}
+		
 		int response = renderDialog.getResponse();
 		if (response != JOptionPane.OK_OPTION)
 		{
 			return;
 		}
+		
 		if (!getCurrentAnimation().getRenderParameters().isRenderDestinationSet())
 		{
 			File destination = promptForImageSequenceLocation();
@@ -1505,11 +1513,6 @@ public class Animator
 				return;
 			}
 			getCurrentAnimation().getRenderParameters().setRenderDestination(destination);
-		}
-		double newAspect = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
-		if (newAspect != oldAspect)
-		{
-			resizeWindowToAnimationSize(getCurrentAnimation().getRenderParameters().getImageDimension());
 		}
 		wwd.redraw();
 		renderer.render(animation);

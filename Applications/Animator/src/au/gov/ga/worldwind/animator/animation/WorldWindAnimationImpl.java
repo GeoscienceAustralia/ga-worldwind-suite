@@ -485,6 +485,12 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	{
 		return this.frameCount;
 	}
+	
+	@Override
+	public int getLastFrame()
+	{
+		return frameCount - 1;
+	}
 
 	@Override
 	public void setFrameCount(int newCount)
