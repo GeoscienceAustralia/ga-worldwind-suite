@@ -51,3 +51,20 @@ td.def {
 	text-decoration: line-through;
 	font-weight: bold;
 }
+
+.tag {
+	color: blue;
+}
+
+.litteral {
+	color: red;
+}
+
+.keyword {
+	color: green;
+}
+
+.fig_code {
+	border: 1px solid black;
+	padding: .5em;
+}

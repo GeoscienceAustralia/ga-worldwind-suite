@@ -16,6 +16,13 @@
 <li><a href="#keyframes">Animating the Camera</a></li>
 <li><a href="#layeranim">Animating Layers</a></li>
 </ol>
+<li><a href="#layers">Adding Layers</a></li>
+<ol>
+<li><a href="#wmsb">The WMS Browser</a></li>
+<li><a href="#layerfile">Layer Files</a></li>
+<li><a href="#foglayer">Fog Layers</a></li>
+<li><a href="#skysphere">Skysphere Layers</a></li>
+</ol>
 </ol>
 <!-- ### END TOC ### -->
 
@@ -45,7 +52,7 @@
 
 <p>As you zoom into places you will notice that as you get closer, the land scape will get more detailed. Because both the image of the earth and the size of the data is so large it has been broken up into smaller tiles at different levels of detail. The animator downloads the tiles from the Internet as it needs them, so that it doesn't get unneeded and unused data.</p>
 
-<p>You will also notice that the image texturing the earth will change when you get close enough. By default, the animator uses two layers to texture the earth: <em>Blue Marble</em> and <em>Landsat</em>. Blue Marble is a layer NASA generated from satalite imagery in order to present the earth as it would look to the human eye from space. Landsat is another layer of satellite images, which have more detail than the Blue Marble layer. As Landsat is more detailed than blue marble at close distances, by default it is rendered on top of the blue marble layer.</p>
+<p>You will also notice that the image texturing the earth will change when you get close enough. By default, the animator uses two layers to texture the earth: <em>Blue Marble</em> and <em>Landsat</em>. Blue Marble is a layer NASA generated from satellite imagery in order to present the earth as it would look to the human eye from space. Landsat is another layer of satellite images, which have more detail than the Blue Marble layer. As Landsat is more detailed than blue marble at close distances, by default it is rendered on top of the blue marble layer.</p>
 
 <p>When you have found somewhere interesting, such as a mountain range, click and hold the right mouse button while dragging the mouse downwards within the viewport; The camera will rotate around the target, changing the angle at which you are viewing the landscape. If you are looking at a feature that has some height or depth, you will be able to see that the surface of the globe is three dimensional; Mountains will protrude out of the ground as if you were actually flying over them.</p>
 
@@ -100,6 +107,105 @@
 <p>Once this is done, go back to the first frame and make sure you are happy with the changes. When you are, find the <em>Quick render (detailed)</em> option in the <em>Animation</em> menu. The quick render function renders an image sequence starting with the current frame. A dialog box will ask you to chose a file name, and then append the frame number to the filename as it renders each frame. It is possible that the animator will hang for a while as it makes sure all the necessary data for the render has been downloaded. When it has finished, you will be able to use the image sequence with your favorite compositing suite to create a video.</p>
 
 <p>You should now have an understanding of the World Wind Animator and how to move and animate the camera, manipulate the appearance of the earth by animating layers. You should also have your first space to place animation as a image sequence, which you can now combine into a movie with a video editing program.</p>
+
+<a href="#TOC">Top</a>
+
+<a name="layers"><h2>Adding Layers</h2></a>
+
+<p>Everything visible within the animator is a layer. You can change their order and manipulate their various properties in order to get various effects. Layer definitions are written in XML, so to add in new effects you can either write your own layers or get them from other sources.</p>
+
+<p>This tutorial aims to go over how to find new layers with the WMS Browser, add them to your animations, as well as how to create fog and Skysphere layers.</p>
+
+<a name="wmsb"><h3>The WMS Browser</h3></a>
+
+<p>Several companies and organisations, such as Geoscience Australia and NASA provide Geoscience information in formats that can be used to create layer files. You can find the <em>WMS Browser</em> in the animator's window menu. WMS stands for 'Web Mapping Service', which is a way to get Geoscience data and maps off the internet. When you open it, you will be presented with three sections: A list to the left and two blank sections.</p>
+
+<p>The list on the left shows known WMS servers. If you expand one (by clicking on the small plus sign next to it's icon), such as the <em>NASA Earth Observations</em> server, you will be shown a list of all the data that you can get from that server.</p>
+
+<p>When you click on one, such as one of the <em>Active Fires</em> data sets, The two blank windows will display a description and preview of the data. At the time of writing, While I have the <em>Active Fires (1 month - Terra/MODIS)</em> data selected I can see that there has been fires across Africa in the last month. The abstract tells me the purpose of the data.</p>
+
+<p>In order to get that data and use it as a layer in your scene, you need to export it as a layer. While it is selected, click the save button (which is up the top of the list, on the right hand side). It will ask you where to save it. Once you have saved it close the WMS Browser, find where you have saved the file and drag it into the <em>Animation Browser</em> (where you can see the rest of the layers). This should add it to the bottom of the list, and on the planet you should now be able to see the data over the top of any other layers you have enabled, such as Blue Marble.</p>
+
+<p>If you would like to get data from a different server, or would just like to search to see what else is out there, there is a <em>Search for and Add WMS Browser</em> button, which looks like a green plus button, at the top of the server list, on the left hand side.</p>
+
+<p>If you click on that, it will bring up another window which will have some instructions, a search bar and a results panel. When search for terms, such as <em>fire</em>, The WMS Browser will try to find WMS Servers on the internet that have data that corresponds to your search terms. Any that are found will be displayed in the results box below the search bar.</p>
+
+<p>If you find a server that you think may have the data you need, you can select it with the checkbox on the left of the entry and then click the okay button. After doing this, it will close the window and you will be able to see any selected servers in the list.</p>
+
+<p>Once you have exported a layer file that will read the data, you can modify or use that layer file within your scene.</p>
+
+<a href="#TOC">Top</a>
+
+<a name="layerfile"><h3>Layer Files</h3></a>
+
+<p>Layer files are XML files that describe a layer. When you have an XML file you can add it to your scene in two ways. You can either add it to the <em>Layer Palette</em>, found underneath the <em>animation browser</em> and <em>properties</em> rollouts on the left of the World Wind Animator's main window.</p>
+
+<p>If you want to add the layer to the palette, there is a button (It looks like the cross section of an open box with an arrow pointing into it) at the top of the rollout, on the left-most side of the toolbar. Click on it will give you a file picker, and you can chose your new layer. Once it is listed in the layer palette, you can then add it to your animation by clicking on the toolbars right most button, a green plus sign, while the layer is selected. Layers in the palette that are in the animation all have yellow flags to the right of their entry, so once you add it to the scene, you should be able to see a yellow flag appear next to it.</p>
+
+<p>If you want to create your own layers, then you will need a copy of the layer file specification. It is a document that explains the XML schema that describes layers, so you are able to find out what it supports and how to go about writing particular kinds of layers.</p>
+
+<div class="fig_code">
+<pre>
+<span class="tag"><</>?xml version=<span class="litteral">"1.0"</span> encoding=<span class="litteral">"UTF-8"</span>?></span>
+<span class="tag"><</>Layer version=<span class="litteral">"1"</span> layerType=<span class="litteral">"SurfaceShapeShapefileLayer"</span>></span>
+	<span class="tag"><</>DisplayName></span>Offshore Basins<span class="tag"><</>/DisplayName></span>
+	<span class="tag"><</>URL></span>offshore basin data/offshore_basins.shp<span class="tag"><</>/URL></span>
+	
+	<span class="comment"><</>!-- Outline --></span>
+	<span class="tag"><</>DrawOutline></span>true<span class="tag"><</>/DrawOutline></span>
+	<span class="tag"><</>OutlineColor red=<span class="litteral">"255"</span> green=<span class="litteral">"255"</span> blue =<span class="litteral">"255"</span> /></span>
+	<span class="tag"><</>OutlineWidth></span>2<span class="tag"><</>/OutlineWidth></span>
+	<span class="tag"><</>OutlineOpacity></span>1<span class="tag"><</>/OutlineOpacity></span>
+	
+	<span class="comment"><</>!-- Interior --></span>
+	<span class="tag"><</>DrawInterior</span>>false<span class="tag"><</>/DrawInterior></span>
+	<span class="tag"><</>InteriorColor red=<span class="litteral">"128"</span> green=<span class="litteral">"128"</span> blue=<span class="litteral">"128"</span> /></span>
+	<span class="tag"><</>InteriorOpacity></span>0.85<span class="tag"><</>/InteriorOpacity></span>
+	
+	<span class="tag"><</>Antialiasing></span>true<span class="tag"><</>/Antialiasing></span>
+	
+<span class="tag"><</>/Layer></span>
+</pre>
+</div>
+
+<p>In this example, the layer is a surface shape created out of a shape file, named "Offshore Basins". It references where it gets the data, specifies that it is to draw a white outline of the data and that it is not supposed to fill in the shapes with colour.</p>
+
+<p>If you have data formatted correctly, you can display that data on the globe. The next two sections go over how to write fog and skysphere layers.</p>
+
+<a href="#TOC">Top</a>
+
+<a name="foglayer"><h3>Fog Layers</h3></a>
+
+<p>A fog layer creates a coloured distance fog effect in the scene. If it is visible, then the further the fog gets away from the camera, the thicker it gets.</p>
+
+<p>To write a layer file, all you will need is a text editor. Any text editor that saves UTF-8 plain text files will do. If you are running a windows machine you will have notepad, which will do the job.</p>
+
+<div class="fig_code">
+<pre>
+<span class="tag"><</>?xml version=<span class="litteral">"1.0"</span> encoding=<span class="litteral">"UTF-8"</span>?></span>
+<span class="tag"><</>Layer version=<span class="litteral">"1"</span> layerType=<span class="litteral">"FogLayer"</span>></span>
+	<span class="tag"><</>DisplayName></span>testName<span class="tag"><</>/DisplayName></span>
+	<span class="tag"><</>NearFactor></span>1.2<span class="tag"><</>/NearFactor></span>
+	<span class="tag"><</>FarFactor></span>1.3<span class="tag"><</>/FarFactor></span>
+	<span class="tag"><</>FogColor red=<span class="litteral">"123"</span> green=<span class="litteral">"23"</span> blue=<span class="litteral">"222"</span> /></span>
+<span class="tag"><</>/Layer></span>
+</pre>
+</div>
+
+<p>The above is the example fog file from the specification. The first thing you will notice, if you have ever looked at an XML file before is the XML header. This first line is common accross all of the layer files that world wind uses. If it doesn't have one, then it wont work.</p>
+
+<p>The next line declares that the file describes a layer, and that that layer is a FogLayer. You can only have one layer in a file. All the different kinds of layers are described in the specification.</p>
+
+<p>While option, it is recommended that you have a display name. It is what your layer will be called when you actually put it in the animator.</p>
+
+<p>The near and far factors describe how close to the cameras current position the fog starts, and how far away it ends. 1.1 is the default for both factors. You will be able to change and animate these parameters from within the animator.</p>
+
+<p>The last line, before the layer closing tag, sets the fogs colour. Colours are specified as RGB values, numbers between 0 and 255 for the amount of red, green and blue in the colour. Those default numbers set the colour to purple.</p>
+<a href="#TOC">Top</a>
+
+<a name="skysphere"><h3>Skysphere Layers</h3></a>
+
+By default, the sky layer is just 
 
 <a href="#TOC">Top</a>
 
