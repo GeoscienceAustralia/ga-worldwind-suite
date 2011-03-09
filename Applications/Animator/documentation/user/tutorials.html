@@ -112,7 +112,7 @@
 
 <a name="layers"><h2>Adding Layers</h2></a>
 
-<p>Everything visible within the animator is a layer. You can change their order and manipulate their various properties in order to get various effects. Layer definitions are written in XML, so to add in new effects you can either write your own layers or get them from other sources.</p>
+<p>Everything visible within the animator is a layer. You can change their order and manipulate their various properties in order to get various effects. Layer definitions are written in XML; To add in new effects you can either write your own layers or get them from other sources.</p>
 
 <p>This tutorial aims to go over how to find new layers with the WMS Browser, add them to your animations, as well as how to create fog and Skysphere layers.</p>
 
@@ -128,7 +128,7 @@
 
 <p>If you would like to get data from a different server, or would just like to search to see what else is out there, there is a <em>Search for and Add WMS Browser</em> button, which looks like a green plus button, at the top of the server list, on the left hand side.</p>
 
-<p>If you click on that, it will bring up another window which will have some instructions, a search bar and a results panel. When search for terms, such as <em>fire</em>, The WMS Browser will try to find WMS Servers on the internet that have data that corresponds to your search terms. Any that are found will be displayed in the results box below the search bar.</p>
+<p>If you click on that, it will bring up another window which will have some instructions, a search bar and a results panel. When you search for terms, such as <em>fire</em>, The WMS Browser will try to find WMS Servers on the internet that have data that corresponds to your search terms. Any that are found will be displayed in the results box below the search bar.</p>
 
 <p>If you find a server that you think may have the data you need, you can select it with the checkbox on the left of the entry and then click the okay button. After doing this, it will close the window and you will be able to see any selected servers in the list.</p>
 
@@ -138,7 +138,7 @@
 
 <a name="layerfile"><h3>Layer Files</h3></a>
 
-<p>Layer files are XML files that describe a layer. When you have an XML file you can add it to your scene in two ways. You can either add it to the <em>Layer Palette</em>, found underneath the <em>animation browser</em> and <em>properties</em> rollouts on the left of the World Wind Animator's main window.</p>
+<p>Layer files are XML files that describe a layer. When you have an XML file you can add it to your scene in two ways. You can either add it to the <em>Layer Palette</em>, found underneath the animation browser and properties rollouts on the left of the World Wind Animator's main window.</p>
 
 <p>If you want to add the layer to the palette, there is a button (It looks like the cross section of an open box with an arrow pointing into it) at the top of the rollout, on the left-most side of the toolbar. Click on it will give you a file picker, and you can chose your new layer. Once it is listed in the layer palette, you can then add it to your animation by clicking on the toolbars right most button, a green plus sign, while the layer is selected. Layers in the palette that are in the animation all have yellow flags to the right of their entry, so once you add it to the scene, you should be able to see a yellow flag appear next to it.</p>
 
@@ -180,23 +180,19 @@
 
 <p>To write a layer file, all you will need is a text editor. Any text editor that saves UTF-8 plain text files will do. If you are running a windows machine you will have notepad, which will do the job.</p>
 
-<div class="fig_code">
-<pre>
-<span class="tag"><</>?xml version=<span class="litteral">"1.0"</span> encoding=<span class="litteral">"UTF-8"</span>?></span>
+<div class="fig_code"><pre><span class="tag"><</>?xml version=<span class="litteral">"1.0"</span> encoding=<span class="litteral">"UTF-8"</span>?></span>
 <span class="tag"><</>Layer version=<span class="litteral">"1"</span> layerType=<span class="litteral">"FogLayer"</span>></span>
 	<span class="tag"><</>DisplayName></span>testName<span class="tag"><</>/DisplayName></span>
 	<span class="tag"><</>NearFactor></span>1.2<span class="tag"><</>/NearFactor></span>
 	<span class="tag"><</>FarFactor></span>1.3<span class="tag"><</>/FarFactor></span>
 	<span class="tag"><</>FogColor red=<span class="litteral">"123"</span> green=<span class="litteral">"23"</span> blue=<span class="litteral">"222"</span> /></span>
-<span class="tag"><</>/Layer></span>
-</pre>
-</div>
+<span class="tag"><</>/Layer></span></pre></div>
 
-<p>The above is the example fog file from the specification. The first thing you will notice, if you have ever looked at an XML file before is the XML header. This first line is common accross all of the layer files that world wind uses. If it doesn't have one, then it wont work.</p>
+<p>The above is the example fog file from the specification. The first thing you will notice, if you have ever looked at an XML file before is the XML header. This first line is common across all of the layer files that world wind uses. If it doesn't have one, then it wont work.</p>
 
 <p>The next line declares that the file describes a layer, and that that layer is a FogLayer. You can only have one layer in a file. All the different kinds of layers are described in the specification.</p>
 
-<p>While option, it is recommended that you have a display name. It is what your layer will be called when you actually put it in the animator.</p>
+<p>While optional, it is recommended that you have a display name. It is what your layer will be called when you actually put it in the animator. If you do not have one, then it will just display the filename.</p>
 
 <p>The near and far factors describe how close to the cameras current position the fog starts, and how far away it ends. 1.1 is the default for both factors. You will be able to change and animate these parameters from within the animator.</p>
 
@@ -205,8 +201,28 @@
 
 <a name="skysphere"><h3>Skysphere Layers</h3></a>
 
-By default, the sky layer is just 
+<p>By default, the sky layer is just a gradient that creates an atmospheric glow coming from the earth. If you have your camera looking at the horizon, this may seem a bit odd to viewers, as often the sky has clouds and the like.</p>
 
+<p>In 3D scenes this can be achieved by creating a skybox or dome and linking it's position to the camera. The skybox would then be textured with panoramic images of the sky. We can do this in the World Wind Animator with a skysphere layer.</p>
+
+<p>Once you have a panoramic image, all you need is a layer definition file. You can find information on the layer type, skysphere, in the layer specification document.</p>
+
+<div class="fig_code"><pre><span class="tag"><</>?xml version=<span class="litteral">"1.0"</span> encoding=<span class="litteral">"UTF-8"</span>?></span>
+<span class="tag"><</>Layer version=<span class="litteral">"1"</span> layerType=<span class="litteral">"SkysphereLayer"</span>></span>
+	<span class="tag"><</>DisplayName></span>Skysphere<span class="tag"><</>/DisplayName></span>
+	<span class="tag"><</>TextureLocation></span>070201-a1.jpg<span class="tag"><</>/TextureLocation></span>
+	<span class="tag"><</>Rotation></span>83<span class="tag"><</>/Rotation></span>
+	<span class="tag"><</>Segments></span>30<span class="tag"><</>/Segments></span>
+	<span class="tag"><</>Slices></span>30<span class="tag"><</>/Slices></span>
+<span class="tag"><</>/Layer></span></pre></div>
+
+<p>The texture location can be a full, hard set path, or it can be relevant to the layer specification file's position. Just remember to make sure it is visible from the client.</p>
+
+<p>The rotation listed in the file is the rotation of the texture, which will change the position of the texture when looking north.</p>
+
+<p>The Segments and Slices define how detailed the geometry of the sphere is. The slices run along the sphere, and the segments run from poll to poll.</p>
+
+<p>You should now have some idea of how to define layers. From here you should be able to look through the layer definition file in order to discover how to define layers of different types.</p>
 <a href="#TOC">Top</a>
 
 </body>

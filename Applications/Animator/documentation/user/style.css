@@ -64,6 +64,11 @@ td.def {
 	color: green;
 }
 
+.param {
+	color: purple;
+	font-weight: bold;
+}
+
 .fig_code {
 	border: 1px solid black;
 	padding: .5em;
