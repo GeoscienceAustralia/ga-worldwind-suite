@@ -974,6 +974,8 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			keyFrameMapLock.writeLock().unlock();
 		}
+		
+		fireChangeEvent(newFrameCount);
 	}
 
 	@Override

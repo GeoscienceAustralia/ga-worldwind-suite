@@ -804,6 +804,13 @@ public class Animator
 	private void initialiseWmsBrowser()
 	{
 		this.wmsBrowser = new WmsBrowser(getMessage(getAnimatorApplicationTitleKey()));
+		this.wmsBrowser.addWindowListener(new WindowAdapter(){
+			@Override
+			public void windowClosing(WindowEvent e)
+			{
+				actionFactory.getShowWmsBrowserAction().setSelected(false);
+			}
+		});
 	}
 
 	/**
