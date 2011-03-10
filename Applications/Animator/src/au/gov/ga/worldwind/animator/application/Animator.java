@@ -234,6 +234,8 @@ public class Animator
 
 	private List<ChangeOfAnimationListener> changeOfAnimationListeners = new ArrayList<ChangeOfAnimationListener>();
 
+	private AboutDialog aboutDialog;
+	
 	/**
 	 * Launch an instance of the Animator Application
 	 */
@@ -773,6 +775,15 @@ public class Animator
 		actionFactory.getShowParameterEditorAction().addToMenu(menu);
 		actionFactory.getShowWmsBrowserAction().addToMenu(menu);
 
+		// Help menu
+		menu = new JMenu(getMessage(getHelpMenuLabelKey()));
+		menu.setMnemonic(KeyEvent.VK_H);
+		menuBar.add(menu);
+		menu.add(actionFactory.getShowUserGuideAction());
+		menu.add(actionFactory.getShowTutorialAction());
+		menu.addSeparator();
+		menu.add(actionFactory.getShowAboutAction());
+		
 		// Debug
 		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
 		menu.setMnemonic(KeyEvent.VK_D);
@@ -1878,6 +1889,16 @@ public class Animator
 	void setZoomScalingRequired(boolean zoomScalingRequired)
 	{
 		getCurrentAnimation().setZoomScalingRequired(zoomScalingRequired);
+	}
+	
+	void showAboutDialog()
+	{
+		if (aboutDialog == null)
+		{
+			aboutDialog = new AboutDialog(getFrame(), getMessage(getAboutDialogTitleKey()));
+			return;
+		}
+		aboutDialog.setVisible(true);
 	}
 
 	private void setDefaultInitialArmedStatus(Animation animation)

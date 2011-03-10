@@ -63,6 +63,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getOpenV1FileMessageKey() { return "animator.message.openv1file.message"; }
 	public static String getOpenV1FileCaptionKey() { return "animator.message.openv1file.caption"; }
 	public static String getOpenDialogTitleKey() { return "animator.gui.dialog.open.title"; }
+	public static String getAboutDialogTitleKey() { return "animator.gui.dialog.about.title"; }
 	public static String getSaveAsDialogTitleKey() { return "animator.gui.dialog.saveas.title"; }
 	public static String getConfirmOverwriteMessageKey() { return "animator.message.overwriteconfirm.message"; }
 	public static String getConfirmOverwriteCaptionKey() { return "animator.message.overwriteconfirm.caption"; }
@@ -127,6 +128,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getRenderProgressStartingMessageKey() { return "animator.gui.dialog.renderprogress.startingmessage.label"; }
 	public static String getParameterEditorWindowLabelKey() { return "animator.gui.parametereditor.window.title"; }
 	public static String getWindowMenuLabelKey() { return "animator.gui.menu.window.label"; }
+	public static String getHelpMenuLabelKey() { return "animator.gui.menu.help.label"; }
 	public static String getShowParameterEditorMenuLabelKey() { return "animator.gui.menu.showparametereditor.label"; }
 	public static String getStereoCameraMenuLabelKey() { return "animator.gui.menu.stereo.camera.label"; }
 	public static String getDynamicStereoMenuLabelKey() { return "animator.gui.menu.dynamic.stereo.label"; }
@@ -138,7 +140,11 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getZoomFrameMenuLabelKey() { return "animator.gui.parametereditor.zoomframe.label"; }
 	public static String getZoomValueMenuLabelKey() { return "animator.gui.parametereditor.zoomvalue.label"; }
 	public static String getShowWmsBrowserMenuLabelKey() { return "animator.gui.menu.showwmsbrowser.label"; }
+	public static String getShowUserGuideMenuLabelKey() { return "animator.gui.menu.showuserguide.label"; }
+	public static String getShowTutorialMenuLabelKey() { return "animator.gui.menu.showtutorial.label"; }
+	public static String getShowAboutMenuLabelKey() { return "animator.gui.menu.showabout.label"; }
 	public static String getRenderDialogTitleKey() { return "animator.gui.dialog.render.title"; }
+	public static String getLicenceDialogTitleKey() { return "animator.gui.dialog.licence.title"; }
 	public static String getRenderDialogRenderLabelKey() { return "animator.gui.dialog.render.renderbutton.label"; }
 	public static String getRenderDialogRenderTooltipKey() { return "animator.gui.dialog.render.renderbutton.tooltip"; }
 	public static String getRenderDialogApplyLabelKey() { return "animator.gui.dialog.render.applybutton.label"; }
@@ -165,5 +171,6 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getRenderDialogFrameEndTooltipKey() { return "animator.gui.dialog.render.frameend.tooltip"; }
 	public static String getRenderDialogResetLabelKey() { return "animator.gui.dialog.render.reset.label"; }
 	public static String getRenderDialogResetTooltipKey() { return "animator.gui.dialog.render.reset.tooltip"; }
+	public static String getShowLicenceLabelKey() { return "animator.gui.dialog.about.licence.label"; }
 	
 }

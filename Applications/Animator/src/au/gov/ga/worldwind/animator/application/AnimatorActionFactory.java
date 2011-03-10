@@ -63,6 +63,10 @@ public class AnimatorActionFactory
 	private SelectableAction showParameterEditorAction;
 	private SelectableAction showWmsBrowserAction;
 	
+	private BasicAction showUserGuideAction;
+	private BasicAction showTutorialAction;
+	private BasicAction showAboutAction;
+	
 	private BasicAction debugKeyFramesAction;
 	private BasicAction debugParameterValuesAction;
 	private SelectableAction logAnimationEventsAction;
@@ -475,6 +479,20 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		showUserGuideAction = new BasicAction(getMessage(getShowUserGuideMenuLabelKey()), null);
+		
+		showTutorialAction = new BasicAction(getMessage(getShowTutorialMenuLabelKey()), null);
+		
+		showAboutAction = new BasicAction(getMessage(getShowAboutMenuLabelKey()), null);
+		showAboutAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.showAboutDialog();
+			}
+		});
+		
 		// Debug key frames
 		debugKeyFramesAction = new BasicAction(getMessage(getKeyValuesMenuLabelKey()), null);
 		debugKeyFramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.CTRL_MASK));
@@ -729,5 +747,20 @@ public class AnimatorActionFactory
 	public SelectableAction getAnimateClippingAction()
 	{
 		return animateClippingAction;
+	}
+	
+	public BasicAction getShowUserGuideAction()
+	{
+		return showUserGuideAction;
+	}
+	
+	public BasicAction getShowTutorialAction()
+	{
+		return showTutorialAction;
+	}
+	
+	public BasicAction getShowAboutAction()
+	{
+		return showAboutAction;
 	}
 }
