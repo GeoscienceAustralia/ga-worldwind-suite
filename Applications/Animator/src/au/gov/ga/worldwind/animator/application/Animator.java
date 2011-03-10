@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -1907,22 +1906,8 @@ public class Animator
 	{
 		String devLocation = "./documentation/user/manual.html";
 		String prodLocation = "./doc/manual.html";
-		
-		File userGuideFile;
-		try
-		{
-			userGuideFile = new File(devLocation);
-			if (!userGuideFile.exists())
-			{
-				userGuideFile = new File(prodLocation);
-			}
-			DefaultLauncher.openFile(userGuideFile);
-		}
-		catch (Exception e)
-		{
-			JOptionPane.showMessageDialog(getFrame(), getMessage(getCantOpenUserGuideMessageKey()), getMessage(getCantOpenUserGuideCaptionKey()), JOptionPane.ERROR);
-			return;
-		}
+
+		showDocumentation(devLocation, prodLocation, getMessage(getCantOpenUserGuideMessageKey()), getMessage(getCantOpenUserGuideCaptionKey()));
 	}
 	
 	void showTutorials()
@@ -1930,6 +1915,11 @@ public class Animator
 		String devLocation = "./documentation/user/tutorials.html";
 		String prodLocation = "./doc/tutorials.html";
 		
+		showDocumentation(devLocation, prodLocation, getMessage(getCantOpenTutorialsMessageKey()), getMessage(getCantOpenTutorialsCaptionKey()));
+	}
+	
+	private void showDocumentation(String devLocation, String prodLocation, String failureMessage, String failureCaption)
+	{
 		File userGuideFile;
 		try
 		{
@@ -1938,11 +1928,11 @@ public class Animator
 			{
 				userGuideFile = new File(prodLocation);
 			}
-			DefaultLauncher.openFile(userGuideFile);
+			DefaultLauncher.openURL(userGuideFile.toURI().toURL());
 		}
 		catch (Exception e)
 		{
-			JOptionPane.showMessageDialog(getFrame(), getMessage(getCantOpenTutorialsMessageKey()), getMessage(getCantOpenTutorialsCaptionKey()), JOptionPane.ERROR);
+			JOptionPane.showMessageDialog(getFrame(), failureMessage, failureCaption, JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 	}
