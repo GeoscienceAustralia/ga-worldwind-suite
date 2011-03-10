@@ -120,13 +120,19 @@
 
 <p>Several companies and organisations, such as Geoscience Australia and NASA provide Geoscience information in formats that can be used to create layer files. You can find the <em>WMS Browser</em> in the animator's window menu. WMS stands for 'Web Mapping Service', which is a way to get Geoscience data and maps off the internet. When you open it, you will be presented with three sections: A list to the left and two blank sections.</p>
 
+<a href="images/WMSBrowserFirstOpen.png"><img src="images/WMSBrowserFirstOpen.png" width="465" height="374"></a>
+
 <p>The list on the left shows known WMS servers. If you expand one (by clicking on the small plus sign next to it's icon), such as the <em>NASA Earth Observations</em> server, you will be shown a list of all the data that you can get from that server.</p>
 
 <p>When you click on one, such as one of the <em>Active Fires</em> data sets, The two blank windows will display a description and preview of the data. At the time of writing, While I have the <em>Active Fires (1 month - Terra/MODIS)</em> data selected I can see that there has been fires across Africa in the last month. The abstract tells me the purpose of the data.</p>
 
+<a href="images/WMSBrowser.png"><img src="images/WMSBrowser.png" width="465" height="299"></a>
+
 <p>In order to get that data and use it as a layer in your scene, you need to export it as a layer. While it is selected, click the save button (which is up the top of the list, on the right hand side). It will ask you where to save it. Once you have saved it close the WMS Browser, find where you have saved the file and drag it into the <em>Animation Browser</em> (where you can see the rest of the layers). This should add it to the bottom of the list, and on the planet you should now be able to see the data over the top of any other layers you have enabled, such as Blue Marble.</p>
 
 <p>If you would like to get data from a different server, or would just like to search to see what else is out there, there is a <em>Search for and Add WMS Browser</em> button, which looks like a green plus button, at the top of the server list, on the left hand side.</p>
+
+<a href="images/SearchWMS.png"><img src="images/SearchWMS.png" height="348" width="465"></a>
 
 <p>If you click on that, it will bring up another window which will have some instructions, a search bar and a results panel. When you search for terms, such as <em>fire</em>, The WMS Browser will try to find WMS Servers on the internet that have data that corresponds to your search terms. Any that are found will be displayed in the results box below the search bar.</p>
 
@@ -139,6 +145,8 @@
 <a name="layerfile"><h3>Layer Files</h3></a>
 
 <p>Layer files are XML files that describe a layer. When you have an XML file you can add it to your scene in two ways. You can either add it to the <em>Layer Palette</em>, found underneath the animation browser and properties rollouts on the left of the World Wind Animator's main window.</p>
+
+<img src="images/layerPalette.png" align="left">
 
 <p>If you want to add the layer to the palette, there is a button (It looks like the cross section of an open box with an arrow pointing into it) at the top of the rollout, on the left-most side of the toolbar. Click on it will give you a file picker, and you can chose your new layer. Once it is listed in the layer palette, you can then add it to your animation by clicking on the toolbars right most button, a green plus sign, while the layer is selected. Layers in the palette that are in the animation all have yellow flags to the right of their entry, so once you add it to the scene, you should be able to see a yellow flag appear next to it.</p>
 
@@ -194,9 +202,14 @@
 
 <p>While optional, it is recommended that you have a display name. It is what your layer will be called when you actually put it in the animator. If you do not have one, then it will just display the filename.</p>
 
-<p>The near and far factors describe how close to the cameras current position the fog starts, and how far away it ends. 1.1 is the default for both factors. You will be able to change and animate these parameters from within the animator.</p>
+<p>The near and far factors describe how close to the camera's current position the fog starts, and how far away it ends. 1.1 is the default for both factors. You will be able to change and animate these parameters from within the animator.</p>
 
 <p>The last line, before the layer closing tag, sets the fogs colour. Colours are specified as RGB values, numbers between 0 and 255 for the amount of red, green and blue in the colour. Those default numbers set the colour to purple.</p>
+
+<a href="images/fogLayer.png"><img src="images/fogLayer.png" width="465" height="246"></a>
+
+<p>An interesting thing about fog layers is that they work slightly differently to normal layers. While you expect that a layer will be drawn after any layer above it, thus showing up over the top of it, fog layers work a bit differently; The fog layer is blended into the layer below it. Thus, in order to see  the fog layer above Landsat, you have it above Landsat in the animation browser.</p>
+
 <a href="#TOC">Top</a>
 
 <a name="skysphere"><h3>Skysphere Layers</h3></a>
@@ -205,12 +218,15 @@
 
 <p>In 3D scenes this can be achieved by creating a skybox or dome and linking it's position to the camera. The skybox would then be textured with panoramic images of the sky. We can do this in the World Wind Animator with a skysphere layer.</p>
 
+<a href="http://modo.cgcookie.com/2010/01/28/textures-sky-panoramics/"><img src="images/cgcookie_sky06.png"></a>
+CG Cookie Sky Textures by <a href="http://www.wesburke.com/">Wes Burke</a> is licensed under a <a href="http://creativecommons.org/licenses/by/3.0/us/">Creative Commons Attribution 3.0 License</a>.
+
 <p>Once you have a panoramic image, all you need is a layer definition file. You can find information on the layer type, skysphere, in the layer specification document.</p>
 
 <div class="fig_code"><pre><span class="tag"><</>?xml version=<span class="litteral">"1.0"</span> encoding=<span class="litteral">"UTF-8"</span>?></span>
 <span class="tag"><</>Layer version=<span class="litteral">"1"</span> layerType=<span class="litteral">"SkysphereLayer"</span>></span>
 	<span class="tag"><</>DisplayName></span>Skysphere<span class="tag"><</>/DisplayName></span>
-	<span class="tag"><</>TextureLocation></span>070201-a1.jpg<span class="tag"><</>/TextureLocation></span>
+	<span class="tag"><</>TextureLocation></span>cgcookie_sky06.png<span class="tag"><</>/TextureLocation></span>
 	<span class="tag"><</>Rotation></span>83<span class="tag"><</>/Rotation></span>
 	<span class="tag"><</>Segments></span>30<span class="tag"><</>/Segments></span>
 	<span class="tag"><</>Slices></span>30<span class="tag"><</>/Slices></span>
@@ -221,6 +237,8 @@
 <p>The rotation listed in the file is the rotation of the texture, which will change the position of the texture when looking north.</p>
 
 <p>The Segments and Slices define how detailed the geometry of the sphere is. The slices run along the sphere, and the segments run from poll to poll.</p>
+
+<a href="images/skysphere.png"><img src="images/skysphere.png" width="465" height="246"></a>
 
 <p>You should now have some idea of how to define layers. From here you should be able to look through the layer definition file in order to discover how to define layers of different types.</p>
 <a href="#TOC">Top</a>
