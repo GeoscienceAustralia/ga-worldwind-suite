@@ -30,6 +30,9 @@
 	<property name="test_results_dir" value="${basedir}/test/results"/>
 	<property name="test_reports_dir" value="${basedir}/test/reports"/>
 	
+	<property name="doco_src_dir" value="${basedir}/documentation/user"/>
+	<property name="doco_dest_dir" value="doc"/>
+	
 	<property name="run_file" value="run.bat"/>
 
 	<property name="javac_debug" value="false" />
@@ -164,7 +167,12 @@
 				<attribute name="Main-Class" value="${executable_class}" />
 			</manifest>
 		</jar>
-
+		
+		<mkdir dir="${target_dir}/${doco_dest_dir}"/>
+		<copy todir="${target_dir}/${doco_dest_dir}">
+			<fileset dir="${doco_src_dir}"/>
+		</copy>
+		
 		<delete file="${target_dir}/temp.zip" />
 		
 		<echo file="${target_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${application_uber_jar}</echo>

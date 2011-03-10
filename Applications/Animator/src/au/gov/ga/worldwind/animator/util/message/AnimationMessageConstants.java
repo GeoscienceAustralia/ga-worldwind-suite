@@ -172,5 +172,9 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getRenderDialogResetLabelKey() { return "animator.gui.dialog.render.reset.label"; }
 	public static String getRenderDialogResetTooltipKey() { return "animator.gui.dialog.render.reset.tooltip"; }
 	public static String getShowLicenceLabelKey() { return "animator.gui.dialog.about.licence.label"; }
+	public static String getCantOpenUserGuideMessageKey() { return "animator.message.openuserguidefailed.message"; }
+	public static String getCantOpenUserGuideCaptionKey() { return "animator.message.openuserguidefailed.caption"; }
+	public static String getCantOpenTutorialsMessageKey() { return "animator.message.opentutorialfailed.message"; }
+	public static String getCantOpenTutorialsCaptionKey() { return "animator.message.opentutorialfailed.caption"; }
 	
 }

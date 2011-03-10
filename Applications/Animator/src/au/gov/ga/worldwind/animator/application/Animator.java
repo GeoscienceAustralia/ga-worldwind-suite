@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -105,6 +106,7 @@ import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.ui.FileFilters.XmlFilter;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
+import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.view.transform.ClipConfigurableView;
 import au.gov.ga.worldwind.wmsbrowser.WmsBrowser;
 
@@ -1901,6 +1903,50 @@ public class Animator
 		aboutDialog.setVisible(true);
 	}
 
+	void showUserGuide()
+	{
+		String devLocation = "./documentation/user/manual.html";
+		String prodLocation = "./doc/manual.html";
+		
+		File userGuideFile;
+		try
+		{
+			userGuideFile = new File(devLocation);
+			if (!userGuideFile.exists())
+			{
+				userGuideFile = new File(prodLocation);
+			}
+			DefaultLauncher.openFile(userGuideFile);
+		}
+		catch (Exception e)
+		{
+			JOptionPane.showMessageDialog(getFrame(), getMessage(getCantOpenUserGuideMessageKey()), getMessage(getCantOpenUserGuideCaptionKey()), JOptionPane.ERROR);
+			return;
+		}
+	}
+	
+	void showTutorials()
+	{
+		String devLocation = "./documentation/user/tutorials.html";
+		String prodLocation = "./doc/tutorials.html";
+		
+		File userGuideFile;
+		try
+		{
+			userGuideFile = new File(devLocation);
+			if (!userGuideFile.exists())
+			{
+				userGuideFile = new File(prodLocation);
+			}
+			DefaultLauncher.openFile(userGuideFile);
+		}
+		catch (Exception e)
+		{
+			JOptionPane.showMessageDialog(getFrame(), getMessage(getCantOpenTutorialsMessageKey()), getMessage(getCantOpenTutorialsCaptionKey()), JOptionPane.ERROR);
+			return;
+		}
+	}
+	
 	private void setDefaultInitialArmedStatus(Animation animation)
 	{
 		for (Animatable object : animation.getAnimatableObjects())

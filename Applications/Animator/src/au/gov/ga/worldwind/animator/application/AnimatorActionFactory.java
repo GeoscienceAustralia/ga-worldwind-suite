@@ -480,8 +480,24 @@ public class AnimatorActionFactory
 		});
 		
 		showUserGuideAction = new BasicAction(getMessage(getShowUserGuideMenuLabelKey()), null);
+		showUserGuideAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.showUserGuide();
+			}
+		});
 		
 		showTutorialAction = new BasicAction(getMessage(getShowTutorialMenuLabelKey()), null);
+		showTutorialAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.showTutorials();
+			}
+		});
 		
 		showAboutAction = new BasicAction(getMessage(getShowAboutMenuLabelKey()), null);
 		showAboutAction.addActionListener(new ActionListener()
