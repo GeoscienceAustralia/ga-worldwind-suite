@@ -34,6 +34,10 @@ td.def {
 	text-align: right;
 }
 
+dt {
+	margin-top: .75em;
+}
+
 .comment {
 	color: darkseagreen;
 	font-style: italic;
