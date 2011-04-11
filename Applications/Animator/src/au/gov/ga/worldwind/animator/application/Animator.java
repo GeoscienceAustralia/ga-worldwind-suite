@@ -237,6 +237,8 @@ public class Animator
 
 	private AboutDialog aboutDialog;
 	
+	private AutoSaver autoSaver;
+	
 	/**
 	 * Launch an instance of the Animator Application
 	 */
@@ -266,7 +268,7 @@ public class Animator
 		initialiseMenuBar();
 		initialiseParameterEditor();
 		initialiseWmsBrowser();
-
+		initialiseAutoSaver();
 		initialiseAnimationListeners();
 
 		updateSlider();
@@ -811,6 +813,13 @@ public class Animator
 				actionFactory.getShowWmsBrowserAction().setSelected(false);
 			}
 		});
+	}
+	
+	private void initialiseAutoSaver()
+	{
+		autoSaver = new AutoSaver(this);
+		changeOfAnimationListeners.add(autoSaver);
+		autoSaver.activate();
 	}
 
 	/**
@@ -2028,5 +2037,10 @@ public class Animator
 		{
 			((StereoCamera) camera).setDynamicStereo(dynamic);
 		}
+	}
+	
+	File getAnimationFile()
+	{
+		return file;
 	}
 }

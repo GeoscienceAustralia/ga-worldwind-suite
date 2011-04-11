@@ -78,6 +78,7 @@ public class Settings
 			saveDefaultElevationModels(rootElement);
 			saveUtilityLayerFlags(rootElement);
 			saveDebugFlags(rootElement);
+			saveAutoSaveConfig(rootElement);
 			
 			XMLUtil.saveDocumentToFormattedStream(document, new FileOutputStream(new File(Util.getUserGAWorldWindDirectory(), SETTINGS_FILE_NAME)));
 		}
@@ -167,6 +168,17 @@ public class Settings
 		}
 	}
 	
+	private static void saveAutoSaveConfig(Element rootElement)
+	{
+		Element autoSaveContainer = WWXML.appendElement(rootElement, "autoSave");
+		WWXML.appendBoolean(autoSaveContainer, "enabled", instance.isAutoSaveEnabled());
+		if (instance.getSaveIntervalInSeconds() != null)
+		{
+			WWXML.appendLong(autoSaveContainer, "saveInterval", instance.getSaveIntervalInSeconds());
+		}
+		WWXML.appendInteger(autoSaveContainer, "maxNumberSaves", instance.getMaxNumberOfAutoSaves());
+	}
+	
 	/**
 	 * Load the settings instance from the persisted xml file
 	 */
@@ -193,6 +205,7 @@ public class Settings
 		loadDefaultElevationModels(rootElement);
 		loadUtilityLayerFlags(rootElement);
 		loadDebugFlags(rootElement);
+		loadAutoSaveConfig(rootElement);
 	}
 
 	private static void loadDebugFlags(Element rootElement)
@@ -295,6 +308,13 @@ public class Settings
 			instance.setSplitLocation(splitLocation);
 		}
 	}
+	
+	private static void loadAutoSaveConfig(Element rootElement)
+	{
+		instance.setAutoSaveEnabled(XMLUtil.getBoolean(rootElement, "//autoSave/enabled", true));
+		instance.setMaxNumberOfAutoSaves(XMLUtil.getInteger(rootElement, "//autoSave/maxNumberSaves", 5));
+		instance.setSaveIntervalInSeconds(XMLUtil.getLong(rootElement, "//autoSave/saveInterval", 300L));
+	}
 
 	// ----------------------------------
 	// Instance members
@@ -334,6 +354,11 @@ public class Settings
 	private boolean ruleOfThirdsShown = true;
 	private boolean animationEventsLogged = false;
 	
+	// Autosave settings
+	private boolean autoSaveEnabled = true;
+	private Long saveIntervalInSeconds = 300L; //5mins
+	private int maxNumberOfAutoSaves = 5;
+	
 	/**
 	 * Private constructor. Use the Singleton accessor {@link #get()}.
 	 */
@@ -347,9 +372,6 @@ public class Settings
 		return lastUsedLocation;
 	}
 	
-	/**
-	 * @param lastUsedLocation the location of the last opened or saved file
-	 */
 	public void setLastUsedLocation(File lastUsedLocation)
 	{
 		if (lastUsedLocation == null)
@@ -374,11 +396,6 @@ public class Settings
 		return Collections.unmodifiableList(recentFiles);
 	}
 	
-	/**
-	 * Add the provided recent file to the list of recent files as the most recently used file.
-	 * 
-	 * @param recentFile The file to add
-	 */
 	public void addRecentFile(File recentFile)
 	{
 		if (recentFile == null || recentFiles.contains(recentFile))
@@ -394,41 +411,26 @@ public class Settings
 		recentFiles.add(0, recentFile);
 	}
 
-	/**
-	 * @return the splitLocation
-	 */
 	public int getSplitLocation()
 	{
 		return splitLocation;
 	}
 
-	/**
-	 * @param splitLocation the splitLocation to set
-	 */
 	public void setSplitLocation(int splitLocation)
 	{
 		this.splitLocation = splitLocation;
 	}
 
-	/**
-	 * Set {@link #defaultAnimationLayers}
-	 */
 	public void setDefaultAnimationLayers(List<LayerIdentifier> defaultAnimationLayers)
 	{
 		this.defaultAnimationLayers = defaultAnimationLayers;
 	}
 	
-	/**
-	 * @return {@link #defaultAnimationLayers}
-	 */
 	public List<LayerIdentifier> getDefaultAnimationLayers()
 	{
 		return defaultAnimationLayers;
 	}
 	
-	/**
-	 * Add the provided layer identifier to the list of default animation layers
-	 */
 	public void addDefaultAnimationLayer(LayerIdentifier layer)
 	{
 		if (defaultAnimationLayers.contains(layer))
@@ -438,25 +440,16 @@ public class Settings
 		defaultAnimationLayers.add(layer);
 	}
 	
-	/**
-	 * @return {@link #knownLayers}
-	 */
 	public List<LayerIdentifier> getKnownLayers()
 	{
 		return knownLayers;
 	}
 	
-	/**
-	 * Set {@link #knownLayers}
-	 */
 	public void setKnownLayers(List<LayerIdentifier> knownLayers)
 	{
 		this.knownLayers = knownLayers;
 	}
 	
-	/**
-	 * Add the provided layer identifier to the list of known layers
-	 */
 	public void addKnownLayer(LayerIdentifier layer)
 	{
 		if (knownLayers.contains(layer))
@@ -466,89 +459,56 @@ public class Settings
 		knownLayers.add(layer);
 	}
 
-	/**
-	 * Remove the provided layer from the list of known layers
-	 */
 	public void removeKnownLayer(LayerIdentifier identifier)
 	{
 		knownLayers.remove(identifier);
 	}
 	
-	/**
-	 * @return {@link #defaultElevationModels}
-	 */
 	public List<ElevationModelIdentifier> getDefaultElevationModels()
 	{
 		return defaultElevationModels;
 	}
 	
-	/**
-	 * Set {@link #defaultElevationModels}
-	 */
 	public void setDefaultElevationModels(List<ElevationModelIdentifier> defaultElevationModels)
 	{
 		this.defaultElevationModels = defaultElevationModels;
 	}
 	
-	/**
-	 * @return {@link #gridShown}
-	 */
 	public boolean isGridShown()
 	{
 		return gridShown;
 	}
 	
-	/**
-	 * Set {@link #gridShown}
-	 */
 	public void setGridShown(boolean gridShown)
 	{
 		this.gridShown = gridShown;
 	}
 	
-	/**
-	 * @return {@link #ruleOfThirdsShown}
-	 */
 	public boolean isRuleOfThirdsShown()
 	{
 		return ruleOfThirdsShown;
 	}
 	
-	/**
-	 * Set {@link #ruleOfThirdsShown}
-	 */
 	public void setRuleOfThirdsShown(boolean ruleOfThirdsShown)
 	{
 		this.ruleOfThirdsShown = ruleOfThirdsShown;
 	}
 	
-	/**
-	 * @return {@link #cameraPathShown}
-	 */
 	public boolean isCameraPathShown()
 	{
 		return cameraPathShown;
 	}
 	
-	/**
-	 * Set {@link #cameraPathShown}
-	 */
 	public void setCameraPathShown(boolean cameraPathShown)
 	{
 		this.cameraPathShown = cameraPathShown;
 	}
 	
-	/**
-	 * @return {@link #crosshairsShown}
-	 */
 	public boolean isCrosshairsShown()
 	{
 		return crosshairsShown;
 	}
 	
-	/**
-	 * Set {@link #crosshairsShown}
-	 */
 	public void setCrosshairsShown(boolean crosshairsShown)
 	{
 		this.crosshairsShown = crosshairsShown;
@@ -564,4 +524,38 @@ public class Settings
 		this.animationEventsLogged = animationEventsLogged;
 	}
 
+	public int getMaxNumberOfAutoSaves()
+	{
+		return maxNumberOfAutoSaves;
+	}
+	
+	public void setMaxNumberOfAutoSaves(int maxNumberOfAutoSaves)
+	{
+		this.maxNumberOfAutoSaves = maxNumberOfAutoSaves;
+	}
+	
+	public Long getSaveIntervalInSeconds()
+	{
+		return saveIntervalInSeconds;
+	}
+	
+	public Long getSaveIntervalInMilliseconds()
+	{
+		return saveIntervalInSeconds * 1000;
+	}
+	
+	public void setSaveIntervalInSeconds(Long saveIntervalInSeconds)
+	{
+		this.saveIntervalInSeconds = saveIntervalInSeconds;
+	}
+	
+	public boolean isAutoSaveEnabled()
+	{
+		return autoSaveEnabled;
+	}
+	
+	public void setAutoSaveEnabled(boolean autoSaveEnabled)
+	{
+		this.autoSaveEnabled = autoSaveEnabled;
+	}
 }
