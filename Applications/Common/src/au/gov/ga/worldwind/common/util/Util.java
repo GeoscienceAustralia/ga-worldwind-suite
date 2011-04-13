@@ -775,6 +775,10 @@ public class Util
 	 */
 	public static String readStreamToString(InputStream stream) throws Exception
 	{
+		if (stream == null)
+		{
+			return null;
+		}
 		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 		StringBuffer result = new StringBuffer();
 		String readLine = null;
