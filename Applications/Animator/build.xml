@@ -2,13 +2,15 @@
 
 <project name="Animator" basedir="." default="deploy">
 
-	<property name="archive_location" value="\\NAS\Corp\gav\GEOVIS\VIS\Projects\World Wind Suite\Animator\Builds\Current"/>
+	<property name="deploy_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Animator\Builds\Current"/>
+	<property name="archive_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Animator\Builds\Release archive"/>
 	
-	<property name="application_version" value="2.0-SNAPSHOT"/>
+	<property name="application_name" value="ga-animator"/>
+	<property name="application_version" value="2.1-SNAPSHOT"/>
 	<property name="application_class" value="au.gov.ga.worldwind.animator.application.Animator"/>
 	<property name="executable_class" value="au.gov.ga.worldwind.animator.application.Executable"/>
-	<property name="application_jar" value="ga-animator-${application_version}.jar" />
-	<property name="application_uber_jar" value="ga-animator-full-${application_version}.jar" />
+	<property name="application_jar" value="${application_name}-${application_version}.jar" />
+	<property name="application_uber_jar" value="${application_name}-full-${application_version}.jar" />
 	
 	<property name="worldwind_version" value="0.6.724.14486"/>
 	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-${worldwind_version}" />
@@ -135,6 +137,7 @@
 		<jar destfile="${build_dir}/${application_jar}" basedir="${build_dir}">
 			<manifest>
 				<attribute name="Main-Class" value="${application_class}" />
+				<attribute name="Implementation-Version" value="${application_version}"/>
 			</manifest>
 		</jar>
 		<jar destfile="${build_dir}/${worldwind_jar}">
@@ -165,6 +168,7 @@
 
 			<manifest>
 				<attribute name="Main-Class" value="${executable_class}" />
+				<attribute name="Implementation-Version" value="${application_version}"/>
 			</manifest>
 		</jar>
 		
@@ -179,13 +183,29 @@
 		
 	</target>
 
-	<target name="archive" depends="executables">
-		<copy todir="${archive_location}" overwrite="true" failonerror="false">
+	<target name="deploy" description="Deploy the current build to the current release candidate folder" depends="clean, executables">
+		<delete>
+			<fileset dir="${deploy_location}">
+				<exclude name="**/*.log*" />
+				<exclude name="**/animationEvents.txt" />
+			</fileset>
+		</delete>
+		<copy todir="${deploy_location}" overwrite="true" failonerror="false">
 			<fileset dir="${target_dir}"/>
+			<fileset dir="${basedir}" file="run-local.bat"/>
 		</copy>
 	</target>
 	
-	<target name="deploy" depends="clean, archive">
+	<target name="archive" description="Copy the current release candidate to the release archive folder">
+		<zip destfile="${deploy_location}/${application_name}-${application_version}.zip">
+			<fileset dir="${deploy_location}">
+				<exclude name="**/*.log" />
+				<exclude name="**/animationEvents.txt" />
+				<exclude name="**/Shortcut*" />
+				<exclude name="**/run-local.bat" />
+			</fileset>
+		</zip>
+		<move todir="${archive_location}" file="${deploy_location}/${application_name}-${application_version}.zip" overwrite="true"/>
 	</target>
 	
 </project>

@@ -25,4 +25,27 @@ public class Util extends au.gov.ga.worldwind.common.util.Util
 		}
 		return sb.toString();
 	}
+	
+	/**
+	 * Attempts to look up the application version in the following order:
+	 * <ol>
+	 * 	<li>From a manifest file <code>Implementation-Version</code> number
+	 * 	<li>From a <code>Implementation-Version</code> environment variable
+	 * </ol>
+	 */
+	public static String getVersion()
+	{
+		String result = null;
+		
+		Package p = Util.class.getPackage();
+		if (p != null)
+		{
+			result = p.getImplementationVersion();
+		}
+		if (isBlank(result))
+		{
+			result = System.getenv("Implementation-Version");
+		}
+		return result;
+	}
 }

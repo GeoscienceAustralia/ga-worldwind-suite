@@ -1,7 +1,10 @@
 package au.gov.ga.worldwind.animator.application;
 
-import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.*;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getLicenceDialogTitleKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getShowLicenceLabelKey;
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getHtmlNotFoundMessageKey;
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermOkKey;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
@@ -28,6 +31,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.event.HyperlinkListener;
 
+import au.gov.ga.worldwind.animator.util.Util;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 
 public class AboutDialog extends JDialog
@@ -61,6 +65,7 @@ public class AboutDialog extends JDialog
 	public AboutDialog(Frame parent, String title)
 	{
 		super(parent, title, true);
+		setMinimumSize(new Dimension(400, 100));
 		licenceDialog = new LicenceDialog(parent);
 		
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -82,22 +87,25 @@ public class AboutDialog extends JDialog
 		// Load the about content
 		JEditorPane editorPane = new JEditorPane();
 		editorPane.setEditable(false);
-		java.net.URL aboutURL = this.getClass().getResource(BASE_LOCATION + "about.html");
-		if (aboutURL != null)
+		editorPane.setContentType("text/html");
+		try
 		{
-			try
+			String aboutContent = Util.readStreamToString(this.getClass().getResourceAsStream(BASE_LOCATION + "about.html"));
+			if (aboutContent != null)
 			{
-				editorPane.setPage(aboutURL);
+				aboutContent = aboutContent.replace("${application_version}", Util.getVersion());
+				editorPane.setText(aboutContent);
 			}
-			catch (IOException e)
+			else
 			{
-				editorPane.setText(e.toString());
+				editorPane.setText(getMessage(getHtmlNotFoundMessageKey()));
 			}
 		}
-		else
+		catch (Exception e)
 		{
-			editorPane.setText(getMessage(getHtmlNotFoundMessageKey()));
+			editorPane.setText(e.toString());
 		}
+		
 		editorPane.addHyperlinkListener(hyperlinkListener);
 		add(editorPane, BorderLayout.CENTER);
 
