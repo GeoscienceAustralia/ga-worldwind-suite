@@ -26,10 +26,10 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.DoubleBuffer;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,11 +54,15 @@ import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Loader;
+import au.gov.ga.worldwind.common.util.MapBackedNamespaceContext;
 import au.gov.ga.worldwind.common.util.Setupable;
 
+/**
+ * A {@link RenderableLayer} that displays recent earthquake data sourced from a RSS feed.
+ */
 public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, Loader
 {
-	private static final String RSS_URL = "http://www.ga.gov.au/rss/quakesfeed.rss";
+	private static final String RSS_URL = "http://www.ga.gov.au/earthquakes/all_recent.rss";
 
 	private static final int UPDATE_TIME = 10 * 60 * 1000; //10 minutes
 	private static final long ONE_DAY = 24 * 60 * 60 * 1000; //1 day
@@ -203,13 +207,13 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 		HSLColor hslColor = new HSLColor((float) percent * 240f, 80f, 50f);
 		Color color = hslColor.getRGB();
 		surfaceAnnotation.getAttributes().setTextColor(color);
-		surfaceAnnotation.getAttributes().setScale(earthquake.magnitude / 10);
+		surfaceAnnotation.getAttributes().setScale(earthquake.magnitude.doubleValue() / 10);
 		addRenderable(surfaceAnnotation);
 
 		EarthquakeAnnotation deepAnnotation =
 				new SubSurfaceEarthquakeAnnotation(earthquake.position, earthquake, attributes, surfaceAnnotation);
 		deepAnnotation.getAttributes().setTextColor(color);
-		deepAnnotation.getAttributes().setScale(earthquake.magnitude / 10);
+		deepAnnotation.getAttributes().setScale(earthquake.magnitude.doubleValue() / 10);
 		deepAnnotation.setPickEnabled(false);
 		addRenderable(deepAnnotation);
 	}
@@ -287,68 +291,88 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 		if (enabled != updateTimer.isRunning())
 		{
 			if (enabled)
+			{
 				updateTimer.start();
+			}
 			else
+			{
 				updateTimer.stop();
+			}
 		}
 	}
 
-	public class Earthquake
+	/**
+	 * Represents a single Earthquake occurrence.
+	 * <p/>
+	 * Contains constructors able to interpret the GA RSS feed for earthquake data.
+	 */
+	public static class Earthquake
 	{
 		public final String title;
 		public final Date date;
 		public final String link;
 		public final Position position;
-		public final double magnitude;
+		public final BigDecimal magnitude;
 
+		private static final Pattern MAGNITUDE_TITLE_PATTERN = Pattern.compile("(?i)(?:magnitude )?(?-i)(\\d+(?:\\.\\d+)?),[\\s]*(.*)[.]*");
+		private static final Pattern DATE_ELEVATION_PATTERN = Pattern.compile("(?i)date and time(?-i).*?(UTC:[\\s]?\\d+\\s+\\w{3}\\s+\\d{4}\\s+\\d{2}:\\d{2}:\\d{2}).*(?i)depth(?-i).*:\\s+(\\d+(?:\\.\\d+))");
+		private static final String DATE_FORMAT = "Z: dd MMM yyyy hh:mm:ss";
+		
 		public Earthquake(Element content)
 		{
-			XPath xpath = WWXML.makeXPath();
-			String dateTitle = WWXML.getText(content, "title", xpath);
-			link = WWXML.getText(content, "link", xpath);
-			String description = WWXML.getText(content, "description", xpath);
-
-			String title = dateTitle;
-			Date date = null;
+			if (content == null)
 			{
-				Pattern pattern = Pattern.compile("(\\d+/\\d+/\\d+ \\d+:\\d+:\\d+\\(\\w+\\)) (.*)");
-				Matcher matcher = pattern.matcher(dateTitle);
+				throw new IllegalArgumentException("An XML element is required.");
+			}
+			XPath xpath = WWXML.makeXPath();
+			MapBackedNamespaceContext context = new MapBackedNamespaceContext();
+			context.addMapping("georss", "http://www.georss.org/georss");
+			xpath.setNamespaceContext(context);
+			
+			// Use the link as-is
+			link = WWXML.getText(content, "link", xpath);
+
+			// Parse magnitude and title from the 'title' element
+			String titleElement = WWXML.getText(content, "title", xpath);
+			{
+				Matcher matcher = MAGNITUDE_TITLE_PATTERN.matcher(titleElement);
+				if (matcher.find())
+				{
+					this.magnitude = new BigDecimal(matcher.group(1));
+					this.title = matcher.group(2);
+				}
+				else
+				{
+					this.magnitude = new BigDecimal(0);
+					this.title = titleElement;
+				}
+			}
+			
+			// Parse location from the 'georss:point' element
+			String pointElement = WWXML.getText(content, "georss:point", xpath);
+			String[] latLonElements = pointElement.split(" ");
+			LatLon latlon = LatLon.fromDegrees(Double.parseDouble(latLonElements[0]), Double.parseDouble(latLonElements[1]));
+			
+			// Parse date and depth from the 'description' element
+			String descriptionElement = WWXML.getText(content, "description", xpath);
+			double elevation = 0;
+			Date theDate = null;
+			{
+				Matcher matcher = DATE_ELEVATION_PATTERN.matcher(descriptionElement);
 				if (matcher.find())
 				{
 					try
 					{
-						DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss(z)");
-						date = formatter.parse(matcher.group(1));
+						theDate = new SimpleDateFormat(DATE_FORMAT).parse(matcher.group(1));
 					}
 					catch (ParseException e)
 					{
-						e.printStackTrace();
 					}
-
-					title = matcher.group(2);
+					elevation = Double.parseDouble(matcher.group(2));
 				}
 			}
-			this.title = title;
-			this.date = date;
-
-			LatLon latlon = null;
-			double magnitude = 0;
-			double elevation = 0;
-			{
-				Pattern pattern =
-						Pattern.compile("Latitude:\\s*(-?\\d*\\.?\\d*)\\s*Longitude:\\s*(-?\\d*\\.?\\d*)\\s*Magnitude:\\s*(-?\\d*\\.?\\d*)\\s*Depth\\(km\\):\\s*(\\d+)");
-				Matcher matcher = pattern.matcher(description);
-				if (matcher.find())
-				{
-					latlon =
-							LatLon.fromDegrees(Double.parseDouble(matcher.group(1)),
-									Double.parseDouble(matcher.group(2)));
-					magnitude = Double.parseDouble(matcher.group(3));
-					elevation = Double.parseDouble(matcher.group(4)) * -1000;
-				}
-			}
+			this.date = theDate;
 			this.position = new Position(latlon, elevation);
-			this.magnitude = magnitude;
 		}
 	}
 
