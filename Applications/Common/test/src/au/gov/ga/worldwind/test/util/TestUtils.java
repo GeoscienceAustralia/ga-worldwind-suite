@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Utility methods to help when unit testing.
@@ -85,5 +86,12 @@ public class TestUtils
 		{
 			return null;
 		}
+	}
+	
+	public static String formatDateInTimezone(Date date, String timezoneId)
+	{
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+		dateFormat.setTimeZone(TimeZone.getTimeZone(timezoneId));
+		return dateFormat.format(date);
 	}
 }

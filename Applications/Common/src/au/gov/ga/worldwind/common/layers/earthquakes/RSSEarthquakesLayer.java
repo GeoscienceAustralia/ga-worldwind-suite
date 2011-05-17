@@ -129,7 +129,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 						try
 						{
 							DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-							builderFactory.setNamespaceAware(false);
+							builderFactory.setNamespaceAware(true); // Required to account for the georss namespace used
 							DocumentBuilder builder = builderFactory.newDocumentBuilder();
 							StringReader reader = new StringReader(result.getAsString().trim());
 							InputSource source = new InputSource(reader);
@@ -138,8 +138,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 							Element[] items = WWXML.getElements(document.getDocumentElement(), "//item", null);
 							if (items != null)
 							{
-								List<Earthquake> earthquakes =
-										new ArrayList<RSSEarthquakesLayer.Earthquake>(items.length);
+								List<Earthquake> earthquakes = new ArrayList<RSSEarthquakesLayer.Earthquake>(items.length);
 								for (Element item : items)
 								{
 									earthquakes.add(new Earthquake(item));
@@ -187,8 +186,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 		}
 
 		Position surfacePosition = new Position(earthquake.position, 0);
-		SurfaceEarthquakeAnnotation surfaceAnnotation =
-				new SurfaceEarthquakeAnnotation(surfacePosition, earthquake, attributes);
+		SurfaceEarthquakeAnnotation surfaceAnnotation = new SurfaceEarthquakeAnnotation(surfacePosition, earthquake, attributes);
 		long time = MAX_TIME;
 		if (earthquake.date != null)
 		{
@@ -210,8 +208,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 		surfaceAnnotation.getAttributes().setScale(earthquake.magnitude.doubleValue() / 10);
 		addRenderable(surfaceAnnotation);
 
-		EarthquakeAnnotation deepAnnotation =
-				new SubSurfaceEarthquakeAnnotation(earthquake.position, earthquake, attributes, surfaceAnnotation);
+		EarthquakeAnnotation deepAnnotation = new SubSurfaceEarthquakeAnnotation(earthquake.position, earthquake, attributes, surfaceAnnotation);
 		deepAnnotation.getAttributes().setTextColor(color);
 		deepAnnotation.getAttributes().setScale(earthquake.magnitude.doubleValue() / 10);
 		deepAnnotation.setPickEnabled(false);
@@ -228,15 +225,17 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 			{
 				Object o = event.getTopObject();
 				if (event.getEventAction().equals(SelectEvent.ROLLOVER))
+				{
 					highlight(o);
+				}
 				else if (event.getEventAction().equals(SelectEvent.LEFT_CLICK))
+				{
 					click(o);
+				}
 
 				if (wwd instanceof Component)
 				{
-					Cursor cursor =
-							(o instanceof SurfaceEarthquakeAnnotation) ? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-									: null;
+					Cursor cursor = (o instanceof SurfaceEarthquakeAnnotation) ? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR) : null;
 					((Component) wwd).setCursor(cursor);
 				}
 			}
@@ -246,7 +245,9 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 	private void highlight(Object o)
 	{
 		if (this.mouseEq == o)
+		{
 			return; // same thing selected
+		}
 
 		if (this.mouseEq != null)
 		{
@@ -259,12 +260,21 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 		{
 			this.mouseEq = (SurfaceEarthquakeAnnotation) o;
 			this.mouseEq.getAttributes().setHighlighted(true);
-			this.tooltipAnnotation.setText("<p><b>" + this.mouseEq.earthquake.title + "</b></p>"
-					+ this.mouseEq.earthquake.date + "<br/>" + "Magnitude: <b>" + this.mouseEq.earthquake.magnitude
-					+ "</b><br/>Depth: <b>" + (this.mouseEq.earthquake.position.elevation / -1000) + " km</b>");
+			this.tooltipAnnotation.setText(createTooltipAnnotationFromEarthquake(mouseEq.earthquake));
 			this.tooltipAnnotation.setPosition(this.mouseEq.getPosition());
 			this.tooltipAnnotation.getAttributes().setVisible(true);
 		}
+	}
+
+	private String createTooltipAnnotationFromEarthquake(Earthquake quake)
+	{
+		final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy HH:mm:ss z");
+		StringBuilder result = new StringBuilder();
+		result.append("<p><b>").append(quake.title).append("</b></p>")
+			  .append(dateFormat.format(quake.date)).append("<br/>")
+			  .append("Magnitude: <b>").append(quake.magnitude).append("</b><br/>")
+			  .append("Depth: <b>").append((quake.position.elevation / -1000)).append(" km</b>");
+		return result.toString();
 	}
 
 	private void click(Object o)
@@ -314,9 +324,9 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 		public final Position position;
 		public final BigDecimal magnitude;
 
-		private static final Pattern MAGNITUDE_TITLE_PATTERN = Pattern.compile("(?i)(?:magnitude )?(?-i)(\\d+(?:\\.\\d+)?),[\\s]*(.*)[.]*");
-		private static final Pattern DATE_ELEVATION_PATTERN = Pattern.compile("(?i)date and time(?-i).*?(UTC:[\\s]?\\d+\\s+\\w{3}\\s+\\d{4}\\s+\\d{2}:\\d{2}:\\d{2}).*(?i)depth(?-i).*:\\s+(\\d+(?:\\.\\d+))");
-		private static final String DATE_FORMAT = "Z: dd MMM yyyy hh:mm:ss";
+		private static final Pattern MAGNITUDE_TITLE_PATTERN = Pattern.compile("(?i)(?:magnitude )?(?-i)(\\d+(?:\\.\\d+)?),[\\s]*([\\w\\s'-,]*)");
+		private static final Pattern DATE_ELEVATION_PATTERN = Pattern.compile("(?s)(?i)date and time(?-i).*?(UTC:[\\s]?\\d+\\s+\\w{3}\\s+\\d{4}\\s+\\d{2}:\\d{2}:\\d{2}).*(?i)depth(?-i).*:\\s+(\\d+(?:\\.\\d+))");
+		private static final String DATE_FORMAT = "Z: dd MMM yyyy HH:mm:ss";
 		
 		public Earthquake(Element content)
 		{
@@ -325,6 +335,8 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 				throw new IllegalArgumentException("An XML element is required.");
 			}
 			XPath xpath = WWXML.makeXPath();
+			
+			// Add the georss namespace to the xpath
 			MapBackedNamespaceContext context = new MapBackedNamespaceContext();
 			context.addMapping("georss", "http://www.georss.org/georss");
 			xpath.setNamespaceContext(context);
@@ -368,7 +380,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 					catch (ParseException e)
 					{
 					}
-					elevation = Double.parseDouble(matcher.group(2));
+					elevation = Double.parseDouble(matcher.group(2)) * -1000; // km -> m
 				}
 			}
 			this.date = theDate;
@@ -411,7 +423,9 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 			}
 
 			if (!this.getAttributes().isVisible())
+			{
 				return;
+			}
 
 			Vec4 annotationPoint = getAnnotationDrawPoint(dc);
 			dc.getAnnotationRenderer().render(dc, this, annotationPoint, dc.getCurrentLayer());
@@ -446,7 +460,9 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 			// Draw 32x32 shape from its bottom left corner
 			int size = 32;
 			if (this.shapeBuffer == null)
+			{
 				this.shapeBuffer = FrameFactory.createShapeBuffer(FrameFactory.SHAPE_ELLIPSE, size, size, 0, null);
+			}
 
 			dc.getGL().glTranslated(-size / 2, -size / 2, 0);
 			FrameFactory.drawBuffer(dc, GL.GL_TRIANGLE_FAN, this.shapeBuffer);
@@ -470,7 +486,9 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 			// Draw 32x32 shape from its bottom left corner
 			int size = 32;
 			if (this.shapeBuffer == null)
+			{
 				this.shapeBuffer = FrameFactory.createShapeBuffer(FrameFactory.SHAPE_RECTANGLE, size, 4, 0, null);
+			}
 
 			dc.getGL().glTranslated(-size / 2, -2, 0);
 			FrameFactory.drawBuffer(dc, GL.GL_TRIANGLE_FAN, this.shapeBuffer);
@@ -491,8 +509,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 					{
 						stack.pushModelview(gl);
 						stack.pushProjection(gl);
-						BasicView.loadGLViewState(dc, dc.getView().getModelviewMatrix(), dc.getView()
-								.getProjectionMatrix());
+						BasicView.loadGLViewState(dc, dc.getView().getModelviewMatrix(), dc.getView().getProjectionMatrix());
 
 						gl.glLineWidth(1f);
 						gl.glBegin(GL.GL_LINES);
