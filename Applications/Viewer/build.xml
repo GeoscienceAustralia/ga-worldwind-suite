@@ -195,7 +195,7 @@
 
 	<target name="run" depends="sign, executable" />
 
-	<target name="archive" depends="clean, run">
+	<target name="archive" depends="clean, run" description="Archives the latest build in the project directory">
 		<copy file="${executable_dir}/${executable_jar}" tofile="${archive_location}/${executable_versioned_jar}" preservelastmodified="true" />
 		<copy file="${executable_dir}/${run_file}" todir="${archive_location}" preservelastmodified="true" />
 		<copy file="${executable_dir}/${experimental_run_file}" todir="${archive_location}" preservelastmodified="true" />
@@ -205,7 +205,7 @@
 		<copy file="${webstart_dir}/${ww_signed_jar}" todir="${archive_location}" preservelastmodified="true" />
 	</target>
 	
-	<target name="deploy" depends="archive">
+	<target name="deploy" depends="archive" description="Deploys the built Viewer into the sandpit location, making it accessible via the intranet">
 		<copy file="${executable_dir}/${executable_jar}" todir="${deploy_location}\executable" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${app_unsigned_jar}" todir="${deploy_location}" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${app_signed_jar}" todir="${deploy_location}" preservelastmodified="true" />
