@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.common.ui.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Frame;
 import java.awt.Window;
 
 import javax.swing.Icon;
@@ -97,5 +98,15 @@ public abstract class CollapsiblePanelBase extends JPanel implements Collapsible
         }
 
         return (Window)comp;
+	}
+	
+	protected Frame getParentFrame()
+	{
+		Component comp = this;
+        while (comp != null && !(comp instanceof Frame)) {
+            comp = comp.getParent();
+        }
+
+        return (Frame)comp;
 	}
 }

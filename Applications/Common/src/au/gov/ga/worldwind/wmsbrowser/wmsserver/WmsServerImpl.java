@@ -70,6 +70,24 @@ public class WmsServerImpl implements WmsServer
 	}
 	
 	@Override
+	public void setIdentifier(WmsServerIdentifier identifier)
+	{
+		if (identifier == null)
+		{
+			return;
+		}
+		boolean reloadRequired = !this.identifier.getCapabilitiesUrl().equals(identifier.getCapabilitiesUrl());
+		
+		this.identifier = identifier;
+		
+		if (reloadRequired)
+		{
+			capabilities = null;
+			layers = null;
+		}
+	}
+	
+	@Override
 	public String getName()
 	{
 		return identifier.getName();

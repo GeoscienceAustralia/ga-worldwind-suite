@@ -61,6 +61,16 @@ public class WmsBrowserMessageConstants extends CommonMessageConstants
 	public static String getEditCswDuplicateUrlTitleKey() { return "wmsbrowser.editcsw.duplicateurl.title"; }
 	public static String getEditServerLabelKey() { return "wmsbrowser.gui.menu.editserver.label"; }
 	public static String getEditServerTooltipKey() { return "wmsbrowser.gui.menu.editserver.tooltip"; }
+	public static String getEditServerDialogOkButtonTooltipKey() { return "wmsbrowser.editserver.ok.tooltip"; }
+	public static String getEditServerDialogCancelButtonTooltipKey() { return "wmsbrowser.editserver.cancel.tooltip"; }
+	public static String getEditServerDialogTitleKey() { return "wmsbrowser.editserver.title"; }
+	public static String getEditServerDialogEditNameLabelKey() { return "wmsbrowser.editserver.servername.label"; }
+	public static String getEditServerDialogEditNameTooltipKey() { return "wmsbrowser.editserver.servername.tooltip"; }
+	public static String getEditServerDialogEditUrlLabelKey() { return "wmsbrowser.editserver.serverurl.label"; }
+	public static String getEditServerDialogEditUrlTooltipKey() { return "wmsbrowser.editserver.serverurl.tooltip"; }
+	public static String getEditServerDialogInvalidUrlMessageKey() { return "wmsbrowser.editserver.serverurl.invalid.message"; }
+	public static String getEditServerDialogInvalidDetailsTitleKey() { return "wmsbrowser.editserver.validation.title"; }
+	public static String getEditServerDialogInvalidDetailsMessageKey() { return "wmsbrowser.editserver.validation.message"; }
 	
 	public static String getServerNotReachableErrorMsgKey() { return "wmsbrowser.error.servernotreachable.message"; }
 	public static String getServerReturnedInvalidErrorMsgKey() { return "wmsbrowser.error.invalidcapabilities.message"; }

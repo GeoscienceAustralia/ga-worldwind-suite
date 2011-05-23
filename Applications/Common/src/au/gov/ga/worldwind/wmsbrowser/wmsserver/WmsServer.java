@@ -27,6 +27,11 @@ public interface WmsServer
 	WmsServerIdentifier getIdentifier();
 	
 	/**
+	 * Change the identifier details for this server
+	 */
+	void setIdentifier(WmsServerIdentifier identifier);
+	
+	/**
 	 * @return The capabilities for this service if loaded; <code>null</code> otherwise.
 	 */
 	WMSCapabilities getCapabilities();

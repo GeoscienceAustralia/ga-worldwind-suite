@@ -121,5 +121,10 @@ public class WmsServerTreeModel extends DefaultLazyTreeModel implements LazyTree
 	{
 		fireTreeStructureChanged(source, new Object[] { servers }, null, null);
 	}
+	
+	public void forceRefresh()
+	{
+		rootNode.refreshChildren(this);
+	}
 
 }
