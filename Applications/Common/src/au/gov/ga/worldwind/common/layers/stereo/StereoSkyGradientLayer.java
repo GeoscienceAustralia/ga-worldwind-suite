@@ -9,8 +9,21 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.render.DrawContext;
 
+/**
+ * An extension of the {@link SkyGradientLayer} that is modified to use {@link View#computeHorizonDistance()} rather than
+ * {@link View#getFarClipDistance()} to make it suitable for use in views that dynamically modify the far clip distance 
+ * (e.g. for occasions when {@link View#getFarClipDistance()} != {@link View#computeHorizonDistance()}).
+ * 
+ */
 public class StereoSkyGradientLayer extends SkyGradientLayer
 {
+	private static final double PI_ON_2 = Math.PI / 2;
+	private static final double ONE80_ON_PI = 180.0 / Math.PI;
+	
+	/* *******************************************************************************************************
+	 * The following methods are overridden to use computeHorizonDistance() in place of getFarClipDistance() *
+	 ******************************************************************************************************* */
+	
 	@Override
 	protected void applyDrawProjection(DrawContext dc)
 	{
@@ -21,7 +34,7 @@ public class StereoSkyGradientLayer extends SkyGradientLayer
 
 			//near is the distance from the origin
 			double near = 100;
-			double far = stereo.getFarClipDistance() + 10e3;
+			double far = stereo.computeHorizonDistance() + 10e3;
 			Matrix projection = stereo.calculateProjectionMatrix(near, far);
 
 			if (projection != null)
@@ -44,10 +57,6 @@ public class StereoSkyGradientLayer extends SkyGradientLayer
 		}
 	}
 	
-	/* *******************************************************************************************************
-	 * The following methods are overridden to use computeHorizonDistance() in place of getFarClipDistance() *
-	 ******************************************************************************************************* */
-	
 	@Override
 	protected boolean isValid(DrawContext dc)
     {
@@ -63,7 +72,9 @@ public class StereoSkyGradientLayer extends SkyGradientLayer
         View view = dc.getView();
 
         if (this.glListId != -1)
+        {
             gl.glDeleteLists(this.glListId, 1);
+        }
 
         double tangentalDistance = view.computeHorizonDistance();
         double distToCenterOfPlanet = view.getEyePoint().getLength3();
@@ -72,21 +83,22 @@ public class StereoSkyGradientLayer extends SkyGradientLayer
         double camAlt = camPos.getElevation();
 
         // horizon latitude degrees
-        double horizonLat = (-Math.PI / 2 + Math.acos(tangentalDistance / distToCenterOfPlanet))
-                * 180 / Math.PI;
+        double horizonLat = (-PI_ON_2 + Math.acos(tangentalDistance / distToCenterOfPlanet)) * ONE80_ON_PI;
+        
         // zenith latitude degrees
         double zenithLat = 90;
         float zenithOpacity = 1f;
         float gradientBias = 2f;
+        
         if (camAlt >= thickness)
         {
             // Eye is above atmosphere
-            double tangentalDistanceZenith = Math.sqrt(distToCenterOfPlanet * distToCenterOfPlanet
-                    - (worldRadius + thickness) * (worldRadius + thickness));
-            zenithLat = (-Math.PI / 2 + Math.acos(tangentalDistanceZenith / distToCenterOfPlanet)) * 180 / Math.PI;
+            double tangentalDistanceZenith = Math.sqrt(distToCenterOfPlanet * distToCenterOfPlanet - (worldRadius + thickness) * (worldRadius + thickness));
+            zenithLat = (-PI_ON_2 + Math.acos(tangentalDistanceZenith / distToCenterOfPlanet)) * ONE80_ON_PI;
             zenithOpacity = 0f;
             gradientBias = 1f;
         }
+        
         if (camAlt < thickness && camAlt > thickness * 0.7)
         {
             // Eye is entering atmosphere - outer 30%
@@ -96,8 +108,7 @@ public class StereoSkyGradientLayer extends SkyGradientLayer
             gradientBias = 1f + (float)factor;
         }
 
-        this.makeSkyDome(dc, (float) (tangentalDistance), horizonLat, zenithLat, SLICES, STACKS,
-            zenithOpacity, gradientBias);
+        this.makeSkyDome(dc, (float) (tangentalDistance), horizonLat, zenithLat, SLICES, STACKS, zenithOpacity, gradientBias);
         this.lastRebuildHorizon = tangentalDistance;
     }
 }
