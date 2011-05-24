@@ -4,10 +4,16 @@ import java.io.File;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.util.FileUtil;
+import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
 
 public class AnimationImageSequenceNameFactory
 {
+	private static final String DEFAULT_FRAME_NAME = "frame";
+
+	private AnimationImageSequenceNameFactory(){}
+	
 	/**
 	 * Create an image sequence file name for the specified frame of the provided animation.
 	 * <p/>
@@ -29,7 +35,10 @@ public class AnimationImageSequenceNameFactory
 	 */
 	public static String createImageSequenceName(Animation animation, int frame, String frameName)
 	{
-		return createImageSequenceName(frame, frameName, String.valueOf(animation.getFrameCount()).length());
+		Validate.notNull(animation, "An animation is required");
+		return createImageSequenceName(frame, 
+									   Util.isBlank(frameName) ? DEFAULT_FRAME_NAME : frameName, 
+									   String.valueOf(animation.getFrameCount()).length());
 	}
 	
 	/**

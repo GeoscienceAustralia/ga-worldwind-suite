@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.animator.application;
 
-import static au.gov.ga.worldwind.animator.util.FileUtil.createSequenceFileName;
+import static au.gov.ga.worldwind.animator.application.render.AnimationImageSequenceNameFactory.createImageSequenceFile;
 import static au.gov.ga.worldwind.animator.util.FileUtil.stripSequenceNumber;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.FileUtil.stripExtension;
@@ -1618,11 +1618,10 @@ public class Animator
 		// Check for existing files and prompt for confirmation if they exist
 		int firstFrame = Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
 		int lastFrame = getCurrentAnimation().getFrameOfLastKeyFrame();
-		int filenameLength = String.valueOf(getCurrentAnimation().getFrameCount()).length();
 		boolean promptForOverwrite = false;
 		for (int i = firstFrame; i <= lastFrame; i++)
 		{
-			if (new File(destinationFile, createImageSequenceName(fileName, i, filenameLength)).exists())
+			if (createImageSequenceFile(getCurrentAnimation(), i, fileName, destinationFile).exists())
 			{
 				promptForOverwrite = true;
 				break;
@@ -1632,8 +1631,8 @@ public class Animator
 		{
 			int response = JOptionPane.showConfirmDialog(frame,
 								getMessage(getConfirmRenderOverwriteMessageKey(),
-										createImageSequenceName(fileName, firstFrame, filenameLength),
-										createImageSequenceName(fileName, lastFrame, filenameLength)),
+										createImageSequenceFile(getCurrentAnimation(), firstFrame, fileName, destinationFile),
+										createImageSequenceFile(getCurrentAnimation(), lastFrame, fileName, destinationFile)),
 								getMessage(getConfirmRenderOverwriteCaptionKey()),
 								JOptionPane.YES_NO_OPTION,
 								JOptionPane.QUESTION_MESSAGE);
@@ -1644,11 +1643,6 @@ public class Animator
 		}
 
 		return new File(destinationFile, fileName);
-	}
-
-	private String createImageSequenceName(String prefix, int sequenceNumber, int padTo)
-	{
-		return createSequenceFileName(prefix, sequenceNumber, padTo, ".tga");
 	}
 
 	public void disableUtilityLayers()

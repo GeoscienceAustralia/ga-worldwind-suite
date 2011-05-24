@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.animator.application.render;
 
-import static au.gov.ga.worldwind.animator.util.FileUtil.createSequenceFileName;
 import static au.gov.ga.worldwind.animator.util.FileUtil.stripSequenceNumber;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.FileUtil.stripExtension;
@@ -564,9 +563,10 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		
 		int firstFrame = Math.max(0, frameStartField.getValue());
 		int lastFrame = Math.min(frameEndField.getValue(), getCurrentAnimation().getLastFrame());
-		int filenameLength = String.valueOf(getCurrentAnimation().getFrameCount()).length();
 		
-		final String example = createSequenceFileName(name, firstFrame, filenameLength, "") + ",...," + createSequenceFileName(name, lastFrame, filenameLength, "");
+		final String example = AnimationImageSequenceNameFactory.createImageSequenceName(getCurrentAnimation(), firstFrame, name) 
+							   + ",...," 
+							   + AnimationImageSequenceNameFactory.createImageSequenceName(getCurrentAnimation(), lastFrame, name);
 		
 		SwingUtil.invokeTaskOnEDT(new Runnable(){
 			@Override
