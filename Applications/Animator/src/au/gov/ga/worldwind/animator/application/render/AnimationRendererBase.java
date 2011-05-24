@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.RenderParameters;
-import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
 
 /**
@@ -43,7 +42,8 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 	public final void render(final Animation animation, final RenderParameters renderParams)
 	{
 		resetRenderFlags();
-		if (animation == null || !animation.hasKeyFrames() || !renderParams.isFrameRangeSet() || renderParams.getEndFrame() < renderParams.getStartFrame())
+		if (animation == null || !animation.hasKeyFrames() || 
+				!renderParams.isFrameRangeSet() || renderParams.getEndFrame() < renderParams.getStartFrame())
 		{
 			return;
 		}
@@ -67,14 +67,12 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 		notifyStarted();
 		doPreRender(animation, renderParams);
 		
-		int numeralPadLength = String.valueOf(renderParams.getEndFrame()).length();
-		
 		for (int frame = renderParams.getStartFrame(); frame <= renderParams.getEndFrame(); frame ++)
 		{
 			currentFrame = frame;
 			notifyStartingFrame(frame);
 			
-			renderFrame(frame, animation, renderParams, numeralPadLength);
+			renderFrame(frame, animation, renderParams);
 			
 			notifyFinishedFrame(frame);
 			completedPercentage = (double)(frame - renderParams.getStartFrame()) / (double)(renderParams.getEndFrame() - renderParams.getStartFrame());
@@ -89,9 +87,11 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 		notifyCompleted(renderParams.getEndFrame());
 	}
 	
-	protected void renderFrame(int frame, Animation animation, RenderParameters renderParams, int numeralPadLength)
+	protected void renderFrame(int frame, Animation animation, RenderParameters renderParams)
 	{
-		File targetFile = createFileForFrame(frame, renderParams.getRenderDirectory(), renderParams.getFrameName(), numeralPadLength);
+		File targetFile = AnimationImageSequenceNameFactory.createImageSequenceFile(animation, frame, 
+																					renderParams.getFrameName(), 
+																					renderParams.getRenderDirectory());
 		doRender(frame, targetFile, animation, renderParams);
 	}
 
@@ -100,19 +100,6 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 		stop.set(false);
 		done.set(false);
 		started.set(false);
-	}
-	
-	protected File createFileForFrame(int frame, File outputDir, String frameName, int numeralPadLength)
-	{
-		return new File(outputDir, createImageSequenceName(frameName, frame, numeralPadLength));
-	}
-	
-	/**
-	 * @return The name of a file in an image sequence, of the form <code>{prefix}{padded sequence number}.tga</code>
-	 */
-	protected String createImageSequenceName(String prefix, int sequenceNumber, int padTo)
-	{
-		return prefix + FileUtil.paddedInt(sequenceNumber, padTo) + ".tga";
 	}
 	
 	/**

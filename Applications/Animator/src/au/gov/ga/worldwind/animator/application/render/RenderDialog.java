@@ -564,7 +564,7 @@ public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 		
 		int firstFrame = Math.max(0, frameStartField.getValue());
 		int lastFrame = Math.min(frameEndField.getValue(), getCurrentAnimation().getLastFrame());
-		int filenameLength = String.valueOf(lastFrame).length();
+		int filenameLength = String.valueOf(getCurrentAnimation().getFrameCount()).length();
 		
 		final String example = createSequenceFileName(name, firstFrame, filenameLength, "") + ",...," + createSequenceFileName(name, lastFrame, filenameLength, "");
 		

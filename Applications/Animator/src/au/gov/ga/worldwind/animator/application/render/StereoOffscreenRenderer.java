@@ -22,38 +22,28 @@ public class StereoOffscreenRenderer extends OffscreenRenderer
 	}
 
 	@Override
-	protected void renderFrame(int frame, Animation animation, RenderParameters renderParams, int numeralPadLength)
+	protected void renderFrame(int frame, Animation animation, RenderParameters renderParams)
 	{
 		//if the view is not a stereo view, then just render with the super method
 		boolean stereo = wwd.getView() instanceof StereoView && animation.getCamera() instanceof StereoCamera;
 		if (!stereo)
 		{
-			super.renderFrame(frame, animation, renderParams, numeralPadLength);
+			super.renderFrame(frame, animation, renderParams);
 			return;
 		}
 
 		StereoView view = (StereoView) wwd.getView();
 		view.setup(true, Eye.LEFT);
 
-		File targetFile = createFileForFrame(frame, renderParams.getRenderDirectory(), renderParams.getFrameName(), numeralPadLength, Eye.LEFT);
+		File targetFile = AnimationImageSequenceNameFactory.createStereoImageSequenceFile(animation, frame, renderParams.getFrameName(), renderParams.getRenderDirectory(), Eye.LEFT);
 		doRender(frame, targetFile, animation, renderParams);
 
 		view.setup(true, Eye.RIGHT);
 
-		targetFile = createFileForFrame(frame, renderParams.getRenderDirectory(), renderParams.getFrameName(), numeralPadLength, Eye.RIGHT);
+		targetFile = AnimationImageSequenceNameFactory.createStereoImageSequenceFile(animation, frame, renderParams.getFrameName(), renderParams.getRenderDirectory(), Eye.RIGHT);
 		doRender(frame, targetFile, animation, renderParams);
 
 		view.setup(false, Eye.LEFT);
 	}
 
-	protected File createFileForFrame(int frame, File outputDir, String frameName, int numeralPadLength, Eye eye)
-	{
-		String eyeString = eye == Eye.LEFT ? "left" : "right";
-		File dir = new File(outputDir, frameName + "_" + eyeString);
-		if (!dir.exists())
-		{
-			dir.mkdirs();
-		}
-		return new File(dir, createImageSequenceName(frameName, frame, numeralPadLength));
-	}
 }

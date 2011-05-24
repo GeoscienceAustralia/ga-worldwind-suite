@@ -111,6 +111,12 @@ public class OffscreenRenderer extends AnimationRendererBase
 	@Override
 	protected void doRender(int frame, File targetFile, Animation animation, RenderParameters renderParams)
 	{
+		// Ensure the directories exist
+		if (!targetFile.getParentFile().exists())
+		{
+			targetFile.getParentFile().mkdirs();
+		}
+		
 		targetApplication.setSlider(frame);
 		animation.applyFrame(frame);
 

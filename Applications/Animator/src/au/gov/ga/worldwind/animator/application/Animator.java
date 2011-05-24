@@ -1618,7 +1618,7 @@ public class Animator
 		// Check for existing files and prompt for confirmation if they exist
 		int firstFrame = Math.max(slider.getValue(), getCurrentAnimation().getFrameOfFirstKeyFrame());
 		int lastFrame = getCurrentAnimation().getFrameOfLastKeyFrame();
-		int filenameLength = String.valueOf(lastFrame).length();
+		int filenameLength = String.valueOf(getCurrentAnimation().getFrameCount()).length();
 		boolean promptForOverwrite = false;
 		for (int i = firstFrame; i <= lastFrame; i++)
 		{
