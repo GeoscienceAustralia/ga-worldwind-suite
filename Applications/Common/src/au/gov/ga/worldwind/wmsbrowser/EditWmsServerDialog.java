@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -20,13 +21,15 @@ import java.util.ArrayList;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.GroupLayout.Alignment;
+import javax.swing.KeyStroke;
 
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
@@ -42,6 +45,9 @@ class EditWmsServerDialog extends JDialog
 
 	private BasicAction okAction;
 	private BasicAction cancelAction;
+	
+	private JButton cancelButton;
+	private JButton okButton;
 	
 	private JTextField serverNameField;
 	private JTextField serverUrlField;
@@ -69,9 +75,12 @@ class EditWmsServerDialog extends JDialog
 			@Override
 			public void componentShown(ComponentEvent e)
 			{
+				serverNameField.requestFocus();
 				response = JOptionPane.CANCEL_OPTION;
 			}
 		});
+		
+		setupEnterEscapeBehaviour();
 	}
 	
 	private void initialiseActions()
@@ -148,9 +157,26 @@ class EditWmsServerDialog extends JDialog
 	private void addButtonBar()
 	{
 		JPanel container = new JPanel(new FlowLayout(FlowLayout.TRAILING));
-		container.add(new JButton(cancelAction));
-		container.add(new JButton(okAction));
+		
+		cancelButton = new JButton(cancelAction);
+		okButton = new JButton(okAction);
+		
+		container.add(cancelButton);
+		container.add(okButton);
 		contentFrame.add(container);
+	}
+	
+	private void setupEnterEscapeBehaviour()
+	{
+		// Configure the root panel to respond to 'Enter' and 'Escape'
+		getRootPane().setDefaultButton(okButton);
+		getRootPane().registerKeyboardAction(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				cancelAction.actionPerformed(e);
+			}
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 	}
 	
 	private void closeDialogWithResponse(int response)
