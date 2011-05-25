@@ -2,7 +2,7 @@
 
 <project name="Viewer" basedir="." default="run">
 
-	<property name="archive_location" value="\\NAS\Corp\gav\GEOVIS\VIS\Projects\World Wind Suite\Viewer\Builds\Current"/>
+	<property name="archive_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Viewer\Builds\Current"/>
 	<property name="deploy_location" value="\\marl\sandpit\symbolic-links\world-wind\current"/>
 	
 	<property name="application_version" value="2.0-SNAPSHOT"/>

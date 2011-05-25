@@ -2,7 +2,7 @@
 
 <project name="Tiler" basedir="." default="run">
 
-	<property name="deploy_location" value="\\NAS\Corp\gav\GEOVIS\VIS\Projects\World Wind Suite\Tiler\Builds\Current"/>
+	<property name="deploy_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Tiler\Builds\Current"/>
 	
 	<property name="src.dir" value="${basedir}/src" />
 	<property name="lib.dir" value="${basedir}/lib" />
