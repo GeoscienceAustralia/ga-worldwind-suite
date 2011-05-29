@@ -331,7 +331,7 @@ public class RibbonTiler
 			}
 		}
 		
-		if (context.isGenerateLayerDefinition())
+		if (!context.isSuppressLayerDefinition())
 		{
 			LayerDefinitionCreator creator = new LayerDefinitionCreator();
 			creator.createDefinition(context);

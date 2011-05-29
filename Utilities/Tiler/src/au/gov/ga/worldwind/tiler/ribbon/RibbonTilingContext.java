@@ -31,7 +31,8 @@ public class RibbonTilingContext {
 	private File sourceFile;
 	@Parameter(names="-output", description="The output location", required=true, converter=FileConverter.class)
 	private File outputLocation;
-	@Parameter(names="-tileset", description="The name to use for the tileset folder", converter=FileConverter.class)
+	@Parameter(names="-tileset", description="The name to use for the tileset folder")
+	private String tilesetName;
 	private File tilesetRoot;
 	private Insets insets = new Insets(0,0,0,0);
 	@Parameter(names="-format", description="Override the output format")
@@ -42,15 +43,15 @@ public class RibbonTilingContext {
 	@Parameter(names="-removeConstantColumns", description="Remove constant colour from the top and bottom of the image")
 	private boolean removeConstantColumns = false;
 	@Parameter(names="-copySource", description="Copy the source image to the tileset folder?")
-	private boolean copySource = true; 
+	private boolean copySource = false; 
 	@Parameter(names="-mask", description="Generate a mask tileset?")
 	private boolean mask = false;
-	@Parameter(names="-generateLog", description="Generate a tiling log?")
-	private boolean generateTilingLog = true;
+	@Parameter(names="-noLog", description="Suppress the generation of a tiling log?")
+	private boolean suppressTilingLog = false;
 	@Parameter(names="-hideStdOut", description="Hide the standard console output?")
 	private boolean hideStdOut = false;
-	@Parameter(names="-generateLayerDef", description="Generate a layer definition file?")
-	private boolean generateLayerDefinition = true;
+	@Parameter(names="-noLayerDef", description="Suppress the generation of a layer definition file?")
+	private boolean suppressLayerDefinition = false;
 	
 	// Layer definition parameters
 	@Parameter(names="-elementCreators", description="The fully qualified classname of element creators to use", converter=CommaSeparatedConverter.class)
@@ -63,9 +64,9 @@ public class RibbonTilingContext {
 	private String dataCache;
 	@Parameter(names="-path", description="Provide pipe-separated lat-lon pairs to specify the path", converter=CommaSeparatedConverter.class)
 	private List<String> pathLatLons = new ArrayList<String>();
-	@Parameter(names="-top", description="The curtain top elevation")
+	@Parameter(names="-top", description="The curtain top elevation", converter=DoubleConverter.class)
 	private Double curtainTop = 0d;
-	@Parameter(names="-bottom", description="The curtain bottom elevation")
+	@Parameter(names="-bottom", description="The curtain bottom elevation", converter=DoubleConverter.class)
 	private Double curtainBottom = -100d;
 	@Parameter(names="-followTerrain", description="Follow the terrain?")
 	private boolean followTerrain = false;
@@ -101,7 +102,7 @@ public class RibbonTilingContext {
 	
 	public Writer getLogWriter()
 	{
-		if (!generateTilingLog)
+		if (suppressTilingLog)
 		{
 			return NULL_WRITER;
 		}
@@ -139,7 +140,16 @@ public class RibbonTilingContext {
 	
 	public String getTilesetName()
 	{
-		return sourceFile == null ? null : Util.stripExtension(sourceFile.getName());
+		if (tilesetName == null)
+		{
+			tilesetName = sourceFile == null ? null : Util.stripExtension(sourceFile.getName());
+		}
+		return tilesetName;
+	}
+	
+	public void setTilesetName(String tilesetName)
+	{
+		this.tilesetName = tilesetName;
 	}
 	
 	public File getSourceLocation()
@@ -151,8 +161,8 @@ public class RibbonTilingContext {
 	{
 		if (tilesetRoot == null)
 		{
-			tilesetRoot = new File(outputLocation, getTilesetName());
-			tilesetRoot.mkdir();
+			tilesetRoot = new File(getOutputLocation(), getTilesetName());
+			tilesetRoot.mkdirs();
 		}
 		return tilesetRoot;
 	}
@@ -205,14 +215,16 @@ public class RibbonTilingContext {
 		return copySource;
 	}
 
-	public void setGenerateTilingLog(boolean generateTilingLog) {
-		this.generateTilingLog = generateTilingLog;
+	public void setSuppressTilingLog(boolean suppressTilingLog)
+	{
+		this.suppressTilingLog = suppressTilingLog;
 	}
-
-	public boolean isGenerateTilingLog() {
-		return generateTilingLog;
+	
+	public boolean isSuppressTilingLog()
+	{
+		return suppressTilingLog;
 	}
-
+	
 	public void setHideStdOut(boolean hideStdOut) {
 		this.hideStdOut = hideStdOut;
 	}
@@ -225,12 +237,14 @@ public class RibbonTilingContext {
 		this.tilesetRoot = destination;
 	}
 	
-	public boolean isGenerateLayerDefinition() {
-		return generateLayerDefinition;
+	public boolean isSuppressLayerDefinition()
+	{
+		return suppressLayerDefinition;
 	}
-
-	public void setGenerateLayerDefinition(boolean generateLayerDefinition) {
-		this.generateLayerDefinition = generateLayerDefinition;
+	
+	public void setSuppressLayerDefinition(boolean suppressLayerDefinition)
+	{
+		this.suppressLayerDefinition = suppressLayerDefinition;
 	}
 	
 	public File getLayerDefinitionFile() {
