@@ -4,5 +4,10 @@
         <Layer enabled="true" expanded="true" icon="file://folder1/layer1/icon" info="file://folder1/layer1/info" layer="file://folder1/layer1/layer" name="layer1"/>
         <Layer icon="file://folder1/layer2/icon" info="file://folder1/layer2/info" layer="file://folder1/layer2/layer" name="layer2" opacity="0.5"/>
     </Folder>
-    <Layer enabled="true" expanded="true" expiry="1000" icon="http://folder1/wmslayer/icon" info="http://folder1/wmslayer/info" layer="http://folder1/wmslayer/layer" layerId="theWmsLayer" legend="http://folder1/wmslayer/legend" name="wmsLayer" opacity="0.3" type="wms"/>
+    <Folder expanded="true" icon="http://wmsRoot/icon" name="wmsRoot" type="wmsRoot">
+        <Layer enabled="true" expanded="true" expiry="1000" icon="http://wmsRoot/wmslayer/icon" info="http://wmsRoot/wmslayer/info" layer="http://wmsRoot/wmslayer/layer" layerId="theWmsLayer" legend="http://wmsRoot/wmslayer/legend" name="wmsLayer" opacity="0.3" type="wms"/>
+        <Folder icon="http://wmsRoot/wmsServer/icon" name="wmsServer" serverUrl="http://wmsRoot/wmsServer/capabilities" type="wms">
+            <Layer enabled="true" expanded="true" expiry="1001" icon="http://wmsRoot/wmsServer/wmslayer1/icon" info="http://wmsRoot/wmsServer/wmslayer1/info" layer="http://wmsRoot/wmsServer/wmslayer1/layer" layerId="theOtherWmsLayer" legend="http://wmsRoot/wmsServer/wmslayer1/legend" name="wmsLayer1" opacity="0.4" type="wms"/>
+        </Folder>
+    </Folder>
 </LayerList>

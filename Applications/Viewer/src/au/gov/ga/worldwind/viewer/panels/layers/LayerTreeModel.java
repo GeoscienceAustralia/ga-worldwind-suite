@@ -1,12 +1,16 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
+import gov.nasa.worldwindow.core.WMSLayerInfo;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
@@ -31,14 +35,34 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	private Map<URL, Set<ILayerNode>> layerURLmap = new HashMap<URL, Set<ILayerNode>>();
 	private LayerEnabler enabler;
 
+	private WmsRootNode wmsRootFolderNode;
+	
 	public LayerTreeModel(LayerTree tree, INode root, LayerEnabler enabler)
 	{
 		this.tree = tree;
 		this.root = root;
 		this.enabler = enabler;
 		addAnyLayers(root, true);
+		findAndSetWmsRootFolderNode();
 	}
 
+	public void addWmsLayer(WMSLayerInfo layerInfo)
+	{
+		if (layerInfo == null)
+		{
+			return;
+		}
+		
+		WmsRootNode wmsRootNode = getWmsRootNode();
+		if (wmsRootNode == null)
+		{
+			wmsRootNode = createAndAddWmsRootNode();
+		}
+		WmsLayerNode wmsLayerNode = wmsRootNode.addWmsLayer(layerInfo);
+		
+		addAnyLayers(wmsLayerNode, true);
+	}
+	
 	public void addToRoot(INode node, boolean refreshLayers)
 	{
 		insertNodeInto(node, root, root.getChildCount(), refreshLayers);
@@ -531,6 +555,48 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				expandIfRequired(tree, path); //call recursively
 				path.remove(path.size() - 1);
 			}
+		}
+	}
+	
+	public WmsRootNode getWmsRootNode()
+	{
+		return wmsRootFolderNode;
+	}
+	
+	public WmsRootNode createAndAddWmsRootNode()
+	{
+		if (wmsRootFolderNode != null)
+		{
+			return wmsRootFolderNode;
+		}
+		
+		wmsRootFolderNode = new WmsRootNode();
+		addToRoot(wmsRootFolderNode, false);
+		return wmsRootFolderNode;
+	}
+	
+	/** 
+	 * Locate and update the WMS root folder from the current node tree
+	 */
+	private void findAndSetWmsRootFolderNode()
+	{
+		// Perform a breadth-first search for the WMS root node 
+		// (it's most likely to be at the first level, if it exists)
+		INode currentNode = null;
+		Queue<INode> nodesToSearch = new ConcurrentLinkedQueue<INode>();
+		nodesToSearch.add(root);
+		
+		while (!nodesToSearch.isEmpty())
+		{
+			currentNode = nodesToSearch.remove();
+			
+			if (currentNode instanceof WmsRootNode)
+			{
+				this.wmsRootFolderNode = (WmsRootNode)currentNode;
+				return;
+			}
+			
+			nodesToSearch.addAll(currentNode.getChildren());
 		}
 	}
 

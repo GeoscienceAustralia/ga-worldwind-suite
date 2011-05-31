@@ -307,7 +307,7 @@ public class LayersPanel extends AbstractLayersPanel
 
 	private void newFolder()
 	{
-		FolderNode node = new FolderNode("New Folder", null, Icons.folder.getURL(), true);
+		FolderNode node = new FolderNode(getMessage(getTreeNewFolderLabelKey()), null, Icons.folder.getURL(), true);
 		TreePath p = tree.getSelectionPath();
 		TreePath editPath;
 		if (p == null)
@@ -720,9 +720,7 @@ public class LayersPanel extends AbstractLayersPanel
 		{
 			return;
 		}
-		
-		WmsLayerNode layerNode = new WmsLayerNode(layerInfo, true, 1.0);
-		getModel().addToRoot(layerNode, true);
+		getModel().addWmsLayer(layerInfo);
 		tree.getUI().relayout();
 	}
 	

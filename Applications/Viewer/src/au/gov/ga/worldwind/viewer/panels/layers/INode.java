@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
 import java.net.URL;
+import java.util.List;
 
 import au.gov.ga.worldwind.viewer.panels.dataset.IIconItem;
 
@@ -39,6 +40,8 @@ public interface INode extends IIconItem
 	public int getChildCount();
 
 	public INode getChild(int index);
+	
+	public List<INode> getChildren();
 
 	public int getChildIndex(Object child);
 

@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.viewer.panels.layers;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import au.gov.ga.worldwind.viewer.panels.dataset.AbstractIconItem;
@@ -103,6 +104,12 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 	public int getChildIndex(Object child)
 	{
 		return children.indexOf(child);
+	}
+	
+	@Override
+	public List<INode> getChildren()
+	{
+		return Collections.unmodifiableList(children);
 	}
 
 	@Override

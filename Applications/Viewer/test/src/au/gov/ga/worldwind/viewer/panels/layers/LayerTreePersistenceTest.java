@@ -60,7 +60,14 @@ public class LayerTreePersistenceTest
 		folder1.addChild(new LayerNode("layer2", URLUtil.fromString("file://folder1/layer2/info"), URLUtil.fromString("file://folder1/layer2/icon"), false, URLUtil.fromString("file://folder1/layer2/layer"), false, 0.5, null));
 		root.addChild(folder1);
 		
-		root.addChild(new WmsLayerNode("wmsLayer", URLUtil.fromString("http://folder1/wmslayer/info"), URLUtil.fromString("http://folder1/wmslayer/icon"), true, URLUtil.fromString("http://folder1/wmslayer/layer"), true, 0.3, 1000L, URLUtil.fromString("http://folder1/wmslayer/legend"), "theWmsLayer"));
+		WmsRootNode wmsRoot = new WmsRootNode("wmsRoot", URLUtil.fromString("http://wmsRoot/icon"), true);
+		root.addChild(wmsRoot);
+		
+		wmsRoot.addChild(new WmsLayerNode("wmsLayer", URLUtil.fromString("http://wmsRoot/wmslayer/info"), URLUtil.fromString("http://wmsRoot/wmslayer/icon"), true, URLUtil.fromString("http://wmsRoot/wmslayer/layer"), true, 0.3, 1000L, URLUtil.fromString("http://wmsRoot/wmslayer/legend"), "theWmsLayer"));
+		
+		WmsServerNode wmsServer = new WmsServerNode("wmsServer", URLUtil.fromString("http://wmsRoot/wmsServer/icon"), false, URLUtil.fromString("http://wmsRoot/wmsServer/capabilities"));
+		wmsRoot.addChild(wmsServer);
+		wmsServer.addChild(new WmsLayerNode("wmsLayer1", URLUtil.fromString("http://wmsRoot/wmsServer/wmslayer1/info"), URLUtil.fromString("http://wmsRoot/wmsServer/wmslayer1/icon"), true, URLUtil.fromString("http://wmsRoot/wmsServer/wmslayer1/layer"), true, 0.4, 1001L, URLUtil.fromString("http://wmsRoot/wmsServer/wmslayer1/legend"), "theOtherWmsLayer"));
 		
 		return root;
 	}

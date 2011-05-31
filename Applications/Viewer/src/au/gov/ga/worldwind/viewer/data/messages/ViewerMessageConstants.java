@@ -105,6 +105,8 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getTermLayerKey() { return "viewer.term.layer"; }
 	public static String getTermFolderKey() { return "viewer.term.folder"; }
 
+	public static String getTreeNewFolderLabelKey() { return "viewer.tree.newfolder.label"; }
+	public static String getTreeWmsRootNodeLabel() { return "viewer.tree.wmsrootnode.label"; }
 	public static String getTreeLoadingNodeLabelKey() { return "viewer.tree.loadingnode.label"; }
 	public static String getTreeErrorNodeLabelKey() { return "viewer.tree.errornode.label"; }
 	
