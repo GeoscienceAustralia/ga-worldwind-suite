@@ -21,10 +21,16 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.viewer.panels.dataset.IData;
 import au.gov.ga.worldwind.viewer.panels.dataset.IDataset;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 
+/**
+ *	A {@link TreeModel} used to back a {@link LayerTree}.
+ *	<p/>
+ *	Contains logic for managing layers and folders etc. 
+ */
 public class LayerTreeModel implements TreeModel, TreeExpansionListener
 {
 	private INode root;
@@ -39,6 +45,10 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	
 	public LayerTreeModel(LayerTree tree, INode root, LayerEnabler enabler)
 	{
+		Validate.notNull(tree, "A LayerTree is required");
+		Validate.notNull(root, "A root node is required");
+		Validate.notNull(enabler, "A layer enabler is required");
+		
 		this.tree = tree;
 		this.root = root;
 		this.enabler = enabler;
@@ -743,5 +753,10 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		{
 			listeners.get(i).treeNodesRemoved(e);
 		}
+	}
+	
+	List<ILayerNode> getLayerNodes()
+	{
+		return layerNodes;
 	}
 }

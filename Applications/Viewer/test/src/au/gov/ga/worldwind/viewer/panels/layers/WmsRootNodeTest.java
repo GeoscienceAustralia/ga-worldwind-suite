@@ -106,6 +106,46 @@ public class WmsRootNodeTest
 		assertEquals(layerNode, serverNode.getChild(0));
 	}
 	
+	@Test
+	public void testAddWmsWithExistingServerNodeUnderFolders() throws Exception
+	{
+		// Root/
+		//  +-Folder1/
+		//  +-Folder2/
+		//      +-Folder3/
+		//          +-ServerNode/
+		//             +-LayerNode
+		
+		WmsRootNode classUnderTest = new WmsRootNode();
+		
+		FolderNode folder1 = new FolderNode("folder1", null, null, true);
+		classUnderTest.addChild(folder1);
+		
+		FolderNode folder2 = new FolderNode("folder2", null, null, true);
+		classUnderTest.addChild(folder2);
+		
+		FolderNode folder3 = new FolderNode("folder2", null, null, true);
+		folder2.addChild(folder3);
+		
+		WmsServerNode serverNode = new WmsServerNode("dummyServer", null, true, URLUtil.fromString("http://neowms.sci.gsfc.nasa.gov/wms/wms"));
+		folder3.addChild(serverNode);
+		
+		WMSLayerInfo layer = createWmsLayerInfo();
+		WmsLayerNode layerNode = classUnderTest.addWmsLayer(layer);
+		
+		// Confirm the node tree is as expected
+		assertEquals(2, classUnderTest.getChildCount());
+		assertEquals(folder1, classUnderTest.getChild(0));
+		assertEquals(0, folder1.getChildCount());
+		assertEquals(folder2, classUnderTest.getChild(1));
+		assertEquals(1, folder2.getChildCount());
+		assertEquals(folder3, folder2.getChild(0));
+		assertEquals(1, folder3.getChildCount());
+		assertEquals(serverNode, folder3.getChild(0));
+		assertEquals(1, serverNode.getChildCount());
+		assertEquals(layerNode, serverNode.getChild(0));
+	}
+	
 	/**
 	 * Creates a default WMS layer with the following properties:
 	 * <ul>
