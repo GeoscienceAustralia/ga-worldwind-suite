@@ -1,9 +1,11 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
 import gov.nasa.worldwind.ogc.OGCCapabilities;
+import gov.nasa.worldwind.ogc.OGCRequestDescription;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;
+import java.util.Set;
 
 import au.gov.ga.worldwind.common.util.Icons;
 
@@ -14,9 +16,10 @@ public class WmsServerNode extends FolderNode
 	public WmsServerNode(OGCCapabilities caps)
 	{
 		super(caps.getServiceInformation().getServiceTitle(), null, Icons.folder.getURL(), true);
-		this.serverCapabilitiesUrl = caps.getServiceInformation().getOnlineResource().getHref();
+		
+		this.serverCapabilitiesUrl = getCapabilitiesUrlForCaps(caps);
 	}
-	
+
 	public WmsServerNode(String name, URL iconURL, boolean expanded, URL capabilitiesURL)
 	{
 		super(name, null, iconURL, expanded);
@@ -35,11 +38,24 @@ public class WmsServerNode extends FolderNode
 		}
 		
 		OGCCapabilities wmsLayerCaps = wmsInfo.getCaps();
-		return serverCapabilitiesUrl.equalsIgnoreCase(wmsLayerCaps.getServiceInformation().getOnlineResource().getHref());
+		return serverCapabilitiesUrl.equalsIgnoreCase(getCapabilitiesUrlForCaps(wmsLayerCaps));
 	}
 
 	public String getServerCapabilitiesUrl()
 	{
 		return serverCapabilitiesUrl;
+	}
+	
+	private String getCapabilitiesUrlForCaps(OGCCapabilities caps)
+	{
+		Set<OGCRequestDescription> requestDescriptions = caps.getCapabilityInformation().getRequestDescriptions();
+        for (OGCRequestDescription rd : requestDescriptions)
+        {
+            if (rd.getRequestName().equals("GetCapabilities"))
+            {
+            	return rd.getOnlineResouce("HTTP", "Get").getHref();
+            }
+        }
+        return null;
 	}
 }

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WMS_Capabilities version="1.3.0"
+  xsi:schemaLocation="http://www.opengis.net/wms http://schemas.opengeospatial.net/wms/1.3.0/capabilities_1_3_0.xsd"
+  xmlns="http://www.opengis.net/wms"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <Service>
+    <Name>WMS</Name>
+    <Title>NASA Earth Observations (NEO) WMS</Title>
+    <Abstract><![CDATA[Remote sensing imagery from NASA Earth Observations (NEO).]]></Abstract>
+    <KeywordList>
+      <Keyword>nasa</Keyword>
+
+      <Keyword>earth science</Keyword>
+      <Keyword>picture</Keyword>
+    </KeywordList>
+    <OnlineResource xlink:type="simple" xlink:href="http://neo.sci.gsfc.nasa.gov/"/>
+    <ContactInformation>
+      <ContactPersonPrimary>
+        <ContactPerson>Kevin Ward</ContactPerson>
+
+        <ContactOrganization>Science Systems and Applications, Inc./NASA</ContactOrganization>
+      </ContactPersonPrimary>
+      <ContactPosition>NEO Architect and Developer</ContactPosition>
+      <ContactAddress>
+        <AddressType>postal</AddressType>
+        <Address>9025 SW 50th Ave.</Address>
+        <City>Portland</City>
+
+        <StateOrProvince>Oregon</StateOrProvince>
+        <PostCode>97219</PostCode>
+        <Country>United States</Country>
+      </ContactAddress>
+      <ContactVoiceTelephone>+01-503-246-1608</ContactVoiceTelephone>
+      <ContactElectronicMailAddress>kevin@eyeonclimate.com</ContactElectronicMailAddress>
+
+    </ContactInformation>
+    <Fees>none</Fees>
+    <AccessConstraints>none</AccessConstraints>
+    <LayerLimit>1</LayerLimit>
+  </Service>
+  <Capability>
+    <Request>
+
+      <GetCapabilities>
+        <Format>text/xml</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xlink:type="simple" xlink:href="http://neowms.sci.gsfc.nasa.gov/wms/wms"/>
+            </Get>
+          </HTTP>
+
+        </DCPType>
+      </GetCapabilities>
+      <GetMap>
+        <Format>image/png</Format>
+        <Format>image/jpeg</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+
+              <OnlineResource xlink:type="simple" xlink:href="http://neowms.sci.gsfc.nasa.gov/wms/wms"/>
+            </Get>
+          </HTTP>
+        </DCPType>
+      </GetMap>
+    </Request>
+    <Exception>
+      <Format>text/xml</Format>
+
+    </Exception>
+    <Layer>
+      <Title>NASA Earth Observations (NEO) WMS</Title>
+      <CRS>CRS:84</CRS>
+      <EX_GeographicBoundingBox>
+        <westBoundLongitude>-180.0</westBoundLongitude>
+        <eastBoundLongitude>180.0</eastBoundLongitude>
+
+        <southBoundLatitude>-90.0</southBoundLatitude>
+        <northBoundLatitude>90.0</northBoundLatitude>
+      </EX_GeographicBoundingBox>
+      <BoundingBox miny="-90.0" minx="-180.0" maxy="90.0" maxx="180.0" CRS="CRS:84"/>
+      <Layer>
+        <Title>Active Fires</Title>
+        <Abstract><![CDATA[<p>Fire is a recurring part of nature.  Wildfires can be caused by lightning striking a forest canopy or, in a few isolated cases, by lava or hot rocks ejected from erupting volcanoes.  Most fires worldwide are started by humans, sometimes accidentally and sometimes on purpose.  Not all fires are bad.  Fire clears away dead and dying underbrush, which can help restore forest ecosystems to good health.  Humans use fire as a tool in slash-and-burn agriculture to speed up the process of breaking down unwanted vegetation into the soil.  Humans also use fire to clear away old-growth forests to make room for living spaces, roads, and fields for raising crops and cattle.  But not all fires are good.  Wildfires can destroy natural resources and human structures.  Globally, fire plays a major role in Earth&apos;s carbon cycle by releasing carbon into the air, and by consuming trees that would otherwise absorb carbon from the air during photosynthesis.  These maps show the locations of actively burning fires around the world, detected by instruments aboard NASA satellites.</p>]]></Abstract>
+
+        <Layer>
+          <Name>MOD14A1_M_FIRE</Name>
+          <Title>Active Fires (1 month - Terra/MODIS)</Title>
+          <Dimension units="ISO8601" name="time" default="2011-05-01">2000-03-01/2011-05-01/P1M</Dimension>
+          <MetadataURL type="FGDC">
+            <Format>text/xml</Format>
+            <OnlineResource xlink:href="http://neo.sci.gsfc.nasa.gov/FGDCMetadata?datasetId=MOD14A1_M_FIRE"/>
+
+          </MetadataURL>
+          <DataURL>
+            <Format>text/html</Format>
+            <OnlineResource xlink:type="simple" xlink:href="http://neo.sci.gsfc.nasa.gov/Search.html?datasetId=MOD14A1_M_FIRE"/>
+          </DataURL>
+          <Style>
+            <Name>rgb</Name>
+            <Title>RGB Style</Title>
+
+            <LegendURL width="200" height="35">
+              <Format>image/gif</Format>
+              <OnlineResource xlink:type="simple" xlink:href="http://neo.sci.gsfc.nasa.gov/palettes/files/modis_fire_l3.gif"/>
+            </LegendURL>
+          </Style>
+        </Layer>
+      </Layer>
+	</Layer>
+  </Capability>
+</WMS_Capabilities>
