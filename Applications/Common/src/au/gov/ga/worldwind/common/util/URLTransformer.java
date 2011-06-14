@@ -50,4 +50,14 @@ public class URLTransformer
 		}
 		return url;
 	}
+	
+	static List<URLTransform> getTransforms()
+	{
+		return transforms;
+	}
+	
+	public static void clearTransforms()
+	{
+		transforms.clear();
+	}
 }

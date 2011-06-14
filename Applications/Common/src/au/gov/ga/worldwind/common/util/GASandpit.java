@@ -5,16 +5,20 @@ import au.gov.ga.worldwind.common.util.URLTransformer.URLTransform;
 public class GASandpit
 {
 	private static boolean SANDPIT = false;
-	private static URLTransform transform = new SandpitURLTransform();
+	private static final URLTransform transform = new SandpitURLTransform();
 	
 	public static void setSandpitMode(boolean enabled)
 	{
-		SANDPIT = enabled;
-		
-		if(enabled)
+		if(enabled && !SANDPIT) // true->false, add transform
+		{
 			URLTransformer.addTransform(transform);
-		else
+		}
+		else if (SANDPIT && !enabled) // false->true, remove transform
+		{
 			URLTransformer.removeTransform(transform);
+		}
+		
+		SANDPIT = enabled;
 	}	
 
 	public static boolean isSandpitMode()
@@ -22,16 +26,22 @@ public class GASandpit
 		return SANDPIT;
 	}
 	
-	private static class SandpitURLTransform implements URLTransform
+	static class SandpitURLTransform implements URLTransform
 	{
+		private static final String EXTERNAL_GA_PREFIX = "http://www.ga.gov.au";
+		private static final String SANDPIT_GA_PREFIX = "http://www.ga.gov.au:8500";
+		
 		@Override
 		public String transformURL(String url)
 		{
-			String externalga = "http://www.ga.gov.au";
-			if (url.startsWith(externalga + "/"))
+			if (Util.isBlank(url))
 			{
-				String sandpitga = externalga + ":8500";
-				url = sandpitga + url.substring(externalga.length());
+				return null;
+			}
+			
+			if (url.startsWith(EXTERNAL_GA_PREFIX + "/"))
+			{
+				url = SANDPIT_GA_PREFIX + url.substring(EXTERNAL_GA_PREFIX.length());
 			}
 			return url;
 		}
