@@ -90,6 +90,10 @@ public class TestUtils
 	
 	public static String formatDateInTimezone(Date date, String timezoneId)
 	{
+		if (date == null)
+		{
+			return null;
+		}
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 		dateFormat.setTimeZone(TimeZone.getTimeZone(timezoneId));
 		return dateFormat.format(date);

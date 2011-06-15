@@ -54,6 +54,22 @@ public class RSSEarthquakesLayerTest
 	}
 	
 	@Test
+	/** Tests creating an earthquake from a single 'item' element of an RSS feed, with a four-letter month date */
+	public void testNewEarthquakeWithFourLetterMonthCase()
+	{
+		Earthquake quake = new Earthquake(loadXmlElementFromResource("juneRssElementExample.xml"));
+		
+		assertNotNull(quake);
+		assertEquals(new BigDecimal("5.0"), quake.magnitude);
+		assertEquals("Southern Sumatra, Indonesia, Sunda Arc", quake.title);
+		assertEquals("http://www.ga.gov.au/earthquakes/getQuakeDetails.do?quakeId=3063176&orid=430273&sta=XMIS", quake.link);
+		assertEquals(-200000, quake.position.elevation, 0.0001);
+		assertEquals(-1.911, quake.position.latitude.degrees, 0.0001);
+		assertEquals(101.989, quake.position.longitude.degrees, 0.0001);
+		assertEquals("2011-06-15 03:06:45 +0000", TestUtils.formatDateInTimezone(quake.date, "UTC"));
+	}
+	
+	@Test
 	/** Tests creating an earthquake from an 'item' element sourced from an RSS feed */
 	public void testNewEarthquakeFromDummyFeed() throws Exception
 	{

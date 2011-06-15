@@ -325,8 +325,8 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 		public final BigDecimal magnitude;
 
 		private static final Pattern MAGNITUDE_TITLE_PATTERN = Pattern.compile("(?i)(?:magnitude )?(?-i)(\\d+(?:\\.\\d+)?),[\\s]*([\\w\\s'-,]*)");
-		private static final Pattern DATE_ELEVATION_PATTERN = Pattern.compile("(?s)(?i)date and time(?-i).*?(UTC:[\\s]?\\d+\\s+\\w{3}\\s+\\d{4}\\s+\\d{2}:\\d{2}:\\d{2}).*(?i)depth(?-i).*:\\s+(\\d+(?:\\.\\d+))");
-		private static final String DATE_FORMAT = "Z: dd MMM yyyy HH:mm:ss";
+		private static final Pattern DATE_ELEVATION_PATTERN = Pattern.compile("(?s)(?i)date and time(?-i).*?(UTC:[\\s]?\\d+\\s+\\w+\\s+\\d{4}\\s+\\d{2}:\\d{2}:\\d{2}).*(?i)depth(?-i).*:\\s+(\\d+(?:\\.\\d+))");
+		private static final String DATE_FORMAT = "Z: dd MMMM yyyy HH:mm:ss";
 		
 		public Earthquake(Element content)
 		{
