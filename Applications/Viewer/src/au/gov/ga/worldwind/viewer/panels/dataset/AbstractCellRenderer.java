@@ -66,7 +66,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		label.setTextSelectionColor(Color.black);
 		Color backgroundSelection = label.getBackgroundSelectionColor();
 		HSLColor hsl = new HSLColor(backgroundSelection);
-		label.setBackgroundSelectionColor(hsl.adjustTone(80));
+		label.setBackgroundSelectionColor(hsl.adjustTone(15));
 		label.setBorderSelectionColor(hsl.adjustShade(40));
 
 		infoLabel = new JLabel(Icons.infowhite.getIcon());
