@@ -2,6 +2,11 @@ package au.gov.ga.worldwind.common.util;
 
 import au.gov.ga.worldwind.common.util.URLTransformer.URLTransform;
 
+/**
+ * A utility class that enables settings specific to working within the GA
+ * @author u09145
+ *
+ */
 public class GASandpit
 {
 	private static boolean SANDPIT = false;
@@ -9,18 +14,30 @@ public class GASandpit
 	
 	public static void setSandpitMode(boolean enabled)
 	{
-		if(enabled && !SANDPIT) // true->false, add transform
+		if(enabled && !SANDPIT) // true->false, do enable
 		{
-			URLTransformer.addTransform(transform);
+			doEnableSandpit();
 		}
-		else if (SANDPIT && !enabled) // false->true, remove transform
+		else if (SANDPIT && !enabled) // false->true, do disable
 		{
-			URLTransformer.removeTransform(transform);
+			doDisableSandpit();
 		}
 		
 		SANDPIT = enabled;
 	}	
 
+	private static void doEnableSandpit()
+	{
+		URLTransformer.addTransform(transform);
+		System.setProperty("http.nonProxyHosts", "*.ga.gov.au");
+	}
+	
+	private static void doDisableSandpit()
+	{
+		URLTransformer.removeTransform(transform);
+		System.clearProperty("http.nonProxyHosts");
+	}
+	
 	public static boolean isSandpitMode()
 	{
 		return SANDPIT;

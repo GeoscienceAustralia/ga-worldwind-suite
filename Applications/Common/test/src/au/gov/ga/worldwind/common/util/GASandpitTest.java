@@ -67,6 +67,27 @@ public class GASandpitTest
 		assertFalse(GASandpit.isSandpitMode());
 	}
 	
+	@Test
+	public void testEnableSetsNonProxyHosts()
+	{
+		assertEquals(null, System.getProperty("http.nonProxyHosts"));
+		
+		GASandpit.setSandpitMode(true);
+		
+		assertEquals("*.ga.gov.au", System.getProperty("http.nonProxyHosts"));
+	}
+	
+	@Test
+	public void testDisableRemovesNonProxyHosts()
+	{
+		GASandpit.setSandpitMode(true);
+		System.setProperty("http.nonProxyHosts", "bob");
+		
+		GASandpit.setSandpitMode(false);
+		
+		assertEquals(null, System.getProperty("http.nonProxyHosts"));
+	}
+	
 	/*
 	 * Tests for the SandpitUrlTransform
 	 */

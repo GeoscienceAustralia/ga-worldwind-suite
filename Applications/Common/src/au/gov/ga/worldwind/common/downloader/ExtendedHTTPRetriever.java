@@ -6,14 +6,18 @@ import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
+import java.net.ProxySelector;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 /**
  * Extension of {@link HTTPRetriever} which implements {@link ExtendedRetriever}.
- * 
- * @author Michael de Hoog
+ * <p/>
+ * Allows modification dates to be set on read, and uses the java {@link ProxySelector} mechanism rather
+ * than the WWIO configuration mechanism. 
  */
 public class ExtendedHTTPRetriever extends HTTPRetriever implements ExtendedRetriever
 {
@@ -36,7 +40,7 @@ public class ExtendedHTTPRetriever extends HTTPRetriever implements ExtendedRetr
 	@Override
 	protected ByteBuffer doRead(URLConnection connection) throws Exception
 	{
-		//overridden to catch exceptions and set the modification date in the URLConnection
+		// Overridden to catch exceptions and set the modification date in the URLConnection
 
 		if (ifModifiedSince != null)
 			connection.setIfModifiedSince(ifModifiedSince.longValue());
@@ -53,6 +57,28 @@ public class ExtendedHTTPRetriever extends HTTPRetriever implements ExtendedRetr
 		{
 			error = e;
 			throw e;
+		}
+	}
+	
+	@Override
+	protected URLConnection openConnection() throws IOException
+	{
+		// Overridden to use the Java proxy selector mechanism rather than the World Wind WWIO configuration
+		// This gives access to the nonProxyHosts mechanism for bypassing proxies for internal addresses
+		// Falls back to the original behaviour if the proxy selector mechanism fails
+		
+		try
+		{
+			List<Proxy> proxies = ProxySelector.getDefault().select(url.toURI());
+			this.connection = this.url.openConnection(proxies.get(0));
+			this.connection.setConnectTimeout(this.connectTimeout);
+			this.connection.setReadTimeout(this.readTimeout);
+			return connection;
+		}
+		catch (Exception e)
+		{
+			// If the proxy selector failed, revert to superclass behaviour
+			return super.openConnection();
 		}
 	}
 
