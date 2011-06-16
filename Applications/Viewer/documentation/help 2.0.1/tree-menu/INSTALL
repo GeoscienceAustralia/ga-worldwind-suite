@@ -1,0 +1,13 @@
+Installation instructions for Morten's JavaScript Tree Menu
+-----------------------------------------------------------
+
+Instructions on how use the tree menu on a web site or upgrade
+and existing installation can be found by opening the file
+'example-site/index.html' in your web browser.  The first two
+items in the menu there are:
+
+ - Upgrade notes
+ - Installation guide
+
+You should also read through the file 'README' as it contains
+generally useful information.

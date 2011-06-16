@@ -1,0 +1,74 @@
+/* Style Sheet for Morten's JavaScript Tree Menu
+   Created & maintained by Morten Wang <morten@treemenu.com>
+   Version 2001-10-20 */
+
+BODY {
+  background: #ffffff;
+  color: #000000;
+}
+
+TD, TH, ADDRESS, P, PRE, CODE, BLOCKQUOTE, UL, LI {
+    background: #ffffff;
+    color: #000000;
+}
+
+
+A:link { color: #330099; background: #ffffff; }
+A:active { color: #990000; background: #ffffff; }
+A:visited { color: #666699; background: #ffffff; }
+A:hover { color: #990000; background: #ffffff; }
+
+TD.link { padding-top: 1em; }
+
+H1, H2, H3, H4, H5, H6 { font-family: Georgia, "Times New Roman", serif;
+                         color: #990000;
+                         background: #ffffff; }
+H1 { font-size: x-large; margin: 0; border: 0; padding: 0; }
+
+P, H3, H4, H5, H6, DL, PRE, TABLE.optionDef { margin-left: 5%; margin-right: 3%; }
+BLOCKQUOTE {
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+P, LI, TD, TH, BLOCKQUOTE, DD, DT {
+  font-family: Geneva, Verdana, Arial, Helvetica, sans-serif;
+  font-size: 83%;
+  line-height: 115%;
+}
+
+DD P {
+  font-size: 100%;
+}
+
+PRE, CODE { font-family: "Courier New", courier, monospace; }
+
+.footer {
+          width: 100%;
+          font-size: 75%;
+          font-family: Geneva, Verdana, Arial, Helvetica, sans-serif;
+          font-style: normal;
+          line-height: 125%;
+          text-align: left;
+          border-width: 1px 0 0 0;
+          border-style: solid;
+          border-color: #000000;
+          padding-top: 0.25em;
+          margin-top: 2em;
+}
+
+.footer #noframes {
+            float: right;
+            text-align: right;
+            width: 25%;
+}
+
+th {
+     text-align: left;
+}
+
+table.optionDef tr {
+                     vertical-align: top;
+}
+
+/* End of Style Sheet */

@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>[insert your title here]</title>
+
+<script type="text/javascript">
+<!-- hide the script from old browsesr
+
+// This script is a part of:
+// Morten's JavaScript Tree Menu
+// version 2.3.2-macfriendly, dated 2002-06-10
+// http://www.treemenu.com/
+
+// Copyright (c) 2001-2002, Morten Wang & contributors
+// All rights reserved.
+
+// This software is released under the BSD License which should accompany
+// it in the file "COPYING".  If you do not have this file you can access
+// the license through the WWW at http://www.treemenu.com/license.txt
+
+var MTMUsableBrowser = false;
+// browser sniffing routine
+browserName = navigator.appName;
+browserVersion = parseInt(navigator.appVersion);
+if(browserName == "Netscape" && browserVersion >= 3) {
+  MTMUsableBrowser = (navigator.userAgent.indexOf("Opera") == -1) ? true : false;
+} else if(browserName == "Microsoft Internet Explorer" && browserVersion >= 4) {
+  MTMUsableBrowser = true;
+} else if(browserName == "Opera" && browserVersion >= 5) {
+  MTMUsableBrowser = true;
+}
+
+// frameset creation
+document.write('</head>');
+document.write('<frameset frameborder="0" framespacing="0" border="0" cols="*" rows="75,*">')
+document.write('<frame marginwidth="0" marginheight="0" src="heading.html" name="heading" noresize scrolling="no">');
+document.write('<frameset frameborder="0" framespacing="0" border="0" cols="275,*" rows="*">');
+if(MTMUsableBrowser) {
+  document.write('<frameset frameborder="0" framespacing="0" border="0" cols="*" rows="0,*">')
+  document.write('<frame marginwidth="0" marginheight="0" src="code.html" name="code" noresize scrolling="no" frameborder="0">');
+  document.write('<frame marginwidth="5" marginheight="5" src="menu_empty.html" name="menu" noresize scrolling="auto" frameborder="0">');
+  document.write('</frameset>');
+} else {
+  document.write('<frame marginwidth="5" marginheight="5" src="menu.html" name="menu" noresize scrolling="auto" frameborder="0">');
+}
+
+document.write('<frame marginwidth="5" marginheight="5" src="main.html" name="text" noresize>');
+document.write('</frameset>');
+document.write('</frameset>');
+document.write('</body>');
+document.write('</html>');
+document.close();
+
+// End of script hiding -->
+</script>
+
+</head>
+<body bgcolor="#000033" text="#ffffcc" link="yellow" vlink="lime" alink="red">
+<h1>Heading</h1>
+
+<p>This part will be shown to those who do not have JavaScript support in their browser, or have chosen to turn it off.  It's your own responsibility to give (or not give) useful content to such users).  This section is more or less like the <code>NOFRAMES</code> part of a regular frameset.</p>
+
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- The frameset</title>
+
+<link rel="stylesheet" type="text/css" href="../main.css">
+
+<script type="text/javascript" src="../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h3>The frameset</h3>
+
+<p>Ok, you're ready for part 1.  This is where you find out how you want
+your frameset done.  There is two options, a dynamically created frameset,
+or a regular frameset.  A dynamically created frameset is where we use JavaScript
+to write the frameset to the document, thereby overriding already present
+HTML.  The tree menu website is an example of a frameset created that way.</p>
+
+<p>A regular frameset it created using plain HTML just like any other frames-enabled
+site.  Both solutions has their pros &amp; cons.  I feel the dynamically
+created frameset is slightly more friendly to different browsers, but the
+regular frameset is easier to get running.  This install guide will first
+create a regular frameset, and then show you how you can use that frameset
+for dynamic creation.  If you already have a site with a frameset and want
+to incorporate the menu into it you can read the first part and skip the
+second.</p>
+
+<h4>Getting the frameset right</h4>
+
+<p>In this part we'll create a regular frames-enabled site, and then incorporate
+the menu into it.  That way we'll have find out what the code behind a frameset
+looks like and then how the menu is inserted into it.  It's not a difficult
+task to get right, but it might look slightly confusing at first.</p>
+
+<p>What you first need to do is decide what your web-site should look like.
+ This example I'll be using here is the same frameset that's used on the
+tree menu website.  It's a three-split window with a top-frame for the site
+heading, a left frame for the menu and a right frame for site content.  Since
+you're already here you know what this kind of setup looks like, and therefore
+it's easy to see what it'll look like when you're finished.</p>
+
+<p>The HTML behind this kind of frameset looks like this (this is not <em>exactly</em> what I use, it's slightly altered for readability):</p>
+
+<pre><code>&lt;FRAMESET ROWS="75,*"&gt;
+  &lt;FRAME SRC="heading.html" NAME="heading"&gt;
+  &lt;FRAMESET COLS="200,*"&gt;
+    &lt;FRAME SRC="menu.html" NAME="menu"&gt;
+    &lt;FRAME SRC="main.html" NAME="text"&gt;
+  &lt;/FRAMESET&gt;
+&lt;/FRAMESET&gt;</code></pre>
+
+<p>There's three frames: heading, menu and text.  They all consist of regular
+HTML-documents with content.  Now we want to use the JavaScript menu for
+this site, instead of the static HTML-document "menu.html".  What we then
+need is another document which I've called "menu_empty.html", and we also
+need to split a frame into two frames.  First, lets look at the document
+"menu_empty.html".</p>
+
+<p>"menu_empty.html" is, as the file name says, an empty menu.  To be exact
+it's an HTML-document with no content, only containing a document head and
+body.  You can find the document in the directory "example-site" in the downloadable
+files.  Here's the source code for it:</p>
+
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;[insert your title here]&lt;/title&gt;
+&lt;style type="text/css" id="mtmsheet"&gt;
+/* this is only a Mozilla quirk fix */
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- blank page --&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+<p>This document will be where the menu code later will write the actual
+menu, erasing any content already present in the document.  Since the menu
+replaces any content you do not need to have any for people using a JavaScript-enabled
+browser, but having a link to a static HTML menu for those without JavaScript
+would be a good idea.</p>
+
+<p>We also need the code, or else the menu won't work.  All the code is kept
+in the file "code.html".  As you might have noticed, if we want both "menu_empty.html"
+and "code.html" in our frameset there aren't enough frames.  We have 4 documents
+(heading, menu, code &amp; content (text)), but only three frames.  Therefore
+we need to split one frame into two. It's the menu-frame that is split into
+two parts, one for the menu and one for the code.  The code is kept in a
+frame with a size of 0 (zero) which means it'll be invisible or nearly invisible
+(some browsers make it invisible, some don't). Here's what our menu-frame
+looked like:</p>
+
+<pre><code>&lt;FRAME SRC="menu.html" NAME="menu"&gt;</code></pre>
+
+<p>Now we split it so it becomes:</p>
+
+<pre><code>&lt;FRAMESET ROWS="0,*"&gt;
+  &lt;FRAME SRC="code.html" NAME="code"&gt;
+  &lt;FRAME SRC="menu_empty.html" NAME="menu"&gt;
+&lt;/FRAMESET&gt;</code></pre>
+
+<p>Our whole frameset then looks like this:</p>
+
+<pre><code>&lt;FRAMESET ROWS="75,*"&gt;
+  &lt;FRAME SRC="heading.html" NAME="heading"&gt;
+  &lt;FRAMESET COLS="200,*"&gt;
+    &lt;FRAMESET ROWS="0,*"&gt;
+      &lt;FRAME SRC="code.html" NAME="code"&gt;
+      &lt;FRAME SRC="menu_empty.html" NAME="menu"&gt;
+    &lt;/FRAMESET&gt;
+    &lt;FRAME SRC="main.html" NAME="text"&gt;
+  &lt;/FRAMESET&gt;
+&lt;/FRAMESET&gt;</code></pre>
+
+<p>That is actually all we need to do to have the frameset correctly set
+up.  You can use this setup if you want to.  Keep in mind that you'd like
+to add a NOFRAMES-section for users with browsers that don't handle frames.</p>
+
+<p>If you want to keep this setup you can go on to the second part, <a href="options.shtml">setting options</a>
+. You can also read on and get to know how this frameset can be created dynamically,
+making the site slightly more browser-friendly (in my opinion it makes a
+site more accessible to different browsers).</p>
+
+<h4>Frameset on-the-fly</h4>
+
+<p>Now we'll take our already existing frameset and make sure it's created
+by JavaScript.  This will make a JavaScript-enabled browser show the frameset,
+while those without JavaScript-support will get a regular HTML-document.
+ There are caveats to this solution too, just like there's pros " cons with
+a regular frameset.  Lets look at how the frameset is created.</p>
+
+<p>First we'll have a look at what our frameset already looks like (just in case you forgot):</p>
+
+<pre><code>&lt;FRAMESET ROWS="75,*"&gt;
+  &lt;FRAME SRC="heading.html" NAME="heading"&gt;
+  &lt;FRAMESET COLS="200,*"&gt;
+    &lt;FRAMESET ROWS="0,*"&gt;
+      &lt;FRAME SRC="code.html" NAME="code"&gt;
+      &lt;FRAME SRC="menu_empty.html" NAME="menu"&gt;
+    &lt;/FRAMESET&gt;
+    &lt;FRAME SRC="main.html" NAME="text"&gt;
+  &lt;/FRAMESET&gt;
+&lt;/FRAMESET&gt;</code></pre>
+
+<p>Ok?  What we'll do is take this frameset, put lots of <code>document.write()</code>
+-things around it, and then throw it all into the head of a regular HTML
+document.  A browser running JavaScript will then read the web-page down
+to where this frameset is, find out that it should use the script, write
+the frameset to the document, and then it'll find a frameset in the document
+and show it to the user.  Sounds easy and straightforward in theory, right?
+ It's not all that difficult in practice either.  First we'll put JavaScript-statements
+around the whole frameset so the browser writes it to the document.  We use
+the <code>document.write()</code>-statement to do that.  Here's how it'll look once finished:</p>
+
+<pre><code>document.write('&lt;FRAMESET ROWS="75,*"&gt;');
+document.write('  &lt;FRAME SRC="heading.html" NAME="heading"&gt;');
+document.write('  &lt;FRAMESET COLS="200,*"&gt;');
+document.write('    &lt;FRAMESET ROWS="0,*"&gt;');
+document.write('      &lt;FRAME SRC="code.html" NAME="code"&gt;');
+document.write('      &lt;FRAME SRC="menu_empty.html" NAME="menu"&gt;');
+document.write('    &lt;/FRAMESET&gt;');
+document.write('    &lt;FRAME SRC="main.html" NAME="text"&gt;');
+document.write('  &lt;/FRAMESET&gt;');
+document.write('&lt;/FRAMESET&gt;');</code></pre>
+
+<p><code>document.write()</code> is a JavaScript-statement telling the browser
+that what's between the single quotes should be written to the document.
+ In other words we're telling the browser that this frameset we have here
+should be written to the document.  The browser will then see the frameset
+and show it to the user (also known as "render the written frameset").</p>
+
+<p>We're not finished yet, there's a couple of things I'd like to do first.
+One thing that's neat with JavaScript is the possibility of identifying the
+browser and then acting accordingly.  The menu doesn't work perfectly will
+all variants of browsers you can find out there.  Therefore, we identify
+what browser the user has, and make sure that only those who can run the
+menu get the code for it.  The rest get a regular HTML menu through the document
+"menu.html".  This is what I do on my site.</p>
+
+<p>To make this possible we need to check what browser the user has, and
+then make sure we change what's written to the document.  For this I use
+this code:</p>
+
+<pre><code>var MTMUsableBrowser = false;
+// browser sniffing routine
+browserName = navigator.appName;
+browserVersion = parseInt(navigator.appVersion);
+if(browserName == "Netscape" &amp;&amp; browserVersion &gt;= 3) {
+  MTMUsableBrowser = (navigator.userAgent.indexOf("Opera") == -1) ? true : false;
+} else if(browserName == "Microsoft Internet Explorer" &amp;&amp; browserVersion &gt;= 4) {
+  MTMUsableBrowser = true;
+} else if(browserName == "Opera" &amp;&amp; browserVersion &gt;= 5) {
+  MTMUsableBrowser = true;
+}</code></pre>
+
+<p>Yeah, I know it's got rather long lines.  The lines ask the user's browser
+if it's Netscape (Navigator) version 3 or newer, Microsoft Internet Explorer
+version 4 or newer, or a version of Opera newer than 5.0.  If the user says
+he/she is running Netscape (Navigator) version 3 or 4 we also check if the
+user runs <a href="http://www.operasoftware.com/" target="_top">Opera</a>
+, since in that version its JavaScript support doesn't enable to run the
+menu. If the user has the right browser the variable "MTMUsableBrowser" is
+set to true.  Otherwise it'll stay false, meaning we don't have a browser
+that can use the menu.  We then alter the code that writes the frames "code"
+&amp; "menu" to the document so that they're only written when MTMUsableBrowser
+is true.  The code for this looks like this:</p>
+
+<pre><code>if(MTMUsableBrowser) {
+  document.write('    &lt;FRAMESET ROWS="0,*"&gt;');
+  document.write('      &lt;FRAME SRC="code.html" NAME="code"&gt;');
+  document.write('      &lt;FRAME SRC="menu_empty.html" NAME="menu"&gt;');
+  document.write('    &lt;/FRAMESET&gt;');
+} else {
+  document.write('    &lt;FRAME SRC="menu.html" NAME="menu"&gt;');
+}</code></pre>
+
+<p>What this code does is first to check the variable MTMUsableBrowser for
+true/false.  If it's true it writes the frameset for the code and the menu,
+if not it writes a single frame with the document "menu.html".  This is also
+done on this web-site.  Lastly, what we need is to put all this code into
+the head of the HTML document.  So, somewhere between <code>&lt;HEAD&gt;</code> and <code>&lt;/HEAD&gt;</code> you will want to put this:</p>
+
+<pre><code>&lt;SCRIPT TYPE="text/javascript"&gt;
+var MTMUsableBrowser = false;
+// browser sniffing routine
+browserName = navigator.appName;
+browserVersion = parseInt(navigator.appVersion);
+if(browserName == "Netscape" &amp;&amp; browserVersion &gt;= 3) {
+  MTMUsableBrowser = (navigator.userAgent.indexOf("Opera") == -1) ? true : false;
+} else if(browserName == "Microsoft Internet Explorer" &amp;&amp; browserVersion &gt;= 4) {
+  MTMUsableBrowser = true;
+} else if(browserName == "Opera" &amp;&amp; browserVersion &gt;= 5) {
+  MTMUsableBrowser = true;
+}
+
+document.write('&lt;FRAMESET ROWS="75,*"&gt;');
+document.write('  &lt;FRAME SRC="heading.html" NAME="heading"&gt;');
+document.write('  &lt;FRAMESET COLS="200,*"&gt;');
+
+if(MTMUsableBrowser) {
+  document.write('    &lt;FRAMESET ROWS="0,*"&gt;');
+  document.write('      &lt;FRAME SRC="code.html" NAME="code"&gt;');
+  document.write('      &lt;FRAME SRC="menu_empty.html" NAME="menu"&gt;');
+  document.write('    &lt;/FRAMESET&gt;');
+} else {
+  document.write('    &lt;FRAME SRC="menu.html" NAME="menu"&gt;');
+}
+
+document.write('    &lt;FRAME SRC="main.html" NAME="text"&gt;');
+document.write('  &lt;/FRAMESET&gt;');
+document.write('&lt;/FRAMESET&gt;');
+document.close();
+&lt;/SCRIPT&gt;</code></pre>
+
+<p>Now you'll have a frameset that is created on-the-fly.  The behaviour of this frameset can be summarized as follows:</p>
+
+<dl><dt>Browsers without JavaScript
+  </dt><dd>They use the rest of the document
+and display that.  Therefore you should make sure it contains useful content
+for those browsers.   </dd><dt>Browsers with JavaScript, but unable to run the menu
+  </dt><dd>
+They are referred to the document "menu.html" which should contain a regular
+HTML links pointing to the documents found in the menu.   </dd><dt>Browsers with JavaScript, and able to run the menu
+  </dt><dd>They'll load and run the menu
+</dd></dl>
+
+<p>If you want to see how this works, turn off JavaScript-support in your
+browser and reload the tree menu web site.  For a look at a complete version
+of such a script there's a file called "javascript-frameset.html" available
+in the downloadable files' example-site directory.</p>
+
+<p>Apart from this there isn't any magic needed, so now that you're finished with the frameset you can instead go on to <a href="options.shtml">part 2, setting options</a>.</p>
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

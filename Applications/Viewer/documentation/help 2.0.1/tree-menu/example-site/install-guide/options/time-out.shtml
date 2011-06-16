@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- MTMTimeOut</title>
+
+<script type="text/javascript" src="../../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>MTMTimeOut</h2>
+
+<table class="optionDef">
+  <tbody><tr><th>Possible values:</th>
+  <td>A number, larger than or equal to 0</td></tr>
+  <tr><th>Default value:</th>
+  <td><code>5</code></td></tr>
+  <tr><th>Requirements:</th>
+  <td>none</td></tr>
+  <tr><th>First available:</th>
+  <td>2.2.2</td></tr>
+  <tr><th>Supported browsers:</th>
+  <td>All</td></tr>
+  <tr><th>Description:</th>
+  <td>
+This specifies a timeout period in tenths of a second (1/10), the default
+value of 5 therefore represents half a second.  The value is only used when
+your site is being loaded, or when the frameset (and thereby code.html) is
+reloaded.  If a document in the frameset doesn't contain the tracking code,
+or said code doesn't update the menu before the specified amount of time,
+there will be a forced display/update of the menu.  This is to make sure
+the menu is shown to the user.</td></tr>
+</tbody></table>
+
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

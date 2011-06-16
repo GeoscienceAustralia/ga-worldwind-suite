@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Morten's JavaScript Tree Menu - Upgrading from version 2.3.0</title>
+
+<script type="text/javascript" src="../mtmtrack.js">
+</script>
+</head>
+
+<body>
+<h1>Upgrading from v2.3.0</h1>
+
+<h2>User-configurable options</h2>
+
+<p>In version 2.3.2-macfriendly all user-configurable options have default values.  Therefore you might not have to set each specifically.  For a list of all the options and their corresponding default values see the Installation Guide under <a href="../install-guide/options/default-values.shtml">List of default values</a>.  All options mentioned below link to their corresponding document in the Install Guide.</p>
+
+<p>The following user-configurable options have changed values in v2.3.2-macfriendly:</p>
+
+<dl>
+  <dt><code><a href="../install-guide/options/extra-css.shtml">MTMExtraCSS</a></code>
+  <dd>This was a string in v2.3.0 but has now become a an object, and you will have to use its method <code>.addRule()</code> to add CSS definitions to it.  If you do not use this option, either delete it or comment it out (by preceding it with <code>//</code>).  Please read the Install Guide entry for details of how it now works.
+</dl>
+
+<p>The following options are new from v2.3.0 to v2.3.2-macfriendly:</p>
+
+<ul>
+  <li><a href="../install-guide/options/relocate-url.shtml">relocateURL</a>
+  <li><a href="../install-guide/options/code-frame.shtml">MTMCodeFrame</a>
+  <li><a href="../install-guide/options/default-target.shtml">MTMDefaultTarget</a>
+  <li><a href="../install-guide/options/always-link-if-we.shtml">MTMAlwaysLinkIfWE</a>, <a href="../install-guide/options/sub-text-color.shtml">MTMSubTextColor</a>
+  <li><a href="../install-guide/options/doctype.shtml">MTMDOCTYPE</a>, <a href="../install-guide/options/content-type.shtml">MTMcontentType</a>
+  <li><a href="../install-guide/options/tracked-cookie-name.shtml">MTMTrackedCookieName</a>
+  <li><a href="../install-guide/options/use-scrollbar-css.shtml">MTMuseScrollbarCSS</a>, <a href="../install-guide/options/scrollbar-base-color.shtml">MTMscrollbarBaseColor</a>, <a href="../install-guide/options/scrollbar-face-color.shtml">MTMscrollbarFaceColor</a>, <a href="../install-guide/options/scrollbar-highlight-color.shtml">MTMscrollbarHighlightColor</a>, <a href="../install-guide/options/scrollbar-shadow-color.shtml">MTMscrollbarShadowColor</a>, <a href="../install-guide/options/scrollbar-3d-light-color.shtml">MTMscrollbar3dLightColor</a>, <a href="../install-guide/options/scrollbar-arrow-color.shtml">MTMscrollbarArrowColor</a>, <a href="../install-guide/options/scrollbar-track-color.shtml">MTMscrollbarTrackColor</a>, <a href="../install-guide/options/scrollbar-dark-shadow-color.shtml">MTMscrollbarDarkShadowColor</a>
+  <li><a href="../install-guide/options/linked-js-url.shtml">MTMLinkedJSURL</a>, <a href="../install-guide/options/linked-init-function.shtml">MTMLinkedInitFunction</a>, <a href="../install-guide/options/right-click-message.shtml">MTMrightClickMessage</a>
+</ul>
+
+<h2>Menu creation changes</h2>
+
+<p>There has been substantial changes to the menu creation code, but backwards compatibility has been kept.  Therefore you do not need to change your existing menu code when upgrading.  Should you wish to use the new code structure for your menus you'll find it described in the Install Guide under <a href="../install-guide/the-menu.shtml">Making the menu</a>.</p>
+
+<p>Please note that in v2.3.2-macfriendly the usage of <code>new MTMItem()</code> is no longer necessary, the method <code>addItem()</code> takes the arguments directly, and that usage of <code>menu.items[x].MTMakeSubmenu()</code> is discouraged in favour of the more flexible <code>menu.makeLastSubmenu()</code>.  This is of course also mentioned in the Install Guide.</p>
+
+<h2>Tracking code</h2>
+
+<p>The tracking code has been moved to the file <code>mtmtrack.js</code> to ease maintenance for those who do not use server-methods for automatic includes.  If you use a code frame name other than <code>&quot;code&quot;</code> you will need to change the option in that file too since it points to the right frame name.  See the Install Guide's section <a href="../install-guide/tracking-code.shtml">Tracking code</a> if you're unsure about how to reference the mtmtrack.js file.</p>
+
+<h2>HTML changes</h2>
+
+<p>Two files have changes that you should look into.  In menu_empty.html (or any other document you have present in the menu frame) there has to be a style sheet present in the document head for Mozilla/Netscape 6 to work correctly.  The element should look like this:</p>
+
+<pre><code>&lt;style type=&quot;text/css&quot; id=&quot;mtmsheet&quot;>
+/* this is only a Mozilla quirk fix */
+&lt;/style&gt;</code></pre>
+
+<p>In code.html there are two changes.  First of all the framebuster script is inserted to fix the problem with IE bookmarking code.html instead of the parent frameset.  You can copy and paste the small script code over from the code.html found in the example-site directory.  Lastly the call to MTMStartMenu() has changed, it's now like this:</p>
+
+<pre><code>onload=&quot;MTMStartMenu(true);&quot;</code></pre>
+
+</body>
+</html>
+

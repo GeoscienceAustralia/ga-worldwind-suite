@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- Setting options</title>
+
+<script type="text/javascript" src="../../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>Default values of all options</h2>
+
+<p>Here's a list of all the options and their corresponding default values.
+ These values nearly recreate the menu used on the site, the only difference
+is that on the site the option <code>MTMSubsGetPlus</code> is set to <code>"Always"</code>.</p>
+
+<p>Legend: "Not set" means the variable doesn't have a default value, which
+usually means it's ignored.  Any value enclosed in double quotes is a string,
+numerical values without quotes are numbers.  Values of true or false are
+never quoted.</p>
+
+<table class="optionDef">
+<tbody><tr><td>relocateURL</td><td>:</td><td>"/"</td></tr>
+<tr><td>MTMTimeOut</td><td>:</td><td>5</td></tr>
+<tr><td>MTMTableWidth</td><td>:</td><td>"100%"</td></tr>
+<tr><td>MTMenuFrame</td><td>:</td><td>"menu"</td></tr>
+<tr><td>MTMCodeFrame</td><td>:</td><td>"code"</td></tr>
+<tr><td>MTMDefaultTarget</td><td>:</td><td>Not set</td></tr>
+
+<tr><td>MTMDOCTYPE</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMcontentType</td><td>:</td><td>Not set</td></tr>
+
+<tr><td>MTMSubsAutoClose</td><td>:</td><td>false</td></tr>
+<tr><td>MTMSubsGetPlus</td><td>:</td><td>"Submenu"</td></tr>
+<tr><td>MTMEmulateWE</td><td>:</td><td>false</td></tr>
+<tr><td>MTMAlwaysLinkIfWE</td><td>:</td><td>true</td></tr>
+<tr><td>MTMSubTextColor</td><td>:</td><td>"#000000"</td></tr>
+
+<tr><td>MTMenuImageDirectory</td><td>:</td><td>"menu-images/"</td></tr>
+
+<tr><td>MTMBGColor</td><td>:</td><td>"#ffffff"</td></tr>
+<tr><td>MTMBackground</td><td>:</td><td>""</td></tr>
+<tr><td>MTMTextColor</td><td>:</td><td>"#000000"</td></tr>
+<tr><td>MTMLinkColor</td><td>:</td><td>"#330099"</td></tr>
+<tr><td>MTMAhoverColor</td><td>:</td><td>"#990000"</td></tr>
+<tr><td>MTMTrackColor</td><td>:</td><td>"#000000"</td></tr>
+<tr><td>MTMSubExpandColor</td><td>:</td><td>"#666699"</td></tr>
+<tr><td>MTMSubClosedColor</td><td>:</td><td>"#666699"</td></tr>
+<tr><td>MTMenuText</td><td>:</td><td>"Site contents:"</td></tr>
+<tr><td>MTMRootIcon</td><td>:</td><td>"menu_new_root.gif"</td></tr>
+<tr><td>MTMRootColor</td><td>:</td><td>"#000000"</td></tr>
+<tr><td>MTMRootFont</td><td>:</td><td>"Arial, Helvetica, sans-serif"</td></tr>
+<tr><td>MTMRootCSSize</td><td>:</td><td>"84%"</td></tr>
+<tr><td>MTMRootFontSize</td><td>:</td><td>"-1"</td></tr>
+<tr><td>MTMenuFont</td><td>:</td><td>"Arial, Helvetica, sans-serif"</td></tr>
+<tr><td>MTMenuCSSize</td><td>:</td><td>"84%"</td></tr>
+<tr><td>MTMenuFontSize</td><td>:</td><td>"-1"</td></tr>
+
+<tr><td>MTMLinkedSS</td><td>:</td><td>false</td></tr>
+<tr><td>MTMSSHREF</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMExtraCSS</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMuseScrollbarCSS</td><td>:</td><td>false</td></tr>
+<tr><td>MTMscrollbarBaseColor</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMscrollbarFaceColor</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMscrollbarHighlightColor</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMscrollbarShadowColor</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMscrollbar3dLightColor</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMscrollbarArrowColor</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMscrollbarTrackColor</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMscrollbarDarkShadowColor</td><td>:</td><td>Not set</td></tr>
+
+<tr><td>MTMHeader</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMFooter</td><td>:</td><td>Not set</td></tr>
+
+<tr><td>MTMUseCookies</td><td>:</td><td>false</td></tr>
+<tr><td>MTMCookieName</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMCookieDays</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMTrackedCookieName</td><td>:</td><td>Not set</td></tr>
+
+<tr><td>MTMUseToolTips</td><td>:</td><td>true</td></tr>
+
+<tr><td>MTMLinkedJSURL</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMLinkedInitFunction</td><td>:</td><td>Not set</td></tr>
+<tr><td>MTMrightClickMessage</td><td>:</td><td>Not set</td></tr>
+</tbody></table>
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

@@ -46,6 +46,8 @@
 	<property name="test_results_dir" value="${basedir}/test/results"/>
 	<property name="test_reports_dir" value="${basedir}/test/reports"/>
 	
+	<property name="help_src_dir" value="${basedir}/documentation/help"/>
+	
 	<path id="classpath">
 		<fileset dir="${worldwind_dir}">
 			<include name="${worldwind_jar}" />
@@ -211,5 +213,8 @@
 		<copy file="${webstart_dir}/${app_signed_jar}" todir="${deploy_location}" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${ww_unsigned_jar}" todir="${deploy_location}" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${ww_signed_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy todir="${deploy_location}/help">
+			<fileset dir="${help_src_dir}/"/>
+		</copy>
 	</target>
 </project>

@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>3D Data Viewer - Help</title>
+
+<script type="text/javascript">
+// Framebuster script to relocate browser when MSIE bookmarks this
+// page instead of the parent frameset.  Set variable relocateURL to
+// the index document of your website (relative URLs are ok):
+var relocateURL = "/";
+
+if(parent.frames.length == 0) {
+  if(document.images) {
+    location.replace(relocateURL);
+  } else {
+    location = relocateURL;
+  }
+}
+</script>
+
+<script type="text/javascript" src="mtmcode.js">
+</script>
+
+<script type="text/javascript">
+// Morten's JavaScript Tree Menu
+// version 2.3.2-macfriendly, dated 2002-06-10
+// http://www.treemenu.com/
+
+// Copyright (c) 2001-2002, Morten Wang & contributors
+// All rights reserved.
+
+// This software is released under the BSD License which should accompany
+// it in the file "COPYING".  If you do not have this file you can access
+// the license through the WWW at http://www.treemenu.com/license.txt
+
+// Nearly all user-configurable options are set to their default values.
+// Have a look at the section "Setting options" in the installation guide
+// for description of each option and their possible values.
+
+MTMDefaultTarget = "text";
+MTMSubsAutoClose = "true";
+MTMEmulateWE = "true";
+MTMBGColor = "#99CCFF";
+MTMenuText = "Help Contents";
+MTMRootIcon = "earth.png";
+
+/******************************************************************************
+* User-configurable list of icons.                                            *
+******************************************************************************/
+
+var MTMIconList = null;
+MTMIconList = new IconList();
+MTMIconList.addIcon(new MTMIcon("menu_link_external.gif", "http://", "pre"));
+MTMIconList.addIcon(new MTMIcon("menu_link_pdf.gif", ".pdf", "post"));
+
+/******************************************************************************
+* User-configurable menu.                                                     *
+******************************************************************************/
+
+// Main menu.
+var menu = null;
+menu = new MTMenu();
+
+menu.addItem("Getting Started", "content/Getting_Started.jsp");
+menu.addItem("Navigation Controls", "content/Navigation.jsp");
+
+menu.addItem("Toolbar", "content/Toolbar.jsp");
+	var toolbar_1 = null;
+	toolbar_1 = new MTMenu();
+    toolbar_1.addItem("Open layer", "content/toolbar.jsp");
+    toolbar_1.addItem("Save image...", "content/toolbar.jsp");
+    toolbar_1.addItem("Default view", "content/toolbar.jsp");
+    toolbar_1.addItem("Go to coordinates...", "content/toolbar.jsp");
+    toolbar_1.addItem("Full screen mode", "content/toolbar.jsp","text","Full screen - switch to full screen mode");
+    toolbar_1.addItem("Search", "content/toolbar.jsp", "text", "Search for places on the globe");
+    toolbar_1.addItem("Places", "content/toolbar.jsp","text","Places - save and manage places, annotations and animations");
+    toolbar_1.addItem("Layers panel", "content/toolbar.jsp", "text", "Open/close Layers panel");
+    toolbar_1.addItem("atasets panel", "content/toolbar.jsp", "text", "Open/close Datasets panel");
+    toolbar_1.addItem("Vertical exaggeration", "content/toolbar.jsp");
+    toolbar_1.addItem("Turn on World map", "content/toolbar.jsp");
+    toolbar_1.addItem("Turn on Compass", "content/toolbar.jsp");
+    toolbar_1.addItem("Turn on Scale bar", "content/toolbar.jsp");
+    toolbar_1.addItem("On-screen Navigation", "content/toolbar.jsp", "text", "Turn on on-screen Navigation controls");
+    toolbar_1.addItem("Turn on Graticule", "content/toolbar.jsp", "text", "Turn on Graticule (latitude and longitude lines)");
+    toolbar_1.addItem("Turn on Crosshair", "content/toolbar.jsp");
+    toolbar_1.addItem("Preferences...", "content/toolbar.jsp");
+
+menu.makeLastSubmenu(toolbar_1);
+
+menu.addItem("Menus", "content/Menus.jsp");
+	var menus = null;
+	menus = new MTMenu();
+	
+	menus.addItem("File Menu", "content/Menu_File.jsp");
+		var menu_file = null;
+		menu_file = new MTMenu();
+		menu_file.addItem("Open Layer", "content/Menu_File.jsp");
+		menu_file.addItem("Create Layer", "content/Menu_File.jsp");
+		menu_file.addItem("Work Offline", "content/Menu_File.jsp");
+		menu_file.addItem("Save Image", "content/Menu_File.jsp");
+		menu_file.addItem("Save as GeoTiff", "content/Menu_File.jsp", "text", "Save sector as GeoTiff");
+		menu_file.addItem("Exit", "content/Menu_File.jsp");
+		
+	menus.makeLastSubmenu(menu_file);
+	
+	menus.addItem("View Menu", "content/Menu_View.jsp");
+		var menu_view = null;
+		menu_view = new MTMenu();
+		menu_view.addItem("Default view", "content/Menu_View.jsp");
+		menu_view.addItem("Go to coordinates...", "content/Menu_View.jsp");
+		menu_view.addItem("Fullscreen", "content/Menu_View.jsp");
+		menu_view.addItem("--------------------");
+		menu_view.addItem("Render tile skirts", "content/Menu_View.jsp");
+		menu_view.addItem("Wireframe", "content/Menu_View.jsp");
+		menu_view.addItem("Wireframe depth testing", "content/Menu_View.jsp");
+		menu_view.addItem("--------------------");
+		menu_view.addItem("Search", "content/Menu_View.jsp");
+		menu_view.addItem("Places", "content/Menu_View.jsp");
+		menu_view.addItem("Layers", "content/Menu_View.jsp");
+		menu_view.addItem("Datasets", "content/Menu_View.jsp");
+		menu_view.addItem("Vertical exaggeration", "content/Menu_View.jsp");
+		menu_view.addItem("--------------------");
+		menu_view.addItem("World map", "content/Menu_View.jsp");
+		menu_view.addItem("Compass", "content/Menu_View.jsp");
+		menu_view.addItem("Scalebar", "content/Menu_View.jsp");
+		menu_view.addItem("Navigation Controls", "content/Menu_View.jsp");
+		menu_view.addItem("Graticule", "content/Menu_View.jsp");
+		menu_view.addItem("Crosshair", "content/Menu_View.jsp");		
+		
+	menus.makeLastSubmenu(menu_view);
+	
+	menus.addItem("Options Menu", "content/Menu_Options.jsp");
+		var menu_options = null;
+		menu_options = new MTMenu();
+		menu_options.addItem("Preferences", "content/Menu_File.jsp");
+		
+	menus.makeLastSubmenu(menu_options);	
+	
+	menus.addItem("Help Menu", "content/Menu_Help.jsp");
+		var menu_help = null;
+		menu_help = new MTMenu();
+		menu_help.addItem("Help", "content/Menu_Help.jsp");
+		menu_help.addItem("Controls", "content/Menu_Help.jsp");
+		menu_help.addItem("About", "content/Menu_Help.jsp");
+		
+	menus.makeLastSubmenu(menu_help);		
+	
+menu.makeLastSubmenu(menus, false, "menu_folder_closed.gif", "menu_folder_open.gif");
+
+menu.addItem("Working with Places", "content/Places.jsp");
+menu.addItem("Working with Layers and Datasets", "content/Layers.jsp");
+menu.addItem("Saving Screen Images", "content/ScreenShots.jsp");
+menu.addItem("Saving Georeferenced Images", "content/GeorefImages.jsp");
+
+
+</script>
+</head>
+<body onLoad="MTMStartMenu(true)" bgcolor="#000033" text="#ffffcc" link="yellow" vlink="lime" alink="red">
+</body>
+</html>

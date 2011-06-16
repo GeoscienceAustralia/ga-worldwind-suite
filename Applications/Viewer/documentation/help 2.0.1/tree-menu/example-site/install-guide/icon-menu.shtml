@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- Icon menu</title>
+
+<link rel="stylesheet" type="text/css" href="../main.css">
+
+<script type="text/javascript" src="../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>Checking the menu's icons</h2>
+
+<p>Before you finish up there's some icons that need your attention.  First
+of all you'd want to have a look into the directory with menu images, particularly
+the file "menu_link_default.gif".  The image with that filename is what will
+be shown if you do not specify an icon in the menu, or if the item's URL
+doesn't match any entry in the icon list.  On my site I have a document-like
+icon, but you can change it to whatever you like.</p>
+
+<p>Then there's the icon list. If you're happy with how the menu works already
+there's no need to alter it. You can instead read about how to add the <a href="tracking-code.shtml">tracking code</a> to the whole site. Those curious about how to define icons read on.</p>
+
+<p>When the menu system tries to determine what icon a regular item should
+have it first checks whether you specified one in the menu.  If you didn't
+specify any it checks each item's URL against the icon list to see if there
+are any matches.  If no match was found the item gets the default icon. 
+With the icon list you'll be able to change icons depending on quite a lot
+of things. Let's have a look at what the icon list looks like by default:</p>
+
+<pre><code>var MTMIconList = null;
+MTMIconList = new IconList();
+MTMIconList.addIcon(new MTMIcon("menu_link_external.gif", "http://", "pre"));
+MTMIconList.addIcon(new MTMIcon("menu_link_pdf.gif", ".pdf", "post"));
+</code></pre>
+
+<p>As you can see it looks more or less like a menu.  That's intentional.
+ The list contains items specifying the icon to be used, what you should
+try to find in the item's URL, and what kind of match we're looking for.
+In other words each line looks like this:</p>
+
+<pre><code>MTMIconList.addIcon(new MTMIcon(filename, match, type));</code></pre>
+
+<p>If we look at the first icon we add to the icon list it has the filename
+"menu_link_external.gif".  This is a picture of a globe. "match" is set to
+"http://" and type to "pre" (as in "prefix").  The two latter variables tell
+the script to look for "http://" at the beginning of the item's URL.  The
+search for a match is <em>case-sensitive</em>, so "http://" will not match
+"HTTP://".  The idea behind this icon list entry is that all URLs that point
+to external web-sites get the globe icon.  Type "pre" can therefore be used
+when you want all menu items pointing to a specific site, or using a specific
+protocol (e.g. "ftp://") to have the same icon.</p>
+
+<p>The next icon we add is of type "post", which means that we look for "match"
+at the end of the menu item's URL.  In this case we look for ".pdf" which
+is the file extention for PDF (Portable Data Format) documents.  Type "post"
+therefore enables you to assign icons to menu items depending on their file
+extention or other matches at the end of their URL.</p>
+
+<p>There is also another type available, but it isn't used in the default
+icon list.  This type is "any".  It means that as long as the menu item's
+URL contains "match" it will use the specified icon.  This can for instance
+be used to give all menu items that point to the same directory the same
+icons.</p>
+
+<p>In other words, this is a powerful thing making you easily able to change
+icons for many menu items by only changing or adding one line to the icon
+list.  Remember to change the list so it suits your needs.</p>
+
+<p>Now it's on to the last part of the installation guide, <a href="tracking-code.shtml">tracking code</a>.</p>
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

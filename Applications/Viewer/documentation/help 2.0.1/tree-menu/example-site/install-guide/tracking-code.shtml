@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- Tracking code</title>
+
+<link rel="stylesheet" type="text/css" href="../main.css">
+
+<script type="text/javascript" src="../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>Tracking code</h2>
+
+<p>What is left is to add a reference to the tracking code to the files that
+are to appear in the right frame (the content frame, in our example called
+"text"), and also checking all pages to make sure everything's right.  Lets
+look at the code we need to add first.</p>
+
+<p>The code is needed for the tracking. If you forget to insert this the
+tracking won't work. You'll also see that submenus with URLs will not expand
+like they should. In the page-header (between <code>&lt;HEAD&gt;</code> and <code>&lt;/HEAD&gt;</code>) you have to insert this little script:</p>
+
+<pre><code>&lt;script type="text/javascript" src="mtmtrack.js"&gt;
+&lt;/script&gt;</code></pre>
+
+<p>Note: the src-attribute will have to point to the right location of mtmtrack.js,
+so if you for instance have a document in a subdirectory use the correct
+relative URL, like "../mtmtrack.js".</p>
+
+<p>The file "mtmtrack.js" is found in the downloadable files, and it's a
+small script that checks what browser the visitor has, and if it's either
+of the ones that get to use the dynamic menu it'll call the necessary function
+to update the menu.  If you've put code.html in a frame that isn't named
+"code" you will have to open mtmtrack.js in your editor and make sure you
+set <code>MTMCodeFrame</code> to the name of the correct frame.</p>
+
+<p>That should be about all there is to do.  If you've used my pages as a
+basis for your pages you might want to remember that I use style sheets for
+my pages, and that each page therefore has a stylesheet linked.  This link
+needs to be removed if you don't use stylesheets.  If you're curious about
+what the inline style sheet looks like and what CSS properties it uses, have
+a look at the next document <a href="css-properties.shtml">CSS-related properties</a>.</p>
+
+<p>If you find that the script doesn't work as it should, go through what
+you've done and make sure it looks like it should do.  Also remember that
+the above script needs to be present in <em>all</em> pages that are to be loaded in the main frame ("text" in our example) for the tracking to work correctly.</p>
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

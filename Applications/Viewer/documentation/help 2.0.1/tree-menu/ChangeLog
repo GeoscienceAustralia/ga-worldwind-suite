@@ -1,0 +1,80 @@
+Changes to Morten's JavaScript Tree Menu v2.3.2-macfriendly (2002-06-10):
+	- Function MTMBrowser() altered so that upon detection of Internet
+	  Explorer 5 running on a Mac it'll treat it as Netscape Nav 4.x
+	  and successfully run the menu.
+
+Changes to Morten's JavaScript Tree Menu v2.3.2 (2002-02-24):
+	- MTMTimeOut can now be set to 0 for "no delay", previously
+	  the lowest possible value was 1.
+	- Relative URLs starting with "../" are now correctly resolved,
+	  and in general relative URLs are handled much better now.
+	- Fixed bugs in the scrolling code, the inline style sheet and
+	  also removed a CSS rule that created scrollbars in Mozilla.
+
+Changes to Morten's JavaScript Tree Menu v2.3.1 (2002-02-02):
+
+	- MTMExtraCSS is no longer a string, but has become an object. 
+	  The user now inserts rules by calling the method addRule()
+	- Framebuster script to fix IE's habit of bookmarking code.html
+	  has been inserted, it uses its own option 'relocateURL'
+	- Multiple menus in the same frameset made possible by configurable
+	  option MTMCodeFrame, which is the name of the menu's code frame
+	- MTMDefaultTarget is a new option, enables users to skip defining
+	  the target frame for all items.
+	- The emulation of Windows Explorer has gotten a new option
+	  MTMAlwaysLinkIfWE, combined with color option MTMSubTextColor,
+	  which will make submenus without URLs only link through their
+	  +/- sign and icon, the rest is text.
+	- Configurable DOCTYPE and Content-Type for the menu document.
+	- Possibility of storing the tracked item in a cookie, name configurable
+	  with MTMTrackedCookieName, enabling users to pick up where the left
+	  when they return to a site using the menu.
+	- Options to control scroll bar properties in IE5.5 & IE6 added.
+	- The possibility of linking a JavaScript source file (.js) into the
+	  menu frame, together with calling an init function.
+	- Right-click prevention code for IE4 users (the rest use linked .js)
+	- Menu building method addItem() now takes arguments directly instead
+	  of relying on 'new MTMenuItem()'
+	- Method makeLastSubmenu() added, which works like MTMakeSubmenu() did,
+	  except that it automatically uses the last item added to the menu
+	  it's called from, removing the need for the items[] array.
+	- Tracking code moved to mtmtrack.js to simplify maintenance.
+	- Small changes in HTML, fixing a Mozilla quirk and a bug with Opera
+	- Several bugs fixed, the most important one being the IE6 back-button
+	  problem, which meant the user had to click twice to go back one page
+	  (check the SourceForge project page for more information about bugs).
+	- Default values for all user-configurable options, removing the need
+	  to have any of them in code.html.
+	- Code converted from using spaces as indentation to tabs.
+	- Function MTMakeSVG() added to show how to insert an SVG into the menu
+	- Added menu-building function makeSubItem() which is a polymorphic
+	  method of adding items directly to another item's submenu.
+	- Added global variable MTMLastItem which can be used to reference
+	  the last item added to the menu.
+	- All items in the menu have a parentNode property, to reverse navigation
+	  in the tree is possible.
+	- Much of the code is rewritten, mostly to enable more advanced usage
+	  of IE's object model and the W3C's Document Object Model.
+	- Installation guide rewritten, the content of downloadable files changed
+	  and also upgrade instructions from both v2.2.6 and v2.3.0 added.
+
+Changes to Morten's JavaScript Tree Menu v2.3.0 (2001-04-30):
+
+	- MTMSubsGetPlus is now a tri-state option with three possible values;
+	  always, never and submenu.
+	- Cookie support is added, saving the state of the menu for a specified
+	  number of days.  Limits the tree to around 4000 items.
+	- Support for Netscape 6 and partial support for Opera 5.
+	- Arguments to MTMakeSubmenu() to define whether the sub menu is expanded
+	  as well as icons for open & closed state.
+	- Re-written the inline style sheet so it does not duplicate any
+	  information already found in the HTML code.
+	- Status bar message changed to "Expand/Collapse " and the item's text.
+	  Any link with a URL to a document will have said URL shown in the
+	  status bar instead of any message provided by the menu.
+	- Variables for headers & footers (HTML) in the menu document.
+	- Tracking of local files in Microsoft Internet Explorer fixed.
+	- Fixed a bug in which the menu didn't track URLs with query strings.
+	- Tooltips, through usage of the TITLE attribute.
+	- General code changes going towards object orientation and code that
+	  is more flexible and easier to work with.

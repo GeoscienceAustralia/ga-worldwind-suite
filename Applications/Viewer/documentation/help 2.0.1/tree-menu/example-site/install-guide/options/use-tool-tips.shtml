@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- MTMUseToolTips</title>
+
+<script type="text/javascript" src="../../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>MTMUseToolTips</h2>
+
+<table class="optionDef">
+  <tbody><tr><th>Possible values:</th>
+  <td>true or false</td></tr>
+  <tr><th>Default value:</th>
+  <td><code>true</code></td></tr>
+  <tr><th>Requirements:</th>
+  <td>none</td></tr>
+  <tr><th>First available:</th>
+  <td>2.3.0</td></tr>
+  <tr><th>Supported browsers:</th>
+  <td>All but NN3 &amp; NN4</td></tr>
+  <tr><th>Description:</th>
+  <td>This controls the usage of tool tips in the menu, which is done by inserting each item's tool tip text into the <code>title</code>
+-attribute of the links.  In other words this in straight HTML and requires
+support for that attribute in the browser.  Since Netscape Navigator 3 &amp;
+4 do not support it they won't support the tool tips.</td></tr>
+</tbody></table>
+
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

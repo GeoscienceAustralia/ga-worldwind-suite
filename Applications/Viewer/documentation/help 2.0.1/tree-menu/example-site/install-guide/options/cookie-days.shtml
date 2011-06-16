@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- MTMCookieDays</title>
+
+<script type="text/javascript" src="../../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>MTMCookieDays</h2>
+
+<table class="optionDef">
+  <tbody><tr><th>Possible values:</th>
+  <td>A number from 0 upwards</td></tr>
+  <tr><th>Default value:</th>
+  <td>Not set</td></tr>
+  <tr><th>Requirements:</th>
+  <td><a href="use-cookies.shtml">MTMUseCookies</a> = true;<br>
+and <a href="cookie-name.shtml">MTMCookieName</a> must be set</td></tr>
+  <tr><th>First available:</th>
+  <td>2.3.0</td></tr>
+  <tr><th>Supported browsers:</th>
+  <td>All</td></tr>
+  <tr><th>Description:</th>
+  <td>This option controls how many days the cookies used by the menu will be stored.  A value of <code>0</code> means they'll only last for the current browser session, and a value of <code>7</code> will mean "one week from the last visit".</td></tr>
+</tbody></table>
+
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

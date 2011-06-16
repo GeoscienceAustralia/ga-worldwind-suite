@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- MTMAlwaysLinkIfWE</title>
+
+<script type="text/javascript" src="../../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>MTMAlwaysLinkIfWE</h2>
+
+<table class="optionDef">
+  <tbody><tr><th>Possible values:</th>
+  <td>true or false</td></tr>
+  <tr><th>Default value:</th>
+  <td><code>true</code></td></tr>
+  <tr><th>Requirements:</th>
+  <td><a href="emulate-we.shtml">MTMEmulateWE</a> = true;</td></tr>
+  <tr><th>First available:</th>
+  <td>2.3.1</td></tr>
+  <tr><th>Supported browsers:</th>
+  <td>All</td></tr>
+  <tr><th>Description:</th>
+  <td>This variable controls the display of submenus when <a href="emulate-we.shtml">MTMEmulateWE</a> is set to <code>true</code>.  The default value of <code>MTMAlwaysLinkIfWE</code>
+ is true, which means that the whole submenu is a link that expands &amp;
+collapses the submenu.  This means the +/- sign, the icon and the text. 
+If you set it to <code>false</code> only the +/- sign and the icon will expand and collapse the submenu, and the text will only be text.  If you set it to <code>false</code> you will also have to set <a href="sub-text-color.shtml">MTMSubTextColor</a> to the right color for your site.</td></tr>
+</tbody></table>
+
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

@@ -1,0 +1,89 @@
+$Id: CREDITS,v 1.3 2002/06/10 20:41:43 nettrom Exp $
+
+==============================================================================
+
+Morten's JavaScript Tree Menu was originally a slightly modified version
+of Mike Hall's JavaScript Tree Menu as found on his web site in October, 1998.
+Development of his version has since discontinued, but his web site remains
+online at http://www.brainjar.com/
+
+Most of the code and the concepts of the current version have, not
+surprisingly, been created by Morten Wang.
+
+In addition to the specific contributions mentioned here I'd like to thank
+all the people who have contributed either on the mailing list or through
+private emails.  The positive feedback, constructive criticism and suggestions
+I've received are too many to list each of them, but they're the reason I keep
+on enjoying this project.  Thank you!
+
+Version 2.3.0: 
+
+  The code needed to add the ability to control expansion as well as separate
+  icons for closed & open state of sub menus was provided by Arthur Veinstein.
+
+  The patch needed to make tracking work when navigating local files in
+  Microsoft Internet Explorer was provided by both Bill Lange
+  and David Favis-Mortlock.
+
+Version 2.3.1:
+
+  Ray Donovan
+	Fix for URLs starting with "/"
+  Patric Eriksson
+	Scrollbar colour code, right-click prevention code and ideas, code
+	and assistance on the linked .js file issue.
+  John Russell
+	Pointed out that code.html missed a DOCTYPE and suggested that the menu
+	should have configurable doctype and content-type elements as well as
+        an option for default target.  Has also been helpful in testing
+	development versions of the menu and identifying any bug that showed up.
+  Lisa Hagin
+	Right-click prevention code
+  Oswald Jaskolla
+	Making MTMenuFrame a pointer to the frame object instead of a string
+  Phillip Feichko
+	Pointed out that there should be a possibility to also store the
+	tracked item in a cookie and then load the saved document.
+  William Denniss
+	Suggested and submitted patch for MTMakeLastSubmenu() to simplify
+	menu building by removing the need for the items[] array.
+	The function has been added to the MTMenu() object as .makeLastSubmenu()
+  Tim Davies
+	The idea & code for an option naming the frame containing code.html
+  Paul Carrielies
+	Supplied a patch for function MTMAddSubItem() which lets you add an
+	item to another item's submenu without knowing whether it has said
+	submenu or not.  The function has been added to the MTMenuItem()
+	object as .addSubItem()
+  Peter Stamfest
+	Suggested option MTMAlwaysLinkIfWE and supplied a patch for adding
+	this option to the code base.
+  Sachin Ghaisas and Chris Coulthrust
+	Function MTMakeSVG() which shows how to use SVGs instead of GIF images
+	in the menu.
+  Martin Rubas
+	Ideas and code for parts of the MTMBrowser() object with regards to
+	browser detection.
+  Ganesh Babu
+	Identified a bug in the expansion argument to MTMakeSubemenu() and
+	helped test the bug fix.
+  Eric Desart
+	Improved image compression in the images used by the menu, thereby
+	saving both disk space and bandwidth.
+
+Version 2.3.2:
+
+  Kristian M Bjerke
+	Checked through the list of sites in use as well as all submitted
+	sites giving that part of the web site a long overdue update.
+  John Russell
+	Massive amounts of testing and follow ups of bug fixes.
+
+Version 2.3.2-macfriendly
+
+  Oscar Carserud
+	For reporting the Mac-related problems with the menu
+  Harald Lapp
+	For helping out with testing of the initial bugfix-attempts
+  Ronny Van Der Borght
+	For testing the patched mtmcode.js and reporting its success

@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- Setting options</title>
+
+<script type="text/javascript" src="../../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>Sample code.html</h2>
+
+<p>This file is only used as an example on how to set some of the options,
+the actual menu structure is removed.  A particular feature of this sample
+is that it sets <a href="extra-css.shtml">MTMExtraCSS</a>.</p>
+
+<pre>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;[insert your title here]&lt;/title&gt;
+&lt;script type="text/javascript"&gt;
+// Framebuster script to relocate browser when MSIE bookmarks this
+// page instead of the parent frames.  Set variable relocateURL to
+// the index document of your website (relative URLs are ok):
+var relocateURL = "/";
+
+if(parent.frames.length == 0) {
+  if(document.images) {
+    location.replace(relocateURL);
+  } else {
+    location = relocateURL;
+  }
+}
+&lt;/script&gt;
+&lt;script type="text/javascript" src="mtmcode.js"&gt;
+&lt;/script&gt;
+
+&lt;script type="text/javascript"&gt;
+// Morten's JavaScript Tree Menu
+// version 2.3.1, dated 2002-02-02
+// http://www.treemenu.com/
+
+// Copyright (c) 2001-2002, Morten Wang &amp; contributors
+// All rights reserved.
+
+// This software is released under the BSD License which should accompany
+// it in the file "COPYING".  If you do not have this file you can access
+// the license through the WWW at http://www.treemenu.com/license.txt
+
+/******************************************************************************
+* User-configurable options.                                                  *
+******************************************************************************/
+
+// Name of the frame where the menu is to appear.
+MTMenuFrame = "newmenu";
+MTMCodeFrame = "foo"; // must correspond with value in mtmtrack.js
+
+// variable for determining whether a sub-menu always gets a plus-sign
+// regardless of whether it holds another sub-menu or not
+MTMSubsGetPlus = "never";
+
+// Variables for controlling colors in the menu document.
+// Regular BODY atttributes as in HTML documents.
+MTMBGColor = "#000033";
+MTMBackground = "blueback.jpg";
+MTMTextColor = "white";
+
+// color for all menu items
+MTMLinkColor = "lime";
+
+// Hover color, when the mouse is over a menu link
+MTMAhoverColor = "white";
+
+// Foreground color for the tracking &amp; clicked submenu item
+MTMTrackColor ="yellow";
+MTMSubExpandColor = "yellow";
+MTMSubClosedColor = "yellow";
+
+// All options regarding the root text and it's icon
+MTMRootColor = "white";
+
+// Additional style sheet properties if you're not using a linked style sheet.
+// See the documentation for details on IDs, classes &amp; elements used in the menu.
+// Line can simply be removed if you haven't got any additional properties.
+MTMExtraCSS.addRule('body','margin: 0px; padding: 0px;');
+
+// Options for controlling the menu document
+MTMcontentType = "text/html; charset=ISO-8859-1";
+
+// Message to pop up when a user right-clicks in the menu frame
+// in case you prefer that kind of action prevented.
+MTMrightClickMessage = "Ah, I see you've got the machine that goes ''Ping!''";
+
+// URL for a linked JavaScript file (.js), this URL is relative
+// to the directory where code.html is located
+MTMLinkedJSURL = "right-click.js";
+MTMLinkedInitFunction = "initialize";
+
+// Cookie usage.  First is use cookie (yes/no, true/false).
+// Second is cookie name to use.
+// Third is how many days we want the cookie to be stored.
+
+MTMUseCookies = true;
+MTMCookieName = "MTMCookie";
+MTMCookieDays = 3;
+MTMTrackedCookieName = "MTMTracked";
+
+// Default target
+MTMDefaultTarget = "text";
+
+/******************************************************************************
+* User-configurable list of icons.                                            *
+******************************************************************************/
+
+var MTMIconList = null;
+MTMIconList = new IconList();
+MTMIconList.addIcon(new MTMIcon("menu_link_external.gif", "http://", "pre"));
+MTMIconList.addIcon(new MTMIcon("menu_link_pdf.gif", ".pdf", "post"));
+
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body onload="MTMStartMenu(true)"&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

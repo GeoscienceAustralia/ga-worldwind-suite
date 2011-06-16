@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- Setting options</title>
+
+<link rel="stylesheet" type="text/css" href="../main.css">
+
+<script type="text/javascript" src="../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>Setting options</h2>
+
+<p>These options used to be found in the file "code.html", but now that they
+all have default values the file doesn't contain any.  Instead you'll have
+to insert the options that you need and make sure they have the right values.
+ To help you on your way there's a <a href="options/default-values.shtml">list of default values</a> so you know what they all are and also a <a href="options/sample-code.shtml">sample code.html</a>
+ which will show they're inserted into the file.  Below are links to all
+options with detailed explanation of what each does and how it's set.</p>
+
+<ul>
+  <li><a href="options/relocate-url.shtml">relocateURL</a>
+  <li><a href="options/time-out.shtml">MTMTimeOut</a>
+  <li><a href="options/table-width.shtml">MTMTableWidth</a>
+  <li><a href="options/menu-frame.shtml">MTMenuFrame</a>
+  <li><a href="options/code-frame.shtml">MTMCodeFrame</a>
+  <li><a href="options/default-target.shtml">MTMDefaultTarget</a>
+  <li><a href="options/doctype.shtml">MTMDOCTYPE</a>
+  <li><a href="options/content-type.shtml">MTMcontentType</a>
+  <li><a href="options/subs-auto-close.shtml">MTMSubsAutoClose</a>
+  <li><a href="options/subs-get-plus.shtml">MTMSubsGetPlus</a>
+  <li><a href="options/emulate-we.shtml">MTMEmulateWE</a>
+  <li><a href="options/always-link-if-we.shtml">MTMAlwaysLinkIfWE</a>
+  <li><a href="options/sub-text-color.shtml">MTMSubTextColor</a>
+  <li><a href="options/menu-image-directory.shtml">MTMenuImageDirectory</a>
+  <li><a href="options/bg-color.shtml">MTMBGColor</a>
+  <li><a href="options/background.shtml">MTMBackground</a>
+  <li><a href="options/text-color.shtml">MTMTextColor</a>
+  <li><a href="options/link-color.shtml">MTMLinkColor</a>
+  <li><a href="options/ahover-color.shtml">MTMAhoverColor</a>
+  <li><a href="options/track-color.shtml">MTMTrackColor</a>
+  <li><a href="options/sub-expand-color.shtml">MTMSubExpandColor</a>
+  <li><a href="options/sub-closed-color.shtml">MTMSubClosedColor</a>
+  <li><a href="options/menu-text.shtml">MTMenuText</a>
+  <li><a href="options/root-icon.shtml">MTMRootIcon</a>
+  <li><a href="options/root-color.shtml">MTMRootColor</a>
+  <li><a href="options/root-font.shtml">MTMRootFont</a>
+  <li><a href="options/root-cssize.shtml">MTMRootCSSize</a>
+  <li><a href="options/root-font-size.shtml">MTMRootFontSize</a>
+  <li><a href="options/menu-font.shtml">MTMenuFont</a>
+  <li><a href="options/menu-cssize.shtml">MTMenuCSSize</a>
+  <li><a href="options/menu-font-size.shtml">MTMenuFontSize</a>
+  <li><a href="options/linked-ss.shtml">MTMLinkedSS</a>
+  <li><a href="options/ss-href.shtml">MTMSSHREF</a>
+  <li><a href="options/extra-css.shtml">MTMExtraCSS</a>
+  <li><a href="options/use-scrollbar-css.shtml">MTMuseScrollbarCSS</a>
+  <li><a href="options/scrollbar-base-color.shtml">MTMscrollbarBaseColor</a>
+  <li><a href="options/scrollbar-face-color.shtml">MTMscrollbarFaceColor</a>
+  <li><a href="options/scrollbar-highlight-color.shtml">MTMscrollbarHighlightColor</a>
+  <li><a href="options/scrollbar-shadow-color.shtml">MTMscrollbarShadowColor</a>
+  <li><a href="options/scrollbar-3d-light-color.shtml">MTMscrollbar3dLightColor</a>
+  <li><a href="options/scrollbar-arrow-color.shtml">MTMscrollbarArrowColor</a>
+  <li><a href="options/scrollbar-track-color.shtml">MTMscrollbarTrackColor</a>
+  <li><a href="options/scrollbar-dark-shadow-color.shtml">MTMscrollbarDarkShadowColor</a>
+  <li><a href="options/header.shtml">MTMHeader</a>
+  <li><a href="options/footer.shtml">MTMFooter</a>
+  <li><a href="options/use-cookies.shtml">MTMUseCookies</a>
+  <li><a href="options/cookie-name.shtml">MTMCookieName</a>
+  <li><a href="options/cookie-days.shtml">MTMCookieDays</a>
+  <li><a href="options/tracked-cookie-name.shtml">MTMTrackedCookieName</a>
+  <li><a href="options/use-tool-tips.shtml">MTMUseToolTips</a>
+  <li><a href="options/linked-js-url.shtml">MTMLinkedJSURL</a>
+  <li><a href="options/linked-init-function.shtml">MTMLinkedInitFunction</a>
+  <li><a href="options/right-click-message.shtml">MTMrightClickMessage</a>
+</ul>
+
+<p>That's all the options currently available.  Once you've set all to the values you want to you can go on to <a href="the-menu.shtml">Part 3: Making the menu</a>.</p>
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

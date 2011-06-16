@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- MTMSubTextColor</title>
+
+<script type="text/javascript" src="../../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>MTMSubTextColor</h2>
+
+<table class="optionDef">
+  <tbody><tr><th>Possible values:</th>
+  <td>A valid HTML/CSS colour value as a string</td></tr>
+  <tr><th>Default value:</th>
+  <td><code>"#000000"</code></td></tr>
+  <tr><th>Requirements:</th>
+  <td><a href="emulate-we.shtml">MTMEmulateWE</a> = true;<br>
+<a href="always-link-if-we.shtml">MTMAlwaysLinkIfWE</a> = false;<br>
+<a href="linked-ss.shtml">MTMLinkedSS</a> = false;</td></tr>
+  <tr><th>First available:</th>
+  <td>2.3.1</td></tr>
+  <tr><th>Supported browsers:</th>
+  <td>All</td></tr>
+  <tr><th>Description:</th>
+  <td>This variable defines the color of a submenu's text when <a href="always-link-if-we.shtml">MTMAlwaysLinkIfWE</a> is set to <code>false</code>.</td></tr>
+</tbody></table>
+
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

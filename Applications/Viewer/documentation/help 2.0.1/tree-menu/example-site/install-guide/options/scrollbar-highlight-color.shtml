@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- MTMscrollbarHighlightColor</title>
+
+<script type="text/javascript" src="../../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>MTMscrollbarHighlightColor</h2>
+
+<table class="optionDef">
+  <tbody><tr><th>Possible values:</th>
+  <td>A valid CSS colour value as a string</td></tr>
+  <tr><th>Default value:</th>
+  <td><code>none</code></td></tr>
+  <tr><th>Requirements:</th>
+  <td><a href="linked-ss.shtml">MTMLinkedSS</a> = false;<br>
+<a href="use-scrollbar-css.shtml">MTMuseScrollbarCSS</a> = true;</td></tr>
+  <tr><th>First available:</th>
+  <td>2.3.1</td></tr>
+  <tr><th>Supported browsers:</th>
+  <td>IE5.5, IE6</td></tr>
+  <tr><th>Description:</th>
+  <td>
+This option controls the colour of the top and left edges of the scroll box
+and scroll arrows of the scroll bar in the menu frame.</td></tr>
+</tbody></table>
+
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

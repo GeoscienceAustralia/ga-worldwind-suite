@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- MTMDefaultTarget</title>
+
+<script type="text/javascript" src="../../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>MTMDefaultTarget</h2>
+
+<table class="optionDef">
+  <tbody><tr><th>Possible values:</th>
+  <td>A frame name as a string</td></tr>
+  <tr><th>Default value:</th>
+  <td>Not set</td></tr>
+  <tr><th>Requirements:</th>
+  <td>none</td></tr>
+  <tr><th>First available:</th>
+  <td>2.3.1</td></tr>
+  <tr><th>Supported browsers:</th>
+  <td>All</td></tr>
+  <tr><th>Description:</th>
+  <td>
+This value should probably correspond to the name of a frame in your frameset,
+that frame being the one where most of your documents are shown.  The value
+is used as the target attribute of a link in HTML, and therefore adheres
+to that attribute's definition in the HTML recommendation.  Setting this
+value enables you to remove the third argument to <code>addItem()</code> when defining menu items.  If you're using the fourth argument set the third to <code>null</code>, e.g: <code>menu.addItem("Foo", "foo.html", null, "foo");</code></td></tr>
+</tbody></table>
+
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>

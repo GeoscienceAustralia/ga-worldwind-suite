@@ -1,0 +1,27 @@
+                  README for Morten's JavaScript Tree Menu
+                 Version 2.3.2-macfriendly dated 2002-06-10
+
+ This software is released under the BSD License and it can be found
+ in the file 'COPYING'.
+
+ This software is OSI Certified Open Source Software.
+ OSI Certified is a certification mark of the Open Source Initiative.
+
+ Changes from the previous version is found in 'ChangeLog'.
+
+ Installation notes are found in the file 'INSTALL'.
+
+ Upgrade notes are found by opening 'example-site/index.html' in your
+ web browser.  See the section marked "Upgrade notes".
+
+ There used to be a file called 'commented-code.html' which had a commented
+ version of 'code.html'.  It has been removed and instead focus will be put
+ on a more in-depth explanation on the web site under "How it works".
+
+ Remember that the tree menu has it's own mailing list,
+ tree_menu@yahoogroups.com.  Visit the web-site for information about how
+ to join the list and receive updates and information regarding the menu 
+ through e-mail.
+
+ Bug-reports, comments, questions, feature suggestions, thank you notes
+ and the like are all welcome by e-mailing Morten on morten@treemenu.com

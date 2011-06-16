@@ -1,0 +1,311 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>[insert your title here]</title>
+
+<script type="text/javascript">
+// Framebuster script to relocate browser when MSIE bookmarks this
+// page instead of the parent frameset.  Set variable relocateURL to
+// the index document of your website (relative URLs are ok):
+var relocateURL = "/";
+
+if(parent.frames.length == 0) {
+  if(document.images) {
+    location.replace(relocateURL);
+  } else {
+    location = relocateURL;
+  }
+}
+</script>
+
+<script type="text/javascript" src="mtmcode.js">
+</script>
+
+<script type="text/javascript">
+// Morten's JavaScript Tree Menu
+// version 2.3.2-macfriendly, dated 2002-06-10
+// http://www.treemenu.com/
+
+// Copyright (c) 2001-2002, Morten Wang & contributors
+// All rights reserved.
+
+// This software is released under the BSD License which should accompany
+// it in the file "COPYING".  If you do not have this file you can access
+// the license through the WWW at http://www.treemenu.com/license.txt
+
+// Nearly all user-configurable options are set to their default values.
+// Have a look at the section "Setting options" in the installation guide
+// for description of each option and their possible values.
+
+MTMDefaultTarget = "text";
+
+/******************************************************************************
+* User-configurable list of icons.                                            *
+******************************************************************************/
+
+var MTMIconList = null;
+MTMIconList = new IconList();
+MTMIconList.addIcon(new MTMIcon("menu_link_external.gif", "http://", "pre"));
+MTMIconList.addIcon(new MTMIcon("menu_link_pdf.gif", ".pdf", "post"));
+
+/******************************************************************************
+* User-configurable menu.                                                     *
+******************************************************************************/
+
+// Main menu.
+var menu = null;
+menu = new MTMenu();
+
+menu.addItem("Upgrade notes");
+var upgrades = null;
+upgrades = new MTMenu();
+upgrades.addItem("from version 2.2.6", "upgrading/version-2.2.6.html");
+upgrades.addItem("from version 2.3.0", "upgrading/version-2.3.0.html");
+upgrades.addItem("from version 2.3.1", "upgrading/version-2.3.1.html");
+upgrades.addItem("from version 2.3.2", "upgrading/version-2.3.2.html");
+menu.makeLastSubmenu(upgrades);
+
+menu.addItem("Install Guide", "install-guide/index.shtml");
+	// Submenu, installation
+	var installation = null;
+	installation = new MTMenu();
+	installation.addItem("The frameset", "install-guide/frameset.shtml");
+	
+	installation.addItem("Setting options", "install-guide/options.shtml");
+		// Submenu options
+		var options = null;
+		options = new MTMenu();
+		options.addItem("List of default values", "install-guide/options/default-values.shtml");
+		options.addItem("Sample code.html", "install-guide/options/sample-code.shtml");
+		options.addItem("Detailed descriptions");
+		
+		var optionsmenu = null;
+		optionsmenu = new MTMenu();
+		optionsmenu.addItem("relocateURL", "install-guide/options/relocate-url.shtml", null, "relocateURL = '&lt;absolute or relative URL&gt;'");
+		optionsmenu.addItem("MTMTimeOut", "install-guide/options/time-out.shtml", null, "MTMTimeOut = &lt;number&gt;");
+		optionsmenu.addItem("MTMTableWidth", "install-guide/options/table-width.shtml", null, "MTMTableWidth = &lt;number | 'percentage-value'&gt;");
+		optionsmenu.addItem("MTMenuFrame", "install-guide/options/menu-frame.shtml", null, "MTMenuFrame = '&lt;frame name&gt;'");
+		optionsmenu.addItem("MTMCodeFrame", "install-guide/options/code-frame.shtml", null, "MTMCodeFrame = '&lt;frame name&gt;'");
+		optionsmenu.addItem("MTMDefaultTarget", "install-guide/options/default-target.shtml", null, "MTMDefaultTarget = '&lt;frame name&gt;'");
+		
+		optionsmenu.addItem("MTMDOCTYPE", "install-guide/options/doctype.shtml", null, "MTMDOCTYPE = '&lt;valid DOCTYPE&gt;'");
+		optionsmenu.addItem("MTMcontentType", "install-guide/options/content-type.shtml", null, "MTMcontentType = '&lt;valid Content-Type header&gt;'");
+		
+		optionsmenu.addItem("MTMSubsAutoClose", "install-guide/options/subs-auto-close.shtml", null, "MTMSubsAutoClose = &lt;true | false&gt;");
+		optionsmenu.addItem("MTMSubsGetPlus", "install-guide/options/subs-get-plus.shtml", null, "MTMSubsGetPlus = '&lt;Submenu | Always | Never&gt;'");
+		optionsmenu.addItem("MTMEmulateWE", "install-guide/options/emulate-we.shtml", null, "MTMEmulateWE = &lt;true | false&gt;");
+		optionsmenu.addItem("MTMAlwaysLinkIfWE", "install-guide/options/always-link-if-we.shtml", null, "MTMAlwaysLinkIfWE = &lt;true | false &gt;");
+		optionsmenu.addItem("MTMSubTextColor", "install-guide/options/sub-text-color.shtml", null, "MTMSubTextColor = '&lt;valid HTML colour value&gt;'");
+		
+		optionsmenu.addItem("MTMenuImageDirectory", "install-guide/options/menu-image-directory.shtml", null, "MTMenuImageDirectory = '&lt;directory name&gt;'");
+		
+		optionsmenu.addItem("MTMBGColor", "install-guide/options/bg-color.shtml", null, "MTMBGColor = '&lt;valid HTML colour value&gt;'");
+		optionsmenu.addItem("MTMBackground", "install-guide/options/background.shtml", null, "MTMBackground = '&lt;image filename&gt;'");
+		optionsmenu.addItem("MTMTextColor", "install-guide/options/text-color.shtml", null, "MTMTextColor = '&lt;valid HTML colour value&gt;'");
+		optionsmenu.addItem("MTMLinkColor", "install-guide/options/link-color.shtml", null, "MTMLinkColor = '&lt;valid HTML colour value&gt;'");
+		optionsmenu.addItem("MTMAhoverColor", "install-guide/options/ahover-color.shtml", null, "MTMAhoverColor = '&lt;valid HTML colour value&gt;'");
+		optionsmenu.addItem("MTMTrackColor", "install-guide/options/track-color.shtml", null, "MTMTrackColor = '&lt;valid HTML colour value&gt;'");
+		optionsmenu.addItem("MTMSubExpandColor", "install-guide/options/sub-expand-color.shtml", null, "MTMSubExpandColor = '&lt;valid HTML colour value&gt;'");
+		optionsmenu.addItem("MTMSubClosedColor", "install-guide/options/sub-closed-color.shtml", null, "MTMSubClosedColor = '&lt;valid HTML colour value&gt;'");
+		optionsmenu.addItem("MTMenuText", "install-guide/options/menu-text.shtml", null, "MTMenuText = '&lt;text&gt;'");
+		optionsmenu.addItem("MTMRootIcon", "install-guide/options/root-icon.shtml", null, "MTMRootIcon = '&lt;image filename&gt;'");
+		optionsmenu.addItem("MTMRootColor", "install-guide/options/root-color.shtml", null, "MTMRootColor = '&lt;valid HTML colour value&gt;'");
+		optionsmenu.addItem("MTMRootFont", "install-guide/options/root-font.shtml", null, "MTMRootFont = '&lt;valid HTML/CSS font definition&gt;'");
+		optionsmenu.addItem("MTMRootCSSize", "install-guide/options/root-cssize.shtml", null, "MTMRootCSSize = '&lt;valid CSS fontsize definition&gt;'");
+		optionsmenu.addItem("MTMRootFontSize", "install-guide/options/root-font-size.shtml", null, "MTMRootFontSize = '&lt;valid HTML fontsize-attribute value&gt;'");
+		optionsmenu.addItem("MTMenuFont", "install-guide/options/menu-font.shtml", null, "MTMenuFont = '&lt;valid HTML/CSS font definition&gt;'");
+		optionsmenu.addItem("MTMenuCSSize", "install-guide/options/menu-cssize.shtml", null, "MTMenuCSSize = '&lt;valid CSS fontsize definition&gt;'");
+		optionsmenu.addItem("MTMenuFontSize", "install-guide/options/menu-font-size.shtml", null, "MTMenuFontSize = '&lt;valid HTML fontsize-attribute value&gt;'");
+		
+		optionsmenu.addItem("MTMLinkedSS", "install-guide/options/linked-ss.shtml", null, "MTMLinkedCSS = &lt;true | false&gt;");
+		optionsmenu.addItem("MTMSSHREF", "install-guide/options/ss-href.shtml", null, "MTMSSHREF = '&lt;relative URL&gt;'");
+		optionsmenu.addItem("MTMExtraCSS", "install-guide/options/extra-css.shtml", null, "MTMExtraCSS.addRule('&lt;CSS selector&gt;', '&lt;CSS rule&gt;')");
+		optionsmenu.addItem("MTMuseScrollbarCSS", "install-guide/options/use-scrollbar-css.shtml", null, "MTMuseScrollbarCSS = &lt;true | false&gt;");
+		optionsmenu.addItem("MTMscrollbarBaseColor", "install-guide/options/scrollbar-base-color.shtml", null, "MTMscrollbarBaseColor = '&lt;valid CSS colour value&gt;'");
+		optionsmenu.addItem("MTMscrollbarFaceColor", "install-guide/options/scrollbar-face-color.shtml", null, "MTMscrollbarFaceColor = '&lt;valid CSS colour value&gt;'");
+		optionsmenu.addItem("MTMscrollbarHighlightColor", "install-guide/options/scrollbar-highlight-color.shtml", null, "MTMscrollbarHighlightColor = '&lt;valid CSS colour value&gt;'");
+		optionsmenu.addItem("MTMscrollbarShadowColor", "install-guide/options/scrollbar-shadow-color.shtml", null, "MTMscrollbarShadowColor = '&lt;valid CSS colour value&gt;'");
+		optionsmenu.addItem("MTMscrollbar3dLightColor", "install-guide/options/scrollbar-3d-light-color.shtml", null, "MTMscrollbar3dLightColor = '&lt;valid CSS colour value&gt;'");
+		optionsmenu.addItem("MTMscrollbarArrowColor", "install-guide/options/scrollbar-arrow-color.shtml", null, "MTMscrollbarArrowColor = '&lt;valid CSS colour value&gt;'");
+		optionsmenu.addItem("MTMscrollbarTrackColor", "install-guide/options/scrollbar-track-color.shtml", null, "MTMscrollbarTrackColor = '&lt;valid CSS colour value&gt;'");
+		optionsmenu.addItem("MTMscrollbarDarkShadowColor", "install-guide/options/scrollbar-dark-shadow-color.shtml", null, "MTMscrollbarDarkShadowColor = '&lt;valid CSS colour value&gt;'");
+		
+		optionsmenu.addItem("MTMHeader", "install-guide/options/header.shtml", null, "MTMHeader = '&lt;HTML code&gt;'");
+		optionsmenu.addItem("MTMFooter", "install-guide/options/footer.shtml", null, "MTMFooter = '&lt;HTML code&gt;'");
+		
+		optionsmenu.addItem("MTMUseCookies", "install-guide/options/use-cookies.shtml", null, "MTMUseCookies = &lt;true | false&gt;");
+		optionsmenu.addItem("MTMCookieName", "install-guide/options/cookie-name.shtml", null, "MTMCookieName = '&lt;name&gt;'");
+		optionsmenu.addItem("MTMCookieDays", "install-guide/options/cookie-days.shtml", null, "MTMCookieDays = &lt;number&gt;");
+		optionsmenu.addItem("MTMTrackedCookieName", "install-guide/options/tracked-cookie-name.shtml", null, "MTMTrackedCookieName = '&lt;name&gt;'");
+		
+		optionsmenu.addItem("MTMUseToolTips", "install-guide/options/use-tool-tips.shtml", null, "MTMUseToolTips = &lt;true | false&gt;");
+		
+		optionsmenu.addItem("MTMLinkedJSURL", "install-guide/options/linked-js-url.shtml", null, "MTMLinkedJSURL = '&lt;relative URL&gt;'");
+		optionsmenu.addItem("MTMLinkedInitFunction", "install-guide/options/linked-init-function.shtml", null, "MTMLinkedInitFunction = '&lt;function name&gt;'");
+		optionsmenu.addItem("MTMrightClickMessage", "install-guide/options/right-click-message.shtml", null, "MTMrightClickMessage = '&lt;message text&gt;'");
+		options.makeLastSubmenu(optionsmenu);
+	
+	installation.makeLastSubmenu(options);
+	
+	installation.addItem("Making the menu", "install-guide/the-menu.shtml");
+	installation.addItem("The icon menu", "install-guide/icon-menu.shtml");
+	installation.addItem("Tracking code", "install-guide/tracking-code.shtml");
+	installation.addItem("CSS Properties", "install-guide/css-properties.shtml");
+	
+menu.makeLastSubmenu(installation, false, 'book-closed.gif','book-open.gif');
+
+menu.addItem("Page #1", "documents/page-1.html");
+menu.addItem("Page #2.", "documents/page-2.html");
+
+menu.addItem("Nested Sub-menu #1");
+// nested submenu #1, multiple submenu levels example
+var number_1 = null;
+number_1 = new MTMenu();
+number_1.addItem("Page #1-1", "documents/page-1-1.html");
+number_1.addItem("Page #1-2", "documents/page-1-2.html");
+
+number_1.addItem("Submenu #1-1");
+// nested submenu #1-1, multiple submenu levels
+var number_1_1 = null;
+number_1_1 = new MTMenu();
+
+number_1_1.addItem("Submenu #1-1-1");
+// nested submenu #1-1-1, 2 items
+var number_1_1_1 = null;
+number_1_1_1 = new MTMenu();
+number_1_1_1.addItem("Page #1-1-1-1", "documents/page-1-1-1-1.html");
+number_1_1_1.addItem("Page #1-1-1-2", "documents/page-1-1-1-2.html");
+number_1_1.makeLastSubmenu(number_1_1_1);
+
+number_1_1.addItem("Submenu #1-1-2");
+// nested submenu #1-1-2, 4 items
+var number_1_1_2 = null;
+number_1_1_2 = new MTMenu();
+number_1_1_2.addItem("Page #1-1-2-1", "documents/page-1-1-2-1.html");
+number_1_1_2.addItem("Page #1-1-2-2", "documents/page-1-1-2-2.html");
+number_1_1_2.addItem("Page #1-1-2-3", "documents/page-1-1-2-3.html");
+number_1_1_2.addItem("Page #1-1-2-4", "documents/page-1-1-2-4.html");
+number_1_1.makeLastSubmenu(number_1_1_2);
+
+number_1_1.addItem("Submenu #1-1-3");
+// nested submenu #1-1-3, 4 items
+var number_1_1_3 = null;
+number_1_1_3 = new MTMenu();
+number_1_1_3.addItem("Page #1-1-3-1", "documents/page-1-1-3-1.html");
+number_1_1_3.addItem("Page #1-1-3-2", "documents/page-1-1-3-2.html");
+number_1_1_3.addItem("Page #1-1-3-3", "documents/page-1-1-3-3.html");
+number_1_1_3.addItem("Page #1-1-3-4", "documents/page-1-1-3-4.html");
+number_1_1.makeLastSubmenu(number_1_1_3);
+
+number_1.makeLastSubmenu(number_1_1);
+
+number_1.addItem("Submenu #1-2");
+// nested submenu #1-2, multiple submenu levels
+var number_1_2 = null;
+number_1_2 = new MTMenu();
+number_1_2.addItem("Submenu #1-2-1");
+// nested submenu #1-2-1, 2 items
+var number_1_2_1 = null;
+number_1_2_1 = new MTMenu();
+number_1_2_1.addItem("Page #1-2-1-1", "documents/page-1-2-1-1.html");
+number_1_2_1.addItem("Page #1-2-1-2", "documents/page-1-2-1-2.html");
+number_1_2.makeLastSubmenu(number_1_2_1);
+
+number_1_2.addItem("Submenu #1-2-2");
+// nested submenu #1-2-2, 2 items
+var number_1_2_2 = null;
+number_1_2_2 = new MTMenu();
+number_1_2_2.addItem("Page #1-2-2-1", "documents/page-1-2-2-1.html");
+number_1_2_2.addItem("Page #1-2-2-2", "documents/page-1-2-2-2.html");
+number_1_2.makeLastSubmenu(number_1_2_2);
+
+number_1_2.addItem("Submenu #1-2-3");
+// nested submenu #1-2-3, 2 items
+var number_1_2_3 = null;
+number_1_2_3 = new MTMenu();
+number_1_2_3.addItem("Page #1-2-3-1", "documents/page-1-2-3-1.html");
+number_1_2_3.addItem("Page #1-2-3-2", "documents/page-1-2-3-2.html");
+number_1_2_3.addItem("Page #1-2-3-3", "documents/page-1-2-3-3.html");
+number_1_2_3.addItem("Page #1-2-3-4", "documents/page-1-2-3-4.html");
+number_1_2.makeLastSubmenu(number_1_2_3);
+
+number_1.makeLastSubmenu(number_1_2);
+
+menu.makeLastSubmenu(number_1);
+
+menu.addItem("Nested Sub-menu #2");
+// nested submenu #2, multiple submenu levels example #2, 6 items
+var number_2 = null;
+number_2 = new MTMenu();
+number_2.addItem("Page #2-1", "documents/page-2-1.html");
+number_2.addItem("Page #2-2", "documents/page-2-2.html");
+number_2.addItem("Page #2-3", "documents/page-2-3.html");
+number_2.addItem("Page #2-4", "documents/page-2-4.html");
+
+number_2.addItem("Submenu #2-1");
+// submmenu #2-1, 2 items
+var number_2_1 = null;
+number_2_1 = new MTMenu();
+number_2_1.addItem("Page #2-1-1", "documents/page-2-1-1.html");
+number_2_1.addItem("Page #2-1-2", "documents/page-2-1-2.html");
+number_2.makeLastSubmenu(number_2_1);
+
+number_2.addItem("Submenu #2-2");
+// submmenu #2-2, 2 items
+var number_2_2 = null;
+number_2_2 = new MTMenu();
+number_2_2.addItem("Page #2-2-1", "documents/page-2-2-1.html");
+number_2_2.addItem("Page #2-2-2", "documents/page-2-2-2.html");
+number_2.items[5].MTMakeSubmenu(number_2_2);
+menu.makeLastSubmenu(number_2);
+
+menu.addItem("Page #3", "documents/page-3.html");
+menu.addItem("Page #4", "documents/page-4.html");
+menu.addItem("Submenu #3");
+// non-nested submenu, #3
+var number_3 = null;
+number_3 = new MTMenu();
+number_3.addItem("Page #3-1", "documents/page-3-1.html");
+number_3.addItem("Page #3-2", "documents/page-3-2.html");
+number_3.addItem("Page #3-3", "documents/page-3-3.html");
+number_3.addItem("Page #3-4", "documents/page-3-4.html");
+menu.makeLastSubmenu(number_3);
+
+menu.addItem("Submenu #4");
+// non-nested submenu, #4
+var number_4 = null;
+number_4 = new MTMenu();
+number_4.addItem("Page #4-1", "documents/page-4-1.html");
+number_4.addItem("Page #4-2", "documents/page-4-2.html");
+number_4.addItem("Page #4-3", "documents/page-4-3.html");
+number_4.addItem("Page #4-4", "documents/page-4-4.html");
+menu.makeLastSubmenu(number_4);
+
+menu.addItem("Page #5", "documents/page-5.html");
+
+menu.addItem("Morten's pages");
+// submenu, links to Morten's pages
+var mortens = null;
+mortens = new MTMenu();
+mortens.addItem("Home page", "http://home.sol.no/~warnckew/", "_top");
+mortens.addItem("Who Am I?", "http://home.sol.no/~warnckew/me/", "_top");
+mortens.addItem("Backgammon", "http://home.sol.no/~warnckew/gammon/", "_top");
+mortens.addItem("Humour", "http://home.sol.no/~warnckew/jokes/", "_top");
+mortens.addItem("Programming", "http://home.sol.no/~warnckew/programming/", "_top");
+mortens.addItem("Guitar", "http://home.sol.no/~warnckew/guitar/", "_top");
+mortens.addItem("Other side", "http://home.sol.no/~warnckew/other-side/", "_top");
+menu.makeLastSubmenu(mortens);
+
+menu.addItem("M. Hall's pages");
+// submenu, link to brainjar.com
+var mikes = null;
+mikes = new MTMenu();
+mikes.addItem("Home page", "http://www.brainjar.com/", "_top");
+menu.makeLastSubmenu(mikes);
+
+menu.addItem("Home", "main.html");
+</script>
+</head>
+<body onLoad="MTMStartMenu(true)" bgcolor="#000033" text="#ffffcc" link="yellow" vlink="lime" alink="red">
+</body>
+</html>

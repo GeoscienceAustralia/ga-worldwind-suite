@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><title>Morten's JavaScript Tree Menu -- Install guide -- Making the menu</title>
+
+<link rel="stylesheet" type="text/css" href="../main.css">
+
+<script type="text/javascript" src="../mtmtrack.js">
+</script></head>
+
+
+<body bgcolor="#ffffff" text="#000000" link="#330099" vlink="#666699" alink="red">
+<h2>Making the menu</h2>
+
+<p>Now it's time to actually make the menu.  It's all done at the bottom of the file "<em>code.html</em>" where the code reads "User-configurable menu".  You want to delete all the code from there on down to <code>&lt;/script&gt;</code> so you don't get any of my code clobbering up your stuff.</p>
+
+<p>We start off with defining the menu.  It has to be (so aptly) named 'menu',
+and the first two lines of your menu code should therefore read:</p>
+
+<pre><code>var menu = null;
+menu = new MTMenu();</code></pre>
+
+<p>The reason for specifically setting it to 'null' before calling <code>MTMenu()</code> is to help the browser clean up memory.  Now, we add menu items and submenus.  This is done mainly by adding menu items using <code>addItem()</code>, but also through creating separate submenus and connecting them to their appropriate menu items.</p>
+
+<p>For each menu item you create you can have from one to five options defined.  They are separated with commas in the call to <code>addItem()</code> and are in order:</p>
+
+<ul>
+  <li><code>text</code> - the text to show in the menu</li>
+  <li><code>URL</code> - the URL the item should point to</li>
+  <li><code>target</code> - the target frame/window of the URL</li>
+  <li><code>tooltip</code> - the tool tip to show for this item</li>
+  <li><code>icon</code> - the image/icon to use</li>
+</ul>
+
+<p>A regular menu item has at least 3 of these defined, while submenus usually
+have only one (the text).  The exact number of course depends on how much
+you want to define for each item.  Let's use my own menu as an example, and
+add the first item (News) to it:</p>
+
+<pre><code>menu.addItem("News", "news.shtml", "text", "Latest news and updates");</code></pre>
+
+<p>(If you've had a close look at my code you might have noticed that I don't use <code>"text"</code>, instead I use <code>null</code>.  This is because I have set <code>MTMDefaultTarget</code> and by using <code>null</code> I say that the item should use the default target)</p>
+
+<p>I define four of the five arguments.  I want the text in the menu to read <code>"News"</code> therefore it becomes the first argument.  The document I point to is reachable through <code>"news.html"</code>
+ and I supply that as the second argument (notice that this URL is relative
+to where code.html resides).  My target frame is named <code>"text"</code> and becomes the third argument.  Lastly I want the tooltip to read <code>"Latest news and updates"</code>
+ and set the fourth argument accordingly.   As you can see each argument
+is separated with a comma.  Now we can add the second item, "Features etc.":</p>
+
+<pre><code>menu.addItem("Features etc.", "general/features.shtml", "text", "A run-through of the menu's features");</code></pre>
+
+<p>Adding another item is as simple as calling <code>addItem()</code> again,
+just with different arguments.  And again for the third, and again... and
+so on and so forth.  Then we arrive at an item that should open up a submenu.
+ This is done by creating the item as usual, then creating another menu on
+its own, and lastly by connecting the new menu to the item.  In other words
+it's a three-step process.  Let's have a look at how my "Install Guide" item
+was created.  First, I create the menu item:</p>
+
+<pre><code>menu.addItem("Install Guide", "install-guide/index.shtml", "text", "General help with menu installation");</code></pre>
+
+<p>Then I create a new menu called 'installation', which will contain the items in my submenu, and I add an item to it:</p>
+
+<pre><code>// Submenu, installation
+var installation = null;
+installation = new MTMenu();
+installation.addItem("The frameset", "install-guide/frameset.shtml", "text");</code></pre>
+
+<p>I now have a menu called 'installation', and it contains one item. I could've
+added further items now if I wanted to, but I'll instead skip it for now
+and hook this submenu up to the main menu.  This is done by calling <code>makeLastSubmenu()</code>
+ which hooks a submenu to the last item created in the menu it's called from.
+ That might sound a bit technical, so let's have a look at the actual code
+needed to hook your newly created submenu 'installation' to the main menu
+(which is called 'menu' as I pointed out earlier):</p>
+
+<pre><code>menu.makeLastSubmenu(installation);</code></pre>
+
+<p>The code is saying "Take the main menu (called 'menu') and make a submenu
+out of the last item I added to it.  You can find the submenu with its items
+as 'installation'."  How to make nested submenus will be explained a bit
+further down.</p>
+
+<p>In the menu that is used on the web site I use all four possible arguments to <code>makeLastSubmenu()</code>.  The first one is, as you've already noticed, the menu you want to hook up.  The three others are, in order:</p>
+
+<ul>
+  <li><code>isExpanded</code> - set to true if the sub menu is to be expanded by default</li>
+  <li><code>closedIcon</code> - the icon/image to use when the sub menu is closed</li>
+  <li><code>openIcon</code> - the icon/image to use when the sub menu is open</li>
+</ul>
+
+<p>As you can see you have the possibility of controlling whether the submenu
+should be shown as expanded when the user first arrives at the site (set
+to 'true' or 'false'), and you can also specify separate icons for the submenu.
+ This is what I do in the code used on the site, where I specify that the
+installation guide should be closed and have an open &amp; closed book as
+its icons.  It is done through the following code:</p>
+
+<pre><code>menu.makeLastSubmenu(installation, false, 'book-closed.gif','book-open.gif');</code></pre>
+
+<p>Then I go on adding more items and sub menus to build the complete menu structure.</p>
+
+<p>The obvious question now is of course "How do I create nested submenus?"
+ You're not limited to only two levels of items in the menu system (as you
+might've noticed I've got three here on the site), you can have as many levels
+as you want, and each level can contain as many items and submenus as you
+like.</p>
+
+<p>The recipe for creating a nested submenu is just the same as for creating
+a submenu off the first level.  You only need to change one thing, and that
+is the reference to the menu you're hooking your submenu to.  At this point
+you're no longer wanting to make submenus on the root level ('menu').  An
+example of a nested submenu is also found on this site, "Setting options"
+found in this installation guide.  I've created a menu called 'options' on
+beforehand, and then hook that up to the last item I added to my 'installation'
+menu after I'm done defining items in my 'options' menu:</p>
+
+<pre><code>installation.makeLastSubmenu(options);</code></pre>
+
+<p>And so the story goes... I also have a menu called 'optionsmenu' which
+contains the detailed description items, and I hooked that up to my 'options'
+menu by doing:</p>
+
+<pre><code>options.makeLastSubmenu(optionsmenu);</code></pre>
+
+<p>...and so on and so forth.  If this was all too confusing I suggest you
+have a look at the menu structure found in the example site directory in
+the downloadable files.  It also nests a few levels down, and contains both
+regular items and sub menu items to show you how to do it all.</p>
+
+<p>With the menu set up properly you can continue on to <a href="icon-menu.shtml">checking the icon list</a> where you'll be able to determine the icons used for the menu items.</p>
+
+<script type="text/javascript">
+if(parent.location.href == location.href) {
+  var searchString = "http://" + location.host + "/";
+  var docString = location.href.substring(searchString.length);
+  document.write('<div class="footer"><span id="noframes"><a href="/index.shtml?' + docString + '">No frames?</a></span></div>');
+}
+</script>
+</body></html>
