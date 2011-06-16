@@ -13,7 +13,11 @@ import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerStyle;
 import gov.nasa.worldwindow.core.WMSLayerInfo;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +32,7 @@ public class LayerTreeModelTest
 	
 	private WorldWindowImpl worldWindow;
 	private LayerTreeModel classUnderTest;
+	private TreeModelTestListener treeListener;
 	
 	@Before
 	public void setup()
@@ -41,6 +46,9 @@ public class LayerTreeModelTest
 		
 		LayerTree tree = new LayerTree(worldWindow, new FolderNode("Root", null, null, true));
 		classUnderTest = tree.getLayerModel();
+		
+		treeListener = new TreeModelTestListener();
+		classUnderTest.addTreeModelListener(treeListener);
 	}
 	
 	@Test
@@ -147,6 +155,41 @@ public class LayerTreeModelTest
 		assertEquals(layerNode, layerNodes.get(0));
 	}
 	
+	@Test
+	public void testAddWmsLayerFiresNodeInsertedEventsCorrectlyNoRootNode() throws Exception
+	{
+		assertNull(classUnderTest.getWmsRootNode());
+		
+		WMSLayerInfo wmsLayerInfo = createWmsLayerInfo();
+		classUnderTest.addWmsLayer(wmsLayerInfo);
+		
+		// Expect three events:
+		// 1. New WMS root node
+		// 2. New WMS server node
+		// 3. New WMS layer node
+		assertEquals(3, treeListener.nodesInstertedEvents.size());
+		assertTrue(treeListener.nodesInstertedEvents.get(0).getChildren()[0] instanceof WmsRootNode);
+		assertTrue(treeListener.nodesInstertedEvents.get(1).getChildren()[0] instanceof WmsServerNode);
+		assertTrue(treeListener.nodesInstertedEvents.get(2).getChildren()[0] instanceof WmsLayerNode);
+	}
+	
+	@Test
+	public void testAddWmsLayerFiresNodeInsertedEventsCorrectlyExistingTree() throws Exception
+	{
+		assertNull(classUnderTest.getWmsRootNode());
+		
+		WMSLayerInfo wmsLayerInfo = createWmsLayerInfo();
+		classUnderTest.addWmsLayer(wmsLayerInfo);
+		treeListener.clearLists();
+		
+		classUnderTest.addWmsLayer(wmsLayerInfo);
+		
+		// Expect one events:
+		// 1. New WMS layer node
+		assertEquals(1, treeListener.nodesInstertedEvents.size());
+		assertTrue(treeListener.nodesInstertedEvents.get(0).getChildren()[0] instanceof WmsLayerNode);
+	}
+	
 	/**
 	 * Creates a default WMS layer with the following properties:
 	 * <ul>
@@ -166,5 +209,45 @@ public class LayerTreeModelTest
 		
 		WMSLayerInfo result = new WMSLayerInfo(caps, layerCaps, style);
 		return result;
+	}
+	
+	private static class TreeModelTestListener implements TreeModelListener
+	{
+		List<TreeModelEvent> treeStructureEvents = new ArrayList<TreeModelEvent>();
+		List<TreeModelEvent> nodesRemovedEvents = new ArrayList<TreeModelEvent>();
+		List<TreeModelEvent> nodesInstertedEvents = new ArrayList<TreeModelEvent>();
+		List<TreeModelEvent> nodesChangedEvents = new ArrayList<TreeModelEvent>();
+
+		@Override
+		public void treeStructureChanged(TreeModelEvent e)
+		{
+			treeStructureEvents.add(e);
+		}
+
+		@Override
+		public void treeNodesRemoved(TreeModelEvent e)
+		{
+			nodesRemovedEvents.add(e);
+		}
+
+		@Override
+		public void treeNodesInserted(TreeModelEvent e)
+		{
+			nodesInstertedEvents.add(e);
+		}
+
+		@Override
+		public void treeNodesChanged(TreeModelEvent e)
+		{
+			nodesChangedEvents.add(e);
+		}
+		
+		public void clearLists()
+		{
+			treeStructureEvents.clear();
+			nodesRemovedEvents.clear();
+			nodesInstertedEvents.clear();
+			nodesChangedEvents.clear();
+		}
 	}
 }

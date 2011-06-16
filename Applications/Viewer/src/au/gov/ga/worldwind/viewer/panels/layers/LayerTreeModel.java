@@ -68,9 +68,21 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		{
 			wmsRootNode = createAndAddWmsRootNode();
 		}
-		WmsLayerNode wmsLayerNode = wmsRootNode.addWmsLayer(layerInfo);
 		
+		int oldServerCount = wmsRootNode.getChildCount();
+		
+		WmsLayerNode wmsLayerNode = wmsRootNode.addWmsLayer(layerInfo);
 		addAnyLayers(wmsLayerNode, true);
+		
+		int newServerCount = wmsRootNode.getChildCount();
+		
+		// If a new server was added, need to fire a change so the tree is redrawn correctly
+		if (newServerCount != oldServerCount)
+		{
+			nodeWasInserted(wmsRootNode, wmsRootNode.getChildIndex(wmsLayerNode.getParent()));
+		}
+		
+		nodeWasInserted(wmsLayerNode.getParent(), wmsLayerNode.getParent().getChildIndex(wmsLayerNode));
 	}
 	
 	public void addToRoot(INode node, boolean refreshLayers)
@@ -495,11 +507,13 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	public void insertNodeInto(INode newNode, INode parentNode, int index, boolean rebuildLayersList)
 	{
 		parentNode.insertChild(index, newNode);
-
-		int[] newIndexs = new int[1];
-		newIndexs[0] = index;
-		nodesWereInserted(parentNode, newIndexs);
-
+		
+		if (newNode instanceof WmsRootNode)
+		{
+			this.wmsRootFolderNode = (WmsRootNode)newNode;
+		}
+		
+		nodeWasInserted(parentNode, index);
 		addAnyLayers(newNode, rebuildLayersList);
 	}
 
@@ -519,6 +533,11 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			nodesWereRemoved(parent, childIndex, removedArray);
 		}
 
+		if (node == this.wmsRootFolderNode)
+		{
+			this.wmsRootFolderNode = null;
+		}
+		
 		removeAnyLayers(node, rebuildLayersList);
 	}
 
@@ -662,6 +681,11 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				fireTreeNodesChanged(this, getPathToRoot(node), null, null);
 			}
 		}
+	}
+	
+	private void nodeWasInserted(INode parent, int newChildIndex)
+	{
+		nodesWereInserted(parent, new int[]{newChildIndex});
 	}
 
 	private void nodesWereInserted(INode node, int[] childIndices)
