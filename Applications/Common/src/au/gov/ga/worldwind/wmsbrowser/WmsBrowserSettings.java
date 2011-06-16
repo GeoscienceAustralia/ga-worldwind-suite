@@ -246,8 +246,8 @@ public class WmsBrowserSettings
 		try
 		{
 			wmsServers = new ArrayList<WmsServerIdentifier>(Arrays.asList(new WmsServerIdentifier[]{
-					new WmsServerIdentifierImpl("Geoscience Australia national geoscience datasets", new URL("http://www.ga.gov.au/wms/getmap?dataset=national&request=getCapabilities")),
-					new WmsServerIdentifierImpl("Geoscience Australia Map Connect (1:250k)", new URL("http://mapconnect.ga.gov.au/wmsconnector/com.esri.wms.Esrimap?Version=1.1.1&Request=getcapabilities&Service=WMS&Servicename=GDA94_MapConnect_SDE_250kmap_WMS&")),
+					//new WmsServerIdentifierImpl("Geoscience Australia national geoscience datasets", new URL("http://www.ga.gov.au/wms/getmap?dataset=national&request=getCapabilities")),
+					//new WmsServerIdentifierImpl("Geoscience Australia Map Connect (1:250k)", new URL("http://mapconnect.ga.gov.au/wmsconnector/com.esri.wms.Esrimap?Version=1.1.1&Request=getcapabilities&Service=WMS&Servicename=GDA94_MapConnect_SDE_250kmap_WMS&")),
 					new WmsServerIdentifierImpl("NASA Earth Observations", new URL("http://neowms.sci.gsfc.nasa.gov/wms/wms")),
 			}));
 			
