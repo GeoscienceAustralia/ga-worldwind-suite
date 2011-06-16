@@ -47,6 +47,7 @@
 	<property name="test_reports_dir" value="${basedir}/test/reports"/>
 	
 	<property name="help_src_dir" value="${basedir}/documentation/help"/>
+	<property name="help_dest_dir" value="${deploy_location}/help"/>
 	
 	<path id="classpath">
 		<fileset dir="${worldwind_dir}">
@@ -207,14 +208,18 @@
 		<copy file="${webstart_dir}/${ww_signed_jar}" todir="${archive_location}" preservelastmodified="true" />
 	</target>
 	
-	<target name="deploy" depends="archive" description="Deploys the built Viewer into the sandpit location, making it accessible via the intranet">
+	<target name="deploy-help" description="Deploys the help files to the sandpit help location">
+		<delete dir="${help_dest_dir}"/>
+		<copy todir="${help_dest_dir}">
+			<fileset dir="${help_src_dir}/"/>
+		</copy>
+	</target>
+	
+	<target name="deploy" depends="archive,deploy-help" description="Deploys the built Viewer into the sandpit location, making it accessible via the intranet">
 		<copy file="${executable_dir}/${executable_jar}" todir="${deploy_location}\executable" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${app_unsigned_jar}" todir="${deploy_location}" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${app_signed_jar}" todir="${deploy_location}" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${ww_unsigned_jar}" todir="${deploy_location}" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${ww_signed_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy todir="${deploy_location}/help">
-			<fileset dir="${help_src_dir}/"/>
-		</copy>
 	</target>
 </project>
