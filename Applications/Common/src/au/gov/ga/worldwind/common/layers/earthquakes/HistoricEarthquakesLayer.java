@@ -275,70 +275,100 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 	{
 		if (DEPTH_COLORING.equalsIgnoreCase(coloring))
 		{
-			double minElevation = Double.MAX_VALUE;
-			double maxElevation = -Double.MAX_VALUE;
-			for (Earthquake earthquake : earthquakes)
-			{
-				minElevation = Math.min(minElevation, earthquake.position.elevation);
-				maxElevation = Math.max(maxElevation, earthquake.position.elevation);
-			}
-			for (Earthquake earthquake : earthquakes)
-			{
-				double percent = (earthquake.position.elevation - minElevation) / (maxElevation - minElevation);
-				Color color = new HSLColor((float) (240d * percent), 100f, 50f).getRGB();
-				colorBuffer.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d);
-			}
+			generateDepthColoring(colorBuffer, earthquakes);
 		}
 		else if (DATE_COLORING.equalsIgnoreCase(coloring))
 		{
-			long minTime = Long.MAX_VALUE;
-			long maxTime = Long.MIN_VALUE;
-
-			//if either of the custom min/max dates are null, calculate from the data
-			if (coloringMinDate == null || coloringMaxDate == null)
-			{
-				for (Earthquake earthquake : earthquakes)
-				{
-					minTime = Math.min(minTime, earthquake.timeInMillis);
-					maxTime = Math.max(maxTime, earthquake.timeInMillis);
-				}
-			}
-
-			minTime = coloringMinDate != null ? coloringMinDate : minTime;
-			maxTime = coloringMaxDate != null ? coloringMaxDate : maxTime;
-
-			for (Earthquake earthquake : earthquakes)
-			{
-				double percent = (earthquake.timeInMillis - minTime) / (double) (maxTime - minTime);
-				percent = Math.max(0, Math.min(1, percent));
-				Color color = new HSLColor((float) (240d * percent), 100f, 50f).getRGB();
-				colorBuffer.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d);
-			}
+			generateDateColoring(colorBuffer, earthquakes);
 		}
 		else
 		{
-			//magnitude coloring
-			double minMagnitude = Double.MAX_VALUE;
-			double maxMagnitude = -Double.MAX_VALUE;
-			for (Earthquake earthquake : earthquakes)
-			{
-				minMagnitude = Math.min(minMagnitude, earthquake.magnitude);
-				maxMagnitude = Math.max(maxMagnitude, earthquake.magnitude);
-			}
-			for (Earthquake earthquake : earthquakes)
-			{
-				double percent = (earthquake.magnitude - minMagnitude) / (maxMagnitude - minMagnitude);
-
-				//scale the magnitude (VERY crude equalisation)
-				percent = Math.pow(percent, 0.2);
-
-				Color color = new HSLColor((float) (240d * percent), 100f, 50f).getRGB();
-				colorBuffer.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d);
-			}
+			generateMagnitudeColoring(colorBuffer, earthquakes);
 		}
 	}
 
-	private static class Earthquake
+	/**
+	 * Populate the color buffer with colours based on earthquake date.
+	 * <p/>
+	 * Blue (shallow) -> Red (deep)
+	 */
+	protected void generateMagnitudeColoring(DoubleBuffer colorBuffer, List<Earthquake> earthquakes)
+	{
+		//magnitude coloring
+		double minMagnitude = Double.MAX_VALUE;
+		double maxMagnitude = -Double.MAX_VALUE;
+		for (Earthquake earthquake : earthquakes)
+		{
+			minMagnitude = Math.min(minMagnitude, earthquake.magnitude);
+			maxMagnitude = Math.max(maxMagnitude, earthquake.magnitude);
+		}
+		for (Earthquake earthquake : earthquakes)
+		{
+			double percent = (earthquake.magnitude - minMagnitude) / (maxMagnitude - minMagnitude);
+
+			//scale the magnitude (VERY crude equalisation)
+			percent = 1 - Math.pow(percent, 0.2);
+			
+			Color color = new HSLColor((float) (240d * percent), 100f, 50f).getRGB();
+			colorBuffer.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d);
+		}
+	}
+
+	/**
+	 * Populate the color buffer with colours based on earthquake date.
+	 * <p/>
+	 * Blue (old) -> Red (new)
+	 */
+	protected void generateDateColoring(DoubleBuffer colorBuffer, List<Earthquake> earthquakes)
+	{
+		long minTime = Long.MAX_VALUE;
+		long maxTime = Long.MIN_VALUE;
+
+		//if either of the custom min/max dates are null, calculate from the data
+		if (coloringMinDate == null || coloringMaxDate == null)
+		{
+			for (Earthquake earthquake : earthquakes)
+			{
+				minTime = Math.min(minTime, earthquake.timeInMillis);
+				maxTime = Math.max(maxTime, earthquake.timeInMillis);
+			}
+		}
+
+		minTime = coloringMinDate != null ? coloringMinDate : minTime;
+		maxTime = coloringMaxDate != null ? coloringMaxDate : maxTime;
+
+		for (Earthquake earthquake : earthquakes)
+		{
+			double percent = (earthquake.timeInMillis - minTime) / (double) (maxTime - minTime);
+			percent = 1 - Math.max(0, Math.min(1, percent));
+			Color color = new HSLColor((float) (240d * percent), 100f, 50f).getRGB();
+			colorBuffer.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d);
+		}
+	}
+
+	/**
+	 * Populate the color buffer with colours based on earthquake depth.
+	 * <p/>
+	 * Blue (shallow) -> Red (deep)
+	 */
+	protected void generateDepthColoring(DoubleBuffer colorBuffer, List<Earthquake> earthquakes)
+	{
+		double minElevation = Double.MAX_VALUE;
+		double maxElevation = -Double.MAX_VALUE;
+		for (Earthquake earthquake : earthquakes)
+		{
+			minElevation = Math.min(minElevation, earthquake.position.elevation);
+			maxElevation = Math.max(maxElevation, earthquake.position.elevation);
+		}
+		for (Earthquake earthquake : earthquakes)
+		{
+			double percent = (earthquake.position.elevation - minElevation) / (maxElevation - minElevation);
+			Color color = new HSLColor((float) (240d * percent), 100f, 50f).getRGB();
+			colorBuffer.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d);
+		}
+	}
+
+	protected static class Earthquake
 	{
 		public final Position position;
 		public final double magnitude;
