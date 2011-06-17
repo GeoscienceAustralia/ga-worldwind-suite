@@ -5,3 +5,7 @@ body {
 	font-size: 0.8em;
 	}
 
+ol li {
+	padding-bottom: 8px;
+}
+
