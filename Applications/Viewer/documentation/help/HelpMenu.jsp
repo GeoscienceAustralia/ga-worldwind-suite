@@ -8,6 +8,7 @@
 	<body class="menu">
 		<p>&nbsp;</p>
 		<p><a href="Getting_Started.jsp" target="mainFrame">Getting Started</a></p>
+		<p><a href="Layers.jsp" target="mainFrame">Layers</a></p>
 		<p><a href="Navigation.jsp" target="mainFrame">Navigation Controls</a></p>
 		<p><a href="Toolbar.jsp" target="mainFrame">Toolbar</a></p>
 		<p><a href="WmsBrowser.jsp" target="mainFrame">WMS Browser</a></p>
