@@ -25,3 +25,17 @@ span.UIElementReference {
 	font-style: italic;	
 }
 
+body.menu {
+	background-color: #CCC;
+	background-image: url('images/bg_shadow.png');
+	background-position: right;
+	background-repeat: repeat-y;
+}
+
+h2 {
+	background-color: #AAF;
+}
+
+h3 {
+	background-color: #DDF;	
+}
