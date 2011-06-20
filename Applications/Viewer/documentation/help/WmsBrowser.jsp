@@ -25,7 +25,7 @@
 		<a name="openWms"/><h3>To launch the WMS Browser</h3>
 		<p>
 			<b>Option 1:</b>
-			<em>File&gt;Browse for WMS layers…</em>
+			<em>File&gt;Browse for WMS layers...</em>
 			<br/><br/>
 			<img src="images/wms_launchBrowser.jpg" alt="From the file menu, selec 'Browse for WMS layers...'"/>
 		</p>
