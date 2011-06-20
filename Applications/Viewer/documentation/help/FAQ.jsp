@@ -7,11 +7,13 @@
 		<link href="style.css" rel="stylesheet" type="text/css" />
 	</head>
 	<body>
+		<a name="top"/>
 		<h2>Frequently Asked Questions (FAQs)</h2>
 		<p>Below are a number of frequently asked questions, along with answers.</p>
 		<hr/>
 		<ul>
 			<li><a href="#q1">Why can't I see <em>layerX</em> on the globe?</a></li>
+			<li><a href="#q2">All of my layers are showing errors loading. What's happening?</a></li>
 		</ul>
 		<hr/>
 		
@@ -31,7 +33,7 @@
 					<br/>
 					If the layer's opacity is 0% it will be completely transparent and will not be visible on the globe.<br/>
 					Ensure that the opacity of your layer is greater than 0%. This can be controlled using the opacity 
-					slider in the layer panel.
+					slider in the <span class="UIElementReference">Layers</span> panel.
 				</li>
 				<li>
 					<strong>It is being obstructed by another layer</strong>
@@ -45,10 +47,30 @@
 				<li>
 					<strong>The layer imagery has not loaded yet</strong>
 					<br/>
-					
+					If there is some network congestion it may take a few moments for the layer imagery to load.<br/>
+					If you are sure they layer should be visible, try waiting to see if the imagery is being loaded.
+					An indication that this may be the case is a loading icon displayed next to the layer in the layer tree.
+				</li>
+				<li>
+					<strong>It has not activated yet</strong>
+					<br/>
+					Some layers will only activate when you zoom in close enough to it.<br/>
+					Try zooming into the region where you expect to see data.
 				</li>
 			</ol> 
+			<a href="#top">[Top]</a>
+		</p>
 		
+		<a name="q2"/><h3>All of my layers are showing errors loading. What's happening?</h3>
+		<p>
+			This is most likely caused by a network problem. If you use a proxy to connect to the internet, ensure that the proxy settings
+			have been updated correctly. These settings can be accessed via the <span class="UIElementReference">Network</span> panel of the 
+			<span class="UIElementReference">Preferences</span> dialog (<span class="UIElementReference">Tools->Preferences...</span>). The 
+			correct proxy settings can often be obtained from your network administrator, or by looking in the connection settings of your
+			web browser.
+			If this does not work, or you are not using a proxy server, confirm that your internet connection is working correctly. 
+			The 3D data viewer requires a working connection to retrieve data for layers.
+			<br/><a href="#top">[Top]</a>
 		</p>
 	</body>
 </html>

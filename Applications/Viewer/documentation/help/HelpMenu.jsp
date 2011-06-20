@@ -10,6 +10,7 @@
 <p class="style1"><a href="Getting_Started.jsp" target="mainFrame">Getting Started</a></p>
 <p class="style1"><a href="Navigation.jsp" target="mainFrame">Navigation Controls</a></p>
 <p class="style1"><a href="Toolbar.jsp" target="mainFrame">Toolbar</a></p>
+<p class="style1"><a href="FAQ.jsp" target="mainFrame">FAQ</a></p>
 <p>&nbsp;</p>
 </body>
 </html>

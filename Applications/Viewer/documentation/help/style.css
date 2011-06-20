@@ -3,9 +3,25 @@
 body {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 0.8em;
-	}
+}
 
 ol li {
 	padding-bottom: 8px;
+}
+
+td {
+	vertical-align: top;
+}
+
+tr {
+	border-spacing: 0;	
+}
+
+tr.odd {
+	background-color: #e0dfe3; 	
+}
+
+span.UIElementReference {
+	font-style: italic;	
 }
 
