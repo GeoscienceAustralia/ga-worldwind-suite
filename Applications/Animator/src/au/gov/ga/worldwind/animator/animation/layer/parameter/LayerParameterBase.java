@@ -7,6 +7,7 @@ import gov.nasa.worldwind.util.WWXML;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
@@ -71,5 +72,11 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 	{
 		Element parameterElement = WWXML.getElement(element, "./*", null);
 		return super.fromXml(parameterElement, version, context);
+	}
+	
+	@Override
+	public void applyDefaultValue(AnimationContext animationContext)
+	{
+		doApplyValue(getDefaultValue());
 	}
 }

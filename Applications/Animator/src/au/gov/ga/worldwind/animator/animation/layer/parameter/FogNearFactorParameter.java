@@ -50,12 +50,6 @@ public class FogNearFactorParameter extends LayerParameterBase
 	}
 
 	@Override
-	public void applyDefaultValue(AnimationContext animationContext)
-	{
-		doApplyValue(getDefaultValue());
-	}
-
-	@Override
 	public ParameterValue getCurrentValue(AnimationContext context)
 	{
 		return ParameterValueFactory.createParameterValue(this, ((FogLayer)getLayer()).getNearFactor(), context.getCurrentFrame());

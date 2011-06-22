@@ -49,7 +49,8 @@ public interface LayerParameter extends Parameter
 	{
 		OPACITY,
 		NEAR,
-		FAR;
+		FAR,
+		OUTLINE_OPACITY;
 	}
 	
 }

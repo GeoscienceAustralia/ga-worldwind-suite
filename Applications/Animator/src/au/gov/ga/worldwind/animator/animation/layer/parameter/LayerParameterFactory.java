@@ -2,15 +2,12 @@ package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.TiledImageLayer;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import nasa.worldwind.layers.FogLayer;
 
 import org.w3c.dom.Element;
 
@@ -20,11 +17,7 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A factory class for creating {@link LayerParameter}s from XML elements
- * 
- * @author James Navin (james.navin@ga.gov.au)
- *
  */
-@SuppressWarnings("unchecked")
 public class LayerParameterFactory
 {
 	
@@ -36,16 +29,7 @@ public class LayerParameterFactory
 		factoryMap.put(LayerParameter.Type.OPACITY.name().toLowerCase(), instantiate(LayerOpacityParameter.class));
 		factoryMap.put(LayerParameter.Type.NEAR.name().toLowerCase(), instantiate(FogNearFactorParameter.class));
 		factoryMap.put(LayerParameter.Type.FAR.name().toLowerCase(), instantiate(FogFarFactorParameter.class));
-	}
-	
-	/** A map of parameter type -> support layer types used to determine which parameters can be applied to which layers */
-	private static Map<Class<? extends LayerParameter>, Class<Layer>[]> parameterTypeMap = new HashMap<Class<? extends LayerParameter>, Class<Layer>[]>();
-	static
-	{
-		// Add additional parameter types here as they are created
-		parameterTypeMap.put(LayerOpacityParameter.class, new Class[]{TiledImageLayer.class});
-		parameterTypeMap.put(FogNearFactorParameter.class, new Class[]{FogLayer.class});
-		parameterTypeMap.put(FogFarFactorParameter.class, new Class[]{FogLayer.class});
+		factoryMap.put(LayerParameter.Type.OUTLINE_OPACITY.name().toLowerCase(), instantiate(ShapeOutlineOpacityParameter.class));
 	}
 	
 	/**
@@ -65,7 +49,7 @@ public class LayerParameterFactory
 		Validate.notNull(version, "A version is required");
 		Validate.notNull(context, "A context is required");
 		
-		LayerParameter layerFactory = factoryMap.get(element.getNodeName());
+		LayerParameter layerFactory = getLayerFactory(element);
 		
 		if (layerFactory == null)
 		{
@@ -73,6 +57,11 @@ public class LayerParameterFactory
 		}
 		
 		return (LayerParameter)layerFactory.fromXml(element, version, context);
+	}
+
+	private static LayerParameter getLayerFactory(Element element)
+	{
+		return factoryMap.get(element.getNodeName());
 	}
 
 	/**
@@ -86,63 +75,17 @@ public class LayerParameterFactory
 		}
 		
 		List<LayerParameter> result = new ArrayList<LayerParameter>();
-		if (supportsOpacityParameter(targetLayer))
+		for (LayerParameterBuilder builder : LayerParameterBuilder.BUILDERS)
 		{
-			result.add(createOpacityParameter(animation, targetLayer));
+			LayerParameter parameterForLayer = builder.createParameterForLayer(animation, targetLayer);
+			if (parameterForLayer != null)
+			{
+				result.add(parameterForLayer);
+			}
 		}
-		if (supportsFogNearFactorParameters(targetLayer))
-		{
-			result.add(createFogNearFactorParameter(animation, targetLayer));
-		}
-		if (supportsFogFarFactorParameters(targetLayer))
-		{
-			result.add(createFogFarFactorParameter(animation, targetLayer));
-		}
-		
 		return result.toArray(new LayerParameter[0]);
 	}
 	
-	private static boolean supportsOpacityParameter(Layer targetLayer)
-	{
-		return layerTypeInList(targetLayer, parameterTypeMap.get(LayerOpacityParameter.class));
-	}
-
-	private static boolean supportsFogNearFactorParameters(Layer targetLayer)
-	{
-		return layerTypeInList(targetLayer, parameterTypeMap.get(FogNearFactorParameter.class));
-	}
-	
-	private static boolean supportsFogFarFactorParameters(Layer targetLayer)
-	{
-		return layerTypeInList(targetLayer, parameterTypeMap.get(FogFarFactorParameter.class));
-	}
-	
-	private static boolean layerTypeInList(Layer targetLayer, Class<Layer>[] layerTypes)
-	{
-		for (Class<Layer> layerType : layerTypes)
-		{
-			if (layerType.isAssignableFrom(targetLayer.getClass()))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private static LayerOpacityParameter createOpacityParameter(Animation animation, Layer targetLayer)
-	{
-		return new LayerOpacityParameter(animation, targetLayer);
-	}
-	
-	private static LayerParameter createFogNearFactorParameter(Animation animation, Layer targetLayer)
-	{
-		return new FogNearFactorParameter(animation, (FogLayer)targetLayer);
-	}
-	
-	private static LayerParameter createFogFarFactorParameter(Animation animation, Layer targetLayer)
-	{
-		return new FogFarFactorParameter(animation, (FogLayer)targetLayer);
-	}
 	
 	/**
 	 * Instantiate the provided class using the default constructor.
@@ -170,5 +113,5 @@ public class LayerParameterFactory
 			throw new IllegalStateException("Exception while instantiating class " + clazz.getSimpleName() + ".", e.getCause());
 		}
 	}
-
+	
 }

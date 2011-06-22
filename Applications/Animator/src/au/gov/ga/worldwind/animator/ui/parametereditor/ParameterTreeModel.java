@@ -36,6 +36,7 @@ class ParameterTreeModel implements TreeModel, AnimationEventListener
 	{
 		Validate.notNull(animation, "An animation is required");
 		this.animation = animation;
+		this.animation.addChangeListener(this);
 	}
 
 	@Override
