@@ -32,9 +32,6 @@ public class PointLayerUtils extends DataConfigurationUtils
 {
 	/**
 	 * Create a new {@link PointLayer} from an XML definition.
-	 * 
-	 * @param domElement
-	 * @param params
 	 * @return New {@link PointLayer}.
 	 */
 	public static PointLayer createPointLayer(Element domElement, AVList params)
@@ -70,9 +67,6 @@ public class PointLayerUtils extends DataConfigurationUtils
 
 	/**
 	 * Call the standard {@link Layer} setters for values in the params AVList.
-	 * 
-	 * @param layer
-	 * @param params
 	 */
 	protected static void setLayerParams(PointLayer layer, AVList params)
 	{
@@ -118,10 +112,6 @@ public class PointLayerUtils extends DataConfigurationUtils
 	/**
 	 * Fill the params with the values in the {@link PointLayer} specific XML
 	 * elements.
-	 * 
-	 * @param domElement
-	 * @param params
-	 * @return params
 	 */
 	public static AVList getParamsFromDocument(Element domElement, AVList params)
 	{
@@ -147,10 +137,6 @@ public class PointLayerUtils extends DataConfigurationUtils
 	/**
 	 * Adds a {@link PointProvider} to params matching the 'DataFormat' XML
 	 * element.
-	 * 
-	 * @param domElement
-	 * @param xpath
-	 * @param params
 	 */
 	protected static void setupPointProvider(Element domElement, XPath xpath, AVList params)
 	{
@@ -172,11 +158,7 @@ public class PointLayerUtils extends DataConfigurationUtils
 	}
 
 	/**
-	 * Parse and add the styles to params.
-	 * 
-	 * @param element
-	 * @param xpath
-	 * @param params
+	 * Parse and add the styles to params
 	 */
 	protected static void addStyles(Element element, XPath xpath, AVList params)
 	{
@@ -212,17 +194,19 @@ public class PointLayerUtils extends DataConfigurationUtils
 	}
 
 	/**
-	 * Parse and add the attributes to params.
-	 * 
-	 * @param element
-	 * @param xpath
-	 * @param params
+	 * Parse and add the attributes to params
 	 */
 	protected static void addAttributes(Element element, XPath xpath, AVList params)
 	{
 		List<Attribute> attributes = new ArrayList<Attribute>();
 
 		Element[] attributesElements = WWXML.getElements(element, "Attributes/Attribute", xpath);
+		if (attributesElements == null)
+		{
+			params.setValue(AVKeyMore.POINT_ATTRIBUTES, new Attribute[0]);
+			return;
+		}
+		
 		for (Element a : attributesElements)
 		{
 			String name = WWXML.getText(a, "@name", xpath);
