@@ -94,6 +94,7 @@ import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPane
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierFactory;
+import au.gov.ga.worldwind.animator.terrain.exaggeration.AnimatorVerticalExaggerationServiceImpl;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
 import au.gov.ga.worldwind.animator.ui.ExaggeratorDialog;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
@@ -106,6 +107,7 @@ import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.ui.FileFilters.XmlFilter;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
+import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 import au.gov.ga.worldwind.common.view.transform.ClipConfigurableView;
 import au.gov.ga.worldwind.wmsbrowser.WmsBrowser;
 
@@ -595,6 +597,7 @@ public class Animator
 	private void updateElevationModelOnGlobe()
 	{
 		model.getGlobe().setElevationModel(getCurrentAnimation().getRootElevationModel());
+		VerticalExaggerationAccessor.setService(new AnimatorVerticalExaggerationServiceImpl());
 	}
 
 	/**
