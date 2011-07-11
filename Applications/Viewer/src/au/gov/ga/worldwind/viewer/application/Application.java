@@ -18,6 +18,7 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.retrieve.RetrievalService;
+import gov.nasa.worldwind.terrain.RectangularTessellatorAccessible;
 import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
@@ -78,6 +79,7 @@ import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
+import au.gov.ga.worldwind.common.terrain.WireframeRectangularTessellator;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.HtmlViewer;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
@@ -109,7 +111,6 @@ import au.gov.ga.worldwind.viewer.settings.Settings.ProxyType;
 import au.gov.ga.worldwind.viewer.settings.SettingsDialog;
 import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
 import au.gov.ga.worldwind.viewer.terrain.SectionListCompoundElevationModel;
-import au.gov.ga.worldwind.viewer.terrain.WireframeRectangularTessellator;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemeFactory;
 import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
@@ -156,6 +157,7 @@ public class Application
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, WireframeRectangularTessellator.class.getName());
+		//Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, RectangularTessellatorAccessible.class.getName());
 	}
 
 	public static void main(String[] args)
@@ -598,6 +600,10 @@ public class Application
 				addWmsLayer(layerInfo);
 			}
 		});
+		
+//		TextOverlayLayer textLayer = new TextOverlayLayer();
+//		textLayer.setText("<html><h1>THIS IS A HEADING!!!</h1><ul><li>Item1</li><li>Item2</li></ul></html>");
+//		wwd.getModel().getLayers().add(textLayer);
 	}
 
 	private void createActions()
