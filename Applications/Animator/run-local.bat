@@ -12,5 +12,6 @@ echo run-local.bat >> c:\Temp\excludeFiles.txt
 xcopy "V:\projects\applications\(Ongoing) - World Wind Suite\Animator\Builds\Current\*" c:\Temp\Animator /Y /Q /S /EXCLUDE:c:\Temp\excludeFiles.txt
 del /F c:\Temp\excludeFiles.txt
 
+c:
 cd c:\temp\Animator
 c:\temp\Animator\run.bat
