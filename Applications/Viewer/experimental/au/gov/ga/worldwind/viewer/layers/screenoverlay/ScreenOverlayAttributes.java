@@ -33,7 +33,7 @@ public interface ScreenOverlayAttributes
 	/** @return the expression for the maximum height of the overlay */
 	LengthExpression getMaxHeight();
 	
-	/** @return the height (in pixels) the overlay should occupy given the screen height */
+	/** @return the height (in pixels) the overlay should occupy given the screen height. Min height is given priority. */
 	float getHeight(float screenHeight);
 	
 	/** @return the expression for the minimum width of the overlay */
@@ -42,7 +42,7 @@ public interface ScreenOverlayAttributes
 	/** @return the expression for the maximum width of the overlay */
 	LengthExpression getMaxWidth();
 	
-	/** @return the width (in pixels) the overlay should occupy given the screen width */
+	/** @return the width (in pixels) the overlay should occupy given the screen width. Min width is given priority. */
 	float getWidth(float screenWidth);
 	
 	// Styling

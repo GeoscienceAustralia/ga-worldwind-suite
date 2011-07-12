@@ -1,6 +1,9 @@
 package au.gov.ga.worldwind.viewer.layers.screenoverlay;
 
+import gov.nasa.worldwind.avlist.AVList;
+
 import java.awt.Color;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.zip.CRC32;
 
@@ -36,6 +39,9 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 	private boolean drawBorder = true;
 	private Color borderColor = DEFAULT_BORDER_COLOR;
 	private int borderWidth = DEFAULT_BORDER_WIDTH;
+	
+	// Constructor used for testing etc.
+	MutableScreenOverlayAttributesImpl(){}
 	
 	public MutableScreenOverlayAttributesImpl(URL sourceUrl)
 	{
@@ -97,6 +103,11 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 		return minHeight;
 	}
 	
+	public void setMinHeight(String expression)
+	{
+		setMinHeight(new LengthExpression(expression));
+	}
+	
 	public void setMinHeight(LengthExpression minHeight)
 	{
 		if (minHeight == null)
@@ -113,6 +124,11 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 		return maxHeight == null ? minHeight : maxHeight;
 	}
 
+	public void setMaxHeight(String expression)
+	{
+		setMaxHeight(new LengthExpression(expression));
+	}
+	
 	public void setMaxHeight(LengthExpression maxHeight)
 	{
 		this.maxHeight = maxHeight;
@@ -121,13 +137,18 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 	@Override
 	public float getHeight(float screenHeight)
 	{
-		return Math.max(1, Math.min(getMinHeight().getLength(screenHeight), getMaxHeight().getLength(screenHeight)));
+		return clampDimension(screenHeight, getMinHeight().getLength(screenHeight), getMaxHeight().getLength(screenHeight));
 	}
 
 	@Override
 	public LengthExpression getMinWidth()
 	{
 		return minWidth;
+	}
+	
+	public void setMinWidth(String expression)
+	{
+		setMinWidth(new LengthExpression(expression));
 	}
 	
 	public void setMinWidth(LengthExpression minWidth)
@@ -141,6 +162,11 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 		return maxWidth == null ? minWidth : maxWidth;
 	}
 	
+	public void setMaxWidth(String expression)
+	{
+		setMaxWidth(new LengthExpression(expression));
+	}
+	
 	public void setMaxWidth(LengthExpression maxWidth)
 	{
 		this.maxWidth = maxWidth;
@@ -149,7 +175,7 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 	@Override
 	public float getWidth(float screenWidth)
 	{
-		return Math.max(1, Math.min(getMinWidth().getLength(screenWidth), getMaxWidth().getLength(screenWidth)));
+		return clampDimension(screenWidth, getMinWidth().getLength(screenWidth), getMaxWidth().getLength(screenWidth));
 	}
 
 	@Override
@@ -185,4 +211,149 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 		this.borderWidth = (borderWidth < 0 ? DEFAULT_BORDER_WIDTH : borderWidth);
 	}
 
+	
+	private float clampDimension(float screenDimension, float min, float max)
+	{
+		screenDimension = Math.max(1, screenDimension);
+		if (screenDimension < min) return min;
+		if (screenDimension > max) return max;
+		return screenDimension;
+	}
+	
+	/**
+	 * Create a new {@link MutableScreenOverlayAttributesImpl} from the provided parameters
+	 */
+	public MutableScreenOverlayAttributesImpl(AVList params)
+	{
+		Validate.notNull(params, "Initialisation parameters are required");
+		if (params.hasKey(ScreenOverlayKeys.URL))
+		{
+			Object urlEntry = params.getValue(ScreenOverlayKeys.URL);
+			if (urlEntry instanceof URL)
+			{
+				// If its a URL, use it
+				this.sourceUrl = (URL)urlEntry;
+			}
+			else
+			{
+				// If its a String, use it along with a context URL (if provided)
+				URL context = (URL)params.getValue(ScreenOverlayKeys.CONTEXT_URL);
+				try
+				{
+					this.sourceUrl = new URL(context, (String)urlEntry);
+				}
+				catch (MalformedURLException e)
+				{
+					throw new IllegalArgumentException("Unable to create source URL from params.", e);
+				}
+			}
+		}
+		else if (params.hasKey(ScreenOverlayKeys.OVERLAY_CONTENT))
+		{
+			this.sourceHtml = params.getStringValue(ScreenOverlayKeys.OVERLAY_CONTENT);
+		}
+		else
+		{
+			throw new IllegalArgumentException("No overlay content or source URL found. At least one is required.");
+		}
+		
+		if (params.hasKey(ScreenOverlayKeys.MIN_HEIGHT))
+		{
+			Object minHeight = params.getValue(ScreenOverlayKeys.MIN_HEIGHT);
+			if (minHeight instanceof LengthExpression)
+			{
+				this.minHeight = (LengthExpression)minHeight;
+			}
+			else if (minHeight instanceof String)
+			{
+				this.minHeight = new LengthExpression((String)minHeight);
+			}
+			else if (minHeight == null)
+			{
+				this.minHeight = null;
+			}
+			else
+			{
+				throw new IllegalArgumentException("Min height must be one of String or LengthExpression");
+			}
+		}
+		
+		if (params.hasKey(ScreenOverlayKeys.MAX_HEIGHT))
+		{
+			Object maxHeight = params.getValue(ScreenOverlayKeys.MAX_HEIGHT);
+			if (maxHeight instanceof LengthExpression)
+			{
+				this.maxHeight = (LengthExpression)maxHeight;
+			}
+			else if (maxHeight instanceof String)
+			{
+				this.maxHeight = new LengthExpression((String)maxHeight);
+			}
+			else if (maxHeight == null)
+			{
+				this.maxHeight = null;
+			}
+			else
+			{
+				throw new IllegalArgumentException("Max height must be one of String or LengthExpression");
+			}
+		}
+		
+		if (params.hasKey(ScreenOverlayKeys.MIN_WIDTH))
+		{
+			Object minWidth = params.getValue(ScreenOverlayKeys.MIN_WIDTH);
+			if (minWidth instanceof LengthExpression)
+			{
+				this.minWidth = (LengthExpression)minWidth;
+			}
+			else if (minWidth instanceof String)
+			{
+				this.minWidth = new LengthExpression((String)minWidth);
+			}
+			else if (minWidth == null)
+			{
+				this.minWidth = null;
+			}
+			else
+			{
+				throw new IllegalArgumentException("Min height must be one of String or LengthExpression");
+			}
+		}
+		
+		if (params.hasKey(ScreenOverlayKeys.MAX_WIDTH))
+		{
+			Object maxWidth = params.getValue(ScreenOverlayKeys.MAX_WIDTH);
+			if (maxWidth instanceof LengthExpression)
+			{
+				this.maxWidth = (LengthExpression)maxWidth;
+			}
+			else if (maxWidth instanceof String)
+			{
+				this.maxWidth = new LengthExpression((String)maxWidth);
+			}
+			else if (maxWidth == null)
+			{
+				this.maxWidth = null;
+			}
+			else
+			{
+				throw new IllegalArgumentException("Max height must be one of String or LengthExpression");
+			}
+		}
+		
+		if (params.hasKey(ScreenOverlayKeys.BORDER_WIDTH))
+		{
+			this.borderWidth = (Integer)params.getValue(ScreenOverlayKeys.BORDER_WIDTH);
+		}
+		
+		if (params.hasKey(ScreenOverlayKeys.BORDER_COLOR))
+		{
+			this.borderColor = (Color)params.getValue(ScreenOverlayKeys.BORDER_COLOR);
+		}
+		
+		if (params.hasKey(ScreenOverlayKeys.POSITION))
+		{
+			this.position = (ScreenOverlayPosition)params.getValue(ScreenOverlayKeys.POSITION);
+		}
+	}
 }

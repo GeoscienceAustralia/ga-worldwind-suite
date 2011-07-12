@@ -14,6 +14,7 @@ import au.gov.ga.worldwind.common.util.Validate;
  */
 public class LengthExpression
 {
+	private String expression;
 	private float value;
 	private ExpressionType type = ExpressionType.ABSOLUTE;
 	
@@ -34,6 +35,7 @@ public class LengthExpression
 	public LengthExpression(String expression)
 	{
 		Validate.notBlank(expression, "A length expression is required.");
+		this.expression = expression;
 		
 		Matcher matcher = VALID_EXPRESSION.matcher(expression.trim());
 		Validate.isTrue(matcher.matches(), "Invalid expression. Expected an expression of the form [Npx | N% | N]");
@@ -55,6 +57,26 @@ public class LengthExpression
 			return (value / 100) * screenSize;
 		}
 		return value;
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return expression.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == this)
+		{
+			return true;
+		}
+		if (obj == null)
+		{
+			return false;
+		}
+		return ((LengthExpression)obj).expression.equalsIgnoreCase(expression);
 	}
 	
 	private static enum ExpressionType

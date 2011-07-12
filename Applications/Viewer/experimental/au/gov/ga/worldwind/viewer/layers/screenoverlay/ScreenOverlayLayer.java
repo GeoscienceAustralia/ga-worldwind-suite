@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.viewer.layers.screenoverlay;
 
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
@@ -48,6 +49,15 @@ public class ScreenOverlayLayer extends AbstractLayer
 	{
 		Validate.notNull(attributes, "Overlay attributes are required");
 		this.attributes = attributes;
+	}
+	
+	/**
+	 * Create a new {@link ScreenOverlayLayer} with parameters provided in the given {@link AVList}
+	 */
+	public ScreenOverlayLayer(AVList params)
+	{
+		Validate.notNull(params, "Initialisation parameters are required");
+		this.attributes = new MutableScreenOverlayAttributesImpl(params);
 	}
 	
 	/**
