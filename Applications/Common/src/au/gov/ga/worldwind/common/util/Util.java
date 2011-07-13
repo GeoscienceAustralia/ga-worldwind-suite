@@ -648,6 +648,15 @@ public class Util
 	}
 
 	/**
+	 * Clamp the provided value to the range specified by <code>[min, max]</code>
+	 */
+	public static float clamp(float value, float min, float max)
+	{
+		Validate.isTrue(min <= max, "Min must be less than or equal to max");
+		return Math.max(min, Math.min(max, value));
+	}
+	
+	/**
 	 * Clamp the provided {@link LatLon} pair to be within the provided {@link Sector} extents.
 	 */
 	public static LatLon clampLatLon(LatLon latlon, Sector sector)
