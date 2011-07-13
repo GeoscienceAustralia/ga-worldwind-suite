@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.viewer.layers.screenoverlay;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,7 +16,6 @@ import au.gov.ga.worldwind.common.util.Validate;
  */
 public class LengthExpression
 {
-	private String expression;
 	private float value;
 	private ExpressionType type = ExpressionType.ABSOLUTE;
 	
@@ -35,7 +36,6 @@ public class LengthExpression
 	public LengthExpression(String expression)
 	{
 		Validate.notBlank(expression, "A length expression is required.");
-		this.expression = expression;
 		
 		Matcher matcher = VALID_EXPRESSION.matcher(expression.trim());
 		Validate.isTrue(matcher.matches(), "Invalid expression. Expected an expression of the form [Npx | N% | N]");
@@ -62,7 +62,7 @@ public class LengthExpression
 	@Override
 	public int hashCode()
 	{
-		return expression.hashCode();
+		return toString().hashCode();
 	}
 	
 	@Override
@@ -76,25 +76,48 @@ public class LengthExpression
 		{
 			return false;
 		}
-		return ((LengthExpression)obj).expression.equalsIgnoreCase(expression);
+		return ((LengthExpression)obj).toString().equalsIgnoreCase(toString());
+	}
+	
+	@Override
+	public String toString()
+	{
+		return value + type.getSuffix();
 	}
 	
 	private static enum ExpressionType
 	{
-		PERCENTAGE,
-		ABSOLUTE;
+		PERCENTAGE("%"),
+		ABSOLUTE("px");
+		
+		private String suffix;
+		
+		private ExpressionType(String suffix)
+		{
+			this.suffix = suffix;
+		}
+		
+		public String getSuffix()
+		{
+			return suffix;
+		}
+		
+		private static Map<String, ExpressionType> suffixToTypeMap = new HashMap<String, ExpressionType>();
+		static
+		{
+			for (ExpressionType t : ExpressionType.values())
+			{
+				suffixToTypeMap.put(t.getSuffix(), t);
+			}
+		}
 		
 		public static ExpressionType forSuffix(String suffix)
 		{
-			if (Util.isBlank(suffix) || suffix.equalsIgnoreCase("px"))
+			if (Util.isBlank(suffix))
 			{
 				return ABSOLUTE;
 			}
-			if (suffix.equalsIgnoreCase("%"))
-			{
-				return PERCENTAGE;
-			}
-			return null;
+			return suffixToTypeMap.get(suffix.toLowerCase());
 		}
 	}
 }

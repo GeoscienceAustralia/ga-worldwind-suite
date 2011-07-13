@@ -58,6 +58,7 @@ public class ScreenOverlayLayer extends AbstractLayer
 	{
 		Validate.notNull(params, "Initialisation parameters are required");
 		this.attributes = new MutableScreenOverlayAttributesImpl(params);
+		super.setValues(params);
 	}
 	
 	/**
@@ -266,7 +267,7 @@ public class ScreenOverlayLayer extends AbstractLayer
         
         switch (attributes.getPosition())
         {
-        	case CENTRE:
+        	case CENTER:
         	{
         		x = ((viewport.width - overlay.width) / 2) - attributes.getBorderWidth();
         		y = ((viewport.height - overlay.height) / 2) - attributes.getBorderWidth();

@@ -13,5 +13,5 @@ public enum ScreenOverlayPosition
 	SOUTHWEST,
 	WEST,
 	NORTHWEST,
-	CENTRE
+	CENTER
 }

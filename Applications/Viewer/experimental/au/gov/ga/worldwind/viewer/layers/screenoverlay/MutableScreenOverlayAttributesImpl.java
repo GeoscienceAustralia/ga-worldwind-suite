@@ -17,7 +17,7 @@ import au.gov.ga.worldwind.common.util.Validate;
 public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttributes
 {
 
-	private static final ScreenOverlayPosition DEFAULT_OVERLAY_POSITION = ScreenOverlayPosition.CENTRE;
+	private static final ScreenOverlayPosition DEFAULT_OVERLAY_POSITION = ScreenOverlayPosition.CENTER;
 	private static final LengthExpression DEFAULT_LENGTH = new LengthExpression("80%");
 	private static final int DEFAULT_BORDER_WIDTH = 2;
 	private static final int NO_BORDER_WIDTH = 0;
@@ -353,7 +353,19 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 		
 		if (params.hasKey(ScreenOverlayKeys.POSITION))
 		{
-			this.position = (ScreenOverlayPosition)params.getValue(ScreenOverlayKeys.POSITION);
+			Object position = params.getValue(ScreenOverlayKeys.POSITION);
+			if (position instanceof ScreenOverlayPosition)
+			{
+				this.position = (ScreenOverlayPosition)position;
+			}
+			else if (position instanceof String)
+			{
+				this.position = ScreenOverlayPosition.valueOf(((String)position).toUpperCase());
+			}
+			else
+			{
+				throw new IllegalArgumentException("Position must be one of String or ScreenOverlayPosition");
+			}
 		}
 	}
 }

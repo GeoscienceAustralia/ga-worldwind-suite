@@ -95,6 +95,10 @@ import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
 import au.gov.ga.worldwind.viewer.components.sectorclipper.SectorClipper;
 import au.gov.ga.worldwind.viewer.components.sectorsaver.ImageSectorSaver;
 import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
+import au.gov.ga.worldwind.viewer.layers.screenoverlay.MutableScreenOverlayAttributesImpl;
+import au.gov.ga.worldwind.viewer.layers.screenoverlay.ScreenOverlayAttributes;
+import au.gov.ga.worldwind.viewer.layers.screenoverlay.ScreenOverlayLayer;
+import au.gov.ga.worldwind.viewer.layers.screenoverlay.ScreenOverlayPosition;
 import au.gov.ga.worldwind.viewer.panels.SideBar;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.layers.AbstractLayersPanel;
@@ -601,9 +605,16 @@ public class Application
 			}
 		});
 		
-//		TextOverlayLayer textLayer = new TextOverlayLayer();
-//		textLayer.setText("<html><h1>THIS IS A HEADING!!!</h1><ul><li>Item1</li><li>Item2</li></ul></html>");
-//		wwd.getModel().getLayers().add(textLayer);
+		try
+		{
+			MutableScreenOverlayAttributesImpl attributes = new MutableScreenOverlayAttributesImpl(new URL("file:/c:/temp/HTMLEditorKit.html"));
+			ScreenOverlayLayer textLayer = new ScreenOverlayLayer(attributes);
+			wwd.getModel().getLayers().add(textLayer);
+		}
+		catch (Exception e)
+		{
+			
+		}
 	}
 
 	private void createActions()
