@@ -18,7 +18,6 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.retrieve.RetrievalService;
-import gov.nasa.worldwind.terrain.RectangularTessellatorAccessible;
 import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
@@ -77,7 +76,6 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
-import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.terrain.WireframeRectangularTessellator;
 import au.gov.ga.worldwind.common.ui.BasicAction;
@@ -94,11 +92,10 @@ import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
 import au.gov.ga.worldwind.viewer.components.sectorclipper.SectorClipper;
 import au.gov.ga.worldwind.viewer.components.sectorsaver.ImageSectorSaver;
+import au.gov.ga.worldwind.viewer.layers.ViewerLayerFactory;
 import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.viewer.layers.screenoverlay.MutableScreenOverlayAttributesImpl;
-import au.gov.ga.worldwind.viewer.layers.screenoverlay.ScreenOverlayAttributes;
 import au.gov.ga.worldwind.viewer.layers.screenoverlay.ScreenOverlayLayer;
-import au.gov.ga.worldwind.viewer.layers.screenoverlay.ScreenOverlayPosition;
 import au.gov.ga.worldwind.viewer.panels.SideBar;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.layers.AbstractLayersPanel;
@@ -154,7 +151,7 @@ public class Application
 		{
 		}
 
-		Configuration.setValue(AVKey.LAYER_FACTORY, LayerFactory.class.getName());
+		Configuration.setValue(AVKey.LAYER_FACTORY, ViewerLayerFactory.class.getName());
 		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
 		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, StereoSceneController.class.getName());
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class.getName());
@@ -605,18 +602,18 @@ public class Application
 			}
 		});
 		
-		try
-		{
-			MutableScreenOverlayAttributesImpl attributes = new MutableScreenOverlayAttributesImpl(new URL("file:/c:/temp/demoSlide.html"));
-			attributes.setMinWidth("960px");
-			attributes.setMinHeight("720px");
-			ScreenOverlayLayer textLayer = new ScreenOverlayLayer(attributes);
-			wwd.getModel().getLayers().add(textLayer);
-		}
-		catch (Exception e)
-		{
-			
-		}
+//		try
+//		{
+//			MutableScreenOverlayAttributesImpl attributes = new MutableScreenOverlayAttributesImpl(new URL("file:/c:/temp/demoSlide.html"));
+//			attributes.setMinWidth("960px");
+//			attributes.setMinHeight("720px");
+//			ScreenOverlayLayer textLayer = new ScreenOverlayLayer(attributes);
+//			wwd.getModel().getLayers().add(textLayer);
+//		}
+//		catch (Exception e)
+//		{
+//			
+//		}
 	}
 
 	private void createActions()

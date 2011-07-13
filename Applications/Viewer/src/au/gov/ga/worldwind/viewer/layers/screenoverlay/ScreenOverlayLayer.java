@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.nio.DoubleBuffer;
 
+import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.util.Validate;
@@ -232,23 +233,33 @@ public class ScreenOverlayLayer extends AbstractLayer
 		try
 		{
 			Texture texture = dc.getTextureCache().get(attributes.getSourceId());
-			
-			if (texture == null || texture.getImageHeight() != overlay.height || texture.getImageWidth() != overlay.width)
+			if (!textureNeedsReloading(texture, overlay))
 			{
-				BufferedImage htmlImage = HtmlToImage.createImageFromHtml(attributes.getSourceUrl(), overlay.width, overlay.height);
-				texture = TextureIO.newTexture(htmlImage, false);
-				dc.getTextureCache().put(attributes.getSourceId(), texture);
-				
-				GL gl = dc.getGL();
-		        gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
-		        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
-		        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-		        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
-		        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
-		        int[] maxAnisotropy = new int[1];
-		        gl.glGetIntegerv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy, 0);
-		        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy[0]);
+				return texture;
 			}
+			
+			BufferedImage image;
+			if (attributes.isSourceHtml())
+			{
+				image = HtmlToImage.createImageFromHtml(attributes.getSourceUrl(), overlay.width, overlay.height);
+			}
+			else
+			{
+				image = ImageIO.read(attributes.getSourceUrl());
+			}
+			
+			texture = TextureIO.newTexture(image, false);
+			dc.getTextureCache().put(attributes.getSourceId(), texture);
+			
+			GL gl = dc.getGL();
+	        gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
+	        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
+	        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+	        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
+	        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
+	        int[] maxAnisotropy = new int[1];
+	        gl.glGetIntegerv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy, 0);
+	        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy[0]);
 			
 			return texture;
 		}
@@ -258,6 +269,22 @@ public class ScreenOverlayLayer extends AbstractLayer
             Logging.logger().severe(msg);
             throw new WWRuntimeException(msg, e);
 		}
+	}
+	
+	private boolean textureNeedsReloading(Texture texture, Rectangle overlay)
+	{
+		if (texture == null)
+		{
+			return true;
+		}
+		
+		if (attributes.isSourceImage()) 
+		{
+			// Images will simply be rescaled - don't need to reload for a dimension change
+			return false;
+		}
+		
+		return texture.getImageHeight() != overlay.height || texture.getImageWidth() != overlay.width;
 	}
 	
 	private Vec4 computeLocation(Rectangle viewport, Rectangle overlay)

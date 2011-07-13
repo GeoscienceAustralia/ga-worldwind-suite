@@ -7,6 +7,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.zip.CRC32;
 
+import javax.imageio.ImageIO;
+
+import au.gov.ga.worldwind.common.util.FileUtil;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**
@@ -84,6 +87,32 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 			sourceId = ID_PREFIX + checksum.getValue();
 		}
 		return sourceId;
+	}
+	
+	@Override
+	public boolean isSourceHtml()
+	{
+		// Assume content is HTML if not an image...
+		return !isSourceImage();
+	}
+	
+	@Override
+	public boolean isSourceImage()
+	{
+		if (sourceUrl == null)
+		{
+			return false;
+		}
+		
+		String urlSuffix = FileUtil.getExtension(sourceUrl.toExternalForm());
+		for (String suffix : ImageIO.getReaderFileSuffixes())
+		{
+			if (suffix.equalsIgnoreCase(urlSuffix))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	@Override

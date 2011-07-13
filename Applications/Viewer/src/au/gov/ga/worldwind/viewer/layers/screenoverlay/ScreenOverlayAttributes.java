@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.net.URL;
 
 /**
- * Attributes that control the look-and-feel of a {@link ScreenOverlayLayer}
+ * The 'model' for a {@link ScreenOverlayLayer}
  */
 public interface ScreenOverlayAttributes
 {
@@ -19,6 +19,12 @@ public interface ScreenOverlayAttributes
 	
 	/** @return a unique ID that can identify this overlay */
 	String getSourceId();
+	
+	/** @return whether the source is of html format */
+	boolean isSourceHtml();
+	
+	/** @return whether the source is an image file */
+	boolean isSourceImage();
 	
 	// Positioning
 	
