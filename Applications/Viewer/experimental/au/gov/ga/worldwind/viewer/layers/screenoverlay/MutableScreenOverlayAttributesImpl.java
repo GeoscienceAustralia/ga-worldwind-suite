@@ -52,7 +52,7 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 	public MutableScreenOverlayAttributesImpl(String sourceHtml)
 	{
 		Validate.notBlank(sourceHtml, "Source html is required");
-		this.sourceHtml = sourceHtml;
+		this.sourceHtml = sourceHtml.trim();
 	}
 	
 	@Override
@@ -250,7 +250,7 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 		}
 		else if (params.hasKey(ScreenOverlayKeys.OVERLAY_CONTENT))
 		{
-			this.sourceHtml = params.getStringValue(ScreenOverlayKeys.OVERLAY_CONTENT);
+			this.sourceHtml = params.getStringValue(ScreenOverlayKeys.OVERLAY_CONTENT).trim();
 		}
 		else
 		{

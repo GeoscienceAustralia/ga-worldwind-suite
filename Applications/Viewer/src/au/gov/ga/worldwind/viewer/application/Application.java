@@ -607,7 +607,9 @@ public class Application
 		
 		try
 		{
-			MutableScreenOverlayAttributesImpl attributes = new MutableScreenOverlayAttributesImpl(new URL("file:/c:/temp/HTMLEditorKit.html"));
+			MutableScreenOverlayAttributesImpl attributes = new MutableScreenOverlayAttributesImpl(new URL("file:/c:/temp/demoSlide.html"));
+			attributes.setMinWidth("960px");
+			attributes.setMinHeight("720px");
 			ScreenOverlayLayer textLayer = new ScreenOverlayLayer(attributes);
 			wwd.getModel().getLayers().add(textLayer);
 		}

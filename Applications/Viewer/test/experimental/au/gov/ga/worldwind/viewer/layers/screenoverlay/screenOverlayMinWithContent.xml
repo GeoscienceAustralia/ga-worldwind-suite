@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Layer version="1" layerType="ScreenOverlayLayer">
 	
-	<!-- Relative to layer definition location -->
-	<URL>Something.html</URL>
+	<Content>
+		<![CDATA[
+		<html><body>This is my dummy content</body></html>
+		]]>
+	</Content>
 	
 </Layer>
