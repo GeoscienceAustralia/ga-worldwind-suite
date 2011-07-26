@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="ScreenOverlayLayer">
+	
+	<URL>http://somewhere.com/Something.html</URL>
+	
+	<DrawBorder>false</DrawBorder>
+		
+</Layer>

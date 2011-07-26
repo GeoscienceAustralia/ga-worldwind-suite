@@ -64,7 +64,7 @@ public class ScreenOverlayLayerFactory
 		
 		XMLUtil.checkAndSetIntegerParam(domElement, params, ScreenOverlayKeys.BORDER_WIDTH, "BorderWidth", xpath);
 		XMLUtil.checkAndSetColorParam(domElement, params, ScreenOverlayKeys.BORDER_COLOR, "BorderColor", xpath);
-		XMLUtil.checkAndSetBooleanParam(domElement, params, ScreenOverlayKeys.DRAW_BORDER, "BorderColor", xpath);
+		XMLUtil.checkAndSetBooleanParam(domElement, params, ScreenOverlayKeys.DRAW_BORDER, "DrawBorder", xpath);
 		
 		XMLUtil.checkAndSetStringParam(domElement, params, ScreenOverlayKeys.MIN_HEIGHT, "MinHeight", xpath);
 		XMLUtil.checkAndSetStringParam(domElement, params, ScreenOverlayKeys.MAX_HEIGHT, "MaxHeight", xpath);

@@ -72,6 +72,15 @@ public class ScreenOverlayLayerFactoryTest
 		assertDefaultsRemain(attributes);
 	}
 	
+	@Test
+	public void testCreateNoBorder() throws Exception
+	{
+		AVListImpl params = new AVListImpl();
+		ScreenOverlayLayer createdLayer = ScreenOverlayLayerFactory.createScreenOverlayLayer(load("screenOverlayMinWithNoBorder.xml"), params);
+		
+		assertEquals(false, createdLayer.getAttributes().isDrawBorder());
+	}
+	
 	private Element load(String documentName)
 	{
 		Document document = XMLUtil.openDocument(getClass().getResource(documentName));

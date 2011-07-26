@@ -203,7 +203,11 @@ public class ScreenOverlayLayer extends AbstractLayer
 		gl.glEnable(GL.GL_BLEND);
 		float[] compArray = new float[4];
 		attributes.getBorderColor().getRGBComponents(compArray);
+		compArray[3] = (float)this.getOpacity();
 		gl.glColor4fv(compArray, 0);
+		
+		gl.glEnable(GL.GL_BLEND);
+	    gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		
 		gl.glTranslated(-attributes.getBorderWidth()/2, -attributes.getBorderWidth()/2, 0);
 		FrameFactory.drawBuffer(dc, GL.GL_LINE_STRIP, buffer.remaining() / 2, buffer);

@@ -370,6 +370,11 @@ public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttribut
 			}
 		}
 		
+		if (params.hasKey(ScreenOverlayKeys.DRAW_BORDER))
+		{
+			this.drawBorder = (Boolean)params.getValue(ScreenOverlayKeys.DRAW_BORDER);
+		}
+		
 		if (params.hasKey(ScreenOverlayKeys.BORDER_WIDTH))
 		{
 			this.borderWidth = (Integer)params.getValue(ScreenOverlayKeys.BORDER_WIDTH);
