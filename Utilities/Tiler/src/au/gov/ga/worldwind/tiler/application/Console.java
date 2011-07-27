@@ -83,6 +83,7 @@ public class Console
 		try
 		{
 			Executable.setGDALEnvironmentVariables();
+			GDALUtil.init();
 		}
 		catch (FileNotFoundException e1)
 		{

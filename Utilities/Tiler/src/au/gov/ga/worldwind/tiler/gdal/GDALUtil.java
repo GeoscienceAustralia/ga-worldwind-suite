@@ -22,6 +22,11 @@ public class GDALUtil
 
 	static
 	{
+		
+	}
+
+	public static void init()
+	{
 		gdal.AllRegister();
 
 		File gcs = null;
@@ -36,10 +41,6 @@ public class GDALUtil
 		}
 
 		projectionsSupported = (gcs != null && gcs.isFile());
-	}
-
-	public static void init()
-	{
 	}
 
 	private static boolean projectionsSupported;
