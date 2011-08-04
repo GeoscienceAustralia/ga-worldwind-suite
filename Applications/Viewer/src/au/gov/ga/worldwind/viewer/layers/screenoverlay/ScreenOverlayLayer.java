@@ -245,7 +245,14 @@ public class ScreenOverlayLayer extends AbstractLayer
 			BufferedImage image;
 			if (attributes.isSourceHtml())
 			{
-				image = HtmlToImage.createImageFromHtml(attributes.getSourceUrl(), overlay.width, overlay.height);
+				if (attributes.getSourceUrl() != null)
+				{
+					image = HtmlToImage.createImageFromHtml(attributes.getSourceUrl(), overlay.width, overlay.height);
+				}
+				else
+				{
+					image = HtmlToImage.createImageFromHtml(attributes.getSourceHtml(), overlay.width, overlay.height);
+				}
 			}
 			else
 			{

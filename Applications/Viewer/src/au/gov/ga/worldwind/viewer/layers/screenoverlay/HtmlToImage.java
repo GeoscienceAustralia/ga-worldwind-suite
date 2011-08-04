@@ -32,6 +32,37 @@ public class HtmlToImage
 		
 		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		
+		JEditorPane editorPane = createEditorPane(width, height);
+		editorPane.setPage(htmlSource);
+		editorPane.paint(image.getGraphics());
+		
+		return image;
+	}
+
+	/**
+	 * Create and return an image of the provided HTML content. The image will have
+	 * the provided dimensions.
+	 * <p/>
+	 * Note: This method will not change any styles to ensure that the html document will fit inside the
+	 * specified dimensions.
+	 */
+	public static BufferedImage createImageFromHtml(String sourceHtml, int width, int height)
+	{
+		Validate.notNull(sourceHtml, "A html source is required");
+		Validate.isTrue(width > 0 && height > 0, "Invalid dimensions. Dimensions must be greater than 0.");
+		
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		
+		JEditorPane editorPane = createEditorPane(width, height);
+		editorPane.setText(sourceHtml);
+		editorPane.paint(image.getGraphics());
+		
+		return image;
+	}
+	
+	
+	private static JEditorPane createEditorPane(int width, int height)
+	{
 		JEditorPane editorPane = new JEditorPane();
 		editorPane.setEditorKit(new HTMLEditorKit(){
 			@Override
@@ -44,12 +75,6 @@ public class HtmlToImage
 		});
 		editorPane.setSize(width, height);
 		editorPane.setPreferredSize(new Dimension(width, height));
-		
-		editorPane.setPage(htmlSource);
-		
-		editorPane.paint(image.getGraphics());
-		
-		return image;
+		return editorPane;
 	}
-	
 }
