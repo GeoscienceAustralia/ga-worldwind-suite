@@ -100,6 +100,24 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getLayersDisableLayerTooltipKey() { return "viewer.action.layers.disable.tooltip"; }
 	public static String getLayersOpacityTooltipKey() { return "viewer.action.layers.opacity.tooltip"; }
 	
+	public static String getPlacesAddLabelKey() { return "viewer.action.places.add.label";}
+	public static String getPlacesAddTooltipKey() { return "viewer.action.places.add.tooltip";}
+	public static String getPlacesEditLabelKey() { return "viewer.action.places.edit.label";}
+	public static String getPlacesEditTooltipKey() { return "viewer.action.places.edit.tooltip";}
+	public static String getPlacesDeleteLabelKey() { return "viewer.action.places.delete.label";}
+	public static String getPlacesDeleteTooltipKey() { return "viewer.action.places.delete.tooltip";}
+	public static String getPlacesPlayLabelKey() { return "viewer.action.places.play.label";}
+	public static String getPlacesPlayTooltipKey() { return "viewer.action.places.play.tooltip";}
+	public static String getPlacesStopTooltipKey() { return "viewer.action.places.stop.tooltip";}
+	public static String getPlacesImportLabelKey() { return "viewer.action.places.import.label";}
+	public static String getPlacesImportTooltipKey() { return "viewer.action.places.import.tooltip";}
+	public static String getPlacesExportLabelKey() { return "viewer.action.places.export.label";}
+	public static String getPlacesExportTooltipKey() { return "viewer.action.places.export.tooltip";}
+	public static String getPlacesNextLabelKey() { return "viewer.action.places.next.label";}
+	public static String getPlacesNextTooltipKey() { return "viewer.action.places.next.tooltip";}
+	public static String getPlacesPreviousLabelKey() { return "viewer.action.places.previous.label";}
+	public static String getPlacesPreviousTooltipKey() { return "viewer.action.places.previous.tooltip";}
+	
 	// Terms
 	public static String getTermImageKey() { return "viewer.term.image"; }
 	public static String getTermLayerKey() { return "viewer.term.layer"; }

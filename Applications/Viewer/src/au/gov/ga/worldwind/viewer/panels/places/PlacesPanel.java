@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.viewer.panels.places;
 
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.event.RenderingEvent;
@@ -33,6 +35,7 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,15 +45,16 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileFilter;
 
 import org.w3c.dom.Document;
 
 import au.gov.ga.worldwind.common.ui.BasicAction;
+import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.Util;
@@ -65,6 +69,9 @@ import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
+/**
+ * A {@link ThemePanel} that manages a list of predefines placemark places.
+ */
 public class PlacesPanel extends AbstractThemePanel
 {
 	private static final String DEFAULT_PLACES_PERSISTANCE_FILENAME = "places.xml";
@@ -79,8 +86,16 @@ public class PlacesPanel extends AbstractThemePanel
 	private ListItem dragging;
 	private PlaceLayer layer;
 	private boolean playing = false;
-	private BasicAction addAction, editAction, deleteAction, playAction, importAction,
-			exportAction;
+	
+	private BasicAction addAction;
+	private BasicAction editAction;
+	private BasicAction deleteAction;
+	private BasicAction playAction;
+	private BasicAction importAction;
+	private BasicAction exportAction;
+	private BasicAction previousAction;
+	private BasicAction nextAction;
+	
 	private JFileChooser exportImportChooser;
 	private LayersPanel layersPanel;
 	private RenderingListener opacityChanger;
@@ -126,12 +141,18 @@ public class PlacesPanel extends AbstractThemePanel
 		}
 
 		if (places == null)
+		{
 			places = new ArrayList<Place>();
+		}
 
 		if (append)
+		{
 			this.places.addAll(places);
+		}
 		else
+		{
 			this.places = places;
+		}
 
 		populateList();
 	}
@@ -159,83 +180,16 @@ public class PlacesPanel extends AbstractThemePanel
 
 	private void createPanel()
 	{
-		addAction = new BasicAction("Add", "Add place", Icons.add.getIcon());
-		addAction.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				addNew();
-			}
-		});
+		initialiseActions();
+		registerKeyboardShortcuts();
+		addToolbar();
+		inititalisePlacesList();
 
-		editAction = new BasicAction("Edit", "Edit selected", Icons.properties.getIcon());
-		editAction.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				editSelected();
-			}
-		});
+		stopPlaces();
+	}
 
-		deleteAction = new BasicAction("Delete", "Delete selected", Icons.delete.getIcon());
-		deleteAction.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				deleteSelected();
-			}
-		});
-
-		playAction = new BasicAction("Play", "", Icons.run.getIcon());
-		playAction.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				if (playing)
-					stopPlaces();
-				else
-					playPlaces();
-			}
-		});
-
-		importAction = new BasicAction("Import", "Import places", Icons.imporrt.getIcon());
-		importAction.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				importPlaces();
-			}
-		});
-
-		exportAction = new BasicAction("Export", "Export places", Icons.export.getIcon());
-		exportAction.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				exportPlaces();
-			}
-		});
-
-
-
-		JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
-		toolBar.setFloatable(false);
-		toolBar.add(addAction);
-		toolBar.add(editAction);
-		toolBar.add(deleteAction);
-		toolBar.addSeparator();
-		toolBar.add(importAction);
-		toolBar.add(exportAction);
-		toolBar.addSeparator();
-		toolBar.add(playAction);
-		add(toolBar, BorderLayout.PAGE_START);
-
+	private void inititalisePlacesList()
+	{
 		model = new DefaultListModel();
 		list = new JList(model);
 		list.setCellRenderer(new CheckboxListCellRenderer());
@@ -248,7 +202,7 @@ public class PlacesPanel extends AbstractThemePanel
 		list.setSelectionForeground(Color.black);
 		Color backgroundSelection = list.getSelectionBackground();
 		HSLColor hsl = new HSLColor(backgroundSelection);
-		list.setSelectionBackground(hsl.adjustTone(80));
+		list.setSelectionBackground(hsl.adjustTone(15));
 
 		ListSelectionListener lsl = new ListSelectionListener()
 		{
@@ -258,7 +212,9 @@ public class PlacesPanel extends AbstractThemePanel
 				enableActions();
 				ListItem item = (ListItem) list.getSelectedValue();
 				if (item != null)
+				{
 					placeSelected(item.place);
+				}
 			}
 		};
 		list.getSelectionModel().addListSelectionListener(lsl);
@@ -281,8 +237,7 @@ public class PlacesPanel extends AbstractThemePanel
 					{
 						if (e.getButton() == MouseEvent.BUTTON1)
 						{
-							Rectangle checkRect =
-									new Rectangle(rect.x, rect.y, rect.height, rect.height);
+							Rectangle checkRect = new Rectangle(rect.x, rect.y, rect.height, rect.height);
 							ListItem listItem = (ListItem) model.get(index);
 							if (checkRect.contains(e.getPoint()))
 							{
@@ -347,8 +302,120 @@ public class PlacesPanel extends AbstractThemePanel
 				}
 			}
 		});
+	}
 
-		stopPlaces();
+	private void addToolbar()
+	{
+		JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
+		toolBar.setFloatable(false);
+		toolBar.add(addAction);
+		toolBar.add(editAction);
+		toolBar.add(deleteAction);
+		toolBar.addSeparator();
+		toolBar.add(importAction);
+		toolBar.add(exportAction);
+		toolBar.addSeparator();
+		toolBar.add(playAction);
+		toolBar.add(nextAction);
+		toolBar.add(previousAction);
+		add(toolBar, BorderLayout.PAGE_START);
+	}
+
+	private void registerKeyboardShortcuts()
+	{
+		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('w'), "places.next");
+		getActionMap().put("places.next", nextAction);
+		
+		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('q'), "places.previous");
+		getActionMap().put("places.previous", previousAction);
+	}
+
+	private void initialiseActions()
+	{
+		addAction = new BasicAction(getMessage(getPlacesAddLabelKey()), getMessage(getPlacesAddTooltipKey()), Icons.add.getIcon());
+		addAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				addNew();
+			}
+		});
+
+		editAction = new BasicAction(getMessage(getPlacesEditLabelKey()), getMessage(getPlacesEditTooltipKey()), Icons.properties.getIcon());
+		editAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				editSelected();
+			}
+		});
+
+		deleteAction = new BasicAction(getMessage(getPlacesDeleteLabelKey()), getMessage(getPlacesDeleteTooltipKey()), Icons.delete.getIcon());
+		deleteAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				deleteSelected();
+			}
+		});
+
+		playAction = new BasicAction(getMessage(getPlacesPlayLabelKey()), getMessage(getPlacesPlayTooltipKey()), Icons.run.getIcon());
+		playAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				if (playing)
+				{
+					stopPlaces();
+				}
+				else
+				{
+					playPlaces();
+				}
+			}
+		});
+
+		importAction = new BasicAction(getMessage(getPlacesImportLabelKey()), getMessage(getPlacesImportTooltipKey()), Icons.imporrt.getIcon());
+		importAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				importPlaces();
+			}
+		});
+
+		exportAction = new BasicAction(getMessage(getPlacesExportLabelKey()), getMessage(getPlacesExportTooltipKey()), Icons.export.getIcon());
+		exportAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				exportPlaces();
+			}
+		});
+		
+		nextAction = new BasicAction(getMessage(getPlacesNextLabelKey()), getMessage(getPlacesNextTooltipKey()), Icons.down.getIcon());
+		nextAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				nextPlace();
+			}
+		});
+		
+		previousAction = new BasicAction(getMessage(getPlacesPreviousLabelKey()), getMessage(getPlacesPreviousTooltipKey()), Icons.up.getIcon());
+		previousAction.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				previousPlace();
+			}
+		});
 	}
 
 	private void enableActions()
@@ -430,8 +497,7 @@ public class PlacesPanel extends AbstractThemePanel
 		Position eyePosition = view.getGlobe().computePositionFromPoint(eyePoint);
 		Position centerPosition = Util.computeViewClosestCenterPosition(view, eyePoint);
 		Vec4 upVector = view.getUpVector();
-		double zoom =
-				eyePoint.distanceTo3(view.getGlobe().computePointFromPosition(centerPosition));
+		double zoom = eyePoint.distanceTo3(view.getGlobe().computePointFromPosition(centerPosition));
 		double minZoom = zoom * 5;
 
 		Place place = new Place("", centerPosition, minZoom);
@@ -486,18 +552,17 @@ public class PlacesPanel extends AbstractThemePanel
 		ListItem item = (ListItem) list.getSelectedValue();
 		if (item != null)
 		{
-			int value =
-					JOptionPane.showConfirmDialog(this,
-							"Are you sure you want to delete the place '" + item.place.getLabel()
-									+ "'?", "Delete place", JOptionPane.YES_NO_OPTION,
-							JOptionPane.QUESTION_MESSAGE);
+			int value = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the place '" + item.place.getLabel() + "'?",
+													  "Delete place", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			if (value == JOptionPane.YES_OPTION)
 			{
 				model.removeElement(item);
 				places.remove(item.place);
 				list.repaint();
 				if (index >= model.getSize())
+				{
 					index = model.getSize() - 1;
+				}
 				list.setSelectedIndex(index);
 				refreshLayer();
 			}
@@ -506,11 +571,8 @@ public class PlacesPanel extends AbstractThemePanel
 
 	public void deleteAllPlacesWarn()
 	{
-		int value =
-				JOptionPane
-						.showConfirmDialog(frame, "All places will be deleted!\nAre you sure?",
-								"Delete all places", JOptionPane.YES_NO_OPTION,
-								JOptionPane.WARNING_MESSAGE);
+		int value = JOptionPane.showConfirmDialog(frame, "All places will be deleted!\nAre you sure?", "Delete all places",
+												  JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 		if (value == JOptionPane.YES_OPTION)
 		{
 			deleteAllPlaces();
@@ -547,13 +609,59 @@ public class PlacesPanel extends AbstractThemePanel
 	private synchronized void stopPlaces()
 	{
 		if (wwd != null)
+		{
 			wwd.getView().stopAnimations();
+		}
 		playing = false;
 		playAction.setIcon(Icons.run.getIcon());
-		playAction.setToolTipText("Play through places");
+		playAction.setToolTipText(getMessage(getPlacesPlayTooltipKey()));
 		enableActions();
 	}
 
+	private synchronized void nextPlace()
+	{
+		stopAllMotion();
+		
+		int index = getSelectedPlaceIndex();
+		int nextIndex = (index + 1) % places.size();
+		
+		if (nextIndex == index || places.isEmpty())
+		{
+			return;
+		}
+		
+		Place place = places.get(nextIndex);
+		selectPlace(place);
+		flyToPlace(place);
+	}
+
+	private synchronized void previousPlace()
+	{
+		stopAllMotion();
+		
+		int index = getSelectedPlaceIndex();
+		int previousIndex = ((index - 1) + places.size()) % places.size();
+		
+		if (previousIndex == index || places.isEmpty())
+		{
+			return;
+		}
+		
+		Place place = places.get(previousIndex);
+		selectPlace(place);
+		flyToPlace(place);
+	}
+	
+	private void stopAllMotion()
+	{
+		if (playing)
+		{
+			stopPlaces();
+		}
+		wwd.getView().stopMovement();
+		wwd.getView().stopAnimations();
+	}
+	
 	private synchronized void playPlaces()
 	{
 		if (!playing)
@@ -582,17 +690,7 @@ public class PlacesPanel extends AbstractThemePanel
 				@Override
 				public void run()
 				{
-					ListItem item = (ListItem) list.getSelectedValue();
-					//List<Place> places = Settings.get().getPlaces();
-					int index = -1;
-					if (item != null)
-					{
-						index = places.indexOf(item.place);
-					}
-					else if (!places.isEmpty())
-					{
-						index = 0;
-					}
+					int index = getSelectedPlaceIndex();
 
 					long jump = 100;
 					while (playing && index >= 0)
@@ -603,7 +701,9 @@ public class PlacesPanel extends AbstractThemePanel
 							selectPlace(place);
 							long length = flyToPlace(place);
 							if (length < 0)
+							{
 								break;
+							}
 							length += Settings.get().getPlacesPause();
 
 							// sleep for 'length' in 'jump' increments
@@ -612,14 +712,18 @@ public class PlacesPanel extends AbstractThemePanel
 								sleep(jump);
 							}
 							if (playing)
+							{
 								sleep(length);
+							}
 						}
 
 						int nextIndex = index;
 						while (true)
 						{
 							if (++nextIndex >= places.size())
+							{
 								nextIndex = 0;
+							}
 							if (nextIndex == index)
 							{
 								index = -1;
@@ -653,7 +757,7 @@ public class PlacesPanel extends AbstractThemePanel
 		}
 
 		playAction.setIcon(Icons.stop.getIcon());
-		playAction.setToolTipText("Stop playback");
+		playAction.setToolTipText(getMessage(getPlacesStopTooltipKey()));
 		enableActions();
 	}
 
@@ -661,9 +765,7 @@ public class PlacesPanel extends AbstractThemePanel
 	{
 		View view = wwd.getView();
 
-		double centerElevation =
-				view.getGlobe().getElevation(place.getLatLon().latitude,
-						place.getLatLon().longitude);
+		double centerElevation = view.getGlobe().getElevation(place.getLatLon().latitude, place.getLatLon().longitude);
 		Position centerPosition = new Position(place.getLatLon(), centerElevation);
 		Position eyePosition = place.getEyePosition();
 		if (!place.isSaveCamera() || eyePosition == null)
@@ -673,10 +775,15 @@ public class PlacesPanel extends AbstractThemePanel
 
 			double minZoom = place.getMinZoom();
 			double maxZoom = place.getMaxZoom();
+			
 			if (minZoom >= 0 && elevation > minZoom)
+			{
 				elevation = Math.max(minZoom, 1000);
+			}
 			else if (maxZoom >= 0 && elevation < maxZoom)
+			{
 				elevation = maxZoom;
+			}
 
 			eyePosition = new Position(centerPosition, elevation);
 		}
@@ -685,8 +792,7 @@ public class PlacesPanel extends AbstractThemePanel
 		wwd.getView().stopMovement();
 		wwd.removeRenderingListener(opacityChanger);
 
-		long lengthMillis =
-				AnimatorHelper.addAnimator(view, centerPosition, eyePosition, place.getUpVector());
+		long lengthMillis = AnimatorHelper.addAnimator(view, centerPosition, eyePosition, place.getUpVector());
 		animateLayers(place, lengthMillis);
 		wwd.redraw();
 
@@ -712,15 +818,21 @@ public class PlacesPanel extends AbstractThemePanel
 		//see revision 1331 for a almost-working reordering implementation
 
 		if (layersPanel == null)
+		{
 			return;
+		}
 
 		INode placeNode = place.getLayers();
 		if (placeNode == null)
+		{
 			return;
+		}
 
 		INode currentNode = layersPanel.getRoot();
 		if (currentNode == null)
+		{
 			return;
+		}
 
 		List<ILayerNode> placeLayers = flattenLayerHierarchy(placeNode);
 		List<ILayerNode> currentLayers = flattenLayerHierarchy(currentNode);
@@ -816,8 +928,7 @@ public class PlacesPanel extends AbstractThemePanel
 				modifyStartOpacities[i] = layer.getOpacity();
 			}
 			int currentIndex = currentLayers.indexOf(layer);
-			modifyEndOpacities[i] =
-					placeLayers.get(indexOfCurrentInPlace[currentIndex]).getOpacity();
+			modifyEndOpacities[i] = placeLayers.get(indexOfCurrentInPlace[currentIndex]).getOpacity();
 		}
 
 		//find an array of start opacities for the layers to disable
@@ -857,9 +968,7 @@ public class PlacesPanel extends AbstractThemePanel
 					for (int i = 0; i < toModify.size(); i++)
 					{
 						ILayerNode layer = toModify.get(i);
-						double opacity =
-								Util.mixDouble(percent, modifyStartOpacities[i],
-										modifyEndOpacities[i]);
+						double opacity = Util.mixDouble(percent, modifyStartOpacities[i], modifyEndOpacities[i]);
 						model.setOpacity(layer, opacity);
 					}
 
@@ -906,27 +1015,7 @@ public class PlacesPanel extends AbstractThemePanel
 		if (exportImportChooser == null)
 		{
 			exportImportChooser = new JFileChooser();
-			FileFilter filter = new FileFilter()
-			{
-				@Override
-				public boolean accept(File f)
-				{
-					if (f.isDirectory())
-						return true;
-					int index = f.getName().lastIndexOf('.');
-					if (index < 0)
-						return false;
-					String ext = f.getName().substring(index + 1);
-					return ext.toLowerCase().equals("xml");
-				}
-
-				@Override
-				public String getDescription()
-				{
-					return "XML files (*.xml)";
-				}
-			};
-			exportImportChooser.setFileFilter(filter);
+			exportImportChooser.setFileFilter(FileFilters.getXmlFilter());
 		}
 		return exportImportChooser;
 	}
@@ -946,7 +1035,7 @@ public class PlacesPanel extends AbstractThemePanel
 				catch (Exception e)
 				{
 					JOptionPane.showMessageDialog(frame, "Could not import " + file.getName(),
-							"Import error", JOptionPane.ERROR_MESSAGE);
+												  "Import error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}
@@ -974,12 +1063,12 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 			if (file.exists())
 			{
-				int answer =
-						JOptionPane.showConfirmDialog(frame, file.getAbsolutePath()
-								+ " already exists.\nDo you want to replace it?", "Export",
-								JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+				int answer = JOptionPane.showConfirmDialog(frame, file.getAbsolutePath() + " already exists.\nDo you want to replace it?", 
+													       "Export", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 				if (answer != JOptionPane.YES_OPTION)
+				{
 					file = null;
+				}
 			}
 			if (file != null)
 			{
@@ -989,8 +1078,7 @@ public class PlacesPanel extends AbstractThemePanel
 				}
 				catch (Exception e)
 				{
-					JOptionPane.showMessageDialog(frame, "Error: " + e, "Export error",
-							JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frame, "Error: " + e, "Export error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}
@@ -1017,8 +1105,7 @@ public class PlacesPanel extends AbstractThemePanel
 		}
 
 		@Override
-		public Component getListCellRendererComponent(JList list, Object value, int index,
-				boolean isSelected, boolean cellHasFocus)
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
 		{
 			Color background = isSelected ? list.getSelectionBackground() : list.getBackground();
 
@@ -1135,20 +1222,42 @@ public class PlacesPanel extends AbstractThemePanel
 		}
 	}
 
+	/**
+	 * @return Whether any nodes in the tree given by the provided root node are enabled
+	 */
 	private boolean anyEnabled(INode node)
 	{
 		if (node instanceof ILayerNode)
 		{
 			if (((ILayerNode) node).isEnabled())
+			{
 				return true;
+			}
 		}
 
 		for (int i = 0; i < node.getChildCount(); i++)
 		{
 			if (anyEnabled(node.getChild(i)))
+			{
 				return true;
+			}
 		}
 
 		return false;
+	}
+
+	private int getSelectedPlaceIndex()
+	{
+		ListItem item = (ListItem) list.getSelectedValue();
+		int index = -1;
+		if (item != null)
+		{
+			index = places.indexOf(item.place);
+		}
+		else if (!places.isEmpty())
+		{
+			index = 0;
+		}
+		return index;
 	}
 }
