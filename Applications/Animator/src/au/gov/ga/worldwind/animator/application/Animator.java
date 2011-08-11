@@ -751,7 +751,6 @@ public class Animator
 		actionFactory.getUseScaledZoomAction().addToMenu(menu);
 		menu.add(actionFactory.getScaleAnimationAction());
 		menu.add(actionFactory.getSmoothEyeSpeedAction());
-		actionFactory.getShowWireframeAction().addToMenu(menu);
 		menu.addSeparator();
 		menu.add(actionFactory.getPreviewAction());
 		menu.add(actionFactory.getPreviewX2Action());
@@ -770,6 +769,8 @@ public class Animator
 		actionFactory.getShowCrosshairsAction().addToMenu(menu);
 		actionFactory.getShowGridAction().addToMenu(menu);
 		actionFactory.getShowRuleOfThirdsAction().addToMenu(menu);
+		menu.addSeparator();
+		actionFactory.getShowWireframeAction().addToMenu(menu);
 		menu.addSeparator();
 		actionFactory.getAnimateClippingAction().addToMenu(menu);
 		actionFactory.getStereoCameraAction().addToMenu(menu);
