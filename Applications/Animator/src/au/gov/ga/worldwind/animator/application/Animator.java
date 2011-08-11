@@ -751,6 +751,7 @@ public class Animator
 		actionFactory.getUseScaledZoomAction().addToMenu(menu);
 		menu.add(actionFactory.getScaleAnimationAction());
 		menu.add(actionFactory.getSmoothEyeSpeedAction());
+		actionFactory.getShowWireframeAction().addToMenu(menu);
 		menu.addSeparator();
 		menu.add(actionFactory.getPreviewAction());
 		menu.add(actionFactory.getPreviewX2Action());
@@ -2023,7 +2024,6 @@ public class Animator
 			Camera newCamera = stereo ? new StereoCameraImpl(animation) : new CameraImpl(animation);
 			animation.setCamera(newCamera);
 			actionFactory.getDynamicStereoAction().setSelected(true);
-			
 		}
 	}
 
@@ -2039,5 +2039,10 @@ public class Animator
 	File getAnimationFile()
 	{
 		return file;
+	}
+
+	void showWireframe(boolean show)
+	{
+		getCurrentAnimation().getWorldWindow().getModel().setShowWireframeInterior(show);
 	}
 }

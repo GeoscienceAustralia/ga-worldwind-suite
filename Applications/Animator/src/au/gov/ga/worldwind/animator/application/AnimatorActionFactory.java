@@ -42,6 +42,7 @@ public class AnimatorActionFactory
 	private SelectableAction useScaledZoomAction;
 	private BasicAction scaleAnimationAction;
 	private BasicAction smoothEyeSpeedAction;
+	private SelectableAction showWireframeAction;
 	private BasicAction previewAction;
 	private BasicAction previewX2Action;
 	private BasicAction previewX10Action;
@@ -294,6 +295,18 @@ public class AnimatorActionFactory
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.smoothEyeSpeed();
+			}
+		});
+		
+		// Show wireframe
+		showWireframeAction = new SelectableAction(getMessage(getShowWireframeMenuLabelKey()), null, false);
+		showWireframeAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_W);
+		showWireframeAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.showWireframe(showWireframeAction.isSelected());
 			}
 		});
 		
@@ -778,5 +791,10 @@ public class AnimatorActionFactory
 	public BasicAction getShowAboutAction()
 	{
 		return showAboutAction;
+	}
+	
+	public SelectableAction getShowWireframeAction()
+	{
+		return showWireframeAction;
 	}
 }

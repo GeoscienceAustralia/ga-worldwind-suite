@@ -33,6 +33,7 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getScaleAnimationMenuLabelKey() { return "animator.gui.menu.scaleanimation.label"; }
 	public static String getScaleHeightMenuLabelKey() { return "animator.gui.menu.scaleheight.label"; }
 	public static String getSmoothEyeSpeedMenuLabelKey() { return "animator.gui.menu.smootheyespeed.label"; }
+	public static String getShowWireframeMenuLabelKey() { return "animator.gui.menu.showwireframe.label"; }
 	public static String getPreviewMenuLabelKey() { return "animator.gui.menu.preview.label"; }
 	public static String getPreviewX2MenuLabelKey() { return "animator.gui.menu.previewx2.label"; }
 	public static String getPreviewX10MenuLabelKey() { return "animator.gui.menu.previewx10.label"; }
