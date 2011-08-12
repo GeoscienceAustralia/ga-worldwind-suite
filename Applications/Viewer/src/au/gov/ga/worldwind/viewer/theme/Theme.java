@@ -42,4 +42,7 @@ public interface Theme extends Disposable
 	public Double getInitialPitch();
 	public Double getVerticalExaggeration();
 	public Double getFieldOfView();
+	
+	public boolean isPlacesPersistanceFilenameSet();
+	public String getPlacesPersistanceFilename();
 }

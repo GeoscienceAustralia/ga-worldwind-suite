@@ -44,6 +44,11 @@ public class Settings implements StereoViewParameters
 		}
 		return instance;
 	}
+	
+	public static void set(Settings newSettings)
+	{
+		instance = newSettings;
+	}
 
 	public static File getSettingsFile()
 	{

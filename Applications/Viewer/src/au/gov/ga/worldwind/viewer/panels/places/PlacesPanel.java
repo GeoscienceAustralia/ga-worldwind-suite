@@ -115,7 +115,6 @@ public class PlacesPanel extends AbstractThemePanel
 	public PlacesPanel()
 	{
 		super(new BorderLayout());
-
 		createPanel();
 		loadPlaces(getPlacesFile(), false);
 	}
@@ -1152,7 +1151,15 @@ public class PlacesPanel extends AbstractThemePanel
 		}
 
 		//load legacy places
-		loadPlaces(Settings.getSettingsFile(), true);
+		if (theme.isPlacesPersistanceFilenameSet())
+		{	
+			placesPersistanceFilename = theme.getPlacesPersistanceFilename();
+			loadPlaces(getPlacesFile(), false);
+		}
+		else
+		{
+			loadPlaces(Settings.getSettingsFile(), true);
+		}
 	}
 
 	@Override

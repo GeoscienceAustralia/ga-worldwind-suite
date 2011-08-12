@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Theme>
+	<ThemeName>Sample theme</ThemeName>
+	<LayersFilename>layers.sample.xml</LayersFilename>
+	<PlacesFilename>places.sample.xml</PlacesFilename>
+	<MenuBar>true</MenuBar>
+	<ToolBar>false</ToolBar>
+	<StatusBar>true</StatusBar>
+	<WmsBrowser>false</WmsBrowser>
+
+	<InitialLatitude>-12</InitialLatitude>
+	<InitialLongitude>123.4</InitialLongitude>
+
+	<CacheLocation>Cache</CacheLocation>
+	
+	<HUD name="World Map" className="au.gov.ga.worldwind.viewer.theme.hud.WorldMapHUD" position="NorthWest"  enabled="false"/>
+	<HUD name="Compass" className="au.gov.ga.worldwind.viewer.theme.hud.CompassHUD" position="NorthEast"  enabled="false"/>
+	<HUD name="Scalebar" className="au.gov.ga.worldwind.viewer.theme.hud.ScalebarHUD" position="SouthEast"  enabled="false" />
+	<HUD name="Navigation Controls" className="au.gov.ga.worldwind.viewer.theme.hud.ControlsHUD" position="SouthWest"  enabled="false" />
+	<HUD name="Graticule" className="au.gov.ga.worldwind.viewer.theme.hud.GraticuleHUD" enabled="false" />
+	<HUD name="Crosshair" className="au.gov.ga.worldwind.viewer.theme.hud.CrosshairHUD" enabled="false" />
+
+	<Dataset name="Datasets" url="dataset.xml" />
+
+	<Panel name="Search" className="au.gov.ga.worldwind.viewer.panels.geonames.GeoNamesSearchPanel" enabled="false" />
+	<Panel name="Places" className="au.gov.ga.worldwind.viewer.panels.places.PlacesPanel" enabled="false" />
+	<Panel name="Layers" className="au.gov.ga.worldwind.viewer.panels.layers.LayersPanel" />
+	<Panel name="Datasets" className="au.gov.ga.worldwind.viewer.panels.dataset.DatasetPanel" />
+	<Panel name="Vertical Exaggeration" className="au.gov.ga.worldwind.viewer.panels.other.ExaggerationPanel" enabled="false" />
+	
+	<Layer name="Sample Layer" url="http://somewhere.com/layer.xml" info="http://somewhere.com/info.xml" icon="http://somewhere.com/icon.xml" enabled="true" visible="false"/>
+</Theme>

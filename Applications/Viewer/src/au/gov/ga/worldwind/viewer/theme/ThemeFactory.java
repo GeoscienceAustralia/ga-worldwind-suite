@@ -17,7 +17,9 @@ public class ThemeFactory
 	{
 		Element element = XMLUtil.getElementFromSource(source);
 		if (element == null)
+		{
 			return null;
+		}
 
 		BasicTheme theme = new BasicTheme(XMLUtil.getText(element, "ThemeName"));
 
@@ -30,6 +32,8 @@ public class ThemeFactory
 		theme.setLayerPersistanceFilename(XMLUtil.getText(element, "LayersFilename"));
 		theme.setCacheLocations(parseCacheLocations(element, "CacheLocation"));
 
+		theme.setPlacesPersistanceFilename(XMLUtil.getText(element, "PlacesFilename"));
+		
 		theme.setHUDs(parseHUDs(element, "HUD"));
 		theme.setPanels(parsePanels(element, "Panel"));
 		theme.setDatasets(parseDatasets(element, "Dataset", context));
@@ -56,7 +60,9 @@ public class ThemeFactory
 			{
 				String location = element.getTextContent();
 				if (location != null && location.length() > 0)
+				{
 					locations.add(location);
+				}
 			}
 		}
 		return locations;

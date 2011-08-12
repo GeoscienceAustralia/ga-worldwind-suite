@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.viewer.panels.dataset.IDataset;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.viewer.panels.layers.ThemeLayersPanel;
@@ -24,6 +25,8 @@ public class BasicTheme implements Theme
 	private boolean persistLayers;
 	private String layerPersistanceFilename;
 	private List<String> cacheLocations;
+	
+	private String placesPersistanceFilename;
 	
 	private List<IDataset> datasets;
 	private List<ThemeLayer> layers;
@@ -63,11 +66,20 @@ public class BasicTheme implements Theme
 	public void dispose()
 	{
 		if (getHUDs() != null)
+		{
 			for (ThemeHUD hud : getHUDs())
+			{
 				hud.dispose();
+			}
+		}
+		
 		if (getPanels() != null)
+		{
 			for (ThemePanel panel : getPanels())
+			{
 				panel.dispose();
+			}
+		}
 	}
 
 	/*-- GETTERS AND SETTERS --*/
@@ -171,6 +183,23 @@ public class BasicTheme implements Theme
 		this.layerPersistanceFilename = layerPersistanceFilename;
 	}
 
+	@Override
+	public String getPlacesPersistanceFilename()
+	{
+		return placesPersistanceFilename;
+	}
+	
+	public void setPlacesPersistanceFilename(String placesPersistanceFilename)
+	{
+		this.placesPersistanceFilename = placesPersistanceFilename;
+	}
+	
+	@Override
+	public boolean isPlacesPersistanceFilenameSet()
+	{
+		return !Util.isBlank(placesPersistanceFilename);
+	}
+	
 	@Override
 	public List<String> getCacheLocations()
 	{
