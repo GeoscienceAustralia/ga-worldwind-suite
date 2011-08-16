@@ -1,8 +1,6 @@
 package au.gov.ga.worldwind.common.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.net.URL;
@@ -73,5 +71,42 @@ public class URLUtilTest
 		File result = URLUtil.urlToFile(new URL("http://this/is/not/a/file.html"));
 		
 		assertEquals(null, result);
+	}
+	
+	// isForResourceWithExtension()
+	@Test
+	public void testIsForResourceWithExtensionWithNullUrl() throws Exception
+	{
+		assertFalse(URLUtil.isForResourceWithExtension(null, "zip"));
+	}
+	
+	@Test
+	public void testIsForResourceWithExtensionWithNullExtension() throws Exception
+	{
+		assertFalse(URLUtil.isForResourceWithExtension(new URL("http://somewhere.com/file.zip"), null));
+	}
+	
+	@Test
+	public void testIsForResourceWithExtensionWithBlankExtension() throws Exception
+	{
+		assertFalse(URLUtil.isForResourceWithExtension(new URL("http://somewhere.com/file.zip"), "   "));
+	}
+	
+	@Test
+	public void testIsForResourceWithExtensionWithMatchingExtension() throws Exception
+	{
+		assertTrue(URLUtil.isForResourceWithExtension(new URL("http://somewhere.com/file.zip"), "zip"));
+	}
+	
+	@Test
+	public void testIsForResourceWithExtensionWithNonMatchingExtension() throws Exception
+	{
+		assertFalse(URLUtil.isForResourceWithExtension(new URL("http://somewhere.com/file.zip"), "zipp"));
+	}
+	
+	@Test
+	public void testIsForResourceWithExtensionWithNonQueryParamsAndMatchingExtension() throws Exception
+	{
+		assertTrue(URLUtil.isForResourceWithExtension(new URL("http://somewhere.com/file.zip?param1=something&"), "zip"));
 	}
 }

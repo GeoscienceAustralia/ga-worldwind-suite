@@ -4,7 +4,6 @@ import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
-import gov.nasa.worldwind.retrieve.URLRetriever;
 import gov.nasa.worldwind.util.BufferWrapper;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.Tile;
@@ -12,14 +11,14 @@ import gov.nasa.worldwind.util.TileKey;
 import gov.nasa.worldwind.util.TileUrlBuilder;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.ByteBuffer;
 
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.IOUtil;
+import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.Util;
 
 /**
@@ -38,7 +37,9 @@ public class FileElevationModel extends BoundedBasicElevationModel
 	protected static AVList createURLBuilderParam(AVList params)
 	{
 		if (params == null)
+		{
 			params = new AVListImpl();
+		}
 
 		URL context = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
 		params.setValue(AVKey.TILE_URL_BUILDER, new FileURLBuilder(context));
@@ -65,7 +66,7 @@ public class FileElevationModel extends BoundedBasicElevationModel
 		public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 		{
 			return Util.getLocalTileURL(tile.getLevel().getService(), tile.getLevel().getDataset(),
-					tile.getLevelNumber(), tile.getRow(), tile.getColumn(), context, imageFormat, "bil");
+										tile.getLevelNumber(), tile.getRow(), tile.getColumn(), context, imageFormat, "bil");
 		}
 	}
 
@@ -83,10 +84,14 @@ public class FileElevationModel extends BoundedBasicElevationModel
 	protected void requestTile(TileKey key)
 	{
 		if (WorldWind.getTaskService().isFull())
+		{
 			return;
+		}
 
 		if (this.getLevels().isResourceAbsent(key))
+		{
 			return;
+		}
 
 		RequestTask request = new RequestTask(key, this);
 		WorldWind.getTaskService().addTask(request);
@@ -97,45 +102,19 @@ public class FileElevationModel extends BoundedBasicElevationModel
 	{
 		//overridden to handle unzipping the file if required
 
-		if (!url.toExternalForm().toLowerCase().endsWith(".zip"))
+		if (!URLUtil.isForResourceWithExtension(url, "zip"))
+		{
 			return super.readElevations(url);
+		}
 
 		try
 		{
-			InputStream is = url.openStream();
-			ZipRetriever zr = new ZipRetriever(url);
-			ByteBuffer byteBuffer = zr.readZipStream(is, url);
-
-			// Setup parameters to instruct BufferWrapper on how to interpret the ByteBuffer.
-			AVList bufferParams = new AVListImpl();
-			bufferParams.setValue(AVKey.DATA_TYPE, this.getElevationDataPixelType());
-			bufferParams.setValue(AVKey.BYTE_ORDER, this.getElevationDataByteOrder());
-			return BufferWrapper.wrap(byteBuffer, bufferParams);
+			return IOUtil.readByteBuffer(url, this.getElevationDataPixelType(), this.getElevationDataByteOrder());
 		}
 		catch (java.io.IOException e)
 		{
-			Logging.logger().log(java.util.logging.Level.SEVERE, "ElevationModel.ExceptionReadingElevationFile",
-					url.toString());
+			Logging.logger().log(java.util.logging.Level.SEVERE, "ElevationModel.ExceptionReadingElevationFile", url.toString());
 			throw e;
-		}
-	}
-
-	/**
-	 * URLRetriever that makes the readZipStream function accessible.
-	 * 
-	 * @author Michael de Hoog
-	 */
-	protected static class ZipRetriever extends URLRetriever
-	{
-		public ZipRetriever(URL url)
-		{
-			super(url, null);
-		}
-
-		@Override
-		public ByteBuffer readZipStream(InputStream inputStream, URL url) throws IOException
-		{
-			return super.readZipStream(inputStream, url);
 		}
 	}
 
@@ -168,7 +147,9 @@ public class FileElevationModel extends BoundedBasicElevationModel
 			{
 				// check to ensure load is still needed
 				if (elevationModel.areElevationsInMemory(tileKey))
+				{
 					return;
+				}
 
 				ElevationTile tile = elevationModel.createTile(tileKey);
 				final URL url = tile.getResourceURL(elevationModel.getImageFormat());
@@ -194,15 +175,20 @@ public class FileElevationModel extends BoundedBasicElevationModel
 		public final boolean equals(Object o)
 		{
 			if (this == o)
+			{
 				return true;
+			}
 			if (o == null || getClass() != o.getClass())
+			{
 				return false;
+			}
 
 			final RequestTask that = (RequestTask) o;
 
-			//noinspection RedundantIfStatement
 			if (this.tileKey != null ? !this.tileKey.equals(that.tileKey) : that.tileKey != null)
+			{
 				return false;
+			}
 
 			return true;
 		}

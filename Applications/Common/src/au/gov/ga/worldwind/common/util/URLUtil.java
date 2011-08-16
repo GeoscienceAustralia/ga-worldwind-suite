@@ -25,6 +25,11 @@ public class URLUtil
 		return url != null && "file".equalsIgnoreCase(url.getProtocol());
 	}
 	
+	public static boolean isForResourceWithExtension(URL url, String extension)
+	{
+		return url != null && !Util.isBlank(extension) && url.getPath().endsWith(extension);
+	}
+	
 	/**
 	 * @return A new URL with the same protocol and path, but devoid of the query string
 	 */

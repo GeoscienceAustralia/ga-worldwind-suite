@@ -1,21 +1,17 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader;
 
-import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.util.BufferWrapper;
-import gov.nasa.worldwind.util.WWIO;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.ByteBuffer;
 
 import au.gov.ga.worldwind.common.layers.delegate.IDelegatorTile;
 import au.gov.ga.worldwind.common.layers.delegate.ITileReaderDelegate;
+import au.gov.ga.worldwind.common.util.IOUtil;
 
 public abstract class ElevationImageReaderDelegate implements ITileReaderDelegate
 {
@@ -44,15 +40,9 @@ public abstract class ElevationImageReaderDelegate implements ITileReaderDelegat
 
 	public BufferedImage readImage(TextureTile tile, URL url, Globe globe) throws IOException
 	{
-		ByteBuffer byteBuffer = WWIO.readURLContentToBuffer(url);
-
-		// Setup parameters to instruct BufferWrapper on how to interpret the ByteBuffer.
-		AVList bufferParams = new AVListImpl();
-		bufferParams.setValue(AVKey.DATA_TYPE, pixelType);
-		bufferParams.setValue(AVKey.BYTE_ORDER, byteOrder);
-		BufferWrapper elevations = BufferWrapper.wrap(byteBuffer, bufferParams);
-
-		return generateImage(elevations, tile.getWidth(), tile.getHeight(), globe, tile.getSector());
+		BufferWrapper byteBuffer = IOUtil.readByteBuffer(url, pixelType, byteOrder);
+		
+		return generateImage(byteBuffer, tile.getWidth(), tile.getHeight(), globe, tile.getSector());
 	}
 
 	protected abstract BufferedImage generateImage(BufferWrapper elevations, int width, int height, Globe globe,
