@@ -4,6 +4,7 @@ import gov.nasa.worldwind.util.Logging;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -18,9 +19,21 @@ import org.w3c.dom.Node;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTreePersistance;
 
+/**
+ * A utility class responsible for persistence of places files.
+ * <p/>
+ * Supports loading and saving of places to and from XML configuration files.
+ */
 public class PlacePersistance
 {
-	public static List<Place> readFromXML(Object source)
+	/**
+	 * Read the places list from the provided XML source.
+	 * <p/>
+	 * Supports all source objects supported by {@link XMLUtil#getElementFromSource(Object)}.
+	 * <p/>
+	 * Also supports an optional context URL to use for loading relative paths. 
+	 */
+	public static List<Place> readFromXML(Object source, URL context)
 	{
 		XPath xpath = XMLUtil.makeXPath();
 		Element elem = XMLUtil.getElementFromSource(source);
@@ -31,17 +44,19 @@ public class PlacePersistance
 			String nodeName = "Places";
 			if (elem.getNodeName().equals(nodeName))
 			{
-				addPlaces(elem, places, xpath);
+				addPlaces(elem, places, xpath, context);
 			}
 			else
 			{
 				Element[] placesElements = XMLUtil.getElements(elem, nodeName, xpath);
 				if (placesElements == null)
+				{
 					return null;
+				}
 
 				for (Element placesElement : placesElements)
 				{
-					addPlaces(placesElement, places, xpath);
+					addPlaces(placesElement, places, xpath, context);
 				}
 			}
 			return places;
@@ -49,19 +64,19 @@ public class PlacePersistance
 		return null;
 	}
 
-	protected static void addPlaces(Element placesElement, List<Place> places, XPath xpath)
+	protected static void addPlaces(Element placesElement, List<Place> places, XPath xpath, URL context)
 	{
 		Element[] placeElements = XMLUtil.getElements(placesElement, "Place", xpath);
 		if (placeElements != null)
 		{
 			for (Element placeElement : placeElements)
 			{
-				addPlace(placeElement, places, xpath);
+				addPlace(placeElement, places, xpath, context);
 			}
 		}
 	}
 
-	protected static void addPlace(Element element, List<Place> places, XPath xpath)
+	protected static void addPlace(Element element, List<Place> places, XPath xpath, URL context)
 	{
 		Place place = new Place();
 		places.add(place);
@@ -73,11 +88,10 @@ public class PlacePersistance
 		place.setSaveCamera(XMLUtil.getBoolean(element, "SaveCamera", place.isSaveCamera(), xpath));
 		place.setEyePosition(XMLUtil.getPosition(element, "EyePosition", xpath));
 		place.setUpVector(XMLUtil.getVec4(element, "UpVector", xpath));
-		place.setExcludeFromPlaylist(XMLUtil.getBoolean(element, "ExcludeFromPlaylist",
-				place.isExcludeFromPlaylist(), xpath));
+		place.setExcludeFromPlaylist(XMLUtil.getBoolean(element, "ExcludeFromPlaylist", place.isExcludeFromPlaylist(), xpath));
 		try
 		{
-			place.setLayers(LayerTreePersistance.readFromXML(element));
+			place.setLayers(LayerTreePersistance.readFromXML(element, context));
 		}
 		catch (MalformedURLException e)
 		{
@@ -116,12 +130,18 @@ public class PlacePersistance
 		XMLUtil.appendDouble(current, "MaxZoom", place.getMaxZoom());
 		XMLUtil.appendBoolean(current, "SaveCamera", place.isSaveCamera());
 		if (place.getEyePosition() != null)
+		{
 			XMLUtil.appendPosition(current, "EyePosition", place.getEyePosition());
+		}
 		if (place.getUpVector() != null)
+		{
 			XMLUtil.appendVec4(current, "UpVector", place.getUpVector());
+		}
 		XMLUtil.appendBoolean(current, "ExcludeFromPlaylist", place.isExcludeFromPlaylist());
 
 		if (place.getLayers() != null)
+		{
 			LayerTreePersistance.saveToNode(place.getLayers(), document, current);
+		}
 	}
 }

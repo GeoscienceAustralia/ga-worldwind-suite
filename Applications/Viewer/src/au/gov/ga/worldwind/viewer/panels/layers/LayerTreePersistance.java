@@ -11,6 +11,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
@@ -48,6 +49,30 @@ public class LayerTreePersistance
 	 */
 	public static INode readFromXML(Object source) throws MalformedURLException
 	{
+		URL context = URLUtil.fromObject(source);
+		
+		return readFromXML(source, context);
+	}
+	
+	/**
+	 * Read a layer tree structure from the provided source.
+	 * <p/>
+	 * The source object may be one of:
+	 * <ul>
+	 * 	<li>DOM Element
+	 * 	<li>DOM Document
+	 * 	<li>URL
+	 *  <li>File
+	 *  <li>InputStream
+	 *  <li>String representation of a URL
+	 * </ul>
+	 * <p/>
+	 * An optional context URL can be provided to support relative layer URLs.
+	 * 
+	 * @return The root node of the layer tree
+	 */
+	public static INode readFromXML(Object source, URL context) throws MalformedURLException
+	{
 		XPath xpath = XMLUtil.makeXPath();
 		Element elem = XMLUtil.getElementFromSource(source);
 		if (elem == null)
@@ -59,7 +84,7 @@ public class LayerTreePersistance
 
 		if (elem.getNodeName().equals(LAYERS_ROOT_ELEMENT_NAME))
 		{
-			addChildNodesFromElement(elem, root, xpath);
+			addChildNodesFromElement(elem, root, xpath, context);
 		}
 		else
 		{
@@ -71,13 +96,13 @@ public class LayerTreePersistance
 
 			for (Element element : elements)
 			{
-				addChildNodesFromElement(element, root, xpath);
+				addChildNodesFromElement(element, root, xpath, context);
 			}
 		}
 		return root;
 	}
 
-	private static void addChildNodesFromElement(Element element, INode parent, XPath xpath) throws MalformedURLException
+	private static void addChildNodesFromElement(Element element, INode parent, XPath xpath, URL context) throws MalformedURLException
 	{
 		Element[] elements = XMLUtil.getElements(element, CHILD_NODE_SELECTOR_XPATH, xpath);
 		if (elements == null)
@@ -88,20 +113,20 @@ public class LayerTreePersistance
 		{
 			if (e.getNodeName().equals(FOLDER_ELEMENT_NAME))
 			{
-				addFolderNodeFromElement(e, parent, xpath);
+				addFolderNodeFromElement(e, parent, xpath, context);
 			}
 			else if (e.getNodeName().equals(LAYER_ELEMENT_NAME))
 			{
-				addLayerNodeFromElement(e, parent, xpath);
+				addLayerNodeFromElement(e, parent, xpath, context);
 			}
 		}
 	}
 
-	private static void addFolderNodeFromElement(Element element, INode parent, XPath xpath) throws MalformedURLException
+	private static void addFolderNodeFromElement(Element element, INode parent, XPath xpath, URL context) throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name", xpath);
-		URL info = XMLUtil.getURL(element, "@info", null, xpath);
-		URL icon = XMLUtil.getURL(element, "@icon", null, xpath);
+		URL info = XMLUtil.getURL(element, "@info", context, xpath);
+		URL icon = XMLUtil.getURL(element, "@icon", context, xpath);
 		boolean expanded = XMLUtil.getBoolean(element, "@expanded", false, xpath);
 		
 		String type = XMLUtil.getText(element, "@type", xpath);
@@ -109,7 +134,7 @@ public class LayerTreePersistance
 		FolderNode node;
 		if (WMS_NODE_TYPE.equals(type))
 		{
-			URL capabilities = XMLUtil.getURL(element, "@serverUrl", null, xpath);
+			URL capabilities = XMLUtil.getURL(element, "@serverUrl", context, xpath);
 			node = new WmsServerNode(name, icon, expanded, capabilities);
 		}
 		else if (WMS_ROOT_FOLDER_TYPE.equals(type))
@@ -122,16 +147,16 @@ public class LayerTreePersistance
 		}
 		
 		parent.addChild(node);
-		addChildNodesFromElement(element, node, xpath);
+		addChildNodesFromElement(element, node, xpath, context);
 	}
 
-	private static void addLayerNodeFromElement(Element element, INode parent, XPath xpath) throws MalformedURLException
+	private static void addLayerNodeFromElement(Element element, INode parent, XPath xpath, URL context) throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name", xpath);
-		URL icon = XMLUtil.getURL(element, "@icon", null, xpath);
+		URL icon = XMLUtil.getURL(element, "@icon", context, xpath);
 		boolean expanded = XMLUtil.getBoolean(element, "@expanded", false, xpath);
-		URL layer = XMLUtil.getURL(element, "@layer", null, xpath);
-		URL info = XMLUtil.getURL(element, "@info", null, xpath);
+		URL layer = XMLUtil.getURL(element, "@layer", context, xpath);
+		URL info = XMLUtil.getURL(element, "@info", context, xpath);
 		boolean enabled = XMLUtil.getBoolean(element, "@enabled", false, xpath);
 		double opacity = XMLUtil.getDouble(element, "@opacity", 1.0, xpath);
 		Long expiryTime = XMLUtil.getLong(element, "@expiry", xpath);
@@ -141,7 +166,7 @@ public class LayerTreePersistance
 		LayerNode node;
 		if (WMS_NODE_TYPE.equals(type))
 		{
-			URL legend = XMLUtil.getURL(element, "@legend", null, xpath);
+			URL legend = XMLUtil.getURL(element, "@legend", context, xpath);
 			String id = XMLUtil.getText(element, "@layerId", xpath);
 			node = new WmsLayerNode(name, info, icon, expanded, layer, enabled, opacity, expiryTime, legend, id);
 		}
@@ -151,7 +176,7 @@ public class LayerTreePersistance
 		}
 		
 		parent.addChild(node);
-		addChildNodesFromElement(element, node, xpath);
+		addChildNodesFromElement(element, node, xpath, context);
 	}
 
 	/**

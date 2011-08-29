@@ -57,6 +57,7 @@ import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.viewer.panels.layers.ILayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.INode;
@@ -131,7 +132,7 @@ public class PlacesPanel extends AbstractThemePanel
 
 	protected void loadPlaces(File file, boolean append)
 	{
-		List<Place> places = PlacePersistance.readFromXML(file);
+		List<Place> places = PlacePersistance.readFromXML(file, URLUtil.fromObject(file.getParentFile()));
 
 		//if the read failed, attempt to read from the old format
 		if (places == null && wwd != null)
