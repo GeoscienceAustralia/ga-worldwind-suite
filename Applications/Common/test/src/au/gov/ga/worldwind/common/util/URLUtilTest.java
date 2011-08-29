@@ -109,4 +109,42 @@ public class URLUtilTest
 	{
 		assertTrue(URLUtil.isForResourceWithExtension(new URL("http://somewhere.com/file.zip?param1=something&"), "zip"));
 	}
+	
+	// fromObject()
+	
+	@Test
+	public void testFromObjectWithNull() throws Exception
+	{
+		assertEquals(null, URLUtil.fromObject(null));
+	}
+	
+	@Test
+	public void testFromObjectWithValidURLString() throws Exception
+	{
+		assertEquals(new URL("http://somewhere.com/something.html"), URLUtil.fromObject("http://somewhere.com/something.html"));
+	}
+	
+	@Test
+	public void testFromObjectWithInvalidURLString() throws Exception
+	{
+		assertEquals(null, URLUtil.fromObject("httpp://somewhere.com/something.html"));
+	}
+	
+	@Test
+	public void testFromObjectWithURL() throws Exception
+	{
+		assertEquals(new URL("http://somewhere.com/something.html"), URLUtil.fromObject(new URL("http://somewhere.com/something.html")));
+	}
+	
+	@Test
+	public void testFromObjectWithFile() throws Exception
+	{
+		assertEquals(new URL("file:/C:/mypath/myfile.txt"), URLUtil.fromObject(new File("C:/mypath/myfile.txt")));
+	}
+	
+	@Test
+	public void testFromObjectWithUnsupportedObject() throws Exception
+	{
+		assertEquals(null, URLUtil.fromObject(new Integer(2)));
+	}
 }

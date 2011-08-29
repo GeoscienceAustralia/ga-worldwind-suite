@@ -94,4 +94,42 @@ public class URLUtil
 			return null;
 		}
 	}
+	
+	/**
+	 * Attempts to create a URL from the provided object.
+	 * <p/>
+	 * Can convert:
+	 * <ul>
+	 * 	<li>URL
+	 *  <li>File
+	 *  <li>String
+	 * </ul>
+	 */
+	public static URL fromObject(Object source)
+	{
+		if (source == null)
+		{
+			return null;
+		}
+		if (source instanceof URL)
+		{
+			return (URL)source;
+		}
+		if (source instanceof File)
+		{
+			try
+			{
+				return ((File)source).toURI().toURL();
+			}
+			catch (MalformedURLException e)
+			{
+				return null;
+			}
+		}
+		if (source instanceof String)
+		{
+			return fromString((String)source);
+		}
+		return null;
+	}
 }
