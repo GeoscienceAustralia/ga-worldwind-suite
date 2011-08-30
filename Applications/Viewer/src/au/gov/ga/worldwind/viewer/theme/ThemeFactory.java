@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.viewer.theme;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,17 @@ public class ThemeFactory
 		theme.setLayerPersistanceFilename(XMLUtil.getText(element, "LayersFilename"));
 		theme.setCacheLocations(parseCacheLocations(element, "CacheLocation"));
 
+		theme.setPersistPlaces(XMLUtil.getBoolean(element, "PersistPlaces", true));
 		theme.setPlacesPersistanceFilename(XMLUtil.getText(element, "PlacesFilename"));
+		
+		try
+		{
+			theme.setPlacesInitialisationPath(XMLUtil.getURL(element, "InitialPlaces", context));
+		}
+		catch (MalformedURLException e)
+		{
+			// Do nothing - default path will be used
+		}
 		
 		theme.setHUDs(parseHUDs(element, "HUD"));
 		theme.setPanels(parsePanels(element, "Panel"));

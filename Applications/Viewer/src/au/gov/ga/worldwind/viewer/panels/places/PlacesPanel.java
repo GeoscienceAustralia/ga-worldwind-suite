@@ -77,7 +77,8 @@ public class PlacesPanel extends AbstractThemePanel
 {
 	private static final String DEFAULT_PLACES_PERSISTANCE_FILENAME = "places.xml";
 	private String placesPersistanceFilename = DEFAULT_PLACES_PERSISTANCE_FILENAME;
-
+	private boolean persistPlaces = true;
+	
 	private List<Place> places = new ArrayList<Place>();
 
 	private JFrame frame;
@@ -1151,7 +1152,6 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 		}
 
-		//load legacy places
 		if (theme.isPlacesPersistanceFilenameSet())
 		{	
 			placesPersistanceFilename = theme.getPlacesPersistanceFilename();
@@ -1161,12 +1161,30 @@ public class PlacesPanel extends AbstractThemePanel
 		{
 			loadPlaces(Settings.getSettingsFile(), true);
 		}
+		
+		persistPlaces = theme.isPersistPlaces();
+		
+		// If no places were loaded, initialise from set path, if provided
+		if (places.isEmpty() && theme.getPlacesInitialisationPath() != null)
+		{
+			try
+			{
+				loadPlaces(new File(theme.getPlacesInitialisationPath().toURI()), false);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public void dispose()
 	{
-		savePlaces(getPlacesFile());
+		if (persistPlaces)
+		{
+			savePlaces(getPlacesFile());
+		}
 	}
 
 	public void setLayersFromLayersPanel(Place place)

@@ -72,8 +72,9 @@ public class ThemeFactoryTest
 		assertEquals("layers.sample.xml", result.getLayerPersistanceFilename());
 		assertEquals(true, result.isPersistLayers());
 		assertEquals("places.sample.xml", result.getPlacesPersistanceFilename());
-		
+		assertEquals(false, result.isPersistPlaces());
 		assertEquals(true, result.isPlacesPersistanceFilenameSet());
+		assertEquals(new URL(sampleFileUrl, "./places.xml"), result.getPlacesInitialisationPath());
 		assertEquals(true, result.hasMenuBar());
 		assertEquals(false, result.hasToolBar());
 		assertEquals(true, result.hasStatusBar());

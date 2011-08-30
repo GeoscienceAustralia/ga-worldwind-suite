@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.viewer.theme;
 
 import gov.nasa.worldwind.WorldWindow;
 
+import java.net.URL;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -26,7 +27,9 @@ public class BasicTheme implements Theme
 	private String layerPersistanceFilename;
 	private List<String> cacheLocations;
 	
+	private boolean persistPlaces;
 	private String placesPersistanceFilename;
+	private URL placesInitialisationPath;
 	
 	private List<IDataset> datasets;
 	private List<ThemeLayer> layers;
@@ -201,6 +204,17 @@ public class BasicTheme implements Theme
 	}
 	
 	@Override
+	public URL getPlacesInitialisationPath()
+	{
+		return placesInitialisationPath;
+	}
+	
+	public void setPlacesInitialisationPath(URL placesInitialisationPath)
+	{
+		this.placesInitialisationPath = placesInitialisationPath;
+	}
+	
+	@Override
 	public List<String> getCacheLocations()
 	{
 		return cacheLocations;
@@ -359,5 +373,16 @@ public class BasicTheme implements Theme
 			if (panel instanceof ThemeLayersPanel)
 				return (ThemeLayersPanel) panel;
 		return null;
+	}
+
+	@Override
+	public boolean isPersistPlaces()
+	{
+		return persistPlaces;
+	}
+	
+	public void setPersistPlaces(boolean persistPlaces)
+	{
+		this.persistPlaces = persistPlaces;
 	}
 }

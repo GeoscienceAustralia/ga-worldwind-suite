@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Theme>
 	<ThemeName>Sample theme</ThemeName>
+	<PersistLayers>true</PersistLayers>
 	<LayersFilename>layers.sample.xml</LayersFilename>
 	<PlacesFilename>places.sample.xml</PlacesFilename>
+	<PersistPlaces>false</PersistPlaces>
+	<InitialPlaces>./places.xml</InitialPlaces>
 	<MenuBar>true</MenuBar>
 	<ToolBar>false</ToolBar>
 	<StatusBar>true</StatusBar>

@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.viewer.theme;
 import gov.nasa.worldwind.Disposable;
 import gov.nasa.worldwind.WorldWindow;
 
+import java.net.URL;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -43,6 +44,16 @@ public interface Theme extends Disposable
 	public Double getVerticalExaggeration();
 	public Double getFieldOfView();
 	
+	boolean isPersistPlaces();
 	public boolean isPlacesPersistanceFilenameSet();
+	
+	/** 
+	 * @return The name to use when saving/initialising places files 
+	 */
 	public String getPlacesPersistanceFilename();
+	
+	/** 
+	 * @return The path a places file to use when initialising the places list on theme load
+	 */
+	public URL getPlacesInitialisationPath();
 }
