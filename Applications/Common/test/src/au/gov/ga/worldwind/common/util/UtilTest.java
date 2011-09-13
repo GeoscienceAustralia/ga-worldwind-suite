@@ -74,6 +74,20 @@ public class UtilTest
 	}
 	
 	@Test
+	public void testComputeVec4FromStringWith4VecWhitespaceSeparators() throws Exception
+	{
+		String vectorString = "1 2 -3.3 0.04";
+		
+		Vec4 result = Util.computeVec4FromString(vectorString);
+		
+		assertNotNull(result);
+		assertEquals(1, result.x, ALLOWABLE_DOUBLE_ERROR);
+		assertEquals(2, result.y, ALLOWABLE_DOUBLE_ERROR);
+		assertEquals(-3.3, result.z, ALLOWABLE_DOUBLE_ERROR);
+		assertEquals(0.04, result.w, ALLOWABLE_DOUBLE_ERROR);
+	}
+	
+	@Test
 	public void testComputeVec4FromStringWith2Vec() throws Exception
 	{
 		String vectorString = "(1, 2)";
@@ -84,7 +98,7 @@ public class UtilTest
 	}
 	
 	@Test
-	public void testComputeVec4FromStringWith4Vec() throws Exception
+	public void testComputeVec4FromStringWith5Vec() throws Exception
 	{
 		String vectorString = "(1, 2, 3, 4, 5)";
 		

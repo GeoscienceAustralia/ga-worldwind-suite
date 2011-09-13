@@ -741,8 +741,8 @@ public class Util
 			return null;
 		}
 		
-		String separators = "(\\s+|,|,\\s+)"; // Separate on commas (with or without whitespace)
-		String[] split = text.replaceAll("\\s", "").replaceAll("\\(|\\)", "").split(separators); // Clean up whitespace and braces before splitting
+		String separators = "[\\s,]+"; // Separate on commas or whitespace
+		String[] split = text.replaceAll("\\(|\\)", "").trim().split(separators); // Clean up braces before splitting
 		if (split.length == 3 || split.length == 4)
 		{
 			try
