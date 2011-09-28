@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.wmsbrowser.layer;
 
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.io.File;
 import java.io.OutputStream;

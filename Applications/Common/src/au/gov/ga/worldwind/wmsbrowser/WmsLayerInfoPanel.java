@@ -21,7 +21,7 @@ import gov.nasa.worldwind.ogc.wms.WMSLogoURL;
 import gov.nasa.worldwind.terrain.ZeroElevationModel;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 import gov.nasa.worldwind.wms.WMSTiledImageLayer;
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.wmsbrowser.wmsserver;
 
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;
 import java.util.List;

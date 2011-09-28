@@ -1,8 +1,10 @@
 package au.gov.ga.worldwind.wmsbrowser;
 
-import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.*;
-import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.*;
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getDefaultWmsLoadingErrorMsgKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getDefaultWmsLoadingErrorPrefixKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getServerNotReachableErrorMsgKey;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;

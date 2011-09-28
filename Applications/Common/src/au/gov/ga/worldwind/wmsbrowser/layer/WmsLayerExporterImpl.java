@@ -4,7 +4,7 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.wms.WMSTiledImageLayer;
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.io.File;
 import java.io.FileOutputStream;

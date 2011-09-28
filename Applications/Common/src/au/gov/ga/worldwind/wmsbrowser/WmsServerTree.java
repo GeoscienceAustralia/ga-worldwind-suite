@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.wmsbrowser;
 
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.awt.Component;
 import java.awt.Point;

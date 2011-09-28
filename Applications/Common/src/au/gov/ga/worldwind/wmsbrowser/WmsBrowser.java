@@ -3,7 +3,7 @@ package au.gov.ga.worldwind.wmsbrowser;
 import static au.gov.ga.worldwind.common.ui.SwingUtil.invokeTaskOnEDT;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getWindowTitleKey;
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
