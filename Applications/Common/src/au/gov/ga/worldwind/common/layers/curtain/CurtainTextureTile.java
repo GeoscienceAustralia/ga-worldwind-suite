@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.common.layers.curtain;
 
 import gov.nasa.worldwind.cache.MemoryCache;
-import gov.nasa.worldwind.cache.TextureCache;
+import gov.nasa.worldwind.cache.GpuResourceCache;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.TileKey;
@@ -95,7 +95,7 @@ public class CurtainTextureTile extends CurtainTile
 			this.hasMipmapData = true;
 	}
 
-	public Texture getTexture(TextureCache tc)
+	public Texture getTexture(GpuResourceCache tc)
 	{
 		if (tc == null)
 		{
@@ -104,10 +104,10 @@ public class CurtainTextureTile extends CurtainTile
 			throw new IllegalStateException(message);
 		}
 
-		return tc.get(this.getTileKey());
+		return tc.getTexture(this.getTileKey());
 	}
 
-	public boolean isTextureInMemory(TextureCache tc)
+	public boolean isTextureInMemory(GpuResourceCache tc)
 	{
 		if (tc == null)
 		{
@@ -129,7 +129,7 @@ public class CurtainTextureTile extends CurtainTile
 		return this.updateTime > 0 && this.updateTime < expiryTime;
 	}
 
-	public void setTexture(TextureCache tc, Texture texture)
+	public void setTexture(GpuResourceCache tc, Texture texture)
 	{
 		if (tc == null)
 		{
