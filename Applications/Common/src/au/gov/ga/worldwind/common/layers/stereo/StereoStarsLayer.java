@@ -2,16 +2,20 @@ package au.gov.ga.worldwind.common.layers.stereo;
 
 import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.util.OGLStackHandler;
 
 import javax.media.opengl.GL;
 
 import nasa.worldwind.layers.ProjectionStarsLayer;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 
+/**
+ * An extension of the {@link ProjectionStarsLayer} that supports stereo rendering of stars
+ */
 public class StereoStarsLayer extends ProjectionStarsLayer
 {
 	@Override
-	protected void applyDrawProjection(DrawContext dc)
+	protected void applyDrawProjection(DrawContext dc, OGLStackHandler ogsh)
 	{
 		boolean loaded = false;
 		if (dc.getView() instanceof StereoView)
@@ -38,7 +42,7 @@ public class StereoStarsLayer extends ProjectionStarsLayer
 
 		if (!loaded)
 		{
-			super.applyDrawProjection(dc);
+			super.applyDrawProjection(dc, ogsh);
 		}
 	}
 
