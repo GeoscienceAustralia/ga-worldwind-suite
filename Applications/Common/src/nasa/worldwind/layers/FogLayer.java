@@ -113,7 +113,7 @@ public class FogLayer extends RenderableLayer
 		// Start based on view altitude
 		float start = alt * this.nearFactor;
 		// End based on distance to horizon
-		float end = (float) (dc.getView().computeHorizonDistance() * this.farFactor);
+		float end = (float) (dc.getView().getHorizonDistance() * this.farFactor);
 		// Set GL fog
 		GL gl = dc.getGL();
 		gl.glFogfv(GL.GL_FOG_COLOR, fogColor, 0); // Set fog color

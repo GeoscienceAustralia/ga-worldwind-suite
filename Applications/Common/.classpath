@@ -6,9 +6,9 @@
 	<classpathentry kind="src" path="test/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="test/lib/junit-4.8.1.jar"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/worldwind-0.6.724.14486"/>
 	<classpathentry kind="lib" path="test/lib/hamcrest-core-1.1.jar"/>
 	<classpathentry kind="lib" path="test/lib/hamcrest-library-1.1.jar"/>
 	<classpathentry kind="lib" path="test/lib/jmock-2.5.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/worldwind-71.66"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

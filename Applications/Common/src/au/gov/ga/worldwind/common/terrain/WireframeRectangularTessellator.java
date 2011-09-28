@@ -13,7 +13,7 @@ import gov.nasa.worldwind.terrain.SectorGeometryList;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
-import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +67,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 			throw new IllegalArgumentException(msg);
 		}
 
-		RenderInfo ri = getRenderInfo(tile);
+		RenderInfo ri = tile.getRi();
 
 		if (ri == null)
 		{
@@ -76,7 +76,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 			throw new IllegalStateException(msg);
 		}
 
-		dc.getView().pushReferenceCenter(dc, getReferenceCenter(ri));
+		dc.getView().pushReferenceCenter(dc, ri.getReferenceCenter());
 
 		javax.media.opengl.GL gl = dc.getGL();
 		gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | GL.GL_POLYGON_BIT | GL.GL_TEXTURE_BIT | GL.GL_ENABLE_BIT
@@ -110,11 +110,13 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 
 				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
 
-				DoubleBuffer vertices = getVertices(ri);
-				IntBuffer indices = getIndices(ri);
-				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vertices.rewind());
-				gl.glDrawElements(javax.media.opengl.GL.GL_TRIANGLE_STRIP, indices.limit(),
-						javax.media.opengl.GL.GL_UNSIGNED_INT, indices.rewind());
+				FloatBuffer vertices = ri.getVertices();
+				IntBuffer indices = ri.getIndices();
+				gl.glVertexPointer(3, GL.GL_FLOAT, 0, vertices.rewind());
+				gl.glDrawElements(javax.media.opengl.GL.GL_TRIANGLE_STRIP, 
+								  indices.limit(),
+								  javax.media.opengl.GL.GL_UNSIGNED_INT, 
+								  indices.rewind());
 			}
 			finally
 			{
@@ -172,7 +174,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 	}
 
 	@Override
-	public RenderInfo buildVerts(DrawContext dc, RectTile tile, boolean makeSkirts)
+	public boolean buildVerts(DrawContext dc, RectTile tile, boolean makeSkirts)
 	{
 		//mark the tile's vertices as rebuilt
 		((RowColRectTile) tile).rebuiltVertices = true;
@@ -186,7 +188,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 		//lat/lon locations between the skirts and the tile edges were causing large differences
 		//in the returned elevation. Perhaps an ElevationModel bug?
 
-		int density = getDensity(tile);
+		int density = tile.getDensity();
 		int numVertices = (density + 3) * (density + 3);
 
 		Sector sector = tile.getSector();
@@ -247,51 +249,51 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 		if (!anyRebuilt)
 			return;
 
-		DoubleBuffer vertices = getVertices(getRenderInfo(tile));
-		Vec4 refCenter = getReferenceCenter(getRenderInfo(tile));
-		int density = getDensity(tile);
+		FloatBuffer vertices = tile.getRi().getVertices();
+		Vec4 refCenter = tile.getRi().getReferenceCenter();
+		int density = tile.getDensity();
 		int size = density + 3;
 
 		if (sLeft != null)
 		{
-			DoubleBuffer leftVertices = getVertices(getRenderInfo(sLeft));
-			Vec4 leftRefCenter = getReferenceCenter(getRenderInfo(sLeft));
+			FloatBuffer leftVertices = sLeft.getRi().getVertices();
+			Vec4 leftRefCenter = sLeft.getRi().getReferenceCenter();
 			int srcStart = topHalf ? 1 : density / 2 + 1;
 			subdivideVerticesFromNeighboringSuperTile(leftVertices, vertices, leftRefCenter, refCenter, size, srcStart,
 					size - 1, 0, true);
 		}
 		else if (left != null)
 		{
-			DoubleBuffer leftVertices = getVertices(getRenderInfo(left));
-			Vec4 leftRefCenter = getReferenceCenter(getRenderInfo(left));
+			FloatBuffer leftVertices = left.getRi().getVertices();
+			Vec4 leftRefCenter = left.getRi().getReferenceCenter();
 			copyVerticesFromNeighboringTile(leftVertices, vertices, leftRefCenter, refCenter, size, size - 1, 0, true);
 		}
 		if (sRight != null)
 		{
-			DoubleBuffer rightVertices = getVertices(getRenderInfo(sRight));
-			Vec4 rightRefCenter = getReferenceCenter(getRenderInfo(sRight));
+			FloatBuffer rightVertices = sRight.getRi().getVertices();
+			Vec4 rightRefCenter = sRight.getRi().getReferenceCenter();
 			int srcStart = topHalf ? 1 : density / 2 + 1;
 			subdivideVerticesFromNeighboringSuperTile(rightVertices, vertices, rightRefCenter, refCenter, size,
 					srcStart, 0, size - 1, true);
 		}
 		if (sTop != null)
 		{
-			DoubleBuffer topVertices = getVertices(getRenderInfo(sTop));
-			Vec4 topRefCenter = getReferenceCenter(getRenderInfo(sTop));
+			FloatBuffer topVertices = sTop.getRi().getVertices();
+			Vec4 topRefCenter = sTop.getRi().getReferenceCenter();
 			int srcStart = leftHalf ? 1 : density / 2 + 1;
 			subdivideVerticesFromNeighboringSuperTile(topVertices, vertices, topRefCenter, refCenter, size, srcStart,
 					size - 1, 0, false);
 		}
 		else if (top != null)
 		{
-			DoubleBuffer topVertices = getVertices(getRenderInfo(top));
-			Vec4 topRefCenter = getReferenceCenter(getRenderInfo(top));
+			FloatBuffer topVertices = top.getRi().getVertices();
+			Vec4 topRefCenter = top.getRi().getReferenceCenter();
 			copyVerticesFromNeighboringTile(topVertices, vertices, topRefCenter, refCenter, size, size - 1, 0, false);
 		}
 		if (sBottom != null)
 		{
-			DoubleBuffer bottomVertices = getVertices(getRenderInfo(sBottom));
-			Vec4 bottomRefCenter = getReferenceCenter(getRenderInfo(sBottom));
+			FloatBuffer bottomVertices = sBottom.getRi().getVertices();
+			Vec4 bottomRefCenter = sBottom.getRi().getReferenceCenter();
 			int srcStart = leftHalf ? 1 : density / 2 + 1;
 			subdivideVerticesFromNeighboringSuperTile(bottomVertices, vertices, bottomRefCenter, refCenter, size,
 					srcStart, 0, size - 1, false);
@@ -305,9 +307,9 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 			try
 			{
 				ogsh.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-				int bufferIdVertices = getBufferIdVertices(getRenderInfo(tile));
-
-				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, bufferIdVertices);
+				
+				int[] vboIds = (int[])dc.getGpuResourceCache().get(tile.getRi().getVboCacheKey());
+				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[0]);
 				gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.limit() * 8, vertices.rewind(), GL.GL_DYNAMIC_DRAW);
 			}
 			finally
@@ -317,7 +319,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 		}
 	}
 
-	private void subdivideVerticesFromNeighboringSuperTile(DoubleBuffer src, DoubleBuffer dst, Vec4 srcRefCenter,
+	private void subdivideVerticesFromNeighboringSuperTile(FloatBuffer src, FloatBuffer dst, Vec4 srcRefCenter,
 			Vec4 dstRefCenter, int size, int srcStart, int srcRC, int dstRC, boolean column)
 	{
 		int offsetFactor = (column ? 1 : size) * 3;
@@ -336,20 +338,26 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 			last = current;
 
 			int dstIndex = dstOffset + (di - 1) * stride;
-			dst.put(dstIndex, previous.x).put(dstIndex + 1, previous.y).put(dstIndex + 2, previous.z);
+			dst.put(dstIndex, (float)previous.x)
+			   .put(dstIndex + 1, (float)previous.y)
+			   .put(dstIndex + 2, (float)previous.z);
 
 			dstIndex += stride;
-			dst.put(dstIndex, current.x).put(dstIndex + 1, current.y).put(dstIndex + 2, current.z);
+			dst.put(dstIndex, (float)current.x)
+			   .put(dstIndex + 1, (float)current.y)
+			   .put(dstIndex + 2, (float)current.z);
 
 			if (di >= size - 2)
 			{
 				dstIndex += stride;
-				dst.put(dstIndex, current.x).put(dstIndex + 1, current.y).put(dstIndex + 2, current.z);
+				dst.put(dstIndex, (float)current.x)
+				   .put(dstIndex + 1, (float)current.y)
+				   .put(dstIndex + 2, (float)current.z);
 			}
 		}
 	}
 
-	private void copyVerticesFromNeighboringTile(DoubleBuffer src, DoubleBuffer dst, Vec4 srcRefCenter,
+	private void copyVerticesFromNeighboringTile(FloatBuffer src, FloatBuffer dst, Vec4 srcRefCenter,
 			Vec4 dstRefCenter, int size, int srcRC, int dstRC, boolean column)
 	{
 		int offsetFactor = (column ? 1 : size) * 3;
@@ -362,9 +370,9 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 			//don't use skirts to copy from
 			int srcIndex = srcOffset + i * stride;
 			int dstIndex = dstOffset + i * stride;
-			dst.put(dstIndex, src.get(srcIndex) + srcRefCenter.x - dstRefCenter.x);
-			dst.put(dstIndex + 1, src.get(srcIndex + 1) + srcRefCenter.y - dstRefCenter.y);
-			dst.put(dstIndex + 2, src.get(srcIndex + 2) + srcRefCenter.z - dstRefCenter.z);
+			dst.put(dstIndex, src.get(srcIndex) + (float)(srcRefCenter.x - dstRefCenter.x));
+			dst.put(dstIndex + 1, src.get(srcIndex + 1) + (float)(srcRefCenter.y - dstRefCenter.y));
+			dst.put(dstIndex + 2, src.get(srcIndex + 2) + (float)(srcRefCenter.z - dstRefCenter.z));
 		}
 	}
 
@@ -380,10 +388,10 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 		int column = ((RowColRectTile) tile).getColumn() * 2;
 
 		RectTile[] subTiles = new RectTile[4];
-		subTiles[0] = this.createTile(dc, sectors[0], getLevel(tile) + 1, row, column);
-		subTiles[1] = this.createTile(dc, sectors[1], getLevel(tile) + 1, row, column + 1);
-		subTiles[2] = this.createTile(dc, sectors[2], getLevel(tile) + 1, row + 1, column);
-		subTiles[3] = this.createTile(dc, sectors[3], getLevel(tile) + 1, row + 1, column + 1);
+		subTiles[0] = this.createTile(dc, sectors[0], tile.getLevel() + 1, row, column);
+		subTiles[1] = this.createTile(dc, sectors[1], tile.getLevel() + 1, row, column + 1);
+		subTiles[2] = this.createTile(dc, sectors[2], tile.getLevel() + 1, row + 1, column);
+		subTiles[3] = this.createTile(dc, sectors[3], tile.getLevel() + 1, row + 1, column + 1);
 
 		return subTiles;
 	}
@@ -437,6 +445,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 			this.column = column;
 		}
 
+		@Override
 		public int getLevel()
 		{
 			return level;
