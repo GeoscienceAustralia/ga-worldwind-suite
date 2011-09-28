@@ -37,7 +37,9 @@ public abstract class AbstractFreeViewInputHandler implements FreeViewInputHandl
 	public void setWorldWindow(WorldWindow newWorldWindow)
 	{
 		if (newWorldWindow == this.wwd)
+		{
 			return;
+		}
 
 		if (this.wwd != null)
 		{
@@ -141,7 +143,9 @@ public abstract class AbstractFreeViewInputHandler implements FreeViewInputHandl
 		// Return the ratio of world distance to screen distance.
 		double slope = vec1.distanceTo3(vec2) / (pixelDistance * pixelSize);
 		if (slope < 1.0)
+		{
 			slope = 1.0;
+		}
 
 		return slope - 1.0;
 	}
@@ -185,6 +189,11 @@ public abstract class AbstractFreeViewInputHandler implements FreeViewInputHandl
 		}
 	}
 
+	@Override
+	public void viewApplied()
+	{
+	}
+	
 	@Override
 	public void focusGained(FocusEvent e)
 	{
