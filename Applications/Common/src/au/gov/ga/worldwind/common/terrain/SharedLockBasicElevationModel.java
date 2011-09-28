@@ -90,7 +90,7 @@ public class SharedLockBasicElevationModel extends URLTransformerBasicElevationM
 
 			// Setup parameters to instruct BufferWrapper on how to interpret the ByteBuffer.
 			AVList bufferParams = new AVListImpl();
-			bufferParams.setValue(AVKey.DATA_TYPE, this.getElevationDataPixelType());
+			bufferParams.setValue(AVKey.DATA_TYPE, this.getElevationDataType());
 			bufferParams.setValue(AVKey.BYTE_ORDER, this.getElevationDataByteOrder());
 			return BufferWrapper.wrap(byteBuffer, bufferParams);
 		}

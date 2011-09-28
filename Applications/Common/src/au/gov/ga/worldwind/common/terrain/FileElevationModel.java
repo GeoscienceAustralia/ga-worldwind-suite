@@ -109,7 +109,7 @@ public class FileElevationModel extends BoundedBasicElevationModel
 
 		try
 		{
-			return IOUtil.readByteBuffer(url, this.getElevationDataPixelType(), this.getElevationDataByteOrder());
+			return IOUtil.readByteBuffer(url, this.getElevationDataType(), this.getElevationDataByteOrder());
 		}
 		catch (java.io.IOException e)
 		{
