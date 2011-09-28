@@ -277,7 +277,9 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 
 		tile.setTextureData(textureData);
 		if (tile.getLevelNumber() != 0 || !isRetainLevelZeroTiles())
-			addTileToCache(tile);
+		{
+			addTileToCache((IDelegatorTile)tile);
+		}
 
 		return true;
 	}

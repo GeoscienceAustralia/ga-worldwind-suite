@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.delegate;
 
-import gov.nasa.worldwind.cache.TextureCache;
+import gov.nasa.worldwind.cache.GpuResourceCache;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.TextureTile;
@@ -147,7 +147,7 @@ public class DelegatorTextureTile extends TextureTile implements IDelegatorTile
 	}
 
 	@Override
-	public Texture getTexture(TextureCache tc)
+	public Texture getTexture(GpuResourceCache tc)
 	{
 		if (tc == null)
 		{
@@ -156,11 +156,11 @@ public class DelegatorTextureTile extends TextureTile implements IDelegatorTile
 			throw new IllegalStateException(message);
 		}
 
-		return tc.get(getTransformedTileKey());
+		return tc.getTexture(getTransformedTileKey());
 	}
 
 	@Override
-	public void setTexture(TextureCache tc, Texture texture)
+	public void setTexture(GpuResourceCache tc, Texture texture)
 	{
 		if (tc == null)
 		{
