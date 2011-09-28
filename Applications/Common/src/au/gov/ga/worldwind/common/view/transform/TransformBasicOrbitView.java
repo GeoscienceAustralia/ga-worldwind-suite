@@ -26,6 +26,7 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 															this.center,
 															this.heading,
 															this.pitch,
+															this.roll,
 															this.zoom);
 	}
 
