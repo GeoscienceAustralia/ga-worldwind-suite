@@ -1,12 +1,12 @@
 package au.gov.ga.worldwind.common.layers.stereo;
 
 import gov.nasa.worldwind.geom.Matrix;
+import gov.nasa.worldwind.layers.ProjectionStarsLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
 import javax.media.opengl.GL;
 
-import nasa.worldwind.layers.ProjectionStarsLayer;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 
 /**
