@@ -1,20 +1,16 @@
 package au.gov.ga.worldwind.common.layers.tiled.image.elevation;
 
-import gov.nasa.worldwind.examples.ApplicationTemplate;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.TerrainProfileLayer;
 import gov.nasa.worldwind.render.WWIcon;
+import gov.nasa.worldwindx.examples.ApplicationTemplate;
 
 import java.io.InputStream;
 
 import au.gov.ga.worldwind.common.layers.LayerFactory;
-import au.gov.ga.worldwind.common.layers.delegate.transformer.ColorLimitTransformerDelegate;
-import au.gov.ga.worldwind.common.layers.delegate.transformer.ResizeTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageDelegateFactory;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader.ColorMapElevationImageReaderDelegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.elevationreader.ShadedElevationImageReaderDelegate;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 
 public class Sandpit extends ApplicationTemplate

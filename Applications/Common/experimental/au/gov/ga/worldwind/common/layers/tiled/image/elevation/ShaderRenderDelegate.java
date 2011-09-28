@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.common.layers.tiled.image.elevation;
 
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.examples.sunlight.SunCalculator;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Vec4;
@@ -212,7 +211,9 @@ public class ShaderRenderDelegate implements IRenderDelegate
 	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
+		{
 			return new ShaderRenderDelegate();
+		}
 		return null;
 	}
 
