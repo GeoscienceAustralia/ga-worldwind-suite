@@ -2,8 +2,8 @@ package au.gov.ga.worldwind.common.layers.curtain;
 
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.examples.ApplicationTemplate;
 import gov.nasa.worldwind.layers.Earth.BMNGWMSLayer;
+import gov.nasa.worldwindx.examples.ApplicationTemplate;
 
 import java.io.InputStream;
 

@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.common.layers.point.marker;
 
-import gov.nasa.worldwind.examples.ApplicationTemplate;
 import gov.nasa.worldwind.render.WWIcon;
+import gov.nasa.worldwindx.examples.ApplicationTemplate;
 
 import java.io.InputStream;
 
