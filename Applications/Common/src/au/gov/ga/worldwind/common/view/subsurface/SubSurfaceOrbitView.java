@@ -43,9 +43,7 @@ public class SubSurfaceOrbitView extends ViewStateBasicOrbitView
 			throw new IllegalStateException(message);
 		}
 
-		Matrix modelview =
-				OrbitViewInputSupport.computeTransformMatrix(this.globe, this.center, this.heading, this.pitch,
-						this.zoom);
+		Matrix modelview = OrbitViewInputSupport.computeTransformMatrix(this.globe, this.center, this.heading, this.pitch, this.roll, this.zoom);
 		if (modelview != null)
 		{
 			Matrix modelviewInv = modelview.getInverse();
@@ -79,7 +77,9 @@ public class SubSurfaceOrbitView extends ViewStateBasicOrbitView
 
 				//calculate the center point as 1 unit vector forward from eye point if it's not on the surface
 				if (newCenterPoint == null)
+				{
 					newCenterPoint = eyePoint.add3(forward);
+				}
 
 				AccessibleOrbitViewInputSupport.AccessibleOrbitViewState modelCoords =
 						AccessibleOrbitViewInputSupport.computeOrbitViewState(this.globe, modelview, newCenterPoint);
