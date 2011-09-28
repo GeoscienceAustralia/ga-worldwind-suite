@@ -1,11 +1,11 @@
 package au.gov.ga.worldwind.common.layers.point.marker;
 
+import gov.nasa.worldwind.layers.FogLayer;
 import gov.nasa.worldwind.render.WWIcon;
 import gov.nasa.worldwindx.examples.ApplicationTemplate;
 
 import java.io.InputStream;
 
-import nasa.worldwind.layers.FogLayer;
 
 import org.w3c.dom.Element;
 
