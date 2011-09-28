@@ -723,7 +723,7 @@ public class Util
 		Vec4 left = normal.cross3(forward);
 		forward = left.cross3(normal);
 
-		double horizonDistance = view.computeHorizonDistance();
+		double horizonDistance = view.getHorizonDistance();
 		centerPoint = eyePoint.add3(forward.multiply3(horizonDistance));
 		Position pos = globe.computePositionFromPoint(centerPoint);
 		double elevation = globe.getElevation(pos.latitude, pos.longitude);
