@@ -1,20 +1,25 @@
 package au.gov.ga.worldwind.common.layers.stereo;
 
-import javax.media.opengl.GL;
-
-import au.gov.ga.worldwind.common.view.stereo.StereoView;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.SkyGradientLayer;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.util.OGLStackHandler;
+
+import javax.media.opengl.GL;
+
+import au.gov.ga.worldwind.common.view.stereo.StereoView;
 
 /**
  * An extension of the {@link SkyGradientLayer} that is modified to use {@link View#computeHorizonDistance()} rather than
  * {@link View#getFarClipDistance()} to make it suitable for use in views that dynamically modify the far clip distance 
  * (e.g. for occasions when {@link View#getFarClipDistance()} != {@link View#computeHorizonDistance()}).
  * 
+ * @deprecated The standard {@link SkyGradientLayer} makes use of the horizon distance rather than the clip plane 
+ * (as of build worldwind-71-66). This change makes this class redundant, and it will be removed in future releases.
  */
+@Deprecated
 public class StereoSkyGradientLayer extends SkyGradientLayer
 {
 	private static final double PI_ON_2 = Math.PI / 2;
@@ -25,7 +30,7 @@ public class StereoSkyGradientLayer extends SkyGradientLayer
 	 ******************************************************************************************************* */
 	
 	@Override
-	protected void applyDrawProjection(DrawContext dc)
+	protected void applyDrawProjection(DrawContext dc, OGLStackHandler ogsh)
 	{
 		boolean loaded = false;
 		if (dc.getView() instanceof StereoView)
@@ -34,7 +39,7 @@ public class StereoSkyGradientLayer extends SkyGradientLayer
 
 			//near is the distance from the origin
 			double near = 100;
-			double far = stereo.computeHorizonDistance() + 10e3;
+			double far = stereo.getHorizonDistance() + 10e3;
 			Matrix projection = stereo.calculateProjectionMatrix(near, far);
 
 			if (projection != null)
@@ -53,37 +58,23 @@ public class StereoSkyGradientLayer extends SkyGradientLayer
 
 		if (!loaded)
 		{
-			super.applyDrawProjection(dc);
+			super.applyDrawProjection(dc, ogsh);
 		}
 	}
 	
 	@Override
-	protected boolean isValid(DrawContext dc)
+	protected int[] updateSkyDome(DrawContext dc)
     {
-        // Build or rebuild sky dome if horizon distance changed more then 100m
-        // Note: increasing this threshold may produce artefacts like far clipping at very low altitude
-        return this.glListId != -1 && Math.abs(this.lastRebuildHorizon - dc.getView().computeHorizonDistance()) <= 100;
-    }
-	
-	@Override
-	protected void updateSkyDone(DrawContext dc)
-    {
-        GL gl = dc.getGL();
         View view = dc.getView();
 
-        if (this.glListId != -1)
-        {
-            gl.glDeleteLists(this.glListId, 1);
-        }
-
-        double tangentalDistance = view.computeHorizonDistance();
+        double tangentialDistance = view.getHorizonDistance();
         double distToCenterOfPlanet = view.getEyePoint().getLength3();
         Position camPos = dc.getGlobe().computePositionFromPoint(view.getEyePoint());
         double worldRadius = dc.getGlobe().getRadiusAt(camPos);
         double camAlt = camPos.getElevation();
 
         // horizon latitude degrees
-        double horizonLat = (-PI_ON_2 + Math.acos(tangentalDistance / distToCenterOfPlanet)) * ONE80_ON_PI;
+        double horizonLat = (-PI_ON_2 + Math.acos(tangentialDistance / distToCenterOfPlanet)) * ONE80_ON_PI;
         
         // zenith latitude degrees
         double zenithLat = 90;
@@ -108,7 +99,9 @@ public class StereoSkyGradientLayer extends SkyGradientLayer
             gradientBias = 1f + (float)factor;
         }
 
-        this.makeSkyDome(dc, (float) (tangentalDistance), horizonLat, zenithLat, SLICES, STACKS, zenithOpacity, gradientBias);
-        this.lastRebuildHorizon = tangentalDistance;
+        int[] dlid = this.makeSkyDome(dc, (float) (tangentialDistance), horizonLat, zenithLat, SLICES, STACKS, zenithOpacity, gradientBias);
+        this.lastRebuildHorizon = tangentialDistance;
+        
+        return dlid;
     }
 }
