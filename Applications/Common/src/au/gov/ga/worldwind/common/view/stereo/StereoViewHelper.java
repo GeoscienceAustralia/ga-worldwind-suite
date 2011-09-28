@@ -24,7 +24,9 @@ public class StereoViewHelper
 	{
 		//don't allow null eye
 		if (eye == null)
+		{
 			eye = Eye.LEFT;
+		}
 
 		this.stereo = stereo;
 		this.eye = eye;
@@ -53,14 +55,18 @@ public class StereoViewHelper
 	public double getCurrentFocalLength()
 	{
 		if(parameters.isDynamicStereo())
+		{
 			return lastFocalLength;
+		}
 		return parameters.getFocalLength();
 	}
 	
 	public double getCurrentEyeSeparation()
 	{
 		if(parameters.isDynamicStereo())
+		{
 			return lastEyeSeparation;
+		}
 		return parameters.getEyeSeparation();
 	}
 
@@ -175,7 +181,7 @@ public class StereoViewHelper
 		}
 		else
 		{
-			distanceToCenter = view.computeHorizonDistance();
+			distanceToCenter = view.getHorizonDistance();
 		}
 
 		//limit the distance to center relative to the eye distance from the ellipsoid surface
