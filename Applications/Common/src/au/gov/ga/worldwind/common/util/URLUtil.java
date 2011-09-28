@@ -2,6 +2,8 @@ package au.gov.ga.worldwind.common.util;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
@@ -131,5 +133,32 @@ public class URLUtil
 			return fromString((String)source);
 		}
 		return null;
+	}
+	
+	/**
+	 * Attempts to create a {@link URI} from the provided {@link URL}.
+	 * <p/>
+	 * If the input {@link URL} is <code>null</code>, or cannot be converted to a {@link URI}, will
+	 * return <code>null</code>.
+	 * 
+	 * @param url The URL to convert
+	 * 
+	 * @return A {@link URI} representation of the provided {@link URL}, or <code>null</code> if one cannot be
+	 * created
+	 */
+	public static URI toURI(URL url)
+	{
+		if (url == null)
+		{
+			return null;
+		}
+		try
+		{
+			return url.toURI();
+		}
+		catch (URISyntaxException e)
+		{
+			return null;
+		}
 	}
 }

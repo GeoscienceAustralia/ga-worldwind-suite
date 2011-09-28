@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.common.layers.kml;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
+import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.ogc.kml.KMLAbstractFeature;
 import gov.nasa.worldwind.ogc.kml.KMLRoot;
@@ -28,8 +29,12 @@ import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.util.Loader;
+import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
+/**
+ * A {@link Layer} that parses and renders KML content from a provided KML source.
+ */
 public class KMLLayer extends RenderableLayer implements Loader
 {
 	private boolean loading = false;
@@ -108,7 +113,7 @@ public class KMLLayer extends RenderableLayer implements Loader
 					{
 						boolean isKmz = url != null && url.toString().toLowerCase().contains("kmz");
 						InputStream stream = inputStream != null ? inputStream : WWIO.openStream(url);
-						KMLDoc doc = isKmz ? new KMZInputStream(stream) : new KMLInputStream(stream);
+						KMLDoc doc = isKmz ? new KMZInputStream(stream) : new KMLInputStream(stream, URLUtil.toURI(url));
 						KMLRoot root = new KMLRoot(doc);
 						root.parse();
 						KMLController controller = new KMLController(root);
