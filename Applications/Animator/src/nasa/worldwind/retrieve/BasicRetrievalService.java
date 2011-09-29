@@ -24,10 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 /**
- * Performs threaded retrieval of data.
- *
- * @author Tom Gaskins
- * @version $Id: BasicRetrievalService.java 11710 2009-06-17 22:48:37Z tgaskins $
+ * A clone of the WW {@link BasicRetrievalService} that is
  */
 public class BasicRetrievalService extends WWObjectImpl
     implements RetrievalService, Thread.UncaughtExceptionHandler
@@ -69,7 +66,8 @@ public class BasicRetrievalService extends WWObjectImpl
             return priority;
         }
 
-        public Retriever getRetriever()
+        @Override
+		public Retriever getRetriever()
         {
             return this.retriever;
         }
@@ -78,7 +76,9 @@ public class BasicRetrievalService extends WWObjectImpl
         public void run()
         {
             if (this.isDone() || this.isCancelled())
-                return;
+			{
+				return;
+			}
 
             super.run();
         }
@@ -88,7 +88,8 @@ public class BasicRetrievalService extends WWObjectImpl
          * @return 0 if task priorities are equal, -1 if priority of this is less than that, 1 otherwise
          * @throws IllegalArgumentException if <code>that</code> is null
          */
-        public int compareTo(RetrievalTask that)
+        @Override
+		public int compareTo(RetrievalTask that)
         {
             if (that == null)
             {
@@ -105,19 +106,26 @@ public class BasicRetrievalService extends WWObjectImpl
                 long thisElapsedTime = now - this.retriever.getSubmitTime();
                 long thatElapsedTime = now - that.retriever.getSubmitTime();
                 if (((thisElapsedTime - thatElapsedTime) / DEFAULT_TIME_PRIORITY_GRANULARITY) != 0)
-                    return thisElapsedTime < thatElapsedTime ? -1 : 1;
+				{
+					return thisElapsedTime < thatElapsedTime ? -1 : 1;
+				}
             }
 
             // The client-pecified priority is compared for requests submitted within the same granularity period.
             return this.priority == that.priority ? 0 : this.priority < that.priority ? -1 : 1;
         }
 
-        public boolean equals(Object o)
+        @Override
+		public boolean equals(Object o)
         {
             if (this == o)
-                return true;
+			{
+				return true;
+			}
             if (o == null || getClass() != o.getClass())
-                return false;
+			{
+				return false;
+			}
 
             final RetrievalTask that = (RetrievalTask) o;
 
@@ -126,13 +134,15 @@ public class BasicRetrievalService extends WWObjectImpl
             // Priority and submint time are not factors in equality
         }
 
-        public int hashCode()
+        @Override
+		public int hashCode()
         {
             return this.retriever.getName().hashCode();
         }
     }
 
-    public void uncaughtException(Thread thread, Throwable throwable)
+    @Override
+	public void uncaughtException(Thread thread, Throwable throwable)
     {
         Logging.logger().fine(Logging.getMessage("BasicRetrievalService.UncaughtExceptionDuringRetrieval",
             thread.getName()));
@@ -148,7 +158,8 @@ public class BasicRetrievalService extends WWObjectImpl
             super(poolSize, poolSize, THREAD_TIMEOUT, TimeUnit.SECONDS, new PriorityBlockingQueue<Runnable>(queueSize),
                 new ThreadFactory()
                 {
-                    public Thread newThread(Runnable runnable)
+                    @Override
+					public Thread newThread(Runnable runnable)
                     {
                         Thread thread = new Thread(runnable);
                         thread.setDaemon(true);
@@ -160,7 +171,8 @@ public class BasicRetrievalService extends WWObjectImpl
             {
                 // This listener is invoked only when the executor queue is a bounded queue and runs out of room.
                 // If the queue is a java.util.concurrent.PriorityBlockingQueue, this listener is never invoked.
-                public void rejectedExecution(Runnable runnable, ThreadPoolExecutor threadPoolExecutor)
+                @Override
+				public void rejectedExecution(Runnable runnable, ThreadPoolExecutor threadPoolExecutor)
                 {
                     // Interposes logging for rejected execution
                     Logging.logger().finer(Logging.getMessage("BasicRetrievalService.ResourceRejected",
@@ -179,7 +191,8 @@ public class BasicRetrievalService extends WWObjectImpl
          * @param runnable the <code>Retriever</code> running on the thread
          * @throws IllegalArgumentException if either <code>thread</code> or <code>runnable</code> is null
          */
-        protected void beforeExecute(Thread thread, Runnable runnable)
+        @Override
+		protected void beforeExecute(Thread thread, Runnable runnable)
         {
             if (thread == null)
             {
@@ -229,7 +242,8 @@ public class BasicRetrievalService extends WWObjectImpl
          * @param throwable an exception thrown during retrieval, will be null if no exception occurred
          * @throws IllegalArgumentException if <code>runnable</code> is null
          */
-        protected void afterExecute(Runnable runnable, Throwable throwable)
+        @Override
+		protected void afterExecute(Runnable runnable, Throwable throwable)
         {
             if (runnable == null)
             {
@@ -297,12 +311,17 @@ public class BasicRetrievalService extends WWObjectImpl
         this.activeTasks = new ConcurrentLinkedQueue<RetrievalTask>();
     }
 
-    public void shutdown(boolean immediately)
+    @Override
+	public void shutdown(boolean immediately)
     {
         if (immediately)
-            this.executor.shutdownNow();
-        else
-            this.executor.shutdown();
+		{
+			this.executor.shutdownNow();
+		}
+		else
+		{
+			this.executor.shutdown();
+		}
 
         this.activeTasks.clear();
     }
@@ -312,7 +331,8 @@ public class BasicRetrievalService extends WWObjectImpl
      * @return a future object that can be used to query the request status of cancel the request.
      * @throws IllegalArgumentException if <code>retrieer</code> is null or has no name
      */
-    public RetrievalFuture runRetriever(Retriever retriever)
+    @Override
+	public RetrievalFuture runRetriever(Retriever retriever)
     {
         if (retriever == null)
         {
@@ -328,7 +348,7 @@ public class BasicRetrievalService extends WWObjectImpl
         }
 
         // Add with secondary priority that removes most recently added requests first.
-        return this.runRetriever(retriever, (double) (Long.MAX_VALUE - System.currentTimeMillis()));
+        return this.runRetriever(retriever, (Long.MAX_VALUE - System.currentTimeMillis()));
     }
 
     /**
@@ -337,7 +357,8 @@ public class BasicRetrievalService extends WWObjectImpl
      * @return a future object that can be used to query the request status of cancel the request.
      * @throws IllegalArgumentException if <code>retriever</code> is null or has no name
      */
-    public synchronized RetrievalFuture runRetriever(Retriever retriever, double priority)
+    @Override
+	public synchronized RetrievalFuture runRetriever(Retriever retriever, double priority)
     {
         if (retriever == null)
         {
@@ -363,7 +384,9 @@ public class BasicRetrievalService extends WWObjectImpl
 
         // Do not queue duplicates.
         if (this.activeTasks.contains(task) || this.executor.getQueue().contains(task))
-            return null;
+		{
+			return null;
+		}
 
         this.executor.execute(task);
 
@@ -374,7 +397,8 @@ public class BasicRetrievalService extends WWObjectImpl
      * @param poolSize the number of threads in the thread pool
      * @throws IllegalArgumentException if <code>poolSize</code> is non-positive
      */
-    public void setRetrieverPoolSize(int poolSize)
+    @Override
+	public void setRetrieverPoolSize(int poolSize)
     {
         if (poolSize < 1)
         {
@@ -387,7 +411,8 @@ public class BasicRetrievalService extends WWObjectImpl
         this.executor.setMaximumPoolSize(poolSize);
     }
 
-    public int getRetrieverPoolSize()
+    @Override
+	public int getRetrieverPoolSize()
     {
         return this.executor.getCorePoolSize();
     }
@@ -399,23 +424,28 @@ public class BasicRetrievalService extends WWObjectImpl
         for (int i = 0; i < numThreads; i++)
         {
             if (threads[i].getName().startsWith(RUNNING_THREAD_NAME_PREFIX))
-                return true;
+			{
+				return true;
+			}
         }
         return false;
     }
 
-    public boolean hasActiveTasks()
+    @Override
+	public boolean hasActiveTasks()
     {
         return this.hasRetrievers();
     }
 
-    public boolean isAvailable()
+    @Override
+	public boolean isAvailable()
     {
         return this.executor.getQueue().size() < this.queueSize;
 //            && !WorldWind.getNetworkStatus().isNetworkUnavailable();
     }
 
-    public int getNumRetrieversPending()
+    @Override
+	public int getNumRetrieversPending()
     {
         // Could use same method to determine active tasks as hasRetrievers() above, but this method only advisory.
         return this.activeTasks.size() + this.executor.getQueue().size();
@@ -426,7 +456,8 @@ public class BasicRetrievalService extends WWObjectImpl
      * @return <code>true</code> if the retriever is being run or pending execution
      * @throws IllegalArgumentException if <code>retriever</code> is null
      */
-    public boolean contains(Retriever retriever)
+    @Override
+	public boolean contains(Retriever retriever)
     {
         if (retriever == null)
         {
@@ -446,7 +477,9 @@ public class BasicRetrievalService extends WWObjectImpl
         for (RetrievalTask task : this.activeTasks)
         {
             if (task.isDone())
-                continue;
+			{
+				continue;
+			}
 
             Retriever retriever = task.getRetriever();
             try
@@ -494,9 +527,13 @@ public class BasicRetrievalService extends WWObjectImpl
         double progress;
 
         if (totalContentLength < 1)
-            progress = 0;
-        else
-            progress = Math.min(100.0, 100.0 * (double) totalBytesRead / (double) totalContentLength);
+		{
+			progress = 0;
+		}
+		else
+		{
+			progress = Math.min(100.0, 100.0 * totalBytesRead / totalContentLength);
+		}
 
         return progress;
     }
