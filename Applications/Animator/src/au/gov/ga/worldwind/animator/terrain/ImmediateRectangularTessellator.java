@@ -14,7 +14,6 @@ public class ImmediateRectangularTessellator extends WireframeRectangularTessell
 	@Override
 	protected void makeVerts(DrawContext dc, RectTile tile)
 	{
-		RenderInfo ri = this.buildVerts(dc, tile, isMakeTileSkirts());
-		setRenderInfo(tile, ri);
+		this.buildVerts(dc, tile, isMakeTileSkirts());
 	}
 }
