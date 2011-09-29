@@ -3,13 +3,13 @@ package au.gov.ga.worldwind.viewer.layers.shapefile;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
-import gov.nasa.worldwind.examples.ApplicationTemplate;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileUrlBuilder;
+import gov.nasa.worldwindx.examples.ApplicationTemplate;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -78,7 +78,9 @@ public class Sandpit extends ApplicationTemplate
 									+ ".zip";
 					File file = new File(filename);
 					if (file.exists())
+					{
 						return file.toURI().toURL();
+					}
 
 					return null;
 				}

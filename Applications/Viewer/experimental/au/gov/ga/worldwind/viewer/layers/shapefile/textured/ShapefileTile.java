@@ -27,8 +27,7 @@ public class ShapefileTile extends TextureTile
 
 	public void setShapefile(Shapefile shapefile, boolean useMipMaps)
 	{
-		BufferedImage image =
-				ImageTessellator.tessellate(shapefile, getWidth(), getHeight(), getSector());
+		BufferedImage image = ImageTessellator.tessellate(shapefile, getWidth(), getHeight(), getSector());
 		TextureData data = TextureIO.newTextureData(image, useMipMaps);
 		setTextureData(data);
 	}
@@ -42,7 +41,9 @@ public class ShapefileTile extends TextureTile
 		{
 			this.path = getLevel().getPath() + "/" + getRow() + "/" + getRow() + "_" + getColumn();
 			if (!getLevel().isEmpty())
+			{
 				path += getLevel().getFormatSuffix();
+			}
 		}
 
 		return this.path;
@@ -50,21 +51,29 @@ public class ShapefileTile extends TextureTile
 
 
 	@Override
-	public void applyInternalTransform(DrawContext dc)
+	public void applyInternalTransform(DrawContext dc, boolean textureIdentityActive)
 	{
 		if (dc.isPickingMode())
-			pickingTile.applyInternalTransform(dc);
+		{
+			pickingTile.applyInternalTransform(dc, textureIdentityActive);
+		}
 		else
-			super.applyInternalTransform(dc);
+		{
+			super.applyInternalTransform(dc, textureIdentityActive);
+		}
 	}
 
 	@Override
 	public boolean bind(DrawContext dc)
 	{
 		if (dc.isPickingMode())
+		{
 			return pickingTile.bind(dc);
+		}
 		else
+		{
 			return super.bind(dc);
+		}
 	}
 
 	@Override
@@ -105,35 +114,46 @@ public class ShapefileTile extends TextureTile
 		TileKey key = new TileKey(nextLevelNum, 2 * row, 2 * col, nextLevelCacheName);
 		TextureTile subTile = this.getTileFromMemoryCache(key);
 		if (subTile != null)
+		{
 			subTiles[0] = subTile;
+		}
 		else
-			subTiles[0] =
-					new ShapefileTile(new Sector(p0, p1, t0, t1), nextLevel, 2 * row, 2 * col);
+		{
+			subTiles[0] = new ShapefileTile(new Sector(p0, p1, t0, t1), nextLevel, 2 * row, 2 * col);
+		}
 
 		key = new TileKey(nextLevelNum, 2 * row, 2 * col + 1, nextLevelCacheName);
 		subTile = this.getTileFromMemoryCache(key);
 		if (subTile != null)
+		{
 			subTiles[1] = subTile;
+		}
 		else
-			subTiles[1] =
-					new ShapefileTile(new Sector(p0, p1, t1, t2), nextLevel, 2 * row, 2 * col + 1);
+		{
+			subTiles[1] = new ShapefileTile(new Sector(p0, p1, t1, t2), nextLevel, 2 * row, 2 * col + 1);
+		}
 
 		key = new TileKey(nextLevelNum, 2 * row + 1, 2 * col, nextLevelCacheName);
 		subTile = this.getTileFromMemoryCache(key);
 		if (subTile != null)
+		{
 			subTiles[2] = subTile;
+		}
 		else
-			subTiles[2] =
-					new ShapefileTile(new Sector(p1, p2, t0, t1), nextLevel, 2 * row + 1, 2 * col);
+		{
+			subTiles[2] = new ShapefileTile(new Sector(p1, p2, t0, t1), nextLevel, 2 * row + 1, 2 * col);
+		}
 
 		key = new TileKey(nextLevelNum, 2 * row + 1, 2 * col + 1, nextLevelCacheName);
 		subTile = this.getTileFromMemoryCache(key);
 		if (subTile != null)
+		{
 			subTiles[3] = subTile;
+		}
 		else
-			subTiles[3] =
-					new ShapefileTile(new Sector(p1, p2, t1, t2), nextLevel, 2 * row + 1,
-							2 * col + 1);
+		{
+			subTiles[3] = new ShapefileTile(new Sector(p1, p2, t1, t2), nextLevel, 2 * row + 1, 2 * col + 1);
+		}
 
 		return subTiles;
 	}

@@ -13,12 +13,12 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.cache.BasicMemoryCache;
 import gov.nasa.worldwind.cache.MemoryCache;
-import gov.nasa.worldwind.formats.dds.DDSConverter;
+import gov.nasa.worldwind.formats.dds.DDSCompressor;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Vec4;
-import gov.nasa.worldwind.layers.Mercator.MercatorSector;
-import gov.nasa.worldwind.layers.Mercator.MercatorTextureTile;
-import gov.nasa.worldwind.layers.Mercator.MercatorTiledImageLayer;
+import gov.nasa.worldwind.layers.mercator.MercatorSector;
+import gov.nasa.worldwind.layers.mercator.MercatorTextureTile;
+import gov.nasa.worldwind.layers.mercator.MercatorTiledImageLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.retrieve.HTTPRetriever;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
@@ -95,7 +95,9 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 	{
 		Vec4 centroid = tile.getCentroidPoint(dc.getGlobe());
 		if (this.getReferencePoint() != null)
+		{
 			tile.setPriority(centroid.distanceTo3(this.getReferencePoint()));
+		}
 
 		RequestTask task = new RequestTask(tile, this);
 		this.getRequestQ().add(task);
@@ -173,9 +175,13 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 		public boolean equals(Object o)
 		{
 			if (this == o)
+			{
 				return true;
+			}
 			if (o == null || getClass() != o.getClass())
+			{
 				return false;
+			}
 
 			final RequestTask that = (RequestTask) o;
 
@@ -201,7 +207,9 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 			java.net.URL textureURL)
 	{
 		if (!WWIO.isFileOutOfDate(textureURL, tile.getLevel().getExpiryTime()))
+		{
 			return false;
+		}
 
 		// The file has expired. Delete it.
 		this.getDataFileStore().removeFile(textureURL);
@@ -222,11 +230,15 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 		}
 
 		if (textureData == null)
+		{
 			return false;
+		}
 
 		tile.setTextureData(textureData);
 		if (tile.getLevelNumber() != 0 || !this.isRetainLevelZeroTiles())
+		{
 			this.addTileToCache(tile);
+		}
 
 		return true;
 	}
@@ -256,17 +268,23 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 	protected void downloadTexture(final MercatorTextureTile tile)
 	{
 		if (!WorldWind.getRetrievalService().isAvailable())
+		{
 			return;
+		}
 
 		java.net.URL url;
 		try
 		{
 			url = tile.getResourceURL();
 			if (url == null)
+			{
 				return;
+			}
 
 			if (WorldWind.getNetworkStatus().isHostUnavailable(url))
+			{
 				return;
+			}
 		}
 		catch (java.net.MalformedURLException e)
 		{
@@ -298,14 +316,20 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 		Integer cto = AVListImpl.getIntegerValue(this,
 				AVKey.URL_CONNECT_TIMEOUT);
 		if (cto != null && cto > 0)
+		{
 			retriever.setConnectTimeout(cto);
+		}
 		Integer cro = AVListImpl.getIntegerValue(this, AVKey.URL_READ_TIMEOUT);
 		if (cro != null && cro > 0)
+		{
 			retriever.setReadTimeout(cro);
+		}
 		Integer srl = AVListImpl.getIntegerValue(this,
 				AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT);
 		if (srl != null && srl > 0)
+		{
 			retriever.setStaleRequestLimit(srl);
+		}
 
 		WorldWind.getRetrievalService().runRetriever(retriever,
 				tile.getPriority());
@@ -349,7 +373,9 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 			{
 				if (!retriever.getState().equals(
 						Retriever.RETRIEVER_STATE_SUCCESSFUL))
+				{
 					return null;
+				}
 
 				URLRetriever r = (URLRetriever) retriever;
 				ByteBuffer buffer = r.getBuffer();
@@ -371,13 +397,16 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 					}
 				}
 
-				final File outFile = this.layer.getDataFileStore().newFile(
-						this.tile.getPath());
+				final File outFile = this.layer.getDataFileStore().newFile(this.tile.getPath());
 				if (outFile == null)
+				{
 					return null;
+				}
 
 				if (outFile.exists())
+				{
 					return buffer;
+				}
 
 				// TODO: Better, more generic and flexible handling of
 				// file-format type
@@ -420,9 +449,11 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 					else if (outFile.getName().endsWith(".dds"))
 					{
 						// Convert to DDS and save the result.
-						buffer = DDSConverter.convertToDDS(buffer, contentType);
+						buffer = DDSCompressor.compressImageBuffer(buffer);
 						if (buffer != null)
+						{
 							this.layer.saveBuffer(buffer, outFile);
+						}
 					}
 					else if (contentType.contains("image"))
 					{
@@ -435,7 +466,9 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 							{
 								if (!this.layer.transformAndSave(image, tile
 										.getMercatorSector(), outFile))
+								{
 									image = null;
+								}
 							}
 							else
 							{
@@ -524,15 +557,21 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 	{
 		int type = image.getType();
 		if (type == 0)
+		{
 			type = BufferedImage.TYPE_INT_RGB;
+		}
 
 		BufferedImage trans = null;
 		ColorModel colorModel = image.getColorModel();
 		if (colorModel != null && colorModel instanceof IndexColorModel)
+		{
 			trans = new BufferedImage(image.getWidth(), image.getHeight(),
 					type, (IndexColorModel) colorModel);
+		}
 		else
+		{
 			trans = new BufferedImage(image.getWidth(), image.getHeight(), type);
+		}
 
 		double miny = sector.getMinLatPercent();
 		double maxy = sector.getMaxLatPercent();

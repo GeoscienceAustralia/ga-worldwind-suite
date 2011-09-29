@@ -211,8 +211,10 @@ public class ShapefileRenderer
 		GL gl = dc.getGL();
 
 		if (this.isUseEXTBlendFuncSeparate())
+		{
 			this.setHaveEXTBlendFuncSeparate(gl
 					.isExtensionAvailable(EXT_BLEND_FUNC_SEPARATE_STRING));
+		}
 
 		gl.glEnable(GL.GL_ALPHA_TEST);
 		gl.glAlphaFunc(GL.GL_GREATER, 0.0f);
@@ -471,7 +473,7 @@ public class ShapefileRenderer
 	private class DepthTile implements SurfaceTile
 	{
 		@Override
-		public void applyInternalTransform(DrawContext dc)
+		public void applyInternalTransform(DrawContext dc, boolean textureIdentityActive)
 		{
 		}
 

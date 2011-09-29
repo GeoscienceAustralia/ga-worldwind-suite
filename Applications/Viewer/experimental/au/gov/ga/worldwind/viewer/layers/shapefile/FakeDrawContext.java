@@ -3,7 +3,8 @@ package au.gov.ga.worldwind.viewer.layers.shapefile;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.cache.TextureCache;
+import gov.nasa.worldwind.cache.GpuResourceCache;
+import gov.nasa.worldwind.event.Message;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.Position;
@@ -58,231 +59,231 @@ public class FakeDrawContext implements DrawContext
 	public FakeDrawContext()
 	{
 		globe =
-				new EllipsoidalGlobe(Earth.WGS84_EQUATORIAL_RADIUS, Earth.WGS84_POLAR_RADIUS,
-						Earth.WGS84_ES, new ZeroElevationModel());
+				new EllipsoidalGlobe(Earth.WGS84_EQUATORIAL_RADIUS, Earth.WGS84_POLAR_RADIUS, Earth.WGS84_ES,
+						new ZeroElevationModel());
 	}
 
 	@Override
 	public Object setValue(String key, Object value)
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public AVList setValues(AVList avList)
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public Object getValue(String key)
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public Collection<Object> getValues()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public String getStringValue(String key)
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public Set<Entry<String, Object>> getEntries()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public boolean hasKey(String key)
 	{
-		// TODO Auto-generated method stub
+
 		return false;
 	}
 
 	@Override
 	public Object removeKey(String key)
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void addPropertyChangeListener(PropertyChangeListener listener)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void removePropertyChangeListener(PropertyChangeListener listener)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void firePropertyChange(String propertyName, Object oldValue, Object newValue)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void firePropertyChange(PropertyChangeEvent propertyChangeEvent)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public AVList copy()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public AVList clearList()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void dispose()
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void setGLContext(GLContext glContext)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public GLContext getGLContext()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public GL getGL()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public GLU getGLU()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public GLDrawable getGLDrawable()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public int getDrawableWidth()
 	{
-		// TODO Auto-generated method stub
+
 		return 0;
 	}
 
 	@Override
 	public int getDrawableHeight()
 	{
-		// TODO Auto-generated method stub
+
 		return 0;
 	}
 
 	@Override
 	public GLRuntimeCapabilities getGLRuntimeCapabilities()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setGLRuntimeCapabilities(GLRuntimeCapabilities capabilities)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void initialize(GLContext glContext)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void setView(View view)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public View getView()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setModel(Model model)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public Model getModel()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
@@ -295,513 +296,531 @@ public class FakeDrawContext implements DrawContext
 	@Override
 	public LayerList getLayers()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public Sector getVisibleSector()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setVisibleSector(Sector s)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void setVerticalExaggeration(double verticalExaggeration)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public double getVerticalExaggeration()
 	{
-		// TODO Auto-generated method stub
+
 		return 0;
 	}
 
 	@Override
 	public SectorGeometryList getSurfaceGeometry()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public PickedObjectList getPickedObjects()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void addPickedObjects(PickedObjectList pickedObjects)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void addPickedObject(PickedObject pickedObject)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public Color getUniquePickColor()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public Color getClearColor()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void enablePickingMode()
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public boolean isPickingMode()
 	{
-		// TODO Auto-generated method stub
+
 		return false;
 	}
 
 	@Override
 	public void disablePickingMode()
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void setDeepPickingEnabled(boolean tf)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public boolean isDeepPickingEnabled()
 	{
-		// TODO Auto-generated method stub
+
 		return false;
 	}
 
 	@Override
 	public void addOrderedRenderable(OrderedRenderable orderedRenderable)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void addOrderedSurfaceRenderable(OrderedRenderable orderedRenderable)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public Queue<OrderedRenderable> getOrderedSurfaceRenderables()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void drawUnitQuad()
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void drawUnitQuad(TextureCoords texCoords)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void drawUnitQuadOutline()
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void setSurfaceGeometry(SectorGeometryList surfaceGeometry)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public Vec4 getPointOnTerrain(Angle latitude, Angle longitude)
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public SurfaceTileRenderer getGeographicSurfaceTileRenderer()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public Point getPickPoint()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setPickPoint(Point pickPoint)
 	{
-		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public TextureCache getTextureCache()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	@Override
-	public void setTextureCache(TextureCache textureCache)
-	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public Collection<PerformanceStatistic> getPerFrameStatistics()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setPerFrameStatisticsKeys(Set<String> statKeys, Collection<PerformanceStatistic> stats)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void setPerFrameStatistic(String key, String displayName, Object statistic)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public void setPerFrameStatistics(Collection<PerformanceStatistic> stats)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public Set<String> getPerFrameStatisticsKeys()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public Point getViewportCenterScreenPoint()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setViewportCenterScreenPoint(Point viewportCenterPoint)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public Position getViewportCenterPosition()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setViewportCenterPosition(Position viewportCenterPosition)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public TextRendererCache getTextRendererCache()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setTextRendererCache(TextRendererCache textRendererCache)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public AnnotationRenderer getAnnotationRenderer()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setAnnotationRenderer(AnnotationRenderer annotationRenderer)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public long getFrameTimeStamp()
 	{
-		// TODO Auto-generated method stub
+
 		return 0;
 	}
 
 	@Override
 	public void setFrameTimeStamp(long frameTimeStamp)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public List<Sector> getVisibleSectors(double[] resolutions, long timeLimit, Sector searchSector)
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setCurrentLayer(Layer layer)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public Layer getCurrentLayer()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void addScreenCredit(ScreenCredit credit)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public Map<ScreenCredit, Long> getScreenCredits()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public int getRedrawRequested()
 	{
-		// TODO Auto-generated method stub
+
 		return 0;
 	}
 
 	@Override
 	public void setRedrawRequested(int redrawRequested)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public PickPointFrustumList getPickFrustums()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setPickPointFrustumDimension(Dimension dim)
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public Dimension getPickPointFrustumDimension()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void addPickPointFrustum()
 	{
-		// TODO Auto-generated method stub
-		
+
+
 	}
 
 	@Override
 	public Collection<Throwable> getRenderingExceptions()
 	{
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
 	@Override
 	public void setRenderingExceptions(Collection<Throwable> exceptions)
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void addRenderingException(Throwable t)
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void pushProjectionOffest(Double offset)
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void popProjectionOffest()
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public boolean isOrderedRenderingMode()
 	{
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void setOrderedRenderingMode(boolean tf)
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void drawOutlinedShape(OutlinedShape renderer, Object shape)
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void beginStandardLighting()
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void endStandardLighting()
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public LightingModel getStandardLightingModel()
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void setStandardLightingModel(LightingModel standardLighting)
 	{
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public Vec4 computeTerrainPoint(Angle lat, Angle lon, double offset)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public boolean isSmall(Extent extent, int numPixels)
 	{
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void drawNormals(float length, FloatBuffer vBuf, FloatBuffer nBuf)
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public OrderedRenderable peekOrderedRenderables()
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public OrderedRenderable pollOrderedRenderables()
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Terrain getTerrain()
 	{
-		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public boolean isPreRenderMode()
+	{
+		return false;
+	}
+	
+	@Override
+	public void addOrderedRenderable(OrderedRenderable orderedRenderable, boolean isBehind)
+	{
+	}
+
+	@Override
+	public void onMessage(Message msg)
+	{
+
+	}
+
+	@Override
+	public GpuResourceCache getGpuResourceCache()
+	{
 		return null;
 	}
 
+	@Override
+	public void setGpuResourceCache(GpuResourceCache gpuResourceCache)
+	{
 
 	}
+
+	@Override
+	public void restoreDefaultBlending()
+	{
+
+	}
+
+	@Override
+	public void restoreDefaultCurrentColor()
+	{
+
+	}
+
+	@Override
+	public void restoreDefaultDepthTesting()
+	{
+
+	}
+
+	@Override
+	public void setPreRenderMode(boolean preRenderMode)
+	{
+
+	}
+
+	@Override
+	public GpuResourceCache getTextureCache()
+	{
+		return null;
+	}
+
+}
