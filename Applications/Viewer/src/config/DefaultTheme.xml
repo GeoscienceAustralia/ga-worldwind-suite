@@ -34,6 +34,6 @@
 	<Panel name="Datasets" className="au.gov.ga.worldwind.viewer.panels.dataset.DatasetPanel" />
 	<!-- <Panel name="Theme Layers" className="au.gov.ga.worldwind.viewer.panels.layers.ThemeLayersPanel" /> -->
 	<Panel name="Vertical Exaggeration" className="au.gov.ga.worldwind.viewer.panels.other.ExaggerationPanel" enabled="false" />
-	<!-- <Panel name="View" className="au.gov.ga.worldwind.viewer.panels.view.ViewPanel" enabled="false" /> Disabled for June 2011 release (CORPWWS-168)--> 
+	<Panel name="View" className="au.gov.ga.worldwind.viewer.panels.view.ViewPanel" enabled="false" /> 
 
 </Theme>
