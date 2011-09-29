@@ -5,12 +5,12 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.data.BufferedImageRaster;
-import gov.nasa.worldwind.examples.util.SectorSelector;
 import gov.nasa.worldwind.formats.tiff.GeotiffWriter;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.TiledImageLayer;
+import gov.nasa.worldwindx.examples.util.SectorSelector;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -366,7 +366,9 @@ public class ImageSectorSaver
 		LatLon topright = Util.computeLatLonFromString(toprightField.getText());
 
 		if (bottomleft == null || topright == null)
+		{
 			return Sector.EMPTY_SECTOR;
+		}
 
 		return new Sector(bottomleft.getLatitude(), topright.getLatitude(),
 				bottomleft.getLongitude(), topright.getLongitude());
@@ -429,7 +431,9 @@ public class ImageSectorSaver
 
 		valid &= size != null;
 		if (size != null)
+		{
 			dimensionsLabel.setText(size.width + " x " + size.height);
+		}
 
 		output = null;
 		if (outputField.getText().length() > 0)
@@ -449,7 +453,9 @@ public class ImageSectorSaver
 		for (Layer layer : wwd.getModel().getLayers())
 		{
 			if (layer.isEnabled() && layer instanceof TiledImageLayer)
+			{
 				layers.add(layer);
+			}
 		}
 
 		final JDialog dialog = new JDialog(frame, "Please wait...", false);
@@ -526,7 +532,7 @@ public class ImageSectorSaver
 	{
 		try
 		{
-			double texelSize = Math.abs(sector.getDeltaLonRadians()) / (double) size.width;
+			double texelSize = Math.abs(sector.getDeltaLonRadians()) / size.width;
 
 			BufferedImage image =
 					new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
@@ -542,9 +548,13 @@ public class ImageSectorSaver
 
 					String mimeType = layer.getDefaultImageFormat();
 					if (layer.isImageFormatAvailable("image/png"))
+					{
 						mimeType = "image/png";
+					}
 					else if (layer.isImageFormatAvailable("image/jpg"))
+					{
 						mimeType = "image/jpg";
+					}
 
 					try
 					{
@@ -592,12 +602,16 @@ public class ImageSectorSaver
 			double max = Math.max(dLat, dLon);
 			double min = Math.min(dLat, dLon);
 
-			int minSize = (int) ((min == 0d) ? maxSize : ((double) maxSize * min / max));
+			int minSize = (int) ((min == 0d) ? maxSize : (maxSize * min / max));
 
 			if (dLon > dLat)
+			{
 				size.height = minSize;
+			}
 			else
+			{
 				size.width = minSize;
+			}
 		}
 
 		return size;
@@ -639,7 +653,9 @@ public class ImageSectorSaver
 		public boolean accept(File f)
 		{
 			if (f.isDirectory())
+			{
 				return true;
+			}
 			return f.getName().toLowerCase().endsWith(".tif");
 		}
 	}

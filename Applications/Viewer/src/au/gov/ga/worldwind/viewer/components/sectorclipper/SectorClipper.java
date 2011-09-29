@@ -1,9 +1,9 @@
 package au.gov.ga.worldwind.viewer.components.sectorclipper;
 
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.examples.util.SectorSelector;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwindx.examples.util.SectorSelector;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -229,7 +229,9 @@ public class SectorClipper
 		LatLon topright = Util.computeLatLonFromString(toprightField.getText());
 
 		if (bottomleft == null || topright == null)
+		{
 			return Sector.EMPTY_SECTOR;
+		}
 
 		return new Sector(bottomleft.getLatitude(), topright.getLatitude(), bottomleft.getLongitude(),
 				topright.getLongitude());
