@@ -1,8 +1,8 @@
 package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
+import gov.nasa.worldwind.layers.FogLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.TiledImageLayer;
-import nasa.worldwind.layers.FogLayer;
 import au.gov.ga.worldwind.animator.animation.Animation;
 
 /**
