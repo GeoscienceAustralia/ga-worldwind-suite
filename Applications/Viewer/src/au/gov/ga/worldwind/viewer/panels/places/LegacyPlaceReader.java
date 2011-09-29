@@ -17,6 +17,12 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
+/**
+ * A helper class that can read {@link Place} information from the legacy XML format.
+ * <p/>
+ * Maintained for backwards compatibility with legacy places files. New places files should be
+ * persisted with the {@link PlacePersistance} class. 
+ */
 public class LegacyPlaceReader
 {
 	public static List<Place> readPlacesFromLegacyXML(Object source, Globe globe)
@@ -25,12 +31,13 @@ public class LegacyPlaceReader
 		Element elem = XMLUtil.getElementFromSource(source);
 		if (elem != null)
 		{
-			Element[] placeElements =
-					XMLUtil.getElements(elem,
-							"//object[@class=\"au.gov.ga.worldwind.viewer.panels.places.Place\"]",
-							xpath);
+			Element[] placeElements = XMLUtil.getElements(elem,
+														  "//object[@class=\"au.gov.ga.worldwind.viewer.panels.places.Place\"]",
+														  xpath);
 			if (placeElements == null)
+			{
 				return null;
+			}
 
 			List<Place> places = new ArrayList<Place>();
 			for (Element placeElement : placeElements)
@@ -46,9 +53,7 @@ public class LegacyPlaceReader
 	{
 		Place place = new Place();
 		places.add(place);
-		place.setExcludeFromPlaylist(XMLUtil.getBoolean(context,
-				"void[@property=\"excludeFromPlaylist\"]/boolean", place.isExcludeFromPlaylist(),
-				xpath));
+		place.setExcludeFromPlaylist(XMLUtil.getBoolean(context, "void[@property=\"excludeFromPlaylist\"]/boolean", place.isExcludeFromPlaylist(), xpath));
 		place.setLabel(XMLUtil.getText(context, "void[@property=\"label\"]/string", xpath));
 		Double lat = XMLUtil.getDouble(context, "void[@property=\"latitude\"]/double", xpath);
 		Double lon = XMLUtil.getDouble(context, "void[@property=\"longitude\"]/double", xpath);
@@ -57,17 +62,12 @@ public class LegacyPlaceReader
 		{
 			place.setLatLon(latlon);
 		}
-		place.setMinZoom(XMLUtil.getDouble(context, "void[@property=\"minZoom\"]/double",
-				place.getMinZoom(), xpath));
-		place.setMaxZoom(XMLUtil.getDouble(context, "void[@property=\"maxZoom\"]/double",
-				place.getMaxZoom(), xpath));
-		place.setSaveCamera(XMLUtil.getBoolean(context, "void[@property=\"saveCamera\"]/boolean",
-				place.isSaveCamera(), xpath));
-		place.setVisible(XMLUtil.getBoolean(context, "void[@property=\"visible\"]/boolean",
-				place.isVisible(), xpath));
+		place.setMinZoom(XMLUtil.getDouble(context, "void[@property=\"minZoom\"]/double", place.getMinZoom(), xpath));
+		place.setMaxZoom(XMLUtil.getDouble(context, "void[@property=\"maxZoom\"]/double", place.getMaxZoom(), xpath));
+		place.setSaveCamera(XMLUtil.getBoolean(context, "void[@property=\"saveCamera\"]/boolean", place.isSaveCamera(), xpath));
+		place.setVisible(XMLUtil.getBoolean(context, "void[@property=\"visible\"]/boolean", place.isVisible(), xpath));
 
-		Double elevation =
-				XMLUtil.getDouble(context, "void[@property=\"elevation\"]/double", xpath);
+		Double elevation = XMLUtil.getDouble(context, "void[@property=\"elevation\"]/double", xpath);
 		Double heading = XMLUtil.getDouble(context, "void[@property=\"heading\"]/double", xpath);
 		Double pitch = XMLUtil.getDouble(context, "void[@property=\"pitch\"]/double", xpath);
 		Double zoom = XMLUtil.getDouble(context, "void[@property=\"zoom\"]/double", xpath);
@@ -75,16 +75,25 @@ public class LegacyPlaceReader
 		if (zoom != null && latlon != null)
 		{
 			if (elevation == null)
+			{
 				elevation = 0d;
+			}
 			if (pitch == null)
+			{
 				pitch = 0d;
+			}
 			if (heading == null)
+			{
 				heading = 0d;
+			}
 
 			Position center = new Position(latlon, elevation);
-			Matrix transform =
-					OrbitViewInputSupport.computeTransformMatrix(globe, center,
-							Angle.fromDegrees(heading), Angle.fromDegrees(pitch), zoom);
+			Matrix transform = OrbitViewInputSupport.computeTransformMatrix(globe, 
+																			center,
+																		    Angle.fromDegrees(heading), 
+																		    Angle.fromDegrees(pitch), 
+																		    Angle.ZERO, 
+																		    zoom);
 
 			Matrix modelviewInv = transform.getInverse();
 			if (modelviewInv != null)

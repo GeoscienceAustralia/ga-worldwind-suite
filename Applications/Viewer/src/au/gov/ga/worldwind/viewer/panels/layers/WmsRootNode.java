@@ -2,7 +2,7 @@ package au.gov.ga.worldwind.viewer.panels.layers;
 
 import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.getTreeWmsRootNodeLabel;
 import static au.gov.ga.worldwind.viewer.util.Message.getMessage;
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;
 import java.util.Queue;

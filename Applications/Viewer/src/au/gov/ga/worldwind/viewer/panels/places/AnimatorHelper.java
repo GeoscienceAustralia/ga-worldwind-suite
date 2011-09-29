@@ -11,10 +11,10 @@ import gov.nasa.worldwind.view.ViewUtil;
 import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 import gov.nasa.worldwind.view.firstperson.FlyToFlyViewAnimator;
 import gov.nasa.worldwind.view.orbit.AccessibleOrbitViewInputSupport;
-import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
-import gov.nasa.worldwind.view.orbit.OrbitViewInputSupport;
 import gov.nasa.worldwind.view.orbit.AccessibleOrbitViewInputSupport.AccessibleOrbitViewState;
+import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
+import gov.nasa.worldwind.view.orbit.OrbitViewInputSupport;
 import au.gov.ga.worldwind.common.view.free.FreeView;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
@@ -32,9 +32,9 @@ public class AnimatorHelper
 			Vec4 forward = centerPoint.subtract3(eyePoint).normalize3();
 			if (forward.cross3(up).getLength3() < 0.001)
 			{
-				Matrix modelview =
-						OrbitViewInputSupport.computeTransformMatrix(globe, centerPosition,
-								view.getHeading(), Angle.ZERO, 1);
+				Matrix modelview = OrbitViewInputSupport.computeTransformMatrix(globe, centerPosition, 
+																				view.getHeading(), Angle.ZERO, 
+																				view.getRoll(), 1);
 				if (modelview != null)
 				{
 					Matrix modelviewInv = modelview.getInverse();

@@ -4,12 +4,15 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.cache.FileStore;
-import gov.nasa.worldwind.data.DataImportUtil;
+import gov.nasa.worldwind.data.BasicDataRasterReaderFactory;
+import gov.nasa.worldwind.data.DataRasterReader;
+import gov.nasa.worldwind.data.DataRasterReaderFactory;
 import gov.nasa.worldwind.data.DataStoreProducer;
 import gov.nasa.worldwind.data.TiledElevationProducer;
 import gov.nasa.worldwind.data.TiledImageProducer;
 import gov.nasa.worldwind.data.WWDotNetLayerSetConverter;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwindx.applications.worldwindow.features.DataImportUtil;
 
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
@@ -111,10 +114,14 @@ public class FileLoader
 			public void propertyChange(PropertyChangeEvent evt)
 			{
 				if (progressMonitor.isCanceled())
+				{
 					return;
+				}
 
 				if (evt.getPropertyName().equals(AVKey.PROGRESS))
+				{
 					progress.set((int) (100 * (Double) evt.getNewValue()));
+				}
 			}
 		};
 		producer.addPropertyChangeListener(progressListener);
@@ -223,16 +230,28 @@ public class FileLoader
 	protected static DataStoreProducer createDataStoreProducerFromFile(File file)
 	{
 		if (file == null)
+		{
 			return null;
+		}
 
 		DataStoreProducer producer = null;
 
-		if (DataImportUtil.isElevationData(file))
+		DataRasterReaderFactory readerFactory = new BasicDataRasterReaderFactory();
+		AVListImpl params = new AVListImpl();
+		DataRasterReader reader = readerFactory.findReaderFor(file, params);
+		
+		if (reader != null && reader.isElevationsRaster(file, params))
+		{
 			producer = new TiledElevationProducer();
-		else if (DataImportUtil.isImageData(file))
+		}
+		else if (reader != null && reader.isImageryRaster(file, params))
+		{
 			producer = new TiledImageProducer();
+		}
 		else if (DataImportUtil.isWWDotNetLayerSet(file))
+		{
 			producer = new WWDotNetLayerSetConverter();
+		}
 
 		return producer;
 	}

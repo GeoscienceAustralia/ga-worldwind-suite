@@ -2,13 +2,19 @@ package au.gov.ga.worldwind.viewer.panels.layers;
 
 import gov.nasa.worldwind.ogc.OGCCapabilities;
 import gov.nasa.worldwind.ogc.OGCRequestDescription;
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;
 import java.util.Set;
 
 import au.gov.ga.worldwind.common.util.Icons;
 
+/**
+ * A {@link FolderNode} that represents a WMS Server.
+ * <p/>
+ * Contains helper methods for matching {@link WmsLayerNode}s to
+ * their correct {@link WmsServerNode}.
+ */
 public class WmsServerNode extends FolderNode
 {
 	private String serverCapabilitiesUrl; 

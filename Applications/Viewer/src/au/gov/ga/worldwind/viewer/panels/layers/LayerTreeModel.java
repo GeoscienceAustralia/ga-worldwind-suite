@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -385,7 +385,9 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		}
 		//call recursively for all node's children
 		for (int i = 0; i < node.getChildCount(); i++)
+		{
 			changed |= addAnyLayersBelow(node.getChild(i));
+		}
 
 		return changed;
 	}
