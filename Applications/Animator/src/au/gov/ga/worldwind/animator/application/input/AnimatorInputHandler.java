@@ -1,12 +1,12 @@
 package au.gov.ga.worldwind.animator.application.input;
 
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-
 import gov.nasa.worldwind.awt.AWTInputHandler;
 import gov.nasa.worldwind.event.DragSelectEvent;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.pick.PickedObjectList;
+
+import java.awt.Point;
+import java.awt.event.MouseEvent;
 
 /**
  * An extension of the {@link AWTInputHandler} that generates 
@@ -35,16 +35,16 @@ public class AnimatorInputHandler extends AWTInputHandler
         if (MouseEvent.BUTTON1_DOWN_MASK == mouseEvent.getModifiersEx() || MouseEvent.BUTTON3_DOWN_MASK == mouseEvent.getModifiersEx())
         {
             PickedObjectList pickedObjects = this.getObjectsAtButtonPress();
-            if (isDragging()
+            if (isDragging
                 || (pickedObjects != null && pickedObjects.getTopPickedObject() != null
                 && !pickedObjects.getTopPickedObject().isTerrain()))
             {
-                setDragging(true);
+                isDragging = true;
                 callSelectListeners(new DragSelectEvent(getWorldWindow(), SelectEvent.DRAG, mouseEvent, pickedObjects, prevMousePoint));
             }
         }
 
-        if (!isDragging())
+        if (!isDragging)
         {
             if (!mouseEvent.isConsumed())
             {
