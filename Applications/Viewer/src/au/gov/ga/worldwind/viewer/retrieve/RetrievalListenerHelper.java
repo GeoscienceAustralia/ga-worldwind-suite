@@ -4,8 +4,8 @@ import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.TiledImageLayer;
-import gov.nasa.worldwind.layers.Mercator.BasicMercatorTiledImageLayer;
-import gov.nasa.worldwind.layers.Mercator.MercatorTiledImageLayer;
+import gov.nasa.worldwind.layers.mercator.BasicMercatorTiledImageLayer;
+import gov.nasa.worldwind.layers.mercator.MercatorTiledImageLayer;
 import gov.nasa.worldwind.layers.placename.PlaceNameLayer;
 import gov.nasa.worldwind.layers.rpf.RPFTiledImageLayer;
 import gov.nasa.worldwind.render.SurfaceImage;
@@ -41,15 +41,9 @@ public class RetrievalListenerHelper
 		// Search classes above for declared classes that implement
 		// RetrivalPostProcess AND contain a Field which is a subclass of Tile,
 		// and add those Fields to an array
-		LAYER_FIELDS =
-				getMatchingFieldsFromInnerImplementingClasses(classes,
-						RetrievalPostProcessor.class, Layer.class);
-		ELEVATION_MODEL_FIELDS =
-				getMatchingFieldsFromInnerImplementingClasses(classes,
-						RetrievalPostProcessor.class, ElevationModel.class);
-		TILE_FIELDS =
-				getMatchingFieldsFromInnerImplementingClasses(classes,
-						RetrievalPostProcessor.class, Tile.class);
+		LAYER_FIELDS = getMatchingFieldsFromInnerImplementingClasses(classes, RetrievalPostProcessor.class, Layer.class);
+		ELEVATION_MODEL_FIELDS = getMatchingFieldsFromInnerImplementingClasses(classes, RetrievalPostProcessor.class, ElevationModel.class);
+		TILE_FIELDS = getMatchingFieldsFromInnerImplementingClasses(classes, RetrievalPostProcessor.class, Tile.class);
 	}
 
 	private static Field[] getMatchingFieldsFromInnerImplementingClasses(Class<?>[] search,
