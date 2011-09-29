@@ -129,7 +129,9 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 		gl.glPopAttrib();
 
 		if (showTileBoundary)
+		{
 			this.renderPatchBoundary(dc, tile);
+		}
 	}
 
 	@Override
@@ -207,16 +209,24 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 				latlons.add(new LatLon(lat, lon));
 
 				if (i != 0 && i <= density)
+				{
 					lon = lon.add(dLon);
+				}
 
 				if (lon.degrees < -180)
+				{
 					lon = Angle.NEG180;
+				}
 				else if (lon.degrees > 180)
+				{
 					lon = Angle.POS180;
+				}
 			}
 
 			if (j != 0 && j <= density)
+			{
 				lat = lat.add(dLat);
+			}
 		}
 
 		return latlons;
@@ -247,7 +257,9 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 						|| (sBottom != null && sBottom.rebuiltVertices) || (left != null && left.rebuiltVertices)
 						|| (top != null && top.rebuiltVertices);
 		if (!anyRebuilt)
+		{
 			return;
+		}
 
 		FloatBuffer vertices = tile.getRi().getVertices();
 		Vec4 refCenter = tile.getRi().getReferenceCenter();
@@ -310,7 +322,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 				
 				int[] vboIds = (int[])dc.getGpuResourceCache().get(tile.getRi().getVboCacheKey());
 				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[0]);
-				gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.limit() * 8, vertices.rewind(), GL.GL_DYNAMIC_DRAW);
+				gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.limit() * 4, vertices.rewind(), GL.GL_DYNAMIC_DRAW);
 			}
 			finally
 			{
