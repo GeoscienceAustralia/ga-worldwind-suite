@@ -10,6 +10,7 @@ import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.AWTInputHandler;
+import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.layers.CrosshairLayer;
 import gov.nasa.worldwind.layers.Layer;
@@ -50,7 +51,6 @@ import javax.swing.ToolTipManager;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import nasa.worldwind.awt.WorldWindowGLCanvas;
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
@@ -328,7 +328,7 @@ public class Animator
 	 */
 	private void initialiseWorldWindow()
 	{
-		wwd = new WorldWindowGLCanvas(AnimatorConfiguration.getGLCapabilities());
+		wwd = new WorldWindowGLCanvas(null, null, AnimatorConfiguration.getGLCapabilities(), null);
 		model = new BasicModel();
 		wwd.setModel(model);
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
@@ -353,8 +353,7 @@ public class Animator
 				double newWidth = bufferSize.width;
 				double newHeight = bufferSize.height;
 
-				double targetRatio =
-						getCurrentAnimation().getRenderParameters().getImageAspectRatio();
+				double targetRatio = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
 				double currentRatio = (double) bufferSize.width / bufferSize.height;
 
 				if (currentRatio > targetRatio)
@@ -629,6 +628,7 @@ public class Animator
 
 		slider.addChangeFrameListener(new ChangeFrameListener()
 		{
+			@Override
 			public void frameChanged(int index, int oldFrame, int newFrame)
 			{
 				KeyFrame oldKey = getCurrentAnimation().getKeyFrame(oldFrame);
@@ -848,6 +848,7 @@ public class Animator
 	{
 		getView().addPropertyChangeListener(AVKey.VIEW, new PropertyChangeListener()
 		{
+			@Override
 			public void propertyChange(PropertyChangeEvent evt)
 			{
 				if (autokey && !applying && !rendering)
@@ -1486,6 +1487,7 @@ public class Animator
 		{
 			Thread thread = new Thread(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					stop = false;
