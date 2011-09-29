@@ -11,11 +11,12 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerStyle;
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.media.opengl.GLContext;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 
@@ -39,10 +40,12 @@ public class LayerTreeModelTest
 	{
 		Configuration.setValue(AVKey.OFFLINE_MODE, true);
 		
-		worldWindow = new WorldWindowImpl();
-		worldWindow.setModel(new BasicModel());
-		worldWindow.getModel().setLayers(new ExtendedLayerList());
-		worldWindow.getModel().getGlobe().setElevationModel(new SectionListCompoundElevationModel());
+		BasicModel model = new BasicModel();
+		model.setLayers(new ExtendedLayerList());
+		model.getGlobe().setElevationModel(new SectionListCompoundElevationModel());
+		
+		worldWindow = new WorldWindowTestImpl();
+		worldWindow.setModel(model);
 		
 		LayerTree tree = new LayerTree(worldWindow, new FolderNode("Root", null, null, true));
 		classUnderTest = tree.getLayerModel();
@@ -249,5 +252,15 @@ public class LayerTreeModelTest
 			nodesInstertedEvents.clear();
 			nodesChangedEvents.clear();
 		}
+	}
+	
+	private static class WorldWindowTestImpl extends WorldWindowImpl
+	{
+		@Override
+		public GLContext getContext()
+		{
+			return null;
+		}
+		
 	}
 }
