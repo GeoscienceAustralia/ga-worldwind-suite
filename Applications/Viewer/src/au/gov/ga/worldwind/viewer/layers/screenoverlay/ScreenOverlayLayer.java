@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.viewer.layers.screenoverlay;
 
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.geom.Vec4;
@@ -189,7 +190,7 @@ public class ScreenOverlayLayer extends AbstractLayer
 	private void drawBorder(DrawContext dc, Rectangle overlay)
 	{
 		DoubleBuffer buffer = null; 
-		buffer = FrameFactory.createShapeBuffer(FrameFactory.SHAPE_RECTANGLE, 
+		buffer = FrameFactory.createShapeBuffer(AVKey.SHAPE_RECTANGLE, 
 									  			(overlay.width + attributes.getBorderWidth() * 2), 
 									  			(overlay.height + attributes.getBorderWidth() * 2), 
 									  			0, buffer);
@@ -198,7 +199,7 @@ public class ScreenOverlayLayer extends AbstractLayer
 		gl.glEnable(GL.GL_LINE_SMOOTH);
 		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
 		
-		gl.glLineWidth((float)attributes.getBorderWidth());
+		gl.glLineWidth(attributes.getBorderWidth());
 		
 		gl.glEnable(GL.GL_BLEND);
 		float[] compArray = new float[4];
@@ -236,7 +237,7 @@ public class ScreenOverlayLayer extends AbstractLayer
 	{
 		try
 		{
-			Texture texture = dc.getTextureCache().get(attributes.getSourceId());
+			Texture texture = dc.getGpuResourceCache().getTexture(attributes.getSourceId());
 			if (!textureNeedsReloading(texture, overlay))
 			{
 				return texture;
