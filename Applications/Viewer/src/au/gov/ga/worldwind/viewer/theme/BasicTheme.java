@@ -362,16 +362,24 @@ public class BasicTheme implements Theme
 	public LayersPanel getLayersPanel()
 	{
 		for (ThemePanel panel : getPanels())
+		{
 			if (panel instanceof LayersPanel)
+			{
 				return (LayersPanel) panel;
+			}
+		}
 		return null;
 	}
 	
 	public ThemeLayersPanel getThemeLayersPanel()
 	{
 		for (ThemePanel panel : getPanels())
+		{
 			if (panel instanceof ThemeLayersPanel)
+			{
 				return (ThemeLayersPanel) panel;
+			}
+		}
 		return null;
 	}
 

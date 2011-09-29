@@ -19,7 +19,9 @@ public class ThemeOpener
 	public static void openTheme(final URL url, final ThemeOpenDelegate delegate)
 	{
 		if (url == null)
+		{
 			throw new IllegalArgumentException("Theme URL cannot be null");
+		}
 
 		final ProgressMonitor progress = new IndeterminateProgressMonitor(null, "Downloading theme", null);
 		progress.setMillisToDecideToPopup(0);
@@ -43,13 +45,17 @@ public class ThemeOpener
 				{
 					RetrievalResult result = Downloader.downloadImmediatelyIfModified(url, true);
 					if (progress.isCanceled())
+					{
 						return;
+					}
 
 					InputStream is = result.getAsInputStream();
 					Element element = XMLUtil.getElementFromSource(is);
 					Theme theme = ThemeFactory.createFromXML(element, url);
 					if (theme == null)
+					{
 						throw new Exception("Could not create theme from XML document");
+					}
 
 					progress.close();
 					innerDelegate.opened(theme, element, url);
@@ -90,7 +96,9 @@ public class ThemeOpener
 			Element element = XMLUtil.getElementFromSource(is);
 			Theme theme = ThemeFactory.createFromXML(element, url);
 			if (theme == null)
+			{
 				throw new Exception("Could not create theme from XML document");
+			}
 			delegate.opened(theme, element, url);
 		}
 		catch (Exception e)
