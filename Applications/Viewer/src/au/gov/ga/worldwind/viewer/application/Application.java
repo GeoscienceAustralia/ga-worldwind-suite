@@ -9,7 +9,6 @@ import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.RenderingExceptionListener;
-import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
 import gov.nasa.worldwind.exception.WWAbsentRequirementException;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
@@ -21,7 +20,8 @@ import gov.nasa.worldwind.retrieve.RetrievalService;
 import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
-import gov.nasa.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
+import gov.nasa.worldwindx.examples.ClickAndGoSelectListener;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -94,8 +94,6 @@ import au.gov.ga.worldwind.viewer.components.sectorclipper.SectorClipper;
 import au.gov.ga.worldwind.viewer.components.sectorsaver.ImageSectorSaver;
 import au.gov.ga.worldwind.viewer.layers.ViewerLayerFactory;
 import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
-import au.gov.ga.worldwind.viewer.layers.screenoverlay.MutableScreenOverlayAttributesImpl;
-import au.gov.ga.worldwind.viewer.layers.screenoverlay.ScreenOverlayLayer;
 import au.gov.ga.worldwind.viewer.panels.SideBar;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.layers.AbstractLayersPanel;
@@ -1175,7 +1173,9 @@ public class Application
 		for (GraphicsDevice g : gds)
 		{
 			if (g != device)
+			{
 				return g;
+			}
 		}
 		return null;
 	}
@@ -1186,7 +1186,9 @@ public class Application
 		for (GraphicsDevice g : gds)
 		{
 			if (g.getDefaultConfiguration().getBounds().intersects(bounds))
+			{
 				return g;
+			}
 		}
 		return null;
 	}
