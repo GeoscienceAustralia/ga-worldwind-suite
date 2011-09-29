@@ -9,6 +9,7 @@ import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWIO;
 
+import java.net.URL;
 import java.nio.ByteBuffer;
 
 import com.sun.opengl.util.texture.TextureData;
@@ -38,6 +39,7 @@ public class AccessibleBasicTiledImageLayer extends BasicTiledImageLayer
 		return fileLockAccessor.getFileLock();
 	}
 	
+	@Override
 	protected boolean loadTexture(TextureTile tile, java.net.URL textureURL)
 	{
 		TextureData textureData;
@@ -48,23 +50,28 @@ public class AccessibleBasicTiledImageLayer extends BasicTiledImageLayer
 		}
 
 		if (textureData == null)
+		{
 			return false;
+		}
 
 		tile.setTextureData(textureData);
 		if (tile.getLevelNumber() != 0 || !this.isRetainLevelZeroTiles())
+		{
 			this.addTileToCache(tile);
+		}
 
 		return true;
 	}
 	
+	@Override
 	protected void addTileToCache(TextureTile tile)
     {
         TextureTile.getMemoryCache().add(tile.getTileKey(), tile);
     }
-	
-	protected static TextureData readTexture(java.net.URL url, String textureFormat, boolean useMipMaps)
-    {
-        try
+
+	protected static TextureData readTextureData(URL url, String textureFormat, boolean useMipMaps)
+	{
+		try
         {
             // If the caller has enabled texture compression, and the texture data is not a DDS file, then use read the
             // texture data and convert it to DDS.
@@ -91,8 +98,8 @@ public class AccessibleBasicTiledImageLayer extends BasicTiledImageLayer
             Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
             return null;
         }
-    }
-
+	}
+	
 	protected static class FileLockAccessor extends DownloadPostProcessor
 	{
 		public FileLockAccessor(BasicTiledImageLayer layer)

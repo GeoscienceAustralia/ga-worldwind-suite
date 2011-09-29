@@ -46,25 +46,31 @@ public class AccessibleWMSTiledImageLayer extends WMSTiledImageLayer
 		return fileLockAccessor.getFileLock();
 	}
 	
+	@Override
 	protected boolean loadTexture(TextureTile tile, java.net.URL textureURL)
 	{
 		TextureData textureData;
 
 		synchronized (getFileLock())
 		{
-			textureData = AccessibleBasicTiledImageLayer.readTexture(textureURL, this.getTextureFormat(), this.isUseMipMaps());
+			textureData = AccessibleBasicTiledImageLayer.readTextureData(textureURL, this.getTextureFormat(), this.isUseMipMaps());
 		}
 
 		if (textureData == null)
+		{
 			return false;
+		}
 
 		tile.setTextureData(textureData);
 		if (tile.getLevelNumber() != 0 || !this.isRetainLevelZeroTiles())
+		{
 			this.addTileToCache(tile);
+		}
 
 		return true;
 	}
 	
+	@Override
 	protected void addTileToCache(TextureTile tile)
     {
         TextureTile.getMemoryCache().add(tile.getTileKey(), tile);
