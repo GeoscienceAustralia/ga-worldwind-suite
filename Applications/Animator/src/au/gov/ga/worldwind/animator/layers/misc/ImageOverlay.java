@@ -36,16 +36,19 @@ public class ImageOverlay extends AbstractLayer
 
 	private class OrderedIcon implements OrderedRenderable
 	{
+		@Override
 		public double getDistanceFromEye()
 		{
 			return 0;
 		}
 
+		@Override
 		public void pick(DrawContext dc, Point pickPoint)
 		{
 			// Not implemented
 		}
 
+		@Override
 		public void render(DrawContext dc)
 		{
 			ImageOverlay.this.draw(dc);
@@ -197,6 +200,7 @@ public class ImageOverlay extends AbstractLayer
 		this.locationCenter = locationCenter;
 	}
 
+	@Override
 	protected void doRender(DrawContext dc)
 	{
 		dc.addOrderedRenderable(this.orderedImage);
@@ -205,7 +209,9 @@ public class ImageOverlay extends AbstractLayer
 	private void draw(DrawContext dc)
 	{
 		if (this.iconFilePath == null)
+		{
 			return;
+		}
 
 		GL gl = dc.getGL();
 
@@ -215,17 +221,20 @@ public class ImageOverlay extends AbstractLayer
 
 		try
 		{
-			gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT
-					| GL.GL_ENABLE_BIT | GL.GL_TEXTURE_BIT
-					| GL.GL_TRANSFORM_BIT | GL.GL_VIEWPORT_BIT
-					| GL.GL_CURRENT_BIT);
+			gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | 
+							GL.GL_COLOR_BUFFER_BIT | 
+							GL.GL_ENABLE_BIT | 
+							GL.GL_TEXTURE_BIT | 
+							GL.GL_TRANSFORM_BIT |
+							GL.GL_VIEWPORT_BIT |
+							GL.GL_CURRENT_BIT);
 			attribsPushed = true;
 
-			Texture iconTexture = dc.getTextureCache().get(this);
+			Texture iconTexture = dc.getGpuResourceCache().getTexture(this);
 			if (iconTexture == null)
 			{
 				this.initializeTexture(dc);
-				iconTexture = dc.getTextureCache().get(this);
+				iconTexture = dc.getGpuResourceCache().getTexture(this);
 				if (iconTexture == null)
 				{
 					// TODO: log warning
@@ -252,8 +261,7 @@ public class ImageOverlay extends AbstractLayer
 			projectionPushed = true;
 			gl.glLoadIdentity();
 			double maxwh = width > height ? width : height;
-			gl.glOrtho(0d, viewport.width, 0d, viewport.height, -0.6 * maxwh,
-					0.6 * maxwh);
+			gl.glOrtho(0d, viewport.width, 0d, viewport.height, -0.6 * maxwh, 0.6 * maxwh);
 
 			gl.glMatrixMode(GL.GL_MODELVIEW);
 			gl.glPushMatrix();
@@ -263,8 +271,7 @@ public class ImageOverlay extends AbstractLayer
 			double scale = this.computeScale(viewport);
 			Vec4 locationSW = this.computeLocation(viewport, scale);
 
-			gl.glTranslated((int) locationSW.x, (int) locationSW.y,
-					(int) locationSW.z);
+			gl.glTranslated((int) locationSW.x, (int) locationSW.y, (int) locationSW.z);
 			gl.glScaled(scale, scale, 1);
 
 			TextureCoords texCoords = iconTexture.getImageTexCoords();
@@ -284,7 +291,9 @@ public class ImageOverlay extends AbstractLayer
 				gl.glPopMatrix();
 			}
 			if (attribsPushed)
+			{
 				gl.glPopAttrib();
+			}
 		}
 	}
 
@@ -292,13 +301,11 @@ public class ImageOverlay extends AbstractLayer
 	{
 		if (this.resizeBehavior.equals(AVKey.RESIZE_SHRINK_ONLY))
 		{
-			return Math.min(1d, (this.toViewportScale) * viewport.width
-					/ this.getScaledIconWidth());
+			return Math.min(1d, (this.toViewportScale) * viewport.width / this.getScaledIconWidth());
 		}
 		else if (this.resizeBehavior.equals(AVKey.RESIZE_STRETCH))
 		{
-			return (this.toViewportScale) * viewport.width
-					/ this.getScaledIconWidth();
+			return (this.toViewportScale) * viewport.width / this.getScaledIconWidth();
 		}
 		else if (this.resizeBehavior.equals(AVKey.RESIZE_KEEP_FIXED_SIZE))
 		{
@@ -348,14 +355,15 @@ public class ImageOverlay extends AbstractLayer
 
 	private void initializeTexture(DrawContext dc)
 	{
-		Texture iconTexture = dc.getTextureCache().get(this);
+		Texture iconTexture = dc.getGpuResourceCache().getTexture(this);
 		if (iconTexture != null)
+		{
 			return;
+		}
 
 		try
 		{
-			InputStream iconStream = this.getClass().getResourceAsStream(
-					"/" + this.iconFilePath);
+			InputStream iconStream = this.getClass().getResourceAsStream("/" + this.iconFilePath);
 			if (iconStream == null)
 			{
 				File iconFile = new File(this.iconFilePath);
@@ -373,29 +381,21 @@ public class ImageOverlay extends AbstractLayer
 		}
 		catch (IOException e)
 		{
-			String msg = Logging
-					.getMessage("layers.IOExceptionDuringInitialization");
+			String msg = Logging.getMessage("layers.IOExceptionDuringInitialization");
 			Logging.logger().severe(msg);
 			throw new WWRuntimeException(msg, e);
 		}
 
 		GL gl = dc.getGL();
 		gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER,
-				GL.GL_LINEAR);//_MIPMAP_LINEAR);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER,
-				GL.GL_LINEAR);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S,
-				GL.GL_CLAMP_TO_EDGE);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T,
-				GL.GL_CLAMP_TO_EDGE);
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);//_MIPMAP_LINEAR);
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
 		// Enable texture anisotropy
 		int[] maxAnisotropy = new int[1];
-		gl
-				.glGetIntegerv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT,
-						maxAnisotropy, 0);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT,
-				maxAnisotropy[0]);
+		gl.glGetIntegerv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy, 0);
+		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy[0]);
 	}
 
 	@Override

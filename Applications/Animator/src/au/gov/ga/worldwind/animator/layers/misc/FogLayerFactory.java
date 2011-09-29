@@ -4,6 +4,7 @@ import static au.gov.ga.worldwind.animator.util.Util.isBlank;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.layers.AbstractLayer;
+import gov.nasa.worldwind.layers.FogLayer;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -11,7 +12,6 @@ import java.awt.Color;
 
 import javax.xml.xpath.XPath;
 
-import nasa.worldwind.layers.FogLayer;
 
 import org.w3c.dom.Element;
 

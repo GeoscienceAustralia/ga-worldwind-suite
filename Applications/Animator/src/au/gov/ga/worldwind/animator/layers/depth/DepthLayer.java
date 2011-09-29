@@ -1,15 +1,15 @@
 package au.gov.ga.worldwind.animator.layers.depth;
 
-import java.util.List;
-
-import javax.media.opengl.GL;
-
 import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.SurfaceTile;
+
+import java.util.List;
+
+import javax.media.opengl.GL;
 
 public class DepthLayer extends AbstractLayer
 {
@@ -42,25 +42,30 @@ public class DepthLayer extends AbstractLayer
 
 	private class DepthTile implements SurfaceTile
 	{
-		public void applyInternalTransform(DrawContext dc)
+		@Override
+		public void applyInternalTransform(DrawContext dc, boolean textureIdAvailable)
 		{
 		}
 
+		@Override
 		public boolean bind(DrawContext dc)
 		{
 			return true;
 		}
 
+		@Override
 		public Extent getExtent(DrawContext dc)
 		{
 			return null;
 		}
 
+		@Override
 		public Sector getSector()
 		{
 			return Sector.FULL_SPHERE;
 		}
 
+		@Override
 		public List<? extends LatLon> getCorners()
 		{
 			return null;
