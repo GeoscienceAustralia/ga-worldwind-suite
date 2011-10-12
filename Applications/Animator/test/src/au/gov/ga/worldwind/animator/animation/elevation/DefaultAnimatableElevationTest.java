@@ -3,7 +3,6 @@ package au.gov.ga.worldwind.animator.animation.elevation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import gov.nasa.worldwind.Factory;
-import gov.nasa.worldwind.WorldWindowImpl;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.globes.ElevationModel;
@@ -35,6 +34,7 @@ import au.gov.ga.worldwind.animator.terrain.AnimationElevationLoader;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierImpl;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggerationImpl;
+import au.gov.ga.worldwind.animator.util.WorldWindowTestImpl;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.StaticMessageSource;
@@ -69,7 +69,7 @@ public class DefaultAnimatableElevationTest
 		
 		intialiseMessageSource();
 		
-		animation = new WorldWindAnimationImpl(new WorldWindowImpl());
+		animation = new WorldWindAnimationImpl(new WorldWindowTestImpl());
 		
 		classToBeTested = new DefaultAnimatableElevation(animation);
 		

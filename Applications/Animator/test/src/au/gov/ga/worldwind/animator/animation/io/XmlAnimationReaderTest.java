@@ -1,7 +1,9 @@
 package au.gov.ga.worldwind.animator.animation.io;
 
-import static org.junit.Assert.*;
-import gov.nasa.worldwind.WorldWindowImpl;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -17,6 +19,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValu
 import au.gov.ga.worldwind.animator.animation.parameter.BasicParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.util.WorldWindowTestImpl;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.StaticMessageSource;
 
@@ -49,7 +52,7 @@ public class XmlAnimationReaderTest
 	{
 		File inputFile = new File(getClass().getResource("v2AnimationFile.xml").toURI());
 		
-		Animation result = classToBeTested.readAnimation(inputFile, new WorldWindowImpl());
+		Animation result = classToBeTested.readAnimation(inputFile, new WorldWindowTestImpl());
 		
 		assertNotNull(result);
 		

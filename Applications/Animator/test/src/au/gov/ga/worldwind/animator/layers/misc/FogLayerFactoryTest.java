@@ -3,11 +3,11 @@ package au.gov.ga.worldwind.animator.layers.misc;
 import static org.junit.Assert.assertEquals;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
+import gov.nasa.worldwind.layers.FogLayer;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.Color;
 
-import nasa.worldwind.layers.FogLayer;
 
 import org.junit.Test;
 import org.w3c.dom.Document;

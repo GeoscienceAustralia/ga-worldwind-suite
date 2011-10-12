@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.animator.animation.layer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import gov.nasa.worldwind.WorldWindowImpl;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.layers.BasicLayerFactory;
@@ -34,6 +33,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueType;
 import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
+import au.gov.ga.worldwind.animator.util.WorldWindowTestImpl;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
@@ -74,7 +74,7 @@ public class DefaultAnimatableLayerTest
 		
 		layer = mockContext.mock(Layer.class);
 		
-		animation = new WorldWindAnimationImpl(new WorldWindowImpl());
+		animation = new WorldWindAnimationImpl(new WorldWindowTestImpl());
 		
 		initialiseParameters();
 		

@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.animator.animation.io;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import gov.nasa.worldwind.WorldWindowImpl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,6 +16,7 @@ import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
 import au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.util.WorldWindowTestImpl;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.util.message.StaticMessageSource;
 import au.gov.ga.worldwind.test.util.TestUtils;
@@ -50,7 +50,7 @@ public class XmlAnimationWriterTest
 	 */
 	private Animation createAnimation()
 	{
-		Animation result = new WorldWindAnimationImpl(new WorldWindowImpl());
+		Animation result = new WorldWindAnimationImpl(new WorldWindowTestImpl());
 		
 		ParameterValue eyeLatVal1 = new BasicBezierParameterValue(1.0, 0, result.getCamera().getEyeLat(), 1.1, 1.2, 1.3, 1.4);
 		ParameterValue eyeLatVal2 = new BasicBezierParameterValue(2.0, 10, result.getCamera().getEyeLat(), 2.1, 2.2, 2.3, 2.4);
