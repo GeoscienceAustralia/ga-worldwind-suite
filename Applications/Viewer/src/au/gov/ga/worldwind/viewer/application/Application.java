@@ -8,6 +8,7 @@ import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingExceptionListener;
 import gov.nasa.worldwind.exception.WWAbsentRequirementException;
 import gov.nasa.worldwind.geom.Angle;
@@ -48,7 +49,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GLCapabilities;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -69,7 +69,6 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
-import nasa.worldwind.awt.WorldWindowStereoGLCanvas;
 import nasa.worldwind.retrieve.ExtendedRetrievalService;
 
 import org.w3c.dom.Element;
@@ -314,7 +313,7 @@ public class Application
 	private JFrame frame;
 	private JFrame fullscreenFrame;
 
-	private WorldWindowStereoGLCanvas wwd;
+	private WorldWindowGLCanvas wwd;
 	private MouseLayer mouseLayer;
 
 	private SideBar sideBar;
@@ -374,8 +373,11 @@ public class Application
 		final SplashScreen splashScreen = showSplashScreen ? new SplashScreen(frame) : null;
 
 		// create worldwind stuff
-		GLCapabilities caps = Settings.get().isHardwareStereoEnabled() ? WorldWindowStereoGLCanvas.stereoCaps : WorldWindowStereoGLCanvas.defaultCaps;
-		wwd = new WorldWindowStereoGLCanvas(caps);
+		if(Settings.get().isHardwareStereoEnabled())
+		{
+			System.setProperty(AVKey.STEREO_MODE, "device");
+		}
+		wwd = new WorldWindowGLCanvas();
 		wwd.setMinimumSize(new Dimension(1, 1));
 		if (splashScreen != null)
 		{
@@ -1142,7 +1144,7 @@ public class Application
 		}
 	}
 
-	protected void copyStateBetweenWorldWindows(WorldWindowStereoGLCanvas src, WorldWindowStereoGLCanvas dst)
+	protected void copyStateBetweenWorldWindows(WorldWindowGLCanvas src, WorldWindowGLCanvas dst)
 	{
 		dst.setView(src.getView());
 	}

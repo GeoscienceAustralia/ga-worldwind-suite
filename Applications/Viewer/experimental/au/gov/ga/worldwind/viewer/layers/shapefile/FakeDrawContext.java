@@ -35,6 +35,7 @@ import gov.nasa.worldwind.util.PickPointFrustumList;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.nio.FloatBuffer;
@@ -821,6 +822,49 @@ public class FakeDrawContext implements DrawContext
 	public GpuResourceCache getTextureCache()
 	{
 		return null;
+	}
+
+	@Override
+	public PickedObjectList getObjectsInPickRectangle() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void addObjectInPickRectangle(PickedObject pickedObject) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getPickColorAtPoint(Point point) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int[] getPickColorsInRectangle(Rectangle rectangle,
+			int[] minAndMaxColorCodes) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Rectangle getPickRectangle() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setPickRectangle(Rectangle pickRect) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addPickRectangleFrustum() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
