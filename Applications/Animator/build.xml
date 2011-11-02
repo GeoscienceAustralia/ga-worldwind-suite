@@ -12,7 +12,7 @@
 	<property name="application_version" value="2.2-SNAPSHOT" />
 	<property name="worldwind_version" value="105.156" />
 
-	<!-- Viewer source code directories -->
+	<!-- Animator source code directories -->
 	<property name="src_dir" value="${basedir}/src" />
 	<property name="common_src_dir" value="${basedir}/../Common/src" />
 
