@@ -2,58 +2,78 @@
 
 <project name="Animator" basedir="." default="deploy">
 
-	<property name="deploy_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Animator\Builds\Current"/>
-	<property name="archive_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Animator\Builds\Release archive"/>
-	
-	<property name="application_name" value="ga-animator"/>
-	<property name="application_version" value="2.1-SNAPSHOT"/>
-	<property name="application_class" value="au.gov.ga.worldwind.animator.application.Animator"/>
-	<property name="executable_class" value="au.gov.ga.worldwind.animator.application.Executable"/>
-	<property name="application_jar" value="${application_name}-${application_version}.jar" />
-	<property name="application_uber_jar" value="${application_name}-full-${application_version}.jar" />
-	
-	<property name="worldwind_version" value="0.6.724.14486"/>
-	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-${worldwind_version}" />
-	<property name="worldwind_jar" value="worldwind.jar" />
-	
-	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />	
-	<property name="common_src_dir" value="${basedir}/../Common/src" />
-	
+	<property name="javac_debug" value="false" />
+
+	<!-- Deploy/archive locations -->
+	<property name="deploy_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Animator\Builds\Current" />
+	<property name="archive_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Animator\Builds\Release archive" />
+
+	<!-- Version numbers -->
+	<property name="application_version" value="2.2-SNAPSHOT" />
+	<property name="worldwind_version" value="105.156" />
+
+	<!-- Viewer source code directories -->
 	<property name="src_dir" value="${basedir}/src" />
-	<property name="working_src_dir" value="${basedir}/tmp_src" />
+	<property name="common_src_dir" value="${basedir}/../Common/src" />
+
+	<!-- WorldWind library locations -->
+	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
+	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-${worldwind_version}" />
+	<property name="worldwind_native_dir" value="${worldwind_dir}/native" />
+	<property name="worldwind_jar" value="worldwind.jar" />
+	<property name="worldwindx_jar" value="worldwindx.jar" />
+
+	<!-- GDAL locations -->
+	<property name="gdal_dir" value="${basedir}/../../SDK/GDAL-172" />
+	<property name="gdal_package_dir" value="${gdal_dir}/package" />
+	<property name="gdal_native_dir" value="${gdal_dir}/native" />
+	<property name="gdal_jar" value="gdal.jar" />
+	<property name="gdal_data_zip" value="data.zip" />
+
+	<!-- Local build and package directories -->
 	<property name="build_dir" value="${basedir}/build" />
 	<property name="target_dir" value="${basedir}/target" />
-	<property name="lib_dir" value="${target_dir}/lib" />
 
-	<property name="test_src_dir" value="${basedir}/test/src"/>
+	<!-- JAR configuration -->
+	<property name="application_name" value="ga-animator" />
+	<property name="executable_class" value="au.gov.ga.worldwind.animator.application.Executable" />
+	<property name="application_jar" value="${application_name}-${application_version}.jar" />
+	<property name="archive_zip" value="${application_name}-${application_version}.zip" />
+
+	<!-- Batch script filenames -->
+	<property name="run_file" value="run.bat" />
+
+	<!-- Test directories -->
+	<property name="test_src_dir" value="${basedir}/test/src" />
 	<property name="common_test_src_dir" value="${basedir}/../Common/test/src" />
-	<property name="test_lib_dir" value="${basedir}/test/lib"/>
-	<property name="test_build_dir" value="${basedir}/test/build"/>
-	<property name="test_results_dir" value="${basedir}/test/results"/>
-	<property name="test_reports_dir" value="${basedir}/test/reports"/>
-	
-	<property name="doco_src_dir" value="${basedir}/documentation/user"/>
-	<property name="doco_dest_dir" value="doc"/>
-	
-	<property name="run_file" value="run.bat"/>
+	<property name="test_lib_dir" value="${basedir}/test/lib" />
+	<property name="test_build_dir" value="${basedir}/test/build" />
+	<property name="test_results_dir" value="${basedir}/test/results" />
+	<property name="test_reports_dir" value="${basedir}/test/reports" />
 
-	<property name="javac_debug" value="false" />
+	<!-- Doco directories -->
+	<property name="doco_src_dir" value="${basedir}/documentation/user" />
+	<property name="doco_dest_dir" value="doc" />
 
 	<path id="classpath">
 		<fileset dir="${worldwind_dir}">
 			<include name="${worldwind_jar}" />
+			<include name="${worldwindx_jar}" />
+		</fileset>
+		<fileset dir="${gdal_package_dir}">
+			<include name="${gdal_jar}" />
 		</fileset>
 		<fileset dir="${jogl_dir}">
 			<include name="**/*.jar" />
 		</fileset>
 	</path>
-	
+
 	<path id="test_classpath">
-		<path refid="classpath"/>
+		<path refid="classpath" />
 		<fileset dir="${test_lib_dir}">
 			<include name="**/*.jar" />
 		</fileset>
-		<path path="${build_dir}"/>
+		<path path="${build_dir}" />
 	</path>
 
 	<patternset id="manifest_exclude">
@@ -70,117 +90,103 @@
 		<delete dir="${test_build_dir}" />
 		<delete dir="${test_results_dir}" />
 		<delete dir="${test_reports_dir}" />
-		<delete dir="${working_src_dir}" />
+
+		<ant antfile="${gdal_dir}/build.xml" target="clean" dir="${gdal_dir}" inheritall="false" />
 	</target>
 
-	<target name="build">
-		<mkdir dir="${working_src_dir}" />
-		<copy todir="${working_src_dir}">
-			<fileset dir="${common_src_dir}"/>
-		</copy>
-		<copy todir="${working_src_dir}" overwrite="true">
-			<fileset dir="${src_dir}"/>
-		</copy>
-		
+	<target name="gdal">
+		<ant antfile="${gdal_dir}/build.xml" target="run" dir="${gdal_dir}" inheritall="false" />
+	</target>
+
+	<target name="build" depends="gdal">
 		<mkdir dir="${build_dir}" />
 		<copy todir="${build_dir}">
-			<fileset dir="${working_src_dir}">
+			<fileset dir="${src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+			<fileset dir="${common_src_dir}">
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javac source="1.6" target="1.6" srcdir="${working_src_dir}" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" />
-		
-		<delete dir="${working_src_dir}" />
+		<javac source="1.5" target="1.5" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}">
+			<src path="${src_dir}" />
+			<src path="${common_src_dir}" />
+		</javac>
 	</target>
 
 	<target name="build-test" depends="build">
-		<mkdir dir="${working_src_dir}" />
-		<copy todir="${working_src_dir}">
-			<fileset dir="${common_test_src_dir}"/>
-		</copy>
-		<copy todir="${working_src_dir}" overwrite="true">
-			<fileset dir="${test_src_dir}"/>
-		</copy>
-		
-		<mkdir dir="${test_build_dir}"/>
+		<mkdir dir="${test_build_dir}" />
 		<copy todir="${test_build_dir}">
-			<fileset dir="${working_src_dir}">
+			<fileset dir="${test_src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+			<fileset dir="${common_test_src_dir}">
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javac source="1.6" target="1.6" srcdir="${working_src_dir}" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}" />
-		
-		<delete dir="${working_src_dir}" />
+		<javac source="1.5" target="1.5" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}">
+			<src path="${test_src_dir}" />
+			<src path="${common_test_src_dir}" />
+		</javac>
 	</target>
-	
+
 	<target name="test" description="Execute unit tests on the project" depends="build-test">
-		<mkdir dir="${test_results_dir}"/>
-		<mkdir dir="${test_reports_dir}"/>
+		<mkdir dir="${test_results_dir}" />
+		<mkdir dir="${test_reports_dir}" />
 		<junit printsummary="withOutAndErr" failureproperty="junit.failure">
-			<classpath refid="test_classpath"/>
-			<classpath path="classes:${test_build_dir}"/>
+			<classpath refid="test_classpath" />
+			<classpath path="classes:${test_build_dir}" />
 			<batchtest todir="${test_results_dir}">
 				<fileset dir="${test_build_dir}">
-					<include name="**/*Test.class"/>
+					<include name="**/*Test.class" />
 				</fileset>
-				<formatter type="xml"/>
+				<formatter type="xml" />
 			</batchtest>
 		</junit>
 		<junitreport todir="${test_reports_dir}">
-			<fileset dir="${test_results_dir}"/>
-			<report todir="${test_reports_dir}"/>
+			<fileset dir="${test_results_dir}" />
+			<report todir="${test_reports_dir}" />
 		</junitreport>
-		<fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
-	</target>
-	
-	<target name="package" depends="test">
-		<jar destfile="${build_dir}/${application_jar}" basedir="${build_dir}">
-			<manifest>
-				<attribute name="Main-Class" value="${application_class}" />
-				<attribute name="Implementation-Version" value="${application_version}"/>
-			</manifest>
-		</jar>
-		<jar destfile="${build_dir}/${worldwind_jar}">
-			<zipfileset src="${worldwind_dir}/${worldwind_jar}">
-				<patternset refid="manifest_exclude" />
-			</zipfileset>
-		</jar>
+		<fail if="junit.failure" message="Unit test(s) failed.  See reports!" />
 	</target>
 
-	<target name="executables" depends="clean, package">
+	<target name="executables" depends="clean, test">
 		<mkdir dir="${target_dir}" />
-		
+
 		<zip destfile="${target_dir}/temp.zip">
 			<zipgroupfileset dir="${jogl_dir}">
 				<include name="**/*.jar" />
 			</zipgroupfileset>
 			<zipgroupfileset dir="${worldwind_dir}">
 				<include name="${worldwind_jar}" />
+				<include name="${worldwindx_jar}" />
 			</zipgroupfileset>
 		</zip>
 
-		<jar destfile="${target_dir}/${application_uber_jar}">
-			<fileset dir="${build_dir}" excludes="**/*.jar,**/*.zip"/>
+		<jar destfile="${target_dir}/${application_jar}">
+			<fileset dir="${build_dir}" />
 			<fileset dir="${jogl_dir}" includes="native/**" />
+			<fileset dir="${gdal_dir}" includes="native/**" />
+			<fileset dir="${worldwind_dir}" includes="native/**" />
+
 			<zipfileset src="${target_dir}/temp.zip">
 				<patternset refid="manifest_exclude" />
 			</zipfileset>
 
 			<manifest>
 				<attribute name="Main-Class" value="${executable_class}" />
-				<attribute name="Implementation-Version" value="${application_version}"/>
+				<attribute name="Implementation-Version" value="${application_version}" />
 			</manifest>
 		</jar>
-		
-		<mkdir dir="${target_dir}/${doco_dest_dir}"/>
+
+		<mkdir dir="${target_dir}/${doco_dest_dir}" />
 		<copy todir="${target_dir}/${doco_dest_dir}">
-			<fileset dir="${doco_src_dir}"/>
+			<fileset dir="${doco_src_dir}" />
 		</copy>
-		
+
 		<delete file="${target_dir}/temp.zip" />
-		
-		<echo file="${target_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${application_uber_jar}</echo>
-		
+
+		<echo file="${target_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${application_jar}</echo>
 	</target>
 
 	<target name="deploy" description="Deploy the current build to the current release candidate folder" depends="clean, executables">
@@ -191,13 +197,14 @@
 			</fileset>
 		</delete>
 		<copy todir="${deploy_location}" overwrite="true" failonerror="false">
-			<fileset dir="${target_dir}"/>
-			<fileset dir="${basedir}" file="run-local.bat"/>
+			<fileset dir="${target_dir}" />
+			<fileset dir="${basedir}" file="run-local.bat" />
 		</copy>
 	</target>
-	
+
 	<target name="archive" description="Copy the current release candidate to the release archive folder">
-		<zip destfile="${deploy_location}/${application_name}-${application_version}.zip">
+		<delete file="${archive_location}/${archive_zip}" />
+		<zip destfile="${archive_location}/${archive_zip}">
 			<fileset dir="${deploy_location}">
 				<exclude name="**/*.log" />
 				<exclude name="**/animationEvents.txt" />
@@ -205,7 +212,6 @@
 				<exclude name="**/run-local.bat" />
 			</fileset>
 		</zip>
-		<move todir="${archive_location}" file="${deploy_location}/${application_name}-${application_version}.zip" overwrite="true"/>
 	</target>
-	
+
 </project>
