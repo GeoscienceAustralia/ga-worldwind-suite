@@ -44,11 +44,11 @@
 	<property name="ww_jar" value="worldwind.jar" />
 	<property name="ww_versioned_jar" value="worldwind-${application_version}.jar" />
 
-	<property name="ww_natives_windows_32_jar" value="worldwind-natives-windows-32.jar" />
-	<property name="ww_natives_windows_64_jar" value="worldwind-natives-windows-64.jar" />
-	<property name="ww_natives_macosx_64_jar" value="worldwind-natives-macosx-64.jar" />
-	<property name="ww_natives_linux_32_jar" value="worldwind-natives-linux-32.jar" />
-	<property name="ww_natives_linux_64_jar" value="worldwind-natives-linux-64.jar" />
+	<property name="ww_natives_windows_i586_jar" value="worldwind-natives-windows-i586.jar" />
+	<property name="ww_natives_windows_amd64_jar" value="worldwind-natives-windows-amd64.jar" />
+	<property name="ww_natives_macosx_universal_jar" value="worldwind-natives-macosx-universal.jar" />
+	<property name="ww_natives_linux_i586_jar" value="worldwind-natives-linux-i586.jar" />
+	<property name="ww_natives_linux_amd64_jar" value="worldwind-natives-linux-amd64.jar" />
 
 	<!-- Batch script filenames -->
 	<property name="run_file" value="run.bat" />
@@ -186,27 +186,27 @@
 			</zipfileset>
 		</jar>
 
-		<jar destfile="${webstart_dir}/unsigned-${ww_natives_windows_32_jar}">
-			<fileset dir="${worldwind_native_dir}/windows32" />
-			<fileset dir="${gdal_native_dir}/windows32" />
+		<jar destfile="${webstart_dir}/unsigned-${ww_natives_windows_i586_jar}">
+			<fileset dir="${worldwind_native_dir}/windows-i586" />
+			<fileset dir="${gdal_native_dir}/windows-i586" />
 		</jar>
-		<jar destfile="${webstart_dir}/unsigned-${ww_natives_windows_64_jar}">
-			<fileset dir="${worldwind_native_dir}/windows64" />
-			<fileset dir="${gdal_native_dir}/windows64" />
-		</jar>
-
-		<jar destfile="${webstart_dir}/unsigned-${ww_natives_macosx_64_jar}">
-			<fileset dir="${worldwind_native_dir}/macosx64" />
-			<fileset dir="${gdal_native_dir}/macosx64" />
+		<jar destfile="${webstart_dir}/unsigned-${ww_natives_windows_amd64_jar}">
+			<fileset dir="${worldwind_native_dir}/windows-amd64" />
+			<fileset dir="${gdal_native_dir}/windows-amd64" />
 		</jar>
 
-		<jar destfile="${webstart_dir}/unsigned-${ww_natives_linux_32_jar}">
-			<fileset dir="${worldwind_native_dir}/linux32" />
-			<fileset dir="${gdal_native_dir}/linux32" />
+		<jar destfile="${webstart_dir}/unsigned-${ww_natives_macosx_universal_jar}">
+			<fileset dir="${worldwind_native_dir}/macosx-universal" />
+			<fileset dir="${gdal_native_dir}/macosx-universal" />
 		</jar>
-		<jar destfile="${webstart_dir}/unsigned-${ww_natives_linux_64_jar}">
-			<fileset dir="${worldwind_native_dir}/linux64" />
-			<fileset dir="${gdal_native_dir}/linux64" />
+
+		<jar destfile="${webstart_dir}/unsigned-${ww_natives_linux_i586_jar}">
+			<fileset dir="${worldwind_native_dir}/linux-i586" />
+			<fileset dir="${gdal_native_dir}/linux-i586" />
+		</jar>
+		<jar destfile="${webstart_dir}/unsigned-${ww_natives_linux_amd64_jar}">
+			<fileset dir="${worldwind_native_dir}/linux-amd64" />
+			<fileset dir="${gdal_native_dir}/linux-amd64" />
 		</jar>
 
 	</target>
@@ -215,11 +215,11 @@
 		<signjar jar="${webstart_dir}/unsigned-${app_jar}" signedjar="${webstart_dir}/${app_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
 		<signjar jar="${webstart_dir}/unsigned-${ww_jar}" signedjar="${webstart_dir}/${ww_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
 
-		<signjar jar="${webstart_dir}/unsigned-${ww_natives_windows_32_jar}" signedjar="${webstart_dir}/${ww_natives_windows_32_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
-		<signjar jar="${webstart_dir}/unsigned-${ww_natives_windows_64_jar}" signedjar="${webstart_dir}/${ww_natives_windows_64_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
-		<signjar jar="${webstart_dir}/unsigned-${ww_natives_macosx_64_jar}" signedjar="${webstart_dir}/${ww_natives_macosx_64_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
-		<signjar jar="${webstart_dir}/unsigned-${ww_natives_linux_32_jar}" signedjar="${webstart_dir}/${ww_natives_linux_32_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
-		<signjar jar="${webstart_dir}/unsigned-${ww_natives_linux_64_jar}" signedjar="${webstart_dir}/${ww_natives_linux_64_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/unsigned-${ww_natives_windows_i586_jar}" signedjar="${webstart_dir}/${ww_natives_windows_i586_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/unsigned-${ww_natives_windows_amd64_jar}" signedjar="${webstart_dir}/${ww_natives_windows_amd64_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/unsigned-${ww_natives_macosx_universal_jar}" signedjar="${webstart_dir}/${ww_natives_macosx_universal_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/unsigned-${ww_natives_linux_i586_jar}" signedjar="${webstart_dir}/${ww_natives_linux_i586_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/unsigned-${ww_natives_linux_amd64_jar}" signedjar="${webstart_dir}/${ww_natives_linux_amd64_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
 	</target>
 
 	<target name="executable" depends="build">
@@ -271,16 +271,16 @@
 		<copy file="${webstart_dir}/unsigned-${ww_jar}" tofile="${archive_location}/unsigned-${ww_versioned_jar}" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${ww_jar}" tofile="${archive_location}/${ww_versioned_jar}" preservelastmodified="true" />
 
-		<copy file="${webstart_dir}/${ww_natives_windows_32_jar}" todir="${archive_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_natives_windows_64_jar}" todir="${archive_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_natives_macosx_64_jar}" todir="${archive_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_natives_linux_32_jar}" todir="${archive_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_natives_linux_64_jar}" todir="${archive_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_32_jar}" todir="${archive_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_64_jar}" todir="${archive_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/unsigned-${ww_natives_macosx_64_jar}" todir="${archive_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_32_jar}" todir="${archive_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_64_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_windows_i586_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_windows_amd64_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_macosx_universal_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_linux_i586_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_linux_amd64_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_i586_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_amd64_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_macosx_universal_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_i586_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_amd64_jar}" todir="${archive_location}" preservelastmodified="true" />
 	</target>
 
 	<target name="deploy-help" description="Deploys the help files to the sandpit help location">
@@ -297,16 +297,16 @@
 		<copy file="${webstart_dir}/unsigned-${ww_jar}" todir="${deploy_location}" preservelastmodified="true" />
 		<copy file="${webstart_dir}/${ww_jar}" todir="${deploy_location}" preservelastmodified="true" />
 
-		<copy file="${webstart_dir}/${ww_natives_windows_32_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_natives_windows_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_natives_macosx_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_natives_linux_32_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_natives_linux_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_32_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/unsigned-${ww_natives_macosx_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_32_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_windows_i586_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_windows_amd64_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_macosx_universal_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_linux_i586_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_linux_amd64_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_i586_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_amd64_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_macosx_universal_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_i586_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_amd64_jar}" todir="${deploy_location}" preservelastmodified="true" />
 	</target>
 
 </project>

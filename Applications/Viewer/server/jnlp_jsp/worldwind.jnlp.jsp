@@ -31,31 +31,31 @@
 		<extension name="jogl" href="http://worldwind.arc.nasa.gov/java/jogl/webstart/jogl.jnlp"/>
 	</resources>
 	<resources os="Windows" arch="x86">
-		<nativelib href="worldwind-natives-windows-32.jar" />
+		<nativelib href="worldwind-natives-windows-i586.jar" />
 	</resources>
 	<resources os="Windows" arch="amd64">
-		<nativelib href="worldwind-natives-windows-64.jar" />
+		<nativelib href="worldwind-natives-windows-amd64.jar" />
 	</resources>
 	<resources os="Windows" arch="x86_64">
-		<nativelib href="worldwind-natives-windows-64.jar" />
+		<nativelib href="worldwind-natives-windows-amd64.jar" />
 	</resources>
 	<resources os="Linux" arch="i386">
-		<nativelib href="worldwind-natives-linux-32.jar" />
+		<nativelib href="worldwind-natives-linux-i586.jar" />
 	</resources>
 	<resources os="Linux" arch="x86">
-		<nativelib href="worldwind-natives-linux-32.jar" />
+		<nativelib href="worldwind-natives-linux-i586.jar" />
 	</resources>
 	<resources os="Linux" arch="amd64">
-		<nativelib href="worldwind-natives-linux-64.jar" />
+		<nativelib href="worldwind-natives-linux-amd64.jar" />
 	</resources>
 	<resources os="Linux" arch="x86_64">
-		<nativelib href="worldwind-natives-linux-64.jar" />
+		<nativelib href="worldwind-natives-linux-amd64.jar" />
 	</resources>
-	<!--<resources os="Mac OS X" arch="i386">
-		<nativelib href="worldwind-natives-macosx-64.jar" />
-	</resources>-->
+	<resources os="Mac OS X" arch="i386">
+		<nativelib href="worldwind-natives-macosx-universal.jar" />
+	</resources>
 	<resources os="Mac OS X" arch="x86_64">
-		<nativelib href="worldwind-natives-macosx-64.jar" />
+		<nativelib href="worldwind-natives-macosx-universal.jar" />
 	</resources>
 	<component-desc />
 </jnlp>
