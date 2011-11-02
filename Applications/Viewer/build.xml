@@ -2,56 +2,82 @@
 
 <project name="Viewer" basedir="." default="run">
 
-	<property name="archive_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Viewer\Builds\Current"/>
-	<property name="deploy_location" value="\\marl\sandpit\symbolic-links\world-wind\current"/>
-	
-	<property name="application_version" value="2.0-SNAPSHOT"/>
-	
+	<property name="javac_debug" value="false" />
+
+	<!-- Deploy/archive locations -->
+	<property name="archive_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Viewer\Builds\Current" />
+	<property name="deploy_location" value="\\marl\sandpit\symbolic-links\world-wind\current" />
+
+	<!-- Version numbers -->
+	<property name="application_version" value="2.2-SNAPSHOT" />
+	<property name="worldwind_version" value="105.156" />
+
+	<!-- Viewer source code directories -->
 	<property name="src_dir" value="${basedir}/src" />
 	<property name="common_src_dir" value="${basedir}/../Common/src" />
-	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-0.6.724.14486" />
-	<property name="worldwind_jar" value="worldwind.jar" />
-	<property name="gdal_jar" value="gdal.jar" />
-	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
 
+	<!-- WorldWind library locations -->
+	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
+	<property name="worldwind_dir" value="${basedir}/../../SDK/worldwind-${worldwind_version}" />
+	<property name="worldwind_native_dir" value="${worldwind_dir}/native" />
+	<property name="worldwind_jar" value="worldwind.jar" />
+	<property name="worldwindx_jar" value="worldwindx.jar" />
+
+	<!-- GDAL locations -->
+	<property name="gdal_dir" value="${basedir}/../../SDK/GDAL-172" />
+	<property name="gdal_package_dir" value="${gdal_dir}/package" />
+	<property name="gdal_native_dir" value="${gdal_dir}/native" />
+	<property name="gdal_jar" value="gdal.jar" />
+	<property name="gdal_data_zip" value="data.zip" />
+
+	<!-- Local build and package directories -->
 	<property name="build_dir" value="${basedir}/build" />
 	<property name="webstart_dir" value="${basedir}/webstart" />
 	<property name="executable_dir" value="${basedir}/executable" />
 
+	<!-- JAR package names -->
 	<property name="executable_jar" value="executable.jar" />
 	<property name="executable_versioned_jar" value="executable-${application_version}.jar" />
-	
-	<property name="app_unsigned_jar" value="application-unsigned.jar" />
-	<property name="app_unsigned_versioned_jar" value="application-unsigned-${application_version}.jar" />
-	
-	<property name="app_signed_jar" value="application.jar" />
-	<property name="app_signed_versioned_jar" value="application-${application_version}.jar" />
 
-	<property name="ww_unsigned_jar" value="worldwind-unsigned.jar" />
-	<property name="ww_signed_jar" value="worldwind.jar" />
+	<property name="app_jar" value="application.jar" />
+	<property name="app_versioned_jar" value="application-${application_version}.jar" />
+	<property name="ww_jar" value="worldwind.jar" />
+	<property name="ww_versioned_jar" value="worldwind-${application_version}.jar" />
 
-	<property name="run_file" value="run.bat"/>
-	<property name="experimental_run_file" value="run-experimental.bat"/>
-	
+	<property name="ww_natives_windows_32_jar" value="worldwind-natives-windows-32.jar" />
+	<property name="ww_natives_windows_64_jar" value="worldwind-natives-windows-64.jar" />
+	<property name="ww_natives_macosx_64_jar" value="worldwind-natives-macosx-64.jar" />
+	<property name="ww_natives_linux_32_jar" value="worldwind-natives-linux-32.jar" />
+	<property name="ww_natives_linux_64_jar" value="worldwind-natives-linux-64.jar" />
+
+	<!-- Batch script filenames -->
+	<property name="run_file" value="run.bat" />
+	<property name="experimental_run_file" value="run-experimental.bat" />
+
+	<!-- Keystore configuration -->
 	<property name="keystore_file" value="${basedir}/keystore" />
 	<property name="keystore_alias" value="selfsigned" />
 	<property name="keystore_password" value="password" />
-	<property name="javac_debug" value="false" />
 
-	<property name="working_src_dir" value="${basedir}/tmp_src" />
-	<property name="test_src_dir" value="${basedir}/test/src"/>
+	<!-- Test directories -->
+	<property name="test_src_dir" value="${basedir}/test/src" />
 	<property name="common_test_src_dir" value="${basedir}/../Common/test/src" />
-	<property name="test_lib_dir" value="${basedir}/test/lib"/>
-	<property name="test_build_dir" value="${basedir}/test/build"/>
-	<property name="test_results_dir" value="${basedir}/test/results"/>
-	<property name="test_reports_dir" value="${basedir}/test/reports"/>
-	
-	<property name="help_src_dir" value="${basedir}/documentation/help"/>
-	<property name="help_dest_dir" value="${deploy_location}/help"/>
-	
+	<property name="test_lib_dir" value="${basedir}/test/lib" />
+	<property name="test_build_dir" value="${basedir}/test/build" />
+	<property name="test_results_dir" value="${basedir}/test/results" />
+	<property name="test_reports_dir" value="${basedir}/test/reports" />
+
+	<!-- Help directories -->
+	<property name="help_src_dir" value="${basedir}/documentation/help" />
+	<property name="help_dest_dir" value="${deploy_location}/help" />
+
 	<path id="classpath">
 		<fileset dir="${worldwind_dir}">
 			<include name="${worldwind_jar}" />
+			<include name="${worldwindx_jar}" />
+		</fileset>
+		<fileset dir="${gdal_package_dir}">
+			<include name="${gdal_jar}" />
 		</fileset>
 		<fileset dir="${jogl_dir}">
 			<include name="**/*.jar" />
@@ -59,13 +85,13 @@
 	</path>
 
 	<path id="test_classpath">
-		<path refid="classpath"/>
+		<path refid="classpath" />
 		<fileset dir="${test_lib_dir}">
 			<include name="**/*.jar" />
 		</fileset>
-		<path path="${build_dir}"/>
+		<path path="${build_dir}" />
 	</path>
-	
+
 	<patternset id="manifest_exclude">
 		<exclude name="META-INF/*.DSA" />
 		<exclude name="META-INF/*.RSA" />
@@ -81,10 +107,15 @@
 		<delete dir="${test_build_dir}" />
 		<delete dir="${test_results_dir}" />
 		<delete dir="${test_reports_dir}" />
-		<delete dir="${working_src_dir}" />
+
+		<ant antfile="${gdal_dir}/build.xml" target="clean" dir="${gdal_dir}" inheritall="false" />
 	</target>
 
-	<target name="build">
+	<target name="gdal">
+		<ant antfile="${gdal_dir}/build.xml" target="run" dir="${gdal_dir}" inheritall="false" />
+	</target>
+
+	<target name="build" depends="gdal">
 		<mkdir dir="${build_dir}" />
 		<copy todir="${build_dir}">
 			<fileset dir="${src_dir}">
@@ -101,65 +132,94 @@
 	</target>
 
 	<target name="build-test" depends="build">
-			<mkdir dir="${working_src_dir}" />
-			<copy todir="${working_src_dir}">
-				<fileset dir="${common_test_src_dir}"/>
-			</copy>
-			<copy todir="${working_src_dir}" overwrite="true">
-				<fileset dir="${test_src_dir}"/>
-			</copy>
-			
-			<mkdir dir="${test_build_dir}"/>
-			<copy todir="${test_build_dir}">
-				<fileset dir="${working_src_dir}">
-					<exclude name="**/*.java" />
+		<mkdir dir="${test_build_dir}" />
+		<copy todir="${test_build_dir}">
+			<fileset dir="${common_test_src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+			<fileset dir="${test_src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<javac source="1.5" target="1.5" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}">
+			<src path="${test_src_dir}" />
+			<src path="${common_test_src_dir}" />
+		</javac>
+	</target>
+
+	<target name="test" description="Execute unit tests on the project" depends="build-test">
+		<mkdir dir="${test_results_dir}" />
+		<mkdir dir="${test_reports_dir}" />
+		<junit printsummary="withOutAndErr" failureproperty="junit.failure">
+			<classpath refid="test_classpath" />
+			<classpath path="classes:${test_build_dir}" />
+			<batchtest todir="${test_results_dir}">
+				<fileset dir="${test_build_dir}">
+					<include name="**/*Test.class" />
 				</fileset>
-			</copy>
-			<javac source="1.6" target="1.6" srcdir="${working_src_dir}" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}" />
-			
-			<delete dir="${working_src_dir}" />
-		</target>
-		
-		<target name="test" description="Execute unit tests on the project" depends="build-test">
-			<mkdir dir="${test_results_dir}"/>
-			<mkdir dir="${test_reports_dir}"/>
-			<junit printsummary="withOutAndErr" failureproperty="junit.failure">
-				<classpath refid="test_classpath"/>
-				<classpath path="classes:${test_build_dir}"/>
-				<batchtest todir="${test_results_dir}">
-					<fileset dir="${test_build_dir}">
-						<include name="**/*Test.class"/>
-					</fileset>
-					<formatter type="xml"/>
-				</batchtest>
-			</junit>
-			<junitreport todir="${test_reports_dir}">
-				<fileset dir="${test_results_dir}"/>
-				<report todir="${test_reports_dir}"/>
-			</junitreport>
-			<fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
-		</target>
-	
+				<formatter type="xml" />
+			</batchtest>
+		</junit>
+		<junitreport todir="${test_reports_dir}">
+			<fileset dir="${test_results_dir}" />
+			<report todir="${test_reports_dir}" />
+		</junitreport>
+		<fail if="junit.failure" message="Unit test(s) failed.  See reports!" />
+	</target>
+
 	<target name="package" depends="test">
 		<mkdir dir="${webstart_dir}" />
-		<jar destfile="${webstart_dir}/${app_unsigned_jar}" basedir="${build_dir}">
+		<jar destfile="${webstart_dir}/unsigned-${app_jar}" basedir="${build_dir}">
 			<manifest>
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.viewer.application.Application" />
 			</manifest>
 		</jar>
-		<jar destfile="${webstart_dir}/${ww_unsigned_jar}">
+		<jar destfile="${webstart_dir}/unsigned-${ww_jar}">
 			<zipfileset src="${worldwind_dir}/${worldwind_jar}">
 				<patternset refid="manifest_exclude" />
 			</zipfileset>
-			<zipfileset src="${worldwind_dir}/${gdal_jar}">
+			<zipfileset src="${worldwind_dir}/${worldwindx_jar}">
+				<patternset refid="manifest_exclude" />
+			</zipfileset>
+			<zipfileset src="${gdal_package_dir}/${gdal_jar}">
 				<patternset refid="manifest_exclude" />
 			</zipfileset>
 		</jar>
+
+		<jar destfile="${webstart_dir}/unsigned-${ww_natives_windows_32_jar}">
+			<fileset dir="${worldwind_native_dir}/windows32" />
+			<fileset dir="${gdal_native_dir}/windows32" />
+		</jar>
+		<jar destfile="${webstart_dir}/unsigned-${ww_natives_windows_64_jar}">
+			<fileset dir="${worldwind_native_dir}/windows64" />
+			<fileset dir="${gdal_native_dir}/windows64" />
+		</jar>
+
+		<jar destfile="${webstart_dir}/unsigned-${ww_natives_macosx_64_jar}">
+			<fileset dir="${worldwind_native_dir}/macosx64" />
+			<fileset dir="${gdal_native_dir}/macosx64" />
+		</jar>
+
+		<jar destfile="${webstart_dir}/unsigned-${ww_natives_linux_32_jar}">
+			<fileset dir="${worldwind_native_dir}/linux32" />
+			<fileset dir="${gdal_native_dir}/linux32" />
+		</jar>
+		<jar destfile="${webstart_dir}/unsigned-${ww_natives_linux_64_jar}">
+			<fileset dir="${worldwind_native_dir}/linux64" />
+			<fileset dir="${gdal_native_dir}/linux64" />
+		</jar>
+
 	</target>
 
 	<target name="sign" depends="package">
-		<signjar jar="${webstart_dir}/${app_unsigned_jar}" signedjar="${webstart_dir}/${app_signed_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
-		<signjar jar="${webstart_dir}/${ww_unsigned_jar}" signedjar="${webstart_dir}/${ww_signed_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/unsigned-${app_jar}" signedjar="${webstart_dir}/${app_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/unsigned-${ww_jar}" signedjar="${webstart_dir}/${ww_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+
+		<signjar jar="${webstart_dir}/unsigned-${ww_natives_windows_32_jar}" signedjar="${webstart_dir}/${ww_natives_windows_32_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/unsigned-${ww_natives_windows_64_jar}" signedjar="${webstart_dir}/${ww_natives_windows_64_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/unsigned-${ww_natives_macosx_64_jar}" signedjar="${webstart_dir}/${ww_natives_macosx_64_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/unsigned-${ww_natives_linux_32_jar}" signedjar="${webstart_dir}/${ww_natives_linux_32_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
+		<signjar jar="${webstart_dir}/unsigned-${ww_natives_linux_64_jar}" signedjar="${webstart_dir}/${ww_natives_linux_64_jar}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}" />
 	</target>
 
 	<target name="executable" depends="build">
@@ -171,8 +231,9 @@
 			</zipgroupfileset>
 			<zipgroupfileset dir="${worldwind_dir}">
 				<include name="${worldwind_jar}" />
+				<include name="${worldwindx_jar}" />
 			</zipgroupfileset>
-			<zipgroupfileset dir="${worldwind_dir}">
+			<zipgroupfileset dir="${gdal_package_dir}">
 				<include name="${gdal_jar}" />
 			</zipgroupfileset>
 		</zip>
@@ -180,6 +241,8 @@
 		<jar destfile="${executable_dir}/${executable_jar}">
 			<fileset dir="${build_dir}" />
 			<fileset dir="${jogl_dir}" includes="native/**" />
+			<fileset dir="${gdal_dir}" includes="native/**" />
+			<fileset dir="${worldwind_dir}" includes="native/**" />
 
 			<zipfileset src="${executable_dir}/temp.zip">
 				<patternset refid="manifest_exclude" />
@@ -191,7 +254,7 @@
 		</jar>
 
 		<delete file="${executable_dir}/temp.zip" />
-		
+
 		<echo file="${executable_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${executable_versioned_jar}</echo>
 		<echo file="${executable_dir}/${experimental_run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${executable_versioned_jar} http://www.ga.gov.au:8500/symbolic-links/world-wind/current/themes/ExperimentalTheme.xml --sandpit</echo>
 	</target>
@@ -202,24 +265,48 @@
 		<copy file="${executable_dir}/${executable_jar}" tofile="${archive_location}/${executable_versioned_jar}" preservelastmodified="true" />
 		<copy file="${executable_dir}/${run_file}" todir="${archive_location}" preservelastmodified="true" />
 		<copy file="${executable_dir}/${experimental_run_file}" todir="${archive_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${app_unsigned_jar}" tofile="${archive_location}/${app_unsigned_versioned_jar}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${app_signed_jar}" tofile="${archive_location}/${app_signed_versioned_jar}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_unsigned_jar}" todir="${archive_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_signed_jar}" todir="${archive_location}" preservelastmodified="true" />
+
+		<copy file="${webstart_dir}/unsigned-${app_jar}" tofile="${archive_location}/unsigned-${app_versioned_jar}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${app_jar}" tofile="${archive_location}/${app_versioned_jar}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_jar}" tofile="${archive_location}/unsigned-${ww_versioned_jar}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_jar}" tofile="${archive_location}/${ww_versioned_jar}" preservelastmodified="true" />
+
+		<copy file="${webstart_dir}/${ww_natives_windows_32_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_windows_64_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_macosx_64_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_linux_32_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_linux_64_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_32_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_64_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_macosx_64_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_32_jar}" todir="${archive_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_64_jar}" todir="${archive_location}" preservelastmodified="true" />
 	</target>
-	
+
 	<target name="deploy-help" description="Deploys the help files to the sandpit help location">
-		<delete dir="${help_dest_dir}"/>
+		<delete dir="${help_dest_dir}" />
 		<copy todir="${help_dest_dir}">
-			<fileset dir="${help_src_dir}/"/>
+			<fileset dir="${help_src_dir}/" />
 		</copy>
 	</target>
-	
+
 	<target name="deploy" depends="archive,deploy-help" description="Deploys the built Viewer into the sandpit location, making it accessible via the intranet">
 		<copy file="${executable_dir}/${executable_jar}" todir="${deploy_location}\executable" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${app_unsigned_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${app_signed_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_unsigned_jar}" todir="${deploy_location}" preservelastmodified="true" />
-		<copy file="${webstart_dir}/${ww_signed_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${app_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${app_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_jar}" todir="${deploy_location}" preservelastmodified="true" />
+
+		<copy file="${webstart_dir}/${ww_natives_windows_32_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_windows_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_macosx_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_linux_32_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/${ww_natives_linux_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_32_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_windows_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_macosx_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_32_jar}" todir="${deploy_location}" preservelastmodified="true" />
+		<copy file="${webstart_dir}/unsigned-${ww_natives_linux_64_jar}" todir="${deploy_location}" preservelastmodified="true" />
 	</target>
+
 </project>

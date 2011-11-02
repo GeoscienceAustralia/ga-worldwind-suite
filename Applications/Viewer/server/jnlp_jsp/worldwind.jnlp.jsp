@@ -25,7 +25,37 @@
 	<resources>
 		<property name="sun.java2d.noddraw" value="true" />
 		<jar href="worldwind.jar" />
+		<!-- Oracle packaged jogl's not signed correctly. Reverting to world wind signed jars - JN 20110919
 		<extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp" />
+		-->
+		<extension name="jogl" href="http://worldwind.arc.nasa.gov/java/jogl/webstart/jogl.jnlp"/>
+	</resources>
+	<resources os="Windows" arch="x86">
+		<nativelib href="worldwind-natives-windows-32.jar" />
+	</resources>
+	<resources os="Windows" arch="amd64">
+		<nativelib href="worldwind-natives-windows-64.jar" />
+	</resources>
+	<resources os="Windows" arch="x86_64">
+		<nativelib href="worldwind-natives-windows-64.jar" />
+	</resources>
+	<resources os="Linux" arch="i386">
+		<nativelib href="worldwind-natives-linux-32.jar" />
+	</resources>
+	<resources os="Linux" arch="x86">
+		<nativelib href="worldwind-natives-linux-32.jar" />
+	</resources>
+	<resources os="Linux" arch="amd64">
+		<nativelib href="worldwind-natives-linux-64.jar" />
+	</resources>
+	<resources os="Linux" arch="x86_64">
+		<nativelib href="worldwind-natives-linux-64.jar" />
+	</resources>
+	<!--<resources os="Mac OS X" arch="i386">
+		<nativelib href="worldwind-natives-macosx-64.jar" />
+	</resources>-->
+	<resources os="Mac OS X" arch="x86_64">
+		<nativelib href="worldwind-natives-macosx-64.jar" />
 	</resources>
 	<component-desc />
 </jnlp>
