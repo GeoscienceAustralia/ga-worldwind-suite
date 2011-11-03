@@ -1,27 +1,29 @@
 package au.gov.ga.worldwind.common.util;
 
-import java.awt.Toolkit;
+import gov.nasa.worldwind.util.Logging;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 
-import com.sun.opengl.impl.NativeLibLoader;
-
-public class NativeJOGLLibs
+public class NativeLibraries
 {
-	private final static String BASE_DIR = "/native/";
+	protected final static String BASE_DIR = "/native/";
+	protected final static String TEMP_DIR = "ga-worldwind-natives";
+	protected static final String[] libraries = new String[] { "jogl",
+			"jogl_awt", "jogl_cg", "gluegen-rt", "gdalalljni", "gdalalljni32",
+			"gdalalljni64", "webview", "WebView32", "WebView64" };
+	protected static final String JAVA_LIBRARY_PATH = "java.library.path";
 
 	public static void init()
 	{
 		String osName = System.getProperty("os.name").toLowerCase();
 		String osArch = System.getProperty("os.arch").toLowerCase();
 		String directory, prefix, suffix;
-		String[] libraries = new String[] { "jogl", "jogl_awt", /*"jogl_cg",*/
-				"gluegen-rt" };
-		File tmpdir = new File(System.getProperty("java.io.tmpdir"));
-		boolean macosx = false;
+		File tmpdir = new File(System.getProperty("java.io.tmpdir") + "/" + TEMP_DIR);
 
 		if (osName.startsWith("wind"))
 		{
@@ -36,9 +38,8 @@ public class NativeJOGLLibs
 				directory = "windows-i586";
 			}
 		}
-		else if (osName.startsWith("mac os x"))
+		else if (osName.startsWith("mac"))
 		{
-			macosx = true;
 			prefix = "lib";
 			suffix = ".jnilib";
 			if (osArch.startsWith("ppc"))
@@ -89,69 +90,44 @@ public class NativeJOGLLibs
 			return;
 		}
 
+		boolean anyLibrariesWritten = false;
 		for (String lib : libraries)
 		{
 			String filename = prefix + lib + suffix;
 			String library = BASE_DIR + directory + "/" + filename;
-			InputStream is = NativeJOGLLibs.class.getResourceAsStream(library);
+			InputStream is = NativeLibraries.class.getResourceAsStream(library);
 			if (is != null)
 			{
+				if(!tmpdir.exists())
+				{
+					tmpdir.mkdirs();
+				}
 				File file = new File(tmpdir, filename);
 				writeStreamToFile(is, file);
 				if (file.exists())
 				{
 					file.deleteOnExit();
-
-					//carry out preloads
-					//see NativeLibLoader for description of this
-					boolean success = true;
-					try
-					{
-						if (lib.equals("jogl_awt"))
-						{
-							Toolkit.getDefaultToolkit();
-							if (!macosx)
-							{
-								System.loadLibrary("jawt");
-							}
-						}
-						else if (lib.equals("jogl_cg"))
-						{
-							System.loadLibrary("cg");
-							System.loadLibrary("cgGL");
-						}
-					}
-					catch (Error e)
-					{
-						if (!e.getMessage().contains("already loaded"))
-							success = false;
-					}
-					catch (Exception e)
-					{
-						success = false;
-					}
-
-					//load library
-					if (success)
-					{
-						try
-						{
-							System.load(file.getAbsolutePath());
-							NativeLibLoader.disableLoading();
-						}
-						catch (Error e)
-						{
-						}
-						catch (Exception e)
-						{
-						}
-					}
+					anyLibrariesWritten = true;
 				}
+			}
+		}
+		
+		if(anyLibrariesWritten)
+		{
+			String pathString = buildPathString(tmpdir.getAbsolutePath());
+			try
+			{
+				alterJavaLibraryPath(pathString);
+			}
+			catch (Exception e)
+			{
+				String message = "Error altering java.library.path: " + e.getLocalizedMessage();
+	            Logging.logger().severe(message);
 			}
 		}
 	}
 
-	private static void writeStreamToFile(InputStream is, File file)
+	protected static void writeStreamToFile(InputStream is, File file)
 	{
 		byte[] buffer = new byte[512];
 		BufferedOutputStream out = null;
@@ -183,6 +159,35 @@ public class NativeJOGLLibs
 		}
 		catch (IOException e)
 		{
+		}
+	}
+
+	protected static String buildPathString(String extraFolder)
+	{
+		String del = System.getProperty("path.separator");
+		StringBuffer path = new StringBuffer();
+
+		path.append(extraFolder).append(del);
+		path.append(".").append(del); // append current directory
+		path.append(System.getProperty("user.dir")).append(del);
+		path.append(System.getProperty(JAVA_LIBRARY_PATH));
+
+		return path.toString();
+	}
+
+	protected static void alterJavaLibraryPath(String newJavaLibraryPath)
+			throws IllegalAccessException, NoSuchFieldException
+	{
+		System.setProperty(JAVA_LIBRARY_PATH, newJavaLibraryPath);
+
+		Class<?> classLoader = ClassLoader.class;
+		Field fieldSysPaths = classLoader.getDeclaredField("sys_paths");
+		if (null != fieldSysPaths)
+		{
+			fieldSysPaths.setAccessible(true);
+			// Reset it to null so that whenever "System.loadLibrary" is called,
+			// it will be reconstructed with the changed value.
+			fieldSysPaths.set(classLoader, null);
 		}
 	}
 }

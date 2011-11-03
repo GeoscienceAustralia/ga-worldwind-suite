@@ -2,7 +2,7 @@ package au.gov.ga.worldwind.viewer.application;
 
 import gov.nasa.worldwind.Configuration;
 import au.gov.ga.worldwind.common.util.DirectDraw;
-import au.gov.ga.worldwind.common.util.NativeJOGLLibs;
+import au.gov.ga.worldwind.common.util.NativeLibraries;
 
 public class Executable
 {
@@ -12,7 +12,8 @@ public class Executable
 		{
 			DirectDraw.disableDirectDraw();
 		}
-		NativeJOGLLibs.init();
+		//NativeJOGLLibs.init();
+		NativeLibraries.init();
 		Application.main(args);
 	}
 }

@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import au.gov.ga.worldwind.common.util.DirectDraw;
-import au.gov.ga.worldwind.common.util.NativeJOGLLibs;
+import au.gov.ga.worldwind.common.util.NativeLibraries;
 
 public class Executable
 {
@@ -60,7 +60,7 @@ public class Executable
 		{
 			DirectDraw.disableDirectDraw();
 		}
-		NativeJOGLLibs.init();
+		NativeLibraries.init();
 
 		//start the animator
 		System.out.println("Starting Animator");
