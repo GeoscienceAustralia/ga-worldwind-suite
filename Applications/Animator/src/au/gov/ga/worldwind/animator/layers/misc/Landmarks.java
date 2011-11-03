@@ -6,7 +6,6 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.AnnotationAttributes;
-import gov.nasa.worldwind.render.FrameFactory;
 import gov.nasa.worldwind.render.GlobeAnnotation;
 import gov.nasa.worldwind.render.PatternFactory;
 
@@ -100,7 +99,7 @@ public class Landmarks extends RenderableLayer
 			aa.setCornerRadius(0);
 			aa.setInsets(new Insets(0, 0, 0, 0));
 			aa.setDrawOffset(new Point(0, -image.getHeight() / 2));
-			aa.setLeader(FrameFactory.LEADER_NONE);
+			aa.setLeader(AVKey.SHAPE_NONE);
 			aa.setDistanceMaxScale(1);
 			aa.setDistanceMinScale(1);
 			aa.setDistanceMinOpacity(1);
