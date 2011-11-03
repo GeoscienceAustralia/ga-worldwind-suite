@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/ardor3d-animation-0.7.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d-awt-0.7.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d-collada-0.7.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d-core-0.7.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d-jogl-0.7.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-api-1.1.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/worldwind-latest"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
