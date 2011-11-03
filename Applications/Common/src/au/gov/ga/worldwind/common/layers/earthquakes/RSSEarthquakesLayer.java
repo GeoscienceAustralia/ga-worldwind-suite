@@ -177,7 +177,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 		{
 			// Init default attributes for all eq
 			attributes = new AnnotationAttributes();
-			attributes.setLeader(FrameFactory.LEADER_NONE);
+			attributes.setLeader(AVKey.SHAPE_NONE);
 			attributes.setDrawOffset(new Point(0, -16));
 			attributes.setSize(new Dimension(32, 32));
 			attributes.setBorderWidth(0);
@@ -461,7 +461,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 			int size = 32;
 			if (this.shapeBuffer == null)
 			{
-				this.shapeBuffer = FrameFactory.createShapeBuffer(FrameFactory.SHAPE_ELLIPSE, size, size, 0, null);
+				this.shapeBuffer = FrameFactory.createShapeBuffer(AVKey.SHAPE_ELLIPSE, size, size, 0, null);
 			}
 
 			dc.getGL().glTranslated(-size / 2, -size / 2, 0);
@@ -487,7 +487,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 			int size = 32;
 			if (this.shapeBuffer == null)
 			{
-				this.shapeBuffer = FrameFactory.createShapeBuffer(FrameFactory.SHAPE_RECTANGLE, size, 4, 0, null);
+				this.shapeBuffer = FrameFactory.createShapeBuffer(AVKey.SHAPE_RECTANGLE, size, 4, 0, null);
 			}
 
 			dc.getGL().glTranslated(-size / 2, -2, 0);
