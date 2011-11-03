@@ -9,6 +9,6 @@
 	<classpathentry kind="lib" path="test/lib/hamcrest-core-1.1.jar"/>
 	<classpathentry kind="lib" path="test/lib/hamcrest-library-1.1.jar"/>
 	<classpathentry kind="lib" path="test/lib/jmock-2.5.1.jar"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/worldwind-105.156"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/worldwind-latest"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
