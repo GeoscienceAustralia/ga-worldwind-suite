@@ -102,6 +102,8 @@ public class NativeLibraries
 				{
 					tmpdir.mkdirs();
 				}
+				tmpdir.deleteOnExit();
+				
 				File file = new File(tmpdir, filename);
 				writeStreamToFile(is, file);
 				if (file.exists())
