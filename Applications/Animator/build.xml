@@ -186,7 +186,7 @@
 
 		<delete file="${target_dir}/temp.zip" />
 
-		<echo file="${target_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx2048m -jar ./${application_jar}</echo>
+		<echo file="${target_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx1536m -jar ./${application_jar}</echo>
 	</target>
 
 	<target name="deploy" description="Deploy the current build to the current release candidate folder" depends="clean, executables">
