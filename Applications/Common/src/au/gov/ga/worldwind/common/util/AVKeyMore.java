@@ -44,5 +44,8 @@ public interface AVKeyMore extends AVKey
 	
 	//crust layer
 	final static String SCALE = "au.gov.ga.worldwind.AVKeyMore.Scale";
-	final static String WRAP = "au.gov.ga.worldwind.AVKeyMore.WRAP";
+	final static String WRAP = "au.gov.ga.worldwind.AVKeyMore.Wrap";
+	
+	//elevation model
+	final static String EXTRACT_ZIP_ENTRY = "au.gov.ga.worldwind.AVKeyMore.ExtractZipEntry";
 }

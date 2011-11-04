@@ -3,9 +3,6 @@ package au.gov.ga.worldwind.common.terrain;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.terrain.WMSBasicElevationModel;
-
-import org.w3c.dom.Element;
-
 import au.gov.ga.worldwind.common.layers.Bounded;
 
 /**
@@ -16,9 +13,9 @@ import au.gov.ga.worldwind.common.layers.Bounded;
  */
 public class BoundedWMSBasicElevationModel extends WMSBasicElevationModel implements Bounded
 {
-	public BoundedWMSBasicElevationModel(Element domElement, AVList params)
+	public BoundedWMSBasicElevationModel(AVList params)
 	{
-		super(domElement, params);
+		super(params);
 	}
 
 	@Override

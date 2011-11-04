@@ -31,7 +31,7 @@ public class FileElevationModel extends BoundedBasicElevationModel
 {
 	public FileElevationModel(Element domElement, AVList params)
 	{
-		super(domElement, createURLBuilderParam(params));
+		super(getBasicElevationModelConfigParams(domElement, createURLBuilderParam(params)));
 	}
 
 	protected static AVList createURLBuilderParam(AVList params)

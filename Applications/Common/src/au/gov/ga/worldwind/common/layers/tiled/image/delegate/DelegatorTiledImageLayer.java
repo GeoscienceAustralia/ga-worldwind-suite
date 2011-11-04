@@ -19,6 +19,7 @@ import gov.nasa.worldwind.ogc.OGCConstants;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
 import gov.nasa.worldwind.retrieve.Retriever;
+import gov.nasa.worldwind.retrieve.URLRetriever;
 import gov.nasa.worldwind.util.DataConfigurationUtils;
 import gov.nasa.worldwind.util.ImageUtil;
 import gov.nasa.worldwind.util.Level;
@@ -26,6 +27,7 @@ import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.Tile;
 import gov.nasa.worldwind.util.TileKey;
 import gov.nasa.worldwind.util.WWIO;
+import gov.nasa.worldwind.util.WWXML;
 import gov.nasa.worldwind.wms.WMSTiledImageLayer;
 
 import java.awt.image.BufferedImage;
@@ -38,6 +40,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
+import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -72,6 +75,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	protected final Object fileLock;
 	protected final URL context;
 	protected final ImageDelegateKit delegateKit;
+	protected boolean extractZipEntry = false;
 
 	protected Globe currentGlobe;
 
@@ -90,6 +94,10 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 			context = (URL) o;
 		else
 			context = null;
+		
+		Boolean b = (Boolean) params.getValue(AVKeyMore.EXTRACT_ZIP_ENTRY);
+		if (b != null)
+			this.setExtractZipEntry(b);
 
 		//Share the filelock with other layers with the same cache name. This allows
 		//multiple layers to save and load from the same cache location.
@@ -118,8 +126,22 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 		//create the delegate kit from the XML element
 		ImageDelegateKit delegateKit = new ImageDelegateKit().createFromXML(domElement, params);
 		params.setValue(AVKeyMore.DELEGATE_KIT, delegateKit);
+		
+		XPath xpath = WWXML.makeXPath();
+		WWXML.checkAndSetBooleanParam(domElement, params,
+				AVKeyMore.EXTRACT_ZIP_ENTRY, "ExtractZipEntry", xpath);
 
 		return params;
+	}
+
+	public boolean isExtractZipEntry()
+	{
+		return extractZipEntry;
+	}
+
+	public void setExtractZipEntry(boolean extractZipEntry)
+	{
+		this.extractZipEntry = extractZipEntry;
 	}
 
 	/**
@@ -622,6 +644,10 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 			retriever.setStaleRequestLimit(srl);
 
 		//MODIFIED
+		if(isExtractZipEntry())
+		{
+			retriever.setValue(URLRetriever.EXTRACT_ZIP_ENTRY, "true");
+		}
 		//WorldWind.getRetrievalService().runRetriever(retriever, tile.getPriority());
 		return retriever;
 		//MODIFIED

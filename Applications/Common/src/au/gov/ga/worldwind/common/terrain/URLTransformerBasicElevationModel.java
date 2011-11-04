@@ -10,8 +10,6 @@ import gov.nasa.worldwind.util.TileUrlBuilder;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.w3c.dom.Element;
-
 import au.gov.ga.worldwind.common.util.URLTransformer;
 
 /**
@@ -22,9 +20,9 @@ import au.gov.ga.worldwind.common.util.URLTransformer;
  */
 public class URLTransformerBasicElevationModel extends BoundedBasicElevationModel
 {
-	public URLTransformerBasicElevationModel(Element domElement, AVList params)
+	public URLTransformerBasicElevationModel(AVList params)
 	{
-		super(domElement, setupParams(params));
+		super(setupParams(params));
 	}
 
 	protected static AVList setupParams(AVList params)

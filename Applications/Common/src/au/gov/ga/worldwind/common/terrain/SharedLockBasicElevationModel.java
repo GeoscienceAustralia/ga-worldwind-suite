@@ -1,20 +1,27 @@
 package au.gov.ga.worldwind.common.terrain;
 
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.cache.FileStore;
 import gov.nasa.worldwind.exception.WWRuntimeException;
+import gov.nasa.worldwind.retrieve.HTTPRetriever;
+import gov.nasa.worldwind.retrieve.URLRetriever;
 import gov.nasa.worldwind.terrain.BasicElevationModel;
 import gov.nasa.worldwind.util.BufferWrapper;
 import gov.nasa.worldwind.util.DataConfigurationUtils;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.Tile;
+import gov.nasa.worldwind.util.WWXML;
 
 import java.io.IOException;
 import java.net.URL;
 
+import javax.xml.xpath.XPath;
+
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.FileLockSharer;
+import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.IOUtil;
 
 /**
@@ -29,12 +36,42 @@ import au.gov.ga.worldwind.common.util.IOUtil;
 public class SharedLockBasicElevationModel extends URLTransformerBasicElevationModel
 {
 	protected final Object fileLock;
+	protected boolean extractZipEntry = false;
 
 	public SharedLockBasicElevationModel(Element domElement, AVList params)
 	{
-		super(domElement, params);
+		this(getMoreElevationModelConfigParams(domElement, params));
+	}
+	
+	public SharedLockBasicElevationModel(AVList params)
+	{
+		super(params);
+		
+		Boolean b = (Boolean) params.getValue(AVKeyMore.EXTRACT_ZIP_ENTRY);
+		if (b != null)
+			this.setExtractZipEntry(b);
 
 		fileLock = FileLockSharer.getLock(getLevels().getFirstLevel().getCacheName());
+	}
+	
+	protected static AVList getMoreElevationModelConfigParams(Element domElement, AVList params)
+	{
+		params = getBasicElevationModelConfigParams(domElement, params);
+		
+		XPath xpath = WWXML.makeXPath();
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.EXTRACT_ZIP_ENTRY, "ExtractZipEntry", xpath);
+		
+		return params;
+	}
+	
+	public boolean isExtractZipEntry()
+	{
+		return extractZipEntry;
+	}
+
+	public void setExtractZipEntry(boolean extractZipEntry)
+	{
+		this.extractZipEntry = extractZipEntry;
 	}
 
 	@Override
@@ -122,5 +159,53 @@ public class SharedLockBasicElevationModel extends URLTransformerBasicElevationM
 
 			this.doWriteConfigurationParams(fileStore, fileName, params);
 		}
+	}
+	
+	@Override
+	protected void retrieveRemoteElevations(final Tile tile,
+			gov.nasa.worldwind.terrain.BasicElevationModel.DownloadPostProcessor postProcessor)
+	{
+		if (!this.isNetworkRetrievalEnabled())
+		{
+			this.getLevels().markResourceAbsent(tile);
+			return;
+		}
+
+		if (!WorldWind.getRetrievalService().isAvailable())
+			return;
+
+		java.net.URL url = null;
+		try
+		{
+			url = tile.getResourceURL();
+			if (WorldWind.getNetworkStatus().isHostUnavailable(url))
+			{
+				this.getLevels().markResourceAbsent(tile);
+				return;
+			}
+		}
+		catch (java.net.MalformedURLException e)
+		{
+			Logging.logger()
+					.log(java.util.logging.Level.SEVERE,
+							Logging.getMessage(
+									"TiledElevationModel.ExceptionCreatingElevationsUrl",
+									url), e);
+			return;
+		}
+
+		if (postProcessor == null)
+			postProcessor = new DownloadPostProcessor(tile, this);
+		URLRetriever retriever = new HTTPRetriever(url, postProcessor);
+		//BEGIN MODIFICATION
+		if (isExtractZipEntry())
+		{
+			retriever.setValue(URLRetriever.EXTRACT_ZIP_ENTRY, "true"); // supports legacy elevation models
+		}
+		//END MODIFICATION
+		if (WorldWind.getRetrievalService().contains(retriever))
+			return;
+
+		WorldWind.getRetrievalService().runRetriever(retriever, 0d);
 	}
 }
