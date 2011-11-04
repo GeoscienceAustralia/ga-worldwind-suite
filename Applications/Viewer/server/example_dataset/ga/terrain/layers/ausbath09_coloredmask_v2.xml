@@ -22,7 +22,7 @@
 	<DatasetName>elevation/ausbath09_r3</DatasetName>
 	<DataCacheName>GA/Elevation/ausbath09_r3</DataCacheName>
 	<ImageFormat>application/zip</ImageFormat>
-	<FormatSuffix>.bil</FormatSuffix>
+	<FormatSuffix>.zip</FormatSuffix>
 	<NumLevels count="7" numEmpty="0"/>
 	<TileOrigin>
 		<LatLon units="degrees" latitude="-90" longitude="-180"/>
