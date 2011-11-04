@@ -198,7 +198,8 @@ public class SharedLockBasicElevationModel extends URLTransformerBasicElevationM
 			postProcessor = new DownloadPostProcessor(tile, this);
 		URLRetriever retriever = new HTTPRetriever(url, postProcessor);
 		//BEGIN MODIFICATION
-		if (isExtractZipEntry())
+		boolean formatContainsZip = getLevels().getFirstLevel().getFormatSuffix().toLowerCase().contains("zip");
+		if (isExtractZipEntry() || !formatContainsZip)
 		{
 			retriever.setValue(URLRetriever.EXTRACT_ZIP_ENTRY, "true"); // supports legacy elevation models
 		}
