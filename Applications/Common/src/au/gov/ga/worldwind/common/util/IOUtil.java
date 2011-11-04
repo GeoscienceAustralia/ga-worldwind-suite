@@ -19,7 +19,8 @@ import au.gov.ga.worldwind.common.downloader.ZipRetriever;
  */
 public class IOUtil extends WWIO
 {
-	public static String readStreamToStringKeepingNewlines(InputStream stream, String encoding) throws IOException
+	public static String readStreamToStringKeepingNewlines(InputStream stream,
+			String encoding) throws IOException
 	{
 		if (stream == null)
 		{
@@ -43,44 +44,61 @@ public class IOUtil extends WWIO
 
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Read the bytes from the resource referenced by the provided url.
 	 * <p/>
-	 * If the URL references a zip archive, the returned buffer will contain the contents
-	 * of the un-zipped resource.
+	 * If the URL references a zip archive, the returned buffer will contain the
+	 * contents of the un-zipped resource.
 	 */
 	public static ByteBuffer readByteBuffer(URL url) throws IOException
 	{
-		ByteBuffer byteBuffer;
+		ByteBuffer byteBuffer = null;
 		if (URLUtil.isForResourceWithExtension(url, "zip"))
 		{
-			InputStream is = url.openStream();
-			ZipRetriever zr = new ZipRetriever(url);
-			byteBuffer = zr.readZipStream(is, url);
+			//try opening the file as a zip file; if this fails, log a warning and read file directly into the buffer
+			InputStream is = null;
+			try
+			{
+				is = url.openStream();
+				ZipRetriever zr = new ZipRetriever(url);
+				byteBuffer = zr.readZipStream(is, url);
+			}
+			catch (Exception e)
+			{
+				String message = "Error loading zip file at '" + url + "': " + e.getLocalizedMessage();
+	            Logging.logger().warning(message);
+			}
+			finally
+			{
+				if (is != null)
+					is.close();
+			}
 		}
-		else
+		if(byteBuffer == null)
 		{
 			byteBuffer = readURLContentToBuffer(url);
 		}
 		return byteBuffer;
 	}
-	
+
 	/**
 	 * Read the bytes from the resource referenced by the provided url.
 	 * <p/>
-	 * The provided pixel types and byte ordering is used to wrap the {@link ByteBuffer}
-	 * with a {@link BufferWrapper} that can manipulate the underlying data if needed.
+	 * The provided pixel types and byte ordering is used to wrap the
+	 * {@link ByteBuffer} with a {@link BufferWrapper} that can manipulate the
+	 * underlying data if needed.
 	 */
-	public static BufferWrapper readByteBuffer(URL url, String pixelType, String byteOrder) throws IOException
+	public static BufferWrapper readByteBuffer(URL url, String pixelType,
+			String byteOrder) throws IOException
 	{
 		ByteBuffer byteBuffer = readByteBuffer(url);
-		
+
 		AVList bufferParams = new AVListImpl();
 		bufferParams.setValue(AVKey.DATA_TYPE, pixelType);
 		bufferParams.setValue(AVKey.BYTE_ORDER, byteOrder);
 		BufferWrapper wrapper = BufferWrapper.wrap(byteBuffer, bufferParams);
-		
+
 		return wrapper;
 	}
 }

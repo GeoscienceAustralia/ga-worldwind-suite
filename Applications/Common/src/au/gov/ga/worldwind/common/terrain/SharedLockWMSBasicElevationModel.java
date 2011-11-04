@@ -1,8 +1,6 @@
 package au.gov.ga.worldwind.common.terrain;
 
-import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.cache.FileStore;
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.terrain.BasicElevationModel;
@@ -10,15 +8,14 @@ import gov.nasa.worldwind.util.BufferWrapper;
 import gov.nasa.worldwind.util.DataConfigurationUtils;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.Tile;
-import gov.nasa.worldwind.util.WWIO;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.ByteBuffer;
 
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.FileLockSharer;
+import au.gov.ga.worldwind.common.util.IOUtil;
 
 public class SharedLockWMSBasicElevationModel extends BoundedWMSBasicElevationModel
 {
@@ -73,17 +70,10 @@ public class SharedLockWMSBasicElevationModel extends BoundedWMSBasicElevationMo
 	{
 		try
 		{
-			ByteBuffer byteBuffer;
 			synchronized (this.fileLock)
 			{
-				byteBuffer = WWIO.readURLContentToBuffer(url);
+				return IOUtil.readByteBuffer(url, getElevationDataType(), getElevationDataByteOrder());
 			}
-
-			// Setup parameters to instruct BufferWrapper on how to interpret the ByteBuffer.
-			AVList bufferParams = new AVListImpl();
-			bufferParams.setValue(AVKey.DATA_TYPE, this.getElevationDataType());
-			bufferParams.setValue(AVKey.BYTE_ORDER, this.getElevationDataByteOrder());
-			return BufferWrapper.wrap(byteBuffer, bufferParams);
 		}
 		catch (java.io.IOException e)
 		{
