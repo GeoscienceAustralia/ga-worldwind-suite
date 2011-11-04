@@ -1924,16 +1924,19 @@ public class Animator
 				JOptionPane.showInputDialog(frame, getMessage(getSetFrameCountMessageKey()),
 						getMessage(getSetFrameCountCaptionKey()), JOptionPane.QUESTION_MESSAGE,
 						null, null, frames);
-		try
+		if(value != null)
 		{
-			frames = Integer.parseInt((String) value);
+			try
+			{
+				frames = Integer.parseInt((String) value);
+			}
+			catch (Exception ex)
+			{
+				ExceptionLogger.logException(ex);
+			}
+			getCurrentAnimation().setFrameCount(frames);
+			updateSlider();
 		}
-		catch (Exception ex)
-		{
-			ExceptionLogger.logException(ex);
-		}
-		getCurrentAnimation().setFrameCount(frames);
-		updateSlider();
 	}
 
 	void setAutokey(boolean autokey)
