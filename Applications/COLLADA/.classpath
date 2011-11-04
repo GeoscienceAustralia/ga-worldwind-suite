@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="lib/ardor3d-animation-0.7.jar" sourcepath="lib/ardor3d-animation-0.7-sources.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d-awt-0.7.jar" sourcepath="lib/ardor3d-awt-0.7-sources.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d-collada-0.7.jar" sourcepath="lib/ardor3d-collada-0.7-sources.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d-core-0.7.jar" sourcepath="lib/ardor3d-core-0.7-sources.jar"/>
-	<classpathentry kind="lib" path="lib/ardor3d-jogl-0.7.jar" sourcepath="lib/ardor3d-jogl-0.7-sources.jar"/>
+	<classpathentry kind="lib" path="lib/ardor3d-animation-0.7.jar" sourcepath="lib/ardor3d-animation-0.7-sources.zip"/>
+	<classpathentry kind="lib" path="lib/ardor3d-awt-0.7.jar" sourcepath="lib/ardor3d-awt-0.7-sources.zip"/>
+	<classpathentry kind="lib" path="lib/ardor3d-collada-0.7.jar" sourcepath="lib/ardor3d-collada-0.7-sources.zip"/>
+	<classpathentry kind="lib" path="lib/ardor3d-core-0.7.jar" sourcepath="lib/ardor3d-core-0.7-sources.zip"/>
+	<classpathentry kind="lib" path="lib/ardor3d-jogl-0.7.jar" sourcepath="lib/ardor3d-jogl-0.7-sources.zip"/>
 	<classpathentry kind="lib" path="lib/commons-logging-api-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/guava-r07.jar"/>
 	<classpathentry kind="lib" path="lib/jdom.jar"/>
