@@ -9,11 +9,9 @@ import gov.nasa.worldwind.view.orbit.OrientationBasicOrbitView;
 
 import javax.media.opengl.GL;
 
-public class TransformBasicOrbitView extends OrientationBasicOrbitView implements TransformView, ClipConfigurableView
+public class TransformBasicOrbitView extends OrientationBasicOrbitView
+		implements TransformView
 {
-	private boolean autoNearClip = true;
-	private boolean autoFarClip = true;
-	
 	@Override
 	public void beforeComputeMatrices()
 	{
@@ -33,8 +31,10 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 	@Override
 	public Matrix computeProjection()
 	{
-		double viewportWidth = this.viewport.getWidth() <= 0.0 ? 1.0 : this.viewport.getWidth();
-		double viewportHeight = this.viewport.getHeight() <= 0.0 ? 1.0 : this.viewport.getHeight();
+		double viewportWidth = this.viewport.getWidth() <= 0.0 ? 1.0
+				: this.viewport.getWidth();
+		double viewportHeight = this.viewport.getHeight() <= 0.0 ? 1.0
+				: this.viewport.getHeight();
 
 		return Matrix.fromPerspective(this.fieldOfView,
 										viewportWidth,
@@ -54,13 +54,15 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 		}
 		if (dc.getGL() == null)
 		{
-			String message = Logging.getMessage("nullValue.DrawingContextGLIsNull");
+			String message = Logging
+					.getMessage("nullValue.DrawingContextGLIsNull");
 			Logging.logger().severe(message);
 			throw new IllegalArgumentException(message);
 		}
 		if (dc.getGlobe() == null)
 		{
-			String message = Logging.getMessage("nullValue.DrawingContextGlobeIsNull");
+			String message = Logging
+					.getMessage("nullValue.DrawingContextGlobeIsNull");
 			Logging.logger().severe(message);
 			throw new IllegalArgumentException(message);
 		}
@@ -89,21 +91,16 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 		// Get the current OpenGL viewport state.
 		int[] viewportArray = new int[4];
 		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
-		this.viewport = new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
+		this.viewport = new java.awt.Rectangle(viewportArray[0],
+				viewportArray[1], viewportArray[2], viewportArray[3]);
 
 		// Compute the current clip plane distances (Use utils methods to better handle underlying elevation data)
-		if (autoNearClip)
-		{
-			this.nearClipDistance = TransformViewUtils.computeNearClippingDistance(dc);
-		}
-		if (autoFarClip)
-		{
-			this.farClipDistance = TransformViewUtils.computeFarClippingDistance(dc);
-		}
-		
+		this.nearClipDistance = computeNearClipDistance();
+		this.farClipDistance = computeFarClipDistance();
+
 		// Compute the current projection matrix.
 		this.projection = computeProjection();
-		
+
 		// Compute the current frustum.
 		this.frustum = Frustum.fromProjectionMatrix(this.projection);
 
@@ -112,31 +109,5 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 
 		//========== after apply (GL matrix state) ==========//
 		afterDoApply();
-	}
-	
-	@Override
-	public void setNearClipDistance(double clipDistance)
-	{
-		autoNearClip = false;
-		super.setNearClipDistance(Math.min(clipDistance, this.farClipDistance - 1));
-	}
-	
-	@Override
-	public void setFarClipDistance(double clipDistance)
-	{
-		autoFarClip = false;
-		super.setFarClipDistance(Math.max(clipDistance, this.nearClipDistance + 1));
-	}
-
-	@Override
-	public void setAutoCalculateNearClipDistance(boolean autoCalculate)
-	{
-		autoNearClip = autoCalculate;
-	}
-
-	@Override
-	public void setAutoCalculateFarClipDistance(boolean autoCalculate)
-	{
-		autoFarClip = autoCalculate;
 	}
 }

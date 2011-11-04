@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.common.view.transform;
+package au.gov.ga.worldwind.animator.view;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
@@ -11,9 +11,9 @@ import gov.nasa.worldwind.view.ViewUtil;
 import java.util.LinkedList;
 
 /**
- * Utilities used in the {@link TransformView}s
+ * Utilities used in the {@link AnimatorView}s
  */
-public class TransformViewUtils
+public class AnimatorViewUtils
 {
 	protected static final double MINIMUM_NEAR_DISTANCE = 2;
     protected static final double MINIMUM_FAR_DISTANCE = 100;

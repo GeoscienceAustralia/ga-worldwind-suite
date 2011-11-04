@@ -12,8 +12,8 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
+import au.gov.ga.worldwind.animator.view.ClipConfigurableView;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
-import au.gov.ga.worldwind.common.view.transform.ClipConfigurableView;
 
 abstract class CameraParameter extends ParameterBase
 {
