@@ -27,8 +27,9 @@
 	<property name="gdal_dir" value="${basedir}/../../SDK/GDAL-172" />
 	<property name="gdal_package_dir" value="${gdal_dir}/package" />
 	<property name="gdal_native_dir" value="${gdal_dir}/native" />
+	<property name="gdal_data_dir" value="${gdal_dir}/data" />
 	<property name="gdal_jar" value="gdal.jar" />
-	<property name="gdal_data_zip" value="data.zip" />
+	<property name="gdal_data_zip" value="gdaldata.zip" />
 
 	<!-- Local build and package directories -->
 	<property name="build_dir" value="${basedir}/build" />
@@ -125,7 +126,7 @@
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javac source="1.6" target="1.6" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}">
+		<javac source="1.6" target="1.6" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" includeantruntime="no">
 			<src path="${src_dir}" />
 			<src path="${common_src_dir}" />
 		</javac>
@@ -141,7 +142,7 @@
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javac source="1.6" target="1.6" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}">
+		<javac source="1.6" target="1.6" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}" includeantruntime="no">
 			<src path="${test_src_dir}" />
 			<src path="${common_test_src_dir}" />
 		</javac>
@@ -174,6 +175,11 @@
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.viewer.application.Application" />
 			</manifest>
 		</jar>
+		
+		<zip destfile="${webstart_dir}/${gdal_data_zip}">
+			<fileset dir="${gdal_data_dir}" />
+		</zip>
+		
 		<jar destfile="${webstart_dir}/unsigned-${ww_jar}">
 			<zipfileset src="${worldwind_dir}/${worldwind_jar}">
 				<patternset refid="manifest_exclude" />
@@ -184,7 +190,10 @@
 			<zipfileset src="${gdal_package_dir}/${gdal_jar}">
 				<patternset refid="manifest_exclude" />
 			</zipfileset>
+			<fileset file="${webstart_dir}/${gdal_data_zip}" />
 		</jar>
+		
+		<delete file="${webstart_dir}/${gdal_data_zip}" />
 
 		<jar destfile="${webstart_dir}/unsigned-${ww_natives_windows_i586_jar}">
 			<fileset dir="${worldwind_native_dir}/windows-i586" />
@@ -225,6 +234,10 @@
 	<target name="executable" depends="build">
 		<mkdir dir="${executable_dir}" />
 
+		<zip destfile="${executable_dir}/${gdal_data_zip}">
+			<fileset dir="${gdal_data_dir}" />
+		</zip>
+
 		<zip destfile="${executable_dir}/temp.zip">
 			<zipgroupfileset dir="${jogl_dir}">
 				<include name="**/*.jar" />
@@ -236,6 +249,7 @@
 			<zipgroupfileset dir="${gdal_package_dir}">
 				<include name="${gdal_jar}" />
 			</zipgroupfileset>
+			<fileset file="${executable_dir}/${gdal_data_zip}" />
 		</zip>
 
 		<jar destfile="${executable_dir}/${executable_jar}">
@@ -254,6 +268,7 @@
 		</jar>
 
 		<delete file="${executable_dir}/temp.zip" />
+		<delete file="${executable_dir}/${gdal_data_zip}" />
 
 		<echo file="${executable_dir}/${run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${executable_versioned_jar}</echo>
 		<echo file="${executable_dir}/${experimental_run_file}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${executable_versioned_jar} http://www.ga.gov.au:8500/symbolic-links/world-wind/current/themes/ExperimentalTheme.xml --sandpit</echo>

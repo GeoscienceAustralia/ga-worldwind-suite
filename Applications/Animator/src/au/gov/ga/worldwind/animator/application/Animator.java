@@ -145,6 +145,7 @@ import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.ui.FileFilters.XmlFilter;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
+import au.gov.ga.worldwind.common.util.GDALDataHelper;
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 import au.gov.ga.worldwind.wmsbrowser.WmsBrowser;
 
@@ -288,6 +289,8 @@ public class Animator
 
 	public Animator()
 	{
+		GDALDataHelper.init();
+		
 		initialiseApplicationWindow();
 		initialiseWorldWindow();
 

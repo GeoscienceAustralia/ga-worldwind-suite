@@ -85,6 +85,7 @@ import au.gov.ga.worldwind.common.ui.SwingUtil;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.common.util.GASandpit;
+import au.gov.ga.worldwind.common.util.GDALDataHelper;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.URLTransformer;
 import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
@@ -156,6 +157,8 @@ public class Application
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, WireframeRectangularTessellator.class.getName());
 		//Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, RectangularTessellatorAccessible.class.getName());
+		
+		GDALDataHelper.init();
 	}
 
 	public static void main(String[] args)
