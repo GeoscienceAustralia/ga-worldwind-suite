@@ -10,6 +10,7 @@
 
 package gov.nasa.worldwind.formats.models.loader;
 
+import gov.nasa.worldwind.custom.render.PickableModel;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
 
@@ -93,7 +94,7 @@ public class ArdorColladaLoader implements iLoader{
 	@Override
 	public Model load(String path) throws ModelLoadException {
 		// TODO Auto-generated method stub
-		Model model = new Model(path);
+		Model model = new PickableModel(path);
 		return model;
 	}
 }
