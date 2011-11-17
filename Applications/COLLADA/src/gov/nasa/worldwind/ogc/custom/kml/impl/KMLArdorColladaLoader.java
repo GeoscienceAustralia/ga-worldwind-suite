@@ -16,27 +16,27 @@ import com.ardor3d.util.resource.SimpleResourceLocator;
 import com.ardor3d.util.resource.URLResourceSource;
 
 public class KMLArdorColladaLoader {
-	public static Node loadColladaModel(String modelFileStr, String modelHref, final KMLRoot kmlRoot) throws Exception {
+	public static Node loadColladaModel(String modelFileStr, final KMLRoot kmlRoot) throws Exception {
     	
         final Node root = new Node( "rootNode" );
 
-        File modelFile = new File(modelFileStr);
-        String modelNameStr = modelFile.getName();
-        File modelDir = modelFile.getParentFile();
-        
-        int indexOfLastSlash = Math.max(modelHref.lastIndexOf('/'), modelHref.lastIndexOf('\\'));
-        final String modelHrefDir = (indexOfLastSlash >= 0 ? modelHref.substring(0, indexOfLastSlash) + "/" : "");
+        String modelDirStr = new File(modelFileStr).getParent();
+        String modelNameStr = new File(modelFileStr).getName();
+
+        File modelDir = new File(modelDirStr);
+        modelDirStr = modelDir.getAbsolutePath();
         
         ColladaImporter importer = new ColladaImporter();
 
-        SimpleResourceLocator modelLocator = new SimpleResourceLocator(modelDir.toURI());
-        importer.setModelLocator(modelLocator);
+        SimpleResourceLocator modelLocator = new SimpleResourceLocator(new URL("file:" + modelDirStr));
+                importer.setModelLocator(modelLocator);
         importer.setTextureLocator(new ResourceLocator() {
 			
         	@Override
 			public ResourceSource locateResource(String resourceName) {
 				try {
-					return new URLResourceSource(new URL("file:"+(String)kmlRoot.resolveReference(modelHrefDir + resourceName)));
+					
+					return new URLResourceSource(new URL("file:"+(String)kmlRoot.resolveReference(resourceName.replace("../", ""))));
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 					return null;
@@ -50,7 +50,6 @@ public class KMLArdorColladaLoader {
         root.attachChild(storage.getScene());
 
         root.updateGeometricState(0);
-        //root.updateWorldBound(true);
         return root;
     }
 }
