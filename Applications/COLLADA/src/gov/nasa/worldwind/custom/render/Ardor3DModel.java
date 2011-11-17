@@ -1,8 +1,6 @@
 package gov.nasa.worldwind.custom.render;
 
 import gov.nasa.worldwind.WorldWind;
-import gov.nasa.worldwind.formats.models.ModelFactory;
-import gov.nasa.worldwind.formats.models.geometry.Model;
 import gov.nasa.worldwind.formats.models.loader.ArdorColladaLoader;
 import gov.nasa.worldwind.formats.models.loader.SimpleNamespaceContext;
 import gov.nasa.worldwind.geom.Angle;
@@ -22,6 +20,9 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+
+import net.java.joglutils.model.ModelFactory;
+import net.java.joglutils.model.geometry.Model;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,7 +76,7 @@ public class Ardor3DModel
     public Ardor3DModel(String path, Position pos) {
     	this.path = path;
         try {
-            this.model = ModelFactory.createModel(path);
+            this.model = PickableModelFactory.createModel(path);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -97,10 +98,8 @@ public class Ardor3DModel
         
         try {
             beginDraw(dc);
-            if (dc.isPickingMode()) {
-                this.model.setRenderPicker(true);
-            } else {
-                this.model.setRenderPicker(false);
+            if (this.model instanceof PickableModel) {
+                ((PickableModel)this.model).setRenderPicker(dc.isPickingMode());
             }
             draw(dc);
         } catch (Exception e) {

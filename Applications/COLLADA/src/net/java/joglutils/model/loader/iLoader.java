@@ -7,11 +7,10 @@
  * and open the template in the editor.
  */
 
-package gov.nasa.worldwind.formats.models.loader;
+package net.java.joglutils.model.loader;
 
-import gov.nasa.worldwind.formats.models.ModelLoadException;
-import gov.nasa.worldwind.formats.models.geometry.Model;
-
+import net.java.joglutils.model.ModelLoadException;
+import net.java.joglutils.model.geometry.Model;
 
 /**
  *

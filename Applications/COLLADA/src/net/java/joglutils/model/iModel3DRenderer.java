@@ -7,9 +7,9 @@
  * and open the template in the editor.
  */
 
-package gov.nasa.worldwind.formats.models;
+package net.java.joglutils.model;
 
-import gov.nasa.worldwind.formats.models.geometry.Model;
+import net.java.joglutils.model.geometry.Model;
 
 /**
  *

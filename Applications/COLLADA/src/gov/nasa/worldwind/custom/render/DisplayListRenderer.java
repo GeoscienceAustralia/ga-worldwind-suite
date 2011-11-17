@@ -8,17 +8,10 @@
  */
 package gov.nasa.worldwind.custom.render;
 
-import gov.nasa.worldwind.formats.models.ResourceRetriever;
-import gov.nasa.worldwind.formats.models.iModel3DRenderer;
-import gov.nasa.worldwind.formats.models.geometry.Bounds;
-import gov.nasa.worldwind.formats.models.geometry.Material;
-import gov.nasa.worldwind.formats.models.geometry.Mesh;
-import gov.nasa.worldwind.formats.models.geometry.Model;
-import gov.nasa.worldwind.formats.models.geometry.Vec4;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -26,10 +19,17 @@ import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 
+import net.java.joglutils.model.ResourceRetriever;
+import net.java.joglutils.model.iModel3DRenderer;
+import net.java.joglutils.model.geometry.Bounds;
+import net.java.joglutils.model.geometry.Material;
+import net.java.joglutils.model.geometry.Mesh;
+import net.java.joglutils.model.geometry.Model;
+import net.java.joglutils.model.geometry.Vec4;
+
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureCoords;
 import com.sun.opengl.util.texture.TextureIO;
-import java.util.ArrayList;
 
 /**
  * 
@@ -168,7 +168,7 @@ public class DisplayListRenderer implements iModel3DRenderer
 			gl.glTranslatef(-center.x, -center.y, -center.z);
 		}
 
-		if (model.isRenderPicker())
+		if (model instanceof PickableModel && ((PickableModel)model).isRenderPicker())
 		{
 			gl.glDisable(GL.GL_TEXTURE_2D); // added by R. Wathelet
 			gl.glCallList(displayList + PICKER_OFFSET);

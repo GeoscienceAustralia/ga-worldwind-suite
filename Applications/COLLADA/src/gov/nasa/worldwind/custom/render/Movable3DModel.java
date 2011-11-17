@@ -1,8 +1,6 @@
 package gov.nasa.worldwind.custom.render;
 
 import gov.nasa.worldwind.Movable;
-import gov.nasa.worldwind.formats.models.ModelFactory;
-import gov.nasa.worldwind.formats.models.geometry.Model;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -14,6 +12,9 @@ import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.util.Logging;
 
 import javax.media.opengl.GL;
+
+import net.java.joglutils.model.ModelFactory;
+import net.java.joglutils.model.geometry.Model;
 
 import org.csiro.examples.model.Adjustable;
 
@@ -53,7 +54,7 @@ public class Movable3DModel implements Renderable, Movable, Adjustable {
 
     public Movable3DModel(String path, Position pos) {
         try {
-            this.model = ModelFactory.createModel(path);
+            this.model = PickableModelFactory.createModel(path);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -75,10 +76,8 @@ public class Movable3DModel implements Renderable, Movable, Adjustable {
         }
         try {
             beginDraw(dc);
-            if (dc.isPickingMode()) {
-                this.model.setRenderPicker(true);
-            } else {
-                this.model.setRenderPicker(false);
+            if (this.model instanceof PickableModel) {
+                ((PickableModel)this.model).setRenderPicker(dc.isPickingMode());
             }
             draw(dc);
         } catch (Exception e) {

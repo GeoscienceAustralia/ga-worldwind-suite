@@ -1,6 +1,4 @@
-package gov.nasa.worldwind.formats.models.geometry;
-
-import gov.nasa.worldwind.formats.models.geometry.Vec4;
+package net.java.joglutils.model.geometry;
 
 /**
  * Provides a instance of a boundary object that stores the maximum and 
@@ -73,33 +71,33 @@ public class Bounds {
      * passed into it.  If any of the coordinates of the passed in point are
      * beyond the current bounding box limits then the bounding box is expanded.
      *
-     * @param d The x coordinate of a point used to adjust the boundary box
-     * @param e The y coordinate of a point used to adjust the boundary box
-     * @param f The z coordinate of a point used to adjust the boundary box
+     * @param x The x coordinate of a point used to adjust the boundary box
+     * @param y The y coordinate of a point used to adjust the boundary box
+     * @param z The z coordinate of a point used to adjust the boundary box
      */
-    public void calc( float d, float e, float f ) {
+    public void calc( float x, float y, float z ) {
         // Compare x component and expand the bounding box as needed
-        if (d > max.x) {
-            max.x = d;
+        if (x > max.x) {
+            max.x = x;
         }
-        if (d < min.x) {
-            min.x = d;
+        if (x < min.x) {
+            min.x = x;
         }
         
         // Compare y component and expand the bounding box as needed
-        if (e > max.y) {
-            max.y = e;
+        if (y > max.y) {
+            max.y = y;
         }
-        if (e < min.y) {
-            min.y = e;
+        if (y < min.y) {
+            min.y = y;
         }
         
         // Compare z component and expand the bounding box as needed
-        if (f > max.z) {
-            max.z = f;
+        if (z > max.z) {
+            max.z = z;
         }
-        if (f < min.z) {
-            min.z = f;
+        if (z < min.z) {
+            min.z = z;
         }
     }
     

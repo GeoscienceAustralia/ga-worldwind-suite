@@ -34,22 +34,21 @@
  * facility.
  */
 
-package gov.nasa.worldwind.formats.models.loader;
-
-import gov.nasa.worldwind.formats.models.ResourceRetriever;
-import gov.nasa.worldwind.formats.models.geometry.Bounds;
-import gov.nasa.worldwind.formats.models.geometry.Face;
-import gov.nasa.worldwind.formats.models.geometry.Material;
-import gov.nasa.worldwind.formats.models.geometry.Mesh;
-import gov.nasa.worldwind.formats.models.geometry.Model;
-import gov.nasa.worldwind.formats.models.geometry.TexCoord;
-import gov.nasa.worldwind.formats.models.geometry.Vec4;
+package net.java.joglutils.model.loader;
 
 import java.awt.Color;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import net.java.joglutils.model.ResourceRetriever;
+import net.java.joglutils.model.geometry.Bounds;
+import net.java.joglutils.model.geometry.Face;
+import net.java.joglutils.model.geometry.Material;
+import net.java.joglutils.model.geometry.Mesh;
+import net.java.joglutils.model.geometry.Model;
+import net.java.joglutils.model.geometry.TexCoord;
+import net.java.joglutils.model.geometry.Vec4;
 
 public class MaxLoader implements MaxConstants, iLoader {
 // File reader

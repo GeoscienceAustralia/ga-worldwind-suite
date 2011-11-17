@@ -34,7 +34,7 @@
  * facility.
  */
 
-package gov.nasa.worldwind.formats.models.geometry;
+package net.java.joglutils.model.geometry;
 
 public class Vec4
 {

@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package gov.nasa.worldwind.formats.models.loader;
+package net.java.joglutils.model.loader;
 
 /**
  * Constants representing block types in the 3DS file.  This is not a complete

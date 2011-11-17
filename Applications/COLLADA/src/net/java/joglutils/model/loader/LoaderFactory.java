@@ -7,11 +7,10 @@
  * and open the template in the editor.
  */
 
-package gov.nasa.worldwind.formats.models.loader;
+package net.java.joglutils.model.loader;
 
-import gov.nasa.worldwind.formats.models.ModelLoadException;
-import gov.nasa.worldwind.formats.models.geometry.Model;
-
+import net.java.joglutils.model.ModelLoadException;
+import net.java.joglutils.model.geometry.Model;
 
 /**
  *
@@ -21,7 +20,6 @@ public class LoaderFactory {
     private static final int FILETYPE_UNKNOWN =    -1;
     private static final int FILETYPE_3DS  =	    1;
     private static final int FILETYPE_OBJ  =	    2;
-    private static final int FILETYPE_DAE = 		3;
     
     public static Model load(String source) throws ModelLoadException {
         iLoader loader = getLoader(source);
@@ -38,11 +36,6 @@ public class LoaderFactory {
 
             case FILETYPE_OBJ:
                 return new WaveFrontLoader();
-                
-            case FILETYPE_DAE:
-            	return new ArdorColladaLoader();
-            	//TODO: Smoother switch between ardor and JAXB loaders
-            	//return new ColladaLoader();
                 
             default:
                 return null;
@@ -63,8 +56,6 @@ public class LoaderFactory {
 	    type = FILETYPE_3DS;
 	else if(tokens[tokens.length - 1].equals("obj"))
 	    type = FILETYPE_OBJ;
-	else if(tokens[tokens.length - 1].equals("dae"))
-	    type = FILETYPE_DAE;
 	    
 	return type;
     }

@@ -39,10 +39,7 @@
 package org.csiro.examples.model;
 
 import gov.nasa.worldwind.custom.render.DisplayListRenderer;
-import gov.nasa.worldwind.formats.models.ModelFactory;
-import gov.nasa.worldwind.formats.models.ModelLoadException;
-import gov.nasa.worldwind.formats.models.iModel3DRenderer;
-import gov.nasa.worldwind.formats.models.geometry.Model;
+import gov.nasa.worldwind.custom.render.PickableModelFactory;
 
 import java.awt.Frame;
 import java.awt.Point;
@@ -59,6 +56,10 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
+
+import net.java.joglutils.model.ModelLoadException;
+import net.java.joglutils.model.iModel3DRenderer;
+import net.java.joglutils.model.geometry.Model;
 
 import com.sun.opengl.util.Animator;
 
@@ -222,7 +223,7 @@ public class ModelTest {
                 //model = ModelFactory.createModel("C:\\models\\apollo.3ds");
                 
                 // Call the factory for a model from a jar file
-                model = ModelFactory.createModel("./testmodels/penguin.obj");
+                model = PickableModelFactory.createModel("./testmodels/penguin.obj");
                 //model = ModelFactory.createModel("net/java/joglutils/model/examples/models/obj/penguin.obj");
                 
                 // When loading the model, adjust the center to the boundary center

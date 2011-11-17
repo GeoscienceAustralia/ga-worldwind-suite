@@ -1,13 +1,12 @@
 package gov.nasa.worldwind.custom.render;
 
-import gov.nasa.worldwind.formats.models.iModel3DRenderer;
-import gov.nasa.worldwind.formats.models.geometry.Model;
 import gov.nasa.worldwind.formats.models.loader.ArdorColladaLoader;
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.util.Logging;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
+
+import net.java.joglutils.model.iModel3DRenderer;
+import net.java.joglutils.model.geometry.Model;
 
 import com.ardor3d.framework.Scene;
 import com.ardor3d.framework.jogl.JoglCanvasRenderer;

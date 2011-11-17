@@ -1,10 +1,10 @@
-package gov.nasa.worldwind.formats.models;
+package net.java.joglutils.model;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.MalformedURLException;
 
 /**
  * Utility class that allows transparent reading of files from the current 

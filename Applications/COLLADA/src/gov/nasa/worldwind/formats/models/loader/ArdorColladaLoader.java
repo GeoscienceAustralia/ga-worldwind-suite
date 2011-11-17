@@ -10,13 +10,15 @@
 
 package gov.nasa.worldwind.formats.models.loader;
 
-import gov.nasa.worldwind.formats.models.ModelLoadException;
-import gov.nasa.worldwind.formats.models.geometry.Model;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
 
 import java.io.File;
 import java.net.URL;
+
+import net.java.joglutils.model.ModelLoadException;
+import net.java.joglutils.model.geometry.Model;
+import net.java.joglutils.model.loader.iLoader;
 
 import com.ardor3d.bounding.BoundingVolume;
 import com.ardor3d.extension.model.collada.jdom.ColladaImporter;

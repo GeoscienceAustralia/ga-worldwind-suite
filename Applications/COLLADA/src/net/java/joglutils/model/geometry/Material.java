@@ -34,31 +34,25 @@
  * facility.
  */
 
-package gov.nasa.worldwind.formats.models.geometry;
+package net.java.joglutils.model.geometry;
 
-import gov.nasa.worldwind.formats.models.geometry.Vec4;
+import java.awt.Color;
 
-public class Mesh
+public class Material
 {
-    public int numOfVerts = 0;
-    public int numOfFaces = 0;
-    public int numTexCoords = 0;
-    public int materialID = 0;
-    public boolean hasTexture = false;
-    public String name = null;
-    public int indices = 0;
-    public Vec4 vertices[] = null;
-    public Vec4 normals[] = null;
-    public TexCoord texCoords[] = null;
-    public Face faces[] = null;
-    public Bounds bounds = null;
-    
-    public Mesh() {
-        this("default");
-    }
-    
-    public Mesh(String name) {
-        this.name = name;
-        bounds = new Bounds();
-    }
+    public String strName;
+    public String strFile;
+
+    public Color ambientColor;
+    public Color specularColor;
+    public Color diffuseColor;
+    public Color emissive = Color.BLACK;
+    public float shininess;
+    public float shininess2;
+    public float transparency;
+    public int textureId;
+    public float uTile;
+    public float vTile;
+    public float uOffset;
+    public float vOffset;
 }

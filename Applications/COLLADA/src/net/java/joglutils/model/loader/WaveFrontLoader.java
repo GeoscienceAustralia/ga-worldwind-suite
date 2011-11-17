@@ -7,10 +7,7 @@
  * and open the template in the editor.
  */
 
-package gov.nasa.worldwind.formats.models.loader;
-
-import gov.nasa.worldwind.formats.models.*;
-import gov.nasa.worldwind.formats.models.geometry.*;
+package net.java.joglutils.model.loader;
 
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -21,6 +18,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Vector;
+import net.java.joglutils.model.ModelLoadException;
+import net.java.joglutils.model.ResourceRetriever;
+import net.java.joglutils.model.geometry.Bounds;
+import net.java.joglutils.model.geometry.Face;
+import net.java.joglutils.model.geometry.Material;
+import net.java.joglutils.model.geometry.Mesh;
+import net.java.joglutils.model.geometry.Model;
+import net.java.joglutils.model.geometry.TexCoord;
+import net.java.joglutils.model.geometry.Vec4;
 
 /**
  *
@@ -86,7 +92,7 @@ public class WaveFrontLoader implements iLoader {
                     continue;
                 }
                 
-                if (line.isEmpty()) {
+                if (line.length() == 0) {
                     // igonore empty lines
                     continue;
                 }
@@ -369,7 +375,7 @@ public class WaveFrontLoader implements iLoader {
             mesh.materialID = materialID;
     }
     
-    private Material loadMaterialFile(InputStream stream) {
+    public Material loadMaterialFile(InputStream stream) {
         Material mat = null;
         int texId = 0;
         
