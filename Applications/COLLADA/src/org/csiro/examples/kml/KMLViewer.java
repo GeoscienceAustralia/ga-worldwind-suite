@@ -8,13 +8,13 @@ All Rights Reserved.
 package org.csiro.examples.kml;
 
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.examples.ApplicationTemplate;
-import gov.nasa.worldwind.examples.kml.KMLApplicationController;
-import gov.nasa.worldwind.examples.util.BalloonController;
-import gov.nasa.worldwind.examples.util.HotSpotController;
-import gov.nasa.worldwind.examples.util.layertree.KMLLayerTreeNode;
-import gov.nasa.worldwind.examples.util.layertree.KMLNetworkLinkTreeNode;
-import gov.nasa.worldwind.examples.util.layertree.LayerTree;
+import gov.nasa.worldwindx.examples.ApplicationTemplate;
+import gov.nasa.worldwindx.examples.kml.KMLApplicationController;
+import gov.nasa.worldwindx.examples.util.BalloonController;
+import gov.nasa.worldwindx.examples.util.HotSpotController;
+import gov.nasa.worldwind.util.layertree.KMLLayerTreeNode;
+import gov.nasa.worldwind.util.layertree.KMLNetworkLinkTreeNode;
+import gov.nasa.worldwind.util.layertree.LayerTree;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.ogc.custom.kml.model.CustomKMLRoot;
 import gov.nasa.worldwind.ogc.kml.KMLAbstractFeature;
