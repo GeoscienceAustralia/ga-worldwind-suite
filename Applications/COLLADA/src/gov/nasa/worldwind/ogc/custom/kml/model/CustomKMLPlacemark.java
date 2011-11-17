@@ -50,15 +50,24 @@ public class CustomKMLPlacemark extends KMLPlacemark {
 		
 	}
 
-	protected void initializeModel(KMLTraversalContext tc, KMLModel model) {
+	protected void initializeModel(final KMLTraversalContext tc, final KMLModel model) {
         if (model == null)
             return;
 
         if (this.getRenderables() == null)
             this.renderables = new ArrayList<KMLRenderable>(1); // most common case is one renderable
 
-        
-        this.addRenderable(this.selectModelRenderable(tc, model));
+        Runnable runnable = new Runnable()
+        {
+			@Override
+			public void run()
+			{
+				addRenderable(selectModelRenderable(tc, model));
+			}
+        };
+        Thread thread = new Thread(runnable);
+        thread.setDaemon(true);
+        thread.start();
 	}
 
 	protected KMLRenderable selectModelRenderable(KMLTraversalContext tc,
