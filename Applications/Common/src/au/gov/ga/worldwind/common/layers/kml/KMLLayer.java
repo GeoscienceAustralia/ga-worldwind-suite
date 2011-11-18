@@ -6,11 +6,15 @@ import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.ogc.kml.KMLAbstractFeature;
+import gov.nasa.worldwind.ogc.kml.KMLConstants;
 import gov.nasa.worldwind.ogc.kml.KMLRoot;
+import gov.nasa.worldwind.ogc.kml.custom.CustomKMLRoot;
 import gov.nasa.worldwind.ogc.kml.impl.KMLController;
 import gov.nasa.worldwind.ogc.kml.io.KMLDoc;
-import gov.nasa.worldwind.ogc.kml.io.KMLInputStream;
-import gov.nasa.worldwind.ogc.kml.io.KMZInputStream;
+import gov.nasa.worldwind.ogc.kml.relativeio.RelativeKMLFile;
+import gov.nasa.worldwind.ogc.kml.relativeio.RelativeKMLInputStream;
+import gov.nasa.worldwind.ogc.kml.relativeio.RelativeKMZFile;
+import gov.nasa.worldwind.ogc.kml.relativeio.RelativeKMZInputStream;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWIO;
 import gov.nasa.worldwind.util.WWUtil;
@@ -33,7 +37,8 @@ import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
- * A {@link Layer} that parses and renders KML content from a provided KML source.
+ * A {@link Layer} that parses and renders KML content from a provided KML
+ * source.
  */
 public class KMLLayer extends RenderableLayer implements Loader
 {
@@ -111,10 +116,26 @@ public class KMLLayer extends RenderableLayer implements Loader
 
 					try
 					{
-						boolean isKmz = url != null && url.toString().toLowerCase().contains("kmz");
-						InputStream stream = inputStream != null ? inputStream : WWIO.openStream(url);
-						KMLDoc doc = isKmz ? new KMZInputStream(stream) : new KMLInputStream(stream, URLUtil.toURI(url));
-						KMLRoot root = new KMLRoot(doc);
+						String contentType = WWIO.makeMimeTypeForSuffix(WWIO.getSuffix(url.getPath()));
+						boolean isKmz = KMLConstants.KMZ_MIME_TYPE.equals(contentType);
+						File file = URLUtil.urlToFile(url);
+
+						KMLDoc doc;
+						if (file != null)
+						{
+							doc =
+									isKmz ? new RelativeKMZFile(URLUtil.urlToFile(url), url.toString(), null)
+											: new RelativeKMLFile(URLUtil.urlToFile(url), url.toString(), null);
+						}
+						else
+						{
+							InputStream stream = inputStream != null ? inputStream : WWIO.openStream(url);
+							doc =
+									isKmz ? new RelativeKMZInputStream(stream, url.toURI(), url.toString(), null)
+											: new RelativeKMLInputStream(stream, url.toURI(), url.toString(), null);
+						}
+
+						CustomKMLRoot root = new CustomKMLRoot(doc);
 						root.parse();
 						KMLController controller = new KMLController(root);
 						addRenderable(controller);
