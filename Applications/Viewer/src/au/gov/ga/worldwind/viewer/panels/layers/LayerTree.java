@@ -14,11 +14,13 @@ import au.gov.ga.worldwind.common.util.Loader.LoadingListener;
 public class LayerTree extends LoadingTree implements LoadingListener
 {
 	private final LayerEnabler enabler;
+	private final ClearableBasicTreeUI ui;
 
 	public LayerTree(WorldWindow wwd, INode root)
 	{
 		super();
-		setUI(new ClearableBasicTreeUI());
+		ui = new ClearableBasicTreeUI();
+		setUI(ui);
 
 		enabler = new LayerEnabler(this, wwd);
 		LayerTreeModel model = new LayerTreeModel(this, root, enabler);
@@ -47,6 +49,8 @@ public class LayerTree extends LoadingTree implements LoadingListener
 	@Override
 	public ClearableBasicTreeUI getUI()
 	{
+		if (super.getUI() != this.ui)
+			setUI(this.ui);
 		return (ClearableBasicTreeUI) super.getUI();
 	}
 
