@@ -11,13 +11,16 @@ import gov.nasa.worldwind.data.DataStoreProducer;
 import gov.nasa.worldwind.data.TiledElevationProducer;
 import gov.nasa.worldwind.data.TiledImageProducer;
 import gov.nasa.worldwind.data.WWDotNetLayerSetConverter;
+import gov.nasa.worldwind.ogc.kml.KMLConstants;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.WWIO;
 import gov.nasa.worldwindx.applications.worldwindow.features.DataImportUtil;
 
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,6 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.ProgressMonitor;
 
 import org.w3c.dom.Document;
+
+import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
 
 public class FileLoader
 {
@@ -37,14 +42,22 @@ public class FileLoader
 		void cancelled();
 	}
 
-	public static void loadFile(final File file, final FileLoadListener listener,
-			final Component parentComponent, final FileStore fileStore)
+	public static void loadFile(final File file, final FileLoadListener listener, final Component parentComponent,
+			final FileStore fileStore)
 	{
 		Thread thread = new Thread(new Runnable()
 		{
 			@Override
 			public void run()
 			{
+				//first attempt to load from a known filetype (eg a KML/KMZ file)
+				LoadedLayer loaded = loadKnownFile(file);
+				if (loaded != null)
+				{
+					listener.loaded(loaded);
+					return;
+				}
+
 				Document dataConfig = null;
 
 				try
@@ -64,9 +77,7 @@ public class FileLoader
 					else
 					{
 						URL sourceUrl = file.toURI().toURL();
-						LoadedLayer loaded =
-								LayerLoader.loadFromElement(dataConfig.getDocumentElement(),
-										sourceUrl, null);
+						loaded = LayerLoader.loadFromElement(dataConfig.getDocumentElement(), sourceUrl, null);
 						listener.loaded(loaded);
 					}
 				}
@@ -82,6 +93,33 @@ public class FileLoader
 		thread.start();
 	}
 
+	protected static LoadedLayer loadKnownFile(File file)
+	{
+		String suffix = WWIO.getSuffix(file.getName());
+		if (suffix == null)
+			return null;
+
+		String contentType = WWIO.makeMimeTypeForSuffix(suffix);
+		if (KMLConstants.KML_MIME_TYPE.equals(contentType) || KMLConstants.KMZ_MIME_TYPE.equals(contentType))
+		{
+			try
+			{
+				URL url = new URL("file:" + file.getAbsolutePath());
+				AVList params = new AVListImpl();
+				params.setValue(AVKey.URL, url);
+				KMLLayer layer = new KMLLayer(url, null, params);
+				return new LoadedLayer(layer, params);
+			}
+			catch (MalformedURLException e)
+			{
+				String message = "Error loading KML file " + file + ": " + e.getLocalizedMessage();
+				Logging.logger().warning(message);
+			}
+		}
+		
+		return null;
+	}
+
 	protected static Document loadCachedData(File file, FileStore fileStore)
 	{
 		//TODO
@@ -90,8 +128,8 @@ public class FileLoader
 
 	//FROM ImportingImagesAndElevationsDemo.java
 
-	protected static Document importDataFromFile(Component parentComponent, File file,
-			FileStore fileStore) throws Exception
+	protected static Document importDataFromFile(Component parentComponent, File file, FileStore fileStore)
+			throws Exception
 	{
 		// Create a DataStoreProducer which is capable of processing the file.
 		final DataStoreProducer producer = createDataStoreProducerFromFile(file);
@@ -172,8 +210,8 @@ public class FileLoader
 		return doc;
 	}
 
-	protected static Document createDataStoreFromFile(File file, FileStore fileStore,
-			DataStoreProducer producer) throws Exception
+	protected static Document createDataStoreFromFile(File file, FileStore fileStore, DataStoreProducer producer)
+			throws Exception
 	{
 		File importLocation = DataImportUtil.getDefaultImportLocation(fileStore);
 		if (importLocation == null)
@@ -239,7 +277,7 @@ public class FileLoader
 		DataRasterReaderFactory readerFactory = new BasicDataRasterReaderFactory();
 		AVListImpl params = new AVListImpl();
 		DataRasterReader reader = readerFactory.findReaderFor(file, params);
-		
+
 		if (reader != null && reader.isElevationsRaster(file, params))
 		{
 			producer = new TiledElevationProducer();
