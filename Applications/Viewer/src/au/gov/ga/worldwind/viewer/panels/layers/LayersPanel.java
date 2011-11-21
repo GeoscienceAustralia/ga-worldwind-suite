@@ -558,12 +558,14 @@ public class LayersPanel extends AbstractLayersPanel
 				{
 					addDefaultLayersFromDataset(lazy, new ArrayList<IData>());
 					lazy.removeListener(this);
+					tree.relayoutOnEDT();
 				}
 			});
 		}
 		else
 		{
 			addDefaultLayersFromDataset(dataset, new ArrayList<IData>());
+			tree.relayoutOnEDT();
 		}
 	}
 

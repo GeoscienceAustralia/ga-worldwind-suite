@@ -8,6 +8,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellEditor;
 
 import au.gov.ga.worldwind.common.ui.ClearableBasicTreeUI;
+import au.gov.ga.worldwind.common.ui.SwingUtil;
 import au.gov.ga.worldwind.common.ui.lazytree.LoadingTree;
 import au.gov.ga.worldwind.common.util.Loader.LoadingListener;
 
@@ -78,5 +79,18 @@ public class LayerTree extends LoadingTree implements LoadingListener
 	public void loadingStateChanged(boolean isLoading)
 	{
 		repaint();
+	}
+	
+	public void relayoutOnEDT()
+	{
+		SwingUtil.invokeTaskOnEDT(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				getUI().relayout();
+				repaint();
+			}
+		});
 	}
 }
