@@ -44,7 +44,7 @@ public class AnimationContextImpl implements AnimationContext
 	@Override
 	public View getView()
 	{
-		return ((WorldWindAnimationImpl)animation).getWorldWindow().getView();
+		return animation.getWorldWindow().getView();
 	}
 	
 	@Override
