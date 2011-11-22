@@ -88,7 +88,8 @@ public class DatasetReader
 		URL url = XMLUtil.getURL(element, "@url", context);
 		boolean base = XMLUtil.getBoolean(element, "@base", false);
 		boolean def = XMLUtil.getBoolean(element, "@default", false);
-		ILayerDefinition layer = new LayerDefinition(name, url, info, icon, base, def);
+		boolean enabled = XMLUtil.getBoolean(element, "@enabled", true);
+		ILayerDefinition layer = new LayerDefinition(name, url, info, icon, base, def, enabled);
 		parent.addChild(layer);
 	}
 }
