@@ -4,7 +4,9 @@
 package au.gov.ga.worldwind.animator.animation;
 
 import gov.nasa.worldwind.View;
+import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.application.AnimatorSceneController;
 
 /**
  * A context that holds information about an animation, and the 'world' in which the 
@@ -77,6 +79,16 @@ public interface AnimationContext
 	 * @return The current frame of the animation
 	 */
 	int getCurrentFrame();
+	
+	/**
+	 * @return The application's scene controller
+	 */
+	AnimatorSceneController getSceneController();
+	
+	/**
+	 * @return The current animation's camera
+	 */
+	Camera getCamera();
 	
 	/**
 	 * A factory class that can be used to create instances of the AnimationContext

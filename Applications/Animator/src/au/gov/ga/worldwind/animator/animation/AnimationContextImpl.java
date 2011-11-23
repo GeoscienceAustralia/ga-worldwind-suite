@@ -4,7 +4,9 @@
 package au.gov.ga.worldwind.animator.animation;
 
 import gov.nasa.worldwind.View;
+import au.gov.ga.worldwind.animator.animation.camera.Camera;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.application.AnimatorSceneController;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**
@@ -65,4 +67,15 @@ public class AnimationContextImpl implements AnimationContext
 		return animation.getCurrentFrame();
 	}
 	
+	@Override
+	public AnimatorSceneController getSceneController()
+	{
+		return (AnimatorSceneController)animation.getWorldWindow().getSceneController();
+	}
+	
+	@Override
+	public Camera getCamera()
+	{
+		return animation.getCamera();
+	}
 }
