@@ -73,7 +73,7 @@ public interface AnimationIOConstants
 	String getAnimatableElevationModelIdentifierAttributeName();
 	String getAnimatableElevationModelIdentifierAttributeUrl();
 	String getElevationExaggerationName();
-	String getElevationExaggerationAttributeBoundary();
+	String getElevationExaggerationBoundaryAttributeName();
 	String getLockedDimensionsElementName();
 	String getRenderDestinationElementName();
 	String getFrameStartElementName();
@@ -141,7 +141,7 @@ public interface AnimationIOConstants
 		public String getAnimatableElevationModelIdentifierAttributeName() {return null;}
 		public String getAnimatableElevationModelIdentifierAttributeUrl() {return null;}
 		public String getElevationExaggerationName() {return null;}
-		public String getElevationExaggerationAttributeBoundary() {return null;}
+		public String getElevationExaggerationBoundaryAttributeName() {return null;}
 		public String getLockedDimensionsElementName() {return null;}
 		public String getRenderDestinationElementName() {return null;}
 		public String getFrameStartElementName() {return null;}
@@ -206,7 +206,7 @@ public interface AnimationIOConstants
 		public String getAnimatableElevationModelIdentifierAttributeName() {return "name";}
 		public String getAnimatableElevationModelIdentifierAttributeUrl() {return "url";}
 		public String getElevationExaggerationName() {return "exaggerator";}
-		public String getElevationExaggerationAttributeBoundary() {return "boundary";}
+		public String getElevationExaggerationBoundaryAttributeName() {return "boundary";}
 		public String getLockedDimensionsElementName() { return "locked";}
 		public String getRenderDestinationElementName() { return "renderDestination"; }
 		public String getFrameStartElementName() {return "startFrame";}

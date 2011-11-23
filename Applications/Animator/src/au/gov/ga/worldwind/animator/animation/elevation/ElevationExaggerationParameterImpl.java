@@ -103,7 +103,7 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 		AnimationIOConstants constants = version.getConstants();
 		
 		Element result = super.toXml(parent, version);
-		WWXML.setDoubleAttribute(result, constants.getElevationExaggerationAttributeBoundary(), exaggerator.getElevationBoundary());
+		WWXML.setDoubleAttribute(result, constants.getElevationExaggerationBoundaryAttributeName(), exaggerator.getElevationBoundary());
 		
 		return result;
 	}
@@ -120,7 +120,7 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 		AnimationIOConstants constants = version.getConstants();
 		Animation currentAnimation = (Animation)context.getValue(constants.getAnimationKey());
 		
-		double boundary = WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getElevationExaggerationAttributeBoundary(), null);
+		double boundary = WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getElevationExaggerationBoundaryAttributeName(), null);
 		double exaggeration = WWXML.getDouble(element, "./" + constants.getParameterElementName() + "/" + ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeDefaultValue(), null);
 		boolean enabled = XMLUtil.getBoolean(element, "./" + constants.getParameterElementName() + "/" + ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeEnabled(), true);
 		String name = XMLUtil.getText(element, "./" + constants.getParameterElementName() + "/" + ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeName(), null);
