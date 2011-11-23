@@ -497,17 +497,17 @@ public class CameraImpl extends AnimatableBase implements Camera
 		camera.animation = (Animation)context.getValue(constants.getAnimationKey());
 		camera.setName(WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getCameraAttributeName()));
 		
-		camera.eyeLat = new EyeLatParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLatElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
-		camera.eyeLon = new EyeLonParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLonElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
-		camera.eyeElevation = new EyeElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeElevationElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
+		camera.eyeLat = new EyeLatParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLatElementName(), xpath), version, context);
+		camera.eyeLon = new EyeLonParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLonElementName(), xpath), version, context);
+		camera.eyeElevation = new EyeElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeElevationElementName(), xpath), version, context);
 		
-		camera.lookAtLat = new LookatLatParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLatElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
-		camera.lookAtLon = new LookatLonParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLonElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
-		camera.lookAtElevation = new LookatElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatElevationElementName()+ "/" + constants.getParameterElementName(), xpath), version, context);
+		camera.lookAtLat = new LookatLatParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLatElementName(), xpath), version, context);
+		camera.lookAtLon = new LookatLonParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLonElementName(), xpath), version, context);
+		camera.lookAtElevation = new LookatElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatElevationElementName(), xpath), version, context);
 		
 		// Near and far clipping are optional.
-		Element nearClipElement = WWXML.getElement(element, constants.getCameraNearClipElementName() + "/" + constants.getParameterElementName(), xpath);
-		Element farClipElement = WWXML.getElement(element, constants.getCameraFarClipElementName() + "/" + constants.getParameterElementName(), xpath);
+		Element nearClipElement = WWXML.getElement(element, constants.getCameraNearClipElementName(), xpath);
+		Element farClipElement = WWXML.getElement(element, constants.getCameraFarClipElementName(), xpath);
 		if (nearClipElement != null || farClipElement != null)
 		{
 			camera.nearClip = nearClipElement != null ? new NearClipParameter().fromXml(nearClipElement, version, context) : new NearClipParameter(animation);

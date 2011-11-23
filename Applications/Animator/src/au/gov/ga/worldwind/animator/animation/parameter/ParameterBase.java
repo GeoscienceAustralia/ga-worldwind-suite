@@ -365,6 +365,8 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 		Validate.notNull(context, "A context is required");
 		
 		AnimationIOConstants constants = version.getConstants();
+		Element parameterElement = WWXML.getElement(element, "./" + constants.getParameterElementName(), null);
+		Validate.notNull(parameterElement, "<" + constants.getParameterElementName() + "> element not found");
 		
 		switch (version)
 		{
@@ -374,14 +376,14 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 				
 				ParameterBase result = createParameter(context);
 				result.animation = (Animation)context.getValue(constants.getAnimationKey());
-				result.setDefaultValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeDefaultValue(), null));
-				result.setName(WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeName()));
-				result.setEnabled(WWXML.getBoolean(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeEnabled(), null));
+				result.setDefaultValue(WWXML.getDouble(parameterElement, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeDefaultValue(), null));
+				result.setName(WWXML.getText(parameterElement, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeName()));
+				result.setEnabled(WWXML.getBoolean(parameterElement, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeEnabled(), null));
 				
 				// Create a parameter value for each child element
 				// Insert it as a key frame (relies on key frames being merged)
 				context.setValue(constants.getParameterValueOwnerKey(), result);
-				Element[] parameterValueElements = WWXML.getElements(element, constants.getParameterValueElementName(), null);
+				Element[] parameterValueElements = WWXML.getElements(parameterElement, constants.getParameterValueElementName(), null);
 				if (parameterValueElements == null)
 				{
 					return result;
