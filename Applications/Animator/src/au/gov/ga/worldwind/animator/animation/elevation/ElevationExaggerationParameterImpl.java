@@ -91,9 +91,9 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 	}
 
 	@Override
-	protected ParameterBase createParameter(AVList context)
+	protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 	{
-		// Not needed in this parameter - the fromXml method has been overriden to perform the required processing
+		// Not needed in this parameter - the fromXml method has been overridden to perform the required processing
 		return null;
 	}
 
