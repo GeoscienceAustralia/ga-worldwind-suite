@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.application.LAFConstants;
@@ -227,6 +228,8 @@ public class EditableParameterInputVerifierTest
 		protected void doApplyValue(double value) {}
 		@Override
 		protected ParameterBase createParameter(AVList context){ return null;}
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants){ return null;}
 	}
 	
 	@EditableParameter(bound = false, minValue = 0.0, maxValue = 10.0)
@@ -239,6 +242,8 @@ public class EditableParameterInputVerifierTest
 		protected void doApplyValue(double value) {}
 		@Override
 		protected ParameterBase createParameter(AVList context){ return null;}
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants){ return null;}
 	}
 	
 }
