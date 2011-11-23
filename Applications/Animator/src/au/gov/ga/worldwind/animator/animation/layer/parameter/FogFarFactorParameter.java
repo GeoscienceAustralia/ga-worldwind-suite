@@ -41,14 +41,6 @@ public class FogFarFactorParameter extends LayerParameterBase
 	}
 
 	@Override
-	public void apply(AnimationContext animationContext, int frame)
-	{
-		ParameterValue farFactorValue = getValueAtFrame(frame);
-		
-		applyValue(farFactorValue.getValue());
-	}
-
-	@Override
 	public ParameterValue getCurrentValue(AnimationContext context)
 	{
 		return ParameterValueFactory.createParameterValue(this, ((FogLayer)getLayer()).getFarFactor(), context.getCurrentFrame());

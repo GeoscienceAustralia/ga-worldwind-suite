@@ -47,14 +47,6 @@ public class ShapeOutlineOpacityParameter extends LayerParameterBase
 	}
 
 	@Override
-	public void apply(AnimationContext animationContext, int frame)
-	{
-		ParameterValue outlineOpacityValue = getValueAtFrame(frame);
-		
-		applyValue(outlineOpacityValue.getValue());
-	}
-
-	@Override
 	public ParameterValue getCurrentValue(AnimationContext context)
 	{
 		for (Renderable renderable : getRenderableLayer().getRenderables())

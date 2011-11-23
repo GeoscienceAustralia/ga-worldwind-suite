@@ -43,14 +43,6 @@ public class LayerOpacityParameter extends LayerParameterBase
 	{
 		return Type.OPACITY;
 	}
-
-	@Override
-	public void apply(AnimationContext animationContext, int frame)
-	{
-		ParameterValue opacityValue = getValueAtFrame(frame);
-		
-		applyValue(opacityValue.getValue());
-	}
 	
 	@Override
 	public void doApplyValue(double value)

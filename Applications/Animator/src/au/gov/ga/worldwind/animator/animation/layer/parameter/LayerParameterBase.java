@@ -5,6 +5,7 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
+import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**
@@ -55,6 +56,13 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 	protected String getXmlElementName(AnimationIOConstants constants)
 	{
 		return getType().name().toLowerCase();
+	}
+	
+	@Override
+	public void apply(AnimationContext animationContext, int frame)
+	{
+		ParameterValue value = getValueAtFrame(frame);
+		applyValue(value.getValue());
 	}
 	
 	@Override
