@@ -102,12 +102,16 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 	{
 		AnimationIOConstants constants = version.getConstants();
 		
-		Element result = WWXML.appendElement(parent, constants.getElevationExaggerationName());
+		Element result = super.toXml(parent, version);
 		WWXML.setDoubleAttribute(result, constants.getElevationExaggerationAttributeBoundary(), exaggerator.getElevationBoundary());
 		
-		result.appendChild(super.toXml(result, version));
-		
 		return result;
+	}
+	
+	@Override
+	protected String getXmlElementName(AnimationIOConstants constants)
+	{
+		return constants.getElevationExaggerationName();
 	}
 	
 	@Override

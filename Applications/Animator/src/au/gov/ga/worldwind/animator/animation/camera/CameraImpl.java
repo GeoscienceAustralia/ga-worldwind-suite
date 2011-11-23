@@ -426,31 +426,17 @@ public class CameraImpl extends AnimatableBase implements Camera
 		
 		WWXML.setTextAttribute(result, constants.getCameraAttributeName(), getName());
 
-		Element eyeLatElement = WWXML.appendElement(result, constants.getCameraEyeLatElementName());
-		eyeLatElement.appendChild(eyeLat.toXml(eyeLatElement, version));
-		
-		Element eyeLonElement = WWXML.appendElement(result, constants.getCameraEyeLonElementName());
-		eyeLonElement.appendChild(eyeLon.toXml(eyeLonElement, version));
-		
-		Element eyeElevationElement = WWXML.appendElement(result, constants.getCameraEyeElevationElementName());
-		eyeElevationElement.appendChild(eyeElevation.toXml(eyeElevationElement, version));
-		
-		Element lookAtLatElement = WWXML.appendElement(result, constants.getCameraLookatLatElementName());
-		lookAtLatElement.appendChild(lookAtLat.toXml(lookAtLatElement, version));
-		
-		Element lookAtLonElement = WWXML.appendElement(result, constants.getCameraLookatLonElementName());
-		lookAtLonElement.appendChild(lookAtLon.toXml(lookAtLonElement, version));
-		
-		Element lookAtElevationElement = WWXML.appendElement(result, constants.getCameraLookatElevationElementName());
-		lookAtElevationElement.appendChild(lookAtElevation.toXml(lookAtElevationElement, version));
+		eyeLat.toXml(result, version);
+		eyeLon.toXml(result, version);
+		eyeElevation.toXml(result, version);
+		lookAtLat.toXml(result, version);
+		lookAtLon.toXml(result, version);
+		lookAtElevation.toXml(result, version);
 		
 		if (clippingParametersActivated)
 		{
-			Element nearClipElement = WWXML.appendElement(result, constants.getCameraNearClipElementName());
-			nearClipElement.appendChild(nearClip.toXml(nearClipElement, version));
-			
-			Element farClipElement = WWXML.appendElement(result, constants.getCameraFarClipElementName());
-			farClipElement.appendChild(farClip.toXml(farClipElement, version));
+			nearClip.toXml(result, version);
+			farClip.toXml(result, version);
 		}
 		
 		return result;

@@ -115,13 +115,8 @@ public class StereoCameraImpl extends CameraImpl implements StereoCamera
 		XMLUtil.setBooleanAttribute(result, constants.getCameraDynamicStereoElementName(),
 				dynamicStereo);
 
-		Element focalLengthElement =
-				WWXML.appendElement(result, constants.getCameraFocalLengthElementName());
-		focalLengthElement.appendChild(focalLength.toXml(focalLengthElement, version));
-
-		Element eyeSeparationElement =
-				WWXML.appendElement(result, constants.getCameraEyeSeparationElementName());
-		eyeSeparationElement.appendChild(eyeSeparation.toXml(eyeSeparationElement, version));
+		focalLength.toXml(result, version);
+		eyeSeparation.toXml(result, version);
 
 		return result;
 	}

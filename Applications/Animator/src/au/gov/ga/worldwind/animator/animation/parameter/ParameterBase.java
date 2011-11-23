@@ -342,16 +342,17 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	{
 		AnimationIOConstants constants = version.getConstants();
 		
-		Element result = WWXML.appendElement(parent, "parameter");
+		Element result = WWXML.appendElement(parent, getXmlElementName(constants));
+		Element parameterElement = WWXML.appendElement(result, constants.getParameterElementName());
 		
-		WWXML.setTextAttribute(result, constants.getParameterAttributeName(), getName());
-		WWXML.setDoubleAttribute(result, constants.getParameterAttributeDefaultValue(), defaultValue);
-		WWXML.setBooleanAttribute(result, constants.getParameterAttributeEnabled(), enabled);
+		WWXML.setTextAttribute(parameterElement, constants.getParameterAttributeName(), getName());
+		WWXML.setDoubleAttribute(parameterElement, constants.getParameterAttributeDefaultValue(), defaultValue);
+		WWXML.setBooleanAttribute(parameterElement, constants.getParameterAttributeEnabled(), enabled);
 		
 		List<KeyFrame> keyFrames = getKeyFramesWithThisParameter();
 		for (KeyFrame keyFrame : keyFrames)
 		{
-			result.appendChild(keyFrame.getValueForParameter(this).toXml(result, version));
+			parameterElement.appendChild(keyFrame.getValueForParameter(this).toXml(parameterElement, version));
 		}
 		
 		return result;
@@ -405,6 +406,11 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	 * @return A new instance of this parameter
 	 */
 	protected abstract ParameterBase createParameter(AVList context);
+	
+	/**
+	 * @return XML element name to use when converting this parameter to XML (the &lt;parameter&gt; element's parent)
+	 */
+	protected abstract String getXmlElementName(AnimationIOConstants constants);
 	
 	@Override
 	protected AnimationEvent createEvent(Type type, AnimationEvent cause, Object value)

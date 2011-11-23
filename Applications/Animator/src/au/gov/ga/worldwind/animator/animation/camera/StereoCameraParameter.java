@@ -4,6 +4,7 @@ import gov.nasa.worldwind.avlist.AVList;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
@@ -67,6 +68,12 @@ public abstract class StereoCameraParameter extends CameraParameter
 		{
 			return new FocalLengthParameter();
 		}
+		
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraFocalLengthElementName();
+		}
 	}
 
 	@SuppressWarnings("serial")
@@ -104,6 +111,12 @@ public abstract class StereoCameraParameter extends CameraParameter
 		protected ParameterBase createParameter(AVList context)
 		{
 			return new EyeSeparationParameter();
+		}
+		
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraEyeSeparationElementName();
 		}
 	}
 }

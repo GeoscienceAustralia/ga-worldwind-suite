@@ -1,13 +1,9 @@
 package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.util.WWXML;
-
-import org.w3c.dom.Element;
-
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
-import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.common.util.Validate;
 
@@ -56,13 +52,9 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 	}
 	
 	@Override
-	public Element toXml(Element parent, AnimationFileVersion version)
+	protected String getXmlElementName(AnimationIOConstants constants)
 	{
-		Element result = WWXML.appendElement(parent, getType().name().toLowerCase());
-		
-		result.appendChild(super.toXml(result, version));
-		
-		return result;
+		return getType().name().toLowerCase();
 	}
 	
 	@Override

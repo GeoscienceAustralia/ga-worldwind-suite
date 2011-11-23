@@ -8,6 +8,7 @@ import gov.nasa.worldwind.globes.Globe;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
@@ -105,6 +106,12 @@ abstract class CameraParameter extends ParameterBase
 		{
 			return new EyeLatParameter();
 		}
+		
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraEyeLatElementName();
+		}
 	}
 
 	/**
@@ -148,6 +155,12 @@ abstract class CameraParameter extends ParameterBase
 		{
 			return new EyeLonParameter();
 		}
+		
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraEyeLonElementName();
+		}
 	}
 
 	/**
@@ -189,6 +202,12 @@ abstract class CameraParameter extends ParameterBase
 		protected ParameterBase createParameter(AVList context)
 		{
 			return new EyeElevationParameter();
+		}
+		
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraEyeElevationElementName();
 		}
 	}
 
@@ -233,6 +252,12 @@ abstract class CameraParameter extends ParameterBase
 		{
 			return new LookatLatParameter();
 		}
+		
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraLookatLatElementName();
+		}
 	}
 
 	/**
@@ -275,6 +300,12 @@ abstract class CameraParameter extends ParameterBase
 		{
 			return new LookatLonParameter();
 		}
+		
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraLookatLonElementName();
+		}
 	}
 
 	/**
@@ -315,6 +346,12 @@ abstract class CameraParameter extends ParameterBase
 		protected ParameterBase createParameter(AVList context)
 		{
 			return new LookatElevationParameter();
+		}
+		
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraLookatElevationElementName();
 		}
 	}
 	
@@ -362,6 +399,12 @@ abstract class CameraParameter extends ParameterBase
 		{
 			return new NearClipParameter();
 		}
+		
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraNearClipElementName();
+		}
 	}
 	
 	@SuppressWarnings("serial")
@@ -407,6 +450,12 @@ abstract class CameraParameter extends ParameterBase
 		protected ParameterBase createParameter(AVList context)
 		{
 			return new FarClipParameter();
+		}
+		
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraFarClipElementName();
 		}
 	}
 }
