@@ -3,6 +3,8 @@ package au.gov.ga.worldwind.animator.ui;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddExaggeratorDialogTitleKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getExaggeratorDialogBoundaryLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getExaggeratorDialogExaggerationLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getTermOkKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getTermCancelKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.Frame;
@@ -123,7 +125,7 @@ public class ExaggeratorDialog extends JDialog
 	
 	private void addActionListeners()
 	{
-		okAction = new BasicAction("Ok", null);
+		okAction = new BasicAction(getMessage(getTermOkKey()), null);
 		okAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
 		okAction.addActionListener(new ActionListener()
 		{
@@ -135,7 +137,7 @@ public class ExaggeratorDialog extends JDialog
 			}
 		});
 		
-		cancelAction = new BasicAction("Cancel", null);
+		cancelAction = new BasicAction(getMessage(getTermCancelKey()), null);
 		cancelAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
 		cancelAction.addActionListener(new ActionListener()
 		{
