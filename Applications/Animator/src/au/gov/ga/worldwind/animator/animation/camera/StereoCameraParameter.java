@@ -64,7 +64,7 @@ public abstract class StereoCameraParameter extends CameraParameter
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context)
+		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 		{
 			return new FocalLengthParameter();
 		}
@@ -108,7 +108,7 @@ public abstract class StereoCameraParameter extends CameraParameter
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context)
+		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 		{
 			return new EyeSeparationParameter();
 		}

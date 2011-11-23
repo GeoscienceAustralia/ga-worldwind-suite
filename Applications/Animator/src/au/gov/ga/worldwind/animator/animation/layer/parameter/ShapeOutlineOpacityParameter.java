@@ -10,7 +10,6 @@ import gov.nasa.worldwind.render.Renderable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
-import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
@@ -81,9 +80,8 @@ public class ShapeOutlineOpacityParameter extends LayerParameterBase
 	}
 
 	@Override
-	protected ParameterBase createParameter(AVList context)
+	protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 	{
-		AnimationIOConstants constants = XmlAnimationWriter.getCurrentFileVersion().getConstants();
 		Layer parameterLayer = (Layer)context.getValue(constants.getCurrentLayerKey());
 		Validate.notNull(parameterLayer, "No layer found in the context. Expected one under the key '" + constants.getCurrentLayerKey() + "'.");
 		

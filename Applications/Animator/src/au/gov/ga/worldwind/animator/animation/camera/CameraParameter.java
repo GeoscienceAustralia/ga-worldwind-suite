@@ -102,7 +102,7 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context)
+		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 		{
 			return new EyeLatParameter();
 		}
@@ -151,7 +151,7 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context)
+		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 		{
 			return new EyeLonParameter();
 		}
@@ -199,7 +199,7 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context)
+		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 		{
 			return new EyeElevationParameter();
 		}
@@ -248,7 +248,7 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context)
+		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 		{
 			return new LookatLatParameter();
 		}
@@ -296,7 +296,7 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context)
+		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 		{
 			return new LookatLonParameter();
 		}
@@ -343,7 +343,7 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context)
+		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 		{
 			return new LookatElevationParameter();
 		}
@@ -395,7 +395,7 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context)
+		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 		{
 			return new NearClipParameter();
 		}
@@ -447,7 +447,7 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context)
+		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
 		{
 			return new FarClipParameter();
 		}

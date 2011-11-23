@@ -375,7 +375,7 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 			{
 				Validate.isTrue(context.hasKey(constants.getAnimationKey()), "An animation is required in context.");
 				
-				ParameterBase result = createParameter(context);
+				ParameterBase result = createParameter(context, constants);
 				result.animation = (Animation)context.getValue(constants.getAnimationKey());
 				result.setDefaultValue(WWXML.getDouble(parameterElement, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeDefaultValue(), null));
 				result.setName(WWXML.getText(parameterElement, ATTRIBUTE_PATH_PREFIX + constants.getParameterAttributeName()));
@@ -405,7 +405,7 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	/**
 	 * @return A new instance of this parameter
 	 */
-	protected abstract ParameterBase createParameter(AVList context);
+	protected abstract ParameterBase createParameter(AVList context, AnimationIOConstants constants);
 	
 	/**
 	 * @return XML element name to use when converting this parameter to XML (the &lt;parameter&gt; element's parent)
