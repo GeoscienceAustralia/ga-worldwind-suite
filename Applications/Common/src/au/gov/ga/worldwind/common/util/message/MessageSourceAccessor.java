@@ -100,7 +100,7 @@ public class MessageSourceAccessor
 	 * @return The message with the provided key, or <code>defaultMsg</code> if
 	 *         a message with the provided key cannot be found
 	 */
-	public static String getMessage(String key, String defaultMsg)
+	public static String getMessageOrDefault(String key, String defaultMsg)
 	{
 		return get().getMessage(key, defaultMsg);
 	}
@@ -122,7 +122,7 @@ public class MessageSourceAccessor
 	 * 
 	 * @see MessageFormat
 	 */
-	public static String getMessage(String key, String defaultMsg, Object... params)
+	public static String getMessageOrDefault(String key, String defaultMsg, Object... params)
 	{
 		return get().getMessage(key, defaultMsg, params);
 	}
