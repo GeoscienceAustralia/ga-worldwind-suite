@@ -397,7 +397,6 @@ public class Skysphere extends AbstractLayer
 
 
 		// generate connectivity
-		int index = 0;
 		for (int iY = 0, iYStart = 0; iY < (slices - 3); iY++)
 		{
 			int i0 = iYStart;
@@ -405,7 +404,7 @@ public class Skysphere extends AbstractLayer
 			iYStart += (segments + 1);
 			int i2 = iYStart;
 			int i3 = i2 + 1;
-			for (int j = 0; j < segments; j++, index += 6)
+			for (int j = 0; j < segments; j++)
 			{
 				if (!interior)
 				{
@@ -430,7 +429,7 @@ public class Skysphere extends AbstractLayer
 		}
 
 		// south pole triangles
-		for (int j = 0; j < segments; j++, index += 3)
+		for (int j = 0; j < segments; j++)
 		{
 			if (!interior)
 			{
@@ -448,7 +447,7 @@ public class Skysphere extends AbstractLayer
 
 		// north pole triangles
 		int iOffset = (slices - 3) * (segments + 1);
-		for (int j = 0; j < segments; j++, index += 3)
+		for (int j = 0; j < segments; j++)
 		{
 			if (!interior)
 			{
