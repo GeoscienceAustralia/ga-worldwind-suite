@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.common.util.message;
 
+import java.text.MessageFormat;
+
 /**
  * A static accessor to get access to the message source from anywhere in the
  * application
@@ -86,4 +88,42 @@ public class MessageSourceAccessor
 		return get().getMessage(key, params);
 	}
 	
+	/**
+	 * Helper function that calls getMessage() on the {@link MessageSource}
+	 * stored in this accessor.
+	 * 
+	 * @param key
+	 *            The key for the message to return
+	 * @param defaultMsg
+	 *            The default message to return if the key cannot be found
+	 * 
+	 * @return The message with the provided key, or <code>defaultMsg</code> if
+	 *         a message with the provided key cannot be found
+	 */
+	public static String getMessage(String key, String defaultMsg)
+	{
+		return get().getMessage(key, defaultMsg);
+	}
+	
+	/**
+	 * Helper function that calls getMessage() on the {@link MessageSource}
+	 * stored in this accessor.
+	 * 
+	 * @param key
+	 *            The key for the message to return
+	 * @param defaultMsg
+	 *            The default message to return if the key cannot be found
+	 * @param params
+	 *            Params to use in substitution
+	 * 
+	 * @return The message with the provided key, or <code>defaultMsg</code> if
+	 *         a message with the provided key cannot be found, with parameter
+	 *         substitution applied
+	 * 
+	 * @see MessageFormat
+	 */
+	public static String getMessage(String key, String defaultMsg, Object... params)
+	{
+		return get().getMessage(key, defaultMsg, params);
+	}
 }
