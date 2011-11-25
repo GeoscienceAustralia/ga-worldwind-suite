@@ -53,6 +53,19 @@ public class XMLUtil extends WWXML
 		return null;
 	}
 
+	public static String getText(Element context, String path, String def)
+	{
+		return getText(context, path, def, null);
+	}
+
+	public static String getText(Element context, String path, String def, XPath xpath)
+	{
+		String s = getText(context, path, xpath);
+		if (s == null)
+			return def;
+		return s;
+	}
+
 	public static boolean getBoolean(Element context, String path, boolean def)
 	{
 		return getBoolean(context, path, def, null);
