@@ -111,6 +111,7 @@ import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.application.debug.AnimationEventLogger;
+import au.gov.ga.worldwind.animator.application.effects.BuiltInEffects;
 import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.effects.EffectDialog;
 import au.gov.ga.worldwind.animator.application.render.AnimationRenderer;
@@ -192,7 +193,7 @@ public class Animator
 
 	/** A tool used to browse for and add WMS layers to the current animation */
 	private WmsBrowser wmsBrowser;
-	
+
 	/** The primary world wind canvas */
 	private WorldWindowGLCanvas wwd;
 
@@ -213,7 +214,7 @@ public class Animator
 
 	/** The render dialog to use */
 	private RenderDialog renderDialog;
-	
+
 	// Status flags
 	private boolean autokey = false;
 	private boolean applying = false;
@@ -276,9 +277,9 @@ public class Animator
 	private List<ChangeOfAnimationListener> changeOfAnimationListeners = new ArrayList<ChangeOfAnimationListener>();
 
 	private AboutDialog aboutDialog;
-	
+
 	private AutoSaver autoSaver;
-	
+
 	/**
 	 * Launch an instance of the Animator Application
 	 */
@@ -290,7 +291,7 @@ public class Animator
 	public Animator()
 	{
 		GDALDataHelper.init();
-		
+
 		initialiseApplicationWindow();
 		initialiseWorldWindow();
 
@@ -298,6 +299,7 @@ public class Animator
 
 		initialiseAnimation();
 		initialiseRenderer();
+		initialiseEffects();
 
 		initialiseUtilityLayers();
 		updateLayersInModel();
@@ -381,7 +383,7 @@ public class Animator
 		wwdBufferPanel.setPreferredSize(RenderParameters.DEFAULT_DIMENSIONS);
 		wwdBufferPanel.setBackground(LAFConstants.getHighlightColor());
 		wwdBufferPanel.add(wwd);
-		
+
 		// On resize, adjust the world wind canvas to maintain the correct aspect ratio
 		wwdBufferPanel.addComponentListener(new ComponentAdapter()
 		{
@@ -423,6 +425,11 @@ public class Animator
 		mainPanel.add(wwdBufferPanel, BorderLayout.CENTER);
 	}
 
+	private void initialiseEffects()
+	{
+		BuiltInEffects.registerBuiltInEffects();
+	}
+
 	/**
 	 * Initialise the animation renderer
 	 */
@@ -460,7 +467,7 @@ public class Animator
 			}
 		});
 		RenderProgressDialog.attachToRenderer(getFrame(), renderer);
-		
+
 		renderDialog = new RenderDialog(this, frame);
 		renderDialog.setCurrentAnimation(getCurrentAnimation());
 		changeOfAnimationListeners.add(renderDialog);
@@ -487,6 +494,7 @@ public class Animator
 		updater = new Updater(this);
 
 		updateTitleBar();
+		updateAnimatorSceneController();
 	}
 
 	/**
@@ -833,7 +841,7 @@ public class Animator
 		menu.add(actionFactory.getShowTutorialAction());
 		menu.addSeparator();
 		menu.add(actionFactory.getShowAboutAction());
-		
+
 		// Debug
 		menu = new JMenu(getMessage(getDebugMenuLabelKey()));
 		menu.setMnemonic(KeyEvent.VK_D);
@@ -849,11 +857,12 @@ public class Animator
 		this.parameterEditor = new ParameterEditor(this);
 		changeOfAnimationListeners.add(parameterEditor);
 	}
-	
+
 	private void initialiseWmsBrowser()
 	{
 		this.wmsBrowser = new WmsBrowser(getMessage(getAnimatorApplicationTitleKey()));
-		this.wmsBrowser.addWindowListener(new WindowAdapter(){
+		this.wmsBrowser.addWindowListener(new WindowAdapter()
+		{
 			@Override
 			public void windowClosing(WindowEvent e)
 			{
@@ -861,7 +870,7 @@ public class Animator
 			}
 		});
 	}
-	
+
 	private void initialiseAutoSaver()
 	{
 		autoSaver = new AutoSaver(this);
@@ -1055,6 +1064,12 @@ public class Animator
 		getCurrentAnimation().addChangeListener(listener);
 	}
 
+	private void updateAnimatorSceneController()
+	{
+		((AnimatorSceneController) getCurrentAnimation().getWorldWindow().getSceneController())
+				.setAnimation(getCurrentAnimation());
+	}
+
 	void updateSlider()
 	{
 		slider.clearKeys();
@@ -1125,8 +1140,7 @@ public class Animator
 		int deltaWidth = calculateTotalWidthOfNonWWDElements();
 		int deltaHeight = calculateTotalHeightOfNonWWDElements();
 
-		Dimension frameSize =
-				new Dimension(animationSize.width + deltaWidth, animationSize.height + deltaHeight);
+		Dimension frameSize = new Dimension(animationSize.width + deltaWidth, animationSize.height + deltaHeight);
 		setFrameSize(frameSize);
 
 		frame.pack();
@@ -1137,9 +1151,9 @@ public class Animator
 		{
 			JOptionPane.showMessageDialog(
 					frame,
-					getMessage(getSetDimensionFailedMessageKey(), animationSize.width,
-							animationSize.height, wwdSize.width, wwdSize.height),
-					getMessage(getSetDimensionFailedCaptionKey()), JOptionPane.ERROR_MESSAGE);
+					getMessage(getSetDimensionFailedMessageKey(), animationSize.width, animationSize.height,
+							wwdSize.width, wwdSize.height), getMessage(getSetDimensionFailedCaptionKey()),
+					JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -1161,9 +1175,8 @@ public class Animator
 
 	private int calculateTotalHeightOfNonWWDElements()
 	{
-		return bottomPanel.getSize().height + slider.getSize().height
-				+ frame.getJMenuBar().getSize().height + frame.getInsets().top
-				+ frame.getInsets().bottom;
+		return bottomPanel.getSize().height + slider.getSize().height + frame.getJMenuBar().getSize().height
+				+ frame.getInsets().top + frame.getInsets().bottom;
 	}
 
 	private int calculateTotalWidthOfNonWWDElements()
@@ -1221,8 +1234,8 @@ public class Animator
 		if (querySave())
 		{
 			WorldWindAnimationImpl newAnimation = new WorldWindAnimationImpl(wwd);
-			((ClipConfigurableView)getView()).setAutoCalculateNearClipDistance(true);
-			((ClipConfigurableView)getView()).setAutoCalculateFarClipDistance(true);
+			((ClipConfigurableView) getView()).setAutoCalculateNearClipDistance(true);
+			((ClipConfigurableView) getView()).setAutoCalculateFarClipDistance(true);
 			addDefaultLayersToAnimation(newAnimation);
 			addDefaultElevationModelsToAnimation(newAnimation);
 			setDefaultInitialArmedStatus(newAnimation);
@@ -1326,17 +1339,15 @@ public class Animator
 		int response =
 				JOptionPane.showConfirmDialog(
 						frame,
-						getMessage(getOpenV1FileMessageKey(), animationFile.getAbsolutePath(),
-								XmlAnimationWriter.getCurrentFileVersion().getDisplayName()),
-						getMessage(getOpenV1FileCaptionKey()), JOptionPane.YES_NO_OPTION,
-						JOptionPane.QUESTION_MESSAGE);
+						getMessage(getOpenV1FileMessageKey(), animationFile.getAbsolutePath(), XmlAnimationWriter
+								.getCurrentFileVersion().getDisplayName()), getMessage(getOpenV1FileCaptionKey()),
+						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		return response;
 	}
 
 	private void promptUserOpenFailed(File animationFile)
 	{
-		JOptionPane.showMessageDialog(frame,
-				getMessage(getOpenFailedMessageKey(), animationFile.getAbsolutePath()),
+		JOptionPane.showMessageDialog(frame, getMessage(getOpenFailedMessageKey(), animationFile.getAbsolutePath()),
 				getMessage(getOpenFailedCaptionKey()), JOptionPane.ERROR_MESSAGE);
 	}
 
@@ -1383,19 +1394,15 @@ public class Animator
 			File newFile = fileChooser.getSelectedFile();
 			if (!newFile.getName().toLowerCase().endsWith(XmlFilter.getFileExtension()))
 			{
-				newFile =
-						new File(newFile.getParent(), newFile.getName()
-								+ XmlFilter.getFileExtension());
+				newFile = new File(newFile.getParent(), newFile.getName() + XmlFilter.getFileExtension());
 			}
 			if (newFile.exists())
 			{
 				int response =
-						JOptionPane.showConfirmDialog(
-								frame,
-								getMessage(getConfirmOverwriteMessageKey(),
-										newFile.getAbsolutePath()),
-								getMessage(getConfirmOverwriteCaptionKey()),
-								JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+						JOptionPane.showConfirmDialog(frame,
+								getMessage(getConfirmOverwriteMessageKey(), newFile.getAbsolutePath()),
+								getMessage(getConfirmOverwriteCaptionKey()), JOptionPane.YES_NO_OPTION,
+								JOptionPane.WARNING_MESSAGE);
 				if (response != JOptionPane.YES_OPTION)
 				{
 					return false;
@@ -1561,19 +1568,19 @@ public class Animator
 	{
 		double oldAspect = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
 		renderDialog.setVisible(true);
-		
+
 		double newAspect = getCurrentAnimation().getRenderParameters().getImageAspectRatio();
 		if (newAspect != oldAspect)
 		{
 			resizeWindowToAnimationSize(getCurrentAnimation().getRenderParameters().getImageDimension());
 		}
-		
+
 		int response = renderDialog.getResponse();
 		if (response != JOptionPane.OK_OPTION)
 		{
 			return;
 		}
-		
+
 		if (!getCurrentAnimation().getRenderParameters().isRenderDestinationSet())
 		{
 			File destination = promptForImageSequenceLocation();
@@ -1586,7 +1593,7 @@ public class Animator
 		wwd.redraw();
 		renderer.render(animation);
 	}
-	
+
 	/**
 	 * Render the current animation, from frame 0 through to
 	 * <code>frameCount</code>
@@ -1619,7 +1626,7 @@ public class Animator
 		renderParams.setRenderDestination(destination);
 		renderParams.setDetailLevel(detailHint);
 		renderParams.setImageScalePercent(100);
-		
+
 		renderer.render(animation, renderParams);
 	}
 
@@ -1670,13 +1677,18 @@ public class Animator
 		}
 		if (promptForOverwrite)
 		{
-			int response = JOptionPane.showConfirmDialog(frame,
-								getMessage(getConfirmRenderOverwriteMessageKey(),
-										createImageSequenceFile(getCurrentAnimation(), firstFrame, fileName, destinationFile),
-										createImageSequenceFile(getCurrentAnimation(), lastFrame, fileName, destinationFile)),
-								getMessage(getConfirmRenderOverwriteCaptionKey()),
-								JOptionPane.YES_NO_OPTION,
-								JOptionPane.QUESTION_MESSAGE);
+			int response =
+					JOptionPane
+							.showConfirmDialog(
+									frame,
+									getMessage(
+											getConfirmRenderOverwriteMessageKey(),
+											createImageSequenceFile(getCurrentAnimation(), firstFrame, fileName,
+													destinationFile),
+											createImageSequenceFile(getCurrentAnimation(), lastFrame, fileName,
+													destinationFile)),
+									getMessage(getConfirmRenderOverwriteCaptionKey()), JOptionPane.YES_NO_OPTION,
+									JOptionPane.QUESTION_MESSAGE);
 			if (response == JOptionPane.NO_OPTION)
 			{
 				return null;
@@ -1736,8 +1748,7 @@ public class Animator
 			return;
 		}
 
-		ElevationModelIdentifier modelIdentifier =
-				ElevationModelIdentifierFactory.createFromDefinition(fileUrl);
+		ElevationModelIdentifier modelIdentifier = ElevationModelIdentifierFactory.createFromDefinition(fileUrl);
 		if (modelIdentifier == null)
 		{
 			promptUserInvalidModelIdentifier(fileUrl);
@@ -1749,8 +1760,7 @@ public class Animator
 
 	private void promptUserInvalidModelIdentifier(URL fileUrl)
 	{
-		JOptionPane.showMessageDialog(frame,
-				getMessage(getOpenElevationModelFailedMessageKey(), fileUrl.getFile()),
+		JOptionPane.showMessageDialog(frame, getMessage(getOpenElevationModelFailedMessageKey(), fileUrl.getFile()),
 				getMessage(getOpenElevationModelFailedCaptionKey()), JOptionPane.ERROR_MESSAGE);
 
 	}
@@ -1781,7 +1791,7 @@ public class Animator
 
 		getCurrentAnimation().getAnimatableElevation().addElevationExaggerator(exaggerator);
 	}
-	
+
 	void promptToAddEffect()
 	{
 		Class<? extends Effect> effect = EffectDialog.collectEffect(frame);
@@ -1790,7 +1800,15 @@ public class Animator
 			return;
 		}
 
-		//TODO
+		try
+		{
+			Effect effectInstance = effect.newInstance();
+			animation.addAnimatableObject(effectInstance);
+		}
+		catch (Exception e)
+		{
+			JOptionPane.showMessageDialog(frame, e.getLocalizedMessage(), "", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	void moveToPreviousFrame()
@@ -1862,7 +1880,7 @@ public class Animator
 		CurrentlySelectedObject.set(null);
 		getCurrentAnimation().getCamera().setClippingParametersActive(active);
 	}
-	
+
 	void setEnableAnimationEventLogging(boolean enabled)
 	{
 		eventLogger.setEnabled(enabled);
@@ -1874,7 +1892,7 @@ public class Animator
 		parameterEditor.setVisible(visible);
 		actionFactory.getShowParameterEditorAction().setSelected(visible);
 	}
-	
+
 	public void setWmsBrowserVisible(boolean visible)
 	{
 		if (visible)
@@ -1892,8 +1910,7 @@ public class Animator
 		double scale = -1.0;
 		Object value =
 				JOptionPane.showInputDialog(frame, getMessage(getScaleAnimationMessageKey()),
-						getMessage(getScaleAnimationCaptionKey()), JOptionPane.QUESTION_MESSAGE,
-						null, null, 1.0);
+						getMessage(getScaleAnimationCaptionKey()), JOptionPane.QUESTION_MESSAGE, null, null, 1.0);
 		try
 		{
 			scale = Double.parseDouble((String) value);
@@ -1911,9 +1928,10 @@ public class Animator
 
 	void smoothEyeSpeed()
 	{
-		if (JOptionPane.showConfirmDialog(frame, getMessage(getQuerySmoothEyeSpeedMessageKey()),
-				getMessage(getQuerySmoothEyeSpeedCaptionKey()), JOptionPane.YES_NO_OPTION,
-				JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+		if (JOptionPane
+				.showConfirmDialog(frame, getMessage(getQuerySmoothEyeSpeedMessageKey()),
+						getMessage(getQuerySmoothEyeSpeedCaptionKey()), JOptionPane.YES_NO_OPTION,
+						JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
 		{
 			getCurrentAnimation().getCamera().smoothEyeSpeed();
 			updateSlider();
@@ -1930,9 +1948,8 @@ public class Animator
 		int frames = slider.getLength() - 1;
 		Object value =
 				JOptionPane.showInputDialog(frame, getMessage(getSetFrameCountMessageKey()),
-						getMessage(getSetFrameCountCaptionKey()), JOptionPane.QUESTION_MESSAGE,
-						null, null, frames);
-		if(value != null)
+						getMessage(getSetFrameCountCaptionKey()), JOptionPane.QUESTION_MESSAGE, null, null, frames);
+		if (value != null)
 		{
 			try
 			{
@@ -1956,7 +1973,7 @@ public class Animator
 	{
 		getCurrentAnimation().setZoomScalingRequired(zoomScalingRequired);
 	}
-	
+
 	void showAboutDialog()
 	{
 		if (aboutDialog == null)
@@ -1972,17 +1989,19 @@ public class Animator
 		String devLocation = "./documentation/user/manual.html";
 		String prodLocation = "./doc/manual.html";
 
-		showDocumentation(devLocation, prodLocation, getMessage(getCantOpenUserGuideMessageKey()), getMessage(getCantOpenUserGuideCaptionKey()));
+		showDocumentation(devLocation, prodLocation, getMessage(getCantOpenUserGuideMessageKey()),
+				getMessage(getCantOpenUserGuideCaptionKey()));
 	}
-	
+
 	void showTutorials()
 	{
 		String devLocation = "./documentation/user/tutorials.html";
 		String prodLocation = "./doc/tutorials.html";
-		
-		showDocumentation(devLocation, prodLocation, getMessage(getCantOpenTutorialsMessageKey()), getMessage(getCantOpenTutorialsCaptionKey()));
+
+		showDocumentation(devLocation, prodLocation, getMessage(getCantOpenTutorialsMessageKey()),
+				getMessage(getCantOpenTutorialsCaptionKey()));
 	}
-	
+
 	private void showDocumentation(String devLocation, String prodLocation, String failureMessage, String failureCaption)
 	{
 		File userGuideFile;
@@ -2001,7 +2020,7 @@ public class Animator
 			return;
 		}
 	}
-	
+
 	private void setDefaultInitialArmedStatus(Animation animation)
 	{
 		for (Animatable object : animation.getAnimatableObjects())
@@ -2009,7 +2028,7 @@ public class Animator
 			object.setArmed(object instanceof Camera);
 		}
 	}
-	
+
 	/**
 	 * Set the current animation on the application
 	 * 
@@ -2022,14 +2041,15 @@ public class Animator
 		if (actionFactory != null)
 		{
 			actionFactory.getUseScaledZoomAction().setSelected(animation.isZoomScalingRequired());
-			
+
 			boolean stereo = animation.getCamera() instanceof StereoCamera;
-			boolean dynamic = !stereo || ((StereoCamera)animation.getCamera()).isDynamicStereo(); 
+			boolean dynamic = !stereo || ((StereoCamera) animation.getCamera()).isDynamicStereo();
 			actionFactory.getStereoCameraAction().setSelected(stereo);
 			actionFactory.getDynamicStereoAction().setEnabled(stereo);
 			actionFactory.getDynamicStereoAction().setSelected(dynamic);
 			actionFactory.getAnimateClippingAction().setSelected(animation.getCamera().isClippingParametersActive());
 		}
+		updateAnimatorSceneController();
 		notifyAnimationChanged(animation);
 		updateAnimationListeners();
 		updateLayersInModel();
@@ -2059,7 +2079,7 @@ public class Animator
 	{
 		return slider;
 	}
-	
+
 	private void stopActiveTasks()
 	{
 		stop = true;
@@ -2081,12 +2101,12 @@ public class Animator
 	void setUseDynamicStereo(boolean dynamic)
 	{
 		Camera camera = getCurrentAnimation().getCamera();
-		if(camera instanceof StereoCamera)
+		if (camera instanceof StereoCamera)
 		{
 			((StereoCamera) camera).setDynamicStereo(dynamic);
 		}
 	}
-	
+
 	File getAnimationFile()
 	{
 		return file;

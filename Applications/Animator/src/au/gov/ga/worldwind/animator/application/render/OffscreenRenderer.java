@@ -59,7 +59,8 @@ public class OffscreenRenderer extends AnimationRendererBase
 
 		final Dimension renderDimensions = renderParams.getRenderDimension();
 		//final Dimension viewDimensions = renderParams.getImageDimension();
-
+		
+		animatorSceneController.setRenderDimensions(renderDimensions);
 		animatorSceneController.addPrePaintTask(new PaintTask()
 		{
 			@Override
@@ -141,6 +142,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 	@Override
 	protected void doPostRender(Animation animation, RenderParameters renderParams)
 	{
+		animatorSceneController.setRenderDimensions(null);
 		animatorSceneController.addPostPaintTask(new PaintTask()
 		{
 			@Override

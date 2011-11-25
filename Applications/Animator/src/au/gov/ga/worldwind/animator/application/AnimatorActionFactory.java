@@ -52,6 +52,7 @@ public class AnimatorActionFactory
 	private BasicAction resizeToRenderDimensionsAction;
 	private BasicAction addElevationModelAction;
 	private BasicAction addExaggeratorAction;
+	private BasicAction addEffectAction;
 	private SelectableAction showCameraPathAction;
 	private SelectableAction showGridAction;
 	private SelectableAction showRuleOfThirdsAction;
@@ -414,6 +415,16 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		addEffectAction = new BasicAction(getMessage(getAddEffectLabelKey()), null);
+		addEffectAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.promptToAddEffect();
+			}
+		});
+		
 		// Show camera path
 		showCameraPathAction = new SelectableAction(getMessage(getShowCameraPathLabelKey()), null, Settings.get().isCameraPathShown());
 		showCameraPathAction.addActionListener(new ActionListener()
@@ -542,7 +553,8 @@ public class AnimatorActionFactory
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				DebugWriter.dumpParameterValues("parameterValues.txt", 
+				DebugWriter.dumpParameterValues("parameterValues.txt",
+												targetApplication.getCurrentAnimation(),
 												targetApplication.getCurrentAnimation().getAllParameters(), 
 												targetApplication.getCurrentAnimation().getFrameOfFirstKeyFrame(), 
 												targetApplication.getCurrentAnimation().getFrameOfLastKeyFrame());
@@ -716,6 +728,11 @@ public class AnimatorActionFactory
 	public BasicAction getAddExaggeratorAction()
 	{
 		return addExaggeratorAction;
+	}
+
+	public BasicAction getAddEffectAction()
+	{
+		return addEffectAction;
 	}
 
 	public BasicAction getDebugKeyFramesAction()

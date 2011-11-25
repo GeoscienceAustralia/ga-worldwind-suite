@@ -1,29 +1,78 @@
 package au.gov.ga.worldwind.animator.application;
 
+import gov.nasa.worldwind.BasicSceneController;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.SurfaceObjectTileBuilder;
 
+import java.awt.Dimension;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.media.opengl.GL;
+
+import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.render.OffscreenSurfaceObjectRenderer;
 
-public class AnimatorSceneController extends QualitySceneController
+public class AnimatorSceneController extends BasicSceneController
 {
-	private Queue<PaintTask> prePaintTasks = new LinkedList<PaintTask>();
-	private Lock prePaintTasksLock = new ReentrantLock(true);
+	private final Queue<PaintTask> prePaintTasks = new LinkedList<PaintTask>();
+	private final Lock prePaintTasksLock = new ReentrantLock(true);
 
-	private Queue<PaintTask> postPaintTasks = new LinkedList<PaintTask>();
-	private Lock postPaintTasksLock = new ReentrantLock(true);
+	private final Queue<PaintTask> postPaintTasks = new LinkedList<PaintTask>();
+	private final Lock postPaintTasksLock = new ReentrantLock(true);
+
+	private Dimension renderDimensions;
+	private Animation animation;
 
 	@Override
 	public void doRepaint(DrawContext dc)
 	{
+		GL gl = dc.getGL();
+		gl.glHint(GL.GL_FOG_HINT, GL.GL_NICEST);
+		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
+		gl.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST);
+		gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
+		gl.glHint(GL.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
+
 		doPrePaintTasks(dc);
 		super.doRepaint(dc);
 		doPostPaintTasks(dc);
+	}
+
+	@Override
+	protected void draw(DrawContext dc)
+	{
+		//The draw call is the lowest level rendering call for the SceneController,
+		//so we still have depth information at this level, which is needed for DoF.
+		Dimension dimensions =
+				renderDimensions != null ? renderDimensions : new Dimension(dc.getDrawableWidth(),
+						dc.getDrawableHeight());
+
+		List<Effect> effects = animation.getEffects();
+		if (effects == null || effects.isEmpty())
+		{
+			super.draw(dc);
+			return;
+		}
+
+		Effect firstEffect = effects.get(0);
+		Effect lastEffect = effects.get(effects.size() - 1);
+
+		firstEffect.preDraw(dc, dimensions);
+		this.clearFrame(dc); //TODO should this be here, or in effect.preDraw?
+		super.draw(dc); //draw the actual scene onto the first effect's frame buffer
+
+		for (int i = 1; i < effects.size(); i++)
+		{
+			effects.get(i).preDraw(dc, dimensions); //bind the next effect's frame buffer
+			effects.get(i - 1).postDraw(dc, dimensions); //draw the previous effect's frame buffer
+		}
+
+		lastEffect.postDraw(dc, dimensions); //draw the final effect's frame buffer onto the final buffer
 	}
 
 	/**
@@ -82,5 +131,25 @@ public class AnimatorSceneController extends QualitySceneController
 	protected SurfaceObjectTileBuilder createSurfaceObjectTileBuilder()
 	{
 		return new OffscreenSurfaceObjectRenderer();
+	}
+
+	public Dimension getRenderDimensions()
+	{
+		return renderDimensions;
+	}
+
+	public void setRenderDimensions(Dimension renderDimensions)
+	{
+		this.renderDimensions = renderDimensions;
+	}
+
+	public Animation getAnimation()
+	{
+		return animation;
+	}
+
+	public void setAnimation(Animation animation)
+	{
+		this.animation = animation;
 	}
 }

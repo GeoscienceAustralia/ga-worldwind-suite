@@ -35,6 +35,7 @@ import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameterFact
 import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
@@ -81,7 +82,13 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	 * The list of animatable layers in this animation. A subset of the
 	 * {@link #animatableObjects} list.
 	 */
-	private List<AnimatableLayer> animatableLayers = new ArrayList<AnimatableLayer>();
+	private final List<AnimatableLayer> animatableLayers = new ArrayList<AnimatableLayer>();
+
+	/**
+	 * The list of effects in this animation. A subset of the
+	 * {@link #animatableObjects} list.
+	 */
+	private final List<Effect> effects = new ArrayList<Effect>();
 
 	/** The elevation model being used in this animation */
 	private AnimatableElevation animatableElevation;
@@ -378,6 +385,17 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 				refreshLayersList();
 			}
 		}
+		if (object instanceof Effect)
+		{
+			if (index >= animatableObjects.size())
+			{
+				effects.add((Effect) object);
+			}
+			else
+			{
+				refreshEffectsList();
+			}
+		}
 
 		object.addChangeListener(this);
 
@@ -400,6 +418,10 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			{
 				animatableLayers.remove((AnimatableLayer) object);
 			}
+			if(object instanceof Effect)
+			{
+				effects.remove((Effect)object);
+			}
 
 			object.removeChangeListener(this);
 
@@ -412,10 +434,10 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		return index;
 	}
-	
+
 	protected void clearAnimatableObjects()
 	{
-		for(Animatable object : animatableObjects)
+		for (Animatable object : animatableObjects)
 		{
 			removeAnimatableObject(object);
 		}
@@ -485,6 +507,18 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			if (object instanceof AnimatableLayer)
 			{
 				animatableLayers.add((AnimatableLayer) object);
+			}
+		}
+	}
+	
+	private void refreshEffectsList()
+	{
+		effects.clear();
+		for (Animatable object : animatableObjects)
+		{
+			if (object instanceof Effect)
+			{
+				effects.add((Effect) object);
 			}
 		}
 	}
@@ -1102,6 +1136,12 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			result.add(animatableLayer.getLayer());
 		}
 		return result;
+	}
+
+	@Override
+	public List<Effect> getEffects()
+	{
+		return Collections.unmodifiableList(effects);
 	}
 
 	@Override

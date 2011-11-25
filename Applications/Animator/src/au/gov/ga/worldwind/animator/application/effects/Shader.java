@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.application.stereo;
+package au.gov.ga.worldwind.animator.application.effects;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,14 +7,24 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.util.IOUtil;
 
-public class Shader
+public abstract class Shader
 {
 	protected int shaderProgram = 0;
 	protected int vertexShader = 0;
 	protected int fragmentShader = 0;
+	
+	protected abstract InputStream getVertexSource();
+	protected abstract InputStream getFragmentSource();
+	protected abstract void getUniformLocations(GL gl);
 
-	public void create(GL gl, InputStream vertex, InputStream fragment)
+	public void create(GL gl)
 	{
+		if (isCreated())
+			return;
+		
+		InputStream vertex = getVertexSource();
+		InputStream fragment = getFragmentSource();
+
 		String vsrc = null, fsrc = null;
 		try
 		{
@@ -29,14 +39,16 @@ public class Shader
 		vertexShader = gl.glCreateShader(GL.GL_VERTEX_SHADER);
 		if (vertexShader <= 0)
 		{
+			delete(gl);
 			throw new IllegalStateException("Error creating vertex shader");
 		}
 		fragmentShader = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
 		if (fragmentShader <= 0)
 		{
+			delete(gl);
 			throw new IllegalStateException("Error creating fragment shader");
 		}
-		
+
 		gl.glShaderSource(vertexShader, 1, new String[] { vsrc }, new int[] { vsrc.length() }, 0);
 		gl.glCompileShader(vertexShader);
 		gl.glShaderSource(fragmentShader, 1, new String[] { fsrc }, new int[] { fsrc.length() }, 0);
@@ -45,6 +57,7 @@ public class Shader
 		shaderProgram = gl.glCreateProgram();
 		if (shaderProgram <= 0)
 		{
+			delete(gl);
 			throw new IllegalStateException("Error creating shader program");
 		}
 
@@ -57,15 +70,20 @@ public class Shader
 		gl.glGetProgramiv(shaderProgram, GL.GL_VALIDATE_STATUS, status, 0);
 		if (status[0] != GL.GL_TRUE)
 		{
+			int maxLength = 10240;
+			int[] length = new int[1];
+			byte[] bytes = new byte[maxLength];
+			gl.glGetProgramInfoLog(shaderProgram, maxLength, length, 0, bytes, 0);
+			String info = new String(bytes, 0, length[0]);
+			System.out.println(info);
+			
+			delete(gl);
 			throw new IllegalStateException("Validation of shader program failed");
 		}
-
-		/*int maxLength = 10240;
-		int[] length = new int[1];
-		byte[] bytes = new byte[maxLength];
-		gl.glGetProgramInfoLog(shaderProgram, maxLength, length, 0, bytes, 0);
-		String info = new String(bytes, 0, length[0]);
-		System.out.println(info);*/
+		
+		gl.glUseProgram(shaderProgram);
+		getUniformLocations(gl);
+		gl.glUseProgram(0);
 	}
 
 	public boolean isCreated()
@@ -73,9 +91,10 @@ public class Shader
 		return shaderProgram > 0;
 	}
 
-	public void use(GL gl)
+	//this must be called by subclasses
+	protected void use(GL gl)
 	{
-		gl.glUseProgram(shaderProgram);
+		gl.glUseProgram(shaderProgram); //if !isCreated(), then shaderProgram == 0
 	}
 
 	public void unuse(GL gl)
@@ -85,10 +104,16 @@ public class Shader
 
 	public void delete(GL gl)
 	{
-		if (isCreated())
+		if (shaderProgram > 0)
 		{
 			gl.glDeleteProgram(shaderProgram);
+		}
+		if (vertexShader > 0)
+		{
 			gl.glDeleteShader(vertexShader);
+		}
+		if (fragmentShader > 0)
+		{
 			gl.glDeleteShader(fragmentShader);
 		}
 		shaderProgram = 0;

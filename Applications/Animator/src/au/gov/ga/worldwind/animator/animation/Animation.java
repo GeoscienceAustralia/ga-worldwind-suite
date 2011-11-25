@@ -18,6 +18,7 @@ import au.gov.ga.worldwind.animator.animation.event.Changeable;
 import au.gov.ga.worldwind.animator.animation.io.XmlSerializable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.util.Nameable;
@@ -391,6 +392,11 @@ public interface Animation extends AnimationObject, XmlSerializable<Animation>, 
 	 * @return The list of layers associated with this animation. If no layers are associated, will return the empty list.
 	 */
 	List<Layer> getLayers();
+	
+	/**
+	 * @return The list of effects associated with this animation. If no effects are associated, will return the empty list.
+	 */
+	List<Effect> getEffects();
 	
 	/**
 	 * @return Whether or not this animation contains the layer identified by the provided layer identifier
