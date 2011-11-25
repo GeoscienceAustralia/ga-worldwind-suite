@@ -2,12 +2,15 @@ package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getFogFarParameterNameKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+
+import org.w3c.dom.Element;
+
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.FogLayer;
 import gov.nasa.worldwind.layers.Layer;
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -20,18 +23,22 @@ import au.gov.ga.worldwind.common.util.Validate;
 @EditableParameter
 public class FogFarFactorParameter extends LayerParameterBase
 {
-
 	private static final long serialVersionUID = 1L;
 
 	public FogFarFactorParameter(Animation animation, FogLayer layer)
 	{
-		super(getMessage(getFogFarParameterNameKey()), animation, layer);
+		this(null, animation, layer);
+	}
+
+	public FogFarFactorParameter(String name, Animation animation, FogLayer layer)
+	{
+		super(nameOrDefaultName(name, getMessage(getFogFarParameterNameKey())), animation, layer);
 		setDefaultValue(layer.getFarFactor());
 	}
 
-	public FogFarFactorParameter()
+	@SuppressWarnings("unused")
+	private FogFarFactorParameter()
 	{
-		super();
 	}
 
 	@Override
@@ -41,26 +48,29 @@ public class FogFarFactorParameter extends LayerParameterBase
 	}
 
 	@Override
-	public ParameterValue getCurrentValue(AnimationContext context)
+	public ParameterValue getCurrentValue()
 	{
-		return ParameterValueFactory.createParameterValue(this, ((FogLayer)getLayer()).getFarFactor(), context.getCurrentFrame());
+		return ParameterValueFactory.createParameterValue(this, ((FogLayer) getLayer()).getFarFactor(),
+				animation.getCurrentFrame());
 	}
 
 	@Override
 	protected void doApplyValue(double value)
 	{
-		((FogLayer)getLayer()).setFarFactor((float)value);
+		((FogLayer) getLayer()).setFarFactor((float) value);
 	}
 
 	@Override
-	protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
+	protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+			Element parameterElement, AnimationFileVersion version, AVList context)
 	{
-		Layer parameterLayer = (Layer)context.getValue(constants.getCurrentLayerKey());
-		Validate.notNull(parameterLayer, "No layer found in the context. Expected one under the key '" + constants.getCurrentLayerKey() + "'.");
-		
-		FogFarFactorParameter result = new FogFarFactorParameter();
-		result.setLayer(parameterLayer);
-		return result;
-	}
+		AnimationIOConstants constants = version.getConstants();
+		Layer parameterLayer = (Layer) context.getValue(constants.getCurrentLayerKey());
+		Validate.notNull(parameterLayer,
+				"No layer found in the context. Expected one under the key '" + constants.getCurrentLayerKey() + "'.");
+		Validate.isTrue(parameterLayer instanceof FogLayer, "Layer found in context is incorrect type: '"
+				+ parameterLayer.getClass().getCanonicalName() + "'");
 
+		return new FogFarFactorParameter(name, animation, (FogLayer) parameterLayer);
+	}
 }

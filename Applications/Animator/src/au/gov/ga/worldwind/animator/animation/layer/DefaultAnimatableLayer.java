@@ -16,21 +16,19 @@ import java.util.logging.Level;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.AnimatableBase;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
+import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
-import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameterFactory;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter.Type;
+import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameterFactory;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifierFactory;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.Validate;
-import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
  * A default implementation of the {@link AnimatableLayer} interface.
@@ -43,23 +41,29 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 
 	/** The layer this instance wraps */
 	private Layer layer;
-	
+
 	/** The map of parameter type -> parameter */
-	private Map<LayerParameter.Type, LayerParameter> layerParameters = new HashMap<LayerParameter.Type, LayerParameter>();
-	
+	private Map<LayerParameter.Type, LayerParameter> layerParameters =
+			new HashMap<LayerParameter.Type, LayerParameter>();
+
 	/**
 	 * Constructor. Initialises the name, layer and layer parameters
 	 * 
-	 * @param name The name to give to this animatable layer
-	 * @param layer The layer to associate with this animatable layer
-	 * @param layerParameters The collection of layer parameters to associate with this layer
+	 * @param name
+	 *            The name to give to this animatable layer
+	 * @param layer
+	 *            The layer to associate with this animatable layer
+	 * @param layerParameters
+	 *            The collection of layer parameters to associate with this
+	 *            layer
 	 */
-	public DefaultAnimatableLayer(String name, Layer layer, Collection<LayerParameter> layerParameters)
+	public DefaultAnimatableLayer(String name, Animation animation, Layer layer,
+			Collection<LayerParameter> layerParameters)
 	{
-		super(name);
+		super(nameOrDefaultName(name, layer.getName()), animation);
 		Validate.notNull(layer, "A layer is required");
 		this.layer = layer;
-		
+
 		// Initialise the layer parameters
 		if (layerParameters != null)
 		{
@@ -71,20 +75,25 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	}
 
 	/**
-	 * Constructor. Sets the name to that of the provided layer and leaves the parameters empty.
+	 * Constructor. Sets the name to that of the provided layer and leaves the
+	 * parameters empty.
 	 * 
-	 * @param layer The layer to associate with this animatable layer
+	 * @param layer
+	 *            The layer to associate with this animatable layer
 	 */
-	public DefaultAnimatableLayer(Layer layer)
+	public DefaultAnimatableLayer(Animation animation, Layer layer)
 	{
-		this(layer.getName(), layer, null);
+		this(null, animation, layer, null);
 	}
-	
+
 	/**
 	 * No-arg constructor required for de-serialisation. Not for general use.
 	 */
 	@SuppressWarnings("unused")
-	private DefaultAnimatableLayer(){super();};
+	private DefaultAnimatableLayer()
+	{
+		super();
+	};
 
 	@Override
 	public void setEnabled(boolean enabled)
@@ -92,20 +101,13 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 		super.setEnabled(enabled);
 		layer.setEnabled(enabled);
 	}
-	
+
 	@Override
-	protected void doApply(AnimationContext animationContext, int frame)
+	protected void doApply()
 	{
 		for (LayerParameter lp : layerParameters.values())
 		{
-			if (lp.isEnabled())
-			{
-				lp.apply(animationContext, frame);
-			}
-			else
-			{
-				lp.applyDefaultValue(animationContext);
-			}
+			lp.apply();
 		}
 	}
 
@@ -128,9 +130,10 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 		{
 			return;
 		}
-		Validate.isTrue(parameter.getLayer().equals(getLayer()), "Parameter is not linked to the correct layer. Expected '" + getLayer() + "'.");
+		Validate.isTrue(parameter.getLayer().equals(getLayer()),
+				"Parameter is not linked to the correct layer. Expected '" + getLayer() + "'.");
 		layerParameters.put(parameter.getType(), parameter);
-		
+
 		parameter.addChangeListener(this);
 	}
 
@@ -139,40 +142,17 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	{
 		return layerParameters.get(type);
 	}
-	
+
 	@Override
 	public LayerIdentifier getLayerIdentifier()
 	{
 		return LayerIdentifierFactory.createFromLayer(layer);
 	}
-	
+
 	@Override
 	public boolean hasError()
 	{
 		return false;
-	}
-	
-	@Override
-	public Element toXml(Element parent, AnimationFileVersion version)
-	{
-		AnimationIOConstants constants = version.getConstants();
-		
-		Element result = WWXML.appendElement(parent, constants.getAnimatableLayerName());
-		WWXML.setTextAttribute(result, constants.getAnimatableLayerAttributeName(), getName());
-		WWXML.setBooleanAttribute(result, constants.getAnimatableLayerAttributeEnabled(), isEnabled());
-		
-		URL layerUrl = getLayerUrl();
-		if (layerUrl != null)
-		{
-			WWXML.setTextAttribute(result, constants.getAnimatableLayerAttributeUrl(), getLayerUrl().toExternalForm());
-		}
-
-		for (LayerParameter parameter : layerParameters.values())
-		{
-			result.appendChild(parameter.toXml(result, version));
-		}
-		
-		return result;
 	}
 
 	/**
@@ -180,68 +160,71 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	 */
 	private URL getLayerUrl()
 	{
-		return (URL)layer.getValue(AVKeyMore.CONTEXT_URL);
+		return (URL) layer.getValue(AVKeyMore.CONTEXT_URL);
 	}
 
 	@Override
-	public Animatable fromXml(Element element, AnimationFileVersion version, AVList context)
+	protected String getXmlElementName(AnimationIOConstants constants)
 	{
-		Validate.notNull(element, "An XML element is required");
-		Validate.notNull(version, "A version ID is required");
-		Validate.notNull(context, "A context is required");
-		
+		return constants.getAnimatableLayerElementName();
+	}
+
+	@Override
+	protected AnimatableBase createAnimatableFromXml(String name, Animation animation, boolean enabled,
+			Element element, AnimationFileVersion version, AVList context)
+	{
 		AnimationIOConstants constants = version.getConstants();
-		
-		switch (version)
+
+		// Extract the layer properties from the XML
+		String layerUrlString = WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableAttributeUrl());
+		if (layerUrlString == null)
 		{
-			case VERSION020:
+			Logging.logger().log(Level.WARNING, "No url found for layer " + name);
+			return null;
+		}
+		URL layerUrl = null;
+		try
+		{
+			layerUrl = new URL(layerUrlString);
+		}
+		catch (MalformedURLException e)
+		{
+			Logging.logger().log(Level.WARNING,
+					"Unable to open layer  " + name + " from " + layerUrlString + ". Bad URL.");
+			return null;
+		}
+
+		// Load the layer
+		Layer loadedLayer = AnimationLayerLoader.loadLayer(layerUrl);
+
+		// Load the parameters for the layer
+		context.setValue(constants.getCurrentLayerKey(), loadedLayer);
+		List<LayerParameter> parameters = new ArrayList<LayerParameter>();
+		Element[] parameterElements = WWXML.getElements(element, "./*", null);
+		if (parameterElements != null)
+		{
+			for (Element parameterElement : parameterElements)
 			{
-				Validate.isTrue(context.hasKey(constants.getAnimationKey()), "An animation is required in context.");
-				
-				// Extract the layer properties from the XML
-				String layerName = WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableLayerAttributeName());
-				String layerUrlString = WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableLayerAttributeUrl());
-				if (layerUrlString == null)
-				{
-					Logging.logger().log(Level.WARNING, "No url found for layer " + layerName);
-					return null;
-				}
-				URL layerUrl = null;
-				try
-				{
-					layerUrl = new URL(layerUrlString);
-				}
-				catch (MalformedURLException e)
-				{
-					Logging.logger().log(Level.WARNING, "Unable to open layer  " + layerName + " from " + layerUrlString + ". Bad URL.");
-					return null;
-				}
-				
-				// Load the layer
-				Layer loadedLayer = AnimationLayerLoader.loadLayer(layerUrl);
-				
-				// Load the parameters for the layer
-				context.setValue(constants.getCurrentLayerKey(), loadedLayer);
-				List<LayerParameter> parameters = new ArrayList<LayerParameter>();
-				Element[] parameterElements = WWXML.getElements(element, "./*", null);
-				if (parameterElements != null)
-				{
-					for (Element parameterElement : parameterElements)
-					{
-						parameters.add(LayerParameterFactory.fromXml(parameterElement, version, context));
-					}
-				}
-				DefaultAnimatableLayer result = new DefaultAnimatableLayer(layerName, loadedLayer, parameters);
-				
-				Boolean enabled = XMLUtil.getBoolean(element, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableLayerAttributeEnabled(), true);
-				result.setEnabled(enabled, false);
-				loadedLayer.setEnabled(enabled);
-				
-				return result;
+				parameters.add(LayerParameterFactory.fromXml(parameterElement, version, context));
 			}
 		}
-		
-		return null;
+
+		DefaultAnimatableLayer result = new DefaultAnimatableLayer(name, animation, loadedLayer, parameters);
+		loadedLayer.setEnabled(enabled);
+
+		return result;
 	}
-	
+
+	@Override
+	protected void saveAnimatableToXml(Element element, AnimationFileVersion version)
+	{
+		super.saveAnimatableToXml(element, version);
+
+		URL layerUrl = getLayerUrl();
+		if (layerUrl != null)
+		{
+			WWXML.setTextAttribute(element, version.getConstants().getAnimatableAttributeUrl(),
+					layerUrl.toExternalForm());
+		}
+	}
 }

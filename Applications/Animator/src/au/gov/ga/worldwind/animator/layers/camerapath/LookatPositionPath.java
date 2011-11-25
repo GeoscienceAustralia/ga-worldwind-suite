@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.animator.layers.camerapath;
 
 import gov.nasa.worldwind.geom.Position;
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 
 /**
@@ -17,9 +16,9 @@ public class LookatPositionPath extends AbstractCameraPositionPath
 	}
 
 	@Override
-	protected Position[] getPathPositions(AnimationContext context, int startFrame, int endFrame)
+	protected Position[] getPathPositions(int startFrame, int endFrame)
 	{
-		return getAnimation().getCamera().getLookatPositionsBetweenFrames(context, startFrame, endFrame);
+		return getAnimation().getCamera().getLookatPositionsBetweenFrames(startFrame, endFrame);
 	}
 
 	@Override

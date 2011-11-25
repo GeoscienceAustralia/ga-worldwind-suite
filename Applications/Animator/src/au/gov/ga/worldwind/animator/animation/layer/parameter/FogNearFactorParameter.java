@@ -5,9 +5,12 @@ import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getM
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.layers.FogLayer;
 import gov.nasa.worldwind.layers.Layer;
+
+import org.w3c.dom.Element;
+
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -20,18 +23,22 @@ import au.gov.ga.worldwind.common.util.Validate;
 @EditableParameter
 public class FogNearFactorParameter extends LayerParameterBase
 {
-
 	private static final long serialVersionUID = 1L;
 
 	public FogNearFactorParameter(Animation animation, FogLayer layer)
 	{
-		super(getMessage(getFogNearParameterNameKey()), animation, layer);
+		this(null, animation, layer);
+	}
+
+	public FogNearFactorParameter(String name, Animation animation, FogLayer layer)
+	{
+		super(nameOrDefaultName(name, getMessage(getFogNearParameterNameKey())), animation, layer);
 		setDefaultValue(layer.getNearFactor());
 	}
 
-	public FogNearFactorParameter()
+	@SuppressWarnings("unused")
+	private FogNearFactorParameter()
 	{
-		super();
 	}
 
 	@Override
@@ -41,26 +48,30 @@ public class FogNearFactorParameter extends LayerParameterBase
 	}
 
 	@Override
-	public ParameterValue getCurrentValue(AnimationContext context)
+	public ParameterValue getCurrentValue()
 	{
-		return ParameterValueFactory.createParameterValue(this, ((FogLayer)getLayer()).getNearFactor(), context.getCurrentFrame());
+		return ParameterValueFactory.createParameterValue(this, ((FogLayer) getLayer()).getNearFactor(),
+				animation.getCurrentFrame());
 	}
 
 	@Override
 	protected void doApplyValue(double value)
 	{
-		((FogLayer)getLayer()).setNearFactor((float)value);
+		((FogLayer) getLayer()).setNearFactor((float) value);
 	}
 
 	@Override
-	protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
+	protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+			Element parameterElement, AnimationFileVersion version, AVList context)
 	{
-		Layer parameterLayer = (Layer)context.getValue(constants.getCurrentLayerKey());
-		Validate.notNull(parameterLayer, "No layer found in the context. Expected one under the key '" + constants.getCurrentLayerKey() + "'.");
-		
-		FogNearFactorParameter result = new FogNearFactorParameter();
-		result.setLayer(parameterLayer);
-		return result;
+		AnimationIOConstants constants = version.getConstants();
+		Layer parameterLayer = (Layer) context.getValue(constants.getCurrentLayerKey());
+		Validate.notNull(parameterLayer,
+				"No layer found in the context. Expected one under the key '" + constants.getCurrentLayerKey() + "'.");
+		Validate.isTrue(parameterLayer instanceof FogLayer, "Layer found in context is incorrect type: '"
+				+ parameterLayer.getClass().getCanonicalName() + "'");
+
+		return new FogNearFactorParameter(name, animation, (FogLayer) parameterLayer);
 	}
 
 }

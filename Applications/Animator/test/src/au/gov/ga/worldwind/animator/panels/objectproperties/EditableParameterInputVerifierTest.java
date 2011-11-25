@@ -1,16 +1,17 @@
 package au.gov.ga.worldwind.animator.panels.objectproperties;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import gov.nasa.worldwind.avlist.AVList;
 
 import javax.swing.JTextField;
 
-import gov.nasa.worldwind.avlist.AVList;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
+import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -223,13 +224,14 @@ public class EditableParameterInputVerifierTest
 	{
 		private static final long serialVersionUID = 20100920L;
 		@Override
-		public ParameterValue getCurrentValue(AnimationContext context){ return null;}
+		public ParameterValue getCurrentValue(){ return null;}
 		@Override
 		protected void doApplyValue(double value) {}
 		@Override
-		protected ParameterBase createParameter(AVList context){ return null;}
-		@Override
 		protected String getXmlElementName(AnimationIOConstants constants){ return null;}
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context) { return null; }
 	}
 	
 	@EditableParameter(bound = false, minValue = 0.0, maxValue = 10.0)
@@ -237,13 +239,14 @@ public class EditableParameterInputVerifierTest
 	{
 		private static final long serialVersionUID = 20100920L;
 		@Override
-		public ParameterValue getCurrentValue(AnimationContext context){ return null;}
+		public ParameterValue getCurrentValue(){ return null;}
 		@Override
 		protected void doApplyValue(double value) {}
 		@Override
-		protected ParameterBase createParameter(AVList context){ return null;}
-		@Override
 		protected String getXmlElementName(AnimationIOConstants constants){ return null;}
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context) { return null; }
 	}
 	
 }

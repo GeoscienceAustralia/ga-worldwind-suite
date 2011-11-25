@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
 import gov.nasa.worldwind.layers.Layer;
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
@@ -59,15 +58,10 @@ public abstract class LayerParameterBase extends ParameterBase implements LayerP
 	}
 	
 	@Override
-	public void apply(AnimationContext animationContext, int frame)
+	public void apply()
 	{
+		int frame = animation.getCurrentFrame();
 		ParameterValue value = getValueAtFrame(frame);
-		applyValue(value.getValue());
-	}
-	
-	@Override
-	public void applyDefaultValue(AnimationContext animationContext)
-	{
-		doApplyValue(getDefaultValue());
+		applyValueIfEnabled(value.getValue(), frame);
 	}
 }

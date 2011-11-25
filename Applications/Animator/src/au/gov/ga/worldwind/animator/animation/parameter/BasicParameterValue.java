@@ -196,7 +196,7 @@ public class BasicParameterValue extends ChangeableBase implements ParameterValu
 				result.setValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterValueAttributeValue(), null));
 				result.setFrame(WWXML.getInteger(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterValueAttributeFrame(), null));
 				
-				result.owner = (Parameter)context.getValue(constants.getParameterValueOwnerKey());
+				result.setOwner((Parameter)context.getValue(constants.getParameterValueOwnerKey()));
 				
 				Validate.notNull(result.owner, "No owner found in the context. Expected type Parameter under key " + constants.getParameterValueOwnerKey());
 

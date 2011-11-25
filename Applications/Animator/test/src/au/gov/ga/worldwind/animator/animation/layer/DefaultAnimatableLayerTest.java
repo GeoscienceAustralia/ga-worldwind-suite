@@ -74,11 +74,17 @@ public class DefaultAnimatableLayerTest
 		
 		layer = mockContext.mock(Layer.class);
 		
+		mockContext.checking(new Expectations()
+		{{
+			allowing(layer).getName();
+			will(returnValue("Layer"));
+		}});
+		
 		animation = new WorldWindAnimationImpl(new WorldWindowTestImpl());
 		
 		initialiseParameters();
 		
-		classToBeTested = new DefaultAnimatableLayer("testLayer", layer, layerParameters);
+		classToBeTested = new DefaultAnimatableLayer("testLayer", animation, layer, layerParameters);
 		
 		setupLayerFactory();
 	}
@@ -148,7 +154,7 @@ public class DefaultAnimatableLayerTest
 		AnimationFileVersion versionId = AnimationFileVersion.VERSION020;
 		
 		Document document = WWXML.openDocument(getClass().getResourceAsStream("animatableLayerXmlSnippet.xml"));
-		Element layerElement = WWXML.getElement(document.getDocumentElement(), "//" + versionId.getConstants().getAnimatableLayerName(), null);
+		Element layerElement = WWXML.getElement(document.getDocumentElement(), "//" + versionId.getConstants().getAnimatableLayerElementName(), null);
 		
 		setLayerUrlExpectation(new URL("file://marl/sandpit/symbolic-links/world-wind/current/dataset/ga/gravity/edition3/gravity.xml"));
 		setLayerEnabledExpectation();

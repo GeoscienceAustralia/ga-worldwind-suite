@@ -8,7 +8,6 @@ import java.util.List;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.event.AnimationEventListener;
@@ -29,31 +28,26 @@ import au.gov.ga.worldwind.animator.util.Nameable;
 public interface Parameter extends AnimationObject, Serializable, Nameable, XmlSerializable<Parameter>,
 		AnimationEventListener, Changeable, Enableable, Armable
 {
-	
+
 	/**
 	 * @return The animation this parameter is associated with
 	 */
 	Animation getAnimation();
-	
+
 	/**
-	 * Get the current value of this {@link Parameter} in the current
-	 * {@link AnimationContext}.
-	 * 
-	 * @param context
-	 *            The context of the current animation
+	 * Get the current value of this {@link Parameter}.
 	 * 
 	 * @return the current value of this {@link Parameter} in the current
 	 *         {@link AnimationContext}.
 	 */
-	ParameterValue getCurrentValue(AnimationContext context);
+	ParameterValue getCurrentValue();
 
 	/**
 	 * Get the value of this {@link Parameter} at the provided frame.
 	 * <p/>
 	 * If there are no {@link KeyFrame}s recorded that contain information for
 	 * this {@link Parameter}, the default {@link ParameterValue} will be
-	 * returned. If the default value is <code>null</code>, this method may
-	 * return <code>null</code>.
+	 * returned.
 	 * <p/>
 	 * If the provided frame is <em>before</em> the <em>first</em> recorded
 	 * {@link KeyFrame} that contains information about this {@link Parameter},
@@ -93,30 +87,28 @@ public interface Parameter extends AnimationObject, Serializable, Nameable, XmlS
 	ParameterValue[] getValuesBetweenFrames(int startFrame, int endFrame, ParameterValue[] array);
 
 	/**
-	 * Set the default value of this {@link Parameter}. This is the value this
-	 * {@link Parameter} will use if no recorded {@link KeyFrame}s contain
-	 * information about this {@link Parameter}. It is also the value that the
-	 * parameter will be set to at the beginning of the animation, before any
-	 * key frames have been recorded.
+	 * Get the default value of this parameter. This could be a static value
+	 * stored in the parameter, or a dynamic value based on the current state of
+	 * the animation/view or the camera parameters.
 	 * 
-	 * @param value
-	 *            The default value of this this {@link Parameter}
-	 */
-	void setDefaultValue(double value);
-
-	/**
+	 * @param context
+	 *            The context of the current animation.
+	 * @param frame
+	 *            The frame for which to retrieve the default value (if dynamic)
 	 * @return The default value of this {@link Parameter}.
-	 * 
-	 * @see #setDefaultValue(double)
 	 */
-	double getDefaultValue();
+	double getDefaultValue(int frame);
 
 	/**
-	 * Apply the provided value to the property this parameter controls.
+	 * Apply the provided value to the property this parameter controls. If this
+	 * parameter is disabled, the default value calculated by
+	 * {@link Parameter#getDefaultValue(AnimationContext, int)} is applied.
 	 * 
 	 * @param value
 	 */
-	void applyValue(double value);
+	void applyValueIfEnabled(double value, int frame);
+
+	void applyValueAnyway(double value);
 
 	/**
 	 * Gets the first recorded value of this parameter on a key frame before the

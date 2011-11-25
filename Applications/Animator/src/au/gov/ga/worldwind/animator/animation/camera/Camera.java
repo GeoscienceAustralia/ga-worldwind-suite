@@ -5,7 +5,6 @@ package au.gov.ga.worldwind.animator.animation.camera;
 
 import gov.nasa.worldwind.geom.Position;
 import au.gov.ga.worldwind.animator.animation.Animatable;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
@@ -79,47 +78,40 @@ public interface Camera extends Animatable
 	/**
 	 * @return The eye position of the camera in the provided frame range (inclusive)
 	 */
-	Position[] getEyePositionsBetweenFrames(AnimationContext animationContext, int startFrame, int endFrame);
+	Position[] getEyePositionsBetweenFrames(int startFrame, int endFrame);
 
 	/**
 	 * @return The lookat position of the camera in the provided frame range (inclusive)
 	 */
-	Position[] getLookatPositionsBetweenFrames(AnimationContext animationContext, int startFrame, int endFrame);
+	Position[] getLookatPositionsBetweenFrames(int startFrame, int endFrame);
 	
 	/**
 	 * Return the eye position of the camera at the provided frame
 	 * 
-	 * @param context
-	 *            The context in which the animation is running
 	 * @param frame
 	 *            The frame at which the eye position is required
 	 * 
 	 * @return The eye position of the camera at the provided frame
 	 */
-	Position getEyePositionAtFrame(AnimationContext context, int frame);
+	Position getEyePositionAtFrame(int frame);
 
 	/**
 	 * Return the look-at position of the camera at the provided frame
 	 * 
-	 * @param context
-	 *            The context in which the animation is running
 	 * @param frame
 	 *            The frame at which the eye position is required
 	 * 
 	 * @return The eye position of the camera at the provided frame
 	 */
-	Position getLookatPositionAtFrame(AnimationContext animationContext, int frame);
+	Position getLookatPositionAtFrame(int frame);
 
 	/**
 	 * Smooths the camera's eye speed through the animation.
 	 * <p/>
 	 * This may result in key frames related to the camera being re-adjusted to
 	 * provide a smooth camera transition.
-	 * 
-	 * @param context
-	 *            The context of the animation
 	 */
-	void smoothEyeSpeed(AnimationContext context);
+	void smoothEyeSpeed();
 
 	/**
 	 * Copy parameters and other globals from the provided camera to this

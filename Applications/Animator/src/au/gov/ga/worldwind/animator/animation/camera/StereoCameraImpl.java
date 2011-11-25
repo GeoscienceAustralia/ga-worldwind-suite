@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.animator.animation.camera;
 
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getStereoCameraNameKey;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.WWXML;
@@ -10,15 +12,12 @@ import java.util.Collections;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.camera.StereoCameraParameter.EyeSeparationParameter;
 import au.gov.ga.worldwind.animator.animation.camera.StereoCameraParameter.FocalLengthParameter;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.common.util.XMLUtil;
-import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 
 public class StereoCameraImpl extends CameraImpl implements StereoCamera
@@ -29,11 +28,15 @@ public class StereoCameraImpl extends CameraImpl implements StereoCamera
 	protected Parameter eyeSeparation;
 
 	protected boolean dynamicStereo = true;
-
+	
 	public StereoCameraImpl(Animation animation)
 	{
-		super(MessageSourceAccessor.get().getMessage(
-				AnimationMessageConstants.getStereoCameraNameKey(), DEFAULT_CAMERA_NAME), animation);
+		this(null, animation);
+	}
+
+	public StereoCameraImpl(String name, Animation animation)
+	{
+		super(nameOrDefaultName(name, getMessage(getStereoCameraNameKey())), animation);
 	}
 
 	/**
@@ -77,14 +80,15 @@ public class StereoCameraImpl extends CameraImpl implements StereoCamera
 	}
 
 	@Override
-	protected void doApply(AnimationContext animationContext, int frame)
+	protected void doApply()
 	{
-		super.doApply(animationContext, frame);
+		super.doApply();
 
-		View view = animationContext.getView();
+		View view = animation.getView();
 		if (view instanceof StereoView)
 		{
 			StereoView stereo = (StereoView) view;
+			int frame = animation.getCurrentFrame();
 			double focalLength = this.focalLength.getValueAtFrame(frame).getValue();
 			double eyeSeparation = this.eyeSeparation.getValueAtFrame(frame).getValue();
 			stereo.getParameters().setDynamicStereo(dynamicStereo);
@@ -106,34 +110,23 @@ public class StereoCameraImpl extends CameraImpl implements StereoCamera
 	}
 
 	@Override
-	public Element toXml(Element parent, AnimationFileVersion version)
-	{
-		AnimationIOConstants constants = version.getConstants();
-
-		Element result = super.toXml(parent, version);
-
-		XMLUtil.setBooleanAttribute(result, constants.getCameraDynamicStereoElementName(),
-				dynamicStereo);
-
-		focalLength.toXml(result, version);
-		eyeSeparation.toXml(result, version);
-
-		return result;
-	}
-	
-	@Override
-	protected String getCameraElementName(AnimationIOConstants constants)
+	protected String getXmlElementName(AnimationIOConstants constants)
 	{
 		return constants.getStereoCameraElementName();
 	}
 
 	@Override
-	protected void setupFromXml(CameraImpl camera, Element element, AnimationFileVersion version,
-			AVList context)
+	protected CameraImpl createCamera(String name, Animation animation)
 	{
-		super.setupFromXml(camera, element, version, context);
+		return new StereoCameraImpl(name, animation);
+	}
 
-		if (camera != null && camera instanceof StereoCameraImpl)
+	@Override
+	protected void setupCameraFromXml(CameraImpl camera, Element element, AnimationFileVersion version, AVList context)
+	{
+		super.setupCameraFromXml(camera, element, version, context);
+
+		if (camera instanceof StereoCameraImpl)
 		{
 			AnimationIOConstants constants = version.getConstants();
 			StereoCameraImpl stereo = (StereoCameraImpl) camera;
@@ -145,14 +138,14 @@ public class StereoCameraImpl extends CameraImpl implements StereoCamera
 					new FocalLengthParameter().fromXml(
 							WWXML.getElement(element, constants.getCameraEyeSeparationElementName(), null), version,
 							context);
-			stereo.dynamicStereo =
-					XMLUtil.getBoolean(element, constants.getCameraDynamicStereoElementName(), true);
+			stereo.dynamicStereo = XMLUtil.getBoolean(element, constants.getCameraDynamicStereoElementName(), true);
 		}
 	}
 
 	@Override
-	protected CameraImpl createAnimatable()
+	protected void saveAnimatableToXml(Element element, AnimationFileVersion version)
 	{
-		return new StereoCameraImpl();
+		super.saveAnimatableToXml(element, version);
+		XMLUtil.setBooleanAttribute(element, version.getConstants().getCameraDynamicStereoElementName(), dynamicStereo);
 	}
 }

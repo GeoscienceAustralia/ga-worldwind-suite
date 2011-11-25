@@ -109,6 +109,8 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getAddExaggeratorDialogTitleKey() { return "animator.gui.dialog.newexaggerator.title"; }
 	public static String getExaggeratorDialogExaggerationLabelKey() { return "animator.gui.dialog.newexaggerator.exaggeration.label"; }
 	public static String getExaggeratorDialogBoundaryLabelKey() { return "animator.gui.dialog.newexaggerator.boundary.label"; }
+	public static String getAddEffectLabelKey() { return "animator.gui.menu.addeffect.label"; }
+	public static String getAddEffectDialogTitleKey() { return "animator.gui.dialog.addeffect.title"; }
 	public static String getAnimationBrowserEnableAllLabelKey() { return "animator.gui.menu.enableall.label"; }
 	public static String getAnimationBrowserDisableAllLabelKey() { return "animator.gui.menu.disableall.label"; }
 	public static String getAnimationBrowserArmAllLabelKey() { return "animator.gui.menu.armall.label"; }
@@ -178,5 +180,9 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getCantOpenUserGuideCaptionKey() { return "animator.message.openuserguidefailed.caption"; }
 	public static String getCantOpenTutorialsMessageKey() { return "animator.message.opentutorialfailed.message"; }
 	public static String getCantOpenTutorialsCaptionKey() { return "animator.message.opentutorialfailed.caption"; }
+	public static String getDepthOfFieldNameKey() { return "animator.effect.depthoffield.name"; }
+	public static String getDepthOfFieldFarParameterNameKey() { return "animator.effect.depthoffieldfar.name"; }
+	public static String getDepthOfFieldNearParameterNameKey() { return "animator.effect.depthoffieldnear.name"; }
+	public static String getDepthOfFieldFocusParameterNameKey() { return "animator.effect.depthoffieldfocus.name"; }
 	
 }

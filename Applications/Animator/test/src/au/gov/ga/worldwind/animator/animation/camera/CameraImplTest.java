@@ -1,6 +1,9 @@
 package au.gov.ga.worldwind.animator.animation.camera;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -16,8 +19,6 @@ import org.junit.Test;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
-import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.WorldWindAnimationImpl;
@@ -43,8 +44,6 @@ public class CameraImplTest
 	
 	private Animation animation;
 	
-	private AnimationContext animationContext;
-	
 	@Before
 	public void setup()
 	{
@@ -53,8 +52,6 @@ public class CameraImplTest
 		mockContext = new Mockery();
 		
 		animation = new WorldWindAnimationImpl(mockContext.mock(WorldWindow.class));
-		
-		animationContext = new AnimationContextImpl(animation);
 		
 		classToBeTested = new CameraImpl(animation);
 		
@@ -68,7 +65,7 @@ public class CameraImplTest
 	{
 		setCameraKeyFrames(new ArrayList<KeyFrame>());
 		
-		classToBeTested.smoothEyeSpeed(animationContext);
+		classToBeTested.smoothEyeSpeed();
 		
 		List<KeyFrame> newKeyFrames = animation.getKeyFrames();
 		assertNotNull(newKeyFrames);
@@ -88,7 +85,7 @@ public class CameraImplTest
 		
 		setCameraKeyFrames(keyFrames);
 		
-		classToBeTested.smoothEyeSpeed(animationContext);
+		classToBeTested.smoothEyeSpeed();
 		
 		List<KeyFrame> newKeyFrames = animation.getKeyFrames();
 		assertNotNull(newKeyFrames);
@@ -110,7 +107,7 @@ public class CameraImplTest
 		
 		setCameraKeyFrames(keyFrames);
 		
-		classToBeTested.smoothEyeSpeed(animationContext);
+		classToBeTested.smoothEyeSpeed();
 		
 		List<KeyFrame> newKeyFrames = animation.getKeyFrames();
 		assertNotNull(newKeyFrames);
@@ -134,7 +131,7 @@ public class CameraImplTest
 		
 		setCameraKeyFrames(keyFrames);
 		
-		classToBeTested.smoothEyeSpeed(animationContext);
+		classToBeTested.smoothEyeSpeed();
 		
 		List<KeyFrame> newKeyFrames = animation.getKeyFrames();
 		assertNotNull(newKeyFrames);
@@ -159,7 +156,7 @@ public class CameraImplTest
 		
 		setCameraKeyFrames(keyFrames);
 		
-		classToBeTested.smoothEyeSpeed(animationContext);
+		classToBeTested.smoothEyeSpeed();
 		
 		List<KeyFrame> newKeyFrames = animation.getKeyFrames();
 		assertNotNull(newKeyFrames);
@@ -168,7 +165,7 @@ public class CameraImplTest
 		assertEyeKeyFrameEquals(5, 5.0, 5.0, 5.0, newKeyFrames.get(1));
 		assertEyeKeyFrameEquals(10, 10.0, 10.0, 10.0, newKeyFrames.get(2));
 		
-		classToBeTested.smoothEyeSpeed(animationContext);
+		classToBeTested.smoothEyeSpeed();
 		
 		newKeyFrames = animation.getKeyFrames();
 		assertNotNull(newKeyFrames);
@@ -177,7 +174,7 @@ public class CameraImplTest
 		assertEyeKeyFrameEquals(5, 5.0, 5.0, 5.0, newKeyFrames.get(1));
 		assertEyeKeyFrameEquals(10, 10.0, 10.0, 10.0, newKeyFrames.get(2));
 		
-		classToBeTested.smoothEyeSpeed(animationContext);
+		classToBeTested.smoothEyeSpeed();
 		
 		newKeyFrames = animation.getKeyFrames();
 		assertNotNull(newKeyFrames);

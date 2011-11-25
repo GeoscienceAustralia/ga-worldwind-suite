@@ -66,7 +66,7 @@ public class DebugWriter
 	 * @param end The end frame
 	 * @param context The current animation context
 	 */
-	public static void dumpParameterValues(String fileName, Collection<Parameter> parameters, int start, int end)
+	public static void dumpParameterValues(String fileName, Animation animation, Collection<Parameter> parameters, int start, int end)
 	{
 		try
 		{

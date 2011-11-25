@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.animator.animation.elevation;
 
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getElevationNameKey;
-import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessageOrDefault;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
@@ -17,10 +17,8 @@ import java.util.TreeMap;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
@@ -42,55 +40,71 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 	private static final long serialVersionUID = 20100929L;
 
 	private static final String DEFAULT_NAME = "Elevation";
-	
-	private Animation animation;
-	
-	private Map<Double, ElevationExaggerationParameter> exaggerationParameters = new TreeMap<Double, ElevationExaggerationParameter>();
 
-	private Map<ElevationModelIdentifier, ElevationModel> elevationModelIdentification = new LinkedHashMap<ElevationModelIdentifier, ElevationModel>();
-	
+	private Map<Double, ElevationExaggerationParameter> exaggerationParameters =
+			new TreeMap<Double, ElevationExaggerationParameter>();
+
+	private Map<ElevationModelIdentifier, ElevationModel> elevationModelIdentification =
+			new LinkedHashMap<ElevationModelIdentifier, ElevationModel>();
+
 	private CompoundElevationModel containerModel = new CompoundElevationModel();
-	private VerticalExaggerationElevationModel rootElevationModel = new VerticalExaggerationElevationModel(containerModel);
+	private VerticalExaggerationElevationModel rootElevationModel = new VerticalExaggerationElevationModel(
+			containerModel);
 
 	/**
 	 * For use in de-serialisation. Not to be used generally.
 	 */
 	@SuppressWarnings("unused")
-	private DefaultAnimatableElevation() { }
-	
+	private DefaultAnimatableElevation()
+	{
+	}
+
 	/**
-	 * Initialise the animatable elevation with no elevation models or exaggerators
+	 * Initialise the animatable elevation with no elevation models or
+	 * exaggerators
 	 */
 	public DefaultAnimatableElevation(Animation animation)
 	{
-		super(getMessage(getElevationNameKey()) == null ? DEFAULT_NAME : getMessage(getElevationNameKey()));
-		
+		this(null, animation);
+	}
+
+	/**
+	 * Initialise the animatable elevation with no elevation models or
+	 * exaggerators
+	 */
+	public DefaultAnimatableElevation(String name, Animation animation)
+	{
+		super(nameOrDefaultName(name, getMessageOrDefault(getElevationNameKey(), DEFAULT_NAME)), animation);
+
 		Validate.notNull(animation, "An animation is required");
-		
+
 		this.animation = animation;
 		this.addChangeListener(animation);
 	}
-	
+
 	/**
-	 * Initialise the animatable elevation with the provided elevation models and exaggerators
+	 * Initialise the animatable elevation with the provided elevation models
+	 * and exaggerators
 	 */
-	public DefaultAnimatableElevation(Animation animation, List<ElevationModel> elevationModels, List<ElevationExaggeration> exaggerators)
+	public DefaultAnimatableElevation(Animation animation, List<ElevationModel> elevationModels,
+			List<ElevationExaggeration> exaggerators)
 	{
 		this(animation);
-		
+
 		for (ElevationModel model : elevationModels)
 		{
 			containerModel.addElevationModel(model);
 			elevationModelIdentification.put(ElevationModelIdentifierFactory.createFromElevationModel(model), model);
 		}
-		
+
 		rootElevationModel.addExaggerators(exaggerators);
 		for (ElevationExaggeration exaggerator : exaggerators)
 		{
-			exaggerationParameters.put(exaggerator.getElevationBoundary(), new ElevationExaggerationParameterImpl(animation, exaggerator));
+			exaggerationParameters.put(exaggerator.getElevationBoundary(), new ElevationExaggerationParameterImpl(
+					animation, exaggerator));
 		}
 	}
-	
+
 	@Override
 	public Collection<Parameter> getParameters()
 	{
@@ -104,13 +118,13 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 	}
 
 	@Override
-	protected void doApply(AnimationContext animationContext, int frame)
+	protected void doApply()
 	{
 		for (ElevationExaggerationParameter p : exaggerationParameters.values())
 		{
 			if (p.isEnabled())
 			{
-				p.apply(animationContext, frame);
+				p.apply();
 			}
 		}
 	}
@@ -118,7 +132,8 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 	@Override
 	public List<ElevationModelIdentifier> getElevationModelIdentifiers()
 	{
-		return Collections.unmodifiableList(new ArrayList<ElevationModelIdentifier>(elevationModelIdentification.keySet()));
+		return Collections.unmodifiableList(new ArrayList<ElevationModelIdentifier>(elevationModelIdentification
+				.keySet()));
 	}
 
 	@Override
@@ -126,7 +141,7 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 	{
 		return elevationModelIdentification.containsKey(modelIdentifier);
 	}
-	
+
 	@Override
 	public void addElevationModel(ElevationModelIdentifier modelIdentifier)
 	{
@@ -139,13 +154,13 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 		{
 			return;
 		}
-		
+
 		containerModel.addElevationModel(loadedModel);
 		elevationModelIdentification.put(modelIdentifier, loadedModel);
 
 		fireAddEvent(loadedModel);
 	}
-	
+
 	@Override
 	public void removeElevationModel(ElevationModelIdentifier modelIdentifier)
 	{
@@ -153,14 +168,14 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 		{
 			return;
 		}
-		
+
 		ElevationModel model = elevationModelIdentification.get(modelIdentifier);
 		containerModel.removeElevationModel(model);
 		elevationModelIdentification.remove(modelIdentifier);
-		
+
 		fireRemoveEvent(model);
 	}
-	
+
 	@Override
 	public void addElevationExaggerator(ElevationExaggeration exaggerator)
 	{
@@ -168,15 +183,16 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 		{
 			return;
 		}
-		
+
 		rootElevationModel.addExaggerator(exaggerator);
-		
-		ElevationExaggerationParameterImpl exaggerationParameter = new ElevationExaggerationParameterImpl(animation, exaggerator);
+
+		ElevationExaggerationParameterImpl exaggerationParameter =
+				new ElevationExaggerationParameterImpl(animation, exaggerator);
 		exaggerationParameters.put(exaggerator.getElevationBoundary(), exaggerationParameter);
-		
+
 		fireAddEvent(exaggerationParameter);
 	}
-	
+
 	/**
 	 * For use during de-serialisation
 	 */
@@ -186,91 +202,85 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 		{
 			return;
 		}
-		
+
 		rootElevationModel.addExaggerator(parameter.getElevationExaggeration());
 		exaggerationParameters.put(parameter.getElevationExaggeration().getElevationBoundary(), parameter);
 	}
-	
+
 	@Override
 	public void removeElevationExaggerator(ElevationExaggeration exaggerator)
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
-	public Element toXml(Element parent, AnimationFileVersion version)
+	protected String getXmlElementName(AnimationIOConstants constants)
 	{
+		return constants.getAnimatableElevationElementName();
+	}
+
+	@Override
+	protected AnimatableBase createAnimatableFromXml(String name, Animation animation, boolean enabled,
+			Element element, AnimationFileVersion version, AVList context)
+	{
+		DefaultAnimatableElevation result = new DefaultAnimatableElevation(name, animation);
 		AnimationIOConstants constants = version.getConstants();
-		
-		Element result = WWXML.appendElement(parent, constants.getAnimatableElevationName());
-		WWXML.setTextAttribute(result, constants.getAnimatableElevationAttributeName(), getName());
-		WWXML.setBooleanAttribute(result, constants.getAnimatableElevationAttributeEnabled(), isEnabled());
-		
-		// Add the elevation model identifiers
-		Element identifierContainer = WWXML.appendElement(result, constants.getAnimatableElevationModelContainerName());
-		for (ElevationModelIdentifier identifier : getElevationModelIdentifiers())
+
+		// Load the models
+		Element[] modelIdentifierElements =
+				WWXML.getElements(element, "./" + constants.getAnimatableElevationModelContainerName() + "/*", null);
+		if (modelIdentifierElements != null)
 		{
-			Element identifierElement = WWXML.appendElement(identifierContainer, constants.getAnimatableElevationModelIdentifierName());
-			WWXML.setTextAttribute(identifierElement, constants.getAnimatableElevationModelIdentifierAttributeName(), identifier.getName());
-			WWXML.setTextAttribute(identifierElement, constants.getAnimatableElevationModelIdentifierAttributeUrl(), identifier.getLocation());
+			for (Element modelIdentifierElement : modelIdentifierElements)
+			{
+				String modelName =
+						WWXML.getText(modelIdentifierElement,
+								ATTRIBUTE_PATH_PREFIX + constants.getAnimatableAttributeName());
+				String modelUrl =
+						WWXML.getText(modelIdentifierElement,
+								ATTRIBUTE_PATH_PREFIX + constants.getAnimatableAttributeUrl());
+				result.addElevationModel(new ElevationModelIdentifierImpl(modelName, modelUrl));
+			}
 		}
-		
-		// Add the exaggeration parameters
-		for (ElevationExaggerationParameter parameter : exaggerationParameters.values())
+
+		// Load the exaggerators
+		ElevationExaggerationParameterImpl parameterFactory = new ElevationExaggerationParameterImpl();
+		Element[] exaggeratorElements =
+				WWXML.getElements(element, "./" + constants.getElevationExaggerationElementName(), null);
+		if (exaggeratorElements != null)
 		{
-			result.appendChild(parameter.toXml(result, version));
+			for (Element exaggeratorElement : exaggeratorElements)
+			{
+				ElevationExaggerationParameter parameter =
+						(ElevationExaggerationParameter) parameterFactory.fromXml(exaggeratorElement, version, context);
+				result.addElevationExaggerationParameter(parameter);
+			}
 		}
-		
+
 		return result;
 	}
 
 	@Override
-	public Animatable fromXml(Element element, AnimationFileVersion version, AVList context)
+	protected void saveAnimatableToXml(Element element, AnimationFileVersion version)
 	{
-		Validate.notNull(element, "An XML element is required");
-		Validate.notNull(version, "A version ID is required");
-		Validate.notNull(context, "A context is required");
-		
 		AnimationIOConstants constants = version.getConstants();
-		
-		switch (version)
-		{
-			case VERSION020:
-			{
-				Validate.isTrue(context.hasKey(constants.getAnimationKey()), "An animation is required in context.");
-				
-				DefaultAnimatableElevation result = new DefaultAnimatableElevation((Animation)context.getValue(constants.getAnimationKey()));
-				
-				// Load the models
-				Element[] modelIdentifierElements = WWXML.getElements(element, "./" + constants.getAnimatableElevationModelContainerName() + "/*", null);
-				if (modelIdentifierElements != null)
-				{
-					for (Element modelIdentifierElement : modelIdentifierElements)
-					{
-						String modelName = WWXML.getText(modelIdentifierElement, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableElevationModelIdentifierAttributeName());
-						String modelUrl = WWXML.getText(modelIdentifierElement, ATTRIBUTE_PATH_PREFIX + constants.getAnimatableElevationModelIdentifierAttributeUrl());
-						result.addElevationModel(new ElevationModelIdentifierImpl(modelName, modelUrl));
-					}
-				}
-				
-				// Load the exaggerators
-				ElevationExaggerationParameterImpl parameterFactory = new ElevationExaggerationParameterImpl();
-				Element[] exaggeratorElements = WWXML.getElements(element, "./" + constants.getElevationExaggerationName(), null);
-				if (exaggeratorElements != null)
-				{
-					for (Element exaggeratorElement : exaggeratorElements)
-					{
-						ElevationExaggerationParameter parameter = (ElevationExaggerationParameter)parameterFactory.fromXml(exaggeratorElement, version, context);
-						result.addElevationExaggerationParameter(parameter);
-					}
-				}
-				
-				return result;
-			}
-		}
-		
-		return null;
-	}
 
+		// Add the elevation model identifiers
+		Element identifierContainer =
+				WWXML.appendElement(element, constants.getAnimatableElevationModelContainerName());
+		for (ElevationModelIdentifier identifier : getElevationModelIdentifiers())
+		{
+			Element identifierElement =
+					WWXML.appendElement(identifierContainer, constants.getAnimatableElevationModelIdentifierName());
+			WWXML.setTextAttribute(identifierElement, constants.getAnimatableAttributeName(), identifier.getName());
+			WWXML.setTextAttribute(identifierElement, constants.getAnimatableAttributeUrl(), identifier.getLocation());
+		}
+
+		// Add the exaggeration parameters
+		for (ElevationExaggerationParameter parameter : exaggerationParameters.values())
+		{
+			parameter.toXml(element, version);
+		}
+	}
 }

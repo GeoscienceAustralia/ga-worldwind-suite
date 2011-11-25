@@ -30,8 +30,8 @@ public class AnimatableFactory
 		// Add additional Animatables here as they are created
 		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getCameraElementName(), instantiate(CameraImpl.class));
 		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getStereoCameraElementName(), instantiate(StereoCameraImpl.class));
-		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getAnimatableLayerName(), instantiate(DefaultAnimatableLayer.class));
-		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getAnimatableElevationName(), instantiate(DefaultAnimatableElevation.class));
+		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getAnimatableLayerElementName(), instantiate(DefaultAnimatableLayer.class));
+		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getAnimatableElevationElementName(), instantiate(DefaultAnimatableElevation.class));
 	}
 	
 	/**

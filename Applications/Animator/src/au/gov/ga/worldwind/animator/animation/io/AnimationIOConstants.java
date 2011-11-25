@@ -18,6 +18,7 @@ public interface AnimationIOConstants
 	String getAnimationKey();
 	String getParameterValueOwnerKey();
 	String getCurrentLayerKey();
+	String getCurrentEffectKey();
 	String getWorldWindowKey();
 	
 	// -------------------------------------
@@ -50,7 +51,6 @@ public interface AnimationIOConstants
 	String getCameraDynamicStereoElementName();
 	String getCameraNearClipElementName();
 	String getCameraFarClipElementName();
-	String getCameraAttributeName();
 	String getCameraElementName();
 	String getStereoCameraElementName();
 	String getAnimationAttributeFrameCount();
@@ -61,18 +61,14 @@ public interface AnimationIOConstants
 	String getHeightElementName();
 	String getWidthElementName();
 	String getFrameRateElementName();
-	String getAnimatableLayerName();
-	String getAnimatableLayerAttributeName();
-	String getAnimatableLayerAttributeUrl();
-	String getAnimatableLayerAttributeEnabled();
-	String getAnimatableElevationName();
-	String getAnimatableElevationAttributeName();
-	String getAnimatableElevationAttributeEnabled();
+	String getAnimatableLayerElementName();
+	String getAnimatableAttributeName();
+	String getAnimatableAttributeUrl();
+	String getAnimatableAttributeEnabled();
+	String getAnimatableElevationElementName();
 	String getAnimatableElevationModelContainerName();
 	String getAnimatableElevationModelIdentifierName();
-	String getAnimatableElevationModelIdentifierAttributeName();
-	String getAnimatableElevationModelIdentifierAttributeUrl();
-	String getElevationExaggerationName();
+	String getElevationExaggerationElementName();
 	String getElevationExaggerationBoundaryAttributeName();
 	String getLockedDimensionsElementName();
 	String getRenderDestinationElementName();
@@ -81,6 +77,9 @@ public interface AnimationIOConstants
 	String getDetailLevelElementName();
 	String getRenderAlphaElementName();
 	String getImageScalePercentElementName();
+	String getDepthOfFieldNearElementName();
+	String getDepthOfFieldFarElementName();
+	String getDepthOfFieldFocusElementName();
 
 	/**
 	 * Common constants that don't change across versions
@@ -91,6 +90,7 @@ public interface AnimationIOConstants
 		public String getAnimationKey() {return "currentAnimation";}
 		public String getWorldWindowKey() {return "worldWindow";}
 		public String getCurrentLayerKey() {return "currentLayer";}
+		public String getCurrentEffectKey() {return "currentEffect";}
 		public String getRootElementName() {return "restorableState";}
 		public String getWorldWindAnimationElementName(){return null;}
 		public String getWorldWindAnimationAttributeVersion(){return null;}
@@ -118,7 +118,6 @@ public interface AnimationIOConstants
 		public String getCameraDynamicStereoElementName() {return null;}
 		public String getCameraNearClipElementName() {return null;}
 		public String getCameraFarClipElementName() {return null;}
-		public String getCameraAttributeName(){return null;}
 		public String getCameraElementName(){return null;}
 		public String getStereoCameraElementName(){return null;}
 		public String getAnimationAttributeFrameCount(){return null;}
@@ -129,18 +128,14 @@ public interface AnimationIOConstants
 		public String getHeightElementName(){return null;}
 		public String getWidthElementName(){return null;}
 		public String getFrameRateElementName(){return null;}
-		public String getAnimatableLayerName() {return null;}
-		public String getAnimatableLayerAttributeName() {return null;}
-		public String getAnimatableLayerAttributeUrl() {return null;}
-		public String getAnimatableLayerAttributeEnabled() {return null;}
-		public String getAnimatableElevationName() {return null;}
-		public String getAnimatableElevationAttributeName() {return null;}
-		public String getAnimatableElevationAttributeEnabled() {return null;}
+		public String getAnimatableLayerElementName() {return null;}
+		public String getAnimatableAttributeName() {return null;}
+		public String getAnimatableAttributeUrl() {return null;}
+		public String getAnimatableAttributeEnabled() {return null;}
+		public String getAnimatableElevationElementName() {return null;}
 		public String getAnimatableElevationModelContainerName() {return null;}
 		public String getAnimatableElevationModelIdentifierName() {return null;}
-		public String getAnimatableElevationModelIdentifierAttributeName() {return null;}
-		public String getAnimatableElevationModelIdentifierAttributeUrl() {return null;}
-		public String getElevationExaggerationName() {return null;}
+		public String getElevationExaggerationElementName() {return null;}
 		public String getElevationExaggerationBoundaryAttributeName() {return null;}
 		public String getLockedDimensionsElementName() {return null;}
 		public String getRenderDestinationElementName() {return null;}
@@ -149,6 +144,9 @@ public interface AnimationIOConstants
 		public String getDetailLevelElementName() {return null;}
 		public String getRenderAlphaElementName() {return null;}
 		public String getImageScalePercentElementName() {return null;}
+		public String getDepthOfFieldNearElementName() {return null;}
+		public String getDepthOfFieldFarElementName() {return null;}
+		public String getDepthOfFieldFocusElementName() {return null;}
 	}
 	
 	/**
@@ -181,7 +179,6 @@ public interface AnimationIOConstants
 		public String getCameraDynamicStereoElementName() {return "dynamicStereo";}
 		public String getCameraNearClipElementName() {return "nearClip";}
 		public String getCameraFarClipElementName() {return "farClip";}
-		public String getCameraAttributeName() {return "name";}
 		public String getCameraElementName() {return "camera";}
 		public String getStereoCameraElementName(){return "stereoCamera";}
 		public String getAnimationAttributeFrameCount() {return "frameCount";}
@@ -194,18 +191,14 @@ public interface AnimationIOConstants
 		public String getHeightElementName() {return "height";}
 		public String getWorldWindAnimationElementName() {return "worldWindAnimation";}
 		public String getWorldWindAnimationAttributeVersion() {return "version";}
-		public String getAnimatableLayerName() {return "layer";}
-		public String getAnimatableLayerAttributeName() {return "name";}
-		public String getAnimatableLayerAttributeUrl() {return "url";}
-		public String getAnimatableLayerAttributeEnabled() {return "enabled";}
-		public String getAnimatableElevationName() {return "elevation";}
-		public String getAnimatableElevationAttributeName() {return "name";}
-		public String getAnimatableElevationAttributeEnabled() {return "enabled";}
+		public String getAnimatableLayerElementName() {return "layer";}
+		public String getAnimatableAttributeName() {return "name";}
+		public String getAnimatableAttributeUrl() {return "url";}
+		public String getAnimatableAttributeEnabled() {return "enabled";}
+		public String getAnimatableElevationElementName() {return "elevation";}
 		public String getAnimatableElevationModelContainerName() {return "models";}
 		public String getAnimatableElevationModelIdentifierName() {return "model";}
-		public String getAnimatableElevationModelIdentifierAttributeName() {return "name";}
-		public String getAnimatableElevationModelIdentifierAttributeUrl() {return "url";}
-		public String getElevationExaggerationName() {return "exaggerator";}
+		public String getElevationExaggerationElementName() {return "exaggerator";}
 		public String getElevationExaggerationBoundaryAttributeName() {return "boundary";}
 		public String getLockedDimensionsElementName() { return "locked";}
 		public String getRenderDestinationElementName() { return "renderDestination"; }
@@ -214,6 +207,9 @@ public interface AnimationIOConstants
 		public String getDetailLevelElementName() {return "detailLevel";}
 		public String getRenderAlphaElementName() {return "renderAlpha";}
 		public String getImageScalePercentElementName() {return "imageScalePercent";}
+		public String getDepthOfFieldNearElementName() {return "near";}
+		public String getDepthOfFieldFarElementName() {return "far";}
+		public String getDepthOfFieldFocusElementName() {return "focus";}
 	}
 	
 	/**

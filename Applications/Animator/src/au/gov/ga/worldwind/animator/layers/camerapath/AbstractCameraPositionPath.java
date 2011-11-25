@@ -12,8 +12,6 @@ import java.nio.DoubleBuffer;
 import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
-import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.common.util.HSLColor;
 
@@ -169,7 +167,6 @@ public abstract class AbstractCameraPositionPath implements Renderable
 	 */
 	private void populatePathBuffers()
 	{
-		AnimationContext context = new AnimationContextImpl(animation);
 		pathReferenceCenter = null;
 
 		int firstFrame = animation.getFrameOfFirstKeyFrame();
@@ -181,7 +178,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 
 		pathVertexBackBuffer.rewind();
 
-		Position[] pathPositions = getPathPositions(context, firstFrame, lastFrame);
+		Position[] pathPositions = getPathPositions(firstFrame, lastFrame);
 
 		Position previousPathPosition = null;
 		for (int i = 0; i < pathPositions.length; i++)
@@ -189,7 +186,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 			Position currentPathPosition = pathPositions[i];
 
 			// Populate the vertex buffer
-			Vec4 eyeVector = context.getView().getGlobe().computePointFromPosition(currentPathPosition);
+			Vec4 eyeVector = animation.getView().getGlobe().computePointFromPosition(currentPathPosition);
 			if (pathReferenceCenter == null)
 			{
 				pathReferenceCenter = eyeVector; // Choose the first point in the path to be the reference point
@@ -201,7 +198,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 			// Populate the delta array
 			if (previousPathPosition != null)
 			{
-				double positionDelta = calculateDelta(context, currentPathPosition, previousPathPosition);
+				double positionDelta = calculateDelta(currentPathPosition, previousPathPosition);
 				deltas[i] = positionDelta;
 				maxDelta = Math.max(maxDelta, positionDelta);
 				minDelta = Math.min(minDelta, positionDelta);
@@ -223,15 +220,15 @@ public abstract class AbstractCameraPositionPath implements Renderable
 	/**
 	 * @return the path positions for this path between the start and end frames
 	 */
-	protected abstract Position[] getPathPositions(AnimationContext context, int startFrame, int endFrame);
+	protected abstract Position[] getPathPositions(int startFrame, int endFrame);
 
 	/**
 	 * @return The delta of the current and previous position
 	 */
-	private double calculateDelta(AnimationContext context, Position currentPosition, Position previousPosition)
+	private double calculateDelta(Position currentPosition, Position previousPosition)
 	{
-		Vec4 current = context.getView().getGlobe().computePointFromPosition(currentPosition);
-		Vec4 previous = context.getView().getGlobe().computePointFromPosition(previousPosition);
+		Vec4 current = animation.getView().getGlobe().computePointFromPosition(currentPosition);
+		Vec4 previous = animation.getView().getGlobe().computePointFromPosition(previousPosition);
 		return Math.abs(current.distanceTo3(previous));
 	}
 

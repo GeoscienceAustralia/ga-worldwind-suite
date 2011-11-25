@@ -29,8 +29,6 @@ import au.gov.ga.worldwind.common.util.Validate;
  */
 public class ParameterCurvePanel implements ParameterCurveListener, CurrentFrameChangeListener
 {
-	private static final long serialVersionUID = 20101110L;
-
 	private List<ParameterCurve> curves = new ArrayList<ParameterCurve>();
 	
 	private AtomicBoolean settingBounds = new AtomicBoolean(false);

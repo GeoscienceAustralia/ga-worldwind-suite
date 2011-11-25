@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.animator.animation.camera;
 
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraNameKey;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessageOrDefault;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
@@ -15,10 +17,8 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.animation.KeyFrameImpl;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.EyeElevationParameter;
@@ -34,10 +34,8 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.math.vector.Vector3;
-import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.animator.view.ClipConfigurableView;
 import au.gov.ga.worldwind.common.util.Validate;
-import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
  * A default implementation of the {@link Camera} interface
@@ -62,26 +60,20 @@ public class CameraImpl extends AnimatableBase implements Camera
 	private boolean clippingParametersActivated = false;
 	private Parameter nearClip;
 	private Parameter farClip;
-	
+
 	protected Collection<Parameter> parameters;
-	
-	private Animation animation;
-	
+
 	/**
 	 * Constructor. Initialises the camera parameters.
 	 */
 	public CameraImpl(Animation animation)
 	{
-		this(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraNameKey(), DEFAULT_CAMERA_NAME), animation);
+		this(null, animation);
 	}
-	
+
 	protected CameraImpl(String name, Animation animation)
 	{
-		super(name);
-
-		Validate.notNull(animation, "An animation instance is required");
-		this.animation = animation;
-		
+		super(nameOrDefaultName(name, getMessageOrDefault(getCameraNameKey(), DEFAULT_CAMERA_NAME)), animation);
 		initialiseParameters(animation);
 		connectCodependants();
 		connectAsListener();
@@ -90,7 +82,9 @@ public class CameraImpl extends AnimatableBase implements Camera
 	/**
 	 * Constructor used for de-serialising. Not for general use.
 	 */
-	protected CameraImpl(){super();}
+	protected CameraImpl()
+	{
+	}
 
 	/**
 	 * Initialise the camera parameters
@@ -106,14 +100,14 @@ public class CameraImpl extends AnimatableBase implements Camera
 		lookAtLat = new LookatLatParameter(animation);
 		lookAtLon = new LookatLonParameter(animation);
 		lookAtElevation = new LookatElevationParameter(animation);
-		
+
 		if (clippingParametersActivated)
 		{
 			nearClip = new NearClipParameter(animation);
 			farClip = new FarClipParameter(animation);
 		}
 	}
-	
+
 	protected void connectCodependants()
 	{
 		eyeLat.connectCodependantParameter(eyeLon);
@@ -122,7 +116,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		eyeLat.connectCodependantParameter(lookAtLon);
 		eyeLat.connectCodependantParameter(lookAtElevation);
 	}
-	
+
 	protected void connectAsListener()
 	{
 		for (Parameter p : getParameters())
@@ -132,74 +126,73 @@ public class CameraImpl extends AnimatableBase implements Camera
 	}
 
 	@Override
-	protected void doApply(AnimationContext animationContext, int frame)
+	protected void doApply()
 	{
 		if (!animation.hasKeyFrame(this))
 		{
 			return;
 		}
-		
-		Position eye = getEyePositionAtFrame(animationContext, frame);
 
-		Position center = getLookatPositionAtFrame(animationContext, frame);
+		int frame = getAnimation().getCurrentFrame();
+		Position eye = getEyePositionAtFrame(frame);
+		Position center = getLookatPositionAtFrame(frame);
 
-		View view = animationContext.getView();
+		View view = animation.getView();
 		view.stopMovement();
 		view.setOrientation(eye, center);
-		
+
 		if (clippingParametersActivated)
 		{
-			nearClip.applyValue(nearClip.getValueAtFrame(frame).getValue());
-			farClip.applyValue(farClip.getValueAtFrame(frame).getValue());
+			nearClip.applyValueIfEnabled(nearClip.getValueAtFrame(frame).getValue(), frame);
+			farClip.applyValueIfEnabled(farClip.getValueAtFrame(frame).getValue(), frame);
 		}
 	}
 
 	@Override
-	public Position[] getEyePositionsBetweenFrames(AnimationContext animationContext, int startFrame, int endFrame)
+	public Position[] getEyePositionsBetweenFrames(int startFrame, int endFrame)
 	{
-		return getPositionsBetweenFrames(animationContext, startFrame, endFrame, eyeLat, eyeLon, eyeElevation);
+		return getPositionsBetweenFrames(startFrame, endFrame, eyeLat, eyeLon, eyeElevation);
 	}
-	
+
 	@Override
-	public Position[] getLookatPositionsBetweenFrames(AnimationContext animationContext, int startFrame, int endFrame)
+	public Position[] getLookatPositionsBetweenFrames(int startFrame, int endFrame)
 	{
-		return getPositionsBetweenFrames(animationContext, startFrame, endFrame, lookAtLat, lookAtLon, lookAtElevation);
+		return getPositionsBetweenFrames(startFrame, endFrame, lookAtLat, lookAtLon, lookAtElevation);
 	}
-	
-	private Position[] getPositionsBetweenFrames(AnimationContext animationContext, int startFrame, int endFrame, Parameter lat, Parameter lon, Parameter elevation)
+
+	private Position[] getPositionsBetweenFrames(int startFrame, int endFrame, Parameter lat, Parameter lon,
+			Parameter elevation)
 	{
 		Validate.isTrue(startFrame <= endFrame, "End frame must not be less than start frame");
-		
+
 		ParameterValue[] latValues = lat.getValuesBetweenFrames(startFrame, endFrame, null);
 		ParameterValue[] lonValues = lon.getValuesBetweenFrames(startFrame, endFrame, null);
 		ParameterValue[] elevationValues = elevation.getValuesBetweenFrames(startFrame, endFrame, null);
-		
+
 		Position[] result = new Position[latValues.length];
 		for (int i = 0; i < result.length; i++)
 		{
-			result[i] = Position.fromDegrees(latValues[i].getValue(),
-											 lonValues[i].getValue(),
-											 animationContext.unapplyZoomScaling(elevationValues[i].getValue()));
+			result[i] =
+					Position.fromDegrees(latValues[i].getValue(), lonValues[i].getValue(),
+							animation.unapplyZoomScaling(elevationValues[i].getValue()));
 		}
-		
+
 		return result;
 	}
-	
-	
+
+
 	@Override
-	public Position getEyePositionAtFrame(AnimationContext animationContext, int frame)
+	public Position getEyePositionAtFrame(int frame)
 	{
-		return Position.fromDegrees(eyeLat.getValueAtFrame(frame).getValue(),
-									eyeLon.getValueAtFrame(frame).getValue(),
-									animationContext.unapplyZoomScaling(eyeElevation.getValueAtFrame(frame).getValue()));
+		return Position.fromDegrees(eyeLat.getValueAtFrame(frame).getValue(), eyeLon.getValueAtFrame(frame).getValue(),
+				getAnimation().unapplyZoomScaling(eyeElevation.getValueAtFrame(frame).getValue()));
 	}
 
 	@Override
-	public Position getLookatPositionAtFrame(AnimationContext animationContext, int frame)
+	public Position getLookatPositionAtFrame(int frame)
 	{
-		return Position.fromDegrees(lookAtLat.getValueAtFrame(frame).getValue(), 
-									lookAtLon.getValueAtFrame(frame).getValue(), 
-									animationContext.unapplyZoomScaling(lookAtElevation.getValueAtFrame(frame).getValue()));
+		return Position.fromDegrees(lookAtLat.getValueAtFrame(frame).getValue(), lookAtLon.getValueAtFrame(frame)
+				.getValue(), getAnimation().unapplyZoomScaling(lookAtElevation.getValueAtFrame(frame).getValue()));
 	}
 
 	@Override
@@ -243,7 +236,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	{
 		return clippingParametersActivated;
 	}
-	
+
 	@Override
 	public void setClippingParametersActive(boolean active)
 	{
@@ -261,23 +254,23 @@ public class CameraImpl extends AnimatableBase implements Camera
 			activateClippingParameters();
 		}
 	}
-	
+
 	private void deactivateClippingParameters()
 	{
 		this.clippingParametersActivated = false;
-		
+
 		// Remove any key frames with the parameters
 		this.animation.removeAnimationParameters(nearClip, farClip);
-		
-		((ClipConfigurableView)this.animation.getWorldWindow().getView()).setAutoCalculateNearClipDistance(true);
-		((ClipConfigurableView)this.animation.getWorldWindow().getView()).setAutoCalculateFarClipDistance(true);
+
+		((ClipConfigurableView) this.animation.getWorldWindow().getView()).setAutoCalculateNearClipDistance(true);
+		((ClipConfigurableView) this.animation.getWorldWindow().getView()).setAutoCalculateFarClipDistance(true);
 
 		Parameter oldNearClip = nearClip;
 		Parameter oldFarClip = farClip;
-		
+
 		this.nearClip = null;
 		this.farClip = null;
-		
+
 		fireRemoveEvent(oldNearClip);
 		fireRemoveEvent(oldFarClip);
 	}
@@ -287,7 +280,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		this.clippingParametersActivated = true;
 		this.nearClip = new NearClipParameter(animation);
 		this.farClip = new FarClipParameter(animation);
-		
+
 		fireAddEvent(nearClip);
 		fireAddEvent(farClip);
 	}
@@ -297,13 +290,13 @@ public class CameraImpl extends AnimatableBase implements Camera
 	{
 		return nearClip;
 	}
-	
+
 	@Override
 	public Parameter getFarClip()
 	{
 		return farClip;
 	}
-	
+
 	@Override
 	public Collection<Parameter> getParameters()
 	{
@@ -326,33 +319,33 @@ public class CameraImpl extends AnimatableBase implements Camera
 	}
 
 	@Override
-	public void smoothEyeSpeed(AnimationContext context)
+	public void smoothEyeSpeed()
 	{
 		List<KeyFrame> eyeKeyFrames = eyeLat.getKeyFramesWithThisParameter();
-		
+
 		// There needs to be at least two key frames for smoothing to apply
 		int numberOfKeys = eyeKeyFrames.size();
 		if (numberOfKeys <= 1)
 		{
 			return;
 		}
-		
+
 		// Calculate the cumulative distance at each key frame
 		double[] cumulativeDistance = new double[numberOfKeys - 1];
 		for (int i = 0; i < numberOfKeys - 1; i++)
 		{
 			int firstFrame = eyeKeyFrames.get(i).getFrame();
 			int lastFrame = eyeKeyFrames.get(i + 1).getFrame();
-			
+
 			cumulativeDistance[i] = i == 0 ? 0 : cumulativeDistance[i - 1];
-			
+
 			Vector3 vStart = null;
 			for (int frame = firstFrame; frame <= lastFrame; frame++)
 			{
 				double x = eyeLat.getValueAtFrame(frame).getValue();
 				double y = eyeLon.getValueAtFrame(frame).getValue();
 				double z = eyeElevation.getValueAtFrame(frame).getValue();
-				
+
 				Vector3 vEnd = new Vector3(x, y, z);
 				if (vStart != null)
 				{
@@ -366,13 +359,15 @@ public class CameraImpl extends AnimatableBase implements Camera
 		int[] newFrames = new int[numberOfKeys];
 		int firstFrame = eyeKeyFrames.get(0).getFrame();
 		int lastFrame = eyeKeyFrames.get(numberOfKeys - 1).getFrame();
-		
+
 		newFrames[0] = firstFrame;
 		newFrames[numberOfKeys - 1] = lastFrame;
 
 		for (int i = 1; i < numberOfKeys - 1; i++)
 		{
-			newFrames[i] = (int) Math.round(Math.abs((firstFrame - lastFrame + 1) * cumulativeDistance[i - 1] / cumulativeDistance[numberOfKeys - 2]));
+			newFrames[i] =
+					(int) Math.round(Math.abs((firstFrame - lastFrame + 1) * cumulativeDistance[i - 1]
+							/ cumulativeDistance[numberOfKeys - 2]));
 		}
 
 		// Fix any frames that have been swapped over by mistake
@@ -397,7 +392,8 @@ public class CameraImpl extends AnimatableBase implements Camera
 		}
 		if (newFrames[0] != firstFrame)
 		{
-			throw new IllegalStateException("Expected new first frame to be '" + firstFrame + "' but is '" + newFrames[0] + "'");
+			throw new IllegalStateException("Expected new first frame to be '" + firstFrame + "' but is '"
+					+ newFrames[0] + "'");
 		}
 
 		// Insert new key frames for eye parameters. This may involve creating new key frames so that
@@ -405,108 +401,17 @@ public class CameraImpl extends AnimatableBase implements Camera
 		for (int i = 0; i < eyeKeyFrames.size(); i++)
 		{
 			KeyFrame oldKeyFrame = eyeKeyFrames.get(i);
-			
+
 			Collection<ParameterValue> eyeValues = oldKeyFrame.getValuesForParameters(getParameters());
 			KeyFrame newKeyFrame = new KeyFrameImpl(newFrames[i], eyeValues);
-			
+
 			oldKeyFrame.removeValuesForParameters(getParameters());
-			
+
 			animation.insertKeyFrame(newKeyFrame);
 		}
 		animation.removeEmptyKeyFrames();
 	}
 
-
-	@Override
-	public Element toXml(Element parent, AnimationFileVersion version)
-	{
-		AnimationIOConstants constants = version.getConstants();
-		
-		Element result = WWXML.appendElement(parent, getCameraElementName(constants));
-		
-		WWXML.setTextAttribute(result, constants.getCameraAttributeName(), getName());
-
-		eyeLat.toXml(result, version);
-		eyeLon.toXml(result, version);
-		eyeElevation.toXml(result, version);
-		lookAtLat.toXml(result, version);
-		lookAtLon.toXml(result, version);
-		lookAtElevation.toXml(result, version);
-		
-		if (clippingParametersActivated)
-		{
-			nearClip.toXml(result, version);
-			farClip.toXml(result, version);
-		}
-		
-		return result;
-	}
-	
-	protected String getCameraElementName(AnimationIOConstants constants)
-	{
-		return constants.getCameraElementName();
-	}
-
-	@Override
-	public Animatable fromXml(Element element, AnimationFileVersion version, AVList context)
-	{
-		Validate.notNull(element, "An XML element is required");
-		Validate.notNull(version, "A version ID is required");
-		Validate.notNull(context, "A context is required");
-		
-		AnimationIOConstants constants = version.getConstants();
-		
-		switch (version)
-		{
-			case VERSION020:
-			{
-				Validate.isTrue(context.hasKey(constants.getAnimationKey()), "An animation is required in context.");
-				
-				CameraImpl result = createAnimatable();
-				setupFromXml(result, element, version, context);
-				
-				result.connectCodependants();
-				result.connectAsListener();
-				
-				return result;
-			}
-		}
-		
-		return null;
-	}
-	
-	protected void setupFromXml(CameraImpl camera, Element element, AnimationFileVersion version, AVList context)
-	{
-		AnimationIOConstants constants = version.getConstants();
-		XPath xpath = XPathFactory.newInstance().newXPath();
-		
-		camera.animation = (Animation)context.getValue(constants.getAnimationKey());
-		camera.setName(WWXML.getText(element, ATTRIBUTE_PATH_PREFIX + constants.getCameraAttributeName()));
-		
-		camera.eyeLat = new EyeLatParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLatElementName(), xpath), version, context);
-		camera.eyeLon = new EyeLonParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLonElementName(), xpath), version, context);
-		camera.eyeElevation = new EyeElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeElevationElementName(), xpath), version, context);
-		
-		camera.lookAtLat = new LookatLatParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLatElementName(), xpath), version, context);
-		camera.lookAtLon = new LookatLonParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatLonElementName(), xpath), version, context);
-		camera.lookAtElevation = new LookatElevationParameter().fromXml(WWXML.getElement(element, constants.getCameraLookatElevationElementName(), xpath), version, context);
-		
-		// Near and far clipping are optional.
-		Element nearClipElement = WWXML.getElement(element, constants.getCameraNearClipElementName(), xpath);
-		Element farClipElement = WWXML.getElement(element, constants.getCameraFarClipElementName(), xpath);
-		if (nearClipElement != null || farClipElement != null)
-		{
-			camera.nearClip = nearClipElement != null ? new NearClipParameter().fromXml(nearClipElement, version, context) : new NearClipParameter(animation);
-			camera.farClip = farClipElement != null ? new FarClipParameter().fromXml(farClipElement, version, context) : new FarClipParameter(animation);
-			camera.clippingParametersActivated = true;
-		}
-	}
-
-	protected CameraImpl createAnimatable()
-	{
-		return new CameraImpl();
-	}
-	
 	@Override
 	public void copyStateFrom(Camera camera)
 	{
@@ -523,5 +428,71 @@ public class CameraImpl extends AnimatableBase implements Camera
 		this.parameters = null;
 		this.setEnabled(camera.isEnabled(), false);
 		this.setArmed(camera.isArmed());
+	}
+
+	@Override
+	protected String getXmlElementName(AnimationIOConstants constants)
+	{
+		return constants.getCameraElementName();
+	}
+
+	@Override
+	protected AnimatableBase createAnimatableFromXml(String name, Animation animation, boolean enabled,
+			Element element, AnimationFileVersion version, AVList context)
+	{
+		CameraImpl camera = createCamera(name, animation);
+		setupCameraFromXml(camera, element, version, context);
+		return camera;
+	}
+
+	protected CameraImpl createCamera(String name, Animation animation)
+	{
+		return new CameraImpl(name, animation);
+	}
+
+	protected void setupCameraFromXml(CameraImpl camera, Element element, AnimationFileVersion version, AVList context)
+	{
+		AnimationIOConstants constants = version.getConstants();
+		XPath xpath = XPathFactory.newInstance().newXPath();
+
+		camera.parameters = null;
+		camera.eyeLat =
+				new EyeLatParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLatElementName(), xpath),
+						version, context);
+		camera.eyeLon =
+				new EyeLonParameter().fromXml(WWXML.getElement(element, constants.getCameraEyeLonElementName(), xpath),
+						version, context);
+		camera.eyeElevation =
+				new EyeElevationParameter().fromXml(
+						WWXML.getElement(element, constants.getCameraEyeElevationElementName(), xpath), version,
+						context);
+
+		camera.lookAtLat =
+				new LookatLatParameter().fromXml(
+						WWXML.getElement(element, constants.getCameraLookatLatElementName(), xpath), version, context);
+		camera.lookAtLon =
+				new LookatLonParameter().fromXml(
+						WWXML.getElement(element, constants.getCameraLookatLonElementName(), xpath), version, context);
+		camera.lookAtElevation =
+				new LookatElevationParameter().fromXml(
+						WWXML.getElement(element, constants.getCameraLookatElevationElementName(), xpath), version,
+						context);
+
+		// Near and far clipping are optional.
+		Element nearClipElement = WWXML.getElement(element, constants.getCameraNearClipElementName(), xpath);
+		Element farClipElement = WWXML.getElement(element, constants.getCameraFarClipElementName(), xpath);
+		if (nearClipElement != null || farClipElement != null)
+		{
+			camera.nearClip =
+					nearClipElement != null ? new NearClipParameter().fromXml(nearClipElement, version, context)
+							: new NearClipParameter(animation);
+			camera.farClip =
+					farClipElement != null ? new FarClipParameter().fromXml(farClipElement, version, context)
+							: new FarClipParameter(animation);
+			camera.clippingParametersActivated = true;
+		}
+
+		camera.connectCodependants();
+		camera.connectAsListener();
 	}
 }

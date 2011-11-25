@@ -34,7 +34,6 @@ import au.gov.ga.worldwind.animator.panels.AnimatorCollapsiblePanel;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
 import au.gov.ga.worldwind.animator.ui.frameslider.CurrentFrameChangeListener;
 import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
-import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A panel used to display and edit properties (parameters) of the currently selected animation object
@@ -72,13 +71,8 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Anima
 	private Map<Parameter, ParameterEditorPanel> editorMap = new HashMap<Parameter, ParameterEditorPanel>();
 	private List<ParameterEditorPanel> visibleEditors = new ArrayList<ParameterEditorPanel>();
 	
-	private Animation animation;
-	
-	public ObjectPropertiesPanel(Animation animation)
+	public ObjectPropertiesPanel()
 	{
-		Validate.notNull(animation, "An animation is required");
-		this.animation = animation;
-		
 		setName(getMessage(getObjectPropertiesPanelNameKey()));
 		setLayout(new BorderLayout());
 		
@@ -157,7 +151,7 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Anima
 		ParameterEditorPanel parameterEditor = editorMap.get(parameterToEdit);
 		if (parameterEditor == null)
 		{
-			parameterEditor = new ParameterEditorPanel(animation, parameterToEdit);
+			parameterEditor = new ParameterEditorPanel(parameterToEdit);
 			editorMap.put(parameterToEdit, parameterEditor);
 		}
 		parameterEditor.updateDisplay();
@@ -193,7 +187,6 @@ public class ObjectPropertiesPanel extends CollapsiblePanelBase implements Anima
 			return;
 		}
 		
-		this.animation = newAnimation;
 		this.editorMap.clear();
 		updatePanelDisplay();
 	}

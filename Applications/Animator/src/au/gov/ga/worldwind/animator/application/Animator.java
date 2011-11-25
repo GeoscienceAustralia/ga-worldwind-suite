@@ -90,8 +90,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
-import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.AnimationObject;
 import au.gov.ga.worldwind.animator.animation.CurrentlySelectedObject;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
@@ -113,6 +111,8 @@ import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.application.debug.AnimationEventLogger;
+import au.gov.ga.worldwind.animator.application.effects.Effect;
+import au.gov.ga.worldwind.animator.application.effects.EffectDialog;
 import au.gov.ga.worldwind.animator.application.render.AnimationRenderer;
 import au.gov.ga.worldwind.animator.application.render.AnimationRenderer.RenderEventListener;
 import au.gov.ga.worldwind.animator.application.render.RenderDialog;
@@ -707,7 +707,7 @@ public class Animator
 	private void initialiseSideBar()
 	{
 		animationBrowserPanel = new AnimationBrowserPanel(getCurrentAnimation());
-		objectPropertiesPanel = new ObjectPropertiesPanel(getCurrentAnimation());
+		objectPropertiesPanel = new ObjectPropertiesPanel();
 		layerPalettePanel = new LayerPalettePanel(getCurrentAnimation());
 
 		List<AnimatorCollapsiblePanel> collapsiblePanels = new ArrayList<AnimatorCollapsiblePanel>(3);
@@ -815,6 +815,8 @@ public class Animator
 		actionFactory.getAnimateClippingAction().addToMenu(menu);
 		actionFactory.getStereoCameraAction().addToMenu(menu);
 		actionFactory.getDynamicStereoAction().addToMenu(menu);
+		menu.addSeparator();
+		menu.add(actionFactory.getAddEffectAction());
 
 		// Window menu
 		menu = new JMenu(getMessage(getWindowMenuLabelKey()));
@@ -1167,14 +1169,6 @@ public class Animator
 	private int calculateTotalWidthOfNonWWDElements()
 	{
 		return sideBar.getSize().width + frame.getInsets().left + frame.getInsets().right;
-	}
-
-	/**
-	 * @return A new animation context
-	 */
-	protected AnimationContext createAnimationContext()
-	{
-		return new AnimationContextImpl(getCurrentAnimation());
 	}
 
 	private OrbitView getView()
@@ -1787,6 +1781,17 @@ public class Animator
 
 		getCurrentAnimation().getAnimatableElevation().addElevationExaggerator(exaggerator);
 	}
+	
+	void promptToAddEffect()
+	{
+		Class<? extends Effect> effect = EffectDialog.collectEffect(frame);
+		if (effect == null)
+		{
+			return;
+		}
+
+		//TODO
+	}
 
 	void moveToPreviousFrame()
 	{
@@ -1910,7 +1915,7 @@ public class Animator
 				getMessage(getQuerySmoothEyeSpeedCaptionKey()), JOptionPane.YES_NO_OPTION,
 				JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
 		{
-			getCurrentAnimation().getCamera().smoothEyeSpeed(createAnimationContext());
+			getCurrentAnimation().getCamera().smoothEyeSpeed();
 			updateSlider();
 		}
 	}

@@ -19,18 +19,23 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface Animatable extends AnimationObject, Serializable, Nameable,
-		XmlSerializable<Animatable>, AnimationEventListener, Changeable, Enableable, Armable
+public interface Animatable extends AnimationObject, Serializable, Nameable, XmlSerializable<Animatable>,
+		AnimationEventListener, Changeable, Enableable, Armable
 {
 	/**
-	 * Apply this object's behaviour/changes to the 'world' for the given frame
+	 * @return The {@link Animation} that this {@link Animatable} is associated
+	 *         with
+	 */
+	Animation getAnimation();
+
+	/**
+	 * Apply this object's behaviour/changes to the 'world' for the current
+	 * frame
 	 * 
 	 * @param animationContext
 	 *            The context in which the animation is executing
-	 * @param frame
-	 *            The current frame of the animation
 	 */
-	void apply(AnimationContext animationContext, int frame);
+	void apply();
 
 	/**
 	 * @return The collection of all parameters associated with this animatable
@@ -58,8 +63,8 @@ public interface Animatable extends AnimationObject, Serializable, Nameable,
 
 	/**
 	 * Calls {@link Armable#connectCodependantArmable(Armable)} and
-	 * {@link Enableable#connectCodependantEnableable(Enableable)} on this, passing
-	 * animatable.
+	 * {@link Enableable#connectCodependantEnableable(Enableable)} on this,
+	 * passing animatable.
 	 */
 	void connectCodependantAnimatable(Animatable animatable);
 }

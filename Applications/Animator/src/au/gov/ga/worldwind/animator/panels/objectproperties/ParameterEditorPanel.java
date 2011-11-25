@@ -18,8 +18,6 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.LAFConstants;
@@ -34,8 +32,6 @@ final class ParameterEditorPanel extends JPanel
 
 	private static final double SPINNER_INCREMENT = 0.01;
 	
-	private Animation animation;
-	
 	private Parameter parameterToEdit;
 
 	private SpinnerNumberModel spinnerModel;
@@ -43,11 +39,9 @@ final class ParameterEditorPanel extends JPanel
 	
 	private boolean updatingDisplay = false;
 	
-	public ParameterEditorPanel(Animation animation, Parameter parameterToEdit)
+	public ParameterEditorPanel(Parameter parameterToEdit)
 	{
-		Validate.notNull(animation, "An animation is required");
 		Validate.notNull(parameterToEdit, "A parameter is required");
-		this.animation = animation;
 		this.parameterToEdit = parameterToEdit;
 		
 		populatePanel();
@@ -87,7 +81,7 @@ final class ParameterEditorPanel extends JPanel
 			{
 				if (!updatingDisplay)
 				{
-					parameterToEdit.applyValue((Double)parameterSpinner.getValue());
+					parameterToEdit.applyValueAnyway((Double)parameterSpinner.getValue());
 				}
 			}
 		});
@@ -98,7 +92,7 @@ final class ParameterEditorPanel extends JPanel
 			{
 				if (!updatingDisplay)
 				{
-					parameterToEdit.applyValue((Double)parameterSpinner.getValue());
+					parameterToEdit.applyValueAnyway((Double)parameterSpinner.getValue());
 				}
 			}
 		});
@@ -127,7 +121,7 @@ final class ParameterEditorPanel extends JPanel
 	
 	private double getParameterCurrentValue()
 	{
-		return parameterToEdit.getCurrentValue(AnimationContext.Factory.createForAnimation(animation)).getValue();
+		return parameterToEdit.getCurrentValue().getValue();
 	}
 	
 	private boolean isBoundParameter()

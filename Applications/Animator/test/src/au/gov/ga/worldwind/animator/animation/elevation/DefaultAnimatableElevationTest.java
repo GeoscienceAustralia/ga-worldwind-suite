@@ -115,7 +115,7 @@ public class DefaultAnimatableElevationTest
 		
 		// Setup the elements correctly (add an 'AnimatableObjects' element
 		Document document = WWXML.openDocument(getClass().getResourceAsStream("animatableElevationXmlSnippet.xml"));
-		Element elevationElement = WWXML.getElement(document.getDocumentElement(), "//" + versionId.getConstants().getAnimatableElevationName(), null);
+		Element elevationElement = WWXML.getElement(document.getDocumentElement(), "//" + versionId.getConstants().getAnimatableElevationElementName(), null);
 		
 		DefaultAnimatableElevation result = (DefaultAnimatableElevation)classToBeTested.fromXml(elevationElement, versionId, context);
 		
@@ -159,7 +159,7 @@ public class DefaultAnimatableElevationTest
 	{
 		assertEquals(name, parameter.getName());
 		assertEquals(enabled, parameter.isEnabled());
-		assertEquals(defaultValue, parameter.getDefaultValue(), ALLOWABLE_ERROR);
+		assertEquals(defaultValue, parameter.getDefaultValue(0), ALLOWABLE_ERROR);
 	}
 
 	private void assertElevationExaggeratorsCorrect(DefaultAnimatableElevation result)

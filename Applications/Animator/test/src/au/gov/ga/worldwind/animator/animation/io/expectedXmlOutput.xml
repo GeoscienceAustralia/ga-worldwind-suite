@@ -11,7 +11,7 @@
             <imageScalePercent>100</imageScalePercent>
         </renderParameters>
         <animatableObjects>
-            <camera name="Render Camera">
+            <camera enabled="true" name="Render Camera">
                 <eyeLat>
                     <parameter defaultValue="0.0" enabled="true" name="Render Camera - Param">
                         <parameterValue frame="0" inPercent="1.2" inValue="1.1" locked="false" outPercent="1.4" outValue="1.3" type="BEZIER" value="1.0"/>

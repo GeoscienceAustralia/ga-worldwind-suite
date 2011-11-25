@@ -1,7 +1,6 @@
 package au.gov.ga.worldwind.animator.layers.camerapath;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
@@ -12,7 +11,7 @@ public class LookatKeyFrameMarker extends KeyFrameMarker
 
 	public LookatKeyFrameMarker(Animation animation, int frame)
 	{
-		super(animation, frame, animation.getCamera().getLookatPositionAtFrame(new AnimationContextImpl(animation), frame));
+		super(animation, frame, animation.getCamera().getLookatPositionAtFrame(frame));
 	}
 
 	@Override

@@ -198,7 +198,7 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 		}
 		
 		Layer loadedLayer = AnimationLayerLoader.loadLayer(identifier);
-		AnimatableLayer animatableLayer = new DefaultAnimatableLayer(loadedLayer);
+		AnimatableLayer animatableLayer = new DefaultAnimatableLayer(animation, loadedLayer);
 		for (LayerParameter parameter : LayerParameterFactory.createDefaultParametersForLayer(animation, loadedLayer))
 		{
 			animatableLayer.addParameter(parameter);

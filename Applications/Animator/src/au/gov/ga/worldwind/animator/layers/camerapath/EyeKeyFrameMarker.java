@@ -6,7 +6,6 @@ import gov.nasa.worldwind.render.markers.BasicMarkerAttributes;
 import java.awt.Color;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
@@ -23,7 +22,7 @@ public class EyeKeyFrameMarker extends KeyFrameMarker
 	
 	public EyeKeyFrameMarker(Animation animation, int frame)
 	{
-		super(animation, frame, animation.getCamera().getEyePositionAtFrame(new AnimationContextImpl(animation), frame));
+		super(animation, frame, animation.getCamera().getEyePositionAtFrame(frame));
 	}
 
 	@Override

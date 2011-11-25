@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.animator.animation;
 
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.globes.ElevationModel;
@@ -74,7 +75,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	private Camera renderCamera;
 
 	/** The list of animatable objects in this animation */
-	private List<Animatable> animatableObjects = new ArrayList<Animatable>();
+	private final List<Animatable> animatableObjects = new ArrayList<Animatable>();
 
 	/**
 	 * The list of animatable layers in this animation. A subset of the
@@ -172,7 +173,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			keyFrameMapLock.readLock().unlock();
 		}
 	}
-	
+
 	@Override
 	public KeyFrame getKeyFrameWithParameterBeforeFrame(Parameter p, int frame)
 	{
@@ -206,7 +207,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	{
 		return getKeyFrameWithParameterAfterFrame(p, frame, false);
 	}
-	
+
 	@Override
 	public KeyFrame getKeyFrameWithParameterAfterFrame(Parameter p, int frame, boolean inclusive)
 	{
@@ -411,6 +412,14 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		return index;
 	}
+	
+	protected void clearAnimatableObjects()
+	{
+		for(Animatable object : animatableObjects)
+		{
+			removeAnimatableObject(object);
+		}
+	}
 
 	private void removeValuesFromKeyFrames(Animatable object)
 	{
@@ -436,7 +445,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		}
 		removeEmptyKeyFrames();
 	}
-	
+
 	@Override
 	public void moveAnimatableObject(Animatable object, int newIndex)
 	{
@@ -485,7 +494,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	{
 		return this.frameCount;
 	}
-	
+
 	@Override
 	public int getLastFrame()
 	{
@@ -503,10 +512,10 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			try
 			{
 				keyFrameMapLock.writeLock().lock();
-				
+
 				// the headMap() operation returns a map that has a restriced range - copy into a new map.
 				NavigableMap<Integer, KeyFrame> headMap = this.keyFrameMap.headMap(newCount, false);
-				
+
 				this.keyFrameMap = new TreeMap<Integer, KeyFrame>();
 				this.keyFrameMap.putAll(headMap);
 			}
@@ -528,10 +537,9 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	public void applyFrame(int frame)
 	{
 		setCurrentFrame(frame);
-		AnimationContext context = createAnimationContext();
 		for (Animatable animatable : animatableObjects)
 		{
-			animatable.apply(context, frame);
+			animatable.apply();
 		}
 	}
 
@@ -546,11 +554,10 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	public void recordKeyFrame(int frame, Collection<Parameter> parameters)
 	{
 		setCurrentFrame(frame);
-		AnimationContext animationContext = createAnimationContext();
 		Collection<ParameterValue> parameterValues = new ArrayList<ParameterValue>();
 		for (Parameter parameter : parameters)
 		{
-			parameterValues.add(parameter.getCurrentValue(animationContext));
+			parameterValues.add(parameter.getCurrentValue());
 		}
 
 		// If there are no parameter values to record, do nothing
@@ -647,15 +654,6 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			}
 
 		}
-	}
-
-	/**
-	 * @return An animation context that reflects the current state of the
-	 *         animation
-	 */
-	private AnimationContext createAnimationContext()
-	{
-		return new AnimationContextImpl(this);
 	}
 
 	@Override
@@ -842,7 +840,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			keyFrameMapLock.readLock().unlock();
 		}
 	}
-	
+
 	@Override
 	public boolean hasKeyFrame(Animatable o)
 	{
@@ -974,7 +972,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 		{
 			keyFrameMapLock.writeLock().unlock();
 		}
-		
+
 		fireChangeEvent(newFrameCount);
 	}
 
@@ -1037,28 +1035,27 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			// Add each animatable object
 			Element[] animatableObjectElements =
 					WWXML.getElements(element, constants.getAnimatableObjectsElementName() + "/*", xpath);
-			if (animatableObjectElements == null)
+			if (animatableObjectElements != null)
 			{
-				return null;
-			}
-			result.animatableObjects = new ArrayList<Animatable>();
-			for (Element animatableObjectElement : animatableObjectElements)
-			{
-				Animatable animatable = AnimatableFactory.fromXml(animatableObjectElement, version, context);
-				if (animatable == null)
+				result.clearAnimatableObjects();
+				for (Element animatableObjectElement : animatableObjectElements)
 				{
-					continue;
-				}
-				result.addAnimatableObject(animatable);
+					Animatable animatable = AnimatableFactory.fromXml(animatableObjectElement, version, context);
+					if (animatable == null)
+					{
+						continue;
+					}
+					result.addAnimatableObject(animatable);
 
-				// If this is a 'special' object, set it to the correct field
-				if (animatable instanceof Camera)
-				{
-					result.renderCamera = (Camera) animatable;
-				}
-				if (animatable instanceof AnimatableElevation)
-				{
-					result.animatableElevation = (AnimatableElevation) animatable;
+					// If this is a 'special' object, set it to the correct field
+					if (animatable instanceof Camera)
+					{
+						result.renderCamera = (Camera) animatable;
+					}
+					if (animatable instanceof AnimatableElevation)
+					{
+						result.animatableElevation = (AnimatableElevation) animatable;
+					}
 				}
 			}
 
@@ -1133,7 +1130,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			throw new IllegalArgumentException("Unable to load layer " + layerIdentifier);
 		}
 
-		DefaultAnimatableLayer animatableLayer = new DefaultAnimatableLayer(loadedLayer);
+		DefaultAnimatableLayer animatableLayer = new DefaultAnimatableLayer(this, loadedLayer);
 		for (LayerParameter parameter : LayerParameterFactory.createDefaultParametersForLayer(this, loadedLayer))
 		{
 			animatableLayer.addParameter(parameter);
@@ -1168,5 +1165,11 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	public void addElevationModel(ElevationModelIdentifier modelIdentifier)
 	{
 		animatableElevation.addElevationModel(modelIdentifier);
+	}
+
+	@Override
+	public View getView()
+	{
+		return getWorldWindow().getView();
 	}
 }

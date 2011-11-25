@@ -26,8 +26,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
-import au.gov.ga.worldwind.animator.animation.AnimationContextImpl;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.animator.util.GeometryUtil;
 import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
@@ -405,7 +403,6 @@ class KeyFrameMarkers implements Renderable, SelectListener
 		lookatMarkersBackBuffer.clear();
 		joinersBackBuffer = BufferUtil.newDoubleBuffer(animation.getKeyFrameCount() * 3 * 2);
 
-		AnimationContext context = new AnimationContextImpl(animation);
 		Vec4 markerCoords;
 		for (KeyFrame keyFrame : animation.getKeyFrames())
 		{
@@ -415,7 +412,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 				KeyFrameMarker marker = new EyeKeyFrameMarker(animation, frame);
 				eyeMarkersBackBuffer.add(marker);
 
-				markerCoords = context.getView().getGlobe().computePointFromPosition(marker.getPosition());
+				markerCoords = animation.getView().getGlobe().computePointFromPosition(marker.getPosition());
 				joinersBackBuffer.put(markerCoords.x);
 				joinersBackBuffer.put(markerCoords.y);
 				joinersBackBuffer.put(markerCoords.z);
@@ -423,7 +420,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 				marker = new LookatKeyFrameMarker(animation, frame);
 				lookatMarkersBackBuffer.add(marker);
 
-				markerCoords = context.getView().getGlobe().computePointFromPosition(marker.getPosition());
+				markerCoords = animation.getView().getGlobe().computePointFromPosition(marker.getPosition());
 				joinersBackBuffer.put(markerCoords.x);
 				joinersBackBuffer.put(markerCoords.y);
 				joinersBackBuffer.put(markerCoords.z);

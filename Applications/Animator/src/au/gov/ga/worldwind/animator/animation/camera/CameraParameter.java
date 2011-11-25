@@ -1,20 +1,30 @@
 package au.gov.ga.worldwind.animator.animation.camera;
 
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraEyeLatNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraEyeLonNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraEyeZoomNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraFarClipNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraLookatLatNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraLookatLonNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraLookatZoomNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraNearClipNameKey;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessageOrDefault;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
+
+import org.w3c.dom.Element;
+
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.AnimationContext;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
-import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
 import au.gov.ga.worldwind.animator.view.ClipConfigurableView;
-import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 abstract class CameraParameter extends ParameterBase
 {
@@ -36,7 +46,7 @@ abstract class CameraParameter extends ParameterBase
 	{
 		return getAnimation().getWorldWindow().getView();
 	}
-	
+
 	protected void redraw()
 	{
 		getAnimation().getWorldWindow().redraw();
@@ -73,10 +83,14 @@ abstract class CameraParameter extends ParameterBase
 	@EditableParameter(units = "deg")
 	static class EyeLatParameter extends CameraParameter
 	{
+		public EyeLatParameter(String name, Animation animation)
+		{
+			super(nameOrDefaultName(name, getMessageOrDefault(getCameraEyeLatNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+		}
+
 		public EyeLatParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLatNameKey(),
-					DEFAULT_PARAMETER_NAME), animation);
+			this(null, animation);
 		}
 
 		EyeLatParameter()
@@ -85,32 +99,32 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
+		public ParameterValue getCurrentValue()
 		{
 			double value = getCurrentEyePosition().getLatitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+			return ParameterValueFactory.createParameterValue(this, value, animation.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentEyePosition = getCurrentEyePosition();
-			Position newEyePosition = Position.fromDegrees(value,
-					currentEyePosition.longitude.degrees,
-					currentEyePosition.elevation);
+			Position newEyePosition =
+					Position.fromDegrees(value, currentEyePosition.longitude.degrees, currentEyePosition.elevation);
 			applyCameraPositions(newEyePosition, getCurrentLookatPosition());
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
-		{
-			return new EyeLatParameter();
-		}
-		
-		@Override
 		protected String getXmlElementName(AnimationIOConstants constants)
 		{
 			return constants.getCameraEyeLatElementName();
+		}
+
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context)
+		{
+			return new EyeLatParameter(name, animation);
 		}
 	}
 
@@ -121,10 +135,14 @@ abstract class CameraParameter extends ParameterBase
 	@EditableParameter(units = "deg")
 	static class EyeLonParameter extends CameraParameter
 	{
+		public EyeLonParameter(String name, Animation animation)
+		{
+			super(nameOrDefaultName(name, getMessageOrDefault(getCameraEyeLonNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+		}
+
 		public EyeLonParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeLonNameKey(),
-					DEFAULT_PARAMETER_NAME), animation);
+			this(null, animation);
 		}
 
 		EyeLonParameter()
@@ -133,33 +151,33 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
+		public ParameterValue getCurrentValue()
 		{
 			double value = getCurrentEyePosition().getLongitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+			return ParameterValueFactory.createParameterValue(this, value, animation.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentEyePosition = getCurrentEyePosition();
-			Position newEyePosition = Position.fromDegrees(currentEyePosition.latitude.degrees,
-					value,
-					currentEyePosition.elevation);
+			Position newEyePosition =
+					Position.fromDegrees(currentEyePosition.latitude.degrees, value, currentEyePosition.elevation);
 			applyCameraPositions(newEyePosition, getCurrentLookatPosition());
 
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
-		{
-			return new EyeLonParameter();
-		}
-		
-		@Override
 		protected String getXmlElementName(AnimationIOConstants constants)
 		{
 			return constants.getCameraEyeLonElementName();
+		}
+
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context)
+		{
+			return new EyeLonParameter(name, animation);
 		}
 	}
 
@@ -170,10 +188,14 @@ abstract class CameraParameter extends ParameterBase
 	@EditableParameter(units = "km")
 	static class EyeElevationParameter extends CameraParameter
 	{
+		public EyeElevationParameter(String name, Animation animation)
+		{
+			super(nameOrDefaultName(name, getMessageOrDefault(getCameraEyeZoomNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+		}
+
 		public EyeElevationParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraEyeZoomNameKey(),
-					DEFAULT_PARAMETER_NAME), animation);
+			this(null, animation);
 		}
 
 		EyeElevationParameter()
@@ -182,32 +204,33 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
+		public ParameterValue getCurrentValue()
 		{
-			double value = context.applyZoomScaling(getCurrentEyePosition().getElevation());
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+			double value = animation.applyZoomScaling(getCurrentEyePosition().getElevation());
+			return ParameterValueFactory.createParameterValue(this, value, animation.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentEyePosition = getCurrentEyePosition();
-			Position newEyePosition = Position.fromDegrees(currentEyePosition.latitude.degrees,
-					currentEyePosition.longitude.degrees,
-					getAnimation().unapplyZoomScaling(value));
+			Position newEyePosition =
+					Position.fromDegrees(currentEyePosition.latitude.degrees, currentEyePosition.longitude.degrees,
+							getAnimation().unapplyZoomScaling(value));
 			applyCameraPositions(newEyePosition, getCurrentLookatPosition());
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
-		{
-			return new EyeElevationParameter();
-		}
-		
-		@Override
 		protected String getXmlElementName(AnimationIOConstants constants)
 		{
 			return constants.getCameraEyeElevationElementName();
+		}
+
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context)
+		{
+			return new EyeElevationParameter(name, animation);
 		}
 	}
 
@@ -218,10 +241,14 @@ abstract class CameraParameter extends ParameterBase
 	@EditableParameter(units = "deg")
 	static class LookatLatParameter extends CameraParameter
 	{
+		public LookatLatParameter(String name, Animation animation)
+		{
+			super(nameOrDefaultName(name, getMessageOrDefault(getCameraLookatLatNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+		}
+
 		public LookatLatParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLatNameKey(),
-					DEFAULT_PARAMETER_NAME), animation);
+			this(null, animation);
 		}
 
 		LookatLatParameter()
@@ -230,33 +257,34 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
+		public ParameterValue getCurrentValue()
 		{
 			double value = getCurrentLookatPosition().getLatitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+			return ParameterValueFactory.createParameterValue(this, value, animation.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentLookatPosition = getCurrentLookatPosition();
-			Position newLookatPosition = Position.fromDegrees(value,
-					currentLookatPosition.longitude.degrees,
-					currentLookatPosition.elevation);
+			Position newLookatPosition =
+					Position.fromDegrees(value, currentLookatPosition.longitude.degrees,
+							currentLookatPosition.elevation);
 			applyCameraPositions(getCurrentEyePosition(), newLookatPosition);
 
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
-		{
-			return new LookatLatParameter();
-		}
-		
-		@Override
 		protected String getXmlElementName(AnimationIOConstants constants)
 		{
 			return constants.getCameraLookatLatElementName();
+		}
+
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context)
+		{
+			return new LookatLatParameter(name, animation);
 		}
 	}
 
@@ -267,10 +295,14 @@ abstract class CameraParameter extends ParameterBase
 	@EditableParameter(units = "deg")
 	static class LookatLonParameter extends CameraParameter
 	{
+		public LookatLonParameter(String name, Animation animation)
+		{
+			super(nameOrDefaultName(name, getMessageOrDefault(getCameraLookatLonNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+		}
+
 		public LookatLonParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatLonNameKey(),
-					DEFAULT_PARAMETER_NAME), animation);
+			this(null, animation);
 		}
 
 		LookatLonParameter()
@@ -279,32 +311,32 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
+		public ParameterValue getCurrentValue()
 		{
 			double value = getCurrentLookatPosition().getLongitude().getDegrees();
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+			return ParameterValueFactory.createParameterValue(this, value, animation.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentLookatPosition = getCurrentLookatPosition();
-			Position newLookatPosition = Position.fromDegrees(currentLookatPosition.latitude.degrees,
-					value,
-					currentLookatPosition.elevation);
+			Position newLookatPosition =
+					Position.fromDegrees(currentLookatPosition.latitude.degrees, value, currentLookatPosition.elevation);
 			applyCameraPositions(getCurrentEyePosition(), newLookatPosition);
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
-		{
-			return new LookatLonParameter();
-		}
-		
-		@Override
 		protected String getXmlElementName(AnimationIOConstants constants)
 		{
 			return constants.getCameraLookatLonElementName();
+		}
+
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context)
+		{
+			return new LookatLonParameter(name, animation);
 		}
 	}
 
@@ -315,9 +347,14 @@ abstract class CameraParameter extends ParameterBase
 	@EditableParameter(units = "km")
 	static class LookatElevationParameter extends CameraParameter
 	{
+		public LookatElevationParameter(String name, Animation animation)
+		{
+			super(nameOrDefaultName(name, getMessageOrDefault(getCameraLookatZoomNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+		}
+
 		public LookatElevationParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraLookatZoomNameKey(), DEFAULT_PARAMETER_NAME), animation);
+			this(null, animation);
 		}
 
 		LookatElevationParameter()
@@ -326,42 +363,49 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
+		public ParameterValue getCurrentValue()
 		{
-			double value = context.applyZoomScaling(getCurrentLookatPosition().getElevation());
-			return ParameterValueFactory.createParameterValue(this, value, context.getCurrentFrame());
+			double value = animation.applyZoomScaling(getCurrentLookatPosition().getElevation());
+			return ParameterValueFactory.createParameterValue(this, value, animation.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
 			Position currentLookatPosition = getCurrentLookatPosition();
-			Position newLookatPosition = Position.fromDegrees(currentLookatPosition.latitude.degrees,
-															  currentLookatPosition.longitude.degrees,
-															  getAnimation().unapplyZoomScaling(value));
+			Position newLookatPosition =
+					Position.fromDegrees(currentLookatPosition.latitude.degrees,
+							currentLookatPosition.longitude.degrees, getAnimation().unapplyZoomScaling(value));
 			applyCameraPositions(getCurrentEyePosition(), newLookatPosition);
 		}
 
-		@Override
-		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
-		{
-			return new LookatElevationParameter();
-		}
-		
 		@Override
 		protected String getXmlElementName(AnimationIOConstants constants)
 		{
 			return constants.getCameraLookatElevationElementName();
 		}
+
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context)
+		{
+			// TODO Auto-generated method stub
+			return new LookatElevationParameter(name, animation);
+		}
 	}
-	
+
 	@SuppressWarnings("serial")
 	@EditableParameter(units = "m")
 	static class NearClipParameter extends CameraParameter
 	{
+		public NearClipParameter(String name, Animation animation)
+		{
+			super(nameOrDefaultName(name, getMessageOrDefault(getCameraNearClipNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+		}
+
 		public NearClipParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraNearClipNameKey(), DEFAULT_PARAMETER_NAME), animation);
+			this(null, animation);
 		}
 
 		NearClipParameter()
@@ -369,11 +413,12 @@ abstract class CameraParameter extends ParameterBase
 			super();
 		}
 
-		
+
 		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
+		public ParameterValue getCurrentValue()
 		{
-			return ParameterValueFactory.createParameterValue(this, getView().getNearClipDistance(), context.getCurrentFrame());
+			return ParameterValueFactory.createParameterValue(this, getView().getNearClipDistance(),
+					animation.getCurrentFrame());
 		}
 
 		@Override
@@ -383,8 +428,8 @@ abstract class CameraParameter extends ParameterBase
 			{
 				return;
 			}
-			ClipConfigurableView view = (ClipConfigurableView)getView();
-			
+			ClipConfigurableView view = (ClipConfigurableView) getView();
+
 			// Only apply if key frames have been stored. Otherwise, let the view auto-calculate them.
 			if (getKeyFramesWithThisParameter().isEmpty() || !(isEnabled()))
 			{
@@ -395,25 +440,31 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
-		{
-			return new NearClipParameter();
-		}
-		
-		@Override
 		protected String getXmlElementName(AnimationIOConstants constants)
 		{
 			return constants.getCameraNearClipElementName();
 		}
+
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context)
+		{
+			return new NearClipParameter(name, animation);
+		}
 	}
-	
+
 	@SuppressWarnings("serial")
 	@EditableParameter(units = "m")
 	static class FarClipParameter extends CameraParameter
 	{
+		public FarClipParameter(String name, Animation animation)
+		{
+			super(nameOrDefaultName(name, getMessageOrDefault(getCameraFarClipNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+		}
+
 		public FarClipParameter(Animation animation)
 		{
-			super(MessageSourceAccessor.get().getMessage(AnimationMessageConstants.getCameraFarClipNameKey(), DEFAULT_PARAMETER_NAME), animation);
+			this(null, animation);
 		}
 
 		FarClipParameter()
@@ -421,11 +472,11 @@ abstract class CameraParameter extends ParameterBase
 			super();
 		}
 
-		
 		@Override
-		public ParameterValue getCurrentValue(AnimationContext context)
+		public ParameterValue getCurrentValue()
 		{
-			return ParameterValueFactory.createParameterValue(this, getView().getFarClipDistance(), context.getCurrentFrame());
+			return ParameterValueFactory.createParameterValue(this, getView().getFarClipDistance(),
+					animation.getCurrentFrame());
 		}
 
 		@Override
@@ -435,8 +486,8 @@ abstract class CameraParameter extends ParameterBase
 			{
 				return;
 			}
-			ClipConfigurableView view = (ClipConfigurableView)getView();
-			
+			ClipConfigurableView view = (ClipConfigurableView) getView();
+
 			// Only apply if key frames have been stored. Otherwise, let the view auto-calculate them.
 			if (getKeyFramesWithThisParameter().isEmpty() || !(isEnabled()))
 			{
@@ -447,15 +498,16 @@ abstract class CameraParameter extends ParameterBase
 		}
 
 		@Override
-		protected ParameterBase createParameter(AVList context, AnimationIOConstants constants)
-		{
-			return new FarClipParameter();
-		}
-		
-		@Override
 		protected String getXmlElementName(AnimationIOConstants constants)
 		{
 			return constants.getCameraFarClipElementName();
+		}
+
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context)
+		{
+			return new FarClipParameter(name, animation);
 		}
 	}
 }

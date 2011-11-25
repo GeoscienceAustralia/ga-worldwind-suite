@@ -101,7 +101,7 @@ public class DefaultParameterCurveModel implements ParameterCurveModel, Animatio
 			
 			if (curvePointsFrontBuffer.isEmpty())
 			{
-				return parameter.getDefaultValue();
+				return parameter.getDefaultValue(frame);
 			}
 			
 			if (frame <= curvePointsFrontBuffer.firstKey())
