@@ -139,6 +139,11 @@ public class FrameBuffer
 		return depthId;
 	}
 
+	public Dimension getDimensions()
+	{
+		return currentDimensions;
+	}
+
 	/**
 	 * @return The ID of the generated frame buffer object
 	 */
@@ -222,6 +227,7 @@ public class FrameBuffer
 			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
 			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
 			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_DEPTH_TEXTURE_MODE, GL.GL_INTENSITY);
+			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_COMPARE_MODE, GL.GL_NONE);
 
 			gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_DEPTH_COMPONENT24, renderDimensions.width,
 					renderDimensions.height, 0, GL.GL_DEPTH_COMPONENT, GL.GL_UNSIGNED_BYTE, null);
@@ -258,20 +264,20 @@ public class FrameBuffer
 			{
 				gl.glActiveTexture(GL.GL_TEXTURE0 + i);
 				gl.glBindTexture(GL.GL_TEXTURE_2D, textureIds[i]);
-
-				gl.glBegin(GL.GL_QUADS);
-				{
-					gl.glTexCoord2f(0, 0);
-					gl.glVertex3i(-1, -1, -1);
-					gl.glTexCoord2f(1, 0);
-					gl.glVertex3i(1, -1, -1);
-					gl.glTexCoord2f(1, 1);
-					gl.glVertex3i(1, 1, -1);
-					gl.glTexCoord2f(0, 1);
-					gl.glVertex3i(-1, 1, -1);
-				}
-				gl.glEnd();
 			}
+			
+			gl.glBegin(GL.GL_QUADS);
+			{
+				gl.glTexCoord2f(0, 0);
+				gl.glVertex3i(-1, -1, -1);
+				gl.glTexCoord2f(1, 0);
+				gl.glVertex3i(1, -1, -1);
+				gl.glTexCoord2f(1, 1);
+				gl.glVertex3i(1, 1, -1);
+				gl.glTexCoord2f(0, 1);
+				gl.glVertex3i(-1, 1, -1);
+			}
+			gl.glEnd();
 		}
 		finally
 		{
