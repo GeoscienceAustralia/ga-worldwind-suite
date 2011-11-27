@@ -83,7 +83,7 @@ public class LayerTree extends LoadingTree implements LoadingListener
 	
 	public void relayoutOnEDT()
 	{
-		SwingUtil.invokeTaskOnEDT(new Runnable()
+		SwingUtil.invokeLaterTaskOnEDT(new Runnable()
 		{
 			@Override
 			public void run()
