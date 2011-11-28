@@ -175,7 +175,6 @@ public class CollapsibleSplitLayout implements LayoutManager2
 		}
 
 		LayoutPlaceholder lastPlaceholder = null;
-		int i = 0;
 		for (LayoutPlaceholder placeholder : placeholders)
 		{
 			if (componentIsVisible(placeholder))
@@ -224,7 +223,6 @@ public class CollapsibleSplitLayout implements LayoutManager2
 				placeholder.nextDividerBounds = b;
 
 				lastPlaceholder = placeholder;
-				i++;
 			}
 		}
 
