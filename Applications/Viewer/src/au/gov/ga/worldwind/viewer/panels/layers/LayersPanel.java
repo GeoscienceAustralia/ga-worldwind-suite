@@ -151,7 +151,9 @@ public class LayersPanel extends AbstractLayersPanel
 	{
 		super.createActions();
 
-		newFolderAction = new BasicAction(getMessage(getLayersNewFolderLabelKey()), getMessage(getLayersNewFolderTooltipKey()), Icons.newfolder.getIcon());
+		newFolderAction =
+				new BasicAction(getMessage(getLayersNewFolderLabelKey()), getMessage(getLayersNewFolderTooltipKey()),
+						Icons.newfolder.getIcon());
 		newFolderAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -161,7 +163,9 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
-		newLayerAction = new BasicAction(getMessage(getLayersNewLayerLabelKey()), getMessage(getLayersNewLayerTooltipKey()), Icons.add.getIcon());
+		newLayerAction =
+				new BasicAction(getMessage(getLayersNewLayerLabelKey()), getMessage(getLayersNewLayerTooltipKey()),
+						Icons.add.getIcon());
 		newLayerAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -171,7 +175,9 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
-		openLayerAction = new BasicAction(getMessage(getLayersOpenLayerLabelKey()), getMessage(getLayersOpenLayerTooltipKey()), Icons.folder.getIcon());
+		openLayerAction =
+				new BasicAction(getMessage(getLayersOpenLayerLabelKey()), getMessage(getLayersOpenLayerTooltipKey()),
+						Icons.folder.getIcon());
 		openLayerAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -181,7 +187,9 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
-		renameAction = new BasicAction(getMessage(getLayersRenameLabelKey()), getMessage(getLayersRenameTooltipKey()), Icons.edit.getIcon());
+		renameAction =
+				new BasicAction(getMessage(getLayersRenameLabelKey()), getMessage(getLayersRenameTooltipKey()),
+						Icons.edit.getIcon());
 		renameAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -191,7 +199,9 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
-		editAction = new BasicAction(getMessage(getLayersEditLabelKey()), getMessage(getLayersEditTooltipKey()), Icons.properties.getIcon());
+		editAction =
+				new BasicAction(getMessage(getLayersEditLabelKey()), getMessage(getLayersEditTooltipKey()),
+						Icons.properties.getIcon());
 		editAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -201,7 +211,9 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
-		deleteAction = new BasicAction(getMessage(getLayersDeleteLabelKey()), getMessage(getLayersDeleteTooltipKey()), Icons.delete.getIcon());
+		deleteAction =
+				new BasicAction(getMessage(getLayersDeleteLabelKey()), getMessage(getLayersDeleteTooltipKey()),
+						Icons.delete.getIcon());
 		deleteAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -211,7 +223,9 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
-		expandAllAction = new BasicAction(getMessage(getLayersExpandAllLabelKey()), getMessage(getLayersExpandAllTooltipKey()), Icons.expandall.getIcon());
+		expandAllAction =
+				new BasicAction(getMessage(getLayersExpandAllLabelKey()), getMessage(getLayersExpandAllTooltipKey()),
+						Icons.expandall.getIcon());
 		expandAllAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -221,7 +235,9 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
-		collapseAllAction = new BasicAction(getMessage(getLayersCollapseAllLabelKey()), getMessage(getLayersCollapseAllTooltipKey()), Icons.collapseall.getIcon());
+		collapseAllAction =
+				new BasicAction(getMessage(getLayersCollapseAllLabelKey()),
+						getMessage(getLayersCollapseAllTooltipKey()), Icons.collapseall.getIcon());
 		collapseAllAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -231,7 +247,9 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
-		refreshAction = new BasicAction(getMessage(getLayersRefreshLayerLabelKey()), getMessage(getLayersRefreshLayerTooltipKey()), Icons.refresh.getIcon());
+		refreshAction =
+				new BasicAction(getMessage(getLayersRefreshLayerLabelKey()),
+						getMessage(getLayersRefreshLayerTooltipKey()), Icons.refresh.getIcon());
 		refreshAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -241,7 +259,9 @@ public class LayersPanel extends AbstractLayersPanel
 			}
 		});
 
-		reloadAction = new BasicAction(getMessage(getLayersReloadLayerLabelKey()), getMessage(getLayersReloadLayerTooltipKey()), Icons.reload.getIcon());
+		reloadAction =
+				new BasicAction(getMessage(getLayersReloadLayerLabelKey()),
+						getMessage(getLayersReloadLayerTooltipKey()), Icons.reload.getIcon());
 		reloadAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -365,27 +385,24 @@ public class LayersPanel extends AbstractLayersPanel
 		if (p != null)
 		{
 			INode node = (INode) p.getLastPathComponent();
-			AbstractNode editing = null;
-			if (node instanceof ILayerNode)
+			INode clone = node.clone();
+			if (clone instanceof AbstractNode)
 			{
-				editing = new LayerNode((ILayerNode) node);
-			}
-			else
-			{
-				editing = new FolderNode(node);
-			}
-			LayerEditor editor = new LayerEditor(window, getMessage(getEditLayerDialogTitleKey()), editing, getIcon());
-			int value = editor.getOkCancel();
-			if (value == JOptionPane.OK_OPTION)
-			{
-				INode parent = node.getParent();
-				int index = getModel().getIndexOfChild(parent, node);
-				getModel().removeNodeFromParent(node, false);
-				getModel().insertNodeInto(editing, parent, index, true);
+				AbstractNode editing = (AbstractNode) clone;
+				LayerEditor editor =
+						new LayerEditor(window, getMessage(getEditLayerDialogTitleKey()), editing, getIcon());
+				int value = editor.getOkCancel();
+				if (value == JOptionPane.OK_OPTION)
+				{
+					INode parent = node.getParent();
+					int index = getModel().getIndexOfChild(parent, node);
+					getModel().removeNodeFromParent(node, false);
+					getModel().insertNodeInto(editing, parent, index, true);
 
-				p = p.getParentPath().pathByAddingChild(editing);
-				tree.scrollPathToVisible(p);
-				tree.getUI().relayout();
+					p = p.getParentPath().pathByAddingChild(editing);
+					tree.scrollPathToVisible(p);
+					tree.getUI().relayout();
+				}
 			}
 		}
 	}
@@ -397,9 +414,11 @@ public class LayersPanel extends AbstractLayersPanel
 		{
 			return;
 		}
-		
-		int choice = JOptionPane.showConfirmDialog(this, createDeleteConfirmationMessage(paths), getMessage(getDeleteLayerDialogTitleKey()), 
-													JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+		int choice =
+				JOptionPane.showConfirmDialog(this, createDeleteConfirmationMessage(paths),
+						getMessage(getDeleteLayerDialogTitleKey()), JOptionPane.YES_NO_OPTION,
+						JOptionPane.WARNING_MESSAGE);
 		if (choice == JOptionPane.YES_OPTION)
 		{
 			for (TreePath p : paths)
@@ -436,9 +455,11 @@ public class LayersPanel extends AbstractLayersPanel
 		else
 		{
 			INode node = (INode) paths[0].getLastPathComponent();
-			
+
 			String typeKey = (node instanceof ILayerNode) ? getTermLayerKey() : getTermFolderKey();
-			message = getMessage(getConfirmDeleteLayerSingleMessageKey(), getMessage(typeKey), node.getName(), node.getChildCount());
+			message =
+					getMessage(getConfirmDeleteLayerSingleMessageKey(), getMessage(typeKey), node.getName(),
+							node.getChildCount());
 		}
 		return message;
 	}
@@ -467,16 +488,14 @@ public class LayersPanel extends AbstractLayersPanel
 		{
 			return;
 		}
-		
+
 		Object o = p.getLastPathComponent();
 		if (o instanceof ILayerNode)
 		{
 			ILayerNode layer = (ILayerNode) o;
-			int choice = JOptionPane.showConfirmDialog(this,
-														getMessage(getRefreshLayerConfirmationMessageKey()),
-														refreshAction.getName(),
-														JOptionPane.YES_NO_OPTION,
-														JOptionPane.WARNING_MESSAGE);
+			int choice =
+					JOptionPane.showConfirmDialog(this, getMessage(getRefreshLayerConfirmationMessageKey()),
+							refreshAction.getName(), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 			if (choice == JOptionPane.YES_OPTION)
 			{
 				getModel().setExpiryTime(layer, System.currentTimeMillis());
@@ -491,7 +510,7 @@ public class LayersPanel extends AbstractLayersPanel
 		{
 			return;
 		}
-		
+
 		Object o = p.getLastPathComponent();
 		if (o instanceof ILayerNode)
 		{
@@ -649,7 +668,9 @@ public class LayersPanel extends AbstractLayersPanel
 
 	protected void collapseAll()
 	{
-		while (collapseLast()){/* Do nothing...*/}
+		while (collapseLast())
+		{/* Do nothing...*/
+		}
 	}
 
 	private boolean collapseLast()
@@ -697,13 +718,15 @@ public class LayersPanel extends AbstractLayersPanel
 				for (File file : files)
 				{
 					URL url = file.toURI().toURL();
-					ILayerDefinition definition = new LayerDefinition(file.getName(), url, null, Icons.file.getURL(), true, false);
+					ILayerDefinition definition =
+							new LayerDefinition(file.getName(), url, null, Icons.file.getURL(), true, false);
 					addLayer(definition);
 				}
 			}
 			catch (Exception e)
 			{
-				JOptionPane.showMessageDialog(this, getMessage(getOpenLayerErrorMessageKey(), e), getMessage(getOpenLayerErrorTitleKey()), JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, getMessage(getOpenLayerErrorMessageKey(), e),
+						getMessage(getOpenLayerErrorTitleKey()), JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
@@ -725,5 +748,5 @@ public class LayersPanel extends AbstractLayersPanel
 		getModel().addWmsLayer(layerInfo);
 		tree.getUI().relayout();
 	}
-	
+
 }

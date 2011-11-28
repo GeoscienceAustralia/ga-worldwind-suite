@@ -28,14 +28,6 @@ public class LayerNode extends AbstractNode implements ILayerNode
 		setExpiryTime(expiryTime);
 	}
 
-	public LayerNode(ILayerNode node)
-	{
-		this(node.getName(), node.getInfoURL(), node.getIconURL(), node.isExpanded(), node
-				.getLayerURL(), node.isEnabled(), node.getOpacity(), node.getExpiryTime());
-		setLegendURL(node.getLegendURL());
-		setQueryURL(node.getQueryURL());
-	}
-
 	@Override
 	public URL getLayerURL()
 	{

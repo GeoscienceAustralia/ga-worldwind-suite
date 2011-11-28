@@ -58,8 +58,9 @@ public class LayerEnabler
 
 	private List<RefreshListener> listeners = new ArrayList<RefreshListener>();
 
-	private static ExecutorService loaderService = Executors.newSingleThreadExecutor(new DaemonThreadFactory("WMS layer loader"));
-	
+	private static ExecutorService loaderService = Executors.newSingleThreadExecutor(new DaemonThreadFactory(
+			"WMS layer loader"));
+
 	public LayerEnabler(WorldWindow wwd)
 	{
 		this.tree = null;
@@ -181,12 +182,12 @@ public class LayerEnabler
 		boolean isFile = file != null && file.isFile();
 		boolean isXml = FileUtil.hasExtension(url.toString(), "xml");
 		boolean isWmsLayer = node instanceof WmsLayerNode;
-		
+
 		setLayerLoading(node, true, true);
 
 		if (isWmsLayer)
 		{
-			loadWmsLayer((WmsLayerNode)node);
+			loadWmsLayer((WmsLayerNode) node);
 		}
 		else if (isFile && !isXml)
 		{
@@ -197,7 +198,7 @@ public class LayerEnabler
 			downloadLayer(node, url, onlyIfModified);
 		}
 	}
-	
+
 	private void loadWmsLayer(final WmsLayerNode node)
 	{
 		final int index = nodes.indexOf(node);
@@ -206,17 +207,19 @@ public class LayerEnabler
 			return;
 		}
 
-		loaderService.submit(new Runnable(){
+		loaderService.submit(new Runnable()
+		{
 			@Override
 			public void run()
 			{
 				LoadedLayer loadedLayer;
 				if (!node.isLayerInfoLoaded())
 				{
-	
+
 					try
 					{
-						WMSCapabilities capabilities = WmsCapabilitiesServiceAccessor.getService().retrieveCapabilities(node.getLayerURL());
+						WMSCapabilities capabilities =
+								WmsCapabilitiesServiceAccessor.getService().retrieveCapabilities(node.getLayerURL());
 						capabilities.parse();
 						WMSLayerCapabilities layerCapabilities = capabilities.getLayerByName(node.getLayerId());
 						List<WMSLayerInfo> layerInfos = WMSLayerInfo.createLayerInfos(capabilities, layerCapabilities);
@@ -230,15 +233,17 @@ public class LayerEnabler
 						return;
 					}
 				}
-				
-				loadedLayer = new LoadedLayer(new WMSTiledImageLayer(node.getWmsCapabilities(), node.getWmsParams()), node.getWmsParams());
+
+				loadedLayer =
+						new LoadedLayer(new WMSTiledImageLayer(node.getWmsCapabilities(), node.getWmsParams()), node
+								.getWmsParams());
 				loadedLayer.setLegendURL(node.getLegendURL());
-				
+
 				Wrapper wrapper = wrappers.get(index);
 				wrapper.setLoaded(loadedLayer);
-				
+
 				setLayerLoading(node, false, true);
-				
+
 				refreshLists();
 			}
 		});
@@ -317,8 +322,7 @@ public class LayerEnabler
 		node.setError(error);
 		if (tree != null)
 		{
-			tree.getUI().relayout();
-			tree.repaint();
+			tree.relayoutOnEDT();
 		}
 	}
 
@@ -327,7 +331,7 @@ public class LayerEnabler
 		node.setLayerLoading(loading);
 		if (repaintTree && tree != null)
 		{
-			tree.repaint();
+			tree.relayoutOnEDT();
 		}
 	}
 
@@ -463,8 +467,7 @@ public class LayerEnabler
 		}
 
 		//relayout and repaint the tree, as the labels may have changed (maybe legend button added)
-		tree.getUI().relayout();
-		tree.repaint();
+		tree.relayoutOnEDT();
 	}
 
 	private void mapChildElevationModelsToNode(ElevationModel elevationModel, ILayerNode node)
@@ -502,7 +505,9 @@ public class LayerEnabler
 		}
 
 		Wrapper wrapper = nodeMap.get(node);
-		Object wrapped = wrapper.hasLayer() ? wrapper.getLayer() : wrapper.hasElevationModel() ? wrapper.getElevationModel() : null;
+		Object wrapped =
+				wrapper.hasLayer() ? wrapper.getLayer() : wrapper.hasElevationModel() ? wrapper.getElevationModel()
+						: null;
 
 		return Bounded.Reader.getSector(wrapped);
 	}

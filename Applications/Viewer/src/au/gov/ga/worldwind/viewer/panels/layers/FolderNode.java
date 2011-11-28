@@ -8,9 +8,4 @@ public class FolderNode extends AbstractNode
 	{
 		super(name, infoURL, iconURL, expanded);
 	}
-
-	public FolderNode(INode node)
-	{
-		this(node.getName(), node.getInfoURL(), node.getIconURL(), node.isExpanded());
-	}
 }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import au.gov.ga.worldwind.viewer.panels.dataset.IIconItem;
 
-public interface INode extends IIconItem
+public interface INode extends IIconItem, Cloneable
 {
 	public String getName();
 
@@ -51,4 +51,6 @@ public interface INode extends IIconItem
 	 * Should only be called by LayerTreeModel
 	 */
 	public void setParent(INode parent);
+	
+	public INode clone();
 }

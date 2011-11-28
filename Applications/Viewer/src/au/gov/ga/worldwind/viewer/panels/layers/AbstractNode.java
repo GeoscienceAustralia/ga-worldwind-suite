@@ -105,7 +105,7 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 	{
 		return children.indexOf(child);
 	}
-	
+
 	@Override
 	public List<INode> getChildren()
 	{
@@ -128,5 +128,18 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 	public String toString()
 	{
 		return getName();
+	}
+
+	@Override
+	public INode clone()
+	{
+		try
+		{
+			return (INode) super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
 	}
 }
