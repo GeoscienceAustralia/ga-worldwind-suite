@@ -103,7 +103,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 			if (recurse)
 			{
-				List<INode> children = layer.getChildren();
+				List<INode> children = new ArrayList<INode>(layer.getChildren()); //create a copy to ensure no ConcurrentModificationException
 				for (INode child : children)
 				{
 					if (child instanceof ILayerNode)
@@ -117,7 +117,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			{
 				ILayerNode parent = (ILayerNode) layer.getParent();
 				boolean anyChildrenEnabled = false;
-				List<INode> siblings = parent.getChildren();
+				List<INode> siblings = new ArrayList<INode>(parent.getChildren()); //create a copy to ensure no ConcurrentModificationException
 				for (INode sibling : siblings)
 				{
 					if (sibling instanceof ILayerNode)
