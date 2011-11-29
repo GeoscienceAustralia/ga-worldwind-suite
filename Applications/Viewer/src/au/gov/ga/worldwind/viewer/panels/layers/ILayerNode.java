@@ -6,41 +6,41 @@ import au.gov.ga.worldwind.common.util.Loader;
 
 public interface ILayerNode extends INode
 {
-	public URL getLayerURL();
+	URL getLayerURL();
 
-	public URL getLegendURL();
+	URL getLegendURL();
 
-	public void setLegendURL(URL legendURL);
+	void setLegendURL(URL legendURL);
 
-	public URL getQueryURL();
+	URL getQueryURL();
 
-	public void setQueryURL(URL queryURL);
+	void setQueryURL(URL queryURL);
 
-	public boolean isEnabled();
+	boolean isEnabled();
 
-	public void setEnabled(boolean enabled);
+	void setEnabled(boolean enabled);
 
-	public double getOpacity();
+	double getOpacity();
 
-	public void setOpacity(double opacity);
+	void setOpacity(double opacity);
 
-	public boolean hasError();
+	boolean hasError();
 
-	public Exception getError();
+	Exception getError();
 
-	public void setError(Exception error);
+	void setError(Exception error);
 
-	public boolean isLayerLoading();
+	boolean isLayerLoading();
 
-	public void setLayerLoading(boolean layerLoading);
+	void setLayerLoading(boolean layerLoading);
 	
-	public boolean isLayerDataLoading();
+	boolean isLayerDataLoading();
 	
-	public void setLayerDataLoading(boolean layerDataLoading);
+	void setLayerDataLoading(boolean layerDataLoading);
 	
-	public void setLoader(Loader loader);
+	void setLoader(Loader loader);
 
-	public Long getExpiryTime();
+	Long getExpiryTime();
 
-	public void setExpiryTime(Long expiryTime);
+	void setExpiryTime(Long expiryTime);
 }

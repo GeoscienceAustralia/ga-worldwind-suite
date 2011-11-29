@@ -252,6 +252,9 @@ public class LayerTreePersistance
 	
 	private static Element createFolderNodeElement(FolderNode folder, Document document)
 	{
+		if(folder.isTransient())
+			return null;
+		
 		Element folderElement = document.createElement(FOLDER_ELEMENT_NAME);
 		
 		if (folder instanceof WmsServerNode)
@@ -270,6 +273,9 @@ public class LayerTreePersistance
 	
 	private static Element createLayerNodeElement(LayerNode layer, Document document)
 	{
+		if(layer.isTransient())
+			return null;
+		
 		Element layerElement = document.createElement(LAYER_ELEMENT_NAME);
 
 		if (layer.getLayerURL() != null)

@@ -19,6 +19,8 @@ import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWIO;
 import gov.nasa.worldwind.util.WWUtil;
 import gov.nasa.worldwind.util.WWXML;
+import gov.nasa.worldwind.util.layertree.KMLLayerTreeNode;
+import gov.nasa.worldwind.util.tree.TreeNode;
 
 import java.io.File;
 import java.io.InputStream;
@@ -32,6 +34,7 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
+import au.gov.ga.worldwind.common.layers.Hierarchical;
 import au.gov.ga.worldwind.common.util.Loader;
 import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -40,11 +43,13 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
  * A {@link Layer} that parses and renders KML content from a provided KML
  * source.
  */
-public class KMLLayer extends RenderableLayer implements Loader
+public class KMLLayer extends RenderableLayer implements Loader, Hierarchical
 {
 	private boolean loading = false;
 	private LoadingListenerList loadingListeners = new LoadingListenerList();
+	private HierarchicalListenerList hierarchicalListeners = new HierarchicalListenerList();
 	private Object lock = new Object();
+	private TreeNode node;
 
 	public KMLLayer(Element domElement, AVList params)
 	{
@@ -81,7 +86,7 @@ public class KMLLayer extends RenderableLayer implements Loader
 		}
 
 		loading = true;
-		notifyListeners();
+		notifyLoadingListeners();
 
 		RetrievalHandler handler = new RetrievalHandler()
 		{
@@ -112,7 +117,7 @@ public class KMLLayer extends RenderableLayer implements Loader
 				synchronized (lock)
 				{
 					loading = true;
-					notifyListeners();
+					notifyLoadingListeners();
 
 					try
 					{
@@ -140,6 +145,9 @@ public class KMLLayer extends RenderableLayer implements Loader
 						KMLController controller = new KMLController(root);
 						addRenderable(controller);
 						setName(formName(url, root));
+						
+						node = new KMLLayerTreeNode(KMLLayer.this, root);
+						notifyHierarchicalListeners(node);
 					}
 					catch (Exception e)
 					{
@@ -150,7 +158,7 @@ public class KMLLayer extends RenderableLayer implements Loader
 					finally
 					{
 						loading = false;
-						notifyListeners();
+						notifyLoadingListeners();
 					}
 				}
 			}
@@ -197,8 +205,33 @@ public class KMLLayer extends RenderableLayer implements Loader
 		loadingListeners.remove(listener);
 	}
 
-	protected void notifyListeners()
+	protected void notifyLoadingListeners()
 	{
 		loadingListeners.notifyListeners(isLoading());
+	}
+	
+	protected void notifyHierarchicalListeners(TreeNode node)
+	{
+		hierarchicalListeners.notifyListeners(this, node);
+	}
+
+	@Override
+	public void addHierarchicalListener(HierarchicalListener listener)
+	{
+		synchronized (lock)
+		{
+			hierarchicalListeners.add(listener);
+			if(node != null)
+			{
+				//already loaded, so notify immediately
+				notifyHierarchicalListeners(node);
+			}
+		}
+	}
+
+	@Override
+	public void removeHierarchicalListener(HierarchicalListener listener)
+	{
+		hierarchicalListeners.remove(listener);
 	}
 }

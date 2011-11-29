@@ -11,6 +11,7 @@ import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.tree.TreeNode;
 import gov.nasa.worldwind.wms.WMSTiledImageLayer;
 import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
@@ -30,6 +31,8 @@ import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.layers.Bounded;
+import au.gov.ga.worldwind.common.layers.Hierarchical;
+import au.gov.ga.worldwind.common.layers.Hierarchical.HierarchicalListener;
 import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.common.util.FileUtil;
 import au.gov.ga.worldwind.common.util.Loader;
@@ -37,7 +40,7 @@ import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.viewer.panels.layers.FileLoader.FileLoadListener;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsCapabilitiesServiceAccessor;
 
-public class LayerEnabler
+public class LayerEnabler implements HierarchicalListener
 {
 	private final LayerTree tree;
 
@@ -57,6 +60,7 @@ public class LayerEnabler
 	private Map<ElevationModel, ILayerNode> elevationModelMap = new HashMap<ElevationModel, ILayerNode>();
 
 	private List<RefreshListener> listeners = new ArrayList<RefreshListener>();
+	private final Set<Hierarchical> hierarchicalListenees = new HashSet<Hierarchical>();
 
 	private static ExecutorService loaderService = Executors.newSingleThreadExecutor(new DaemonThreadFactory(
 			"WMS layer loader"));
@@ -178,6 +182,10 @@ public class LayerEnabler
 	private void loadLayer(ILayerNode node, boolean onlyIfModified)
 	{
 		URL url = node.getLayerURL();
+		//url could possibly be null (eg KML layer's children); ignore a load request if this occurs
+		if(url == null)
+			return;
+		
 		File file = URLUtil.urlToFile(url);
 		boolean isFile = file != null && file.isFile();
 		boolean isXml = FileUtil.hasExtension(url.toString(), "xml");
@@ -420,6 +428,10 @@ public class LayerEnabler
 		//clear the lists
 		layers.clear();
 		elevationModels.clear();
+		
+		//list of hierarchicals to setup outside of the main loop (to ensure
+		//we don't get a ConcurrentModificationException on the wrappers list)
+		List<Hierarchical> hierarchicalsToSetup = new ArrayList<Hierarchical>();
 
 		//rebuild the lists
 		for (Wrapper wrapper : wrappers)
@@ -433,6 +445,12 @@ public class LayerEnabler
 					layer.setOpacity(wrapper.node.getOpacity());
 					layers.add(layer);
 					layerMap.put(layer, wrapper.node);
+					
+					if (layer instanceof Hierarchical && !hierarchicalListenees.contains(layer))
+					{
+						hierarchicalsToSetup.add((Hierarchical) layer);
+						hierarchicalListenees.add((Hierarchical) layer);
+					}
 				}
 				else if (wrapper.hasElevationModel())
 				{
@@ -459,6 +477,12 @@ public class LayerEnabler
 
 		layerList.addAllFromSection(this, layers);
 		elevationModel.addAllFromSection(this, elevationModels);
+		
+		//now setup the hierarchicals
+		for(Hierarchical hierarchical : hierarchicalsToSetup)
+		{
+			hierarchical.addHierarchicalListener(this);
+		}
 
 		//tell the listeners that the list has been refreshed
 		for (RefreshListener listener : listeners)
@@ -651,5 +675,15 @@ public class LayerEnabler
 	public static interface RefreshListener
 	{
 		public void refreshed();
+	}
+
+	@Override
+	public void hierarchyChanged(Layer layer, TreeNode node)
+	{
+		ILayerNode layerNode = layerMap.get(layer);
+		if (layerNode != null)
+		{
+			WWTreeToLayerTreeConnector.connect(tree.getLayerModel(), layerNode, node);
+		}
 	}
 }

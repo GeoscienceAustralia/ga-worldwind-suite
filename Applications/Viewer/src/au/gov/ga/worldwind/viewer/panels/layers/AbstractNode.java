@@ -15,6 +15,7 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 	private boolean expanded;
 	private INode parent;
 	private List<INode> children = new ArrayList<INode>();
+	private boolean transienT = false;
 
 	public AbstractNode(String name, URL infoURL, URL iconURL, boolean expanded)
 	{
@@ -141,5 +142,17 @@ public abstract class AbstractNode extends AbstractIconItem implements INode
 		{
 			return null;
 		}
+	}
+	
+	@Override
+	public boolean isTransient()
+	{
+		return transienT;
+	}
+	
+	@Override
+	public void setTransient(boolean t)
+	{
+		this.transienT = t;
 	}
 }

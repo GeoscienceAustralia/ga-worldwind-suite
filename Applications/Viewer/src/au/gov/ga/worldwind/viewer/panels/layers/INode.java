@@ -53,4 +53,8 @@ public interface INode extends IIconItem, Cloneable
 	public void setParent(INode parent);
 	
 	public INode clone();
+	
+	boolean isTransient();
+	
+	void setTransient(boolean t);
 }
