@@ -30,4 +30,9 @@ public class TreeNodeLayerNode extends LayerNode
 		else
 			treeNode.setSelected(enabled);
 	}
+
+	public TreeNode getTreeNode()
+	{
+		return treeNode;
+	}
 }

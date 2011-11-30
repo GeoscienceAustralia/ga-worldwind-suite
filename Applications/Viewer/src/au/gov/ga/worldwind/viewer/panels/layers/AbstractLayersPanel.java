@@ -2,16 +2,19 @@ package au.gov.ga.worldwind.viewer.panels.layers;
 
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
-
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.ogc.kml.KMLAbstractFeature;
 import gov.nasa.worldwind.retrieve.RetrievalService;
+import gov.nasa.worldwind.util.layertree.KMLFeatureTreeNode;
+import gov.nasa.worldwind.util.tree.TreeNode;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
+import gov.nasa.worldwindx.examples.kml.KMLViewController;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -39,6 +42,7 @@ import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.resizabletoolbar.ResizableToolBar;
 import au.gov.ga.worldwind.common.util.FlyToSectorAnimator;
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.common.view.kml.CustomKMLViewControllerFactory;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerEnabler.RefreshListener;
 import au.gov.ga.worldwind.viewer.retrieve.LayerTreeRetrievalListener;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
@@ -119,7 +123,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			}
 		});
 	}
-	
+
 	private void addResizedListener()
 	{
 		addComponentListener(new ComponentAdapter()
@@ -152,7 +156,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 					{
 						return;
 					}
-					
+
 					//remove height from left edge to ignore space taken by the checkbox
 					bounds.width -= bounds.height;
 					bounds.x += bounds.height;
@@ -165,20 +169,39 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 					{
 						return;
 					}
-					
+
 					Object o = path.getLastPathComponent();
-					if (o == null || !(o instanceof ILayerNode))
+
+					//first check if the tree node is pointing to a KML feature; if so, goto the feature 
+					if (o instanceof TreeNodeLayerNode)
+					{
+						TreeNode treeNode = ((TreeNodeLayerNode) o).getTreeNode();
+						if (treeNode instanceof KMLFeatureTreeNode)
+						{
+							KMLAbstractFeature feature = ((KMLFeatureTreeNode) treeNode).getFeature();
+
+							KMLViewController viewController = CustomKMLViewControllerFactory.create(wwd);
+							if (viewController != null)
+							{
+								viewController.goTo(feature);
+								wwd.redraw();
+								return;
+							}
+						}
+					}
+
+					if (!(o instanceof ILayerNode))
 					{
 						return;
 					}
-					
+
 					ILayerNode layer = (ILayerNode) o;
 					Sector sector = layerEnabler.getLayerExtents(layer);
 					if (sector == null || !(wwd.getView() instanceof OrbitView))
 					{
 						return;
 					}
-					
+
 					OrbitView orbitView = (OrbitView) wwd.getView();
 					Position center = orbitView.getCenterPosition();
 					Position newCenter;
@@ -194,14 +217,10 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 					LatLon endVisibleDelta = new LatLon(sector.getDeltaLat(), sector.getDeltaLon());
 					long lengthMillis = SettingsUtil.getScaledLengthMillis(center, newCenter);
 
-					FlyToOrbitViewAnimator animator = FlyToSectorAnimator.createFlyToSectorAnimator(orbitView,
-																									center,
-																									newCenter,
-																									orbitView.getHeading(),
-																									orbitView.getPitch(),
-																									orbitView.getZoom(),
-																									endVisibleDelta,
-																									lengthMillis);
+					FlyToOrbitViewAnimator animator =
+							FlyToSectorAnimator.createFlyToSectorAnimator(orbitView, center, newCenter,
+									orbitView.getHeading(), orbitView.getPitch(), orbitView.getZoom(), endVisibleDelta,
+									lengthMillis);
 					orbitView.stopAnimations();
 					orbitView.stopMovement();
 					orbitView.addAnimator(animator);
@@ -211,12 +230,14 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			}
 		});
 	}
-	
+
 	protected abstract INode createRootNode(Theme theme);
 
 	protected void createActions()
 	{
-		enableAction = new BasicAction(getMessage(getLayersEnableLayerLabelKey()), getMessage(getLayersEnableLayerTooltipKey()), Icons.check.getIcon());
+		enableAction =
+				new BasicAction(getMessage(getLayersEnableLayerLabelKey()),
+						getMessage(getLayersEnableLayerTooltipKey()), Icons.check.getIcon());
 		enableAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -226,7 +247,9 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			}
 		});
 
-		disableAction = new BasicAction(getMessage(getLayersDisableLayerLabelKey()), getMessage(getLayersDisableLayerTooltipKey()), Icons.uncheck.getIcon());
+		disableAction =
+				new BasicAction(getMessage(getLayersDisableLayerLabelKey()),
+						getMessage(getLayersDisableLayerTooltipKey()), Icons.uncheck.getIcon());
 		disableAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -303,7 +326,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		{
 			return;
 		}
-		
+
 		TreePath[] selected = tree.getSelectionPaths();
 		ILayerNode layer = firstChildLayer(selected, true);
 		if (layer != null)
@@ -460,12 +483,12 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 	{
 		return layerEnabler.hasLayer(layer);
 	}
-	
+
 	public INode getRoot()
 	{
 		return root;
 	}
-	
+
 	public LayerTree getTree()
 	{
 		return tree;
