@@ -64,6 +64,7 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	 */
 	public ParameterBase(String name, Animation animation)
 	{
+		name = name != null ? name : getDefaultName();
 		Validate.notNull(name, "A name is required");
 		Validate.notNull(animation, "An animation is required");
 		this.name = name;

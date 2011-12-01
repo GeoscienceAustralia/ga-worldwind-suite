@@ -54,9 +54,10 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	 */
 	public AnimatableBase(String name, Animation animation)
 	{
+		name = name != null ? name : getDefaultName();
 		Validate.notNull(name, "A name must be provided");
 		Validate.notNull(animation, "An animation instance is required");
-		this.name = name != null ? name : getDefaultName();
+		this.name = name;
 		this.animation = animation;
 	}
 
