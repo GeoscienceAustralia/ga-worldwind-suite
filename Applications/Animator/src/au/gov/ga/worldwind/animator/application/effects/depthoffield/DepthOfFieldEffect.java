@@ -1,5 +1,8 @@
 package au.gov.ga.worldwind.animator.application.effects.depthoffield;
 
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessageOrDefault;
+
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.render.DrawContext;
 
@@ -9,7 +12,6 @@ import javax.media.opengl.GL;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
@@ -25,10 +27,27 @@ public class DepthOfFieldEffect extends EffectBase
 	private final GaussianBlurShader gaussianBlurShader = new GaussianBlurShader();
 	private final FrameBuffer mainFrameBuffer = new FrameBuffer();
 	private final FrameBuffer blurFrameBuffer = new FrameBuffer();
-	
+
 	private double near = 0;
 	private double far = 10;
 	private double focus = 5;
+
+	public DepthOfFieldEffect(String name, Animation animation)
+	{
+		super(name, animation);
+	}
+
+	@SuppressWarnings("unused")
+	private DepthOfFieldEffect()
+	{
+		super();
+	}
+	
+	@Override
+	protected String getDefaultName()
+	{
+		return getMessageOrDefault(getDepthOfFieldNameKey(), "Depth of Field");
+	}
 
 	public boolean isEnabled()
 	{
@@ -103,7 +122,7 @@ public class DepthOfFieldEffect extends EffectBase
 				//bind and clear the blur frame buffer
 				blurFrameBuffer.bind(gl);
 				gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-				
+
 				//draw the scene, blurring vertically first, then horizontally
 				gaussianBlurShader.use(dc, blurFrameBuffer.getDimensions(), false);
 				FrameBuffer.renderTexturedQuad(gl, mainFrameBuffer.getTextureId());
@@ -166,15 +185,13 @@ public class DepthOfFieldEffect extends EffectBase
 	@Override
 	protected String getXmlElementName(AnimationIOConstants constants)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return constants.getDepthOfFieldEffectElementName();
 	}
 
 	@Override
-	protected AnimatableBase createAnimatableFromXml(String name, Animation animation, boolean enabled,
-			Element element, AnimationFileVersion version, AVList context)
+	protected EffectBase createEffectFromXml(String name, Animation animation, boolean enabled, Element element,
+			AnimationFileVersion version, AVList context)
 	{
-		// TODO Auto-generated method stub
-		return null;
-	}	
+		return new DepthOfFieldEffect(name, animation);
+	}
 }
