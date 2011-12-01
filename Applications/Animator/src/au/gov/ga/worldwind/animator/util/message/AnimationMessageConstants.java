@@ -184,5 +184,6 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getDepthOfFieldFarParameterNameKey() { return "animator.effect.depthoffieldfar.name"; }
 	public static String getDepthOfFieldNearParameterNameKey() { return "animator.effect.depthoffieldnear.name"; }
 	public static String getDepthOfFieldFocusParameterNameKey() { return "animator.effect.depthoffieldfocus.name"; }
+	public static String getEdgeDetectionNameKey() { return "animator.effect.edgedetection.name"; }
 	
 }

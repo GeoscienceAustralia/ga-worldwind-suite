@@ -81,6 +81,7 @@ public interface AnimationIOConstants
 	String getDepthOfFieldNearElementName();
 	String getDepthOfFieldFarElementName();
 	String getDepthOfFieldFocusElementName();
+	String getEdgeDetectionEffectElementName();
 
 	/**
 	 * Common constants that don't change across versions
@@ -149,6 +150,7 @@ public interface AnimationIOConstants
 		public String getDepthOfFieldNearElementName() {return null;}
 		public String getDepthOfFieldFarElementName() {return null;}
 		public String getDepthOfFieldFocusElementName() {return null;}
+		public String getEdgeDetectionEffectElementName() {return null;}
 	}
 	
 	/**
@@ -213,6 +215,7 @@ public interface AnimationIOConstants
 		public String getDepthOfFieldNearElementName() {return "near";}
 		public String getDepthOfFieldFarElementName() {return "far";}
 		public String getDepthOfFieldFocusElementName() {return "focus";}
+		public String getEdgeDetectionEffectElementName() {return "edgeeffect";}
 	}
 	
 	/**

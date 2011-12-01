@@ -21,13 +21,13 @@ public class EdgeShader extends Shader
 	@Override
 	protected InputStream getVertexSource()
 	{
-		return this.getClass().getResourceAsStream("edge_vertex.glsl");
+		return this.getClass().getResourceAsStream("EdgeDetectionVertexShader.glsl");
 	}
 
 	@Override
 	protected InputStream getFragmentSource()
 	{
-		return this.getClass().getResourceAsStream("edge_fragment.glsl");
+		return this.getClass().getResourceAsStream("EdgeDetectionFragmentShader.glsl");
 	}
 
 	@Override
