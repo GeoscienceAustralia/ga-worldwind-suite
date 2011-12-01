@@ -73,7 +73,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 
 	protected CameraImpl(String name, Animation animation)
 	{
-		super(nameOrDefaultName(name, getMessageOrDefault(getCameraNameKey(), DEFAULT_CAMERA_NAME)), animation);
+		super(name, animation);
 		initialiseParameters(animation);
 		connectCodependants();
 		connectAsListener();
@@ -84,6 +84,12 @@ public class CameraImpl extends AnimatableBase implements Camera
 	 */
 	protected CameraImpl()
 	{
+	}
+	
+	@Override
+	protected String getDefaultName()
+	{
+		return getMessageOrDefault(getCameraNameKey(), DEFAULT_CAMERA_NAME);
 	}
 
 	/**

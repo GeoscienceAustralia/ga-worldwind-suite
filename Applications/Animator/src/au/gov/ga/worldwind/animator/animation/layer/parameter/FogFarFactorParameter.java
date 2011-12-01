@@ -32,13 +32,19 @@ public class FogFarFactorParameter extends LayerParameterBase
 
 	public FogFarFactorParameter(String name, Animation animation, FogLayer layer)
 	{
-		super(nameOrDefaultName(name, getMessage(getFogFarParameterNameKey())), animation, layer);
+		super(name, animation, layer);
 		setDefaultValue(layer.getFarFactor());
 	}
 
 	@SuppressWarnings("unused")
 	private FogFarFactorParameter()
 	{
+	}
+	
+	@Override
+	protected String getDefaultName()
+	{
+		return getMessage(getFogFarParameterNameKey());
 	}
 
 	@Override

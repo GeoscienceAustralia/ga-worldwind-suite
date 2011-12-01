@@ -42,7 +42,7 @@ public abstract class StereoCameraParameter extends CameraParameter
 	{
 		public FocalLengthParameter(String name, Animation animation)
 		{
-			super(nameOrDefaultName(name, getMessageOrDefault(getCameraFocalLengthNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+			super(name, animation);
 		}
 
 		public FocalLengthParameter(Animation animation)
@@ -53,6 +53,12 @@ public abstract class StereoCameraParameter extends CameraParameter
 		FocalLengthParameter()
 		{
 			super();
+		}
+
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraFocalLengthNameKey(), DEFAULT_PARAMETER_NAME);
 		}
 
 		@Override
@@ -89,8 +95,7 @@ public abstract class StereoCameraParameter extends CameraParameter
 	{
 		public EyeSeparationParameter(String name, Animation animation)
 		{
-			super(nameOrDefaultName(name, getMessageOrDefault(getCameraEyeSeparationNameKey(), DEFAULT_PARAMETER_NAME)),
-					animation);
+			super(name, animation);
 		}
 
 		public EyeSeparationParameter(Animation animation)
@@ -101,6 +106,12 @@ public abstract class StereoCameraParameter extends CameraParameter
 		EyeSeparationParameter()
 		{
 			super();
+		}
+		
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraEyeSeparationNameKey(), DEFAULT_PARAMETER_NAME);
 		}
 
 		@Override

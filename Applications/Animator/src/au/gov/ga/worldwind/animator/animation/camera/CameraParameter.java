@@ -85,7 +85,7 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public EyeLatParameter(String name, Animation animation)
 		{
-			super(nameOrDefaultName(name, getMessageOrDefault(getCameraEyeLatNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+			super(name, animation);
 		}
 
 		public EyeLatParameter(Animation animation)
@@ -96,6 +96,12 @@ abstract class CameraParameter extends ParameterBase
 		EyeLatParameter()
 		{
 			super();
+		}
+		
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraEyeLatNameKey(), DEFAULT_PARAMETER_NAME);
 		}
 
 		@Override
@@ -137,7 +143,7 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public EyeLonParameter(String name, Animation animation)
 		{
-			super(nameOrDefaultName(name, getMessageOrDefault(getCameraEyeLonNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+			super(name, animation);
 		}
 
 		public EyeLonParameter(Animation animation)
@@ -148,6 +154,12 @@ abstract class CameraParameter extends ParameterBase
 		EyeLonParameter()
 		{
 			super();
+		}
+		
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraEyeLonNameKey(), DEFAULT_PARAMETER_NAME);
 		}
 
 		@Override
@@ -190,7 +202,7 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public EyeElevationParameter(String name, Animation animation)
 		{
-			super(nameOrDefaultName(name, getMessageOrDefault(getCameraEyeZoomNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+			super(name, animation);
 		}
 
 		public EyeElevationParameter(Animation animation)
@@ -201,6 +213,12 @@ abstract class CameraParameter extends ParameterBase
 		EyeElevationParameter()
 		{
 			super();
+		}
+		
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraEyeZoomNameKey(), DEFAULT_PARAMETER_NAME);
 		}
 
 		@Override
@@ -243,7 +261,7 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public LookatLatParameter(String name, Animation animation)
 		{
-			super(nameOrDefaultName(name, getMessageOrDefault(getCameraLookatLatNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+			super(name, animation);
 		}
 
 		public LookatLatParameter(Animation animation)
@@ -254,6 +272,12 @@ abstract class CameraParameter extends ParameterBase
 		LookatLatParameter()
 		{
 			super();
+		}
+		
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraLookatLatNameKey(), DEFAULT_PARAMETER_NAME);
 		}
 
 		@Override
@@ -297,7 +321,7 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public LookatLonParameter(String name, Animation animation)
 		{
-			super(nameOrDefaultName(name, getMessageOrDefault(getCameraLookatLonNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+			super(name, animation);
 		}
 
 		public LookatLonParameter(Animation animation)
@@ -308,6 +332,12 @@ abstract class CameraParameter extends ParameterBase
 		LookatLonParameter()
 		{
 			super();
+		}
+		
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraLookatLonNameKey(), DEFAULT_PARAMETER_NAME);
 		}
 
 		@Override
@@ -349,7 +379,7 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public LookatElevationParameter(String name, Animation animation)
 		{
-			super(nameOrDefaultName(name, getMessageOrDefault(getCameraLookatZoomNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+			super(name, animation);
 		}
 
 		public LookatElevationParameter(Animation animation)
@@ -360,6 +390,12 @@ abstract class CameraParameter extends ParameterBase
 		LookatElevationParameter()
 		{
 			super();
+		}
+		
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraLookatZoomNameKey(), DEFAULT_PARAMETER_NAME);
 		}
 
 		@Override
@@ -400,7 +436,7 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public NearClipParameter(String name, Animation animation)
 		{
-			super(nameOrDefaultName(name, getMessageOrDefault(getCameraNearClipNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+			super(name, animation);
 		}
 
 		public NearClipParameter(Animation animation)
@@ -413,6 +449,11 @@ abstract class CameraParameter extends ParameterBase
 			super();
 		}
 
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraNearClipNameKey(), DEFAULT_PARAMETER_NAME);
+		}
 
 		@Override
 		public ParameterValue getCurrentValue()
@@ -459,7 +500,7 @@ abstract class CameraParameter extends ParameterBase
 	{
 		public FarClipParameter(String name, Animation animation)
 		{
-			super(nameOrDefaultName(name, getMessageOrDefault(getCameraFarClipNameKey(), DEFAULT_PARAMETER_NAME)), animation);
+			super(name, animation);
 		}
 
 		public FarClipParameter(Animation animation)
@@ -470,6 +511,12 @@ abstract class CameraParameter extends ParameterBase
 		FarClipParameter()
 		{
 			super();
+		}
+		
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraFarClipNameKey(), DEFAULT_PARAMETER_NAME);
 		}
 
 		@Override

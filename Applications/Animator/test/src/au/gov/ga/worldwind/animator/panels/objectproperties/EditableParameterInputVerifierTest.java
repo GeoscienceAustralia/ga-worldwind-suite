@@ -232,6 +232,8 @@ public class EditableParameterInputVerifierTest
 		@Override
 		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
 				Element parameterElement, AnimationFileVersion version, AVList context) { return null; }
+		@Override
+		protected String getDefaultName() { return null; }
 	}
 	
 	@EditableParameter(bound = false, minValue = 0.0, maxValue = 10.0)
@@ -247,6 +249,8 @@ public class EditableParameterInputVerifierTest
 		@Override
 		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
 				Element parameterElement, AnimationFileVersion version, AVList context) { return null; }
+		@Override
+		protected String getDefaultName() { return null; }
 	}
 	
 }

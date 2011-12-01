@@ -38,13 +38,19 @@ public class LayerOpacityParameter extends LayerParameterBase
 	 */
 	public LayerOpacityParameter(String name, Animation animation, Layer layer)
 	{
-		super(nameOrDefaultName(name, getMessage(getOpacityParameterNameKey())), animation, layer);
+		super(name, animation, layer);
 		setDefaultValue(1.0);
 	}
 
 	@SuppressWarnings("unused")
 	private LayerOpacityParameter()
 	{
+	}
+	
+	@Override
+	protected String getDefaultName()
+	{
+		return getMessage(getOpacityParameterNameKey());
 	}
 
 	@Override

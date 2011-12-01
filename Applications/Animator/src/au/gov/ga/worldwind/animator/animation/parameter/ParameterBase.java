@@ -472,16 +472,10 @@ public abstract class ParameterBase extends PropagatingChangeableEventListener i
 	}
 
 	/**
-	 * @return name if not null, otherwise defaultName
+	 * @return The default name of this parameter. Called by constructor, so
+	 *         don't rely on global variables being setup.
 	 */
-	protected static String nameOrDefaultName(String name, String defaultName)
-	{
-		if (name != null)
-		{
-			return name;
-		}
-		return defaultName;
-	}
+	protected abstract String getDefaultName();
 
 	@Override
 	protected AnimationEvent createEvent(Type type, AnimationEvent cause, Object value)

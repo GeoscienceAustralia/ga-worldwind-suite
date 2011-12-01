@@ -32,13 +32,19 @@ public class FogNearFactorParameter extends LayerParameterBase
 
 	public FogNearFactorParameter(String name, Animation animation, FogLayer layer)
 	{
-		super(nameOrDefaultName(name, getMessage(getFogNearParameterNameKey())), animation, layer);
+		super(name, animation, layer);
 		setDefaultValue(layer.getNearFactor());
 	}
 
 	@SuppressWarnings("unused")
 	private FogNearFactorParameter()
 	{
+	}
+	
+	@Override
+	protected String getDefaultName()
+	{
+		return getMessage(getFogNearParameterNameKey());
 	}
 
 	@Override

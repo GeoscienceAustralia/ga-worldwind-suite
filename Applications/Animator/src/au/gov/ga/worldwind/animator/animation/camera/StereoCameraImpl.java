@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.animator.animation.camera;
 
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getStereoCameraNameKey;
-import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessageOrDefault;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.util.WWXML;
@@ -36,7 +36,7 @@ public class StereoCameraImpl extends CameraImpl implements StereoCamera
 
 	public StereoCameraImpl(String name, Animation animation)
 	{
-		super(nameOrDefaultName(name, getMessage(getStereoCameraNameKey())), animation);
+		super(name, animation);
 	}
 
 	/**
@@ -45,6 +45,12 @@ public class StereoCameraImpl extends CameraImpl implements StereoCamera
 	protected StereoCameraImpl()
 	{
 		super();
+	}
+	
+	@Override
+	protected String getDefaultName()
+	{
+		return getMessageOrDefault(getStereoCameraNameKey(), DEFAULT_CAMERA_NAME);
 	}
 
 	@Override

@@ -33,7 +33,7 @@ public class ShapeOutlineOpacityParameter extends LayerParameterBase
 
 	public ShapeOutlineOpacityParameter(String name, Animation animation, RenderableLayer layer)
 	{
-		super(nameOrDefaultName(name, getMessage(getOutlineOpacityParameterNameKey())), animation, layer);
+		super(name, animation, layer);
 		for (Renderable renderable : layer.getRenderables())
 		{
 			if (renderable instanceof AbstractSurfaceShape)
@@ -47,6 +47,12 @@ public class ShapeOutlineOpacityParameter extends LayerParameterBase
 	@SuppressWarnings("unused")
 	private ShapeOutlineOpacityParameter()
 	{
+	}
+
+	@Override
+	protected String getDefaultName()
+	{
+		return getMessage(getOutlineOpacityParameterNameKey());
 	}
 
 	@Override

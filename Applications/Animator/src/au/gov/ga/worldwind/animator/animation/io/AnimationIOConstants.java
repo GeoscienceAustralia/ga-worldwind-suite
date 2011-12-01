@@ -77,6 +77,7 @@ public interface AnimationIOConstants
 	String getDetailLevelElementName();
 	String getRenderAlphaElementName();
 	String getImageScalePercentElementName();
+	String getDepthOfFieldEffectElementName();
 	String getDepthOfFieldNearElementName();
 	String getDepthOfFieldFarElementName();
 	String getDepthOfFieldFocusElementName();
@@ -144,6 +145,7 @@ public interface AnimationIOConstants
 		public String getDetailLevelElementName() {return null;}
 		public String getRenderAlphaElementName() {return null;}
 		public String getImageScalePercentElementName() {return null;}
+		public String getDepthOfFieldEffectElementName() {return null;}
 		public String getDepthOfFieldNearElementName() {return null;}
 		public String getDepthOfFieldFarElementName() {return null;}
 		public String getDepthOfFieldFocusElementName() {return null;}
@@ -207,6 +209,7 @@ public interface AnimationIOConstants
 		public String getDetailLevelElementName() {return "detailLevel";}
 		public String getRenderAlphaElementName() {return "renderAlpha";}
 		public String getImageScalePercentElementName() {return "imageScalePercent";}
+		public String getDepthOfFieldEffectElementName() {return "depthoffield";}
 		public String getDepthOfFieldNearElementName() {return "near";}
 		public String getDepthOfFieldFarElementName() {return "far";}
 		public String getDepthOfFieldFocusElementName() {return "focus";}

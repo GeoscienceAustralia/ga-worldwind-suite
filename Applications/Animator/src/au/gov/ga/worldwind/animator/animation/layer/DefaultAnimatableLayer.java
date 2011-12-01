@@ -60,7 +60,7 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	public DefaultAnimatableLayer(String name, Animation animation, Layer layer,
 			Collection<LayerParameter> layerParameters)
 	{
-		super(nameOrDefaultName(name, layer.getName()), animation);
+		super(nameOrLayerName(name, layer), animation);
 		Validate.notNull(layer, "A layer is required");
 		this.layer = layer;
 
@@ -72,6 +72,11 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 				addParameter(layerParameter);
 			}
 		}
+	}
+	
+	protected static String nameOrLayerName(String name, Layer layer)
+	{
+		return name != null ? name : layer != null ? layer.getName() : null;
 	}
 
 	/**
@@ -93,7 +98,13 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	private DefaultAnimatableLayer()
 	{
 		super();
-	};
+	}
+	
+	@Override
+	protected String getDefaultName()
+	{
+		return "Layer";
+	}
 
 	@Override
 	public void setEnabled(boolean enabled)

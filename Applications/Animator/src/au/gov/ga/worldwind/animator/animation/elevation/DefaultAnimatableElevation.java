@@ -74,7 +74,7 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 	 */
 	public DefaultAnimatableElevation(String name, Animation animation)
 	{
-		super(nameOrDefaultName(name, getMessageOrDefault(getElevationNameKey(), DEFAULT_NAME)), animation);
+		super(name, animation);
 
 		Validate.notNull(animation, "An animation is required");
 
@@ -103,6 +103,12 @@ public class DefaultAnimatableElevation extends AnimatableBase implements Animat
 			exaggerationParameters.put(exaggerator.getElevationBoundary(), new ElevationExaggerationParameterImpl(
 					animation, exaggerator));
 		}
+	}
+	
+	@Override
+	protected String getDefaultName()
+	{
+		return getMessageOrDefault(getElevationNameKey(), DEFAULT_NAME);
 	}
 
 	@Override

@@ -56,7 +56,7 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	{
 		Validate.notNull(name, "A name must be provided");
 		Validate.notNull(animation, "An animation instance is required");
-		this.name = name;
+		this.name = name != null ? name : getDefaultName();
 		this.animation = animation;
 	}
 
@@ -332,6 +332,12 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 			Element element, AnimationFileVersion version, AVList context);
 
 	/**
+	 * @return The default name of this animatable. Called by constructor, so
+	 *         don't rely on global variables being setup.
+	 */
+	protected abstract String getDefaultName();
+
+	/**
 	 * Save any extra data in this animatable to XML. This should handle saving
 	 * any extra data in the animatable. The default implementation just saves
 	 * the animtables {@link Parameter}s.
@@ -348,17 +354,5 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 		{
 			parameter.toXml(element, version);
 		}
-	}
-
-	/**
-	 * @return name if not null, otherwise defaultName
-	 */
-	protected static String nameOrDefaultName(String name, String defaultName)
-	{
-		if (name != null)
-		{
-			return name;
-		}
-		return defaultName;
 	}
 }

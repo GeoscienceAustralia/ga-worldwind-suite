@@ -48,7 +48,7 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 
 	public ElevationExaggerationParameterImpl(String name, Animation animation, ElevationExaggeration exaggerator)
 	{
-		super(nameOrDefaultName(name, getName(exaggerator)), animation);
+		super(getNameOrDefault(name, exaggerator), animation);
 
 		Validate.notNull(exaggerator, "An exaggerator is required");
 		this.exaggerator = exaggerator;
@@ -56,9 +56,16 @@ public class ElevationExaggerationParameterImpl extends ParameterBase implements
 		setDefaultValue(exaggerator.getExaggeration());
 	}
 
-	protected static String getName(ElevationExaggeration exaggerator)
+	protected static String getNameOrDefault(String name, ElevationExaggeration exaggerator)
 	{
-		return getMessageOrDefault(getElevationExaggerationNameKey(), DEFAULT_NAME, exaggerator.getElevationBoundary());
+		return name != null ? name : getMessageOrDefault(getElevationExaggerationNameKey(), DEFAULT_NAME,
+				exaggerator.getElevationBoundary());
+	}
+
+	@Override
+	protected String getDefaultName()
+	{
+		return DEFAULT_NAME;
 	}
 
 	@Override
