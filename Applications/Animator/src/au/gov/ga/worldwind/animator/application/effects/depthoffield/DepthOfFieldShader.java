@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.animator.application.effects.depthoffield;
 
-import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.DrawContext;
 
 import java.awt.Dimension;
@@ -17,13 +16,13 @@ public class DepthOfFieldShader extends Shader
 	private int focalLengthUniform = -1;
 	private int pixelSizeUniform = -1;
 	private int blurTextureScaleUniform = -1;
-	
-	public void use(DrawContext dc, Dimension dimensions, float blurTextureScale)
+
+	public void use(DrawContext dc, Dimension dimensions, float focus, float near, float far, float blurTextureScale)
 	{
 		GL gl = dc.getGL();
 		super.use(gl);
-		
-		float nearClipDistance = (float) dc.getView().getNearClipDistance();
+
+		/*float nearClipDistance = (float) dc.getView().getNearClipDistance();
 		float farClipDistance = (float) dc.getView().getFarClipDistance();
 
 		float focalLength;
@@ -40,11 +39,16 @@ public class DepthOfFieldShader extends Shader
 
 		gl.glUniform1f(cameraNearUniform, nearClipDistance);
 		gl.glUniform1f(cameraFarUniform, farClipDistance);
-		gl.glUniform1f(focalLengthUniform, focalLength);
+		gl.glUniform1f(focalLengthUniform, focalLength);*/
+		
+		gl.glUniform1f(cameraNearUniform, near);
+		gl.glUniform1f(cameraFarUniform, far);
+		gl.glUniform1f(focalLengthUniform, focus);
+		
 		gl.glUniform2f(pixelSizeUniform, 1f / dimensions.width, 1f / dimensions.height);
 		gl.glUniform1f(blurTextureScaleUniform, blurTextureScale);
 	}
-	
+
 	@Override
 	protected InputStream getVertexSource()
 	{

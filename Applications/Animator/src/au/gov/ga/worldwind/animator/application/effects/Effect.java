@@ -5,6 +5,7 @@ import gov.nasa.worldwind.render.DrawContext;
 import java.awt.Dimension;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
+import au.gov.ga.worldwind.animator.animation.Animation;
 
 public interface Effect extends Animatable
 {
@@ -39,4 +40,14 @@ public interface Effect extends Animatable
 	 *            rendering)
 	 */
 	void postDraw(DrawContext dc, Dimension dimensions);
+
+	/**
+	 * Create a new instance of this {@link Effect}, associated with the
+	 * provided {@link Animation}.
+	 * 
+	 * @param animation
+	 *            Animation to associated new Effect with
+	 * @return New instance of this Effect
+	 */
+	Effect createWithAnimation(Animation animation);
 }

@@ -1,20 +1,23 @@
 package au.gov.ga.worldwind.animator.application.effects.depthoffield;
 
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getDepthOfFieldNameKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessageOrDefault;
-
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.Dimension;
 
 import javax.media.opengl.GL;
+import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.effects.EffectBase;
 import au.gov.ga.worldwind.animator.application.render.FrameBuffer;
 
@@ -28,13 +31,18 @@ public class DepthOfFieldEffect extends EffectBase
 	private final FrameBuffer mainFrameBuffer = new FrameBuffer();
 	private final FrameBuffer blurFrameBuffer = new FrameBuffer();
 
+	private double focus = 5;
 	private double near = 0;
 	private double far = 10;
-	private double focus = 5;
+
+	private Parameter focusParameter;
+	private Parameter nearParameter;
+	private Parameter farParameter;
 
 	public DepthOfFieldEffect(String name, Animation animation)
 	{
 		super(name, animation);
+		refreshParameters();
 	}
 
 	@SuppressWarnings("unused")
@@ -42,11 +50,33 @@ public class DepthOfFieldEffect extends EffectBase
 	{
 		super();
 	}
-	
+
 	@Override
 	protected String getDefaultName()
 	{
 		return getMessageOrDefault(getDepthOfFieldNameKey(), "Depth of Field");
+	}
+
+	protected void refreshParameters()
+	{
+		if (focusParameter == null || nearParameter == null || farParameter == null)
+		{
+			focusParameter = new DepthOfFieldFocusParameter(null, animation, this);
+			nearParameter = new DepthOfFieldNearParameter(null, animation, this);
+			farParameter = new DepthOfFieldFarParameter(null, animation, this);
+		}
+		
+		focusParameter.setArmed(false);
+		focusParameter.setEnabled(false);
+		nearParameter.setArmed(false);
+		nearParameter.setEnabled(false);
+		farParameter.setArmed(false);
+		farParameter.setEnabled(false);
+
+		parameters.clear();
+		parameters.add(focusParameter);
+		parameters.add(nearParameter);
+		parameters.add(farParameter);
 	}
 
 	public boolean isEnabled()
@@ -142,7 +172,8 @@ public class DepthOfFieldEffect extends EffectBase
 
 		try
 		{
-			depthOfFieldShader.use(dc, mainFrameBuffer.getDimensions(), 1f / 4f);
+			depthOfFieldShader.use(dc, mainFrameBuffer.getDimensions(), (float) focus, (float) near, (float) far,
+					1f / 4f);
 			FrameBuffer.renderTexturedQuad(gl, mainFrameBuffer.getTextureId(), mainFrameBuffer.getDepthId(),
 					blurFrameBuffer.getTextureId());
 		}
@@ -192,6 +223,30 @@ public class DepthOfFieldEffect extends EffectBase
 	protected EffectBase createEffectFromXml(String name, Animation animation, boolean enabled, Element element,
 			AnimationFileVersion version, AVList context)
 	{
-		return new DepthOfFieldEffect(name, animation);
+		AnimationIOConstants constants = version.getConstants();
+		XPath xpath = WWXML.makeXPath();
+
+		DepthOfFieldEffect effect = new DepthOfFieldEffect(name, animation);
+
+		effect.focusParameter =
+				new DepthOfFieldFocusParameter()
+						.fromXml(WWXML.getElement(element, constants.getDepthOfFieldFocusElementName(), xpath),
+								version, context);
+		effect.nearParameter =
+				new DepthOfFieldNearParameter().fromXml(
+						WWXML.getElement(element, constants.getDepthOfFieldNearElementName(), xpath), version, context);
+		effect.farParameter =
+				new DepthOfFieldFarParameter().fromXml(
+						WWXML.getElement(element, constants.getDepthOfFieldFarElementName(), xpath), version, context);
+
+		effect.refreshParameters();
+
+		return effect;
+	}
+	
+	@Override
+	public Effect createWithAnimation(Animation animation)
+	{
+		return new DepthOfFieldEffect(null, animation);
 	}
 }

@@ -114,6 +114,7 @@ import au.gov.ga.worldwind.animator.application.debug.AnimationEventLogger;
 import au.gov.ga.worldwind.animator.application.effects.BuiltInEffects;
 import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.effects.EffectDialog;
+import au.gov.ga.worldwind.animator.application.effects.EffectFactory;
 import au.gov.ga.worldwind.animator.application.render.AnimationRenderer;
 import au.gov.ga.worldwind.animator.application.render.AnimationRenderer.RenderEventListener;
 import au.gov.ga.worldwind.animator.application.render.RenderDialog;
@@ -1802,7 +1803,8 @@ public class Animator
 
 		try
 		{
-			Effect effectInstance = effect.newInstance();
+			Effect effectInstance = EffectFactory.createEffect(effect, animation);
+			effectInstance.setArmed(false);
 			animation.addAnimatableObject(effectInstance);
 		}
 		catch (Exception e)

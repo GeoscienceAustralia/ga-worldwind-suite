@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.animator.application.effects;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -36,7 +37,7 @@ public class EffectRegistry
 	{
 		try
 		{
-			effect.getConstructor();
+			effect.getDeclaredConstructor();
 		}
 		catch (Exception e)
 		{
@@ -67,7 +68,9 @@ public class EffectRegistry
 		//next try the "getName()" method of a new instance
 		try
 		{
-			Effect effectInstance = effect.newInstance();
+			Constructor<? extends Effect> constructor = effect.getDeclaredConstructor();
+			constructor.setAccessible(true);
+			Effect effectInstance = constructor.newInstance();
 			String s = effectInstance.getName();
 			if (s != null)
 			{

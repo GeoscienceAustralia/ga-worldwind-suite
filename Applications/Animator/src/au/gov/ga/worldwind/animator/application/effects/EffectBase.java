@@ -18,7 +18,7 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 public abstract class EffectBase extends AnimatableBase implements Effect
 {
-	private final List<Parameter> parameters = new ArrayList<Parameter>();
+	protected final List<Parameter> parameters = new ArrayList<Parameter>();
 	
 	public EffectBase(String name, Animation animation)
 	{
@@ -28,6 +28,7 @@ public abstract class EffectBase extends AnimatableBase implements Effect
 	protected EffectBase()
 	{
 		super();
+		setName(getDefaultName());
 	}
 
 	@Override
