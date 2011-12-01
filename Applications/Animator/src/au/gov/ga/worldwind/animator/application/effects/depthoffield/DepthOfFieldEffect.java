@@ -13,6 +13,7 @@ import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
@@ -52,7 +53,7 @@ public class DepthOfFieldEffect extends EffectBase
 	}
 
 	@Override
-	protected String getDefaultName()
+	public String getDefaultName()
 	{
 		return getMessageOrDefault(getDepthOfFieldNameKey(), "Depth of Field");
 	}
@@ -65,7 +66,7 @@ public class DepthOfFieldEffect extends EffectBase
 			nearParameter = new DepthOfFieldNearParameter(null, animation, this);
 			farParameter = new DepthOfFieldFarParameter(null, animation, this);
 		}
-		
+
 		focusParameter.setArmed(false);
 		focusParameter.setEnabled(false);
 		nearParameter.setArmed(false);
@@ -214,19 +215,20 @@ public class DepthOfFieldEffect extends EffectBase
 	}
 
 	@Override
-	protected String getXmlElementName(AnimationIOConstants constants)
+	public String getXmlElementName(AnimationIOConstants constants)
 	{
 		return constants.getDepthOfFieldEffectElementName();
 	}
 
 	@Override
-	protected EffectBase createEffectFromXml(String name, Animation animation, boolean enabled, Element element,
-			AnimationFileVersion version, AVList context)
+	protected AnimatableBase createAnimatableFromXml(String name, Animation animation, boolean enabled,
+			Element element, AnimationFileVersion version, AVList context)
 	{
 		AnimationIOConstants constants = version.getConstants();
 		XPath xpath = WWXML.makeXPath();
 
 		DepthOfFieldEffect effect = new DepthOfFieldEffect(name, animation);
+		context.setValue(constants.getCurrentEffectKey(), effect);
 
 		effect.focusParameter =
 				new DepthOfFieldFocusParameter()
@@ -243,7 +245,7 @@ public class DepthOfFieldEffect extends EffectBase
 
 		return effect;
 	}
-	
+
 	@Override
 	public Effect createWithAnimation(Animation animation)
 	{
