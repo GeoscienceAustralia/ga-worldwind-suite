@@ -321,6 +321,8 @@ public abstract class AnimatableBase extends PropagatingChangeableEventListener 
 	 *            name)
 	 * @param animation
 	 *            Animation to associate with this animatable
+	 * @param enabled
+	 *            Is this Animatable enabled?
 	 * @param element
 	 *            XML element containing this animatable
 	 * @param version

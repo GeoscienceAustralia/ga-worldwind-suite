@@ -6,6 +6,6 @@ public class BuiltInEffects
 {
 	public static void registerBuiltInEffects()
 	{
-		EffectRegistry.registerEffect(DepthOfFieldEffect.class);
+		EffectRegistry.instance.registerEffect(DepthOfFieldEffect.class);
 	}
 }

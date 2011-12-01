@@ -6,6 +6,7 @@ import java.awt.Dimension;
 
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
+import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 
 public interface Effect extends Animatable
 {
@@ -50,4 +51,15 @@ public interface Effect extends Animatable
 	 * @return New instance of this Effect
 	 */
 	Effect createWithAnimation(Animation animation);
+
+	/**
+	 * @return The default name for this effect.
+	 */
+	String getDefaultName();
+
+	/**
+	 * @param constants
+	 * @return The effect's XML element name.
+	 */
+	String getXmlElementName(AnimationIOConstants constants);
 }

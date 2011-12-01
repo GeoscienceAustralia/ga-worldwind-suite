@@ -1,19 +1,36 @@
 package au.gov.ga.worldwind.animator.application.effects;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import gov.nasa.worldwind.avlist.AVList;
+
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class EffectRegistry
-{
-	private static SortedSet<Class<? extends Effect>> effects = new TreeSet<Class<? extends Effect>>(
-			new EffectComparator());
+import org.w3c.dom.Element;
 
-	private static class EffectComparator implements Comparator<Class<? extends Effect>>
+import au.gov.ga.worldwind.animator.animation.Animatable;
+import au.gov.ga.worldwind.animator.animation.AnimatableFactory;
+import au.gov.ga.worldwind.animator.animation.AnimatableFactoryRegistry;
+import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
+
+public enum EffectRegistry implements AnimatableFactory
+{
+	instance;
+
+	private final Map<String, Class<? extends Effect>> elementToEffectMap =
+			new HashMap<String, Class<? extends Effect>>();
+	private final SortedSet<Class<? extends Effect>> effects = new TreeSet<Class<? extends Effect>>(
+			new EffectComparator());
+	
+	private EffectRegistry()
+	{
+		AnimatableFactoryRegistry.instance.registerFactory(this);
+	}
+
+	private class EffectComparator implements Comparator<Class<? extends Effect>>
 	{
 		@Override
 		public int compare(Class<? extends Effect> o1, Class<? extends Effect> o2)
@@ -28,60 +45,42 @@ public class EffectRegistry
 		}
 	}
 
-	public static SortedSet<Class<? extends Effect>> getEffects()
+	public SortedSet<Class<? extends Effect>> getEffects()
 	{
 		return Collections.unmodifiableSortedSet(effects);
 	}
 
-	public static void registerEffect(Class<? extends Effect> effect)
+	public void registerEffect(Class<? extends Effect> effect)
 	{
-		try
-		{
-			effect.getDeclaredConstructor();
-		}
-		catch (Exception e)
-		{
-			throw new IllegalArgumentException("Effect class '" + effect + "' does not have a default constructor");
-		}
+		Effect effectInstance = AnimatableInstanciator.instantiate(effect);
 		effects.add(effect);
+		elementToEffectMap
+				.put(effectInstance.getXmlElementName(AnimationFileVersion.VERSION020.getConstants()), effect);
 	}
 
-	public static String getEffectName(Class<? extends Effect> effect)
+	public String getEffectName(Class<? extends Effect> effect)
 	{
-		//first try a static class method named "getEffectName()"
-		try
+		Effect effectInstance = AnimatableInstanciator.instantiate(effect);
+		String name = effectInstance.getName();
+		if (name == null)
 		{
-			Method method = effect.getMethod("getEffectName");
-			if (Modifier.isStatic(method.getModifiers()))
-			{
-				String s = (String) method.invoke(null);
-				if (s != null)
-				{
-					return s;
-				}
-			}
+			name = effectInstance.getDefaultName();
 		}
-		catch (Exception e)
+		if (name == null)
 		{
+			name = effect.getCanonicalName();
 		}
+		return name;
+	}
 
-		//next try the "getName()" method of a new instance
-		try
+	@Override
+	public Animatable fromXml(Element element, AnimationFileVersion version, AVList context)
+	{
+		Class<? extends Effect> effectClass = elementToEffectMap.get(element.getNodeName());
+		if (effectClass == null)
 		{
-			Constructor<? extends Effect> constructor = effect.getDeclaredConstructor();
-			constructor.setAccessible(true);
-			Effect effectInstance = constructor.newInstance();
-			String s = effectInstance.getName();
-			if (s != null)
-			{
-				return s;
-			}
+			return null;
 		}
-		catch (Exception e)
-		{
-		}
-
-		//finally just return the effect's class name
-		return effect.getCanonicalName();
+		return AnimatableInstanciator.instantiate(effectClass).fromXml(element, version, context);
 	}
 }

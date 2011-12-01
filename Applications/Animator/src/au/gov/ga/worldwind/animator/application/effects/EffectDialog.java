@@ -65,7 +65,7 @@ public class EffectDialog extends JDialog
 		int spacing = 5;
 
 		DefaultListModel model = new DefaultListModel();
-		SortedSet<Class<? extends Effect>> effects = EffectRegistry.getEffects();
+		SortedSet<Class<? extends Effect>> effects = EffectRegistry.instance.getEffects();
 		for (Class<? extends Effect> effect : effects)
 		{
 			model.addElement(new EffectListElement(effect));
@@ -150,7 +150,7 @@ public class EffectDialog extends JDialog
 		@Override
 		public String toString()
 		{
-			return EffectRegistry.getEffectName(effect);
+			return EffectRegistry.instance.getEffectName(effect);
 		}
 	}
 }

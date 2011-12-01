@@ -418,9 +418,9 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			{
 				animatableLayers.remove((AnimatableLayer) object);
 			}
-			if(object instanceof Effect)
+			if (object instanceof Effect)
 			{
-				effects.remove((Effect)object);
+				effects.remove((Effect) object);
 			}
 
 			object.removeChangeListener(this);
@@ -510,7 +510,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			}
 		}
 	}
-	
+
 	private void refreshEffectsList()
 	{
 		effects.clear();
@@ -1074,7 +1074,8 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 				result.clearAnimatableObjects();
 				for (Element animatableObjectElement : animatableObjectElements)
 				{
-					Animatable animatable = AnimatableFactory.fromXml(animatableObjectElement, version, context);
+					Animatable animatable =
+							AnimatableFactoryRegistry.instance.fromXml(animatableObjectElement, version, context);
 					if (animatable == null)
 					{
 						continue;
