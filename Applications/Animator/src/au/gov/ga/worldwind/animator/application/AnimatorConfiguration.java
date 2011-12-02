@@ -2,9 +2,6 @@ package au.gov.ga.worldwind.animator.application;
 
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.util.Logging;
-
-import java.util.logging.Level;
 
 import javax.media.opengl.GLCapabilities;
 import javax.swing.UIManager;
@@ -22,6 +19,9 @@ import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
  * Class that holds and initialises the configuration details for the Animator application
+ * 
+ * @author Michael de Hoog (michael.deHoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class AnimatorConfiguration
 {
@@ -29,7 +29,6 @@ public class AnimatorConfiguration
 	
 	public static final void initialiseConfiguration()
 	{
-		initialiseLogging();
 		initialiseGLCapabilities();
 		initialisePlatformDependentConfiguration();
 		initialiseLAF();
@@ -37,11 +36,6 @@ public class AnimatorConfiguration
 		initialiseWorldWindConfiguration();
 		initialiseSandpitMode();
 		initialiseMessageSource();
-	}
-
-	private static void initialiseLogging()
-	{
-		Logging.logger().setLevel(Level.FINER);
 	}
 	
 	private static void initialiseGLCapabilities()
@@ -80,8 +74,6 @@ public class AnimatorConfiguration
 	
 	private static void initialiseProxySettings()
 	{
-		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
-		System.setProperty("http.proxyPort", "8080");
 		System.setProperty("http.nonProxyHosts", "localhost");
 	}
 	

@@ -120,6 +120,7 @@ import au.gov.ga.worldwind.animator.application.render.AnimationRenderer.RenderE
 import au.gov.ga.worldwind.animator.application.render.RenderDialog;
 import au.gov.ga.worldwind.animator.application.render.RenderProgressDialog;
 import au.gov.ga.worldwind.animator.application.render.StereoOffscreenRenderer;
+import au.gov.ga.worldwind.animator.application.settings.ProxyDialog;
 import au.gov.ga.worldwind.animator.application.settings.RecentlyUsedFilesMenuList;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
@@ -769,6 +770,8 @@ public class Animator
 		menu.addSeparator();
 		this.mruFileMenu = new RecentlyUsedFilesMenuList(this);
 		this.mruFileMenu.addToMenu(menu);
+		menu.addSeparator();
+		menu.add(actionFactory.getSetProxyAction());
 		menu.addSeparator();
 		menu.add(actionFactory.getExitAction());
 
@@ -1964,6 +1967,11 @@ public class Animator
 			getCurrentAnimation().setFrameCount(frames);
 			updateSlider();
 		}
+	}
+	
+	void promptToSetProxy()
+	{
+		ProxyDialog.show(frame);
 	}
 
 	void setAutokey(boolean autokey)

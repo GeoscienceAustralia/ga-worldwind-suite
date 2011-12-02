@@ -19,6 +19,9 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A factory used for creating and accessing action objects used in the Animator application
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class AnimatorActionFactory
 {
@@ -53,6 +56,7 @@ public class AnimatorActionFactory
 	private BasicAction addElevationModelAction;
 	private BasicAction addExaggeratorAction;
 	private BasicAction addEffectAction;
+	private BasicAction setProxyAction;
 	private SelectableAction showCameraPathAction;
 	private SelectableAction showGridAction;
 	private SelectableAction showRuleOfThirdsAction;
@@ -425,6 +429,16 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		setProxyAction = new BasicAction(getMessage(getSetProxyLabelKey()), null);
+		setProxyAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.promptToSetProxy();
+			}
+		});
+		
 		// Show camera path
 		showCameraPathAction = new SelectableAction(getMessage(getShowCameraPathLabelKey()), null, Settings.get().isCameraPathShown());
 		showCameraPathAction.addActionListener(new ActionListener()
@@ -733,6 +747,11 @@ public class AnimatorActionFactory
 	public BasicAction getAddEffectAction()
 	{
 		return addEffectAction;
+	}
+	
+	public BasicAction getSetProxyAction()
+	{
+		return setProxyAction;
 	}
 
 	public BasicAction getDebugKeyFramesAction()

@@ -111,6 +111,12 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getExaggeratorDialogBoundaryLabelKey() { return "animator.gui.dialog.newexaggerator.boundary.label"; }
 	public static String getAddEffectLabelKey() { return "animator.gui.menu.addeffect.label"; }
 	public static String getAddEffectDialogTitleKey() { return "animator.gui.dialog.addeffect.title"; }
+	public static String getSetProxyLabelKey() { return "animator.gui.dialog.setproxy"; }
+	public static String getProxyDialogTitleKey() { return "animator.gui.dialog.proxy.title"; }
+	public static String getProxyEnabledLabelKey() { return "animator.gui.dialog.proxy.enabled"; }
+	public static String getProxyHostLabelKey() { return "animator.gui.dialog.proxy.host"; }
+	public static String getProxyPortLabelKey() { return "animator.gui.dialog.proxy.port"; }
+	public static String getProxyTypeLabelKey() { return "animator.gui.dialog.proxy.type"; }
 	public static String getAnimationBrowserEnableAllLabelKey() { return "animator.gui.menu.enableall.label"; }
 	public static String getAnimationBrowserDisableAllLabelKey() { return "animator.gui.menu.disableall.label"; }
 	public static String getAnimationBrowserArmAllLabelKey() { return "animator.gui.menu.armall.label"; }
