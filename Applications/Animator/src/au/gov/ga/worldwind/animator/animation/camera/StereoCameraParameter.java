@@ -11,11 +11,17 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 
+/**
+ * Contains {@link Parameter}s used by the {@link StereoCamera}
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class StereoCameraParameter extends CameraParameter
 {
 	private static final long serialVersionUID = 20101111L;
@@ -36,6 +42,9 @@ public abstract class StereoCameraParameter extends CameraParameter
 		return (StereoView) super.getView();
 	}
 
+	/**
+	 * Parameter for stereo focal length
+	 */
 	@SuppressWarnings("serial")
 	@EditableParameter
 	public static class FocalLengthParameter extends StereoCameraParameter
@@ -89,6 +98,9 @@ public abstract class StereoCameraParameter extends CameraParameter
 		}
 	}
 
+	/**
+	 * Parameter for stereo eye separation
+	 */
 	@SuppressWarnings("serial")
 	@EditableParameter
 	public static class EyeSeparationParameter extends StereoCameraParameter

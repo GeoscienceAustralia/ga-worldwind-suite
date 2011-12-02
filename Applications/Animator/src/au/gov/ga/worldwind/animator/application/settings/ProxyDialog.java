@@ -1,6 +1,10 @@
 package au.gov.ga.worldwind.animator.application.settings;
 
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyDialogTitleKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyEnabledLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyHostLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyPortLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyTypeLabelKey;
 import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermCancelKey;
 import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermOkKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
@@ -13,39 +17,30 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.SortedSet;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import au.gov.ga.worldwind.animator.application.effects.Effect;
-import au.gov.ga.worldwind.animator.application.effects.EffectDialog;
-import au.gov.ga.worldwind.animator.application.effects.EffectRegistry;
 import au.gov.ga.worldwind.common.ui.JIntegerField;
 
 /**
+ * {@link JDialog} used for setting up the proxy settings.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
- *
  */
 public class ProxyDialog extends JDialog
 {
 	/**
-	 * Show a new {@link EffectDialog}, and block until the user has selected an
-	 * effect.
+	 * Show a new {@link ProxyDialog}, and block until the user has completed.
 	 * 
 	 * @param parent
 	 *            Dialog's parent
-	 * @return The effect class selected, or null if the user cancelled.
 	 */
 	public static void show(Frame parent)
 	{
@@ -64,18 +59,18 @@ public class ProxyDialog extends JDialog
 		{
 			port = Integer.valueOf(dialog.port.getText());
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			//ignore
 		}
 		Settings.get().setProxyPort(port);
-		Settings.get().setProxyType((Settings.ProxyType)dialog.type.getSelectedItem());
+		Settings.get().setProxyType((Settings.ProxyType) dialog.type.getSelectedItem());
 	}
 
 	private JButton okButton;
 	private JButton cancelButton;
 	private int response;
-	
+
 	private JCheckBox enabled;
 	private JTextField host;
 	private JIntegerField port;
@@ -103,7 +98,7 @@ public class ProxyDialog extends JDialog
 		setContentPane(rootPanel);
 		int spacing = 5;
 		int row = -1;
-		
+
 		enabled = new JCheckBox(getMessage(getProxyEnabledLabelKey()));
 		enabled.setSelected(Settings.get().isProxyEnabled());
 		c = new GridBagConstraints();
@@ -112,7 +107,7 @@ public class ProxyDialog extends JDialog
 		c.insets = new Insets(spacing, spacing, spacing, spacing);
 		c.anchor = GridBagConstraints.WEST;
 		rootPanel.add(enabled, c);
-		
+
 		label = new JLabel(getMessage(getProxyHostLabelKey()));
 		c = new GridBagConstraints();
 		c.gridy = ++row;
@@ -128,14 +123,14 @@ public class ProxyDialog extends JDialog
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		rootPanel.add(host, c);
-		
+
 		label = new JLabel(getMessage(getProxyPortLabelKey()));
 		c = new GridBagConstraints();
 		c.gridy = ++row;
 		c.insets = new Insets(0, spacing, spacing, spacing);
 		c.anchor = GridBagConstraints.EAST;
 		rootPanel.add(label, c);
-		
+
 		port = new JIntegerField(Settings.get().getProxyPort());
 		c = new GridBagConstraints();
 		c.gridy = row;
@@ -144,14 +139,14 @@ public class ProxyDialog extends JDialog
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		rootPanel.add(port, c);
-		
+
 		label = new JLabel(getMessage(getProxyTypeLabelKey()));
 		c = new GridBagConstraints();
 		c.gridy = ++row;
 		c.insets = new Insets(0, spacing, spacing, spacing);
 		c.anchor = GridBagConstraints.EAST;
 		rootPanel.add(label, c);
-		
+
 		type = new JComboBox(Settings.ProxyType.values());
 		c = new GridBagConstraints();
 		c.gridy = row;

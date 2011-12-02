@@ -15,7 +15,7 @@ import au.gov.ga.worldwind.animator.util.TGAScreenshot;
  * should be called (from the non-GL thread) to block until the screenshot has
  * completed.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class ScreenshotPaintTask implements PaintTask
 {

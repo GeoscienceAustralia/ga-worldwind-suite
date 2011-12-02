@@ -40,7 +40,7 @@ import au.gov.ga.worldwind.common.util.Validate;
 /**
  * A default implementation of the {@link Camera} interface
  * 
- * @author James Navin (james.navin@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)z
  * 
  */
 public class CameraImpl extends AnimatableBase implements Camera

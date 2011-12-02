@@ -10,6 +10,8 @@ import au.gov.ga.worldwind.common.util.Validate;
  * Used to update the animation outside of the render thread.
  * <p/>
  * New key frames are queued on a waiting queue, and then applied to the animation asynchronously.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class Updater
 {

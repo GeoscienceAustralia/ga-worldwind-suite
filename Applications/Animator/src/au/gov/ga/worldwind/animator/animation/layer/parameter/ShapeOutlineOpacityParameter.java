@@ -21,6 +21,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 /**
  * A {@link LayerParameter} that controls the Outline Opacity of any shapes
  * contained in a {@link RenderableLayer}.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ShapeOutlineOpacityParameter extends LayerParameterBase
 {

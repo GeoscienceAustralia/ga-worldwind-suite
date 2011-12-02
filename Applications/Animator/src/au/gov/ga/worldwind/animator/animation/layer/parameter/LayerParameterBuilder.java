@@ -7,6 +7,8 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 
 /**
  * An interface for builders that can yield an initialised {@link LayerParameter} given a {@link Layer}
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface LayerParameterBuilder
 {

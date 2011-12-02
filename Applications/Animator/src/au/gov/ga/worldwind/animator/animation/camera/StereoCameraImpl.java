@@ -20,6 +20,11 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 
+/**
+ * A default implementation of the {@link StereoCamera} interface
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class StereoCameraImpl extends CameraImpl implements StereoCamera
 {
 	private static final long serialVersionUID = 20101111L;
@@ -28,7 +33,7 @@ public class StereoCameraImpl extends CameraImpl implements StereoCamera
 	protected Parameter eyeSeparation;
 
 	protected boolean dynamicStereo = true;
-	
+
 	public StereoCameraImpl(Animation animation)
 	{
 		this(null, animation);
@@ -46,7 +51,7 @@ public class StereoCameraImpl extends CameraImpl implements StereoCamera
 	{
 		super();
 	}
-	
+
 	@Override
 	protected String getDefaultName()
 	{

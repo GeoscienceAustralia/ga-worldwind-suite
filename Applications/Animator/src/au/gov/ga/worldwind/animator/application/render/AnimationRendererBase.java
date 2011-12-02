@@ -11,6 +11,8 @@ import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
 
 /**
  * A base class for animation renderers
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public abstract class AnimationRendererBase implements AnimationRenderer
 {

@@ -5,6 +5,8 @@ import java.awt.Font;
 
 /**
  * Look and Feel (Color etc.) constants used throughout the application
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class LAFConstants
 {

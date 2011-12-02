@@ -18,6 +18,7 @@ import au.gov.ga.worldwind.common.util.Validate;
  * <p/>
  * Used to log events for use in debug analysis.
  *
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class AnimationEventLogger implements AnimationEventListener
 {

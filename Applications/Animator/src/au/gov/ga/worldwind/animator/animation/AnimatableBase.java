@@ -30,7 +30,7 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
  * Provides convenience implementations of common methods.
  * 
  * @author James Navin (james.navin@ga.gov.au)
- * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public abstract class AnimatableBase extends PropagatingChangeableEventListener implements Animatable
 {

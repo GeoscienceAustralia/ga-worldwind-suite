@@ -11,6 +11,8 @@ import java.awt.event.MouseEvent;
 /**
  * An extension of the {@link AWTInputHandler} that generates 
  * {@link SelectEvent}s in response to right-click dragging etc.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class AnimatorInputHandler extends AWTInputHandler
 {

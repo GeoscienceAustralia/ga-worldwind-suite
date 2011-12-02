@@ -17,6 +17,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A factory class for creating {@link LayerParameter}s from XML elements
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class LayerParameterFactory
 {

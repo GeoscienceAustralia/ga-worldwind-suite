@@ -19,6 +19,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A layer parameter controlling the far factor of a {@link FogLayer}
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 @EditableParameter
 public class FogFarFactorParameter extends LayerParameterBase

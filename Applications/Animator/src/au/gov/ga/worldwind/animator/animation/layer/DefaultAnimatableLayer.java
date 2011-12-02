@@ -34,6 +34,8 @@ import au.gov.ga.worldwind.common.util.Validate;
  * A default implementation of the {@link AnimatableLayer} interface.
  * <p/>
  * Can be used to wrap around any {@link Layer} implementation.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class DefaultAnimatableLayer extends AnimatableBase implements AnimatableLayer
 {
@@ -73,7 +75,7 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 			}
 		}
 	}
-	
+
 	protected static String nameOrLayerName(String name, Layer layer)
 	{
 		return name != null ? name : layer != null ? layer.getName() : null;
@@ -99,7 +101,7 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 	{
 		super();
 	}
-	
+
 	@Override
 	protected String getDefaultName()
 	{

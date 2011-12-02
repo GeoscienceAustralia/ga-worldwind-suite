@@ -34,14 +34,20 @@ import javax.swing.event.HyperlinkListener;
 import au.gov.ga.worldwind.animator.util.Util;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 
+/**
+ * {@link JDialog} that displays the About help information.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
+ */
 public class AboutDialog extends JDialog
 {
 	private static final long serialVersionUID = 20110310L;
 
 	private static final String BASE_LOCATION = "/au/gov/ga/worldwind/animator/data/help/";
-	
+
 	private final LicenceDialog licenceDialog;
-	
+
 	private final HyperlinkListener hyperlinkListener = new HyperlinkListener()
 	{
 		@Override
@@ -61,13 +67,13 @@ public class AboutDialog extends JDialog
 			}
 		}
 	};
-	
+
 	public AboutDialog(Frame parent, String title)
 	{
 		super(parent, title, true);
 		setMinimumSize(new Dimension(400, 100));
 		licenceDialog = new LicenceDialog(parent);
-		
+
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 		{
@@ -79,7 +85,7 @@ public class AboutDialog extends JDialog
 		});
 
 		setLayout(new BorderLayout());
-		
+
 		// Load the image canvas
 		ImageCanvas canvas = new ImageCanvas(loadImage());
 		add(canvas, BorderLayout.WEST);
@@ -90,10 +96,16 @@ public class AboutDialog extends JDialog
 		editorPane.setContentType("text/html");
 		try
 		{
-			String aboutContent = Util.readStreamToString(this.getClass().getResourceAsStream(BASE_LOCATION + "about.html"));
+			String aboutContent =
+					Util.readStreamToString(this.getClass().getResourceAsStream(BASE_LOCATION + "about.html"));
 			if (aboutContent != null)
 			{
-				aboutContent = aboutContent.replace("${application_version}", Util.getVersion());
+				String version = Util.getVersion();
+				if (version == null)
+				{
+					version = ": DEV";
+				}
+				aboutContent = aboutContent.replace("${application_version}", version);
 				editorPane.setText(aboutContent);
 			}
 			else
@@ -104,15 +116,17 @@ public class AboutDialog extends JDialog
 		catch (Exception e)
 		{
 			editorPane.setText(e.toString());
+			e.printStackTrace();
 		}
-		
+
 		editorPane.addHyperlinkListener(hyperlinkListener);
 		add(editorPane, BorderLayout.CENTER);
 
 		// Add the button panel
 		JPanel panel = new JPanel(new BorderLayout());
 		int spacing = 10;
-		panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(spacing, spacing, spacing, spacing)));
+		panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
+				BorderFactory.createEmptyBorder(spacing, spacing, spacing, spacing)));
 		add(panel, BorderLayout.PAGE_END);
 
 		JButton okButton = new JButton(getMessage(getTermOkKey()));
@@ -125,7 +139,7 @@ public class AboutDialog extends JDialog
 				dispose();
 			}
 		});
-		
+
 		JButton licenceButton = new JButton(getMessage(getShowLicenceLabelKey()));
 		panel.add(licenceButton, BorderLayout.WEST);
 		licenceButton.addActionListener(new ActionListener()
@@ -162,7 +176,7 @@ public class AboutDialog extends JDialog
 	private static class ImageCanvas extends Canvas
 	{
 		private static final long serialVersionUID = 20110310L;
-		
+
 		private BufferedImage image;
 
 		public ImageCanvas(BufferedImage image)
@@ -180,7 +194,7 @@ public class AboutDialog extends JDialog
 			g.drawImage(image, 0, 0, null);
 		}
 	}
-	
+
 	private class LicenceDialog extends JDialog
 	{
 		private static final long serialVersionUID = 20110310L;
@@ -188,7 +202,7 @@ public class AboutDialog extends JDialog
 		public LicenceDialog(Frame parent)
 		{
 			super(parent, getMessage(getLicenceDialogTitleKey()), true);
-			
+
 			setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 			addWindowListener(new WindowAdapter()
 			{
@@ -198,12 +212,12 @@ public class AboutDialog extends JDialog
 					dispose();
 				}
 			});
-			
+
 			Dimension size = new Dimension(600, 400);
 			setMaximumSize(size);
 			setPreferredSize(size);
 			setLayout(new BorderLayout());
-			
+
 			// Load the about content
 			JEditorPane editorPane = new JEditorPane();
 			editorPane.setEditable(false);
@@ -226,11 +240,12 @@ public class AboutDialog extends JDialog
 			editorPane.addHyperlinkListener(hyperlinkListener);
 			JScrollPane scrollPane = new JScrollPane(editorPane);
 			add(scrollPane, BorderLayout.CENTER);
-			
+
 			// Add the button panel
 			JPanel panel = new JPanel(new BorderLayout());
 			int spacing = 10;
-			panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(spacing, spacing, spacing, spacing)));
+			panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(),
+					BorderFactory.createEmptyBorder(spacing, spacing, spacing, spacing)));
 			add(panel, BorderLayout.PAGE_END);
 
 			JButton okButton = new JButton(getMessage(getTermOkKey()));
@@ -243,11 +258,11 @@ public class AboutDialog extends JDialog
 					dispose();
 				}
 			});
-			
+
 			pack();
 			setResizable(false);
 			setLocationRelativeTo(parent);
 		}
-		
+
 	}
 }

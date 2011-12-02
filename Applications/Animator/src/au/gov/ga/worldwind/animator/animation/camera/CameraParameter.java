@@ -10,6 +10,7 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraNearClipNameKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessageOrDefault;
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
@@ -21,11 +22,17 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.annotation.EditableParameter;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.view.ClipConfigurableView;
 
+/**
+ * Contains {@link Parameter}s used by the {@link Camera}
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
+ */
 abstract class CameraParameter extends ParameterBase
 {
 	private static final long serialVersionUID = 20100922L;
@@ -42,21 +49,33 @@ abstract class CameraParameter extends ParameterBase
 		super(name, animation);
 	}
 
+	/**
+	 * @return The current {@link View} being used by the Animator
+	 */
 	protected View getView()
 	{
-		return getAnimation().getWorldWindow().getView();
+		return getAnimation().getView();
 	}
 
+	/**
+	 * Queue a redraw on the {@link WorldWindow}
+	 */
 	protected void redraw()
 	{
 		getAnimation().getWorldWindow().redraw();
 	}
 
+	/**
+	 * @return The {@link View}'s current eye position
+	 */
 	protected Position getCurrentEyePosition()
 	{
 		return getView().getCurrentEyePosition();
 	}
 
+	/**
+	 * @return The {@link View}'s current look-at position
+	 */
 	protected Position getCurrentLookatPosition()
 	{
 		Vec4 center = getView().getCenterPoint();
@@ -68,6 +87,12 @@ abstract class CameraParameter extends ParameterBase
 		return globe.computePositionFromPoint(center);
 	}
 
+	/**
+	 * Apply the given eye and look-at positions to the current view
+	 * 
+	 * @param eyePosition
+	 * @param lookAtPosition
+	 */
 	protected void applyCameraPositions(Position eyePosition, Position lookAtPosition)
 	{
 		View view = getView();
@@ -97,7 +122,7 @@ abstract class CameraParameter extends ParameterBase
 		{
 			super();
 		}
-		
+
 		@Override
 		protected String getDefaultName()
 		{
@@ -155,7 +180,7 @@ abstract class CameraParameter extends ParameterBase
 		{
 			super();
 		}
-		
+
 		@Override
 		protected String getDefaultName()
 		{
@@ -214,7 +239,7 @@ abstract class CameraParameter extends ParameterBase
 		{
 			super();
 		}
-		
+
 		@Override
 		protected String getDefaultName()
 		{
@@ -273,7 +298,7 @@ abstract class CameraParameter extends ParameterBase
 		{
 			super();
 		}
-		
+
 		@Override
 		protected String getDefaultName()
 		{
@@ -333,7 +358,7 @@ abstract class CameraParameter extends ParameterBase
 		{
 			super();
 		}
-		
+
 		@Override
 		protected String getDefaultName()
 		{
@@ -391,7 +416,7 @@ abstract class CameraParameter extends ParameterBase
 		{
 			super();
 		}
-		
+
 		@Override
 		protected String getDefaultName()
 		{
@@ -512,7 +537,7 @@ abstract class CameraParameter extends ParameterBase
 		{
 			super();
 		}
-		
+
 		@Override
 		protected String getDefaultName()
 		{

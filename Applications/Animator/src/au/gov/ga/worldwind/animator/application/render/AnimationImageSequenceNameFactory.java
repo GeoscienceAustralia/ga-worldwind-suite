@@ -8,6 +8,11 @@ import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
 
+/**
+ * A Factory that produces filename strings for the rendered animation frames.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
+ */
 public class AnimationImageSequenceNameFactory
 {
 	private static final String DEFAULT_FRAME_NAME = "frame";

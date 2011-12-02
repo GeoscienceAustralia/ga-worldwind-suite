@@ -5,6 +5,7 @@ package au.gov.ga.worldwind.animator.animation.io;
  * An interface defining accessors for constants used during animation IO.
  * 
  * @author James Navin (james.navin@ga.gov.au)
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface AnimationIOConstants
 {

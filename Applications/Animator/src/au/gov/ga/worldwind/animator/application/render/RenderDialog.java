@@ -49,6 +49,8 @@ import au.gov.ga.worldwind.common.ui.SwingUtil;
  * <p/>
  * Most render properties are stored with the {@link Animation} object. 
  * Others may be application settings.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class RenderDialog extends JDialog implements ChangeOfAnimationListener
 {

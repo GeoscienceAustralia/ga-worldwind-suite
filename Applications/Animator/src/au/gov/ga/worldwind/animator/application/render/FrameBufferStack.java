@@ -4,6 +4,13 @@ import java.util.Stack;
 
 import javax.media.opengl.GL;
 
+/**
+ * Stack that the {@link FrameBuffer}s call when binding/unbinding. This ensures
+ * that, when binding a new {@link FrameBuffer}, the previously bound
+ * {@link FrameBuffer} is rebound when the new one is unbound.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class FrameBufferStack
 {
 	private static Stack<Integer> stack = new Stack<Integer>();

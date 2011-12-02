@@ -2,6 +2,12 @@ package au.gov.ga.worldwind.animator.animation.camera;
 
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
+/**
+ * An extended {@link Camera} interface that supports extra parameters
+ * associated with stereo animation rendering.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public interface StereoCamera extends Camera
 {
 	/**

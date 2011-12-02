@@ -20,10 +20,11 @@ import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 
 /**
  * A class that auto-saves animations according to user preferences.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class AutoSaver implements ChangeOfAnimationListener
 {
-
 	private Animator targetApplication;
 	
 	private Animation currentAnimation;

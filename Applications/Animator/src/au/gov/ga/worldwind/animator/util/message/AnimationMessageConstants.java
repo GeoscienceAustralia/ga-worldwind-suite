@@ -6,6 +6,7 @@ import au.gov.ga.worldwind.common.util.message.CommonMessageConstants;
  * Constants class that contains the keys into the animation message bundle
  * 
  * @author James Navin (james.navin@ga.gov.au)
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class AnimationMessageConstants extends CommonMessageConstants
 {

@@ -24,6 +24,13 @@ import java.util.logging.SimpleFormatter;
 import au.gov.ga.worldwind.common.util.DirectDraw;
 import au.gov.ga.worldwind.common.util.NativeLibraries;
 
+/**
+ * Main class that runs the {@link Animator} as an executable. This class saves
+ * the stdout to a log file, and also initializes native libraries.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
+ */
 public class Executable
 {
 	public static void main(String[] args)
@@ -111,8 +118,7 @@ public class Executable
 		@Override
 		public String format(LogRecord record)
 		{
-			if (record.getLevel() != StdOutErrLevel.STDOUT
-					&& record.getLevel() != StdOutErrLevel.STDERR)
+			if (record.getLevel() != StdOutErrLevel.STDOUT && record.getLevel() != StdOutErrLevel.STDERR)
 			{
 				return super.format(record);
 			}

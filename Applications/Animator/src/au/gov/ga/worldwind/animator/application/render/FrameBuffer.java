@@ -9,8 +9,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 /**
  * Helper class for the creation and binding of an OpenGL Frame Buffer Object.
  * 
- * @author Michael de Hoog
- * @author James Navin
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class FrameBuffer
 {
@@ -32,6 +32,16 @@ public class FrameBuffer
 		create(gl, dimensions, false);
 	}
 
+	/**
+	 * Create a frame buffer, and its texture and depth buffer (but don't bind)
+	 * 
+	 * @param gl
+	 *            GL context
+	 * @param dimensions
+	 *            Frame buffer dimensions
+	 * @param depthAsTexture
+	 *            Should the depth be created as a texture?
+	 */
 	public void create(GL gl, Dimension dimensions, boolean depthAsTexture)
 	{
 		//generate a texture, depth buffer, and frame buffer
@@ -45,11 +55,13 @@ public class FrameBuffer
 		gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_TEXTURE_2D, textureId, 0);
 		if (depthAsTexture)
 		{
-			gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_TEXTURE_2D, depthId, 0);
+			gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_TEXTURE_2D, depthId,
+					0);
 		}
 		else
 		{
-			gl.glFramebufferRenderbufferEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, depthId);
+			gl.glFramebufferRenderbufferEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT,
+					depthId);
 		}
 
 		//check to see if the frame buffer is supported and complete
@@ -75,6 +87,16 @@ public class FrameBuffer
 		resize(gl, dimensions, false);
 	}
 
+	/**
+	 * Ensure this frame buffer has the correct dimensions. If the frame buffer
+	 * has not yet been created, it is created now. If it has already been
+	 * created, and the dimensions are different, it is deleted and recreated
+	 * with the new dimensions.
+	 * 
+	 * @param gl
+	 * @param dimensions
+	 * @param depthAsTexture
+	 */
 	public void resize(GL gl, Dimension dimensions, boolean depthAsTexture)
 	{
 		Validate.notNull(dimensions, "Dimensions cannot be null");
@@ -193,8 +215,8 @@ public class FrameBuffer
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
 		gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
 
-		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA8, renderDimensions.width,
-				renderDimensions.height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, null);
+		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA8, renderDimensions.width, renderDimensions.height, 0,
+				GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, null);
 		gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
 		return textures[0];
 	}
@@ -236,8 +258,8 @@ public class FrameBuffer
 		else
 		{
 			gl.glBindRenderbufferEXT(GL.GL_RENDERBUFFER_EXT, renderBuffers[0]);
-			gl.glRenderbufferStorageEXT(GL.GL_RENDERBUFFER_EXT, GL.GL_DEPTH_COMPONENT24,
-					renderDimensions.width, renderDimensions.height);
+			gl.glRenderbufferStorageEXT(GL.GL_RENDERBUFFER_EXT, GL.GL_DEPTH_COMPONENT24, renderDimensions.width,
+					renderDimensions.height);
 			gl.glBindRenderbufferEXT(GL.GL_RENDERBUFFER_EXT, 0);
 		}
 
@@ -265,7 +287,7 @@ public class FrameBuffer
 				gl.glActiveTexture(GL.GL_TEXTURE0 + i);
 				gl.glBindTexture(GL.GL_TEXTURE_2D, textureIds[i]);
 			}
-			
+
 			gl.glBegin(GL.GL_QUADS);
 			{
 				gl.glTexCoord2f(0, 0);

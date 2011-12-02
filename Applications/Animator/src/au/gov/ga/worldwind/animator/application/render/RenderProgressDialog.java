@@ -14,6 +14,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A dialog box used to show the progress of a render task
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class RenderProgressDialog implements RenderEventListener
 {

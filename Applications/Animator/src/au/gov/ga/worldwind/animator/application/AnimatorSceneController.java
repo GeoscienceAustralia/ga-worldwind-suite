@@ -16,8 +16,15 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.application.effects.Effect;
+import au.gov.ga.worldwind.animator.application.render.OffscreenRenderer;
 import au.gov.ga.worldwind.animator.application.render.OffscreenSurfaceObjectRenderer;
 
+/**
+ * A custom scene controller that supports {@link Effect}s, as well as pre/post
+ * paint tasks (for taking screen captures when rendering the animation).
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class AnimatorSceneController extends BasicSceneController
 {
 	private final Queue<PaintTask> prePaintTasks = new LinkedList<PaintTask>();
@@ -165,21 +172,39 @@ public class AnimatorSceneController extends BasicSceneController
 		return new OffscreenSurfaceObjectRenderer();
 	}
 
+	/**
+	 * @return The current render dimensions (null if not rendering)
+	 */
 	public Dimension getRenderDimensions()
 	{
 		return renderDimensions;
 	}
 
+	/**
+	 * Set the current render dimensions. This is called by the
+	 * {@link OffscreenRenderer} when the rendering begins.
+	 * 
+	 * @param renderDimensions
+	 */
 	public void setRenderDimensions(Dimension renderDimensions)
 	{
 		this.renderDimensions = renderDimensions;
 	}
 
+	/**
+	 * @return The current animation
+	 */
 	public Animation getAnimation()
 	{
 		return animation;
 	}
 
+	/**
+	 * Set the current animation. This is called by the {@link Animator} when
+	 * the animation changes.
+	 * 
+	 * @param animation
+	 */
 	public void setAnimation(Animation animation)
 	{
 		this.animation = animation;

@@ -7,6 +7,8 @@ import au.gov.ga.worldwind.animator.animation.RenderParameters;
  * An interface for animation renderers
  * <p/>
  * Provides a mechanism to start and stop rendering.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface AnimationRenderer
 {

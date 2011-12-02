@@ -13,6 +13,8 @@ import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
 /**
  * An extension of the basic {@link OffscreenRenderer} that supports a stereo view,
  * rendering two file sequences when stereo is enabled, one for the left and right eye.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class StereoOffscreenRenderer extends OffscreenRenderer
 {

@@ -22,8 +22,8 @@ import au.gov.ga.worldwind.common.util.Validate;
  * An {@link AnimationRenderer} that renders each frame of the animation to an
  * offscreen texture, then writes that texture to disk.
  * 
- * @author James Navin
- * @author Michael de Hoog
+ * @author James Navin (james.navin@ga.gov.au)
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class OffscreenRenderer extends AnimationRendererBase
 {
