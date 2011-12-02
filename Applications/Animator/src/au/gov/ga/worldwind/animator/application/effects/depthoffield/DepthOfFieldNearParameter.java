@@ -10,11 +10,19 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.application.effects.EffectParameterBase;
 import au.gov.ga.worldwind.common.util.Validate;
 
+/**
+ * A {@link Parameter} which controls the near limit of the
+ * {@link DepthOfFieldEffect}. Everything closer than this distance is fully
+ * blurred.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DepthOfFieldNearParameter extends EffectParameterBase
 {
 	public DepthOfFieldNearParameter(String name, Animation animation, DepthOfFieldEffect effect)
@@ -26,7 +34,7 @@ public class DepthOfFieldNearParameter extends EffectParameterBase
 	{
 		super();
 	}
-	
+
 	@Override
 	protected String getDefaultName()
 	{
@@ -51,7 +59,7 @@ public class DepthOfFieldNearParameter extends EffectParameterBase
 	{
 		return constants.getDepthOfFieldNearElementName();
 	}
-	
+
 	@Override
 	public double getDefaultValue(int frame)
 	{

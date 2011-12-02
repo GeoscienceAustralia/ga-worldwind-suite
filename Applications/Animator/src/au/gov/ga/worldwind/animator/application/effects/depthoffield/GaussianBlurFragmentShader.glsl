@@ -1,3 +1,5 @@
+//from http://callumhay.blogspot.com/2010/09/gaussian-blur-shader-glsl.html
+
 uniform float sigma;     // The sigma value for the gaussian function: higher value means more blur
                          // A good value for 9x9 is around 3 to 5
                          // A good value for 7x7 is around 2.5 to 4

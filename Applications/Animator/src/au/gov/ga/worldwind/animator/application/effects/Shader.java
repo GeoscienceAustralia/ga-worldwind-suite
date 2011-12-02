@@ -7,21 +7,44 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.util.IOUtil;
 
+/**
+ * Abstract base class for shaders. Handles the OpenGL setup for GLSL shaders.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class Shader
 {
 	protected int shaderProgram = 0;
 	protected int vertexShader = 0;
 	protected int fragmentShader = 0;
-	
+
+	/**
+	 * @return An {@link InputStream} containing the GLSL vertex shader string
+	 */
 	protected abstract InputStream getVertexSource();
+
+	/**
+	 * @return An {@link InputStream} containing the GLSL fragment shader string
+	 */
 	protected abstract InputStream getFragmentSource();
+
+	/**
+	 * Locate the uniforms for this shader
+	 * 
+	 * @param gl
+	 */
 	protected abstract void getUniformLocations(GL gl);
 
-	public void create(GL gl)
+	/**
+	 * Setup this GLSL shader in OpenGL
+	 * 
+	 * @param gl
+	 */
+	public final void create(GL gl)
 	{
 		if (isCreated())
 			return;
-		
+
 		InputStream vertex = getVertexSource();
 		InputStream fragment = getFragmentSource();
 
@@ -76,32 +99,50 @@ public abstract class Shader
 			gl.glGetProgramInfoLog(shaderProgram, maxLength, length, 0, bytes, 0);
 			String info = new String(bytes, 0, length[0]);
 			System.out.println(info);
-			
+
 			delete(gl);
 			throw new IllegalStateException("Validation of shader program failed");
 		}
-		
+
 		gl.glUseProgram(shaderProgram);
 		getUniformLocations(gl);
 		gl.glUseProgram(0);
 	}
 
-	public boolean isCreated()
+	/**
+	 * @return Has this shader been created yet?
+	 */
+	public final boolean isCreated()
 	{
 		return shaderProgram > 0;
 	}
 
-	//this must be called by subclasses
+	/**
+	 * Tell OpenGL to use this shader program. This method must be called by
+	 * {@link Shader} subclasses.
+	 * 
+	 * @param gl
+	 */
 	protected void use(GL gl)
 	{
 		gl.glUseProgram(shaderProgram); //if !isCreated(), then shaderProgram == 0
 	}
 
+	/**
+	 * Tell OpenGL to stop using this shader.
+	 * 
+	 * @param gl
+	 */
 	public void unuse(GL gl)
 	{
 		gl.glUseProgram(0);
 	}
 
+	/**
+	 * Delete any OpenGL resources associated with this shader.
+	 * 
+	 * @param gl
+	 */
 	public void delete(GL gl)
 	{
 		if (shaderProgram > 0)

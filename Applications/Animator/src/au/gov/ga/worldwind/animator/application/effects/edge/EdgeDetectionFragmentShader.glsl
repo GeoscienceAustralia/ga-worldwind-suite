@@ -1,11 +1,11 @@
-uniform sampler2D tex0;
-uniform sampler2D tex1;
+uniform sampler2D colorTexture;
+uniform sampler2D depthTexture;
 uniform float textureWidth;
 uniform float textureHeight;
 
 vec4 get_pixel(in vec2 coords, in float dx, in float dy)
 {
-	return texture2D(tex0, coords + vec2(dx, dy));
+	return texture2D(colorTexture, coords + vec2(dx, dy));
 }
 
 float Convolve(in float[9] kernel, in float[9] matrix, in float denom, in float offset)
@@ -69,9 +69,9 @@ void main()
 	float mata[9] = GetMean(matr,matg,matb);
 
    // Sharpness kernel
-   //gl_FragColor = vec4(Convolve(kerSharpness,matr,1.,0.),
-   //                    Convolve(kerSharpness,matg,1.,0.),
-   //                    Convolve(kerSharpness,matb,1.,0.),1.0);
+   gl_FragColor = vec4(Convolve(kerSharpness,matr,1.,0.),
+                       Convolve(kerSharpness,matg,1.,0.),
+                       Convolve(kerSharpness,matb,1.,0.),1.0);
 
    // Gaussian blur kernel
    //gl_FragColor = vec4(Convolve(kerGausBlur,matr,16.,0.),
@@ -79,12 +79,15 @@ void main()
    //                    Convolve(kerGausBlur,matb,16.,0.),1.0);
 
    // Edge Detection kernel
-   float edge = Convolve(kerEdgeDetect,mata,0.1,0.);
+   //float edge = Convolve(kerEdgeDetect,mata,0.1,0.);
    //gl_FragColor = vec4(edge, edge, edge, edge);
-   gl_FragColor = vec4(1.0, 1.0, 1.0, edge);
+   //gl_FragColor = vec4(1.0, 1.0, 1.0, edge);
    
    // Emboss kernel
 	//gl_FragColor = vec4(Convolve(kerEmboss,mata,1.,1./2.),
 	//					Convolve(kerEmboss,mata,1.,1./2.),
 	//					Convolve(kerEmboss,mata,1.,1./2.), 1.0);
+	
+	float unnormalizedDepth = texture2D(depthTexture, gl_TexCoord[0].xy).r;
+	gl_FragDepth = unnormalizedDepth;
 }

@@ -12,11 +12,18 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.BasicBezierParameterValue;
+import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.application.effects.EffectParameterBase;
 import au.gov.ga.worldwind.common.util.Validate;
 
+/**
+ * A {@link Parameter} which controls the focus distance of the
+ * {@link DepthOfFieldEffect}. Everything at this depth is in focus.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DepthOfFieldFocusParameter extends EffectParameterBase
 {
 	public DepthOfFieldFocusParameter(String name, Animation animation, DepthOfFieldEffect effect)

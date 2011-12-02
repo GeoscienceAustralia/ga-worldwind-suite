@@ -9,17 +9,34 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.animator.application.effects.Shader;
 
+/**
+ * Gaussian blur shader that blurs the input in a single direction (must be
+ * applied twice, both horizontally and vertically, for a correct Gaussian
+ * blur).
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class GaussianBlurShader extends Shader
 {
 	private int sigmaUniform;
 	private int blurSizeUniform;
 	private int horizontalUniform;
-	
+
+	/**
+	 * Use this shader.
+	 * 
+	 * @param dc
+	 *            Draw context
+	 * @param dimensions
+	 *            Dimensions of the input texture
+	 * @param horizontal
+	 *            Blur horizontally?
+	 */
 	public void use(DrawContext dc, Dimension dimensions, boolean horizontal)
 	{
 		GL gl = dc.getGL();
 		super.use(gl);
-		
+
 		gl.glUniform1f(sigmaUniform, 4.0f);
 		gl.glUniform1i(horizontalUniform, horizontal ? 1 : 0);
 		float blurSize = 1.0f / (horizontal ? dimensions.width : dimensions.height);

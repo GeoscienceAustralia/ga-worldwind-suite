@@ -5,6 +5,11 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.common.util.Validate;
 
+/**
+ * Base class for most {@link EffectParameter} implementations.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class EffectParameterBase extends ParameterBase implements EffectParameter
 {
 	/** The effect this parameter is associated with */

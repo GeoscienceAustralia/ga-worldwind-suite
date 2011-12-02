@@ -9,6 +9,13 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.animator.application.effects.Shader;
 
+/**
+ * A {@link Shader} that takes a scene, depth and blurred scene texture, and
+ * interpolates between the scene and blurred texture according to the depth,
+ * creating a depth-of-field effect.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DepthOfFieldShader extends Shader
 {
 	private int cameraNearUniform = -1;
@@ -17,34 +24,30 @@ public class DepthOfFieldShader extends Shader
 	private int pixelSizeUniform = -1;
 	private int blurTextureScaleUniform = -1;
 
+	/**
+	 * Use this shader.
+	 * 
+	 * @param dc
+	 *            Draw context
+	 * @param dimensions
+	 *            Dimensions of the textures
+	 * @param focus
+	 *            Focus distance
+	 * @param near
+	 *            Near limit
+	 * @param far
+	 *            Far limit
+	 * @param blurTextureScale
+	 *            Scale of the blurred texture compared to the scene texture
+	 */
 	public void use(DrawContext dc, Dimension dimensions, float focus, float near, float far, float blurTextureScale)
 	{
 		GL gl = dc.getGL();
 		super.use(gl);
 
-		/*float nearClipDistance = (float) dc.getView().getNearClipDistance();
-		float farClipDistance = (float) dc.getView().getFarClipDistance();
-
-		float focalLength;
-		Vec4 eyePoint = dc.getView().getEyePoint();
-		Vec4 centerPoint = dc.getView().getCenterPoint();
-		if (centerPoint != null && eyePoint != null)
-		{
-			focalLength = (float) centerPoint.distanceTo3(eyePoint);
-		}
-		else
-		{
-			focalLength = (farClipDistance + nearClipDistance) / 2f;
-		}
-
-		gl.glUniform1f(cameraNearUniform, nearClipDistance);
-		gl.glUniform1f(cameraFarUniform, farClipDistance);
-		gl.glUniform1f(focalLengthUniform, focalLength);*/
-		
 		gl.glUniform1f(cameraNearUniform, near);
 		gl.glUniform1f(cameraFarUniform, far);
 		gl.glUniform1f(focalLengthUniform, focus);
-		
 		gl.glUniform2f(pixelSizeUniform, 1f / dimensions.width, 1f / dimensions.height);
 		gl.glUniform1f(blurTextureScaleUniform, blurTextureScale);
 	}

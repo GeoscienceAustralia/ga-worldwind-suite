@@ -1,18 +1,38 @@
 package au.gov.ga.worldwind.animator.application.effects;
 
+import gov.nasa.worldwind.render.DrawContext;
+
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.media.opengl.GL;
+
 import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.animator.application.render.FrameBuffer;
 import au.gov.ga.worldwind.common.util.Validate;
 
+/**
+ * Abstract base implementation of the {@link Effect} interface. Most
+ * {@link Effect} implementations should use this as their base class.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class EffectBase extends AnimatableBase implements Effect
 {
+	/**
+	 * The animatable parameters used by this effect.
+	 */
 	protected final List<Parameter> parameters = new ArrayList<Parameter>();
+
+	/**
+	 * The frame buffer to draw to for this effect.
+	 */
+	protected final FrameBuffer frameBuffer = new FrameBuffer();
 
 	public EffectBase(String name, Animation animation)
 	{
@@ -54,4 +74,74 @@ public abstract class EffectBase extends AnimatableBase implements Effect
 			((EffectParameter) parameter).apply();
 		}
 	}
+
+	@Override
+	public final void bindFrameBuffer(DrawContext dc, Dimension dimensions)
+	{
+		GL gl = dc.getGL();
+
+		//this will create the framebuffer if it doesn't exist
+		frameBuffer.resize(gl, dimensions, true);
+		resizeExtraFrameBuffers(dc, dimensions);
+		frameBuffer.bind(gl);
+	}
+
+	/**
+	 * If this effect requires any extra frame buffers, resize them here.
+	 * 
+	 * @param dc
+	 *            Draw context
+	 * @param dimensions
+	 *            Render dimensions
+	 */
+	protected void resizeExtraFrameBuffers(DrawContext dc, Dimension dimensions)
+	{
+	}
+
+	@Override
+	public final void unbindFrameBuffer(DrawContext dc, Dimension dimensions)
+	{
+		frameBuffer.unbind(dc.getGL());
+	}
+
+	@Override
+	public final void drawFrameBufferWithEffect(DrawContext dc, Dimension dimensions)
+	{
+		drawFrameBufferWithEffect(dc, dimensions, frameBuffer);
+	}
+
+	@Override
+	public final void releaseResources(DrawContext dc)
+	{
+		if (frameBuffer.isCreated())
+		{
+			frameBuffer.delete(dc.getGL());
+		}
+		releaseEffect(dc);
+	}
+
+	/**
+	 * Called after the scene is rendered, and possibly after another
+	 * {@link Effect}'s frame buffer has been bound. The effect should render
+	 * it's framebuffer using it's effect shader here.
+	 * 
+	 * @param dc
+	 *            Draw context
+	 * @param dimensions
+	 *            Dimensions of the viewport (includes render scale during
+	 *            rendering)
+	 * @param frameBuffer
+	 *            {@link FrameBuffer} containing the scene to apply the effect
+	 *            to.
+	 */
+	protected abstract void drawFrameBufferWithEffect(DrawContext dc, Dimension dimensions, FrameBuffer frameBuffer);
+
+	/**
+	 * Release any resources associated with this effect. This is called every
+	 * frame if the effect is disabled.
+	 * 
+	 * @param dc
+	 *            Draw context
+	 */
+	protected abstract void releaseEffect(DrawContext dc);
 }

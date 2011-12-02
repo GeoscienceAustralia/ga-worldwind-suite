@@ -5,6 +5,7 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.SurfaceObjectTileBuilder;
 
 import java.awt.Dimension;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -52,8 +53,22 @@ public class AnimatorSceneController extends BasicSceneController
 				renderDimensions != null ? renderDimensions : new Dimension(dc.getDrawableWidth(),
 						dc.getDrawableHeight());
 
-		List<Effect> effects = animation.getEffects();
-		if (effects == null || effects.isEmpty())
+		//retrieve the list of effects, put them in a new list
+		List<Effect> effects = new ArrayList<Effect>(animation.getEffects());
+
+		//remove any disabled effects
+		for (int i = effects.size() - 1; i >= 0; i--)
+		{
+			Effect effect = effects.get(i);
+			if (!effect.isEnabled())
+			{
+				effect.releaseResources(dc);
+				effects.remove(i);
+			}
+		}
+
+		//if there's no enabled effects, draw normally
+		if (effects.isEmpty())
 		{
 			super.draw(dc);
 			return;
@@ -62,17 +77,34 @@ public class AnimatorSceneController extends BasicSceneController
 		Effect firstEffect = effects.get(0);
 		Effect lastEffect = effects.get(effects.size() - 1);
 
-		firstEffect.preDraw(dc, dimensions);
-		this.clearFrame(dc); //TODO should this be here, or in effect.preDraw?
-		super.draw(dc); //draw the actual scene onto the first effect's frame buffer
+		try
+		{
+			firstEffect.bindFrameBuffer(dc, dimensions);
+			this.clearFrame(dc);
+			//draw the actual scene onto the first effect's frame buffer:
+			super.draw(dc);
+		}
+		finally
+		{
+			firstEffect.unbindFrameBuffer(dc, dimensions);
+		}
 
 		for (int i = 1; i < effects.size(); i++)
 		{
-			effects.get(i).preDraw(dc, dimensions); //bind the next effect's frame buffer
-			effects.get(i - 1).postDraw(dc, dimensions); //draw the previous effect's frame buffer
+			try
+			{
+				effects.get(i).bindFrameBuffer(dc, dimensions);
+				this.clearFrame(dc);
+				//draw the previous effect's frame buffer onto the current frame buffer:
+				effects.get(i - 1).drawFrameBufferWithEffect(dc, dimensions);
+			}
+			finally
+			{
+				effects.get(i).unbindFrameBuffer(dc, dimensions);
+			}
 		}
 
-		lastEffect.postDraw(dc, dimensions); //draw the final effect's frame buffer onto the final buffer
+		lastEffect.drawFrameBufferWithEffect(dc, dimensions); //draw the final effect's frame buffer onto the final buffer
 	}
 
 	/**

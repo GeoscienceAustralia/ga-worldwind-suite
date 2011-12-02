@@ -1,3 +1,5 @@
+//see http://developer.amd.com/media/gpu_assets/Scheuermann_DepthOfField.pdf
+
 uniform sampler2D colorTexture;
 uniform sampler2D depthTexture;
 uniform sampler2D blurTexture;
@@ -11,34 +13,14 @@ uniform float blurTextureScale;
 
 const vec2 poisson_old[NUM_TAPS] =
 {
-	{-.326,-.406},
-	{-.840,-.074},
-	{-.696, .457},
-	{-.203, .621},
-	{ .962,-.195},
-	{ .473,-.480},
-	{ .519, .767},
-	{ .185,-.893},
-	{ .507, .064},
-	{ .896, .412},
-	{-.322,-.933},
-	{-.792,-.598}
+	{-.326,-.406}, {-.840,-.074}, {-.696, .457}, {-.203, .621}, { .962,-.195}, { .473,-.480},
+	{ .519, .767}, { .185,-.893}, { .507, .064}, { .896, .412}, {-.322,-.933}, {-.792,-.598}
 };
 
 const vec2 poisson[NUM_TAPS] =
 {
-	{ 0.00,  0.00},
-	{ 0.07, -0.45},
-	{-0.15, -0.33},
-	{ 0.35, -0.32},
-	{-0.39, -0.26},
-	{ 0.10, -0.23},
-	{ 0.36, -0.12},
-	{-0.31, -0.01},
-	{-0.38,  0.22},
-	{ 0.36,  0.23},
-	{-0.13,  0.29},
-	{ 0.14,  0.41}
+	{ 0.00,  0.00}, { 0.07, -0.45}, {-0.15, -0.33}, { 0.35, -0.32}, {-0.39, -0.26}, { 0.10, -0.23},
+	{ 0.36, -0.12}, {-0.31, -0.01}, {-0.38,  0.22}, { 0.36,  0.23}, {-0.13,  0.29}, { 0.14,  0.41}
 };
 
 const float maxCoCRadius = 5.0; //max circle of confusion radius
@@ -67,7 +49,8 @@ float NormalizeDepth(float depth)
 void main()
 {
 	vec2 texCoord = gl_TexCoord[0].st;
-	float depth = NormalizeDepth(LinearizeDepth(texture2D(depthTexture, texCoord).r));
+	float unnormalizedDepth = texture2D(depthTexture, texCoord).r;
+	float depth = NormalizeDepth(LinearizeDepth(unnormalizedDepth));
 	
 	//vec4 color = texture2D(colorTexture, gl_TexCoord[0].st);
 	//vec4 blurc = texture2D(blurTexture, gl_TexCoord[0].st);
@@ -102,4 +85,5 @@ void main()
 	}
 	
 	gl_FragColor = colorAccum / colorAccum.a;
+	gl_FragDepth = unnormalizedDepth;
 }

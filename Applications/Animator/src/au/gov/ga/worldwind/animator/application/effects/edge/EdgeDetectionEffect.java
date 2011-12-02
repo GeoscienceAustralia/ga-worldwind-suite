@@ -19,11 +19,16 @@ import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.effects.EffectBase;
 import au.gov.ga.worldwind.animator.application.render.FrameBuffer;
 
+/**
+ * Example {@link Effect} that convolves the input with a kernel matrix,
+ * producing different filter effects like blurring, edge detection, sharpening,
+ * embossing, etc.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class EdgeDetectionEffect extends EffectBase
 {
-	private boolean enabledInPreDraw;
-	private EdgeShader edgeShader = new EdgeShader();
-	private FrameBuffer frameBuffer = new FrameBuffer();
+	private final EdgeShader edgeShader = new EdgeShader();
 
 	public EdgeDetectionEffect(String name, Animation animation)
 	{
@@ -33,55 +38,6 @@ public class EdgeDetectionEffect extends EffectBase
 	protected EdgeDetectionEffect()
 	{
 		super();
-	}
-
-	@Override
-	public void preDraw(DrawContext dc, Dimension dimensions)
-	{
-		enabledInPreDraw = isEnabled();
-
-		if (!enabledInPreDraw)
-		{
-			return;
-		}
-
-		//create the frame buffers
-		GL gl = dc.getGL();
-		frameBuffer.resize(gl, dimensions, true);
-		frameBuffer.bind(gl);
-	}
-
-	@Override
-	public void postDraw(DrawContext dc, Dimension dimensions)
-	{
-		GL gl = dc.getGL();
-
-		if (!enabledInPreDraw)
-		{
-			if (edgeShader.isCreated())
-			{
-				edgeShader.delete(gl);
-			}
-			return;
-		}
-
-		//unbind the main frame buffer
-		frameBuffer.unbind(gl);
-
-		if (!edgeShader.isCreated())
-		{
-			edgeShader.create(gl);
-		}
-
-		try
-		{
-			edgeShader.use(gl, dimensions.width, dimensions.height);
-			FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTextureId(), frameBuffer.getDepthId());
-		}
-		finally
-		{
-			edgeShader.unuse(gl);
-		}
 	}
 
 	@Override
@@ -107,5 +63,35 @@ public class EdgeDetectionEffect extends EffectBase
 	public String getDefaultName()
 	{
 		return getMessageOrDefault(getEdgeDetectionNameKey(), "Edge Detection");
+	}
+
+	@Override
+	protected void drawFrameBufferWithEffect(DrawContext dc, Dimension dimensions, FrameBuffer frameBuffer)
+	{
+		GL gl = dc.getGL();
+
+		if (!edgeShader.isCreated())
+		{
+			edgeShader.create(gl);
+		}
+
+		try
+		{
+			edgeShader.use(gl, dimensions.width, dimensions.height);
+			FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTextureId(), frameBuffer.getDepthId());
+		}
+		finally
+		{
+			edgeShader.unuse(gl);
+		}
+	}
+
+	@Override
+	protected void releaseEffect(DrawContext dc)
+	{
+		if (edgeShader.isCreated())
+		{
+			edgeShader.delete(dc.getGL());
+		}
 	}
 }

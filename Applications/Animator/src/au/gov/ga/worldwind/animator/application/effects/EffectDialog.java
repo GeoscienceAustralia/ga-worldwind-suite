@@ -23,8 +23,22 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+/**
+ * A {@link JDialog} that displays a list of {@link Effect}s, allowing the user
+ * to select an effect to add to the current animation.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class EffectDialog extends JDialog
 {
+	/**
+	 * Show a new {@link EffectDialog}, and block until the user has selected an
+	 * effect.
+	 * 
+	 * @param parent
+	 *            Dialog's parent
+	 * @return The effect class selected, or null if the user cancelled.
+	 */
 	public static Class<? extends Effect> collectEffect(Frame parent)
 	{
 		EffectDialog dialog = new EffectDialog(parent);
