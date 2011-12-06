@@ -50,7 +50,10 @@
 			if(sandpit)
 			{
 		%>
-		<argument>-sandpit</argument><%
+		<argument>--url-regex</argument>
+		<argument>http://www\.ga\.gov\.au/</argument>
+		<argument>--url-replacement</argument>
+		<argument>http://www.ga.gov.au:8500/</argument><%
 			}
 		%>
 	</application-desc>
