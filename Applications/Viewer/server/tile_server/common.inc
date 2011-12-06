@@ -7,8 +7,8 @@
 	 * @author Michael de Hoog
 	 */
 
-	//when deploying to production, this path should be changed to point to the 'tiles' symbolic link in prod
-	private static final String path = "/web/html/test_root/docs/resources/images/world-wind/tiles-orig";
+	private static final String sandpitRootPath = "/web/html/test_root/docs/resources/images/world-wind/tiles-orig"; //sandpit
+	private static final String productionRootPath = "/public/http/www/docs/resources/images/world-wind/tiles"; //production
 
 	private static final Map<String, String> extensions = new HashMap<String, String>();
 	private static final Map<String, String> contentTypes = new HashMap<String, String>();
@@ -188,6 +188,8 @@
 	/**
 	 * Find a file with the tiles path.
 	 * 
+	 * @param rootPath
+	 *            Root directory of the tiles
 	 * @param rowDirectory
 	 *            Tile row directory
 	 * @param filename
@@ -202,8 +204,8 @@
 	 *            Should we search in the 'mask' directory?
 	 * @return InputStream if a file exists, else null
 	 */
-	private static ExtensionInputStream findFile(String rowDirectory, String filename, String L,
-			String T, String extension, boolean mask, boolean useJavaZip) throws IOException
+	private static ExtensionInputStream findFile(String rootPath, String rowDirectory, String filename,
+			String L, String T, String extension, boolean mask, boolean useJavaZip) throws IOException
 	{
 		//if searching for mask, replace last directory in T string with 'mask'
 		if (mask && T != null)
@@ -226,7 +228,7 @@
 				if (ext != null)
 				{
 					ExtensionInputStream result =
-							findFile(rowDirectory, filename, L, T, ext, false, useJavaZip);
+							findFile(rootPath, rowDirectory, filename, L, T, ext, false, useJavaZip);
 					if (result != null)
 						return result;
 				}
@@ -235,7 +237,7 @@
 		else
 		{
 			//build the tile filename string
-			String parentPath = path;
+			String parentPath = rootPath;
 			if (T != null)
 				parentPath += "/" + T;
 
@@ -323,16 +325,18 @@
 	/**
 	 * Does the dataset/level directory exist?
 	 * 
+	 * @param rootPath
+	 *            Root directory of the tiles
 	 * @param L
 	 *            Tile level
 	 * @param T
 	 *            Tile dataset
 	 * @return true if the directory exists, else false
 	 */
-	private static boolean directoryExists(String L, String T, boolean useJavaZip)
+	private static boolean directoryExists(String rootPath, String L, String T, boolean useJavaZip)
 			throws IOException
 	{
-		File parent = new File(path + "/" + T);
+		File parent = new File(rootPath + "/" + T);
 		if (parent.isDirectory())
 		{
 			File file = new File(parent, L);
@@ -341,7 +345,7 @@
 		else
 		{
 			if (!(parent.exists() && parent.getName().toLowerCase().endsWith(".zip")))
-				parent = new File(path + "/" + T + ".zip");
+				parent = new File(rootPath + "/" + T + ".zip");
 
 			if (parent.isFile())
 			{
@@ -398,32 +402,34 @@
 
 	/**
 	 * Find a blank tile file. First searches the dataset/level directory, then
-	 * the dataset directory, and finally 'path'.
+	 * the dataset directory, and finally 'rootPath'.
 	 * 
+	 * @param rootPath
+	 *            Root directory of the tiles
 	 * @param L
 	 *            Tile level
 	 * @param T
 	 *            Tile dataset
 	 * @param extension
-	 *            File extension of the blank file under 'path'
+	 *            File extension of the blank file under 'rootPath'
 	 * @return File if a blank file exists, else null
 	 */
-	private static ExtensionInputStream findBlankFile(String L, String T, String extension,
-			boolean mask, boolean useJavaZip) throws IOException
+	private static ExtensionInputStream findBlankFile(String rootPath, String L, String T,
+			String extension, boolean mask, boolean useJavaZip) throws IOException
 	{
 		String filename = "blank";
 		ExtensionInputStream result;
 
 		//commented out searching inside layer folders for blanks, as currently no layers implement this
-		/*result = findFile(null, filename, L, T, null, mask);
+		/*result = findFile(rootPath, null, filename, L, T, null, mask);
 		if (result != null)
 			return result;
 
-		result = findFile(null, filename, null, T, null, mask);
+		result = findFile(rootPath, null, filename, null, T, null, mask);
 		if (result != null)
 			return result;*/
 
-		result = findFile(null, filename, null, null, extension, false, useJavaZip);
+		result = findFile(rootPath, null, filename, null, null, extension, false, useJavaZip);
 		if (result != null)
 			return result;
 
@@ -491,6 +497,10 @@
 			//if the essential parameters are not defined, just return
 			return;
 		}
+		
+		//determine the root path of the tiles
+		boolean sandpit = request.getServerPort() == 8500;
+		String rootPath = sandpit ? sandpitRootPath : productionRootPath;
 
 		//calculate tile directory and filename
 		String rowDirectory = paddedInt(Y, 4);
@@ -505,17 +515,17 @@
 			if (F == null)
 			{
 				//if no format has been specified, search for a file using any known extension
-				file = findFile(rowDirectory, filename, L, T, null, false, useJavaZip);
+				file = findFile(rootPath, rowDirectory, filename, L, T, null, false, useJavaZip);
 				if (file != null)
 				{
 					//if the file has been found, set the correct content type
 					contentType = getContentTypeForExtension(file.extension);
 				}
-				else if (blankOnError && directoryExists(L, T, useJavaZip))
+				else if (blankOnError && directoryExists(rootPath, L, T, useJavaZip))
 				{
 					//if no file has been found and a blank should be returned, return a blank file (default to jpg)
 					String extension = "jpg";
-					file = findBlankFile(L, T, extension, false, useJavaZip);
+					file = findBlankFile(rootPath, L, T, extension, false, useJavaZip);
 					contentType = getContentTypeForExtension(extension);
 				}
 			}
@@ -537,37 +547,37 @@
 				boolean isZip = extension.equals("zip");
 
 				//find a file matching the extension
-				file = findFile(rowDirectory, filename, L, T, extension, false, useJavaZip);
+				file = findFile(rootPath, rowDirectory, filename, L, T, extension, false, useJavaZip);
 
 				if (file == null && isZip)
 				{
 					//if no file has been found but a zip is requested
 					needsZip = true;
 					//search for a file using any known extension
-					file = findFile(rowDirectory, filename, L, T, null, false, useJavaZip);
+					file = findFile(rootPath, rowDirectory, filename, L, T, null, false, useJavaZip);
 					if (searchForMask)
 					{
 						//search for a file in the mask directory using any known extension
-						mask = findFile(rowDirectory, filename, L, T, null, true, useJavaZip);
+						mask = findFile(rootPath, rowDirectory, filename, L, T, null, true, useJavaZip);
 					}
 				}
 
-				if (file == null && blankOnError && directoryExists(L, T, useJavaZip))
+				if (file == null && blankOnError && directoryExists(rootPath, L, T, useJavaZip))
 				{
 					//if still no file has been found and a blank file should be returned
 					if (isZip)
 					{
 						//if a zip is requested, find blank files for the image and mask (default to jpg and png)
-						file = findBlankFile(L, T, "jpg", false, useJavaZip);
+						file = findBlankFile(rootPath, L, T, "jpg", false, useJavaZip);
 						if (searchForMask)
 						{
-							mask = findBlankFile(L, T, "png", true, useJavaZip);
+							mask = findBlankFile(rootPath, L, T, "png", true, useJavaZip);
 						}
 					}
 					else
 					{
 						//find a blank file for the requested extension
-						file = findBlankFile(L, T, extension, false, useJavaZip);
+						file = findBlankFile(rootPath, L, T, extension, false, useJavaZip);
 					}
 				}
 			}
