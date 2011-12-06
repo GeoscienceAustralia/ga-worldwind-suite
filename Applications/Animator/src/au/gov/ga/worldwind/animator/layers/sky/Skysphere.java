@@ -35,12 +35,13 @@ import com.sun.opengl.util.texture.TextureIO;
 /**
  * A layer that renders a hemisphere skysphere mapped with the specified image.
  * <p/>
- * Texture images should be provided in a dome projection to ensure correct display of 
- * the image within the world window.
+ * Texture images should be provided in a dome projection to ensure correct
+ * display of the image within the world window.
  * <p/>
- * The rotation of the image can be controlled using the <code>&lt;Rotation&gt;</code> elements within the 
- * layer definition file.
- *
+ * The rotation of the image can be controlled using the
+ * <code>&lt;Rotation&gt;</code> elements within the layer definition file.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class Skysphere extends AbstractLayer
 {
@@ -64,7 +65,7 @@ public class Skysphere extends AbstractLayer
 	public Skysphere(AVList params)
 	{
 		Validate.notNull(params, "Parameters are required");
-		
+
 		initialiseFromParams(params);
 	}
 
@@ -77,17 +78,17 @@ public class Skysphere extends AbstractLayer
 		{
 			params = new AVListImpl();
 		}
-		
+
 		AbstractLayer.getLayerConfigParams(domElement, params);
-		
+
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.URL, "TextureLocation", null);
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SKYSPHERE_SLICES, "Slices", null);
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SKYSPHERE_SEGMENTS, "Segments", null);
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.SKYSPHERE_ANGLE, "Rotation", null);
-		
+
 		initialiseFromParams(params);
 	}
-	
+
 	private void initialiseFromParams(AVList params)
 	{
 		String s = params.getStringValue(AVKey.DISPLAY_NAME);
@@ -95,29 +96,29 @@ public class Skysphere extends AbstractLayer
 		{
 			setName(s);
 		}
-		
+
 		s = params.getStringValue(AVKey.URL);
 		Validate.notBlank(s, "A texture location must be provided");
 		textureLocation = s;
-		
-		Integer i = (Integer)params.getValue(AVKeyMore.SKYSPHERE_SLICES);
+
+		Integer i = (Integer) params.getValue(AVKeyMore.SKYSPHERE_SLICES);
 		if (i != null)
 		{
 			slices = i;
 		}
-		
-		i = (Integer)params.getValue(AVKeyMore.SKYSPHERE_SEGMENTS);
+
+		i = (Integer) params.getValue(AVKeyMore.SKYSPHERE_SEGMENTS);
 		if (i != null)
 		{
 			segments = i;
 		}
-		
-		Double d = (Double)params.getValue(AVKeyMore.SKYSPHERE_ANGLE);
+
+		Double d = (Double) params.getValue(AVKeyMore.SKYSPHERE_ANGLE);
 		if (d != null)
 		{
 			rotation = Angle.fromDegrees(d);
 		}
-		
+
 		context = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
 		Validate.notNull(context, "A context URL must be provided");
 	}
@@ -128,7 +129,7 @@ public class Skysphere extends AbstractLayer
 		{
 			URL textureUrl = new URL(context, textureLocation);
 			InputStream stream = textureUrl.openStream();
-			
+
 			texture = TextureIO.newTexture(stream, true, null);
 			texture.bind();
 		}
@@ -172,9 +173,7 @@ public class Skysphere extends AbstractLayer
 		gl.glLoadIdentity();
 
 		dc.getGLU().gluPerspective(dc.getView().getFieldOfView().degrees,
-								   dc.getView().getViewport().getWidth() / dc.getView().getViewport().getHeight(), 
-								   0.1, 
-								   10.0);
+				dc.getView().getViewport().getWidth() / dc.getView().getViewport().getHeight(), 0.1, 10.0);
 
 		//set up modelview matrix
 		gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -392,7 +391,7 @@ public class Skysphere extends AbstractLayer
 		{
 			nb.put(0).put(-1).put(0);
 		}
-		
+
 		tb.put(0.5f).put(1.0f);
 
 

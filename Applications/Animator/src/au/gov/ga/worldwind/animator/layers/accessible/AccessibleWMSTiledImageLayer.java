@@ -1,7 +1,6 @@
 package au.gov.ga.worldwind.animator.layers.accessible;
 
 import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.layers.TextureTile;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 import gov.nasa.worldwind.wms.WMSTiledImageLayer;
 
@@ -10,12 +9,16 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.layers.accessible.AccessibleBasicTiledImageLayer.FileLockAccessor;
 
-import com.sun.opengl.util.texture.TextureData;
-
+/**
+ * {@link WMSTiledImageLayer} that provides access to its internal filelock
+ * object.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class AccessibleWMSTiledImageLayer extends WMSTiledImageLayer
 {
 	private final FileLockAccessor fileLockAccessor = new FileLockAccessor(this);
-	
+
 	public AccessibleWMSTiledImageLayer(AVList params)
 	{
 		super(params);
@@ -40,39 +43,9 @@ public class AccessibleWMSTiledImageLayer extends WMSTiledImageLayer
 	{
 		super(stateInXml);
 	}
-	
+
 	protected Object getFileLock()
 	{
 		return fileLockAccessor.getFileLock();
 	}
-	
-	@Override
-	protected boolean loadTexture(TextureTile tile, java.net.URL textureURL)
-	{
-		TextureData textureData;
-
-		synchronized (getFileLock())
-		{
-			textureData = AccessibleBasicTiledImageLayer.readTextureData(textureURL, this.getTextureFormat(), this.isUseMipMaps());
-		}
-
-		if (textureData == null)
-		{
-			return false;
-		}
-
-		tile.setTextureData(textureData);
-		if (tile.getLevelNumber() != 0 || !this.isRetainLevelZeroTiles())
-		{
-			this.addTileToCache(tile);
-		}
-
-		return true;
-	}
-	
-	@Override
-	protected void addTileToCache(TextureTile tile)
-    {
-        TextureTile.getMemoryCache().add(tile.getTileKey(), tile);
-    }
 }

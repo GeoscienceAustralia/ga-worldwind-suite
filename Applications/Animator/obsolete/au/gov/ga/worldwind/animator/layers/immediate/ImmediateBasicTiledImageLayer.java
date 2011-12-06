@@ -10,7 +10,20 @@ import gov.nasa.worldwind.util.Logging;
 import java.net.URL;
 
 import au.gov.ga.worldwind.animator.layers.accessible.AccessibleBasicTiledImageLayer;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 
+/**
+ * {@link AccessibleBasicTiledImageLayer} subclass that, when
+ * {@link ImmediateMode#isImmediate()}, ensures that textures are downloaded and
+ * loaded immediately in the render thread, instead of passing the texture
+ * requests to the task service.
+ * <p>
+ * No longer used; replaced by the {@link DelegatorTiledImageLayer} with the
+ * {@link ImmediateURLRequesterDelegate}.
+ * </p>
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ImmediateBasicTiledImageLayer extends AccessibleBasicTiledImageLayer
 {
 	public ImmediateBasicTiledImageLayer(LevelSet levelSet)

@@ -5,6 +5,8 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
  * A key frame marker used to mark the position of the camera look-at at a specific key frame.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class LookatKeyFrameMarker extends KeyFrameMarker
 {

@@ -15,6 +15,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A superclass for camera key frame markers
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public abstract class KeyFrameMarker extends BasicMarker
 {	

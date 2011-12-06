@@ -23,6 +23,8 @@ import au.gov.ga.worldwind.animator.util.AVKeyMore;
  * <p/>
  * Implemented as a separate factory class to re-use the existing world wind 
  * fog layer.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class FogLayerFactory
 {

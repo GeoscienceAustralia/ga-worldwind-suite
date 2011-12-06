@@ -6,6 +6,8 @@ import au.gov.ga.worldwind.animator.animation.KeyFrame;
 
 /**
  * An {@link AbstractCameraPositionPath} that draws the current animation's lookat position along with nodes representing key frames.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class LookatPositionPath extends AbstractCameraPositionPath
 {

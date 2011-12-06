@@ -9,7 +9,20 @@ import gov.nasa.worldwind.util.Logging;
 import java.net.URL;
 
 import au.gov.ga.worldwind.animator.layers.accessible.AccessibleWMSTiledImageLayer;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 
+/**
+ * {@link AccessibleWMSTiledImageLayer} subclass that, when
+ * {@link ImmediateMode#isImmediate()}, ensures that textures are downloaded and
+ * loaded immediately in the render thread, instead of passing the texture
+ * requests to the task service.
+ * <p>
+ * No longer used; replaced by the {@link DelegatorTiledImageLayer} with the
+ * {@link ImmediateURLRequesterDelegate}.
+ * </p>
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ImmediateWMSTiledImageLayer extends AccessibleWMSTiledImageLayer
 {
 	public ImmediateWMSTiledImageLayer(String stateInXml)
@@ -50,10 +63,8 @@ public class ImmediateWMSTiledImageLayer extends AccessibleWMSTiledImageLayer
 	{
 		// from BasicTiledImageLayer.requestTask.run()
 
-		final URL textureURL = getDataFileStore().findFile(tile.getPath(),
-				false);
-		if (textureURL != null
-				&& !isTextureFileExpired(tile, textureURL, getDataFileStore()))
+		final URL textureURL = getDataFileStore().findFile(tile.getPath(), false);
+		if (textureURL != null && !isTextureFileExpired(tile, textureURL, getDataFileStore()))
 		{
 			if (loadTexture(tile, textureURL))
 			{
@@ -65,8 +76,7 @@ public class ImmediateWMSTiledImageLayer extends AccessibleWMSTiledImageLayer
 			{
 				// Assume that something's wrong with the file and delete it.
 				getDataFileStore().removeFile(textureURL);
-				String message = Logging.getMessage(
-						"generic.DeletedCorruptDataFile", textureURL);
+				String message = Logging.getMessage("generic.DeletedCorruptDataFile", textureURL);
 				Logging.logger().info(message);
 			}
 		}

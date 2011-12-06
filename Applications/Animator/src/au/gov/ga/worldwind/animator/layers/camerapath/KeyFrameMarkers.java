@@ -40,6 +40,8 @@ import com.sun.opengl.util.BufferUtil;
  * position.
  * 
  * @see WorldWindow#addSelectListener(SelectListener)
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 class KeyFrameMarkers implements Renderable, SelectListener
 {
@@ -64,9 +66,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 
 	private enum Click
 	{
-		LEFT,
-		MIDDLE,
-		RIGHT;
+		LEFT, MIDDLE, RIGHT;
 	}
 
 	private KeyFrameMarker lastPickedMarker = null;
@@ -297,10 +297,19 @@ class KeyFrameMarkers implements Renderable, SelectListener
 			int totalSize = eyeMarkersFrontBuffer.size() + lookatMarkersFrontBuffer.size();
 			if (totalSize > 0)
 			{
-				ArrayList<Marker> combinedBuffer = new ArrayList<Marker>(totalSize);
+				List<Marker> combinedBuffer = new ArrayList<Marker>(totalSize);
 				combinedBuffer.addAll(eyeMarkersFrontBuffer);
 				combinedBuffer.addAll(lookatMarkersFrontBuffer);
-				markerRenderer.render(dc, combinedBuffer);
+				try
+				{
+					markerRenderer.render(dc, combinedBuffer);
+				}
+				catch (IndexOutOfBoundsException e)
+				{
+					//There is a bug in the MarkerRenderer where, if the two frames are rendered at the same time, the internal
+					//surface points array isn't updated, causing a possible IndexOutOfBoundsException. Ignore it, as it will
+					//be rendered correctly on the next update.
+				}
 			}
 
 			drawJoiners(dc);

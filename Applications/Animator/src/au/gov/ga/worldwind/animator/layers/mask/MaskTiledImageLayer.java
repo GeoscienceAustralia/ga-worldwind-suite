@@ -42,10 +42,28 @@ import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.animator.layers.file.FileRetriever;
+import au.gov.ga.worldwind.common.layers.delegate.reader.MaskImageReaderDelegate;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
 
+/**
+ * {@link TiledImageLayer} that requests two textures per tile: one image
+ * texture and one mask texture. The mask texture is generally a PNG with an
+ * alpha channel, and is composited with the image texture before sending to the
+ * video card.
+ * <p>
+ * This was done to save download bandwidth, as the combination of a JPG image
+ * and PNG mask is much smaller than a single 32-bit PNG.
+ * </p>
+ * <p>
+ * This layer is no longer used, as it has been replaced with the
+ * {@link DelegatorTiledImageLayer} with a {@link MaskImageReaderDelegate}.
+ * </p>
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class MaskTiledImageLayer extends TiledImageLayer
 {
 	private final Object fileLock = new Object();
@@ -55,15 +73,12 @@ public class MaskTiledImageLayer extends TiledImageLayer
 	{
 		super(levelSet);
 
-		if (!WorldWind.getMemoryCacheSet().containsCache(
-				TextureTile.class.getName()))
+		if (!WorldWind.getMemoryCacheSet().containsCache(TextureTile.class.getName()))
 		{
-			long size = Configuration.getLongValue(
-					AVKey.TEXTURE_IMAGE_CACHE_SIZE, 3000000L);
+			long size = Configuration.getLongValue(AVKey.TEXTURE_IMAGE_CACHE_SIZE, 3000000L);
 			MemoryCache cache = new BasicMemoryCache((long) (0.85 * size), size);
 			cache.setName("Texture Tiles");
-			WorldWind.getMemoryCacheSet().addCache(TextureTile.class.getName(),
-					cache);
+			WorldWind.getMemoryCacheSet().addCache(TextureTile.class.getName(), cache);
 		}
 	}
 
@@ -86,8 +101,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		catch (Exception e)
 		{
 			// Parsing the document specified by stateInXml failed.
-			String message = Logging.getMessage(
-					"generic.ExceptionAttemptingToParseStateXml", stateInXml);
+			String message = Logging.getMessage("generic.ExceptionAttemptingToParseStateXml", stateInXml);
 			Logging.logger().severe(message);
 			throw new IllegalArgumentException(message, e);
 		}
@@ -123,8 +137,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		RestorableSupport.StateObject so = rs.getStateObject("avlist");
 		if (so != null)
 		{
-			RestorableSupport.StateObject[] avpairs = rs.getAllStateObjects(so,
-					"");
+			RestorableSupport.StateObject[] avpairs = rs.getAllStateObjects(so, "");
 			for (RestorableSupport.StateObject avp : avpairs)
 			{
 				if (avp != null)
@@ -150,8 +163,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		catch (Exception e)
 		{
 			// Parsing the document specified by stateInXml failed.
-			String message = Logging.getMessage(
-					"generic.ExceptionAttemptingToParseStateXml", stateInXml);
+			String message = Logging.getMessage("generic.ExceptionAttemptingToParseStateXml", stateInXml);
 			Logging.logger().severe(message);
 			throw new IllegalArgumentException(message, e);
 		}
@@ -237,15 +249,11 @@ public class MaskTiledImageLayer extends TiledImageLayer
 
 		rs.addStateValueAsBoolean("Layer.Enabled", this.isEnabled());
 		rs.addStateValueAsDouble("Layer.Opacity", this.getOpacity());
-		rs.addStateValueAsDouble("Layer.MinActiveAltitude", this
-				.getMinActiveAltitude());
-		rs.addStateValueAsDouble("Layer.MaxActiveAltitude", this
-				.getMaxActiveAltitude());
-		rs.addStateValueAsBoolean("Layer.NetworkRetrievalEnabled", this
-				.isNetworkRetrievalEnabled());
+		rs.addStateValueAsDouble("Layer.MinActiveAltitude", this.getMinActiveAltitude());
+		rs.addStateValueAsDouble("Layer.MaxActiveAltitude", this.getMaxActiveAltitude());
+		rs.addStateValueAsBoolean("Layer.NetworkRetrievalEnabled", this.isNetworkRetrievalEnabled());
 		rs.addStateValueAsString("Layer.Name", this.getName());
-		rs.addStateValueAsBoolean("TiledImageLayer.UseTransparentTextures",
-				this.isUseTransparentTextures());
+		rs.addStateValueAsBoolean("TiledImageLayer.UseTransparentTextures", this.isUseTransparentTextures());
 
 		RestorableSupport.StateObject so = rs.addStateObject("avlist");
 		for (Map.Entry<String, Object> p : this.getEntries())
@@ -272,16 +280,14 @@ public class MaskTiledImageLayer extends TiledImageLayer
 
 	public void restoreState(String stateInXml)
 	{
-		String message = Logging
-				.getMessage("RestorableSupport.RestoreRequiresConstructor");
+		String message = Logging.getMessage("RestorableSupport.RestoreRequiresConstructor");
 		Logging.logger().severe(message);
 		throw new UnsupportedOperationException(message);
 	}
 
 	protected void forceTextureLoad(TextureTile tile)
 	{
-		final URL textureURL = WorldWind.getDataFileStore().findFile(
-				tile.getPath(), true);
+		final URL textureURL = WorldWind.getDataFileStore().findFile(tile.getPath(), true);
 
 		if (textureURL != null && !this.isTextureExpired(tile, textureURL))
 		{
@@ -292,16 +298,15 @@ public class MaskTiledImageLayer extends TiledImageLayer
 	protected void requestTexture(DrawContext dc, TextureTile tile)
 	{
 		Vec4 centroid = tile.getCentroidPoint(dc.getGlobe());
-        Vec4 referencePoint = this.getReferencePoint(dc);
-        if (referencePoint != null)
-            tile.setPriority(centroid.distanceTo3(referencePoint));
+		Vec4 referencePoint = this.getReferencePoint(dc);
+		if (referencePoint != null)
+			tile.setPriority(centroid.distanceTo3(referencePoint));
 
 		RequestTask task = new RequestTask(tile, this);
 		this.getRequestQ().add(task);
 	}
 
-	private static class RequestTask implements Runnable,
-			Comparable<RequestTask>
+	private static class RequestTask implements Runnable, Comparable<RequestTask>
 	{
 		private final MaskTiledImageLayer layer;
 		private final TextureTile tile;
@@ -316,10 +321,8 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		{
 			// TODO: check to ensure load is still needed
 
-			final java.net.URL textureURL = WorldWind.getDataFileStore()
-					.findFile(tile.getPath(), false);
-			if (textureURL != null
-					&& !this.layer.isTextureExpired(tile, textureURL))
+			final java.net.URL textureURL = WorldWind.getDataFileStore().findFile(tile.getPath(), false);
+			if (textureURL != null && !this.layer.isTextureExpired(tile, textureURL))
 			{
 				if (this.layer.loadTexture(tile, textureURL))
 				{
@@ -330,11 +333,9 @@ public class MaskTiledImageLayer extends TiledImageLayer
 				else
 				{
 					// Assume that something's wrong with the file and delete it.
-					gov.nasa.worldwind.WorldWind.getDataFileStore().removeFile(
-							textureURL);
+					gov.nasa.worldwind.WorldWind.getDataFileStore().removeFile(textureURL);
 					layer.getLevels().markResourceAbsent(tile);
-					String message = Logging.getMessage(
-							"generic.DeletedCorruptDataFile", textureURL);
+					String message = Logging.getMessage("generic.DeletedCorruptDataFile", textureURL);
 					Logging.logger().info(message);
 				}
 			}
@@ -358,9 +359,8 @@ public class MaskTiledImageLayer extends TiledImageLayer
 				Logging.logger().severe(msg);
 				throw new IllegalArgumentException(msg);
 			}
-			return this.tile.getPriority() == that.tile.getPriority() ? 0
-					: this.tile.getPriority() < that.tile.getPriority() ? -1
-							: 1;
+			return this.tile.getPriority() == that.tile.getPriority() ? 0 : this.tile.getPriority() < that.tile
+					.getPriority() ? -1 : 1;
 		}
 
 		public boolean equals(Object o)
@@ -394,8 +394,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 
 		// The file has expired. Delete it.
 		gov.nasa.worldwind.WorldWind.getDataFileStore().removeFile(textureURL);
-		String message = Logging.getMessage("generic.DataFileExpired",
-				textureURL);
+		String message = Logging.getMessage("generic.DataFileExpired", textureURL);
 		Logging.logger().fine(message);
 		return true;
 	}
@@ -428,16 +427,14 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		catch (Exception e)
 		{
 			Logging.logger().log(java.util.logging.Level.SEVERE,
-					"layers.TextureLayer.ExceptionAttemptingToReadTextureFile",
-					e);
+					"layers.TextureLayer.ExceptionAttemptingToReadTextureFile", e);
 			return null;
 		}
 	}
 
 	private void addTileToCache(TextureTile tile)
 	{
-		WorldWind.getMemoryCache(TextureTile.class.getName()).add(
-				tile.getTileKey(), tile);
+		WorldWind.getMemoryCache(TextureTile.class.getName()).add(tile.getTileKey(), tile);
 	}
 
 	protected void downloadTexture(final TextureTile tile)
@@ -469,11 +466,8 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		}
 		catch (java.net.MalformedURLException e)
 		{
-			Logging.logger().log(
-					java.util.logging.Level.SEVERE,
-					Logging.getMessage(
-							"layers.TextureLayer.ExceptionCreatingTextureUrl",
-							tile), e);
+			Logging.logger().log(java.util.logging.Level.SEVERE,
+					Logging.getMessage("layers.TextureLayer.ExceptionCreatingTextureUrl", tile), e);
 			return;
 		}
 
@@ -481,10 +475,8 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		Retriever maskRetriever = null;
 		DownloadPostProcessor dpp = new DownloadPostProcessor(tile, this);
 
-		boolean textureFileProtocol = "file".equalsIgnoreCase(textureUrl
-				.getProtocol());
-		boolean maskFileProtocol = "file".equalsIgnoreCase(maskUrl
-				.getProtocol());
+		boolean textureFileProtocol = "file".equalsIgnoreCase(textureUrl.getProtocol());
+		boolean maskFileProtocol = "file".equalsIgnoreCase(maskUrl.getProtocol());
 
 		if (textureFileProtocol)
 		{
@@ -498,9 +490,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		else
 		{
 			Logging.logger().severe(
-					Logging.getMessage(
-							"layers.TextureLayer.UnknownRetrievalProtocol",
-							textureUrl.toString()));
+					Logging.getMessage("layers.TextureLayer.UnknownRetrievalProtocol", textureUrl.toString()));
 			return;
 		}
 
@@ -508,25 +498,21 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		{
 			maskRetriever = new FileRetriever(maskUrl, dpp);
 		}
-		else if ("http".equalsIgnoreCase(maskUrl.getProtocol())
-				|| "https".equalsIgnoreCase(maskUrl.getProtocol()))
+		else if ("http".equalsIgnoreCase(maskUrl.getProtocol()) || "https".equalsIgnoreCase(maskUrl.getProtocol()))
 		{
 			maskRetriever = new HTTPRetriever(maskUrl, dpp);
 		}
 		else
 		{
 			Logging.logger().severe(
-					Logging.getMessage(
-							"layers.TextureLayer.UnknownRetrievalProtocol",
-							maskUrl.toString()));
+					Logging.getMessage("layers.TextureLayer.UnknownRetrievalProtocol", maskUrl.toString()));
 			return;
 		}
 
 		dpp.setRetrievers(textureRetriever, maskRetriever);
 
 		// Apply any overridden timeouts.
-		Integer cto = AVListImpl.getIntegerValue(this,
-				AVKey.URL_CONNECT_TIMEOUT);
+		Integer cto = AVListImpl.getIntegerValue(this, AVKey.URL_CONNECT_TIMEOUT);
 		if (cto != null && cto > 0)
 		{
 			textureRetriever.setConnectTimeout(cto);
@@ -538,22 +524,17 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			textureRetriever.setReadTimeout(cro);
 			maskRetriever.setReadTimeout(cro);
 		}
-		Integer srl = AVListImpl.getIntegerValue(this,
-				AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT);
+		Integer srl = AVListImpl.getIntegerValue(this, AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT);
 		if (srl != null && srl > 0)
 		{
 			textureRetriever.setStaleRequestLimit(srl);
 			maskRetriever.setStaleRequestLimit(srl);
 		}
 
-		WorldWind.getRetrievalService().runRetriever(
-				textureRetriever,
-				textureFileProtocol ? tile.getPriority() - 1e100 : tile
-						.getPriority());
-		WorldWind.getRetrievalService().runRetriever(
-				maskRetriever,
-				maskFileProtocol ? tile.getPriority() - 1e100 : tile
-						.getPriority());
+		WorldWind.getRetrievalService().runRetriever(textureRetriever,
+				textureFileProtocol ? tile.getPriority() - 1e100 : tile.getPriority());
+		WorldWind.getRetrievalService().runRetriever(maskRetriever,
+				maskFileProtocol ? tile.getPriority() - 1e100 : tile.getPriority());
 	}
 
 	private void saveDDS(BufferedImage image, File file) throws IOException
@@ -565,8 +546,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		}
 	}
 
-	private void saveImage(BufferedImage image, String format, File file)
-			throws IOException
+	private void saveImage(BufferedImage image, String format, File file) throws IOException
 	{
 		synchronized (this.fileLock) // sychronized with read of file in RequestTask.run()
 		{
@@ -574,8 +554,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		}
 	}
 
-	private static class DownloadPostProcessor implements
-			RetrievalPostProcessor
+	private static class DownloadPostProcessor implements RetrievalPostProcessor
 	{
 		// TODO: Rewrite this inner class, factoring out the generic parts.
 		private final TextureTile tile;
@@ -593,8 +572,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			this.layer = layer;
 		}
 
-		public void setRetrievers(Retriever textureRetriever,
-				Retriever maskRetriever)
+		public void setRetrievers(Retriever textureRetriever, Retriever maskRetriever)
 		{
 			this.textureRetriever = textureRetriever;
 			this.maskRetriever = maskRetriever;
@@ -655,8 +633,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 
 		public ByteBuffer getData(Retriever retriever)
 		{
-			if (!retriever.getState().equals(
-					Retriever.RETRIEVER_STATE_SUCCESSFUL))
+			if (!retriever.getState().equals(Retriever.RETRIEVER_STATE_SUCCESSFUL))
 			{
 				return null;
 			}
@@ -700,8 +677,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 				return false;
 			}
 
-			final File outFile = WorldWind.getDataFileStore().newFile(
-					this.tile.getPath());
+			final File outFile = WorldWind.getDataFileStore().newFile(this.tile.getPath());
 			if (outFile == null)
 				return false;
 
@@ -715,8 +691,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 
 			try
 			{
-				String ext = outFile.getName().substring(
-						outFile.getName().lastIndexOf('.') + 1);
+				String ext = outFile.getName().substring(outFile.getName().lastIndexOf('.') + 1);
 				if (ext.toLowerCase().equals("dds"))
 					layer.saveDDS(mask, outFile);
 				else
@@ -737,19 +712,17 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		return createDefaultUrlBuilder((File) null, null, null, null);
 	}
 
-	public static TileUrlBuilder createDefaultUrlBuilder(
-			String localTextureDir, String localMaskDir,
+	public static TileUrlBuilder createDefaultUrlBuilder(String localTextureDir, String localMaskDir,
 			String textureExtension, String maskExtension)
 	{
-		return createDefaultUrlBuilder(new File(localTextureDir), new File(
-				localMaskDir), textureExtension, maskExtension);
+		return createDefaultUrlBuilder(new File(localTextureDir), new File(localMaskDir), textureExtension,
+				maskExtension);
 	}
 
-	public static TileUrlBuilder createDefaultUrlBuilder(File localTextureDir,
-			File localMaskDir, String textureExtension, String maskExtension)
+	public static TileUrlBuilder createDefaultUrlBuilder(File localTextureDir, File localMaskDir,
+			String textureExtension, String maskExtension)
 	{
-		return new MaskUrlBuilder(localTextureDir, localMaskDir,
-				textureExtension, maskExtension);
+		return new MaskUrlBuilder(localTextureDir, localMaskDir, textureExtension, maskExtension);
 	}
 
 	private static class MaskUrlBuilder implements TileUrlBuilder
@@ -759,17 +732,14 @@ public class MaskTiledImageLayer extends TiledImageLayer
 		private String textureExtension;
 		private String maskExtension;
 
-		public MaskUrlBuilder(File localTextureDir, File localMaskDir,
-				String textureExtension, String maskExtension)
+		public MaskUrlBuilder(File localTextureDir, File localMaskDir, String textureExtension, String maskExtension)
 		{
 			this.localTextureDir = localTextureDir;
 			this.localMaskDir = localMaskDir;
-			this.textureExtension = textureExtension == null ? null
-					: (textureExtension.startsWith(".") ? "" : ".")
-							+ textureExtension;
-			this.maskExtension = maskExtension == null ? null : (maskExtension
-					.startsWith(".") ? "" : ".")
-					+ maskExtension;
+			this.textureExtension =
+					textureExtension == null ? null : (textureExtension.startsWith(".") ? "" : ".") + textureExtension;
+			this.maskExtension =
+					maskExtension == null ? null : (maskExtension.startsWith(".") ? "" : ".") + maskExtension;
 		}
 
 		private String prependZeros(int number, int length)
@@ -791,16 +761,13 @@ public class MaskTiledImageLayer extends TiledImageLayer
 			String level = String.valueOf(tile.getLevelNumber());
 			String row = prependZeros(tile.getRow(), 4);
 			String col = prependZeros(tile.getColumn(), 4);
-			return new File(dir, level + "/" + row + "/" + row + "_" + col
-					+ extension);
+			return new File(dir, level + "/" + row + "/" + row + "_" + col + extension);
 		}
 
-		public URL getURL(Tile tile, String imageFormat)
-				throws MalformedURLException
+		public URL getURL(Tile tile, String imageFormat) throws MalformedURLException
 		{
 			boolean mask = "mask".equalsIgnoreCase(imageFormat);
-			File file = buildFile(tile, mask ? localMaskDir : localTextureDir,
-					mask ? maskExtension : textureExtension);
+			File file = buildFile(tile, mask ? localMaskDir : localTextureDir, mask ? maskExtension : textureExtension);
 			if (file != null && file.exists())
 			{
 				return file.toURI().toURL();

@@ -22,6 +22,11 @@ import java.util.List;
 
 import au.gov.ga.worldwind.animator.util.FileUtil;
 
+/**
+ * Layer that renders a collection of placemarks (as text) read from a CSV file.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Landmarks extends RenderableLayer
 {
 	private BufferedImage image;
@@ -33,8 +38,7 @@ public class Landmarks extends RenderableLayer
 		String landmarksString = "";
 		try
 		{
-			landmarksString = FileUtil.readFileAsString(new File(
-					"D:/West Macs Imagery/landmarks.csv"));
+			landmarksString = FileUtil.readFileAsString(new File("D:/West Macs Imagery/landmarks.csv"));
 		}
 		catch (IOException e)
 		{
@@ -55,8 +59,7 @@ public class Landmarks extends RenderableLayer
 					double lon = Double.parseDouble(split[1]);
 					double number = Double.parseDouble(split[2]);
 					String description = split[3];
-					landmark = new Landmark(LatLon.fromDegrees(lat, lon),
-							number, description, image);
+					landmark = new Landmark(LatLon.fromDegrees(lat, lon), number, description, image);
 				}
 				catch (Exception e)
 				{
@@ -71,8 +74,7 @@ public class Landmarks extends RenderableLayer
 		for (Landmark landmark : landmarks)
 		{
 			addRenderable(landmark);
-			GlobeAnnotation anno = new GlobeAnnotation(landmark.number + "",
-					landmark.getPosition());
+			GlobeAnnotation anno = new GlobeAnnotation(landmark.number + "", landmark.getPosition());
 			addRenderable(anno);
 		}
 	}
@@ -82,8 +84,7 @@ public class Landmarks extends RenderableLayer
 		private double number;
 		private String description;
 
-		public Landmark(LatLon latlon, double number, String description,
-				BufferedImage image)
+		public Landmark(LatLon latlon, double number, String description, BufferedImage image)
 		{
 			super("", new Position(latlon, 0));
 			this.number = number;
@@ -120,9 +121,8 @@ public class Landmarks extends RenderableLayer
 
 	public static BufferedImage createDiskImage(int size, Color color)
 	{
-		BufferedImage image = PatternFactory.createPattern(
-				PatternFactory.PATTERN_CIRCLE, new Dimension(size, size), 1f,
-				color);
+		BufferedImage image =
+				PatternFactory.createPattern(PatternFactory.PATTERN_CIRCLE, new Dimension(size, size), 1f, color);
 		Graphics g = image.getGraphics();
 		g.setColor(Color.black);
 		g.drawOval(size / 2 - 1, size / 2 - 1, 1, 1);

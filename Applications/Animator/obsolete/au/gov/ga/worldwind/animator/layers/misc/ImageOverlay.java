@@ -21,6 +21,11 @@ import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureCoords;
 import com.sun.opengl.util.texture.TextureIO;
 
+/**
+ * Layer that renders an image on the screen in screenspace.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ImageOverlay extends AbstractLayer
 {
 	private String iconFilePath;
@@ -221,13 +226,8 @@ public class ImageOverlay extends AbstractLayer
 
 		try
 		{
-			gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | 
-							GL.GL_COLOR_BUFFER_BIT | 
-							GL.GL_ENABLE_BIT | 
-							GL.GL_TEXTURE_BIT | 
-							GL.GL_TRANSFORM_BIT |
-							GL.GL_VIEWPORT_BIT |
-							GL.GL_CURRENT_BIT);
+			gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT | GL.GL_ENABLE_BIT | GL.GL_TEXTURE_BIT
+					| GL.GL_TRANSFORM_BIT | GL.GL_VIEWPORT_BIT | GL.GL_CURRENT_BIT);
 			attribsPushed = true;
 
 			Texture iconTexture = dc.getGpuResourceCache().getTexture(this);

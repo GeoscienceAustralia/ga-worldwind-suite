@@ -8,7 +8,20 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.LevelSet;
 import gov.nasa.worldwind.util.Logging;
 import au.gov.ga.worldwind.animator.layers.mask.MaskTiledImageLayer;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 
+/**
+ * {@link MaskTiledImageLayer} subclass that, when
+ * {@link ImmediateMode#isImmediate()}, ensures that textures are downloaded and
+ * loaded immediately in the render thread, instead of passing the texture
+ * requests to the task service.
+ * <p>
+ * No longer used; replaced by the {@link DelegatorTiledImageLayer} with the
+ * {@link ImmediateURLRequesterDelegate}.
+ * </p>
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ImmediateMaskTiledImageLayer extends MaskTiledImageLayer
 {
 	public ImmediateMaskTiledImageLayer(LevelSet levelSet)
@@ -25,7 +38,7 @@ public class ImmediateMaskTiledImageLayer extends MaskTiledImageLayer
 	{
 		super(stateInXml);
 	}
-	
+
 	@Override
 	protected void requestTexture(DrawContext dc, TextureTile tile)
 	{
@@ -48,8 +61,7 @@ public class ImmediateMaskTiledImageLayer extends MaskTiledImageLayer
 	{
 		//from BasicTiledImageLayer.requestTask.run()
 
-		final java.net.URL textureURL = WorldWind.getDataFileStore().findFile(
-				tile.getPath(), false);
+		final java.net.URL textureURL = WorldWind.getDataFileStore().findFile(tile.getPath(), false);
 		if (textureURL != null && !isTextureExpired(tile, textureURL))
 		{
 			if (loadTexture(tile, textureURL))
@@ -61,11 +73,9 @@ public class ImmediateMaskTiledImageLayer extends MaskTiledImageLayer
 			else
 			{
 				// Assume that something's wrong with the file and delete it.
-				gov.nasa.worldwind.WorldWind.getDataFileStore().removeFile(
-						textureURL);
+				gov.nasa.worldwind.WorldWind.getDataFileStore().removeFile(textureURL);
 				getLevels().markResourceAbsent(tile);
-				String message = Logging.getMessage(
-						"generic.DeletedCorruptDataFile", textureURL);
+				String message = Logging.getMessage("generic.DeletedCorruptDataFile", textureURL);
 				Logging.logger().info(message);
 			}
 		}

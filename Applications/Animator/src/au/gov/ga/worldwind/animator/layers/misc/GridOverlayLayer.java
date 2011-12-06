@@ -24,6 +24,9 @@ import com.sun.opengl.util.BufferUtil;
  * <p/>
  * The grid is centred in the x- and y-dimensions, and grid spacing can be
  * configured.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class GridOverlayLayer extends AbstractLayer
 {

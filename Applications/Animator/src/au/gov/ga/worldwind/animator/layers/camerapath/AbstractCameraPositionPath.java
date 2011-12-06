@@ -19,6 +19,8 @@ import com.sun.opengl.util.BufferUtil;
 
 /**
  * Base class for camera position paths
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public abstract class AbstractCameraPositionPath implements Renderable
 {

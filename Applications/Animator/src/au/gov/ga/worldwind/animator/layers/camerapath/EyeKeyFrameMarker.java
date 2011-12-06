@@ -10,6 +10,8 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
  * A key frame marker used to mark the position of the camera eye at a specific key frame.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class EyeKeyFrameMarker extends KeyFrameMarker
 {

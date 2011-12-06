@@ -24,6 +24,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 /**
  * A WorldWind Layer that displays the camera path of a given {@link Animation}
  * in the 3D world.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class CameraPathLayer extends AbstractLayer implements AnimationEventListener, SelectListener, ChangeOfAnimationListener
 {

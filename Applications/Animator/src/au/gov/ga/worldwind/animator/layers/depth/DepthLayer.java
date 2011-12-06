@@ -11,6 +11,14 @@ import java.util.List;
 
 import javax.media.opengl.GL;
 
+/**
+ * A layer that draws the elevation tiles with the OpenGL color mask disabled,
+ * so that it only writes to the depth buffer. This is useful for ensuring that
+ * that back of transparent layers (such as roads) aren't visible when no other
+ * layers are enabled, because the depth testing is still performed.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DepthLayer extends AbstractLayer
 {
 	private SurfaceTile tile = new DepthTile();
@@ -24,7 +32,7 @@ public class DepthLayer extends AbstractLayer
 	{
 		GL gl = dc.getGL();
 		gl.glPushAttrib(GL.GL_POLYGON_BIT);
-		
+
 		try
 		{
 			gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);

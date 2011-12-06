@@ -20,13 +20,17 @@ import javax.media.opengl.GL;
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
 
+/**
+ * Layer that renders a skybox in the background.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Skybox extends RenderableLayer
 {
 	private boolean inited = false;
 	private Texture[] skybox = new Texture[6];
 	private static final String[] keys = new String[6];
-	private static final String[] id = { "front", "left", "back", "right",
-			"top", "bottom" };
+	private static final String[] id = { "front", "left", "back", "right", "top", "bottom" };
 	private String skyboxDir = "data/skybox";
 	private String extension = ".png";
 
@@ -47,11 +51,9 @@ public class Skybox extends RenderableLayer
 			{
 				try
 				{
-					String slash = skyboxDir != null && skyboxDir.length() > 0
-							&& !skyboxDir.endsWith("/") ? "/" : "";
+					String slash = skyboxDir != null && skyboxDir.length() > 0 && !skyboxDir.endsWith("/") ? "/" : "";
 					String filename = skyboxDir + slash + id[i] + extension;
-					InputStream stream = this.getClass().getResourceAsStream(
-							"/" + filename);
+					InputStream stream = this.getClass().getResourceAsStream("/" + filename);
 					if (stream == null)
 					{
 						File file = new File(filename);
@@ -67,23 +69,17 @@ public class Skybox extends RenderableLayer
 				}
 				catch (IOException e)
 				{
-					String msg = Logging
-							.getMessage("layers.IOExceptionDuringInitialization");
+					String msg = Logging.getMessage("layers.IOExceptionDuringInitialization");
 					Logging.logger().severe(msg);
 					throw new WWRuntimeException(msg, e);
 				}
 
 				GL gl = dc.getGL();
-				gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE,
-						GL.GL_MODULATE);
-				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER,
-						GL.GL_LINEAR_MIPMAP_LINEAR);
-				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER,
-						GL.GL_LINEAR);
-				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S,
-						GL.GL_CLAMP_TO_EDGE);
-				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T,
-						GL.GL_CLAMP_TO_EDGE);
+				gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
+				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR);
+				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
+				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
 				// Enable texture anisotropy, improves "tilted" world map quality.
 				/*int[] maxAnisotropy = new int[1];
 				gl
@@ -111,10 +107,8 @@ public class Skybox extends RenderableLayer
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
 
-		dc.getGLU().gluPerspective(
-				dc.getView().getFieldOfView().degrees,
-				dc.getView().getViewport().getWidth()
-						/ dc.getView().getViewport().getHeight(), 0.1, 5.0);
+		dc.getGLU().gluPerspective(dc.getView().getFieldOfView().degrees,
+				dc.getView().getViewport().getWidth() / dc.getView().getViewport().getHeight(), 0.1, 5.0);
 
 		//set up modelview matrix
 		gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -135,16 +129,13 @@ public class Skybox extends RenderableLayer
 		}
 
 		Matrix transform = Matrix.IDENTITY;
-		transform = transform.multiply(Matrix.fromRotationY(heading
-				.multiply(-1.0)));
-		transform = transform.multiply(Matrix.fromRotationX(pitch
-				.addDegrees(90)));
+		transform = transform.multiply(Matrix.fromRotationY(heading.multiply(-1.0)));
+		transform = transform.multiply(Matrix.fromRotationX(pitch.addDegrees(90)));
 		transform = transform.multiply(Matrix.fromRotationZ(roll)); //TODO check
 
 		Vec4 up = Vec4.UNIT_Y; //TODO recalculate if forward is parallel to up
 		Vec4 forward = Vec4.UNIT_Z.transformBy4(transform);
-		dc.getGLU().gluLookAt(0, 0, 0, forward.x, forward.y, forward.z, up.x,
-				up.y, up.z);
+		dc.getGLU().gluLookAt(0, 0, 0, forward.x, forward.y, forward.z, up.x, up.y, up.z);
 
 		// Enable/Disable features
 		gl.glPushAttrib(GL.GL_ENABLE_BIT);
