@@ -149,7 +149,7 @@
 	</target>
 
 	<target name="test" description="Execute unit tests on the project" depends="build-test">
-		<!--<mkdir dir="${test_results_dir}" />
+		<mkdir dir="${test_results_dir}" />
 		<mkdir dir="${test_reports_dir}" />
 		<junit printsummary="withOutAndErr" failureproperty="junit.failure">
 			<classpath refid="test_classpath" />
@@ -165,7 +165,7 @@
 			<fileset dir="${test_results_dir}" />
 			<report todir="${test_reports_dir}" />
 		</junitreport>
-		<fail if="junit.failure" message="Unit test(s) failed.  See reports!" />-->
+		<fail if="junit.failure" message="Unit test(s) failed.  See reports!" />
 	</target>
 
 	<target name="executables" depends="clean, test">
