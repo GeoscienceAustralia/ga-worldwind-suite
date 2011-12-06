@@ -145,17 +145,17 @@
 	<target name="build-test" depends="build">
 		<mkdir dir="${test_build_dir}" />
 		<copy todir="${test_build_dir}">
-			<fileset dir="${collada_test_src_dir}">
-				<exclude name="**/*.java" />
-			</fileset>
 			<fileset dir="${common_test_src_dir}">
 				<exclude name="**/*.java" />
 			</fileset>
 			<fileset dir="${test_src_dir}">
 				<exclude name="**/*.java" />
 			</fileset>
+			<fileset dir="${collada_test_src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
 			<fileset dir="${collada_dir}">
-				<include name="testmodels/**"/>
+				<include name="testmodels/**" />
 			</fileset>
 		</copy>
 		<javac source="1.6" target="1.6" destdir="${test_build_dir}" classpathref="test_classpath" listfiles="no" fork="true" debug="${javac_debug}" includeantruntime="no">
@@ -203,7 +203,7 @@
 			<fileset dir="${build_dir}" />
 			<fileset dir="${webstart_dir}/temp" />
 		</jar>
-		
+
 		<delete dir="${webstart_dir}/temp" />
 
 		<zip destfile="${webstart_dir}/${gdal_data_zip}">
@@ -270,6 +270,9 @@
 
 		<zip destfile="${executable_dir}/temp.zip">
 			<zipgroupfileset dir="${jogl_dir}">
+				<include name="**/*.jar" />
+			</zipgroupfileset>
+			<zipgroupfileset dir="${collada_lib_dir}">
 				<include name="**/*.jar" />
 			</zipgroupfileset>
 			<zipgroupfileset dir="${worldwind_dir}">
