@@ -31,7 +31,6 @@ public class AnimatorConfiguration
 		initialiseGLCapabilities();
 		initialisePlatformDependentConfiguration();
 		initialiseLAF();
-		initialiseProxySettings();
 		initialiseWorldWindConfiguration();
 		initialiseMessageSource();
 	}
@@ -68,11 +67,6 @@ public class AnimatorConfiguration
 		{
 			ExceptionLogger.logException(e);
 		}
-	}
-	
-	private static void initialiseProxySettings()
-	{
-		System.setProperty("http.nonProxyHosts", "localhost");
 	}
 	
 	private static void initialiseWorldWindConfiguration()
