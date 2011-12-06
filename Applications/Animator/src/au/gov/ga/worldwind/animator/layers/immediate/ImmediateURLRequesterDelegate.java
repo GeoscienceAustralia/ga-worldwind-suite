@@ -1,10 +1,9 @@
-package au.gov.ga.worldwind.animator.layers;
+package au.gov.ga.worldwind.animator.layers.immediate;
 
 import gov.nasa.worldwind.avlist.AVList;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegatorLayer;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTextureTile;
@@ -19,7 +18,7 @@ import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageURLRequesterD
  * animation.
  * 
  * @author James Navin (james.navin@ga.gov.au)
- * @author Michael de Hoog (michael.deHoog@ga.gov.au)
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class ImmediateURLRequesterDelegate extends ImageURLRequesterDelegate
 {
