@@ -1,20 +1,10 @@
 package au.gov.ga.worldwind.animator.application.settings;
 
 import static au.gov.ga.worldwind.common.util.Util.isBlank;
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getGaMachinenameRegexKey;
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getGaProxyHostKey;
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getGaProxyPortKey;
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getProxyTestUrlKey;
-import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
-import gov.nasa.worldwind.Configuration;
-import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.InetAddress;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,7 +19,8 @@ import au.gov.ga.worldwind.animator.layers.LayerIdentifierImpl;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierImpl;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
-import au.gov.ga.worldwind.common.downloader.Downloader;
+import au.gov.ga.worldwind.common.util.Proxy;
+import au.gov.ga.worldwind.common.util.Proxy.ProxyType;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
@@ -196,17 +187,23 @@ public class Settings
 
 	private static void saveProxy(Element rootElement)
 	{
+		Proxy proxy = instance.getProxy();
 		Element proxyContainer = WWXML.appendElement(rootElement, "proxy");
-		WWXML.appendBoolean(proxyContainer, "enabled", instance.isProxyEnabled());
-		if (instance.getProxyHost() != null)
+		WWXML.appendBoolean(proxyContainer, "enabled", proxy.isEnabled());
+		WWXML.appendBoolean(proxyContainer, "useSystem", proxy.isUseSystem());
+		if (proxy.getHost() != null)
 		{
-			WWXML.appendText(proxyContainer, "host", instance.getProxyHost());
+			WWXML.appendText(proxyContainer, "host", proxy.getHost());
 		}
-		if (instance.getProxyType() != null)
+		if (proxy.getType() != null)
 		{
-			WWXML.appendText(proxyContainer, "type", instance.getProxyType().toString());
+			WWXML.appendText(proxyContainer, "type", proxy.getType().toString());
 		}
-		WWXML.appendInteger(proxyContainer, "port", instance.getProxyPort());
+		if (proxy.getNonProxyHosts() != null)
+		{
+			WWXML.appendText(proxyContainer, "nonProxyHosts", proxy.getType().toString());
+		}
+		WWXML.appendInteger(proxyContainer, "port", proxy.getPort());
 	}
 
 	/**
@@ -220,7 +217,6 @@ public class Settings
 		File settingsFile = new File(Util.getUserGAWorldWindDirectory(), SETTINGS_FILE_NAME);
 		if (!settingsFile.exists())
 		{
-			instance.loadDefaultProxySettings();
 			return;
 		}
 
@@ -350,16 +346,27 @@ public class Settings
 
 	private static void loadProxy(Element rootElement)
 	{
-		instance.setProxyEnabled(XMLUtil.getBoolean(rootElement, "//proxy/enabled", false));
-		instance.setProxyPort(XMLUtil.getInteger(rootElement, "//proxy/port", 80));
-		instance.setProxyHost(XMLUtil.getText(rootElement, "//proxy/host", (String) null));
-		String type = XMLUtil.getText(rootElement, "//proxy/type", (String) null);
-		ProxyType proxyType = ProxyType.fromString(type);
-		if(proxyType == null)
+		Proxy proxy = new Proxy();
+		if (XMLUtil.getElement(rootElement, "//proxy", null) == null)
 		{
-			proxyType = ProxyType.HTTP;
+			proxy.setEnabled(XMLUtil.getBoolean(rootElement, "//proxy/enabled", true));
+			proxy.setUseSystem(XMLUtil.getBoolean(rootElement, "//proxy/useSystem", true));
+			proxy.setHost(XMLUtil.getText(rootElement, "//proxy/host", (String) null));
+			proxy.setNonProxyHosts(XMLUtil.getText(rootElement, "//proxy/nonProxyHosts", ""));
+
+			Integer port = XMLUtil.getInteger(rootElement, "//proxy/port", null);
+			if (port != null)
+			{
+				proxy.setPort(port);
+			}
+
+			ProxyType type = ProxyType.fromString(XMLUtil.getText(rootElement, "//proxy/type", (String) null));
+			if (type != null)
+			{
+				proxy.setType(type);
+			}
 		}
-		instance.setProxyType(proxyType);
+		instance.setProxy(proxy);
 	}
 
 	// ----------------------------------
@@ -413,11 +420,7 @@ public class Settings
 	private Long saveIntervalInSeconds = 300L; //5mins
 	private int maxNumberOfAutoSaves = 5;
 
-	private boolean proxyEnabled = false;
-	private String proxyHost = null;
-	private int proxyPort = 80;
-	private ProxyType proxyType = ProxyType.HTTP;
-
+	private Proxy proxy = new Proxy();
 
 	/**
 	 * Private constructor. Use the Singleton accessor {@link #get()}.
@@ -623,146 +626,23 @@ public class Settings
 		this.autoSaveEnabled = autoSaveEnabled;
 	}
 
-	public boolean isProxyEnabled()
+	public Proxy getProxy()
 	{
-		return proxyEnabled;
+		return proxy;
 	}
 
-	public void setProxyEnabled(boolean proxyEnabled)
+	public void setProxy(Proxy proxy)
 	{
-		this.proxyEnabled = proxyEnabled;
-		updateProxyConfiguration();
-	}
-
-	public String getProxyHost()
-	{
-		return proxyHost;
-	}
-
-	public void setProxyHost(String proxyHost)
-	{
-		if (proxyHost != null && proxyHost.length() == 0)
-			proxyHost = null;
-		this.proxyHost = proxyHost;
-		updateProxyConfiguration();
-	}
-
-	public int getProxyPort()
-	{
-		return proxyPort;
-	}
-
-	public void setProxyPort(int proxyPort)
-	{
-		if (proxyPort <= 0)
-			proxyPort = 80;
-		this.proxyPort = proxyPort;
-		updateProxyConfiguration();
-	}
-
-	public ProxyType getProxyType()
-	{
-		return proxyType;
-	}
-
-	public void setProxyType(ProxyType proxyType)
-	{
-		this.proxyType = proxyType;
+		if (proxy == null)
+		{
+			proxy = new Proxy();
+		}
+		this.proxy = proxy;
 		updateProxyConfiguration();
 	}
 
 	private void updateProxyConfiguration()
 	{
-		if (isProxyEnabled())
-		{
-			String host = getProxyHost() == null ? "" : getProxyHost();
-			Configuration.setValue(AVKey.URL_PROXY_HOST, host);
-			Configuration.setValue(AVKey.URL_PROXY_PORT, getProxyPort());
-			Configuration.setValue(AVKey.URL_PROXY_TYPE, getProxyType().getType());
-
-			System.setProperty("http.proxyHost", host);
-			System.setProperty("http.proxyPort", String.valueOf(getProxyPort()));
-		}
-		else
-		{
-			Configuration.removeKey(AVKey.URL_PROXY_HOST);
-
-			System.setProperty("http.proxyHost", "");
-			System.setProperty("http.proxyPort", "");
-		}
-	}
-
-	private void loadDefaultProxySettings()
-	{
-		try
-		{
-			//check for a GA machine; if so, setup the default GA proxy
-			String hostname = InetAddress.getLocalHost().getCanonicalHostName();
-			if (hostname.matches(getMessage(getGaMachinenameRegexKey())))
-			{
-				setProxyHost(getMessage(getGaProxyHostKey()));
-				setProxyPort(Integer.parseInt(getMessage(getGaProxyPortKey())));
-				setProxyType(ProxyType.HTTP);
-				setProxyEnabled(true);
-
-				URL url = new URL(getMessage(getProxyTestUrlKey()));
-				try
-				{
-					Downloader.downloadImmediately(url, false, true);
-				}
-				catch (UnknownHostException e)
-				{
-					//proxy was wrong (perhaps GA machine running outside GA network),
-					//so reset to default and disable
-					setProxyHost(null);
-					setProxyPort(80);
-					setProxyEnabled(false);
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			//ignore
-		}
-	}
-
-	public enum ProxyType
-	{
-		HTTP("HTTP", "Proxy.Type.Http"), SOCKS("SOCKS", "Proxy.Type.SOCKS");
-
-		private String pretty;
-		private String type;
-
-		ProxyType(String pretty, String type)
-		{
-			this.pretty = pretty;
-			this.type = type;
-		}
-
-		@Override
-		public String toString()
-		{
-			return pretty;
-		}
-
-		public String getType()
-		{
-			return type;
-		}
-
-		public static ProxyType fromString(String proxyType)
-		{
-			if (proxyType != null)
-			{
-				for (ProxyType type : ProxyType.values())
-				{
-					if (type.pretty.equalsIgnoreCase(proxyType))
-						return type;
-					if (type.type.equalsIgnoreCase(proxyType))
-						return type;
-				}
-			}
-			return null;
-		}
+		proxy.set();
 	}
 }

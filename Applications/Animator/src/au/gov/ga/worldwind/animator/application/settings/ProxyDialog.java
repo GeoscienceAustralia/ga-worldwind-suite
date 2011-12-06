@@ -3,8 +3,10 @@ package au.gov.ga.worldwind.animator.application.settings;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyDialogTitleKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyEnabledLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyHostLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyNonProxyHostsLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyPortLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyTypeLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getProxyUseSystemLabelKey;
 import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermCancelKey;
 import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermOkKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
@@ -17,6 +19,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -28,6 +32,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import au.gov.ga.worldwind.common.ui.JIntegerField;
+import au.gov.ga.worldwind.common.util.Proxy;
+import au.gov.ga.worldwind.common.util.Proxy.ProxyType;
 
 /**
  * {@link JDialog} used for setting up the proxy settings.
@@ -52,19 +58,17 @@ public class ProxyDialog extends JDialog
 			return;
 		}
 
-		Settings.get().setProxyEnabled(dialog.enabled.isSelected());
-		Settings.get().setProxyHost(dialog.host.getText());
-		int port = Settings.get().getProxyPort();
-		try
+		Proxy proxy = new Proxy();
+		proxy.setEnabled(dialog.enabled.isSelected());
+		proxy.setUseSystem(dialog.useSystem.isSelected());
+		Integer port = dialog.port.getValue();
+		if (port != null)
 		{
-			port = Integer.valueOf(dialog.port.getText());
+			proxy.setPort(port);
 		}
-		catch (Exception e)
-		{
-			//ignore
-		}
-		Settings.get().setProxyPort(port);
-		Settings.get().setProxyType((Settings.ProxyType) dialog.type.getSelectedItem());
+		proxy.setHost(dialog.host.getText());
+		proxy.setNonProxyHosts(dialog.nonProxyHosts.getText());
+		proxy.setType((ProxyType) dialog.type.getSelectedItem());
 	}
 
 	private JButton okButton;
@@ -72,9 +76,12 @@ public class ProxyDialog extends JDialog
 	private int response;
 
 	private JCheckBox enabled;
+	private JCheckBox useSystem;
+	private JComboBox type;
 	private JTextField host;
 	private JIntegerField port;
-	private JComboBox type;
+	private JTextField nonProxyHosts;
+	private List<JLabel> labels = new ArrayList<JLabel>();
 
 	private ProxyDialog(Frame parent)
 	{
@@ -99,8 +106,18 @@ public class ProxyDialog extends JDialog
 		int spacing = 5;
 		int row = -1;
 
+		Proxy proxy = Settings.get().getProxy();
+
 		enabled = new JCheckBox(getMessage(getProxyEnabledLabelKey()));
-		enabled.setSelected(Settings.get().isProxyEnabled());
+		enabled.setSelected(proxy.isEnabled());
+		enabled.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				enableFields();
+			}
+		});
 		c = new GridBagConstraints();
 		c.gridy = ++row;
 		c.gridwidth = GridBagConstraints.REMAINDER;
@@ -108,14 +125,58 @@ public class ProxyDialog extends JDialog
 		c.anchor = GridBagConstraints.WEST;
 		rootPanel.add(enabled, c);
 
-		label = new JLabel(getMessage(getProxyHostLabelKey()));
+		useSystem = new JCheckBox(getMessage(getProxyUseSystemLabelKey()));
+		useSystem.setSelected(proxy.isUseSystem());
+		useSystem.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				enableFields();
+			}
+		});
+		c = new GridBagConstraints();
+		c.gridy = ++row;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.insets = new Insets(0, spacing, spacing, spacing);
+		c.anchor = GridBagConstraints.WEST;
+		rootPanel.add(useSystem, c);
+
+		label = new JLabel(getMessage(getProxyTypeLabelKey()));
+		labels.add(label);
 		c = new GridBagConstraints();
 		c.gridy = ++row;
 		c.insets = new Insets(0, spacing, spacing, spacing);
 		c.anchor = GridBagConstraints.EAST;
 		rootPanel.add(label, c);
 
-		host = new JTextField(Settings.get().getProxyHost());
+		type = new JComboBox(ProxyType.values());
+		type.setSelectedItem(proxy.getType());
+		type.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				enableFields();
+			}
+		});
+		c = new GridBagConstraints();
+		c.gridy = row;
+		c.gridx = 1;
+		c.insets = new Insets(0, 0, spacing, spacing);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		rootPanel.add(type, c);
+
+		label = new JLabel(getMessage(getProxyHostLabelKey()));
+		labels.add(label);
+		c = new GridBagConstraints();
+		c.gridy = ++row;
+		c.insets = new Insets(0, spacing, spacing, spacing);
+		c.anchor = GridBagConstraints.EAST;
+		rootPanel.add(label, c);
+
+		host = new JTextField(proxy.getHost());
 		c = new GridBagConstraints();
 		c.gridy = row;
 		c.gridx = 1;
@@ -125,13 +186,14 @@ public class ProxyDialog extends JDialog
 		rootPanel.add(host, c);
 
 		label = new JLabel(getMessage(getProxyPortLabelKey()));
+		labels.add(label);
 		c = new GridBagConstraints();
 		c.gridy = ++row;
 		c.insets = new Insets(0, spacing, spacing, spacing);
 		c.anchor = GridBagConstraints.EAST;
 		rootPanel.add(label, c);
 
-		port = new JIntegerField(Settings.get().getProxyPort());
+		port = new JIntegerField(proxy.getPort());
 		c = new GridBagConstraints();
 		c.gridy = row;
 		c.gridx = 1;
@@ -140,21 +202,22 @@ public class ProxyDialog extends JDialog
 		c.weightx = 1;
 		rootPanel.add(port, c);
 
-		label = new JLabel(getMessage(getProxyTypeLabelKey()));
+		label = new JLabel(getMessage(getProxyNonProxyHostsLabelKey()));
+		labels.add(label);
 		c = new GridBagConstraints();
 		c.gridy = ++row;
 		c.insets = new Insets(0, spacing, spacing, spacing);
 		c.anchor = GridBagConstraints.EAST;
 		rootPanel.add(label, c);
 
-		type = new JComboBox(Settings.ProxyType.values());
+		nonProxyHosts = new JTextField(proxy.getNonProxyHosts());
 		c = new GridBagConstraints();
 		c.gridy = row;
 		c.gridx = 1;
 		c.insets = new Insets(0, 0, spacing, spacing);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
-		rootPanel.add(type, c);
+		rootPanel.add(nonProxyHosts, c);
 
 		JPanel buttonPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -199,5 +262,23 @@ public class ProxyDialog extends JDialog
 		pack();
 		setSize(300, getHeight());
 		setLocationRelativeTo(parent);
+		
+		enableFields();
+	}
+
+	private void enableFields()
+	{
+		boolean e = enabled.isSelected();
+		boolean s = useSystem.isSelected();
+		boolean h = type.getSelectedItem() == ProxyType.HTTP;
+		useSystem.setEnabled(e);
+		for (JLabel label : labels)
+		{
+			label.setEnabled(e && !s);
+		}
+		type.setEnabled(e && !s);
+		host.setEnabled(e && !s);
+		port.setEnabled(e && !s);
+		nonProxyHosts.setEnabled(e && !s && h);
 	}
 }

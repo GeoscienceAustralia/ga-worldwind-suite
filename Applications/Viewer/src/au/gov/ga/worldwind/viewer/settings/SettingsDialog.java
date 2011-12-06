@@ -45,7 +45,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import au.gov.ga.worldwind.common.ui.JIntegerField;
-import au.gov.ga.worldwind.viewer.settings.Settings.ProxyType;
+import au.gov.ga.worldwind.common.util.Proxy;
+import au.gov.ga.worldwind.common.util.Proxy.ProxyType;
 import au.gov.ga.worldwind.viewer.settings.Settings.StereoMode;
 
 public class SettingsDialog extends JDialog
@@ -87,12 +88,15 @@ public class SettingsDialog extends JDialog
 	private JCheckBox stereoCursorCheck;
 
 	private JCheckBox proxyEnabledCheck;
+	private JCheckBox proxyUseSystemCheck;
+	private JLabel proxyTypeLabel;
+	private JComboBox proxyTypeCombo;
 	private JLabel proxyHostLabel;
 	private JTextField proxyHostText;
 	private JLabel proxyPortLabel;
 	private JIntegerField proxyPortText;
-	private JLabel proxyTypeLabel;
-	private JComboBox proxyTypeCombo;
+	private JLabel proxyNonProxyHostsLabel;
+	private JTextField proxyNonProxyHostsText;
 
 	public SettingsDialog(JFrame frame, String title, ImageIcon icon)
 	{
@@ -189,7 +193,7 @@ public class SettingsDialog extends JDialog
 
 	private boolean verifyAndSave()
 	{
-		boolean proxyValid = true;
+		boolean valid = true;
 
 		boolean spanDisplays = spanDisplayRadio.isSelected();
 		String displayId = ((DisplayObject) displayCombo.getSelectedItem()).device.getIDstring();
@@ -209,21 +213,26 @@ public class SettingsDialog extends JDialog
 		Integer annotationsPause = annotationsPauseText.getValue();
 		boolean showDownloads = showDownloadsCheck.isSelected();
 
-		boolean proxyEnabled = proxyEnabledCheck.isSelected();
-		String proxyHost = proxyHostText.getText();
-		Integer proxyPort = proxyPortText.getValue();
-		ProxyType proxyType = (ProxyType) proxyTypeCombo.getSelectedItem();
-
-		if (proxyEnabled)
+		Proxy proxy = new Proxy();
+		proxy.setEnabled(proxyEnabledCheck.isSelected());
+		proxy.setUseSystem(proxyUseSystemCheck.isSelected());
+		proxy.setType((ProxyType) proxyTypeCombo.getSelectedItem());
+		proxy.setHost(proxyHostText.getText());
+		Integer port = proxyPortText.getValue();
+		if (port != null)
 		{
-			if (proxyHost.length() == 0 || proxyPort == null)
+			proxy.setPort(port);
+		}
+		proxy.setNonProxyHosts(proxyNonProxyHostsText.getText());
+
+		if (proxy.isEnabled())
+		{
+			if (!proxy.isUseSystem() && (proxy.getHost().length() == 0 || port == null))
 			{
-				proxyValid = false;
+				valid = false;
 				showError(this, "Proxy values you entered are invalid.");
 			}
 		}
-
-		boolean valid = proxyValid;
 
 		if (valid)
 		{
@@ -244,14 +253,12 @@ public class SettingsDialog extends JDialog
 			settings.setViewIteratorSpeed(viewIteratorSpeed);
 			settings.setVerticalExaggeration(verticalExaggeration);
 			if (annotationsPause != null)
+			{
 				settings.setPlacesPause(annotationsPause);
+			}
 			settings.setShowDownloads(showDownloads);
 
-			settings.setProxyEnabled(proxyEnabled);
-			settings.setProxyHost(proxyHost);
-			if (proxyPort != null)
-				settings.setProxyPort(proxyPort);
-			settings.setProxyType(proxyType);
+			settings.setProxy(proxy);
 		}
 
 		return valid;
@@ -530,8 +537,7 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel.add(eyeSeparationLabel, c);
 
-		SpinnerModel eyeSeparationModel =
-				new SpinnerNumberModel(settings.getEyeSeparation(), 0, 1e6, 0.1);
+		SpinnerModel eyeSeparationModel = new SpinnerNumberModel(settings.getEyeSeparation(), 0, 1e6, 0.1);
 		eyeSeparationSpinner = new JSpinner(eyeSeparationModel);
 		c = new GridBagConstraints();
 		c.gridx = 1;
@@ -549,8 +555,7 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel.add(focalLengthLabel, c);
 
-		SpinnerModel focalLengthModel =
-				new SpinnerNumberModel(settings.getFocalLength(), 0, 1e8, 1);
+		SpinnerModel focalLengthModel = new SpinnerNumberModel(settings.getFocalLength(), 0, 1e8, 1);
 		focalLengthSpinner = new JSpinner(focalLengthModel);
 		c = new GridBagConstraints();
 		c.gridx = 1;
@@ -570,8 +575,7 @@ public class SettingsDialog extends JDialog
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(stereoCursorCheck, c);
 
-		hardwareStereoEnabledCheck =
-				new JCheckBox("Enable quad-buffered stereo support (requires restart)");
+		hardwareStereoEnabledCheck = new JCheckBox("Enable quad-buffered stereo support (requires restart)");
 		hardwareStereoEnabledCheck.setSelected(settings.isHardwareStereoEnabled());
 		c = new GridBagConstraints();
 		c.gridx = 0;
@@ -604,8 +608,7 @@ public class SettingsDialog extends JDialog
 		panel2.add(label, c);
 
 		verticalExaggeration = Settings.get().getVerticalExaggeration();
-		verticalExaggerationSlider =
-				new JSlider(0, 2000, exaggerationToSlider(verticalExaggeration));
+		verticalExaggerationSlider = new JSlider(0, 2000, exaggerationToSlider(verticalExaggeration));
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.weightx = 1;
@@ -622,8 +625,7 @@ public class SettingsDialog extends JDialog
 				if (e != null)
 					verticalExaggeration = exaggeration;
 
-				String format =
-						"%1." + (exaggeration < 10 ? "2" : exaggeration < 100 ? "1" : "0") + "f";
+				String format = "%1." + (exaggeration < 10 ? "2" : exaggeration < 100 ? "1" : "0") + "f";
 				String value = String.format(format, exaggeration);
 				if (value.indexOf('.') < 0)
 					value += ".";
@@ -790,9 +792,12 @@ public class SettingsDialog extends JDialog
 	{
 		GridBagConstraints c;
 		JPanel panel = new JPanel(new GridBagLayout());
+		int row = -1;
+
+		Proxy proxy = settings.getProxy();
 
 		proxyEnabledCheck = new JCheckBox("Enable proxy");
-		proxyEnabledCheck.setSelected(settings.isProxyEnabled());
+		proxyEnabledCheck.setSelected(proxy.isEnabled());
 		proxyEnabledCheck.addActionListener(new ActionListener()
 		{
 			@Override
@@ -803,24 +808,67 @@ public class SettingsDialog extends JDialog
 		});
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = ++row;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(proxyEnabledCheck, c);
 
+		proxyUseSystemCheck = new JCheckBox("Use system proxy");
+		proxyUseSystemCheck.setSelected(proxy.isUseSystem());
+		proxyUseSystemCheck.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				enableProxySettings();
+			}
+		});
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = ++row;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
+		panel.add(proxyUseSystemCheck, c);
+
+		proxyTypeLabel = new JLabel("Proxy type:");
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = ++row;
+		c.anchor = GridBagConstraints.EAST;
+		c.insets = new Insets(SPACING, SPACING, 0, 0);
+		panel.add(proxyTypeLabel, c);
+
+		proxyTypeCombo = new JComboBox(ProxyType.values());
+		proxyTypeCombo.setSelectedItem(proxy.getType());
+		proxyTypeCombo.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				enableProxySettings();
+			}
+		});
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.gridy = row;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
+		panel.add(proxyTypeCombo, c);
+
 		proxyHostLabel = new JLabel("Host:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel.add(proxyHostLabel, c);
 
-		proxyHostText = new JTextField(settings.getProxyHost());
+		proxyHostText = new JTextField(proxy.getHost());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 1;
+		c.gridy = row;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
@@ -829,36 +877,35 @@ public class SettingsDialog extends JDialog
 		proxyPortLabel = new JLabel("Port:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
 		panel.add(proxyPortLabel, c);
 
-		proxyPortText = new JIntegerField(settings.getProxyPort());
+		proxyPortText = new JIntegerField(proxy.getPort());
 		proxyPortText.setPositive(true);
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 2;
+		c.gridy = row;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, 0, SPACING);
 		panel.add(proxyPortText, c);
 
-		proxyTypeLabel = new JLabel("Proxy type:");
+		proxyNonProxyHostsLabel = new JLabel("Non-proxy hosts:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy = ++row;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = new Insets(SPACING, SPACING, 0, 0);
-		panel.add(proxyTypeLabel, c);
+		panel.add(proxyNonProxyHostsLabel, c);
 
-		proxyTypeCombo = new JComboBox(ProxyType.values());
-		proxyTypeCombo.setSelectedItem(settings.getProxyType());
+		proxyNonProxyHostsText = new JTextField(proxy.getNonProxyHosts());
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.gridy = 3;
+		c.gridy = row;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(SPACING, SPACING, SPACING, SPACING);
-		panel.add(proxyTypeCombo, c);
+		panel.add(proxyNonProxyHostsText, c);
 
 		enableProxySettings();
 
@@ -868,12 +915,17 @@ public class SettingsDialog extends JDialog
 	private void enableProxySettings()
 	{
 		boolean enabled = proxyEnabledCheck.isSelected();
-		proxyHostLabel.setEnabled(enabled);
-		proxyHostText.setEnabled(enabled);
-		proxyPortLabel.setEnabled(enabled);
-		proxyPortText.setEnabled(enabled);
-		proxyTypeLabel.setEnabled(enabled);
-		proxyTypeCombo.setEnabled(enabled);
+		boolean useSystem = proxyUseSystemCheck.isSelected();
+		boolean http = proxyTypeCombo.getSelectedItem() == ProxyType.HTTP;
+		proxyUseSystemCheck.setEnabled(enabled);
+		proxyTypeLabel.setEnabled(enabled && !useSystem);
+		proxyTypeCombo.setEnabled(enabled && !useSystem);
+		proxyHostLabel.setEnabled(enabled && !useSystem);
+		proxyHostText.setEnabled(enabled && !useSystem);
+		proxyPortLabel.setEnabled(enabled && !useSystem);
+		proxyPortText.setEnabled(enabled && !useSystem);
+		proxyNonProxyHostsLabel.setEnabled(enabled && !useSystem && http);
+		proxyNonProxyHostsText.setEnabled(enabled && !useSystem && http);
 	}
 
 	private void enableStereoSettings()

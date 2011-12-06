@@ -115,9 +115,11 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getSetProxyLabelKey() { return "animator.gui.dialog.setproxy"; }
 	public static String getProxyDialogTitleKey() { return "animator.gui.dialog.proxy.title"; }
 	public static String getProxyEnabledLabelKey() { return "animator.gui.dialog.proxy.enabled"; }
+	public static String getProxyUseSystemLabelKey() { return "animator.gui.dialog.proxy.usesystem"; }
 	public static String getProxyHostLabelKey() { return "animator.gui.dialog.proxy.host"; }
 	public static String getProxyPortLabelKey() { return "animator.gui.dialog.proxy.port"; }
 	public static String getProxyTypeLabelKey() { return "animator.gui.dialog.proxy.type"; }
+	public static String getProxyNonProxyHostsLabelKey() { return "animator.gui.dialog.proxy.nonproxyhosts"; }
 	public static String getAnimationBrowserEnableAllLabelKey() { return "animator.gui.menu.enableall.label"; }
 	public static String getAnimationBrowserDisableAllLabelKey() { return "animator.gui.menu.disableall.label"; }
 	public static String getAnimationBrowserArmAllLabelKey() { return "animator.gui.menu.armall.label"; }

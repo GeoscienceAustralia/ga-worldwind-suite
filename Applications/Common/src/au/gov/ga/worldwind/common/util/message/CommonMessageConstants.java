@@ -15,11 +15,6 @@ public class CommonMessageConstants
 	public static String getTermFullHeightKey() { return "common.term.full.height"; }
 	public static String getTermPathKey() { return "common.term.path"; }
 	
-	public static String getGaMachinenameRegexKey() { return "common.ga.machinename.regex"; }
-	public static String getGaProxyHostKey() { return "common.ga.proxy.host"; }
-	public static String getGaProxyPortKey() { return "common.ga.proxy.port"; }
-	public static String getProxyTestUrlKey() { return "common.proxy.test.url"; }
-	
 	public static String getVideocardFailureTitleKey() { return "common.videocard.failure.title"; }
 	public static String getVideocardFailureMessageKey() { return "common.videocard.failure.message"; }
 	public static String getHtmlNotFoundMessageKey() { return "common.html.notfound.message"; }

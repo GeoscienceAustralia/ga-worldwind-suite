@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.gov.ga.worldwind.common.util.EnumPersistenceDelegate;
+import au.gov.ga.worldwind.common.util.Proxy;
 import au.gov.ga.worldwind.common.view.stereo.StereoViewParameters;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
@@ -23,7 +24,6 @@ public class Settings implements StereoViewParameters
 {
 	private static Settings instance;
 	private static boolean stereoSupported = false;
-	private static boolean newSettings = false;
 
 	public static void init()
 	{
@@ -31,7 +31,6 @@ public class Settings implements StereoViewParameters
 		if (instance == null)
 		{
 			instance = new Settings();
-			newSettings = true;
 		}
 	}
 
@@ -69,11 +68,6 @@ public class Settings implements StereoViewParameters
 		}
 	}
 
-	public static boolean isNewSettings()
-	{
-		return newSettings;
-	}
-
 	public Settings()
 	{
 		//force configuration update
@@ -86,10 +80,7 @@ public class Settings implements StereoViewParameters
 		SettingsPersistance.save(this, getSettingsFile());
 	}
 
-	private boolean proxyEnabled = false;
-	private String proxyHost = "";
-	private int proxyPort = 80;
-	private ProxyType proxyType = ProxyType.HTTP;
+	private Proxy proxy = new Proxy();
 	private StereoMode stereoMode = StereoMode.RC_ANAGLYPH;
 	private boolean stereoSwap = false;
 	private String displayId = null;
@@ -113,73 +104,20 @@ public class Settings implements StereoViewParameters
 	private List<ThemePanelProperties> panelProperties = new ArrayList<ThemePanelProperties>();
 	private List<ThemeHUDProperties> hudProperties = new ArrayList<ThemeHUDProperties>();
 
-	public boolean isProxyEnabled()
+	public Proxy getProxy()
 	{
-		return proxyEnabled;
+		return proxy;
 	}
 
-	public void setProxyEnabled(boolean proxyEnabled)
+	public void setProxy(Proxy proxy)
 	{
-		this.proxyEnabled = proxyEnabled;
-		updateProxyConfiguration();
-	}
-
-	public String getProxyHost()
-	{
-		return proxyHost;
-	}
-
-	public void setProxyHost(String proxyHost)
-	{
-		if (proxyHost != null && proxyHost.length() == 0)
-			proxyHost = null;
-		this.proxyHost = proxyHost;
-		updateProxyConfiguration();
-	}
-
-	public int getProxyPort()
-	{
-		return proxyPort;
-	}
-
-	public void setProxyPort(int proxyPort)
-	{
-		if (proxyPort <= 0)
-			proxyPort = 80;
-		this.proxyPort = proxyPort;
-		updateProxyConfiguration();
-	}
-
-	public ProxyType getProxyType()
-	{
-		return proxyType;
-	}
-
-	public void setProxyType(ProxyType proxyType)
-	{
-		this.proxyType = proxyType;
+		this.proxy = proxy;
 		updateProxyConfiguration();
 	}
 
 	private void updateProxyConfiguration()
 	{
-		if (isProxyEnabled())
-		{
-			String host = getProxyHost() == null ? "" : getProxyHost();
-			Configuration.setValue(AVKey.URL_PROXY_HOST, host);
-			Configuration.setValue(AVKey.URL_PROXY_PORT, getProxyPort());
-			Configuration.setValue(AVKey.URL_PROXY_TYPE, getProxyType().getType());
-
-			System.setProperty("http.proxyHost", host);
-			System.setProperty("http.proxyPort", String.valueOf(getProxyPort()));
-		}
-		else
-		{
-			Configuration.removeKey(AVKey.URL_PROXY_HOST);
-
-			System.setProperty("http.proxyHost", "");
-			System.setProperty("http.proxyPort", "");
-		}
+		proxy.set();
 	}
 
 	public StereoMode getStereoMode()
@@ -587,37 +525,6 @@ public class Settings implements StereoViewParameters
 		public String toString()
 		{
 			return pretty;
-		}
-
-		static
-		{
-			EnumPersistenceDelegate.installFor(values());
-		}
-	}
-
-	public enum ProxyType implements Serializable
-	{
-		HTTP("HTTP", "Proxy.Type.Http"),
-		SOCKS("SOCKS", "Proxy.Type.SOCKS");
-
-		private String pretty;
-		private String type;
-
-		ProxyType(String pretty, String type)
-		{
-			this.pretty = pretty;
-			this.type = type;
-		}
-
-		@Override
-		public String toString()
-		{
-			return pretty;
-		}
-
-		public String getType()
-		{
-			return type;
 		}
 
 		static

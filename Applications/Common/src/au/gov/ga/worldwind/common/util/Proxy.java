@@ -1,17 +1,11 @@
 package au.gov.ga.worldwind.common.util;
 
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getProxyTestUrlKey;
-import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 
 import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.URL;
 
-import au.gov.ga.worldwind.common.downloader.Downloader;
-
-public class Proxy
+public class Proxy implements Serializable
 {
 	public enum ProxyType implements Serializable
 	{
@@ -75,6 +69,16 @@ public class Proxy
 		this.enabled = enabled;
 	}
 
+	public boolean isUseSystem()
+	{
+		return useSystem;
+	}
+
+	public void setUseSystem(boolean useSystem)
+	{
+		this.useSystem = useSystem;
+	}
+
 	public String getHost()
 	{
 		return host;
@@ -115,117 +119,37 @@ public class Proxy
 		this.nonProxyHosts = nonProxyHosts;
 	}
 
-	public boolean test()
-	{
-		String oldhttpHost = System.getProperty("http.proxyHost");
-		String oldHttpPort = System.getProperty("http.proxyPort");
-		String oldHttpNonProxyHosts = System.getProperty("http.nonProxyHosts");
-		String oldSocksHost = System.getProperty("socksProxyHost");
-		String oldSocksPort = System.getProperty("socksProxyPort");
-		String oldConfigurationHost = Configuration.getStringValue(AVKey.URL_PROXY_HOST);
-		String oldConfigurationPort = Configuration.getStringValue(AVKey.URL_PROXY_PORT);
-		String oldConfigurationType = Configuration.getStringValue(AVKey.URL_PROXY_TYPE);
-
-		try
-		{
-			//set the proxy values
-			set();
-
-			if (enabled)
-			{
-				try
-				{
-					URL url = new URL(getMessage(getProxyTestUrlKey()));
-					Downloader.downloadImmediately(url, false, true);
-				}
-				catch (Exception e)
-				{
-					//proxy was wrong, so reset to default and disable
-					return false;
-				}
-			}
-			else
-			{
-				Configuration.removeKey(AVKey.URL_PROXY_HOST);
-				System.clearProperty("http.proxyHost");
-				System.clearProperty("socksProxyHost");
-			}
-
-			return true;
-		}
-		finally
-		{
-			//restore old values
-			System.setProperty("http.proxyHost", oldhttpHost);
-			System.setProperty("http.proxyPort", oldHttpPort);
-			System.setProperty("http.nonProxyHosts", oldHttpNonProxyHosts);
-			System.setProperty("socksProxyHost", oldSocksHost);
-			System.setProperty("socksProxyPort", oldSocksPort);
-			Configuration.setValue(AVKey.URL_PROXY_HOST, oldConfigurationHost);
-			Configuration.setValue(AVKey.URL_PROXY_PORT, oldConfigurationPort);
-			Configuration.setValue(AVKey.URL_PROXY_TYPE, oldConfigurationType);
-		}
-	}
-
 	public void set()
 	{
+		Configuration.removeKey(AVKey.URL_PROXY_HOST);
+		System.clearProperty("http.proxyHost");
+		System.clearProperty("socksProxyHost");
+		System.clearProperty("java.net.useSystemProxies");
+
 		if (enabled)
 		{
-			Configuration.setValue(AVKey.URL_PROXY_HOST, host);
-			Configuration.setValue(AVKey.URL_PROXY_PORT, port);
-			Configuration.setValue(AVKey.URL_PROXY_TYPE, type.getType());
-
-			if (type == ProxyType.HTTP)
+			if (useSystem)
 			{
-				System.setProperty("http.proxyHost", host);
-				System.setProperty("http.proxyPort", String.valueOf(port));
-				System.setProperty("http.nonProxyHosts", nonProxyHosts);
-				System.clearProperty("socksProxyHost");
+				System.setProperty("java.net.useSystemProxies", "true");
 			}
-			else
+			else if (host != null)
 			{
-				System.clearProperty("http.proxyHost");
-				System.setProperty("socksProxyHost", host);
-				System.setProperty("socksProxyPort", String.valueOf(port));
-			}
-		}
-		else
-		{
-			Configuration.removeKey(AVKey.URL_PROXY_HOST);
-			System.clearProperty("http.proxyHost");
-			System.clearProperty("socksProxyHost");
-		}
-	}
+				Configuration.setValue(AVKey.URL_PROXY_HOST, host);
+				Configuration.setValue(AVKey.URL_PROXY_PORT, port);
+				Configuration.setValue(AVKey.URL_PROXY_TYPE, type.getType());
 
-	public static Proxy guess()
-	{
-		try
-		{
-			String hostname = InetAddress.getLocalHost().getCanonicalHostName();
-			int indexOfDot = hostname.indexOf('.');
-			//if the canonical host name has a dot, we could possibly assume it is part of a domain
-			//eg: PC-00000.agso.gov.au is part of domain agso.gov.au:
-			if (indexOfDot >= 0)
-			{
-				Proxy proxy = new Proxy();
-				proxy.setEnabled(true);
-				
-				//example: change PC-00000.agso.gov.au to proxy.agso.gov.au:
-				proxy.setHost("proxy" + hostname.substring(indexOfDot));
-				proxy.setPort(8080);
-				proxy.setNonProxyHosts("localhost|*" + hostname.substring(indexOfDot));
-
-				if (proxy.test())
+				if (type == ProxyType.HTTP)
 				{
-					return proxy;
+					System.setProperty("http.proxyHost", host);
+					System.setProperty("http.proxyPort", String.valueOf(port));
+					System.setProperty("http.nonProxyHosts", nonProxyHosts);
+				}
+				else
+				{
+					System.setProperty("socksProxyHost", host);
+					System.setProperty("socksProxyPort", String.valueOf(port));
 				}
 			}
 		}
-		catch (Exception e)
-		{
-			//ignore
-		}
-
-		return new Proxy();
 	}
 }

@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.viewer.application;
 
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.*;
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getVideocardFailureMessageKey;
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getVideocardFailureTitleKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
 import gov.nasa.worldwind.BasicModel;
@@ -39,10 +40,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.io.File;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -73,7 +72,6 @@ import nasa.worldwind.retrieve.ExtendedRetrievalService;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.terrain.WireframeRectangularTessellator;
@@ -106,7 +104,6 @@ import au.gov.ga.worldwind.viewer.panels.layers.QueryClickListener;
 import au.gov.ga.worldwind.viewer.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.viewer.retrieve.PolylineLayerRetrievalListener;
 import au.gov.ga.worldwind.viewer.settings.Settings;
-import au.gov.ga.worldwind.viewer.settings.Settings.ProxyType;
 import au.gov.ga.worldwind.viewer.settings.SettingsDialog;
 import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
 import au.gov.ga.worldwind.viewer.terrain.SectionListCompoundElevationModel;
@@ -175,39 +172,6 @@ public class Application
 
 		//Settings need to be initialised before Theme is opened, so that proxy values are set
 		Settings.init();
-
-		if (Settings.isNewSettings())
-		{
-			try
-			{
-				//check for a GA machine; if so, setup the default GA proxy
-				String hostname = InetAddress.getLocalHost().getCanonicalHostName();
-				if (hostname.matches(getMessage(getGaMachinenameRegexKey())))
-				{
-					Settings.get().setProxyHost(getMessage(getGaProxyHostKey()));
-					Settings.get().setProxyPort(Integer.parseInt(getMessage(getGaProxyPortKey())));
-					Settings.get().setProxyType(ProxyType.HTTP);
-					Settings.get().setProxyEnabled(true);
-
-					URL url = new URL(getMessage(getProxyTestUrlKey()));
-					try
-					{
-						Downloader.downloadImmediately(url, false, true);
-					}
-					catch (UnknownHostException e)
-					{
-						//proxy was wrong (perhaps GA machine running outside GA network),
-						//so reset to default and disable
-						Settings.get().setProxyHost(null);
-						Settings.get().setProxyPort(80);
-						Settings.get().setProxyEnabled(false);
-					}
-				}
-			}
-			catch (Throwable t)
-			{
-			}
-		}
 
 		URL themeUrl = null;
 		if (argsLength > 0)
