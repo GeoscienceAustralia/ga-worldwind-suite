@@ -10,7 +10,6 @@ import java.io.InputStream;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.curtain.delegate.DelegatorTiledCurtainLayer;
-import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.common.view.free.FreeView;
 
@@ -18,8 +17,6 @@ public class Sandpit extends ApplicationTemplate
 {
 	public static void main(String[] args)
 	{
-		GASandpit.setSandpitMode(true);
-
 		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
 		System.setProperty("http.proxyPort", "8080");
 		System.setProperty("http.nonProxyHosts", "localhost");

@@ -10,7 +10,7 @@ import gov.nasa.worldwind.util.TileUrlBuilder;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import au.gov.ga.worldwind.common.util.URLTransformer;
+import au.gov.ga.worldwind.common.util.transform.URLTransformer;
 
 /**
  * {@link BasicElevationModel} that uses a custom {@link TileUrlBuilder} that

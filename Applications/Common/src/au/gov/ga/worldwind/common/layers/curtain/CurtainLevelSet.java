@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.gov.ga.worldwind.common.util.AVKeyMore;
-import au.gov.ga.worldwind.common.util.URLTransformer;
+import au.gov.ga.worldwind.common.util.transform.URLTransformer;
 
 public class CurtainLevelSet extends WWObjectImpl
 {

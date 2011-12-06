@@ -12,7 +12,7 @@ import java.net.URL;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.common.util.URLTransformer;
+import au.gov.ga.worldwind.common.util.transform.URLTransformer;
 
 /**
  * Extension of {@link BasicTiledImageLayer} which provides the default image

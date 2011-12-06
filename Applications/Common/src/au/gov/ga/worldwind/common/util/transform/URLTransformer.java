@@ -1,8 +1,9 @@
-package au.gov.ga.worldwind.common.util;
+package au.gov.ga.worldwind.common.util.transform;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,11 +15,6 @@ import java.util.List;
  */
 public class URLTransformer
 {
-	public interface URLTransform
-	{
-		String transformURL(String url);
-	}
-	
 	private static List<URLTransform> transforms = new ArrayList<URLTransform>();
 	
 	public synchronized static void addTransform(URLTransform transform)
@@ -51,13 +47,13 @@ public class URLTransformer
 		return url;
 	}
 	
-	static List<URLTransform> getTransforms()
-	{
-		return transforms;
-	}
-	
-	public static void clearTransforms()
+	public synchronized static void clearTransforms()
 	{
 		transforms.clear();
+	}
+	
+	public static List<URLTransform> getTransforms()
+	{
+		return Collections.unmodifiableList(transforms);
 	}
 }

@@ -4,7 +4,6 @@ import gov.nasa.worldwind.geom.LatLon;
 
 import java.io.File;
 
-import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 
@@ -28,24 +27,6 @@ public class SettingsUtil
 
 	public static File getSettingsFile(String filename)
 	{
-		if (GASandpit.isSandpitMode())
-		{
-			//Sandpit mode is enabled, so insert '.sandpit' in the filename
-			String prefix, suffix;
-			int lastIndexOfPeriod = filename.lastIndexOf('.');
-			if (lastIndexOfPeriod >= 0)
-			{
-				prefix = filename.substring(0, lastIndexOfPeriod);
-				suffix = filename.substring(lastIndexOfPeriod, filename.length());
-			}
-			else
-			{
-				prefix = filename;
-				suffix = "";
-			}
-			filename = prefix + ".sandpit" + suffix;
-		}
-
 		return new File(getUserDirectory(), filename);
 	}
 }

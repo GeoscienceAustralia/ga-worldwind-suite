@@ -14,7 +14,6 @@ import au.gov.ga.worldwind.animator.terrain.ImmediateRectangularTessellator;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.view.AnimatorView;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
-import au.gov.ga.worldwind.common.util.GASandpit;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
 /**
@@ -34,7 +33,6 @@ public class AnimatorConfiguration
 		initialiseLAF();
 		initialiseProxySettings();
 		initialiseWorldWindConfiguration();
-		initialiseSandpitMode();
 		initialiseMessageSource();
 	}
 	
@@ -90,11 +88,6 @@ public class AnimatorConfiguration
 		Configuration.setValue(AVKey.LAYER_FACTORY, AnimationLayerFactory.class.getName());
 		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
 		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME, AnimatorInputHandler.class.getName());
-	}
-	
-	private static void initialiseSandpitMode()
-	{
-		GASandpit.setSandpitMode(true);
 	}
 	
 	private static void initialiseMessageSource()

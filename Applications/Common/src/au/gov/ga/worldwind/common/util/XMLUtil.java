@@ -29,6 +29,8 @@ import javax.xml.xpath.XPath;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.util.transform.URLTransformer;
+
 /**
  * An extension of the World-Wind provided {@link WWXML} utilities,
  * provides additional helper methods for dealing with XML documents.
