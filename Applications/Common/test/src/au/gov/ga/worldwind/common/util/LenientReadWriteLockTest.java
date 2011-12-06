@@ -21,6 +21,7 @@ public class LenientReadWriteLockTest
 	private List<Thread> threads = new ArrayList<Thread>();
 	private ThreadFactory threadFactory = new ThreadFactory()
 	{
+		@Override
 		public Thread newThread(Runnable r) 
 		{
 			Thread result= new Thread(r);
@@ -37,6 +38,7 @@ public class LenientReadWriteLockTest
 	}
 	
 	@After
+	@SuppressWarnings("deprecation")
 	public void teardown()
 	{
 		// Destroy all threads
