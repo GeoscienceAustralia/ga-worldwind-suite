@@ -33,7 +33,7 @@ import au.gov.ga.worldwind.common.util.DefaultLauncher;
  * {@link PointLayer} implementation which extends {@link MarkerLayer} and uses
  * Markers to represent points.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class MarkerPointLayer extends MarkerLayer implements PointLayer, SelectListener
 {

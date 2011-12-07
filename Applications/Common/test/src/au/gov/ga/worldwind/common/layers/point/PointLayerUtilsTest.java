@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import au.gov.ga.worldwind.common.layers.styled.Attribute;
+import au.gov.ga.worldwind.common.layers.styled.StringWithPlaceholderGetter;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
@@ -52,8 +53,8 @@ public class PointLayerUtilsTest
 		assertTrue(attributes.length == 1);
 		
 		assertEquals("NAME", attributes[0].getName());
-		assertEquals("Name: %v%", attributes[0].textString.string);
-		assertEquals("%v%", attributes[0].textString.placeholder);
+		assertEquals("Name: %v%", StringWithPlaceholderGetter.getTextString(attributes[0]));
+		assertEquals("%v%", StringWithPlaceholderGetter.getTextPlaceholder(attributes[0]));
 		
 		// Test regular parameters
 		assertEquals("PointLayerWithAttributes", pointLayer.getName());

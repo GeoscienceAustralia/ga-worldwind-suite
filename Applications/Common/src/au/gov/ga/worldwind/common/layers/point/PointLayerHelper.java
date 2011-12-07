@@ -17,10 +17,9 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
  * Helper class for {@link PointLayer}s. Contains common functionality for the
- * different point layer types, including storing the . Contains the
- * {@link PointProvider}.
+ * different point layer types. Contains the {@link PointProvider}.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class PointLayerHelper
 {
@@ -73,7 +72,7 @@ public class PointLayerHelper
 	 */
 	public void requestPoints(PointLayer layer)
 	{
-		pointProvider.requestPoints(layer);
+		pointProvider.requestData(layer);
 	}
 
 	/**

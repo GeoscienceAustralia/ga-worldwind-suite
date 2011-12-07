@@ -23,6 +23,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 /**
  * An implementation of the {@link GeometryLayer} interface that renders each
  * shape as a separate {@link Airspace}.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class AirspaceGeometryLayer extends GeometryLayerBase implements GeometryLayer
 {

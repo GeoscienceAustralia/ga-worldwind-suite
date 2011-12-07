@@ -28,7 +28,7 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
  * Helper class for the creation of {@link PointLayer}s. Contains XML parsing
  * functionality, as well as factory methods.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class PointLayerUtils extends DataConfigurationUtils
 {

@@ -1,18 +1,13 @@
 package au.gov.ga.worldwind.common.layers.geometry;
 
-import au.gov.ga.worldwind.common.layers.Bounded;
+import au.gov.ga.worldwind.common.layers.data.DataProvider;
 
 /**
  * Represents a shape source for the {@link GeometryLayer}. Handles loading shapes
  * from the data source and adding them to the layer.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
-public interface ShapeProvider extends Bounded
+public interface ShapeProvider extends DataProvider<GeometryLayer>
 {
-	/**
-	 * Request (download if not cached) the shapes from the source data for the provided layer.
-	 * 
-	 * @param layer Layer for which to retrieve shapes
-	 */
-	public void requestShapes(GeometryLayer layer);
-	
 }

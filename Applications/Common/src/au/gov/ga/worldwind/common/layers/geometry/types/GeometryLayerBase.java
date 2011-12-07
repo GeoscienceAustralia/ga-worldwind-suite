@@ -32,6 +32,8 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
  * A base class for {@link GeometryLayer} implementations.
  * <p/>
  * Provides convenience methods to aid in implementation.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public abstract class GeometryLayerBase extends AbstractLayer implements GeometryLayer
 {
@@ -187,7 +189,7 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 	}
 
 	@Override
-	public URL getShapeSourceUrl() throws MalformedURLException
+	public URL getUrl() throws MalformedURLException
 	{
 		return shapeSourceUrl;
 	}
@@ -203,7 +205,7 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 	{
 		if (isEnabled())
 		{
-			getShapeProvider().requestShapes(this);
+			getShapeProvider().requestData(this);
 		}
 		renderGeometry(dc);
 	}

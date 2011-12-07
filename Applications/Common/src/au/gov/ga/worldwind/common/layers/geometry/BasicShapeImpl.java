@@ -10,6 +10,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A default implementation of the {@link Shape} interface.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class BasicShapeImpl implements Shape
 {

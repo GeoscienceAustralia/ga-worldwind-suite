@@ -24,6 +24,8 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
 /**
  * A factory class used to create {@link GeometryLayer}s from XML layer
  * definition files
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class GeometryLayerFactory
 {

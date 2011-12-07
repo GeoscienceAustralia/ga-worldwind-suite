@@ -11,7 +11,7 @@ import gov.nasa.worldwind.util.VecBuffer;
 import java.net.URL;
 import java.util.logging.Level;
 
-import au.gov.ga.worldwind.common.layers.point.AbstractPointProvider;
+import au.gov.ga.worldwind.common.layers.data.AbstractDataProvider;
 import au.gov.ga.worldwind.common.layers.point.PointLayer;
 import au.gov.ga.worldwind.common.layers.point.PointProvider;
 import au.gov.ga.worldwind.common.util.URLUtil;
@@ -20,14 +20,14 @@ import au.gov.ga.worldwind.common.util.URLUtil;
  * {@link PointProvider} implementation which loads points from a zipped
  * shapefile.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class ShapefilePointProvider extends AbstractPointProvider
+public class ShapefilePointProvider extends AbstractDataProvider<PointLayer> implements PointProvider
 {
 	private Sector sector;
 
 	@Override
-	protected boolean doLoadPoints(URL url, PointLayer layer)
+	protected boolean doLoadData(URL url, PointLayer layer)
 	{
 		try
 		{

@@ -9,7 +9,7 @@ import gov.nasa.worldwind.render.markers.MarkerAttributes;
  * Extension to the {@link BasicMarker} class which adds a 'url' property, so
  * that markers can have associated urls.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class UrlMarker extends BasicMarker
 {

@@ -10,6 +10,8 @@ import java.util.List;
 
 /**
  * A {@link Shape} is a collection of {@link Position}s that has an ID unique for a given {@link GeometryLayer}.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface Shape
 {

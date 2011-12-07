@@ -1,21 +1,13 @@
 package au.gov.ga.worldwind.common.layers.point;
 
-import au.gov.ga.worldwind.common.layers.Bounded;
+import au.gov.ga.worldwind.common.layers.data.DataProvider;
 
 /**
  * Represents a point source for the {@link PointLayer}. Handles loading points
  * from the data source, and adding them to the layer.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public interface PointProvider extends Bounded
+public interface PointProvider extends DataProvider<PointLayer>
 {
-	/**
-	 * Request (download if not cached) the points from the source data for the
-	 * provided layer.
-	 * 
-	 * @param layer
-	 *            Layer for which to retrieve points
-	 */
-	public void requestPoints(PointLayer layer);
 }

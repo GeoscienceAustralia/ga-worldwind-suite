@@ -13,6 +13,8 @@ import javax.media.opengl.GL;
 /**
  * An extension of the {@link Curtain} airspace that can render the generating
  * shape as a line at the upper and lower elevations.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 {

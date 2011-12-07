@@ -19,6 +19,11 @@ import au.gov.ga.worldwind.common.layers.point.PointLayer;
 import au.gov.ga.worldwind.common.layers.point.PointProvider;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
+/**
+ * {@link PointProvider} implementation which loads points from an XML element.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class XMLPointProvider implements PointProvider
 {
 	private List<Position> points = new ArrayList<Position>();
@@ -43,7 +48,7 @@ public class XMLPointProvider implements PointProvider
 					AVList attributes = new AVListImpl();
 					this.attributes.add(attributes);
 					NamedNodeMap elementAttributes = pointElement.getAttributes();
-					for(int i = 0; i < elementAttributes.getLength(); i++)
+					for (int i = 0; i < elementAttributes.getLength(); i++)
 					{
 						Node child = elementAttributes.item(i);
 						attributes.setValue(child.getNodeName(), child.getTextContent());
@@ -66,11 +71,11 @@ public class XMLPointProvider implements PointProvider
 	}
 
 	@Override
-	public void requestPoints(PointLayer layer)
+	public void requestData(PointLayer layer)
 	{
-		if(added)
+		if (added)
 			return;
-		
+
 		added = true;
 		for (int i = 0; i < points.size(); i++)
 		{

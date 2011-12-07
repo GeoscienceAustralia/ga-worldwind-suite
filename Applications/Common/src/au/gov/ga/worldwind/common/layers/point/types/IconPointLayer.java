@@ -25,7 +25,7 @@ import au.gov.ga.worldwind.common.util.DefaultLauncher;
  * {@link PointLayer} implementation which extends {@link IconLayer} and uses
  * Icons to represent points.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class IconPointLayer extends IconLayer implements PointLayer, SelectListener
 {

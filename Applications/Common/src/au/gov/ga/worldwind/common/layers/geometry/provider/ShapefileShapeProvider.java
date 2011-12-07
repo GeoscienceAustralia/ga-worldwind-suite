@@ -1,4 +1,5 @@
 package au.gov.ga.worldwind.common.layers.geometry.provider;
+
 import static au.gov.ga.worldwind.common.util.Util.isBlank;
 import gov.nasa.worldwind.formats.shapefile.DBaseRecord;
 import gov.nasa.worldwind.formats.shapefile.Shapefile;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import au.gov.ga.worldwind.common.layers.data.AbstractDataProvider;
 import au.gov.ga.worldwind.common.layers.geometry.BasicShapeImpl;
 import au.gov.ga.worldwind.common.layers.geometry.GeometryLayer;
 import au.gov.ga.worldwind.common.layers.geometry.Shape;
@@ -25,8 +27,10 @@ import au.gov.ga.worldwind.common.util.URLUtil;
  * A {@link ShapeProvider} that loads shapes from a zipped Shapefile.
  * <p/>
  * A new shape is defined for each record in the shapefile.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
-public class ShapefileShapeProvider extends ShapeProviderBase implements ShapeProvider
+public class ShapefileShapeProvider extends AbstractDataProvider<GeometryLayer> implements ShapeProvider
 {
 	private static Map<String, Type> shapeTypeMap = new HashMap<String, Type>();
 	static
@@ -34,20 +38,20 @@ public class ShapefileShapeProvider extends ShapeProviderBase implements ShapePr
 		shapeTypeMap.put(Shapefile.SHAPE_POINT, Type.POINT);
 		shapeTypeMap.put(Shapefile.SHAPE_POINT_M, Type.POINT);
 		shapeTypeMap.put(Shapefile.SHAPE_POINT_Z, Type.POINT);
-		
+
 		shapeTypeMap.put(Shapefile.SHAPE_POLYLINE, Type.LINE);
 		shapeTypeMap.put(Shapefile.SHAPE_POLYLINE_M, Type.LINE);
 		shapeTypeMap.put(Shapefile.SHAPE_POLYLINE_Z, Type.LINE);
-		
+
 		shapeTypeMap.put(Shapefile.SHAPE_POLYGON, Type.POLYGON);
 		shapeTypeMap.put(Shapefile.SHAPE_POLYGON_M, Type.POLYGON);
 		shapeTypeMap.put(Shapefile.SHAPE_POLYGON_Z, Type.POLYGON);
 	}
-	
+
 	private Sector sector;
-	
+
 	@Override
-	protected boolean doLoadShapes(URL url, GeometryLayer layer)
+	protected boolean doLoadData(URL url, GeometryLayer layer)
 	{
 		try
 		{
@@ -57,7 +61,9 @@ public class ShapefileShapeProvider extends ShapeProviderBase implements ShapePr
 				ShapefileRecord record = shapefile.nextRecord();
 				DBaseRecord values = record.getAttributes();
 
-				Shape loadedShape = new BasicShapeImpl(url.getPath() + record.getRecordNumber(), getShapeTypeForRecord(layer, record)); 
+				Shape loadedShape =
+						new BasicShapeImpl(url.getPath() + record.getRecordNumber(), getShapeTypeForRecord(layer,
+								record));
 				for (int part = 0; part < record.getNumberOfParts(); part++)
 				{
 					VecBuffer buffer = record.getPointBuffer(part);
@@ -67,7 +73,7 @@ public class ShapefileShapeProvider extends ShapeProviderBase implements ShapePr
 						loadedShape.addPoint(buffer.getPosition(i), values);
 					}
 				}
-				
+
 				layer.addShape(loadedShape);
 			}
 
@@ -84,7 +90,8 @@ public class ShapefileShapeProvider extends ShapeProviderBase implements ShapePr
 	}
 
 	/**
-	 * @return The shape type to use for the provided record. Checks for an override in the layer before inspecting the shapefile record.
+	 * @return The shape type to use for the provided record. Checks for an
+	 *         override in the layer before inspecting the shapefile record.
 	 */
 	private Type getShapeTypeForRecord(GeometryLayer layer, ShapefileRecord record)
 	{
@@ -105,5 +112,5 @@ public class ShapefileShapeProvider extends ShapeProviderBase implements ShapePr
 	{
 		return shapeTypeMap.get(record.getShapeType());
 	}
-	
+
 }

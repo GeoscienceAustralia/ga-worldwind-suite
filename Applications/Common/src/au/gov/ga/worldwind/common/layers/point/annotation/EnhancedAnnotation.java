@@ -16,8 +16,13 @@ import java.awt.Font;
 import javax.media.opengl.GL;
 
 /**
- * An enhanced annotation that supports: - Fade in/out based on eye elevation -
- * Fade in/out based on eye distance
+ * An enhanced annotation that supports:
+ * <ul>
+ * <li>Fade in/out based on eye elevation</li>
+ * <li>Fade in/out based on eye distance</li>
+ * </ul>
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class EnhancedAnnotation extends GlobeAnnotation
 {

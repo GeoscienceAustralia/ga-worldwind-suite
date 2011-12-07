@@ -1,13 +1,10 @@
-package au.gov.ga.worldwind.common.layers.geometry.provider;
-
-import static au.gov.ga.worldwind.common.util.URLUtil.*;
+package au.gov.ga.worldwind.common.layers.data;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.cache.FileStore;
 import gov.nasa.worldwind.retrieve.AbstractRetrievalPostProcessor;
-import gov.nasa.worldwind.retrieve.HTTPRetriever;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
 import gov.nasa.worldwind.retrieve.Retriever;
 import gov.nasa.worldwind.util.Logging;
@@ -17,21 +14,23 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import au.gov.ga.worldwind.common.layers.geometry.GeometryLayer;
-import au.gov.ga.worldwind.common.layers.geometry.ShapeProvider;
+import au.gov.ga.worldwind.common.layers.delegate.retriever.PassThroughZipRetriever;
 
 /**
- * A base class for shape providers. Handles the download and cache management, leaving subclasses
- * to implement specific file format handling logic. 
+ * Basic implementation of the {@link DataProvider} interface. Handles
+ * retrieving the data from the layer's url, and once downloaded, calls an
+ * abstract method which loads the data. Also handles caching the data.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public abstract class ShapeProviderBase implements ShapeProvider
+public abstract class AbstractDataProvider<L extends DataLayer> implements DataProvider<L>
 {
 	private boolean loaded = false;
 	private FileStore dataFileStore = WorldWind.getDataFileStore();
 	private final Object fileLock = new Object();
 
 	@Override
-	public void requestShapes(GeometryLayer layer)
+	public void requestData(L layer)
 	{
 		if (!loaded)
 		{
@@ -44,14 +43,15 @@ public abstract class ShapeProviderBase implements ShapeProvider
 	 * Is the cached file expired (download time is earlier than layer's last
 	 * update time)?
 	 * 
-	 * @return <code>true</code> if the file has expired
+	 * @param layer
+	 * @param fileURL
+	 * @param fileStore
+	 * @return True if the file has expired
 	 */
-	protected boolean isFileExpired(GeometryLayer layer, URL fileURL, FileStore fileStore)
+	protected boolean isFileExpired(L layer, URL fileURL, FileStore fileStore)
 	{
 		if (!WWIO.isFileOutOfDate(fileURL, layer.getExpiryTime()))
-		{
 			return false;
-		}
 
 		// The file has expired. Delete it.
 		fileStore.removeFile(fileURL);
@@ -83,40 +83,43 @@ public abstract class ShapeProviderBase implements ShapeProvider
 	}
 
 	/**
-	 * Downloads the shape source file for the layer.
+	 * Downloads the data file for the layer.
+	 * 
+	 * @param layer
+	 * @param postProcessor
 	 */
-	protected void downloadShapeSourceFile(GeometryLayer layer, RetrievalPostProcessor postProcessor)
+	protected void downloadFile(L layer, RetrievalPostProcessor postProcessor)
 	{
-		if (!layer.isNetworkRetrievalEnabled() || !WorldWind.getRetrievalService().isAvailable())
-		{
+		if (!layer.isNetworkRetrievalEnabled())
 			return;
-		}
+
+		if (!WorldWind.getRetrievalService().isAvailable())
+			return;
 
 		URL url;
 		try
 		{
-			url = layer.getShapeSourceUrl();
-			if (url == null || WorldWind.getNetworkStatus().isHostUnavailable(url))
-			{
+			url = layer.getUrl();
+			if (url == null)
 				return;
-			}
+
+			if (WorldWind.getNetworkStatus().isHostUnavailable(url))
+				return;
 		}
 		catch (MalformedURLException e)
 		{
-			String message = "Exception creating point data URL";
+			String message = "Exception creating data URL";
 			Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
 			return;
 		}
 
 		Retriever retriever;
 
-		if (isHttpUrl(url) || isHttpsUrl(url))
+		if ("http".equalsIgnoreCase(url.getProtocol()) || "https".equalsIgnoreCase(url.getProtocol()))
 		{
 			if (postProcessor == null)
-			{
 				postProcessor = new DownloadPostProcessor(this, layer);
-			}
-			retriever = new HTTPRetriever(url, postProcessor);
+			retriever = new PassThroughZipRetriever(url, postProcessor);
 		}
 		else
 		{
@@ -125,61 +128,55 @@ public abstract class ShapeProviderBase implements ShapeProvider
 		}
 
 		// Apply any overridden timeouts.
-		Integer timeout = AVListImpl.getIntegerValue(layer, AVKey.URL_CONNECT_TIMEOUT);
-		if (timeout != null && timeout > 0)
-		{
-			retriever.setConnectTimeout(timeout);
-		}
-		
-		timeout = AVListImpl.getIntegerValue(layer, AVKey.URL_READ_TIMEOUT);
-		if (timeout != null && timeout > 0)
-		{
-			retriever.setReadTimeout(timeout);
-		}
-		
-		Integer staleRequestLimit = AVListImpl.getIntegerValue(layer, AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT);
-		if (staleRequestLimit != null && staleRequestLimit > 0)
-		{
-			retriever.setStaleRequestLimit(staleRequestLimit);
-		}
+		Integer cto = AVListImpl.getIntegerValue(layer, AVKey.URL_CONNECT_TIMEOUT);
+		if (cto != null && cto > 0)
+			retriever.setConnectTimeout(cto);
+		Integer cro = AVListImpl.getIntegerValue(layer, AVKey.URL_READ_TIMEOUT);
+		if (cro != null && cro > 0)
+			retriever.setReadTimeout(cro);
+		Integer srl = AVListImpl.getIntegerValue(layer, AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT);
+		if (srl != null && srl > 0)
+			retriever.setStaleRequestLimit(srl);
 
 		WorldWind.getRetrievalService().runRetriever(retriever);
 	}
 
 	/**
-	 * Load the shapes from the file pointed to by the url. Delegates the
-	 * loading to the subclass.
+	 * Load the data from the file pointed to by the url. Delegates the loading
+	 * to the subclass.
 	 * 
-	 * @return <code>true</code> if the shapes were loaded successfully
+	 * @param url
+	 * @param layer
+	 * @return True if the data was loaded successfully
 	 */
-	protected boolean loadShapes(URL url, GeometryLayer layer)
+	protected boolean loadData(URL url, L layer)
 	{
 		synchronized (getFileLock())
 		{
 			if (!loaded)
-			{
-				loaded = doLoadShapes(url, layer);
-			}
+				loaded = doLoadData(url, layer);
 			return loaded;
 		}
 	}
 
 	/**
-	 * Load the shapes from the file pointed to by the url.
+	 * Load the data from the file pointed to by the url.
 	 * 
-	 * @return <code>true</code> if the shapes were loaded successfully
+	 * @param url
+	 * @param layer
+	 * @return True if the data was loaded successfully
 	 */
-	protected abstract boolean doLoadShapes(URL url, GeometryLayer layer);
+	protected abstract boolean doLoadData(URL url, L layer);
 
 	/**
-	 * {@link RetrievalPostProcessor} used when downloading the shape data.
+	 * {@link RetrievalPostProcessor} used when downloading the data.
 	 */
-	protected static class DownloadPostProcessor extends AbstractRetrievalPostProcessor
+	protected class DownloadPostProcessor extends AbstractRetrievalPostProcessor
 	{
-		protected final ShapeProviderBase provider;
-		protected final GeometryLayer layer;
+		protected final AbstractDataProvider<L> provider;
+		protected final L layer;
 
-		public DownloadPostProcessor(ShapeProviderBase provider, GeometryLayer layer)
+		public DownloadPostProcessor(AbstractDataProvider<L> provider, L layer)
 		{
 			this.provider = provider;
 			this.layer = layer;
@@ -199,14 +196,14 @@ public abstract class ShapeProviderBase implements ShapeProvider
 	}
 
 	/**
-	 * Task which downloads and/or loads the shapes.
+	 * Task which downloads and/or loads the data.
 	 */
-	private static class RequestTask implements Runnable
+	private class RequestTask implements Runnable
 	{
-		private final ShapeProviderBase provider;
-		private final GeometryLayer layer;
+		private final AbstractDataProvider<L> provider;
+		private final L layer;
 
-		private RequestTask(ShapeProviderBase provider, GeometryLayer layer)
+		private RequestTask(AbstractDataProvider<L> provider, L layer)
 		{
 			this.provider = provider;
 			this.layer = layer;
@@ -221,8 +218,8 @@ public abstract class ShapeProviderBase implements ShapeProvider
 			URL fileUrl = null;
 			try
 			{
-				URL url = layer.getShapeSourceUrl();
-				if (isFileUrl(url))
+				URL url = layer.getUrl();
+				if ("file".equalsIgnoreCase(url.getProtocol()))
 				{
 					fileUrl = url;
 				}
@@ -233,8 +230,8 @@ public abstract class ShapeProviderBase implements ShapeProvider
 
 			if (fileUrl != null)
 			{
-				//if the layer url is a local file, load the points straight away
-				if (provider.loadShapes(fileUrl, layer))
+				//if the layer url is a local file, load the data straight away
+				if (provider.loadData(fileUrl, layer))
 				{
 					layer.firePropertyChange(AVKey.LAYER, null, this);
 					return;
@@ -242,12 +239,12 @@ public abstract class ShapeProviderBase implements ShapeProvider
 			}
 			else
 			{
-				//otherwise, check the cache for the downloaded points, and load or download
+				//otherwise, check the cache for the downloaded data, and load or download
 
 				URL url = provider.getDataFileStore().findFile(dataCacheName, false);
 				if (url != null && !this.provider.isFileExpired(layer, url, provider.getDataFileStore()))
 				{
-					if (provider.loadShapes(url, layer))
+					if (provider.loadData(url, layer))
 					{
 						layer.firePropertyChange(AVKey.LAYER, null, this);
 						return;
@@ -261,7 +258,7 @@ public abstract class ShapeProviderBase implements ShapeProvider
 					}
 				}
 
-				provider.downloadShapeSourceFile(layer, null);
+				provider.downloadFile(layer, null);
 			}
 		}
 
@@ -269,14 +266,11 @@ public abstract class ShapeProviderBase implements ShapeProvider
 		public boolean equals(Object o)
 		{
 			if (this == o)
-			{
 				return true;
-			}
 			if (o == null || getClass() != o.getClass())
-			{
 				return false;
-			}
 
+			@SuppressWarnings("unchecked")
 			final RequestTask that = (RequestTask) o;
 
 			//assumes each layer only has a single file to request
@@ -289,5 +283,4 @@ public abstract class ShapeProviderBase implements ShapeProvider
 			return (layer != null ? layer.hashCode() : 0);
 		}
 	}
-
 }
