@@ -6,7 +6,13 @@ import gov.nasa.worldwind.geom.Sector;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
+import au.gov.ga.worldwind.common.layers.styled.Attribute;
+import au.gov.ga.worldwind.common.layers.styled.BasicStyleProvider;
+import au.gov.ga.worldwind.common.layers.styled.Style;
+import au.gov.ga.worldwind.common.layers.styled.StyleAndText;
+import au.gov.ga.worldwind.common.layers.styled.StyleProvider;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
@@ -18,12 +24,13 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
  */
 public class PointLayerHelper
 {
-	protected final StyleProvider styleProvider = new StyleProvider();
+	protected final StyleProvider styleProvider = new BasicStyleProvider();
 	protected final PointProvider pointProvider;
 	protected final URL context;
 	protected final String url;
 	protected final String dataCacheName;
 
+	@SuppressWarnings("unchecked")
 	public PointLayerHelper(AVList params)
 	{
 		//retrieve the globals from the params
@@ -33,8 +40,8 @@ public class PointLayerHelper
 		dataCacheName = params.getStringValue(AVKey.DATA_CACHE_NAME);
 		pointProvider = (PointProvider) params.getValue(AVKeyMore.POINT_PROVIDER);
 
-		styleProvider.setStyles((Style[]) params.getValue(AVKeyMore.POINT_STYLES));
-		styleProvider.setAttributes((Attribute[]) params.getValue(AVKeyMore.POINT_ATTRIBUTES));
+		styleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.POINT_STYLES));
+		styleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.POINT_ATTRIBUTES));
 	}
 
 	public URL getContext()
@@ -76,7 +83,7 @@ public class PointLayerHelper
 	 *            Attribute values to find a matching style for
 	 * @return A matching style for the provided attributes
 	 */
-	public PointProperties getStyle(AVList attributeValues)
+	public StyleAndText getStyle(AVList attributeValues)
 	{
 		return styleProvider.getStyle(attributeValues);
 	}

@@ -10,6 +10,7 @@ import gov.nasa.worldwind.util.WWXML;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import au.gov.ga.worldwind.common.layers.styled.Attribute;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**

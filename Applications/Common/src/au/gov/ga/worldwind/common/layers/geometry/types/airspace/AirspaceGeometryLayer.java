@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import au.gov.ga.worldwind.common.layers.geometry.GeometryLayer;
 import au.gov.ga.worldwind.common.layers.geometry.Shape;
 import au.gov.ga.worldwind.common.layers.geometry.types.GeometryLayerBase;
-import au.gov.ga.worldwind.common.layers.point.Style;
+import au.gov.ga.worldwind.common.layers.styled.StyleAndText;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.Validate;
 
@@ -27,7 +27,7 @@ import au.gov.ga.worldwind.common.util.Validate;
 public class AirspaceGeometryLayer extends GeometryLayerBase implements GeometryLayer
 {
 	private List<AirspaceShape> airspaceShapes = new ArrayList<AirspaceShape>();
-	
+
 	public AirspaceGeometryLayer(AVList params)
 	{
 		super(params);
@@ -57,7 +57,7 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 	{
 		synchronized (airspaceShapes)
 		{
-			for (AirspaceShape airspaceShape :  airspaceShapes)
+			for (AirspaceShape airspaceShape : airspaceShapes)
 			{
 				airspaceShape.render(dc);
 			}
@@ -65,20 +65,21 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 	}
 
 	/**
-	 * A container class that associates a {@link Shape} with a renderable {@link Airspace}.
+	 * A container class that associates a {@link Shape} with a renderable
+	 * {@link Airspace}.
 	 */
 	private class AirspaceShape implements Shape, Renderable
 	{
 		private AtomicBoolean dirty = new AtomicBoolean(true);
 		private AbstractAirspace airspace;
 		private Shape shapeDelegate;
-		
+
 		public AirspaceShape(Shape shape)
 		{
 			Validate.notNull(shape, "A shape is required");
 			this.shapeDelegate = shape;
 		}
-		
+
 		@Override
 		public String getId()
 		{
@@ -97,20 +98,20 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 			shapeDelegate.addPoint(p, attributeValues);
 			dirty.set(true);
 		}
-		
+
 		@Override
 		public void addPoint(ShapePoint p)
 		{
 			shapeDelegate.addPoint(p);
 			dirty.set(true);
 		}
-		
+
 		@Override
 		public Type getType()
 		{
 			return shapeDelegate.getType();
 		}
-		
+
 		/**
 		 * Generates the airspace used to render the associated shape
 		 */
@@ -118,42 +119,40 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 		{
 			switch (shapeDelegate.getType())
 			{
-				case LINE:
-				{
-					airspace = new ShapeOutlineCurtain(getPoints());
-					break;
-				}
-				case POLYGON:
-				{
-					airspace = new Polygon(getPoints());
-					break;
-				}
+			case LINE:
+			{
+				airspace = new ShapeOutlineCurtain(getPoints());
+				break;
 			}
-			
+			case POLYGON:
+			{
+				airspace = new Polygon(getPoints());
+				break;
+			}
+			}
+
 			applyStyleToAirspace();
-			
+
 			dirty.set(false);
 		}
-		
+
 		private void applyStyleToAirspace()
 		{
-			Style style = getStyleProvider().getStyle(AirspaceGeometryLayer.this);
+			StyleAndText style = getStyleProvider().getStyle(AirspaceGeometryLayer.this);
 			if (style == null)
 			{
 				applyDefaultStyleToAirspace();
 			}
 			else
 			{
-				style.setPropertiesFromAttributes((URL)getValue(AVKeyMore.CONTEXT_URL),
-											   	  AirspaceGeometryLayer.this, 
-											   	  airspace,
-											   	  airspace.getAttributes(),
-											   	  airspace.getRenderer());
+				style.style.setPropertiesFromAttributes((URL) getValue(AVKeyMore.CONTEXT_URL),
+						AirspaceGeometryLayer.this, airspace, airspace.getAttributes(), airspace.getRenderer());
 			}
 		}
 
 		/**
-		 * Apply some sensible defaults to the airspace in case no style was found
+		 * Apply some sensible defaults to the airspace in case no style was
+		 * found
 		 */
 		private void applyDefaultStyleToAirspace()
 		{
@@ -174,5 +173,5 @@ public class AirspaceGeometryLayer extends GeometryLayerBase implements Geometry
 			airspace.render(dc);
 		}
 	}
-	
+
 }

@@ -19,6 +19,8 @@ import au.gov.ga.worldwind.common.layers.point.providers.XMLPointProvider;
 import au.gov.ga.worldwind.common.layers.point.types.AnnotationPointLayer;
 import au.gov.ga.worldwind.common.layers.point.types.IconPointLayer;
 import au.gov.ga.worldwind.common.layers.point.types.MarkerPointLayer;
+import au.gov.ga.worldwind.common.layers.styled.Attribute;
+import au.gov.ga.worldwind.common.layers.styled.Style;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
@@ -189,8 +191,7 @@ public class PointLayerUtils extends DataConfigurationUtils
 			}
 		}
 
-		Style[] s = styles.toArray(new Style[styles.size()]);
-		params.setValue(AVKeyMore.POINT_STYLES, s);
+		params.setValue(AVKeyMore.POINT_STYLES, styles);
 	}
 
 	/**
@@ -265,7 +266,6 @@ public class PointLayerUtils extends DataConfigurationUtils
 			attributes.add(attribute);
 		}
 
-		Attribute[] a = attributes.toArray(new Attribute[attributes.size()]);
-		params.setValue(AVKeyMore.POINT_ATTRIBUTES, a);
+		params.setValue(AVKeyMore.POINT_ATTRIBUTES, attributes);
 	}
 }

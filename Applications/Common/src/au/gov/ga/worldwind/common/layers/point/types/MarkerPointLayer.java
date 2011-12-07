@@ -26,7 +26,7 @@ import java.util.List;
 
 import au.gov.ga.worldwind.common.layers.point.PointLayer;
 import au.gov.ga.worldwind.common.layers.point.PointLayerHelper;
-import au.gov.ga.worldwind.common.layers.point.PointProperties;
+import au.gov.ga.worldwind.common.layers.styled.StyleAndText;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 
 /**
@@ -88,7 +88,7 @@ public class MarkerPointLayer extends MarkerLayer implements PointLayer, SelectL
 	public void addPoint(Position position, AVList attributeValues)
 	{
 		MarkerAttributes attributes = new BasicMarkerAttributes();
-		PointProperties properties = helper.getStyle(attributeValues);
+		StyleAndText properties = helper.getStyle(attributeValues);
 		properties.style.setPropertiesFromAttributes(helper.getContext(), attributeValues, attributes);
 		fixShapeType(attributes);
 		UrlMarker marker = new UrlMarker(position, attributes);

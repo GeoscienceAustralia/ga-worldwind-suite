@@ -18,7 +18,7 @@ import java.net.URL;
 
 import au.gov.ga.worldwind.common.layers.point.PointLayer;
 import au.gov.ga.worldwind.common.layers.point.PointLayerHelper;
-import au.gov.ga.worldwind.common.layers.point.PointProperties;
+import au.gov.ga.worldwind.common.layers.styled.StyleAndText;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 
 /**
@@ -62,7 +62,7 @@ public class IconPointLayer extends IconLayer implements PointLayer, SelectListe
 	@Override
 	public void addPoint(Position position, AVList attributeValues)
 	{
-		PointProperties properties = helper.getStyle(attributeValues);
+		StyleAndText properties = helper.getStyle(attributeValues);
 		UserFacingIcon icon = new UserFacingIcon();
 		icon.setPosition(position);
 		icon.setToolTipText(properties.text);

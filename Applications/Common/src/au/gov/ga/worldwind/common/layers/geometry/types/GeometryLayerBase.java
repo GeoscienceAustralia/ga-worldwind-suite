@@ -19,13 +19,13 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import au.gov.ga.worldwind.common.layers.geometry.BasicStyleProviderImpl;
 import au.gov.ga.worldwind.common.layers.geometry.GeometryLayer;
 import au.gov.ga.worldwind.common.layers.geometry.Shape;
 import au.gov.ga.worldwind.common.layers.geometry.ShapeProvider;
-import au.gov.ga.worldwind.common.layers.geometry.StyleProvider;
-import au.gov.ga.worldwind.common.layers.point.Attribute;
-import au.gov.ga.worldwind.common.layers.point.Style;
+import au.gov.ga.worldwind.common.layers.styled.Attribute;
+import au.gov.ga.worldwind.common.layers.styled.BasicStyleProvider;
+import au.gov.ga.worldwind.common.layers.styled.Style;
+import au.gov.ga.worldwind.common.layers.styled.StyleProvider;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
@@ -40,7 +40,7 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 	private final String dataCacheName;
 	private final ShapeProvider shapeProvider;
 	private final StyleProvider styleProvider;
-	
+
 	@SuppressWarnings("unchecked")
 	public GeometryLayerBase(AVList params)
 	{
@@ -54,17 +54,18 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 		{
 			throw new IllegalArgumentException("Unable to parse shape source URL", e);
 		}
-		
+
 		dataCacheName = params.getStringValue(AVKey.DATA_CACHE_NAME);
-		
-		shapeProvider = (ShapeProvider)params.getValue(AVKeyMore.SHAPE_PROVIDER);
-		
-		styleProvider = new BasicStyleProviderImpl((Collection<? extends Attribute>)params.getValue(AVKeyMore.SHAPE_ATTRIBUTES), 
-												   (Collection<? extends Style>)params.getValue(AVKeyMore.SHAPE_STYLES)); 
-		
+
+		shapeProvider = (ShapeProvider) params.getValue(AVKeyMore.SHAPE_PROVIDER);
+
+		styleProvider = new BasicStyleProvider();
+		styleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.SHAPE_STYLES));
+		styleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.SHAPE_ATTRIBUTES));
+
 		setValues(params);
 	}
-	
+
 	@Override
 	public Object setValue(String key, Object value)
 	{
@@ -177,26 +178,26 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 	public void setup(WorldWindow wwd)
 	{
 		// Subclasses may override to perform required setup
-	} 
-	
+	}
+
 	@Override
 	public void loadComplete()
 	{
 		// Subclasses may override to perform required post-load processing
 	}
-	
+
 	@Override
 	public URL getShapeSourceUrl() throws MalformedURLException
 	{
 		return shapeSourceUrl;
 	}
-	
+
 	@Override
 	public String getDataCacheName()
 	{
 		return dataCacheName;
 	}
-	
+
 	@Override
 	protected final void doRender(DrawContext dc)
 	{
@@ -206,12 +207,12 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 		}
 		renderGeometry(dc);
 	}
-	
+
 	protected ShapeProvider getShapeProvider()
 	{
 		return shapeProvider;
 	}
-	
+
 	protected StyleProvider getStyleProvider()
 	{
 		return styleProvider;

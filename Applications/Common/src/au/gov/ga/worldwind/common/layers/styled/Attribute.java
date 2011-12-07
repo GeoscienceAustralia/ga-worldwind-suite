@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.common.layers.point;
+package au.gov.ga.worldwind.common.layers.styled;
 
 import gov.nasa.worldwind.avlist.AVList;
 
@@ -99,9 +99,7 @@ public class Attribute
 	 */
 	public void addText(String value, String placeholder)
 	{
-		textString = new StringWithPlaceholder();
-		textString.string = value;
-		textString.placeholder = placeholder;
+		textString = new StringWithPlaceholder(value, placeholder);
 	}
 
 	/**
@@ -114,9 +112,7 @@ public class Attribute
 	 */
 	public void addLink(String url, String placeholder)
 	{
-		linkString = new StringWithPlaceholder();
-		linkString.string = url;
-		linkString.placeholder = placeholder;
+		linkString = new StringWithPlaceholder(url, placeholder);
 	}
 
 	/**
@@ -215,8 +211,14 @@ public class Attribute
 	 */
 	protected class StringWithPlaceholder
 	{
-		public String string;
-		public String placeholder;
+		public final String string;
+		public final String placeholder;
+		
+		public StringWithPlaceholder(String string, String placeholder)
+		{
+			this.string = string;
+			this.placeholder = placeholder;
+		}
 
 		public String replacePlaceholder(String with)
 		{

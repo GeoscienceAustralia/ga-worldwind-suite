@@ -13,6 +13,8 @@ import java.awt.Point;
 import org.junit.Before;
 import org.junit.Test;
 
+import au.gov.ga.worldwind.common.layers.styled.Style;
+
 /**
  * Unit tests for the {@link Style} class
  */

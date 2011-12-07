@@ -165,11 +165,13 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 		this.drawCurtain = drawCurtain;
 	}
 
+	@Override
 	public void setDrawUpperShapeOutline(boolean drawUpperShapeOutline)
 	{
 		this.drawUpperShapeOutline = drawUpperShapeOutline;
 	}
 
+	@Override
 	public void setDrawLowerShapeOutline(boolean drawLowerShapeOutline)
 	{
 		this.drawLowerShapeOutline = drawLowerShapeOutline;

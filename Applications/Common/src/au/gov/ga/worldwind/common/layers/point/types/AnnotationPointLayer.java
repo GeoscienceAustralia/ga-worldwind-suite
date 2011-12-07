@@ -17,9 +17,9 @@ import java.net.URL;
 
 import au.gov.ga.worldwind.common.layers.point.PointLayer;
 import au.gov.ga.worldwind.common.layers.point.PointLayerHelper;
-import au.gov.ga.worldwind.common.layers.point.PointProperties;
 import au.gov.ga.worldwind.common.layers.point.annotation.EnhancedAnnotation;
 import au.gov.ga.worldwind.common.layers.point.annotation.EnhancedAnnotationAttributes;
+import au.gov.ga.worldwind.common.layers.styled.StyleAndText;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 
 /**
@@ -63,7 +63,7 @@ public class AnnotationPointLayer extends AnnotationLayer implements PointLayer,
 	@Override
 	public void addPoint(Position position, AVList attributeValues)
 	{
-		PointProperties properties = helper.getStyle(attributeValues);
+		StyleAndText properties = helper.getStyle(attributeValues);
 		EnhancedAnnotation annotation = new EnhancedAnnotation(properties.text, position);
 		annotation.setValue(AVKey.URL, properties.link);
 		EnhancedAnnotationAttributes attributes = new EnhancedAnnotationAttributes();

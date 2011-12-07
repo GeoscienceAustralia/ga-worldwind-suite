@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.common.layers.point;
+package au.gov.ga.worldwind.common.layers.styled;
 
 import static au.gov.ga.worldwind.common.util.Util.*;
 import gov.nasa.worldwind.avlist.AVList;

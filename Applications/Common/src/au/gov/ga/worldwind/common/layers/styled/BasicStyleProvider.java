@@ -1,8 +1,9 @@
-package au.gov.ga.worldwind.common.layers.point;
+package au.gov.ga.worldwind.common.layers.styled;
 
 import gov.nasa.worldwind.avlist.AVList;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -11,12 +12,12 @@ import java.util.Map;
  * 
  * @author Michael de Hoog
  */
-public class StyleProvider
+public class BasicStyleProvider implements StyleProvider
 {
-	protected Style[] styles;
+	protected List<Style> styles;
 	protected Map<String, Style> styleMap = new HashMap<String, Style>();
 	protected Style defaultStyle;
-	protected Attribute[] attributes;
+	protected List<Attribute> attributes;
 
 	/**
 	 * Get a matching style for the provided set of attribute values
@@ -24,7 +25,8 @@ public class StyleProvider
 	 * @param attributeValues
 	 * @return
 	 */
-	public PointProperties getStyle(AVList attributeValues)
+	@Override
+	public StyleAndText getStyle(AVList attributeValues)
 	{
 		String link = null;
 		String text = null;
@@ -51,15 +53,17 @@ public class StyleProvider
 		if (style == null)
 			style = defaultStyle;
 
-		return new PointProperties(style, text, link);
+		return new StyleAndText(style, text, link);
 	}
 
-	public Style[] getStyles()
+	@Override
+	public List<Style> getStyles()
 	{
 		return styles;
 	}
 
-	public synchronized void setStyles(Style[] styles)
+	@Override
+	public synchronized void setStyles(List<Style> styles)
 	{
 		this.styles = styles;
 
@@ -69,7 +73,9 @@ public class StyleProvider
 		for (Style style : styles)
 		{
 			if (style.isDefault() && defaultStyle == null)
+			{
 				defaultStyle = style;
+			}
 			styleMap.put(style.getName(), style);
 		}
 
@@ -79,12 +85,14 @@ public class StyleProvider
 		}
 	}
 
-	public Attribute[] getAttributes()
+	@Override
+	public List<Attribute> getAttributes()
 	{
 		return attributes;
 	}
 
-	public synchronized void setAttributes(Attribute[] attributes)
+	@Override
+	public synchronized void setAttributes(List<Attribute> attributes)
 	{
 		this.attributes = attributes;
 	}
