@@ -9,7 +9,7 @@
 	<property name="deploy_location" value="\\marl\sandpit\symbolic-links\world-wind\current" />
 
 	<!-- Version numbers -->
-	<property name="application_version" value="2.2-SNAPSHOT" />
+	<property name="application_version" value="2.3-SNAPSHOT" />
 	<property name="worldwind_version" value="105.156" />
 
 	<!-- Viewer source code directories -->
