@@ -18,7 +18,7 @@ public class StereoStarsLayer extends ProjectionStarsLayer
 	protected void applyDrawProjection(DrawContext dc, OGLStackHandler ogsh)
 	{
 		boolean loaded = false;
-		if (dc.getView() instanceof StereoView)
+		if (dc.getView() instanceof StereoView && ((StereoView) dc.getView()).isStereo())
 		{
 			StereoView stereo = (StereoView) dc.getView();
 			//near is the distance from the origin
