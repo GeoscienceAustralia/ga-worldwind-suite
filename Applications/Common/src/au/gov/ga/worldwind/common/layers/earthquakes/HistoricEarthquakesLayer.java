@@ -11,6 +11,7 @@ import gov.nasa.worldwind.util.OGLStackHandler;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.Color;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -19,6 +20,7 @@ import java.net.URL;
 import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 import javax.media.opengl.GL;
 import javax.xml.xpath.XPath;
@@ -38,18 +40,21 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
 import com.sun.opengl.util.BufferUtil;
 
 /**
- * A specialised sub-surface layer that reads and displays earthquake data 
- * from a reference data file.
+ * A specialised sub-surface layer that reads and displays earthquake data from
+ * a reference data file.
  * <p/>
- * Each datapoint in the earthquake file is plotted as a point plotted at 
- * the recorded earthquake depth.
+ * Each datapoint in the earthquake file is plotted as a point plotted at the
+ * recorded earthquake depth.
  * <p/>
  * Colouring is configurable, and can be based on Date, Magnitude or Depth.
  * <p/>
- * This implementation makes use of the {@link FastShape} class to load earthquake data
- * outside the rendering thread to ensure the interface remains responsive.
+ * This implementation makes use of the {@link FastShape} class to load
+ * earthquake data outside the rendering thread to ensure the interface remains
+ * responsive.
  * <p/>
- * Each record in the data file should have the following format (without line breaks):
+ * Each record in the data file should have the following format (without line
+ * breaks):
+ * 
  * <pre>
  * double latitude (in degrees)
  * double longitude (in degrees)
@@ -57,7 +62,11 @@ import com.sun.opengl.util.BufferUtil;
  * double magnitude
  * long timestamp (in milliseconds since epoc 01 01 1970 00:00:00 UTC)
  * </pre>
- * To save on bandwidth, it is recommended that the data file be compressed into a .zip file.
+ * 
+ * To save on bandwidth, it is recommended that the data file be compressed into
+ * a .zip file.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 {
@@ -215,19 +224,36 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 	{
 		try
 		{
+			boolean isZipFile = url.toExternalForm().toLowerCase().endsWith(".zip");
+			if (isZipFile)
+			{
+				ZipInputStream zis = new ZipInputStream(is);
+				zis.getNextEntry(); //move to first entry
+				is = zis;
+			}
+
 			List<Earthquake> quakes = new ArrayList<Earthquake>();
 			ObjectInputStream ois = new ObjectInputStream(is);
-			while (ois.available() > 0)
+			try
 			{
-				double lat = ois.readDouble();
-				double lon = ois.readDouble();
-				double elevation = ois.readDouble();
-				double magnitude = ois.readDouble();
-				long timeInMillis = ois.readLong();
+				while (is.available() > 0)
+				{
+					double lat = ois.readDouble();
+					double lon = ois.readDouble();
+					double elevation = ois.readDouble();
+					double magnitude = ois.readDouble();
+					long timeInMillis = ois.readLong();
 
-				Position position = Position.fromDegrees(lat, lon, elevation);
-				Earthquake quake = new Earthquake(position, magnitude, timeInMillis);
-				quakes.add(quake);
+					Position position = Position.fromDegrees(lat, lon, elevation);
+					Earthquake quake = new Earthquake(position, magnitude, timeInMillis);
+					quakes.add(quake);
+				}
+			}
+			catch (EOFException e)
+			{
+				//When reading from a ZipInputStream, the ObjectInputStream.available() method always returns 0,
+				//so just read it anyway. This will throw an EOFException at some stage (when there's no data
+				//left), this means we are at the end of the file. Ignore it.
 			}
 			ois.close();
 
@@ -235,6 +261,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 		}
 		catch (IOException e)
 		{
+			e.printStackTrace();
 			if (loadAttempts < MAX_DOWNLOAD_ATTEMPTS)
 			{
 				loaded = false;
@@ -308,7 +335,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 
 			//scale the magnitude (VERY crude equalisation)
 			percent = 1 - Math.pow(percent, 0.2);
-			
+
 			Color color = new HSLColor((float) (240d * percent), 100f, 50f).getRGB();
 			colorBuffer.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d);
 		}
