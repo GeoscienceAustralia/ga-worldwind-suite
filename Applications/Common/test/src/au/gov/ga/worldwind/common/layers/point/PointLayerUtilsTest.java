@@ -7,6 +7,8 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.util.WWXML;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -29,9 +31,10 @@ public class PointLayerUtilsTest
 		assertNotNull(params);
 		
 		// Attributes should be empty
-		Attribute[] attributes = (Attribute[])params.getValue(AVKeyMore.POINT_ATTRIBUTES);
+		@SuppressWarnings("unchecked")
+		List<Attribute> attributes = (List<Attribute>)params.getValue(AVKeyMore.POINT_ATTRIBUTES);
 		assertNotNull(attributes);
-		assertTrue(attributes.length == 0);
+		assertTrue(attributes.size() == 0);
 		
 		// Test regular parameters
 		assertEquals("PointLayerNoAttributes", pointLayer.getName());
@@ -48,13 +51,14 @@ public class PointLayerUtilsTest
 		assertNotNull(params);
 		
 		// Attributes should not be empty
-		Attribute[] attributes = (Attribute[])params.getValue(AVKeyMore.POINT_ATTRIBUTES);
+		@SuppressWarnings("unchecked")
+		List<Attribute> attributes = (List<Attribute>)params.getValue(AVKeyMore.POINT_ATTRIBUTES);
 		assertNotNull(attributes);
-		assertTrue(attributes.length == 1);
+		assertTrue(attributes.size() == 1);
 		
-		assertEquals("NAME", attributes[0].getName());
-		assertEquals("Name: %v%", StringWithPlaceholderGetter.getTextString(attributes[0]));
-		assertEquals("%v%", StringWithPlaceholderGetter.getTextPlaceholder(attributes[0]));
+		assertEquals("NAME", attributes.get(0).getName());
+		assertEquals("Name: %v%", StringWithPlaceholderGetter.getTextString(attributes.get(0)));
+		assertEquals("%v%", StringWithPlaceholderGetter.getTextPlaceholder(attributes.get(0)));
 		
 		// Test regular parameters
 		assertEquals("PointLayerWithAttributes", pointLayer.getName());

@@ -34,6 +34,7 @@ public class PointLayerUtils extends DataConfigurationUtils
 {
 	/**
 	 * Create a new {@link PointLayer} from an XML definition.
+	 * 
 	 * @return New {@link PointLayer}.
 	 */
 	public static PointLayer createPointLayer(Element domElement, AVList params)
@@ -148,14 +149,13 @@ public class PointLayerUtils extends DataConfigurationUtils
 		{
 			params.setValue(AVKeyMore.POINT_PROVIDER, new ShapefilePointProvider());
 		}
-		else if("XML".equalsIgnoreCase(format))
+		else if ("XML".equalsIgnoreCase(format))
 		{
 			params.setValue(AVKeyMore.POINT_PROVIDER, new XMLPointProvider(domElement));
 		}
 		else
 		{
-			throw new IllegalArgumentException("Could not find point provider for DataFormat: "
-					+ format);
+			throw new IllegalArgumentException("Could not find point provider for DataFormat: " + format);
 		}
 	}
 
@@ -202,68 +202,65 @@ public class PointLayerUtils extends DataConfigurationUtils
 		List<Attribute> attributes = new ArrayList<Attribute>();
 
 		Element[] attributesElements = WWXML.getElements(element, "Attributes/Attribute", xpath);
-		if (attributesElements == null)
+		if (attributesElements != null)
 		{
-			params.setValue(AVKeyMore.POINT_ATTRIBUTES, new Attribute[0]);
-			return;
-		}
-		
-		for (Element a : attributesElements)
-		{
-			String name = WWXML.getText(a, "@name", xpath);
-			Attribute attribute = new Attribute(name);
-
-			Element[] cases = WWXML.getElements(a, "Case", xpath);
-			if (cases != null)
+			for (Element a : attributesElements)
 			{
-				for (Element c : cases)
+				String name = WWXML.getText(a, "@name", xpath);
+				Attribute attribute = new Attribute(name);
+
+				Element[] cases = WWXML.getElements(a, "Case", xpath);
+				if (cases != null)
 				{
-					String value = WWXML.getText(c, "@value", xpath);
-					String style = WWXML.getText(c, "@style", xpath);
-					attribute.addCase(value, style);
+					for (Element c : cases)
+					{
+						String value = WWXML.getText(c, "@value", xpath);
+						String style = WWXML.getText(c, "@style", xpath);
+						attribute.addCase(value, style);
+					}
 				}
-			}
 
-			Element[] regexes = WWXML.getElements(a, "Regex", xpath);
-			if (regexes != null)
-			{
-				for (Element r : regexes)
+				Element[] regexes = WWXML.getElements(a, "Regex", xpath);
+				if (regexes != null)
 				{
-					String pattern = WWXML.getText(r, "@pattern", xpath);
-					String style = WWXML.getText(r, "@style", xpath);
-					attribute.addRegex(pattern, style);
+					for (Element r : regexes)
+					{
+						String pattern = WWXML.getText(r, "@pattern", xpath);
+						String style = WWXML.getText(r, "@style", xpath);
+						attribute.addRegex(pattern, style);
+					}
 				}
-			}
 
-			Element[] ranges = WWXML.getElements(a, "Range", xpath);
-			if (ranges != null)
-			{
-				for (Element r : ranges)
+				Element[] ranges = WWXML.getElements(a, "Range", xpath);
+				if (ranges != null)
 				{
-					Double min = WWXML.getDouble(r, "@min", xpath);
-					Double max = WWXML.getDouble(r, "@max", xpath);
-					String style = WWXML.getText(r, "@style", xpath);
-					attribute.addRange(min, max, style);
+					for (Element r : ranges)
+					{
+						Double min = WWXML.getDouble(r, "@min", xpath);
+						Double max = WWXML.getDouble(r, "@max", xpath);
+						String style = WWXML.getText(r, "@style", xpath);
+						attribute.addRange(min, max, style);
+					}
 				}
-			}
 
-			Element text = WWXML.getElement(a, "Text", xpath);
-			if (text != null)
-			{
-				String value = WWXML.getText(text, "@value", xpath);
-				String placeholder = WWXML.getText(text, "@placeholder", xpath);
-				attribute.addText(value, placeholder);
-			}
+				Element text = WWXML.getElement(a, "Text", xpath);
+				if (text != null)
+				{
+					String value = WWXML.getText(text, "@value", xpath);
+					String placeholder = WWXML.getText(text, "@placeholder", xpath);
+					attribute.addText(value, placeholder);
+				}
 
-			Element link = WWXML.getElement(a, "Link", xpath);
-			if (link != null)
-			{
-				String url = WWXML.getText(link, "@url", xpath);
-				String placeholder = WWXML.getText(link, "@placeholder", xpath);
-				attribute.addLink(url, placeholder);
-			}
+				Element link = WWXML.getElement(a, "Link", xpath);
+				if (link != null)
+				{
+					String url = WWXML.getText(link, "@url", xpath);
+					String placeholder = WWXML.getText(link, "@placeholder", xpath);
+					attribute.addLink(url, placeholder);
+				}
 
-			attributes.add(attribute);
+				attributes.add(attribute);
+			}
 		}
 
 		params.setValue(AVKeyMore.POINT_ATTRIBUTES, attributes);
