@@ -204,4 +204,22 @@ public class MarkerPointLayer extends MarkerLayer implements PointLayer, SelectL
 			this.tooltipAnnotation.getAttributes().setVisible(false);
 		}
 	}
+
+	@Override
+	public boolean isLoading()
+	{
+		return helper.getPointProvider().isLoading();
+	}
+
+	@Override
+	public void addLoadingListener(LoadingListener listener)
+	{
+		helper.getPointProvider().addLoadingListener(listener);
+	}
+
+	@Override
+	public void removeLoadingListener(LoadingListener listener)
+	{
+		helper.getPointProvider().removeLoadingListener(listener);
+	}
 }

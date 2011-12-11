@@ -134,4 +134,22 @@ public class AnnotationPointLayer extends AnnotationLayer implements PointLayer,
 	{
 		annotation.getAttributes().setHighlighted(highlight);
 	}
+
+	@Override
+	public boolean isLoading()
+	{
+		return helper.getPointProvider().isLoading();
+	}
+
+	@Override
+	public void addLoadingListener(LoadingListener listener)
+	{
+		helper.getPointProvider().addLoadingListener(listener);
+	}
+
+	@Override
+	public void removeLoadingListener(LoadingListener listener)
+	{
+		helper.getPointProvider().removeLoadingListener(listener);
+	}
 }

@@ -25,15 +25,20 @@ import au.gov.ga.worldwind.common.layers.delegate.retriever.PassThroughZipRetrie
  */
 public abstract class AbstractDataProvider<L extends DataLayer> implements DataProvider<L>
 {
+	private boolean loading = false;
 	private boolean loaded = false;
 	private FileStore dataFileStore = WorldWind.getDataFileStore();
 	private final Object fileLock = new Object();
+	private final LoadingListenerList loadingListeners = new LoadingListenerList();
 
 	@Override
 	public void requestData(L layer)
 	{
 		if (!loaded)
 		{
+			loading = true;
+			loadingListeners.notifyListeners(isLoading());
+			
 			RequestTask task = new RequestTask(this, layer);
 			WorldWind.getTaskService().addTask(task);
 		}
@@ -153,10 +158,31 @@ public abstract class AbstractDataProvider<L extends DataLayer> implements DataP
 	{
 		synchronized (getFileLock())
 		{
+			loading = false;
+			loadingListeners.notifyListeners(isLoading());
+			
 			if (!loaded)
 				loaded = doLoadData(url, layer);
 			return loaded;
 		}
+	}
+	
+	@Override
+	public boolean isLoading()
+	{
+		return loading;
+	}
+
+	@Override
+	public void addLoadingListener(LoadingListener listener)
+	{
+		loadingListeners.add(listener);
+	}
+
+	@Override
+	public void removeLoadingListener(LoadingListener listener)
+	{
+		loadingListeners.remove(listener);
 	}
 
 	/**

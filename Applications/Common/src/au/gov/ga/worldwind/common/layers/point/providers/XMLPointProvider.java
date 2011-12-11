@@ -83,4 +83,22 @@ public class XMLPointProvider implements PointProvider
 		}
 		layer.loadComplete();
 	}
+	
+	@Override
+	public boolean isLoading()
+	{
+		return false;
+	}
+	
+	@Override
+	public void addLoadingListener(LoadingListener listener)
+	{
+		//do nothing, as this provider is never loading
+	}
+	
+	@Override
+	public void removeLoadingListener(LoadingListener listener)
+	{
+		//do nothing, as this provider is never loading
+	}
 }

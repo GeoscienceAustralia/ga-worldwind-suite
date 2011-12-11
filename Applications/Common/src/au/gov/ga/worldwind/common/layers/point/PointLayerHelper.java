@@ -86,4 +86,9 @@ public class PointLayerHelper
 	{
 		return styleProvider.getStyle(attributeValues);
 	}
+
+	public PointProvider getPointProvider()
+	{
+		return pointProvider;
+	}
 }

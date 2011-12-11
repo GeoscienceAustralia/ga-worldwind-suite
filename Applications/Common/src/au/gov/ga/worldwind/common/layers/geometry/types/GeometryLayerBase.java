@@ -219,4 +219,22 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 	{
 		return styleProvider;
 	}
+	
+	@Override
+	public boolean isLoading()
+	{
+		return shapeProvider.isLoading();
+	}
+	
+	@Override
+	public void addLoadingListener(LoadingListener listener)
+	{
+		shapeProvider.addLoadingListener(listener);
+	}
+	
+	@Override
+	public void removeLoadingListener(LoadingListener listener)
+	{
+		shapeProvider.removeLoadingListener(listener);
+	}
 }
