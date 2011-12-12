@@ -10,16 +10,14 @@ import java.io.InputStream;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.point.PointLayer;
-import au.gov.ga.worldwind.common.layers.point.PointLayerUtils;
+import au.gov.ga.worldwind.common.layers.point.PointLayerFactory;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 public class Sandpit extends ApplicationTemplate
 {
 	public static void main(String[] args)
 	{
-		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
-		System.setProperty("http.proxyPort", "8080");
-		System.setProperty("http.nonProxyHosts", "localhost");
+		System.setProperty("java.net.useSystemProxies", "true");
 
 		//Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 100d);
 
@@ -37,7 +35,7 @@ public class Sandpit extends ApplicationTemplate
 			InputStream is = Sandpit.class.getResourceAsStream("layer_definition.xml");
 			Element domElement = XMLUtil.getElementFromSource(is);
 
-			PointLayer layer = PointLayerUtils.createPointLayer(domElement, null);
+			PointLayer layer = PointLayerFactory.createPointLayer(domElement, null);
 			layer.setName("Markers");
 			insertAfterPlacenames(getWwd(), layer);
 			layer.setup(getWwd());

@@ -14,6 +14,7 @@ import au.gov.ga.worldwind.common.layers.styled.Style;
 import au.gov.ga.worldwind.common.layers.styled.StyleAndText;
 import au.gov.ga.worldwind.common.layers.styled.StyleProvider;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * Helper class for {@link PointLayer}s. Contains common functionality for the
@@ -41,6 +42,13 @@ public class PointLayerHelper
 
 		styleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.POINT_STYLES));
 		styleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.POINT_ATTRIBUTES));
+		
+		Validate.notBlank(url, "Point data url not set");
+		Validate.notBlank(dataCacheName, "Point data cache name not set");
+
+		Validate.notNull(pointProvider, "Point data provider is null");
+		Validate.notNull(styleProvider.getStyles(), "Point style list is null");
+		Validate.notNull(styleProvider.getAttributes(), "Point attribute list is null");
 	}
 
 	public URL getContext()

@@ -27,6 +27,7 @@ import au.gov.ga.worldwind.common.layers.styled.BasicStyleProvider;
 import au.gov.ga.worldwind.common.layers.styled.Style;
 import au.gov.ga.worldwind.common.layers.styled.StyleProvider;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A base class for {@link GeometryLayer} implementations.
@@ -64,6 +65,12 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 		styleProvider = new BasicStyleProvider();
 		styleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.SHAPE_STYLES));
 		styleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.SHAPE_ATTRIBUTES));
+		
+		Validate.notBlank(dataCacheName, "Shape data cache name not set");
+
+		Validate.notNull(shapeProvider, "Shape data provider is null");
+		Validate.notNull(styleProvider.getStyles(), "Shape style list is null");
+		Validate.notNull(styleProvider.getAttributes(), "Shape attribute list is null");
 
 		setValues(params);
 	}

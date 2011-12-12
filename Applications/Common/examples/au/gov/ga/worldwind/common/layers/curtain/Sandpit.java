@@ -17,9 +17,7 @@ public class Sandpit extends ApplicationTemplate
 {
 	public static void main(String[] args)
 	{
-		System.setProperty("http.proxyHost", "proxy.agso.gov.au");
-		System.setProperty("http.proxyPort", "8080");
-		System.setProperty("http.nonProxyHosts", "localhost");
+		System.setProperty("java.net.useSystemProxies", "true");
 
 		//Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 100d);
 		Configuration.setValue(AVKey.INITIAL_ALTITUDE, 100000);

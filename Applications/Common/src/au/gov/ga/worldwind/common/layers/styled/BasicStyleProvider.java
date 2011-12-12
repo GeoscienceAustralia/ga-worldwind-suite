@@ -70,13 +70,16 @@ public class BasicStyleProvider implements StyleProvider
 		styleMap.clear();
 		defaultStyle = null;
 
-		for (Style style : styles)
+		if (styles != null)
 		{
-			if (style.isDefault() && defaultStyle == null)
+			for (Style style : styles)
 			{
-				defaultStyle = style;
+				if (style.isDefault() && defaultStyle == null)
+				{
+					defaultStyle = style;
+				}
+				styleMap.put(style.getName(), style);
 			}
-			styleMap.put(style.getName(), style);
 		}
 
 		if (defaultStyle == null)

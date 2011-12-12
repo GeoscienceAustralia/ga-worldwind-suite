@@ -15,7 +15,7 @@ import au.gov.ga.worldwind.common.layers.curtain.BasicTiledCurtainLayer;
 import au.gov.ga.worldwind.common.layers.curtain.delegate.DelegatorTiledCurtainLayer;
 import au.gov.ga.worldwind.common.layers.earthquakes.HistoricEarthquakesLayer;
 import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
-import au.gov.ga.worldwind.common.layers.point.PointLayerUtils;
+import au.gov.ga.worldwind.common.layers.point.PointLayerFactory;
 import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -40,7 +40,7 @@ public class LayerFactory extends BasicLayerFactory
 		}
 		else if ("PointLayer".equals(layerType))
 		{
-			return PointLayerUtils.createPointLayer(domElement, params);
+			return PointLayerFactory.createPointLayer(domElement, params);
 		}
 		else if ("KMLLayer".equals(layerType))
 		{

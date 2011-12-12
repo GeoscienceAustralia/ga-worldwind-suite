@@ -7,19 +7,14 @@ import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.util.WWXML;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.geometry.provider.ShapefileShapeProvider;
 import au.gov.ga.worldwind.common.layers.geometry.types.airspace.AirspaceGeometryLayer;
-import au.gov.ga.worldwind.common.layers.styled.Attribute;
-import au.gov.ga.worldwind.common.layers.styled.Style;
+import au.gov.ga.worldwind.common.layers.styled.StyleAndAttributeFactory;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
-import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
  * A factory class used to create {@link GeometryLayer}s from XML layer
@@ -131,14 +126,24 @@ public class GeometryLayerFactory
 
 		setupShapeProvider(domElement, xpath, params);
 
-		addStyles(domElement, xpath, params);
-		addAttributes(domElement, xpath, params);
+		Element styles = WWXML.getElement(domElement, "Styles", xpath);
+		if (styles != null)
+		{
+			StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.SHAPE_STYLES, params);
+		}
+
+		Element attributes = WWXML.getElement(domElement, "Attributes", xpath);
+		if (attributes != null)
+		{
+			StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.SHAPE_ATTRIBUTES, params);
+		}
 
 		return params;
 	}
 
 	/**
-	 * Adds a {@link ShapeProvider} to params matching the 'DataFormat' XML element.
+	 * Adds a {@link ShapeProvider} to params matching the 'DataFormat' XML
+	 * element.
 	 */
 	protected static void setupShapeProvider(Element domElement, XPath xpath, AVList params)
 	{
@@ -152,113 +157,5 @@ public class GeometryLayerFactory
 		{
 			throw new IllegalArgumentException("Could not find shape provider for DataFormat: " + format);
 		}
-	}
-
-	/**
-	 * Parse and add the styles to params.
-	 */
-	protected static void addStyles(Element element, XPath xpath, AVList params)
-	{
-		List<Style> styles = new ArrayList<Style>();
-
-		Element[] styleElements = WWXML.getElements(element, "Styles/Style", xpath);
-		if (styleElements != null)
-		{
-			for (Element s : styleElements)
-			{
-				String name = WWXML.getText(s, "@name", xpath);
-				boolean defalt = XMLUtil.getBoolean(s, "@default", false);
-				Style style = new Style(name, defalt);
-
-				Element[] properties = WWXML.getElements(s, "Property", xpath);
-				if (properties != null)
-				{
-					for (Element p : properties)
-					{
-						String pname = WWXML.getText(p, "@name", xpath);
-						String value = WWXML.getText(p, "@value", xpath);
-						String type = WWXML.getText(p, "@type", xpath);
-						style.addProperty(pname, value, type);
-					}
-				}
-				styles.add(style);
-			}
-		}
-
-		params.setValue(AVKeyMore.SHAPE_STYLES, styles);
-	}
-
-	/**
-	 * Parse and add the attributes to params.
-	 */
-	protected static void addAttributes(Element element, XPath xpath, AVList params)
-	{
-		List<Attribute> attributes = new ArrayList<Attribute>();
-
-		Element[] attributesElements = WWXML.getElements(element, "Attributes/Attribute", xpath);
-		if (attributesElements == null)
-		{
-			params.setValue(AVKeyMore.SHAPE_ATTRIBUTES, new ArrayList<Attribute>(0));
-			return;
-		}
-		for (Element a : attributesElements)
-		{
-			String name = WWXML.getText(a, "@name", xpath);
-			Attribute attribute = new Attribute(name);
-
-			Element[] cases = WWXML.getElements(a, "Case", xpath);
-			if (cases != null)
-			{
-				for (Element c : cases)
-				{
-					String value = WWXML.getText(c, "@value", xpath);
-					String style = WWXML.getText(c, "@style", xpath);
-					attribute.addCase(value, style);
-				}
-			}
-
-			Element[] regexes = WWXML.getElements(a, "Regex", xpath);
-			if (regexes != null)
-			{
-				for (Element r : regexes)
-				{
-					String pattern = WWXML.getText(r, "@pattern", xpath);
-					String style = WWXML.getText(r, "@style", xpath);
-					attribute.addRegex(pattern, style);
-				}
-			}
-
-			Element[] ranges = WWXML.getElements(a, "Range", xpath);
-			if (ranges != null)
-			{
-				for (Element r : ranges)
-				{
-					Double min = WWXML.getDouble(r, "@min", xpath);
-					Double max = WWXML.getDouble(r, "@max", xpath);
-					String style = WWXML.getText(r, "@style", xpath);
-					attribute.addRange(min, max, style);
-				}
-			}
-
-			Element text = WWXML.getElement(a, "Text", xpath);
-			if (text != null)
-			{
-				String value = WWXML.getText(text, "@value", xpath);
-				String placeholder = WWXML.getText(text, "@placeholder", xpath);
-				attribute.addText(value, placeholder);
-			}
-
-			Element link = WWXML.getElement(a, "Link", xpath);
-			if (link != null)
-			{
-				String url = WWXML.getText(link, "@url", xpath);
-				String placeholder = WWXML.getText(link, "@placeholder", xpath);
-				attribute.addLink(url, placeholder);
-			}
-
-			attributes.add(attribute);
-		}
-
-		params.setValue(AVKeyMore.SHAPE_ATTRIBUTES, attributes);
 	}
 }

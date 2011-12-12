@@ -17,7 +17,7 @@ import au.gov.ga.worldwind.common.layers.styled.StringWithPlaceholderGetter;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
- * Unit tests for the {@link PointLayerUtils} class
+ * Unit tests for the {@link PointLayerFactory} class
  */
 public class PointLayerUtilsTest
 {
@@ -25,7 +25,7 @@ public class PointLayerUtilsTest
 	public void testCreatePointLayerNoAttributes()
 	{
 		Document doc = WWXML.openDocument(getClass().getResourceAsStream("pointLayerNoAttributes.xml"));
-		PointLayer pointLayer = PointLayerUtils.createPointLayer(doc.getDocumentElement(), new AVListImpl());
+		PointLayer pointLayer = PointLayerFactory.createPointLayer(doc.getDocumentElement(), new AVListImpl());
 		
 		AVList params = (AVList)pointLayer.getValue(AVKeyMore.CONSTRUCTION_PARAMETERS);
 		assertNotNull(params);
@@ -45,7 +45,7 @@ public class PointLayerUtilsTest
 	public void testCreatePointLayerWithAttributes()
 	{
 		Document doc = WWXML.openDocument(getClass().getResourceAsStream("pointLayerWithAttributes.xml"));
-		PointLayer pointLayer = PointLayerUtils.createPointLayer(doc.getDocumentElement(), new AVListImpl());
+		PointLayer pointLayer = PointLayerFactory.createPointLayer(doc.getDocumentElement(), new AVListImpl());
 		
 		AVList params = (AVList)pointLayer.getValue(AVKeyMore.CONSTRUCTION_PARAMETERS);
 		assertNotNull(params);

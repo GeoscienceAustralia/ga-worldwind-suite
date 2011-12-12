@@ -4,7 +4,7 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.layers.AbstractLayer;
-import gov.nasa.worldwind.util.DataConfigurationUtils;
+import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.util.ArrayList;
@@ -30,8 +30,10 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class PointLayerUtils extends DataConfigurationUtils
+public class PointLayerFactory
 {
+	protected static final String DATE_TIME_PATTERN = "dd MM yyyy HH:mm:ss z";
+	
 	/**
 	 * Create a new {@link PointLayer} from an XML definition.
 	 * 
