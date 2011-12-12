@@ -14,6 +14,7 @@ import au.gov.ga.worldwind.common.layers.crust.CrustLayer;
 import au.gov.ga.worldwind.common.layers.curtain.BasicTiledCurtainLayer;
 import au.gov.ga.worldwind.common.layers.curtain.delegate.DelegatorTiledCurtainLayer;
 import au.gov.ga.worldwind.common.layers.earthquakes.HistoricEarthquakesLayer;
+import au.gov.ga.worldwind.common.layers.geometry.GeometryLayerFactory;
 import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
 import au.gov.ga.worldwind.common.layers.point.PointLayerFactory;
 import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
@@ -38,25 +39,29 @@ public class LayerFactory extends BasicLayerFactory
 		{
 			return ShapefileLayerFactory.createLayer(domElement, params);
 		}
-		else if ("PointLayer".equals(layerType))
+		if ("PointLayer".equals(layerType))
 		{
 			return PointLayerFactory.createPointLayer(domElement, params);
 		}
-		else if ("KMLLayer".equals(layerType))
+		if ("KMLLayer".equals(layerType))
 		{
 			return new KMLLayer(domElement, params);
 		}
-		else if("CurtainImageLayer".equals(layerType))
+		if("CurtainImageLayer".equals(layerType))
 		{
 			return createTiledCurtainLayer(domElement, params);
 		}
-		else if("HistoricEarthquakesLayer".equals(layerType))
+		if("HistoricEarthquakesLayer".equals(layerType))
 		{
 			return new HistoricEarthquakesLayer(domElement, params);
 		}
-		else if("CrustLayer".equals(layerType))
+		if("CrustLayer".equals(layerType))
 		{
 			return new CrustLayer(domElement, params);
+		}
+		if ("GeometryLayer".equalsIgnoreCase(layerType))
+		{
+			return GeometryLayerFactory.createGeometryLayer(domElement, params);
 		}
 
 		return super.createFromLayerDocument(domElement, params);
