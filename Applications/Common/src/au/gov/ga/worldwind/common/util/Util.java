@@ -836,6 +836,34 @@ public class Util
 		reader.close();
 		return result.toString();
 	}
+	
+	/**
+	 * Convert an object to a Float.
+	 * 
+	 * @param o
+	 *            Object to convert
+	 * @return Float converted from object, or null if the object couldn't be
+	 *         converted
+	 */
+	public static Float objectToFloat(Object o)
+	{
+		if (o == null)
+		{
+			return null;
+		}
+		if (o instanceof Float)
+		{
+			return (Float) o;
+		}
+		try
+		{
+			return Float.valueOf(o.toString());
+		}
+		catch (NumberFormatException e)
+		{
+			return null;
+		}
+	}
 
 	/**
 	 * Convert an object to a Double.

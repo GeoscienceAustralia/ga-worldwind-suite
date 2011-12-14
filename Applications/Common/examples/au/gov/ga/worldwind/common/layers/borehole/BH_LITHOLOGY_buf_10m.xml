@@ -12,6 +12,7 @@
 	
 	<UniqueBoreholeIdentifier>HOLE_ID</UniqueBoreholeIdentifier>
 	<SampleDepthAttributes from="FROM_" to="TO" />
+	<LineWidth>10</LineWidth>
 
 	<BoreholeStyles>
 		<Style name="borehole" default="true">

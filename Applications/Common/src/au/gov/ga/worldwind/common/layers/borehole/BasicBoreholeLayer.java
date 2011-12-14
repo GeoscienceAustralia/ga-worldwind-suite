@@ -61,6 +61,7 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 	protected String uniqueIdentifierAttribute;
 	protected String sampleDepthFromAttribute;
 	protected String sampleDepthToAttribute;
+	protected double lineWidth = 10;
 
 	protected GlobeAnnotation tooltipAnnotation;
 
@@ -81,6 +82,10 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		sampleDepthFromAttribute = params.getStringValue(AVKeyMore.BOREHOLE_SAMPLE_DEPTH_FROM_ATTRIBUTE);
 		sampleDepthToAttribute = params.getStringValue(AVKeyMore.BOREHOLE_SAMPLE_DEPTH_TO_ATTRIBUTE);
 
+		Double d = (Double) params.getValue(AVKeyMore.BOREHOLE_LINE_WIDTH);
+		if (d != null)
+			lineWidth = d;
+
 		Validate.notBlank(url, "Borehole data url not set");
 		Validate.notBlank(dataCacheName, "Borehole data cache name not set");
 
@@ -96,7 +101,7 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 
 		// Init tooltip annotation
 		this.tooltipAnnotation = new GlobeAnnotation("", Position.fromDegrees(0, 0, 0));
-		Font font = Font.decode("Arial-Plain-16");
+		Font font = Font.decode("Arial-Plain-15");
 		this.tooltipAnnotation.getAttributes().setFont(font);
 		this.tooltipAnnotation.getAttributes().setSize(new Dimension(270, 0));
 		this.tooltipAnnotation.getAttributes().setDistanceMinScale(1);
@@ -199,7 +204,7 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 			try
 			{
 				gl.glPushAttrib(GL.GL_LINE_BIT);
-				gl.glLineWidth(10);
+				gl.glLineWidth((float)lineWidth);
 
 				for (BoreholeImpl borehole : boreholes)
 				{
