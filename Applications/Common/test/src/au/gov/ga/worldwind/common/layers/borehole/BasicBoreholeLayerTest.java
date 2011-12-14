@@ -58,5 +58,8 @@ public class BasicBoreholeLayerTest
 		attributeValues.setValue("TO", 60.0);
 		boreholeLayer.addBoreholeSample(Position.ZERO, attributeValues);
 		boreholeLayer.loadComplete();
+		
+		assertEquals(1, ((BasicBoreholeLayer)boreholeLayer).boreholes.size());
+		assertEquals(1, ((BasicBoreholeLayer)boreholeLayer).boreholes.get(0).getSamples().size());
 	}
 }

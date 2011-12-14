@@ -47,22 +47,22 @@ import au.gov.ga.worldwind.common.util.Validate;
  */
 public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, SelectListener
 {
-	private BoreholeProvider boreholeProvider;
-	private StyleProvider boreholeStyleProvider = new BasicStyleProvider();
-	private StyleProvider sampleStyleProvider = new BasicStyleProvider();
-	private final List<BoreholeImpl> boreholes = new ArrayList<BoreholeImpl>();
-	private final List<Marker> markers = new ArrayList<Marker>();
-	private final Map<Object, BoreholeImpl> idToBorehole = new HashMap<Object, BoreholeImpl>();
-	private final MarkerRenderer markerRenderer = new MarkerRenderer();
+	protected BoreholeProvider boreholeProvider;
+	protected StyleProvider boreholeStyleProvider = new BasicStyleProvider();
+	protected StyleProvider sampleStyleProvider = new BasicStyleProvider();
+	protected final List<BoreholeImpl> boreholes = new ArrayList<BoreholeImpl>();
+	protected final List<Marker> markers = new ArrayList<Marker>();
+	protected final Map<Object, BoreholeImpl> idToBorehole = new HashMap<Object, BoreholeImpl>();
+	protected final MarkerRenderer markerRenderer = new MarkerRenderer();
 
-	private URL context;
-	private String url;
-	private String dataCacheName;
-	private String uniqueIdentifierAttribute;
-	private String sampleDepthFromAttribute;
-	private String sampleDepthToAttribute;
+	protected URL context;
+	protected String url;
+	protected String dataCacheName;
+	protected String uniqueIdentifierAttribute;
+	protected String sampleDepthFromAttribute;
+	protected String sampleDepthToAttribute;
 
-	private GlobeAnnotation tooltipAnnotation;
+	protected GlobeAnnotation tooltipAnnotation;
 
 	@SuppressWarnings("unchecked")
 	public BasicBoreholeLayer(AVList params)
