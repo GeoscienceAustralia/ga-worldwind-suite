@@ -30,7 +30,7 @@ public class Util
 {
 	/** The settings folder name to use for GA world wind settings */
 	public static final String SETTINGS_FOLDER_NAME = ".gaww";
-	
+
 	public final static double METER_TO_FEET = 3.280839895;
 	public final static double METER_TO_MILE = 0.000621371192;
 
@@ -38,9 +38,10 @@ public class Util
 			"(?:[a-zA-Z]*\\s*)(\\d+)(?:\\s*)([a-zA-Z])(?:\\s+)((?:\\d*\\.?\\d+)|(?:\\d+))(?:[E|e]?)(?:\\s+)((?:\\d*\\.?\\d+)|(?:\\d+))(?:[N|n]?)";
 
 	/**
-	 * @return A string representation of the provided integer value, padded with 0's to a total
-	 * length of <code>charcount</code>. Note: If length(value) > charcount, the input value
-	 * will be returned as a string.
+	 * @return A string representation of the provided integer value, padded
+	 *         with 0's to a total length of <code>charcount</code>. Note: If
+	 *         length(value) > charcount, the input value will be returned as a
+	 *         string.
 	 */
 	public static String paddedInt(int value, int charcount)
 	{
@@ -253,7 +254,8 @@ public class Util
 	}
 
 	/**
-	 * @return A string containing random characters <code>[a-zA-z]</code> of length <code>length</code>
+	 * @return A string containing random characters <code>[a-zA-z]</code> of
+	 *         length <code>length</code>
 	 */
 	public static String randomString(int length)
 	{
@@ -280,7 +282,8 @@ public class Util
 		return (long) mixDouble(scaleFactor, minLengthMillis, maxLengthMillis);
 	}
 
-	public static long getScaledLengthMillis(double beginZoom, double endZoom, long minLengthMillis, long maxLengthMillis)
+	public static long getScaledLengthMillis(double beginZoom, double endZoom, long minLengthMillis,
+			long maxLengthMillis)
 	{
 		double scaleFactor = Math.abs(endZoom - beginZoom) / Math.max(endZoom, beginZoom);
 		scaleFactor = clamp(scaleFactor, 0.0, 1.0);
@@ -288,8 +291,11 @@ public class Util
 	}
 
 	/**
-	 * Returns a 'mixing' of the values <code>value1</code> and <code>value2</code> using <code>1-amount<code> of <code>value1</code> linearly combined
-	 * with <code>amount</code> of <code>value2</code>. <code>amount</code> should be expressed as a percentage in the range <code>[0,1]</code>
+	 * Returns a 'mixing' of the values <code>value1</code> and
+	 * <code>value2</code> using <code>1-amount<code> of <code>value1</code>
+	 * linearly combined with <code>amount</code> of <code>value2</code>.
+	 * <code>amount</code> should be expressed as a percentage in the range
+	 * <code>[0,1]</code>
 	 */
 	public static double mixDouble(double amount, double value1, double value2)
 	{
@@ -301,7 +307,9 @@ public class Util
 	}
 
 	/**
-	 * @return The provided value as a percentage of the interval <code>[min, max]</code>, clamped to the interval <code>[0,1]</code>
+	 * @return The provided value as a percentage of the interval
+	 *         <code>[min, max]</code>, clamped to the interval
+	 *         <code>[0,1]</code>
 	 */
 	public static double percentDouble(double value, double min, double max)
 	{
@@ -368,13 +376,22 @@ public class Util
 	 * <p/>
 	 * Supported formats are:
 	 * <ol>
-	 * 	<li>Comma- or space-separated signed decimal degrees, with optional E/W/N/S suffixes (eg. <code>-97.345, 123.45</code> or <code>97.345S 123.345W</code>)</li>
-	 * 	<li>Comma- or space-separated degree-minute-second blocks, with optional E/W/N/S suffixes (eg. <code>-123° 34' 42", +45° 12' 30"</code> or <code>123° 34' 42"S 45° 12' 30"W</code>)</li>
+	 * <li>Comma- or space-separated signed decimal degrees, with optional
+	 * E/W/N/S suffixes (eg. <code>-97.345, 123.45</code> or
+	 * <code>97.345S 123.345W</code>)</li>
+	 * <li>Comma- or space-separated degree-minute-second blocks, with optional
+	 * E/W/N/S suffixes (eg. <code>-123° 34' 42", +45° 12' 30"</code> or
+	 * <code>123° 34' 42"S 45° 12' 30"W</code>)</li>
 	 * </ol>
 	 * <p/>
-	 * If the parsed Lat-Lons are outside of the valid range of <code>Lat=[-90,90]</code> and <code>Lon=[-180,180]</code>, or parsing fails, will return <code>null</code>.
-	 * @param coordString the input string 
-	 * @param globe the current <code>Globe</code> (Optional).
+	 * If the parsed Lat-Lons are outside of the valid range of
+	 * <code>Lat=[-90,90]</code> and <code>Lon=[-180,180]</code>, or parsing
+	 * fails, will return <code>null</code>.
+	 * 
+	 * @param coordString
+	 *            the input string
+	 * @param globe
+	 *            the current <code>Globe</code> (Optional).
 	 * 
 	 * @return the corresponding <code>LatLon</code> or <code>null</code>.
 	 */
@@ -465,9 +482,11 @@ public class Util
 		// eg: 123° 34' 42"S 45° 12' 30"W
 		if (lat == null || lon == null)
 		{
-			regex = "([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}[m|M|'|\u2019|\\s])?(\\s*\\d{1,2}[s|S|\"|\u201d])?\\s*[N|n|S|s]?)";
+			regex =
+					"([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}[m|M|'|\u2019|\\s])?(\\s*\\d{1,2}[s|S|\"|\u201d])?\\s*[N|n|S|s]?)";
 			regex += separators;
-			regex += "([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}[m|M|'|\u2019|\\s])?(\\s*\\d{1,2}[s|S|\"|\u201d])?\\s*[E|e|W|w]?)";
+			regex +=
+					"([-|\\+]?\\d{1,3}[d|D|\u00B0|\\s](\\s*\\d{1,2}[m|M|'|\u2019|\\s])?(\\s*\\d{1,2}[s|S|\"|\u201d])?\\s*[E|e|W|w]?)";
 			pattern = Pattern.compile(regex);
 			matcher = pattern.matcher(coordString);
 			if (matcher.matches())
@@ -592,7 +611,7 @@ public class Util
 		{
 			return s;
 		}
-		
+
 		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
 
@@ -612,15 +631,15 @@ public class Util
 	{
 		return collection == null || collection.isEmpty();
 	}
-	
+
 	/**
 	 * @return Whether the provided map is <code>null</code> or empty
 	 */
-	public static boolean isEmpty(Map<?,?> map)
+	public static boolean isEmpty(Map<?, ?> map)
 	{
 		return map == null || map.isEmpty();
 	}
-	
+
 	/**
 	 * @return Whether the provided array is <code>null</code> or empty
 	 */
@@ -628,9 +647,10 @@ public class Util
 	{
 		return array == null || array.length == 0;
 	}
-	
+
 	/**
-	 * Clamp the provided value to the range specified by <code>[min, max]</code>
+	 * Clamp the provided value to the range specified by
+	 * <code>[min, max]</code>
 	 */
 	public static int clamp(int value, int min, int max)
 	{
@@ -639,7 +659,8 @@ public class Util
 	}
 
 	/**
-	 * Clamp the provided value to the range specified by <code>[min, max]</code>
+	 * Clamp the provided value to the range specified by
+	 * <code>[min, max]</code>
 	 */
 	public static double clamp(double value, double min, double max)
 	{
@@ -648,32 +669,36 @@ public class Util
 	}
 
 	/**
-	 * Clamp the provided value to the range specified by <code>[min, max]</code>
+	 * Clamp the provided value to the range specified by
+	 * <code>[min, max]</code>
 	 */
 	public static float clamp(float value, float min, float max)
 	{
 		Validate.isTrue(min <= max, "Min must be less than or equal to max");
 		return Math.max(min, Math.min(max, value));
 	}
-	
+
 	/**
-	 * Clamp the provided {@link LatLon} pair to be within the provided {@link Sector} extents.
+	 * Clamp the provided {@link LatLon} pair to be within the provided
+	 * {@link Sector} extents.
 	 */
 	public static LatLon clampLatLon(LatLon latlon, Sector sector)
 	{
-		if (latlon ==  null || sector == null)
+		if (latlon == null || sector == null)
 		{
 			return latlon;
 		}
-		
+
 		double lat = clamp(latlon.latitude.degrees, sector.getMinLatitude().degrees, sector.getMaxLatitude().degrees);
-		double lon = clamp(latlon.longitude.degrees, sector.getMinLongitude().degrees, sector.getMaxLongitude().degrees);
+		double lon =
+				clamp(latlon.longitude.degrees, sector.getMinLongitude().degrees, sector.getMaxLongitude().degrees);
 
 		return LatLon.fromDegrees(lat, lon);
 	}
-	
+
 	/**
-	 * Clamp the provided {@link Sector} to be within the provided {@link Sector} extents.
+	 * Clamp the provided {@link Sector} to be within the provided
+	 * {@link Sector} extents.
 	 */
 	public static Sector clampSector(Sector source, Sector extents)
 	{
@@ -681,12 +706,20 @@ public class Util
 		{
 			return source;
 		}
-		
-		double minLat = clamp(source.getMinLatitude().degrees, extents.getMinLatitude().degrees, extents.getMaxLatitude().degrees);
-		double maxLat = clamp(source.getMaxLatitude().degrees, extents.getMinLatitude().degrees, extents.getMaxLatitude().degrees);
-		double minLon = clamp(source.getMinLongitude().degrees, extents.getMinLongitude().degrees, extents.getMaxLongitude().degrees);
-		double maxLon = clamp(source.getMaxLongitude().degrees, extents.getMinLongitude().degrees, extents.getMaxLongitude().degrees);
-		
+
+		double minLat =
+				clamp(source.getMinLatitude().degrees, extents.getMinLatitude().degrees,
+						extents.getMaxLatitude().degrees);
+		double maxLat =
+				clamp(source.getMaxLatitude().degrees, extents.getMinLatitude().degrees,
+						extents.getMaxLatitude().degrees);
+		double minLon =
+				clamp(source.getMinLongitude().degrees, extents.getMinLongitude().degrees,
+						extents.getMaxLongitude().degrees);
+		double maxLon =
+				clamp(source.getMaxLongitude().degrees, extents.getMinLongitude().degrees,
+						extents.getMaxLongitude().degrees);
+
 		return Sector.fromDegrees(minLat, maxLat, minLon, maxLon);
 	}
 
@@ -732,7 +765,8 @@ public class Util
 	}
 
 	/**
-	 * Parse a Vec4 from a String representation of the form <code>[(]x,[ ]y,[ ]z[,w][)]</code>
+	 * Parse a Vec4 from a String representation of the form
+	 * <code>[(]x,[ ]y,[ ]z[,w][)]</code>
 	 */
 	public static Vec4 computeVec4FromString(String text)
 	{
@@ -740,7 +774,7 @@ public class Util
 		{
 			return null;
 		}
-		
+
 		String separators = "[\\s,]+"; // Separate on commas or whitespace
 		String[] split = text.replaceAll("\\(|\\)", "").trim().split(separators); // Clean up braces before splitting
 		if (split.length == 3 || split.length == 4)
@@ -763,7 +797,7 @@ public class Util
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @return The user's home directory
 	 */
@@ -778,7 +812,7 @@ public class Util
 		}
 		return dir;
 	}
-	
+
 	/**
 	 * Read the provided stream into a String
 	 */
@@ -791,7 +825,7 @@ public class Util
 		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 		StringBuffer result = new StringBuffer();
 		String readLine = null;
-		while((readLine = reader.readLine()) != null)
+		while ((readLine = reader.readLine()) != null)
 		{
 			if (result.length() > 0)
 			{
@@ -801,5 +835,33 @@ public class Util
 		}
 		reader.close();
 		return result.toString();
+	}
+
+	/**
+	 * Convert an object to a Double.
+	 * 
+	 * @param o
+	 *            Object to convert
+	 * @return Double converted from object, or null if the object couldn't be
+	 *         converted
+	 */
+	public static Double objectToDouble(Object o)
+	{
+		if (o == null)
+		{
+			return null;
+		}
+		if (o instanceof Double)
+		{
+			return (Double) o;
+		}
+		try
+		{
+			return Double.valueOf(o.toString());
+		}
+		catch (NumberFormatException e)
+		{
+			return null;
+		}
 	}
 }

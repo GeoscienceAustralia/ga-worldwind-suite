@@ -16,6 +16,12 @@ import au.gov.ga.worldwind.common.layers.borehole.BoreholeProvider;
 import au.gov.ga.worldwind.common.layers.data.AbstractDataProvider;
 import au.gov.ga.worldwind.common.util.URLUtil;
 
+/**
+ * Implementation of {@link BoreholeProvider} that provides borehole data to a
+ * {@link BoreholeLayer} from a zipped shapefile source.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ShapefileBoreholeProvider extends AbstractDataProvider<BoreholeLayer> implements BoreholeProvider
 {
 	private Sector sector;

@@ -2,6 +2,11 @@ package au.gov.ga.worldwind.common.layers.borehole;
 
 import java.awt.Color;
 
+/**
+ * Basic implementation of {@link BoreholeSample}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class BoreholeSampleImpl implements BoreholeSample
 {
 	private final Borehole borehole;

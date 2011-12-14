@@ -20,6 +20,11 @@ import au.gov.ga.worldwind.common.util.FastShape;
 
 import com.sun.opengl.util.BufferUtil;
 
+/**
+ * Basic implementation of a {@link Borehole}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 {
 	private final BoreholeLayer layer;
@@ -57,6 +62,11 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 		}
 	}
 
+	/**
+	 * Notify this {@link Borehole} that all samples have been added to it, and
+	 * it can create it's geometry. This should be called by the
+	 * {@link BoreholeLayer} in it's own loadComplete() function.
+	 */
 	public void loadComplete()
 	{
 		List<Position> positions = new ArrayList<Position>();
@@ -114,9 +124,12 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 			boolean oldDeepPicking = dc.isDeepPickingEnabled();
 			try
 			{
+				//deep picking needs to be enabled, because boreholes are below the surface
 				dc.setDeepPickingEnabled(true);
 				pickSupport.beginPicking(dc);
 
+				//First pick on the entire object by setting the shape to a single color.
+				//This will determine if we have to go further and pick individual samples.
 				Color overallPickColor = dc.getUniquePickColor();
 				pickSupport.addPickableObject(overallPickColor.getRGB(), this, getPosition());
 				fastShape.setColor(overallPickColor);
@@ -128,22 +141,24 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 
 				if (object != null && object.getObject() == this)
 				{
-					//this borehole has been picked; now try picking the samples individually
+					//This borehole has been picked; now try picking the samples individually
 
+					//Put unique pick colours into the pickingColorBuffer (2 per sample)
 					pickingColorBuffer.rewind();
 					for (BoreholeSample sample : getSamples())
 					{
 						Color color = dc.getUniquePickColor();
 						pickSupport.addPickableObject(color.getRGB(), sample, getPosition());
-						pickingColorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f)
-								.put(color.getBlue() / 255f);
-						pickingColorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f)
-								.put(color.getBlue() / 255f);
+						for (int i = 0; i < 2; i++)
+						{
+							pickingColorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f)
+									.put(color.getBlue() / 255f);
+						}
 					}
-					
+
+					//render the shape with the pickingColorBuffer, and then resolve the pick
 					fastShape.setColorBuffer(pickingColorBuffer);
 					fastShape.render(dc);
-					
 					pickSupport.resolvePick(dc, dc.getPickPoint(), layer);
 				}
 			}

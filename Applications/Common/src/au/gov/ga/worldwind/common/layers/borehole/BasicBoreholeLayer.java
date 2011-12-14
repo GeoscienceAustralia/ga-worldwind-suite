@@ -16,13 +16,11 @@ import gov.nasa.worldwind.render.markers.Marker;
 import gov.nasa.worldwind.render.markers.MarkerAttributes;
 import gov.nasa.worldwind.render.markers.MarkerRenderer;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,11 +36,15 @@ import au.gov.ga.worldwind.common.layers.styled.StyleAndText;
 import au.gov.ga.worldwind.common.layers.styled.StyleProvider;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
 
-import com.sun.opengl.util.BufferUtil;
-
+/**
+ * Basic implementation of the {@link BoreholeLayer}. Draws markers for each
+ * borehole location, and coloured lines for borehole samples.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, SelectListener
 {
 	private BoreholeProvider boreholeProvider;
@@ -61,10 +63,6 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 	private String sampleDepthToAttribute;
 
 	private GlobeAnnotation tooltipAnnotation;
-
-	private FastShape fastShape;
-	private FloatBuffer boreholeColorBuffer;
-	private FloatBuffer pickingColorBuffer;
 
 	@SuppressWarnings("unchecked")
 	public BasicBoreholeLayer(AVList params)
@@ -135,8 +133,8 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		Object id = attributeValues.getValue(uniqueIdentifierAttribute);
 		Validate.notNull(id, "Borehole attributes do not contain an identifier");
 
-		Double depthFrom = objectToDouble(attributeValues.getValue(sampleDepthFromAttribute));
-		Double depthTo = objectToDouble(attributeValues.getValue(sampleDepthToAttribute));
+		Double depthFrom = Util.objectToDouble(attributeValues.getValue(sampleDepthFromAttribute));
+		Double depthTo = Util.objectToDouble(attributeValues.getValue(sampleDepthToAttribute));
 		Validate.notNull(depthFrom, "Borehole sample attributes do not contain a valid depth-from");
 		Validate.notNull(depthTo, "Borehole sample attributes do not contain a valid depth-to");
 
@@ -146,7 +144,7 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 			MarkerAttributes markerAttributes = new BasicMarkerAttributes();
 			borehole = new BoreholeImpl(this, position, markerAttributes);
 			idToBorehole.put(id, borehole);
-			synchronized (markers)
+			synchronized (boreholes)
 			{
 				boreholes.add(borehole);
 				markers.add(borehole);
@@ -168,26 +166,6 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		sample.setText(sampleProperties.text);
 		sample.setLink(sampleProperties.link);
 		sampleProperties.style.setPropertiesFromAttributes(context, attributeValues, sample);
-	}
-
-	protected Double objectToDouble(Object o)
-	{
-		if (o == null)
-		{
-			return null;
-		}
-		if (o instanceof Double)
-		{
-			return (Double) o;
-		}
-		try
-		{
-			return Double.valueOf(o.toString());
-		}
-		catch (NumberFormatException e)
-		{
-			return null;
-		}
 	}
 
 	@Override
@@ -212,55 +190,26 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 			return;
 
 		boreholeProvider.requestData(this);
-		synchronized (markers)
+		synchronized (boreholes)
 		{
 			markerRenderer.render(dc, markers);
-		}
-		tooltipAnnotation.render(dc);
-		renderSamples(dc);
-	}
+			tooltipAnnotation.render(dc);
 
-	protected void renderSamples(DrawContext dc)
-	{
-		GL gl = dc.getGL();
-		try
-		{
-			gl.glPushAttrib(GL.GL_LINE_BIT);
-			gl.glLineWidth(10);
+			GL gl = dc.getGL();
+			try
+			{
+				gl.glPushAttrib(GL.GL_LINE_BIT);
+				gl.glLineWidth(10);
 
-			for (BoreholeImpl borehole : boreholes)
-			{
-				borehole.render(dc);
-			}
-
-			/*if (!dc.isPickingMode())
-			{
-				fastShape.setColorBuffer(boreholeColorBuffer);
-				fastShape.render(dc);
-			}
-			else
-			{
-				if(pickingColorBuffer == null)
+				for (BoreholeImpl borehole : boreholes)
 				{
-					createPickingColorBuffer(dc);
+					borehole.render(dc);
 				}
-				
-				pickSupport.beginPicking(dc);
-
-				fastShape.setColorBuffer(pickingColorBuffer);
-				fastShape.render(dc);
-
-				pickSupport.endPicking(dc);
-				PickedObject o = pickSupport.resolvePick(dc, dc.getPickPoint(), this);
-				if(o != null)
-				{
-					System.out.println(((BoreholeSample)o.getObject()).getBorehole().getPosition());
-				}
-			}*/
-		}
-		finally
-		{
-			gl.glPopAttrib();
+			}
+			finally
+			{
+				gl.glPopAttrib();
+			}
 		}
 	}
 
@@ -334,6 +283,14 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		}
 	}
 
+	/**
+	 * Highlight the provided object by showing the tooltip annotation over it.
+	 * 
+	 * @param object
+	 *            {@link Borehole} or {@link BoreholeSample} to highlight
+	 * @param highlight
+	 *            True to show tooltip annotation, false to hide it
+	 */
 	protected void highlight(Object object, boolean highlight)
 	{
 		if (highlight)
@@ -369,119 +326,4 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 			tooltipAnnotation.getAttributes().setVisible(false);
 		}
 	}
-
-	protected void createFastShape()
-	{
-		double widthInDegrees = 0.00002; //TODO make parameter
-		double invsqrt2 = 1.0 / Math.sqrt(2.0);
-
-		List<Position> positions = new ArrayList<Position>();
-		List<Color> colors = new ArrayList<Color>();
-
-		for (Borehole borehole : boreholes)
-		{
-			double latitude = borehole.getPosition().getLatitude().degrees;
-			double longitude = borehole.getPosition().getLongitude().degrees;
-			for (BoreholeSample sample : borehole.getSamples())
-			{
-				Position t = Position.fromDegrees(latitude, longitude, -sample.getDepthFrom());
-				Position b = Position.fromDegrees(latitude, longitude, -sample.getDepthTo());
-				positions.add(t);
-				positions.add(b);
-
-				/*Position t1 = Position.fromDegrees(latitude + widthInDegrees, longitude, -sample.getDepthFrom());
-				Position t2 = Position.fromDegrees(latitude + widthInDegrees * invsqrt2, longitude + widthInDegrees * invsqrt2, -sample.getDepthFrom());
-				Position t3 = Position.fromDegrees(latitude, longitude + widthInDegrees, -sample.getDepthFrom());
-				Position t4 = Position.fromDegrees(latitude - widthInDegrees * invsqrt2, longitude + widthInDegrees * invsqrt2, -sample.getDepthFrom());
-				Position t5 = Position.fromDegrees(latitude - widthInDegrees, longitude, -sample.getDepthFrom());
-				Position t6 = Position.fromDegrees(latitude - widthInDegrees * invsqrt2, longitude - widthInDegrees * invsqrt2, -sample.getDepthFrom());
-				Position t7 = Position.fromDegrees(latitude, longitude - widthInDegrees, -sample.getDepthFrom());
-				Position t8 = Position.fromDegrees(latitude + widthInDegrees * invsqrt2, longitude - widthInDegrees * invsqrt2, -sample.getDepthFrom());
-				Position b1 = Position.fromDegrees(latitude + widthInDegrees, longitude, -sample.getDepthTo());
-				Position b2 = Position.fromDegrees(latitude + widthInDegrees * invsqrt2, longitude + widthInDegrees * invsqrt2, -sample.getDepthTo());
-				Position b3 = Position.fromDegrees(latitude, longitude + widthInDegrees, -sample.getDepthTo());
-				Position b4 = Position.fromDegrees(latitude - widthInDegrees * invsqrt2, longitude + widthInDegrees * invsqrt2, -sample.getDepthTo());
-				Position b5 = Position.fromDegrees(latitude - widthInDegrees, longitude, -sample.getDepthTo());
-				Position b6 = Position.fromDegrees(latitude - widthInDegrees * invsqrt2, longitude - widthInDegrees * invsqrt2, -sample.getDepthTo());
-				Position b7 = Position.fromDegrees(latitude, longitude - widthInDegrees, -sample.getDepthTo());
-				Position b8 = Position.fromDegrees(latitude + widthInDegrees * invsqrt2, longitude - widthInDegrees * invsqrt2, -sample.getDepthTo());
-
-				positions.add(t1);
-				positions.add(t2);
-				positions.add(b2);
-				positions.add(b1);
-				
-				positions.add(t2);
-				positions.add(t3);
-				positions.add(b3);
-				positions.add(b2);
-				
-				positions.add(t3);
-				positions.add(t4);
-				positions.add(b4);
-				positions.add(b3);
-				
-				positions.add(t4);
-				positions.add(t5);
-				positions.add(b5);
-				positions.add(b4);
-				
-				positions.add(t5);
-				positions.add(t6);
-				positions.add(b6);
-				positions.add(b5);
-				
-				positions.add(t6);
-				positions.add(t7);
-				positions.add(b7);
-				positions.add(b6);
-				
-				positions.add(t7);
-				positions.add(t8);
-				positions.add(b8);
-				positions.add(b7);
-				
-				positions.add(t8);
-				positions.add(t1);
-				positions.add(b1);
-				positions.add(b8);*/
-
-				colors.add(sample.getColor());
-			}
-		}
-
-		boreholeColorBuffer = BufferUtil.newFloatBuffer(3 * colors.size() * 2);
-		for (Color color : colors)
-		{
-			for (int i = 0; i < 2; i++)
-			{
-				boreholeColorBuffer.put(color.getRed() / 255f);
-				boreholeColorBuffer.put(color.getGreen() / 255f);
-				boreholeColorBuffer.put(color.getBlue() / 255f);
-			}
-		}
-
-		fastShape = new FastShape(positions, GL.GL_LINES);
-		fastShape.setFollowTerrain(true);
-	}
-
-	/*protected void createPickingColorBuffer(DrawContext dc)
-	{
-		List<Color> colors = new ArrayList<Color>();
-		for (Borehole borehole : boreholes)
-		{
-			double latitude = borehole.getPosition().getLatitude().degrees;
-			double longitude = borehole.getPosition().getLongitude().degrees;
-			for (BoreholeSample sample : borehole.getSamples())
-			{
-				Color pickColor = dc.getUniquePickColor();
-				colors.add(pickColor);
-				colors.add(pickColor);
-				Position position =
-						Position.fromDegrees(latitude, longitude, -(sample.getDepthFrom() + sample.getDepthTo()) / 2.0);
-				pickSupport.addPickableObject(pickColor.getRGB(), sample, position);
-			}
-		}
-		pickingColorBuffer = FastShape.color3ToFloatBuffer(colors);
-	}*/
 }
