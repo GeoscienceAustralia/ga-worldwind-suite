@@ -10,6 +10,7 @@ import gov.nasa.worldwind.util.WWXML;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.borehole.BoreholeLayerFactory;
 import au.gov.ga.worldwind.common.layers.crust.CrustLayer;
 import au.gov.ga.worldwind.common.layers.curtain.BasicTiledCurtainLayer;
 import au.gov.ga.worldwind.common.layers.curtain.delegate.DelegatorTiledCurtainLayer;
@@ -62,6 +63,10 @@ public class LayerFactory extends BasicLayerFactory
 		if ("GeometryLayer".equalsIgnoreCase(layerType))
 		{
 			return GeometryLayerFactory.createGeometryLayer(domElement, params);
+		}
+		if ("BoreholeLayer".equalsIgnoreCase(layerType))
+		{
+			return BoreholeLayerFactory.createBoreholeLayer(domElement, params);
 		}
 
 		return super.createFromLayerDocument(domElement, params);

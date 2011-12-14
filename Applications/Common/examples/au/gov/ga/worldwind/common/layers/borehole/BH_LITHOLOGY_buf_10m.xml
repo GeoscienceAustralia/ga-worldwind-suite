@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="BoreholeLayer">
+
+	<DisplayName>BH_LITHOLOGY_buf_10m</DisplayName>
+	<Legend></Legend>
+
+	<URL>file:///D:/Groundwater Data/Bore_holes/BH_LITHOLOGY_buf_10m.WGS 84.zip</URL>
+	<DataFormat>Shapefile</DataFormat>
+
+	<LastUpdate></LastUpdate>
+	<DataCacheName>GA/Groundwater/Boreholes/BH_LITHOLOGY_buf_10m.WGS 84.zip</DataCacheName>
+	
+	<UniqueBoreholeIdentifier>HOLE_ID</UniqueBoreholeIdentifier>
+	<SampleDepthAttributes from="FROM_" to="TO" />
+
+	<BoreholeStyles>
+		<Style name="borehole" default="true">
+			<Property name="Material" value="128,128,128" />
+			<Property name="ShapeType" value="gov.nasa.worldwind.render.markers.Sphere" />
+			<Property name="MinMarkerSize" value="0.5" />
+		</Style>
+	</BoreholeStyles>
+
+	<BoreholeAttributes>
+		<Attribute name="HOLE_ID">
+			<Text value="&lt;p&gt; &lt;b&gt;%value%&lt;/b&gt; &lt;/p&gt;" placeholder="%value%" />
+		</Attribute>
+	</BoreholeAttributes>
+	
+	<SampleStyles>
+		<Style name="unknown" default="true">
+			<Property name="Color" value="255,255,255" />
+		</Style>
+		<Style name="mud">
+			<Property name="Color" value="255,127,127" />
+		</Style>
+		<Style name="zfs_vfs">
+			<Property name="Color" value="255,195,195" />
+		</Style>
+		<Style name="fs">
+			<Property name="Color" value="178,255,255" />
+		</Style>
+		<Style name="ms">
+			<Property name="Color" value="80,168,254" />
+		</Style>
+		<Style name="cs_vcs">
+			<Property name="Color" value="0,0,255" />
+		</Style>
+	</SampleStyles>
+	
+	<SampleAttributes>
+	
+		<Attribute name="HYDTEXTURE">
+			<Case value="MUD" style="mud" />
+			<Case value="ZFS VFS" style="zfs_vfs" />
+			<Case value="FS" style="fs" />
+			<Case value="MS" style="ms" />
+			<Case value="CS VCS" style="cs_vcs" />
+
+			<Text value="Hydraulic Texture Class: &lt;b&gt;%value%&lt;/b&gt;" placeholder="%value%" />
+		</Attribute>
+		
+		<Attribute name="HYD_TEXT">
+			<Text value=" (%value%)&lt;br/&gt;" placeholder="%value%" />
+		</Attribute>
+		
+		<Attribute name="LITH_SIMPL">
+			<Text value="Lithology (simple): &lt;b&gt;%value%&lt;/b&gt; &lt;br/&gt;" placeholder="%value%" />
+		</Attribute>
+		<Attribute name="LITH_MAIN">
+			<Text value="Lithology (main): &lt;b&gt;%value%&lt;/b&gt; &lt;br/&gt;" placeholder="%value%" />
+		</Attribute>
+		<Attribute name="LITH_GROUP">
+			<Text value="Lithology (group): &lt;b&gt;%value%&lt;/b&gt; &lt;br/&gt;" placeholder="%value%" />
+		</Attribute>
+		
+	</SampleAttributes>
+
+</Layer>
