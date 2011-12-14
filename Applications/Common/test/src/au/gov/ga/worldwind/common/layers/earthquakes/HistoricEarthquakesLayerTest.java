@@ -1,13 +1,13 @@
 package au.gov.ga.worldwind.common.layers.earthquakes;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.geom.Position;
 
 import java.awt.Color;
-import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -50,7 +50,7 @@ public class HistoricEarthquakesLayerTest
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -100), 5, getMillisForDate("1970-01-01")));
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -100), 5, getMillisForDate("1990-01-01")));
 		
-		DoubleBuffer colorBuffer = BufferUtil.newDoubleBuffer(quakes.size() * 3);
+		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(quakes.size() * 3);
 		classUnderTest.generateDateColoring(colorBuffer, quakes);
 		colorBuffer.rewind();
 		
@@ -71,7 +71,7 @@ public class HistoricEarthquakesLayerTest
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -100), 5, getMillisForDate("1990-01-01")));
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -200), 5, getMillisForDate("1990-01-01")));
 		
-		DoubleBuffer colorBuffer = BufferUtil.newDoubleBuffer(quakes.size() * 3);
+		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(quakes.size() * 3);
 		classUnderTest.generateDepthColoring(colorBuffer, quakes);
 		colorBuffer.rewind();
 		
@@ -92,7 +92,7 @@ public class HistoricEarthquakesLayerTest
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -100), 5, getMillisForDate("1990-01-01")));
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -200), 10, getMillisForDate("1990-01-01")));
 		
-		DoubleBuffer colorBuffer = BufferUtil.newDoubleBuffer(quakes.size() * 3);
+		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(quakes.size() * 3);
 		classUnderTest.generateMagnitudeColoring(colorBuffer, quakes);
 		colorBuffer.rewind();
 		
@@ -111,7 +111,7 @@ public class HistoricEarthquakesLayerTest
 		return parsedDate.getTime();
 	}
 	
-	private List<HSLColor> getColors(DoubleBuffer colorBuffer)
+	private List<HSLColor> getColors(FloatBuffer colorBuffer)
 	{
 		ArrayList<HSLColor> result = new ArrayList<HSLColor>();
 		while (colorBuffer.hasRemaining())

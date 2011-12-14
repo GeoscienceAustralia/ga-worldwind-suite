@@ -17,7 +17,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipInputStream;
@@ -283,7 +283,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 			positions.add(earthquake.position);
 		}
 
-		DoubleBuffer colorBuffer = BufferUtil.newDoubleBuffer(positions.size() * 3);
+		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * 3);
 		generateColorBuffer(colorBuffer, earthquakes);
 
 		FastShape shape = new FastShape(positions, GL.GL_POINTS);
@@ -298,7 +298,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 		firePropertyChange(AVKey.LAYER, null, this);
 	}
 
-	private void generateColorBuffer(DoubleBuffer colorBuffer, List<Earthquake> earthquakes)
+	private void generateColorBuffer(FloatBuffer colorBuffer, List<Earthquake> earthquakes)
 	{
 		if (DEPTH_COLORING.equalsIgnoreCase(coloring))
 		{
@@ -319,7 +319,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 	 * <p/>
 	 * Blue (shallow) -> Red (deep)
 	 */
-	protected void generateMagnitudeColoring(DoubleBuffer colorBuffer, List<Earthquake> earthquakes)
+	protected void generateMagnitudeColoring(FloatBuffer colorBuffer, List<Earthquake> earthquakes)
 	{
 		//magnitude coloring
 		double minMagnitude = Double.MAX_VALUE;
@@ -337,7 +337,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 			percent = 1 - Math.pow(percent, 0.2);
 
 			Color color = new HSLColor((float) (240d * percent), 100f, 50f).getRGB();
-			colorBuffer.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d);
+			colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f);
 		}
 	}
 
@@ -346,7 +346,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 	 * <p/>
 	 * Blue (old) -> Red (new)
 	 */
-	protected void generateDateColoring(DoubleBuffer colorBuffer, List<Earthquake> earthquakes)
+	protected void generateDateColoring(FloatBuffer colorBuffer, List<Earthquake> earthquakes)
 	{
 		long minTime = Long.MAX_VALUE;
 		long maxTime = Long.MIN_VALUE;
@@ -369,7 +369,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 			double percent = (earthquake.timeInMillis - minTime) / (double) (maxTime - minTime);
 			percent = 1 - Math.max(0, Math.min(1, percent));
 			Color color = new HSLColor((float) (240d * percent), 100f, 50f).getRGB();
-			colorBuffer.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d);
+			colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f);
 		}
 	}
 
@@ -378,7 +378,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 	 * <p/>
 	 * Blue (shallow) -> Red (deep)
 	 */
-	protected void generateDepthColoring(DoubleBuffer colorBuffer, List<Earthquake> earthquakes)
+	protected void generateDepthColoring(FloatBuffer colorBuffer, List<Earthquake> earthquakes)
 	{
 		double minElevation = Double.MAX_VALUE;
 		double maxElevation = -Double.MAX_VALUE;
@@ -391,7 +391,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 		{
 			double percent = (earthquake.position.elevation - minElevation) / (maxElevation - minElevation);
 			Color color = new HSLColor((float) (240d * percent), 100f, 50f).getRGB();
-			colorBuffer.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d);
+			colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f);
 		}
 	}
 

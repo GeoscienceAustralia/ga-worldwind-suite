@@ -48,6 +48,8 @@ public class MarkerPointLayer extends MarkerLayer implements PointLayer, SelectL
 	public MarkerPointLayer(PointLayerHelper helper)
 	{
 		this.helper = helper;
+		getMarkerRenderer().setOverrideMarkerElevation(true);
+		getMarkerRenderer().setElevation(0);
 
 		// Init tooltip annotation
 		this.tooltipAnnotation = new GlobeAnnotation("", Position.fromDegrees(0, 0, 0));
@@ -97,7 +99,15 @@ public class MarkerPointLayer extends MarkerLayer implements PointLayer, SelectL
 		markers.add(marker);
 	}
 
-	protected void fixShapeType(MarkerAttributes attributes)
+	/**
+	 * In the {@link BasicMarkerShape#createShapeInstance(String)} function, the
+	 * shape type string is checked for equality instead of using the equals()
+	 * function. This function will replace a shape type with the actual
+	 * constant, so that the == check works.
+	 * 
+	 * @param attributes
+	 */
+	public static void fixShapeType(MarkerAttributes attributes)
 	{
 		//someone decided to use string equality instead of the equals function when testing the
 		//shape type; so fix it here instead (see BasicMarkerShape.createShapeInstance()).
@@ -107,6 +117,8 @@ public class MarkerPointLayer extends MarkerLayer implements PointLayer, SelectL
 		{
 			if (BasicMarkerShape.SPHERE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.SPHERE);
+			else if (BasicMarkerShape.CUBE.equalsIgnoreCase(shapetype))
+				attributes.setShapeType(BasicMarkerShape.CUBE);
 			else if (BasicMarkerShape.CONE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.CONE);
 			else if (BasicMarkerShape.CYLINDER.equalsIgnoreCase(shapetype))
@@ -117,6 +129,8 @@ public class MarkerPointLayer extends MarkerLayer implements PointLayer, SelectL
 				attributes.setShapeType(BasicMarkerShape.HEADING_LINE);
 			else if (BasicMarkerShape.ORIENTED_SPHERE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.ORIENTED_SPHERE);
+			else if (BasicMarkerShape.ORIENTED_CUBE.equalsIgnoreCase(shapetype))
+				attributes.setShapeType(BasicMarkerShape.ORIENTED_CUBE);
 			else if (BasicMarkerShape.ORIENTED_CONE.equalsIgnoreCase(shapetype))
 				attributes.setShapeType(BasicMarkerShape.ORIENTED_CONE);
 			else if (BasicMarkerShape.ORIENTED_CYLINDER.equalsIgnoreCase(shapetype))

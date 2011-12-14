@@ -1,16 +1,20 @@
 package au.gov.ga.worldwind.common.util;
 
 import gov.nasa.worldwind.cache.Cacheable;
+import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sphere;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Renderable;
+import gov.nasa.worldwind.util.BufferWrapper;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.awt.Color;
 import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Collections;
 import java.util.HashSet;
@@ -36,9 +40,9 @@ public class FastShape implements Renderable, Cacheable
 	//TODO this class can probably be generalised to support other geometry types, and add VBO support
 
 	protected List<Position> positions;
-	protected Object positionLock = new Object();
+	protected final Object positionLock = new Object();
 
-	protected DoubleBuffer colorBuffer;
+	protected FloatBuffer colorBuffer;
 	protected int colorBufferElementSize = 3;
 	protected IntBuffer[] indices;
 	protected int mode;
@@ -47,7 +51,9 @@ public class FastShape implements Renderable, Cacheable
 	protected DoubleBuffer modVertexBuffer;
 	protected DoubleBuffer normalBuffer;
 	protected DoubleBuffer modNormalBuffer;
-	protected Object vertexLock = new Object();
+	protected Sphere boundingSphere;
+	protected Sphere modBoundingSphere;
+	protected final Object vertexLock = new Object();
 
 	protected Color color = Color.white;
 	protected double opacity = 1;
@@ -75,19 +81,14 @@ public class FastShape implements Renderable, Cacheable
 	@Override
 	public void render(DrawContext dc)
 	{
-		boolean recalculate = followTerrain || lastVerticalExaggeration != dc.getVerticalExaggeration();
-		boolean recalculateNow = verticesDirty || lastGlobe != dc.getGlobe();
-		if (recalculate || recalculateNow)
-		{
-			lastVerticalExaggeration = dc.getVerticalExaggeration();
-			lastGlobe = dc.getGlobe();
-			recalculateVertices(dc, recalculateNow);
-			verticesDirty = false;
-		}
+		recalculateIfRequired(dc);
 
 		synchronized (vertexLock)
 		{
 			if (vertexBuffer == null || vertexBuffer.limit() <= 0)
+				return;
+
+			if (boundingSphere == null || !dc.getView().getFrustumInModelCoordinates().intersects(boundingSphere))
 				return;
 
 			GL gl = dc.getGL();
@@ -97,11 +98,12 @@ public class FastShape implements Renderable, Cacheable
 			{
 				stack.pushAttrib(gl, GL.GL_CURRENT_BIT);
 				stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+				dc.getView().pushReferenceCenter(dc, boundingSphere.getCenter());
 
 				if (colorBuffer != null)
 				{
 					gl.glEnableClientState(GL.GL_COLOR_ARRAY);
-					gl.glColorPointer(colorBufferElementSize, GL.GL_DOUBLE, 0, colorBuffer.rewind());
+					gl.glColorPointer(colorBufferElementSize, GL.GL_FLOAT, 0, colorBuffer.rewind());
 				}
 
 				double alpha = getOpacity();
@@ -140,7 +142,21 @@ public class FastShape implements Renderable, Cacheable
 			finally
 			{
 				stack.pop(gl);
+				dc.getView().popReferenceCenter(dc);
 			}
+		}
+	}
+
+	protected void recalculateIfRequired(DrawContext dc)
+	{
+		boolean recalculate = followTerrain || lastVerticalExaggeration != dc.getVerticalExaggeration();
+		boolean recalculateNow = verticesDirty || lastGlobe != dc.getGlobe();
+		if (recalculate || recalculateNow)
+		{
+			lastVerticalExaggeration = dc.getVerticalExaggeration();
+			lastGlobe = dc.getGlobe();
+			recalculateVertices(dc, recalculateNow);
+			verticesDirty = false;
 		}
 	}
 
@@ -161,6 +177,9 @@ public class FastShape implements Renderable, Cacheable
 					DoubleBuffer temp = vertexBuffer;
 					vertexBuffer = modVertexBuffer;
 					modVertexBuffer = temp;
+					Sphere temps = boundingSphere;
+					boundingSphere = modBoundingSphere;
+					modBoundingSphere = temps;
 					if (isCalculateNormals())
 					{
 						temp = normalBuffer;
@@ -204,6 +223,18 @@ public class FastShape implements Renderable, Cacheable
 						dc.getGlobe().computePointFromPosition(position.getLatitude(), position.getLongitude(),
 								elevation);
 				modVertexBuffer.put(v.x).put(v.y).put(v.z);
+			}
+
+			modVertexBuffer.rewind();
+			BufferWrapper wrapper = new BufferWrapper.DoubleBufferWrapper(modVertexBuffer);
+			modBoundingSphere = Sphere.createBoundingSphere(wrapper);
+
+			modVertexBuffer.rewind();
+			for (int i = 0; modVertexBuffer.remaining() >= 3; i += 3)
+			{
+				modVertexBuffer.put(i + 0, modVertexBuffer.get() - modBoundingSphere.getCenter().x);
+				modVertexBuffer.put(i + 1, modVertexBuffer.get() - modBoundingSphere.getCenter().y);
+				modVertexBuffer.put(i + 2, modVertexBuffer.get() - modBoundingSphere.getCenter().z);
 			}
 		}
 	}
@@ -281,14 +312,14 @@ public class FastShape implements Renderable, Cacheable
 		synchronized (vertexLock)
 		{
 			int size = positions.size() * 3;
-			if (vertexBuffer == null || vertexBuffer.limit() != size)
+			if (modVertexBuffer == null || modVertexBuffer.limit() != size)
 			{
-				vertexBuffer = BufferUtil.newDoubleBuffer(size);
+				//vertexBuffer = BufferUtil.newDoubleBuffer(size);
 				modVertexBuffer = BufferUtil.newDoubleBuffer(size);
 			}
-			if (isCalculateNormals() && (normalBuffer == null || normalBuffer.limit() != size))
+			if (isCalculateNormals() && (modNormalBuffer == null || modNormalBuffer.limit() != size))
 			{
-				normalBuffer = BufferUtil.newDoubleBuffer(size);
+				//normalBuffer = BufferUtil.newDoubleBuffer(size);
 				modNormalBuffer = BufferUtil.newDoubleBuffer(size);
 			}
 		}
@@ -304,12 +335,12 @@ public class FastShape implements Renderable, Cacheable
 		this.color = color;
 	}
 
-	public DoubleBuffer getColorBuffer()
+	public FloatBuffer getColorBuffer()
 	{
 		return colorBuffer;
 	}
 
-	public void setColorBuffer(DoubleBuffer colorBuffer)
+	public void setColorBuffer(FloatBuffer colorBuffer)
 	{
 		this.colorBuffer = colorBuffer;
 	}
@@ -408,16 +439,50 @@ public class FastShape implements Renderable, Cacheable
 		return 500 + 80 * getPositions().size();
 	}
 
-	public static DoubleBuffer colorToDoubleBuffer(List<Color> colors)
+	/**
+	 * @return The extent of this shape. This is calculated by
+	 *         {@link FastShape#render(DrawContext)}, so don't use this for
+	 *         frustum culling.
+	 */
+	public Extent getExtent()
 	{
-		DoubleBuffer cb = BufferUtil.newDoubleBuffer(colors.size() * 4);
+		synchronized (vertexLock)
+		{
+			return boundingSphere;
+		}
+	}
+
+	public static FloatBuffer color4ToFloatBuffer(List<Color> colors)
+	{
+		FloatBuffer buffer = BufferUtil.newFloatBuffer(colors.size() * 4);
+		return color4ToFloatBuffer(colors, buffer);
+	}
+
+	public static FloatBuffer color4ToFloatBuffer(List<Color> colors, FloatBuffer buffer)
+	{
 		for (Color color : colors)
 		{
-			cb.put(color.getRed() / 255d).put(color.getGreen() / 255d).put(color.getBlue() / 255d)
-					.put(color.getAlpha() / 255d);
+			buffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
+					.put(color.getAlpha() / 255f);
 		}
-		cb.rewind();
-		return cb;
+		buffer.rewind();
+		return buffer;
+	}
+
+	public static FloatBuffer color3ToFloatBuffer(List<Color> colors)
+	{
+		FloatBuffer buffer = BufferUtil.newFloatBuffer(colors.size() * 3);
+		return color3ToFloatBuffer(colors, buffer);
+	}
+
+	public static FloatBuffer color3ToFloatBuffer(List<Color> colors, FloatBuffer buffer)
+	{
+		for (Color color : colors)
+		{
+			buffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f);
+		}
+		buffer.rewind();
+		return buffer;
 	}
 
 	private static class VertexUpdater
