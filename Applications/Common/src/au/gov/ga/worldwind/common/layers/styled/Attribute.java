@@ -143,7 +143,7 @@ public class Attribute
 
 	protected String getPlaceholderString(StringWithPlaceholder string, AVList attributeValues)
 	{
-		if (string == null || !attributeValues.hasKey(name))
+		if (string == null || attributeValues.getValue(name) == null)
 			return null;
 
 		String stringValue = attributeValues.getValue(name).toString();
@@ -159,7 +159,7 @@ public class Attribute
 	 */
 	public String getMatchingStyle(AVList attributeValues)
 	{
-		if (!attributeValues.hasKey(name))
+		if (attributeValues.getValue(name) == null)
 			return null;
 
 		String stringValue = attributeValues.getValue(name).toString();
