@@ -50,6 +50,7 @@ public class BasicBoreholeLayerTest
 		// Test regular parameters
 		assertEquals("Borehole Layer", boreholeLayer.getName());
 		assertEquals("GA/Boreholes.zip", boreholeLayer.getDataCacheName());
+		assertEquals(Double.valueOf(1e4), boreholeLayer.getMinimumDistance());
 		
 		// Test adding a borehole sample
 		AVList attributeValues = new AVListImpl();

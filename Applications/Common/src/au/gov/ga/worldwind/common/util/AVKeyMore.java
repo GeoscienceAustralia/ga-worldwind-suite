@@ -46,6 +46,7 @@ public interface AVKeyMore extends AVKey
 	final static String BOREHOLE_SAMPLE_DEPTH_FROM_ATTRIBUTE = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthFromAttribute";
 	final static String BOREHOLE_SAMPLE_DEPTH_TO_ATTRIBUTE = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthToAttribute";
 	final static String BOREHOLE_LINE_WIDTH = "au.gov.ga.worldwind.AVKeyMore.BoreholeLineWidth";
+	final static String BOREHOLE_MINIMUM_DISTANCE = "au.gov.ga.worldwind.AVKeyMore.BoreholeMinimumDistance";
 
 	//historic earthquakes layer
 	final static String COLORING = "au.gov.ga.worldwind.AVKeyMore.Coloring";

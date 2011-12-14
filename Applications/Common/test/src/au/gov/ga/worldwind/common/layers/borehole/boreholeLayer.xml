@@ -12,6 +12,7 @@
 	
 	<UniqueBoreholeIdentifier>HOLE_ID</UniqueBoreholeIdentifier>
 	<SampleDepthAttributes from="FROM" to="TO" />
+	<MinimumDistance>1e4</MinimumDistance>
 
 	<BoreholeStyles>
 		<Style name="borehole" default="true">

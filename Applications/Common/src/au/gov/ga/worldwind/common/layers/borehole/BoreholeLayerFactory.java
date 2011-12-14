@@ -64,6 +64,7 @@ public class BoreholeLayerFactory
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.BOREHOLE_SAMPLE_DEPTH_TO_ATTRIBUTE,
 				"SampleDepthAttributes/@to", xpath);
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.BOREHOLE_LINE_WIDTH, "LineWidth", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.BOREHOLE_MINIMUM_DISTANCE, "MinimumDistance", xpath);
 
 		setupBoreholeProvider(domElement, xpath, params);
 

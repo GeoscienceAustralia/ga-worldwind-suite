@@ -108,6 +108,15 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 		if (fastShape == null)
 			return;
 
+		//check if the borehole is within the minimum drawing distance; if not, don't draw
+		Extent extent = fastShape.getExtent();
+		if (extent != null && layer.getMinimumDistance() != null)
+		{
+			double distanceToEye = extent.getCenter().distanceTo3(dc.getView().getEyePoint()) - extent.getRadius();
+			if (distanceToEye > layer.getMinimumDistance())
+				return;
+		}
+
 		if (!dc.isPickingMode())
 		{
 			fastShape.setColorBuffer(boreholeColorBuffer);
@@ -117,7 +126,6 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 		{
 			//Don't calculate the picking buffer if the shape isn't going to be rendered anyway.
 			//This check is also performed in the shape's render() function, so don't do it above.
-			Extent extent = fastShape.getExtent();
 			if (extent != null && !dc.getView().getFrustumInModelCoordinates().intersects(extent))
 				return;
 

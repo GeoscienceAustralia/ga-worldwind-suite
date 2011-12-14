@@ -62,6 +62,7 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 	protected String sampleDepthFromAttribute;
 	protected String sampleDepthToAttribute;
 	protected double lineWidth = 10;
+	protected Double minimumDistance;
 
 	protected GlobeAnnotation tooltipAnnotation;
 
@@ -85,6 +86,8 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		Double d = (Double) params.getValue(AVKeyMore.BOREHOLE_LINE_WIDTH);
 		if (d != null)
 			lineWidth = d;
+		
+		minimumDistance = (Double) params.getValue(AVKeyMore.BOREHOLE_MINIMUM_DISTANCE);
 
 		Validate.notBlank(url, "Borehole data url not set");
 		Validate.notBlank(dataCacheName, "Borehole data cache name not set");
@@ -183,6 +186,12 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 	}
 
 	@Override
+	public Double getMinimumDistance()
+	{
+		return minimumDistance;
+	}
+
+	@Override
 	protected void doPick(DrawContext dc, Point point)
 	{
 		doRender(dc);
@@ -204,7 +213,7 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 			try
 			{
 				gl.glPushAttrib(GL.GL_LINE_BIT);
-				gl.glLineWidth((float)lineWidth);
+				gl.glLineWidth((float) lineWidth);
 
 				for (BoreholeImpl borehole : boreholes)
 				{

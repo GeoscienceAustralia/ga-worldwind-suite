@@ -29,4 +29,11 @@ public interface BoreholeLayer extends AVList, Bounded, DataLayer, Setupable
 	 * loaded.
 	 */
 	void loadComplete();
+
+	/**
+	 * @return The minimum distance a Borehole must be from the camera to render
+	 *         it. Any borehole closer to the camera than this minimum distance
+	 *         should be rendered. If null, there's no minimum distance.
+	 */
+	Double getMinimumDistance();
 }
