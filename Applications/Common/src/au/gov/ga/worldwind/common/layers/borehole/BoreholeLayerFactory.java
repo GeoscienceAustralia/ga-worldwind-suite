@@ -67,29 +67,16 @@ public class BoreholeLayerFactory
 		setupBoreholeProvider(domElement, xpath, params);
 
 		Element styles = WWXML.getElement(domElement, "BoreholeStyles", xpath);
-		if (styles != null)
-		{
-			StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.BOREHOLE_STYLES, params);
-		}
+		StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.BOREHOLE_STYLES, params);
 
 		Element attributes = WWXML.getElement(domElement, "BoreholeAttributes", xpath);
-		if (attributes != null)
-		{
-			StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.BOREHOLE_ATTRIBUTES, params);
-		}
+		StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.BOREHOLE_ATTRIBUTES, params);
 
 		Element sampleStyles = WWXML.getElement(domElement, "SampleStyles", xpath);
-		if (sampleStyles != null)
-		{
-			StyleAndAttributeFactory.addStyles(sampleStyles, xpath, AVKeyMore.BOREHOLE_SAMPLE_STYLES, params);
-		}
+		StyleAndAttributeFactory.addStyles(sampleStyles, xpath, AVKeyMore.BOREHOLE_SAMPLE_STYLES, params);
 
 		Element sampleAttributes = WWXML.getElement(domElement, "SampleAttributes", xpath);
-		if (sampleAttributes != null)
-		{
-			StyleAndAttributeFactory.addAttributes(sampleAttributes, xpath, AVKeyMore.BOREHOLE_SAMPLE_ATTRIBUTES,
-					params);
-		}
+		StyleAndAttributeFactory.addAttributes(sampleAttributes, xpath, AVKeyMore.BOREHOLE_SAMPLE_ATTRIBUTES, params);
 
 		return params;
 	}

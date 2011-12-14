@@ -85,16 +85,10 @@ public class PointLayerFactory
 		setupPointProvider(domElement, xpath, params);
 
 		Element styles = WWXML.getElement(domElement, "Styles", xpath);
-		if (styles != null)
-		{
-			StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.POINT_STYLES, params);
-		}
+		StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.POINT_STYLES, params);
 
 		Element attributes = WWXML.getElement(domElement, "Attributes", xpath);
-		if (attributes != null)
-		{
-			StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.POINT_ATTRIBUTES, params);
-		}
+		StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.POINT_ATTRIBUTES, params);
 
 		return params;
 	}

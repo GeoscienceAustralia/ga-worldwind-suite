@@ -71,16 +71,10 @@ public class GeometryLayerFactory
 		setupShapeProvider(domElement, xpath, params);
 
 		Element styles = WWXML.getElement(domElement, "Styles", xpath);
-		if (styles != null)
-		{
-			StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.SHAPE_STYLES, params);
-		}
+		StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.SHAPE_STYLES, params);
 
 		Element attributes = WWXML.getElement(domElement, "Attributes", xpath);
-		if (attributes != null)
-		{
-			StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.SHAPE_ATTRIBUTES, params);
-		}
+		StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.SHAPE_ATTRIBUTES, params);
 
 		return params;
 	}
