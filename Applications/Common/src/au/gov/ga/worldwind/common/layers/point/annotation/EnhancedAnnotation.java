@@ -22,7 +22,7 @@ import javax.media.opengl.GL;
  * <li>Fade in/out based on eye distance</li>
  * </ul>
  * 
- * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class EnhancedAnnotation extends GlobeAnnotation
 {

@@ -6,7 +6,7 @@ import gov.nasa.worldwind.render.AnnotationAttributes;
  * Enhanced annotation attributes that contains additional attributes for use
  * with the {@link EnhancedAnnotation} class.
  * 
- * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class EnhancedAnnotationAttributes extends AnnotationAttributes
 {
