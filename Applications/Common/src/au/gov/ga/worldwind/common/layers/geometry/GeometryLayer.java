@@ -1,11 +1,8 @@
 package au.gov.ga.worldwind.common.layers.geometry;
 
-import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.render.DrawContext;
-import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.layers.data.DataLayer;
-import au.gov.ga.worldwind.common.util.Setupable;
 
 /**
  * The interface for all geometry layers.
@@ -14,7 +11,7 @@ import au.gov.ga.worldwind.common.util.Setupable;
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public interface GeometryLayer extends AVList, Setupable, Bounded, DataLayer
+public interface GeometryLayer extends DataLayer
 {
 
 	/**

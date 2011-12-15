@@ -34,7 +34,7 @@ public class BasicBoreholeLayerTest
 		assertNotNull(params);
 
 		// Attributes should not be empty
-		List<Attribute> attributes = (List<Attribute>) params.getValue(AVKeyMore.BOREHOLE_ATTRIBUTES);
+		List<Attribute> attributes = (List<Attribute>) params.getValue(AVKeyMore.DATA_LAYER_ATTRIBUTES);
 		assertNotNull(attributes);
 		assertTrue(attributes.size() == 1);
 

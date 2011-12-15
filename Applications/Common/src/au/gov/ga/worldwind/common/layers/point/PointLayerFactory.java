@@ -80,15 +80,15 @@ public class PointLayerFactory
 		WWXML.checkAndSetLongParam(domElement, params, AVKey.EXPIRY_TIME, "ExpiryTime", xpath);
 		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate", DATE_TIME_PATTERN, xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.DATA_CACHE_NAME, "DataCacheName", xpath);
-		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.POINT_TYPE, "PointType", xpath);
+		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.DATA_TYPE, "PointType", xpath);
 
 		setupPointProvider(domElement, xpath, params);
 
 		Element styles = WWXML.getElement(domElement, "Styles", xpath);
-		StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.POINT_STYLES, params);
+		StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.DATA_LAYER_STYLES, params);
 
 		Element attributes = WWXML.getElement(domElement, "Attributes", xpath);
-		StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.POINT_ATTRIBUTES, params);
+		StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.DATA_LAYER_ATTRIBUTES, params);
 
 		return params;
 	}
@@ -103,11 +103,11 @@ public class PointLayerFactory
 
 		if ("Shapefile".equalsIgnoreCase(format))
 		{
-			params.setValue(AVKeyMore.POINT_PROVIDER, new ShapefilePointProvider());
+			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ShapefilePointProvider());
 		}
 		else if ("XML".equalsIgnoreCase(format))
 		{
-			params.setValue(AVKeyMore.POINT_PROVIDER, new XMLPointProvider(domElement));
+			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new XMLPointProvider(domElement));
 		}
 		else
 		{

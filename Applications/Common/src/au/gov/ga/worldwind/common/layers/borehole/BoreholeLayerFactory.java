@@ -55,7 +55,6 @@ public class BoreholeLayerFactory
 		WWXML.checkAndSetLongParam(domElement, params, AVKey.EXPIRY_TIME, "ExpiryTime", xpath);
 		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate", DATE_TIME_PATTERN, xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.DATA_CACHE_NAME, "DataCacheName", xpath);
-		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.POINT_TYPE, "PointType", xpath);
 
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.BOREHOLE_UNIQUE_IDENTIFIER_ATTRIBUTE,
 				"UniqueBoreholeIdentifier", xpath);
@@ -63,16 +62,16 @@ public class BoreholeLayerFactory
 				"SampleDepthAttributes/@from", xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.BOREHOLE_SAMPLE_DEPTH_TO_ATTRIBUTE,
 				"SampleDepthAttributes/@to", xpath);
-		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.BOREHOLE_LINE_WIDTH, "LineWidth", xpath);
-		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.BOREHOLE_MINIMUM_DISTANCE, "MinimumDistance", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.LINE_WIDTH, "LineWidth", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.MINIMUM_DISTANCE, "MinimumDistance", xpath);
 
 		setupBoreholeProvider(domElement, xpath, params);
 
 		Element styles = WWXML.getElement(domElement, "BoreholeStyles", xpath);
-		StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.BOREHOLE_STYLES, params);
+		StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.DATA_LAYER_STYLES, params);
 
 		Element attributes = WWXML.getElement(domElement, "BoreholeAttributes", xpath);
-		StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.BOREHOLE_ATTRIBUTES, params);
+		StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.DATA_LAYER_ATTRIBUTES, params);
 
 		Element sampleStyles = WWXML.getElement(domElement, "SampleStyles", xpath);
 		StyleAndAttributeFactory.addStyles(sampleStyles, xpath, AVKeyMore.BOREHOLE_SAMPLE_STYLES, params);
@@ -93,7 +92,7 @@ public class BoreholeLayerFactory
 
 		if ("Shapefile".equalsIgnoreCase(format))
 		{
-			params.setValue(AVKeyMore.BOREHOLE_PROVIDER, new ShapefileBoreholeProvider());
+			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ShapefileBoreholeProvider());
 		}
 		else
 		{

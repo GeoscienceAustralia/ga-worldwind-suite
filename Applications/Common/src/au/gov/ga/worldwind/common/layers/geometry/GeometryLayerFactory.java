@@ -65,16 +65,16 @@ public class GeometryLayerFactory
 		WWXML.checkAndSetLongParam(domElement, params, AVKey.EXPIRY_TIME, "ExpiryTime", xpath);
 		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate", DATE_TIME_PATTERN, xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.DATA_CACHE_NAME, "DataCacheName", xpath);
-		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.RENDER_TYPE, "RenderType", xpath);
+		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.DATA_TYPE, "RenderType", xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.SHAPE_TYPE, "ShapeType", xpath);
 
 		setupShapeProvider(domElement, xpath, params);
 
 		Element styles = WWXML.getElement(domElement, "Styles", xpath);
-		StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.SHAPE_STYLES, params);
+		StyleAndAttributeFactory.addStyles(styles, xpath, AVKeyMore.DATA_LAYER_STYLES, params);
 
 		Element attributes = WWXML.getElement(domElement, "Attributes", xpath);
-		StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.SHAPE_ATTRIBUTES, params);
+		StyleAndAttributeFactory.addAttributes(attributes, xpath, AVKeyMore.DATA_LAYER_ATTRIBUTES, params);
 
 		return params;
 	}
@@ -89,7 +89,7 @@ public class GeometryLayerFactory
 
 		if ("Shapefile".equalsIgnoreCase(format))
 		{
-			params.setValue(AVKeyMore.SHAPE_PROVIDER, new ShapefileShapeProvider());
+			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ShapefileShapeProvider());
 		}
 		else
 		{

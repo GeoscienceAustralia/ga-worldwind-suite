@@ -38,10 +38,10 @@ public class PointLayerHelper
 		context = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
 		url = params.getStringValue(AVKey.URL);
 		dataCacheName = params.getStringValue(AVKey.DATA_CACHE_NAME);
-		pointProvider = (PointProvider) params.getValue(AVKeyMore.POINT_PROVIDER);
+		pointProvider = (PointProvider) params.getValue(AVKeyMore.DATA_LAYER_PROVIDER);
 
-		styleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.POINT_STYLES));
-		styleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.POINT_ATTRIBUTES));
+		styleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.DATA_LAYER_STYLES));
+		styleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.DATA_LAYER_ATTRIBUTES));
 		
 		Validate.notBlank(url, "Point data url not set");
 		Validate.notBlank(dataCacheName, "Point data cache name not set");

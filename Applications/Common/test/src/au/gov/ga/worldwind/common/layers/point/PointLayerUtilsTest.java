@@ -32,7 +32,7 @@ public class PointLayerUtilsTest
 		
 		// Attributes should be empty
 		@SuppressWarnings("unchecked")
-		List<Attribute> attributes = (List<Attribute>)params.getValue(AVKeyMore.POINT_ATTRIBUTES);
+		List<Attribute> attributes = (List<Attribute>)params.getValue(AVKeyMore.DATA_LAYER_ATTRIBUTES);
 		assertNotNull(attributes);
 		assertTrue(attributes.size() == 0);
 		
@@ -52,7 +52,7 @@ public class PointLayerUtilsTest
 		
 		// Attributes should not be empty
 		@SuppressWarnings("unchecked")
-		List<Attribute> attributes = (List<Attribute>)params.getValue(AVKeyMore.POINT_ATTRIBUTES);
+		List<Attribute> attributes = (List<Attribute>)params.getValue(AVKeyMore.DATA_LAYER_ATTRIBUTES);
 		assertNotNull(attributes);
 		assertTrue(attributes.size() == 1);
 		

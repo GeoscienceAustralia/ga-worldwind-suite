@@ -72,10 +72,10 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		context = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
 		url = params.getStringValue(AVKey.URL);
 		dataCacheName = params.getStringValue(AVKey.DATA_CACHE_NAME);
-		boreholeProvider = (BoreholeProvider) params.getValue(AVKeyMore.BOREHOLE_PROVIDER);
+		boreholeProvider = (BoreholeProvider) params.getValue(AVKeyMore.DATA_LAYER_PROVIDER);
 
-		boreholeStyleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.BOREHOLE_STYLES));
-		boreholeStyleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.BOREHOLE_ATTRIBUTES));
+		boreholeStyleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.DATA_LAYER_STYLES));
+		boreholeStyleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.DATA_LAYER_ATTRIBUTES));
 		sampleStyleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.BOREHOLE_SAMPLE_STYLES));
 		sampleStyleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.BOREHOLE_SAMPLE_ATTRIBUTES));
 
@@ -83,11 +83,11 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		sampleDepthFromAttribute = params.getStringValue(AVKeyMore.BOREHOLE_SAMPLE_DEPTH_FROM_ATTRIBUTE);
 		sampleDepthToAttribute = params.getStringValue(AVKeyMore.BOREHOLE_SAMPLE_DEPTH_TO_ATTRIBUTE);
 
-		Double d = (Double) params.getValue(AVKeyMore.BOREHOLE_LINE_WIDTH);
+		Double d = (Double) params.getValue(AVKeyMore.LINE_WIDTH);
 		if (d != null)
 			lineWidth = d;
 		
-		minimumDistance = (Double) params.getValue(AVKeyMore.BOREHOLE_MINIMUM_DISTANCE);
+		minimumDistance = (Double) params.getValue(AVKeyMore.MINIMUM_DISTANCE);
 
 		Validate.notBlank(url, "Borehole data url not set");
 		Validate.notBlank(dataCacheName, "Borehole data cache name not set");

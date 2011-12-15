@@ -5,7 +5,9 @@ import gov.nasa.worldwind.layers.Layer;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.util.Loader;
+import au.gov.ga.worldwind.common.util.Setupable;
 
 /**
  * {@link Layer} which reads it's data from a single URL, using a
@@ -13,7 +15,7 @@ import au.gov.ga.worldwind.common.util.Loader;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public interface DataLayer extends Layer, Loader
+public interface DataLayer extends Layer, Loader, Setupable, Bounded
 {
 	/**
 	 * @return The download url for this layer's data

@@ -60,11 +60,11 @@ public abstract class GeometryLayerBase extends AbstractLayer implements Geometr
 
 		dataCacheName = params.getStringValue(AVKey.DATA_CACHE_NAME);
 
-		shapeProvider = (ShapeProvider) params.getValue(AVKeyMore.SHAPE_PROVIDER);
+		shapeProvider = (ShapeProvider) params.getValue(AVKeyMore.DATA_LAYER_PROVIDER);
 
 		styleProvider = new BasicStyleProvider();
-		styleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.SHAPE_STYLES));
-		styleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.SHAPE_ATTRIBUTES));
+		styleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.DATA_LAYER_STYLES));
+		styleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.DATA_LAYER_ATTRIBUTES));
 		
 		Validate.notBlank(dataCacheName, "Shape data cache name not set");
 

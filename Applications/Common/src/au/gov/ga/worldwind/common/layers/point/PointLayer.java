@@ -2,9 +2,7 @@ package au.gov.ga.worldwind.common.layers.point;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
-import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.layers.data.DataLayer;
-import au.gov.ga.worldwind.common.util.Setupable;
 
 /**
  * Interface for all Point layers. Point classes can extend the specific class
@@ -13,7 +11,7 @@ import au.gov.ga.worldwind.common.util.Setupable;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public interface PointLayer extends AVList, Setupable, Bounded, DataLayer
+public interface PointLayer extends DataLayer
 {
 	/**
 	 * Add a point to this layer. Called by the {@link PointProvider}.
