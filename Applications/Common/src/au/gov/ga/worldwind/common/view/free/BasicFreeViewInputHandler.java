@@ -49,13 +49,15 @@ public class BasicFreeViewInputHandler extends AbstractInputFreeViewInputHandler
 			Vec4 up = view.getUpVector();
 			//Vec4 side = forward.transformBy3(Matrix.fromAxisAngle(Angle.fromDegrees(90), up));
 			Vec4 side = up.cross3(forward);
+			
+			Vec4 eyePoint = view.getCurrentEyePoint();
+			Position eyePosition = view.getGlobe().computePositionFromPoint(eyePoint);
 
-			double scale = getScaleValueElevation();
+			double scale = getScaleValueElevation(eyePosition);
 			side = side.multiply3(deltaX * scale);
 			up = up.multiply3(deltaY * scale);
 			forward = forward.multiply3(deltaZ * scale);
 
-			Vec4 eyePoint = view.getCurrentEyePoint();
 			eyePoint = eyePoint.add3(forward.add3(up.add3(side)));
 			Position newPosition = view.getGlobe().computePositionFromPoint(eyePoint);
 
@@ -64,16 +66,14 @@ public class BasicFreeViewInputHandler extends AbstractInputFreeViewInputHandler
 		}
 	}
 
-	protected double getScaleValueElevation()
+	protected double getScaleValueElevation(Position eyePosition)
 	{
 		double[] range = new double[] { 10, 100000 };
 
-		View view = getView();
-		Position eyePos = view.getEyePosition();
-		Globe globe = getWorldWindow().getModel().getGlobe();
+		Globe globe = getView().getGlobe();
 		double radius = globe.getRadius();
-		double surfaceElevation = globe.getElevation(eyePos.getLatitude(), eyePos.getLongitude());
-		double t = getScaleValue(range[0], range[1], eyePos.getElevation() - surfaceElevation, 3.0 * radius, true);
+		double surfaceElevation = globe.getElevation(eyePosition.getLatitude(), eyePosition.getLongitude());
+		double t = getScaleValue(range[0], range[1], eyePosition.getElevation() - surfaceElevation, 3.0 * radius, true);
 		//t *= deviceAttributes.getSensitivity(); //TODO
 
 		return t;

@@ -135,8 +135,11 @@ public class FreeView extends BasicView implements TransformView
 
 	protected void afterDoApply()
 	{
+		// Establish frame-specific values.
+        this.lastEyePosition = this.computeEyePositionFromModelview();
+        this.horizonDistance = this.computeHorizonDistance();
+		
 		// Clear cached computations.
-		this.lastEyePosition = null;
 		this.lastEyePoint = null;
 		this.lastUpVector = null;
 		this.lastForwardVector = null;
