@@ -71,6 +71,8 @@ public class FastShape implements Renderable, Cacheable, Bounded
 	protected double elevation = 0d;
 	protected boolean calculateNormals = false;
 	protected boolean fogEnabled = false;
+	protected boolean wireframe = false;
+	protected boolean lighted = false;
 
 	public FastShape(List<Position> positions, int mode)
 	{
@@ -102,13 +104,61 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 			try
 			{
-				stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_FOG_BIT);
+				int attributesToPush = GL.GL_CURRENT_BIT;
+				if (!fogEnabled)
+				{
+					attributesToPush |= GL.GL_FOG_BIT;
+				}
+				if (wireframe)
+				{
+					attributesToPush |= GL.GL_POLYGON_BIT;
+				}
+				if (lighted)
+				{
+					attributesToPush |= GL.GL_LIGHTING_BIT;
+				}
+
+				stack.pushAttrib(gl, attributesToPush);
 				stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-				dc.getView().pushReferenceCenter(dc, boundingSphere.getCenter());
+				Vec4 referenceCenter = boundingSphere.getCenter();
+				dc.getView().pushReferenceCenter(dc, referenceCenter);
+
+				double alpha = getOpacity();
+				if (dc.getCurrentLayer() != null)
+				{
+					alpha *= dc.getCurrentLayer().getOpacity();
+				}
 
 				if (!fogEnabled)
 				{
 					gl.glDisable(GL.GL_FOG);
+				}
+				if (wireframe)
+				{
+					gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+				}
+				if (lighted)
+				{
+					Vec4 cameraPosition = dc.getView().getEyePoint();
+					Vec4 lightPos = cameraPosition.subtract3(referenceCenter);
+					float[] lightPosition = { (float) lightPos.x, (float) lightPos.y, (float) lightPos.z, 1.0f };
+					float[] lightAmbient = { 0.0f, 0.0f, 0.0f, 1.0f };
+					float[] lightDiffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
+					float[] lightSpecular = { 1.0f, 1.0f, 1.0f, 1.0f };
+					float[] modelAmbient = { 0.3f, 0.3f, 0.3f, 1.0f };
+					gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, modelAmbient, 0);
+					gl.glLightfv(GL.GL_LIGHT1, GL.GL_POSITION, lightPosition, 0);
+					gl.glLightfv(GL.GL_LIGHT1, GL.GL_DIFFUSE, lightDiffuse, 0);
+					gl.glLightfv(GL.GL_LIGHT1, GL.GL_AMBIENT, lightAmbient, 0);
+					gl.glLightfv(GL.GL_LIGHT1, GL.GL_SPECULAR, lightSpecular, 0);
+					gl.glDisable(GL.GL_LIGHT0);
+					gl.glEnable(GL.GL_LIGHT1);
+					gl.glEnable(GL.GL_LIGHTING);
+
+					float[] materialColor =
+							{ color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, (float) alpha };
+					gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE, materialColor, 0);
+					gl.glEnable(GL.GL_COLOR_MATERIAL);
 				}
 
 				if (colorBuffer != null)
@@ -117,11 +167,6 @@ public class FastShape implements Renderable, Cacheable, Bounded
 					gl.glColorPointer(colorBufferElementSize, GL.GL_FLOAT, 0, colorBuffer.rewind());
 				}
 
-				double alpha = getOpacity();
-				if (dc.getCurrentLayer() != null)
-				{
-					alpha *= dc.getCurrentLayer().getOpacity();
-				}
 				gl.glColor4d(color.getRed() / 255d, color.getGreen() / 255d, color.getBlue() / 255d, alpha);
 				if (alpha < 1.0)
 				{
@@ -132,7 +177,7 @@ public class FastShape implements Renderable, Cacheable, Bounded
 				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
 				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vertexBuffer.rewind());
 
-				if (isCalculateNormals() && getMode() == GL.GL_TRIANGLES)
+				if (willCalculateNormals())
 				{
 					gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
 					gl.glNormalPointer(GL.GL_DOUBLE, 0, normalBuffer.rewind());
@@ -191,7 +236,7 @@ public class FastShape implements Renderable, Cacheable, Bounded
 					Sphere tempe = boundingSphere;
 					boundingSphere = modBoundingSphere;
 					modBoundingSphere = tempe;
-					if (isCalculateNormals())
+					if (willCalculateNormals())
 					{
 						temp = normalBuffer;
 						normalBuffer = modNormalBuffer;
@@ -252,29 +297,51 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	protected void calculateNormals()
 	{
-		if (isCalculateNormals() && getMode() == GL.GL_TRIANGLES)
+		if (willCalculateNormals())
 		{
 			int size = modNormalBuffer.limit() / 3;
 			int[] count = new int[size];
+			Vec4[] vertices = new Vec4[size];
+			Vec4[] normals = new Vec4[size];
+
+			int j = 0;
+			modVertexBuffer.rewind();
+			while (modVertexBuffer.hasRemaining())
+			{
+				vertices[j] = new Vec4(modVertexBuffer.get(), modVertexBuffer.get(), modVertexBuffer.get());
+				normals[j] = new Vec4(0);
+				j++;
+			}
 
 			if (indices == null)
 			{
-				//TODO
+				for (int i = 0; i < size; i += 3)
+				{
+					int index0 = i + 0;
+					int index1 = i + 1;
+					int index2 = i + 2;
+					Vec4 v0 = vertices[index0];
+					Vec4 v1 = vertices[index1];
+					Vec4 v2 = vertices[index2];
+
+					Vec4 e1 = v1.subtract3(v0);
+					Vec4 e2 = v2.subtract3(v0);
+					Vec4 N = e1.cross3(e2).normalize3(); // if N is 0, the triangle is degenerate
+
+					if (N.getLength3() > 0)
+					{
+						normals[index0] = normals[index0].add3(N);
+						normals[index1] = normals[index1].add3(N);
+						normals[index2] = normals[index2].add3(N);
+
+						count[index0]++;
+						count[index1]++;
+						count[index2]++;
+					}
+				}
 			}
 			else
 			{
-				Vec4[] vertices = new Vec4[size];
-				Vec4[] normals = new Vec4[size];
-
-				int j = 0;
-				modVertexBuffer.rewind();
-				while (modVertexBuffer.hasRemaining())
-				{
-					vertices[j] = new Vec4(modVertexBuffer.get(), modVertexBuffer.get(), modVertexBuffer.get());
-					normals[j] = new Vec4(0);
-					j++;
-				}
-
 				for (IntBuffer ib : indices)
 				{
 					//don't touch ib's position/mark, because it may currently be in use by OpenGL thread
@@ -303,17 +370,17 @@ public class FastShape implements Renderable, Cacheable, Bounded
 						}
 					}
 				}
+			}
 
-				j = 0;
-				modNormalBuffer.rewind();
-				while (modNormalBuffer.hasRemaining())
-				{
-					int c = count[j] > 0 ? count[j] : 1; //prevent divide by zero
-					modNormalBuffer.put(normals[j].x / c);
-					modNormalBuffer.put(normals[j].y / c);
-					modNormalBuffer.put(normals[j].z / c);
-					j++;
-				}
+			j = 0;
+			modNormalBuffer.rewind();
+			while (modNormalBuffer.hasRemaining())
+			{
+				int c = count[j] > 0 ? count[j] : 1; //prevent divide by zero
+				modNormalBuffer.put(normals[j].x / c);
+				modNormalBuffer.put(normals[j].y / c);
+				modNormalBuffer.put(normals[j].z / c);
+				j++;
 			}
 		}
 	}
@@ -325,12 +392,10 @@ public class FastShape implements Renderable, Cacheable, Bounded
 			int size = positions.size() * 3;
 			if (modVertexBuffer == null || modVertexBuffer.limit() != size)
 			{
-				//vertexBuffer = BufferUtil.newDoubleBuffer(size);
 				modVertexBuffer = BufferUtil.newDoubleBuffer(size);
 			}
-			if (isCalculateNormals() && (modNormalBuffer == null || modNormalBuffer.limit() != size))
+			if (willCalculateNormals() && (modNormalBuffer == null || modNormalBuffer.limit() != size))
 			{
-				//normalBuffer = BufferUtil.newDoubleBuffer(size);
 				modNormalBuffer = BufferUtil.newDoubleBuffer(size);
 			}
 		}
@@ -452,6 +517,11 @@ public class FastShape implements Renderable, Cacheable, Bounded
 		this.calculateNormals = calculateNormals;
 	}
 
+	protected boolean willCalculateNormals()
+	{
+		return isCalculateNormals() && getMode() == GL.GL_TRIANGLES;
+	}
+
 	public boolean isFogEnabled()
 	{
 		return fogEnabled;
@@ -460,6 +530,26 @@ public class FastShape implements Renderable, Cacheable, Bounded
 	public void setFogEnabled(boolean fogEnabled)
 	{
 		this.fogEnabled = fogEnabled;
+	}
+
+	public boolean isWireframe()
+	{
+		return wireframe;
+	}
+
+	public void setWireframe(boolean wireframe)
+	{
+		this.wireframe = wireframe;
+	}
+
+	public boolean isLighted()
+	{
+		return lighted;
+	}
+
+	public void setLighted(boolean lighted)
+	{
+		this.lighted = lighted;
 	}
 
 	@Override
