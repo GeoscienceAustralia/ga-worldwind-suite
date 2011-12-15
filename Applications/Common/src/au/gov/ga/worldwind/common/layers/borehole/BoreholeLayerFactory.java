@@ -95,7 +95,7 @@ public class BoreholeLayerFactory
 		}
 		else
 		{
-			throw new IllegalArgumentException("Could not find point provider for DataFormat: " + format);
+			throw new IllegalArgumentException("Could not find borehole provider for DataFormat: " + format);
 		}
 	}
 }

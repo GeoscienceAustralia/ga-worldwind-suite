@@ -4,6 +4,7 @@ import gov.nasa.worldwind.cache.Cacheable;
 import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Sphere;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
@@ -25,6 +26,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.media.opengl.GL;
 
+import au.gov.ga.worldwind.common.layers.Bounded;
+
 import com.sun.opengl.util.BufferUtil;
 
 /**
@@ -35,7 +38,7 @@ import com.sun.opengl.util.BufferUtil;
  * 
  * @author Michael de Hoog
  */
-public class FastShape implements Renderable, Cacheable
+public class FastShape implements Renderable, Cacheable, Bounded
 {
 	//TODO this class can probably be generalised to support other geometry types, and add VBO support
 
@@ -53,7 +56,9 @@ public class FastShape implements Renderable, Cacheable
 	protected DoubleBuffer modNormalBuffer;
 	protected Sphere boundingSphere;
 	protected Sphere modBoundingSphere;
+	protected Sector sector;
 	protected final Object vertexLock = new Object();
+	protected final Object sectorLock = new Object();
 
 	protected Color color = Color.white;
 	protected double opacity = 1;
@@ -183,9 +188,9 @@ public class FastShape implements Renderable, Cacheable
 					DoubleBuffer temp = vertexBuffer;
 					vertexBuffer = modVertexBuffer;
 					modVertexBuffer = temp;
-					Sphere temps = boundingSphere;
+					Sphere tempe = boundingSphere;
 					boundingSphere = modBoundingSphere;
-					modBoundingSphere = temps;
+					modBoundingSphere = tempe;
 					if (isCalculateNormals())
 					{
 						temp = normalBuffer;
@@ -380,8 +385,17 @@ public class FastShape implements Renderable, Cacheable
 	{
 		synchronized (positionLock)
 		{
-			this.positions = positions;
-			verticesDirty = true;
+			synchronized (sectorLock)
+			{
+				this.positions = positions;
+				verticesDirty = true;
+
+				sector = Sector.EMPTY_SECTOR;
+				for (Position position : positions)
+				{
+					sector = sector.union(position.latitude, position.longitude);
+				}
+			}
 		}
 	}
 
@@ -465,6 +479,15 @@ public class FastShape implements Renderable, Cacheable
 		synchronized (vertexLock)
 		{
 			return boundingSphere;
+		}
+	}
+
+	@Override
+	public Sector getSector()
+	{
+		synchronized (sectorLock)
+		{
+			return sector;
 		}
 	}
 
