@@ -65,6 +65,7 @@ public class FastShape implements Renderable, Cacheable
 
 	protected double elevation = 0d;
 	protected boolean calculateNormals = false;
+	protected boolean fogEnabled = false;
 
 	public FastShape(List<Position> positions, int mode)
 	{
@@ -96,9 +97,14 @@ public class FastShape implements Renderable, Cacheable
 
 			try
 			{
-				stack.pushAttrib(gl, GL.GL_CURRENT_BIT);
+				stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_FOG_BIT);
 				stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 				dc.getView().pushReferenceCenter(dc, boundingSphere.getCenter());
+
+				if (!fogEnabled)
+				{
+					gl.glDisable(GL.GL_FOG);
+				}
 
 				if (colorBuffer != null)
 				{
@@ -430,6 +436,16 @@ public class FastShape implements Renderable, Cacheable
 	public void setCalculateNormals(boolean calculateNormals)
 	{
 		this.calculateNormals = calculateNormals;
+	}
+
+	public boolean isFogEnabled()
+	{
+		return fogEnabled;
+	}
+
+	public void setFogEnabled(boolean fogEnabled)
+	{
+		this.fogEnabled = fogEnabled;
 	}
 
 	@Override
