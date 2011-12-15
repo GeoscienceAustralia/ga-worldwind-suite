@@ -24,8 +24,6 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
  */
 public class GeometryLayerFactory
 {
-	protected static final String DATE_TIME_PATTERN = "dd MM yyyy HH:mm:ss z";
-
 	/**
 	 * Create a new {@link GeometryLayer} from an XML definition.
 	 */
@@ -63,7 +61,8 @@ public class GeometryLayerFactory
 
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.URL, "URL", xpath);
 		WWXML.checkAndSetLongParam(domElement, params, AVKey.EXPIRY_TIME, "ExpiryTime", xpath);
-		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate", DATE_TIME_PATTERN, xpath);
+		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate",
+				DataLayerFactory.DATE_TIME_PATTERN, xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.DATA_CACHE_NAME, "DataCacheName", xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.DATA_TYPE, "RenderType", xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.SHAPE_TYPE, "ShapeType", xpath);

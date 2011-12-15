@@ -23,8 +23,6 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
  */
 public class BoreholeLayerFactory
 {
-	protected static final String DATE_TIME_PATTERN = "dd MM yyyy HH:mm:ss z";
-
 	/**
 	 * Create a new {@link BoreholeLayer} from an XML definition.
 	 * 
@@ -53,7 +51,8 @@ public class BoreholeLayerFactory
 
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.URL, "URL", xpath);
 		WWXML.checkAndSetLongParam(domElement, params, AVKey.EXPIRY_TIME, "ExpiryTime", xpath);
-		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate", DATE_TIME_PATTERN, xpath);
+		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate",
+				DataLayerFactory.DATE_TIME_PATTERN, xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.DATA_CACHE_NAME, "DataCacheName", xpath);
 
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.BOREHOLE_UNIQUE_IDENTIFIER_ATTRIBUTE,

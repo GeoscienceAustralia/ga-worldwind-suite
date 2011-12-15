@@ -11,6 +11,8 @@ import gov.nasa.worldwind.layers.Layer;
  */
 public class DataLayerFactory
 {
+	public static final String DATE_TIME_PATTERN = "dd MM yyyy HH:mm:ss z";
+	
 	/**
 	 * Call the standard {@link Layer} setters for values in the params AVList.
 	 */
