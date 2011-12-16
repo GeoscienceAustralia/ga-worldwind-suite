@@ -17,6 +17,7 @@ import au.gov.ga.worldwind.common.layers.curtain.delegate.DelegatorTiledCurtainL
 import au.gov.ga.worldwind.common.layers.earthquakes.HistoricEarthquakesLayer;
 import au.gov.ga.worldwind.common.layers.geometry.GeometryLayerFactory;
 import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
+import au.gov.ga.worldwind.common.layers.model.ModelLayerFactory;
 import au.gov.ga.worldwind.common.layers.point.PointLayerFactory;
 import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
@@ -48,15 +49,15 @@ public class LayerFactory extends BasicLayerFactory
 		{
 			return new KMLLayer(domElement, params);
 		}
-		if("CurtainImageLayer".equals(layerType))
+		if ("CurtainImageLayer".equals(layerType))
 		{
 			return createTiledCurtainLayer(domElement, params);
 		}
-		if("HistoricEarthquakesLayer".equals(layerType))
+		if ("HistoricEarthquakesLayer".equals(layerType))
 		{
 			return new HistoricEarthquakesLayer(domElement, params);
 		}
-		if("CrustLayer".equals(layerType))
+		if ("CrustLayer".equals(layerType))
 		{
 			return new CrustLayer(domElement, params);
 		}
@@ -68,10 +69,14 @@ public class LayerFactory extends BasicLayerFactory
 		{
 			return BoreholeLayerFactory.createBoreholeLayer(domElement, params);
 		}
+		if ("ModelLayer".equalsIgnoreCase(layerType))
+		{
+			return ModelLayerFactory.createModelLayer(domElement, params);
+		}
 
 		return super.createFromLayerDocument(domElement, params);
 	}
-	
+
 	protected Layer createTiledCurtainLayer(Element domElement, AVList params)
 	{
 		if (params == null)
@@ -106,8 +111,7 @@ public class LayerFactory extends BasicLayerFactory
 		Layer layer;
 		String serviceName = XMLUtil.getText(domElement, "Service/@serviceName");
 
-		if ("DelegatorTileService".equals(serviceName)
-				|| OGCConstants.WMS_SERVICE_NAME.equals(serviceName))
+		if ("DelegatorTileService".equals(serviceName) || OGCConstants.WMS_SERVICE_NAME.equals(serviceName))
 		{
 			layer = new DelegatorTiledImageLayer(domElement, params);
 		}

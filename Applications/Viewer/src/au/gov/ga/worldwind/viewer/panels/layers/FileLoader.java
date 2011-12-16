@@ -22,6 +22,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,6 +31,11 @@ import javax.swing.ProgressMonitor;
 import org.w3c.dom.Document;
 
 import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
+import au.gov.ga.worldwind.common.layers.model.LocalModelLayer;
+import au.gov.ga.worldwind.common.layers.model.ModelLayer;
+import au.gov.ga.worldwind.common.layers.model.gocad.GocadFactory;
+import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.FastShape;
 
 public class FileLoader
 {
@@ -99,24 +105,36 @@ public class FileLoader
 		if (suffix == null)
 			return null;
 
+		URL url;
+		try
+		{
+			url = file.toURI().toURL();
+		}
+		catch (MalformedURLException e1)
+		{
+			//won't happen
+			return null;
+		}
+		AVList params = new AVListImpl();
+		params.setValue(AVKey.URL, url);
+		params.setValue(AVKeyMore.CONTEXT_URL, url);
+
 		String contentType = WWIO.makeMimeTypeForSuffix(suffix);
 		if (KMLConstants.KML_MIME_TYPE.equals(contentType) || KMLConstants.KMZ_MIME_TYPE.equals(contentType))
 		{
-			try
+			KMLLayer layer = new KMLLayer(url, null, params);
+			return new LoadedLayer(layer, params);
+		}
+		else if (suffix.equalsIgnoreCase("ts"))
+		{
+			List<FastShape> shapes = GocadFactory.read(file);
+			if (!shapes.isEmpty())
 			{
-				URL url = new URL("file:" + file.getAbsolutePath());
-				AVList params = new AVListImpl();
-				params.setValue(AVKey.URL, url);
-				KMLLayer layer = new KMLLayer(url, null, params);
+				ModelLayer layer = new LocalModelLayer(shapes.get(0));
 				return new LoadedLayer(layer, params);
 			}
-			catch (MalformedURLException e)
-			{
-				String message = "Error loading KML file " + file + ": " + e.getLocalizedMessage();
-				Logging.logger().warning(message);
-			}
 		}
-		
+
 		return null;
 	}
 
