@@ -105,10 +105,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 		recalculateIfRequired(dc, alpha);
 
+		frontLock.readLock().lock();
 		try
 		{
-			frontLock.readLock().lock();
-
 			if (vertexBuffer == null || vertexBuffer.limit() <= 0)
 				return;
 
@@ -120,6 +119,8 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 			try
 			{
+				boolean willUseSortedIndices = sortTransparentTriangles && alpha < 1.0 && sortedIndices != null;
+				
 				int attributesToPush = GL.GL_CURRENT_BIT;
 				if (!fogEnabled)
 				{
@@ -133,18 +134,15 @@ public class FastShape implements Renderable, Cacheable, Bounded
 				{
 					attributesToPush |= GL.GL_LIGHTING_BIT;
 				}
-				if (sortTransparentTriangles && alpha < 1.0)
+				if (willUseSortedIndices)
 				{
 					attributesToPush |= GL.GL_DEPTH_BUFFER_BIT;
 				}
-
 
 				stack.pushAttrib(gl, attributesToPush);
 				stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 				Vec4 referenceCenter = boundingSphere.getCenter();
 				dc.getView().pushReferenceCenter(dc, referenceCenter);
-
-
 
 				if (!fogEnabled)
 				{
@@ -205,7 +203,7 @@ public class FastShape implements Renderable, Cacheable, Bounded
 					gl.glNormalPointer(GL.GL_DOUBLE, 0, normalBuffer.rewind());
 				}
 
-				if (sortTransparentTriangles && alpha < 1.0 && sortedIndices != null)
+				if (willUseSortedIndices)
 				{
 					gl.glDepthMask(false);
 					gl.glDrawElements(mode, sortedIndices.limit(), GL.GL_UNSIGNED_INT, sortedIndices.rewind());
@@ -260,10 +258,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 			@Override
 			public void run()
 			{
+				frontLock.readLock().lock();
 				try
 				{
-					frontLock.readLock().lock();
-
 					int size = positions.size() * 3;
 					if (modVertexBuffer == null || modVertexBuffer.limit() != size)
 					{
@@ -282,10 +279,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 					frontLock.readLock().unlock();
 				}
 
+				frontLock.writeLock().lock();
 				try
 				{
-					frontLock.writeLock().lock();
-
 					DoubleBuffer temp = vertexBuffer;
 					vertexBuffer = modVertexBuffer;
 					modVertexBuffer = temp;
@@ -416,10 +412,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 			@Override
 			public void run()
 			{
+				frontLock.readLock().lock();
 				try
 				{
-					frontLock.readLock().lock();
-
 					int size = indices != null ? indices.limit() : vertexBuffer.limit() / 3;
 					if (modSortedIndices == null || modSortedIndices.limit() != size)
 					{
@@ -433,10 +428,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 					frontLock.readLock().unlock();
 				}
 
+				frontLock.writeLock().lock();
 				try
 				{
-					frontLock.writeLock().lock();
-
 					IntBuffer temp = sortedIndices;
 					sortedIndices = modSortedIndices;
 					modSortedIndices = temp;
@@ -497,9 +491,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setColor(Color color)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.color = color;
 		}
 		finally
@@ -515,9 +509,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setColorBuffer(FloatBuffer colorBuffer)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.colorBuffer = colorBuffer;
 		}
 		finally
@@ -533,9 +527,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setColorBufferElementSize(int colorBufferElementSize)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.colorBufferElementSize = colorBufferElementSize;
 		}
 		finally
@@ -551,9 +545,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setOpacity(double opacity)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.opacity = opacity;
 		}
 		finally
@@ -569,10 +563,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setPositions(List<Position> positions)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
-
 			this.positions = positions;
 			verticesDirty = true;
 
@@ -595,9 +588,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setIndices(IntBuffer indices)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.indices = indices;
 			verticesDirty = true;
 		}
@@ -614,9 +607,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setFollowTerrain(boolean followTerrain)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.followTerrain = followTerrain;
 			verticesDirty = true;
 		}
@@ -633,9 +626,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setMode(int mode)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.mode = mode;
 		}
 		finally
@@ -651,9 +644,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setElevation(double elevation)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.elevation = elevation;
 		}
 		finally
@@ -669,9 +662,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setCalculateNormals(boolean calculateNormals)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.calculateNormals = calculateNormals;
 		}
 		finally
@@ -692,9 +685,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setFogEnabled(boolean fogEnabled)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.fogEnabled = fogEnabled;
 		}
 		finally
@@ -710,9 +703,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setWireframe(boolean wireframe)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.wireframe = wireframe;
 		}
 		finally
@@ -728,9 +721,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setBackfaceCulling(boolean backfaceCulling)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.backfaceCulling = backfaceCulling;
 		}
 		finally
@@ -746,9 +739,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 
 	public void setLighted(boolean lighted)
 	{
+		frontLock.writeLock().lock();
 		try
 		{
-			frontLock.writeLock().lock();
 			this.lighted = lighted;
 		}
 		finally
@@ -771,9 +764,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 	 */
 	public Extent getExtent()
 	{
+		frontLock.readLock().unlock();
 		try
 		{
-			frontLock.readLock().unlock();
 			return boundingSphere;
 		}
 		finally
@@ -785,9 +778,9 @@ public class FastShape implements Renderable, Cacheable, Bounded
 	@Override
 	public Sector getSector()
 	{
+		frontLock.readLock().unlock();
 		try
 		{
-			frontLock.readLock().unlock();
 			return sector;
 		}
 		finally
