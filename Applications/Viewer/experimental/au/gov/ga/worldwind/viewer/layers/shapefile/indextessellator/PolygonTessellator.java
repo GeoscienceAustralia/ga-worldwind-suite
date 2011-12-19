@@ -294,7 +294,7 @@ public class PolygonTessellator
 		for (Integer i : indices)
 			ib.put(i);
 
-		FastShape shape = new FastShape(positions, new IntBuffer[] { ib }, GL.GL_TRIANGLES);
+		FastShape shape = new FastShape(positions, ib, GL.GL_TRIANGLES);
 		shape.setCalculateNormals(true);
 		return shape;
 

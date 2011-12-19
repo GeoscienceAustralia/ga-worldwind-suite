@@ -104,7 +104,7 @@ public class GocadTSurfReader implements GocadReader
 			}
 			indicesBuffer.put(vertexIdMap.get(i));
 		}
-		FastShape shape = new FastShape(positions, new IntBuffer[] { indicesBuffer }, GL.GL_TRIANGLES);
+		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_TRIANGLES);
 		shape.setLighted(true);
 		shape.setCalculateNormals(true);
 		if(color != null)

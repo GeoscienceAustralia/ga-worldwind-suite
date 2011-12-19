@@ -142,7 +142,7 @@ public class ShapefileTileData implements Renderable, Cacheable
 			for (Integer i : mergedIndices)
 				indices.put(i);
 
-			FastShape shape = new FastShape(mergedLines, new IntBuffer[] { indices }, GL.GL_LINES);
+			FastShape shape = new FastShape(mergedLines, indices, GL.GL_LINES);
 			shape.setColor(randomColor());
 			shapes.add(shape);
 		}
