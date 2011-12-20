@@ -52,6 +52,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		this.tree = tree;
 		this.root = root;
 		this.enabler = enabler;
+		tree.setModel(this);
 		addAnyLayers(root, true);
 		findAndSetWmsRootFolderNode();
 	}

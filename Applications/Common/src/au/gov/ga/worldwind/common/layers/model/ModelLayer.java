@@ -1,27 +1,31 @@
 package au.gov.ga.worldwind.common.layers.model;
 
+import au.gov.ga.worldwind.common.layers.Hierarchical;
+import au.gov.ga.worldwind.common.layers.Wireframeable;
 import au.gov.ga.worldwind.common.layers.data.DataLayer;
 import au.gov.ga.worldwind.common.util.FastShape;
 
 /**
- * Layer that renders a model. Uses a {@link FastShape} for storing and
- * rendering geometry.
+ * Layer that renders a model. Uses {@link FastShape}s for storing and rendering
+ * geometry.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public interface ModelLayer extends DataLayer
+public interface ModelLayer extends DataLayer, Hierarchical, Wireframeable
 {
 	/**
-	 * @return The {@link FastShape} containing the model geometry for this
-	 *         layer.
-	 */
-	FastShape getShape();
-
-	/**
-	 * Set the model geometry for this layer. Called by the
-	 * {@link ModelProvider}.
+	 * Add a shape to this layer
 	 * 
 	 * @param shape
+	 *            Shape to add
 	 */
-	void setShape(FastShape shape);
+	void addShape(FastShape shape);
+
+	/**
+	 * Remove a shape from this layer
+	 * 
+	 * @param shape
+	 *            Shape to remove
+	 */
+	void removeShape(FastShape shape);
 }

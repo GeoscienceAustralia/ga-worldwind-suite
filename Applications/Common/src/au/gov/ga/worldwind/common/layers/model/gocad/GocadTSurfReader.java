@@ -29,14 +29,17 @@ public class GocadTSurfReader implements GocadReader
 	private final static String TRIANGLE_REGEX = "TRGL\\s+(\\d+)\\s+(\\d+)\\s+(\\d+).*";
 	private final static String COLOR_REGEX =
 			"\\*solid\\*color:\\s*([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)";
+	private final static String NAME_REGEX = "name:\\s*(.*)\\s*";
 
 	private List<Position> positions;
 	private List<Integer> triangleIds;
 	private Color color;
 	private Map<Integer, Integer> vertexIdMap;
+	private String name;
 	private final Pattern vertexPattern = Pattern.compile(VERTEX_REGEX);
 	private final Pattern trianglePattern = Pattern.compile(TRIANGLE_REGEX);
 	private final Pattern colorPattern = Pattern.compile(COLOR_REGEX);
+	private final Pattern namePattern = Pattern.compile(NAME_REGEX);
 
 	@Override
 	public void begin()
@@ -90,6 +93,12 @@ public class GocadTSurfReader implements GocadReader
 			double a = Double.parseDouble(matcher.group(4));
 			color = new Color((float) r, (float) g, (float) b, (float) a);
 		}
+		
+		matcher = namePattern.matcher(line);
+		if(matcher.matches())
+		{
+			name = matcher.group(1);
+		}
 	}
 
 	@Override
@@ -105,6 +114,7 @@ public class GocadTSurfReader implements GocadReader
 			indicesBuffer.put(vertexIdMap.get(i));
 		}
 		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_TRIANGLES);
+		shape.setName(name);
 		shape.setLighted(true);
 		shape.setCalculateNormals(true);
 		if(color != null)

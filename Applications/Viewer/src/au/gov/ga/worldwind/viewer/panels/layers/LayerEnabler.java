@@ -61,6 +61,7 @@ public class LayerEnabler implements HierarchicalListener
 
 	private List<RefreshListener> listeners = new ArrayList<RefreshListener>();
 	private final Set<Hierarchical> hierarchicalListenees = new HashSet<Hierarchical>();
+	private final Set<ILayerNode> connectedHierarchicalLayerNodes = new HashSet<ILayerNode>();
 
 	private static ExecutorService loaderService = Executors.newSingleThreadExecutor(new DaemonThreadFactory(
 			"WMS layer loader"));
@@ -681,9 +682,10 @@ public class LayerEnabler implements HierarchicalListener
 	public void hierarchyChanged(Layer layer, TreeNode node)
 	{
 		ILayerNode layerNode = layerMap.get(layer);
-		if (layerNode != null)
+		if (layerNode != null && !connectedHierarchicalLayerNodes.contains(layerNode))
 		{
 			WWTreeToLayerTreeConnector.connect(tree.getLayerModel(), layerNode, node);
+			connectedHierarchicalLayerNodes.add(layerNode);
 		}
 	}
 }

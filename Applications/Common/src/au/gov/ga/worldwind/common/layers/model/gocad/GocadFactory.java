@@ -31,6 +31,7 @@ public class GocadFactory
 	public enum GocadType
 	{
 		//Voxet(GocadVoxetReader.HEADER_REGEX, GocadVoxetReader.class),
+		//PLine(GocadPLineReader.HEADER_REGEX, GocadPLineReader.class),
 		TSurf(GocadTSurfReader.HEADER_REGEX, GocadTSurfReader.class);
 
 		/**

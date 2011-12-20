@@ -28,7 +28,7 @@ public class XMLPointProvider implements PointProvider
 {
 	private List<Position> points = new ArrayList<Position>();
 	private List<AVList> attributes = new ArrayList<AVList>();
-	private Sector sector = Sector.EMPTY_SECTOR;
+	private Sector sector = null;
 	private boolean added = false;
 
 	public XMLPointProvider(Element element)
@@ -43,7 +43,9 @@ public class XMLPointProvider implements PointProvider
 				if (position != null)
 				{
 					points.add(position);
-					sector = sector.union(position.latitude, position.longitude);
+					sector =
+							sector != null ? sector.union(position.latitude, position.longitude) : new Sector(
+									position.latitude, position.longitude, position.latitude, position.longitude);
 
 					AVList attributes = new AVListImpl();
 					this.attributes.add(attributes);
@@ -83,19 +85,19 @@ public class XMLPointProvider implements PointProvider
 		}
 		layer.loadComplete();
 	}
-	
+
 	@Override
 	public boolean isLoading()
 	{
 		return false;
 	}
-	
+
 	@Override
 	public void addLoadingListener(LoadingListener listener)
 	{
 		//do nothing, as this provider is never loading
 	}
-	
+
 	@Override
 	public void removeLoadingListener(LoadingListener listener)
 	{

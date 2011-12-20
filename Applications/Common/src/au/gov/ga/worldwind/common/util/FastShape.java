@@ -30,6 +30,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.layers.Bounded;
+import au.gov.ga.worldwind.common.layers.Wireframeable;
 
 import com.sun.opengl.util.BufferUtil;
 
@@ -41,7 +42,7 @@ import com.sun.opengl.util.BufferUtil;
  * 
  * @author Michael de Hoog
  */
-public class FastShape implements Renderable, Cacheable, Bounded
+public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 {
 	//TODO add VBO support
 
@@ -53,6 +54,7 @@ public class FastShape implements Renderable, Cacheable, Bounded
 	protected int colorBufferElementSize = 3;
 	protected IntBuffer indices;
 	protected int mode;
+	protected String name;
 
 	protected DoubleBuffer vertexBuffer;
 	protected DoubleBuffer modVertexBuffer;
@@ -80,7 +82,8 @@ public class FastShape implements Renderable, Cacheable, Bounded
 	protected boolean wireframe = false;
 	protected boolean lighted = false;
 	protected boolean sortTransparentTriangles = true;
-	protected boolean backfaceCulling = true;
+	protected boolean backfaceCulling = false;
+	protected boolean enabled = true;
 
 	public FastShape(List<Position> positions, int mode)
 	{
@@ -97,6 +100,11 @@ public class FastShape implements Renderable, Cacheable, Bounded
 	@Override
 	public void render(DrawContext dc)
 	{
+		if (!isEnabled())
+		{
+			return;
+		}
+
 		double alpha = getOpacity();
 		if (dc.getCurrentLayer() != null)
 		{
@@ -120,7 +128,7 @@ public class FastShape implements Renderable, Cacheable, Bounded
 			try
 			{
 				boolean willUseSortedIndices = sortTransparentTriangles && alpha < 1.0 && sortedIndices != null;
-				
+
 				int attributesToPush = GL.GL_CURRENT_BIT;
 				if (!fogEnabled)
 				{
@@ -484,6 +492,26 @@ public class FastShape implements Renderable, Cacheable, Bounded
 		}
 	}
 
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	public boolean isEnabled()
+	{
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled)
+	{
+		this.enabled = enabled;
+	}
+
 	public Color getColor()
 	{
 		return color;
@@ -569,10 +597,12 @@ public class FastShape implements Renderable, Cacheable, Bounded
 			this.positions = positions;
 			verticesDirty = true;
 
-			sector = Sector.EMPTY_SECTOR;
+			sector = null;
 			for (Position position : positions)
 			{
-				sector = sector.union(position.latitude, position.longitude);
+				sector =
+						sector != null ? sector.union(position.latitude, position.longitude) : new Sector(
+								position.latitude, position.longitude, position.latitude, position.longitude);
 			}
 		}
 		finally
@@ -696,11 +726,13 @@ public class FastShape implements Renderable, Cacheable, Bounded
 		}
 	}
 
+	@Override
 	public boolean isWireframe()
 	{
 		return wireframe;
 	}
 
+	@Override
 	public void setWireframe(boolean wireframe)
 	{
 		frontLock.writeLock().lock();

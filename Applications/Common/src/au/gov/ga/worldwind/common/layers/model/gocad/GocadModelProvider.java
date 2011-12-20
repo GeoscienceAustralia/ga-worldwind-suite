@@ -34,11 +34,12 @@ public class GocadModelProvider extends AbstractDataProvider<ModelLayer> impleme
 	{
 		File file = URLUtil.urlToFile(url);
 		List<FastShape> shapes = GocadFactory.read(file);
-		if (shapes != null && shapes.size() > 0)
+		if (shapes != null && !shapes.isEmpty())
 		{
-			//only use the first shape read from the GOCAD file
-			shape = shapes.get(0);
-			layer.setShape(shape);
+			for (FastShape shape : shapes)
+			{
+				layer.addShape(shape);
+			}
 			return true;
 		}
 		return false;

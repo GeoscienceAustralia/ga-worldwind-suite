@@ -24,8 +24,7 @@ public class LayerTree extends LoadingTree implements LoadingListener
 		setUI(ui);
 
 		enabler = new LayerEnabler(this, wwd);
-		LayerTreeModel model = new LayerTreeModel(this, root, enabler);
-		setModel(model);
+		LayerTreeModel model = new LayerTreeModel(this, root, enabler); //constructor calls this.setModel()
 
 		setCellRenderer(new LayerCellRenderer());
 		setCellEditor(new LayerTreeCellEditor(this));

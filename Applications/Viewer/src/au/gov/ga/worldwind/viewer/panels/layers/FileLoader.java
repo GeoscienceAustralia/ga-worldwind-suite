@@ -125,12 +125,12 @@ public class FileLoader
 			KMLLayer layer = new KMLLayer(url, null, params);
 			return new LoadedLayer(layer, params);
 		}
-		else if (suffix.equalsIgnoreCase("ts"))
+		else if (suffix.equalsIgnoreCase("ts") || suffix.equalsIgnoreCase("gp") || suffix.equalsIgnoreCase("vo"))
 		{
 			List<FastShape> shapes = GocadFactory.read(file);
 			if (!shapes.isEmpty())
 			{
-				ModelLayer layer = new LocalModelLayer(shapes.get(0));
+				ModelLayer layer = new LocalModelLayer(shapes);
 				return new LoadedLayer(layer, params);
 			}
 		}

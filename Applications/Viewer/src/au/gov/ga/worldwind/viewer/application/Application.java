@@ -15,6 +15,7 @@ import gov.nasa.worldwind.exception.WWAbsentRequirementException;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.globes.Earth;
+import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
@@ -74,6 +75,7 @@ import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
+import au.gov.ga.worldwind.common.layers.Wireframeable;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.terrain.WireframeRectangularTessellator;
 import au.gov.ga.worldwind.common.ui.BasicAction;
@@ -162,7 +164,7 @@ public class Application
 	public static void main(String[] args)
 	{
 		//first parse the command line options
-		
+
 		CmdLineParser parser = new CmdLineParser();
 		CmdLineParser.Option urlRegexOption = parser.addStringOption('u', "url-regex");
 		CmdLineParser.Option urlReplacementOption = parser.addStringOption('r', "url-replacement");
@@ -699,6 +701,14 @@ public class Application
 			public void actionPerformed(ActionEvent e)
 			{
 				wireframeDepthAction.setEnabled(wireframeAction.isSelected());
+				LayerList layers = wwd.getModel().getLayers();
+				for (Layer layer : layers)
+				{
+					if (layer instanceof Wireframeable)
+					{
+						((Wireframeable) layer).setWireframe(wireframeAction.isSelected());
+					}
+				}
 				wwd.getModel().setShowWireframeInterior(wireframeAction.isSelected());
 				wwd.redraw();
 			}

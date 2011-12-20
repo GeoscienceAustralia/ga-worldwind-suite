@@ -2,20 +2,15 @@ package au.gov.ga.worldwind.common.layers.model;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 import au.gov.ga.worldwind.common.util.FastShape;
-import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.layers.AbstractLayer;
-import gov.nasa.worldwind.render.DrawContext;
 
-public class LocalModelLayer extends AbstractLayer implements ModelLayer
+public class LocalModelLayer extends AbstractModelLayer implements ModelLayer
 {
-	private FastShape shape;
-	
-	public LocalModelLayer(FastShape shape)
+	public LocalModelLayer(List<FastShape> shapes)
 	{
-		this.shape = shape;
+		super(shapes);
 	}
 
 	@Override
@@ -47,39 +42,7 @@ public class LocalModelLayer extends AbstractLayer implements ModelLayer
 	}
 
 	@Override
-	public void setup(WorldWindow wwd)
+	protected void requestData()
 	{
-	}
-
-	@Override
-	public Sector getSector()
-	{
-		if(shape == null)
-		{
-			return null;
-		}
-		return shape.getSector();
-	}
-
-	@Override
-	public FastShape getShape()
-	{
-		return shape;
-	}
-
-	@Override
-	public void setShape(FastShape shape)
-	{
-		this.shape = shape;
-	}
-
-	@Override
-	protected void doRender(DrawContext dc)
-	{
-		if(!isEnabled() || shape == null)
-		{
-			return;
-		}
-		shape.render(dc);
 	}
 }
