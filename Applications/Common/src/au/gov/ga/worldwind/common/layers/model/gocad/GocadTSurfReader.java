@@ -27,8 +27,7 @@ public class GocadTSurfReader implements GocadReader
 	public final static String HEADER_REGEX = "(?i).*tsurf.*";
 	private final static String VERTEX_REGEX = "VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*";
 	private final static String TRIANGLE_REGEX = "TRGL\\s+(\\d+)\\s+(\\d+)\\s+(\\d+).*";
-	private final static String COLOR_REGEX =
-			"\\*solid\\*color:\\s*([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)";
+	private final static String COLOR_REGEX = "\\*solid\\*color:.+";
 	private final static String NAME_REGEX = "name:\\s*(.*)\\s*";
 
 	private List<Position> positions;
@@ -87,15 +86,11 @@ public class GocadTSurfReader implements GocadReader
 		matcher = colorPattern.matcher(line);
 		if (matcher.matches())
 		{
-			double r = Double.parseDouble(matcher.group(1));
-			double g = Double.parseDouble(matcher.group(2));
-			double b = Double.parseDouble(matcher.group(3));
-			double a = Double.parseDouble(matcher.group(4));
-			color = new Color((float) r, (float) g, (float) b, (float) a);
+			color = GocadColor.gocadLineToColor(line);
 		}
-		
+
 		matcher = namePattern.matcher(line);
-		if(matcher.matches())
+		if (matcher.matches())
 		{
 			name = matcher.group(1);
 		}
@@ -117,7 +112,7 @@ public class GocadTSurfReader implements GocadReader
 		shape.setName(name);
 		shape.setLighted(true);
 		shape.setCalculateNormals(true);
-		if(color != null)
+		if (color != null)
 		{
 			shape.setColor(color);
 		}

@@ -119,16 +119,12 @@ public class GocadFactory
 					break;
 				}
 
-				//ignore blank lines while searching for header
-				if (line.trim().length() == 0)
-				{
-					continue;
-				}
-
+				//check if the line matches any of the GOCAD object header regexes
 				GocadType type = determineGocadType(line);
 				if (type == null)
 				{
-					throw new IllegalArgumentException("Unknown GOCAD type in header: " + line);
+					//if this line doesn't, try the next line
+					continue;
 				}
 
 				GocadReader gocadReader = type.instanciateReader();
