@@ -185,11 +185,13 @@ public enum GocadColor
 	}
 
 	private static Map<String, GocadColor> prettyToColor = new HashMap<String, GocadColor>();
+	private static Map<String, GocadColor> nameToColor = new HashMap<String, GocadColor>();
 	static
 	{
 		for (GocadColor color : values())
 		{
 			prettyToColor.put(color.pretty.toLowerCase(), color);
+			nameToColor.put(color.name().toLowerCase(), color);
 		}
 	}
 
@@ -239,6 +241,10 @@ public enum GocadColor
 		{
 			String name = matcher.group(1);
 			GocadColor gc = prettyToColor.get(name.toLowerCase());
+			if (gc == null)
+			{
+				gc = nameToColor.get(name.toLowerCase());
+			}
 			if (gc != null)
 			{
 				return gc.color;
