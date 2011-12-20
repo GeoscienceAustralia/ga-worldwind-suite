@@ -796,7 +796,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	 */
 	public Extent getExtent()
 	{
-		frontLock.readLock().unlock();
+		frontLock.readLock().lock();
 		try
 		{
 			return boundingSphere;
@@ -810,7 +810,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	@Override
 	public Sector getSector()
 	{
-		frontLock.readLock().unlock();
+		frontLock.readLock().lock();
 		try
 		{
 			return sector;
