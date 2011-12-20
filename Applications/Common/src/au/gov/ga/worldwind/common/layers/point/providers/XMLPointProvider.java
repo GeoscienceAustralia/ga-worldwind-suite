@@ -45,7 +45,7 @@ public class XMLPointProvider implements PointProvider
 					points.add(position);
 					sector =
 							sector != null ? sector.union(position.latitude, position.longitude) : new Sector(
-									position.latitude, position.longitude, position.latitude, position.longitude);
+									position.latitude, position.latitude, position.longitude, position.longitude);
 
 					AVList attributes = new AVListImpl();
 					this.attributes.add(attributes);

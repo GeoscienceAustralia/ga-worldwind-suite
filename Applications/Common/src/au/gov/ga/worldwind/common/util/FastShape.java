@@ -602,7 +602,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			{
 				sector =
 						sector != null ? sector.union(position.latitude, position.longitude) : new Sector(
-								position.latitude, position.longitude, position.latitude, position.longitude);
+								position.latitude, position.latitude, position.longitude, position.longitude);
 			}
 		}
 		finally
