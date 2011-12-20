@@ -239,11 +239,11 @@ public enum GocadColor
 		matcher = colorNamePattern.matcher(gocadLine);
 		if (matcher.matches())
 		{
-			String name = matcher.group(1);
-			GocadColor gc = prettyToColor.get(name.toLowerCase());
+			String name = matcher.group(1).toLowerCase();
+			GocadColor gc = prettyToColor.get(name);
 			if (gc == null)
 			{
-				gc = nameToColor.get(name.toLowerCase());
+				gc = nameToColor.get(name);
 			}
 			if (gc != null)
 			{
