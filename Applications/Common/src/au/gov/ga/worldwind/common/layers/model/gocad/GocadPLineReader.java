@@ -13,30 +13,30 @@ import java.util.regex.Pattern;
 
 import javax.media.opengl.GL;
 
-import au.gov.ga.worldwind.common.util.FastShape;
-
 import com.sun.opengl.util.BufferUtil;
 
+import au.gov.ga.worldwind.common.util.FastShape;
+
 /**
- * {@link GocadReader} implementation for reading TSurf GOCAD files.
+ * {@link GocadReader} implementation for reading PLine GOCAD files.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class GocadTSurfReader implements GocadReader
+public class GocadPLineReader implements GocadReader
 {
-	public final static String HEADER_REGEX = "(?i).*tsurf.*";
+	public final static String HEADER_REGEX = "(?i).*pline.*";
 	private final static String VERTEX_REGEX = "P?VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*";
-	private final static String TRIANGLE_REGEX = "TRGL\\s+(\\d+)\\s+(\\d+)\\s+(\\d+).*";
-	private final static String COLOR_REGEX = "\\*solid\\*color:.+";
+	private final static String SEGMENT_REGEX = "SEG\\s+(\\d+)\\s+(\\d+).*";
+	private final static String COLOR_REGEX = "\\*line\\*color:.+";
 	private final static String NAME_REGEX = "name:\\s*(.*)\\s*";
 
 	private List<Position> positions;
-	private List<Integer> triangleIds;
+	private List<Integer> segmentIds;
 	private Color color;
 	private Map<Integer, Integer> vertexIdMap;
 	private String name;
 	private final Pattern vertexPattern = Pattern.compile(VERTEX_REGEX);
-	private final Pattern trianglePattern = Pattern.compile(TRIANGLE_REGEX);
+	private final Pattern segmentPattern = Pattern.compile(SEGMENT_REGEX);
 	private final Pattern colorPattern = Pattern.compile(COLOR_REGEX);
 	private final Pattern namePattern = Pattern.compile(NAME_REGEX);
 
@@ -44,7 +44,7 @@ public class GocadTSurfReader implements GocadReader
 	public void begin()
 	{
 		positions = new ArrayList<Position>();
-		triangleIds = new ArrayList<Integer>();
+		segmentIds = new ArrayList<Integer>();
 		vertexIdMap = new HashMap<Integer, Integer>();
 	}
 
@@ -71,15 +71,13 @@ public class GocadTSurfReader implements GocadReader
 			return;
 		}
 
-		matcher = trianglePattern.matcher(line);
+		matcher = segmentPattern.matcher(line);
 		if (matcher.matches())
 		{
-			int t1 = Integer.parseInt(matcher.group(1));
-			int t2 = Integer.parseInt(matcher.group(2));
-			int t3 = Integer.parseInt(matcher.group(3));
-			triangleIds.add(t1);
-			triangleIds.add(t2);
-			triangleIds.add(t3);
+			int s1 = Integer.parseInt(matcher.group(1));
+			int s2 = Integer.parseInt(matcher.group(2));
+			segmentIds.add(s1);
+			segmentIds.add(s2);
 			return;
 		}
 
@@ -99,8 +97,8 @@ public class GocadTSurfReader implements GocadReader
 	@Override
 	public FastShape end()
 	{
-		IntBuffer indicesBuffer = BufferUtil.newIntBuffer(triangleIds.size());
-		for (Integer i : triangleIds)
+		IntBuffer indicesBuffer = BufferUtil.newIntBuffer(segmentIds.size());
+		for (Integer i : segmentIds)
 		{
 			if (!vertexIdMap.containsKey(i))
 			{
@@ -108,10 +106,8 @@ public class GocadTSurfReader implements GocadReader
 			}
 			indicesBuffer.put(vertexIdMap.get(i));
 		}
-		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_TRIANGLES);
+		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_LINES);
 		shape.setName(name);
-		shape.setLighted(true);
-		shape.setCalculateNormals(true);
 		if (color != null)
 		{
 			shape.setColor(color);
