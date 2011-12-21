@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.common.layers.model.gocad;
 import gov.nasa.worldwind.geom.Position;
 
 import java.awt.Color;
+import java.net.URL;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,9 +14,9 @@ import java.util.regex.Pattern;
 
 import javax.media.opengl.GL;
 
-import com.sun.opengl.util.BufferUtil;
-
 import au.gov.ga.worldwind.common.util.FastShape;
+
+import com.sun.opengl.util.BufferUtil;
 
 /**
  * {@link GocadReader} implementation for reading PLine GOCAD files.
@@ -25,20 +26,18 @@ import au.gov.ga.worldwind.common.util.FastShape;
 public class GocadPLineReader implements GocadReader
 {
 	public final static String HEADER_REGEX = "(?i).*pline.*";
-	private final static String VERTEX_REGEX = "P?VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*";
-	private final static String SEGMENT_REGEX = "SEG\\s+(\\d+)\\s+(\\d+).*";
-	private final static String COLOR_REGEX = "\\*line\\*color:.+";
-	private final static String NAME_REGEX = "name:\\s*(.*)\\s*";
+
+	private final static Pattern vertexPattern = Pattern
+			.compile("P?VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
+	private final static Pattern segmentPattern = Pattern.compile("SEG\\s+(\\d+)\\s+(\\d+).*");
+	private final static Pattern colorPattern = Pattern.compile("\\*line\\*color:.+");
+	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
 
 	private List<Position> positions;
 	private List<Integer> segmentIds;
 	private Color color;
 	private Map<Integer, Integer> vertexIdMap;
 	private String name;
-	private final Pattern vertexPattern = Pattern.compile(VERTEX_REGEX);
-	private final Pattern segmentPattern = Pattern.compile(SEGMENT_REGEX);
-	private final Pattern colorPattern = Pattern.compile(COLOR_REGEX);
-	private final Pattern namePattern = Pattern.compile(NAME_REGEX);
 
 	@Override
 	public void begin()
@@ -85,17 +84,19 @@ public class GocadPLineReader implements GocadReader
 		if (matcher.matches())
 		{
 			color = GocadColor.gocadLineToColor(line);
+			return;
 		}
 
 		matcher = namePattern.matcher(line);
 		if (matcher.matches())
 		{
 			name = matcher.group(1);
+			return;
 		}
 	}
 
 	@Override
-	public FastShape end()
+	public FastShape end(URL context)
 	{
 		IntBuffer indicesBuffer = BufferUtil.newIntBuffer(segmentIds.size());
 		for (Integer i : segmentIds)
@@ -106,6 +107,12 @@ public class GocadPLineReader implements GocadReader
 			}
 			indicesBuffer.put(vertexIdMap.get(i));
 		}
+
+		if (name == null)
+		{
+			name = "PLine";
+		}
+
 		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_LINES);
 		shape.setName(name);
 		if (color != null)

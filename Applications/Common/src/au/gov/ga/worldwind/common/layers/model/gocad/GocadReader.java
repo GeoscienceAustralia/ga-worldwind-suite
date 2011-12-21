@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.common.layers.model.gocad;
 
+import java.net.URL;
+
 import au.gov.ga.worldwind.common.util.FastShape;
 
 /**
@@ -27,7 +29,11 @@ public interface GocadReader
 	 * Called after reading all the lines from this GOCAD object. A
 	 * {@link FastShape} can be created from the read geometry and returned.
 	 * 
+	 * @param context
+	 *            URL context in which this object is being read; can be used to
+	 *            resolve relative references
+	 * 
 	 * @return A {@link FastShape} containing the geometry read
 	 */
-	FastShape end();
+	FastShape end(URL context);
 }

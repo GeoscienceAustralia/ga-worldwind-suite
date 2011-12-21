@@ -3,6 +3,7 @@ package au.gov.ga.worldwind.common.layers.model.gocad;
 import gov.nasa.worldwind.geom.Position;
 
 import java.awt.Color;
+import java.net.URL;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,20 +26,18 @@ import com.sun.opengl.util.BufferUtil;
 public class GocadTSurfReader implements GocadReader
 {
 	public final static String HEADER_REGEX = "(?i).*tsurf.*";
-	private final static String VERTEX_REGEX = "P?VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*";
-	private final static String TRIANGLE_REGEX = "TRGL\\s+(\\d+)\\s+(\\d+)\\s+(\\d+).*";
-	private final static String COLOR_REGEX = "\\*solid\\*color:.+";
-	private final static String NAME_REGEX = "name:\\s*(.*)\\s*";
+
+	private final static Pattern vertexPattern = Pattern
+			.compile("P?VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
+	private final static Pattern trianglePattern = Pattern.compile("TRGL\\s+(\\d+)\\s+(\\d+)\\s+(\\d+).*");
+	private final static Pattern colorPattern = Pattern.compile("\\*solid\\*color:.+");
+	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
 
 	private List<Position> positions;
 	private List<Integer> triangleIds;
 	private Color color;
 	private Map<Integer, Integer> vertexIdMap;
 	private String name;
-	private final Pattern vertexPattern = Pattern.compile(VERTEX_REGEX);
-	private final Pattern trianglePattern = Pattern.compile(TRIANGLE_REGEX);
-	private final Pattern colorPattern = Pattern.compile(COLOR_REGEX);
-	private final Pattern namePattern = Pattern.compile(NAME_REGEX);
 
 	@Override
 	public void begin()
@@ -87,17 +86,19 @@ public class GocadTSurfReader implements GocadReader
 		if (matcher.matches())
 		{
 			color = GocadColor.gocadLineToColor(line);
+			return;
 		}
 
 		matcher = namePattern.matcher(line);
 		if (matcher.matches())
 		{
 			name = matcher.group(1);
+			return;
 		}
 	}
 
 	@Override
-	public FastShape end()
+	public FastShape end(URL context)
 	{
 		IntBuffer indicesBuffer = BufferUtil.newIntBuffer(triangleIds.size());
 		for (Integer i : triangleIds)
@@ -108,6 +109,12 @@ public class GocadTSurfReader implements GocadReader
 			}
 			indicesBuffer.put(vertexIdMap.get(i));
 		}
+		
+		if (name == null)
+		{
+			name = "TSurf";
+		}
+		
 		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_TRIANGLES);
 		shape.setName(name);
 		shape.setLighted(true);

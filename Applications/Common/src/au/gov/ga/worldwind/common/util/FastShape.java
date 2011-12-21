@@ -54,7 +54,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected int colorBufferElementSize = 3;
 	protected IntBuffer indices;
 	protected int mode;
-	protected String name;
+	protected String name = "Shape";
 
 	protected DoubleBuffer vertexBuffer;
 	protected DoubleBuffer modVertexBuffer;

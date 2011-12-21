@@ -31,7 +31,7 @@ public class GocadFactory
 	public enum GocadType
 	{
 		PLine(GocadPLineReader.HEADER_REGEX, GocadPLineReader.class),
-		//Voxet(GocadVoxetReader.HEADER_REGEX, GocadVoxetReader.class),
+		Voxet(GocadVoxetReader.HEADER_REGEX, GocadVoxetReader.class),
 		TSurf(GocadTSurfReader.HEADER_REGEX, GocadTSurfReader.class);
 
 		/**
@@ -148,7 +148,7 @@ public class GocadFactory
 					}
 					gocadReader.addLine(line);
 				}
-				shapes.add(gocadReader.end());
+				shapes.add(gocadReader.end(context));
 			}
 		}
 		catch (IOException e)

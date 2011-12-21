@@ -202,6 +202,7 @@ public enum GocadColor
 	 * <li>*solid*color:1 0.447059 0.337255 1</li>
 	 * <li>*solid*color:1 0.447059 0.337255</li>
 	 * <li>*solid*color:dark olive green</li>
+	 * <li>*solid*color:darkolivegreen</li>
 	 * </ul>
 	 * The "*solid*color" part can be replaced by any text that doesn't contain
 	 * a ':'.
