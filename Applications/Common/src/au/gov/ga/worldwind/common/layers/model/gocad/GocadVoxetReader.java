@@ -36,8 +36,6 @@ public class GocadVoxetReader implements GocadReader
 	private final static Pattern propertyPattern = Pattern.compile("PROP_(\\S+)\\s+(\\d+)\\s+(\\S+).*");
 	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
 
-	private List<Position> positions;
-	private List<Float> values;
 	private String name;
 
 	private Vec4 axisO;
@@ -57,14 +55,15 @@ public class GocadVoxetReader implements GocadReader
 	private String file;
 
 	private boolean littleEndian = true;
+	private boolean bilinear = true;
 
-	private int skip = 4; //TODO make parameter
+	private int skipU = 8; //TODO make parameter
+	private int skipV = 4;
+	private int skipW = 8;
 
 	@Override
 	public void begin()
 	{
-		positions = new ArrayList<Position>();
-		values = new ArrayList<Float>();
 	}
 
 	@Override
@@ -200,6 +199,17 @@ public class GocadVoxetReader implements GocadReader
 		Validate.isTrue("RAW".equals(format), "Unsupported PROP_FORMAT value: " + format); //TODO support "SEGY"?
 		Validate.isTrue("IBM".equals(etype) || "IEEE".equals(etype), "Unsupported PROP_ETYPE value: " + format);
 
+		int uSamples = (int) (1 + (nu - 1) / skipU);
+		int vSamples = (int) (1 + (nv - 1) / skipV);
+		int wSamples = (int) (1 + (nw - 1) / skipW);
+
+		List<Position> positions = new ArrayList<Position>();
+		float[] values = new float[uSamples * vSamples * wSamples];
+		for (int i = 0; i < values.length; i++)
+		{
+			values[i] = Float.NaN;
+		}
+
 		float min = Float.MAX_VALUE, max = -Float.MAX_VALUE;
 		try
 		{
@@ -207,50 +217,112 @@ public class GocadVoxetReader implements GocadReader
 			InputStream is = new BufferedInputStream(fileUrl.openStream());
 			is.skip(offset);
 
-			int b0, b1, b2, b3;
 			boolean ieee = "IEEE".equals(etype);
 
-			for (int w = 0; w < nw; w += skip)
+			if (bilinear)
 			{
-				Vec4 wAdd = axisWStride.multiply3(w);
-				for (int v = 0; v < nv; v += skip)
+				//contains the number of values summed
+				int[] count = new int[values.length];
+
+				//read all the values, and sum them in regions
+				for (int w = 0; w < nw; w++)
 				{
-					Vec4 vAdd = axisVStride.multiply3(v);
-					for (int u = 0; u < nu; u += skip)
+					int wRegion = (w / skipW) * vSamples * uSamples;
+					for (int v = 0; v < nv; v++)
 					{
-						if (littleEndian)
+						int vRegion = (v / skipV) * uSamples;
+						for (int u = 0; u < nu; u++)
 						{
-							b3 = is.read();
-							b2 = is.read();
-							b1 = is.read();
-							b0 = is.read();
-						}
-						else
-						{
-							b0 = is.read();
-							b1 = is.read();
-							b2 = is.read();
-							b3 = is.read();
-						}
-						float value = bytesToFloat(b0, b1, b2, b3, ieee);
-						if (!Float.isNaN(value) && value != noDataValue)
-						{
-							values.add(value);
-							min = Math.min(min, value);
-							max = Math.max(max, value);
+							float value = readNextFloat(is, littleEndian, ieee);
+							if (!Float.isNaN(value) && value != noDataValue)
+							{
+								int uRegion = (u / skipU);
+								int valueIndex = wRegion + vRegion + uRegion;
 
-							Vec4 uAdd = axisUStride.multiply3(u);
-
-							Vec4 p =
-									new Vec4(origin.x + uAdd.x + vAdd.x + wAdd.x, origin.y + uAdd.y + vAdd.y + wAdd.y,
-											origin.z + uAdd.z + vAdd.z + wAdd.z);
-							positions.add(Position.fromDegrees(p.y, p.x, p.z));
+								//if this is the first value for this region, set it, otherwise add it
+								if (count[valueIndex] == 0)
+								{
+									values[valueIndex] = value;
+								}
+								else
+								{
+									values[valueIndex] += value;
+								}
+								count[valueIndex]++;
+							}
 						}
-						skipBytes(is, esize * Math.min(skip - 1, nu - u - 1));
 					}
-					skipBytes(is, esize * nu * Math.min(skip - 1, nv - v - 1));
 				}
-				skipBytes(is, esize * nu * nv * Math.min(skip - 1, nw - w - 1));
+
+				//divide all the sums by the number of values summed (basically, average)
+				for (int i = 0; i < values.length; i++)
+				{
+					if (count[i] > 0)
+					{
+						values[i] /= count[i];
+						min = Math.min(min, values[i]);
+						max = Math.max(max, values[i]);
+					}
+				}
+
+				//create points for each summed region that has a value
+				for (int w = 0, wi = 0; w < nw; w += skipW, wi++)
+				{
+					int wOffset = wi * vSamples * uSamples;
+					Vec4 wAdd = axisWStride.multiply3(w);
+					for (int v = 0, vi = 0; v < nv; v += skipV, vi++)
+					{
+						int vOffset = vi * uSamples;
+						Vec4 vAdd = axisVStride.multiply3(v);
+						for (int u = 0, ui = 0; u < nu; u += skipU, ui++)
+						{
+							int uOffset = ui;
+							int valueIndex = wOffset + vOffset + uOffset;
+							float value = values[valueIndex];
+
+							if (!Float.isNaN(value))
+							{
+								Vec4 uAdd = axisUStride.multiply3(u);
+								Vec4 p =
+										new Vec4(origin.x + uAdd.x + vAdd.x + wAdd.x, origin.y + uAdd.y + vAdd.y
+												+ wAdd.y, origin.z + uAdd.z + vAdd.z + wAdd.z);
+								positions.add(Position.fromDegrees(p.y, p.x, p.z));
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				//non-bilinear is simple; we can skip over any input values that don't contribute to the points
+				int valueIndex = 0;
+				for (int w = 0; w < nw; w += skipW)
+				{
+					Vec4 wAdd = axisWStride.multiply3(w);
+					for (int v = 0; v < nv; v += skipV)
+					{
+						Vec4 vAdd = axisVStride.multiply3(v);
+						for (int u = 0; u < nu; u += skipU)
+						{
+							float value = readNextFloat(is, littleEndian, ieee);
+							if (!Float.isNaN(value) && value != noDataValue)
+							{
+								values[valueIndex++] = value;
+								min = Math.min(min, value);
+								max = Math.max(max, value);
+
+								Vec4 uAdd = axisUStride.multiply3(u);
+								Vec4 p =
+										new Vec4(origin.x + uAdd.x + vAdd.x + wAdd.x, origin.y + uAdd.y + vAdd.y
+												+ wAdd.y, origin.z + uAdd.z + vAdd.z + wAdd.z);
+								positions.add(Position.fromDegrees(p.y, p.x, p.z));
+							}
+							skipBytes(is, esize * Math.min(skipU - 1, nu - u - 1));
+						}
+						skipBytes(is, esize * nu * Math.min(skipV - 1, nv - v - 1));
+					}
+					skipBytes(is, esize * nu * nv * Math.min(skipW - 1, nw - w - 1));
+				}
 			}
 		}
 		catch (Exception e)
@@ -259,13 +331,19 @@ public class GocadVoxetReader implements GocadReader
 			return null;
 		}
 
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(values.size() * 3);
+		//create a color buffer containing a color for each point
+		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * 4);
 		for (float value : values)
 		{
-			float percent = (value - min) / (max - min);
-			HSLColor hsl = new HSLColor(percent * 300f, 100f, 50f);
-			Color color = hsl.getRGB();
-			colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f);
+			//check that this value is valid; only non-NaN floats have points associated
+			if (!Float.isNaN(value))
+			{
+				float percent = (value - min) / (max - min);
+				HSLColor hsl = new HSLColor((1f - percent) * 300f, 100f, 50f);
+				Color color = hsl.getRGB();
+				colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
+						.put(percent);
+			}
 		}
 
 		if (name == null)
@@ -276,6 +354,8 @@ public class GocadVoxetReader implements GocadReader
 		FastShape shape = new FastShape(positions, GL.GL_POINTS);
 		shape.setName(name);
 		shape.setColorBuffer(colorBuffer);
+		shape.setColorBufferElementSize(4);
+		shape.setForceSortedPrimitives(true);
 		return shape;
 	}
 
@@ -290,6 +370,26 @@ public class GocadVoxetReader implements GocadReader
 			}
 			n -= skipped;
 		}
+	}
+
+	private static float readNextFloat(InputStream is, boolean littleEndian, boolean ieee) throws IOException
+	{
+		int b0, b1, b2, b3;
+		if (littleEndian)
+		{
+			b3 = is.read();
+			b2 = is.read();
+			b1 = is.read();
+			b0 = is.read();
+		}
+		else
+		{
+			b0 = is.read();
+			b1 = is.read();
+			b2 = is.read();
+			b3 = is.read();
+		}
+		return bytesToFloat(b0, b1, b2, b3, ieee);
 	}
 
 	private static float bytesToFloat(int b0, int b1, int b2, int b3, boolean ieee)
