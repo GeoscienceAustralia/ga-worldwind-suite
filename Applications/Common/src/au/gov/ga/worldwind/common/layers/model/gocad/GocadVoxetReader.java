@@ -405,14 +405,13 @@ public class GocadVoxetReader implements GocadReader
 			int E = (b3 & 0x7f);
 			long F = (b2 << 16) + (b1 << 8) + b0;
 
+			if (S == 0 && E == 0 && F == 0)
+				return 0;
+
 			double A = 16.0;
 			double B = 64.0;
 			double e24 = 16777216.0; // 2^24
-
 			double M = (double) F / e24;
-
-			if (S == 0 && E == 0 && F == 0)
-				return 0;
 
 			double F1 = S == 0 ? 1.0 : -1.0;
 			return (float) (F1 * M * Math.pow(A, E - B));
