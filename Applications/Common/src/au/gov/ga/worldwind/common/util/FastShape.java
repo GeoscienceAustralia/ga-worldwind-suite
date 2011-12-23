@@ -81,7 +81,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected boolean fogEnabled = false;
 	protected boolean wireframe = false;
 	protected boolean lighted = false;
-	protected boolean sortTransparentTriangles = true;
+	protected boolean sortTransparentPrimitives = true;
+	protected boolean forceSortedPrimitives = false;
 	protected boolean backfaceCulling = false;
 	protected boolean enabled = true;
 
@@ -127,7 +128,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 			try
 			{
-				boolean willUseSortedIndices = sortTransparentTriangles && alpha < 1.0 && sortedIndices != null;
+				boolean willUseSortedIndices =
+						(forceSortedPrimitives || (sortTransparentPrimitives && alpha < 1.0)) && sortedIndices != null;
 
 				int attributesToPush = GL.GL_CURRENT_BIT;
 				if (!fogEnabled)
@@ -183,10 +185,13 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					gl.glEnable(GL.GL_LIGHT1);
 					gl.glEnable(GL.GL_LIGHTING);
 
-					float[] materialColor =
-							{ color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, (float) alpha };
-					gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE, materialColor, 0);
-					gl.glEnable(GL.GL_COLOR_MATERIAL);
+					if (color != null)
+					{
+						float[] materialColor =
+								{ color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, (float) alpha };
+						gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE, materialColor, 0);
+						gl.glEnable(GL.GL_COLOR_MATERIAL);
+					}
 				}
 
 				if (colorBuffer != null)
@@ -195,8 +200,13 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					gl.glColorPointer(colorBufferElementSize, GL.GL_FLOAT, 0, colorBuffer.rewind());
 				}
 
-				gl.glColor4d(color.getRed() / 255d, color.getGreen() / 255d, color.getBlue() / 255d, alpha);
-				if (alpha < 1.0)
+				if (color != null)
+				{
+					float r = color.getRed() / 255f, g = color.getGreen() / 255f, b = color.getBlue() / 255f;
+					gl.glColor4f(r, g, b, (float) alpha);
+				}
+
+				if (alpha < 1.0 || willUseSortedIndices)
 				{
 					gl.glEnable(GL.GL_BLEND);
 					gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
@@ -251,7 +261,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 		Vec4 eyePoint = dc.getView().getEyePoint();
 		boolean recalculateIndices =
-				sortTransparentTriangles && mode == GL.GL_TRIANGLES && alpha < 1.0 && !eyePoint.equals(lastEyePoint);
+				(forceSortedPrimitives || (sortTransparentPrimitives && alpha < 1.0))
+						&& (mode == GL.GL_TRIANGLES || mode == GL.GL_POINTS) && !eyePoint.equals(lastEyePoint);
 		if (recalculateIndices)
 		{
 			lastEyePoint = eyePoint;
@@ -464,31 +475,52 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					new Vec4(vertexBuffer.get(i * 3 + 0), vertexBuffer.get(i * 3 + 1), vertexBuffer.get(i * 3 + 2));
 		}
 
-		boolean hasIndices = indices != null;
-		int triangleCountBy3 = hasIndices ? indices.limit() : size;
-		TriangleDistance[] distances = new TriangleDistance[triangleCountBy3 / 3];
-
-		for (int i = 0; i < triangleCountBy3; i += 3)
+		if (mode == GL.GL_TRIANGLES)
 		{
-			int index0 = hasIndices ? indices.get(i + 0) : i + 0;
-			int index1 = hasIndices ? indices.get(i + 1) : i + 1;
-			int index2 = hasIndices ? indices.get(i + 2) : i + 2;
-			Vec4 v0 = vertices[index0];
-			Vec4 v1 = vertices[index1];
-			Vec4 v2 = vertices[index2];
-			double distance =
-					v0.distanceToSquared3(eyePoint) + v1.distanceToSquared3(eyePoint) + v2.distanceToSquared3(eyePoint);
-			distances[i / 3] = new TriangleDistance(distance, i);
+			boolean hasIndices = indices != null;
+			int triangleCountBy3 = hasIndices ? indices.limit() : size;
+			IndexAndDistance[] distances = new IndexAndDistance[triangleCountBy3 / 3];
+
+			for (int i = 0; i < triangleCountBy3; i += 3)
+			{
+				int index0 = hasIndices ? indices.get(i + 0) : i + 0;
+				int index1 = hasIndices ? indices.get(i + 1) : i + 1;
+				int index2 = hasIndices ? indices.get(i + 2) : i + 2;
+				Vec4 v0 = vertices[index0];
+				Vec4 v1 = vertices[index1];
+				Vec4 v2 = vertices[index2];
+				double distance =
+						v0.distanceToSquared3(eyePoint) + v1.distanceToSquared3(eyePoint)
+								+ v2.distanceToSquared3(eyePoint);
+				distances[i / 3] = new IndexAndDistance(distance, i);
+			}
+
+			Arrays.sort(distances);
+
+			modSortedIndices.rewind();
+			for (IndexAndDistance distance : distances)
+			{
+				modSortedIndices.put(hasIndices ? indices.get(distance.index + 0) : distance.index + 0);
+				modSortedIndices.put(hasIndices ? indices.get(distance.index + 1) : distance.index + 1);
+				modSortedIndices.put(hasIndices ? indices.get(distance.index + 2) : distance.index + 2);
+			}
 		}
-
-		Arrays.sort(distances);
-
-		modSortedIndices.rewind();
-		for (TriangleDistance distance : distances)
+		else if (mode == GL.GL_POINTS)
 		{
-			modSortedIndices.put(hasIndices ? indices.get(distance.triangleIndex + 0) : distance.triangleIndex + 0);
-			modSortedIndices.put(hasIndices ? indices.get(distance.triangleIndex + 1) : distance.triangleIndex + 1);
-			modSortedIndices.put(hasIndices ? indices.get(distance.triangleIndex + 2) : distance.triangleIndex + 2);
+			IndexAndDistance[] distances = new IndexAndDistance[size];
+			for (int i = 0; i < size; i++)
+			{
+				double distance = vertices[i].distanceToSquared3(eyePoint);
+				distances[i] = new IndexAndDistance(distance, i);
+			}
+
+			Arrays.sort(distances);
+
+			modSortedIndices.rewind();
+			for (IndexAndDistance distance : distances)
+			{
+				modSortedIndices.put(distance.index);
+			}
 		}
 	}
 
@@ -782,6 +814,42 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		}
 	}
 
+	public boolean isSortTransparentPrimitives()
+	{
+		return sortTransparentPrimitives;
+	}
+
+	public void setSortTransparentPrimitives(boolean sortTransparentPrimitives)
+	{
+		frontLock.writeLock().lock();
+		try
+		{
+			this.sortTransparentPrimitives = sortTransparentPrimitives;
+		}
+		finally
+		{
+			frontLock.writeLock().unlock();
+		}
+	}
+
+	public boolean isForceSortedPrimitives()
+	{
+		return forceSortedPrimitives;
+	}
+
+	public void setForceSortedPrimitives(boolean forceSortedPrimitives)
+	{
+		frontLock.writeLock().lock();
+		try
+		{
+			this.forceSortedPrimitives = forceSortedPrimitives;
+		}
+		finally
+		{
+			frontLock.writeLock().unlock();
+		}
+	}
+
 	@Override
 	public long getSizeInBytes()
 	{
@@ -854,19 +922,19 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		return buffer;
 	}
 
-	protected static class TriangleDistance implements Comparable<TriangleDistance>
+	protected static class IndexAndDistance implements Comparable<IndexAndDistance>
 	{
 		public final double distance;
-		public final int triangleIndex;
+		public final int index;
 
-		public TriangleDistance(double distance, int triangleIndex)
+		public IndexAndDistance(double distance, int index)
 		{
 			this.distance = distance;
-			this.triangleIndex = triangleIndex;
+			this.index = index;
 		}
 
 		@Override
-		public int compareTo(TriangleDistance o)
+		public int compareTo(IndexAndDistance o)
 		{
 			return -Double.compare(distance, o.distance);
 		}
