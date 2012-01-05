@@ -2,20 +2,21 @@
 
 <project name="Tiler" basedir="." default="run">
 
-	<property name="deploy_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Tiler\Builds\Current"/>
-	
+	<property name="deploy_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Tiler\Builds\Current" />
+
 	<property name="src.dir" value="${basedir}/src" />
 	<property name="lib.dir" value="${basedir}/lib" />
 	<property name="gdal.dir" value="${basedir}/gdal" />
 	<property name="data.dir" value="${basedir}/gdal/data" />
+	<property name="plugins.dir" value="${basedir}/gdal/plugins" />
 
 	<property name="build.dir" value="${basedir}/build" />
 	<property name="executable.dir" value="${basedir}/executable" />
-	
-	<property name="tiler.version" value="1.0"/>
+
+	<property name="tiler.version" value="1.1" />
 	<property name="executable.jar" value="tiler-${tiler.version}.jar" />
-	
-	<property name="ribbon.version" value="1.0-SNAPSHOT"/>
+
+	<property name="ribbon.version" value="1.1-SNAPSHOT" />
 	<property name="ribbon.jar" value="ribbonTiler-${ribbon.version}.jar" />
 
 	<property name="javac.debug" value="false" />
@@ -82,11 +83,16 @@
 				<include name="**/*" />
 			</fileset>
 		</copy>
+		<copy todir="${executable.dir}/gdal/plugins">
+			<fileset dir="${plugins.dir}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
 		<echo file="${executable.dir}/gui.bat">@echo off
-java -jar ./${executable.jar}
+java -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Executable %*
 		</echo>
 		<echo file="${executable.dir}/console.bat">@echo off
-java -cp ${executable.jar} au.gov.ga.worldwind.tiler.application.Console %*
+java -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Console %*
 		</echo>
 		<copy todir="${executable.dir}">
 			<fileset dir="${basedir}">
@@ -94,7 +100,7 @@ java -cp ${executable.jar} au.gov.ga.worldwind.tiler.application.Console %*
 			</fileset>
 		</copy>
 	</target>
-	
+
 	<target name="ribbonExecutable" depends="compile">
 		<mkdir dir="${executable.dir}" />
 		<zip destfile="${executable.dir}/temp.zip">
@@ -126,18 +132,23 @@ java -cp ${executable.jar} au.gov.ga.worldwind.tiler.application.Console %*
 				<include name="**/*" />
 			</fileset>
 		</copy>
+		<copy todir="${executable.dir}/gdal/plugins">
+			<fileset dir="${plugins.dir}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
 		<copy todir="${executable.dir}">
 			<fileset dir="${basedir}">
 				<include name="7za.exe" />
 			</fileset>
 		</copy>
 	</target>
-	
+
 	<target name="run" depends="executable" />
-	
+
 	<target name="deploy" depends="clean,executable">
 		<copy todir="${deploy_location}" overwrite="true" failonerror="false">
-			<fileset dir="${executable.dir}"/>
+			<fileset dir="${executable.dir}" />
 		</copy>
 	</target>
 </project>

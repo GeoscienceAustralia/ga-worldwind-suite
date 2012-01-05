@@ -78,7 +78,7 @@ public class GDALTile
 
 	protected void readDataset() throws GDALException, TilerException
 	{
-		if (parameters.reprojectIfRequired && GDALUtil.isProjectionsSupported())
+		if (parameters.reprojectIfRequired)
 		{
 			SpatialReference dstSR = new SpatialReference();
 			dstSR.ImportFromEPSG(4326); // WGS84

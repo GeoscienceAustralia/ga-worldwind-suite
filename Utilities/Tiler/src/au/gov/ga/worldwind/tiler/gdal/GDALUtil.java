@@ -18,36 +18,39 @@ import au.gov.ga.worldwind.tiler.util.Util;
 
 public class GDALUtil
 {
-	public static final String GCS_FILE = "gcs.csv";
+	public static final String GDAL_DATUM_FILE = "gdal_datum.csv";
 
-	static
-	{
-		
-	}
+	protected final static String GDAL_DATA_PATH = "GDAL_DATA";
+	protected final static String GDAL_DRIVER_PATH = "GDAL_DRIVER_PATH";
 
 	public static void init()
 	{
-		gdal.AllRegister();
-
-		File gcs = null;
-		String gdaldata = System.getenv("GDAL_DATA");
-		if (gdaldata != null)
+		File gdalDirectory = null;
+		if (new File("gdal/data/" + GDAL_DATUM_FILE).exists())
 		{
-			File dir = new File(gdaldata);
-			if (dir.exists() && dir.isDirectory())
-			{
-				gcs = new File(dir, GCS_FILE);
-			}
+			gdalDirectory = new File("gdal");
+		}
+		else if (new File("../gdal/data/" + GDAL_DATUM_FILE).exists())
+		{
+			gdalDirectory = new File("../gdal");
 		}
 
-		projectionsSupported = (gcs != null && gcs.isFile());
+		if (gdalDirectory != null)
+		{
+			gdal.SetConfigOption(GDAL_DATA_PATH, new File(gdalDirectory, "data").getAbsolutePath());
+			gdal.SetConfigOption(GDAL_DRIVER_PATH, new File(gdalDirectory, "plugins").getAbsolutePath());
+
+			gdalDirectoryFound = true;
+		}
+
+		gdal.AllRegister();
 	}
 
-	private static boolean projectionsSupported;
+	private static boolean gdalDirectoryFound;
 
-	public static boolean isProjectionsSupported()
+	public static boolean isGdalDirectoryFound()
 	{
-		return projectionsSupported;
+		return gdalDirectoryFound;
 	}
 
 	public static Dataset open(File file) throws GDALException
@@ -66,8 +69,7 @@ public class GDALUtil
 		dataset.GetGeoTransform(geoTransformArray);
 
 		if (geoTransformArray[0] == 0 && geoTransformArray[1] == 0 && geoTransformArray[2] == 0
-				&& geoTransformArray[3] == 0 && geoTransformArray[4] == 0
-				&& geoTransformArray[5] == 0)
+				&& geoTransformArray[3] == 0 && geoTransformArray[4] == 0 && geoTransformArray[5] == 0)
 		{
 			throw new TilerException("Dataset contains zeroed geotransform");
 		}
@@ -78,12 +80,9 @@ public class GDALUtil
 		// gY = gt[3] + gt[4] * x + gt[5] * y;
 		double minlon = geoTransformArray[0];
 		double maxlat = geoTransformArray[3];
-		double maxlon =
-				geoTransformArray[0] + geoTransformArray[1] * width + geoTransformArray[2] * height;
-		double minlat =
-				geoTransformArray[3] + geoTransformArray[4] * width + geoTransformArray[5] * height;
+		double maxlon = geoTransformArray[0] + geoTransformArray[1] * width + geoTransformArray[2] * height;
+		double minlat = geoTransformArray[3] + geoTransformArray[4] * width + geoTransformArray[5] * height;
 
-		if (isProjectionsSupported())
 		{
 			String projection = dataset.GetProjectionRef();
 			if (projection != null && projection.length() > 0)
@@ -94,8 +93,7 @@ public class GDALUtil
 					SpatialReference geog = proj.CloneGeogCS();
 					if (geog != null)
 					{
-						CoordinateTransformation transform =
-								new CoordinateTransformation(proj, geog);
+						CoordinateTransformation transform = new CoordinateTransformation(proj, geog);
 						if (transform != null)
 						{
 							double[] transPoint = new double[3];
@@ -137,8 +135,7 @@ public class GDALUtil
 		int bandCount = dataset.getRasterCount();
 		String projection = dataset.GetProjection();
 		SpatialReference spatialReference =
-				(projection == null || projection.length() == 0 || !GDALUtil
-						.isProjectionsSupported()) ? null : new SpatialReference(projection);
+				(projection == null || projection.length() == 0) ? null : new SpatialReference(projection);
 		String[] dataTypes = new String[bandCount];
 		int[] dataTypeSizes = new int[bandCount];
 		Double[] nodata = new Double[bandCount];
@@ -167,10 +164,8 @@ public class GDALUtil
 		info.appendLine("Size = " + width + ", " + height);
 		info.appendLine("Cell size = " + (sector.getDeltaLongitude() / width) + ", "
 				+ (sector.getDeltaLatitude() / height));
-		info.appendLine("Bottom left corner = (" + sector.getMinLatitude() + ", "
-				+ sector.getMinLongitude() + ")");
-		info.appendLine("Top right corner = (" + sector.getMaxLatitude() + ", "
-				+ sector.getMaxLongitude() + ")");
+		info.appendLine("Bottom left corner = (" + sector.getMinLatitude() + ", " + sector.getMinLongitude() + ")");
+		info.appendLine("Top right corner = (" + sector.getMaxLatitude() + ", " + sector.getMaxLongitude() + ")");
 		info.appendLine("Raster band count = " + bandCount);
 		for (int i = 0; i < bandCount; i++)
 		{
@@ -189,8 +184,8 @@ public class GDALUtil
 		return info.toString(true);
 	}
 
-	public static String getTileText(Dataset dataset, Sector sector, LatLon origin, double lzts,
-			int levels, boolean overviews)
+	public static String getTileText(Dataset dataset, Sector sector, LatLon origin, double lzts, int levels,
+			boolean overviews)
 	{
 		StringLineBuilder info = new StringLineBuilder();
 
