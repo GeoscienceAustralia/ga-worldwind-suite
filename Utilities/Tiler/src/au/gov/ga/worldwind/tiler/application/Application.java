@@ -1736,8 +1736,11 @@ public class Application implements UncaughtExceptionHandler
 								{
 									w = h * width / height;
 								}
+								Sector previewSector = GDALUtil.getSector(dataset, false);
 								GDALTileParameters parameters =
-										new GDALTileParameters(dataset, new Dimension(w, h), sector);
+										new GDALTileParameters(dataset, new Dimension(w, h), previewSector);
+								parameters.bilinearInterpolationIfRequired = false;
+								parameters.reprojectIfRequired = false;
 								GDALTile tile = new GDALTile(parameters);
 								tile = tile.convertToType(gdalconst.GDT_Byte);
 								image = tile.getAsImage();

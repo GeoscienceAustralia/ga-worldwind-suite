@@ -65,6 +65,11 @@ public class GDALUtil
 
 	public static Sector getSector(Dataset dataset) throws TilerException
 	{
+		return getSector(dataset, true);
+	}
+
+	public static Sector getSector(Dataset dataset, boolean performCoordinateTransformation) throws TilerException
+	{
 		double[] geoTransformArray = new double[6];
 		dataset.GetGeoTransform(geoTransformArray);
 
@@ -83,6 +88,7 @@ public class GDALUtil
 		double maxlon = geoTransformArray[0] + geoTransformArray[1] * width + geoTransformArray[2] * height;
 		double minlat = geoTransformArray[3] + geoTransformArray[4] * width + geoTransformArray[5] * height;
 
+		if(performCoordinateTransformation)
 		{
 			String projection = dataset.GetProjectionRef();
 			if (projection != null && projection.length() > 0)
