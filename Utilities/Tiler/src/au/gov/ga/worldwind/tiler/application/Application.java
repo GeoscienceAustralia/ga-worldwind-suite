@@ -2367,7 +2367,7 @@ public class Application implements UncaughtExceptionHandler
 		}
 		else
 		{
-			chooser.setFileFilter(new XMLFileFilter());
+			chooser.setFileFilter(new XMLMMLFileFilter());
 		}
 		chooser.setAcceptAllFileFilterUsed(false);
 		if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
@@ -2682,18 +2682,19 @@ public class Application implements UncaughtExceptionHandler
 		}
 	}
 
-	private static class XMLFileFilter extends FileFilter
+	private static class XMLMMLFileFilter extends FileFilter
 	{
 		@Override
 		public boolean accept(File f)
 		{
-			return f.isDirectory() || f.getName().toLowerCase().endsWith(".xml");
+			return f.isDirectory() || f.getName().toLowerCase().endsWith(".xml")
+					|| f.getName().toLowerCase().endsWith(".mml");
 		}
 
 		@Override
 		public String getDescription()
 		{
-			return "Mapnik mapfile (*.xml)";
+			return "Mapnik mapfile (*.xml) or Cascadenik mapfile (*.mml)";
 		}
 	}
 

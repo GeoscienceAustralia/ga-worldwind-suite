@@ -1,8 +1,6 @@
 package au.gov.ga.worldwind.tiler.mapnik;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.OutputStream;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
@@ -68,25 +66,13 @@ public class MapnikUtil
 		File python = getPythonBinaryFile();
 		File mapnik = getMapnikScriptFile();
 		String command =
-				"\"" + python.getAbsolutePath() + "\" \"" + mapnik.getAbsolutePath()
-						+ "\" -v -n --no-color";
+				"\"" + python.getAbsolutePath() + "\" \"" + mapnik.getAbsolutePath() + "\" \""
+						+ input.getAbsolutePath() + "\" -v -n --no-color";
 		final StringBuilder sb = new StringBuilder();
 		final StringBuilder eb = new StringBuilder();
 		try
 		{
 			Process process = Runtime.getRuntime().exec(command);
-
-			OutputStream os = process.getOutputStream();
-			FileInputStream fis = new FileInputStream(input);
-			byte[] buffer = new byte[1024];
-			int len;
-			while ((len = fis.read(buffer)) > 0)
-			{
-				os.write(buffer, 0, len);
-			}
-			fis.close();
-			os.close();
-
 			new InputStreamHandler(process.getInputStream())
 			{
 				@Override
@@ -145,8 +131,8 @@ public class MapnikUtil
 		return null;
 	}
 
-	public static void tile(Sector sector, int width, int height, boolean ignoreBlank, File input,
-			File dst, final Logger logger) throws TilerException
+	public static void tile(Sector sector, int width, int height, boolean ignoreBlank, File input, File dst,
+			final Logger logger) throws TilerException
 	{
 		File python = getPythonBinaryFile();
 		File mapnik = getMapnikScriptFile();
@@ -154,24 +140,12 @@ public class MapnikUtil
 		String format = dst.getName().toLowerCase().endsWith("jpg") ? "jpeg" : "png";
 		String command =
 				"\"" + python.getAbsolutePath() + "\" \"" + mapnik.getAbsolutePath() + "\" \""
-						+ dst.getAbsolutePath() + "\" -f " + format + " -e "
-						+ sector.getMinLongitude() + " " + sector.getMinLatitude() + " "
-						+ sector.getMaxLongitude() + " " + sector.getMaxLatitude() + " -d " + width
-						+ " " + height + " --no-open --no-color";
+						+ input.getAbsolutePath() + "\" \"" + dst.getAbsolutePath() + "\" -f " + format + " -b "
+						+ sector.getMinLongitude() + " " + sector.getMinLatitude() + " " + sector.getMaxLongitude()
+						+ " " + sector.getMaxLatitude() + " -d " + width + " " + height + " --no-open --no-color";
 		try
 		{
 			Process process = Runtime.getRuntime().exec(command);
-
-			OutputStream os = process.getOutputStream();
-			FileInputStream fis = new FileInputStream(input);
-			byte[] buffer = new byte[1024];
-			int len;
-			while ((len = fis.read(buffer)) > 0)
-			{
-				os.write(buffer, 0, len);
-			}
-			fis.close();
-			os.close();
 
 			new InputStreamHandler(process.getInputStream())
 			{
