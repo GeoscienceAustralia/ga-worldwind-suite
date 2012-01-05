@@ -13,7 +13,6 @@ import javax.imageio.ImageIO;
 
 import org.gdal.gdal.Dataset;
 
-import au.gov.ga.worldwind.tiler.application.Executable;
 import au.gov.ga.worldwind.tiler.gdal.GDALTile;
 import au.gov.ga.worldwind.tiler.gdal.GDALTileParameters;
 import au.gov.ga.worldwind.tiler.gdal.GDALUtil;
@@ -31,8 +30,6 @@ public class RibbonTiler
 {
 	public static void main(String[] args) throws Exception
 	{
-		Executable.setGDALEnvironmentVariables();
-		
 		RibbonTilingContext context = new RibbonTilingContext();
 		JCommander jCommander = null;
 		try

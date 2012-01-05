@@ -30,10 +30,6 @@ public class GDALUtil
 		{
 			gdalDirectory = new File("gdal");
 		}
-		else if (new File("../gdal/data/" + GDAL_DATUM_FILE).exists())
-		{
-			gdalDirectory = new File("../gdal");
-		}
 
 		if (gdalDirectory != null)
 		{

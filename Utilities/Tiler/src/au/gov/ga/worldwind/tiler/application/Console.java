@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.tiler.application;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.text.DateFormat;
@@ -82,13 +81,7 @@ public class Console
 	{
 		try
 		{
-			Executable.setGDALEnvironmentVariables();
 			GDALUtil.init();
-		}
-		catch (FileNotFoundException e1)
-		{
-			System.err.println(e1.getMessage());
-			System.exit(2);
 		}
 		catch (Exception e)
 		{
