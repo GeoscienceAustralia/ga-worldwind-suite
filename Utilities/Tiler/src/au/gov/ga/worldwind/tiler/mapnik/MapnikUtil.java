@@ -131,7 +131,7 @@ public class MapnikUtil
 		return null;
 	}
 
-	public static void tile(Sector sector, int width, int height, boolean ignoreBlank, File input, File dst,
+	public static void tile(Sector sector, int width, int height, boolean ignoreBlank, boolean reproject, File input, File dst,
 			final Logger logger) throws TilerException
 	{
 		File python = getPythonBinaryFile();
@@ -143,6 +143,11 @@ public class MapnikUtil
 						+ input.getAbsolutePath() + "\" \"" + dst.getAbsolutePath() + "\" -f " + format + " -b "
 						+ sector.getMinLongitude() + " " + sector.getMinLatitude() + " " + sector.getMaxLongitude()
 						+ " " + sector.getMaxLatitude() + " -d " + width + " " + height + " --no-open --no-color";
+		if(reproject)
+		{
+			command += " -s epsg:4326";
+		}
+		
 		try
 		{
 			Process process = Runtime.getRuntime().exec(command);

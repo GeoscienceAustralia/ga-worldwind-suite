@@ -24,6 +24,7 @@ import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
 import org.gdal.osr.SpatialReference;
 
+import au.gov.ga.worldwind.tiler.util.ByteBufferCache;
 import au.gov.ga.worldwind.tiler.util.MinMaxArray;
 import au.gov.ga.worldwind.tiler.util.NullableNumberArray;
 import au.gov.ga.worldwind.tiler.util.NumberArray;
@@ -247,7 +248,8 @@ public class GDALTile
 
 		// image parameters and data
 		int bandSize = width * height * bufferTypeSize;
-		buffer = ByteBuffer.allocateDirect(bandSize * bufferBandCount);
+		//buffer = ByteBuffer.allocateDirect(bandSize * bufferBandCount);
+		buffer = ByteBufferCache.getByteBuffer(bandSize * bufferBandCount);
 		buffer.order(ByteOrder.LITTLE_ENDIAN); // TODO check if always the case?
 
 		// calculate src and dst image rectangles
@@ -295,7 +297,8 @@ public class GDALTile
 				//src rect is smaller: read into buffer, and then interpolate
 
 				int smallBandSize = srcRect.width * srcRect.height * bufferTypeSize;
-				ByteBuffer small = ByteBuffer.allocateDirect(smallBandSize * bufferBandCount);
+				//ByteBuffer small = ByteBuffer.allocateDirect(smallBandSize * bufferBandCount);
+				ByteBuffer small = ByteBufferCache.getByteBuffer(smallBandSize * bufferBandCount);
 				small.order(ByteOrder.LITTLE_ENDIAN);
 
 				//fill the alpha channel if required
@@ -981,7 +984,8 @@ public class GDALTile
 		int newBufferTypeSize = gdal.GetDataTypeSize(newBufferType) / 8;
 		boolean newFloatingPoint = isTypeFloatingPoint(newBufferType);
 		int size = buffer.limit() / bufferTypeSize;
-		ByteBuffer newBuffer = ByteBuffer.allocateDirect(size * newBufferTypeSize);
+		//ByteBuffer newBuffer = ByteBuffer.allocateDirect(size * newBufferTypeSize);
+		ByteBuffer newBuffer = ByteBufferCache.getByteBuffer(size * newBufferTypeSize);
 		newBuffer.order(buffer.order());
 
 		long lvalue = 0;

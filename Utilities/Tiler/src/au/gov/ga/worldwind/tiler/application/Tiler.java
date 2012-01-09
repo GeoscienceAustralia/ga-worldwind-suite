@@ -68,11 +68,11 @@ public class Tiler
 
 	public static void tileMapnik(File mapFile, Sector sector, LatLon origin, int level,
 			int tilesize, double lzts, String imageFormat, boolean ignoreBlank,
-			File outputDirectory, ProgressReporter progress)
+			boolean reprojectIfRequired, File outputDirectory, ProgressReporter progress)
 	{
-		tile(TilingType.Mapnik, null, false, false, mapFile, sector, origin, level, tilesize, lzts,
-				imageFormat, false, -1, -1, -1, null, ignoreBlank, null, null, null, null,
-				outputDirectory, progress);
+		tile(TilingType.Mapnik, null, reprojectIfRequired, false, mapFile, sector, origin, level,
+				tilesize, lzts, imageFormat, false, -1, -1, -1, null, ignoreBlank, null, null,
+				null, null, outputDirectory, progress);
 	}
 
 	private static void tile(TilingType type, Dataset dataset, boolean reprojectIfRequired,
@@ -139,7 +139,7 @@ public class Tiler
 					{
 						if (type == TilingType.Mapnik)
 						{
-							MapnikUtil.tile(s, tilesize, tilesize, ignoreBlank, mapFile, dst,
+							MapnikUtil.tile(s, tilesize, tilesize, ignoreBlank, reprojectIfRequired, mapFile, dst,
 									progress.getLogger());
 						}
 						else

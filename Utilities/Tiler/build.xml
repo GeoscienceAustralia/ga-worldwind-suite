@@ -89,10 +89,10 @@
 			</fileset>
 		</copy>
 		<echo file="${executable.dir}/gui.bat">@echo off
-java -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Executable %*
+java -Xmx1024m -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Executable %*
 		</echo>
 		<echo file="${executable.dir}/console.bat">@echo off
-java -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Console %*
+java -Xmx1024m -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Console %*
 		</echo>
 		<copy todir="${executable.dir}">
 			<fileset dir="${basedir}">

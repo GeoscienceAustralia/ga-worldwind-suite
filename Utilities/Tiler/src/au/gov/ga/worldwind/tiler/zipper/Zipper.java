@@ -8,7 +8,7 @@ public class Zipper
 {
 	public static void main(String[] args)
 	{
-		File dir = new File("D:/Bathymetry/ausbath09_r3");
+		File dir = new File("D:/Groundwater Data/layers/tiles/mos_dem_10box_ers_wgs84");
 		String ext = "bil";
 		zipAndDelete(dir, ext);
 		//unzipAndDelete(dir);

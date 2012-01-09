@@ -1023,8 +1023,8 @@ public class Application implements UncaughtExceptionHandler
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(overviewsCheck, c);
 
-		reprojectCheck = new JCheckBox("Reproject if required");
-		reprojectCheck.setSelected(false);
+		reprojectCheck = new JCheckBox("Reproject if required (to WGS84)");
+		reprojectCheck.setSelected(true);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = ++row;
@@ -1788,7 +1788,7 @@ public class Application implements UncaughtExceptionHandler
 								File dst = File.createTempFile("preview", ".png");
 								dst.deleteOnExit();
 								MapnikUtil.tile(sector, previewCanvas.getWidth(), previewCanvas.getHeight(), false,
-										mapFile, dst, logger);
+										false, mapFile, dst, logger);
 								BufferedImage image = ImageIO.read(dst);
 								ImageIcon icon = new ImageIcon(image);
 								previewCanvas.setIcon(icon);
@@ -2133,7 +2133,7 @@ public class Application implements UncaughtExceptionHandler
 			longitudeOriginField.setEnabled(standard);
 			outsideCheck.setEnabled(standard && !mapnik);
 			overviewsCheck.setEnabled(standard);
-			reprojectCheck.setEnabled(standard && !mapnik);
+			reprojectCheck.setEnabled(standard);
 			bilinearCheck.setEnabled(standard && !mapnik);
 			bilinearOverviewsCheck.setEnabled(standard && !mapnik);
 			overrideLevelsCheck.setEnabled(standard && !mapnik);
@@ -2165,7 +2165,7 @@ public class Application implements UncaughtExceptionHandler
 			{
 				field.setEnabled(outsideCheck.isSelected() && standard);
 			}
-			ignoreBlankCheck.setEnabled(outsideCheck.isSelected() && standard);
+			ignoreBlankCheck.setEnabled((mapnik || outsideCheck.isSelected()) && standard);
 
 			if (!elevationRadio.isSelected())
 			{
@@ -2256,7 +2256,7 @@ public class Application implements UncaughtExceptionHandler
 		levelsSpinner.setVisible(mapnik);
 		overrideLevelsCheck.setVisible(!mapnik);
 		overrideLevelsSpinner.setVisible(!mapnik);
-		reprojectCheck.setVisible(!mapnik);
+		reprojectCheck.setVisible(true);
 		bilinearCheck.setVisible(!mapnik);
 		bilinearOverviewsCheck.setVisible(!mapnik);
 		outsideCheck.setVisible(!mapnik);
@@ -2483,7 +2483,7 @@ public class Application implements UncaughtExceptionHandler
 								null, null, null, false);
 
 						Tiler.tileMapnik(mapFile, sector, origin, level, tilesize, lzts, imageFormat, ignoreBlank,
-								outDir, reporter);
+								reproject, outDir, reporter);
 						if (overviews && !reporter.isCancelled())
 						{
 							Overviewer.createImageOverviews(outDir, imageFormat, tilesize, tilesize, null, sector,
