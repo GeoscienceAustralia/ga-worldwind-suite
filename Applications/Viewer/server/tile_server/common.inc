@@ -7,7 +7,7 @@
 	 * @author Michael de Hoog
 	 */
 
-	private static final String sandpitRootPath = "/web/html/test_root/docs/resources/images/world-wind/tiles-orig"; //sandpit
+	private static final String sandpitRootPath = "/web/html/test_root/docs/resources/images/world-wind/tiles-sandpit"; //sandpit
 	private static final String productionRootPath = "/public/http/www/docs/resources/images/world-wind/tiles"; //production
 
 	private static final Map<String, String> extensions = new HashMap<String, String>();
