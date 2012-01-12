@@ -135,12 +135,8 @@ public class Application implements UncaughtExceptionHandler
 
 	private JTextField gdalFileField;
 	private JTextField mapnikFileField;
-	private JTextField pythonBinaryField;
-	private JTextField mapnikScriptField;
 	private JButton browseGdalButton;
 	private JButton browseMapnikButton;
-	private JButton browsePythonBinaryButton;
-	private JButton browseMapnikScriptButton;
 	private JTextArea infoText;
 	private JLabel previewCanvas;
 	private boolean previewGenerated;
@@ -164,6 +160,7 @@ public class Application implements UncaughtExceptionHandler
 	private JLabel levelsLabel;
 	private JSpinner levelsSpinner;
 	private JCheckBox overviewsCheck;
+	private JCheckBox mapnikOverviewsCheck;
 	private JCheckBox replaceCheck;
 	private JLabel replace1Label;
 	private JLabel replace2Label;
@@ -454,70 +451,6 @@ public class Application implements UncaughtExceptionHandler
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		mapnikCard.add(panel, c);
-
-		label = new JLabel("Python binary:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(0, 0, SPACING, SPACING);
-		panel.add(label, c);
-
-		pythonBinaryField = new JTextField();
-		pythonBinaryField.setEnabled(false);
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1;
-		c.insets = new Insets(0, 0, SPACING, 0);
-		panel.add(pythonBinaryField, c);
-
-		browsePythonBinaryButton = new JButton("...");
-		c = new GridBagConstraints();
-		c.gridx = 2;
-		c.gridy = 0;
-		c.insets = new Insets(0, 0, SPACING, 0);
-		panel.add(browsePythonBinaryButton, c);
-		browsePythonBinaryButton.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				setupPythonBinary();
-			}
-		});
-
-		label = new JLabel("nik2img.py script:");
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 1;
-		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(0, 0, SPACING, SPACING);
-		panel.add(label, c);
-
-		mapnikScriptField = new JTextField();
-		mapnikScriptField.setEnabled(false);
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.gridy = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1;
-		c.insets = new Insets(0, 0, SPACING, 0);
-		panel.add(mapnikScriptField, c);
-
-		browseMapnikScriptButton = new JButton("...");
-		c = new GridBagConstraints();
-		c.gridx = 2;
-		c.gridy = 1;
-		c.insets = new Insets(0, 0, SPACING, 0);
-		panel.add(browseMapnikScriptButton, c);
-		browseMapnikScriptButton.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				setupMapnikScript();
-			}
-		});
 
 		label = new JLabel("Map file:");
 		c = new GridBagConstraints();
@@ -1023,6 +956,16 @@ public class Application implements UncaughtExceptionHandler
 		c.insets = new Insets(0, 0, SPACING, 0);
 		trPanel.add(overviewsCheck, c);
 
+		mapnikOverviewsCheck = new JCheckBox("Use Mapnik for all levels");
+		mapnikOverviewsCheck.setSelected(true);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = ++row;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = new Insets(0, 0, SPACING, 0);
+		trPanel.add(mapnikOverviewsCheck, c);
+
 		reprojectCheck = new JCheckBox("Reproject if required (to WGS84)");
 		reprojectCheck.setSelected(true);
 		c = new GridBagConstraints();
@@ -1357,7 +1300,6 @@ public class Application implements UncaughtExceptionHandler
 			}
 		});
 
-		updatePythonFields();
 		addRecalculateListeners();
 		openDataset(null);
 		datasetModeChanged();
@@ -1705,26 +1647,7 @@ public class Application implements UncaughtExceptionHandler
 							logger.fine("Generating preview...");
 							try
 							{
-								BufferedImage image = new BufferedImage(150, 50, BufferedImage.TYPE_INT_ARGB);
-								Graphics2D g = null;
-								try
-								{
-									g = image.createGraphics();
-									g.setColor(Color.black);
-									String s = "LOADING...";
-									Font font = new Font("Dialog", Font.BOLD, 18);
-									g.setFont(font);
-									int width = g.getFontMetrics().stringWidth(s);
-									int height = g.getFontMetrics().getAscent();
-									g.drawString(s, (image.getWidth() - width) / 2, (image.getHeight() + height) / 2);
-								}
-								finally
-								{
-									if (g != null)
-										g.dispose();
-								}
-								ImageIcon icon = new ImageIcon(image);
-								previewCanvas.setIcon(icon);
+								showPreviewLoading();
 
 								int w = 400;
 								int h = w;
@@ -1743,8 +1666,8 @@ public class Application implements UncaughtExceptionHandler
 								parameters.reprojectIfRequired = false;
 								GDALTile tile = new GDALTile(parameters);
 								tile = tile.convertToType(gdalconst.GDT_Byte);
-								image = tile.getAsImage();
-								icon = new ImageIcon(image);
+								BufferedImage image = tile.getAsImage();
+								ImageIcon icon = new ImageIcon(image);
 								previewCanvas.setIcon(icon);
 								logger.fine("Preview generation complete");
 							}
@@ -1785,6 +1708,8 @@ public class Application implements UncaughtExceptionHandler
 							logger.fine("Generating preview...");
 							try
 							{
+								showPreviewLoading();
+								
 								File dst = File.createTempFile("preview", ".png");
 								dst.deleteOnExit();
 								MapnikUtil.tile(sector, previewCanvas.getWidth(), previewCanvas.getHeight(), false,
@@ -1821,6 +1746,30 @@ public class Application implements UncaughtExceptionHandler
 		recalculateTiles();
 
 		frame.doLayout();
+	}
+
+	protected void showPreviewLoading()
+	{
+		BufferedImage image = new BufferedImage(150, 50, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = null;
+		try
+		{
+			g = image.createGraphics();
+			g.setColor(Color.black);
+			String s = "LOADING...";
+			Font font = new Font("Dialog", Font.BOLD, 18);
+			g.setFont(font);
+			int width = g.getFontMetrics().stringWidth(s);
+			int height = g.getFontMetrics().getAscent();
+			g.drawString(s, (image.getWidth() - width) / 2, (image.getHeight() + height) / 2);
+		}
+		finally
+		{
+			if (g != null)
+				g.dispose();
+		}
+		ImageIcon icon = new ImageIcon(image);
+		previewCanvas.setIcon(icon);
 	}
 
 	private void datasetModeChanged()
@@ -2133,9 +2082,10 @@ public class Application implements UncaughtExceptionHandler
 			longitudeOriginField.setEnabled(standard);
 			outsideCheck.setEnabled(standard && !mapnik);
 			overviewsCheck.setEnabled(standard);
+			mapnikOverviewsCheck.setEnabled(standard && mapnik);
 			reprojectCheck.setEnabled(standard);
 			bilinearCheck.setEnabled(standard && !mapnik);
-			bilinearOverviewsCheck.setEnabled(standard && !mapnik);
+			bilinearOverviewsCheck.setEnabled(standard);
 			overrideLevelsCheck.setEnabled(standard && !mapnik);
 			pngRadio.setEnabled(standard);
 			tilesizeField.setEnabled(standard);
@@ -2212,8 +2162,6 @@ public class Application implements UncaughtExceptionHandler
 			mapnikRadio.setEnabled(!running);
 			browseGdalButton.setEnabled(!running);
 			browseMapnikButton.setEnabled(!running);
-			browseMapnikScriptButton.setEnabled(!running);
-			browsePythonBinaryButton.setEnabled(!running);
 			outputButton.setEnabled(!running);
 			outputDirectory.setEnabled(!running);
 			tileButton.setEnabled(validOptions && previewGenerated && outputDirectory.getText().length() != 0
@@ -2274,6 +2222,7 @@ public class Application implements UncaughtExceptionHandler
 		max2Panel.setVisible(!mapnik);
 		withPanel.setVisible(!mapnik);
 		otherwisePanel.setVisible(!mapnik);
+		mapnikOverviewsCheck.setVisible(mapnik);
 	}
 
 	private void recalculateTiles()
@@ -2367,7 +2316,7 @@ public class Application implements UncaughtExceptionHandler
 		}
 		else
 		{
-			chooser.setFileFilter(new XMLMMLFileFilter());
+			chooser.setFileFilter(new XMLFileFilter());
 		}
 		chooser.setAcceptAllFileFilterUsed(false);
 		if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
@@ -2376,72 +2325,6 @@ public class Application implements UncaughtExceptionHandler
 			preferences.put(preferenceKey, file.getParentFile().getAbsolutePath());
 			openDataset(file);
 		}
-	}
-
-	private void setupPythonBinary()
-	{
-		String pb = MapnikUtil.getPythonBinary();
-		JFileChooser chooser = new JFileChooser(pb);
-		chooser.setFileFilter(new FileFilter()
-		{
-			@Override
-			public boolean accept(File f)
-			{
-				return f.isDirectory() || f.getName().equalsIgnoreCase("python.exe");
-			}
-
-			@Override
-			public String getDescription()
-			{
-				return "python.exe";
-			}
-		});
-		chooser.setDialogTitle("Select python binary...");
-		if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
-		{
-			File file = chooser.getSelectedFile();
-			MapnikUtil.setPythonBinary(file.getAbsolutePath());
-		}
-		updatePythonFields();
-	}
-
-	private void setupMapnikScript()
-	{
-		String ms = MapnikUtil.getMapnikScript();
-		JFileChooser chooser = new JFileChooser(ms);
-		chooser.setFileFilter(new FileFilter()
-		{
-			@Override
-			public boolean accept(File f)
-			{
-				return f.isDirectory() || f.getName().toLowerCase().endsWith(".py");
-			}
-
-			@Override
-			public String getDescription()
-			{
-				return "Python scripts (*.py)";
-			}
-		});
-		chooser.setDialogTitle("Select nik2img script...");
-		if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
-		{
-			File file = chooser.getSelectedFile();
-			MapnikUtil.setMapnikScript(file.getAbsolutePath());
-		}
-		updatePythonFields();
-	}
-
-	private void updatePythonFields()
-	{
-		String pb = MapnikUtil.getPythonBinary();
-		if (pb == null)
-			pb = "";
-		pythonBinaryField.setText(pb);
-		String ms = MapnikUtil.getMapnikScript();
-		if (ms == null)
-			ms = "";
-		mapnikScriptField.setText(ms);
 	}
 
 	private void generateTiles()
@@ -2459,6 +2342,7 @@ public class Application implements UncaughtExceptionHandler
 				double lzts = lztsField.getValue();
 				File outDir = new File(outputDirectory.getText());
 				boolean overviews = overviewsCheck.isSelected();
+				boolean mapnikOverviews = mapnikOverviewsCheck.isSelected();
 				boolean reproject = reprojectCheck.isSelected();
 				boolean bilinear = bilinearCheck.isSelected();
 				boolean bilinearOverviews = bilinearOverviewsCheck.isSelected();
@@ -2486,8 +2370,23 @@ public class Application implements UncaughtExceptionHandler
 								reproject, outDir, reporter);
 						if (overviews && !reporter.isCancelled())
 						{
-							Overviewer.createImageOverviews(outDir, imageFormat, tilesize, tilesize, null, sector,
-									origin, lzts, bilinearOverviews, ignoreBlank, jpegQuality, reporter);
+							if (mapnikOverviews)
+							{
+								for (int l = level - 1; l >= 0; l--)
+								{
+									if (reporter.isCancelled())
+									{
+										break;
+									}
+									Tiler.tileMapnik(mapFile, sector, origin, l, tilesize, lzts, imageFormat,
+											ignoreBlank, reproject, outDir, reporter);
+								}
+							}
+							else
+							{
+								Overviewer.createImageOverviews(outDir, imageFormat, tilesize, tilesize, null, sector,
+										origin, lzts, bilinearOverviews, ignoreBlank, jpegQuality, reporter);
+							}
 						}
 					}
 					else
@@ -2682,19 +2581,18 @@ public class Application implements UncaughtExceptionHandler
 		}
 	}
 
-	private static class XMLMMLFileFilter extends FileFilter
+	private static class XMLFileFilter extends FileFilter
 	{
 		@Override
 		public boolean accept(File f)
 		{
-			return f.isDirectory() || f.getName().toLowerCase().endsWith(".xml")
-					|| f.getName().toLowerCase().endsWith(".mml");
+			return f.isDirectory() || f.getName().toLowerCase().endsWith(".xml");
 		}
 
 		@Override
 		public String getDescription()
 		{
-			return "Mapnik mapfile (*.xml) or Cascadenik mapfile (*.mml)";
+			return "Mapnik mapfile (*.xml)";
 		}
 	}
 

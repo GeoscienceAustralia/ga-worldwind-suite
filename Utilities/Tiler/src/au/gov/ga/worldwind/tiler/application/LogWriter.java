@@ -10,7 +10,6 @@ import java.util.Date;
 import org.gdal.gdal.gdal;
 
 import au.gov.ga.worldwind.tiler.application.Tiler.TilingType;
-import au.gov.ga.worldwind.tiler.mapnik.MapnikUtil;
 import au.gov.ga.worldwind.tiler.util.BufferedLineWriter;
 import au.gov.ga.worldwind.tiler.util.LatLon;
 import au.gov.ga.worldwind.tiler.util.MinMaxArray;
@@ -41,8 +40,6 @@ public class LogWriter
 		if (type == TilingType.Mapnik)
 		{
 			writer.writeLine("Input file: " + mapFile.getAbsolutePath());
-			writer.writeLine("Python binary: " + MapnikUtil.getPythonBinary());
-			writer.writeLine("Mapnik script: " + MapnikUtil.getMapnikScript());
 			writer.writeLine("Sector: " + sector);
 			writer.writeLine("Tile origin: " + origin);
 			writer.writeLine("Output directory: " + outDir.getAbsolutePath());

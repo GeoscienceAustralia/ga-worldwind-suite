@@ -1,11 +1,16 @@
 package au.gov.ga.worldwind.tiler.mapnik;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.imageio.ImageIO;
+
+import au.gov.ga.worldwind.tiler.mask.MaskDeleter;
 import au.gov.ga.worldwind.tiler.util.InputStreamHandler;
 import au.gov.ga.worldwind.tiler.util.Prefs;
 import au.gov.ga.worldwind.tiler.util.Sector;
@@ -14,65 +19,14 @@ import au.gov.ga.worldwind.tiler.util.TilerException;
 
 public class MapnikUtil
 {
-	private final static Preferences preferences = Prefs.getPreferences();
-
-	private final static String PYTHON_KEY = "Python Binary";
-	private final static String MAPNIK_KEY = "Mapnik Script";
-
-	public static String getPythonBinary()
-	{
-		return preferences.get(PYTHON_KEY, null);
-	}
-
-	public static String getMapnikScript()
-	{
-		return preferences.get(MAPNIK_KEY, null);
-	}
-
-	public static void setPythonBinary(String value)
-	{
-		preferences.put(PYTHON_KEY, value);
-	}
-
-	public static void setMapnikScript(String value)
-	{
-		preferences.put(MAPNIK_KEY, value);
-	}
-
-	private static File getPythonBinaryFile() throws TilerException
-	{
-		String str = getPythonBinary();
-		File file = str == null ? null : new File(str);
-		if (file == null || !file.isFile())
-		{
-			throw new TilerException("Python binary setting is incorrect");
-		}
-		return file;
-	}
-
-	private static File getMapnikScriptFile() throws TilerException
-	{
-		String str = getMapnikScript();
-		File file = str == null ? null : new File(str);
-		if (file == null || !file.isFile())
-		{
-			throw new TilerException("Mapnik script setting is incorrect");
-		}
-		return file;
-	}
-
 	public static Sector getSector(File input) throws TilerException
 	{
-		File python = getPythonBinaryFile();
-		File mapnik = getMapnikScriptFile();
-		String command =
-				"\"" + python.getAbsolutePath() + "\" \"" + mapnik.getAbsolutePath() + "\" \""
-						+ input.getAbsolutePath() + "\" -v -n --no-color";
+		String command = "mapnik/Nik2Img.exe -m \"" + input.getAbsolutePath() + "\" -e";
 		final StringBuilder sb = new StringBuilder();
 		final StringBuilder eb = new StringBuilder();
 		try
 		{
-			Process process = Runtime.getRuntime().exec(command);
+			Process process = Runtime.getRuntime().exec(command, null, new File("mapnik"));
 			new InputStreamHandler(process.getInputStream())
 			{
 				@Override
@@ -96,61 +50,48 @@ public class MapnikUtil
 			throw new TilerException(e.getLocalizedMessage());
 		}
 
-		//unfortunately new version of nik2img prints everything to stderr, so can't do the following
-		/*String error = eb.toString();
+		String error = eb.toString();
 		if (error.length() > 0)
-			throw new TilerException(error);*/
+			throw new TilerException(error);
 
-		String output = sb.toString() + eb.toString();
-		Pattern pattern = Pattern.compile("Step.+Map long/lat bbox.+\\(.+\\)");
+		String output = sb.toString();
+		Pattern pattern = Pattern.compile("(-?[\\d\\.]+),(-?[\\d\\.]+),(-?[\\d\\.]+),(-?[\\d\\.]+)");
 		Matcher matcher = pattern.matcher(output);
 		if (matcher.find())
 		{
-			String found = matcher.group();
-			pattern = Pattern.compile("-?[\\d\\.]+,-?[\\d\\.]+,-?[\\d\\.]+,-?[\\d\\.]+");
-			matcher = pattern.matcher(found);
-			if (matcher.find())
+			try
 			{
-				found = matcher.group();
-				found = found.replace(" ", "");
-				String[] split = found.split(",");
-				try
-				{
-					double minlon = Double.parseDouble(split[0]);
-					double minlat = Double.parseDouble(split[1]);
-					double maxlon = Double.parseDouble(split[2]);
-					double maxlat = Double.parseDouble(split[3]);
-					return new Sector(minlat, minlon, maxlat, maxlon);
-				}
-				catch (Exception e)
-				{
-				}
+				double minlon = Double.parseDouble(matcher.group(1));
+				double minlat = Double.parseDouble(matcher.group(2));
+				double maxlon = Double.parseDouble(matcher.group(3));
+				double maxlat = Double.parseDouble(matcher.group(4));
+				return new Sector(minlat, minlon, maxlat, maxlon);
+			}
+			catch (NumberFormatException e)
+			{
+				//ignore
 			}
 		}
 
 		return null;
 	}
 
-	public static void tile(Sector sector, int width, int height, boolean ignoreBlank, boolean reproject, File input, File dst,
-			final Logger logger) throws TilerException
+	public static void tile(Sector sector, int width, int height, boolean ignoreBlank, boolean reproject, File input,
+			File dst, final Logger logger) throws TilerException
 	{
-		File python = getPythonBinaryFile();
-		File mapnik = getMapnikScriptFile();
-
-		String format = dst.getName().toLowerCase().endsWith("jpg") ? "jpeg" : "png";
+		String format = dst.getName().toLowerCase().endsWith("jpg") ? "jpg" : "png";
 		String command =
-				"\"" + python.getAbsolutePath() + "\" \"" + mapnik.getAbsolutePath() + "\" \""
-						+ input.getAbsolutePath() + "\" \"" + dst.getAbsolutePath() + "\" -f " + format + " -b "
-						+ sector.getMinLongitude() + " " + sector.getMinLatitude() + " " + sector.getMaxLongitude()
-						+ " " + sector.getMaxLatitude() + " -d " + width + " " + height + " --no-open --no-color";
-		if(reproject)
+				"mapnik/Nik2Img.exe -m \"" + input.getAbsolutePath() + "\" -o \"" + dst.getAbsolutePath() + "\" -f "
+						+ format + " -b " + sector.getMinLongitude() + "," + sector.getMinLatitude() + ","
+						+ sector.getMaxLongitude() + "," + sector.getMaxLatitude() + " -d " + width + "," + height;
+		if (reproject)
 		{
 			command += " -s epsg:4326";
 		}
-		
+
 		try
 		{
-			Process process = Runtime.getRuntime().exec(command);
+			Process process = Runtime.getRuntime().exec(command, null, new File("mapnik"));
 
 			new InputStreamHandler(process.getInputStream())
 			{
@@ -173,6 +114,22 @@ public class MapnikUtil
 		catch (Exception e)
 		{
 			throw new TilerException(e.getLocalizedMessage());
+		}
+
+		if (ignoreBlank)
+		{
+			try
+			{
+				BufferedImage image = ImageIO.read(dst);
+				if (MaskDeleter.isEmpty(image))
+				{
+					dst.delete();
+				}
+			}
+			catch (IOException e)
+			{
+				logger.severe(e.getLocalizedMessage());
+			}
 		}
 	}
 }

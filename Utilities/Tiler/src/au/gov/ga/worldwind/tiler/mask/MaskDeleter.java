@@ -222,7 +222,7 @@ public class MaskDeleter
 		}
 	}
 
-	protected static boolean isEmpty(BufferedImage image)
+	public static boolean isEmpty(BufferedImage image)
 	{
 		if (!image.getColorModel().hasAlpha())
 			throw new IllegalArgumentException("Image has no alpha channel");

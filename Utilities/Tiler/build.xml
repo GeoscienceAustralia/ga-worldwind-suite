@@ -9,6 +9,7 @@
 	<property name="gdal.dir" value="${basedir}/gdal" />
 	<property name="data.dir" value="${basedir}/gdal/data" />
 	<property name="plugins.dir" value="${basedir}/gdal/plugins" />
+	<property name="mapnik.dir" value="${basedir}/mapnik" />
 
 	<property name="build.dir" value="${basedir}/build" />
 	<property name="executable.dir" value="${basedir}/executable" />
@@ -88,6 +89,11 @@
 				<include name="**/*" />
 			</fileset>
 		</copy>
+		<copy todir="${executable.dir}/mapnik">
+			<fileset dir="${mapnik.dir}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
 		<echo file="${executable.dir}/gui.bat">@echo off
 java -Xmx1024m -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Executable %*
 		</echo>
@@ -134,6 +140,11 @@ java -Xmx1024m -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwin
 		</copy>
 		<copy todir="${executable.dir}/gdal/plugins">
 			<fileset dir="${plugins.dir}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+		<copy todir="${executable.dir}/mapnik">
+			<fileset dir="${mapnik.dir}">
 				<include name="**/*" />
 			</fileset>
 		</copy>
