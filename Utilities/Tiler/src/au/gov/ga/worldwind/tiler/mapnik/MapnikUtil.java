@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,10 +11,8 @@ import javax.imageio.ImageIO;
 
 import au.gov.ga.worldwind.tiler.mask.MaskDeleter;
 import au.gov.ga.worldwind.tiler.util.InputStreamHandler;
-import au.gov.ga.worldwind.tiler.util.Prefs;
 import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.TilerException;
-
 
 public class MapnikUtil
 {
