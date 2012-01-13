@@ -4,6 +4,7 @@ import gov.nasa.worldwind.formats.shapefile.DBaseRecord;
 import gov.nasa.worldwind.formats.shapefile.Shapefile;
 import gov.nasa.worldwind.formats.shapefile.ShapefileRecord;
 import gov.nasa.worldwind.formats.shapefile.ShapefileUtils;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.VecBuffer;
@@ -41,9 +42,39 @@ public class ShapefileBoreholeProvider extends AbstractDataProvider<BoreholeLaye
 				{
 					VecBuffer buffer = record.getPointBuffer(part);
 					int size = buffer.getSize();
-					for (int i = 0; i < size; i++)
+
+					if (Shapefile.isPointType(shapefile.getShapeType()))
 					{
-						layer.addBoreholeSample(buffer.getPosition(i), values);
+						for (int i = 0; i < size; i++)
+						{
+							layer.addBoreholeSample(buffer.getPosition(i), values);
+						}
+					}
+					else
+					{
+						//if the shapefile is not a point shapefile, then calculate the centroid of the feature and use that instead
+						
+						Sector sector = null;
+						double elevation = 0;
+						for (int i = 0; i < size; i++)
+						{
+							Position position = buffer.getPosition(i);
+							if (sector == null)
+							{
+								sector =
+										new Sector(position.latitude, position.longitude, position.latitude,
+												position.longitude);
+							}
+							else
+							{
+								sector = sector.union(position.latitude, position.longitude);
+							}
+							elevation += position.elevation;
+						}
+						if (sector != null)
+						{
+							layer.addBoreholeSample(new Position(sector.getCentroid(), elevation / size), values);
+						}
 					}
 				}
 			}
