@@ -32,8 +32,8 @@ import org.w3c.dom.Document;
 
 import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
 import au.gov.ga.worldwind.common.layers.model.LocalModelLayer;
-import au.gov.ga.worldwind.common.layers.model.ModelLayer;
 import au.gov.ga.worldwind.common.layers.model.gocad.GocadFactory;
+import au.gov.ga.worldwind.common.layers.model.gocad.GocadReaderParameters;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.FastShape;
 
@@ -125,12 +125,18 @@ public class FileLoader
 			KMLLayer layer = new KMLLayer(url, null, params);
 			return new LoadedLayer(layer, params);
 		}
-		else if (suffix.equalsIgnoreCase("ts") || suffix.equalsIgnoreCase("gp") || suffix.equalsIgnoreCase("vo"))
+		else if (GocadFactory.isGocadFileSuffix(suffix))
 		{
-			List<FastShape> shapes = GocadFactory.read(file);
+			GocadReaderParameters parameters = new GocadReaderParameters();
+			List<FastShape> shapes = GocadFactory.read(file, parameters);
 			if (!shapes.isEmpty())
 			{
-				ModelLayer layer = new LocalModelLayer(shapes);
+				LocalModelLayer layer = new LocalModelLayer(shapes);
+				if (suffix.equalsIgnoreCase("vo"))
+				{
+					//voxet, default to point sprite
+					layer.setPointSprite(true);
+				}
 				return new LoadedLayer(layer, params);
 			}
 		}

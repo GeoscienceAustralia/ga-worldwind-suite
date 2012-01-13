@@ -32,12 +32,12 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 	protected Double pointSize;
 	protected boolean wireframe = false;
 
+	protected boolean pointSprite = false;
 	protected Double pointMinSize = 2d;
 	protected Double pointMaxSize = 1000d;
 	protected Double pointConstantAttenuation = 0d;
 	protected Double pointLinearAttenuation = 0d;
-	//protected Double pointQuadraticAttenuation = 1.5E-11d; //good for skip == 4
-	protected Double pointQuadraticAttenuation = 6E-12d; //good for skip == 8
+	protected Double pointQuadraticAttenuation = 6E-12d;
 
 	protected final HierarchicalListenerList hierarchicalListenerList = new HierarchicalListenerList();
 	protected final ModelLayerTreeNode treeNode = new ModelLayerTreeNode(this);
@@ -113,7 +113,7 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 					{
 						shape.setColor(color);
 					}
-					if (shape.getMode() == GL.GL_POINTS)
+					if (shape.getMode() == GL.GL_POINTS && pointSprite)
 					{
 						//shape will be rendered as points; setup point sprite texture
 						try
@@ -231,6 +231,16 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 				shape.setWireframe(wireframe);
 			}
 		}
+	}
+
+	public boolean isPointSprite()
+	{
+		return pointSprite;
+	}
+
+	public void setPointSprite(boolean pointSprite)
+	{
+		this.pointSprite = pointSprite;
 	}
 
 	@Override

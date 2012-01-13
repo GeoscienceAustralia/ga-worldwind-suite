@@ -25,6 +25,11 @@ public class GocadFactory
 	private static final String OBJECT_END_REGEX = "END\\s*";
 	private static final String COMMENT_REGEX = "\\s*#.*";
 
+	public static boolean isGocadFileSuffix(String suffix)
+	{
+		return suffix.equalsIgnoreCase("ts") || suffix.equalsIgnoreCase("gp") || suffix.equalsIgnoreCase("vo");
+	}
+
 	/**
 	 * Enumeration of different GOCAD file types.
 	 */
@@ -68,11 +73,11 @@ public class GocadFactory
 		}
 	}
 
-	public static List<FastShape> read(File file)
+	public static List<FastShape> read(File file, GocadReaderParameters parameters)
 	{
 		try
 		{
-			return read(new FileReader(file), file.toURI().toURL());
+			return read(new FileReader(file), file.toURI().toURL(), parameters);
 		}
 		catch (MalformedURLException e)
 		{
@@ -86,9 +91,9 @@ public class GocadFactory
 		}
 	}
 
-	public static List<FastShape> read(InputStream is, URL context)
+	public static List<FastShape> read(InputStream is, URL context, GocadReaderParameters parameters)
 	{
-		return read(new InputStreamReader(is), context);
+		return read(new InputStreamReader(is), context, parameters);
 	}
 
 	/**
@@ -99,7 +104,7 @@ public class GocadFactory
 	 * @return A list of {@link FastShape}s containing the geometry from the
 	 *         GOCAD file
 	 */
-	public static List<FastShape> read(Reader reader, URL context)
+	public static List<FastShape> read(Reader reader, URL context, GocadReaderParameters parameters)
 	{
 		List<FastShape> shapes = new ArrayList<FastShape>();
 
@@ -128,7 +133,7 @@ public class GocadFactory
 				}
 
 				GocadReader gocadReader = type.instanciateReader();
-				gocadReader.begin();
+				gocadReader.begin(parameters);
 				while (true)
 				{
 					line = br.readLine();

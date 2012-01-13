@@ -8,6 +8,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.media.opengl.GL;
+
+import org.gdal.osr.CoordinateTransformation;
 
 import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.HSLColor;
@@ -54,16 +57,12 @@ public class GocadVoxetReader implements GocadReader
 	private int offset = 0;
 	private String file;
 
-	private boolean littleEndian = true;
-	private boolean bilinear = true;
-
-	private int skipU = 8; //TODO make parameter
-	private int skipV = 4;
-	private int skipW = 8;
+	private GocadReaderParameters parameters;
 
 	@Override
-	public void begin()
+	public void begin(GocadReaderParameters parameters)
 	{
+		this.parameters = parameters;
 	}
 
 	@Override
@@ -199,9 +198,21 @@ public class GocadVoxetReader implements GocadReader
 		Validate.isTrue("RAW".equals(format), "Unsupported PROP_FORMAT value: " + format); //TODO support "SEGY"?
 		Validate.isTrue("IBM".equals(etype) || "IEEE".equals(etype), "Unsupported PROP_ETYPE value: " + format);
 
-		int uSamples = (int) (1 + (nu - 1) / skipU);
-		int vSamples = (int) (1 + (nv - 1) / skipV);
-		int wSamples = (int) (1 + (nw - 1) / skipW);
+		int strideU = parameters.getVoxetSubsamplingU();
+		int strideV = parameters.getVoxetSubsamplingV();
+		int strideW = parameters.getVoxetSubsamplingW();
+
+		if (parameters.isVoxetDynamicSubsampling())
+		{
+			float samplesPerAxis = parameters.getVoxetDynamicSubsamplingSamplesPerAxis();
+			strideU = Math.max(1, Math.round((float) axisN.x / samplesPerAxis));
+			strideV = Math.max(1, Math.round((float) axisN.y / samplesPerAxis));
+			strideW = Math.max(1, Math.round((float) axisN.z / samplesPerAxis));
+		}
+
+		int uSamples = (int) (1 + (nu - 1) / strideU);
+		int vSamples = (int) (1 + (nv - 1) / strideV);
+		int wSamples = (int) (1 + (nw - 1) / strideW);
 
 		List<Position> positions = new ArrayList<Position>();
 		float[] values = new float[uSamples * vSamples * wSamples];
@@ -209,6 +220,9 @@ public class GocadVoxetReader implements GocadReader
 		{
 			values[i] = Float.NaN;
 		}
+
+		double[] transformed = new double[3];
+		CoordinateTransformation transformation = parameters.getCoordinateTransformation();
 
 		float min = Float.MAX_VALUE, max = -Float.MAX_VALUE;
 		try
@@ -219,7 +233,7 @@ public class GocadVoxetReader implements GocadReader
 
 			boolean ieee = "IEEE".equals(etype);
 
-			if (bilinear)
+			if (parameters.isVoxetBilinearMinification())
 			{
 				//contains the number of values summed
 				int[] count = new int[values.length];
@@ -227,16 +241,16 @@ public class GocadVoxetReader implements GocadReader
 				//read all the values, and sum them in regions
 				for (int w = 0; w < nw; w++)
 				{
-					int wRegion = (w / skipW) * vSamples * uSamples;
+					int wRegion = (w / strideW) * vSamples * uSamples;
 					for (int v = 0; v < nv; v++)
 					{
-						int vRegion = (v / skipV) * uSamples;
+						int vRegion = (v / strideV) * uSamples;
 						for (int u = 0; u < nu; u++)
 						{
-							float value = readNextFloat(is, littleEndian, ieee);
+							float value = readNextFloat(is, parameters.getByteOrder(), ieee);
 							if (!Float.isNaN(value) && value != noDataValue)
 							{
-								int uRegion = (u / skipU);
+								int uRegion = (u / strideU);
 								int valueIndex = wRegion + vRegion + uRegion;
 
 								//if this is the first value for this region, set it, otherwise add it
@@ -266,15 +280,15 @@ public class GocadVoxetReader implements GocadReader
 				}
 
 				//create points for each summed region that has a value
-				for (int w = 0, wi = 0; w < nw; w += skipW, wi++)
+				for (int w = 0, wi = 0; w < nw; w += strideW, wi++)
 				{
 					int wOffset = wi * vSamples * uSamples;
 					Vec4 wAdd = axisWStride.multiply3(w);
-					for (int v = 0, vi = 0; v < nv; v += skipV, vi++)
+					for (int v = 0, vi = 0; v < nv; v += strideV, vi++)
 					{
 						int vOffset = vi * uSamples;
 						Vec4 vAdd = axisVStride.multiply3(v);
-						for (int u = 0, ui = 0; u < nu; u += skipU, ui++)
+						for (int u = 0, ui = 0; u < nu; u += strideU, ui++)
 						{
 							int uOffset = ui;
 							int valueIndex = wOffset + vOffset + uOffset;
@@ -286,7 +300,15 @@ public class GocadVoxetReader implements GocadReader
 								Vec4 p =
 										new Vec4(origin.x + uAdd.x + vAdd.x + wAdd.x, origin.y + uAdd.y + vAdd.y
 												+ wAdd.y, origin.z + uAdd.z + vAdd.z + wAdd.z);
-								positions.add(Position.fromDegrees(p.y, p.x, p.z));
+								if (transformation != null)
+								{
+									transformation.TransformPoint(transformed, p.x, p.y, 0);
+									positions.add(Position.fromDegrees(transformed[1], transformed[0], p.z));
+								}
+								else
+								{
+									positions.add(Position.fromDegrees(p.y, p.x, p.z));
+								}
 							}
 						}
 					}
@@ -296,15 +318,15 @@ public class GocadVoxetReader implements GocadReader
 			{
 				//non-bilinear is simple; we can skip over any input values that don't contribute to the points
 				int valueIndex = 0;
-				for (int w = 0; w < nw; w += skipW)
+				for (int w = 0; w < nw; w += strideW)
 				{
 					Vec4 wAdd = axisWStride.multiply3(w);
-					for (int v = 0; v < nv; v += skipV)
+					for (int v = 0; v < nv; v += strideV)
 					{
 						Vec4 vAdd = axisVStride.multiply3(v);
-						for (int u = 0; u < nu; u += skipU)
+						for (int u = 0; u < nu; u += strideU)
 						{
-							float value = readNextFloat(is, littleEndian, ieee);
+							float value = readNextFloat(is, parameters.getByteOrder(), ieee);
 							if (!Float.isNaN(value) && value != noDataValue)
 							{
 								values[valueIndex++] = value;
@@ -315,13 +337,21 @@ public class GocadVoxetReader implements GocadReader
 								Vec4 p =
 										new Vec4(origin.x + uAdd.x + vAdd.x + wAdd.x, origin.y + uAdd.y + vAdd.y
 												+ wAdd.y, origin.z + uAdd.z + vAdd.z + wAdd.z);
-								positions.add(Position.fromDegrees(p.y, p.x, p.z));
+								if (transformation != null)
+								{
+									transformation.TransformPoint(transformed, p.x, p.y, 0);
+									positions.add(Position.fromDegrees(transformed[1], transformed[0], p.z));
+								}
+								else
+								{
+									positions.add(Position.fromDegrees(p.y, p.x, p.z));
+								}
 							}
-							skipBytes(is, esize * Math.min(skipU - 1, nu - u - 1));
+							skipBytes(is, esize * Math.min(strideU - 1, nu - u - 1));
 						}
-						skipBytes(is, esize * nu * Math.min(skipV - 1, nv - v - 1));
+						skipBytes(is, esize * nu * Math.min(strideV - 1, nv - v - 1));
 					}
-					skipBytes(is, esize * nu * nv * Math.min(skipW - 1, nw - w - 1));
+					skipBytes(is, esize * nu * nv * Math.min(strideW - 1, nw - w - 1));
 				}
 			}
 		}
@@ -332,7 +362,8 @@ public class GocadVoxetReader implements GocadReader
 		}
 
 		//create a color buffer containing a color for each point
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * 4);
+		int colorBufferElementSize = parameters.isVoxetAlphaFromValue() ? 4 : 3;
+		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * colorBufferElementSize);
 		for (float value : values)
 		{
 			//check that this value is valid; only non-NaN floats have points associated
@@ -341,8 +372,11 @@ public class GocadVoxetReader implements GocadReader
 				float percent = (value - min) / (max - min);
 				HSLColor hsl = new HSLColor((1f - percent) * 300f, 100f, 50f);
 				Color color = hsl.getRGB();
-				colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
-						.put(percent);
+				colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f);
+				if (parameters.isVoxetAlphaFromValue())
+				{
+					colorBuffer.put(percent);
+				}
 			}
 		}
 
@@ -354,8 +388,9 @@ public class GocadVoxetReader implements GocadReader
 		FastShape shape = new FastShape(positions, GL.GL_POINTS);
 		shape.setName(name);
 		shape.setColorBuffer(colorBuffer);
-		shape.setColorBufferElementSize(4);
+		shape.setColorBufferElementSize(colorBufferElementSize);
 		shape.setForceSortedPrimitives(true);
+		shape.setFollowTerrain(true);
 		return shape;
 	}
 
@@ -372,10 +407,10 @@ public class GocadVoxetReader implements GocadReader
 		}
 	}
 
-	private static float readNextFloat(InputStream is, boolean littleEndian, boolean ieee) throws IOException
+	private static float readNextFloat(InputStream is, ByteOrder byteOrder, boolean ieee) throws IOException
 	{
 		int b0, b1, b2, b3;
-		if (littleEndian)
+		if (byteOrder == ByteOrder.LITTLE_ENDIAN)
 		{
 			b3 = is.read();
 			b2 = is.read();

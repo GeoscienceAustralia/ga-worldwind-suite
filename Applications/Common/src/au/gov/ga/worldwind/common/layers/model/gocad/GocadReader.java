@@ -13,8 +13,11 @@ public interface GocadReader
 {
 	/**
 	 * Called before reading any lines.
+	 * 
+	 * @param parameters
+	 *            Reader parameters to use when reading this file
 	 */
-	void begin();
+	void begin(GocadReaderParameters parameters);
 
 	/**
 	 * Parse a line from the GOCAD file. The HEADER line and the END line are

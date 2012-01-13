@@ -33,6 +33,7 @@ public class GocadPLineReader implements GocadReader
 	private final static Pattern colorPattern = Pattern.compile("\\*line\\*color:.+");
 	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
 
+	private GocadReaderParameters parameters;
 	private List<Position> positions;
 	private List<Integer> segmentIds;
 	private Color color;
@@ -40,8 +41,9 @@ public class GocadPLineReader implements GocadReader
 	private String name;
 
 	@Override
-	public void begin()
+	public void begin(GocadReaderParameters parameters)
 	{
+		this.parameters = parameters;
 		positions = new ArrayList<Position>();
 		segmentIds = new ArrayList<Integer>();
 		vertexIdMap = new HashMap<Integer, Integer>();
@@ -59,6 +61,15 @@ public class GocadPLineReader implements GocadReader
 			double x = Double.parseDouble(matcher.group(2));
 			double y = Double.parseDouble(matcher.group(3));
 			double z = Double.parseDouble(matcher.group(4));
+			
+			if(parameters.getCoordinateTransformation() != null)
+			{
+				double[] transformed = new double[3];
+				parameters.getCoordinateTransformation().TransformPoint(transformed, x, y, 0);
+				x = transformed[0];
+				y = transformed[1];
+			}
+			
 			Position position = Position.fromDegrees(y, x, z);
 
 			if (vertexIdMap.containsKey(id))

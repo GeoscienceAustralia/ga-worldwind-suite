@@ -1,5 +1,7 @@
 package au.gov.ga.worldwind.common.layers.model;
 
+import java.nio.ByteOrder;
+
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -12,6 +14,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.data.DataLayerFactory;
 import au.gov.ga.worldwind.common.layers.model.gocad.GocadModelProvider;
+import au.gov.ga.worldwind.common.layers.model.gocad.GocadReaderParameters;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
@@ -58,6 +61,42 @@ public class ModelLayerFactory
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.POINT_SIZE, "PointSize", xpath);
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.MINIMUM_DISTANCE, "MinimumDistance", xpath);
 
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.POINT_SPRITE, "PointSprite", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.POINT_MIN_SIZE, "PointMinSize", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.POINT_MAX_SIZE, "PointMaxSize", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.POINT_CONSTANT_ATTENUATION,
+				"PointSizeAttenuation/@constant", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.POINT_LINEAR_ATTENUATION,
+				"PointSizeAttenuation/@linear", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.POINT_QUADRATIC_ATTENUATION,
+				"PointSizeAttenuation/@quadratic", xpath);
+
+		String byteOrder = WWXML.getText(domElement, "ByteOrder", xpath);
+		if (byteOrder != null)
+		{
+			if (byteOrder.equals(AVKey.LITTLE_ENDIAN) || byteOrder.toLowerCase().startsWith("little"))
+			{
+				params.setValue(AVKey.BYTE_ORDER, ByteOrder.LITTLE_ENDIAN);
+			}
+			else if (byteOrder.equals(AVKey.BIG_ENDIAN) || byteOrder.toLowerCase().startsWith("big"))
+			{
+				params.setValue(AVKey.BYTE_ORDER, ByteOrder.BIG_ENDIAN);
+			}
+		}
+
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.BILINEAR_MINIFICATION, "BilinearMinification",
+				xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.ALPHA_FROM_VALUE, "AlphaFromValue", xpath);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SUBSAMPLING_U, "Subsampling/@u", xpath);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SUBSAMPLING_V, "Subsampling/@v", xpath);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SUBSAMPLING_W, "Subsampling/@w", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.DYNAMIC_SUBSAMPLING, "DynamicSubsampling/@enabled",
+				xpath);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.DYNAMIC_SUBSAMPLING_SAMPLES_PER_AXIS,
+				"DynamicSubsampling/@samples", xpath);
+
+		WWXML.checkAndSetStringParam(domElement, params, AVKey.COORDINATE_SYSTEM, "CoordinateSystem", xpath);
+
 		setupModelProvider(domElement, xpath, params);
 
 		return params;
@@ -73,7 +112,8 @@ public class ModelLayerFactory
 
 		if ("GOCAD".equalsIgnoreCase(format))
 		{
-			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new GocadModelProvider());
+			GocadReaderParameters parameters = new GocadReaderParameters(params);
+			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new GocadModelProvider(parameters));
 		}
 		else
 		{

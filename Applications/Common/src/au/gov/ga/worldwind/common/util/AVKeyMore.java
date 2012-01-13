@@ -13,6 +13,12 @@ public interface AVKeyMore extends AVKey
 	final static String MINIMUM_DISTANCE = "au.gov.ga.worldwind.AVKeyMore.MinimumDistance";
 	final static String LINE_WIDTH = "au.gov.ga.worldwind.AVKeyMore.LineWidth";
 	final static String POINT_SIZE = "au.gov.ga.worldwind.AVKeyMore.PointSize";
+	final static String POINT_MIN_SIZE = "au.gov.ga.worldwind.AVKeyMore.PointMinSize";
+	final static String POINT_MAX_SIZE = "au.gov.ga.worldwind.AVKeyMore.PointMaxSize";
+	final static String POINT_SPRITE = "au.gov.ga.worldwind.AVKeyMore.PointSprite";
+	final static String POINT_CONSTANT_ATTENUATION = "au.gov.ga.worldwind.AVKeyMore.PointConstantAttenuation";
+	final static String POINT_LINEAR_ATTENUATION = "au.gov.ga.worldwind.AVKeyMore.PointLinearAttenuation";
+	final static String POINT_QUADRATIC_ATTENUATION = "au.gov.ga.worldwind.AVKeyMore.PointQuadraticAttenuation";
 
 	//curtain layer
 	final static String FULL_WIDTH = "au.gov.ga.worldwind.AVKeyMore.FullWidth";
@@ -52,4 +58,13 @@ public interface AVKeyMore extends AVKey
 	
 	//elevation model
 	final static String EXTRACT_ZIP_ENTRY = "au.gov.ga.worldwind.AVKeyMore.ExtractZipEntry";
+	
+	//voxet model
+	final static String BILINEAR_MINIFICATION = "au.gov.ga.worldwind.AVKeyMore.BilinearMinification";
+	final static String SUBSAMPLING_U = "au.gov.ga.worldwind.AVKeyMore.SubsamplingU";
+	final static String SUBSAMPLING_V = "au.gov.ga.worldwind.AVKeyMore.SubsamplingV";
+	final static String SUBSAMPLING_W = "au.gov.ga.worldwind.AVKeyMore.SubsamplingW";
+	final static String DYNAMIC_SUBSAMPLING = "au.gov.ga.worldwind.AVKeyMore.DynamicSubsampling";
+	final static String DYNAMIC_SUBSAMPLING_SAMPLES_PER_AXIS = "au.gov.ga.worldwind.AVKeyMore.DynamicSubsamplingSamplesPerAxis";
+	final static String ALPHA_FROM_VALUE = "au.gov.ga.worldwind.AVKeyMore.AlphaFromValue";
 }
