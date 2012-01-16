@@ -354,7 +354,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 		modVertexBuffer.rewind();
 		BufferWrapper wrapper = new BufferWrapper.DoubleBufferWrapper(modVertexBuffer);
-		modBoundingSphere = Sphere.createBoundingSphere(wrapper);
+		modBoundingSphere = createBoundingSphere(wrapper);
 
 		modVertexBuffer.rewind();
 		for (int i = 0; modVertexBuffer.remaining() >= 3; i += 3)
@@ -363,6 +363,18 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			modVertexBuffer.put(i + 1, modVertexBuffer.get() - modBoundingSphere.getCenter().y);
 			modVertexBuffer.put(i + 2, modVertexBuffer.get() - modBoundingSphere.getCenter().z);
 		}
+	}
+	
+	protected static Sphere createBoundingSphere(BufferWrapper wrapper)
+	{
+		//the Sphere.createBoundingSphere() function doesn't ensure that the radius is at least 1, causing errors
+		Vec4[] extrema = Vec4.computeExtrema(wrapper);
+        Vec4 center = new Vec4(
+            (extrema[0].x + extrema[1].x) / 2.0,
+            (extrema[0].y + extrema[1].y) / 2.0,
+            (extrema[0].z + extrema[1].z) / 2.0);
+        double radius = Math.max(1, extrema[0].distanceTo3(extrema[1]) / 2.0);
+        return new Sphere(center, radius);
 	}
 
 	protected void calculateNormals()
