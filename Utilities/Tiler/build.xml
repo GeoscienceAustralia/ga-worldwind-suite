@@ -94,12 +94,8 @@
 				<include name="**/*" />
 			</fileset>
 		</copy>
-		<echo file="${executable.dir}/gui.bat">@echo off
-java -Xmx1024m -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Executable %*
-		</echo>
-		<echo file="${executable.dir}/console.bat">@echo off
-java -Xmx1024m -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Console %*
-		</echo>
+		<echo file="${executable.dir}/gui.bat">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Executable %*</echo>
+		<echo file="${executable.dir}/console.bat">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable.jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Console %*</echo>
 		<copy todir="${executable.dir}">
 			<fileset dir="${basedir}">
 				<include name="7za.exe" />
