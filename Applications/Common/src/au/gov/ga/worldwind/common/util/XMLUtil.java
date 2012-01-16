@@ -32,11 +32,13 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.util.transform.URLTransformer;
 
 /**
- * An extension of the World-Wind provided {@link WWXML} utilities,
- * provides additional helper methods for dealing with XML documents.
+ * An extension of the World-Wind provided {@link WWXML} utilities, provides
+ * additional helper methods for dealing with XML documents.
  */
 public class XMLUtil extends WWXML
 {
+	private final static double EPSILON = 1e-10;
+
 	public static Element getElementFromSource(Object source)
 	{
 		if (source != null)
@@ -106,7 +108,7 @@ public class XMLUtil extends WWXML
 			return def;
 		return i;
 	}
-	
+
 	public static long getLong(Element context, String path, long def)
 	{
 		return getLong(context, path, def, null);
@@ -163,7 +165,7 @@ public class XMLUtil extends WWXML
 			return null;
 		}
 	}
-	
+
 	public static Element appendColor(Element context, String path, Color color)
 	{
 		Element element = WWXML.appendElement(context, path);
@@ -338,6 +340,55 @@ public class XMLUtil extends WWXML
 		}
 	}
 
+	public static ColorMap getColorMap(Element element, XPath xpath)
+	{
+		ColorMap colorMap = new ColorMap();
+
+		if (element != null)
+		{
+			if(xpath == null)
+			{
+				xpath = makeXPath();
+			}
+			
+			Boolean b = XMLUtil.getBoolean(element, "ColorMap/@interpolateHue", true, xpath);
+			if(b != null)
+			{
+				colorMap.setInterpolateHue(b);
+			}
+			
+			Element[] mapEntries = WWXML.getElements(element, "ColorMap/Entry", xpath);
+			if (mapEntries != null)
+			{
+				for (Element entry : mapEntries)
+				{
+					Double value = WWXML.getDouble(entry, "@value", xpath);
+					if (value == null)
+					{
+						value = WWXML.getDouble(entry, "@elevation", xpath);
+					}
+					if (value == null)
+					{
+						continue;
+					}
+
+					//don't allow a duplicate key
+					while (colorMap.containsKey(value))
+						value += EPSILON;
+
+					int red = XMLUtil.getInteger(entry, "@red", 0, xpath);
+					int green = XMLUtil.getInteger(entry, "@green", 0, xpath);
+					int blue = XMLUtil.getInteger(entry, "@blue", 0, xpath);
+					int alpha = XMLUtil.getInteger(entry, "@alpha", 255, xpath);
+					Color color = new Color(red, green, blue, alpha);
+					colorMap.put(value, color);
+				}
+			}
+		}
+
+		return colorMap;
+	}
+
 	public static void checkAndSetFormattedDateParam(Element context, AVList params, String paramKey, String paramName,
 			XPath xpath)
 	{
@@ -368,9 +419,9 @@ public class XMLUtil extends WWXML
 			Logging.logger().severe(message);
 			throw new IllegalArgumentException(message);
 		}
-		
+
 		Long l = getFormattedDate(context, paramName, xpath);
-		if(l != null)
+		if (l != null)
 		{
 			params.setValue(paramKey, l);
 		}

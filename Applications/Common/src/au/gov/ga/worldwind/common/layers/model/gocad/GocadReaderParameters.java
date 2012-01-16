@@ -8,6 +8,7 @@ import java.nio.ByteOrder;
 import org.gdal.osr.CoordinateTransformation;
 
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.ColorMap;
 import au.gov.ga.worldwind.common.util.CoordinateTransformationUtil;
 
 public class GocadReaderParameters
@@ -19,8 +20,8 @@ public class GocadReaderParameters
 	private boolean voxetDynamicSubsampling = true;
 	private int voxetDynamicSubsamplingSamplesPerAxis = 50;
 	private boolean voxetBilinearMinification = true;
-	private boolean voxetAlphaFromValue = true;
 	private CoordinateTransformation coordinateTransformation = null;
+	private ColorMap colorMap = null;
 
 	public GocadReaderParameters()
 	{
@@ -57,13 +58,13 @@ public class GocadReaderParameters
 		if (b != null)
 			setVoxetBilinearMinification(b);
 
-		b = (Boolean) params.getValue(AVKeyMore.ALPHA_FROM_VALUE);
-		if (b != null)
-			setVoxetAlphaFromValue(b);
-
 		String s = (String) params.getValue(AVKey.COORDINATE_SYSTEM);
 		if (s != null)
 			setCoordinateTransformation(CoordinateTransformationUtil.getTransformationToWGS84(s));
+		
+		ColorMap cm = (ColorMap) params.getValue(AVKeyMore.COLOR_MAP);
+		if(cm != null)
+			setColorMap(cm);
 	}
 
 	public int getVoxetSubsamplingU()
@@ -126,16 +127,6 @@ public class GocadReaderParameters
 		this.voxetBilinearMinification = voxetBilinearMinification;
 	}
 
-	public boolean isVoxetAlphaFromValue()
-	{
-		return voxetAlphaFromValue;
-	}
-
-	public void setVoxetAlphaFromValue(boolean voxetAlphaFromValue)
-	{
-		this.voxetAlphaFromValue = voxetAlphaFromValue;
-	}
-
 	public ByteOrder getByteOrder()
 	{
 		return byteOrder;
@@ -154,5 +145,15 @@ public class GocadReaderParameters
 	public void setCoordinateTransformation(CoordinateTransformation coordinateTransformation)
 	{
 		this.coordinateTransformation = coordinateTransformation;
+	}
+
+	public ColorMap getColorMap()
+	{
+		return colorMap;
+	}
+
+	public void setColorMap(ColorMap colorMap)
+	{
+		this.colorMap = colorMap;
 	}
 }

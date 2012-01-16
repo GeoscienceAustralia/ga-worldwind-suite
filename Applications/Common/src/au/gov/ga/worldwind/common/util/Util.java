@@ -12,6 +12,7 @@ import gov.nasa.worldwind.geom.coords.UTMCoordConverterAccessible;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -891,5 +892,57 @@ public class Util
 		{
 			return null;
 		}
+	}
+	
+	public static Color interpolateColor(Color color0, Color color1, double mixer, boolean useHue)
+	{
+		if (color0 == null && color1 == null)
+			return Color.black;
+		if (color1 == null)
+			return color0;
+		if (color0 == null)
+			return color1;
+		if (mixer <= 0d)
+			return color0;
+		if (mixer >= 1d)
+			return color1;
+
+		if (useHue)
+		{
+			float[] hsb0 = Color.RGBtoHSB(color0.getRed(), color0.getGreen(), color0.getBlue(), null);
+			float[] hsb1 = Color.RGBtoHSB(color1.getRed(), color1.getGreen(), color1.getBlue(), null);
+			float h0 = hsb0[0];
+			float h1 = hsb1[0];
+
+			if (h1 < h0)
+				h1 += 1f;
+			if (h1 - h0 > 0.5f)
+				h0 += 1f;
+
+			float h = interpolateFloat(h0, h1, mixer);
+			float s = interpolateFloat(hsb0[1], hsb1[1], mixer);
+			float b = interpolateFloat(hsb0[2], hsb1[2], mixer);
+			int alpha = interpolateInt(color0.getAlpha(), color1.getAlpha(), mixer);
+			Color color = Color.getHSBColor(h, s, b);
+			return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+		}
+		else
+		{
+			int r = interpolateInt(color0.getRed(), color1.getRed(), mixer);
+			int g = interpolateInt(color0.getGreen(), color1.getGreen(), mixer);
+			int b = interpolateInt(color0.getBlue(), color1.getBlue(), mixer);
+			int a = interpolateInt(color0.getAlpha(), color1.getAlpha(), mixer);
+			return new Color(r, g, b, a);
+		}
+	}
+
+	public static int interpolateInt(int i0, int i1, double mixer)
+	{
+		return (int) Math.round(i0 * (1d - mixer) + i1 * mixer);
+	}
+
+	public static float interpolateFloat(float f0, float f1, double mixer)
+	{
+		return (float) (f0 * (1d - mixer) + f1 * mixer);
 	}
 }

@@ -1,12 +1,12 @@
 package au.gov.ga.worldwind.common.layers.model;
 
-import java.nio.ByteOrder;
-
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.util.WWXML;
+
+import java.nio.ByteOrder;
 
 import javax.xml.xpath.XPath;
 
@@ -16,6 +16,8 @@ import au.gov.ga.worldwind.common.layers.data.DataLayerFactory;
 import au.gov.ga.worldwind.common.layers.model.gocad.GocadModelProvider;
 import au.gov.ga.worldwind.common.layers.model.gocad.GocadReaderParameters;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.ColorMap;
+import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
  * Factory used for creating {@link ModelLayer} instances an XML definition.
@@ -86,7 +88,6 @@ public class ModelLayerFactory
 
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.BILINEAR_MINIFICATION, "BilinearMinification",
 				xpath);
-		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.ALPHA_FROM_VALUE, "AlphaFromValue", xpath);
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SUBSAMPLING_U, "Subsampling/@u", xpath);
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SUBSAMPLING_V, "Subsampling/@v", xpath);
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SUBSAMPLING_W, "Subsampling/@w", xpath);
@@ -96,6 +97,9 @@ public class ModelLayerFactory
 				"DynamicSubsampling/@samples", xpath);
 
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.COORDINATE_SYSTEM, "CoordinateSystem", xpath);
+		
+		ColorMap colorMap = XMLUtil.getColorMap(domElement, xpath);
+		params.setValue(AVKeyMore.COLOR_MAP, colorMap);
 
 		setupModelProvider(domElement, xpath, params);
 

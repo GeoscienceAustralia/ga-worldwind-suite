@@ -362,20 +362,25 @@ public class GocadVoxetReader implements GocadReader
 		}
 
 		//create a color buffer containing a color for each point
-		int colorBufferElementSize = parameters.isVoxetAlphaFromValue() ? 4 : 3;
+		int colorBufferElementSize = parameters.getColorMap() != null ? 4 : 3;
 		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * colorBufferElementSize);
 		for (float value : values)
 		{
 			//check that this value is valid; only non-NaN floats have points associated
 			if (!Float.isNaN(value))
 			{
-				float percent = (value - min) / (max - min);
-				HSLColor hsl = new HSLColor((1f - percent) * 300f, 100f, 50f);
-				Color color = hsl.getRGB();
-				colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f);
-				if (parameters.isVoxetAlphaFromValue())
+				if (parameters.getColorMap() != null)
 				{
-					colorBuffer.put(percent);
+					Color color = parameters.getColorMap().calculateColor(value);
+					colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
+							.put(color.getAlpha() / 255f);
+				}
+				else
+				{
+					float percent = (value - min) / (max - min);
+					HSLColor hsl = new HSLColor((1f - percent) * 300f, 100f, 50f);
+					Color color = hsl.getRGB();
+					colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f);
 				}
 			}
 		}
