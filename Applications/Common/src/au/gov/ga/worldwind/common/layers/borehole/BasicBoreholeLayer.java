@@ -9,6 +9,8 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.pick.PickedObject;
+import gov.nasa.worldwind.render.AnnotationRenderer;
+import gov.nasa.worldwind.render.BasicAnnotationRenderer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.GlobeAnnotation;
 import gov.nasa.worldwind.render.markers.BasicMarkerAttributes;
@@ -36,6 +38,7 @@ import au.gov.ga.worldwind.common.layers.styled.StyleAndText;
 import au.gov.ga.worldwind.common.layers.styled.StyleProvider;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
+import au.gov.ga.worldwind.common.util.OnTopGlobeAnnotation;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
 
@@ -54,6 +57,7 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 	protected final List<Marker> markers = new ArrayList<Marker>();
 	protected final Map<Object, BoreholeImpl> idToBorehole = new HashMap<Object, BoreholeImpl>();
 	protected final MarkerRenderer markerRenderer = new MarkerRenderer();
+	protected final AnnotationRenderer annotationRenderer = new BasicAnnotationRenderer();
 
 	protected URL context;
 	protected String url;
@@ -103,7 +107,7 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		Validate.notBlank(sampleDepthToAttribute, "Borehole sample depth-to attribute not set");
 
 		// Init tooltip annotation
-		this.tooltipAnnotation = new GlobeAnnotation("", Position.fromDegrees(0, 0, 0));
+		this.tooltipAnnotation = new OnTopGlobeAnnotation("", Position.fromDegrees(0, 0, 0));
 		Font font = Font.decode("Arial-Plain-15");
 		this.tooltipAnnotation.getAttributes().setFont(font);
 		this.tooltipAnnotation.getAttributes().setSize(new Dimension(270, 0));
@@ -207,7 +211,7 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		synchronized (boreholes)
 		{
 			markerRenderer.render(dc, markers);
-			tooltipAnnotation.render(dc);
+			annotationRenderer.render(dc, tooltipAnnotation, tooltipAnnotation.getAnnotationDrawPoint(dc), this);
 
 			GL gl = dc.getGL();
 			try
