@@ -65,6 +65,7 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 	protected String uniqueIdentifierAttribute;
 	protected String sampleDepthFromAttribute;
 	protected String sampleDepthToAttribute;
+	protected boolean attributesRepresentPositiveDepth = true;
 	protected double lineWidth = 10;
 	protected Double minimumDistance;
 
@@ -86,6 +87,10 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		uniqueIdentifierAttribute = params.getStringValue(AVKeyMore.BOREHOLE_UNIQUE_IDENTIFIER_ATTRIBUTE);
 		sampleDepthFromAttribute = params.getStringValue(AVKeyMore.BOREHOLE_SAMPLE_DEPTH_FROM_ATTRIBUTE);
 		sampleDepthToAttribute = params.getStringValue(AVKeyMore.BOREHOLE_SAMPLE_DEPTH_TO_ATTRIBUTE);
+		
+		Boolean b = (Boolean) params.getValue(AVKeyMore.BOREHOLE_SAMPLE_DEPTH_ATTRIBUTES_POSITIVE);
+		if(b != null)
+			attributesRepresentPositiveDepth = b;
 
 		Double d = (Double) params.getValue(AVKeyMore.LINE_WIDTH);
 		if (d != null)
@@ -171,8 +176,8 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 
 		BoreholeSampleImpl sample = new BoreholeSampleImpl(borehole);
 		borehole.addSample(sample);
-		sample.setDepthFrom(depthFrom);
-		sample.setDepthTo(depthTo);
+		sample.setDepthFrom(attributesRepresentPositiveDepth ? depthFrom : -depthFrom);
+		sample.setDepthTo(attributesRepresentPositiveDepth ? depthTo : -depthTo);
 
 		StyleAndText sampleProperties = sampleStyleProvider.getStyle(attributeValues);
 		sample.setText(sampleProperties.text);
