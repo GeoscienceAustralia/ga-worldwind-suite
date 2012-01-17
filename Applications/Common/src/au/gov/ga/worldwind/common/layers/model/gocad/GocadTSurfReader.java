@@ -4,6 +4,7 @@ import gov.nasa.worldwind.geom.Position;
 
 import java.awt.Color;
 import java.net.URL;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,15 +62,15 @@ public class GocadTSurfReader implements GocadReader
 			double x = Double.parseDouble(matcher.group(2));
 			double y = Double.parseDouble(matcher.group(3));
 			double z = Double.parseDouble(matcher.group(4));
-			
-			if(parameters.getCoordinateTransformation() != null)
+
+			if (parameters.getCoordinateTransformation() != null)
 			{
 				double[] transformed = new double[3];
 				parameters.getCoordinateTransformation().TransformPoint(transformed, x, y, 0);
 				x = transformed[0];
 				y = transformed[1];
 			}
-			
+
 			Position position = Position.fromDegrees(y, x, z);
 
 			if (vertexIdMap.containsKey(id))
@@ -120,12 +121,12 @@ public class GocadTSurfReader implements GocadReader
 			}
 			indicesBuffer.put(vertexIdMap.get(i));
 		}
-		
+
 		if (name == null)
 		{
 			name = "TSurf";
 		}
-		
+
 		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_TRIANGLES);
 		shape.setName(name);
 		shape.setLighted(true);
@@ -134,6 +135,29 @@ public class GocadTSurfReader implements GocadReader
 		{
 			shape.setColor(color);
 		}
+		if (parameters.getColorMap() != null)
+		{
+			//TODO allow the user to specify which PVRTX property the color is defined by
+			//for now, just assume the colormap is applied to elevations
+			FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * 4);
+			for (Position position : positions)
+			{
+				Color color = parameters.getColorMap().calculateColor(position.elevation);
+				colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
+						.put(color.getAlpha() / 255f);
+			}
+			shape.setColorBufferElementSize(4);
+			shape.setColorBuffer(colorBuffer);
+		}
+		
+		/*double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
+		for(Position position : positions)
+		{
+			min = Math.min(min, position.elevation);
+			max = Math.max(max, position.elevation);
+		}
+		System.out.println("Min elevation = " + min + ", max elevation = " + max);*/
+		
 		return shape;
 	}
 }
