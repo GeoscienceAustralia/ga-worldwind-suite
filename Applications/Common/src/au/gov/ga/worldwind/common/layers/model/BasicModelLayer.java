@@ -47,6 +47,8 @@ public class BasicModelLayer extends AbstractModelLayer implements ModelLayer
 		pointConstantAttenuation = (Double) params.getValue(AVKeyMore.POINT_CONSTANT_ATTENUATION);
 		pointLinearAttenuation = (Double) params.getValue(AVKeyMore.POINT_LINEAR_ATTENUATION);
 		pointQuadraticAttenuation = (Double) params.getValue(AVKeyMore.POINT_QUADRATIC_ATTENUATION);
+		
+		minimumDistance = (Double) params.getValue(AVKeyMore.MINIMUM_DISTANCE);
 
 		Validate.notBlank(url, "Model data url not set");
 		Validate.notBlank(dataCacheName, "Model data cache name not set");

@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.common.layers.model;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.BasicWWTexture;
@@ -26,6 +27,7 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 
 	protected boolean sectorDirty = true;
 	protected Sector sector;
+	protected Double minimumDistance;
 
 	protected Color color;
 	protected Double lineWidth;
@@ -109,6 +111,20 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 
 				for (FastShape shape : shapes)
 				{
+					if (minimumDistance != null)
+					{
+						Extent extent = shape.getExtent();
+						if (extent != null)
+						{
+							double distanceToEye =
+									extent.getCenter().distanceTo3(dc.getView().getEyePoint()) - extent.getRadius();
+							if (distanceToEye > minimumDistance)
+							{
+								continue;
+							}
+						}
+					}
+
 					if (color != null)
 					{
 						shape.setColor(color);
@@ -212,6 +228,16 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 			}
 		}
 		return sector;
+	}
+
+	public Double getMinimumDistance()
+	{
+		return minimumDistance;
+	}
+
+	public void setMinimumDistance(Double minimumDistance)
+	{
+		this.minimumDistance = minimumDistance;
 	}
 
 	@Override
