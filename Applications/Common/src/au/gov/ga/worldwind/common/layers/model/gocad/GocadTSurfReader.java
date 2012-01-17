@@ -33,6 +33,7 @@ public class GocadTSurfReader implements GocadReader
 	private final static Pattern trianglePattern = Pattern.compile("TRGL\\s+(\\d+)\\s+(\\d+)\\s+(\\d+).*");
 	private final static Pattern colorPattern = Pattern.compile("\\*solid\\*color:.+");
 	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
+	private final static Pattern zpositivePattern = Pattern.compile("ZPOSITIVE\\s+(\\w+)\\s*");
 
 	private GocadReaderParameters parameters;
 	private List<Position> positions;
@@ -40,6 +41,7 @@ public class GocadTSurfReader implements GocadReader
 	private Color color;
 	private Map<Integer, Integer> vertexIdMap;
 	private String name;
+	private boolean zPositive = true;
 
 	@Override
 	public void begin(GocadReaderParameters parameters)
@@ -71,7 +73,7 @@ public class GocadTSurfReader implements GocadReader
 				y = transformed[1];
 			}
 
-			Position position = Position.fromDegrees(y, x, z);
+			Position position = Position.fromDegrees(y, x, zPositive ? z : -z);
 
 			if (vertexIdMap.containsKey(id))
 			{
@@ -106,6 +108,12 @@ public class GocadTSurfReader implements GocadReader
 		{
 			name = matcher.group(1);
 			return;
+		}
+		
+		matcher = zpositivePattern.matcher(line);
+		if(matcher.matches())
+		{
+			zPositive = !matcher.group(1).equalsIgnoreCase("depth");
 		}
 	}
 
@@ -156,7 +164,7 @@ public class GocadTSurfReader implements GocadReader
 			min = Math.min(min, position.elevation);
 			max = Math.max(max, position.elevation);
 		}
-		System.out.println("Min elevation = " + min + ", max elevation = " + max);*/
+		System.out.println(min + ", " + ((max + min) / 2) + ", " + max);*/
 		
 		return shape;
 	}

@@ -38,8 +38,10 @@ public class GocadVoxetReader implements GocadReader
 			.compile("AXIS_(\\S+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
 	private final static Pattern propertyPattern = Pattern.compile("PROP_(\\S+)\\s+(\\d+)\\s+(\\S+).*");
 	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
+	private final static Pattern zpositivePattern = Pattern.compile("ZPOSITIVE\\s+(\\w+)\\s*");
 
 	private String name;
+	private boolean zPositive = true;
 
 	private Vec4 axisO;
 	private Vec4 axisU;
@@ -87,6 +89,12 @@ public class GocadVoxetReader implements GocadReader
 		{
 			name = matcher.group(1);
 			return;
+		}
+		
+		matcher = zpositivePattern.matcher(line);
+		if(matcher.matches())
+		{
+			zPositive = !matcher.group(1).equalsIgnoreCase("depth");
 		}
 	}
 
@@ -303,11 +311,11 @@ public class GocadVoxetReader implements GocadReader
 								if (transformation != null)
 								{
 									transformation.TransformPoint(transformed, p.x, p.y, 0);
-									positions.add(Position.fromDegrees(transformed[1], transformed[0], p.z));
+									positions.add(Position.fromDegrees(transformed[1], transformed[0], zPositive ? p.z : -p.z));
 								}
 								else
 								{
-									positions.add(Position.fromDegrees(p.y, p.x, p.z));
+									positions.add(Position.fromDegrees(p.y, p.x, zPositive ? p.z : -p.z));
 								}
 							}
 						}
@@ -340,11 +348,11 @@ public class GocadVoxetReader implements GocadReader
 								if (transformation != null)
 								{
 									transformation.TransformPoint(transformed, p.x, p.y, 0);
-									positions.add(Position.fromDegrees(transformed[1], transformed[0], p.z));
+									positions.add(Position.fromDegrees(transformed[1], transformed[0], zPositive ? p.z : -p.z));
 								}
 								else
 								{
-									positions.add(Position.fromDegrees(p.y, p.x, p.z));
+									positions.add(Position.fromDegrees(p.y, p.x, zPositive ? p.z : -p.z));
 								}
 							}
 							skipBytes(is, esize * Math.min(strideU - 1, nu - u - 1));
