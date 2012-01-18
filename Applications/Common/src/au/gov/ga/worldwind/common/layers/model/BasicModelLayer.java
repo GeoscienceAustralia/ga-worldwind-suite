@@ -6,10 +6,8 @@ import gov.nasa.worldwind.avlist.AVList;
 import java.awt.Color;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 
 import au.gov.ga.worldwind.common.util.AVKeyMore;
-import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**
@@ -27,7 +25,7 @@ public class BasicModelLayer extends AbstractModelLayer implements ModelLayer
 
 	public BasicModelLayer(AVList params)
 	{
-		super(new ArrayList<FastShape>());
+		super();
 
 		context = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
 		url = params.getStringValue(AVKey.URL);

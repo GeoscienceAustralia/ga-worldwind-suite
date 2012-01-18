@@ -10,7 +10,12 @@ public class LocalModelLayer extends AbstractModelLayer implements ModelLayer
 {
 	public LocalModelLayer(List<FastShape> shapes)
 	{
-		super(shapes);
+		super();
+		
+		for(FastShape shape : shapes)
+		{
+			addShape(shape);
+		}
 	}
 
 	@Override

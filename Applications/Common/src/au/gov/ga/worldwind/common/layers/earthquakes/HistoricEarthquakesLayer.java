@@ -7,7 +7,6 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
-import gov.nasa.worldwind.util.OGLStackHandler;
 import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.Color;
@@ -166,24 +165,13 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 			downloadData();
 		}
 
-		GL gl = dc.getGL();
-		OGLStackHandler stack = new OGLStackHandler();
-		try
+		synchronized (shapeLock)
 		{
-			stack.pushAttrib(gl, GL.GL_POINT_BIT);
-			gl.glPointSize((float) pointSize);
-
-			synchronized (shapeLock)
+			if (shape != null)
 			{
-				if (shape != null)
-				{
-					shape.render(dc);
-				}
+				shape.setPointSize(pointSize);
+				shape.render(dc);
 			}
-		}
-		finally
-		{
-			stack.pop(gl);
 		}
 	}
 

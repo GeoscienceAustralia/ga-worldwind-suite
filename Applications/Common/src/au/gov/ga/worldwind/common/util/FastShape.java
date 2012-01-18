@@ -8,12 +8,17 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Sphere;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
+import gov.nasa.worldwind.render.BasicWWTexture;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Renderable;
+import gov.nasa.worldwind.render.WWTexture;
 import gov.nasa.worldwind.util.BufferWrapper;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -27,6 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.layers.Bounded;
@@ -86,6 +92,19 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected boolean backfaceCulling = false;
 	protected boolean enabled = true;
 
+	protected Double lineWidth;
+	protected Double pointSize;
+	protected Double pointMinSize;
+	protected Double pointMaxSize;
+	protected Double pointConstantAttenuation;
+	protected Double pointLinearAttenuation;
+	protected Double pointQuadraticAttenuation;
+	protected boolean pointSprite = false;
+
+	protected URL pointTextureUrl;
+	protected WWTexture pointTexture;
+	protected WWTexture blankTexture;
+
 	public FastShape(List<Position> positions, int mode)
 	{
 		this(positions, null, mode);
@@ -128,10 +147,32 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 			try
 			{
+				boolean colorBufferContainsAlpha = colorBuffer != null && colorBufferElementSize > 3;
 				boolean willUseSortedIndices =
 						(forceSortedPrimitives || (sortTransparentPrimitives && alpha < 1.0)) && sortedIndices != null;
+				boolean willUsePointSprite = mode == GL.GL_POINTS && pointSprite && pointTextureUrl != null;
+				boolean willUseTextureBlending = (alpha < 1.0 || color != null) && colorBufferContainsAlpha;
 
-				int attributesToPush = GL.GL_CURRENT_BIT;
+				if (willUsePointSprite && pointTexture == null)
+				{
+					try
+					{
+						BufferedImage image = ImageIO.read(pointTextureUrl.openStream());
+						pointTexture = new BasicWWTexture(image, true);
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+						willUsePointSprite = false;
+					}
+				}
+				if (willUseTextureBlending && blankTexture == null)
+				{
+					BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+					blankTexture = new BasicWWTexture(image, true);
+				}
+
+				int attributesToPush = GL.GL_CURRENT_BIT | GL.GL_POINT_BIT;
 				if (!fogEnabled)
 				{
 					attributesToPush |= GL.GL_FOG_BIT;
@@ -148,12 +189,44 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 				{
 					attributesToPush |= GL.GL_DEPTH_BUFFER_BIT;
 				}
+				if (lineWidth != null)
+				{
+					attributesToPush |= GL.GL_LINE_BIT;
+				}
+				if (willUsePointSprite || willUseTextureBlending)
+				{
+					attributesToPush |= GL.GL_TEXTURE_BIT;
+				}
 
 				stack.pushAttrib(gl, attributesToPush);
 				stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
 				Vec4 referenceCenter = boundingSphere.getCenter();
 				dc.getView().pushReferenceCenter(dc, referenceCenter);
 
+				if (lineWidth != null)
+				{
+					gl.glLineWidth(lineWidth.floatValue());
+				}
+				if (pointSize != null)
+				{
+					gl.glPointSize(pointSize.floatValue());
+				}
+				if (pointMinSize != null)
+				{
+					gl.glPointParameterf(GL.GL_POINT_SIZE_MIN, pointMinSize.floatValue());
+				}
+				if (pointMaxSize != null)
+				{
+					gl.glPointParameterf(GL.GL_POINT_SIZE_MAX, pointMaxSize.floatValue());
+				}
+				if (pointConstantAttenuation != null || pointLinearAttenuation != null
+						|| pointQuadraticAttenuation != null)
+				{
+					float ca = pointConstantAttenuation != null ? pointConstantAttenuation.floatValue() : 1f;
+					float la = pointLinearAttenuation != null ? pointLinearAttenuation.floatValue() : 0f;
+					float qa = pointQuadraticAttenuation != null ? pointQuadraticAttenuation.floatValue() : 0f;
+					gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, new float[] { ca, la, qa }, 0);
+				}
 				if (!fogEnabled)
 				{
 					gl.glDisable(GL.GL_FOG);
@@ -184,14 +257,62 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					gl.glDisable(GL.GL_LIGHT0);
 					gl.glEnable(GL.GL_LIGHT1);
 					gl.glEnable(GL.GL_LIGHTING);
+					gl.glEnable(GL.GL_COLOR_MATERIAL);
+				}
 
+				if (willUsePointSprite)
+				{
+					gl.glEnable(GL.GL_POINT_SMOOTH);
+					gl.glEnable(GL.GL_POINT_SPRITE);
+
+					//stage 0: previous (color) * texture
+
+					gl.glActiveTexture(GL.GL_TEXTURE0);
+					gl.glEnable(GL.GL_TEXTURE_2D);
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
+					gl.glTexEnvi(GL.GL_POINT_SPRITE, GL.GL_COORD_REPLACE, GL.GL_TRUE);
+
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_REPLACE);
+
+					//TODO consider (instead of 2 calls above):
+					//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
+					//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_RGB, GL.GL_TEXTURE);
+					//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_MODULATE);
+
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_ALPHA, GL.GL_PREVIOUS);
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_ALPHA, GL.GL_TEXTURE);
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_ALPHA, GL.GL_MODULATE);
+
+					pointTexture.bind(dc);
+				}
+
+				if (willUseTextureBlending)
+				{
+					float r = 1, g = 1, b = 1;
 					if (color != null)
 					{
-						float[] materialColor =
-								{ color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, (float) alpha };
-						gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT_AND_DIFFUSE, materialColor, 0);
-						gl.glEnable(GL.GL_COLOR_MATERIAL);
+						r = color.getRed() / 255f;
+						g = color.getGreen() / 255f;
+						b = color.getBlue() / 255f;
 					}
+
+					//stage 1: previous (color) * texture envionment color
+
+					gl.glActiveTexture(willUsePointSprite ? GL.GL_TEXTURE1 : GL.GL_TEXTURE0);
+					gl.glEnable(GL.GL_TEXTURE_2D);
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
+
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_RGB, GL.GL_CONSTANT);
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_MODULATE);
+
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_ALPHA, GL.GL_PREVIOUS);
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_ALPHA, GL.GL_CONSTANT);
+					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_ALPHA, GL.GL_MODULATE);
+
+					gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, new float[] { r, g, b, (float) alpha }, 0);
+					blankTexture.bind(dc);
 				}
 
 				if (colorBuffer != null)
@@ -200,13 +321,13 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					gl.glColorPointer(colorBufferElementSize, GL.GL_FLOAT, 0, colorBuffer.rewind());
 				}
 
-				if (color != null)
+				if (color != null && !willUseTextureBlending)
 				{
 					float r = color.getRed() / 255f, g = color.getGreen() / 255f, b = color.getBlue() / 255f;
 					gl.glColor4f(r, g, b, (float) alpha);
 				}
 
-				if (alpha < 1.0 || willUseSortedIndices)
+				if (alpha < 1.0 || colorBufferContainsAlpha || willUseSortedIndices)
 				{
 					gl.glEnable(GL.GL_BLEND);
 					gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
@@ -364,17 +485,16 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			modVertexBuffer.put(i + 2, modVertexBuffer.get() - modBoundingSphere.getCenter().z);
 		}
 	}
-	
+
 	protected static Sphere createBoundingSphere(BufferWrapper wrapper)
 	{
 		//the Sphere.createBoundingSphere() function doesn't ensure that the radius is at least 1, causing errors
 		Vec4[] extrema = Vec4.computeExtrema(wrapper);
-        Vec4 center = new Vec4(
-            (extrema[0].x + extrema[1].x) / 2.0,
-            (extrema[0].y + extrema[1].y) / 2.0,
-            (extrema[0].z + extrema[1].z) / 2.0);
-        double radius = Math.max(1, extrema[0].distanceTo3(extrema[1]) / 2.0);
-        return new Sphere(center, radius);
+		Vec4 center =
+				new Vec4((extrema[0].x + extrema[1].x) / 2.0, (extrema[0].y + extrema[1].y) / 2.0,
+						(extrema[0].z + extrema[1].z) / 2.0);
+		double radius = Math.max(1, extrema[0].distanceTo3(extrema[1]) / 2.0);
+		return new Sphere(center, radius);
 	}
 
 	protected void calculateNormals()
@@ -855,6 +975,112 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		try
 		{
 			this.forceSortedPrimitives = forceSortedPrimitives;
+		}
+		finally
+		{
+			frontLock.writeLock().unlock();
+		}
+	}
+
+	public Double getLineWidth()
+	{
+		return lineWidth;
+	}
+
+	public void setLineWidth(Double lineWidth)
+	{
+		frontLock.writeLock().lock();
+		try
+		{
+			this.lineWidth = lineWidth;
+		}
+		finally
+		{
+			frontLock.writeLock().unlock();
+		}
+	}
+
+	public Double getPointSize()
+	{
+		return pointSize;
+	}
+
+	public void setPointSize(Double pointSize)
+	{
+		this.pointSize = pointSize;
+	}
+
+	public Double getPointMinSize()
+	{
+		return pointMinSize;
+	}
+
+	public void setPointMinSize(Double pointMinSize)
+	{
+		this.pointMinSize = pointMinSize;
+	}
+
+	public Double getPointMaxSize()
+	{
+		return pointMaxSize;
+	}
+
+	public void setPointMaxSize(Double pointMaxSize)
+	{
+		this.pointMaxSize = pointMaxSize;
+	}
+
+	public Double getPointConstantAttenuation()
+	{
+		return pointConstantAttenuation;
+	}
+
+	public void setPointConstantAttenuation(Double pointConstantAttenuation)
+	{
+		this.pointConstantAttenuation = pointConstantAttenuation;
+	}
+
+	public Double getPointLinearAttenuation()
+	{
+		return pointLinearAttenuation;
+	}
+
+	public void setPointLinearAttenuation(Double pointLinearAttenuation)
+	{
+		this.pointLinearAttenuation = pointLinearAttenuation;
+	}
+
+	public Double getPointQuadraticAttenuation()
+	{
+		return pointQuadraticAttenuation;
+	}
+
+	public void setPointQuadraticAttenuation(Double pointQuadraticAttenuation)
+	{
+		this.pointQuadraticAttenuation = pointQuadraticAttenuation;
+	}
+
+	public boolean isPointSprite()
+	{
+		return pointSprite;
+	}
+
+	public void setPointSprite(boolean pointSprite)
+	{
+		this.pointSprite = pointSprite;
+	}
+
+	public URL getPointTextureUrl()
+	{
+		return pointTextureUrl;
+	}
+
+	public void setPointTextureUrl(URL pointTextureUrl)
+	{
+		frontLock.writeLock().lock();
+		try
+		{
+			this.pointTextureUrl = pointTextureUrl;
 		}
 		finally
 		{

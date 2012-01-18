@@ -139,10 +139,6 @@ public class GocadTSurfReader implements GocadReader
 		shape.setName(name);
 		shape.setLighted(true);
 		shape.setCalculateNormals(true);
-		if (color != null)
-		{
-			shape.setColor(color);
-		}
 		if (parameters.getColorMap() != null)
 		{
 			//TODO allow the user to specify which PVRTX property the color is defined by
@@ -156,6 +152,10 @@ public class GocadTSurfReader implements GocadReader
 			}
 			shape.setColorBufferElementSize(4);
 			shape.setColorBuffer(colorBuffer);
+		}
+		else if (color != null)
+		{
+			shape.setColor(color);
 		}
 		
 		/*double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
