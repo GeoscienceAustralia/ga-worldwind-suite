@@ -1,11 +1,9 @@
 package au.gov.ga.worldwind.animator.ui.frameslider;
 
-
 /**
  * A listener interface that allows clients to listen for changes to frames in the {@link FrameSlider}.
  * 
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
- *
  */
 public interface ChangeFrameListener
 {

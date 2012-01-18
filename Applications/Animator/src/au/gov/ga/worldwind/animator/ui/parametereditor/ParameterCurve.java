@@ -47,6 +47,8 @@ import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 
 /**
  * A class that draws the curve for a single parameter
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ParameterCurve extends JPanel implements ParameterCurveModelListener
 {

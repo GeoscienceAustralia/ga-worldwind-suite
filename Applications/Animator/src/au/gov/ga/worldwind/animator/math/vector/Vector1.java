@@ -1,5 +1,10 @@
 package au.gov.ga.worldwind.animator.math.vector;
 
+/**
+ * {@link Vector} implementation that represents a 1-dimensional vector.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 @SuppressWarnings("serial")
 public class Vector1 implements Vector<Vector1>
 {
@@ -310,15 +315,13 @@ public class Vector1 implements Vector<Vector1>
 	{
 		return divideLocal(distance());
 	}
-	
+
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof Vector1) && 
-				other != null && 
-				this.x == ((Vector1)other).x;
+		return (other instanceof Vector1) && other != null && this.x == ((Vector1) other).x;
 	}
-	
+
 	@Override
 	public String toString()
 	{

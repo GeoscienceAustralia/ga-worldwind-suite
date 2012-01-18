@@ -44,8 +44,8 @@ import au.gov.ga.worldwind.common.ui.panels.CollapsiblePanelBase;
  * 	<li>Movement of the camera
  * 	<li>Selection of different animation object
  * </ul>
+ * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class ObjectPropertiesPanel extends CollapsiblePanelBase implements AnimatorCollapsiblePanel,
 																		   CurrentlySelectedObject.ChangeListener, 

@@ -10,7 +10,6 @@ import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
  * A class containing supported data transfer flavors in the Animator application.
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class DataTransferFlavors
 {

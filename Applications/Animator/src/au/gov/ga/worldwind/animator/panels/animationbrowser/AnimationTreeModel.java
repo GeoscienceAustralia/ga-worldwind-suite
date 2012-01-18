@@ -23,6 +23,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A Tree model that is backed by an animation
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class AnimationTreeModel implements TreeModel, AnimationEventListener
 {

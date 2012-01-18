@@ -20,6 +20,7 @@ import au.gov.ga.worldwind.common.util.Validate;
  * <p/>
  * Uses a provided executor service to calculate and cache curve points.
  *
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class DefaultParameterCurveModel implements ParameterCurveModel, AnimationEventListener
 {

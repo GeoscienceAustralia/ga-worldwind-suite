@@ -8,7 +8,6 @@ import au.gov.ga.worldwind.animator.util.Nameable;
  * it's location and name
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public interface ElevationModelIdentifier extends Nameable
 {

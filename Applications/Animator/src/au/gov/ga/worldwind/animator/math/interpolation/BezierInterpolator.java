@@ -16,6 +16,7 @@ import au.gov.ga.worldwind.common.util.Validate;
  * This interpolator needs to be primed with the four control points needed to define the bezier curve to use
  * for interpolation
  *
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class BezierInterpolator<V extends Vector<V>> implements Interpolator<V>
 {

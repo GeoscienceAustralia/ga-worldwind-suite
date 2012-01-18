@@ -1,5 +1,10 @@
 package au.gov.ga.worldwind.animator.math.vector;
 
+/**
+ * {@link Vector} implementation that represents a 2-dimensional vector.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 @SuppressWarnings("serial")
 public class Vector2 implements Vector<Vector2>
 {
@@ -332,16 +337,14 @@ public class Vector2 implements Vector<Vector2>
 	{
 		return divideLocal(distance());
 	}
-	
+
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof Vector2) &&
-				other != null &&
-				this.x == ((Vector2)other).x &&
-				this.y == ((Vector2)other).y;
+		return (other instanceof Vector2) && other != null && this.x == ((Vector2) other).x
+				&& this.y == ((Vector2) other).y;
 	}
-	
+
 	@Override
 	public String toString()
 	{

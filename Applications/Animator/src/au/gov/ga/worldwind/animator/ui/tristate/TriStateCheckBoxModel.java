@@ -6,7 +6,6 @@ import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox.State;
  * The model interface for the {@link TriStateCheckBox} component. 
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public interface TriStateCheckBoxModel
 {

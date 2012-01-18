@@ -12,6 +12,9 @@ import java.util.LinkedList;
 
 /**
  * Utilities used in the {@link AnimatorView}s
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class AnimatorViewUtils
 {

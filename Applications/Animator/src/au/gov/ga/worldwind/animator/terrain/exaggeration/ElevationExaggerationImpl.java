@@ -7,7 +7,6 @@ import java.util.List;
  * The default implementation of the {@link ElevationExaggeration} interface
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class ElevationExaggerationImpl implements ElevationExaggeration
 {

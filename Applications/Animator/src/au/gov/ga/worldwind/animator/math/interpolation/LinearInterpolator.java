@@ -8,7 +8,6 @@ import au.gov.ga.worldwind.common.util.Validate;
  * a start and end vector
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class LinearInterpolator<V extends Vector<V>> implements Interpolator<V>
 {

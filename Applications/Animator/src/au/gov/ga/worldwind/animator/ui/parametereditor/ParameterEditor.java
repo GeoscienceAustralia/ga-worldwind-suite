@@ -32,6 +32,8 @@ import au.gov.ga.worldwind.common.util.Validate;
  * <p/>
  * Contains an animation tree for selecting parameters, and a {@link ParameterCurvePanel} used
  * to contain multiple {@link ParameterCurve}s.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ParameterEditor extends JFrame implements ChangeOfAnimationListener, ParameterTreeModel.ParameterSelectionListener
 {

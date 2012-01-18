@@ -24,7 +24,9 @@ import au.gov.ga.worldwind.animator.application.LAFConstants;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**
- * A panel used to edit a single parameter. 
+ * A panel used to edit a single parameter.
+ * 
+ *  @author James Navin (james.navin@ga.gov.au)
  */
 final class ParameterEditorPanel extends JPanel
 {

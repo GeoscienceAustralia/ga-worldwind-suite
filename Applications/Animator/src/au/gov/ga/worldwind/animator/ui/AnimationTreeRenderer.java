@@ -29,6 +29,8 @@ import au.gov.ga.worldwind.common.util.HSLColor;
 /**
  * An extension of the {@link DefaultTreeCellRenderer} that allows the standard tree components
  * to be decorated with additional elements (check boxes, buttons etc.) that can be tailored to specific uses.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public abstract class AnimationTreeRenderer extends JPanel implements TreeCellRenderer
 {

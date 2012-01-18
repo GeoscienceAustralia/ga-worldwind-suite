@@ -16,6 +16,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 /**
  * An extension of the {@link AnimationTreeRenderer} that adds a tristate checkbox
  * for 'selected' parameters to be included in the parameter editor graph window.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 class ParameterTreeRenderer extends AnimationTreeRenderer
 {

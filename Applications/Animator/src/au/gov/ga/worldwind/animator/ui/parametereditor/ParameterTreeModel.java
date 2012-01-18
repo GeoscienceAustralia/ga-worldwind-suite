@@ -22,6 +22,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 /**
  * A tree model that only displays editable parameters
  * contained within the current animation
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 class ParameterTreeModel implements TreeModel, AnimationEventListener
 {

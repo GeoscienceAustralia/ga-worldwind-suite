@@ -9,6 +9,8 @@ import au.gov.ga.worldwind.animator.util.Nameable;
 /**
  * An extension of the {@link DefaultMutableTreeNode} that renders a {@link Nameable} object's name
  * as the text value of the tree nodes. Used in conjunction with the {@link AnimationTreeRenderer}.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class NameableTree extends JTree
 {

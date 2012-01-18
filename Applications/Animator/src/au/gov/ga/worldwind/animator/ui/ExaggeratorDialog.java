@@ -30,6 +30,8 @@ import au.gov.ga.worldwind.common.ui.JDoubleField;
 /**
  * A dialog box that prompts the user for the two values needed to define an
  * elevation exaggerator: boundary elevation and exaggeration.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ExaggeratorDialog extends JDialog
 {

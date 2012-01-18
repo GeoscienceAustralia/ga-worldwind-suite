@@ -25,7 +25,6 @@ import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
  * In addition, an (optional) global elevation offset can be configured. This offset is applied <b>after</b> exaggeration.
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class VerticalExaggerationElevationModel extends DetailedElevationModel implements ElevationExaggeration.ChangeListener
 {

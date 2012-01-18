@@ -17,6 +17,9 @@ import au.gov.ga.worldwind.common.util.Validate;
  * @see http://en.wikipedia.org/wiki/B%C3%A9zier_curve
  * 
  * @param <V>
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class Bezier<V extends Vector<V>> implements Serializable
 {

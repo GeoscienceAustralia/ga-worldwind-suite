@@ -41,7 +41,6 @@ import au.gov.ga.worldwind.common.util.Validate;
  * </ul>
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class AnimationBrowserTransferHandler extends TransferHandler
 {

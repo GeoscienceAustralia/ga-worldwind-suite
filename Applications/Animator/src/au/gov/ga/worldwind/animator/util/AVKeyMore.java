@@ -2,6 +2,9 @@ package au.gov.ga.worldwind.animator.util;
 
 /**
  * Further AV Keys specific to the animator application
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface AVKeyMore extends au.gov.ga.worldwind.common.util.AVKeyMore
 {

@@ -9,6 +9,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * Holds information about a keyframe node on a parameter curve
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 class ParameterCurveKeyNode
 {

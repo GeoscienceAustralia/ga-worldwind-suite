@@ -1,5 +1,10 @@
 package au.gov.ga.worldwind.animator.math.vector;
 
+/**
+ * {@link Vector} implementation that represents a 3-dimensional vector.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 @SuppressWarnings("serial")
 public class Vector3 implements Vector<Vector3>
 {
@@ -358,17 +363,14 @@ public class Vector3 implements Vector<Vector3>
 	{
 		return divideLocal(distance());
 	}
-	
+
 	@Override
 	public boolean equals(Object other)
 	{
-		return (other instanceof Vector3) &&
-				other != null &&
-				this.x == ((Vector3)other).x &&
-				this.y == ((Vector3)other).y &&
-				this.z == ((Vector3)other).z;
+		return (other instanceof Vector3) && other != null && this.x == ((Vector3) other).x
+				&& this.y == ((Vector3) other).y && this.z == ((Vector3) other).z;
 	}
-	
+
 	@Override
 	public String toString()
 	{

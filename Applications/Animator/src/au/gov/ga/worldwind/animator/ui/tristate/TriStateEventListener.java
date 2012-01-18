@@ -6,7 +6,6 @@ import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox.State;
  * A listener that detects events occurring on a {@link DefaultTriStateCheckBoxModel}
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public interface TriStateEventListener
 {

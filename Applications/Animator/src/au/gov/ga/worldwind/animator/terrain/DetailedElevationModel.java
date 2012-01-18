@@ -14,7 +14,9 @@ import java.util.List;
  * <p/>
  * Actual elevation data is handled by a delegate {@link ElevationModel}. 
  * <p/>
- * The global detail hint replaces any sector-specific hints provided by the delegate's {@link #getDetailHint(Sector)} method. 
+ * The global detail hint replaces any sector-specific hints provided by the delegate's {@link #getDetailHint(Sector)} method.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class DetailedElevationModel extends AbstractElevationModel
 {

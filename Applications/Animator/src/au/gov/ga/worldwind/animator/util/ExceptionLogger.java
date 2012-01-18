@@ -9,7 +9,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  * A simple helper class that can be used to control exception logging.
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class ExceptionLogger
 {

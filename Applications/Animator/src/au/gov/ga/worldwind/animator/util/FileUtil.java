@@ -11,6 +11,8 @@ import java.io.IOException;
 
 /**
  * Utilities for working with files
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class FileUtil extends au.gov.ga.worldwind.common.util.FileUtil
 {

@@ -6,6 +6,8 @@ import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationService;
 /**
  * An implementation of the {@link VerticalExaggerationService} that uses the {@link VerticalExaggerationElevationModel} to
  * calculate the exaggeration to be applied to a given elevation value
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class AnimatorVerticalExaggerationServiceImpl implements VerticalExaggerationService
 {

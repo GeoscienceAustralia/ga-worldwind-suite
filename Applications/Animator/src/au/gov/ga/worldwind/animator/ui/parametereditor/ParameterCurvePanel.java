@@ -26,6 +26,7 @@ import au.gov.ga.worldwind.common.util.Validate;
  * A panel that holds multiple {@link ParameterCurve}s, and draws various annotations over them
  * (such as current frame line, mouse position line etc.)
  *
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ParameterCurvePanel implements ParameterCurveListener, CurrentFrameChangeListener
 {

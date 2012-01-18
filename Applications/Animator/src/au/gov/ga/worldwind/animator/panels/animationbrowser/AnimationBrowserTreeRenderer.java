@@ -16,6 +16,8 @@ import au.gov.ga.worldwind.animator.util.Icons;
 /**
  * An extension of the {@link AnimationTreeRenderer} that adds a tristate-checkbox for enabled/disabled
  * and another for armed/disarmed.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 class AnimationBrowserTreeRenderer extends AnimationTreeRenderer
 {

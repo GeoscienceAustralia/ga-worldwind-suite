@@ -9,7 +9,6 @@ import au.gov.ga.worldwind.animator.ui.tristate.TriStateCheckBox.State;
  * The default model implementation for the {@link TriStateCheckBox} component
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class DefaultTriStateCheckBoxModel implements TriStateCheckBoxModel
 {

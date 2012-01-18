@@ -5,7 +5,6 @@ package au.gov.ga.worldwind.animator.util;
  * with additional icons specific to the Animator project.
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class Icons extends au.gov.ga.worldwind.common.util.Icons
 {

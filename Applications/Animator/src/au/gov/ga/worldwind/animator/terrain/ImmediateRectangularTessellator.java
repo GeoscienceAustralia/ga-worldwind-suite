@@ -8,6 +8,8 @@ import au.gov.ga.worldwind.common.terrain.WireframeRectangularTessellator;
  * An extension of the {@link RectangularTessellator} that ignores the cache and
  * regenerates vertices every repaint, instead of caching and regenerating
  * every second.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class ImmediateRectangularTessellator extends WireframeRectangularTessellator
 {

@@ -7,6 +7,8 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
  * An interface for a model that backs the {@link ParameterCurve} component
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface ParameterCurveModel
 {

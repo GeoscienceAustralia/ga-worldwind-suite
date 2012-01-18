@@ -4,6 +4,8 @@ package au.gov.ga.worldwind.animator.terrain.exaggeration;
  * A window in which elevation exaggeration is applied.
  * <p/>
  * Allows construction of a double linked-list of windows so that window offsets can be cached
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 class ExaggerationWindow
 {

@@ -7,6 +7,8 @@ import gov.nasa.worldwind.geom.Vec4;
 
 /**
  * Utility methods for working with geometry
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class GeometryUtil
 {

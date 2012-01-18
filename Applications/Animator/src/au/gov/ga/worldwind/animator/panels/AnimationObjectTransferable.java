@@ -16,7 +16,6 @@ import au.gov.ga.worldwind.animator.animation.AnimationObject;
  * Supports the {@link String} flavor (will return the object's name) and the {@link AnimationObject} flavor (will return the object itself).
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class AnimationObjectTransferable implements Transferable
 {

@@ -17,6 +17,8 @@ import au.gov.ga.worldwind.common.util.Validate;
  * 	<li>The value is not a valid double
  *  <li>The value lies outside of the bounds of a 'bounded' parameter (marked using the {@link EditableParameter#bound()} field)
  * </ul>
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class EditableParameterInputVerifier extends InputVerifier
 {

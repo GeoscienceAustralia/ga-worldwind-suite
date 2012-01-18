@@ -15,7 +15,6 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
  * A factory class to create instances of {@link ElevationModelIdentifier}s
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class ElevationModelIdentifierFactory
 {

@@ -2,6 +2,8 @@ package au.gov.ga.worldwind.animator.ui.parametereditor;
 
 /**
  * A simple container representing a curve point [frame, value]
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 class ParameterCurvePoint
 {

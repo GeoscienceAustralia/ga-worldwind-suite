@@ -2,6 +2,8 @@ package au.gov.ga.worldwind.animator.view;
 
 /**
  * An interface for views that have a configurable clipping distance
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface ClipConfigurableView
 {

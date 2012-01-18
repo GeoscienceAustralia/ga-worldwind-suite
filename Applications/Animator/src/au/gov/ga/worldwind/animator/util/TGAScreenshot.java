@@ -14,6 +14,11 @@ import javax.media.opengl.glu.GLU;
 import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.Screenshot;
 
+/**
+ * Helper class that saves the current OpenGL context as a TGA screenshot.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class TGAScreenshot
 {
 	private static void checkExtABGR()
@@ -21,25 +26,23 @@ public class TGAScreenshot
 		GL gl = GLU.getCurrentGL();
 		if (!gl.isExtensionAvailable("GL_EXT_abgr"))
 		{
-			throw new IllegalArgumentException(
-					"Saving alpha channel requires GL_EXT_abgr");
+			throw new IllegalArgumentException("Saving alpha channel requires GL_EXT_abgr");
 		}
 	}
 
-	public static void writeToTargaFile(File file, int width, int height)
-			throws GLException, IOException
+	public static void writeToTargaFile(File file, int width, int height) throws GLException, IOException
 	{
 		writeToTargaFile(file, width, height, false);
 	}
 
-	public static void writeToTargaFile(File file, int width, int height,
-			boolean alpha) throws GLException, IOException
+	public static void writeToTargaFile(File file, int width, int height, boolean alpha) throws GLException,
+			IOException
 	{
 		writeToTargaFile(file, 0, 0, width, height, alpha);
 	}
 
-	public static void writeToTargaFile(File file, int x, int y, int width,
-			int height, boolean alpha) throws GLException, IOException
+	public static void writeToTargaFile(File file, int x, int y, int width, int height, boolean alpha)
+			throws GLException, IOException
 	{
 		if (!alpha)
 		{
@@ -62,8 +65,7 @@ public class TGAScreenshot
 		int readbackType = (alpha ? GL.GL_ABGR_EXT : GL.GL_BGR);
 
 		// read the BGR values into the image buffer
-		gl.glReadPixels(x, y, width, height, readbackType, GL.GL_UNSIGNED_BYTE,
-				bgr);
+		gl.glReadPixels(x, y, width, height, readbackType, GL.GL_UNSIGNED_BYTE, bgr);
 
 		// Restore pixel storage modes
 		psm.restore(gl);
@@ -85,8 +87,7 @@ public class TGAScreenshot
 		{
 		}
 
-		public void open(File file, int width, int height, boolean alpha)
-				throws IOException
+		public void open(File file, int width, int height, boolean alpha) throws IOException
 		{
 			this.alpha = alpha;
 			RandomAccessFile out = new RandomAccessFile(file, "rw");

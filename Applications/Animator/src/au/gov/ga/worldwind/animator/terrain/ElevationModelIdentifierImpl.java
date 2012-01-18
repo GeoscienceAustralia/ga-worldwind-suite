@@ -6,7 +6,6 @@ import au.gov.ga.worldwind.common.util.Validate;
  * The default implementation of the {@link ElevationModelIdentifier} interface
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class ElevationModelIdentifierImpl implements ElevationModelIdentifier
 {

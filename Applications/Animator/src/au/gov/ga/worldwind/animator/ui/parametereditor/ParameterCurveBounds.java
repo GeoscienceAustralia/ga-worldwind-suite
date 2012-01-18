@@ -4,7 +4,9 @@ import au.gov.ga.worldwind.common.util.Range;
 
 
 /**
- * A container that defines a bounding box for a drawn parameter curve. 
+ * A container that defines a bounding box for a drawn parameter curve.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 class ParameterCurveBounds
 {
