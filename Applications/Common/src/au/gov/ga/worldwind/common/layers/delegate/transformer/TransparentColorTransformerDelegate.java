@@ -30,7 +30,7 @@ import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
  *  (double in range [0, 1], 0 = only the target colour, 1 = all colours)
  * </ul>
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class TransparentColorTransformerDelegate implements IImageTransformerDelegate
 {

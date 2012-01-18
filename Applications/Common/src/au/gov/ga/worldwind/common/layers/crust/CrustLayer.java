@@ -44,6 +44,8 @@ import com.sun.opengl.util.BufferUtil;
  * <p/>
  * The crust layer will be rendered as a surface deformed by the elevation data and
  * coloured using a colour map based on min and max elevation values.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class CrustLayer extends AbstractLayer implements Loader
 {

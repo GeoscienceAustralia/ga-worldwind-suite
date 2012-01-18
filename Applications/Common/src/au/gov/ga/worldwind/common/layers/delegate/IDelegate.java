@@ -11,7 +11,7 @@ import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImag
  * saving delegates to a string definition and loading a new instance from a
  * string definition.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface IDelegate
 {

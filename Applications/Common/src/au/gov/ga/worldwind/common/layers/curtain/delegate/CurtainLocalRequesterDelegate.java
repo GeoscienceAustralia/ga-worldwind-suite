@@ -7,8 +7,14 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.requester.AbstractLocalRequesterDelegate;
 
-public class CurtainLocalRequesterDelegate extends AbstractLocalRequesterDelegate<DelegatorCurtainTextureTile> implements
-		ICurtainTileRequesterDelegate
+/**
+ * {@link ICurtainTileRequesterDelegate} implementation that requests curtain
+ * tiles from a local file tileset.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
+public class CurtainLocalRequesterDelegate extends AbstractLocalRequesterDelegate<DelegatorCurtainTextureTile>
+		implements ICurtainTileRequesterDelegate
 {
 	@Override
 	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)

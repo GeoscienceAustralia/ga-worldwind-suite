@@ -16,7 +16,7 @@ import au.gov.ga.worldwind.common.layers.delegate.ITileRequesterDelegate;
  * Implementation of {@link ITileRequesterDelegate} which performs the same
  * texture tile requests as {@link BasicTiledImageLayer}.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public abstract class AbstractURLRequesterDelegate<TILE extends IDelegatorTile> implements ITileRequesterDelegate<TILE>
 {

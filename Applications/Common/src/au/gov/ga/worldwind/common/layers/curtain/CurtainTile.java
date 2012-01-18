@@ -5,6 +5,11 @@ import gov.nasa.worldwind.util.TileKey;
 
 import java.net.URL;
 
+/**
+ * Represents a single tile for the {@link TiledCurtainLayer}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class CurtainTile implements Cacheable
 {
 	private final CurtainLevel level;

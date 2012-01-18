@@ -9,7 +9,7 @@ import java.net.URL;
  * Instances of {@link IRetrieverFactoryDelegate} are used to create
  * {@link Retriever}s when downloading tiles.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface IRetrieverFactoryDelegate extends IDelegate
 {

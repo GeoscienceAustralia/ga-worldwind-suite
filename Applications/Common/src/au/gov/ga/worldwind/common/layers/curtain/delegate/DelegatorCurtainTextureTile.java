@@ -7,6 +7,12 @@ import au.gov.ga.worldwind.common.layers.curtain.Segment;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegatorTile;
 import au.gov.ga.worldwind.common.layers.delegate.ITileFactoryDelegate;
 
+/**
+ * {@link IDelegatorTile} implementation which represents a tile for a curtain
+ * layer.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DelegatorCurtainTextureTile extends CurtainTextureTile implements IDelegatorTile
 {
 	protected final ITileFactoryDelegate<DelegatorCurtainTextureTile, Segment, CurtainLevel> delegate;

@@ -28,7 +28,7 @@ import au.gov.ga.worldwind.common.util.URLUtil;
  * directory relative to the input URL, which is useful for local file tilesets
  * with masks.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class MaskImageReaderDelegate implements ITileReaderDelegate
 {

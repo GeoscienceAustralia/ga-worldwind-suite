@@ -15,7 +15,7 @@ import au.gov.ga.worldwind.common.layers.delegate.IRetrieverFactoryDelegate;
  * Implementation of {@link IRetrieverFactoryDelegate} which creates
  * {@link PassThroughZipRetriever}s.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class PassThroughZipRetrieverFactoryDelegate implements IRetrieverFactoryDelegate
 {

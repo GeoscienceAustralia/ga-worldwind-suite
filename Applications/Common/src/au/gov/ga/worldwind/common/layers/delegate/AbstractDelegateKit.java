@@ -21,7 +21,15 @@ import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Element;
 
-public abstract class AbstractDelegateKit<TILE extends IDelegatorTile, BOUNDS, LEVEL> implements IDelegateKit<TILE, BOUNDS, LEVEL>
+/**
+ * Abstract generic implementation of the {@link IDelegateKit} interface. Stores
+ * the delegate objects for each of the delegate types, and forward the delegate
+ * interface functions to the stored delegate implementations.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
+public abstract class AbstractDelegateKit<TILE extends IDelegatorTile, BOUNDS, LEVEL> implements
+		IDelegateKit<TILE, BOUNDS, LEVEL>
 {
 	//default delegate implementations
 	protected ITileRequesterDelegate<TILE> requesterDelegate;
@@ -83,7 +91,7 @@ public abstract class AbstractDelegateKit<TILE extends IDelegatorTile, BOUNDS, L
 		}
 		return kit;
 	}
-	
+
 	/**
 	 * Attempt to set or add a delegate; return false if this delegate is not
 	 * recognized and therefore not set or added.

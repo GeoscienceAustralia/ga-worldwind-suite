@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 /**
  * URLRetriever that makes the readZipStream function accessible.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class ZipRetriever extends URLRetriever
 {

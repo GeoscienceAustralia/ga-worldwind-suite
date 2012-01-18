@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
  * An implementation of RetrievalResult which stores the downloaded data in a
  * ByteBuffer.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class ByteBufferRetrievalResult implements RetrievalResult
 {

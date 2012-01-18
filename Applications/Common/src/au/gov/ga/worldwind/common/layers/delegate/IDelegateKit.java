@@ -1,14 +1,31 @@
 package au.gov.ga.worldwind.common.layers.delegate;
 
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.layers.Layer;
 
 import java.util.Collection;
 
 import org.w3c.dom.Element;
 
+/**
+ * Kit that provides delegates for performing various tasks to the tiled
+ * {@link Layer} s that support them. This interface also extends all of the
+ * delegate interfaces; implementations should forward these delegate functions
+ * to the actual delegate objects.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * 
+ * @param <TILE>
+ *            Layer's tile type
+ * @param <BOUNDS>
+ *            Class that represents the bounds of each tile
+ * @param <LEVEL>
+ *            Class that represents a level of detail for the layer for which
+ *            this {@link IDelegateKit} is for
+ */
 public interface IDelegateKit<TILE extends IDelegatorTile, BOUNDS, LEVEL> extends ITileRequesterDelegate<TILE>,
-		IRetrieverFactoryDelegate, ITileFactoryDelegate<TILE, BOUNDS, LEVEL>, ITileReaderDelegate, IImageTransformerDelegate,
-		IRenderDelegate
+		IRetrieverFactoryDelegate, ITileFactoryDelegate<TILE, BOUNDS, LEVEL>, ITileReaderDelegate,
+		IImageTransformerDelegate, IRenderDelegate
 {
 	/**
 	 * Create a new {@link IDelegateKit} from an XML element.

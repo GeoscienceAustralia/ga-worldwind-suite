@@ -14,10 +14,14 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * Extension of {@link HTTPRetriever} which implements {@link ExtendedRetriever}.
+ * Extension of {@link HTTPRetriever} which implements {@link ExtendedRetriever}
+ * .
  * <p/>
- * Allows modification dates to be set on read, and uses the java {@link ProxySelector} mechanism rather
- * than the WWIO configuration mechanism. 
+ * Allows modification dates to be set on read, and uses the java
+ * {@link ProxySelector} mechanism rather than the WWIO configuration mechanism.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ExtendedHTTPRetriever extends HTTPRetriever implements ExtendedRetriever
 {
@@ -59,14 +63,14 @@ public class ExtendedHTTPRetriever extends HTTPRetriever implements ExtendedRetr
 			throw e;
 		}
 	}
-	
+
 	@Override
 	protected URLConnection openConnection() throws IOException
 	{
 		// Overridden to use the Java proxy selector mechanism rather than the World Wind WWIO configuration
 		// This gives access to the nonProxyHosts mechanism for bypassing proxies for internal addresses
 		// Falls back to the original behaviour if the proxy selector mechanism fails
-		
+
 		try
 		{
 			List<Proxy> proxies = ProxySelector.getDefault().select(url.toURI());

@@ -30,7 +30,7 @@ import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
  * 
  * @see http://manual.gimp.org/en/plug-in-colortoalpha.html
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class ColorToAlphaTransformerDelegate implements IImageTransformerDelegate
 {

@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
  * Extended {@link HTTPRetriever} which simply stores incoming zip files
  * directly to the ByteBuffer, instead of decompressing them.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class PassThroughZipRetriever extends HTTPRetriever
 {

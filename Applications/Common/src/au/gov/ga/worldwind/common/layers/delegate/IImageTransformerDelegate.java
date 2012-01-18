@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
  * during texture load. This can be used for post processing of a downloaded
  * texture.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface IImageTransformerDelegate extends IDelegate
 {

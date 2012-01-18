@@ -9,6 +9,12 @@ import java.nio.DoubleBuffer;
 
 import javax.media.opengl.GL;
 
+/**
+ * A {@link Renderable} piece of geometry that draws a segment (or section) of a
+ * curtain/path for the {@link TiledCurtainLayer}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SegmentGeometry implements Renderable
 {
 	private final Vec4 referenceCenter;

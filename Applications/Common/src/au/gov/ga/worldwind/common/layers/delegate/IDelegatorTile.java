@@ -8,7 +8,7 @@ import gov.nasa.worldwind.util.TileKey;
 /**
  * An individual tile used by an {@link IDelegatorLayer}.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface IDelegatorTile extends Cacheable
 {

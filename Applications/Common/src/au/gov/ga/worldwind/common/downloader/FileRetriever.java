@@ -11,7 +11,7 @@ import java.net.URL;
  * support the file protocol. Simply a non-abstract subclass of the abstract
  * {@link URLRetriever} class.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class FileRetriever extends URLRetriever
 {

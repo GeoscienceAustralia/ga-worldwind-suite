@@ -14,7 +14,7 @@ import java.util.List;
  * {@link RetrievalHandler}s can be added, and each one will be notified when
  * the result is downloaded.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class HandlerPostProcessor implements RetrievalPostProcessor
 {

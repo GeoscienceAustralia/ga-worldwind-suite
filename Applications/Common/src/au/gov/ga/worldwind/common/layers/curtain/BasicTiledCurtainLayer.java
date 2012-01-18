@@ -32,6 +32,11 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
 
+/**
+ * Basic implementation subclass of the abstract {@link TiledCurtainLayer}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class BasicTiledCurtainLayer extends TiledCurtainLayer
 {
 	private final Object fileLock;

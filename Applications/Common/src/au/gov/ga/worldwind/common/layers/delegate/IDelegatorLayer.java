@@ -14,7 +14,7 @@ import com.sun.opengl.util.texture.TextureData;
  * 
  * @param <TILE>
  *            The tile type for this layer.
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface IDelegatorLayer<TILE extends IDelegatorTile> extends AVList
 {

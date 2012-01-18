@@ -11,7 +11,7 @@ import java.net.URL;
  * file URLs (ie during texture load). This is useful if there is a need to read
  * an image from a custom file format (such as a zip file).
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface ITileReaderDelegate extends IDelegate
 {

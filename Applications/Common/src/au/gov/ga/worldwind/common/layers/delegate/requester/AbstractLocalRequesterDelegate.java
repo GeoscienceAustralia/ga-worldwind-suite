@@ -17,7 +17,7 @@ import au.gov.ga.worldwind.common.util.Util;
  * tilesets stored in the local filesystem. This means that tiles are not
  * downloaded/cached, but are loaded directly from the tileset.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public abstract class AbstractLocalRequesterDelegate<TILE extends IDelegatorTile> implements
 		ITileRequesterDelegate<TILE>

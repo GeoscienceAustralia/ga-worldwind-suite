@@ -40,6 +40,13 @@ import au.gov.ga.worldwind.common.util.DDSUncompressor;
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
 
+/**
+ * {@link BasicTiledCurtainLayer} subclass that uses delegates provided by a
+ * {@link CurtainDelegateKit} for the retrieval, transformation, and creation of
+ * curtain data.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DelegatorTiledCurtainLayer extends BasicTiledCurtainLayer implements
 		IDelegatorLayer<DelegatorCurtainTextureTile>
 {
@@ -306,13 +313,13 @@ public class DelegatorTiledCurtainLayer extends BasicTiledCurtainLayer implement
 			return layer.fileLock;
 		}
 	}
-	
+
 	@Override
 	protected CurtainTextureTile createCurtainTextureTile(Segment segment, CurtainLevel level, int row, int col)
 	{
 		return delegateKit.createTextureTile(segment, level, row, col);
 	}
-	
+
 	@Override
 	public void unmarkResourceAbsent(DelegatorCurtainTextureTile tile)
 	{
@@ -336,7 +343,8 @@ public class DelegatorTiledCurtainLayer extends BasicTiledCurtainLayer implement
 	 ********************************************************************************************** */
 
 	@Override
-	public void retrieveRemoteTexture(CurtainTextureTile tile, BasicTiledCurtainLayer.DownloadPostProcessor postProcessor)
+	public void retrieveRemoteTexture(CurtainTextureTile tile,
+			BasicTiledCurtainLayer.DownloadPostProcessor postProcessor)
 	{
 		createAndRunRetriever(tile, postProcessor);
 	}
@@ -346,8 +354,8 @@ public class DelegatorTiledCurtainLayer extends BasicTiledCurtainLayer implement
 	{
 		createAndRunRetriever(tile, postProcessor);
 	}
-	
-	protected void createAndRunRetriever(CurtainTextureTile tile, RetrievalPostProcessor postProcessor) 
+
+	protected void createAndRunRetriever(CurtainTextureTile tile, RetrievalPostProcessor postProcessor)
 	{
 		Retriever retriever = createRetriever(tile, postProcessor);
 		if (retriever != null)

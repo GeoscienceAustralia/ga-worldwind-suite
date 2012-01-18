@@ -11,6 +11,7 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
+import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.util.Logging;
@@ -35,6 +36,12 @@ import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor
 
 import com.sun.opengl.util.j2d.TextRenderer;
 
+/**
+ * {@link Layer} which renders a textured surface along a horizontal line (ie a
+ * curtain).
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 {
 	//TODO where should this live
@@ -217,40 +224,49 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		this.drawBoundingVolumes = drawBoundingVolumes;
 	}
 
-    /**
-     * Indicates the layer's detail hint, which is described in {@link #setDetailHint(double)}.
-     *
-     * @return the detail hint
-     *
-     * @see #setDetailHint(double)
-     */
-    public double getDetailHint()
-    {
-        return this.detailHint;
-    }
+	/**
+	 * Indicates the layer's detail hint, which is described in
+	 * {@link #setDetailHint(double)}.
+	 * 
+	 * @return the detail hint
+	 * 
+	 * @see #setDetailHint(double)
+	 */
+	public double getDetailHint()
+	{
+		return this.detailHint;
+	}
 
-    /**
-     * Modifies the default relationship of image resolution to screen resolution as the viewing altitude changes.
-     * Values greater than 0 cause imagery to appear at higher resolution at greater altitudes than normal, but at an
-     * increased performance cost. Values less than 0 decrease the default resolution at any given altitude. The default
-     * value is 0. Values typically range between -0.5 and 0.5.
-     * <p/>
-     * Note: The resolution-to-height relationship is defined by a scale factor that specifies the approximate size of
-     * discernable lengths in the image relative to eye distance. The scale is specified as a power of 10. A value of 3,
-     * for example, specifies that 1 meter on the surface should be distinguishable from an altitude of 10^3 meters
-     * (1000 meters). The default scale is 1/10^2.8, (1 over 10 raised to the power 2.8). The detail hint specifies
-     * deviations from that default. A detail hint of 0.2 specifies a scale of 1/1000, i.e., 1/10^(2.8 + .2) = 1/10^3.
-     * Scales much larger than 3 typically cause the applied resolution to be higher than discernable for the altitude.
-     * Such scales significantly decrease performance.
-     *
-     * @param detailHint the degree to modify the default relationship of image resolution to screen resolution with
-     *                   changing view altitudes. Values greater than 1 increase the resolution. Values less than zero
-     *                   decrease the resolution. The default value is 0.
-     */
-    public void setDetailHint(double detailHint)
-    {
-        this.detailHint = detailHint;
-    }
+	/**
+	 * Modifies the default relationship of image resolution to screen
+	 * resolution as the viewing altitude changes. Values greater than 0 cause
+	 * imagery to appear at higher resolution at greater altitudes than normal,
+	 * but at an increased performance cost. Values less than 0 decrease the
+	 * default resolution at any given altitude. The default value is 0. Values
+	 * typically range between -0.5 and 0.5.
+	 * <p/>
+	 * Note: The resolution-to-height relationship is defined by a scale factor
+	 * that specifies the approximate size of discernable lengths in the image
+	 * relative to eye distance. The scale is specified as a power of 10. A
+	 * value of 3, for example, specifies that 1 meter on the surface should be
+	 * distinguishable from an altitude of 10^3 meters (1000 meters). The
+	 * default scale is 1/10^2.8, (1 over 10 raised to the power 2.8). The
+	 * detail hint specifies deviations from that default. A detail hint of 0.2
+	 * specifies a scale of 1/1000, i.e., 1/10^(2.8 + .2) = 1/10^3. Scales much
+	 * larger than 3 typically cause the applied resolution to be higher than
+	 * discernable for the altitude. Such scales significantly decrease
+	 * performance.
+	 * 
+	 * @param detailHint
+	 *            the degree to modify the default relationship of image
+	 *            resolution to screen resolution with changing view altitudes.
+	 *            Values greater than 1 increase the resolution. Values less
+	 *            than zero decrease the resolution. The default value is 0.
+	 */
+	public void setDetailHint(double detailHint)
+	{
+		this.detailHint = detailHint;
+	}
 
 	protected CurtainLevelSet getLevels()
 	{
@@ -381,7 +397,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 			}
 		}
 	}
-	
+
 	protected CurtainTextureTile createCurtainTextureTile(Segment segment, CurtainLevel level, int row, int col)
 	{
 		return new CurtainTextureTile(segment, level, row, col);
@@ -409,7 +425,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		}
 		return boundingSector;
 	}
-	
+
 	// ============== Tile Assembly ======================= //
 	// ============== Tile Assembly ======================= //
 	// ============== Tile Assembly ======================= //
@@ -482,8 +498,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 				//                }
 			}
 
-			CurtainTextureTile[] subTiles =
-					tile.createSubTiles(this.levels.getLevel(tile.getLevelNumber() + 1));
+			CurtainTextureTile[] subTiles = tile.createSubTiles(this.levels.getLevel(tile.getLevelNumber() + 1));
 			for (CurtainTextureTile child : subTiles)
 			{
 				if (this.isTileVisible(dc, child))
@@ -553,13 +568,15 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 
 	protected boolean isTileVisible(DrawContext dc, CurtainTextureTile tile)
 	{
-//		Segment segment = tile.getSegment();
-//		Extent extent = path.getSegmentExtent(dc, segment, curtainTop, curtainBottom, subsegments, followTerrain);
-		
+		//		Segment segment = tile.getSegment();
+		//		Extent extent = path.getSegmentExtent(dc, segment, curtainTop, curtainBottom, subsegments, followTerrain);
+
 		// TODO: Fix this - see CWW-129
 		Sector pathBoundingSector = getSector();
-		Extent extent = Sector.computeBoundingBox(dc.getGlobe(), VerticalExaggerationAccessor.getGlobalVerticalExaggeration(dc), pathBoundingSector);
-		
+		Extent extent =
+				Sector.computeBoundingBox(dc.getGlobe(),
+						VerticalExaggerationAccessor.getGlobalVerticalExaggeration(dc), pathBoundingSector);
+
 		return extent.intersects(dc.getView().getFrustumInModelCoordinates());
 	}
 
@@ -567,28 +584,29 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 	{
 		return this.levels.isFinalLevel(tile.getLevelNumber()) || !needToSplit(dc, tile);
 	}
-	
-    protected double getDetailFactor()
-    {
-        return this.detailHintOrigin + this.getDetailHint();
-    }
+
+	protected double getDetailFactor()
+	{
+		return this.detailHintOrigin + this.getDetailHint();
+	}
 
 	protected boolean needToSplit(DrawContext dc, CurtainTextureTile tile)
 	{
-		Vec4[] points = path.getPointsInSegment(dc, tile.getSegment(), curtainTop, curtainBottom, subsegments, followTerrain);
+		Vec4[] points =
+				path.getPointsInSegment(dc, tile.getSegment(), curtainTop, curtainBottom, subsegments, followTerrain);
 		Vec4 centerPoint = path.getSegmentCenterPoint(dc, tile.getSegment(), curtainTop, curtainBottom, followTerrain);
 
 		View view = dc.getView();
 		Vec4 eyePoint = view.getEyePoint();
-		
+
 		double texelSize = tile.getLevel().getTexelSize();
 		double minDistance = eyePoint.distanceTo3(centerPoint);
 		double cellHeight = centerPoint.getLength3() * texelSize;
-		
+
 		for (Vec4 point : points)
 		{
 			double distance = eyePoint.distanceTo3(point);
-			if(distance < minDistance)
+			if (distance < minDistance)
 			{
 				minDistance = distance;
 				cellHeight = point.getLength3() * texelSize;
@@ -596,13 +614,13 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		}
 
 		// Split when the cell height (length of a texel) becomes greater than the specified fraction of the eye
-        // distance. The fraction is specified as a power of 10. For example, a detail factor of 3 means split when the
-        // cell height becomes more than one thousandth of the eye distance. Another way to say it is, use the current
-        // tile if its cell height is less than the specified fraction of the eye distance.
-        //
-        // NOTE: It's tempting to instead compare a screen pixel size to the texel size, but that calculation is
-        // window-size dependent and results in selecting an excessive number of tiles when the window is large.
-        return cellHeight > minDistance * Math.pow(10, -this.getDetailFactor());
+		// distance. The fraction is specified as a power of 10. For example, a detail factor of 3 means split when the
+		// cell height becomes more than one thousandth of the eye distance. Another way to say it is, use the current
+		// tile if its cell height is less than the specified fraction of the eye distance.
+		//
+		// NOTE: It's tempting to instead compare a screen pixel size to the texel size, but that calculation is
+		// window-size dependent and results in selecting an excessive number of tiles when the window is large.
+		return cellHeight > minDistance * Math.pow(10, -this.getDetailFactor());
 	}
 
 	// ============== Rendering ======================= //
@@ -661,10 +679,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 			gl.glEnable(GL.GL_CULL_FACE);
 			gl.glCullFace(GL.GL_BACK);
 
-			dc.setPerFrameStatistic(PerformanceStatistic.IMAGE_TILE_COUNT, this.tileCountName,
-					this.currentTiles.size());
-			renderer.renderTiles(dc, this.currentTiles, getPath(), getCurtainTop(),
-					getCurtainBottom(), getSubsegments(), isFollowTerrain());
+			dc.setPerFrameStatistic(PerformanceStatistic.IMAGE_TILE_COUNT, this.tileCountName, this.currentTiles.size());
+			renderer.renderTiles(dc, this.currentTiles, getPath(), getCurtainTop(), getCurtainBottom(),
+					getSubsegments(), isFollowTerrain());
 
 			gl.glPopAttrib();
 
@@ -737,14 +754,12 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 
 		if (dc.getView() == null)
 		{
-			String message =
-					Logging.getMessage("layers.AbstractLayer.NoViewSpecifiedInDrawingContext");
+			String message = Logging.getMessage("layers.AbstractLayer.NoViewSpecifiedInDrawingContext");
 			Logging.logger().severe(message);
 			throw new IllegalStateException(message);
 		}
 
-		Extent extent =
-				path.getSegmentExtent(dc, Segment.FULL, curtainTop, curtainBottom, 1, followTerrain);
+		Extent extent = path.getSegmentExtent(dc, Segment.FULL, curtainTop, curtainBottom, 1, followTerrain);
 		return extent.intersects(dc.getView().getFrustumInModelCoordinates());
 
 		/*return dc.getVisibleSector() == null
@@ -765,8 +780,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 			if (pos == null)
 				continue;
 
-			return dc.getGlobe()
-					.computePointFromPosition(pos.getLatitude(), pos.getLongitude(), 0d);
+			return dc.getGlobe().computePointFromPosition(pos.getLatitude(), pos.getLongitude(), 0d);
 		}
 
 		return null;
@@ -782,12 +796,8 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		@Override
 		public int compare(CurtainTextureTile ta, CurtainTextureTile tb)
 		{
-			int la =
-					ta.getFallbackTile() == null ? ta.getLevelNumber() : ta.getFallbackTile()
-							.getLevelNumber();
-			int lb =
-					tb.getFallbackTile() == null ? tb.getLevelNumber() : tb.getFallbackTile()
-							.getLevelNumber();
+			int la = ta.getFallbackTile() == null ? ta.getLevelNumber() : ta.getFallbackTile().getLevelNumber();
+			int lb = tb.getFallbackTile() == null ? tb.getLevelNumber() : tb.getFallbackTile().getLevelNumber();
 
 			return la < lb ? -1 : la == lb ? 0 : 1;
 		}
@@ -813,9 +823,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 			if (tile.getFallbackTile() != null)
 				tileLabel += "/" + tile.getFallbackTile().getLabel();
 
-			Vec4 pt =
-					path.getSegmentCenterPoint(dc, tile.getSegment(), curtainTop, curtainBottom,
-							followTerrain);
+			Vec4 pt = path.getSegmentCenterPoint(dc, tile.getSegment(), curtainTop, curtainBottom, followTerrain);
 			pt = dc.getView().project(pt);
 			textRenderer.draw(tileLabel, (int) pt.x, (int) pt.y);
 		}
@@ -832,8 +840,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		for (CurtainTextureTile tile : tiles)
 		{
 			Extent extent =
-					path.getSegmentExtent(dc, tile.getSegment(), curtainTop, curtainBottom,
-							subsegments, followTerrain);
+					path.getSegmentExtent(dc, tile.getSegment(), curtainTop, curtainBottom, subsegments, followTerrain);
 			if (extent instanceof Renderable)
 				((Renderable) extent).render(dc);
 
@@ -874,29 +881,25 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		CurtainDataConfigurationUtils.getLevelSetConfigParams(domElement, params);
 
 		// Service properties.
-		WWXML.checkAndSetStringParam(domElement, params, AVKey.SERVICE_NAME,
-				"Service/@serviceName", xpath);
+		WWXML.checkAndSetStringParam(domElement, params, AVKey.SERVICE_NAME, "Service/@serviceName", xpath);
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.RETRIEVE_PROPERTIES_FROM_SERVICE,
 				"RetrievePropertiesFromService", xpath);
 
 		// Image format properties.
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.IMAGE_FORMAT, "ImageFormat", xpath);
-		WWXML.checkAndSetStringParam(domElement, params, AVKey.TEXTURE_FORMAT, "TextureFormat",
-				xpath);
+		WWXML.checkAndSetStringParam(domElement, params, AVKey.TEXTURE_FORMAT, "TextureFormat", xpath);
 		WWXML.checkAndSetUniqueStringsParam(domElement, params, AVKey.AVAILABLE_IMAGE_FORMATS,
 				"AvailableImageFormats/ImageFormat", xpath);
 
 		// Optional behavior properties.
-		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.FORCE_LEVEL_ZERO_LOADS,
-				"ForceLevelZeroLoads", xpath);
-		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.RETAIN_LEVEL_ZERO_TILES,
-				"RetainLevelZeroTiles", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.FORCE_LEVEL_ZERO_LOADS, "ForceLevelZeroLoads", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.RETAIN_LEVEL_ZERO_TILES, "RetainLevelZeroTiles", xpath);
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.USE_MIP_MAPS, "UseMipMaps", xpath);
-		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.USE_TRANSPARENT_TEXTURES,
-				"UseTransparentTextures", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKey.USE_TRANSPARENT_TEXTURES, "UseTransparentTextures",
+				xpath);
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKey.DETAIL_HINT, "DetailHint", xpath);
-		WWXML.checkAndSetColorArrayParam(domElement, params, AVKey.TRANSPARENCY_COLORS,
-				"TransparencyColors/Color", xpath);
+		WWXML.checkAndSetColorArrayParam(domElement, params, AVKey.TRANSPARENCY_COLORS, "TransparencyColors/Color",
+				xpath);
 
 		// Retrieval properties. Convert the Long time values to Integers, because BasicTiledImageLayer is expecting
 		// Integer values.
@@ -904,18 +907,14 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 				"RetrievalTimeouts/ConnectTimeout/Time", xpath);
 		WWXML.checkAndSetTimeParamAsInteger(domElement, params, AVKey.URL_READ_TIMEOUT,
 				"RetrievalTimeouts/ReadTimeout/Time", xpath);
-		WWXML.checkAndSetTimeParamAsInteger(domElement, params,
-				AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT,
+		WWXML.checkAndSetTimeParamAsInteger(domElement, params, AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT,
 				"RetrievalTimeouts/StaleRequestLimit/Time", xpath);
 
 		// Curtain specific properties.
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.CURTAIN_TOP, "CurtainTop", xpath);
-		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.CURTAIN_BOTTOM, "CurtainBottom",
-				xpath);
-		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.FOLLOW_TERRAIN,
-				"FollowTerrain", xpath);
-		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SUBSEGMENTS, "Subsegments",
-				xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.CURTAIN_BOTTOM, "CurtainBottom", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.FOLLOW_TERRAIN, "FollowTerrain", xpath);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.SUBSEGMENTS, "Subsegments", xpath);
 
 		// Curtain path
 		List<LatLon> positions = new ArrayList<LatLon>();

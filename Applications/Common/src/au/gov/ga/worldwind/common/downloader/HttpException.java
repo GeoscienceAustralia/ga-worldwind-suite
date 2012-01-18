@@ -4,7 +4,7 @@ package au.gov.ga.worldwind.common.downloader;
  * Exception subclass which also provides the HTTP status code returned from the
  * server.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class HttpException extends Exception
 {

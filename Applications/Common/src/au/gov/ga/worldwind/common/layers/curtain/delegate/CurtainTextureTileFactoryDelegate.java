@@ -10,6 +10,12 @@ import au.gov.ga.worldwind.common.layers.curtain.Segment;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.util.Util;
 
+/**
+ * {@link ICurtainTileFactoryDelegate} implementation which creates new
+ * {@link DelegatorCurtainTextureTile} objects.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class CurtainTextureTileFactoryDelegate implements ICurtainTileFactoryDelegate
 {
 	private final static String DEFINITION_STRING = "CurtainTextureTile";

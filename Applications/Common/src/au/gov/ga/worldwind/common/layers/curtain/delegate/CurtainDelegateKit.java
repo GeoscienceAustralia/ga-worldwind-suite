@@ -12,9 +12,16 @@ import au.gov.ga.worldwind.common.layers.curtain.Segment;
 import au.gov.ga.worldwind.common.layers.delegate.AbstractDelegateKit;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegateFactory;
+import au.gov.ga.worldwind.common.layers.delegate.IDelegateKit;
 import au.gov.ga.worldwind.common.layers.delegate.IRetrieverFactoryDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.retriever.HttpRetrieverFactoryDelegate;
 
+/**
+ * {@link IDelegateKit} implementation for providing specific delegates to the
+ * {@link DelegatorTiledCurtainLayer}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class CurtainDelegateKit extends AbstractDelegateKit<DelegatorCurtainTextureTile, Segment, CurtainLevel>
 {
 	private final static Collection<String> defaultDelegateDefinitions = new HashSet<String>();

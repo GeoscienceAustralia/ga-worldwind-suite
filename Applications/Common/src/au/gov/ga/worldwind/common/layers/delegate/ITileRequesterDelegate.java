@@ -6,7 +6,7 @@ import java.net.URL;
  * Instances of {@link ITileRequesterDelegate} are used to customise the
  * requesting of tile textures.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface ITileRequesterDelegate<TILE extends IDelegatorTile> extends IDelegate
 {

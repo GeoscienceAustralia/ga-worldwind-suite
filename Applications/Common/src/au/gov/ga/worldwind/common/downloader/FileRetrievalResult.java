@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
  * Extension of the {@link ByteBufferRetrievalResult} which fills the ByteBuffer
  * from a File. Used for returning results from the local cache.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class FileRetrievalResult extends ByteBufferRetrievalResult
 {

@@ -12,10 +12,12 @@ import gov.nasa.worldwind.util.TileKey;
  * @param <TILE>
  *            Tile type to create from this factory.
  * @param <BOUNDS>
- *            Bounds type expected by the tile's constructor (eg, {@link Sector}).
+ *            Bounds type expected by the tile's constructor (eg, {@link Sector}
+ *            ).
  * @param <LEVEL>
  *            Level type expected by the tile's constructor.
- * @author Michael de Hoog
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface ITileFactoryDelegate<TILE extends IDelegatorTile, BOUNDS, LEVEL> extends IDelegate
 {

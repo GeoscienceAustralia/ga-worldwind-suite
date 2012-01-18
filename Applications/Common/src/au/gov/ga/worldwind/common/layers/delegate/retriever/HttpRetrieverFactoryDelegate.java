@@ -16,7 +16,7 @@ import au.gov.ga.worldwind.common.layers.delegate.IRetrieverFactoryDelegate;
  * Implementation of {@link IRetrieverFactoryDelegate} which creates
  * {@link HTTPRetriever}s.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class HttpRetrieverFactoryDelegate implements IRetrieverFactoryDelegate
 {

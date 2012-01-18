@@ -14,7 +14,7 @@ import au.gov.ga.worldwind.common.util.URLUtil;
 /**
  * Extension of {@link FileRetriever} which implements {@link ExtendedRetriever}.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class ExtendedFileRetriever extends FileRetriever implements ExtendedRetriever
 {

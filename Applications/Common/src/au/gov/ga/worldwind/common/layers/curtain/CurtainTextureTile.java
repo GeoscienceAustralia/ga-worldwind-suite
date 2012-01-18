@@ -13,6 +13,12 @@ import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureData;
 import com.sun.opengl.util.texture.TextureIO;
 
+/**
+ * Extension of the {@link CurtainTile} class which contains texture data for
+ * the tile.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class CurtainTextureTile extends CurtainTile
 {
 	private volatile TextureData textureData; // if non-null, then must be converted to a Texture
@@ -220,7 +226,7 @@ public class CurtainTextureTile extends CurtainTile
 
 		return subTiles;
 	}
-	
+
 	protected CurtainTextureTile createTextureTile(Segment segment, CurtainLevel level, int row, int column)
 	{
 		return new CurtainTextureTile(segment, level, row, column);
@@ -264,9 +270,7 @@ public class CurtainTextureTile extends CurtainTile
 		}
 		catch (Exception e)
 		{
-			String msg =
-					Logging.getMessage("layers.TextureLayer.ExceptionAttemptingToReadTextureFile",
-							"");
+			String msg = Logging.getMessage("layers.TextureLayer.ExceptionAttemptingToReadTextureFile", "");
 			Logging.logger().log(java.util.logging.Level.SEVERE, msg, e);
 			return null;
 		}
@@ -304,17 +308,14 @@ public class CurtainTextureTile extends CurtainTile
 		// surface is at a high slope to the eye.
 		if (useMipmapFilter)
 		{
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER,
-					GL.GL_LINEAR_MIPMAP_LINEAR);
+			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR);
 
 			// If the maximum degree of anisotropy is 2.0 or greater, then we know this graphics context supports
 			// the anisotropic texture filter.
 			double maxAnisotropy = dc.getGLRuntimeCapabilities().getMaxTextureAnisotropy();
-			if (dc.getGLRuntimeCapabilities().isUseAnisotropicTextureFilter()
-					&& maxAnisotropy >= 2.0)
+			if (dc.getGLRuntimeCapabilities().isUseAnisotropicTextureFilter() && maxAnisotropy >= 2.0)
 			{
-				gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT,
-						(float) maxAnisotropy);
+				gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, (float) maxAnisotropy);
 			}
 		}
 		// If the texture does not qualify for mipmaps, then apply a linear minification filter.
@@ -466,8 +467,7 @@ public class CurtainTextureTile extends CurtainTile
 
 		final CurtainTextureTile tile = (CurtainTextureTile) o;
 
-		return !(this.getTileKey() != null ? !this.getTileKey().equals(tile.getTileKey()) : tile
-				.getTileKey() != null);
+		return !(this.getTileKey() != null ? !this.getTileKey().equals(tile.getTileKey()) : tile.getTileKey() != null);
 	}
 
 	@Override

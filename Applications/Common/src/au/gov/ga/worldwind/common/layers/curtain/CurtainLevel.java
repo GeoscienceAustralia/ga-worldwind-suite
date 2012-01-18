@@ -12,6 +12,11 @@ import gov.nasa.worldwind.util.TileKey;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.Util;
 
+/**
+ * Represents a single LOD level for the {@link TiledCurtainLayer}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 {
 	private final AVList params;

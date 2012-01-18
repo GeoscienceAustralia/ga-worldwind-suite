@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 /**
  * Represents a result from a download.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface RetrievalResult
 {

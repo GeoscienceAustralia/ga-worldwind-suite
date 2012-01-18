@@ -23,7 +23,10 @@ import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor
 import com.sun.opengl.util.BufferUtil;
 
 /**
- * Defines a path consisting of lat/lon coordinates.
+ * Defines a path consisting of lat/lon coordinates. Contains functionality for
+ * generating vertex geometry for segments within the path.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class Path
 {
@@ -68,9 +71,11 @@ public class Path
 	}
 
 	/**
-	 * @param percent The percentage expressed as a decimal (e.g. 50% == 0.5)
+	 * @param percent
+	 *            The percentage expressed as a decimal (e.g. 50% == 0.5)
 	 * 
-	 * @return The {@link LatLon} location that lies <code>percent</code>% of the way along the path
+	 * @return The {@link LatLon} location that lies <code>percent</code>% of
+	 *         the way along the path
 	 */
 	public synchronized LatLon getPercentLatLon(double percent)
 	{
@@ -94,7 +99,8 @@ public class Path
 		return LatLon.interpolateGreatCircle(p, lower.getValue(), higher.getValue());
 	}
 
-	public synchronized Vec4 getSegmentCenterPoint(DrawContext dc, Segment segment, double top, double bottom, boolean followTerrain)
+	public synchronized Vec4 getSegmentCenterPoint(DrawContext dc, Segment segment, double top, double bottom,
+			boolean followTerrain)
 	{
 		top = VerticalExaggerationAccessor.applyVerticalExaggeration(dc, top);
 		bottom = VerticalExaggerationAccessor.applyVerticalExaggeration(dc, bottom);
@@ -104,13 +110,16 @@ public class Path
 
 		if (followTerrain)
 		{
-			e += dc.getGlobe().getElevation(ll.latitude, ll.longitude) * VerticalExaggerationAccessor.getGlobalVerticalExaggeration(dc);
+			e +=
+					dc.getGlobe().getElevation(ll.latitude, ll.longitude)
+							* VerticalExaggerationAccessor.getGlobalVerticalExaggeration(dc);
 		}
 
 		return dc.getGlobe().computePointFromPosition(ll, e);
 	}
 
-	public synchronized SegmentGeometry getGeometry(DrawContext dc, Segment segment, double top, double bottom, int subsegments, boolean followTerrain)
+	public synchronized SegmentGeometry getGeometry(DrawContext dc, Segment segment, double top, double bottom,
+			int subsegments, boolean followTerrain)
 	{
 		NavigableMap<Double, LatLon> betweenMap = segmentMap(segment, subsegments);
 		int numVertices = betweenMap.size() * 2;
@@ -142,7 +151,9 @@ public class Path
 			double e = 0;
 			if (followTerrain)
 			{
-				e = globe.getElevation(ll.latitude, ll.longitude) * VerticalExaggerationAccessor.getGlobalVerticalExaggeration(dc);
+				e =
+						globe.getElevation(ll.latitude, ll.longitude)
+								* VerticalExaggerationAccessor.getGlobalVerticalExaggeration(dc);
 			}
 
 			Vec4 point1 = globe.computePointFromPosition(ll, t + e);
@@ -158,7 +169,8 @@ public class Path
 		return new SegmentGeometry(verts, texCoords, refCenter);
 	}
 
-	public synchronized Vec4[] getPointsInSegment(DrawContext dc, Segment segment, double top, double bottom, int subsegments, boolean followTerrain)
+	public synchronized Vec4[] getPointsInSegment(DrawContext dc, Segment segment, double top, double bottom,
+			int subsegments, boolean followTerrain)
 	{
 		//TODO ?? cache value returned from this method, and if called twice with same input parameters, return cached value ??
 		//TODO create a new function to return some object with a vertex buffer and texture buffer instead of just a Vec4[] array
@@ -183,7 +195,9 @@ public class Path
 			if (followTerrain)
 			{
 				// Note: The elevation model has already applied vertical exaggeration in the case of the VerticalExaggerationElevationModel...
-				e = globe.getElevation(ll.latitude, ll.longitude) * VerticalExaggerationAccessor.getGlobalVerticalExaggeration(dc);
+				e =
+						globe.getElevation(ll.latitude, ll.longitude)
+								* VerticalExaggerationAccessor.getGlobalVerticalExaggeration(dc);
 			}
 
 			points[j++] = globe.computePointFromPosition(ll, t + e);
@@ -217,7 +231,8 @@ public class Path
 		return betweenMap;
 	}
 
-	public synchronized Extent getSegmentExtent(DrawContext dc, Segment segment, double top, double bottom, int subsegments, boolean followTerrain)
+	public synchronized Extent getSegmentExtent(DrawContext dc, Segment segment, double top, double bottom,
+			int subsegments, boolean followTerrain)
 	{
 		Vec4[] points = getPointsInSegment(dc, segment, top, bottom, subsegments, followTerrain);
 		return Box.computeBoundingBox(Arrays.asList(points));
@@ -242,7 +257,7 @@ public class Path
 	{
 		return length.radians * percent;
 	}
-	
+
 	/**
 	 * @return The sector that bounds the path
 	 */
@@ -252,12 +267,12 @@ public class Path
 		{
 			return null;
 		}
-		
+
 		Angle minLat = Angle.fromDegrees(360);
 		Angle minLon = Angle.fromDegrees(360);
 		Angle maxLat = Angle.fromDegrees(-360);
 		Angle maxLon = Angle.fromDegrees(-360);
-		
+
 		for (LatLon pathPosition : positions.values())
 		{
 			if (pathPosition.getLatitude().compareTo(minLat) < 0)
@@ -277,7 +292,7 @@ public class Path
 				maxLon = pathPosition.getLongitude();
 			}
 		}
-		
+
 		return new Sector(minLat, maxLat, minLon, maxLon);
 	}
 }

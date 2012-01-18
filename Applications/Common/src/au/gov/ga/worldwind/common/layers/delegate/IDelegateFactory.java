@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
  * All DelegateFactory instances should be implemented as singletons. This
  * function returns the singleton instance of this DelegateFactory.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface IDelegateFactory
 {

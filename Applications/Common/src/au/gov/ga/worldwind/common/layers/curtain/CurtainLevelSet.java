@@ -17,6 +17,11 @@ import java.util.List;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.transform.URLTransformer;
 
+/**
+ * Represents a set of LOD levels for the {@link TiledCurtainLayer}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class CurtainLevelSet extends WWObjectImpl
 {
 	private final List<CurtainLevel> levels = new ArrayList<CurtainLevel>();
@@ -49,16 +54,14 @@ public class CurtainLevelSet extends WWObjectImpl
 		o = params.getValue(AVKeyMore.FULL_HEIGHT);
 		if (o == null || !(o instanceof Integer))
 			sb.append(getMessage(getTermFullHeightKey())).append(" ");
-		
+
 		o = params.getValue(AVKeyMore.PATH);
-		if(o == null || !(o instanceof Path))
+		if (o == null || !(o instanceof Path))
 			sb.append(getMessage(getTermPathKey())).append(" ");
 
 		if (sb.length() > 0)
 		{
-			String message =
-					Logging.getMessage("layers.LevelSet.InvalidLevelDescriptorFields",
-							sb.toString());
+			String message = Logging.getMessage("layers.LevelSet.InvalidLevelDescriptorFields", sb.toString());
 			Logging.logger().severe(message);
 			throw new IllegalArgumentException(message);
 		}
@@ -72,12 +75,11 @@ public class CurtainLevelSet extends WWObjectImpl
 		if (tub == null)
 		{
 			final String paramsImageFormat = (String) params.getValue(AVKey.IMAGE_FORMAT);
-			
+
 			params.setValue(AVKey.TILE_URL_BUILDER, new CurtainTileUrlBuilder()
 			{
 				@Override
-				public URL getURL(CurtainTile tile, String imageFormat)
-						throws MalformedURLException
+				public URL getURL(CurtainTile tile, String imageFormat) throws MalformedURLException
 				{
 					String service = tile.getLevel().getService();
 					if (service == null || service.length() < 1)
@@ -119,8 +121,7 @@ public class CurtainLevelSet extends WWObjectImpl
 
 		for (int i = 0; i < numLevels; i++)
 		{
-			params.setValue(AVKey.LEVEL_NAME,
-					i < numEmptyLevels ? "" : Integer.toString(i - numEmptyLevels));
+			params.setValue(AVKey.LEVEL_NAME, i < numEmptyLevels ? "" : Integer.toString(i - numEmptyLevels));
 			params.setValue(AVKey.LEVEL_NUMBER, i);
 
 			params.setValue(AVKeyMore.LEVEL_WIDTH, levelSizes[i].width);
@@ -191,8 +192,7 @@ public class CurtainLevelSet extends WWObjectImpl
 
 	public final CurtainLevel getLevel(int levelNumber)
 	{
-		return (levelNumber >= 0 && levelNumber < this.levels.size()) ? this.levels
-				.get(levelNumber) : null;
+		return (levelNumber >= 0 && levelNumber < this.levels.size()) ? this.levels.get(levelNumber) : null;
 	}
 
 	public final int getNumLevels()
@@ -232,15 +232,13 @@ public class CurtainLevelSet extends WWObjectImpl
 
 	private long getTileNumber(CurtainTile tile)
 	{
-		return tile.getRow() < 0 ? -1 : tile.getRow() * this.numColumnsInLevel(tile.getLevel())
-				+ tile.getColumn();
+		return tile.getRow() < 0 ? -1 : tile.getRow() * this.numColumnsInLevel(tile.getLevel()) + tile.getColumn();
 	}
 
 	private long getTileNumber(TileKey tileKey)
 	{
 		return tileKey.getRow() < 0 ? -1 : tileKey.getRow()
-				* this.numColumnsInLevel(this.getLevel(tileKey.getLevelNumber()))
-				+ tileKey.getColumn();
+				* this.numColumnsInLevel(this.getLevel(tileKey.getLevelNumber())) + tileKey.getColumn();
 	}
 
 	/**
@@ -310,8 +308,7 @@ public class CurtainLevelSet extends WWObjectImpl
 			throw new IllegalArgumentException(msg);
 		}
 
-		return tile.getLevel().isEmpty()
-				|| tile.getLevel().isResourceAbsent(this.getTileNumber(tile));
+		return tile.getLevel().isEmpty() || tile.getLevel().isResourceAbsent(this.getTileNumber(tile));
 	}
 
 	/**

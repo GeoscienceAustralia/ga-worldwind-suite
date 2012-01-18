@@ -6,7 +6,7 @@ import gov.nasa.worldwind.render.DrawContext;
  * Instances of {@link IRenderDelegate} are called before and after rendering a
  * layer.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface IRenderDelegate extends IDelegate
 {

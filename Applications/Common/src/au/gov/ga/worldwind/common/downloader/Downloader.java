@@ -28,7 +28,7 @@ import au.gov.ga.worldwind.common.util.URLUtil;
  * store provided by WorldWind.getDataFileStore(). Supports testing if the data
  * on the server has been modified since last downloaded.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class Downloader
 {

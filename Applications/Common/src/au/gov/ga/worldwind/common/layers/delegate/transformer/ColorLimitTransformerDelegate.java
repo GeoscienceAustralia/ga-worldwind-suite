@@ -22,6 +22,8 @@ import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
  *  <li>g = limit for the green channel (integer in range [0, 255])
  *  <li>b = limit for the blue channel (integer in range [0, 255])
  * </ul>
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class ColorLimitTransformerDelegate implements IImageTransformerDelegate
 {

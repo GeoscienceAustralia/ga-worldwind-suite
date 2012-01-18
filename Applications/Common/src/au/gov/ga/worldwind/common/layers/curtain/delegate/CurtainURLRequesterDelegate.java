@@ -7,6 +7,12 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.requester.AbstractURLRequesterDelegate;
 
+/**
+ * {@link ICurtainTileRequesterDelegate} implementation which requests tiles
+ * from a URL.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class CurtainURLRequesterDelegate extends AbstractURLRequesterDelegate<DelegatorCurtainTextureTile> implements
 		ICurtainTileRequesterDelegate
 {

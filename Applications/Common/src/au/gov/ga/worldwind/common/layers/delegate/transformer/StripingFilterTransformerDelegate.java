@@ -31,6 +31,8 @@ import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
  *  <li>highPassRows = the filter size for the high pass filter applied to the rows of the image (integer number of pixels)
  * </ul>
  * <b>Note:</b> If the lowPass and highPass filters are the same size for columns or rows, no effect will be seen in that direction of the image
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class StripingFilterTransformerDelegate implements IImageTransformerDelegate
 {

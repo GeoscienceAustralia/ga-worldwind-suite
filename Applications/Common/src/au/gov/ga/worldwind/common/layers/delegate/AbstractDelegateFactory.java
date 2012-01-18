@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.layers.Layer;
 
 import org.w3c.dom.Element;
 
@@ -17,6 +18,12 @@ import au.gov.ga.worldwind.common.layers.delegate.transformer.ResizeTransformerD
 import au.gov.ga.worldwind.common.layers.delegate.transformer.StripingFilterTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.transformer.TransparentColorTransformerDelegate;
 
+/**
+ * Abstract implmentation of the {@link IDelegateFactory}. It contains all the
+ * general delegates that are supported on all tiled {@link Layer}s.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class AbstractDelegateFactory implements IDelegateFactory
 {
 	private Map<Class<? extends IDelegate>, IDelegate> classToInstanceMap =

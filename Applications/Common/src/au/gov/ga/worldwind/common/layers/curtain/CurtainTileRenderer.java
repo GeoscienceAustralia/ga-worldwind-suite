@@ -8,10 +8,15 @@ import java.util.logging.Level;
 
 import javax.media.opengl.GL;
 
+/**
+ * Helper class used to render a curtain's {@link CurtainTile}s.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class CurtainTileRenderer
 {
-	public void renderTile(DrawContext dc, CurtainTextureTile tile, Path path, double top,
-			double bottom, int subsegments, boolean followTerrain)
+	public void renderTile(DrawContext dc, CurtainTextureTile tile, Path path, double top, double bottom,
+			int subsegments, boolean followTerrain)
 	{
 		if (tile == null)
 		{
@@ -26,8 +31,8 @@ public class CurtainTileRenderer
 		al.clear();
 	}
 
-	public void renderTiles(DrawContext dc, Iterable<? extends CurtainTextureTile> tiles,
-			Path path, double top, double bottom, int subsegments, boolean followTerrain)
+	public void renderTiles(DrawContext dc, Iterable<? extends CurtainTextureTile> tiles, Path path, double top,
+			double bottom, int subsegments, boolean followTerrain)
 	{
 		if (tiles == null)
 		{
@@ -84,8 +89,7 @@ public class CurtainTileRenderer
 					tile.applyInternalTransform(dc);
 
 					SegmentGeometry geometry =
-							path.getGeometry(dc, tile.getSegment(), top, bottom, subsegments,
-									followTerrain);
+							path.getGeometry(dc, tile.getSegment(), top, bottom, subsegments, followTerrain);
 					geometry.render(dc, 1);
 				}
 			}
@@ -97,10 +101,8 @@ public class CurtainTileRenderer
 		}
 		catch (Exception e)
 		{
-			Logging.logger().log(
-					Level.SEVERE,
-					Logging.getMessage("generic.ExceptionWhileRenderingLayer", this.getClass()
-							.getName()), e);
+			Logging.logger().log(Level.SEVERE,
+					Logging.getMessage("generic.ExceptionWhileRenderingLayer", this.getClass().getName()), e);
 		}
 		finally
 		{

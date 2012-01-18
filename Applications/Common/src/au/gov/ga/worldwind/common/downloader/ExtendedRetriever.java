@@ -6,7 +6,7 @@ import gov.nasa.worldwind.retrieve.Retriever;
  * Extension of the World Wind {@link Retriever} interface which provides
  * additional getter methods required for the {@link Downloader}.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface ExtendedRetriever extends Retriever
 {

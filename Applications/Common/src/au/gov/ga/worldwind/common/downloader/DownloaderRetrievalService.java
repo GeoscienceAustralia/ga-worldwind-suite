@@ -17,6 +17,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
+/**
+ * {@link RetrievalService} used by the {@link Downloader}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DownloaderRetrievalService extends WWObjectImpl implements RetrievalService,
 		Thread.UncaughtExceptionHandler
 {

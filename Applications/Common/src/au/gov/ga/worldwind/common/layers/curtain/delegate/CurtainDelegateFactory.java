@@ -5,7 +5,7 @@ import au.gov.ga.worldwind.common.layers.delegate.AbstractDelegateFactory;
 /**
  * Factory which creates delegates for the {@link DelegatorTiledCurtainLayer}.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class CurtainDelegateFactory extends AbstractDelegateFactory
 {
