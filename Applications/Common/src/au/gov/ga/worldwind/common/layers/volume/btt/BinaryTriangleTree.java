@@ -25,12 +25,40 @@ public class BinaryTriangleTree
 	public List<Triangle> buildMesh(float maxVariance)
 	{
 		List<Triangle> triangles = new ArrayList<Triangle>();
+		buildMesh(maxVariance, 0, 0, width, height, false, false, triangles);
+		return triangles;
+	}
 
-		int yStart = 0;
+	public List<Triangle> buildMeshFromCenter(float maxVariance)
+	{
+		List<Triangle> triangles = new ArrayList<Triangle>();
+
+		int centerWidth = nextLowestPowerOf2Plus1(width);
+		int centerHeight = nextLowestPowerOf2Plus1(height);
+		int centerXOffset = (width - centerWidth) / 2;
+		int centerYOffset = (height - centerHeight) / 2;
+		int remainingWidth = width - centerWidth - centerXOffset;
+		int remainingHeight = height - centerHeight - centerYOffset;
+
+		buildMesh(maxVariance, centerXOffset, centerYOffset, centerWidth, centerHeight, false, false, triangles);
+		buildMesh(maxVariance, 0, 0, centerWidth + centerXOffset, centerYOffset + 1, true, true, triangles);
+		buildMesh(maxVariance, 0, centerYOffset, centerXOffset + 1, height - centerYOffset, true, false, triangles);
+		buildMesh(maxVariance, centerWidth + centerXOffset - 1, 0, remainingWidth + 1, centerHeight + centerYOffset,
+				false, true, triangles);
+		buildMesh(maxVariance, centerXOffset, centerHeight + centerYOffset - 1, width - centerXOffset,
+				remainingHeight + 1, false, false, triangles);
+
+		return triangles;
+	}
+
+	protected void buildMesh(float maxVariance, int x, int y, int width, int height, boolean reverseX,
+			boolean reverseY, List<Triangle> triangles)
+	{
+		int yStart = y;
 		int remainingHeight = height;
 		while (remainingHeight > 1)
 		{
-			int x = 0;
+			int xStart = x;
 			int remainingWidth = width;
 			int currentHeight = nextLowestPowerOf2Plus1(Math.min(remainingWidth, remainingHeight));
 			while (remainingWidth > 1)
@@ -38,16 +66,16 @@ public class BinaryTriangleTree
 				int currentWidth = nextLowestPowerOf2Plus1(Math.min(remainingWidth, remainingHeight));
 				for (int yOffset = 0; yOffset < currentHeight - 1; yOffset += currentWidth - 1)
 				{
-					buildTree(maxVariance, x, yStart + yOffset, currentWidth, triangles);
+					int tx = reverseX ? width - xStart - currentWidth : xStart;
+					int ty = reverseY ? height - yStart - yOffset - currentWidth : yStart + yOffset;
+					buildTree(maxVariance, tx, ty, currentWidth, triangles);
 				}
 				remainingWidth -= currentWidth - 1;
-				x += currentWidth - 1;
+				xStart += currentWidth - 1;
 			}
 			remainingHeight -= currentHeight - 1;
 			yStart += currentHeight - 1;
 		}
-
-		return triangles;
 	}
 
 	protected void buildTree(float maxVariance, int x, int y, int size, List<Triangle> triangles)
@@ -257,7 +285,7 @@ public class BinaryTriangleTree
 			this.rightPosition = rightPosition;
 		}
 	}
-	
+
 	/*public static void main(String[] args) throws IOException
 	{
 		Thread.currentThread().setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler()
@@ -297,7 +325,7 @@ public class BinaryTriangleTree
 		}
 
 		BinaryTriangleTree btt = new BinaryTriangleTree(positions, width, height);
-		List<Triangle> leaves = btt.buildMesh(1000);
+		List<Triangle> leaves = btt.buildMeshFromCenter(2);
 
 		int s = (width - 1) * 8 + 1;
 		BufferedImage image = new BufferedImage(s, s, BufferedImage.TYPE_INT_RGB);
