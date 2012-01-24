@@ -23,7 +23,7 @@ import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
  * <p/>
  * <pre>
  * &lt;Delegate&gt;
- *   ShadedElevationReader(pixelType,byteOrder,missingData,sunX,sunY,sunZ,exaggeration[,(min,max)])
+ *   ShadedElevationReader(pixelType,byteOrder,missingData,(sunX,sunY,sunZ),exaggeration[,(min,max)])
  * &lt;/Delegate&gt;
  * </pre>
  * Where:
@@ -31,9 +31,7 @@ import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
  * 	<li>pixelType = the pixel format of the elevation tiles (one of "<code>Float32</code>", "<code>Int32</code>", "<code>Int16</code>" or "<code>Int8</code>")
  * 	<li>byteOrder = the byte order of the elevation tiles (one of "<code>little</code>" or "<code>big</code>")
  * 	<li>missingData = the value used in the elevation tiles to represent missing data (float)
- * 	<li>sunX = The X location of the virtual sun position (double)
- * 	<li>sunY = The Y location of the virtual sun position (double)
- *  <li>sunZ = The Z location of the virtual sun position (double)
+ * 	<li>(sunX, sunY, sunZ) = the vector representing the location of the virtual sun. Expressed in arbitrary Cartesian coordinates (not geographic)
  *  <li>exaggeration = The vertical exaggeration to bake into the shading (double)
  *  <li>(min,max) = (Optional) The minimum and maximum elevation values to use when calculating shading (in metres as doubles)
  * </ul>
