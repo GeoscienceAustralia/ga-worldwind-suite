@@ -39,6 +39,7 @@ import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.layers.Wireframeable;
 
 import com.sun.opengl.util.BufferUtil;
+import com.sun.opengl.util.texture.Texture;
 
 /**
  * The FastShape class is a representation of a piece of geometry. It is useful
@@ -58,6 +59,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	protected FloatBuffer colorBuffer;
 	protected int colorBufferElementSize = 3;
+	protected FloatBuffer textureCoordinateBuffer;
 	protected IntBuffer indices;
 	protected int mode;
 	protected String name = "Shape";
@@ -83,7 +85,9 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected Vec4 lastEyePoint = null;
 
 	protected double elevation = 0d;
+	protected boolean elevationChanged = false;
 	protected boolean calculateNormals = false;
+	protected boolean reverseNormals = false;
 	protected boolean fogEnabled = false;
 	protected boolean wireframe = false;
 	protected boolean lighted = false;
@@ -104,6 +108,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected URL pointTextureUrl;
 	protected WWTexture pointTexture;
 	protected WWTexture blankTexture;
+	protected Texture texture;
 
 	public FastShape(List<Position> positions, int mode)
 	{
@@ -315,6 +320,13 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					blankTexture.bind(dc);
 				}
 
+				if (texture != null)
+				{
+					gl.glActiveTexture(GL.GL_TEXTURE0);
+					gl.glEnable(GL.GL_TEXTURE_2D);
+					texture.bind();
+				}
+
 				if (colorBuffer != null)
 				{
 					gl.glEnableClientState(GL.GL_COLOR_ARRAY);
@@ -325,6 +337,12 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 				{
 					float r = color.getRed() / 255f, g = color.getGreen() / 255f, b = color.getBlue() / 255f;
 					gl.glColor4f(r, g, b, (float) alpha);
+				}
+
+				if (textureCoordinateBuffer != null)
+				{
+					gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+					gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, textureCoordinateBuffer.rewind());
 				}
 
 				if (alpha < 1.0 || colorBufferContainsAlpha || willUseSortedIndices)
@@ -370,11 +388,10 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	protected void recalculateIfRequired(DrawContext dc, double alpha)
 	{
-		boolean recalculateVertices = followTerrain || lastVerticalExaggeration != dc.getVerticalExaggeration();
+		boolean recalculateVertices = isVertexRecalculationRequired(dc);
 		boolean recalculateVerticesNow = verticesDirty || lastGlobe != dc.getGlobe();
 		if (recalculateVertices || recalculateVerticesNow)
 		{
-			lastVerticalExaggeration = dc.getVerticalExaggeration();
 			lastGlobe = dc.getGlobe();
 			recalculateVertices(dc, recalculateVerticesNow);
 			verticesDirty = false;
@@ -389,6 +406,15 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			lastEyePoint = eyePoint;
 			resortIndices(dc, lastEyePoint);
 		}
+	}
+
+	protected boolean isVertexRecalculationRequired(DrawContext dc)
+	{
+		boolean recalculateVertices =
+				followTerrain || elevationChanged || lastVerticalExaggeration != dc.getVerticalExaggeration();
+		lastVerticalExaggeration = dc.getVerticalExaggeration();
+		elevationChanged = false;
+		return recalculateVertices;
 	}
 
 	protected synchronized void recalculateVertices(final DrawContext dc, boolean runNow)
@@ -455,21 +481,9 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected void calculateVertices(DrawContext dc)
 	{
 		modVertexBuffer.rewind();
-		Globe globe = dc.getGlobe();
 		for (LatLon position : positions)
 		{
-			double elevation = this.elevation;
-			if (followTerrain)
-			{
-				elevation += globe.getElevation(position.getLatitude(), position.getLongitude());
-			}
-			if (position instanceof Position)
-			{
-				elevation += ((Position) position).getElevation();
-			}
-			elevation *= dc.getVerticalExaggeration();
-			elevation = Math.max(elevation, -dc.getGlobe().getMaximumRadius());
-			Vec4 v = dc.getGlobe().computePointFromPosition(position.getLatitude(), position.getLongitude(), elevation);
+			Vec4 v = calculateVertex(dc, position);
 			modVertexBuffer.put(v.x).put(v.y).put(v.z);
 		}
 
@@ -484,6 +498,28 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			modVertexBuffer.put(i + 1, modVertexBuffer.get() - modBoundingSphere.getCenter().y);
 			modVertexBuffer.put(i + 2, modVertexBuffer.get() - modBoundingSphere.getCenter().z);
 		}
+	}
+
+	protected Vec4 calculateVertex(DrawContext dc, LatLon position)
+	{
+		double elevation = this.elevation;
+		if (followTerrain)
+		{
+			elevation += dc.getGlobe().getElevation(position.getLatitude(), position.getLongitude());
+		}
+		elevation += calculateElevationOffset(position);
+		elevation *= dc.getVerticalExaggeration();
+		elevation = Math.max(elevation, -dc.getGlobe().getMaximumRadius());
+		return dc.getGlobe().computePointFromPosition(position.getLatitude(), position.getLongitude(), elevation);
+	}
+
+	protected double calculateElevationOffset(LatLon position)
+	{
+		if (position instanceof Position)
+		{
+			return ((Position) position).elevation;
+		}
+		return 0;
 	}
 
 	protected static Sphere createBoundingSphere(BufferWrapper wrapper)
@@ -516,8 +552,15 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			}
 
 			boolean hasIndices = indices != null;
-			int triangleCountBy3 = hasIndices ? indices.limit() : size;
-			for (int i = 0; i < triangleCountBy3; i += 3)
+			int loopLimit = hasIndices ? indices.limit() : size;
+			int loopIncrement = 3;
+			if (mode == GL.GL_TRIANGLE_STRIP)
+			{
+				loopLimit -= 2;
+				loopIncrement = 1;
+			}
+
+			for (int i = 0; i < loopLimit; i += loopIncrement)
 			{
 				//don't touch indices's position/mark, because it may currently be in use by OpenGL thread
 				int index0 = hasIndices ? indices.get(i + 0) : i + 0;
@@ -528,9 +571,10 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 				Vec4 v2 = vertices[index2];
 
 				Vec4 e1 = v1.subtract3(v0);
-				Vec4 e2 = v2.subtract3(v0);
-				Vec4 N = e1.cross3(e2).normalize3(); // if N is 0, the triangle is degenerate
+				Vec4 e2 = mode == GL.GL_TRIANGLE_STRIP && i % 2 == 0 ? v0.subtract3(v2) : v2.subtract3(v0);
+				Vec4 N = reverseNormals ? e2.cross3(e1).normalize3() : e1.cross3(e2).normalize3();
 
+				// if N is 0, the triangle is degenerate
 				if (N.getLength3() > 0)
 				{
 					normals[index0] = normals[index0].add3(N);
@@ -730,6 +774,24 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		}
 	}
 
+	public FloatBuffer getTextureCoordinateBuffer()
+	{
+		return textureCoordinateBuffer;
+	}
+
+	public void setTextureCoordinateBuffer(FloatBuffer textureCoordinateBuffer)
+	{
+		frontLock.writeLock().lock();
+		try
+		{
+			this.textureCoordinateBuffer = textureCoordinateBuffer;
+		}
+		finally
+		{
+			frontLock.writeLock().unlock();
+		}
+	}
+
 	public double getOpacity()
 	{
 		return opacity;
@@ -841,6 +903,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		frontLock.writeLock().lock();
 		try
 		{
+			elevationChanged = this.elevation != elevation;
 			this.elevation = elevation;
 		}
 		finally
@@ -867,9 +930,27 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		}
 	}
 
+	public boolean isReverseNormals()
+	{
+		return reverseNormals;
+	}
+
+	public void setReverseNormals(boolean reverseNormals)
+	{
+		frontLock.writeLock().lock();
+		try
+		{
+			this.reverseNormals = reverseNormals;
+		}
+		finally
+		{
+			frontLock.writeLock().unlock();
+		}
+	}
+
 	protected boolean willCalculateNormals()
 	{
-		return isCalculateNormals() && getMode() == GL.GL_TRIANGLES;
+		return isCalculateNormals() && (getMode() == GL.GL_TRIANGLES || getMode() == GL.GL_TRIANGLE_STRIP);
 	}
 
 	public boolean isFogEnabled()
@@ -1081,6 +1162,24 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		try
 		{
 			this.pointTextureUrl = pointTextureUrl;
+		}
+		finally
+		{
+			frontLock.writeLock().unlock();
+		}
+	}
+
+	public Texture getTexture()
+	{
+		return texture;
+	}
+
+	public void setTexture(Texture texture)
+	{
+		frontLock.writeLock().lock();
+		try
+		{
+			this.texture = texture;
 		}
 		finally
 		{

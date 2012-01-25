@@ -21,6 +21,7 @@ import au.gov.ga.worldwind.common.layers.model.ModelLayerFactory;
 import au.gov.ga.worldwind.common.layers.point.PointLayerFactory;
 import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
+import au.gov.ga.worldwind.common.layers.volume.VolumeLayerFactory;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
@@ -72,6 +73,10 @@ public class LayerFactory extends BasicLayerFactory
 		if ("ModelLayer".equalsIgnoreCase(layerType))
 		{
 			return ModelLayerFactory.createModelLayer(domElement, params);
+		}
+		if ("VolumeLayer".equalsIgnoreCase(layerType))
+		{
+			return VolumeLayerFactory.createModelLayer(domElement, params);
 		}
 
 		return super.createFromLayerDocument(domElement, params);

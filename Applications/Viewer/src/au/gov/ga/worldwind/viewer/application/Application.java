@@ -318,6 +318,7 @@ public class Application
 	private List<SelectableAction> panelActions = new ArrayList<SelectableAction>();
 	private SelectableAction skirtAction;
 	private SelectableAction wireframeAction;
+	private SelectableAction wireframeElevationAction;
 	private SelectableAction wireframeDepthAction;
 	private BasicAction settingsAction;
 	private BasicAction helpAction;
@@ -700,7 +701,6 @@ public class Application
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				wireframeDepthAction.setEnabled(wireframeAction.isSelected());
 				LayerList layers = wwd.getModel().getLayers();
 				for (Layer layer : layers)
 				{
@@ -709,6 +709,19 @@ public class Application
 						((Wireframeable) layer).setWireframe(wireframeAction.isSelected());
 					}
 				}
+				wwd.redraw();
+			}
+		});
+
+		wireframeElevationAction =
+				new SelectableAction(getMessage(getWireframeElevationLabelKey()), Icons.wireframe.getIcon(), wwd
+						.getModel().isShowWireframeInterior());
+		wireframeElevationAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				wireframeDepthAction.setEnabled(wireframeAction.isSelected());
 				wwd.getModel().setShowWireframeInterior(wireframeAction.isSelected());
 				wwd.redraw();
 			}
@@ -1283,6 +1296,7 @@ public class Application
 		menu.addSeparator();
 		skirtAction.addToMenu(menu);
 		wireframeAction.addToMenu(menu);
+		wireframeElevationAction.addToMenu(menu);
 		wireframeDepthAction.addToMenu(menu);
 
 		menu.addSeparator();

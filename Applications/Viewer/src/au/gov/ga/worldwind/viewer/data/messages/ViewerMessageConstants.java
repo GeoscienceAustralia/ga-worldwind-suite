@@ -63,6 +63,7 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getGotoCoordsLabelKey() { return "viewer.action.gotocoords.label"; }
 	public static String getRenderSkirtsLabelKey() { return "viewer.action.renderskirts.label"; }
 	public static String getWireframeLabelKey() { return "viewer.action.wireframe.label"; }
+	public static String getWireframeElevationLabelKey() { return "viewer.action.wireframeelevation.label"; }
 	public static String getWireframeDepthLabelKey() { return "viewer.action.wireframedepth.label"; }
 	public static String getFullscreenLabelKey() { return "viewer.action.fullscreen.label"; }
 	public static String getPreferencesLabelKey() { return "viewer.action.preferences.label"; }
