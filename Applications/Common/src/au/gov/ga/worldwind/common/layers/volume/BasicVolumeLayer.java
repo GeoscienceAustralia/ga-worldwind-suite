@@ -39,6 +39,7 @@ import au.gov.ga.worldwind.common.util.ColorMap;
 import au.gov.ga.worldwind.common.util.CoordinateTransformationUtil;
 import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.GeometryUtil;
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
 
 import com.sun.opengl.util.j2d.TextureRenderer;
@@ -63,10 +64,10 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	private final PickableObject minLatPO = new PickableObject(), maxLatPO = new PickableObject(),
 			minLonPO = new PickableObject(), maxLonPO = new PickableObject(), topPO = new PickableObject(),
 			bottomPO = new PickableObject();
-	private int topSlice = 0, bottomSlice = Integer.MAX_VALUE, minLatSlice = 0, maxLatSlice = Integer.MAX_VALUE,
-			minLonSlice = 0, maxLonSlice = Integer.MAX_VALUE;
-	private int lastTopSlice = -1, lastBottomSlice = -1, lastMinLatSlice = -1, lastMaxLatSlice = -1,
-			lastMinLonSlice = -1, lastMaxLonSlice = -1;
+	private int topOffset = 0, bottomOffset = 0, minLatOffset = 0, maxLatOffset = 0, minLonOffset = 0,
+			maxLonOffset = 0;
+	private int lastTopOffset = -1, lastBottomOffset = -1, lastMinLatOffset = -1, lastMaxLatOffset = -1,
+			lastMinLonOffset = -1, lastMaxLonOffset = -1;
 
 	private boolean wireframe = false;
 	private final PickSupport pickSupport = new PickSupport();
@@ -97,6 +98,25 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		String s = (String) params.getValue(AVKey.COORDINATE_SYSTEM);
 		if (s != null)
 			coordinateTransformation = CoordinateTransformationUtil.getTransformationToWGS84(s);
+
+		Integer i = (Integer) params.getValue(AVKeyMore.INITIAL_OFFSET_MIN_U);
+		if (i != null)
+			minLatOffset = i;
+		i = (Integer) params.getValue(AVKeyMore.INITIAL_OFFSET_MAX_U);
+		if (i != null)
+			maxLatOffset = i;
+		i = (Integer) params.getValue(AVKeyMore.INITIAL_OFFSET_MIN_V);
+		if (i != null)
+			minLonOffset = i;
+		i = (Integer) params.getValue(AVKeyMore.INITIAL_OFFSET_MAX_V);
+		if (i != null)
+			maxLonOffset = i;
+		i = (Integer) params.getValue(AVKeyMore.INITIAL_OFFSET_MIN_W);
+		if (i != null)
+			topOffset = i;
+		i = (Integer) params.getValue(AVKeyMore.INITIAL_OFFSET_MAX_W);
+		if (i != null)
+			bottomOffset = i;
 
 		Validate.notBlank(url, "Model data url not set");
 		Validate.notBlank(dataCacheName, "Model data cache name not set");
@@ -167,19 +187,23 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			maxLonTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getZSize(), true, true);
 		}
 
-		minLatSlice = Math.max(0, minLatSlice);
-		maxLatSlice = Math.max(minLatSlice, Math.min(dataProvider.getXSize() - 1, maxLatSlice));
-		minLonSlice = Math.max(0, minLonSlice);
-		maxLonSlice = Math.max(minLonSlice, Math.min(dataProvider.getYSize() - 1, maxLonSlice));
-		topSlice = Math.max(0, topSlice);
-		bottomSlice = Math.max(topSlice, Math.min(dataProvider.getZSize() - 1, bottomSlice));
+		minLatOffset = Util.clamp(minLatOffset, 0, dataProvider.getXSize() - 1);
+		maxLatOffset = Util.clamp(maxLatOffset, 0, dataProvider.getXSize() - 1 - minLatOffset);
+		minLonOffset = Util.clamp(minLonOffset, 0, dataProvider.getYSize() - 1);
+		maxLonOffset = Util.clamp(maxLonOffset, 0, dataProvider.getYSize() - 1 - minLonOffset);
+		topOffset = Util.clamp(topOffset, 0, dataProvider.getZSize() - 1);
+		bottomOffset = Util.clamp(bottomOffset, 0, dataProvider.getZSize() - 1 - topOffset);
 
-		boolean recalculateMinLatTexture = lastMinLatSlice != minLatSlice;
-		boolean recalculateMaxLatTexture = lastMaxLatSlice != maxLatSlice;
-		boolean recalculateMinLonTexture = lastMinLonSlice != minLonSlice;
-		boolean recalculateMaxLonTexture = lastMaxLonSlice != maxLonSlice;
-		boolean recalculateTopTexture = lastTopSlice != topSlice;
-		boolean recalculateBottomTexture = lastBottomSlice != bottomSlice;
+		int maxLatSlice = dataProvider.getXSize() - 1 - maxLatOffset;
+		int maxLonSlice = dataProvider.getYSize() - 1 - maxLonOffset;
+		int bottomSlice = dataProvider.getZSize() - 1 - bottomOffset;
+
+		boolean recalculateMinLatTexture = lastMinLatOffset != minLatOffset;
+		boolean recalculateMaxLatTexture = lastMaxLatOffset != maxLatOffset;
+		boolean recalculateMinLonTexture = lastMinLonOffset != minLonOffset;
+		boolean recalculateMaxLonTexture = lastMaxLonOffset != maxLonOffset;
+		boolean recalculateTopTexture = lastTopOffset != topOffset;
+		boolean recalculateBottomTexture = lastBottomOffset != bottomOffset;
 
 		boolean recalculateEitherElevation = recalculateTopTexture || recalculateBottomTexture;
 		boolean recalculateEitherLat = recalculateMinLatTexture || recalculateMaxLatTexture;
@@ -197,13 +221,13 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 				this.minLonCurtain, maxLonCurtain = this.maxLonCurtain;
 		FastShape bottomSurface = this.bottomSurface, topSurface = this.topSurface;
 
-		double topElevation = -dataProvider.getDepth() * (topSlice / (double) (dataProvider.getZSize() - 1));
+		double topElevation = -dataProvider.getDepth() * (topOffset / (double) (dataProvider.getZSize() - 1));
 		double bottomElevation = -dataProvider.getDepth() * (bottomSlice / (double) (dataProvider.getZSize() - 1));
 
 		if (recalculateMinLat)
 		{
 			minLatCurtain =
-					dataProvider.createLatitudeCurtain(minLatSlice, minLonSlice, maxLonSlice, topSlice, bottomSlice);
+					dataProvider.createLatitudeCurtain(minLatOffset, minLonOffset, maxLonSlice, topOffset, bottomSlice);
 			minLatCurtain.setLighted(true);
 			minLatCurtain.setCalculateNormals(true);
 			minLatCurtain.setTopElevationOffset(topElevation);
@@ -213,7 +237,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (recalculateMaxLat)
 		{
 			maxLatCurtain =
-					dataProvider.createLatitudeCurtain(maxLatSlice, minLonSlice, maxLonSlice, topSlice, bottomSlice);
+					dataProvider.createLatitudeCurtain(maxLatSlice, minLonOffset, maxLonSlice, topOffset, bottomSlice);
 			maxLatCurtain.setLighted(true);
 			maxLatCurtain.setCalculateNormals(true);
 			maxLatCurtain.setReverseNormals(true);
@@ -224,7 +248,8 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (recalculateMinLon)
 		{
 			minLonCurtain =
-					dataProvider.createLongitudeCurtain(minLonSlice, minLatSlice, maxLatSlice, topSlice, bottomSlice);
+					dataProvider
+							.createLongitudeCurtain(minLonOffset, minLatOffset, maxLatSlice, topOffset, bottomSlice);
 			minLonCurtain.setLighted(true);
 			minLonCurtain.setCalculateNormals(true);
 			minLonCurtain.setReverseNormals(true);
@@ -235,7 +260,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (recalculateMaxLon)
 		{
 			maxLonCurtain =
-					dataProvider.createLongitudeCurtain(maxLonSlice, minLatSlice, maxLatSlice, topSlice, bottomSlice);
+					dataProvider.createLongitudeCurtain(maxLonSlice, minLatOffset, maxLatSlice, topOffset, bottomSlice);
 			maxLonCurtain.setLighted(true);
 			maxLonCurtain.setCalculateNormals(true);
 			maxLonCurtain.setTopElevationOffset(topElevation);
@@ -245,8 +270,8 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (recalculateTop)
 		{
 			topSurface =
-					dataProvider.createHorizontalSurface((float) maxVariance, new Rectangle(minLatSlice, minLonSlice,
-							maxLatSlice - minLatSlice + 1, maxLonSlice - minLonSlice + 1));
+					dataProvider.createHorizontalSurface((float) maxVariance, new Rectangle(minLatOffset, minLonOffset,
+							maxLatSlice - minLatOffset + 1, maxLonSlice - minLonOffset + 1));
 			topSurface.setLighted(true);
 			topSurface.setCalculateNormals(true);
 			topSurface.setElevation(topElevation);
@@ -255,8 +280,8 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (recalculateBottom)
 		{
 			bottomSurface =
-					dataProvider.createHorizontalSurface((float) maxVariance, new Rectangle(minLatSlice, minLonSlice,
-							maxLatSlice - minLatSlice + 1, maxLonSlice - minLonSlice + 1));
+					dataProvider.createHorizontalSurface((float) maxVariance, new Rectangle(minLatOffset, minLonOffset,
+							maxLatSlice - minLatOffset + 1, maxLonSlice - minLonOffset + 1));
 			bottomSurface.setLighted(true);
 			bottomSurface.setCalculateNormals(true);
 			bottomSurface.setReverseNormals(true);
@@ -286,33 +311,33 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 
 		if (recalculateMinLatTexture)
 		{
-			updateTexture(generateTexture(0, minLatSlice, latRectangle), minLatTexture, minLatCurtain);
-			lastMinLatSlice = minLatSlice;
+			updateTexture(generateTexture(0, minLatOffset, latRectangle), minLatTexture, minLatCurtain);
+			lastMinLatOffset = minLatOffset;
 		}
 		if (recalculateMaxLatTexture)
 		{
 			updateTexture(generateTexture(0, maxLatSlice, latRectangle), maxLatTexture, maxLatCurtain);
-			lastMaxLatSlice = maxLatSlice;
+			lastMaxLatOffset = maxLatOffset;
 		}
 		if (recalculateMinLonTexture)
 		{
-			updateTexture(generateTexture(1, minLonSlice, lonRectangle), minLonTexture, minLonCurtain);
-			lastMinLonSlice = minLonSlice;
+			updateTexture(generateTexture(1, minLonOffset, lonRectangle), minLonTexture, minLonCurtain);
+			lastMinLonOffset = minLonOffset;
 		}
 		if (recalculateMaxLonTexture)
 		{
 			updateTexture(generateTexture(1, maxLonSlice, lonRectangle), maxLonTexture, maxLonCurtain);
-			lastMaxLonSlice = maxLonSlice;
+			lastMaxLonOffset = maxLonOffset;
 		}
 		if (recalculateTopTexture)
 		{
-			updateTexture(generateTexture(2, topSlice, elevationRectangle), topTexture, topSurface);
-			lastTopSlice = topSlice;
+			updateTexture(generateTexture(2, topOffset, elevationRectangle), topTexture, topSurface);
+			lastTopOffset = topOffset;
 		}
 		if (recalculateBottomTexture)
 		{
 			updateTexture(generateTexture(2, bottomSlice, elevationRectangle), bottomTexture, bottomSurface);
-			lastBottomSlice = bottomSlice;
+			lastBottomOffset = bottomOffset;
 		}
 
 		synchronized (dataLock)
@@ -357,7 +382,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 				int vy = axis == 2 ? y : axis == 1 ? position : x;
 				int vz = axis == 2 ? position : y;
 				float value = dataProvider.getValue(vx, vy, vz);
-				int rgb =  noDataColor != null ? noDataColor.getRGB() : 0;
+				int rgb = noDataColor != null ? noDataColor.getRGB() : 0;
 				if (value != dataProvider.getNoDataValue())
 				{
 					if (colorMap != null)
@@ -653,7 +678,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (!dragging)
 		{
 			dragStartPosition = intersectionPosition.elevation;
-			dragStartSlice = shape == topSurface ? topSlice : bottomSlice;
+			dragStartSlice = shape == topSurface ? topOffset : bottomOffset;
 		}
 		else
 		{
@@ -664,13 +689,13 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			int sliceMovement = (int) (deltaPercentage * (dataProvider.getZSize() - 1));
 			if (shape == topSurface)
 			{
-				topSlice = Math.max(0, Math.min(dataProvider.getZSize() - 1, dragStartSlice + sliceMovement));
-				bottomSlice = Math.max(bottomSlice, topSlice);
+				topOffset = Util.clamp(dragStartSlice + sliceMovement, 0, dataProvider.getZSize() - 1);
+				bottomOffset = Util.clamp(bottomOffset, 0, dataProvider.getZSize() - 1 - topOffset);
 			}
 			else
 			{
-				bottomSlice = Math.max(0, Math.min(dataProvider.getZSize() - 1, dragStartSlice + sliceMovement));
-				topSlice = Math.min(topSlice, bottomSlice);
+				bottomOffset = Util.clamp(dragStartSlice - sliceMovement, 0, dataProvider.getZSize() - 1);
+				topOffset = Util.clamp(topOffset, 0, dataProvider.getZSize() - 1 - bottomOffset);
 			}
 		}
 	}
@@ -697,7 +722,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (!dragging)
 		{
 			dragStartPosition = position.longitude.degrees;
-			dragStartSlice = shape == minLatCurtain ? minLatSlice : maxLatSlice;
+			dragStartSlice = shape == minLatCurtain ? minLatOffset : maxLatOffset;
 		}
 		else
 		{
@@ -706,13 +731,13 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			int sliceMovement = (int) (deltaPercentage * (dataProvider.getXSize() - 1));
 			if (shape == minLatCurtain)
 			{
-				minLatSlice = Math.max(0, Math.min(dataProvider.getXSize() - 1, dragStartSlice + sliceMovement));
-				maxLatSlice = Math.max(maxLatSlice, minLatSlice);
+				minLatOffset = Util.clamp(dragStartSlice + sliceMovement, 0, dataProvider.getXSize() - 1);
+				maxLatOffset = Util.clamp(maxLatOffset, 0, dataProvider.getXSize() - 1 - minLatOffset);
 			}
 			else
 			{
-				maxLatSlice = Math.max(0, Math.min(dataProvider.getXSize() - 1, dragStartSlice + sliceMovement));
-				minLatSlice = Math.min(minLatSlice, maxLatSlice);
+				maxLatOffset = Util.clamp(dragStartSlice - sliceMovement, 0, dataProvider.getXSize() - 1);
+				minLatOffset = Util.clamp(minLatOffset, 0, dataProvider.getXSize() - 1 - maxLatOffset);
 			}
 		}
 	}
@@ -739,7 +764,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (!dragging)
 		{
 			dragStartPosition = position.latitude.degrees;
-			dragStartSlice = shape == minLonCurtain ? minLonSlice : maxLonSlice;
+			dragStartSlice = shape == minLonCurtain ? minLonOffset : maxLonOffset;
 		}
 		else
 		{
@@ -748,13 +773,13 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			int sliceMovement = (int) (deltaPercentage * (dataProvider.getYSize() - 1));
 			if (shape == minLonCurtain)
 			{
-				minLonSlice = Math.max(0, Math.min(dataProvider.getYSize() - 1, dragStartSlice + sliceMovement));
-				maxLonSlice = Math.max(maxLonSlice, minLonSlice);
+				minLonOffset = Util.clamp(dragStartSlice + sliceMovement, 0, dataProvider.getYSize() - 1);
+				maxLonOffset = Util.clamp(maxLonOffset, 0, dataProvider.getYSize() - 1 - minLonOffset);
 			}
 			else
 			{
-				maxLonSlice = Math.max(0, Math.min(dataProvider.getYSize() - 1, dragStartSlice + sliceMovement));
-				minLonSlice = Math.min(minLonSlice, maxLonSlice);
+				maxLonOffset = Util.clamp(dragStartSlice - sliceMovement, 0, dataProvider.getYSize() - 1);
+				minLonOffset = Util.clamp(minLonOffset, 0, dataProvider.getYSize() - 1 - maxLonOffset);
 			}
 		}
 	}

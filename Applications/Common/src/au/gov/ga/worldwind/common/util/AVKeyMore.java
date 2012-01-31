@@ -72,4 +72,10 @@ public interface AVKeyMore extends AVKey
 	//volume layer
 	final static String MAX_VARIANCE = "au.gov.ga.worldwind.AVKeyMore.MaxVariance";
 	final static String NO_DATA_COLOR = "au.gov.ga.worldwind.AVKeyMore.NoDataColor";
+	final static String INITIAL_OFFSET_MIN_U = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMinU";
+	final static String INITIAL_OFFSET_MAX_U = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMaxU";
+	final static String INITIAL_OFFSET_MIN_V = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMinV";
+	final static String INITIAL_OFFSET_MAX_V = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMaxV";
+	final static String INITIAL_OFFSET_MIN_W = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMinW";
+	final static String INITIAL_OFFSET_MAX_W = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMaxW";
 }

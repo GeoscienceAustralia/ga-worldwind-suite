@@ -59,8 +59,15 @@ public class VolumeLayerFactory
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.MAX_VARIANCE, "MaxVariance", xpath);
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.MINIMUM_DISTANCE, "MinimumDistance", xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.COORDINATE_SYSTEM, "CoordinateSystem", xpath);
-		
+
 		WWXML.checkAndSetColorParam(domElement, params, AVKeyMore.NO_DATA_COLOR, "NoDataColor", xpath);
+
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MIN_U, "InitialOffset/@minU", xpath);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MAX_U, "InitialOffset/@maxU", xpath);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MIN_V, "InitialOffset/@minV", xpath);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MAX_V, "InitialOffset/@maxV", xpath);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MIN_W, "InitialOffset/@minW", xpath);
+		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MAX_W, "InitialOffset/@maxW", xpath);
 
 		ColorMap colorMap = XMLUtil.getColorMap(domElement, xpath);
 		params.setValue(AVKeyMore.COLOR_MAP, colorMap);
