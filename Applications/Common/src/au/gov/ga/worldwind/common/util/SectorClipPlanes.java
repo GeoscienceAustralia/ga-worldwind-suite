@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.viewer.stereo;
+package au.gov.ga.worldwind.common.util;
 
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;

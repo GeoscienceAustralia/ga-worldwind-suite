@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
 
+import au.gov.ga.worldwind.common.util.SectorClipPlanes;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
 import au.gov.ga.worldwind.viewer.settings.Settings;
