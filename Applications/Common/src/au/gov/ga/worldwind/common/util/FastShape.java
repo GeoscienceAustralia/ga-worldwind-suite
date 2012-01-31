@@ -492,6 +492,10 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		BufferWrapper wrapper = new BufferWrapper.DoubleBufferWrapper(modVertexBuffer);
 		modBoundingSphere = createBoundingSphere(wrapper);
 
+		//prevent NullPointerExceptions when there's no vertices:
+		if (modBoundingSphere == null)
+			modBoundingSphere = new Sphere(Vec4.ZERO, 1);
+
 		modVertexBuffer.rewind();
 		for (int i = 0; modVertexBuffer.remaining() >= 3; i += 3)
 		{
@@ -527,6 +531,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	{
 		//the Sphere.createBoundingSphere() function doesn't ensure that the radius is at least 1, causing errors
 		Vec4[] extrema = Vec4.computeExtrema(wrapper);
+		if (extrema == null)
+			return null;
 		Vec4 center =
 				new Vec4((extrema[0].x + extrema[1].x) / 2.0, (extrema[0].y + extrema[1].y) / 2.0,
 						(extrema[0].z + extrema[1].z) / 2.0);
@@ -811,7 +817,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		}
 	}
 
-	public List<? extends LatLon> getPositions()
+	public List<Position> getPositions()
 	{
 		return positions;
 	}

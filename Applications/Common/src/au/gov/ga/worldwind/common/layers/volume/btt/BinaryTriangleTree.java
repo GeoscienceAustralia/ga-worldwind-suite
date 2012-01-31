@@ -161,8 +161,8 @@ public class BinaryTriangleTree
 				int currentWidth = nextLowestPowerOf2Plus1(Math.min(remainingWidth, remainingHeight));
 				for (int yOffset = 0; yOffset < currentHeight - 1; yOffset += currentWidth - 1)
 				{
-					int tx = reverseX ? width - xStart - currentWidth : xStart;
-					int ty = reverseY ? height - yStart - yOffset - currentWidth : yStart + yOffset;
+					int tx = reverseX ? width - xStart - currentWidth + x * 2 : xStart;
+					int ty = reverseY ? height - yStart - yOffset - currentWidth + y * 2 : yStart + yOffset;
 					buildTree(maxVariance, tx, ty, currentWidth, triangles);
 				}
 				remainingWidth -= currentWidth - 1;
@@ -461,7 +461,10 @@ public class BinaryTriangleTree
 		}
 
 		BinaryTriangleTree btt = new BinaryTriangleTree(positions, width, height);
-		List<Triangle> leaves = btt.buildMeshFromCenter(3);
+		FastShape shape = btt.buildMeshFromCenter(1, new Rectangle(29, 29, 119, 119));
+		IntBuffer indices = shape.getIndices();
+		indices.rewind();
+		List<Position> posi = shape.getPositions();
 
 		int s = (width - 1) * 8 + 1;
 		BufferedImage image = new BufferedImage(s, s, BufferedImage.TYPE_INT_RGB);
@@ -469,11 +472,11 @@ public class BinaryTriangleTree
 		g.setColor(Color.white);
 		g.fillRect(0, 0, s, s);
 		g.setColor(Color.black);
-		for (Triangle t : leaves)
+		while(indices.hasRemaining())
 		{
-			Position left = t.leftPosition;
-			Position apex = t.apexPosition;
-			Position right = t.rightPosition;
+			Position left = posi.get(indices.get());
+			Position apex = posi.get(indices.get());
+			Position right = posi.get(indices.get());
 			g.drawLine((int) (left.longitude.degrees * (s - 1) / (width - 1)),
 					(int) (left.latitude.degrees * (s - 1) / (height - 1)),
 					(int) (apex.longitude.degrees * (s - 1) / (width - 1)),
