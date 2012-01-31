@@ -655,7 +655,6 @@ public class Util
 	 */
 	public static int clamp(int value, int min, int max)
 	{
-		Validate.isTrue(min <= max, "Min must be less than or equal to max");
 		return Math.max(min, Math.min(max, value));
 	}
 
@@ -665,7 +664,6 @@ public class Util
 	 */
 	public static double clamp(double value, double min, double max)
 	{
-		Validate.isTrue(min <= max, "Min must be less than or equal to max");
 		return Math.max(min, Math.min(max, value));
 	}
 
@@ -675,7 +673,6 @@ public class Util
 	 */
 	public static float clamp(float value, float min, float max)
 	{
-		Validate.isTrue(min <= max, "Min must be less than or equal to max");
 		return Math.max(min, Math.min(max, value));
 	}
 
