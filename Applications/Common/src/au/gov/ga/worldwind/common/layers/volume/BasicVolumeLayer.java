@@ -1,15 +1,27 @@
 package au.gov.ga.worldwind.common.layers.volume;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.event.SelectEvent;
+import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.geom.Extent;
+import gov.nasa.worldwind.geom.Intersection;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Line;
+import gov.nasa.worldwind.geom.Plane;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.AbstractLayer;
+import gov.nasa.worldwind.pick.PickSupport;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.Material;
+import gov.nasa.worldwind.render.airspaces.Box;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
@@ -17,21 +29,16 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import javax.swing.JFrame;
-import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.gdal.osr.CoordinateTransformation;
 
 import au.gov.ga.worldwind.common.layers.Wireframeable;
 import au.gov.ga.worldwind.common.util.CoordinateTransformationUtil;
 import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.util.GeometryUtil;
 
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureIO;
+import com.sun.opengl.util.j2d.TextureRenderer;
 
-public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wireframeable
+public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wireframeable, SelectListener
 {
 	private VolumeDataProvider dataProvider;
 	private float maxVariance = 0;
@@ -40,147 +47,34 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 
 	private final Object dataLock = new Object();
 	private boolean dataAvailable = false;
-	private FastShape topSurface;
-	private FastShape bottomSurface;
-	private TopBottomFastShape minLatCurtain;
-	private TopBottomFastShape maxLatCurtain;
-	private TopBottomFastShape minLonCurtain;
-	private TopBottomFastShape maxLonCurtain;
+	private FastShape topSurface, bottomSurface;
+	private TopBottomFastShape minLatCurtain, maxLatCurtain, minLonCurtain, maxLonCurtain;
+	private TextureRenderer topTexture, bottomTexture;
+	private TextureRenderer minLatTexture, maxLatTexture, minLonTexture, maxLonTexture;
+	private final PickableObject minLatPO = new PickableObject(), maxLatPO = new PickableObject(),
+			minLonPO = new PickableObject(), maxLonPO = new PickableObject(), topPO = new PickableObject(),
+			bottomPO = new PickableObject();
 
-	private int minLatSlice = 0;
-	private int maxLatSlice = Integer.MAX_VALUE;
-	private int minLonSlice = 0;
-	private int maxLonSlice = Integer.MAX_VALUE;
-	private int topSlice = 0;
-	private int bottomSlice = Integer.MAX_VALUE;
-
-	private int lastMinLatSlice = -1;
-	private int lastMaxLatSlice = -1;
-	private int lastMinLonSlice = -1;
-	private int lastMaxLonSlice = -1;
-	private int lastTopSlice = -1;
-	private int lastBottomSlice = -1;
+	private int topSlice = 0, bottomSlice = Integer.MAX_VALUE;
+	private int minLatSlice = 0, maxLatSlice = Integer.MAX_VALUE, minLonSlice = 0, maxLonSlice = Integer.MAX_VALUE;
+	private int lastTopSlice = -1, lastBottomSlice = -1;
+	private int lastMinLatSlice = -1, lastMaxLatSlice = -1, lastMinLonSlice = -1, lastMaxLonSlice = -1;
 
 	private boolean wireframe = false;
+	private final PickSupport pickSupport = new PickSupport();
+	private FastShape pickedShape;
 
-	//TEMP
-	private JFrame frame;
-	private JSlider minLatSlider;
-	private JSlider maxLatSlider;
-	private JSlider minLonSlider;
-	private JSlider maxLonSlider;
-	private JSlider topSlider;
-	private JSlider bottomSlider;
+	private boolean dragging = false;
+	private double dragStartPosition;
+	private int dragStartSlice;
+	private Vec4 dragStartCenter;
+
 	private WorldWindow wwd;
-
-	//TEMP
 
 	public BasicVolumeLayer()
 	{
 		// TODO Auto-generated constructor stub
 		dataProvider = new SGridVolumeDataProvider();
-
-
-		//TEMP
-		GridBagConstraints c;
-		frame = new JFrame(getName());
-		frame.getRootPane().setLayout(new GridBagLayout());
-
-		minLatSlider = new JSlider(0, 1000, 0);
-		minLatSlider.addChangeListener(new ChangeListener()
-		{
-			@Override
-			public void stateChanged(ChangeEvent e)
-			{
-				minLatSlice = minLatSlider.getValue();
-				wwd.redraw();
-			}
-		});
-		c = new GridBagConstraints();
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1;
-		frame.getRootPane().add(minLatSlider, c);
-
-		maxLatSlider = new JSlider(0, 1000, 1000);
-		maxLatSlider.addChangeListener(new ChangeListener()
-		{
-			@Override
-			public void stateChanged(ChangeEvent e)
-			{
-				maxLatSlice = maxLatSlider.getValue();
-				wwd.redraw();
-			}
-		});
-		c = new GridBagConstraints();
-		c.gridy = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		frame.getRootPane().add(maxLatSlider, c);
-
-		minLonSlider = new JSlider(0, 1000, 0);
-		minLonSlider.addChangeListener(new ChangeListener()
-		{
-			@Override
-			public void stateChanged(ChangeEvent e)
-			{
-				minLonSlice = minLonSlider.getValue();
-				wwd.redraw();
-			}
-		});
-		c = new GridBagConstraints();
-		c.gridy = 2;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		frame.getRootPane().add(minLonSlider, c);
-
-		maxLonSlider = new JSlider(0, 1000, 1000);
-		maxLonSlider.addChangeListener(new ChangeListener()
-		{
-			@Override
-			public void stateChanged(ChangeEvent e)
-			{
-				maxLonSlice = maxLonSlider.getValue();
-				wwd.redraw();
-			}
-		});
-		c = new GridBagConstraints();
-		c.gridy = 3;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		frame.getRootPane().add(maxLonSlider, c);
-
-		topSlider = new JSlider(0, 1000, 0);
-		topSlider.addChangeListener(new ChangeListener()
-		{
-			@Override
-			public void stateChanged(ChangeEvent e)
-			{
-				topSlice = topSlider.getValue();
-				wwd.redraw();
-			}
-		});
-		c = new GridBagConstraints();
-		c.gridy = 4;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		frame.getRootPane().add(topSlider, c);
-
-		bottomSlider = new JSlider(0, 1000, 1000);
-		bottomSlider.addChangeListener(new ChangeListener()
-		{
-			@Override
-			public void stateChanged(ChangeEvent e)
-			{
-				bottomSlice = bottomSlider.getValue();
-				wwd.redraw();
-			}
-		});
-		c = new GridBagConstraints();
-		c.gridy = 5;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		frame.getRootPane().add(bottomSlider, c);
-
-		frame.pack();
-		frame.setVisible(true);
-		//TEMP
 	}
 
 	@Override
@@ -220,6 +114,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	public void setup(WorldWindow wwd)
 	{
 		this.wwd = wwd;
+		wwd.addSelectListener(this);
 	}
 
 	@Override
@@ -232,21 +127,22 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	public void dataAvailable(VolumeDataProvider provider)
 	{
 		dataAvailable = true;
-
-		//TEMP
-		minLatSlider.setMaximum(provider.getXSize() - 1);
-		maxLatSlider.setMaximum(provider.getXSize() - 1);
-		minLonSlider.setMaximum(provider.getYSize() - 1);
-		maxLonSlider.setMaximum(provider.getYSize() - 1);
-		topSlider.setMaximum(provider.getZSize() - 1);
-		bottomSlider.setMaximum(provider.getZSize() - 1);
-		//TEMP
 	}
 
 	protected void recalculateSurfaces()
 	{
 		if (!dataAvailable)
 			return;
+
+		if (topTexture == null)
+		{
+			topTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
+			bottomTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
+			minLatTexture = new TextureRenderer(dataProvider.getYSize(), dataProvider.getZSize(), true, true);
+			maxLatTexture = new TextureRenderer(dataProvider.getYSize(), dataProvider.getZSize(), true, true);
+			minLonTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getZSize(), true, true);
+			maxLonTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getZSize(), true, true);
+		}
 
 		minLatSlice = Math.max(0, minLatSlice);
 		maxLatSlice = Math.max(minLatSlice, Math.min(dataProvider.getXSize() - 1, maxLatSlice));
@@ -255,27 +151,24 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		topSlice = Math.max(0, topSlice);
 		bottomSlice = Math.max(topSlice, Math.min(dataProvider.getZSize() - 1, bottomSlice));
 
-		boolean recalculateMinLat = lastMinLatSlice != minLatSlice;
-		boolean recalculateMaxLat = lastMaxLatSlice != maxLatSlice;
-		boolean recalculateMinLon = lastMinLonSlice != minLonSlice;
-		boolean recalculateMaxLon = lastMaxLonSlice != maxLonSlice;
-		recalculateMinLat |= recalculateMinLon | recalculateMaxLon;
-		recalculateMaxLat |= recalculateMinLon | recalculateMaxLon;
-		recalculateMinLon |= recalculateMinLat | recalculateMaxLat;
-		recalculateMaxLon |= recalculateMinLat | recalculateMaxLat;
-		boolean recalculateTop = recalculateMinLat || recalculateMaxLat || recalculateMinLon || recalculateMaxLon;
-		boolean recalculateBottom = recalculateTop;
-		boolean recalculateTopElevation = lastTopSlice != topSlice;
-		boolean recalculateBottomElevation = lastBottomSlice != bottomSlice;
+		boolean recalculateMinLatTexture = lastMinLatSlice != minLatSlice;
+		boolean recalculateMaxLatTexture = lastMaxLatSlice != maxLatSlice;
+		boolean recalculateMinLonTexture = lastMinLonSlice != minLonSlice;
+		boolean recalculateMaxLonTexture = lastMaxLonSlice != maxLonSlice;
+		boolean recalculateTopTexture = lastTopSlice != topSlice;
+		boolean recalculateBottomTexture = lastBottomSlice != bottomSlice;
 
-		boolean recalculateEitherElevation = recalculateTopElevation | recalculateBottomElevation;
-		boolean recalculateAnySide = recalculateMinLat | recalculateMinLon;
-		boolean recalculateMinLatTexture = recalculateMinLat | recalculateEitherElevation;
-		boolean recalculateMaxLatTexture = recalculateMaxLat | recalculateEitherElevation;
-		boolean recalculateMinLonTexture = recalculateMinLon | recalculateEitherElevation;
-		boolean recalculateMaxLonTexture = recalculateMaxLon | recalculateEitherElevation;
-		boolean recalculateTopTexture = recalculateTopElevation | recalculateAnySide;
-		boolean recalculateBottomTexture = recalculateBottomElevation | recalculateAnySide;
+		boolean recalculateEitherElevation = recalculateTopTexture || recalculateBottomTexture;
+		boolean recalculateEitherLat = recalculateMinLatTexture || recalculateMaxLatTexture;
+		boolean recalculateEitherLon = recalculateMinLonTexture || recalculateMaxLonTexture;
+		boolean recalculateMinLat = recalculateMinLatTexture || recalculateEitherLon || recalculateEitherElevation;
+		boolean recalculateMaxLat = recalculateMaxLatTexture || recalculateEitherLon || recalculateEitherElevation;
+		boolean recalculateMinLon = recalculateMinLonTexture || recalculateEitherLat || recalculateEitherElevation;
+		boolean recalculateMaxLon = recalculateMaxLonTexture || recalculateEitherLat || recalculateEitherElevation;
+		boolean recalculateTop = recalculateEitherLat || recalculateEitherLon;
+		boolean recalculateBottom = recalculateTop;
+		boolean recalculateTopElevation = recalculateTopTexture;
+		boolean recalculateBottomElevation = recalculateBottomTexture;
 
 		TopBottomFastShape minLatCurtain = this.minLatCurtain, maxLatCurtain = this.maxLatCurtain, minLonCurtain =
 				this.minLonCurtain, maxLonCurtain = this.maxLonCurtain;
@@ -286,41 +179,45 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 
 		if (recalculateMinLat)
 		{
-			minLatCurtain = dataProvider.createLatitudeCurtain(minLatSlice, minLonSlice, maxLonSlice);
+			minLatCurtain =
+					dataProvider.createLatitudeCurtain(minLatSlice, minLonSlice, maxLonSlice, topSlice, bottomSlice);
 			minLatCurtain.setLighted(true);
 			minLatCurtain.setCalculateNormals(true);
 			minLatCurtain.setTopElevationOffset(topElevation);
 			minLatCurtain.setBottomElevationOffset(bottomElevation);
-			lastMinLatSlice = minLatSlice;
+			minLatCurtain.setTexture(minLatTexture.getTexture());
 		}
 		if (recalculateMaxLat)
 		{
-			maxLatCurtain = dataProvider.createLatitudeCurtain(maxLatSlice, minLonSlice, maxLonSlice);
+			maxLatCurtain =
+					dataProvider.createLatitudeCurtain(maxLatSlice, minLonSlice, maxLonSlice, topSlice, bottomSlice);
 			maxLatCurtain.setLighted(true);
 			maxLatCurtain.setCalculateNormals(true);
 			maxLatCurtain.setReverseNormals(true);
 			maxLatCurtain.setTopElevationOffset(topElevation);
 			maxLatCurtain.setBottomElevationOffset(bottomElevation);
-			lastMaxLatSlice = maxLatSlice;
+			maxLatCurtain.setTexture(maxLatTexture.getTexture());
 		}
 		if (recalculateMinLon)
 		{
-			minLonCurtain = dataProvider.createLongitudeCurtain(minLonSlice, minLatSlice, maxLatSlice);
+			minLonCurtain =
+					dataProvider.createLongitudeCurtain(minLonSlice, minLatSlice, maxLatSlice, topSlice, bottomSlice);
 			minLonCurtain.setLighted(true);
 			minLonCurtain.setCalculateNormals(true);
 			minLonCurtain.setReverseNormals(true);
 			minLonCurtain.setTopElevationOffset(topElevation);
 			minLonCurtain.setBottomElevationOffset(bottomElevation);
-			lastMinLonSlice = minLonSlice;
+			minLonCurtain.setTexture(minLonTexture.getTexture());
 		}
 		if (recalculateMaxLon)
 		{
-			maxLonCurtain = dataProvider.createLongitudeCurtain(maxLonSlice, minLatSlice, maxLatSlice);
+			maxLonCurtain =
+					dataProvider.createLongitudeCurtain(maxLonSlice, minLatSlice, maxLatSlice, topSlice, bottomSlice);
 			maxLonCurtain.setLighted(true);
 			maxLonCurtain.setCalculateNormals(true);
 			maxLonCurtain.setTopElevationOffset(topElevation);
 			maxLonCurtain.setBottomElevationOffset(bottomElevation);
-			lastMaxLonSlice = maxLonSlice;
+			maxLonCurtain.setTexture(maxLonTexture.getTexture());
 		}
 		if (recalculateTop)
 		{
@@ -330,6 +227,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			topSurface.setLighted(true);
 			topSurface.setCalculateNormals(true);
 			topSurface.setElevation(topElevation);
+			topSurface.setTexture(topTexture.getTexture());
 		}
 		if (recalculateBottom)
 		{
@@ -340,6 +238,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			bottomSurface.setCalculateNormals(true);
 			bottomSurface.setReverseNormals(true);
 			bottomSurface.setElevation(bottomElevation);
+			bottomSurface.setTexture(bottomTexture.getTexture());
 		}
 		if (recalculateTopElevation)
 		{
@@ -348,7 +247,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			maxLatCurtain.setTopElevationOffset(topElevation);
 			minLonCurtain.setTopElevationOffset(topElevation);
 			maxLonCurtain.setTopElevationOffset(topElevation);
-			lastTopSlice = topSlice;
 		}
 		if (recalculateBottomElevation)
 		{
@@ -357,47 +255,44 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			maxLatCurtain.setBottomElevationOffset(bottomElevation);
 			minLonCurtain.setBottomElevationOffset(bottomElevation);
 			maxLonCurtain.setBottomElevationOffset(bottomElevation);
-			lastBottomSlice = bottomSlice;
 		}
-		
+
 		//TODO after a while, regenerating textures crashes the video card. could this be a memory issue? does it run out of texture ids?
 		//or could it just possibly be the regeneration of fastshapes causing the JVM to run out of buffer memory?
 
+		Rectangle latRectangle = new Rectangle(0, 0, dataProvider.getYSize(), dataProvider.getZSize());
+		Rectangle lonRectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getZSize());
+		Rectangle elevationRectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getYSize());
+
 		if (recalculateMinLatTexture)
 		{
-			setTexture(
-					generateTexture(0, minLatSlice, new Rectangle(minLonSlice, topSlice, maxLonSlice - minLonSlice + 1,
-							bottomSlice - topSlice + 1)), minLatCurtain);
+			updateTexture(generateTexture(0, minLatSlice, latRectangle), minLatTexture, minLatCurtain);
+			lastMinLatSlice = minLatSlice;
 		}
 		if (recalculateMaxLatTexture)
 		{
-			setTexture(
-					generateTexture(0, maxLatSlice, new Rectangle(minLonSlice, topSlice, maxLonSlice - minLonSlice + 1,
-							bottomSlice - topSlice + 1)), maxLatCurtain);
+			updateTexture(generateTexture(0, maxLatSlice, latRectangle), maxLatTexture, maxLatCurtain);
+			lastMaxLatSlice = maxLatSlice;
 		}
 		if (recalculateMinLonTexture)
 		{
-			setTexture(
-					generateTexture(1, minLonSlice, new Rectangle(minLatSlice, topSlice, maxLatSlice - minLatSlice + 1,
-							bottomSlice - topSlice + 1)), minLonCurtain);
+			updateTexture(generateTexture(1, minLonSlice, lonRectangle), minLonTexture, minLonCurtain);
+			lastMinLonSlice = minLonSlice;
 		}
 		if (recalculateMaxLonTexture)
 		{
-			setTexture(
-					generateTexture(1, maxLonSlice, new Rectangle(minLatSlice, topSlice, maxLatSlice - minLatSlice + 1,
-							bottomSlice - topSlice + 1)), maxLonCurtain);
+			updateTexture(generateTexture(1, maxLonSlice, lonRectangle), maxLonTexture, maxLonCurtain);
+			lastMaxLonSlice = maxLonSlice;
 		}
 		if (recalculateTopTexture)
 		{
-			setTexture(
-					generateTexture(2, topSlice, new Rectangle(minLatSlice, minLonSlice, maxLatSlice - minLatSlice + 1,
-							maxLonSlice - minLonSlice + 1)), topSurface);
+			updateTexture(generateTexture(2, topSlice, elevationRectangle), topTexture, topSurface);
+			lastTopSlice = topSlice;
 		}
 		if (recalculateBottomTexture)
 		{
-			setTexture(
-					generateTexture(2, bottomSlice, new Rectangle(minLatSlice, minLonSlice, maxLatSlice - minLatSlice
-							+ 1, maxLonSlice - minLonSlice + 1)), bottomSurface);
+			updateTexture(generateTexture(2, bottomSlice, elevationRectangle), bottomTexture, bottomSurface);
+			lastBottomSlice = bottomSlice;
 		}
 
 		synchronized (dataLock)
@@ -453,23 +348,36 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		return image;
 	}
 
-	protected void setTexture(BufferedImage image, FastShape shape)
+	protected void updateTexture(BufferedImage image, TextureRenderer texture, FastShape shape)
 	{
-		Texture texture = shape.getTexture();
-		if (texture != null)
+		Graphics2D g = null;
+		try
 		{
-			texture.updateImage(TextureIO.newTextureData(image, true));
+			g = (Graphics2D) texture.getImage().getGraphics();
+			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
+			g.drawImage(image, 0, 0, null);
 		}
-		else
+		finally
 		{
-			shape.setTexture(TextureIO.newTexture(image, true));
+			if (g != null)
+			{
+				g.dispose();
+			}
 		}
+		texture.markDirty(0, 0, texture.getWidth(), texture.getHeight());
+		shape.setTexture(texture.getTexture());
 	}
 
 	@Override
 	public CoordinateTransformation getCoordinateTransformation()
 	{
 		return coordinateTransformation;
+	}
+
+	@Override
+	protected void doPick(DrawContext dc, Point point)
+	{
+		doRender(dc);
 	}
 
 	@Override
@@ -491,23 +399,74 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 							maxLonCurtain };
 			Arrays.sort(shapes, new ShapeComparator(dc));
 
-			/*for (FastShape shape : shapes)
+			if (!dc.isPickingMode())
 			{
-				if (shape != null)
+				//render back-to-front
+				for (FastShape shape : shapes)
 				{
-					shape.render(dc);
+					if (shape != null)
+					{
+						shape.setColor(Color.white);
+						shape.setLighted(true);
+						shape.setTextured(true);
+						shape.render(dc);
+					}
 				}
-			}*/
 
-			for (int i = shapes.length - 1; i >= 0; i--)
-			{
-				FastShape shape = shapes[i];
-				if (shape != null)
+				if (dragging)
 				{
-					shape.render(dc);
+					renderBoundingBox(dc);
+				}
+			}
+			else
+			{
+				boolean oldDeepPicking = dc.isDeepPickingEnabled();
+				try
+				{
+					//deep picking needs to be enabled, because boreholes are below the surface
+					dc.setDeepPickingEnabled(true);
+					pickSupport.beginPicking(dc);
+
+					for (FastShape shape : shapes)
+					{
+						if (shape != null)
+						{
+							Color color = dc.getUniquePickColor();
+							pickSupport.addPickableObject(color.getRGB(), shapeToPickableObject(shape));
+							shape.setColor(color);
+							shape.setLighted(false);
+							shape.setTextured(false);
+							shape.render(dc);
+						}
+					}
+
+					pickSupport.resolvePick(dc, dc.getPickPoint(), this);
+				}
+				finally
+				{
+					pickSupport.endPicking(dc);
+					dc.setDeepPickingEnabled(oldDeepPicking);
 				}
 			}
 		}
+	}
+
+	protected void renderBoundingBox(DrawContext dc)
+	{
+		Sector sector = dataProvider.getSector();
+		Position center = new Position(sector.getCentroid(), dataProvider.getTop() - dataProvider.getDepth() / 2);
+		Vec4 v1 = dc.getGlobe().computePointFromPosition(sector.getMinLatitude(), center.longitude, center.elevation);
+		Vec4 v2 = dc.getGlobe().computePointFromPosition(sector.getMaxLatitude(), center.longitude, center.elevation);
+		double distance = v1.distanceTo3(v2) / 2;
+		LatLon latlon1 = new LatLon(center.latitude, sector.getMinLongitude());
+		LatLon latlon2 = new LatLon(center.latitude, sector.getMaxLongitude());
+		Box box = new Box(latlon1, latlon2, distance, distance);
+		box.setAltitudes(dataProvider.getTop() - dataProvider.getDepth(), dataProvider.getTop());
+		box.getAttributes().setDrawInterior(false);
+		box.getAttributes().setDrawOutline(true);
+		box.getAttributes().setOutlineMaterial(Material.WHITE);
+		box.getAttributes().setOutlineWidth(2.0);
+		box.render(dc);
 	}
 
 	@Override
@@ -530,6 +489,229 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 				maxLatCurtain.setWireframe(wireframe);
 				minLonCurtain.setWireframe(wireframe);
 				maxLonCurtain.setWireframe(wireframe);
+			}
+		}
+	}
+
+	protected FastShape pickableObjectToShape(PickableObject po)
+	{
+		if (po == topPO)
+			return topSurface;
+		if (po == bottomPO)
+			return bottomSurface;
+		if (po == minLatPO)
+			return minLatCurtain;
+		if (po == maxLatPO)
+			return maxLatCurtain;
+		if (po == minLonPO)
+			return minLonCurtain;
+		if (po == maxLonPO)
+			return maxLonCurtain;
+		return null;
+	}
+
+	protected PickableObject shapeToPickableObject(FastShape shape)
+	{
+		if (shape == topSurface)
+			return topPO;
+		if (shape == bottomSurface)
+			return bottomPO;
+		if (shape == minLatCurtain)
+			return minLatPO;
+		if (shape == maxLatCurtain)
+			return maxLatPO;
+		if (shape == minLonCurtain)
+			return minLonPO;
+		if (shape == maxLonCurtain)
+			return maxLonPO;
+		return null;
+	}
+
+	@Override
+	public void selected(SelectEvent event)
+	{
+		Object topObject = event.getTopObject();
+		pickedShape = topObject instanceof PickableObject ? pickableObjectToShape((PickableObject) topObject) : null;
+
+		if (pickedShape == null)
+		{
+			return;
+		}
+
+		boolean top = pickedShape == topSurface;
+		boolean bottom = pickedShape == bottomSurface;
+		boolean minLat = pickedShape == minLatCurtain;
+		boolean maxLat = pickedShape == maxLatCurtain;
+		boolean minLon = pickedShape == minLonCurtain;
+		boolean maxLon = pickedShape == maxLonCurtain;
+		if (top || bottom || minLat || maxLat || minLon || maxLon)
+		{
+			if (event.getEventAction().equals(SelectEvent.DRAG_END))
+			{
+				dragging = false;
+				event.consume();
+			}
+			else if (event.getEventAction().equals(SelectEvent.DRAG))
+			{
+				if (!dragging || dragStartCenter == null)
+				{
+					Extent extent = pickedShape.getExtent();
+					if (extent != null)
+					{
+						dragStartCenter = extent.getCenter();
+					}
+				}
+
+				if (dragStartCenter != null)
+				{
+					if (top || bottom)
+					{
+						dragElevation(event.getPickPoint(), pickedShape);
+					}
+					else if (minLat || maxLat)
+					{
+						dragLatitude(event.getPickPoint(), pickedShape);
+					}
+					else
+					{
+						dragLongitude(event.getPickPoint(), pickedShape);
+					}
+				}
+				dragging = true;
+				event.consume();
+			}
+		}
+	}
+
+	protected void dragElevation(Point pickPoint, FastShape shape)
+	{
+		// Calculate the plane projected from screen y=pickPoint.y
+		Line screenLeftRay = wwd.getView().computeRayFromScreenPoint(pickPoint.x - 100, pickPoint.y);
+		Line screenRightRay = wwd.getView().computeRayFromScreenPoint(pickPoint.x + 100, pickPoint.y);
+
+		// As the two lines are very close to parallel, use an arbitrary line joining them rather than the two lines to avoid precision problems
+		Line joiner = Line.fromSegment(screenLeftRay.getPointAt(500), screenRightRay.getPointAt(500));
+		Plane screenPlane = GeometryUtil.createPlaneContainingLines(screenLeftRay, joiner);
+		if (screenPlane == null)
+		{
+			return;
+		}
+
+		// Calculate the origin-marker ray
+		Globe globe = wwd.getModel().getGlobe();
+		Line centreRay = Line.fromSegment(globe.getCenter(), dragStartCenter);
+		Vec4 intersection = screenPlane.intersect(centreRay);
+		if (intersection == null)
+		{
+			return;
+		}
+
+		Position intersectionPosition = globe.computePositionFromPoint(intersection);
+		if (!dragging)
+		{
+			dragStartPosition = intersectionPosition.elevation;
+			dragStartSlice = shape == topSurface ? topSlice : bottomSlice;
+		}
+		else
+		{
+			double deltaElevation =
+					(dragStartPosition - intersectionPosition.elevation)
+							/ (wwd.getSceneController().getVerticalExaggeration());
+			double deltaPercentage = deltaElevation / dataProvider.getDepth();
+			int sliceMovement = (int) (deltaPercentage * (dataProvider.getZSize() - 1));
+			if (shape == topSurface)
+			{
+				topSlice = Math.max(0, Math.min(dataProvider.getZSize() - 1, dragStartSlice + sliceMovement));
+				bottomSlice = Math.max(bottomSlice, topSlice);
+			}
+			else
+			{
+				bottomSlice = Math.max(0, Math.min(dataProvider.getZSize() - 1, dragStartSlice + sliceMovement));
+				topSlice = Math.min(topSlice, bottomSlice);
+			}
+		}
+	}
+
+	protected void dragLatitude(Point pickPoint, FastShape shape)
+	{
+		Globe globe = wwd.getView().getGlobe();
+		double centerElevation = globe.computePositionFromPoint(dragStartCenter).elevation;
+
+		// Compute the ray from the screen point
+		Line ray = wwd.getView().computeRayFromScreenPoint(pickPoint.x, pickPoint.y);
+		Intersection[] intersections = globe.intersect(ray, centerElevation);
+		if (intersections == null || intersections.length == 0)
+		{
+			return;
+		}
+		Vec4 intersection = ray.nearestIntersectionPoint(intersections);
+		if (intersection == null)
+		{
+			return;
+		}
+
+		Position position = globe.computePositionFromPoint(intersection);
+		if (!dragging)
+		{
+			dragStartPosition = position.longitude.degrees;
+			dragStartSlice = shape == minLatCurtain ? minLatSlice : maxLatSlice;
+		}
+		else
+		{
+			double deltaLongitude = position.longitude.degrees - dragStartPosition;
+			double deltaPercentage = deltaLongitude / dataProvider.getSector().getDeltaLonDegrees();
+			int sliceMovement = (int) (deltaPercentage * (dataProvider.getXSize() - 1));
+			if (shape == minLatCurtain)
+			{
+				minLatSlice = Math.max(0, Math.min(dataProvider.getXSize() - 1, dragStartSlice + sliceMovement));
+				maxLatSlice = Math.max(maxLatSlice, minLatSlice);
+			}
+			else
+			{
+				maxLatSlice = Math.max(0, Math.min(dataProvider.getXSize() - 1, dragStartSlice + sliceMovement));
+				minLatSlice = Math.min(minLatSlice, maxLatSlice);
+			}
+		}
+	}
+
+	protected void dragLongitude(Point pickPoint, FastShape shape)
+	{
+		Globe globe = wwd.getView().getGlobe();
+		double centerElevation = globe.computePositionFromPoint(dragStartCenter).elevation;
+
+		// Compute the ray from the screen point
+		Line ray = wwd.getView().computeRayFromScreenPoint(pickPoint.x, pickPoint.y);
+		Intersection[] intersections = globe.intersect(ray, centerElevation);
+		if (intersections == null || intersections.length == 0)
+		{
+			return;
+		}
+		Vec4 intersection = ray.nearestIntersectionPoint(intersections);
+		if (intersection == null)
+		{
+			return;
+		}
+
+		Position position = globe.computePositionFromPoint(intersection);
+		if (!dragging)
+		{
+			dragStartPosition = position.latitude.degrees;
+			dragStartSlice = shape == minLonCurtain ? minLonSlice : maxLonSlice;
+		}
+		else
+		{
+			double deltaLatitude = position.latitude.degrees - dragStartPosition;
+			double deltaPercentage = deltaLatitude / dataProvider.getSector().getDeltaLatDegrees();
+			int sliceMovement = (int) (deltaPercentage * (dataProvider.getYSize() - 1));
+			if (shape == minLonCurtain)
+			{
+				minLonSlice = Math.max(0, Math.min(dataProvider.getYSize() - 1, dragStartSlice + sliceMovement));
+				maxLonSlice = Math.max(maxLonSlice, minLonSlice);
+			}
+			else
+			{
+				maxLonSlice = Math.max(0, Math.min(dataProvider.getYSize() - 1, dragStartSlice + sliceMovement));
+				minLonSlice = Math.min(minLonSlice, maxLonSlice);
 			}
 		}
 	}
@@ -563,7 +745,11 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			Vec4 eyePoint = dc.getView().getEyePoint();
 			double d1 = e1.getCenter().distanceToSquared3(eyePoint);
 			double d2 = e2.getCenter().distanceToSquared3(eyePoint);
-			return Double.compare(d1, d2);
+			return -Double.compare(d1, d2);
 		}
+	}
+
+	private class PickableObject
+	{
 	}
 }

@@ -108,6 +108,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected URL pointTextureUrl;
 	protected WWTexture pointTexture;
 	protected WWTexture blankTexture;
+	protected boolean textured = true; //only actually textured if texture is not null
 	protected Texture texture;
 
 	public FastShape(List<Position> positions, int mode)
@@ -198,7 +199,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 				{
 					attributesToPush |= GL.GL_LINE_BIT;
 				}
-				if (willUsePointSprite || willUseTextureBlending)
+				if (willUsePointSprite || willUseTextureBlending || (textured && texture != null))
 				{
 					attributesToPush |= GL.GL_TEXTURE_BIT;
 				}
@@ -320,7 +321,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					blankTexture.bind(dc);
 				}
 
-				if (texture != null)
+				if (textured && texture != null)
 				{
 					gl.glActiveTexture(GL.GL_TEXTURE0);
 					gl.glEnable(GL.GL_TEXTURE_2D);
@@ -1180,6 +1181,24 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		try
 		{
 			this.texture = texture;
+		}
+		finally
+		{
+			frontLock.writeLock().unlock();
+		}
+	}
+
+	public boolean isTextured()
+	{
+		return textured;
+	}
+
+	public void setTextured(boolean textured)
+	{
+		frontLock.writeLock().lock();
+		try
+		{
+			this.textured = textured;
 		}
 		finally
 		{

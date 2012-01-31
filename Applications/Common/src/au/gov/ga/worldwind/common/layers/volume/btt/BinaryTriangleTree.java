@@ -136,7 +136,8 @@ public class BinaryTriangleTree
 		{
 			for (int x = 0; x < rect.width; x++)
 			{
-				textureCoordinateBuffer.put(x / (float)(rect.width - 1)).put(y / (float)(rect.height - 1));
+				textureCoordinateBuffer.put((x + rect.x) / (float) (width - 1))
+						.put((y + rect.y) / (float) (height - 1));
 			}
 		}
 

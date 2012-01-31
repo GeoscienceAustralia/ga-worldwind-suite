@@ -1,6 +1,5 @@
-package au.gov.ga.worldwind.animator.util;
+package au.gov.ga.worldwind.common.util;
 
-import au.gov.ga.worldwind.common.util.Validate;
 import gov.nasa.worldwind.geom.Line;
 import gov.nasa.worldwind.geom.Plane;
 import gov.nasa.worldwind.geom.Vec4;

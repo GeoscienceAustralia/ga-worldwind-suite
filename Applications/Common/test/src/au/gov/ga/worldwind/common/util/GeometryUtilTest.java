@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.animator.util;
+package au.gov.ga.worldwind.common.util;
 
 import static org.junit.Assert.*;
 import gov.nasa.worldwind.geom.Line;
@@ -7,7 +7,7 @@ import gov.nasa.worldwind.geom.Vec4;
 
 import org.junit.Test;
 
-import au.gov.ga.worldwind.animator.util.GeometryUtil;
+import au.gov.ga.worldwind.common.util.GeometryUtil;
 
 /**
  * Unit tests for the {@link GeometryUtil} class

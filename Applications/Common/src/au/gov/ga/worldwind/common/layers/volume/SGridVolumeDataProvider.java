@@ -57,6 +57,7 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 	private List<Position> positions;
 	private FloatBuffer data;
 	private double depth;
+	private double top;
 
 	@Override
 	protected boolean doLoadData(URL url, VolumeLayer layer)
@@ -157,6 +158,7 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 				int positionIndex = 0;
 				double firstZValue = 0;
 				data = BufferUtil.newFloatBuffer(xSize * ySize * zSize);
+				top = 0;
 
 				//setup the ASCII data file line regex
 				String doublePattern = "([\\d.\\-]+)";
@@ -201,6 +203,7 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 						{
 							Position position = Position.fromDegrees(y, x, z);
 							positions.add(position);
+							top += z / (double) (xSize * ySize);
 
 							//update the sector to include this latitude/longitude
 							if (sector == null)
@@ -356,6 +359,12 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 	}
 
 	@Override
+	public double getTop()
+	{
+		return top;
+	}
+
+	@Override
 	public float getValue(int x, int y, int z)
 	{
 		return data.get(x + y * xSize + z * xSize * ySize);
@@ -381,8 +390,11 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 	}
 
 	@Override
-	public TopBottomFastShape createLatitudeCurtain(int x, int yMin, int yMax)
+	public TopBottomFastShape createLatitudeCurtain(int x, int yMin, int yMax, int zMin, int zMax)
 	{
+		float v0 = zMin / (float) Math.max(1, zSize - 1);
+		float v1 = zMax / (float) Math.max(1, zSize - 1);
+
 		List<Position> positions = new ArrayList<Position>();
 		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(ySize * 4);
 		for (int y = yMin; y <= yMax; y++)
@@ -394,9 +406,9 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 					new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
 			positions.add(top);
 			positions.add(bottom);
-			float u = (y - yMin) / (float) Math.max(0, yMax - yMin);
-			textureCoordinateBuffer.put(u).put(0);
-			textureCoordinateBuffer.put(u).put(1);
+			float u = y / (float) Math.max(1, ySize - 1);
+			textureCoordinateBuffer.put(u).put(v0);
+			textureCoordinateBuffer.put(u).put(v1);
 		}
 		TopBottomFastShape shape = new TopBottomFastShape(positions, GL.GL_TRIANGLE_STRIP);
 		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
@@ -404,8 +416,11 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 	}
 
 	@Override
-	public TopBottomFastShape createLongitudeCurtain(int y, int xMin, int xMax)
+	public TopBottomFastShape createLongitudeCurtain(int y, int xMin, int xMax, int zMin, int zMax)
 	{
+		float v0 = zMin / (float) Math.max(1, zSize - 1);
+		float v1 = zMax / (float) Math.max(1, zSize - 1);
+
 		List<Position> positions = new ArrayList<Position>();
 		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(ySize * 4);
 		for (int x = xMin; x <= xMax; x++)
@@ -417,9 +432,9 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 					new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
 			positions.add(top);
 			positions.add(bottom);
-			float u = (x - xMin) / (float) Math.max(1, xMax - xMin);
-			textureCoordinateBuffer.put(u).put(0);
-			textureCoordinateBuffer.put(u).put(1);
+			float u = x / (float) Math.max(1, xSize - 1);
+			textureCoordinateBuffer.put(u).put(v0);
+			textureCoordinateBuffer.put(u).put(v1);
 		}
 		TopBottomFastShape shape = new TopBottomFastShape(positions, GL.GL_TRIANGLE_STRIP);
 		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);

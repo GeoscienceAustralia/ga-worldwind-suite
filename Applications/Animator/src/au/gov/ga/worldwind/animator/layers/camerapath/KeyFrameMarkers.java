@@ -27,7 +27,7 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
-import au.gov.ga.worldwind.animator.util.GeometryUtil;
+import au.gov.ga.worldwind.common.util.GeometryUtil;
 import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 
 import com.sun.opengl.util.BufferUtil;
