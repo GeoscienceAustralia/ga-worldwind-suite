@@ -149,6 +149,10 @@ public class BinaryTriangleTree
 	protected void buildMesh(float maxVariance, int x, int y, int width, int height, boolean reverseX,
 			boolean reverseY, List<BTTTriangle> triangles)
 	{
+		//cannot build a mesh between less that 2 rows/columns
+		if(width < 2 || height < 2)
+			return;
+		
 		int yStart = y;
 		int remainingHeight = height;
 		while (remainingHeight > 1)
