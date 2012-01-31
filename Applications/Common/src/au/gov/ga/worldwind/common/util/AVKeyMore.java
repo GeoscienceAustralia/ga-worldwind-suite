@@ -68,4 +68,8 @@ public interface AVKeyMore extends AVKey
 	final static String SUBSAMPLING_W = "au.gov.ga.worldwind.AVKeyMore.SubsamplingW";
 	final static String DYNAMIC_SUBSAMPLING = "au.gov.ga.worldwind.AVKeyMore.DynamicSubsampling";
 	final static String DYNAMIC_SUBSAMPLING_SAMPLES_PER_AXIS = "au.gov.ga.worldwind.AVKeyMore.DynamicSubsamplingSamplesPerAxis";
+	
+	//volume layer
+	final static String MAX_VARIANCE = "au.gov.ga.worldwind.AVKeyMore.MaxVariance";
+	final static String NO_DATA_COLOR = "au.gov.ga.worldwind.AVKeyMore.NoDataColor";
 }

@@ -76,7 +76,7 @@ public class LayerFactory extends BasicLayerFactory
 		}
 		if ("VolumeLayer".equalsIgnoreCase(layerType))
 		{
-			return VolumeLayerFactory.createModelLayer(domElement, params);
+			return VolumeLayerFactory.createVolumeLayer(domElement, params);
 		}
 
 		return super.createFromLayerDocument(domElement, params);

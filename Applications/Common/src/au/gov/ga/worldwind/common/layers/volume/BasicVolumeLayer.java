@@ -1,6 +1,8 @@
 package au.gov.ga.worldwind.common.layers.volume;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.geom.Extent;
@@ -32,33 +34,39 @@ import java.util.Comparator;
 import org.gdal.osr.CoordinateTransformation;
 
 import au.gov.ga.worldwind.common.layers.Wireframeable;
+import au.gov.ga.worldwind.common.util.AVKeyMore;
+import au.gov.ga.worldwind.common.util.ColorMap;
 import au.gov.ga.worldwind.common.util.CoordinateTransformationUtil;
 import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.GeometryUtil;
+import au.gov.ga.worldwind.common.util.Validate;
 
 import com.sun.opengl.util.j2d.TextureRenderer;
 
 public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wireframeable, SelectListener
 {
+	private URL context;
+	private String url;
+	private String dataCacheName;
 	private VolumeDataProvider dataProvider;
-	private float maxVariance = 0;
-	private CoordinateTransformation coordinateTransformation = CoordinateTransformationUtil
-			.getTransformationToWGS84("EPSG:28354"); //TODO
+	private Double minimumDistance;
+	private double maxVariance = 0;
+	private CoordinateTransformation coordinateTransformation;
+	private ColorMap colorMap;
+	private Color noDataColor;
 
 	private final Object dataLock = new Object();
 	private boolean dataAvailable = false;
 	private FastShape topSurface, bottomSurface;
 	private TopBottomFastShape minLatCurtain, maxLatCurtain, minLonCurtain, maxLonCurtain;
-	private TextureRenderer topTexture, bottomTexture;
-	private TextureRenderer minLatTexture, maxLatTexture, minLonTexture, maxLonTexture;
+	private TextureRenderer topTexture, bottomTexture, minLatTexture, maxLatTexture, minLonTexture, maxLonTexture;
 	private final PickableObject minLatPO = new PickableObject(), maxLatPO = new PickableObject(),
 			minLonPO = new PickableObject(), maxLonPO = new PickableObject(), topPO = new PickableObject(),
 			bottomPO = new PickableObject();
-
-	private int topSlice = 0, bottomSlice = Integer.MAX_VALUE;
-	private int minLatSlice = 0, maxLatSlice = Integer.MAX_VALUE, minLonSlice = 0, maxLonSlice = Integer.MAX_VALUE;
-	private int lastTopSlice = -1, lastBottomSlice = -1;
-	private int lastMinLatSlice = -1, lastMaxLatSlice = -1, lastMinLonSlice = -1, lastMaxLonSlice = -1;
+	private int topSlice = 0, bottomSlice = Integer.MAX_VALUE, minLatSlice = 0, maxLatSlice = Integer.MAX_VALUE,
+			minLonSlice = 0, maxLonSlice = Integer.MAX_VALUE;
+	private int lastTopSlice = -1, lastBottomSlice = -1, lastMinLatSlice = -1, lastMaxLatSlice = -1,
+			lastMinLonSlice = -1, lastMaxLonSlice = -1;
 
 	private boolean wireframe = false;
 	private final PickSupport pickSupport = new PickSupport();
@@ -71,25 +79,40 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 
 	private WorldWindow wwd;
 
-	public BasicVolumeLayer()
+	public BasicVolumeLayer(AVList params)
 	{
-		// TODO Auto-generated constructor stub
-		dataProvider = new SGridVolumeDataProvider();
+		context = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
+		url = params.getStringValue(AVKey.URL);
+		dataCacheName = params.getStringValue(AVKey.DATA_CACHE_NAME);
+		dataProvider = (VolumeDataProvider) params.getValue(AVKeyMore.DATA_LAYER_PROVIDER);
+
+		minimumDistance = (Double) params.getValue(AVKeyMore.MINIMUM_DISTANCE);
+		colorMap = (ColorMap) params.getValue(AVKeyMore.COLOR_MAP);
+		noDataColor = (Color) params.getValue(AVKeyMore.NO_DATA_COLOR);
+
+		Double d = (Double) params.getValue(AVKeyMore.MAX_VARIANCE);
+		if (d != null)
+			maxVariance = d;
+
+		String s = (String) params.getValue(AVKey.COORDINATE_SYSTEM);
+		if (s != null)
+			coordinateTransformation = CoordinateTransformationUtil.getTransformationToWGS84(s);
+
+		Validate.notBlank(url, "Model data url not set");
+		Validate.notBlank(dataCacheName, "Model data cache name not set");
+		Validate.notNull(dataProvider, "Model data provider is null");
 	}
 
 	@Override
 	public URL getUrl() throws MalformedURLException
 	{
-		// TODO Auto-generated constructor stub
-		return new URL(
-				"file:///V:/projects/presentations/11-5902 - Broken Hill 3D model data visualisation/Source/gocad/sgrid_volume/GWMAR_NBC_Vol_200x200.sg");
+		return new URL(context, url);
 	}
 
 	@Override
 	public String getDataCacheName()
 	{
-		// TODO Auto-generated constructor stub
-		return "GWMAR_NBC_Vol_400x400.sg";
+		return dataCacheName;
 	}
 
 	@Override
@@ -222,7 +245,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (recalculateTop)
 		{
 			topSurface =
-					dataProvider.createHorizontalSurface(maxVariance, new Rectangle(minLatSlice, minLonSlice,
+					dataProvider.createHorizontalSurface((float) maxVariance, new Rectangle(minLatSlice, minLonSlice,
 							maxLatSlice - minLatSlice + 1, maxLonSlice - minLonSlice + 1));
 			topSurface.setLighted(true);
 			topSurface.setCalculateNormals(true);
@@ -232,7 +255,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (recalculateBottom)
 		{
 			bottomSurface =
-					dataProvider.createHorizontalSurface(maxVariance, new Rectangle(minLatSlice, minLonSlice,
+					dataProvider.createHorizontalSurface((float) maxVariance, new Rectangle(minLatSlice, minLonSlice,
 							maxLatSlice - minLatSlice + 1, maxLonSlice - minLonSlice + 1));
 			bottomSurface.setLighted(true);
 			bottomSurface.setCalculateNormals(true);
@@ -256,9 +279,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			minLonCurtain.setBottomElevationOffset(bottomElevation);
 			maxLonCurtain.setBottomElevationOffset(bottomElevation);
 		}
-
-		//TODO after a while, regenerating textures crashes the video card. could this be a memory issue? does it run out of texture ids?
-		//or could it just possibly be the regeneration of fastshapes causing the JVM to run out of buffer memory?
 
 		Rectangle latRectangle = new Rectangle(0, 0, dataProvider.getYSize(), dataProvider.getZSize());
 		Rectangle lonRectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getZSize());
@@ -337,10 +357,13 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 				int vy = axis == 2 ? y : axis == 1 ? position : x;
 				int vz = axis == 2 ? position : y;
 				float value = dataProvider.getValue(vx, vy, vz);
-				int rgb = 0;
+				int rgb =  noDataColor != null ? noDataColor.getRGB() : 0;
 				if (value != dataProvider.getNoDataValue())
 				{
-					rgb = Color.HSBtoRGB(-0.3f - value * 0.7f, 1.0f, 1.0f);
+					if (colorMap != null)
+						rgb = colorMap.calculateColor(value).getRGB();
+					else
+						rgb = Color.HSBtoRGB(-0.3f - value * 0.7f, 1.0f, 1.0f);
 				}
 				image.setRGB(x - rectangle.x, y - rectangle.y, rgb);
 			}
@@ -398,6 +421,26 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 					new FastShape[] { topSurface, bottomSurface, minLatCurtain, maxLatCurtain, minLonCurtain,
 							maxLonCurtain };
 			Arrays.sort(shapes, new ShapeComparator(dc));
+
+			if (minimumDistance != null)
+			{
+				for (int i = 0; i < shapes.length; i++)
+				{
+					if (shapes[i] != null)
+					{
+						Extent extent = shapes[i].getExtent();
+						if (extent != null)
+						{
+							double distanceToEye =
+									extent.getCenter().distanceTo3(dc.getView().getEyePoint()) - extent.getRadius();
+							if (distanceToEye > minimumDistance)
+							{
+								shapes[i] = null;
+							}
+						}
+					}
+				}
+			}
 
 			if (!dc.isPickingMode())
 			{
