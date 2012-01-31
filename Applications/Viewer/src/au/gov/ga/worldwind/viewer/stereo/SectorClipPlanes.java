@@ -39,6 +39,7 @@ public class SectorClipPlanes
 			{
 				planes = computeSectorClippingPlanes(dc.getGlobe(), sector);
 			}
+			dirty = false;
 		}
 
 		if (planes != null)
