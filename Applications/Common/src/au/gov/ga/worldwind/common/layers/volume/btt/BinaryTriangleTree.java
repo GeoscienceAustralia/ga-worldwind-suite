@@ -300,8 +300,8 @@ public class BinaryTriangleTree
 		t1.bottomNeighbour = t2;
 		t2.bottomNeighbour = t1;
 
-		buildFace(maxVariance, t1);
-		buildFace(maxVariance, t2);
+		buildFace(maxVariance, t1, x, y, size);
+		buildFace(maxVariance, t2, x, y, size);
 
 		addLeavesToTriangleList(t1, triangles);
 		addLeavesToTriangleList(t2, triangles);
@@ -316,12 +316,12 @@ public class BinaryTriangleTree
 	 * @param t
 	 *            Triangle to sub-divide
 	 */
-	protected void buildFace(float maxVariance, BTTTriangle t)
+	protected void buildFace(float maxVariance, BTTTriangle t, int x, int y, int size)
 	{
 		if (t.leftChild != null)
 		{
-			buildFace(maxVariance, t.leftChild);
-			buildFace(maxVariance, t.rightChild);
+			buildFace(maxVariance, t.leftChild, x, y, size);
+			buildFace(maxVariance, t.rightChild, x, y, size);
 		}
 		else
 		{
@@ -329,15 +329,28 @@ public class BinaryTriangleTree
 					Math.abs(t.apexIndex - t.leftIndex) == 1 || Math.abs(t.apexIndex - t.rightIndex) == 1;
 			if (!atLowestLevel)
 			{
-				float variance = calculateVariance(t.apexIndex, t.leftIndex, t.rightIndex);
-				if (variance >= maxVariance)
+				if (isAnyIndexOnEdge(t.apexIndex, t.leftIndex, t.rightIndex, x, y, size)
+						|| calculateVariance(t.apexIndex, t.leftIndex, t.rightIndex) >= maxVariance)
 				{
 					trySplitFace(t);
-					buildFace(maxVariance, t.leftChild);
-					buildFace(maxVariance, t.rightChild);
+					buildFace(maxVariance, t.leftChild, x, y, size);
+					buildFace(maxVariance, t.rightChild, x, y, size);
 				}
 			}
 		}
+	}
+
+	protected boolean isAnyIndexOnEdge(int apexIndex, int leftIndex, int rightIndex, int x, int y, int size)
+	{
+		return isIndexOnEdge(apexIndex, x, y, size) || isIndexOnEdge(leftIndex, x, y, size)
+				|| isIndexOnEdge(rightIndex, x, y, size);
+	}
+
+	protected boolean isIndexOnEdge(int index, int x, int y, int size)
+	{
+		int ix = index % width;
+		int iy = index / width;
+		return ix == x || iy == y || ix == x + size - 1 || iy == y + size - 1;
 	}
 
 	/**
@@ -625,7 +638,7 @@ public class BinaryTriangleTree
 		g.setColor(Color.white);
 		g.fillRect(0, 0, s, s);
 		g.setColor(Color.black);
-		while(indices.hasRemaining())
+		while (indices.hasRemaining())
 		{
 			Position left = posi.get(indices.get());
 			Position apex = posi.get(indices.get());
