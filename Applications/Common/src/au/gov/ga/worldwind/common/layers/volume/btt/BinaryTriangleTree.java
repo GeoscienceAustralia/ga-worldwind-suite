@@ -214,7 +214,9 @@ public class BinaryTriangleTree
 
 	/**
 	 * Build a mesh within the given rectangle, adding triangles to the triangle
-	 * list.
+	 * list. Because the BTT algorithm only supports power-of-2-plus-1 squares,
+	 * this function divides the rectangle area into squares and then builds the
+	 * tree from the sub-squares.
 	 * 
 	 * @param maxVariance
 	 *            BTT algorithm variance
@@ -315,6 +317,12 @@ public class BinaryTriangleTree
 	 *            BTT algorithm variance
 	 * @param t
 	 *            Triangle to sub-divide
+	 * @param x
+	 *            x coordinate from which the area started
+	 * @param y
+	 *            y coordinate from which the area started
+	 * @param size
+	 *            Size of the square (must be a power of 2 plus 1)
 	 */
 	protected void buildFace(float maxVariance, BTTTriangle t, int x, int y, int size)
 	{
@@ -340,12 +348,43 @@ public class BinaryTriangleTree
 		}
 	}
 
+	/**
+	 * Test if any of the provided indices are on the edge of the BTT
+	 * calculation square.
+	 * 
+	 * @param apexIndex
+	 *            Index of the triangle apex position
+	 * @param leftIndex
+	 *            Index of the triangle left position
+	 * @param rightIndex
+	 *            Index of the triangle right position
+	 * @param x
+	 *            x coordinate from which the area started
+	 * @param y
+	 *            y coordinate from which the area started
+	 * @param size
+	 *            Size of the square (must be a power of 2 plus 1)
+	 * @return True if the provided indices are on the edge of the area
+	 */
 	protected boolean isAnyIndexOnEdge(int apexIndex, int leftIndex, int rightIndex, int x, int y, int size)
 	{
 		return isIndexOnEdge(apexIndex, x, y, size) || isIndexOnEdge(leftIndex, x, y, size)
 				|| isIndexOnEdge(rightIndex, x, y, size);
 	}
 
+	/**
+	 * Test if the provided index is on the edge of the BTT calculation square.
+	 * 
+	 * @param index
+	 *            Position index
+	 * @param x
+	 *            x coordinate from which the area started
+	 * @param y
+	 *            y coordinate from which the area started
+	 * @param size
+	 *            Size of the square (must be a power of 2 plus 1)
+	 * @return True if the provided index is on the edge of the area
+	 */
 	protected boolean isIndexOnEdge(int index, int x, int y, int size)
 	{
 		int ix = index % width;
