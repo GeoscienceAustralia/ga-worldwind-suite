@@ -8,6 +8,14 @@ import java.util.List;
 
 import au.gov.ga.worldwind.common.util.FastShape;
 
+/**
+ * {@link FastShape} subclass which defines top and bottom elevation offsets.
+ * When calculating the {@link FastShape}s vertices, if a position is a
+ * {@link TopBottomPosition}, it is offset by either the top or bottom elevation
+ * offset. This class can also define a {@link LatLon} offset.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class TopBottomFastShape extends FastShape
 {
 	protected double topElevationOffset = 0d;
@@ -24,11 +32,19 @@ public class TopBottomFastShape extends FastShape
 		super(positions, indices, mode);
 	}
 
+	/**
+	 * @return The elevation offset by which top positions are offset.
+	 */
 	public double getTopElevationOffset()
 	{
 		return topElevationOffset;
 	}
 
+	/**
+	 * Set the elevation offset by which top positions are offset.
+	 * 
+	 * @param topElevationOffset
+	 */
 	public void setTopElevationOffset(double topElevationOffset)
 	{
 		if (this.topElevationOffset != topElevationOffset)
@@ -47,11 +63,19 @@ public class TopBottomFastShape extends FastShape
 		}
 	}
 
+	/**
+	 * @return The elevation offset by which bottom positions are offset.
+	 */
 	public double getBottomElevationOffset()
 	{
 		return bottomElevationOffset;
 	}
 
+	/**
+	 * Set the elevation offset by which bottom positions are offset.
+	 * 
+	 * @param bottomElevationOffset
+	 */
 	public void setBottomElevationOffset(double bottomElevationOffset)
 	{
 		if (this.bottomElevationOffset != bottomElevationOffset)
@@ -69,11 +93,19 @@ public class TopBottomFastShape extends FastShape
 		}
 	}
 
+	/**
+	 * @return The {@link LatLon} offset by which each position is offset.
+	 */
 	public LatLon getLatlonOffset()
 	{
 		return latlonOffset;
 	}
 
+	/**
+	 * Set the {@link LatLon} offset by which each position is offset.
+	 * 
+	 * @param latlonOffset
+	 */
 	public void setLatlonOffset(LatLon latlonOffset)
 	{
 		if (!LatLon.equals(latlonOffset, this.latlonOffset))

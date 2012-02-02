@@ -13,6 +13,15 @@ import java.util.ArrayList;
 
 import com.sun.opengl.util.BufferUtil;
 
+/**
+ * {@link VolumeDataProvider} which reads its data from a custom object array
+ * file. Any {@link AbstractVolumeDataProvider} instance can be converted to a
+ * file which this class supports, using the
+ * {@link ArrayVolumeDataProvider#saveVolumeDataProviderToArrayFile(AbstractVolumeDataProvider, File)}
+ * function.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ArrayVolumeDataProvider extends AbstractVolumeDataProvider
 {
 	@Override
@@ -61,6 +70,15 @@ public class ArrayVolumeDataProvider extends AbstractVolumeDataProvider
 		}
 	}
 
+	/**
+	 * Save the given {@link AbstractVolumeDataProvider} to a File which this
+	 * class supports reading.
+	 * 
+	 * @param provider
+	 *            {@link AbstractVolumeDataProvider} to write to a file.
+	 * @param file
+	 *            {@link File} to write to.
+	 */
 	public static void saveVolumeDataProviderToArrayFile(AbstractVolumeDataProvider provider, File file)
 	{
 		try

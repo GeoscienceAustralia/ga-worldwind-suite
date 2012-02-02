@@ -16,7 +16,15 @@ import au.gov.ga.worldwind.common.util.FastShape;
 
 import com.sun.opengl.util.BufferUtil;
 
-public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<VolumeLayer> implements VolumeDataProvider
+/**
+ * Abstract implementation of the {@link VolumeDataProvider} interface. Provides
+ * getter methods to the required fields, as well as curtain and surface shape
+ * calculation.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
+public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<VolumeLayer> implements
+		VolumeDataProvider
 {
 	protected int xSize;
 	protected int ySize;
@@ -25,7 +33,7 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	protected double depth;
 	protected double top;
 	protected float noDataValue;
-	
+
 	protected List<Position> positions;
 	protected FloatBuffer data;
 
@@ -85,7 +93,7 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	}
 
 	@Override
-	public TopBottomFastShape createLatitudeCurtain(int x)
+	public TopBottomFastShape createLongitudeCurtain(int x)
 	{
 		List<Position> positions = new ArrayList<Position>();
 		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(ySize * 4);
@@ -108,7 +116,7 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	}
 
 	@Override
-	public TopBottomFastShape createLongitudeCurtain(int y)
+	public TopBottomFastShape createLatitudeCurtain(int y)
 	{
 		List<Position> positions = new ArrayList<Position>();
 		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(ySize * 4);

@@ -23,6 +23,12 @@ import au.gov.ga.worldwind.common.util.URLUtil;
 
 import com.sun.opengl.util.BufferUtil;
 
+/**
+ * {@link VolumeDataProvider} implementation which reads volume data from a
+ * GOCAD SGrid (.sg) file.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 {
 	private final static Pattern paintedVariablePattern = Pattern.compile("\\*painted\\*variable:\\s*(.*?)\\s*");

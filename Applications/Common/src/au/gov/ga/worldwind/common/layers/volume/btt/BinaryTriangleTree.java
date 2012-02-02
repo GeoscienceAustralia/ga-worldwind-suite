@@ -13,16 +13,34 @@ import java.util.Map;
 import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
 
 import com.sun.opengl.util.BufferUtil;
 
+/**
+ * A mesh generation helper which uses a grid of positions to generate a mesh.
+ * Uses the Binary Triangle Tree mesh simplification algorithm.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class BinaryTriangleTree
 {
 	private final List<Position> positions;
 	private final int width;
 	private final int height;
 
+	/**
+	 * Create a new {@link BinaryTriangleTree} object.
+	 * 
+	 * @param positions
+	 *            Grid of positions in the mesh. Should be ordered in the
+	 *            x-axis, then the y-axis.
+	 * @param width
+	 *            Number of positions in the x-axis
+	 * @param height
+	 *            Number of positions in the y-axis
+	 */
 	public BinaryTriangleTree(List<Position> positions, int width, int height)
 	{
 		Validate.isTrue(positions.size() == width * height, "Positions list count doesn't match provided width/height");
@@ -32,16 +50,44 @@ public class BinaryTriangleTree
 		this.height = height;
 	}
 
+	/**
+	 * Build a mesh from the position grid.
+	 * 
+	 * @param maxVariance
+	 *            Variances between triangle vertices less than maxVariance will
+	 *            be simplified. Use 0 to use every vertex in the final mesh.
+	 * @return A {@link FastShape} containing the mesh.
+	 */
 	public FastShape buildMesh(float maxVariance)
 	{
 		return buildMesh(maxVariance, new Rectangle(0, 0, width, height));
 	}
 
+	/**
+	 * Build a mesh from the position grid. The simplification algorithm will
+	 * start from the center instead of the top-left.
+	 * 
+	 * @param maxVariance
+	 *            Variances between triangle vertices less than maxVariance will
+	 *            be simplified. Use 0 to use every vertex in the final mesh.
+	 * @return A {@link FastShape} containing the mesh.
+	 */
 	public FastShape buildMeshFromCenter(float maxVariance)
 	{
 		return buildMeshFromCenter(maxVariance, new Rectangle(0, 0, width, height));
 	}
 
+	/**
+	 * Build a mesh from the position grid using positions within the given
+	 * rectangle.
+	 * 
+	 * @param maxVariance
+	 *            Variances between triangle vertices less than maxVariance will
+	 *            be simplified. Use 0 to use every vertex in the final mesh.
+	 * @param rectangle
+	 *            Sub-rectangle of positions to use in the mesh.
+	 * @return A {@link FastShape} containing the mesh.
+	 */
 	public FastShape buildMesh(float maxVariance, Rectangle rectangle)
 	{
 		if (maxVariance <= 0)
@@ -54,6 +100,18 @@ public class BinaryTriangleTree
 		return buildFastShape(triangles);
 	}
 
+	/**
+	 * Build a mesh from the position grid using positions within the given
+	 * rectangle. The simplification algorithm will start from the center
+	 * instead of the top-left.
+	 * 
+	 * @param maxVariance
+	 *            Variances between triangle vertices less than maxVariance will
+	 *            be simplified. Use 0 to use every vertex in the final mesh.
+	 * @param rectangle
+	 *            Sub-rectangle of positions to use in the mesh.
+	 * @return A {@link FastShape} containing the mesh.
+	 */
 	public FastShape buildMeshFromCenter(float maxVariance, Rectangle rectangle)
 	{
 		if (maxVariance <= 0)
@@ -63,8 +121,8 @@ public class BinaryTriangleTree
 
 		List<BTTTriangle> triangles = new ArrayList<BTTTriangle>();
 
-		int centerWidth = nextLowestPowerOf2Plus1(rectangle.width);
-		int centerHeight = nextLowestPowerOf2Plus1(rectangle.height);
+		int centerWidth = Util.nextLowestPowerOf2Plus1(rectangle.width);
+		int centerHeight = Util.nextLowestPowerOf2Plus1(rectangle.height);
 		int centerXOffset = (rectangle.width - centerWidth) / 2;
 		int centerYOffset = (rectangle.height - centerHeight) / 2;
 		int remainingWidth = rectangle.width - centerWidth - centerXOffset;
@@ -84,6 +142,14 @@ public class BinaryTriangleTree
 		return buildFastShape(triangles);
 	}
 
+	/**
+	 * Build a mesh from the position grid using positions within the given
+	 * rectangle, using no simplification.
+	 * 
+	 * @param rect
+	 *            Sub-rectangle of positions to use in the mesh.
+	 * @return A {@link FastShape} containing the mesh.
+	 */
 	public FastShape buildFullMesh(Rectangle rect)
 	{
 		List<Position> positions;
@@ -146,23 +212,44 @@ public class BinaryTriangleTree
 		return shape;
 	}
 
+	/**
+	 * Build a mesh within the given rectangle, adding triangles to the triangle
+	 * list.
+	 * 
+	 * @param maxVariance
+	 *            BTT algorithm variance
+	 * @param x
+	 *            Rectangle x coordinate
+	 * @param y
+	 *            Rectangle y coordinate
+	 * @param width
+	 *            Rectangle width
+	 * @param height
+	 *            Rectangle height
+	 * @param reverseX
+	 *            Begin the mesh building from the right instead of left?
+	 * @param reverseY
+	 *            Begin the mesh building from the bottom instead of top?
+	 * @param triangles
+	 *            Triangle list to add generated triangles to
+	 */
 	protected void buildMesh(float maxVariance, int x, int y, int width, int height, boolean reverseX,
 			boolean reverseY, List<BTTTriangle> triangles)
 	{
 		//cannot build a mesh between less that 2 rows/columns
-		if(width < 2 || height < 2)
+		if (width < 2 || height < 2)
 			return;
-		
+
 		int yStart = y;
 		int remainingHeight = height;
 		while (remainingHeight > 1)
 		{
 			int xStart = x;
 			int remainingWidth = width;
-			int currentHeight = nextLowestPowerOf2Plus1(Math.min(remainingWidth, remainingHeight));
+			int currentHeight = Util.nextLowestPowerOf2Plus1(Math.min(remainingWidth, remainingHeight));
 			while (remainingWidth > 1)
 			{
-				int currentWidth = nextLowestPowerOf2Plus1(Math.min(remainingWidth, remainingHeight));
+				int currentWidth = Util.nextLowestPowerOf2Plus1(Math.min(remainingWidth, remainingHeight));
 				for (int yOffset = 0; yOffset < currentHeight - 1; yOffset += currentWidth - 1)
 				{
 					int tx = reverseX ? width - xStart - currentWidth + x * 2 : xStart;
@@ -177,6 +264,20 @@ public class BinaryTriangleTree
 		}
 	}
 
+	/**
+	 * Build a BinaryTriangleTree starting at the x,y coordinate.
+	 * 
+	 * @param maxVariance
+	 *            BTT algorithm variance
+	 * @param x
+	 *            x coordinate from which to start
+	 * @param y
+	 *            y coordinate from which to start
+	 * @param size
+	 *            Size of the square (must be a power of 2 plus 1)
+	 * @param triangles
+	 *            Triangle list to add generated triangles to
+	 */
 	protected void buildTree(float maxVariance, int x, int y, int size, List<BTTTriangle> triangles)
 	{
 		/*
@@ -206,6 +307,15 @@ public class BinaryTriangleTree
 		addLeavesToTriangleList(t2, triangles);
 	}
 
+	/**
+	 * Recursively sub-divide triangles within t if the triangle variance is
+	 * greater than the maxVariance.
+	 * 
+	 * @param maxVariance
+	 *            BTT algorithm variance
+	 * @param t
+	 *            Triangle to sub-divide
+	 */
 	protected void buildFace(float maxVariance, BTTTriangle t)
 	{
 		if (t.leftChild != null)
@@ -230,6 +340,13 @@ public class BinaryTriangleTree
 		}
 	}
 
+	/**
+	 * Try splitting the given triangle. If the triangle's bottom neighbour
+	 * isn't split, it also gets split to ensure there's no gaps in the mesh.
+	 * 
+	 * @param t
+	 *            Triangle to split.
+	 */
 	protected void trySplitFace(BTTTriangle t)
 	{
 		if (t.bottomNeighbour != null)
@@ -251,6 +368,12 @@ public class BinaryTriangleTree
 		}
 	}
 
+	/**
+	 * Actually split the given triangle.
+	 * 
+	 * @param t
+	 *            Triangle to split.
+	 */
 	protected void splitFace(BTTTriangle t)
 	{
 		int midpointIndex = hypotenuseMidpointIndex(t.leftIndex, t.rightIndex);
@@ -294,6 +417,17 @@ public class BinaryTriangleTree
 		}
 	}
 
+	/**
+	 * Calculate the variance of the provided triangle.
+	 * 
+	 * @param apexIndex
+	 *            Index of the triangle apex position.
+	 * @param leftIndex
+	 *            Index of the triangle left position.
+	 * @param rightIndex
+	 *            Index of the triangle right position.
+	 * @return Variance of the triangle.
+	 */
 	protected float calculateVariance(int apexIndex, int leftIndex, int rightIndex)
 	{
 		if (Math.abs(apexIndex - leftIndex) == 1 || Math.abs(apexIndex - rightIndex) == 1)
@@ -308,6 +442,15 @@ public class BinaryTriangleTree
 		return delta;
 	}
 
+	/**
+	 * Index of the midpoint position between the two provided indices.
+	 * 
+	 * @param leftIndex
+	 *            Left position index.
+	 * @param rightIndex
+	 *            Right position index.
+	 * @return Index of the midpoint between leftIndex and rightIndex.
+	 */
 	protected int hypotenuseMidpointIndex(int leftIndex, int rightIndex)
 	{
 		int leftX = leftIndex % width;
@@ -317,20 +460,15 @@ public class BinaryTriangleTree
 		return (leftX + rightX) / 2 + ((leftY + rightY) / 2) * width;
 	}
 
-	public static int nextLowestPowerOf2Plus1(int v)
-	{
-		//based on http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-		v--;
-		v |= v >> 1;
-		v |= v >> 2;
-		v |= v >> 4;
-		v |= v >> 8;
-		v |= v >> 16;
-		v++;
-		v >>= 1;
-		return ++v;
-	}
-
+	/**
+	 * Recursively add all the leaves of the binary triangle tree to the
+	 * provided triangle list, beginning at the provided triangle.
+	 * 
+	 * @param t
+	 *            Parent triangle to add leaves from
+	 * @param triangles
+	 *            Triangle list to add leaves to
+	 */
 	protected void addLeavesToTriangleList(BTTTriangle t, List<BTTTriangle> triangles)
 	{
 		if (t.leftChild == null || t.rightChild == null)
@@ -345,6 +483,14 @@ public class BinaryTriangleTree
 		}
 	}
 
+	/**
+	 * Build a {@link FastShape} object from the list of binary triangle tree
+	 * leaves.
+	 * 
+	 * @param triangles
+	 *            Triangle list.
+	 * @return FastShape containing triangles from the provided triangle list.
+	 */
 	protected FastShape buildFastShape(List<BTTTriangle> triangles)
 	{
 		List<Position> positions = new ArrayList<Position>();
@@ -397,6 +543,9 @@ public class BinaryTriangleTree
 		return shape;
 	}
 
+	/**
+	 * Helper class that stores binary triangle tree information.
+	 */
 	protected class BTTTriangle
 	{
 		public final int apexIndex;
