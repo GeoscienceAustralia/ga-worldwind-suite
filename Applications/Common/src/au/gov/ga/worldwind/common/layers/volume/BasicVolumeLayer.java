@@ -74,7 +74,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 
 	private Double minLatClip = null, maxLatClip = null, minLonClip = null, maxLonClip = null;
 	private boolean minLatClipDirty = false, maxLatClipDirty = false, minLonClipDirty = false, maxLonClipDirty = false;
-	private double[] clippingPlanes = new double[4 * 4];
+	private double[] clippingPlanes = new double[16];
 
 	private boolean wireframe = false;
 	private final PickSupport pickSupport = new PickSupport();
@@ -365,6 +365,9 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 
 	protected void recalculateClipPlanes(DrawContext dc)
 	{
+		if (!dataAvailable)
+			return;
+
 		if (minLatClipDirty && minLatClip != null)
 		{
 			Plane plane = calculateClipPlane(dc, minLatClip, true, false);
@@ -570,12 +573,10 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 						{
 							int clipPlaneShapeIndex = Util.indexInArray(clipPlaneShapes, shape);
 
-							if (clipPlaneShapeIndex >= 0)
+							//don't clip this shape with this shape's clipping plane
+							if (clipPlaneShapeIndex >= 0 && clipPlaneEnabled[clipPlaneShapeIndex])
 							{
-								if (clipPlaneEnabled[clipPlaneShapeIndex])
-								{
-									gl.glDisable(GL.GL_CLIP_PLANE0 + clipPlaneShapeIndex);
-								}
+								gl.glDisable(GL.GL_CLIP_PLANE0 + clipPlaneShapeIndex);
 							}
 
 							if (dc.isPickingMode())
@@ -592,12 +593,9 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 							shape.setTextured(!dc.isPickingMode());
 							shape.render(dc);
 
-							if (clipPlaneShapeIndex >= 0)
+							if (clipPlaneShapeIndex >= 0 && clipPlaneEnabled[clipPlaneShapeIndex])
 							{
-								if (clipPlaneEnabled[clipPlaneShapeIndex])
-								{
-									gl.glEnable(GL.GL_CLIP_PLANE0 + clipPlaneShapeIndex);
-								}
+								gl.glEnable(GL.GL_CLIP_PLANE0 + clipPlaneShapeIndex);
 							}
 						}
 					}

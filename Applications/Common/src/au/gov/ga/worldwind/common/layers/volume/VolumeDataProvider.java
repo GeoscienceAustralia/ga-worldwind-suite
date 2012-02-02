@@ -7,7 +7,6 @@ import au.gov.ga.worldwind.common.util.FastShape;
 
 public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 {
-	String getName();
 	int getXSize();
 	int getYSize();
 	int getZSize();

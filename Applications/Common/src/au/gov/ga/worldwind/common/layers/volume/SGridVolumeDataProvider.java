@@ -3,7 +3,6 @@ package au.gov.ga.worldwind.common.layers.volume;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 
-import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,29 +10,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.media.opengl.GL;
-
 import org.gdal.osr.CoordinateTransformation;
 
-import au.gov.ga.worldwind.common.layers.data.AbstractDataProvider;
-import au.gov.ga.worldwind.common.layers.volume.btt.BinaryTriangleTree;
-import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.URLUtil;
 
 import com.sun.opengl.util.BufferUtil;
 
-public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> implements VolumeDataProvider
+public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 {
-	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*?)\\s*");
 	private final static Pattern paintedVariablePattern = Pattern.compile("\\*painted\\*variable:\\s*(.*?)\\s*");
 	private final static Pattern axisPattern = Pattern
 			.compile("AXIS_(\\S+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
@@ -43,21 +34,10 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 	private final static Pattern propertyNoDataPattern = Pattern
 			.compile("PROP_NO_DATA_VALUE\\s+(\\d+)\\s+([\\d.\\-]+)\\s*");
 
-	private String name;
-	private int xSize;
-	private int ySize;
-	private int zSize;
 	private String asciiDataFile;
 	private String paintedVariable;
 	private int paintedVariableId;
-	private float paintedVariableNoDataValue;
 	private boolean cellCentered;
-
-	private Sector sector = null;
-	private List<Position> positions;
-	private FloatBuffer data;
-	private double depth;
-	private double top;
 
 	@Override
 	protected boolean doLoadData(URL url, VolumeLayer layer)
@@ -229,7 +209,7 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 							depth = firstZValue - z;
 						}
 
-						//put the data into the memory mapped file
+						//put the data into the floatbuffer
 						data.put(value);
 						positionIndex++;
 					}
@@ -268,13 +248,7 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 
 	protected void parseLine(String line)
 	{
-		Matcher matcher = namePattern.matcher(line);
-		if (matcher.matches())
-		{
-			name = matcher.group(1);
-		}
-
-		matcher = paintedVariablePattern.matcher(line);
+		Matcher matcher = paintedVariablePattern.matcher(line);
 		if (matcher.matches())
 		{
 			paintedVariable = matcher.group(1);
@@ -323,115 +297,8 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 			float noDataValue = Float.parseFloat(matcher.group(2));
 			if (propertyId == paintedVariableId)
 			{
-				paintedVariableNoDataValue = noDataValue;
+				this.noDataValue = noDataValue;
 			}
 		}
-	}
-
-	@Override
-	public String getName()
-	{
-		return name;
-	}
-
-	@Override
-	public int getXSize()
-	{
-		return xSize;
-	}
-
-	@Override
-	public int getYSize()
-	{
-		return ySize;
-	}
-
-	@Override
-	public int getZSize()
-	{
-		return zSize;
-	}
-
-	@Override
-	public double getDepth()
-	{
-		return depth;
-	}
-
-	@Override
-	public double getTop()
-	{
-		return top;
-	}
-
-	@Override
-	public float getValue(int x, int y, int z)
-	{
-		return data.get(x + y * xSize + z * xSize * ySize);
-	}
-
-	@Override
-	public float getNoDataValue()
-	{
-		return paintedVariableNoDataValue;
-	}
-
-	@Override
-	public Sector getSector()
-	{
-		return sector;
-	}
-
-	@Override
-	public FastShape createHorizontalSurface(float maxVariance, Rectangle rectangle)
-	{
-		BinaryTriangleTree btt = new BinaryTriangleTree(positions, xSize, ySize);
-		return btt.buildMeshFromCenter(maxVariance, rectangle);
-	}
-
-	@Override
-	public TopBottomFastShape createLatitudeCurtain(int x)
-	{
-		List<Position> positions = new ArrayList<Position>();
-		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(ySize * 4);
-		for (int y = 0; y < ySize; y++)
-		{
-			Position position = this.positions.get(x + y * xSize);
-			TopBottomPosition top =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, false);
-			TopBottomPosition bottom =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
-			positions.add(top);
-			positions.add(bottom);
-			float u = y / (float) Math.max(1, ySize - 1);
-			textureCoordinateBuffer.put(u).put(0);
-			textureCoordinateBuffer.put(u).put(1);
-		}
-		TopBottomFastShape shape = new TopBottomFastShape(positions, GL.GL_TRIANGLE_STRIP);
-		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
-		return shape;
-	}
-
-	@Override
-	public TopBottomFastShape createLongitudeCurtain(int y)
-	{
-		List<Position> positions = new ArrayList<Position>();
-		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(ySize * 4);
-		for (int x = 0; x < xSize; x++)
-		{
-			Position position = this.positions.get(x + y * xSize);
-			TopBottomPosition top =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, false);
-			TopBottomPosition bottom =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
-			positions.add(top);
-			positions.add(bottom);
-			float u = x / (float) Math.max(1, xSize - 1);
-			textureCoordinateBuffer.put(u).put(0);
-			textureCoordinateBuffer.put(u).put(1);
-		}
-		TopBottomFastShape shape = new TopBottomFastShape(positions, GL.GL_TRIANGLE_STRIP);
-		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
-		return shape;
 	}
 }
