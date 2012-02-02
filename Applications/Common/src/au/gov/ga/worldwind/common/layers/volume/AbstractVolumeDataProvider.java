@@ -21,11 +21,11 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	protected int xSize;
 	protected int ySize;
 	protected int zSize;
-	protected float noDataValue;
-
+	protected Sector sector = null;
 	protected double depth;
 	protected double top;
-	protected Sector sector = null;
+	protected float noDataValue;
+	
 	protected List<Position> positions;
 	protected FloatBuffer data;
 

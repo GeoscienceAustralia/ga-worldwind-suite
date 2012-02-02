@@ -11,23 +11,21 @@ import javax.xml.xpath.XPath;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.data.DataLayerFactory;
-import au.gov.ga.worldwind.common.layers.model.ModelLayer;
-import au.gov.ga.worldwind.common.layers.model.ModelProvider;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.ColorMap;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
- * Factory used for creating {@link ModelLayer} instances an XML definition.
+ * Factory used for creating {@link VolumeLayer} instances an XML definition.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class VolumeLayerFactory
 {
 	/**
-	 * Create a new {@link ModelLayer} from an XML definition.
+	 * Create a new {@link VolumeLayer} from an XML definition.
 	 * 
-	 * @return New {@link ModelLayer}.
+	 * @return New {@link VolumeLayer}.
 	 */
 	public static VolumeLayer createVolumeLayer(Element domElement, AVList params)
 	{
@@ -40,7 +38,7 @@ public class VolumeLayerFactory
 	}
 
 	/**
-	 * Fill the params with the values in the {@link ModelLayer} specific XML
+	 * Fill the params with the values in the {@link VolumeLayer} specific XML
 	 * elements.
 	 */
 	public static AVList getParamsFromDocument(Element domElement, AVList params)
@@ -78,7 +76,7 @@ public class VolumeLayerFactory
 	}
 
 	/**
-	 * Adds a {@link ModelProvider} to params matching the 'DataFormat' XML
+	 * Adds a {@link VolumeProvider} to params matching the 'DataFormat' XML
 	 * element.
 	 */
 	protected static void setupVolumeDataProvider(Element domElement, XPath xpath, AVList params)
@@ -88,6 +86,10 @@ public class VolumeLayerFactory
 		if ("GOCAD SGrid".equalsIgnoreCase(format))
 		{
 			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new SGridVolumeDataProvider());
+		}
+		else if("Array".equalsIgnoreCase(format))
+		{
+			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ArrayVolumeDataProvider());
 		}
 		else
 		{

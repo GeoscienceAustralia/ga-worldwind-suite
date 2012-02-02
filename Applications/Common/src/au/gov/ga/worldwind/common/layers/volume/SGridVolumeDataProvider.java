@@ -242,6 +242,16 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 			}
 		}
 
+		/*try
+		{
+			ArrayVolumeDataProvider.saveVolumeDataProviderToArrayFile(this,
+					URLUtil.urlToFile(new URL(url.toExternalForm() + ".array")));
+		}
+		catch (MalformedURLException e)
+		{
+			e.printStackTrace();
+		}*/
+
 		layer.dataAvailable(this);
 		return true;
 	}
