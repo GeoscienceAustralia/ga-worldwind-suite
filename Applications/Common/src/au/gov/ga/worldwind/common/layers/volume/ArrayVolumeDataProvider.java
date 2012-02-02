@@ -6,10 +6,12 @@ import gov.nasa.worldwind.geom.Sector;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.zip.ZipInputStream;
 
 import com.sun.opengl.util.BufferUtil;
 
@@ -29,7 +31,19 @@ public class ArrayVolumeDataProvider extends AbstractVolumeDataProvider
 	{
 		try
 		{
-			ObjectInputStream ois = new ObjectInputStream(url.openStream());
+			InputStream is = null;
+			if (url.toString().toLowerCase().endsWith(".zip"))
+			{
+				ZipInputStream zis = new ZipInputStream(url.openStream());
+				zis.getNextEntry();
+				is = zis;
+			}
+			else
+			{
+				is = url.openStream();
+			}
+
+			ObjectInputStream ois = new ObjectInputStream(is);
 			xSize = ois.readInt();
 			ySize = ois.readInt();
 			zSize = ois.readInt();
