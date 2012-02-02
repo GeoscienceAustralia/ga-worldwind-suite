@@ -834,7 +834,7 @@ public class Util
 		reader.close();
 		return result.toString();
 	}
-	
+
 	/**
 	 * Convert an object to a Float.
 	 * 
@@ -890,7 +890,7 @@ public class Util
 			return null;
 		}
 	}
-	
+
 	public static Color interpolateColor(Color color0, Color color1, double mixer, boolean useHue)
 	{
 		if (color0 == null && color1 == null)
@@ -941,5 +941,17 @@ public class Util
 	public static float interpolateFloat(float f0, float f1, double mixer)
 	{
 		return (float) (f0 * (1d - mixer) + f1 * mixer);
+	}
+
+	public static int indexInArray(Object[] array, Object object)
+	{
+		if (array == null)
+			return -1;
+		for (int i = 0; i < array.length; i++)
+		{
+			if (array[i] == object)
+				return i;
+		}
+		return -1;
 	}
 }

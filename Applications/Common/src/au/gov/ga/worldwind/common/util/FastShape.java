@@ -110,6 +110,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected WWTexture blankTexture;
 	protected boolean textured = true; //only actually textured if texture is not null
 	protected Texture texture;
+	protected double[] textureMatrix;
 
 	public FastShape(List<Position> positions, int mode)
 	{
@@ -328,6 +329,12 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					texture.bind();
 				}
 
+				if (textureMatrix != null && textureMatrix.length >= 16)
+				{
+					stack.pushTexture(gl);
+					gl.glLoadMatrixd(textureMatrix, 0);
+				}
+
 				if (colorBuffer != null)
 				{
 					gl.glEnableClientState(GL.GL_COLOR_ARRAY);
@@ -515,7 +522,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		elevation += calculateElevationOffset(position);
 		elevation *= dc.getVerticalExaggeration();
 		elevation = Math.max(elevation, -dc.getGlobe().getMaximumRadius());
-		return dc.getGlobe().computePointFromPosition(position.getLatitude(), position.getLongitude(), elevation);
+		return dc.getGlobe().computePointFromPosition(position.add(calculateLatLonOffset()), elevation);
 	}
 
 	protected double calculateElevationOffset(LatLon position)
@@ -525,6 +532,11 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			return ((Position) position).elevation;
 		}
 		return 0;
+	}
+
+	protected LatLon calculateLatLonOffset()
+	{
+		return LatLon.ZERO;
 	}
 
 	protected static Sphere createBoundingSphere(BufferWrapper wrapper)
@@ -1205,6 +1217,24 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		try
 		{
 			this.textured = textured;
+		}
+		finally
+		{
+			frontLock.writeLock().unlock();
+		}
+	}
+
+	public double[] getTextureMatrix()
+	{
+		return textureMatrix;
+	}
+
+	public void setTextureMatrix(double[] textureMatrix)
+	{
+		frontLock.writeLock().lock();
+		try
+		{
+			this.textureMatrix = textureMatrix;
 		}
 		finally
 		{

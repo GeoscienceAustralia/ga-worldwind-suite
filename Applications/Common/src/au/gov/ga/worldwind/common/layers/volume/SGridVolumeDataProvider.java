@@ -390,14 +390,11 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 	}
 
 	@Override
-	public TopBottomFastShape createLatitudeCurtain(int x, int yMin, int yMax, int zMin, int zMax)
+	public TopBottomFastShape createLatitudeCurtain(int x)
 	{
-		float v0 = zMin / (float) Math.max(1, zSize - 1);
-		float v1 = zMax / (float) Math.max(1, zSize - 1);
-
 		List<Position> positions = new ArrayList<Position>();
 		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(ySize * 4);
-		for (int y = yMin; y <= yMax; y++)
+		for (int y = 0; y < ySize; y++)
 		{
 			Position position = this.positions.get(x + y * xSize);
 			TopBottomPosition top =
@@ -407,8 +404,8 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 			positions.add(top);
 			positions.add(bottom);
 			float u = y / (float) Math.max(1, ySize - 1);
-			textureCoordinateBuffer.put(u).put(v0);
-			textureCoordinateBuffer.put(u).put(v1);
+			textureCoordinateBuffer.put(u).put(0);
+			textureCoordinateBuffer.put(u).put(1);
 		}
 		TopBottomFastShape shape = new TopBottomFastShape(positions, GL.GL_TRIANGLE_STRIP);
 		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
@@ -416,14 +413,11 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 	}
 
 	@Override
-	public TopBottomFastShape createLongitudeCurtain(int y, int xMin, int xMax, int zMin, int zMax)
+	public TopBottomFastShape createLongitudeCurtain(int y)
 	{
-		float v0 = zMin / (float) Math.max(1, zSize - 1);
-		float v1 = zMax / (float) Math.max(1, zSize - 1);
-
 		List<Position> positions = new ArrayList<Position>();
 		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(ySize * 4);
-		for (int x = xMin; x <= xMax; x++)
+		for (int x = 0; x < xSize; x++)
 		{
 			Position position = this.positions.get(x + y * xSize);
 			TopBottomPosition top =
@@ -433,8 +427,8 @@ public class SGridVolumeDataProvider extends AbstractDataProvider<VolumeLayer> i
 			positions.add(top);
 			positions.add(bottom);
 			float u = x / (float) Math.max(1, xSize - 1);
-			textureCoordinateBuffer.put(u).put(v0);
-			textureCoordinateBuffer.put(u).put(v1);
+			textureCoordinateBuffer.put(u).put(0);
+			textureCoordinateBuffer.put(u).put(1);
 		}
 		TopBottomFastShape shape = new TopBottomFastShape(positions, GL.GL_TRIANGLE_STRIP);
 		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);

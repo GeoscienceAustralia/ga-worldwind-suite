@@ -16,6 +16,6 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	float getValue(int x, int y, int z);
 	float getNoDataValue();
 	FastShape createHorizontalSurface(float maxVariance, Rectangle rectangle);
-	TopBottomFastShape createLatitudeCurtain(int x, int yMin, int yMax, int zMin, int zMax);
-	TopBottomFastShape createLongitudeCurtain(int y, int xMin, int xMax, int zMin, int zMax);
+	TopBottomFastShape createLatitudeCurtain(int x);
+	TopBottomFastShape createLongitudeCurtain(int y);
 }

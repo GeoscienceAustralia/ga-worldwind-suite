@@ -2,7 +2,6 @@ package au.gov.ga.worldwind.common.layers.volume;
 
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.render.DrawContext;
 
 import java.nio.IntBuffer;
 import java.util.List;
@@ -13,7 +12,7 @@ public class TopBottomFastShape extends FastShape
 {
 	protected double topElevationOffset = 0d;
 	protected double bottomElevationOffset = 0d;
-	protected boolean recalculateRequired = false;
+	protected LatLon latlonOffset = LatLon.ZERO;
 
 	public TopBottomFastShape(List<Position> positions, int mode)
 	{
@@ -32,15 +31,19 @@ public class TopBottomFastShape extends FastShape
 
 	public void setTopElevationOffset(double topElevationOffset)
 	{
-		frontLock.writeLock().lock();
-		try
+		if (this.topElevationOffset != topElevationOffset)
 		{
-			recalculateRequired = true;
-			this.topElevationOffset = topElevationOffset;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
+			frontLock.writeLock().lock();
+			try
+			{
+
+				verticesDirty = true;
+				this.topElevationOffset = topElevationOffset;
+			}
+			finally
+			{
+				frontLock.writeLock().unlock();
+			}
 		}
 	}
 
@@ -51,15 +54,40 @@ public class TopBottomFastShape extends FastShape
 
 	public void setBottomElevationOffset(double bottomElevationOffset)
 	{
-		frontLock.writeLock().lock();
-		try
+		if (this.bottomElevationOffset != bottomElevationOffset)
 		{
-			recalculateRequired = true;
-			this.bottomElevationOffset = bottomElevationOffset;
+			frontLock.writeLock().lock();
+			try
+			{
+				verticesDirty = true;
+				this.bottomElevationOffset = bottomElevationOffset;
+			}
+			finally
+			{
+				frontLock.writeLock().unlock();
+			}
 		}
-		finally
+	}
+
+	public LatLon getLatlonOffset()
+	{
+		return latlonOffset;
+	}
+
+	public void setLatlonOffset(LatLon latlonOffset)
+	{
+		if (!LatLon.equals(latlonOffset, this.latlonOffset))
 		{
-			frontLock.writeLock().unlock();
+			frontLock.writeLock().lock();
+			try
+			{
+				verticesDirty = true;
+				this.latlonOffset = latlonOffset;
+			}
+			finally
+			{
+				frontLock.writeLock().unlock();
+			}
 		}
 	}
 
@@ -75,10 +103,8 @@ public class TopBottomFastShape extends FastShape
 	}
 
 	@Override
-	protected boolean isVertexRecalculationRequired(DrawContext dc)
+	protected LatLon calculateLatLonOffset()
 	{
-		boolean recalcuationRequired = super.isVertexRecalculationRequired(dc) || recalculateRequired;
-		recalculateRequired = false;
-		return recalcuationRequired;
+		return latlonOffset;
 	}
 }
