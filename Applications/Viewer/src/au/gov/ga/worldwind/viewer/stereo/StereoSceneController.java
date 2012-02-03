@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
 
+import au.gov.ga.worldwind.common.render.OffsetSurfaceTileDrawContext;
 import au.gov.ga.worldwind.common.util.SectorClipPlanes;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
@@ -24,12 +25,18 @@ public class StereoSceneController extends AbstractSceneController
 	private double lastFieldOfView = -1;
 	private boolean stereoTested = false;
 	private SectorClipPlanes sectorClipping = new SectorClipPlanes();
-	
+
+	public StereoSceneController()
+	{
+		dc.dispose();
+		dc = new OffsetSurfaceTileDrawContext();
+	}
+
 	public void clipSector(Sector sector)
 	{
 		sectorClipping.clipSector(sector);
 	}
-	
+
 	public void clearClipping()
 	{
 		sectorClipping.clear();
