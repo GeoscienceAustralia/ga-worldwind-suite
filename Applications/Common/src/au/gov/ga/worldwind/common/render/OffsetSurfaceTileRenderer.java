@@ -19,7 +19,8 @@ public class OffsetSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 	{
 		super.preComputeTextureTransform(dc, sg, t);
 
-		if (elevationOffset != 0)
+		double exaggeratedOffset = elevationOffset * dc.getVerticalExaggeration();
+		if (exaggeratedOffset != 0)
 		{
 			GL gl = dc.getGL();
 			gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -28,12 +29,12 @@ public class OffsetSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 			Sector sector = sg.getSector();
 			LatLon centroid = sector.getCentroid();
 			Vec4 v1 = globe.computePointFromPosition(centroid.latitude, sector.getMinLongitude(), 0);
-			Vec4 v2 = globe.computePointFromPosition(centroid.latitude, sector.getMinLongitude(), elevationOffset);
+			Vec4 v2 = globe.computePointFromPosition(centroid.latitude, sector.getMinLongitude(), exaggeratedOffset);
 			Vec4 v3 = globe.computePointFromPosition(centroid.latitude, sector.getMaxLongitude(), 0);
-			Vec4 v4 = globe.computePointFromPosition(centroid.latitude, sector.getMaxLongitude(), elevationOffset);
+			Vec4 v4 = globe.computePointFromPosition(centroid.latitude, sector.getMaxLongitude(), exaggeratedOffset);
 
 			double elevationDelta = v1.distanceTo3(v2);
-			if (elevationOffset < 0)
+			if (exaggeratedOffset < 0)
 			{
 				elevationDelta = -elevationDelta;
 			}
