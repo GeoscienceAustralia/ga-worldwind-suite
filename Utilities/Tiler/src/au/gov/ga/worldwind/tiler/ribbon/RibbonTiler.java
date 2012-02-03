@@ -30,6 +30,7 @@ public class RibbonTiler
 {
 	public static void main(String[] args) throws Exception
 	{
+		GDALUtil.init();
 		RibbonTilingContext context = new RibbonTilingContext();
 		JCommander jCommander = null;
 		try
