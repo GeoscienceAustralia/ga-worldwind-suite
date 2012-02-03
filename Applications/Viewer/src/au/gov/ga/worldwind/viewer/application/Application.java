@@ -721,8 +721,8 @@ public class Application
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				wireframeDepthAction.setEnabled(wireframeAction.isSelected());
-				wwd.getModel().setShowWireframeInterior(wireframeAction.isSelected());
+				wireframeDepthAction.setEnabled(wireframeElevationAction.isSelected());
+				wwd.getModel().setShowWireframeInterior(wireframeElevationAction.isSelected());
 				wwd.redraw();
 			}
 		});
