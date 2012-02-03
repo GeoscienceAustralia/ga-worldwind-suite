@@ -76,6 +76,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
 import au.gov.ga.worldwind.common.layers.Wireframeable;
+import au.gov.ga.worldwind.common.render.DrawContextExtended;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.terrain.WireframeRectangularTessellator;
 import au.gov.ga.worldwind.common.ui.BasicAction;
@@ -701,13 +702,10 @@ public class Application
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				LayerList layers = wwd.getModel().getLayers();
-				for (Layer layer : layers)
+				if (wwd.getSceneController().getDrawContext() instanceof DrawContextExtended)
 				{
-					if (layer instanceof Wireframeable)
-					{
-						((Wireframeable) layer).setWireframe(wireframeAction.isSelected());
-					}
+					((DrawContextExtended) wwd.getSceneController().getDrawContext()).setWireframe(wireframeAction
+							.isSelected());
 				}
 				wwd.redraw();
 			}

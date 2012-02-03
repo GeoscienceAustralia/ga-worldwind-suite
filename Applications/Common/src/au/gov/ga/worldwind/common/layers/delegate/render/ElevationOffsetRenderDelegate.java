@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.IRenderDelegate;
-import au.gov.ga.worldwind.common.render.OffsetSurfaceTileDrawContext;
+import au.gov.ga.worldwind.common.render.DrawContextExtended;
 
 public class ElevationOffsetRenderDelegate implements IRenderDelegate
 {
@@ -32,21 +32,19 @@ public class ElevationOffsetRenderDelegate implements IRenderDelegate
 	@Override
 	public void preRender(DrawContext dc)
 	{
-		if (dc instanceof OffsetSurfaceTileDrawContext)
+		if (dc instanceof DrawContextExtended)
 		{
-			oldElevationOffset =
-					((OffsetSurfaceTileDrawContext) dc).getGeographicSurfaceTileRenderer().getElevationOffset();
-			((OffsetSurfaceTileDrawContext) dc).getGeographicSurfaceTileRenderer().setElevationOffset(elevationOffset);
+			oldElevationOffset = ((DrawContextExtended) dc).getGeographicSurfaceTileRenderer().getElevationOffset();
+			((DrawContextExtended) dc).getGeographicSurfaceTileRenderer().setElevationOffset(elevationOffset);
 		}
 	}
 
 	@Override
 	public void postRender(DrawContext dc)
 	{
-		if (dc instanceof OffsetSurfaceTileDrawContext)
+		if (dc instanceof DrawContextExtended)
 		{
-			((OffsetSurfaceTileDrawContext) dc).getGeographicSurfaceTileRenderer().setElevationOffset(
-					oldElevationOffset);
+			((DrawContextExtended) dc).getGeographicSurfaceTileRenderer().setElevationOffset(oldElevationOffset);
 		}
 	}
 

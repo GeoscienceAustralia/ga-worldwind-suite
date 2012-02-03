@@ -6,6 +6,7 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.GeographicSurfaceTileRenderer;
+import gov.nasa.worldwind.render.SurfaceTile;
 import gov.nasa.worldwind.terrain.SectorGeometry;
 
 import javax.media.opengl.GL;
@@ -13,6 +14,13 @@ import javax.media.opengl.GL;
 public class OffsetSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 {
 	protected double elevationOffset = 0;
+	
+	@Override
+	public void renderTiles(DrawContext dc, Iterable<? extends SurfaceTile> tiles)
+	{
+		DrawContextExtended.applyWireframePolygonMode(dc);
+		super.renderTiles(dc, tiles);
+	}
 
 	@Override
 	protected void preComputeTextureTransform(DrawContext dc, SectorGeometry sg, Transform t)
