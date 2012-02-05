@@ -30,6 +30,14 @@ public abstract class AbstractSnapshotExportCommand implements SnapshotExportCom
 	}
 	
 	/**
+	 * @return A warn result with the provided message.
+	 */
+	final protected CommandExecutionResult warn(String message)
+	{
+		return CommandExecutionResultFactory.getWarnResult(message);
+	}
+	
+	/**
 	 * @return A proceed result with the provided message.
 	 */
 	final protected CommandExecutionResult proceed()

@@ -20,7 +20,8 @@ public class CreateOutputLocationCommand extends AbstractSnapshotExportCommand
 			{
 				return halt(getMessage(getExporterCreateOutputLocationErrorMsgKey(), parameters.outputLocation.getAbsolutePath()));
 			}
+			return proceed();
 		}
-		return proceed();
+		return warn(getMessage(getExporterOutputLocationExistsMsgKey(), parameters.outputLocation.getAbsolutePath()));
 	}
 }
