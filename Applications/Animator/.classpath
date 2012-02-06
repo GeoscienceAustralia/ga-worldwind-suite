@@ -4,9 +4,9 @@
 	<classpathentry kind="src" path="test/src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Common"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="test/lib/junit-4.8.1.jar"/>
-	<classpathentry kind="lib" path="test/lib/hamcrest-core-1.1.jar"/>
-	<classpathentry kind="lib" path="test/lib/hamcrest-library-1.1.jar"/>
-	<classpathentry kind="lib" path="test/lib/jmock-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/hamcrest-core-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/hamcrest-library-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/jmock-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/junit-4.8.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
