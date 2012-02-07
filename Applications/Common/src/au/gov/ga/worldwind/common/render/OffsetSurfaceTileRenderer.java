@@ -45,7 +45,7 @@ public class OffsetSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 		super.preComputeTextureTransform(dc, sg, t);
 
 		double exaggeratedOffset = elevationOffset * dc.getVerticalExaggeration();
-		if (exaggeratedOffset != 0/* || ignoreElevation*/)
+		if (exaggeratedOffset != 0)
 		{
 			GL gl = dc.getGL();
 			gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -55,8 +55,6 @@ public class OffsetSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 			LatLon centroid = sector.getCentroid();
 			Vec4 cn = globe.computePointFromLocation(centroid).normalize3();
 
-			/*if (exaggeratedOffset != 0)
-			{*/
 			Vec4 v1 = globe.computePointFromPosition(centroid.latitude, sector.getMinLongitude(), 0);
 			Vec4 v2 = globe.computePointFromPosition(centroid.latitude, sector.getMinLongitude(), exaggeratedOffset);
 			Vec4 v3 = globe.computePointFromPosition(centroid.latitude, sector.getMaxLongitude(), 0);
@@ -72,16 +70,6 @@ public class OffsetSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 
 			double longitudeScale = v2.distanceTo3(v4) / v1.distanceTo3(v3);
 			gl.glScaled(longitudeScale, longitudeScale, longitudeScale);
-			/*}
-			
-			if (ignoreElevation)
-			{
-				double angle = Math.acos(cn.dot3(Vec4.UNIT_Z)) * 180.0 / Math.PI; //in degrees
-				Vec4 axis = cn.cross3(Vec4.UNIT_Z);
-				gl.glRotated(-angle, axis.x, axis.y, axis.z);
-				gl.glScaled(1, 1, 0);
-				gl.glRotated(angle, axis.x, axis.y, axis.z);
-			}*/
 		}
 	}
 

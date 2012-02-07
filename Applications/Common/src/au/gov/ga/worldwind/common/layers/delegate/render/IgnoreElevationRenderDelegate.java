@@ -46,7 +46,7 @@ public class IgnoreElevationRenderDelegate implements IRenderDelegate
 	@Override
 	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
-		if (definition.toLowerCase().startsWith(DEFINITION_STRING.toLowerCase()))
+		if (definition.equalsIgnoreCase(DEFINITION_STRING))
 		{
 			return new IgnoreElevationRenderDelegate();
 		}
