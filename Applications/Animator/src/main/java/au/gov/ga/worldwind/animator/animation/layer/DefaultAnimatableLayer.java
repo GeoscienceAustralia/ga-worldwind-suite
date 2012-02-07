@@ -24,7 +24,7 @@ import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter.Type;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameterFactory;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
+import au.gov.ga.worldwind.animator.layers.AnimationLayerLoaderFactory;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifierFactory;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
@@ -208,7 +208,7 @@ public class DefaultAnimatableLayer extends AnimatableBase implements Animatable
 		}
 
 		// Load the layer
-		Layer loadedLayer = AnimationLayerLoader.loadLayer(layerUrl);
+		Layer loadedLayer = AnimationLayerLoaderFactory.loadLayer(layerUrl);
 
 		// Load the parameters for the layer
 		context.setValue(constants.getCurrentLayerKey(), loadedLayer);

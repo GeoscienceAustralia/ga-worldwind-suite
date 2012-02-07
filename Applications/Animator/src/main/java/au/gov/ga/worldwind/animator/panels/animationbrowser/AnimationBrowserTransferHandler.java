@@ -22,7 +22,7 @@ import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameter;
 import au.gov.ga.worldwind.animator.animation.layer.parameter.LayerParameterFactory;
-import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
+import au.gov.ga.worldwind.animator.layers.AnimationLayerLoaderFactory;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifierFactory;
 import au.gov.ga.worldwind.animator.panels.AnimationObjectTransferable;
@@ -196,7 +196,7 @@ public class AnimationBrowserTransferHandler extends TransferHandler
 			return null;
 		}
 		
-		Layer loadedLayer = AnimationLayerLoader.loadLayer(identifier);
+		Layer loadedLayer = AnimationLayerLoaderFactory.loadLayer(identifier);
 		AnimatableLayer animatableLayer = new DefaultAnimatableLayer(animation, loadedLayer);
 		for (LayerParameter parameter : LayerParameterFactory.createDefaultParametersForLayer(animation, loadedLayer))
 		{

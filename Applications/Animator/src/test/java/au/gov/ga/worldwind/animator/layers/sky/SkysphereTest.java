@@ -43,7 +43,7 @@ public class SkysphereTest
 		
 		assertEquals(23, (int)TestUtils.getField(classToBeTested, "slices", Integer.class));
 		assertEquals(32, (int)TestUtils.getField(classToBeTested, "segments", Integer.class));
-		assertEquals(Angle.fromDegrees(14), (Angle)TestUtils.getField(classToBeTested, "rotation", Angle.class));
+		assertEquals(Angle.fromDegrees(14), TestUtils.getField(classToBeTested, "rotation", Angle.class));
 	}
 	
 	@Test
@@ -53,9 +53,6 @@ public class SkysphereTest
 		params.setValue(AVKeyMore.DISPLAY_NAME, "testName");
 		params.setValue(AVKeyMore.URL, "testTexture.png");
 		params.setValue(AVKeyMore.CONTEXT_URL, new URL("http://test/url"));
-		// params.setValue(AVKeyMore.SKYSPHERE_SLICES, 23); -- Test missing optional params
-		// params.setValue(AVKeyMore.SKYSPHERE_SEGMENTS, 32);
-		// params.setValue(AVKeyMore.SKYSPHERE_ANGLE, 14d);
 		
 		classToBeTested = new Skysphere(params);
 		
@@ -65,7 +62,7 @@ public class SkysphereTest
 		
 		assertEquals(20, (int)TestUtils.getField(classToBeTested, "slices", Integer.class));
 		assertEquals(20, (int)TestUtils.getField(classToBeTested, "segments", Integer.class));
-		assertEquals(Angle.fromDegrees(0), (Angle)TestUtils.getField(classToBeTested, "rotation", Angle.class));
+		assertEquals(Angle.fromDegrees(0), TestUtils.getField(classToBeTested, "rotation", Angle.class));
 	}
 	
 	@Test
@@ -128,7 +125,7 @@ public class SkysphereTest
 		
 		assertEquals(23, (int)TestUtils.getField(classToBeTested, "slices", Integer.class));
 		assertEquals(32, (int)TestUtils.getField(classToBeTested, "segments", Integer.class));
-		assertEquals(Angle.fromDegrees(14), (Angle)TestUtils.getField(classToBeTested, "rotation", Angle.class));
+		assertEquals(Angle.fromDegrees(14), TestUtils.getField(classToBeTested, "rotation", Angle.class));
 	}
 	
 	@Test
@@ -146,7 +143,7 @@ public class SkysphereTest
 		
 		assertEquals(20, (int)TestUtils.getField(classToBeTested, "slices", Integer.class));
 		assertEquals(20, (int)TestUtils.getField(classToBeTested, "segments", Integer.class));
-		assertEquals(Angle.fromDegrees(0), (Angle)TestUtils.getField(classToBeTested, "rotation", Angle.class));
+		assertEquals(Angle.fromDegrees(0), TestUtils.getField(classToBeTested, "rotation", Angle.class));
 	}
 	
 }

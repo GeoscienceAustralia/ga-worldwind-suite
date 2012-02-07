@@ -36,7 +36,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.BezierParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.application.effects.Effect;
-import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
+import au.gov.ga.worldwind.animator.layers.AnimationLayerLoaderFactory;
 import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.util.Nameable;
@@ -416,11 +416,11 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 			animatableObjects.remove(index);
 			if (object instanceof AnimatableLayer)
 			{
-				animatableLayers.remove((AnimatableLayer) object);
+				animatableLayers.remove(object);
 			}
 			if (object instanceof Effect)
 			{
-				effects.remove((Effect) object);
+				effects.remove(object);
 			}
 
 			object.removeChangeListener(this);
@@ -1165,7 +1165,7 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 	@Override
 	public void addLayer(LayerIdentifier layerIdentifier)
 	{
-		Layer loadedLayer = AnimationLayerLoader.loadLayer(layerIdentifier);
+		Layer loadedLayer = AnimationLayerLoaderFactory.loadLayer(layerIdentifier);
 		if (loadedLayer == null)
 		{
 			throw new IllegalArgumentException("Unable to load layer " + layerIdentifier);

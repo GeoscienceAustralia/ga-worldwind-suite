@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
-import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -33,9 +32,11 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueType;
 import au.gov.ga.worldwind.animator.layers.AnimationLayerLoader;
+import au.gov.ga.worldwind.animator.layers.AnimationLayerLoaderFactory;
+import au.gov.ga.worldwind.animator.layers.DefaultAnimationLayerLoader;
+import au.gov.ga.worldwind.animator.layers.LayerIdentifier;
 import au.gov.ga.worldwind.animator.util.WorldWindowTestImpl;
 import au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants;
-import au.gov.ga.worldwind.common.layers.LayerFactory;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
@@ -46,7 +47,6 @@ import au.gov.ga.worldwind.test.util.TestUtils;
  * Unit tests for the {@link DefaultAnimatableLayer} class
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public class DefaultAnimatableLayerTest
 {
@@ -63,7 +63,7 @@ public class DefaultAnimatableLayerTest
 
 	private DefaultAnimatableLayer classToBeTested;
 	
-	private MockLayerFactory layerFactory;
+	private AnimationLayerLoader layerLoader;
 	
 	@Before
 	public void setup()
@@ -74,10 +74,14 @@ public class DefaultAnimatableLayerTest
 		
 		layer = mockContext.mock(Layer.class);
 		
+		layerLoader = mockContext.mock(AnimationLayerLoader.class);
+		
 		mockContext.checking(new Expectations()
 		{{
-			allowing(layer).getName();
-			will(returnValue("Layer"));
+			allowing(layer).getName(); will(returnValue("Layer"));
+			allowing(layerLoader).loadLayer(with(any(LayerIdentifier.class))); will(returnValue(layer));
+			allowing(layerLoader).loadLayer(with(any(URL.class))); will(returnValue(layer));
+			allowing(layerLoader).loadLayer(with(any(String.class))); will(returnValue(layer));
 		}});
 		
 		animation = new WorldWindAnimationImpl(new WorldWindowTestImpl());
@@ -86,21 +90,15 @@ public class DefaultAnimatableLayerTest
 		
 		classToBeTested = new DefaultAnimatableLayer("testLayer", animation, layer, layerParameters);
 		
-		setupLayerFactory();
+		AnimationLayerLoaderFactory.setDelegate(layerLoader);
 	}
 	
 	@After
 	public void tearDown()
 	{
-		AnimationLayerLoader.setLayerFactory(new LayerFactory());
+		AnimationLayerLoaderFactory.setDelegate(new DefaultAnimationLayerLoader());
 	}
 	
-	private void setupLayerFactory()
-	{
-		layerFactory = new MockLayerFactory();
-		AnimationLayerLoader.setLayerFactory(layerFactory);
-	}
-
 	private void intialiseMessageSource()
 	{
 		messageSource = new StaticMessageSource();
@@ -122,7 +120,7 @@ public class DefaultAnimatableLayerTest
 	@Test
 	public void testToXml() throws Exception
 	{
-		setLayerUrl("file://marl/sandpit/symbolic-links/world-wind/current/dataset/ga/gravity/edition3/gravity.xml");
+		setLayerUrl("http://some/url/layer.xml");
 		addKeyFrame(0, 0.1, layerParameters.get(0));
 		addKeyFrame(10, 1.0, layerParameters.get(0));
 		
@@ -156,9 +154,8 @@ public class DefaultAnimatableLayerTest
 		Document document = WWXML.openDocument(getClass().getResourceAsStream("animatableLayerXmlSnippet.xml"));
 		Element layerElement = WWXML.getElement(document.getDocumentElement(), "//" + versionId.getConstants().getAnimatableLayerElementName(), null);
 		
-		setLayerUrlExpectation(new URL("file://marl/sandpit/symbolic-links/world-wind/current/dataset/ga/gravity/edition3/gravity.xml"));
+		setLayerUrlExpectation(new URL("http://some/url/layer.xml"));
 		setLayerEnabledExpectation();
-		layerFactory.setResult(layer);
 		
 		DefaultAnimatableLayer result = (DefaultAnimatableLayer)classToBeTested.fromXml(layerElement, versionId, context);
 		
@@ -220,29 +217,4 @@ public class DefaultAnimatableLayerTest
 		return target.trim().replace("\r\n", "\n");
 	}
 
-	/**
-	 * A mock layer factory that can have results set on it for testing purposes.
-	 */
-	private static class MockLayerFactory extends BasicLayerFactory
-	{
-		private Object result = null;
-		
-		@Override
-		public Object createFromConfigSource(Object configSource, AVList params)
-		{
-			return result;
-		}
-		
-		@Override
-		public Object createFromCapabilities(String capsFileName, AVList params)
-		{
-			return result;
-		}
-	
-		public void setResult(Object result)
-		{
-			this.result = result;
-		}
-		
-	}
 }
