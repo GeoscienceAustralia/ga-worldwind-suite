@@ -11,6 +11,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.delegate.reader.MaskImageReaderDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.render.ElevationOffsetRenderDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.render.IgnoreElevationRenderDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.retriever.HttpRetrieverFactoryDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.retriever.PassThroughZipRetrieverFactoryDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.transformer.ColorLimitTransformerDelegate;
@@ -46,6 +47,7 @@ public abstract class AbstractDelegateFactory implements IDelegateFactory
 		registerDelegate(ColorLimitTransformerDelegate.class);
 		
 		registerDelegate(ElevationOffsetRenderDelegate.class);
+		registerDelegate(IgnoreElevationRenderDelegate.class);
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.viewer.stereo;
 
-import gov.nasa.worldwind.AbstractSceneController;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Sector;
@@ -10,7 +9,8 @@ import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
 
-import au.gov.ga.worldwind.common.render.DrawContextExtended;
+import au.gov.ga.worldwind.common.render.ExtendedDrawContext;
+import au.gov.ga.worldwind.common.render.ExtendedSceneController;
 import au.gov.ga.worldwind.common.util.SectorClipPlanes;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
@@ -19,7 +19,7 @@ import au.gov.ga.worldwind.viewer.settings.Settings.StereoMode;
 
 import com.sun.opengl.util.BufferUtil;
 
-public class StereoSceneController extends AbstractSceneController
+public class StereoSceneController extends ExtendedSceneController
 {
 	private double lastVerticalExaggeration = -1;
 	private double lastFieldOfView = -1;
@@ -29,7 +29,7 @@ public class StereoSceneController extends AbstractSceneController
 	public StereoSceneController()
 	{
 		dc.dispose();
-		dc = new DrawContextExtended();
+		dc = new ExtendedDrawContext();
 	}
 
 	public void clipSector(Sector sector)
@@ -87,7 +87,7 @@ public class StereoSceneController extends AbstractSceneController
 			this.clearFrame(dc);
 			this.pick(dc);
 			this.clearFrame(dc);
-			DrawContextExtended.applyWireframePolygonMode(dc);
+			ExtendedDrawContext.applyWireframePolygonMode(dc);
 
 			try
 			{

@@ -14,12 +14,29 @@ import javax.media.opengl.GL;
 public class OffsetSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 {
 	protected double elevationOffset = 0;
-	
+	protected boolean ignoreElevation = false;
+
 	@Override
 	public void renderTiles(DrawContext dc, Iterable<? extends SurfaceTile> tiles)
 	{
-		DrawContextExtended.applyWireframePolygonMode(dc);
-		super.renderTiles(dc, tiles);
+		ExtendedDrawContext.applyWireframePolygonMode(dc);
+
+		if (ignoreElevation && dc instanceof ExtendedDrawContext)
+		{
+			try
+			{
+				((ExtendedDrawContext) dc).switchToFlatSurfaceGeometry();
+				super.renderTiles(dc, tiles);
+			}
+			finally
+			{
+				((ExtendedDrawContext) dc).switchToStandardSurfaceGeometry();
+			}
+		}
+		else
+		{
+			super.renderTiles(dc, tiles);
+		}
 	}
 
 	@Override
@@ -28,7 +45,7 @@ public class OffsetSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 		super.preComputeTextureTransform(dc, sg, t);
 
 		double exaggeratedOffset = elevationOffset * dc.getVerticalExaggeration();
-		if (exaggeratedOffset != 0)
+		if (exaggeratedOffset != 0/* || ignoreElevation*/)
 		{
 			GL gl = dc.getGL();
 			gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -36,6 +53,10 @@ public class OffsetSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 			Globe globe = dc.getGlobe();
 			Sector sector = sg.getSector();
 			LatLon centroid = sector.getCentroid();
+			Vec4 cn = globe.computePointFromLocation(centroid).normalize3();
+
+			/*if (exaggeratedOffset != 0)
+			{*/
 			Vec4 v1 = globe.computePointFromPosition(centroid.latitude, sector.getMinLongitude(), 0);
 			Vec4 v2 = globe.computePointFromPosition(centroid.latitude, sector.getMinLongitude(), exaggeratedOffset);
 			Vec4 v3 = globe.computePointFromPosition(centroid.latitude, sector.getMaxLongitude(), 0);
@@ -46,11 +67,21 @@ public class OffsetSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 			{
 				elevationDelta = -elevationDelta;
 			}
-			Vec4 translation = globe.computePointFromLocation(centroid).normalize3().multiply3(elevationDelta);
+			Vec4 translation = cn.multiply3(elevationDelta);
 			gl.glTranslated(translation.x, translation.y, translation.z);
 
 			double longitudeScale = v2.distanceTo3(v4) / v1.distanceTo3(v3);
 			gl.glScaled(longitudeScale, longitudeScale, longitudeScale);
+			/*}
+			
+			if (ignoreElevation)
+			{
+				double angle = Math.acos(cn.dot3(Vec4.UNIT_Z)) * 180.0 / Math.PI; //in degrees
+				Vec4 axis = cn.cross3(Vec4.UNIT_Z);
+				gl.glRotated(-angle, axis.x, axis.y, axis.z);
+				gl.glScaled(1, 1, 0);
+				gl.glRotated(angle, axis.x, axis.y, axis.z);
+			}*/
 		}
 	}
 
@@ -62,5 +93,15 @@ public class OffsetSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 	public void setElevationOffset(double elevationOffset)
 	{
 		this.elevationOffset = elevationOffset;
+	}
+
+	public boolean isIgnoreElevation()
+	{
+		return ignoreElevation;
+	}
+
+	public void setIgnoreElevation(boolean ignoreElevation)
+	{
+		this.ignoreElevation = ignoreElevation;
 	}
 }
