@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="**/.svn/*" kind="src" path="src"/>
-	<classpathentry kind="src" path="experimental"/>
-	<classpathentry kind="src" path="test/src"/>
-	<classpathentry kind="src" path="test/experimental"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/experimental/java"/>
+	<classpathentry kind="src" path="src/experimental-test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Common"/>
-	<classpathentry kind="lib" path="test/lib/junit-4.8.1.jar"/>
-	<classpathentry kind="lib" path="test/lib/hamcrest-core-1.1.jar"/>
-	<classpathentry kind="lib" path="test/lib/hamcrest-library-1.1.jar"/>
-	<classpathentry kind="lib" path="test/lib/jmock-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/hamcrest-core-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/hamcrest-library-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/jmock-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/junit-4.8.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
