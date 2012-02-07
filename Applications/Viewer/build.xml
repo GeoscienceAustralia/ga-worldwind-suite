@@ -13,8 +13,8 @@
 	<property name="worldwind_version" value="105.156" />
 
 	<!-- Viewer source code directories -->
-	<property name="src_dir" value="${basedir}/src" />
-	<property name="common_src_dir" value="${basedir}/../Common/src" />
+	<property name="src_dir" value="${basedir}/src/main/java" />
+	<property name="common_src_dir" value="${basedir}/../Common/src/main/java" />
 
 	<!-- WorldWind library locations -->
 	<property name="jogl_dir" value="${basedir}/../../SDK/JOGL-JSR-231" />
@@ -66,14 +66,14 @@
 	<property name="keystore_password" value="password" />
 
 	<!-- Test directories -->
-	<property name="test_src_dir" value="${basedir}/test/src" />
-	<property name="common_test_src_dir" value="${basedir}/../Common/test/src" />
+	<property name="test_src_dir" value="${basedir}/src/test/java" />
+	<property name="common_test_src_dir" value="${basedir}/../Common/src/test/java" />
 	<property name="collada_test_src_dir" value="${collada_dir}/test/src" />
 	<property name="collada_testmodels_dir" value="${collada_dir}/testmodels" />
-	<property name="test_lib_dir" value="${basedir}/test/lib" />
-	<property name="test_build_dir" value="${basedir}/test/build" />
-	<property name="test_results_dir" value="${basedir}/test/results" />
-	<property name="test_reports_dir" value="${basedir}/test/reports" />
+	<property name="test_lib_dir" value="${basedir}/lib/test" />
+	<property name="test_build_dir" value="${basedir}/build/test" />
+	<property name="test_results_dir" value="${basedir}/target/test-results" />
+	<property name="test_reports_dir" value="${basedir}/target/test-reports" />
 
 	<!-- Help directories -->
 	<property name="help_src_dir" value="${basedir}/documentation/help" />
