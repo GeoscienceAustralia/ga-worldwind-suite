@@ -34,24 +34,40 @@ import au.gov.ga.worldwind.common.util.transform.URLTransformer;
 /**
  * An extension of the World-Wind provided {@link WWXML} utilities, provides
  * additional helper methods for dealing with XML documents.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class XMLUtil extends WWXML
 {
 	private final static double EPSILON = 1e-10;
 
+	/**
+	 * @return The XML element from a generic source. If the source is an {@link Element}, will return the provided source. Otherwise, will attempt
+	 * to open the source as an XML {@link Document} and will return the document element.
+	 * 
+	 * @see {@link WWXML#openDocument(Object)}
+	 */
 	public static Element getElementFromSource(Object source)
 	{
-		if (source != null)
+		if (source == null)
 		{
-			if (source instanceof Element)
-				return (Element) source;
-			else if (source instanceof Document)
-				return ((Document) source).getDocumentElement();
-			else
+			return null;
+		}
+		if (source instanceof Element)
+		{
+			return (Element) source;
+		}
+		else if (source instanceof Document)
+		{
+			return ((Document) source).getDocumentElement();
+		}
+		else
+		{
+			Document document = openDocument(source);
+			if (document != null)
 			{
-				Document document = openDocument(source);
-				if (document != null)
-					return document.getDocumentElement();
+				return document.getDocumentElement();
 			}
 		}
 		return null;
@@ -66,7 +82,9 @@ public class XMLUtil extends WWXML
 	{
 		String s = getText(context, path, xpath);
 		if (s == null)
+		{
 			return def;
+		}
 		return s;
 	}
 
@@ -79,7 +97,9 @@ public class XMLUtil extends WWXML
 	{
 		Boolean b = getBoolean(context, path, xpath);
 		if (b == null)
+		{
 			return def;
+		}
 		return b;
 	}
 
@@ -92,7 +112,9 @@ public class XMLUtil extends WWXML
 	{
 		Double d = getDouble(context, path, xpath);
 		if (d == null)
+		{
 			return def;
+		}
 		return d;
 	}
 
@@ -105,7 +127,9 @@ public class XMLUtil extends WWXML
 	{
 		Integer i = getInteger(context, path, xpath);
 		if (i == null)
+		{
 			return def;
+		}
 		return i;
 	}
 
@@ -118,7 +142,9 @@ public class XMLUtil extends WWXML
 	{
 		Long i = getLong(context, path, xpath);
 		if (i == null)
+		{
 			return def;
+		}
 		return i;
 	}
 
@@ -143,9 +169,13 @@ public class XMLUtil extends WWXML
 	protected static URL textToURL(String text, URL context) throws MalformedURLException
 	{
 		if (text == null || text.length() == 0)
+		{
 			return null;
+		}
 		if (context == null)
+		{
 			return new URL(text);
+		}
 		return new URL(context, text);
 	}
 
@@ -189,7 +219,9 @@ public class XMLUtil extends WWXML
 		{
 			Element el = path == null ? context : getElement(context, path, xpath);
 			if (el == null)
+			{
 				return null;
+			}
 
 			String units = getText(el, "@units", xpath);
 			Double lat = getDouble(el, "@latitude", xpath);
@@ -197,16 +229,24 @@ public class XMLUtil extends WWXML
 			Double elev = getDouble(el, "@elevation", xpath);
 
 			if (lat == null || lon == null)
+			{
 				return null;
+			}
 
 			if (elev == null)
+			{
 				elev = 0d;
+			}
 
 			if (units == null || units.length() == 0 || units.equals("degrees"))
+			{
 				return Position.fromDegrees(lat, lon, elev);
+			}
 
 			if (units.equals("radians"))
+			{
 				return Position.fromRadians(lat, lon, elev);
+			}
 
 			// Warn that units are not recognized
 			String message = Logging.getMessage("XML.UnitsUnrecognized", units);
@@ -260,7 +300,9 @@ public class XMLUtil extends WWXML
 		{
 			Element el = path == null ? context : getElement(context, path, xpath);
 			if (el == null)
+			{
 				return null;
+			}
 
 			Double x = getDouble(el, "@x", xpath);
 			Double y = getDouble(el, "@y", xpath);
@@ -268,10 +310,14 @@ public class XMLUtil extends WWXML
 			Double w = getDouble(el, "@w", xpath);
 
 			if (x == null || y == null || z == null)
+			{
 				return null;
+			}
 
 			if (w == null)
+			{
 				w = 1d;
+			}
 
 			return new Vec4(x, y, z, w);
 		}
@@ -304,7 +350,9 @@ public class XMLUtil extends WWXML
 		setDoubleAttribute(el, "y", v.y);
 		setDoubleAttribute(el, "z", v.z);
 		if (v.w != 1)
+		{
 			setDoubleAttribute(el, "w", v.w);
+		}
 
 		return el;
 	}
@@ -322,7 +370,9 @@ public class XMLUtil extends WWXML
 		{
 			Element el = path == null ? context : getElement(context, path, xpath);
 			if (el == null)
+			{
 				return null;
+			}
 
 			String value = getText(el, "@value", xpath);
 			String format = getText(el, "@format", xpath);
@@ -374,7 +424,9 @@ public class XMLUtil extends WWXML
 
 					//don't allow a duplicate key
 					while (colorMap.containsKey(value))
+					{
 						value += EPSILON;
+					}
 
 					int red = XMLUtil.getInteger(entry, "@red", 0, xpath);
 					int green = XMLUtil.getInteger(entry, "@green", 0, xpath);
