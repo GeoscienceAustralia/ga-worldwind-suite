@@ -19,7 +19,10 @@
 	<!-- Animator source code directories -->
 	<property name="src_dir" value="${basedir}/src/main/java" />
 	<property name="res_dir" value="${basedir}/src/main/resources" />
-	<property name="common_src_dir" value="${basedir}/../Common/src" />
+	
+	<property name="common_src_dir" value="${basedir}/../Common/src/main/java" />
+	<property name="common_res_dir" value="${basedir}/../Common/src/main/resources" />
+	
 	<property name="main_build_dir" value="${build_dir}/main" />
 
 	<!-- WorldWind library locations -->
@@ -56,11 +59,16 @@
 	<!-- Test directories -->
 	<property name="test_src_dir" value="${basedir}/src/test/java" />
 	<property name="test_res_dir" value="${basedir}/src/test/resources" />
-	<property name="common_test_src_dir" value="${basedir}/../Common/test/src" />
+	
+	<property name="common_test_src_dir" value="${basedir}/../Common/src/test/java" />
+	<property name="common_test_res_dir" value="${basedir}/../Common/src/test/resources" />
+	
 	<property name="collada_test_src_dir" value="${collada_dir}/test/src" />
 	<property name="collada_testmodels_dir" value="${collada_dir}/testmodels" />
+	
 	<property name="test_lib_dir" value="${basedir}/lib/test" />
 	<property name="test_build_dir" value="${build_dir}/test" />
+	
 	<property name="test_results_dir" value="${target_dir}/test-results" />
 	<property name="test_reports_dir" value="${target_dir}/test-reports" />
 
@@ -144,6 +152,9 @@
 			<fileset dir="${common_src_dir}">
 				<exclude name="**/*.java" />
 			</fileset>
+			<fileset dir="${common_res_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
 			<fileset dir="${collada_src_dir}">
 				<exclude name="**/*.java" />
 			</fileset>
@@ -165,6 +176,9 @@
 				<exclude name="**/*.java" />
 			</fileset>
 			<fileset dir="${common_test_src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+			<fileset dir="${common_test_res_dir}">
 				<exclude name="**/*.java" />
 			</fileset>
 			<fileset dir="${collada_test_src_dir}">
