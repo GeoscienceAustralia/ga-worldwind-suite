@@ -400,8 +400,6 @@ public class Util
 	{
 		if (isBlank(coordString))
 		{
-			String msg = Logging.getMessage("nullValue.StringIsNull");
-			Logging.logger().severe(msg);
 			return null;
 		}
 
@@ -655,6 +653,10 @@ public class Util
 	 */
 	public static int clamp(int value, int min, int max)
 	{
+		if(min > max)
+		{
+			return clamp(value, max, min);
+		}
 		return Math.max(min, Math.min(max, value));
 	}
 
@@ -664,6 +666,10 @@ public class Util
 	 */
 	public static double clamp(double value, double min, double max)
 	{
+		if(min > max)
+		{
+			return clamp(value, max, min);
+		}
 		return Math.max(min, Math.min(max, value));
 	}
 
@@ -673,6 +679,10 @@ public class Util
 	 */
 	public static float clamp(float value, float min, float max)
 	{
+		if(min > max)
+		{
+			return clamp(value, max, min);
+		}
 		return Math.max(min, Math.min(max, value));
 	}
 
