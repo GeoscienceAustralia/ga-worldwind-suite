@@ -3,9 +3,16 @@ package au.gov.ga.worldwind.common.render;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.terrain.RectangularTessellator;
 import gov.nasa.worldwind.terrain.SectorGeometryList;
 import au.gov.ga.worldwind.common.terrain.WireframeRectangularTessellator;
 
+/**
+ * Custom {@link RectangularTessellator} that generates flat sector geometry (by
+ * forcing vertical exaggeration to 0).
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class FlatRectangularTessellator extends WireframeRectangularTessellator
 {
 	@Override

@@ -18,7 +18,7 @@ import com.sun.opengl.util.texture.Texture;
  * {@link TextureTile} which performs NearestNeighbor Magnification at when
  * viewing the layer's lowest level (highest resolution).
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class NearestNeighborTextureTile extends DelegatorTextureTile
 {

@@ -12,9 +12,15 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.delegate.AbstractDelegateKit;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegateFactory;
+import au.gov.ga.worldwind.common.layers.delegate.IDelegateKit;
 import au.gov.ga.worldwind.common.layers.delegate.IRetrieverFactoryDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.retriever.HttpRetrieverFactoryDelegate;
 
+/**
+ * Default {@link IDelegateKit} used by delegator tiled image layers.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ImageDelegateKit extends AbstractDelegateKit<DelegatorTextureTile, Sector, Level>
 {
 	private final static Collection<String> defaultDelegateDefinitions = new HashSet<String>();

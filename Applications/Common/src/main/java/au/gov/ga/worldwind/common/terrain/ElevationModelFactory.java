@@ -17,7 +17,7 @@ import au.gov.ga.worldwind.common.layers.Bounded;
  * Extension to World Wind's {@link BasicElevationModelFactory} which creates
  * {@link ElevationModel}'s that implement the {@link Bounded} interface.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class ElevationModelFactory extends BasicElevationModelFactory
 {

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * of attribute values to an associated {@link Style} name, using exact
  * matching, regex matching, and in-range matching.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class Attribute
 {

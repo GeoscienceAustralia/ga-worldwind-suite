@@ -28,7 +28,7 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
  * Extension to World Wind's {@link BasicLayerFactory} which allows creation of
  * extra layer types.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class LayerFactory extends BasicLayerFactory
 {

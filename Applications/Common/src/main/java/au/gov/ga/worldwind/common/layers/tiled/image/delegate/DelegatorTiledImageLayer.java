@@ -67,7 +67,7 @@ import com.sun.opengl.util.texture.TextureIO;
  * name and synchronize with each other on the same fileLock object. (Note: this
  * has not yet been added to Bulk Download facility).
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer implements Bounded,
 		IDelegatorLayer<DelegatorTextureTile>

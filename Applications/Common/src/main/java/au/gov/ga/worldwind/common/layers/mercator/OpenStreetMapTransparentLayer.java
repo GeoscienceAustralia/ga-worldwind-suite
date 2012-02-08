@@ -15,6 +15,12 @@ import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * Mercator tiled image layer that displays maps from the OpenStreetMap.
+ * Attempts to convert any common fill colors to real transparency.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class OpenStreetMapTransparentLayer extends BasicMercatorTiledImageLayer
 {
 	public OpenStreetMapTransparentLayer()
@@ -29,17 +35,14 @@ public class OpenStreetMapTransparentLayer extends BasicMercatorTiledImageLayer
 
 		params.setValue(AVKey.TILE_WIDTH, 256);
 		params.setValue(AVKey.TILE_HEIGHT, 256);
-		params.setValue(AVKey.DATA_CACHE_NAME,
-				"OpenStreetMap Mapnik Transparent");
+		params.setValue(AVKey.DATA_CACHE_NAME, "OpenStreetMap Mapnik Transparent");
 		params.setValue(AVKey.SERVICE, "http://a.tile.openstreetmap.org/");
 		params.setValue(AVKey.DATASET_NAME, "mapnik");
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 16);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
-		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle
-				.fromDegrees(22.5d), Angle.fromDegrees(45d)));
-		params.setValue(AVKey.SECTOR, new MercatorSector(-1.0, 1.0,
-				Angle.NEG180, Angle.POS180));
+		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle.fromDegrees(22.5d), Angle.fromDegrees(45d)));
+		params.setValue(AVKey.SECTOR, new MercatorSector(-1.0, 1.0, Angle.NEG180, Angle.POS180));
 		params.setValue(AVKey.TILE_URL_BUILDER, new URLBuilder());
 
 		return new LevelSet(params);
@@ -53,16 +56,14 @@ public class OpenStreetMapTransparentLayer extends BasicMercatorTiledImageLayer
 			int level = tile.getLevelNumber() + 3;
 			int column = tile.getColumn();
 			int row = (1 << (tile.getLevelNumber()) + 3) - 1 - tile.getRow();
-			return new URL(tile.getLevel().getService() + level + "/" + column
-					+ "/" + row + ".png");
+			return new URL(tile.getLevel().getService() + level + "/" + column + "/" + row + ".png");
 		}
 	}
 
 	@Override
 	protected BufferedImage modifyImage(BufferedImage image)
 	{
-		BufferedImage newImage = new BufferedImage(image.getWidth(), image
-				.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		for (int x = 0; x < image.getWidth(); x++)
 			for (int y = 0; y < image.getHeight(); y++)
 				newImage.setRGB(x, y, convertTransparent(image.getRGB(x, y)));
@@ -73,8 +74,7 @@ public class OpenStreetMapTransparentLayer extends BasicMercatorTiledImageLayer
 	{
 		int a = 255;
 		//transparent colours
-		if (rgb == -921880 || rgb == -4861744 || rgb == -856344
-				|| rgb == -856087)
+		if (rgb == -921880 || rgb == -4861744 || rgb == -856344 || rgb == -856087)
 			a = 0;
 		return (rgb & 0xffffff) | (a << 24);
 	}

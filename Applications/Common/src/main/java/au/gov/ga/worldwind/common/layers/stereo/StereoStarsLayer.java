@@ -11,6 +11,8 @@ import au.gov.ga.worldwind.common.view.stereo.StereoView;
 
 /**
  * An extension of the {@link ProjectionStarsLayer} that supports stereo rendering of stars
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class StereoStarsLayer extends ProjectionStarsLayer
 {

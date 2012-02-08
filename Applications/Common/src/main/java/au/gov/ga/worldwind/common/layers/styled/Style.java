@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  * {@link StyleProvider} for a particular set of attribute values, and then the
  * Style is used to set an object's properties.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class Style
 {

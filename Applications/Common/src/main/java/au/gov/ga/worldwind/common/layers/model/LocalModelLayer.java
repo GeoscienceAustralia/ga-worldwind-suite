@@ -6,13 +6,19 @@ import java.util.List;
 
 import au.gov.ga.worldwind.common.util.FastShape;
 
+/**
+ * Simple implementation of {@link ModelLayer} that renders a list of
+ * {@link FastShape}s provided in the class constructor.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LocalModelLayer extends AbstractModelLayer implements ModelLayer
 {
 	public LocalModelLayer(List<FastShape> shapes)
 	{
 		super();
-		
-		for(FastShape shape : shapes)
+
+		for (FastShape shape : shapes)
 		{
 			addShape(shape);
 		}

@@ -19,7 +19,7 @@ import au.gov.ga.worldwind.common.util.transform.URLTransformer;
  * format as a parameter (F) to the texture URLs and also uses the
  * {@link URLTransformer} to transform the URLs.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class URLTransformerBasicTiledImageLayer extends BasicTiledImageLayer
 {

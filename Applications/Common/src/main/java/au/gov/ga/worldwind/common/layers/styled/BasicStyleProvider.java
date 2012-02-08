@@ -10,7 +10,7 @@ import java.util.Map;
  * Helper class that maps a set of attribute values to a Style. Also generates
  * the text and link for the attribute values.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class BasicStyleProvider implements StyleProvider
 {

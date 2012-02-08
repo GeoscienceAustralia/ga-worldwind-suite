@@ -7,6 +7,11 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.requester.AbstractLocalRequesterDelegate;
 
+/**
+ * Non-abstract implementation of the {@link AbstractLocalRequesterDelegate}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ImageLocalRequesterDelegate extends AbstractLocalRequesterDelegate<DelegatorTextureTile> implements
 		IImageTileRequesterDelegate
 {

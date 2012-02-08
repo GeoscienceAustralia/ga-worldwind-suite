@@ -9,7 +9,7 @@ import au.gov.ga.worldwind.common.layers.Bounded;
  * Extension to {@link BasicElevationModel} that implements the {@link Bounded}
  * interface.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class BoundedBasicElevationModel extends BasicElevationModel implements Bounded
 {

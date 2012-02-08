@@ -13,6 +13,12 @@ import au.gov.ga.worldwind.common.layers.delegate.IDelegatorTile;
 import au.gov.ga.worldwind.common.layers.delegate.ITileReaderDelegate;
 import au.gov.ga.worldwind.common.util.IOUtil;
 
+/**
+ * Abstract class that acts as a super class of all {@link ITileReaderDelegate}s
+ * that generate an image from elevation tiles.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class ElevationImageReaderDelegate implements ITileReaderDelegate
 {
 	protected final static String doublePattern = "((?:-?\\d*\\.\\d*)|(?:-?\\d+))";
@@ -38,13 +44,30 @@ public abstract class ElevationImageReaderDelegate implements ITileReaderDelegat
 		return readImage((TextureTile) tile, url, globe);
 	}
 
+	/**
+	 * @see ITileReaderDelegate#readImage(IDelegatorTile, URL, Globe)
+	 */
 	public BufferedImage readImage(TextureTile tile, URL url, Globe globe) throws IOException
 	{
 		BufferWrapper byteBuffer = IOUtil.readByteBuffer(url, pixelType, byteOrder);
-		
 		return generateImage(byteBuffer, tile.getWidth(), tile.getHeight(), globe, tile.getSector());
 	}
 
+	/**
+	 * Generate an image from elevation data.
+	 * 
+	 * @param elevations
+	 *            Wrapped elevation data
+	 * @param width
+	 *            Width of the data tile
+	 * @param height
+	 *            Height of the data tile
+	 * @param globe
+	 *            Current globe
+	 * @param sector
+	 *            Sector of the data tile
+	 * @return Image generated from the elevation data
+	 */
 	protected abstract BufferedImage generateImage(BufferWrapper elevations, int width, int height, Globe globe,
 			Sector sector);
 }

@@ -55,6 +55,8 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
  * <li>blue = the blue channel of the colour entry (integer in range [0, 255])
  * <li>alpha = the alpha channel of the colour entry (integer in range [0, 255])
  * </ul>
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class ColorMapElevationImageReaderDelegate extends ElevationImageReaderDelegate
 {

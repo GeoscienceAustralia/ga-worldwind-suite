@@ -14,6 +14,11 @@ import gov.nasa.worldwind.util.TileUrlBuilder;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * Mercator tiled image layer that displays maps from the OpenStreetMap.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class OpenStreetMapLayer extends BasicMercatorTiledImageLayer
 {
 	public OpenStreetMapLayer()
@@ -35,10 +40,8 @@ public class OpenStreetMapLayer extends BasicMercatorTiledImageLayer
 		params.setValue(AVKey.FORMAT_SUFFIX, ".png");
 		params.setValue(AVKey.NUM_LEVELS, 16);
 		params.setValue(AVKey.NUM_EMPTY_LEVELS, 0);
-		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle
-				.fromDegrees(22.5d), Angle.fromDegrees(45d)));
-		params.setValue(AVKey.SECTOR, new MercatorSector(-1.0, 1.0,
-				Angle.NEG180, Angle.POS180));
+		params.setValue(AVKey.LEVEL_ZERO_TILE_DELTA, new LatLon(Angle.fromDegrees(22.5d), Angle.fromDegrees(45d)));
+		params.setValue(AVKey.SECTOR, new MercatorSector(-1.0, 1.0, Angle.NEG180, Angle.POS180));
 		params.setValue(AVKey.TILE_URL_BUILDER, new URLBuilder());
 
 		return new LevelSet(params);
@@ -52,8 +55,7 @@ public class OpenStreetMapLayer extends BasicMercatorTiledImageLayer
 			int level = tile.getLevelNumber() + 3;
 			int column = tile.getColumn();
 			int row = (1 << (tile.getLevelNumber()) + 3) - 1 - tile.getRow();
-			return new URL(tile.getLevel().getService() + level + "/" + column
-					+ "/" + row + ".png");
+			return new URL(tile.getLevel().getService() + level + "/" + column + "/" + row + ".png");
 		}
 	}
 

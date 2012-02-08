@@ -24,6 +24,15 @@ import au.gov.ga.worldwind.common.layers.tiled.image.delegate.FileLockSharer;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.IOUtil;
 
+/**
+ * {@link WMSBasicElevationModel} that uses the {@link FileLockSharer} to
+ * create/share the fileLock object. This is so that multiple layers can point
+ * and write to the same data cache name and synchronize with each other on the
+ * same fileLock object. (Note: this has not yet been added to Bulk Download
+ * facility).
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SharedLockWMSBasicElevationModel extends BoundedWMSBasicElevationModel
 {
 	protected final Object fileLock;
@@ -33,28 +42,28 @@ public class SharedLockWMSBasicElevationModel extends BoundedWMSBasicElevationMo
 	{
 		this(wmsGetMoreParamsFromDocument(domElement, params));
 	}
-	
+
 	public SharedLockWMSBasicElevationModel(AVList params)
 	{
 		super(params);
-		
+
 		Boolean b = (Boolean) params.getValue(AVKeyMore.EXTRACT_ZIP_ENTRY);
 		if (b != null)
 			this.setExtractZipEntry(b);
 
 		fileLock = FileLockSharer.getLock(getLevels().getFirstLevel().getCacheName());
 	}
-	
+
 	protected static AVList wmsGetMoreParamsFromDocument(Element domElement, AVList params)
 	{
 		params = wmsGetParamsFromDocument(domElement, params);
-		
+
 		XPath xpath = WWXML.makeXPath();
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.EXTRACT_ZIP_ENTRY, "ExtractZipEntry", xpath);
-		
+
 		return params;
 	}
-	
+
 	public boolean isExtractZipEntry()
 	{
 		return extractZipEntry;
@@ -66,8 +75,7 @@ public class SharedLockWMSBasicElevationModel extends BoundedWMSBasicElevationMo
 	}
 
 	@Override
-	protected void downloadElevations(Tile tile,
-			BasicElevationModel.DownloadPostProcessor postProcessor)
+	protected void downloadElevations(Tile tile, BasicElevationModel.DownloadPostProcessor postProcessor)
 	{
 		if (postProcessor == null)
 			postProcessor = new DownloadPostProcessor(tile, this);
@@ -114,8 +122,8 @@ public class SharedLockWMSBasicElevationModel extends BoundedWMSBasicElevationMo
 		}
 		catch (java.io.IOException e)
 		{
-			Logging.logger().log(java.util.logging.Level.SEVERE,
-					"ElevationModel.ExceptionReadingElevationFile", url.toString());
+			Logging.logger().log(java.util.logging.Level.SEVERE, "ElevationModel.ExceptionReadingElevationFile",
+					url.toString());
 			throw e;
 		}
 	}
@@ -151,7 +159,7 @@ public class SharedLockWMSBasicElevationModel extends BoundedWMSBasicElevationMo
 			this.doWriteConfigurationParams(fileStore, fileName, params);
 		}
 	}
-	
+
 	@Override
 	protected void retrieveRemoteElevations(final Tile tile,
 			gov.nasa.worldwind.terrain.BasicElevationModel.DownloadPostProcessor postProcessor)
@@ -177,11 +185,8 @@ public class SharedLockWMSBasicElevationModel extends BoundedWMSBasicElevationMo
 		}
 		catch (java.net.MalformedURLException e)
 		{
-			Logging.logger()
-					.log(java.util.logging.Level.SEVERE,
-							Logging.getMessage(
-									"TiledElevationModel.ExceptionCreatingElevationsUrl",
-									url), e);
+			Logging.logger().log(java.util.logging.Level.SEVERE,
+					Logging.getMessage("TiledElevationModel.ExceptionCreatingElevationsUrl", url), e);
 			return;
 		}
 

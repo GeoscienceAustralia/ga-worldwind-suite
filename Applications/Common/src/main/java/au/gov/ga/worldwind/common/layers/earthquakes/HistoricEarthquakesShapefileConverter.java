@@ -11,6 +11,13 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Calendar;
 
+/**
+ * Helper class used for converting the large historic earthquakes shapefile
+ * into a smaller double array, which is used by the
+ * {@link HistoricEarthquakesLayer}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class HistoricEarthquakesShapefileConverter
 {
 	public static void main(String[] args) throws IOException
@@ -19,7 +26,7 @@ public class HistoricEarthquakesShapefileConverter
 		File output = new File("D:/Earthquakes/quakes.dat");
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(output));
 		Shapefile shapefile = new Shapefile(file);
-		
+
 		while (shapefile.hasNext())
 		{
 			ShapefileRecord record = shapefile.nextRecord();

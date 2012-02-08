@@ -21,37 +21,77 @@ import java.util.Map;
 
 import javax.media.opengl.GL;
 
+/**
+ * Subclass of the {@link RectangularTessellator} that adds several features:
+ * <ul>
+ * <li>Ability to enable/disable depth testing for the elevation wireframe.</li>
+ * <li>Ability to disable backface culling for tiled image layers.</li>
+ * <li>Smart skirts: instead of skirts that go down to the minimum elevation,
+ * smart skirts are skirts generated from the vertices of neighbouring tiles,
+ * ensuring that no gaps exist, but also ensuring that skirts don't get in the
+ * way of sub-surface navigation.</li>
+ * </ul>
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class WireframeRectangularTessellator extends RectangularTessellatorAccessible
 {
 	private boolean wireframeDepthTesting = true;
 	private boolean backfaceCulling = false;
 	private boolean smartSkirts = true;
 
+	/**
+	 * @return Is depth testing enabled for the elevation model wireframe?
+	 */
 	public boolean isWireframeDepthTesting()
 	{
 		return wireframeDepthTesting;
 	}
 
+	/**
+	 * Enable/disable depth testing for the elevation model wireframe.
+	 * 
+	 * @param wireframeDepthTesting
+	 */
 	public void setWireframeDepthTesting(boolean wireframeDepthTesting)
 	{
 		this.wireframeDepthTesting = wireframeDepthTesting;
 	}
 
+	/**
+	 * @return Is backface culling enabled for surface tiles (tiled image
+	 *         layers)?
+	 */
 	public boolean isBackfaceCulling()
 	{
 		return backfaceCulling;
 	}
 
+	/**
+	 * Enable/disable backface culling for surface tiles.
+	 * 
+	 * @param backfaceCulling
+	 */
 	public void setBackfaceCulling(boolean backfaceCulling)
 	{
 		this.backfaceCulling = backfaceCulling;
 	}
 
+	/**
+	 * @return Are smart skirts enabled? Smart skirts are skirts that use
+	 *         neighbouring tile vertices as skirts, instead of skirts that go
+	 *         down to the minimum elevation. This helps sub-surface rendering.
+	 */
 	public boolean isSmartSkirts()
 	{
 		return smartSkirts;
 	}
 
+	/**
+	 * Enable/disable smart skirts.
+	 * 
+	 * @param smartSkirts
+	 */
 	public void setSmartSkirts(boolean smartSkirts)
 	{
 		this.smartSkirts = smartSkirts;
@@ -113,10 +153,8 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 				FloatBuffer vertices = ri.getVertices();
 				IntBuffer indices = ri.getIndices();
 				gl.glVertexPointer(3, GL.GL_FLOAT, 0, vertices.rewind());
-				gl.glDrawElements(javax.media.opengl.GL.GL_TRIANGLE_STRIP, 
-								  indices.limit(),
-								  javax.media.opengl.GL.GL_UNSIGNED_INT, 
-								  indices.rewind());
+				gl.glDrawElements(javax.media.opengl.GL.GL_TRIANGLE_STRIP, indices.limit(),
+						javax.media.opengl.GL.GL_UNSIGNED_INT, indices.rewind());
 			}
 			finally
 			{
@@ -319,8 +357,8 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 			try
 			{
 				ogsh.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-				
-				int[] vboIds = (int[])dc.getGpuResourceCache().get(tile.getRi().getVboCacheKey());
+
+				int[] vboIds = (int[]) dc.getGpuResourceCache().get(tile.getRi().getVboCacheKey());
 				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[0]);
 				gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.limit() * 4, vertices.rewind(), GL.GL_DYNAMIC_DRAW);
 			}
@@ -350,21 +388,18 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 			last = current;
 
 			int dstIndex = dstOffset + (di - 1) * stride;
-			dst.put(dstIndex, (float)previous.x)
-			   .put(dstIndex + 1, (float)previous.y)
-			   .put(dstIndex + 2, (float)previous.z);
+			dst.put(dstIndex, (float) previous.x).put(dstIndex + 1, (float) previous.y)
+					.put(dstIndex + 2, (float) previous.z);
 
 			dstIndex += stride;
-			dst.put(dstIndex, (float)current.x)
-			   .put(dstIndex + 1, (float)current.y)
-			   .put(dstIndex + 2, (float)current.z);
+			dst.put(dstIndex, (float) current.x).put(dstIndex + 1, (float) current.y)
+					.put(dstIndex + 2, (float) current.z);
 
 			if (di >= size - 2)
 			{
 				dstIndex += stride;
-				dst.put(dstIndex, (float)current.x)
-				   .put(dstIndex + 1, (float)current.y)
-				   .put(dstIndex + 2, (float)current.z);
+				dst.put(dstIndex, (float) current.x).put(dstIndex + 1, (float) current.y)
+						.put(dstIndex + 2, (float) current.z);
 			}
 		}
 	}
@@ -382,9 +417,9 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 			//don't use skirts to copy from
 			int srcIndex = srcOffset + i * stride;
 			int dstIndex = dstOffset + i * stride;
-			dst.put(dstIndex, src.get(srcIndex) + (float)(srcRefCenter.x - dstRefCenter.x));
-			dst.put(dstIndex + 1, src.get(srcIndex + 1) + (float)(srcRefCenter.y - dstRefCenter.y));
-			dst.put(dstIndex + 2, src.get(srcIndex + 2) + (float)(srcRefCenter.z - dstRefCenter.z));
+			dst.put(dstIndex, src.get(srcIndex) + (float) (srcRefCenter.x - dstRefCenter.x));
+			dst.put(dstIndex + 1, src.get(srcIndex + 1) + (float) (srcRefCenter.y - dstRefCenter.y));
+			dst.put(dstIndex + 2, src.get(srcIndex + 2) + (float) (srcRefCenter.z - dstRefCenter.z));
 		}
 	}
 
@@ -443,6 +478,12 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 		return (int) Y;
 	}
 
+	/**
+	 * Subclass of {@link RectTile} that store the tile's row/column, so that
+	 * neighbouring tiles can easily be calculated for the smart skirts.
+	 * 
+	 * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+	 */
 	protected static class RowColRectTile extends RectTile
 	{
 		protected boolean rebuiltVertices = false;

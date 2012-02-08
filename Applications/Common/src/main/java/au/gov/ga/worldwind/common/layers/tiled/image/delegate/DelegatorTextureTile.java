@@ -17,7 +17,7 @@ import com.sun.opengl.util.texture.Texture;
  * Extension of the {@link TextureTile} class which uses a
  * {@link ITileFactoryDelegate} when creating sub tiles.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class DelegatorTextureTile extends TextureTile implements IDelegatorTile
 {

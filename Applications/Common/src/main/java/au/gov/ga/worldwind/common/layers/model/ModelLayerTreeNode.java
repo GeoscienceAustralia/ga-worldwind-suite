@@ -5,6 +5,12 @@ import gov.nasa.worldwind.util.layertree.LayerTreeNode;
 import gov.nasa.worldwind.util.tree.TreeNode;
 import au.gov.ga.worldwind.common.util.FastShape;
 
+/**
+ * {@link TreeNode} representing a {@link ModelLayer}, for displaying the
+ * {@link ModelLayer} in a hierarchical tree.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ModelLayerTreeNode extends LayerTreeNode
 {
 	public ModelLayerTreeNode(Layer layer)

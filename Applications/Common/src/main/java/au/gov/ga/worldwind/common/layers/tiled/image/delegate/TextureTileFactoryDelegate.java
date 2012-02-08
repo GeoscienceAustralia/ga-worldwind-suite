@@ -18,7 +18,7 @@ import au.gov.ga.worldwind.common.util.Util;
  * random string to the data cache name. This means that layers with the same
  * data cache name will be cached separately in memory.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class TextureTileFactoryDelegate implements IImageTileFactoryDelegate
 {

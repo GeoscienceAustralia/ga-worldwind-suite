@@ -31,7 +31,7 @@ import au.gov.ga.worldwind.common.util.IOUtil;
  * same fileLock object. (Note: this has not yet been added to Bulk Download
  * facility).
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class SharedLockBasicElevationModel extends URLTransformerBasicElevationModel
 {

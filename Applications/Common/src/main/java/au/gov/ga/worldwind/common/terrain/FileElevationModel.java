@@ -25,7 +25,7 @@ import au.gov.ga.worldwind.common.util.Util;
  * Elevation model that retrieves its elevation data from elevation tiles stored
  * in a directory in the local file system.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class FileElevationModel extends BoundedBasicElevationModel
 {

@@ -9,6 +9,13 @@ import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.IRenderDelegate;
 import au.gov.ga.worldwind.common.render.ExtendedDrawContext;
 
+/**
+ * Implementation of {@link IRenderDelegate} that uses the
+ * {@link ExtendedDrawContext} to disable the elevation model for this layer,
+ * causing the layer to be rendered on a flat surface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class IgnoreElevationRenderDelegate implements IRenderDelegate
 {
 	protected final static String DEFINITION_STRING = "IgnoreElevation";

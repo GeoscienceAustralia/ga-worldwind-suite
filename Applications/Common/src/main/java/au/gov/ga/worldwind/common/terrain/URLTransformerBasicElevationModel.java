@@ -16,7 +16,7 @@ import au.gov.ga.worldwind.common.util.transform.URLTransformer;
  * {@link BasicElevationModel} that uses a custom {@link TileUrlBuilder} that
  * uses the {@link URLTransformer} to transform elevation tile download URLs.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class URLTransformerBasicElevationModel extends BoundedBasicElevationModel
 {

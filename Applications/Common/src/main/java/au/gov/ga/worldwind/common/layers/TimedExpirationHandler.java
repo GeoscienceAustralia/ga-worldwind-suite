@@ -20,7 +20,7 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
  * all textures as expired and re-download them. Useful for layers that update
  * every few hours, such as weather layers.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class TimedExpirationHandler
 {

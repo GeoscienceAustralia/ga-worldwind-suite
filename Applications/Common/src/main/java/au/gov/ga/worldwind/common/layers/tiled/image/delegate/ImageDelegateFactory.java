@@ -8,7 +8,7 @@ import au.gov.ga.worldwind.common.layers.tiled.image.delegate.nearestneighbor.Ne
 /**
  * Factory which creates delegates for the {@link DelegatorTiledImageLayer}.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class ImageDelegateFactory extends AbstractDelegateFactory
 {

@@ -13,6 +13,12 @@ import java.util.List;
 
 import au.gov.ga.worldwind.common.util.FastShape;
 
+/**
+ * Abstract implementation of the {@link ModelLayer}. Contains the common
+ * functionality for setting up and rendering.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class AbstractModelLayer extends AbstractLayer implements ModelLayer
 {
 	protected final List<FastShape> shapes = new ArrayList<FastShape>();
@@ -159,7 +165,7 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 		shape.setPointSprite(pointSprite);
 		shape.setPointTextureUrl(this.getClass().getResource("sprite.png"));
 		shape.setWireframe(isWireframe());
-		
+
 		synchronized (shapes)
 		{
 			shapes.add(shape);

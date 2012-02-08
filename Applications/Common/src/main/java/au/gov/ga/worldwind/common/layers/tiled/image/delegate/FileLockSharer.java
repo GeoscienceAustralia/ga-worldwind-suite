@@ -9,7 +9,7 @@ import java.util.Map;
  * some layers may share the same imagery but do different post processing on
  * the textures.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class FileLockSharer
 {

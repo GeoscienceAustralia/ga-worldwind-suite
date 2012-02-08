@@ -15,7 +15,7 @@ import au.gov.ga.worldwind.common.layers.tiled.image.delegate.TextureTileFactory
  * Implementation of {@link ITileFactoryDelegate} which creates
  * {@link NearestNeighborTextureTile}s.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class NearestNeighborTextureTileFactoryDelegate extends TextureTileFactoryDelegate
 {
