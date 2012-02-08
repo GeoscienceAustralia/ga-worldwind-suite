@@ -27,7 +27,8 @@ public class GocadFactory
 
 	public static boolean isGocadFileSuffix(String suffix)
 	{
-		return suffix.equalsIgnoreCase("ts") || suffix.equalsIgnoreCase("gp") || suffix.equalsIgnoreCase("vo");
+		return suffix.equalsIgnoreCase("ts") || suffix.equalsIgnoreCase("gp") || suffix.equalsIgnoreCase("vo")
+				|| suffix.equalsIgnoreCase("pl");
 	}
 
 	/**
