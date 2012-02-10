@@ -8,6 +8,7 @@ import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.util.Logging;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -78,7 +79,7 @@ public class PlacesPanel extends AbstractThemePanel
 	private static final String DEFAULT_PLACES_PERSISTANCE_FILENAME = "places.xml";
 	private String placesPersistanceFilename = DEFAULT_PLACES_PERSISTANCE_FILENAME;
 	private boolean persistPlaces = true;
-	
+
 	private List<Place> places = new ArrayList<Place>();
 
 	private JFrame frame;
@@ -88,7 +89,7 @@ public class PlacesPanel extends AbstractThemePanel
 	private ListItem dragging;
 	private PlaceLayer layer;
 	private boolean playing = false;
-	
+
 	private BasicAction addAction;
 	private BasicAction editAction;
 	private BasicAction deleteAction;
@@ -97,7 +98,7 @@ public class PlacesPanel extends AbstractThemePanel
 	private BasicAction exportAction;
 	private BasicAction previousAction;
 	private BasicAction nextAction;
-	
+
 	private JFileChooser exportImportChooser;
 	private LayersPanel layersPanel;
 	private RenderingListener opacityChanger;
@@ -133,29 +134,36 @@ public class PlacesPanel extends AbstractThemePanel
 
 	protected void loadPlaces(File file, boolean append)
 	{
-		List<Place> places = PlacePersistance.readFromXML(file, URLUtil.fromObject(file.getParentFile()));
-
-		//if the read failed, attempt to read from the old format
-		if (places == null && wwd != null)
+		try
 		{
-			places = LegacyPlaceReader.readPlacesFromLegacyXML(file, wwd.getModel().getGlobe());
-		}
+			List<Place> places = PlacePersistance.readFromXML(file, URLUtil.fromObject(file.getParentFile()));
 
-		if (places == null)
-		{
-			places = new ArrayList<Place>();
-		}
+			//if the read failed, attempt to read from the old format
+			if (places == null && wwd != null)
+			{
+				places = LegacyPlaceReader.readPlacesFromLegacyXML(file, wwd.getModel().getGlobe());
+			}
 
-		if (append)
-		{
-			this.places.addAll(places);
-		}
-		else
-		{
-			this.places = places;
-		}
+			if (places == null)
+			{
+				places = new ArrayList<Place>();
+			}
 
-		populateList();
+			if (append)
+			{
+				this.places.addAll(places);
+			}
+			else
+			{
+				this.places = places;
+			}
+
+			populateList();
+		}
+		catch (Exception e)
+		{
+			Logging.logger().warning("Error loading places from " + file.getName() + ": " + e.getLocalizedMessage());
+		}
 	}
 
 	protected void savePlaces(File file)
@@ -326,14 +334,16 @@ public class PlacesPanel extends AbstractThemePanel
 	{
 		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('w'), "places.next");
 		getActionMap().put("places.next", nextAction);
-		
+
 		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('q'), "places.previous");
 		getActionMap().put("places.previous", previousAction);
 	}
 
 	private void initialiseActions()
 	{
-		addAction = new BasicAction(getMessage(getPlacesAddLabelKey()), getMessage(getPlacesAddTooltipKey()), Icons.add.getIcon());
+		addAction =
+				new BasicAction(getMessage(getPlacesAddLabelKey()), getMessage(getPlacesAddTooltipKey()),
+						Icons.add.getIcon());
 		addAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -343,7 +353,9 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 		});
 
-		editAction = new BasicAction(getMessage(getPlacesEditLabelKey()), getMessage(getPlacesEditTooltipKey()), Icons.properties.getIcon());
+		editAction =
+				new BasicAction(getMessage(getPlacesEditLabelKey()), getMessage(getPlacesEditTooltipKey()),
+						Icons.properties.getIcon());
 		editAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -353,7 +365,9 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 		});
 
-		deleteAction = new BasicAction(getMessage(getPlacesDeleteLabelKey()), getMessage(getPlacesDeleteTooltipKey()), Icons.delete.getIcon());
+		deleteAction =
+				new BasicAction(getMessage(getPlacesDeleteLabelKey()), getMessage(getPlacesDeleteTooltipKey()),
+						Icons.delete.getIcon());
 		deleteAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -363,7 +377,9 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 		});
 
-		playAction = new BasicAction(getMessage(getPlacesPlayLabelKey()), getMessage(getPlacesPlayTooltipKey()), Icons.run.getIcon());
+		playAction =
+				new BasicAction(getMessage(getPlacesPlayLabelKey()), getMessage(getPlacesPlayTooltipKey()),
+						Icons.run.getIcon());
 		playAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -380,7 +396,9 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 		});
 
-		importAction = new BasicAction(getMessage(getPlacesImportLabelKey()), getMessage(getPlacesImportTooltipKey()), Icons.imporrt.getIcon());
+		importAction =
+				new BasicAction(getMessage(getPlacesImportLabelKey()), getMessage(getPlacesImportTooltipKey()),
+						Icons.imporrt.getIcon());
 		importAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -390,7 +408,9 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 		});
 
-		exportAction = new BasicAction(getMessage(getPlacesExportLabelKey()), getMessage(getPlacesExportTooltipKey()), Icons.export.getIcon());
+		exportAction =
+				new BasicAction(getMessage(getPlacesExportLabelKey()), getMessage(getPlacesExportTooltipKey()),
+						Icons.export.getIcon());
 		exportAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -399,18 +419,24 @@ public class PlacesPanel extends AbstractThemePanel
 				exportPlaces();
 			}
 		});
-		
-		nextAction = new BasicAction(getMessage(getPlacesNextLabelKey()), getMessage(getPlacesNextTooltipKey()), Icons.down.getIcon());
-		nextAction.addActionListener(new ActionListener(){
+
+		nextAction =
+				new BasicAction(getMessage(getPlacesNextLabelKey()), getMessage(getPlacesNextTooltipKey()),
+						Icons.down.getIcon());
+		nextAction.addActionListener(new ActionListener()
+		{
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				nextPlace();
 			}
 		});
-		
-		previousAction = new BasicAction(getMessage(getPlacesPreviousLabelKey()), getMessage(getPlacesPreviousTooltipKey()), Icons.up.getIcon());
-		previousAction.addActionListener(new ActionListener(){
+
+		previousAction =
+				new BasicAction(getMessage(getPlacesPreviousLabelKey()), getMessage(getPlacesPreviousTooltipKey()),
+						Icons.up.getIcon());
+		previousAction.addActionListener(new ActionListener()
+		{
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
@@ -553,8 +579,10 @@ public class PlacesPanel extends AbstractThemePanel
 		ListItem item = (ListItem) list.getSelectedValue();
 		if (item != null)
 		{
-			int value = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the place '" + item.place.getLabel() + "'?",
-													  "Delete place", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			int value =
+					JOptionPane.showConfirmDialog(this,
+							"Are you sure you want to delete the place '" + item.place.getLabel() + "'?",
+							"Delete place", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			if (value == JOptionPane.YES_OPTION)
 			{
 				model.removeElement(item);
@@ -572,8 +600,9 @@ public class PlacesPanel extends AbstractThemePanel
 
 	public void deleteAllPlacesWarn()
 	{
-		int value = JOptionPane.showConfirmDialog(frame, "All places will be deleted!\nAre you sure?", "Delete all places",
-												  JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+		int value =
+				JOptionPane.showConfirmDialog(frame, "All places will be deleted!\nAre you sure?", "Delete all places",
+						JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 		if (value == JOptionPane.YES_OPTION)
 		{
 			deleteAllPlaces();
@@ -622,15 +651,15 @@ public class PlacesPanel extends AbstractThemePanel
 	private synchronized void nextPlace()
 	{
 		stopAllMotion();
-		
+
 		int index = getSelectedPlaceIndex();
 		int nextIndex = (index + 1) % places.size();
-		
+
 		if (nextIndex == index || places.isEmpty())
 		{
 			return;
 		}
-		
+
 		Place place = places.get(nextIndex);
 		selectPlace(place);
 		flyToPlace(place);
@@ -639,20 +668,20 @@ public class PlacesPanel extends AbstractThemePanel
 	private synchronized void previousPlace()
 	{
 		stopAllMotion();
-		
+
 		int index = getSelectedPlaceIndex();
 		int previousIndex = ((index - 1) + places.size()) % places.size();
-		
+
 		if (previousIndex == index || places.isEmpty())
 		{
 			return;
 		}
-		
+
 		Place place = places.get(previousIndex);
 		selectPlace(place);
 		flyToPlace(place);
 	}
-	
+
 	private void stopAllMotion()
 	{
 		if (playing)
@@ -662,7 +691,7 @@ public class PlacesPanel extends AbstractThemePanel
 		wwd.getView().stopMovement();
 		wwd.getView().stopAnimations();
 	}
-	
+
 	private synchronized void playPlaces()
 	{
 		if (!playing)
@@ -776,7 +805,7 @@ public class PlacesPanel extends AbstractThemePanel
 
 			double minZoom = place.getMinZoom();
 			double maxZoom = place.getMaxZoom();
-			
+
 			if (minZoom >= 0 && elevation > minZoom)
 			{
 				elevation = Math.max(minZoom, 1000);
@@ -814,7 +843,7 @@ public class PlacesPanel extends AbstractThemePanel
 		// - fade OOO layers from current to 0 between 0.0 and 0.5 percent
 		// - move layers to correct positions at 0.5 percent
 		// - fade OOO layers from 0 to new between 0.5 and 1.0 percent
-		
+
 		//TODO most of the above is implemented, apart from reordering
 		//see revision 1331 for a almost-working reordering implementation
 
@@ -1035,8 +1064,8 @@ public class PlacesPanel extends AbstractThemePanel
 				}
 				catch (Exception e)
 				{
-					JOptionPane.showMessageDialog(frame, "Could not import " + file.getName(),
-												  "Import error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frame, "Could not import " + file.getName(), "Import error",
+							JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}
@@ -1064,8 +1093,10 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 			if (file.exists())
 			{
-				int answer = JOptionPane.showConfirmDialog(frame, file.getAbsolutePath() + " already exists.\nDo you want to replace it?", 
-													       "Export", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+				int answer =
+						JOptionPane.showConfirmDialog(frame, file.getAbsolutePath()
+								+ " already exists.\nDo you want to replace it?", "Export", JOptionPane.YES_NO_OPTION,
+								JOptionPane.WARNING_MESSAGE);
 				if (answer != JOptionPane.YES_OPTION)
 				{
 					file = null;
@@ -1106,7 +1137,8 @@ public class PlacesPanel extends AbstractThemePanel
 		}
 
 		@Override
-		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+				boolean cellHasFocus)
 		{
 			Color background = isSelected ? list.getSelectionBackground() : list.getBackground();
 
@@ -1153,17 +1185,14 @@ public class PlacesPanel extends AbstractThemePanel
 		}
 
 		if (theme.isPlacesPersistanceFilenameSet())
-		{	
+		{
 			placesPersistanceFilename = theme.getPlacesPersistanceFilename();
 			loadPlaces(getPlacesFile(), false);
 		}
-		else
-		{
-			loadPlaces(Settings.getSettingsFile(), true);
-		}
-		
+		loadPlaces(Settings.getSettingsFile(), true);
+
 		persistPlaces = theme.isPersistPlaces();
-		
+
 		// If no places were loaded, initialise from set path, if provided
 		if (places.isEmpty() && theme.getPlacesInitialisationPath() != null)
 		{
@@ -1249,7 +1278,8 @@ public class PlacesPanel extends AbstractThemePanel
 	}
 
 	/**
-	 * @return Whether any nodes in the tree given by the provided root node are enabled
+	 * @return Whether any nodes in the tree given by the provided root node are
+	 *         enabled
 	 */
 	private boolean anyEnabled(INode node)
 	{

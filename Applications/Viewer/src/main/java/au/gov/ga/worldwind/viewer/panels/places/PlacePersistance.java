@@ -29,9 +29,10 @@ public class PlacePersistance
 	/**
 	 * Read the places list from the provided XML source.
 	 * <p/>
-	 * Supports all source objects supported by {@link XMLUtil#getElementFromSource(Object)}.
+	 * Supports all source objects supported by
+	 * {@link XMLUtil#getElementFromSource(Object)}.
 	 * <p/>
-	 * Also supports an optional context URL to use for loading relative paths. 
+	 * Also supports an optional context URL to use for loading relative paths.
 	 */
 	public static List<Place> readFromXML(Object source, URL context)
 	{
@@ -88,7 +89,8 @@ public class PlacePersistance
 		place.setSaveCamera(XMLUtil.getBoolean(element, "SaveCamera", place.isSaveCamera(), xpath));
 		place.setEyePosition(XMLUtil.getPosition(element, "EyePosition", xpath));
 		place.setUpVector(XMLUtil.getVec4(element, "UpVector", xpath));
-		place.setExcludeFromPlaylist(XMLUtil.getBoolean(element, "ExcludeFromPlaylist", place.isExcludeFromPlaylist(), xpath));
+		place.setExcludeFromPlaylist(XMLUtil.getBoolean(element, "ExcludeFromPlaylist", place.isExcludeFromPlaylist(),
+				xpath));
 		try
 		{
 			place.setLayers(LayerTreePersistance.readFromXML(element, context));
