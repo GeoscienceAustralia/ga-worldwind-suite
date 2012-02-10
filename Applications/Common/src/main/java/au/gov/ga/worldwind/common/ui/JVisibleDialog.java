@@ -6,6 +6,11 @@ import java.util.List;
 
 import javax.swing.JDialog;
 
+/**
+ * JDialog that allows listening for visibility events.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class JVisibleDialog extends JDialog
 {
 	public static interface VisibilityListener
@@ -16,7 +21,7 @@ public class JVisibleDialog extends JDialog
 	private List<VisibilityListener> listeners = new ArrayList<VisibilityListener>();
 	private boolean centerInOwner = false;
 	private Frame owner;
-	
+
 	public JVisibleDialog(Frame owner, String title)
 	{
 		super(owner, title);
@@ -26,7 +31,7 @@ public class JVisibleDialog extends JDialog
 	@Override
 	public void setVisible(boolean b)
 	{
-		if(b && centerInOwner)
+		if (b && centerInOwner)
 		{
 			setLocationRelativeTo(owner);
 			centerInOwner = false;

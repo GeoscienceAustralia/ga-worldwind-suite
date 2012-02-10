@@ -8,6 +8,12 @@ import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 
+/**
+ * {@link JDialog} used for displaying an image. The image is scrollable if
+ * larger than the dialog.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ImageDialog extends JDialog
 {
 	public ImageDialog(Frame frame, String title, boolean modal, final Image image, ImageIcon icon)

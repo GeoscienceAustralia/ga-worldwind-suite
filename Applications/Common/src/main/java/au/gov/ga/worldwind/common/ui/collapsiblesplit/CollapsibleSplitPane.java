@@ -16,6 +16,13 @@ import java.awt.event.MouseEvent;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputAdapter;
 
+/**
+ * {@link JPanel} subclass that acts as a container for {@link ICollapsible}
+ * components. It uses the {@link CollapsibleSplitLayout} to layout its
+ * children, and implements the draggable dividers between its child components.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class CollapsibleSplitPane extends JPanel implements CollapseListener
 {
 	private boolean continuousLayout = true;
@@ -53,11 +60,23 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 		super.setLayout(mgr);
 	}
 
+	/**
+	 * Add the given listener to the given component.
+	 * 
+	 * @param comp
+	 * @param listener
+	 */
 	public void addListener(Component comp, CollapsibleSplitListener listener)
 	{
 		getLayout().addListener(comp, listener);
 	}
 
+	/**
+	 * Remove the given listener from the given component.
+	 * 
+	 * @param comp
+	 * @param listener
+	 */
 	public void removeListener(Component comp, CollapsibleSplitListener listener)
 	{
 		getLayout().removeListener(comp, listener);
@@ -105,11 +124,22 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 		super.remove(index);
 	}
 
+	/**
+	 * @return Should the layout be updated during dragging the dividers, or
+	 *         just at the end of the drag?
+	 */
 	public boolean isContinuousLayout()
 	{
 		return continuousLayout;
 	}
 
+	/**
+	 * Enable/disable updating the layout when dragging the dividers. If true,
+	 * the layout is updated while dragging, if false it is only updated at the
+	 * end of the drag.
+	 * 
+	 * @param continuousLayout
+	 */
 	public void setContinuousLayout(boolean continuousLayout)
 	{
 		this.continuousLayout = continuousLayout;
@@ -126,11 +156,17 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 		}
 	}
 
+	/**
+	 * Class responsible for painting dividers whilst they are being dragged.
+	 */
 	public static abstract class DividerPainter
 	{
 		public abstract void paint(Graphics g, Rectangle bounds);
 	}
 
+	/**
+	 * Default divider painter, simply fills the divider with black.
+	 */
 	private class DefaultDividerPainter extends DividerPainter
 	{
 		@Override
@@ -142,6 +178,13 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 		}
 	}
 
+	/**
+	 * Update the cursor when the user is dragging or hovering over a divider.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param inside
+	 */
 	private void updateCursor(int x, int y, boolean inside)
 	{
 		if (dragging)
@@ -154,13 +197,20 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 			int index = getLayout().dividerAt(x, y);
 			if (index >= 0)
 			{
-				cursorID =
-						getLayout().isVertical() ? Cursor.N_RESIZE_CURSOR : Cursor.E_RESIZE_CURSOR;
+				cursorID = getLayout().isVertical() ? Cursor.N_RESIZE_CURSOR : Cursor.E_RESIZE_CURSOR;
 			}
 		}
 		setCursor(Cursor.getPredefinedCursor(cursorID));
 	}
 
+	/**
+	 * Called when the user begins dragging a divider.
+	 * 
+	 * @param x
+	 *            mouse x-coordinate
+	 * @param y
+	 *            mouse y-coordinate
+	 */
 	private void startDrag(int x, int y)
 	{
 		if (!dragging)
@@ -183,6 +233,14 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 		}
 	}
 
+	/**
+	 * Called when the mouse moves while dragging a divider.
+	 * 
+	 * @param x
+	 *            mouse x-coordinate
+	 * @param y
+	 *            mouse y-coordinate
+	 */
 	private void updateDrag(int x, int y)
 	{
 		if (dragging)
@@ -191,6 +249,14 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 		}
 	}
 
+	/**
+	 * Called when the user finishes dragging a divider.
+	 * 
+	 * @param x
+	 *            mouse x-coordinate
+	 * @param y
+	 *            mouse y-coordinate
+	 */
 	private void finishDrag(int x, int y)
 	{
 		if (dragging)
@@ -205,6 +271,10 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 		}
 	}
 
+	/**
+	 * Called when the user cancels a drag operation (ie presses ESC while
+	 * dragging).
+	 */
 	private void cancelDrag()
 	{
 		if (dragging)
@@ -219,6 +289,14 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 		}
 	}
 
+	/**
+	 * Helper method that calls setDividerPosition on the layout, and then
+	 * repaints the component.
+	 * 
+	 * @param index
+	 * @param x
+	 * @param y
+	 */
 	private void setDividerPosition(int index, int x, int y)
 	{
 		dragActual = getLayout().setDividerPosition(index, x, y);
@@ -235,6 +313,9 @@ public class CollapsibleSplitPane extends JPanel implements CollapseListener
 		}
 	}
 
+	/**
+	 * Helper class that handles mouse and keyboard input for this component.
+	 */
 	private class InputHandler extends MouseInputAdapter implements KeyListener
 	{
 		@Override

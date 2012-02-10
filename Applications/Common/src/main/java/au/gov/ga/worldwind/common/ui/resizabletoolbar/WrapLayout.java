@@ -8,6 +8,8 @@ import java.awt.Insets;
 
 /**
  * FlowLayout subclass that fully supports wrapping of components.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class WrapLayout extends FlowLayout
 {

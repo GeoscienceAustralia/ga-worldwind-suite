@@ -84,7 +84,7 @@ public class SideBar extends JPanel implements ChangeOfAnimationListener
 			group.add(panel.getPanel(), BorderLayout.CENTER);
 
 			CollapsibleSplitConstraints c = new CollapsibleSplitConstraints();
-			c.expanded = panel.isExpanded();
+			c.collapsed = !panel.isExpanded();
 			c.resizable = panel.isResizable();
 			c.weight = panel.getWeight();
 

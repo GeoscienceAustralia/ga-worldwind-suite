@@ -9,8 +9,12 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import au.gov.ga.worldwind.common.ui.ClearableBasicTreeUI;
-
+/**
+ * Helper class for the {@link LazyTree}. Generates {@link SwingWorker}s used to
+ * load lazy node's children whenever a lazy node is expanded.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LazyTreeController implements TreeWillExpandListener
 {
 	private SwingWorkerFactory<MutableTreeNode[], ?> workerFactory = new DefaultWorkerFactory();
@@ -45,20 +49,23 @@ public class LazyTreeController implements TreeWillExpandListener
 		}
 	}
 
-	public void collapseNode(final LazyTreeNode node)
+	protected void collapseNode(final LazyTreeNode node)
 	{
+		//if expanding this node last time caused an error, collapsing it should reset it
+		//so that next time it is expanded it can attempt loading again
 		if (node.isErrorLoading())
 		{
 			node.reset();
 		}
 	}
 
-	public void expandNode(final LazyTreeNode node)
+	protected void expandNode(final LazyTreeNode node)
 	{
 		if (node.areChildrenLoaded())
 		{
 			return;
 		}
+		//show a loading node, and then try loading the children
 		node.setChildren(createLoadingNode());
 		createSwingWorker(node).execute();
 	}
@@ -105,10 +112,7 @@ public class LazyTreeController implements TreeWillExpandListener
 			public void done(MutableTreeNode[] nodes)
 			{
 				node.setChildren(nodes);
-				if (tree.getUI() instanceof ClearableBasicTreeUI)
-				{
-					((ClearableBasicTreeUI) tree.getUI()).relayout();
-				}
+				tree.getUI().relayout();
 			}
 
 			@Override
@@ -144,12 +148,10 @@ public class LazyTreeController implements TreeWillExpandListener
 		public SwingWorker<T, V> getInstance(final IWorker<T> worker);
 	}
 
-	public static class DefaultWorkerFactory implements
-			SwingWorkerFactory<MutableTreeNode[], Object>
+	public static class DefaultWorkerFactory implements SwingWorkerFactory<MutableTreeNode[], Object>
 	{
 		@Override
-		public SwingWorker<MutableTreeNode[], Object> getInstance(
-				final IWorker<MutableTreeNode[]> worker)
+		public SwingWorker<MutableTreeNode[], Object> getInstance(final IWorker<MutableTreeNode[]> worker)
 		{
 			return new SwingWorker<MutableTreeNode[], Object>()
 			{

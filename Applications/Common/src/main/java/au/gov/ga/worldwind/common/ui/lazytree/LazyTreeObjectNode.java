@@ -2,7 +2,13 @@ package au.gov.ga.worldwind.common.ui.lazytree;
 
 import javax.swing.tree.MutableTreeNode;
 
-
+/**
+ * {@link LazyTreeNode} concrete subclass that takes {@link ITreeObject}s as its
+ * user object. If the user object is an instance of {@link ILazyTreeObject},
+ * it's children are loaded lazily when expanded.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LazyTreeObjectNode extends LazyTreeNode
 {
 	public LazyTreeObjectNode(ITreeObject userObject, LazyTreeModel model)

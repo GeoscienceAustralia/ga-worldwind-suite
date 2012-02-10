@@ -1,8 +1,14 @@
 package au.gov.ga.worldwind.common.ui.lazytree;
 
+import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 
+/**
+ * {@link JTree} node that supports loading its children lazily when expanded.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class LazyTreeNode extends DefaultMutableTreeNode
 {
 	private LazyTreeModel model;

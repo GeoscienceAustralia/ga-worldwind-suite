@@ -13,6 +13,8 @@ import javax.swing.ListModel;
  * An implementation of the {@link ListModel} interface that is backed by a {@link List}.
  * <p/>
  * Add and remove events are fired when elements are added or removed from the backing list.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ListBackedModel<T> extends AbstractListModel implements List<T>
 {

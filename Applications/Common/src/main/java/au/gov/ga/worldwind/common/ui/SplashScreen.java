@@ -19,7 +19,7 @@ import javax.swing.JLabel;
  * Displays the default NASA World Wind splashscreen, and hides when WorldWindow
  * starts rendering.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class SplashScreen
 {

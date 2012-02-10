@@ -8,18 +8,18 @@ import java.awt.Window;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
-
 /**
  * A base implementation of the {@link CollapsiblePanel} interface that extends
  * {@link JPanel}.
  * <p/>
  * Provides convenience implementations of the {@link CollapsiblePanel} methods.
- *
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public abstract class CollapsiblePanelBase extends JPanel implements CollapsiblePanel
 {
 	private static final long serialVersionUID = 20100906L;
-	
+
 	private boolean resizable = true;
 	private boolean expanded = true;
 	private boolean activated = true;
@@ -29,7 +29,7 @@ public abstract class CollapsiblePanelBase extends JPanel implements Collapsible
 	{
 		super(new BorderLayout());
 	}
-	
+
 	@Override
 	public JPanel getPanel()
 	{
@@ -89,24 +89,26 @@ public abstract class CollapsiblePanelBase extends JPanel implements Collapsible
 	{
 		return null;
 	}
-	
+
 	protected Window getParentWindow()
 	{
 		Component comp = this;
-        while (comp != null && !(comp instanceof Window)) {
-            comp = comp.getParent();
-        }
+		while (comp != null && !(comp instanceof Window))
+		{
+			comp = comp.getParent();
+		}
 
-        return (Window)comp;
+		return (Window) comp;
 	}
-	
+
 	protected Frame getParentFrame()
 	{
 		Component comp = this;
-        while (comp != null && !(comp instanceof Frame)) {
-            comp = comp.getParent();
-        }
+		while (comp != null && !(comp instanceof Frame))
+		{
+			comp = comp.getParent();
+		}
 
-        return (Frame)comp;
+		return (Frame) comp;
 	}
 }

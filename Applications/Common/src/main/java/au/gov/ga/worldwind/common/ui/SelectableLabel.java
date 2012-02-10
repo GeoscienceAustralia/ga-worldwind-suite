@@ -7,6 +7,8 @@ import javax.swing.UIManager;
 /**
  * A simple extension of the {@link JTextField} to make it appear like a label,
  * but allow text selection via the mouse
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class SelectableLabel extends JTextArea
 {

@@ -6,6 +6,12 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
+/**
+ * {@link JTextField} subclass that only allows the user to input valid integer
+ * values. Also allows limiting the input to positive values.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class JIntegerField extends JTextField
 {
 	private Integer value;
@@ -17,7 +23,7 @@ public class JIntegerField extends JTextField
 		super();
 		setValue(value);
 	}
-	
+
 	public JIntegerField(boolean isPositive, Integer initialValue)
 	{
 		setValue(initialValue);
@@ -70,11 +76,9 @@ public class JIntegerField extends JTextField
 	private class IntegerDocument extends PlainDocument
 	{
 		@Override
-		public void insertString(int offs, String str, AttributeSet a)
-				throws BadLocationException
+		public void insertString(int offs, String str, AttributeSet a) throws BadLocationException
 		{
-			String result = getText(0, offs) + str
-					+ getText(offs, getLength() - offs);
+			String result = getText(0, offs) + str + getText(offs, getLength() - offs);
 			if (checkAndSet(result))
 				super.insertString(offs, str, a);
 		}
@@ -82,8 +86,7 @@ public class JIntegerField extends JTextField
 		@Override
 		public void remove(int offs, int len) throws BadLocationException
 		{
-			String result = getText(0, offs)
-					+ getText(offs + len, getLength() - offs - len);
+			String result = getText(0, offs) + getText(offs + len, getLength() - offs - len);
 			if (checkAndSet(result))
 				super.remove(offs, len);
 		}

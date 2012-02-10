@@ -16,6 +16,11 @@ import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.JToolBar;
 
+/**
+ * {@link BasicAction} subclass that adds toggleable checkbox style selection.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SelectableAction extends BasicAction
 {
 	public SelectableAction(String name, Icon icon, boolean selected)
@@ -85,7 +90,7 @@ public class SelectableAction extends BasicAction
 		registerButton(item, false);
 		menu.add(item);
 	}
-	
+
 	public void addToPopupMenu(JPopupMenu menu)
 	{
 		JCheckBoxMenuItem item = new JCheckBoxMenuItem(this);

@@ -10,6 +10,8 @@ import javax.swing.UIManager;
 /**
  * A text field that displays a hint when no text is entered and the field is not
  * in focus.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class HintTextField extends JTextField implements FocusListener
 {

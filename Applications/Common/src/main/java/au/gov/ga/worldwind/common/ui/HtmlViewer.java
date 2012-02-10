@@ -34,6 +34,13 @@ import javax.swing.plaf.basic.BasicHTML;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.message.CommonMessageConstants;
 
+/**
+ * {@link JDialog} used for displaying a simple HTML page. Uses a
+ * {@link JEditorPane} to display the HTML. Uses the {@link DefaultLauncher} to
+ * open any links in the default browser.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class HtmlViewer extends JDialog
 {
 	public HtmlViewer(Frame owner, String title, String resource)

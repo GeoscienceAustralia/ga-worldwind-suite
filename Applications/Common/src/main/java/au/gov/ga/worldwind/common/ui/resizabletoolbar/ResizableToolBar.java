@@ -4,6 +4,12 @@ import java.awt.Dimension;
 
 import javax.swing.JToolBar;
 
+/**
+ * {@link JToolBar} subclass that uses the {@link WrapLayout} layout so that it
+ * can be resized (icons are wrapped to the next line if too small).
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ResizableToolBar extends JToolBar
 {
 	public ResizableToolBar()

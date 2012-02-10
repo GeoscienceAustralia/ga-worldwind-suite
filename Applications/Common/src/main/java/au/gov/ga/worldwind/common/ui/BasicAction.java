@@ -9,6 +9,12 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
 
+/**
+ * Basic concrete implementation of {@link AbstractAction}. Has a name, icon,
+ * and tooltip.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class BasicAction extends AbstractAction
 {
 	private List<ActionListener> listeners = new ArrayList<ActionListener>();
@@ -31,11 +37,22 @@ public class BasicAction extends AbstractAction
 			listeners.get(i).actionPerformed(e);
 	}
 
+	/**
+	 * Add a listener that is notified when this action is performed.
+	 * 
+	 * @param listener
+	 *            Listener to add
+	 */
 	public void addActionListener(ActionListener listener)
 	{
 		listeners.add(listener);
 	}
 
+	/**
+	 * Remove a listener from this action.
+	 * 
+	 * @param listener
+	 */
 	public void removeActionListener(ActionListener listener)
 	{
 		listeners.remove(listener);

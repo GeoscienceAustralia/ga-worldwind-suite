@@ -1,10 +1,11 @@
 package au.gov.ga.worldwind.common.ui;
 
 /**
- * A wrapper exception that allows checked exceptions from the EDT thread to
- * be wrapped in an unchecked exception so clients can decide if they want to 
- * deal with them or not.
- *
+ * A wrapper exception that allows checked exceptions from the EDT thread to be
+ * wrapped in an unchecked exception so clients can decide if they want to deal
+ * with them or not.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class SwingEDTException extends RuntimeException
 {

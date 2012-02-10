@@ -6,6 +6,12 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
+/**
+ * {@link JTextField} subclass that only allows the user to input valid double
+ * values. Also allows limiting the input to positive values.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class JDoubleField extends JTextField
 {
 	private Double value;

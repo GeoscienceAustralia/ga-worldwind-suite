@@ -11,6 +11,12 @@ import javax.swing.JLabel;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 
+/**
+ * {@link JLabel} subclass that provides a {@link Scrollable} image
+ * implementation.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ScrollableImage extends JLabel implements Scrollable, MouseMotionListener
 {
 	private int maxUnitIncrement = 1;
@@ -85,8 +91,7 @@ public class ScrollableImage extends JLabel implements Scrollable, MouseMotionLi
 		//and the nearest tick mark in the indicated direction.
 		if (direction < 0)
 		{
-			int newPosition =
-					currentPosition - (currentPosition / maxUnitIncrement) * maxUnitIncrement;
+			int newPosition = currentPosition - (currentPosition / maxUnitIncrement) * maxUnitIncrement;
 			return (newPosition == 0) ? maxUnitIncrement : newPosition;
 		}
 		else

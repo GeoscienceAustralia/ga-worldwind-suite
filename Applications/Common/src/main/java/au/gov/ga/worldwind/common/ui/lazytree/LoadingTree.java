@@ -8,6 +8,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+/**
+ * {@link JTree} subclass that detects loading tree nodes and ensures the
+ * {@link JTree#imageUpdate(Image, int, int, int, int, int)} function returns
+ * the correct result when there are loading nodes.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LoadingTree extends JTree
 {
 	public LoadingTree()
@@ -48,7 +55,7 @@ public class LoadingTree extends JTree
 		return anyLoading;
 	}
 
-	private boolean isLoading(Object node)
+	protected boolean isLoading(Object node)
 	{
 		if (node instanceof ILoadingNode)
 		{

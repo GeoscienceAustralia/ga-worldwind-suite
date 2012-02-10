@@ -6,6 +6,8 @@ import javax.swing.SwingUtilities;
 
 /**
  * Utilities for working with Swing GUIs
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class SwingUtil
 {

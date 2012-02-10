@@ -1,5 +1,10 @@
 package au.gov.ga.worldwind.common.ui.lazytree;
 
+/**
+ * 
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public interface ILazyTreeObject extends ITreeObject
 {
 	/**

@@ -1,21 +1,41 @@
 package au.gov.ga.worldwind.common.ui;
 
 import java.awt.Graphics;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JComponent;
 import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.TreePath;
 
+/**
+ * {@link BasicTreeUI} subclass that adds the ability to relayout the tree (or
+ * certain subpaths).
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ClearableBasicTreeUI extends BasicTreeUI
 {
 	private boolean relayout = false;
-	private TreePath invalidatePath = null;
+	private Set<TreePath> invalidatedPaths = new HashSet<TreePath>();
 
+	/**
+	 * Relayout the specified tree path.
+	 * 
+	 * @param path
+	 *            Path to relayout
+	 */
 	public void relayout(TreePath path)
 	{
-		invalidatePath = path;
+		synchronized (invalidatedPaths)
+		{
+			invalidatedPaths.add(path);
+		}
 	}
 
+	/**
+	 * Relayout the tree associated with this UI.
+	 */
 	public void relayout()
 	{
 		relayout = true;
@@ -24,19 +44,28 @@ public class ClearableBasicTreeUI extends BasicTreeUI
 	@Override
 	public void paint(Graphics g, JComponent c)
 	{
-		if (relayout || invalidatePath != null)
+		synchronized (invalidatedPaths)
 		{
-			if (invalidatePath == null)
-				treeState.invalidateSizes();
-			else
-				treeState.invalidatePathBounds(invalidatePath);
+			if (relayout || !invalidatedPaths.isEmpty())
+			{
+				if (relayout)
+				{
+					treeState.invalidateSizes();
+				}
+				else
+				{
+					for (TreePath path : invalidatedPaths)
+					{
+						treeState.invalidatePathBounds(path);
+					}
+				}
 
-			updateSize();
+				updateSize();
 
-			relayout = false;
-			invalidatePath = null;
+				relayout = false;
+				invalidatedPaths.clear();
+			}
 		}
-
 		super.paint(g, c);
 	}
 }
