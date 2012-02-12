@@ -2,6 +2,12 @@ package au.gov.ga.worldwind.common.util;
 
 import gov.nasa.worldwind.avlist.AVKey;
 
+/**
+ * {@link AVKey} extension with extra keys used for this project.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
+ */
 public interface AVKeyMore extends AVKey
 {
 	final static String CONTEXT_URL = "au.gov.ga.worldwind.AVKeyMore.ContextURL";
@@ -32,43 +38,48 @@ public interface AVKeyMore extends AVKey
 	final static String FOLLOW_TERRAIN = "au.gov.ga.worldwind.AVKeyMore.FollowTerrain";
 	final static String SUBSEGMENTS = "au.gov.ga.worldwind.AVKeyMore.Subsegments";
 	final static String PATH = "au.gov.ga.worldwind.AVKeyMore.Path";
-	
+
 	//data layers
 	final static String DATA_LAYER_PROVIDER = "au.gov.ga.worldwind.AVKeyMore.DataLayerProvider";
 	final static String DATA_LAYER_STYLES = "au.gov.ga.worldwind.AVKeyMore.DataLayerStyles";
 	final static String DATA_LAYER_ATTRIBUTES = "au.gov.ga.worldwind.AVKeyMore.DataLayerAttributes";
-	
+
 	//geometry layer
 	final static String SHAPE_TYPE = "au.gov.ga.worldwind.AVKeyMore.ShapeType";
-	
+
 	//borehole layer
 	final static String BOREHOLE_SAMPLE_STYLES = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleStyles";
 	final static String BOREHOLE_SAMPLE_ATTRIBUTES = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleAttributes";
-	final static String BOREHOLE_UNIQUE_IDENTIFIER_ATTRIBUTE = "au.gov.ga.worldwind.AVKeyMore.BoreholeUniqueIdentifierAttribute";
-	final static String BOREHOLE_SAMPLE_DEPTH_FROM_ATTRIBUTE = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthFromAttribute";
-	final static String BOREHOLE_SAMPLE_DEPTH_TO_ATTRIBUTE = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthToAttribute";
-	final static String BOREHOLE_SAMPLE_DEPTH_ATTRIBUTES_POSITIVE = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthAttributesPositive";
+	final static String BOREHOLE_UNIQUE_IDENTIFIER_ATTRIBUTE =
+			"au.gov.ga.worldwind.AVKeyMore.BoreholeUniqueIdentifierAttribute";
+	final static String BOREHOLE_SAMPLE_DEPTH_FROM_ATTRIBUTE =
+			"au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthFromAttribute";
+	final static String BOREHOLE_SAMPLE_DEPTH_TO_ATTRIBUTE =
+			"au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthToAttribute";
+	final static String BOREHOLE_SAMPLE_DEPTH_ATTRIBUTES_POSITIVE =
+			"au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthAttributesPositive";
 
 	//historic earthquakes layer
 	final static String COLORING = "au.gov.ga.worldwind.AVKeyMore.Coloring";
 	final static String COLORING_MIN_DATE = "au.gov.ga.worldwind.AVKeyMore.ColoringMinDate";
 	final static String COLORING_MAX_DATE = "au.gov.ga.worldwind.AVKeyMore.ColoringMaxDate";
-	
+
 	//crust layer
 	final static String SCALE = "au.gov.ga.worldwind.AVKeyMore.Scale";
 	final static String WRAP = "au.gov.ga.worldwind.AVKeyMore.Wrap";
-	
+
 	//elevation model
 	final static String EXTRACT_ZIP_ENTRY = "au.gov.ga.worldwind.AVKeyMore.ExtractZipEntry";
-	
+
 	//voxet model
 	final static String BILINEAR_MINIFICATION = "au.gov.ga.worldwind.AVKeyMore.BilinearMinification";
 	final static String SUBSAMPLING_U = "au.gov.ga.worldwind.AVKeyMore.SubsamplingU";
 	final static String SUBSAMPLING_V = "au.gov.ga.worldwind.AVKeyMore.SubsamplingV";
 	final static String SUBSAMPLING_W = "au.gov.ga.worldwind.AVKeyMore.SubsamplingW";
 	final static String DYNAMIC_SUBSAMPLING = "au.gov.ga.worldwind.AVKeyMore.DynamicSubsampling";
-	final static String DYNAMIC_SUBSAMPLING_SAMPLES_PER_AXIS = "au.gov.ga.worldwind.AVKeyMore.DynamicSubsamplingSamplesPerAxis";
-	
+	final static String DYNAMIC_SUBSAMPLING_SAMPLES_PER_AXIS =
+			"au.gov.ga.worldwind.AVKeyMore.DynamicSubsamplingSamplesPerAxis";
+
 	//volume layer
 	final static String MAX_VARIANCE = "au.gov.ga.worldwind.AVKeyMore.MaxVariance";
 	final static String NO_DATA_COLOR = "au.gov.ga.worldwind.AVKeyMore.NoDataColor";

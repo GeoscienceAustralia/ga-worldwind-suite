@@ -19,8 +19,15 @@ import au.gov.ga.worldwind.common.downloader.ZipRetriever;
  */
 public class IOUtil extends WWIO
 {
-	public static String readStreamToStringKeepingNewlines(InputStream stream,
-			String encoding) throws IOException
+	/**
+	 * Read the given stream into a string, keeping newlines.
+	 * 
+	 * @param stream
+	 * @param encoding
+	 * @return
+	 * @throws IOException
+	 */
+	public static String readStreamToStringKeepingNewlines(InputStream stream, String encoding) throws IOException
 	{
 		if (stream == null)
 		{
@@ -67,7 +74,7 @@ public class IOUtil extends WWIO
 			catch (Exception e)
 			{
 				String message = "Error loading zip file at '" + url + "': " + e.getLocalizedMessage();
-	            Logging.logger().warning(message);
+				Logging.logger().warning(message);
 			}
 			finally
 			{
@@ -75,7 +82,7 @@ public class IOUtil extends WWIO
 					is.close();
 			}
 		}
-		if(byteBuffer == null)
+		if (byteBuffer == null)
 		{
 			byteBuffer = readURLContentToBuffer(url);
 		}
@@ -89,8 +96,7 @@ public class IOUtil extends WWIO
 	 * {@link ByteBuffer} with a {@link BufferWrapper} that can manipulate the
 	 * underlying data if needed.
 	 */
-	public static BufferWrapper readByteBuffer(URL url, String pixelType,
-			String byteOrder) throws IOException
+	public static BufferWrapper readByteBuffer(URL url, String pixelType, String byteOrder) throws IOException
 	{
 		ByteBuffer byteBuffer = readByteBuffer(url);
 

@@ -9,15 +9,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 
+/**
+ * Helper class that extracts the native libraries required by the WorldWind
+ * applications into a temporary directory, and then adds the directory to the
+ * java.library.path.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class NativeLibraries
 {
 	protected final static String BASE_DIR = "/native/";
 	protected final static String TEMP_DIR = "ga-worldwind-natives";
-	protected static final String[] libraries = new String[] { "jogl",
-			"jogl_awt", "jogl_cg", "gluegen-rt", "gdalalljni", "gdalalljni32",
-			"gdalalljni64", "webview", "WebView32", "WebView64" };
+	protected static final String[] libraries = new String[] { "jogl", "jogl_awt", "jogl_cg", "gluegen-rt",
+			"gdalalljni", "gdalalljni32", "gdalalljni64", "webview", "WebView32", "WebView64" };
 	protected static final String JAVA_LIBRARY_PATH = "java.library.path";
 
+	/**
+	 * Extract any native libraries found using the class-resource mechanism to
+	 * a temporary directory, and then add the temporary directory to the
+	 * java.library.path. Requires the Oracle JVM.
+	 */
 	public static void init()
 	{
 		String osName = System.getProperty("os.name").toLowerCase();
@@ -98,12 +109,12 @@ public class NativeLibraries
 			InputStream is = NativeLibraries.class.getResourceAsStream(library);
 			if (is != null)
 			{
-				if(!tmpdir.exists())
+				if (!tmpdir.exists())
 				{
 					tmpdir.mkdirs();
 				}
 				tmpdir.deleteOnExit();
-				
+
 				File file = new File(tmpdir, filename);
 				writeStreamToFile(is, file);
 				if (file.exists())
@@ -113,8 +124,8 @@ public class NativeLibraries
 				}
 			}
 		}
-		
-		if(anyLibrariesWritten)
+
+		if (anyLibrariesWritten)
 		{
 			String pathString = buildPathString(tmpdir.getAbsolutePath());
 			try
@@ -124,7 +135,7 @@ public class NativeLibraries
 			catch (Exception e)
 			{
 				String message = "Error altering java.library.path: " + e.getLocalizedMessage();
-	            Logging.logger().severe(message);
+				Logging.logger().severe(message);
 			}
 		}
 	}
@@ -177,8 +188,8 @@ public class NativeLibraries
 		return path.toString();
 	}
 
-	protected static void alterJavaLibraryPath(String newJavaLibraryPath)
-			throws IllegalAccessException, NoSuchFieldException
+	protected static void alterJavaLibraryPath(String newJavaLibraryPath) throws IllegalAccessException,
+			NoSuchFieldException
 	{
 		System.setProperty(JAVA_LIBRARY_PATH, newJavaLibraryPath);
 

@@ -4,6 +4,8 @@ import gov.nasa.worldwind.render.DrawContext;
 
 /**
  * An interface for services that can apply vertical exaggeration to an elevation value
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface VerticalExaggerationService
 {

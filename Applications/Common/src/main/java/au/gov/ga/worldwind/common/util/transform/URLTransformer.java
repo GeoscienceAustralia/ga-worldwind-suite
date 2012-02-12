@@ -7,21 +7,24 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Maintains a static list of {@link URLTransform}'s that can be applied in order using
- * the {@link #transform} methods.
+ * Maintains a static list of {@link URLTransform}'s that can be applied in
+ * order using the {@link #transform} methods.
  * <p/>
- * Examples of {@link URLTransform}s might be to change the port number based on the current environment,
- * or append request parameters to URLs matching a given pattern.
+ * Examples of {@link URLTransform}s might be to change the port number based on
+ * the current environment, or append request parameters to URLs matching a
+ * given pattern.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class URLTransformer
 {
 	private static List<URLTransform> transforms = new ArrayList<URLTransform>();
-	
+
 	public synchronized static void addTransform(URLTransform transform)
 	{
 		transforms.add(transform);
 	}
-	
+
 	public synchronized static void removeTransform(URLTransform transform)
 	{
 		transforms.remove(transform);
@@ -29,29 +32,29 @@ public class URLTransformer
 
 	public synchronized static URL transform(URL url) throws MalformedURLException
 	{
-		if(url == null)
+		if (url == null)
 			return null;
-		
+
 		return new URL(transform(url.toExternalForm()));
 	}
 
 	public synchronized static String transform(String url)
 	{
-		if(url == null)
+		if (url == null)
 			return null;
-		
-		for(URLTransform transform : transforms)
+
+		for (URLTransform transform : transforms)
 		{
 			url = transform.transformURL(url);
 		}
 		return url;
 	}
-	
+
 	public synchronized static void clearTransforms()
 	{
 		transforms.clear();
 	}
-	
+
 	public static List<URLTransform> getTransforms()
 	{
 		return Collections.unmodifiableList(transforms);

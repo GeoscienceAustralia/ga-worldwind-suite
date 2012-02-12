@@ -2,6 +2,14 @@ package au.gov.ga.worldwind.common.util;
 
 import java.util.Iterator;
 
+/**
+ * Provides the ability to create an {@link Iterable} of a subclass from an
+ * {@link Iterable} of one of its superclasses.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * 
+ * @param <E>
+ */
 public class IterableProxy<E> implements Iterable<E>
 {
 	private Iterable<? extends E> source;

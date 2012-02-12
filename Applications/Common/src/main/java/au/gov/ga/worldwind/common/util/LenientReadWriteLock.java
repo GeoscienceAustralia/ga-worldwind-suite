@@ -13,6 +13,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <p/>
  * Essentially treats the <code>writeLock</code> as the 'master lock' and permits reads and 
  * writes to the thread that holds the lock.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class LenientReadWriteLock implements ReadWriteLock
 {

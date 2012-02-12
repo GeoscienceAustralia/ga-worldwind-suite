@@ -2,6 +2,13 @@ package au.gov.ga.worldwind.common.util;
 
 import java.lang.reflect.Field;
 
+/**
+ * Utility class for disabling direct draw. This is required to run WorldWind
+ * without the UI flickering. Currently this is done in the webstart JNLP file,
+ * but this can be used when running a standalone instance of WorldWind.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DirectDraw
 {
 	public static void disableDirectDraw()
@@ -20,8 +27,7 @@ public class DirectDraw
 			{
 				try
 				{
-					windowsFlags = Class
-							.forName("sun.java2d.windows.WindowsFlags");
+					windowsFlags = Class.forName("sun.java2d.windows.WindowsFlags");
 				}
 				catch (ClassNotFoundException e2)
 				{

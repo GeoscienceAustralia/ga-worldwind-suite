@@ -27,6 +27,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 
+/**
+ * General utility methods.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
+ */
 public class Util
 {
 	/** The settings folder name to use for GA world wind settings */
@@ -653,7 +659,7 @@ public class Util
 	 */
 	public static int clamp(int value, int min, int max)
 	{
-		if(min > max)
+		if (min > max)
 		{
 			return clamp(value, max, min);
 		}
@@ -666,7 +672,7 @@ public class Util
 	 */
 	public static double clamp(double value, double min, double max)
 	{
-		if(min > max)
+		if (min > max)
 		{
 			return clamp(value, max, min);
 		}
@@ -679,7 +685,7 @@ public class Util
 	 */
 	public static float clamp(float value, float min, float max)
 	{
-		if(min > max)
+		if (min > max)
 		{
 			return clamp(value, max, min);
 		}
@@ -964,7 +970,7 @@ public class Util
 		}
 		return -1;
 	}
-	
+
 	public static int nextLowestPowerOf2Plus1(int v)
 	{
 		//based on http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2

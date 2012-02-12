@@ -3,8 +3,23 @@ package au.gov.ga.worldwind.common.util;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 
+/**
+ * Utility class for the creation of {@link CoordinateTransformation} and
+ * {@link SpatialReference} instances.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class CoordinateTransformationUtil
 {
+	/**
+	 * Create a {@link CoordinateTransformation} that projects from the given
+	 * projection string back to WGS84 (EPSG:4326).
+	 * 
+	 * @param wktOrEpsgOrProj4
+	 *            Projection string in Well Known Text form, EPSG code, or a
+	 *            Proj4 string
+	 * @return Coordinate transformation from the given projection to WGS84
+	 */
 	public static CoordinateTransformation getTransformationToWGS84(String wktOrEpsgOrProj4)
 	{
 		SpatialReference src = stringToSpatialReference(wktOrEpsgOrProj4);
@@ -19,6 +34,15 @@ public class CoordinateTransformationUtil
 		return new CoordinateTransformation(src, dst);
 	}
 
+	/**
+	 * Create a {@link SpatialReference} instance for the given projection
+	 * string.
+	 * 
+	 * @param s
+	 *            Projection string in Well Known Text form, EPSG code, or a
+	 *            Proj4 string
+	 * @return {@link SpatialReference} for the given projection string
+	 */
 	public static SpatialReference stringToSpatialReference(String s)
 	{
 		if (s == null)

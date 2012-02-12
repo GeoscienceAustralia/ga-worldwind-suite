@@ -12,7 +12,6 @@ import java.util.ResourceBundle;
  * {@link ResourceBundle} mechanism to load messages.
  * 
  * @author James Navin (james.navin@ga.gov.au)
- * 
  */
 public class ResourceBundleMessageSource extends MessageSourceBase implements MessageSource
 {

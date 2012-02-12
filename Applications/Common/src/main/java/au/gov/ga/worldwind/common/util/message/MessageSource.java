@@ -7,7 +7,6 @@ import java.text.MessageFormat;
  * resource bundles.
  * 
  * @author James Navin (james.navin@ga.gov.au)
- * 
  */
 public interface MessageSource
 {

@@ -4,15 +4,17 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * A {@link ThreadFactory} that yields low-priority daemon threads.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class DaemonThreadFactory implements ThreadFactory
 {
 	private String threadName = "Daemon Thread";
-	
+
 	public DaemonThreadFactory()
 	{
 	}
-	
+
 	public DaemonThreadFactory(String threadName)
 	{
 		this.threadName = threadName;
@@ -23,7 +25,7 @@ public class DaemonThreadFactory implements ThreadFactory
 	{
 		return newThread(r, threadName);
 	}
-	
+
 	public static Thread newThread(Runnable r, String threadName)
 	{
 		Thread thread = new Thread(r);

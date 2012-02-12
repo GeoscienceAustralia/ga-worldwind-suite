@@ -5,6 +5,8 @@ import gov.nasa.worldwind.render.DrawContext;
 /**
  * The default implementation of the {@link VerticalExaggerationService} that simply uses the global
  * vertical exaggeration as provided by the supplied {@link DrawContext}.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class DefaultVerticalExaggerationServiceImpl implements VerticalExaggerationService
 {

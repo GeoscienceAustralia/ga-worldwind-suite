@@ -9,24 +9,42 @@ import gov.nasa.worldwind.render.DrawContext;
 
 import javax.media.opengl.GL;
 
+/**
+ * Uses the OpenGL clipping planes to clip the geometry around a given sector.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SectorClipPlanes
 {
 	private Sector sector = null;
 	private boolean dirty = false;
 	private double[] planes;
 
+	/**
+	 * Setup the clipping planes to clip around the given sector.
+	 * 
+	 * @param sector
+	 */
 	public void clipSector(Sector sector)
 	{
 		this.sector = sector;
 		dirty = true;
 	}
 
+	/**
+	 * Clear the sector clipping planes so that no geometry is clipped.
+	 */
 	public void clear()
 	{
 		this.sector = null;
 		dirty = true;
 	}
 
+	/**
+	 * Enable the clipping planes.
+	 * 
+	 * @param dc
+	 */
 	public void enableClipping(DrawContext dc)
 	{
 		if (dirty)
@@ -58,6 +76,11 @@ public class SectorClipPlanes
 		}
 	}
 
+	/**
+	 * Disable the clipping planes.
+	 * 
+	 * @param dc
+	 */
 	public void disableClipping(DrawContext dc)
 	{
 		GL gl = dc.getGL();
@@ -68,6 +91,17 @@ public class SectorClipPlanes
 		gl.glDisable(GL.GL_CLIP_PLANE3);
 	}
 
+	/**
+	 * Calculate 4 clipping planes which clip the geomtry around the provided
+	 * sector.
+	 * 
+	 * @param globe
+	 *            Current globe
+	 * @param sector
+	 *            Sector to clip around
+	 * @return An array of length 16, containing 4x 4-value vectors representing
+	 *         4 clipping planes
+	 */
 	protected static double[] computeSectorClippingPlanes(Globe globe, Sector sector)
 	{
 		if (globe instanceof FlatGlobe)

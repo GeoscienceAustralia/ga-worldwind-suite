@@ -47,7 +47,7 @@ import com.sun.opengl.util.texture.Texture;
  * positions aren't updated every frame (instead they are updated in a vertex
  * updater thread).
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 {

@@ -2,6 +2,8 @@ package au.gov.ga.worldwind.common.util;
 
 /**
  * Represents an immutable range of comparable values (eg. <code>[minValue, maxValue]</code>)
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class Range<C extends Comparable<C>>
 {

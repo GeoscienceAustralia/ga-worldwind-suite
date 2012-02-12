@@ -7,7 +7,6 @@ import java.text.MessageFormat;
  * application
  * 
  * @author James Navin (james.navin@ga.gov.au)
- * 
  */
 public class MessageSourceAccessor
 {

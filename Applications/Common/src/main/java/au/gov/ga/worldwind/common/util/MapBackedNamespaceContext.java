@@ -9,6 +9,8 @@ import javax.xml.namespace.NamespaceContext;
 
 /**
  * A simple implementation of the {@link NamespaceContext} that maintains a map of prefix->URI mappings
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class MapBackedNamespaceContext implements NamespaceContext
 {

@@ -7,7 +7,9 @@ import java.net.URL;
 import javax.swing.ImageIcon;
 
 /**
- * An accessor class that allows easy access to icon resources. 
+ * An accessor class that allows easy access to icon resources.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class Icons
 {

@@ -5,11 +5,17 @@ import gov.nasa.worldwind.avlist.AVKey;
 
 import java.io.Serializable;
 
+/**
+ * Helper class that stores proxy information, and sets up the Java proxy.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Proxy implements Serializable
 {
 	public enum ProxyType implements Serializable
 	{
-		HTTP("HTTP", "Proxy.Type.Http"), SOCKS("SOCKS", "Proxy.Type.SOCKS");
+		HTTP("HTTP", "Proxy.Type.Http"),
+		SOCKS("SOCKS", "Proxy.Type.SOCKS");
 
 		private String pretty;
 		private String type;

@@ -5,6 +5,8 @@ import gov.nasa.worldwind.render.DrawContext;
 /**
  * A static accessor used to apply the correct vertical exaggeration values to
  * a given elevation value
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class VerticalExaggerationAccessor
 {

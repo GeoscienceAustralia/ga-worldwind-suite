@@ -12,6 +12,12 @@ import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+/**
+ * Mouse listener that, when the user double-clicks, zooms in by 3x, centering
+ * at the latlon that the user clicked on.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DoubleClickZoomListener extends MouseAdapter
 {
 	private WorldWindow wwd;
@@ -57,9 +63,7 @@ public class DoubleClickZoomListener extends MouseAdapter
 				double zoom = view.getZoom();
 				if (zoom > minElevation)
 				{
-					zoom =
-							Math.max(minElevation, e.getButton() == MouseEvent.BUTTON1 ? zoom / 3
-									: zoom * 3);
+					zoom = Math.max(minElevation, e.getButton() == MouseEvent.BUTTON1 ? zoom / 3 : zoom * 3);
 				}
 				Position beginCenter = view.getCenterPosition();
 				Position endCenter = new Position(latlon, beginCenter.getElevation());
@@ -67,9 +71,9 @@ public class DoubleClickZoomListener extends MouseAdapter
 				view.stopMovement();
 				view.stopAnimations();
 
-				view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view,
-						beginCenter, endCenter, view.getHeading(), view.getHeading(),
-						view.getPitch(), view.getPitch(), view.getZoom(), zoom, 1000, WorldWind.ABSOLUTE));
+				view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter, endCenter,
+						view.getHeading(), view.getHeading(), view.getPitch(), view.getPitch(), view.getZoom(), zoom,
+						1000, WorldWind.ABSOLUTE));
 				e.consume();
 				wwd.redraw();
 				latlon = null;

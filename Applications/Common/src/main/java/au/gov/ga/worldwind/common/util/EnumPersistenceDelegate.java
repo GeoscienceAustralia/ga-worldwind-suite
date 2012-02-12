@@ -7,10 +7,23 @@ import java.beans.Expression;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 
+/**
+ * Helper class for making enum classes persistent when serializing classes
+ * containing an enum property. Each enum must be registered with the class
+ * using the {@link EnumPersistenceDelegate#installFor(Enum[])} method.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class EnumPersistenceDelegate extends DefaultPersistenceDelegate
 {
 	private static EnumPersistenceDelegate INSTANCE = new EnumPersistenceDelegate();
 
+	/**
+	 * Install the {@link EnumPersistenceDelegate} for each of the provided enum
+	 * values.
+	 * 
+	 * @param values
+	 */
 	public static void installFor(Enum<?>[] values)
 	{
 		Class<?> declaringClass = values[0].getDeclaringClass();
@@ -30,8 +43,7 @@ public class EnumPersistenceDelegate extends DefaultPersistenceDelegate
 		}
 		catch (IntrospectionException exception)
 		{
-			throw new RuntimeException("Unable to persist enumerated type "
-					+ enumClass, exception);
+			throw new RuntimeException("Unable to persist enumerated type " + enumClass, exception);
 		}
 	}
 
@@ -39,8 +51,7 @@ public class EnumPersistenceDelegate extends DefaultPersistenceDelegate
 	protected Expression instantiate(Object oldInstance, Encoder out)
 	{
 		Enum<?> e = (Enum<?>) oldInstance;
-		return new Expression(e.getDeclaringClass(), "valueOf",
-				new Object[] { e.name() });
+		return new Expression(e.getDeclaringClass(), "valueOf", new Object[] { e.name() });
 	}
 
 	@Override

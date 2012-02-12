@@ -6,8 +6,20 @@ import java.net.URL;
 
 import javax.swing.JOptionPane;
 
+/**
+ * Utility class for opening a file or url with the operating system's default
+ * program or browser.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DefaultLauncher
 {
+	/**
+	 * Open the given file with the default program.
+	 * 
+	 * @param file
+	 *            File to open
+	 */
 	public static void openFile(final File file)
 	{
 		boolean desktopSupported = false;
@@ -51,8 +63,8 @@ public class DefaultLauncher
 					}
 					catch (Exception e)
 					{
-						JOptionPane.showMessageDialog(null, "Error attempting to open file" + ":\n"
-								+ e.getLocalizedMessage());
+						JOptionPane.showMessageDialog(null,
+								"Error attempting to open file" + ":\n" + e.getLocalizedMessage());
 					}
 				}
 			};
@@ -61,6 +73,11 @@ public class DefaultLauncher
 		}
 	}
 
+	/**
+	 * Open the given url in the user's default browser.
+	 * 
+	 * @param url
+	 */
 	public static void openURL(final URL url)
 	{
 		/*if ("file".equalsIgnoreCase(url.getProtocol()))
@@ -109,8 +126,7 @@ public class DefaultLauncher
 					{
 						if (osName.startsWith("windows"))
 						{
-							Runtime.getRuntime().exec(
-									"rundll32 url.dll,FileProtocolHandler " + url.toExternalForm());
+							Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url.toExternalForm());
 						}
 						else if (osName.startsWith("mac"))
 						{
@@ -123,10 +139,8 @@ public class DefaultLauncher
 					}
 					catch (Exception e)
 					{
-						JOptionPane.showMessageDialog(
-								null,
-								"Error attempting to launch web browser" + ":\n"
-										+ e.getLocalizedMessage());
+						JOptionPane.showMessageDialog(null,
+								"Error attempting to launch web browser" + ":\n" + e.getLocalizedMessage());
 					}
 				}
 			};
@@ -140,8 +154,7 @@ public class DefaultLauncher
 		try
 		{
 			Class<?> desktopClass = Class.forName("java.awt.Desktop");
-			Method isDesktopSupportedMethod =
-					desktopClass.getMethod("isDesktopSupported", new Class<?>[] {});
+			Method isDesktopSupportedMethod = desktopClass.getMethod("isDesktopSupported", new Class<?>[] {});
 			Object isSupported = isDesktopSupportedMethod.invoke(null, new Object[] {});
 			if (isSupported instanceof Boolean && ((Boolean) isSupported).booleanValue() == true)
 				return desktopClass;
@@ -187,8 +200,7 @@ public class DefaultLauncher
 			throw new Exception("Could not find web browser");
 		else
 		{
-			Process process =
-					Runtime.getRuntime().exec(new String[] { browser, url.toExternalForm() });
+			Process process = Runtime.getRuntime().exec(new String[] { browser, url.toExternalForm() });
 			new InputStreamGobbler(process.getInputStream());
 			new InputStreamGobbler(process.getErrorStream());
 		}

@@ -8,7 +8,6 @@ import java.text.MessageFormat;
  * specific implementations of the {@link #getMessageInternal(String)} method.
  * 
  * @author James Navin (james.navin@ga.gov.au)
- *
  */
 public abstract class MessageSourceBase implements MessageSource
 {

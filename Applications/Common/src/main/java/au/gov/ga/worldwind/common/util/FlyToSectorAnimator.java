@@ -9,11 +9,40 @@ import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.Rectangle;
 
+/**
+ * Helper class to create an {@link OrbitView} animator that flies to a given
+ * sector.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class FlyToSectorAnimator
 {
-	public static FlyToOrbitViewAnimator createFlyToSectorAnimator(OrbitView orbitView,
-			Position beginCenterPos, Position endCenterPos, Angle beginHeading, Angle beginPitch,
-			double beginZoom, LatLon endVisibleDelta, long timeToMove)
+	/**
+	 * Create a {@link FlyToOrbitViewAnimator} that flies to a given position,
+	 * ensuring that a delta lat/lon area is visible.
+	 * 
+	 * @param orbitView
+	 *            Orbit view to create the animator for
+	 * @param beginCenterPos
+	 *            Begin position
+	 * @param endCenterPos
+	 *            End position
+	 * @param beginHeading
+	 *            Initial heading
+	 * @param beginPitch
+	 *            Initial pitch
+	 * @param beginZoom
+	 *            Initial zoom
+	 * @param endVisibleDelta
+	 *            End lat/lon delta. The end zoom is calculated to ensure that
+	 *            this lat/lon delta is visible.
+	 * @param timeToMove
+	 *            Time in milliseconds for the animation
+	 * @return Animator to fly to the given position and zoom
+	 */
+	public static FlyToOrbitViewAnimator createFlyToSectorAnimator(OrbitView orbitView, Position beginCenterPos,
+			Position endCenterPos, Angle beginHeading, Angle beginPitch, double beginZoom, LatLon endVisibleDelta,
+			long timeToMove)
 	{
 		Rectangle viewport = orbitView.getViewport();
 		Angle fieldOfView = orbitView.getFieldOfView();
@@ -29,13 +58,11 @@ public class FlyToSectorAnimator
 		metersPerPixel *= 1.1; //zoom out just a little more, to add a slight border
 
 		double viewportWidth = viewport.getWidth();
-		double pixelSizeScale =
-				2 * fieldOfView.tanHalfAngle() / (viewportWidth <= 0 ? 1d : viewportWidth);
+		double pixelSizeScale = 2 * fieldOfView.tanHalfAngle() / (viewportWidth <= 0 ? 1d : viewportWidth);
 
 		double endZoom = metersPerPixel / pixelSizeScale;
 
-		return FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView, beginCenterPos,
-				endCenterPos, beginHeading, Angle.ZERO, beginPitch, Angle.ZERO, beginZoom, endZoom,
-				timeToMove, WorldWind.ABSOLUTE);
+		return FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView, beginCenterPos, endCenterPos,
+				beginHeading, Angle.ZERO, beginPitch, Angle.ZERO, beginZoom, endZoom, timeToMove, WorldWind.ABSOLUTE);
 	}
 }
