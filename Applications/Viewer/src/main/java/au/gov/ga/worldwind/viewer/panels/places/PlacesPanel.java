@@ -1030,7 +1030,7 @@ public class PlacesPanel extends AbstractThemePanel
 
 	private void addLayersToList(INode parent, List<ILayerNode> layers)
 	{
-		if (parent instanceof ILayerNode)
+		if (parent instanceof ILayerNode && !parent.isTransient())
 		{
 			layers.add((ILayerNode) parent);
 		}
