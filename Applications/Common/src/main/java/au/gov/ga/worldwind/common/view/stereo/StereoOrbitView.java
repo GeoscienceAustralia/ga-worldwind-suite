@@ -3,6 +3,11 @@ package au.gov.ga.worldwind.common.view.stereo;
 import gov.nasa.worldwind.geom.Matrix;
 import au.gov.ga.worldwind.common.view.state.ViewStateBasicOrbitView;
 
+/**
+ * Orbit view with {@link StereoView} support.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class StereoOrbitView extends ViewStateBasicOrbitView implements StereoView
 {
 	private StereoViewHelper helper = new StereoViewHelper();
@@ -12,7 +17,7 @@ public class StereoOrbitView extends ViewStateBasicOrbitView implements StereoVi
 	{
 		helper.setup(stereo, eye);
 	}
-	
+
 	@Override
 	public boolean isStereo()
 	{
@@ -24,7 +29,7 @@ public class StereoOrbitView extends ViewStateBasicOrbitView implements StereoVi
 	{
 		return helper.getEye();
 	}
-	
+
 	@Override
 	public StereoViewParameters getParameters()
 	{
@@ -36,13 +41,13 @@ public class StereoOrbitView extends ViewStateBasicOrbitView implements StereoVi
 	{
 		helper.setParameters(parameters);
 	}
-	
+
 	@Override
 	public double getCurrentFocalLength()
 	{
 		return helper.getCurrentFocalLength();
 	}
-	
+
 	@Override
 	public double getCurrentEyeSeparation()
 	{

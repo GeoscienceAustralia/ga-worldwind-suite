@@ -11,6 +11,12 @@ import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitViewInputHandler;
 import gov.nasa.worldwind.view.orbit.OrbitViewLimits;
 
+/**
+ * {@link OrbitViewInputHandler} subclass that supports the
+ * {@link SubSurfaceOrbitView} which allows the user to move sub-surface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SubSurfaceOrbitViewInputHandler extends OrbitViewInputHandler
 {
 	@Override

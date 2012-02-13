@@ -8,9 +8,15 @@ import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.orbit.AccessibleOrbitViewInputSupport;
+import gov.nasa.worldwind.view.orbit.OrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitViewInputSupport;
 import au.gov.ga.worldwind.common.view.state.ViewStateBasicOrbitView;
 
+/**
+ * {@link OrbitView} implementation that allows the user to move sub-surface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SubSurfaceOrbitView extends ViewStateBasicOrbitView
 {
 	public SubSurfaceOrbitView()
@@ -43,7 +49,9 @@ public class SubSurfaceOrbitView extends ViewStateBasicOrbitView
 			throw new IllegalStateException(message);
 		}
 
-		Matrix modelview = OrbitViewInputSupport.computeTransformMatrix(this.globe, this.center, this.heading, this.pitch, this.roll, this.zoom);
+		Matrix modelview =
+				OrbitViewInputSupport.computeTransformMatrix(this.globe, this.center, this.heading, this.pitch,
+						this.roll, this.zoom);
 		if (modelview != null)
 		{
 			Matrix modelviewInv = modelview.getInverse();

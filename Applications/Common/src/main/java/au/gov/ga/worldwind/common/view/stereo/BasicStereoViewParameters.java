@@ -1,5 +1,10 @@
 package au.gov.ga.worldwind.common.view.stereo;
 
+/**
+ * Basic implementation of the {@link StereoViewParameters} interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class BasicStereoViewParameters implements StereoViewParameters
 {
 	private double focalLength = 100;

@@ -7,6 +7,11 @@ import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.view.subsurface.SubSurfaceOrbitView;
 import au.gov.ga.worldwind.common.view.transform.TransformBasicOrbitView;
 
+/**
+ * Orbit view with better support for copying view state from other views.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ViewStateBasicOrbitView extends TransformBasicOrbitView
 {
 	protected double minimumFarDistance = MINIMUM_FAR_DISTANCE;

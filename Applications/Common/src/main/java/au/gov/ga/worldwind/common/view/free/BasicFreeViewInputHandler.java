@@ -10,6 +10,11 @@ import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.view.BasicView;
 import gov.nasa.worldwind.view.ViewUtil;
 
+/**
+ * Implements the actual movement for the {@link FreeViewInputHandler}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class BasicFreeViewInputHandler extends AbstractInputFreeViewInputHandler
 {
 	private double headingSpeed = 0.15;
@@ -49,7 +54,7 @@ public class BasicFreeViewInputHandler extends AbstractInputFreeViewInputHandler
 			Vec4 up = view.getUpVector();
 			//Vec4 side = forward.transformBy3(Matrix.fromAxisAngle(Angle.fromDegrees(90), up));
 			Vec4 side = up.cross3(forward);
-			
+
 			Vec4 eyePoint = view.getCurrentEyePoint();
 			Position eyePosition = view.getGlobe().computePositionFromPoint(eyePoint);
 

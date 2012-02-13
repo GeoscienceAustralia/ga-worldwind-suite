@@ -4,6 +4,12 @@ import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.view.ViewUtil;
 
+/**
+ * View interface extension that provides the ability to customize the model
+ * view and projection matrices before they are applied.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public interface TransformView extends View
 {
 	/**

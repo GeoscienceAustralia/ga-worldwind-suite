@@ -6,6 +6,11 @@ import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.ViewUtil;
 import au.gov.ga.worldwind.common.view.transform.TransformBasicFlyView;
 
+/**
+ * Fly view with better support for copying view state from other views.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ViewStateBasicFlyView extends TransformBasicFlyView
 {
 	@Override

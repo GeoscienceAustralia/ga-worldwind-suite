@@ -6,6 +6,7 @@ import gov.nasa.worldwind.animation.AnimationController;
 import gov.nasa.worldwind.animation.Animator;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.ViewInputAttributes;
+import gov.nasa.worldwind.awt.ViewInputHandler;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 
@@ -14,8 +15,14 @@ import java.awt.event.FocusEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public abstract class AbstractFreeViewInputHandler implements FreeViewInputHandler,
-		PropertyChangeListener
+/**
+ * Abstract implementation of the {@link FreeViewInputHandler} interface;
+ * implements much of the {@link ViewInputHandler} methods, but not the
+ * mouse/keyboard input handling.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
+public abstract class AbstractFreeViewInputHandler implements FreeViewInputHandler, PropertyChangeListener
 {
 	private WorldWindow wwd;
 	private boolean enableSmoothing;
@@ -193,7 +200,7 @@ public abstract class AbstractFreeViewInputHandler implements FreeViewInputHandl
 	public void viewApplied()
 	{
 	}
-	
+
 	@Override
 	public void focusGained(FocusEvent e)
 	{

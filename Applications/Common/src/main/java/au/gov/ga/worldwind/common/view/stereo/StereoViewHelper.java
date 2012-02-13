@@ -9,7 +9,13 @@ import java.awt.Rectangle;
 
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
+import au.gov.ga.worldwind.common.view.transform.TransformView;
 
+/**
+ * Helper with common functionality for all {@link StereoView} implementations.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class StereoViewHelper
 {
 	private Eye eye = Eye.LEFT;
@@ -20,6 +26,9 @@ public class StereoViewHelper
 	private double lastFocalLength = 1;
 	private double lastEyeSeparation = 0;
 
+	/**
+	 * @see StereoView#setup(boolean, Eye)
+	 */
 	public void setup(boolean stereo, Eye eye)
 	{
 		//don't allow null eye
@@ -32,50 +41,71 @@ public class StereoViewHelper
 		this.eye = eye;
 	}
 
+	/**
+	 * @see StereoView#getEye()
+	 */
 	public Eye getEye()
 	{
 		return eye;
 	}
 
+	/**
+	 * @see StereoView#isStereo()
+	 */
 	public boolean isStereo()
 	{
 		return stereo;
 	}
 
+	/**
+	 * @see StereoView#getParameters()
+	 */
 	public StereoViewParameters getParameters()
 	{
 		return parameters;
 	}
 
+	/**
+	 * @see StereoView#setParameters(StereoViewParameters)
+	 */
 	public void setParameters(StereoViewParameters parameters)
 	{
 		this.parameters = parameters;
 	}
-	
+
+	/**
+	 * @see StereoView#getCurrentFocalLength()
+	 */
 	public double getCurrentFocalLength()
 	{
-		if(parameters.isDynamicStereo())
+		if (parameters.isDynamicStereo())
 		{
 			return lastFocalLength;
 		}
 		return parameters.getFocalLength();
 	}
-	
+
+	/**
+	 * @see StereoView#getCurrentEyeSeparation()
+	 */
 	public double getCurrentEyeSeparation()
 	{
-		if(parameters.isDynamicStereo())
+		if (parameters.isDynamicStereo())
 		{
 			return lastEyeSeparation;
 		}
 		return parameters.getEyeSeparation();
 	}
 
+	/**
+	 * @see StereoView#calculateProjectionMatrix(double, double)
+	 */
 	public Matrix calculateProjectionMatrix(View view, double nearDistance, double farDistance)
 	{
 		if (stereo)
 		{
-			return calculateStereoProjectionMatrix(view, nearDistance, farDistance, eye,
-					lastFocalLength, lastEyeSeparation);
+			return calculateStereoProjectionMatrix(view, nearDistance, farDistance, eye, lastFocalLength,
+					lastEyeSeparation);
 		}
 		else
 		{
@@ -83,12 +113,17 @@ public class StereoViewHelper
 		}
 	}
 
+	/**
+	 * Calculate the focal length and eye separation for the current view. These
+	 * parameters are calculated on the fly if dynamic stereo is enabled.
+	 * 
+	 * @param view
+	 */
 	protected void calculateStereoParameters(View view)
 	{
 		if (parameters.isDynamicStereo())
 		{
-			AsymmetricFrutumParameters afp =
-					calculateStereoParameters(view, parameters.getEyeSeparationMultiplier());
+			AsymmetricFrutumParameters afp = calculateStereoParameters(view, parameters.getEyeSeparationMultiplier());
 			this.lastFocalLength = afp.focalLength;
 			this.lastEyeSeparation = afp.eyeSeparation;
 		}
@@ -99,30 +134,56 @@ public class StereoViewHelper
 		}
 	}
 
+	/**
+	 * @see TransformView#beforeComputeMatrices()
+	 */
 	public void beforeComputeMatrices(View view)
 	{
 		calculateStereoParameters(view);
 	}
 
+	/**
+	 * If stereo is enabled, translate the given matrix to the left or right
+	 * according to which eye is currently being rendered.
+	 * 
+	 * @param matrix
+	 *            Matrix to transform
+	 * @return Transformed matrix
+	 */
 	public Matrix transformModelView(Matrix matrix)
 	{
 		if (matrix != null && stereo)
 		{
 			matrix =
-					Matrix.fromTranslation((eye == Eye.RIGHT ? 1 : -1) * lastEyeSeparation * 0.5,
-							0, 0).multiply(matrix);
+					Matrix.fromTranslation((eye == Eye.RIGHT ? 1 : -1) * lastEyeSeparation * 0.5, 0, 0)
+							.multiply(matrix);
 		}
 		return matrix;
 	}
 
+	/**
+	 * @see TransformView#computeProjection()
+	 */
 	public Matrix computeProjection(View view)
 	{
-		return calculateProjectionMatrix(view, view.getNearClipDistance(),
-				view.getFarClipDistance());
+		return calculateProjectionMatrix(view, view.getNearClipDistance(), view.getFarClipDistance());
 	}
 
-	public static Matrix calculateStereoProjectionMatrix(View view, double nearDistance,
-			double farDistance, Eye eye, double focalLength, double eyeSeparation)
+	/**
+	 * Calculate the projection matrix for the given view, taking into account
+	 * the current stereo eye being rendered. Off-axis frustums are used; see
+	 * http://paulbourke.net/miscellaneous/stereographics/stereorender/.
+	 * 
+	 * @param view
+	 * @param nearDistance
+	 * @param farDistance
+	 * @param eye
+	 * @param focalLength
+	 * @param eyeSeparation
+	 * @return Stereo projection matrix
+	 */
+	public static Matrix calculateStereoProjectionMatrix(View view, double nearDistance, double farDistance, Eye eye,
+			double focalLength, double eyeSeparation)
 	{
 		Rectangle viewport = view.getViewport();
 		double viewportWidth = viewport.getWidth() <= 0d ? 1d : viewport.getWidth();
@@ -141,18 +202,34 @@ public class StereoViewHelper
 		return fromFrustum(left, right, bottom, top, nearDistance, farDistance);
 	}
 
-	public static Matrix calculateMonoProjectionMatrix(View view, double nearDistance,
-			double farDistance)
+	/**
+	 * Calculate a standard non-stereo projection matrix.
+	 * 
+	 * @param view
+	 * @param nearDistance
+	 * @param farDistance
+	 * @return Perspective projection matrix
+	 */
+	public static Matrix calculateMonoProjectionMatrix(View view, double nearDistance, double farDistance)
 	{
 		Rectangle viewport = view.getViewport();
 		double viewportWidth = viewport.getWidth() <= 0d ? 1d : viewport.getWidth();
 		double viewportHeight = viewport.getHeight() <= 0d ? 1d : viewport.getHeight();
-		return Matrix.fromPerspective(view.getFieldOfView(), viewportWidth, viewportHeight,
-				nearDistance, farDistance);
+		return Matrix.fromPerspective(view.getFieldOfView(), viewportWidth, viewportHeight, nearDistance, farDistance);
 	}
 
-	public static Matrix fromFrustum(double left, double right, double bottom, double top,
-			double near, double far)
+	/**
+	 * Calculate a projection matrix from the given frustum parameters.
+	 * 
+	 * @param left
+	 * @param right
+	 * @param bottom
+	 * @param top
+	 * @param near
+	 * @param far
+	 * @return Frustum projection matrix
+	 */
+	public static Matrix fromFrustum(double left, double right, double bottom, double top, double near, double far)
 	{
 		double A = (right + left) / (right - left);
 		double B = (top + bottom) / (top - bottom);
@@ -163,8 +240,17 @@ public class StereoViewHelper
 		return new Matrix(E, 0, A, 0, 0, F, B, 0, 0, 0, C, D, 0, 0, -1, 0);
 	}
 
-	public static AsymmetricFrutumParameters calculateStereoParameters(View view,
-			double separationExaggeration)
+	/**
+	 * Calculate a good eye separation and focal length for the current view.
+	 * Used when dynamic stereo is enabled.
+	 * 
+	 * @param view
+	 * @param separationExaggeration
+	 *            Eye separation multiplier
+	 * @return {@link AsymmetricFrutumParameters} containing a good eye
+	 *         separation and focal length to use for the current view.
+	 */
+	public static AsymmetricFrutumParameters calculateStereoParameters(View view, double separationExaggeration)
 	{
 		Vec4 eyePoint = view.getCurrentEyePoint();
 		double distanceFromOrigin = eyePoint.getLength3();
@@ -192,8 +278,7 @@ public class StereoViewHelper
 		double focalLength = Util.mixDouble(amount, distanceToCenter, distanceFromOrigin);
 
 		//exaggerate separation more when zoomed out
-		separationExaggeration =
-				Util.mixDouble(amount, separationExaggeration, separationExaggeration * 4);
+		separationExaggeration = Util.mixDouble(amount, separationExaggeration, separationExaggeration * 4);
 
 		//move focal length closer as view is pitched
 		amount = Util.percentDouble(view.getPitch().degrees, 0d, 90d);
@@ -205,6 +290,9 @@ public class StereoViewHelper
 		return new AsymmetricFrutumParameters(focalLength, eyeSeparation);
 	}
 
+	/**
+	 * Container class for passing eye separation and focal length parameters.
+	 */
 	public static class AsymmetricFrutumParameters
 	{
 		public final double focalLength;

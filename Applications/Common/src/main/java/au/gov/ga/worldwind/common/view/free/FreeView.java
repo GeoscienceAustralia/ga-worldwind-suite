@@ -16,6 +16,14 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.view.transform.TransformView;
 
+/**
+ * Special {@link View} that allows the user to freely move around the model,
+ * without being constrained to the surface of the globe. Removes the concept of
+ * 'up' being the normal to the globe's surface. User is able to move and rotate
+ * the camera in another direction (6 degrees of freedom).
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class FreeView extends BasicView implements TransformView
 {
 	protected double minimumFarDistance = MINIMUM_FAR_DISTANCE;
@@ -25,7 +33,7 @@ public class FreeView extends BasicView implements TransformView
 	{
 		this.viewInputHandler = new BasicFreeViewInputHandler();
 	}
-	
+
 	protected static Matrix computeRotationTransform(Angle heading, Angle pitch, Angle roll)
 	{
 		Matrix transform = Matrix.IDENTITY;
@@ -64,8 +72,8 @@ public class FreeView extends BasicView implements TransformView
 		double viewportWidth = this.viewport.getWidth() <= 0.0 ? 1.0 : this.viewport.getWidth();
 		double viewportHeight = this.viewport.getHeight() <= 0.0 ? 1.0 : this.viewport.getHeight();
 
-		return Matrix.fromPerspective(this.fieldOfView, viewportWidth, viewportHeight,
-				this.nearClipDistance, this.farClipDistance);
+		return Matrix.fromPerspective(this.fieldOfView, viewportWidth, viewportHeight, this.nearClipDistance,
+				this.farClipDistance);
 	}
 
 	@Override
@@ -113,9 +121,7 @@ public class FreeView extends BasicView implements TransformView
 		// Get the current OpenGL viewport state.
 		int[] viewportArray = new int[4];
 		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
-		this.viewport =
-				new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2],
-						viewportArray[3]);
+		this.viewport = new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
 
 		// Compute the current clip plane distances.
 		this.nearClipDistance = this.computeNearClipDistance();
@@ -136,9 +142,9 @@ public class FreeView extends BasicView implements TransformView
 	protected void afterDoApply()
 	{
 		// Establish frame-specific values.
-        this.lastEyePosition = this.computeEyePositionFromModelview();
-        this.horizonDistance = this.computeHorizonDistance();
-		
+		this.lastEyePosition = this.computeEyePositionFromModelview();
+		this.horizonDistance = this.computeHorizonDistance();
+
 		// Clear cached computations.
 		this.lastEyePoint = null;
 		this.lastUpVector = null;

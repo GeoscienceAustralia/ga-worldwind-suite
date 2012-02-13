@@ -3,6 +3,11 @@ package au.gov.ga.worldwind.common.view.stereo;
 import gov.nasa.worldwind.geom.Matrix;
 import au.gov.ga.worldwind.common.view.state.ViewStateBasicFlyView;
 
+/**
+ * Fly view with {@link StereoView} support.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class StereoFlyView extends ViewStateBasicFlyView implements StereoView
 {
 	private StereoViewHelper helper = new StereoViewHelper();
@@ -12,7 +17,7 @@ public class StereoFlyView extends ViewStateBasicFlyView implements StereoView
 	{
 		helper.setup(stereo, eye);
 	}
-	
+
 	@Override
 	public boolean isStereo()
 	{
@@ -36,13 +41,13 @@ public class StereoFlyView extends ViewStateBasicFlyView implements StereoView
 	{
 		helper.setParameters(parameters);
 	}
-	
+
 	@Override
 	public double getCurrentFocalLength()
 	{
 		return helper.getCurrentFocalLength();
 	}
-	
+
 	@Override
 	public double getCurrentEyeSeparation()
 	{

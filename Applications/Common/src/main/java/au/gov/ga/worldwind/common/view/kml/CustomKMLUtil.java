@@ -8,8 +8,27 @@ import gov.nasa.worldwind.ogc.kml.KMLLocation;
 import gov.nasa.worldwind.ogc.kml.KMLModel;
 import gov.nasa.worldwind.ogc.kml.impl.KMLUtil;
 
+/**
+ * {@link KMLUtil} extension that adds KMLModel support to the
+ * {@link KMLUtil#getPositions(Globe, KMLAbstractGeometry, java.util.List)}
+ * method.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class CustomKMLUtil extends KMLUtil
 {
+	/**
+	 * Get all of the positions that make up a {@link KMLAbstractGeometry}. If
+	 * the geometry contains other geometries, this method collects all the
+	 * points from all of the geometries.
+	 * 
+	 * @param globe
+	 *            Globe to use to determine altitude above terrain.
+	 * @param geometry
+	 *            Geometry to collect positions from.
+	 * @param positions
+	 *            Placemark positions will be added to this list.
+	 */
 	public static void getPositions(Globe globe, KMLAbstractGeometry geometry, java.util.List<Position> positions)
 	{
 		KMLUtil.getPositions(globe, geometry, positions);
@@ -19,6 +38,13 @@ public class CustomKMLUtil extends KMLUtil
 		}
 	}
 
+	/**
+	 * Convert a {@link KMLLocation} to a WorldWind {@link Position}.
+	 * 
+	 * @param location
+	 *            Location to convert
+	 * @return Position containing location information
+	 */
 	public static Position locationToPosition(KMLLocation location)
 	{
 		if (location == null)

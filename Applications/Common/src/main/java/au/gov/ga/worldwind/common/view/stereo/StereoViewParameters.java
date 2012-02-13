@@ -3,7 +3,7 @@ package au.gov.ga.worldwind.common.view.stereo;
 /**
  * Parameters for {@link StereoView}s.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface StereoViewParameters
 {

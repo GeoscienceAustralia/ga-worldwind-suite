@@ -10,6 +10,13 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 
+/**
+ * Extension of the {@link AbstractFreeViewInputHandler} that adds the
+ * mouse/keyboard handling methods, passing them to the abstract move() and
+ * look() methods.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class AbstractInputFreeViewInputHandler extends AbstractFreeViewInputHandler
 {
 	private final Robot robot;
@@ -41,29 +48,21 @@ public abstract class AbstractInputFreeViewInputHandler extends AbstractFreeView
 	@Override
 	public void keyTyped(KeyEvent e)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -132,9 +131,8 @@ public abstract class AbstractInputFreeViewInputHandler extends AbstractFreeView
 			deltaY += e.getY() - startY;
 			robot.mouseMove(screenX, screenY);
 			e =
-					new MouseEvent(e.getComponent(), e.getID(), e.getWhen(), e.getModifiers(),
-							startX + deltaX, startY + deltaY, screenX + deltaX, screenY + deltaY,
-							e.getClickCount(), false, e.getButton());
+					new MouseEvent(e.getComponent(), e.getID(), e.getWhen(), e.getModifiers(), startX + deltaX, startY
+							+ deltaY, screenX + deltaX, screenY + deltaY, e.getClickCount(), false, e.getButton());
 		}
 		else
 		{
@@ -166,8 +164,6 @@ public abstract class AbstractInputFreeViewInputHandler extends AbstractFreeView
 	@Override
 	public void mouseMoved(MouseEvent e)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

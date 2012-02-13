@@ -6,7 +6,7 @@ import gov.nasa.worldwind.geom.Matrix;
 /**
  * Interface which stereoscopic capable View subclasses must implement.
  * 
- * @author Michael de Hoog
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface StereoView extends View
 {
@@ -50,12 +50,12 @@ public interface StereoView extends View
 	 * @param parameters
 	 */
 	void setParameters(StereoViewParameters parameters);
-	
+
 	/**
 	 * @return Focal length used in the last call to doApply()
 	 */
 	double getCurrentFocalLength();
-	
+
 	/**
 	 * @return Eye separation used in the last call to doApply()
 	 */

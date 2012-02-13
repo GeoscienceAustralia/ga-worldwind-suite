@@ -9,6 +9,11 @@ import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.ViewUtil;
 import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 
+/**
+ * Fly view that adds {@link TransformView} support.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class TransformBasicFlyView extends BasicFlyView implements TransformView
 {
 	@Override
@@ -19,8 +24,7 @@ public class TransformBasicFlyView extends BasicFlyView implements TransformView
 	@Override
 	public Matrix computeModelView()
 	{
-		return ViewUtil.computeTransformMatrix(this.globe, this.eyePosition, this.heading,
-				this.pitch, this.roll);
+		return ViewUtil.computeTransformMatrix(this.globe, this.eyePosition, this.heading, this.pitch, this.roll);
 	}
 
 	@Override
@@ -29,8 +33,8 @@ public class TransformBasicFlyView extends BasicFlyView implements TransformView
 		double viewportWidth = this.viewport.getWidth() <= 0.0 ? 1.0 : this.viewport.getWidth();
 		double viewportHeight = this.viewport.getHeight() <= 0.0 ? 1.0 : this.viewport.getHeight();
 
-		return Matrix.fromPerspective(this.fieldOfView, viewportWidth, viewportHeight,
-				this.nearClipDistance, this.farClipDistance);
+		return Matrix.fromPerspective(this.fieldOfView, viewportWidth, viewportHeight, this.nearClipDistance,
+				this.farClipDistance);
 	}
 
 	@Override
@@ -79,9 +83,7 @@ public class TransformBasicFlyView extends BasicFlyView implements TransformView
 		// Get the current OpenGL viewport state.
 		int[] viewportArray = new int[4];
 		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
-		this.viewport =
-				new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2],
-						viewportArray[3]);
+		this.viewport = new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
 
 		// Compute the current clip plane distances.
 		this.nearClipDistance = this.computeNearClipDistance();
