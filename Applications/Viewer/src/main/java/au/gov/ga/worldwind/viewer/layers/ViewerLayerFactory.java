@@ -12,10 +12,11 @@ import au.gov.ga.worldwind.viewer.layers.screenoverlay.ScreenOverlayLayerFactory
 /**
  * An extension of the common {@link LayerFactory} that is able to instantiate
  * layers specific to the Viewer tool
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ViewerLayerFactory extends LayerFactory
 {
-
 	@Override
 	protected Layer createFromLayerDocument(Element domElement, AVList params)
 	{

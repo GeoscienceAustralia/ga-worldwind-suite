@@ -14,6 +14,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * Utility class to convert a HTML document to an image of a specified size.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class HtmlToImage
 {

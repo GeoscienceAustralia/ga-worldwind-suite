@@ -13,6 +13,8 @@ import au.gov.ga.worldwind.common.util.Validate;
  * <p/>
  * Lengths can be expressed as an absolute value in pixels ("px") or
  * as a percentage of total screen size ("%").
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class LengthExpression
 {

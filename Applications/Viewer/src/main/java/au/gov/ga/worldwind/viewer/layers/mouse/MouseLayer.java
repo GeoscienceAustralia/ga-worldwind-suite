@@ -18,6 +18,13 @@ import java.util.List;
 
 import nasa.worldwind.render.offset.IconRenderer;
 
+/**
+ * Layer that renders an icon at the point on the globe's surface where the
+ * mouse should be. This is useful when rendering with a stereo view, the
+ * operating system mouse cursor can destroy the illusion of depth.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class MouseLayer extends AbstractLayer implements PositionListener
 {
 	private final IconRenderer iconRenderer = new IconRenderer();

@@ -22,17 +22,46 @@ import javax.swing.JFrame;
 
 import com.sun.opengl.util.Screenshot;
 
+/**
+ * Utility class for taking screenshots of WorldWind.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Screenshotter
 {
-	public static void takeScreenshot(WorldWindow wwd, GLCanvas canvas,
-			File file)
+	/**
+	 * Take a simple screenshot of the WorldWindow canvas at the current
+	 * dimensions.
+	 * 
+	 * @param wwd
+	 *            WorldWindow to take a screenshot of.
+	 * @param canvas
+	 *            GLCanvas associated with the WorldWindow.
+	 * @param file
+	 *            File to save the screenshot to.
+	 */
+	public static void takeScreenshot(WorldWindow wwd, GLCanvas canvas, File file)
 	{
-		wwd.addRenderingListener(new SimpleScreenshotListener(wwd, file, canvas
-				.getWidth(), canvas.getHeight()));
+		wwd.addRenderingListener(new SimpleScreenshotListener(wwd, file, canvas.getWidth(), canvas.getHeight()));
 	}
 
-	public static void takeScreenshot(final WorldWindow wwd, final int width,
-			final int height, final File file)
+	/**
+	 * Take a screenshot at the provided dimensions. Temporarily resizes the
+	 * WorldWind canvas to the dimensions. If the dimensions are larger than the
+	 * current screen resolution, the canvas is moved around the screen and
+	 * captured in parts. This is because any part of the canvas outside of the
+	 * screen bounds cannot be captured.
+	 * 
+	 * @param wwd
+	 *            WorldWindow to take a screenshot of.
+	 * @param width
+	 *            Width of the screenshot.
+	 * @param height
+	 *            Height of the screenshot.
+	 * @param file
+	 *            File to save the screenshot to.
+	 */
+	public static void takeScreenshot(final WorldWindow wwd, final int width, final int height, final File file)
 	{
 		Thread thread = new Thread(new Runnable()
 		{
@@ -45,8 +74,7 @@ public class Screenshotter
 		thread.start();
 	}
 
-	private static void takeScreenshotThread(WorldWindow wwd, int width,
-			int height, File file)
+	private static void takeScreenshotThread(WorldWindow wwd, int width, int height, File file)
 	{
 		if (!(wwd instanceof Component))
 			throw new IllegalArgumentException();
@@ -67,8 +95,7 @@ public class Screenshotter
 		frame.setSize(size);
 		frame.setVisible(true);
 
-		GraphicsDevice device = GraphicsEnvironment
-				.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		DisplayMode displayMode = device.getDisplayMode();
 		int displayWidth = displayMode.getWidth();
 		int displayHeight = displayMode.getHeight();
@@ -76,8 +103,7 @@ public class Screenshotter
 		final int rows = (width - 1) / displayWidth + 1;
 		final int columns = (height - 1) / displayHeight + 1;
 
-		BufferedImage bi = new BufferedImage(width, height,
-				BufferedImage.TYPE_INT_RGB);
+		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		final Graphics2D g2d = bi.createGraphics();
 
 		for (int x = 0; x < rows; x++)
@@ -86,17 +112,13 @@ public class Screenshotter
 			{
 				final int xOffset = x * displayWidth;
 				final int yOffset = y * displayHeight;
-				final int screenshotWidth = Math.min(width - xOffset,
-						displayWidth);
-				final int screenshotHeight = Math.min(height - yOffset,
-						displayHeight);
+				final int screenshotWidth = Math.min(width - xOffset, displayWidth);
+				final int screenshotHeight = Math.min(height - yOffset, displayHeight);
 				frame.setLocation(-xOffset, -yOffset);
 
 				BufferedImage shot = takeShot(wwd, 0, 0, width, height);
-				g2d.drawImage(shot, xOffset, yOffset,
-						xOffset + screenshotWidth, yOffset + screenshotHeight,
-						xOffset, yOffset, xOffset + screenshotWidth, yOffset
-								+ screenshotHeight, null);
+				g2d.drawImage(shot, xOffset, yOffset, xOffset + screenshotWidth, yOffset + screenshotHeight, xOffset,
+						yOffset, xOffset + screenshotWidth, yOffset + screenshotHeight, null);
 			}
 		}
 		g2d.dispose();
@@ -117,11 +139,9 @@ public class Screenshotter
 		frame.dispose();
 	}
 
-	private static BufferedImage takeShot(final WorldWindow wwd, int x, int y,
-			int width, int height)
+	private static BufferedImage takeShot(final WorldWindow wwd, int x, int y, int width, int height)
 	{
-		ScreenshotListener screenshotListener = new ScreenshotListener(x, y,
-				width, height);
+		ScreenshotListener screenshotListener = new ScreenshotListener(x, y, width, height);
 
 		wwd.addRenderingListener(screenshotListener);
 		wwd.redraw();
@@ -172,8 +192,7 @@ public class Screenshotter
 			if (!doing && event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)
 			{
 				doing = true;
-				image = Screenshot.readToBufferedImage(x, y, width, height,
-						false);
+				image = Screenshot.readToBufferedImage(x, y, width, height, false);
 				done = true;
 			}
 		}
@@ -186,8 +205,7 @@ public class Screenshotter
 		private int height;
 		private WorldWindow wwd;
 
-		public SimpleScreenshotListener(WorldWindow wwd, File file, int width,
-				int height)
+		public SimpleScreenshotListener(WorldWindow wwd, File file, int width, int height)
 		{
 			this.wwd = wwd;
 			this.file = file;

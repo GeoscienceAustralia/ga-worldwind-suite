@@ -27,7 +27,11 @@ import javax.swing.event.HyperlinkListener;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.viewer.util.Message;
 
-
+/**
+ * About dialog for the GA WorldWind Data Viewer.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class AboutDialog extends JDialog
 {
 	public AboutDialog(Frame parent, String title)

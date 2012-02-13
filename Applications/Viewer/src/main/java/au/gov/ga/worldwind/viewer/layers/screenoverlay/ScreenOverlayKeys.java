@@ -4,6 +4,8 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
 
 /**
  * Parameter list keys for the {@link ScreenOverlayLayer} layer
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface ScreenOverlayKeys extends AVKeyMore
 {

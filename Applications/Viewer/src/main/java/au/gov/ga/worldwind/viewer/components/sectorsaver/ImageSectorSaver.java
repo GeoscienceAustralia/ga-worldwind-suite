@@ -47,6 +47,12 @@ import javax.swing.filechooser.FileFilter;
 import au.gov.ga.worldwind.common.ui.JIntegerField;
 import au.gov.ga.worldwind.common.util.Util;
 
+/**
+ * Dialog used to save a sector of the currently displayed imagery layers to a
+ * GeoTIFF.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ImageSectorSaver
 {
 	public static void beginSelection(final Frame frame, String title, final WorldWindow wwd)
@@ -126,15 +132,14 @@ public class ImageSectorSaver
 				updateSector();
 			}
 		};
-		selector.addPropertyChangeListener(SectorSelector.SECTOR_PROPERTY,
-				new PropertyChangeListener()
-				{
-					@Override
-					public void propertyChange(PropertyChangeEvent evt)
-					{
-						setSector(selector.getSector(), true);
-					}
-				});
+		selector.addPropertyChangeListener(SectorSelector.SECTOR_PROPERTY, new PropertyChangeListener()
+		{
+			@Override
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				setSector(selector.getSector(), true);
+			}
+		});
 
 		dialog.setLayout(new BorderLayout());
 
@@ -370,8 +375,8 @@ public class ImageSectorSaver
 			return Sector.EMPTY_SECTOR;
 		}
 
-		return new Sector(bottomleft.getLatitude(), topright.getLatitude(),
-				bottomleft.getLongitude(), topright.getLongitude());
+		return new Sector(bottomleft.getLatitude(), topright.getLatitude(), bottomleft.getLongitude(),
+				topright.getLongitude());
 	}
 
 	private void setSector(Sector sector, boolean fromGlobe)
@@ -384,15 +389,15 @@ public class ImageSectorSaver
 			if (sector.getDeltaLatDegrees() < 0)
 			{
 				sector =
-						new Sector(sector.getMaxLatitude(), sector.getMinLatitude(),
-								sector.getMinLongitude(), sector.getMaxLongitude());
+						new Sector(sector.getMaxLatitude(), sector.getMinLatitude(), sector.getMinLongitude(),
+								sector.getMaxLongitude());
 				modified = true;
 			}
 			if (sector.getDeltaLonDegrees() < 0)
 			{
 				sector =
-						new Sector(sector.getMinLatitude(), sector.getMaxLatitude(),
-								sector.getMaxLongitude(), sector.getMinLongitude());
+						new Sector(sector.getMinLatitude(), sector.getMaxLatitude(), sector.getMaxLongitude(),
+								sector.getMinLongitude());
 				modified = true;
 			}
 
@@ -400,10 +405,8 @@ public class ImageSectorSaver
 
 			if (fromGlobe | modified)
 			{
-				bottomleftField.setText(sector.getMinLatitude().degrees + " "
-						+ sector.getMinLongitude().degrees);
-				toprightField.setText(sector.getMaxLatitude().degrees + " "
-						+ sector.getMaxLongitude().degrees);
+				bottomleftField.setText(sector.getMinLatitude().degrees + " " + sector.getMinLongitude().degrees);
+				toprightField.setText(sector.getMaxLatitude().degrees + " " + sector.getMaxLongitude().degrees);
 			}
 			if (!fromGlobe | modified)
 			{
@@ -472,8 +475,7 @@ public class ImageSectorSaver
 		c.weightx = 1;
 		panel.add(label, c);
 
-		final JProgressBar progressBar =
-				new JProgressBar(JProgressBar.HORIZONTAL, 0, layers.size());
+		final JProgressBar progressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, layers.size());
 		dialog.add(progressBar, BorderLayout.CENTER);
 
 		dialog.pack();
@@ -511,13 +513,11 @@ public class ImageSectorSaver
 			{
 				try
 				{
-					saveSector(frame, layers, sector, size, output.getAbsoluteFile(), label,
-							progressBar);
+					saveSector(frame, layers, sector, size, output.getAbsoluteFile(), label, progressBar);
 				}
 				catch (Exception e)
 				{
-					JOptionPane.showMessageDialog(frame,
-							"Error saving image:\n\n" + e.getMessage(), "Error",
+					JOptionPane.showMessageDialog(frame, "Error saving image:\n\n" + e.getMessage(), "Error",
 							JOptionPane.ERROR_MESSAGE);
 				}
 				dialog.dispose();
@@ -527,15 +527,14 @@ public class ImageSectorSaver
 		thread.start();
 	}
 
-	private void saveSector(Frame frame, List<Layer> layers, Sector sector, Dimension size,
-			File output, JLabel label, JProgressBar progressBar) throws Exception
+	private void saveSector(Frame frame, List<Layer> layers, Sector sector, Dimension size, File output, JLabel label,
+			JProgressBar progressBar) throws Exception
 	{
 		try
 		{
 			double texelSize = Math.abs(sector.getDeltaLonRadians()) / size.width;
 
-			BufferedImage image =
-					new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
+			BufferedImage image = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
 
 			for (Layer l : layers)
 			{
@@ -559,14 +558,13 @@ public class ImageSectorSaver
 					try
 					{
 						image =
-								layer.composeImageForSector(sector, size.width, size.height, 1d,
-										level, mimeType, true, image, 30000);
+								layer.composeImageForSector(sector, size.width, size.height, 1d, level, mimeType, true,
+										image, 30000);
 					}
 					catch (Exception e)
 					{
-						JOptionPane.showMessageDialog(frame, "Error composing image for layer "
-								+ layer.getName() + ":\n\n" + e.getMessage(), "Warning",
-								JOptionPane.WARNING_MESSAGE);
+						JOptionPane.showMessageDialog(frame, "Error composing image for layer " + layer.getName()
+								+ ":\n\n" + e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 					}
 				}
 
@@ -585,8 +583,7 @@ public class ImageSectorSaver
 		}
 		catch (OutOfMemoryError e)
 		{
-			JOptionPane.showMessageDialog(frame,
-					"Not enough memory. Try saving at a lower resolution.", "Error",
+			JOptionPane.showMessageDialog(frame, "Not enough memory. Try saving at a lower resolution.", "Error",
 					JOptionPane.ERROR_MESSAGE);
 		}
 	}

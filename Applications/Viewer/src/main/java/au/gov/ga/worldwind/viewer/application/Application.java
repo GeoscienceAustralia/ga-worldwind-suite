@@ -123,6 +123,11 @@ import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 import au.gov.ga.worldwind.wmsbrowser.WmsBrowser;
 import au.gov.ga.worldwind.wmsbrowser.WmsLayerReceiver;
 
+/**
+ * Main application class for the Viewer.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Application
 {
 	private static final String HELP_URL = getMessage(getHelpUrlKey());

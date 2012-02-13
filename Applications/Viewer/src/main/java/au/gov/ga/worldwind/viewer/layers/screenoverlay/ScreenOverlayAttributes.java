@@ -5,6 +5,8 @@ import java.net.URL;
 
 /**
  * The 'model' for a {@link ScreenOverlayLayer}
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface ScreenOverlayAttributes
 {

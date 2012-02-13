@@ -4,6 +4,13 @@ import gov.nasa.worldwind.Configuration;
 import au.gov.ga.worldwind.common.util.DirectDraw;
 import au.gov.ga.worldwind.common.util.NativeLibraries;
 
+/**
+ * Main application class for the executable jar version of the Viewer. Performs
+ * some extra setup steps like disabling direct draw and initializing the native
+ * binaries.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Executable
 {
 	public static void main(String[] args)

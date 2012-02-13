@@ -59,6 +59,11 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.dataset.LayerDefinition;
 
+/**
+ * Dialog used to create local layer definitions from a local tileset.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LocalLayerCreator extends JDialog
 {
 	private JTextField nameField;

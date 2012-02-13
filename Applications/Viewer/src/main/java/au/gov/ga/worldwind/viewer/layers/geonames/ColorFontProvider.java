@@ -1,17 +1,18 @@
 package au.gov.ga.worldwind.viewer.layers.geonames;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.util.HashMap;
-import java.util.Map;
 
 import au.gov.ga.worldwind.viewer.util.ColorFont;
 
-
-public class ColorFontProvider
+/**
+ * Simple map between a String and {@link ColorFont}. Used for providing
+ * different font/color combinations for different attribute values.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
+public class ColorFontProvider extends HashMap<String, ColorFont>
 {
 	private ColorFont def;
-	private Map<String, ColorFont> fontMap = new HashMap<String, ColorFont>();
 
 	public ColorFontProvider()
 	{
@@ -23,19 +24,10 @@ public class ColorFontProvider
 		this.def = def;
 	}
 
-	public void put(String key, ColorFont font)
+	@Override
+	public ColorFont get(Object key)
 	{
-		fontMap.put(key, font);
-	}
-
-	public void put(String key, Font font, Color color, Color backgroundColor)
-	{
-		put(key, new ColorFont(font, color, backgroundColor));
-	}
-
-	public ColorFont get(String key)
-	{
-		ColorFont font = fontMap.get(key);
+		ColorFont font = super.get(key);
 		if (font == null)
 		{
 			font = def;

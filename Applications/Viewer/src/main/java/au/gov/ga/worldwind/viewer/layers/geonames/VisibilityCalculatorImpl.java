@@ -4,6 +4,11 @@ import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 
+/**
+ * Implementation of the {@link VisibilityCalculator} interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class VisibilityCalculatorImpl implements VisibilityCalculator
 {
 	private Sector sector = Sector.FULL_SPHERE;
@@ -53,8 +58,7 @@ public class VisibilityCalculatorImpl implements VisibilityCalculator
 			height /= 2d;
 			double lat = eye.getLatitude().degrees; //-90 to 90
 			double lon = eye.getLongitude().degrees; //-180 to 180
-			levelSectors[i] = Sector.fromDegrees(lat - height, lat + height,
-					lon - width, lon + width);
+			levelSectors[i] = Sector.fromDegrees(lat - height, lat + height, lon - width, lon + width);
 		}
 
 		dirty = false;
@@ -109,8 +113,7 @@ public class VisibilityCalculatorImpl implements VisibilityCalculator
 	public static double latlonDistanceSquared(LatLon ll1, LatLon ll2)
 	{
 		double latDelta = ll1.getLatitude().degrees - ll2.getLatitude().degrees;
-		double lonDelta = ll1.getLongitude().degrees
-				- ll2.getLongitude().degrees;
+		double lonDelta = ll1.getLongitude().degrees - ll2.getLongitude().degrees;
 		return (latDelta * latDelta) + (lonDelta * lonDelta);
 	}
 }

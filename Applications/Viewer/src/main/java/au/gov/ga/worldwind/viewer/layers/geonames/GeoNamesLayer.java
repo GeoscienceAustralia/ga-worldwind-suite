@@ -33,7 +33,13 @@ import java.util.concurrent.PriorityBlockingQueue;
 import au.gov.ga.worldwind.common.util.IterableProxy;
 import au.gov.ga.worldwind.viewer.util.ColorFont;
 
-
+/**
+ * Place name layer which uses place data from geonames.org. Uses
+ * level-of-detail to download levels in the GeoName hirarchy according to
+ * camera altitude.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class GeoNamesLayer extends AbstractLayer
 {
 	private final static String GEONAMES_CHILDREN = "http://ws.geonames.org/children";
@@ -54,44 +60,32 @@ public class GeoNamesLayer extends AbstractLayer
 		setPickEnabled(false);
 
 		ColorFontProvider fontProvider = setupFontProvider();
-		topGeoName = new GeoName(null, GEONAMES_GLOBE_ID, LatLon.ZERO, null,
-				null, -1, fontProvider, visibilityCalculator);
+		topGeoName =
+				new GeoName(null, GEONAMES_GLOBE_ID, LatLon.ZERO, null, null, -1, fontProvider, visibilityCalculator);
 
-		requestQ = new PriorityBlockingQueue<GeoName>(64,
-				new Comparator<GeoName>()
-				{
-					@Override
-					public int compare(GeoName o1, GeoName o2)
-					{
-						double distance1 = visibilityCalculator
-								.distanceSquaredFromEye(o1);
-						double distance2 = visibilityCalculator
-								.distanceSquaredFromEye(o2);
-						return distance1 > distance2 ? 1
-								: distance1 == distance2 ? 0 : -1;
-					}
-				});
+		requestQ = new PriorityBlockingQueue<GeoName>(64, new Comparator<GeoName>()
+		{
+			@Override
+			public int compare(GeoName o1, GeoName o2)
+			{
+				double distance1 = visibilityCalculator.distanceSquaredFromEye(o1);
+				double distance2 = visibilityCalculator.distanceSquaredFromEye(o2);
+				return distance1 > distance2 ? 1 : distance1 == distance2 ? 0 : -1;
+			}
+		});
 	}
 
 	private ColorFontProvider setupFontProvider()
 	{
-		ColorFont def = new ColorFont(Font.decode("Arial-PLAIN-10"),
-				Color.lightGray, Color.black);
+		ColorFont def = new ColorFont(Font.decode("Arial-PLAIN-10"), Color.lightGray, Color.black);
 
-		ColorFont continents = new ColorFont(Font.decode("Arial-BOLD-12"),
-				new Color(255, 255, 240), Color.black);
-		ColorFont countries = new ColorFont(Font.decode("Arial-BOLD-11"),
-				Color.white, Color.black);
-		ColorFont states = new ColorFont(Font.decode("Arial-BOLD-10"),
-				Color.yellow, Color.black);
-		ColorFont admin = new ColorFont(Font.decode("Arial-BOLD-10"),
-				Color.orange, Color.black);
-		ColorFont capitals = new ColorFont(Font.decode("Arial-BOLD-10"),
-				Color.red, Color.black);
-		ColorFont firstorder = new ColorFont(Font.decode("Arial-PLAIN-10"),
-				Color.green, Color.black);
-		ColorFont towns = new ColorFont(Font.decode("Arial-PLAIN-10"),
-				Color.cyan, Color.black);
+		ColorFont continents = new ColorFont(Font.decode("Arial-BOLD-12"), new Color(255, 255, 240), Color.black);
+		ColorFont countries = new ColorFont(Font.decode("Arial-BOLD-11"), Color.white, Color.black);
+		ColorFont states = new ColorFont(Font.decode("Arial-BOLD-10"), Color.yellow, Color.black);
+		ColorFont admin = new ColorFont(Font.decode("Arial-BOLD-10"), Color.orange, Color.black);
+		ColorFont capitals = new ColorFont(Font.decode("Arial-BOLD-10"), Color.red, Color.black);
+		ColorFont firstorder = new ColorFont(Font.decode("Arial-PLAIN-10"), Color.green, Color.black);
+		ColorFont towns = new ColorFont(Font.decode("Arial-PLAIN-10"), Color.cyan, Color.black);
 
 		ColorFontProvider fontProvider = new ColorFontProvider(def);
 		fontProvider.put("CONT", continents);
@@ -184,19 +178,17 @@ public class GeoNamesLayer extends AbstractLayer
 	{
 		View view = dc.getView();
 		Position eyePosition = view.getEyePosition();
-		Vec4 surfacePoint = getSurfacePoint(dc, eyePosition.getLatitude(),
-				eyePosition.getLongitude());
+		Vec4 surfacePoint = getSurfacePoint(dc, eyePosition.getLatitude(), eyePosition.getLongitude());
 		return view.getEyePoint().distanceTo3(surfacePoint);
 	}
 
 	private Vec4 getSurfacePoint(DrawContext dc, Angle latitude, Angle longitude)
 	{
-		Vec4 surfacePoint = dc.getSurfaceGeometry().getSurfacePoint(latitude,
-				longitude);
+		Vec4 surfacePoint = dc.getSurfaceGeometry().getSurfacePoint(latitude, longitude);
 		if (surfacePoint == null)
-			surfacePoint = dc.getGlobe().computePointFromPosition(
-					new Position(latitude, longitude, dc.getGlobe()
-							.getElevation(latitude, longitude)));
+			surfacePoint =
+					dc.getGlobe().computePointFromPosition(
+							new Position(latitude, longitude, dc.getGlobe().getElevation(latitude, longitude)));
 		return surfacePoint;
 	}
 
@@ -215,8 +207,7 @@ public class GeoNamesLayer extends AbstractLayer
 				{
 					render(dc, child);
 				}
-				nameRenderer.render(dc, new IterableProxy<GeographicText>(
-						children));
+				nameRenderer.render(dc, new IterableProxy<GeographicText>(children));
 			}
 		}
 	}
@@ -262,21 +253,18 @@ public class GeoNamesLayer extends AbstractLayer
 		}
 		else
 		{
-			Logging.logger().severe(
-					"UnknownRetrievalProtocol: " + url.toString());
+			Logging.logger().severe("UnknownRetrievalProtocol: " + url.toString());
 			return;
 		}
 
 		// Apply any overridden timeouts.
-		Integer cto = AVListImpl.getIntegerValue(this,
-				AVKey.URL_CONNECT_TIMEOUT);
+		Integer cto = AVListImpl.getIntegerValue(this, AVKey.URL_CONNECT_TIMEOUT);
 		if (cto != null && cto > 0)
 			retriever.setConnectTimeout(cto);
 		Integer cro = AVListImpl.getIntegerValue(this, AVKey.URL_READ_TIMEOUT);
 		if (cro != null && cro > 0)
 			retriever.setReadTimeout(cro);
-		Integer srl = AVListImpl.getIntegerValue(this,
-				AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT);
+		Integer srl = AVListImpl.getIntegerValue(this, AVKey.RETRIEVAL_QUEUE_STALE_REQUEST_LIMIT);
 		if (srl != null && srl > 0)
 			retriever.setStaleRequestLimit(srl);
 
@@ -308,8 +296,7 @@ public class GeoNamesLayer extends AbstractLayer
 				}
 				catch (Exception e)
 				{
-					Logging.logger().log(java.util.logging.Level.SEVERE,
-							"Error saving GeoNames .xml", e);
+					Logging.logger().log(java.util.logging.Level.SEVERE, "Error saving GeoNames .xml", e);
 				}
 			}
 			return buffer;
@@ -324,8 +311,7 @@ public class GeoNamesLayer extends AbstractLayer
 				throw new IllegalArgumentException(msg);
 			}
 
-			if (!retriever.getState().equals(
-					Retriever.RETRIEVER_STATE_SUCCESSFUL))
+			if (!retriever.getState().equals(Retriever.RETRIEVER_STATE_SUCCESSFUL))
 				return null;
 
 			URLRetriever r = (URLRetriever) retriever;
@@ -345,9 +331,7 @@ public class GeoNamesLayer extends AbstractLayer
 
 			String contentType = r.getContentType();
 			if (contentType != null
-					&& (contentType.contains("xml")
-							|| contentType.contains("html") || contentType
-							.contains("text")))
+					&& (contentType.contains("xml") || contentType.contains("html") || contentType.contains("text")))
 			{
 				return buffer;
 			}

@@ -3,6 +3,9 @@ package au.gov.ga.worldwind.viewer.data.messages;
 import au.gov.ga.worldwind.common.util.message.CommonMessageConstants;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 
+/**
+ * Message constants used to localize the Viewer UI.
+ */
 public class ViewerMessageConstants extends CommonMessageConstants
 {
 	static

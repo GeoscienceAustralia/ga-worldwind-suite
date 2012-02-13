@@ -16,6 +16,8 @@ import au.gov.ga.worldwind.common.util.Validate;
  * A default mutable implementation of the {@link ScreenOverlayAttributes} interface.
  * <p/>
  * Provides some sensible defaults that can be used with minimal configuration.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class MutableScreenOverlayAttributesImpl implements ScreenOverlayAttributes
 {

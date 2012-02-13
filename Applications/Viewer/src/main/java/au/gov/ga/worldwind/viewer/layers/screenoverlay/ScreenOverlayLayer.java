@@ -27,6 +27,8 @@ import com.sun.opengl.util.texture.TextureIO;
 
 /**
  * A layer that can display html formatted text and images overlayed on the screen.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ScreenOverlayLayer extends AbstractLayer
 {

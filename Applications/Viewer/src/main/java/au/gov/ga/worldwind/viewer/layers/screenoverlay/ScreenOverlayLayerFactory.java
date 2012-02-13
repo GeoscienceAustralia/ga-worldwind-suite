@@ -16,6 +16,8 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
 /**
  * A factory class for creating instances of {@link ScreenOverlayLayer}s
  * from xml documents etc.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ScreenOverlayLayerFactory
 {

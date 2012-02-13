@@ -29,13 +29,37 @@ import org.w3c.dom.NodeList;
 
 import au.gov.ga.worldwind.viewer.util.ColorFont;
 
+/**
+ * Represents a single GeoName from the geoname.org database.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class GeoName implements GeographicText
 {
+	/**
+	 * GeoName name
+	 */
 	public final String name;
+	/**
+	 * GeoName id (unique)
+	 */
 	public final int geonameId;
+	/**
+	 * GeoName location
+	 */
 	public final LatLon latlon;
+	/**
+	 * GeoName feature class
+	 */
 	public final String featureClass;
+	/**
+	 * GeoName feature code
+	 */
 	public final String featureCode;
+	/**
+	 * Level in the GeoName hierarchy (globe is -1, continent is 0, country is
+	 * 1, etc)
+	 */
 	public final int level;
 
 	private final VisibilityCalculator visibilityCalculator;
@@ -45,15 +69,13 @@ public class GeoName implements GeographicText
 
 	private GeoName parent;
 	private Collection<GeoName> children;
-	
+
 	private static Object fileLock = new Object();
 	private static Map<Integer, GeoName> geonameMap = new HashMap<Integer, GeoName>();
 	private static Object mapLock = new Object();
 
-	public GeoName(String name, int geonameId, LatLon latlon,
-			String featureClass, String featureCode, int level,
-			ColorFontProvider fontProvider,
-			VisibilityCalculator visibilityCalculator)
+	public GeoName(String name, int geonameId, LatLon latlon, String featureClass, String featureCode, int level,
+			ColorFontProvider fontProvider, VisibilityCalculator visibilityCalculator)
 	{
 		this.name = name;
 		this.geonameId = geonameId;
@@ -104,11 +126,9 @@ public class GeoName implements GeographicText
 		{
 			try
 			{
-				DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
-						.newInstance();
+				DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 				documentBuilderFactory.setNamespaceAware(false);
-				DocumentBuilder documentBuilder = documentBuilderFactory
-						.newDocumentBuilder();
+				DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 
 				Document document = null;
 				synchronized (fileLock)
@@ -134,17 +154,14 @@ public class GeoName implements GeographicText
 							else
 							{
 								geoname = mapped;
-								double distance1 = VisibilityCalculatorImpl
-										.latlonDistanceSquared(latlon,
-												geoname.latlon);
-								double distance2 = VisibilityCalculatorImpl
-										.latlonDistanceSquared(
-												geoname.parent.latlon,
+								double distance1 =
+										VisibilityCalculatorImpl.latlonDistanceSquared(latlon, geoname.latlon);
+								double distance2 =
+										VisibilityCalculatorImpl.latlonDistanceSquared(geoname.parent.latlon,
 												geoname.latlon);
 								if (distance1 < distance2)
 								{
-									geoname.parent.getChildren()
-											.remove(geoname);
+									geoname.parent.getChildren().remove(geoname);
 									children.add(geoname);
 									geoname.parent = this;
 								}
@@ -155,8 +172,7 @@ public class GeoName implements GeographicText
 			}
 			catch (Exception e)
 			{
-				Logging.logger().log(java.util.logging.Level.SEVERE,
-						"Deleting corrupt GeoNames .xml file " + url, e);
+				Logging.logger().log(java.util.logging.Level.SEVERE, "Deleting corrupt GeoNames .xml file " + url, e);
 				WorldWind.getDataFileStore().removeFile(url);
 			}
 		}
@@ -164,8 +180,7 @@ public class GeoName implements GeographicText
 
 	private Collection<GeoName> parseDocument(Document document)
 	{
-		NodeList resultsCount = document
-				.getElementsByTagName("totalResultsCount");
+		NodeList resultsCount = document.getElementsByTagName("totalResultsCount");
 		if (resultsCount.getLength() <= 0)
 		{
 			return null;
@@ -221,14 +236,12 @@ public class GeoName implements GeographicText
 					}
 				}
 
-				if (lat != null && lon != null && geonameId != null
-						&& name != null && name.length() > 0)
+				if (lat != null && lon != null && geonameId != null && name != null && name.length() > 0)
 				{
-					LatLon latlon = new LatLon(Angle.fromDegreesLatitude(lat),
-							Angle.fromDegreesLongitude(lon));
-					GeoName geoname = new GeoName(name, geonameId, latlon,
-							featureClass, featureCode, level + 1, fontProvider,
-							visibilityCalculator);
+					LatLon latlon = new LatLon(Angle.fromDegreesLatitude(lat), Angle.fromDegreesLongitude(lon));
+					GeoName geoname =
+							new GeoName(name, geonameId, latlon, featureClass, featureCode, level + 1, fontProvider,
+									visibilityCalculator);
 					geonames.add(geoname);
 				}
 			}
@@ -281,7 +294,7 @@ public class GeoName implements GeographicText
 	{
 		return visibilityCalculator.isVisible(this);
 	}
-	
+
 	@Override
 	public double getPriority()
 	{

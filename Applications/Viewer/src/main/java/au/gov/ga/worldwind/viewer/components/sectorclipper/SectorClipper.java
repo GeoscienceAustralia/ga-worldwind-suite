@@ -33,6 +33,12 @@ import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
 
+/**
+ * Dialog used to edit the sector clipping planes of the
+ * {@link StereoSceneController}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SectorClipper
 {
 	public static void beginSelection(Frame frame, String title, WorldWindow wwd, BasicAction clipAction,
