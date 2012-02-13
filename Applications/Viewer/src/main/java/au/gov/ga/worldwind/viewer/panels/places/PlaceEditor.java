@@ -57,12 +57,18 @@ public class PlaceEditor
 	private JCheckBox cameraInformationCheck;
 	private JButton copyCameraButton;
 	private JCheckBox excludeFromPlaylistCheck;
-	private JTextField eyePositionField;
 	private JLabel eyePositionLabel;
+	private JTextField eyePositionField;
+	private JLabel calculatedEyePositionLabel;
+	private JLabel upVectorLabel;
 	private JTextField upVectorField;
 	private JLabel layersLabel;
 	private JButton saveLayersButton;
 	private JButton clearLayersButton;
+	private JCheckBox verticalExaggerationCheck;
+	private JButton copyExaggerationButton;
+	private JLabel verticalExaggerationLabel;
+	private JDoubleField verticalExaggerationField;
 
 	private WorldWindow wwd;
 	private int returnValue = JOptionPane.CANCEL_OPTION;
@@ -234,8 +240,7 @@ public class PlaceEditor
 		panel3.add(visibleCheck);
 		visibleCheck.addActionListener(al);
 
-		excludeFromPlaylistCheck =
-				new JCheckBox("Exclude from playlist", place.isExcludeFromPlaylist());
+		excludeFromPlaylistCheck = new JCheckBox("Exclude from playlist", place.isExcludeFromPlaylist());
 		panel3.add(excludeFromPlaylistCheck);
 		excludeFromPlaylistCheck.addActionListener(al);
 
@@ -435,12 +440,9 @@ public class PlaceEditor
 				if (LatLon.greatCircleDistance(centerPosition, place.getLatLon()).degrees > 0.1)
 				{
 					int value =
-							JOptionPane
-									.showConfirmDialog(
-											dialog,
-											"Do you want to change the Lat/Lon to match the current camera center?",
-											"Move place", JOptionPane.YES_NO_OPTION,
-											JOptionPane.QUESTION_MESSAGE);
+							JOptionPane.showConfirmDialog(dialog,
+									"Do you want to change the Lat/Lon to match the current camera center?",
+									"Move place", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 					if (value == JOptionPane.YES_OPTION)
 					{
 						latlonField.setText(textFormattedLatLon(centerPosition));
@@ -450,14 +452,14 @@ public class PlaceEditor
 			}
 		});
 
-		label = new JLabel("Eye position:");
+		eyePositionLabel = new JLabel("Eye position:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 1;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
 		c.insets.bottom = 0;
-		panel2.add(label, c);
+		panel2.add(eyePositionLabel, c);
 
 		eyePositionField = new JTextField(textFormattedPosition(place.getEyePosition()));
 		c = new GridBagConstraints();
@@ -469,23 +471,22 @@ public class PlaceEditor
 		c.insets.bottom = 0;
 		panel2.add(eyePositionField, c);
 
-		eyePositionLabel = new JLabel(" ");
+		calculatedEyePositionLabel = new JLabel(" ");
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 2;
 		c.anchor = GridBagConstraints.CENTER;
 		c.insets = (Insets) insets.clone();
 		c.insets.top = 0;
-		panel2.add(eyePositionLabel, c);
+		panel2.add(calculatedEyePositionLabel, c);
 
-
-		label = new JLabel("Up vector:");
+		upVectorLabel = new JLabel("Up vector:");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 3;
 		c.anchor = GridBagConstraints.EAST;
 		c.insets = (Insets) insets.clone();
-		panel2.add(label, c);
+		panel2.add(upVectorLabel, c);
 
 		upVectorField = new JTextField(textFormattedVec4(place.getUpVector()));
 		c = new GridBagConstraints();
@@ -544,6 +545,68 @@ public class PlaceEditor
 			}
 		});
 
+		panel2 = new JPanel(new GridBagLayout());
+		panel2.setBorder(BorderFactory.createTitledBorder("Vertical exaggeration"));
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 4;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(panel2, c);
+
+		verticalExaggerationCheck = new JCheckBox("Save vertical exaggeration");
+		verticalExaggerationCheck.setSelected(place.getVerticalExaggeration() != null);
+		c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = (Insets) insets.clone();
+		c.insets.bottom = 0;
+		panel2.add(verticalExaggerationCheck, c);
+		verticalExaggerationCheck.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				enableExaggerationComponents();
+				checkValidity();
+			}
+		});
+
+		copyExaggerationButton = new JButton("Fill from current value");
+		c = new GridBagConstraints();
+		c.gridx = 1;
+		c.anchor = GridBagConstraints.EAST;
+		panel2.add(copyExaggerationButton, c);
+		copyExaggerationButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				verticalExaggerationField.setValue(wwd.getSceneController().getVerticalExaggeration());
+			}
+		});
+
+		verticalExaggerationLabel = new JLabel("Exaggeration:");
+		c = new GridBagConstraints();
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.WEST;
+		c.insets = (Insets) insets.clone();
+		c.insets.bottom = 0;
+		panel2.add(verticalExaggerationLabel, c);
+
+		verticalExaggerationField =
+				new JDoubleField(place.getVerticalExaggeration() != null ? place.getVerticalExaggeration() : wwd
+						.getSceneController().getVerticalExaggeration(), 3);
+		verticalExaggerationField.setPositive(true);
+		verticalExaggerationField.getDocument().addDocumentListener(dl);
+		c = new GridBagConstraints();
+		c.gridy = 1;
+		c.gridx = 1;
+		c.anchor = GridBagConstraints.WEST;
+		c.weightx = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = (Insets) insets.clone();
+		c.insets.bottom = 0;
+		panel2.add(verticalExaggerationField, c);
+
 
 		panel = new JPanel(new BorderLayout());
 		int spacing = 5;
@@ -584,6 +647,7 @@ public class PlaceEditor
 		checkValidity();
 		enableCameraInformation();
 		enableLayersComponents();
+		enableExaggerationComponents();
 
 		labelText.getDocument().addDocumentListener(dl);
 		latlonField.getDocument().addDocumentListener(dl);
@@ -637,12 +701,12 @@ public class PlaceEditor
 		if (pos == null)
 		{
 			valid = false;
-			eyePositionLabel.setText("Invalid position");
+			calculatedEyePositionLabel.setText("Invalid position");
 		}
 		else
 		{
 			place.setEyePosition(pos);
-			eyePositionLabel.setText(labelFormattedPosition(pos));
+			calculatedEyePositionLabel.setText(labelFormattedPosition(pos));
 		}
 
 		Vec4 v = parseVec4(upVectorField.getText());
@@ -650,6 +714,16 @@ public class PlaceEditor
 
 		place.setSaveCamera(cameraInformationCheck.isSelected());
 		place.setExcludeFromPlaylist(excludeFromPlaylistCheck.isSelected());
+
+		Double exaggeration = verticalExaggerationField.getValue();
+		if (verticalExaggerationCheck.isSelected() && (exaggeration == null || exaggeration < 0 || exaggeration > 100))
+		{
+			valid = false;
+		}
+		else
+		{
+			place.setVerticalExaggeration(verticalExaggerationCheck.isSelected() ? exaggeration : null);
+		}
 
 		okButton.setEnabled(valid);
 		return valid;
@@ -659,9 +733,19 @@ public class PlaceEditor
 	{
 		boolean enabled = cameraInformationCheck.isSelected();
 		copyCameraButton.setEnabled(enabled);
-		eyePositionLabel.setEnabled(enabled);
+		calculatedEyePositionLabel.setEnabled(enabled);
 		eyePositionField.setEnabled(enabled);
+		eyePositionLabel.setEnabled(enabled);
 		upVectorField.setEnabled(enabled);
+		upVectorLabel.setEnabled(enabled);
+	}
+
+	private void enableExaggerationComponents()
+	{
+		boolean enabled = verticalExaggerationCheck.isSelected();
+		copyExaggerationButton.setEnabled(enabled);
+		verticalExaggerationField.setEnabled(enabled);
+		verticalExaggerationLabel.setEnabled(enabled);
 	}
 
 	private String textFormattedLatLon(LatLon latlon)
@@ -677,8 +761,7 @@ public class PlaceEditor
 		if (latlon == null)
 			return "";
 
-		return String.format("Lat %1.4f\u00B0 Lon %1.4f\u00B0", latlon.latitude.degrees,
-				latlon.longitude.degrees);
+		return String.format("Lat %1.4f\u00B0 Lon %1.4f\u00B0", latlon.latitude.degrees, latlon.longitude.degrees);
 	}
 
 	private LatLon parseLatLon(String text)
@@ -691,8 +774,8 @@ public class PlaceEditor
 		if (position == null)
 			return "";
 
-		return String.format("%1.4f %1.4f %1.0f", position.latitude.degrees,
-				position.longitude.degrees, position.elevation);
+		return String.format("%1.4f %1.4f %1.0f", position.latitude.degrees, position.longitude.degrees,
+				position.elevation);
 	}
 
 	private String labelFormattedPosition(Position position)
@@ -700,8 +783,8 @@ public class PlaceEditor
 		if (position == null)
 			return "";
 
-		return String.format("Lat %1.4f\u00B0 Lon %1.4f\u00B0 Elev %1.0fm",
-				position.latitude.degrees, position.longitude.degrees, position.elevation);
+		return String.format("Lat %1.4f\u00B0 Lon %1.4f\u00B0 Elev %1.0fm", position.latitude.degrees,
+				position.longitude.degrees, position.elevation);
 	}
 
 	private Position parsePosition(String text)

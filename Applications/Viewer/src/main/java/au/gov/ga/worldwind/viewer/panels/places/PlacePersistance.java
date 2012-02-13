@@ -91,6 +91,7 @@ public class PlacePersistance
 		place.setUpVector(XMLUtil.getVec4(element, "UpVector", xpath));
 		place.setExcludeFromPlaylist(XMLUtil.getBoolean(element, "ExcludeFromPlaylist", place.isExcludeFromPlaylist(),
 				xpath));
+		place.setVerticalExaggeration(XMLUtil.getDouble(element, "VerticalExaggeration", xpath));
 		try
 		{
 			place.setLayers(LayerTreePersistance.readFromXML(element, context));
@@ -144,6 +145,11 @@ public class PlacePersistance
 		if (place.getLayers() != null)
 		{
 			LayerTreePersistance.saveToNode(place.getLayers(), document, current);
+		}
+
+		if (place.getVerticalExaggeration() != null)
+		{
+			XMLUtil.appendDouble(current, "VerticalExaggeration", place.getVerticalExaggeration());
 		}
 	}
 }

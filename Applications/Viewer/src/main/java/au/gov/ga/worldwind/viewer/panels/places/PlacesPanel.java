@@ -102,6 +102,7 @@ public class PlacesPanel extends AbstractThemePanel
 	private JFileChooser exportImportChooser;
 	private LayersPanel layersPanel;
 	private RenderingListener opacityChanger;
+	private RenderingListener exaggerationChanger;
 
 	private class ListItem
 	{
@@ -824,6 +825,7 @@ public class PlacesPanel extends AbstractThemePanel
 
 		long lengthMillis = AnimatorHelper.addAnimator(view, centerPosition, eyePosition, place.getUpVector());
 		animateLayers(place, lengthMillis);
+		animateVerticalExaggeration(place, lengthMillis);
 		wwd.redraw();
 
 		return lengthMillis;
@@ -1017,6 +1019,7 @@ public class PlacesPanel extends AbstractThemePanel
 			public void mousePressed(MouseEvent e)
 			{
 				wwd.removeRenderingListener(opacityChanger);
+				wwd.getInputHandler().removeMouseListener(this);
 			}
 		});
 	}
@@ -1038,6 +1041,48 @@ public class PlacesPanel extends AbstractThemePanel
 		{
 			addLayersToList(parent.getChild(i), layers);
 		}
+	}
+
+	private void animateVerticalExaggeration(final Place place, final long lengthMillis)
+	{
+		final double startExaggeration = wwd.getSceneController().getVerticalExaggeration();
+		if (place.getVerticalExaggeration() == null || place.getVerticalExaggeration() == startExaggeration)
+		{
+			return;
+		}
+
+		final long startTime = System.currentTimeMillis();
+		exaggerationChanger = new RenderingListener()
+		{
+			@Override
+			public void stageChanged(RenderingEvent event)
+			{
+				long currentTime = System.currentTimeMillis();
+				double percent = (currentTime - startTime) / (double) lengthMillis;
+				percent = Math.max(0d, Math.min(1d, percent));
+				boolean complete = percent >= 1d;
+				
+				double exaggeration = Util.mixDouble(percent, startExaggeration, place.getVerticalExaggeration());
+				//wwd.getSceneController().setVerticalExaggeration(exaggeration);
+				Settings.get().setVerticalExaggeration(exaggeration);
+				
+				if (complete)
+				{
+					wwd.removeRenderingListener(this);
+				}
+			}
+		};
+		wwd.addRenderingListener(exaggerationChanger);
+
+		wwd.getInputHandler().addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				wwd.removeRenderingListener(exaggerationChanger);
+				wwd.getInputHandler().removeMouseListener(this);
+			}
+		});
 	}
 
 	private JFileChooser getChooser()

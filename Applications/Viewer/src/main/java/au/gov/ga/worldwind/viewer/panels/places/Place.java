@@ -20,6 +20,7 @@ public class Place implements Serializable
 	private Vec4 upVector = null;
 	private boolean excludeFromPlaylist = false;
 	private INode layers = null;
+	private Double verticalExaggeration = null;
 
 	public Place()
 	{
@@ -54,6 +55,7 @@ public class Place implements Serializable
 		this.upVector = place.upVector;
 		this.excludeFromPlaylist = place.excludeFromPlaylist;
 		this.layers = place.layers;
+		this.verticalExaggeration = place.verticalExaggeration;
 	}
 
 	public String getLabel()
@@ -158,5 +160,15 @@ public class Place implements Serializable
 	public void setLayers(INode layers)
 	{
 		this.layers = layers;
+	}
+
+	public Double getVerticalExaggeration()
+	{
+		return verticalExaggeration;
+	}
+
+	public void setVerticalExaggeration(Double verticalExaggeration)
+	{
+		this.verticalExaggeration = verticalExaggeration;
 	}
 }
