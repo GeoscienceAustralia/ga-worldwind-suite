@@ -21,6 +21,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.common.ui.SwingUtil;
 import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.viewer.panels.dataset.IData;
 import au.gov.ga.worldwind.viewer.panels.dataset.IDataset;
@@ -292,11 +293,18 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 		//add the layer
 		insertNodeInto(layerNode, currentParent, index, true);
-		TreePath expand = new TreePath(expandPath.toArray());
+		final TreePath expand = new TreePath(expandPath.toArray());
 
 		//relayout the tree, and expand to make the layer node visible
-		tree.getUI().relayout(expand);
-		tree.scrollPathToVisible(expand);
+		SwingUtil.invokeLaterTaskOnEDT(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				tree.getUI().relayout(expand);
+				tree.scrollPathToVisible(expand);
+			}
+		});
 	}
 
 	protected int findInsertionIndex(ILayerDefinition layer, IDataset directParent, INode currentParent)

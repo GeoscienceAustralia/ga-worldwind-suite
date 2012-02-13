@@ -27,10 +27,7 @@ public class ClearableBasicTreeUI extends BasicTreeUI
 	 */
 	public void relayout(TreePath path)
 	{
-		synchronized (invalidatedPaths)
-		{
-			invalidatedPaths.add(path);
-		}
+		invalidatedPaths.add(path);
 	}
 
 	/**
@@ -44,28 +41,26 @@ public class ClearableBasicTreeUI extends BasicTreeUI
 	@Override
 	public void paint(Graphics g, JComponent c)
 	{
-		synchronized (invalidatedPaths)
+		if (relayout || !invalidatedPaths.isEmpty())
 		{
-			if (relayout || !invalidatedPaths.isEmpty())
+			if (relayout)
 			{
-				if (relayout)
-				{
-					treeState.invalidateSizes();
-				}
-				else
-				{
-					for (TreePath path : invalidatedPaths)
-					{
-						treeState.invalidatePathBounds(path);
-					}
-				}
-
-				updateSize();
-
-				relayout = false;
-				invalidatedPaths.clear();
+				treeState.invalidateSizes();
 			}
+			else
+			{
+				for (TreePath path : invalidatedPaths)
+				{
+					treeState.invalidatePathBounds(path);
+				}
+			}
+
+			updateSize();
+
+			relayout = false;
+			invalidatedPaths.clear();
 		}
+
 		super.paint(g, c);
 	}
 }

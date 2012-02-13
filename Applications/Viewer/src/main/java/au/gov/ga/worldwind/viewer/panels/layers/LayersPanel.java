@@ -79,7 +79,7 @@ public class LayersPanel extends AbstractLayersPanel
 	}
 
 	@Override
-	public void setup(Theme theme)
+	public void setup(final Theme theme)
 	{
 		super.setup(theme);
 
@@ -102,10 +102,20 @@ public class LayersPanel extends AbstractLayersPanel
 
 		if (!layersFileExisted)
 		{
-			for (IDataset dataset : theme.getDatasets())
+			Thread thread = new Thread(new Runnable()
 			{
-				addDefaultLayersFromDataset(dataset);
-			}
+				
+				@Override
+				public void run()
+				{
+					for (IDataset dataset : theme.getDatasets())
+					{
+						addDefaultLayersFromDataset(dataset);
+					}
+				}
+			});
+			thread.setDaemon(true);
+			thread.start();
 		}
 
 		window = SwingUtilities.getWindowAncestor(this);
