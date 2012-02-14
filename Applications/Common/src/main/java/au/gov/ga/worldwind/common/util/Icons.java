@@ -30,6 +30,7 @@ public class Icons
 	public static final Icons cutdelete = new Icons("cutdelete.gif");
 	public static final Icons datasets = new Icons("datasets.gif");
 	public static final Icons delete = new Icons("delete.gif");
+	public static final Icons deleteall = new Icons("deleteall.gif");	
 	public static final Icons deletevalue = new Icons("deletevalue.gif");
 	public static final Icons down = new Icons("down.gif");
 	public static final Icons earth32 = new Icons("earth32.png");

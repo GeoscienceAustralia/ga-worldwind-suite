@@ -39,6 +39,10 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getConfirmDeleteLayerSingleMessageKey() { return "viewer.deletelayer.confirm.single.message"; }
 	public static String getGotoLocationSupportsMessageKey() { return "viewer.gotolocation.supports.message"; }
 	public static String getGotoLocationInvalidMessageKey() { return "viewer.gotolocation.invalid.message"; }
+	public static String getDeletePlaceWarnTitleKey() { return "viewer.deleteplace.warn.title"; }
+	public static String getDeletePlaceWarnMessageKey() { return "viewer.deleteplace.warn.message"; }
+	public static String getDeleteAllPlacesWarnTitleKey() { return "viewer.deleteallplaces.warn.title"; }
+	public static String getDeleteAllPlacesWarnMessageKey() { return "viewer.deleteallplaces.warn.message"; }
 	
 	// Field labels
 	public static String getGotoLocationPromptLabelKey() { return "viewer.gotolocation.prompt.label"; }
@@ -110,6 +114,8 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	public static String getPlacesEditTooltipKey() { return "viewer.action.places.edit.tooltip";}
 	public static String getPlacesDeleteLabelKey() { return "viewer.action.places.delete.label";}
 	public static String getPlacesDeleteTooltipKey() { return "viewer.action.places.delete.tooltip";}
+	public static String getPlacesDeleteAllLabelKey() { return "viewer.action.places.deleteall.label";}
+	public static String getPlacesDeleteAllTooltipKey() { return "viewer.action.places.deleteall.tooltip";}
 	public static String getPlacesPlayLabelKey() { return "viewer.action.places.play.label";}
 	public static String getPlacesPlayTooltipKey() { return "viewer.action.places.play.tooltip";}
 	public static String getPlacesStopTooltipKey() { return "viewer.action.places.stop.tooltip";}

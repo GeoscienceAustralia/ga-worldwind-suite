@@ -93,6 +93,7 @@ public class PlacesPanel extends AbstractThemePanel
 	private BasicAction addAction;
 	private BasicAction editAction;
 	private BasicAction deleteAction;
+	private BasicAction deleteAllAction;
 	private BasicAction playAction;
 	private BasicAction importAction;
 	private BasicAction exportAction;
@@ -321,6 +322,7 @@ public class PlacesPanel extends AbstractThemePanel
 		toolBar.add(addAction);
 		toolBar.add(editAction);
 		toolBar.add(deleteAction);
+		toolBar.add(deleteAllAction);
 		toolBar.addSeparator();
 		toolBar.add(importAction);
 		toolBar.add(exportAction);
@@ -377,7 +379,17 @@ public class PlacesPanel extends AbstractThemePanel
 				deleteSelected();
 			}
 		});
-
+		
+		deleteAllAction = new BasicAction(getMessage(getPlacesDeleteAllLabelKey()), getMessage(getPlacesDeleteAllTooltipKey()), Icons.deleteall.getIcon());
+		deleteAllAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				promptToDeleteAllPlaces();
+			}
+		});
+		
 		playAction =
 				new BasicAction(getMessage(getPlacesPlayLabelKey()), getMessage(getPlacesPlayTooltipKey()),
 						Icons.run.getIcon());
@@ -580,10 +592,10 @@ public class PlacesPanel extends AbstractThemePanel
 		ListItem item = (ListItem) list.getSelectedValue();
 		if (item != null)
 		{
-			int value =
-					JOptionPane.showConfirmDialog(this,
-							"Are you sure you want to delete the place '" + item.place.getLabel() + "'?",
-							"Delete place", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			int value = JOptionPane.showConfirmDialog(this,
+												  	 getMessage(getDeletePlaceWarnMessageKey(), item.place.getLabel()),
+												  	 getMessage(getDeletePlaceWarnTitleKey()),
+												  	 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			if (value == JOptionPane.YES_OPTION)
 			{
 				model.removeElement(item);
@@ -599,11 +611,12 @@ public class PlacesPanel extends AbstractThemePanel
 		}
 	}
 
-	public void deleteAllPlacesWarn()
+	private void promptToDeleteAllPlaces()
 	{
-		int value =
-				JOptionPane.showConfirmDialog(frame, "All places will be deleted!\nAre you sure?", "Delete all places",
-						JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+		int value = JOptionPane.showConfirmDialog(frame, 
+												  getMessage(getDeleteAllPlacesWarnMessageKey()), 
+												  getMessage(getDeleteAllPlacesWarnTitleKey()), 
+												  JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 		if (value == JOptionPane.YES_OPTION)
 		{
 			deleteAllPlaces();
@@ -651,6 +664,11 @@ public class PlacesPanel extends AbstractThemePanel
 
 	private synchronized void nextPlace()
 	{
+		if (places.isEmpty())
+		{
+			return;
+		}
+		
 		stopAllMotion();
 
 		int index = getSelectedPlaceIndex();
@@ -668,6 +686,11 @@ public class PlacesPanel extends AbstractThemePanel
 
 	private synchronized void previousPlace()
 	{
+		if (places.isEmpty())
+		{
+			return;
+		}
+		
 		stopAllMotion();
 
 		int index = getSelectedPlaceIndex();
@@ -695,6 +718,11 @@ public class PlacesPanel extends AbstractThemePanel
 
 	private synchronized void playPlaces()
 	{
+		if (places.isEmpty())
+		{
+			return;
+		}
+		
 		if (!playing)
 		{
 			playing = true;
