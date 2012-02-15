@@ -12,6 +12,11 @@ import au.gov.ga.worldwind.common.ui.SwingUtil;
 import au.gov.ga.worldwind.common.ui.lazytree.LoadingTree;
 import au.gov.ga.worldwind.common.util.Loader.LoadingListener;
 
+/**
+ * {@link JTree} used for rendering a hierarchy of layers.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LayerTree extends LoadingTree implements LoadingListener
 {
 	private final LayerEnabler enabler;
@@ -79,7 +84,7 @@ public class LayerTree extends LoadingTree implements LoadingListener
 	{
 		repaint();
 	}
-	
+
 	public void relayoutOnEDT()
 	{
 		SwingUtil.invokeLaterTaskOnEDT(new Runnable()

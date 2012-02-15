@@ -14,6 +14,8 @@ import au.gov.ga.worldwind.common.util.Icons;
  * Represents the root node for WMS layers in the layer panel.
  * <p/>
  * Contains convenience methods for adding WMS layers from the WMS browser etc.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsRootNode extends FolderNode
 {

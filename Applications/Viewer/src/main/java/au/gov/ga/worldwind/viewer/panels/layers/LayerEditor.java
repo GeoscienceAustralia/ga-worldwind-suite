@@ -22,6 +22,11 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+/**
+ * JDialog that allows editing of layer nodes in the layer tree.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LayerEditor extends JDialog
 {
 	private AbstractNode node;

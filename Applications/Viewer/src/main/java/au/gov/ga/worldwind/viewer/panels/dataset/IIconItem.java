@@ -6,15 +6,40 @@ import javax.swing.ImageIcon;
 
 import au.gov.ga.worldwind.common.ui.lazytree.ILoadingNode;
 
+/**
+ * Represents a tree node that has an icon. The icon can be loaded lazily.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public interface IIconItem extends ILoadingNode
 {
-	public boolean isIconLoaded();
+	/**
+	 * @return Has the icon associated with this node been loaded?
+	 */
+	boolean isIconLoaded();
 
-	public void loadIcon(Runnable afterLoad);
+	/**
+	 * Load this node's icon.
+	 * 
+	 * @param afterLoad
+	 *            Runnable to run after the icon has been loaded.
+	 */
+	void loadIcon(Runnable afterLoad);
 
-	public ImageIcon getIcon();
+	/**
+	 * @return This node's icon.
+	 */
+	ImageIcon getIcon();
 
-	public URL getIconURL();
+	/**
+	 * @return The URL pointing to the icon.
+	 */
+	URL getIconURL();
 
-	public void setIconURL(URL iconURL);
+	/**
+	 * Set the icon's URL.
+	 * 
+	 * @param iconURL
+	 */
+	void setIconURL(URL iconURL);
 }

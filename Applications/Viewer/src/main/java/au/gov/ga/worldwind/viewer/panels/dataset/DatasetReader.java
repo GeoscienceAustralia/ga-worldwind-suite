@@ -7,6 +7,11 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
+/**
+ * Helper class that reads {@link IDataset}s from XML files.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DatasetReader
 {
 	public static IDataset read(Object source, URL context) throws MalformedURLException
@@ -30,8 +35,7 @@ public class DatasetReader
 		return root;
 	}
 
-	private static void addRelevant(Element element, IDataset parent, URL context)
-			throws MalformedURLException
+	private static void addRelevant(Element element, IDataset parent, URL context) throws MalformedURLException
 	{
 		Element[] elements = XMLUtil.getElements(element, "Dataset|Link|Layer", null);
 		if (elements != null)
@@ -55,8 +59,7 @@ public class DatasetReader
 		}
 	}
 
-	private static IDataset addDataset(Element element, IDataset parent, URL context)
-			throws MalformedURLException
+	private static IDataset addDataset(Element element, IDataset parent, URL context) throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name");
 		URL info = XMLUtil.getURL(element, "@info", context);
@@ -67,8 +70,7 @@ public class DatasetReader
 		return dataset;
 	}
 
-	private static void addLink(Element element, IDataset parent, URL context)
-			throws MalformedURLException
+	private static void addLink(Element element, IDataset parent, URL context) throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name");
 		URL info = XMLUtil.getURL(element, "@info", context);
@@ -79,8 +81,7 @@ public class DatasetReader
 		parent.addChild(dataset);
 	}
 
-	private static void addLayer(Element element, IDataset parent, URL context)
-			throws MalformedURLException
+	private static void addLayer(Element element, IDataset parent, URL context) throws MalformedURLException
 	{
 		String name = XMLUtil.getText(element, "@name");
 		URL info = XMLUtil.getURL(element, "@info", context);

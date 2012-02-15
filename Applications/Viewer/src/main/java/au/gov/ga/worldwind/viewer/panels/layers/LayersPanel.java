@@ -47,6 +47,15 @@ import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
+/**
+ * {@link ThemePanel} that displays a list of layers that have been added to the
+ * viewer. These layers are saved when closing the viewer, and reloaded next
+ * time the viewer is started.
+ * <p>
+ * The layers persistance filename can be customized in the {@link Theme}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LayersPanel extends AbstractLayersPanel
 {
 	private static final String DEFAULT_LAYERS_PERSISTANCE_FILENAME = "layers.xml";
@@ -104,7 +113,7 @@ public class LayersPanel extends AbstractLayersPanel
 		{
 			Thread thread = new Thread(new Runnable()
 			{
-				
+
 				@Override
 				public void run()
 				{

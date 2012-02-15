@@ -2,6 +2,11 @@ package au.gov.ga.worldwind.viewer.panels.dataset;
 
 import java.net.URL;
 
+/**
+ * Abstract implementation of the {@link IData} interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class AbstractData extends AbstractIconItem implements IData
 {
 	private String name;
@@ -33,7 +38,7 @@ public abstract class AbstractData extends AbstractIconItem implements IData
 	{
 		return getName();
 	}
-	
+
 	@Override
 	public boolean isBase()
 	{

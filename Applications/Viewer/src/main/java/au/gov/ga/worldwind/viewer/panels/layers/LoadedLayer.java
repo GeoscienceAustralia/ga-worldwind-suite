@@ -9,6 +9,12 @@ import java.net.URL;
 
 import au.gov.ga.worldwind.common.util.Setupable;
 
+/**
+ * Container class that is used when loading a layer or elevation model from a
+ * layer definition.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LoadedLayer implements Setupable
 {
 	private Layer layer;
@@ -39,51 +45,86 @@ public class LoadedLayer implements Setupable
 		}
 	}
 
+	/**
+	 * @return Does this represent a layer?
+	 */
 	public boolean isLayer()
 	{
 		return layer != null;
 	}
 
+	/**
+	 * @return The loaded layer
+	 */
 	public Layer getLayer()
 	{
 		return layer;
 	}
 
+	/**
+	 * @return Does this represent an elevation model?
+	 */
 	public boolean isElevationModel()
 	{
 		return elevationModel != null;
 	}
 
+	/**
+	 * @return The loaded elevation model
+	 */
 	public ElevationModel getElevationModel()
 	{
 		return elevationModel;
 	}
 
+	/**
+	 * @return The loaded layer or elevation model
+	 */
 	public Object getLoadedObject()
 	{
 		return isLayer() ? layer : elevationModel;
 	}
 
+	/**
+	 * @return The URL pointing at the legend
+	 */
 	public URL getLegendURL()
 	{
 		return legendURL;
 	}
 
+	/**
+	 * Set the legend URL
+	 * 
+	 * @param legendURL
+	 */
 	public void setLegendURL(URL legendURL)
 	{
 		this.legendURL = legendURL;
 	}
 
+	/**
+	 * @return The URL to used for querying points in the loaded layer
+	 */
 	public URL getQueryURL()
 	{
 		return queryURL;
 	}
 
+	/**
+	 * Set the query URL
+	 * 
+	 * @param queryURL
+	 */
 	public void setQueryURL(URL queryURL)
 	{
 		this.queryURL = queryURL;
 	}
 
+	/**
+	 * @return The attribute-value list parameters read when loading the layer
+	 *         definition
+	 */
 	public AVList getParams()
 	{
 		return params;

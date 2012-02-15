@@ -30,8 +30,20 @@ import au.gov.ga.worldwind.common.ui.lazytree.LoadingTree;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Icons;
 
-public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconItem> extends JPanel
-		implements TreeCellRenderer
+/**
+ * Superclass of the {@link TreeCellRenderer} implementations for the layer
+ * trees.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * 
+ * @param <E>
+ *            Supertype of the nodes rendered by this class.
+ * @param <L>
+ *            Type of the layer nodes rendered by this class. Generally a
+ *            subclass of &lt;E&gt;.
+ */
+public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconItem> extends JPanel implements
+		TreeCellRenderer
 {
 	private LoadingTree tree;
 	private RendererMouseKeyListener mouseKeyListener = new RendererMouseKeyListener();
@@ -81,23 +93,23 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		buttonPanel = new JPanel(new GridBagLayout());
 		buttonPanel.setOpaque(false);
 		add(buttonPanel, BorderLayout.EAST);
-		
+
 		GridBagConstraints c;
 		Insets insets = new Insets(0, 0, 0, 2);
 		int i = 0;
-		
+
 		c = new GridBagConstraints();
 		c.gridx = i++;
 		c.anchor = GridBagConstraints.CENTER;
 		c.insets = (Insets) insets.clone();
 		buttonPanel.add(infoLabel, c);
-		
+
 		c = new GridBagConstraints();
 		c.gridx = i++;
 		c.anchor = GridBagConstraints.CENTER;
 		c.insets = (Insets) insets.clone();
 		buttonPanel.add(legendLabel, c);
-		
+
 		c = new GridBagConstraints();
 		c.gridx = i++;
 		c.anchor = GridBagConstraints.CENTER;
@@ -113,8 +125,8 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 	}
 
 	@Override
-	public Component getTreeCellRendererComponent(final JTree t, Object value, boolean selected,
-			boolean expanded, boolean leaf, final int row, boolean hasFocus)
+	public Component getTreeCellRendererComponent(final JTree t, Object value, boolean selected, boolean expanded,
+			boolean leaf, final int row, boolean hasFocus)
 	{
 		validateTree(t);
 
@@ -200,13 +212,9 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 
 		if (layerRow)
 		{
-			boolean mouseInsideButton =
-					mouseRow >= 0 && button.getBounds().contains(mouseX, mouseY);
-			boolean rollover =
-					(mouseInsideButton && row == mouseRow && mouseButtonDownRow <= 0) || (hasFocus);
-			boolean down =
-					(mouseInsideButton && row == mouseButtonDownRow)
-							|| (hasFocus && row == keyDownRow);
+			boolean mouseInsideButton = mouseRow >= 0 && button.getBounds().contains(mouseX, mouseY);
+			boolean rollover = (mouseInsideButton && row == mouseRow && mouseButtonDownRow <= 0) || (hasFocus);
+			boolean down = (mouseInsideButton && row == mouseButtonDownRow) || (hasFocus && row == keyDownRow);
 
 			setupButton(button, layerItem, mouseInsideButton, rollover, down);
 		}
@@ -215,12 +223,9 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		button.setVisible(layerRow);
 
 		//set up the icon labels
-		updateLabel(row, mouseInfoRow, infoRow, infoLabel, Icons.info.getIcon(), Icons.infowhite
-				.getIcon());
-		updateLabel(row, mouseLegendRow, legendRow, legendLabel, Icons.legend.getIcon(),
-				Icons.legendwhite.getIcon());
-		updateLabel(row, mouseQueryRow, queryRow, queryLabel, Icons.crosshair.getIcon(),
-				Icons.crosshairwhite.getIcon());
+		updateLabel(row, mouseInfoRow, infoRow, infoLabel, Icons.info.getIcon(), Icons.infowhite.getIcon());
+		updateLabel(row, mouseLegendRow, legendRow, legendLabel, Icons.legend.getIcon(), Icons.legendwhite.getIcon());
+		updateLabel(row, mouseQueryRow, queryRow, queryLabel, Icons.crosshair.getIcon(), Icons.crosshairwhite.getIcon());
 
 		//ensure the labels are in the correct position by forcing a layout
 		validate();
@@ -233,8 +238,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 		return this;
 	}
 
-	private void updateLabel(int row, int mouseRow, boolean isRow, JLabel label, Icon overIcon,
-			Icon otherIcon)
+	private void updateLabel(int row, int mouseRow, boolean isRow, JLabel label, Icon overIcon, Icon otherIcon)
 	{
 		label.setVisible(isRow);
 		if (row == mouseRow)
@@ -255,33 +259,115 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 			map.remove(row);
 	}
 
+	/**
+	 * @return A new button to be displayed on the left of the label. Could be a
+	 *         check box (for the layer tree), or an add button (for the dataset
+	 *         tree).
+	 */
 	protected abstract AbstractButton createButton();
 
+	/**
+	 * Ensure that the given tree is the correct type.
+	 * 
+	 * @param tree
+	 */
 	protected abstract void validateTree(JTree tree);
 
+	/**
+	 * Get the node value from the given object.
+	 * 
+	 * @param value
+	 * @return Node value from the object, or null if it could not be converted.
+	 */
 	protected abstract E getValue(Object value);
 
+	/**
+	 * Should the given node value be displayed as a info row (with an info
+	 * button)?
+	 * 
+	 * @param value
+	 * @return True if the given value should be displayed as an info row.
+	 */
 	protected abstract boolean isInfoRow(E value);
 
+	/**
+	 * Should the given node value be displayed as a legend row (with a legend
+	 * button)?
+	 * 
+	 * @param value
+	 * @return True if the given value should be displayed as a legend row.
+	 */
 	protected abstract boolean isLegendRow(L value);
 
+	/**
+	 * Should the given node value be displayed as a queryable row (with a query
+	 * button)?
+	 * 
+	 * @param value
+	 * @return True if the given value should be displayed as a queryable row.
+	 */
 	protected abstract boolean isQueryRow(L value);
 
+	/**
+	 * If the given value is a layer node value, return it as such, otherwise
+	 * return null.
+	 * 
+	 * @param value
+	 * @return value if it is a layer node value, else null.
+	 */
 	protected abstract L getLayerValue(E value);
 
+	/**
+	 * Set up the given label with the given value.
+	 * 
+	 * @param label
+	 * @param value
+	 */
 	protected abstract void setupLabel(DefaultTreeCellRenderer label, E value);
 
-	protected abstract void setupButton(AbstractButton button, L value, boolean mouseInsideButton,
-			boolean rollover, boolean down);
+	/**
+	 * Set up the button to the left of the label with the given value.
+	 * 
+	 * @param button
+	 *            Button to set up
+	 * @param value
+	 *            Value to use
+	 * @param mouseInsideButton
+	 *            Is the mouse inside the button?
+	 * @param rollover
+	 *            Is the mouse rolling over the button?
+	 * @param down
+	 *            Is the mouse down over the button?
+	 */
+	protected abstract void setupButton(AbstractButton button, L value, boolean mouseInsideButton, boolean rollover,
+			boolean down);
 
-	//protected abstract String getLinkLabelToolTipText(Object value);
-
+	/**
+	 * Called when the button to the left of the label is pressed.
+	 * 
+	 * @param row
+	 */
 	protected abstract void buttonPressed(int row);
 
+	/**
+	 * Called when the info button is clicked.
+	 * 
+	 * @param row
+	 */
 	protected abstract void infoClicked(int row);
 
+	/**
+	 * Called when the legend button is clicked.
+	 * 
+	 * @param row
+	 */
 	protected abstract void legendClicked(int row);
 
+	/**
+	 * Called when the query button is clicked.
+	 * 
+	 * @param row
+	 */
 	protected abstract void queryClicked(int row);
 
 	private class RendererMouseKeyListener extends MouseAdapter implements KeyListener
@@ -348,8 +434,7 @@ public abstract class AbstractCellRenderer<E extends IIconItem, L extends IIconI
 				//only selected if it was the same row the mouse down was on
 				if (mouseRow >= 0)
 				{
-					if (mouseButtonDownRow == mouseRow
-							&& button.getBounds().contains(mouseX, mouseY))
+					if (mouseButtonDownRow == mouseRow && button.getBounds().contains(mouseX, mouseY))
 					{
 						buttonPressed(mouseRow);
 					}

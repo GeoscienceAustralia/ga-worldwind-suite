@@ -31,6 +31,8 @@ import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
  * A {@link TreeModel} used to back a {@link LayerTree}.
  * <p/>
  * Contains logic for managing layers and folders etc.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class LayerTreeModel implements TreeModel, TreeExpansionListener
 {

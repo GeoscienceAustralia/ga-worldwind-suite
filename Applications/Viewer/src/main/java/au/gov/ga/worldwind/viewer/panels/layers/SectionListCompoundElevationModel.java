@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.viewer.terrain;
+package au.gov.ga.worldwind.viewer.panels.layers;
 
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
@@ -7,10 +7,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import au.gov.ga.worldwind.viewer.panels.layers.SectionList;
-
-public class SectionListCompoundElevationModel extends CompoundElevationModel implements
-		SectionList<ElevationModel>
+/**
+ * {@link ElevationModel} which implements the {@link SectionList} interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
+public class SectionListCompoundElevationModel extends CompoundElevationModel implements SectionList<ElevationModel>
 {
 	private Map<Object, SectionListCompoundElevationModel> sectionMap =
 			new HashMap<Object, SectionListCompoundElevationModel>();

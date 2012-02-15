@@ -14,6 +14,8 @@ import au.gov.ga.worldwind.common.util.Icons;
  * <p/>
  * Contains helper methods for matching {@link WmsLayerNode}s to
  * their correct {@link WmsServerNode}.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsServerNode extends FolderNode
 {

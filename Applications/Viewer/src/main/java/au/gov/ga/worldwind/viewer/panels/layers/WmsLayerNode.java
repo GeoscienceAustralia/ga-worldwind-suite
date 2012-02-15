@@ -21,7 +21,9 @@ import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.Util;
 
 /**
- * A layer node that holds information about a WMS layer
+ * A layer node that holds information about a WMS layer.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsLayerNode extends LayerNode
 {

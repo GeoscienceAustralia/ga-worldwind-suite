@@ -97,18 +97,18 @@ import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.viewer.panels.SideBar;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.layers.AbstractLayersPanel;
-import au.gov.ga.worldwind.viewer.panels.layers.ExtendedLayerList;
+import au.gov.ga.worldwind.viewer.panels.layers.SectionListLayerList;
 import au.gov.ga.worldwind.viewer.panels.layers.ILayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerEnabler;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.viewer.panels.layers.QueryClickListener;
+import au.gov.ga.worldwind.viewer.panels.layers.SectionListCompoundElevationModel;
 import au.gov.ga.worldwind.viewer.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.viewer.retrieve.PolylineLayerRetrievalListener;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.settings.SettingsDialog;
 import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
-import au.gov.ga.worldwind.viewer.terrain.SectionListCompoundElevationModel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemeFactory;
 import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
@@ -366,7 +366,7 @@ public class Application
 		}
 
 		Model model = new BasicModel();
-		model.setLayers(new ExtendedLayerList());
+		model.setLayers(new SectionListLayerList());
 		model.getGlobe().setElevationModel(new SectionListCompoundElevationModel());
 		wwd.setModel(model);
 		wwd.addSelectListener(new ClickAndGoSelectListener(wwd, WorldMapLayer.class));
@@ -1379,31 +1379,32 @@ public class Application
 		}
 	}
 
-	private void initDataQuery(URL queryURL)
+	public void initDataQuery(URL queryURL)
 	{
-		Position pos = ((OrbitView) wwd.getView()).getCenterPosition();
-		double small = 1e-5;
-		String bbox =
-				(pos.getLongitude().degrees - small) + "," + (pos.getLatitude().degrees - small) + ","
-						+ (pos.getLongitude().degrees + small) + "," + (pos.getLatitude().degrees + small);
-		String external = queryURL.toExternalForm();
-		String placeholder = "#bbox#";
-		int index = external.indexOf(placeholder);
-		if (index >= 0)
+		if (wwd.getView() instanceof OrbitView)
 		{
-			external = external.substring(0, index) + bbox + external.substring(index + placeholder.length());
-		}
+			Position pos = ((OrbitView) wwd.getView()).getCenterPosition();
+			double small = 1e-5;
+			String external = queryURL.toExternalForm();
 
-		try
-		{
-			URL url = new URL(external);
-			HtmlViewer viewer = new HtmlViewer(frame, "Data", url, null);
-			viewer.setSize(640, 480);
-			viewer.setVisible(true);
-		}
-		catch (MalformedURLException e)
-		{
-			e.printStackTrace();
+			external =
+					external.replaceAll("#bbox#", (pos.getLongitude().degrees - small) + ","
+							+ (pos.getLatitude().degrees - small) + "," + (pos.getLongitude().degrees + small) + ","
+							+ (pos.getLatitude().degrees + small));
+			external = external.replaceAll("#latlon#", pos.getLatitude().degrees + "," + pos.getLongitude().degrees);
+			external = external.replaceAll("#lonlat#", pos.getLongitude().degrees + "," + pos.getLatitude().degrees);
+
+			try
+			{
+				URL url = new URL(external);
+				HtmlViewer viewer = new HtmlViewer(frame, "Data", url, null);
+				viewer.setSize(640, 480);
+				viewer.setVisible(true);
+			}
+			catch (MalformedURLException e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 

@@ -6,8 +6,16 @@ import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemeLayer;
 
+/**
+ * Special layers panel that displays a flat list of layers that are hard-coded
+ * in a theme.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ThemeLayersPanel extends AbstractLayersPanel
 {
+	//TODO probably needs refactoring to support layer hierarchies, currently a bit useless
+	
 	public ThemeLayersPanel()
 	{
 		super();

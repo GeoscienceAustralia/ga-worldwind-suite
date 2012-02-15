@@ -10,6 +10,13 @@ import java.util.Set;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.util.tree.TreeNode;
 
+/**
+ * Helper class that supports connecting a World Wind {@link TreeNode} to a
+ * layer tree {@link ILayerNode}. This allows a {@link TreeNode} and its child
+ * hierarchy to be added to the layer tree.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class WWTreeToLayerTreeConnector
 {
 	public static void connect(LayerTreeModel model, ILayerNode layerNode, TreeNode treeNode)

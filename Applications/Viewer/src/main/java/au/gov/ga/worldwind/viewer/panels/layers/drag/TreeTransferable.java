@@ -8,6 +8,12 @@ import java.io.IOException;
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 
+/**
+ * {@link Transferable} implementation used for transfering layers from the
+ * layers tree or dataset tree to a location in the layers tree.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class TreeTransferable implements Transferable
 {
 	private JTree source;

@@ -4,6 +4,12 @@ import au.gov.ga.worldwind.common.ui.ClearableBasicTreeUI;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTree;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 
+/**
+ * {@link LazyTree} subclass with a custom cell renderer that renders dataset
+ * nodes.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DatasetTree extends LazyTree
 {
 	public DatasetTree(LazyTreeModel treeModel)

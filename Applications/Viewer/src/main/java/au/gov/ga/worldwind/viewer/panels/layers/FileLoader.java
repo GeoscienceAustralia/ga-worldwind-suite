@@ -37,8 +37,18 @@ import au.gov.ga.worldwind.common.layers.model.gocad.GocadReaderParameters;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.FastShape;
 
+/**
+ * Helper class used to load (non layer definition) files as layers. Examples of
+ * files that could be loaded are a GeoTIFF, a GOCAD geometry file, or a KML
+ * file.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class FileLoader
 {
+	/**
+	 * Listener interface for {@link FileLoader} events.
+	 */
 	public interface FileLoadListener
 	{
 		void loaded(LoadedLayer loaded);
@@ -48,6 +58,21 @@ public class FileLoader
 		void cancelled();
 	}
 
+	/**
+	 * Attempt to load the given file. Runs the load operation asynchronously on
+	 * a separate thread.
+	 * 
+	 * @param file
+	 *            File to load
+	 * @param listener
+	 *            Listener for load events
+	 * @param parentComponent
+	 *            Parent component to show any loading progress bars as children
+	 *            of
+	 * @param fileStore
+	 *            File store to save a local tileset to (for georeferenced
+	 *            images such as GeoTIFFs)
+	 */
 	public static void loadFile(final File file, final FileLoadListener listener, final Component parentComponent,
 			final FileStore fileStore)
 	{

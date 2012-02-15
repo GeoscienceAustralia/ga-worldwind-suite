@@ -8,6 +8,11 @@ import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyLoadListener;
 
+/**
+ * Basic implementation of the {@link ILazyDataset} interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LazyDataset extends Dataset implements ILazyDataset
 {
 	private final URL url;

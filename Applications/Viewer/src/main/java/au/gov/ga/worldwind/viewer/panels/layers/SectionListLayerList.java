@@ -10,7 +10,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ExtendedLayerList extends LayerList implements SectionList<Layer>
+/**
+ * {@link LayerList} subclass which implements the {@link SectionList}
+ * interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
+public class SectionListLayerList extends LayerList implements SectionList<Layer>
 {
 	private Map<Object, Layer> sectionMap = new HashMap<Object, Layer>();
 

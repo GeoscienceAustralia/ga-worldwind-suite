@@ -18,9 +18,32 @@ import java.util.Collection;
  */
 public interface SectionList<E>
 {
-	public void registerSectionObject(Object section);
+	/**
+	 * Register the given object as a section key. This object can then be
+	 * passed in the add/remove methods to keep the added objects in the same
+	 * section of the list.
+	 * 
+	 * @param section
+	 */
+	void registerSectionObject(Object section);
 
-	public void addAllFromSection(Object section, Collection<? extends E> c);
+	/**
+	 * Add all from the given collection into this list into the given section.
+	 * 
+	 * @param section
+	 *            Section in the list in which to insert objects
+	 * @param c
+	 *            Collection of objects to add
+	 */
+	void addAllFromSection(Object section, Collection<? extends E> c);
 
-	public void removeAllFromSection(Object section, Collection<? extends E> c);
+	/**
+	 * Remove all from the given collection from the given section in this list.
+	 * 
+	 * @param section
+	 *            Section in the list from which to remove objects
+	 * @param c
+	 *            Collection of objects to remove
+	 */
+	void removeAllFromSection(Object section, Collection<? extends E> c);
 }

@@ -19,6 +19,11 @@ import javax.swing.JScrollPane;
 import au.gov.ga.worldwind.common.ui.ScrollableImage;
 import au.gov.ga.worldwind.common.util.Icons;
 
+/**
+ * Simple helper class used for displaying legends in a pop-up dialog.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LegendViewer
 {
 	private static Map<URL, Dialog> dialogs = new HashMap<URL, Dialog>();
@@ -78,7 +83,7 @@ public class LegendViewer
 				}
 			}
 		};
-		
+
 		Thread thread = new Thread(runnable);
 		thread.setDaemon(true);
 		thread.setName("Legend downloader");

@@ -23,7 +23,6 @@ import javax.swing.event.TreeModelListener;
 import org.junit.Before;
 import org.junit.Test;
 
-import au.gov.ga.worldwind.viewer.terrain.SectionListCompoundElevationModel;
 
 /**
  * Unit tests for the {@link LayerTreeModel} class
@@ -41,7 +40,7 @@ public class LayerTreeModelTest
 		Configuration.setValue(AVKey.OFFLINE_MODE, true);
 		
 		BasicModel model = new BasicModel();
-		model.setLayers(new ExtendedLayerList());
+		model.setLayers(new SectionListLayerList());
 		model.getGlobe().setElevationModel(new SectionListCompoundElevationModel());
 		
 		worldWindow = new WorldWindowTestImpl();

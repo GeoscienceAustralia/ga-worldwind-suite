@@ -16,6 +16,11 @@ import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.panels.dataset.AbstractCellRenderer;
 
+/**
+ * Cell renderer used to render layer tree nodes.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 {
 	private List<QueryClickListener> queryClickListeners = new ArrayList<QueryClickListener>();
@@ -92,15 +97,14 @@ public class LayerCellRenderer extends AbstractCellRenderer<INode, ILayerNode>
 			}
 			else if (layer.getOpacity() != 0d && layer.getOpacity() != 1d)
 			{
-				label.setText(label.getText() + " (" + (int) Math.round(layer.getOpacity() * 100d)
-						+ "%)");
+				label.setText(label.getText() + " (" + (int) Math.round(layer.getOpacity() * 100d) + "%)");
 			}
 		}
 	}
 
 	@Override
-	protected void setupButton(AbstractButton button, ILayerNode value, boolean mouseInsideButton,
-			boolean rollover, boolean down)
+	protected void setupButton(AbstractButton button, ILayerNode value, boolean mouseInsideButton, boolean rollover,
+			boolean down)
 	{
 		button.getModel().setRollover(rollover);
 		button.getModel().setPressed(down);

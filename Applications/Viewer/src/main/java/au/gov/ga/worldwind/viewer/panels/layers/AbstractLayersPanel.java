@@ -51,6 +51,8 @@ import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 /**
  * Superclass for panels that display layer information.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public abstract class AbstractLayersPanel extends AbstractThemePanel
 {

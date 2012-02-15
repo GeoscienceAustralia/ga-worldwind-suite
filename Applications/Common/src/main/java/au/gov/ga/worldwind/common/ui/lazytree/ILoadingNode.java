@@ -11,5 +11,5 @@ public interface ILoadingNode
 	/**
 	 * @return Is this tree node loading?
 	 */
-	public boolean isLoading();
+	boolean isLoading();
 }

@@ -16,7 +16,15 @@ import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTreeModel;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
+import au.gov.ga.worldwind.viewer.theme.ThemePanel;
 
+/**
+ * {@link ThemePanel} that displays the datasets (sets of layers) available to
+ * the Viewer. The datasets are loaded from a hierarchy of XML files, and tree
+ * node children are downloaded lazily as the user expands their parent nodes.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DatasetPanel extends AbstractThemePanel
 {
 	private DatasetTree tree;

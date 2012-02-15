@@ -7,6 +7,11 @@ import java.util.List;
 
 import au.gov.ga.worldwind.viewer.panels.dataset.AbstractIconItem;
 
+/**
+ * Abstract implementation of the {@link INode} interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class AbstractNode extends AbstractIconItem implements INode
 {
 	private String name;

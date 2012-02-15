@@ -15,6 +15,13 @@ import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
+/**
+ * Helper class for loading layers from XML. Uses the layer factory and
+ * elevation model factory to attempt to instanciate layers from XML layer
+ * definitions.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LayerLoader
 {
 	public static LoadedLayer load(URL sourceUrl, InputStream stream) throws Exception
@@ -41,8 +48,7 @@ public class LayerLoader
 		}
 	}
 
-	public static LoadedLayer loadFromElement(Element element, URL sourceUrl, AVList params)
-			throws Exception
+	public static LoadedLayer loadFromElement(Element element, URL sourceUrl, AVList params) throws Exception
 	{
 		URL legend = XMLUtil.getURL(element, "Legend", sourceUrl);
 		URL query = XMLUtil.getURL(element, "Query", sourceUrl);
@@ -57,8 +63,7 @@ public class LayerLoader
 		{
 			try
 			{
-				Factory factory =
-						(Factory) WorldWind.createConfigurationComponent(AVKey.LAYER_FACTORY);
+				Factory factory = (Factory) WorldWind.createConfigurationComponent(AVKey.LAYER_FACTORY);
 				o = factory.createFromConfigSource(element, params);
 			}
 			catch (Exception e)
@@ -72,9 +77,7 @@ public class LayerLoader
 		{
 			try
 			{
-				Factory factory =
-						(Factory) WorldWind
-								.createConfigurationComponent(AVKey.ELEVATION_MODEL_FACTORY);
+				Factory factory = (Factory) WorldWind.createConfigurationComponent(AVKey.ELEVATION_MODEL_FACTORY);
 				o = factory.createFromConfigSource(element, params);
 			}
 			catch (Exception e)

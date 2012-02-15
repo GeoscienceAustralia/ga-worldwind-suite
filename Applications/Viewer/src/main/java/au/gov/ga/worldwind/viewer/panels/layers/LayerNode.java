@@ -5,6 +5,11 @@ import java.net.URL;
 import au.gov.ga.worldwind.common.util.Loader;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 
+/**
+ * Basic implementation of the {@link ILayerNode} interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LayerNode extends AbstractNode implements ILayerNode
 {
 	private URL layerURL;
@@ -18,8 +23,8 @@ public class LayerNode extends AbstractNode implements ILayerNode
 	private Long expiryTime;
 	private Loader loader;
 
-	public LayerNode(String name, URL infoURL, URL iconURL, boolean expanded, URL layerURL,
-			boolean enabled, double opacity, Long expiryTime)
+	public LayerNode(String name, URL infoURL, URL iconURL, boolean expanded, URL layerURL, boolean enabled,
+			double opacity, Long expiryTime)
 	{
 		super(name, infoURL, iconURL, expanded);
 		setLayerURL(layerURL);
@@ -79,16 +84,14 @@ public class LayerNode extends AbstractNode implements ILayerNode
 
 	public static LayerNode createFromLayerDefinition(ILayerDefinition definition)
 	{
-		return new LayerNode(definition.getName(), definition.getInfoURL(),
-				definition.getIconURL(), true, definition.getLayerURL(), definition.isEnabled(),
-				1.0, null);
+		return new LayerNode(definition.getName(), definition.getInfoURL(), definition.getIconURL(), true,
+				definition.getLayerURL(), definition.isEnabled(), 1.0, null);
 	}
 
 	@Override
 	public boolean isLoading()
 	{
-		return super.isLoading() || isLayerLoading() || isLayerDataLoading()
-				|| (loader != null && loader.isLoading());
+		return super.isLoading() || isLayerLoading() || isLayerDataLoading() || (loader != null && loader.isLoading());
 	}
 
 	@Override

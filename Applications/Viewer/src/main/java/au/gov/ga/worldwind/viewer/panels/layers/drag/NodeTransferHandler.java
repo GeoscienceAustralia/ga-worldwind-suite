@@ -23,6 +23,12 @@ import au.gov.ga.worldwind.viewer.panels.layers.LayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTree;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTreeModel;
 
+/**
+ * {@link TransferHandler} used to drag-and-drop layers from the dataset tree to
+ * the layers tree. Also supports dragging files into the layers tree.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class NodeTransferHandler extends TransferHandler
 {
 	private LayerTree layersTree;
@@ -122,8 +128,7 @@ public class NodeTransferHandler extends TransferHandler
 			{
 				LayerTreeModel model = layersTree.getLayerModel();
 
-				List<?> files =
-						(List<?>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+				List<?> files = (List<?>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
 				int i = 0;
 				for (Object o : files)
 				{
@@ -132,8 +137,7 @@ public class NodeTransferHandler extends TransferHandler
 						File file = (File) o;
 						URL url = file.toURI().toURL();
 						ILayerDefinition definition =
-								new LayerDefinition(file.getName(), url, null, Icons.file.getURL(),
-										true, false);
+								new LayerDefinition(file.getName(), url, null, Icons.file.getURL(), true, false);
 						INode node = LayerNode.createFromLayerDefinition(definition);
 						addNodeToTree(dropLocation, model, node, false, i++);
 					}
@@ -161,8 +165,7 @@ public class NodeTransferHandler extends TransferHandler
 	@Override
 	protected void exportDone(JComponent source, Transferable data, int action)
 	{
-		if (source == null || dropLocation == null || data == null
-				|| !(data instanceof TreeTransferable))
+		if (source == null || dropLocation == null || data == null || !(data instanceof TreeTransferable))
 			return;
 
 		TreeTransferable t = (TreeTransferable) data;
@@ -185,12 +188,10 @@ public class NodeTransferHandler extends TransferHandler
 				{
 					if (moveIntoFolders == null)
 					{
-						String message =
-								"Would you like to include the folder hierarchy with the dragged layers?";
+						String message = "Would you like to include the folder hierarchy with the dragged layers?";
 						int result =
-								JOptionPane.showConfirmDialog(layersTree, message,
-										"Include folders", JOptionPane.YES_NO_OPTION,
-										JOptionPane.QUESTION_MESSAGE);
+								JOptionPane.showConfirmDialog(layersTree, message, "Include folders",
+										JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 						moveIntoFolders = result == JOptionPane.YES_OPTION;
 					}
 

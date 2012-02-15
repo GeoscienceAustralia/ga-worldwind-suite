@@ -9,6 +9,11 @@ import javax.swing.tree.MutableTreeNode;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeObjectNode;
 
+/**
+ * Basic implementation of the {@link IDataset} interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Dataset extends AbstractData implements IDataset
 {
 	private final List<IData> children = new ArrayList<IData>();

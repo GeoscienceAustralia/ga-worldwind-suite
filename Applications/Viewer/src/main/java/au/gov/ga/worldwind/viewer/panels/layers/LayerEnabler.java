@@ -40,6 +40,14 @@ import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.viewer.panels.layers.FileLoader.FileLoadListener;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsCapabilitiesServiceAccessor;
 
+/**
+ * This class acts as a joiner between the WorldWind layers list & elevation
+ * model, and the layer tree. It is responsible for adding/removing elevation
+ * models and layers to the World Wind lists whenever they are enabled/disabled
+ * in the layer tree.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LayerEnabler implements HierarchicalListener
 {
 	private final LayerTree tree;
@@ -184,9 +192,9 @@ public class LayerEnabler implements HierarchicalListener
 	{
 		URL url = node.getLayerURL();
 		//url could possibly be null (eg KML layer's children); ignore a load request if this occurs
-		if(url == null)
+		if (url == null)
 			return;
-		
+
 		File file = URLUtil.urlToFile(url);
 		boolean isFile = file != null && file.isFile();
 		boolean isXml = FileUtil.hasExtension(url.toString(), "xml");
@@ -429,7 +437,7 @@ public class LayerEnabler implements HierarchicalListener
 		//clear the lists
 		layers.clear();
 		elevationModels.clear();
-		
+
 		//list of hierarchicals to setup outside of the main loop (to ensure
 		//we don't get a ConcurrentModificationException on the wrappers list)
 		List<Hierarchical> hierarchicalsToSetup = new ArrayList<Hierarchical>();
@@ -446,7 +454,7 @@ public class LayerEnabler implements HierarchicalListener
 					layer.setOpacity(wrapper.node.getOpacity());
 					layers.add(layer);
 					layerMap.put(layer, wrapper.node);
-					
+
 					if (layer instanceof Hierarchical && !hierarchicalListenees.contains(layer))
 					{
 						hierarchicalsToSetup.add((Hierarchical) layer);
@@ -478,9 +486,9 @@ public class LayerEnabler implements HierarchicalListener
 
 		layerList.addAllFromSection(this, layers);
 		elevationModel.addAllFromSection(this, elevationModels);
-		
+
 		//now setup the hierarchicals
-		for(Hierarchical hierarchical : hierarchicalsToSetup)
+		for (Hierarchical hierarchical : hierarchicalsToSetup)
 		{
 			hierarchical.addHierarchicalListener(this);
 		}

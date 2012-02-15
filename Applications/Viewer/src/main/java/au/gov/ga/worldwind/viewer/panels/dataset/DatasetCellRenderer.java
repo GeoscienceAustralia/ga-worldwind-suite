@@ -13,6 +13,11 @@ import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTreeModel;
 
+/**
+ * Concrete subclass of the {@link AbstractCellRenderer} for the Dataset tree.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DatasetCellRenderer extends AbstractCellRenderer<IData, ILayerDefinition>
 {
 	private LayerTreeModel layerTreeModel;
@@ -73,7 +78,7 @@ public class DatasetCellRenderer extends AbstractCellRenderer<IData, ILayerDefin
 	{
 		return false;
 	}
-	
+
 	@Override
 	protected boolean isQueryRow(ILayerDefinition value)
 	{
@@ -95,9 +100,12 @@ public class DatasetCellRenderer extends AbstractCellRenderer<IData, ILayerDefin
 	}
 
 	@Override
-	protected void setupButton(AbstractButton button, ILayerDefinition value,
-			boolean mouseInsideButton, boolean rollover, boolean down)
+	protected void setupButton(AbstractButton button, ILayerDefinition value, boolean mouseInsideButton,
+			boolean rollover, boolean down)
 	{
+		if (layerTreeModel == null)
+			return;
+
 		if (layerTreeModel.containsLayer(value))
 			button.setIcon(Icons.remove.getIcon());
 		else

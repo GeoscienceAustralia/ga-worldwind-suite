@@ -4,6 +4,13 @@ import gov.nasa.worldwind.util.tree.TreeNode;
 
 import java.net.URL;
 
+/**
+ * Subclass of {@link LayerNode} that connects the 'enable' getter/setter to a
+ * {@link TreeNode}'s 'selected' getter/setter. This allows adding a World Wind
+ * {@link TreeNode} to a layer tree.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class TreeNodeLayerNode extends LayerNode
 {
 	private final TreeNode treeNode;
@@ -31,6 +38,9 @@ public class TreeNodeLayerNode extends LayerNode
 			treeNode.setSelected(enabled);
 	}
 
+	/**
+	 * @return The tree node associated with this layer node.
+	 */
 	public TreeNode getTreeNode()
 	{
 		return treeNode;

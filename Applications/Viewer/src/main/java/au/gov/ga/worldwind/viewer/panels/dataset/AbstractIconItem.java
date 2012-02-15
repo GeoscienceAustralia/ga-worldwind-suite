@@ -10,6 +10,11 @@ import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 
+/**
+ * Abstract implementation of the {@link IIconItem} interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class AbstractIconItem implements IIconItem
 {
 	private URL iconURL;
