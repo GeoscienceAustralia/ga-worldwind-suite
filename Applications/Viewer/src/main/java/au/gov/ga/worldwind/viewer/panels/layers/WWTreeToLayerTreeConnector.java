@@ -19,11 +19,24 @@ import gov.nasa.worldwind.util.tree.TreeNode;
  */
 public class WWTreeToLayerTreeConnector
 {
+	/**
+	 * Connect a {@link TreeNode} to a {@link ILayerNode}, and associate with
+	 * the given {@link LayerTreeModel}.
+	 * 
+	 * @param model
+	 * @param layerNode
+	 * @param treeNode
+	 */
 	public static void connect(LayerTreeModel model, ILayerNode layerNode, TreeNode treeNode)
 	{
 		new Listener(model, layerNode, treeNode);
 	}
 
+	/**
+	 * {@link PropertyChangeListener} that listeners for {@link TreeNode}
+	 * changes and adds required {@link ILayerNode}s when new tree node children
+	 * are added.
+	 */
 	protected static class Listener implements PropertyChangeListener
 	{
 		private final LayerTreeModel model;
