@@ -1,5 +1,6 @@
 package au.gov.ga.worldwind.viewer.stereo;
 
+import gov.nasa.worldwind.SceneController;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Sector;
@@ -19,6 +20,15 @@ import au.gov.ga.worldwind.viewer.settings.Settings.StereoMode;
 
 import com.sun.opengl.util.BufferUtil;
 
+/**
+ * {@link SceneController} implementation that supports stereo rendering. When
+ * stereo is enabled, the scene is drawn twice, once for the left eye and once
+ * for the right eye.
+ * <p>
+ * Supports hardware quad-buffered stereo, and also a number of anaglyph modes.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class StereoSceneController extends ExtendedSceneController
 {
 	private double lastVerticalExaggeration = -1;

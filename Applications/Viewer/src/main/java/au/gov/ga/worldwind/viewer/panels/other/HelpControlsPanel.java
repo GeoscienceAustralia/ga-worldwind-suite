@@ -7,6 +7,12 @@ import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+/**
+ * Simple {@link JPanel} containing the controls html page, outlining the
+ * supported navigation keyboard/mouse controls.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class HelpControlsPanel extends JPanel
 {
 	public HelpControlsPanel()
@@ -15,8 +21,7 @@ public class HelpControlsPanel extends JPanel
 
 		JEditorPane editorPane = new JEditorPane();
 		editorPane.setEditable(false);
-		java.net.URL helpURL = this.getClass().getResource(
-				"/au/gov/ga/worldwind/data/help/controls");
+		java.net.URL helpURL = this.getClass().getResource("/au/gov/ga/worldwind/data/help/controls");
 		if (helpURL != null)
 		{
 			try

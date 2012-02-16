@@ -10,6 +10,11 @@ import gov.nasa.worldwind.render.GlobeAnnotation;
 import gov.nasa.worldwind.util.WWMath;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
+/**
+ * {@link GlobeAnnotation} subclass that is used to render {@link Place}s.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class RenderablePlace extends GlobeAnnotation
 {
 	private Place place;
@@ -75,8 +80,8 @@ public class RenderablePlace extends GlobeAnnotation
 
 
 		this.setDepthFunc(dc, screenPoint);
-		this.drawTopLevelAnnotation(dc, (int) screenPoint.x, (int) screenPoint.y, size.width,
-				size.height, scale, opacity, pos);
+		this.drawTopLevelAnnotation(dc, (int) screenPoint.x, (int) screenPoint.y, size.width, size.height, scale,
+				opacity, pos);
 	}
 
 	@Override
@@ -86,8 +91,7 @@ public class RenderablePlace extends GlobeAnnotation
 		if (dragging)
 		{
 			String latlon =
-					String.format("Lat %7.4f\u00B0\nLon %7.4f\u00B0",
-							getPosition().getLatitude().degrees,
+					String.format("Lat %7.4f\u00B0\nLon %7.4f\u00B0", getPosition().getLatitude().degrees,
 							getPosition().getLongitude().degrees);
 			text += "\n" + latlon;
 		}

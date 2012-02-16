@@ -8,6 +8,11 @@ import gov.nasa.worldwind.render.Polyline;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * {@link Polyline} extension used to render a line around a sector.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SectorPolyline extends Polyline
 {
 	private final Sector sector;

@@ -53,7 +53,14 @@ import au.gov.ga.worldwind.viewer.panels.geonames.GeoNamesSearch.SearchType;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
+import au.gov.ga.worldwind.viewer.theme.ThemePanel;
 
+/**
+ * {@link ThemePanel} used for searching for places. Uses the geonames.org
+ * database for searching.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class GeoNamesSearchPanel extends AbstractThemePanel
 {
 	private WorldWindow wwd;
@@ -197,15 +204,12 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 							GeoName place = (GeoName) o;
 							text = "<html>Name: " + place.name + "<br>";
 							text += "Country: " + place.country + "<br>";
-							text +=
-									"Class: " + Util.capitalizeFirstLetter(place.fcodename)
-											+ "<br>";
+							text += "Class: " + Util.capitalizeFirstLetter(place.fcodename) + "<br>";
 							text +=
 									"Location: ("
 											+ String.format("%7.3f\u00B0, %7.3f\u00B0",
 													place.latlon.getLatitude().degrees,
-													place.latlon.getLongitude().degrees)
-											+ ")</html>";
+													place.latlon.getLongitude().degrees) + ")</html>";
 
 							if (lastPlace != place)
 								setToolTipText(null);
@@ -324,15 +328,13 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 					Position center = orbitView.getCenterPosition();
 					Position newCenter = place.getPosition();
 					long lengthMillis =
-							Util.getScaledLengthMillis(Settings.get().getViewIteratorSpeed(),
-									center, newCenter);
+							Util.getScaledLengthMillis(Settings.get().getViewIteratorSpeed(), center, newCenter);
 
 					double zoom = Math.max(1e4, Math.min(1e5, orbitView.getZoom()));
 
-					view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView,
-							center, newCenter, orbitView.getHeading(), Angle.ZERO,
-							orbitView.getPitch(), Angle.ZERO, orbitView.getZoom(), zoom,
-							lengthMillis, WorldWind.ABSOLUTE));
+					view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView, center, newCenter,
+							orbitView.getHeading(), Angle.ZERO, orbitView.getPitch(), Angle.ZERO, orbitView.getZoom(),
+							zoom, lengthMillis, WorldWind.ABSOLUTE));
 					wwd.redraw();
 				}
 			}
@@ -429,8 +431,8 @@ public class GeoNamesSearchPanel extends AbstractThemePanel
 		}
 
 		@Override
-		public Component getListCellRendererComponent(JList list, Object value, int index,
-				boolean isSelected, boolean cellHasFocus)
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+				boolean cellHasFocus)
 		{
 			if (value instanceof GeoName)
 			{

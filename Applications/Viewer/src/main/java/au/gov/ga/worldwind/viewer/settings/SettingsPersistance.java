@@ -6,10 +6,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
+/**
+ * Used to save/restore a Settings object to/from an XML file. Currently uses
+ * the {@link XMLEncoder} and {@link XMLDecoder} to serialize the object to XML.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SettingsPersistance
 {
 	//TODO don't use XMLEncoder, but rather write a custom XML file
-	
+
 	public static Settings load(Object source)
 	{
 		/*Settings settings = new Settings();
@@ -20,9 +26,9 @@ public class SettingsPersistance
 		}
 		
 		return settings;*/
-		
-		
-		
+
+
+
 		Settings settings = null;
 		File file = (File) source;
 		if (file.exists())

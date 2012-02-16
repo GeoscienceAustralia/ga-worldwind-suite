@@ -1,12 +1,19 @@
 package au.gov.ga.worldwind.viewer.theme.hud;
 
-import javax.swing.Icon;
-
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.ScalebarLayer;
+
+import javax.swing.Icon;
+
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemeHUD;
+import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
 
+/**
+ * {@link ThemeHUD} implementation that displays the {@link ScalebarLayer}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ScalebarHUD extends AbstractThemeHUD
 {
 	private ScalebarLayer layer;
@@ -29,7 +36,7 @@ public class ScalebarHUD extends AbstractThemeHUD
 	{
 		return layer.getPosition();
 	}
-	
+
 	@Override
 	public Icon getIcon()
 	{

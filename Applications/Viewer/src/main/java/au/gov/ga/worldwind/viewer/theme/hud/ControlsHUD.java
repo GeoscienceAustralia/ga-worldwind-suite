@@ -1,15 +1,22 @@
 package au.gov.ga.worldwind.viewer.theme.hud;
 
-import javax.swing.Icon;
-
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.ViewControlsLayer;
 import gov.nasa.worldwind.layers.ViewControlsSelectListener;
+
+import javax.swing.Icon;
+
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemeHUD;
 import au.gov.ga.worldwind.viewer.theme.Theme;
+import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
 
+/**
+ * {@link ThemeHUD} implementation that displays the {@link ViewControlsLayer}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ControlsHUD extends AbstractThemeHUD
 {
 	private ViewControlsLayer layer;
@@ -43,7 +50,7 @@ public class ControlsHUD extends AbstractThemeHUD
 		WorldWindow wwd = theme.getWwd();
 		wwd.addSelectListener(new ViewControlsSelectListener(wwd, layer));
 	}
-	
+
 	@Override
 	public Icon getIcon()
 	{

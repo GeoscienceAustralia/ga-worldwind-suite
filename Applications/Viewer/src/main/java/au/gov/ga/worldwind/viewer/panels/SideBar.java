@@ -17,6 +17,12 @@ import au.gov.ga.worldwind.viewer.theme.ThemePanel;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel.ThemePanelListener;
 import au.gov.ga.worldwind.viewer.theme.ThemePiece;
 
+/**
+ * Bar used to display all the {@link ThemePanel}s in a
+ * {@link CollapsibleSplitPane}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SideBar extends JPanel
 {
 	private CollapsibleSplitPane pane;

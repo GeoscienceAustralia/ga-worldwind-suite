@@ -6,6 +6,11 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+/**
+ * Abstract implementation of the {@link ThemePanel} interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 {
 	public static final int MINIMUM_LIST_HEIGHT = 25;
@@ -58,8 +63,7 @@ public abstract class AbstractThemePanel extends JPanel implements ThemePanel
 	@Override
 	public void setDisplayName(String displayName)
 	{
-		if (this.displayName != displayName
-				&& (displayName == null || !displayName.equals(this.displayName)))
+		if (this.displayName != displayName && (displayName == null || !displayName.equals(this.displayName)))
 		{
 			this.displayName = displayName;
 			raiseDisplayNameChange();

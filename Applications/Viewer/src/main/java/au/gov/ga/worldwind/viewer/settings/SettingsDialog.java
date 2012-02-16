@@ -49,6 +49,11 @@ import au.gov.ga.worldwind.common.util.Proxy;
 import au.gov.ga.worldwind.common.util.Proxy.ProxyType;
 import au.gov.ga.worldwind.viewer.settings.Settings.StereoMode;
 
+/**
+ * {@link JDialog} used to display/edit settings.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class SettingsDialog extends JDialog
 {
 	private final static int SPACING = 5;

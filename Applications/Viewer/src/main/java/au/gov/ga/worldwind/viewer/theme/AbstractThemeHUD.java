@@ -6,6 +6,11 @@ import gov.nasa.worldwind.layers.Layer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Abstract implementation of the {@link ThemeHUD} interface.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class AbstractThemeHUD implements ThemeHUD
 {
 	private Layer layer;
@@ -122,19 +127,19 @@ public abstract class AbstractThemeHUD implements ThemeHUD
 
 	protected void raiseOnToggled()
 	{
-		for(int i = listeners.size() - 1; i >= 0; i--)
+		for (int i = listeners.size() - 1; i >= 0; i--)
 			listeners.get(i).onToggled(this);
 	}
 
 	protected void raiseDisplayNameChange()
 	{
-		for(int i = listeners.size() - 1; i >= 0; i--)
+		for (int i = listeners.size() - 1; i >= 0; i--)
 			listeners.get(i).displayNameChanged(this);
 	}
 
 	protected void raisePositionChanged()
 	{
-		for(int i = hudListeners.size() - 1; i >= 0; i--)
+		for (int i = hudListeners.size() - 1; i >= 0; i--)
 			hudListeners.get(i).positionChanged(this);
 	}
 }

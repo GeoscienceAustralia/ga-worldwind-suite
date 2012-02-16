@@ -16,6 +16,12 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Layer used to render {@link Place}s as annotations. Supports dragging of the
+ * place.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class PlaceLayer extends AbstractLayer
 {
 	private AnnotationRenderer renderer = new BasicAnnotationRenderer();
@@ -60,8 +66,7 @@ public class PlaceLayer extends AbstractLayer
 					}
 				}
 				// Highlight on rollover
-				else if (event.getEventAction().equals(SelectEvent.ROLLOVER)
-						&& !this.dragger.isDragging())
+				else if (event.getEventAction().equals(SelectEvent.ROLLOVER) && !this.dragger.isDragging())
 				{
 					highlight(event.getTopObject());
 				}
@@ -75,8 +80,7 @@ public class PlaceLayer extends AbstractLayer
 						if (event.getTopObject() == selectedAnnotation)
 						{
 							this.dragger.selected(event);
-							selectedAnnotation.setDragging(event.getEventAction().equals(
-									SelectEvent.DRAG));
+							selectedAnnotation.setDragging(event.getEventAction().equals(SelectEvent.DRAG));
 						}
 					}
 

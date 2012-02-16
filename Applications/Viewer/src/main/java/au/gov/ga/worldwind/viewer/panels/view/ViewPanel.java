@@ -23,7 +23,13 @@ import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.common.view.stereo.StereoSubSurfaceOrbitView;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
+import au.gov.ga.worldwind.viewer.theme.ThemePanel;
 
+/**
+ * {@link ThemePanel} used to switch between different view types.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ViewPanel extends AbstractThemePanel
 {
 	private WorldWindow wwd;
@@ -114,23 +120,23 @@ public class ViewPanel extends AbstractThemePanel
 	public void dispose()
 	{
 	}
-	
+
 	protected void updateRadioButtons()
 	{
 		View view = wwd.getView();
-		if(view instanceof StereoSubSurfaceOrbitView)
+		if (view instanceof StereoSubSurfaceOrbitView)
 		{
 			subSurfaceRadio.setSelected(true);
 		}
-		else if(view instanceof StereoOrbitView)
+		else if (view instanceof StereoOrbitView)
 		{
 			orbitRadio.setSelected(true);
 		}
-		else if(view instanceof StereoFlyView)
+		else if (view instanceof StereoFlyView)
 		{
 			flyRadio.setSelected(true);
 		}
-		else if(view instanceof StereoFreeView)
+		else if (view instanceof StereoFreeView)
 		{
 			freeRadio.setSelected(true);
 		}

@@ -36,6 +36,11 @@ import au.gov.ga.worldwind.common.ui.JDoubleField;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.Util;
 
+/**
+ * Editor used to edit {@link Place}s. Displayed in a {@link JDialog}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class PlaceEditor
 {
 	public static String IMPERIAL = "Imperial";
@@ -102,6 +107,18 @@ public class PlaceEditor
 		}
 	}
 
+	/**
+	 * Edit the given place with a new editor.
+	 * 
+	 * @param place
+	 *            Place to edit
+	 * @param panel
+	 *            Parent panel
+	 * @param title
+	 *            Title of the dialog
+	 * @return Return value from the dialog ({@link JOptionPane#OK_OPTION} or
+	 *         {@link JOptionPane#CANCEL_OPTION})
+	 */
 	public static int edit(Place place, PlacesPanel panel, String title)
 	{
 		PlaceEditor pe = new PlaceEditor(place, panel, title);

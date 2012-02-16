@@ -23,6 +23,13 @@ import au.gov.ga.worldwind.common.layers.data.AbstractDataProvider;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 import au.gov.ga.worldwind.viewer.layers.geonames.GeoNamesLayer;
 
+/**
+ * Helper class for pulling out {@link Tile}s, {@link Layer}s, or
+ * {@link ElevationModel}s from a {@link Retriever} object. Uses reflection to
+ * access private fields.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class RetrievalListenerHelper
 {
 	private static final Field[] LAYER_FIELDS;
@@ -32,22 +39,24 @@ public class RetrievalListenerHelper
 	static
 	{
 		Class<?>[] classes =
-				new Class<?>[] { DelegatorTiledImageLayer.class, TiledImageLayer.class,
-						BasicElevationModel.class, BasicTiledImageLayer.class,
-						PlaceNameLayer.class, RPFTiledImageLayer.class, SurfaceImage.class,
-						MercatorTiledImageLayer.class, BasicMercatorTiledImageLayer.class,
-						GeoNamesLayer.class, AbstractDataProvider.class };
+				new Class<?>[] { DelegatorTiledImageLayer.class, TiledImageLayer.class, BasicElevationModel.class,
+						BasicTiledImageLayer.class, PlaceNameLayer.class, RPFTiledImageLayer.class, SurfaceImage.class,
+						MercatorTiledImageLayer.class, BasicMercatorTiledImageLayer.class, GeoNamesLayer.class,
+						AbstractDataProvider.class };
 
 		// Search classes above for declared classes that implement
 		// RetrivalPostProcess AND contain a Field which is a subclass of Tile,
 		// and add those Fields to an array
-		LAYER_FIELDS = getMatchingFieldsFromInnerImplementingClasses(classes, RetrievalPostProcessor.class, Layer.class);
-		ELEVATION_MODEL_FIELDS = getMatchingFieldsFromInnerImplementingClasses(classes, RetrievalPostProcessor.class, ElevationModel.class);
+		LAYER_FIELDS =
+				getMatchingFieldsFromInnerImplementingClasses(classes, RetrievalPostProcessor.class, Layer.class);
+		ELEVATION_MODEL_FIELDS =
+				getMatchingFieldsFromInnerImplementingClasses(classes, RetrievalPostProcessor.class,
+						ElevationModel.class);
 		TILE_FIELDS = getMatchingFieldsFromInnerImplementingClasses(classes, RetrievalPostProcessor.class, Tile.class);
 	}
 
-	private static Field[] getMatchingFieldsFromInnerImplementingClasses(Class<?>[] search,
-			Class<?> interfaceType, Class<?> fieldType)
+	private static Field[] getMatchingFieldsFromInnerImplementingClasses(Class<?>[] search, Class<?> interfaceType,
+			Class<?> fieldType)
 	{
 		List<Field> fields = new ArrayList<Field>();
 		for (Class<?> c : search)
@@ -73,16 +82,37 @@ public class RetrievalListenerHelper
 		return fields.toArray(new Field[fields.size()]);
 	}
 
+	/**
+	 * Get a {@link Layer} from the given {@link Retriever} (if the Retriever
+	 * has been instanciated by a Layer).
+	 * 
+	 * @param retriever
+	 * @return Layer that instanciated the given Retriever.
+	 */
 	public static Layer getLayer(Retriever retriever)
 	{
 		return getObject(retriever, LAYER_FIELDS, Layer.class);
 	}
 
+	/**
+	 * Get an {@link ElevationModel} from the given {@link Retriever} (if the
+	 * Retriever has been instanciated by an ElevationModel).
+	 * 
+	 * @param retriever
+	 * @return ElevationModel that instanciated the given Retriever.
+	 */
 	public static ElevationModel getElevationModel(Retriever retriever)
 	{
 		return getObject(retriever, ELEVATION_MODEL_FIELDS, ElevationModel.class);
 	}
 
+	/**
+	 * Get a {@link Tile} from the given {@link Retriever} (if the Retriever was
+	 * created to download a Tile).
+	 * 
+	 * @param retriever
+	 * @return Tile for the given Retriever.
+	 */
 	public static Tile getTile(Retriever retriever)
 	{
 		return getObject(retriever, TILE_FIELDS, Tile.class);

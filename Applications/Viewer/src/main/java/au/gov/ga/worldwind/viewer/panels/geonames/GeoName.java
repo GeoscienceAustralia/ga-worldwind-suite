@@ -9,6 +9,11 @@ import java.awt.Font;
 
 import au.gov.ga.worldwind.viewer.util.ColorFont;
 
+/**
+ * Represents a single GeoName from the geoname.org database.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class GeoName implements GeographicText
 {
 	public final String name;
@@ -23,8 +28,8 @@ public class GeoName implements GeographicText
 
 	public String[] parents;
 
-	public GeoName(String name, String country, int id, LatLon latlon,
-			String fclass, String fclassname, String fcode, String fcodename, ColorFont colorFont)
+	public GeoName(String name, String country, int id, LatLon latlon, String fclass, String fclassname, String fcode,
+			String fcodename, ColorFont colorFont)
 	{
 		this.name = name;
 		this.country = country;
@@ -72,43 +77,50 @@ public class GeoName implements GeographicText
 	{
 		return true;
 	}
-	
+
 	@Override
 	public double getPriority()
 	{
 		return 0;
 	}
 
+	@Deprecated
 	@Override
 	public void setBackgroundColor(Color background)
 	{
 	}
 
+	@Deprecated
 	@Override
 	public void setColor(Color color)
 	{
 	}
 
+	@Deprecated
 	@Override
 	public void setFont(Font font)
 	{
 	}
 
+	@Deprecated
 	@Override
 	public void setPosition(Position position)
 	{
 	}
 
+	@Deprecated
 	@Override
 	public void setText(CharSequence text)
 	{
 	}
 
+	@Deprecated
 	@Override
 	public void setVisible(boolean visible)
 	{
 	}
 
+	@Deprecated
 	@Override
 	public void setPriority(double d)
 	{

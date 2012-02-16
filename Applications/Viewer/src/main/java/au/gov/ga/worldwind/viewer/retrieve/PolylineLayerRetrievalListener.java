@@ -15,14 +15,21 @@ import java.util.Map;
 
 import au.gov.ga.worldwind.viewer.settings.Settings;
 
+import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import nasa.worldwind.retrieve.ExtendedRetrievalService.RetrievalListener;
 
+/**
+ * {@link RetrievalListener} implementation that displays polylines on the
+ * earth's surface when the {@link ExtendedRetrievalService} downloads surface
+ * tiles.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class PolylineLayerRetrievalListener extends RenderableLayer implements RetrievalListener
 {
 	private static final Color COLOR = new Color(1f, 0f, 0f, 0.5f);
 
-	private final Map<Retriever, SectorPolyline> retrievingLines =
-			new HashMap<Retriever, SectorPolyline>();
+	private final Map<Retriever, SectorPolyline> retrievingLines = new HashMap<Retriever, SectorPolyline>();
 
 	@Override
 	public void beforeRetrieve(Retriever retriever)

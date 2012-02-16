@@ -14,8 +14,24 @@ import au.gov.ga.worldwind.common.downloader.HttpException;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
+/**
+ * Helper class that downloads a {@link Theme} from a url, and notifies a
+ * delegate when the download is complete. Displays a small progress dialog
+ * during the download.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ThemeOpener
 {
+	/**
+	 * Attempt to open a {@link Theme} from the given url, and notify the given
+	 * delegate when complete.
+	 * 
+	 * @param url
+	 *            Theme url
+	 * @param delegate
+	 *            Delegate to notify
+	 */
 	public static void openTheme(final URL url, final ThemeOpenDelegate delegate)
 	{
 		if (url == null)
@@ -111,7 +127,7 @@ public class ThemeOpener
 
 	public static interface ThemeOpenDelegate
 	{
-		public void opened(Theme theme, Element themeElement, URL themeUrl);
+		void opened(Theme theme, Element themeElement, URL themeUrl);
 	}
 
 	public static class IndeterminateProgressMonitor extends ProgressMonitor

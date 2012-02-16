@@ -24,36 +24,34 @@ import org.w3c.dom.NodeList;
 
 import au.gov.ga.worldwind.viewer.util.ColorFont;
 
-
+/**
+ * Helper class for searching the GeoNames.org database.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class GeoNamesSearch
 {
 	private final static String GEONAMES_SEARCH = "http://ws.geonames.org/search";
 	private final static Map<String, ColorFont> colorFonts = new HashMap<String, ColorFont>();
-	private final static ColorFont defaultColorFont = new ColorFont(Font
-			.decode("Arial-PLAIN-10"), Color.white, Color.black);
+	private final static ColorFont defaultColorFont = new ColorFont(Font.decode("Arial-PLAIN-10"), Color.white,
+			Color.black);
 
 	static
 	{
-		colorFonts.put("A", new ColorFont(Font.decode("Arial-BOLD-11"),
-				Color.lightGray, Color.black));
-		colorFonts.put("H", new ColorFont(Font.decode("Arial-PLAIN-10"),
-				Color.cyan, Color.black));
-		colorFonts.put("L", new ColorFont(Font.decode("Arial-PLAIN-10"),
-				Color.green, Color.black));
-		colorFonts.put("P", new ColorFont(Font.decode("Arial-BOLD-11"),
-				Color.yellow, Color.black));
-		colorFonts.put("R", new ColorFont(Font.decode("Arial-PLAIN-10"),
-				Color.red, Color.black));
-		colorFonts.put("S", new ColorFont(Font.decode("Arial-PLAIN-10"),
-				Color.pink, Color.black));
-		colorFonts.put("T", new ColorFont(Font.decode("Arial-PLAIN-10"),
-				Color.orange, Color.black));
-		colorFonts.put("U", new ColorFont(Font.decode("Arial-PLAIN-10"),
-				Color.blue, Color.black));
-		colorFonts.put("V", new ColorFont(Font.decode("Arial-PLAIN-10"),
-				new Color(0, 128, 0), Color.black));
+		colorFonts.put("A", new ColorFont(Font.decode("Arial-BOLD-11"), Color.lightGray, Color.black));
+		colorFonts.put("H", new ColorFont(Font.decode("Arial-PLAIN-10"), Color.cyan, Color.black));
+		colorFonts.put("L", new ColorFont(Font.decode("Arial-PLAIN-10"), Color.green, Color.black));
+		colorFonts.put("P", new ColorFont(Font.decode("Arial-BOLD-11"), Color.yellow, Color.black));
+		colorFonts.put("R", new ColorFont(Font.decode("Arial-PLAIN-10"), Color.red, Color.black));
+		colorFonts.put("S", new ColorFont(Font.decode("Arial-PLAIN-10"), Color.pink, Color.black));
+		colorFonts.put("T", new ColorFont(Font.decode("Arial-PLAIN-10"), Color.orange, Color.black));
+		colorFonts.put("U", new ColorFont(Font.decode("Arial-PLAIN-10"), Color.blue, Color.black));
+		colorFonts.put("V", new ColorFont(Font.decode("Arial-PLAIN-10"), new Color(0, 128, 0), Color.black));
 	}
 
+	/**
+	 * Enum of different search types supported by geonames.org.
+	 */
 	public static enum SearchType
 	{
 		FUZZY("q"),
@@ -68,6 +66,9 @@ public class GeoNamesSearch
 		}
 	}
 
+	/**
+	 * Container class to store results from a geonames.org search.
+	 */
 	public static class Results
 	{
 		public final String error;
@@ -86,6 +87,15 @@ public class GeoNamesSearch
 		}
 	}
 
+	/**
+	 * Search geonames.org for the given text, and parse and return the results.
+	 * 
+	 * @param text
+	 *            Text to search for
+	 * @param type
+	 *            Type of search to perform
+	 * @return Search results.
+	 */
 	public static Results search(String text, SearchType type)
 	{
 		try
@@ -101,8 +111,7 @@ public class GeoNamesSearch
 		URL url = null;
 		try
 		{
-			url = new URL(GEONAMES_SEARCH + "?style=long&"
-					+ type.queryParameter + "=" + text);
+			url = new URL(GEONAMES_SEARCH + "?style=long&" + type.queryParameter + "=" + text);
 		}
 		catch (MalformedURLException e)
 		{
@@ -113,11 +122,9 @@ public class GeoNamesSearch
 		try
 		{
 			InputStream is = url.openStream();
-			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
-					.newInstance();
+			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 			documentBuilderFactory.setNamespaceAware(false);
-			DocumentBuilder documentBuilder = documentBuilderFactory
-					.newDocumentBuilder();
+			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 			Document document = documentBuilder.parse(is);
 
 			return parse(document);
@@ -131,8 +138,7 @@ public class GeoNamesSearch
 
 	private static Results parse(Document document)
 	{
-		NodeList resultsCount = document
-				.getElementsByTagName("totalResultsCount");
+		NodeList resultsCount = document.getElementsByTagName("totalResultsCount");
 		if (resultsCount.getLength() <= 0)
 		{
 			try
@@ -214,19 +220,17 @@ public class GeoNamesSearch
 					}
 				}
 
-				if (lat != null && lon != null && name != null
-						&& name.length() > 0)
+				if (lat != null && lon != null && name != null && name.length() > 0)
 				{
-					LatLon latlon = new LatLon(Angle.fromDegreesLatitude(lat),
-							Angle.fromDegreesLongitude(lon));
+					LatLon latlon = new LatLon(Angle.fromDegreesLatitude(lat), Angle.fromDegreesLongitude(lon));
 					ColorFont colorFont = colorFonts.get(fcl);
 					if (colorFont == null)
 					{
 						colorFont = defaultColorFont;
 					}
 
-					GeoName place = new GeoName(name, country, geonameId, latlon,
-							fcl, fclName, fcode, fcodeName, colorFont);
+					GeoName place =
+							new GeoName(name, country, geonameId, latlon, fcl, fclName, fcode, fcodeName, colorFont);
 					places.add(place);
 				}
 			}

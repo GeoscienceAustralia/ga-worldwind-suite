@@ -8,6 +8,12 @@ import gov.nasa.worldwind.render.GeographicTextRenderer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Simple layer used to render {@link GeoName}s. Uses a
+ * {@link GeographicTextRenderer}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class GeoNameLayer extends AbstractLayer
 {
 	private final GeographicTextRenderer nameRenderer = new GeographicTextRenderer();
@@ -37,7 +43,7 @@ public class GeoNameLayer extends AbstractLayer
 			this.text.clear();
 		}
 	}
-	
+
 	@Override
 	public void dispose()
 	{

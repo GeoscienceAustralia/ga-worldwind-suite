@@ -12,8 +12,20 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
 import au.gov.ga.worldwind.viewer.panels.dataset.IDataset;
 import au.gov.ga.worldwind.viewer.panels.dataset.LazyDataset;
 
+/**
+ * Factory class for creating a {@link Theme} from an XML source.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ThemeFactory
 {
+	/**
+	 * Parse the given XML source into a {@link Theme} object.
+	 * 
+	 * @param source
+	 * @param context
+	 * @return Theme object read from the XML.
+	 */
 	public static Theme createFromXML(Object source, URL context)
 	{
 		Element element = XMLUtil.getElementFromSource(source);
@@ -35,7 +47,7 @@ public class ThemeFactory
 
 		theme.setPersistPlaces(XMLUtil.getBoolean(element, "PersistPlaces", true));
 		theme.setPlacesPersistanceFilename(XMLUtil.getText(element, "PlacesFilename"));
-		
+
 		try
 		{
 			theme.setPlacesInitialisationPath(XMLUtil.getURL(element, "InitialPlaces", context));
@@ -44,7 +56,7 @@ public class ThemeFactory
 		{
 			// Do nothing - default path will be used
 		}
-		
+
 		theme.setHUDs(parseHUDs(element, "HUD"));
 		theme.setPanels(parsePanels(element, "Panel"));
 		theme.setDatasets(parseDatasets(element, "Dataset", context));

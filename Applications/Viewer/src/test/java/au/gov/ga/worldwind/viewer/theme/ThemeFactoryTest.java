@@ -1,14 +1,10 @@
 package au.gov.ga.worldwind.viewer.theme;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import gov.nasa.worldwind.avlist.AVKey;
 
 import java.net.URL;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,13 +31,7 @@ public class ThemeFactoryTest
 	@Before
 	public void setup()
 	{
-		Settings.set(new Settings());
-	}
-	
-	@After
-	public void tearDown()
-	{
-		Settings.set(null);
+		Settings.init();
 	}
 	
 	@Test

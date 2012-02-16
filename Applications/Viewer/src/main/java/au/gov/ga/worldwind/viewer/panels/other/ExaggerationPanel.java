@@ -24,7 +24,14 @@ import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
+import au.gov.ga.worldwind.viewer.theme.ThemePanel;
 
+/**
+ * {@link ThemePanel} for controlling vertical exaggeration. Implements a
+ * logarithmically-scaled slider.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ExaggerationPanel extends AbstractThemePanel
 {
 	private WorldWindow wwd;

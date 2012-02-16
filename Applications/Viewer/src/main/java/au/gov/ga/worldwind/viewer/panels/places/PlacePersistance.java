@@ -23,6 +23,8 @@ import au.gov.ga.worldwind.viewer.panels.layers.LayerTreePersistance;
  * A utility class responsible for persistence of places files.
  * <p/>
  * Supports loading and saving of places to and from XML configuration files.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class PlacePersistance
 {

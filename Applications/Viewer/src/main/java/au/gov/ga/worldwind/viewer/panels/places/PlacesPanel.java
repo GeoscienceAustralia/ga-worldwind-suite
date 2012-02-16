@@ -73,6 +73,8 @@ import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 /**
  * A {@link ThemePanel} that manages a list of predefines placemark places.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class PlacesPanel extends AbstractThemePanel
 {
@@ -175,7 +177,7 @@ public class PlacesPanel extends AbstractThemePanel
 
 	protected File getPlacesFile()
 	{
-		return new File(SettingsUtil.getUserDirectory(), placesPersistanceFilename);
+		return SettingsUtil.getSettingsFile(placesPersistanceFilename);
 	}
 
 	public List<Place> getPlaces()
@@ -1089,11 +1091,11 @@ public class PlacesPanel extends AbstractThemePanel
 				double percent = (currentTime - startTime) / (double) lengthMillis;
 				percent = Math.max(0d, Math.min(1d, percent));
 				boolean complete = percent >= 1d;
-				
+
 				double exaggeration = Util.mixDouble(percent, startExaggeration, place.getVerticalExaggeration());
 				//wwd.getSceneController().setVerticalExaggeration(exaggeration);
 				Settings.get().setVerticalExaggeration(exaggeration);
-				
+
 				if (complete)
 				{
 					wwd.removeRenderingListener(this);
@@ -1257,7 +1259,7 @@ public class PlacesPanel extends AbstractThemePanel
 			}
 		}
 
-		if (theme.isPlacesPersistanceFilenameSet())
+		if (!Util.isBlank(theme.getPlacesPersistanceFilename()))
 		{
 			placesPersistanceFilename = theme.getPlacesPersistanceFilename();
 			loadPlaces(getPlacesFile(), false);

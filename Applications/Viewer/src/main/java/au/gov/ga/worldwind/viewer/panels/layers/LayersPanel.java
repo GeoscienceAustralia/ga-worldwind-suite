@@ -565,7 +565,7 @@ public class LayersPanel extends AbstractLayersPanel
 
 	protected File getLayersFile()
 	{
-		return new File(SettingsUtil.getUserDirectory(), layersPersistanceFilename);
+		return SettingsUtil.getSettingsFile(layersPersistanceFilename);
 	}
 
 	private void linkPanels(Collection<ThemePanel> panels)

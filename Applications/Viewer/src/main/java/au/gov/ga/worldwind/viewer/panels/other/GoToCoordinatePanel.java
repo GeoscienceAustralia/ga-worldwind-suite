@@ -48,6 +48,13 @@ import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
+/**
+ * Modified version of the
+ * {@link gov.nasa.worldwindx.examples.GoToCoordinatePanel} class. Contains more
+ * information about supported coordinate formats.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class GoToCoordinatePanel extends JPanel
 {
 	private WorldWindow wwd;
@@ -185,7 +192,8 @@ public class GoToCoordinatePanel extends JPanel
 		inputValid = latlon != null;
 		if (latlon != null)
 		{
-			resultLabel.setText(String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", latlon.getLatitude().degrees, latlon.getLongitude().degrees));
+			resultLabel.setText(String.format("Lat %7.4f\u00B0 Lon %7.4f\u00B0", latlon.getLatitude().degrees,
+					latlon.getLongitude().degrees));
 		}
 		else if (showInvalid)
 		{
@@ -211,9 +219,9 @@ public class GoToCoordinatePanel extends JPanel
 			Position center = new Position(latLon, 0);
 			long lengthMillis = SettingsUtil.getScaledLengthMillis(beginCenter, center);
 
-			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter,
-					center, view.getHeading(), view.getHeading(), view.getPitch(), view.getPitch(),
-					view.getZoom(), view.getZoom(), lengthMillis, WorldWind.ABSOLUTE));
+			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter, center,
+					view.getHeading(), view.getHeading(), view.getPitch(), view.getPitch(), view.getZoom(),
+					view.getZoom(), lengthMillis, WorldWind.ABSOLUTE));
 			wwd.redraw();
 		}
 	}

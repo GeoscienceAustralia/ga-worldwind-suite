@@ -10,50 +10,170 @@ import javax.swing.JFrame;
 
 import au.gov.ga.worldwind.viewer.panels.dataset.IDataset;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
+import au.gov.ga.worldwind.viewer.panels.layers.ThemeLayersPanel;
+import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public interface Theme extends Disposable
 {
-	public void setup(JFrame frame, WorldWindow wwd);
-	public WorldWindow getWwd();
-	public JFrame getFrame();
-	
-	public String getName();
-	public boolean hasMenuBar();
-	public boolean hasToolBar();
-	public boolean hasStatusBar();
-	public boolean hasWms();
-	
-	public boolean isPersistLayers();
-	public String getLayerPersistanceFilename();
-	public List<String> getCacheLocations();
-	
-	public List<IDataset> getDatasets();
-	public List<ThemeLayer> getLayers();
-	public List<ThemeHUD> getHUDs();
-	public List<ThemePanel> getPanels();
-	
-	public boolean hasLayersPanel();
-	public boolean hasThemeLayersPanel();
-	public LayersPanel getLayersPanel();
-	
-	public Double getInitialLatitude();
-	public Double getInitialLongitude();
-	public Double getInitialAltitude();
-	public Double getInitialHeading();
-	public Double getInitialPitch();
-	public Double getVerticalExaggeration();
-	public Double getFieldOfView();
-	
+	/**
+	 * Setup this theme. This should call setup() on each of this theme's panels
+	 * and huds.
+	 * 
+	 * @param frame
+	 * @param wwd
+	 */
+	void setup(JFrame frame, WorldWindow wwd);
+
+	/**
+	 * @return The {@link WorldWindow} currently associated with this theme
+	 */
+	WorldWindow getWwd();
+
+	/**
+	 * @return The main {@link JFrame} for this application
+	 */
+	JFrame getFrame();
+
+	/**
+	 * @return The name/label of this theme
+	 */
+	String getName();
+
+	/**
+	 * @return Should the menu bar be displayed?
+	 */
+	boolean hasMenuBar();
+
+	/**
+	 * @return Should the tool bar be displayed?
+	 */
+	boolean hasToolBar();
+
+	/**
+	 * @return Should the status bar be displayed?
+	 */
+	boolean hasStatusBar();
+
+	/**
+	 * @return Should the WMS browser be enabled?
+	 */
+	boolean hasWms();
+
+	/**
+	 * @return Should the added layers be persisted to the layers persistance
+	 *         file on exit? If false, the default layers are added for this
+	 *         theme each time the application is started.
+	 */
+	boolean isPersistLayers();
+
+	/**
+	 * @return The filename to which to persist layers to (if relative, file is
+	 *         saved in the user directory, see
+	 *         {@link SettingsUtil#getUserDirectory()}.
+	 */
+	String getLayerPersistanceFilename();
+
+	/**
+	 * @return List of extra WorldWindData cache locations
+	 */
+	List<String> getCacheLocations();
+
+	/**
+	 * @return List of {@link IDataset}s associated with this theme
+	 */
+	List<IDataset> getDatasets();
+
+	/**
+	 * @return List of layers hard-coded in this theme. If the
+	 *         {@link ThemeLayersPanel} is not used, these layers are added and
+	 *         enabled invisibly.
+	 */
+	List<ThemeLayer> getLayers();
+
+	/**
+	 * @return List of {@link ThemeHUD}s associated with this theme
+	 */
+	List<ThemeHUD> getHUDs();
+
+	/**
+	 * @return List of {@link ThemePanel}s to make available when using this
+	 *         theme
+	 */
+	List<ThemePanel> getPanels();
+
+	/**
+	 * @return True if a {@link LayersPanel} exists in this theme's panels list
+	 */
+	boolean hasLayersPanel();
+
+	/**
+	 * @return True if a {@link ThemeLayersPanel} exists in this theme's panels
+	 *         list
+	 */
+	boolean hasThemeLayersPanel();
+
+	/**
+	 * @return The {@link LayersPanel} in this theme, if any
+	 */
+	LayersPanel getLayersPanel();
+
+	/**
+	 * @return Initial view center latitude to use when starting the application
+	 */
+	Double getInitialLatitude();
+
+	/**
+	 * @return Initial view center longitude to use when starting the
+	 *         application
+	 */
+	Double getInitialLongitude();
+
+	/**
+	 * @return Initial camera altitude to use when starting the application
+	 */
+	Double getInitialAltitude();
+
+	/**
+	 * @return Initial camera heading to use when starting the application
+	 */
+	Double getInitialHeading();
+
+	/**
+	 * @return Initial camera pitch to use when starting the application
+	 */
+	Double getInitialPitch();
+
+	/**
+	 * @return Initial vertical exaggeration to use when starting the
+	 *         application. If this is set, the stored Settings vertical
+	 *         exaggeration is ignored.
+	 */
+	Double getVerticalExaggeration();
+
+	/**
+	 * @return Initial field of view to use when starting the application. If
+	 *         this is set, the stored Settings field of view is ignored.
+	 */
+	Double getFieldOfView();
+
+	/**
+	 * @return Should the places be persisted?
+	 */
 	boolean isPersistPlaces();
-	public boolean isPlacesPersistanceFilenameSet();
-	
-	/** 
-	 * @return The name to use when saving/initialising places files 
+
+	/**
+	 * @return Is the places persistance filename set?
 	 */
-	public String getPlacesPersistanceFilename();
-	
-	/** 
-	 * @return The path a places file to use when initialising the places list on theme load
+	boolean isPlacesPersistanceFilenameSet();
+
+	/**
+	 * @return The name to use when saving/initialising places files
 	 */
-	public URL getPlacesInitialisationPath();
+	String getPlacesPersistanceFilename();
+
+	/**
+	 * @return The path a places file to use when initialising the places list
+	 *         on theme load
+	 */
+	URL getPlacesInitialisationPath();
 }

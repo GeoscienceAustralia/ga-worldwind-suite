@@ -7,10 +7,18 @@ import gov.nasa.worldwind.retrieve.Retriever;
 import java.util.HashMap;
 import java.util.Map;
 
+import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import nasa.worldwind.retrieve.ExtendedRetrievalService.RetrievalListener;
 import au.gov.ga.worldwind.viewer.panels.layers.ILayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerEnabler;
 
+/**
+ * {@link RetrievalListener} implementation used to mark layer tree nodes as
+ * loading when the associated layer downloads a tile using the
+ * {@link ExtendedRetrievalService}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LayerTreeRetrievalListener implements RetrievalListener
 {
 	private final Map<Retriever, ILayerNode> retrievingNodes = new HashMap<Retriever, ILayerNode>();

@@ -2,6 +2,7 @@ package au.gov.ga.worldwind.viewer.panels.places;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.animation.Animator;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Position;
@@ -16,10 +17,32 @@ import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitViewInputSupport;
 import au.gov.ga.worldwind.common.view.free.FreeView;
+import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
+/**
+ * Helper class for generating view {@link Animator}s for animating from the
+ * current view position to a given center/eye position.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class AnimatorHelper
 {
+	/**
+	 * Create an apply a new {@link Animator} to fly from the current position
+	 * to the given center/eye positions.
+	 * 
+	 * @param view
+	 *            View to apply the animator to
+	 * @param centerPosition
+	 *            Destination center position (look-at)
+	 * @param eyePosition
+	 *            Destination eye position (camera)
+	 * @param up
+	 *            Final up-vector
+	 * @return Calculated length of the animation, taking into account the
+	 *         {@link Settings} view iterator speed
+	 */
 	public static long addAnimator(View view, Position centerPosition, Position eyePosition, Vec4 up)
 	{
 		Globe globe = view.getGlobe();
@@ -32,9 +55,9 @@ public class AnimatorHelper
 			Vec4 forward = centerPoint.subtract3(eyePoint).normalize3();
 			if (forward.cross3(up).getLength3() < 0.001)
 			{
-				Matrix modelview = OrbitViewInputSupport.computeTransformMatrix(globe, centerPosition, 
-																				view.getHeading(), Angle.ZERO, 
-																				view.getRoll(), 1);
+				Matrix modelview =
+						OrbitViewInputSupport.computeTransformMatrix(globe, centerPosition, view.getHeading(),
+								Angle.ZERO, view.getRoll(), 1);
 				if (modelview != null)
 				{
 					Matrix modelviewInv = modelview.getInverse();
@@ -55,8 +78,7 @@ public class AnimatorHelper
 		if (view instanceof OrbitView)
 		{
 			AccessibleOrbitViewState ovs =
-					AccessibleOrbitViewInputSupport.computeOrbitViewState(globe, eyePoint,
-							centerPoint, up);
+					AccessibleOrbitViewInputSupport.computeOrbitViewState(globe, eyePoint, centerPoint, up);
 
 			if (ovs == null)
 			{
@@ -68,10 +90,9 @@ public class AnimatorHelper
 			Position currentCenter = orbitView.getCenterPosition();
 			long lengthMillis = SettingsUtil.getScaledLengthMillis(currentCenter, centerPosition);
 
-			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView,
-					currentCenter, centerPosition, view.getHeading(), ovs.getHeading(),
-					view.getPitch(), ovs.getPitch(), orbitView.getZoom(), ovs.getZoom(),
-					lengthMillis, WorldWind.ABSOLUTE));
+			view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(orbitView, currentCenter,
+					centerPosition, view.getHeading(), ovs.getHeading(), view.getPitch(), ovs.getPitch(),
+					orbitView.getZoom(), ovs.getZoom(), lengthMillis, WorldWind.ABSOLUTE));
 
 			return lengthMillis;
 		}
@@ -97,15 +118,15 @@ public class AnimatorHelper
 			BasicFlyView flyView = (BasicFlyView) view;
 			long lengthMillis = SettingsUtil.getScaledLengthMillis(currentCenter, centerPosition);
 
-			FlyToFlyViewAnimator.createFlyToFlyViewAnimator(flyView, currentCenter, centerPosition,
-					view.getHeading(), vs.getHeading(), view.getPitch(), vs.getPitch(),
-					currentEye.elevation, eyePosition.elevation, lengthMillis, WorldWind.ABSOLUTE);
+			FlyToFlyViewAnimator.createFlyToFlyViewAnimator(flyView, currentCenter, centerPosition, view.getHeading(),
+					vs.getHeading(), view.getPitch(), vs.getPitch(), currentEye.elevation, eyePosition.elevation,
+					lengthMillis, WorldWind.ABSOLUTE);
 
 			return lengthMillis;
 		}
 		else if (view instanceof FreeView)
 		{
-
+			//TODO
 		}
 		return -1;
 	}
