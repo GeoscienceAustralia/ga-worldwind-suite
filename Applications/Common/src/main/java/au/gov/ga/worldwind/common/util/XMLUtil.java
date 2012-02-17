@@ -17,6 +17,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map.Entry;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -43,8 +44,10 @@ public class XMLUtil extends WWXML
 	private final static double EPSILON = 1e-10;
 
 	/**
-	 * @return The XML element from a generic source. If the source is an {@link Element}, will return the provided source. Otherwise, will attempt
-	 * to open the source as an XML {@link Document} and will return the document element.
+	 * @return The XML element from a generic source. If the source is an
+	 *         {@link Element}, will return the provided source. Otherwise, will
+	 *         attempt to open the source as an XML {@link Document} and will
+	 *         return the document element.
 	 * 
 	 * @see {@link WWXML#openDocument(Object)}
 	 */
@@ -390,24 +393,24 @@ public class XMLUtil extends WWXML
 		}
 	}
 
-	public static ColorMap getColorMap(Element element, XPath xpath)
+	public static ColorMap getColorMap(Element element, String path, XPath xpath)
 	{
 		ColorMap colorMap = new ColorMap();
 
 		if (element != null)
 		{
-			if(xpath == null)
+			if (xpath == null)
 			{
 				xpath = makeXPath();
 			}
-			
-			Boolean b = XMLUtil.getBoolean(element, "ColorMap/@interpolateHue", true, xpath);
-			if(b != null)
+
+			Boolean b = XMLUtil.getBoolean(element, path + "/@interpolateHue", true, xpath);
+			if (b != null)
 			{
 				colorMap.setInterpolateHue(b);
 			}
-			
-			Element[] mapEntries = WWXML.getElements(element, "ColorMap/Entry", xpath);
+
+			Element[] mapEntries = WWXML.getElements(element, path + "/Entry", xpath);
 			if (mapEntries != null)
 			{
 				for (Element entry : mapEntries)
@@ -439,6 +442,21 @@ public class XMLUtil extends WWXML
 		}
 
 		return colorMap;
+	}
+
+	public static void appendColorMap(Element element, String path, ColorMap colorMap)
+	{
+		Element colorMapElement = appendElement(element, path);
+		setBooleanAttribute(colorMapElement, "interpolateHue", colorMap.isInterpolateHue());
+		for (Entry<Double, Color> colorMapEntry : colorMap.entrySet())
+		{
+			Element entryElement = appendElement(colorMapElement, "Entry");
+			setDoubleAttribute(entryElement, "value", colorMapEntry.getKey());
+			setIntegerAttribute(entryElement, "red", colorMapEntry.getValue().getRed());
+			setIntegerAttribute(entryElement, "green", colorMapEntry.getValue().getGreen());
+			setIntegerAttribute(entryElement, "blue", colorMapEntry.getValue().getBlue());
+			setIntegerAttribute(entryElement, "alpha", colorMapEntry.getValue().getAlpha());
+		}
 	}
 
 	public static void checkAndSetFormattedDateParam(Element context, AVList params, String paramKey, String paramName,

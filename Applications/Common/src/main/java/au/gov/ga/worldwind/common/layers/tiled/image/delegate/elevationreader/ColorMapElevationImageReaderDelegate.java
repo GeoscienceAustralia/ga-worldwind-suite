@@ -90,7 +90,7 @@ public class ColorMapElevationImageReaderDelegate extends ElevationImageReaderDe
 				String byteOrder = matcher.group(2);
 				double missingDataSignal = Double.parseDouble(matcher.group(3));
 
-				ColorMap colorMap = XMLUtil.getColorMap(layerElement, null);
+				ColorMap colorMap = XMLUtil.getColorMap(layerElement, "ColorMap", null);
 				return new ColorMapElevationImageReaderDelegate(WWXML.parseDataType(pixelType),
 						WWXML.parseByteOrder(byteOrder), missingDataSignal, colorMap);
 			}
@@ -101,6 +101,10 @@ public class ColorMapElevationImageReaderDelegate extends ElevationImageReaderDe
 	@Override
 	public String toDefinition(Element layerElement)
 	{
+		if (layerElement != null)
+		{
+			XMLUtil.appendColorMap(layerElement, "ColorMap", colorMap);
+		}
 		return DEFINITION_STRING + "(" + WWXML.dataTypeAsText(pixelType) + "," + WWXML.byteOrderAsText(byteOrder) + ","
 				+ missingDataSignal + ")";
 	}

@@ -98,7 +98,7 @@ public class ModelLayerFactory
 
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.COORDINATE_SYSTEM, "CoordinateSystem", xpath);
 		
-		ColorMap colorMap = XMLUtil.getColorMap(domElement, xpath);
+		ColorMap colorMap = XMLUtil.getColorMap(domElement, "ColorMap", xpath);
 		params.setValue(AVKeyMore.COLOR_MAP, colorMap);
 
 		setupModelProvider(domElement, xpath, params);

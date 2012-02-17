@@ -67,7 +67,7 @@ public class VolumeLayerFactory
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MIN_W, "InitialOffset/@minW", xpath);
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MAX_W, "InitialOffset/@maxW", xpath);
 
-		ColorMap colorMap = XMLUtil.getColorMap(domElement, xpath);
+		ColorMap colorMap = XMLUtil.getColorMap(domElement, "ColorMap", xpath);
 		params.setValue(AVKeyMore.COLOR_MAP, colorMap);
 
 		setupVolumeDataProvider(domElement, xpath, params);
