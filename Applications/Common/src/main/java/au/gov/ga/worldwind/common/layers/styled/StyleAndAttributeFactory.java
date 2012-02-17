@@ -46,25 +46,42 @@ public class StyleAndAttributeFactory
 					String name = WWXML.getText(s, "@name", xpath);
 					boolean defalt = XMLUtil.getBoolean(s, "@default", false);
 					Style style = new Style(name, defalt);
-
-					Element[] properties = WWXML.getElements(s, "Property", xpath);
-					if (properties != null)
-					{
-						for (Element p : properties)
-						{
-							String pname = WWXML.getText(p, "@name", xpath);
-							String value = WWXML.getText(p, "@value", xpath);
-							String type = WWXML.getText(p, "@type", xpath);
-							style.addProperty(pname, value, type);
-						}
-					}
-
+					addProperties(s, xpath, style);
 					styles.add(style);
 				}
 			}
 		}
 
 		params.setValue(paramKey, styles);
+	}
+
+	/**
+	 * Parse any &lt;Property&gt; elements below the given element, and add them
+	 * to the given {@link PropertySetter}.
+	 * 
+	 * @param element
+	 *            Parent element of the &lt;Property&gt; XML elements
+	 * @param xpath
+	 *            XPath object
+	 * @param setter
+	 *            {@link PropertySetter} to add the properties to
+	 */
+	public static void addProperties(Element element, XPath xpath, PropertySetter setter)
+	{
+		if (element != null)
+		{
+			Element[] properties = WWXML.getElements(element, "Property", xpath);
+			if (properties != null)
+			{
+				for (Element p : properties)
+				{
+					String pname = WWXML.getText(p, "@name", xpath);
+					String value = WWXML.getText(p, "@value", xpath);
+					String type = WWXML.getText(p, "@type", xpath);
+					setter.addProperty(pname, value, type);
+				}
+			}
+		}
 	}
 
 	/**
