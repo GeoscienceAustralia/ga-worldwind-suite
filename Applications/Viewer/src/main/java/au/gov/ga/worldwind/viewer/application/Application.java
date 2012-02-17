@@ -160,7 +160,6 @@ public class Application
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, WireframeRectangularTessellator.class.getName());
-		//Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, RectangularTessellatorAccessible.class.getName());
 
 		GDALDataHelper.init();
 	}

@@ -14,7 +14,6 @@ public class ViewerMessageConstants extends CommonMessageConstants
 	}
 
 	public static String getApplicationTitleKey() { return "viewer.application.title"; }
-	public static String getApplicationTitleSandpitSuffixKey() { return "viewer.application.title.sandpitsuffix"; }
 	public static String getHelpUrlKey() { return "viewer.help.url"; }
 
 	// Dialogs
