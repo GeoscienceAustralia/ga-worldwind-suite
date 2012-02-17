@@ -16,6 +16,7 @@ import au.gov.ga.worldwind.common.layers.delegate.retriever.HttpRetrieverFactory
 import au.gov.ga.worldwind.common.layers.delegate.retriever.PassThroughZipRetrieverFactoryDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.transformer.ColorLimitTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.transformer.ColorToAlphaTransformerDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.transformer.FilterTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.transformer.ResizeTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.transformer.StripingFilterTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.transformer.TransparentColorTransformerDelegate;
@@ -45,6 +46,7 @@ public abstract class AbstractDelegateFactory implements IDelegateFactory
 		registerDelegate(StripingFilterTransformerDelegate.class);
 		registerDelegate(ResizeTransformerDelegate.class);
 		registerDelegate(ColorLimitTransformerDelegate.class);
+		registerDelegate(FilterTransformerDelegate.class);
 		
 		registerDelegate(ElevationOffsetRenderDelegate.class);
 		registerDelegate(IgnoreElevationRenderDelegate.class);
