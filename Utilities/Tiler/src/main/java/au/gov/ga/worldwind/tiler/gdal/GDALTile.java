@@ -15,6 +15,9 @@ import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Map.Entry;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
@@ -24,12 +27,10 @@ import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
 import org.gdal.osr.SpatialReference;
 
-import au.gov.ga.worldwind.tiler.util.ByteBufferCache;
 import au.gov.ga.worldwind.tiler.util.MinMaxArray;
 import au.gov.ga.worldwind.tiler.util.NullableNumberArray;
 import au.gov.ga.worldwind.tiler.util.NumberArray;
 import au.gov.ga.worldwind.tiler.util.TilerException;
-
 
 public class GDALTile
 {
@@ -49,6 +50,9 @@ public class GDALTile
 	private int bufferBandCount;
 	private boolean indexed;
 	private IndexColorModel indexColorModel;
+
+	//ByteBuffer cache:
+	private static NavigableMap<Integer, ByteBuffer> availableBuffers = new TreeMap<Integer, ByteBuffer>();
 
 	public GDALTile(GDALTileParameters parameters) throws GDALException, TilerException
 	{
@@ -241,7 +245,7 @@ public class GDALTile
 			// image parameters and data
 			int bandSize = width * height * bufferTypeSize;
 			//buffer = ByteBuffer.allocateDirect(bandSize * bufferBandCount);
-			directBuffer = ByteBufferCache.takeByteBuffer(bandSize * bufferBandCount);
+			directBuffer = takeByteBuffer(bandSize * bufferBandCount);
 			directBuffer.order(ByteOrder.LITTLE_ENDIAN); // TODO check if always the case?
 
 			// calculate src and dst image rectangles
@@ -290,7 +294,7 @@ public class GDALTile
 					{
 						int smallBandSize = srcRect.width * srcRect.height * bufferTypeSize;
 						//ByteBuffer small = ByteBuffer.allocateDirect(smallBandSize * bufferBandCount);
-						small = ByteBufferCache.takeByteBuffer(smallBandSize * bufferBandCount);
+						small = takeByteBuffer(smallBandSize * bufferBandCount);
 						small.order(ByteOrder.LITTLE_ENDIAN);
 
 						//fill the alpha channel if required
@@ -328,7 +332,7 @@ public class GDALTile
 					}
 					finally
 					{
-						ByteBufferCache.returnByteBuffer(small);
+						returnByteBuffer(small);
 					}
 				}
 				else
@@ -379,14 +383,14 @@ public class GDALTile
 
 			// rewind the buffer
 			directBuffer.rewind();
-			
+
 			//copy the direct buffer into the standard buffer array
 			this.buffer = ByteBuffer.allocate(directBuffer.limit());
 			directBuffer.get(this.buffer.array());
 		}
 		finally
 		{
-			ByteBufferCache.returnByteBuffer(directBuffer);
+			returnByteBuffer(directBuffer);
 		}
 
 		// set variables for indexed image
@@ -1224,6 +1228,28 @@ public class GDALTile
 			buffer.put(index + 1, third);
 			buffer.put(index + 2, second);
 			buffer.put(index + 3, first);
+		}
+	}
+
+	private synchronized static ByteBuffer takeByteBuffer(int size)
+	{
+		Entry<Integer, ByteBuffer> entry = availableBuffers.higherEntry(size);
+		if (entry != null)
+		{
+			ByteBuffer buffer = entry.getValue();
+			availableBuffers.remove(entry.getKey());
+			buffer.rewind();
+			buffer.limit(size);
+			return buffer;
+		}
+		return ByteBuffer.allocateDirect(size);
+	}
+
+	private synchronized static void returnByteBuffer(ByteBuffer buffer)
+	{
+		if (buffer != null)
+		{
+			availableBuffers.put(buffer.capacity(), buffer);
 		}
 	}
 }
