@@ -51,8 +51,22 @@ public class FilterTransformerDelegate implements IImageTransformerDelegate
 					String name = XMLUtil.getText(filterElement, "@name", xpath);
 					try
 					{
-						Class<?> filterClass =
-								Class.forName(AbstractBufferedImageOp.class.getPackage().getName() + "." + name);
+						Class<?> filterClass = null;
+						try
+						{
+							//first try class name with the com.jhlabs.image package prefix
+							filterClass =
+									Class.forName(AbstractBufferedImageOp.class.getPackage().getName() + "." + name);
+						}
+						catch (ClassNotFoundException e)
+						{
+						}
+						if (filterClass == null)
+						{
+							//if not found, simply try the name as the full class name
+							filterClass = Class.forName(name);
+						}
+						
 						Object filterObject = filterClass.newInstance();
 						if (filterObject instanceof BufferedImageOp)
 						{
