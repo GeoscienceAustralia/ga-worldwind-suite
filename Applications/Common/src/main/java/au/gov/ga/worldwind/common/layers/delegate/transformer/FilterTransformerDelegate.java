@@ -13,6 +13,7 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.filters.TransparentMinimumFilter;
 import au.gov.ga.worldwind.common.layers.styled.PropertySetter;
 import au.gov.ga.worldwind.common.layers.styled.StyleAndAttributeFactory;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -54,19 +55,38 @@ public class FilterTransformerDelegate implements IImageTransformerDelegate
 						Class<?> filterClass = null;
 						try
 						{
-							//first try class name with the com.jhlabs.image package prefix
+							//first try class name with the local .filter package prefix
 							filterClass =
-									Class.forName(AbstractBufferedImageOp.class.getPackage().getName() + "." + name);
+									Class.forName(TransparentMinimumFilter.class.getPackage().getName() + "." + name);
 						}
 						catch (ClassNotFoundException e)
 						{
 						}
 						if (filterClass == null)
 						{
-							//if not found, simply try the name as the full class name
-							filterClass = Class.forName(name);
+							try
+							{
+								//next try class name with the com.jhlabs.image package prefix
+								filterClass =
+										Class.forName(AbstractBufferedImageOp.class.getPackage().getName() + "." + name);
+							}
+							catch (ClassNotFoundException e)
+							{
+							}
 						}
-						
+						if (filterClass == null)
+						{
+							try
+							{
+								//if not found, simply try the name as the full class name
+								filterClass = Class.forName(name);
+							}
+							catch (ClassNotFoundException e)
+							{
+								throw new Exception("Filter not found: " + name, e);
+							}
+						}
+
 						Object filterObject = filterClass.newInstance();
 						if (filterObject instanceof BufferedImageOp)
 						{
@@ -80,7 +100,7 @@ public class FilterTransformerDelegate implements IImageTransformerDelegate
 					}
 					catch (Exception e)
 					{
-						//reflection exception:
+						//log exception
 						e.printStackTrace();
 					}
 				}
