@@ -56,6 +56,7 @@ import org.w3c.dom.Document;
 
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.FileFilters;
+import au.gov.ga.worldwind.common.ui.SwingUtil;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.URLUtil;
@@ -756,10 +757,16 @@ public class PlacesPanel extends AbstractThemePanel
 					long jump = 100;
 					while (playing && index >= 0)
 					{
-						Place place = places.get(index);
+						final Place place = places.get(index);
 						if (!place.isExcludeFromPlaylist())
 						{
-							selectPlace(place);
+							SwingUtil.invokeTaskOnEDT(new Runnable(){
+								@Override
+								public void run()
+								{
+									selectPlace(place);
+								}
+							});
 							long length = flyToPlace(place);
 							if (length < 0)
 							{
