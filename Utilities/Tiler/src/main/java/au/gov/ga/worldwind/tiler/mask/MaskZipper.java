@@ -31,7 +31,7 @@ public class MaskZipper
 
 		/*File dir =
 				new File(
-						"V:/projects/presentations/11-5902 - Broken Hill 3D model data visualisation/Source/AEM/elevation_tif");
+						"V:/projects/presentations/11-5902 - Broken Hill 3D model data visualisation/Source/AEM/depth_tif");
 		File[] files = dir.listFiles();
 		String tilesSuffix = "_tiles";
 		String maskSuffix = "_mask";
@@ -70,9 +70,9 @@ public class MaskZipper
 
 		File dir =
 				new File(
-						"V:/projects/presentations/11-5902 - Broken Hill 3D model data visualisation/Source/AEM/elevation_tiled");
-		File template = new File(dir, "e01_m050_m045.xml");
-		Pattern elevationPattern = Pattern.compile(".+_([mp])(\\d\\d\\d)_.+");
+						"V:/projects/presentations/11-5902 - Broken Hill 3D model data visualisation/Source/AEM/depth_tif");
+		File template = new File(dir, "d000p0_000p5m.xml");
+		Pattern elevationPattern = Pattern.compile("d(\\d\\d\\d)p(\\d)_.+");
 		File[] files = dir.listFiles();
 		for (File file : files)
 		{
@@ -85,8 +85,9 @@ public class MaskZipper
 					Matcher matcher = elevationPattern.matcher(file.getName());
 					if (matcher.matches())
 					{
-						boolean negative = matcher.group(1).equals("m");
-						int elevation = Integer.parseInt(matcher.group(2)) * (negative ? -1 : 1);
+						int elevationInt = Integer.parseInt(matcher.group(1));
+						int elevationPoint = Integer.parseInt(matcher.group(2));
+						double elevation = -(elevationInt + elevationPoint / 10d);
 						try
 						{
 							BufferedWriter writer = new BufferedWriter(new FileWriter(output));
@@ -94,15 +95,15 @@ public class MaskZipper
 							String line;
 							while ((line = reader.readLine()) != null)
 							{
-								line = line.replaceAll("e01_m050_m045", fileWithoutExtension);
+								line = line.replaceAll("d000p0_000p5m", fileWithoutExtension);
 								line =
-										line.replaceAll("ElevationOffset\\(-50\\)", "ElevationOffset(" + elevation
+										line.replaceAll("ElevationOffset\\(0\\)", "ElevationOffset(" + elevation
 												+ ")");
 								writer.append(line + "\r\n");
 							}
 							writer.close();
 							reader.close();
-							
+
 						}
 						catch (Exception e)
 						{
