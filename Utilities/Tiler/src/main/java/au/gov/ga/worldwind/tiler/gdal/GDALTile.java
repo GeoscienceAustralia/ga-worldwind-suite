@@ -1233,7 +1233,7 @@ public class GDALTile
 
 	private synchronized static ByteBuffer takeByteBuffer(int size)
 	{
-		Entry<Integer, ByteBuffer> entry = availableBuffers.higherEntry(size);
+		Entry<Integer, ByteBuffer> entry = availableBuffers.ceilingEntry(size);
 		if (entry != null)
 		{
 			ByteBuffer buffer = entry.getValue();
