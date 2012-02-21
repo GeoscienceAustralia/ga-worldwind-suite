@@ -40,48 +40,43 @@ public class Tiler
 		Mapnik
 	}
 
-	public static void tileImages(Dataset dataset, boolean reprojectIfRequired,
-			boolean linearInterpolationIfRequired, Sector sector, LatLon origin, int level,
-			int tilesize, double lzts, String imageFormat, boolean addAlpha, float jpegQuality,
-			NullableNumberArray outsideValues, boolean ignoreBlank, MinMaxArray[] replaceMinMaxs,
-			NullableNumberArray replace, NullableNumberArray otherwise, File outputDirectory,
+	public static void tileImages(Dataset dataset, boolean reprojectIfRequired, boolean linearInterpolationIfRequired,
+			Sector sector, LatLon origin, int level, int tilesize, double lzts, String imageFormat, boolean addAlpha,
+			float jpegQuality, NullableNumberArray outsideValues, boolean ignoreBlank, MinMaxArray[] replaceMinMaxs,
+			NullableNumberArray replace, NullableNumberArray otherwise, File outputDirectory, boolean resume,
 			ProgressReporter progress)
 	{
-		tile(TilingType.Images, dataset, reprojectIfRequired, linearInterpolationIfRequired, null,
-				sector, origin, level, tilesize, lzts, imageFormat, addAlpha, jpegQuality, -1, -1,
-				outsideValues, ignoreBlank, replaceMinMaxs, replace, otherwise, null,
-				outputDirectory, progress);
+		tile(TilingType.Images, dataset, reprojectIfRequired, linearInterpolationIfRequired, null, sector, origin,
+				level, tilesize, lzts, imageFormat, addAlpha, jpegQuality, -1, -1, outsideValues, ignoreBlank,
+				replaceMinMaxs, replace, otherwise, null, outputDirectory, resume, progress);
 	}
 
 	public static void tileElevations(Dataset dataset, boolean reprojectIfRequired,
-			boolean linearInterpolationIfRequired, Sector sector, LatLon origin, int level,
-			int tilesize, double lzts, int bufferType, int band, NullableNumberArray outsideValues,
-			MinMaxArray[] replaceMinMaxs, NullableNumberArray replace,
-			NullableNumberArray otherwise, NumberArray minMax, File outputDirectory,
+			boolean linearInterpolationIfRequired, Sector sector, LatLon origin, int level, int tilesize, double lzts,
+			int bufferType, int band, NullableNumberArray outsideValues, MinMaxArray[] replaceMinMaxs,
+			NullableNumberArray replace, NullableNumberArray otherwise, NumberArray minMax, File outputDirectory,
+			boolean resume, ProgressReporter progress)
+	{
+		tile(TilingType.Elevations, dataset, reprojectIfRequired, linearInterpolationIfRequired, null, sector, origin,
+				level, tilesize, lzts, null, false, -1, bufferType, band, outsideValues, false, replaceMinMaxs,
+				replace, otherwise, minMax, outputDirectory, resume, progress);
+	}
+
+	public static void tileMapnik(File mapFile, Sector sector, LatLon origin, int level, int tilesize, double lzts,
+			String imageFormat, boolean ignoreBlank, boolean reprojectIfRequired, File outputDirectory, boolean resume,
 			ProgressReporter progress)
 	{
-		tile(TilingType.Elevations, dataset, reprojectIfRequired, linearInterpolationIfRequired,
-				null, sector, origin, level, tilesize, lzts, null, false, -1, bufferType, band,
-				outsideValues, false, replaceMinMaxs, replace, otherwise, minMax, outputDirectory,
+		tile(TilingType.Mapnik, null, reprojectIfRequired, false, mapFile, sector, origin, level, tilesize, lzts,
+				imageFormat, false, -1, -1, -1, null, ignoreBlank, null, null, null, null, outputDirectory, resume,
 				progress);
 	}
 
-	public static void tileMapnik(File mapFile, Sector sector, LatLon origin, int level,
-			int tilesize, double lzts, String imageFormat, boolean ignoreBlank,
-			boolean reprojectIfRequired, File outputDirectory, ProgressReporter progress)
-	{
-		tile(TilingType.Mapnik, null, reprojectIfRequired, false, mapFile, sector, origin, level,
-				tilesize, lzts, imageFormat, false, -1, -1, -1, null, ignoreBlank, null, null,
-				null, null, outputDirectory, progress);
-	}
-
 	private static void tile(TilingType type, Dataset dataset, boolean reprojectIfRequired,
-			boolean linearInterpolationIfRequired, File mapFile, Sector sector, LatLon origin,
-			int level, int tilesize, double lzts, String imageFormat, boolean addAlpha,
-			float jpegQuality, int bufferType, int band, NullableNumberArray outsideValues,
-			boolean ignoreBlank, MinMaxArray[] replaceMinMaxs, NullableNumberArray replace,
-			NullableNumberArray otherwise, NumberArray minMax, File outputDirectory,
-			ProgressReporter progress)
+			boolean linearInterpolationIfRequired, File mapFile, Sector sector, LatLon origin, int level, int tilesize,
+			double lzts, String imageFormat, boolean addAlpha, float jpegQuality, int bufferType, int band,
+			NullableNumberArray outsideValues, boolean ignoreBlank, MinMaxArray[] replaceMinMaxs,
+			NullableNumberArray replace, NullableNumberArray otherwise, NumberArray minMax, File outputDirectory,
+			boolean resume, ProgressReporter progress)
 	{
 		progress.getLogger().info("Generating tiles...");
 
@@ -93,31 +88,60 @@ public class Tiler
 		int minY = Util.getTileY(sector.getMinLatitude() + 1e-10, origin, level, lzts);
 		int maxY = Util.getTileY(sector.getMaxLatitude() - 1e-10, origin, level, lzts);
 
+		File levelDir = new File(outputDirectory, String.valueOf(level));
+
+		int startX = minX;
+		int startY = minY;
+		if (resume)
+		{
+			//check if this data has been tiled before; if so, start from previous position
+			for (int Y = minY; Y <= maxY; Y++)
+			{
+				File rowDir = new File(levelDir, Util.paddedInt(Y, 4));
+				if (rowDir.exists())
+				{
+					startY = Y;
+				}
+			}
+
+			File rowDir = new File(levelDir, Util.paddedInt(startY, 4));
+			if (rowDir.exists())
+			{
+				for (int X = minX; X <= maxX; X++)
+				{
+					final File dst =
+							new File(rowDir, Util.paddedInt(startY, 4) + "_" + Util.paddedInt(X, 4) + "." + outputExt);
+					if (dst.exists())
+					{
+						startX = X + 1;
+					}
+				}
+			}
+		}
+
 		int size = (maxX - minX + 1) * (maxY - minY + 1);
 		int count = 0;
-		for (int Y = minY; Y <= maxY; Y++)
+		for (int Y = startY; Y <= maxY; Y++)
 		{
 			if (progress.isCancelled())
 				break;
 
-			File rowDir = new File(outputDirectory, String.valueOf(level));
-			rowDir = new File(rowDir, Util.paddedInt(Y, 4));
+			File rowDir = new File(levelDir, Util.paddedInt(Y, 4));
 			if (!rowDir.exists())
 			{
 				rowDir.mkdirs();
 			}
 
-			for (int X = minX; X <= maxX; X++)
+			for (int X = (Y == startY ? startX : minX); X <= maxX; X++)
 			{
 				if (progress.isCancelled())
 					break;
 
 				count++;
 				progress.getLogger().fine(
-						"Tile (" + X + "," + Y + "), " + count + "/" + size + " ("
-								+ (count * 100 / size) + "%) (column " + (X - minX + 1) + "/"
-								+ (maxX - minX + 1) + ", row " + (Y - minY + 1) + "/"
-								+ (maxY - minY + 1) + ")");
+						"Tile (" + X + "," + Y + "), " + count + "/" + size + " (" + (count * 100 / size)
+								+ "%) (column " + (X - minX + 1) + "/" + (maxX - minX + 1) + ", row " + (Y - minY + 1)
+								+ "/" + (maxY - minY + 1) + ")");
 				progress.progress(count / (double) size);
 
 				final double lat1 = (Y * tilesizedegrees) + origin.getLatitude();
@@ -126,9 +150,7 @@ public class Tiler
 				final double lon2 = lon1 + tilesizedegrees;
 				Sector s = new Sector(lat1, lon1, lat2, lon2);
 
-				final File dst =
-						new File(rowDir, Util.paddedInt(Y, 4) + "_" + Util.paddedInt(X, 4) + "."
-								+ outputExt);
+				final File dst = new File(rowDir, Util.paddedInt(Y, 4) + "_" + Util.paddedInt(X, 4) + "." + outputExt);
 				if (dst.exists())
 				{
 					progress.getLogger().warning(dst.getAbsolutePath() + " already exists");
@@ -145,13 +167,11 @@ public class Tiler
 						else
 						{
 							GDALTileParameters parameters =
-									new GDALTileParameters(dataset, new Dimension(tilesize,
-											tilesize), s);
+									new GDALTileParameters(dataset, new Dimension(tilesize, tilesize), s);
 							parameters.addAlpha = addAlpha;
 							parameters.selectedBand = band;
 							parameters.reprojectIfRequired = reprojectIfRequired;
-							parameters.bilinearInterpolationIfRequired =
-									linearInterpolationIfRequired;
+							parameters.bilinearInterpolationIfRequired = linearInterpolationIfRequired;
 							parameters.noData = outsideValues;
 							parameters.minMaxs = replaceMinMaxs;
 							parameters.replacement = replace;
@@ -171,8 +191,7 @@ public class Tiler
 								try
 								{
 									raf = new RandomAccessFile(dst, "rw");
-									MappedByteBuffer mbb =
-											raf.getChannel().map(MapMode.READ_WRITE, 0, bb.limit());
+									MappedByteBuffer mbb = raf.getChannel().map(MapMode.READ_WRITE, 0, bb.limit());
 									mbb.order(bb.order());
 									mbb.put(bb);
 								}
@@ -208,12 +227,10 @@ public class Tiler
 			}
 		}
 
-		progress.getLogger().info(
-				"Tile generation " + (progress.isCancelled() ? "cancelled" : "complete"));
+		progress.getLogger().info("Tile generation " + (progress.isCancelled() ? "cancelled" : "complete"));
 	}
 
-	public static void writeImage(BufferedImage image, String format, File file, float jpegQuality)
-			throws IOException
+	public static void writeImage(BufferedImage image, String format, File file, float jpegQuality) throws IOException
 	{
 		if ("jpg".equalsIgnoreCase(format))
 		{

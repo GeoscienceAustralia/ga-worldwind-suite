@@ -288,7 +288,7 @@ public class Console
 					NumberArray minMax = new NumberArray(2);
 					Tiler.tileElevations(dataset, reproject, bilinear, sector, origin, level,
 							tilesize, lzts, bufferType, band, outside, replaces.replaceMinMaxs,
-							replaces.replace, replaces.otherwise, minMax, output, reporter);
+							replaces.replace, replaces.otherwise, minMax, output, true, reporter);
 					if (!nooverviews)
 					{
 						Overviewer.createElevationOverviews(output, tilesize, tilesize, bufferType,
@@ -307,7 +307,7 @@ public class Console
 					Tiler.tileImages(dataset, reproject, bilinear, sector, origin, level, tilesize,
 							lzts, imageFormat, addAlpha, quality.floatValue(), outside,
 							!includeBlank, replaces.replaceMinMaxs, replaces.replace,
-							replaces.otherwise, output, reporter);
+							replaces.otherwise, output, true, reporter);
 					if (!nooverviews)
 					{
 						Overviewer.createImageOverviews(output, imageFormat, tilesize, tilesize,

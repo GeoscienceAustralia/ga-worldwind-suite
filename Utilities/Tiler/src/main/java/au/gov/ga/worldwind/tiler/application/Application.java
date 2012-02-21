@@ -705,7 +705,7 @@ public class Application implements UncaughtExceptionHandler
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		size = lztsField.getPreferredSize();
-		size.width = 50;
+		size.width = 148;
 		lztsField.setMinimumSize(size);
 		lztsField.setMaximumSize(size);
 		lztsField.setPreferredSize(size);
@@ -742,8 +742,10 @@ public class Application implements UncaughtExceptionHandler
 				Integer tilesize = tilesizeField.getValue();
 				if (tilesize != null && sector != null && dataset != null)
 				{
-					lztsField.setValue(Util.optimalLztsd(dataset, sector, tilesizeField.getValue(),
-							elevationRadio.isSelected() ? 20 : 36));
+					double optimal = Util.optimalLztsd(dataset, sector, tilesizeField.getValue(),
+							elevationRadio.isSelected() ? 20 : 36);
+					optimal = Math.floor(optimal * 10e6) / 10e6;
+					lztsField.setValue(optimal);
 				}
 			}
 		});
@@ -2373,6 +2375,7 @@ public class Application implements UncaughtExceptionHandler
 				Double latOrigin = latitudeOriginField.getValue();
 				Double lonOrigin = longitudeOriginField.getValue();
 				LatLon origin = new LatLon(latOrigin, lonOrigin);
+				boolean resume = true;
 
 				LogWriter logWriter = null;
 				try
@@ -2388,7 +2391,7 @@ public class Application implements UncaughtExceptionHandler
 								null, null, null, false);
 
 						Tiler.tileMapnik(mapFile, sector, origin, level, tilesize, lzts, imageFormat, ignoreBlank,
-								reproject, outDir, reporter);
+								reproject, outDir, resume, reporter);
 						if (overviews && !reporter.isCancelled())
 						{
 							if (mapnikOverviews)
@@ -2400,7 +2403,7 @@ public class Application implements UncaughtExceptionHandler
 										break;
 									}
 									Tiler.tileMapnik(mapFile, sector, origin, l, tilesize, lzts, imageFormat,
-											ignoreBlank, reproject, outDir, reporter);
+											ignoreBlank, reproject, outDir, resume, reporter);
 								}
 							}
 							else
@@ -2473,7 +2476,7 @@ public class Application implements UncaughtExceptionHandler
 
 							Tiler.tileImages(dataset, reproject, bilinear, sector, origin, level, tilesize, lzts,
 									imageFormat, addAlpha, jpegQuality, outsideValues, ignoreBlank, minMaxReplaces,
-									replace, otherwise, outDir, reporter);
+									replace, otherwise, outDir, resume, reporter);
 							if (overviews && !reporter.isCancelled())
 							{
 								Overviewer.createImageOverviews(outDir, imageFormat, tilesize, tilesize, outsideValues,
@@ -2504,7 +2507,7 @@ public class Application implements UncaughtExceptionHandler
 
 							Tiler.tileElevations(dataset, reproject, bilinear, sector, origin, level, tilesize, lzts,
 									bufferType, band, outsideValues, minMaxReplaces, replace, otherwise, minmax,
-									outDir, reporter);
+									outDir, resume, reporter);
 
 							if (overviews && !reporter.isCancelled())
 							{
