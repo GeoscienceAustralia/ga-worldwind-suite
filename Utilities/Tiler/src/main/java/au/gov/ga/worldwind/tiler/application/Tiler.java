@@ -113,14 +113,26 @@ public class Tiler
 							new File(rowDir, Util.paddedInt(startY, 4) + "_" + Util.paddedInt(X, 4) + "." + outputExt);
 					if (dst.exists())
 					{
-						startX = X + 1;
+						//Instead of (startX = X + 1), use X, so that it re-does the last tile done. This is
+						//because sometimes the last tile didn't completely save when the process was stopped.
+						startX = X;
 					}
+				}
+
+				//for same reason as above, delete the last tile processed last time
+				final File dst =
+						new File(rowDir, Util.paddedInt(startY, 4) + "_" + Util.paddedInt(startX, 4) + "." + outputExt);
+				if (dst.exists())
+				{
+					dst.delete();
 				}
 			}
 		}
 
-		int size = (maxX - minX + 1) * (maxY - minY + 1);
-		int count = 0;
+		int xsize = maxX - minX + 1;
+		int ysize = maxY - minY + 1;
+		int size = xsize * ysize;
+		int count = (startY - minY) * xsize + (startX - minX);
 		for (int Y = startY; Y <= maxY; Y++)
 		{
 			if (progress.isCancelled())
@@ -140,8 +152,8 @@ public class Tiler
 				count++;
 				progress.getLogger().fine(
 						"Tile (" + X + "," + Y + "), " + count + "/" + size + " (" + (count * 100 / size)
-								+ "%) (column " + (X - minX + 1) + "/" + (maxX - minX + 1) + ", row " + (Y - minY + 1)
-								+ "/" + (maxY - minY + 1) + ")");
+								+ "%) (column " + (X - minX + 1) + "/" + xsize + ", row " + (Y - minY + 1) + "/"
+								+ ysize + ")");
 				progress.progress(count / (double) size);
 
 				final double lat1 = (Y * tilesizedegrees) + origin.getLatitude();
