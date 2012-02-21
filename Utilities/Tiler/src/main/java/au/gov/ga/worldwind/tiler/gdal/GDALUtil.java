@@ -84,7 +84,7 @@ public class GDALUtil
 		double maxlon = geoTransformArray[0] + geoTransformArray[1] * width + geoTransformArray[2] * height;
 		double minlat = geoTransformArray[3] + geoTransformArray[4] * width + geoTransformArray[5] * height;
 
-		if(performCoordinateTransformation)
+		if (performCoordinateTransformation)
 		{
 			String projection = dataset.GetProjectionRef();
 			if (projection != null && projection.length() > 0)
@@ -186,8 +186,7 @@ public class GDALUtil
 		return info.toString(true);
 	}
 
-	public static String getTileText(Dataset dataset, Sector sector, LatLon origin, double lzts, int levels,
-			boolean overviews)
+	public static String getTileText(Sector sector, LatLon origin, double lzts, int levels, boolean overviews)
 	{
 		StringLineBuilder info = new StringLineBuilder();
 

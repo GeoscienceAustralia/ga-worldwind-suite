@@ -276,7 +276,7 @@ public class Console
 				logWriter = new LogWriter(output);
 				String infoText = GDALUtil.getInfoText(dataset, sector);
 				String tileText =
-						GDALUtil.getTileText(dataset, sector, origin, lzts, levels, !nooverviews);
+						GDALUtil.getTileText(sector, origin, lzts, levels, !nooverviews);
 
 				if (elevations)
 				{

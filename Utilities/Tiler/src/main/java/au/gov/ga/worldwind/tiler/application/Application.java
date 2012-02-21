@@ -150,6 +150,7 @@ public class Application implements UncaughtExceptionHandler
 	private JCheckBox bilinearCheck;
 	private JCheckBox bilinearOverviewsCheck;
 	private JDoubleField lztsField;
+	private JButton optimalLztsButton;
 	private JDoubleField latitudeOriginField;
 	private JDoubleField longitudeOriginField;
 	private JIntegerField tilesizeField;
@@ -727,6 +728,25 @@ public class Application implements UncaughtExceptionHandler
 		c.insets = new Insets(0, SPACING / 2, 0, 0);
 		panel.add(label, c);
 		labels.add(label);
+
+		optimalLztsButton = new JButton("Calculate optimal");
+		c = new GridBagConstraints();
+		c.gridx = 2;
+		c.insets = new Insets(0, SPACING, 0, 0);
+		panel.add(optimalLztsButton, c);
+		optimalLztsButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				Integer tilesize = tilesizeField.getValue();
+				if (tilesize != null && sector != null && dataset != null)
+				{
+					lztsField.setValue(Util.optimalLztsd(dataset, sector, tilesizeField.getValue(),
+							elevationRadio.isSelected() ? 20 : 36));
+				}
+			}
+		});
 
 		label = new JLabel("Tile origin (lat/lon):");
 		c = new GridBagConstraints();
@@ -1709,7 +1729,7 @@ public class Application implements UncaughtExceptionHandler
 							try
 							{
 								showPreviewLoading();
-								
+
 								File dst = File.createTempFile("preview", ".png");
 								dst.deleteOnExit();
 								MapnikUtil.tile(sector, previewCanvas.getWidth(), previewCanvas.getHeight(), false,
@@ -2078,6 +2098,7 @@ public class Application implements UncaughtExceptionHandler
 			float32Radio.setEnabled(standard);
 			jpegRadio.setEnabled(standard);
 			lztsField.setEnabled(standard);
+			optimalLztsButton.setEnabled(standard);
 			latitudeOriginField.setEnabled(standard);
 			longitudeOriginField.setEnabled(standard);
 			outsideCheck.setEnabled(standard && !mapnik);
@@ -2290,7 +2311,7 @@ public class Application implements UncaughtExceptionHandler
 			String outDirText = outputDirectory.getText();
 			File outDir = outDirText.length() == 0 ? null : new File(outDirText);
 
-			String info = GDALUtil.getTileText(dataset, sector, origin, lzts, levels, overviews);
+			String info = GDALUtil.getTileText(sector, origin, lzts, levels, overviews);
 			if (outDir == null)
 			{
 				info += System.getProperty("line.separator") + "Please select an output directory";

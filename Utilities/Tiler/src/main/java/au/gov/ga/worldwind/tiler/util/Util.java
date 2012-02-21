@@ -39,6 +39,18 @@ public class Util
 		int maxY = getTileY(sector.getMaxLatitude() - 1e-10, origin, level, lztsd);
 		return (maxX - minX + 1) * (maxY - minY + 1);
 	}
+	
+	public static double optimalLztsd(Dataset dataset, Sector sector, int tilesize, double closeLztsd)
+	{
+		double width = dataset.getRasterXSize();
+		double height = dataset.getRasterYSize();
+		double lonPixels = sector.getDeltaLongitude() / width;
+		double latPixels = sector.getDeltaLatitude() / height;
+		double texelSize = Math.min(latPixels, lonPixels);
+		double tileDegrees = texelSize * tilesize;
+		double level = Math.log10(closeLztsd / tileDegrees) / Math.log10(2);
+		return Math.pow(2, Math.round(level)) * tileDegrees;
+	}
 
 	public static int getTileX(double longitude, LatLon origin, int level, double lztsd)
 	{
