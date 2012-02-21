@@ -113,18 +113,8 @@ public class Tiler
 							new File(rowDir, Util.paddedInt(startY, 4) + "_" + Util.paddedInt(X, 4) + "." + outputExt);
 					if (dst.exists())
 					{
-						//Instead of (startX = X + 1), use X, so that it re-does the last tile done. This is
-						//because sometimes the last tile didn't completely save when the process was stopped.
-						startX = X;
+						startX = X + 1;
 					}
-				}
-
-				//for same reason as above, delete the last tile processed last time
-				final File dst =
-						new File(rowDir, Util.paddedInt(startY, 4) + "_" + Util.paddedInt(startX, 4) + "." + outputExt);
-				if (dst.exists())
-				{
-					dst.delete();
 				}
 			}
 		}
