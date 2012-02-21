@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.tiler.mask;
+package au.gov.ga.worldwind.dataprep;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

@@ -1,33 +1,26 @@
-package au.gov.ga.worldwind.tiler.mask;
+package au.gov.ga.worldwind.dataprep;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MaskZipper
 {
 	public static void main(String[] args)
 	{
-		/*File imageDir = new File("D:/Groundwater Data/layers/tiles/bh_spot2p5m_wgs84_ecw_tiles");
-		File maskDir = new File("D:/Groundwater Data/layers/tiles/bh_spot2p5m_wgs84_ecw_mask");
-		File outputDir = new File("D:/Groundwater Data/layers/tiles/bh_spot2p5m_wgs84_ecw");
+		File imageDir = new File("D:/ASTER/WA/Tiles/AlOH_GROUP_CONTENT_tiles");
+		File maskDir = new File("D:/ASTER/WA/Tiles/AlOH_GROUP_CONTENT_mask");
+		File outputDir = new File("D:/ASTER/WA/Tiles/AlOH_GROUP_CONTENT");
 		String imageExt = "jpg";
 		String maskExt = "png";
 		String outputExt = "zip";
-		zip(imageDir, imageExt, maskDir, maskExt, outputDir, outputExt);*/
+		zip(imageDir, imageExt, maskDir, maskExt, outputDir, outputExt);
 
 		/*File dir =
 				new File(
@@ -68,7 +61,7 @@ public class MaskZipper
 			}
 		}*/
 
-		File dir =
+		/*File dir =
 				new File(
 						"V:/projects/presentations/11-5902 - Broken Hill 3D model data visualisation/Source/AEM/depth_tif");
 		File template = new File(dir, "d000p0_000p5m.xml");
@@ -112,7 +105,7 @@ public class MaskZipper
 					}
 				}
 			}
-		}
+		}*/
 	}
 
 	public static void zip(File imageDir, String imageExt, File maskDir, String maskExt, File outputDir,

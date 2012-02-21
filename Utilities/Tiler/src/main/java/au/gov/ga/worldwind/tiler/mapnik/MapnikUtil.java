@@ -9,10 +9,10 @@ import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
-import au.gov.ga.worldwind.tiler.mask.MaskDeleter;
 import au.gov.ga.worldwind.tiler.util.InputStreamHandler;
 import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.TilerException;
+import au.gov.ga.worldwind.tiler.util.Util;
 
 public class MapnikUtil
 {
@@ -118,7 +118,7 @@ public class MapnikUtil
 			try
 			{
 				BufferedImage image = ImageIO.read(dst);
-				if (MaskDeleter.isEmpty(image))
+				if (Util.isEmpty(image))
 				{
 					dst.delete();
 				}

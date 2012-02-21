@@ -1,14 +1,19 @@
-package au.gov.ga.worldwind.tiler.zipper;
+package au.gov.ga.worldwind.dataprep;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class Zipper
 {
 	public static void main(String[] args)
 	{
-		File dir = new File("D:/Groundwater Data/layers/tiles/mos_dem_10box_ers_wgs84");
+		File dir = new File("V:/projects/presentations/11-5902 - Broken Hill 3D model data visualisation/Worldwind/layers/dem/mos_dem_10box_ers_wgs84");
 		String ext = "bil";
 		zipAndDelete(dir, ext);
 		//unzipAndDelete(dir);
@@ -36,7 +41,7 @@ public class Zipper
 				filename = filename.substring(0, filename.length() - ext.length()) + "zip";
 				File zip = new File(filename);
 
-				au.gov.ga.worldwind.tiler.util.Zipper.zip(file, zip);
+				zip(file, zip);
 
 				file.delete();
 			}
@@ -65,7 +70,7 @@ public class Zipper
 				System.out.println("Unzipping " + file + " (" + (i + 1) + "/" + files.size() + " - "
 						+ ((i + 1) * 100 / files.size()) + "%)");
 
-				au.gov.ga.worldwind.tiler.util.Zipper.unzip(file, file.getParentFile());
+				unzip(file, file.getParentFile());
 
 				file.delete();
 			}
@@ -92,6 +97,44 @@ public class Zipper
 					list.add(file);
 				}
 			}
+		}
+	}
+	
+	public static void zip(File input, File output) throws IOException, InterruptedException
+	{
+		String command =
+				"7za a -tzip \"" + output.getAbsolutePath() + "\" \"" + input.getAbsolutePath()
+						+ "\"";
+		Process process = Runtime.getRuntime().exec(command);
+		process.waitFor();
+	}
+	
+	public static void unzip(File input, File outputDir) throws IOException
+	{
+		byte[] buffer = new byte[10240];
+
+		ZipInputStream zis = null;
+		FileOutputStream fos = null;
+
+		try
+		{
+			zis = new ZipInputStream(new FileInputStream(input));
+			ZipEntry entry = zis.getNextEntry();
+			File output = new File(outputDir, entry.getName());
+			fos = new FileOutputStream(output);
+
+			int len;
+			while ((len = zis.read(buffer)) >= 0)
+			{
+				fos.write(buffer, 0, len);
+			}
+		}
+		finally
+		{
+			if (zis != null)
+				zis.close();
+			if (fos != null)
+				fos.close();
 		}
 	}
 }
