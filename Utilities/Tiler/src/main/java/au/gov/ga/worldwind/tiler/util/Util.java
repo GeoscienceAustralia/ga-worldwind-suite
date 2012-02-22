@@ -19,12 +19,33 @@ public class Util
 {
 	private static final long FIFTY_MB = 1024 * 1024 * 50;
 
+	/**
+	 * Replace any newlines in a string with the newline string stored in the
+	 * 'line.separator' system property.
+	 * 
+	 * @param s
+	 * @return
+	 */
 	public static String fixNewlines(String s)
 	{
 		String newLine = System.getProperty("line.separator");
 		return s.replaceAll("(\\r\\n)|(\\r)|(\\n)", newLine);
 	}
 
+	/**
+	 * Calculate the number of levels in a tileset generated using the given
+	 * parameters.
+	 * 
+	 * @param dataset
+	 *            Dataset to be tiled
+	 * @param lztd
+	 *            Level zero tile size (in degrees)
+	 * @param sector
+	 *            Sector to be tiled
+	 * @param tilesize
+	 *            Width/height of the tiles
+	 * @return Number of levels
+	 */
 	public static int levelCount(Dataset dataset, double lztd, Sector sector, int tilesize)
 	{
 		double width = dataset.getRasterXSize();
@@ -36,6 +57,20 @@ public class Util
 		return Math.max(level, 1);
 	}
 
+	/**
+	 * Calculate the number of tiles at a given level in a tileset tiled using
+	 * the given parameters.
+	 * 
+	 * @param sector
+	 *            Tileset extents
+	 * @param origin
+	 *            Origin of the tileset
+	 * @param level
+	 *            Level at which to calculate the tile count
+	 * @param lztsd
+	 *            Level zero tile size (in degrees)
+	 * @return Number of tiles in the tileset at the given level
+	 */
 	public static int tileCount(Sector sector, LatLon origin, int level, double lztsd)
 	{
 		int minX = getTileX(sector.getMinLongitude() + 1e-10, origin, level, lztsd);
@@ -45,6 +80,25 @@ public class Util
 		return (maxX - minX + 1) * (maxY - minY + 1);
 	}
 
+	/**
+	 * Calculate the optimal 'level zero tile size' (in degrees) for the given
+	 * parameters. The optimal lzts matches the resolution of the source dataset
+	 * to the resolution of the lowest level of the destination tileset. This
+	 * will ensure minimal magnification, and also produce the optimal number of
+	 * tiles, causing the tileset to be as compact as possible.
+	 * 
+	 * @param dataset
+	 *            Dataset to tile
+	 * @param sector
+	 *            Sector in which to tile
+	 * @param tilesize
+	 *            Width/height of each tile
+	 * @param closeLztsd
+	 *            Level zero tile size (in degrees) to try and match. The
+	 *            returned lzts is calculated to be as close to this parameter
+	 *            as possible.
+	 * @return Optimal lzts for the given parameters
+	 */
 	public static double optimalLztsd(Dataset dataset, Sector sector, int tilesize, double closeLztsd)
 	{
 		double width = dataset.getRasterXSize();
@@ -57,6 +111,15 @@ public class Util
 		return Math.pow(2, Math.round(level)) * tileDegrees;
 	}
 
+	/**
+	 * Calculate the tile x-coordinate (column) for the given longitude.
+	 * 
+	 * @param longitude
+	 * @param origin
+	 * @param level
+	 * @param lztsd
+	 * @return
+	 */
 	public static int getTileX(double longitude, LatLon origin, int level, double lztsd)
 	{
 		double layerpow = Math.pow(0.5, level);
@@ -64,6 +127,15 @@ public class Util
 		return (int) X;
 	}
 
+	/**
+	 * Calculate the tile y-coordinate (row) for the given latitude.
+	 * 
+	 * @param latitude
+	 * @param origin
+	 * @param level
+	 * @param lztsd
+	 * @return
+	 */
 	public static int getTileY(double latitude, LatLon origin, int level, double lztsd)
 	{
 		double layerpow = Math.pow(0.5, level);
@@ -71,6 +143,14 @@ public class Util
 		return (int) Y;
 	}
 
+	/**
+	 * Generate a string from the given integer, padded with zeros so that it is
+	 * at least 'charcount' in length.
+	 * 
+	 * @param value
+	 * @param charcount
+	 * @return
+	 */
 	public static String paddedInt(int value, int charcount)
 	{
 		String str = String.valueOf(value);
@@ -81,12 +161,12 @@ public class Util
 		return str;
 	}
 
-	public static int limitRange(int value, int min, int max)
+	public static int clamp(int value, int min, int max)
 	{
 		return Math.max(min, Math.min(max, value));
 	}
 
-	public static double limitRange(double value, double min, double max)
+	public static double clamp(double value, double min, double max)
 	{
 		return Math.max(min, Math.min(max, value));
 	}
@@ -109,7 +189,7 @@ public class Util
 	/**
 	 * From Apache Commons FileUtils
 	 * 
-	 * @see http
+	 * @see http 
 	 *      ://svn.apache.org/viewvc/commons/proper/io/trunk/src/main/java/org
 	 *      /apache/commons/io/FileUtils.java?view=markup
 	 */
@@ -126,7 +206,7 @@ public class Util
 	/**
 	 * From Apache Commons FileUtils
 	 * 
-	 * @see http
+	 * @see http 
 	 *      ://svn.apache.org/viewvc/commons/proper/io/trunk/src/main/java/org
 	 *      /apache/commons/io/FileUtils.java?view=markup
 	 */
@@ -169,7 +249,7 @@ public class Util
 	/**
 	 * From Apache Commons FileUtils
 	 * 
-	 * @see http
+	 * @see http 
 	 *      ://svn.apache.org/viewvc/commons/proper/io/trunk/src/main/java/org
 	 *      /apache/commons/io/FileUtils.java?view=markup
 	 */

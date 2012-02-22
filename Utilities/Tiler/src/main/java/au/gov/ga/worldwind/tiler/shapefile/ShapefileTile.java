@@ -222,8 +222,8 @@ public class ShapefileTile
 	 */
 	public Coordinate limitCoordinateWithinTile(Coordinate coordinate)
 	{
-		double x = Util.limitRange(coordinate.x, sector.getMinLongitude(), sector.getMaxLongitude());
-		double y = Util.limitRange(coordinate.y, sector.getMinLatitude(), sector.getMaxLatitude());
+		double x = Util.clamp(coordinate.x, sector.getMinLongitude(), sector.getMaxLongitude());
+		double y = Util.clamp(coordinate.y, sector.getMinLatitude(), sector.getMaxLatitude());
 		return new Coordinate(x, y);
 	}
 

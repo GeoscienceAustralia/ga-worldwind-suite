@@ -384,8 +384,8 @@ public class ShapefileTiler
 
 			//limit tile x/y on the edges
 			//(eg lon=180 will resolve to x=11 at level 0 lzts 36, but should be x=10)
-			x = Util.limitRange(x, min.x, min.x + size.width - 1);
-			y = Util.limitRange(y, min.y, min.y + size.height - 1);
+			x = Util.clamp(x, min.x, min.x + size.width - 1);
+			y = Util.clamp(y, min.y, min.y + size.height - 1);
 
 			int x0 = x - min.x;
 			int y0 = y - min.y;
@@ -418,8 +418,8 @@ public class ShapefileTiler
 					for (int j = 1; j < line.size() - 1; j++)
 					{
 						Point p = line.get(j);
-						p.x = Util.limitRange(p.x, min.x, min.x + size.width - 1);
-						p.y = Util.limitRange(p.y, min.y, min.y + size.height - 1);
+						p.x = Util.clamp(p.x, min.x, min.x + size.width - 1);
+						p.y = Util.clamp(p.y, min.y, min.y + size.height - 1);
 
 						int crossTileIndex = (p.y - min.y) * size.width + (p.x - min.x);
 						//ignore first and last
@@ -503,8 +503,8 @@ public class ShapefileTiler
 			int x = Util.getTileX(coordinate.x, origin, level, lzts);
 			int y = Util.getTileY(coordinate.y, origin, level, lzts);
 
-			x = Util.limitRange(x, min.x, min.x + size.width - 1);
-			y = Util.limitRange(y, min.y, min.y + size.height - 1);
+			x = Util.clamp(x, min.x, min.x + size.width - 1);
+			y = Util.clamp(y, min.y, min.y + size.height - 1);
 
 			//if tile has changed
 			if (X != null && X != x)
