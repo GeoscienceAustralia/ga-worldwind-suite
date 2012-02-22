@@ -20,9 +20,9 @@ public class MaskZipper
 {
 	public static void main(String[] args)
 	{
-		File imageDir = new File("D:/ASTER/WA/Tiles/FeOH_GROUP_CONTENT_tiles");
-		File maskDir = new File("D:/ASTER/WA/Tiles/FeOH_GROUP_CONTENT_mask");
-		File outputDir = new File("D:/ASTER/WA/Tiles/FeOH_GROUP_CONTENT");
+		File imageDir = new File("D:/ASTER/WA/Tiles/FERROUS_IRON_CONTENT_IN_MgOH_CONTENT_tiles");
+		File maskDir = new File("D:/ASTER/WA/Tiles/FERROUS_IRON_CONTENT_IN_MgOH_CONTENT_mask");
+		File outputDir = new File("D:/ASTER/WA/Tiles/FERROUS_IRON_CONTENT_IN_MgOH_CONTENT");
 		String imageExt = "jpg";
 		String maskExt = "png";
 		String outputExt = "zip";

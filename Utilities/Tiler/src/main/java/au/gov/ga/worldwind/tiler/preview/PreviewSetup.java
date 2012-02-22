@@ -30,12 +30,15 @@ import au.gov.ga.worldwind.tiler.util.JDoubleField;
 import au.gov.ga.worldwind.tiler.util.JIntegerField;
 import au.gov.ga.worldwind.tiler.util.Prefs;
 
-
+/**
+ * JFrame that displays the parameters for setting up the {@link Previewer}.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class PreviewSetup
 {
-	public PreviewSetup(JFrame parent, String directory, String extension,
-			boolean elevations, Integer type, Integer tilesize, Double nodata,
-			Double lzts)
+	public PreviewSetup(JFrame parent, String directory, String extension, boolean elevations, Integer type,
+			Integer tilesize, Double nodata, Double lzts)
 	{
 		initilize(parent);
 
@@ -134,16 +137,14 @@ public class PreviewSetup
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				JFileChooser chooser = new JFileChooser(preferences.get(
-						Application.OUTPUT_DIR_KEY, null));
+				JFileChooser chooser = new JFileChooser(preferences.get(Application.OUTPUT_DIR_KEY, null));
 				chooser.setAcceptAllFileFilterUsed(false);
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 				{
 					File dir = chooser.getSelectedFile();
 					directory.setText(dir.getAbsolutePath());
-					preferences.put(Application.OUTPUT_DIR_KEY, dir
-							.getAbsolutePath());
+					preferences.put(Application.OUTPUT_DIR_KEY, dir.getAbsolutePath());
 				}
 			}
 		});
@@ -379,11 +380,9 @@ public class PreviewSetup
 						throw new Exception("Directory field is blank");
 					File dir = new File(directory.getText());
 					if (!dir.exists())
-						throw new Exception("Directory does not exist: "
-								+ dir.getAbsolutePath());
+						throw new Exception("Directory does not exist: " + dir.getAbsolutePath());
 					if (lztsField.getValue() == null)
-						throw new Exception(
-								"Level Zero Tile Size field is blank");
+						throw new Exception("Level Zero Tile Size field is blank");
 
 					if (elevationRadio.isSelected())
 					{
@@ -392,15 +391,12 @@ public class PreviewSetup
 
 						int type = getElevationBufferType();
 						int tilesize = tilesizeField.getValue();
-						Double nodata = nodataCheck.isSelected() ? nodataField
-								.getValue() : null;
-						new Previewer(dir, "bil", type, tilesize, tilesize,
-								nodata, lztsField.getValue());
+						Double nodata = nodataCheck.isSelected() ? nodataField.getValue() : null;
+						new Previewer(dir, "bil", type, tilesize, tilesize, nodata, lztsField.getValue());
 					}
 					else
 					{
-						new Previewer(dir, getImageFormat(), lztsField
-								.getValue());
+						new Previewer(dir, getImageFormat(), lztsField.getValue());
 					}
 
 					frame.setVisible(false);
@@ -408,8 +404,7 @@ public class PreviewSetup
 				}
 				catch (Exception ex)
 				{
-					JOptionPane.showMessageDialog(frame, ex.getMessage(),
-							"Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -444,9 +439,8 @@ public class PreviewSetup
 
 	private int getElevationBufferType()
 	{
-		return byteRadio.isSelected() ? gdalconstConstants.GDT_Byte
-				: int16Radio.isSelected() ? gdalconstConstants.GDT_Int16
-						: int32Radio.isSelected() ? gdalconstConstants.GDT_Int32
-								: gdalconstConstants.GDT_Float32;
+		return byteRadio.isSelected() ? gdalconstConstants.GDT_Byte : int16Radio.isSelected()
+				? gdalconstConstants.GDT_Int16 : int32Radio.isSelected() ? gdalconstConstants.GDT_Int32
+						: gdalconstConstants.GDT_Float32;
 	}
 }

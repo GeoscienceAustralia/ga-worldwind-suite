@@ -20,6 +20,8 @@ import com.beust.jcommander.converters.FileConverter;
 
 /**
  * Contains the contextual information for a ribbon tiling job
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class RibbonTilingContext {
 

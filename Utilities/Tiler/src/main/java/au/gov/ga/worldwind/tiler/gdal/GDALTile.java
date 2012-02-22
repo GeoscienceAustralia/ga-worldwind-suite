@@ -32,10 +32,17 @@ import au.gov.ga.worldwind.tiler.util.NullableNumberArray;
 import au.gov.ga.worldwind.tiler.util.NumberArray;
 import au.gov.ga.worldwind.tiler.util.TilerException;
 
+/**
+ * The heart of the Tiler. Represents a single tile of a GDAL dataset.
+ * Implements reading a subset of the dataset into a {@link ByteBuffer}, and
+ * converting the tile to an image.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class GDALTile
 {
-	// TODO test with various datatypes:
-	// So far, only really tested with 3 and 4 band image datasets and 1 band DEMs
+	// TODO test with more datatypes:
+	// So far, only really tested with 3 and 4 band image datasets and 1 band DEMs.
 
 	private final GDALTileParameters parameters;
 
@@ -59,7 +66,9 @@ public class GDALTile
 		if (parameters.sector != null
 				&& (parameters.sector.getMinLatitude() >= parameters.sector.getMaxLatitude() || parameters.sector
 						.getMinLongitude() >= parameters.sector.getMaxLongitude()))
-			throw new IllegalArgumentException();
+		{
+			throw new IllegalArgumentException("Invalid sector");
+		}
 
 		this.parameters = parameters;
 		readDataset();
@@ -527,62 +536,6 @@ public class GDALTile
 				}
 			}
 		}
-
-		/*for (int b = 0; b < bands; b++)
-		{
-			src.position(srcBandSize * b);
-			dst
-					.position(b * dstBandSize + (dstRect.x + dstRect.y * dstSize.width)
-							* bufferTypeSize);
-			ByteBuffer ss = src.slice();
-			ByteBuffer ds = dst.slice();
-			ss.order(src.order());
-			ds.order(dst.order());
-
-			for (int y = 0; y < dstRect.height; y++)
-			{
-				double mixY = srcRect.getHeight() * y / dstRect.getHeight();
-				int srcY = (int) Math.floor(mixY);
-				mixY -= srcY;
-
-				ds.position(y * dstStride);
-
-				for (int x = 0; x < dstRect.width; x++)
-				{
-					double mixX = srcRect.getWidth() * x / dstRect.getWidth();
-					int srcX = (int) Math.floor(mixX);
-					mixX -= srcX;
-
-					int i0 = srcY * srcStride + srcX * bufferTypeSize;
-					int i1 = srcX < srcRect.width - 1 ? i0 + bufferTypeSize : i0;
-					int i2 = srcY < srcRect.height - 1 ? i0 + srcStride : i0;
-					int i3 = srcX < srcRect.width - 1 ? i2 + bufferTypeSize : i2;
-
-					if (isFloat)
-					{
-						double s0 = getDoubleValue(i0, ss, bufferType);
-						double s1 = getDoubleValue(i1, ss, bufferType);
-						double s2 = getDoubleValue(i2, ss, bufferType);
-						double s3 = getDoubleValue(i3, ss, bufferType);
-						double mixed =
-								s0 * (1.0 - mixX) * (1.0 - mixY) + s1 * mixX * (1.0 - mixY) + s2
-										* (1.0 - mixX) * mixY + s3 * mixX * mixY;
-						putDoubleValue(ds, bufferType, mixed);
-					}
-					else
-					{
-						long s0 = getLongValue(i0, ss, bufferType);
-						long s1 = getLongValue(i1, ss, bufferType);
-						long s2 = getLongValue(i2, ss, bufferType);
-						long s3 = getLongValue(i3, ss, bufferType);
-						long mixed =
-								(long) (s0 * (1.0 - mixX) * (1.0 - mixY) + s1 * mixX * (1.0 - mixY)
-										+ s2 * (1.0 - mixX) * mixY + s3 * mixX * mixY);
-						putLongValue(ds, bufferType, mixed);
-					}
-				}
-			}
-		}*/
 	}
 
 	public static boolean isTypeFloatingPoint(int bufferType)

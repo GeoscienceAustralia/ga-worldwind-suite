@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.tiler.preview;
 
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -29,25 +28,18 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
 
 import au.gov.ga.worldwind.tiler.gdal.GDALTile;
-import au.gov.ga.worldwind.tiler.util.Util;
 import au.gov.ga.worldwind.tiler.util.FileFilters.DirectoryFileFilter;
+import au.gov.ga.worldwind.tiler.util.Util;
 
-
+/**
+ * JFrame which provides the ability to preview tilesets.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Previewer extends JFrame
 {
-	public static void main(String[] args) throws Exception
-	{
-		File directory = new File("C:/WINNT/Profiles/u97852/Desktop/bathy");
-		new Previewer(directory, "bil", gdalconst.GDT_Float32, 150, 150, 0d,
-				20d);
-		/*File directory = new File(
-				"S:/resources/images/world-wind/radiometrics/radio_KThU_100m_he_rgb");
-		new Previewer(directory, "jpg", 36d);*/
-	}
-
 	private File directory;
 	private String extension;
 	private double lzts;
@@ -61,8 +53,7 @@ public class Previewer extends JFrame
 
 	private BufferedImage[] images;
 	private String[] labels;
-	private int xpos = 0, ypos = 0, xposOld = Integer.MAX_VALUE,
-			yposOld = Integer.MAX_VALUE;
+	private int xpos = 0, ypos = 0, xposOld = Integer.MAX_VALUE, yposOld = Integer.MAX_VALUE;
 	private int level = 0, levelOld = Integer.MAX_VALUE;
 	private int minlevel, maxlevel;
 	private int xCount, yCount;
@@ -78,8 +69,8 @@ public class Previewer extends JFrame
 		initilize();
 	}
 
-	public Previewer(File directory, String extension, int elevationDataType,
-			int width, int height, Double nodata, double lzts)
+	public Previewer(File directory, String extension, int elevationDataType, int width, int height, Double nodata,
+			double lzts)
 	{
 		this.elevations = true;
 		this.directory = directory;
@@ -121,8 +112,7 @@ public class Previewer extends JFrame
 
 				if (e.isControlDown())
 				{
-					int index = (tileY - ypos + 1) * (xCount + 2)
-							+ (tileX - xpos + 1);
+					int index = (tileY - ypos + 1) * (xCount + 2) + (tileX - xpos + 1);
 					JDialog dialog = new ImageView(images[index]);
 					dialog.setSize(800, 800);
 					dialog.setVisible(true);
@@ -226,8 +216,7 @@ public class Previewer extends JFrame
 
 	private void loadImages()
 	{
-		setTitle("World Wind Tile Previewer - Level " + level + ", Position ("
-				+ xpos + "," + ypos + ")");
+		setTitle("World Wind Tile Previewer - Level " + level + ", Position (" + xpos + "," + ypos + ")");
 
 		if (level == levelOld && xpos == xposOld && ypos == yposOld)
 			return;
@@ -244,9 +233,9 @@ public class Previewer extends JFrame
 		{
 			int deltax = xpos - xposOld;
 			int deltay = ypos - yposOld;
-			dontReload = new Rectangle(Math.max(-deltax, 0), Math.max(-deltay,
-					0), Math.max(xCount - Math.abs(deltax) + 2, 0), Math.max(
-					yCount - Math.abs(deltay) + 2, 0));
+			dontReload =
+					new Rectangle(Math.max(-deltax, 0), Math.max(-deltay, 0),
+							Math.max(xCount - Math.abs(deltax) + 2, 0), Math.max(yCount - Math.abs(deltay) + 2, 0));
 
 			if (!dontReload.isEmpty())
 			{
@@ -255,12 +244,10 @@ public class Previewer extends JFrame
 
 				for (int y = dontReload.y; y < dontReload.height + dontReload.y; y++)
 				{
-					for (int x = dontReload.x; x < dontReload.width
-							+ dontReload.x; x++)
+					for (int x = dontReload.x; x < dontReload.width + dontReload.x; x++)
 					{
 						int indexNew = x + y * (xCount + 2);
-						int indexOld = (x + deltax) + (y + deltay)
-								* (xCount + 2);
+						int indexOld = (x + deltax) + (y + deltay) * (xCount + 2);
 						imagesNew[indexNew] = images[indexOld];
 						labelsNew[indexNew] = labels[indexOld];
 					}
@@ -289,8 +276,7 @@ public class Previewer extends JFrame
 					labels[index] = X + "," + Y;
 
 					File rowDir = new File(levelDir, Util.paddedInt(Y, 4));
-					File file = new File(rowDir, Util.paddedInt(Y, 4) + "_"
-							+ Util.paddedInt(X, 4) + "." + extension);
+					File file = new File(rowDir, Util.paddedInt(Y, 4) + "_" + Util.paddedInt(X, 4) + "." + extension);
 					images[index] = null;
 					if (file.exists())
 					{
@@ -343,11 +329,9 @@ public class Previewer extends JFrame
 			{
 				for (int x = 0; x < drawRect.width; x += transparentSquareSize)
 				{
-					if ((x / transparentSquareSize % 2 == 0)
-							^ (y / transparentSquareSize % 2 == 0))
+					if ((x / transparentSquareSize % 2 == 0) ^ (y / transparentSquareSize % 2 == 0))
 					{
-						g2.fillRect(x, y, transparentSquareSize,
-								transparentSquareSize);
+						g2.fillRect(x, y, transparentSquareSize, transparentSquareSize);
 					}
 				}
 			}
@@ -378,10 +362,8 @@ public class Previewer extends JFrame
 					if (labels[index] != null)
 					{
 						g2.setColor(Color.black);
-						int stringWidth = g2.getFontMetrics().stringWidth(
-								labels[index]);
-						g2.drawString(labels[index], x1 + w / 2 - stringWidth
-								/ 2, y1 + h / 2);
+						int stringWidth = g2.getFontMetrics().stringWidth(labels[index]);
+						g2.drawString(labels[index], x1 + w / 2 - stringWidth / 2, y1 + h / 2);
 					}
 
 					index++;
@@ -445,17 +427,13 @@ public class Previewer extends JFrame
 			{
 				double value = getBufferValue(bb);
 				bytes[i] = (byte) (255d * (value - min) / (max - min));
-				bytes[i + pixels] = (byte) (nodata != null && value == nodata ? 0
-						: 255);
+				bytes[i + pixels] = (byte) (nodata != null && value == nodata ? 0 : 255);
 			}
 
 			DataBuffer dataBuffer = new DataBufferByte(bytes, bytes.length);
-			SampleModel sampleModel = new ComponentSampleModel(
-					DataBuffer.TYPE_BYTE, width, height, 1, width, offsets);
-			WritableRaster raster = Raster.createWritableRaster(sampleModel,
-					dataBuffer, null);
-			BufferedImage image = new BufferedImage(width, height,
-					BufferedImage.TYPE_INT_ARGB);
+			SampleModel sampleModel = new ComponentSampleModel(DataBuffer.TYPE_BYTE, width, height, 1, width, offsets);
+			WritableRaster raster = Raster.createWritableRaster(sampleModel, dataBuffer, null);
+			BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 			image.setData(raster);
 			return image;
 		}
@@ -521,11 +499,9 @@ public class Previewer extends JFrame
 			{
 				for (int x = 0; x < drawRect.width; x += transparentSquareSize)
 				{
-					if ((x / transparentSquareSize % 2 == 0)
-							^ (y / transparentSquareSize % 2 == 0))
+					if ((x / transparentSquareSize % 2 == 0) ^ (y / transparentSquareSize % 2 == 0))
 					{
-						g2.fillRect(x, y, transparentSquareSize,
-								transparentSquareSize);
+						g2.fillRect(x, y, transparentSquareSize, transparentSquareSize);
 					}
 				}
 			}

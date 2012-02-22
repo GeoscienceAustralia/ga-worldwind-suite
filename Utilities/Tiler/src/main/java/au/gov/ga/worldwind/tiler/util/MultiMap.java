@@ -4,6 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * {@link HashMap} subclass that supports adding multiple values for a single
+ * key.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * 
+ * @param <K>
+ *            Key class
+ * @param <V>
+ *            Value class
+ */
 public class MultiMap<K, V> extends HashMap<K, List<V>>
 {
 	public void putSingle(K key, V value)

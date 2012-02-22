@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.tiler.application;
+package jargs.gnu;
 
 import java.text.NumberFormat;
 import java.text.ParseException;

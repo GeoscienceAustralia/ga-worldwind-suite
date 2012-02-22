@@ -1,5 +1,10 @@
 package au.gov.ga.worldwind.tiler.util;
 
+/**
+ * Represents a number array.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class NumberArray
 {
 	private long[] longs;
@@ -10,7 +15,7 @@ public class NumberArray
 		longs = new long[length];
 		doubles = new double[length];
 	}
-	
+
 	public int length()
 	{
 		return longs.length;
@@ -81,7 +86,7 @@ public class NumberArray
 		longs[i] = (long) v;
 		doubles[i] = v;
 	}
-	
+
 	public String toString(boolean isFloat)
 	{
 		String s = "(";

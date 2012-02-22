@@ -13,6 +13,12 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
+/**
+ * {@link Logger} subclass that supports logging to a {@link StyledDocument},
+ * using different {@link Color}s for the different logging {@link Level}s.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class DocumentLogger extends Logger
 {
 	private StyledDocument document;
@@ -26,8 +32,7 @@ public class DocumentLogger extends Logger
 
 	private void setupLogStyles()
 	{
-		Style def = StyleContext.getDefaultStyleContext().getStyle(
-				StyleContext.DEFAULT_STYLE);
+		Style def = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 
 		Style regular = document.addStyle(Level.ALL.getName(), def);
 		StyleConstants.setFontFamily(def, "SansSerif");

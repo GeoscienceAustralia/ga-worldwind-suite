@@ -20,6 +20,12 @@ import com.vividsolutions.jump.feature.FeatureCollection;
 import com.vividsolutions.jump.feature.FeatureDataset;
 import com.vividsolutions.jump.feature.FeatureSchema;
 
+/**
+ * A subtile of a shapefile which contains all the geometry of a shapefile
+ * within a certain sector.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ShapefileTile
 {
 	public final int row;
@@ -56,8 +62,23 @@ public class ShapefileTile
 	//x = longitude
 	//y = latitude
 
-	public void addCoordinate(int shapeId, Coordinate coordinate, boolean entry, boolean exit,
-			Attributes attributes)
+	/**
+	 * Add a new coordinate to the current shape. If the shapeId is different
+	 * from the current shape's id or this coordinate is entering this tile, a
+	 * new shape is started.
+	 * 
+	 * @param shapeId
+	 *            Id of the shape that this coordinate is a part of
+	 * @param coordinate
+	 *            Coordinate to add
+	 * @param entry
+	 *            Is this coordinate entering this tile?
+	 * @param exit
+	 *            Is this coordinate exiting this tile?
+	 * @param attributes
+	 *            Shape attributes
+	 */
+	public void addCoordinate(int shapeId, Coordinate coordinate, boolean entry, boolean exit, Attributes attributes)
 	{
 		//create a new pointset if:
 		// - the record has entered the tile (each entry creates a new shape)
@@ -69,14 +90,18 @@ public class ShapefileTile
 		if (entry || newShapeId)
 		{
 			if (newShapeId)
+			{
 				startPointsIndex = records.size();
+			}
 
 			current = new TileRecord(shapeId, entry, attributes);
 			records.add(current);
 
 			//if this shape was not created by a record entering the tile, then a 'noEntryShapeExists'
 			if (!entry)
+			{
 				noEntryShapeExists = true;
+			}
 		}
 
 		if (exit)
@@ -88,22 +113,34 @@ public class ShapefileTile
 		current.coordinates.add(coordinate);
 	}
 
+	/**
+	 * Add a hole to the current shape. The hole must be fully within both the
+	 * current shape and this tile's sector.
+	 * 
+	 * @param points
+	 *            Points involved in the hole
+	 * @param attributes
+	 *            Shape attributes
+	 */
 	public void addHole(List<Coordinate> points, Attributes attributes)
 	{
 		if (current == null)
-			throw new IllegalStateException("Cannot add hole to " + this
-					+ ", as it has no current shape");
+			throw new IllegalStateException("Cannot add hole to " + this + ", as it has no current shape");
 
 		TileRecord hole = new TileRecord(-1, false, attributes, points);
 		current.holes.add(hole);
 	}
 
-	public void joinOrphanPolygons(int shapeId, ProgressReporter progress)
+	/**
+	 * Polygons must either be fully contained in the tile, or both enter AND
+	 * exit. If a pointset enters but not exits, there MUST be another pointset
+	 * that exits but not enters. Join these two pointsets (they will share a
+	 * end point).
+	 * 
+	 * @param progress
+	 */
+	public void joinOrphanPolygons(ProgressReporter progress)
 	{
-		//Polygons must either be fully contained in the tile, or both enter AND exit.
-		//If a pointset enters but not exits, there MUST be another pointset that exits
-		//but not enters. Join these two pointsets (they will share a end point).
-
 		if (noEntryShapeExists)
 		{
 			int noExitIndex = -1, noEntryIndex = -1;
@@ -133,8 +170,7 @@ public class ShapefileTile
 				int start = 1;
 				if (!p1.equals(p2))
 				{
-					progress.getLogger().warning(
-							"First entry Coordinate doesn't join up with last exit point");
+					progress.getLogger().warning("First entry Coordinate doesn't join up with last exit point");
 					start = 0;
 				}
 
@@ -153,45 +189,89 @@ public class ShapefileTile
 		}
 	}
 
+	/**
+	 * Mark this tile as fully filled (ie inside a polygon).
+	 * 
+	 * @param attributes
+	 *            Attributes of the polygon that this tile is inside
+	 */
 	public void markFilled(Attributes attributes)
 	{
 		filled = true;
 		filledAttributes = attributes;
 	}
 
+	/**
+	 * Does this tile's sector contain the given coordinate?
+	 * 
+	 * @param coordinate
+	 * @return True if coordinate is inside this tile's sector
+	 */
 	public boolean contains(Coordinate coordinate)
 	{
 		return sector.containsPoint(coordinate.y, coordinate.x);
 	}
 
+	/**
+	 * Limit the given coordinate's latitude/longitude to be within this tile's
+	 * sector.
+	 * 
+	 * @param coordinate
+	 *            Coordinate to limit
+	 * @return coordinate limited to this tile's sector
+	 */
 	public Coordinate limitCoordinateWithinTile(Coordinate coordinate)
 	{
-		double x =
-				Util.limitRange(coordinate.x, sector.getMinLongitude(), sector.getMaxLongitude());
+		double x = Util.limitRange(coordinate.x, sector.getMinLongitude(), sector.getMaxLongitude());
 		double y = Util.limitRange(coordinate.y, sector.getMinLatitude(), sector.getMaxLatitude());
 		return new Coordinate(x, y);
 	}
 
+	/**
+	 * @return Tile's sector's delta latitude in degrees
+	 */
 	public double deltaLatitude()
 	{
 		return sector.getDeltaLatitude();
 	}
 
+	/**
+	 * @return Tile's sector's delta longitude in degrees
+	 */
 	public double deltaLongitude()
 	{
 		return sector.getDeltaLongitude();
 	}
 
+	/**
+	 * Fraction of the given coordinate's latitude within the tile's sector's
+	 * latitude span
+	 * 
+	 * @param coordinate
+	 * @return
+	 */
 	public double latitudeFract(Coordinate coordinate)
 	{
 		return (coordinate.y - sector.getMinLatitude()) / deltaLatitude();
 	}
 
+	/**
+	 * Fraction of the given coordinate's longitude within the tile's sector's
+	 * longitude span
+	 * 
+	 * @param coordinate
+	 * @return
+	 */
 	public double longitudeFract(Coordinate coordinate)
 	{
 		return (coordinate.x - sector.getMinLongitude()) / deltaLongitude();
 	}
 
+	/**
+	 * Join any exits to their neighbouring entries, moving clockwise around the
+	 * sector. If an exit is on a different side to it's corresponding entry,
+	 * add the sector corner points between the two points when joining.
+	 */
 	public void completePolygons()
 	{
 		Map<EntryExit, TileRecord> pointMap = new HashMap<EntryExit, TileRecord>();
@@ -294,6 +374,9 @@ public class ShapefileTile
 		}
 	}
 
+	/**
+	 * Fill the tile's sector with a square polygon.
+	 */
 	protected void fillSector()
 	{
 		TileRecord current = new TileRecord(-1, false, filledAttributes);
@@ -304,6 +387,17 @@ public class ShapefileTile
 			current.coordinates.add(c);
 	}
 
+	/**
+	 * Add the sector's corner points that lie between the entry and exit points
+	 * (in a clockwise direction) to the given record.
+	 * 
+	 * @param addTo
+	 *            Record to add corner points to
+	 * @param entry
+	 *            Entry point
+	 * @param exit
+	 *            Exit point
+	 */
 	protected void addCornerPoints(TileRecord addTo, Coordinate entry, Coordinate exit)
 	{
 		if (entry.equals(exit))
@@ -332,362 +426,18 @@ public class ShapefileTile
 		}
 	}
 
-	/*public void enterShape(int shapeId, Coordinate outsidePoint, Coordinate insidePoint,
-			Attributes attributes)
-	{
-		updateCurrentShapeIfRequired(shapeId, true, attributes);
-
-		Coordinate edge = edgePoint(outsidePoint, insidePoint, sector);
-		current.coordinates.add(edge);
-		current.coordinates.add(insidePoint);
-	}
-
-	public void continueShape(int shapeId, Coordinate insidePoint, Attributes attributes)
-	{
-		updateCurrentShapeIfRequired(shapeId, false, attributes);
-
-		current.coordinates.add(insidePoint);
-	}
-
-	public void exitShape(int shapeId, Coordinate insidePoint, Coordinate outsidePoint)
-	{
-		Coordinate edge = edgePoint(insidePoint, outsidePoint, sector);
-		current.coordinates.add(edge);
-		current.exited = true;
-	}
-
-	public boolean crossShape(int shapeId, Coordinate fromPoint1, Coordinate toPoint2,
-			Attributes attributes)
-	{
-		Coordinate minXminY = new Coordinate(sector.getMinLongitude(), sector.getMinLatitude());
-		Coordinate minXmaxY = new Coordinate(sector.getMinLongitude(), sector.getMaxLatitude());
-		Coordinate maxXminY = new Coordinate(sector.getMaxLongitude(), sector.getMinLatitude());
-		Coordinate maxXmaxY = new Coordinate(sector.getMaxLongitude(), sector.getMaxLatitude());
-
-		Coordinate minXintersect =
-				lineSegmentIntersection(fromPoint1, toPoint2, minXminY, minXmaxY);
-		Coordinate minYintersect =
-				lineSegmentIntersection(fromPoint1, toPoint2, minXminY, maxXminY);
-		Coordinate maxXintersect =
-				lineSegmentIntersection(fromPoint1, toPoint2, maxXminY, maxXmaxY);
-		Coordinate maxYintersect =
-				lineSegmentIntersection(fromPoint1, toPoint2, minXmaxY, maxXmaxY);
-		Coordinate[] intersects =
-				new Coordinate[] { minXintersect, minYintersect, maxXintersect, maxYintersect };
-
-		int count = 0;
-		Coordinate[] notNull = new Coordinate[2];
-		for (Coordinate p : intersects)
-		{
-			if (p != null)
-			{
-				if (count < 2)
-					notNull[count] = p;
-				count++;
-			}
-		}
-
-		//if more or less than two intersections were found, then the line either
-		//doesn't cross this shape or something strange has happened, so return false
-		if (count != 2)
-			return false;
-
-		if (fromPoint1.distance(notNull[0]) > fromPoint1.distance(notNull[1]))
-		{
-			Coordinate temp = notNull[0];
-			notNull[0] = notNull[1];
-			notNull[1] = temp;
-		}
-
-		updateCurrentShapeIfRequired(shapeId, true, attributes);
-		current.coordinates.add(notNull[0]);
-		current.coordinates.add(notNull[1]);
-		current.exited = true;
-		return true;
-	}*/
-
-	/*private static Coordinate lineSegmentIntersection(Coordinate p1, Coordinate p2, Coordinate p3,
-			Coordinate p4)
-	{
-		double ud = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
-
-		//lines are parallel (don't care about coincident lines)
-		if (ud == 0)
-			return null;
-
-		double uan = (p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x);
-		double ubn = (p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x);
-		double ua = uan / ud;
-		double ub = ubn / ud;
-
-		//intersection is not within the line segments
-		if (ua < 0 || 1 < ua || ub < 0 || 1 < ub)
-			return null;
-
-		double x = p1.x + ua * (p2.x - p1.x);
-		double y = p1.y + ua * (p2.y - p1.y);
-		return new Coordinate(x, y);
-	}*/
-
-	/*private void updateCurrentShapeIfRequired(int shapeId, boolean entered, Attributes attributes)
-	{
-		//create a new pointset if:
-		// - the record has entered the tile (each entry creates a new shape)
-		// - no current pointset exists (continueShape is called without an enter)
-		// - the shape id is different (a new shape has started, through continueShape without an enter)
-
-		boolean newShapeId = current == null || current.shapeId != shapeId;
-
-		if (entered || newShapeId)
-		{
-			if (newShapeId)
-				startPointsIndex = records.size();
-
-			current = new TileRecord(shapeId, entered, attributes);
-			records.add(current);
-
-			//if this shape was not created by a record entering the tile, then a 'noEntryShapeExists'
-			if (!entered)
-				noEntryShapeExists = true;
-		}
-	}*/
-
 	/**
-	 * Returns a Coordinate on the edge of the sector that exists on the line
-	 * between p1 and p2. One of p1 or p2 must be inside the sector.
+	 * Create Shapefile records for this tile.
+	 * 
+	 * @param factory
+	 * @param schema
+	 * @param polygon
+	 *            Should the features created be marked as polygons? Otherwise
+	 *            linestrings are created.
+	 * @return {@link FeatureCollection} containing all the records in this
+	 *         tile.
 	 */
-	/*private static Coordinate edgePoint(Coordinate p1, Coordinate p2, Sector sector)
-	{
-		double minX = Math.min(p1.x, p2.x);
-		double maxX = Math.max(p1.x, p2.x);
-		double minY = Math.min(p1.y, p2.y);
-		double maxY = Math.max(p1.y, p2.y);
-
-		double yOfMinX = minX == p1.x ? p1.y : p2.y;
-		double yOfMaxX = maxX == p1.x ? p1.y : p2.y;
-		double xOfMinY = minY == p1.y ? p1.x : p2.x;
-		double xOfMaxY = maxY == p1.y ? p1.x : p2.x;
-
-		boolean crossMinLon = minX <= sector.getMinLongitude() && sector.getMinLongitude() <= maxX;
-		boolean crossMaxLon = minX <= sector.getMaxLongitude() && sector.getMaxLongitude() <= maxX;
-		boolean crossMinLat = minY <= sector.getMinLatitude() && sector.getMinLatitude() <= maxY;
-		boolean crossMaxLat = minY <= sector.getMaxLatitude() && sector.getMaxLatitude() <= maxY;
-		boolean crossLon = crossMinLon || crossMaxLon;
-		boolean crossLat = crossMinLat || crossMaxLat;
-
-		if (crossLon && crossLat)
-		{
-			//line is crossing two boundaries, find the actual crossing point
-
-			double lonCrossing = crossMinLon ? sector.getMinLongitude() : sector.getMaxLongitude();
-			double xpos = (lonCrossing - minX) / (maxX - minX);
-			double crossY = yOfMinX + xpos * (yOfMaxX - yOfMinX);
-			if (sector.getMinLatitude() <= crossY && crossY <= sector.getMaxLatitude())
-			{
-				return new Coordinate(lonCrossing, crossY);
-			}
-			else
-			{
-				crossMinLon = crossMaxLon = false;
-				crossMinLat = crossY < sector.getMinLatitude();
-				crossMaxLat = !crossMinLat;
-			}
-		}
-
-		if (crossMinLon || crossMaxLon)
-		{
-			double lonCrossing = crossMinLon ? sector.getMinLongitude() : sector.getMaxLongitude();
-			double xpos = (lonCrossing - minX) / (maxX - minX);
-			double crossY = yOfMinX + xpos * (yOfMaxX - yOfMinX);
-			return new Coordinate(lonCrossing, crossY);
-		}
-		else
-		{
-			double latCrossing = crossMinLat ? sector.getMinLatitude() : sector.getMaxLatitude();
-			double ypos = (latCrossing - minY) / (maxY - minY);
-			double crossX = xOfMinY + ypos * (xOfMaxY - xOfMinY);
-			return new Coordinate(crossX, latCrossing);
-		}
-	}*/
-
-	/*public void completePolygons()
-	{
-		Map<EntryExit, TileRecord> pointMap = new HashMap<EntryExit, TileRecord>();
-		Map<TileRecord, EntryExit> reverseExitMap = new HashMap<TileRecord, EntryExit>();
-		List<EntryExit> entryExits = new ArrayList<EntryExit>();
-
-		for (TileRecord p : records)
-		{
-			if (p.entered && p.exited)
-			{
-				Coordinate en = p.coordinates.get(0);
-				Coordinate ex = p.coordinates.get(p.coordinates.size() - 1);
-
-				EntryExit entry = new EntryExit(en, centroid, true);
-				EntryExit exit = new EntryExit(ex, centroid, false);
-
-				pointMap.put(entry, p);
-				pointMap.put(exit, p);
-				reverseExitMap.put(p, exit);
-				entryExits.add(entry);
-				entryExits.add(exit);
-			}
-		}
-
-		//no polygons have entered/exited this tile's sector's edges
-		if (entryExits.isEmpty())
-		{
-			//if this tile's sector is inside a polygon, then fill the entire sector
-			//(if it is inside a polygon, but there are some entry/exits, then the code
-			//below will fill the sector properly)
-			if (filled)
-			{
-				fillSector();
-			}
-			return;
-		}
-
-		//sort the list and ensure entry's/exit's alternate
-		sortEntryExitList(entryExits);
-
-		int firstExit = entryExits.get(0).isExit() ? 0 : 1;
-		for (int i = firstExit; i < entryExits.size(); i += 2)
-		{
-			EntryExit exit = entryExits.get(i);
-			EntryExit entry = entryExits.get((i + 1) % entryExits.size());
-
-			if (exit.isEntry() || entry.isExit())
-			{
-				throw new IllegalStateException(
-						"Exit/Entry points don't alternate clockwise around the tile's sector");
-			}
-
-			//join curves from exit to entry
-
-			TileRecord exitPoints = pointMap.remove(exit);
-			TileRecord entryPoints = pointMap.remove(entry);
-
-			//add any required sector corner points clockwise from exit to entry
-			addCornerPoints(exitPoints, entry.coordinate, exit.coordinate, sector);
-
-			if (exitPoints == entryPoints)
-			{
-				//same pointset, so do nothing
-			}
-			else
-			{
-				//add all points from entry points to the start of the exit points
-				exitPoints.coordinates.addAll(entryPoints.coordinates);
-				//remove the entry points from the points list
-				records.remove(entryPoints);
-
-				//because we removed entryPoints from the list, exitPoints now becomes
-				//the mapped value for the entryPoints' exit point
-				EntryExit entrysExit = reverseExitMap.get(entryPoints);
-				pointMap.put(entrysExit, exitPoints);
-				reverseExitMap.put(exitPoints, entrysExit);
-			}
-		}
-	}
-
-	private static void sortEntryExitList(List<EntryExit> list)
-	{
-		//sort entry/exit points in clockwise order
-		Collections.sort(list);
-
-		//Now if the shapefile is valid, the list should alternate in entry/exit order.
-		//However, if entry/exit points are the same, the list may not alternate.
-		//Now check the list for this case.
-
-		//first check to see if the bulk of the exits are in even or odd indices
-		int evenExits = 0, oddExits = 0;
-		for (int i = 0; i < list.size(); i++)
-		{
-			EntryExit p = list.get(i);
-			if (p.isExit())
-			{
-				//if this Coordinate is the same as the Coordinate either side of it, then
-				//don't let it count toward even/odd weight
-				if (i > 0 && p.coordinate.equals(list.get(i - 1).coordinate))
-					continue;
-				if (i < list.size() - 1 && p.coordinate.equals(list.get(i + 1).coordinate))
-					continue;
-
-				if (i % 2 == 0)
-					evenExits++;
-				else
-					oddExits++;
-			}
-		}
-
-		//now swap any entries/exits that are the same but in the incorrect spot
-		int start = evenExits > oddExits ? 0 : 1;
-		for (int i = start; i < list.size(); i += 2)
-		{
-			EntryExit current = list.get(i);
-			if (!current.isExit())
-			{
-				boolean swapped = moveEntryIfEqualToExit(list, i, -1);
-				if (!swapped)
-					swapped = moveEntryIfEqualToExit(list, i, 1);
-			}
-		}
-	}
-
-	private static boolean moveEntryIfEqualToExit(List<EntryExit> list, int index, int offset)
-	{
-		if (index >= 0 && index + offset >= 0 && index < list.size()
-				&& index + offset < list.size())
-		{
-			EntryExit p1 = list.get(index);
-			EntryExit p2 = list.get(index + offset);
-			if (p2.isExit() && p2.coordinate.equals(p1.coordinate))
-			{
-				list.remove(index);
-				list.add(index + offset, p1);
-			}
-		}
-		return false;
-	}
-
-	private static void addCornerPoints(TileRecord addTo, Coordinate entry, Coordinate exit,
-			Sector sector)
-	{
-		if (entry.equals(exit))
-			return;
-
-		double enX = entry.x - sector.getCenterLongitude();
-		double enY = entry.y - sector.getCenterLatitude();
-		double exX = exit.x - sector.getCenterLongitude();
-		double exY = exit.y - sector.getCenterLatitude();
-
-		//negative atan2 for clockwise direction
-		double entryAngle = -Math.atan2(enY, enX);
-		double exitAngle = -Math.atan2(exY, exX);
-
-		double twoPI = Math.PI * 2d; //360 degrees
-		double halfPI = Math.PI * 0.5d; //90 degrees
-		double clockwiseDelta = (twoPI + entryAngle - exitAngle) % twoPI;
-
-		double diff90 = (exitAngle + twoPI - Math.PI / 4d) % halfPI;
-		int addCount = (int) ((clockwiseDelta + diff90) / halfPI);
-		int firstCorner = (int) (((exitAngle - diff90 + twoPI) % twoPI) / halfPI);
-
-		Coordinate minXminY = new Coordinate(sector.getMinLongitude(), sector.getMinLatitude());
-		Coordinate maxXminY = new Coordinate(sector.getMaxLongitude(), sector.getMinLatitude());
-		Coordinate minXmaxY = new Coordinate(sector.getMinLongitude(), sector.getMaxLatitude());
-		Coordinate maxXmaxY = new Coordinate(sector.getMaxLongitude(), sector.getMaxLatitude());
-
-		Coordinate[] clockwise = new Coordinate[] { minXminY, minXmaxY, maxXmaxY, maxXminY };
-
-		for (int i = firstCorner; i < addCount + firstCorner; i++)
-		{
-			addTo.coordinates.add(clockwise[i % 4]);
-		}
-	}*/
-
-	public FeatureCollection createRecords(GeometryFactory factory, FeatureSchema schema,
-			boolean polygon)
+	public FeatureCollection createRecords(GeometryFactory factory, FeatureSchema schema, boolean polygon)
 	{
 		FeatureCollection fc = new FeatureDataset(schema);
 		for (TileRecord p : records)
@@ -704,8 +454,7 @@ public class ShapefileTile
 				for (int i = 0; i < p.holes.size(); i++)
 				{
 					TileRecord h = p.holes.get(i);
-					Coordinate[] holeCoordinates =
-							h.coordinates.toArray(new Coordinate[h.coordinates.size()]);
+					Coordinate[] holeCoordinates = h.coordinates.toArray(new Coordinate[h.coordinates.size()]);
 					LinearRing hole = factory.createLinearRing(holeCoordinates);
 					holes[i] = hole;
 				}
@@ -713,8 +462,7 @@ public class ShapefileTile
 			}
 			else
 			{
-				Coordinate[] coordinates =
-						p.coordinates.toArray(new Coordinate[p.coordinates.size()]);
+				Coordinate[] coordinates = p.coordinates.toArray(new Coordinate[p.coordinates.size()]);
 				geometry = factory.createLineString(coordinates);
 			}
 
@@ -726,21 +474,4 @@ public class ShapefileTile
 		}
 		return fc;
 	}
-
-	/*public boolean overlaps(Envelope inEnvelope)
-	{
-		if (inEnvelope == null)
-			return false;
-
-		// check the sides.
-		if (inEnvelope.getMaxX() < sector.getMinLongitude())
-			return false;
-		if (inEnvelope.getMinX() > sector.getMaxLongitude())
-			return false;
-		if (inEnvelope.getMinY() > sector.getMaxLatitude())
-			return false;
-		if (inEnvelope.getMaxY() < sector.getMinLatitude())
-			return false;
-		return true;
-	}*/
 }

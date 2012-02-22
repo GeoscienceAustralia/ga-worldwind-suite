@@ -17,7 +17,11 @@ import au.gov.ga.worldwind.tiler.util.NullableNumberArray;
 import au.gov.ga.worldwind.tiler.util.NumberArray;
 import au.gov.ga.worldwind.tiler.util.Sector;
 
-
+/**
+ * Helper class for writing the tiler log files in the tile output directory.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LogWriter
 {
 	private FileWriter logWriter;
@@ -30,11 +34,10 @@ public class LogWriter
 		writer = new BufferedLineWriter(logWriter);
 	}
 
-	public void startLog(TilingType type, File mapFile, File outDir, Sector sector, LatLon origin,
-			int level, int tilesize, double lzts, String imageFormat, boolean addAlpha, int band,
-			int bufferType, boolean bilinear, boolean reproject, String infoText, String tileText,
-			NullableNumberArray outsideValues, MinMaxArray[] minMaxReplaces,
-			NullableNumberArray replace, NullableNumberArray otherwise, boolean isFloat)
+	public void startLog(TilingType type, File mapFile, File outDir, Sector sector, LatLon origin, int level,
+			int tilesize, double lzts, String imageFormat, boolean addAlpha, int band, int bufferType,
+			boolean bilinear, boolean reproject, String infoText, String tileText, NullableNumberArray outsideValues,
+			MinMaxArray[] minMaxReplaces, NullableNumberArray replace, NullableNumberArray otherwise, boolean isFloat)
 			throws IOException
 	{
 		if (type == TilingType.Mapnik)

@@ -5,7 +5,14 @@ import java.io.IOException;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jump.io.EndianDataInputStream;
 
-
+/**
+ * Class that reads the shapefile header from a file and provides access to the
+ * shapetype, version, and shapefile bounds from the header.
+ * <p>
+ * Based on the ShapefileHeader class from GeoTools.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ShapefileHeader
 {
 	public static final int SHAPEFILE_ID = 9994;
@@ -19,21 +26,18 @@ public class ShapefileHeader
 
 	public ShapefileHeader(EndianDataInputStream file) throws IOException
 	{
-		//  file.setLittleEndianMode(false);
 		fileCode = file.readIntBE();
-		// if(DEBUG)System.out.println("Sfh->Filecode "+fileCode);
 		if (fileCode != SHAPEFILE_ID)
-			System.err.println("Sfh->WARNING filecode " + fileCode
-					+ " not a match for documented shapefile code " + SHAPEFILE_ID);
+		{
+			System.err.println("WARNING filecode " + fileCode + " not a match for documented shapefile code "
+					+ SHAPEFILE_ID);
+		}
 
 		for (int i = 0; i < 5; i++)
 		{
-			/*int tmp =*/file.readIntBE();
-			// if(DEBUG)System.out.println("Sfh->blank "+tmp);
+			file.readIntBE();
 		}
 		fileLength = file.readIntBE();
-
-		//  file.setLittleEndianMode(true);
 		version = file.readIntLE();
 		shapeType = file.readIntLE();
 
@@ -45,7 +49,6 @@ public class ShapefileHeader
 		bounds = new Envelope(minx, maxx, miny, maxy);
 
 		//skip remaining unused bytes
-		// file.setLittleEndianMode(false);//well they may not be unused forever...
 		file.skipBytes(32);
 	}
 
@@ -67,8 +70,8 @@ public class ShapefileHeader
 	public String toString()
 	{
 		String res =
-				new String("Sf-->type " + fileCode + " size " + fileLength + " version " + version
-						+ " Shape Type " + shapeType);
+				new String("Sf-->type " + fileCode + " size " + fileLength + " version " + version + " Shape Type "
+						+ shapeType);
 		return res;
 	}
 }

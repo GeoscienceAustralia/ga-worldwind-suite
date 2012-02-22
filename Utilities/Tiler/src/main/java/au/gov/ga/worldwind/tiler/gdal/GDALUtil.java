@@ -15,7 +15,11 @@ import au.gov.ga.worldwind.tiler.util.StringLineBuilder;
 import au.gov.ga.worldwind.tiler.util.TilerException;
 import au.gov.ga.worldwind.tiler.util.Util;
 
-
+/**
+ * Helper class containing some utility functions for handling GDAL datasets.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class GDALUtil
 {
 	public static final String GDAL_DATUM_FILE = "gdal_datum.csv";
@@ -23,6 +27,10 @@ public class GDALUtil
 	protected final static String GDAL_DATA_PATH = "GDAL_DATA";
 	protected final static String GDAL_DRIVER_PATH = "GDAL_DRIVER_PATH";
 
+	/**
+	 * Initialize the GDAL library. This should be called before any use of the
+	 * library.
+	 */
 	public static void init()
 	{
 		File gdalDirectory = null;
@@ -44,11 +52,23 @@ public class GDALUtil
 
 	private static boolean gdalDirectoryFound;
 
+	/**
+	 * @return Was the GDAL directory found by the init() function?
+	 */
 	public static boolean isGdalDirectoryFound()
 	{
 		return gdalDirectoryFound;
 	}
 
+	/**
+	 * Attempt to open the given file as a GDAL dataset.
+	 * 
+	 * @param file
+	 *            File to open
+	 * @return Opened {@link Dataset}
+	 * @throws GDALException
+	 *             When the open fails
+	 */
 	public static Dataset open(File file) throws GDALException
 	{
 		Dataset dataset = (Dataset) gdal.Open(file.getAbsolutePath(), gdalconst.GA_ReadOnly);
@@ -59,11 +79,28 @@ public class GDALUtil
 		return dataset;
 	}
 
+	/**
+	 * Calculate the sector of the given dataset.
+	 * 
+	 * @param dataset
+	 * @return Sector of the dataset
+	 * @throws TilerException
+	 */
 	public static Sector getSector(Dataset dataset) throws TilerException
 	{
 		return getSector(dataset, true);
 	}
 
+	/**
+	 * Calculate the sector of the given dataset.
+	 * 
+	 * @param dataset
+	 * @param performCoordinateTransformation
+	 *            Should the dataset extent coordinates be transformed to
+	 *            geographic coordinates (lat/lon)?
+	 * @return Sector of the dataset
+	 * @throws TilerException
+	 */
 	public static Sector getSector(Dataset dataset, boolean performCoordinateTransformation) throws TilerException
 	{
 		double[] geoTransformArray = new double[6];
@@ -130,6 +167,13 @@ public class GDALUtil
 		return new Sector(minlat, minlon, maxlat, maxlon);
 	}
 
+	/**
+	 * Generate a string containing information about the given dataset.
+	 * 
+	 * @param dataset
+	 * @param sector
+	 * @return Info string about the given dataset
+	 */
 	public static String getInfoText(Dataset dataset, Sector sector)
 	{
 		int width = dataset.getRasterXSize();
@@ -186,6 +230,16 @@ public class GDALUtil
 		return info.toString(true);
 	}
 
+	/**
+	 * Generate a string describing the current tiling parameters.
+	 * 
+	 * @param sector
+	 * @param origin
+	 * @param lzts
+	 * @param levels
+	 * @param overviews
+	 * @return String with info about the tile output
+	 */
 	public static String getTileText(Sector sector, LatLon origin, double lzts, int levels, boolean overviews)
 	{
 		StringLineBuilder info = new StringLineBuilder();

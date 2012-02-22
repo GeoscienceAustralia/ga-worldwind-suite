@@ -22,6 +22,11 @@ import com.vividsolutions.jump.feature.Feature;
 import com.vividsolutions.jump.feature.FeatureSchema;
 import com.vividsolutions.jump.io.EndianDataInputStream;
 
+/**
+ * Reads a shapefile. Provides access to shapefile features one-by-one.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ShapefileReader
 {
 	private File shp;

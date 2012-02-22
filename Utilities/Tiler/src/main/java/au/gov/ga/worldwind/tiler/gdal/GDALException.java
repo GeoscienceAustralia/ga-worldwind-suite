@@ -2,6 +2,12 @@ package au.gov.ga.worldwind.tiler.gdal;
 
 import org.gdal.gdal.gdal;
 
+/**
+ * {@link Exception} that retrieves error information from the GDAL library
+ * whenever instaciated.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class GDALException extends Exception
 {
 	private final int errorNo;
@@ -10,8 +16,7 @@ public class GDALException extends Exception
 
 	public GDALException()
 	{
-		this(gdal.GetLastErrorNo(), gdal.GetLastErrorType(), gdal
-				.GetLastErrorMsg());
+		this(gdal.GetLastErrorNo(), gdal.GetLastErrorType(), gdal.GetLastErrorMsg());
 	}
 
 	public GDALException(int errorNo, int errorType, String errorMsg)

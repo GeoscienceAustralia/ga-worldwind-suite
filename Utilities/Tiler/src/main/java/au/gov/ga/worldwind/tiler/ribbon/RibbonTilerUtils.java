@@ -9,9 +9,11 @@ import java.io.IOException;
 
 /**
  * Utility methods for the ribbon tiler
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
-public class RibbonTilerUtils {
-
+public class RibbonTilerUtils
+{
 	public static void saveIntArrayToFile(int[] array, File file)
 	{
 		try
@@ -56,5 +58,4 @@ public class RibbonTilerUtils {
 		}
 		return null;
 	}
-	
 }

@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.tiler.application;
 
-
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -41,36 +40,92 @@ import au.gov.ga.worldwind.tiler.util.ProgressReporter;
 import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.Util;
 
-
+/**
+ * This class is used to generate the overviews of the lowest level of tiles.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Overviewer
 {
-	public static void createImageOverviews(File directory, String extension, int width,
-			int height, NullableNumberArray outsideValues, Sector sector, LatLon origin,
-			double lzts, boolean bilinear, boolean ignoreBlank, float jpegQuality,
-			ProgressReporter reporter)
+	/**
+	 * Create the overviews of a set of image tiles.
+	 * 
+	 * @param directory
+	 *            Directory containing the tiles (parent directory of the level
+	 *            directories)
+	 * @param extension
+	 *            File extension of the tiles (without the '.' prefix)
+	 * @param width
+	 *            Width of each tile
+	 * @param height
+	 *            Height of each tile
+	 * @param outsideValues
+	 *            Values to set data outside the dataset extents to (for each
+	 *            band)
+	 * @param sector
+	 *            Sector being tiled
+	 * @param origin
+	 *            Origin of the tiling
+	 * @param lzts
+	 *            Level zero tile size (in degrees)
+	 * @param bilinear
+	 *            Should bilinear minification be used?
+	 * @param ignoreBlank
+	 *            Should blank tiles be ignored?
+	 * @param jpegQuality
+	 *            JPEG compression quality to use (if saving JPEGs)
+	 * @param reporter
+	 *            Object to report progress to
+	 */
+	public static void createImageOverviews(File directory, String extension, int width, int height,
+			NullableNumberArray outsideValues, Sector sector, LatLon origin, double lzts, boolean bilinear,
+			boolean ignoreBlank, float jpegQuality, ProgressReporter reporter)
 	{
-		OverviewCreator overviewCreator =
-				new ImageOverviewCreator(width, height, outsideValues, bilinear, jpegQuality);
-		createOverviews(overviewCreator, directory, extension, sector, origin, lzts, ignoreBlank,
-				reporter);
+		OverviewCreator overviewCreator = new ImageOverviewCreator(width, height, outsideValues, bilinear, jpegQuality);
+		createOverviews(overviewCreator, directory, extension, sector, origin, lzts, ignoreBlank, reporter);
 	}
 
-	public static void createElevationOverviews(File directory, int width, int height,
-			int bufferType, ByteOrder byteOrder, NullableNumberArray outsideValues, Sector sector,
-			LatLon origin, double lzts, boolean bilinear, boolean ignoreBlank,
-			ProgressReporter reporter)
+	/**
+	 * Create the overviews of a set of elevation tiles.
+	 * 
+	 * @param directory
+	 *            Directory containing the tiles (parent directory of the level
+	 *            directories)
+	 * @param width
+	 *            Width of each tile
+	 * @param height
+	 *            Height of each tile
+	 * @param bufferType
+	 *            GDAL data type
+	 * @param byteOrder
+	 *            Byte order of the data
+	 * @param outsideValues
+	 *            Value to set data outside the dataset extents to
+	 * @param sector
+	 *            Sector being tiled
+	 * @param origin
+	 *            Origin of the tiling
+	 * @param lzts
+	 *            Level zero tile size (in degrees)
+	 * @param bilinear
+	 *            Should bilinear minification be used?
+	 * @param ignoreBlank
+	 *            Should blank tiles be ignored?
+	 * @param reporter
+	 *            Object to report progress to
+	 */
+	public static void createElevationOverviews(File directory, int width, int height, int bufferType,
+			ByteOrder byteOrder, NullableNumberArray outsideValues, Sector sector, LatLon origin, double lzts,
+			boolean bilinear, boolean ignoreBlank, ProgressReporter reporter)
 	{
 		int bands = 1;
 		OverviewCreator overviewCreator =
-				new ElevationOverviewCreator(width, height, bands, bufferType, byteOrder,
-						outsideValues, bilinear);
-		createOverviews(overviewCreator, directory, "bil", sector, origin, lzts, ignoreBlank,
-				reporter);
+				new ElevationOverviewCreator(width, height, bands, bufferType, byteOrder, outsideValues, bilinear);
+		createOverviews(overviewCreator, directory, "bil", sector, origin, lzts, ignoreBlank, reporter);
 	}
 
-	private static void createOverviews(OverviewCreator overviewCreator, File directory,
-			String extension, Sector sector, LatLon origin, double lzts, boolean ignoreBlank,
-			ProgressReporter progress)
+	private static void createOverviews(OverviewCreator overviewCreator, File directory, String extension,
+			Sector sector, LatLon origin, double lzts, boolean ignoreBlank, ProgressReporter progress)
 	{
 		progress.getLogger().info("Generating overviews...");
 
@@ -84,11 +139,11 @@ public class Overviewer
 
 			File[] dirs = directory.listFiles(new DirectoryFileFilter());
 			int maxlevel = Integer.MIN_VALUE;
-			for (int i = 0; i < dirs.length; i++)
+			for (File dir : dirs)
 			{
 				try
 				{
-					int num = Integer.parseInt(dirs[i].getName());
+					int num = Integer.parseInt(dir.getName());
 					if (num > maxlevel)
 					{
 						maxlevel = num;
@@ -125,8 +180,7 @@ public class Overviewer
 						break;
 
 					count++;
-					progress.getLogger().fine(
-							"Overview " + count + "/" + size + " (" + (count * 100 / size) + "%)");
+					progress.getLogger().fine("Overview " + count + "/" + size + " (" + (count * 100 / size) + "%)");
 					progress.progress(count / (double) size);
 
 					File file = sourceFiles.iterator().next();
@@ -152,8 +206,7 @@ public class Overviewer
 					sourceFiles.remove(src3);
 
 					final File dst =
-							tileFile(new File(dir.getParent() + "/" + (level - 1)), extension,
-									rowabove, colabove);
+							tileFile(new File(dir.getParent() + "/" + (level - 1)), extension, rowabove, colabove);
 					dst.getParentFile().mkdirs();
 					if (dst.exists())
 					{
@@ -174,20 +227,18 @@ public class Overviewer
 			}
 		}
 
-		progress.getLogger().info(
-				"Overview generation " + (progress.isCancelled() ? "cancelled" : "complete"));
+		progress.getLogger().info("Overview generation " + (progress.isCancelled() ? "cancelled" : "complete"));
 	}
 
 	private static File tileFile(File dir, String extension, int row, int col)
 	{
-		return new File(dir.getAbsolutePath() + "/" + FileUtil.paddedInt(row, 4) + "/"
-				+ FileUtil.paddedInt(row, 4) + "_" + FileUtil.paddedInt(col, 4) + "." + extension);
+		return new File(dir.getAbsolutePath() + "/" + FileUtil.paddedInt(row, 4) + "/" + FileUtil.paddedInt(row, 4)
+				+ "_" + FileUtil.paddedInt(col, 4) + "." + extension);
 	}
 
 	private interface OverviewCreator
 	{
-		void mix(File src0, File src1, File src2, File src3, File dst, boolean ignoreBlank)
-				throws IOException;
+		void mix(File src0, File src1, File src2, File src3, File dst, boolean ignoreBlank) throws IOException;
 	}
 
 	private static class ImageOverviewCreator implements OverviewCreator
@@ -198,8 +249,8 @@ public class Overviewer
 		private boolean bilinear;
 		private float jpegQuality;
 
-		public ImageOverviewCreator(int width, int height, NullableNumberArray outsideValues,
-				boolean bilinear, float jpegQuality)
+		public ImageOverviewCreator(int width, int height, NullableNumberArray outsideValues, boolean bilinear,
+				float jpegQuality)
 		{
 			this.width = width;
 			this.height = height;
@@ -232,20 +283,18 @@ public class Overviewer
 
 				DataBuffer db = new DataBufferByte(bytes, bytes.length);
 				SampleModel sampleModel =
-						new ComponentSampleModel(DataBuffer.TYPE_BYTE, width, height, 1, width,
-								offsets);
+						new ComponentSampleModel(DataBuffer.TYPE_BYTE, width, height, 1, width, offsets);
 				WritableRaster raster = Raster.createWritableRaster(sampleModel, db, null);
 				int imageType =
-						bandCount == 1 ? BufferedImage.TYPE_BYTE_GRAY : bandCount == 3
-								? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB_PRE;
+						bandCount == 1 ? BufferedImage.TYPE_BYTE_GRAY : bandCount == 3 ? BufferedImage.TYPE_INT_RGB
+								: BufferedImage.TYPE_INT_ARGB_PRE;
 				outsideImage = new BufferedImage(width, height, imageType);
 				outsideImage.setData(raster);
 			}
 		}
 
 		@Override
-		public void mix(File src0, File src1, File src2, File src3, File dst, boolean ignoreBlank)
-				throws IOException
+		public void mix(File src0, File src1, File src2, File src3, File dst, boolean ignoreBlank) throws IOException
 		{
 			if (dst.exists())
 				throw new IllegalArgumentException("Destination already exists");
@@ -289,8 +338,7 @@ public class Overviewer
 				throw new IOException("Error reading " + src3, e);
 			}
 
-			BufferedImage image =
-					i0 != null ? i0 : i1 != null ? i1 : i2 != null ? i2 : i3 != null ? i3 : null;
+			BufferedImage image = i0 != null ? i0 : i1 != null ? i1 : i2 != null ? i2 : i3 != null ? i3 : null;
 
 			//if no images exist
 			if (image == null)
@@ -300,9 +348,7 @@ public class Overviewer
 				throw new IOException("No children images exist for " + dst);
 			}
 
-			int type =
-					image != null && image.getType() != 0 ? image.getType()
-							: BufferedImage.TYPE_INT_ARGB;
+			int type = image != null && image.getType() != 0 ? image.getType() : BufferedImage.TYPE_INT_ARGB;
 
 			i0 = i0 != null ? i0 : outsideImage;
 			i1 = i1 != null ? i1 : outsideImage;
@@ -317,8 +363,7 @@ public class Overviewer
 			BufferedImage id = new BufferedImage(w, h, type);
 			Graphics2D g = id.createGraphics();
 			if (bilinear)
-				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-						RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 			else
 				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
 						RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
@@ -350,8 +395,7 @@ public class Overviewer
 			g.dispose();
 
 			dst.getParentFile().mkdirs();
-			String imageformat =
-					dst.getName().substring(dst.getName().lastIndexOf('.') + 1).toLowerCase();
+			String imageformat = dst.getName().substring(dst.getName().lastIndexOf('.') + 1).toLowerCase();
 			Tiler.writeImage(id, imageformat, dst, jpegQuality);
 		}
 	}
@@ -368,8 +412,8 @@ public class Overviewer
 		private TypeHandler typeHandler;
 		private boolean bilinear;
 
-		public ElevationOverviewCreator(int width, int height, int bands, int bufferType,
-				ByteOrder byteOrder, NullableNumberArray outsideValues, boolean bilinear)
+		public ElevationOverviewCreator(int width, int height, int bands, int bufferType, ByteOrder byteOrder,
+				NullableNumberArray outsideValues, boolean bilinear)
 		{
 			floatingPoint = GDALTile.isTypeFloatingPoint(bufferType);
 
@@ -383,8 +427,7 @@ public class Overviewer
 				throw new IllegalArgumentException("Width/Height must be multiples of 2");
 
 			if (outsideValues != null && outsideValues.length() != bands)
-				throw new IllegalArgumentException(
-						"Outside values array length doesn't equal the number of bands");
+				throw new IllegalArgumentException("Outside values array length doesn't equal the number of bands");
 
 			typeHandler = createTypeHandler();
 
@@ -413,8 +456,7 @@ public class Overviewer
 		}
 
 		@Override
-		public void mix(File src0, File src1, File src2, File src3, File dst, boolean ignoreBlank)
-				throws IOException
+		public void mix(File src0, File src1, File src2, File src3, File dst, boolean ignoreBlank) throws IOException
 		{
 			if (dst.exists())
 				throw new IllegalArgumentException("Destination already exists");
@@ -429,11 +471,10 @@ public class Overviewer
 				src3 = src3 != null && src3.exists() ? src3 : null;
 
 				long length =
-						src0 != null ? src0.length() : src1 != null ? src1.length() : src2 != null
-								? src2.length() : src3 != null ? src3.length() : -1;
+						src0 != null ? src0.length() : src1 != null ? src1.length() : src2 != null ? src2.length()
+								: src3 != null ? src3.length() : -1;
 
-				if ((src1 != null && src1.length() != length)
-						|| (src2 != null && src2.length() != length)
+				if ((src1 != null && src1.length() != length) || (src2 != null && src2.length() != length)
 						|| (src3 != null && src3.length() != length))
 					throw new IllegalArgumentException("Source file(s) don't have equal sizes");
 
@@ -449,8 +490,7 @@ public class Overviewer
 
 				dstraf = new RandomAccessFile(dst, "rw");
 				FileChannel dstfc = dstraf.getChannel();
-				MappedByteBuffer dstbb =
-						dstfc.map(MapMode.READ_WRITE, 0, width * height * bands * bufferTypeSize);
+				MappedByteBuffer dstbb = dstfc.map(MapMode.READ_WRITE, 0, width * height * bands * bufferTypeSize);
 				dstbb.order(byteOrder);
 
 				src0fis = src0 != null ? new FileInputStream(src0) : null;
@@ -459,24 +499,23 @@ public class Overviewer
 				src3fis = src3 != null ? new FileInputStream(src3) : null;
 
 				ByteBuffer src0bb =
-						src0fis != null ? getFileChannelAsByteBuffer(src0fis.getChannel(),
-								(int) src0.length(), byteOrder) : null;
+						src0fis != null ? getFileChannelAsByteBuffer(src0fis.getChannel(), (int) src0.length(),
+								byteOrder) : null;
 				ByteBuffer src1bb =
-						src1fis != null ? getFileChannelAsByteBuffer(src1fis.getChannel(),
-								(int) src1.length(), byteOrder) : null;
+						src1fis != null ? getFileChannelAsByteBuffer(src1fis.getChannel(), (int) src1.length(),
+								byteOrder) : null;
 				ByteBuffer src2bb =
-						src2fis != null ? getFileChannelAsByteBuffer(src2fis.getChannel(),
-								(int) src2.length(), byteOrder) : null;
+						src2fis != null ? getFileChannelAsByteBuffer(src2fis.getChannel(), (int) src2.length(),
+								byteOrder) : null;
 				ByteBuffer src3bb =
-						src3fis != null ? getFileChannelAsByteBuffer(src3fis.getChannel(),
-								(int) src3.length(), byteOrder) : null;
+						src3fis != null ? getFileChannelAsByteBuffer(src3fis.getChannel(), (int) src3.length(),
+								byteOrder) : null;
 
 				for (int b = 0; b < bands; b++)
 				{
 					int offset = b * width * height * bufferTypeSize;
 					Object outsideValue =
-							outsideValues == null ? null : typeHandler.getNumberArrayValue(b,
-									outsideValues);
+							outsideValues == null ? null : typeHandler.getNumberArrayValue(b, outsideValues);
 
 					for (int y = 0; y < height; y++)
 					{
@@ -484,27 +523,18 @@ public class Overviewer
 						for (int x = 0; x < width; x++)
 						{
 							int sx = x % (width / 2);
-							ByteBuffer buffer =
-									selectBuffer(src0bb, src1bb, src2bb, src3bb, x, y, width,
-											height);
+							ByteBuffer buffer = selectBuffer(src0bb, src1bb, src2bb, src3bb, x, y, width, height);
 							Object value = outsideValue;
 							if (buffer != null)
 							{
-								int index0 =
-										((sy * 2) * width + (sx * 2)) * bufferTypeSize + offset;
+								int index0 = ((sy * 2) * width + (sx * 2)) * bufferTypeSize + offset;
 								Object v0 = typeHandler.getBufferValue(index0, buffer);
 
 								if (bilinear)
 								{
-									int index1 =
-											((sy * 2) * width + (sx * 2 + 1)) * bufferTypeSize
-													+ offset;
-									int index2 =
-											((sy * 2 + 1) * width + sx * 2) * bufferTypeSize
-													+ offset;
-									int index3 =
-											((sy * 2 + 1) * width + (sx * 2 + 1)) * bufferTypeSize
-													+ offset;
+									int index1 = ((sy * 2) * width + (sx * 2 + 1)) * bufferTypeSize + offset;
+									int index2 = ((sy * 2 + 1) * width + sx * 2) * bufferTypeSize + offset;
+									int index3 = ((sy * 2 + 1) * width + (sx * 2 + 1)) * bufferTypeSize + offset;
 
 									Object v1 = typeHandler.getBufferValue(index1, buffer);
 									Object v2 = typeHandler.getBufferValue(index2, buffer);
@@ -512,8 +542,7 @@ public class Overviewer
 
 									if (outsideValue == null
 											|| !(v0.equals(outsideValue) || v1.equals(outsideValue)
-													|| v2.equals(outsideValue) || v3
-													.equals(outsideValue)))
+													|| v2.equals(outsideValue) || v3.equals(outsideValue)))
 									{
 										value = typeHandler.average(v0, v1, v2, v3);
 									}
@@ -549,8 +578,8 @@ public class Overviewer
 			}
 		}
 
-		private ByteBuffer getFileChannelAsByteBuffer(FileChannel fileChannel, int length,
-				ByteOrder byteOrder) throws IOException
+		private ByteBuffer getFileChannelAsByteBuffer(FileChannel fileChannel, int length, ByteOrder byteOrder)
+				throws IOException
 		{
 			ByteBuffer bb = ByteBuffer.allocate(length);
 			bb.order(byteOrder);
@@ -559,8 +588,7 @@ public class Overviewer
 			return bb;
 		}
 
-		private <E extends Buffer> E selectBuffer(E src0, E src1, E src2, E src3, int x, int y,
-				int w, int h)
+		private <E extends Buffer> E selectBuffer(E src0, E src1, E src2, E src3, int x, int y, int w, int h)
 		{
 			// +--+--+
 			// |i1|i3|
@@ -601,8 +629,8 @@ public class Overviewer
 
 		public Object average(Object v0, Object v1, Object v2, Object v3)
 		{
-			return (byte) ((((Byte) v0).shortValue() + ((Byte) v1).shortValue()
-					+ ((Byte) v2).shortValue() + ((Byte) v3).shortValue()) / (short) 4);
+			return (byte) ((((Byte) v0).shortValue() + ((Byte) v1).shortValue() + ((Byte) v2).shortValue() + ((Byte) v3)
+					.shortValue()) / (short) 4);
 		}
 	}
 
@@ -625,8 +653,8 @@ public class Overviewer
 
 		public Object average(Object v0, Object v1, Object v2, Object v3)
 		{
-			return (short) ((((Short) v0).intValue() + ((Short) v1).intValue()
-					+ ((Short) v2).intValue() + ((Short) v3).intValue()) / 4);
+			return (short) ((((Short) v0).intValue() + ((Short) v1).intValue() + ((Short) v2).intValue() + ((Short) v3)
+					.intValue()) / 4);
 		}
 	}
 
@@ -649,8 +677,8 @@ public class Overviewer
 
 		public Object average(Object v0, Object v1, Object v2, Object v3)
 		{
-			return (int) ((((Integer) v0).longValue() + ((Integer) v1).longValue()
-					+ ((Integer) v2).longValue() + ((Integer) v3).longValue()) / 4l);
+			return (int) ((((Integer) v0).longValue() + ((Integer) v1).longValue() + ((Integer) v2).longValue() + ((Integer) v3)
+					.longValue()) / 4l);
 		}
 	}
 
@@ -673,8 +701,8 @@ public class Overviewer
 
 		public Object average(Object v0, Object v1, Object v2, Object v3)
 		{
-			return (float) ((((Float) v0).doubleValue() + ((Float) v1).doubleValue()
-					+ ((Float) v2).doubleValue() + ((Float) v3).doubleValue()) / 4d);
+			return (float) ((((Float) v0).doubleValue() + ((Float) v1).doubleValue() + ((Float) v2).doubleValue() + ((Float) v3)
+					.doubleValue()) / 4d);
 		}
 	}
 

@@ -1,5 +1,10 @@
 package au.gov.ga.worldwind.tiler.util;
 
+/**
+ * Represents a array value range with a minimum/maximum for each array entry.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class MinMaxArray
 {
 	private Long[] minLongs;
@@ -9,6 +14,12 @@ public class MinMaxArray
 	private boolean allNullCache;
 	private boolean allNullDirty = true;
 
+	/**
+	 * Create a new {@link MinMaxArray} instance.
+	 * 
+	 * @param length
+	 *            Length of the arrays
+	 */
 	public MinMaxArray(int length)
 	{
 		minLongs = new Long[length];
@@ -17,11 +28,21 @@ public class MinMaxArray
 		maxDoubles = new Double[length];
 	}
 
+	/**
+	 * @return Length of the range arrays
+	 */
 	public int length()
 	{
 		return minLongs.length;
 	}
 
+	/**
+	 * Set the min/max as longs at the given index
+	 * 
+	 * @param i
+	 * @param min
+	 * @param max
+	 */
 	public void setMinMaxLong(int i, Long min, Long max)
 	{
 		minLongs[i] = min;
@@ -31,12 +52,25 @@ public class MinMaxArray
 		allNullDirty = true;
 	}
 
+	/**
+	 * Set all min/max values as longs
+	 * 
+	 * @param min
+	 * @param max
+	 */
 	public void setMinMaxLongs(Long[] min, Long[] max)
 	{
 		for (int i = 0; i < min.length; i++)
 			setMinMaxLong(i, min[i], max[i]);
 	}
 
+	/**
+	 * Set the min/max as doubles at the given index
+	 * 
+	 * @param i
+	 * @param min
+	 * @param max
+	 */
 	public void setMinMaxDouble(int i, Double min, Double max)
 	{
 		minDoubles[i] = min;
@@ -46,6 +80,12 @@ public class MinMaxArray
 		allNullDirty = true;
 	}
 
+	/**
+	 * Set all min/max values as doubles
+	 * 
+	 * @param min
+	 * @param max
+	 */
 	public void setMinMaxDoubles(Double[] min, Double[] max)
 	{
 		for (int i = 0; i < min.length; i++)
@@ -70,6 +110,12 @@ public class MinMaxArray
 		return allNullCache;
 	}
 
+	/**
+	 * Do the given long values lie within the ranges in this object?
+	 * 
+	 * @param values
+	 * @return
+	 */
 	public boolean isBetweenLong(long[] values)
 	{
 		if (values.length != length())
@@ -80,14 +126,19 @@ public class MinMaxArray
 
 		for (int i = 0; i < length(); i++)
 		{
-			if ((minLongs[i] != null && values[i] < minLongs[i])
-					|| (maxLongs[i] != null && values[i] > maxLongs[i]))
+			if ((minLongs[i] != null && values[i] < minLongs[i]) || (maxLongs[i] != null && values[i] > maxLongs[i]))
 				return false;
 		}
 
 		return true;
 	}
 
+	/**
+	 * Do the given double values lie within the ranges in this object?
+	 * 
+	 * @param values
+	 * @return
+	 */
 	public boolean isBetweenDouble(double[] values)
 	{
 		if (values.length != length())
@@ -106,6 +157,16 @@ public class MinMaxArray
 		return true;
 	}
 
+	/**
+	 * Generate a string containing the values from this object.
+	 * 
+	 * @param isFloat
+	 *            Should the double values or the long values be used?
+	 * @param mins
+	 *            Should the mins or the maxs be used?
+	 * @return String containing a comma-separated list of the mins or maxs from
+	 *         this object.
+	 */
 	public String toString(boolean isFloat, boolean mins)
 	{
 		Double[] ds = mins ? minDoubles : maxDoubles;

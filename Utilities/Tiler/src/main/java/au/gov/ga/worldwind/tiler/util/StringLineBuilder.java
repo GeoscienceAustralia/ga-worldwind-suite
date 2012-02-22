@@ -1,5 +1,11 @@
 package au.gov.ga.worldwind.tiler.util;
 
+/**
+ * Helper class that uses an internal {@link StringBuilder} to build a string
+ * from a number of lines.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class StringLineBuilder
 {
 	private StringBuilder s;

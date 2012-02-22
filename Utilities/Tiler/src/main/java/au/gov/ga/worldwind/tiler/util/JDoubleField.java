@@ -6,6 +6,11 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
+/**
+ * {@link JTextField} subclass that only accepts doubles as input.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class JDoubleField extends JTextField
 {
 	private Double value;
@@ -76,8 +81,7 @@ public class JDoubleField extends JTextField
 			if (value == null)
 				setText("");
 			else if (precision != null)
-				setText(String.format("%1." + precision + "f", value
-						* getScale()));
+				setText(String.format("%1." + precision + "f", value * getScale()));
 			else
 				setText(String.valueOf(value * getScale()));
 			setting = false;
@@ -86,11 +90,9 @@ public class JDoubleField extends JTextField
 
 	private class DoubleDocument extends PlainDocument
 	{
-		public void insertString(int offs, String str, AttributeSet a)
-				throws BadLocationException
+		public void insertString(int offs, String str, AttributeSet a) throws BadLocationException
 		{
-			String result = getText(0, offs) + str
-					+ getText(offs, getLength() - offs);
+			String result = getText(0, offs) + str + getText(offs, getLength() - offs);
 			if (checkAndSet(result))
 				super.insertString(offs, str, a);
 		}
@@ -98,8 +100,7 @@ public class JDoubleField extends JTextField
 		@Override
 		public void remove(int offs, int len) throws BadLocationException
 		{
-			String result = getText(0, offs)
-					+ getText(offs + len, getLength() - offs - len);
+			String result = getText(0, offs) + getText(offs + len, getLength() - offs - len);
 			if (checkAndSet(result))
 				super.remove(offs, len);
 		}

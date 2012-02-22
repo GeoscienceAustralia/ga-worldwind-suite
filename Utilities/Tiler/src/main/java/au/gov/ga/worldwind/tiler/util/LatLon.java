@@ -1,5 +1,10 @@
 package au.gov.ga.worldwind.tiler.util;
 
+/**
+ * Represents a latitude/longitude pair.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class LatLon
 {
 	public final static LatLon DEFAULT_ORIGIN = new LatLon(-90, -180);

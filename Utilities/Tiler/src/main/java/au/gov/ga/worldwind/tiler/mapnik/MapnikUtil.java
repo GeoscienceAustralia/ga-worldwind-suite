@@ -14,8 +14,21 @@ import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.TilerException;
 import au.gov.ga.worldwind.tiler.util.Util;
 
+/**
+ * Helper class containing some utility functions for handling Mapnik XML
+ * mapfiles.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class MapnikUtil
 {
+	/**
+	 * Calculate the sector of the given Mapnik XML mapfile.
+	 * 
+	 * @param input
+	 * @return Sector of XML mapfile
+	 * @throws TilerException
+	 */
 	public static Sector getSector(File input) throws TilerException
 	{
 		String command = "mapnik/Nik2Img.exe -m \"" + input.getAbsolutePath() + "\" -e";
@@ -73,6 +86,31 @@ public class MapnikUtil
 		return null;
 	}
 
+	/**
+	 * Generate a tile from the given Mapnik XML mapfile within the given sector
+	 * extents.
+	 * 
+	 * @param sector
+	 *            Dataset extents contained within the tile
+	 * @param width
+	 *            Width of the tile
+	 * @param height
+	 *            Height of the tile
+	 * @param ignoreBlank
+	 *            Should blank (transparent) tiles be ignored? (This function
+	 *            generates the tile anyway, and if it's blank, deletes it. Only
+	 *            works for PNG output.)
+	 * @param reproject
+	 *            Should the dataset be reprojected to WGS84 if not already?
+	 * @param input
+	 *            Input Mapnik XML mapfile
+	 * @param dst
+	 *            Output image file
+	 * @param logger
+	 *            Logger which logs the progress
+	 * @throws TilerException
+	 *             If generating the tile fails for some reason
+	 */
 	public static void tile(Sector sector, int width, int height, boolean ignoreBlank, boolean reproject, File input,
 			File dst, final Logger logger) throws TilerException
 	{

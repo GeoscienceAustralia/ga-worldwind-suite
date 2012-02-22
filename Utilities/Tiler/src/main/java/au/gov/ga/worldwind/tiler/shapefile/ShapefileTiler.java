@@ -36,10 +36,30 @@ import com.vividsolutions.jump.feature.FeatureSchema;
 import com.vividsolutions.jump.io.DriverProperties;
 import com.vividsolutions.jump.io.ShapefileWriter;
 
+/**
+ * Class used to tile shapefiles.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class ShapefileTiler
 {
-	public static void tile(File input, File output, int level, double lzts, LatLon origin,
-			ProgressReporter progress)
+	/**
+	 * Tile the given shapefile.
+	 * 
+	 * @param input
+	 *            Input shapefile
+	 * @param output
+	 *            Output directory
+	 * @param level
+	 *            Level at which to tile
+	 * @param lzts
+	 *            Level zero tile size (in degrees)
+	 * @param origin
+	 *            Origin to begin tiling at
+	 * @param progress
+	 *            Object to report progress
+	 */
+	public static void tile(File input, File output, int level, double lzts, LatLon origin, ProgressReporter progress)
 	{
 		ShapefileReader reader = null;
 		try
@@ -49,9 +69,7 @@ public class ShapefileTiler
 			reader = new ShapefileReader(input);
 			reader.open();
 			Envelope envelope = reader.getBounds();
-			Sector sector =
-					new Sector(envelope.getMinY(), envelope.getMinX(), envelope.getMaxY(),
-							envelope.getMaxX());
+			Sector sector = new Sector(envelope.getMinY(), envelope.getMinX(), envelope.getMaxY(), envelope.getMaxX());
 
 			//TODO replace this schema with a customisable one, so users can select a subset of attributes
 			FeatureSchema schema = reader.getSchema();
@@ -111,37 +129,31 @@ public class ShapefileTiler
 				if (geometry instanceof MultiPolygon)
 				{
 					MultiPolygon mp = (MultiPolygon) geometry;
-					shapeId =
-							addMultiPolygon(shapeId, mp, attributes, tiles, level, lzts, origin,
-									min, size, progress);
+					shapeId = addMultiPolygon(shapeId, mp, attributes, tiles, level, lzts, origin, min, size, progress);
 				}
 				else if (geometry instanceof Polygon)
 				{
 					Polygon p = (Polygon) geometry;
-					shapeId =
-							addPolygon(shapeId, p, attributes, tiles, level, lzts, origin, min,
-									size, progress);
+					shapeId = addPolygon(shapeId, p, attributes, tiles, level, lzts, origin, min, size, progress);
 				}
 				else if (geometry instanceof LinearRing)
 				{
 					LinearRing lr = (LinearRing) geometry;
 					shapeId =
-							addLinearRing(shapeId, lr, attributes, tiles, level, lzts, origin, min,
-									size, true, progress);
+							addLinearRing(shapeId, lr, attributes, tiles, level, lzts, origin, min, size, true,
+									progress);
 				}
 				else if (geometry instanceof MultiLineString)
 				{
 					MultiLineString mls = (MultiLineString) geometry;
 					shapeId =
-							addMultiLineString(shapeId, mls, attributes, tiles, level, lzts,
-									origin, min, size, progress);
+							addMultiLineString(shapeId, mls, attributes, tiles, level, lzts, origin, min, size,
+									progress);
 				}
 				else if (geometry instanceof LineString)
 				{
 					LineString ls = (LineString) geometry;
-					shapeId =
-							addLineString(shapeId, ls, attributes, tiles, level, lzts, origin, min,
-									size, progress);
+					shapeId = addLineString(shapeId, ls, attributes, tiles, level, lzts, origin, min, size, progress);
 				}
 				else
 				{
@@ -168,9 +180,7 @@ public class ShapefileTiler
 				if (!rowDir.exists())
 					rowDir.mkdirs();
 
-				File dst =
-						new File(rowDir, Util.paddedInt(tile.row, 4) + "_"
-								+ Util.paddedInt(tile.col, 4) + ".zip");
+				File dst = new File(rowDir, Util.paddedInt(tile.row, 4) + "_" + Util.paddedInt(tile.col, 4) + ".zip");
 
 				saveShapefileZip(tile, reader.getFactory(), schema, dst, anyPolygons, progress);
 			}
@@ -196,9 +206,8 @@ public class ShapefileTiler
 		}
 	}
 
-	protected static void saveShapefileZip(ShapefileTile tile, GeometryFactory factory,
-			FeatureSchema schema, File file, boolean polygon, ProgressReporter progress)
-			throws IOException
+	protected static void saveShapefileZip(ShapefileTile tile, GeometryFactory factory, FeatureSchema schema,
+			File file, boolean polygon, ProgressReporter progress) throws IOException
 	{
 		if (file.exists())
 		{
@@ -288,8 +297,8 @@ public class ShapefileTiler
 	}
 
 	protected static int addMultiPolygon(int shapeId, MultiPolygon polygon, Attributes attributes,
-			ShapefileTile[] tiles, int level, double lzts, LatLon origin, java.awt.Point min,
-			Dimension size, ProgressReporter progress)
+			ShapefileTile[] tiles, int level, double lzts, LatLon origin, java.awt.Point min, Dimension size,
+			ProgressReporter progress)
 	{
 		for (int i = 0; i < polygon.getNumGeometries(); i++)
 		{
@@ -297,22 +306,17 @@ public class ShapefileTiler
 			if (g instanceof Polygon)
 			{
 				Polygon p = (Polygon) g;
-				shapeId =
-						addPolygon(shapeId, p, attributes, tiles, level, lzts, origin, min, size,
-								progress);
+				shapeId = addPolygon(shapeId, p, attributes, tiles, level, lzts, origin, min, size, progress);
 			}
 		}
 		return shapeId;
 	}
 
-	protected static int addPolygon(int shapeId, Polygon polygon, Attributes attributes,
-			ShapefileTile[] tiles, int level, double lzts, LatLon origin, java.awt.Point min,
-			Dimension size, ProgressReporter progress)
+	protected static int addPolygon(int shapeId, Polygon polygon, Attributes attributes, ShapefileTile[] tiles,
+			int level, double lzts, LatLon origin, java.awt.Point min, Dimension size, ProgressReporter progress)
 	{
 		LineString shell = polygon.getExteriorRing();
-		shapeId =
-				addLinearRing(shapeId, shell, attributes, tiles, level, lzts, origin, min, size,
-						true, progress);
+		shapeId = addLinearRing(shapeId, shell, attributes, tiles, level, lzts, origin, min, size, true, progress);
 
 		for (int i = 0; i < polygon.getNumInteriorRing(); i++)
 		{
@@ -325,24 +329,22 @@ public class ShapefileTiler
 			else
 			{
 				shapeId =
-						addLinearRing(shapeId, hole, attributes, tiles, level, lzts, origin, min,
-								size, false, progress);
+						addLinearRing(shapeId, hole, attributes, tiles, level, lzts, origin, min, size, false, progress);
 			}
 		}
 		return shapeId;
 	}
 
-	protected static int addLinearRing(int shapeId, LineString ring, Attributes attributes,
-			ShapefileTile[] tiles, int level, double lzts, LatLon origin, java.awt.Point min,
-			Dimension size, boolean fillInside, ProgressReporter progress)
+	protected static int addLinearRing(int shapeId, LineString ring, Attributes attributes, ShapefileTile[] tiles,
+			int level, double lzts, LatLon origin, java.awt.Point min, Dimension size, boolean fillInside,
+			ProgressReporter progress)
 	{
-		return addPoints(shapeId, ring, attributes, true, fillInside, tiles, level, lzts, origin,
-				min, size, progress);
+		return addPoints(shapeId, ring, attributes, true, fillInside, tiles, level, lzts, origin, min, size, progress);
 	}
 
-	protected static int addMultiLineString(int shapeId, MultiLineString multiLineString,
-			Attributes attributes, ShapefileTile[] tiles, int level, double lzts, LatLon origin,
-			java.awt.Point min, Dimension size, ProgressReporter progress)
+	protected static int addMultiLineString(int shapeId, MultiLineString multiLineString, Attributes attributes,
+			ShapefileTile[] tiles, int level, double lzts, LatLon origin, java.awt.Point min, Dimension size,
+			ProgressReporter progress)
 	{
 		for (int i = 0; i < multiLineString.getNumGeometries(); i++)
 		{
@@ -350,25 +352,22 @@ public class ShapefileTiler
 			if (g instanceof LineString)
 			{
 				LineString ls = (LineString) g;
-				shapeId =
-						addLineString(shapeId, ls, attributes, tiles, level, lzts, origin, min,
-								size, progress);
+				shapeId = addLineString(shapeId, ls, attributes, tiles, level, lzts, origin, min, size, progress);
 			}
 		}
 		return shapeId;
 	}
 
 	protected static int addLineString(int shapeId, LineString lineString, Attributes attributes,
-			ShapefileTile[] tiles, int level, double lzts, LatLon origin, java.awt.Point min,
-			Dimension size, ProgressReporter progress)
+			ShapefileTile[] tiles, int level, double lzts, LatLon origin, java.awt.Point min, Dimension size,
+			ProgressReporter progress)
 	{
-		return addPoints(shapeId, lineString, attributes, false, false, tiles, level, lzts, origin,
-				min, size, progress);
+		return addPoints(shapeId, lineString, attributes, false, false, tiles, level, lzts, origin, min, size, progress);
 	}
 
-	protected static int addPoints(int shapeId, LineString lineString, Attributes attributes,
-			boolean polygon, boolean fillInside, ShapefileTile[] tiles, int level, double lzts,
-			LatLon origin, java.awt.Point min, Dimension size, ProgressReporter progress)
+	protected static int addPoints(int shapeId, LineString lineString, Attributes attributes, boolean polygon,
+			boolean fillInside, ShapefileTile[] tiles, int level, double lzts, LatLon origin, java.awt.Point min,
+			Dimension size, ProgressReporter progress)
 	{
 		Coordinate lastCoordinate = null;
 		ShapefileTile lastTile = null;
@@ -413,9 +412,7 @@ public class ShapefileTiler
 					float y2 = (float) (tile.latitudeFract(coordinate) - 0.5);
 
 					//create a list of possible tiles that may be affected by the line between the two tiles
-					List<Point> line =
-							linePoints(lastTile.col + x1, lastTile.row + y1, tile.col + x2,
-									tile.row + y2);
+					List<Point> line = linePoints(lastTile.col + x1, lastTile.row + y1, tile.col + x2, tile.row + y2);
 
 					ShapefileTile lastCrossTile = lastTile;
 					for (int j = 1; j < line.size() - 1; j++)
@@ -436,8 +433,7 @@ public class ShapefileTiler
 						Coordinate edge = edgePoint(lastCoordinate, coordinate, crossTile);
 						if (edge != null)
 						{
-							if (lastCrossTile.col != crossTile.col
-									&& lastCrossTile.row != crossTile.row)
+							if (lastCrossTile.col != crossTile.col && lastCrossTile.row != crossTile.row)
 							{
 								String message = "Crossed tiles are not adjacent";
 								progress.getLogger().warning(message);
@@ -481,7 +477,9 @@ public class ShapefileTiler
 		if (polygon)
 		{
 			for (ShapefileTile tile : tilesAffected)
-				tile.joinOrphanPolygons(shapeId, progress);
+			{
+				tile.joinOrphanPolygons(progress);
+			}
 
 			if (fillInside)
 			{
@@ -492,8 +490,8 @@ public class ShapefileTiler
 		return shapeId + 1;
 	}
 
-	protected static ShapefileTile allPointsWithin(LineString lineString, ShapefileTile[] tiles,
-			int level, double lzts, LatLon origin, java.awt.Point min, Dimension size)
+	protected static ShapefileTile allPointsWithin(LineString lineString, ShapefileTile[] tiles, int level,
+			double lzts, LatLon origin, java.awt.Point min, Dimension size)
 	{
 		if (lineString.isEmpty())
 			return null;
@@ -536,14 +534,12 @@ public class ShapefileTiler
 		tile.addHole(coordinates, attributes);
 	}
 
-	protected static void markFilledTilesInside(ShapefileTile[] tiles,
-			List<ShapefileTile> tilesAffected, java.awt.Point min, Dimension size,
-			Attributes attributes)
+	protected static void markFilledTilesInside(ShapefileTile[] tiles, List<ShapefileTile> tilesAffected,
+			java.awt.Point min, Dimension size, Attributes attributes)
 	{
 		if (tilesAffected.get(0) != tilesAffected.get(tilesAffected.size() - 1))
 		{
-			throw new IllegalStateException(
-					"First tile doesn't equal last tile; cannot fill inside polygon");
+			throw new IllegalStateException("First tile doesn't equal last tile; cannot fill inside polygon");
 		}
 
 		//ignore the last tile (it is the same as the first)
@@ -674,8 +670,7 @@ public class ShapefileTiler
 				boolean first = add > 0 ^ gradient < 0;
 
 				java.awt.Point p1 = steep ? new java.awt.Point(y, x) : new java.awt.Point(x, y);
-				java.awt.Point p2 =
-						steep ? new java.awt.Point(y + add, x) : new java.awt.Point(x, y + add);
+				java.awt.Point p2 = steep ? new java.awt.Point(y + add, x) : new java.awt.Point(x, y + add);
 
 				if (first)
 				{
@@ -713,8 +708,7 @@ public class ShapefileTiler
 		Coordinate minYintersect = lineSegmentIntersection(p1, p2, minmin, minmax);
 		Coordinate maxXintersect = lineSegmentIntersection(p1, p2, minmax, maxmax);
 		Coordinate maxYintersect = lineSegmentIntersection(p1, p2, maxmin, maxmax);
-		Coordinate[] intersects =
-				new Coordinate[] { minXintersect, minYintersect, maxXintersect, maxYintersect };
+		Coordinate[] intersects = new Coordinate[] { minXintersect, minYintersect, maxXintersect, maxYintersect };
 		double minDistance = Double.MAX_VALUE;
 		Coordinate minDistanceIntersect = null;
 
@@ -734,8 +728,7 @@ public class ShapefileTiler
 		return minDistanceIntersect;
 	}
 
-	private static Coordinate lineSegmentIntersection(Coordinate p1, Coordinate p2, Coordinate p3,
-			Coordinate p4)
+	private static Coordinate lineSegmentIntersection(Coordinate p1, Coordinate p2, Coordinate p3, Coordinate p4)
 	{
 		double ud = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
 

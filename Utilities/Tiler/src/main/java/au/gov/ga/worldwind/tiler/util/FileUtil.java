@@ -6,11 +6,14 @@ import java.util.Collection;
 
 import au.gov.ga.worldwind.tiler.util.FileFilters.DirectoryFileFilter;
 
-
+/**
+ * Utility class containing functions to help with file handling.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class FileUtil
 {
-	public static void recursivelyAddFiles(Collection<File> files, File dir,
-			FileFilter filter)
+	public static void recursivelyAddFiles(Collection<File> files, File dir, FileFilter filter)
 	{
 		File[] list = dir.listFiles(filter);
 		if (list != null)

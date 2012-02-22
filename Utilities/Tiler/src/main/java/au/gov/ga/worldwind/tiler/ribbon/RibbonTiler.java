@@ -23,8 +23,11 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 
 /**
- * A tiler that is used to process long, thin images for use in <code>CurtainImageTiles</code>
- * (e.g. seismic, AEM, MT etc.)
+ * A tiler that is used to process long, thin images for use in
+ * <code>CurtainImageTiles</code> (e.g. seismic, AEM, MT etc.)
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class RibbonTiler
 {
@@ -45,27 +48,27 @@ public class RibbonTiler
 			jCommander.usage();
 			return;
 		}
-		
+
 		new RibbonTiler().tileRibbon(context);
 	}
-	
+
 	public void tileRibbon(RibbonTilingContext context) throws Exception
 	{
 		if (context == null)
 		{
 			throw new IllegalArgumentException("A contex is required");
 		}
-		
+
 		log(context, "Tiled on: " + new Date(), true);
 		log(context, "Source: " + context.getSourceFile().getAbsolutePath(), true);
 		log(context, "", true);
-		
+
 		Dataset dataset = GDALUtil.open(context.getSourceFile());
 
 		int width = dataset.GetRasterXSize() - context.getInsets().left - context.getInsets().right;
 		int height = dataset.GetRasterYSize() - context.getInsets().top - context.getInsets().bottom;
 		context.setSourceImageSize(new Dimension(width, height));
-		
+
 		int levels = levelCount(width, height, context.getTilesize());
 		context.setNumLevels(levels);
 		log(context, "Level count = " + levels, true);
@@ -82,10 +85,8 @@ public class RibbonTiler
 			File bottomFile = new File(context.getTilesetRoot(), context.getTilesetName() + ".bottom.dat");
 			constantPixelsFromTop = RibbonTilerUtils.loadIntArrayFromFile(topFile);
 			constantPixelsFromBottom = RibbonTilerUtils.loadIntArrayFromFile(bottomFile);
-			if (!(constantPixelsFromTop == null || 
-					constantPixelsFromBottom == null || 
-					constantPixelsFromTop.length != width || 
-					constantPixelsFromBottom.length != width))
+			if (!(constantPixelsFromTop == null || constantPixelsFromBottom == null
+					|| constantPixelsFromTop.length != width || constantPixelsFromBottom.length != width))
 			{
 				log(context, "Loaded removal columns from previous calculations", false);
 			}
@@ -93,20 +94,21 @@ public class RibbonTiler
 			{
 				constantPixelsFromTop = new int[width];
 				constantPixelsFromBottom = new int[width];
-	
+
 				int constantWidth = Math.max(1, 10 * context.getTilesize() * context.getTilesize() / height);
 				for (int startX = 0; startX < width; startX += constantWidth)
 				{
 					int w = Math.min(constantWidth, width - startX);
-	
+
 					//get an image of the full height, 1 pixel wide at column x
-					Rectangle src = new Rectangle(context.getInsets().left + startX, context.getInsets().top, w, height);
+					Rectangle src =
+							new Rectangle(context.getInsets().left + startX, context.getInsets().top, w, height);
 					GDALTileParameters parameters = new GDALTileParameters(dataset, src.getSize(), src);
 					GDALTile tile = new GDALTile(parameters);
 					BufferedImage image = tile.getAsImage();
-	
+
 					log(context, (100 * (startX + 1) / width) + "% done", false);
-	
+
 					for (int x = 0; x < w; x++)
 					{
 						int fromTop = 0;
@@ -122,7 +124,7 @@ public class RibbonTiler
 							lastColor = thisColor;
 							fromTop++;
 						}
-	
+
 						if (fromTop < height)
 						{
 							for (int y = height - 1; y >= 0; y--)
@@ -136,12 +138,12 @@ public class RibbonTiler
 								fromBottom++;
 							}
 						}
-	
+
 						constantPixelsFromTop[startX + x] = fromTop;
 						constantPixelsFromBottom[startX + x] = fromBottom;
 					}
 				}
-	
+
 				RibbonTilerUtils.saveIntArrayToFile(constantPixelsFromTop, topFile);
 				RibbonTilerUtils.saveIntArrayToFile(constantPixelsFromBottom, bottomFile);
 			}
@@ -182,7 +184,9 @@ public class RibbonTiler
 
 				if (context.isRemoveConstantColumns())
 				{
-					image = removeConstantColumns(image, constantPixelsFromTop, constantPixelsFromBottom, x, y, width, height, context.isMask());
+					image =
+							removeConstantColumns(image, constantPixelsFromTop, constantPixelsFromBottom, x, y, width,
+									height, context.isMask());
 				}
 
 				ImageIO.write(image, context.getFormat(), imageFile);
@@ -215,7 +219,7 @@ public class RibbonTiler
 			log(context, "Rows x Cols = " + rows + " x " + cols, true);
 			log(context, "xStrips,yStrips = " + xStrips + "," + yStrips, true);
 			log(context, "", true);
-			
+
 			File lastLevelDir = levelDir;
 			levelDir = new File(context.getTilesetRoot(), String.valueOf(level));
 			levelDir.mkdirs();
@@ -316,7 +320,7 @@ public class RibbonTiler
 				}
 			}
 		}
-		
+
 		if (context.isCopySource())
 		{
 			try
@@ -328,18 +332,19 @@ public class RibbonTiler
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (!context.isSuppressLayerDefinition())
 		{
 			LayerDefinitionCreator creator = new LayerDefinitionCreator();
 			creator.createDefinition(context);
 			log(context, "", true);
-			log(context, "Layer definition file generated at " + context.getLayerDefinitionFile().getAbsolutePath(), true);
+			log(context, "Layer definition file generated at " + context.getLayerDefinitionFile().getAbsolutePath(),
+					true);
 		}
 	}
 
-	private void printLevelsSummary(RibbonTilingContext context, int width,
-			int height, int levels) {
+	private void printLevelsSummary(RibbonTilingContext context, int width, int height, int levels)
+	{
 		int printWidth = width, printHeight = height;
 		for (int level = levels - 1; level >= 0; level--)
 		{
@@ -402,7 +407,7 @@ public class RibbonTiler
 
 		return newImage;
 	}
-	
+
 	private static void log(RibbonTilingContext context, String msg, boolean addToTilingLog)
 	{
 		try
@@ -410,7 +415,7 @@ public class RibbonTiler
 			context.getStdWriter().write(msg + '\n');
 			if (addToTilingLog)
 			{
-				context.getLogWriter().write(msg + '\n'); 
+				context.getLogWriter().write(msg + '\n');
 			}
 			context.getStdWriter().flush();
 			context.getLogWriter().flush();

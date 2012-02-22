@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.tiler.application;
 
-
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -30,9 +29,16 @@ import au.gov.ga.worldwind.tiler.util.ProgressReporter;
 import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.Util;
 
-
+/**
+ * Helper class used to generate the tiles.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Tiler
 {
+	/**
+	 * Enum of the various tiling formats/types supported by this application.
+	 */
 	public enum TilingType
 	{
 		Images,
@@ -40,6 +46,59 @@ public class Tiler
 		Mapnik
 	}
 
+	/**
+	 * Tile the given image dataset at the given level.
+	 * 
+	 * @param dataset
+	 *            Dataset to tile
+	 * @param reprojectIfRequired
+	 *            If the dataset isn't in WGS84, should it be reprojected?
+	 * @param linearInterpolationIfRequired
+	 *            Should linear interpolation be used when reprojecting and
+	 *            resizing?
+	 * @param sector
+	 *            Sector to tile
+	 * @param origin
+	 *            Origin to use when tiling (used to calculate tile row/column
+	 *            numbers)
+	 * @param level
+	 *            Level at which to tile
+	 * @param tilesize
+	 *            Size of the tiles (width/height)
+	 * @param lzts
+	 *            Level zero tile size (in degrees)
+	 * @param imageFormat
+	 *            Format to save images in (must be supported by {@link ImageIO}
+	 *            )
+	 * @param addAlpha
+	 *            Should an alpha channel be added to the image?
+	 * @param jpegQuality
+	 *            JPEG compression to use (if using the JPEG image format)
+	 * @param outsideValues
+	 *            Values to set data outside the dataset extents to (for each
+	 *            band)
+	 * @param ignoreBlank
+	 *            Should blank tiles be ignored/not saved? (when each pixel is
+	 *            equal to the outsideValues)
+	 * @param replaceMinMaxs
+	 *            Ranges to search for when replacing values
+	 * @param replace
+	 *            Values to use when replacing values inside the given replace
+	 *            ranges (if a replacement value is null, the original value is
+	 *            used)
+	 * @param otherwise
+	 *            Values to use when not replacing values inside the given
+	 *            replace ranges (if an otherwise value is null, the original
+	 *            value is used)
+	 * @param outputDirectory
+	 *            Tile output directory
+	 * @param resume
+	 *            Should the tiling progress be resumed at the last point (last
+	 *            tile file is searched for, and then tiling begins from the
+	 *            next tile)
+	 * @param progress
+	 *            Object to report progress to
+	 */
 	public static void tileImages(Dataset dataset, boolean reprojectIfRequired, boolean linearInterpolationIfRequired,
 			Sector sector, LatLon origin, int level, int tilesize, double lzts, String imageFormat, boolean addAlpha,
 			float jpegQuality, NullableNumberArray outsideValues, boolean ignoreBlank, MinMaxArray[] replaceMinMaxs,
@@ -51,6 +110,54 @@ public class Tiler
 				replaceMinMaxs, replace, otherwise, null, outputDirectory, resume, progress);
 	}
 
+	/**
+	 * Tile the given elevation dataset at the given level.
+	 * 
+	 * @param dataset
+	 *            Dataset to tile
+	 * @param reprojectIfRequired
+	 *            If the dataset isn't in WGS84, should it be reprojected?
+	 * @param linearInterpolationIfRequired
+	 *            Should linear interpolation be used when reprojecting and
+	 *            resizing?
+	 * @param sector
+	 *            Sector to tile
+	 * @param origin
+	 *            Origin to use when tiling (used to calculate tile row/colum
+	 *            numbers)
+	 * @param level
+	 *            Level at which to tile
+	 * @param tilesize
+	 *            Size of the tiles (width/height)
+	 * @param lzts
+	 *            Level zero tile size (in degrees)
+	 * @param bufferType
+	 *            GDAL data type
+	 * @param band
+	 *            Band to tile (usually 1, not zero indexed)
+	 * @param outsideValues
+	 *            Value to set data outside the dataset extents to
+	 * @param replaceMinMaxs
+	 *            Ranges to search for when replacing values
+	 * @param replace
+	 *            Values to use when replacing values inside the given replace
+	 *            ranges (if a replacement value is null, the original value is
+	 *            used)
+	 * @param otherwise
+	 *            Values to use when not replacing values inside the given
+	 *            replace ranges (if an otherwise value is null, the original
+	 *            value is used)
+	 * @param minMax
+	 *            Array to store minimum/maximum elevations in
+	 * @param outputDirectory
+	 *            Tile output directory
+	 * @param resume
+	 *            Should the tiling progress be resumed at the last point (last
+	 *            tile file is searched for, and then tiling begins from the
+	 *            next tile)
+	 * @param progress
+	 *            Object to report progress to
+	 */
 	public static void tileElevations(Dataset dataset, boolean reprojectIfRequired,
 			boolean linearInterpolationIfRequired, Sector sector, LatLon origin, int level, int tilesize, double lzts,
 			int bufferType, int band, NullableNumberArray outsideValues, MinMaxArray[] replaceMinMaxs,
@@ -62,6 +169,37 @@ public class Tiler
 				replace, otherwise, minMax, outputDirectory, resume, progress);
 	}
 
+	/**
+	 * Tile the given Mapnik XML dataset.
+	 * 
+	 * @param mapFile
+	 *            Mapnik XML mapfile to tile
+	 * @param sector
+	 *            Sector to tile
+	 * @param origin
+	 *            Origin to use when tiling (used to calculate tile row/colum
+	 *            numbers)
+	 * @param level
+	 *            Level at which to tile
+	 * @param tilesize
+	 *            Size of the tiles (width/height)
+	 * @param lzts
+	 *            Level zero tile size (in degrees)
+	 * @param imageFormat
+	 *            Image output format (must be supported by the Mapnik util)
+	 * @param ignoreBlank
+	 *            Should blank (transparent) tiles be ignored/not saved?
+	 * @param reprojectIfRequired
+	 *            If the dataset isn't in WGS84, should it be reprojected?
+	 * @param outputDirectory
+	 *            Tile output directory
+	 * @param resume
+	 *            Should the tiling progress be resumed at the last point (last
+	 *            tile file is searched for, and then tiling begins from the
+	 *            next tile)
+	 * @param progress
+	 *            Object to report progress to
+	 */
 	public static void tileMapnik(File mapFile, Sector sector, LatLon origin, int level, int tilesize, double lzts,
 			String imageFormat, boolean ignoreBlank, boolean reprojectIfRequired, File outputDirectory, boolean resume,
 			ProgressReporter progress)
@@ -178,7 +316,6 @@ public class Tiler
 							parameters.minMaxs = replaceMinMaxs;
 							parameters.replacement = replace;
 							parameters.otherwise = otherwise;
-							parameters.ignoreBlank = ignoreBlank;
 
 							GDALTile tile = new GDALTile(parameters);
 							if (type == TilingType.Elevations)
@@ -205,7 +342,7 @@ public class Tiler
 							}
 							else
 							{
-								if (!(parameters.ignoreBlank && tile.isBlank()))
+								if (!(ignoreBlank && tile.isBlank()))
 								{
 									BufferedImage image = tile.getAsImage();
 									writeImage(image, imageFormat, dst, jpegQuality);

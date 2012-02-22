@@ -2,8 +2,18 @@ package au.gov.ga.worldwind.tiler.shapefile;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+/**
+ * Represents an entry or an exit point of a piece of shapefile geometry
+ * into/out of a shapefile tile. Implements the {@link Comparable} interface,
+ * which supports sorting entry/exit points in a clockwise direction.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class EntryExit implements Comparable<EntryExit>
 {
+	/**
+	 * Entry/exit point's coordinate
+	 */
 	public final Coordinate coordinate;
 	private final Coordinate tileCentroid;
 	private boolean entry;
@@ -18,11 +28,17 @@ public class EntryExit implements Comparable<EntryExit>
 		this.entry = entry;
 	}
 
+	/**
+	 * @return Is this point an entry point?
+	 */
 	public boolean isEntry()
 	{
 		return entry;
 	}
 
+	/**
+	 * @return Is this point an exit point?
+	 */
 	public boolean isExit()
 	{
 		return !entry;

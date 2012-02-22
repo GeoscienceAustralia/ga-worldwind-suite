@@ -1,5 +1,9 @@
 package au.gov.ga.worldwind.tiler.application;
 
+import jargs.gnu.CmdLineParser;
+import jargs.gnu.CmdLineParser.IllegalOptionValueException;
+import jargs.gnu.CmdLineParser.Option;
+import jargs.gnu.CmdLineParser.OptionException;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,9 +19,6 @@ import java.util.logging.Logger;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdalconst.gdalconst;
 
-import au.gov.ga.worldwind.tiler.application.CmdLineParser.IllegalOptionValueException;
-import au.gov.ga.worldwind.tiler.application.CmdLineParser.Option;
-import au.gov.ga.worldwind.tiler.application.CmdLineParser.OptionException;
 import au.gov.ga.worldwind.tiler.application.Tiler.TilingType;
 import au.gov.ga.worldwind.tiler.gdal.GDALUtil;
 import au.gov.ga.worldwind.tiler.util.LatLon;
@@ -28,13 +29,18 @@ import au.gov.ga.worldwind.tiler.util.ProgressReporter;
 import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.Util;
 
-
+/**
+ * Console version of the WorldWind Tiler.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Console
 {
 	public final static String LOGGER = "ConsoleLogger";
 
 	private static void printUsage()
 	{
+		// @formatter:off
 		String text =
 				"Usage: [{-h,--help}] [{-i,--images}] [{-e,--elevations}] [{-p,--reproject}]\n"
 						+ "       [{-z,--lzts} lzts] [{-t,--tilesize} size] [{-f,--format} {JPG|PNG}]\n"
@@ -74,6 +80,7 @@ public class Console
 						+ "Elevation specific switches:\n"
 						+ "  -d type    Elevation output format (default: INT16)\n"
 						+ "  -b band    Band to read from for elevation data (default: 1)";
+		// @formatter:on
 		System.out.println(text);
 	}
 
@@ -128,8 +135,7 @@ public class Console
 		Option originO = new Option('s', "origin", true)
 		{
 			@Override
-			protected Object parseValue(String arg, Locale locale)
-					throws IllegalOptionValueException
+			protected Object parseValue(String arg, Locale locale) throws IllegalOptionValueException
 			{
 				return parseOrigin(this, arg);
 			}
@@ -137,8 +143,7 @@ public class Console
 		Option outsideO = new Option('o', "setoutside", true)
 		{
 			@Override
-			protected Object parseValue(String arg, Locale locale)
-					throws IllegalOptionValueException
+			protected Object parseValue(String arg, Locale locale) throws IllegalOptionValueException
 			{
 				return parseNumberArray(this, arg);
 			}
@@ -147,8 +152,7 @@ public class Console
 		Option replaceO = new Option('r', "replacevalues", true)
 		{
 			@Override
-			protected Object parseValue(String arg, Locale locale)
-					throws IllegalOptionValueException
+			protected Object parseValue(String arg, Locale locale) throws IllegalOptionValueException
 			{
 				return parseReplaceValues(this, arg);
 			}
@@ -241,8 +245,7 @@ public class Console
 		Boolean nooverviews = (Boolean) parser.getOptionValue(nooverviewsO, false);
 		Integer levels = (Integer) parser.getOptionValue(levelsO);
 		NullableNumberArray outside = (NullableNumberArray) parser.getOptionValue(outsideO);
-		ReplaceValues replaces =
-				(ReplaceValues) parser.getOptionValue(replaceO, new ReplaceValues());
+		ReplaceValues replaces = (ReplaceValues) parser.getOptionValue(replaceO, new ReplaceValues());
 
 		try
 		{
@@ -258,8 +261,8 @@ public class Console
 
 			if (outside != null && outside.length() != bandCount)
 			{
-				exitWithMessage("Outside value count (" + outside.length()
-						+ ") doesn't equal output band count (" + bandCount + ")");
+				exitWithMessage("Outside value count (" + outside.length() + ") doesn't equal output band count ("
+						+ bandCount + ")");
 			}
 			else if (replaces.replaceMinMaxs != null && replaces.valueCount != bandCount)
 			{
@@ -275,44 +278,39 @@ public class Console
 				output.mkdirs();
 				logWriter = new LogWriter(output);
 				String infoText = GDALUtil.getInfoText(dataset, sector);
-				String tileText =
-						GDALUtil.getTileText(sector, origin, lzts, levels, !nooverviews);
+				String tileText = GDALUtil.getTileText(sector, origin, lzts, levels, !nooverviews);
 
 				if (elevations)
 				{
-					logWriter.startLog(TilingType.Elevations, input, output, sector, origin, level,
-							tilesize, lzts, imageFormat, addAlpha, band, bufferType, bilinear,
-							reproject, infoText, tileText, outside, replaces.replaceMinMaxs,
-							replaces.replace, replaces.otherwise, isFloat);
+					logWriter.startLog(TilingType.Elevations, input, output, sector, origin, level, tilesize, lzts,
+							imageFormat, addAlpha, band, bufferType, bilinear, reproject, infoText, tileText, outside,
+							replaces.replaceMinMaxs, replaces.replace, replaces.otherwise, isFloat);
 
 					NumberArray minMax = new NumberArray(2);
-					Tiler.tileElevations(dataset, reproject, bilinear, sector, origin, level,
-							tilesize, lzts, bufferType, band, outside, replaces.replaceMinMaxs,
-							replaces.replace, replaces.otherwise, minMax, output, true, reporter);
+					Tiler.tileElevations(dataset, reproject, bilinear, sector, origin, level, tilesize, lzts,
+							bufferType, band, outside, replaces.replaceMinMaxs, replaces.replace, replaces.otherwise,
+							minMax, output, true, reporter);
 					if (!nooverviews)
 					{
 						Overviewer.createElevationOverviews(output, tilesize, tilesize, bufferType,
-								ByteOrder.LITTLE_ENDIAN, outside, sector, origin, lzts,
-								bilinearOverviews, !includeBlank, reporter);
+								ByteOrder.LITTLE_ENDIAN, outside, sector, origin, lzts, bilinearOverviews,
+								!includeBlank, reporter);
 					}
 					logWriter.logMinMax(minMax, isFloat);
 				}
 				else
 				{
-					logWriter.startLog(TilingType.Images, input, output, sector, origin, level,
-							tilesize, lzts, imageFormat, addAlpha, band, bufferType, bilinear,
-							reproject, infoText, tileText, outside, replaces.replaceMinMaxs,
-							replaces.replace, replaces.otherwise, isFloat);
+					logWriter.startLog(TilingType.Images, input, output, sector, origin, level, tilesize, lzts,
+							imageFormat, addAlpha, band, bufferType, bilinear, reproject, infoText, tileText, outside,
+							replaces.replaceMinMaxs, replaces.replace, replaces.otherwise, isFloat);
 
-					Tiler.tileImages(dataset, reproject, bilinear, sector, origin, level, tilesize,
-							lzts, imageFormat, addAlpha, quality.floatValue(), outside,
-							!includeBlank, replaces.replaceMinMaxs, replaces.replace,
-							replaces.otherwise, output, true, reporter);
+					Tiler.tileImages(dataset, reproject, bilinear, sector, origin, level, tilesize, lzts, imageFormat,
+							addAlpha, quality.floatValue(), outside, !includeBlank, replaces.replaceMinMaxs,
+							replaces.replace, replaces.otherwise, output, true, reporter);
 					if (!nooverviews)
 					{
-						Overviewer.createImageOverviews(output, imageFormat, tilesize, tilesize,
-								outside, sector, origin, lzts, bilinearOverviews, !includeBlank,
-								quality.floatValue(), reporter);
+						Overviewer.createImageOverviews(output, imageFormat, tilesize, tilesize, outside, sector,
+								origin, lzts, bilinearOverviews, !includeBlank, quality.floatValue(), reporter);
 					}
 				}
 			}
@@ -356,8 +354,7 @@ public class Console
 		}
 	}
 
-	private static NullableNumberArray parseNumberArray(Option option, String arg)
-			throws IllegalOptionValueException
+	private static NullableNumberArray parseNumberArray(Option option, String arg) throws IllegalOptionValueException
 	{
 		try
 		{
@@ -373,8 +370,7 @@ public class Console
 		}
 	}
 
-	private static ReplaceValues parseReplaceValues(Option option, String arg)
-			throws IllegalOptionValueException
+	private static ReplaceValues parseReplaceValues(Option option, String arg) throws IllegalOptionValueException
 	{
 		ReplaceValues replaceValues = new ReplaceValues();
 		replaceValues.replaceMinMaxs = new MinMaxArray[2];
@@ -393,8 +389,8 @@ public class Console
 		String[] replace = groups[4].split(",");
 		String[] otherwise = groups[5].split(",");
 
-		if (!(min1.length == max1.length && min1.length == min2.length
-				&& min1.length == max2.length && min1.length == replace.length && min1.length == otherwise.length))
+		if (!(min1.length == max1.length && min1.length == min2.length && min1.length == max2.length
+				&& min1.length == replace.length && min1.length == otherwise.length))
 			throw new IllegalOptionValueException(option, arg);
 
 		int length = min1.length;

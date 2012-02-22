@@ -2,6 +2,12 @@ package au.gov.ga.worldwind.tiler.util;
 
 import java.util.logging.Logger;
 
+/**
+ * Simple abstract implementation of the {@link ProgressReporter} interface
+ * containing common code.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class ProgressReporterImpl implements ProgressReporter
 {
 	private boolean cancelled = false;

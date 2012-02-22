@@ -1,5 +1,10 @@
 package au.gov.ga.worldwind.tiler.util;
 
+/**
+ * Represents a sector in geographic (latitude/longitude) space.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Sector
 {
 	public static final Sector FULL_SPHERE = new Sector(-90, -180, 90, 180);
@@ -59,14 +64,13 @@ public class Sector
 
 	public boolean containsPoint(double latitude, double longitude)
 	{
-		return getMinLatitude() <= latitude && latitude <= getMaxLatitude()
-				&& getMinLongitude() <= longitude && longitude <= getMaxLongitude();
+		return getMinLatitude() <= latitude && latitude <= getMaxLatitude() && getMinLongitude() <= longitude
+				&& longitude <= getMaxLongitude();
 	}
 
 	@Override
 	public String toString()
 	{
-		return "(" + minLatitude + "," + minLongitude + "," + maxLatitude + "," + maxLongitude
-				+ ")";
+		return "(" + minLatitude + "," + minLongitude + "," + maxLatitude + "," + maxLongitude + ")";
 	}
 }

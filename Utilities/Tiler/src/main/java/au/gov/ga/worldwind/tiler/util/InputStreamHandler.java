@@ -2,6 +2,12 @@ package au.gov.ga.worldwind.tiler.util;
 
 import java.io.InputStream;
 
+/**
+ * Helper class that creates a daemon thread which reads from an InputStream,
+ * and passes the read data as a string to an abstract function.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public abstract class InputStreamHandler
 {
 	public InputStreamHandler(final InputStream is)

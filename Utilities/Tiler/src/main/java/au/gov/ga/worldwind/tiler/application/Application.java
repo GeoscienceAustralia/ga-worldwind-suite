@@ -1,6 +1,5 @@
 package au.gov.ga.worldwind.tiler.application;
 
-
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -66,7 +65,6 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -98,20 +96,13 @@ import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.TilerException;
 import au.gov.ga.worldwind.tiler.util.Util;
 
-
+/**
+ * UI of the WorldWind Tiler.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Application implements UncaughtExceptionHandler
 {
-	static
-	{
-		try
-		{
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (Exception e)
-		{
-		}
-	}
-
 	private final static String LOGGER = "TilerLogger";
 
 	public final static String OUTPUT_DIR_KEY = "Last Output Directory";
@@ -742,8 +733,9 @@ public class Application implements UncaughtExceptionHandler
 				Integer tilesize = tilesizeField.getValue();
 				if (tilesize != null && sector != null && dataset != null)
 				{
-					double optimal = Util.optimalLztsd(dataset, sector, tilesizeField.getValue(),
-							elevationRadio.isSelected() ? 20 : 36);
+					double optimal =
+							Util.optimalLztsd(dataset, sector, tilesizeField.getValue(), elevationRadio.isSelected()
+									? 20 : 36);
 					optimal = Math.floor(optimal * 10e6) / 10e6;
 					lztsField.setValue(optimal);
 				}
