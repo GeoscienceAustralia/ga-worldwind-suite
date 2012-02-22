@@ -4,6 +4,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This script deletes any image tiles that don't have associated mask tiles.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class NoMaskDeleter
 {
 	public static void main(String[] args)
@@ -28,8 +33,8 @@ public class NoMaskDeleter
 			{
 				File imageFile = images.get(i);
 
-				System.out.println("Deleting " + imageFile + " (" + (i + 1) + "/" + images.size()
-						+ " - " + ((i + 1) * 100 / images.size()) + "%)");
+				System.out.println("Deleting " + imageFile + " (" + (i + 1) + "/" + images.size() + " - "
+						+ ((i + 1) * 100 / images.size()) + "%)");
 
 				imageFile.delete();
 			}
@@ -42,8 +47,8 @@ public class NoMaskDeleter
 		}
 	}
 
-	protected static void addImages(File dir, List<File> images, File imageDir, String imageExt,
-			File maskDir, String maskExt)
+	protected static void addImages(File dir, List<File> images, File imageDir, String imageExt, File maskDir,
+			String maskExt)
 	{
 		File[] files = dir.listFiles();
 		if (files != null)

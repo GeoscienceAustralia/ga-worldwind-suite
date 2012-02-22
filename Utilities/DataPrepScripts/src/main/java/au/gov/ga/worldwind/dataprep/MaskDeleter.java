@@ -11,6 +11,12 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
+/**
+ * This script can be used to delete image tiles and their associated mask if
+ * the mask is blank (fully transparent).
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class MaskDeleter
 {
 	public static void main(String[] args)
@@ -70,7 +76,7 @@ public class MaskDeleter
 				"jpg",
 				new File("S:/resources/images/world-wind/tiles/radiometrics/edition2/ratio_uut_clip/mask"),
 				"png");*/
-		
+
 		/*deleteBlankImages(new File("S:/resources/images/world-wind/tiles/surface_uranium/calcrete_raster"), "png");
 		
 		deleteImagesWithBlankMasks(new File[] {
@@ -96,14 +102,11 @@ public class MaskDeleter
 				"jpg",
 				new File("S:/resources/images/world-wind/tiles/terrain/ozhill2/mask"),
 				"png");*/
-		
+
 		//deleteBlankImages(new File("G:/LandCover/DLCM_RGB/mask"), "png");
-		
-		deleteImagesWithBlankMasks(new File[] {
-				new File("D:/Magmap_images/1_tiles") },
-				"jpg",
-				new File("D:/Magmap_images/1_mask"),
-				"png");
+
+		deleteImagesWithBlankMasks(new File[] { new File("D:/Magmap_images/1_tiles") }, "jpg", new File(
+				"D:/Magmap_images/1_mask"), "png");
 	}
 
 	public static void deleteBlankImages(File imageDir, String imageExt)
@@ -124,8 +127,8 @@ public class MaskDeleter
 			{
 				File imageFile = images.get(i);
 
-				System.out.println("Reading " + imageFile + " (" + (i + 1) + "/" + images.size()
-						+ " - " + ((i + 1) * 100 / images.size()) + "%)");
+				System.out.println("Reading " + imageFile + " (" + (i + 1) + "/" + images.size() + " - "
+						+ ((i + 1) * 100 / images.size()) + "%)");
 
 				BufferedImage image = ImageIO.read(imageFile);
 				if (isEmpty(image))
@@ -136,7 +139,7 @@ public class MaskDeleter
 					deleteCount++;
 				}
 			}
-			
+
 			System.out.println("Searching for empty row directories");
 			for (File dir : directories)
 			{
@@ -148,8 +151,7 @@ public class MaskDeleter
 				}
 			}
 
-			System.out.println("Complete: deleted " + deleteCount + "/" + images.size()
-					+ " images");
+			System.out.println("Complete: deleted " + deleteCount + "/" + images.size() + " images");
 		}
 		catch (IOException e)
 		{
@@ -157,8 +159,7 @@ public class MaskDeleter
 		}
 	}
 
-	public static void deleteImagesWithBlankMasks(File[] imageDirs, String imageExt, File maskDir,
-			String maskExt)
+	public static void deleteImagesWithBlankMasks(File[] imageDirs, String imageExt, File maskDir, String maskExt)
 	{
 		try
 		{
@@ -181,8 +182,8 @@ public class MaskDeleter
 			{
 				File maskFile = masks.get(i);
 
-				System.out.println("Reading " + maskFile + " (" + (i + 1) + "/" + masks.size()
-						+ " - " + ((i + 1) * 100 / masks.size()) + "%)");
+				System.out.println("Reading " + maskFile + " (" + (i + 1) + "/" + masks.size() + " - "
+						+ ((i + 1) * 100 / masks.size()) + "%)");
 
 				BufferedImage image = ImageIO.read(maskFile);
 				if (isEmpty(image))
@@ -259,9 +260,8 @@ public class MaskDeleter
 		}
 	}
 
-	protected static void addMaskImages(File dir, List<File>[] images, List<File> masks,
-			File[] imageDirs, String imageExt, File maskDir, String maskExt)
-			throws FileNotFoundException
+	protected static void addMaskImages(File dir, List<File>[] images, List<File> masks, File[] imageDirs,
+			String imageExt, File maskDir, String maskExt) throws FileNotFoundException
 	{
 		File[] files = dir.listFiles();
 		if (files != null)

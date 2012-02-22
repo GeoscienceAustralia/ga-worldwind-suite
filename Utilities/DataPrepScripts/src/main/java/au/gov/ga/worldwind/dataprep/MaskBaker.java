@@ -10,6 +10,13 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+/**
+ * This script can be used to take a set of image tiles and a set of mask tiles,
+ * and bake the masks into the image by using the alpha channel of the mask tile
+ * as the alpha channel of the image tile.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class MaskBaker
 {
 	public static void main(String[] args)
@@ -23,8 +30,8 @@ public class MaskBaker
 		bake(imageDir, imageExt, maskDir, maskExt, outputDir, outputExt);
 	}
 
-	public static void bake(File imageDir, String imageExt, File maskDir, String maskExt,
-			File outputDir, String outputExt)
+	public static void bake(File imageDir, String imageExt, File maskDir, String maskExt, File outputDir,
+			String outputExt)
 	{
 		try
 		{
@@ -32,8 +39,7 @@ public class MaskBaker
 			List<File> masks = new ArrayList<File>();
 			List<File> outputs = new ArrayList<File>();
 
-			addImages(imageDir, images, masks, outputs, imageDir, imageExt, maskDir, maskExt,
-					outputDir, outputExt);
+			addImages(imageDir, images, masks, outputs, imageDir, imageExt, maskDir, maskExt, outputDir, outputExt);
 
 			System.out.println("Found " + images.size() + " images");
 
@@ -43,8 +49,8 @@ public class MaskBaker
 				File maskFile = masks.get(i);
 				File outputFile = outputs.get(i);
 
-				System.out.println("Writing " + outputFile + " (" + (i + 1) + "/" + images.size()
-						+ " - " + ((i + 1) * 100 / images.size()) + "%)");
+				System.out.println("Writing " + outputFile + " (" + (i + 1) + "/" + images.size() + " - "
+						+ ((i + 1) * 100 / images.size()) + "%)");
 
 				BufferedImage image = ImageIO.read(imageFile);
 				BufferedImage mask = ImageIO.read(maskFile);
@@ -69,9 +75,8 @@ public class MaskBaker
 		}
 	}
 
-	protected static void addImages(File dir, List<File> images, List<File> masks,
-			List<File> outputs, File imageDir, String imageExt, File maskDir, String maskExt,
-			File outputDir, String outputExt)
+	protected static void addImages(File dir, List<File> images, List<File> masks, List<File> outputs, File imageDir,
+			String imageExt, File maskDir, String maskExt, File outputDir, String outputExt)
 	{
 		File[] files = dir.listFiles();
 		if (files != null)
@@ -80,8 +85,7 @@ public class MaskBaker
 			{
 				if (file.isDirectory())
 				{
-					addImages(file, images, masks, outputs, imageDir, imageExt, maskDir, maskExt,
-							outputDir, outputExt);
+					addImages(file, images, masks, outputs, imageDir, imageExt, maskDir, maskExt, outputDir, outputExt);
 				}
 				else if (file.getName().toLowerCase().endsWith("." + imageExt))
 				{

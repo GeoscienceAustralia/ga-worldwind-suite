@@ -9,11 +9,19 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * This script zips tiles (image or elevation) into individual zip files of the
+ * same name (one zip file per tile).
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class Zipper
 {
 	public static void main(String[] args)
 	{
-		File dir = new File("V:/projects/presentations/11-5902 - Broken Hill 3D model data visualisation/Worldwind/layers/dem/mos_dem_10box_ers_wgs84");
+		File dir =
+				new File(
+						"V:/projects/presentations/11-5902 - Broken Hill 3D model data visualisation/Worldwind/layers/dem/mos_dem_10box_ers_wgs84");
 		String ext = "bil";
 		zipAndDelete(dir, ext);
 		//unzipAndDelete(dir);
@@ -51,7 +59,7 @@ public class Zipper
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void unzipAndDelete(File dir)
 	{
 		System.out.println("Searching for files");
@@ -99,16 +107,14 @@ public class Zipper
 			}
 		}
 	}
-	
+
 	public static void zip(File input, File output) throws IOException, InterruptedException
 	{
-		String command =
-				"7za a -tzip \"" + output.getAbsolutePath() + "\" \"" + input.getAbsolutePath()
-						+ "\"";
+		String command = "7za a -tzip \"" + output.getAbsolutePath() + "\" \"" + input.getAbsolutePath() + "\"";
 		Process process = Runtime.getRuntime().exec(command);
 		process.waitFor();
 	}
-	
+
 	public static void unzip(File input, File outputDir) throws IOException
 	{
 		byte[] buffer = new byte[10240];

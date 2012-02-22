@@ -10,13 +10,19 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This script can be used to zip image tiles and their associated mask tiles
+ * into individual zip files (1 zip per tile).
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class MaskZipper
 {
 	public static void main(String[] args)
 	{
-		File imageDir = new File("D:/ASTER/WA/Tiles/AlOH_GROUP_CONTENT_tiles");
-		File maskDir = new File("D:/ASTER/WA/Tiles/AlOH_GROUP_CONTENT_mask");
-		File outputDir = new File("D:/ASTER/WA/Tiles/AlOH_GROUP_CONTENT");
+		File imageDir = new File("D:/ASTER/WA/Tiles/FeOH_GROUP_CONTENT_tiles");
+		File maskDir = new File("D:/ASTER/WA/Tiles/FeOH_GROUP_CONTENT_mask");
+		File outputDir = new File("D:/ASTER/WA/Tiles/FeOH_GROUP_CONTENT");
 		String imageExt = "jpg";
 		String maskExt = "png";
 		String outputExt = "zip";
