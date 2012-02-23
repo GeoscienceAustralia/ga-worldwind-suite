@@ -12,7 +12,6 @@
 	<classpathentry kind="src" path="src/examples/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/worldwind-latest"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/COLLADA"/>
 	<classpathentry kind="lib" path="lib/test/hamcrest-core-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/test/hamcrest-library-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/test/jmock-2.5.1.jar"/>

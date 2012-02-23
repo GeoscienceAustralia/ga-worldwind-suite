@@ -8,13 +8,8 @@ import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.ogc.kml.KMLAbstractFeature;
 import gov.nasa.worldwind.ogc.kml.KMLConstants;
 import gov.nasa.worldwind.ogc.kml.KMLRoot;
-import gov.nasa.worldwind.ogc.kml.custom.CustomKMLRoot;
 import gov.nasa.worldwind.ogc.kml.impl.KMLController;
 import gov.nasa.worldwind.ogc.kml.io.KMLDoc;
-import gov.nasa.worldwind.ogc.kml.relativeio.RelativeKMLFile;
-import gov.nasa.worldwind.ogc.kml.relativeio.RelativeKMLInputStream;
-import gov.nasa.worldwind.ogc.kml.relativeio.RelativeKMZFile;
-import gov.nasa.worldwind.ogc.kml.relativeio.RelativeKMZInputStream;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWIO;
 import gov.nasa.worldwind.util.WWUtil;
@@ -24,6 +19,7 @@ import gov.nasa.worldwind.util.tree.TreeNode;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.logging.Level;
 
@@ -35,6 +31,10 @@ import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.layers.Hierarchical;
+import au.gov.ga.worldwind.common.layers.kml.relativeio.RelativeKMLFile;
+import au.gov.ga.worldwind.common.layers.kml.relativeio.RelativeKMLInputStream;
+import au.gov.ga.worldwind.common.layers.kml.relativeio.RelativeKMZFile;
+import au.gov.ga.worldwind.common.layers.kml.relativeio.RelativeKMZInputStream;
 import au.gov.ga.worldwind.common.util.Loader;
 import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -140,12 +140,27 @@ public class KMLLayer extends RenderableLayer implements Loader, Hierarchical
 											: new RelativeKMLInputStream(stream, url.toURI(), url.toString(), null);
 						}
 
-						CustomKMLRoot root = new CustomKMLRoot(doc);
+						KMLRoot root;
+						try
+						{
+							//Attempt to create an instance of the CustomKMLRoot object, for loading
+							//COLLADA models. This is done via reflection, so there's no requirement
+							//for the library to be in the classpath.
+							Class<?> colladaKmlRootClass =
+									Class.forName("gov.nasa.worldwind.ogc.kml.custom.CustomKMLRoot");
+							Constructor<?> c = colladaKmlRootClass.getConstructor(KMLDoc.class);
+							root = (KMLRoot) c.newInstance(doc);
+						}
+						catch (Exception e)
+						{
+							root = new KMLRoot(doc);
+						}
+
 						root.parse();
 						KMLController controller = new KMLController(root);
 						addRenderable(controller);
 						setName(formName(url, root));
-						
+
 						node = new KMLLayerTreeNode(KMLLayer.this, root);
 						notifyHierarchicalListeners(node);
 					}
@@ -209,7 +224,7 @@ public class KMLLayer extends RenderableLayer implements Loader, Hierarchical
 	{
 		loadingListeners.notifyListeners(isLoading());
 	}
-	
+
 	protected void notifyHierarchicalListeners(TreeNode node)
 	{
 		hierarchicalListeners.notifyListeners(this, node);
@@ -221,7 +236,7 @@ public class KMLLayer extends RenderableLayer implements Loader, Hierarchical
 		synchronized (lock)
 		{
 			hierarchicalListeners.add(listener);
-			if(node != null)
+			if (node != null)
 			{
 				//already loaded, so notify immediately
 				notifyHierarchicalListeners(node);
