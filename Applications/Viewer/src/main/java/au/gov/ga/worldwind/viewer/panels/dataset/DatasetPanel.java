@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.viewer.panels.dataset;
 
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
-import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.getDatasetsPanelTitleKey;
+import static au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants.getDatasetsPanelTitleKey;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

@@ -7,7 +7,7 @@ All Rights Reserved.
 package au.gov.ga.worldwind.viewer.panels.other;
 
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
-import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
+import static au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants.*;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;

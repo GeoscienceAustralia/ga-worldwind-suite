@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
-import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.getTreeWmsRootNodeLabel;
 import static au.gov.ga.worldwind.viewer.util.Message.getMessage;
+import static au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants.getTreeWmsRootNodeLabel;
 import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;

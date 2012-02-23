@@ -1,6 +1,6 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
-import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.getTreeWmsRootNodeLabel;
+import static au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants.getTreeWmsRootNodeLabel;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;

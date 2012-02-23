@@ -44,7 +44,7 @@ public class LogoLayer extends RenderableLayer
 
 	public LogoLayer()
 	{
-		iconFilePath = "au/gov/ga/worldwind/data/images/geoscience_inline_white.png";
+		iconFilePath = "images/geoscience_australia_inline_white.png";
 		setName("GA logo");
 	}
 

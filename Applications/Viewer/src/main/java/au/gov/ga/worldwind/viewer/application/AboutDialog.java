@@ -47,12 +47,10 @@ public class AboutDialog extends JDialog
 			}
 		});
 
-		String base = "/au/gov/ga/worldwind/viewer/data/help/";
-
 		BufferedImage image = null;
 		try
 		{
-			InputStream is = AboutDialog.class.getResourceAsStream(base + "about.jpg");
+			InputStream is = AboutDialog.class.getResourceAsStream("/images/about.jpg");
 			image = ImageIO.read(is);
 			is.close();
 		}
@@ -72,7 +70,7 @@ public class AboutDialog extends JDialog
 
 		JEditorPane editorPane = new JEditorPane();
 		editorPane.setEditable(false);
-		java.net.URL helpURL = this.getClass().getResource(base + "about.html");
+		java.net.URL helpURL = this.getClass().getResource("/html/about.html");
 		if (helpURL != null)
 		{
 			try

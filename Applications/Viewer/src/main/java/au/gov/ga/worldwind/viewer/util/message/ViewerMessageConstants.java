@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.viewer.data.messages;
+package au.gov.ga.worldwind.viewer.util.message;
 
 import au.gov.ga.worldwind.common.util.message.CommonMessageConstants;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
@@ -10,7 +10,7 @@ public class ViewerMessageConstants extends CommonMessageConstants
 {
 	static
 	{
-		MessageSourceAccessor.addBundle("au.gov.ga.worldwind.viewer.data.messages.viewerMessages");
+		MessageSourceAccessor.addBundle("messages.viewerMessages");
 	}
 
 	public static String getApplicationTitleKey() { return "viewer.application.title"; }

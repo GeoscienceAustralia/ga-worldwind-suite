@@ -3,7 +3,7 @@ package au.gov.ga.worldwind.viewer.panels.layers;
 import static au.gov.ga.worldwind.common.util.Util.isBlank;
 import static au.gov.ga.worldwind.common.util.Util.isEmpty;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
-import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
+import static au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants.*;
 import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.awt.Window;

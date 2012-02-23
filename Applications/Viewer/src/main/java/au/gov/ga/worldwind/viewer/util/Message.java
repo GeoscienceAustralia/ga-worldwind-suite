@@ -1,7 +1,7 @@
 package au.gov.ga.worldwind.viewer.util;
 
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
-import au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants;
+import au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants;
 
 /**
  * Helper class for getting message strings.

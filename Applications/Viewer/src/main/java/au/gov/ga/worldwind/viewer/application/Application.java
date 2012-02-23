@@ -3,7 +3,7 @@ package au.gov.ga.worldwind.viewer.application;
 import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getVideocardFailureMessageKey;
 import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getVideocardFailureTitleKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
-import static au.gov.ga.worldwind.viewer.data.messages.ViewerMessageConstants.*;
+import static au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants.*;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
@@ -1088,9 +1088,7 @@ public class Application
 
 	private void create3DMouse()
 	{
-		final UserFacingIcon icon =
-				new UserFacingIcon("au/gov/ga/worldwind/viewer/data/images/cursor.png", new Position(Angle.ZERO,
-						Angle.ZERO, 0));
+		final UserFacingIcon icon = new UserFacingIcon("images/cursor.png", new Position(Angle.ZERO, Angle.ZERO, 0));
 		icon.setSize(new Dimension(16, 32));
 		icon.setAlwaysOnTop(true);
 
@@ -1350,9 +1348,7 @@ public class Application
 
 	private void showControls()
 	{
-		JDialog dialog =
-				new HtmlViewer(frame, getMessage(getControlsTitleKey()), false,
-						"/au/gov/ga/worldwind/viewer/data/help/controls.html", true);
+		JDialog dialog = new HtmlViewer(frame, getMessage(getControlsTitleKey()), false, "/html/controls.html", true);
 		dialog.setResizable(false);
 		dialog.setSize(640, 480);
 		dialog.setLocationRelativeTo(frame);
