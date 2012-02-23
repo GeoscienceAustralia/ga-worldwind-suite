@@ -45,7 +45,7 @@ public class WmsBrowser
 	
 	public WmsBrowser(String parentApplicationTitle)
 	{
-		MessageSourceAccessor.addBundle("au.gov.ga.worldwind.wmsbrowser.data.messages.wmsBrowserMessages");
+		MessageSourceAccessor.addBundle("messages.wmsBrowserMessages");
 		
 		initialiseWindow(parentApplicationTitle);
 		initialiseWindowContents();

@@ -13,7 +13,7 @@ public class MessageSourceAccessor
 	static
 	{
 		set(new ResourceBundleMessageSource());
-		addBundle("au.gov.ga.worldwind.common.data.messages.commonMessages");
+		addBundle("messages.commonMessages");
 	}
 
 	private static MessageSource messageSource;

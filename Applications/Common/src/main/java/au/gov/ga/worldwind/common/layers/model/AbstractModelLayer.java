@@ -163,7 +163,7 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 		shape.setPointLinearAttenuation(pointLinearAttenuation);
 		shape.setPointQuadraticAttenuation(pointQuadraticAttenuation);
 		shape.setPointSprite(pointSprite);
-		shape.setPointTextureUrl(this.getClass().getResource("sprite.png"));
+		shape.setPointTextureUrl(getClass().getResource("/images/pointsprite.png"));
 		shape.setWireframe(isWireframe());
 
 		synchronized (shapes)

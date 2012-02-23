@@ -18,7 +18,7 @@ public class LayerInfoBuilderTest
 
 	public LayerInfoBuilderTest()
 	{
-		MessageSourceAccessor.addBundle("au.gov.ga.worldwind.wmsbrowser.data.messages.wmsBrowserMessages");
+		MessageSourceAccessor.addBundle("messages.wmsBrowserMessages");
 	}
 	
 	@Test

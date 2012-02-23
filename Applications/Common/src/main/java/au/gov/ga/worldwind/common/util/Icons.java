@@ -120,7 +120,7 @@ public class Icons
 		}
 	}
 	
-	private static final String DEFAULT_ICON_DIRECTORY = "/au/gov/ga/worldwind/common/data/icons/";
+	private static final String DEFAULT_ICON_DIRECTORY = "/images/icons/";
 	private ImageIcon icon;
 	private URL url;
 
