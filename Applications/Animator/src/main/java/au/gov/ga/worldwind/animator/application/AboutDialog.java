@@ -44,8 +44,6 @@ public class AboutDialog extends JDialog
 {
 	private static final long serialVersionUID = 20110310L;
 
-	private static final String BASE_LOCATION = "/au/gov/ga/worldwind/animator/data/help/";
-
 	private final LicenceDialog licenceDialog;
 
 	private final HyperlinkListener hyperlinkListener = new HyperlinkListener()
@@ -97,7 +95,7 @@ public class AboutDialog extends JDialog
 		try
 		{
 			String aboutContent =
-					Util.readStreamToString(this.getClass().getResourceAsStream(BASE_LOCATION + "about.html"));
+					Util.readStreamToString(this.getClass().getResourceAsStream("/html/about.html"));
 			if (aboutContent != null)
 			{
 				String version = Util.getVersion();
@@ -162,7 +160,7 @@ public class AboutDialog extends JDialog
 		BufferedImage image = null;
 		try
 		{
-			InputStream is = AboutDialog.class.getResourceAsStream(BASE_LOCATION + "about.jpg");
+			InputStream is = AboutDialog.class.getResourceAsStream("/images/about.jpg");
 			image = ImageIO.read(is);
 			is.close();
 		}
@@ -221,7 +219,7 @@ public class AboutDialog extends JDialog
 			// Load the about content
 			JEditorPane editorPane = new JEditorPane();
 			editorPane.setEditable(false);
-			java.net.URL aboutURL = this.getClass().getResource(BASE_LOCATION + "eula.html");
+			java.net.URL aboutURL = this.getClass().getResource("/html/eula.html");
 			if (aboutURL != null)
 			{
 				try

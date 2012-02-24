@@ -23,6 +23,7 @@ public class Icons
 	public static final Icons collapse = new Icons("collapse.gif");
 	public static final Icons collapseall = new Icons("collapseall.gif");
 	public static final Icons compass = new Icons("compass.gif");
+	public static final Icons copy = new Icons("copy.gif");
 	public static final Icons crosshair45 = new Icons("crosshair45.gif");
 	public static final Icons crosshair = new Icons("crosshair.gif");
 	public static final Icons crosshairwhite = new Icons("crosshairwhite.gif");
@@ -64,6 +65,8 @@ public class Icons
 	public static final Icons newfolder = new Icons("newfolder.gif");
 	public static final Icons offline = new Icons("offline.gif");
 	public static final Icons overview = new Icons("overview.gif");
+	public static final Icons partialCheck = new Icons("partialcheck.gif");
+	public static final Icons paste = new Icons("paste.gif");
 	public static final Icons pause = new Icons("pause.gif");
 	public static final Icons properties = new Icons("properties.gif");
 	public static final Icons refresh = new Icons("refresh.gif");

@@ -86,7 +86,7 @@ public class AnimatorConfiguration
 	
 	private static void initialiseMessageSource()
 	{
-		MessageSourceAccessor.addBundle("au.gov.ga.worldwind.animator.data.messages.animatorMessages");
+		MessageSourceAccessor.addBundle("messages.animatorMessages");
 	}
 	
 	public static GLCapabilities getGLCapabilities()

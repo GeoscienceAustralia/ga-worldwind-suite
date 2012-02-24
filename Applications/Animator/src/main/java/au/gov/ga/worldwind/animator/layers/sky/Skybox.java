@@ -31,7 +31,7 @@ public class Skybox extends RenderableLayer
 	private Texture[] skybox = new Texture[6];
 	private static final String[] keys = new String[6];
 	private static final String[] id = { "front", "left", "back", "right", "top", "bottom" };
-	private String skyboxDir = "data/skybox";
+	private String skyboxDir = "/images/skybox/";
 	private String extension = ".png";
 
 	static
@@ -51,9 +51,8 @@ public class Skybox extends RenderableLayer
 			{
 				try
 				{
-					String slash = skyboxDir != null && skyboxDir.length() > 0 && !skyboxDir.endsWith("/") ? "/" : "";
-					String filename = skyboxDir + slash + id[i] + extension;
-					InputStream stream = this.getClass().getResourceAsStream("/" + filename);
+					String filename = skyboxDir + id[i] + extension;
+					InputStream stream = this.getClass().getResourceAsStream(filename);
 					if (stream == null)
 					{
 						File file = new File(filename);
