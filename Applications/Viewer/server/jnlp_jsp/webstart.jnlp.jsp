@@ -36,10 +36,45 @@
 		<all-permissions />
 	</security>
 	<resources>
-		<j2se href="http://java.sun.com/products/autodl/j2se" version="1.6+" initial-heap-size="512m" max-heap-size="512m" />
+		<j2se href="http://java.sun.com/products/autodl/j2se" version="1.6+" initial-heap-size="1024m" max-heap-size="1024m" />
 		<property name="sun.java2d.noddraw" value="true" />
-		<jar href="application.jar" main="true" />
-		<extension name="worldwind" href="<%= codebase %>worldwind.jnlp.jsp" />
+		<jar href="viewer.jar" main="true" />
+		<jar href="common.jar" />
+		<jar href="resources.jar" />
+		<jar href="worldwind.jar" />
+		<jar href="worldwindx.jar" />
+		<jar href="gdal.jar" />
+		<jar href="jhlabs-filters.jar" />
+		<!-- Java.net jogl jar certificate has expired. Using jars on NASA servers instead. -->
+		<!-- <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp" /> -->
+		<extension name="jogl" href="http://worldwind.arc.nasa.gov/java/jogl/webstart/jogl.jnlp"/>
+	</resources>
+	<resources os="Windows" arch="x86">
+		<nativelib href="worldwind-natives-windows-i586.jar" />
+	</resources>
+	<resources os="Windows" arch="amd64">
+		<nativelib href="worldwind-natives-windows-amd64.jar" />
+	</resources>
+	<resources os="Windows" arch="x86_64">
+		<nativelib href="worldwind-natives-windows-amd64.jar" />
+	</resources>
+	<resources os="Linux" arch="i386">
+		<nativelib href="worldwind-natives-linux-i586.jar" />
+	</resources>
+	<resources os="Linux" arch="x86">
+		<nativelib href="worldwind-natives-linux-i586.jar" />
+	</resources>
+	<resources os="Linux" arch="amd64">
+		<nativelib href="worldwind-natives-linux-amd64.jar" />
+	</resources>
+	<resources os="Linux" arch="x86_64">
+		<nativelib href="worldwind-natives-linux-amd64.jar" />
+	</resources>
+	<resources os="Mac OS X" arch="i386">
+		<nativelib href="worldwind-natives-macosx-universal.jar" />
+	</resources>
+	<resources os="Mac OS X" arch="x86_64">
+		<nativelib href="worldwind-natives-macosx-universal.jar" />
 	</resources>
 	<application-desc main-class="au.gov.ga.worldwind.viewer.application.Application"><%
 			if(theme != null)
