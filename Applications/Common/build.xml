@@ -2,6 +2,7 @@
 
 <project name="Common" basedir="." default="run">
 
+	<property name="perform_unit_tests" value="true" />
 	<property name="javac_debug" value="false" />
 
 	<property name="src_dir" value="${basedir}/src/main/java" />
@@ -57,7 +58,7 @@
 		</javac>
 	</target>
 
-	<target name="build-test" depends="build">
+	<target name="build-test" depends="build" if="${perform_unit_tests}">
 		<mkdir dir="${test_build_dir}" />
 		<copy todir="${test_build_dir}">
 			<fileset dir="${test_src_dir}">
@@ -69,10 +70,10 @@
 		</javac>
 	</target>
 
-	<target name="test" description="Execute unit tests on the project" depends="build-test">
+	<target name="test" depends="build-test" if="${perform_unit_tests}">
 		<mkdir dir="${test_results_dir}" />
 		<mkdir dir="${test_reports_dir}" />
-		<junit printsummary="withOutAndErr" failureproperty="junit.failure">
+		<junit printsummary="on" failureproperty="junit.failure">
 			<classpath>
 				<path refid="test_classpath" />
 				<path path="${test_build_dir}" />
