@@ -152,8 +152,10 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	{
 		if (layer.getOpacity() != opacity)
 		{
+			//set the opacity on both the layer node and the layer, so they match
 			layer.setOpacity(opacity);
-			refreshLayers();
+			enabler.getLayer(layer).setOpacity(opacity);
+			enabler.redrawWwd();
 		}
 	}
 
@@ -166,8 +168,10 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	{
 		if (layer.getExpiryTime() != expiryTime)
 		{
+			//set the expiry on both the layer node and the layer, so they match
 			layer.setExpiryTime(expiryTime);
-			refreshLayers();
+			enabler.getLayer(layer).setExpiryTime(expiryTime);
+			enabler.redrawWwd();
 		}
 	}
 

@@ -566,6 +566,14 @@ public class LayerEnabler implements HierarchicalListener
 		return elevationModelMap.get(elevationModel);
 	}
 
+	public void redrawWwd()
+	{
+		if (wwd != null)
+		{
+			wwd.redraw();
+		}
+	}
+
 	private class Wrapper
 	{
 		public final ILayerNode node;
