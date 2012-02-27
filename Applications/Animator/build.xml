@@ -60,14 +60,14 @@
 		<delete dir="${target_dir}" />
 	</target>
 
-	<target name="package_common">
+	<target name="package-common">
 		<ant antfile="${common_build_script}" target="run" dir="${common_dir}" inheritall="false">
 			<property name="javac_debug" value="${javac_debug}" />
 			<property name="perform_unit_tests" value="${perform_unit_tests}" />
 		</ant>
 	</target>
 
-	<target name="build" depends="package_common">
+	<target name="build" depends="package-common">
 		<mkdir dir="${build_dir}" />
 		<copy todir="${build_dir}">
 			<fileset dir="${resources_dir}" />
