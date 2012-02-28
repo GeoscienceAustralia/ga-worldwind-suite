@@ -2,27 +2,27 @@
 
 <project name="Tiler" basedir="." default="run">
 
-	<property name="deploy_location" value="\\NAS\Corp\gav\GEOVIS\VIS\projects\applications\(Ongoing) - World Wind Suite\Tiler\Builds\Current" />
+	<property name="javac_debug" value="false" />
 
 	<property name="src_dir" value="${basedir}/src/main/java" />
+	<property name="resources_dir" value="${basedir}/src/main/resources" />
+
 	<property name="lib_dir" value="${basedir}/lib" />
 	<property name="gdal_dir" value="${basedir}/gdal" />
 	<property name="data_dir" value="${basedir}/gdal/data" />
 	<property name="plugins_dir" value="${basedir}/gdal/plugins" />
 	<property name="mapnik_dir" value="${basedir}/mapnik" />
 
-	<property name="build_dir" value="${basedir}/build" />
-	<property name="main_build_dir" value="${build_dir}/main" />
-	<property name="test_build_dir" value="${build_dir}/test" />
-	<property name="executable_dir" value="${basedir}/executable" />
+	<property name="target_dir" value="${basedir}/target" />
+	<property name="build_dir" value="${target_dir}/classes" />
+	<property name="package_dir" value="${target_dir}/package" />
+	<property name="jar_name" value="tiler.jar" />
 
-	<property name="tiler_version" value="1.1" />
-	<property name="executable_jar" value="tiler-${tiler_version}.jar" />
-
-	<property name="ribbon_version" value="1.1-SNAPSHOT" />
-	<property name="ribbon_jar" value="ribbonTiler-${ribbon_version}.jar" />
-
-	<property name="javac_debug" value="false" />
+	<property name="executable_dir" value="${target_dir}/executable" />
+	<property name="executable_jar_name" value="tiler-all-in-one.jar" />
+	<property name="executable_gui_batch_name" value="gui.bat" />
+	<property name="executable_console_batch_name" value="console.bat" />
+	<property name="executable_ribbon_batch_name" value="ribbon.bat" />
 
 	<path id="classpath">
 		<fileset dir="${lib_dir}">
@@ -33,131 +33,84 @@
 		</fileset>
 	</path>
 
+	<patternset id="manifest_exclude">
+		<exclude name="META-INF/**" />
+	</patternset>
+
 	<target name="clean">
-		<delete dir="${build_dir}" />
-		<delete dir="${executable_dir}" />
+		<delete dir="${target_dir}" />
 	</target>
 
-	<target name="compile">
+	<target name="build">
 		<mkdir dir="${build_dir}" />
+		<copy todir="${build_dir}">
+			<fileset dir="${resources_dir}" />
+		</copy>
 		<copy todir="${build_dir}">
 			<fileset dir="${src_dir}">
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javac source="1.5" target="1.5" srcdir="${src_dir}" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" />
+		<javac source="1.6" target="1.6" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" includeantruntime="no">
+			<src path="${src_dir}" />
+		</javac>
 	</target>
 
-	<patternset id="manifest.exclude">
-		<exclude name="META-INF/*.DSA" />
-		<exclude name="META-INF/*.RSA" />
-		<exclude name="META-INF/*.SF" />
-		<exclude name="META-INF/MANIFEST.MF" />
-		<exclude name="META-INF/INDEX.LIST" />
-	</patternset>
+	<target name="package" depends="build">
+		<mkdir dir="${package_dir}" />
+		<jar destfile="${package_dir}/${jar_name}">
+			<manifest>
+				<attribute name="Main-Class" value="au.gov.ga.worldwind.tiler.application.Executable" />
+			</manifest>
+			<fileset dir="${build_dir}" />
+		</jar>
+	</target>
 
-	<target name="executable" depends="compile">
+	<target name="executable" depends="package">
 		<mkdir dir="${executable_dir}" />
-		<zip destfile="${executable_dir}/temp.zip">
+
+		<jar destfile="${executable_dir}/${executable_jar_name}">
+			<fileset dir="${build_dir}" />
+
 			<zipgroupfileset dir="${lib_dir}">
 				<include name="**/*.jar" />
+				<patternset refid="manifest_exclude" />
 			</zipgroupfileset>
 			<zipgroupfileset dir="${gdal_dir}">
 				<include name="**/*.jar" />
+				<patternset refid="manifest_exclude" />
 			</zipgroupfileset>
-		</zip>
-		<jar destfile="${executable_dir}/${executable_jar}">
-			<fileset dir="${build_dir}" />
-			<zipfileset src="${executable_dir}/temp.zip">
-				<patternset refid="manifest.exclude" />
-			</zipfileset>
+
 			<manifest>
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.tiler.application.Executable" />
 			</manifest>
 		</jar>
-		<delete file="${executable_dir}/temp.zip" />
+
 		<copy todir="${executable_dir}/gdal">
 			<fileset dir="${gdal_dir}">
 				<include name="**/*.dll" />
 			</fileset>
 		</copy>
 		<copy todir="${executable_dir}/gdal/data">
-			<fileset dir="${data_dir}">
-				<include name="**/*" />
-			</fileset>
+			<fileset dir="${data_dir}" />
 		</copy>
 		<copy todir="${executable_dir}/gdal/plugins">
-			<fileset dir="${plugins_dir}">
-				<include name="**/*" />
-			</fileset>
+			<fileset dir="${plugins_dir}" />
 		</copy>
 		<copy todir="${executable_dir}/mapnik">
-			<fileset dir="${mapnik_dir}">
-				<include name="**/*" />
-			</fileset>
-		</copy>
-		<echo file="${executable_dir}/gui.bat">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Executable %*</echo>
-		<echo file="${executable_dir}/console.bat">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Console %*</echo>
-		<copy todir="${executable_dir}">
-			<fileset dir="${basedir}">
-				<include name="7za.exe" />
-			</fileset>
-		</copy>
-	</target>
-
-	<target name="ribbonExecutable" depends="compile">
-		<mkdir dir="${executable_dir}" />
-		<zip destfile="${executable_dir}/temp.zip">
-			<zipgroupfileset dir="${lib_dir}">
-				<include name="**/*.jar" />
-			</zipgroupfileset>
-			<zipgroupfileset dir="${gdal_dir}">
-				<include name="**/*.jar" />
-			</zipgroupfileset>
-		</zip>
-		<jar destfile="${executable_dir}/${ribbon_jar}">
-			<fileset dir="${build_dir}" />
-			<zipfileset src="${executable_dir}/temp.zip">
-				<patternset refid="manifest.exclude" />
-			</zipfileset>
-			<manifest>
-				<attribute name="Main-Class" value="au.gov.ga.worldwind.tiler.ribbon.RibbonTiler" />
-
-			</manifest>
-		</jar>
-		<delete file="${executable_dir}/temp.zip" />
-		<copy todir="${executable_dir}/gdal">
-			<fileset dir="${gdal_dir}">
-				<include name="**/*.dll" />
-			</fileset>
-		</copy>
-		<copy todir="${executable_dir}/gdal/data">
-			<fileset dir="${data_dir}">
-				<include name="**/*" />
-			</fileset>
-		</copy>
-		<copy todir="${executable_dir}/gdal/plugins">
-			<fileset dir="${plugins_dir}">
-				<include name="**/*" />
-			</fileset>
-		</copy>
-		<copy todir="${executable_dir}/mapnik">
-			<fileset dir="${mapnik_dir}">
-				<include name="**/*" />
-			</fileset>
+			<fileset dir="${mapnik_dir}" />
 		</copy>
 		<copy todir="${executable_dir}">
 			<fileset dir="${basedir}">
 				<include name="7za.exe" />
 			</fileset>
 		</copy>
+
+		<echo file="${executable_dir}/${executable_gui_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Executable %*</echo>
+		<echo file="${executable_dir}/${executable_console_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Console %*</echo>
+		<echo file="${executable_dir}/${executable_ribbon_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.ribbon.RibbonTiler %*</echo>
 	</target>
 
 	<target name="run" depends="executable" />
 
-	<target name="deploy" depends="clean,executable">
-		<copy todir="${deploy_location}" overwrite="true" failonerror="false">
-			<fileset dir="${executable_dir}" />
-		</copy>
-	</target>
 </project>
