@@ -27,6 +27,7 @@ import javax.xml.xpath.XPath;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.IDelegatorTile;
 import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.filters.TransparentMinimumFilter;
 import au.gov.ga.worldwind.common.layers.styled.PropertySetter;
@@ -133,7 +134,7 @@ public class FilterTransformerDelegate implements IImageTransformerDelegate
 	}
 
 	@Override
-	public BufferedImage transformImage(BufferedImage image)
+	public BufferedImage transformImage(BufferedImage image, IDelegatorTile tile)
 	{
 		if (filters != null)
 		{

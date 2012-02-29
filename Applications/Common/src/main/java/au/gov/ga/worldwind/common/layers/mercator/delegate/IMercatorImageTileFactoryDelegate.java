@@ -13,27 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.common.layers.delegate;
+package au.gov.ga.worldwind.common.layers.mercator.delegate;
 
-import java.awt.image.BufferedImage;
+import gov.nasa.worldwind.layers.mercator.MercatorSector;
+import gov.nasa.worldwind.util.Level;
+import au.gov.ga.worldwind.common.layers.delegate.ITileFactoryDelegate;
 
 /**
- * Instances of {@link IImageTransformerDelegate} are used to transform images
- * during texture load. This can be used for post processing of a downloaded
- * texture.
+ * Sub-interface of the {@link ITileFactoryDelegate} for ease-of-use with layers
+ * that use {@link DelegatorMercatorTextureTile}s.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public interface IImageTransformerDelegate extends IDelegate
+public interface IMercatorImageTileFactoryDelegate extends
+		ITileFactoryDelegate<DelegatorMercatorTextureTile, MercatorSector, Level>
 {
-	/**
-	 * Transform an image.
-	 * 
-	 * @param image
-	 *            Image to transform
-	 * @param tile
-	 *            Tile associated with this image
-	 * @return Transformed image
-	 */
-	BufferedImage transformImage(BufferedImage image, IDelegatorTile tile);
 }

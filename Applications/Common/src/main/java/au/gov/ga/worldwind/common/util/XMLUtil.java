@@ -17,8 +17,12 @@ package au.gov.ga.worldwind.common.util;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.exception.WWRuntimeException;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.layers.mercator.MercatorSector;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -164,6 +168,80 @@ public class XMLUtil extends WWXML
 			return def;
 		}
 		return i;
+	}
+
+	public static MercatorSector getMercatorSector(Element context, String path, XPath xpath)
+	{
+		if (context == null)
+		{
+			String message = Logging.getMessage("nullValue.ContextIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		Element el = path == null ? context : getElement(context, path, xpath);
+		if (el == null)
+			return null;
+
+		LatLon sw = getMercatorLatLon(el, "SouthWest/LatLon", xpath);
+		LatLon ne = getMercatorLatLon(el, "NorthEast/LatLon", xpath);
+
+		if (sw == null || ne == null)
+			return null;
+
+		return new MercatorSector(MercatorSector.gudermannianInverse(sw.latitude),
+				MercatorSector.gudermannianInverse(ne.latitude), sw.longitude, ne.longitude);
+	}
+
+	protected static LatLon getMercatorLatLon(Element context, String path, XPath xpath)
+	{
+		if (context == null)
+		{
+			String message = Logging.getMessage("nullValue.ContextIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		try
+		{
+			Element el = path == null ? context : getElement(context, path, xpath);
+			if (el == null)
+				return null;
+
+			String units = getText(el, "@units", xpath);
+			boolean degrees = units == null || "degrees".equals(units);
+			boolean radians = "radians".equals(units);
+			Double lat = getDouble(el, "@latitude", xpath);
+			Double latPercent = getDouble(el, "@latitudePercent", xpath);
+			Double lon = getDouble(el, "@longitude", xpath);
+
+			if (lat == null && latPercent != null)
+			{
+				Angle latAngle = MercatorSector.gudermannian(latPercent);
+				lat = radians ? latAngle.radians : latAngle.degrees;
+			}
+
+			if (lat == null || lon == null)
+				return null;
+
+			if (degrees)
+				return LatLon.fromDegrees(lat, lon);
+
+			if (radians)
+				return LatLon.fromRadians(lat, lon);
+
+			// Warn that units are not recognized
+			String message = Logging.getMessage("XML.UnitsUnrecognized", units);
+			Logging.logger().warning(message);
+
+			return null;
+		}
+		catch (NumberFormatException e)
+		{
+			String message = Logging.getMessage("generic.ConversionError", path);
+			Logging.logger().log(java.util.logging.Level.SEVERE, message, e);
+			return null;
+		}
 	}
 
 	public static URL getURL(Element element, String path, URL context) throws MalformedURLException
@@ -559,6 +637,46 @@ public class XMLUtil extends WWXML
 					e.printStackTrace();
 				}
 			}
+		}
+	}
+
+	public static void checkAndSetMercatorSectorParam(Element context, AVList params, String paramKey,
+			String paramName, XPath xpath)
+	{
+		if (context == null)
+		{
+			String message = Logging.getMessage("nullValue.ElementIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (params == null)
+		{
+			String message = Logging.getMessage("nullValue.ParametersIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (paramKey == null)
+		{
+			String message = Logging.getMessage("nullValue.ParameterKeyIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (paramName == null)
+		{
+			String message = Logging.getMessage("nullValue.ParameterNameIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		Object o = params.getValue(paramKey);
+		if (o == null)
+		{
+			Sector sector = getMercatorSector(context, paramName, xpath);
+			if (sector != null)
+				params.setValue(paramKey, sector);
 		}
 	}
 

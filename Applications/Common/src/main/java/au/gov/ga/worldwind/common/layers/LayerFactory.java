@@ -20,6 +20,7 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.mercator.BasicMercatorTiledImageLayer;
 import gov.nasa.worldwind.ogc.OGCConstants;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -32,6 +33,7 @@ import au.gov.ga.worldwind.common.layers.curtain.delegate.DelegatorTiledCurtainL
 import au.gov.ga.worldwind.common.layers.earthquakes.HistoricEarthquakesLayer;
 import au.gov.ga.worldwind.common.layers.geometry.GeometryLayerFactory;
 import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
+import au.gov.ga.worldwind.common.layers.mercator.delegate.DelegatorMercatorTiledImageLayer;
 import au.gov.ga.worldwind.common.layers.model.ModelLayerFactory;
 import au.gov.ga.worldwind.common.layers.point.PointLayerFactory;
 import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
@@ -68,6 +70,10 @@ public class LayerFactory extends BasicLayerFactory
 		if ("CurtainImageLayer".equals(layerType))
 		{
 			return createTiledCurtainLayer(domElement, params);
+		}
+		if ("MercatorImageLayer".equals(layerType))
+		{
+			return createTiledMercatorLayer(domElement, params);
 		}
 		if ("HistoricEarthquakesLayer".equals(layerType))
 		{
@@ -112,6 +118,29 @@ public class LayerFactory extends BasicLayerFactory
 		else
 		{
 			layer = new BasicTiledCurtainLayer(domElement, params);
+		}
+
+		params = TimedExpirationHandler.getExpirationParams(domElement, params);
+		TimedExpirationHandler.registerLayer(layer, params);
+
+		return layer;
+	}
+	
+	protected Layer createTiledMercatorLayer(Element domElement, AVList params)
+	{
+		if (params == null)
+			params = new AVListImpl();
+
+		Layer layer;
+		String serviceName = XMLUtil.getText(domElement, "Service/@serviceName");
+
+		if ("DelegatorTileService".equals(serviceName))
+		{
+			layer = new DelegatorMercatorTiledImageLayer(domElement, params);
+		}
+		else
+		{
+			layer = new BasicMercatorTiledImageLayer(params);
 		}
 
 		params = TimedExpirationHandler.getExpirationParams(domElement, params);

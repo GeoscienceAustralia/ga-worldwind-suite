@@ -15,25 +15,30 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.layers.delegate;
 
-import java.awt.image.BufferedImage;
+import gov.nasa.worldwind.util.Tile;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
- * Instances of {@link IImageTransformerDelegate} are used to transform images
- * during texture load. This can be used for post processing of a downloaded
- * texture.
+ * Instances of the {@link ITileURLBuilderDelegate} are used to customize the
+ * URL used to download tiles from a remote server.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public interface IImageTransformerDelegate extends IDelegate
+public interface ITileURLBuilderDelegate extends IDelegate
 {
 	/**
-	 * Transform an image.
+	 * Calculate the URL used to download the given tile from the remote server.
+	 * Usually this is simply forwarded to the
+	 * {@link Tile#getResourceURL(String)} method.
 	 * 
-	 * @param image
-	 *            Image to transform
 	 * @param tile
-	 *            Tile associated with this image
-	 * @return Transformed image
+	 *            Tile to calculate the remote resource url for
+	 * @param imageFormat
+	 *            a string identifying the mime type of the desired image format
+	 * @return URL used to download the given tile
+	 * @throws MalformedURLException
 	 */
-	BufferedImage transformImage(BufferedImage image, IDelegatorTile tile);
+	URL getRemoteTileURL(IDelegatorTile tile, String imageFormat) throws MalformedURLException;
 }

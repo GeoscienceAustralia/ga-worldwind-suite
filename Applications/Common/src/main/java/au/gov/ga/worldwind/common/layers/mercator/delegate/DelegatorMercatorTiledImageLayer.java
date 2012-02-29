@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.common.layers.tiled.image.delegate;
+package au.gov.ga.worldwind.common.layers.mercator.delegate;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -30,6 +30,7 @@ import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.BasicTiledImageLayer;
 import gov.nasa.worldwind.layers.TextureTile;
+import gov.nasa.worldwind.layers.mercator.MercatorSector;
 import gov.nasa.worldwind.ogc.OGCConstants;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.retrieve.RetrievalPostProcessor;
@@ -65,6 +66,7 @@ import au.gov.ga.worldwind.common.layers.delegate.IDelegatorLayer;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegatorTile;
 import au.gov.ga.worldwind.common.layers.delegate.ITileRequesterDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.URLTransformerBasicTiledImageLayer;
+import au.gov.ga.worldwind.common.layers.tiled.image.delegate.FileLockSharer;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.DDSUncompressor;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -84,25 +86,25 @@ import com.sun.opengl.util.texture.TextureIO;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer implements Bounded,
-		IDelegatorLayer<DelegatorTextureTile>
+public class DelegatorMercatorTiledImageLayer extends URLTransformerBasicTiledImageLayer implements Bounded,
+		IDelegatorLayer<DelegatorMercatorTextureTile>
 {
 	protected final Object fileLock;
 	protected final URL context;
-	protected final ImageDelegateKit delegateKit;
+	protected final MercatorImageDelegateKit delegateKit;
 	protected boolean extractZipEntry = false;
 
 	protected Globe currentGlobe;
 
-	public DelegatorTiledImageLayer(AVList params)
+	public DelegatorMercatorTiledImageLayer(AVList params)
 	{
 		super(params);
 
 		Object o = params.getValue(AVKeyMore.DELEGATE_KIT);
-		if (o != null && o instanceof ImageDelegateKit)
-			delegateKit = (ImageDelegateKit) o;
+		if (o != null && o instanceof MercatorImageDelegateKit)
+			delegateKit = (MercatorImageDelegateKit) o;
 		else
-			delegateKit = new ImageDelegateKit();
+			delegateKit = new MercatorImageDelegateKit();
 
 		o = params.getValue(AVKeyMore.CONTEXT_URL);
 		if (o != null && o instanceof URL)
@@ -119,7 +121,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 		fileLock = FileLockSharer.getLock(getLevels().getFirstLevel().getCacheName());
 	}
 
-	public DelegatorTiledImageLayer(Element domElement, AVList params)
+	public DelegatorMercatorTiledImageLayer(Element domElement, AVList params)
 	{
 		this(getParamsFromDocument(domElement, params));
 	}
@@ -139,11 +141,12 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 		}
 
 		//create the delegate kit from the XML element
-		ImageDelegateKit delegateKit = new ImageDelegateKit().createFromXML(domElement, params);
+		MercatorImageDelegateKit delegateKit = new MercatorImageDelegateKit().createFromXML(domElement, params);
 		params.setValue(AVKeyMore.DELEGATE_KIT, delegateKit);
 
 		XPath xpath = WWXML.makeXPath();
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.EXTRACT_ZIP_ENTRY, "ExtractZipEntry", xpath);
+		XMLUtil.checkAndSetMercatorSectorParam(domElement, params, AVKey.SECTOR, "MercatorSector", xpath);
 
 		return params;
 	}
@@ -178,8 +181,8 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	}
 
 	/**
-	 * Create a new XML document describing a {@link DelegatorTiledImageLayer}
-	 * from an AVList.
+	 * Create a new XML document describing a
+	 * {@link DelegatorMercatorTiledImageLayer} from an AVList.
 	 * 
 	 * @param params
 	 * @return New XML document
@@ -193,8 +196,8 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	}
 
 	/**
-	 * Add XML elements specific to the {@link DelegatorTiledImageLayer} from an
-	 * AVList to an XML element.
+	 * Add XML elements specific to the {@link DelegatorMercatorTiledImageLayer}
+	 * from an AVList to an XML element.
 	 * 
 	 * @param params
 	 * @param context
@@ -204,9 +207,9 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	public static Element createDelegatorTiledImageLayerConfigElements(AVList params, Element context)
 	{
 		Object o = params.getValue(AVKeyMore.DELEGATE_KIT);
-		if (o != null && o instanceof ImageDelegateKit)
+		if (o != null && o instanceof MercatorImageDelegateKit)
 		{
-			((ImageDelegateKit) o).saveToXML(context);
+			((MercatorImageDelegateKit) o).saveToXML(context);
 		}
 		return context;
 	}
@@ -232,7 +235,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	}
 
 	@Override
-	public boolean isTextureFileExpired(DelegatorTextureTile tile, URL textureURL, FileStore fileStore)
+	public boolean isTextureFileExpired(DelegatorMercatorTextureTile tile, URL textureURL, FileStore fileStore)
 	{
 		return super.isTextureFileExpired(tile, textureURL, fileStore);
 	}
@@ -243,7 +246,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 		validateTileClass(tile);
 
 		//pass request to delegate
-		delegateKit.forceTextureLoad((DelegatorTextureTile) tile, this);
+		delegateKit.forceTextureLoad((DelegatorMercatorTextureTile) tile, this);
 	}
 
 	@Override
@@ -267,7 +270,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 			tile.setPriority(centroid.distanceTo3(referencePoint));
 
 		//pass request to delegate
-		Runnable task = delegateKit.createRequestTask((DelegatorTextureTile) tile, this);
+		Runnable task = delegateKit.createRequestTask((DelegatorMercatorTextureTile) tile, this);
 
 		//if returned task is null, the task has already been run by
 		//the immediate delegates, so don't add to queue
@@ -279,9 +282,9 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 
 	protected void validateTileClass(Object tile)
 	{
-		if (!(tile instanceof DelegatorTextureTile))
+		if (!(tile instanceof DelegatorMercatorTextureTile))
 		{
-			throw new IllegalArgumentException("Tile must be a " + DelegatorTextureTile.class.getName());
+			throw new IllegalArgumentException("Tile must be a " + DelegatorMercatorTextureTile.class.getName());
 		}
 	}
 
@@ -297,7 +300,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	 * @return true if the texture data was loaded successfully
 	 */
 	@Override
-	public boolean loadTexture(DelegatorTextureTile tile, URL textureURL)
+	public boolean loadTexture(DelegatorMercatorTextureTile tile, URL textureURL)
 	{
 		//public for delegate access
 
@@ -327,7 +330,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	}
 
 	@Override
-	public TextureData readTexture(DelegatorTextureTile tile, URL url)
+	public TextureData readTexture(DelegatorMercatorTextureTile tile, URL url)
 	{
 		try
 		{
@@ -379,7 +382,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	 * @throws IOException
 	 *             If image could not be read
 	 */
-	protected BufferedImage readImage(DelegatorTextureTile tile, URL url) throws IOException
+	protected BufferedImage readImage(DelegatorMercatorTextureTile tile, URL url) throws IOException
 	{
 		//first try to read the image via the ImageReaderDelegates
 		BufferedImage image = delegateKit.readImage(tile, url, currentGlobe);
@@ -421,9 +424,9 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	 */
 	protected static class DownloadPostProcessor extends BasicTiledImageLayer.DownloadPostProcessor
 	{
-		private final DelegatorTiledImageLayer layer;
+		private final DelegatorMercatorTiledImageLayer layer;
 
-		public DownloadPostProcessor(TextureTile tile, DelegatorTiledImageLayer layer)
+		public DownloadPostProcessor(TextureTile tile, DelegatorMercatorTiledImageLayer layer)
 		{
 			super(tile, layer);
 			this.layer = layer;
@@ -442,10 +445,10 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	{
 		validateTileClass(tile);
 
-		return requestImage((DelegatorTextureTile) tile, mimeType);
+		return requestImage((DelegatorMercatorTextureTile) tile, mimeType);
 	}
 
-	protected BufferedImage requestImage(DelegatorTextureTile tile, String mimeType) throws URISyntaxException,
+	protected BufferedImage requestImage(DelegatorMercatorTextureTile tile, String mimeType) throws URISyntaxException,
 			InterruptedIOException, MalformedURLException
 	{
 		//ignores mimeType parameter
@@ -503,11 +506,14 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 
 		this.topLevels = new ArrayList<TextureTile>(nLatTiles * nLonTiles);
 
-		Angle p1 = Tile.computeRowLatitude(firstRow, dLat, latOrigin);
+		//Angle p1 = Tile.computeRowLatitude(firstRow, dLat, latOrigin);
+		double deltaLat = dLat.degrees / 90;
+		double d1 = -1.0 + deltaLat * firstRow;
 		for (int row = firstRow; row <= lastRow; row++)
 		{
-			Angle p2;
-			p2 = p1.add(dLat);
+			//Angle p2;
+			//p2 = p1.add(dLat);
+			double d2 = d1 + deltaLat;
 
 			Angle t1 = Tile.computeColumnLongitude(firstCol, dLon, lonOrigin);
 			for (int col = firstCol; col <= lastCol; col++)
@@ -516,11 +522,12 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 				t2 = t1.add(dLon);
 
 				//MODIFIED
-				this.topLevels.add(delegateKit.createTextureTile(new Sector(p1, p2, t1, t2), level, row, col));
+				this.topLevels.add(delegateKit.createTextureTile(new MercatorSector(d1, d2, t1, t2), level, row, col));
 				//MODIFIED
 				t1 = t2;
 			}
-			p1 = p2;
+			//p1 = p2;
+			d1 = d2;
 		}
 	}
 
@@ -566,8 +573,8 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 				TileKey key = new TileKey(targetLevel.getLevelNumber(), row, col, targetLevel.getCacheName());
 				Sector tileSector = this.getLevels().computeSectorForKey(key);
 				//MODIFIED
-				sectorTiles[nwRow - row][col - nwCol] =
-						delegateKit.createTextureTile(tileSector, targetLevel, row, col); //new TextureTile(tileSector, targetLevel, row, col);
+				MercatorSector mSector = MercatorSector.fromSector(tileSector);
+				sectorTiles[nwRow - row][col - nwCol] = delegateKit.createTextureTile(mSector, targetLevel, row, col); //new TextureTile(tileSector, targetLevel, row, col);
 				//MODIFIED
 			}
 		}
@@ -582,7 +589,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	}
 
 	@Override
-	public void retrieveRemoteTexture(DelegatorTextureTile tile, RetrievalPostProcessor postProcessor)
+	public void retrieveRemoteTexture(DelegatorMercatorTextureTile tile, RetrievalPostProcessor postProcessor)
 	{
 		createAndRunRetriever(tile, postProcessor);
 	}
@@ -614,7 +621,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 		{
 			//MODIFIED
 			validateTileClass(tile);
-			url = delegateKit.getRemoteTileURL((DelegatorTextureTile) tile, null);
+			url = delegateKit.getRemoteTileURL((DelegatorMercatorTextureTile) tile, null);
 			//MODIFIED
 			if (url == null)
 				return null;
@@ -703,13 +710,13 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 	}
 
 	@Override
-	public void unmarkResourceAbsent(DelegatorTextureTile tile)
+	public void unmarkResourceAbsent(DelegatorMercatorTextureTile tile)
 	{
 		getLevels().unmarkResourceAbsent(tile);
 	}
 
 	@Override
-	public void markResourceAbsent(DelegatorTextureTile tile)
+	public void markResourceAbsent(DelegatorMercatorTextureTile tile)
 	{
 		getLevels().markResourceAbsent(tile);
 	}

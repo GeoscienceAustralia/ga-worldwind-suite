@@ -15,12 +15,12 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.layers.delegate;
 
+import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.layers.Layer;
+
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
-
-import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.layers.Layer;
 
 import org.w3c.dom.Element;
 

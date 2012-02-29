@@ -48,6 +48,7 @@ public abstract class AbstractDelegateKit<TILE extends IDelegatorTile, BOUNDS, L
 {
 	//default delegate implementations
 	protected ITileRequesterDelegate<TILE> requesterDelegate;
+	protected ITileURLBuilderDelegate tileURLBuilderDelegate;
 	protected IRetrieverFactoryDelegate retrieverDelegate;
 	protected ITileFactoryDelegate<TILE, BOUNDS, LEVEL> factoryDelegate;
 	protected final List<ITileReaderDelegate> readerDelegates = new ArrayList<ITileReaderDelegate>();
@@ -118,6 +119,11 @@ public abstract class AbstractDelegateKit<TILE extends IDelegatorTile, BOUNDS, L
 			setRetrieverFactoryDelegate((IRetrieverFactoryDelegate) delegate);
 			return true;
 		}
+		if (delegate instanceof ITileURLBuilderDelegate)
+		{
+			setTileURLBuilderDelegate((ITileURLBuilderDelegate) delegate);
+			return true;
+		}
 		if (delegate instanceof ITileReaderDelegate)
 		{
 			addTileReaderDelegate((ITileReaderDelegate) delegate);
@@ -165,6 +171,12 @@ public abstract class AbstractDelegateKit<TILE extends IDelegatorTile, BOUNDS, L
 	}
 
 	@Override
+	public void setTileURLBuilderDelegate(ITileURLBuilderDelegate delegate)
+	{
+		this.tileURLBuilderDelegate = delegate;
+	}
+
+	@Override
 	public void setRetrieverFactoryDelegate(IRetrieverFactoryDelegate delegate)
 	{
 		this.retrieverDelegate = delegate;
@@ -199,11 +211,11 @@ public abstract class AbstractDelegateKit<TILE extends IDelegatorTile, BOUNDS, L
 	 ****************************** */
 
 	@Override
-	public BufferedImage transformImage(BufferedImage image)
+	public BufferedImage transformImage(BufferedImage image, IDelegatorTile tile)
 	{
 		for (IImageTransformerDelegate transformer : transformerDelegates)
 		{
-			image = transformer.transformImage(image);
+			image = transformer.transformImage(image, tile);
 		}
 		return image;
 	}
@@ -254,6 +266,14 @@ public abstract class AbstractDelegateKit<TILE extends IDelegatorTile, BOUNDS, L
 	public Runnable createRequestTask(TILE tile, IDelegatorLayer<TILE> layer)
 	{
 		return requesterDelegate.createRequestTask(tile, layer);
+	}
+
+	@Override
+	public URL getRemoteTileURL(IDelegatorTile tile, String imageFormat) throws java.net.MalformedURLException
+	{
+		if (tileURLBuilderDelegate != null)
+			return tileURLBuilderDelegate.getRemoteTileURL(tile, imageFormat);
+		return tile.getResourceURL(imageFormat);
 	}
 
 	@Override

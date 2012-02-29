@@ -13,27 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.common.layers.delegate;
+package au.gov.ga.worldwind.common.layers.mercator.delegate;
 
-import java.awt.image.BufferedImage;
+import au.gov.ga.worldwind.common.layers.delegate.ITileRequesterDelegate;
 
 /**
- * Instances of {@link IImageTransformerDelegate} are used to transform images
- * during texture load. This can be used for post processing of a downloaded
- * texture.
+ * Sub-interface of {@link ITileRequesterDelegate} for ease-of-use with layers
+ * that use the {@link DelegatorMercatorTextureTile}.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public interface IImageTransformerDelegate extends IDelegate
+public interface IMercatorImageTileRequesterDelegate extends ITileRequesterDelegate<DelegatorMercatorTextureTile>
 {
-	/**
-	 * Transform an image.
-	 * 
-	 * @param image
-	 *            Image to transform
-	 * @param tile
-	 *            Tile associated with this image
-	 * @return Transformed image
-	 */
-	BufferedImage transformImage(BufferedImage image, IDelegatorTile tile);
 }

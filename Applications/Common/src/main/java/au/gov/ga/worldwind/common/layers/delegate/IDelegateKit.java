@@ -39,8 +39,8 @@ import org.w3c.dom.Element;
  *            this {@link IDelegateKit} is for
  */
 public interface IDelegateKit<TILE extends IDelegatorTile, BOUNDS, LEVEL> extends ITileRequesterDelegate<TILE>,
-		IRetrieverFactoryDelegate, ITileFactoryDelegate<TILE, BOUNDS, LEVEL>, ITileReaderDelegate,
-		IImageTransformerDelegate, IRenderDelegate
+		ITileURLBuilderDelegate, IRetrieverFactoryDelegate, ITileFactoryDelegate<TILE, BOUNDS, LEVEL>,
+		ITileReaderDelegate, IImageTransformerDelegate, IRenderDelegate
 {
 	/**
 	 * Create a new {@link IDelegateKit} from an XML element.
@@ -76,42 +76,49 @@ public interface IDelegateKit<TILE extends IDelegatorTile, BOUNDS, LEVEL> extend
 	/**
 	 * Set the {@link ITileFactoryDelegate}.
 	 * 
-	 * @param factoryDelegate
+	 * @param delegate
 	 */
 	void setTileFactoryDelegate(ITileFactoryDelegate<TILE, BOUNDS, LEVEL> delegate);
 
 	/**
+	 * Set the {@link ITileURLBuilderDelegate}.
+	 * 
+	 * @param delegate
+	 */
+	void setTileURLBuilderDelegate(ITileURLBuilderDelegate delegate);
+
+	/**
 	 * Set the {@link IRetrieverFactoryDelegate}.
 	 * 
-	 * @param retrieverDelegate
+	 * @param delegate
 	 */
 	void setRetrieverFactoryDelegate(IRetrieverFactoryDelegate delegate);
 
 	/**
 	 * Set the {@link ITileRequesterDelegate}.
 	 * 
-	 * @param requesterDelegate
+	 * @param delegate
 	 */
 	void setTileRequesterDelegate(ITileRequesterDelegate<TILE> delegate);
 
 	/**
 	 * Add an {@link ITileReaderDelegate}.
 	 * 
-	 * @param readerDelegate
+	 * @param delegate
 	 */
 	void addTileReaderDelegate(ITileReaderDelegate delegate);
 
 	/**
 	 * Add an {@link IRenderDelegate}.
 	 * 
-	 * @param renderDelegate
+	 * @param delegate
 	 */
 	void addRenderDelegate(IRenderDelegate delegate);
 
 	/**
 	 * Add an {@link IImageTransformerDelegate}.
 	 * 
-	 * @param transformerDelegate
+	 * @param delegate
 	 */
 	void addImageTransformerDelegate(IImageTransformerDelegate delegate);
 }

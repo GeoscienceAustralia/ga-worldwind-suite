@@ -13,27 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.common.layers.delegate;
+package au.gov.ga.worldwind.common.layers.mercator.delegate;
 
-import java.awt.image.BufferedImage;
+import gov.nasa.worldwind.avlist.AVList;
+
+import org.w3c.dom.Element;
+
+import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.requester.AbstractURLRequesterDelegate;
 
 /**
- * Instances of {@link IImageTransformerDelegate} are used to transform images
- * during texture load. This can be used for post processing of a downloaded
- * texture.
+ * Non-abstract implementation of the {@link AbstractURLRequesterDelegate} used
+ * for requesting tiles for the {@link DelegatorMercatorTextureTile}.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public interface IImageTransformerDelegate extends IDelegate
+public class MercatorImageURLRequesterDelegate extends AbstractURLRequesterDelegate<DelegatorMercatorTextureTile>
+		implements IMercatorImageTileRequesterDelegate
 {
-	/**
-	 * Transform an image.
-	 * 
-	 * @param image
-	 *            Image to transform
-	 * @param tile
-	 *            Tile associated with this image
-	 * @return Transformed image
-	 */
-	BufferedImage transformImage(BufferedImage image, IDelegatorTile tile);
+	@Override
+	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
+	{
+		if (definition.equalsIgnoreCase(DEFINITION_STRING))
+			return new MercatorImageURLRequesterDelegate();
+		return null;
+	}
 }

@@ -296,7 +296,7 @@ public class DelegatorTiledCurtainLayer extends BasicTiledCurtainLayer implement
 		}
 
 		//perform any transformations on the image
-		image = delegateKit.transformImage(image);
+		image = delegateKit.transformImage(image, tile);
 
 		//manually do the TRANSPARENCY_COLORS transform, for compatibility with AbstractRetrievalPostProcessor
 		int[] colors = (int[]) this.getValue(AVKey.TRANSPARENCY_COLORS);
@@ -395,7 +395,10 @@ public class DelegatorTiledCurtainLayer extends BasicTiledCurtainLayer implement
 		java.net.URL url;
 		try
 		{
-			url = tile.getResourceURL();
+			//MODIFIED
+			validateTileClass(tile);
+			url = delegateKit.getRemoteTileURL((DelegatorCurtainTextureTile) tile, null);
+			//MODIFIED
 			if (url == null)
 				return null;
 

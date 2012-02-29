@@ -15,10 +15,12 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.layers.delegate;
 
-import com.sun.opengl.util.texture.TextureData;
-
 import gov.nasa.worldwind.cache.Cacheable;
 import gov.nasa.worldwind.util.TileKey;
+
+import java.net.MalformedURLException;
+
+import com.sun.opengl.util.texture.TextureData;
 
 /**
  * An individual tile used by an {@link IDelegatorLayer}.
@@ -36,6 +38,13 @@ public interface IDelegatorTile extends Cacheable
 	 * @return Local tile cache path.
 	 */
 	String getPath(); //Tile
+
+	/**
+	 * @param imageFormat
+	 * @return Remote URL used to download this tile.
+	 * @throws MalformedURLException
+	 */
+	java.net.URL getResourceURL(String imageFormat) throws MalformedURLException; //Tile
 
 	/**
 	 * @return Tile's level's service.

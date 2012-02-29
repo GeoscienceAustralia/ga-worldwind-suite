@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.delegate.IDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.IDelegatorTile;
 import au.gov.ga.worldwind.common.layers.delegate.IImageTransformerDelegate;
 
 /**
@@ -97,7 +98,7 @@ public class ColorToAlphaTransformerDelegate implements IImageTransformerDelegat
 	}
 
 	@Override
-	public BufferedImage transformImage(BufferedImage image)
+	public BufferedImage transformImage(BufferedImage image, IDelegatorTile tile)
 	{
 		if (image == null)
 			return null;
