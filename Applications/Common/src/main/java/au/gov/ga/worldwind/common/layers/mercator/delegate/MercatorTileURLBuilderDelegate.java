@@ -40,7 +40,8 @@ import au.gov.ga.worldwind.common.layers.delegate.ITileURLBuilderDelegate;
  * <li><code>skipLevels</code> = number of levels to skip in the source dataset</li>
  * <li>
  * <code>format</code> = URL format string containing tile parameter
- * placeholders. The following placeholders are supported:
+ * placeholders. Must be surrounded by braces { }. The following placeholders
+ * are supported:
  * <ul>
  * <li><code>%service%</code> = replaced with the service url</li>
  * <li><code>%dataset%</code> = replaced with the dataset name</li>
@@ -109,7 +110,7 @@ public class MercatorTileURLBuilderDelegate implements ITileURLBuilderDelegate
 	{
 		int level = tile.getLevelNumber() + skipLevels;
 		int column = tile.getColumn();
-		int row = (1 << level) - 1 - tile.getRow();
+		int row = (1 << level) - 1 - tile.getRow(); //reverse the row integer (mercator rows are top to bottom)
 
 		String url = format;
 		url = url.replaceAll(SERVICE_PLACEHOLDER, tile.getService());
