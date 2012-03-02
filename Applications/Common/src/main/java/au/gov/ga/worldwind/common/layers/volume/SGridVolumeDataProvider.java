@@ -166,7 +166,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 				String nonCapturingDoublePattern = "(?:[\\d.\\-]+)";
 				String spacerPattern = "\\s+";
 				//regex for coordinates
-				String lineRegex = doublePattern + spacerPattern + doublePattern + spacerPattern + doublePattern;
+				String lineRegex = "\\s*" + doublePattern + spacerPattern + doublePattern + spacerPattern + doublePattern;
 				for (int property = 1; property < paintedVariableId; property++)
 				{
 					//ignore all properties in between coordinates and painted property

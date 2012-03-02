@@ -134,7 +134,7 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	public TopBottomFastShape createLatitudeCurtain(int y)
 	{
 		List<Position> positions = new ArrayList<Position>();
-		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(ySize * 4);
+		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(xSize * 4);
 		for (int x = 0; x < xSize; x++)
 		{
 			Position position = this.positions.get(x + y * xSize);
