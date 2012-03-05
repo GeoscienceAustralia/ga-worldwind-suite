@@ -20,7 +20,6 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.event.SelectEvent;
 import gov.nasa.worldwind.event.SelectListener;
-import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.Intersection;
 import gov.nasa.worldwind.geom.LatLon;
@@ -92,10 +91,12 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 
 	protected final double[] curtainTextureMatrix = new double[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 
-	protected Double minLonClip = null, maxLonClip = null, minLatClip = null, maxLatClip = null;
 	protected boolean minLonClipDirty = false, maxLonClipDirty = false, minLatClipDirty = false,
-			maxLatClipDirty = false;
-	protected final double[] clippingPlanes = new double[16];
+			maxLatClipDirty = false, topClipDirty = false, bottomClipDirty = false;
+	protected final double[] topClippingPlanes = new double[4 * 4];
+	protected final double[] bottomClippingPlanes = new double[4 * 4];
+	protected final double[] curtainClippingPlanes = new double[4 * 4];
+	protected double lastVerticalExaggeration = -1;
 
 	protected boolean wireframe = false;
 	protected final PickSupport pickSupport = new PickSupport();
@@ -302,15 +303,11 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		Rectangle lonRectangle = new Rectangle(0, 0, dataProvider.getYSize(), dataProvider.getZSize());
 		Rectangle latRectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getZSize());
 		Rectangle elevationRectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getYSize());
-		Sector sector = getSector();
 		double topPercent = topOffset / (double) (dataProvider.getZSize() - 1);
 		double bottomPercent = bottomSlice / (double) (dataProvider.getZSize() - 1);
 
 		if (recalculateMinLon)
 		{
-			double longitudeOffset =
-					(minLonOffset / (double) (dataProvider.getXSize() - 1)) * sector.getDeltaLonDegrees();
-			minLonClip = minLonOffset == 0 ? null : sector.getMinLongitude().degrees + longitudeOffset;
 			minLonClipDirty = true;
 
 			TopBottomFastShape newMinLonCurtain = dataProvider.createLongitudeCurtain(minLonOffset);
@@ -321,9 +318,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		}
 		if (recalculateMaxLon)
 		{
-			double longitudeOffset =
-					(maxLonOffset / (double) (dataProvider.getXSize() - 1)) * sector.getDeltaLonDegrees();
-			maxLonClip = maxLonOffset == 0 ? null : sector.getMaxLongitude().degrees - longitudeOffset;
 			maxLonClipDirty = true;
 
 			TopBottomFastShape newMaxLonCurtain =
@@ -335,9 +329,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		}
 		if (recalculateMinLat)
 		{
-			double latitudeOffset =
-					(minLatOffset / (double) (dataProvider.getYSize() - 1)) * sector.getDeltaLatDegrees();
-			minLatClip = minLatOffset == 0 ? null : sector.getMinLatitude().degrees + latitudeOffset;
 			minLatClipDirty = true;
 
 			TopBottomFastShape newMinLatCurtain = dataProvider.createLatitudeCurtain(minLatOffset);
@@ -348,9 +339,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		}
 		if (recalculateMaxLat)
 		{
-			double latitudeOffset =
-					(maxLatOffset / (double) (dataProvider.getYSize() - 1)) * sector.getDeltaLatDegrees();
-			maxLatClip = maxLatOffset == 0 ? null : sector.getMaxLatitude().degrees - latitudeOffset;
 			maxLatClipDirty = true;
 
 			TopBottomFastShape newMaxLatCurtain =
@@ -362,6 +350,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		}
 		if (recalculateTop)
 		{
+			topClipDirty = true;
 			double elevation = -dataProvider.getDepth() * topPercent;
 
 			updateTexture(generateTexture(2, topOffset, elevationRectangle), topTexture, topSurface);
@@ -377,6 +366,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		}
 		if (recalculateBottom)
 		{
+			bottomClipDirty = true;
 			double elevation = -dataProvider.getDepth() * bottomPercent;
 
 			updateTexture(generateTexture(2, bottomSlice, elevationRectangle), bottomTexture, bottomSurface);
@@ -420,87 +410,166 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (!dataAvailable)
 			return;
 
-		if (minLonClipDirty && minLonClip != null)
+		boolean verticalExaggerationChanged = lastVerticalExaggeration != dc.getVerticalExaggeration();
+		lastVerticalExaggeration = dc.getVerticalExaggeration();
+
+		boolean minLon = minLonClipDirty || verticalExaggerationChanged;
+		boolean maxLon = maxLonClipDirty || verticalExaggerationChanged;
+		boolean minLat = minLatClipDirty || verticalExaggerationChanged;
+		boolean maxLat = maxLatClipDirty || verticalExaggerationChanged;
+
+		boolean sw = minLon || minLat;
+		boolean nw = minLon || maxLat;
+		boolean se = maxLon || minLat;
+		boolean ne = maxLon || maxLat;
+
+		minLon |= topClipDirty || bottomClipDirty;
+		maxLon |= topClipDirty || bottomClipDirty;
+		minLat |= topClipDirty || bottomClipDirty;
+		maxLat |= topClipDirty || bottomClipDirty;
+
+		if (!(minLon || maxLon || minLat || maxLat))
+			return;
+
+		int maxLonSlice = dataProvider.getXSize() - 1 - maxLonOffset;
+		int maxLatSlice = dataProvider.getYSize() - 1 - maxLatOffset;
+		int bottomSlice = dataProvider.getZSize() - 1 - bottomOffset;
+
+		double top = dataProvider.getTop();
+		double depth = dataProvider.getDepth();
+
+		double topPercent = topOffset / (double) (dataProvider.getZSize() - 1);
+		double bottomPercent = bottomSlice / (double) (dataProvider.getZSize() - 1);
+		double topElevation = top - topPercent * depth;
+		double bottomElevation = top - bottomPercent * depth;
+
+		Position swPosTop = dataProvider.getPosition(minLonOffset, minLatOffset);
+		Position nwPosTop = dataProvider.getPosition(minLonOffset, maxLatSlice);
+		Position sePosTop = dataProvider.getPosition(maxLonSlice, minLatOffset);
+		Position nePosTop = dataProvider.getPosition(maxLonSlice, maxLatSlice);
+
+		double deltaLat = 0.005, deltaLon = 0.005;
+		if (sw)
 		{
-			Plane plane = calculateClippingPlane(dc, minLonClip, true, false);
-			Vec4 vector = plane.getVector();
-			clippingPlanes[0] = vector.x;
-			clippingPlanes[1] = vector.y;
-			clippingPlanes[2] = vector.z;
-			clippingPlanes[3] = vector.w;
+			Position swPosBottom = new Position(swPosTop, swPosTop.elevation - depth);
+			Position otherPos = swPosTop.add(Position.fromDegrees(-deltaLat, deltaLon, 0));
+			insertClippingPlaneForPositions(dc, curtainClippingPlanes, 0, swPosTop, swPosBottom, otherPos, false);
 		}
-		if (maxLonClipDirty && maxLonClip != null)
+		if (nw)
 		{
-			Plane plane = calculateClippingPlane(dc, maxLonClip, true, true);
-			Vec4 vector = plane.getVector();
-			clippingPlanes[4] = vector.x;
-			clippingPlanes[5] = vector.y;
-			clippingPlanes[6] = vector.z;
-			clippingPlanes[7] = vector.w;
+			Position nwPosBottom = new Position(nwPosTop, nwPosTop.elevation - depth);
+			Position otherPos = nwPosTop.add(Position.fromDegrees(deltaLat, deltaLon, 0));
+			insertClippingPlaneForPositions(dc, curtainClippingPlanes, 4, nwPosTop, nwPosBottom, otherPos, true);
 		}
-		if (minLatClipDirty && minLatClip != null)
+		if (se)
 		{
-			Plane plane = calculateClippingPlane(dc, minLatClip, false, false);
-			Vec4 vector = plane.getVector();
-			clippingPlanes[8] = vector.x;
-			clippingPlanes[9] = vector.y;
-			clippingPlanes[10] = vector.z;
-			clippingPlanes[11] = vector.w;
+			Position sePosBottom = new Position(sePosTop, sePosTop.elevation - depth);
+			Position otherPos = sePosTop.add(Position.fromDegrees(-deltaLat, -deltaLon, 0));
+			insertClippingPlaneForPositions(dc, curtainClippingPlanes, 8, sePosTop, sePosBottom, otherPos, true);
 		}
-		if (maxLatClipDirty && maxLatClip != null)
+		if (ne)
 		{
-			Plane plane = calculateClippingPlane(dc, maxLatClip, false, true);
-			Vec4 vector = plane.getVector();
-			clippingPlanes[12] = vector.x;
-			clippingPlanes[13] = vector.y;
-			clippingPlanes[14] = vector.z;
-			clippingPlanes[15] = vector.w;
+			Position nePosBottom = new Position(nePosTop, nePosTop.elevation - depth);
+			Position otherPos = nePosTop.add(Position.fromDegrees(deltaLat, -deltaLon, 0));
+			insertClippingPlaneForPositions(dc, curtainClippingPlanes, 12, nePosTop, nePosBottom, otherPos, false);
 		}
-		minLonClipDirty = maxLonClipDirty = minLatClipDirty = maxLatClipDirty = false;
+
+		if (minLon)
+		{
+			Position middlePos = dataProvider.getPosition(minLonOffset, (maxLatSlice + minLatOffset) / 2);
+
+			Position pt1 = new Position(middlePos, topElevation);
+			Position pt2 = new Position(swPosTop, topElevation);
+			Position pt3 = new Position(nwPosTop, topElevation);
+			insertClippingPlaneForPositions(dc, topClippingPlanes, 0, pt1, pt2, pt3, true);
+
+			Position pb1 = new Position(middlePos, bottomElevation);
+			Position pb2 = new Position(swPosTop, bottomElevation);
+			Position pb3 = new Position(nwPosTop, bottomElevation);
+			insertClippingPlaneForPositions(dc, bottomClippingPlanes, 0, pb1, pb2, pb3, true);
+		}
+		if (maxLon)
+		{
+			Position middlePos = dataProvider.getPosition(maxLonSlice, (maxLatSlice + minLatOffset) / 2);
+
+			Position pt1 = new Position(middlePos, topElevation);
+			Position pt2 = new Position(sePosTop, topElevation);
+			Position pt3 = new Position(nePosTop, topElevation);
+			insertClippingPlaneForPositions(dc, topClippingPlanes, 4, pt1, pt2, pt3, false);
+
+			Position pb1 = new Position(middlePos, bottomElevation);
+			Position pb2 = new Position(sePosTop, bottomElevation);
+			Position pb3 = new Position(nePosTop, bottomElevation);
+			insertClippingPlaneForPositions(dc, bottomClippingPlanes, 4, pb1, pb2, pb3, false);
+		}
+		if (minLat)
+		{
+			Position middlePos = dataProvider.getPosition((maxLonSlice + minLonOffset) / 2, minLatOffset);
+
+			Position pt1 = new Position(middlePos, topElevation);
+			Position pt2 = new Position(swPosTop, topElevation);
+			Position pt3 = new Position(sePosTop, topElevation);
+			insertClippingPlaneForPositions(dc, topClippingPlanes, 8, pt1, pt2, pt3, false);
+
+			Position pb1 = new Position(middlePos, bottomElevation);
+			Position pb2 = new Position(swPosTop, bottomElevation);
+			Position pb3 = new Position(sePosTop, bottomElevation);
+			insertClippingPlaneForPositions(dc, bottomClippingPlanes, 8, pb1, pb2, pb3, false);
+		}
+		if (maxLat)
+		{
+			Position middlePos = dataProvider.getPosition((maxLonSlice + minLonOffset) / 2, maxLatSlice);
+
+			Position pt1 = new Position(middlePos, topElevation);
+			Position pt2 = new Position(nwPosTop, topElevation);
+			Position pt3 = new Position(nePosTop, topElevation);
+			insertClippingPlaneForPositions(dc, topClippingPlanes, 12, pt1, pt2, pt3, true);
+
+			Position pb1 = new Position(middlePos, bottomElevation);
+			Position pb2 = new Position(nwPosTop, bottomElevation);
+			Position pb3 = new Position(nePosTop, bottomElevation);
+			insertClippingPlaneForPositions(dc, bottomClippingPlanes, 12, pb1, pb2, pb3, true);
+		}
+
+		minLonClipDirty = maxLonClipDirty = minLatClipDirty = maxLatClipDirty = topClipDirty = bottomClipDirty = false;
 	}
 
 	/**
-	 * Calculate a single clipping plane at the provided latitude or longitude.
+	 * Insert a clipping plane vector into the given array. The vector is
+	 * calculated by finding a plane that intersects the three given points.
 	 * 
 	 * @param dc
-	 * @param latOrLon
-	 *            Latitude or longitude line through which the plane should
-	 *            intersect
-	 * @param isLongitude
-	 *            Does latOrLon define a latitude or a longitude?
+	 * @param clippingPlaneArray
+	 *            Array to insert clipping plane vector into
+	 * @param arrayOffset
+	 *            Array start offset to begin inserting values at
+	 * @param p1
+	 *            First point that the plane must intersect
+	 * @param p2
+	 *            Second point that the plane must intersect
+	 * @param p3
+	 *            Third point that the plane must intersect
 	 * @param isReversed
-	 *            Should the plane's normal be reversed?
-	 * @return Plane parallel to and intersecting the given latitude or
-	 *         longitude
+	 *            Should the plane's normal be reversed (ie clip the alternate
+	 *            side)
 	 */
-	protected Plane calculateClippingPlane(DrawContext dc, double latOrLon, boolean isLongitude, boolean isReversed)
+	protected void insertClippingPlaneForPositions(DrawContext dc, double[] clippingPlaneArray, int arrayOffset,
+			Position p1, Position p2, Position p3, boolean isReversed)
 	{
 		Globe globe = dc.getGlobe();
-		Sector sector = getSector();
-		LatLon centroid = sector.getCentroid();
-		Position p1 = null, p2 = null, p3 = null;
-
-		if (isLongitude)
-		{
-			Angle longitude = Angle.fromDegrees(latOrLon);
-			p1 = new Position(sector.getMinLatitude(), longitude, 0);
-			p2 = new Position(centroid.latitude, longitude, 0);
-			p3 = new Position(centroid.latitude, longitude, 100);
-		}
-		else
-		{
-			Angle latitude = Angle.fromDegrees(latOrLon);
-			p1 = new Position(latitude, centroid.longitude, 100);
-			p2 = new Position(latitude, centroid.longitude, 0);
-			p3 = new Position(latitude, sector.getMinLongitude(), 0);
-		}
-
-		Vec4 v1 = globe.computePointFromPosition(isReversed ? p3 : p1);
-		Vec4 v2 = globe.computePointFromPosition(p2);
-		Vec4 v3 = globe.computePointFromPosition(isReversed ? p1 : p3);
-		Line l1 = Line.fromSegment(v1, v2);
-		Line l2 = Line.fromSegment(v2, v3);
-		return GeometryUtil.createPlaneContainingLines(l1, l2);
+		Position pr2 = isReversed ? p3 : p2;
+		Position pr3 = isReversed ? p2 : p3;
+		Vec4 v1 = globe.computePointFromPosition(p1, p1.elevation * dc.getVerticalExaggeration());
+		Vec4 v2 = globe.computePointFromPosition(pr2, pr2.elevation * dc.getVerticalExaggeration());
+		Vec4 v3 = globe.computePointFromPosition(pr3, pr3.elevation * dc.getVerticalExaggeration());
+		Line l1 = Line.fromSegment(v2, v1);
+		Line l2 = Line.fromSegment(v1, v3);
+		Plane plane = GeometryUtil.createPlaneContainingLines(l1, l2);
+		Vec4 v = plane.getVector();
+		clippingPlaneArray[arrayOffset + 0] = v.x;
+		clippingPlaneArray[arrayOffset + 1] = v.y;
+		clippingPlaneArray[arrayOffset + 2] = v.z;
+		clippingPlaneArray[arrayOffset + 3] = v.w;
 	}
 
 	/**
@@ -606,6 +675,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			FastShape[] shapes =
 					new FastShape[] { topSurface, bottomSurface, minLonCurtain, maxLonCurtain, minLatCurtain,
 							maxLatCurtain };
+			//FastShape[] shapes = new FastShape[] { topSurface };
 			Arrays.sort(shapes, new ShapeComparator(dc));
 
 			//test all the shapes with the minimum distance, culling them if they are outside
@@ -635,24 +705,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 				//push the OpenGL clipping plane state on the attribute stack
 				gl.glPushAttrib(GL.GL_TRANSFORM_BIT);
 
-				//update and enable the OpenGL clipping planes for each of the curtain clipping positions 
-				boolean[] clipPlaneEnabled =
-						new boolean[] { minLonClip != null, maxLonClip != null, minLatClip != null, maxLatClip != null };
-				FastShape[] clipPlaneShapes =
-						new FastShape[] { minLonCurtain, maxLonCurtain, minLatCurtain, maxLatCurtain };
-				for (int i = 0; i < 4; i++)
-				{
-					gl.glClipPlane(GL.GL_CLIP_PLANE0 + i, clippingPlanes, i * 4);
-					if (clipPlaneEnabled[i])
-					{
-						gl.glEnable(GL.GL_CLIP_PLANE0 + i);
-					}
-					else
-					{
-						gl.glDisable(GL.GL_CLIP_PLANE0 + i);
-					}
-				}
-
 				boolean oldDeepPicking = dc.isDeepPickingEnabled();
 				try
 				{
@@ -668,12 +720,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 					{
 						if (shape != null)
 						{
-							//don't clip this shape with this shape's clipping plane
-							int clipPlaneShapeIndex = Util.indexInArray(clipPlaneShapes, shape);
-							if (clipPlaneShapeIndex >= 0 && clipPlaneEnabled[clipPlaneShapeIndex])
-							{
-								gl.glDisable(GL.GL_CLIP_PLANE0 + clipPlaneShapeIndex);
-							}
+							setupClippingPlanes(dc, shape == topSurface, shape == bottomSurface);
 
 							//if in picking mode, render the shape with a unique picking color, and don't light or texture
 							if (dc.isPickingMode())
@@ -689,22 +736,13 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 							shape.setLighted(!dc.isPickingMode());
 							shape.setTextured(!dc.isPickingMode());
 							shape.render(dc);
-
-							//renable the clipping plane disabled earlier
-							if (clipPlaneShapeIndex >= 0 && clipPlaneEnabled[clipPlaneShapeIndex])
-							{
-								gl.glEnable(GL.GL_CLIP_PLANE0 + clipPlaneShapeIndex);
-							}
 						}
 					}
 
 					//disable all clipping planes enabled earlier
 					for (int i = 0; i < 4; i++)
 					{
-						if (clipPlaneEnabled[i])
-						{
-							gl.glDisable(GL.GL_CLIP_PLANE0 + i);
-						}
+						gl.glDisable(GL.GL_CLIP_PLANE0 + i);
 					}
 
 					if (dc.isPickingMode())
@@ -730,6 +768,46 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			finally
 			{
 				gl.glPopAttrib();
+			}
+		}
+	}
+
+	protected void setupClippingPlanes(DrawContext dc, boolean top, boolean bottom)
+	{
+		boolean minLon = minLonOffset > 0;
+		boolean maxLon = maxLonOffset > 0;
+		boolean minLat = minLatOffset > 0;
+		boolean maxLat = maxLatOffset > 0;
+
+		boolean[] enabled;
+		double[] array;
+
+		GL gl = dc.getGL();
+		if (top || bottom)
+		{
+			array = top ? topClippingPlanes : bottomClippingPlanes;
+			enabled = new boolean[] { minLon, maxLon, minLat, maxLat };
+		}
+		else
+		{
+			array = curtainClippingPlanes;
+			boolean sw = minLon || minLat;
+			boolean nw = minLon || maxLat;
+			boolean se = maxLon || minLat;
+			boolean ne = maxLon || maxLat;
+			enabled = new boolean[] { sw, nw, se, ne };
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			gl.glClipPlane(GL.GL_CLIP_PLANE0 + i, array, i * 4);
+			if (enabled[i])
+			{
+				gl.glEnable(GL.GL_CLIP_PLANE0 + i);
+			}
+			else
+			{
+				gl.glDisable(GL.GL_CLIP_PLANE0 + i);
 			}
 		}
 	}

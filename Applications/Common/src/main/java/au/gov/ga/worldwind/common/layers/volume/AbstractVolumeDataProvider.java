@@ -41,15 +41,57 @@ import com.sun.opengl.util.BufferUtil;
 public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<VolumeLayer> implements
 		VolumeDataProvider
 {
+	/**
+	 * Number of samples in the volume data along the x-axis.
+	 */
 	protected int xSize;
+	/**
+	 * Number of samples in the volume data along the y-axis;
+	 */
 	protected int ySize;
+	/**
+	 * Number of samples in the volume data along the z-axis;
+	 */
 	protected int zSize;
+	/**
+	 * Approximate sector containing the volume data.
+	 */
 	protected Sector sector = null;
-	protected double depth;
+	/**
+	 * Average top elevation of the volume data (in meters).
+	 */
 	protected double top;
+	/**
+	 * Depth (distance between top and bottom slice) of the volume data (in
+	 * meters).
+	 */
+	protected double depth;
+	/**
+	 * Value in the data that represents NODATA.
+	 */
 	protected float noDataValue;
+	/**
+	 * Is the volume data reversed along the x-axis?
+	 */
+	protected boolean reverseX = false;
+	/**
+	 * Is the volume data reversed along the y-axis?
+	 */
+	protected boolean reverseY = false;
+	/**
+	 * Is the volume data reversed along the z-axis?
+	 */
+	protected boolean reverseZ = false;
 
+	/**
+	 * Contains the positions of the top slice of the volume data, from the
+	 * south-west corner to the north-east corner. Longitude (x values) should
+	 * increment first.
+	 */
 	protected List<Position> positions;
+	/**
+	 * Float array that contains the volume data.
+	 */
 	protected FloatBuffer data;
 
 	@Override
@@ -85,7 +127,25 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	@Override
 	public float getValue(int x, int y, int z)
 	{
+		if (reverseX)
+		{
+			x = xSize - x - 1;
+		}
+		if (reverseY)
+		{
+			y = ySize - y - 1;
+		}
+		if (reverseZ)
+		{
+			z = zSize - z - 1;
+		}
 		return data.get(x + y * xSize + z * xSize * ySize);
+	}
+	
+	@Override
+	public Position getPosition(int x, int y)
+	{
+		return positions.get(x + y * xSize);
 	}
 
 	@Override

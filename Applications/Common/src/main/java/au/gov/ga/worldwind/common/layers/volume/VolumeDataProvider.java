@@ -15,6 +15,8 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.layers.volume;
 
+import gov.nasa.worldwind.geom.Position;
+
 import java.awt.Rectangle;
 
 import au.gov.ga.worldwind.common.layers.data.DataProvider;
@@ -65,6 +67,17 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	 * @return The (x,y,z) value of the volume.
 	 */
 	float getValue(int x, int y, int z);
+
+	/**
+	 * The position of the top (z == 0) volume point at the given (x,y) point.
+	 * 
+	 * @param x
+	 *            x-coordinate
+	 * @param y
+	 *            y-coordinate
+	 * @return The position at the (x,y) point.
+	 */
+	Position getPosition(int x, int y);
 
 	/**
 	 * @return The value that identifies no-data.

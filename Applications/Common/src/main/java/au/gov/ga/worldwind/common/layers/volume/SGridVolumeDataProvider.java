@@ -25,8 +25,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -35,8 +37,6 @@ import java.util.zip.ZipFile;
 import org.gdal.osr.CoordinateTransformation;
 
 import au.gov.ga.worldwind.common.util.URLUtil;
-
-import com.sun.opengl.util.BufferUtil;
 
 /**
  * {@link VolumeDataProvider} implementation which reads volume data from a
@@ -157,8 +157,8 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 				CoordinateTransformation transformation = layer.getCoordinateTransformation();
 				positions = new ArrayList<Position>(xSize * ySize);
 				int positionIndex = 0;
-				double firstZValue = 0;
-				data = BufferUtil.newFloatBuffer(xSize * ySize * zSize);
+				double firstXValue = 0, firstYValue = 0, firstZValue = 0;
+				data = FloatBuffer.allocate(xSize * ySize * zSize);
 				top = 0;
 
 				//setup the ASCII data file line regex
@@ -166,7 +166,8 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 				String nonCapturingDoublePattern = "(?:[\\d.\\-]+)";
 				String spacerPattern = "\\s+";
 				//regex for coordinates
-				String lineRegex = "\\s*" + doublePattern + spacerPattern + doublePattern + spacerPattern + doublePattern;
+				String lineRegex =
+						"\\s*" + doublePattern + spacerPattern + doublePattern + spacerPattern + doublePattern;
 				for (int property = 1; property < paintedVariableId; property++)
 				{
 					//ignore all properties in between coordinates and painted property
@@ -192,7 +193,6 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 						//transform the point
 						if (transformation != null)
 						{
-							//TODO should the z coordinate be transformed here?
 							transformation.TransformPoint(transformed, x, y, z);
 							x = transformed[0];
 							y = transformed[1];
@@ -203,6 +203,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 						if (positionIndex < xSize * ySize)
 						{
 							Position position = Position.fromDegrees(y, x, z);
+							//positions.add(position);
 							positions.add(position);
 							top += z / (double) (xSize * ySize);
 
@@ -221,18 +222,68 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 
 						if (positionIndex == 0)
 						{
+							firstXValue = x;
+							firstYValue = y;
 							firstZValue = z;
+						}
+						else if (positionIndex == 1)
+						{
+							//second x value
+							reverseX = x < firstXValue;
+						}
+						else if (positionIndex == xSize)
+						{
+							//second y value
+							reverseY = y < firstYValue;
 						}
 						else if (positionIndex == xSize * ySize * (zSize - 1))
 						{
 							//positionIndex is the same x/y as 0, but at the bottom elevation instead of top,
 							//so we can calculate the depth as the difference between the two elevations
-							depth = firstZValue - z;
+							reverseZ = z > firstZValue;
+							depth = reverseZ ? z - firstZValue : firstZValue - z;
+							top += reverseZ ? depth : 0;
 						}
 
 						//put the data into the floatbuffer
 						data.put(value);
 						positionIndex++;
+					}
+				}
+
+				if (positions.size() != xSize * ySize)
+				{
+					throw new IOException("Data file doesn't contain the correct number of positions");
+				}
+
+				if (reverseX || reverseY || reverseZ)
+				{
+					//if the z-axis is reversed, bring all the positions up to the
+					//top depth (they are currently at the bottom depth)
+					if (reverseZ)
+					{
+						List<Position> oldPositions = positions;
+						positions = new ArrayList<Position>(oldPositions.size());
+						for (Position position : oldPositions)
+						{
+							positions.add(new Position(position, position.elevation + depth));
+						}
+					}
+
+					//if the x-axis or y-axis are reversed, mirror them
+					if (reverseX || reverseY)
+					{
+						List<Position> oldPositions = positions;
+						positions = new ArrayList<Position>(oldPositions.size());
+						for (int y = 0; y < ySize; y++)
+						{
+							int ry = reverseY ? ySize - y - 1 : y;
+							for (int x = 0; x < xSize; x++)
+							{
+								int rx = reverseX ? xSize - x - 1 : x;
+								positions.add(oldPositions.get(rx + ry * xSize));
+							}
+						}
 					}
 				}
 			}
