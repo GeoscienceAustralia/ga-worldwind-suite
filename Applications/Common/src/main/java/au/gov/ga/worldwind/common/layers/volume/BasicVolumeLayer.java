@@ -448,95 +448,91 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		Position sePosTop = dataProvider.getPosition(maxLonSlice, minLatOffset);
 		Position nePosTop = dataProvider.getPosition(maxLonSlice, maxLatSlice);
 
-		double deltaLat = 0.005, deltaLon = 0.005;
-		if (sw)
+		if (depth != 0)
 		{
-			Position swPosBottom = new Position(swPosTop, swPosTop.elevation - depth);
-			Position otherPos = swPosTop.add(Position.fromDegrees(-deltaLat, deltaLon, 0));
-			insertClippingPlaneForPositions(dc, curtainClippingPlanes, 0, swPosTop, swPosBottom, otherPos, false);
+			double deltaLat = 0.005, deltaLon = 0.005;
+			if (sw)
+			{
+				Position swPosBottom = new Position(swPosTop, swPosTop.elevation - depth);
+				Position otherPos = swPosTop.add(Position.fromDegrees(-deltaLat, deltaLon, 0));
+				insertClippingPlaneForPositions(dc, curtainClippingPlanes, 0, swPosTop, swPosBottom, otherPos);
+			}
+			if (nw)
+			{
+				Position nwPosBottom = new Position(nwPosTop, nwPosTop.elevation - depth);
+				Position otherPos = nwPosTop.add(Position.fromDegrees(deltaLat, deltaLon, 0));
+				insertClippingPlaneForPositions(dc, curtainClippingPlanes, 4, nwPosTop, otherPos, nwPosBottom);
+			}
+			if (se)
+			{
+				Position sePosBottom = new Position(sePosTop, sePosTop.elevation - depth);
+				Position otherPos = sePosTop.add(Position.fromDegrees(-deltaLat, -deltaLon, 0));
+				insertClippingPlaneForPositions(dc, curtainClippingPlanes, 8, sePosTop, otherPos, sePosBottom);
+			}
+			if (ne)
+			{
+				Position nePosBottom = new Position(nePosTop, nePosTop.elevation - depth);
+				Position otherPos = nePosTop.add(Position.fromDegrees(deltaLat, -deltaLon, 0));
+				insertClippingPlaneForPositions(dc, curtainClippingPlanes, 12, nePosTop, nePosBottom, otherPos);
+			}
 		}
-		if (nw)
-		{
-			Position nwPosBottom = new Position(nwPosTop, nwPosTop.elevation - depth);
-			Position otherPos = nwPosTop.add(Position.fromDegrees(deltaLat, deltaLon, 0));
-			insertClippingPlaneForPositions(dc, curtainClippingPlanes, 4, nwPosTop, nwPosBottom, otherPos, true);
-		}
-		if (se)
-		{
-			Position sePosBottom = new Position(sePosTop, sePosTop.elevation - depth);
-			Position otherPos = sePosTop.add(Position.fromDegrees(-deltaLat, -deltaLon, 0));
-			insertClippingPlaneForPositions(dc, curtainClippingPlanes, 8, sePosTop, sePosBottom, otherPos, true);
-		}
-		if (ne)
-		{
-			Position nePosBottom = new Position(nePosTop, nePosTop.elevation - depth);
-			Position otherPos = nePosTop.add(Position.fromDegrees(deltaLat, -deltaLon, 0));
-			insertClippingPlaneForPositions(dc, curtainClippingPlanes, 12, nePosTop, nePosBottom, otherPos, false);
-		}
+
+		//the following only works for a spherical earth (as opposed to flat earth), as it relies on adjacent
+		//points not being colinear (3 points along a latitude are not colinear when wrapped around a sphere)
 
 		if (minLon)
 		{
 			Position middlePos = dataProvider.getPosition(minLonOffset, (maxLatSlice + minLatOffset) / 2);
-
-			Position pt1 = new Position(middlePos, topElevation);
-			Position pt2 = new Position(swPosTop, topElevation);
-			Position pt3 = new Position(nwPosTop, topElevation);
-			insertClippingPlaneForPositions(dc, topClippingPlanes, 0, pt1, pt2, pt3, true);
-
-			Position pb1 = new Position(middlePos, bottomElevation);
-			Position pb2 = new Position(swPosTop, bottomElevation);
-			Position pb3 = new Position(nwPosTop, bottomElevation);
-			insertClippingPlaneForPositions(dc, bottomClippingPlanes, 0, pb1, pb2, pb3, true);
+			middlePos = midpointPositionIfEqual(middlePos, nwPosTop, swPosTop);
+			insertClippingPlaneForLatLons(dc, topClippingPlanes, 0, middlePos, nwPosTop, swPosTop, topElevation);
+			insertClippingPlaneForLatLons(dc, bottomClippingPlanes, 0, middlePos, nwPosTop, swPosTop, bottomElevation);
 		}
 		if (maxLon)
 		{
 			Position middlePos = dataProvider.getPosition(maxLonSlice, (maxLatSlice + minLatOffset) / 2);
-
-			Position pt1 = new Position(middlePos, topElevation);
-			Position pt2 = new Position(sePosTop, topElevation);
-			Position pt3 = new Position(nePosTop, topElevation);
-			insertClippingPlaneForPositions(dc, topClippingPlanes, 4, pt1, pt2, pt3, false);
-
-			Position pb1 = new Position(middlePos, bottomElevation);
-			Position pb2 = new Position(sePosTop, bottomElevation);
-			Position pb3 = new Position(nePosTop, bottomElevation);
-			insertClippingPlaneForPositions(dc, bottomClippingPlanes, 4, pb1, pb2, pb3, false);
+			middlePos = midpointPositionIfEqual(middlePos, sePosTop, nePosTop);
+			insertClippingPlaneForLatLons(dc, topClippingPlanes, 4, middlePos, sePosTop, nePosTop, topElevation);
+			insertClippingPlaneForLatLons(dc, bottomClippingPlanes, 4, middlePos, sePosTop, nePosTop, bottomElevation);
 		}
 		if (minLat)
 		{
 			Position middlePos = dataProvider.getPosition((maxLonSlice + minLonOffset) / 2, minLatOffset);
-
-			Position pt1 = new Position(middlePos, topElevation);
-			Position pt2 = new Position(swPosTop, topElevation);
-			Position pt3 = new Position(sePosTop, topElevation);
-			insertClippingPlaneForPositions(dc, topClippingPlanes, 8, pt1, pt2, pt3, false);
-
-			Position pb1 = new Position(middlePos, bottomElevation);
-			Position pb2 = new Position(swPosTop, bottomElevation);
-			Position pb3 = new Position(sePosTop, bottomElevation);
-			insertClippingPlaneForPositions(dc, bottomClippingPlanes, 8, pb1, pb2, pb3, false);
+			middlePos = midpointPositionIfEqual(middlePos, swPosTop, sePosTop);
+			insertClippingPlaneForLatLons(dc, topClippingPlanes, 8, middlePos, swPosTop, sePosTop, topElevation);
+			insertClippingPlaneForLatLons(dc, bottomClippingPlanes, 8, middlePos, swPosTop, sePosTop, bottomElevation);
 		}
 		if (maxLat)
 		{
 			Position middlePos = dataProvider.getPosition((maxLonSlice + minLonOffset) / 2, maxLatSlice);
-
-			Position pt1 = new Position(middlePos, topElevation);
-			Position pt2 = new Position(nwPosTop, topElevation);
-			Position pt3 = new Position(nePosTop, topElevation);
-			insertClippingPlaneForPositions(dc, topClippingPlanes, 12, pt1, pt2, pt3, true);
-
-			Position pb1 = new Position(middlePos, bottomElevation);
-			Position pb2 = new Position(nwPosTop, bottomElevation);
-			Position pb3 = new Position(nePosTop, bottomElevation);
-			insertClippingPlaneForPositions(dc, bottomClippingPlanes, 12, pb1, pb2, pb3, true);
+			middlePos = midpointPositionIfEqual(middlePos, nePosTop, nwPosTop);
+			insertClippingPlaneForLatLons(dc, topClippingPlanes, 12, middlePos, nePosTop, nwPosTop, topElevation);
+			insertClippingPlaneForLatLons(dc, bottomClippingPlanes, 12, middlePos, nePosTop, nwPosTop, bottomElevation);
 		}
 
 		minLonClipDirty = maxLonClipDirty = minLatClipDirty = maxLatClipDirty = topClipDirty = bottomClipDirty = false;
 	}
 
 	/**
+	 * Return the midpoint of the two end positions if the given middle position
+	 * is equal to one of the ends.
+	 * 
+	 * @param middle
+	 * @param end1
+	 * @param end2
+	 * @return Midpoint between end1 and end2 if middle equals end1 or end2.
+	 */
+	protected Position midpointPositionIfEqual(Position middle, Position end1, Position end2)
+	{
+		if (middle.equals(end1) || middle.equals(end2))
+		{
+			return Position.interpolate(0.5, end1, end2);
+		}
+		return middle;
+	}
+
+	/**
 	 * Insert a clipping plane vector into the given array. The vector is
-	 * calculated by finding a plane that intersects the three given points.
+	 * calculated by finding a plane that intersects the three given positions.
 	 * 
 	 * @param dc
 	 * @param clippingPlaneArray
@@ -544,26 +540,71 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	 * @param arrayOffset
 	 *            Array start offset to begin inserting values at
 	 * @param p1
-	 *            First point that the plane must intersect
+	 *            First position that the plane must intersect
 	 * @param p2
-	 *            Second point that the plane must intersect
+	 *            Second position that the plane must intersect
 	 * @param p3
-	 *            Third point that the plane must intersect
-	 * @param isReversed
-	 *            Should the plane's normal be reversed (ie clip the alternate
-	 *            side)
+	 *            Third position that the plane must intersect
 	 */
 	protected void insertClippingPlaneForPositions(DrawContext dc, double[] clippingPlaneArray, int arrayOffset,
-			Position p1, Position p2, Position p3, boolean isReversed)
+			Position p1, Position p2, Position p3)
 	{
 		Globe globe = dc.getGlobe();
-		Position pr2 = isReversed ? p3 : p2;
-		Position pr3 = isReversed ? p2 : p3;
 		Vec4 v1 = globe.computePointFromPosition(p1, p1.elevation * dc.getVerticalExaggeration());
-		Vec4 v2 = globe.computePointFromPosition(pr2, pr2.elevation * dc.getVerticalExaggeration());
-		Vec4 v3 = globe.computePointFromPosition(pr3, pr3.elevation * dc.getVerticalExaggeration());
-		Line l1 = Line.fromSegment(v2, v1);
-		Line l2 = Line.fromSegment(v1, v3);
+		Vec4 v2 = globe.computePointFromPosition(p2, p2.elevation * dc.getVerticalExaggeration());
+		Vec4 v3 = globe.computePointFromPosition(p3, p3.elevation * dc.getVerticalExaggeration());
+		insertClippingPlaneForPoints(clippingPlaneArray, arrayOffset, v1, v2, v3);
+	}
+
+	/**
+	 * Insert a clipping plane vector into the given array. The vector is
+	 * calculated by finding a plane that intersects the three given latlons at
+	 * the given elevation.
+	 * 
+	 * @param dc
+	 * @param clippingPlaneArray
+	 *            Array to insert clipping plane vector into
+	 * @param arrayOffset
+	 *            Array start offset to begin inserting values at
+	 * @param l1
+	 *            First latlon that the plane must intersect
+	 * @param l2
+	 *            Second latlon that the plane must intersect
+	 * @param l3
+	 *            Third latlon that the plane must intersect
+	 * @param elevation
+	 *            Elevation of the latlons
+	 */
+	protected void insertClippingPlaneForLatLons(DrawContext dc, double[] clippingPlaneArray, int arrayOffset,
+			LatLon l1, LatLon l2, LatLon l3, double elevation)
+	{
+		Globe globe = dc.getGlobe();
+		double exaggeratedElevation = elevation * dc.getVerticalExaggeration();
+		Vec4 v1 = globe.computePointFromPosition(l1, exaggeratedElevation);
+		Vec4 v2 = globe.computePointFromPosition(l2, exaggeratedElevation);
+		Vec4 v3 = globe.computePointFromPosition(l3, exaggeratedElevation);
+		insertClippingPlaneForPoints(clippingPlaneArray, arrayOffset, v1, v2, v3);
+	}
+
+	/**
+	 * Insert a clipping plane vector into the given array. The vector is
+	 * calculated by finding a plane that intersects the three given points.
+	 * 
+	 * @param clippingPlaneArray
+	 *            Array to insert clipping plane vector into
+	 * @param arrayOffset
+	 *            Array start offset to begin inserting values at
+	 * @param v1
+	 *            First point that the plane must intersect
+	 * @param v2
+	 *            Second point that the plane must intersect
+	 * @param v3
+	 *            Third point that the plane must intersect
+	 */
+	protected void insertClippingPlaneForPoints(double[] clippingPlaneArray, int arrayOffset, Vec4 v1, Vec4 v2, Vec4 v3)
+	{
+		Line l1 = Line.fromSegment(v1, v3);
+		Line l2 = Line.fromSegment(v1, v2);
 		Plane plane = GeometryUtil.createPlaneContainingLines(l1, l2);
 		Vec4 v = plane.getVector();
 		clippingPlaneArray[arrayOffset + 0] = v.x;
