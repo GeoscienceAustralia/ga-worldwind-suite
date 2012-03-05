@@ -29,6 +29,7 @@ import java.util.TreeMap;
 public class ColorMap extends TreeMap<Double, Color>
 {
 	private boolean interpolateHue = true;
+	private boolean valuesPercentages = false;
 
 	/**
 	 * @return Should the interpolation be performed in the HSB color space? If
@@ -47,6 +48,26 @@ public class ColorMap extends TreeMap<Double, Color>
 	public void setInterpolateHue(boolean interpolateHue)
 	{
 		this.interpolateHue = interpolateHue;
+	}
+
+	/**
+	 * @return Should the values mapped to the colors in this map be treated as
+	 *         percentages?
+	 */
+	public boolean isValuesPercentages()
+	{
+		return valuesPercentages;
+	}
+
+	/**
+	 * Set whether the values mapped to the colors in the map should be treated
+	 * as percentages.
+	 * 
+	 * @param valuesPercentages
+	 */
+	public void setValuesPercentages(boolean valuesPercentages)
+	{
+		this.valuesPercentages = valuesPercentages;
 	}
 
 	/**
@@ -74,5 +95,38 @@ public class ColorMap extends TreeMap<Double, Color>
 		Color color0 = lessEntry == null ? null : lessEntry.getValue();
 		Color color1 = greaterEntry == null ? null : greaterEntry.getValue();
 		return Util.interpolateColor(color0, color1, mixer, interpolateHue);
+	}
+
+	/**
+	 * Calculate the color for the given double value as a percentage between
+	 * the given minimum and maximum. The given value is scaled between 0 and 1
+	 * before passing to the {@link #calculateColor(double)} function.
+	 * 
+	 * @param value
+	 * @param minimum
+	 * @param maximum
+	 * @return Color at value
+	 */
+	public Color calculateColorAsPercentage(double value, double minimum, double maximum)
+	{
+		return calculateColor((value - minimum) / (maximum - minimum));
+	}
+
+	/**
+	 * Calculate the color for the given double value. If
+	 * {@link #isValuesPercentages()} is true, the given value is scaled between
+	 * 0 and 1 (using the given minimum and maximum) before being passed to the
+	 * {@link #calculateColor(double)} function.
+	 * 
+	 * @param value
+	 * @param minimum
+	 * @param maximum
+	 * @return Color at value
+	 */
+	public Color calculateColorNotingIsValuesPercentages(double value, double minimum, double maximum)
+	{
+		if (isValuesPercentages())
+			return calculateColorAsPercentage(value, minimum, maximum);
+		return calculateColor(value);
 	}
 }

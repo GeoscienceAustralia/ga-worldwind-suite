@@ -160,6 +160,8 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 				double firstXValue = 0, firstYValue = 0, firstZValue = 0;
 				data = FloatBuffer.allocate(xSize * ySize * zSize);
 				top = 0;
+				minValue = Float.MAX_VALUE;
+				maxValue = -Float.MAX_VALUE;
 
 				//setup the ASCII data file line regex
 				String doublePattern = "([\\d.\\-]+)";
@@ -247,6 +249,8 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 
 						//put the data into the floatbuffer
 						data.put(value);
+						minValue = Math.min(minValue, value);
+						maxValue = Math.max(maxValue, value);
 						positionIndex++;
 					}
 				}

@@ -503,6 +503,12 @@ public class XMLUtil extends WWXML
 				colorMap.setInterpolateHue(b);
 			}
 
+			b = XMLUtil.getBoolean(element, path + "/@percentages", true, xpath);
+			if (b != null)
+			{
+				colorMap.setValuesPercentages(b);
+			}
+
 			Element[] mapEntries = WWXML.getElements(element, path + "/Entry", xpath);
 			if (mapEntries != null)
 			{
@@ -541,6 +547,10 @@ public class XMLUtil extends WWXML
 	{
 		Element colorMapElement = appendElement(element, path);
 		setBooleanAttribute(colorMapElement, "interpolateHue", colorMap.isInterpolateHue());
+		if (colorMap.isValuesPercentages())
+		{
+			setBooleanAttribute(colorMapElement, "percentages", colorMap.isValuesPercentages());
+		}
 		for (Entry<Double, Color> colorMapEntry : colorMap.entrySet())
 		{
 			Element entryElement = appendElement(colorMapElement, "Entry");

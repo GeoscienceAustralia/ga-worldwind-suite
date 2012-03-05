@@ -25,10 +25,9 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.zip.ZipInputStream;
-
-import com.sun.opengl.util.BufferUtil;
 
 /**
  * {@link VolumeDataProvider} which reads its data from a custom object array
@@ -70,6 +69,8 @@ public class ArrayVolumeDataProvider extends AbstractVolumeDataProvider
 			top = ois.readDouble();
 			depth = ois.readDouble();
 			noDataValue = ois.readFloat();
+			minValue = Float.MAX_VALUE;
+			maxValue = -Float.MAX_VALUE;
 
 			positions = new ArrayList<Position>(xSize * ySize);
 			for (int y = 0; y < ySize; y++)
@@ -82,10 +83,13 @@ public class ArrayVolumeDataProvider extends AbstractVolumeDataProvider
 				}
 			}
 
-			data = BufferUtil.newFloatBuffer(xSize * ySize * zSize);
+			data = FloatBuffer.allocate(xSize * ySize * zSize);
 			for (int i = 0; i < data.limit(); i++)
 			{
-				data.put(ois.readFloat());
+				float value = ois.readFloat();
+				data.put(value);
+				minValue = Math.min(minValue, value);
+				maxValue = Math.max(maxValue, value);
 			}
 			data.rewind();
 

@@ -93,6 +93,14 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	 * Float array that contains the volume data.
 	 */
 	protected FloatBuffer data;
+	/**
+	 * The minimum volume data value.
+	 */
+	protected float minValue;
+	/**
+	 * The maximum volume data value.
+	 */
+	protected float maxValue;
 
 	@Override
 	public int getXSize()
@@ -142,6 +150,18 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 		return data.get(x + y * xSize + z * xSize * ySize);
 	}
 	
+	@Override
+	public float getMinValue()
+	{
+		return minValue;
+	}
+	
+	@Override
+	public float getMaxValue()
+	{
+		return maxValue;
+	}
+
 	@Override
 	public Position getPosition(int x, int y)
 	{

@@ -69,6 +69,16 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	float getValue(int x, int y, int z);
 
 	/**
+	 * @return The minimum value in the volume data.
+	 */
+	float getMinValue();
+
+	/**
+	 * @return The maximum value in the volume data.
+	 */
+	float getMaxValue();
+
+	/**
 	 * The position of the top (z == 0) volume point at the given (x,y) point.
 	 * 
 	 * @param x

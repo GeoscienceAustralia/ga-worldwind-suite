@@ -303,8 +303,8 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		Rectangle lonRectangle = new Rectangle(0, 0, dataProvider.getYSize(), dataProvider.getZSize());
 		Rectangle latRectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getZSize());
 		Rectangle elevationRectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getYSize());
-		double topPercent = topOffset / (double) (dataProvider.getZSize() - 1);
-		double bottomPercent = bottomSlice / (double) (dataProvider.getZSize() - 1);
+		double topPercent = topOffset / (double) Math.max(dataProvider.getZSize() - 1, 1);
+		double bottomPercent = bottomSlice / (double) Math.max(dataProvider.getZSize() - 1, 1);
 
 		if (recalculateMinLon)
 		{
@@ -438,8 +438,8 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		double top = dataProvider.getTop();
 		double depth = dataProvider.getDepth();
 
-		double topPercent = topOffset / (double) (dataProvider.getZSize() - 1);
-		double bottomPercent = bottomSlice / (double) (dataProvider.getZSize() - 1);
+		double topPercent = topOffset / (double) Math.max(dataProvider.getZSize() - 1, 1);
+		double bottomPercent = bottomSlice / (double) Math.max(dataProvider.getZSize() - 1, 1);
 		double topElevation = top - topPercent * depth;
 		double bottomElevation = top - bottomPercent * depth;
 
@@ -631,6 +631,8 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	protected BufferedImage generateTexture(int axis, int position, Rectangle rectangle)
 	{
 		BufferedImage image = new BufferedImage(rectangle.width, rectangle.height, BufferedImage.TYPE_INT_ARGB);
+		float minimum = dataProvider.getMinValue();
+		float maximum = dataProvider.getMaxValue();
 		for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++)
 		{
 			for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++)
@@ -643,7 +645,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 				if (value != dataProvider.getNoDataValue())
 				{
 					if (colorMap != null)
-						rgb = colorMap.calculateColor(value).getRGB();
+						rgb = colorMap.calculateColorNotingIsValuesPercentages(value, minimum, maximum).getRGB();
 					else
 						rgb = Color.HSBtoRGB(-0.3f - value * 0.7f, 1.0f, 1.0f);
 				}
@@ -716,7 +718,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			FastShape[] shapes =
 					new FastShape[] { topSurface, bottomSurface, minLonCurtain, maxLonCurtain, minLatCurtain,
 							maxLatCurtain };
-			//FastShape[] shapes = new FastShape[] { topSurface };
 			Arrays.sort(shapes, new ShapeComparator(dc));
 
 			//test all the shapes with the minimum distance, culling them if they are outside
