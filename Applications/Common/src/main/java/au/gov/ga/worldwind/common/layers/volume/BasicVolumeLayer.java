@@ -33,14 +33,13 @@ import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.pick.PickSupport;
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.Material;
-import gov.nasa.worldwind.render.airspaces.Box;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -83,6 +82,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	protected boolean dataAvailable = false;
 	protected FastShape topSurface, bottomSurface;
 	protected TopBottomFastShape minLonCurtain, maxLonCurtain, minLatCurtain, maxLatCurtain;
+	protected FastShape boundingBoxShape;
 	protected TextureRenderer topTexture, bottomTexture, minLonTexture, maxLonTexture, minLatTexture, maxLatTexture;
 	protected int topOffset = 0, bottomOffset = 0, minLonOffset = 0, maxLonOffset = 0, minLatOffset = 0,
 			maxLatOffset = 0;
@@ -862,7 +862,34 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	 */
 	protected void renderBoundingBox(DrawContext dc)
 	{
-		Sector sector = dataProvider.getSector();
+		if(boundingBoxShape == null)
+		{
+			boundingBoxShape = dataProvider.createBoundingBox();
+		}
+		boundingBoxShape.render(dc);
+		
+		/*Position bl = dataProvider.getPosition(0, 0);
+		Position br = dataProvider.getPosition(dataProvider.getXSize() - 1, 0);
+		Position tl = dataProvider.getPosition(0, dataProvider.getYSize() - 1);
+		Position tr = dataProvider.getPosition(dataProvider.getXSize() - 1, dataProvider.getYSize() - 1);
+		Position cb = Position.interpolate(0.5, bl, br);
+		Position ct = Position.interpolate(0.5, tl, tr);
+		Globe globe = dc.getGlobe();
+		Vec4 blv = globe.computePointFromPosition(bl);
+		Vec4 brv = globe.computePointFromPosition(br);
+		Vec4 tlv = globe.computePointFromPosition(tl);
+		Vec4 trv = globe.computePointFromPosition(tr);
+		double bw = blv.distanceTo3(brv) / 2d;
+		double tw = tlv.distanceTo3(trv) / 2d;
+		Box box = new Box(cb, ct, bw, tw);
+		box.setAltitudes(dataProvider.getTop() - dataProvider.getDepth(), dataProvider.getTop());
+		box.getAttributes().setDrawInterior(false);
+		box.getAttributes().setDrawOutline(true);
+		box.getAttributes().setOutlineMaterial(Material.WHITE);
+		box.getAttributes().setOutlineWidth(2.0);
+		box.render(dc);*/
+		
+		/*Sector sector = dataProvider.getSector();
 		Position center = new Position(sector.getCentroid(), dataProvider.getTop() - dataProvider.getDepth() / 2);
 		Vec4 v1 = dc.getGlobe().computePointFromPosition(sector.getMinLatitude(), center.longitude, center.elevation);
 		Vec4 v2 = dc.getGlobe().computePointFromPosition(sector.getMaxLatitude(), center.longitude, center.elevation);
@@ -875,7 +902,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		box.getAttributes().setDrawOutline(true);
 		box.getAttributes().setOutlineMaterial(Material.WHITE);
 		box.getAttributes().setOutlineWidth(2.0);
-		box.render(dc);
+		box.render(dc);*/
 	}
 
 	@Override
@@ -905,6 +932,22 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	@Override
 	public void selected(SelectEvent event)
 	{
+		//ignore this event if ctrl, alt, or shift are down
+		if (event.getMouseEvent() != null)
+		{
+			int onmask = MouseEvent.SHIFT_DOWN_MASK | MouseEvent.CTRL_DOWN_MASK | MouseEvent.ALT_DOWN_MASK;
+			if ((event.getMouseEvent().getModifiersEx() & onmask) == onmask)
+			{
+				return;
+			}
+		}
+
+		//don't allow dragging if there's only one layer in any one direction
+		if (dataProvider.getXSize() <= 1 || dataProvider.getYSize() <= 1 || dataProvider.getZSize() <= 1)
+		{
+			return;
+		}
+
 		//we only care about drag events
 		boolean drag = event.getEventAction().equals(SelectEvent.DRAG);
 		boolean dragEnd = event.getEventAction().equals(SelectEvent.DRAG_END);

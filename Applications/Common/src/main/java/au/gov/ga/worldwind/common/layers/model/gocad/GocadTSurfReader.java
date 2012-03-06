@@ -45,6 +45,7 @@ public class GocadTSurfReader implements GocadReader
 
 	private final static Pattern vertexPattern = Pattern
 			.compile("P?VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
+	private final static Pattern atomPattern = Pattern.compile("P?ATOM\\s+(\\d+)\\s+(\\d+).*");
 	private final static Pattern trianglePattern = Pattern.compile("TRGL\\s+(\\d+)\\s+(\\d+)\\s+(\\d+).*");
 	private final static Pattern colorPattern = Pattern.compile("\\*solid\\*color:.+");
 	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
@@ -98,6 +99,27 @@ public class GocadTSurfReader implements GocadReader
 			positions.add(position);
 			return;
 		}
+		
+		matcher = atomPattern.matcher(line);
+		if(matcher.matches())
+		{
+			int id1 = Integer.parseInt(matcher.group(1));
+			int id2 = Integer.parseInt(matcher.group(2));
+			
+			if (vertexIdMap.containsKey(id1))
+			{
+				throw new IllegalArgumentException("Duplicate vertex id: " + id1);
+			}
+			if (!vertexIdMap.containsKey(id2))
+			{
+				throw new IllegalArgumentException("Unknown vertex id: " + id2);
+			}
+			
+			Position position = positions.get(vertexIdMap.get(id2));
+			vertexIdMap.put(id1, positions.size());
+			positions.add(position);
+			return;
+		}
 
 		matcher = trianglePattern.matcher(line);
 		if (matcher.matches())
@@ -124,9 +146,9 @@ public class GocadTSurfReader implements GocadReader
 			name = matcher.group(1);
 			return;
 		}
-		
+
 		matcher = zpositivePattern.matcher(line);
-		if(matcher.matches())
+		if (matcher.matches())
 		{
 			zPositive = !matcher.group(1).equalsIgnoreCase("depth");
 		}
@@ -172,7 +194,7 @@ public class GocadTSurfReader implements GocadReader
 		{
 			shape.setColor(color);
 		}
-		
+
 		/*double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
 		for(Position position : positions)
 		{
@@ -180,7 +202,7 @@ public class GocadTSurfReader implements GocadReader
 			max = Math.max(max, position.elevation);
 		}
 		System.out.println(min + ", " + ((max + min) / 2) + ", " + max);*/
-		
+
 		return shape;
 	}
 }

@@ -78,6 +78,7 @@ public class ModelLayerFactory
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.POINT_SIZE, "PointSize", xpath);
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.MINIMUM_DISTANCE, "MinimumDistance", xpath);
 
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.REVERSE_NORMALS, "ReverseNormals", xpath);
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.POINT_SPRITE, "PointSprite", xpath);
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.POINT_MIN_SIZE, "PointMinSize", xpath);
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.POINT_MAX_SIZE, "PointMaxSize", xpath);

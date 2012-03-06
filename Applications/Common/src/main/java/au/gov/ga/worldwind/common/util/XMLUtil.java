@@ -497,13 +497,13 @@ public class XMLUtil extends WWXML
 				xpath = makeXPath();
 			}
 
-			Boolean b = XMLUtil.getBoolean(element, path + "/@interpolateHue", true, xpath);
+			Boolean b = XMLUtil.getBoolean(element, path + "/@interpolateHue", xpath);
 			if (b != null)
 			{
 				colorMap.setInterpolateHue(b);
 			}
 
-			b = XMLUtil.getBoolean(element, path + "/@percentages", true, xpath);
+			b = XMLUtil.getBoolean(element, path + "/@percentages", xpath);
 			if (b != null)
 			{
 				colorMap.setValuesPercentages(b);

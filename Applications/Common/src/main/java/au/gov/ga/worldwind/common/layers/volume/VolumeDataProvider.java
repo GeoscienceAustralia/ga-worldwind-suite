@@ -124,4 +124,10 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	 * @return A {@link TopBottomFastShape} containing a triangle mesh curtain.
 	 */
 	TopBottomFastShape createLatitudeCurtain(int y);
+
+	/**
+	 * @return Shape that can be used to visualize the bounding box of the
+	 *         volume.
+	 */
+	FastShape createBoundingBox();
 }

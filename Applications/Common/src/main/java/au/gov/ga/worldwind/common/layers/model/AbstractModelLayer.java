@@ -49,6 +49,7 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 	protected Double pointSize;
 	protected boolean wireframe = false;
 
+	protected boolean reverseNormals = false;
 	protected boolean pointSprite = false;
 	protected Double pointMinSize = 2d;
 	protected Double pointMaxSize = 1000d;
@@ -180,6 +181,7 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 		shape.setPointSprite(pointSprite);
 		shape.setPointTextureUrl(getClass().getResource("/images/pointsprite.png"));
 		shape.setWireframe(isWireframe());
+		shape.setReverseNormals(reverseNormals);
 
 		synchronized (shapes)
 		{
