@@ -42,6 +42,7 @@ public interface AVKeyMore extends AVKey
 	final static String POINT_QUADRATIC_ATTENUATION = "au.gov.ga.worldwind.AVKeyMore.PointQuadraticAttenuation";
 	final static String COLOR_MAP = "au.gov.ga.worldwind.AVKeyMore.ColorMap";
 	final static String REVERSE_NORMALS = "au.gov.ga.worldwind.AVKeyMore.ReverseNormals";
+	final static String PAINTED_VARIABLE = "au.gov.ga.worldwind.AVKeyMore.PaintedVariable";
 
 	//curtain layer
 	final static String FULL_WIDTH = "au.gov.ga.worldwind.AVKeyMore.FullWidth";

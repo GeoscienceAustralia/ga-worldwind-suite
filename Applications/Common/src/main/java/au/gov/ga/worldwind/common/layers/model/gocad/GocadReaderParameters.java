@@ -45,6 +45,7 @@ public class GocadReaderParameters
 	private CoordinateTransformation coordinateTransformation = null;
 	private ColorMap colorMap = null;
 	private float maxVariance = 0;
+	private String paintedVariable;
 
 	public GocadReaderParameters()
 	{
@@ -99,6 +100,8 @@ public class GocadReaderParameters
 		Double d = (Double) params.getValue(AVKeyMore.MAX_VARIANCE);
 		if (d != null)
 			setMaxVariance(d.floatValue());
+
+		setPaintedVariable((String) params.getValue(AVKeyMore.PAINTED_VARIABLE));
 	}
 
 	/**
@@ -299,5 +302,25 @@ public class GocadReaderParameters
 	public void setMaxVariance(float maxVariance)
 	{
 		this.maxVariance = maxVariance;
+	}
+
+	/**
+	 * @return Property used to calculate vertex colors. This will override the
+	 *         '*painted*variable' parameter in the GOCAD file.
+	 */
+	public String getPaintedVariable()
+	{
+		return paintedVariable;
+	}
+
+	/**
+	 * Set the property used to calculate vertex colors. This can be used to
+	 * override the '*painted*variable' parameter in the GOCAD file.
+	 * 
+	 * @param paintedVariable
+	 */
+	public void setPaintedVariable(String paintedVariable)
+	{
+		this.paintedVariable = paintedVariable;
 	}
 }

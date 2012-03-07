@@ -118,6 +118,7 @@ public class ModelLayerFactory
 		params.setValue(AVKeyMore.COLOR_MAP, colorMap);
 		
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.MAX_VARIANCE, "MaxVariance", xpath);
+		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.PAINTED_VARIABLE, "PaintedVariable", xpath);
 
 		setupModelProvider(domElement, xpath, params);
 

@@ -56,7 +56,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 			.compile("PROP_NO_DATA_VALUE\\s+(\\d+)\\s+([\\d.\\-]+)\\s*");
 
 	private String asciiDataFile;
-	private String paintedVariable;
+	private String paintedVariableName;
 	private int paintedVariableId;
 	private boolean cellCentered;
 
@@ -337,7 +337,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		Matcher matcher = paintedVariablePattern.matcher(line);
 		if (matcher.matches())
 		{
-			paintedVariable = matcher.group(1);
+			paintedVariableName = matcher.group(1);
 		}
 
 		matcher = axisPattern.matcher(line);
@@ -370,7 +370,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		{
 			int propertyId = Integer.parseInt(matcher.group(1));
 			String propertyName = matcher.group(2);
-			if (propertyName.equals(paintedVariable))
+			if (propertyName.equals(paintedVariableName))
 			{
 				paintedVariableId = propertyId;
 			}

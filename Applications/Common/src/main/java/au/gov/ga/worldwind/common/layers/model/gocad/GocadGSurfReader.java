@@ -21,6 +21,7 @@ import gov.nasa.worldwind.geom.Vec4;
 
 import java.awt.Color;
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.FloatBuffer;
@@ -53,6 +54,8 @@ public class GocadGSurfReader implements GocadReader
 	private final static Pattern zpositivePattern = Pattern.compile("ZPOSITIVE\\s+(\\w+)\\s*");
 	private final static Pattern colorPattern = Pattern.compile("\\*solid\\*color:.+");
 	private final static Pattern propertyPattern = Pattern.compile("PROP_(\\S+)\\s+(\\d+)\\s+(\\S+).*");
+	private final static Pattern propertyIdPattern = Pattern.compile("PROPERTY\\s+(\\d+)\\s+\"?([^\"]+)\"?.*");
+	private final static Pattern paintedVariablePattern = Pattern.compile("\\*painted\\*variable:\\s*(.*?)\\s*");
 
 	private String name;
 	private boolean zPositive = true;
@@ -65,11 +68,20 @@ public class GocadGSurfReader implements GocadReader
 	private Vec4 axisMAX;
 	private Vec4 axisN;
 
-	private Double noDataValue = null;
-	private int esize = 4;
-	private String etype = "IEEE";
-	private int offset = 0;
-	private String file;
+	private String paintedVariableName;
+	private int paintedVariableId = 1;
+
+	private Double elevationNoDataValue = null;
+	private int elevationEsize = 4;
+	private String elevationEtype = "IEEE";
+	private int elevationOffset = 0;
+	private String elevationFile;
+
+	private Double propertyNoDataValue = null;
+	private int propertyEsize = 4;
+	private String propertyEtype = "IEEE";
+	private int propertyOffset = 0;
+	private String propertyFile;
 
 	private Color color;
 	private boolean cellCentered = false;
@@ -80,6 +92,7 @@ public class GocadGSurfReader implements GocadReader
 	public void begin(GocadReaderParameters parameters)
 	{
 		this.parameters = parameters;
+		paintedVariableName = parameters.getPaintedVariable();
 	}
 
 	@Override
@@ -110,6 +123,7 @@ public class GocadGSurfReader implements GocadReader
 		if (matcher.matches())
 		{
 			zPositive = !matcher.group(1).equalsIgnoreCase("depth");
+			return;
 		}
 
 		matcher = colorPattern.matcher(line);
@@ -123,6 +137,28 @@ public class GocadGSurfReader implements GocadReader
 		if (matcher.matches())
 		{
 			cellCentered = matcher.group(1).equalsIgnoreCase("cells");
+			return;
+		}
+
+		matcher = paintedVariablePattern.matcher(line);
+		if (matcher.matches())
+		{
+			if (parameters.getPaintedVariable() == null)
+			{
+				paintedVariableName = matcher.group(1);
+			}
+			return;
+		}
+
+		matcher = propertyIdPattern.matcher(line);
+		if (matcher.matches())
+		{
+			int id = Integer.parseInt(matcher.group(1));
+			String propertyName = matcher.group(2);
+			if (propertyName.equalsIgnoreCase(paintedVariableName))
+			{
+				paintedVariableId = id;
+			}
 		}
 	}
 
@@ -180,28 +216,40 @@ public class GocadGSurfReader implements GocadReader
 		String value = matcher.group(3);
 
 		//currently only read the first property's parameters:
-		if (id != 1)
-			return;
-
 		if (type.equals("NO_DATA_VALUE"))
 		{
-			noDataValue = Double.parseDouble(value);
+			if (id == 1)
+				elevationNoDataValue = Double.parseDouble(value);
+			else if (id == paintedVariableId)
+				propertyNoDataValue = Double.parseDouble(value);
 		}
 		else if (type.equals("ESIZE"))
 		{
-			esize = Integer.parseInt(value);
+			if (id == 1)
+				elevationEsize = Integer.parseInt(value);
+			else if (id == paintedVariableId)
+				propertyEsize = Integer.parseInt(value);
 		}
 		else if (type.equals("TYPE"))
 		{
-			etype = value;
+			if (id == 1)
+				elevationEtype = value;
+			else if (id == paintedVariableId)
+				propertyEtype = value;
 		}
 		else if (type.equals("OFFSET"))
 		{
-			offset = Integer.parseInt(value);
+			if (id == 1)
+				elevationOffset = Integer.parseInt(value);
+			else if (id == paintedVariableId)
+				propertyOffset = Integer.parseInt(value);
 		}
 		else if (type.equals("FILE"))
 		{
-			file = value;
+			if (id == 1)
+				elevationFile = value;
+			else if (id == paintedVariableId)
+				propertyFile = value;
 		}
 	}
 
@@ -228,8 +276,8 @@ public class GocadGSurfReader implements GocadReader
 				new Vec4(axisO.x + axisUOrigin.x + axisVOrigin.x + axisWOrigin.x, axisO.y + axisUOrigin.y
 						+ axisVOrigin.y + axisWOrigin.y, axisO.z + axisUOrigin.z + axisVOrigin.z + axisWOrigin.z);
 
-		Validate.isTrue(esize == 4, "Unsupported PROP_ESIZE value: " + esize);
-		Validate.isTrue("IEEE".equals(etype), "Unsupported PROP_ETYPE value: " + etype);
+		Validate.isTrue(elevationEsize == 4, "Unsupported PROP_ESIZE value: " + elevationEsize);
+		Validate.isTrue("IEEE".equals(elevationEtype), "Unsupported PROP_ETYPE value: " + elevationEtype);
 
 		int strideU = parameters.getSubsamplingU();
 		int strideV = parameters.getSubsamplingV();
@@ -246,144 +294,27 @@ public class GocadGSurfReader implements GocadReader
 
 		List<Position> positions = new ArrayList<Position>(uSamples * vSamples);
 		float[] values = new float[uSamples * vSamples];
-		for (int i = 0; i < values.length; i++)
-		{
-			values[i] = Float.NaN;
-		}
+		float[] minmax = new float[2];
 
-		double[] transformed = new double[3];
-		CoordinateTransformation transformation = parameters.getCoordinateTransformation();
-
-		float min = Float.MAX_VALUE, max = -Float.MAX_VALUE;
 		try
 		{
-			URL fileUrl = new URL(context, file);
-			InputStream is = new BufferedInputStream(fileUrl.openStream());
-			is.skip(offset);
-
-			boolean ieee = "IEEE".equals(etype);
-
-			if (parameters.isBilinearMinification())
+			if (propertyFile != null)
 			{
-				//contains the number of values summed
-				int[] count = new int[values.length];
-
-				//read all the values, and sum them in regions
-				for (int v = 0; v < nv; v++)
-				{
-					int vRegion = (v / strideV) * uSamples;
-					for (int u = 0; u < nu; u++)
-					{
-						float value = GocadVoxetReader.readNextFloat(is, parameters.getByteOrder(), ieee);
-						if (!Float.isNaN(value) && value != noDataValue)
-						{
-							int uRegion = (u / strideU);
-							int valueIndex = vRegion + uRegion;
-
-							//if this is the first value for this region, set it, otherwise add it
-							if (count[valueIndex] == 0)
-							{
-								values[valueIndex] = value;
-							}
-							else
-							{
-								values[valueIndex] += value;
-							}
-							count[valueIndex]++;
-						}
-					}
-				}
-
-				//divide all the sums by the number of values summed (basically, average)
-				for (int i = 0; i < values.length; i++)
-				{
-					if (count[i] > 0)
-					{
-						values[i] /= count[i];
-						min = Math.min(min, values[i]);
-						max = Math.max(max, values[i]);
-					}
-				}
-
-				//create points for each summed region that has a value
-				for (int v = 0, vi = 0; v < nv; v += strideV, vi++)
-				{
-					int vOffset = vi * uSamples;
-					Vec4 vAdd = axisVStride.multiply3(v);
-					for (int u = 0, ui = 0; u < nu; u += strideU, ui++)
-					{
-						int uOffset = ui;
-						int valueIndex = vOffset + uOffset;
-						float value = values[valueIndex];
-
-						Vec4 uAdd = axisUStride.multiply3(u);
-						Vec4 p =
-								Float.isNaN(value) ? new Vec4(origin.x + uAdd.x + vAdd.x, origin.y + uAdd.y + vAdd.y,
-										origin.z + uAdd.z + vAdd.z) : new Vec4(origin.x + uAdd.x + vAdd.x + axisW.x
-										* value, origin.y + uAdd.y + vAdd.y + axisW.y * value, origin.z + uAdd.z
-										+ vAdd.z + axisW.z * value);
-
-						if (transformation != null)
-						{
-							transformation.TransformPoint(transformed, p.x, p.y, zPositive ? p.z : -p.z);
-							positions.add(PositionWithCoord.fromDegrees(transformed[1], transformed[0], transformed[2],
-									ui, vi));
-						}
-						else
-						{
-							positions.add(PositionWithCoord.fromDegrees(p.y, p.x, zPositive ? p.z : -p.z, ui, vi));
-						}
-					}
-				}
+				readFileIntoFloatArray(context, elevationFile, elevationOffset, elevationEtype, elevationEsize,
+						elevationNoDataValue, positions, values, minmax, nu, nv, uSamples, vSamples, strideU, strideV,
+						origin, axisUStride, axisVStride, parameters.isBilinearMinification());
+				readFileIntoFloatArray(context, propertyFile, propertyOffset, propertyEtype, propertyEsize,
+						propertyNoDataValue, null, values, minmax, nu, nv, uSamples, vSamples, strideU, strideV,
+						origin, axisUStride, axisVStride, parameters.isBilinearMinification());
 			}
 			else
 			{
-				//non-bilinear is simple; we can skip over any input values that don't contribute to the points
-				int valueIndex = 0;
-				for (int v = 0, vi = 0; v < nv; v += strideV, vi++)
-				{
-					Vec4 vAdd = axisVStride.multiply3(v);
-					for (int u = 0, ui = 0; u < nu; u += strideU, ui++)
-					{
-						Vec4 uAdd = axisUStride.multiply3(u);
-						Vec4 p;
-
-						float value = GocadVoxetReader.readNextFloat(is, parameters.getByteOrder(), ieee);
-						if (!Float.isNaN(value) && value != noDataValue)
-						{
-							values[valueIndex] = value;
-							min = Math.min(min, value);
-							max = Math.max(max, value);
-							p =
-									new Vec4(origin.x + uAdd.x + vAdd.x + axisW.x * value, origin.y + uAdd.y + vAdd.y
-											+ axisW.y * value, origin.z + uAdd.z + vAdd.z + axisW.z * value);
-						}
-						else
-						{
-							p =
-									new Vec4(origin.x + uAdd.x + vAdd.x, origin.y + uAdd.y + vAdd.y, origin.z + uAdd.z
-											+ vAdd.z);
-						}
-
-						if (transformation != null)
-						{
-							transformation.TransformPoint(transformed, p.x, p.y, zPositive ? p.z : -p.z);
-							positions.add(PositionWithCoord.fromDegrees(transformed[1], transformed[0], transformed[2],
-									ui, vi));
-						}
-						else
-						{
-							positions.add(PositionWithCoord.fromDegrees(p.y, p.x, zPositive ? p.z : -p.z, ui, vi));
-						}
-
-						valueIndex++;
-						GocadVoxetReader.skipBytes(is, esize * Math.min(strideU - 1, nu - u - 1));
-					}
-					GocadVoxetReader.skipBytes(is, esize * nu * Math.min(strideV - 1, nv - v - 1));
-				}
+				readFileIntoFloatArray(context, elevationFile, elevationOffset, elevationEtype, elevationEsize,
+						elevationNoDataValue, positions, values, minmax, nu, nv, uSamples, vSamples, strideU, strideV,
+						origin, axisUStride, axisVStride, parameters.isBilinearMinification());
 			}
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
 			e.printStackTrace();
 			return null;
@@ -434,7 +365,9 @@ public class GocadGSurfReader implements GocadReader
 				Color color = this.color;
 				if (parameters.getColorMap() != null)
 				{
-					color = parameters.getColorMap().calculateColorNotingIsValuesPercentages(value, min, max);
+					color =
+							parameters.getColorMap().calculateColorNotingIsValuesPercentages(value, minmax[0],
+									minmax[1]);
 				}
 				else
 				{
@@ -449,6 +382,160 @@ public class GocadGSurfReader implements GocadReader
 		shape.setColorBufferElementSize(colorBufferElementSize);
 
 		return shape;
+	}
+
+	protected void readFileIntoFloatArray(URL context, String file, int offset, String etype, int esize,
+			Double noDataValue, List<Position> positions, float[] values, float[] minmax, int nu, int nv, int uSamples,
+			int vSamples, int strideU, int strideV, Vec4 origin, Vec4 axisUStride, Vec4 axisVStride,
+			boolean bilinearMinification) throws IOException
+	{
+		if (values != null)
+		{
+			for (int i = 0; i < values.length; i++)
+			{
+				values[i] = Float.NaN;
+			}
+			minmax[0] = Float.MAX_VALUE;
+			minmax[1] = -Float.MAX_VALUE;
+		}
+
+		double[] transformed = new double[3];
+		CoordinateTransformation transformation = parameters.getCoordinateTransformation();
+
+		URL eFileUrl = new URL(context, file);
+		InputStream eis = new BufferedInputStream(eFileUrl.openStream());
+		eis.skip(offset);
+		boolean ieee = "IEEE".equals(etype);
+
+		if (bilinearMinification && values != null)
+		{
+			//contains the number of values summed
+			int[] count = new int[values.length];
+
+			//read all the values, and sum them in regions
+			for (int v = 0; v < nv; v++)
+			{
+				int vRegion = (v / strideV) * uSamples;
+				for (int u = 0; u < nu; u++)
+				{
+					float value = GocadVoxetReader.readNextFloat(eis, parameters.getByteOrder(), ieee);
+					if (!Float.isNaN(value) && value != noDataValue)
+					{
+						int uRegion = (u / strideU);
+						int valueIndex = vRegion + uRegion;
+
+						//if this is the first value for this region, set it, otherwise add it
+						if (count[valueIndex] == 0)
+						{
+							values[valueIndex] = value;
+						}
+						else
+						{
+							values[valueIndex] += value;
+						}
+						count[valueIndex]++;
+					}
+				}
+			}
+
+			//divide all the sums by the number of values summed (basically, average)
+			for (int i = 0; i < values.length; i++)
+			{
+				if (count[i] > 0)
+				{
+					values[i] /= count[i];
+					minmax[0] = Math.min(minmax[0], values[i]);
+					minmax[1] = Math.max(minmax[1], values[i]);
+				}
+			}
+
+			//create points for each summed region that has a value
+			for (int v = 0, vi = 0; v < nv; v += strideV, vi++)
+			{
+				int vOffset = vi * uSamples;
+				Vec4 vAdd = axisVStride.multiply3(v);
+				for (int u = 0, ui = 0; u < nu; u += strideU, ui++)
+				{
+					int uOffset = ui;
+					int valueIndex = vOffset + uOffset;
+					float value = values[valueIndex];
+
+					Vec4 uAdd = axisUStride.multiply3(u);
+					Vec4 p =
+							Float.isNaN(value) ? new Vec4(origin.x + uAdd.x + vAdd.x, origin.y + uAdd.y + vAdd.y,
+									origin.z + uAdd.z + vAdd.z) : new Vec4(
+									origin.x + uAdd.x + vAdd.x + axisW.x * value, origin.y + uAdd.y + vAdd.y + axisW.y
+											* value, origin.z + uAdd.z + vAdd.z + axisW.z * value);
+
+					if (positions != null)
+					{
+						if (transformation != null)
+						{
+							transformation.TransformPoint(transformed, p.x, p.y, zPositive ? p.z : -p.z);
+							positions.add(PositionWithCoord.fromDegrees(transformed[1], transformed[0], transformed[2],
+									ui, vi));
+						}
+						else
+						{
+							positions.add(PositionWithCoord.fromDegrees(p.y, p.x, zPositive ? p.z : -p.z, ui, vi));
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			//non-bilinear is simple; we can skip over any input values that don't contribute to the points
+			int valueIndex = 0;
+			for (int v = 0, vi = 0; v < nv; v += strideV, vi++)
+			{
+				Vec4 vAdd = axisVStride.multiply3(v);
+				for (int u = 0, ui = 0; u < nu; u += strideU, ui++)
+				{
+					Vec4 uAdd = axisUStride.multiply3(u);
+					Vec4 p;
+
+					float value = GocadVoxetReader.readNextFloat(eis, parameters.getByteOrder(), ieee);
+					boolean valid = !Float.isNaN(value) && value != noDataValue;
+					if (valid && values != null)
+					{
+						values[valueIndex] = value;
+						minmax[0] = Math.min(minmax[0], value);
+						minmax[1] = Math.max(minmax[1], value);
+					}
+
+					if (positions != null)
+					{
+						if (valid)
+						{
+							p =
+									new Vec4(origin.x + uAdd.x + vAdd.x + axisW.x * value, origin.y + uAdd.y + vAdd.y
+											+ axisW.y * value, origin.z + uAdd.z + vAdd.z + axisW.z * value);
+						}
+						else
+						{
+							p =
+									new Vec4(origin.x + uAdd.x + vAdd.x, origin.y + uAdd.y + vAdd.y, origin.z + uAdd.z
+											+ vAdd.z);
+						}
+						if (transformation != null)
+						{
+							transformation.TransformPoint(transformed, p.x, p.y, zPositive ? p.z : -p.z);
+							positions.add(PositionWithCoord.fromDegrees(transformed[1], transformed[0], transformed[2],
+									ui, vi));
+						}
+						else
+						{
+							positions.add(PositionWithCoord.fromDegrees(p.y, p.x, zPositive ? p.z : -p.z, ui, vi));
+						}
+					}
+
+					valueIndex++;
+					GocadVoxetReader.skipBytes(eis, esize * Math.min(strideU - 1, nu - u - 1));
+				}
+				GocadVoxetReader.skipBytes(eis, esize * nu * Math.min(strideV - 1, nv - v - 1));
+			}
+		}
 	}
 
 	protected static class PositionWithCoord extends Position

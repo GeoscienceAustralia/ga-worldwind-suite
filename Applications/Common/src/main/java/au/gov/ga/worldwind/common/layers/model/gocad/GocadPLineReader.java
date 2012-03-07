@@ -78,16 +78,18 @@ public class GocadPLineReader implements GocadReader
 			double x = Double.parseDouble(matcher.group(2));
 			double y = Double.parseDouble(matcher.group(3));
 			double z = Double.parseDouble(matcher.group(4));
+			z = zPositive ? z : -z;
 			
 			if(parameters.getCoordinateTransformation() != null)
 			{
 				double[] transformed = new double[3];
-				parameters.getCoordinateTransformation().TransformPoint(transformed, x, y, 0);
+				parameters.getCoordinateTransformation().TransformPoint(transformed, x, y, z);
 				x = transformed[0];
 				y = transformed[1];
+				z = transformed[2];
 			}
 			
-			Position position = Position.fromDegrees(y, x, zPositive ? z : -z);
+			Position position = Position.fromDegrees(y, x, z);
 
 			if (vertexIdMap.containsKey(id))
 			{
