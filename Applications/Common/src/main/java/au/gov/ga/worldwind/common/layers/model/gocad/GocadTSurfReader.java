@@ -242,6 +242,7 @@ public class GocadTSurfReader implements GocadReader
 			{
 				noDataValue = (float) values[paintedVariableId - 1];
 			}
+			return;
 		}
 	}
 
