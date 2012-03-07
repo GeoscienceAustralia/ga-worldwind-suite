@@ -168,6 +168,8 @@ public class FileLoader
 		else if (GocadFactory.isGocadFileSuffix(suffix))
 		{
 			GocadReaderParameters parameters = new GocadReaderParameters();
+			parameters.setDynamicSubsampling(true);
+			parameters.setBilinearMinification(true);
 			List<FastShape> shapes = GocadFactory.read(file, parameters);
 			if (!shapes.isEmpty())
 			{

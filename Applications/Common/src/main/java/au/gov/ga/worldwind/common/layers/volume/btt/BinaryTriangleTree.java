@@ -44,6 +44,39 @@ public class BinaryTriangleTree
 	private final List<Position> positions;
 	private final int width;
 	private final int height;
+	private boolean generateTextureCoordinates = false;
+	private boolean forceGLTriangles = false;
+
+	public boolean isGenerateTextureCoordinates()
+	{
+		return generateTextureCoordinates;
+	}
+
+	public void setGenerateTextureCoordinates(boolean generateTextureCoordinates)
+	{
+		this.generateTextureCoordinates = generateTextureCoordinates;
+	}
+
+	/**
+	 * @return Should the mesh be forced to use the {@link GL#GL_TRIANGLES}
+	 *         mode? Otherwise a {@link GL#GL_TRIANGLE_STRIP} mesh could
+	 *         possibly be generated (if maximum variance is 0).
+	 */
+	public boolean isForceGLTriangles()
+	{
+		return forceGLTriangles;
+	}
+
+	/**
+	 * Force the mesh generated (if max variance is 0) to use
+	 * {@link GL#GL_TRIANGLES} instead of {@link GL#GL_TRIANGLE_STRIP}.
+	 * 
+	 * @param forceGLTriangles
+	 */
+	public void setForceGLTriangles(boolean forceGLTriangles)
+	{
+		this.forceGLTriangles = forceGLTriangles;
+	}
 
 	/**
 	 * Create a new {@link BinaryTriangleTree} object.
@@ -186,44 +219,71 @@ public class BinaryTriangleTree
 			}
 		}
 
-		int indexCount = 2 * rect.width * (rect.height - 1);
-		IntBuffer indices = BufferUtil.newIntBuffer(indexCount);
-
-		int k = 0;
-		for (int y = 0; y < rect.height - 1; y++)
+		IntBuffer indices;
+		if (forceGLTriangles)
 		{
-			if (y % 2 == 0) //even
+			int indexCount = 6 * (rect.width - 1) * (rect.height - 1);
+			indices = BufferUtil.newIntBuffer(indexCount);
+
+			int k = 0;
+			for (int y = 0; y < rect.height - 1; y++, k++)
 			{
-				for (int x = 0; x < rect.width; x++, k++)
+				for (int x = 0; x < rect.width - 1; x++, k++)
 				{
 					indices.put(k);
+					indices.put(k + 1);
+					indices.put(k + rect.width);
+					indices.put(k + 1);
+					indices.put(k + rect.width + 1);
 					indices.put(k + rect.width);
 				}
 			}
-			else
-			{
-				k += rect.width - 1;
-				for (int x = 0; x < rect.width; x++, k--)
-				{
-					indices.put(k + rect.width);
-					indices.put(k);
-				}
-				k += rect.width + 1;
-			}
 		}
-
-		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(positions.size() * 2);
-		for (int y = 0; y < rect.height; y++)
+		else
 		{
-			for (int x = 0; x < rect.width; x++)
+			int indexCount = 2 * rect.width * (rect.height - 1);
+			indices = BufferUtil.newIntBuffer(indexCount);
+
+			int k = 0;
+			for (int y = 0; y < rect.height - 1; y++)
 			{
-				textureCoordinateBuffer.put((x + rect.x) / (float) (width - 1))
-						.put((y + rect.y) / (float) (height - 1));
+				if (y % 2 == 0) //even
+				{
+					for (int x = 0; x < rect.width; x++, k++)
+					{
+						indices.put(k);
+						indices.put(k + rect.width);
+					}
+				}
+				else
+				{
+					k += rect.width - 1;
+					for (int x = 0; x < rect.width; x++, k--)
+					{
+						indices.put(k + rect.width);
+						indices.put(k);
+					}
+					k += rect.width + 1;
+				}
 			}
 		}
 
-		FastShape shape = new FastShape(positions, indices, GL.GL_TRIANGLE_STRIP);
-		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
+		FastShape shape = new FastShape(positions, indices, forceGLTriangles ? GL.GL_TRIANGLES : GL.GL_TRIANGLE_STRIP);
+
+		if (generateTextureCoordinates)
+		{
+			FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(positions.size() * 2);
+			for (int y = 0; y < rect.height; y++)
+			{
+				for (int x = 0; x < rect.width; x++)
+				{
+					textureCoordinateBuffer.put((x + rect.x) / (float) (width - 1)).put(
+							(y + rect.y) / (float) (height - 1));
+				}
+			}
+			shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
+		}
+
 		return shape;
 	}
 
@@ -597,16 +657,20 @@ public class BinaryTriangleTree
 			indices.put(leftIndex).put(apexIndex).put(rightIndex);
 		}
 
-		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(positions.size() * 2);
-		for (Integer index : originalIndices)
+		FastShape shape = new FastShape(positions, indices, GL.GL_TRIANGLES);
+
+		if (generateTextureCoordinates)
 		{
-			int x = index % width;
-			int y = index / width;
-			textureCoordinateBuffer.put(x / (float) (width - 1)).put(y / (float) (height - 1));
+			FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(positions.size() * 2);
+			for (Integer index : originalIndices)
+			{
+				int x = index % width;
+				int y = index / width;
+				textureCoordinateBuffer.put(x / (float) (width - 1)).put(y / (float) (height - 1));
+			}
+			shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
 		}
 
-		FastShape shape = new FastShape(positions, indices, GL.GL_TRIANGLES);
-		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
 		return shape;
 	}
 

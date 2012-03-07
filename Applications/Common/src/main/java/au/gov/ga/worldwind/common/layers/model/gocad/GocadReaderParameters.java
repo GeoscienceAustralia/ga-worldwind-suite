@@ -22,6 +22,7 @@ import java.nio.ByteOrder;
 
 import org.gdal.osr.CoordinateTransformation;
 
+import au.gov.ga.worldwind.common.layers.volume.btt.BinaryTriangleTree;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.ColorMap;
 import au.gov.ga.worldwind.common.util.CoordinateTransformationUtil;
@@ -35,14 +36,15 @@ import au.gov.ga.worldwind.common.util.CoordinateTransformationUtil;
 public class GocadReaderParameters
 {
 	private ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
-	private int voxetSubsamplingU = 1;
-	private int voxetSubsamplingV = 1;
-	private int voxetSubsamplingW = 1;
-	private boolean voxetDynamicSubsampling = true;
-	private int voxetDynamicSubsamplingSamplesPerAxis = 50;
-	private boolean voxetBilinearMinification = true;
+	private int subsamplingU = 1;
+	private int subsamplingV = 1;
+	private int subsamplingW = 1;
+	private boolean dynamicSubsampling = false;
+	private int dynamicSubsamplingSamplesPerAxis = 50;
+	private boolean bilinearMinification = false;
 	private CoordinateTransformation coordinateTransformation = null;
 	private ColorMap colorMap = null;
+	private float maxVariance = 0;
 
 	public GocadReaderParameters()
 	{
@@ -64,27 +66,27 @@ public class GocadReaderParameters
 
 		Integer i = (Integer) params.getValue(AVKeyMore.SUBSAMPLING_U);
 		if (i != null)
-			setVoxetSubsamplingU(i);
+			setSubsamplingU(i);
 
 		i = (Integer) params.getValue(AVKeyMore.SUBSAMPLING_V);
 		if (i != null)
-			setVoxetSubsamplingV(i);
+			setSubsamplingV(i);
 
 		i = (Integer) params.getValue(AVKeyMore.SUBSAMPLING_W);
 		if (i != null)
-			setVoxetSubsamplingW(i);
+			setSubsamplingW(i);
 
 		Boolean b = (Boolean) params.getValue(AVKeyMore.DYNAMIC_SUBSAMPLING);
 		if (b != null)
-			setVoxetDynamicSubsampling(b);
+			setDynamicSubsampling(b);
 
 		i = (Integer) params.getValue(AVKeyMore.DYNAMIC_SUBSAMPLING_SAMPLES_PER_AXIS);
 		if (i != null)
-			setVoxetDynamicSubsamplingSamplesPerAxis(i);
+			setDynamicSubsamplingSamplesPerAxis(i);
 
 		b = (Boolean) params.getValue(AVKeyMore.BILINEAR_MINIFICATION);
 		if (b != null)
-			setVoxetBilinearMinification(b);
+			setBilinearMinification(b);
 
 		String s = (String) params.getValue(AVKey.COORDINATE_SYSTEM);
 		if (s != null)
@@ -93,15 +95,19 @@ public class GocadReaderParameters
 		ColorMap cm = (ColorMap) params.getValue(AVKeyMore.COLOR_MAP);
 		if (cm != null)
 			setColorMap(cm);
+
+		Double d = (Double) params.getValue(AVKeyMore.MAX_VARIANCE);
+		if (d != null)
+			setMaxVariance(d.floatValue());
 	}
 
 	/**
 	 * @return The amount of subsampling to use in the u-axis when reading GOCAD
 	 *         voxets. Defaults to 1 (no subsampling).
 	 */
-	public int getVoxetSubsamplingU()
+	public int getSubsamplingU()
 	{
-		return voxetSubsamplingU;
+		return subsamplingU;
 	}
 
 	/**
@@ -110,18 +116,18 @@ public class GocadReaderParameters
 	 * 
 	 * @param voxetSubsamplingU
 	 */
-	public void setVoxetSubsamplingU(int voxetSubsamplingU)
+	public void setSubsamplingU(int voxetSubsamplingU)
 	{
-		this.voxetSubsamplingU = voxetSubsamplingU;
+		this.subsamplingU = voxetSubsamplingU;
 	}
 
 	/**
 	 * @return The amount of subsampling to use in the v-axis when reading GOCAD
 	 *         voxets. Defaults to 1 (no subsampling).
 	 */
-	public int getVoxetSubsamplingV()
+	public int getSubsamplingV()
 	{
-		return voxetSubsamplingV;
+		return subsamplingV;
 	}
 
 	/**
@@ -130,18 +136,18 @@ public class GocadReaderParameters
 	 * 
 	 * @param voxetSubsamplingV
 	 */
-	public void setVoxetSubsamplingV(int voxetSubsamplingV)
+	public void setSubsamplingV(int voxetSubsamplingV)
 	{
-		this.voxetSubsamplingV = voxetSubsamplingV;
+		this.subsamplingV = voxetSubsamplingV;
 	}
 
 	/**
 	 * @return The amount of subsampling to use in the w-axis when reading GOCAD
 	 *         voxets. Defaults to 1 (no subsampling).
 	 */
-	public int getVoxetSubsamplingW()
+	public int getSubsamplingW()
 	{
-		return voxetSubsamplingW;
+		return subsamplingW;
 	}
 
 	/**
@@ -150,9 +156,9 @@ public class GocadReaderParameters
 	 * 
 	 * @param voxetSubsamplingW
 	 */
-	public void setVoxetSubsamplingW(int voxetSubsamplingW)
+	public void setSubsamplingW(int voxetSubsamplingW)
 	{
-		this.voxetSubsamplingW = voxetSubsamplingW;
+		this.subsamplingW = voxetSubsamplingW;
 	}
 
 	/**
@@ -161,9 +167,9 @@ public class GocadReaderParameters
 	 *         automatically to ensure a certain resolution (number of samples)
 	 *         in each axis. Defaults to true.
 	 */
-	public boolean isVoxetDynamicSubsampling()
+	public boolean isDynamicSubsampling()
 	{
-		return voxetDynamicSubsampling;
+		return dynamicSubsampling;
 	}
 
 	/**
@@ -172,18 +178,18 @@ public class GocadReaderParameters
 	 * 
 	 * @param voxetDynamicSubsampling
 	 */
-	public void setVoxetDynamicSubsampling(boolean voxetDynamicSubsampling)
+	public void setDynamicSubsampling(boolean voxetDynamicSubsampling)
 	{
-		this.voxetDynamicSubsampling = voxetDynamicSubsampling;
+		this.dynamicSubsampling = voxetDynamicSubsampling;
 	}
 
 	/**
 	 * @return The number of samples to attempt to subsample to per axis when
 	 *         dynamic subsampling is enabled. Defaults to 50.
 	 */
-	public int getVoxetDynamicSubsamplingSamplesPerAxis()
+	public int getDynamicSubsamplingSamplesPerAxis()
 	{
-		return voxetDynamicSubsamplingSamplesPerAxis;
+		return dynamicSubsamplingSamplesPerAxis;
 	}
 
 	/**
@@ -192,9 +198,9 @@ public class GocadReaderParameters
 	 * 
 	 * @param voxetDynamicSubsamplingSamplesPerAxis
 	 */
-	public void setVoxetDynamicSubsamplingSamplesPerAxis(int voxetDynamicSubsamplingSamplesPerAxis)
+	public void setDynamicSubsamplingSamplesPerAxis(int voxetDynamicSubsamplingSamplesPerAxis)
 	{
-		this.voxetDynamicSubsamplingSamplesPerAxis = voxetDynamicSubsamplingSamplesPerAxis;
+		this.dynamicSubsamplingSamplesPerAxis = voxetDynamicSubsamplingSamplesPerAxis;
 	}
 
 	/**
@@ -202,9 +208,9 @@ public class GocadReaderParameters
 	 *         subsampling GOCAD voxets. If false, a nearest neighbour approach
 	 *         is used. Defaults to true.
 	 */
-	public boolean isVoxetBilinearMinification()
+	public boolean isBilinearMinification()
 	{
-		return voxetBilinearMinification;
+		return bilinearMinification;
 	}
 
 	/**
@@ -213,9 +219,9 @@ public class GocadReaderParameters
 	 * 
 	 * @param voxetBilinearMinification
 	 */
-	public void setVoxetBilinearMinification(boolean voxetBilinearMinification)
+	public void setBilinearMinification(boolean voxetBilinearMinification)
 	{
-		this.voxetBilinearMinification = voxetBilinearMinification;
+		this.bilinearMinification = voxetBilinearMinification;
 	}
 
 	/**
@@ -272,5 +278,26 @@ public class GocadReaderParameters
 	public void setColorMap(ColorMap colorMap)
 	{
 		this.colorMap = colorMap;
+	}
+
+	/**
+	 * @return The maximum variance to use when generating a triangle mesh from
+	 *         a gridded elevation dataset (ie a GSurf).
+	 * @see BinaryTriangleTree
+	 */
+	public float getMaxVariance()
+	{
+		return maxVariance;
+	}
+
+	/**
+	 * Set the maximum variance to use when generating a triangle mesh from a
+	 * gridded elevatoin dataset. Defaults to 0 (no simplification).
+	 * 
+	 * @param maxVariance
+	 */
+	public void setMaxVariance(float maxVariance)
+	{
+		this.maxVariance = maxVariance;
 	}
 }

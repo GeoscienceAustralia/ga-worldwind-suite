@@ -486,57 +486,67 @@ public class XMLUtil extends WWXML
 		}
 	}
 
-	public static ColorMap getColorMap(Element element, String path, XPath xpath)
+	public static ColorMap getColorMap(Element context, String path, XPath xpath)
 	{
+		if (context == null)
+		{
+			String message = Logging.getMessage("nullValue.ContextIsNull");
+			Logging.logger().severe(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if (xpath == null)
+		{
+			xpath = makeXPath();
+		}
+
+		Element element = getElement(context, path, xpath);
+		if (element == null)
+		{
+			return null;
+		}
+
 		ColorMap colorMap = new ColorMap();
 
-		if (element != null)
+		Boolean b = XMLUtil.getBoolean(element, "@interpolateHue", xpath);
+		if (b != null)
 		{
-			if (xpath == null)
-			{
-				xpath = makeXPath();
-			}
+			colorMap.setInterpolateHue(b);
+		}
 
-			Boolean b = XMLUtil.getBoolean(element, path + "/@interpolateHue", xpath);
-			if (b != null)
-			{
-				colorMap.setInterpolateHue(b);
-			}
+		b = XMLUtil.getBoolean(element, "@percentages", xpath);
+		if (b != null)
+		{
+			colorMap.setValuesPercentages(b);
+		}
 
-			b = XMLUtil.getBoolean(element, path + "/@percentages", xpath);
-			if (b != null)
+		Element[] mapEntries = WWXML.getElements(element, "Entry", xpath);
+		if (mapEntries != null)
+		{
+			for (Element entry : mapEntries)
 			{
-				colorMap.setValuesPercentages(b);
-			}
-
-			Element[] mapEntries = WWXML.getElements(element, path + "/Entry", xpath);
-			if (mapEntries != null)
-			{
-				for (Element entry : mapEntries)
+				Double value = WWXML.getDouble(entry, "@value", xpath);
+				if (value == null)
 				{
-					Double value = WWXML.getDouble(entry, "@value", xpath);
-					if (value == null)
-					{
-						value = WWXML.getDouble(entry, "@elevation", xpath);
-					}
-					if (value == null)
-					{
-						continue;
-					}
-
-					//don't allow a duplicate key
-					while (colorMap.containsKey(value))
-					{
-						value += EPSILON;
-					}
-
-					int red = XMLUtil.getInteger(entry, "@red", 0, xpath);
-					int green = XMLUtil.getInteger(entry, "@green", 0, xpath);
-					int blue = XMLUtil.getInteger(entry, "@blue", 0, xpath);
-					int alpha = XMLUtil.getInteger(entry, "@alpha", 255, xpath);
-					Color color = new Color(red, green, blue, alpha);
-					colorMap.put(value, color);
+					value = WWXML.getDouble(entry, "@elevation", xpath);
 				}
+				if (value == null)
+				{
+					continue;
+				}
+
+				//don't allow a duplicate key
+				while (colorMap.containsKey(value))
+				{
+					value += EPSILON;
+				}
+
+				int red = XMLUtil.getInteger(entry, "@red", 0, xpath);
+				int green = XMLUtil.getInteger(entry, "@green", 0, xpath);
+				int blue = XMLUtil.getInteger(entry, "@blue", 0, xpath);
+				int alpha = XMLUtil.getInteger(entry, "@alpha", 255, xpath);
+				Color color = new Color(red, green, blue, alpha);
+				colorMap.put(value, color);
 			}
 		}
 

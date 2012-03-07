@@ -219,15 +219,15 @@ public class GocadVoxetReader implements GocadReader
 
 		Validate.isTrue(esize == 4, "Unsupported PROP_ESIZE value: " + esize); //TODO support "1"?
 		Validate.isTrue("RAW".equals(format), "Unsupported PROP_FORMAT value: " + format); //TODO support "SEGY"?
-		Validate.isTrue("IBM".equals(etype) || "IEEE".equals(etype), "Unsupported PROP_ETYPE value: " + format);
+		Validate.isTrue("IBM".equals(etype) || "IEEE".equals(etype), "Unsupported PROP_ETYPE value: " + etype);
 
-		int strideU = parameters.getVoxetSubsamplingU();
-		int strideV = parameters.getVoxetSubsamplingV();
-		int strideW = parameters.getVoxetSubsamplingW();
+		int strideU = parameters.getSubsamplingU();
+		int strideV = parameters.getSubsamplingV();
+		int strideW = parameters.getSubsamplingW();
 
-		if (parameters.isVoxetDynamicSubsampling())
+		if (parameters.isDynamicSubsampling())
 		{
-			float samplesPerAxis = parameters.getVoxetDynamicSubsamplingSamplesPerAxis();
+			float samplesPerAxis = parameters.getDynamicSubsamplingSamplesPerAxis();
 			strideU = Math.max(1, Math.round((float) axisN.x / samplesPerAxis));
 			strideV = Math.max(1, Math.round((float) axisN.y / samplesPerAxis));
 			strideW = Math.max(1, Math.round((float) axisN.z / samplesPerAxis));
@@ -256,7 +256,7 @@ public class GocadVoxetReader implements GocadReader
 
 			boolean ieee = "IEEE".equals(etype);
 
-			if (parameters.isVoxetBilinearMinification())
+			if (parameters.isBilinearMinification())
 			{
 				//contains the number of values summed
 				int[] count = new int[values.length];
@@ -325,8 +325,8 @@ public class GocadVoxetReader implements GocadReader
 												+ wAdd.y, origin.z + uAdd.z + vAdd.z + wAdd.z);
 								if (transformation != null)
 								{
-									transformation.TransformPoint(transformed, p.x, p.y, 0);
-									positions.add(Position.fromDegrees(transformed[1], transformed[0], zPositive ? p.z : -p.z));
+									transformation.TransformPoint(transformed, p.x, p.y, zPositive ? p.z : -p.z);
+									positions.add(Position.fromDegrees(transformed[1], transformed[0], transformed[2]));
 								}
 								else
 								{
@@ -352,7 +352,7 @@ public class GocadVoxetReader implements GocadReader
 							float value = readNextFloat(is, parameters.getByteOrder(), ieee);
 							if (!Float.isNaN(value) && value != noDataValue)
 							{
-								values[valueIndex++] = value;
+								values[valueIndex] = value;
 								min = Math.min(min, value);
 								max = Math.max(max, value);
 
@@ -362,14 +362,15 @@ public class GocadVoxetReader implements GocadReader
 												+ wAdd.y, origin.z + uAdd.z + vAdd.z + wAdd.z);
 								if (transformation != null)
 								{
-									transformation.TransformPoint(transformed, p.x, p.y, 0);
-									positions.add(Position.fromDegrees(transformed[1], transformed[0], zPositive ? p.z : -p.z));
+									transformation.TransformPoint(transformed, p.x, p.y, zPositive ? p.z : -p.z);
+									positions.add(Position.fromDegrees(transformed[1], transformed[0], transformed[2]));
 								}
 								else
 								{
 									positions.add(Position.fromDegrees(p.y, p.x, zPositive ? p.z : -p.z));
 								}
 							}
+							valueIndex++;
 							skipBytes(is, esize * Math.min(strideU - 1, nu - u - 1));
 						}
 						skipBytes(is, esize * nu * Math.min(strideV - 1, nv - v - 1));
@@ -394,7 +395,7 @@ public class GocadVoxetReader implements GocadReader
 			{
 				if (parameters.getColorMap() != null)
 				{
-					Color color = parameters.getColorMap().calculateColor(value);
+					Color color = parameters.getColorMap().calculateColorNotingIsValuesPercentages(value, min, max);
 					colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
 							.put(color.getAlpha() / 255f);
 				}
@@ -422,7 +423,7 @@ public class GocadVoxetReader implements GocadReader
 		return shape;
 	}
 
-	private static void skipBytes(InputStream is, long n) throws IOException
+	public static void skipBytes(InputStream is, long n) throws IOException
 	{
 		while (n > 0)
 		{
@@ -435,7 +436,7 @@ public class GocadVoxetReader implements GocadReader
 		}
 	}
 
-	private static float readNextFloat(InputStream is, ByteOrder byteOrder, boolean ieee) throws IOException
+	public static float readNextFloat(InputStream is, ByteOrder byteOrder, boolean ieee) throws IOException
 	{
 		int b0, b1, b2, b3;
 		if (byteOrder == ByteOrder.LITTLE_ENDIAN)

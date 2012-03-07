@@ -43,7 +43,7 @@ public class GocadFactory
 	public static boolean isGocadFileSuffix(String suffix)
 	{
 		return suffix.equalsIgnoreCase("ts") || suffix.equalsIgnoreCase("gp") || suffix.equalsIgnoreCase("vo")
-				|| suffix.equalsIgnoreCase("pl");
+				|| suffix.equalsIgnoreCase("pl") || suffix.equalsIgnoreCase("grs");
 	}
 
 	/**
@@ -53,7 +53,8 @@ public class GocadFactory
 	{
 		PLine(GocadPLineReader.HEADER_REGEX, GocadPLineReader.class),
 		Voxet(GocadVoxetReader.HEADER_REGEX, GocadVoxetReader.class),
-		TSurf(GocadTSurfReader.HEADER_REGEX, GocadTSurfReader.class);
+		TSurf(GocadTSurfReader.HEADER_REGEX, GocadTSurfReader.class),
+		GSurf(GocadGSurfReader.HEADER_REGEX, GocadGSurfReader.class);
 
 		/**
 		 * Regular expression used for matching the first line of the GOCAD file

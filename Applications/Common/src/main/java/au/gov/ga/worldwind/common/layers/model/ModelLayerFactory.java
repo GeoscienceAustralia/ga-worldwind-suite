@@ -116,6 +116,8 @@ public class ModelLayerFactory
 		
 		ColorMap colorMap = XMLUtil.getColorMap(domElement, "ColorMap", xpath);
 		params.setValue(AVKeyMore.COLOR_MAP, colorMap);
+		
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.MAX_VARIANCE, "MaxVariance", xpath);
 
 		setupModelProvider(domElement, xpath, params);
 

@@ -175,6 +175,7 @@ public class GocadTSurfReader implements GocadReader
 		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_TRIANGLES);
 		shape.setName(name);
 		shape.setLighted(true);
+		shape.setTwoSidedLighting(true);
 		shape.setCalculateNormals(true);
 		if (parameters.getColorMap() != null)
 		{

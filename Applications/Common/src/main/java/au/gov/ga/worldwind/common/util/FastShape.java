@@ -110,6 +110,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected boolean forceSortedPrimitives = false;
 	protected boolean backfaceCulling = false;
 	protected boolean enabled = true;
+	protected boolean twoSidedLighting = false;
 
 	protected Double lineWidth;
 	protected Double pointSize;
@@ -190,7 +191,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 				}
 				if (willUseTextureBlending && blankTexture == null)
 				{
-					BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+					BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 					blankTexture = new BasicWWTexture(image, true);
 				}
 
@@ -280,6 +281,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					gl.glEnable(GL.GL_LIGHT1);
 					gl.glEnable(GL.GL_LIGHTING);
 					gl.glEnable(GL.GL_COLOR_MATERIAL);
+					gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, twoSidedLighting ? GL.GL_TRUE : GL.GL_FALSE);
 				}
 
 				if (willUsePointSprite)
@@ -1054,6 +1056,24 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		try
 		{
 			this.lighted = lighted;
+		}
+		finally
+		{
+			frontLock.writeLock().unlock();
+		}
+	}
+
+	public boolean isTwoSidedLighting()
+	{
+		return twoSidedLighting;
+	}
+
+	public void setTwoSidedLighting(boolean twoSidedLighting)
+	{
+		frontLock.writeLock().lock();
+		try
+		{
+			this.twoSidedLighting = twoSidedLighting;
 		}
 		finally
 		{

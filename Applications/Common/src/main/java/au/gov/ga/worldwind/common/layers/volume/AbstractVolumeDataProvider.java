@@ -185,6 +185,7 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	public FastShape createHorizontalSurface(float maxVariance, Rectangle rectangle)
 	{
 		BinaryTriangleTree btt = new BinaryTriangleTree(positions, xSize, ySize);
+		btt.setGenerateTextureCoordinates(true);
 		return btt.buildMeshFromCenter(maxVariance, rectangle);
 	}
 
