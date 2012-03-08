@@ -46,7 +46,7 @@ public class Screenshotter
 {
 	/**
 	 * Take a simple screenshot of the WorldWindow canvas at the current
-	 * dimensions.
+	 * dimensions with alpha enabled.
 	 * 
 	 * @param wwd
 	 *            WorldWindow to take a screenshot of.
@@ -57,9 +57,27 @@ public class Screenshotter
 	 */
 	public static void takeScreenshot(WorldWindow wwd, GLCanvas canvas, File file)
 	{
-		wwd.addRenderingListener(new SimpleScreenshotListener(wwd, file, canvas.getWidth(), canvas.getHeight()));
+		takeScreenshot(wwd, canvas, file, true);
 	}
 
+	/**
+	 * Take a simple screenshot of the WorldWindow canvas at the current
+	 * dimensions, optionally enabling transparency.
+	 * 
+	 * @param wwd
+	 *            WorldWindow to take a screenshot of.
+	 * @param canvas
+	 *            GLCanvas associated with the WorldWindow.
+	 * @param file
+	 *            File to save the screenshot to.
+	 * @param enableAlpha
+	 * 			  Whether to enable an alpha channel (if applicable)
+	 */
+	public static void takeScreenshot(WorldWindow wwd, GLCanvas canvas, File file, boolean enableAlpha)
+	{
+		wwd.addRenderingListener(new SimpleScreenshotListener(wwd, file, canvas.getWidth(), canvas.getHeight(), enableAlpha));
+	}
+	
 	/**
 	 * Take a screenshot at the provided dimensions. Temporarily resizes the
 	 * WorldWind canvas to the dimensions. If the dimensions are larger than the
@@ -78,21 +96,46 @@ public class Screenshotter
 	 */
 	public static void takeScreenshot(final WorldWindow wwd, final int width, final int height, final File file)
 	{
+		takeScreenshot(wwd, width, height, file, true);
+	}
+
+	/**
+	 * Take a screenshot at the provided dimensions. Temporarily resizes the
+	 * WorldWind canvas to the dimensions. If the dimensions are larger than the
+	 * current screen resolution, the canvas is moved around the screen and
+	 * captured in parts. This is because any part of the canvas outside of the
+	 * screen bounds cannot be captured.
+	 * 
+	 * @param wwd
+	 *            WorldWindow to take a screenshot of.
+	 * @param width
+	 *            Width of the screenshot.
+	 * @param height
+	 *            Height of the screenshot.
+	 * @param file
+	 *            File to save the screenshot to.
+	 * @param enableAlpha
+	 * 			  Whether to enable alpha channel in the saved screenshot
+	 */
+	public static void takeScreenshot(final WorldWindow wwd, final int width, final int height, final File file, final boolean enableAlpha)
+	{
 		Thread thread = new Thread(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				takeScreenshotThread(wwd, width, height, file);
+				takeScreenshotThread(wwd, width, height, file, enableAlpha);
 			}
 		});
 		thread.start();
 	}
-
-	private static void takeScreenshotThread(WorldWindow wwd, int width, int height, File file)
+	
+	private static void takeScreenshotThread(WorldWindow wwd, int width, int height, File file, boolean enableAlpha)
 	{
 		if (!(wwd instanceof Component))
+		{
 			throw new IllegalArgumentException();
+		}
 
 		Component component = (Component) wwd;
 
@@ -118,7 +161,7 @@ public class Screenshotter
 		final int rows = (width - 1) / displayWidth + 1;
 		final int columns = (height - 1) / displayHeight + 1;
 
-		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		BufferedImage bi = new BufferedImage(width, height, enableAlpha ? BufferedImage.TYPE_INT_ARGB_PRE : BufferedImage.TYPE_INT_RGB);
 		final Graphics2D g2d = bi.createGraphics();
 
 		for (int x = 0; x < rows; x++)
@@ -130,8 +173,15 @@ public class Screenshotter
 				final int screenshotWidth = Math.min(width - xOffset, displayWidth);
 				final int screenshotHeight = Math.min(height - yOffset, displayHeight);
 				frame.setLocation(-xOffset, -yOffset);
-
-				BufferedImage shot = takeShot(wwd, 0, 0, width, height);
+				try
+				{
+					Thread.sleep(10000);
+				}
+				catch (InterruptedException e)
+				{
+					
+				}
+				BufferedImage shot = takeShot(wwd, 0, 0, width, height, enableAlpha);
 				g2d.drawImage(shot, xOffset, yOffset, xOffset + screenshotWidth, yOffset + screenshotHeight, xOffset,
 						yOffset, xOffset + screenshotWidth, yOffset + screenshotHeight, null);
 			}
@@ -154,9 +204,9 @@ public class Screenshotter
 		frame.dispose();
 	}
 
-	private static BufferedImage takeShot(final WorldWindow wwd, int x, int y, int width, int height)
+	private static BufferedImage takeShot(final WorldWindow wwd, int x, int y, int width, int height, boolean enableAlpha)
 	{
-		ScreenshotListener screenshotListener = new ScreenshotListener(x, y, width, height);
+		ScreenshotListener screenshotListener = new ScreenshotListener(x, y, width, height, enableAlpha);
 
 		wwd.addRenderingListener(screenshotListener);
 		wwd.redraw();
@@ -191,14 +241,16 @@ public class Screenshotter
 		private int y;
 		private int width;
 		private int height;
+		private boolean enableAlpha;
 		private boolean doing = false;
 
-		public ScreenshotListener(int x, int y, int width, int height)
+		public ScreenshotListener(int x, int y, int width, int height, boolean enableAlpha)
 		{
 			this.x = x;
 			this.y = y;
 			this.width = width;
 			this.height = height;
+			this.enableAlpha = enableAlpha;
 		}
 
 		@Override
@@ -207,7 +259,7 @@ public class Screenshotter
 			if (!doing && event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)
 			{
 				doing = true;
-				image = Screenshot.readToBufferedImage(x, y, width, height, false);
+				image = Screenshot.readToBufferedImage(x, y, width, height, enableAlpha);
 				done = true;
 			}
 		}
@@ -219,13 +271,15 @@ public class Screenshotter
 		private int width;
 		private int height;
 		private WorldWindow wwd;
+		private boolean enableAlpha;
 
-		public SimpleScreenshotListener(WorldWindow wwd, File file, int width, int height)
+		public SimpleScreenshotListener(WorldWindow wwd, File file, int width, int height, boolean enableAlpha)
 		{
 			this.wwd = wwd;
 			this.file = file;
 			this.width = width;
 			this.height = height;
+			this.enableAlpha = enableAlpha;
 		}
 
 		@Override
@@ -235,7 +289,7 @@ public class Screenshotter
 			{
 				try
 				{
-					Screenshot.writeToFile(file, width, height);
+					Screenshot.writeToFile(file, width, height, enableAlpha);
 				}
 				catch (Exception e)
 				{
