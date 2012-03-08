@@ -22,6 +22,8 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * Default implementation of the {@link WmsServerIdentifier} interface
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsServerIdentifierImpl implements WmsServerIdentifier
 {

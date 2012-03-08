@@ -20,6 +20,8 @@ import java.net.URL;
 /**
  * Holds the identification details of a WMS server, including its name
  * and capabilities URL.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface WmsServerIdentifier
 {

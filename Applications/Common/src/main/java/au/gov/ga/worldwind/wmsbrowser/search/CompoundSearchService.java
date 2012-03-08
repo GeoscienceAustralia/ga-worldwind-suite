@@ -24,6 +24,8 @@ import java.util.Set;
  * An implementation of the {@link WmsServerSearchService} interface
  * that queries each search service in turn and accumulates the results
  * into a single returned list of servers.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class CompoundSearchService extends DelegatingSearchService implements WmsServerSearchService
 {

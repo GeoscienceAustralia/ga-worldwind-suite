@@ -25,6 +25,8 @@ import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 /**
  * A base class for search services that wish to delegate to a list of 
  * search services in some way.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public abstract class DelegatingSearchService implements WmsServerSearchService
 {

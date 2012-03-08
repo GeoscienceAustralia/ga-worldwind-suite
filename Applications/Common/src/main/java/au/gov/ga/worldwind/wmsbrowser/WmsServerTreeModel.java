@@ -30,6 +30,8 @@ import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
  * A tree model backed by a list of {@link WmsServer}s.
  * <p/>
  * Supports lazy-loading of the servers layer lists
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsServerTreeModel extends DefaultLazyTreeModel implements LazyTreeModel
 {

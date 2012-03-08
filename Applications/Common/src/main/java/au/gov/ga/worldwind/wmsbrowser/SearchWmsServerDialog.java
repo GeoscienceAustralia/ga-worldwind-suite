@@ -82,6 +82,8 @@ import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 
 /**
  * A dialog that allows the user to search for WMS servers, or enter the URL of a WMS server
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class SearchWmsServerDialog extends JDialog
 {
@@ -632,7 +634,10 @@ public class SearchWmsServerDialog extends JDialog
 		try
 		{
 			searchResultsLock.writeLock().lock();
-			if (!selectedResults.contains(server));
+			if (!selectedResults.contains(server))
+			{
+				;
+			}
 			{
 				selectedResults.add(server);
 			}

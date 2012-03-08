@@ -27,6 +27,8 @@ import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
  * <p/>
  * Attempts to use the provided {@link WmsServer} to retrieve metadata, if the
  * capabilities have been loaded. Otherwise, uses provided values.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsServerSearchResultImpl implements WmsServerSearchResult
 {

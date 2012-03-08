@@ -40,6 +40,8 @@ import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerIdentifierImpl;
 /**
  * A class used to retrieve and persist WMS browser settings between
  * invocations.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsBrowserSettings
 {

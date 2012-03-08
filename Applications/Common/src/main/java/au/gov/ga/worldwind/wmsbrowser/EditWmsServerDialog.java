@@ -51,6 +51,8 @@ import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 
 /**
  * A simple dialog box used to edit WMS server details
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 class EditWmsServerDialog extends JDialog
 {

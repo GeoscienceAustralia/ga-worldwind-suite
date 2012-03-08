@@ -47,6 +47,8 @@ import au.gov.ga.worldwind.wmsbrowser.WmsServerBrowserPanel.LayerInfoSelectionLi
  *  <li> View information about a selected layer
  *  <li> Export a layer as a WW compatible layer definition for use in the Viewer and Animator
  * </ul>
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsBrowser
 {

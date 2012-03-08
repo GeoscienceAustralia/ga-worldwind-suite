@@ -34,6 +34,8 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**
  * Default implementation of the {@link WmsLayerExporter} interface
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsLayerExporterImpl implements WmsLayerExporter
 {

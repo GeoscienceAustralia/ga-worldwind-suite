@@ -19,6 +19,8 @@ import java.util.List;
 
 /**
  * An interface for services that can search for a WMS server using a provided search string
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface WmsServerSearchService
 {

@@ -33,6 +33,8 @@ import au.gov.ga.worldwind.common.util.Validate;
  * <p/>
  * By default uses the {@link WMSCapabilities#retrieve(java.net.URI)} method to retrieve capabilities from
  * a WMS server. This can be overridden using the {@link #setCapabilitiesService()} method.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsServerImpl implements WmsServer
 {

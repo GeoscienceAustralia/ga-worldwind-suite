@@ -24,6 +24,7 @@ import java.io.OutputStream;
  * Allows WMS layers to be exported to an XML layer definition file for 
  * later re-use within the WorldWind system.
  *
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface WmsLayerExporter
 {

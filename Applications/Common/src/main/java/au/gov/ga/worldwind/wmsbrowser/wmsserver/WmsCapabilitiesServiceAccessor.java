@@ -19,6 +19,8 @@ package au.gov.ga.worldwind.wmsbrowser.wmsserver;
  * A static accessor class for the current WMS capabilities service
  * <p/>
  * For use where injecting a service is not appropriate.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsCapabilitiesServiceAccessor
 {

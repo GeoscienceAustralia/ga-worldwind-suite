@@ -23,6 +23,8 @@ import java.util.List;
 
 /**
  * An interface that captures information about a single WMS server
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface WmsServer
 {

@@ -20,7 +20,9 @@ import java.net.URL;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 
 /**
- * An interface for search results yeilded by a {@link WmsServerSearchService}
+ * An interface for search results yielded by a {@link WmsServerSearchService}
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface WmsServerSearchResult
 {

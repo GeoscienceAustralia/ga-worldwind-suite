@@ -72,6 +72,8 @@ import au.gov.ga.worldwind.wmsbrowser.layer.MetacartaCountryBoundariesLayer;
  * A panel used to display WMS Layer information
  * <p/>
  * Uses the capabilities information to display layer metadata, and a flat globe view to display the layer data itself
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsLayerInfoPanel extends JComponent
 {

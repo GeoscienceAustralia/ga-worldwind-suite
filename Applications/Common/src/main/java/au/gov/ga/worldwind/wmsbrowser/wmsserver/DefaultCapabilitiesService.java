@@ -27,6 +27,8 @@ import java.net.URL;
  * <p/>
  * Uses the {@link WMSCapabilities#retrieve(java.net.URI)} method to 
  * perform capabilities retrieval.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public final class DefaultCapabilitiesService implements WmsCapabilitiesService
 {

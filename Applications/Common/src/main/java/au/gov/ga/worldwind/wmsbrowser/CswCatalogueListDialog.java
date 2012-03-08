@@ -69,6 +69,8 @@ import au.gov.ga.worldwind.common.util.Util;
  * A dialog for adding/removing CSW catalogues.
  * <p/>
  * Updates the {@link WmsBrowserSettings} instance, and provides access to the new list of CSW catalogues.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class CswCatalogueListDialog extends JDialog
 {

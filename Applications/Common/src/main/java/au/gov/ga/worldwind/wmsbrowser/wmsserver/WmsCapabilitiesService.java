@@ -21,6 +21,8 @@ import java.net.URL;
 
 /**
  * A service interface to services that can retrieve WMS capabilities from a URL.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface WmsCapabilitiesService
 {

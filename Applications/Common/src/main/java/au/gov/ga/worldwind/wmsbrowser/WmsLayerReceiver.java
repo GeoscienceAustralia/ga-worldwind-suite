@@ -19,6 +19,8 @@ import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 /**
  * An interface for classes that want to receive WMS layers selected by the user
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public interface WmsLayerReceiver
 {

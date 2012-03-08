@@ -62,6 +62,8 @@ import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerImpl;
 /**
  * A {@link CollapsiblePanel} that allows the user to browse through known
  * WMS servers and select layers from those servers.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsServerBrowserPanel extends CollapsiblePanelBase
 {

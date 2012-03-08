@@ -39,6 +39,8 @@ import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServer;
 
 /**
  * A lazy tree object backed by a single {@link WmsServer} instance
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class WmsServerTreeObject implements ILazyTreeObject
 {

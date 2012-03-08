@@ -35,6 +35,8 @@ import au.gov.ga.worldwind.common.util.Icons;
 /**
  * An extension of the {@link LazyTree} class customised for
  * use in the WMS browser panel
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 class WmsServerTree extends LazyTree
 {

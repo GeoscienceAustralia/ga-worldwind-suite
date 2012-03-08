@@ -22,6 +22,8 @@ import java.util.List;
  * An implementation of the {@link WmsServerSearchService} that queries
  * delegate search services in order until one returns a result, at which point
  * the result is returned.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class ChainingSearchService extends DelegatingSearchService implements WmsServerSearchService
 {

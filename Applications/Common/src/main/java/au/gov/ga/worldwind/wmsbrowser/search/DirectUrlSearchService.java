@@ -34,6 +34,8 @@ import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsServerImpl;
 /**
  * A search service that attempts to use the provided search string directly as a
  * WMS server capabilities URL.
+ * 
+ * @author James Navin (james.navin@ga.gov.au)
  */
 public class DirectUrlSearchService implements WmsServerSearchService
 {
