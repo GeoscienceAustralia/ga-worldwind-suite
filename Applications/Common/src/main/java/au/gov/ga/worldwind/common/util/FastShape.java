@@ -34,7 +34,6 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -79,10 +78,10 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected int mode;
 	protected String name = "Shape";
 
-	protected DoubleBuffer vertexBuffer;
-	protected DoubleBuffer modVertexBuffer;
-	protected DoubleBuffer normalBuffer;
-	protected DoubleBuffer modNormalBuffer;
+	protected FloatBuffer vertexBuffer;
+	protected FloatBuffer modVertexBuffer;
+	protected FloatBuffer normalBuffer;
+	protected FloatBuffer modNormalBuffer;
 	protected Sphere boundingSphere;
 	protected Sphere modBoundingSphere;
 	protected Sector sector;
@@ -377,12 +376,12 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 				}
 
 				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vertexBuffer.rewind());
+				gl.glVertexPointer(3, GL.GL_FLOAT, 0, vertexBuffer.rewind());
 
 				if (willCalculateNormals())
 				{
 					gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
-					gl.glNormalPointer(GL.GL_DOUBLE, 0, normalBuffer.rewind());
+					gl.glNormalPointer(GL.GL_FLOAT, 0, normalBuffer.rewind());
 				}
 
 				if (willUseSortedIndices)
@@ -455,11 +454,11 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					int size = positions.size() * 3;
 					if (modVertexBuffer == null || modVertexBuffer.limit() != size)
 					{
-						modVertexBuffer = BufferUtil.newDoubleBuffer(size);
+						modVertexBuffer = BufferUtil.newFloatBuffer(size);
 					}
 					if (willCalculateNormals() && (modNormalBuffer == null || modNormalBuffer.limit() != size))
 					{
-						modNormalBuffer = BufferUtil.newDoubleBuffer(size);
+						modNormalBuffer = BufferUtil.newFloatBuffer(size);
 					}
 
 					calculateVertices(dc);
@@ -473,7 +472,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 				frontLock.writeLock().lock();
 				try
 				{
-					DoubleBuffer temp = vertexBuffer;
+					FloatBuffer temp = vertexBuffer;
 					vertexBuffer = modVertexBuffer;
 					modVertexBuffer = temp;
 					Sphere tempe = boundingSphere;
@@ -509,11 +508,11 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		for (LatLon position : positions)
 		{
 			Vec4 v = calculateVertex(dc, position);
-			modVertexBuffer.put(v.x).put(v.y).put(v.z);
+			modVertexBuffer.put((float) v.x).put((float) v.y).put((float) v.z);
 		}
 
 		modVertexBuffer.rewind();
-		BufferWrapper wrapper = new BufferWrapper.DoubleBufferWrapper(modVertexBuffer);
+		BufferWrapper wrapper = new BufferWrapper.FloatBufferWrapper(modVertexBuffer);
 		modBoundingSphere = createBoundingSphere(wrapper);
 
 		//prevent NullPointerExceptions when there's no vertices:
@@ -523,9 +522,9 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		modVertexBuffer.rewind();
 		for (int i = 0; modVertexBuffer.remaining() >= 3; i += 3)
 		{
-			modVertexBuffer.put(i + 0, modVertexBuffer.get() - modBoundingSphere.getCenter().x);
-			modVertexBuffer.put(i + 1, modVertexBuffer.get() - modBoundingSphere.getCenter().y);
-			modVertexBuffer.put(i + 2, modVertexBuffer.get() - modBoundingSphere.getCenter().z);
+			modVertexBuffer.put(i + 0, modVertexBuffer.get() - (float) modBoundingSphere.getCenter().x);
+			modVertexBuffer.put(i + 1, modVertexBuffer.get() - (float) modBoundingSphere.getCenter().y);
+			modVertexBuffer.put(i + 2, modVertexBuffer.get() - (float) modBoundingSphere.getCenter().z);
 		}
 	}
 
@@ -628,9 +627,9 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			while (modNormalBuffer.hasRemaining())
 			{
 				int c = count[j] > 0 ? count[j] : 1; //prevent divide by zero
-				modNormalBuffer.put(normals[j].x / c);
-				modNormalBuffer.put(normals[j].y / c);
-				modNormalBuffer.put(normals[j].z / c);
+				modNormalBuffer.put((float) normals[j].x / c);
+				modNormalBuffer.put((float) normals[j].y / c);
+				modNormalBuffer.put((float) normals[j].z / c);
 				j++;
 			}
 		}
