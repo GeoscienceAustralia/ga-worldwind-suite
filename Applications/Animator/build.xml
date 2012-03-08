@@ -154,7 +154,7 @@
 			</manifest>
 		</jar>
 
-		<echo file="${executable_dir}/${executable_batch_name}">java -Dsun.java2d.noddraw=true -Xmx1536m -jar ./${executable_jar_name}</echo>
+		<echo file="${executable_dir}/${executable_batch_name}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${executable_jar_name}</echo>
 	</target>
 
 	<target name="run" depends="executable" />
