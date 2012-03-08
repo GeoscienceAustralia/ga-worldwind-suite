@@ -238,7 +238,7 @@ public class GocadTSurfReader implements GocadReader
 		if (matcher.matches())
 		{
 			double[] values = splitStringToDoubles(matcher.group(1));
-			if (paintedVariableId <= values.length)
+			if (0 < paintedVariableId && paintedVariableId <= values.length)
 			{
 				noDataValue = (float) values[paintedVariableId - 1];
 			}
