@@ -73,7 +73,7 @@ public class PolylineLayerRetrievalListener extends RenderableLayer implements R
 	@Override
 	public void afterRetrieve(Retriever retriever)
 	{
-		SectorPolyline s = retrievingLines.get(retriever);
+		SectorPolyline s = retrievingLines.remove(retriever);
 		if (s != null)
 		{
 			removeRenderable(s);
