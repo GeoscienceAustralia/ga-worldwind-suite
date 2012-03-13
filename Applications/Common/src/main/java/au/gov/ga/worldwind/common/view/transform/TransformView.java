@@ -17,6 +17,7 @@ package au.gov.ga.worldwind.common.view.transform;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Matrix;
+import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.view.ViewUtil;
 
 /**
@@ -32,6 +33,12 @@ public interface TransformView extends View
 	 * Override this function in subclasses to perform necessary calculations.
 	 */
 	void beforeComputeMatrices();
+
+	/**
+	 * Calculate the current viewport for this view. Default implementation gets
+	 * the viewport from the OpenGL state.
+	 */
+	java.awt.Rectangle computeViewport(DrawContext dc);
 
 	/**
 	 * Calculate a MODELVIEW transform for this view. Default implementation

@@ -35,6 +35,14 @@ public class TransformBasicFlyView extends BasicFlyView implements TransformView
 	public void beforeComputeMatrices()
 	{
 	}
+	
+	@Override
+	public java.awt.Rectangle computeViewport(DrawContext dc)
+	{
+		int[] viewportArray = new int[4];
+		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
+		return new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
+	}
 
 	@Override
 	public Matrix computeModelView()
@@ -96,9 +104,7 @@ public class TransformBasicFlyView extends BasicFlyView implements TransformView
 
 		//========== projection matrix state ==========//
 		// Get the current OpenGL viewport state.
-		int[] viewportArray = new int[4];
-		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
-		this.viewport = new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
+		this.viewport = computeViewport(dc);
 
 		// Compute the current clip plane distances.
 		this.nearClipDistance = this.computeNearClipDistance();

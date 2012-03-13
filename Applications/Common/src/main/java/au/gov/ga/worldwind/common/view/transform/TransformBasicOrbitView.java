@@ -35,6 +35,14 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 	public void beforeComputeMatrices()
 	{
 	}
+	
+	@Override
+	public java.awt.Rectangle computeViewport(DrawContext dc)
+	{
+		int[] viewportArray = new int[4];
+		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
+		return new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
+	}
 
 	@Override
 	public Matrix computeModelView()
@@ -97,9 +105,7 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 
 		//========== projection matrix state ==========//
 		// Get the current OpenGL viewport state.
-		int[] viewportArray = new int[4];
-		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
-		this.viewport = new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
+		this.viewport = computeViewport(dc);
 
 		// Compute the current clip plane distances (Use utils methods to better handle underlying elevation data)
 		this.nearClipDistance = computeNearClipDistance();
