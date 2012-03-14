@@ -448,7 +448,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		Position sePosTop = dataProvider.getPosition(maxLonSlice, minLatOffset);
 		Position nePosTop = dataProvider.getPosition(maxLonSlice, maxLatSlice);
 
-		if (depth != 0)
+		if (depth != 0 && dc.getVerticalExaggeration() > 0)
 		{
 			double deltaLat = 0.005, deltaLon = 0.005;
 			if (sw)
