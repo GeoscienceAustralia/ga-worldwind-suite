@@ -28,6 +28,9 @@ import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.util.Logging;
 
 import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.geom.Rectangle2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -58,6 +61,8 @@ public class Util
 
 	public final static String UTM_COORDINATE_REGEX =
 			"(?:[a-zA-Z]*\\s*)(\\d+)(?:\\s*)([a-zA-Z])(?:\\s+)((?:\\d*\\.?\\d+)|(?:\\d+))(?:[E|e]?)(?:\\s+)((?:\\d*\\.?\\d+)|(?:\\d+))(?:[N|n]?)";
+
+	public final static String ELLIPSIS = "…";
 
 	/**
 	 * @return A string representation of the provided integer value, padded
@@ -998,5 +1003,44 @@ public class Util
 		v++;
 		v >>= 1;
 		return ++v;
+	}
+
+	/**
+	 * Truncate a string until it fits in the given width. Tests string with
+	 * using the {@link FontMetrics} in the given {@link Graphics} object.
+	 * 
+	 * @param s
+	 *            String to truncate
+	 * @param width
+	 *            Width to fit string in
+	 * @param g
+	 *            Graphics object used to test string length
+	 * @param truncatedSuffix
+	 *            Suffix to append onto the string if it is truncated
+	 * @return String that fits within the width. Returns null if null is
+	 *         passed, or returns a blank string if no string will fit within
+	 *         the given width.
+	 */
+	public static String stringByTruncatingToFitInWidth(String s, int width, Graphics g, String truncatedSuffix)
+	{
+		if (s == null)
+			return null;
+		
+		if(truncatedSuffix == null)
+			truncatedSuffix = "";
+
+		int length = s.length();
+		String truncated = s;
+		while (length > 0)
+		{
+			Rectangle2D r = g.getFontMetrics().getStringBounds(truncated, g);
+			if (r.getWidth() <= width)
+			{
+				return truncated;
+			}
+			length--;
+			truncated = s.substring(0, length) + truncatedSuffix;
+		}
+		return "";
 	}
 }
