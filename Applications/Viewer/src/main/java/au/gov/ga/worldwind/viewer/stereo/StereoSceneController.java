@@ -51,12 +51,6 @@ public class StereoSceneController extends ExtendedSceneController
 	private boolean stereoTested = false;
 	private SectorClipPlanes sectorClipping = new SectorClipPlanes();
 
-	public StereoSceneController()
-	{
-		dc.dispose();
-		dc = new ExtendedDrawContext();
-	}
-
 	public void clipSector(Sector sector)
 	{
 		sectorClipping.clipSector(sector);
