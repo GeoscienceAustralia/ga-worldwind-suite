@@ -49,4 +49,19 @@ public interface MultiTextureTile
 	 * @return True if bind succeeds.
 	 */
 	boolean bind(DrawContext dc, int firstExtraTextureUnit, int remainingExtraTextureUnits);
+
+	/**
+	 * Apply the texture transform to this tile for the given texture.
+	 * 
+	 * @param dc
+	 *            {@link DrawContext}
+	 * @param textureIdentityActive
+	 *            Does the current texture matrix contain the identity?
+	 * @param texture
+	 *            Texture index to apply the internal transform for. This
+	 *            function will be called the number of times returned by
+	 *            {@link #extraTextureCount()}, incremeting this value each time
+	 *            (starting from 0).
+	 */
+	void applyInternalTransform(DrawContext dc, boolean textureIdentityActive, int texture);
 }

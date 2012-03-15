@@ -177,6 +177,10 @@ public class MultiTextureSurfaceTileRenderer extends GeographicSurfaceTileRender
 								{
 									this.alphaTexture.bind();
 								}
+								else if(tile instanceof MultiTextureTile)
+								{
+									((MultiTextureTile) tile).applyInternalTransform(dc, true, i);
+								}
 								else
 								{
 									tile.applyInternalTransform(dc, true);
