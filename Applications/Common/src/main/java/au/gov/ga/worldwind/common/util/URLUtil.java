@@ -115,6 +115,24 @@ public class URLUtil
 			return null;
 		}
 	}
+	
+	/**
+	 * Create a URL from the provided string. If the url is malformed, will
+	 * prepend the provided protocol string and try again. If it still fails, return <code>null</code>.
+	 */
+	public static URL fromString(String urlString, String protocol)
+	{
+		URL result = fromString(urlString);
+		if (result != null)
+		{
+			return result;
+		}
+		if (!protocol.endsWith("://") || !protocol.endsWith(":/"))
+		{
+			protocol = protocol + "://";
+		}
+		return fromString(protocol + urlString);
+	}
 
 	/**
 	 * Attempts to create a URL from the provided object.

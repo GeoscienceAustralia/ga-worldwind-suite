@@ -5,6 +5,7 @@
 	<classpathentry kind="src" path="src/experimental/java"/>
 	<classpathentry kind="src" path="src/experimental/resources"/>
 	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="src" path="src/test/resources"/>
 	<classpathentry kind="src" path="src/examples/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry exported="true" kind="lib" path="lib/test/hamcrest-core-1.1.jar"/>

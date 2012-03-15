@@ -17,12 +17,12 @@ package au.gov.ga.worldwind.wmsbrowser.search;
 
 import gov.nasa.worldwind.ogc.wms.WMSCapabilities;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.DefaultCapabilitiesService;
 import au.gov.ga.worldwind.wmsbrowser.wmsserver.WmsCapabilitiesService;
@@ -62,14 +62,9 @@ public class DirectUrlSearchService implements WmsServerSearchService
 		}
 		
 		// Check the search string is a URL
-		URL searchUrl = null;
-		try
+		URL searchUrl = URLUtil.fromString(searchString, "http");
+		if (searchUrl == null)
 		{
-			searchUrl = new URL(searchString.trim());
-		}
-		catch (MalformedURLException e)
-		{
-			// Not a URL..
 			return Collections.emptyList();
 		}
 		

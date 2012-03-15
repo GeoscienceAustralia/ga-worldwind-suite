@@ -45,7 +45,7 @@ public final class DefaultCapabilitiesService implements WmsCapabilitiesService
 		try
 		{
 			CapabilitiesRequest request = new CapabilitiesRequest(url.toURI());
-			
+
 			// Try v1.3.0 first, then v1.1.1
 			request.setVersion("1.3.0");
 			result = new WMSCapabilities(request).parse();
