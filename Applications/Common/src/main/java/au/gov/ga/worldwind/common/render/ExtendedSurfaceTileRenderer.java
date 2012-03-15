@@ -20,7 +20,6 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.GeographicSurfaceTileRenderer;
 import gov.nasa.worldwind.render.SurfaceTile;
 import gov.nasa.worldwind.render.SurfaceTileRenderer;
 import gov.nasa.worldwind.terrain.SectorGeometry;
@@ -34,7 +33,7 @@ import javax.media.opengl.GL;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class ExtendedSurfaceTileRenderer extends GeographicSurfaceTileRenderer
+public class ExtendedSurfaceTileRenderer extends MultiTextureSurfaceTileRenderer
 {
 	protected double elevationOffset = 0;
 	protected boolean ignoreElevation = false;
@@ -63,7 +62,7 @@ public class ExtendedSurfaceTileRenderer extends GeographicSurfaceTileRenderer
 	}
 
 	@Override
-	protected void preComputeTextureTransform(DrawContext dc, SectorGeometry sg, Transform t)
+	protected void preComputeTextureTransform(DrawContext dc, SectorGeometry sg, SurfaceTileRenderer.Transform t)
 	{
 		super.preComputeTextureTransform(dc, sg, t);
 

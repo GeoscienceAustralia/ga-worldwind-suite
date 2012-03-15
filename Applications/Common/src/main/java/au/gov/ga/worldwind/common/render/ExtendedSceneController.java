@@ -31,6 +31,12 @@ import gov.nasa.worldwind.terrain.Tessellator;
 public abstract class ExtendedSceneController extends AbstractSceneController
 {
 	private FlatRectangularTessellator flatTessellator = new FlatRectangularTessellator();
+	
+	public ExtendedSceneController()
+	{
+		dc.dispose();
+		dc = new ExtendedDrawContext();
+	}
 
 	@Override
 	protected void createTerrain(DrawContext dc)
