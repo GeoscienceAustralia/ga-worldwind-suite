@@ -122,4 +122,23 @@ public class IOUtil extends WWIO
 
 		return wrapper;
 	}
+
+	/**
+	 * Read the bytes from the resource referenced by the provided InputStream.
+	 * <p/>
+	 * The provided pixel types and byte ordering is used to wrap the
+	 * {@link ByteBuffer} with a {@link BufferWrapper} that can manipulate the
+	 * underlying data if needed.
+	 */
+	public static BufferWrapper readByteBuffer(InputStream is, String pixelType, String byteOrder) throws IOException
+	{
+		ByteBuffer byteBuffer = readStreamToBuffer(is);
+
+		AVList bufferParams = new AVListImpl();
+		bufferParams.setValue(AVKey.DATA_TYPE, pixelType);
+		bufferParams.setValue(AVKey.BYTE_ORDER, byteOrder);
+		BufferWrapper wrapper = BufferWrapper.wrap(byteBuffer, bufferParams);
+
+		return wrapper;
+	}
 }
