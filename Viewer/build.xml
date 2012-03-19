@@ -15,8 +15,8 @@
 
 	<property name="test_src_dir" value="${basedir}/src/test/java" />
 	<property name="test_build_dir" value="${target_dir}/test-classes" />
-	<property name="test_results_dir" value="${basedir}/target/test-results" />
-	<property name="test_reports_dir" value="${basedir}/target/test-reports" />
+	<property name="test_results_dir" value="${target_dir}/test-results" />
+	<property name="test_reports_dir" value="${target_dir}/test-reports" />
 
 	<property name="executable_dir" value="${target_dir}/executable" />
 	<property name="executable_jar_name" value="viewer-all-in-one.jar" />

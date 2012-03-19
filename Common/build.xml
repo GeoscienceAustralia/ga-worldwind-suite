@@ -20,8 +20,8 @@
 	<property name="package_lib_dir" value="${lib_dir}/package" />
 	<property name="test_lib_dir" value="${lib_dir}/test" />
 
-	<property name="test_results_dir" value="${basedir}/target/test-results" />
-	<property name="test_reports_dir" value="${basedir}/target/test-reports" />
+	<property name="test_results_dir" value="${target_dir}/test-results" />
+	<property name="test_reports_dir" value="${target_dir}/test-reports" />
 
 	<path id="classpath">
 		<fileset dir="${build_lib_dir}">
