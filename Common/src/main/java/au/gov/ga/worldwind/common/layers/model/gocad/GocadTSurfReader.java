@@ -58,8 +58,7 @@ public class GocadTSurfReader implements GocadReader
 	private GocadReaderParameters parameters;
 	private List<Position> positions;
 	private List<Float> values;
-	private float min = Float.MAX_VALUE;
-	private float max = -Float.MAX_VALUE;
+	private float min, max;
 	private List<Integer> triangleIds;
 	private Color color;
 	private Map<Integer, Integer> vertexIdMap;
@@ -75,6 +74,8 @@ public class GocadTSurfReader implements GocadReader
 		this.parameters = parameters;
 		positions = new ArrayList<Position>();
 		values = new ArrayList<Float>();
+		min = Float.MAX_VALUE;
+		max = -Float.MAX_VALUE;
 		triangleIds = new ArrayList<Integer>();
 		vertexIdMap = new HashMap<Integer, Integer>();
 		paintedVariableName = parameters.getPaintedVariable();

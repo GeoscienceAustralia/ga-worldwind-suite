@@ -19,6 +19,7 @@ import gov.nasa.worldwind.geom.Position;
 
 import java.awt.Color;
 import java.net.URL;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,11 +44,15 @@ public class GocadPLineReader implements GocadReader
 	public final static String HEADER_REGEX = "(?i).*pline.*";
 
 	private final static Pattern vertexPattern = Pattern
-			.compile("P?VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
+			.compile("P?VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)([\\s\\d.\\-e]*)\\s*");
+	private final static Pattern atomPattern = Pattern.compile("P?ATOM\\s+(\\d+)\\s+(\\d+)([\\s\\d.\\-e]*)\\s*");
 	private final static Pattern segmentPattern = Pattern.compile("SEG\\s+(\\d+)\\s+(\\d+).*");
 	private final static Pattern colorPattern = Pattern.compile("\\*line\\*color:.+");
 	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
 	private final static Pattern zpositivePattern = Pattern.compile("ZPOSITIVE\\s+(\\w+)\\s*");
+	private final static Pattern paintedVariablePattern = Pattern.compile("\\*painted\\*variable:\\s*(.*?)\\s*");
+	private final static Pattern propertiesPattern = Pattern.compile("PROPERTIES\\s+(.*)\\s*");
+	private final static Pattern nodataPattern = Pattern.compile("NO_DATA_VALUES\\s*([\\s\\d.\\-e]*)\\s*");
 
 	private GocadReaderParameters parameters;
 	private List<Position> positions;
@@ -56,14 +61,23 @@ public class GocadPLineReader implements GocadReader
 	private Map<Integer, Integer> vertexIdMap;
 	private String name;
 	private boolean zPositive = true;
+	private List<Float> values;
+	private float min, max;
+	private String paintedVariableName;
+	private int paintedVariableId = 0;
+	private float noDataValue = -Float.MAX_VALUE;
 
 	@Override
 	public void begin(GocadReaderParameters parameters)
 	{
 		this.parameters = parameters;
 		positions = new ArrayList<Position>();
+		values = new ArrayList<Float>();
+		min = Float.MAX_VALUE;
+		max = -Float.MAX_VALUE;
 		segmentIds = new ArrayList<Integer>();
 		vertexIdMap = new HashMap<Integer, Integer>();
+		paintedVariableName = parameters.getPaintedVariable();
 	}
 
 	@Override
@@ -75,12 +89,16 @@ public class GocadPLineReader implements GocadReader
 		if (matcher.matches())
 		{
 			int id = Integer.parseInt(matcher.group(1));
+			if (vertexIdMap.containsKey(id))
+			{
+				throw new IllegalArgumentException("Duplicate vertex id: " + id);
+			}
+
 			double x = Double.parseDouble(matcher.group(2));
 			double y = Double.parseDouble(matcher.group(3));
 			double z = Double.parseDouble(matcher.group(4));
 			z = zPositive ? z : -z;
-			
-			if(parameters.getCoordinateTransformation() != null)
+			if (parameters.getCoordinateTransformation() != null)
 			{
 				double[] transformed = new double[3];
 				parameters.getCoordinateTransformation().TransformPoint(transformed, x, y, z);
@@ -88,15 +106,72 @@ public class GocadPLineReader implements GocadReader
 				y = transformed[1];
 				z = transformed[2];
 			}
-			
 			Position position = Position.fromDegrees(y, x, z);
-
-			if (vertexIdMap.containsKey(id))
-			{
-				throw new IllegalArgumentException("Duplicate vertex id: " + id);
-			}
 			vertexIdMap.put(id, positions.size());
 			positions.add(position);
+
+			float value = Float.NaN;
+			if (paintedVariableId <= 0)
+			{
+				value = (float) z;
+			}
+			else
+			{
+				double[] values = GocadTSurfReader.splitStringToDoubles(matcher.group(5));
+				if (paintedVariableId <= values.length)
+				{
+					value = (float) values[paintedVariableId - 1];
+				}
+			}
+			if (!Float.isNaN(value) && value != noDataValue)
+			{
+				min = Math.min(min, value);
+				max = Math.max(max, value);
+			}
+			values.add(value);
+
+			return;
+		}
+		
+		matcher = atomPattern.matcher(line);
+		if (matcher.matches())
+		{
+			int id1 = Integer.parseInt(matcher.group(1));
+			int id2 = Integer.parseInt(matcher.group(2));
+
+			if (vertexIdMap.containsKey(id1))
+			{
+				throw new IllegalArgumentException("Duplicate vertex id: " + id1);
+			}
+			if (!vertexIdMap.containsKey(id2))
+			{
+				throw new IllegalArgumentException("Unknown vertex id: " + id2);
+			}
+
+			Position position = positions.get(vertexIdMap.get(id2));
+			vertexIdMap.put(id1, positions.size());
+			positions.add(position);
+
+			float value = Float.NaN;
+			if (paintedVariableId <= 0)
+			{
+				value = (float) position.elevation;
+			}
+			else
+			{
+				double[] values = GocadTSurfReader.splitStringToDoubles(matcher.group(3));
+				if (paintedVariableId <= values.length)
+				{
+					value = (float) values[paintedVariableId - 1];
+				}
+			}
+			if (!Float.isNaN(value) && value != noDataValue)
+			{
+				min = Math.min(min, value);
+				max = Math.max(max, value);
+			}
+			values.add(value);
+
 			return;
 		}
 
@@ -129,6 +204,43 @@ public class GocadPLineReader implements GocadReader
 		{
 			zPositive = !matcher.group(1).equalsIgnoreCase("depth");
 		}
+
+		matcher = paintedVariablePattern.matcher(line);
+		if (matcher.matches())
+		{
+			if (parameters.getPaintedVariable() == null)
+			{
+				paintedVariableName = matcher.group(1);
+			}
+			return;
+		}
+
+		matcher = propertiesPattern.matcher(line);
+		if (matcher.matches())
+		{
+			String properties = matcher.group(1).trim();
+			String[] split = properties.split("\\s+");
+			for (int i = 0; i < split.length; i++)
+			{
+				if (split[i].equalsIgnoreCase(paintedVariableName))
+				{
+					paintedVariableId = i + 1;
+					break;
+				}
+			}
+			return;
+		}
+
+		matcher = nodataPattern.matcher(line);
+		if (matcher.matches())
+		{
+			double[] values = GocadTSurfReader.splitStringToDoubles(matcher.group(1));
+			if (0 < paintedVariableId && paintedVariableId <= values.length)
+			{
+				noDataValue = (float) values[paintedVariableId - 1];
+			}
+			return;
+		}
 	}
 
 	@Override
@@ -151,7 +263,26 @@ public class GocadPLineReader implements GocadReader
 
 		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_LINES);
 		shape.setName(name);
-		if (color != null)
+		if (parameters.getColorMap() != null)
+		{
+			FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * 4);
+			for (float value : values)
+			{
+				if (Float.isNaN(value) || value == noDataValue)
+				{
+					colorBuffer.put(0).put(0).put(0).put(0);
+				}
+				else
+				{
+					Color color = parameters.getColorMap().calculateColorNotingIsValuesPercentages(value, min, max);
+					colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
+							.put(color.getAlpha() / 255f);
+				}
+			}
+			shape.setColorBufferElementSize(4);
+			shape.setColorBuffer(colorBuffer);
+		}
+		else if (color != null)
 		{
 			shape.setColor(color);
 		}
