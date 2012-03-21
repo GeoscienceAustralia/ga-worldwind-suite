@@ -23,6 +23,8 @@ import java.util.logging.Level;
 
 import javax.media.opengl.GL;
 
+import au.gov.ga.worldwind.common.render.ExtendedDrawContext;
+
 /**
  * Helper class used to render a curtain's {@link CurtainTile}s.
  * 
@@ -62,6 +64,8 @@ public class CurtainTileRenderer
 			Logging.logger().severe(message);
 			throw new IllegalStateException(message);
 		}
+		
+		ExtendedDrawContext.applyWireframePolygonMode(dc);
 
 		GL gl = dc.getGL();
 
