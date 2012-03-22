@@ -51,9 +51,6 @@ public class GocadVoxetReader implements GocadReader
 
 	private final static Pattern axisPattern = Pattern
 			.compile("AXIS_(\\S+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
-	private final static Pattern propertyPattern = Pattern.compile("PROP_(\\S+)\\s+(\\d+)\\s+(\\S+).*");
-	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
-	private final static Pattern zpositivePattern = Pattern.compile("ZPOSITIVE\\s+(\\w+)\\s*");
 
 	private String name;
 	private boolean zPositive = true;

@@ -16,6 +16,7 @@
 package au.gov.ga.worldwind.common.layers.model.gocad;
 
 import java.net.URL;
+import java.util.regex.Pattern;
 
 import au.gov.ga.worldwind.common.util.FastShape;
 
@@ -26,6 +27,18 @@ import au.gov.ga.worldwind.common.util.FastShape;
  */
 public interface GocadReader
 {
+	final static Pattern vertexPattern =
+			Pattern.compile("P?VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)([\\s\\d.\\-e]*)\\s*(?:\\D+)?\\s*");
+	final static Pattern atomPattern = Pattern.compile("P?ATOM\\s+(\\d+)\\s+(\\d+)([\\s\\d.\\-e]*)\\s*");
+	final static Pattern zpositivePattern = Pattern.compile("ZPOSITIVE\\s+(\\w+)\\s*");
+	final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
+	final static Pattern solidColorPattern = Pattern.compile("\\*solid\\*color:.+");
+	final static Pattern lineColorPattern = Pattern.compile("\\*line\\*color:.+");
+	final static Pattern paintedVariablePattern = Pattern.compile("\\*painted\\*variable:\\s*(.*?)\\s*");
+	final static Pattern nodataValuesPattern = Pattern.compile("NO_DATA_VALUES\\s*([\\s\\d.\\-e]*)\\s*");
+	final static Pattern propertiesPattern = Pattern.compile("PROPERTIES\\s+(.*)\\s*");
+	final static Pattern propertyPattern = Pattern.compile("PROP_(\\S+)\\s+(\\d+)\\s+(\\S+).*");
+
 	/**
 	 * Called before reading any lines.
 	 * 

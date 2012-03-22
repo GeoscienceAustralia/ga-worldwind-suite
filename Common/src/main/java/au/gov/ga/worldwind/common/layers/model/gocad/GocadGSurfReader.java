@@ -47,15 +47,11 @@ public class GocadGSurfReader implements GocadReader
 {
 	public final static String HEADER_REGEX = "(?i).*gsurf.*";
 
+	//axis pattern is different to voxet axis pattern, because AXIS_N only has 2 values instead of 3
 	private final static Pattern axisPattern = Pattern
 			.compile("(?:(ORIGIN)|(?:AXIS_(\\S+)))\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)(?:\\s+([\\d.\\-]+))?.*");
-	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
 	private final static Pattern typePattern = Pattern.compile("TYPE\\s+(\\w+)\\s*");
-	private final static Pattern zpositivePattern = Pattern.compile("ZPOSITIVE\\s+(\\w+)\\s*");
-	private final static Pattern colorPattern = Pattern.compile("\\*solid\\*color:.+");
-	private final static Pattern propertyPattern = Pattern.compile("PROP_(\\S+)\\s+(\\d+)\\s+(\\S+).*");
 	private final static Pattern propertyIdPattern = Pattern.compile("PROPERTY\\s+(\\d+)\\s+\"?([^\"]+)\"?.*");
-	private final static Pattern paintedVariablePattern = Pattern.compile("\\*painted\\*variable:\\s*(.*?)\\s*");
 
 	private String name;
 	private boolean zPositive = true;
@@ -126,7 +122,7 @@ public class GocadGSurfReader implements GocadReader
 			return;
 		}
 
-		matcher = colorPattern.matcher(line);
+		matcher = solidColorPattern.matcher(line);
 		if (matcher.matches())
 		{
 			color = GocadColor.gocadLineToColor(line);

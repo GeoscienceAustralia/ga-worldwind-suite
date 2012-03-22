@@ -44,22 +44,12 @@ public class GocadTSurfReader implements GocadReader
 {
 	public final static String HEADER_REGEX = "(?i).*tsurf.*";
 
-	private final static Pattern vertexPattern = Pattern
-			.compile("P?VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)([\\s\\d.\\-e]*)\\s*");
-	private final static Pattern atomPattern = Pattern.compile("P?ATOM\\s+(\\d+)\\s+(\\d+)([\\s\\d.\\-e]*)\\s*");
 	private final static Pattern trianglePattern = Pattern.compile("TRGL\\s+(\\d+)\\s+(\\d+)\\s+(\\d+).*");
-	private final static Pattern colorPattern = Pattern.compile("\\*solid\\*color:.+");
-	private final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
-	private final static Pattern zpositivePattern = Pattern.compile("ZPOSITIVE\\s+(\\w+)\\s*");
-	private final static Pattern paintedVariablePattern = Pattern.compile("\\*painted\\*variable:\\s*(.*?)\\s*");
-	private final static Pattern propertiesPattern = Pattern.compile("PROPERTIES\\s+(.*)\\s*");
-	private final static Pattern nodataPattern = Pattern.compile("NO_DATA_VALUES\\s*([\\s\\d.\\-e]*)\\s*");
 
 	private GocadReaderParameters parameters;
 	private List<Position> positions;
 	private List<Float> values;
-	private float min = Float.MAX_VALUE;
-	private float max = -Float.MAX_VALUE;
+	private float min, max;
 	private List<Integer> triangleIds;
 	private Color color;
 	private Map<Integer, Integer> vertexIdMap;
@@ -75,6 +65,8 @@ public class GocadTSurfReader implements GocadReader
 		this.parameters = parameters;
 		positions = new ArrayList<Position>();
 		values = new ArrayList<Float>();
+		min = Float.MAX_VALUE;
+		max = -Float.MAX_VALUE;
 		triangleIds = new ArrayList<Integer>();
 		vertexIdMap = new HashMap<Integer, Integer>();
 		paintedVariableName = parameters.getPaintedVariable();
@@ -187,7 +179,7 @@ public class GocadTSurfReader implements GocadReader
 			return;
 		}
 
-		matcher = colorPattern.matcher(line);
+		matcher = solidColorPattern.matcher(line);
 		if (matcher.matches())
 		{
 			color = GocadColor.gocadLineToColor(line);
@@ -234,7 +226,7 @@ public class GocadTSurfReader implements GocadReader
 			return;
 		}
 
-		matcher = nodataPattern.matcher(line);
+		matcher = nodataValuesPattern.matcher(line);
 		if (matcher.matches())
 		{
 			double[] values = splitStringToDoubles(matcher.group(1));
