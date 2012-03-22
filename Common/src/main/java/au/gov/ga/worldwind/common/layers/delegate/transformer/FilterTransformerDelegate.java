@@ -36,6 +36,41 @@ import au.gov.ga.worldwind.common.util.XMLUtil;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
 
+/**
+ * {@link IImageTransformerDelegate} implementation that uses implementations of
+ * the {@link BufferedImageOp} interface to filter images. There are many such
+ * implementations in the jhlabs filters library, which is included with this
+ * project.
+ * <p/>
+ * <code>&lt;Delegate&gt;FilterTransformer&lt;/Delegate&gt;</code>
+ * <p/>
+ * When parsing from a layer definition file, the filter list must be provided
+ * in the layer xml, as follows:
+ * 
+ * <pre>
+ * &lt;Filters&gt;
+ *   &lt;Filter name="classname"&gt;
+ *     &lt;Property name="" value="" /&gt;
+ *     &lt;Property name="" value="" type="" /&gt;
+ *   &lt;/Filter&gt;
+ *   &lt;Filter name="classname" /&gt;
+ *   ...
+ * &lt;/Filters&gt;
+ * </pre>
+ * 
+ * Where:
+ * <ul>
+ * <li>classname = Class name of the {@link BufferedImageOp} implementation. If
+ * the class is in the com.jhlabs.image package, the package prefix can be
+ * optionally omitted.
+ * <li>Property = Values to set on the instanciated class. The name attribute is
+ * the name of the setter, and the value attribute is the value to set. If the
+ * type attribute is included, the value is converted to type before setting,
+ * otherwise the type of the setter is used.
+ * </ul>
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ */
 public class FilterTransformerDelegate implements IImageTransformerDelegate
 {
 	private final static String DEFINITION_STRING = "FilterTransformer";
