@@ -67,14 +67,10 @@ public interface AVKeyMore extends AVKey
 	//borehole layer
 	final static String BOREHOLE_SAMPLE_STYLES = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleStyles";
 	final static String BOREHOLE_SAMPLE_ATTRIBUTES = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleAttributes";
-	final static String BOREHOLE_UNIQUE_IDENTIFIER_ATTRIBUTE =
-			"au.gov.ga.worldwind.AVKeyMore.BoreholeUniqueIdentifierAttribute";
-	final static String BOREHOLE_SAMPLE_DEPTH_FROM_ATTRIBUTE =
-			"au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthFromAttribute";
-	final static String BOREHOLE_SAMPLE_DEPTH_TO_ATTRIBUTE =
-			"au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthToAttribute";
-	final static String BOREHOLE_SAMPLE_DEPTH_ATTRIBUTES_POSITIVE =
-			"au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthAttributesPositive";
+	final static String BOREHOLE_UNIQUE_IDENTIFIER_ATTRIBUTE = "au.gov.ga.worldwind.AVKeyMore.BoreholeUniqueIdentifierAttribute";
+	final static String BOREHOLE_SAMPLE_DEPTH_FROM_ATTRIBUTE = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthFromAttribute";
+	final static String BOREHOLE_SAMPLE_DEPTH_TO_ATTRIBUTE = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthToAttribute";
+	final static String BOREHOLE_SAMPLE_DEPTH_ATTRIBUTES_POSITIVE = "au.gov.ga.worldwind.AVKeyMore.BoreholeSampleDepthAttributesPositive";
 
 	//historic earthquakes layer
 	final static String COLORING = "au.gov.ga.worldwind.AVKeyMore.Coloring";
@@ -94,8 +90,7 @@ public interface AVKeyMore extends AVKey
 	final static String SUBSAMPLING_V = "au.gov.ga.worldwind.AVKeyMore.SubsamplingV";
 	final static String SUBSAMPLING_W = "au.gov.ga.worldwind.AVKeyMore.SubsamplingW";
 	final static String DYNAMIC_SUBSAMPLING = "au.gov.ga.worldwind.AVKeyMore.DynamicSubsampling";
-	final static String DYNAMIC_SUBSAMPLING_SAMPLES_PER_AXIS =
-			"au.gov.ga.worldwind.AVKeyMore.DynamicSubsamplingSamplesPerAxis";
+	final static String DYNAMIC_SUBSAMPLING_SAMPLES_PER_AXIS = "au.gov.ga.worldwind.AVKeyMore.DynamicSubsamplingSamplesPerAxis";
 
 	//volume layer
 	final static String MAX_VARIANCE = "au.gov.ga.worldwind.AVKeyMore.MaxVariance";
