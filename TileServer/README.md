@@ -41,11 +41,11 @@ To install:
 	used to access the tileserver instance). 
 	An example might be `wwtileserver`.
 
-1.	Copy the files `tiles.jsp`, `elev.jsp` and `common.inc` into the newly created folder.
+2.	Copy the files `tiles.jsp`, `elev.jsp` and `common.inc` into the newly created folder.
 
-1.	Edit the marked lines in `common.inc` to point to the root folder of your tile caches.
+3.	Edit the marked lines in `common.inc` to point to the root folder of your tile caches.
 
-1.	Restart Tomcat.
+4.	Restart Tomcat.
 
 You should now be able to access the `TileServer` using a URL like `http://www.yourdomain.com/wwtileserver/tiles.jsp' 
 (_Note that the actual URL will depend on how Tomcat has been set up_).
@@ -58,4 +58,4 @@ For more information, see `LICENSE-2.0.html`, or [http://www.apache.org/licenses
 ## See also ##
 
 1. [Geoscience Australia](http://www.ga.gov.au)
-1. [NASA World Wind SDK](http://worldwind.arc.nasa.gov/java/)
+2. [NASA World Wind SDK](http://worldwind.arc.nasa.gov/java/)
