@@ -112,13 +112,13 @@ import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.viewer.panels.SideBar;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.layers.AbstractLayersPanel;
-import au.gov.ga.worldwind.viewer.panels.layers.SectionListLayerList;
 import au.gov.ga.worldwind.viewer.panels.layers.ILayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerEnabler;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.viewer.panels.layers.QueryClickListener;
 import au.gov.ga.worldwind.viewer.panels.layers.SectionListCompoundElevationModel;
+import au.gov.ga.worldwind.viewer.panels.layers.SectionListLayerList;
 import au.gov.ga.worldwind.viewer.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.viewer.retrieve.PolylineLayerRetrievalListener;
 import au.gov.ga.worldwind.viewer.settings.Settings;
@@ -365,7 +365,7 @@ public class Application
 		frame.setIconImage(Icons.earth32.getIcon().getImage());
 
 		// show splashscreen
-		final SplashScreen splashScreen = showSplashScreen ? new SplashScreen(frame) : null;
+		final SplashScreen splashScreen = showSplashScreen ? new SplashScreen(frame, SplashScreen.class.getResource("/images/viewer-splash-400x230.png")) : null;
 
 		// create worldwind stuff
 		if (Settings.get().isHardwareStereoEnabled())
