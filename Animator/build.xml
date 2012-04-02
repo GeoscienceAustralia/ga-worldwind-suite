@@ -121,6 +121,7 @@
 		<jar destfile="${package_dir}/${jar_name}">
 			<manifest>
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.animator.application.Application" />
+				<attribute name="SplashScreen-Image" value="images/animator-splash-400x230.png" />
 			</manifest>
 			<fileset dir="${build_dir}" />
 		</jar>
@@ -151,6 +152,7 @@
 
 			<manifest>
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.animator.application.Executable" />
+				<attribute name="SplashScreen-Image" value="images/animator-splash-400x230.png" />
 			</manifest>
 		</jar>
 
