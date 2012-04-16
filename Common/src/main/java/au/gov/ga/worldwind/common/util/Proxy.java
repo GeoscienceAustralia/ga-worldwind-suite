@@ -59,9 +59,13 @@ public class Proxy implements Serializable
 				for (ProxyType type : ProxyType.values())
 				{
 					if (type.pretty.equalsIgnoreCase(proxyType))
+					{
 						return type;
+					}
 					if (type.type.equalsIgnoreCase(proxyType))
+					{
 						return type;
+					}
 				}
 			}
 			return null;
@@ -144,7 +148,9 @@ public class Proxy implements Serializable
 	{
 		Configuration.removeKey(AVKey.URL_PROXY_HOST);
 		System.clearProperty("http.proxyHost");
+		System.clearProperty("http.proxyPort");
 		System.clearProperty("socksProxyHost");
+		System.clearProperty("socksProxyPort");
 		System.clearProperty("java.net.useSystemProxies");
 
 		if (enabled)
