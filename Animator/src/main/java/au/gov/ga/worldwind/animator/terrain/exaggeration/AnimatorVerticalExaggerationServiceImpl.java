@@ -16,6 +16,12 @@
 package au.gov.ga.worldwind.animator.terrain.exaggeration;
 
 import gov.nasa.worldwind.render.DrawContext;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationService;
 
 /**
@@ -27,6 +33,8 @@ import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationService;
 public class AnimatorVerticalExaggerationServiceImpl implements VerticalExaggerationService
 {
 
+	private Map<Object, VerticalExaggerationSettings> marks = new WeakHashMap<Object, VerticalExaggerationSettings>();
+	
 	@Override
 	public double applyVerticalExaggeration(DrawContext dc, double elevation)
 	{
@@ -34,9 +42,114 @@ public class AnimatorVerticalExaggerationServiceImpl implements VerticalExaggera
 	}
 
 	@Override
+	public double unapplyVerticalExaggeration(DrawContext dc, double exaggeratedElevation)
+	{
+		// TODO: Implement unapply
+		return exaggeratedElevation;
+	}
+	
+	@Override
 	public double getGlobalVerticalExaggeration(DrawContext dc)
 	{
 		return 1.0;
 	}
+	
+	@Override
+	public void markVerticalExaggeration(Object key, DrawContext dc)
+	{
+		marks.put(key, new VerticalExaggerationSettings(dc));
+	}
+	
+	@Override
+	public boolean isVerticalExaggerationChanged(Object key, DrawContext dc)
+	{
+		if (!marks.containsKey(key))
+		{
+			return true;
+		}
+		VerticalExaggerationSettings currentSettings = new VerticalExaggerationSettings(dc);
+		VerticalExaggerationSettings oldSettings = marks.get(key);
+		return !currentSettings.equals(oldSettings);
+	}
+	
+	@Override
+	public void clearMark(Object key)
+	{
+		marks.remove(key);
+	}
+	
+	@Override
+	public boolean checkAndMarkVerticalExaggeration(Object key, DrawContext dc)
+	{
+		boolean result = isVerticalExaggerationChanged(key, dc);
+		markVerticalExaggeration(key, dc);
+		return result;
+	}
 
+	private static class VerticalExaggerationSettings
+	{
+		private List<ExaggerationEntry> exaggerations = new ArrayList<ExaggerationEntry>();
+		
+		public VerticalExaggerationSettings(DrawContext dc)
+		{
+			for (ElevationExaggeration ee : ((VerticalExaggerationElevationModel)dc.getGlobe().getElevationModel()).getExaggerators())
+			{
+				exaggerations.add(new ExaggerationEntry(ee));
+			}
+		}
+		
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (!(obj instanceof VerticalExaggerationSettings))
+			{
+				return false;
+			}
+			if (obj == this)
+			{
+				return true;
+			}
+			VerticalExaggerationSettings other = (VerticalExaggerationSettings)obj;
+			if (other.exaggerations.size() != this.exaggerations.size())
+			{
+				return false;
+			}
+			for (int i = 0; i < this.exaggerations.size(); i++)
+			{
+				if (!this.exaggerations.get(i).equals(other.exaggerations.get(i)))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+	
+	private static class ExaggerationEntry
+	{
+		private double boundary;
+		private double exaggeration;
+		
+		public ExaggerationEntry(ElevationExaggeration exaggerator)
+		{
+			this.boundary = exaggerator.getElevationBoundary();
+			this.exaggeration = exaggerator.getExaggeration();
+		}
+		
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (!(obj instanceof ExaggerationEntry))
+			{
+				return false;
+			}
+			if (obj == this)
+			{
+				return true;
+			}
+			ExaggerationEntry other = (ExaggerationEntry)obj;
+			return other.boundary == this.boundary && other.exaggeration == this.exaggeration;
+		}
+	}
+	
 }

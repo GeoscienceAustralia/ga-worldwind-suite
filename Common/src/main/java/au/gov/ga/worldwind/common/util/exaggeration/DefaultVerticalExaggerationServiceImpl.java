@@ -17,6 +17,9 @@ package au.gov.ga.worldwind.common.util.exaggeration;
 
 import gov.nasa.worldwind.render.DrawContext;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 /**
  * The default implementation of the {@link VerticalExaggerationService} that simply uses the global
  * vertical exaggeration as provided by the supplied {@link DrawContext}.
@@ -25,7 +28,9 @@ import gov.nasa.worldwind.render.DrawContext;
  */
 public class DefaultVerticalExaggerationServiceImpl implements VerticalExaggerationService
 {
-
+	
+	private Map<Object, Double> marks = new WeakHashMap<Object, Double>();  
+	
 	@Override
 	public double applyVerticalExaggeration(DrawContext dc, double elevation)
 	{
@@ -33,9 +38,45 @@ public class DefaultVerticalExaggerationServiceImpl implements VerticalExaggerat
 	}
 
 	@Override
+	public double unapplyVerticalExaggeration(DrawContext dc, double exaggeratedElevation)
+	{
+		return exaggeratedElevation / dc.getVerticalExaggeration();
+	}
+	
+	@Override
 	public double getGlobalVerticalExaggeration(DrawContext dc)
 	{
 		return dc.getVerticalExaggeration();
+	}
+	
+	@Override
+	public void markVerticalExaggeration(Object key, DrawContext dc)
+	{
+		marks.put(key, dc.getVerticalExaggeration());
+	}
+	
+	@Override
+	public boolean isVerticalExaggerationChanged(Object key, DrawContext dc)
+	{
+		if (!marks.containsKey(key))
+		{
+			return true;
+		}
+		return marks.get(key) != dc.getVerticalExaggeration();
+	}
+	
+	@Override
+	public void clearMark(Object key)
+	{
+		marks.remove(key);
+	}
+	
+	@Override
+	public boolean checkAndMarkVerticalExaggeration(Object key, DrawContext dc)
+	{
+		boolean result = isVerticalExaggerationChanged(key, dc);
+		markVerticalExaggeration(key, dc);
+		return result;
 	}
 
 }

@@ -51,6 +51,7 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.layers.Wireframeable;
+import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
 import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.texture.Texture;
@@ -93,7 +94,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected double opacity = 1;
 	protected boolean followTerrain = false;
 
-	protected double lastVerticalExaggeration = -1;
+	//protected double lastVerticalExaggeration = -1;
 	protected Globe lastGlobe = null;
 	protected boolean verticesDirty = true;
 	protected Vec4 lastEyePoint = null;
@@ -159,10 +160,14 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		try
 		{
 			if (vertexBuffer == null || vertexBuffer.limit() <= 0)
+			{
 				return;
+			}
 
 			if (boundingSphere == null || !dc.getView().getFrustumInModelCoordinates().intersects(boundingSphere))
+			{
 				return;
+			}
 
 			GL gl = dc.getGL();
 			OGLStackHandler stack = new OGLStackHandler();
@@ -170,8 +175,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			try
 			{
 				boolean colorBufferContainsAlpha = colorBuffer != null && colorBufferElementSize > 3;
-				boolean willUseSortedIndices =
-						(forceSortedPrimitives || (sortTransparentPrimitives && alpha < 1.0)) && sortedIndices != null;
+				boolean willUseSortedIndices = (forceSortedPrimitives || (sortTransparentPrimitives && alpha < 1.0)) && sortedIndices != null;
 				boolean willUsePointSprite = mode == GL.GL_POINTS && pointSprite && pointTextureUrl != null;
 				boolean willUseTextureBlending = (alpha < 1.0 || color != null) && colorBufferContainsAlpha;
 
@@ -241,8 +245,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 				{
 					gl.glPointParameterf(GL.GL_POINT_SIZE_MAX, pointMaxSize.floatValue());
 				}
-				if (pointConstantAttenuation != null || pointLinearAttenuation != null
-						|| pointQuadraticAttenuation != null)
+				if (pointConstantAttenuation != null || pointLinearAttenuation != null || pointQuadraticAttenuation != null)
 				{
 					float ca = pointConstantAttenuation != null ? pointConstantAttenuation.floatValue() : 1f;
 					float la = pointLinearAttenuation != null ? pointLinearAttenuation.floatValue() : 0f;
@@ -434,9 +437,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	protected boolean isVertexRecalculationRequired(DrawContext dc)
 	{
-		boolean recalculateVertices =
-				followTerrain || elevationChanged || lastVerticalExaggeration != dc.getVerticalExaggeration();
-		lastVerticalExaggeration = dc.getVerticalExaggeration();
+		boolean recalculateVertices = followTerrain || elevationChanged || VerticalExaggerationAccessor.isVerticalExaggerationChanged(FastShape.this, dc);
+		VerticalExaggerationAccessor.markVerticalExaggeration(FastShape.this, dc);
 		elevationChanged = false;
 		return recalculateVertices;
 	}
@@ -517,7 +519,9 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 		//prevent NullPointerExceptions when there's no vertices:
 		if (modBoundingSphere == null)
+		{
 			modBoundingSphere = new Sphere(Vec4.ZERO, 1);
+		}
 
 		modVertexBuffer.rewind();
 		for (int i = 0; modVertexBuffer.remaining() >= 3; i += 3)
@@ -536,7 +540,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			elevation += dc.getGlobe().getElevation(position.getLatitude(), position.getLongitude());
 		}
 		elevation += calculateElevationOffset(position);
-		elevation *= dc.getVerticalExaggeration();
+		elevation = VerticalExaggerationAccessor.applyVerticalExaggeration(dc, elevation);
 		elevation = Math.max(elevation, -dc.getGlobe().getMaximumRadius());
 		return dc.getGlobe().computePointFromPosition(position.add(calculateLatLonOffset()), elevation);
 	}
@@ -560,7 +564,9 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		//the Sphere.createBoundingSphere() function doesn't ensure that the radius is at least 1, causing errors
 		Vec4[] extrema = Vec4.computeExtrema(wrapper);
 		if (extrema == null)
+		{
 			return null;
+		}
 		Vec4 center =
 				new Vec4((extrema[0].x + extrema[1].x) / 2.0, (extrema[0].y + extrema[1].y) / 2.0,
 						(extrema[0].z + extrema[1].z) / 2.0);
@@ -1387,9 +1393,13 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		public boolean equals(Object obj)
 		{
 			if (obj == null)
+			{
 				return false;
+			}
 			if (obj.equals(owner))
+			{
 				return true;
+			}
 			return super.equals(obj);
 		}
 	}
