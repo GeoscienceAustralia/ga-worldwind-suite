@@ -272,6 +272,8 @@ public class Animator
 	{
 		GDALDataHelper.init();
 
+		loadSettings();
+		
 		initialiseApplicationWindow();
 		initialiseWorldWindow();
 
@@ -299,6 +301,11 @@ public class Animator
 		resetChanged();
 
 		showApplicationWindow();
+	}
+
+	private void loadSettings()
+	{
+		Settings.get();
 	}
 
 	/**
@@ -494,7 +501,14 @@ public class Animator
 				continue;
 			}
 
-			animation.addLayer(layerIdentifier);
+			try
+			{
+				animation.addLayer(layerIdentifier);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -510,7 +524,14 @@ public class Animator
 				continue;
 			}
 
-			animation.addElevationModel(modelIdentifier);
+			try
+			{
+				animation.addElevationModel(modelIdentifier);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 
