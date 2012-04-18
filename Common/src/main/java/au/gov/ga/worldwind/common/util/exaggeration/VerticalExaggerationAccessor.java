@@ -52,7 +52,7 @@ public class VerticalExaggerationAccessor
 	 */
 	public static double unapplyVerticalExaggeration(DrawContext dc, double exaggeratedElevation)
 	{
-		return service.unapplyVerticalExaggeration(dc, exaggeratedElevation);
+		return getService().unapplyVerticalExaggeration(dc, exaggeratedElevation);
 	}
 
 	/** @see VerticalExaggerationService#getGlobalVerticalExaggeration(DrawContext) */

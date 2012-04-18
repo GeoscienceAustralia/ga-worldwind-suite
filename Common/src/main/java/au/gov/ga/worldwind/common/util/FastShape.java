@@ -437,8 +437,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	protected boolean isVertexRecalculationRequired(DrawContext dc)
 	{
-		boolean recalculateVertices = followTerrain || elevationChanged || VerticalExaggerationAccessor.isVerticalExaggerationChanged(FastShape.this, dc);
-		VerticalExaggerationAccessor.markVerticalExaggeration(FastShape.this, dc);
+		boolean recalculateVertices = followTerrain || elevationChanged || VerticalExaggerationAccessor.checkAndMarkVerticalExaggeration(FastShape.this, dc);
 		elevationChanged = false;
 		return recalculateVertices;
 	}

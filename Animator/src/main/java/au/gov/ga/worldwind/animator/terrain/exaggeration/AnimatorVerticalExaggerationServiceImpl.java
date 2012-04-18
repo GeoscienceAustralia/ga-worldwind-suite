@@ -81,9 +81,13 @@ public class AnimatorVerticalExaggerationServiceImpl implements VerticalExaggera
 	@Override
 	public boolean checkAndMarkVerticalExaggeration(Object key, DrawContext dc)
 	{
-		boolean result = isVerticalExaggerationChanged(key, dc);
+		boolean isChanged = isVerticalExaggerationChanged(key, dc);
+		if (!isChanged)
+		{
+			return false;
+		}
 		markVerticalExaggeration(key, dc);
-		return result;
+		return true;
 	}
 
 	private static class VerticalExaggerationSettings
