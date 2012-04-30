@@ -292,4 +292,10 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 		shape.setLineWidth(2.0);
 		return shape;
 	}
+	
+	@Override
+	public boolean isSingleSliceVolume()
+	{
+		return xSize == 1 || ySize == 1 || zSize == 1;
+	}
 }

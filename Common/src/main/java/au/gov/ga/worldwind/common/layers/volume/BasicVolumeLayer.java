@@ -264,7 +264,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		topSurface.setLighted(true);
 		topSurface.setCalculateNormals(true);
 		topSurface.setElevation(topElevation);
-
+		
 		bottomSurface = dataProvider.createHorizontalSurface((float) maxVariance, rectangle);
 		bottomSurface.setLighted(true);
 		bottomSurface.setCalculateNormals(true);
@@ -422,7 +422,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	 */
 	protected void recalculateClippingPlanes(DrawContext dc)
 	{
-		if (!dataAvailable)
+		if (!dataAvailable || dataProvider.isSingleSliceVolume())
 		{
 			return;
 		}

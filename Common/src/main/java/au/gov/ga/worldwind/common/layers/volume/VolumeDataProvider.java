@@ -130,4 +130,9 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	 *         volume.
 	 */
 	FastShape createBoundingBox();
+	
+	/**
+	 * @return Whether this volume is the special case of a single slice in the x- y- or z-direction.
+	 */
+	boolean isSingleSliceVolume();
 }
