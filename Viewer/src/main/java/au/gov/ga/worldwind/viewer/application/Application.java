@@ -159,6 +159,10 @@ public class Application
 			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
 			System.setProperty("apple.awt.brushMetalLook", "true");
 		}
+		else if (Configuration.isWindowsOS())
+        {
+            System.setProperty("sun.awt.noerasebackground", "true"); // prevents flashing during window resizing
+        }
 
 		try
 		{
