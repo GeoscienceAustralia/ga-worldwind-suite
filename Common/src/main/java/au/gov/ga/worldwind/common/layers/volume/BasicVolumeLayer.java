@@ -78,6 +78,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	protected CoordinateTransformation coordinateTransformation;
 	protected ColorMap colorMap;
 	protected Color noDataColor;
+	protected boolean forceTwoSidedLighting;
 
 	protected final Object dataLock = new Object();
 	protected boolean dataAvailable = false;
@@ -121,6 +122,8 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		colorMap = (ColorMap) params.getValue(AVKeyMore.COLOR_MAP);
 		noDataColor = (Color) params.getValue(AVKeyMore.NO_DATA_COLOR);
 
+		forceTwoSidedLighting = params.getValue(AVKeyMore.FORCE_TWO_SIDED_LIGHTING) == null ? false : (Boolean)params.getValue(AVKeyMore.FORCE_TWO_SIDED_LIGHTING);
+		
 		Double d = (Double) params.getValue(AVKeyMore.MAX_VARIANCE);
 		if (d != null)
 		{
@@ -235,6 +238,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		minLonCurtain.setTopElevationOffset(topElevation);
 		minLonCurtain.setBottomElevationOffset(bottomElevation);
 		minLonCurtain.setTextureMatrix(curtainTextureMatrix);
+		minLonCurtain.setTwoSidedLighting(forceTwoSidedLighting);
 
 		maxLonCurtain = dataProvider.createLongitudeCurtain(dataProvider.getXSize() - 1);
 		maxLonCurtain.setLighted(true);
@@ -243,6 +247,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		maxLonCurtain.setTopElevationOffset(topElevation);
 		maxLonCurtain.setBottomElevationOffset(bottomElevation);
 		maxLonCurtain.setTextureMatrix(curtainTextureMatrix);
+		maxLonCurtain.setTwoSidedLighting(forceTwoSidedLighting);
 
 		minLatCurtain = dataProvider.createLatitudeCurtain(0);
 		minLatCurtain.setLighted(true);
@@ -251,6 +256,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		minLatCurtain.setTopElevationOffset(topElevation);
 		minLatCurtain.setBottomElevationOffset(bottomElevation);
 		minLatCurtain.setTextureMatrix(curtainTextureMatrix);
+		minLatCurtain.setTwoSidedLighting(forceTwoSidedLighting);
 
 		maxLatCurtain = dataProvider.createLatitudeCurtain(dataProvider.getYSize() - 1);
 		maxLatCurtain.setLighted(true);
@@ -258,18 +264,21 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		maxLatCurtain.setTopElevationOffset(topElevation);
 		maxLatCurtain.setBottomElevationOffset(bottomElevation);
 		maxLatCurtain.setTextureMatrix(curtainTextureMatrix);
+		maxLatCurtain.setTwoSidedLighting(forceTwoSidedLighting);
 
 		Rectangle rectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getYSize());
 		topSurface = dataProvider.createHorizontalSurface((float) maxVariance, rectangle);
 		topSurface.setLighted(true);
 		topSurface.setCalculateNormals(true);
 		topSurface.setElevation(topElevation);
+		topSurface.setTwoSidedLighting(forceTwoSidedLighting);
 		
 		bottomSurface = dataProvider.createHorizontalSurface((float) maxVariance, rectangle);
 		bottomSurface.setLighted(true);
 		bottomSurface.setCalculateNormals(true);
 		bottomSurface.setReverseNormals(true);
 		bottomSurface.setElevation(bottomElevation);
+		bottomSurface.setTwoSidedLighting(forceTwoSidedLighting);
 
 		//create the textures
 		topTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);

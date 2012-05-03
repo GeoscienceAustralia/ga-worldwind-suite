@@ -59,7 +59,9 @@ public class VolumeLayerFactory
 	public static AVList getParamsFromDocument(Element domElement, AVList params)
 	{
 		if (params == null)
+		{
 			params = new AVListImpl();
+		}
 
 		XPath xpath = WWXML.makeXPath();
 
@@ -82,6 +84,8 @@ public class VolumeLayerFactory
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MIN_W, "InitialOffset/@minW", xpath);
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MAX_W, "InitialOffset/@maxW", xpath);
 
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.FORCE_TWO_SIDED_LIGHTING, "ForceTwoSidedLighting", xpath);
+		
 		ColorMap colorMap = XMLUtil.getColorMap(domElement, "ColorMap", xpath);
 		params.setValue(AVKeyMore.COLOR_MAP, colorMap);
 

@@ -22,4 +22,6 @@
 		<Entry value="1.0" red="255" green="0" blue="0" alpha="255" />
 	</ColorMap>
 
+	<ForceTwoSidedLighting>true</ForceTwoSidedLighting>
+
 </Layer>
