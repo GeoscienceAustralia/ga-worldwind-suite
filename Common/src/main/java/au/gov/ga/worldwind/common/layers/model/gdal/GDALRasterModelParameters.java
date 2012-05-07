@@ -1,6 +1,9 @@
 package au.gov.ga.worldwind.common.layers.model.gdal;
 
 import gov.nasa.worldwind.avlist.AVList;
+
+import java.awt.Color;
+
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.ColorMap;
 
@@ -17,6 +20,9 @@ public class GDALRasterModelParameters
 	
 	/** The maximum variance used for mesh simplification */
 	private float maxVariance = 0;
+	
+	/** The default color to use if no color map is provided */
+	private Color defaultColor = Color.GRAY;
 	
 	/** The color map to apply to the model data */
 	private ColorMap colorMap;
@@ -100,4 +106,19 @@ public class GDALRasterModelParameters
 		this.colorMap = colorMap;
 	}
 	
+	/**
+	 * @return the default color to use if no color map is provided
+	 */
+	public Color getDefaultColor()
+	{
+		return defaultColor;
+	}
+	
+	/**
+	 * @param defaultColor the defaultColor to set
+	 */
+	public void setDefaultColor(Color defaultColor)
+	{
+		this.defaultColor = defaultColor;
+	}
 }

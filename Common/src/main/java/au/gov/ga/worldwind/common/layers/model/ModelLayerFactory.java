@@ -142,7 +142,7 @@ public class ModelLayerFactory
 			GocadReaderParameters parameters = new GocadReaderParameters(params);
 			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new GocadModelProvider(parameters));
 		}
-		if ("GDAL".equalsIgnoreCase(format))
+		else if ("GDAL".equalsIgnoreCase(format))
 		{
 			GDALRasterModelParameters parameters = new GDALRasterModelParameters(params);
 			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new GDALRasterModelProvider(parameters));
