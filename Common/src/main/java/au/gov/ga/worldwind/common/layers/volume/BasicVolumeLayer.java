@@ -955,7 +955,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		}
 
 		//don't allow dragging if there's only one layer in any one direction
-		if (dataProvider.getXSize() <= 1 || dataProvider.getYSize() <= 1 || dataProvider.getZSize() <= 1)
+		if (dataProvider.isSingleSliceVolume())
 		{
 			return;
 		}
