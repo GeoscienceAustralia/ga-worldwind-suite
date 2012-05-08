@@ -106,6 +106,10 @@ public class VolumeLayerFactory
 		{
 			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ArrayVolumeDataProvider());
 		}
+		else if("Position Array".equalsIgnoreCase(format))
+		{
+			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ArrayWithPositionsVolumeDataProvider());
+		}
 		else
 		{
 			throw new IllegalArgumentException("Could not find volume data provider for DataFormat: " + format);

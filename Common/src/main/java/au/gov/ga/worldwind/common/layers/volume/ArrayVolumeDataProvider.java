@@ -24,15 +24,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * {@link VolumeDataProvider} which reads its data from a custom object array
- * file. Any {@link AbstractVolumeDataProvider} instance can be converted to a
- * file which this class supports, using the
+ * file. The file does not store individual position's latitude/longitude, but
+ * only each position's elevation value. This means it is only suitable for
+ * storing horizontal slice data with equal latitude/longitude spacing between
+ * positions.
+ * <p>
+ * Any {@link AbstractVolumeDataProvider} instance can be converted to a file
+ * which this class supports, using the
  * {@link ArrayVolumeDataProvider#saveVolumeDataProviderToArrayFile(AbstractVolumeDataProvider, File)}
  * function.
  * 
@@ -58,40 +66,47 @@ public class ArrayVolumeDataProvider extends AbstractVolumeDataProvider
 			}
 
 			ObjectInputStream ois = new ObjectInputStream(is);
-			xSize = ois.readInt();
-			ySize = ois.readInt();
-			zSize = ois.readInt();
-			double minLatitude = ois.readDouble();
-			double maxLatitude = ois.readDouble();
-			double minLongitude = ois.readDouble();
-			double maxLongitude = ois.readDouble();
-			sector = Sector.fromDegrees(minLatitude, maxLatitude, minLongitude, maxLongitude);
-			top = ois.readDouble();
-			depth = ois.readDouble();
-			noDataValue = ois.readFloat();
-			minValue = Float.MAX_VALUE;
-			maxValue = -Float.MAX_VALUE;
-
-			positions = new ArrayList<Position>(xSize * ySize);
-			for (int y = 0; y < ySize; y++)
+			try
 			{
-				double latitude = minLatitude + (y / (double) (ySize - 1)) * (maxLatitude - minLatitude);
-				for (int x = 0; x < xSize; x++)
+				xSize = ois.readInt();
+				ySize = ois.readInt();
+				zSize = ois.readInt();
+				double minLatitude = ois.readDouble();
+				double maxLatitude = ois.readDouble();
+				double minLongitude = ois.readDouble();
+				double maxLongitude = ois.readDouble();
+				sector = Sector.fromDegrees(minLatitude, maxLatitude, minLongitude, maxLongitude);
+				top = ois.readDouble();
+				depth = ois.readDouble();
+				noDataValue = ois.readFloat();
+				minValue = Float.MAX_VALUE;
+				maxValue = -Float.MAX_VALUE;
+
+				positions = new ArrayList<Position>(xSize * ySize);
+				for (int y = 0; y < ySize; y++)
 				{
-					double longitude = minLongitude + (x / (double) (xSize - 1)) * (maxLongitude - minLongitude);
-					positions.add(Position.fromDegrees(latitude, longitude, ois.readDouble()));
+					double latitude = minLatitude + (y / (double) (ySize - 1)) * (maxLatitude - minLatitude);
+					for (int x = 0; x < xSize; x++)
+					{
+						double longitude = minLongitude + (x / (double) (xSize - 1)) * (maxLongitude - minLongitude);
+						positions.add(Position.fromDegrees(latitude, longitude, ois.readDouble()));
+					}
 				}
-			}
 
-			data = FloatBuffer.allocate(xSize * ySize * zSize);
-			for (int i = 0; i < data.limit(); i++)
-			{
-				float value = ois.readFloat();
-				data.put(value);
-				minValue = Math.min(minValue, value);
-				maxValue = Math.max(maxValue, value);
+				data = FloatBuffer.allocate(xSize * ySize * zSize);
+				for (int i = 0; i < data.limit(); i++)
+				{
+					float value = ois.readFloat();
+					data.put(value);
+					minValue = Math.min(minValue, value);
+					maxValue = Math.max(maxValue, value);
+				}
+				data.rewind();
 			}
-			data.rewind();
+			finally
+			{
+				ois.close();
+			}
 
 			layer.dataAvailable(this);
 			return true;
@@ -105,7 +120,8 @@ public class ArrayVolumeDataProvider extends AbstractVolumeDataProvider
 
 	/**
 	 * Save the given {@link AbstractVolumeDataProvider} to a File which this
-	 * class supports reading.
+	 * class supports reading. If the file extension is .zip, a zip file is
+	 * written.
 	 * 
 	 * @param provider
 	 *            {@link AbstractVolumeDataProvider} to write to a file.
@@ -116,26 +132,43 @@ public class ArrayVolumeDataProvider extends AbstractVolumeDataProvider
 	{
 		try
 		{
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
-			oos.writeInt(provider.xSize);
-			oos.writeInt(provider.ySize);
-			oos.writeInt(provider.zSize);
-			oos.writeDouble(provider.sector.getMinLatitude().degrees);
-			oos.writeDouble(provider.sector.getMaxLatitude().degrees);
-			oos.writeDouble(provider.sector.getMinLongitude().degrees);
-			oos.writeDouble(provider.sector.getMaxLongitude().degrees);
-			oos.writeDouble(provider.top);
-			oos.writeDouble(provider.depth);
-			oos.writeFloat(provider.noDataValue);
-			for (Position position : provider.positions)
+			OutputStream os;
+			if (file.getName().toLowerCase().endsWith(".zip"))
 			{
-				oos.writeDouble(position.elevation);
+				ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
+				zos.putNextEntry(new ZipEntry("data"));
+				os = zos;
 			}
-			for (int i = 0; i < provider.data.limit(); i++)
+			else
 			{
-				oos.writeFloat(provider.data.get(i));
+				os = new FileOutputStream(file);
 			}
-			oos.close();
+			ObjectOutputStream oos = new ObjectOutputStream(os);
+			try
+			{
+				oos.writeInt(provider.xSize);
+				oos.writeInt(provider.ySize);
+				oos.writeInt(provider.zSize);
+				oos.writeDouble(provider.sector.getMinLatitude().degrees);
+				oos.writeDouble(provider.sector.getMaxLatitude().degrees);
+				oos.writeDouble(provider.sector.getMinLongitude().degrees);
+				oos.writeDouble(provider.sector.getMaxLongitude().degrees);
+				oos.writeDouble(provider.top);
+				oos.writeDouble(provider.depth);
+				oos.writeFloat(provider.noDataValue);
+				for (Position position : provider.positions)
+				{
+					oos.writeDouble(position.elevation);
+				}
+				for (int i = 0; i < provider.data.limit(); i++)
+				{
+					oos.writeFloat(provider.data.get(i));
+				}
+			}
+			finally
+			{
+				oos.close();
+			}
 		}
 		catch (Exception e)
 		{
