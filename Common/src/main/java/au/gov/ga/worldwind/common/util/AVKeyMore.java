@@ -101,4 +101,5 @@ public interface AVKeyMore extends AVKey
 	final static String INITIAL_OFFSET_MAX_V = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMaxV";
 	final static String INITIAL_OFFSET_MIN_W = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMinW";
 	final static String INITIAL_OFFSET_MAX_W = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMaxW";
+	final static String FORCE_TWO_SIDED_LIGHTING = "au.gov.ga.worldwind.AVKeyMore.Force2SidedLighting";
 }
