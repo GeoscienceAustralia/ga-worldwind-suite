@@ -38,6 +38,8 @@ public interface GocadReader
 	final static Pattern nodataValuesPattern = Pattern.compile("NO_DATA_VALUES\\s*([\\s\\d.\\-e]*)\\s*");
 	final static Pattern propertiesPattern = Pattern.compile("PROPERTIES\\s+(.*)\\s*");
 	final static Pattern propertyPattern = Pattern.compile("PROP_(\\S+)\\s+(\\d+)\\s+(\\S+).*");
+	final static Pattern axis3Pattern = Pattern
+			.compile("AXIS_(\\S+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
 
 	/**
 	 * Called before reading any lines.
