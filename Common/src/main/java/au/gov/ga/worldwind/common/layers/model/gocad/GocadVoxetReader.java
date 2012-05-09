@@ -28,7 +28,6 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.media.opengl.GL;
 
@@ -48,9 +47,6 @@ import com.sun.opengl.util.BufferUtil;
 public class GocadVoxetReader implements GocadReader
 {
 	public final static String HEADER_REGEX = "(?i).*voxet.*";
-
-	private final static Pattern axisPattern = Pattern
-			.compile("AXIS_(\\S+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
 
 	private String name;
 	private boolean zPositive = true;
@@ -82,7 +78,7 @@ public class GocadVoxetReader implements GocadReader
 	@Override
 	public void addLine(String line)
 	{
-		Matcher matcher = axisPattern.matcher(line);
+		Matcher matcher = axis3Pattern.matcher(line);
 		if (matcher.matches())
 		{
 			parseAxis(matcher);

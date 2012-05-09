@@ -185,6 +185,7 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	public FastShape createHorizontalSurface(float maxVariance, Rectangle rectangle)
 	{
 		BinaryTriangleTree btt = new BinaryTriangleTree(positions, xSize, ySize);
+		btt.setForceGLTriangles(true);
 		btt.setGenerateTextureCoordinates(true);
 		return btt.buildMeshFromCenter(maxVariance, rectangle);
 	}
@@ -296,6 +297,6 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	@Override
 	public boolean isSingleSliceVolume()
 	{
-		return xSize == 1 || ySize == 1 || zSize == 1;
+		return xSize <= 1 || ySize <= 1 || zSize <= 1;
 	}
 }

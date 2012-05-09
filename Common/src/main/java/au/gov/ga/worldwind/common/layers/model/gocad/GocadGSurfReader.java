@@ -415,7 +415,7 @@ public class GocadGSurfReader implements GocadReader
 				for (int u = 0; u < nu; u++)
 				{
 					float value = GocadVoxetReader.readNextFloat(eis, parameters.getByteOrder(), ieee);
-					if (!Float.isNaN(value) && value != noDataValue)
+					if (!Float.isNaN(value) && (noDataValue == null || value != noDataValue))
 					{
 						int uRegion = (u / strideU);
 						int valueIndex = vRegion + uRegion;
@@ -492,7 +492,7 @@ public class GocadGSurfReader implements GocadReader
 					Vec4 p;
 
 					float value = GocadVoxetReader.readNextFloat(eis, parameters.getByteOrder(), ieee);
-					boolean valid = !Float.isNaN(value) && value != noDataValue;
+					boolean valid = !Float.isNaN(value) && (noDataValue == null || value != noDataValue);
 					if (valid && values != null)
 					{
 						values[valueIndex] = value;
