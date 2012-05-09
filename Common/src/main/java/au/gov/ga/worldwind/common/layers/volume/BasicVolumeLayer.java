@@ -31,7 +31,6 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.AbstractLayer;
-import gov.nasa.worldwind.pick.PickSupport;
 import gov.nasa.worldwind.render.DrawContext;
 
 import java.awt.AlphaComposite;
@@ -55,6 +54,7 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.ColorMap;
 import au.gov.ga.worldwind.common.util.CoordinateTransformationUtil;
 import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.util.FastShapeRenderListener;
 import au.gov.ga.worldwind.common.util.GeometryUtil;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
@@ -67,7 +67,8 @@ import com.sun.opengl.util.j2d.TextureRenderer;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wireframeable, SelectListener
+public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wireframeable, SelectListener,
+		FastShapeRenderListener
 {
 	protected URL context;
 	protected String url;
@@ -78,7 +79,8 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	protected CoordinateTransformation coordinateTransformation;
 	protected ColorMap colorMap;
 	protected Color noDataColor;
-	protected boolean forceTwoSidedLighting;
+	protected boolean reverseNormals = false;
+	protected boolean useOrderedRendering = false;
 
 	protected final Object dataLock = new Object();
 	protected boolean dataAvailable = false;
@@ -100,7 +102,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	protected final double[] curtainClippingPlanes = new double[4 * 4];
 
 	protected boolean wireframe = false;
-	protected final PickSupport pickSupport = new PickSupport();
 
 	protected boolean dragging = false;
 	protected double dragStartPosition;
@@ -125,8 +126,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		colorMap = (ColorMap) params.getValue(AVKeyMore.COLOR_MAP);
 		noDataColor = (Color) params.getValue(AVKeyMore.NO_DATA_COLOR);
 
-		forceTwoSidedLighting = params.getValue(AVKeyMore.FORCE_TWO_SIDED_LIGHTING) == null ? false : (Boolean)params.getValue(AVKeyMore.FORCE_TWO_SIDED_LIGHTING);
-		
 		Double d = (Double) params.getValue(AVKeyMore.MAX_VARIANCE);
 		if (d != null)
 		{
@@ -168,6 +167,17 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (i != null)
 		{
 			bottomOffset = i;
+		}
+
+		Boolean b = (Boolean) params.getValue(AVKeyMore.REVERSE_NORMALS);
+		if (b != null)
+		{
+			reverseNormals = b;
+		}
+		b = (Boolean) params.getValue(AVKeyMore.ORDERED_RENDERING);
+		if (b != null)
+		{
+			useOrderedRendering = b;
 		}
 
 		Validate.notBlank(url, "Model data url not set");
@@ -236,52 +246,61 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		double bottomElevation = -dataProvider.getDepth();
 
 		minLonCurtain = dataProvider.createLongitudeCurtain(0);
+		minLonCurtain.addRenderListener(this);
 		minLonCurtain.setLighted(true);
 		minLonCurtain.setCalculateNormals(true);
+		minLonCurtain.setReverseNormals(reverseNormals);
 		minLonCurtain.setTopElevationOffset(topElevation);
 		minLonCurtain.setBottomElevationOffset(bottomElevation);
 		minLonCurtain.setTextureMatrix(curtainTextureMatrix);
-		minLonCurtain.setTwoSidedLighting(forceTwoSidedLighting);
+		minLonCurtain.setUseOrderedRendering(useOrderedRendering);
 
 		maxLonCurtain = dataProvider.createLongitudeCurtain(dataProvider.getXSize() - 1);
+		maxLonCurtain.addRenderListener(this);
 		maxLonCurtain.setLighted(true);
 		maxLonCurtain.setCalculateNormals(true);
-		maxLonCurtain.setReverseNormals(true);
+		maxLonCurtain.setReverseNormals(!reverseNormals);
 		maxLonCurtain.setTopElevationOffset(topElevation);
 		maxLonCurtain.setBottomElevationOffset(bottomElevation);
 		maxLonCurtain.setTextureMatrix(curtainTextureMatrix);
-		maxLonCurtain.setTwoSidedLighting(forceTwoSidedLighting);
+		maxLonCurtain.setUseOrderedRendering(useOrderedRendering);
 
 		minLatCurtain = dataProvider.createLatitudeCurtain(0);
+		minLatCurtain.addRenderListener(this);
 		minLatCurtain.setLighted(true);
 		minLatCurtain.setCalculateNormals(true);
-		minLatCurtain.setReverseNormals(true);
+		minLatCurtain.setReverseNormals(!reverseNormals);
 		minLatCurtain.setTopElevationOffset(topElevation);
 		minLatCurtain.setBottomElevationOffset(bottomElevation);
 		minLatCurtain.setTextureMatrix(curtainTextureMatrix);
-		minLatCurtain.setTwoSidedLighting(forceTwoSidedLighting);
+		minLatCurtain.setUseOrderedRendering(useOrderedRendering);
 
 		maxLatCurtain = dataProvider.createLatitudeCurtain(dataProvider.getYSize() - 1);
+		maxLatCurtain.addRenderListener(this);
 		maxLatCurtain.setLighted(true);
 		maxLatCurtain.setCalculateNormals(true);
+		maxLatCurtain.setReverseNormals(reverseNormals);
 		maxLatCurtain.setTopElevationOffset(topElevation);
 		maxLatCurtain.setBottomElevationOffset(bottomElevation);
 		maxLatCurtain.setTextureMatrix(curtainTextureMatrix);
-		maxLatCurtain.setTwoSidedLighting(forceTwoSidedLighting);
+		maxLatCurtain.setUseOrderedRendering(useOrderedRendering);
 
 		Rectangle rectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getYSize());
 		topSurface = dataProvider.createHorizontalSurface((float) maxVariance, rectangle);
+		topSurface.addRenderListener(this);
 		topSurface.setLighted(true);
 		topSurface.setCalculateNormals(true);
+		topSurface.setReverseNormals(reverseNormals);
 		topSurface.setElevation(topElevation);
-		topSurface.setTwoSidedLighting(forceTwoSidedLighting);
-		
+		topSurface.setUseOrderedRendering(useOrderedRendering);
+
 		bottomSurface = dataProvider.createHorizontalSurface((float) maxVariance, rectangle);
+		bottomSurface.addRenderListener(this);
 		bottomSurface.setLighted(true);
 		bottomSurface.setCalculateNormals(true);
-		bottomSurface.setReverseNormals(true);
+		bottomSurface.setReverseNormals(!reverseNormals);
 		bottomSurface.setElevation(bottomElevation);
-		bottomSurface.setTwoSidedLighting(forceTwoSidedLighting);
+		bottomSurface.setUseOrderedRendering(useOrderedRendering);
 
 		//create the textures
 		topTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
@@ -743,7 +762,10 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	@Override
 	protected void doPick(DrawContext dc, Point point)
 	{
-		doRender(dc);
+		if (!dataProvider.isSingleSliceVolume())
+		{
+			doRender(dc);
+		}
 	}
 
 	@Override
@@ -762,104 +784,77 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			recalculateSurfaces();
 			recalculateClippingPlanes(dc);
 
-			//sort the shapes from back-to-front
+			//when only one slice is shown in any given direction, only one of the curtains needs to be rendered
+			boolean singleLonSlice = dataProvider.getXSize() - minLonOffset - maxLonOffset <= 1;
+			boolean singleLatSlice = dataProvider.getYSize() - minLatOffset - maxLatOffset <= 1;
+			boolean singleHorSlice = dataProvider.getZSize() - topOffset - bottomOffset <= 1;
+			boolean anySingleSlice = singleLonSlice || singleLatSlice || singleHorSlice;
 			FastShape[] shapes =
-					new FastShape[] { topSurface, bottomSurface, minLonCurtain, maxLonCurtain, minLatCurtain,
-							maxLatCurtain };
-			Arrays.sort(shapes, new ShapeComparator(dc));
+					anySingleSlice ? new FastShape[] { singleLonSlice ? maxLonCurtain : singleLatSlice ? minLatCurtain
+							: topSurface } : new FastShape[] { topSurface, bottomSurface, minLonCurtain, maxLonCurtain,
+							minLatCurtain, maxLatCurtain };
+
+			//sort the shapes from back-to-front
+			if (!anySingleSlice)
+			{
+				Arrays.sort(shapes, new ShapeComparator(dc));
+			}
 
 			//test all the shapes with the minimum distance, culling them if they are outside
 			if (minimumDistance != null)
 			{
 				for (int i = 0; i < shapes.length; i++)
 				{
-					if (shapes[i] != null)
+					Extent extent = shapes[i].getExtent();
+					if (extent != null)
 					{
-						Extent extent = shapes[i].getExtent();
-						if (extent != null)
+						double distanceToEye =
+								extent.getCenter().distanceTo3(dc.getView().getEyePoint()) - extent.getRadius();
+						if (distanceToEye > minimumDistance)
 						{
-							double distanceToEye =
-									extent.getCenter().distanceTo3(dc.getView().getEyePoint()) - extent.getRadius();
-							if (distanceToEye > minimumDistance)
-							{
-								shapes[i] = null;
-							}
+							shapes[i] = null;
 						}
 					}
 				}
 			}
 
-			GL gl = dc.getGL();
-			try
+			//draw each shape
+			for (FastShape shape : shapes)
 			{
-				//push the OpenGL clipping plane state on the attribute stack
-				gl.glPushAttrib(GL.GL_TRANSFORM_BIT);
-
-				boolean oldDeepPicking = dc.isDeepPickingEnabled();
-				try
+				if (shape != null)
 				{
-					//deep picking needs to be enabled, because the shapes could be below the surface
+					shape.setTwoSidedLighting(anySingleSlice);
 					if (dc.isPickingMode())
 					{
-						dc.setDeepPickingEnabled(true);
-						pickSupport.beginPicking(dc);
+						shape.pick(dc, dc.getPickPoint());
 					}
-
-					//draw each shape
-					for (FastShape shape : shapes)
+					else
 					{
-						if (shape != null)
-						{
-							setupClippingPlanes(dc, shape == topSurface, shape == bottomSurface);
-
-							//if in picking mode, render the shape with a unique picking color, and don't light or texture
-							if (dc.isPickingMode())
-							{
-								Color color = dc.getUniquePickColor();
-								pickSupport.addPickableObject(color.getRGB(), shape);
-								shape.setColor(color);
-							}
-							else
-							{
-								shape.setColor(Color.white);
-							}
-							shape.setLighted(!dc.isPickingMode());
-							shape.setTextured(!dc.isPickingMode());
-							shape.render(dc);
-						}
-					}
-
-					//disable all clipping planes enabled earlier
-					for (int i = 0; i < 4; i++)
-					{
-						gl.glDisable(GL.GL_CLIP_PLANE0 + i);
-					}
-
-					if (dc.isPickingMode())
-					{
-						pickSupport.resolvePick(dc, dc.getPickPoint(), this);
-					}
-					else if (dragging)
-					{
-						//render a bounding box around the data if the user is dragging a surface
-						renderBoundingBox(dc);
-					}
-				}
-				finally
-				{
-					//reset the deep picking flag
-					if (dc.isPickingMode())
-					{
-						pickSupport.endPicking(dc);
-						dc.setDeepPickingEnabled(oldDeepPicking);
+						shape.render(dc);
 					}
 				}
 			}
-			finally
+
+			if (dragging)
 			{
-				gl.glPopAttrib();
+				//render a bounding box around the data if the user is dragging a surface
+				renderBoundingBox(dc);
 			}
 		}
+	}
+
+	@Override
+	public void shapePreRender(DrawContext dc, FastShape shape)
+	{
+		//push the OpenGL clipping plane state on the attribute stack
+		dc.getGL().glPushAttrib(GL.GL_TRANSFORM_BIT);
+		setupClippingPlanes(dc, shape == topSurface, shape == bottomSurface);
+	}
+
+	@Override
+	public void shapePostRender(DrawContext dc, FastShape shape)
+	{
+		dc.getGL().glPopAttrib();
 	}
 
 	protected void setupClippingPlanes(DrawContext dc, boolean top, boolean bottom)
