@@ -15,6 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.util.exaggeration;
 
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.render.DrawContext;
 
 import java.util.Map;
@@ -47,6 +48,12 @@ public class DefaultVerticalExaggerationServiceImpl implements VerticalExaggerat
 	public double getGlobalVerticalExaggeration(DrawContext dc)
 	{
 		return dc.getVerticalExaggeration();
+	}
+	
+	@Override
+	public double getUnexaggeratedElevation(DrawContext dc, Angle latitude, Angle longitude)
+	{
+		return dc.getGlobe().getElevation(latitude, longitude);
 	}
 	
 	@Override

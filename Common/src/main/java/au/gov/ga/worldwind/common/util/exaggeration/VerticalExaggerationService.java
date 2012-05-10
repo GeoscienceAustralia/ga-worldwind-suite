@@ -15,6 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.util.exaggeration;
 
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.render.DrawContext;
 
 /**
@@ -43,6 +44,11 @@ public interface VerticalExaggerationService
 	 * @return The global vertical exaggeration value 
 	 */
 	double getGlobalVerticalExaggeration(DrawContext dc);
+	
+	/**
+	 * @return The elevation at the given point, unexaggerated
+	 */
+	double getUnexaggeratedElevation(DrawContext dc, Angle latitude, Angle longitude);
 	
 	/**
 	 * Mark the current vertical exaggeration settings against the provided object.

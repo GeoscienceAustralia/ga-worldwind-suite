@@ -669,7 +669,9 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		double elevation = this.elevation;
 		if (followTerrain)
 		{
-			elevation += dc.getGlobe().getElevation(position.getLatitude(), position.getLongitude());
+			elevation +=
+					VerticalExaggerationAccessor.getUnexaggeratedElevation(dc, position.getLatitude(),
+							position.getLongitude());
 		}
 		elevation += calculateElevationOffset(position);
 		elevation = VerticalExaggerationAccessor.applyVerticalExaggeration(dc, elevation);
