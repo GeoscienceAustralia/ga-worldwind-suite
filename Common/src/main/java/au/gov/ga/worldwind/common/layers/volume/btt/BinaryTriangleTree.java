@@ -47,11 +47,39 @@ public class BinaryTriangleTree
 	private boolean generateTextureCoordinates = false;
 	private boolean forceGLTriangles = false;
 
+	/**
+	 * Create a new {@link BinaryTriangleTree} object.
+	 * 
+	 * @param positions
+	 *            Grid of positions in the mesh. Should be ordered in the
+	 *            x-axis, then the y-axis.
+	 * @param width
+	 *            Number of positions in the x-axis
+	 * @param height
+	 *            Number of positions in the y-axis
+	 */
+	public BinaryTriangleTree(List<Position> positions, int width, int height)
+	{
+		Validate.isTrue(positions.size() == width * height, "Positions list count doesn't match provided width/height");
+
+		this.positions = positions;
+		this.width = width;
+		this.height = height;
+	}
+
+	/**
+	 * @return Should texture coordinates be generated for the mesh?
+	 */
 	public boolean isGenerateTextureCoordinates()
 	{
 		return generateTextureCoordinates;
 	}
 
+	/**
+	 * Enable/disable texture coordinate generation during mesh creation.
+	 * 
+	 * @param generateTextureCoordinates
+	 */
 	public void setGenerateTextureCoordinates(boolean generateTextureCoordinates)
 	{
 		this.generateTextureCoordinates = generateTextureCoordinates;
@@ -76,26 +104,6 @@ public class BinaryTriangleTree
 	public void setForceGLTriangles(boolean forceGLTriangles)
 	{
 		this.forceGLTriangles = forceGLTriangles;
-	}
-
-	/**
-	 * Create a new {@link BinaryTriangleTree} object.
-	 * 
-	 * @param positions
-	 *            Grid of positions in the mesh. Should be ordered in the
-	 *            x-axis, then the y-axis.
-	 * @param width
-	 *            Number of positions in the x-axis
-	 * @param height
-	 *            Number of positions in the y-axis
-	 */
-	public BinaryTriangleTree(List<Position> positions, int width, int height)
-	{
-		Validate.isTrue(positions.size() == width * height, "Positions list count doesn't match provided width/height");
-
-		this.positions = positions;
-		this.width = width;
-		this.height = height;
 	}
 
 	/**

@@ -84,8 +84,9 @@ public class VolumeLayerFactory
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MIN_W, "InitialOffset/@minW", xpath);
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MAX_W, "InitialOffset/@maxW", xpath);
 
-		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.FORCE_TWO_SIDED_LIGHTING, "ForceTwoSidedLighting", xpath);
-		
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.REVERSE_NORMALS, "ReverseNormals", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.ORDERED_RENDERING, "OrderedRendering", xpath);
+
 		ColorMap colorMap = XMLUtil.getColorMap(domElement, "ColorMap", xpath);
 		params.setValue(AVKeyMore.COLOR_MAP, colorMap);
 
@@ -106,9 +107,13 @@ public class VolumeLayerFactory
 		{
 			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new SGridVolumeDataProvider());
 		}
-		else if("Array".equalsIgnoreCase(format))
+		else if ("Array".equalsIgnoreCase(format))
 		{
 			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ArrayVolumeDataProvider());
+		}
+		else if ("Position Array".equalsIgnoreCase(format))
+		{
+			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ArrayWithPositionsVolumeDataProvider());
 		}
 		else
 		{

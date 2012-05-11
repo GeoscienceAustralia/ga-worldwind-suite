@@ -43,7 +43,7 @@ public class GocadFactory
 	public static boolean isGocadFileSuffix(String suffix)
 	{
 		return suffix.equalsIgnoreCase("ts") || suffix.equalsIgnoreCase("gp") || suffix.equalsIgnoreCase("vo")
-				|| suffix.equalsIgnoreCase("pl") || suffix.equalsIgnoreCase("grs");
+				|| suffix.equalsIgnoreCase("pl") || suffix.equalsIgnoreCase("grs") || suffix.equalsIgnoreCase("sg");
 	}
 
 	/**
@@ -54,6 +54,7 @@ public class GocadFactory
 		PLine(GocadPLineReader.HEADER_REGEX, GocadPLineReader.class),
 		Voxet(GocadVoxetReader.HEADER_REGEX, GocadVoxetReader.class),
 		TSurf(GocadTSurfReader.HEADER_REGEX, GocadTSurfReader.class),
+		SGrid(GocadSGridReader.HEADER_REGEX, GocadSGridReader.class),
 		GSurf(GocadGSurfReader.HEADER_REGEX, GocadGSurfReader.class);
 
 		/**

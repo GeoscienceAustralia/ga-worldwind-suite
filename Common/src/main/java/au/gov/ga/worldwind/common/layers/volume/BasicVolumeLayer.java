@@ -31,7 +31,6 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.AbstractLayer;
-import gov.nasa.worldwind.pick.PickSupport;
 import gov.nasa.worldwind.render.DrawContext;
 
 import java.awt.AlphaComposite;
@@ -55,6 +54,7 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.ColorMap;
 import au.gov.ga.worldwind.common.util.CoordinateTransformationUtil;
 import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.util.FastShapeRenderListener;
 import au.gov.ga.worldwind.common.util.GeometryUtil;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
@@ -67,7 +67,8 @@ import com.sun.opengl.util.j2d.TextureRenderer;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wireframeable, SelectListener
+public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wireframeable, SelectListener,
+		FastShapeRenderListener
 {
 	protected URL context;
 	protected String url;
@@ -78,7 +79,8 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	protected CoordinateTransformation coordinateTransformation;
 	protected ColorMap colorMap;
 	protected Color noDataColor;
-	protected boolean forceTwoSidedLighting;
+	protected boolean reverseNormals = false;
+	protected boolean useOrderedRendering = false;
 
 	protected final Object dataLock = new Object();
 	protected boolean dataAvailable = false;
@@ -86,18 +88,20 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	protected TopBottomFastShape minLonCurtain, maxLonCurtain, minLatCurtain, maxLatCurtain;
 	protected FastShape boundingBoxShape;
 	protected TextureRenderer topTexture, bottomTexture, minLonTexture, maxLonTexture, minLatTexture, maxLatTexture;
-	protected int topOffset = 0, bottomOffset = 0, minLonOffset = 0, maxLonOffset = 0, minLatOffset = 0, maxLatOffset = 0;
-	protected int lastTopOffset = -1, lastBottomOffset = -1, lastMinLonOffset = -1, lastMaxLonOffset = -1, lastMinLatOffset = -1, lastMaxLatOffset = -1;
+	protected int topOffset = 0, bottomOffset = 0, minLonOffset = 0, maxLonOffset = 0, minLatOffset = 0,
+			maxLatOffset = 0;
+	protected int lastTopOffset = -1, lastBottomOffset = -1, lastMinLonOffset = -1, lastMaxLonOffset = -1,
+			lastMinLatOffset = -1, lastMaxLatOffset = -1;
 
 	protected final double[] curtainTextureMatrix = new double[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 
-	protected boolean minLonClipDirty = false, maxLonClipDirty = false, minLatClipDirty = false, maxLatClipDirty = false, topClipDirty = false, bottomClipDirty = false;
+	protected boolean minLonClipDirty = false, maxLonClipDirty = false, minLatClipDirty = false,
+			maxLatClipDirty = false, topClipDirty = false, bottomClipDirty = false;
 	protected final double[] topClippingPlanes = new double[4 * 4];
 	protected final double[] bottomClippingPlanes = new double[4 * 4];
 	protected final double[] curtainClippingPlanes = new double[4 * 4];
 
 	protected boolean wireframe = false;
-	protected final PickSupport pickSupport = new PickSupport();
 
 	protected boolean dragging = false;
 	protected double dragStartPosition;
@@ -122,8 +126,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		colorMap = (ColorMap) params.getValue(AVKeyMore.COLOR_MAP);
 		noDataColor = (Color) params.getValue(AVKeyMore.NO_DATA_COLOR);
 
-		forceTwoSidedLighting = params.getValue(AVKeyMore.FORCE_TWO_SIDED_LIGHTING) == null ? false : (Boolean)params.getValue(AVKeyMore.FORCE_TWO_SIDED_LIGHTING);
-		
 		Double d = (Double) params.getValue(AVKeyMore.MAX_VARIANCE);
 		if (d != null)
 		{
@@ -165,6 +167,17 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (i != null)
 		{
 			bottomOffset = i;
+		}
+
+		Boolean b = (Boolean) params.getValue(AVKeyMore.REVERSE_NORMALS);
+		if (b != null)
+		{
+			reverseNormals = b;
+		}
+		b = (Boolean) params.getValue(AVKeyMore.ORDERED_RENDERING);
+		if (b != null)
+		{
+			useOrderedRendering = b;
 		}
 
 		Validate.notBlank(url, "Model data url not set");
@@ -233,52 +246,61 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		double bottomElevation = -dataProvider.getDepth();
 
 		minLonCurtain = dataProvider.createLongitudeCurtain(0);
+		minLonCurtain.addRenderListener(this);
 		minLonCurtain.setLighted(true);
 		minLonCurtain.setCalculateNormals(true);
+		minLonCurtain.setReverseNormals(reverseNormals);
 		minLonCurtain.setTopElevationOffset(topElevation);
 		minLonCurtain.setBottomElevationOffset(bottomElevation);
 		minLonCurtain.setTextureMatrix(curtainTextureMatrix);
-		minLonCurtain.setTwoSidedLighting(forceTwoSidedLighting);
+		minLonCurtain.setUseOrderedRendering(useOrderedRendering);
 
 		maxLonCurtain = dataProvider.createLongitudeCurtain(dataProvider.getXSize() - 1);
+		maxLonCurtain.addRenderListener(this);
 		maxLonCurtain.setLighted(true);
 		maxLonCurtain.setCalculateNormals(true);
-		maxLonCurtain.setReverseNormals(true);
+		maxLonCurtain.setReverseNormals(!reverseNormals);
 		maxLonCurtain.setTopElevationOffset(topElevation);
 		maxLonCurtain.setBottomElevationOffset(bottomElevation);
 		maxLonCurtain.setTextureMatrix(curtainTextureMatrix);
-		maxLonCurtain.setTwoSidedLighting(forceTwoSidedLighting);
+		maxLonCurtain.setUseOrderedRendering(useOrderedRendering);
 
 		minLatCurtain = dataProvider.createLatitudeCurtain(0);
+		minLatCurtain.addRenderListener(this);
 		minLatCurtain.setLighted(true);
 		minLatCurtain.setCalculateNormals(true);
-		minLatCurtain.setReverseNormals(true);
+		minLatCurtain.setReverseNormals(!reverseNormals);
 		minLatCurtain.setTopElevationOffset(topElevation);
 		minLatCurtain.setBottomElevationOffset(bottomElevation);
 		minLatCurtain.setTextureMatrix(curtainTextureMatrix);
-		minLatCurtain.setTwoSidedLighting(forceTwoSidedLighting);
+		minLatCurtain.setUseOrderedRendering(useOrderedRendering);
 
 		maxLatCurtain = dataProvider.createLatitudeCurtain(dataProvider.getYSize() - 1);
+		maxLatCurtain.addRenderListener(this);
 		maxLatCurtain.setLighted(true);
 		maxLatCurtain.setCalculateNormals(true);
+		maxLatCurtain.setReverseNormals(reverseNormals);
 		maxLatCurtain.setTopElevationOffset(topElevation);
 		maxLatCurtain.setBottomElevationOffset(bottomElevation);
 		maxLatCurtain.setTextureMatrix(curtainTextureMatrix);
-		maxLatCurtain.setTwoSidedLighting(forceTwoSidedLighting);
+		maxLatCurtain.setUseOrderedRendering(useOrderedRendering);
 
 		Rectangle rectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getYSize());
 		topSurface = dataProvider.createHorizontalSurface((float) maxVariance, rectangle);
+		topSurface.addRenderListener(this);
 		topSurface.setLighted(true);
 		topSurface.setCalculateNormals(true);
+		topSurface.setReverseNormals(reverseNormals);
 		topSurface.setElevation(topElevation);
-		topSurface.setTwoSidedLighting(forceTwoSidedLighting);
-		
+		topSurface.setUseOrderedRendering(useOrderedRendering);
+
 		bottomSurface = dataProvider.createHorizontalSurface((float) maxVariance, rectangle);
+		bottomSurface.addRenderListener(this);
 		bottomSurface.setLighted(true);
 		bottomSurface.setCalculateNormals(true);
-		bottomSurface.setReverseNormals(true);
+		bottomSurface.setReverseNormals(!reverseNormals);
 		bottomSurface.setElevation(bottomElevation);
-		bottomSurface.setTwoSidedLighting(forceTwoSidedLighting);
+		bottomSurface.setUseOrderedRendering(useOrderedRendering);
 
 		//create the textures
 		topTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
@@ -304,17 +326,21 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			return;
 		}
 
-		//ensure the min/max offsets don't overlap one-another
-		minLonOffset = Util.clamp(minLonOffset, 0, dataProvider.getXSize() - 1);
-		maxLonOffset = Util.clamp(maxLonOffset, 0, dataProvider.getXSize() - 1 - minLonOffset);
-		minLatOffset = Util.clamp(minLatOffset, 0, dataProvider.getYSize() - 1);
-		maxLatOffset = Util.clamp(maxLatOffset, 0, dataProvider.getYSize() - 1 - minLatOffset);
-		topOffset = Util.clamp(topOffset, 0, dataProvider.getZSize() - 1);
-		bottomOffset = Util.clamp(bottomOffset, 0, dataProvider.getZSize() - 1 - topOffset);
+		int xSize = dataProvider.getXSize();
+		int ySize = dataProvider.getYSize();
+		int zSize = dataProvider.getZSize();
 
-		int maxLonSlice = dataProvider.getXSize() - 1 - maxLonOffset;
-		int maxLatSlice = dataProvider.getYSize() - 1 - maxLatOffset;
-		int bottomSlice = dataProvider.getZSize() - 1 - bottomOffset;
+		//ensure the min/max offsets don't overlap one-another
+		minLonOffset = Util.clamp(minLonOffset, 0, xSize - 1);
+		maxLonOffset = Util.clamp(maxLonOffset, 0, xSize - 1 - minLonOffset);
+		minLatOffset = Util.clamp(minLatOffset, 0, ySize - 1);
+		maxLatOffset = Util.clamp(maxLatOffset, 0, ySize - 1 - minLatOffset);
+		topOffset = Util.clamp(topOffset, 0, zSize - 1);
+		bottomOffset = Util.clamp(bottomOffset, 0, zSize - 1 - topOffset);
+
+		int maxLonSlice = xSize - 1 - maxLonOffset;
+		int maxLatSlice = ySize - 1 - maxLatOffset;
+		int bottomSlice = zSize - 1 - bottomOffset;
 
 		//only recalculate those that have changed
 		boolean recalculateMinLon = lastMinLonOffset != minLonOffset;
@@ -324,11 +350,11 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		boolean recalculateTop = lastTopOffset != topOffset;
 		boolean recalculateBottom = lastBottomOffset != bottomOffset;
 
-		Rectangle lonRectangle = new Rectangle(0, 0, dataProvider.getYSize(), dataProvider.getZSize());
-		Rectangle latRectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getZSize());
-		Rectangle elevationRectangle = new Rectangle(0, 0, dataProvider.getXSize(), dataProvider.getYSize());
-		double topPercent = topOffset / (double) Math.max(dataProvider.getZSize() - 1, 1);
-		double bottomPercent = bottomSlice / (double) Math.max(dataProvider.getZSize() - 1, 1);
+		Rectangle lonRectangle = new Rectangle(0, 0, ySize, zSize);
+		Rectangle latRectangle = new Rectangle(0, 0, xSize, zSize);
+		Rectangle elevationRectangle = new Rectangle(0, 0, xSize, ySize);
+		double topPercent = topOffset / (double) Math.max(zSize - 1, 1);
+		double bottomPercent = bottomSlice / (double) Math.max(zSize - 1, 1);
 
 		if (recalculateMinLon)
 		{
@@ -344,8 +370,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		{
 			maxLonClipDirty = true;
 
-			TopBottomFastShape newMaxLonCurtain =
-					dataProvider.createLongitudeCurtain(dataProvider.getXSize() - 1 - maxLonOffset);
+			TopBottomFastShape newMaxLonCurtain = dataProvider.createLongitudeCurtain(xSize - 1 - maxLonOffset);
 			maxLonCurtain.setPositions(newMaxLonCurtain.getPositions());
 
 			updateTexture(generateTexture(0, maxLonSlice, lonRectangle), maxLonTexture, maxLonCurtain);
@@ -365,8 +390,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		{
 			maxLatClipDirty = true;
 
-			TopBottomFastShape newMaxLatCurtain =
-					dataProvider.createLatitudeCurtain(dataProvider.getYSize() - 1 - maxLatOffset);
+			TopBottomFastShape newMaxLatCurtain = dataProvider.createLatitudeCurtain(ySize - 1 - maxLatOffset);
 			maxLatCurtain.setPositions(newMaxLatCurtain.getPositions());
 
 			updateTexture(generateTexture(1, maxLatSlice, latRectangle), maxLatTexture, maxLatCurtain);
@@ -436,7 +460,8 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			return;
 		}
 
-		boolean verticalExaggerationChanged = VerticalExaggerationAccessor.checkAndMarkVerticalExaggeration(BasicVolumeLayer.this, dc);
+		boolean verticalExaggerationChanged =
+				VerticalExaggerationAccessor.checkAndMarkVerticalExaggeration(BasicVolumeLayer.this, dc);
 
 		boolean minLon = minLonClipDirty || verticalExaggerationChanged;
 		boolean maxLon = maxLonClipDirty || verticalExaggerationChanged;
@@ -577,9 +602,15 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			Position p1, Position p2, Position p3)
 	{
 		Globe globe = dc.getGlobe();
-		Vec4 v1 = globe.computePointFromPosition(p1, VerticalExaggerationAccessor.applyVerticalExaggeration(dc, p1.elevation));
-		Vec4 v2 = globe.computePointFromPosition(p2, VerticalExaggerationAccessor.applyVerticalExaggeration(dc, p2.elevation));
-		Vec4 v3 = globe.computePointFromPosition(p3, VerticalExaggerationAccessor.applyVerticalExaggeration(dc, p3.elevation));
+		Vec4 v1 =
+				globe.computePointFromPosition(p1,
+						VerticalExaggerationAccessor.applyVerticalExaggeration(dc, p1.elevation));
+		Vec4 v2 =
+				globe.computePointFromPosition(p2,
+						VerticalExaggerationAccessor.applyVerticalExaggeration(dc, p2.elevation));
+		Vec4 v3 =
+				globe.computePointFromPosition(p3,
+						VerticalExaggerationAccessor.applyVerticalExaggeration(dc, p3.elevation));
 		insertClippingPlaneForPoints(clippingPlaneArray, arrayOffset, v1, v2, v3);
 	}
 
@@ -630,6 +661,11 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	 */
 	protected void insertClippingPlaneForPoints(double[] clippingPlaneArray, int arrayOffset, Vec4 v1, Vec4 v2, Vec4 v3)
 	{
+		if (v1 == null || v2 == null || v3 == null || v1.equals(v2) || v1.equals(v3))
+		{
+			return;
+		}
+
 		Line l1 = Line.fromSegment(v1, v3);
 		Line l2 = Line.fromSegment(v1, v2);
 		Plane plane = GeometryUtil.createPlaneContainingLines(l1, l2);
@@ -726,7 +762,10 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	@Override
 	protected void doPick(DrawContext dc, Point point)
 	{
-		doRender(dc);
+		if (!dataProvider.isSingleSliceVolume())
+		{
+			doRender(dc);
+		}
 	}
 
 	@Override
@@ -745,104 +784,77 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 			recalculateSurfaces();
 			recalculateClippingPlanes(dc);
 
-			//sort the shapes from back-to-front
+			//when only one slice is shown in any given direction, only one of the curtains needs to be rendered
+			boolean singleLonSlice = dataProvider.getXSize() - minLonOffset - maxLonOffset <= 1;
+			boolean singleLatSlice = dataProvider.getYSize() - minLatOffset - maxLatOffset <= 1;
+			boolean singleHorSlice = dataProvider.getZSize() - topOffset - bottomOffset <= 1;
+			boolean anySingleSlice = singleLonSlice || singleLatSlice || singleHorSlice;
 			FastShape[] shapes =
-					new FastShape[] { topSurface, bottomSurface, minLonCurtain, maxLonCurtain, minLatCurtain,
-							maxLatCurtain };
-			Arrays.sort(shapes, new ShapeComparator(dc));
+					anySingleSlice ? new FastShape[] { singleLonSlice ? maxLonCurtain : singleLatSlice ? minLatCurtain
+							: topSurface } : new FastShape[] { topSurface, bottomSurface, minLonCurtain, maxLonCurtain,
+							minLatCurtain, maxLatCurtain };
+
+			//sort the shapes from back-to-front
+			if (!anySingleSlice)
+			{
+				Arrays.sort(shapes, new ShapeComparator(dc));
+			}
 
 			//test all the shapes with the minimum distance, culling them if they are outside
 			if (minimumDistance != null)
 			{
 				for (int i = 0; i < shapes.length; i++)
 				{
-					if (shapes[i] != null)
+					Extent extent = shapes[i].getExtent();
+					if (extent != null)
 					{
-						Extent extent = shapes[i].getExtent();
-						if (extent != null)
+						double distanceToEye =
+								extent.getCenter().distanceTo3(dc.getView().getEyePoint()) - extent.getRadius();
+						if (distanceToEye > minimumDistance)
 						{
-							double distanceToEye =
-									extent.getCenter().distanceTo3(dc.getView().getEyePoint()) - extent.getRadius();
-							if (distanceToEye > minimumDistance)
-							{
-								shapes[i] = null;
-							}
+							shapes[i] = null;
 						}
 					}
 				}
 			}
 
-			GL gl = dc.getGL();
-			try
+			//draw each shape
+			for (FastShape shape : shapes)
 			{
-				//push the OpenGL clipping plane state on the attribute stack
-				gl.glPushAttrib(GL.GL_TRANSFORM_BIT);
-
-				boolean oldDeepPicking = dc.isDeepPickingEnabled();
-				try
+				if (shape != null)
 				{
-					//deep picking needs to be enabled, because the shapes could be below the surface
+					shape.setTwoSidedLighting(anySingleSlice);
 					if (dc.isPickingMode())
 					{
-						dc.setDeepPickingEnabled(true);
-						pickSupport.beginPicking(dc);
+						shape.pick(dc, dc.getPickPoint());
 					}
-
-					//draw each shape
-					for (FastShape shape : shapes)
+					else
 					{
-						if (shape != null)
-						{
-							setupClippingPlanes(dc, shape == topSurface, shape == bottomSurface);
-
-							//if in picking mode, render the shape with a unique picking color, and don't light or texture
-							if (dc.isPickingMode())
-							{
-								Color color = dc.getUniquePickColor();
-								pickSupport.addPickableObject(color.getRGB(), shape);
-								shape.setColor(color);
-							}
-							else
-							{
-								shape.setColor(Color.white);
-							}
-							shape.setLighted(!dc.isPickingMode());
-							shape.setTextured(!dc.isPickingMode());
-							shape.render(dc);
-						}
-					}
-
-					//disable all clipping planes enabled earlier
-					for (int i = 0; i < 4; i++)
-					{
-						gl.glDisable(GL.GL_CLIP_PLANE0 + i);
-					}
-
-					if (dc.isPickingMode())
-					{
-						pickSupport.resolvePick(dc, dc.getPickPoint(), this);
-					}
-					else if (dragging)
-					{
-						//render a bounding box around the data if the user is dragging a surface
-						renderBoundingBox(dc);
-					}
-				}
-				finally
-				{
-					//reset the deep picking flag
-					if (dc.isPickingMode())
-					{
-						pickSupport.endPicking(dc);
-						dc.setDeepPickingEnabled(oldDeepPicking);
+						shape.render(dc);
 					}
 				}
 			}
-			finally
+
+			if (dragging)
 			{
-				gl.glPopAttrib();
+				//render a bounding box around the data if the user is dragging a surface
+				renderBoundingBox(dc);
 			}
 		}
+	}
+
+	@Override
+	public void shapePreRender(DrawContext dc, FastShape shape)
+	{
+		//push the OpenGL clipping plane state on the attribute stack
+		dc.getGL().glPushAttrib(GL.GL_TRANSFORM_BIT);
+		setupClippingPlanes(dc, shape == topSurface, shape == bottomSurface);
+	}
+
+	@Override
+	public void shapePostRender(DrawContext dc, FastShape shape)
+	{
+		dc.getGL().glPopAttrib();
 	}
 
 	protected void setupClippingPlanes(DrawContext dc, boolean top, boolean bottom)
@@ -893,47 +905,11 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	 */
 	protected void renderBoundingBox(DrawContext dc)
 	{
-		if(boundingBoxShape == null)
+		if (boundingBoxShape == null)
 		{
 			boundingBoxShape = dataProvider.createBoundingBox();
 		}
 		boundingBoxShape.render(dc);
-		
-		/*Position bl = dataProvider.getPosition(0, 0);
-		Position br = dataProvider.getPosition(dataProvider.getXSize() - 1, 0);
-		Position tl = dataProvider.getPosition(0, dataProvider.getYSize() - 1);
-		Position tr = dataProvider.getPosition(dataProvider.getXSize() - 1, dataProvider.getYSize() - 1);
-		Position cb = Position.interpolate(0.5, bl, br);
-		Position ct = Position.interpolate(0.5, tl, tr);
-		Globe globe = dc.getGlobe();
-		Vec4 blv = globe.computePointFromPosition(bl);
-		Vec4 brv = globe.computePointFromPosition(br);
-		Vec4 tlv = globe.computePointFromPosition(tl);
-		Vec4 trv = globe.computePointFromPosition(tr);
-		double bw = blv.distanceTo3(brv) / 2d;
-		double tw = tlv.distanceTo3(trv) / 2d;
-		Box box = new Box(cb, ct, bw, tw);
-		box.setAltitudes(dataProvider.getTop() - dataProvider.getDepth(), dataProvider.getTop());
-		box.getAttributes().setDrawInterior(false);
-		box.getAttributes().setDrawOutline(true);
-		box.getAttributes().setOutlineMaterial(Material.WHITE);
-		box.getAttributes().setOutlineWidth(2.0);
-		box.render(dc);*/
-		
-		/*Sector sector = dataProvider.getSector();
-		Position center = new Position(sector.getCentroid(), dataProvider.getTop() - dataProvider.getDepth() / 2);
-		Vec4 v1 = dc.getGlobe().computePointFromPosition(sector.getMinLatitude(), center.longitude, center.elevation);
-		Vec4 v2 = dc.getGlobe().computePointFromPosition(sector.getMaxLatitude(), center.longitude, center.elevation);
-		double distance = v1.distanceTo3(v2) / 2;
-		LatLon latlon1 = new LatLon(center.latitude, sector.getMinLongitude());
-		LatLon latlon2 = new LatLon(center.latitude, sector.getMaxLongitude());
-		Box box = new Box(latlon1, latlon2, distance, distance);
-		box.setAltitudes(dataProvider.getTop() - dataProvider.getDepth(), dataProvider.getTop());
-		box.getAttributes().setDrawInterior(false);
-		box.getAttributes().setDrawOutline(true);
-		box.getAttributes().setOutlineMaterial(Material.WHITE);
-		box.getAttributes().setOutlineWidth(2.0);
-		box.render(dc);*/
 	}
 
 	@Override
@@ -974,7 +950,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		}
 
 		//don't allow dragging if there's only one layer in any one direction
-		if (dataProvider.getXSize() <= 1 || dataProvider.getYSize() <= 1 || dataProvider.getZSize() <= 1)
+		if (dataProvider.isSingleSliceVolume())
 		{
 			return;
 		}
@@ -1078,7 +1054,9 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		}
 		else
 		{
-			double deltaElevation = VerticalExaggerationAccessor.unapplyVerticalExaggeration(wwd.getSceneController().getDrawContext(), dragStartPosition - intersectionPosition.elevation);
+			double deltaElevation =
+					VerticalExaggerationAccessor.unapplyVerticalExaggeration(wwd.getSceneController().getDrawContext(),
+							dragStartPosition - intersectionPosition.elevation);
 			double deltaPercentage = deltaElevation / dataProvider.getDepth();
 			int sliceMovement = (int) (deltaPercentage * (dataProvider.getZSize() - 1));
 			if (shape == topSurface)

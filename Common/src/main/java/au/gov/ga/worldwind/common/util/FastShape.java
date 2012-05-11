@@ -23,19 +23,23 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Sphere;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
+import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.pick.PickSupport;
 import gov.nasa.worldwind.render.BasicWWTexture;
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.Renderable;
+import gov.nasa.worldwind.render.OrderedRenderable;
 import gov.nasa.worldwind.render.WWTexture;
 import gov.nasa.worldwind.util.BufferWrapper;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -64,11 +68,23 @@ import com.sun.opengl.util.texture.Texture;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
+public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wireframeable
 {
 	//TODO add VBO support
 
+	protected final static OwnerRunnableRunner VertexUpdater = new OwnerRunnableRunner(FastShape.class.getName()
+			+ " VertexUpdater");
+	protected final static OwnerRunnableRunner IndexUpdater = new OwnerRunnableRunner(FastShape.class.getName()
+			+ " IndexUpdater");
+
 	protected final ReadWriteLock frontLock = new ReentrantReadWriteLock();
+
+	protected boolean useOrderedRendering = false;
+	protected double distanceFromEye = 0;
+	protected double alphaForOrderedRenderingMode;
+
+	protected final PickSupport pickSupport = new PickSupport();
+	protected Layer pickLayer = null;
 
 	protected List<Position> positions;
 
@@ -128,6 +144,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	protected Texture texture;
 	protected double[] textureMatrix;
 
+	protected final List<FastShapeRenderListener> renderListeners = new ArrayList<FastShapeRenderListener>();
+
 	public FastShape(List<Position> positions, int mode)
 	{
 		this(positions, null, mode);
@@ -141,12 +159,97 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	}
 
 	@Override
+	public double getDistanceFromEye()
+	{
+		return distanceFromEye;
+	}
+
+	@Override
+	public void pick(DrawContext dc, Point pickPoint)
+	{
+		if (useOrderedRendering && !dc.isOrderedRenderingMode())
+		{
+			render(dc);
+			return;
+		}
+
+		Color color = getColor();
+		boolean lighted = isLighted();
+		boolean textured = isTextured();
+		boolean deepPicking = dc.isDeepPickingEnabled();
+
+		try
+		{
+			Color uniqueColor = dc.getUniquePickColor();
+			pickSupport.clearPickList();
+			pickSupport.addPickableObject(uniqueColor.getRGB(), this);
+			setColor(uniqueColor);
+			setLighted(false);
+			setTextured(false);
+			dc.setDeepPickingEnabled(true);
+
+			try
+			{
+				pickSupport.beginPicking(dc);
+				render(dc);
+			}
+			finally
+			{
+				pickSupport.endPicking(dc);
+				pickSupport.resolvePick(dc, pickPoint, pickLayer);
+			}
+		}
+		finally
+		{
+			setColor(color);
+			setLighted(lighted);
+			setTextured(textured);
+			dc.setDeepPickingEnabled(deepPicking);
+		}
+	}
+
+	@Override
 	public void render(DrawContext dc)
 	{
 		if (!isEnabled())
 		{
 			return;
 		}
+
+		//Store all the parameters locally, so they don't change in the middle of rendering.
+		//This means we don't have to lock the writeLock when changing render parameters.
+		boolean backfaceCulling = isBackfaceCulling();
+		Sphere boundingSphere = this.boundingSphere;
+		Color color = getColor();
+		FloatBuffer colorBuffer = getColorBuffer();
+		int colorBufferElementSize = getColorBufferElementSize();
+		boolean fogEnabled = isFogEnabled();
+		boolean forceSortedPrimitives = isForceSortedPrimitives();
+		IntBuffer indices = getIndices();
+		boolean lighted = isLighted();
+		Double lineWidth = getLineWidth();
+		int mode = getMode();
+		FloatBuffer normalBuffer = this.normalBuffer;
+		Double pointConstantAttenuation = getPointConstantAttenuation();
+		Double pointLinearAttenuation = getPointLinearAttenuation();
+		Double pointQuadraticAttenuation = getPointQuadraticAttenuation();
+		Double pointMinSize = getPointMinSize();
+		Double pointMaxSize = getPointMaxSize();
+		Double pointSize = getPointSize();
+		boolean pointSprite = isPointSprite();
+		WWTexture pointTexture = this.pointTexture;
+		URL pointTextureUrl = getPointTextureUrl();
+		IntBuffer sortedIndices = this.sortedIndices;
+		boolean sortTransparentPrimitives = isSortTransparentPrimitives();
+		Texture texture = getTexture();
+		FloatBuffer textureCoordinateBuffer = getTextureCoordinateBuffer();
+		boolean textured = isTextured();
+		double[] textureMatrix = getTextureMatrix();
+		boolean twoSidedLighting = isTwoSidedLighting();
+		FloatBuffer vertexBuffer = this.vertexBuffer;
+		boolean wireframe = isWireframe();
+		boolean willCalculateNormals = willCalculateNormals();
+		boolean useOrderedRenderingMode = isUseOrderedRendering();
 
 		double alpha = getOpacity();
 		if (dc.getCurrentLayer() != null)
@@ -169,13 +272,33 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 				return;
 			}
 
+			if (useOrderedRenderingMode)
+			{
+				if (!dc.isOrderedRenderingMode())
+				{
+					alphaForOrderedRenderingMode = alpha;
+					pickLayer = dc.getCurrentLayer();
+					dc.addOrderedRenderable(this);
+					return;
+				}
+				alpha = alphaForOrderedRenderingMode;
+			}
+
+			if (dc.isPickingMode())
+			{
+				alpha = 1;
+			}
+
 			GL gl = dc.getGL();
 			OGLStackHandler stack = new OGLStackHandler();
 
 			try
 			{
+				notifyRenderListenersOfPreRender(dc);
+
 				boolean colorBufferContainsAlpha = colorBuffer != null && colorBufferElementSize > 3;
-				boolean willUseSortedIndices = (forceSortedPrimitives || (sortTransparentPrimitives && alpha < 1.0)) && sortedIndices != null;
+				boolean willUseSortedIndices =
+						(forceSortedPrimitives || (sortTransparentPrimitives && alpha < 1.0)) && sortedIndices != null;
 				boolean willUsePointSprite = mode == GL.GL_POINTS && pointSprite && pointTextureUrl != null;
 				boolean willUseTextureBlending = (alpha < 1.0 || color != null) && colorBufferContainsAlpha;
 
@@ -245,7 +368,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 				{
 					gl.glPointParameterf(GL.GL_POINT_SIZE_MAX, pointMaxSize.floatValue());
 				}
-				if (pointConstantAttenuation != null || pointLinearAttenuation != null || pointQuadraticAttenuation != null)
+				if (pointConstantAttenuation != null || pointLinearAttenuation != null
+						|| pointQuadraticAttenuation != null)
 				{
 					float ca = pointConstantAttenuation != null ? pointConstantAttenuation.floatValue() : 1f;
 					float la = pointLinearAttenuation != null ? pointLinearAttenuation.floatValue() : 0f;
@@ -381,7 +505,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
 				gl.glVertexPointer(3, GL.GL_FLOAT, 0, vertexBuffer.rewind());
 
-				if (willCalculateNormals())
+				if (willCalculateNormals)
 				{
 					gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
 					gl.glNormalPointer(GL.GL_FLOAT, 0, normalBuffer.rewind());
@@ -405,6 +529,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			{
 				stack.pop(gl);
 				dc.getView().popReferenceCenter(dc);
+
+				notifyRenderListenersOfPostRender(dc);
 			}
 		}
 		finally
@@ -437,7 +563,9 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	protected boolean isVertexRecalculationRequired(DrawContext dc)
 	{
-		boolean recalculateVertices = followTerrain || elevationChanged || VerticalExaggerationAccessor.checkAndMarkVerticalExaggeration(FastShape.this, dc);
+		boolean recalculateVertices =
+				followTerrain || elevationChanged
+						|| VerticalExaggerationAccessor.checkAndMarkVerticalExaggeration(FastShape.this, dc);
 		elevationChanged = false;
 		return recalculateVertices;
 	}
@@ -449,6 +577,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			@Override
 			public void run()
 			{
+				boolean willCalculateNormals = willCalculateNormals();
+
 				frontLock.readLock().lock();
 				try
 				{
@@ -457,13 +587,16 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					{
 						modVertexBuffer = BufferUtil.newFloatBuffer(size);
 					}
-					if (willCalculateNormals() && (modNormalBuffer == null || modNormalBuffer.limit() != size))
+					if (willCalculateNormals && (modNormalBuffer == null || modNormalBuffer.limit() != size))
 					{
 						modNormalBuffer = BufferUtil.newFloatBuffer(size);
 					}
 
 					calculateVertices(dc);
-					calculateNormals();
+					if (willCalculateNormals)
+					{
+						calculateNormals();
+					}
 				}
 				finally
 				{
@@ -479,7 +612,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					Sphere tempe = boundingSphere;
 					boundingSphere = modBoundingSphere;
 					modBoundingSphere = tempe;
-					if (willCalculateNormals())
+					if (willCalculateNormals)
 					{
 						temp = normalBuffer;
 						normalBuffer = modNormalBuffer;
@@ -536,7 +669,9 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		double elevation = this.elevation;
 		if (followTerrain)
 		{
-			elevation += dc.getGlobe().getElevation(position.getLatitude(), position.getLongitude());
+			elevation +=
+					VerticalExaggerationAccessor.getUnexaggeratedElevation(dc, position.getLatitude(),
+							position.getLongitude());
 		}
 		elevation += calculateElevationOffset(position);
 		elevation = VerticalExaggerationAccessor.applyVerticalExaggeration(dc, elevation);
@@ -575,68 +710,65 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	protected void calculateNormals()
 	{
-		if (willCalculateNormals())
+		int size = modNormalBuffer.limit() / 3;
+		int[] count = new int[size];
+		Vec4[] vertices = new Vec4[size];
+		Vec4[] normals = new Vec4[size];
+
+		int j = 0;
+		modVertexBuffer.rewind();
+		while (modVertexBuffer.hasRemaining())
 		{
-			int size = modNormalBuffer.limit() / 3;
-			int[] count = new int[size];
-			Vec4[] vertices = new Vec4[size];
-			Vec4[] normals = new Vec4[size];
+			vertices[j] = new Vec4(modVertexBuffer.get(), modVertexBuffer.get(), modVertexBuffer.get());
+			normals[j] = new Vec4(0);
+			j++;
+		}
 
-			int j = 0;
-			modVertexBuffer.rewind();
-			while (modVertexBuffer.hasRemaining())
+		boolean hasIndices = indices != null;
+		int loopLimit = hasIndices ? indices.limit() : size;
+		int loopIncrement = 3;
+		if (mode == GL.GL_TRIANGLE_STRIP)
+		{
+			loopLimit -= 2;
+			loopIncrement = 1;
+		}
+
+		for (int i = 0; i < loopLimit; i += loopIncrement)
+		{
+			//don't touch indices's position/mark, because it may currently be in use by OpenGL thread
+			int index0 = hasIndices ? indices.get(i + 0) : i + 0;
+			int index1 = hasIndices ? indices.get(i + 1) : i + 1;
+			int index2 = hasIndices ? indices.get(i + 2) : i + 2;
+			Vec4 v0 = vertices[index0];
+			Vec4 v1 = vertices[index1];
+			Vec4 v2 = vertices[index2];
+
+			Vec4 e1 = v1.subtract3(v0);
+			Vec4 e2 = mode == GL.GL_TRIANGLE_STRIP && i % 2 == 0 ? v0.subtract3(v2) : v2.subtract3(v0);
+			Vec4 N = reverseNormals ? e2.cross3(e1).normalize3() : e1.cross3(e2).normalize3();
+
+			// if N is 0, the triangle is degenerate
+			if (N.getLength3() > 0)
 			{
-				vertices[j] = new Vec4(modVertexBuffer.get(), modVertexBuffer.get(), modVertexBuffer.get());
-				normals[j] = new Vec4(0);
-				j++;
+				normals[index0] = normals[index0].add3(N);
+				normals[index1] = normals[index1].add3(N);
+				normals[index2] = normals[index2].add3(N);
+
+				count[index0]++;
+				count[index1]++;
+				count[index2]++;
 			}
+		}
 
-			boolean hasIndices = indices != null;
-			int loopLimit = hasIndices ? indices.limit() : size;
-			int loopIncrement = 3;
-			if (mode == GL.GL_TRIANGLE_STRIP)
-			{
-				loopLimit -= 2;
-				loopIncrement = 1;
-			}
-
-			for (int i = 0; i < loopLimit; i += loopIncrement)
-			{
-				//don't touch indices's position/mark, because it may currently be in use by OpenGL thread
-				int index0 = hasIndices ? indices.get(i + 0) : i + 0;
-				int index1 = hasIndices ? indices.get(i + 1) : i + 1;
-				int index2 = hasIndices ? indices.get(i + 2) : i + 2;
-				Vec4 v0 = vertices[index0];
-				Vec4 v1 = vertices[index1];
-				Vec4 v2 = vertices[index2];
-
-				Vec4 e1 = v1.subtract3(v0);
-				Vec4 e2 = mode == GL.GL_TRIANGLE_STRIP && i % 2 == 0 ? v0.subtract3(v2) : v2.subtract3(v0);
-				Vec4 N = reverseNormals ? e2.cross3(e1).normalize3() : e1.cross3(e2).normalize3();
-
-				// if N is 0, the triangle is degenerate
-				if (N.getLength3() > 0)
-				{
-					normals[index0] = normals[index0].add3(N);
-					normals[index1] = normals[index1].add3(N);
-					normals[index2] = normals[index2].add3(N);
-
-					count[index0]++;
-					count[index1]++;
-					count[index2]++;
-				}
-			}
-
-			j = 0;
-			modNormalBuffer.rewind();
-			while (modNormalBuffer.hasRemaining())
-			{
-				int c = count[j] > 0 ? count[j] : 1; //prevent divide by zero
-				modNormalBuffer.put((float) normals[j].x / c);
-				modNormalBuffer.put((float) normals[j].y / c);
-				modNormalBuffer.put((float) normals[j].z / c);
-				j++;
-			}
+		j = 0;
+		modNormalBuffer.rewind();
+		while (modNormalBuffer.hasRemaining())
+		{
+			int c = count[j] > 0 ? count[j] : 1; //prevent divide by zero
+			modNormalBuffer.put((float) normals[j].x / c);
+			modNormalBuffer.put((float) normals[j].y / c);
+			modNormalBuffer.put((float) normals[j].z / c);
+			j++;
 		}
 	}
 
@@ -655,7 +787,6 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					{
 						modSortedIndices = BufferUtil.newIntBuffer(size);
 					}
-
 					sortIndices(dc, eyePoint);
 				}
 				finally
@@ -691,6 +822,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 					new Vec4(vertexBuffer.get(i * 3 + 0), vertexBuffer.get(i * 3 + 1), vertexBuffer.get(i * 3 + 2));
 		}
 
+		eyePoint = eyePoint.subtract3(boundingSphere.getCenter());
+
 		if (mode == GL.GL_TRIANGLES)
 		{
 			boolean hasIndices = indices != null;
@@ -712,6 +845,9 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			}
 
 			Arrays.sort(distances);
+			IndexAndDistance closest = distances[distances.length - 1];
+			Vec4 closestPoint = vertices[hasIndices ? indices.get(closest.index) : closest.index];
+			distanceFromEye = closestPoint.distanceTo3(eyePoint);
 
 			modSortedIndices.rewind();
 			for (IndexAndDistance distance : distances)
@@ -731,6 +867,9 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 			}
 
 			Arrays.sort(distances);
+			IndexAndDistance closest = distances[distances.length - 1];
+			Vec4 closestPoint = vertices[closest.index];
+			distanceFromEye = closestPoint.distanceTo3(eyePoint);
 
 			modSortedIndices.rewind();
 			for (IndexAndDistance distance : distances)
@@ -767,15 +906,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setColor(Color color)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.color = color;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.color = color;
 	}
 
 	public FloatBuffer getColorBuffer()
@@ -785,15 +916,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setColorBuffer(FloatBuffer colorBuffer)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.colorBuffer = colorBuffer;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.colorBuffer = colorBuffer;
 	}
 
 	public int getColorBufferElementSize()
@@ -803,15 +926,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setColorBufferElementSize(int colorBufferElementSize)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.colorBufferElementSize = colorBufferElementSize;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.colorBufferElementSize = colorBufferElementSize;
 	}
 
 	public FloatBuffer getTextureCoordinateBuffer()
@@ -821,15 +936,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setTextureCoordinateBuffer(FloatBuffer textureCoordinateBuffer)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.textureCoordinateBuffer = textureCoordinateBuffer;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.textureCoordinateBuffer = textureCoordinateBuffer;
 	}
 
 	public double getOpacity()
@@ -839,15 +946,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setOpacity(double opacity)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.opacity = opacity;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.opacity = opacity;
 	}
 
 	public List<Position> getPositions()
@@ -940,16 +1039,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setElevation(double elevation)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			elevationChanged = this.elevation != elevation;
-			this.elevation = elevation;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		elevationChanged = this.elevation != elevation;
+		this.elevation = elevation;
 	}
 
 	public boolean isCalculateNormals()
@@ -959,15 +1050,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setCalculateNormals(boolean calculateNormals)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.calculateNormals = calculateNormals;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.calculateNormals = calculateNormals;
 	}
 
 	public boolean isReverseNormals()
@@ -981,6 +1064,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		try
 		{
 			this.reverseNormals = reverseNormals;
+			verticesDirty = true;
 		}
 		finally
 		{
@@ -1000,15 +1084,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setFogEnabled(boolean fogEnabled)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.fogEnabled = fogEnabled;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.fogEnabled = fogEnabled;
 	}
 
 	@Override
@@ -1020,15 +1096,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 	@Override
 	public void setWireframe(boolean wireframe)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.wireframe = wireframe;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.wireframe = wireframe;
 	}
 
 	public boolean isBackfaceCulling()
@@ -1038,15 +1106,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setBackfaceCulling(boolean backfaceCulling)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.backfaceCulling = backfaceCulling;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.backfaceCulling = backfaceCulling;
 	}
 
 	public boolean isLighted()
@@ -1056,15 +1116,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setLighted(boolean lighted)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.lighted = lighted;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.lighted = lighted;
 	}
 
 	public boolean isTwoSidedLighting()
@@ -1074,15 +1126,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setTwoSidedLighting(boolean twoSidedLighting)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.twoSidedLighting = twoSidedLighting;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.twoSidedLighting = twoSidedLighting;
 	}
 
 	public boolean isSortTransparentPrimitives()
@@ -1092,15 +1136,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setSortTransparentPrimitives(boolean sortTransparentPrimitives)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.sortTransparentPrimitives = sortTransparentPrimitives;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.sortTransparentPrimitives = sortTransparentPrimitives;
 	}
 
 	public boolean isForceSortedPrimitives()
@@ -1110,15 +1146,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setForceSortedPrimitives(boolean forceSortedPrimitives)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.forceSortedPrimitives = forceSortedPrimitives;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.forceSortedPrimitives = forceSortedPrimitives;
 	}
 
 	public Double getLineWidth()
@@ -1128,15 +1156,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setLineWidth(Double lineWidth)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.lineWidth = lineWidth;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.lineWidth = lineWidth;
 	}
 
 	public Double getPointSize()
@@ -1216,15 +1236,8 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setPointTextureUrl(URL pointTextureUrl)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.pointTextureUrl = pointTextureUrl;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.pointTextureUrl = pointTextureUrl;
+		pointTexture = null;
 	}
 
 	public Texture getTexture()
@@ -1234,15 +1247,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setTexture(Texture texture)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.texture = texture;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.texture = texture;
 	}
 
 	public boolean isTextured()
@@ -1252,15 +1257,7 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setTextured(boolean textured)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.textured = textured;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.textured = textured;
 	}
 
 	public double[] getTextureMatrix()
@@ -1270,15 +1267,17 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 
 	public void setTextureMatrix(double[] textureMatrix)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.textureMatrix = textureMatrix;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.textureMatrix = textureMatrix;
+	}
+
+	public boolean isUseOrderedRendering()
+	{
+		return useOrderedRendering;
+	}
+
+	public void setUseOrderedRendering(boolean useOrderedRendering)
+	{
+		this.useOrderedRendering = useOrderedRendering;
 	}
 
 	@Override
@@ -1317,6 +1316,32 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		finally
 		{
 			frontLock.readLock().unlock();
+		}
+	}
+
+	public void addRenderListener(FastShapeRenderListener renderListener)
+	{
+		renderListeners.add(renderListener);
+	}
+
+	public void removeRenderListener(FastShapeRenderListener renderListener)
+	{
+		renderListeners.remove(renderListener);
+	}
+
+	protected void notifyRenderListenersOfPreRender(DrawContext dc)
+	{
+		for (int i = renderListeners.size() - 1; i >= 0; i--)
+		{
+			renderListeners.get(i).shapePreRender(dc, this);
+		}
+	}
+
+	protected void notifyRenderListenersOfPostRender(DrawContext dc)
+	{
+		for (int i = renderListeners.size() - 1; i >= 0; i--)
+		{
+			renderListeners.get(i).shapePostRender(dc, this);
 		}
 	}
 
@@ -1391,11 +1416,11 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		@Override
 		public boolean equals(Object obj)
 		{
-			if (obj == null)
+			if (owner.equals(obj))
 			{
-				return false;
+				return true;
 			}
-			if (obj.equals(owner))
+			if (obj instanceof OwnerRunnable && owner.equals(((OwnerRunnable) obj).owner))
 			{
 				return true;
 			}
@@ -1403,13 +1428,13 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 		}
 	}
 
-	protected static class VertexUpdater
+	protected static class OwnerRunnableRunner
 	{
-		private static BlockingQueue<OwnerRunnable> queue = new LinkedBlockingQueue<OwnerRunnable>();
-		private static Set<OwnerRunnable> set = Collections.synchronizedSet(new HashSet<OwnerRunnable>());
-		private static final int THREAD_COUNT = 1;
+		private BlockingQueue<OwnerRunnable> queue = new LinkedBlockingQueue<OwnerRunnable>();
+		private Set<OwnerRunnable> set = Collections.synchronizedSet(new HashSet<OwnerRunnable>());
+		private final int THREAD_COUNT = 1;
 
-		static
+		public OwnerRunnableRunner(String threadName)
 		{
 			for (int i = 0; i < THREAD_COUNT; i++)
 			{
@@ -1433,60 +1458,13 @@ public class FastShape implements Renderable, Cacheable, Bounded, Wireframeable
 						}
 					}
 				});
-				thread.setName(VertexUpdater.class.getName());
+				thread.setName(threadName);
 				thread.setDaemon(true);
 				thread.start();
 			}
 		}
 
-		public synchronized static void run(Object owner, Runnable runnable)
-		{
-			OwnerRunnable or = new OwnerRunnable(owner, runnable);
-			if (!set.contains(or))
-			{
-				set.add(or);
-				queue.add(or);
-			}
-		}
-	}
-
-	protected static class IndexUpdater
-	{
-		private static BlockingQueue<OwnerRunnable> queue = new LinkedBlockingQueue<OwnerRunnable>();
-		private static Set<OwnerRunnable> set = Collections.synchronizedSet(new HashSet<OwnerRunnable>());
-		private static final int THREAD_COUNT = 1;
-
-		static
-		{
-			for (int i = 0; i < THREAD_COUNT; i++)
-			{
-				Thread thread = new Thread(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						while (true)
-						{
-							try
-							{
-								OwnerRunnable or = queue.take();
-								or.runnable.run();
-								set.remove(or);
-							}
-							catch (Throwable t)
-							{
-								t.printStackTrace();
-							}
-						}
-					}
-				});
-				thread.setName(VertexUpdater.class.getName());
-				thread.setDaemon(true);
-				thread.start();
-			}
-		}
-
-		public synchronized static void run(Object owner, Runnable runnable)
+		public synchronized void run(Object owner, Runnable runnable)
 		{
 			OwnerRunnable or = new OwnerRunnable(owner, runnable);
 			if (!set.contains(or))

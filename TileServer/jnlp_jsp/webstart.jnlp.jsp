@@ -29,7 +29,7 @@
 		<description></description>
 		<description kind="short"></description>
 		<icon href="32x32-icon-earth.png" />
-		<icon kind="splash" href="400x230-splash-nww.jpg" />
+		<icon kind="splash" href="viewer-splash-400x230.png" />
 		<offline-allowed />
 	</information>
 	<security>

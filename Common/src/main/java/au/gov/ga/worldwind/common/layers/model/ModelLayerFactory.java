@@ -83,6 +83,7 @@ public class ModelLayerFactory
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.MINIMUM_DISTANCE, "MinimumDistance", xpath);
 
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.REVERSE_NORMALS, "ReverseNormals", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.ORDERED_RENDERING, "OrderedRendering", xpath);
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.POINT_SPRITE, "PointSprite", xpath);
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.POINT_MIN_SIZE, "PointMinSize", xpath);
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.POINT_MAX_SIZE, "PointMaxSize", xpath);
@@ -117,10 +118,10 @@ public class ModelLayerFactory
 				"DynamicSubsampling/@samples", xpath);
 
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.COORDINATE_SYSTEM, "CoordinateSystem", xpath);
-		
+
 		ColorMap colorMap = XMLUtil.getColorMap(domElement, "ColorMap", xpath);
 		params.setValue(AVKeyMore.COLOR_MAP, colorMap);
-		
+
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.MAX_VARIANCE, "MaxVariance", xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.PAINTED_VARIABLE, "PaintedVariable", xpath);
 

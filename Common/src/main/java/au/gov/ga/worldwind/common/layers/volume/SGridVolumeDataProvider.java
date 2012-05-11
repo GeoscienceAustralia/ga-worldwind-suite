@@ -117,15 +117,15 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 			{
 				throw new IOException("Data file not specified");
 			}
-			if (xSize == 0 || ySize == 0 || zSize == 0)
-			{
-				throw new IOException("Volume dimensions are 0");
-			}
 			if (cellCentered)
 			{
 				xSize--;
 				ySize--;
 				zSize--;
+			}
+			if (xSize == 0 || ySize == 0 || zSize == 0)
+			{
+				throw new IOException("Volume dimensions are 0");
 			}
 
 			InputStream dataInputStream = null;
@@ -205,7 +205,6 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 						if (positionIndex < xSize * ySize)
 						{
 							Position position = Position.fromDegrees(y, x, z);
-							//positions.add(position);
 							positions.add(position);
 							top += z / (double) (xSize * ySize);
 
@@ -327,6 +326,16 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		{
 			e.printStackTrace();
 		}*/
+		
+		/*try
+		{
+			ArrayWithPositionsVolumeDataProvider.saveVolumeDataProviderToArrayFile(this,
+					URLUtil.urlToFile(new URL(url.toExternalForm() + ".array.zip")));
+		}
+		catch (MalformedURLException e)
+		{
+			e.printStackTrace();
+		}*/
 
 		layer.dataAvailable(this);
 		return true;
@@ -338,6 +347,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		if (matcher.matches())
 		{
 			paintedVariableName = matcher.group(1);
+			return;
 		}
 
 		matcher = axisPattern.matcher(line);
@@ -350,6 +360,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 				ySize = (int) Double.parseDouble(matcher.group(3));
 				zSize = (int) Double.parseDouble(matcher.group(4));
 			}
+			return;
 		}
 
 		matcher = propAlignmentPattern.matcher(line);
@@ -357,12 +368,14 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		{
 			String propAlignment = matcher.group(1);
 			cellCentered = propAlignment.toLowerCase().equals("cells");
+			return;
 		}
 
 		matcher = asciiDataFilePattern.matcher(line);
 		if (matcher.matches())
 		{
 			asciiDataFile = matcher.group(1);
+			return;
 		}
 
 		matcher = propertyNamePattern.matcher(line);
@@ -374,6 +387,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 			{
 				paintedVariableId = propertyId;
 			}
+			return;
 		}
 
 		matcher = propertyNoDataPattern.matcher(line);
@@ -385,6 +399,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 			{
 				this.noDataValue = noDataValue;
 			}
+			return;
 		}
 	}
 }
