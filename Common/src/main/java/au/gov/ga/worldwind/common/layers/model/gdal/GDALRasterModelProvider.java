@@ -27,6 +27,7 @@ import au.gov.ga.worldwind.common.layers.volume.btt.BinaryTriangleTree;
 import au.gov.ga.worldwind.common.util.CoordinateTransformationUtil;
 import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.URLUtil;
+import au.gov.ga.worldwind.common.util.Validate;
 
 import com.sun.opengl.util.BufferUtil;
 
@@ -38,12 +39,26 @@ import com.sun.opengl.util.BufferUtil;
  */
 public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> implements ModelProvider
 {
+	private static final int COLOR_BUFFER_ELEMENT_SIZE = 4;
+
 	private Sector sector = null;
 	private GDALRasterModelParameters modelParameters = null;
 	
+	public GDALRasterModelProvider()
+	{
+		this(null);
+	}
+	
 	public GDALRasterModelProvider(GDALRasterModelParameters parameters)
 	{
-		this.modelParameters = parameters;
+		if (parameters == null)
+		{
+			this.modelParameters = new GDALRasterModelParameters();
+		}
+		else
+		{
+			this.modelParameters = parameters;
+		}
 	}
 
 	@Override
@@ -55,6 +70,9 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	@Override
 	protected boolean doLoadData(URL url, ModelLayer layer)
 	{
+		Validate.notNull(url, "A URL is required");
+		Validate.notNull(layer, "A model layer is required");
+		
 		File file = URLUtil.urlToFile(url);
 		
 		// TODO: Add zip support
@@ -76,11 +94,11 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 		
 		readValuesFromDataset(gdalDataset, positions, values, minmax);
 		
-		System.out.println("**** Minmax: " + minmax[0] + ", " + minmax[1]);
-		
 		BinaryTriangleTree btt = new BinaryTriangleTree(positions, gdalDataset.GetRasterXSize(), gdalDataset.GetRasterYSize());
 		btt.setForceGLTriangles(true);
 		FastShape shape = btt.buildMesh(modelParameters.getMaxVariance());
+		
+		positions = shape.getPositions();
 		
 		shape.setForceSortedPrimitives(true);
 		shape.setLighted(true);
@@ -323,9 +341,7 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	{
 		float nodata = getModelBandNodata(gdalDataset);
 		
-		//create a color buffer containing a color for each point
-		int colorBufferElementSize = 4;
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * colorBufferElementSize);
+		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * COLOR_BUFFER_ELEMENT_SIZE);
 		for (Position position : positions)
 		{
 			PositionWithCoord pwv = (PositionWithCoord) position;
@@ -333,27 +349,12 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 			int u = pwv.u;
 			int v = pwv.v;
 			
-			int un = u > 0 ? u - 1 : u;
-			int up = u < values.length - 1 ? u + 1 : u;
-			int vn = v > 0 ? v - 1 : v;
-			int vp = v < values[0].length - 1 ? v + 1 : v;
+			float[] adjacentValues = getAdjacentValues(values, u, v);
 			
 			//check all values around the current position for NODATA; if NODATA, use a transparent color
-			float value = values[u][v];
-			float l = values[un][v]; 
-			float r = values[up][v]; 
-			float t = values[u][vn]; 
-			float b = values[u][vp]; 
-			float tl = values[un][vn];
-			float tr = values[up][vn];
-			float bl = values[un][vp];
-			float br = values[up][vp];
-			
-			//TODO: When maxvariance is high this fails
-			if (isNoData(nodata, value, l, r, t, b, tl, tr, bl,br))
+			if (isNoData(nodata, adjacentValues))
 			{
-				//this or adjacent cell is NODATA
-				for (int i = 0; i < colorBufferElementSize; i++)
+				for (int i = 0; i < COLOR_BUFFER_ELEMENT_SIZE; i++)
 				{
 					colorBuffer.put(0);
 				}
@@ -363,7 +364,7 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 				Color color;
 				if (modelParameters.getColorMap() != null)
 				{
-					color = modelParameters.getColorMap().calculateColorNotingIsValuesPercentages(value, minmax[0], minmax[1]);
+					color = modelParameters.getColorMap().calculateColorNotingIsValuesPercentages(values[u][v], minmax[0], minmax[1]);
 				}
 				else
 				{
@@ -377,6 +378,23 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 			}
 		}
 		return colorBuffer;
+	}
+
+	private float[] getAdjacentValues(float[][] values, int u, int v)
+	{
+		int un = u > 0 ? u - 1 : u;
+		int up = u < values.length - 1 ? u + 1 : u;
+		int vn = v > 0 ? v - 1 : v;
+		int vp = v < values[0].length - 1 ? v + 1 : v;
+		
+		float[] adjacentValues = new float[] {
+			values[u][v], values[un][v], 
+			values[up][v], values[u][vn], 
+			values[u][vp], values[un][vn], 
+			values[up][vn], values[un][vp], 
+			values[up][vp],
+		};
+		return adjacentValues;
 	}
 
 	private float getModelBandNodata(Dataset gdalDataset)
@@ -402,6 +420,17 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 		return false;
 	}
 	
+	/**
+	 * @return the modelParameters
+	 */
+	protected GDALRasterModelParameters getModelParameters()
+	{
+		return modelParameters;
+	}
+	
+	/**
+	 * A utility class that stores the pixel coordinates of a raster cell alongside it's real-world position
+	 */
 	protected static class PositionWithCoord extends Position
 	{
 		public final int u;
