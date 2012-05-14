@@ -24,6 +24,7 @@ import gov.nasa.worldwind.geom.Sector;
 
 import java.net.URL;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hamcrest.BaseMatcher;
@@ -47,6 +48,26 @@ public class GDALRasterModelProviderTest
 	private GDALRasterModelProvider classUnderTest;
 	private Mockery mockContext;
 	private ModelLayer modelLayer;
+
+	// Test raster properties (in WGS84 lat/lon)
+	private static final List<RasterProperties> TEST_RASTERS = new ArrayList<RasterProperties>();
+	static
+	{
+		TEST_RASTERS.add(new RasterProperties(){{{
+			name="testgrid.tif";
+			testBand=1;
+			maxLat=-25.5230437;
+			minLat=-27.6117002;
+			minLon=141.7329060;
+			maxLon=144.7855579;
+			xCellSize=0.040166471522998;
+			yCellSize=-0.040166471522998;
+			width=76;
+			height=52;
+			minValue=-2558.0;
+			maxValue=-699.0;
+		}}});
+	}
 	
 	@Before
 	public void setup()
@@ -105,7 +126,8 @@ public class GDALRasterModelProviderTest
 	@Test
 	public void loadValidUrl()
 	{
-		URL url = getClass().getResource("testgrid.tif");
+		RasterProperties testRaster = TEST_RASTERS.get(0);
+		URL url = getClass().getResource(testRaster.name);
 
 		final FastShapeMatcher matcher = new FastShapeMatcher();
 		mockContext.checking(new Expectations(){{{
@@ -122,22 +144,43 @@ public class GDALRasterModelProviderTest
 		assertTrue(shape.isLighted());
 		assertTrue(shape.isTwoSidedLighting());
 		assertTrue(shape.isCalculateNormals());
-		assertEquals(4, shape.getColorBufferElementSize());
 		
 		// With MaxVariance = 0 we expect every pixel to have a corresponding position
 		List<Position> positions = shape.getPositions();
 		assertNotNull(positions);
-		assertEquals(76*52, positions.size());
+		assertEquals(testRaster.width*testRaster.height, positions.size());
 		
 		// Colour buffer should have a 4 element entry per-point 
+		assertEquals(4, shape.getColorBufferElementSize());
 		FloatBuffer colourBuffer = shape.getColorBuffer();
 		assertNotNull(colourBuffer);
-		assertEquals(76*52*4, colourBuffer.limit());
+		assertEquals(testRaster.width*testRaster.height*4, colourBuffer.limit());
 		
+		// Sector will be sampled from 'bottom-left' corners of cells
 		Sector sector = shape.getSector();
 		assertNotNull(sector);
-		assertEquals(141.7855579, sector.getMaxLongitude().degrees, 0.0001);
+		assertEquals(testRaster.minLon, sector.getMinLongitude().degrees, 0.0001);
+		assertEquals(testRaster.maxLon - testRaster.xCellSize, sector.getMaxLongitude().degrees, 0.0001);
+		assertEquals(testRaster.minLat - testRaster.yCellSize, sector.getMinLatitude().degrees, 0.0001);
+		assertEquals(testRaster.maxLat, sector.getMaxLatitude().degrees, 0.0001);
 		
+	}
+	
+	/** A simple properties class that holds raster details for use in tests */
+	private static class RasterProperties
+	{
+		String name;
+		int testBand = 1;
+		double minLat;
+		double minLon;
+		double maxLat;
+		double maxLon;
+		double xCellSize;
+		double yCellSize;
+		int width;
+		int height;
+		double minValue;
+		double maxValue;
 	}
 	
 	/** A matcher that accepts any FastShape, and provides access for later inspection */
