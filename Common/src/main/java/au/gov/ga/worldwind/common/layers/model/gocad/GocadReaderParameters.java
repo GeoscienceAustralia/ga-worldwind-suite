@@ -18,6 +18,7 @@ package au.gov.ga.worldwind.common.layers.model.gocad;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 
+import java.awt.Color;
 import java.nio.ByteOrder;
 
 import org.gdal.osr.CoordinateTransformation;
@@ -43,6 +44,7 @@ public class GocadReaderParameters
 	private int dynamicSubsamplingSamplesPerAxis = 50;
 	private boolean bilinearMinification = false;
 	private CoordinateTransformation coordinateTransformation = null;
+	private Color color = null; // To use it no colormap found
 	private ColorMap colorMap = null;
 	private float maxVariance = 0;
 	private String paintedVariable;
@@ -52,6 +54,25 @@ public class GocadReaderParameters
 		//use defaults
 	}
 
+	/**
+	 * Copy constructor
+	 */
+	public GocadReaderParameters(GocadReaderParameters other)
+	{
+		this.byteOrder = other.byteOrder;
+		this.subsamplingU = other.subsamplingU;
+		this.subsamplingV = other.subsamplingV;
+		this.subsamplingW = other.subsamplingW;
+		this.dynamicSubsampling = other.dynamicSubsampling;
+		this.dynamicSubsamplingSamplesPerAxis = other.dynamicSubsamplingSamplesPerAxis;
+		this.bilinearMinification = other.bilinearMinification;
+		this.coordinateTransformation = other.coordinateTransformation;
+		this.color = other.color;
+		this.colorMap = other.colorMap;
+		this.maxVariance = other.maxVariance;
+		this.paintedVariable = other.paintedVariable;
+	}
+	
 	/**
 	 * Construct a new instance of this class, using the params to setup any
 	 * default values.
@@ -63,43 +84,69 @@ public class GocadReaderParameters
 	{
 		ByteOrder bo = (ByteOrder) params.getValue(AVKey.BYTE_ORDER);
 		if (bo != null)
+		{
 			setByteOrder(bo);
+		}
 
 		Integer i = (Integer) params.getValue(AVKeyMore.SUBSAMPLING_U);
 		if (i != null)
+		{
 			setSubsamplingU(i);
+		}
 
 		i = (Integer) params.getValue(AVKeyMore.SUBSAMPLING_V);
 		if (i != null)
+		{
 			setSubsamplingV(i);
+		}
 
 		i = (Integer) params.getValue(AVKeyMore.SUBSAMPLING_W);
 		if (i != null)
+		{
 			setSubsamplingW(i);
+		}
 
 		Boolean b = (Boolean) params.getValue(AVKeyMore.DYNAMIC_SUBSAMPLING);
 		if (b != null)
+		{
 			setDynamicSubsampling(b);
+		}
 
 		i = (Integer) params.getValue(AVKeyMore.DYNAMIC_SUBSAMPLING_SAMPLES_PER_AXIS);
 		if (i != null)
+		{
 			setDynamicSubsamplingSamplesPerAxis(i);
+		}
 
 		b = (Boolean) params.getValue(AVKeyMore.BILINEAR_MINIFICATION);
 		if (b != null)
+		{
 			setBilinearMinification(b);
+		}
 
 		String s = (String) params.getValue(AVKey.COORDINATE_SYSTEM);
 		if (s != null)
+		{
 			setCoordinateTransformation(CoordinateTransformationUtil.getTransformationToWGS84(s));
+		}
 
 		ColorMap cm = (ColorMap) params.getValue(AVKeyMore.COLOR_MAP);
 		if (cm != null)
+		{
 			setColorMap(cm);
+		}
 
+		Color c = (Color) params.getValue(AVKeyMore.COLOR);
+		if (c != null)
+		{
+			setColor(c);
+		}
+		
 		Double d = (Double) params.getValue(AVKeyMore.MAX_VARIANCE);
 		if (d != null)
+		{
 			setMaxVariance(d.floatValue());
+		}
 
 		setPaintedVariable((String) params.getValue(AVKeyMore.PAINTED_VARIABLE));
 	}
@@ -322,5 +369,29 @@ public class GocadReaderParameters
 	public void setPaintedVariable(String paintedVariable)
 	{
 		this.paintedVariable = paintedVariable;
+	}
+	
+	/**
+	 * @return the color to use if no colour map is found
+	 */
+	public Color getColor()
+	{
+		return color;
+	}
+	
+	/**
+	 * @param color the color to set
+	 */
+	public void setColor(Color color)
+	{
+		this.color = color;
+	}
+	
+	/**
+	 * @return Whether colour information is available in these parameters
+	 */
+	public boolean isColorInformationAvailable()
+	{
+		return this.colorMap != null || this.color != null;
 	}
 }
