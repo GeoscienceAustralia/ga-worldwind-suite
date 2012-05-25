@@ -47,7 +47,7 @@ import com.sun.opengl.util.BufferUtil;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class GocadSGridReader implements GocadReader
+public class GocadSGridReader implements GocadReader<FastShape>
 {
 	public final static String HEADER_REGEX = "(?i).*sgrid.*";
 

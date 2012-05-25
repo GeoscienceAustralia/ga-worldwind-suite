@@ -15,6 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.util;
 
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.cache.Cacheable;
 import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.LatLon;
@@ -143,6 +144,8 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 	protected boolean textured = true; //only actually textured if texture is not null
 	protected Texture texture;
 	protected double[] textureMatrix;
+	
+	protected Layer lastLayer;
 
 	protected final List<FastShapeRenderListener> renderListeners = new ArrayList<FastShapeRenderListener>();
 
@@ -214,6 +217,11 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		if (!isEnabled())
 		{
 			return;
+		}
+		
+		if(dc.getCurrentLayer() != null)
+		{
+			lastLayer = dc.getCurrentLayer();
 		}
 
 		//Store all the parameters locally, so they don't change in the middle of rendering.
@@ -541,12 +549,11 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 	protected void recalculateIfRequired(DrawContext dc, double alpha)
 	{
-		boolean recalculateVertices = isVertexRecalculationRequired(dc);
-		boolean recalculateVerticesNow = verticesDirty || lastGlobe != dc.getGlobe();
-		if (recalculateVertices || recalculateVerticesNow)
+		boolean recalculateVertices = isVertexRecalculationRequired(dc) || verticesDirty || lastGlobe != dc.getGlobe();
+		if (recalculateVertices)
 		{
 			lastGlobe = dc.getGlobe();
-			recalculateVertices(dc, recalculateVerticesNow);
+			recalculateVertices(dc, false);
 			verticesDirty = false;
 		}
 
@@ -622,6 +629,15 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 				finally
 				{
 					frontLock.writeLock().unlock();
+				}
+				
+				// When the vertices have been recalculated, trigger a render of the layer
+				// IMPORTANT: When followTerrain is true the vertices are recalculated on every render call 
+				// (necessary to ensure it follows the terrain accurately as elevation tiles are loaded in etc). 
+				// If we remove this guard we get an endless render->recalculate->render->recalculate loop.
+				if(lastLayer != null && !followTerrain)
+				{
+					lastLayer.firePropertyChange(AVKey.LAYER, null, lastLayer);
 				}
 			}
 		};

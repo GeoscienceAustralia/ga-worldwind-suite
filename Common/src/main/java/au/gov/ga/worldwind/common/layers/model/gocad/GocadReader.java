@@ -25,8 +25,10 @@ import au.gov.ga.worldwind.common.util.FastShape;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public interface GocadReader
+public interface GocadReader<T>
 {
+	final static String END_REGEX = "END\\s*";
+
 	final static Pattern vertexPattern =
 			Pattern.compile("P?VRTX\\s+(\\d+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)([\\s\\d.\\-e]*)\\s*(?:\\D+)?\\s*");
 	final static Pattern atomPattern = Pattern.compile("P?ATOM\\s+(\\d+)\\s+(\\d+)([\\s\\d.\\-e]*)\\s*");
@@ -34,6 +36,8 @@ public interface GocadReader
 	final static Pattern namePattern = Pattern.compile("name:\\s*(.*)\\s*");
 	final static Pattern solidColorPattern = Pattern.compile("\\*solid\\*color:.+");
 	final static Pattern lineColorPattern = Pattern.compile("\\*line\\*color:.+");
+	final static Pattern colormapAlphaPattern = Pattern.compile("\\*colormap\\*alphas:.+");
+	final static Pattern colormapColorsPattern = Pattern.compile("\\*colormap\\*\\*colors:.+");	
 	final static Pattern paintedVariablePattern = Pattern.compile("\\*painted\\*variable:\\s*(.*?)\\s*");
 	final static Pattern nodataValuesPattern = Pattern.compile("NO_DATA_VALUES\\s*([\\s\\d.\\-e]*)\\s*");
 	final static Pattern propertiesPattern = Pattern.compile("PROPERTIES\\s+(.*)\\s*");
@@ -68,5 +72,5 @@ public interface GocadReader
 	 * 
 	 * @return A {@link FastShape} containing the geometry read
 	 */
-	FastShape end(URL context);
+	T end(URL context);
 }

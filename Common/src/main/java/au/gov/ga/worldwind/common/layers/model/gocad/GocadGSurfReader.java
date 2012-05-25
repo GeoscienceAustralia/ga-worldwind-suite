@@ -43,7 +43,7 @@ import com.sun.opengl.util.BufferUtil;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class GocadGSurfReader implements GocadReader
+public class GocadGSurfReader implements GocadReader<FastShape>
 {
 	public final static String HEADER_REGEX = "(?i).*gsurf.*";
 
@@ -215,37 +215,57 @@ public class GocadGSurfReader implements GocadReader
 		if (type.equals("NO_DATA_VALUE"))
 		{
 			if (id == 1)
+			{
 				elevationNoDataValue = Double.parseDouble(value);
+			}
 			else if (id == paintedVariableId)
+			{
 				propertyNoDataValue = Double.parseDouble(value);
+			}
 		}
 		else if (type.equals("ESIZE"))
 		{
 			if (id == 1)
+			{
 				elevationEsize = Integer.parseInt(value);
+			}
 			else if (id == paintedVariableId)
+			{
 				propertyEsize = Integer.parseInt(value);
+			}
 		}
 		else if (type.equals("TYPE"))
 		{
 			if (id == 1)
+			{
 				elevationEtype = value;
+			}
 			else if (id == paintedVariableId)
+			{
 				propertyEtype = value;
+			}
 		}
 		else if (type.equals("OFFSET"))
 		{
 			if (id == 1)
+			{
 				elevationOffset = Integer.parseInt(value);
+			}
 			else if (id == paintedVariableId)
+			{
 				propertyOffset = Integer.parseInt(value);
+			}
 		}
 		else if (type.equals("FILE"))
 		{
 			if (id == 1)
+			{
 				elevationFile = value;
+			}
 			else if (id == paintedVariableId)
+			{
 				propertyFile = value;
+			}
 		}
 	}
 
@@ -285,8 +305,8 @@ public class GocadGSurfReader implements GocadReader
 			strideV = Math.max(1, Math.round((float) axisN.y / samplesPerAxis));
 		}
 
-		int uSamples = (int) (1 + (nu - 1) / strideU);
-		int vSamples = (int) (1 + (nv - 1) / strideV);
+		int uSamples = (1 + (nu - 1) / strideU);
+		int vSamples = (1 + (nv - 1) / strideV);
 
 		List<Position> positions = new ArrayList<Position>(uSamples * vSamples);
 		float[] values = new float[uSamples * vSamples];
@@ -296,15 +316,18 @@ public class GocadGSurfReader implements GocadReader
 		{
 			if (propertyFile != null)
 			{
+				//first read elevations into array, to create the list of positions
 				readFileIntoFloatArray(context, elevationFile, elevationOffset, elevationEtype, elevationEsize,
 						elevationNoDataValue, positions, values, minmax, nu, nv, uSamples, vSamples, strideU, strideV,
 						origin, axisUStride, axisVStride, parameters.isBilinearMinification());
+				//next read the property file into the array for the actual values (passing null for positions)
 				readFileIntoFloatArray(context, propertyFile, propertyOffset, propertyEtype, propertyEsize,
 						propertyNoDataValue, null, values, minmax, nu, nv, uSamples, vSamples, strideU, strideV,
 						origin, axisUStride, axisVStride, parameters.isBilinearMinification());
 			}
 			else
 			{
+				//no property file, so use elevations as values
 				readFileIntoFloatArray(context, elevationFile, elevationOffset, elevationEtype, elevationEsize,
 						elevationNoDataValue, positions, values, minmax, nu, nv, uSamples, vSamples, strideU, strideV,
 						origin, axisUStride, axisVStride, parameters.isBilinearMinification());
@@ -365,11 +388,6 @@ public class GocadGSurfReader implements GocadReader
 							parameters.getColorMap().calculateColorNotingIsValuesPercentages(value, minmax[0],
 									minmax[1]);
 				}
-				else
-				{
-					//float percent = (value - min) / (max - min);
-					//color = new HSLColor((1f - percent) * 300f, 100f, 50f).getRGB();
-				}
 				colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
 						.put(color.getAlpha() / 255f);
 			}
@@ -385,15 +403,12 @@ public class GocadGSurfReader implements GocadReader
 			int vSamples, int strideU, int strideV, Vec4 origin, Vec4 axisUStride, Vec4 axisVStride,
 			boolean bilinearMinification) throws IOException
 	{
-		if (values != null)
+		for (int i = 0; i < values.length; i++)
 		{
-			for (int i = 0; i < values.length; i++)
-			{
-				values[i] = Float.NaN;
-			}
-			minmax[0] = Float.MAX_VALUE;
-			minmax[1] = -Float.MAX_VALUE;
+			values[i] = Float.NaN;
 		}
+		minmax[0] = Float.MAX_VALUE;
+		minmax[1] = -Float.MAX_VALUE;
 
 		double[] transformed = new double[3];
 		CoordinateTransformation transformation = parameters.getCoordinateTransformation();
@@ -403,7 +418,7 @@ public class GocadGSurfReader implements GocadReader
 		eis.skip(offset);
 		boolean ieee = "IEEE".equals(etype);
 
-		if (bilinearMinification && values != null)
+		if (bilinearMinification)
 		{
 			//contains the number of values summed
 			int[] count = new int[values.length];
@@ -445,26 +460,26 @@ public class GocadGSurfReader implements GocadReader
 				}
 			}
 
-			//create points for each summed region that has a value
-			for (int v = 0, vi = 0; v < nv; v += strideV, vi++)
+			if (positions != null)
 			{
-				int vOffset = vi * uSamples;
-				Vec4 vAdd = axisVStride.multiply3(v);
-				for (int u = 0, ui = 0; u < nu; u += strideU, ui++)
+				//create points for each summed region that has a value
+				for (int v = 0, vi = 0; v < nv; v += strideV, vi++)
 				{
-					int uOffset = ui;
-					int valueIndex = vOffset + uOffset;
-					float value = values[valueIndex];
-
-					Vec4 uAdd = axisUStride.multiply3(u);
-					Vec4 p =
-							Float.isNaN(value) ? new Vec4(origin.x + uAdd.x + vAdd.x, origin.y + uAdd.y + vAdd.y,
-									origin.z + uAdd.z + vAdd.z) : new Vec4(
-									origin.x + uAdd.x + vAdd.x + axisW.x * value, origin.y + uAdd.y + vAdd.y + axisW.y
-											* value, origin.z + uAdd.z + vAdd.z + axisW.z * value);
-
-					if (positions != null)
+					int vOffset = vi * uSamples;
+					Vec4 vAdd = axisVStride.multiply3(v);
+					for (int u = 0, ui = 0; u < nu; u += strideU, ui++)
 					{
+						int uOffset = ui;
+						int valueIndex = vOffset + uOffset;
+						float value = values[valueIndex];
+
+						Vec4 uAdd = axisUStride.multiply3(u);
+						Vec4 p =
+								Float.isNaN(value) ? new Vec4(origin.x + uAdd.x + vAdd.x, origin.y + uAdd.y + vAdd.y,
+										origin.z + uAdd.z + vAdd.z) : new Vec4(origin.x + uAdd.x + vAdd.x + axisW.x
+										* value, origin.y + uAdd.y + vAdd.y + axisW.y * value, origin.z + uAdd.z
+										+ vAdd.z + axisW.z * value);
+
 						if (transformation != null)
 						{
 							transformation.TransformPoint(transformed, p.x, p.y, zPositive ? p.z : -p.z);
@@ -493,7 +508,7 @@ public class GocadGSurfReader implements GocadReader
 
 					float value = GocadVoxetReader.readNextFloat(eis, parameters.getByteOrder(), ieee);
 					boolean valid = !Float.isNaN(value) && (noDataValue == null || value != noDataValue);
-					if (valid && values != null)
+					if (valid)
 					{
 						values[valueIndex] = value;
 						minmax[0] = Math.min(minmax[0], value);

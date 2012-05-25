@@ -39,11 +39,12 @@ import com.sun.opengl.util.BufferUtil;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class GocadPLineReader implements GocadReader
+public class GocadPLineReader implements GocadReader<FastShape>
 {
 	public final static String HEADER_REGEX = "(?i).*pline.*";
 
 	private final static Pattern segmentPattern = Pattern.compile("SEG\\s+(\\d+)\\s+(\\d+).*");
+
 
 	private GocadReaderParameters parameters;
 	private List<Position> positions;
