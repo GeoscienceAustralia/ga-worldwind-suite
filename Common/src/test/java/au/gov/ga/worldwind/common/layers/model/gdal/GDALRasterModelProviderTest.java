@@ -22,6 +22,8 @@ import static org.junit.Assert.fail;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import au.gov.ga.worldwind.common.layers.model.ModelLayer;
@@ -67,6 +70,21 @@ public class GDALRasterModelProviderTest
 			minValue=-2558.0;
 			maxValue=-699.0;
 		}}});
+	}
+	
+	@BeforeClass
+	public static void init()
+	{
+		// IMPORTANT: This fixes resolution of GDAL path in GDALUtils for the case when 
+		// tests are executed from Ant scripts other than Common
+		try
+		{
+			String userdir = new File(System.getProperty("user.dir")).getCanonicalPath();
+			System.setProperty("user.dir", userdir);
+		}
+		catch (IOException e)
+		{
+		}
 	}
 	
 	@Before
@@ -124,11 +142,11 @@ public class GDALRasterModelProviderTest
 	}
 	
 	@Test
-	public void loadValidUrl()
+	public void loadValidUrl() throws Exception
 	{
 		RasterProperties testRaster = TEST_RASTERS.get(0);
 		URL url = getClass().getResource(testRaster.name);
-
+		
 		final FastShapeMatcher matcher = new FastShapeMatcher();
 		mockContext.checking(new Expectations(){{{
 			allowing(modelLayer).addShape(with(matcher));
@@ -137,12 +155,12 @@ public class GDALRasterModelProviderTest
 		boolean dataLoaded = classUnderTest.doLoadData(url, modelLayer);
 		FastShape shape = matcher.shape;
 		
-		assertTrue(dataLoaded);
+		assertTrue("Data did not load as expected", dataLoaded);
 		
-		assertNotNull(shape);
-		assertTrue(shape.isForceSortedPrimitives());
-		assertTrue(shape.isLighted());
-		assertTrue(shape.isTwoSidedLighting());
+		assertNotNull("Shape is null", shape);
+		assertTrue("Force sorted primitives is not true", shape.isForceSortedPrimitives());
+		assertTrue("Shape is not lighted", shape.isLighted());
+		assertTrue("Two-sided lighting is not enabled", shape.isTwoSidedLighting());
 		assertTrue(shape.isCalculateNormals());
 		
 		// With MaxVariance = 0 we expect every pixel to have a corresponding position
@@ -163,7 +181,6 @@ public class GDALRasterModelProviderTest
 		assertEquals(testRaster.maxLon - testRaster.xCellSize, sector.getMaxLongitude().degrees, 0.0001);
 		assertEquals(testRaster.minLat - testRaster.yCellSize, sector.getMinLatitude().degrees, 0.0001);
 		assertEquals(testRaster.maxLat, sector.getMaxLatitude().degrees, 0.0001);
-		
 	}
 	
 	/** A simple properties class that holds raster details for use in tests */
