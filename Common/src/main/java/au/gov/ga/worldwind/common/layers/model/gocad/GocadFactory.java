@@ -55,7 +55,8 @@ public class GocadFactory
 		TSurf(GocadTSurfReader.HEADER_REGEX, GocadTSurfReader.END_REGEX, GocadTSurfReader.class),
 		SGrid(GocadSGridReader.HEADER_REGEX, GocadSGridReader.END_REGEX, GocadSGridReader.class),
 		GSurf(GocadGSurfReader.HEADER_REGEX, GocadGSurfReader.END_REGEX, GocadGSurfReader.class),
-		Group(GocadGroupReader.HEADER_REGEX, GocadGroupReader.END_REGEX, GocadGroupReader.class);
+		Group(GocadGroupReader.HEADER_REGEX, GocadGroupReader.END_REGEX, GocadGroupReader.class),
+		VSet(GocadVSetReader.HEADER_REGEX, GocadVSetReader.END_REGEX, GocadVSetReader.class);
 
 		/**
 		 * Regular expression used for matching the first line of the GOCAD object to this type.

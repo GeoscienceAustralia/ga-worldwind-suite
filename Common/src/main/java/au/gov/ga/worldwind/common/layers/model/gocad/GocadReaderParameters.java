@@ -49,6 +49,13 @@ public class GocadReaderParameters
 	private float maxVariance = 0;
 	private String paintedVariable;
 
+	private Double pointSize;
+	private Double pointMinSize;
+	private Double pointMaxSize;
+	private Double pointConstantAttenuation;
+	private Double pointLinearAttenuation;
+	private Double pointQuadraticAttenuation;
+	
 	public GocadReaderParameters()
 	{
 		//use defaults
@@ -71,6 +78,12 @@ public class GocadReaderParameters
 		this.colorMap = other.colorMap;
 		this.maxVariance = other.maxVariance;
 		this.paintedVariable = other.paintedVariable;
+		this.pointSize = other.pointSize;
+		this.pointMinSize = other.pointMinSize;
+		this.pointMaxSize = other.pointMaxSize;
+		this.pointConstantAttenuation = other.pointConstantAttenuation;
+		this.pointLinearAttenuation = other.pointLinearAttenuation;
+		this.pointQuadraticAttenuation = other.pointQuadraticAttenuation;
 	}
 	
 	/**
@@ -393,5 +406,101 @@ public class GocadReaderParameters
 	public boolean isColorInformationAvailable()
 	{
 		return this.colorMap != null || this.color != null;
+	}
+
+	/**
+	 * @return the pointSize
+	 */
+	public Double getPointSize()
+	{
+		return pointSize;
+	}
+
+	/**
+	 * @param pointSize the pointSize to set
+	 */
+	public void setPointSize(Double pointSize)
+	{
+		this.pointSize = pointSize;
+	}
+
+	/**
+	 * @return the pointMinSize
+	 */
+	public Double getPointMinSize()
+	{
+		return pointMinSize;
+	}
+
+	/**
+	 * @param pointMinSize the pointMinSize to set
+	 */
+	public void setPointMinSize(Double pointMinSize)
+	{
+		this.pointMinSize = pointMinSize;
+	}
+
+	/**
+	 * @return the pointMaxSize
+	 */
+	public Double getPointMaxSize()
+	{
+		return pointMaxSize;
+	}
+
+	/**
+	 * @param pointMaxSize the pointMaxSize to set
+	 */
+	public void setPointMaxSize(Double pointMaxSize)
+	{
+		this.pointMaxSize = pointMaxSize;
+	}
+
+	/**
+	 * @return the pointConstantAttenuation
+	 */
+	public Double getPointConstantAttenuation()
+	{
+		return pointConstantAttenuation;
+	}
+
+	/**
+	 * @param pointConstantAttenuation the pointConstantAttenuation to set
+	 */
+	public void setPointConstantAttenuation(Double pointConstantAttenuation)
+	{
+		this.pointConstantAttenuation = pointConstantAttenuation;
+	}
+
+	/**
+	 * @return the pointLinearAttenuation
+	 */
+	public Double getPointLinearAttenuation()
+	{
+		return pointLinearAttenuation;
+	}
+
+	/**
+	 * @param pointLinearAttenuation the pointLinearAttenuation to set
+	 */
+	public void setPointLinearAttenuation(Double pointLinearAttenuation)
+	{
+		this.pointLinearAttenuation = pointLinearAttenuation;
+	}
+
+	/**
+	 * @return the pointQuadraticAttenuation
+	 */
+	public Double getPointQuadraticAttenuation()
+	{
+		return pointQuadraticAttenuation;
+	}
+
+	/**
+	 * @param pointQuadraticAttenuation the pointQuadraticAttenuation to set
+	 */
+	public void setPointQuadraticAttenuation(Double pointQuadraticAttenuation)
+	{
+		this.pointQuadraticAttenuation = pointQuadraticAttenuation;
 	}
 }

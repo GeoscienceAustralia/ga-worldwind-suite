@@ -798,6 +798,11 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 				frontLock.readLock().lock();
 				try
 				{
+					if (indices == null && vertexBuffer == null)
+					{
+						return;
+					}
+					
 					int size = indices != null ? indices.limit() : vertexBuffer.limit() / 3;
 					if (modSortedIndices == null || modSortedIndices.limit() != size)
 					{
