@@ -106,4 +106,9 @@ public interface AVKeyMore extends AVKey
 
 	//model layer
 	final static String TARGET_BAND = "au.gov.ga.worldwind.AVKeyMore.TargetBand";
+	
+	//sphere layer
+	final static String SPHERE_RADIUS = "au.gov.worldwind.AVKeyMore.SphereRadius";
+	final static String SPHERE_SLICES = "au.gov.worldwind.AVKeyMore.SphereSlices";
+	final static String SPHERE_STACKS = "au.gov.worldwind.AVKeyMore.SphereStacks";
 }

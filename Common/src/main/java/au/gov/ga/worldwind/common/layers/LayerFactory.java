@@ -37,6 +37,7 @@ import au.gov.ga.worldwind.common.layers.mercator.delegate.DelegatorMercatorTile
 import au.gov.ga.worldwind.common.layers.model.ModelLayerFactory;
 import au.gov.ga.worldwind.common.layers.point.PointLayerFactory;
 import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
+import au.gov.ga.worldwind.common.layers.sphere.SphereLayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 import au.gov.ga.worldwind.common.layers.volume.VolumeLayerFactory;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -99,6 +100,10 @@ public class LayerFactory extends BasicLayerFactory
 		{
 			return VolumeLayerFactory.createVolumeLayer(domElement, params);
 		}
+		if ("SphereLayer".equalsIgnoreCase(layerType))
+		{
+			return SphereLayerFactory.createSphereLayer(domElement, params);
+		}
 
 		return super.createFromLayerDocument(domElement, params);
 	}
@@ -106,7 +111,9 @@ public class LayerFactory extends BasicLayerFactory
 	protected Layer createTiledCurtainLayer(Element domElement, AVList params)
 	{
 		if (params == null)
+		{
 			params = new AVListImpl();
+		}
 
 		Layer layer;
 		String serviceName = XMLUtil.getText(domElement, "Service/@serviceName");
@@ -129,7 +136,9 @@ public class LayerFactory extends BasicLayerFactory
 	protected Layer createTiledMercatorLayer(Element domElement, AVList params)
 	{
 		if (params == null)
+		{
 			params = new AVListImpl();
+		}
 
 		Layer layer;
 		String serviceName = XMLUtil.getText(domElement, "Service/@serviceName");
@@ -155,7 +164,9 @@ public class LayerFactory extends BasicLayerFactory
 		//overridden to allow extra service names for the TiledImageLayer type
 
 		if (params == null)
+		{
 			params = new AVListImpl();
+		}
 
 		Layer layer;
 		String serviceName = XMLUtil.getText(domElement, "Service/@serviceName");
@@ -168,7 +179,9 @@ public class LayerFactory extends BasicLayerFactory
 		{
 			layer = super.createTiledImageLayer(domElement, params);
 			if (params.getValue(AVKey.SECTOR) != null)
+			{
 				layer.setValue(AVKey.SECTOR, params.getValue(AVKey.SECTOR));
+			}
 		}
 
 		params = TimedExpirationHandler.getExpirationParams(domElement, params);
