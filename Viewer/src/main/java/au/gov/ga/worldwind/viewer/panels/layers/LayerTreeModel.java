@@ -15,6 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.viewer.panels.layers;
 
+import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;
@@ -169,8 +170,12 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		{
 			//set the opacity on both the layer node and the layer, so they match
 			layer.setOpacity(opacity);
-			enabler.getLayer(layer).setOpacity(opacity);
-			enabler.redrawWwd();
+			Layer l = enabler.getLayer(layer);
+			if (l != null)
+			{
+				l.setOpacity(opacity);
+				enabler.redrawWwd();
+			}
 		}
 	}
 
@@ -185,8 +190,12 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		{
 			//set the expiry on both the layer node and the layer, so they match
 			layer.setExpiryTime(expiryTime);
-			enabler.getLayer(layer).setExpiryTime(expiryTime);
-			enabler.redrawWwd();
+			Layer l = enabler.getLayer(layer);
+			if (l != null)
+			{
+				l.setExpiryTime(expiryTime);
+				enabler.redrawWwd();
+			}
 		}
 	}
 
