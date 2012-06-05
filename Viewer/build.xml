@@ -80,6 +80,7 @@
 		<ant antfile="${common_build_script}" target="run" dir="${common_dir}" inheritall="false">
 			<property name="javac_debug" value="${javac_debug}" />
 			<property name="perform_unit_tests" value="${perform_unit_tests}" />
+			<property name="user.dir" value="${common_dir}" />
 		</ant>
 	</target>
 

@@ -35,7 +35,7 @@ public class ViewStateBasicOrbitView extends TransformBasicOrbitView
 	public void beforeComputeMatrices()
 	{
 		super.beforeComputeMatrices();
-		minimumFarDistance = globe.getDiameter() / 2d;
+		minimumFarDistance = globe.getDiameter() * 1.5d;
 	}
 
 	@Override
@@ -74,13 +74,17 @@ public class ViewStateBasicOrbitView extends TransformBasicOrbitView
 		Position centerPosition = globe.computePositionFromPoint(centerPoint);
 
 		if (trySetOrientation(eyePosition, centerPosition))
+		{
 			return;
+		}
 
 		//if a center position just in front of the eye doesn't work, then try the closest position
 		centerPosition = Util.computeViewClosestCenterPosition(view, eyePoint);
 
 		if (trySetOrientation(eyePosition, centerPosition))
+		{
 			return;
+		}
 
 		//if everything failed, just set the view using the heading/pitch
 		setEyePosition(eyePosition);

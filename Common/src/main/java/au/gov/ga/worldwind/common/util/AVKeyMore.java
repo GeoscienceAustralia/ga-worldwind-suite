@@ -103,4 +103,12 @@ public interface AVKeyMore extends AVKey
 	final static String INITIAL_OFFSET_MIN_W = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMinW";
 	final static String INITIAL_OFFSET_MAX_W = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMaxW";
 	final static String FORCE_TWO_SIDED_LIGHTING = "au.gov.ga.worldwind.AVKeyMore.Force2SidedLighting";
+
+	//model layer
+	final static String TARGET_BAND = "au.gov.ga.worldwind.AVKeyMore.TargetBand";
+	
+	//sphere layer
+	final static String SPHERE_RADIUS = "au.gov.worldwind.AVKeyMore.SphereRadius";
+	final static String SPHERE_SLICES = "au.gov.worldwind.AVKeyMore.SphereSlices";
+	final static String SPHERE_STACKS = "au.gov.worldwind.AVKeyMore.SphereStacks";
 }

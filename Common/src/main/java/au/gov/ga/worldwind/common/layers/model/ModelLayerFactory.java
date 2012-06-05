@@ -28,6 +28,8 @@ import javax.xml.xpath.XPath;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.data.DataLayerFactory;
+import au.gov.ga.worldwind.common.layers.model.gdal.GDALRasterModelParameters;
+import au.gov.ga.worldwind.common.layers.model.gdal.GDALRasterModelProvider;
 import au.gov.ga.worldwind.common.layers.model.gocad.GocadModelProvider;
 import au.gov.ga.worldwind.common.layers.model.gocad.GocadReaderParameters;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
@@ -63,7 +65,9 @@ public class ModelLayerFactory
 	public static AVList getParamsFromDocument(Element domElement, AVList params)
 	{
 		if (params == null)
+		{
 			params = new AVListImpl();
+		}
 
 		XPath xpath = WWXML.makeXPath();
 
@@ -138,6 +142,11 @@ public class ModelLayerFactory
 		{
 			GocadReaderParameters parameters = new GocadReaderParameters(params);
 			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new GocadModelProvider(parameters));
+		}
+		else if ("GDAL".equalsIgnoreCase(format))
+		{
+			GDALRasterModelParameters parameters = new GDALRasterModelParameters(params);
+			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new GDALRasterModelProvider(parameters));
 		}
 		else
 		{

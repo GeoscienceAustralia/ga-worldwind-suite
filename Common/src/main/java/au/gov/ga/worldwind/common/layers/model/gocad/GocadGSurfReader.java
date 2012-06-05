@@ -43,7 +43,7 @@ import com.sun.opengl.util.BufferUtil;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class GocadGSurfReader implements GocadReader
+public class GocadGSurfReader implements GocadReader<FastShape>
 {
 	public final static String HEADER_REGEX = "(?i).*gsurf.*";
 
@@ -215,37 +215,57 @@ public class GocadGSurfReader implements GocadReader
 		if (type.equals("NO_DATA_VALUE"))
 		{
 			if (id == 1)
+			{
 				elevationNoDataValue = Double.parseDouble(value);
+			}
 			else if (id == paintedVariableId)
+			{
 				propertyNoDataValue = Double.parseDouble(value);
+			}
 		}
 		else if (type.equals("ESIZE"))
 		{
 			if (id == 1)
+			{
 				elevationEsize = Integer.parseInt(value);
+			}
 			else if (id == paintedVariableId)
+			{
 				propertyEsize = Integer.parseInt(value);
+			}
 		}
 		else if (type.equals("TYPE"))
 		{
 			if (id == 1)
+			{
 				elevationEtype = value;
+			}
 			else if (id == paintedVariableId)
+			{
 				propertyEtype = value;
+			}
 		}
 		else if (type.equals("OFFSET"))
 		{
 			if (id == 1)
+			{
 				elevationOffset = Integer.parseInt(value);
+			}
 			else if (id == paintedVariableId)
+			{
 				propertyOffset = Integer.parseInt(value);
+			}
 		}
 		else if (type.equals("FILE"))
 		{
 			if (id == 1)
+			{
 				elevationFile = value;
+			}
 			else if (id == paintedVariableId)
+			{
 				propertyFile = value;
+			}
 		}
 	}
 
@@ -285,8 +305,8 @@ public class GocadGSurfReader implements GocadReader
 			strideV = Math.max(1, Math.round((float) axisN.y / samplesPerAxis));
 		}
 
-		int uSamples = (int) (1 + (nu - 1) / strideU);
-		int vSamples = (int) (1 + (nv - 1) / strideV);
+		int uSamples = (1 + (nu - 1) / strideU);
+		int vSamples = (1 + (nv - 1) / strideV);
 
 		List<Position> positions = new ArrayList<Position>(uSamples * vSamples);
 		float[] values = new float[uSamples * vSamples];
