@@ -286,6 +286,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 			for (int i = startIndex; i < parents.size(); i++)
 			{
+				IData dataParent = i > 0 ? parents.get(i - 1) : null;
 				IData data = parents.get(i);
 				INode node = null;
 				for (int j = 0; j < currentParent.getChildCount(); j++)
@@ -300,7 +301,17 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				if (node == null)
 				{
 					node = new FolderNode(data.getName(), data.getInfoURL(), data.getIconURL(), true);
-					insertNodeInto(node, currentParent, currentParent.getChildCount(), false);
+					int index = currentParent.getChildCount();
+					if (dataParent instanceof IDataset)
+					{
+						IDataset dataset = (IDataset) dataParent;
+						int insertionIndex = findInsertionIndex(data, dataset, currentParent);
+						if (insertionIndex >= 0)
+						{
+							index = insertionIndex;
+						}
+					}
+					insertNodeInto(node, currentParent, index, false);
 				}
 				expandPath.add(currentParent);
 				currentParent = node;
@@ -311,7 +322,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 		//attempt to insert the layer into the same position as it is defined in the dataset
 		int index = currentParent.getChildCount();
-		if (directParent != null && directParent instanceof IDataset)
+		if (directParent instanceof IDataset)
 		{
 			IDataset dataset = (IDataset) directParent;
 			int insertionIndex = findInsertionIndex(layer, dataset, currentParent);
@@ -337,25 +348,16 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		});
 	}
 
-	protected int findInsertionIndex(ILayerDefinition layer, IDataset directParent, INode currentParent)
+	protected int findInsertionIndex(IData datasetOrLayer, IDataset directParent, INode currentParent)
 	{
-		List<ILayerDefinition> layers = new ArrayList<ILayerDefinition>();
 		List<IData> children = directParent.getChildren();
-		for (IData child : children)
-		{
-			if (child instanceof ILayerDefinition)
-			{
-				layers.add((ILayerDefinition) child);
-			}
-		}
-
-		int indexOfChild = layers.indexOf(layer);
+		int indexOfChild = children.indexOf(datasetOrLayer);
 		if (indexOfChild >= 0)
 		{
-			for (int i = indexOfChild + 1; i < layers.size(); i++)
+			for (int i = indexOfChild + 1; i < children.size(); i++)
 			{
-				ILayerDefinition l = layers.get(i);
-				int j = indexOfLayerName(l.getName(), currentParent);
+				IData d = children.get(i);
+				int j = indexOfDataName(d.getName(), currentParent);
 				if (j >= 0)
 				{
 					return j;
@@ -363,8 +365,8 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			}
 			for (int i = indexOfChild - 1; i >= 0; i--)
 			{
-				ILayerDefinition l = layers.get(i);
-				int j = indexOfLayerName(l.getName(), currentParent);
+				IData d = children.get(i);
+				int j = indexOfDataName(d.getName(), currentParent);
 				if (j >= 0)
 				{
 					return j + 1;
@@ -374,11 +376,11 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		return -1;
 	}
 
-	protected int indexOfLayerName(String layerName, INode parent)
+	protected int indexOfDataName(String dataName, INode parent)
 	{
 		for (int i = 0; i < parent.getChildCount(); i++)
 		{
-			if (layerName.equalsIgnoreCase(parent.getChild(i).getName()))
+			if (dataName.equalsIgnoreCase(parent.getChild(i).getName()))
 			{
 				return i;
 			}
