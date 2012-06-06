@@ -64,7 +64,7 @@ public class CurtainTileRenderer
 			Logging.logger().severe(message);
 			throw new IllegalStateException(message);
 		}
-		
+
 		ExtendedDrawContext.applyWireframePolygonMode(dc);
 
 		GL gl = dc.getGL();
@@ -107,8 +107,7 @@ public class CurtainTileRenderer
 					gl.glLoadIdentity();
 					tile.applyInternalTransform(dc);
 
-					SegmentGeometry geometry =
-							path.getGeometry(dc, tile.getSegment(), top, bottom, subsegments, followTerrain);
+					SegmentGeometry geometry = path.getGeometry(dc, tile, top, bottom, subsegments, followTerrain);
 					geometry.render(dc, 1);
 				}
 			}
