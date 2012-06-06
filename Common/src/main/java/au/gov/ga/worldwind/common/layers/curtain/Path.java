@@ -57,6 +57,7 @@ public class Path
 	protected static final String CACHE_ID = Path.class.getName();
 
 	protected long updateFrequency = 2000; // milliseconds
+	protected long exaggerationChangeTime = -1;
 
 	public Path(List<LatLon> positions)
 	{
@@ -175,10 +176,17 @@ public class Path
 	public synchronized SegmentGeometry getGeometry(DrawContext dc, CurtainTile tile, double top, double bottom,
 			int subsegments, boolean followTerrain)
 	{
+		boolean exaggerationChanged = VerticalExaggerationAccessor.checkAndMarkVerticalExaggeration(this, dc);
+		if (exaggerationChanged)
+		{
+			exaggerationChangeTime = System.currentTimeMillis();
+		}
+
 		MemoryCache cache = WorldWind.getMemoryCache(CACHE_ID);
 		TileKey tileKey = tile.getTileKey();
 		SegmentGeometry geometry = (SegmentGeometry) cache.getObject(tileKey);
-		if (geometry != null && geometry.getTime() >= System.currentTimeMillis() - this.getUpdateFrequency())
+		if (geometry != null && geometry.getTime() >= System.currentTimeMillis() - this.getUpdateFrequency()
+				&& geometry.getTime() >= exaggerationChangeTime)
 		{
 			return geometry;
 		}
@@ -252,7 +260,7 @@ public class Path
 		}
 		else
 		{
-			geometry.update(dc);
+			geometry.update(dc, refCenter);
 		}
 		return geometry;
 	}

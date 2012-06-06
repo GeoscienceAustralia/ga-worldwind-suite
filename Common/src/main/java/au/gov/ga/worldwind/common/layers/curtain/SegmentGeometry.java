@@ -33,10 +33,10 @@ import javax.media.opengl.GL;
  */
 public class SegmentGeometry implements Renderable
 {
-	private final Vec4 referenceCenter;
 	private final int vertexCount;
 	private final FloatBuffer vertices;
 	private final FloatBuffer texCoords;
+	private Vec4 referenceCenter;
 	private long time;
 
 	protected Object vboCacheKey = new Object();
@@ -143,9 +143,10 @@ public class SegmentGeometry implements Renderable
 		return 5 * vertexCount * Float.SIZE / 8;
 	}
 	
-	protected void update(DrawContext dc)
+	protected void update(DrawContext dc, Vec4 referenceCenter)
     {
         this.time = System.currentTimeMillis();
+        this.referenceCenter = referenceCenter;
 
         if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
         {
