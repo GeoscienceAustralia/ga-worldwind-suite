@@ -37,7 +37,7 @@ public class SegmentGeometry implements Renderable
 	private final int vertexCount;
 	private final FloatBuffer vertices;
 	private final FloatBuffer texCoords;
-	private final long time;
+	private long time;
 
 	protected Object vboCacheKey = new Object();
 
@@ -142,6 +142,16 @@ public class SegmentGeometry implements Renderable
 	{
 		return 5 * vertexCount * Float.SIZE / 8;
 	}
+	
+	protected void update(DrawContext dc)
+    {
+        this.time = System.currentTimeMillis();
+
+        if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
+        {
+            this.fillVerticesVBO(dc);
+        }
+    }
 
 	protected int[] fillVerticesVBO(DrawContext dc)
 	{

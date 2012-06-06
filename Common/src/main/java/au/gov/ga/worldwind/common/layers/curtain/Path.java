@@ -71,7 +71,10 @@ public class Path
 		setPositions(positions);
 	}
 
-	public synchronized void setPositions(List<LatLon> positions)
+	/*
+	 * Private; should only be called by constructor, as vertices are cached.
+	 */
+	private synchronized void setPositions(List<LatLon> positions)
 	{
 		this.positions.clear();
 		double[] distances = new double[positions.size()]; //last array value is unused, but required for simple second loop
@@ -187,7 +190,12 @@ public class Path
 		Globe globe = dc.getGlobe();
 
 		FloatBuffer verts, texCoords;
-		if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
+		if (geometry != null)
+		{
+			verts = geometry.getVertices();
+			texCoords = geometry.getTexCoords();
+		}
+		else if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
 		{
 			verts = FloatBuffer.allocate(numVertices * 3);
 			texCoords = FloatBuffer.allocate(numVertices * 2);
@@ -237,8 +245,15 @@ public class Path
 			texCoords.put((float) percent).put(0f);
 		}
 
-		geometry = new SegmentGeometry(dc, verts, texCoords, refCenter);
-		cache.add(tileKey, geometry, geometry.getSizeInBytes());
+		if (geometry == null)
+		{
+			geometry = new SegmentGeometry(dc, verts, texCoords, refCenter);
+			cache.add(tileKey, geometry, geometry.getSizeInBytes());
+		}
+		else
+		{
+			geometry.update(dc);
+		}
 		return geometry;
 	}
 
