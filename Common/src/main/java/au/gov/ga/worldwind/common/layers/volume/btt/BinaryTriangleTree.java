@@ -662,6 +662,7 @@ public class BinaryTriangleTree
 				originalIndices.add(triangle.rightIndex);
 			}
 			indices[i++] = leftIndex;
+			indices[i++] = apexIndex;
 			indices[i++] = rightIndex;
 		}
 
