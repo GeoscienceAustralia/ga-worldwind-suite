@@ -29,8 +29,6 @@ import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.Validate;
 
-import com.sun.opengl.util.BufferUtil;
-
 /**
  * A {@link ModelProvider} that reads a band from a GDAL-supported raster file
  * and treats band values as depth/elevation.
@@ -43,12 +41,12 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 
 	private Sector sector = null;
 	private GDALRasterModelParameters modelParameters = null;
-	
+
 	public GDALRasterModelProvider()
 	{
 		this(null);
 	}
-	
+
 	public GDALRasterModelProvider(GDALRasterModelParameters parameters)
 	{
 		if (parameters == null)
@@ -72,11 +70,11 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	{
 		Validate.notNull(url, "A URL is required");
 		Validate.notNull(layer, "A model layer is required");
-		
+
 		File file = URLUtil.urlToFile(url);
-		
+
 		// TODO: Add zip support
-		
+
 		Dataset gdalDataset;
 		try
 		{
@@ -87,92 +85,96 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 			e.printStackTrace();
 			return false;
 		}
-		
+
 		List<Position> positions = new ArrayList<Position>();
 		float[][] values = new float[gdalDataset.getRasterXSize()][gdalDataset.getRasterYSize()];
-		float[] minmax = new float[]{Float.MAX_VALUE, -Float.MAX_VALUE};
-		
+		float[] minmax = new float[] { Float.MAX_VALUE, -Float.MAX_VALUE };
+
 		readValuesFromDataset(gdalDataset, positions, values, minmax);
-		
-		BinaryTriangleTree btt = new BinaryTriangleTree(positions, gdalDataset.GetRasterXSize(), gdalDataset.GetRasterYSize());
+
+		BinaryTriangleTree btt =
+				new BinaryTriangleTree(positions, gdalDataset.GetRasterXSize(), gdalDataset.GetRasterYSize());
 		btt.setForceGLTriangles(true);
 		FastShape shape = btt.buildMesh(modelParameters.getMaxVariance());
-		
+
 		positions = shape.getPositions();
-		
+
 		shape.setForceSortedPrimitives(true);
 		shape.setLighted(true);
 		shape.setCalculateNormals(true);
 		shape.setTwoSidedLighting(true);
-		
+
 		shape.setColorBuffer(createColorBufferForDataset(positions, values, minmax, gdalDataset));
 		shape.setColorBufferElementSize(4);
-		
+
 		layer.addShape(shape);
-		
+
 		this.sector = shape.getSector();
-		
+
 		return true;
 	}
 
 	/**
 	 * Reads the values from the provided dataset into:
 	 * <ul>
-	 * 	<li>The provided positions list <code>(lat,lon,elevation)</code>
-	 *  <li>The provided values array <code>values[x,y] = elevation</code>
+	 * <li>The provided positions list <code>(lat,lon,elevation)</code>
+	 * <li>The provided values array <code>values[x,y] = elevation</code>
 	 * </ul>
 	 */
 	private void readValuesFromDataset(Dataset gdalDataset, List<Position> positions, float[][] values, float[] minmax)
 	{
 		Band band = getModelBand(gdalDataset);
-		
+
 		int columns = band.getXSize();
 		int rows = band.getYSize();
-		
+
 		ByteBuffer buffer = band.ReadRaster_Direct(0, 0, columns, rows, band.getDataType());
 		buffer.order(ByteOrder.nativeOrder()); // @see Band.ReadRaster_Direct
 		buffer.rewind();
-		
+
 		float nodata = getModelBandNodata(gdalDataset);
-		
+
 		double elevationOffset = getOffset(band);
 		double elevationScale = getScale(band);
-		
+
 		double[] geoTransform = gdalDataset.GetGeoTransform();
-		CoordinateTransformation coordinateTransformation = CoordinateTransformationUtil.getTransformationToWGS84(gdalDataset.GetProjection());
-		
+		CoordinateTransformation coordinateTransformation =
+				CoordinateTransformationUtil.getTransformationToWGS84(gdalDataset.GetProjection());
+
 		int dataType = band.getDataType();
-		
+
 		for (int y = 0; y < rows; y++)
 		{
 			for (int x = 0; x < columns; x++)
 			{
 				double datasetValue = getValue(buffer, dataType);
 				double elevation = toElevation(elevationOffset, elevationScale, datasetValue);
-				
+
 				double[] transformedCoords = transformCoordinates(geoTransform, x, y);
-				
-				Position position = new PositionWithCoord(projectCoordinates(coordinateTransformation, transformedCoords[0], transformedCoords[1], elevation), x, y);
-				
-				values[x][y] = (float)position.elevation;
-				
-				if (!isNoData(nodata, (float)position.elevation))
+
+				Position position =
+						new PositionWithCoord(projectCoordinates(coordinateTransformation, transformedCoords[0],
+								transformedCoords[1], elevation), x, y);
+
+				values[x][y] = (float) position.elevation;
+
+				if (!isNoData(nodata, (float) position.elevation))
 				{
 					if (position.elevation < minmax[0])
 					{
-						minmax[0] = (float)position.elevation;
+						minmax[0] = (float) position.elevation;
 					}
 					if (position.elevation > minmax[1])
 					{
-						minmax[1] = (float)position.elevation;
+						minmax[1] = (float) position.elevation;
 					}
 				}
-				
+
 				positions.add(position);
 			}
 		}
 	}
-	
+
 	/**
 	 * @return The band to use for loading the model data
 	 */
@@ -181,20 +183,27 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 		int band = modelParameters.getBand();
 		if (band > gdalDataset.GetRasterCount())
 		{
-			Logging.logger().warning("Cannot use specified band " + band + ". Raster dataset only has " + gdalDataset.GetRasterCount() + " bands.");
+			Logging.logger().warning(
+					"Cannot use specified band " + band + ". Raster dataset only has " + gdalDataset.GetRasterCount()
+							+ " bands.");
 			return gdalDataset.GetRasterBand(1);
 		}
 		return gdalDataset.GetRasterBand(band);
 	}
-	
+
 	/**
-	 * Transform the dataset pixel coordinates [Xs,Ys] into coordinates in the dataset's source projection [Xp,Yp]
+	 * Transform the dataset pixel coordinates [Xs,Ys] into coordinates in the
+	 * dataset's source projection [Xp,Yp]
 	 * 
-	 * @param geoTransform The geo transform coefficients 
-	 * @param x Pixel X coordinate
-	 * @param y Pixel Y coordinate
+	 * @param geoTransform
+	 *            The geo transform coefficients
+	 * @param x
+	 *            Pixel X coordinate
+	 * @param y
+	 *            Pixel Y coordinate
 	 * 
-	 * @return The provided coordinates transformed into the source projection [Xp,Yp]
+	 * @return The provided coordinates transformed into the source projection
+	 *         [Xp,Yp]
 	 * 
 	 * @see Dataset#GetGeoTransform()
 	 */
@@ -202,37 +211,39 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	{
 		double Xp = geoTransform[0] + x * geoTransform[1] + y * geoTransform[2];
 		double Yp = geoTransform[3] + x * geoTransform[4] + y * geoTransform[5];
-		return new double[]{Xp,Yp};
+		return new double[] { Xp, Yp };
 	}
-	
+
 	/**
 	 * Project the provided x,y,z coordinates from the source SRS to WGS84
 	 * 
-	 * @param ct The coordinate transformation to use for transforming the coordinates
-	 * @param x The x coordinate in source SRS
-	 * @param y The y coordinate in source SRS
-	 * @param elevation The elevation in source SRS
-	 *
+	 * @param ct
+	 *            The coordinate transformation to use for transforming the
+	 *            coordinates
+	 * @param x
+	 *            The x coordinate in source SRS
+	 * @param y
+	 *            The y coordinate in source SRS
+	 * @param elevation
+	 *            The elevation in source SRS
+	 * 
 	 * @return The coordinates projected in WGS84
 	 */
 	private Position projectCoordinates(CoordinateTransformation ct, double x, double y, double elevation)
 	{
 		if (ct == null)
 		{
-			return new Position(Angle.fromDegrees(y),
-							 	Angle.fromDegrees(x),
-							 	elevation);
+			return new Position(Angle.fromDegrees(y), Angle.fromDegrees(x), elevation);
 		}
-		
+
 		double transformed[] = new double[3];
 		ct.TransformPoint(transformed, x, y, elevation);
-		
-		Position projectedPosition = new Position(Angle.fromDegrees(transformed[1]),
-						 						  Angle.fromDegrees(transformed[0]),
-						 						  transformed[2]);
+
+		Position projectedPosition =
+				new Position(Angle.fromDegrees(transformed[1]), Angle.fromDegrees(transformed[0]), transformed[2]);
 		return projectedPosition;
 	}
-	
+
 	/**
 	 * @return The data scale for the provided band
 	 */
@@ -254,7 +265,8 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	}
 
 	/**
-	 * Convert a provided value (sampled from the raster band) to an elevation value in metres
+	 * Convert a provided value (sampled from the raster band) to an elevation
+	 * value in metres
 	 */
 	private double toElevation(double offset, double scale, double value)
 	{
@@ -301,7 +313,7 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 			throw new IllegalStateException("Unknown buffer type");
 		}
 	}
-	
+
 	private static int getUInt16(ByteBuffer buffer)
 	{
 		int first = 0xff & buffer.get();
@@ -315,7 +327,7 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 			return (first | second << 8);
 		}
 	}
-	
+
 	private static long getUInt32(ByteBuffer buffer)
 	{
 		long first = 0xff & buffer.get();
@@ -333,24 +345,27 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	}
 
 	/**
-	 * Create and return an RGBA color buffer with an entry for each position in the provided dataset
-	 *
-	 * @return An RGBA color buffer that can be used directly by the {@link FastShape} class
+	 * Create and return an RGBA color buffer with an entry for each position in
+	 * the provided dataset
+	 * 
+	 * @return An RGBA color buffer that can be used directly by the
+	 *         {@link FastShape} class
 	 */
-	private FloatBuffer createColorBufferForDataset(List<Position> positions, float[][] values, float[] minmax, Dataset gdalDataset)
+	private float[] createColorBufferForDataset(List<Position> positions, float[][] values, float[] minmax,
+			Dataset gdalDataset)
 	{
 		float nodata = getModelBandNodata(gdalDataset);
-		
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * COLOR_BUFFER_ELEMENT_SIZE);
+
+		FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * COLOR_BUFFER_ELEMENT_SIZE);
 		for (Position position : positions)
 		{
 			PositionWithCoord pwv = (PositionWithCoord) position;
-			
+
 			int u = pwv.u;
 			int v = pwv.v;
-			
+
 			float[] adjacentValues = getAdjacentValues(values, u, v);
-			
+
 			//check all values around the current position for NODATA; if NODATA, use a transparent color
 			if (isNoData(nodata, adjacentValues))
 			{
@@ -364,20 +379,20 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 				Color color;
 				if (modelParameters.getColorMap() != null)
 				{
-					color = modelParameters.getColorMap().calculateColorNotingIsValuesPercentages(values[u][v], minmax[0], minmax[1]);
+					color =
+							modelParameters.getColorMap().calculateColorNotingIsValuesPercentages(values[u][v],
+									minmax[0], minmax[1]);
 				}
 				else
 				{
 					color = modelParameters.getDefaultColor();
 				}
-				
-				colorBuffer.put(color.getRed() / 255f)
-						   .put(color.getGreen() / 255f)
-						   .put(color.getBlue() / 255f)
-						   .put(color.getAlpha() / 255f);
+
+				colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
+						.put(color.getAlpha() / 255f);
 			}
 		}
-		return colorBuffer;
+		return colorBuffer.array();
 	}
 
 	private float[] getAdjacentValues(float[][] values, int u, int v)
@@ -386,14 +401,10 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 		int up = u < values.length - 1 ? u + 1 : u;
 		int vn = v > 0 ? v - 1 : v;
 		int vp = v < values[0].length - 1 ? v + 1 : v;
-		
-		float[] adjacentValues = new float[] {
-			values[u][v], values[un][v], 
-			values[up][v], values[u][vn], 
-			values[u][vp], values[un][vn], 
-			values[up][vn], values[un][vp], 
-			values[up][vp],
-		};
+
+		float[] adjacentValues =
+				new float[] { values[u][v], values[un][v], values[up][v], values[u][vn], values[u][vp], values[un][vn],
+						values[up][vn], values[un][vp], values[up][vp], };
 		return adjacentValues;
 	}
 
@@ -401,14 +412,14 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	{
 		Double[] nodatas = new Double[1];
 		getModelBand(gdalDataset).GetNoDataValue(nodatas);
-		float nodata = (float)(double)nodatas[0];
+		float nodata = (float) (double) nodatas[0];
 		return nodata;
 	}
-	
+
 	/**
 	 * @return <code>true</code> if any value in the provided values is NODATA
 	 */
-	private boolean isNoData(float nodata, float...values)
+	private boolean isNoData(float nodata, float... values)
 	{
 		for (float f : values)
 		{
@@ -419,7 +430,7 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 		}
 		return false;
 	}
-	
+
 	/**
 	 * @return the modelParameters
 	 */
@@ -427,9 +438,10 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	{
 		return modelParameters;
 	}
-	
+
 	/**
-	 * A utility class that stores the pixel coordinates of a raster cell alongside it's real-world position
+	 * A utility class that stores the pixel coordinates of a raster cell
+	 * alongside it's real-world position
 	 */
 	protected static class PositionWithCoord extends Position
 	{
@@ -440,7 +452,7 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 		{
 			this(p.latitude, p.longitude, p.elevation, u, v);
 		}
-		
+
 		public PositionWithCoord(Angle latitude, Angle longitude, double elevation, int u, int v)
 		{
 			super(latitude, longitude, elevation);

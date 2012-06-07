@@ -20,7 +20,6 @@ import gov.nasa.worldwind.geom.Sector;
 
 import java.awt.Rectangle;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +28,6 @@ import javax.media.opengl.GL;
 import au.gov.ga.worldwind.common.layers.data.AbstractDataProvider;
 import au.gov.ga.worldwind.common.layers.volume.btt.BinaryTriangleTree;
 import au.gov.ga.worldwind.common.util.FastShape;
-
-import com.sun.opengl.util.BufferUtil;
 
 /**
  * Abstract implementation of the {@link VolumeDataProvider} interface. Provides
@@ -194,7 +191,8 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	public TopBottomFastShape createLongitudeCurtain(int x)
 	{
 		List<Position> positions = new ArrayList<Position>();
-		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(ySize * 4);
+		float[] textureCoordinateBuffer = new float[ySize * 4];
+		int i = 0;
 		for (int y = 0; y < ySize; y++)
 		{
 			Position position = getPosition(x, y);
@@ -205,8 +203,10 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 			positions.add(top);
 			positions.add(bottom);
 			float u = y / (float) Math.max(1, ySize - 1);
-			textureCoordinateBuffer.put(u).put(0);
-			textureCoordinateBuffer.put(u).put(1);
+			textureCoordinateBuffer[i++] = u;
+			textureCoordinateBuffer[i++] = 0;
+			textureCoordinateBuffer[i++] = u;
+			textureCoordinateBuffer[i++] = 1;
 		}
 		TopBottomFastShape shape = new TopBottomFastShape(positions, GL.GL_TRIANGLE_STRIP);
 		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
@@ -217,7 +217,8 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	public TopBottomFastShape createLatitudeCurtain(int y)
 	{
 		List<Position> positions = new ArrayList<Position>();
-		FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(xSize * 4);
+		float[] textureCoordinateBuffer = new float[xSize * 4];
+		int i = 0;
 		for (int x = 0; x < xSize; x++)
 		{
 			Position position = getPosition(x, y);
@@ -228,8 +229,10 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 			positions.add(top);
 			positions.add(bottom);
 			float u = x / (float) Math.max(1, xSize - 1);
-			textureCoordinateBuffer.put(u).put(0);
-			textureCoordinateBuffer.put(u).put(1);
+			textureCoordinateBuffer[i++] = u;
+			textureCoordinateBuffer[i++] = 0;
+			textureCoordinateBuffer[i++] = u;
+			textureCoordinateBuffer[i++] = 1;
 		}
 		TopBottomFastShape shape = new TopBottomFastShape(positions, GL.GL_TRIANGLE_STRIP);
 		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
@@ -269,22 +272,23 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 		}
 
 		int squareIndexCount = ((getXSize() - 1) + (getYSize() - 1)) * 2;
-		IntBuffer indices = BufferUtil.newIntBuffer(2 * (squareIndexCount * 2 + 4));
+		int[] indices = new int[2 * (squareIndexCount * 2 + 4)];
 
+		int k = 0;
 		for (int i = 0; i < squareIndexCount; i++)
 		{
 			int j = (i + 1) % squareIndexCount;
-			indices.put(i);
-			indices.put(j);
-			indices.put(i + squareIndexCount);
-			indices.put(j + squareIndexCount);
+			indices[k++] = i;
+			indices[k++] = j;
+			indices[k++] = i + squareIndexCount;
+			indices[k++] = j + squareIndexCount;
 		}
 		
 		int j = 0;
 		for(int i = 0; i < 4; i++)
 		{
-			indices.put(j);
-			indices.put(j + squareIndexCount);
+			indices[k++] = j;
+			indices[k++] = j + squareIndexCount;
 			j += (i % 2 == 0 ? getXSize() : getYSize()) - 1;
 		}
 

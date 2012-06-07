@@ -37,8 +37,6 @@ import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Validate;
 
-import com.sun.opengl.util.BufferUtil;
-
 /**
  * {@link GocadReader} implementation for reading Voxet GOCAD files.
  * 
@@ -98,9 +96,9 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 			name = matcher.group(1);
 			return;
 		}
-		
+
 		matcher = zpositivePattern.matcher(line);
-		if(matcher.matches())
+		if (matcher.matches())
 		{
 			zPositive = !matcher.group(1).equalsIgnoreCase("depth");
 		}
@@ -380,7 +378,7 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 
 		//create a color buffer containing a color for each point
 		int colorBufferElementSize = parameters.getColorMap() != null ? 4 : 3;
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * colorBufferElementSize);
+		FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * colorBufferElementSize);
 		for (float value : values)
 		{
 			//check that this value is valid; only non-NaN floats have points associated
@@ -409,7 +407,7 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 
 		FastShape shape = new FastShape(positions, GL.GL_POINTS);
 		shape.setName(name);
-		shape.setColorBuffer(colorBuffer);
+		shape.setColorBuffer(colorBuffer.array());
 		shape.setColorBufferElementSize(colorBufferElementSize);
 		shape.setForceSortedPrimitives(true);
 		shape.setFollowTerrain(true);

@@ -50,7 +50,7 @@ public class HistoricEarthquakesLayerTest
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -100), 5, getMillisForDate("1970-01-01")));
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -100), 5, getMillisForDate("1990-01-01")));
 		
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(quakes.size() * 3);
+		FloatBuffer colorBuffer = FloatBuffer.allocate(quakes.size() * 3);
 		classUnderTest.generateDateColoring(colorBuffer, quakes);
 		colorBuffer.rewind();
 		
@@ -71,7 +71,7 @@ public class HistoricEarthquakesLayerTest
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -100), 5, getMillisForDate("1990-01-01")));
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -200), 5, getMillisForDate("1990-01-01")));
 		
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(quakes.size() * 3);
+		FloatBuffer colorBuffer = FloatBuffer.allocate(quakes.size() * 3);
 		classUnderTest.generateDepthColoring(colorBuffer, quakes);
 		colorBuffer.rewind();
 		
@@ -92,7 +92,7 @@ public class HistoricEarthquakesLayerTest
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -100), 5, getMillisForDate("1990-01-01")));
 		quakes.add(new Earthquake(Position.fromDegrees(100, 100, -200), 10, getMillisForDate("1990-01-01")));
 		
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(quakes.size() * 3);
+		FloatBuffer colorBuffer = FloatBuffer.allocate(quakes.size() * 3);
 		classUnderTest.generateMagnitudeColoring(colorBuffer, quakes);
 		colorBuffer.rewind();
 		
@@ -116,7 +116,7 @@ public class HistoricEarthquakesLayerTest
 		ArrayList<HSLColor> result = new ArrayList<HSLColor>();
 		while (colorBuffer.hasRemaining())
 		{
-			Color rgbColor = new Color((float)colorBuffer.get(), (float)colorBuffer.get(), (float)colorBuffer.get());
+			Color rgbColor = new Color(colorBuffer.get(), colorBuffer.get(), colorBuffer.get());
 			result.add(new HSLColor(rgbColor));
 		}
 		return result;

@@ -31,6 +31,7 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.OrderedRenderable;
 import gov.nasa.worldwind.render.WWTexture;
 import gov.nasa.worldwind.util.BufferWrapper;
+import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.awt.Color;
@@ -38,8 +39,10 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,7 +51,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.imageio.ImageIO;
@@ -56,9 +61,9 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.layers.Wireframeable;
+import au.gov.ga.worldwind.common.render.DrawContextDelegateVerticalExaggerationOverride;
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
-import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.texture.Texture;
 
 /**
@@ -71,47 +76,44 @@ import com.sun.opengl.util.texture.Texture;
  */
 public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wireframeable
 {
-	//TODO add VBO support
-
 	protected final static OwnerRunnableRunner VertexUpdater = new OwnerRunnableRunner(FastShape.class.getName()
 			+ " VertexUpdater");
 	protected final static OwnerRunnableRunner IndexUpdater = new OwnerRunnableRunner(FastShape.class.getName()
 			+ " IndexUpdater");
 
-	protected final ReadWriteLock frontLock = new ReentrantReadWriteLock();
+	protected final ReadWriteLock positionLock = new ReentrantReadWriteLock();
+	protected final PickSupport pickSupport = new PickSupport();
+	protected Layer pickLayer = null;
+
+	protected List<Position> positions;
+	protected ReadWriteLock positionsLock = new ReentrantReadWriteLock();
+	protected String name = "Shape";
+	protected final int mode;
+
+	//calculated:
+	protected final FloatVBO vertexVBO = new FloatVBO(3);
+	protected final FloatVBO normalVBO = new FloatVBO(3);
+	protected final IntIndexVBO sortedIndexVBO = new IntIndexVBO();
+
+	//set:
+	protected final IntIndexVBO indexVBO = new IntIndexVBO();
+	protected final FloatVBO colorVBO = new FloatVBO(3);
+	protected final FloatVBO pickingColorVBO = new FloatVBO(3);
+	protected final FloatVBO textureCoordinateVBO = new FloatVBO(2);
 
 	protected boolean useOrderedRendering = false;
 	protected double distanceFromEye = 0;
 	protected double alphaForOrderedRenderingMode;
 
-	protected final PickSupport pickSupport = new PickSupport();
-	protected Layer pickLayer = null;
-
-	protected List<Position> positions;
-
-	protected FloatBuffer colorBuffer;
-	protected int colorBufferElementSize = 3;
-	protected FloatBuffer textureCoordinateBuffer;
-	protected IntBuffer indices;
-	protected int mode;
-	protected String name = "Shape";
-
-	protected FloatBuffer vertexBuffer;
-	protected FloatBuffer modVertexBuffer;
-	protected FloatBuffer normalBuffer;
-	protected FloatBuffer modNormalBuffer;
 	protected Sphere boundingSphere;
 	protected Sphere modBoundingSphere;
 	protected Sector sector;
 
-	protected IntBuffer sortedIndices;
-	protected IntBuffer modSortedIndices;
-
+	protected boolean colorBufferEnabled = true;
 	protected Color color = Color.white;
 	protected double opacity = 1;
 	protected boolean followTerrain = false;
 
-	//protected double lastVerticalExaggeration = -1;
 	protected Globe lastGlobe = null;
 	protected boolean verticesDirty = true;
 	protected Vec4 lastEyePoint = null;
@@ -144,7 +146,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 	protected boolean textured = true; //only actually textured if texture is not null
 	protected Texture texture;
 	protected double[] textureMatrix;
-	
+
 	protected Layer lastLayer;
 
 	protected final List<FastShapeRenderListener> renderListeners = new ArrayList<FastShapeRenderListener>();
@@ -154,12 +156,17 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		this(positions, null, mode);
 	}
 
-	public FastShape(List<Position> positions, IntBuffer indices, int mode)
+	public FastShape(List<Position> positions, int[] indices, int mode)
 	{
+		this.mode = mode;
 		setPositions(positions);
 		setIndices(indices);
-		setMode(mode);
+		if (firstShape == null)
+			firstShape = this;
 	}
+
+	@Deprecated
+	private static FastShape firstShape;
 
 	@Override
 	public double getDistanceFromEye()
@@ -218,8 +225,16 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		{
 			return;
 		}
-		
-		if(dc.getCurrentLayer() != null)
+
+		if (!dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
+		{
+			String message = "Vertex Buffer Objects are disabled or unsupported by your graphics card.";
+			Logging.logger().severe(message);
+			setEnabled(false);
+			return;
+		}
+
+		if (dc.getCurrentLayer() != null)
 		{
 			lastLayer = dc.getCurrentLayer();
 		}
@@ -229,15 +244,12 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		boolean backfaceCulling = isBackfaceCulling();
 		Sphere boundingSphere = this.boundingSphere;
 		Color color = getColor();
-		FloatBuffer colorBuffer = getColorBuffer();
-		int colorBufferElementSize = getColorBufferElementSize();
+		boolean colorBufferEnabled = isColorBufferEnabled();
 		boolean fogEnabled = isFogEnabled();
 		boolean forceSortedPrimitives = isForceSortedPrimitives();
-		IntBuffer indices = getIndices();
 		boolean lighted = isLighted();
 		Double lineWidth = getLineWidth();
 		int mode = getMode();
-		FloatBuffer normalBuffer = this.normalBuffer;
 		Double pointConstantAttenuation = getPointConstantAttenuation();
 		Double pointLinearAttenuation = getPointLinearAttenuation();
 		Double pointQuadraticAttenuation = getPointQuadraticAttenuation();
@@ -247,14 +259,11 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		boolean pointSprite = isPointSprite();
 		WWTexture pointTexture = this.pointTexture;
 		URL pointTextureUrl = getPointTextureUrl();
-		IntBuffer sortedIndices = this.sortedIndices;
 		boolean sortTransparentPrimitives = isSortTransparentPrimitives();
 		Texture texture = getTexture();
-		FloatBuffer textureCoordinateBuffer = getTextureCoordinateBuffer();
 		boolean textured = isTextured();
 		double[] textureMatrix = getTextureMatrix();
 		boolean twoSidedLighting = isTwoSidedLighting();
-		FloatBuffer vertexBuffer = this.vertexBuffer;
 		boolean wireframe = isWireframe();
 		boolean willCalculateNormals = willCalculateNormals();
 		boolean useOrderedRenderingMode = isUseOrderedRendering();
@@ -267,283 +276,285 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 		recalculateIfRequired(dc, alpha);
 
-		frontLock.readLock().lock();
+		if (positions.isEmpty() || vertexVBO.getBuffer() == null)
+		{
+			return;
+		}
+
+		if (boundingSphere == null || !dc.getView().getFrustumInModelCoordinates().intersects(boundingSphere))
+		{
+			return;
+		}
+
+		if (useOrderedRenderingMode)
+		{
+			if (!dc.isOrderedRenderingMode())
+			{
+				alphaForOrderedRenderingMode = alpha;
+				pickLayer = dc.getCurrentLayer();
+				dc.addOrderedRenderable(this);
+				return;
+			}
+			alpha = alphaForOrderedRenderingMode;
+		}
+
+		if (dc.isPickingMode())
+		{
+			alpha = 1;
+		}
+
+		GL gl = dc.getGL();
+		OGLStackHandler stack = new OGLStackHandler();
+
 		try
 		{
-			if (vertexBuffer == null || vertexBuffer.limit() <= 0)
+			notifyRenderListenersOfPreRender(dc);
+
+			boolean colorBufferContainsAlpha = colorVBO.getBuffer() != null && colorVBO.getElementStride() > 3;
+			boolean willUseSortedIndices =
+					(forceSortedPrimitives || (sortTransparentPrimitives && alpha < 1.0))
+							&& sortedIndexVBO.getBuffer() != null;
+			boolean willUsePointSprite = mode == GL.GL_POINTS && pointSprite && pointTextureUrl != null;
+			boolean willUseTextureBlending = (alpha < 1.0 || color != null) && colorBufferContainsAlpha;
+
+			if (willUsePointSprite && pointTexture == null)
 			{
-				return;
+				try
+				{
+					BufferedImage image = ImageIO.read(pointTextureUrl.openStream());
+					pointTexture = new BasicWWTexture(image, true);
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+					willUsePointSprite = false;
+				}
+			}
+			if (willUseTextureBlending && blankTexture == null)
+			{
+				BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+				blankTexture = new BasicWWTexture(image, true);
 			}
 
-			if (boundingSphere == null || !dc.getView().getFrustumInModelCoordinates().intersects(boundingSphere))
+			int attributesToPush = GL.GL_CURRENT_BIT | GL.GL_POINT_BIT;
+			if (!fogEnabled)
 			{
-				return;
+				attributesToPush |= GL.GL_FOG_BIT;
+			}
+			if (wireframe || backfaceCulling)
+			{
+				attributesToPush |= GL.GL_POLYGON_BIT;
+			}
+			if (lighted)
+			{
+				attributesToPush |= GL.GL_LIGHTING_BIT;
+			}
+			if (willUseSortedIndices)
+			{
+				attributesToPush |= GL.GL_DEPTH_BUFFER_BIT;
+			}
+			if (lineWidth != null)
+			{
+				attributesToPush |= GL.GL_LINE_BIT;
+			}
+			if (willUsePointSprite || willUseTextureBlending || (textured && texture != null))
+			{
+				attributesToPush |= GL.GL_TEXTURE_BIT;
 			}
 
-			if (useOrderedRenderingMode)
+			stack.pushAttrib(gl, attributesToPush);
+			stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+			Vec4 referenceCenter = boundingSphere.getCenter();
+			dc.getView().pushReferenceCenter(dc, referenceCenter);
+
+			if (lineWidth != null)
 			{
-				if (!dc.isOrderedRenderingMode())
-				{
-					alphaForOrderedRenderingMode = alpha;
-					pickLayer = dc.getCurrentLayer();
-					dc.addOrderedRenderable(this);
-					return;
-				}
-				alpha = alphaForOrderedRenderingMode;
+				gl.glLineWidth(lineWidth.floatValue());
+			}
+			if (pointSize != null)
+			{
+				gl.glPointSize(pointSize.floatValue());
+			}
+			if (pointMinSize != null)
+			{
+				gl.glPointParameterf(GL.GL_POINT_SIZE_MIN, pointMinSize.floatValue());
+			}
+			if (pointMaxSize != null)
+			{
+				gl.glPointParameterf(GL.GL_POINT_SIZE_MAX, pointMaxSize.floatValue());
+			}
+			if (pointConstantAttenuation != null || pointLinearAttenuation != null || pointQuadraticAttenuation != null)
+			{
+				float ca = pointConstantAttenuation != null ? pointConstantAttenuation.floatValue() : 1f;
+				float la = pointLinearAttenuation != null ? pointLinearAttenuation.floatValue() : 0f;
+				float qa = pointQuadraticAttenuation != null ? pointQuadraticAttenuation.floatValue() : 0f;
+				gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, new float[] { ca, la, qa }, 0);
+			}
+			if (!fogEnabled)
+			{
+				gl.glDisable(GL.GL_FOG);
+			}
+			if (wireframe)
+			{
+				gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+			}
+			if (backfaceCulling)
+			{
+				gl.glEnable(GL.GL_CULL_FACE);
+				gl.glCullFace(GL.GL_BACK);
+			}
+			if (lighted)
+			{
+				Vec4 cameraPosition = dc.getView().getEyePoint();
+				Vec4 lightPos = cameraPosition.subtract3(referenceCenter);
+				float[] lightPosition = { (float) lightPos.x, (float) lightPos.y, (float) lightPos.z, 1.0f };
+				float[] lightAmbient = { 0.0f, 0.0f, 0.0f, 1.0f };
+				float[] lightDiffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
+				float[] lightSpecular = { 1.0f, 1.0f, 1.0f, 1.0f };
+				float[] modelAmbient = { 0.3f, 0.3f, 0.3f, 1.0f };
+				gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, modelAmbient, 0);
+				gl.glLightfv(GL.GL_LIGHT1, GL.GL_POSITION, lightPosition, 0);
+				gl.glLightfv(GL.GL_LIGHT1, GL.GL_DIFFUSE, lightDiffuse, 0);
+				gl.glLightfv(GL.GL_LIGHT1, GL.GL_AMBIENT, lightAmbient, 0);
+				gl.glLightfv(GL.GL_LIGHT1, GL.GL_SPECULAR, lightSpecular, 0);
+				gl.glDisable(GL.GL_LIGHT0);
+				gl.glEnable(GL.GL_LIGHT1);
+				gl.glEnable(GL.GL_LIGHTING);
+				gl.glEnable(GL.GL_COLOR_MATERIAL);
+				gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, twoSidedLighting ? GL.GL_TRUE : GL.GL_FALSE);
 			}
 
-			if (dc.isPickingMode())
+			if (willUsePointSprite)
 			{
-				alpha = 1;
+				gl.glEnable(GL.GL_POINT_SMOOTH);
+				gl.glEnable(GL.GL_POINT_SPRITE);
+
+				//stage 0: previous (color) * texture
+
+				gl.glActiveTexture(GL.GL_TEXTURE0);
+				gl.glEnable(GL.GL_TEXTURE_2D);
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
+				gl.glTexEnvi(GL.GL_POINT_SPRITE, GL.GL_COORD_REPLACE, GL.GL_TRUE);
+
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_REPLACE);
+
+				//TODO consider (instead of 2 calls above):
+				//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
+				//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_RGB, GL.GL_TEXTURE);
+				//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_MODULATE);
+
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_ALPHA, GL.GL_PREVIOUS);
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_ALPHA, GL.GL_TEXTURE);
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_ALPHA, GL.GL_MODULATE);
+
+				pointTexture.bind(dc);
 			}
 
-			GL gl = dc.getGL();
-			OGLStackHandler stack = new OGLStackHandler();
-
-			try
+			if (willUseTextureBlending)
 			{
-				notifyRenderListenersOfPreRender(dc);
-
-				boolean colorBufferContainsAlpha = colorBuffer != null && colorBufferElementSize > 3;
-				boolean willUseSortedIndices =
-						(forceSortedPrimitives || (sortTransparentPrimitives && alpha < 1.0)) && sortedIndices != null;
-				boolean willUsePointSprite = mode == GL.GL_POINTS && pointSprite && pointTextureUrl != null;
-				boolean willUseTextureBlending = (alpha < 1.0 || color != null) && colorBufferContainsAlpha;
-
-				if (willUsePointSprite && pointTexture == null)
+				float r = 1, g = 1, b = 1;
+				if (color != null)
 				{
-					try
-					{
-						BufferedImage image = ImageIO.read(pointTextureUrl.openStream());
-						pointTexture = new BasicWWTexture(image, true);
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-						willUsePointSprite = false;
-					}
-				}
-				if (willUseTextureBlending && blankTexture == null)
-				{
-					BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-					blankTexture = new BasicWWTexture(image, true);
+					r = color.getRed() / 255f;
+					g = color.getGreen() / 255f;
+					b = color.getBlue() / 255f;
 				}
 
-				int attributesToPush = GL.GL_CURRENT_BIT | GL.GL_POINT_BIT;
-				if (!fogEnabled)
-				{
-					attributesToPush |= GL.GL_FOG_BIT;
-				}
-				if (wireframe || backfaceCulling)
-				{
-					attributesToPush |= GL.GL_POLYGON_BIT;
-				}
-				if (lighted)
-				{
-					attributesToPush |= GL.GL_LIGHTING_BIT;
-				}
-				if (willUseSortedIndices)
-				{
-					attributesToPush |= GL.GL_DEPTH_BUFFER_BIT;
-				}
-				if (lineWidth != null)
-				{
-					attributesToPush |= GL.GL_LINE_BIT;
-				}
-				if (willUsePointSprite || willUseTextureBlending || (textured && texture != null))
-				{
-					attributesToPush |= GL.GL_TEXTURE_BIT;
-				}
+				//stage 1: previous (color) * texture envionment color
 
-				stack.pushAttrib(gl, attributesToPush);
-				stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-				Vec4 referenceCenter = boundingSphere.getCenter();
-				dc.getView().pushReferenceCenter(dc, referenceCenter);
+				gl.glActiveTexture(willUsePointSprite ? GL.GL_TEXTURE1 : GL.GL_TEXTURE0);
+				gl.glEnable(GL.GL_TEXTURE_2D);
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
 
-				if (lineWidth != null)
-				{
-					gl.glLineWidth(lineWidth.floatValue());
-				}
-				if (pointSize != null)
-				{
-					gl.glPointSize(pointSize.floatValue());
-				}
-				if (pointMinSize != null)
-				{
-					gl.glPointParameterf(GL.GL_POINT_SIZE_MIN, pointMinSize.floatValue());
-				}
-				if (pointMaxSize != null)
-				{
-					gl.glPointParameterf(GL.GL_POINT_SIZE_MAX, pointMaxSize.floatValue());
-				}
-				if (pointConstantAttenuation != null || pointLinearAttenuation != null
-						|| pointQuadraticAttenuation != null)
-				{
-					float ca = pointConstantAttenuation != null ? pointConstantAttenuation.floatValue() : 1f;
-					float la = pointLinearAttenuation != null ? pointLinearAttenuation.floatValue() : 0f;
-					float qa = pointQuadraticAttenuation != null ? pointQuadraticAttenuation.floatValue() : 0f;
-					gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, new float[] { ca, la, qa }, 0);
-				}
-				if (!fogEnabled)
-				{
-					gl.glDisable(GL.GL_FOG);
-				}
-				if (wireframe)
-				{
-					gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
-				}
-				if (backfaceCulling)
-				{
-					gl.glEnable(GL.GL_CULL_FACE);
-					gl.glCullFace(GL.GL_BACK);
-				}
-				if (lighted)
-				{
-					Vec4 cameraPosition = dc.getView().getEyePoint();
-					Vec4 lightPos = cameraPosition.subtract3(referenceCenter);
-					float[] lightPosition = { (float) lightPos.x, (float) lightPos.y, (float) lightPos.z, 1.0f };
-					float[] lightAmbient = { 0.0f, 0.0f, 0.0f, 1.0f };
-					float[] lightDiffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
-					float[] lightSpecular = { 1.0f, 1.0f, 1.0f, 1.0f };
-					float[] modelAmbient = { 0.3f, 0.3f, 0.3f, 1.0f };
-					gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, modelAmbient, 0);
-					gl.glLightfv(GL.GL_LIGHT1, GL.GL_POSITION, lightPosition, 0);
-					gl.glLightfv(GL.GL_LIGHT1, GL.GL_DIFFUSE, lightDiffuse, 0);
-					gl.glLightfv(GL.GL_LIGHT1, GL.GL_AMBIENT, lightAmbient, 0);
-					gl.glLightfv(GL.GL_LIGHT1, GL.GL_SPECULAR, lightSpecular, 0);
-					gl.glDisable(GL.GL_LIGHT0);
-					gl.glEnable(GL.GL_LIGHT1);
-					gl.glEnable(GL.GL_LIGHTING);
-					gl.glEnable(GL.GL_COLOR_MATERIAL);
-					gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, twoSidedLighting ? GL.GL_TRUE : GL.GL_FALSE);
-				}
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_RGB, GL.GL_CONSTANT);
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_MODULATE);
 
-				if (willUsePointSprite)
-				{
-					gl.glEnable(GL.GL_POINT_SMOOTH);
-					gl.glEnable(GL.GL_POINT_SPRITE);
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_ALPHA, GL.GL_PREVIOUS);
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_ALPHA, GL.GL_CONSTANT);
+				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_ALPHA, GL.GL_MODULATE);
 
-					//stage 0: previous (color) * texture
+				gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, new float[] { r, g, b, (float) alpha }, 0);
+				blankTexture.bind(dc);
+			}
 
-					gl.glActiveTexture(GL.GL_TEXTURE0);
-					gl.glEnable(GL.GL_TEXTURE_2D);
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
-					gl.glTexEnvi(GL.GL_POINT_SPRITE, GL.GL_COORD_REPLACE, GL.GL_TRUE);
+			if (textured && texture != null)
+			{
+				gl.glActiveTexture(GL.GL_TEXTURE0);
+				gl.glEnable(GL.GL_TEXTURE_2D);
+				texture.bind();
+			}
 
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_REPLACE);
+			if (textureMatrix != null && textureMatrix.length >= 16)
+			{
+				stack.pushTexture(gl);
+				gl.glLoadMatrixd(textureMatrix, 0);
+			}
 
-					//TODO consider (instead of 2 calls above):
-					//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
-					//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_RGB, GL.GL_TEXTURE);
-					//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_MODULATE);
-
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_ALPHA, GL.GL_PREVIOUS);
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_ALPHA, GL.GL_TEXTURE);
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_ALPHA, GL.GL_MODULATE);
-
-					pointTexture.bind(dc);
-				}
-
-				if (willUseTextureBlending)
-				{
-					float r = 1, g = 1, b = 1;
-					if (color != null)
-					{
-						r = color.getRed() / 255f;
-						g = color.getGreen() / 255f;
-						b = color.getBlue() / 255f;
-					}
-
-					//stage 1: previous (color) * texture envionment color
-
-					gl.glActiveTexture(willUsePointSprite ? GL.GL_TEXTURE1 : GL.GL_TEXTURE0);
-					gl.glEnable(GL.GL_TEXTURE_2D);
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
-
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_RGB, GL.GL_CONSTANT);
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_MODULATE);
-
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_ALPHA, GL.GL_PREVIOUS);
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_ALPHA, GL.GL_CONSTANT);
-					gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_ALPHA, GL.GL_MODULATE);
-
-					gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, new float[] { r, g, b, (float) alpha }, 0);
-					blankTexture.bind(dc);
-				}
-
-				if (textured && texture != null)
-				{
-					gl.glActiveTexture(GL.GL_TEXTURE0);
-					gl.glEnable(GL.GL_TEXTURE_2D);
-					texture.bind();
-				}
-
-				if (textureMatrix != null && textureMatrix.length >= 16)
-				{
-					stack.pushTexture(gl);
-					gl.glLoadMatrixd(textureMatrix, 0);
-				}
-
-				if (colorBuffer != null)
+			if (colorBufferEnabled)
+			{
+				FloatVBO vbo = dc.isPickingMode() && pickingColorVBO.getBuffer() != null ? pickingColorVBO : colorVBO;
+				if (vbo.getBuffer() != null)
 				{
 					gl.glEnableClientState(GL.GL_COLOR_ARRAY);
-					gl.glColorPointer(colorBufferElementSize, GL.GL_FLOAT, 0, colorBuffer.rewind());
-				}
-
-				if (color != null && !willUseTextureBlending)
-				{
-					float r = color.getRed() / 255f, g = color.getGreen() / 255f, b = color.getBlue() / 255f;
-					gl.glColor4f(r, g, b, (float) alpha);
-				}
-
-				if (textureCoordinateBuffer != null)
-				{
-					gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
-					gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, textureCoordinateBuffer.rewind());
-				}
-
-				if (alpha < 1.0 || colorBufferContainsAlpha || willUseSortedIndices)
-				{
-					gl.glEnable(GL.GL_BLEND);
-					gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-				}
-
-				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-				gl.glVertexPointer(3, GL.GL_FLOAT, 0, vertexBuffer.rewind());
-
-				if (willCalculateNormals)
-				{
-					gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
-					gl.glNormalPointer(GL.GL_FLOAT, 0, normalBuffer.rewind());
-				}
-
-				if (willUseSortedIndices)
-				{
-					gl.glDepthMask(false);
-					gl.glDrawElements(mode, sortedIndices.limit(), GL.GL_UNSIGNED_INT, sortedIndices.rewind());
-				}
-				else if (indices != null)
-				{
-					gl.glDrawElements(mode, indices.limit(), GL.GL_UNSIGNED_INT, indices.rewind());
-				}
-				else
-				{
-					gl.glDrawArrays(mode, 0, vertexBuffer.limit() / 3);
+					vbo.bind(gl);
+					gl.glColorPointer(vbo.getElementStride(), GL.GL_FLOAT, 0, 0);
 				}
 			}
-			finally
-			{
-				stack.pop(gl);
-				dc.getView().popReferenceCenter(dc);
 
-				notifyRenderListenersOfPostRender(dc);
+			if (color != null && !willUseTextureBlending)
+			{
+				float r = color.getRed() / 255f, g = color.getGreen() / 255f, b = color.getBlue() / 255f;
+				gl.glColor4f(r, g, b, (float) alpha);
+			}
+
+			if (textureCoordinateVBO.getBuffer() != null)
+			{
+				gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+				textureCoordinateVBO.bind(gl);
+				gl.glTexCoordPointer(textureCoordinateVBO.getElementStride(), GL.GL_FLOAT, 0, 0);
+			}
+
+			if (alpha < 1.0 || colorBufferContainsAlpha || willUseSortedIndices)
+			{
+				gl.glEnable(GL.GL_BLEND);
+				gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+			}
+
+			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+			vertexVBO.bind(gl);
+			gl.glVertexPointer(vertexVBO.getElementStride(), GL.GL_FLOAT, 0, 0);
+
+			if (willCalculateNormals)
+			{
+				gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
+				normalVBO.bind(gl);
+				gl.glNormalPointer(GL.GL_FLOAT, 0, 0);
+			}
+
+			if (willUseSortedIndices)
+			{
+				gl.glDepthMask(false);
+				sortedIndexVBO.bind(gl);
+				gl.glDrawElements(mode, sortedIndexVBO.getBuffer().length, GL.GL_UNSIGNED_INT, 0);
+			}
+			else if (indexVBO.getBuffer() != null)
+			{
+				indexVBO.bind(gl);
+				gl.glDrawElements(mode, indexVBO.getBuffer().length, GL.GL_UNSIGNED_INT, 0);
+			}
+			else
+			{
+				gl.glDrawArrays(mode, 0, vertexVBO.getBuffer().length / vertexVBO.getElementStride());
 			}
 		}
 		finally
 		{
-			frontLock.readLock().unlock();
+			stack.pop(gl);
+			dc.getView().popReferenceCenter(dc);
+
+			notifyRenderListenersOfPostRender(dc);
 		}
 	}
 
@@ -553,7 +564,10 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		if (recalculateVertices)
 		{
 			lastGlobe = dc.getGlobe();
-			recalculateVertices(dc, false);
+			DrawContextDelegateVerticalExaggerationOverride dcve =
+					new DrawContextDelegateVerticalExaggerationOverride(dc);
+			dcve.overrideVerticalExaggeration(dc.getVerticalExaggeration());
+			recalculateVertices(dcve, false);
 			verticesDirty = false;
 		}
 
@@ -577,65 +591,55 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		return recalculateVertices;
 	}
 
-	protected synchronized void recalculateVertices(final DrawContext dc, boolean runNow)
+	protected void recalculateVertices(final DrawContext dc, boolean runNow)
 	{
 		Runnable runnable = new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				boolean willCalculateNormals = willCalculateNormals();
-
-				frontLock.readLock().lock();
+				vertexVBO.lock();
+				normalVBO.lock();
+				positionsLock.readLock().lock();
 				try
 				{
 					int size = positions.size() * 3;
-					if (modVertexBuffer == null || modVertexBuffer.limit() != size)
+
+					float[] vertices = vertexVBO.getBuffer();
+					if (vertices == null || vertices.length != size)
 					{
-						modVertexBuffer = BufferUtil.newFloatBuffer(size);
+						vertices = new float[size];
 					}
-					if (willCalculateNormals && (modNormalBuffer == null || modNormalBuffer.limit() != size))
+					calculateVertices(dc, vertices);
+					vertexVBO.setBuffer(vertices);
+
+					if (willCalculateNormals())
 					{
-						modNormalBuffer = BufferUtil.newFloatBuffer(size);
+						float[] normals = normalVBO.getBuffer();
+						if (normals == null || normals.length != size)
+						{
+							normals = new float[size];
+						}
+						calculateNormals(vertices, normals);
+						normalVBO.setBuffer(normals);
 					}
 
-					calculateVertices(dc);
-					if (willCalculateNormals)
-					{
-						calculateNormals();
-					}
-				}
-				finally
-				{
-					frontLock.readLock().unlock();
-				}
-
-				frontLock.writeLock().lock();
-				try
-				{
-					FloatBuffer temp = vertexBuffer;
-					vertexBuffer = modVertexBuffer;
-					modVertexBuffer = temp;
-					Sphere tempe = boundingSphere;
+					Sphere temp = boundingSphere;
 					boundingSphere = modBoundingSphere;
-					modBoundingSphere = tempe;
-					if (willCalculateNormals)
-					{
-						temp = normalBuffer;
-						normalBuffer = modNormalBuffer;
-						modNormalBuffer = temp;
-					}
+					modBoundingSphere = temp;
 				}
 				finally
 				{
-					frontLock.writeLock().unlock();
+					vertexVBO.unlock();
+					normalVBO.unlock();
+					positionsLock.readLock().unlock();
 				}
-				
+
 				// When the vertices have been recalculated, trigger a render of the layer
 				// IMPORTANT: When followTerrain is true the vertices are recalculated on every render call 
 				// (necessary to ensure it follows the terrain accurately as elevation tiles are loaded in etc). 
 				// If we remove this guard we get an endless render->recalculate->render->recalculate loop.
-				if(lastLayer != null && !followTerrain)
+				if (lastLayer != null && !followTerrain)
 				{
 					lastLayer.firePropertyChange(AVKey.LAYER, null, lastLayer);
 				}
@@ -652,17 +656,25 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		}
 	}
 
-	protected void calculateVertices(DrawContext dc)
+	protected synchronized void calculateVertices(DrawContext dc, float[] vertices)
 	{
-		modVertexBuffer.rewind();
+		double ve = dc.getVerticalExaggeration();
+
+		int index = 0;
 		for (LatLon position : positions)
 		{
 			Vec4 v = calculateVertex(dc, position);
-			modVertexBuffer.put((float) v.x).put((float) v.y).put((float) v.z);
+			vertices[index++] = (float) v.x;
+			vertices[index++] = (float) v.y;
+			vertices[index++] = (float) v.z;
+
+			if (ve != dc.getVerticalExaggeration())
+			{
+				System.out.println(ve + " != " + dc.getVerticalExaggeration());
+			}
 		}
 
-		modVertexBuffer.rewind();
-		BufferWrapper wrapper = new BufferWrapper.FloatBufferWrapper(modVertexBuffer);
+		BufferWrapper wrapper = new BufferWrapper.FloatBufferWrapper(FloatBuffer.wrap(vertices));
 		modBoundingSphere = createBoundingSphere(wrapper);
 
 		//prevent NullPointerExceptions when there's no vertices:
@@ -671,12 +683,11 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			modBoundingSphere = new Sphere(Vec4.ZERO, 1);
 		}
 
-		modVertexBuffer.rewind();
-		for (int i = 0; modVertexBuffer.remaining() >= 3; i += 3)
+		for (int i = 0; i < vertices.length; i += 3)
 		{
-			modVertexBuffer.put(i + 0, modVertexBuffer.get() - (float) modBoundingSphere.getCenter().x);
-			modVertexBuffer.put(i + 1, modVertexBuffer.get() - (float) modBoundingSphere.getCenter().y);
-			modVertexBuffer.put(i + 2, modVertexBuffer.get() - (float) modBoundingSphere.getCenter().z);
+			vertices[i + 0] -= (float) modBoundingSphere.getCenter().x;
+			vertices[i + 1] -= (float) modBoundingSphere.getCenter().y;
+			vertices[i + 2] -= (float) modBoundingSphere.getCenter().z;
 		}
 	}
 
@@ -724,24 +735,22 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		return new Sphere(center, radius);
 	}
 
-	protected void calculateNormals()
+	protected void calculateNormals(float[] vertices, float[] normals)
 	{
-		int size = modNormalBuffer.limit() / 3;
+		int size = normals.length / 3;
 		int[] count = new int[size];
-		Vec4[] vertices = new Vec4[size];
-		Vec4[] normals = new Vec4[size];
+		Vec4[] verts = new Vec4[size];
+		Vec4[] norms = new Vec4[size];
 
-		int j = 0;
-		modVertexBuffer.rewind();
-		while (modVertexBuffer.hasRemaining())
+		for (int i = 0, j = 0; i < vertices.length; i += 3, j++)
 		{
-			vertices[j] = new Vec4(modVertexBuffer.get(), modVertexBuffer.get(), modVertexBuffer.get());
-			normals[j] = new Vec4(0);
-			j++;
+			verts[j] = new Vec4(vertices[i + 0], vertices[i + 1], vertices[i + 2]);
+			norms[j] = new Vec4(0);
 		}
 
+		int[] indices = indexVBO.getBuffer();
 		boolean hasIndices = indices != null;
-		int loopLimit = hasIndices ? indices.limit() : size;
+		int loopLimit = hasIndices ? indices.length : size;
 		int loopIncrement = 3;
 		if (mode == GL.GL_TRIANGLE_STRIP)
 		{
@@ -752,12 +761,12 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		for (int i = 0; i < loopLimit; i += loopIncrement)
 		{
 			//don't touch indices's position/mark, because it may currently be in use by OpenGL thread
-			int index0 = hasIndices ? indices.get(i + 0) : i + 0;
-			int index1 = hasIndices ? indices.get(i + 1) : i + 1;
-			int index2 = hasIndices ? indices.get(i + 2) : i + 2;
-			Vec4 v0 = vertices[index0];
-			Vec4 v1 = vertices[index1];
-			Vec4 v2 = vertices[index2];
+			int index0 = hasIndices ? indices[i + 0] : i + 0;
+			int index1 = hasIndices ? indices[i + 1] : i + 1;
+			int index2 = hasIndices ? indices[i + 2] : i + 2;
+			Vec4 v0 = verts[index0];
+			Vec4 v1 = verts[index1];
+			Vec4 v2 = verts[index2];
 
 			Vec4 e1 = v1.subtract3(v0);
 			Vec4 e2 = mode == GL.GL_TRIANGLE_STRIP && i % 2 == 0 ? v0.subtract3(v2) : v2.subtract3(v0);
@@ -766,9 +775,9 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			// if N is 0, the triangle is degenerate
 			if (N.getLength3() > 0)
 			{
-				normals[index0] = normals[index0].add3(N);
-				normals[index1] = normals[index1].add3(N);
-				normals[index2] = normals[index2].add3(N);
+				norms[index0] = norms[index0].add3(N);
+				norms[index1] = norms[index1].add3(N);
+				norms[index2] = norms[index2].add3(N);
 
 				count[index0]++;
 				count[index1]++;
@@ -776,15 +785,12 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			}
 		}
 
-		j = 0;
-		modNormalBuffer.rewind();
-		while (modNormalBuffer.hasRemaining())
+		for (int i = 0, j = 0; i < normals.length; i += 3, j++)
 		{
 			int c = count[j] > 0 ? count[j] : 1; //prevent divide by zero
-			modNormalBuffer.put((float) normals[j].x / c);
-			modNormalBuffer.put((float) normals[j].y / c);
-			modNormalBuffer.put((float) normals[j].z / c);
-			j++;
+			normals[i + 0] = (float) norms[j].x / c;
+			normals[i + 1] = (float) norms[j].y / c;
+			normals[i + 2] = (float) norms[j].z / c;
 		}
 	}
 
@@ -795,36 +801,28 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			@Override
 			public void run()
 			{
-				frontLock.readLock().lock();
-				try
+				float[] vertices = vertexVBO.getBuffer();
+				if (vertices == null)
 				{
-					if (vertexBuffer == null)
-					{
-						return;
-					}
-					
-					int size = indices != null ? indices.limit() : vertexBuffer.limit() / 3;
-					if (modSortedIndices == null || modSortedIndices.limit() != size)
-					{
-						modSortedIndices = BufferUtil.newIntBuffer(size);
-					}
-					sortIndices(dc, eyePoint);
-				}
-				finally
-				{
-					frontLock.readLock().unlock();
+					return;
 				}
 
-				frontLock.writeLock().lock();
+				sortedIndexVBO.lock();
 				try
 				{
-					IntBuffer temp = sortedIndices;
-					sortedIndices = modSortedIndices;
-					modSortedIndices = temp;
+					int[] indices = indexVBO.getBuffer();
+					int size = indices != null ? indices.length : vertices.length / 3;
+					int[] sortedIndices = sortedIndexVBO.getBuffer();
+					if (sortedIndices == null || sortedIndices.length != size)
+					{
+						sortedIndices = new int[size];
+					}
+					sortIndices(dc, eyePoint, vertices, indices, sortedIndices);
+					sortedIndexVBO.setBuffer(sortedIndices);
 				}
 				finally
 				{
-					frontLock.writeLock().unlock();
+					sortedIndexVBO.unlock();
 				}
 			}
 		};
@@ -832,15 +830,14 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		IndexUpdater.run(this, runnable);
 	}
 
-	protected void sortIndices(DrawContext dc, Vec4 eyePoint)
+	protected void sortIndices(DrawContext dc, Vec4 eyePoint, float[] vertices, int[] indices, int[] sortedIndices)
 	{
-		int size = vertexBuffer.limit() / 3;
-		Vec4[] vertices = new Vec4[size];
+		int size = vertices.length / 3;
+		Vec4[] verts = new Vec4[size];
 
-		for (int i = 0; i < size; i++)
+		for (int i = 0, j = 0; i < vertices.length; i += 3, j++)
 		{
-			vertices[i] =
-					new Vec4(vertexBuffer.get(i * 3 + 0), vertexBuffer.get(i * 3 + 1), vertexBuffer.get(i * 3 + 2));
+			verts[j] = new Vec4(vertices[i + 0], vertices[i + 1], vertices[i + 2]);
 		}
 
 		eyePoint = eyePoint.subtract3(boundingSphere.getCenter());
@@ -848,34 +845,34 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		if (mode == GL.GL_TRIANGLES)
 		{
 			boolean hasIndices = indices != null;
-			int triangleCountBy3 = hasIndices ? indices.limit() : size;
+			int triangleCountBy3 = hasIndices ? indices.length : size;
 			IndexAndDistance[] distances = new IndexAndDistance[triangleCountBy3 / 3];
 
-			for (int i = 0; i < triangleCountBy3; i += 3)
+			for (int i = 0, j = 0; i < triangleCountBy3; i += 3, j++)
 			{
-				int index0 = hasIndices ? indices.get(i + 0) : i + 0;
-				int index1 = hasIndices ? indices.get(i + 1) : i + 1;
-				int index2 = hasIndices ? indices.get(i + 2) : i + 2;
-				Vec4 v0 = vertices[index0];
-				Vec4 v1 = vertices[index1];
-				Vec4 v2 = vertices[index2];
+				int index0 = hasIndices ? indices[i + 0] : i + 0;
+				int index1 = hasIndices ? indices[i + 1] : i + 1;
+				int index2 = hasIndices ? indices[i + 2] : i + 2;
+				Vec4 v0 = verts[index0];
+				Vec4 v1 = verts[index1];
+				Vec4 v2 = verts[index2];
 				double distance =
 						v0.distanceToSquared3(eyePoint) + v1.distanceToSquared3(eyePoint)
 								+ v2.distanceToSquared3(eyePoint);
-				distances[i / 3] = new IndexAndDistance(distance, i);
+				distances[j] = new IndexAndDistance(distance, i);
 			}
 
 			Arrays.sort(distances);
 			IndexAndDistance closest = distances[distances.length - 1];
-			Vec4 closestPoint = vertices[hasIndices ? indices.get(closest.index) : closest.index];
+			Vec4 closestPoint = verts[hasIndices ? indices[closest.index] : closest.index];
 			distanceFromEye = closestPoint.distanceTo3(eyePoint);
 
-			modSortedIndices.rewind();
-			for (IndexAndDistance distance : distances)
+			for (int i = 0, j = 0; i < triangleCountBy3; i += 3, j++)
 			{
-				modSortedIndices.put(hasIndices ? indices.get(distance.index + 0) : distance.index + 0);
-				modSortedIndices.put(hasIndices ? indices.get(distance.index + 1) : distance.index + 1);
-				modSortedIndices.put(hasIndices ? indices.get(distance.index + 2) : distance.index + 2);
+				IndexAndDistance distance = distances[j];
+				sortedIndices[i + 0] = hasIndices ? indices[distance.index + 0] : distance.index + 0;
+				sortedIndices[i + 1] = hasIndices ? indices[distance.index + 1] : distance.index + 1;
+				sortedIndices[i + 2] = hasIndices ? indices[distance.index + 2] : distance.index + 2;
 			}
 		}
 		else if (mode == GL.GL_POINTS)
@@ -883,19 +880,18 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			IndexAndDistance[] distances = new IndexAndDistance[size];
 			for (int i = 0; i < size; i++)
 			{
-				double distance = vertices[i].distanceToSquared3(eyePoint);
+				double distance = verts[i].distanceToSquared3(eyePoint);
 				distances[i] = new IndexAndDistance(distance, i);
 			}
 
 			Arrays.sort(distances);
 			IndexAndDistance closest = distances[distances.length - 1];
-			Vec4 closestPoint = vertices[closest.index];
+			Vec4 closestPoint = verts[closest.index];
 			distanceFromEye = closestPoint.distanceTo3(eyePoint);
 
-			modSortedIndices.rewind();
-			for (IndexAndDistance distance : distances)
+			for (int i = 0; i < size; i++)
 			{
-				modSortedIndices.put(distance.index);
+				sortedIndices[i] = distances[i].index;
 			}
 		}
 	}
@@ -930,34 +926,64 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		this.color = color;
 	}
 
-	public FloatBuffer getColorBuffer()
+	public float[] getColorBuffer()
 	{
-		return colorBuffer;
+		return colorVBO.getBuffer();
 	}
 
-	public void setColorBuffer(FloatBuffer colorBuffer)
+	public void setColorBuffer(float[] colorBuffer)
 	{
-		this.colorBuffer = colorBuffer;
+		colorVBO.setBuffer(colorBuffer);
 	}
 
 	public int getColorBufferElementSize()
 	{
-		return colorBufferElementSize;
+		return colorVBO.getElementStride();
 	}
 
 	public void setColorBufferElementSize(int colorBufferElementSize)
 	{
-		this.colorBufferElementSize = colorBufferElementSize;
+		colorVBO.setElementStride(colorBufferElementSize);
 	}
 
-	public FloatBuffer getTextureCoordinateBuffer()
+	public float[] getPickingColorBuffer()
 	{
-		return textureCoordinateBuffer;
+		return pickingColorVBO.getBuffer();
 	}
 
-	public void setTextureCoordinateBuffer(FloatBuffer textureCoordinateBuffer)
+	public void setPickingColorBuffer(float[] pickingColorBuffer)
 	{
-		this.textureCoordinateBuffer = textureCoordinateBuffer;
+		pickingColorVBO.setBuffer(pickingColorBuffer);
+	}
+
+	public int getPickingColorBufferElementSize()
+	{
+		return pickingColorVBO.getElementStride();
+	}
+
+	public void setPickingColorBufferElementSize(int pickingColorBufferElementSize)
+	{
+		pickingColorVBO.setElementStride(pickingColorBufferElementSize);
+	}
+
+	public boolean isColorBufferEnabled()
+	{
+		return colorBufferEnabled;
+	}
+
+	public void setColorBufferEnabled(boolean useColorBuffer)
+	{
+		this.colorBufferEnabled = useColorBuffer;
+	}
+
+	public float[] getTextureCoordinateBuffer()
+	{
+		return textureCoordinateVBO.getBuffer();
+	}
+
+	public void setTextureCoordinateBuffer(float[] textureCoordinateBuffer)
+	{
+		textureCoordinateVBO.setBuffer(textureCoordinateBuffer);
 	}
 
 	public double getOpacity()
@@ -977,7 +1003,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 	public void setPositions(List<Position> positions)
 	{
-		frontLock.writeLock().lock();
+		positionsLock.writeLock().lock();
 		try
 		{
 			this.positions = positions;
@@ -993,26 +1019,25 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		}
 		finally
 		{
-			frontLock.writeLock().unlock();
+			positionsLock.writeLock().unlock();
 		}
 	}
 
-	public IntBuffer getIndices()
+	public int[] getIndices()
 	{
-		return indices;
+		return indexVBO.getBuffer();
 	}
 
-	public void setIndices(IntBuffer indices)
+	public void setIndices(int[] indices)
 	{
-		frontLock.writeLock().lock();
+		indexVBO.lock();
 		try
 		{
-			this.indices = indices;
-			verticesDirty = true;
+			indexVBO.setBuffer(indices);
 		}
 		finally
 		{
-			frontLock.writeLock().unlock();
+			indexVBO.unlock();
 		}
 	}
 
@@ -1023,34 +1048,13 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 	public void setFollowTerrain(boolean followTerrain)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.followTerrain = followTerrain;
-			verticesDirty = true;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.followTerrain = followTerrain;
+		verticesDirty = true;
 	}
 
 	public int getMode()
 	{
 		return mode;
-	}
-
-	public void setMode(int mode)
-	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.mode = mode;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
 	}
 
 	public double getElevation()
@@ -1081,16 +1085,8 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 	public void setReverseNormals(boolean reverseNormals)
 	{
-		frontLock.writeLock().lock();
-		try
-		{
-			this.reverseNormals = reverseNormals;
-			verticesDirty = true;
-		}
-		finally
-		{
-			frontLock.writeLock().unlock();
-		}
+		this.reverseNormals = reverseNormals;
+		verticesDirty = true;
 	}
 
 	protected boolean willCalculateNormals()
@@ -1315,28 +1311,20 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 	 */
 	public Extent getExtent()
 	{
-		frontLock.readLock().lock();
-		try
-		{
-			return boundingSphere;
-		}
-		finally
-		{
-			frontLock.readLock().unlock();
-		}
+		return boundingSphere;
 	}
 
 	@Override
 	public Sector getSector()
 	{
-		frontLock.readLock().lock();
+		positionsLock.readLock().lock();
 		try
 		{
 			return sector;
 		}
 		finally
 		{
-			frontLock.readLock().unlock();
+			positionsLock.readLock().unlock();
 		}
 	}
 
@@ -1366,37 +1354,189 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		}
 	}
 
-	public static FloatBuffer color4ToFloatBuffer(List<Color> colors)
+	public static float[] color4ToFloats(List<Color> colors)
 	{
-		FloatBuffer buffer = BufferUtil.newFloatBuffer(colors.size() * 4);
-		return color4ToFloatBuffer(colors, buffer);
+		return color4ToFloats(colors, new float[colors.size() * 4]);
 	}
 
-	public static FloatBuffer color4ToFloatBuffer(List<Color> colors, FloatBuffer buffer)
+	public static float[] color4ToFloats(List<Color> colors, float[] floats)
 	{
+		int i = 0;
 		for (Color color : colors)
 		{
-			buffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
-					.put(color.getAlpha() / 255f);
+			floats[i++] = color.getRed() / 255f;
+			floats[i++] = color.getGreen() / 255f;
+			floats[i++] = color.getBlue() / 255f;
+			floats[i++] = color.getAlpha() / 255f;
 		}
-		buffer.rewind();
-		return buffer;
+		return floats;
 	}
 
-	public static FloatBuffer color3ToFloatBuffer(List<Color> colors)
+	public static float[] color3ToFloats(List<Color> colors)
 	{
-		FloatBuffer buffer = BufferUtil.newFloatBuffer(colors.size() * 3);
-		return color3ToFloatBuffer(colors, buffer);
+		return color3ToFloats(colors, new float[colors.size() * 3]);
 	}
 
-	public static FloatBuffer color3ToFloatBuffer(List<Color> colors, FloatBuffer buffer)
+	public static float[] color3ToFloats(List<Color> colors, float[] floats)
 	{
+		int i = 0;
 		for (Color color : colors)
 		{
-			buffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f);
+			floats[i++] = color.getRed() / 255f;
+			floats[i++] = color.getGreen() / 255f;
+			floats[i++] = color.getBlue() / 255f;
 		}
-		buffer.rewind();
-		return buffer;
+		return floats;
+	}
+
+	protected abstract static class AbstractVBO<ARRAY>
+	{
+		private ARRAY buffer = null;
+		private int vboId = -1;
+		private boolean dirty = false;
+		private Lock lock = new ReentrantLock();
+
+		public ARRAY getBuffer()
+		{
+			return buffer;
+		}
+
+		public void setBuffer(ARRAY buffer)
+		{
+			this.buffer = buffer;
+			markDirty();
+		}
+
+		public void lock()
+		{
+			lock.lock();
+		}
+
+		public void unlock()
+		{
+			lock.unlock();
+		}
+
+		public void markDirty()
+		{
+			dirty = true;
+		}
+
+		public void bind(GL gl)
+		{
+			if (vboId < 0)
+			{
+				int[] vboIds = new int[1];
+				gl.glGenBuffers(vboIds.length, vboIds, 0);
+				vboId = vboIds[0];
+			}
+			gl.glBindBuffer(getTarget(), vboId);
+			if (dirty)
+			{
+				lock.lock();
+				try
+				{
+					Buffer b = wrapBuffer(buffer);
+					gl.glBufferData(getTarget(), b.limit() * getDataSize(), b.rewind(), GL.GL_STATIC_DRAW);
+				}
+				finally
+				{
+					lock.unlock();
+				}
+				dirty = false;
+			}
+		}
+
+		public void unbind(GL gl)
+		{
+			gl.glBindBuffer(getTarget(), 0);
+		}
+
+		protected abstract int getTarget();
+
+		protected abstract Buffer wrapBuffer(ARRAY buffer);
+
+		protected abstract int getDataSize();
+	}
+
+	protected static class FloatVBO extends AbstractVBO<float[]>
+	{
+		private int elementStride;
+
+		public FloatVBO(int elementStride)
+		{
+			this.elementStride = elementStride;
+		}
+
+		public int getElementStride()
+		{
+			return elementStride;
+		}
+
+		public void setElementStride(int elementStride)
+		{
+			this.elementStride = elementStride;
+		}
+
+		@Override
+		protected int getTarget()
+		{
+			return GL.GL_ARRAY_BUFFER;
+		}
+
+		@Override
+		protected Buffer wrapBuffer(float[] buffer)
+		{
+			return FloatBuffer.wrap(buffer);
+		}
+
+		@Override
+		protected int getDataSize()
+		{
+			return Float.SIZE / 8;
+		}
+	}
+
+	protected static class IntIndexVBO extends AbstractVBO<int[]>
+	{
+		@Override
+		protected int getTarget()
+		{
+			return GL.GL_ELEMENT_ARRAY_BUFFER;
+		}
+
+		@Override
+		protected Buffer wrapBuffer(int[] buffer)
+		{
+			return IntBuffer.wrap(buffer);
+		}
+
+		@Override
+		protected int getDataSize()
+		{
+			return Integer.SIZE / 8;
+		}
+	}
+
+	protected static class ShortIndexVBO extends AbstractVBO<short[]>
+	{
+		@Override
+		protected int getTarget()
+		{
+			return GL.GL_ELEMENT_ARRAY_BUFFER;
+		}
+
+		@Override
+		protected Buffer wrapBuffer(short[] buffer)
+		{
+			return ShortBuffer.wrap(buffer);
+		}
+
+		@Override
+		protected int getDataSize()
+		{
+			return Short.SIZE / 8;
+		}
 	}
 
 	protected static class IndexAndDistance implements Comparable<IndexAndDistance>

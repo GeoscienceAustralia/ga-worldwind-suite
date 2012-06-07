@@ -36,8 +36,6 @@ import au.gov.ga.worldwind.common.layers.volume.btt.BinaryTriangleTree;
 import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.Validate;
 
-import com.sun.opengl.util.BufferUtil;
-
 /**
  * {@link GocadReader} implementation for reading GOCAD GSurf files.
  * 
@@ -357,7 +355,7 @@ public class GocadGSurfReader implements GocadReader<FastShape>
 
 		//create a color buffer containing a color for each point
 		int colorBufferElementSize = 4;
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * colorBufferElementSize);
+		FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * colorBufferElementSize);
 		for (Position position : positions)
 		{
 			PositionWithCoord pwv = (PositionWithCoord) position;
@@ -392,7 +390,7 @@ public class GocadGSurfReader implements GocadReader<FastShape>
 						.put(color.getAlpha() / 255f);
 			}
 		}
-		shape.setColorBuffer(colorBuffer);
+		shape.setColorBuffer(colorBuffer.array());
 		shape.setColorBufferElementSize(colorBufferElementSize);
 
 		return shape;
