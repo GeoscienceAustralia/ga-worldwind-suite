@@ -27,6 +27,7 @@ import au.gov.ga.worldwind.common.layers.volume.btt.BinaryTriangleTree;
 import au.gov.ga.worldwind.common.util.CoordinateTransformationUtil;
 import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.URLUtil;
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
 
 import com.sun.opengl.util.BufferUtil;
@@ -139,7 +140,7 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 		double elevationScale = getScale(band);
 		
 		double[] geoTransform = gdalDataset.GetGeoTransform();
-		CoordinateTransformation coordinateTransformation = CoordinateTransformationUtil.getTransformationToWGS84(gdalDataset.GetProjection());
+		CoordinateTransformation coordinateTransformation = getCoordinateTransformation(gdalDataset);
 		
 		int dataType = band.getDataType();
 		
@@ -171,6 +172,24 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 				positions.add(position);
 			}
 		}
+	}
+
+	/**
+	 * @return A coordinate transform to use for this raster
+	 */
+	private CoordinateTransformation getCoordinateTransformation(Dataset gdalDataset)
+	{
+		String rasterProjection = gdalDataset.GetProjection();
+		
+		// If no coordinate system can be found, default to wgs84
+		if (Util.isBlank(rasterProjection) && Util.isBlank(modelParameters.getCoordinateSystem()))
+		{
+			Logging.logger().warning("Cannot determine coordinate system. Assuming EPSG:4326");
+			return CoordinateTransformationUtil.getTransformationToWGS84("EPSG:4326");
+		}
+		
+		// Only use the layer definition coordinate system if one is not present in the raster
+		return CoordinateTransformationUtil.getTransformationToWGS84(Util.isBlank(rasterProjection) ? modelParameters.getCoordinateSystem() : rasterProjection);
 	}
 	
 	/**
@@ -238,6 +257,11 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	 */
 	private double getScale(Band band)
 	{
+		if (modelParameters.getScaleFactor() != null)
+		{
+			return modelParameters.getScaleFactor();
+		}
+		
 		Double[] vals = new Double[1];
 		band.GetScale(vals);
 		return vals[0] != null ? vals[0] : 1.0;

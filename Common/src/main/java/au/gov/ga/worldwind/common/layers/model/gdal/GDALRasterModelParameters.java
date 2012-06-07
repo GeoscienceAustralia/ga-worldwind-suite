@@ -27,6 +27,15 @@ public class GDALRasterModelParameters
 	/** The color map to apply to the model data */
 	private ColorMap colorMap;
 	
+	/** A scale factor to use to scale Z values as appropriate */
+	private Double scaleFactor;
+	
+	/** 
+	 * The coordinate system of the raster. 
+	 * Used to provide a coordinate system for raster formats that do not store it (ASCII grids etc.) 
+	 */
+	private String coordinateSystem;
+	
 	public GDALRasterModelParameters()
 	{
 		//use defaults
@@ -55,6 +64,18 @@ public class GDALRasterModelParameters
 		if (i != null)
 		{
 			setBand(i);
+		}
+		
+		String s = (String)params.getValue(AVKeyMore.COORDINATE_SYSTEM);
+		if (s != null)
+		{
+			setCoordinateSystem(s);
+		}
+		
+		d = (Double) params.getValue(AVKeyMore.SCALE);
+		if (d != null)
+		{
+			setScaleFactor(d);
 		}
 	}
 
@@ -120,5 +141,37 @@ public class GDALRasterModelParameters
 	public void setDefaultColor(Color defaultColor)
 	{
 		this.defaultColor = defaultColor;
+	}
+	
+	/**
+	 * @param coordinateSystem the coordinateSystem to set
+	 */
+	public void setCoordinateSystem(String coordinateSystem)
+	{
+		this.coordinateSystem = coordinateSystem;
+	}
+	
+	/**
+	 * @return the coordinateSystem
+	 */
+	public String getCoordinateSystem()
+	{
+		return coordinateSystem;
+	}
+
+	/**
+	 * @return the scaleFactor
+	 */
+	public Double getScaleFactor()
+	{
+		return scaleFactor;
+	}
+
+	/**
+	 * @param scaleFactor the scaleFactor to set
+	 */
+	public void setScaleFactor(Double scaleFactor)
+	{
+		this.scaleFactor = scaleFactor;
 	}
 }
