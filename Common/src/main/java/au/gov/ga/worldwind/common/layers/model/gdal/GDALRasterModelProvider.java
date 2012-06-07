@@ -30,8 +30,6 @@ import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
 
-import com.sun.opengl.util.BufferUtil;
-
 /**
  * A {@link ModelProvider} that reads a band from a GDAL-supported raster file
  * and treats band values as depth/elevation.
@@ -361,11 +359,11 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	 *
 	 * @return An RGBA color buffer that can be used directly by the {@link FastShape} class
 	 */
-	private FloatBuffer createColorBufferForDataset(List<Position> positions, float[][] values, float[] minmax, Dataset gdalDataset)
+	private float[] createColorBufferForDataset(List<Position> positions, float[][] values, float[] minmax, Dataset gdalDataset)
 	{
 		float nodata = getModelBandNodata(gdalDataset);
 		
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * COLOR_BUFFER_ELEMENT_SIZE);
+		FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * COLOR_BUFFER_ELEMENT_SIZE);
 		for (Position position : positions)
 		{
 			PositionWithCoord pwv = (PositionWithCoord) position;
@@ -401,7 +399,7 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 						   .put(color.getAlpha() / 255f);
 			}
 		}
-		return colorBuffer;
+		return colorBuffer.array();
 	}
 
 	private float[] getAdjacentValues(float[][] values, int u, int v)

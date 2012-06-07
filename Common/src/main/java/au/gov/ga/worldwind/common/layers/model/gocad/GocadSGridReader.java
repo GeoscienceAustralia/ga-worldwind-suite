@@ -38,8 +38,6 @@ import au.gov.ga.worldwind.common.layers.volume.btt.BinaryTriangleTree;
 import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.Validate;
 
-import com.sun.opengl.util.BufferUtil;
-
 /**
  * {@link GocadReader} implementation for reading GOCAD SGrid files (only
  * supports single slice, use the {@link VolumeLayer} for volumetric SGrid
@@ -254,7 +252,7 @@ public class GocadSGridReader implements GocadReader<FastShape>
 						minValue = Math.min(minValue, value);
 						maxValue = Math.max(maxValue, value);
 					}
-					
+
 					positionIndex++;
 				}
 			}
@@ -315,7 +313,7 @@ public class GocadSGridReader implements GocadReader<FastShape>
 
 		//create a color buffer containing a color for each point
 		int colorBufferElementSize = 4;
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * colorBufferElementSize);
+		FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * colorBufferElementSize);
 		for (Position position : positions)
 		{
 			PositionWithCoord pwv = (PositionWithCoord) position;
@@ -348,7 +346,7 @@ public class GocadSGridReader implements GocadReader<FastShape>
 						.put(color.getAlpha() / 255f);
 			}
 		}
-		shape.setColorBuffer(colorBuffer);
+		shape.setColorBuffer(colorBuffer.array());
 		shape.setColorBufferElementSize(colorBufferElementSize);
 
 		return shape;

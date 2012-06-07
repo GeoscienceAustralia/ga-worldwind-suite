@@ -34,8 +34,6 @@ import javax.media.opengl.GL;
 import au.gov.ga.worldwind.common.util.ColorMap;
 import au.gov.ga.worldwind.common.util.FastShape;
 
-import com.sun.opengl.util.BufferUtil;
-
 /**
  * {@link GocadReader} implementation for reading TSurf GOCAD files.
  * 
@@ -189,14 +187,14 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 				color = GocadColor.gocadLineToColor(line);
 				return;
 			}
-	
+
 			matcher = colormapColorsPattern.matcher(line);
 			if (matcher.matches())
 			{
 				colorMap = addColorsToColorMap(line);
 				return;
 			}
-			
+
 			matcher = colormapAlphaPattern.matcher(line);
 			if (matcher.matches())
 			{
@@ -204,7 +202,7 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 				return;
 			}
 		}
-		
+
 		matcher = namePattern.matcher(line);
 		if (matcher.matches())
 		{
@@ -260,7 +258,7 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 	@Override
 	public FastShape end(URL context)
 	{
-		IntBuffer indicesBuffer = BufferUtil.newIntBuffer(triangleIds.size());
+		IntBuffer indicesBuffer = IntBuffer.allocate(triangleIds.size());
 		for (Integer i : triangleIds)
 		{
 			if (!vertexIdMap.containsKey(i))
@@ -275,12 +273,12 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 			name = "TSurf";
 		}
 
-		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_TRIANGLES);
+		FastShape shape = new FastShape(positions, indicesBuffer.array(), GL.GL_TRIANGLES);
 		shape.setName(name);
 		shape.setLighted(true);
 		shape.setTwoSidedLighting(true);
 		shape.setCalculateNormals(true);
-		
+
 		// Colouring priority is 
 		// (1) Colour map from layer def (parameters)
 		// (2) Colour from layer def (parameters), 
@@ -288,7 +286,7 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 		// (4) Colour from the GOCAD file
 		if (parameters.getColorMap() != null)
 		{
-			FloatBuffer colorBuffer = createColorBufferFromColorMap(parameters.getColorMap());
+			float[] colorBuffer = createColorBufferFromColorMap(parameters.getColorMap());
 			shape.setColorBufferElementSize(4);
 			shape.setColorBuffer(colorBuffer);
 		}
@@ -298,7 +296,7 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 		}
 		else if (colorMap != null)
 		{
-			FloatBuffer colorBuffer = createColorBufferFromColorMap(colorMap);
+			float[] colorBuffer = createColorBufferFromColorMap(colorMap);
 			shape.setColorBufferElementSize(4);
 			shape.setColorBuffer(colorBuffer);
 		}
@@ -331,7 +329,7 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 		}
 		return Arrays.copyOf(array, i);
 	}
-	
+
 	private ColorMap addAlphasToColorMap(String line)
 	{
 		ColorMap result = this.colorMap;
@@ -340,29 +338,31 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 			result = new ColorMap();
 			result.setValuesPercentages(true);
 		}
-		
+
 		// Format is [index alpha index alpha ...]
 		double[] values = splitStringToDoubles(line.replace("*colormap*alphas:", ""));
-		
+
 		double maxIndex = values[values.length - 2];
-		for (int i = 0; i < values.length; i+=2)
+		for (int i = 0; i < values.length; i += 2)
 		{
 			double index = values[i] / maxIndex;
-			double alpha = values[i+1];
-			
+			double alpha = values[i + 1];
+
 			if (result.containsKey(index))
 			{
 				Color existingColor = result.get(index);
-				Color replacement = new Color(existingColor.getRed(), existingColor.getGreen(), existingColor.getBlue(), (int)(alpha * 255));
+				Color replacement =
+						new Color(existingColor.getRed(), existingColor.getGreen(), existingColor.getBlue(),
+								(int) (alpha * 255));
 				result.put(index, replacement);
 			}
 			else
 			{
-				Color newColor = new Color(0, 0, 0, (int)(alpha * 255));
+				Color newColor = new Color(0, 0, 0, (int) (alpha * 255));
 				result.put(index, newColor);
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -374,18 +374,18 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 			result = new ColorMap();
 			result.setValuesPercentages(true);
 		}
-		
+
 		// Format is [index r g b index r g b ...]
 		double[] values = splitStringToDoubles(line.replace("*colormap**colors:", ""));
-		
+
 		double maxIndex = values[values.length - 4];
-		for (int i = 0; i < values.length; i+=4)
+		for (int i = 0; i < values.length; i += 4)
 		{
 			double index = values[i] / maxIndex;
-			int red = (int)(values[i+1] * 255);
-			int green = (int)(values[i+2] * 255);
-			int blue = (int)(values[i+3] * 255);
-			
+			int red = (int) (values[i + 1] * 255);
+			int green = (int) (values[i + 2] * 255);
+			int blue = (int) (values[i + 3] * 255);
+
 			if (result.containsKey(index))
 			{
 				Color existingColor = result.get(index);
@@ -398,13 +398,13 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 				result.put(index, newColor);
 			}
 		}
-		
+
 		return result;
 	}
-	
-	private FloatBuffer createColorBufferFromColorMap(ColorMap colorMap)
+
+	private float[] createColorBufferFromColorMap(ColorMap colorMap)
 	{
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * 4);
+		FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * 4);
 		for (float value : values)
 		{
 			if (Float.isNaN(value) || value == noDataValue)
@@ -414,12 +414,10 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 			else
 			{
 				Color color = colorMap.calculateColorNotingIsValuesPercentages(value, min, max);
-				colorBuffer.put(color.getRed() / 255f)
-						   .put(color.getGreen() / 255f)
-						   .put(color.getBlue() / 255f)
-						   .put(color.getAlpha() / 255f);
+				colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
+						.put(color.getAlpha() / 255f);
 			}
 		}
-		return colorBuffer;
+		return colorBuffer.array();
 	}
 }

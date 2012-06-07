@@ -24,7 +24,6 @@ import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.render.markers.MarkerAttributes;
 
 import java.awt.Color;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +31,6 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.layers.point.types.UrlMarker;
 import au.gov.ga.worldwind.common.util.FastShape;
-
-import com.sun.opengl.util.BufferUtil;
 
 /**
  * Basic implementation of a {@link Borehole}.
@@ -47,8 +44,8 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 	private List<BoreholeSample> samples = new ArrayList<BoreholeSample>();
 
 	private FastShape fastShape;
-	private FloatBuffer boreholeColorBuffer;
-	private FloatBuffer pickingColorBuffer;
+	private float[] boreholeColorBuffer;
+	private float[] pickingColorBuffer;
 
 	private final PickSupport pickSupport = new PickSupport();
 
@@ -97,8 +94,8 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 			colors.add(sample.getColor());
 		}
 
-		boreholeColorBuffer = FastShape.color3ToFloatBuffer(colors);
-		pickingColorBuffer = BufferUtil.newFloatBuffer(colors.size() * 3);
+		boreholeColorBuffer = FastShape.color3ToFloats(colors);
+		pickingColorBuffer = new float[colors.size() * 3];
 
 		fastShape = new FastShape(positions, GL.GL_LINES);
 		fastShape.setColorBuffer(boreholeColorBuffer);
@@ -134,7 +131,6 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 
 		if (!dc.isPickingMode())
 		{
-			fastShape.setColorBuffer(boreholeColorBuffer);
 			fastShape.render(dc);
 		}
 		else
@@ -156,8 +152,9 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 				Color overallPickColor = dc.getUniquePickColor();
 				pickSupport.addPickableObject(overallPickColor.getRGB(), this, getPosition());
 				fastShape.setColor(overallPickColor);
-				fastShape.setColorBuffer(null);
+				fastShape.setColorBufferEnabled(false);
 				fastShape.render(dc);
+				fastShape.setColorBufferEnabled(true);
 
 				PickedObject object = pickSupport.getTopObject(dc, dc.getPickPoint());
 				pickSupport.clearPickList();
@@ -167,20 +164,21 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 					//This borehole has been picked; now try picking the samples individually
 
 					//Put unique pick colours into the pickingColorBuffer (2 per sample)
-					pickingColorBuffer.rewind();
+					int i = 0;
 					for (BoreholeSample sample : getSamples())
 					{
 						Color color = dc.getUniquePickColor();
 						pickSupport.addPickableObject(color.getRGB(), sample, getPosition());
-						for (int i = 0; i < 2; i++)
+						for (int j = 0; j < 2; j++)
 						{
-							pickingColorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f)
-									.put(color.getBlue() / 255f);
+							pickingColorBuffer[i++] = color.getRed() / 255f;
+							pickingColorBuffer[i++] = color.getGreen() / 255f;
+							pickingColorBuffer[i++] = color.getBlue() / 255f;
 						}
 					}
 
 					//render the shape with the pickingColorBuffer, and then resolve the pick
-					fastShape.setColorBuffer(pickingColorBuffer);
+					fastShape.setPickingColorBuffer(pickingColorBuffer);
 					fastShape.render(dc);
 					pickSupport.resolvePick(dc, dc.getPickPoint(), layer);
 				}

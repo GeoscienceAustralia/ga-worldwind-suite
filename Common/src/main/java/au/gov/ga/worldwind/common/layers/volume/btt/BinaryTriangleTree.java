@@ -18,8 +18,6 @@ package au.gov.ga.worldwind.common.layers.volume.btt;
 import gov.nasa.worldwind.geom.Position;
 
 import java.awt.Rectangle;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +28,6 @@ import javax.media.opengl.GL;
 import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
-
-import com.sun.opengl.util.BufferUtil;
 
 /**
  * A mesh generation helper which uses a grid of positions to generate a mesh.
@@ -227,30 +223,31 @@ public class BinaryTriangleTree
 			}
 		}
 
-		IntBuffer indices;
+		int[] indices;
+		int i = 0;
 		if (forceGLTriangles)
 		{
 			int indexCount = 6 * (rect.width - 1) * (rect.height - 1);
-			indices = BufferUtil.newIntBuffer(indexCount);
+			indices = new int[indexCount];
 
 			int k = 0;
 			for (int y = 0; y < rect.height - 1; y++, k++)
 			{
 				for (int x = 0; x < rect.width - 1; x++, k++)
 				{
-					indices.put(k);
-					indices.put(k + 1);
-					indices.put(k + rect.width);
-					indices.put(k + 1);
-					indices.put(k + rect.width + 1);
-					indices.put(k + rect.width);
+					indices[i++] = k;
+					indices[i++] = k + 1;
+					indices[i++] = k + rect.width;
+					indices[i++] = k + 1;
+					indices[i++] = k + rect.width + 1;
+					indices[i++] = k + rect.width;
 				}
 			}
 		}
 		else
 		{
 			int indexCount = 2 * rect.width * (rect.height - 1);
-			indices = BufferUtil.newIntBuffer(indexCount);
+			indices = new int[indexCount];
 
 			int k = 0;
 			for (int y = 0; y < rect.height - 1; y++)
@@ -259,8 +256,8 @@ public class BinaryTriangleTree
 				{
 					for (int x = 0; x < rect.width; x++, k++)
 					{
-						indices.put(k);
-						indices.put(k + rect.width);
+						indices[i++] = k;
+						indices[i++] = k + rect.width;
 					}
 				}
 				else
@@ -268,8 +265,8 @@ public class BinaryTriangleTree
 					k += rect.width - 1;
 					for (int x = 0; x < rect.width; x++, k--)
 					{
-						indices.put(k + rect.width);
-						indices.put(k);
+						indices[i++] = k + rect.width;
+						indices[i++] = k;
 					}
 					k += rect.width + 1;
 				}
@@ -280,13 +277,14 @@ public class BinaryTriangleTree
 
 		if (generateTextureCoordinates)
 		{
-			FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(positions.size() * 2);
+			i = 0;
+			float[] textureCoordinateBuffer = new float[positions.size() * 2];
 			for (int y = 0; y < rect.height; y++)
 			{
 				for (int x = 0; x < rect.width; x++)
 				{
-					textureCoordinateBuffer.put((x + rect.x) / (float) (width - 1)).put(
-							(y + rect.y) / (float) (height - 1));
+					textureCoordinateBuffer[i++] = (x + rect.x) / (float) (width - 1);
+					textureCoordinateBuffer[i++] = (y + rect.y) / (float) (height - 1);
 				}
 			}
 			shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
@@ -631,7 +629,8 @@ public class BinaryTriangleTree
 		List<Position> positions = new ArrayList<Position>();
 		List<Integer> originalIndices = new ArrayList<Integer>();
 		Map<Position, Integer> positionIndexMap = new HashMap<Position, Integer>();
-		IntBuffer indices = BufferUtil.newIntBuffer(triangles.size() * 3);
+		int[] indices = new int[triangles.size() * 3];
+		int i = 0;
 
 		for (BTTTriangle triangle : triangles)
 		{
@@ -662,19 +661,22 @@ public class BinaryTriangleTree
 				positions.add(rightPosition);
 				originalIndices.add(triangle.rightIndex);
 			}
-			indices.put(leftIndex).put(apexIndex).put(rightIndex);
+			indices[i++] = leftIndex;
+			indices[i++] = rightIndex;
 		}
 
 		FastShape shape = new FastShape(positions, indices, GL.GL_TRIANGLES);
 
 		if (generateTextureCoordinates)
 		{
-			FloatBuffer textureCoordinateBuffer = BufferUtil.newFloatBuffer(positions.size() * 2);
+			float[] textureCoordinateBuffer = new float[positions.size() * 2];
+			i = 0;
 			for (Integer index : originalIndices)
 			{
 				int x = index % width;
 				int y = index / width;
-				textureCoordinateBuffer.put(x / (float) (width - 1)).put(y / (float) (height - 1));
+				textureCoordinateBuffer[i++] = x / (float) (width - 1);
+				textureCoordinateBuffer[i++] = y / (float) (height - 1);
 			}
 			shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
 		}

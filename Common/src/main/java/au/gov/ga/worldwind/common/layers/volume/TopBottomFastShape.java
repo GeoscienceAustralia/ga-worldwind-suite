@@ -18,7 +18,6 @@ package au.gov.ga.worldwind.common.layers.volume;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
 
-import java.nio.IntBuffer;
 import java.util.List;
 
 import au.gov.ga.worldwind.common.util.FastShape;
@@ -42,7 +41,7 @@ public class TopBottomFastShape extends FastShape
 		super(positions, mode);
 	}
 
-	public TopBottomFastShape(List<Position> positions, IntBuffer indices, int mode)
+	public TopBottomFastShape(List<Position> positions, int[] indices, int mode)
 	{
 		super(positions, indices, mode);
 	}
@@ -64,17 +63,8 @@ public class TopBottomFastShape extends FastShape
 	{
 		if (this.topElevationOffset != topElevationOffset)
 		{
-			frontLock.writeLock().lock();
-			try
-			{
-
-				verticesDirty = true;
-				this.topElevationOffset = topElevationOffset;
-			}
-			finally
-			{
-				frontLock.writeLock().unlock();
-			}
+			verticesDirty = true;
+			this.topElevationOffset = topElevationOffset;
 		}
 	}
 
@@ -95,16 +85,8 @@ public class TopBottomFastShape extends FastShape
 	{
 		if (this.bottomElevationOffset != bottomElevationOffset)
 		{
-			frontLock.writeLock().lock();
-			try
-			{
-				verticesDirty = true;
-				this.bottomElevationOffset = bottomElevationOffset;
-			}
-			finally
-			{
-				frontLock.writeLock().unlock();
-			}
+			verticesDirty = true;
+			this.bottomElevationOffset = bottomElevationOffset;
 		}
 	}
 
@@ -125,16 +107,8 @@ public class TopBottomFastShape extends FastShape
 	{
 		if (!LatLon.equals(latlonOffset, this.latlonOffset))
 		{
-			frontLock.writeLock().lock();
-			try
-			{
-				verticesDirty = true;
-				this.latlonOffset = latlonOffset;
-			}
-			finally
-			{
-				frontLock.writeLock().unlock();
-			}
+			verticesDirty = true;
+			this.latlonOffset = latlonOffset;
 		}
 	}
 

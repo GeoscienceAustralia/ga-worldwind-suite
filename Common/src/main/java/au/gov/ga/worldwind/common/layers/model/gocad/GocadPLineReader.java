@@ -32,8 +32,6 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.util.FastShape;
 
-import com.sun.opengl.util.BufferUtil;
-
 /**
  * {@link GocadReader} implementation for reading PLine GOCAD files.
  * 
@@ -124,7 +122,7 @@ public class GocadPLineReader implements GocadReader<FastShape>
 
 			return;
 		}
-		
+
 		matcher = atomPattern.matcher(line);
 		if (matcher.matches())
 		{
@@ -190,9 +188,9 @@ public class GocadPLineReader implements GocadReader<FastShape>
 			name = matcher.group(1);
 			return;
 		}
-		
+
 		matcher = zpositivePattern.matcher(line);
-		if(matcher.matches())
+		if (matcher.matches())
 		{
 			zPositive = !matcher.group(1).equalsIgnoreCase("depth");
 		}
@@ -238,7 +236,7 @@ public class GocadPLineReader implements GocadReader<FastShape>
 	@Override
 	public FastShape end(URL context)
 	{
-		IntBuffer indicesBuffer = BufferUtil.newIntBuffer(segmentIds.size());
+		IntBuffer indicesBuffer = IntBuffer.allocate(segmentIds.size());
 		for (Integer i : segmentIds)
 		{
 			if (!vertexIdMap.containsKey(i))
@@ -253,11 +251,11 @@ public class GocadPLineReader implements GocadReader<FastShape>
 			name = "PLine";
 		}
 
-		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_LINES);
+		FastShape shape = new FastShape(positions, indicesBuffer.array(), GL.GL_LINES);
 		shape.setName(name);
 		if (parameters.getColorMap() != null)
 		{
-			FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * 4);
+			FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * 4);
 			for (float value : values)
 			{
 				if (Float.isNaN(value) || value == noDataValue)
@@ -272,7 +270,7 @@ public class GocadPLineReader implements GocadReader<FastShape>
 				}
 			}
 			shape.setColorBufferElementSize(4);
-			shape.setColorBuffer(colorBuffer);
+			shape.setColorBuffer(colorBuffer.array());
 		}
 		else if (color != null)
 		{

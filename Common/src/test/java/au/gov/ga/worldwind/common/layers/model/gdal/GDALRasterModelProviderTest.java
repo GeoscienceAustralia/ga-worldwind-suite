@@ -25,7 +25,6 @@ import gov.nasa.worldwind.geom.Sector;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,22 +55,27 @@ public class GDALRasterModelProviderTest
 	private static final List<RasterProperties> TEST_RASTERS = new ArrayList<RasterProperties>();
 	static
 	{
-		TEST_RASTERS.add(new RasterProperties(){{{
-			name="testgrid.tif";
-			testBand=1;
-			maxLat=-25.5230437;
-			minLat=-27.6117002;
-			minLon=141.7329060;
-			maxLon=144.7855579;
-			xCellSize=0.040166471522998;
-			yCellSize=-0.040166471522998;
-			width=76;
-			height=52;
-			minValue=-2558.0;
-			maxValue=-699.0;
-		}}});
+		TEST_RASTERS.add(new RasterProperties()
+		{
+			{
+				{
+					name = "testgrid.tif";
+					testBand = 1;
+					maxLat = -25.5230437;
+					minLat = -27.6117002;
+					minLon = 141.7329060;
+					maxLon = 144.7855579;
+					xCellSize = 0.040166471522998;
+					yCellSize = -0.040166471522998;
+					width = 76;
+					height = 52;
+					minValue = -2558.0;
+					maxValue = -699.0;
+				}
+			}
+		});
 	}
-	
+
 	@BeforeClass
 	public static void init()
 	{
@@ -86,32 +90,32 @@ public class GDALRasterModelProviderTest
 		{
 		}
 	}
-	
+
 	@Before
 	public void setup()
 	{
 		classUnderTest = new GDALRasterModelProvider();
-		
+
 		mockContext = new Mockery();
-		
+
 		modelLayer = mockContext.mock(ModelLayer.class);
 	}
-	
+
 	@Test
 	public void testConstructWithNull()
 	{
 		classUnderTest = new GDALRasterModelProvider(null);
-		
+
 		// Expect default parameters
 		GDALRasterModelParameters defaults = new GDALRasterModelParameters();
 		GDALRasterModelParameters actuals = classUnderTest.getModelParameters();
-		
+
 		assertEquals(defaults.getBand(), actuals.getBand());
 		assertEquals(defaults.getDefaultColor(), actuals.getDefaultColor());
 		assertEquals(defaults.getColorMap(), actuals.getColorMap());
 		assertEquals(defaults.getMaxVariance(), actuals.getMaxVariance(), 0.001);
 	}
-	
+
 	@Test
 	public void loadWithNullUrl()
 	{
@@ -125,7 +129,7 @@ public class GDALRasterModelProviderTest
 			// pass
 		}
 	}
-	
+
 	@Test
 	public void loadWithNullLayer()
 	{
@@ -140,40 +144,45 @@ public class GDALRasterModelProviderTest
 			// pass
 		}
 	}
-	
+
 	@Test
 	public void loadValidUrl() throws Exception
 	{
 		RasterProperties testRaster = TEST_RASTERS.get(0);
 		URL url = getClass().getResource(testRaster.name);
-		
+
 		final FastShapeMatcher matcher = new FastShapeMatcher();
-		mockContext.checking(new Expectations(){{{
-			allowing(modelLayer).addShape(with(matcher));
-		}}});
-		
+		mockContext.checking(new Expectations()
+		{
+			{
+				{
+					allowing(modelLayer).addShape(with(matcher));
+				}
+			}
+		});
+
 		boolean dataLoaded = classUnderTest.doLoadData(url, modelLayer);
 		FastShape shape = matcher.shape;
-		
+
 		assertTrue("Data did not load as expected", dataLoaded);
-		
+
 		assertNotNull("Shape is null", shape);
 		assertTrue("Force sorted primitives is not true", shape.isForceSortedPrimitives());
 		assertTrue("Shape is not lighted", shape.isLighted());
 		assertTrue("Two-sided lighting is not enabled", shape.isTwoSidedLighting());
 		assertTrue(shape.isCalculateNormals());
-		
+
 		// With MaxVariance = 0 we expect every pixel to have a corresponding position
 		List<Position> positions = shape.getPositions();
 		assertNotNull(positions);
-		assertEquals(testRaster.width*testRaster.height, positions.size());
-		
+		assertEquals(testRaster.width * testRaster.height, positions.size());
+
 		// Colour buffer should have a 4 element entry per-point 
 		assertEquals(4, shape.getColorBufferElementSize());
-		FloatBuffer colourBuffer = shape.getColorBuffer();
+		float[] colourBuffer = shape.getColorBuffer();
 		assertNotNull(colourBuffer);
-		assertEquals(testRaster.width*testRaster.height*4, colourBuffer.limit());
-		
+		assertEquals(testRaster.width * testRaster.height * 4, colourBuffer.length);
+
 		// Sector will be sampled from 'bottom-left' corners of cells
 		Sector sector = shape.getSector();
 		assertNotNull(sector);
@@ -182,7 +191,7 @@ public class GDALRasterModelProviderTest
 		assertEquals(testRaster.minLat - testRaster.yCellSize, sector.getMinLatitude().degrees, 0.0001);
 		assertEquals(testRaster.maxLat, sector.getMaxLatitude().degrees, 0.0001);
 	}
-	
+
 	/** A simple properties class that holds raster details for use in tests */
 	private static class RasterProperties
 	{
@@ -199,20 +208,25 @@ public class GDALRasterModelProviderTest
 		double minValue;
 		double maxValue;
 	}
-	
-	/** A matcher that accepts any FastShape, and provides access for later inspection */
+
+	/**
+	 * A matcher that accepts any FastShape, and provides access for later
+	 * inspection
+	 */
 	private static class FastShapeMatcher extends BaseMatcher<FastShape>
 	{
 		public FastShape shape;
-		
+
 		@Override
 		public boolean matches(Object item)
 		{
-			this.shape = (FastShape)item;
+			this.shape = (FastShape) item;
 			return true;
 		}
 
 		@Override
-		public void describeTo(Description description) { }
+		public void describeTo(Description description)
+		{
+		}
 	}
 }
