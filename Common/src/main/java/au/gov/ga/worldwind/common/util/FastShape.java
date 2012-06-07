@@ -51,9 +51,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.imageio.ImageIO;
@@ -598,8 +596,6 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			@Override
 			public void run()
 			{
-				vertexVBO.lock();
-				normalVBO.lock();
 				positionsLock.readLock().lock();
 				try
 				{
@@ -630,8 +626,6 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 				}
 				finally
 				{
-					vertexVBO.unlock();
-					normalVBO.unlock();
 					positionsLock.readLock().unlock();
 				}
 
@@ -807,23 +801,15 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 					return;
 				}
 
-				sortedIndexVBO.lock();
-				try
+				int[] indices = indexVBO.getBuffer();
+				int size = indices != null ? indices.length : vertices.length / 3;
+				int[] sortedIndices = sortedIndexVBO.getBuffer();
+				if (sortedIndices == null || sortedIndices.length != size)
 				{
-					int[] indices = indexVBO.getBuffer();
-					int size = indices != null ? indices.length : vertices.length / 3;
-					int[] sortedIndices = sortedIndexVBO.getBuffer();
-					if (sortedIndices == null || sortedIndices.length != size)
-					{
-						sortedIndices = new int[size];
-					}
-					sortIndices(dc, eyePoint, vertices, indices, sortedIndices);
-					sortedIndexVBO.setBuffer(sortedIndices);
+					sortedIndices = new int[size];
 				}
-				finally
-				{
-					sortedIndexVBO.unlock();
-				}
+				sortIndices(dc, eyePoint, vertices, indices, sortedIndices);
+				sortedIndexVBO.setBuffer(sortedIndices);
 			}
 		};
 
@@ -1030,15 +1016,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 	public void setIndices(int[] indices)
 	{
-		indexVBO.lock();
-		try
-		{
-			indexVBO.setBuffer(indices);
-		}
-		finally
-		{
-			indexVBO.unlock();
-		}
+		indexVBO.setBuffer(indices);
 	}
 
 	public boolean isFollowTerrain()
@@ -1394,7 +1372,6 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		private ARRAY buffer = null;
 		private int vboId = -1;
 		private boolean dirty = false;
-		private Lock lock = new ReentrantLock();
 
 		public ARRAY getBuffer()
 		{
@@ -1405,16 +1382,6 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		{
 			this.buffer = buffer;
 			markDirty();
-		}
-
-		public void lock()
-		{
-			lock.lock();
-		}
-
-		public void unlock()
-		{
-			lock.unlock();
 		}
 
 		public void markDirty()
@@ -1433,16 +1400,8 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			gl.glBindBuffer(getTarget(), vboId);
 			if (dirty)
 			{
-				lock.lock();
-				try
-				{
-					Buffer b = wrapBuffer(buffer);
-					gl.glBufferData(getTarget(), b.limit() * getDataSize(), b.rewind(), GL.GL_STATIC_DRAW);
-				}
-				finally
-				{
-					lock.unlock();
-				}
+				Buffer b = wrapBuffer(buffer);
+				gl.glBufferData(getTarget(), b.limit() * getDataSize(), b.rewind(), GL.GL_STATIC_DRAW);
 				dirty = false;
 			}
 		}
