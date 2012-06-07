@@ -51,8 +51,6 @@ import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Loader;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
-import com.sun.opengl.util.BufferUtil;
-
 /**
  * A specialised sub-surface layer that reads and displays earthquake data from
  * a reference data file.
@@ -286,11 +284,11 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 			positions.add(earthquake.position);
 		}
 
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * 3);
+		FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * 3);
 		generateColorBuffer(colorBuffer, earthquakes);
 
 		FastShape shape = new FastShape(positions, GL.GL_POINTS);
-		shape.setColorBuffer(colorBuffer);
+		shape.setColorBuffer(colorBuffer.array());
 		shape.setColorBufferElementSize(3);
 
 		synchronized (shapeLock)

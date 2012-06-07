@@ -26,8 +26,6 @@ import au.gov.ga.worldwind.common.util.FastShape;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.viewer.layers.shapefile.indextessellator.PolygonTessellator;
 
-import com.sun.opengl.util.BufferUtil;
-
 public class ShapefileTileData implements Renderable, Cacheable
 {
 	private Sector sector;
@@ -138,11 +136,11 @@ public class ShapefileTileData implements Renderable, Cacheable
 
 		if (!mergedLines.isEmpty())
 		{
-			IntBuffer indices = BufferUtil.newIntBuffer(mergedIndices.size());
+			IntBuffer indices = IntBuffer.allocate(mergedIndices.size());
 			for (Integer i : mergedIndices)
 				indices.put(i);
 
-			FastShape shape = new FastShape(mergedLines, indices, GL.GL_LINES);
+			FastShape shape = new FastShape(mergedLines, indices.array(), GL.GL_LINES);
 			shape.setColor(randomColor());
 			shapes.add(shape);
 		}
