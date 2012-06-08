@@ -377,8 +377,7 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 		}
 
 		//create a color buffer containing a color for each point
-		int colorBufferElementSize = parameters.getColorMap() != null ? 4 : 3;
-		FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * colorBufferElementSize);
+		FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * 4);
 		for (float value : values)
 		{
 			//check that this value is valid; only non-NaN floats have points associated
@@ -387,15 +386,20 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 				if (parameters.getColorMap() != null)
 				{
 					Color color = parameters.getColorMap().calculateColorNotingIsValuesPercentages(value, min, max);
-					colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
-							.put(color.getAlpha() / 255f);
+					colorBuffer.put(color.getRed() / 255f)
+							   .put(color.getGreen() / 255f)
+							   .put(color.getBlue() / 255f)
+							   .put(color.getAlpha() / 255f);
 				}
 				else
 				{
 					float percent = (value - min) / (max - min);
 					HSLColor hsl = new HSLColor((1f - percent) * 300f, 100f, 50f);
 					Color color = hsl.getRGB();
-					colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f);
+					colorBuffer.put(color.getRed() / 255f)
+							   .put(color.getGreen() / 255f)
+							   .put(color.getBlue() / 255f)
+							   .put(255);
 				}
 			}
 		}
@@ -408,7 +412,7 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 		FastShape shape = new FastShape(positions, GL.GL_POINTS);
 		shape.setName(name);
 		shape.setColorBuffer(colorBuffer.array());
-		shape.setColorBufferElementSize(colorBufferElementSize);
+		shape.setColorBufferElementSize(4);
 		shape.setForceSortedPrimitives(true);
 		shape.setFollowTerrain(true);
 		return shape;
