@@ -26,7 +26,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * Abstract implementation of the {@link ModelLayer}. Contains the common

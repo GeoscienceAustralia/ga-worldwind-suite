@@ -18,7 +18,7 @@ package au.gov.ga.worldwind.common.layers.model.gocad;
 import java.net.URL;
 import java.util.regex.Pattern;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * A reader that creates a {@link FastShape} from a GOCAD file.

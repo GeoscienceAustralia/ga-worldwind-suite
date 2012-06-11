@@ -50,11 +50,11 @@ import javax.media.opengl.GL;
 import org.gdal.osr.CoordinateTransformation;
 
 import au.gov.ga.worldwind.common.layers.Wireframeable;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShapeRenderListener;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.ColorMap;
 import au.gov.ga.worldwind.common.util.CoordinateTransformationUtil;
-import au.gov.ga.worldwind.common.util.FastShape;
-import au.gov.ga.worldwind.common.util.FastShapeRenderListener;
 import au.gov.ga.worldwind.common.util.GeometryUtil;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;

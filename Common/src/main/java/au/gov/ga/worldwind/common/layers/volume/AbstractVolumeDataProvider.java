@@ -27,7 +27,7 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.layers.data.AbstractDataProvider;
 import au.gov.ga.worldwind.common.layers.volume.btt.BinaryTriangleTree;
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * Abstract implementation of the {@link VolumeDataProvider} interface. Provides
