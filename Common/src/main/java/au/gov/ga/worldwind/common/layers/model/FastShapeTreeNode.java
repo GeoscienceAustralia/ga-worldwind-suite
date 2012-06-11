@@ -15,7 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.layers.model;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import gov.nasa.worldwind.util.tree.BasicTreeNode;
 import gov.nasa.worldwind.util.tree.TreeNode;
 

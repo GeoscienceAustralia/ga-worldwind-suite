@@ -33,7 +33,7 @@ import javax.media.opengl.GL;
 
 import org.gdal.osr.CoordinateTransformation;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Validate;
 

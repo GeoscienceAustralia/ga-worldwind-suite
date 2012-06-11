@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 import javax.media.opengl.GL;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * {@link GocadReader} implementation for reading PLine GOCAD files.

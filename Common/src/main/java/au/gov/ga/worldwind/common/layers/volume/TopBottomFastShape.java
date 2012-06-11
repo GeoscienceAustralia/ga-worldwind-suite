@@ -20,7 +20,7 @@ import gov.nasa.worldwind.geom.Position;
 
 import java.util.List;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * {@link FastShape} subclass which defines top and bottom elevation offsets.

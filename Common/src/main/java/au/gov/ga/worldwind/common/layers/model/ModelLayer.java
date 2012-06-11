@@ -18,7 +18,7 @@ package au.gov.ga.worldwind.common.layers.model;
 import au.gov.ga.worldwind.common.layers.Hierarchical;
 import au.gov.ga.worldwind.common.layers.Wireframeable;
 import au.gov.ga.worldwind.common.layers.data.DataLayer;
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * Layer that renders a model. Uses {@link FastShape}s for storing and rendering

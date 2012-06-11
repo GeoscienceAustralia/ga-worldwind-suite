@@ -31,8 +31,8 @@ import java.util.regex.Pattern;
 
 import javax.media.opengl.GL;
 
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import au.gov.ga.worldwind.common.util.ColorMap;
-import au.gov.ga.worldwind.common.util.FastShape;
 
 /**
  * {@link GocadReader} implementation for reading TSurf GOCAD files.

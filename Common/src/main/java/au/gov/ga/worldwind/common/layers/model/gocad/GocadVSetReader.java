@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 import javax.media.opengl.GL;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * A {@link GocadReader} that reads a VSet object into a {@link FastShape}

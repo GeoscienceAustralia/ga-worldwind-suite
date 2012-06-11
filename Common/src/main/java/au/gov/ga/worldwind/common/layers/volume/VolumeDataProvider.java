@@ -21,7 +21,7 @@ import java.awt.Rectangle;
 
 import au.gov.ga.worldwind.common.layers.data.DataProvider;
 import au.gov.ga.worldwind.common.layers.volume.btt.BinaryTriangleTree;
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * {@link DataProvider} that provides data to a {@link VolumeLayer}.

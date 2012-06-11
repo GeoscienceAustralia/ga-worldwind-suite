@@ -28,7 +28,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * Factory for creating {@link Object}s from GOCAD files.
