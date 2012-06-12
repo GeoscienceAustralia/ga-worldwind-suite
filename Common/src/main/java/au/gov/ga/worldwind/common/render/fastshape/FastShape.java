@@ -39,18 +39,10 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.Buffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -74,9 +66,9 @@ import com.sun.opengl.util.texture.Texture;
  */
 public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wireframeable
 {
-	protected final static OwnerRunnableRunner VertexUpdater = new OwnerRunnableRunner(FastShape.class.getName()
+	protected final static SingleTaskRunner VertexUpdater = new SingleTaskRunner(FastShape.class.getName()
 			+ " VertexUpdater");
-	protected final static OwnerRunnableRunner IndexUpdater = new OwnerRunnableRunner(FastShape.class.getName()
+	protected final static SingleTaskRunner IndexUpdater = new SingleTaskRunner(FastShape.class.getName()
 			+ " IndexUpdater");
 
 	protected final ReadWriteLock positionLock = new ReentrantReadWriteLock();
@@ -546,6 +538,10 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			{
 				gl.glDrawArrays(mode, 0, vertexVBO.getBuffer().length / vertexVBO.getElementStride());
 			}
+
+			//unbind the buffers
+			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+			gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 		finally
 		{
@@ -1365,233 +1361,5 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			floats[i++] = color.getBlue() / 255f;
 		}
 		return floats;
-	}
-
-	protected abstract static class AbstractVBO<ARRAY>
-	{
-		private ARRAY buffer = null;
-		private int vboId = -1;
-		private boolean dirty = false;
-
-		public ARRAY getBuffer()
-		{
-			return buffer;
-		}
-
-		public void setBuffer(ARRAY buffer)
-		{
-			this.buffer = buffer;
-			markDirty();
-		}
-
-		public void markDirty()
-		{
-			dirty = true;
-		}
-
-		public void bind(GL gl)
-		{
-			if (vboId < 0)
-			{
-				int[] vboIds = new int[1];
-				gl.glGenBuffers(vboIds.length, vboIds, 0);
-				vboId = vboIds[0];
-			}
-			gl.glBindBuffer(getTarget(), vboId);
-			if (dirty)
-			{
-				Buffer b = wrapBuffer(buffer);
-				gl.glBufferData(getTarget(), b.limit() * getDataSize(), b.rewind(), GL.GL_STATIC_DRAW);
-				dirty = false;
-			}
-		}
-
-		public void unbind(GL gl)
-		{
-			gl.glBindBuffer(getTarget(), 0);
-		}
-
-		protected abstract int getTarget();
-
-		protected abstract Buffer wrapBuffer(ARRAY buffer);
-
-		protected abstract int getDataSize();
-	}
-
-	protected static class FloatVBO extends AbstractVBO<float[]>
-	{
-		private int elementStride;
-
-		public FloatVBO(int elementStride)
-		{
-			this.elementStride = elementStride;
-		}
-
-		public int getElementStride()
-		{
-			return elementStride;
-		}
-
-		public void setElementStride(int elementStride)
-		{
-			this.elementStride = elementStride;
-		}
-
-		@Override
-		protected int getTarget()
-		{
-			return GL.GL_ARRAY_BUFFER;
-		}
-
-		@Override
-		protected Buffer wrapBuffer(float[] buffer)
-		{
-			return FloatBuffer.wrap(buffer);
-		}
-
-		@Override
-		protected int getDataSize()
-		{
-			return Float.SIZE / 8;
-		}
-	}
-
-	protected static class IntIndexVBO extends AbstractVBO<int[]>
-	{
-		@Override
-		protected int getTarget()
-		{
-			return GL.GL_ELEMENT_ARRAY_BUFFER;
-		}
-
-		@Override
-		protected Buffer wrapBuffer(int[] buffer)
-		{
-			return IntBuffer.wrap(buffer);
-		}
-
-		@Override
-		protected int getDataSize()
-		{
-			return Integer.SIZE / 8;
-		}
-	}
-
-	protected static class ShortIndexVBO extends AbstractVBO<short[]>
-	{
-		@Override
-		protected int getTarget()
-		{
-			return GL.GL_ELEMENT_ARRAY_BUFFER;
-		}
-
-		@Override
-		protected Buffer wrapBuffer(short[] buffer)
-		{
-			return ShortBuffer.wrap(buffer);
-		}
-
-		@Override
-		protected int getDataSize()
-		{
-			return Short.SIZE / 8;
-		}
-	}
-
-	protected static class IndexAndDistance implements Comparable<IndexAndDistance>
-	{
-		public final double distance;
-		public final int index;
-
-		public IndexAndDistance(double distance, int index)
-		{
-			this.distance = distance;
-			this.index = index;
-		}
-
-		@Override
-		public int compareTo(IndexAndDistance o)
-		{
-			return -Double.compare(distance, o.distance);
-		}
-	}
-
-	protected static class OwnerRunnable
-	{
-		public final Object owner;
-		public final Runnable runnable;
-
-		public OwnerRunnable(Object owner, Runnable runnable)
-		{
-			this.owner = owner;
-			this.runnable = runnable;
-		}
-
-		@Override
-		public int hashCode()
-		{
-			return owner.hashCode();
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (owner.equals(obj))
-			{
-				return true;
-			}
-			if (obj instanceof OwnerRunnable && owner.equals(((OwnerRunnable) obj).owner))
-			{
-				return true;
-			}
-			return super.equals(obj);
-		}
-	}
-
-	protected static class OwnerRunnableRunner
-	{
-		private BlockingQueue<OwnerRunnable> queue = new LinkedBlockingQueue<OwnerRunnable>();
-		private Set<OwnerRunnable> set = Collections.synchronizedSet(new HashSet<OwnerRunnable>());
-		private final int THREAD_COUNT = 1;
-
-		public OwnerRunnableRunner(String threadName)
-		{
-			for (int i = 0; i < THREAD_COUNT; i++)
-			{
-				Thread thread = new Thread(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						while (true)
-						{
-							try
-							{
-								OwnerRunnable or = queue.take();
-								or.runnable.run();
-								set.remove(or);
-							}
-							catch (Throwable t)
-							{
-								t.printStackTrace();
-							}
-						}
-					}
-				});
-				thread.setName(threadName);
-				thread.setDaemon(true);
-				thread.start();
-			}
-		}
-
-		public synchronized void run(Object owner, Runnable runnable)
-		{
-			OwnerRunnable or = new OwnerRunnable(owner, runnable);
-			if (!set.contains(or))
-			{
-				set.add(or);
-				queue.add(or);
-			}
-		}
 	}
 }
