@@ -29,7 +29,7 @@ import java.util.zip.ZipFile;
 import au.gov.ga.worldwind.common.layers.data.AbstractDataProvider;
 import au.gov.ga.worldwind.common.layers.model.ModelLayer;
 import au.gov.ga.worldwind.common.layers.model.ModelProvider;
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import au.gov.ga.worldwind.common.util.URLUtil;
 
 /**

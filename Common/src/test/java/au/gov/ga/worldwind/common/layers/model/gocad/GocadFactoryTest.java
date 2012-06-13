@@ -15,8 +15,8 @@ import javax.media.opengl.GL;
 
 import org.junit.Test;
 
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import au.gov.ga.worldwind.common.util.ColorMap;
-import au.gov.ga.worldwind.common.util.FastShape;
 
 public class GocadFactoryTest
 {

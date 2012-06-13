@@ -30,7 +30,7 @@ import java.util.List;
 import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.layers.point.types.UrlMarker;
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * Basic implementation of a {@link Borehole}.

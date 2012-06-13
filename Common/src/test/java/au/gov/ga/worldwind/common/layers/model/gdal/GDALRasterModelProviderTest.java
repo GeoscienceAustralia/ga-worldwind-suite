@@ -37,7 +37,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import au.gov.ga.worldwind.common.layers.model.ModelLayer;
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * Unit tests for the {@link GDALRasterModelProvider}

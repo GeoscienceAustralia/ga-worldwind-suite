@@ -18,7 +18,7 @@ package au.gov.ga.worldwind.common.layers.model;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.util.layertree.LayerTreeNode;
 import gov.nasa.worldwind.util.tree.TreeNode;
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * {@link TreeNode} representing a {@link ModelLayer}, for displaying the
