@@ -45,6 +45,7 @@ import org.gdal.osr.SpatialReference;
 import au.gov.ga.worldwind.tiler.util.MinMaxArray;
 import au.gov.ga.worldwind.tiler.util.NullableNumberArray;
 import au.gov.ga.worldwind.tiler.util.NumberArray;
+import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.TilerException;
 
 /**
@@ -78,9 +79,15 @@ public class GDALTile
 
 	public GDALTile(GDALTileParameters parameters) throws GDALException, TilerException
 	{
-		if (parameters.sector != null
-				&& (parameters.sector.getMinLatitude() >= parameters.sector.getMaxLatitude() || parameters.sector
-						.getMinLongitude() >= parameters.sector.getMaxLongitude()))
+		if (parameters == null)
+		{
+			throw new IllegalArgumentException("Tile parameters are required");
+		}
+		if (!isSectorOrSourceRectangleSet(parameters))
+		{
+			throw new IllegalArgumentException("Either source sector or rectangle must be set");
+		}
+		if (!isValidSector(parameters.sector))
 		{
 			throw new IllegalArgumentException("Invalid sector");
 		}
@@ -89,6 +96,20 @@ public class GDALTile
 		readDataset();
 	}
 
+	private boolean isValidSector(Sector sector)
+	{
+		if (sector == null)
+		{
+			return true;
+		}
+		return sector.getMinLatitude() < sector.getMaxLatitude() && sector.getMinLongitude() < sector.getMaxLongitude();
+	}
+	
+	private boolean isSectorOrSourceRectangleSet(GDALTileParameters parameters)
+	{
+		return parameters.sector != null || parameters.sourceRectangle != null;
+	}
+	
 	protected GDALTile(GDALTile tile, ByteBuffer buffer, int bufferType, int bufferTypeSize, boolean floatingPoint)
 	{
 		this.buffer = buffer;
@@ -136,9 +157,13 @@ public class GDALTile
 			finally
 			{
 				if (srcSR != null)
+				{
 					srcSR.delete();
+				}
 				if (dstSR != null)
+				{
 					dstSR.delete();
+				}
 			}
 		}
 		else
@@ -196,8 +221,8 @@ public class GDALTile
 		double[] geoTransformArray = new double[6];
 		geoTransformArray[0] = parameters.sector.getMinLongitude();
 		geoTransformArray[3] = parameters.sector.getMaxLatitude();
-		geoTransformArray[1] = parameters.sector.getDeltaLongitude() / (double) width;
-		geoTransformArray[5] = -parameters.sector.getDeltaLatitude() / (double) height;
+		geoTransformArray[1] = parameters.sector.getDeltaLongitude() / width;
+		geoTransformArray[5] = -parameters.sector.getDeltaLatitude() / height;
 		dst.SetGeoTransform(geoTransformArray);
 		dst.SetProjection(dstSR.ExportToWkt());
 
@@ -230,7 +255,9 @@ public class GDALTile
 		{
 			// check the selected band is valid
 			if (parameters.selectedBand >= dataBandCount)
+			{
 				throw new IllegalArgumentException("Selected band does not exist");
+			}
 
 			dataBandCount = 1;
 			bands = new Band[dataBandCount];
@@ -433,9 +460,13 @@ public class GDALTile
 				for (int i = 0; i < bufferTypeSize; i++)
 				{
 					if (fillRegion.contains(x, y))
+					{
 						buffer.put(index + i, (byte) 0xff);
+					}
 					else
+					{
 						buffer.put(index + i, (byte) 0x00);
+					}
 				}
 			}
 		}
@@ -446,7 +477,9 @@ public class GDALTile
 			NullableNumberArray noData)
 	{
 		if (noData != null && noData.length() != bands)
+		{
 			throw new IllegalArgumentException("Array size does not equal band count");
+		}
 
 		int srcStride = srcRect.width * bufferTypeSize;
 		int dstStride = dstSize.width * bufferTypeSize;
@@ -492,9 +525,13 @@ public class GDALTile
 				for (int i = 0; i < bands * 4; i++)
 				{
 					if (isFloat)
+					{
 						doubleValues[i] = getDoubleValue(indices[i], src, bufferType);
+					}
 					else
+					{
 						longValues[i] = getLongValue(indices[i], src, bufferType);
+					}
 				}
 
 				//check if any of the pixels match the no data values
@@ -503,9 +540,13 @@ public class GDALTile
 					for (int i = 0; i < 4; i++)
 					{
 						if (isFloat)
+						{
 							isNoData[i] = noData.equalsDoubles(doubleValues, bands * i);
+						}
 						else
+						{
 							isNoData[i] = noData.equalsLongs(longValues, bands * i);
+						}
 					}
 
 					//If any pixels were no data values, then round the mixers. This will ensure that
@@ -519,11 +560,15 @@ public class GDALTile
 						//interpolation, then reset the X mixer
 						if ((mxY == 1d && !(isNoData[2] || isNoData[3]))
 								|| (mxY == 0d && !(isNoData[0] || isNoData[1])))
+						{
 							mxX = mixX;
+						}
 						//do the same for the Y mixer
 						if ((mxX == 1d && !(isNoData[1] || isNoData[3]))
 								|| (mxX == 0d && !(isNoData[0] || isNoData[2])))
+						{
 							mxY = mixY;
+						}
 					}
 				}
 
@@ -659,10 +704,14 @@ public class GDALTile
 	private boolean isEqual(ByteBuffer buffer, NullableNumberArray values)
 	{
 		if (values == null)
+		{
 			return false;
+		}
 
 		if (values.length() != bufferBandCount)
+		{
 			throw new IllegalArgumentException("Array size does not equal band count");
+		}
 
 		boolean allNull = true;
 		for (int b = 0; b < bufferBandCount; b++)
@@ -670,12 +719,16 @@ public class GDALTile
 			if (floatingPoint)
 			{
 				if (values.getDouble(b) == null)
+				{
 					continue;
+				}
 			}
 			else
 			{
 				if (values.getLong(b) == null)
+				{
 					continue;
+				}
 			}
 
 			allNull = false;
@@ -683,19 +736,25 @@ public class GDALTile
 		}
 
 		if (allNull)
+		{
 			return false;
+		}
 
 		for (int b = 0; b < bufferBandCount; b++)
 		{
 			if (floatingPoint)
 			{
 				if (values.getDouble(b) == null)
+				{
 					continue;
+				}
 			}
 			else
 			{
 				if (values.getLong(b) == null)
+				{
 					continue;
+				}
 			}
 
 			for (int x = 0; x < dataRectangle.width; x++)
@@ -706,12 +765,16 @@ public class GDALTile
 					if (floatingPoint)
 					{
 						if (getDoubleValue(index, buffer, bufferType) != values.getDouble(b))
+						{
 							return false;
+						}
 					}
 					else
 					{
 						if (getLongValue(index, buffer, bufferType) != values.getLong(b))
+						{
 							return false;
+						}
 					}
 				}
 			}
@@ -723,29 +786,39 @@ public class GDALTile
 	private void fillOutside(ByteBuffer buffer, NullableNumberArray values)
 	{
 		if (values == null)
+		{
 			return;
+		}
 
 		if (values.length() != bufferBandCount)
+		{
 			throw new IllegalArgumentException("Array size does not equal band count");
+		}
 
 		int width = parameters.size.width;
 		int height = parameters.size.height;
 
 		if (dataRectangle.x == 0 && dataRectangle.y == 0 && dataRectangle.width == width
 				&& dataRectangle.height == height)
+		{
 			return;
+		}
 
 		for (int b = 0; b < bufferBandCount; b++)
 		{
 			if (floatingPoint)
 			{
 				if (values.getDouble(b) == null)
+				{
 					continue;
+				}
 			}
 			else
 			{
 				if (values.getLong(b) == null)
+				{
 					continue;
+				}
 			}
 
 			for (int x = 0; x < width; x++)
@@ -756,9 +829,13 @@ public class GDALTile
 					{
 						int index = getBufferIndex(x, y, b, width, height) * bufferTypeSize;
 						if (floatingPoint)
+						{
 							putDoubleValue(index, buffer, bufferType, values.getDouble(b));
+						}
 						else
+						{
 							putLongValue(index, buffer, bufferType, values.getLong(b));
+						}
 					}
 				}
 			}
@@ -770,17 +847,27 @@ public class GDALTile
 			NullableNumberArray replacement, NullableNumberArray otherwise) throws TilerException
 	{
 		if (minMaxs == null || minMaxs.length == 0)
+		{
 			return;
+		}
 		if (replacement == null && otherwise == null)
+		{
 			return;
+		}
 
 		for (int i = 0; i < minMaxs.length; i++)
+		{
 			if (minMaxs[i].length() != bufferBandCount)
+			{
 				throw new IllegalArgumentException("Array size must equal band count");
+			}
+		}
 
 		if ((replacement != null && replacement.length() != bufferBandCount)
 				|| (otherwise != null && otherwise.length() != bufferBandCount))
+		{
 			throw new IllegalArgumentException("Array size must equal band count");
+		}
 
 		boolean allNull = true;
 		for (int b = 0; b < bufferBandCount; b++)
@@ -812,9 +899,13 @@ public class GDALTile
 				{
 					indices[b] = getBufferIndex(x, y, b, bufferSize.width, bufferSize.height) * bufferTypeSize;
 					if (floatingPoint)
+					{
 						doubleValues[b] = getDoubleValue(indices[b], buffer, bufferType);
+					}
 					else
+					{
 						longValues[b] = getLongValue(indices[b], buffer, bufferType);
+					}
 				}
 
 				for (int i = 0; i < minMaxs.length; i++)
@@ -822,11 +913,17 @@ public class GDALTile
 					if (minMaxs[i] != null)
 					{
 						if (floatingPoint)
+						{
 							between = minMaxs[i].isBetweenDouble(doubleValues);
+						}
 						else
+						{
 							between = minMaxs[i].isBetweenLong(longValues);
+						}
 						if (between)
+						{
 							break;
+						}
 					}
 				}
 
@@ -838,9 +935,13 @@ public class GDALTile
 						if (values.getDouble(b) != null)
 						{
 							if (floatingPoint)
+							{
 								putDoubleValue(indices[b], buffer, bufferType, values.getDouble(b));
+							}
 							else
+							{
 								putLongValue(indices[b], buffer, bufferType, values.getLong(b));
+							}
 						}
 					}
 				}
@@ -851,10 +952,14 @@ public class GDALTile
 	public void updateMinMax(NumberArray minmax, NullableNumberArray outsideValues)
 	{
 		if (minmax == null)
+		{
 			return;
+		}
 
 		if (outsideValues != null && outsideValues.length() < bufferBandCount)
+		 {
 			outsideValues = null; // just in case
+		}
 
 		int width = parameters.size.width;
 		int height = parameters.size.height;
@@ -871,24 +976,36 @@ public class GDALTile
 						double value = getDoubleValue(index, buffer, bufferType);
 						if (outsideValues != null && outsideValues.getDouble(b) != null
 								&& value == outsideValues.getDouble(b))
+						{
 							continue;
+						}
 
 						if (value < minmax.getDouble(0))
+						{
 							minmax.setDouble(0, value);
+						}
 						if (value > minmax.getDouble(1))
+						{
 							minmax.setDouble(1, value);
+						}
 					}
 					else
 					{
 						Long value = getLongValue(index, buffer, bufferType);
 						if (outsideValues != null && outsideValues.getLong(b) != null
 								&& value == outsideValues.getLong(b))
+						{
 							continue;
+						}
 
 						if (value < minmax.getLong(0))
+						{
 							minmax.setLong(0, value);
+						}
 						if (value > minmax.getLong(1))
+						{
 							minmax.setLong(1, value);
+						}
 					}
 				}
 			}
@@ -938,7 +1055,9 @@ public class GDALTile
 	public GDALTile convertToType(int newBufferType)
 	{
 		if (newBufferType == bufferType)
+		{
 			return this;
+		}
 
 		int newBufferTypeSize = gdal.GetDataTypeSize(newBufferType) / 8;
 		boolean newFloatingPoint = isTypeFloatingPoint(newBufferType);
@@ -964,9 +1083,13 @@ public class GDALTile
 			}
 
 			if (newFloatingPoint)
+			{
 				putDoubleValue(newBuffer, newBufferType, dvalue);
+			}
 			else
+			{
 				putLongValue(newBuffer, newBufferType, lvalue);
+			}
 		}
 
 		buffer.rewind();
@@ -978,149 +1101,237 @@ public class GDALTile
 	public static long getLongValue(ByteBuffer buffer, int bufferType)
 	{
 		if (bufferType == gdalconstConstants.GDT_Byte)
+		{
 			return buffer.get() & 0xff;
+		}
 		else if (bufferType == gdalconstConstants.GDT_Int16 || bufferType == gdalconstConstants.GDT_CInt16)
+		{
 			return buffer.getShort();
+		}
 		else if (bufferType == gdalconstConstants.GDT_Int32 || bufferType == gdalconstConstants.GDT_CInt32)
+		{
 			return buffer.getInt();
+		}
 		else if (bufferType == gdalconstConstants.GDT_UInt16)
+		{
 			return getUInt16(buffer);
+		}
 		else if (bufferType == gdalconstConstants.GDT_UInt32)
+		{
 			return getUInt32(buffer);
+		}
 		else
+		{
 			throw new IllegalStateException("Unknown buffer type");
+		}
 	}
 
 	private static long getLongValue(int index, ByteBuffer buffer, int bufferType)
 	{
 		if (bufferType == gdalconstConstants.GDT_Byte)
+		{
 			return buffer.get(index) & 0xff;
+		}
 		else if (bufferType == gdalconstConstants.GDT_Int16 || bufferType == gdalconstConstants.GDT_CInt16)
+		{
 			return buffer.getShort(index);
+		}
 		else if (bufferType == gdalconstConstants.GDT_Int32 || bufferType == gdalconstConstants.GDT_CInt32)
+		{
 			return buffer.getInt(index);
+		}
 		else if (bufferType == gdalconstConstants.GDT_UInt16)
+		{
 			return getUInt16(index, buffer);
+		}
 		else if (bufferType == gdalconstConstants.GDT_UInt32)
+		{
 			return getUInt32(index, buffer);
+		}
 		else
+		{
 			throw new IllegalStateException("Unknown buffer type");
+		}
 	}
 
 	public static double getDoubleValue(ByteBuffer buffer, int bufferType)
 	{
 		if (bufferType == gdalconstConstants.GDT_Float32 || bufferType == gdalconstConstants.GDT_CFloat32)
+		{
 			return buffer.getFloat();
+		}
 		else if (bufferType == gdalconstConstants.GDT_Float64 || bufferType == gdalconstConstants.GDT_CFloat64)
+		{
 			return buffer.getDouble();
+		}
 		else
+		{
 			throw new IllegalStateException("Unknown buffer type");
+		}
 	}
 
 	private static double getDoubleValue(int index, ByteBuffer buffer, int bufferType)
 	{
 		if (bufferType == gdalconstConstants.GDT_Float32 || bufferType == gdalconstConstants.GDT_CFloat32)
+		{
 			return buffer.getFloat(index);
+		}
 		else if (bufferType == gdalconstConstants.GDT_Float64 || bufferType == gdalconstConstants.GDT_CFloat64)
+		{
 			return buffer.getDouble(index);
+		}
 		else
+		{
 			throw new IllegalStateException("Unknown buffer type");
+		}
 	}
 
 	private static void putLongValue(ByteBuffer buffer, int bufferType, long value)
 	{
 		if (bufferType == gdalconstConstants.GDT_Byte)
+		{
 			buffer.put((byte) value);
+		}
 		else if (bufferType == gdalconstConstants.GDT_Int16 || bufferType == gdalconstConstants.GDT_CInt16)
+		{
 			buffer.putShort((short) value);
+		}
 		else if (bufferType == gdalconstConstants.GDT_Int32 || bufferType == gdalconstConstants.GDT_CInt32)
+		{
 			buffer.putInt((int) value);
+		}
 		else if (bufferType == gdalconstConstants.GDT_UInt16)
+		{
 			putUInt16(buffer, value);
+		}
 		else if (bufferType == gdalconstConstants.GDT_UInt32)
+		{
 			putUInt32(buffer, value);
+		}
 		else
+		{
 			throw new IllegalStateException("Unknown buffer type");
+		}
 	}
 
 	private static void putLongValue(int index, ByteBuffer buffer, int bufferType, long value)
 	{
 		if (bufferType == gdalconstConstants.GDT_Byte)
+		{
 			buffer.put(index, (byte) value);
+		}
 		else if (bufferType == gdalconstConstants.GDT_Int16 || bufferType == gdalconstConstants.GDT_CInt16)
+		{
 			buffer.putShort(index, (short) value);
+		}
 		else if (bufferType == gdalconstConstants.GDT_Int32 || bufferType == gdalconstConstants.GDT_CInt32)
+		{
 			buffer.putInt(index, (int) value);
+		}
 		else if (bufferType == gdalconstConstants.GDT_UInt16)
+		{
 			putUInt16(index, buffer, value);
+		}
 		else if (bufferType == gdalconstConstants.GDT_UInt32)
+		{
 			putUInt32(index, buffer, value);
+		}
 		else
+		{
 			throw new IllegalStateException("Unknown buffer type");
+		}
 	}
 
 	private static void putDoubleValue(ByteBuffer buffer, int bufferType, double value)
 	{
 		if (bufferType == gdalconstConstants.GDT_Float32 || bufferType == gdalconstConstants.GDT_CFloat32)
+		{
 			buffer.putFloat((float) value);
+		}
 		else if (bufferType == gdalconstConstants.GDT_Float64 || bufferType == gdalconstConstants.GDT_CFloat64)
+		{
 			buffer.putDouble(value);
+		}
 		else
+		{
 			throw new IllegalStateException("Unknown buffer type");
+		}
 	}
 
 	private static void putDoubleValue(int index, ByteBuffer buffer, int bufferType, double value)
 	{
 		if (bufferType == gdalconstConstants.GDT_Float32 || bufferType == gdalconstConstants.GDT_CFloat32)
+		{
 			buffer.putFloat(index, (float) value);
+		}
 		else if (bufferType == gdalconstConstants.GDT_Float64 || bufferType == gdalconstConstants.GDT_CFloat64)
+		{
 			buffer.putDouble(index, value);
+		}
 		else
+		{
 			throw new IllegalStateException("Unknown buffer type");
+		}
 	}
 
 	private static int getUInt16(ByteBuffer buffer)
 	{
-		int first = 0xff & (int) buffer.get();
-		int second = 0xff & (int) buffer.get();
+		int first = 0xff & buffer.get();
+		int second = 0xff & buffer.get();
 		if (buffer.order() == ByteOrder.LITTLE_ENDIAN)
+		{
 			return (first << 8 | second);
+		}
 		else
+		{
 			return (first | second << 8);
+		}
 	}
 
 	private static int getUInt16(int index, ByteBuffer buffer)
 	{
-		int first = 0xff & (int) buffer.get(index);
-		int second = 0xff & (int) buffer.get(index + 1);
+		int first = 0xff & buffer.get(index);
+		int second = 0xff & buffer.get(index + 1);
 		if (buffer.order() == ByteOrder.LITTLE_ENDIAN)
+		{
 			return (first << 8 | second);
+		}
 		else
+		{
 			return (first | second << 8);
+		}
 	}
 
 	private static long getUInt32(ByteBuffer buffer)
 	{
-		long first = 0xff & (int) buffer.get();
-		long second = 0xff & (int) buffer.get();
-		long third = 0xff & (int) buffer.get();
-		long fourth = 0xff & (int) buffer.get();
+		long first = 0xff & buffer.get();
+		long second = 0xff & buffer.get();
+		long third = 0xff & buffer.get();
+		long fourth = 0xff & buffer.get();
 		if (buffer.order() == ByteOrder.LITTLE_ENDIAN)
+		{
 			return (first << 24l | second << 16l | third << 8l | fourth);
+		}
 		else
+		{
 			return (first | second << 8l | third << 16l | fourth << 24l);
+		}
 	}
 
 	private static long getUInt32(int index, ByteBuffer buffer)
 	{
-		long first = 0xff & (int) buffer.get(index);
-		long second = 0xff & (int) buffer.get(index + 1);
-		long third = 0xff & (int) buffer.get(index + 2);
-		long fourth = 0xff & (int) buffer.get(index + 3);
+		long first = 0xff & buffer.get(index);
+		long second = 0xff & buffer.get(index + 1);
+		long third = 0xff & buffer.get(index + 2);
+		long fourth = 0xff & buffer.get(index + 3);
 		if (buffer.order() == ByteOrder.LITTLE_ENDIAN)
+		{
 			return (first << 24l | second << 16l | third << 8l | fourth);
+		}
 		else
+		{
 			return (first | second << 8l | third << 16l | fourth << 24l);
+		}
 	}
 
 	private static void putUInt16(ByteBuffer buffer, long value)
@@ -1206,8 +1417,17 @@ public class GDALTile
 		{
 			ByteBuffer buffer = entry.getValue();
 			availableBuffers.remove(entry.getKey());
+			
 			buffer.rewind();
 			buffer.limit(size);
+			
+			// Clear the buffer incase there's something in there...
+			for (int i = 0; i < size; i++)
+			{
+				buffer.put((byte)0);
+			}
+			
+			buffer.rewind();
 			return buffer;
 		}
 		return ByteBuffer.allocateDirect(size);
