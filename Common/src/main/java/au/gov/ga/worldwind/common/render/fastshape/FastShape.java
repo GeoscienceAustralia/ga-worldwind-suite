@@ -51,7 +51,6 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.layers.Wireframeable;
-import au.gov.ga.worldwind.common.render.DrawContextDelegateVerticalExaggerationOverride;
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
 import com.sun.opengl.util.texture.Texture;
@@ -103,6 +102,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 	protected Color color = Color.white;
 	protected double opacity = 1;
 	protected boolean followTerrain = false;
+	protected long followTerrainUpdateFrequency = 2000; //ms
 
 	protected Globe lastGlobe = null;
 	protected boolean verticesDirty = true;
@@ -138,6 +138,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 	protected double[] textureMatrix;
 
 	protected Layer lastLayer;
+	protected long lastFollowTerrainUpdateTime;
 
 	protected final List<FastShapeRenderListener> renderListeners = new ArrayList<FastShapeRenderListener>();
 
@@ -554,15 +555,30 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 	protected void recalculateIfRequired(DrawContext dc, double alpha)
 	{
-		boolean recalculateVertices = isVertexRecalculationRequired(dc) || verticesDirty || lastGlobe != dc.getGlobe();
+		boolean followTerrainRecalculationRequired = false;
+		if (followTerrain)
+		{
+			long currentTime = System.currentTimeMillis();
+			if (currentTime - lastFollowTerrainUpdateTime > getFollowTerrainUpdateFrequency())
+			{
+				lastFollowTerrainUpdateTime = currentTime;
+				followTerrainRecalculationRequired = true;
+			}
+		}
+
+		boolean recalculateVertices =
+				followTerrainRecalculationRequired || elevationChanged || verticesDirty || lastGlobe != dc.getGlobe()
+						|| VerticalExaggerationAccessor.isVerticalExaggerationChanged(this, dc);
 		if (recalculateVertices)
 		{
-			lastGlobe = dc.getGlobe();
-			DrawContextDelegateVerticalExaggerationOverride dcve =
-					new DrawContextDelegateVerticalExaggerationOverride(dc);
-			dcve.overrideVerticalExaggeration(dc.getVerticalExaggeration());
-			recalculateVertices(dcve, false);
-			verticesDirty = false;
+			boolean willRecalculate = recalculateVertices(dc, false);
+			if (willRecalculate)
+			{
+				lastGlobe = dc.getGlobe();
+				verticesDirty = false;
+				elevationChanged = false;
+				VerticalExaggerationAccessor.markVerticalExaggeration(this, dc);
+			}
 		}
 
 		Vec4 eyePoint = dc.getView().getEyePoint();
@@ -576,16 +592,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		}
 	}
 
-	protected boolean isVertexRecalculationRequired(DrawContext dc)
-	{
-		boolean recalculateVertices =
-				followTerrain || elevationChanged
-						|| VerticalExaggerationAccessor.checkAndMarkVerticalExaggeration(FastShape.this, dc);
-		elevationChanged = false;
-		return recalculateVertices;
-	}
-
-	protected void recalculateVertices(final DrawContext dc, boolean runNow)
+	protected boolean recalculateVertices(final DrawContext dc, boolean runNow)
 	{
 		Runnable runnable = new Runnable()
 		{
@@ -596,24 +603,41 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 				try
 				{
 					int size = positions.size() * 3;
+					float[] vertices;
 
-					float[] vertices = vertexVBO.getBuffer();
-					if (vertices == null || vertices.length != size)
+					vertexVBO.lock();
+					try
 					{
-						vertices = new float[size];
+						vertices = vertexVBO.getBuffer();
+						if (vertices == null || vertices.length != size)
+						{
+							vertices = new float[size];
+						}
+						calculateVertices(dc, vertices);
+						vertexVBO.setBuffer(vertices);
 					}
-					calculateVertices(dc, vertices);
-					vertexVBO.setBuffer(vertices);
+					finally
+					{
+						vertexVBO.unlock();
+					}
 
 					if (willCalculateNormals())
 					{
-						float[] normals = normalVBO.getBuffer();
-						if (normals == null || normals.length != size)
+						normalVBO.lock();
+						try
 						{
-							normals = new float[size];
+							float[] normals = normalVBO.getBuffer();
+							if (normals == null || normals.length != size)
+							{
+								normals = new float[size];
+							}
+							calculateNormals(vertices, normals);
+							normalVBO.setBuffer(normals);
 						}
-						calculateNormals(vertices, normals);
-						normalVBO.setBuffer(normals);
+						finally
+						{
+							normalVBO.unlock();
+						}
 					}
 
 					Sphere temp = boundingSphere;
@@ -625,11 +649,8 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 					positionsLock.readLock().unlock();
 				}
 
-				// When the vertices have been recalculated, trigger a render of the layer
-				// IMPORTANT: When followTerrain is true the vertices are recalculated on every render call 
-				// (necessary to ensure it follows the terrain accurately as elevation tiles are loaded in etc). 
-				// If we remove this guard we get an endless render->recalculate->render->recalculate loop.
-				if (lastLayer != null && !followTerrain)
+				//when the vertices have been recalculated, trigger a render of the layer
+				if (lastLayer != null)
 				{
 					lastLayer.firePropertyChange(AVKey.LAYER, null, lastLayer);
 				}
@@ -639,17 +660,16 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		if (runNow)
 		{
 			runnable.run();
+			return true;
 		}
 		else
 		{
-			VertexUpdater.run(this, runnable);
+			return VertexUpdater.run(this, runnable);
 		}
 	}
 
 	protected synchronized void calculateVertices(DrawContext dc, float[] vertices)
 	{
-		double ve = dc.getVerticalExaggeration();
-
 		int index = 0;
 		for (LatLon position : positions)
 		{
@@ -657,11 +677,6 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			vertices[index++] = (float) v.x;
 			vertices[index++] = (float) v.y;
 			vertices[index++] = (float) v.z;
-
-			if (ve != dc.getVerticalExaggeration())
-			{
-				System.out.println(ve + " != " + dc.getVerticalExaggeration());
-			}
 		}
 
 		BufferWrapper wrapper = new BufferWrapper.FloatBufferWrapper(FloatBuffer.wrap(vertices));
@@ -799,13 +814,21 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 				int[] indices = indexVBO.getBuffer();
 				int size = indices != null ? indices.length : vertices.length / 3;
-				int[] sortedIndices = sortedIndexVBO.getBuffer();
-				if (sortedIndices == null || sortedIndices.length != size)
+				sortedIndexVBO.lock();
+				try
 				{
-					sortedIndices = new int[size];
+					int[] sortedIndices = sortedIndexVBO.getBuffer();
+					if (sortedIndices == null || sortedIndices.length != size)
+					{
+						sortedIndices = new int[size];
+					}
+					sortIndices(dc, eyePoint, vertices, indices, sortedIndices);
+					sortedIndexVBO.setBuffer(sortedIndices);
 				}
-				sortIndices(dc, eyePoint, vertices, indices, sortedIndices);
-				sortedIndexVBO.setBuffer(sortedIndices);
+				finally
+				{
+					sortedIndexVBO.unlock();
+				}
 			}
 		};
 
@@ -822,7 +845,8 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			verts[j] = new Vec4(vertices[i + 0], vertices[i + 1], vertices[i + 2]);
 		}
 
-		eyePoint = eyePoint.subtract3(boundingSphere.getCenter());
+		if (boundingSphere != null)
+			eyePoint = eyePoint.subtract3(boundingSphere.getCenter());
 
 		if (mode == GL.GL_TRIANGLES)
 		{
@@ -1024,6 +1048,16 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 	{
 		this.followTerrain = followTerrain;
 		verticesDirty = true;
+	}
+
+	public long getFollowTerrainUpdateFrequency()
+	{
+		return followTerrainUpdateFrequency;
+	}
+
+	public void setFollowTerrainUpdateFrequency(long followTerrainUpdateFrequency)
+	{
+		this.followTerrainUpdateFrequency = followTerrainUpdateFrequency;
 	}
 
 	public int getMode()

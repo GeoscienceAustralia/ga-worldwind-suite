@@ -32,7 +32,7 @@ public class SingleTaskRunner
 {
 	private BlockingQueue<OwnerRunnable> queue = new LinkedBlockingQueue<OwnerRunnable>();
 	private Set<OwnerRunnable> set = Collections.synchronizedSet(new HashSet<OwnerRunnable>());
-	private final int THREAD_COUNT = 1;
+	private final int THREAD_COUNT = 2;
 
 	public SingleTaskRunner(String threadName)
 	{
@@ -64,14 +64,16 @@ public class SingleTaskRunner
 		}
 	}
 
-	public synchronized void run(Object owner, Runnable runnable)
+	public synchronized boolean run(Object owner, Runnable runnable)
 	{
 		OwnerRunnable or = new OwnerRunnable(owner, runnable);
 		if (!set.contains(or))
 		{
 			set.add(or);
 			queue.add(or);
+			return true;
 		}
+		return false;
 	}
 
 	/**

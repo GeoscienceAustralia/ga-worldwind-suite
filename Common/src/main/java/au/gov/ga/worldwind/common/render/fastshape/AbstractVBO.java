@@ -16,6 +16,8 @@
 package au.gov.ga.worldwind.common.render.fastshape;
 
 import java.nio.Buffer;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
 
@@ -30,6 +32,8 @@ public abstract class AbstractVBO<ARRAY>
 	private ARRAY buffer = null;
 	private int vboId = -1;
 	private boolean dirty = false;
+	private Lock lock = new ReentrantLock();
+	private boolean uploadRequired = true;
 
 	/**
 	 * @return This VBO's data array
@@ -47,6 +51,10 @@ public abstract class AbstractVBO<ARRAY>
 	 */
 	public void setBuffer(ARRAY buffer)
 	{
+		if (!uploadRequired)
+		{
+			uploadRequired = this.buffer != buffer;
+		}
 		this.buffer = buffer;
 		markDirty();
 	}
@@ -59,6 +67,24 @@ public abstract class AbstractVBO<ARRAY>
 	public void markDirty()
 	{
 		dirty = true;
+	}
+
+	/**
+	 * Mark this VBO as locked for writing. While this is locked, the
+	 * {@link #bind(GL)} method will not upload the buffer to the video card.
+	 */
+	public void lock()
+	{
+		lock.lock();
+	}
+
+	/**
+	 * Mark this VBO as unlocked. The {@link #bind(GL)} method will now be able
+	 * to upload the buffer if it's dirty.
+	 */
+	public void unlock()
+	{
+		lock.unlock();
 	}
 
 	/**
@@ -79,9 +105,30 @@ public abstract class AbstractVBO<ARRAY>
 		gl.glBindBuffer(getTarget(), vboId);
 		if (dirty)
 		{
-			Buffer b = wrapBuffer(buffer);
-			gl.glBufferData(getTarget(), b.limit() * getDataSize(), b.rewind(), GL.GL_STATIC_DRAW);
-			dirty = false;
+			boolean locked = false;
+			if (uploadRequired)
+			{
+				lock.lock();
+				uploadRequired = false;
+				locked = true;
+			}
+			else
+			{
+				locked = lock.tryLock();
+			}
+			if (locked)
+			{
+				try
+				{
+					Buffer b = wrapBuffer(buffer);
+					gl.glBufferData(getTarget(), b.limit() * getDataSize(), b.rewind(), GL.GL_STATIC_DRAW);
+					dirty = false;
+				}
+				finally
+				{
+					lock.unlock();
+				}
+			}
 		}
 	}
 
