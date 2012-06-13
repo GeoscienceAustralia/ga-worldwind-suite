@@ -79,9 +79,32 @@ public class GDALTile
 
 	public GDALTile(GDALTileParameters parameters) throws GDALException, TilerException
 	{
+		validateParameters(parameters);
+
+		this.parameters = parameters;
+		readDataset();
+	}
+
+	/**
+	 * Validates the provided tile parameters.
+	 * 
+	 * @param parameters The parameters to validate
+	 * 
+	 * @throws IllegalArgumentException If validation fails
+	 */
+	private void validateParameters(GDALTileParameters parameters) throws IllegalArgumentException
+	{
 		if (parameters == null)
 		{
 			throw new IllegalArgumentException("Tile parameters are required");
+		}
+		if (parameters.dataset == null)
+		{
+			throw new IllegalArgumentException("A dataset is required");
+		}
+		if (parameters.size == null)
+		{
+			throw new IllegalArgumentException("A tile size is required");
 		}
 		if (!isSectorOrSourceRectangleSet(parameters))
 		{
@@ -91,11 +114,8 @@ public class GDALTile
 		{
 			throw new IllegalArgumentException("Invalid sector");
 		}
-
-		this.parameters = parameters;
-		readDataset();
 	}
-
+	
 	private boolean isValidSector(Sector sector)
 	{
 		if (sector == null)
